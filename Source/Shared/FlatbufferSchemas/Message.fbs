@@ -1,0 +1,18 @@
+// NewWorlds network message schema.
+
+namespace NW;
+
+enum MessageType : byte { Init, Update }
+
+struct Vec2 {
+  row:ushort;
+  column:ushort;
+}
+
+table Message {
+  type:MessageType;
+  pos:Vec2;
+
+}
+
+root_type Message;

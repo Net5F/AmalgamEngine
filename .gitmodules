@@ -1,0 +1,9 @@
+[submodule "Libraries/libSDL2pp"]
+	path = Libraries/libSDL2pp
+	url = git@github.com:mmpuskas/libSDL2pp.git
+[submodule "Libraries/flatbuffers"]
+	path = Libraries/flatbuffers
+	url = git@github.com:google/flatbuffers.git
+[submodule "Libraries/messend-cpp"]
+	path = Libraries/messend-cpp
+	url = git@github.com:mmpuskas/messend-cpp.git
