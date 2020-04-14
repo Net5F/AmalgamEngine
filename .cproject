@@ -49,7 +49,7 @@
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 			<storageModule buildDir="Binaries/${ConfigName}" moduleId="de.marw.cdt.cmake.core.settings">
-				<options/>
+				<options clearCache="true"/>
 				<linux command="cmake" generator="UnixMakefiles" use-default="true">
 					<defs/>
 					<undefs/>
@@ -58,6 +58,8 @@
 					<defs/>
 					<undefs/>
 				</win32>
+				<defs/>
+				<undefs/>
 			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.exe.release.376375036">
@@ -132,4 +134,5 @@
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

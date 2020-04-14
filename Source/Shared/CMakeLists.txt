@@ -5,7 +5,7 @@ message(STATUS "Building Shared")
 # Add our static library target
 add_library(Shared STATIC
     Public/Message_generated.h
-    Public/NWStructs.h
+    Public/AMStructs.h
 )
 
 target_include_directories(Shared

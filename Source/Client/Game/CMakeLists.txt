@@ -1,17 +1,5 @@
 target_sources(Client
 	PRIVATE
-	    Private/GameManager.cpp
-		Public/GameManager.h
-		Private/TileManager.cpp
-		Public/TileManager.h
-		Private/Tile.cpp
-		Public/Tile.h
-		Private/Object.cpp
-		Public/Object.h
-		Private/ObjectManager.cpp
-		Public/ObjectManager.h
-	    Private/CharacterManager.cpp
-		Public/CharacterManager.h
 )
 
 target_include_directories(Client
