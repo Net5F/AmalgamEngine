@@ -15,31 +15,19 @@
 // Anonymous namespace restricts vars to this translation unit
 namespace
 {
-const int SCREEN_WIDTH = 1280;
+static constexpr uint32_t SCREEN_WIDTH = 1280;
 
-const int SCREEN_HEIGHT = 720;
+static constexpr uint32_t SCREEN_HEIGHT = 720;
+
+static constexpr uint32_t MAX_ENTITIES = 100;
 }
 
-class Component
+struct PositionComponent
 {
 public:
-    // The indices in each Entity's components array that each component resides at.
-    enum Indices
-    {
-        Position,
-        Movement,
-        Input,
-        Sprite,
-        NumComponents
-    };
-};
-
-class PositionComponent : Component
-{
-public:
-    PositionComponent(float inX, float inY)
-    : x(inX)
-    , y(inY)
+    PositionComponent()
+    : x(0)
+    , y(0)
     {
     }
 
@@ -48,12 +36,12 @@ public:
     float y;
 };
 
-class MovementComponent : Component
+struct MovementComponent
 {
 public:
-    MovementComponent(float inVelX, float inVelY)
-    : velX(inVelX)
-    , velY(inVelY)
+    MovementComponent()
+    : velX(0)
+    , velY(0)
     {
     }
 
@@ -62,35 +50,40 @@ public:
     float velY;
 };
 
-class InputComponent : Component
+enum class Input
+{
+    None,
+    Up,
+    Down,
+    Left,
+    Right,
+    Exit
+};
+
+struct InputComponent
 {
 public:
-    enum class Input
+    InputComponent()
+    : currentInput(Input::None)
     {
-        None,
-        Up,
-        Down,
-        Left,
-        Right,
-        Exit
-    };
+    }
 
     /** The last received input. */
     Input currentInput;
 };
 
-class SpriteComponent : Component
+struct SpriteComponent
 {
 public:
-    SpriteComponent(SDL2pp::Texture& inTexture, SDL2pp::Rect inPosInTexture, SDL2pp::Rect inPosInWorld)
-    : texture(inTexture)
-    , posInTexture(inPosInTexture)
-    , posInWorld(inPosInWorld)
+    SpriteComponent()
+    : texturePtr(nullptr)
+    , posInTexture{0, 0, 0, 0}
+    , posInWorld{0, 0, 0, 0}
     {
     }
 
-    /** A reference to the texture that holds this sprite. */
-    SDL2pp::Texture& texture;
+    /** A pointer to the texture that holds this sprite. */
+    std::shared_ptr<SDL2pp::Texture> texturePtr;
 
     /** UV position and size in texture. */
     SDL2pp::Rect posInTexture;
@@ -102,9 +95,9 @@ public:
 class IDPool
 {
 public:
-    static uint32_t getID()
+    static uint32_t reserveID()
     {
-        for (uint16_t i = 0; i < MAX_IDS; ++i) {
+        for (uint16_t i = 0; i < MAX_ENTITIES; ++i) {
             // Find the first false.
             if (!(IDs[i])) {
                 IDs[i] = true;
@@ -112,63 +105,85 @@ public:
             }
         }
 
-        std::cerr << "Tried to get ID when all were taken. Returning 0." << std::endl;
+        std::cerr << "Tried to reserve ID when all were taken. Returning 0." << std::endl;
         return 0;
     }
 
-    static void resetID(uint32_t ID)
+    static void freeID(uint32_t ID)
     {
         if (IDs[ID]) {
             IDs[ID] = false;
         }
         else {
-            std::cerr << "Tried to reset an unused ID." << std::endl;
+            std::cerr << "Tried to free an unused ID." << std::endl;
         }
     }
 
 private:
-    static constexpr uint16_t MAX_IDS = 100;
-
     /**
      * If ID 'x' is available, IDs[x] will be true. Else, it will be false.
      */
-    static std::array<bool, MAX_IDS> IDs;
+    static std::array<bool, MAX_ENTITIES> IDs;
 };
-std::array<bool, IDPool::MAX_IDS> IDPool::IDs = {}; // Init to 0;
+std::array<bool, MAX_ENTITIES> IDPool::IDs = {}; // Init to 0;
 
-class Entity
+typedef uint32_t EntityID;
+
+class World
 {
 public:
-    Entity()
-    : ID(IDPool::getID())
+    enum ComponentType
     {
-        components.resize(Component::NumComponents);
+        PositionType = 1 << 0,
+        MovementType = 1 << 1,
+        InputType = 1 << 2,
+        SpriteType = 1 << 3
     };
 
-    void addComponent(std::unique_ptr<Component> component, Component::Indices index)
+    EntityID AddEntity(const std::string& name)
     {
-        if (components[index] == nullptr) {
-            components[index] = std::move(component);
-        }
-        else {
-            std::cerr << "Tried to add a component where one already existed." << std::endl;
-        }
+        EntityID id = IDPool::reserveID();
+        entityNames[id] = name;
+
+        return id;
     }
 
-    void remComponent(Component::Indices index)
+    /** Entity data lists. */
+    std::array<std::string, MAX_ENTITIES> entityNames;
+    std::array<PositionComponent, MAX_ENTITIES> positions;
+    std::array<MovementComponent, MAX_ENTITIES> movements;
+    std::array<InputComponent, MAX_ENTITIES> inputs;
+    std::array<SpriteComponent, MAX_ENTITIES> sprites;
+    // Bit flags for every component, indicating whether the object at a given index has that component.
+    std::array<uint32_t, MAX_ENTITIES> componentTypes;
+};
+
+class InputSystem
+{
+public:
+    void processLatestInputs()
     {
-        if (components[index] != nullptr) {
-            components[index] = nullptr;
-        }
-        else {
-            std::cerr << "Tried to remove a component where one didn't exist." << std::endl;
-        }
+    }
+};
+
+class MovementSystem
+{
+public:
+    void processMovements()
+    {
+    }
+};
+
+class RenderSystem
+{
+public:
+    void collectRenderObjects()
+    {
     }
 
-    uint32_t ID;
-
-    /** The components that the Entity possesses. The ComponentTypes enum accesses the proper index for each component. */
-    std::vector<std::unique_ptr<Component>> components;
+    void render()
+    {
+    }
 };
 
 int main(int argc, char **argv) try
@@ -177,20 +192,25 @@ int main(int argc, char **argv) try
     SDL2pp::SDL sdl(SDL_INIT_VIDEO);
     SDL2pp::Window window("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
-    SDL2pp::Texture sprites(renderer, "Resources/u4_tiles_pc_ega.png");
+    std::shared_ptr<SDL2pp::Texture> sprites = std::make_shared<SDL2pp::Texture>(renderer, "Resources/u4_tiles_pc_ega.png");
 
     // Calc the center of the screen.
     int centerX = renderer.GetOutputWidth() / 2;
     int centerY = renderer.GetOutputHeight() / 2;
 
+    // Setup our world.
+    World world;
+
     // Setup our player.
-    Entity player;
     SDL2pp::Rect textureRect(0, 32, 16, 16);
     SDL2pp::Rect worldRect(centerX - 64, centerY - 64, 64, 64);
-    player.addComponent(std::unique_ptr<Component>(new PositionComponent(40, 40)), Component::Position);
-    player.addComponent(std::unique_ptr<Component>(new MovementComponent(0, 0)), Component::Movement);
-    player.addComponent(std::unique_ptr<Component>(new InputComponent(InputComponent::Input::None)), Component::Input);
-    player.addComponent(std::unique_ptr<Component>(new SpriteComponent(sprites, textureRect, worldRect)), Component::Sprite);
+
+    EntityID playerID = world.AddEntity("Player");
+    world.positions[playerID].x = centerX - 64;
+    world.positions[playerID].y = centerY - 64;
+    world.sprites[playerID].texturePtr = sprites;
+    world.sprites[playerID].posInTexture = textureRect;
+    world.sprites[playerID].posInWorld = worldRect;
 
     bool bQuit = false;
     while (!bQuit)
@@ -215,7 +235,9 @@ int main(int argc, char **argv) try
 
         renderer.Clear();
 
-        renderer.Copy(sprites, SDL2pp::Rect(0, 32, 16, 16), SDL2pp::Rect(centerX - 64, centerY - 64, 64, 64));
+        renderer.Copy(*(world.sprites[playerID].texturePtr)
+                      , world.sprites[playerID].posInTexture
+                      , world.sprites[playerID].posInWorld);
 
         renderer.Present();
 
