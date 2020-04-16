@@ -39,6 +39,11 @@ add_custom_command(
                 ${PROJECT_SOURCE_DIR}/../Libraries/SDL2/
                 ${PROJECT_BINARY_DIR}/Output/Client/
 
+        # Copy pthread dll to the output directory.
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${PROJECT_SOURCE_DIR}/../Libraries/WinPthread/
+                ${PROJECT_BINARY_DIR}/Output/Client/
+
         # Copy resource files to the output directory.
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${PROJECT_SOURCE_DIR}/../Resources/

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(NewWorlds)
+project(Amalgam)
 
 # Tell CMake where the CMake folder is, since our source dir isn't the base dir.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../CMake/")
@@ -38,7 +38,7 @@ add_subdirectory(Shared)
 add_subdirectory(Client)
 
 # Build server
-add_subdirectory(Server)
+#add_subdirectory(Server)
 
 # Build editor
 #add_subdirectory(Editor)

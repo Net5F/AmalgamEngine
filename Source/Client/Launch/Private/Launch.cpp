@@ -1,8 +1,4 @@
 //#include <Message_generated.h>
-//#include <messend.hpp>
-//#include <iostream>
-//#include <memory>
-//#include <stdio.h>
 #include <string>
 #include <exception>
 #include <iostream>
@@ -27,9 +23,8 @@ static constexpr uint32_t MAX_ENTITIES = 100;
 struct PositionComponent
 {
 public:
-    PositionComponent()
-    : x(0)
-    , y(0)
+    PositionComponent ()
+    : x (0), y (0)
     {
     }
 
@@ -41,11 +36,8 @@ public:
 struct MovementComponent
 {
 public:
-    MovementComponent()
-    : velX(0)
-    , velY(0)
-    , maxVelY(5)
-    , maxVelX(5)
+    MovementComponent ()
+    : velX (0), velY (0), maxVelY (5), maxVelX (5)
     {
     }
 
@@ -56,7 +48,8 @@ public:
     float maxVelY;
 };
 
-struct Input {
+struct Input
+{
     enum Type
     {
         None,
@@ -64,7 +57,7 @@ struct Input {
         Down,
         Left,
         Right,
-        Exit,// Exit the application.
+        Exit, // Exit the application.
         NumInputs
     };
 
@@ -75,9 +68,8 @@ struct Input {
         Released
     };
 
-    Input(Type inType, State inState)
-    : type(inType)
-    , state(inState)
+    Input (Type inType, State inState)
+    : type (inType), state (inState)
     {
     }
 
@@ -88,9 +80,9 @@ struct Input {
 struct InputComponent
 {
 public:
-    InputComponent()
+    InputComponent ()
     {
-        inputStates.fill(Input::Released);
+        inputStates.fill (Input::Released);
     }
 
     /** Holds the current state of the inputs. */
@@ -100,10 +92,8 @@ public:
 struct SpriteComponent
 {
 public:
-    SpriteComponent()
-    : texturePtr(nullptr)
-    , posInTexture{0, 0, 0, 0}
-    , posInWorld{0, 0, 0, 0}
+    SpriteComponent ()
+    : texturePtr (nullptr), posInTexture { 0, 0, 0, 0 }, posInWorld { 0, 0, 0, 0 }
     {
     }
 
@@ -120,7 +110,7 @@ public:
 class IDPool
 {
 public:
-    static uint32_t reserveID()
+    static uint32_t reserveID ()
     {
         for (uint16_t i = 0; i < MAX_ENTITIES; ++i) {
             // Find the first false.
@@ -134,7 +124,7 @@ public:
         return 0;
     }
 
-    static void freeID(uint32_t ID)
+    static void freeID (uint32_t ID)
     {
         if (IDs[ID]) {
             IDs[ID] = false;
@@ -154,7 +144,8 @@ std::array<bool, MAX_ENTITIES> IDPool::IDs = {}; // Init to 0;
 
 typedef uint32_t EntityID;
 
-struct ComponentFlag {
+struct ComponentFlag
+{
     enum FlagType
     {
         Position = 1 << 0,
@@ -167,25 +158,20 @@ struct ComponentFlag {
 class World
 {
 public:
-    World()
-    : entityNames{}
-    , positions{}
-    , movements{}
-    , inputs{}
-    , sprites{}
-    , componentFlags{}
+    World ()
+    : entityNames {}, positions {}, movements {}, inputs {}, sprites {}, componentFlags {}
     {
     }
 
-    EntityID AddEntity(const std::string& name)
+    EntityID AddEntity (const std::string& name)
     {
-        EntityID id = IDPool::reserveID();
+        EntityID id = IDPool::reserveID ();
         entityNames[id] = name;
 
         return id;
     }
 
-    void RemoveEntity(EntityID entityID)
+    void RemoveEntity (EntityID entityID)
     {
         componentFlags[entityID] = 0;
         entityNames[entityID] = "";
@@ -195,25 +181,27 @@ public:
      * Registers this entity as possessing this component.
      * The caller is in charge of making sure the state of the component is appropriate.
      */
-    void AttachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
+    void AttachComponent (EntityID entityID, ComponentFlag::FlagType componentFlag)
     {
         // If the entity doesn't have the component, add it.
         if ((componentFlags[entityID] & componentFlag) == 0) {
             componentFlags[entityID] |= componentFlag;
         }
         else {
-            std::cerr << "Tried to add component when entity already has it." << std::endl;
+            std::cerr << "Tried to add component when entity already has it."
+            << std::endl;
         }
     }
 
-    void RemoveComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
+    void RemoveComponent (EntityID entityID, ComponentFlag::FlagType componentFlag)
     {
         // If the entity has the component, remove it.
         if ((componentFlags[entityID] & componentFlag) == componentFlag) {
             componentFlags[entityID] |= componentFlag;
         }
         else {
-            std::cerr << "Tried to remove component when entity doesn't have it." << std::endl;
+            std::cerr << "Tried to remove component when entity doesn't have it."
+            << std::endl;
         }
     }
 
@@ -230,8 +218,8 @@ public:
 class InputSystem
 {
 public:
-    InputSystem(World& inWorld)
-    : world(inWorld)
+    InputSystem (World& inWorld)
+    : world (inWorld)
     {
     }
 
@@ -243,20 +231,18 @@ public:
      *
      * @return Input::None if nothing relevant to main was received, else returns the relevant input.
      */
-    Input processInputEvents()
+    Input processInputEvents ()
     {
         // Process all events.
         SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            if (event.type == SDL_QUIT)
-            {
+        while (SDL_PollEvent (&event)) {
+            if (event.type == SDL_QUIT) {
                 return {Input::Exit, Input::Pressed};
             }
-            else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
-            {
-                Input::State inputType = (event.type == SDL_KEYDOWN) ? Input::Pressed : Input::Released;
-                Input keyInput = {Input::None, inputType};
+            else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+                Input::State inputType =
+                (event.type == SDL_KEYDOWN) ? Input::Pressed : Input::Released;
+                Input keyInput = { Input::None, inputType };
 
                 switch (event.key.keysym.sym)
                 {
@@ -295,24 +281,27 @@ private:
 class MovementSystem
 {
 public:
-    MovementSystem(World& inWorld)
-    : world(inWorld)
+    MovementSystem (World& inWorld)
+    : world (inWorld)
     {
     }
 
-    void processMovements()
+    /**
+     * Updates movement components based on input state, moves position components based on movement, updates sprites based on position.
+     */
+    void processMovements ()
     {
         for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
-            /* Process inputs on everything that has an input component and a movement component. */
+            /* Process input state on everything that has an input component and a movement component. */
             if ((world.componentFlags[entityID] & ComponentFlag::Input)
-                    && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
+            && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
                 // Process the input state for each entity.
-                changeVelocity(entityID, world.inputs[entityID].inputStates);
+                changeVelocity (entityID, world.inputs[entityID].inputStates);
             }
 
             /* Move all entities that have a position and movement component. */
             if ((world.componentFlags[entityID] & ComponentFlag::Position)
-                    && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
+            && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
                 // Update the positions based on the velocities.
                 world.positions[entityID].x += world.movements[entityID].velX;
                 world.positions[entityID].y += world.movements[entityID].velY;
@@ -320,7 +309,7 @@ public:
 
             /* Move the sprites to the new positions. */
             if ((world.componentFlags[entityID] & ComponentFlag::Position)
-                    && (world.componentFlags[entityID] & ComponentFlag::Sprite)) {
+            && (world.componentFlags[entityID] & ComponentFlag::Sprite)) {
                 world.sprites[entityID].posInWorld.x = world.positions[entityID].x;
                 world.sprites[entityID].posInWorld.y = world.positions[entityID].y;
             }
@@ -328,7 +317,9 @@ public:
     }
 
 private:
-    void changeVelocity(EntityID entityID, std::array<Input::State, static_cast<int>(Input::Type::NumInputs)>& inputStates) {
+    void changeVelocity (EntityID entityID, std::array<Input::State,
+                         static_cast<int> (Input::Type::NumInputs)>& inputStates)
+    {
         MovementComponent& movement = world.movements[entityID];
         // Handle up/down (favors up).
         if (inputStates[Input::Up] == Input::Pressed) {
@@ -387,16 +378,16 @@ private:
 class RenderSystem
 {
 public:
-    RenderSystem(World& inWorld)
-    : world(inWorld)
+    RenderSystem (World& inWorld)
+    : world (inWorld)
     {
     }
 
-    void collectRenderObjects()
+    void collectRenderObjects ()
     {
     }
 
-    void render()
+    void render ()
     {
     }
 
@@ -404,31 +395,34 @@ private:
     World& world;
 };
 
-int main(int argc, char **argv) try
+int main (int argc, char **argv)
+try
 {
     // Setup the SDL constructs.
-    SDL2pp::SDL sdl(SDL_INIT_VIDEO);
-    SDL2pp::Window window("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-    SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
-    std::shared_ptr<SDL2pp::Texture> sprites = std::make_shared<SDL2pp::Texture>(renderer, "Resources/u4_tiles_pc_ega.png");
+    SDL2pp::SDL sdl (SDL_INIT_VIDEO);
+    SDL2pp::Window window ("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                           SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    SDL2pp::Renderer renderer (window, -1, SDL_RENDERER_ACCELERATED);
+    std::shared_ptr<SDL2pp::Texture> sprites = std::make_shared<SDL2pp::Texture> (
+    renderer, "Resources/u4_tiles_pc_ega.png");
 
     // Calc the center of the screen.
-    int centerX = renderer.GetOutputWidth() / 2;
-    int centerY = renderer.GetOutputHeight() / 2;
+    int centerX = renderer.GetOutputWidth () / 2;
+    int centerY = renderer.GetOutputHeight () / 2;
 
     // Setup our world.
     World world;
 
     // Setup our systems.
-    InputSystem inputSystem(world);
-    MovementSystem movementSystem(world);
-    RenderSystem renderSystem(world);
+    InputSystem inputSystem (world);
+    MovementSystem movementSystem (world);
+    RenderSystem renderSystem (world);
 
     // Setup our player.
-    SDL2pp::Rect textureRect(0, 32, 16, 16);
-    SDL2pp::Rect worldRect(centerX - 64, centerY - 64, 64, 64);
+    SDL2pp::Rect textureRect (0, 32, 16, 16);
+    SDL2pp::Rect worldRect (centerX - 64, centerY - 64, 64, 64);
 
-    EntityID player = world.AddEntity("Player");
+    EntityID player = world.AddEntity ("Player");
     world.positions[player].x = centerX - 64;
     world.positions[player].y = centerY - 64;
     world.movements[player].maxVelX = 1;
@@ -436,78 +430,75 @@ int main(int argc, char **argv) try
     world.sprites[player].texturePtr = sprites;
     world.sprites[player].posInTexture = textureRect;
     world.sprites[player].posInWorld = worldRect;
-    world.AttachComponent(player, ComponentFlag::Input);
-    world.AttachComponent(player, ComponentFlag::Movement);
-    world.AttachComponent(player, ComponentFlag::Position);
-    world.AttachComponent(player, ComponentFlag::Sprite);
+    world.AttachComponent (player, ComponentFlag::Input);
+    world.AttachComponent (player, ComponentFlag::Movement);
+    world.AttachComponent (player, ComponentFlag::Position);
+    world.AttachComponent (player, ComponentFlag::Sprite);
 
     bool bQuit = false;
-    while (!bQuit)
-    {
+    while (!bQuit) {
         // Will return Input::Type::Exit if the app needs to exit.
-        Input input = inputSystem.processInputEvents();
+        Input input = inputSystem.processInputEvents ();
         if (input.type == Input::Exit) {
             break;
         }
 
-        movementSystem.processMovements();
+        movementSystem.processMovements ();
 
-        renderer.Clear();
+        renderer.Clear ();
 
-        renderer.Copy(*(world.sprites[player].texturePtr)
-                      , world.sprites[player].posInTexture
-                      , world.sprites[player].posInWorld);
+        renderer.Copy (*(world.sprites[player].texturePtr),
+                       world.sprites[player].posInTexture,
+                       world.sprites[player].posInWorld);
 
-        renderer.Present();
+        renderer.Present ();
 
-        SDL_Delay(1);
+        SDL_Delay (1);
     }
     /*
-    flatbuffers::FlatBufferBuilder builder;
+     flatbuffers::FlatBufferBuilder builder;
 
-    msnd::startup();
+     msnd::startup();
 
-    std::unique_ptr<msnd::Peer> server = msnd::initiate("127.0.0.1", 41499);
+     std::unique_ptr<msnd::Peer> server = msnd::initiate("127.0.0.1", 41499);
 
-    if (server == nullptr)
-    {
-        return 1;
-    }
+     if (server == nullptr)
+     {
+     return 1;
+     }
 
-    while (1)
-    {
-        if (!(server->isConnected()))
-        {
-            std::cout << "Disconnected.\n";
-            break;
-        }
-        else
-        {
-            std::unique_ptr<msnd::Message> response
-                    = server->receiveMessage();
-            if (response != nullptr)
-            {
-                auto message = NW::GetMessage(response->data);
+     while (1)
+     {
+     if (!(server->isConnected()))
+     {
+     std::cout << "Disconnected.\n";
+     break;
+     }
+     else
+     {
+     std::unique_ptr<msnd::Message> response
+     = server->receiveMessage();
+     if (response != nullptr)
+     {
+     auto message = NW::GetMessage(response->data);
 
-                printf("Type: %d, Pos: (%d, %d)\n", message->type()
-                       , message->pos()->row(), message->pos()->column());
-            }
-        }
-    }
+     printf("Type: %d, Pos: (%d, %d)\n", message->type()
+     , message->pos()->row(), message->pos()->column());
+     }
+     }
+     }
 
-    msnd::shutdown();
-    */
+     msnd::shutdown();
+     */
 
     return 0;
 }
-catch (SDL2pp::Exception& e)
-{
-    std::cerr << "Error in: " << e.GetSDLFunction() << std::endl;
-    std::cerr << "  Reason:  " << e.GetSDLError() << std::endl;
+catch (SDL2pp::Exception& e) {
+    std::cerr << "Error in: " << e.GetSDLFunction () << std::endl;
+    std::cerr << "  Reason:  " << e.GetSDLError () << std::endl;
     return 1;
 }
-catch (std::exception& e)
-{
-    std::cerr << e.what() << std::endl;
+catch (std::exception& e) {
+    std::cerr << e.what () << std::endl;
     return 1;
 }
