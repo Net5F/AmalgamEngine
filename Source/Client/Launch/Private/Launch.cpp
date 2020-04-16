@@ -56,22 +56,45 @@ public:
     float maxVelY;
 };
 
-enum class Input
-{
-    None,
-    Up,
-    Down,
-    Left,
-    Right,
-    Exit,// Exit the application.
-    NumInputs
+struct Input {
+    enum Type
+    {
+        None,
+        Up,
+        Down,
+        Left,
+        Right,
+        Exit,// Exit the application.
+        NumInputs
+    };
+
+    enum State
+    {
+        Invalid,
+        Pressed,
+        Released
+    };
+
+    Input(Type inType, State inState)
+    : type(inType)
+    , state(inState)
+    {
+    }
+
+    Type type;
+    State state;
 };
 
 struct InputComponent
 {
 public:
-    /** The last received input. */
-    std::queue<Input> inputQueue;
+    InputComponent()
+    {
+        inputStates.fill(Input::Released);
+    }
+
+    /** Holds the current state of the inputs. */
+    std::array<Input::State, Input::NumInputs> inputStates;
 };
 
 struct SpriteComponent
@@ -228,39 +251,41 @@ public:
         {
             if (event.type == SDL_QUIT)
             {
-                return Input::Exit;
+                return {Input::Exit, Input::Pressed};
             }
-            else if (event.type == SDL_KEYDOWN)
+            else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
             {
-                Input keyInput = Input::None;
+                Input::State inputType = (event.type == SDL_KEYDOWN) ? Input::Pressed : Input::Released;
+                Input keyInput = {Input::None, inputType};
+
                 switch (event.key.keysym.sym)
                 {
                     case SDLK_w:
-                        keyInput = Input::Up;
+                        keyInput.type = Input::Up;
                         break;
                     case SDLK_a:
-                        keyInput = Input::Left;
+                        keyInput.type = Input::Left;
                         break;
                     case SDLK_s:
-                        keyInput = Input::Down;
+                        keyInput.type = Input::Down;
                         break;
                     case SDLK_d:
-                        keyInput = Input::Right;
+                        keyInput.type = Input::Right;
                         break;
                     case SDLK_ESCAPE:
-                        return Input::Exit;
+                        return {Input::Exit, Input::Pressed};
                 }
 
                 // Push the input to all InputComponents.
                 for (size_t i = 0; i < MAX_ENTITIES; ++i) {
                     if (world.componentFlags[i] & ComponentFlag::Input) {
-                        world.inputs[i].inputQueue.push(keyInput);
+                        world.inputs[i].inputStates[keyInput.type] = keyInput.state;
                     }
                 }
             }
         }
 
-        return Input::None;
+        return {Input::None, Input::Invalid};
     }
 
 private:
@@ -281,18 +306,8 @@ public:
             /* Process inputs on everything that has an input component and a movement component. */
             if ((world.componentFlags[entityID] & ComponentFlag::Input)
                     && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
-                std::queue<Input>& inputQueue = world.inputs[entityID].inputQueue;
-                if (inputQueue.empty()) {
-                    // If we have no inputs, process the velocity appropriately.
-                    changeVelocity(entityID, Input::None);
-                }
-                else {
-                    // Process all the inputs in the component's queue.
-                    while (!(inputQueue.empty())) {
-                        changeVelocity(entityID, inputQueue.front());
-                        inputQueue.pop();
-                    }
-                }
+                // Process the input state for each entity.
+                changeVelocity(entityID, world.inputs[entityID].inputStates);
             }
 
             /* Move all entities that have a position and movement component. */
@@ -313,49 +328,56 @@ public:
     }
 
 private:
-    void changeVelocity(EntityID entityID, Input input) {
+    void changeVelocity(EntityID entityID, std::array<Input::State, static_cast<int>(Input::Type::NumInputs)>& inputStates) {
         MovementComponent& movement = world.movements[entityID];
-        switch (input) {
-            case Input::Up:
+        // Handle up/down (favors up).
+        if (inputStates[Input::Up] == Input::Pressed) {
+            movement.velY -= 0.25;
+
+            if (movement.velY < movement.maxVelY) {
+                movement.velY = -(movement.maxVelY);
+            }
+        }
+        else if (inputStates[Input::Down] == Input::Pressed) {
+            movement.velY += 0.25;
+
+            if (movement.velY > movement.maxVelY) {
+                movement.velY = movement.maxVelY;
+            }
+        }
+        else {
+            // Slow the entity down.
+            if (movement.velY > 0) {
                 movement.velY -= 0.25;
-                std::cout << "Input: Up. velY: " << movement.velY << std::endl;
-                break;
-            case Input::Left:
-                movement.velX -= 0.25;
-                break;
-            case Input::Down:
+            }
+            else if (movement.velY < 0) {
                 movement.velY += 0.25;
-                break;
-            case Input::Right:
+            }
+        }
+
+        // Handle left/right (favors right).
+        if (inputStates[Input::Left] == Input::Pressed) {
+            movement.velX -= 0.25;
+
+            if (movement.velX < movement.maxVelX) {
+                movement.velX = -(movement.maxVelX);
+            }
+        }
+        else if (inputStates[Input::Right] == Input::Pressed) {
+            movement.velX += 0.25;
+
+            if (movement.velX > movement.maxVelX) {
+                movement.velX = movement.maxVelX;
+            }
+        }
+        else {
+            // Slow the entity down.
+            if (movement.velX > 0) {
+                movement.velX -= 0.25;
+            }
+            else if (movement.velX < 0) {
                 movement.velX += 0.25;
-                break;
-            case Input::None:
-                std::cout << "Input: None." << std::endl;
-                // Slow the entity down.
-                if (movement.velX > 0) {
-                    movement.velX -= 0.25;
-                }
-                else if (movement.velX < 0) {
-                    movement.velX += 0.25;
-                }
-
-                if (movement.velY > 0) {
-                    movement.velY -= 0.25;
-                }
-                else if (movement.velY < 0) {
-                    movement.velY += 0.25;
-                }
-                break;
-        }
-
-        // Lock movement to the max velocity.
-        if (movement.velX > movement.maxVelX) {
-            std::cout << "Hit max" << std::endl;
-            movement.velX = movement.maxVelX;
-        }
-        if (movement.velY > movement.maxVelY) {
-            std::cout << "Hit max" << std::endl;
-            movement.velY = movement.maxVelY;
+            }
         }
     }
 
@@ -409,8 +431,8 @@ int main(int argc, char **argv) try
     EntityID player = world.AddEntity("Player");
     world.positions[player].x = centerX - 64;
     world.positions[player].y = centerY - 64;
-    world.movements[player].maxVelX = 5;
-    world.movements[player].maxVelY = 5;
+    world.movements[player].maxVelX = 1;
+    world.movements[player].maxVelY = 1;
     world.sprites[player].texturePtr = sprites;
     world.sprites[player].posInTexture = textureRect;
     world.sprites[player].posInWorld = worldRect;
@@ -422,9 +444,9 @@ int main(int argc, char **argv) try
     bool bQuit = false;
     while (!bQuit)
     {
-        // Will return Input::Exit if the app needs to exit.
+        // Will return Input::Type::Exit if the app needs to exit.
         Input input = inputSystem.processInputEvents();
-        if (input == Input::Exit) {
+        if (input.type == Input::Exit) {
             break;
         }
 
