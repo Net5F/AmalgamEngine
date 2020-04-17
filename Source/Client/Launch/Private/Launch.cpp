@@ -97,6 +97,7 @@ public:
     {
     }
 
+    // TODO: Switch to textureID and add a texture loader.
     /** A pointer to the texture that holds this sprite. */
     std::shared_ptr<SDL2pp::Texture> texturePtr;
 

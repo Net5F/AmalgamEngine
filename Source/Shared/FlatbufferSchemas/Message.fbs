@@ -1,18 +1,66 @@
-// NewWorlds network message schema.
+// Amalgam network message schema.
 
-namespace NW;
+namespace AM;
 
-enum MessageType : byte { Init, Update }
-
-struct Vec2 {
-  row:ushort;
-  column:ushort;
+// ################################
+// ## Connection 
+// ################################
+table ConnectionRequest {
+    playerName:string;
 }
 
-table Message {
-  type:MessageType;
-  pos:Vec2;
+table ConnectionResponse {
+    // Position (new player or last logout).
+    x:float;
+    y:float;
+}
 
+// ################################
+// ## Entity
+// ################################
+struct PositionComponent {
+    x:float;
+    y:float;
+}
+
+struct MovementComponent {
+    velX:float;
+    velY:float;
+    maxVelX:float;
+    maxVelY:float;
+}
+
+struct Rect {
+    x:int;
+    y:int;
+    w:int;
+    h:int;
+}
+struct SpriteComponent {
+    textureID:short;
+    posInTexture:Rect;
+    posInWorld:Rect;
+}
+
+table Entity {
+    id:uint;
+    name:string;
+    positionComponent:PositionComponent;
+    movementComponent:MovementComponent;
+    spriteComponent:SpriteComponent;
+}
+
+table EntityUpdate {
+    entities:[Entity];
+}
+
+// ################################
+// ## Message
+// ################################
+table Message {
+    connectionRequest:ConnectionRequest;
+    connectionResponse:ConnectionResponse;
+    entityUpdate:EntityUpdate;
 }
 
 root_type Message;
