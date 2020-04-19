@@ -1,6 +1,6 @@
 target_sources(Client
 	PRIVATE
-		Private/Launch.cpp
+		Private/main.cpp
 )
 
 target_include_directories(Client

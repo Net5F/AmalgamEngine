@@ -38,7 +38,7 @@ add_subdirectory(Shared)
 add_subdirectory(Client)
 
 # Build server
-#add_subdirectory(Server)
+add_subdirectory(Server)
 
 # Build editor
 #add_subdirectory(Editor)

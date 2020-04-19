@@ -1,6 +1,6 @@
 // Amalgam network message schema.
 
-namespace AM;
+namespace AM.fb;
 
 // ################################
 // ## Connection 
@@ -18,12 +18,22 @@ table ConnectionResponse {
 // ################################
 // ## Entity
 // ################################
-struct PositionComponent {
+enum InputState:byte {
+    Invalid,
+    Pressed,
+    Released
+}
+
+table InputComponent {
+    inputStates:[InputState];
+}
+
+table PositionComponent {
     x:float;
     y:float;
 }
 
-struct MovementComponent {
+table MovementComponent {
     velX:float;
     velY:float;
     maxVelX:float;
@@ -45,9 +55,11 @@ struct SpriteComponent {
 table Entity {
     id:uint;
     name:string;
+    flags:int;
+    inputComponent:InputComponent;
     positionComponent:PositionComponent;
     movementComponent:MovementComponent;
-    spriteComponent:SpriteComponent;
+    //spriteComponent:SpriteComponent; Not yet in use.
 }
 
 table EntityUpdate {
@@ -57,10 +69,14 @@ table EntityUpdate {
 // ################################
 // ## Message
 // ################################
+union MessageContent {
+    ConnectionRequest,
+    ConnectionResponse,
+    EntityUpdate
+}
+
 table Message {
-    connectionRequest:ConnectionRequest;
-    connectionResponse:ConnectionResponse;
-    entityUpdate:EntityUpdate;
+    content:MessageContent;
 }
 
 root_type Message;
