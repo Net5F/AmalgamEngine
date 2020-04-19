@@ -1,4 +1,4 @@
-//#include <Message_generated.h>
+#include <SDL2pp/SDL2pp.hh>
 #include <string>
 #include <exception>
 #include <iostream>
@@ -7,7 +7,10 @@
 #include <memory>
 #include <queue>
 #include <algorithm>
-#include <SDL2pp/SDL2pp.hh>
+#include <atomic>
+#include <thread>
+#include <messend.hpp>
+#include <Message_generated.h>
 
 // Anonymous namespace restricts vars to this translation unit
 namespace
@@ -215,63 +218,19 @@ public:
     std::array<uint32_t, MAX_ENTITIES> componentFlags;
 };
 
-class InputSystem
+class NetworkInputSystem
 {
 public:
-    InputSystem(World& inWorld)
+    NetworkInputSystem(World& inWorld)
     : world(inWorld)
     {
     }
 
     /**
-     * Processes the waiting input events.
-     *
-     * If an input relevant to the components is received, modifies them appropriately.
-     * If an input relevant to main is received, returns it.
-     *
-     * @return Input::None if nothing relevant to main was received, else returns the relevant input.
+     * Processes incoming EntityUpdate messages.
      */
-    Input processInputEvents()
+    void processInputEvents()
     {
-        // Process all events.
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                return {Input::Exit, Input::Pressed};
-            }
-            else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
-                Input::State inputType =
-                (event.type == SDL_KEYDOWN) ? Input::Pressed : Input::Released;
-                Input keyInput = { Input::None, inputType };
-
-                switch (event.key.keysym.sym)
-                {
-                    case SDLK_w:
-                        keyInput.type = Input::Up;
-                        break;
-                    case SDLK_a:
-                        keyInput.type = Input::Left;
-                        break;
-                    case SDLK_s:
-                        keyInput.type = Input::Down;
-                        break;
-                    case SDLK_d:
-                        keyInput.type = Input::Right;
-                        break;
-                    case SDLK_ESCAPE:
-                        return {Input::Exit, Input::Pressed};
-                }
-
-                // Push the input to all InputComponents.
-                for (size_t i = 0; i < MAX_ENTITIES; ++i) {
-                    if (world.componentFlags[i] & ComponentFlag::Input) {
-                        world.inputs[i].inputStates[keyInput.type] = keyInput.state;
-                    }
-                }
-            }
-        }
-
-        return {Input::None, Input::Invalid};
     }
 
 private:
@@ -399,98 +358,62 @@ private:
 int main(int argc, char **argv)
 try
 {
-    // Setup the SDL constructs.
-    SDL2pp::SDL sdl(SDL_INIT_VIDEO);
-    SDL2pp::Window window("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                          SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-    SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
-    std::shared_ptr<SDL2pp::Texture> sprites = std::make_shared<SDL2pp::Texture>(
-    renderer, "Resources/u4_tiles_pc_ega.png");
+    // Set up the SDL constructs.
+    // TODO: Check if constructing this is necessary for for networking.
+    SDL2pp::SDL sdl();
 
     // Calc the center of the screen.
-    int centerX = renderer.GetOutputWidth() / 2;
-    int centerY = renderer.GetOutputHeight() / 2;
+    int centerX = SCREEN_WIDTH / 2;
+    int centerY = SCREEN_HEIGHT / 2;
 
-    // Setup our world.
+    // Set up our world.
     World world;
 
-    // Setup our systems.
-    InputSystem inputSystem(world);
+    // Set up our systems.
+    NetworkInputSystem networkInputSystem(world);
     MovementSystem movementSystem(world);
-    RenderSystem renderSystem(world);
 
-    // Setup our player.
-    SDL2pp::Rect textureRect(0, 32, 16, 16);
-    SDL2pp::Rect worldRect(centerX - 64, centerY - 64, 64, 64);
+    // Set up the networking.
+    msnd::startup();
+    msnd::Acceptor acceptor("127.0.0.1", 41499);
+    std::vector<std::unique_ptr<msnd::Peer>> clients;
 
-    EntityID player = world.AddEntity("Player");
-    world.positions[player].x = centerX - 64;
-    world.positions[player].y = centerY - 64;
-    world.movements[player].maxVelX = 1;
-    world.movements[player].maxVelY = 1;
-    world.sprites[player].texturePtr = sprites;
-    world.sprites[player].posInTexture = textureRect;
-    world.sprites[player].posInWorld = worldRect;
-    world.AttachComponent(player, ComponentFlag::Input);
-    world.AttachComponent(player, ComponentFlag::Movement);
-    world.AttachComponent(player, ComponentFlag::Position);
-    world.AttachComponent(player, ComponentFlag::Sprite);
-
-    bool bQuit = false;
-    while (!bQuit) {
-        // Will return Input::Type::Exit if the app needs to exit.
-        Input input = inputSystem.processInputEvents();
-        if (input.type == Input::Exit) {
-            break;
+    // Spin up a thread to check for command line input.
+    std::atomic<bool> bQuit = false;
+    std::thread([&]
+    {
+        while (1) {
+            std::string userInput = "";
+            std::getline(std::cin, userInput);
+            if (userInput == "exit") {
+                bQuit = true;
+            }
         }
+    }).detach();
+
+    std::cout << "Starting main loop." << std::endl;
+    while (!bQuit) {
+        // Check for new connections.
+        std::unique_ptr<msnd::Peer> newClient = acceptor.accept();
+        if (newClient != nullptr) {
+            std::cout << "New peer connected." << std::endl;
+            clients.push_back(std::move(newClient));
+        }
+
+        // Check for disconnects.
+        for (auto i = clients.begin(); i != clients.end(); ++i) {
+            if (!((*i)->isConnected())) {
+                clients.erase(i);
+            }
+        }
+
+        // Will return Input::Type::Exit if the app needs to exit.
+        networkInputSystem.processInputEvents();
 
         movementSystem.processMovements();
 
-        renderer.Clear();
-
-        renderer.Copy(*(world.sprites[player].texturePtr),
-                      world.sprites[player].posInTexture,
-                      world.sprites[player].posInWorld);
-
-        renderer.Present();
-
         SDL_Delay(1);
     }
-    /*
-     flatbuffers::FlatBufferBuilder builder;
-
-     msnd::startup();
-
-     std::unique_ptr<msnd::Peer> server = msnd::initiate("127.0.0.1", 41499);
-
-     if (server == nullptr)
-     {
-     return 1;
-     }
-
-     while (1)
-     {
-     if (!(server->isConnected()))
-     {
-     std::cout << "Disconnected.\n";
-     break;
-     }
-     else
-     {
-     std::unique_ptr<msnd::Message> response
-     = server->receiveMessage();
-     if (response != nullptr)
-     {
-     auto message = NW::GetMessage(response->data);
-
-     printf("Type: %d, Pos: (%d, %d)\n", message->type()
-     , message->pos()->row(), message->pos()->column());
-     }
-     }
-     }
-
-     msnd::shutdown();
-     */
 
     return 0;
 }

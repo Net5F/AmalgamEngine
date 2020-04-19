@@ -7,8 +7,8 @@
 #include <memory>
 #include <queue>
 #include <algorithm>
-#include <Message_generated.h>
 #include <messend.hpp>
+#include <Message_generated.h>
 
 // Anonymous namespace restricts vars to this translation unit
 namespace
@@ -591,12 +591,12 @@ try
 
     // Connect to the server.
     Network network;
-//    while (!(network.connect())) {
-//        std::cerr << "Network failed to connect. Retrying." << std::endl;
-//    }
+    while (!(network.connect())) {
+        std::cerr << "Network failed to connect. Retrying." << std::endl;
+    }
 
     // Set up our systems.
-    PlayerInputSystem inputSystem(world, network);
+    PlayerInputSystem playerInputSystem(world, network);
     MovementSystem movementSystem(world);
     RenderSystem renderSystem(world);
 
@@ -621,7 +621,7 @@ try
     bool bQuit = false;
     while (!bQuit) {
         // Will return Input::Type::Exit if the app needs to exit.
-        Input input = inputSystem.processInputEvents();
+        Input input = playerInputSystem.processInputEvents();
         if (input.type == Input::Exit) {
             break;
         }
