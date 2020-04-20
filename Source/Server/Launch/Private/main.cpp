@@ -1,4 +1,13 @@
 #include <SDL2pp/SDL2pp.hh>
+#include "messend.hpp"
+#include "Message_generated.h"
+
+#include "SharedDefs.h"
+#include "InputComponent.h"
+#include "PositionComponent.h"
+#include "MovementComponent.h"
+#include "SpriteComponent.h"
+
 #include <string>
 #include <exception>
 #include <iostream>
@@ -9,106 +18,15 @@
 #include <algorithm>
 #include <atomic>
 #include <thread>
-#include <messend.hpp>
-#include <Message_generated.h>
 
-// Anonymous namespace restricts vars to this translation unit
-namespace
+namespace AM
 {
-static constexpr uint32_t SCREEN_WIDTH = 1280;
+static constexpr Uint32 SCREEN_WIDTH = 1280;
 
-static constexpr uint32_t SCREEN_HEIGHT = 720;
-
-static constexpr uint32_t MAX_ENTITIES = 100;
+static constexpr Uint32 SCREEN_HEIGHT = 720;
 }
 
-struct PositionComponent
-{
-public:
-    PositionComponent()
-    : x(0), y(0)
-    {
-    }
-
-    /** Current position. */
-    float x;
-    float y;
-};
-
-struct MovementComponent
-{
-public:
-    MovementComponent()
-    : velX(0), velY(0), maxVelY(5), maxVelX(5)
-    {
-    }
-
-    /** Current velocities. */
-    float velX;
-    float velY;
-    float maxVelX;
-    float maxVelY;
-};
-
-struct Input
-{
-    enum Type
-    {
-        None,
-        Up,
-        Down,
-        Left,
-        Right,
-        Exit, // Exit the application.
-        NumInputs
-    };
-
-    enum State
-    {
-        Invalid,
-        Pressed,
-        Released
-    };
-
-    Input(Type inType, State inState)
-    : type(inType), state(inState)
-    {
-    }
-
-    Type type;
-    State state;
-};
-
-struct InputComponent
-{
-public:
-    InputComponent()
-    {
-        inputStates.fill(Input::Released);
-    }
-
-    /** Holds the current state of the inputs. */
-    std::array<Input::State, Input::NumInputs> inputStates;
-};
-
-struct SpriteComponent
-{
-public:
-    SpriteComponent()
-    : texturePtr(nullptr), posInTexture { 0, 0, 0, 0 }, posInWorld { 0, 0, 0, 0 }
-    {
-    }
-
-    // TODO: Switch to textureID and add a texture loader.
-    /** A pointer to the texture that holds this sprite. */
-    std::shared_ptr<SDL2pp::Texture> texturePtr;
-
-    /** UV position and size in texture. */
-    SDL2pp::Rect posInTexture;
-
-    /** ST position and size in world. */
-    SDL2pp::Rect posInWorld;
-};
+using namespace AM;
 
 class IDPool
 {
@@ -144,19 +62,6 @@ private:
     static std::array<bool, MAX_ENTITIES> IDs;
 };
 std::array<bool, MAX_ENTITIES> IDPool::IDs = {}; // Init to 0;
-
-typedef uint32_t EntityID;
-
-struct ComponentFlag
-{
-    enum FlagType
-    {
-        Position = 1 << 0,
-        Movement = 1 << 1,
-        Input = 1 << 2,
-        Sprite = 1 << 3
-    };
-};
 
 class World
 {
@@ -278,7 +183,7 @@ public:
 private:
     void changeVelocity(
     EntityID entityID,
-    std::array<Input::State, static_cast<int>(Input::Type::NumInputs)>& inputStates)
+    std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates)
     {
         MovementComponent& movement = world.movements[entityID];
         // Handle up/down (favors up).
@@ -398,6 +303,10 @@ try
         if (newClient != nullptr) {
             std::cout << "New peer connected." << std::endl;
             clients.push_back(std::move(newClient));
+
+            // Build their entity.
+
+            // Send them their ID.
         }
 
         // Check for disconnects.

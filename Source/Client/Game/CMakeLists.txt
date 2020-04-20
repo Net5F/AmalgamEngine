@@ -1,5 +1,16 @@
 target_sources(Client
 	PRIVATE
+		Private/Network.cpp
+		Private/World.cpp
+		Private/PlayerInputSystem.cpp
+		Private/MovementSystem.cpp
+		Private/RenderSystem.cpp
+	PUBLIC
+		Public/Network.h
+		Public/World.h
+		Public/PlayerInputSystem.h
+		Public/MovementSystem.h
+		Public/RenderSystem.h
 )
 
 target_include_directories(Client
