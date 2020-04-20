@@ -53,3 +53,5 @@ add_custom_command(
 
 # Build all of the subdirectories
 add_subdirectory(Launch)
+add_subdirectory(Game)
+add_subdirectory(Utility)
