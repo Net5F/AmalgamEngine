@@ -41,7 +41,10 @@ private:
     static const std::string SERVER_IP;
     static constexpr int SERVER_PORT = 41499;
 
-    msnd::Acceptor acceptor;
+    // We delay creating the acceptor because msnd::startup has to be called first.
+    void createAcceptor();
+
+    std::unique_ptr<msnd::Acceptor> acceptor;
 
     std::vector<std::shared_ptr<msnd::Peer>> clients;
 };

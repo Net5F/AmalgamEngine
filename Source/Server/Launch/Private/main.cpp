@@ -38,7 +38,6 @@ try
     World world;
 
     // Set up the network utility.
-    msnd::startup();
     Network network;
 
     // Set up our systems.

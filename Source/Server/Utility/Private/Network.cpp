@@ -4,8 +4,9 @@
 const std::string AM::Network::SERVER_IP = "127.0.0.1";
 
 AM::Network::Network()
-: acceptor(SERVER_IP, SERVER_PORT)
 {
+    msnd::startup();
+    createAcceptor();
 }
 
 AM::Network::~Network()
@@ -38,13 +39,13 @@ std::vector<std::shared_ptr<msnd::Peer>> AM::Network::acceptNewClients()
 {
     std::vector<std::shared_ptr<msnd::Peer>> newClients;
 
-    std::shared_ptr<msnd::Peer> newClient = acceptor.accept();
+    std::shared_ptr<msnd::Peer> newClient = acceptor->accept();
     while (newClient != nullptr) {
         std::cout << "New client connected." << std::endl;
         clients.push_back(newClient);
         newClients.push_back(newClient);
 
-        newClient = acceptor.accept();
+        newClient = acceptor->accept();
     }
 
     return newClients;
@@ -62,4 +63,9 @@ void AM::Network::checkForDisconnections()
 const std::vector<std::shared_ptr<msnd::Peer>>& AM::Network::getClients()
 {
     return clients;
+}
+
+void AM::Network::createAcceptor()
+{
+    acceptor = std::make_unique<msnd::Acceptor>(SERVER_IP, SERVER_PORT);
 }
