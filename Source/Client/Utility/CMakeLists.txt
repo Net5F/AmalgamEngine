@@ -1,13 +1,11 @@
-target_sources(Server
+target_sources(Client
 	PRIVATE
-		Private/IDPool.cpp
 		Private/Network.cpp
 	PUBLIC
-		Public/IDPool.h
 		Public/Network.h
 )
 
-target_include_directories(Server
+target_include_directories(Client
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
     PUBLIC

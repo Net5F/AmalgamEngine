@@ -248,9 +248,13 @@ struct ConnectionResponse FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef ConnectionResponseBuilder Builder;
   struct Traits;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_X = 4,
-    VT_Y = 6
+    VT_ENTITYID = 4,
+    VT_X = 6,
+    VT_Y = 8
   };
+  uint32_t entityID() const {
+    return GetField<uint32_t>(VT_ENTITYID, 0);
+  }
   float x() const {
     return GetField<float>(VT_X, 0.0f);
   }
@@ -259,6 +263,7 @@ struct ConnectionResponse FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, VT_ENTITYID) &&
            VerifyField<float>(verifier, VT_X) &&
            VerifyField<float>(verifier, VT_Y) &&
            verifier.EndTable();
@@ -269,6 +274,9 @@ struct ConnectionResponseBuilder {
   typedef ConnectionResponse Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
+  void add_entityID(uint32_t entityID) {
+    fbb_.AddElement<uint32_t>(ConnectionResponse::VT_ENTITYID, entityID, 0);
+  }
   void add_x(float x) {
     fbb_.AddElement<float>(ConnectionResponse::VT_X, x, 0.0f);
   }
@@ -288,11 +296,13 @@ struct ConnectionResponseBuilder {
 
 inline flatbuffers::Offset<ConnectionResponse> CreateConnectionResponse(
     flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t entityID = 0,
     float x = 0.0f,
     float y = 0.0f) {
   ConnectionResponseBuilder builder_(_fbb);
   builder_.add_y(y);
   builder_.add_x(x);
+  builder_.add_entityID(entityID);
   return builder_.Finish();
 }
 

@@ -10,6 +10,9 @@ table ConnectionRequest {
 }
 
 table ConnectionResponse {
+    // ID for the player entity.
+    entityID:uint;
+    
     // Position (new player or last logout).
     x:float;
     y:float;

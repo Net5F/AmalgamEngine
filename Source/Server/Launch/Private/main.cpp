@@ -10,6 +10,7 @@
 #include "MovementSystem.h"
 #include "NetworkInputSystem.h"
 #include "World.h"
+#include "Network.h"
 
 #include <string>
 #include <exception>
@@ -22,22 +23,13 @@
 #include <atomic>
 #include <thread>
 
-namespace AM
-{
-static constexpr Uint32 SCREEN_WIDTH = 1280;
-
-static constexpr Uint32 SCREEN_HEIGHT = 720;
-}
-
 using namespace AM;
+
+static constexpr int BUILDER_BUFFER_SIZE = 512;
 
 int main(int argc, char **argv)
 try
 {
-    // Set up the SDL constructs.
-    // TODO: Check if constructing this is necessary for networking.
-    SDL2pp::SDL sdl();
-
     // Calc the center of the screen.
     int centerX = SCREEN_WIDTH / 2;
     int centerY = SCREEN_HEIGHT / 2;
@@ -45,14 +37,15 @@ try
     // Set up our world.
     World world;
 
+    // Set up the network utility.
+    msnd::startup();
+    Network network;
+
     // Set up our systems.
     NetworkInputSystem networkInputSystem(world);
     MovementSystem movementSystem(world);
 
-    // Set up the networking.
-    msnd::startup();
-    msnd::Acceptor acceptor("127.0.0.1", 41499);
-    std::vector<std::unique_ptr<msnd::Peer>> clients;
+    flatbuffers::FlatBufferBuilder builder(BUILDER_BUFFER_SIZE);
 
     // Spin up a thread to check for command line input.
     std::atomic<bool> bQuit = false;
@@ -69,25 +62,28 @@ try
 
     std::cout << "Starting main loop." << std::endl;
     while (!bQuit) {
-        // Check for new connections.
-        std::unique_ptr<msnd::Peer> newClient = acceptor.accept();
-        if (newClient != nullptr) {
-            std::cout << "New peer connected." << std::endl;
-            clients.push_back(std::move(newClient));
-
+        // Add any new connections.
+        std::vector<std::shared_ptr<msnd::Peer>> newClients =
+            network.acceptNewClients();
+        for (std::shared_ptr<msnd::Peer> peer : newClients) {
             // Build their entity.
+            EntityID newID = world.AddEntity("Player");
 
             // Send them their ID.
+            builder.Clear();
+            auto response = fb::CreateConnectionResponse(builder, newID, 0, 0);
+            auto message = fb::CreateMessage(builder,
+                fb::MessageContent::ConnectionResponse, response.Union());
+            builder.Finish(message);
+
+            network.send(peer,
+                msnd::Message(builder.GetBufferPointer(), builder.GetSize()));
         }
 
         // Check for disconnects.
-        for (auto i = clients.begin(); i != clients.end(); ++i) {
-            if (!((*i)->isConnected())) {
-                clients.erase(i);
-            }
-        }
+        network.checkForDisconnections();
 
-        // Will return Input::Type::Exit if the app needs to exit.
+        // Run all systems.
         networkInputSystem.processInputEvents();
 
         movementSystem.processMovements();

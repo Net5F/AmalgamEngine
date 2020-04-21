@@ -1,6 +1,6 @@
 #include <SDL2pp/SDL2pp.hh>
-#include "Message_generated.h"
 #include "messend.hpp"
+#include "Message_generated.h"
 
 #include "SharedDefs.h"
 #include "InputComponent.h"
@@ -22,13 +22,6 @@
 #include <memory>
 #include <queue>
 #include <algorithm>
-
-namespace AM
-{
-static constexpr Uint32 SCREEN_WIDTH = 1280;
-
-static constexpr Uint32 SCREEN_HEIGHT = 720;
-}
 
 using namespace AM;
 

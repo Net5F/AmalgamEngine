@@ -58,6 +58,8 @@
 					<defs/>
 					<undefs/>
 				</win32>
+				<defs/>
+				<undefs/>
 			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.exe.release.376375036">

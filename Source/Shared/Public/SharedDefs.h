@@ -12,6 +12,10 @@ namespace AM
 
 static constexpr Uint32 MAX_ENTITIES = 100;
 
+static constexpr Uint32 SCREEN_WIDTH = 1280;
+
+static constexpr Uint32 SCREEN_HEIGHT = 720;
+
 typedef uint32_t EntityID;
 
 struct ComponentFlag
