@@ -13,7 +13,6 @@ target_link_libraries(Server
         ${SDL2_MIXER_LIBRARIES} ${SDL2_TTF_LIBRARIES}
         ${SDL2_NET_LIBRARIES}
         SDL2pp
-        Messend
         flatbuffers
         Shared
 )

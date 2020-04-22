@@ -2,6 +2,7 @@
 #define PLAYERINPUTSYSTEM_H
 
 #include "SharedDefs.h"
+#include "NetworkClient.h"
 #include "InputComponent.h"
 #include "Message_generated.h"
 
@@ -14,7 +15,7 @@ class Network;
 class PlayerInputSystem
 {
 public:
-    PlayerInputSystem(World& inWorld, Network& inNetwork);
+    PlayerInputSystem(World& inWorld, NetworkClient& inNetwork);
 
     Input processInputEvents();
 
@@ -26,7 +27,7 @@ private:
     fb::InputState convertToFbInputState(Input::State state);
 
     World& world;
-    Network& network;
+    NetworkClient& network;
     flatbuffers::FlatBufferBuilder builder;
 };
 

@@ -5,7 +5,7 @@ std::array<bool, AM::MAX_ENTITIES> AM::IDPool::IDs = {}; // Init to 0;
 
 Uint32 AM::IDPool::reserveID()
 {
-    for (uint16_t i = 0; i < MAX_ENTITIES; ++i) {
+    for (Uint16 i = 0; i < MAX_ENTITIES; ++i) {
         // Find the first false.
         if (!(IDs[i])) {
             IDs[i] = true;
@@ -17,7 +17,7 @@ Uint32 AM::IDPool::reserveID()
     return 0;
 }
 
-void AM::IDPool::freeID(uint32_t ID)
+void AM::IDPool::freeID(Uint32 ID)
 {
     if (IDs[ID]) {
         IDs[ID] = false;

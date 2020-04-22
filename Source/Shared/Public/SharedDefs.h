@@ -2,6 +2,8 @@
 #define AMSTRUCTS_H
 
 #include <SDL_stdinc.h>
+#include <memory>
+#include <vector>
 
 /**
  * This file contains shared definitions that should be
@@ -10,13 +12,18 @@
 namespace AM
 {
 
-static constexpr Uint32 MAX_ENTITIES = 100;
+/** Game constants. */
+static constexpr unsigned int MAX_ENTITIES = 100;
+static constexpr unsigned int SCREEN_WIDTH = 1280;
+static constexpr unsigned int SCREEN_HEIGHT = 720;
 
-static constexpr Uint32 SCREEN_WIDTH = 1280;
+/** Messaging constants. */
+static constexpr unsigned int MESSAGE_HEADER_SIZE = 1;
 
-static constexpr Uint32 SCREEN_HEIGHT = 720;
+typedef Uint32 EntityID;
 
-typedef uint32_t EntityID;
+typedef std::unique_ptr<std::vector<Uint8>> BinaryBufferPtr;
+typedef std::shared_ptr<std::vector<Uint8>> BinaryBufferSharedPtr;
 
 struct ComponentFlag
 {

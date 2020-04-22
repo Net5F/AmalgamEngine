@@ -1,10 +1,10 @@
 target_sources(Server
 	PRIVATE
 		Private/IDPool.cpp
-		Private/Network.cpp
+		Private/NetworkServer.cpp
 	PUBLIC
 		Public/IDPool.h
-		Public/Network.h
+		Public/NetworkServer.h
 )
 
 target_include_directories(Server

@@ -1,5 +1,4 @@
 #include <SDL2pp/SDL2pp.hh>
-#include "messend.hpp"
 #include "Message_generated.h"
 
 #include "SharedDefs.h"
@@ -12,7 +11,7 @@
 #include "MovementSystem.h"
 #include "RenderSystem.h"
 
-#include "Network.h"
+#include "NetworkClient.h"
 
 #include <string>
 #include <exception>
@@ -44,10 +43,12 @@ try
     World world;
 
     // Connect to the server.
-    Network network;
+    NetworkClient network;
     while (!(network.connect())) {
         std::cerr << "Network failed to connect. Retrying." << std::endl;
     }
+
+    // TODO: Receive the player's ID from the server.
 
     // Set up our systems.
     PlayerInputSystem playerInputSystem(world, network);
@@ -58,7 +59,6 @@ try
     SDL2pp::Rect textureRect(0, 32, 16, 16);
     SDL2pp::Rect worldRect(centerX - 64, centerY - 64, 64, 64);
 
-    // TODO: Receive the player's ID from the server.
     EntityID player = 0;
     world.AddEntity("Player", player);
     world.positions[player].x = centerX - 64;

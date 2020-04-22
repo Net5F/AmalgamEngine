@@ -1,5 +1,4 @@
 #include <SDL2pp/SDL2pp.hh>
-#include "messend.hpp"
 #include "Message_generated.h"
 
 #include "SharedDefs.h"
@@ -10,7 +9,7 @@
 #include "MovementSystem.h"
 #include "NetworkInputSystem.h"
 #include "World.h"
-#include "Network.h"
+#include "NetworkServer.h"
 
 #include <string>
 #include <exception>
@@ -38,7 +37,7 @@ try
     World world;
 
     // Set up the network utility.
-    Network network;
+    NetworkServer network;
 
     // Set up our systems.
     NetworkInputSystem networkInputSystem(world);
@@ -62,21 +61,23 @@ try
     std::cout << "Starting main loop." << std::endl;
     while (!bQuit) {
         // Add any new connections.
-        std::vector<std::shared_ptr<msnd::Peer>> newClients =
+        std::vector<std::shared_ptr<Peer>> newClients =
             network.acceptNewClients();
-        for (std::shared_ptr<msnd::Peer> peer : newClients) {
+        for (std::shared_ptr<Peer> peer : newClients) {
             // Build their entity.
             EntityID newID = world.AddEntity("Player");
 
             // Send them their ID.
             builder.Clear();
             auto response = fb::CreateConnectionResponse(builder, newID, 0, 0);
-            auto message = fb::CreateMessage(builder,
+            auto encodedMessage = fb::CreateMessage(builder,
                 fb::MessageContent::ConnectionResponse, response.Union());
-            builder.Finish(message);
+            builder.Finish(encodedMessage);
 
-            network.send(peer,
-                msnd::Message(builder.GetBufferPointer(), builder.GetSize()));
+            Uint8* buffer = builder.GetBufferPointer();
+            BinaryBufferSharedPtr message = std::make_shared<std::vector<Uint8>>(
+            buffer, (buffer + builder.GetSize()));
+            network.send(peer, message);
         }
 
         // Check for disconnects.

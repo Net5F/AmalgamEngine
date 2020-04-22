@@ -1,8 +1,8 @@
 #include <PlayerInputSystem.h>
 #include "World.h"
-#include "Network.h"
+#include "NetworkClient.h"
 
-AM::PlayerInputSystem::PlayerInputSystem(World& inWorld, Network& inNetwork)
+AM::PlayerInputSystem::PlayerInputSystem(World& inWorld, NetworkClient& inNetwork)
 : world(inWorld), network(inNetwork), builder(BUILDER_BUFFER_SIZE)
 {
 }

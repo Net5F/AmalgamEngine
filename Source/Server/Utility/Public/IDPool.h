@@ -13,7 +13,7 @@ class IDPool
 public:
     static Uint32 reserveID();
 
-    static void freeID(uint32_t ID);
+    static void freeID(Uint32 ID);
 
 private:
     /**

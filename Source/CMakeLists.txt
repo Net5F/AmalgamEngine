@@ -26,10 +26,6 @@ SET(FLATBUFFERS_INSTALL OFF CACHE BOOL "Enable the installation of targets." FOR
 SET(FLATBUFFERS_BUILD_FLATHASH OFF CACHE BOOL "Enable the build of flathash" FORCE)
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/flatbuffers/"
                  "${PROJECT_BINARY_DIR}/Libraries/flatbuffers/")
-                 
-# Build messend
-add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/messend-cpp/"
-                 "${PROJECT_BINARY_DIR}/Libraries/messend-cpp/")
 
 # Build shared library
 add_subdirectory(Shared)
