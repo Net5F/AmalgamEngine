@@ -120,25 +120,6 @@ void AM::PlayerInputSystem::sendInputState()
     == fb::InputState::Released) {
         std::cout << "Right released" << std::endl;
     }
-
-//        while (1) {
-//            if (!(server->isConnected())) {
-//                std::cout << "Disconnected.\n";
-//                break;
-//            }
-//            else {
-//                std::unique_ptr<msnd::Message> response = server->receiveMessage();
-//                if (response != nullptr) {
-//                    Message message = GetMessage(response->data);
-//
-//                    switch (message.content_type()) {
-//                        case MessageContent::MessageContent_EntityUpdate
-//                    }
-//                    printf("Type: %d, Pos: (%d, %d)\n", message.,
-//                           message->pos()->row(), message->pos()->column());
-//                }
-//            }
-//        }
 }
 
 AM::fb::InputState AM::PlayerInputSystem::convertToFbInputState(Input::State state)

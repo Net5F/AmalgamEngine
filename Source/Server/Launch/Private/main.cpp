@@ -77,7 +77,11 @@ try
             Uint8* buffer = builder.GetBufferPointer();
             BinaryBufferSharedPtr message = std::make_shared<std::vector<Uint8>>(
             buffer, (buffer + builder.GetSize()));
-            network.send(peer, message);
+
+            bool result = network.send(peer, message);
+            if (!result) {
+                std::cerr << "Failed to send response." << std::endl;
+            }
         }
 
         // Check for disconnects.

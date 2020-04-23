@@ -48,7 +48,20 @@ try
         std::cerr << "Network failed to connect. Retrying." << std::endl;
     }
 
-    // TODO: Receive the player's ID from the server.
+    // Wait for the player's ID from the server.
+    BinaryBufferPtr responseBuffer = network.receive();
+    while (responseBuffer == nullptr) {
+        responseBuffer = network.receive();
+        SDL_Delay(10);
+    }
+
+    // Get the player ID from the connection response.
+    const fb::Message* message = fb::GetMessage(responseBuffer->data());
+    if (message->content_type() != fb::MessageContent::ConnectionResponse) {
+        std::cerr << "Expected connection response but got something else." << std::endl;
+    }
+    auto connectionResponse = static_cast<const fb::ConnectionResponse*>(message->content());
+    EntityID player = connectionResponse->entityID();
 
     // Set up our systems.
     PlayerInputSystem playerInputSystem(world, network);
@@ -59,7 +72,6 @@ try
     SDL2pp::Rect textureRect(0, 32, 16, 16);
     SDL2pp::Rect worldRect(centerX - 64, centerY - 64, 64, 64);
 
-    EntityID player = 0;
     world.AddEntity("Player", player);
     world.positions[player].x = centerX - 64;
     world.positions[player].y = centerY - 64;

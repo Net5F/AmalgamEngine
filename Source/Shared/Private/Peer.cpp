@@ -26,10 +26,13 @@ AM::Peer::Peer(TCPsocket inSocket)
 {
     set = SDLNet_AllocSocketSet(1);
     if (!set) {
-        std::cerr << "Error allocating socket set" << std::endl;
+        std::cerr << "Error allocating socket set" << SDLNet_GetError() << std::endl;
     }
 
-    SDLNet_TCP_AddSocket(set, socket);
+    int numAdded = SDLNet_TCP_AddSocket(set, inSocket);
+    if (numAdded < 1) {
+        std::cerr << "Error while adding socket." << SDLNet_GetError() << std::endl;
+    }
 
     socket = inSocket;
 
@@ -70,7 +73,12 @@ bool AM::Peer::sendMessage(BinaryBufferSharedPtr message)
 BinaryBufferPtr AM::Peer::receiveMessage()
 {
     // Poll to see if there's data
-    SDLNet_CheckSockets(set, 0);
+    int numReady = SDLNet_CheckSockets(set, 0);
+    if (numReady == -1) {
+        std::cerr << "Error while checking sockets: " << SDLNet_GetError() << std::endl;
+        // Most of the time this is a system error, where perror might help.
+        perror("SDLNet_CheckSockets");
+    }
 
     if (!SDLNet_SocketReady(socket)) {
         return nullptr;
@@ -104,7 +112,7 @@ BinaryBufferPtr AM::Peer::receiveMessageWait()
         return nullptr;
     }
 
-    return std::make_unique <std::vector<Uint8>>(messageBuffer.begin()
+    return std::make_unique<std::vector<Uint8>>(messageBuffer.begin()
     , (messageBuffer.begin() + messageSize));
 }
 
