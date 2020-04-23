@@ -66,9 +66,11 @@ void AM::PlayerInputSystem::sendInputState()
 
     // Translate the inputs to fb's enum.
     fb::InputState fbInputStates[Input::Type::NumTypes];
+    std::array<Input::State, Input::NumTypes>& playerInputStates =
+        world.inputs[playerID].inputStates;
     for (uint8_t i = 0; i < Input::Type::NumTypes; ++i) {
         // Translate the Input::State enum to fb::InputState.
-        fbInputStates[i] = convertToFbInputState(world.inputs[playerID].inputStates[i]);
+        fbInputStates[i] = convertToFbInputState(playerInputStates[i]);
     }
     flatbuffers::Offset<flatbuffers::Vector<fb::InputState>> inputVector =
         builder.CreateVector(fbInputStates, Input::Type::NumTypes);
@@ -102,24 +104,10 @@ void AM::PlayerInputSystem::sendInputState()
     flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
     builder.Finish(message);
 
-//        network.send(msnd::Message(builder.GetBufferPointer(), builder.GetSize()));
-
-    /** Temporary: Try to read from the buffer. */
-    const fb::Message* readMessage = fb::GetMessage(builder.GetBufferPointer());
-    const fb::EntityUpdate* readEntityUpdate =
-        static_cast<const fb::EntityUpdate*>(readMessage->content());
-    auto readEntity = readEntityUpdate->entities()->Get(0);
-
-    std::cout << "Entity: " << readEntity->name()->c_str() << std::endl;
-    std::cout << "ID: " << readEntity->id() << std::endl;
-    std::cout << "Flags: " << std::hex << readEntity->flags() << std::endl;
-    if (readEntity->inputComponent()->inputStates()->Get(4) == fb::InputState::Pressed) {
-        std::cout << "Right pressed" << std::endl;
-    }
-    else if (readEntity->inputComponent()->inputStates()->Get(4)
-    == fb::InputState::Released) {
-        std::cout << "Right released" << std::endl;
-    }
+    // Send the message.
+    Uint8* buffer = builder.GetBufferPointer();
+    network.send(
+        std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
 }
 
 AM::fb::InputState AM::PlayerInputSystem::convertToFbInputState(Input::State state)

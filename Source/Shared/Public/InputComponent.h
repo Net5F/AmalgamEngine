@@ -12,8 +12,8 @@ struct Input
     {
         None,
         Up,
-        Down,
         Left,
+        Down,
         Right,
         Exit, // Exit the application.
         NumTypes
@@ -43,7 +43,7 @@ public:
         inputStates.fill(Input::Released);
     }
 
-    /** Holds the current state of the inputs. */
+    /** Holds the current state of the inputs, indexed by Input::Type. */
     std::array<Input::State, Input::NumTypes> inputStates;
 };
 

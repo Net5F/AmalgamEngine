@@ -3,7 +3,13 @@
 #include <iostream>
 
 AM::World::World()
-: entityNames {}, positions {}, movements {}, inputs {}, sprites {}, componentFlags {}
+: entityNames {},
+  positions {},
+  movements {},
+  inputs {},
+  sprites {},
+  componentFlags {},
+  entityIsDirty {}
 {
 }
 

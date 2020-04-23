@@ -40,13 +40,14 @@ try
     NetworkServer network;
 
     // Set up our systems.
-    NetworkInputSystem networkInputSystem(world);
+    NetworkInputSystem networkInputSystem(world, network);
     MovementSystem movementSystem(world);
 
     flatbuffers::FlatBufferBuilder builder(BUILDER_BUFFER_SIZE);
 
     // Spin up a thread to check for command line input.
     std::atomic<bool> bQuit = false;
+    // TODO: Change to sdl thread?
     std::thread([&]
     {
         while (1) {

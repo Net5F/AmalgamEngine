@@ -58,7 +58,7 @@ try
     // Get the player ID from the connection response.
     const fb::Message* message = fb::GetMessage(responseBuffer->data());
     if (message->content_type() != fb::MessageContent::ConnectionResponse) {
-        std::cerr << "Expected connection response but got something else." << std::endl;
+        std::cerr << "Expected ConnectionResponse but got something else." << std::endl;
     }
     auto connectionResponse = static_cast<const fb::ConnectionResponse*>(message->content());
     EntityID player = connectionResponse->entityID();

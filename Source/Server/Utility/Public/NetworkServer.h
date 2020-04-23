@@ -39,11 +39,17 @@ public:
      */
     std::vector<std::shared_ptr<AM::Peer>> acceptNewClients();
 
+    /**
+     * Iterates through the clients and erases any that are disconnected.
+     */
     void checkForDisconnections();
 
     const std::vector<std::shared_ptr<AM::Peer>>& getClients();
 
 private:
+    // The predicate used for checking if clients are disconnected.
+    static bool IsDisconnected(const std::shared_ptr<Peer>& peer);
+
     static const std::string SERVER_IP;
     static constexpr int SERVER_PORT = 41499;
 

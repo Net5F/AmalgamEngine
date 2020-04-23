@@ -2,6 +2,7 @@
 #include "Acceptor.h"
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
+#include <algorithm>
 #include <iostream>
 
 using namespace AM;
@@ -59,14 +60,16 @@ std::vector<std::shared_ptr<Peer>> AM::NetworkServer::acceptNewClients()
 
 void AM::NetworkServer::checkForDisconnections()
 {
-    for (auto i = clients.begin(); i != clients.end(); ++i) {
-        if (!((*i)->isConnected())) {
-            clients.erase(i);
-        }
-    }
+    clients.erase(std::remove_if(clients.begin(), clients.end(), IsDisconnected),
+        clients.end());
 }
 
 const std::vector<std::shared_ptr<Peer>>& AM::NetworkServer::getClients()
 {
     return clients;
+}
+
+bool AM::NetworkServer::IsDisconnected(const std::shared_ptr<Peer>& peer)
+{
+    return !(peer->isConnected());
 }

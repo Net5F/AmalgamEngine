@@ -1,0 +1,1 @@
+DLLs from SDL 2.0.9-1 installed through MSYS2

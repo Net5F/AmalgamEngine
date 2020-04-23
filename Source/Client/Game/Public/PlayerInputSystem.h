@@ -24,6 +24,9 @@ public:
 private:
     static constexpr int BUILDER_BUFFER_SIZE = 512;
 
+    /**
+     * Converts AM input states to the flatbuffer equivalent.
+     */
     fb::InputState convertToFbInputState(Input::State state);
 
     World& world;
