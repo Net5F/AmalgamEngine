@@ -6,12 +6,13 @@
 
 using namespace AM;
 
-const std::string AM::NetworkServer::SERVER_IP = "127.0.0.1";
-
 AM::NetworkServer::NetworkServer()
+: acceptor(nullptr)
 {
     SDLNet_Init();
-    createAcceptor();
+
+    // We delay creating the acceptor because startup has to be called first.
+    acceptor = std::make_unique<Acceptor>(SERVER_PORT);
 }
 
 AM::NetworkServer::~NetworkServer()
@@ -68,9 +69,4 @@ void AM::NetworkServer::checkForDisconnections()
 const std::vector<std::shared_ptr<Peer>>& AM::NetworkServer::getClients()
 {
     return clients;
-}
-
-void AM::NetworkServer::createAcceptor()
-{
-    acceptor = std::make_unique<Acceptor>(SERVER_IP, SERVER_PORT);
 }

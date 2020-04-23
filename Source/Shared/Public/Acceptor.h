@@ -15,7 +15,7 @@ namespace AM
 class Acceptor
 {
 public:
-    Acceptor(std::string inHostIP, unsigned int inPort);
+    Acceptor(unsigned int inPort);
 
     ~Acceptor();
 

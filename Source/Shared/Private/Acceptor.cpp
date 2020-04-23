@@ -3,9 +3,8 @@
 
 using namespace AM;
 
-AM::Acceptor::Acceptor(std::string inHostIP, unsigned int inPort)
-: hostIP(inHostIP)
-, port(port)
+AM::Acceptor::Acceptor(unsigned int inPort)
+: port(inPort)
 {
     IPaddress ip;
     if (SDLNet_ResolveHost(&ip, NULL, port)) {

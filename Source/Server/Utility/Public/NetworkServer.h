@@ -47,9 +47,6 @@ private:
     static const std::string SERVER_IP;
     static constexpr int SERVER_PORT = 41499;
 
-    // We delay creating the acceptor because startup has to be called first.
-    void createAcceptor();
-
     std::unique_ptr<AM::Acceptor> acceptor;
 
     std::vector<std::shared_ptr<Peer>> clients;
