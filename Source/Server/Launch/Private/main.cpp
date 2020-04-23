@@ -1,4 +1,5 @@
 #include <SDL2pp/SDL2pp.hh>
+#include <SDL_thread.h>
 #include "Message_generated.h"
 
 #include "SharedDefs.h"
@@ -20,11 +21,24 @@
 #include <queue>
 #include <algorithm>
 #include <atomic>
-#include <thread>
 
 using namespace AM;
 
 static constexpr int BUILDER_BUFFER_SIZE = 512;
+
+int inputThread(void* inExitRequested)
+{
+    while (1) {
+        std::string userInput = "";
+        std::getline(std::cin, userInput);
+        if (userInput == "exit") {
+            int* exitRequested = (int*) inExitRequested;
+            *exitRequested = true;
+        }
+    }
+
+    return 0;
+}
 
 int main(int argc, char **argv)
 try
@@ -46,21 +60,12 @@ try
     flatbuffers::FlatBufferBuilder builder(BUILDER_BUFFER_SIZE);
 
     // Spin up a thread to check for command line input.
-    std::atomic<bool> bQuit = false;
-    // TODO: Change to sdl thread?
-    std::thread([&]
-    {
-        while (1) {
-            std::string userInput = "";
-            std::getline(std::cin, userInput);
-            if (userInput == "exit") {
-                bQuit = true;
-            }
-        }
-    }).detach();
+    std::atomic<bool> exitRequested = false;
+    SDL_Thread* inputThreadPtr = SDL_CreateThread(inputThread, "User Input",
+        (void*) &exitRequested);
 
     std::cout << "Starting main loop." << std::endl;
-    while (!bQuit) {
+    while (!exitRequested) {
         // Add any new connections.
         std::vector<std::shared_ptr<Peer>> newClients =
             network.acceptNewClients();
