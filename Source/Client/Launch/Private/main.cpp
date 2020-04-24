@@ -9,6 +9,7 @@
 #include "World.h"
 #include "PlayerInputSystem.h"
 #include "MovementSystem.h"
+#include "NetworkMovementSystem.h"
 #include "RenderSystem.h"
 
 #include "NetworkClient.h"
@@ -65,6 +66,7 @@ try
 
     // Set up our systems.
     PlayerInputSystem playerInputSystem(world, network);
+    NetworkMovementSystem networkMovementSystem(world, network);
     MovementSystem movementSystem(world);
     RenderSystem renderSystem(world);
 
@@ -93,6 +95,9 @@ try
         if (input.type == Input::Exit) {
             break;
         }
+
+        // Run all systems.
+        networkMovementSystem.processServerMovements();
 
         movementSystem.processMovements();
 

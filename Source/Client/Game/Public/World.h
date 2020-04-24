@@ -18,9 +18,12 @@ class World
 public:
     World();
 
+    // TODO: Rename these to camelCase
     void AddEntity(const std::string& name, EntityID ID);
 
     void RemoveEntity(EntityID entityID);
+
+    bool entityExists(EntityID entityID);
 
     /**
      * Registers the entity as possessing this component.

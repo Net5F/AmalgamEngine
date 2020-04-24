@@ -27,6 +27,7 @@ typedef Uint32 EntityID;
 typedef std::unique_ptr<std::vector<Uint8>> BinaryBufferPtr;
 typedef std::shared_ptr<std::vector<Uint8>> BinaryBufferSharedPtr;
 
+/** Structs. */
 struct ComponentFlag
 {
     enum FlagType

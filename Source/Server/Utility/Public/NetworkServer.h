@@ -21,9 +21,16 @@ public:
     virtual ~NetworkServer();
 
     /**
-     * Sends bytes over the network.
+     * Sends message over the network.
+     * @return false if the send failed, else true.
      */
     bool send(std::shared_ptr<Peer> client, BinaryBufferSharedPtr message);
+
+    /**
+     * Sends message to all connected clients.
+     * @return false if any send failed, else true.
+     */
+    bool sendToAll(BinaryBufferSharedPtr message);
 
     /**
      * Checks for a waiting message for the given client. If one is waiting, packs it into a

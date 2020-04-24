@@ -24,6 +24,11 @@ void AM::World::RemoveEntity(EntityID entityID)
     entityNames[entityID] = "";
 }
 
+bool AM::World::entityExists(EntityID entityID)
+{
+    return (componentFlags[entityID] == 0) ? false : true;
+}
+
 void AM::World::AttachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
 {
     // If the entity doesn't have the component, add it.

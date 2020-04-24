@@ -3,11 +3,13 @@ target_sources(Client
 		Private/World.cpp
 		Private/PlayerInputSystem.cpp
 		Private/MovementSystem.cpp
+		Private/NetworkMovementSystem.cpp
 		Private/RenderSystem.cpp
 	PUBLIC
 		Public/World.h
 		Public/PlayerInputSystem.h
 		Public/MovementSystem.h
+		Public/NetworkMovementSystem.h
 		Public/RenderSystem.h
 )
 

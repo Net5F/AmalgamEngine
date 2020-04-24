@@ -21,6 +21,7 @@ void AM::NetworkInputSystem::processInputEvents()
             const fb::Message* message = fb::GetMessage(responseBuffer->data());
             if (message->content_type() != fb::MessageContent::EntityUpdate) {
                 std::cerr << "Expected EntityUpdate but got something else." << std::endl;
+                continue;
             }
             auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
 
@@ -38,6 +39,9 @@ void AM::NetworkInputSystem::processInputEvents()
                 std::cout << "InputState: {" << i << ", " << entityInputStates[i] << "}"
                 << std::endl;
             }
+
+            // Flag the entity as dirty.
+            world.entityIsDirty[clientEntityID] = true;
         }
     }
 }

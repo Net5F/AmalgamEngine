@@ -7,7 +7,7 @@ AM::Game::Game(NetworkServer& inNetwork)
 : world()
 , network(inNetwork)
 , networkInputSystem(world, network)
-, movementSystem(world)
+, movementSystem(world, network)
 , builder(BUILDER_BUFFER_SIZE)
 , timeSinceTick(0)
 {
@@ -27,7 +27,7 @@ void AM::Game::tick(double deltaMs)
     // Add any new connections.
     std::vector<std::shared_ptr<Peer>> newClients =
         network.acceptNewClients();
-    for (std::shared_ptr<Peer> peer : newClients) {
+    for (std::shared_ptr<Peer> client : newClients) {
         // Build their entity.
         EntityID newID = world.AddEntity("Player");
 
@@ -42,7 +42,7 @@ void AM::Game::tick(double deltaMs)
         BinaryBufferSharedPtr message = std::make_shared<std::vector<Uint8>>(
         buffer, (buffer + builder.GetSize()));
 
-        bool result = network.send(peer, message);
+        bool result = network.send(client, message);
         if (!result) {
             std::cerr << "Failed to send response." << std::endl;
         }

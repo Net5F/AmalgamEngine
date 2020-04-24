@@ -28,6 +28,10 @@ public:
 
     bool isConnected();
 
+    /**
+     * Sends the message to this peer.
+     * @return false if the send failed, else true.
+     */
     bool sendMessage(BinaryBufferSharedPtr message);
 
     BinaryBufferPtr receiveMessage();

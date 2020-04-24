@@ -32,6 +32,22 @@ bool AM::NetworkServer::send(std::shared_ptr<Peer> client,
     return client->sendMessage(message);
 }
 
+bool AM::NetworkServer::sendToAll(BinaryBufferSharedPtr message)
+{
+    bool sendSucceeded = true;
+
+    // Send to all connected clients.
+    for (std::shared_ptr<Peer> client : clients) {
+        if (client->isConnected()) {
+            if (!send(client, message)) {
+                sendSucceeded = false;
+            }
+        }
+    }
+
+    return sendSucceeded;
+}
+
 AM::BinaryBufferPtr AM::NetworkServer::receive(std::shared_ptr<Peer> client)
 {
     if (!(client->isConnected())) {

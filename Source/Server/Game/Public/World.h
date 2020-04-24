@@ -36,11 +36,16 @@ public:
     std::array<MovementComponent, MAX_ENTITIES> movements;
     std::array<InputComponent, MAX_ENTITIES> inputs;
     std::array<SpriteComponent, MAX_ENTITIES> sprites;
-    // Bit flags for every component, indicating whether the object at a given index
-    // has that component.
+    /**
+     * Bit flags for every component, indicating whether the object at a given index
+     * has that component.
+     */
     std::array<Uint32, MAX_ENTITIES> componentFlags;
-    // Indicates whether changes have been made to the entity since the last time its
-    // data was broadcast.
+    /**
+     * Indicates whether we've received new input data for the entity.
+     * Since input gets processed before movement, we assume that this also
+     * shows which entities need to be broadcast after moving.
+     */
     std::array<bool, MAX_ENTITIES> entityIsDirty;
 };
 
