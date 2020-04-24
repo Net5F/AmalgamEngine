@@ -42,10 +42,6 @@ int inputThread(void* inExitRequested)
 int main(int argc, char **argv)
 try
 {
-    // Calc the center of the screen.
-    int centerX = SCREEN_WIDTH / 2;
-    int centerY = SCREEN_HEIGHT / 2;
-
     // Set up the network utility.
     NetworkServer network;
 
@@ -59,10 +55,13 @@ try
 
     std::cout << "Starting main loop." << std::endl;
     Uint64 previousTime = 0;
-    Uint64 currentTime = SDL_GetPerformanceCounter();
     while (!exitRequested) {
+        // Calc the time delta.
+        Uint64 currentTime = SDL_GetPerformanceCounter();
         double deltaMs = (double)(((currentTime - previousTime) * 1000)
                          / ((double) SDL_GetPerformanceFrequency()));
+        previousTime = currentTime;
+
         game.tick(deltaMs);
     }
 
