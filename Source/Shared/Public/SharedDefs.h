@@ -19,6 +19,8 @@ static constexpr unsigned int SCREEN_HEIGHT = 720;
 
 /** Messaging constants. */
 static constexpr unsigned int MESSAGE_HEADER_SIZE = 1;
+// Max size that a builder needs to be to handle our messages.
+static constexpr int BUILDER_BUFFER_SIZE = 512;
 
 typedef Uint32 EntityID;
 

@@ -32,6 +32,8 @@ void AM::MovementSystem::processMovements()
             world.sprites[entityID].posInWorld.y = world.positions[entityID].y;
         }
     }
+
+    // TODO: Track entity dirty state. Send all dirty entities to all clients.
 }
 
 void AM::MovementSystem::changeVelocity(

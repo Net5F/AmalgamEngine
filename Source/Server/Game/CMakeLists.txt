@@ -3,10 +3,12 @@ target_sources(Server
 		Private/World.cpp
 		Private/MovementSystem.cpp
 		Private/NetworkInputSystem.cpp
+		Private/Game.cpp
 	PUBLIC
 		Public/World.h
 		Public/MovementSystem.h
 		Public/NetworkInputSystem.h
+		Public/Game.h
 )
 
 target_include_directories(Server

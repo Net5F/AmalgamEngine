@@ -10,6 +10,7 @@
 #include "MovementSystem.h"
 #include "NetworkInputSystem.h"
 #include "World.h"
+#include "Game.h"
 #include "NetworkServer.h"
 
 #include <string>
@@ -23,8 +24,6 @@
 #include <atomic>
 
 using namespace AM;
-
-static constexpr int BUILDER_BUFFER_SIZE = 512;
 
 int inputThread(void* inExitRequested)
 {
@@ -47,17 +46,11 @@ try
     int centerX = SCREEN_WIDTH / 2;
     int centerY = SCREEN_HEIGHT / 2;
 
-    // Set up our world.
-    World world;
-
     // Set up the network utility.
     NetworkServer network;
 
-    // Set up our systems.
-    NetworkInputSystem networkInputSystem(world, network);
-    MovementSystem movementSystem(world);
-
-    flatbuffers::FlatBufferBuilder builder(BUILDER_BUFFER_SIZE);
+    // Set up our game.
+    Game game(network);
 
     // Spin up a thread to check for command line input.
     std::atomic<bool> exitRequested = false;
@@ -65,40 +58,12 @@ try
         (void*) &exitRequested);
 
     std::cout << "Starting main loop." << std::endl;
+    Uint64 previousTime = 0;
+    Uint64 currentTime = SDL_GetPerformanceCounter();
     while (!exitRequested) {
-        // Add any new connections.
-        std::vector<std::shared_ptr<Peer>> newClients =
-            network.acceptNewClients();
-        for (std::shared_ptr<Peer> peer : newClients) {
-            // Build their entity.
-            EntityID newID = world.AddEntity("Player");
-
-            // Send them their ID.
-            builder.Clear();
-            auto response = fb::CreateConnectionResponse(builder, newID, 0, 0);
-            auto encodedMessage = fb::CreateMessage(builder,
-                fb::MessageContent::ConnectionResponse, response.Union());
-            builder.Finish(encodedMessage);
-
-            Uint8* buffer = builder.GetBufferPointer();
-            BinaryBufferSharedPtr message = std::make_shared<std::vector<Uint8>>(
-            buffer, (buffer + builder.GetSize()));
-
-            bool result = network.send(peer, message);
-            if (!result) {
-                std::cerr << "Failed to send response." << std::endl;
-            }
-        }
-
-        // Check for disconnects.
-        network.checkForDisconnections();
-
-        // Run all systems.
-        networkInputSystem.processInputEvents();
-
-        movementSystem.processMovements();
-
-        SDL_Delay(1);
+        double deltaMs = (double)(((currentTime - previousTime) * 1000)
+                         / ((double) SDL_GetPerformanceFrequency()));
+        game.tick(deltaMs);
     }
 
     return 0;
