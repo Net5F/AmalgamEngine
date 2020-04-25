@@ -9,7 +9,8 @@ AM::World::World()
   inputs {},
   sprites {},
   componentFlags {},
-  entityIsDirty {}
+  entityIsDirty {},
+  spawnPoint {0, 0}
 {
 }
 
@@ -47,4 +48,14 @@ void AM::World::RemoveComponent(EntityID entityID, ComponentFlag::FlagType compo
         std::cerr << "Tried to remove component when entity doesn't have it."
         << std::endl;
     }
+}
+
+void AM::World::setSpawnPoint(const Position& newSpawnPoint)
+{
+    spawnPoint = newSpawnPoint;
+}
+
+const AM::Position& AM::World::getSpawnPoint()
+{
+    return spawnPoint;
 }

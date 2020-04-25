@@ -34,6 +34,7 @@ void AM::NetworkMovementSystem::processServerMovements()
 
         // If the entity doesn't exist, add it to our list.
         if (!(world.entityExists(entityID))) {
+            std::cout << "New entity added. ID: " << entityID << std::endl;
             world.AddEntity((*entityIt)->name()->str(), entityID);
 
             // TODO: Get this info from the server.
@@ -50,7 +51,7 @@ void AM::NetworkMovementSystem::processServerMovements()
 
         // TEMP: Print the updated position so we know something happened.
         if (entityID == world.getPlayerID()) {
-            std::cout << "( " << position.x << ", " << position.y << ") -> ("
+            std::cout << entityID <<  ": ( " << position.x << ", " << position.y << ") -> ("
             << newPosition->x() << ", " << newPosition->y() << ")" << std::endl;
         }
         position.x = newPosition->x();

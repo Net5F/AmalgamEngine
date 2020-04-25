@@ -39,6 +39,12 @@ struct ComponentFlag
     };
 };
 
+struct Position
+{
+    float x;
+    float y;
+};
+
 } /* End namespace AM */
 
 #endif /* End AMSTRUCTS_H */

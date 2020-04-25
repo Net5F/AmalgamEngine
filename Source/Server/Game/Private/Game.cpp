@@ -11,6 +11,7 @@ AM::Game::Game(NetworkServer& inNetwork)
 , builder(BUILDER_BUFFER_SIZE)
 , timeSinceTick(0)
 {
+    world.setSpawnPoint({64, 64});
 }
 
 void AM::Game::tick(double deltaMs)
@@ -30,10 +31,20 @@ void AM::Game::tick(double deltaMs)
     for (std::shared_ptr<Peer> client : newClients) {
         // Build their entity.
         EntityID newID = world.AddEntity("Player");
+        const Position& spawnPoint = world.getSpawnPoint();
+        world.positions[newID].x = spawnPoint.x;
+        world.positions[newID].y = spawnPoint.y;
+        world.movements[newID].maxVelX = 15;
+        world.movements[newID].maxVelY = 15;
+        world.AttachComponent(newID, ComponentFlag::Input);
+        world.AttachComponent(newID, ComponentFlag::Movement);
+        world.AttachComponent(newID, ComponentFlag::Position);
+        world.AttachComponent(newID, ComponentFlag::Sprite);
 
-        // Send them their ID.
+        // Send them their ID and spawn point.
         builder.Clear();
-        auto response = fb::CreateConnectionResponse(builder, newID, 0, 0);
+        auto response = fb::CreateConnectionResponse(builder, newID, spawnPoint.x,
+            spawnPoint.y);
         auto encodedMessage = fb::CreateMessage(builder,
             fb::MessageContent::ConnectionResponse, response.Union());
         builder.Finish(encodedMessage);
@@ -54,5 +65,5 @@ void AM::Game::tick(double deltaMs)
     // Run all systems.
     networkInputSystem.processInputEvents();
 
-    movementSystem.processMovements();
+    movementSystem.processMovements(33.3);
 }

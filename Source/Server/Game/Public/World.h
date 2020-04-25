@@ -47,6 +47,12 @@ public:
      * shows which entities need to be broadcast after moving.
      */
     std::array<bool, MAX_ENTITIES> entityIsDirty;
+
+    void setSpawnPoint(const Position& position);
+    const Position& getSpawnPoint();
+
+private:
+    Position spawnPoint;
 };
 
 } // namespace AM

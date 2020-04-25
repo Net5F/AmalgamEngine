@@ -11,20 +11,15 @@ AM::MovementSystem::MovementSystem(World& inWorld, NetworkServer& inNetwork)
 {
 }
 
-void AM::MovementSystem::processMovements()
+void AM::MovementSystem::processMovements(double deltaMs)
 {
     for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
-        // If this entity doesn't have dirty inputs, it doesn't need to be
-        if (!(world.entityIsDirty[entityID])) {
-            continue;
-        }
-
-        /* Process input state on any dirty entity that has an input component
-           and a movement component. */
+        // TODO: Split this into "change inputs" and "add velocity based on current inputs".
+        //       Then, Put the former behind an "isDirty" check.
         if ((world.componentFlags[entityID] & ComponentFlag::Input)
         && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
             // Process the input state for each entity.
-            changeVelocity(entityID, world.inputs[entityID].inputStates);
+            changeVelocity(entityID, world.inputs[entityID].inputStates, deltaMs);
         }
 
         /* Move all entities that have a position and movement component. */
@@ -48,63 +43,70 @@ void AM::MovementSystem::processMovements()
         // Only send updates for entities that changed.
         if (world.entityIsDirty[entityID]) {
             broadcastEntity(entityID);
+            world.entityIsDirty[entityID] = false;
         }
     }
 }
 
 void AM::MovementSystem::changeVelocity(
 EntityID entityID,
-std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates)
+std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates,
+double deltaMs)
 {
     MovementComponent& movement = world.movements[entityID];
+    // TODO: Add movement speed to the component.
+    float movementSpeed = 5;
+
     // Handle up/down (favors up).
     if (inputStates[Input::Up] == Input::Pressed) {
-        movement.velY -= 0.25;
+        movement.velY -= (movementSpeed * deltaMs);
 
         if (movement.velY < movement.maxVelY) {
             movement.velY = -(movement.maxVelY);
         }
     }
     else if (inputStates[Input::Down] == Input::Pressed) {
-        movement.velY += 0.25;
+        movement.velY += (movementSpeed * deltaMs);
 
         if (movement.velY > movement.maxVelY) {
             movement.velY = movement.maxVelY;
         }
     }
     else {
-        // Slow the entity down.
-        if (movement.velY > 0) {
-            movement.velY -= 0.25;
-        }
-        else if (movement.velY < 0) {
-            movement.velY += 0.25;
-        }
+//        // Slow the entity down.
+//        if (movement.velY > 0) {
+//            movement.velY -= (movementSpeed * deltaMs);
+//        }
+//        else if (movement.velY < 0) {
+//            movement.velY += (movementSpeed * deltaMs);
+//        }
+        movement.velY = 0;
     }
 
     // Handle left/right (favors right).
     if (inputStates[Input::Left] == Input::Pressed) {
-        movement.velX -= 0.25;
+        movement.velX -= (movementSpeed * deltaMs);
 
         if (movement.velX < movement.maxVelX) {
             movement.velX = -(movement.maxVelX);
         }
     }
     else if (inputStates[Input::Right] == Input::Pressed) {
-        movement.velX += 0.25;
+        movement.velX += (movementSpeed * deltaMs);
 
         if (movement.velX > movement.maxVelX) {
             movement.velX = movement.maxVelX;
         }
     }
     else {
-        // Slow the entity down.
-        if (movement.velX > 0) {
-            movement.velX -= 0.25;
-        }
-        else if (movement.velX < 0) {
-            movement.velX += 0.25;
-        }
+//        // Slow the entity down.
+//        if (movement.velX > 0) {
+//            movement.velX -= (movementSpeed * deltaMs);
+//        }
+//        else if (movement.velX < 0) {
+//            movement.velX += (movementSpeed * deltaMs);
+//        }
+        movement.velX = 0;
     }
 }
 
@@ -116,6 +118,7 @@ void AM::MovementSystem::broadcastEntity(EntityID entityID)
     PositionComponent& position = world.positions[entityID];
     flatbuffers::Offset<fb::PositionComponent> positionComponent =
         fb::CreatePositionComponent(builder, position.x, position.y);
+    std::cout << "Sending: (" << position.x << ", " << position.y << ")" << std::endl;
 
     // Build the MovementComponent.
     MovementComponent& movement = world.movements[entityID];
@@ -129,7 +132,7 @@ void AM::MovementSystem::broadcastEntity(EntityID entityID)
     entityBuilder.add_id(entityID);
     entityBuilder.add_name(entityName);
 
-    // Mark that we only are sending the InputComponent.
+    // Mark the components that we're sending.
     entityBuilder.add_flags(ComponentFlag::Position & ComponentFlag::Movement);
     entityBuilder.add_positionComponent(positionComponent);
     entityBuilder.add_movementComponent(movementComponent);

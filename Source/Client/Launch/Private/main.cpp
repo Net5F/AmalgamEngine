@@ -75,10 +75,10 @@ try
     SDL2pp::Rect worldRect(centerX - 64, centerY - 64, 64, 64);
 
     world.AddEntity("Player", player);
-    world.positions[player].x = centerX - 64;
-    world.positions[player].y = centerY - 64;
-    world.movements[player].maxVelX = 1;
-    world.movements[player].maxVelY = 1;
+    world.positions[player].x = connectionResponse->x();
+    world.positions[player].y = connectionResponse->y();
+    world.movements[player].maxVelX = 15;
+    world.movements[player].maxVelY = 15;
     world.sprites[player].texturePtr = sprites;
     world.sprites[player].posInTexture = textureRect;
     world.sprites[player].posInWorld = worldRect;
@@ -89,27 +89,46 @@ try
     world.registerPlayerID(player);
 
     bool bQuit = false;
+    Uint64 previousTime = 0;
+    double timeSinceTick = 0;
+    double timeSinceRender = 0;
     while (!bQuit) {
-        // Will return Input::Type::Exit if the app needs to exit.
-        Input input = playerInputSystem.processInputEvents();
-        if (input.type == Input::Exit) {
-            break;
+        // Calc the time delta.
+        Uint64 currentTime = SDL_GetPerformanceCounter();
+        double deltaMs = (double)(((currentTime - previousTime) * 1000)
+                         / ((double) SDL_GetPerformanceFrequency()));
+        previousTime = currentTime;
+
+        // Check if we should process this tick.
+        timeSinceTick += deltaMs;
+        if (timeSinceTick >= 33.3) {
+            timeSinceTick = 0;
+
+            // Will return Input::Type::Exit if the app needs to exit.
+            Input input = playerInputSystem.processInputEvents();
+            if (input.type == Input::Exit) {
+                break;
+            }
+
+            // Run all systems.
+            networkMovementSystem.processServerMovements();
+
+            movementSystem.processMovements(33.3);
         }
 
-        // Run all systems.
-        networkMovementSystem.processServerMovements();
+        // Render at 60fps.
+        timeSinceRender += deltaMs;
+        if (timeSinceRender >= 16.66) {
+            timeSinceRender = 0;
 
-        movementSystem.processMovements();
+            renderer.Clear();
 
-        renderer.Clear();
+            renderer.Copy(*(world.sprites[player].texturePtr),
+                          world.sprites[player].posInTexture,
+                          world.sprites[player].posInWorld);
 
-        renderer.Copy(*(world.sprites[player].texturePtr),
-                      world.sprites[player].posInTexture,
-                      world.sprites[player].posInWorld);
-
-        renderer.Present();
-
-        SDL_Delay(1);
+            renderer.Present();
+        }
     }
 
     return 0;
