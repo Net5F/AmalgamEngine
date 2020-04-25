@@ -72,7 +72,7 @@ try
 
     // Set up our player.
     SDL2pp::Rect textureRect(0, 32, 16, 16);
-    SDL2pp::Rect worldRect(centerX - 64, centerY - 64, 64, 64);
+    SDL2pp::Rect worldRect(connectionResponse->x(), connectionResponse->y(), 64, 64);
 
     world.AddEntity("Player", player);
     world.positions[player].x = connectionResponse->x();
@@ -123,9 +123,14 @@ try
 
             renderer.Clear();
 
-            renderer.Copy(*(world.sprites[player].texturePtr),
-                          world.sprites[player].posInTexture,
-                          world.sprites[player].posInWorld);
+            /* Render all entities. */
+            for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
+                if (world.entityExists(entityID)) {
+                    renderer.Copy(*(world.sprites[entityID].texturePtr),
+                        world.sprites[entityID].posInTexture,
+                        world.sprites[entityID].posInWorld);
+                }
+            }
 
             renderer.Present();
         }

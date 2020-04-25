@@ -102,7 +102,8 @@ BinaryBufferPtr AM::Peer::receiveMessageWait()
     Uint32 messageSize = _SDLNet_Read32(sizeBuf);
 
     if (messageSize > MAX_MESSAGE_SIZE) {
-        std::cerr << "Tried to receive too large of a message." << std::endl;
+        std::cerr << "Tried to receive too large of a message. messageSize: "
+        << messageSize << " MaxSize: " << MAX_MESSAGE_SIZE << std::endl;
         return nullptr;
     }
 

@@ -41,8 +41,10 @@ void AM::Game::tick(double deltaMs)
         world.AttachComponent(newID, ComponentFlag::Position);
         world.AttachComponent(newID, ComponentFlag::Sprite);
 
-        // Send them their ID and spawn point.
+        // Prep the builder for a new message.
         builder.Clear();
+
+        // Send them their ID and spawn point.
         auto response = fb::CreateConnectionResponse(builder, newID, spawnPoint.x,
             spawnPoint.y);
         auto encodedMessage = fb::CreateMessage(builder,

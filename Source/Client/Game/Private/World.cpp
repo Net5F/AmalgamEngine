@@ -14,7 +14,6 @@ AM::World::World()
 
 void AM::World::AddEntity(const std::string& name, EntityID ID)
 {
-    playerID = ID;
     entityNames[ID] = name;
 }
 

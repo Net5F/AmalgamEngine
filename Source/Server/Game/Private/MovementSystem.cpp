@@ -42,6 +42,7 @@ void AM::MovementSystem::processMovements(double deltaMs)
     for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
         // Only send updates for entities that changed.
         if (world.entityIsDirty[entityID]) {
+            std::cout << "Broadcasting: " << entityID << std::endl;
             broadcastEntity(entityID);
             world.entityIsDirty[entityID] = false;
         }
@@ -112,6 +113,9 @@ double deltaMs)
 
 void AM::MovementSystem::broadcastEntity(EntityID entityID)
 {
+    // Prep the builder for a new message.
+    builder.Clear();
+
     /* Fill a message with the updated PositionComponent, MovementComponent,
        and SpriteComponent data. */
     // Build the PositionComponent.

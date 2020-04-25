@@ -43,6 +43,13 @@ void AM::NetworkMovementSystem::processServerMovements()
                 world.sprites[world.getPlayerID()].texturePtr;
             world.sprites[entityID].posInTexture =
                 world.sprites[world.getPlayerID()].posInTexture;
+            world.sprites[entityID].posInWorld.h = 64;
+            world.sprites[entityID].posInWorld.y = 64;
+
+            world.AttachComponent(entityID, ComponentFlag::Input);
+            world.AttachComponent(entityID, ComponentFlag::Movement);
+            world.AttachComponent(entityID, ComponentFlag::Position);
+            world.AttachComponent(entityID, ComponentFlag::Sprite);
         }
 
         /* Update the positions. */
@@ -50,10 +57,8 @@ void AM::NetworkMovementSystem::processServerMovements()
         auto newPosition = (*entityIt)->positionComponent();
 
         // TEMP: Print the updated position so we know something happened.
-        if (entityID == world.getPlayerID()) {
-            std::cout << entityID <<  ": ( " << position.x << ", " << position.y << ") -> ("
-            << newPosition->x() << ", " << newPosition->y() << ")" << std::endl;
-        }
+        std::cout << entityID <<  ": ( " << position.x << ", " << position.y << ") -> ("
+        << newPosition->x() << ", " << newPosition->y() << ")" << std::endl;
         position.x = newPosition->x();
         position.y = newPosition->y();
 

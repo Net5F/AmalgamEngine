@@ -61,7 +61,9 @@ AM::Input AM::PlayerInputSystem::processInputEvents()
 
 void AM::PlayerInputSystem::sendInputState()
 {
+    // Prep the builder for a new message.
     builder.Clear();
+
     EntityID playerID = world.getPlayerID();
 
     // Translate the inputs to fb's enum.
