@@ -37,6 +37,11 @@ private:
      */
     void broadcastEntity(EntityID entityID);
 
+    /**
+     * Converts AM input states to the flatbuffer equivalent.
+     */
+    fb::InputState convertToFbInputState(Input::State state);
+
     World& world;
     NetworkServer& network;
 

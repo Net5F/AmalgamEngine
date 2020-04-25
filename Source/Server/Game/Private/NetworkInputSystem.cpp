@@ -35,9 +35,6 @@ void AM::NetworkInputSystem::processInputEvents()
             auto clientInputStates = clientEntity->inputComponent()->inputStates();
             for (unsigned int i = 0; i < Input::NumTypes; ++i) {
                 entityInputStates[i] = convertToAMInputState(clientInputStates->Get(i));
-
-//                std::cout << "InputState: {" << i << ", " << entityInputStates[i] << "}"
-//                << std::endl;
             }
 
             // Flag the entity as dirty.

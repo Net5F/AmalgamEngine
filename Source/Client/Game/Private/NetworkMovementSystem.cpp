@@ -1,7 +1,6 @@
 #include "NetworkMovementSystem.h"
 #include "World.h"
 #include "NetworkClient.h"
-#include "Message_generated.h"
 
 AM::NetworkMovementSystem::NetworkMovementSystem(World& inWorld, NetworkClient& inNetwork)
 : world(inWorld), network(inNetwork)
@@ -44,12 +43,20 @@ void AM::NetworkMovementSystem::processServerMovements()
             world.sprites[entityID].posInTexture =
                 world.sprites[world.getPlayerID()].posInTexture;
             world.sprites[entityID].posInWorld.h = 64;
-            world.sprites[entityID].posInWorld.y = 64;
+            world.sprites[entityID].posInWorld.w = 64;
 
             world.AttachComponent(entityID, ComponentFlag::Input);
             world.AttachComponent(entityID, ComponentFlag::Movement);
             world.AttachComponent(entityID, ComponentFlag::Position);
             world.AttachComponent(entityID, ComponentFlag::Sprite);
+        }
+
+        /* Update the inputs. */
+        std::array<Input::State, Input::NumTypes>& entityInputStates =
+            world.inputs[entityID].inputStates;
+        auto clientInputStates = (*entityIt)->inputComponent()->inputStates();
+        for (unsigned int i = 0; i < Input::NumTypes; ++i) {
+            entityInputStates[i] = convertToAMInputState(clientInputStates->Get(i));
         }
 
         /* Update the positions. */
@@ -74,5 +81,23 @@ void AM::NetworkMovementSystem::processServerMovements()
         SpriteComponent& sprite = world.sprites[entityID];
         sprite.posInWorld.x = world.positions[entityID].x;
         sprite.posInWorld.y = world.positions[entityID].y;
+    }
+}
+
+AM::Input::State AM::NetworkMovementSystem::convertToAMInputState(fb::InputState state)
+{
+    switch (state)
+    {
+        case fb::InputState::Invalid:
+            return Input::Invalid;
+            break;
+        case fb::InputState::Pressed:
+            return Input::Pressed;
+            break;
+        case fb::InputState::Released:
+            return Input::Released;
+            break;
+        default:
+            return Input::State::Invalid;
     }
 }

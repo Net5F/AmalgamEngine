@@ -3,6 +3,7 @@
 
 #include "SharedDefs.h"
 #include "InputComponent.h"
+#include "Message_generated.h"
 #include <array>
 
 namespace AM
@@ -25,6 +26,8 @@ private:
     void changeVelocity(
     EntityID entityID,
     std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates);
+
+    Input::State convertToAMInputState(fb::InputState state);
 
     World& world;
     NetworkClient& network;

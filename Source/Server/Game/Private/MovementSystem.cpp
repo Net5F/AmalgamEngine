@@ -117,7 +117,26 @@ void AM::MovementSystem::broadcastEntity(EntityID entityID)
     builder.Clear();
 
     /* Fill a message with the updated PositionComponent, MovementComponent,
-       and SpriteComponent data. */
+       and InputComponent data. */
+    // Translate the inputs to fb's enum.
+    InputComponent& input = world.inputs[entityID];
+
+    fb::InputState fbInputStates[Input::Type::NumTypes];
+    std::array<Input::State, Input::NumTypes>& playerInputStates =
+        world.inputs[entityID].inputStates;
+
+    for (uint8_t i = 0; i < Input::Type::NumTypes; ++i) {
+        // Translate the Input::State enum to fb::InputState.
+        fbInputStates[i] = convertToFbInputState(playerInputStates[i]);
+    }
+
+    flatbuffers::Offset<flatbuffers::Vector<fb::InputState>> inputVector =
+        builder.CreateVector(fbInputStates, Input::Type::NumTypes);
+
+    // Build the InputComponent.
+    flatbuffers::Offset<fb::InputComponent> inputComponent = fb::CreateInputComponent(
+        builder, inputVector);
+
     // Build the PositionComponent.
     PositionComponent& position = world.positions[entityID];
     flatbuffers::Offset<fb::PositionComponent> positionComponent =
@@ -137,9 +156,11 @@ void AM::MovementSystem::broadcastEntity(EntityID entityID)
     entityBuilder.add_name(entityName);
 
     // Mark the components that we're sending.
-    entityBuilder.add_flags(ComponentFlag::Position & ComponentFlag::Movement);
+    entityBuilder.add_flags(
+        ComponentFlag::Position & ComponentFlag::Movement & ComponentFlag::Input);
     entityBuilder.add_positionComponent(positionComponent);
     entityBuilder.add_movementComponent(movementComponent);
+    entityBuilder.add_inputComponent(inputComponent);
 
     std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
     entityVector.push_back(entityBuilder.Finish());
@@ -160,4 +181,22 @@ void AM::MovementSystem::broadcastEntity(EntityID entityID)
     Uint8* buffer = builder.GetBufferPointer();
     network.sendToAll(
         std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
+}
+
+AM::fb::InputState AM::MovementSystem::convertToFbInputState(Input::State state)
+{
+    switch (state)
+    {
+        case Input::Invalid:
+            return fb::InputState::Invalid;
+            break;
+        case Input::Pressed:
+            return fb::InputState::Pressed;
+            break;
+        case Input::Released:
+            return fb::InputState::Released;
+            break;
+        default:
+            return fb::InputState::Invalid;
+    }
 }
