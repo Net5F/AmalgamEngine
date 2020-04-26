@@ -23,7 +23,7 @@ public:
      * Updates movement components based on input state, moves position components
      * based on movement, updates sprites based on position.
      */
-    void processMovements(double deltaMs);
+    void processMovements(double deltaSeconds);
 
 private:
     /**
@@ -32,7 +32,7 @@ private:
     void changeVelocity(
     EntityID entityID,
     std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates,
-    double deltaMs);
+    double deltaSeconds);
 
     /**
      * Sends the given entity's relevant state information to all connected clients.

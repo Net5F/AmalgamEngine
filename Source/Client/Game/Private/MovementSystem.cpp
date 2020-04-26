@@ -25,8 +25,10 @@ void MovementSystem::processMovements(float deltaSeconds)
         if ((world.componentFlags[entityID] & ComponentFlag::Position)
         && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
             // Update the positions based on the velocities.
-            world.positions[entityID].x += (deltaSeconds * world.movements[entityID].velX);
-            world.positions[entityID].y += (deltaSeconds * world.movements[entityID].velY);
+            world.positions[entityID].x +=
+                (deltaSeconds * world.movements[entityID].velX);
+            world.positions[entityID].y +=
+                (deltaSeconds * world.movements[entityID].velY);
         }
 
         /* Move the sprites to the new positions. */

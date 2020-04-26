@@ -55,18 +55,15 @@ try
         (void*) &exitRequested);
 
     std::cout << "Starting main loop." << std::endl;
-    Uint64 previousTime = 0;
+    Uint32 timeElapsed = 0;
+    Uint32 lastFrameTimeElapsed = 0;
     while (!exitRequested) {
         // Calc the time delta.
-        Uint64 currentTime = SDL_GetPerformanceCounter();
-        double deltaMs = (double)(((currentTime - previousTime) * 1000)
-                         / ((double) SDL_GetPerformanceFrequency()));
-        previousTime = currentTime;
+        timeElapsed = SDL_GetTicks();
+        float deltaSeconds = (timeElapsed - lastFrameTimeElapsed) * (0.001f);
+        lastFrameTimeElapsed = timeElapsed;
 
-        game.tick(deltaMs);
-
-        // TODO: Check how long we can delay to lower CPU usage.
-        SDL_Delay(1);
+        game.tick(deltaSeconds);
     }
 
     return 0;

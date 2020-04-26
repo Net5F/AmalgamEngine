@@ -24,6 +24,9 @@ void Game::tick(float deltaSeconds)
         // It's not yet time to process the game tick.
         return;
     }
+    if ((timeSinceTick - GAME_TICK_INTERVAL_S) > .001) {
+        std::cout << "Game overrun" << std::endl;
+    }
 
     // Add any new connections.
     std::vector<std::shared_ptr<Peer>> newClients =
@@ -34,8 +37,8 @@ void Game::tick(float deltaSeconds)
         const Position& spawnPoint = world.getSpawnPoint();
         world.positions[newID].x = spawnPoint.x;
         world.positions[newID].y = spawnPoint.y;
-        world.movements[newID].maxVelX = 8;
-        world.movements[newID].maxVelY = 8;
+        world.movements[newID].maxVelX = 250;
+        world.movements[newID].maxVelY = 250;
         world.AttachComponent(newID, ComponentFlag::Input);
         world.AttachComponent(newID, ComponentFlag::Movement);
         world.AttachComponent(newID, ComponentFlag::Position);

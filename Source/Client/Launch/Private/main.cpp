@@ -51,9 +51,10 @@ try
     float timeSinceRender = 0;
     constexpr float RENDER_INTERVAL_S = 1 / 60.0f;
     while (!exitRequested) {
+        Uint32 start = SDL_GetTicks();
         // Calc the time delta.
         timeElapsed = SDL_GetTicks();
-        float deltaSeconds = (timeElapsed - lastFrameTimeElapsed) * (0.001f);
+        float deltaSeconds = (timeElapsed - lastFrameTimeElapsed) / (float )1000;
         lastFrameTimeElapsed = timeElapsed;
 
         // Run the game.
@@ -77,9 +78,6 @@ try
             renderer.Present();
 
             timeSinceRender = 0;
-
-            // TODO: Check how long we can delay to lower CPU usage.
-            SDL_Delay(1);
         }
     }
 

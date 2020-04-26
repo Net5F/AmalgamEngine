@@ -79,8 +79,9 @@ void Game::tick(float deltaSeconds)
         exitRequested = true;
     }
 
+    // TODO: Movement is spazzing out a bit
     // Run all systems.
-//            networkMovementSystem.processServerMovements();
+//    networkMovementSystem.processServerMovements();
 
     movementSystem.processMovements(timeSinceTick);
 
