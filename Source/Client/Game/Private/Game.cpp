@@ -1,5 +1,7 @@
 #include "Game.h"
 #include "Network.h"
+#include <iostream>
+#include <iomanip>
 
 extern bool exitRequested;
 
@@ -15,7 +17,7 @@ Game::Game(Network& inNetwork, std::shared_ptr<SDL2pp::Texture>& inSprites)
 , networkMovementSystem(world, network)
 , movementSystem(world)
 , builder(BUILDER_BUFFER_SIZE)
-, timeSinceTick(0)
+, timeSinceTick(0.0f)
 , sprites(inSprites)
 {
 }
@@ -72,14 +74,21 @@ void Game::tick(float deltaSeconds)
         // It's not yet time to process the game tick.
         return;
     }
+    if (timeSinceTick > 0.0171) {
+        std::cout << "Tick time: " << std::setprecision(10) << timeSinceTick << std::endl;
+    }
 
     // Will return Input::Type::Exit if the app needs to exit.
+    Uint32 start = SDL_GetTicks();
     Input input = playerInputSystem.processInputEvents();
     if (input.type == Input::Exit) {
         exitRequested = true;
     }
+    Uint32 result = SDL_GetTicks() - start;
+    if (result > 1) {
+        std::cout << "Input time: " << result << std::endl;
+    }
 
-    // TODO: Movement is spazzing out a bit
     // Run all systems.
 //    networkMovementSystem.processServerMovements();
 

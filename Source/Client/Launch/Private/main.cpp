@@ -2,27 +2,16 @@
 #include "Message_generated.h"
 
 #include "SharedDefs.h"
-#include "InputComponent.h"
-#include "PositionComponent.h"
-#include "MovementComponent.h"
-#include "SpriteComponent.h"
 #include "World.h"
 #include "Game.h"
-#include "PlayerInputSystem.h"
-#include "MovementSystem.h"
-#include "NetworkMovementSystem.h"
 #include "RenderSystem.h"
-
 #include "Network.h"
+#include "Timer.h"
 
-#include <string>
 #include <exception>
-#include <iostream>
-#include <vector>
-#include <array>
 #include <memory>
-#include <queue>
-#include <algorithm>
+#include <iostream>
+#include <iomanip>
 
 using namespace AM;
 using namespace AM::Client;
@@ -46,16 +35,13 @@ try
     Game game(network, sprites);
     game.connect();
 
-    Uint32 timeElapsed = 0;
-    Uint32 lastFrameTimeElapsed = 0;
-    float timeSinceRender = 0;
     constexpr float RENDER_INTERVAL_S = 1 / 60.0f;
+    float timeSinceRender = 0.0f;
+
+    Timer timer;
     while (!exitRequested) {
-        Uint32 start = SDL_GetTicks();
         // Calc the time delta.
-        timeElapsed = SDL_GetTicks();
-        float deltaSeconds = (timeElapsed - lastFrameTimeElapsed) / (float )1000;
-        lastFrameTimeElapsed = timeElapsed;
+        float deltaSeconds = timer.getDeltaSeconds();
 
         // Run the game.
         game.tick(deltaSeconds);
@@ -63,6 +49,9 @@ try
         // Render at 60fps.
         timeSinceRender += deltaSeconds;
         if (timeSinceRender >= RENDER_INTERVAL_S) {
+            if (timeSinceRender > 0.0171) {
+                std::cout << "Render time: " << std::setprecision(10) << timeSinceRender << std::endl;
+            }
             renderer.Clear();
 
             /* Render all entities. */

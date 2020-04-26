@@ -7,9 +7,11 @@ add_library(Shared STATIC
 	PRIVATE
 		Private/Acceptor.cpp
 		Private/Peer.cpp
+		Private/Timer.cpp
 	PUBLIC
 		Public/Acceptor.h
 		Public/Peer.h
+		Public/Timer.h
 
 		Public/InputComponent.h
 		Public/MovementComponent.h

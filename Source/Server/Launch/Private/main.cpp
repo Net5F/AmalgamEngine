@@ -3,24 +3,13 @@
 #include "Message_generated.h"
 
 #include "SharedDefs.h"
-#include "InputComponent.h"
-#include "PositionComponent.h"
-#include "MovementComponent.h"
-#include "SpriteComponent.h"
-#include "MovementSystem.h"
-#include "NetworkInputSystem.h"
-#include "World.h"
 #include "Game.h"
 #include "Network.h"
+#include "Timer.h"
 
-#include <string>
 #include <exception>
 #include <iostream>
-#include <vector>
-#include <array>
 #include <memory>
-#include <queue>
-#include <algorithm>
 #include <atomic>
 
 using namespace AM;
@@ -55,13 +44,10 @@ try
         (void*) &exitRequested);
 
     std::cout << "Starting main loop." << std::endl;
-    Uint32 timeElapsed = 0;
-    Uint32 lastFrameTimeElapsed = 0;
+    Timer timer;
     while (!exitRequested) {
         // Calc the time delta.
-        timeElapsed = SDL_GetTicks();
-        float deltaSeconds = (timeElapsed - lastFrameTimeElapsed) * (0.001f);
-        lastFrameTimeElapsed = timeElapsed;
+        float deltaSeconds = timer.getDeltaSeconds();
 
         game.tick(deltaSeconds);
     }

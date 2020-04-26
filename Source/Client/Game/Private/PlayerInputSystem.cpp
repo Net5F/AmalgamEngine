@@ -18,14 +18,7 @@ Input PlayerInputSystem::processInputEvents()
     SDL_Event event;
     bool stateChanged = false;
 
-    Uint32 start = SDL_GetTicks();
-    int result = SDL_PollEvent(&event);
-    Uint32 one = SDL_GetTicks() - start;
-    if (one > 1) {
-        std::cout << "One: " << one << std::endl;
-    }
-//    while (SDL_PollEvent(&event)) {
-    while (result) {
+    while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
             return {Input::Exit, Input::Pressed};
         }
@@ -61,12 +54,6 @@ Input PlayerInputSystem::processInputEvents()
                 stateChanged = true;
                 entityState = keyInput.state;
             }
-        }
-        start = SDL_GetTicks();
-        result = SDL_PollEvent(&event);
-        one = SDL_GetTicks() - start;
-        if (one > 1) {
-            std::cout << "One: " << one << std::endl;
         }
     }
 

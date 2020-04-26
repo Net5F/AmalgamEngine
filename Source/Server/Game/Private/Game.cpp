@@ -12,7 +12,7 @@ Game::Game(Network& inNetwork)
 , networkInputSystem(world, network)
 , movementSystem(world, network)
 , builder(BUILDER_BUFFER_SIZE)
-, timeSinceTick(0)
+, timeSinceTick(0.0f)
 {
     world.setSpawnPoint({64, 64});
 }
