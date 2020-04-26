@@ -11,7 +11,7 @@
 #include "NetworkInputSystem.h"
 #include "World.h"
 #include "Game.h"
-#include "NetworkServer.h"
+#include "Network.h"
 
 #include <string>
 #include <exception>
@@ -24,6 +24,7 @@
 #include <atomic>
 
 using namespace AM;
+using namespace AM::Server;
 
 int inputThread(void* inExitRequested)
 {
@@ -43,7 +44,7 @@ int main(int argc, char **argv)
 try
 {
     // Set up the network utility.
-    NetworkServer network;
+    Network network;
 
     // Set up our game.
     Game game(network);
@@ -63,6 +64,9 @@ try
         previousTime = currentTime;
 
         game.tick(deltaMs);
+
+        // TODO: Check how long we can delay to lower CPU usage.
+        SDL_Delay(1);
     }
 
     return 0;

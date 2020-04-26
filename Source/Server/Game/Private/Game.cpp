@@ -1,9 +1,12 @@
 #include "Game.h"
-#include "NetworkServer.h"
+#include "Network.h"
 
-using namespace AM;
+namespace AM
+{
+namespace Server
+{
 
-AM::Game::Game(NetworkServer& inNetwork)
+Game::Game(Network& inNetwork)
 : world()
 , network(inNetwork)
 , networkInputSystem(world, network)
@@ -14,15 +17,12 @@ AM::Game::Game(NetworkServer& inNetwork)
     world.setSpawnPoint({64, 64});
 }
 
-void AM::Game::tick(double deltaMs)
+void Game::tick(float deltaSeconds)
 {
-    // Check if we should process this tick.
-    timeSinceTick += deltaMs;
-    if (timeSinceTick < TICK_INTERVAL_MS) {
+    timeSinceTick += deltaSeconds;
+    if (timeSinceTick < GAME_TICK_INTERVAL_S) {
+        // It's not yet time to process the game tick.
         return;
-    }
-    else {
-        timeSinceTick = 0;
     }
 
     // Add any new connections.
@@ -34,8 +34,8 @@ void AM::Game::tick(double deltaMs)
         const Position& spawnPoint = world.getSpawnPoint();
         world.positions[newID].x = spawnPoint.x;
         world.positions[newID].y = spawnPoint.y;
-        world.movements[newID].maxVelX = 15;
-        world.movements[newID].maxVelY = 15;
+        world.movements[newID].maxVelX = 8;
+        world.movements[newID].maxVelY = 8;
         world.AttachComponent(newID, ComponentFlag::Input);
         world.AttachComponent(newID, ComponentFlag::Movement);
         world.AttachComponent(newID, ComponentFlag::Position);
@@ -67,5 +67,10 @@ void AM::Game::tick(double deltaMs)
     // Run all systems.
     networkInputSystem.processInputEvents();
 
-    movementSystem.processMovements(33.3);
+    movementSystem.processMovements(timeSinceTick);
+
+    timeSinceTick = 0;
 }
+
+} // namespace Server
+} // namespace AM

@@ -1,17 +1,20 @@
 #include "MovementSystem.h"
 #include "World.h"
-#include "NetworkServer.h"
+#include "Network.h"
 
-using namespace AM;
+namespace AM
+{
+namespace Server
+{
 
-AM::MovementSystem::MovementSystem(World& inWorld, NetworkServer& inNetwork)
+MovementSystem::MovementSystem(World& inWorld, Network& inNetwork)
 : world(inWorld)
 , network(inNetwork)
 , builder(BUILDER_BUFFER_SIZE)
 {
 }
 
-void AM::MovementSystem::processMovements(double deltaMs)
+void MovementSystem::processMovements(double deltaMs)
 {
     for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
         // TODO: Split this into "change inputs" and "add velocity based on current inputs".
@@ -49,7 +52,7 @@ void AM::MovementSystem::processMovements(double deltaMs)
     }
 }
 
-void AM::MovementSystem::changeVelocity(
+void MovementSystem::changeVelocity(
 EntityID entityID,
 std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates,
 double deltaMs)
@@ -62,7 +65,7 @@ double deltaMs)
     if (inputStates[Input::Up] == Input::Pressed) {
         movement.velY -= (movementSpeed * deltaMs);
 
-        if (movement.velY < movement.maxVelY) {
+        if (movement.velY < -(movement.maxVelY)) {
             movement.velY = -(movement.maxVelY);
         }
     }
@@ -88,7 +91,7 @@ double deltaMs)
     if (inputStates[Input::Left] == Input::Pressed) {
         movement.velX -= (movementSpeed * deltaMs);
 
-        if (movement.velX < movement.maxVelX) {
+        if (movement.velX < -(movement.maxVelX)) {
             movement.velX = -(movement.maxVelX);
         }
     }
@@ -111,7 +114,7 @@ double deltaMs)
     }
 }
 
-void AM::MovementSystem::broadcastEntity(EntityID entityID)
+void MovementSystem::broadcastEntity(EntityID entityID)
 {
     // Prep the builder for a new message.
     builder.Clear();
@@ -183,7 +186,7 @@ void AM::MovementSystem::broadcastEntity(EntityID entityID)
         std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
 }
 
-AM::fb::InputState AM::MovementSystem::convertToFbInputState(Input::State state)
+fb::InputState MovementSystem::convertToFbInputState(Input::State state)
 {
     switch (state)
     {
@@ -200,3 +203,6 @@ AM::fb::InputState AM::MovementSystem::convertToFbInputState(Input::State state)
             return fb::InputState::Invalid;
     }
 }
+
+} // namespace Server
+} // namespace AM

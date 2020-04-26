@@ -1,13 +1,18 @@
 #include <PlayerInputSystem.h>
 #include "World.h"
-#include "NetworkClient.h"
+#include "Network.h"
 
-AM::PlayerInputSystem::PlayerInputSystem(World& inWorld, NetworkClient& inNetwork)
+namespace AM
+{
+namespace Client
+{
+
+PlayerInputSystem::PlayerInputSystem(World& inWorld, Network& inNetwork)
 : world(inWorld), network(inNetwork), builder(BUILDER_BUFFER_SIZE)
 {
 }
 
-AM::Input AM::PlayerInputSystem::processInputEvents()
+Input PlayerInputSystem::processInputEvents()
 {
     // Process all events.
     SDL_Event event;
@@ -59,7 +64,7 @@ AM::Input AM::PlayerInputSystem::processInputEvents()
     return {Input::None, Input::Invalid};
 }
 
-void AM::PlayerInputSystem::sendInputState()
+void PlayerInputSystem::sendInputState()
 {
     // Prep the builder for a new message.
     builder.Clear();
@@ -112,7 +117,7 @@ void AM::PlayerInputSystem::sendInputState()
         std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
 }
 
-AM::fb::InputState AM::PlayerInputSystem::convertToFbInputState(Input::State state)
+fb::InputState PlayerInputSystem::convertToFbInputState(Input::State state)
 {
     switch (state)
     {
@@ -129,3 +134,6 @@ AM::fb::InputState AM::PlayerInputSystem::convertToFbInputState(Input::State sta
             return fb::InputState::Invalid;
     }
 }
+
+} // namespace Client
+} // namespace AM

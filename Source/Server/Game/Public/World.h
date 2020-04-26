@@ -12,6 +12,8 @@
 
 namespace AM
 {
+namespace Server
+{
 
 class World
 {
@@ -55,6 +57,7 @@ private:
     Position spawnPoint;
 };
 
+} // namespace Server
 } // namespace AM
 
 #endif /* WORLD_H */

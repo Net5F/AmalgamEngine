@@ -12,6 +12,8 @@
 
 namespace AM
 {
+namespace Client
+{
 
 class World
 {
@@ -23,7 +25,7 @@ public:
 
     void RemoveEntity(EntityID entityID);
 
-    bool entityExists(EntityID entityID);
+    bool entityExists(EntityID entityID) const;
 
     /**
      * Registers the entity as possessing this component.
@@ -53,6 +55,7 @@ private:
     EntityID playerID;
 };
 
+} // namespace Client
 } // namespace AM
 
 #endif /* WORLD_H */

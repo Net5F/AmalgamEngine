@@ -8,14 +8,16 @@
 
 namespace AM
 {
+namespace Server
+{
 
 class World;
-class NetworkServer;
+class Network;
 
 class MovementSystem
 {
 public:
-    MovementSystem(World& inWorld, NetworkServer& inNetwork);
+    MovementSystem(World& inWorld, Network& inNetwork);
 
     /**
      * Updates movement components based on input state, moves position components
@@ -43,11 +45,12 @@ private:
     fb::InputState convertToFbInputState(Input::State state);
 
     World& world;
-    NetworkServer& network;
+    Network& network;
 
     flatbuffers::FlatBufferBuilder builder;
 };
 
+} // namespace Server
 } // namespace AM
 
 #endif /* MOVEMENTSYSTEM_H */

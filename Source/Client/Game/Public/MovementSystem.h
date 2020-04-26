@@ -7,6 +7,8 @@
 
 namespace AM
 {
+namespace Client
+{
 
 class World;
 
@@ -19,7 +21,7 @@ public:
      * Updates movement components based on input state, moves position components
      * based on movement, updates sprites based on position.
      */
-    void processMovements(double deltaMs);
+    void processMovements(float deltaSeconds);
 
 private:
     /**
@@ -28,11 +30,12 @@ private:
     void changeVelocity(
     EntityID entityID,
     std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates,
-    double deltaMs);
+    float deltaSeconds);
 
     World& world;
 };
 
+} // namespace Client
 } // namespace AM
 
 #endif /* MOVEMENTSYSTEM_H */

@@ -1,15 +1,23 @@
 #include "RenderSystem.h"
 #include "World.h"
 
-AM::RenderSystem::RenderSystem(World& inWorld)
+namespace AM
+{
+namespace Client
+{
+
+RenderSystem::RenderSystem(World& inWorld)
 : world(inWorld)
 {
 }
 
-void AM::RenderSystem::collectRenderObjects()
+void RenderSystem::collectRenderObjects()
 {
 }
 
-void AM::RenderSystem::render()
+void RenderSystem::render()
 {
 }
+
+} // namespace Client
+} // namespace AM

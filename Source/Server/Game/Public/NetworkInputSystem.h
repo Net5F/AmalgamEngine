@@ -6,14 +6,16 @@
 
 namespace AM
 {
+namespace Server
+{
 
 class World;
-class NetworkServer;
+class Network;
 
 class NetworkInputSystem
 {
 public:
-    NetworkInputSystem(World& inWorld, NetworkServer& inNetwork);
+    NetworkInputSystem(World& inWorld, Network& inNetwork);
 
     /**
      * Processes incoming EntityUpdate messages.
@@ -27,9 +29,10 @@ private:
     Input::State convertToAMInputState(fb::InputState state);
 
     World& world;
-    NetworkServer& network;
+    Network& network;
 };
 
+} // namespace Server
 } // namespace AM
 
 #endif /* NETWORKINPUTSYSTEM_H */

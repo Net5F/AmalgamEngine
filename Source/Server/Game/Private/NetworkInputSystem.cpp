@@ -1,17 +1,22 @@
 #include "NetworkInputSystem.h"
 #include "World.h"
-#include "NetworkServer.h"
+#include "Network.h"
 #include "Peer.h"
 #include "SharedDefs.h"
 #include <memory>
 #include <iostream>
 
-AM::NetworkInputSystem::NetworkInputSystem(World& inWorld, NetworkServer& inNetwork)
+namespace AM
+{
+namespace Server
+{
+
+NetworkInputSystem::NetworkInputSystem(World& inWorld, Network& inNetwork)
 : world(inWorld), network(inNetwork)
 {
 }
 
-void AM::NetworkInputSystem::processInputEvents()
+void NetworkInputSystem::processInputEvents()
 {
     // Process input messages for all clients.
     for (std::shared_ptr<Peer> client : network.getClients()) {
@@ -43,7 +48,7 @@ void AM::NetworkInputSystem::processInputEvents()
     }
 }
 
-AM::Input::State AM::NetworkInputSystem::convertToAMInputState(fb::InputState state)
+Input::State NetworkInputSystem::convertToAMInputState(fb::InputState state)
 {
     switch (state)
     {
@@ -60,3 +65,6 @@ AM::Input::State AM::NetworkInputSystem::convertToAMInputState(fb::InputState st
             return Input::State::Invalid;
     }
 }
+
+} // namespace Server
+} // namespace AM

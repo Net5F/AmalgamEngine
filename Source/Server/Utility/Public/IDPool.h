@@ -7,6 +7,8 @@
 
 namespace AM
 {
+namespace Server
+{
 
 class IDPool
 {
@@ -22,6 +24,7 @@ private:
     static std::array<bool, MAX_ENTITIES> IDs;
 };
 
+} // namespace Server
 } // namespace AM
 
 #endif /* IDPOOL_H */

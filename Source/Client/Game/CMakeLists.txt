@@ -5,12 +5,14 @@ target_sources(Client
 		Private/MovementSystem.cpp
 		Private/NetworkMovementSystem.cpp
 		Private/RenderSystem.cpp
+		Private/Game.cpp
 	PUBLIC
 		Public/World.h
 		Public/PlayerInputSystem.h
 		Public/MovementSystem.h
 		Public/NetworkMovementSystem.h
 		Public/RenderSystem.h
+		Public/Game.h
 )
 
 target_include_directories(Client

@@ -1,8 +1,8 @@
 target_sources(Client
 	PRIVATE
-		Private/NetworkClient.cpp
+		Private/Network.cpp
 	PUBLIC
-		Public/NetworkClient.h
+		Public/Network.h
 )
 
 target_include_directories(Client

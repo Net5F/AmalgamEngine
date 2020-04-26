@@ -1,24 +1,27 @@
-#include "NetworkClient.h"
+#include "Network.h"
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
 #include <iostream>
 
-using namespace AM;
+namespace AM
+{
+namespace Client
+{
 
-const std::string AM::NetworkClient::SERVER_IP = "127.0.0.1";
+const std::string Network::SERVER_IP = "127.0.0.1";
 
-AM::NetworkClient::NetworkClient()
+Network::Network()
 : server(nullptr)
 {
     SDLNet_Init();
 }
 
-AM::NetworkClient::~NetworkClient()
+Network::~Network()
 {
     SDLNet_Quit();
 }
 
-bool AM::NetworkClient::connect()
+bool Network::connect()
 {
     IPaddress ip;
 
@@ -27,7 +30,7 @@ bool AM::NetworkClient::connect()
     return (server != nullptr) ? true : false;
 }
 
-bool AM::NetworkClient::send(BinaryBufferSharedPtr message)
+bool Network::send(BinaryBufferSharedPtr message)
 {
     if (!(server->isConnected())) {
         std::cerr << "Tried to send while server is disconnected." << std::endl;
@@ -37,7 +40,7 @@ bool AM::NetworkClient::send(BinaryBufferSharedPtr message)
     return server->sendMessage(message);
 }
 
-BinaryBufferPtr AM::NetworkClient::receive()
+BinaryBufferPtr Network::receive()
 {
     if (!(server->isConnected())) {
         std::cerr << "Tried to receive while server is disconnected." << std::endl;
@@ -46,3 +49,6 @@ BinaryBufferPtr AM::NetworkClient::receive()
 
     return server->receiveMessage();
 }
+
+} // namespace Client
+} // namespace AM

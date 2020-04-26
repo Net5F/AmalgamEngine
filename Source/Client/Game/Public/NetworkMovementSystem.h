@@ -8,14 +8,16 @@
 
 namespace AM
 {
+namespace Client
+{
 
 class World;
-class NetworkClient;
+class Network;
 
 class NetworkMovementSystem
 {
 public:
-    NetworkMovementSystem(World& inWorld, NetworkClient& inNetwork);
+    NetworkMovementSystem(World& inWorld, Network& inNetwork);
 
     /**
      * Updates movement components based on input state, moves position components based on movement, updates sprites based on position.
@@ -30,9 +32,10 @@ private:
     Input::State convertToAMInputState(fb::InputState state);
 
     World& world;
-    NetworkClient& network;
+    Network& network;
 };
 
+} // namespace Client
 } // namespace AM
 
 #endif /* NETWORKMOVEMENTSYSTEM_H */

@@ -1,13 +1,18 @@
 #include "NetworkMovementSystem.h"
 #include "World.h"
-#include "NetworkClient.h"
+#include "Network.h"
 
-AM::NetworkMovementSystem::NetworkMovementSystem(World& inWorld, NetworkClient& inNetwork)
+namespace AM
+{
+namespace Client
+{
+
+NetworkMovementSystem::NetworkMovementSystem(World& inWorld, Network& inNetwork)
 : world(inWorld), network(inNetwork)
 {
 }
 
-void AM::NetworkMovementSystem::processServerMovements()
+void NetworkMovementSystem::processServerMovements()
 {
     // Check for a message from the server.
     BinaryBufferPtr responseBuffer = network.receive();
@@ -84,7 +89,7 @@ void AM::NetworkMovementSystem::processServerMovements()
     }
 }
 
-AM::Input::State AM::NetworkMovementSystem::convertToAMInputState(fb::InputState state)
+Input::State NetworkMovementSystem::convertToAMInputState(fb::InputState state)
 {
     switch (state)
     {
@@ -101,3 +106,6 @@ AM::Input::State AM::NetworkMovementSystem::convertToAMInputState(fb::InputState
             return Input::State::Invalid;
     }
 }
+
+} // namespace Client
+} // namespace AM

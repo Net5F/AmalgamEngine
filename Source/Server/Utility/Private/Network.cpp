@@ -1,13 +1,16 @@
-#include "NetworkServer.h"
+#include "Network.h"
 #include "Acceptor.h"
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
 #include <algorithm>
 #include <iostream>
 
-using namespace AM;
+namespace AM
+{
+namespace Server
+{
 
-AM::NetworkServer::NetworkServer()
+Network::Network()
 : acceptor(nullptr)
 {
     SDLNet_Init();
@@ -16,12 +19,12 @@ AM::NetworkServer::NetworkServer()
     acceptor = std::make_unique<Acceptor>(SERVER_PORT);
 }
 
-AM::NetworkServer::~NetworkServer()
+Network::~Network()
 {
     SDLNet_Quit();
 }
 
-bool AM::NetworkServer::send(std::shared_ptr<Peer> client,
+bool Network::send(std::shared_ptr<Peer> client,
                              BinaryBufferSharedPtr message)
 {
     if (!(client->isConnected())) {
@@ -32,7 +35,7 @@ bool AM::NetworkServer::send(std::shared_ptr<Peer> client,
     return client->sendMessage(message);
 }
 
-bool AM::NetworkServer::sendToAll(BinaryBufferSharedPtr message)
+bool Network::sendToAll(BinaryBufferSharedPtr message)
 {
     bool sendSucceeded = true;
 
@@ -48,7 +51,7 @@ bool AM::NetworkServer::sendToAll(BinaryBufferSharedPtr message)
     return sendSucceeded;
 }
 
-AM::BinaryBufferPtr AM::NetworkServer::receive(std::shared_ptr<Peer> client)
+BinaryBufferPtr Network::receive(std::shared_ptr<Peer> client)
 {
     if (!(client->isConnected())) {
         std::cerr << "Tried to receive while client is disconnected." << std::endl;
@@ -58,7 +61,7 @@ AM::BinaryBufferPtr AM::NetworkServer::receive(std::shared_ptr<Peer> client)
     return client->receiveMessage();
 }
 
-std::vector<std::shared_ptr<Peer>> AM::NetworkServer::acceptNewClients()
+std::vector<std::shared_ptr<Peer>> Network::acceptNewClients()
 {
     std::vector<std::shared_ptr<Peer>> newClients;
 
@@ -74,18 +77,21 @@ std::vector<std::shared_ptr<Peer>> AM::NetworkServer::acceptNewClients()
     return newClients;
 }
 
-void AM::NetworkServer::checkForDisconnections()
+void Network::checkForDisconnections()
 {
     clients.erase(std::remove_if(clients.begin(), clients.end(), IsDisconnected),
         clients.end());
 }
 
-const std::vector<std::shared_ptr<Peer>>& AM::NetworkServer::getClients()
+const std::vector<std::shared_ptr<Peer>>& Network::getClients()
 {
     return clients;
 }
 
-bool AM::NetworkServer::IsDisconnected(const std::shared_ptr<Peer>& peer)
+bool Network::IsDisconnected(const std::shared_ptr<Peer>& peer)
 {
     return !(peer->isConnected());
 }
+
+} // namespace Server
+} // namespace AM

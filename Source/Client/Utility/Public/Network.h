@@ -1,5 +1,5 @@
-#ifndef NETWORKCLIENT_H
-#define NETWORKCLIENT_H
+#ifndef NETWORK_H
+#define NETWORK_H
 
 #include "SharedDefs.h"
 #include <string>
@@ -10,12 +10,15 @@ namespace AM
 
 class Peer;
 
-class NetworkClient
+namespace Client
+{
+
+class Network
 {
 public:
-    NetworkClient();
+    Network();
 
-    virtual ~NetworkClient();
+    virtual ~Network();
 
     bool connect();
 
@@ -33,6 +36,7 @@ private:
     std::unique_ptr<AM::Peer> server;
 };
 
+} // namespace Client
 } // namespace AM
 
-#endif /* NETWORKCLIENT_H */
+#endif /* NETWORK_H */

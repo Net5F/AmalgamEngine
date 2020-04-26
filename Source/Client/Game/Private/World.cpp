@@ -1,7 +1,12 @@
 #include <World.h>
 #include <iostream>
 
-AM::World::World()
+namespace AM
+{
+namespace Client
+{
+
+World::World()
 : entityNames {},
   positions {},
   movements {},
@@ -12,23 +17,23 @@ AM::World::World()
 {
 }
 
-void AM::World::AddEntity(const std::string& name, EntityID ID)
+void World::AddEntity(const std::string& name, EntityID ID)
 {
     entityNames[ID] = name;
 }
 
-void AM::World::RemoveEntity(EntityID entityID)
+void World::RemoveEntity(EntityID entityID)
 {
     componentFlags[entityID] = 0;
     entityNames[entityID] = "";
 }
 
-bool AM::World::entityExists(EntityID entityID)
+bool World::entityExists(EntityID entityID) const
 {
     return (componentFlags[entityID] == 0) ? false : true;
 }
 
-void AM::World::AttachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
+void World::AttachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
 {
     // If the entity doesn't have the component, add it.
     if ((componentFlags[entityID] & componentFlag) == 0) {
@@ -39,7 +44,7 @@ void AM::World::AttachComponent(EntityID entityID, ComponentFlag::FlagType compo
     }
 }
 
-void AM::World::RemoveComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
+void World::RemoveComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
 {
     // If the entity has the component, remove it.
     if ((componentFlags[entityID] & componentFlag) == componentFlag) {
@@ -51,12 +56,15 @@ void AM::World::RemoveComponent(EntityID entityID, ComponentFlag::FlagType compo
     }
 }
 
-void AM::World::registerPlayerID(EntityID inPlayerID)
+void World::registerPlayerID(EntityID inPlayerID)
 {
     playerID = inPlayerID;
 }
 
-AM::EntityID AM::World::getPlayerID()
+EntityID World::getPlayerID()
 {
     return playerID;
 }
+
+} // namespace Client
+} // namespace AM

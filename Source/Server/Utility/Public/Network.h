@@ -1,5 +1,5 @@
-#ifndef NETWORKSERVER_H
-#define NETWORKSERVER_H
+#ifndef NETWORK_H
+#define NETWORK_H
 
 #include "SharedDefs.h"
 #include <string>
@@ -13,12 +13,15 @@ namespace AM
 class Acceptor;
 class Peer;
 
-class NetworkServer
+namespace Server
+{
+
+class Network
 {
 public:
-    NetworkServer();
+    Network();
 
-    virtual ~NetworkServer();
+    virtual ~Network();
 
     /**
      * Sends message over the network.
@@ -65,6 +68,7 @@ private:
     std::vector<std::shared_ptr<Peer>> clients;
 };
 
+} // namespace Server
 } // namespace AM
 
-#endif /* NETWORKSERVER_H */
+#endif /* NETWORK_H */

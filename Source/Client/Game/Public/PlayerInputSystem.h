@@ -2,11 +2,13 @@
 #define PLAYERINPUTSYSTEM_H
 
 #include "SharedDefs.h"
-#include "NetworkClient.h"
+#include "Network.h"
 #include "InputComponent.h"
 #include "Message_generated.h"
 
 namespace AM
+{
+namespace Client
 {
 
 class World;
@@ -15,7 +17,7 @@ class Network;
 class PlayerInputSystem
 {
 public:
-    PlayerInputSystem(World& inWorld, NetworkClient& inNetwork);
+    PlayerInputSystem(World& inWorld, Network& inNetwork);
 
     Input processInputEvents();
 
@@ -30,10 +32,11 @@ private:
     fb::InputState convertToFbInputState(Input::State state);
 
     World& world;
-    NetworkClient& network;
+    Network& network;
     flatbuffers::FlatBufferBuilder builder;
 };
 
+} // namespace Client
 } // namespace AM
 
 #endif /* PLAYERINPUTSYSTEM_H */

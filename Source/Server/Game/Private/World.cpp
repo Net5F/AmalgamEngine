@@ -2,7 +2,12 @@
 #include "IDPool.h"
 #include <iostream>
 
-AM::World::World()
+namespace AM
+{
+namespace Server
+{
+
+World::World()
 : entityNames {},
   positions {},
   movements {},
@@ -14,20 +19,20 @@ AM::World::World()
 {
 }
 
-AM::EntityID AM::World::AddEntity(const std::string& name)
+EntityID World::AddEntity(const std::string& name)
 {
     EntityID id = IDPool::reserveID();
     entityNames[id] = name;
     return id;
 }
 
-void AM::World::RemoveEntity(EntityID entityID)
+void World::RemoveEntity(EntityID entityID)
 {
     componentFlags[entityID] = 0;
     entityNames[entityID] = "";
 }
 
-void AM::World::AttachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
+void World::AttachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
 {
     // If the entity doesn't have the component, add it.
     if ((componentFlags[entityID] & componentFlag) == 0) {
@@ -38,7 +43,7 @@ void AM::World::AttachComponent(EntityID entityID, ComponentFlag::FlagType compo
     }
 }
 
-void AM::World::RemoveComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
+void World::RemoveComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
 {
     // If the entity has the component, remove it.
     if ((componentFlags[entityID] & componentFlag) == componentFlag) {
@@ -50,12 +55,15 @@ void AM::World::RemoveComponent(EntityID entityID, ComponentFlag::FlagType compo
     }
 }
 
-void AM::World::setSpawnPoint(const Position& newSpawnPoint)
+void World::setSpawnPoint(const Position& newSpawnPoint)
 {
     spawnPoint = newSpawnPoint;
 }
 
-const AM::Position& AM::World::getSpawnPoint()
+const Position& World::getSpawnPoint()
 {
     return spawnPoint;
 }
+
+} // namespace Server
+} // namespace AM
