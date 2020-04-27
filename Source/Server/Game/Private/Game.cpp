@@ -25,7 +25,8 @@ void Game::tick(float deltaSeconds)
         return;
     }
     if ((timeSinceTick - GAME_TICK_INTERVAL_S) > .001) {
-        std::cout << "Game overrun" << std::endl;
+        std::cout << "Game overrun: " << (timeSinceTick - GAME_TICK_INTERVAL_S)
+        << std::endl;
     }
 
     // Add any new connections.

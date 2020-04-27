@@ -59,7 +59,7 @@ Input PlayerInputSystem::processInputEvents()
 
     // If a change occurred, send the updated player input state to the server.
     if (stateChanged) {
-//        sendInputState();
+        sendInputState();
     }
 
     return {Input::None, Input::Invalid};

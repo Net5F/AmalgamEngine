@@ -74,8 +74,9 @@ void Game::tick(float deltaSeconds)
         // It's not yet time to process the game tick.
         return;
     }
-    if (timeSinceTick > 0.0171) {
-        std::cout << "Tick time: " << std::setprecision(10) << timeSinceTick << std::endl;
+    if ((timeSinceTick - GAME_TICK_INTERVAL_S) > .001) {
+        std::cout << "Game overrun: " << (timeSinceTick - GAME_TICK_INTERVAL_S)
+        << std::endl;
     }
 
     // Will return Input::Type::Exit if the app needs to exit.
@@ -90,7 +91,7 @@ void Game::tick(float deltaSeconds)
     }
 
     // Run all systems.
-//    networkMovementSystem.processServerMovements();
+    networkMovementSystem.processServerMovements();
 
     movementSystem.processMovements(timeSinceTick);
 
