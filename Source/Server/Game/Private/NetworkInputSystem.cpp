@@ -4,8 +4,8 @@
 #include "Peer.h"
 #include "SharedDefs.h"
 #include "MessageUtil.h"
+#include "Debug.h"
 #include <memory>
-#include <iostream>
 
 namespace AM
 {
@@ -26,7 +26,7 @@ void NetworkInputSystem::processInputEvents()
             // Decode the message.
             const fb::Message* message = fb::GetMessage(responseBuffer->data());
             if (message->content_type() != fb::MessageContent::EntityUpdate) {
-                std::cerr << "Expected EntityUpdate but got something else." << std::endl;
+                DebugInfo("Expected EntityUpdate but got something else.");
                 continue;
             }
             auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());

@@ -3,7 +3,7 @@
 #include "World.h"
 #include "Network.h"
 #include "MessageUtil.h"
-#include <iostream>
+#include "Debug.h"
 
 namespace AM
 {
@@ -31,7 +31,7 @@ void NetworkOutputSystem::updateClients(float deltaSeconds)
     for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
         // Only send updates for entities that changed.
         if (world.entityIsDirty[entityID]) {
-            std::cout << "Broadcasting: " << entityID << std::endl;
+            DebugInfo("Broadcasting: %u", entityID);
             broadcastEntity(entityID);
             world.entityIsDirty[entityID] = false;
         }
@@ -76,9 +76,8 @@ void NetworkOutputSystem::broadcastEntity(EntityID entityID)
     flatbuffers::Offset<fb::MovementComponent> movementComponent =
         fb::CreateMovementComponent(builder, movement.velX, movement.velY,
             movement.maxVelX, movement.maxVelY);
-    std::cout << "Sending@" << game.getCurrentTick() << ": (" << position.x << ", "
-    << position.y << ")" << ", (" << movement.velX << ", " << movement.velY << ")"
-    << std::endl;
+    DebugInfo("Sending: (%f, %f), (%f, %f)", position.x, position.y, movement.velX,
+        movement.velY);
 
     // Build the Entity.
     auto entityName = builder.CreateString(world.entityNames[entityID]);

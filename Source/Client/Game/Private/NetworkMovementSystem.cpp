@@ -3,6 +3,7 @@
 #include "World.h"
 #include "Network.h"
 #include "MessageUtil.h"
+#include "Debug.h"
 
 namespace AM
 {
@@ -59,32 +60,34 @@ void NetworkMovementSystem::processServerMovements()
             world.AttachComponent(entityID, ComponentFlag::Sprite);
         }
 
-        /* Update the inputs. */
-        std::array<Input::State, Input::NumTypes>& entityInputStates =
-            world.inputs[entityID].inputStates;
-        auto clientInputStates = (*entityIt)->inputComponent()->inputStates();
-        for (unsigned int i = 0; i < Input::NumTypes; ++i) {
-            entityInputStates[i] = MessageUtil::convertToAMInputState(
-                clientInputStates->Get(i));
+        // Only update movements and inputs if we weren't the cause of the inputs.
+        if (entityID != world.getPlayerID()) {
+            /* Update the inputs. */
+            std::array<Input::State, Input::NumTypes>& entityInputStates =
+                world.inputs[entityID].inputStates;
+            auto clientInputStates = (*entityIt)->inputComponent()->inputStates();
+            for (unsigned int i = 0; i < Input::NumTypes; ++i) {
+                entityInputStates[i] = MessageUtil::convertToAMInputState(
+                    clientInputStates->Get(i));
+            }
+
+            /* Update the movements. */
+            MovementComponent& movement = world.movements[entityID];
+            auto newMovement = (*entityIt)->movementComponent();
+            movement.velX = newMovement->velX();
+            movement.velY = newMovement->velY();
+            movement.maxVelX = newMovement->maxVelX();
+            movement.maxVelY = newMovement->maxVelY();
         }
 
         /* Update the positions. */
         PositionComponent& position = world.positions[entityID];
         auto newPosition = (*entityIt)->positionComponent();
 
-        // TEMP: Print the updated position so we know something happened.
-        std::cout << entityID << "@" << game.getCurrentTick() <<  ": ( " << position.x << ", " << position.y << ") -> ("
-        << newPosition->x() << ", " << newPosition->y() << ")" << std::endl;
+        DebugInfo("%d: (%f, %f) -> (%f, %f)", entityID, position.x, position.y,
+            newPosition->x(), newPosition->y());
         position.x = newPosition->x();
         position.y = newPosition->y();
-
-        /* Update the movements. */
-        MovementComponent& movement = world.movements[entityID];
-        auto newMovement = (*entityIt)->movementComponent();
-        movement.velX = newMovement->velX();
-        movement.velY = newMovement->velY();
-        movement.maxVelX = newMovement->maxVelX();
-        movement.maxVelY = newMovement->maxVelY();
 
         /* Move the sprites to the new positions. */
         SpriteComponent& sprite = world.sprites[entityID];
