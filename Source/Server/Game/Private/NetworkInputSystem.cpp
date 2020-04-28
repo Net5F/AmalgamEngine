@@ -3,6 +3,7 @@
 #include "Network.h"
 #include "Peer.h"
 #include "SharedDefs.h"
+#include "MessageUtil.h"
 #include <memory>
 #include <iostream>
 
@@ -39,30 +40,13 @@ void NetworkInputSystem::processInputEvents()
                 world.inputs[clientEntityID].inputStates;
             auto clientInputStates = clientEntity->inputComponent()->inputStates();
             for (unsigned int i = 0; i < Input::NumTypes; ++i) {
-                entityInputStates[i] = convertToAMInputState(clientInputStates->Get(i));
+                entityInputStates[i] = MessageUtil::convertToAMInputState(
+                    clientInputStates->Get(i));
             }
 
             // Flag the entity as dirty.
             world.entityIsDirty[clientEntityID] = true;
         }
-    }
-}
-
-Input::State NetworkInputSystem::convertToAMInputState(fb::InputState state)
-{
-    switch (state)
-    {
-        case fb::InputState::Invalid:
-            return Input::Invalid;
-            break;
-        case fb::InputState::Pressed:
-            return Input::Pressed;
-            break;
-        case fb::InputState::Released:
-            return Input::Released;
-            break;
-        default:
-            return Input::State::Invalid;
     }
 }
 

@@ -8,6 +8,7 @@ add_library(Shared STATIC
 		Private/Acceptor.cpp
 		Private/Peer.cpp
 		Private/Timer.cpp
+		Private/MessageUtil.cpp
 	PUBLIC
 		Public/Acceptor.h
 		Public/Peer.h
@@ -19,6 +20,7 @@ add_library(Shared STATIC
 		Public/SpriteComponent.h
 
 		Public/SharedDefs.h
+		Public/MessageUtil.h
 )
 
 target_include_directories(Shared

@@ -79,6 +79,7 @@ void Game::tick(float deltaSeconds)
         << std::endl;
     }
 
+    /* Run all systems. */
     // Will return Input::Type::Exit if the app needs to exit.
     Uint32 start = SDL_GetTicks();
     Input input = playerInputSystem.processInputEvents();
@@ -90,7 +91,6 @@ void Game::tick(float deltaSeconds)
         std::cout << "Input time: " << result << std::endl;
     }
 
-    // Run all systems.
     networkMovementSystem.processServerMovements();
 
     movementSystem.processMovements(timeSinceTick);

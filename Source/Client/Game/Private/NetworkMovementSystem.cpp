@@ -1,6 +1,7 @@
 #include "NetworkMovementSystem.h"
 #include "World.h"
 #include "Network.h"
+#include "MessageUtil.h"
 
 namespace AM
 {
@@ -61,7 +62,8 @@ void NetworkMovementSystem::processServerMovements()
             world.inputs[entityID].inputStates;
         auto clientInputStates = (*entityIt)->inputComponent()->inputStates();
         for (unsigned int i = 0; i < Input::NumTypes; ++i) {
-            entityInputStates[i] = convertToAMInputState(clientInputStates->Get(i));
+            entityInputStates[i] = MessageUtil::convertToAMInputState(
+                clientInputStates->Get(i));
         }
 
         /* Update the positions. */
@@ -86,24 +88,6 @@ void NetworkMovementSystem::processServerMovements()
         SpriteComponent& sprite = world.sprites[entityID];
         sprite.posInWorld.x = world.positions[entityID].x;
         sprite.posInWorld.y = world.positions[entityID].y;
-    }
-}
-
-Input::State NetworkMovementSystem::convertToAMInputState(fb::InputState state)
-{
-    switch (state)
-    {
-        case fb::InputState::Invalid:
-            return Input::Invalid;
-            break;
-        case fb::InputState::Pressed:
-            return Input::Pressed;
-            break;
-        case fb::InputState::Released:
-            return Input::Released;
-            break;
-        default:
-            return Input::State::Invalid;
     }
 }
 

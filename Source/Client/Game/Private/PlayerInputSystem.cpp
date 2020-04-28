@@ -1,6 +1,7 @@
-#include <PlayerInputSystem.h>
+#include "PlayerInputSystem.h"
 #include "World.h"
 #include "Network.h"
+#include "MessageUtil.h"
 
 namespace AM
 {
@@ -78,7 +79,7 @@ void PlayerInputSystem::sendInputState()
         world.inputs[playerID].inputStates;
     for (uint8_t i = 0; i < Input::Type::NumTypes; ++i) {
         // Translate the Input::State enum to fb::InputState.
-        fbInputStates[i] = convertToFbInputState(playerInputStates[i]);
+        fbInputStates[i] = MessageUtil::convertToFbInputState(playerInputStates[i]);
     }
     flatbuffers::Offset<flatbuffers::Vector<fb::InputState>> inputVector =
         builder.CreateVector(fbInputStates, Input::Type::NumTypes);
@@ -116,24 +117,6 @@ void PlayerInputSystem::sendInputState()
     Uint8* buffer = builder.GetBufferPointer();
     network.send(
         std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
-}
-
-fb::InputState PlayerInputSystem::convertToFbInputState(Input::State state)
-{
-    switch (state)
-    {
-        case Input::Invalid:
-            return fb::InputState::Invalid;
-            break;
-        case Input::Pressed:
-            return fb::InputState::Pressed;
-            break;
-        case Input::Released:
-            return fb::InputState::Released;
-            break;
-        default:
-            return fb::InputState::Invalid;
-    }
 }
 
 } // namespace Client

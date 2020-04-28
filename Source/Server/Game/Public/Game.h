@@ -4,6 +4,7 @@
 #include "World.h"
 #include "NetworkInputSystem.h"
 #include "MovementSystem.h"
+#include "NetworkOutputSystem.h"
 #include "Message_generated.h"
 
 namespace AM
@@ -20,7 +21,7 @@ class Game
 {
 public:
     /** 30 game ticks per second. */
-    static constexpr float GAME_TICK_INTERVAL_S = 1 / 30.0f;
+    static constexpr float GAME_TICK_INTERVAL_S = 1 / 60.0f;
 
     Game(Network& inNetwork);
 
@@ -35,6 +36,7 @@ private:
 
     NetworkInputSystem networkInputSystem;
     MovementSystem movementSystem;
+    NetworkOutputSystem networkOutputSystem;
 
     flatbuffers::FlatBufferBuilder builder;
 

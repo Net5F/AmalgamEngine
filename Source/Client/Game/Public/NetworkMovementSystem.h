@@ -29,8 +29,6 @@ private:
     EntityID entityID,
     std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates);
 
-    Input::State convertToAMInputState(fb::InputState state);
-
     World& world;
     Network& network;
 };

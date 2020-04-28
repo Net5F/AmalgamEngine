@@ -12,12 +12,11 @@ namespace Server
 {
 
 class World;
-class Network;
 
 class MovementSystem
 {
 public:
-    MovementSystem(World& inWorld, Network& inNetwork);
+    MovementSystem(World& inWorld);
 
     /**
      * Updates movement components based on input state, moves position components
@@ -34,18 +33,7 @@ private:
     std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates,
     double deltaSeconds);
 
-    /**
-     * Sends the given entity's relevant state information to all connected clients.
-     */
-    void broadcastEntity(EntityID entityID);
-
-    /**
-     * Converts AM input states to the flatbuffer equivalent.
-     */
-    fb::InputState convertToFbInputState(Input::State state);
-
     World& world;
-    Network& network;
 
     flatbuffers::FlatBufferBuilder builder;
 };

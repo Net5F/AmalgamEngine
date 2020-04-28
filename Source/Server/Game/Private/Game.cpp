@@ -10,7 +10,8 @@ Game::Game(Network& inNetwork)
 : world()
 , network(inNetwork)
 , networkInputSystem(world, network)
-, movementSystem(world, network)
+, movementSystem(world)
+, networkOutputSystem(world, network)
 , builder(BUILDER_BUFFER_SIZE)
 , timeSinceTick(0.0f)
 {
@@ -23,10 +24,6 @@ void Game::tick(float deltaSeconds)
     if (timeSinceTick < GAME_TICK_INTERVAL_S) {
         // It's not yet time to process the game tick.
         return;
-    }
-    if ((timeSinceTick - GAME_TICK_INTERVAL_S) > .001) {
-        std::cout << "Game overrun: " << (timeSinceTick - GAME_TICK_INTERVAL_S)
-        << std::endl;
     }
 
     // Add any new connections.
@@ -72,6 +69,8 @@ void Game::tick(float deltaSeconds)
     networkInputSystem.processInputEvents();
 
     movementSystem.processMovements(timeSinceTick);
+
+    networkOutputSystem.updateClients(timeSinceTick);
 
     timeSinceTick = 0;
 }

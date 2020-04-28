@@ -23,11 +23,6 @@ public:
     void processInputEvents();
 
 private:
-    /**
-     * Converts flatbuffer input states to the AM equivalent.
-     */
-    Input::State convertToAMInputState(fb::InputState state);
-
     World& world;
     Network& network;
 };
