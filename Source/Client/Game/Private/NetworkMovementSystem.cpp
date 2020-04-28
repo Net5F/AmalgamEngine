@@ -1,4 +1,5 @@
 #include "NetworkMovementSystem.h"
+#include "Game.h"
 #include "World.h"
 #include "Network.h"
 #include "MessageUtil.h"
@@ -8,8 +9,9 @@ namespace AM
 namespace Client
 {
 
-NetworkMovementSystem::NetworkMovementSystem(World& inWorld, Network& inNetwork)
-: world(inWorld), network(inNetwork)
+NetworkMovementSystem::NetworkMovementSystem(Game& inGame, World& inWorld,
+                                             Network& inNetwork)
+: game(inGame), world(inWorld), network(inNetwork)
 {
 }
 
@@ -71,7 +73,7 @@ void NetworkMovementSystem::processServerMovements()
         auto newPosition = (*entityIt)->positionComponent();
 
         // TEMP: Print the updated position so we know something happened.
-        std::cout << entityID <<  ": ( " << position.x << ", " << position.y << ") -> ("
+        std::cout << entityID << "@" << game.getCurrentTick() <<  ": ( " << position.x << ", " << position.y << ") -> ("
         << newPosition->x() << ", " << newPosition->y() << ")" << std::endl;
         position.x = newPosition->x();
         position.y = newPosition->y();

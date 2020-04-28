@@ -1,5 +1,6 @@
 #include "MovementSystem.h"
 #include "World.h"
+#include "Debug.h"
 
 namespace AM
 {
@@ -36,6 +37,13 @@ void MovementSystem::processMovements(double deltaSeconds)
         /* Move the sprites to the new positions. */
         if ((world.componentFlags[entityID] & ComponentFlag::Position)
         && (world.componentFlags[entityID] & ComponentFlag::Sprite)) {
+            if (world.sprites[entityID].posInWorld.x != world.positions[entityID].x
+            || world.sprites[entityID].posInWorld.y != world.positions[entityID].y) {
+                DebugInfo("Pos change: (%u, %u) -> (%u, %u)",
+                    world.sprites[entityID].posInWorld.x, world.positions[entityID].x,
+                    world.sprites[entityID].posInWorld.y, world.positions[entityID].y);
+            }
+
             world.sprites[entityID].posInWorld.x = world.positions[entityID].x;
             world.sprites[entityID].posInWorld.y = world.positions[entityID].y;
         }

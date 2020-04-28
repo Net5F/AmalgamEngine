@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Network.h"
+#include "Debug.h"
 #include <iostream>
 #include <iomanip>
 
@@ -13,13 +14,15 @@ namespace Client
 Game::Game(Network& inNetwork, std::shared_ptr<SDL2pp::Texture>& inSprites)
 : world()
 , network(inNetwork)
-, playerInputSystem(world, network)
-, networkMovementSystem(world, network)
+, playerInputSystem(*this, world, network)
+, networkMovementSystem(*this, world, network)
 , movementSystem(world)
 , builder(BUILDER_BUFFER_SIZE)
 , timeSinceTick(0.0f)
+, currentTick(0)
 , sprites(inSprites)
 {
+    Debug::registerCurrentTickPtr(&currentTick);
 }
 
 void Game::connect()
@@ -35,18 +38,14 @@ void Game::connect()
         SDL_Delay(10);
     }
 
-    // Get the player ID from the connection response.
+    // Get our info from the connection response.
     const fb::Message* message = fb::GetMessage(responseBuffer->data());
     if (message->content_type() != fb::MessageContent::ConnectionResponse) {
         std::cerr << "Expected ConnectionResponse but got something else." << std::endl;
     }
     auto connectionResponse = static_cast<const fb::ConnectionResponse*>(message->content());
+    currentTick = connectionResponse->currentTick();
     EntityID player = connectionResponse->entityID();
-
-    // Set up our systems.
-    PlayerInputSystem playerInputSystem(world, network);
-    NetworkMovementSystem networkMovementSystem(world, network);
-    MovementSystem movementSystem(world);
 
     // Set up our player.
     SDL2pp::Rect textureRect(0, 32, 16, 16);
@@ -74,21 +73,13 @@ void Game::tick(float deltaSeconds)
         // It's not yet time to process the game tick.
         return;
     }
-    if ((timeSinceTick - GAME_TICK_INTERVAL_S) > .001) {
-        std::cout << "Game overrun: " << (timeSinceTick - GAME_TICK_INTERVAL_S)
-        << std::endl;
-    }
+    currentTick++;
 
     /* Run all systems. */
     // Will return Input::Type::Exit if the app needs to exit.
-    Uint32 start = SDL_GetTicks();
     Input input = playerInputSystem.processInputEvents();
     if (input.type == Input::Exit) {
         exitRequested = true;
-    }
-    Uint32 result = SDL_GetTicks() - start;
-    if (result > 1) {
-        std::cout << "Input time: " << result << std::endl;
     }
 
     networkMovementSystem.processServerMovements();
@@ -101,6 +92,11 @@ void Game::tick(float deltaSeconds)
 World& Game::getWorld()
 {
     return world;
+}
+
+Uint32 Game::getCurrentTick()
+{
+    return currentTick;
 }
 
 } // namespace Client

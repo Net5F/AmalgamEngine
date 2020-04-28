@@ -41,6 +41,8 @@ public:
 
     World& getWorld();
 
+    Uint32 getCurrentTick();
+
 private:
     World world;
     Network& network;
@@ -53,6 +55,12 @@ private:
 
     /** The aggregated time since we last processed a tick. */
     float timeSinceTick;
+
+    /**
+     * The number of the tick that we're currently on.
+     * Initialized to the number that the server tells us it's on.
+     */
+    Uint32 currentTick;
 
     // Temporary until a resource manager is created.
     std::shared_ptr<SDL2pp::Texture>& sprites;

@@ -11,13 +11,14 @@ namespace AM
 namespace Client
 {
 
+class Game;
 class World;
 class Network;
 
 class NetworkMovementSystem
 {
 public:
-    NetworkMovementSystem(World& inWorld, Network& inNetwork);
+    NetworkMovementSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
     /**
      * Updates movement components based on input state, moves position components based on movement, updates sprites based on position.
@@ -29,6 +30,7 @@ private:
     EntityID entityID,
     std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates);
 
+    Game& game;
     World& world;
     Network& network;
 };

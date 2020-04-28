@@ -30,6 +30,8 @@ public:
      */
     void tick(float deltaSeconds);
 
+    Uint32 getCurrentTick();
+
 private:
     World world;
     Network& network;
@@ -42,6 +44,11 @@ private:
 
     /** The aggregated time since we last processed a tick. */
     float timeSinceTick;
+
+    /**
+     * The number of the tick that we're currently on.
+     */
+    Uint32 currentTick;
 };
 
 } // namespace Server

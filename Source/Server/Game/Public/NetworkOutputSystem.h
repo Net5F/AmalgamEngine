@@ -9,6 +9,7 @@ namespace AM
 namespace Server
 {
 
+class Game;
 class World;
 class Network;
 
@@ -21,7 +22,7 @@ public:
     /** 30 game ticks per second. */
     static constexpr float NETWORK_OUTPUT_TICK_INTERVAL_S = 1 / 20.0f;
 
-    NetworkOutputSystem(World& inWorld, Network& inNetwork);
+    NetworkOutputSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
     /**
      * Sends dirty entity state data to all clients.
@@ -34,6 +35,7 @@ private:
      */
     void broadcastEntity(EntityID entityID);
 
+    Game& game;
     World& world;
     Network& network;
 

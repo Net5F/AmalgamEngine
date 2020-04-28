@@ -248,10 +248,14 @@ struct ConnectionResponse FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef ConnectionResponseBuilder Builder;
   struct Traits;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_ENTITYID = 4,
-    VT_X = 6,
-    VT_Y = 8
+    VT_CURRENTTICK = 4,
+    VT_ENTITYID = 6,
+    VT_X = 8,
+    VT_Y = 10
   };
+  uint32_t currentTick() const {
+    return GetField<uint32_t>(VT_CURRENTTICK, 0);
+  }
   uint32_t entityID() const {
     return GetField<uint32_t>(VT_ENTITYID, 0);
   }
@@ -263,6 +267,7 @@ struct ConnectionResponse FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, VT_CURRENTTICK) &&
            VerifyField<uint32_t>(verifier, VT_ENTITYID) &&
            VerifyField<float>(verifier, VT_X) &&
            VerifyField<float>(verifier, VT_Y) &&
@@ -274,6 +279,9 @@ struct ConnectionResponseBuilder {
   typedef ConnectionResponse Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
+  void add_currentTick(uint32_t currentTick) {
+    fbb_.AddElement<uint32_t>(ConnectionResponse::VT_CURRENTTICK, currentTick, 0);
+  }
   void add_entityID(uint32_t entityID) {
     fbb_.AddElement<uint32_t>(ConnectionResponse::VT_ENTITYID, entityID, 0);
   }
@@ -296,6 +304,7 @@ struct ConnectionResponseBuilder {
 
 inline flatbuffers::Offset<ConnectionResponse> CreateConnectionResponse(
     flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t currentTick = 0,
     uint32_t entityID = 0,
     float x = 0.0f,
     float y = 0.0f) {
@@ -303,6 +312,7 @@ inline flatbuffers::Offset<ConnectionResponse> CreateConnectionResponse(
   builder_.add_y(y);
   builder_.add_x(x);
   builder_.add_entityID(entityID);
+  builder_.add_currentTick(currentTick);
   return builder_.Finish();
 }
 
@@ -626,13 +636,18 @@ struct EntityUpdate FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef EntityUpdateBuilder Builder;
   struct Traits;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_ENTITIES = 4
+    VT_CURRENTTICK = 4,
+    VT_ENTITIES = 6
   };
+  uint32_t currentTick() const {
+    return GetField<uint32_t>(VT_CURRENTTICK, 0);
+  }
   const flatbuffers::Vector<flatbuffers::Offset<AM::fb::Entity>> *entities() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<AM::fb::Entity>> *>(VT_ENTITIES);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, VT_CURRENTTICK) &&
            VerifyOffset(verifier, VT_ENTITIES) &&
            verifier.VerifyVector(entities()) &&
            verifier.VerifyVectorOfTables(entities()) &&
@@ -644,6 +659,9 @@ struct EntityUpdateBuilder {
   typedef EntityUpdate Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
+  void add_currentTick(uint32_t currentTick) {
+    fbb_.AddElement<uint32_t>(EntityUpdate::VT_CURRENTTICK, currentTick, 0);
+  }
   void add_entities(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AM::fb::Entity>>> entities) {
     fbb_.AddOffset(EntityUpdate::VT_ENTITIES, entities);
   }
@@ -660,9 +678,11 @@ struct EntityUpdateBuilder {
 
 inline flatbuffers::Offset<EntityUpdate> CreateEntityUpdate(
     flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t currentTick = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AM::fb::Entity>>> entities = 0) {
   EntityUpdateBuilder builder_(_fbb);
   builder_.add_entities(entities);
+  builder_.add_currentTick(currentTick);
   return builder_.Finish();
 }
 
@@ -673,10 +693,12 @@ struct EntityUpdate::Traits {
 
 inline flatbuffers::Offset<EntityUpdate> CreateEntityUpdateDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t currentTick = 0,
     const std::vector<flatbuffers::Offset<AM::fb::Entity>> *entities = nullptr) {
   auto entities__ = entities ? _fbb.CreateVector<flatbuffers::Offset<AM::fb::Entity>>(*entities) : 0;
   return AM::fb::CreateEntityUpdate(
       _fbb,
+      currentTick,
       entities__);
 }
 

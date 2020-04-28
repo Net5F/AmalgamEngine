@@ -1,4 +1,5 @@
 #include "PlayerInputSystem.h"
+#include "Game.h"
 #include "World.h"
 #include "Network.h"
 #include "MessageUtil.h"
@@ -8,8 +9,8 @@ namespace AM
 namespace Client
 {
 
-PlayerInputSystem::PlayerInputSystem(World& inWorld, Network& inNetwork)
-: world(inWorld), network(inNetwork), builder(BUILDER_BUFFER_SIZE)
+PlayerInputSystem::PlayerInputSystem(Game& inGame, World& inWorld, Network& inNetwork)
+: game(inGame), world(inWorld), network(inNetwork), builder(BUILDER_BUFFER_SIZE)
 {
 }
 
@@ -103,8 +104,8 @@ void PlayerInputSystem::sendInputState()
     auto entity = builder.CreateVector(entityVector);
 
     // Build an EntityUpdate.
-    flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder,
-        entity);
+    flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder, game.getCurrentTick()
+    , entity);
 
     // Build a Message.
     fb::MessageBuilder messageBuilder(builder);

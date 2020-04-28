@@ -1,7 +1,8 @@
 #include "NetworkOutputSystem.h"
+#include "Game.h"
+#include "World.h"
 #include "Network.h"
 #include "MessageUtil.h"
-#include "World.h"
 #include <iostream>
 
 namespace AM
@@ -9,8 +10,9 @@ namespace AM
 namespace Server
 {
 
-NetworkOutputSystem::NetworkOutputSystem(World& inWorld, Network& inNetwork)
-: world(inWorld)
+NetworkOutputSystem::NetworkOutputSystem(Game& inGame, World& inWorld, Network& inNetwork)
+: game(inGame)
+, world(inWorld)
 , network(inNetwork)
 , builder(BUILDER_BUFFER_SIZE)
 , timeSinceTick(0.0f)
@@ -68,13 +70,15 @@ void NetworkOutputSystem::broadcastEntity(EntityID entityID)
     PositionComponent& position = world.positions[entityID];
     flatbuffers::Offset<fb::PositionComponent> positionComponent =
         fb::CreatePositionComponent(builder, position.x, position.y);
-    std::cout << "Sending: (" << position.x << ", " << position.y << ")" << std::endl;
 
     // Build the MovementComponent.
     MovementComponent& movement = world.movements[entityID];
     flatbuffers::Offset<fb::MovementComponent> movementComponent =
         fb::CreateMovementComponent(builder, movement.velX, movement.velY,
             movement.maxVelX, movement.maxVelY);
+    std::cout << "Sending@" << game.getCurrentTick() << ": (" << position.x << ", "
+    << position.y << ")" << ", (" << movement.velX << ", " << movement.velY << ")"
+    << std::endl;
 
     // Build the Entity.
     auto entityName = builder.CreateString(world.entityNames[entityID]);
@@ -95,7 +99,7 @@ void NetworkOutputSystem::broadcastEntity(EntityID entityID)
 
     // Build an EntityUpdate.
     flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder,
-        entity);
+        game.getCurrentTick(), entity);
 
     // Build a Message.
     fb::MessageBuilder messageBuilder(builder);

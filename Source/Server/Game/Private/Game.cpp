@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Network.h"
+#include "Debug.h"
 
 namespace AM
 {
@@ -11,11 +12,13 @@ Game::Game(Network& inNetwork)
 , network(inNetwork)
 , networkInputSystem(world, network)
 , movementSystem(world)
-, networkOutputSystem(world, network)
+, networkOutputSystem(*this, world, network)
 , builder(BUILDER_BUFFER_SIZE)
 , timeSinceTick(0.0f)
+, currentTick(0)
 {
     world.setSpawnPoint({64, 64});
+    Debug::registerCurrentTickPtr(&currentTick);
 }
 
 void Game::tick(float deltaSeconds)
@@ -25,6 +28,7 @@ void Game::tick(float deltaSeconds)
         // It's not yet time to process the game tick.
         return;
     }
+    currentTick++;
 
     // Add any new connections.
     std::vector<std::shared_ptr<Peer>> newClients =
@@ -46,8 +50,8 @@ void Game::tick(float deltaSeconds)
         builder.Clear();
 
         // Send them their ID and spawn point.
-        auto response = fb::CreateConnectionResponse(builder, newID, spawnPoint.x,
-            spawnPoint.y);
+        auto response = fb::CreateConnectionResponse(builder, currentTick, newID,
+            spawnPoint.x, spawnPoint.y);
         auto encodedMessage = fb::CreateMessage(builder,
             fb::MessageContent::ConnectionResponse, response.Union());
         builder.Finish(encodedMessage);
@@ -73,6 +77,11 @@ void Game::tick(float deltaSeconds)
     networkOutputSystem.updateClients(timeSinceTick);
 
     timeSinceTick = 0;
+}
+
+Uint32 Game::getCurrentTick()
+{
+    return currentTick;
 }
 
 } // namespace Server

@@ -11,13 +11,14 @@ namespace AM
 namespace Client
 {
 
+class Game;
 class World;
 class Network;
 
 class PlayerInputSystem
 {
 public:
-    PlayerInputSystem(World& inWorld, Network& inNetwork);
+    PlayerInputSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
     Input processInputEvents();
 
@@ -26,6 +27,7 @@ public:
 private:
     static constexpr int BUILDER_BUFFER_SIZE = 512;
 
+    Game& game;
     World& world;
     Network& network;
     flatbuffers::FlatBufferBuilder builder;

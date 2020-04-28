@@ -9,6 +9,7 @@ add_library(Shared STATIC
 		Private/Peer.cpp
 		Private/Timer.cpp
 		Private/MessageUtil.cpp
+		Private/Debug.cpp
 	PUBLIC
 		Public/Acceptor.h
 		Public/Peer.h
@@ -21,6 +22,7 @@ add_library(Shared STATIC
 
 		Public/SharedDefs.h
 		Public/MessageUtil.h
+		Public/Debug.h
 )
 
 target_include_directories(Shared
@@ -42,3 +44,7 @@ target_link_libraries(Shared
 target_compile_features(Shared PRIVATE cxx_std_17)
 set_target_properties(Shared PROPERTIES CXX_EXTENSIONS OFF)
 
+# If debug, enable debug printing.
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(Shared PUBLIC -DENABLE_DEBUG_INFO)
+endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
