@@ -26,6 +26,13 @@ public:
     void sendInputState();
 
 private:
+    /**
+     * Serializes the given entity's relevant world data.
+     * @param entityID  The entity to serialize.
+     * @return An offset where the data was stored in the builder.
+     */
+    flatbuffers::Offset<AM::fb::Entity> serializeEntity(EntityID entityID);
+
     static constexpr int BUILDER_BUFFER_SIZE = 512;
 
     Game& game;

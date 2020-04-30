@@ -68,6 +68,33 @@ void PlayerInputSystem::sendInputState()
 
     EntityID playerID = world.getPlayerID();
 
+    // Create the vector of entity data.
+    std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
+    entityVector.push_back(serializeEntity(playerID));
+    auto serializedEntity = builder.CreateVector(entityVector);
+
+    // Build an EntityUpdate.
+    flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder, game.getCurrentTick()
+    , serializedEntity);
+
+    // Build a Message.
+    fb::MessageBuilder messageBuilder(builder);
+    messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
+    messageBuilder.add_content(entityUpdate.Union());
+    flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
+    builder.Finish(message);
+
+    // Send the message.
+    Uint8* buffer = builder.GetBufferPointer();
+    network.send(
+        std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
+
+    stateIsDirty = false;
+}
+
+flatbuffers::Offset<AM::fb::Entity> PlayerInputSystem::serializeEntity(
+EntityID playerID)
+{
     // Translate the inputs to fb's enum.
     fb::InputState fbInputStates[Input::Type::NumTypes];
     std::array<Input::State, Input::NumTypes>& playerInputStates =
@@ -93,27 +120,7 @@ void PlayerInputSystem::sendInputState()
     entityBuilder.add_flags(ComponentFlag::Input);
     entityBuilder.add_inputComponent(inputComponent);
 
-    std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
-    entityVector.push_back(entityBuilder.Finish());
-    auto entity = builder.CreateVector(entityVector);
-
-    // Build an EntityUpdate.
-    flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder, game.getCurrentTick()
-    , entity);
-
-    // Build a Message.
-    fb::MessageBuilder messageBuilder(builder);
-    messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
-    messageBuilder.add_content(entityUpdate.Union());
-    flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
-    builder.Finish(message);
-
-    // Send the message.
-    Uint8* buffer = builder.GetBufferPointer();
-    network.send(
-        std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
-
-    stateIsDirty = false;
+    return entityBuilder.Finish();
 }
 
 } // namespace Client

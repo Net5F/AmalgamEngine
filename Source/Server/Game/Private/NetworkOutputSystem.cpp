@@ -28,24 +28,49 @@ void NetworkOutputSystem::updateClients(float deltaSeconds)
     }
 
     /* Send all updated entity states to all clients. */
-    for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
-        // Only send updates for entities that changed.
-        if (world.entityIsDirty[entityID]) {
-            DebugInfo("Broadcasting: %u", entityID);
-            broadcastEntity(entityID);
-            world.entityIsDirty[entityID] = false;
-        }
-    }
+    broadcastDirtyEntities();
 
     timeSinceTick = 0;
 }
 
-void NetworkOutputSystem::broadcastEntity(EntityID entityID)
+void NetworkOutputSystem::broadcastDirtyEntities()
 {
     // Prep the builder for a new message.
     builder.Clear();
 
-    /* Fill a message with the updated PositionComponent, NetworkOutputComponent,
+    // Create the vector of entity data.
+    std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
+    for (EntityID entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
+        // Only send updates for entities that changed.
+        if (world.entityIsDirty[entityID]) {
+            DebugInfo("Broadcasting: %u", entityID);
+            entityVector.push_back(serializeEntity(entityID));
+            world.entityIsDirty[entityID] = false;
+        }
+    }
+    auto serializedEntities = builder.CreateVector(entityVector);
+
+    // Build an EntityUpdate.
+    flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder,
+        game.getCurrentTick(), serializedEntities);
+
+    // Build a Message.
+    fb::MessageBuilder messageBuilder(builder);
+    messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
+    messageBuilder.add_content(entityUpdate.Union());
+    flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
+    builder.Finish(message);
+
+    // Send the message to all connected clients.
+    Uint8* buffer = builder.GetBufferPointer();
+    network.sendToAll(
+        std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
+}
+
+flatbuffers::Offset<AM::fb::Entity> NetworkOutputSystem::serializeEntity(
+EntityID entityID)
+{
+    /* Fill the message with the latest PositionComponent, NetworkOutputComponent,
        and InputComponent data. */
     // Translate the inputs to fb's enum.
     InputComponent& input = world.inputs[entityID];
@@ -92,25 +117,7 @@ void NetworkOutputSystem::broadcastEntity(EntityID entityID)
     entityBuilder.add_movementComponent(movementComponent);
     entityBuilder.add_inputComponent(inputComponent);
 
-    std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
-    entityVector.push_back(entityBuilder.Finish());
-    auto entity = builder.CreateVector(entityVector);
-
-    // Build an EntityUpdate.
-    flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder,
-        game.getCurrentTick(), entity);
-
-    // Build a Message.
-    fb::MessageBuilder messageBuilder(builder);
-    messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
-    messageBuilder.add_content(entityUpdate.Union());
-    flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
-    builder.Finish(message);
-
-    // Send the message to all connected clients.
-    Uint8* buffer = builder.GetBufferPointer();
-    network.sendToAll(
-        std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
+    return entityBuilder.Finish();
 }
 
 } // namespace Server

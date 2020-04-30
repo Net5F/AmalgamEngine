@@ -31,9 +31,17 @@ public:
 
 private:
     /**
-     * Sends the given entity's relevant state information to all connected clients.
+     * Checks the world for dirty entities and relevant state information to all
+     * connected clients.
      */
-    void broadcastEntity(EntityID entityID);
+    void broadcastDirtyEntities();
+
+    /**
+     * Serializes the given entity's relevant world data.
+     * @param entityID  The entity to serialize.
+     * @return An offset where the data was stored in the builder.
+     */
+    flatbuffers::Offset<AM::fb::Entity> serializeEntity(EntityID entityID);
 
     Game& game;
     World& world;
