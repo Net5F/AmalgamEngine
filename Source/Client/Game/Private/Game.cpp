@@ -76,15 +76,37 @@ void Game::tick(float deltaSeconds)
     currentTick++;
 
     /* Run all systems. */
-    // Will return Input::Type::Exit if the app needs to exit.
-    Input input = playerInputSystem.processInputEvents();
-    if (input.type == Input::Exit) {
-        exitRequested = true;
+    // Process all waiting user input events.
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            exitRequested = true;
+        }
+        else if (event.type == SDL_WINDOWEVENT) {
+//            switch(event.type) {
+//                case SDL_WINDOWEVENT_SHOWN:
+//                case SDL_WINDOWEVENT_EXPOSED:
+//                case SDL_WINDOWEVENT_MOVED:
+//                case SDL_WINDOWEVENT_MAXIMIZED:
+//                case SDL_WINDOWEVENT_RESTORED:
+//                case SDL_WINDOWEVENT_FOCUS_GAINED:
+//                // Window was messed with, we've probably lost sync with the server.
+//                // TODO: Handle the far-out-of-sync client.
+//            }
+        }
+        else {
+            // Assume it's a key or mouse event.
+            playerInputSystem.processInputEvent(event);
+        }
     }
-
-    networkMovementSystem.processServerMovements();
+    // Send updates to the server.
+    playerInputSystem.sendInputState();
 
     movementSystem.processMovements(timeSinceTick);
+
+    // Process network movement after normal movement to sync with server.
+    // (The server processes movement before sending updates.)
+    networkMovementSystem.processServerMovements();
 
     timeSinceTick = 0;
 }

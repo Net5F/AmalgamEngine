@@ -11,65 +11,58 @@ namespace Client
 {
 
 PlayerInputSystem::PlayerInputSystem(Game& inGame, World& inWorld, Network& inNetwork)
-: game(inGame), world(inWorld), network(inNetwork), builder(BUILDER_BUFFER_SIZE)
+: game(inGame),
+  world(inWorld),
+  network(inNetwork),
+  builder(BUILDER_BUFFER_SIZE),
+  stateIsDirty(false)
 {
 }
 
-Input PlayerInputSystem::processInputEvents()
+void PlayerInputSystem::processInputEvent(SDL_Event& event)
 {
     // Process all events.
-    SDL_Event event;
-    bool stateChanged = false;
+    if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+        Input::State inputType =
+        (event.type == SDL_KEYDOWN) ? Input::Pressed : Input::Released;
+        Input keyInput = { Input::None, inputType };
 
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
-            return {Input::Exit, Input::Pressed};
+        switch (event.key.keysym.sym)
+        {
+            case SDLK_w:
+                keyInput.type = Input::Up;
+                break;
+            case SDLK_a:
+                keyInput.type = Input::Left;
+                break;
+            case SDLK_s:
+                keyInput.type = Input::Down;
+                break;
+            case SDLK_d:
+                keyInput.type = Input::Right;
+                break;
         }
-        else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
-            Input::State inputType =
-            (event.type == SDL_KEYDOWN) ? Input::Pressed : Input::Released;
-            Input keyInput = { Input::None, inputType };
 
-            switch (event.key.keysym.sym)
-            {
-                case SDLK_w:
-                    keyInput.type = Input::Up;
-                    break;
-                case SDLK_a:
-                    keyInput.type = Input::Left;
-                    break;
-                case SDLK_s:
-                    keyInput.type = Input::Down;
-                    break;
-                case SDLK_d:
-                    keyInput.type = Input::Right;
-                    break;
-                case SDLK_ESCAPE:
-                    return {Input::Exit, Input::Pressed};
-            }
+        // Push the input to the player's InputComponent.
+        EntityID player = world.getPlayerID();
+        Input::State& entityState = world.inputs[player].inputStates[keyInput.type];
 
-            // Push the input to the player's InputComponent.
-            EntityID player = world.getPlayerID();
-            Input::State& entityState = world.inputs[player].inputStates[keyInput.type];
-
-            // Only update on change.
-            if (entityState != keyInput.state) {
-                stateChanged = true;
-                entityState = keyInput.state;
-            }
+        // Track changes.
+        if (entityState != keyInput.state) {
+            stateIsDirty = true;
+            entityState = keyInput.state;
         }
     }
-
-    // If a change occurred, send the updated player input state to the server.
-    if (stateChanged) {
-        sendInputState();
-    }
-
-    return {Input::None, Input::Invalid};
 }
 
 void PlayerInputSystem::sendInputState()
 {
+    if (!stateIsDirty) {
+        // If there's no change, don't send anything.
+        return;
+    }
+
+    /* Send the updated state to the server. */
     // Prep the builder for a new message.
     builder.Clear();
 
@@ -119,6 +112,8 @@ void PlayerInputSystem::sendInputState()
     Uint8* buffer = builder.GetBufferPointer();
     network.send(
         std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
+
+    stateIsDirty = false;
 }
 
 } // namespace Client

@@ -5,6 +5,7 @@
 #include "Network.h"
 #include "InputComponent.h"
 #include "Message_generated.h"
+#include "SDL_Events.h"
 
 namespace AM
 {
@@ -20,7 +21,7 @@ class PlayerInputSystem
 public:
     PlayerInputSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
-    Input processInputEvents();
+    void processInputEvent(SDL_Event& event);
 
     void sendInputState();
 
@@ -31,6 +32,8 @@ private:
     World& world;
     Network& network;
     flatbuffers::FlatBufferBuilder builder;
+
+    bool stateIsDirty;
 };
 
 } // namespace Client
