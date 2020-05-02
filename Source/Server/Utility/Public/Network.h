@@ -2,12 +2,12 @@
 #define NETWORK_H
 
 #include "SharedDefs.h"
-#include "SDL_thread.h"
 #include <string>
 #include <memory>
 #include <cstddef>
 #include <unordered_map>
 #include <atomic>
+#include <thread>
 #include "readerwriterqueue.h"
 
 struct _SDLNet_SocketSet;
@@ -87,10 +87,11 @@ private:
     void eraseDisconnectedClients();
 
     /**
-     * Tries to retrieve a message from the server.
-     * If successful, passes it to queueMessage().
+     * Thread function, started from constructor.
+     * Accepts new clients, erases disconnected clients, and tries to receive
+     * messages from the clients.
      */
-    static int pollForMessages(void* inNetwork);
+    static int processClients(Network* network);
 
     /**
      * Used by pollForMessages, checks for new messages and pushes them into their queues.
@@ -123,8 +124,8 @@ private:
     /** Stores input messages from clients. */
     moodycamel::ReaderWriterQueue<BinaryBufferPtr> inputQueue;
 
-    /** Calls pollForMessages(). */
-    SDL_Thread* receiveThreadPtr;
+    /** Calls processClients(). */
+    std::thread receiveThreadObj;
     /** Turn false to signal that the receive thread should end. */
     std::atomic<bool> exitRequested;
 };

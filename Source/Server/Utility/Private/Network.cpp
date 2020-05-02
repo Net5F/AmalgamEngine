@@ -14,7 +14,7 @@ Network::Network()
 : acceptor(nullptr)
 , newClientQueue(MAX_QUEUED_NEW_CLIENTS)
 , clientSet(std::make_shared<SDLNet_SocketSet>(SDLNet_AllocSocketSet(MAX_CLIENTS)))
-, receiveThreadPtr(nullptr)
+, receiveThreadObj()
 , exitRequested(false)
 , inputQueue(MAX_QUEUED_INPUT_MESSAGES)
 {
@@ -24,18 +24,14 @@ Network::Network()
     acceptor = std::make_unique<Acceptor>(SERVER_PORT, clientSet);
 
     // Start the receive thread.
-    receiveThreadPtr = SDL_CreateThread(Network::pollForMessages, "Receiving Messages",
-        (void*) this);
-    if (receiveThreadPtr == nullptr) {
-        DebugError("Receive thread could not be constructed.");
-    }
+    receiveThreadObj = std::thread(Network::processClients, this);
 }
 
 Network::~Network()
 {
     SDLNet_Quit();
     exitRequested = true;
-    SDL_WaitThread(receiveThreadPtr, NULL);
+    receiveThreadObj.join();
 }
 
 bool Network::send(std::shared_ptr<Peer> client,
@@ -114,10 +110,8 @@ void Network::eraseDisconnectedClients()
     }
 }
 
-int Network::pollForMessages(void* inNetwork)
+int Network::processClients(Network* network)
 {
-    Network* network = static_cast<Network*>(inNetwork);
-
     const std::shared_ptr<SDLNet_SocketSet> clientSet = network->getClientSet();
     const std::unordered_map<EntityID, std::shared_ptr<Peer>>& clients =
         network->getClients();

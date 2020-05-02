@@ -1,5 +1,4 @@
 #include <SDL2pp/SDL2pp.hh>
-#include <SDL_thread.h>
 #include "Message_generated.h"
 
 #include "SharedDefs.h"
@@ -11,13 +10,13 @@
 #include <iostream>
 #include <memory>
 #include <atomic>
+#include <thread>
 
 using namespace AM;
 using namespace AM::Server;
 
-int inputThread(void* inExitRequested)
+int inputThread(std::atomic<bool>* exitRequested)
 {
-    std::atomic<bool>* exitRequested = static_cast<std::atomic<bool>*>(inExitRequested);
     while (!(*exitRequested)) {
         std::string userInput = "";
         std::getline(std::cin, userInput);
@@ -40,8 +39,7 @@ try
 
     // Spin up a thread to check for command line input.
     std::atomic<bool> exitRequested = false;
-    SDL_Thread* inputThreadPtr = SDL_CreateThread(inputThread, "User Input",
-        (void*) &exitRequested);
+    std::thread inputThreadObj(inputThread, &exitRequested);
 
     std::cout << "Starting main loop." << std::endl;
     Timer timer;
@@ -52,7 +50,7 @@ try
         game.tick(deltaSeconds);
     }
 
-    SDL_WaitThread(inputThreadPtr, NULL);
+    inputThreadObj.join();
 
     return 0;
 }

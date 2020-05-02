@@ -12,7 +12,7 @@ const std::string Network::SERVER_IP = "127.0.0.1";
 
 Network::Network()
 : server(nullptr)
-, receiveThreadPtr(nullptr)
+, receiveThreadObj()
 , exitRequested(false)
 {
     SDLNet_Init();
@@ -22,7 +22,7 @@ Network::~Network()
 {
     SDLNet_Quit();
     exitRequested = true;
-    SDL_WaitThread(receiveThreadPtr, NULL);
+    receiveThreadObj.join();
 }
 
 bool Network::connect()
@@ -34,11 +34,7 @@ bool Network::connect()
 
     // Spin up the receive thread.
     if (server != nullptr) {
-        receiveThreadPtr = SDL_CreateThread(Network::pollForMessages, "Receiving Messages",
-            (void*) this);
-        if (receiveThreadPtr == nullptr) {
-            DebugError("Receive thread could not be constructed.");
-        }
+        receiveThreadObj = std::thread(Network::pollForMessages, this);
     }
 
     return (server != nullptr) ? true : false;
