@@ -15,15 +15,16 @@ void Debug::registerCurrentTickPtr(Uint32* inCurrentTickPtr)
 void Debug::info(const char* expression, ...)
 {
 #if defined(ENABLE_DEBUG_INFO)
-    if (currentTickPtr == nullptr) {
-        std::printf("WARNING: Tried to print debug info without registering tick ptr.");
-        return;
+    // If the app hasn't registered a tick count, default to 0.
+    Uint32 currentTick = 0;
+    if (currentTickPtr != nullptr) {
+        currentTick = *currentTickPtr;
     }
 
     std::va_list arg;
     va_start(arg, expression);
 
-    std::printf("%u: ", *currentTickPtr);
+    std::printf("%u: ", currentTick);
     std::vprintf(expression, arg);
     std::printf("\n");
     std::fflush(stdout);
@@ -35,16 +36,17 @@ void Debug::info(const char* expression, ...)
 void Debug::error(const char* fileName, int line, const char* expression, ...)
 {
 #if defined(ENABLE_DEBUG_INFO)
-    if (currentTickPtr == nullptr) {
-        std::printf("WARNING: Tried to cause debug error without registering tick ptr.");
-        return;
+    // If the app hasn't registered a tick count, default to 0.
+    Uint32 currentTick = 0;
+    if (currentTickPtr != nullptr) {
+        currentTick = *currentTickPtr;
     }
 
     std::va_list arg;
     va_start(arg, expression);
 
     std::printf("Error at file: %s, line: %d, during tick: %u\n", fileName, line,
-        *currentTickPtr);
+        currentTick);
     std::vprintf(expression, arg);
     std::printf("\n");
     std::fflush(stdout);

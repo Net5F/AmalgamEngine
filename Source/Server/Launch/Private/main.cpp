@@ -17,11 +17,11 @@ using namespace AM::Server;
 
 int inputThread(void* inExitRequested)
 {
-    while (1) {
+    std::atomic<bool>* exitRequested = static_cast<std::atomic<bool>*>(inExitRequested);
+    while (!(*exitRequested)) {
         std::string userInput = "";
         std::getline(std::cin, userInput);
         if (userInput == "exit") {
-            int* exitRequested = (int*) inExitRequested;
             *exitRequested = true;
         }
     }
@@ -51,6 +51,8 @@ try
 
         game.tick(deltaSeconds);
     }
+
+    SDL_WaitThread(inputThreadPtr, NULL);
 
     return 0;
 }

@@ -15,6 +15,7 @@ target_link_libraries(Server
         SDL2pp
         flatbuffers
         Shared
+        readerwriterqueue
 )
 
 # Compile with C++17

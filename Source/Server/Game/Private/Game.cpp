@@ -31,9 +31,8 @@ void Game::tick(float deltaSeconds)
     currentTick++;
 
     // Add any new connections.
-    std::vector<std::shared_ptr<Peer>> newClients =
-        network.acceptNewClients();
-    for (std::shared_ptr<Peer> client : newClients) {
+    std::shared_ptr<Peer> newClient = network.getNewClient();
+    while (newClient != nullptr) {
         // Build their entity.
         EntityID newID = world.AddEntity("Player");
         const Position& spawnPoint = world.getSpawnPoint();
@@ -45,6 +44,9 @@ void Game::tick(float deltaSeconds)
         world.AttachComponent(newID, ComponentFlag::Movement);
         world.AttachComponent(newID, ComponentFlag::Position);
         world.AttachComponent(newID, ComponentFlag::Sprite);
+
+        // Add them to the network's map.
+        network.addClient(newID, newClient);
 
         // Prep the builder for a new message.
         builder.Clear();
@@ -60,14 +62,13 @@ void Game::tick(float deltaSeconds)
         BinaryBufferSharedPtr message = std::make_shared<std::vector<Uint8>>(
         buffer, (buffer + builder.GetSize()));
 
-        bool result = network.send(client, message);
+        bool result = network.send(newClient, message);
         if (!result) {
             std::cerr << "Failed to send response." << std::endl;
         }
-    }
 
-    // Check for disconnects.
-    network.checkForDisconnections();
+        newClient = network.getNewClient();
+    }
 
     // Run all systems.
     networkInputSystem.processInputEvents();

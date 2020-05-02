@@ -1,10 +1,12 @@
 #include "Acceptor.h"
 #include <iostream>
 
-using namespace AM;
+namespace AM
+{
 
-AM::Acceptor::Acceptor(unsigned int inPort)
+Acceptor::Acceptor(unsigned int inPort, std::shared_ptr<SDLNet_SocketSet> inClientSet)
 : port(inPort)
+, clientSet(inClientSet)
 {
     IPaddress ip;
     if (SDLNet_ResolveHost(&ip, NULL, port)) {
@@ -26,9 +28,11 @@ std::shared_ptr<Peer> AM::Acceptor::accept()
 {
     TCPsocket client = SDLNet_TCP_Accept(socket);
     if (client) {
-        return std::make_shared<Peer>(client);
+        return std::make_shared<Peer>(client, clientSet);
     }
     else {
         return nullptr;
     }
 }
+
+} // namespace AM

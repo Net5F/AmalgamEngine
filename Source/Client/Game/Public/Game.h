@@ -6,6 +6,7 @@
 #include "NetworkMovementSystem.h"
 #include "MovementSystem.h"
 #include "Message_generated.h"
+#include <atomic>
 
 namespace AM
 {
@@ -43,6 +44,8 @@ public:
 
     Uint32 getCurrentTick();
 
+    std::atomic<bool> const* getExitRequestedPtr();
+
 private:
     World world;
     Network& network;
@@ -64,6 +67,12 @@ private:
 
     // Temporary until a resource manager is created.
     std::shared_ptr<SDL2pp::Texture>& sprites;
+
+    /**
+     * Turn false to signal that the main loop should end.
+     * The game processes the inputs, so it gets to be in charge of program lifespan.
+     */
+    std::atomic<bool> exitRequested;
 };
 
 } // namespace Client

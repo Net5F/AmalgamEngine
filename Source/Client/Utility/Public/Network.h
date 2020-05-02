@@ -2,8 +2,11 @@
 #define NETWORK_H
 
 #include "SharedDefs.h"
+#include "SDL_thread.h"
 #include <string>
 #include <memory>
+#include <atomic>
+#include "readerwriterqueue.h"
 
 namespace AM
 {
@@ -27,13 +30,40 @@ public:
      */
     bool send(BinaryBufferSharedPtr message);
 
+    /**
+     * Returns a message if there are any in the queue.
+     * @return A waiting message, else nullptr.
+     */
     BinaryBufferPtr receive();
+
+    /**
+     * Tries to retrieve a message from the server.
+     * If successful, passes it to queueMessage().
+     */
+    static int pollForMessages(void* inNetwork);
+
+    /**
+     * Pushes a message into the receiveQueue.
+     */
+    void queueMessage(BinaryBufferPtr message);
+
+    std::shared_ptr<Peer> getServer();
+
+    std::atomic<bool> const* getExitRequestedPtr();
 
 private:
     static const std::string SERVER_IP;
     static constexpr int SERVER_PORT = 41499;
 
-    std::unique_ptr<AM::Peer> server;
+    std::shared_ptr<Peer> server;
+
+    /** Calls pollForMessages(). */
+    SDL_Thread* receiveThreadPtr;
+    /** Turn false to signal that the receive thread should end. */
+    std::atomic<bool> exitRequested;
+
+    /** Stores messages after they're asynchronously received. */
+    moodycamel::ReaderWriterQueue<BinaryBufferPtr> receiveQueue;
 };
 
 } // namespace Client

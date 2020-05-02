@@ -4,8 +4,6 @@
 #include <iostream>
 #include <iomanip>
 
-extern bool exitRequested;
-
 namespace AM
 {
 namespace Client
@@ -21,6 +19,7 @@ Game::Game(Network& inNetwork, std::shared_ptr<SDL2pp::Texture>& inSprites)
 , timeSinceTick(0.0f)
 , currentTick(0)
 , sprites(inSprites)
+, exitRequested(false)
 {
     Debug::registerCurrentTickPtr(&currentTick);
 }
@@ -119,6 +118,10 @@ World& Game::getWorld()
 Uint32 Game::getCurrentTick()
 {
     return currentTick;
+}
+
+std::atomic<bool> const* Game::getExitRequestedPtr() {
+    return &exitRequested;
 }
 
 } // namespace Client

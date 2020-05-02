@@ -18,11 +18,23 @@ public:
     static constexpr unsigned int MAX_MESSAGE_SIZE = 4000;
 
     /**
-     * Allows the client to connect to the server.
+     * Initiates a TCP connection that the other side can then accept.
+     * (e.g. the client connecting to the server)
      */
     static std::unique_ptr<Peer> initiate(std::string serverIP, unsigned int serverPort);
 
+    /**
+     * Constructor for when you only need 1 peer (client connecting to server, anyone
+     * connecting to chat server.)
+     * Constructs a socket set for this peer to use.
+     */
     Peer(TCPsocket inSocket);
+
+    /**
+     * Constructor for when you need a set of peers (server connecting to clients).
+     * Adds the socket to the given set.
+     */
+    Peer(TCPsocket inSocket, std::shared_ptr<SDLNet_SocketSet> inSet);
 
     ~Peer();
 
@@ -34,12 +46,22 @@ public:
      */
     bool sendMessage(BinaryBufferSharedPtr message);
 
-    BinaryBufferPtr receiveMessage();
+    /**
+     * @param checkSockets  If true, will call CheckSockets() before checking
+     *                      SocketReady(). Set this to false if you're going to call
+     *                      CheckSockets() yourself.
+     * @return A message if one is ready, else nullptr.
+     */
+    BinaryBufferPtr receiveMessage(bool checkSockets);
 
+    /**
+     * Waits for a message to be ready.
+     * @return A message.
+     */
     BinaryBufferPtr receiveMessageWait();
 
 private:
-    SDLNet_SocketSet set;
+    std::shared_ptr<SDLNet_SocketSet> set;
     TCPsocket socket;
 
     bool peerIsConnected;

@@ -4,3 +4,6 @@
 [submodule "Libraries/flatbuffers"]
 	path = Libraries/flatbuffers
 	url = git@github.com:google/flatbuffers.git
+[submodule "Libraries/readerwriterqueue"]
+	path = Libraries/readerwriterqueue
+	url = git@github.com:cameron314/readerwriterqueue.git

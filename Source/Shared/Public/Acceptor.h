@@ -15,7 +15,7 @@ namespace AM
 class Acceptor
 {
 public:
-    Acceptor(unsigned int inPort);
+    Acceptor(unsigned int inPort, std::shared_ptr<SDLNet_SocketSet> inClientSet);
 
     ~Acceptor();
 
@@ -25,6 +25,10 @@ private:
     std::string hostIP;
     Uint16 port;
     TCPsocket socket;
+
+    /** A pointer to the set to add accepted clients to.
+        Typically owned by the Network. */
+    std::shared_ptr<SDLNet_SocketSet> clientSet;
 };
 
 

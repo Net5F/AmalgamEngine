@@ -7,16 +7,14 @@
 #include "RenderSystem.h"
 #include "Network.h"
 #include "Timer.h"
+#include "Debug.h"
 
 #include <exception>
 #include <memory>
-#include <iostream>
-#include <iomanip>
+#include <atomic>
 
 using namespace AM;
 using namespace AM::Client;
-
-bool exitRequested = false;
 
 int main(int argc, char **argv)
 try
@@ -29,7 +27,7 @@ try
     std::shared_ptr<SDL2pp::Texture> sprites = std::make_shared<SDL2pp::Texture>(
     renderer, "Resources/u4_tiles_pc_ega.png");
 
-    // Construct the server (Connected in Game.connect().)
+    // Construct the network manager (connected in Game.connect()).
     Network network;
 
     Game game(network, sprites);
@@ -39,7 +37,8 @@ try
     float timeSinceRender = 0.0f;
 
     Timer timer;
-    while (!exitRequested) {
+    std::atomic<bool> const* exitRequested = game.getExitRequestedPtr();
+    while (!(*exitRequested)) {
         // Calc the time delta.
         float deltaSeconds = timer.getDeltaSeconds();
 
@@ -50,7 +49,7 @@ try
         timeSinceRender += deltaSeconds;
         if (timeSinceRender >= RENDER_INTERVAL_S) {
             if (timeSinceRender > 0.0171) {
-                std::cout << "Render time: " << std::setprecision(10) << timeSinceRender << std::endl;
+                DebugInfo("Render time: %f", timeSinceRender);
             }
             renderer.Clear();
 
@@ -73,11 +72,10 @@ try
     return 0;
 }
 catch (SDL2pp::Exception& e) {
-    std::cerr << "Error in: " << e.GetSDLFunction() << std::endl;
-    std::cerr << "  Reason:  " << e.GetSDLError() << std::endl;
+    DebugInfo("Error in: %s  Reason:  %s", e.GetSDLFunction(), e.GetSDLError());
     return 1;
 }
 catch (std::exception& e) {
-    std::cerr << e.what() << std::endl;
+    DebugInfo("%s", e.what());
     return 1;
 }
