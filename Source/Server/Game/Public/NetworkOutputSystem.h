@@ -50,7 +50,7 @@ private:
     flatbuffers::FlatBufferBuilder builder;
 
     /** The aggregated time since we last processed a tick. */
-    float timeAccumulator;
+    float accumulatedTime;
 };
 
 } // namespace Server

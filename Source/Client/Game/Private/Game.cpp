@@ -16,7 +16,7 @@ Game::Game(Network& inNetwork, std::shared_ptr<SDL2pp::Texture>& inSprites)
 , networkMovementSystem(*this, world, network)
 , movementSystem(world)
 , builder(BUILDER_BUFFER_SIZE)
-, timeAccumulator(0.0f)
+, accumulatedTime(0.0f)
 , currentTick(0)
 , sprites(inSprites)
 , exitRequested(false)
@@ -70,10 +70,10 @@ void Game::connect()
 
 void Game::tick(float deltaSeconds)
 {
-    timeAccumulator += deltaSeconds;
+    accumulatedTime += deltaSeconds;
 
     // Process as many game ticks as have accumulated.
-    while (timeAccumulator >= GAME_TICK_INTERVAL_S) {
+    while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
         currentTick++;
 
         /* Run all systems. */
@@ -109,7 +109,7 @@ void Game::tick(float deltaSeconds)
         // (The server processes movement before sending updates.)
         networkMovementSystem.processServerMovements();
 
-        timeAccumulator -= GAME_TICK_INTERVAL_S;
+        accumulatedTime -= GAME_TICK_INTERVAL_S;
     }
 }
 
@@ -118,9 +118,9 @@ World& Game::getWorld()
     return world;
 }
 
-float Game::getTimeAccumulator()
+float Game::getAccumulatedTime()
 {
-    return timeAccumulator;
+    return accumulatedTime;
 }
 
 Uint32 Game::getCurrentTick()

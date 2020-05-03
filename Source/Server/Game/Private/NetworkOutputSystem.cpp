@@ -15,29 +15,29 @@ NetworkOutputSystem::NetworkOutputSystem(Game& inGame, World& inWorld, Network& 
 , world(inWorld)
 , network(inNetwork)
 , builder(BUILDER_BUFFER_SIZE)
-, timeAccumulator(0.0f)
+, accumulatedTime(0.0f)
 {
 }
 
 void NetworkOutputSystem::updateClients(float deltaSeconds)
 {
-    timeAccumulator += deltaSeconds;
+    accumulatedTime += deltaSeconds;
 
     // Process as many network ticks as have accumulated.
-    if (timeAccumulator >= NETWORK_OUTPUT_TICK_INTERVAL_S) {
+    if (accumulatedTime >= NETWORK_OUTPUT_TICK_INTERVAL_S) {
         /* Send all updated entity states to all clients. */
         broadcastDirtyEntities();
 
-        timeAccumulator -= NETWORK_OUTPUT_TICK_INTERVAL_S;
-        if (timeAccumulator >= NETWORK_OUTPUT_TICK_INTERVAL_S) {
+        accumulatedTime -= NETWORK_OUTPUT_TICK_INTERVAL_S;
+        if (accumulatedTime >= NETWORK_OUTPUT_TICK_INTERVAL_S) {
             // If we've accumulated enough time to send more, something
             // happened to delay us.
             // We still only want to send the latest data, but it's worth giving
             // debug output that we detected this.
             DebugInfo(
-                "Detected a delayed network send. timeAccumulator: %f. Setting to 0.",
-                timeAccumulator);
-            timeAccumulator = 0;
+                "Detected a delayed network send. accumulatedTime: %f. Setting to 0.",
+                accumulatedTime);
+            accumulatedTime = 0;
         }
     }
 }

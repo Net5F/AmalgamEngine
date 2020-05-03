@@ -14,7 +14,7 @@ Game::Game(Network& inNetwork)
 , movementSystem(world)
 , networkOutputSystem(*this, world, network)
 , builder(BUILDER_BUFFER_SIZE)
-, timeAccumulator(0.0f)
+, accumulatedTime(0.0f)
 , currentTick(0)
 {
     world.setSpawnPoint({64, 64});
@@ -23,10 +23,10 @@ Game::Game(Network& inNetwork)
 
 void Game::tick(float deltaSeconds)
 {
-    timeAccumulator += deltaSeconds;
+    accumulatedTime += deltaSeconds;
 
     // Process as many game ticks as have accumulated.
-    while (timeAccumulator >= GAME_TICK_INTERVAL_S) {
+    while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
         currentTick++;
 
         // Add any new connections.
@@ -76,7 +76,7 @@ void Game::tick(float deltaSeconds)
 
         networkOutputSystem.updateClients(GAME_TICK_INTERVAL_S);
 
-        timeAccumulator -= GAME_TICK_INTERVAL_S;
+        accumulatedTime -= GAME_TICK_INTERVAL_S;
     }
 }
 

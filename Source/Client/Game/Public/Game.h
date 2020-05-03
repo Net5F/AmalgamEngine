@@ -39,7 +39,7 @@ public:
 
     World& getWorld();
 
-    float getTimeAccumulator();
+    float getAccumulatedTime();
 
     Uint32 getCurrentTick();
 
@@ -56,7 +56,7 @@ private:
     flatbuffers::FlatBufferBuilder builder;
 
     /** The aggregated time since we last processed a tick. */
-    float timeAccumulator;
+    float accumulatedTime;
 
     /**
      * The number of the tick that we're currently on.
