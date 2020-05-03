@@ -71,7 +71,6 @@ try
             renderer.Present();
 
             renderTimeAccumulator -= RENDER_INTERVAL_S;
-
             if (renderTimeAccumulator >= RENDER_INTERVAL_S) {
                 // If we've accumulated enough time to render more, something
                 // happened (probably a window event that stopped app execution.)

@@ -24,11 +24,21 @@ void NetworkOutputSystem::updateClients(float deltaSeconds)
     timeAccumulator += deltaSeconds;
 
     // Process as many network ticks as have accumulated.
-    while (timeAccumulator >= NETWORK_OUTPUT_TICK_INTERVAL_S) {
+    if (timeAccumulator >= NETWORK_OUTPUT_TICK_INTERVAL_S) {
         /* Send all updated entity states to all clients. */
         broadcastDirtyEntities();
 
         timeAccumulator -= NETWORK_OUTPUT_TICK_INTERVAL_S;
+        if (timeAccumulator >= NETWORK_OUTPUT_TICK_INTERVAL_S) {
+            // If we've accumulated enough time to send more, something
+            // happened to delay us.
+            // We still only want to send the latest data, but it's worth giving
+            // debug output that we detected this.
+            DebugInfo(
+                "Detected a delayed network send. timeAccumulator: %f. Setting to 0.",
+                timeAccumulator);
+            timeAccumulator = 0;
+        }
     }
 }
 
