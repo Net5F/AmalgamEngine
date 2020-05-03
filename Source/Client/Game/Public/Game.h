@@ -39,6 +39,8 @@ public:
 
     World& getWorld();
 
+    float getTimeAccumulator();
+
     Uint32 getCurrentTick();
 
     std::atomic<bool> const* getExitRequestedPtr();

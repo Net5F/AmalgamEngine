@@ -53,6 +53,8 @@ void Game::connect()
     world.addEntity("Player", player);
     world.positions[player].x = connectionResponse->x();
     world.positions[player].y = connectionResponse->y();
+    world.oldPositions[player].x = world.positions[player].x;
+    world.oldPositions[player].y = world.positions[player].y;
     world.movements[player].maxVelX = 250;
     world.movements[player].maxVelY = 250;
     world.sprites[player].texturePtr = sprites;
@@ -114,6 +116,11 @@ void Game::tick(float deltaSeconds)
 World& Game::getWorld()
 {
     return world;
+}
+
+float Game::getTimeAccumulator()
+{
+    return timeAccumulator;
 }
 
 Uint32 Game::getCurrentTick()

@@ -25,6 +25,10 @@ void MovementSystem::processMovements(float deltaSeconds)
         /* Move all entities that have a position and movement component. */
         if ((world.componentFlags[entityID] & ComponentFlag::Position)
         && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
+            // Save the old positions.
+            world.oldPositions[entityID].x = world.positions[entityID].x;
+            world.oldPositions[entityID].y = world.positions[entityID].y;
+
             // Update the positions based on the velocities.
             world.positions[entityID].x +=
                 (deltaSeconds * world.movements[entityID].velX);

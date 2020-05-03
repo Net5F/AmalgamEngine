@@ -60,13 +60,21 @@ try
 
             /* Render all entities. */
             World& world = game.getWorld();
+            // How far we are between game ticks in decimal percent.
+            float alpha = game.getTimeAccumulator() / Game::GAME_TICK_INTERVAL_S;
             for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
                 if (world.entityExists(entityID)) {
                     const SpriteComponent& sprite = world.sprites[entityID];
                     const PositionComponent& position = world.positions[entityID];
-                    SDL2pp::Rect spriteWorldData = { (int) position.x, (int) position.y,
-                            sprite.width, sprite.height };
+                    const PositionComponent& oldPosition = world.oldPositions[entityID];
+
+                    // Lerp'd position based on how far we are between game ticks.
                     // TODO: Have a real conversion instead of casting to int here.
+                    int lerpX = (position.x * alpha) + (oldPosition.x * (1.0 - alpha));
+                    int lerpY = (position.y * alpha) + (oldPosition.y * (1.0 - alpha));
+                    SDL2pp::Rect spriteWorldData = { lerpX, lerpY, sprite.width,
+                            sprite.height };
+
                     renderer.Copy(*(world.sprites[entityID].texturePtr),
                         world.sprites[entityID].posInTexture, spriteWorldData);
                 }

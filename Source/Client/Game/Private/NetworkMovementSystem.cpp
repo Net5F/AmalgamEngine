@@ -77,14 +77,16 @@ void NetworkMovementSystem::processServerMovements()
                 movement.maxVelY = newMovement->maxVelY();
             }
 
-            /* Update the positions. */
-            PositionComponent& position = world.positions[entityID];
+            /* Save the old position. */
+            PositionComponent& currentPosition = world.positions[entityID];
+
+            /* Update the currentPosition. */
             auto newPosition = (*entityIt)->positionComponent();
 
-            DebugInfo("%d: (%f, %f) -> (%f, %f)", entityID, position.x, position.y,
-                newPosition->x(), newPosition->y());
-            position.x = newPosition->x();
-            position.y = newPosition->y();
+            DebugInfo("%d: (%f, %f) -> (%f, %f)", entityID, currentPosition.x,
+                currentPosition.y, newPosition->x(), newPosition->y());
+            currentPosition.x = newPosition->x();
+            currentPosition.y = newPosition->y();
         }
 
         responseBuffer = network.receive();
