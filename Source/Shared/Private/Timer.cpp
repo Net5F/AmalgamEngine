@@ -5,15 +5,18 @@ namespace AM
 
 Timer::Timer()
 : TICKS_PER_SECOND(SDL_GetPerformanceFrequency())
-, previousTicks(0)
+, savedTimestamp(0)
 {
 }
 
-float Timer::getDeltaSeconds()
+float Timer::getDeltaSeconds(bool updateSavedTime)
 {
     Uint64 currentTicks = SDL_GetPerformanceCounter();
-    Uint64 deltaTicks =  currentTicks - previousTicks;
-    previousTicks = currentTicks;
+    Uint64 deltaTicks =  currentTicks - savedTimestamp;
+
+    if (updateSavedTime) {
+        savedTimestamp = currentTicks;
+    }
 
     return deltaTicks / static_cast<float>(TICKS_PER_SECOND);
 }

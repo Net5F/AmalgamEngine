@@ -16,7 +16,7 @@ Game::Game(Network& inNetwork, std::shared_ptr<SDL2pp::Texture>& inSprites)
 , networkMovementSystem(*this, world, network)
 , movementSystem(world)
 , builder(BUILDER_BUFFER_SIZE)
-, timeSinceTick(0.0f)
+, timeAccumulator(0.0f)
 , currentTick(0)
 , sprites(inSprites)
 , exitRequested(false)
@@ -50,7 +50,7 @@ void Game::connect()
     SDL2pp::Rect textureRect(0, 32, 16, 16);
     SDL2pp::Rect worldRect(connectionResponse->x(), connectionResponse->y(), 64, 64);
 
-    world.AddEntity("Player", player);
+    world.addEntity("Player", player);
     world.positions[player].x = connectionResponse->x();
     world.positions[player].y = connectionResponse->y();
     world.movements[player].maxVelX = 250;
@@ -58,56 +58,56 @@ void Game::connect()
     world.sprites[player].texturePtr = sprites;
     world.sprites[player].posInTexture = textureRect;
     world.sprites[player].posInWorld = worldRect;
-    world.AttachComponent(player, ComponentFlag::Input);
-    world.AttachComponent(player, ComponentFlag::Movement);
-    world.AttachComponent(player, ComponentFlag::Position);
-    world.AttachComponent(player, ComponentFlag::Sprite);
+    world.attachComponent(player, ComponentFlag::Input);
+    world.attachComponent(player, ComponentFlag::Movement);
+    world.attachComponent(player, ComponentFlag::Position);
+    world.attachComponent(player, ComponentFlag::Sprite);
     world.registerPlayerID(player);
 }
 
 void Game::tick(float deltaSeconds)
 {
-    timeSinceTick += deltaSeconds;
-    if (timeSinceTick < GAME_TICK_INTERVAL_S) {
-        // It's not yet time to process the game tick.
-        return;
+    timeAccumulator += deltaSeconds;
+
+    // Process as many game ticks as have accumulated.
+    while (timeAccumulator >= GAME_TICK_INTERVAL_S) {
+        currentTick++;
+
+        /* Run all systems. */
+        // Process all waiting user input events.
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                exitRequested = true;
+            }
+            else if (event.type == SDL_WINDOWEVENT) {
+    //            switch(event.type) {
+    //                case SDL_WINDOWEVENT_SHOWN:
+    //                case SDL_WINDOWEVENT_EXPOSED:
+    //                case SDL_WINDOWEVENT_MOVED:
+    //                case SDL_WINDOWEVENT_MAXIMIZED:
+    //                case SDL_WINDOWEVENT_RESTORED:
+    //                case SDL_WINDOWEVENT_FOCUS_GAINED:
+    //                // Window was messed with, we've probably lost sync with the server.
+    //                // TODO: Handle the far-out-of-sync client.
+    //            }
+            }
+            else {
+                // Assume it's a key or mouse event.
+                playerInputSystem.processInputEvent(event);
+            }
+        }
+        // Send updates to the server.
+        playerInputSystem.sendInputState();
+
+        movementSystem.processMovements(GAME_TICK_INTERVAL_S);
+
+        // Process network movement after normal movement to sync with server.
+        // (The server processes movement before sending updates.)
+        networkMovementSystem.processServerMovements();
+
+        timeAccumulator -= GAME_TICK_INTERVAL_S;
     }
-    currentTick++;
-
-    /* Run all systems. */
-    // Process all waiting user input events.
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
-            exitRequested = true;
-        }
-        else if (event.type == SDL_WINDOWEVENT) {
-//            switch(event.type) {
-//                case SDL_WINDOWEVENT_SHOWN:
-//                case SDL_WINDOWEVENT_EXPOSED:
-//                case SDL_WINDOWEVENT_MOVED:
-//                case SDL_WINDOWEVENT_MAXIMIZED:
-//                case SDL_WINDOWEVENT_RESTORED:
-//                case SDL_WINDOWEVENT_FOCUS_GAINED:
-//                // Window was messed with, we've probably lost sync with the server.
-//                // TODO: Handle the far-out-of-sync client.
-//            }
-        }
-        else {
-            // Assume it's a key or mouse event.
-            playerInputSystem.processInputEvent(event);
-        }
-    }
-    // Send updates to the server.
-    playerInputSystem.sendInputState();
-
-    movementSystem.processMovements(timeSinceTick);
-
-    // Process network movement after normal movement to sync with server.
-    // (The server processes movement before sending updates.)
-    networkMovementSystem.processServerMovements();
-
-    timeSinceTick = 0;
 }
 
 World& Game::getWorld()

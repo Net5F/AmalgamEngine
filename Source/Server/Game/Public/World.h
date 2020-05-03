@@ -20,17 +20,17 @@ class World
 public:
     World();
 
-    EntityID AddEntity(const std::string& name);
+    EntityID addEntity(const std::string& name);
 
-    void RemoveEntity(EntityID entityID);
+    void removeEntity(EntityID entityID);
 
     /**
      * Registers the entity as possessing this component.
      * The caller is in charge of making sure the state of the component is appropriate.
      */
-    void AttachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag);
+    void attachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag);
 
-    void RemoveComponent(EntityID entityID, ComponentFlag::FlagType componentFlag);
+    void removeComponent(EntityID entityID, ComponentFlag::FlagType componentFlag);
 
     /** Entity data lists. */
     std::array<std::string, MAX_ENTITIES> entityNames;

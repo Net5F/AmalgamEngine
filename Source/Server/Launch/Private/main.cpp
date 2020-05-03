@@ -5,9 +5,9 @@
 #include "Game.h"
 #include "Network.h"
 #include "Timer.h"
+#include "Debug.h"
 
 #include <exception>
-#include <iostream>
 #include <memory>
 #include <atomic>
 #include <thread>
@@ -41,13 +41,21 @@ try
     std::atomic<bool> exitRequested = false;
     std::thread inputThreadObj(inputThread, &exitRequested);
 
-    std::cout << "Starting main loop." << std::endl;
+    DebugInfo("Starting main loop.");
     Timer timer;
+    // Prime the timer so it doesn't start at 0.
+    timer.getDeltaSeconds(true);
     while (!exitRequested) {
         // Calc the time delta.
-        float deltaSeconds = timer.getDeltaSeconds();
+        float deltaSeconds = timer.getDeltaSeconds(true);
 
         game.tick(deltaSeconds);
+
+        // Check if we overran.
+        float executionSeconds = timer.getDeltaSeconds(false);
+        if (executionSeconds >= Game::GAME_TICK_INTERVAL_S) {
+            DebugInfo("Overran the game tick rate.");
+        }
     }
 
     inputThreadObj.join();

@@ -57,7 +57,7 @@ private:
     flatbuffers::FlatBufferBuilder builder;
 
     /** The aggregated time since we last processed a tick. */
-    float timeSinceTick;
+    float timeAccumulator;
 
     /**
      * The number of the tick that we're currently on.

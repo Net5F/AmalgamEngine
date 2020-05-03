@@ -15,22 +15,21 @@ NetworkOutputSystem::NetworkOutputSystem(Game& inGame, World& inWorld, Network& 
 , world(inWorld)
 , network(inNetwork)
 , builder(BUILDER_BUFFER_SIZE)
-, timeSinceTick(0.0f)
+, timeAccumulator(0.0f)
 {
 }
 
 void NetworkOutputSystem::updateClients(float deltaSeconds)
 {
-    timeSinceTick += deltaSeconds;
-    if (timeSinceTick < NETWORK_OUTPUT_TICK_INTERVAL_S) {
-        // It's not yet time to process the game tick.
-        return;
+    timeAccumulator += deltaSeconds;
+
+    // Process as many network ticks as have accumulated.
+    while (timeAccumulator >= NETWORK_OUTPUT_TICK_INTERVAL_S) {
+        /* Send all updated entity states to all clients. */
+        broadcastDirtyEntities();
+
+        timeAccumulator -= NETWORK_OUTPUT_TICK_INTERVAL_S;
     }
-
-    /* Send all updated entity states to all clients. */
-    broadcastDirtyEntities();
-
-    timeSinceTick = 0;
 }
 
 void NetworkOutputSystem::broadcastDirtyEntities()

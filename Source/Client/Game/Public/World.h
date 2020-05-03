@@ -20,10 +20,9 @@ class World
 public:
     World();
 
-    // TODO: Rename these to camelCase
-    void AddEntity(const std::string& name, EntityID ID);
+    void addEntity(const std::string& name, EntityID ID);
 
-    void RemoveEntity(EntityID entityID);
+    void removeEntity(EntityID entityID);
 
     bool entityExists(EntityID entityID) const;
 
@@ -31,9 +30,9 @@ public:
      * Registers the entity as possessing this component.
      * The caller is in charge of making sure the state of the component is appropriate.
      */
-    void AttachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag);
+    void attachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag);
 
-    void RemoveComponent(EntityID entityID, ComponentFlag::FlagType componentFlag);
+    void removeComponent(EntityID entityID, ComponentFlag::FlagType componentFlag);
 
     /**
      * Registers an entity as being the player. Various systems will only apply to this entity.

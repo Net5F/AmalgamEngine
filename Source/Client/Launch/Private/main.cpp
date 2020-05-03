@@ -34,23 +34,28 @@ try
     game.connect();
 
     constexpr float RENDER_INTERVAL_S = 1 / 60.0f;
-    float timeSinceRender = 0.0f;
+    float renderTimeAccumulator = 0.0f;
+
+    // We delay for 1ms when possible to reduce our CPU usage. We can't trust the scheduler
+    // to come back to us after exactly 1ms though, so we need to give it some leeway.
+    // Picked .003 = 3ms as a reasonable number. Open for tweaking.
+    constexpr float DELAY_LEEWAY_S = .003;
 
     Timer timer;
+    // Prime the timer so it doesn't start at 0.
+    timer.getDeltaSeconds(true);
+
     std::atomic<bool> const* exitRequested = game.getExitRequestedPtr();
     while (!(*exitRequested)) {
         // Calc the time delta.
-        float deltaSeconds = timer.getDeltaSeconds();
+        float deltaSeconds = timer.getDeltaSeconds(true);
 
         // Run the game.
         game.tick(deltaSeconds);
 
         // Render at 60fps.
-        timeSinceRender += deltaSeconds;
-        if (timeSinceRender >= RENDER_INTERVAL_S) {
-            if (timeSinceRender > 0.0171) {
-                DebugInfo("Render time: %f", timeSinceRender);
-            }
+        renderTimeAccumulator += deltaSeconds;
+        if (renderTimeAccumulator >= RENDER_INTERVAL_S) {
             renderer.Clear();
 
             /* Render all entities. */
@@ -65,7 +70,29 @@ try
 
             renderer.Present();
 
-            timeSinceRender = 0;
+            renderTimeAccumulator -= RENDER_INTERVAL_S;
+
+            if (renderTimeAccumulator >= RENDER_INTERVAL_S) {
+                // If we've accumulated enough time to render more, something
+                // happened (probably a window event that stopped app execution.)
+                // We still only want to render the latest data, but it's worth giving
+                // debug output that we detected this.
+                DebugInfo(
+                    "Detected a delayed render. renderTimeAccumulator: %f. Setting to 0.",
+                    renderTimeAccumulator);
+                renderTimeAccumulator = 0;
+            }
+        }
+
+        /* Act based on how long this tick took. */
+        float executionSeconds = timer.getDeltaSeconds(false);
+        if (executionSeconds >= RENDER_INTERVAL_S) {
+            DebugInfo("Overran the render tick rate.");
+        }
+        else if ((renderTimeAccumulator + executionSeconds + DELAY_LEEWAY_S)
+        < RENDER_INTERVAL_S) {
+            // If we have enough time leftover to delay for 1ms, do it.
+            SDL_Delay(1);
         }
     }
 

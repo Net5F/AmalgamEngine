@@ -19,20 +19,20 @@ World::World()
 {
 }
 
-EntityID World::AddEntity(const std::string& name)
+EntityID World::addEntity(const std::string& name)
 {
     EntityID id = IDPool::reserveID();
     entityNames[id] = name;
     return id;
 }
 
-void World::RemoveEntity(EntityID entityID)
+void World::removeEntity(EntityID entityID)
 {
     componentFlags[entityID] = 0;
     entityNames[entityID] = "";
 }
 
-void World::AttachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
+void World::attachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
 {
     // If the entity doesn't have the component, add it.
     if ((componentFlags[entityID] & componentFlag) == 0) {
@@ -43,7 +43,7 @@ void World::AttachComponent(EntityID entityID, ComponentFlag::FlagType component
     }
 }
 
-void World::RemoveComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
+void World::removeComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
 {
     // If the entity has the component, remove it.
     if ((componentFlags[entityID] & componentFlag) == componentFlag) {

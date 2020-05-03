@@ -40,7 +40,7 @@ void NetworkMovementSystem::processServerMovements()
             // If the entity doesn't exist, add it to our list.
             if (!(world.entityExists(entityID))) {
                 std::cout << "New entity added. ID: " << entityID << std::endl;
-                world.AddEntity((*entityIt)->name()->str(), entityID);
+                world.addEntity((*entityIt)->name()->str(), entityID);
 
                 // TODO: Get this info from the server.
                 // Get the same texture as the player.
@@ -51,10 +51,10 @@ void NetworkMovementSystem::processServerMovements()
                 world.sprites[entityID].posInWorld.h = 64;
                 world.sprites[entityID].posInWorld.w = 64;
 
-                world.AttachComponent(entityID, ComponentFlag::Input);
-                world.AttachComponent(entityID, ComponentFlag::Movement);
-                world.AttachComponent(entityID, ComponentFlag::Position);
-                world.AttachComponent(entityID, ComponentFlag::Sprite);
+                world.attachComponent(entityID, ComponentFlag::Input);
+                world.attachComponent(entityID, ComponentFlag::Movement);
+                world.attachComponent(entityID, ComponentFlag::Position);
+                world.attachComponent(entityID, ComponentFlag::Sprite);
             }
 
             // Only update movements and inputs if we weren't the cause of the inputs.
