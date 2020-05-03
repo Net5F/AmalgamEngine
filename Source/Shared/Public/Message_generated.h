@@ -162,17 +162,19 @@ FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) SpriteComponent FLATBUFFERS_FINAL_CLASS {
   int16_t textureID_;
   int16_t padding0__;
   AM::fb::Rect posInTexture_;
-  AM::fb::Rect posInWorld_;
+  int32_t width_;
+  int32_t height_;
 
  public:
   SpriteComponent() {
     memset(static_cast<void *>(this), 0, sizeof(SpriteComponent));
   }
-  SpriteComponent(int16_t _textureID, const AM::fb::Rect &_posInTexture, const AM::fb::Rect &_posInWorld)
+  SpriteComponent(int16_t _textureID, const AM::fb::Rect &_posInTexture, int32_t _width, int32_t _height)
       : textureID_(flatbuffers::EndianScalar(_textureID)),
         padding0__(0),
         posInTexture_(_posInTexture),
-        posInWorld_(_posInWorld) {
+        width_(flatbuffers::EndianScalar(_width)),
+        height_(flatbuffers::EndianScalar(_height)) {
     (void)padding0__;
   }
   int16_t textureID() const {
@@ -181,11 +183,14 @@ FLATBUFFERS_MANUALLY_ALIGNED_STRUCT(4) SpriteComponent FLATBUFFERS_FINAL_CLASS {
   const AM::fb::Rect &posInTexture() const {
     return posInTexture_;
   }
-  const AM::fb::Rect &posInWorld() const {
-    return posInWorld_;
+  int32_t width() const {
+    return flatbuffers::EndianScalar(width_);
+  }
+  int32_t height() const {
+    return flatbuffers::EndianScalar(height_);
   }
 };
-FLATBUFFERS_STRUCT_END(SpriteComponent, 36);
+FLATBUFFERS_STRUCT_END(SpriteComponent, 28);
 
 struct ConnectionRequest FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef ConnectionRequestBuilder Builder;

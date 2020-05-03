@@ -7,11 +7,17 @@
 namespace AM
 {
 
+/**
+ * This struct represents all of the sprite data that the RenderSystem needs, except for
+ * the world position.
+ *
+ * World position should be pulled from an associated PositionComponent.
+ */
 struct SpriteComponent
 {
 public:
     SpriteComponent()
-    : texturePtr(nullptr), posInTexture { 0, 0, 0, 0 }, posInWorld { 0, 0, 0, 0 }
+    : texturePtr(nullptr), posInTexture { 0, 0, 0, 0 }, width(0), height(0)
     {
     }
 
@@ -22,8 +28,9 @@ public:
     /** UV position and size in texture. */
     SDL2pp::Rect posInTexture;
 
-    /** ST position and size in world. */
-    SDL2pp::Rect posInWorld;
+    /** Width and height of sprite in the world. */
+    int width;
+    int height;
 };
 
 } /* End namespace AM */

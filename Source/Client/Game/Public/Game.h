@@ -22,10 +22,7 @@ class Game
 {
 public:
     /** 30 game ticks per second. */
-    static constexpr float GAME_TICK_INTERVAL_S = 1 / 60.0f;
-
-    /** 60 render ticks per seconds. */
-    static constexpr float RENDER_TICK_INTERVAL_S = 1 / 60.0f;
+    static constexpr float GAME_TICK_INTERVAL_S = 1 / 30.0f;
 
     Game(Network& inNetwork, std::shared_ptr<SDL2pp::Texture>& inSprites);
 

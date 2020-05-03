@@ -62,9 +62,13 @@ try
             World& world = game.getWorld();
             for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
                 if (world.entityExists(entityID)) {
+                    const SpriteComponent& sprite = world.sprites[entityID];
+                    const PositionComponent& position = world.positions[entityID];
+                    SDL2pp::Rect spriteWorldData = { (int) position.x, (int) position.y,
+                            sprite.width, sprite.height };
+                    // TODO: Have a real conversion instead of casting to int here.
                     renderer.Copy(*(world.sprites[entityID].texturePtr),
-                        world.sprites[entityID].posInTexture,
-                        world.sprites[entityID].posInWorld);
+                        world.sprites[entityID].posInTexture, spriteWorldData);
                 }
             }
 

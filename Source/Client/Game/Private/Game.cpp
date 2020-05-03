@@ -57,7 +57,8 @@ void Game::connect()
     world.movements[player].maxVelY = 250;
     world.sprites[player].texturePtr = sprites;
     world.sprites[player].posInTexture = textureRect;
-    world.sprites[player].posInWorld = worldRect;
+    world.sprites[player].width = 64;
+    world.sprites[player].height = 64;
     world.attachComponent(player, ComponentFlag::Input);
     world.attachComponent(player, ComponentFlag::Movement);
     world.attachComponent(player, ComponentFlag::Position);

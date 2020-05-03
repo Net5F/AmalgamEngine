@@ -48,8 +48,8 @@ void NetworkMovementSystem::processServerMovements()
                     world.sprites[world.getPlayerID()].texturePtr;
                 world.sprites[entityID].posInTexture =
                     world.sprites[world.getPlayerID()].posInTexture;
-                world.sprites[entityID].posInWorld.h = 64;
-                world.sprites[entityID].posInWorld.w = 64;
+                world.sprites[entityID].width = 64;
+                world.sprites[entityID].height = 64;
 
                 world.attachComponent(entityID, ComponentFlag::Input);
                 world.attachComponent(entityID, ComponentFlag::Movement);
@@ -85,11 +85,6 @@ void NetworkMovementSystem::processServerMovements()
                 newPosition->x(), newPosition->y());
             position.x = newPosition->x();
             position.y = newPosition->y();
-
-            /* Move the sprites to the new positions. */
-            SpriteComponent& sprite = world.sprites[entityID];
-            sprite.posInWorld.x = world.positions[entityID].x;
-            sprite.posInWorld.y = world.positions[entityID].y;
         }
 
         responseBuffer = network.receive();

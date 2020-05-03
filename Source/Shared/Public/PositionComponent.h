@@ -4,6 +4,10 @@
 namespace AM
 {
 
+/**
+ * Represents an entity's position in the world.
+ * When used for rendering a sprite, represents the top left.
+ */
 struct PositionComponent
 {
 public:

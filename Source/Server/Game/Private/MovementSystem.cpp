@@ -33,13 +33,6 @@ void MovementSystem::processMovements(double deltaSeconds)
             world.positions[entityID].y +=
                 (deltaSeconds * world.movements[entityID].velY);
         }
-
-        /* Move the sprites to the new positions. */
-        if ((world.componentFlags[entityID] & ComponentFlag::Position)
-        && (world.componentFlags[entityID] & ComponentFlag::Sprite)) {
-            world.sprites[entityID].posInWorld.x = world.positions[entityID].x;
-            world.sprites[entityID].posInWorld.y = world.positions[entityID].y;
-        }
     }
 }
 

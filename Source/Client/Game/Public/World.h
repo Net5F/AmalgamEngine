@@ -50,6 +50,10 @@ public:
     // Bit flags for every component, indicating whether the object at a given index has that component.
     std::array<uint32_t, MAX_ENTITIES> componentFlags;
 
+    /** Additional data */
+    // Position from the previous tick that the renderer can use to lerp.
+    std::array<PositionComponent, MAX_ENTITIES> oldPositions;
+
 private:
     EntityID playerID;
 };
