@@ -9,7 +9,6 @@ namespace Server
 
 MovementSystem::MovementSystem(World& inWorld)
 : world(inWorld)
-, builder(BUILDER_BUFFER_SIZE)
 {
 }
 

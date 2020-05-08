@@ -12,10 +12,10 @@ namespace Client
 Game::Game(Network& inNetwork, std::shared_ptr<SDL2pp::Texture>& inSprites)
 : world()
 , network(inNetwork)
-, playerInputSystem(*this, world, network)
+, playerInputSystem(*this, world)
+, networkOutputSystem(*this, world, network)
 , networkMovementSystem(*this, world, network)
 , movementSystem(world)
-, builder(BUILDER_BUFFER_SIZE)
 , accumulatedTime(0.0f)
 , currentTick(0)
 , sprites(inSprites)
@@ -100,8 +100,8 @@ void Game::tick(float deltaSeconds)
                 playerInputSystem.processInputEvent(event);
             }
         }
-        // Send updates to the server.
-        playerInputSystem.sendInputState();
+        // Send input updates to the server.
+        networkOutputSystem.updateServer(GAME_TICK_INTERVAL_S);
 
         movementSystem.processMovements(GAME_TICK_INTERVAL_S);
 

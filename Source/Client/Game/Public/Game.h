@@ -3,6 +3,7 @@
 
 #include "World.h"
 #include "PlayerInputSystem.h"
+#include "NetworkOutputSystem.h"
 #include "NetworkMovementSystem.h"
 #include "MovementSystem.h"
 #include "Message_generated.h"
@@ -50,10 +51,9 @@ private:
     Network& network;
 
     PlayerInputSystem playerInputSystem;
+    NetworkOutputSystem networkOutputSystem;
     NetworkMovementSystem networkMovementSystem;
     MovementSystem movementSystem;
-
-    flatbuffers::FlatBufferBuilder builder;
 
     /** The aggregated time since we last processed a tick. */
     float accumulatedTime;

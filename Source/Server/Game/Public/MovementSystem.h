@@ -34,8 +34,6 @@ private:
     double deltaSeconds);
 
     World& world;
-
-    flatbuffers::FlatBufferBuilder builder;
 };
 
 } // namespace Server

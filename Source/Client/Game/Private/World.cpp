@@ -13,7 +13,9 @@ World::World()
   inputs {},
   sprites {},
   componentFlags {},
-  playerID(0)
+  playerID(0),
+  playerIsDirty(false),
+  oldPositions {}
 {
 }
 
@@ -59,11 +61,6 @@ void World::removeComponent(EntityID entityID, ComponentFlag::FlagType component
 void World::registerPlayerID(EntityID inPlayerID)
 {
     playerID = inPlayerID;
-}
-
-EntityID World::getPlayerID()
-{
-    return playerID;
 }
 
 } // namespace Client

@@ -40,6 +40,7 @@ private:
     MovementSystem movementSystem;
     NetworkOutputSystem networkOutputSystem;
 
+    static constexpr int BUILDER_BUFFER_SIZE = 512;
     flatbuffers::FlatBufferBuilder builder;
 
     /** The aggregated time since we last processed a tick. */

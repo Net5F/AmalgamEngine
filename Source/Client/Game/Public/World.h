@@ -39,8 +39,6 @@ public:
      */
     void registerPlayerID(EntityID inPlayerID);
 
-    EntityID getPlayerID();
-
     /** Entity data lists. */
     std::array<std::string, MAX_ENTITIES> entityNames;
     std::array<PositionComponent, MAX_ENTITIES> positions;
@@ -50,12 +48,15 @@ public:
     // Bit flags for every component, indicating whether the object at a given index has that component.
     std::array<uint32_t, MAX_ENTITIES> componentFlags;
 
+    /** Player-specific. */
+    EntityID playerID;
+
+    // We don't need to track NPC dirty states because we don't give them input.
+    bool playerIsDirty;
+
     /** Additional data */
     // Position from the previous tick that the renderer can use to lerp.
     std::array<PositionComponent, MAX_ENTITIES> oldPositions;
-
-private:
-    EntityID playerID;
 };
 
 } // namespace Client

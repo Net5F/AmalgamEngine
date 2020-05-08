@@ -6,7 +6,7 @@
 
 namespace AM
 {
-namespace Server
+namespace Client
 {
 
 class Game;
@@ -14,7 +14,8 @@ class World;
 class Network;
 
 /**
- *
+ * This class is in charge of checking for data that needs to be sent, wrapping it
+ * appropriately, and sending it through the Network.
  */
 class NetworkOutputSystem
 {
@@ -25,16 +26,17 @@ public:
     NetworkOutputSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
     /**
-     * Sends dirty entity state data to all clients.
+     * Sends input state data to the server.
      */
-    void updateClients(float deltaSeconds);
+    void updateServer(float deltaSeconds);
 
 private:
     /**
-     * Checks the world for dirty entities and relevant state information to all
-     * connected clients.
+     * If the player inputs have changed, sends them to the server.
+     * Else, sends an empty message as a heartbeat.
+     * Either way, wraps the message in our wall time to facilitate latency tracking.
      */
-    void broadcastDirtyEntities();
+    void sendInputState();
 
     /**
      * Serializes the given entity's relevant world data.
@@ -54,7 +56,7 @@ private:
     float accumulatedTime;
 };
 
-} // namespace Server
+} // namespace Client
 } // namespace AM
 
 #endif /* NETWORKOUTPUTSYSTEM_H */

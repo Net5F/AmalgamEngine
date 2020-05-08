@@ -45,9 +45,9 @@ void NetworkMovementSystem::processServerMovements()
                 // TODO: Get this info from the server.
                 // Get the same texture as the player.
                 world.sprites[entityID].texturePtr =
-                    world.sprites[world.getPlayerID()].texturePtr;
+                    world.sprites[world.playerID].texturePtr;
                 world.sprites[entityID].posInTexture =
-                    world.sprites[world.getPlayerID()].posInTexture;
+                    world.sprites[world.playerID].posInTexture;
                 world.sprites[entityID].width = 64;
                 world.sprites[entityID].height = 64;
 
@@ -58,7 +58,7 @@ void NetworkMovementSystem::processServerMovements()
             }
 
             // Only update movements and inputs if we weren't the cause of the inputs.
-            if (entityID != world.getPlayerID()) {
+            if (entityID != world.playerID) {
                 /* Update the inputs. */
                 std::array<Input::State, Input::NumTypes>& entityInputStates =
                     world.inputs[entityID].inputStates;

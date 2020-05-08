@@ -5,6 +5,7 @@
 #include "InputComponent.h"
 #include "Message_generated.h"
 #include <array>
+#include <vector>
 
 namespace AM
 {
@@ -26,9 +27,14 @@ public:
     void processServerMovements();
 
 private:
+    static constexpr int MIN_BUFFERED_MESSAGES = 2;
+
     void changeVelocity(
     EntityID entityID,
     std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates);
+
+    // TODO: Can replace with a ring buffer if this ever is an issue.
+    std::vector<BinaryBufferPtr> stateMessageQueue;
 
     Game& game;
     World& world;

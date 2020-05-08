@@ -82,12 +82,13 @@ bool AM::Peer::sendMessage(BinaryBufferSharedPtr message)
     _SDLNet_Write32(size, size_buf);
 
     unsigned int bytesSent = SDLNet_TCP_Send(socket, size_buf, sizeof(Uint32));
-    if (bytesSent < MESSAGE_HEADER_SIZE) {
+    if (bytesSent < sizeof(Uint32)) {
         return false;
     }
 
-    bytesSent = SDLNet_TCP_Send(socket, message->data(), message->size());
-    if (bytesSent < MESSAGE_HEADER_SIZE) {
+    unsigned int messageSize = message->size();
+    bytesSent = SDLNet_TCP_Send(socket, message->data(), messageSize);
+    if (bytesSent < messageSize) {
         return false;
     }
     else {
