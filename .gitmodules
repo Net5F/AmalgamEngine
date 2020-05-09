@@ -7,3 +7,6 @@
 [submodule "Libraries/readerwriterqueue"]
 	path = Libraries/readerwriterqueue
 	url = git@github.com:cameron314/readerwriterqueue.git
+[submodule "Libraries/CircularBuffer"]
+	path = Libraries/CircularBuffer
+	url = git@github.com:Mmpuskas/CircularBuffer.git

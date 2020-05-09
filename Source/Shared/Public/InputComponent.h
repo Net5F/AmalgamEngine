@@ -1,39 +1,11 @@
 #ifndef INPUTCOMPONENT_H
 #define INPUTCOMPONENT_H
 
+#include "SharedDefs.h"
 #include <array>
 
 namespace AM
 {
-
-struct Input
-{
-    enum Type
-    {
-        None,
-        Up,
-        Left,
-        Down,
-        Right,
-        Exit, // Exit the application.
-        NumTypes
-    };
-
-    enum State
-    {
-        Invalid,
-        Pressed,
-        Released
-    };
-
-    Input(Type inType, State inState)
-    : type(inType), state(inState)
-    {
-    }
-
-    Type type;
-    State state;
-};
 
 struct InputComponent
 {

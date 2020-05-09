@@ -103,6 +103,10 @@ void Game::tick(float deltaSeconds)
         // Send input updates to the server.
         networkOutputSystem.updateServer(GAME_TICK_INTERVAL_S);
 
+        // Push the new input state into the player's history.
+        playerInputSystem.addCurrentInputsToHistory(currentTick);
+
+        // Process player and NPC movements.
         movementSystem.processMovements(GAME_TICK_INTERVAL_S);
 
         // Process network movement after normal movement to sync with server.

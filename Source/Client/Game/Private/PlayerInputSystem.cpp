@@ -52,5 +52,18 @@ void PlayerInputSystem::processInputEvent(SDL_Event& event)
     }
 }
 
+void PlayerInputSystem::addCurrentInputsToHistory(Uint32 tickNum)
+{
+    InputSnapshot snapshot;
+
+    std::array<Input::State, Input::NumTypes>& playerInputStates =
+        world.inputs[world.playerID].inputStates;
+    for (uint8_t i = 0; i < Input::Type::NumTypes; ++i) {
+        snapshot.inputStates[i] = playerInputStates[i];
+    }
+
+    world.playerInputHistory.push(snapshot);
+}
+
 } // namespace Client
 } // namespace AM

@@ -6,6 +6,7 @@
 #include "PositionComponent.h"
 #include "MovementComponent.h"
 #include "SpriteComponent.h"
+#include "CircularBuffer.h"
 
 #include <array>
 #include <string>
@@ -18,6 +19,13 @@ namespace Client
 class World
 {
 public:
+    /**
+     * The number of input snapshots that we'll remember.
+     * TODO: Once we have a timeout set up, this can be set to a large enough value
+     *       to hold all inputs up to the timeout.
+     */
+    static constexpr unsigned int INPUT_HISTORY_LENGTH = 10;
+
     World();
 
     void addEntity(const std::string& name, EntityID ID);
@@ -50,6 +58,7 @@ public:
 
     /** Player-specific. */
     EntityID playerID;
+    CircularBuffer<InputSnapshot, INPUT_HISTORY_LENGTH> playerInputHistory;
 
     // We don't need to track NPC dirty states because we don't give them input.
     bool playerIsDirty;

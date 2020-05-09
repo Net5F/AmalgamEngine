@@ -40,6 +40,49 @@ struct Position
     float y;
 };
 
+struct Input
+{
+    enum Type
+    {
+        None,
+        Up,
+        Left,
+        Down,
+        Right,
+        Exit, // Exit the application.
+        NumTypes
+    };
+
+    enum State
+    {
+        Invalid,
+        Pressed,
+        Released
+    };
+
+    Input(Type inType, State inState)
+    : type(inType), state(inState)
+    {
+    }
+
+    Type type;
+    State state;
+};
+
+struct InputSnapshot {
+public:
+    InputSnapshot()
+    : tickNum(0)
+    {
+    }
+
+    /** The tick that this snapshot was taken at. */
+    Uint32 tickNum;
+
+    /** Holds the current state of the inputs, indexed by Input::Type. */
+    std::array<Input::State, Input::NumTypes> inputStates;
+};
+
 } /* End namespace AM */
 
 #endif /* End AMSTRUCTS_H */

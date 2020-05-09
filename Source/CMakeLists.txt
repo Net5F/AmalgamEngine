@@ -27,8 +27,12 @@ SET(FLATBUFFERS_BUILD_FLATHASH OFF CACHE BOOL "Enable the build of flathash" FOR
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/flatbuffers/"
                  "${PROJECT_BINARY_DIR}/Libraries/flatbuffers/")
 
-# Pack readerwriterqueue headers into a target
+# Include header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/../CMake/readerwriterqueue.cmake")
+
+# Include header-only CircularBuffer.
+add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/CircularBuffer/"
+                 "${PROJECT_BINARY_DIR}/Libraries/CircularBuffer/")
 
 # Build shared library
 add_subdirectory(Shared)

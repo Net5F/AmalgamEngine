@@ -17,6 +17,10 @@ World::World()
   playerIsDirty(false),
   oldPositions {}
 {
+    // Init the history with default snapshots.
+    for (unsigned int i = 0; i < INPUT_HISTORY_LENGTH; ++i) {
+        playerInputHistory.push(InputSnapshot());
+    }
 }
 
 void World::addEntity(const std::string& name, EntityID ID)
