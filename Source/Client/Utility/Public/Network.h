@@ -2,6 +2,7 @@
 #define NETWORK_H
 
 #include "SharedDefs.h"
+#include "Message_generated.h"
 #include <string>
 #include <memory>
 #include <atomic>
@@ -16,6 +17,16 @@ class Peer;
 namespace Client
 {
 
+/**
+ * The various types of flatbuffer message that we receive.
+ * Enum class because it doesn't read well from other namespaces.
+ */
+enum class MessageType {
+    ConnectionResponse,
+    PlayerUpdate,
+    NpcUpdate
+};
+
 class Network
 {
 public:
@@ -26,15 +37,20 @@ public:
     bool connect();
 
     /**
+     * Registers an entity as being the player. Various systems will only apply to this entity.
+     */
+    void registerPlayerID(EntityID inPlayerID);
+
+    /**
      * Sends bytes over the network.
      */
     bool send(BinaryBufferSharedPtr message);
 
     /**
-     * Returns a message if there are any in the queue.
+     * Returns a message if there are any in the requested queue.
      * @return A waiting message, else nullptr.
      */
-    BinaryBufferPtr receive();
+    BinaryBufferSharedPtr receive(MessageType type);
 
     /**
      * Thread function, started from connect().
@@ -44,9 +60,9 @@ public:
     static int pollForMessages(void* inNetwork);
 
     /**
-     * Pushes a message into the receiveQueue.
+     * Pushes a message into the appropriate queue, based on its contents.
      */
-    void queueMessage(BinaryBufferPtr message);
+    void queueMessage(BinaryBufferSharedPtr messageBuffer);
 
     std::shared_ptr<Peer> getServer();
 
@@ -58,13 +74,19 @@ private:
 
     std::shared_ptr<Peer> server;
 
+    /** Local copy of the playerID so we can tell if we got a player message. */
+    EntityID playerID;
+
     /** Calls pollForMessages(). */
     std::thread receiveThreadObj;
     /** Turn false to signal that the receive thread should end. */
     std::atomic<bool> exitRequested;
 
-    /** Stores messages after they're asynchronously received. */
-    moodycamel::ReaderWriterQueue<BinaryBufferPtr> receiveQueue;
+    /** These queues store received messages that are waiting to be consumed. */
+    typedef moodycamel::ReaderWriterQueue<BinaryBufferSharedPtr> MessageQueue;
+    MessageQueue connectionResponseQueue;
+    MessageQueue playerUpdateQueue;
+    MessageQueue npcUpdateQueue;
 };
 
 } // namespace Client

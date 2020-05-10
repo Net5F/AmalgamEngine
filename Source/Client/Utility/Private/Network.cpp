@@ -12,6 +12,7 @@ const std::string Network::SERVER_IP = "127.0.0.1";
 
 Network::Network()
 : server(nullptr)
+, playerID(0)
 , receiveThreadObj()
 , exitRequested(false)
 {
@@ -37,7 +38,12 @@ bool Network::connect()
         receiveThreadObj = std::thread(Network::pollForMessages, this);
     }
 
-    return (server != nullptr) ? true : false;
+    return (server != nullptr);
+}
+
+void Network::registerPlayerID(EntityID inPlayerID)
+{
+    playerID = inPlayerID;
 }
 
 bool Network::send(BinaryBufferSharedPtr message)
@@ -50,20 +56,29 @@ bool Network::send(BinaryBufferSharedPtr message)
     return server->sendMessage(message);
 }
 
-BinaryBufferPtr Network::receive()
+BinaryBufferSharedPtr Network::receive(MessageType type)
 {
     if (!(server->isConnected())) {
         DebugInfo("Tried to receive while server is disconnected.");
         return nullptr;
     }
 
-    BinaryBufferPtr message = nullptr;
-    if (receiveQueue.try_dequeue(message)) {
-        return message;
+    BinaryBufferSharedPtr message = nullptr;
+
+    switch (type)
+    {
+        case (MessageType::ConnectionResponse):
+            connectionResponseQueue.try_dequeue(message);
+            break;
+        case (MessageType::PlayerUpdate):
+            playerUpdateQueue.try_dequeue(message);
+            break;
+        case (MessageType::NpcUpdate):
+            npcUpdateQueue.try_dequeue(message);
+            break;
     }
-    else {
-        return nullptr;
-    }
+
+    return message;
 }
 
 int Network::pollForMessages(void* inNetwork)
@@ -74,21 +89,59 @@ int Network::pollForMessages(void* inNetwork)
 
     while (!(*exitRequested)) {
         // Check if there are any messages to receive.
-        BinaryBufferPtr message = server->receiveMessageWait();
+        BinaryBufferSharedPtr message = server->receiveMessageWait();
 
-        // If we received a message, push it into the queue.
+        // If we received a message, push it into the appropriate queue.
         if (message != nullptr) {
-            network->queueMessage(std::move(message));
+            network->queueMessage(message);
         }
     }
 
     return 0;
 }
 
-void Network::queueMessage(BinaryBufferPtr message)
+void Network::queueMessage(BinaryBufferSharedPtr messageBuffer)
 {
-    if (!(receiveQueue.enqueue(std::move(message)))) {
-        DebugError("Ran out of room in receive queue and memory allocation failed.");
+    const fb::Message* message = fb::GetMessage(messageBuffer->data());
+
+    /* Funnel the message into the appropriate queue. */
+    if (message->content_type() == fb::MessageContent::ConnectionResponse) {
+        if (!(connectionResponseQueue.enqueue(std::move(messageBuffer)))) {
+            DebugError("Ran out of room in queue and memory allocation failed.");
+        }
+    }
+    else if (message->content_type() == fb::MessageContent::EntityUpdate) {
+        auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
+
+        // Pull out the vector of entities.
+        auto entities = entityUpdate->entities();
+
+        // Iterate through the entities, checking if there's player or npc data.
+        bool playerFound = false;
+        bool npcFound = false;
+        for (auto entityIt = entities->begin(); entityIt != entities->end(); ++entityIt) {
+            EntityID entityID = (*entityIt)->id();
+
+            if (entityID == playerID) {
+                // Found the player.
+                if (!(playerUpdateQueue.enqueue(std::move(messageBuffer)))) {
+                    DebugError("Ran out of room in queue and memory allocation failed.");
+                    playerFound = true;
+                }
+            }
+            else if (!npcFound){
+                // Found a non-player (npc).
+                if (!(npcUpdateQueue.enqueue(std::move(messageBuffer)))) {
+                    DebugError("Ran out of room in queue and memory allocation failed.");
+                    npcFound = true;
+                }
+            }
+
+            // If we found the player and an npc, we can stop looking.
+            if (playerFound && npcFound) {
+                return;
+            }
+        }
     }
 }
 

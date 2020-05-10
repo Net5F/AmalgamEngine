@@ -19,11 +19,16 @@ NetworkInputSystem::NetworkInputSystem(World& inWorld, Network& inNetwork)
 
 void NetworkInputSystem::processInputEvents()
 {
+    // TODO: Potentially combine this and MovementSystem.
+    //       How do we take the waterfall of messages and organize them
+    //       so that we can easily get the ones for this tick?
+
+
     // Process all the input messages that existed when we first check.
     // (We don't want to get stuck in a loop of constantly receiving.)
     unsigned int waitingMessageCount = network.getNumInputMessagesWaiting();
     for (unsigned int i = 0; i < waitingMessageCount; ++i) {
-        BinaryBufferPtr inputMessage = network.receiveInputMessage();
+        BinaryBufferSharedPtr inputMessage = network.receiveInputMessage();
         if (inputMessage == nullptr) {
             DebugInfo(
                 "Failed to receive input message after getting count (this shouldn't happen).")

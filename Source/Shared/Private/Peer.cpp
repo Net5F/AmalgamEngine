@@ -96,7 +96,7 @@ bool AM::Peer::sendMessage(BinaryBufferSharedPtr message)
     }
 }
 
-BinaryBufferPtr AM::Peer::receiveMessage(bool checkSockets)
+BinaryBufferSharedPtr AM::Peer::receiveMessage(bool checkSockets)
 {
     if (checkSockets) {
         // Poll to see if there's data
@@ -116,7 +116,7 @@ BinaryBufferPtr AM::Peer::receiveMessage(bool checkSockets)
     }
 }
 
-BinaryBufferPtr AM::Peer::receiveMessageWait()
+BinaryBufferSharedPtr AM::Peer::receiveMessageWait()
 {
     // Receive the header (single byte, says the size of the upcoming message.)
     Uint8 sizeBuf[sizeof(Uint32)];
@@ -141,7 +141,7 @@ BinaryBufferPtr AM::Peer::receiveMessageWait()
         return nullptr;
     }
 
-    return std::make_unique<std::vector<Uint8>>(messageBuffer.begin()
+    return std::make_shared<std::vector<Uint8>>(messageBuffer.begin()
     , (messageBuffer.begin() + messageSize));
 }
 

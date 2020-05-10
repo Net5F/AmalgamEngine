@@ -1,11 +1,11 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "NpcMovementSystem.h"
+#include "PlayerMovementSystem.h"
 #include "World.h"
 #include "PlayerInputSystem.h"
 #include "NetworkOutputSystem.h"
-#include "NetworkMovementSystem.h"
-#include "MovementSystem.h"
 #include "Message_generated.h"
 #include <atomic>
 
@@ -52,8 +52,8 @@ private:
 
     PlayerInputSystem playerInputSystem;
     NetworkOutputSystem networkOutputSystem;
-    NetworkMovementSystem networkMovementSystem;
-    MovementSystem movementSystem;
+    PlayerMovementSystem playerMovementSystem;
+//    NpcMovementSystem networkMovementSystem;
 
     /** The aggregated time since we last processed a tick. */
     float accumulatedTime;

@@ -3,16 +3,16 @@ target_sources(Client
 		Private/World.cpp
 		Private/PlayerInputSystem.cpp
 		Private/NetworkOutputSystem.cpp
-		Private/MovementSystem.cpp
-		Private/NetworkMovementSystem.cpp
+		Private/PlayerMovementSystem.cpp
+		Private/NpcMovementSystem.cpp
 		Private/RenderSystem.cpp
 		Private/Game.cpp
 	PUBLIC
 		Public/World.h
 		Public/PlayerInputSystem.h
 		Public/NetworkOutputSystem.h
-		Public/MovementSystem.h
-		Public/NetworkMovementSystem.h
+		Public/PlayerMovementSystem.h
+		Public/NpcMovementSystem.h
 		Public/RenderSystem.h
 		Public/Game.h
 )

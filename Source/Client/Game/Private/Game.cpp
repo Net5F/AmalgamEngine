@@ -1,8 +1,6 @@
 #include "Game.h"
 #include "Network.h"
 #include "Debug.h"
-#include <iostream>
-#include <iomanip>
 
 namespace AM
 {
@@ -14,8 +12,8 @@ Game::Game(Network& inNetwork, std::shared_ptr<SDL2pp::Texture>& inSprites)
 , network(inNetwork)
 , playerInputSystem(*this, world)
 , networkOutputSystem(*this, world, network)
-, networkMovementSystem(*this, world, network)
-, movementSystem(world)
+//, networkMovementSystem(*this, world, network)
+, playerMovementSystem(*this, world, network)
 , accumulatedTime(0.0f)
 , currentTick(0)
 , sprites(inSprites)
@@ -27,21 +25,19 @@ Game::Game(Network& inNetwork, std::shared_ptr<SDL2pp::Texture>& inSprites)
 void Game::connect()
 {
     while (!(network.connect())) {
-        std::cerr << "Network failed to connect. Retrying." << std::endl;
+        DebugInfo("Network failed to connect. Retrying.");
     }
 
     // Wait for the player's ID from the server.
-    BinaryBufferPtr responseBuffer = network.receive();
+    BinaryBufferSharedPtr responseBuffer = network.receive(
+        MessageType::ConnectionResponse);
     while (responseBuffer == nullptr) {
-        responseBuffer = network.receive();
+        responseBuffer = network.receive(MessageType::ConnectionResponse);
         SDL_Delay(10);
     }
 
     // Get our info from the connection response.
     const fb::Message* message = fb::GetMessage(responseBuffer->data());
-    if (message->content_type() != fb::MessageContent::ConnectionResponse) {
-        std::cerr << "Expected ConnectionResponse but got something else." << std::endl;
-    }
     auto connectionResponse = static_cast<const fb::ConnectionResponse*>(message->content());
     currentTick = connectionResponse->currentTick();
     EntityID player = connectionResponse->entityID();
@@ -50,6 +46,11 @@ void Game::connect()
     SDL2pp::Rect textureRect(0, 32, 16, 16);
     SDL2pp::Rect worldRect(connectionResponse->x(), connectionResponse->y(), 64, 64);
 
+    // Register the player ID with the world and the network.
+    world.registerPlayerID(player);
+    network.registerPlayerID(player);
+
+    // Initialize the player state.
     world.addEntity("Player", player);
     world.positions[player].x = connectionResponse->x();
     world.positions[player].y = connectionResponse->y();
@@ -65,7 +66,6 @@ void Game::connect()
     world.attachComponent(player, ComponentFlag::Movement);
     world.attachComponent(player, ComponentFlag::Position);
     world.attachComponent(player, ComponentFlag::Sprite);
-    world.registerPlayerID(player);
 }
 
 void Game::tick(float deltaSeconds)
@@ -107,11 +107,11 @@ void Game::tick(float deltaSeconds)
         playerInputSystem.addCurrentInputsToHistory(currentTick);
 
         // Process player and NPC movements.
-        movementSystem.processMovements(GAME_TICK_INTERVAL_S);
+        playerMovementSystem.processMovements(GAME_TICK_INTERVAL_S);
 
         // Process network movement after normal movement to sync with server.
         // (The server processes movement before sending updates.)
-        networkMovementSystem.processServerMovements();
+//        networkMovementSystem.processServerMovements();
 
         accumulatedTime -= GAME_TICK_INTERVAL_S;
     }

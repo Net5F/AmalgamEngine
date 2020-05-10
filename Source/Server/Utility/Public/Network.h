@@ -55,7 +55,7 @@ public:
      * Returns a message if there are any in inputQueue.
      * @return A waiting message, else nullptr.
      */
-    BinaryBufferPtr receiveInputMessage();
+    BinaryBufferSharedPtr receiveInputMessage();
 
     /**
      * Accepts any new clients, pushing them into the newClientQueue.
@@ -103,7 +103,7 @@ private:
     /**
      * Pushes a message into the inputQueue.
      */
-    void queueInputMessage(BinaryBufferPtr message);
+    void queueInputMessage(BinaryBufferSharedPtr message);
 
 
     static const std::string SERVER_IP;
@@ -122,7 +122,8 @@ private:
     std::unordered_map<EntityID, std::shared_ptr<Peer>> clients;
 
     /** Stores input messages from clients. */
-    moodycamel::ReaderWriterQueue<BinaryBufferPtr> inputQueue;
+    typedef moodycamel::ReaderWriterQueue<BinaryBufferSharedPtr> MessageQueue;
+    MessageQueue inputQueue;
 
     /** Calls processClients(). */
     std::thread receiveThreadObj;

@@ -8,21 +8,22 @@ add_library(Shared STATIC
 		Private/Acceptor.cpp
 		Private/Peer.cpp
 		Private/Timer.cpp
+		Private/MovementHelpers.cpp
 		Private/MessageUtil.cpp
 		Private/Debug.cpp
 	PUBLIC
 		Public/Acceptor.h
 		Public/Peer.h
 		Public/Timer.h
+		Public/MovementHelpers.h
+		Public/SharedDefs.h
+		Public/MessageUtil.h
+		Public/Debug.h
 
 		Public/InputComponent.h
 		Public/MovementComponent.h
 		Public/PositionComponent.h
 		Public/SpriteComponent.h
-
-		Public/SharedDefs.h
-		Public/MessageUtil.h
-		Public/Debug.h
 )
 
 target_include_directories(Shared

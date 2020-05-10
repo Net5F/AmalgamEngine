@@ -6,6 +6,7 @@
 
 namespace AM
 {
+typedef std::array<Input::State, Input::Type::NumTypes> InputStateArr;
 
 struct InputComponent
 {
@@ -16,7 +17,7 @@ public:
     }
 
     /** Holds the current state of the inputs, indexed by Input::Type. */
-    std::array<Input::State, Input::NumTypes> inputStates;
+    InputStateArr inputStates;
 };
 
 } // namespace AM

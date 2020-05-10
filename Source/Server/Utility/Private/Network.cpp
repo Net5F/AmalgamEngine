@@ -66,9 +66,9 @@ unsigned int Network::getNumInputMessagesWaiting()
     return inputQueue.size_approx();
 }
 
-BinaryBufferPtr Network::receiveInputMessage()
+BinaryBufferSharedPtr Network::receiveInputMessage()
 {
-    BinaryBufferPtr message = nullptr;
+    BinaryBufferSharedPtr message = nullptr;
     if (inputQueue.try_dequeue(message)) {
         return message;
     }
@@ -153,10 +153,10 @@ const std::unordered_map<EntityID, std::shared_ptr<Peer>>& clients)
     else if (numReady > 0) {
         // Receive all messages from all clients.
         for (const auto& pair : clients) {
-            BinaryBufferPtr message = pair.second->receiveMessage(false);
+            BinaryBufferSharedPtr message = pair.second->receiveMessage(false);
             while (message != nullptr) {
                 // Queue the message.
-                network->queueInputMessage(std::move(message));
+                network->queueInputMessage(message);
 
                 message = pair.second->receiveMessage(false);
             }
@@ -164,9 +164,9 @@ const std::unordered_map<EntityID, std::shared_ptr<Peer>>& clients)
     }
 }
 
-void Network::queueInputMessage(BinaryBufferPtr message)
+void Network::queueInputMessage(BinaryBufferSharedPtr message)
 {
-    if (!(inputQueue.enqueue(std::move(message)))) {
+    if (!(inputQueue.enqueue(message))) {
         DebugError("Ran out of room in input queue and memory allocation failed.");
     }
 }

@@ -52,13 +52,13 @@ public:
      *                      CheckSockets() yourself.
      * @return A message if one is ready, else nullptr.
      */
-    BinaryBufferPtr receiveMessage(bool checkSockets);
+    BinaryBufferSharedPtr receiveMessage(bool checkSockets);
 
     /**
      * Waits for a message to be ready.
      * @return A message.
      */
-    BinaryBufferPtr receiveMessageWait();
+    BinaryBufferSharedPtr receiveMessageWait();
 
 private:
     std::shared_ptr<SDLNet_SocketSet> set;
