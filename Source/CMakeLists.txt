@@ -45,3 +45,7 @@ add_subdirectory(Server)
 
 # Build editor
 #add_subdirectory(Editor)
+
+# Build tests.
+# (No fancy flags since we aren't a lib, just uncomment when you want to build tests.)
+add_subdirectory(Tests)

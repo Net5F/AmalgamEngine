@@ -34,7 +34,7 @@ target_include_directories(Shared
 )
 
 target_link_libraries(Shared
-    PRIVATE
+    PUBLIC
         ${SDL2_LIBRARIES}
         ${SDL2_NET_LIBRARIES}
         SDL2pp

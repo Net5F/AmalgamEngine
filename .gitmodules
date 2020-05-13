@@ -10,3 +10,6 @@
 [submodule "Libraries/CircularBuffer"]
 	path = Libraries/CircularBuffer
 	url = git@github.com:Mmpuskas/CircularBuffer.git
+[submodule "Libraries/Catch2"]
+	path = Libraries/Catch2
+	url = git@github.com:catchorg/Catch2.git
