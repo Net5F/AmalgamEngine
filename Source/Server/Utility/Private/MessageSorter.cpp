@@ -24,7 +24,7 @@ std::queue<BinaryBufferSharedPtr>& MessageSorter::startReceive(Uint32 tickNum)
         DebugError("Tried to start receive for an invalid tick number.");
     }
 
-    return queueBuffer[tickNum - currentTick];
+    return queueBuffer[tickNum % BUFFER_SIZE];
 }
 
 void MessageSorter::endReceive()
@@ -71,6 +71,11 @@ bool MessageSorter::isTickValid(Uint32 tickNum)
     else {
         return true;
     }
+}
+
+int MessageSorter::getCurrentTick()
+{
+    return currentTick;
 }
 
 } // namespace Server

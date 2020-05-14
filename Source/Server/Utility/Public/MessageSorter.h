@@ -68,6 +68,8 @@ public:
     /** Helper for checking if a tick number is within the bounds. */
     bool isTickValid(Uint32 tickNum);
 
+    int getCurrentTick();
+
 private:
     /**
      * Holds the queues used for sorting and storing messages.
