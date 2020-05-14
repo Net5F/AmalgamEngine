@@ -25,14 +25,6 @@ public:
     void processMovements(double deltaSeconds);
 
 private:
-    /**
-     * Updates the entity's velocity based on the current input states and delta time.
-     */
-    void changeVelocity(
-    EntityID entityID,
-    std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates,
-    double deltaSeconds);
-
     World& world;
 };
 

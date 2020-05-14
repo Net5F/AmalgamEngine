@@ -132,10 +132,11 @@ void Network::queueMessage(BinaryBufferSharedPtr messageBuffer)
             }
             else if (!npcFound){
                 // Found a non-player (npc).
-                if (!(npcUpdateQueue.enqueue(std::move(messageBuffer)))) {
-                    DebugError("Ran out of room in queue and memory allocation failed.");
-                    npcFound = true;
-                }
+                // TODO: Add npc movement back in.
+//                if (!(npcUpdateQueue.enqueue(std::move(messageBuffer)))) {
+//                    DebugError("Ran out of room in queue and memory allocation failed.");
+//                    npcFound = true;
+//                }
             }
 
             // If we found the player and an npc, we can stop looking.
