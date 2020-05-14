@@ -10,7 +10,7 @@ namespace Server
 Game::Game(Network& inNetwork)
 : world()
 , network(inNetwork)
-, networkInputSystem(world, network)
+, networkInputSystem(*this, world, network)
 , movementSystem(world)
 , networkOutputSystem(*this, world, network)
 , builder(BUILDER_BUFFER_SIZE)
@@ -63,7 +63,7 @@ void Game::tick(float deltaSeconds)
 
             bool result = network.send(newClient, message);
             if (!result) {
-                std::cerr << "Failed to send response." << std::endl;
+                DebugInfo("Failed to send response.");
             }
 
             newClient = network.getNewClient();

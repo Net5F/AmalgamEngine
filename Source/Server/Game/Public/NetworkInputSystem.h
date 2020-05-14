@@ -9,13 +9,14 @@ namespace AM
 namespace Server
 {
 
+class Game;
 class World;
 class Network;
 
 class NetworkInputSystem
 {
 public:
-    NetworkInputSystem(World& inWorld, Network& inNetwork);
+    NetworkInputSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
     /**
      * Processes incoming EntityUpdate messages.
@@ -23,6 +24,7 @@ public:
     void processInputEvents();
 
 private:
+    Game& game;
     World& world;
     Network& network;
 };

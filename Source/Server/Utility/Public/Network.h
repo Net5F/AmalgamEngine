@@ -9,6 +9,7 @@
 #include <atomic>
 #include <thread>
 #include "readerwriterqueue.h"
+#include "MessageSorter.h"
 
 struct _SDLNet_SocketSet;
 typedef struct _SDLNet_SocketSet* SDLNet_SocketSet;
@@ -26,7 +27,6 @@ class Network
 {
 public:
     static constexpr unsigned int MAX_CLIENTS = 100;
-    static constexpr unsigned int MAX_QUEUED_INPUT_MESSAGES = 1000;
     static constexpr unsigned int MAX_QUEUED_NEW_CLIENTS = 100;
 
     Network();
@@ -45,17 +45,11 @@ public:
      */
     bool sendToAll(BinaryBufferSharedPtr message);
 
-    /**
-     * Returns the number of waiting input messages.
-     * Allows you to take a snapshot so you aren't looping on an ever-growing queue.
-     */
-    unsigned int getNumInputMessagesWaiting();
+    /** Forwards to the inputMessageSorter's startReceive. */
+    std::queue<BinaryBufferSharedPtr>& startReceiveInputMessages(Uint32 tickNum);
 
-    /**
-     * Returns a message if there are any in inputQueue.
-     * @return A waiting message, else nullptr.
-     */
-    BinaryBufferSharedPtr receiveInputMessage();
+    /** Forward to the inputMessageSorter's endReceive. */
+    void endReceiveInputMessages();
 
     /**
      * Accepts any new clients, pushing them into the newClientQueue.
@@ -121,9 +115,8 @@ private:
         to this entity" instead of needing to track the connection objects. */
     std::unordered_map<EntityID, std::shared_ptr<Peer>> clients;
 
-    /** Stores input messages from clients. */
-    typedef moodycamel::ReaderWriterQueue<BinaryBufferSharedPtr> MessageQueue;
-    MessageQueue inputQueue;
+    /** Stores input messages from clients, sorted by tick number. */
+    MessageSorter inputMessageSorter;
 
     /** Calls processClients(). */
     std::thread receiveThreadObj;

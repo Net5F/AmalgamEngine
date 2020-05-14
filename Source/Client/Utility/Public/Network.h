@@ -2,7 +2,6 @@
 #define NETWORK_H
 
 #include "SharedDefs.h"
-#include "Message_generated.h"
 #include <string>
 #include <memory>
 #include <atomic>

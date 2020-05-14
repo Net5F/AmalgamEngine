@@ -15,7 +15,11 @@ MessageSorter::MessageSorter()
 std::queue<BinaryBufferSharedPtr>& MessageSorter::startReceive(Uint32 tickNum)
 {
     // Acquire the lock.
-    lock.lock();
+    bool lockWasFree = lock.try_lock();
+    if (!lockWasFree) {
+        DebugError(
+            "Tried to startReceive twice in a row. You probably forgot to call endReceive.");
+    }
 
     // Check if the tick is valid.
     if (!isTickValid(tickNum)) {

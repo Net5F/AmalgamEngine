@@ -1,4 +1,5 @@
 #include "NetworkInputSystem.h"
+#include "Game.h"
 #include "World.h"
 #include "Network.h"
 #include "Peer.h"
@@ -12,23 +13,21 @@ namespace AM
 namespace Server
 {
 
-NetworkInputSystem::NetworkInputSystem(World& inWorld, Network& inNetwork)
-: world(inWorld), network(inNetwork)
+NetworkInputSystem::NetworkInputSystem(Game& inGame, World& inWorld, Network& inNetwork)
+: game(inGame), world(inWorld), network(inNetwork)
 {
 }
 
 void NetworkInputSystem::processInputEvents()
 {
-    // TODO: Potentially combine this and MovementSystem.
-    //       How do we take the waterfall of messages and organize them
-    //       so that we can easily get the ones for this tick?
+    // Get the queue reference for this tick's messages.
+    std::queue<BinaryBufferSharedPtr>& messageQueue = network.startReceiveInputMessages(
+        game.getCurrentTick());
 
-
-    // Process all the input messages that existed when we first check.
-    // (We don't want to get stuck in a loop of constantly receiving.)
-    unsigned int waitingMessageCount = network.getNumInputMessagesWaiting();
-    for (unsigned int i = 0; i < waitingMessageCount; ++i) {
-        BinaryBufferSharedPtr inputMessage = network.receiveInputMessage();
+    // Process all messages.
+    while (!(messageQueue.empty())) {
+        BinaryBufferSharedPtr inputMessage = messageQueue.front();
+        messageQueue.pop();
         if (inputMessage == nullptr) {
             DebugInfo(
                 "Failed to receive input message after getting count (this shouldn't happen).")
@@ -58,6 +57,8 @@ void NetworkInputSystem::processInputEvents()
         // Flag the entity as dirty.
         world.entityIsDirty[clientEntityID] = true;
     }
+
+    network.endReceiveInputMessages();
 }
 
 } // namespace Server

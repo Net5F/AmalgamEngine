@@ -3,6 +3,7 @@
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
 #include <algorithm>
+#include "Message_generated.h"
 #include "Debug.h"
 
 namespace AM
@@ -16,7 +17,6 @@ Network::Network()
 , clientSet(std::make_shared<SDLNet_SocketSet>(SDLNet_AllocSocketSet(MAX_CLIENTS)))
 , receiveThreadObj()
 , exitRequested(false)
-, inputQueue(MAX_QUEUED_INPUT_MESSAGES)
 {
     SDLNet_Init();
 
@@ -61,20 +61,14 @@ bool Network::sendToAll(BinaryBufferSharedPtr message)
     return sendSucceeded;
 }
 
-unsigned int Network::getNumInputMessagesWaiting()
+std::queue<BinaryBufferSharedPtr>& Network::startReceiveInputMessages(Uint32 tickNum)
 {
-    return inputQueue.size_approx();
+    return inputMessageSorter.startReceive(tickNum);
 }
 
-BinaryBufferSharedPtr Network::receiveInputMessage()
+void Network::endReceiveInputMessages()
 {
-    BinaryBufferSharedPtr message = nullptr;
-    if (inputQueue.try_dequeue(message)) {
-        return message;
-    }
-    else {
-        return nullptr;
-    }
+    inputMessageSorter.endReceive();
 }
 
 void Network::acceptNewClients()
@@ -155,7 +149,7 @@ const std::unordered_map<EntityID, std::shared_ptr<Peer>>& clients)
         for (const auto& pair : clients) {
             BinaryBufferSharedPtr message = pair.second->receiveMessage(false);
             while (message != nullptr) {
-                // Queue the message.
+                // Queue the message (blocks if the queue is locked).
                 network->queueInputMessage(message);
 
                 message = pair.second->receiveMessage(false);
@@ -164,11 +158,16 @@ const std::unordered_map<EntityID, std::shared_ptr<Peer>>& clients)
     }
 }
 
-void Network::queueInputMessage(BinaryBufferSharedPtr message)
+void Network::queueInputMessage(BinaryBufferSharedPtr messageBuffer)
 {
-    if (!(inputQueue.enqueue(message))) {
-        DebugError("Ran out of room in input queue and memory allocation failed.");
+    const fb::Message* message = fb::GetMessage(messageBuffer->data());
+    if (message->content_type() != fb::MessageContent::EntityUpdate) {
+        DebugError("Expected EntityUpdate but got something else.");
     }
+    auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
+
+    // Push the message into the queue for its tick.
+    inputMessageSorter.push(entityUpdate->currentTick(), messageBuffer);
 }
 
 std::shared_ptr<Peer> Network::getNewClient()

@@ -1,6 +1,7 @@
 #include "Network.h"
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
+#include "Message_generated.h"
 #include "Debug.h"
 
 namespace AM
