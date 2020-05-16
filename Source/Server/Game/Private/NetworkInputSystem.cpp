@@ -56,7 +56,8 @@ void NetworkInputSystem::processInputMessages()
 
         // Flag the entity as dirty.
         world.entityIsDirty[clientEntityID] = true;
-        DebugInfo("Processed input message on tick %u", game.getCurrentTick());
+        DebugInfo("Processed input message on tick %u. Message tick: %u",
+            game.getCurrentTick(), entityUpdate->currentTick());
     }
 
     network.endReceiveInputMessages();

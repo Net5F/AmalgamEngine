@@ -57,10 +57,11 @@ bool MessageSorter::push(Uint32 tickNum, BinaryBufferSharedPtr message)
         lock.unlock();
         return false;
     }
-    DebugInfo("Tick valid. tickNum: %u, currentTick %u", tickNum, currentTick);
+    DebugInfo("Tick valid. tickNum: %u, currentTick %u. Pushing into slot: %u", tickNum,
+        currentTick, (tickNum % BUFFER_SIZE));
 
     // Push the message.
-    queueBuffer[tickNum - currentTick].push(message);
+    queueBuffer[tickNum % BUFFER_SIZE].push(message);
 
     // Release the lock.
     lock.unlock();

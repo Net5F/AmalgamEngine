@@ -182,4 +182,34 @@ TEST_CASE("TestMessageSorter")
         messageSorter.endReceive();
         REQUIRE(!(messageSorter.isTickValid(tickNum)));
     }
+
+    SECTION("Pushing from non-zero indices works correctly.")
+    {
+        // Advance to tick 2.
+        for (unsigned int i = 0; i < 2; ++i) {
+            messageSorter.startReceive(i);
+            messageSorter.endReceive();
+        }
+
+        // Push a message into tick 7.
+        messageSorter.push(7,
+            std::make_shared<std::vector<Uint8>>(std::vector<Uint8>{1, 2, 3}));
+
+        // Advance to tick 7.
+        for (unsigned int i = 2; i < 7; ++i) {
+            messageSorter.startReceive(i);
+            messageSorter.endReceive();
+        }
+
+        // Try to receive.
+        std::queue<BinaryBufferSharedPtr>& queue = messageSorter.startReceive(7);
+        REQUIRE(!(queue.empty()));
+
+        BinaryBufferSharedPtr message = queue.front();
+        REQUIRE(*message == std::vector<Uint8>({1, 2, 3}));
+
+        // Advance the tick.
+        messageSorter.endReceive();
+        REQUIRE(!(messageSorter.isTickValid(7)));
+    }
 }
