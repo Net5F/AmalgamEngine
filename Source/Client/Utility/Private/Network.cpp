@@ -186,6 +186,7 @@ void Network::sendWaitingMessagesInternal()
             return;
         }
         else {
+            DebugInfo("Sent message");
             sendQueue.pop_front();
         }
     }

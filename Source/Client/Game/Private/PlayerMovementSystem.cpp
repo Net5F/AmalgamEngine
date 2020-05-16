@@ -90,8 +90,11 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
         float recX = currentPosition.x;
         float recY = currentPosition.y;
         DebugInfo("Latest: %u, current: %u", latestReceivedTick, currentTick);
+
+        // TODO: Find the appropriate futureOffset through synchro timestamps.
+        Uint32 futureOffset = 5;
         /* Relay all inputs since the received message, except the current. */
-        for (Uint32 i = (latestReceivedTick + 1); i < currentTick; ++i) {
+        for (Uint32 i = (latestReceivedTick + 1 - futureOffset); i < currentTick; ++i) {
             Uint32 tickDiff = currentTick - i;
 
             if (tickDiff > World::INPUT_HISTORY_LENGTH) {

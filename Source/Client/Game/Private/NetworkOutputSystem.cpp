@@ -54,7 +54,7 @@ void NetworkOutputSystem::sendInputState()
     Uint8* buffer = builder.GetBufferPointer();
     network.send(
         std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
-    DebugInfo("Sent message on tick %u with currentTick = %u", game.getCurrentTick(),
+    DebugInfo("Queued message on tick %u with currentTick = %u", game.getCurrentTick(),
         game.getCurrentTick() + futureOffset);
 
     world.playerIsDirty = false;
