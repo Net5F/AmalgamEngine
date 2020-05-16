@@ -24,7 +24,7 @@ void Debug::info(const char* expression, ...)
     std::va_list arg;
     va_start(arg, expression);
 
-    std::printf("%u: ", currentTick);
+    std::printf(" %u: ", currentTick);
     std::vprintf(expression, arg);
     std::printf("\n");
     std::fflush(stdout);
@@ -45,7 +45,7 @@ void Debug::error(const char* fileName, int line, const char* expression, ...)
     std::va_list arg;
     va_start(arg, expression);
 
-    std::printf("Error at file: %s, line: %d, during tick: %u\n", fileName, line,
+    std::printf(" Error at file: %s, line: %d, during tick: %u\n", fileName, line,
         currentTick);
     std::vprintf(expression, arg);
     std::printf("\n");

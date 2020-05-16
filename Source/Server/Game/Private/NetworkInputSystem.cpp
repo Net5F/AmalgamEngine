@@ -18,7 +18,7 @@ NetworkInputSystem::NetworkInputSystem(Game& inGame, World& inWorld, Network& in
 {
 }
 
-void NetworkInputSystem::processInputEvents()
+void NetworkInputSystem::processInputMessages()
 {
     // Get the queue reference for this tick's messages.
     std::queue<BinaryBufferSharedPtr>& messageQueue = network.startReceiveInputMessages(
@@ -56,6 +56,7 @@ void NetworkInputSystem::processInputEvents()
 
         // Flag the entity as dirty.
         world.entityIsDirty[clientEntityID] = true;
+        DebugInfo("Processed input message on tick %u", game.getCurrentTick());
     }
 
     network.endReceiveInputMessages();

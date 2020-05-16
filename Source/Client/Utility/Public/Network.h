@@ -6,6 +6,7 @@
 #include <memory>
 #include <atomic>
 #include <thread>
+#include <deque>
 #include "readerwriterqueue.h"
 
 namespace AM
@@ -29,6 +30,9 @@ enum class MessageType {
 class Network
 {
 public:
+    /** 20 network ticks per second. */
+    static constexpr float NETWORK_TICK_INTERVAL_S = 1 / 20.0f;
+
     Network();
 
     virtual ~Network();
@@ -41,9 +45,15 @@ public:
     void registerPlayerID(EntityID inPlayerID);
 
     /**
-     * Sends bytes over the network.
+     * Queues a message to be sent the next time sendWaitingMessages is called.
      */
-    bool send(BinaryBufferSharedPtr message);
+    void send(BinaryBufferSharedPtr message);
+
+    /**
+     * Sends any queued messages over the network.
+     * Acts as the Network's tick.
+     */
+    void sendWaitingMessages(float deltaSeconds);
 
     /**
      * Returns a message if there are any in the requested queue.
@@ -61,13 +71,20 @@ public:
     /**
      * Pushes a message into the appropriate queue, based on its contents.
      */
-    void queueMessage(BinaryBufferSharedPtr messageBuffer);
+    void queueReceivedMessage(BinaryBufferSharedPtr messageBuffer);
 
     std::shared_ptr<Peer> getServer();
 
     std::atomic<bool> const* getExitRequestedPtr();
 
 private:
+    /**
+     * Tries to send any messages in sendQueue over the network.
+     * If a send fails, leaves the message at the front of the queue and returns.
+     */
+    void sendWaitingMessagesInternal();
+
+
     static const std::string SERVER_IP;
     static constexpr int SERVER_PORT = 41499;
 
@@ -86,6 +103,12 @@ private:
     MessageQueue connectionResponseQueue;
     MessageQueue playerUpdateQueue;
     MessageQueue npcUpdateQueue;
+
+    /** The outgoing message queue. Holds messages ready to be sent. */
+    std::deque<BinaryBufferSharedPtr> sendQueue;
+
+    /** The aggregated time since we last processed a tick. */
+    float accumulatedTime;
 };
 
 } // namespace Client

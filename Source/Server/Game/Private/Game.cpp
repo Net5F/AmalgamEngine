@@ -27,8 +27,6 @@ void Game::tick(float deltaSeconds)
 
     // Process as many game ticks as have accumulated.
     while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
-        currentTick++;
-
         // Add any new connections.
         std::shared_ptr<Peer> newClient = network.getNewClient();
         while (newClient != nullptr) {
@@ -61,22 +59,21 @@ void Game::tick(float deltaSeconds)
             BinaryBufferSharedPtr message = std::make_shared<std::vector<Uint8>>(
             buffer, (buffer + builder.GetSize()));
 
-            bool result = network.send(newClient, message);
-            if (!result) {
-                DebugInfo("Failed to send response.");
-            }
+            network.send(newClient, message);
 
             newClient = network.getNewClient();
         }
 
         // Run all systems.
-        networkInputSystem.processInputEvents();
+        networkInputSystem.processInputMessages();
 
         movementSystem.processMovements(GAME_TICK_INTERVAL_S);
 
-        networkOutputSystem.updateClients(GAME_TICK_INTERVAL_S);
+        networkOutputSystem.broadcastDirtyEntities();
 
         accumulatedTime -= GAME_TICK_INTERVAL_S;
+
+        currentTick++;
     }
 }
 

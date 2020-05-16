@@ -74,8 +74,6 @@ void Game::tick(float deltaSeconds)
 
     // Process as many game ticks as have accumulated.
     while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
-        currentTick++;
-
         /* Run all systems. */
         // Process all waiting user input events.
         SDL_Event event;
@@ -101,7 +99,7 @@ void Game::tick(float deltaSeconds)
             }
         }
         // Send input updates to the server.
-        networkOutputSystem.updateServer(GAME_TICK_INTERVAL_S);
+        networkOutputSystem.sendInputState();
 
         // Push the new input state into the player's history.
         playerInputSystem.addCurrentInputsToHistory(currentTick);
@@ -114,6 +112,8 @@ void Game::tick(float deltaSeconds)
 //        networkMovementSystem.processServerMovements();
 
         accumulatedTime -= GAME_TICK_INTERVAL_S;
+
+        currentTick++;
     }
 }
 

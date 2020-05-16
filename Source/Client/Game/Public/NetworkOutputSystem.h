@@ -15,29 +15,20 @@ class Network;
 
 /**
  * This class is in charge of checking for data that needs to be sent, wrapping it
- * appropriately, and sending it through the Network.
+ * appropriately, and passing it to the Network's send queue.
  */
 class NetworkOutputSystem
 {
 public:
-    /** 30 game ticks per second. */
-    static constexpr float NETWORK_OUTPUT_TICK_INTERVAL_S = 1 / 20.0f;
-
     NetworkOutputSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
     /**
-     * Sends input state data to the server.
-     */
-    void updateServer(float deltaSeconds);
-
-private:
-    /**
      * If the player inputs have changed, sends them to the server.
      * Else, sends an empty message as a heartbeat.
-     * Either way, wraps the message in our wall time to facilitate latency tracking.
      */
     void sendInputState();
 
+private:
     /**
      * Serializes the given entity's relevant world data.
      * @param entityID  The entity to serialize.
@@ -51,9 +42,6 @@ private:
 
     static constexpr int BUILDER_BUFFER_SIZE = 512;
     flatbuffers::FlatBufferBuilder builder;
-
-    /** The aggregated time since we last processed a tick. */
-    float accumulatedTime;
 };
 
 } // namespace Client

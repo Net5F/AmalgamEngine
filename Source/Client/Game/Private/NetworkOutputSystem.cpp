@@ -15,36 +15,14 @@ NetworkOutputSystem::NetworkOutputSystem(Game& inGame, World& inWorld, Network& 
 , world(inWorld)
 , network(inNetwork)
 , builder(BUILDER_BUFFER_SIZE)
-, accumulatedTime(0.0f)
 {
-}
-
-void NetworkOutputSystem::updateServer(float deltaSeconds)
-{
-    accumulatedTime += deltaSeconds;
-
-    // Process as many network ticks as have accumulated.
-    if (accumulatedTime >= NETWORK_OUTPUT_TICK_INTERVAL_S) {
-        sendInputState();
-
-        accumulatedTime -= NETWORK_OUTPUT_TICK_INTERVAL_S;
-        if (accumulatedTime >= NETWORK_OUTPUT_TICK_INTERVAL_S) {
-            // If we've accumulated enough time to send more, something
-            // happened to delay us.
-            // We still only want to send the latest data, but it's worth giving
-            // debug output that we detected this.
-            DebugInfo(
-                "Detected a delayed network send. accumulatedTime: %f. Setting to 0.",
-                accumulatedTime);
-            accumulatedTime = 0;
-        }
-    }
 }
 
 void NetworkOutputSystem::sendInputState()
 {
     if (!world.playerIsDirty) {
         // If there's no change, don't send anything.
+        // TODO: Send a heartbeat here.
         return;
     }
 
@@ -60,8 +38,10 @@ void NetworkOutputSystem::sendInputState()
     auto serializedEntity = builder.CreateVector(entityVector);
 
     // Build an EntityUpdate.
-    flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder, game.getCurrentTick()
-    , serializedEntity);
+    // TODO: Find the appropriate futureOffset through synchro timestamps.
+    Uint32 futureOffset = 5;
+    flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder,
+        game.getCurrentTick() + futureOffset, serializedEntity);
 
     // Build a Message.
     fb::MessageBuilder messageBuilder(builder);
@@ -74,6 +54,8 @@ void NetworkOutputSystem::sendInputState()
     Uint8* buffer = builder.GetBufferPointer();
     network.send(
         std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
+    DebugInfo("Sent message on tick %u with currentTick = %u", game.getCurrentTick(),
+        game.getCurrentTick() + futureOffset);
 
     world.playerIsDirty = false;
 }

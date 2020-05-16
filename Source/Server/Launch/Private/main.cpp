@@ -49,7 +49,11 @@ try
         // Calc the time delta.
         float deltaSeconds = timer.getDeltaSeconds(true);
 
+        // Run the game.
         game.tick(deltaSeconds);
+
+        // Send waiting messages.
+        network.sendWaitingMessages(deltaSeconds);
 
         // Check if we overran.
         float executionSeconds = timer.getDeltaSeconds(false);

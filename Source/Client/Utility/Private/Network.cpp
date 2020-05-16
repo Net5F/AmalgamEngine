@@ -16,6 +16,7 @@ Network::Network()
 , playerID(0)
 , receiveThreadObj()
 , exitRequested(false)
+, accumulatedTime(0.0f)
 {
     SDLNet_Init();
 }
@@ -47,14 +48,30 @@ void Network::registerPlayerID(EntityID inPlayerID)
     playerID = inPlayerID;
 }
 
-bool Network::send(BinaryBufferSharedPtr message)
+void Network::send(BinaryBufferSharedPtr message)
 {
-    if (!(server->isConnected())) {
-        DebugInfo("Tried to send while server is disconnected.");
-        return false;
-    }
+    sendQueue.push_back(message);
+}
 
-    return server->sendMessage(message);
+void Network::sendWaitingMessages(float deltaSeconds)
+{
+    accumulatedTime += deltaSeconds;
+
+    if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
+        sendWaitingMessagesInternal();
+
+        accumulatedTime -= NETWORK_TICK_INTERVAL_S;
+        if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
+            // If we've accumulated enough time to send more, something
+            // happened to delay us.
+            // We still only want to send what's in the queue, but it's worth giving
+            // debug output that we detected this.
+            DebugInfo(
+                "Detected a delayed network send. accumulatedTime: %f. Setting to 0.",
+                accumulatedTime);
+            accumulatedTime = 0;
+        }
+    }
 }
 
 BinaryBufferSharedPtr Network::receive(MessageType type)
@@ -94,14 +111,14 @@ int Network::pollForMessages(void* inNetwork)
 
         // If we received a message, push it into the appropriate queue.
         if (message != nullptr) {
-            network->queueMessage(message);
+            network->queueReceivedMessage(message);
         }
     }
 
     return 0;
 }
 
-void Network::queueMessage(BinaryBufferSharedPtr messageBuffer)
+void Network::queueReceivedMessage(BinaryBufferSharedPtr messageBuffer)
 {
     const fb::Message* message = fb::GetMessage(messageBuffer->data());
 
@@ -154,6 +171,24 @@ std::shared_ptr<Peer> Network::getServer()
 
 std::atomic<bool> const* Network::getExitRequestedPtr() {
     return &exitRequested;
+}
+
+void Network::sendWaitingMessagesInternal()
+{
+    if (!(server->isConnected())) {
+        DebugError("Tried to send while server is disconnected.");
+    }
+
+    /* Attempt to send all waiting messages. */
+    while (!sendQueue.empty()) {
+        if (!server->sendMessage(sendQueue.front())) {
+            DebugError("Send failed. Returning, will be attempted again next tick.");
+            return;
+        }
+        else {
+            sendQueue.pop_front();
+        }
+    }
 }
 
 } // namespace Client

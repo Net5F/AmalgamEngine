@@ -15,6 +15,7 @@ Network::Network()
 : acceptor(nullptr)
 , newClientQueue(MAX_QUEUED_NEW_CLIENTS)
 , clientSet(std::make_shared<SDLNet_SocketSet>(SDLNet_AllocSocketSet(MAX_CLIENTS)))
+, accumulatedTime(0.0f)
 , receiveThreadObj()
 , exitRequested(false)
 {
@@ -34,31 +35,36 @@ Network::~Network()
     receiveThreadObj.join();
 }
 
-bool Network::send(std::shared_ptr<Peer> client,
+void Network::send(std::shared_ptr<Peer> client,
                              BinaryBufferSharedPtr message)
 {
-    if (!(client->isConnected())) {
-        DebugInfo("Tried to send while client is disconnected.");
-        return false;
-    }
-
-    return client->sendMessage(message);
+    sendQueue.push_back({client, message});
 }
 
-bool Network::sendToAll(BinaryBufferSharedPtr message)
+void Network::sendToAll(BinaryBufferSharedPtr message)
 {
-    bool sendSucceeded = true;
+    sendQueue.push_back({nullptr, message});
+}
 
-    // Send to all connected clients.
-    for (const auto& pair : clients) {
-        if (pair.second->isConnected()) {
-            if (!send(pair.second, message)) {
-                sendSucceeded = false;
-            }
+void Network::sendWaitingMessages(float deltaSeconds)
+{
+    accumulatedTime += deltaSeconds;
+
+    if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
+        sendWaitingMessagesInternal();
+
+        accumulatedTime -= NETWORK_TICK_INTERVAL_S;
+        if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
+            // If we've accumulated enough time to send more, something
+            // happened to delay us.
+            // We still only want to send what's in the queue, but it's worth giving
+            // debug output that we detected this.
+            DebugInfo(
+                "Detected a delayed network send. accumulatedTime: %f. Setting to 0.",
+                accumulatedTime);
+            accumulatedTime = 0;
         }
     }
-
-    return sendSucceeded;
 }
 
 std::queue<BinaryBufferSharedPtr>& Network::startReceiveInputMessages(Uint32 tickNum)
@@ -167,7 +173,41 @@ void Network::queueInputMessage(BinaryBufferSharedPtr messageBuffer)
     auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
 
     // Push the message into the queue for its tick.
+    DebugInfo("Received message with tick: %u", entityUpdate->currentTick());
     inputMessageSorter.push(entityUpdate->currentTick(), messageBuffer);
+}
+
+void Network::sendWaitingMessagesInternal()
+{
+    /* Attempt to send all waiting messages. */
+    while (!sendQueue.empty()) {
+        MessageInfo& messageInfo = sendQueue.front();
+        if (messageInfo.client != nullptr) {
+            // Send to single client.
+            if (!messageInfo.client->sendMessage(messageInfo.message)) {
+                DebugError("Send failed. Returning, will be attempted again next tick.");
+                return;
+            }
+            else {
+                sendQueue.pop_front();
+            }
+        }
+        else {
+            // Send to all connected clients.
+            for (const auto& pair : clients) {
+                if (pair.second->isConnected()) {
+                    if (!pair.second->sendMessage(messageInfo.message)) {
+                        DebugError(
+                            "Send failed. Returning, will be attempted again next tick.");
+                        return;
+                    }
+                }
+            }
+
+            // Message has been sent to any connected clients, get rid of it.
+            sendQueue.pop_front();
+        }
+    }
 }
 
 std::shared_ptr<Peer> Network::getNewClient()

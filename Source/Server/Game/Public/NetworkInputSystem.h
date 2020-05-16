@@ -21,7 +21,7 @@ public:
     /**
      * Processes incoming EntityUpdate messages.
      */
-    void processInputEvents();
+    void processInputMessages();
 
 private:
     Game& game;

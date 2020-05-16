@@ -19,23 +19,15 @@ class Network;
 class NetworkOutputSystem
 {
 public:
-    /** 30 game ticks per second. */
-    static constexpr float NETWORK_OUTPUT_TICK_INTERVAL_S = 1 / 20.0f;
-
     NetworkOutputSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
     /**
-     * Sends dirty entity state data to all clients.
-     */
-    void updateClients(float deltaSeconds);
-
-private:
-    /**
-     * Checks the world for dirty entities and relevant state information to all
-     * connected clients.
+     * If there is dirty state information, sends it to all connected clients.
+     * Else, sends an empty message as a heartbeat.
      */
     void broadcastDirtyEntities();
 
+private:
     /**
      * Serializes the given entity's relevant world data.
      * @param entityID  The entity to serialize.
@@ -49,9 +41,6 @@ private:
 
     static constexpr int BUILDER_BUFFER_SIZE = 512;
     flatbuffers::FlatBufferBuilder builder;
-
-    /** The aggregated time since we last processed a tick. */
-    float accumulatedTime;
 };
 
 } // namespace Server

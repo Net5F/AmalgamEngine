@@ -53,9 +53,11 @@ bool MessageSorter::push(Uint32 tickNum, BinaryBufferSharedPtr message)
     // Check if the tick is valid.
     if (!isTickValid(tickNum)) {
         // tickNum is invalid, release the lock.
+        DebugInfo("Tick invalid. tickNum: %u, currentTick %u", tickNum, currentTick);
         lock.unlock();
         return false;
     }
+    DebugInfo("Tick valid. tickNum: %u, currentTick %u", tickNum, currentTick);
 
     // Push the message.
     queueBuffer[tickNum - currentTick].push(message);

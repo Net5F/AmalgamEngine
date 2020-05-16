@@ -29,21 +29,29 @@ public:
     static constexpr unsigned int MAX_CLIENTS = 100;
     static constexpr unsigned int MAX_QUEUED_NEW_CLIENTS = 100;
 
+    /** 20 network ticks per second. */
+    static constexpr float NETWORK_TICK_INTERVAL_S = 1 / 20.0f;
+
     Network();
 
     virtual ~Network();
 
     /**
-     * Sends message over the network.
-     * @return false if the send failed, else true.
+     * Queues a message to be sent the next time sendWaitingMessages is called.
      */
-    bool send(std::shared_ptr<Peer> client, BinaryBufferSharedPtr message);
+    void send(std::shared_ptr<Peer> client, BinaryBufferSharedPtr message);
 
     /**
-     * Sends message to all connected clients.
-     * @return false if any send failed, else true.
+     * Queues a message to be sent to all connected clients the next time
+     * sendWaitingMessages is called.
      */
-    bool sendToAll(BinaryBufferSharedPtr message);
+    void sendToAll(BinaryBufferSharedPtr message);
+
+    /**
+     * Sends any queued messages over the network.
+     * Acts as the Network's tick.
+     */
+    void sendWaitingMessages(float deltaSeconds);
 
     /** Forwards to the inputMessageSorter's startReceive. */
     std::queue<BinaryBufferSharedPtr>& startReceiveInputMessages(Uint32 tickNum);
@@ -75,6 +83,12 @@ public:
     std::atomic<bool> const* getExitRequestedPtr();
 
 private:
+    /** Pairs a message with the client to send it to. client == nullptr means send to all. */
+    struct MessageInfo {
+        std::shared_ptr<Peer> client;
+        BinaryBufferSharedPtr message;
+    };
+
     /**
      * Iterates through the clients and erases any that are disconnected.
      */
@@ -99,6 +113,12 @@ private:
      */
     void queueInputMessage(BinaryBufferSharedPtr message);
 
+    /**
+     * Tries to send any messages in sendQueue over the network.
+     * If a send fails, leaves the message at the front of the queue and returns.
+     */
+    void sendWaitingMessagesInternal();
+
 
     static const std::string SERVER_IP;
     static constexpr int SERVER_PORT = 41499;
@@ -114,6 +134,12 @@ private:
     /** Maps IDs to their connections. Allows the game to say "send this message
         to this entity" instead of needing to track the connection objects. */
     std::unordered_map<EntityID, std::shared_ptr<Peer>> clients;
+
+    /** The outgoing message queue. Holds messages ready to be sent. */
+    std::deque<MessageInfo> sendQueue;
+
+    /** The aggregated time since we last processed a tick. */
+    float accumulatedTime;
 
     /** Stores input messages from clients, sorted by tick number. */
     MessageSorter inputMessageSorter;

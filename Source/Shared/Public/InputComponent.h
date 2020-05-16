@@ -6,7 +6,6 @@
 
 namespace AM
 {
-typedef std::array<Input::State, Input::Type::NumTypes> InputStateArr;
 
 struct InputComponent
 {

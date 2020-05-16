@@ -52,6 +52,9 @@ try
         // Run the game.
         game.tick(deltaSeconds);
 
+        // Send waiting messages.
+        network.sendWaitingMessages(deltaSeconds);
+
         // Render at 60fps.
         renderSystem.render(deltaSeconds);
 
