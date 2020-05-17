@@ -60,6 +60,7 @@ void Game::tick(float deltaSeconds)
             buffer, (buffer + builder.GetSize()));
 
             network.send(newClient, message);
+            DebugInfo("Sent new client response at tick %u", currentTick);
 
             newClient = network.getNewClient();
         }

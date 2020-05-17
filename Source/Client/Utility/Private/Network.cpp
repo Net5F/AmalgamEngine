@@ -74,26 +74,36 @@ void Network::sendWaitingMessages(float deltaSeconds)
     }
 }
 
-BinaryBufferSharedPtr Network::receive(MessageType type)
+BinaryBufferSharedPtr Network::receive(MessageType type, Uint64 timeoutMs)
 {
     if (!(server->isConnected())) {
         DebugInfo("Tried to receive while server is disconnected.");
         return nullptr;
     }
 
-    BinaryBufferSharedPtr message = nullptr;
-
+    MessageQueue* selectedQueue = nullptr;
     switch (type)
     {
         case (MessageType::ConnectionResponse):
-            connectionResponseQueue.try_dequeue(message);
+            selectedQueue = &connectionResponseQueue;
             break;
         case (MessageType::PlayerUpdate):
-            playerUpdateQueue.try_dequeue(message);
+            selectedQueue = &playerUpdateQueue;
             break;
         case (MessageType::NpcUpdate):
-            npcUpdateQueue.try_dequeue(message);
+            selectedQueue = &npcUpdateQueue;
             break;
+        default:
+            DebugError("Provided unexpected type.");
+    }
+
+    BinaryBufferSharedPtr message = nullptr;
+    if (timeoutMs == 0) {
+        selectedQueue->try_dequeue(message);
+    }
+    else {
+        DebugInfo("Waiting for %lu ms", timeoutMs);
+        selectedQueue->wait_dequeue_timed(message, timeoutMs * 1000);
     }
 
     return message;

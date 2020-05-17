@@ -57,9 +57,13 @@ public:
 
     /**
      * Returns a message if there are any in the requested queue.
+     * If there are none, waits for one up to the given timeout.
+     *
+     * @param type  The type of message to receive.
+     * @param timeoutMs  How long to wait. 0 for no wait, -1 for indefinite. Defaults to 0.
      * @return A waiting message, else nullptr.
      */
-    BinaryBufferSharedPtr receive(MessageType type);
+    BinaryBufferSharedPtr receive(MessageType type, Uint64 timeoutMs = 0);
 
     /**
      * Thread function, started from connect().
@@ -99,7 +103,7 @@ private:
     std::atomic<bool> exitRequested;
 
     /** These queues store received messages that are waiting to be consumed. */
-    typedef moodycamel::ReaderWriterQueue<BinaryBufferSharedPtr> MessageQueue;
+    typedef moodycamel::BlockingReaderWriterQueue<BinaryBufferSharedPtr> MessageQueue;
     MessageQueue connectionResponseQueue;
     MessageQueue playerUpdateQueue;
     MessageQueue npcUpdateQueue;

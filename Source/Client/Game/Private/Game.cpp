@@ -31,20 +31,21 @@ void Game::connect()
     // Wait for the player's ID from the server.
     BinaryBufferSharedPtr responseBuffer = network.receive(
         MessageType::ConnectionResponse);
-    while (responseBuffer == nullptr) {
-        responseBuffer = network.receive(MessageType::ConnectionResponse);
-        SDL_Delay(10);
+    responseBuffer = network.receive(MessageType::ConnectionResponse, 1000);
+    if (responseBuffer == nullptr) {
+        DebugError("Server did not respond.");
     }
 
     // Get our info from the connection response.
     const fb::Message* message = fb::GetMessage(responseBuffer->data());
     auto connectionResponse = static_cast<const fb::ConnectionResponse*>(message->content());
     EntityID player = connectionResponse->entityID();
+    DebugInfo("Received connection response.");
 
     // TODO: Calculate the RTT and set this to 1/2 RTT / TickFreq.
     // The calculated number of ticks that it took to send this message.
     // The server's currentTick will be this + the tick held in the message.
-    Uint32 ticksInFlight = 1;
+    Uint32 ticksInFlight = 0;
     currentTick = connectionResponse->currentTick() + ticksInFlight;
 
     // Set up our player.
