@@ -20,9 +20,9 @@ void PlayerInputSystem::processInputEvent(SDL_Event& event)
 {
     // Process all events.
     if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
-        Input::State inputType =
+        Input::State inputState =
         (event.type == SDL_KEYDOWN) ? Input::Pressed : Input::Released;
-        Input keyInput = { Input::None, inputType };
+        Input keyInput = { Input::None, inputState };
 
         switch (event.key.keysym.sym)
         {
@@ -40,14 +40,16 @@ void PlayerInputSystem::processInputEvent(SDL_Event& event)
                 break;
         }
 
-        // Push the input to the player's InputComponent.
-        EntityID player = world.playerID;
-        Input::State& entityState = world.inputs[player].inputStates[keyInput.type];
+        if (keyInput.type != Input::None) {
+            // Push the input to the player's InputComponent.
+            EntityID player = world.playerID;
+            Input::State& entityState = world.inputs[player].inputStates[keyInput.type];
 
-        // Track changes.
-        if (entityState != keyInput.state) {
-            entityState = keyInput.state;
-            world.playerIsDirty = true;
+            // Track changes.
+            if (entityState != keyInput.state) {
+                entityState = keyInput.state;
+                world.playerIsDirty = true;
+            }
         }
     }
 }

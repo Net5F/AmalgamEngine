@@ -81,8 +81,7 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
     /* Replay inputs newer than the message's tick. */
     Uint32 currentTick = game.getCurrentTick();
     if (latestReceivedTick > currentTick) {
-        DebugError("Received data from the future, can't replay inputs. "
-                "receivedTick: %u, currentTick %u", latestReceivedTick, currentTick);
+        DebugError("Received data for tick %u on tick %u", latestReceivedTick, currentTick);
     }
 
     // Only replay inputs if we received a message.

@@ -40,13 +40,9 @@ void Game::connect()
     const fb::Message* message = fb::GetMessage(responseBuffer->data());
     auto connectionResponse = static_cast<const fb::ConnectionResponse*>(message->content());
     EntityID player = connectionResponse->entityID();
-    DebugInfo("Received connection response.");
+    DebugInfo("Received connection response. Tick = %u", connectionResponse->currentTick());
 
-    // TODO: Calculate the RTT and set this to 1/2 RTT / TickFreq.
-    // The calculated number of ticks that it took to send this message.
-    // The server's currentTick will be this + the tick held in the message.
-    Uint32 ticksInFlight = 0;
-    currentTick = connectionResponse->currentTick() + ticksInFlight;
+    currentTick = connectionResponse->currentTick();
 
     // Set up our player.
     SDL2pp::Rect textureRect(0, 32, 16, 16);

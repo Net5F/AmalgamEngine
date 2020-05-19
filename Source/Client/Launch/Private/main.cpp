@@ -33,27 +33,23 @@ try
     renderer, "Resources/u4_tiles_pc_ega.png");
 
     Network network;
-
     Game game(network, sprites);
+    RenderSystem renderSystem(renderer, game, window);
+    Timer timer;
+
+    std::atomic<bool> const* exitRequested = game.getExitRequestedPtr();
+
     // Connect to the server (waits for connection response).
     game.connect();
 
-    RenderSystem renderSystem(renderer, game, window);
-
-    Timer timer;
     // Prime the timer so it doesn't start at 0.
     timer.getDeltaSeconds(true);
-
-    std::atomic<bool> const* exitRequested = game.getExitRequestedPtr();
     while (!(*exitRequested)) {
         // Calc the time delta.
         float deltaSeconds = timer.getDeltaSeconds(true);
 
         // Run the game.
         game.tick(deltaSeconds);
-
-        // Send waiting messages.
-        network.sendWaitingMessages(deltaSeconds);
 
         // Render at 60fps.
         renderSystem.render(deltaSeconds);
@@ -63,8 +59,11 @@ try
         if (executionSeconds >= RenderSystem::RENDER_INTERVAL_S) {
             DebugInfo("Overran the render tick rate.");
         }
-        else if ((renderSystem.getAccumulatedTime() + executionSeconds + DELAY_LEEWAY_S)
-        < RenderSystem::RENDER_INTERVAL_S) {
+        else if (((renderSystem.getAccumulatedTime() + executionSeconds + DELAY_LEEWAY_S)
+                   < RenderSystem::RENDER_INTERVAL_S)
+                 && ((game.getAccumulatedTime() + executionSeconds
+                      + DELAY_LEEWAY_S)
+                     < Game::GAME_TICK_INTERVAL_S)) {
             // If we have enough time leftover to delay for 1ms, do it.
             SDL_Delay(1);
         }

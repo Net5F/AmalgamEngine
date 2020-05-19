@@ -16,7 +16,6 @@ Network::Network()
 , playerID(0)
 , receiveThreadObj()
 , exitRequested(false)
-, accumulatedTime(0.0f)
 {
     SDLNet_Init();
 }
@@ -50,27 +49,13 @@ void Network::registerPlayerID(EntityID inPlayerID)
 
 void Network::send(BinaryBufferSharedPtr message)
 {
-    sendQueue.push_back(message);
-}
+    if (!(server->isConnected())) {
+        DebugError("Tried to send while server is disconnected.");
+    }
 
-void Network::sendWaitingMessages(float deltaSeconds)
-{
-    accumulatedTime += deltaSeconds;
-
-    if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
-        sendWaitingMessagesInternal();
-
-        accumulatedTime -= NETWORK_TICK_INTERVAL_S;
-        if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
-            // If we've accumulated enough time to send more, something
-            // happened to delay us.
-            // We still only want to send what's in the queue, but it's worth giving
-            // debug output that we detected this.
-            DebugInfo(
-                "Detected a delayed network send. accumulatedTime: %f. Setting to 0.",
-                accumulatedTime);
-            accumulatedTime = 0;
-        }
+    // Send the message.
+    if (!(server->sendMessage(message))) {
+        DebugError("Send failed.");
     }
 }
 
@@ -102,7 +87,6 @@ BinaryBufferSharedPtr Network::receive(MessageType type, Uint64 timeoutMs)
         selectedQueue->try_dequeue(message);
     }
     else {
-        DebugInfo("Waiting for %lu ms", timeoutMs);
         selectedQueue->wait_dequeue_timed(message, timeoutMs * 1000);
     }
 
@@ -140,6 +124,7 @@ void Network::queueReceivedMessage(BinaryBufferSharedPtr messageBuffer)
     }
     else if (message->content_type() == fb::MessageContent::EntityUpdate) {
         auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
+//        DebugInfo("Received message with tick = %u", entityUpdate->currentTick());
 
         // Pull out the vector of entities.
         auto entities = entityUpdate->entities();
@@ -181,25 +166,6 @@ std::shared_ptr<Peer> Network::getServer()
 
 std::atomic<bool> const* Network::getExitRequestedPtr() {
     return &exitRequested;
-}
-
-void Network::sendWaitingMessagesInternal()
-{
-    if (!(server->isConnected())) {
-        DebugError("Tried to send while server is disconnected.");
-    }
-
-    /* Attempt to send all waiting messages. */
-    while (!sendQueue.empty()) {
-        if (!server->sendMessage(sendQueue.front())) {
-            DebugError("Send failed. Returning, will be attempted again next tick.");
-            return;
-        }
-        else {
-            DebugInfo("Sent message");
-            sendQueue.pop_front();
-        }
-    }
 }
 
 } // namespace Client
