@@ -55,7 +55,8 @@ struct Rect {
 struct SpriteComponent {
     textureID:short;
     posInTexture:Rect;
-    posInWorld:Rect;
+    width:int;
+    height:int;
 }
 
 table Entity {
