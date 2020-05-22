@@ -5,7 +5,6 @@
 #include "NetworkInputSystem.h"
 #include "MovementSystem.h"
 #include "NetworkOutputSystem.h"
-#include "Message_generated.h"
 
 namespace AM
 {
@@ -39,9 +38,6 @@ private:
     NetworkInputSystem networkInputSystem;
     MovementSystem movementSystem;
     NetworkOutputSystem networkOutputSystem;
-
-    static constexpr int BUILDER_BUFFER_SIZE = 512;
-    flatbuffers::FlatBufferBuilder builder;
 
     /** The aggregated time since we last processed a tick. */
     float accumulatedTime;

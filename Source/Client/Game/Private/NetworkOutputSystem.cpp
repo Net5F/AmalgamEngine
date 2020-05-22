@@ -41,10 +41,11 @@ void NetworkOutputSystem::sendInputState()
     // TODO: Find the appropriate futureOffset through synchro timestamps.
     Uint32 futureOffset = 5;
     flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder,
-        game.getCurrentTick() + futureOffset, serializedEntity);
+        serializedEntity);
 
     // Build a Message.
     fb::MessageBuilder messageBuilder(builder);
+    messageBuilder.add_tickTimestamp(game.getCurrentTick() + futureOffset);
     messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
     messageBuilder.add_content(entityUpdate.Union());
     flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();

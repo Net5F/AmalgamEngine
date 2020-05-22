@@ -40,9 +40,9 @@ void Game::connect()
     const fb::Message* message = fb::GetMessage(responseBuffer->data());
     auto connectionResponse = static_cast<const fb::ConnectionResponse*>(message->content());
     EntityID player = connectionResponse->entityID();
-    DebugInfo("Received connection response. Tick = %u", connectionResponse->currentTick());
+    DebugInfo("Received connection response. Tick = %u", message->tickTimestamp());
 
-    currentTick = connectionResponse->currentTick();
+    currentTick = message->tickTimestamp();
 
     // Set up our player.
     SDL2pp::Rect textureRect(0, 32, 16, 16);

@@ -10,9 +10,6 @@ table ConnectionRequest {
 }
 
 table ConnectionResponse {
-    // The tick that the server sent this response on.
-    currentTick:uint;
-    
     // ID for the player entity.
     entityID:uint;
     
@@ -70,9 +67,6 @@ table Entity {
 }
 
 table EntityUpdate {
-    // The tick that the server sent this response on.
-    currentTick:uint;
-    
     entities:[Entity];
 }
 
@@ -86,6 +80,8 @@ union MessageContent {
 }
 
 table Message {
+    // The tick that this response was processed on.
+    tickTimestamp:uint;
     content:MessageContent;
 }
 

@@ -253,14 +253,10 @@ struct ConnectionResponse FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef ConnectionResponseBuilder Builder;
   struct Traits;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_CURRENTTICK = 4,
-    VT_ENTITYID = 6,
-    VT_X = 8,
-    VT_Y = 10
+    VT_ENTITYID = 4,
+    VT_X = 6,
+    VT_Y = 8
   };
-  uint32_t currentTick() const {
-    return GetField<uint32_t>(VT_CURRENTTICK, 0);
-  }
   uint32_t entityID() const {
     return GetField<uint32_t>(VT_ENTITYID, 0);
   }
@@ -272,7 +268,6 @@ struct ConnectionResponse FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<uint32_t>(verifier, VT_CURRENTTICK) &&
            VerifyField<uint32_t>(verifier, VT_ENTITYID) &&
            VerifyField<float>(verifier, VT_X) &&
            VerifyField<float>(verifier, VT_Y) &&
@@ -284,9 +279,6 @@ struct ConnectionResponseBuilder {
   typedef ConnectionResponse Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_currentTick(uint32_t currentTick) {
-    fbb_.AddElement<uint32_t>(ConnectionResponse::VT_CURRENTTICK, currentTick, 0);
-  }
   void add_entityID(uint32_t entityID) {
     fbb_.AddElement<uint32_t>(ConnectionResponse::VT_ENTITYID, entityID, 0);
   }
@@ -309,7 +301,6 @@ struct ConnectionResponseBuilder {
 
 inline flatbuffers::Offset<ConnectionResponse> CreateConnectionResponse(
     flatbuffers::FlatBufferBuilder &_fbb,
-    uint32_t currentTick = 0,
     uint32_t entityID = 0,
     float x = 0.0f,
     float y = 0.0f) {
@@ -317,7 +308,6 @@ inline flatbuffers::Offset<ConnectionResponse> CreateConnectionResponse(
   builder_.add_y(y);
   builder_.add_x(x);
   builder_.add_entityID(entityID);
-  builder_.add_currentTick(currentTick);
   return builder_.Finish();
 }
 
@@ -641,18 +631,13 @@ struct EntityUpdate FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef EntityUpdateBuilder Builder;
   struct Traits;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_CURRENTTICK = 4,
-    VT_ENTITIES = 6
+    VT_ENTITIES = 4
   };
-  uint32_t currentTick() const {
-    return GetField<uint32_t>(VT_CURRENTTICK, 0);
-  }
   const flatbuffers::Vector<flatbuffers::Offset<AM::fb::Entity>> *entities() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<AM::fb::Entity>> *>(VT_ENTITIES);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<uint32_t>(verifier, VT_CURRENTTICK) &&
            VerifyOffset(verifier, VT_ENTITIES) &&
            verifier.VerifyVector(entities()) &&
            verifier.VerifyVectorOfTables(entities()) &&
@@ -664,9 +649,6 @@ struct EntityUpdateBuilder {
   typedef EntityUpdate Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_currentTick(uint32_t currentTick) {
-    fbb_.AddElement<uint32_t>(EntityUpdate::VT_CURRENTTICK, currentTick, 0);
-  }
   void add_entities(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AM::fb::Entity>>> entities) {
     fbb_.AddOffset(EntityUpdate::VT_ENTITIES, entities);
   }
@@ -683,11 +665,9 @@ struct EntityUpdateBuilder {
 
 inline flatbuffers::Offset<EntityUpdate> CreateEntityUpdate(
     flatbuffers::FlatBufferBuilder &_fbb,
-    uint32_t currentTick = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<AM::fb::Entity>>> entities = 0) {
   EntityUpdateBuilder builder_(_fbb);
   builder_.add_entities(entities);
-  builder_.add_currentTick(currentTick);
   return builder_.Finish();
 }
 
@@ -698,12 +678,10 @@ struct EntityUpdate::Traits {
 
 inline flatbuffers::Offset<EntityUpdate> CreateEntityUpdateDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    uint32_t currentTick = 0,
     const std::vector<flatbuffers::Offset<AM::fb::Entity>> *entities = nullptr) {
   auto entities__ = entities ? _fbb.CreateVector<flatbuffers::Offset<AM::fb::Entity>>(*entities) : 0;
   return AM::fb::CreateEntityUpdate(
       _fbb,
-      currentTick,
       entities__);
 }
 
@@ -711,9 +689,13 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef MessageBuilder Builder;
   struct Traits;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
-    VT_CONTENT_TYPE = 4,
-    VT_CONTENT = 6
+    VT_TICKTIMESTAMP = 4,
+    VT_CONTENT_TYPE = 6,
+    VT_CONTENT = 8
   };
+  uint32_t tickTimestamp() const {
+    return GetField<uint32_t>(VT_TICKTIMESTAMP, 0);
+  }
   AM::fb::MessageContent content_type() const {
     return static_cast<AM::fb::MessageContent>(GetField<uint8_t>(VT_CONTENT_TYPE, 0));
   }
@@ -732,6 +714,7 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, VT_TICKTIMESTAMP) &&
            VerifyField<uint8_t>(verifier, VT_CONTENT_TYPE) &&
            VerifyOffset(verifier, VT_CONTENT) &&
            VerifyMessageContent(verifier, content(), content_type()) &&
@@ -755,6 +738,9 @@ struct MessageBuilder {
   typedef Message Table;
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
+  void add_tickTimestamp(uint32_t tickTimestamp) {
+    fbb_.AddElement<uint32_t>(Message::VT_TICKTIMESTAMP, tickTimestamp, 0);
+  }
   void add_content_type(AM::fb::MessageContent content_type) {
     fbb_.AddElement<uint8_t>(Message::VT_CONTENT_TYPE, static_cast<uint8_t>(content_type), 0);
   }
@@ -774,10 +760,12 @@ struct MessageBuilder {
 
 inline flatbuffers::Offset<Message> CreateMessage(
     flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t tickTimestamp = 0,
     AM::fb::MessageContent content_type = AM::fb::MessageContent::NONE,
     flatbuffers::Offset<void> content = 0) {
   MessageBuilder builder_(_fbb);
   builder_.add_content(content);
+  builder_.add_tickTimestamp(tickTimestamp);
   builder_.add_content_type(content_type);
   return builder_.Finish();
 }

@@ -3,13 +3,19 @@
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
 #include <algorithm>
-#include "Message_generated.h"
 #include "Debug.h"
 
 namespace AM
 {
 namespace Server
 {
+
+Uint32* Network::currentTickPtr = nullptr;
+
+void Network::registerCurrentTickPtr(Uint32* inCurrentTickPtr)
+{
+    currentTickPtr = inCurrentTickPtr;
+}
 
 Network::Network()
 : acceptor(nullptr)
@@ -18,6 +24,7 @@ Network::Network()
 , accumulatedTime(0.0f)
 , receiveThreadObj()
 , exitRequested(false)
+, builder(BUILDER_BUFFER_SIZE)
 {
     SDLNet_Init();
 
@@ -51,6 +58,7 @@ void Network::sendWaitingMessages(float deltaSeconds)
     accumulatedTime += deltaSeconds;
 
     if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
+        sendConnectionResponsesInternal();
         sendWaitingMessagesInternal();
 
         accumulatedTime -= NETWORK_TICK_INTERVAL_S;
@@ -96,6 +104,11 @@ void Network::acceptNewClients()
 void Network::addClient(EntityID entityID, std::shared_ptr<AM::Peer> client)
 {
     clients.emplace(entityID, client);
+}
+
+void Network::sendConnectionResponse(EntityID id, float spawnX, float spawnY)
+{
+    connectionResponseQueue.push({id, spawnX, spawnY});
 }
 
 void Network::eraseDisconnectedClients()
@@ -173,13 +186,46 @@ void Network::queueInputMessage(BinaryBufferSharedPtr messageBuffer)
     auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
 
     // Push the message into the queue for its tick.
-    DebugInfo("Received message with tick: %u", entityUpdate->currentTick());
-    inputMessageSorter.push(entityUpdate->currentTick(), messageBuffer);
+    DebugInfo("Received message with tick: %u", message->tickTimestamp());
+    inputMessageSorter.push(message->tickTimestamp(), messageBuffer);
+}
+
+void Network::sendConnectionResponsesInternal()
+{
+    /* Send all waiting ConnectionResponse messages. */
+    unsigned int responseCount = connectionResponseQueue.size();
+    if (responseCount > 0) {
+        Uint32 latestTickTimestamp = *currentTickPtr;
+        DebugInfo("Sending latest tick: %u", latestTickTimestamp);
+
+        for (unsigned int i = 0; i < responseCount; ++i) {
+            ConnectionResponseData& data = connectionResponseQueue.front();
+
+            // Prep the builder for a new message.
+            builder.Clear();
+
+            // Send them their ID and spawn point.
+            auto response = fb::CreateConnectionResponse(builder, data.id, data.spawnX,
+                data.spawnY);
+            auto encodedMessage = fb::CreateMessage(builder, latestTickTimestamp,
+                fb::MessageContent::ConnectionResponse, response.Union());
+            builder.Finish(encodedMessage);
+
+            Uint8* buffer = builder.GetBufferPointer();
+            BinaryBufferSharedPtr message = std::make_shared<std::vector<Uint8>>(
+            buffer, (buffer + builder.GetSize()));
+
+            send(clients.at(data.id), message);
+            DebugInfo("Sent new client response with tick = %u", latestTickTimestamp);
+
+            connectionResponseQueue.pop();
+        }
+    }
 }
 
 void Network::sendWaitingMessagesInternal()
 {
-    /* Attempt to send all waiting messages. */
+    /* Send all waiting messages from the standard send queue. */
     while (!sendQueue.empty()) {
         MessageInfo& messageInfo = sendQueue.front();
         if (messageInfo.client != nullptr) {
@@ -197,8 +243,7 @@ void Network::sendWaitingMessagesInternal()
             for (const auto& pair : clients) {
                 if (pair.second->isConnected()) {
                     if (!pair.second->sendMessage(messageInfo.message)) {
-                        DebugError(
-                            "Send failed. Returning, will be attempted again next tick.");
+                        DebugInfo("Send failed. Client probably disconnected.");
                         return;
                     }
                 }

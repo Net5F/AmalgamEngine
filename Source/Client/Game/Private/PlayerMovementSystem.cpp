@@ -34,16 +34,16 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
     // The tick of the newest message that we received.
     Uint32 latestReceivedTick = 0;
     while (responseBuffer != nullptr) {
-        // Ready the EntityUpdate for reading.
+        // Ready the Message for reading.
         const fb::Message* message = fb::GetMessage(responseBuffer->data());
-        auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
 
-        Uint32 newTick = entityUpdate->currentTick();
+        Uint32 newTick = message->tickTimestamp();
         if (newTick > latestReceivedTick) {
             latestReceivedTick = newTick;
         }
 
         // Pull out the vector of entities.
+        auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
         auto entities = entityUpdate->entities();
 
         // Find the player data.
@@ -91,6 +91,7 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
         DebugInfo("Latest: %u, current: %u", latestReceivedTick, currentTick);
 
         // TODO: Find the appropriate futureOffset through synchro timestamps.
+        // Bring the server's tick number back into our local reference.
         Uint32 futureOffset = 5;
         /* Relay all inputs since the received message, except the current. */
         for (Uint32 i = (latestReceivedTick + 1 - futureOffset); i < currentTick; ++i) {

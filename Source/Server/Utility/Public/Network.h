@@ -10,6 +10,7 @@
 #include <thread>
 #include "readerwriterqueue.h"
 #include "MessageSorter.h"
+#include "Message_generated.h"
 
 struct _SDLNet_SocketSet;
 typedef struct _SDLNet_SocketSet* SDLNet_SocketSet;
@@ -31,6 +32,8 @@ public:
 
     /** 20 network ticks per second. */
     static constexpr float NETWORK_TICK_INTERVAL_S = 1 / 20.0f;
+
+    static void registerCurrentTickPtr(Uint32* inCurrentTickPtr);
 
     Network();
 
@@ -67,9 +70,23 @@ public:
     void acceptNewClients();
 
     /**
-     * Adds the given client to the client map at key entityID.
+     * Adds the given client to the client map at key entityID
+     *
+     * Effectively, this means it will start receiving messages broadcast
+     * through sendToAll().
+     *
+     * Do this after the client has been registered with the game.
      */
     void addClient(EntityID entityID, std::shared_ptr<Peer> client);
+
+    /**
+     * Queues the given data to be sent on the next network tick to the client associated
+     * with the given EntityID.
+     *
+     * This must be done instead of queueing a message immediately to ensure that the
+     * client receives the latest tick (because messages are batched).
+     */
+    void sendConnectionResponse(EntityID id, float spawnX, float spawnY);
 
     /**
      * @return A pointer to a new client if one is waiting, else nullptr.
@@ -87,6 +104,13 @@ private:
     struct MessageInfo {
         std::shared_ptr<Peer> client;
         BinaryBufferSharedPtr message;
+    };
+
+    /** Holds data for a deferred send of a ConnectionResponse message. */
+    struct ConnectionResponseData {
+        EntityID id;
+        float spawnX;
+        float spawnY;
     };
 
     /**
@@ -112,6 +136,12 @@ private:
      * Pushes a message into the inputQueue.
      */
     void queueInputMessage(BinaryBufferSharedPtr message);
+
+    /**
+     * Constructs any data in connectionResponseQueue into a message and
+     * sends it to the relevant client.
+     */
+    void sendConnectionResponsesInternal();
 
     /**
      * Tries to send any messages in sendQueue over the network.
@@ -144,10 +174,18 @@ private:
     /** Stores input messages from clients, sorted by tick number. */
     MessageSorter inputMessageSorter;
 
+    /** Holds data for ConnectionResponse messages that need to be sent. */
+    std::queue<ConnectionResponseData> connectionResponseQueue;
+
     /** Calls processClients(). */
     std::thread receiveThreadObj;
     /** Turn false to signal that the receive thread should end. */
     std::atomic<bool> exitRequested;
+
+    static constexpr int BUILDER_BUFFER_SIZE = 512;
+    flatbuffers::FlatBufferBuilder builder;
+
+    static Uint32* currentTickPtr;
 };
 
 } // namespace Server

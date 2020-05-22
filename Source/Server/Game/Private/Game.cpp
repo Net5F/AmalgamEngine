@@ -13,12 +13,12 @@ Game::Game(Network& inNetwork)
 , networkInputSystem(*this, world, network)
 , movementSystem(world)
 , networkOutputSystem(*this, world, network)
-, builder(BUILDER_BUFFER_SIZE)
 , accumulatedTime(0.0f)
 , currentTick(0)
 {
     world.setSpawnPoint({64, 64});
     Debug::registerCurrentTickPtr(&currentTick);
+    Network::registerCurrentTickPtr(&currentTick);
 }
 
 void Game::tick(float deltaSeconds)
@@ -45,22 +45,8 @@ void Game::tick(float deltaSeconds)
             // Add them to the network's map.
             network.addClient(newID, newClient);
 
-            // Prep the builder for a new message.
-            builder.Clear();
-
-            // Send them their ID and spawn point.
-            auto response = fb::CreateConnectionResponse(builder, currentTick, newID,
-                spawnPoint.x, spawnPoint.y);
-            auto encodedMessage = fb::CreateMessage(builder,
-                fb::MessageContent::ConnectionResponse, response.Union());
-            builder.Finish(encodedMessage);
-
-            Uint8* buffer = builder.GetBufferPointer();
-            BinaryBufferSharedPtr message = std::make_shared<std::vector<Uint8>>(
-            buffer, (buffer + builder.GetSize()));
-
-            network.send(newClient, message);
-            DebugInfo("Sent new client response at tick %u", currentTick);
+            // Tell the network to send a connectionResponse on the next network tick.
+            network.sendConnectionResponse(newID, spawnPoint.x, spawnPoint.y);
 
             newClient = network.getNewClient();
         }
