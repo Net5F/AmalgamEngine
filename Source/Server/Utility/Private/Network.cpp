@@ -2,6 +2,7 @@
 #include "Acceptor.h"
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
+#include "NetworkHelpers.h"
 #include <algorithm>
 #include "Debug.h"
 
@@ -211,11 +212,9 @@ void Network::sendConnectionResponsesInternal()
                 fb::MessageContent::ConnectionResponse, response.Union());
             builder.Finish(encodedMessage);
 
-            Uint8* buffer = builder.GetBufferPointer();
-            BinaryBufferSharedPtr message = std::make_shared<std::vector<Uint8>>(
-            buffer, (buffer + builder.GetSize()));
-
-            send(clients.at(data.id), message);
+            send(clients.at(data.id),
+                NetworkHelpers::constructMessage(builder.GetSize(),
+                    builder.GetBufferPointer()));
             DebugInfo("Sent new client response with tick = %u", latestTickTimestamp);
 
             connectionResponseQueue.pop();

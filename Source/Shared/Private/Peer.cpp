@@ -77,17 +77,12 @@ bool AM::Peer::isConnected()
 
 bool AM::Peer::sendMessage(BinaryBufferSharedPtr message)
 {
-    Uint8 size_buf[sizeof(Uint32)];
-    std::size_t size = message->size();
-    _SDLNet_Write32(size, size_buf);
-
-    unsigned int bytesSent = SDLNet_TCP_Send(socket, size_buf, sizeof(Uint32));
-    if (bytesSent < sizeof(Uint32)) {
-        return false;
+    std::size_t messageSize = message->size();
+    if (messageSize > SDL_MAX_UINT16) {
+        DebugError("Tried to send a too-large message. Size: %u, max: %u", messageSize, SDL_MAX_UINT16);
     }
 
-    unsigned int messageSize = message->size();
-    bytesSent = SDLNet_TCP_Send(socket, message->data(), messageSize);
+    unsigned int bytesSent = SDLNet_TCP_Send(socket, message->data(), messageSize);
     if (bytesSent < messageSize) {
         return false;
     }
@@ -119,15 +114,15 @@ BinaryBufferSharedPtr AM::Peer::receiveMessage(bool checkSockets)
 BinaryBufferSharedPtr AM::Peer::receiveMessageWait()
 {
     // Receive the header (single byte, says the size of the upcoming message.)
-    Uint8 sizeBuf[sizeof(Uint32)];
-    if (SDLNet_TCP_Recv(socket, sizeBuf, sizeof(Uint32)) <= 0) {
+    Uint8 sizeBuf[sizeof(Uint16)];
+    if (SDLNet_TCP_Recv(socket, sizeBuf, sizeof(Uint16)) <= 0) {
         // Disconnected
         peerIsConnected = false;
         return nullptr;
     }
 
     // The number of bytes in the upcoming message.
-    Uint32 messageSize = _SDLNet_Read32(sizeBuf);
+    Uint16 messageSize = _SDLNet_Read16(sizeBuf);
 
     if (messageSize > MAX_MESSAGE_SIZE) {
         DebugInfo("Tried to receive too large of a message. messageSize: %u, MaxSize: %u",

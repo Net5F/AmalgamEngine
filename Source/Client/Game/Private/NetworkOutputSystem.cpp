@@ -3,6 +3,7 @@
 #include "World.h"
 #include "Network.h"
 #include "MessageUtil.h"
+#include "NetworkHelpers.h"
 #include "Debug.h"
 
 namespace AM
@@ -52,9 +53,8 @@ void NetworkOutputSystem::sendInputState()
     builder.Finish(message);
 
     // Send the message.
-    Uint8* buffer = builder.GetBufferPointer();
     network.send(
-        std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
+        NetworkHelpers::constructMessage(builder.GetSize(), builder.GetBufferPointer()));
     DebugInfo("Queued message on tick %u with currentTick = %u", game.getCurrentTick(),
         game.getCurrentTick() + futureOffset);
 

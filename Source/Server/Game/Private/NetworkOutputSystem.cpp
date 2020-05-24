@@ -3,6 +3,7 @@
 #include "World.h"
 #include "Network.h"
 #include "MessageUtil.h"
+#include "NetworkHelpers.h"
 #include "Debug.h"
 
 namespace AM
@@ -48,9 +49,8 @@ void NetworkOutputSystem::broadcastDirtyEntities()
     builder.Finish(message);
 
     // Send the message to all connected clients.
-    Uint8* buffer = builder.GetBufferPointer();
     network.sendToAll(
-        std::make_shared<std::vector<Uint8>>(buffer, (buffer + builder.GetSize())));
+        NetworkHelpers::constructMessage(builder.GetSize(), builder.GetBufferPointer()));
 }
 
 flatbuffers::Offset<AM::fb::Entity> NetworkOutputSystem::serializeEntity(

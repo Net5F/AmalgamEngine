@@ -15,7 +15,9 @@ namespace AM
 class Peer
 {
 public:
-    static constexpr unsigned int MAX_MESSAGE_SIZE = 4000;
+    /** Largest message we'll accept. Kept at 1450 for now to try to avoid IP fragmentation.
+     *  Can rethink if we need larger. */
+    static constexpr unsigned int MAX_MESSAGE_SIZE = 1450;
 
     /**
      * Initiates a TCP connection that the other side can then accept.
@@ -41,7 +43,8 @@ public:
     bool isConnected();
 
     /**
-     * Sends the message to this peer.
+     * Sends a message to this Peer.
+     * Will error if the message size is larger than a Uint16 can hold.
      * @return false if the send failed, else true.
      */
     bool sendMessage(BinaryBufferSharedPtr message);
