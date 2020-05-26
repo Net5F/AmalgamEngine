@@ -2,7 +2,7 @@
 #define PLAYERMOVEMENTSYSTEM_H
 
 #include "MovementHelpers.h"
-#include "SharedDefs.h"
+#include "GameDefs.h"
 #include "InputComponent.h"
 #include "Message_generated.h"
 #include <array>

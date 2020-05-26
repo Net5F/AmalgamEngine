@@ -70,12 +70,12 @@ AM::Peer::~Peer()
     SDLNet_TCP_Close(socket);
 }
 
-bool AM::Peer::isConnected()
+bool AM::Peer::isConnected() const
 {
     return peerIsConnected;
 }
 
-bool AM::Peer::sendMessage(BinaryBufferSharedPtr message)
+bool AM::Peer::send(BinaryBufferSharedPtr message)
 {
     std::size_t messageSize = message->size();
     if (messageSize > SDL_MAX_UINT16) {
@@ -84,11 +84,56 @@ bool AM::Peer::sendMessage(BinaryBufferSharedPtr message)
 
     unsigned int bytesSent = SDLNet_TCP_Send(socket, message->data(), messageSize);
     if (bytesSent < messageSize) {
+        // The peer probably disconnected (could be a different issue).
+        peerIsConnected = false;
         return false;
     }
     else {
         return true;
     }
+}
+
+BinaryBufferSharedPtr AM::Peer::receiveBytes(Uint16 numBytes, bool checkSockets)
+{
+    if (checkSockets) {
+        // Poll to see if there's data
+        int numReady = SDLNet_CheckSockets(*set, 0);
+        if (numReady == -1) {
+            DebugInfo("Error while checking sockets: %s", SDLNet_GetError());
+            // Most of the time this is a system error, where perror might help.
+            perror("SDLNet_CheckSockets");
+        }
+    }
+
+    if (!SDLNet_SocketReady(socket)) {
+        return nullptr;
+    }
+    else {
+        return receiveBytesWait(numBytes);
+    }
+}
+
+BinaryBufferSharedPtr AM::Peer::receiveBytesWait(Uint16 numBytes)
+{
+    if (numBytes > MAX_MESSAGE_SIZE) {
+        DebugInfo("Tried to receive too large of a message. messageSize: %u, MaxSize: %u",
+            numBytes, MAX_MESSAGE_SIZE);
+        return nullptr;
+    }
+
+    int result = SDLNet_TCP_Recv(socket, &messageBuffer, numBytes);
+    if (result <= 0) {
+        // Disconnected
+        peerIsConnected = false;
+        return nullptr;
+    }
+    else if (result < numBytes) {
+        DebugError(
+            "Didn't receive all the bytes in one chunk. Need to add logic for this scenario.");
+    }
+
+    return std::make_shared<std::vector<Uint8>>(messageBuffer.begin()
+    , (messageBuffer.begin() + numBytes));
 }
 
 BinaryBufferSharedPtr AM::Peer::receiveMessage(bool checkSockets)
@@ -130,13 +175,18 @@ BinaryBufferSharedPtr AM::Peer::receiveMessageWait()
         return nullptr;
     }
 
-    if (SDLNet_TCP_Recv(socket, &messageBuffer, messageSize) <= 0) {
+    int result = SDLNet_TCP_Recv(socket, &messageBuffer, messageSize);
+    if (result <= 0) {
         // Disconnected
         peerIsConnected = false;
         return nullptr;
     }
+    else if (result < messageSize) {
+        DebugError(
+            "Didn't receive all the bytes in one chunk. Need to add logic for this scenario.");
+    }
 
-    return std::make_shared<std::vector<Uint8>>(messageBuffer.begin()
-    , (messageBuffer.begin() + messageSize));
+    return std::make_shared<std::vector<Uint8>>(messageBuffer.begin(),
+        (messageBuffer.begin() + messageSize));
 }
 

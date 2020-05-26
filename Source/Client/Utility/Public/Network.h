@@ -1,7 +1,8 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include "SharedDefs.h"
+#include "GameDefs.h"
+#include "NetworkDefs.h"
 #include <string>
 #include <memory>
 #include <atomic>
@@ -67,7 +68,7 @@ public:
     /**
      * Pushes a message into the appropriate queue, based on its contents.
      */
-    void queueReceivedMessage(BinaryBufferSharedPtr messageBuffer);
+    void processReceivedMessage(BinaryBufferSharedPtr messageBuffer);
 
     std::shared_ptr<Peer> getServer();
 

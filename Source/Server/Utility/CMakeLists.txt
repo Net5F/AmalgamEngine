@@ -2,10 +2,12 @@ target_sources(Server
 	PRIVATE
 		Private/IDPool.cpp
 		Private/Network.cpp
+		Private/Client.cpp
 		Private/MessageSorter.cpp
 	PUBLIC
 		Public/IDPool.h
 		Public/Network.h
+		Public/Client.h
 		Public/MessageSorter.h
 )
 

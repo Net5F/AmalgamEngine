@@ -4,7 +4,7 @@
 #include "PositionComponent.h"
 #include "MovementComponent.h"
 #include "InputComponent.h"
-#include "SharedDefs.h"
+#include "GameDefs.h"
 #include <array>
 
 namespace AM

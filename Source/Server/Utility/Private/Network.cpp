@@ -43,15 +43,17 @@ Network::~Network()
     receiveThreadObj.join();
 }
 
-void Network::send(std::shared_ptr<Peer> client,
-                             BinaryBufferSharedPtr message)
+void Network::send(EntityID id, BinaryBufferSharedPtr message)
 {
-    sendQueue.push_back({client, message});
+    clients.at(id).send(message);
 }
 
 void Network::sendToAll(BinaryBufferSharedPtr message)
 {
-    sendQueue.push_back({nullptr, message});
+    // Push the message into all client queues.
+    for (auto& pair : clients) {
+        pair.second.send(message);
+    }
 }
 
 void Network::sendWaitingMessages(float deltaSeconds)
@@ -59,7 +61,10 @@ void Network::sendWaitingMessages(float deltaSeconds)
     accumulatedTime += deltaSeconds;
 
     if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
-        sendConnectionResponsesInternal();
+        // Queue connection responses before starting to send this batch.
+        queueConnectionResponses();
+
+        // Send all messages for this batch.
         sendWaitingMessagesInternal();
 
         accumulatedTime -= NETWORK_TICK_INTERVAL_S;
@@ -115,7 +120,7 @@ void Network::sendConnectionResponse(EntityID id, float spawnX, float spawnY)
 void Network::eraseDisconnectedClients()
 {
     for (auto it = clients.begin(); it != clients.end();) {
-       if (!(it->second->isConnected())) {
+       if (!(it->second.isConnected())) {
            it = clients.erase(it);
        }
        else {
@@ -127,8 +132,7 @@ void Network::eraseDisconnectedClients()
 int Network::processClients(Network* network)
 {
     const std::shared_ptr<SDLNet_SocketSet> clientSet = network->getClientSet();
-    const std::unordered_map<EntityID, std::shared_ptr<Peer>>& clients =
-        network->getClients();
+    std::unordered_map<EntityID, Client>& clients = network->getClients();
 
     std::atomic<bool> const* exitRequested = network->getExitRequestedPtr();
 
@@ -155,7 +159,7 @@ int Network::processClients(Network* network)
 void Network::receiveClientMessages(
 Network* network,
 const std::shared_ptr<SDLNet_SocketSet> clientSet,
-const std::unordered_map<EntityID, std::shared_ptr<Peer>>& clients)
+std::unordered_map<EntityID, Client>& clients)
 {
     // Check if there are any messages to receive.
     int numReady = SDLNet_CheckSockets(*clientSet, 100);
@@ -166,13 +170,13 @@ const std::unordered_map<EntityID, std::shared_ptr<Peer>>& clients)
     }
     else if (numReady > 0) {
         // Receive all messages from all clients.
-        for (const auto& pair : clients) {
-            BinaryBufferSharedPtr message = pair.second->receiveMessage(false);
+        for (auto& pair : clients) {
+            BinaryBufferSharedPtr message = pair.second.receiveMessage();
             while (message != nullptr) {
                 // Queue the message (blocks if the queue is locked).
                 network->queueInputMessage(message);
 
-                message = pair.second->receiveMessage(false);
+                message = pair.second.receiveMessage();
             }
         }
     }
@@ -191,13 +195,12 @@ void Network::queueInputMessage(BinaryBufferSharedPtr messageBuffer)
     inputMessageSorter.push(message->tickTimestamp(), messageBuffer);
 }
 
-void Network::sendConnectionResponsesInternal()
+void Network::queueConnectionResponses()
 {
     /* Send all waiting ConnectionResponse messages. */
     unsigned int responseCount = connectionResponseQueue.size();
     if (responseCount > 0) {
         Uint32 latestTickTimestamp = *currentTickPtr;
-        DebugInfo("Sending latest tick: %u", latestTickTimestamp);
 
         for (unsigned int i = 0; i < responseCount; ++i) {
             ConnectionResponseData& data = connectionResponseQueue.front();
@@ -212,7 +215,8 @@ void Network::sendConnectionResponsesInternal()
                 fb::MessageContent::ConnectionResponse, response.Union());
             builder.Finish(encodedMessage);
 
-            send(clients.at(data.id),
+            // Queue the message so it gets included in the next batch.
+            send(data.id,
                 NetworkHelpers::constructMessage(builder.GetSize(),
                     builder.GetBufferPointer()));
             DebugInfo("Sent new client response with tick = %u", latestTickTimestamp);
@@ -224,32 +228,27 @@ void Network::sendConnectionResponsesInternal()
 
 void Network::sendWaitingMessagesInternal()
 {
-    /* Send all waiting messages from the standard send queue. */
-    while (!sendQueue.empty()) {
-        MessageInfo& messageInfo = sendQueue.front();
-        if (messageInfo.client != nullptr) {
-            // Send to single client.
-            if (!messageInfo.client->sendMessage(messageInfo.message)) {
-                DebugError("Send failed. Returning, will be attempted again next tick.");
-                return;
-            }
-            else {
-                sendQueue.pop_front();
-            }
-        }
-        else {
-            // Send to all connected clients.
-            for (const auto& pair : clients) {
-                if (pair.second->isConnected()) {
-                    if (!pair.second->sendMessage(messageInfo.message)) {
-                        DebugInfo("Send failed. Client probably disconnected.");
-                        return;
-                    }
-                }
+    /* Send the waiting messages in every client's queue. */
+    for (auto& pair : clients) {
+        Uint8 messageCount = pair.second.getWaitingMessageCount();
+        if (pair.second.isConnected() && (messageCount > 0)) {
+            // Build the batch header.
+            Uint8 header[SERVER_HEADER_SIZE] = {0, messageCount};
+
+            // Send the batch header.
+            bool result = pair.second.send(
+                std::make_shared<std::vector<Uint8>>(header, header + SERVER_HEADER_SIZE));
+            if (!result) {
+                DebugInfo("Send failed, client likely disconnected. Skipping further"
+                    "sends to this client.");
+                continue;
             }
 
-            // Message has been sent to any connected clients, get rid of it.
-            sendQueue.pop_front();
+            // Send all waiting messages.
+            result = pair.second.sendWaitingMessages();
+            if (!result) {
+                DebugInfo("Send failed, client likely disconnected.")
+            }
         }
     }
 }
@@ -270,7 +269,7 @@ const std::shared_ptr<SDLNet_SocketSet> Network::getClientSet()
     return clientSet;
 }
 
-const std::unordered_map<EntityID, std::shared_ptr<Peer>>& Network::getClients()
+std::unordered_map<EntityID, Client>& Network::getClients()
 {
     return clients;
 }

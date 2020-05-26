@@ -1,12 +1,11 @@
-#ifndef AMSTRUCTS_H
-#define AMSTRUCTS_H
+#ifndef GAMEDEFS_H
+#define GAMEDEFS_H
 
 #include <SDL_stdinc.h>
-#include <memory>
-#include <vector>
+#include <array>
 
 /**
- * This file contains shared definitions that should be
+ * This file contains shared game definitions that should be
  * consistent between the server and client.
  */
 namespace AM
@@ -18,9 +17,6 @@ static constexpr unsigned int SCREEN_WIDTH = 1280;
 static constexpr unsigned int SCREEN_HEIGHT = 720;
 
 typedef Uint32 EntityID;
-
-typedef std::unique_ptr<std::vector<Uint8>> BinaryBufferPtr;
-typedef std::shared_ptr<std::vector<Uint8>> BinaryBufferSharedPtr;
 
 /** Structs. */
 struct ComponentFlag
@@ -86,4 +82,4 @@ public:
 
 } /* End namespace AM */
 
-#endif /* End AMSTRUCTS_H */
+#endif /* End GAMEDEFS_H */

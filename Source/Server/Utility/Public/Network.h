@@ -1,7 +1,10 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include "SharedDefs.h"
+#include "Client.h"
+#include "NetworkDefs.h"
+#include "MessageSorter.h"
+#include "Message_generated.h"
 #include <string>
 #include <memory>
 #include <cstddef>
@@ -9,8 +12,6 @@
 #include <atomic>
 #include <thread>
 #include "readerwriterqueue.h"
-#include "MessageSorter.h"
-#include "Message_generated.h"
 
 struct _SDLNet_SocketSet;
 typedef struct _SDLNet_SocketSet* SDLNet_SocketSet;
@@ -39,10 +40,15 @@ public:
 
     virtual ~Network();
 
+    // TODO: Can we merge some of the socket stuff into Client?
+    //       Or some of the "connected but not in the game state yet" stuff?
+    //       Need to clarify difference between Peer and Client and
+    //       rename the functions that call a shared_ptr<Peer> a client.
+
     /**
      * Queues a message to be sent the next time sendWaitingMessages is called.
      */
-    void send(std::shared_ptr<Peer> client, BinaryBufferSharedPtr message);
+    void send(EntityID id, BinaryBufferSharedPtr message);
 
     /**
      * Queues a message to be sent to all connected clients the next time
@@ -95,7 +101,7 @@ public:
 
     const std::shared_ptr<SDLNet_SocketSet> getClientSet();
 
-    const std::unordered_map<EntityID, std::shared_ptr<Peer>>& getClients();
+    std::unordered_map<EntityID, Client>& getClients();
 
     std::atomic<bool> const* getExitRequestedPtr();
 
@@ -130,7 +136,7 @@ private:
      */
     static void receiveClientMessages(
     Network* network, const std::shared_ptr<SDLNet_SocketSet> clientSet,
-    const std::unordered_map<EntityID, std::shared_ptr<Peer>>& clients);
+    std::unordered_map<EntityID, Client>& clients);
 
     /**
      * Pushes a message into the inputQueue.
@@ -139,9 +145,9 @@ private:
 
     /**
      * Constructs any data in connectionResponseQueue into a message and
-     * sends it to the relevant client.
+     * queues it in the relevant client's send queue.
      */
-    void sendConnectionResponsesInternal();
+    void queueConnectionResponses();
 
     /**
      * Tries to send any messages in sendQueue over the network.
@@ -163,7 +169,7 @@ private:
     std::shared_ptr<SDLNet_SocketSet> clientSet;
     /** Maps IDs to their connections. Allows the game to say "send this message
         to this entity" instead of needing to track the connection objects. */
-    std::unordered_map<EntityID, std::shared_ptr<Peer>> clients;
+    std::unordered_map<EntityID, Client> clients;
 
     /** The outgoing message queue. Holds messages ready to be sent. */
     std::deque<MessageInfo> sendQueue;
@@ -171,7 +177,7 @@ private:
     /** The aggregated time since we last processed a tick. */
     float accumulatedTime;
 
-    /** Stores input messages from clients, sorted by tick number. */
+    /** Stores input messages received from clients, sorted by tick number. */
     MessageSorter inputMessageSorter;
 
     /** Holds data for ConnectionResponse messages that need to be sent. */

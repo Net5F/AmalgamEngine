@@ -1,7 +1,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include "SharedDefs.h"
+#include "GameDefs.h"
 #include "InputComponent.h"
 #include "PositionComponent.h"
 #include "MovementComponent.h"

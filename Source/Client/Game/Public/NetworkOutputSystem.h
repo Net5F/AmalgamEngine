@@ -2,7 +2,7 @@
 #define NETWORKOUTPUTSYSTEM_H
 
 #include "Message_generated.h"
-#include "SharedDefs.h"
+#include "GameDefs.h"
 
 namespace AM
 {

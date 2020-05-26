@@ -3,7 +3,7 @@
 #include "World.h"
 #include "Network.h"
 #include "Peer.h"
-#include "SharedDefs.h"
+#include "GameDefs.h"
 #include "MessageUtil.h"
 #include "Debug.h"
 #include <memory>

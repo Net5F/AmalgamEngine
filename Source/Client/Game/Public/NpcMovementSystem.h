@@ -1,7 +1,8 @@
 #ifndef NPCMOVEMENTSYSTEM_H
 #define NPCMOVEMENTSYSTEM_H
 
-#include "SharedDefs.h"
+#include "GameDefs.h"
+#include "NetworkDefs.h"
 #include "InputComponent.h"
 #include <array>
 

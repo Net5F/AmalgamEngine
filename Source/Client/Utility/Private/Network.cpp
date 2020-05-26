@@ -1,7 +1,9 @@
 #include "Network.h"
 #include "Peer.h"
+#include "NetworkHelpers.h"
 #include <SDL2/SDL_net.h>
 #include "Message_generated.h"
+#include "GameDefs.h"
 #include "Debug.h"
 
 namespace AM
@@ -54,7 +56,7 @@ void Network::send(BinaryBufferSharedPtr message)
     }
 
     // Send the message.
-    if (!(server->sendMessage(message))) {
+    if (!(server->send(message))) {
         DebugError("Send failed.");
     }
 }
@@ -100,19 +102,28 @@ int Network::pollForMessages(void* inNetwork)
     std::atomic<bool> const* exitRequested = network->getExitRequestedPtr();
 
     while (!(*exitRequested)) {
-        // Check if there are any messages to receive.
-        BinaryBufferSharedPtr message = server->receiveMessageWait();
+        // Wait for a server header.
+        BinaryBufferSharedPtr header = server->receiveBytesWait(SERVER_HEADER_SIZE);
 
-        // If we received a message, push it into the appropriate queue.
-        if (message != nullptr) {
-            network->queueReceivedMessage(message);
+        // Extract the data from the header.
+        Sint8 tickOffsetAdjustment = header->data()[ServerHeaderIndex::TickOffsetAdjustment];
+        Uint8 messageCount = header->data()[ServerHeaderIndex::MessageCount];
+
+        // Receive all of the expected messages.
+        for (unsigned int i = 0; i < messageCount; ++i) {
+            BinaryBufferSharedPtr message = server->receiveMessageWait();
+
+            // If we received a message, push it into the appropriate queue.
+            if (message != nullptr) {
+                network->processReceivedMessage(message);
+            }
         }
     }
 
     return 0;
 }
 
-void Network::queueReceivedMessage(BinaryBufferSharedPtr messageBuffer)
+void Network::processReceivedMessage(BinaryBufferSharedPtr messageBuffer)
 {
     const fb::Message* message = fb::GetMessage(messageBuffer->data());
 

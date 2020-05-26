@@ -1,7 +1,7 @@
 #ifndef MESSAGESORTER_H_
 #define MESSAGESORTER_H_
 
-#include "SharedDefs.h"
+#include "NetworkDefs.h"
 #include <array>
 #include <queue>
 #include <mutex>

@@ -1,7 +1,7 @@
 #ifndef INPUTCOMPONENT_H
 #define INPUTCOMPONENT_H
 
-#include "SharedDefs.h"
+#include "GameDefs.h"
 #include <array>
 
 namespace AM

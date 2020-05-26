@@ -1,7 +1,7 @@
 #ifndef IDPOOL_H
 #define IDPOOL_H
 
-#include "SharedDefs.h"
+#include "GameDefs.h"
 #include <SDL_stdinc.h>
 #include <array>
 

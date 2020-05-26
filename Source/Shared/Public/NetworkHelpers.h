@@ -1,10 +1,13 @@
 #ifndef NETWORKHELPERS_H
 #define NETWORKHELPERS_H
 
-#include "SharedDefs.h"
+#include "NetworkDefs.h"
+#include <memory>
 
 namespace AM
 {
+
+class Peer;
 
 /**
  * Shared static functions for network tasks.

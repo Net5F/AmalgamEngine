@@ -1,6 +1,6 @@
 #include <catch2/catch.hpp>
 #include "MessageSorter.h"
-#include "SharedDefs.h"
+#include "GameDefs.h"
 #include <memory>
 #include <queue>
 #include "Debug.h"

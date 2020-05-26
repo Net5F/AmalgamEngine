@@ -1,7 +1,7 @@
 #include <SDL2pp/SDL2pp.hh>
 #include "Message_generated.h"
 
-#include "SharedDefs.h"
+#include "GameDefs.h"
 #include "Game.h"
 #include "Network.h"
 #include "Timer.h"

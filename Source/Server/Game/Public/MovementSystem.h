@@ -1,7 +1,7 @@
 #ifndef MOVEMENTSYSTEM_H
 #define MOVEMENTSYSTEM_H
 
-#include "SharedDefs.h"
+#include "GameDefs.h"
 #include "InputComponent.h"
 #include "Message_generated.h"
 #include <array>

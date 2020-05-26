@@ -18,7 +18,8 @@ add_library(Shared STATIC
 		Public/Timer.h
 		Public/MovementHelpers.h
 		Public/NetworkHelpers.h
-		Public/SharedDefs.h
+		Public/GameDefs.h
+		Public/NetworkDefs.h
 		Public/MessageUtil.h
 		Public/Debug.h
 
