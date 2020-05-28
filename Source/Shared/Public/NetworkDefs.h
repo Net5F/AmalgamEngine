@@ -35,6 +35,22 @@ enum MessageIndex : Uint8 {
     MessageStart = 2
 };
 
+/** All potential results for a network send or receive. */
+enum class NetworkResult {
+    Success,
+    /* Used for when a send or receive was attempted and
+     * the peer was found to be disconnected. */
+    Disconnected,
+    /* Used for when a receive is attempted but there is no data waiting. */
+    NoWaitingData
+};
+/** The NetworkResult and associated data from a network receive. */
+struct ReceiveResult {
+    NetworkResult result;
+    // message will be nullptr if result != Success.
+    BinaryBufferSharedPtr message;
+};
+
 } /* End namespace AM */
 
 #endif /* End NETWORKDEFS_H */

@@ -106,12 +106,6 @@ public:
     std::atomic<bool> const* getExitRequestedPtr();
 
 private:
-    /** Pairs a message with the client to send it to. client == nullptr means send to all. */
-    struct MessageInfo {
-        std::shared_ptr<Peer> client;
-        BinaryBufferSharedPtr message;
-    };
-
     /** Holds data for a deferred send of a ConnectionResponse message. */
     struct ConnectionResponseData {
         EntityID id;
@@ -120,14 +114,8 @@ private:
     };
 
     /**
-     * Iterates through the clients and erases any that are disconnected.
-     */
-    void eraseDisconnectedClients();
-
-    /**
      * Thread function, started from constructor.
-     * Accepts new clients, erases disconnected clients, and tries to receive
-     * messages from the clients.
+     * Accepts new clients and tries to receive messages from the clients.
      */
     static int processClients(Network* network);
 
@@ -170,9 +158,6 @@ private:
     /** Maps IDs to their connections. Allows the game to say "send this message
         to this entity" instead of needing to track the connection objects. */
     std::unordered_map<EntityID, Client> clients;
-
-    /** The outgoing message queue. Holds messages ready to be sent. */
-    std::deque<MessageInfo> sendQueue;
 
     /** The aggregated time since we last processed a tick. */
     float accumulatedTime;

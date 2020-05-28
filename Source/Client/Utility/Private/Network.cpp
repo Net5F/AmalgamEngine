@@ -24,9 +24,9 @@ Network::Network()
 
 Network::~Network()
 {
-    SDLNet_Quit();
     exitRequested = true;
     receiveThreadObj.join();
+    SDLNet_Quit();
 }
 
 bool Network::connect()
@@ -56,7 +56,8 @@ void Network::send(BinaryBufferSharedPtr message)
     }
 
     // Send the message.
-    if (!(server->send(message))) {
+    NetworkResult result = server->send(message);
+    if (result != NetworkResult::Success) {
         DebugError("Send failed.");
     }
 }
@@ -103,19 +104,26 @@ int Network::pollForMessages(void* inNetwork)
 
     while (!(*exitRequested)) {
         // Wait for a server header.
-        BinaryBufferSharedPtr header = server->receiveBytesWait(SERVER_HEADER_SIZE);
+        ReceiveResult receiveResult = server->receiveBytesWait(SERVER_HEADER_SIZE);
 
-        // Extract the data from the header.
-        Sint8 tickOffsetAdjustment = header->data()[ServerHeaderIndex::TickOffsetAdjustment];
-        Uint8 messageCount = header->data()[ServerHeaderIndex::MessageCount];
+        if (receiveResult.result == NetworkResult::Success) {
+            BinaryBufferSharedPtr header = receiveResult.message;
 
-        // Receive all of the expected messages.
-        for (unsigned int i = 0; i < messageCount; ++i) {
-            BinaryBufferSharedPtr message = server->receiveMessageWait();
+            // Extract the data from the header.
+            Sint8 tickOffsetAdjustment =
+                header->data()[ServerHeaderIndex::TickOffsetAdjustment];
+            Uint8 messageCount = header->data()[ServerHeaderIndex::MessageCount];
 
-            // If we received a message, push it into the appropriate queue.
-            if (message != nullptr) {
-                network->processReceivedMessage(message);
+            // Receive all of the expected messages.
+            for (unsigned int i = 0; i < messageCount; ++i) {
+                ReceiveResult receiveResult = server->receiveMessageWait();
+
+                // If we received a message, push it into the appropriate queue.
+                if (receiveResult.result == NetworkResult::Success) {
+                    BinaryBufferSharedPtr message = receiveResult.message;
+
+                    network->processReceivedMessage(message);
+                }
             }
         }
     }

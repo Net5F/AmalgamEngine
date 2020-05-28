@@ -38,21 +38,22 @@ Network::Network()
 
 Network::~Network()
 {
-    SDLNet_Quit();
     exitRequested = true;
     receiveThreadObj.join();
+    SDLNet_Quit();
 }
 
 void Network::send(EntityID id, BinaryBufferSharedPtr message)
 {
-    clients.at(id).send(message);
+    // Queue the message to be sent with the next batch.
+    clients.at(id).queueMessage(message);
 }
 
 void Network::sendToAll(BinaryBufferSharedPtr message)
 {
-    // Push the message into all client queues.
+    // Queue the message to be sent with the next batch.
     for (auto& pair : clients) {
-        pair.second.send(message);
+        pair.second.queueMessage(message);
     }
 }
 
@@ -117,18 +118,6 @@ void Network::sendConnectionResponse(EntityID id, float spawnX, float spawnY)
     connectionResponseQueue.push({id, spawnX, spawnY});
 }
 
-void Network::eraseDisconnectedClients()
-{
-    for (auto it = clients.begin(); it != clients.end();) {
-       if (!(it->second.isConnected())) {
-           it = clients.erase(it);
-       }
-       else {
-           ++it;
-       }
-    }
-}
-
 int Network::processClients(Network* network)
 {
     const std::shared_ptr<SDLNet_SocketSet> clientSet = network->getClientSet();
@@ -139,9 +128,6 @@ int Network::processClients(Network* network)
     while (!(*exitRequested)) {
         // Check if there are any new clients to connect.
         network->acceptNewClients();
-
-        // Check if we've detected any disconnected clients.
-        network->eraseDisconnectedClients();
 
         // Check if there's any clients to receive from.
         if (clients.size() == 0) {
@@ -169,14 +155,26 @@ std::unordered_map<EntityID, Client>& clients)
         perror("SDLNet_CheckSockets");
     }
     else if (numReady > 0) {
-        // Receive all messages from all clients.
-        for (auto& pair : clients) {
-            BinaryBufferSharedPtr message = pair.second.receiveMessage();
-            while (message != nullptr) {
-                // Queue the message (blocks if the queue is locked).
-                network->queueInputMessage(message);
+        /* Iterate through all clients. */
+        for (auto it = clients.begin(); it != clients.end();) {
+            Client& client = it->second;
 
-                message = pair.second.receiveMessage();
+            /* Receive all messages from the client. */
+            ReceiveResult receiveResult = client.receiveMessage();
+            while (receiveResult.result == NetworkResult::Success) {
+                // Queue the message (blocks if the queue is locked).
+                network->queueInputMessage(receiveResult.message);
+
+                receiveResult = client.receiveMessage();
+            }
+
+            if (receiveResult.result == NetworkResult::Disconnected) {
+                DebugInfo("Client disconnected. Removing from map.");
+                it = clients.erase(it);
+            }
+            else {
+                // Manually increment the iterator because of the paths that erase elements.
+                ++it;
             }
         }
     }
@@ -229,26 +227,36 @@ void Network::queueConnectionResponses()
 void Network::sendWaitingMessagesInternal()
 {
     /* Send the waiting messages in every client's queue. */
-    for (auto& pair : clients) {
-        Uint8 messageCount = pair.second.getWaitingMessageCount();
-        if (pair.second.isConnected() && (messageCount > 0)) {
+    for (auto it = clients.begin(); it != clients.end();) {
+        Client& client = it->second;
+
+        Uint8 messageCount = client.getWaitingMessageCount();
+        if (messageCount > 0) {
             // Build the batch header.
             Uint8 header[SERVER_HEADER_SIZE] = {0, messageCount};
 
             // Send the batch header.
-            bool result = pair.second.send(
-                std::make_shared<std::vector<Uint8>>(header, header + SERVER_HEADER_SIZE));
-            if (!result) {
-                DebugInfo("Send failed, client likely disconnected. Skipping further"
-                    "sends to this client.");
-                continue;
+            NetworkResult result = client.sendHeader(
+                std::make_shared<std::vector<Uint8>>(header,
+                    header + SERVER_HEADER_SIZE));
+            if (result == NetworkResult::Disconnected) {
+                DebugInfo(
+                    "Send failed, client likely disconnected. Removing client from map.");
+                it = clients.erase(it);
+                continue; // Continue to avoid confusing iterator state.
             }
 
             // Send all waiting messages.
-            result = pair.second.sendWaitingMessages();
-            if (!result) {
-                DebugInfo("Send failed, client likely disconnected.")
+            result = client.sendWaitingMessages();
+            if (result == NetworkResult::Disconnected) {
+                DebugInfo(
+                    "Send failed, client likely disconnected. Removing client from map.");
+                it = clients.erase(it);
+                continue; // Continue to avoid confusing iterator state.
             }
+
+            // Manually increment the iterator because of the paths that erase elements.
+            ++it;
         }
     }
 }

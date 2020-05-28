@@ -40,14 +40,19 @@ public:
 
     ~Peer();
 
+    /**
+     * Returns false if the client was at some point found to be disconnected, else true.
+     * Note: This is just here as a safeguard, you should be considering a Peer as
+     *       disconnected as soon as a send or receive returns false.
+     */
     bool isConnected() const;
 
     /**
      * Sends a message to this Peer.
      * Will error if the message size is larger than a Uint16 can hold.
-     * @return false if the send failed, else true.
+     * @return Disconnected if the peer was found to be disconnected, else Success.
      */
-    bool send(BinaryBufferSharedPtr message);
+    NetworkResult send(BinaryBufferSharedPtr message);
 
     /**
      * Tries to receive bytes over the network.
@@ -56,16 +61,17 @@ public:
      *                      SocketReady(). Set this to false if you're going to call
      *                      CheckSockets() yourself.
      * @param numBytes  The number of bytes to receive.
-     * @return A message if one is ready, else nullptr.
+     * @return An appropriate ReceiveResult if the receive failed, else a ReceiveResult with
+     *         result == Success and data in the message field.
      */
-    BinaryBufferSharedPtr receiveBytes(Uint16 numBytes, bool checkSockets);
+    ReceiveResult receiveBytes(Uint16 numBytes, bool checkSockets);
 
     /**
      * Returns the requested number of bytes, waiting if they're not yet available.
      * @param numBytes  The number of bytes to receive.
      * @return A message.
      */
-    BinaryBufferSharedPtr receiveBytesWait(Uint16 numBytes);
+    ReceiveResult receiveBytesWait(Uint16 numBytes);
 
     /**
      * Tries to receive a {size, message} pair over the network.
@@ -73,16 +79,17 @@ public:
      * @param checkSockets  If true, will call CheckSockets() before checking
      *                      SocketReady(). Set this to false if you're going to call
      *                      CheckSockets() yourself.
-     * @return A message if one is ready, else nullptr.
+     * @return An appropriate ReceiveResult if the receive failed, else a ReceiveResult with
+     *         result == Success and data in the message field.
      */
-    BinaryBufferSharedPtr receiveMessage(bool checkSockets);
+    ReceiveResult receiveMessage(bool checkSockets);
 
     /**
      * Receives a {size, message} pair and returns a message, waiting if the data is
      * not yet available.
      * @return A message.
      */
-    BinaryBufferSharedPtr receiveMessageWait();
+    ReceiveResult receiveMessageWait();
 
 private:
     std::shared_ptr<SDLNet_SocketSet> set;

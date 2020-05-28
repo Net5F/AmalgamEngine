@@ -12,32 +12,34 @@ Client::Client(std::shared_ptr<Peer> inPeer)
 {
 }
 
-bool Client::isConnected() const
+NetworkResult Client::sendHeader(BinaryBufferSharedPtr header)
 {
-    return peer->isConnected();
+    return peer->send(header);
 }
 
-bool Client::send(BinaryBufferSharedPtr message)
+void Client::queueMessage(BinaryBufferSharedPtr message)
 {
-    return peer->send(message);
+    sendQueue.push_back(message);
 }
 
-bool Client::sendWaitingMessages()
+NetworkResult Client::sendWaitingMessages()
 {
-    BinaryBufferSharedPtr message = sendQueue.front();
-    while (message != nullptr) {
-        if (!(peer->send(message))) {
-            return false;
+    while (!(sendQueue.empty())) {
+        BinaryBufferSharedPtr message = sendQueue.front();
+
+        NetworkResult result = peer->send(message);
+        if (result != NetworkResult::Success) {
+            // Some sort of failure, stop sending and return it.
+            return result;
         }
 
         sendQueue.pop_front();
-        message = sendQueue.front();
     }
 
-    return true;
+    return NetworkResult::Success;
 }
 
-BinaryBufferSharedPtr Client::receiveMessage()
+ReceiveResult Client::receiveMessage()
 {
     return peer->receiveMessage(false);
 }
