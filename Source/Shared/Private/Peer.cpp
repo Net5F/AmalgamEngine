@@ -78,7 +78,6 @@ bool AM::Peer::isConnected() const
 AM::NetworkResult AM::Peer::send(BinaryBufferSharedPtr message)
 {
     if (!peerIsConnected) {
-        DebugInfo("Disconnect 1");
         return NetworkResult::Disconnected;
     }
 
@@ -101,7 +100,6 @@ AM::NetworkResult AM::Peer::send(BinaryBufferSharedPtr message)
 ReceiveResult AM::Peer::receiveBytes(Uint16 numBytes, bool checkSockets)
 {
     if (!peerIsConnected) {
-        DebugInfo("Disconnect 2");
         return {NetworkResult::Disconnected, nullptr};
     }
     else if (checkSockets) {
@@ -125,7 +123,6 @@ ReceiveResult AM::Peer::receiveBytes(Uint16 numBytes, bool checkSockets)
 ReceiveResult AM::Peer::receiveBytesWait(Uint16 numBytes)
 {
     if (!peerIsConnected) {
-        DebugInfo("Disconnect 3");
         return {NetworkResult::Disconnected, nullptr};
     }
     else if (numBytes > MAX_MESSAGE_SIZE) {
@@ -138,7 +135,6 @@ ReceiveResult AM::Peer::receiveBytesWait(Uint16 numBytes)
     if (result <= 0) {
         // Disconnected
         peerIsConnected = false;
-        DebugInfo("Disconnect 8");
         return {NetworkResult::Disconnected, nullptr};
     }
     else if (result < numBytes) {
@@ -154,7 +150,6 @@ ReceiveResult AM::Peer::receiveBytesWait(Uint16 numBytes)
 ReceiveResult AM::Peer::receiveMessage(bool checkSockets)
 {
     if (!peerIsConnected) {
-        DebugInfo("Disconnect 4");
         return {NetworkResult::Disconnected, nullptr};
     }
     else if (checkSockets) {
@@ -178,7 +173,6 @@ ReceiveResult AM::Peer::receiveMessage(bool checkSockets)
 ReceiveResult AM::Peer::receiveMessageWait()
 {
     if (!peerIsConnected) {
-        DebugInfo("Disconnect 5");
         return {NetworkResult::Disconnected, nullptr};
     }
 
@@ -187,7 +181,6 @@ ReceiveResult AM::Peer::receiveMessageWait()
     if (SDLNet_TCP_Recv(socket, sizeBuf, sizeof(Uint16)) <= 0) {
         // Disconnected
         peerIsConnected = false;
-        DebugInfo("Disconnect 6");
         return {NetworkResult::Disconnected, nullptr};
     }
 
@@ -204,7 +197,6 @@ ReceiveResult AM::Peer::receiveMessageWait()
     if (result <= 0) {
         // Disconnected
         peerIsConnected = false;
-        DebugInfo("Disconnect 7");
         return {NetworkResult::Disconnected, nullptr};
     }
     else if (result < messageSize) {
