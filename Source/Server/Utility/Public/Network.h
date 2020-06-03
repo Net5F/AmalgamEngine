@@ -42,11 +42,15 @@ public:
 
     // TODO: Can we merge some of the socket stuff into Client?
     //       Or some of the "connected but not in the game state yet" stuff?
-    //       Need to clarify difference between Peer and Client and
-    //       rename the functions that call a shared_ptr<Peer> a client.
+    //
+    //       How does the NetworkOutputSystem know what entities to send stuff to
+    //       and what ones have no connection?
+    //       When a client disconnects, how does the game know?
+    //       NetworkComponent?
 
     /**
      * Queues a message to be sent the next time sendWaitingMessages is called.
+     * @throws std::out_of_range if id is not in the clients map.
      */
     void send(EntityID id, BinaryBufferSharedPtr message);
 
@@ -76,7 +80,7 @@ public:
     void acceptNewClients();
 
     /**
-     * Adds the given client to the client map at key entityID
+     * Constructs a Client from the given peer and adds it to the client map at key entityID.
      *
      * Effectively, this means it will start receiving messages broadcast
      * through sendToAll().
@@ -149,7 +153,9 @@ private:
 
     std::unique_ptr<Acceptor> acceptor;
     /** Stores new connected clients until the game ties them to an ID and
-        adds them to the clients map. */
+        adds them to the clients map.
+        Important for thread safety since the new clients are accepted
+        by the receive thread and processed by the main thread. */
     moodycamel::ReaderWriterQueue<std::shared_ptr<Peer>> newClientQueue;
 
     /** The socket set used for all clients. Lets us do select()-like behavior,

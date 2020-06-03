@@ -27,7 +27,7 @@ void Game::tick(float deltaSeconds)
 
     // Process as many game ticks as have accumulated.
     while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
-        // Add any new connections.
+        // Add any newly connected clients to the game sim.
         std::shared_ptr<Peer> newClient = network.getNewClient();
         while (newClient != nullptr) {
             // Build their entity.

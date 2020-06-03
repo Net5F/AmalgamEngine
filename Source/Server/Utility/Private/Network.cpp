@@ -29,7 +29,7 @@ Network::Network()
 {
     SDLNet_Init();
 
-    // We delay creating the acceptor because startup has to be called first.
+    // We delay creating the acceptor because SDLNet_Init has to be called first.
     acceptor = std::make_unique<Acceptor>(SERVER_PORT, clientSet);
 
     // Start the receive thread.
@@ -115,6 +115,11 @@ void Network::addClient(EntityID entityID, std::shared_ptr<AM::Peer> client)
 
 void Network::sendConnectionResponse(EntityID id, float spawnX, float spawnY)
 {
+    if (clients.find(id) == clients.end()) {
+        DebugError(
+            "Tried to send a connectionResponse to a client that isn't in the clients map.")
+    }
+
     connectionResponseQueue.push({id, spawnX, spawnY});
 }
 
@@ -171,6 +176,7 @@ std::unordered_map<EntityID, Client>& clients)
             if (receiveResult.result == NetworkResult::Disconnected) {
                 DebugInfo("Client disconnected. Removing from map.");
                 it = clients.erase(it);
+                // TODO: This is a synchro issue, fix it.
             }
             else {
                 // Manually increment the iterator because of the paths that erase elements.
@@ -233,7 +239,8 @@ void Network::sendWaitingMessagesInternal()
         Uint8 messageCount = client.getWaitingMessageCount();
         if (messageCount > 0) {
             // Build the batch header.
-            Uint8 header[SERVER_HEADER_SIZE] = {0, messageCount};
+            Sint8 offset = -42;
+            Uint8 header[SERVER_HEADER_SIZE] = {(Uint8) offset, messageCount};
 
             // Send the batch header.
             NetworkResult result = client.sendHeader(
@@ -252,6 +259,7 @@ void Network::sendWaitingMessagesInternal()
                 DebugInfo(
                     "Send failed, client likely disconnected. Removing client from map.");
                 it = clients.erase(it);
+                // TODO: Synchro issue, fix it
                 continue; // Continue to avoid confusing iterator state.
             }
 
