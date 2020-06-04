@@ -42,8 +42,6 @@ public:
 
     /**
      * Returns false if the client was at some point found to be disconnected, else true.
-     * Note: This is just here as a safeguard, you should be considering a Peer as
-     *       disconnected as soon as a send or receive returns false.
      */
     bool isConnected() const;
 
@@ -99,7 +97,7 @@ private:
      * Tracks whether or not this peer is connected. Is set to false if a disconnect
      * was detected when trying to send or receive.
      */
-    bool peerIsConnected;
+    bool bIsConnected;
 
     std::array<Uint8, MAX_MESSAGE_SIZE> messageBuffer;
 };

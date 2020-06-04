@@ -25,11 +25,14 @@ void Game::tick(float deltaSeconds)
 {
     accumulatedTime += deltaSeconds;
 
-    // Process as many game ticks as have accumulated.
+    /* Process as many game ticks as have accumulated. */
     while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
-        // Add any newly connected clients to the game sim.
-        std::shared_ptr<Peer> newClient = network.getNewClient();
-        while (newClient != nullptr) {
+        /* Add any newly connected clients to the game sim. */
+        moodycamel::ReaderWriterQueue<NetworkID>& connectEventQueue =
+            network.getConnectEventQueue();
+
+        // TODO: Move to a function to make this loop easier to read.
+        for (unsigned int i = 0; i < connectEventQueue.size_approx(); ++i) {
             // Build their entity.
             EntityID newID = world.addEntity("Player");
             const Position& spawnPoint = world.getSpawnPoint();
@@ -41,17 +44,16 @@ void Game::tick(float deltaSeconds)
             world.attachComponent(newID, ComponentFlag::Movement);
             world.attachComponent(newID, ComponentFlag::Position);
             world.attachComponent(newID, ComponentFlag::Sprite);
-
-            // Add them to the network's map.
-            network.addClient(newID, newClient);
+            // TODO: Add NetworkComponent that tracks NetworkID.
 
             // Tell the network to send a connectionResponse on the next network tick.
+            // TODO: Refactor this to account for NetworkID and EntityID.
             network.sendConnectionResponse(newID, spawnPoint.x, spawnPoint.y);
-
-            newClient = network.getNewClient();
         }
 
-        // Run all systems.
+        // TODO: Process disconnects.
+
+        /* Run all systems. */
         networkInputSystem.processInputMessages();
 
         movementSystem.processMovements(GAME_TICK_INTERVAL_S);

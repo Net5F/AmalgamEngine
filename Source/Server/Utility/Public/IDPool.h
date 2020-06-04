@@ -13,15 +13,17 @@ namespace Server
 class IDPool
 {
 public:
-    static Uint32 reserveID();
+    IDPool();
 
-    static void freeID(Uint32 ID);
+    Uint32 reserveID();
+
+    void freeID(Uint32 ID);
 
 private:
     /**
      * If ID 'x' is available, IDs[x] will be true. Else, it will be false.
      */
-    static std::array<bool, MAX_ENTITIES> IDs;
+    std::array<bool, MAX_ENTITIES> IDs;
 };
 
 } // namespace Server

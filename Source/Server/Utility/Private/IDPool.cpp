@@ -6,7 +6,10 @@ namespace AM
 namespace Server
 {
 
-std::array<bool, MAX_ENTITIES> AM::Server::IDPool::IDs = {}; // Init to 0;
+IDPool::IDPool()
+: IDs{}
+{
+}
 
 Uint32 IDPool::reserveID()
 {

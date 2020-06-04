@@ -55,6 +55,10 @@ Uint8 Client::getWaitingMessageCount() const
     return size;
 }
 
+bool Client::isConnected() {
+    return peer->isConnected();
+}
+
 } // end namespace Server
 } // end namespace AM
 

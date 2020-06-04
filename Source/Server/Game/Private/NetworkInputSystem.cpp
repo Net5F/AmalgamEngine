@@ -49,6 +49,7 @@ void NetworkInputSystem::processInputMessages()
         std::array<Input::State, Input::NumTypes>& entityInputStates =
             world.inputs[clientEntityID].inputStates;
         auto clientInputStates = clientEntity->inputComponent()->inputStates();
+
         for (unsigned int i = 0; i < Input::NumTypes; ++i) {
             entityInputStates[i] = MessageUtil::convertToAMInputState(
                 clientInputStates->Get(i));

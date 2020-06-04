@@ -12,6 +12,9 @@
 namespace AM
 {
 
+/** Represents a single network client. Will be reused if the client disconnects. */
+typedef Uint32 NetworkID;
+
 /** Dynamically allocated, portable buffers for messages. */
 typedef std::unique_ptr<std::vector<Uint8>> BinaryBufferPtr;
 typedef std::shared_ptr<std::vector<Uint8>> BinaryBufferSharedPtr;

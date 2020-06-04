@@ -16,6 +16,7 @@ static constexpr unsigned int MAX_ENTITIES = 100;
 static constexpr unsigned int SCREEN_WIDTH = 1280;
 static constexpr unsigned int SCREEN_HEIGHT = 720;
 
+/** Represents a single entity. Will be reused if the entity is destructed. */
 typedef Uint32 EntityID;
 
 /** Structs. */

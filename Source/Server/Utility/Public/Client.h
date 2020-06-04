@@ -61,6 +61,8 @@ public:
      */
     Uint8 getWaitingMessageCount() const;
 
+    bool isConnected();
+
 private:
     std::shared_ptr<Peer> peer;
     std::deque<BinaryBufferSharedPtr> sendQueue;

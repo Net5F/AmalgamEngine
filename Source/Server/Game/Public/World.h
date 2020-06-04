@@ -6,6 +6,7 @@
 #include "PositionComponent.h"
 #include "MovementComponent.h"
 #include "SpriteComponent.h"
+#include "IDPool.h"
 
 #include <array>
 #include <string>
@@ -54,6 +55,10 @@ public:
     const Position& getSpawnPoint();
 
 private:
+    /** Used for generating entity IDs. */
+    IDPool idPool;
+
+    /** The initial spawn point for connecting players. */
     Position spawnPoint;
 };
 
