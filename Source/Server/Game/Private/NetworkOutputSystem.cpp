@@ -21,6 +21,10 @@ NetworkOutputSystem::NetworkOutputSystem(Game& inGame, World& inWorld, Network& 
 
 void NetworkOutputSystem::broadcastDirtyEntities()
 {
+    // TODO: Change this to iterate through entities with a ClientComponent and
+    //       specifically send to them.
+    //       Maybe change name to ClientOutputSystem and sendClientUpdates().
+
     // Prep the builder for a new message.
     builder.Clear();
 

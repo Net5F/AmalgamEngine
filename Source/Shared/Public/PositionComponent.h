@@ -21,6 +21,6 @@ public:
     float y;
 };
 
-} /* End namespace NW */
+} // namespace AM
 
 #endif /* End POSITIONCOMPONENT_H_ */

@@ -22,6 +22,6 @@ public:
     float maxVelY;
 };
 
-} /* End namespace AM */
+} // namespace AM
 
 #endif /* End MOVEMENTCOMPONENT_H_ */

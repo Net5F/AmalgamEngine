@@ -29,6 +29,16 @@ public:
      */
     void tick(float deltaSeconds);
 
+    /**
+     * Processes all newly connected clients, adding them to the sim.
+     */
+    void processConnectEvents();
+
+    /**
+     * Processes all newly disconnected clients, removing them from the sim.
+     */
+    void processDisconnectEvents();
+
     Uint32 getCurrentTick();
 
 private:

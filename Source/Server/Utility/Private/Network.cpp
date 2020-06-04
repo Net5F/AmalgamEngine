@@ -20,6 +20,7 @@ void Network::registerCurrentTickPtr(Uint32* inCurrentTickPtr)
 
 Network::Network()
 : accumulatedTime(0.0f)
+, clientHandler(*this)
 , builder(BUILDER_BUFFER_SIZE)
 {
 }
@@ -92,15 +93,17 @@ void Network::endReceiveInputMessages()
     inputMessageSorter.endReceive();
 }
 
-void Network::sendConnectionResponse(NetworkID id, float spawnX, float spawnY)
+void Network::sendConnectionResponse(NetworkID networkID, EntityID newEntityID,
+                                     float spawnX, float spawnY)
 {
     std::shared_lock readLock(clientMapMutex);
-    if (clientMap.find(id) == clientMap.end()) {
-        DebugError(
+    if (clientMap.find(networkID) == clientMap.end()) {
+        // Client disconnected or bug is present.
+        DebugInfo(
             "Tried to send a connectionResponse to a client that isn't in the clients map.")
     }
 
-    connectionResponseQueue.push({id, spawnX, spawnY});
+    connectionResponseQueue.push({networkID, newEntityID, spawnX, spawnY});
 }
 
 void Network::queueConnectionResponses()
@@ -117,14 +120,14 @@ void Network::queueConnectionResponses()
             builder.Clear();
 
             // Send them their ID and spawn point.
-            auto response = fb::CreateConnectionResponse(builder, data.id, data.spawnX,
-                data.spawnY);
+            auto response = fb::CreateConnectionResponse(builder, data.networkID,
+                data.spawnX, data.spawnY);
             auto encodedMessage = fb::CreateMessage(builder, latestTickTimestamp,
                 fb::MessageContent::ConnectionResponse, response.Union());
             builder.Finish(encodedMessage);
 
             // Queue the message so it gets included in the next batch.
-            send(data.id,
+            send(data.networkID,
                 NetworkHelpers::constructMessage(builder.GetSize(),
                     builder.GetBufferPointer()));
             DebugInfo("Sent new client response with tick = %u", latestTickTimestamp);
@@ -171,6 +174,11 @@ std::shared_mutex& Network::getClientMapMutex()
 moodycamel::ReaderWriterQueue<NetworkID>& Network::getConnectEventQueue()
 {
     return connectEventQueue;
+}
+
+moodycamel::ReaderWriterQueue<NetworkID>& Network::getDisconnectEventQueue()
+{
+    return disconnectEventQueue;
 }
 
 } // namespace Server

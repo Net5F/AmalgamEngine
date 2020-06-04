@@ -1,4 +1,5 @@
 #include "ClientHandler.h"
+#include "Network.h"
 #include <shared_mutex>
 #include <mutex>
 #include "Debug.h"
@@ -41,15 +42,18 @@ std::unordered_map<NetworkID, Client>& clientMap)
     while (newClient != nullptr) {
         DebugInfo("New client connected.");
 
-        NetworkID newId = idPool.reserveID();
+        NetworkID newID = idPool.reserveID();
 
         // Add the client to the Network's clientMap.
         std::unique_lock writeLock(network.getClientMapMutex());
-        if (clientMap.emplace(newId, newClient).second) {
-            idPool.freeID(newId);
+        if (clientMap.emplace(newID, newClient).second) {
+            idPool.freeID(newID);
             DebugError(
                 "Ran out of room in new client queue and memory allocation failed.");
         }
+
+        // Add an event to the Network's queue.
+        network.getConnectEventQueue().enqueue(newID);
 
         newClient = acceptor->accept();
     }
@@ -70,6 +74,9 @@ std::unordered_map<NetworkID, Client>& clientMap)
             // Need to modify the map, acquire a write lock.
             readLock.release();
             std::unique_lock writeLock(clientMapMutex);
+
+            // Add an event to the Network's queue.
+            network.getDisconnectEventQueue().enqueue(it->first);
 
             // Erase the disconnected client.
             it = clientMap.erase(it);

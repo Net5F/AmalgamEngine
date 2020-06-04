@@ -27,31 +27,11 @@ void Game::tick(float deltaSeconds)
 
     /* Process as many game ticks as have accumulated. */
     while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
-        /* Add any newly connected clients to the game sim. */
-        moodycamel::ReaderWriterQueue<NetworkID>& connectEventQueue =
-            network.getConnectEventQueue();
+        // Add any newly connected clients to the sim.
+        processConnectEvents();
 
-        // TODO: Move to a function to make this loop easier to read.
-        for (unsigned int i = 0; i < connectEventQueue.size_approx(); ++i) {
-            // Build their entity.
-            EntityID newID = world.addEntity("Player");
-            const Position& spawnPoint = world.getSpawnPoint();
-            world.positions[newID].x = spawnPoint.x;
-            world.positions[newID].y = spawnPoint.y;
-            world.movements[newID].maxVelX = 250;
-            world.movements[newID].maxVelY = 250;
-            world.attachComponent(newID, ComponentFlag::Input);
-            world.attachComponent(newID, ComponentFlag::Movement);
-            world.attachComponent(newID, ComponentFlag::Position);
-            world.attachComponent(newID, ComponentFlag::Sprite);
-            // TODO: Add NetworkComponent that tracks NetworkID.
-
-            // Tell the network to send a connectionResponse on the next network tick.
-            // TODO: Refactor this to account for NetworkID and EntityID.
-            network.sendConnectionResponse(newID, spawnPoint.x, spawnPoint.y);
-        }
-
-        // TODO: Process disconnects.
+        // Remove any newly disconnected clients from the sim.
+        processDisconnectEvents();
 
         /* Run all systems. */
         networkInputSystem.processInputMessages();
@@ -60,9 +40,65 @@ void Game::tick(float deltaSeconds)
 
         networkOutputSystem.broadcastDirtyEntities();
 
+        /* Prepare for the next tick. */
         accumulatedTime -= GAME_TICK_INTERVAL_S;
-
         currentTick++;
+    }
+}
+
+void Game::processConnectEvents()
+{
+    moodycamel::ReaderWriterQueue<NetworkID>& connectEventQueue =
+        network.getConnectEventQueue();
+
+    // Add all newly connected client's entities to the sim.
+    for (unsigned int i = 0; i < connectEventQueue.size_approx(); ++i) {
+        NetworkID clientNetworkID = 0;
+        if (!(connectEventQueue.try_dequeue(clientNetworkID))) {
+            DebugError("Expected element in connectEventQueue but dequeue failed.");
+        }
+
+        // Build their entity.
+        EntityID newEntityID = world.addEntity("Player");
+        const Position& spawnPoint = world.getSpawnPoint();
+        world.positions[newEntityID].x = spawnPoint.x;
+        world.positions[newEntityID].y = spawnPoint.y;
+        world.movements[newEntityID].maxVelX = 250;
+        world.movements[newEntityID].maxVelY = 250;
+        world.clients.emplace(newEntityID, clientNetworkID);
+        world.attachComponent(newEntityID, ComponentFlag::Input);
+        world.attachComponent(newEntityID, ComponentFlag::Movement);
+        world.attachComponent(newEntityID, ComponentFlag::Position);
+        world.attachComponent(newEntityID, ComponentFlag::Sprite);
+        world.attachComponent(newEntityID, ComponentFlag::Network);
+
+        // Tell the network to send a connectionResponse on the next network tick.
+        network.sendConnectionResponse(clientNetworkID, newEntityID, spawnPoint.x,
+            spawnPoint.y);
+    }
+}
+
+void Game::processDisconnectEvents()
+{
+    moodycamel::ReaderWriterQueue<NetworkID>& disconnectEventQueue =
+        network.getDisconnectEventQueue();
+
+    // Remove all newly disconnected client's entities from the sim.
+    for (unsigned int i = 0; i < disconnectEventQueue.size_approx(); ++i) {
+        NetworkID clientNetworkID = 0;
+        if (!(disconnectEventQueue.try_dequeue(clientNetworkID))) {
+            DebugError("Expected element in disconnectEventQueue but dequeue failed.");
+        }
+
+        auto it = world.clients.find(clientNetworkID);
+        if (it == world.clients.end()) {
+            DebugError("Failed to find ClientComponent while erasing.");
+        }
+        else {
+            // Found the ClientComponent we expected, remove the entity from everything.
+            world.clients.erase(it);
+            world.removeEntity(clientNetworkID);
+        }
     }
 }
 

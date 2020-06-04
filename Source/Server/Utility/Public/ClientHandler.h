@@ -4,15 +4,18 @@
 #include "NetworkDefs.h"
 #include "Client.h"
 #include "Acceptor.h"
-#include "Network.h"
 #include "IDPool.h"
 #include <memory>
 #include <thread>
+#include <unordered_map>
+#include <atomic>
 
 namespace AM
 {
 namespace Server
 {
+
+class Network;
 
 /**
  * Handles all asynchronous activity that the Clients require.

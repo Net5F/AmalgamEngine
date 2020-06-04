@@ -33,6 +33,6 @@ public:
     int height;
 };
 
-} /* End namespace AM */
+} // namespace AM
 
 #endif /* End SPRITECOMPONENT_H_ */

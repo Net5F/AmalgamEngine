@@ -27,7 +27,8 @@ struct ComponentFlag
         Position = 1 << 0,
         Movement = 1 << 1,
         Input = 1 << 2,
-        Sprite = 1 << 3
+        Sprite = 1 << 3,
+        Network = 1 << 4
     };
 };
 

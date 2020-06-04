@@ -6,9 +6,11 @@
 #include "PositionComponent.h"
 #include "MovementComponent.h"
 #include "SpriteComponent.h"
+#include "ClientComponent.h"
 #include "IDPool.h"
 
 #include <array>
+#include <map>
 #include <string>
 
 namespace AM
@@ -39,6 +41,7 @@ public:
     std::array<MovementComponent, MAX_ENTITIES> movements;
     std::array<InputComponent, MAX_ENTITIES> inputs;
     std::array<SpriteComponent, MAX_ENTITIES> sprites;
+    std::map<EntityID, ClientComponent> clients;
     /**
      * Bit flags for every component, indicating whether the object at a given index
      * has that component.

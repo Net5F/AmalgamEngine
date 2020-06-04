@@ -10,6 +10,7 @@ target_sources(Server
 		Public/MovementSystem.h
 		Public/NetworkInputSystem.h
 		Public/NetworkOutputSystem.h
+		Public/ClientComponent.h
 		Public/Game.h
 )
 
