@@ -46,7 +46,7 @@ std::unordered_map<NetworkID, Client>& clientMap)
 
         // Add the client to the Network's clientMap.
         std::unique_lock writeLock(network.getClientMapMutex());
-        if (clientMap.emplace(newID, newClient).second) {
+        if (!(clientMap.emplace(newID, newClient).second)) {
             idPool.freeID(newID);
             DebugError(
                 "Ran out of room in new client queue and memory allocation failed.");
@@ -72,7 +72,7 @@ std::unordered_map<NetworkID, Client>& clientMap)
 
         if (!(client.isConnected())) {
             // Need to modify the map, acquire a write lock.
-            readLock.release();
+            readLock.unlock();
             std::unique_lock writeLock(clientMapMutex);
 
             // Add an event to the Network's queue.
@@ -102,7 +102,7 @@ int ClientHandler::serviceClients()
         std::shared_lock readLock(network.getClientMapMutex());
         if (clientMap.size() == 0) {
             // Release the lock before we delay.
-            readLock.release();
+            readLock.unlock();
 
             // Delay so we don't waste CPU spinning.
             SDL_Delay(1);
