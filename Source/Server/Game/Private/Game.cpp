@@ -72,6 +72,9 @@ void Game::processConnectEvents()
         world.attachComponent(newEntityID, ComponentFlag::Sprite);
         world.attachComponent(newEntityID, ComponentFlag::Network);
 
+        DebugInfo("Constructed entity with netID: %u, entityID: %u", clientNetworkID,
+            newEntityID);
+
         // Tell the network to send a connectionResponse on the next network tick.
         network.sendConnectionResponse(clientNetworkID, newEntityID, spawnPoint.x,
             spawnPoint.y);
@@ -85,19 +88,30 @@ void Game::processDisconnectEvents()
 
     // Remove all newly disconnected client's entities from the sim.
     for (unsigned int i = 0; i < disconnectEventQueue.size_approx(); ++i) {
-        NetworkID clientNetworkID = 0;
-        if (!(disconnectEventQueue.try_dequeue(clientNetworkID))) {
+        NetworkID disconnectedClientID = 0;
+        if (!(disconnectEventQueue.try_dequeue(disconnectedClientID))) {
             DebugError("Expected element in disconnectEventQueue but dequeue failed.");
         }
 
-        auto it = world.clients.find(clientNetworkID);
-        if (it == world.clients.end()) {
-            DebugError("Failed to find ClientComponent while erasing.");
+        // Iterate through the connected clients, bailing early if we find the one we want.
+        bool entityFound = false;
+        auto it = world.clients.begin();
+        while ((it != world.clients.end()) && !entityFound) {
+            if (it->second.networkID == disconnectedClientID) {
+                // Found the ClientComponent we expected, remove the entity from everything.
+                entityFound = true;
+
+                world.removeEntity(it->first);
+                DebugInfo("Erased entity with netID: %u", it->first);
+                world.clients.erase(it);
+            } else {
+                ++it;
+            }
         }
-        else {
-            // Found the ClientComponent we expected, remove the entity from everything.
-            world.clients.erase(it);
-            world.removeEntity(clientNetworkID);
+
+        if (!entityFound) {
+            DebugError(
+                "Failed to find entity with netID: %u while erasing.", disconnectedClientID);
         }
     }
 }

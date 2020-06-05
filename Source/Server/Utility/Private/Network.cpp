@@ -120,7 +120,7 @@ void Network::queueConnectionResponses()
             builder.Clear();
 
             // Send them their ID and spawn point.
-            auto response = fb::CreateConnectionResponse(builder, data.networkID,
+            auto response = fb::CreateConnectionResponse(builder, data.entityID,
                 data.spawnX, data.spawnY);
             auto encodedMessage = fb::CreateMessage(builder, latestTickTimestamp,
                 fb::MessageContent::ConnectionResponse, response.Union());

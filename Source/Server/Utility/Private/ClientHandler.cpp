@@ -40,9 +40,8 @@ std::unordered_map<NetworkID, Client>& clientMap)
     std::shared_ptr<Peer> newClient = acceptor->accept();
 
     while (newClient != nullptr) {
-        DebugInfo("New client connected.");
-
         NetworkID newID = idPool.reserveID();
+        DebugInfo("New client connected. Assigning netID: %u", newID);
 
         // Add the client to the Network's clientMap.
         std::unique_lock writeLock(network.getClientMapMutex());
@@ -79,6 +78,8 @@ std::unordered_map<NetworkID, Client>& clientMap)
             network.getDisconnectEventQueue().enqueue(it->first);
 
             // Erase the disconnected client.
+            DebugInfo("Erased disconnected client with netID: %u.", it->first);
+            idPool.freeID(it->first);
             it = clientMap.erase(it);
         }
         else {

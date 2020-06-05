@@ -1,5 +1,5 @@
 #include "IDPool.h"
-#include <iostream>
+#include "Debug.h"
 
 namespace AM
 {
@@ -13,7 +13,7 @@ IDPool::IDPool()
 
 Uint32 IDPool::reserveID()
 {
-    for (Uint16 i = 0; i < MAX_ENTITIES; ++i) {
+    for (Uint32 i = 0; i < MAX_ENTITIES; ++i) {
         // Find the first false.
         if (!(IDs[i])) {
             IDs[i] = true;
@@ -21,7 +21,7 @@ Uint32 IDPool::reserveID()
         }
     }
 
-    std::cerr << "Tried to reserve ID when all were taken. Returning 0." << std::endl;
+    DebugError("Tried to reserve ID when all were taken.");
     return 0;
 }
 
@@ -31,7 +31,7 @@ void IDPool::freeID(Uint32 ID)
         IDs[ID] = false;
     }
     else {
-        std::cerr << "Tried to free an unused ID." << std::endl;
+        DebugError("Tried to free an unused ID.");
     }
 }
 
