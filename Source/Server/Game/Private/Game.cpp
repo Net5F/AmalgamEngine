@@ -38,7 +38,7 @@ void Game::tick(float deltaSeconds)
 
         movementSystem.processMovements(GAME_TICK_INTERVAL_S);
 
-        networkOutputSystem.broadcastDirtyEntities();
+        networkOutputSystem.sendClientUpdates();
 
         /* Prepare for the next tick. */
         accumulatedTime -= GAME_TICK_INTERVAL_S;
@@ -70,7 +70,7 @@ void Game::processConnectEvents()
         world.attachComponent(newEntityID, ComponentFlag::Movement);
         world.attachComponent(newEntityID, ComponentFlag::Position);
         world.attachComponent(newEntityID, ComponentFlag::Sprite);
-        world.attachComponent(newEntityID, ComponentFlag::Network);
+        world.attachComponent(newEntityID, ComponentFlag::Client);
 
         DebugInfo("Constructed entity with netID: %u, entityID: %u", clientNetworkID,
             newEntityID);

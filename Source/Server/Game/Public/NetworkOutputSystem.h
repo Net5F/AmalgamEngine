@@ -22,10 +22,9 @@ public:
     NetworkOutputSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
     /**
-     * If there is dirty state information, sends it to all connected clients.
-     * Else, sends an empty message as a heartbeat.
+     * Updates all connected clients with relevant world state.
      */
-    void broadcastDirtyEntities();
+    void sendClientUpdates();
 
 private:
     /**
