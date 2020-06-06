@@ -40,7 +40,7 @@ AM::Peer::Peer(TCPsocket inSocket)
     bIsConnected = true;
 }
 
-AM::Peer::Peer(TCPsocket inSocket, std::shared_ptr<SDLNet_SocketSet> inSet)
+AM::Peer::Peer(TCPsocket inSocket, const std::shared_ptr<SDLNet_SocketSet>& inSet)
 : bIsConnected(false)
 , set(inSet)
 {
@@ -75,7 +75,7 @@ bool AM::Peer::isConnected() const
     return bIsConnected;
 }
 
-AM::NetworkResult AM::Peer::send(BinaryBufferSharedPtr message)
+AM::NetworkResult AM::Peer::send(const BinaryBufferSharedPtr& message)
 {
     if (!bIsConnected) {
         return NetworkResult::Disconnected;

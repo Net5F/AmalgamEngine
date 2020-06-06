@@ -109,16 +109,14 @@ int ClientHandler::serviceClients()
             SDL_Delay(1);
         }
         else {
-            receiveClientMessages(clientSet, clientMap);
+            receiveClientMessages(clientMap);
         }
     }
 
     return 0;
 }
 
-void ClientHandler::receiveClientMessages(
-const std::shared_ptr<SDLNet_SocketSet> clientSet,
-std::unordered_map<EntityID, Client>& clientMap)
+void ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& clientMap)
 {
     // Check if there are any messages to receive.
     int numReady = SDLNet_CheckSockets(*clientSet, 100);

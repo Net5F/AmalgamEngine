@@ -36,7 +36,7 @@ public:
      * Constructor for when you need a set of peers (server connecting to clients).
      * Adds the socket to the given set.
      */
-    Peer(TCPsocket inSocket, std::shared_ptr<SDLNet_SocketSet> inSet);
+    Peer(TCPsocket inSocket, const std::shared_ptr<SDLNet_SocketSet>& inSet);
 
     ~Peer();
 
@@ -50,7 +50,7 @@ public:
      * Will error if the message size is larger than a Uint16 can hold.
      * @return Disconnected if the peer was found to be disconnected, else Success.
      */
-    NetworkResult send(BinaryBufferSharedPtr message);
+    NetworkResult send(const BinaryBufferSharedPtr& message);
 
     /**
      * Tries to receive bytes over the network.

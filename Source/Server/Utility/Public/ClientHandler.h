@@ -58,8 +58,7 @@ private:
     /**
      * Used by pollForMessages, checks for new messages and pushes them into their queues.
      */
-    void receiveClientMessages(const std::shared_ptr<SDLNet_SocketSet> clientSet,
-                               std::unordered_map<NetworkID, Client>& clientMap);
+    void receiveClientMessages(std::unordered_map<NetworkID, Client>& clientMap);
 
     Network& network;
 

@@ -25,14 +25,14 @@ Network::Network()
 {
 }
 
-void Network::send(NetworkID id, BinaryBufferSharedPtr message)
+void Network::send(NetworkID id, const BinaryBufferSharedPtr& message)
 {
     // Queue the message to be sent with the next batch.
     std::shared_lock readLock(clientMapMutex);
     clientMap.at(id).queueMessage(message);
 }
 
-void Network::sendToAll(BinaryBufferSharedPtr message)
+void Network::sendToAll(const BinaryBufferSharedPtr& message)
 {
     // Queue the message to be sent with the next batch.
     std::shared_lock readLock(clientMapMutex);
@@ -66,7 +66,7 @@ void Network::sendWaitingMessages(float deltaSeconds)
     }
 }
 
-void Network::queueInputMessage(BinaryBufferSharedPtr messageBuffer)
+void Network::queueInputMessage(const BinaryBufferSharedPtr& messageBuffer)
 {
     const fb::Message* message = fb::GetMessage(messageBuffer->data());
     if (message->content_type() != fb::MessageContent::EntityUpdate) {

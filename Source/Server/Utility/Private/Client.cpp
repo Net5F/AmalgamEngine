@@ -7,17 +7,17 @@ namespace AM
 namespace Server
 {
 
-Client::Client(std::shared_ptr<Peer> inPeer)
+Client::Client(const std::shared_ptr<Peer>& inPeer)
 : peer(inPeer)
 {
 }
 
-NetworkResult Client::sendHeader(BinaryBufferSharedPtr header)
+NetworkResult Client::sendHeader(const BinaryBufferSharedPtr& header)
 {
     return peer->send(header);
 }
 
-void Client::queueMessage(BinaryBufferSharedPtr message)
+void Client::queueMessage(const BinaryBufferSharedPtr& message)
 {
     sendQueue.push_back(message);
 }

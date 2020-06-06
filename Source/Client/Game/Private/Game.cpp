@@ -7,7 +7,7 @@ namespace AM
 namespace Client
 {
 
-Game::Game(Network& inNetwork, std::shared_ptr<SDL2pp::Texture>& inSprites)
+Game::Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites)
 : world()
 , network(inNetwork)
 , playerInputSystem(*this, world)

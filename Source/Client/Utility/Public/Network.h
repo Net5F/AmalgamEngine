@@ -46,7 +46,7 @@ public:
      * Sends bytes over the network.
      * Errors if the server is disconnected.
      */
-    void send(BinaryBufferSharedPtr message);
+    void send(const BinaryBufferSharedPtr& message);
 
     /**
      * Returns a message if there are any in the requested queue.
@@ -68,7 +68,7 @@ public:
     /**
      * Pushes a message into the appropriate queue, based on its contents.
      */
-    void processReceivedMessage(BinaryBufferSharedPtr messageBuffer);
+    void processReceivedMessage(const BinaryBufferSharedPtr& messageBuffer);
 
     std::shared_ptr<Peer> getServer();
 

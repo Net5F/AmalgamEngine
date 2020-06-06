@@ -45,7 +45,7 @@ void MessageSorter::endReceive()
     lock.unlock();
 }
 
-bool MessageSorter::push(Uint32 tickNum, BinaryBufferSharedPtr message)
+bool MessageSorter::push(Uint32 tickNum, const BinaryBufferSharedPtr& message)
 {
     // Acquire the lock.
     lock.lock();

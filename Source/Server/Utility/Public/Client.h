@@ -21,7 +21,7 @@ namespace Server
 class Client
 {
 public:
-    Client(std::shared_ptr<Peer> inPeer);
+    Client(const std::shared_ptr<Peer>& inPeer);
 
     /**
      * Immediately sends the given header to this Peer.
@@ -32,12 +32,12 @@ public:
      * Will error if the message size is larger than a Uint16 can hold.
      * @return Disconnected if the peer was found to be disconnected, else Success.
      */
-    NetworkResult sendHeader(BinaryBufferSharedPtr header);
+    NetworkResult sendHeader(const BinaryBufferSharedPtr& header);
 
     /**
      * Queues a message to be sent the next time sendWaitingMessages is called.
      */
-    void queueMessage(BinaryBufferSharedPtr message);
+    void queueMessage(const BinaryBufferSharedPtr& message);
 
     /**
      * Attempts to send all queued messages over the network.

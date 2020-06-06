@@ -63,7 +63,7 @@ public:
      *
      * @return true if tickNum was valid and the message was pushed, else false.
      */
-    bool push(Uint32 tickNum, BinaryBufferSharedPtr message);
+    bool push(Uint32 tickNum, const BinaryBufferSharedPtr& message);
 
     /** Helper for checking if a tick number is within the bounds. */
     bool isTickValid(Uint32 tickNum);

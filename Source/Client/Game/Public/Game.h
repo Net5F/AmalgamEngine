@@ -25,7 +25,7 @@ public:
     /** 30 game ticks per second. */
     static constexpr float GAME_TICK_INTERVAL_S = 1 / 30.0f;
 
-    Game(Network& inNetwork, std::shared_ptr<SDL2pp::Texture>& inSprites);
+    Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites);
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,
@@ -65,7 +65,7 @@ private:
     Uint32 currentTick;
 
     // Temporary until a resource manager is created.
-    std::shared_ptr<SDL2pp::Texture>& sprites;
+    const std::shared_ptr<SDL2pp::Texture>& sprites;
 
     /**
      * Turn false to signal that the main loop should end.

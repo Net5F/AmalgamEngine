@@ -45,13 +45,13 @@ public:
      * Queues a message to be sent the next time sendWaitingMessages is called.
      * @throws std::out_of_range if id is not in the clients map.
      */
-    void send(NetworkID id, BinaryBufferSharedPtr message);
+    void send(NetworkID id, const BinaryBufferSharedPtr& message);
 
     /**
      * Queues a message to be sent to all connected clients the next time
      * sendWaitingMessages is called.
      */
-    void sendToAll(BinaryBufferSharedPtr message);
+    void sendToAll(const BinaryBufferSharedPtr& message);
 
     /**
      * Sends any queued messages over the network.
@@ -63,7 +63,7 @@ public:
      * Pushes a message into the inputMessageSorter.
      * For use in receiving input messages.
      */
-    void queueInputMessage(BinaryBufferSharedPtr message);
+    void queueInputMessage(const BinaryBufferSharedPtr& message);
 
     /** Forwards to the inputMessageSorter's startReceive. */
     std::queue<BinaryBufferSharedPtr>& startReceiveInputMessages(Uint32 tickNum);

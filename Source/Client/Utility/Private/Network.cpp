@@ -49,7 +49,7 @@ void Network::registerPlayerID(EntityID inPlayerID)
     playerID = inPlayerID;
 }
 
-void Network::send(BinaryBufferSharedPtr message)
+void Network::send(const BinaryBufferSharedPtr& message)
 {
     if (!(server->isConnected())) {
         DebugError("Tried to send while server is disconnected.");
@@ -131,7 +131,7 @@ int Network::pollForMessages(void* inNetwork)
     return 0;
 }
 
-void Network::processReceivedMessage(BinaryBufferSharedPtr messageBuffer)
+void Network::processReceivedMessage(const BinaryBufferSharedPtr& messageBuffer)
 {
     const fb::Message* message = fb::GetMessage(messageBuffer->data());
 
