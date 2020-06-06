@@ -1,7 +1,7 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "SDL.h"
+#include "SDL_stdinc.h"
 
 namespace AM
 {

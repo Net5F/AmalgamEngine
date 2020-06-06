@@ -1,4 +1,5 @@
 #include <Timer.h>
+#include "SDL.h"
 
 namespace AM
 {

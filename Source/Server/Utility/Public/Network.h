@@ -9,7 +9,6 @@
 #include <string>
 #include <memory>
 #include <cstddef>
-#include <atomic>
 #include <unordered_map>
 #include <shared_mutex>
 #include "readerwriterqueue.h"

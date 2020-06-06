@@ -7,6 +7,9 @@ target_include_directories(Server
         ${SDL2_NET_INCLUDE_DIRS}
 )
 
+# Inherit Shared's precompiled header.
+target_precompile_headers(Server REUSE_FROM Shared)
+
 target_link_libraries(Server
     PRIVATE
         ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}

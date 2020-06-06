@@ -1,5 +1,5 @@
 #include <World.h>
-#include <iostream>
+#include "Debug.h"
 
 namespace AM
 {
@@ -46,7 +46,7 @@ void World::attachComponent(EntityID entityID, ComponentFlag::FlagType component
         componentFlags[entityID] |= componentFlag;
     }
     else {
-        std::cerr << "Tried to add component when entity already has it." << std::endl;
+        DebugError("Tried to add component when entity already has it.");
     }
 }
 
@@ -57,8 +57,7 @@ void World::removeComponent(EntityID entityID, ComponentFlag::FlagType component
         componentFlags[entityID] |= componentFlag;
     }
     else {
-        std::cerr << "Tried to remove component when entity doesn't have it."
-        << std::endl;
+        DebugError("Tried to remove component when entity doesn't have it.");
     }
 }
 

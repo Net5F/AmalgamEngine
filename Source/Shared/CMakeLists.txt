@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 message(STATUS "Building Shared")
 
@@ -36,7 +36,8 @@ target_include_directories(Shared
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 )
 
-#target_precompile_headers(Shared PRIVATE Private/pch.h)
+# Build our precompiled header.
+target_precompile_headers(Shared PRIVATE Private/pch.h)
 
 target_link_libraries(Shared
     PUBLIC
