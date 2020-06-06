@@ -36,6 +36,8 @@ target_include_directories(Shared
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 )
 
+#target_precompile_headers(Shared PRIVATE Private/pch.h)
+
 target_link_libraries(Shared
     PUBLIC
         ${SDL2_LIBRARIES}

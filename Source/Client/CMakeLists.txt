@@ -32,17 +32,17 @@ add_custom_command(
 
         # Copy C and C++ stl dlls to the output directory.
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${PROJECT_SOURCE_DIR}/../Libraries/Stl/
+                ${PROJECT_SOURCE_DIR}/../Libraries/Stl/${CMAKE_SYSTEM_NAME}
                 ${PROJECT_BINARY_DIR}/Output/Client/
 
         # Copy SDL2 dlls to the output directory.
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${PROJECT_SOURCE_DIR}/../Libraries/SDL2/
+                ${PROJECT_SOURCE_DIR}/../Libraries/SDL2/${CMAKE_SYSTEM_NAME}
                 ${PROJECT_BINARY_DIR}/Output/Client/
 
         # Copy pthread dll to the output directory.
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${PROJECT_SOURCE_DIR}/../Libraries/WinPthread/
+                ${PROJECT_SOURCE_DIR}/../Libraries/Pthread/${CMAKE_SYSTEM_NAME}
                 ${PROJECT_BINARY_DIR}/Output/Client/
 
         # Copy resource files to the output directory.
