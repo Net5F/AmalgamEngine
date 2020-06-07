@@ -11,7 +11,8 @@ namespace AM
 namespace Client
 {
 
-const std::string Network::SERVER_IP = "127.0.0.1";
+//const std::string Network::SERVER_IP = "127.0.0.1";
+const std::string Network::SERVER_IP = "45.79.37.63";
 
 Network::Network()
 : server(nullptr)
