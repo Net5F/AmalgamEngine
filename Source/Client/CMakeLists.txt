@@ -43,9 +43,9 @@ add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E make_directory 
                 ${PROJECT_BINARY_DIR}/Output/Client/
 
-        # Copy C and C++ stl dlls to the output directory.
+        # Copy C and C++ dlls to the output directory.
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${PROJECT_SOURCE_DIR}/../Libraries/Stl/${CMAKE_SYSTEM_NAME}
+                ${PROJECT_SOURCE_DIR}/../Libraries/Cpp/${CMAKE_SYSTEM_NAME}
                 ${PROJECT_BINARY_DIR}/Output/Client/
 
         # Copy SDL2 dlls to the output directory.
