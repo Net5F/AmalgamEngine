@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # This script builds a new enough cmake from source to use for this project.
+# If your OS version is new enough, you won't need to use this.
 
 version=3.17.3
 

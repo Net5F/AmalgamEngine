@@ -30,6 +30,12 @@ target_link_libraries(Client
 target_compile_features(Client PRIVATE cxx_std_17)
 set_target_properties(Client PROPERTIES CXX_EXTENSIONS OFF)
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set(EXE_NAME "Client.exe")
+else()
+    set(EXE_NAME "Client")
+endif()
+
 add_custom_command(
         TARGET Client POST_BUILD
         
@@ -60,7 +66,7 @@ add_custom_command(
         # Copy the .exe to the output directory.
         TARGET Client POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/Client.exe
+                ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}
                 ${PROJECT_BINARY_DIR}/Output/Client/
 )
 

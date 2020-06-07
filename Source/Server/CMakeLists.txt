@@ -29,6 +29,12 @@ target_link_libraries(Server
 target_compile_features(Server PRIVATE cxx_std_17)
 set_target_properties(Server PROPERTIES CXX_EXTENSIONS OFF)
 
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set(EXE_NAME "Server.exe")
+else()
+    set(EXE_NAME "Server")
+endif()
+
 add_custom_command(
         TARGET Server POST_BUILD
         
@@ -54,7 +60,7 @@ add_custom_command(
         # Copy the .exe to the output directory.
         TARGET Server POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/Server.exe
+                ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}
                 ${PROJECT_BINARY_DIR}/Output/Server/
 )
 
