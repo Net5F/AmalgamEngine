@@ -16,7 +16,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.511478739." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.exe.debug.1709988355" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.exe.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.exe.debug.308727119" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.exe.debug"/>
-							<builder buildPath="/NewWorlds/build/Debug" id="de.marw.cdt.cmake.core.genscriptbuilder.965048151" keepEnvironmentInBuildfile="false" name="CMake Builder" parallelBuildOn="false" superClass="de.marw.cdt.cmake.core.genscriptbuilder"/>
+							<builder buildPath="/NewWorlds/build/Debug" id="de.marw.cdt.cmake.core.genscriptbuilder.965048151" keepEnvironmentInBuildfile="false" name="CMake Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="de.marw.cdt.cmake.core.genscriptbuilder"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug.1399276770" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1673896368" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -50,9 +50,13 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 			<storageModule buildDir="Build/Windows/Debug" moduleId="de.marw.cdt.cmake.core.settings">
 				<options/>
-				<linux command="cmake" generator="UnixMakefiles" use-default="true">
+				<linux command="cmake" generator="Ninja" use-default="true">
+					<defs/>
+					<undefs/>
 				</linux>
 				<win32 command="cmake" generator="Ninja" use-default="true">
+					<defs/>
+					<undefs/>
 				</win32>
 				<defs/>
 				<undefs/>
@@ -73,7 +77,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.511478739.705862884." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.exe.debug.1700226616" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.exe.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.exe.debug.1665940132" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.exe.debug"/>
-							<builder buildPath="/NewWorlds/build/Debug" id="de.marw.cdt.cmake.core.genscriptbuilder.497207827" keepEnvironmentInBuildfile="false" name="CMake Builder" parallelBuildOn="false" superClass="de.marw.cdt.cmake.core.genscriptbuilder"/>
+							<builder buildPath="/NewWorlds/build/Debug" id="de.marw.cdt.cmake.core.genscriptbuilder.497207827" keepEnvironmentInBuildfile="false" name="CMake Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="de.marw.cdt.cmake.core.genscriptbuilder"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug.490900068" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1686367933" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -135,7 +139,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.511478739.234147743." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.exe.debug.572491022" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.exe.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.exe.debug.326735748" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.exe.debug"/>
-							<builder buildPath="/NewWorlds/build/Debug" id="de.marw.cdt.cmake.core.genscriptbuilder.82789757" keepEnvironmentInBuildfile="false" name="CMake Builder" parallelBuildOn="false" superClass="de.marw.cdt.cmake.core.genscriptbuilder"/>
+							<builder buildPath="/NewWorlds/build/Debug" id="de.marw.cdt.cmake.core.genscriptbuilder.82789757" keepEnvironmentInBuildfile="false" name="CMake Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="de.marw.cdt.cmake.core.genscriptbuilder"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug.605307070" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1434371430" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -194,7 +198,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.mingw.exe.debug.511478739.705862884.1096400898." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.exe.debug.1855230690" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.exe.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.exe.debug.2003947107" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.exe.debug"/>
-							<builder buildPath="/NewWorlds/build/Debug" id="de.marw.cdt.cmake.core.genscriptbuilder.1449340361" keepEnvironmentInBuildfile="false" name="CMake Builder" parallelBuildOn="false" superClass="de.marw.cdt.cmake.core.genscriptbuilder"/>
+							<builder buildPath="/NewWorlds/build/Debug" id="de.marw.cdt.cmake.core.genscriptbuilder.1449340361" keepEnvironmentInBuildfile="false" name="CMake Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="de.marw.cdt.cmake.core.genscriptbuilder"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug.1088946158" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1109258212" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -249,6 +253,9 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="DebugLinux">
+			<resource resourceType="PROJECT" workspacePath="/Amalgam"/>
+		</configuration>
 		<configuration configurationName="test">
 			<resource resourceType="PROJECT" workspacePath="/Amalgam"/>
 		</configuration>
@@ -260,6 +267,9 @@
 		</configuration>
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/NewWorlds"/>
+		</configuration>
+		<configuration configurationName="DebugWindows">
+			<resource resourceType="PROJECT" workspacePath="/Amalgam"/>
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>

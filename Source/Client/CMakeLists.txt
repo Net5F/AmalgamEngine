@@ -1,3 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+
+message(STATUS "Building Client")
+
 add_executable(Client "")
 
 target_include_directories(Client

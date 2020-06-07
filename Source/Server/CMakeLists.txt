@@ -1,3 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+
+message(STATUS "Building Server")
+
 add_executable(Server "")
 
 target_include_directories(Server

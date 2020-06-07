@@ -5,7 +5,7 @@
 #include "Network.h"
 #include "InputComponent.h"
 #include "Message_generated.h"
-#include "SDL_Events.h"
+#include "SDL_events.h"
 
 namespace AM
 {
