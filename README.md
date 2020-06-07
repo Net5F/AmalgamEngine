@@ -1,5 +1,5 @@
 ## The Amalgam Engine
-#### A game engine for virtual worlds.
+#### A game engine for building virtual worlds.
 
 ## Building
 ### Windows
@@ -17,3 +17,8 @@ Tested on Ubuntu 20.0.4. Older distros may run into issues with package versions
 3. `cd Build/Linux/Debug`
 4. `cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -G Ninja ../../../Source/`
 5. `ninja all`
+
+## Shared Libraries
+There's currently a lot of shared libs committed through git-lfs. The SDL2-related libs will be taken care of by submoduling the mirrors (https://github.com/SDL-mirror) and switching to static linking (not an ethical issue since we're AGPL-licensed). The other libs will be handled with some TBD method.
+
+Currently not a priority since I'm still in prototype-mode and building from 1 machine, but it'll be pretty easy to switch whenever it makes sense to.
