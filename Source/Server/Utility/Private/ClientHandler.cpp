@@ -132,12 +132,12 @@ void ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& 
             Client& client = pair.second;
 
             /* Receive all messages from the client. */
-            ReceiveResult receiveResult = client.receiveMessage();
-            while (receiveResult.result == NetworkResult::Success) {
+            ReceiveResult messageResult = client.receiveMessage();
+            while (messageResult.result == NetworkResult::Success) {
                 // Queue the message (blocks if the queue is locked).
-                network.queueInputMessage(receiveResult.message);
+                network.queueInputMessage(std::move(messageResult.message));
 
-                receiveResult = client.receiveMessage();
+                messageResult = client.receiveMessage();
             }
         }
     }

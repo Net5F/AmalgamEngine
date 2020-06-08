@@ -42,7 +42,7 @@ public:
      * @return If tickNum is valid (not too new or old), returns a pointer to a queue.
      *         Else, raises an error.
      */
-    std::queue<BinaryBufferSharedPtr>& startReceive(Uint32 tickNum);
+    std::queue<BinaryBufferPtr>& startReceive(Uint32 tickNum);
 
     /**
      * Increments currentTick and head, effectively removing the element at the old
@@ -63,7 +63,7 @@ public:
      *
      * @return true if tickNum was valid and the message was pushed, else false.
      */
-    bool push(Uint32 tickNum, const BinaryBufferSharedPtr& message);
+    bool push(Uint32 tickNum, BinaryBufferPtr message);
 
     /** Helper for checking if a tick number is within the bounds. */
     bool isTickValid(Uint32 tickNum);
@@ -78,7 +78,7 @@ private:
      * (e.g. if currentTick is 42, the queue in index 0 holds messages for tick number 42,
      * index 1: 43, ..., index (BUFFER_SIZE - 1): (currentTick + BUFFER_SIZE - 1)).
      */
-    std::array<std::queue<BinaryBufferSharedPtr>, BUFFER_SIZE> queueBuffer;
+    std::array<std::queue<BinaryBufferPtr>, BUFFER_SIZE> queueBuffer;
 
     /**
      * The current tick that we've advanced to.

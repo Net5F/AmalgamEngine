@@ -12,7 +12,7 @@ MessageSorter::MessageSorter()
 {
 }
 
-std::queue<BinaryBufferSharedPtr>& MessageSorter::startReceive(Uint32 tickNum)
+std::queue<BinaryBufferPtr>& MessageSorter::startReceive(Uint32 tickNum)
 {
     // Acquire the lock.
     bool lockWasFree = lock.try_lock();
@@ -45,7 +45,7 @@ void MessageSorter::endReceive()
     lock.unlock();
 }
 
-bool MessageSorter::push(Uint32 tickNum, const BinaryBufferSharedPtr& message)
+bool MessageSorter::push(Uint32 tickNum, BinaryBufferPtr message)
 {
     // Acquire the lock.
     lock.lock();
@@ -61,7 +61,7 @@ bool MessageSorter::push(Uint32 tickNum, const BinaryBufferSharedPtr& message)
         currentTick, (tickNum % BUFFER_SIZE));
 
     // Push the message.
-    queueBuffer[tickNum % BUFFER_SIZE].push(message);
+    queueBuffer[tickNum % BUFFER_SIZE].push(std::move(message));
 
     // Release the lock.
     lock.unlock();

@@ -143,7 +143,7 @@ ReceiveResult AM::Peer::receiveBytesWait(Uint16 numBytes)
     }
 
     return {NetworkResult::Success,
-            std::make_shared<std::vector<Uint8>>(messageBuffer.begin()
+            std::make_unique<std::vector<Uint8>>(messageBuffer.begin()
                 , (messageBuffer.begin() + numBytes))};
 }
 
@@ -205,7 +205,7 @@ ReceiveResult AM::Peer::receiveMessageWait()
     }
 
     return {NetworkResult::Success,
-            std::make_shared<std::vector<Uint8>>(messageBuffer.begin(),
+            std::make_unique<std::vector<Uint8>>(messageBuffer.begin(),
                 (messageBuffer.begin() + messageSize))};
 }
 

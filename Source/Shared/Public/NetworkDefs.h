@@ -16,6 +16,7 @@ namespace AM
 typedef Uint32 NetworkID;
 
 /** Dynamically allocated, portable buffers for messages. */
+typedef std::vector<Uint8> BinaryBufferType;
 typedef std::unique_ptr<std::vector<Uint8>> BinaryBufferPtr;
 typedef std::shared_ptr<std::vector<Uint8>> BinaryBufferSharedPtr;
 
@@ -51,7 +52,7 @@ enum class NetworkResult {
 struct ReceiveResult {
     NetworkResult result;
     // message will be nullptr if result != Success.
-    BinaryBufferSharedPtr message;
+    BinaryBufferPtr message;
 };
 
 } /* End namespace AM */

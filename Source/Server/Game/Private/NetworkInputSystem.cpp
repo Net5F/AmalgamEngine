@@ -21,12 +21,12 @@ NetworkInputSystem::NetworkInputSystem(Game& inGame, World& inWorld, Network& in
 void NetworkInputSystem::processInputMessages()
 {
     // Get the queue reference for this tick's messages.
-    std::queue<BinaryBufferSharedPtr>& messageQueue = network.startReceiveInputMessages(
+    std::queue<BinaryBufferPtr>& messageQueue = network.startReceiveInputMessages(
         game.getCurrentTick());
 
     // Process all messages.
     while (!(messageQueue.empty())) {
-        BinaryBufferSharedPtr inputMessage = messageQueue.front();
+        BinaryBufferPtr inputMessage = std::move(messageQueue.front());
         messageQueue.pop();
         if (inputMessage == nullptr) {
             DebugInfo(

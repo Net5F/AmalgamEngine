@@ -62,10 +62,10 @@ public:
      * Pushes a message into the inputMessageSorter.
      * For use in receiving input messages.
      */
-    void queueInputMessage(const BinaryBufferSharedPtr& message);
+    void queueInputMessage(BinaryBufferPtr message);
 
     /** Forwards to the inputMessageSorter's startReceive. */
-    std::queue<BinaryBufferSharedPtr>& startReceiveInputMessages(Uint32 tickNum);
+    std::queue<BinaryBufferPtr>& startReceiveInputMessages(Uint32 tickNum);
 
     /** Forward to the inputMessageSorter's endReceive. */
     void endReceiveInputMessages();

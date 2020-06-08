@@ -66,24 +66,24 @@ void Network::sendWaitingMessages(float deltaSeconds)
     }
 }
 
-void Network::queueInputMessage(const BinaryBufferSharedPtr& messageBuffer)
+void Network::queueInputMessage(BinaryBufferPtr messageBuffer)
 {
     const fb::Message* message = fb::GetMessage(messageBuffer->data());
     if (message->content_type() != fb::MessageContent::EntityUpdate) {
         DebugError("Expected EntityUpdate but got something else.");
     }
-    auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
 
     DebugInfo("Received message with tick: %u", message->tickTimestamp());
 
     // Push the message into the MessageSorter.
-    bool result = inputMessageSorter.push(message->tickTimestamp(), messageBuffer);
+    bool result = inputMessageSorter.push(message->tickTimestamp(),
+        std::move(messageBuffer));
     if (!result) {
         DebugInfo("Message rejected from MessageSorter.");
     }
 }
 
-std::queue<BinaryBufferSharedPtr>& Network::startReceiveInputMessages(Uint32 tickNum)
+std::queue<BinaryBufferPtr>& Network::startReceiveInputMessages(Uint32 tickNum)
 {
     return inputMessageSorter.startReceive(tickNum);
 }

@@ -11,8 +11,8 @@ namespace AM
 namespace Client
 {
 
-//const std::string Network::SERVER_IP = "127.0.0.1";
-const std::string Network::SERVER_IP = "45.79.37.63";
+const std::string Network::SERVER_IP = "127.0.0.1";
+//const std::string Network::SERVER_IP = "45.79.37.63";
 
 Network::Network()
 : server(nullptr)
@@ -105,25 +105,23 @@ int Network::pollForMessages(void* inNetwork)
 
     while (!(*exitRequested)) {
         // Wait for a server header.
-        ReceiveResult receiveResult = server->receiveBytesWait(SERVER_HEADER_SIZE);
+        ReceiveResult headerResult = server->receiveBytesWait(SERVER_HEADER_SIZE);
 
-        if (receiveResult.result == NetworkResult::Success) {
-            BinaryBufferSharedPtr header = receiveResult.message;
+        if (headerResult.result == NetworkResult::Success) {
+            const BinaryBufferType& header = *(headerResult.message.get());
 
             // Extract the data from the header.
             Sint8 tickOffsetAdjustment =
-                header->data()[ServerHeaderIndex::TickOffsetAdjustment];
-            Uint8 messageCount = header->data()[ServerHeaderIndex::MessageCount];
+                header[ServerHeaderIndex::TickOffsetAdjustment];
+            Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
 
             // Receive all of the expected messages.
             for (unsigned int i = 0; i < messageCount; ++i) {
-                ReceiveResult receiveResult = server->receiveMessageWait();
+                ReceiveResult messageResult = server->receiveMessageWait();
 
                 // If we received a message, push it into the appropriate queue.
-                if (receiveResult.result == NetworkResult::Success) {
-                    BinaryBufferSharedPtr message = receiveResult.message;
-
-                    network->processReceivedMessage(message);
+                if (messageResult.result == NetworkResult::Success) {
+                    network->processReceivedMessage(std::move(messageResult.message));
                 }
             }
         }
@@ -132,22 +130,23 @@ int Network::pollForMessages(void* inNetwork)
     return 0;
 }
 
-void Network::processReceivedMessage(const BinaryBufferSharedPtr& messageBuffer)
+void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
 {
-    const fb::Message* message = fb::GetMessage(messageBuffer->data());
+    // We might be sharing this message between queues, so convert it to shared.
+    BinaryBufferSharedPtr sharedBuffer = std::move(messageBuffer);
+    const fb::Message* message = fb::GetMessage(sharedBuffer->data());
 
     /* Funnel the message into the appropriate queue. */
     if (message->content_type() == fb::MessageContent::ConnectionResponse) {
-        if (!(connectionResponseQueue.enqueue(std::move(messageBuffer)))) {
+        if (!(connectionResponseQueue.enqueue(sharedBuffer))) {
             DebugError("Ran out of room in queue and memory allocation failed.");
         }
     }
     else if (message->content_type() == fb::MessageContent::EntityUpdate) {
-        auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
-//        DebugInfo("Received message with tick = %u", entityUpdate->currentTick());
-
         // Pull out the vector of entities.
+        auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
         auto entities = entityUpdate->entities();
+//        DebugInfo("Received message with tick = %u", entityUpdate->currentTick());
 
         // Iterate through the entities, checking if there's player or npc data.
         bool playerFound = false;
@@ -157,7 +156,7 @@ void Network::processReceivedMessage(const BinaryBufferSharedPtr& messageBuffer)
 
             if (entityID == playerID) {
                 // Found the player.
-                if (!(playerUpdateQueue.enqueue(std::move(messageBuffer)))) {
+                if (!(playerUpdateQueue.enqueue(sharedBuffer))) {
                     DebugError("Ran out of room in queue and memory allocation failed.");
                     playerFound = true;
                 }
@@ -165,7 +164,7 @@ void Network::processReceivedMessage(const BinaryBufferSharedPtr& messageBuffer)
             else if (!npcFound){
                 // Found a non-player (npc).
                 // TODO: Add npc movement back in.
-//                if (!(npcUpdateQueue.enqueue(std::move(messageBuffer)))) {
+//                if (!(npcUpdateQueue.enqueue(sharedBuffer))) {
 //                    DebugError("Ran out of room in queue and memory allocation failed.");
 //                    npcFound = true;
 //                }

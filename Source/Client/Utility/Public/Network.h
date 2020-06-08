@@ -68,7 +68,7 @@ public:
     /**
      * Pushes a message into the appropriate queue, based on its contents.
      */
-    void processReceivedMessage(const BinaryBufferSharedPtr& messageBuffer);
+    void processReceivedMessage(BinaryBufferPtr messageBuffer);
 
     std::shared_ptr<Peer> getServer();
 
@@ -89,6 +89,9 @@ private:
     std::atomic<bool> exitRequested;
 
     /** These queues store received messages that are waiting to be consumed. */
+    // TODO: Change our messaging to use wrappers and start using those.
+    //       ConnectionResponseQueue should be a unique_ptr, but can't until we wrap.
+    //       processReceivedMessage should probably be where we wrap it.
     typedef moodycamel::BlockingReaderWriterQueue<BinaryBufferSharedPtr> MessageQueue;
     MessageQueue connectionResponseQueue;
     MessageQueue playerUpdateQueue;
