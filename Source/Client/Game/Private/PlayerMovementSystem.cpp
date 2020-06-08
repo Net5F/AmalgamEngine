@@ -38,6 +38,7 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
         const fb::Message* message = fb::GetMessage(responseBuffer->data());
 
         Uint32 newTick = message->tickTimestamp();
+        DebugInfo("Received timestamp: %u", newTick);
         if (newTick > latestReceivedTick) {
             latestReceivedTick = newTick;
         }
@@ -78,21 +79,22 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
         responseBuffer = network.receive(MessageType::PlayerUpdate);
     } // End while
 
-    /* Replay inputs newer than the message's tick. */
-    Uint32 currentTick = game.getCurrentTick();
-    if (latestReceivedTick > currentTick) {
-        DebugError("Received data for tick %u on tick %u", latestReceivedTick, currentTick);
-    }
-
     // Only replay inputs if we received a message.
     if (latestReceivedTick != 0) {
+        Uint32 currentTick = game.getCurrentTick();
+        // TODO: Find the appropriate futureOffset through synchro timestamps.
+        Uint32 futureOffset = 5;
+        if ((latestReceivedTick - futureOffset) > currentTick) {
+            DebugError(
+                "Received data for tick %u on tick %u. Server is in the future, can't replay inputs.",
+                (latestReceivedTick - futureOffset), currentTick);
+        }
+
         float recX = currentPosition.x;
         float recY = currentPosition.y;
         DebugInfo("Latest: %u, current: %u", latestReceivedTick, currentTick);
 
-        // TODO: Find the appropriate futureOffset through synchro timestamps.
         // Bring the server's tick number back into our local reference.
-        Uint32 futureOffset = 5;
         /* Relay all inputs since the received message, except the current. */
         for (Uint32 i = (latestReceivedTick + 1 - futureOffset); i < currentTick; ++i) {
             Uint32 tickDiff = currentTick - i;
