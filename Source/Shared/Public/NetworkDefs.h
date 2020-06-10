@@ -16,9 +16,9 @@ namespace AM
 typedef Uint32 NetworkID;
 
 /** Dynamically allocated, portable buffers for messages. */
-typedef std::vector<Uint8> BinaryBufferType;
-typedef std::unique_ptr<std::vector<Uint8>> BinaryBufferPtr;
-typedef std::shared_ptr<std::vector<Uint8>> BinaryBufferSharedPtr;
+typedef std::vector<Uint8> BinaryBuffer;
+typedef std::unique_ptr<BinaryBuffer> BinaryBufferPtr;
+typedef std::shared_ptr<BinaryBuffer> BinaryBufferSharedPtr;
 
 
 /** Used for indexing into the parts of a server header. */

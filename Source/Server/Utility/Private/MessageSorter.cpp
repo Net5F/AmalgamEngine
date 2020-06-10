@@ -22,13 +22,14 @@ std::queue<BinaryBufferPtr>& MessageSorter::startReceive(Uint32 tickNum)
     }
 
     // Check if the tick is valid.
-    if (!isTickValid(tickNum)) {
+    Uint32 upperBound = (currentTick + VALID_DIFFERENCE - 1);
+    if ((tickNum < currentTick) || (tickNum > upperBound)) {
         // tickNum is invalid, release the lock.
         lock.unlock();
         DebugError("Tried to start receive for an invalid tick number.");
     }
 
-    return queueBuffer[tickNum % BUFFER_SIZE];
+    return queueBuffer[tickNum % VALID_DIFFERENCE];
 }
 
 void MessageSorter::endReceive()
@@ -45,42 +46,42 @@ void MessageSorter::endReceive()
     lock.unlock();
 }
 
-bool MessageSorter::push(Uint32 tickNum, BinaryBufferPtr message)
+Sint32 MessageSorter::push(Uint32 tickNum, BinaryBufferPtr message)
 {
     // Acquire the lock.
     lock.lock();
 
-    // Check if the tick is valid.
-    if (!isTickValid(tickNum)) {
-        // tickNum is invalid, release the lock.
-        DebugInfo("Tick invalid. tickNum: %u, currentTick %u", tickNum, currentTick);
-        lock.unlock();
-        return false;
-    }
-    DebugInfo("Tick valid. tickNum: %u, currentTick %u. Pushing into slot: %u", tickNum,
-        currentTick, (tickNum % BUFFER_SIZE));
+    // Calc the difference (may underflow).
+    Uint32 difference = tickNum - currentTick;
+    Sint32 returnValue = INVALID_VALUE;
 
-    // Push the message.
-    queueBuffer[tickNum % BUFFER_SIZE].push(std::move(message));
+    /* Carefully process the difference. */
+    if (difference <= VALID_DIFFERENCE) {
+        // Positive difference within range.
+        returnValue = static_cast<Sint32>(difference);
+
+        // Push the message.
+        queueBuffer[tickNum % VALID_DIFFERENCE].push(std::move(message));
+    }
+    else {
+        // Either positive but too large, or negative (underflowed during subtraction).
+
+        // Check if it's within the acceptable negative range by trying to overflow
+        // back around.
+        if ((difference + VALID_DIFFERENCE) >= 0) {
+            // Acceptable negative difference.
+            returnValue = static_cast<Sint32>(difference);
+        }
+    }
 
     // Release the lock.
     lock.unlock();
 
-    return true;
+    // Return either INVALID_VALUE, or the valid difference.
+    return returnValue;
 }
 
-bool MessageSorter::isTickValid(Uint32 tickNum)
-{
-    if (tickNum < currentTick || tickNum > (currentTick + BUFFER_SIZE - 1)) {
-        // tickNum is invalid.
-        return false;
-    }
-    else {
-        return true;
-    }
-}
-
-int MessageSorter::getCurrentTick()
+Uint32 MessageSorter::getCurrentTick()
 {
     return currentTick;
 }

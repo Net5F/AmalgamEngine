@@ -108,7 +108,7 @@ int Network::pollForMessages(void* inNetwork)
         ReceiveResult headerResult = server->receiveBytesWait(SERVER_HEADER_SIZE);
 
         if (headerResult.result == NetworkResult::Success) {
-            const BinaryBufferType& header = *(headerResult.message.get());
+            const BinaryBuffer& header = *(headerResult.message.get());
 
             // Extract the data from the header.
             Sint8 tickOffsetAdjustment =

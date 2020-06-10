@@ -2,6 +2,7 @@
 #define MESSAGESORTER_H_
 
 #include "NetworkDefs.h"
+#include <SDL_stdinc.h>
 #include <array>
 #include <queue>
 #include <mutex>
@@ -25,10 +26,18 @@ class MessageSorter
 {
 public:
     /**
-     * The number of ticks in the future that we'll accept messages for.
-     * If equal to 10 and currentTick is 42, the range [42, 51] is valid.
+     * The difference between currentTick and a given tickNum that we'll accept as valid,
+     * either positive or negative.
+     *
+     * If positive, we'll buffer the message and return the difference.
+     * If negative, we will not buffer the message, but will still return the difference.
      */
-    static constexpr unsigned int BUFFER_SIZE = 10;
+    static constexpr unsigned int VALID_DIFFERENCE = 10;
+
+    /**
+     * Used to flag that the given tickNum was invalid.
+     */
+    static constexpr int INVALID_VALUE = -1000;
 
     MessageSorter();
 
@@ -61,14 +70,11 @@ public:
      *
      * Note: Blocks while a receive has been started, until the receive is ended.
      *
-     * @return true if tickNum was valid and the message was pushed, else false.
+     * @return The difference between the current tick number and tickNum.
      */
-    bool push(Uint32 tickNum, BinaryBufferPtr message);
+    Sint32 push(Uint32 tickNum, BinaryBufferPtr message);
 
-    /** Helper for checking if a tick number is within the bounds. */
-    bool isTickValid(Uint32 tickNum);
-
-    int getCurrentTick();
+    Uint32 getCurrentTick();
 
 private:
     /**
@@ -78,7 +84,7 @@ private:
      * (e.g. if currentTick is 42, the queue in index 0 holds messages for tick number 42,
      * index 1: 43, ..., index (BUFFER_SIZE - 1): (currentTick + BUFFER_SIZE - 1)).
      */
-    std::array<std::queue<BinaryBufferPtr>, BUFFER_SIZE> queueBuffer;
+    std::array<std::queue<BinaryBufferPtr>, VALID_DIFFERENCE> queueBuffer;
 
     /**
      * The current tick that we've advanced to.
@@ -103,7 +109,7 @@ private:
      */
     std::size_t increment(const std::size_t index, const std::size_t amount) const
     {
-        return (index + amount) % BUFFER_SIZE;
+        return (index + amount) % VALID_DIFFERENCE;
     }
 };
 
