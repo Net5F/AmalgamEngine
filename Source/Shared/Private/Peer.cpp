@@ -1,5 +1,5 @@
 #include "Peer.h"
-#include <SDL_stdinc.h>
+#include "SDL_stdinc.h"
 #include "Debug.h"
 
 using namespace AM;

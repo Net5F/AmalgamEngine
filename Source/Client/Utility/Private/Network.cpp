@@ -1,7 +1,7 @@
 #include "Network.h"
 #include "Peer.h"
 #include "NetworkHelpers.h"
-#include <SDL2/SDL_net.h>
+#include "SDL_net.h"
 #include "Message_generated.h"
 #include "GameDefs.h"
 #include "Debug.h"

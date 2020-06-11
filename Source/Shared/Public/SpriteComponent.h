@@ -2,7 +2,7 @@
 #define SPRITECOMPONENT_H_
 
 #include <memory>
-#include <SDL2pp/SDL2pp.hh>
+#include "SDL2pp/SDL2pp.hh"
 
 namespace AM
 {

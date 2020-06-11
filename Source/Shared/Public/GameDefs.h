@@ -1,7 +1,7 @@
 #ifndef GAMEDEFS_H
 #define GAMEDEFS_H
 
-#include <SDL_stdinc.h>
+#include "SDL_stdinc.h"
 #include <array>
 
 /**

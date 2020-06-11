@@ -1,7 +1,7 @@
 #include "Network.h"
 #include "Acceptor.h"
 #include "Peer.h"
-#include <SDL2/SDL_net.h>
+#include "SDL_net.h"
 #include "NetworkHelpers.h"
 #include <algorithm>
 #include "Debug.h"

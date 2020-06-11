@@ -8,7 +8,7 @@
 #include <string>
 
 // Libs
-#include <SDL_stdinc.h>
+#include "SDL_stdinc.h"
 
 // Ours
 #include "Debug.h"

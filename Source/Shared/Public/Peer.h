@@ -2,7 +2,7 @@
 #define PEER_H_
 
 #include "NetworkDefs.h"
-#include <SDL2/SDL_net.h>
+#include "SDL_net.h"
 #include <memory>
 #include <array>
 

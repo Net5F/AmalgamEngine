@@ -2,7 +2,7 @@
 #define IDPOOL_H
 
 #include "GameDefs.h"
-#include <SDL_stdinc.h>
+#include "SDL_stdinc.h"
 #include <array>
 
 namespace AM
