@@ -11,19 +11,16 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/SDL/"
                  "${PROJECT_BINARY_DIR}/Libraries/SDL/")
 
 # Build the SDL2 libs. They don't support cmake so we need to run our own.
-set(SUPPORT_JPG OFF CACHE BOOL "SDL2_image png support")
-set(SUPPORT_PNG ON CACHE BOOL "SDL2_image png support")
-set(SUPPORT_WEBP OFF CACHE BOOL "SDL2_image png support")
 include("${PROJECT_SOURCE_DIR}/../CMake/SDL2_image.cmake")
 include("${PROJECT_SOURCE_DIR}/../CMake/SDL2_mixer.cmake")
 include("${PROJECT_SOURCE_DIR}/../CMake/SDL2_net.cmake")
 include("${PROJECT_SOURCE_DIR}/../CMake/SDL2_ttf.cmake")
 
 # Build SDL2pp into a static lib.
-set(SDL2PP_WITH_IMAGE ON CACHE BOOL "SDL2pp SDL2_image support.")
-set(SDL2PP_WITH_MIXER ON CACHE BOOL "SDL2pp SDL2_mixer support.")
-set(SDL2PP_WITH_TTF ON CACHE BOOL "SDL2pp SDL2_ttf support.")
-set(SDL2PP_WITH_NET ON CACHE BOOL "SDL2pp SDL2_net support.")
+set(SDL2PP_WITH_IMAGE ON)
+set(SDL2PP_WITH_MIXER ON)
+set(SDL2PP_WITH_TTF ON)
+set(SDL2PP_WITH_NET ON)
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/libSDL2pp/"
                  "${PROJECT_BINARY_DIR}/Libraries/libSDL2pp/")
 
