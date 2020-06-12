@@ -13,18 +13,3 @@
 [submodule "Libraries/Catch2"]
 	path = Libraries/Catch2
 	url = git@github.com:catchorg/Catch2.git
-[submodule "Libraries/SDL"]
-	path = Libraries/SDL
-	url = git@github.com:SDL-mirror/SDL.git
-[submodule "Libraries/SDL_mixer"]
-	path = Libraries/SDL_mixer
-	url = git@github.com:SDL-mirror/SDL_mixer.git
-[submodule "Libraries/SDL_net"]
-	path = Libraries/SDL_net
-	url = git@github.com:SDL-mirror/SDL_net.git
-[submodule "Libraries/SDL_ttf"]
-	path = Libraries/SDL_ttf
-	url = git@github.com:SDL-mirror/SDL_ttf.git
-[submodule "Libraries/SDL_image"]
-	path = Libraries/SDL_image
-	url = git@github.com:SDL-mirror/SDL_image.git

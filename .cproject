@@ -49,15 +49,13 @@
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 			<storageModule buildDir="Build/Windows/Debug" moduleId="de.marw.cdt.cmake.core.settings">
-				<options clearCache="true"/>
+				<options/>
 				<linux command="cmake" generator="Ninja" use-default="true">
 				</linux>
 				<win32 command="cmake" generator="Ninja" use-default="true">
 					<defs/>
 					<undefs/>
 				</win32>
-				<defs/>
-				<undefs/>
 			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.exe.debug.511478739.705862884">

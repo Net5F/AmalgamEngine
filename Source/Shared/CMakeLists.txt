@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-message(STATUS "Configuring Shared")
+message(STATUS "Building Shared")
 
 # Add our static library target
 add_library(Shared STATIC
@@ -31,6 +31,8 @@ add_library(Shared STATIC
 
 target_include_directories(Shared
     PRIVATE
+        ${SDL2_INCLUDE_DIRS}
+        ${SDL2_NET_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
@@ -41,8 +43,8 @@ target_precompile_headers(Shared PRIVATE Private/pch.h)
 
 target_link_libraries(Shared
     PUBLIC
-        SDL2-static
-        SDL2_net-static
+        ${SDL2_LIBRARIES}
+        ${SDL2_NET_LIBRARIES}
         SDL2pp
         flatbuffers
 )

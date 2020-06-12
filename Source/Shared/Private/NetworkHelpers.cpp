@@ -1,6 +1,6 @@
 #include "NetworkHelpers.h"
-#include "SDL_net.h"
-#include "SDL_stdinc.h"
+#include <SDL_net.h>
+#include <SDL_stdinc.h>
 #include <algorithm>
 #include "Peer.h"
 #include "Debug.h"

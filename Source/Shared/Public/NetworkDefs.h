@@ -1,7 +1,7 @@
 #ifndef NETWORKDEFS_H
 #define NETWORKDEFS_H
 
-#include "SDL_stdinc.h"
+#include <SDL_stdinc.h>
 #include <memory>
 #include <vector>
 

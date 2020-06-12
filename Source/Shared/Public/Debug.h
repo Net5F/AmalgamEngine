@@ -1,7 +1,7 @@
 #ifndef DEBUG_H_
 #define DEBUG_H_
 
-#include "SDL_stdinc.h"
+#include <SDL_stdinc.h>
 
 
 /**

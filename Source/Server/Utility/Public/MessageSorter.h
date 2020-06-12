@@ -2,7 +2,7 @@
 #define MESSAGESORTER_H_
 
 #include "NetworkDefs.h"
-#include "SDL_stdinc.h"
+#include <SDL_stdinc.h>
 #include <array>
 #include <queue>
 #include <mutex>

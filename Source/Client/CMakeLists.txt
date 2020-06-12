@@ -1,25 +1,24 @@
 cmake_minimum_required(VERSION 3.16)
 
-message(STATUS "Configuring Client")
+message(STATUS "Building Client")
 
-# Sources and includes are added in included subdirectories.
 add_executable(Client "")
+
+target_include_directories(Client
+    PRIVATE
+        ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} 
+        ${SDL2_MIXER_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS}
+        ${SDL2_NET_INCLUDE_DIRS}
+)
 
 # Inherit Shared's precompiled header.
 target_precompile_headers(Client REUSE_FROM Shared)
 
-# Link all our dependencies.
-if(MINGW)
-  # We need the specific order: mingw32, SDL2main, SDL2.
-    target_link_libraries(Client PRIVATE mingw32)
-endif()
-
 target_link_libraries(Client
     PRIVATE
-        SDL2-static
-        SDL2main
-        SDL2_image-static
-        SDL2_net-static
+        ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}
+        ${SDL2_MIXER_LIBRARIES} ${SDL2_TTF_LIBRARIES}
+        ${SDL2_NET_LIBRARIES}
         SDL2pp
         flatbuffers
         Shared
