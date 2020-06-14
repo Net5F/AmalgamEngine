@@ -43,31 +43,21 @@ add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E make_directory 
                 ${PROJECT_BINARY_DIR}/Output/Client/
 
-        # Copy C and C++ dlls to the output directory.
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${PROJECT_SOURCE_DIR}/../Libraries/Cpp/${CMAKE_SYSTEM_NAME}
-                ${PROJECT_BINARY_DIR}/Output/Client/
-
-        # Copy SDL2 dlls to the output directory.
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${PROJECT_SOURCE_DIR}/../Libraries/SDL2/${CMAKE_SYSTEM_NAME}
-                ${PROJECT_BINARY_DIR}/Output/Client/
-
-        # Copy pthread dll to the output directory.
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${PROJECT_SOURCE_DIR}/../Libraries/Pthread/${CMAKE_SYSTEM_NAME}
-                ${PROJECT_BINARY_DIR}/Output/Client/
-
         # Copy resource files to the output directory.
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${PROJECT_SOURCE_DIR}/../Resources/
                 ${PROJECT_BINARY_DIR}/Output/Client/Resources/
 
         # Copy the .exe to the output directory.
-        TARGET Client POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
                 ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}
                 ${PROJECT_BINARY_DIR}/Output/Client/
+
+        # Detect and copy dependencies to the output directory.
+        COMMAND ${CMAKE_COMMAND} -P 
+                ${PROJECT_SOURCE_DIR}/../CMake/copy_runtime_deps.cmake
+                    ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}
+                    ${PROJECT_BINARY_DIR}/Output/Client/
 )
 
 # Build all of the subdirectories
