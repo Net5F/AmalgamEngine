@@ -9,16 +9,31 @@ endif()
 # Normalize the environment path into cmake format.
 file(TO_CMAKE_PATH "$ENV{PATH}" NORMALIZED_ENV_PATH)
 
+if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
+    # Exclude all in system32.
+    message(STATUS "Using Windows lib exclude regex.")
+    set(EXCLUDE_SYSLIBS_REGEX [\\\/]WINDOWS[\\\/]system32\/*)
+elseif(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
+    # Exclude all libs that were found to already come with Ubuntu 20.04.
+    # Note: This produces a minimal list. If some of these libs are missing on some
+    #       systems, they can be added back in.
+    message(STATUS "Using Linux lib exclude regex.")
+    set(EXCLUDE_SYSLIBS_REGEX ld- libasound libbsd libc libdbus libdl libffi
+                              libgcrypt libgpg-err liblz4 liblzma libm\\. libnsl libogg
+                              libpthread libresolv librt libsystemd libvorbis\\. libwrap
+                              libX11 libXau libxcb libXdmcp libXext)
+else()
+    message(FATAL_ERROR "Unknown platform. Only Windows and Linux are supported.")
+endif()
+
 # Detect dependencies on the given executable.
 message(STATUS "Detecting dependencies for: ${CMAKE_ARGV3}")
 file(GET_RUNTIME_DEPENDENCIES
      RESOLVED_DEPENDENCIES_VAR RESOLVED_DEPENDENCIES
      EXECUTABLES ${CMAKE_ARGV3}
      DIRECTORIES ${NORMALIZED_ENV_PATH}
-     POST_EXCLUDE_REGEXES "[\\\/]WINDOWS[\\\/]system32\/*"
+     POST_EXCLUDE_REGEXES ${EXCLUDE_SYSLIBS_REGEX}
 )
-
-message(STATUS "Deps: ${RESOLVED_DEPENDENCIES}")
 
 # Copy dependencies into the given path.
 message(STATUS "Copying dependencies to ${CMAKE_ARGV4}")
