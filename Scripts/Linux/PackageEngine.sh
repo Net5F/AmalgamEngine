@@ -14,6 +14,7 @@ Config=$1
 BuildPath=$BasePath/Build/Linux/$Config
 if ! [ -f "$BuildPath/Server/Server" ] || ! [ -f "$BuildPath/Client/Client" ] ; then
     echo "Build files for $Config config were not found. Please build before attempting to package."
+    exit 1
 fi
 
 # Make the directories we're going to use.
@@ -37,4 +38,7 @@ cp -r $BasePath/Resources $PackagePath/Client/
 # Detect and copy dependencies.
 cmake -P $BasePath/CMake/copy_runtime_deps.cmake $BuildPath/Client/Client $PackagePath/Client/
 cmake -P $BasePath/CMake/copy_runtime_deps.cmake $BuildPath/Server/Server $PackagePath/Server/
+
+# Set the rpath of our executable and dependencies to $ORIGIN (effectively ./)
+find $PackagePath/Server/ -maxdepth 1 -type f -exec patchelf --set-rpath '$ORIGIN' {} \;
     
