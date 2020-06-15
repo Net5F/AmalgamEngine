@@ -32,45 +32,14 @@ target_link_libraries(Client
 target_compile_features(Client PRIVATE cxx_std_17)
 set_target_properties(Client PROPERTIES CXX_EXTENSIONS OFF)
 
-# Set up our exe name and output path.
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    set(EXE_NAME "Client.exe")
-else()
-    set(EXE_NAME "Client")
-endif()
-set(OUTPUT_DIR "${PROJECT_BINARY_DIR}/Output/Client/")
-
 add_custom_command(
         TARGET Client POST_BUILD
         
-        # Make sure the output directory exists
-        COMMAND ${CMAKE_COMMAND} -E make_directory 
-                ${OUTPUT_DIR}
-
-        # Copy resource files to the output directory.
+        # Copy resource files to the build directory.
         COMMAND ${CMAKE_COMMAND} -E copy_directory
                 ${PROJECT_SOURCE_DIR}/../Resources/
-                ${OUTPUT_DIR}/Resources/
-
-        # Copy the .exe to the output directory.
-        COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}
-                ${OUTPUT_DIR}
-
-        # Detect and copy dependencies to the output directory.
-        COMMAND ${CMAKE_COMMAND} -P 
-                ${PROJECT_SOURCE_DIR}/../CMake/copy_runtime_deps.cmake
-                    ${CMAKE_CURRENT_BINARY_DIR}/${EXE_NAME}
-                    ${OUTPUT_DIR}
+                ${CMAKE_CURRENT_BINARY_DIR}/Resources/
 )
-                    
-# Set the rpath of our executable and dependencies to $ORIGIN (effectively ./)
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    add_custom_command(
-            TARGET Client POST_BUILD
-                COMMAND find ${OUTPUT_DIR} -type f -maxdepth 1 -exec patchelf --set-rpath '\$\$ORIGIN' {} \\\;
-    )
-endif()
 
 # Build all of the subdirectories
 add_subdirectory(Launch)

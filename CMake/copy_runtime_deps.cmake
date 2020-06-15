@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.16)
 if(${CMAKE_ARGC} LESS 5)
     message(FATAL_ERROR "Invalid arguments.\n"
       "Usage: cmake -P copy_runtime_deps.cmake <path_to_executable> <path_to_copy_to>\n"
-      "On returning, the resolved dependencies will be copied into the directory at path_to_copy_to.\n")
-      "Note: This script has an internal excludes list that can be modified if needed."
+      "On returning, the resolved dependencies will be copied into the directory at path_to_copy_to.\n"
+      "Note: This script has an internal excludes list that can be modified if needed.")
 endif()
 
 # Normalize the environment path into cmake format.
