@@ -35,18 +35,24 @@ if not exist %PackagePath%\Client mkdir %PackagePath%\Client
 if not exist %PackagePath%\Server mkdir %PackagePath%\Server
 
 rem Clear out the package directories to prep for the new files.
-del /s /f /q %PackagePath%\Client\*.*
+del /s /f /q %PackagePath%\Client\*.* >nul 2>&1
 for /f %%f in ('dir /ad /b %PackagePath%\Client\') do rd /s /q %PackagePath%\Client\%%f
 
-del /s /f /q %PackagePath%\Server\*.*
+del /s /f /q %PackagePath%\Server\*.* >nul 2>&1
 for /f %%f in ('dir /ad /b %PackagePath%\Server\') do rd /s /q %PackagePath%\Server\%%f
 
+echo "Starting package process."
 
 rem Copy the client and server binaries.
+robocopy "%BuildPath%\Client" "%PackagePath%\Client" "Client.exe" >nul 2>&1
+robocopy "%BuildPath%\Server" "%PackagePath%\Server" "Server.exe" >nul 2>&1
 
 rem Copy the resource files to the client.
+robocopy "%BasePath%\Resources" "%PackagePath%\Client\Resources" /E >nul 2>&1
 
 rem Detect and copy dependencies.
+cmake -P "%BasePath%\CMake\copy_runtime_deps.cmake" "%BuildPath%\Client\Client.exe" "%PackagePath%\Client"
+cmake -P "%BasePath%\CMake\copy_runtime_deps.cmake" "%BuildPath%\Server\Server.exe" "%PackagePath%\Server"
 
 
 :End
