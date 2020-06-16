@@ -5,8 +5,8 @@ message(STATUS "Building Tests")
 # Catch2 settings.
 SET(CATCH_BUILD_TESTING OFF CACHE BOOL "Build SelfTest project")
 SET(CATCH_INSTALL_DOCS OFF CACHE BOOL "Install documentation alongside library")
-find_package( Catch2 REQUIRED )
-include(CTest)
+add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/Catch2/"
+                 "${PROJECT_BINARY_DIR}/Libraries/Catch2/")
 
 # Add the executable.
 add_executable(Tests
