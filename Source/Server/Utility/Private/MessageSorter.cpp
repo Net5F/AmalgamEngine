@@ -22,14 +22,13 @@ std::queue<BinaryBufferPtr>& MessageSorter::startReceive(Uint32 tickNum)
     }
 
     // Check if the tick is valid.
-    Uint32 upperBound = (currentTick + VALID_DIFFERENCE - 1);
-    if ((tickNum < currentTick) || (tickNum > upperBound)) {
+    if (!isTickValid(tickNum)) {
         // tickNum is invalid, release the lock.
         lock.unlock();
         DebugError("Tried to start receive for an invalid tick number.");
     }
 
-    return queueBuffer[tickNum % VALID_DIFFERENCE];
+    return queueBuffer[tickNum % BUFFER_SIZE];
 }
 
 void MessageSorter::endReceive()
@@ -46,39 +45,33 @@ void MessageSorter::endReceive()
     lock.unlock();
 }
 
-Sint32 MessageSorter::push(Uint32 tickNum, BinaryBufferPtr message)
+Sint64 MessageSorter::push(Uint32 tickNum, BinaryBufferPtr message)
 {
     // Acquire the lock.
     lock.lock();
 
-    // Calc the difference (may underflow).
-    Uint32 difference = tickNum - currentTick;
-    Sint32 returnValue = INVALID_VALUE;
-
-    /* Carefully process the difference. */
-    if (difference <= VALID_DIFFERENCE) {
-        // Positive difference within range.
-        returnValue = static_cast<Sint32>(difference);
-
-        // Push the message.
-        queueBuffer[tickNum % VALID_DIFFERENCE].push(std::move(message));
-    }
-    else {
-        // Either positive but too large, or negative (underflowed during subtraction).
-
-        // Check if it's within the acceptable negative range by trying to overflow
-        // back around.
-        if ((difference + VALID_DIFFERENCE) >= 0) {
-            // Acceptable negative difference.
-            returnValue = static_cast<Sint32>(difference);
-        }
+    // If tickNum is valid, push the message.
+    if (isTickValid(tickNum)) {
+        queueBuffer[tickNum % BUFFER_SIZE].push(std::move(message));
     }
 
     // Release the lock.
     lock.unlock();
 
-    // Return either INVALID_VALUE, or the valid difference.
-    return returnValue;
+    // Return how far ahead or behind tickNum is in relation to currentTick.
+    return static_cast<Sint64>(tickNum) - static_cast<Sint64>(currentTick);
+}
+
+bool MessageSorter::isTickValid(Uint32 tickNum)
+{
+    // Check if tickNum is within our lower and upper bounds.
+    Uint32 upperBound = (currentTick + BUFFER_SIZE - 1);
+    if ((tickNum < currentTick) || (tickNum > upperBound)) {
+        return false;
+    }
+    else {
+        return true;
+    }
 }
 
 Uint32 MessageSorter::getCurrentTick()

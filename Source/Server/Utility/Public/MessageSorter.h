@@ -2,7 +2,7 @@
 #define MESSAGESORTER_H_
 
 #include "NetworkDefs.h"
-#include <SDL_stdinc.h>
+#include "SDL_stdinc.h"
 #include <array>
 #include <queue>
 #include <mutex>
@@ -26,25 +26,18 @@ class MessageSorter
 {
 public:
     /**
-     * The difference between currentTick and a given tickNum that we'll accept as valid,
-     * either positive or negative.
-     *
-     * If positive, we'll buffer the message and return the difference.
-     * If negative, we will not buffer the message, but will still return the difference.
+     * The max valid positive difference between an incoming tickNum and our currentTick that
+     * we'll accept. If 10, the valid range is [currentTick, currentTick + 10).
+     * Effectively, how far into the future we'll buffer messages for.
      */
-    static constexpr unsigned int VALID_DIFFERENCE = 10;
-
-    /**
-     * Used to flag that the given tickNum was invalid.
-     */
-    static constexpr int INVALID_VALUE = -1000;
+    static constexpr Sint64 BUFFER_SIZE = 10;
 
     MessageSorter();
 
     /**
      * Returns a pointer to the queue holding messages for the given tick number.
-     * If tickNum < currentTick or tickNum >= (currentTick + BUFFER_SIZE), it is considered
-     * not valid and an error occurs.
+     * If tickNum < currentTick or tickNum > (currentTick + VALID_DIFFERENCE), it is
+     * considered not valid and an error occurs.
      *
      * NOTE: If tickNum is valid, locks the MessageSorter until endReceive is called.
      *
@@ -66,13 +59,16 @@ public:
     void endReceive();
 
     /**
-     * If tickNum is valid, pushes the given message into the appropriate queue.
+     * If tickNum is valid, buffers the message.
      *
-     * Note: Blocks while a receive has been started, until the receive is ended.
+     * Note: Blocks while a receive has been started, until the receive has ended.
      *
-     * @return The difference between the current tick number and tickNum.
+     * @return The amount that tickNum is ahead or behind currentTick.
      */
-    Sint32 push(Uint32 tickNum, BinaryBufferPtr message);
+    Sint64 push(Uint32 tickNum, BinaryBufferPtr message);
+
+    /** Helper for checking if a tick number is within the bounds. */
+    bool isTickValid(Uint32 tickNum);
 
     Uint32 getCurrentTick();
 
@@ -82,9 +78,9 @@ private:
      *
      * Holds messages at the index equal to their tick number - currentTick.
      * (e.g. if currentTick is 42, the queue in index 0 holds messages for tick number 42,
-     * index 1: 43, ..., index (BUFFER_SIZE - 1): (currentTick + BUFFER_SIZE - 1)).
+     * index 1: 43, ..., index (VALID_DIFFERENCE): (42 + VALID_DIFFERENCE)).
      */
-    std::array<std::queue<BinaryBufferPtr>, VALID_DIFFERENCE> queueBuffer;
+    std::array<std::queue<BinaryBufferPtr>, BUFFER_SIZE> queueBuffer;
 
     /**
      * The current tick that we've advanced to.
@@ -109,7 +105,7 @@ private:
      */
     std::size_t increment(const std::size_t index, const std::size_t amount) const
     {
-        return (index + amount) % VALID_DIFFERENCE;
+        return (index + amount) % BUFFER_SIZE;
     }
 };
 
