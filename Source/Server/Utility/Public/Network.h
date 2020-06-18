@@ -83,6 +83,8 @@ public:
     void sendConnectionResponse(NetworkID networkID, EntityID newEntityID, float spawnX,
                                 float spawnY);
 
+    // Returning non-const refs because they need to be modified. Be careful not to attempt
+    // to re-assign the obtained ref (can't re-seat a reference once bound).
     std::unordered_map<NetworkID, Client>& getClientMap();
     std::shared_mutex& getClientMapMutex();
     moodycamel::ReaderWriterQueue<NetworkID>& getConnectEventQueue();
