@@ -5,6 +5,8 @@
 #include "NetworkDefs.h"
 #include <memory>
 #include <queue>
+#include "CircularBuffer.h"
+#include <mutex>
 
 namespace AM
 {
@@ -16,12 +18,23 @@ namespace Server
 
 /**
  * This class represents a single client and facilitates the organization of our
- * communication with them. It's effectively an adapter for Peer with an added outgoing queue.
+ * communication with them.
+ *
+ * It's effectively an adapter for Peer with an added outgoing queue and some
+ * storing of sync data.
  */
 class Client
 {
 public:
-    Client(const std::shared_ptr<Peer>& inPeer);
+    Client(std::unique_ptr<Peer> inPeer);
+
+    //--------------------------------------------------------------------------
+    // Communication
+    //--------------------------------------------------------------------------
+    /**
+     * Queues a message to be sent the next time sendWaitingMessages is called.
+     */
+    void queueMessage(const BinaryBufferSharedPtr& message);
 
     /**
      * Immediately sends the given header to this Peer.
@@ -33,11 +46,6 @@ public:
      * @return Disconnected if the peer was found to be disconnected, else Success.
      */
     NetworkResult sendHeader(const BinaryBufferSharedPtr& header);
-
-    /**
-     * Queues a message to be sent the next time sendWaitingMessages is called.
-     */
-    void queueMessage(const BinaryBufferSharedPtr& message);
 
     /**
      * Attempts to send all queued messages over the network.
@@ -61,11 +69,66 @@ public:
      */
     Uint8 getWaitingMessageCount() const;
 
+    /**
+     * @return True if the client is connected, else false.
+     *
+     * Note: There's 2 places where a disconnect can occur:
+     *       If the client initiates a disconnect, the peer will internally set a flag.
+     *       If we initiated a disconnect, peer will be set to nullptr.
+     *       Both cases are detected by this method.
+     */
     bool isConnected();
 
+    //--------------------------------------------------------------------------
+    // Synchronization
+    //--------------------------------------------------------------------------
+    /** The number of tick offsets that we'll remember. */
+    static constexpr int TICKDIFF_HISTORY_LENGTH = 10;
+
+    /** The lowest difference we'll work with. */
+    static constexpr Sint64 LOWEST_VALID_TICKDIFF = -10;
+    /** The highest difference we'll work with. */
+    static constexpr Sint64 HIGHEST_VALID_TICKDIFF = 10;
+    /** The average difference that we'll aim a client towards. */
+    static constexpr Sint64 TARGET_TICKDIFF = 3;
+
+    /**
+     * Records the given tick diff in tickDiffHistory.
+     *
+     * Diffs are generally obtained through the return value of MessageSorter.push(),
+     * and represent how far off the tickNum in a received message was from our current tick.
+     *
+     * If the diff isn't in our valid range, it's discarded and the client is forcibly
+     * disconnected.
+     */
+    void recordTickDiff(Sint64 tickDiff);
+
+    /**
+     * Uses the tickDiffHistory to calculate an appropriate tick adjustment for
+     * this client to make.
+     */
+    Sint8 getTickAdjustment();
+
 private:
-    std::shared_ptr<Peer> peer;
+    /**
+     * Our connection and interface to the client.
+     */
+    std::unique_ptr<Peer> peer;
+
+    /**
+     * Holds messages to be sent with the next call to sendWaitingMessages.
+     */
     std::deque<BinaryBufferSharedPtr> sendQueue;
+
+    /**
+     * Holds tick diffs that have been added through recordTickDiff.
+     */
+    CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH> tickDiffHistory;
+
+    /**
+     * Used to prevent tickDiffHistory changing while a getTickAdjustment is happening.
+     */
+    std::mutex tickDiffMutex;
 };
 
 } // End namespace Server

@@ -36,16 +36,16 @@ ClientHandler::~ClientHandler()
 void ClientHandler::acceptNewClients(
 std::unordered_map<NetworkID, Client>& clientMap)
 {
-    // Creates the new client, which adds itself to the socket set.
-    std::shared_ptr<Peer> newClient = acceptor->accept();
+    // Creates the new peer, which adds itself to the socket set.
+    std::unique_ptr<Peer> newPeer = acceptor->accept();
 
-    while (newClient != nullptr) {
+    while (newPeer != nullptr) {
         NetworkID newID = idPool.reserveID();
         DebugInfo("New client connected. Assigning netID: %u", newID);
 
-        // Add the client to the Network's clientMap.
+        // Add the peer to the Network's clientMap, constructing a Client in-place.
         std::unique_lock writeLock(network.getClientMapMutex());
-        if (!(clientMap.emplace(newID, newClient).second)) {
+        if (!(clientMap.emplace(newID, std::move(newPeer)).second)) {
             idPool.freeID(newID);
             DebugError(
                 "Ran out of room in new client queue and memory allocation failed.");
@@ -54,7 +54,7 @@ std::unordered_map<NetworkID, Client>& clientMap)
         // Add an event to the Network's queue.
         network.getConnectEventQueue().enqueue(newID);
 
-        newClient = acceptor->accept();
+        newPeer = acceptor->accept();
     }
 }
 

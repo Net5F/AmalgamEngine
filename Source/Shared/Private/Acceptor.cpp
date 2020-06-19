@@ -24,11 +24,11 @@ AM::Acceptor::~Acceptor()
     SDLNet_TCP_Close(socket);
 }
 
-std::shared_ptr<Peer> AM::Acceptor::accept()
+std::unique_ptr<Peer> AM::Acceptor::accept()
 {
     TCPsocket client = SDLNet_TCP_Accept(socket);
     if (client) {
-        return std::make_shared<Peer>(client, clientSet);
+        return std::make_unique<Peer>(client, clientSet);
     }
     else {
         return nullptr;

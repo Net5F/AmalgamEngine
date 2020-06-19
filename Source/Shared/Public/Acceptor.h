@@ -19,15 +19,14 @@ public:
 
     ~Acceptor();
 
-    std::shared_ptr<Peer> accept();
+    std::unique_ptr<Peer> accept();
 
 private:
     std::string hostIP;
     Uint16 port;
     TCPsocket socket;
 
-    /** A pointer to the set to add accepted clients to.
-        Typically owned by the Network. */
+    /** A pointer to the set to add accepted clients to. Typically owned by the Network. */
     std::shared_ptr<SDLNet_SocketSet> clientSet;
 };
 

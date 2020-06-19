@@ -25,6 +25,7 @@ target_link_libraries(Server
         flatbuffers
         Shared
         readerwriterqueue
+        CircularBuffer
 )
 
 # Compile with C++17

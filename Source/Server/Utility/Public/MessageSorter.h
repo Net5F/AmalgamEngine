@@ -93,9 +93,9 @@ private:
     std::size_t head;
 
     /**
-     * Used to lock the container while a push or receive is happening.
+     * Used to prevent queueBuffer and head updates while a push or receive is happening.
      */
-    std::mutex lock;
+    std::mutex mutex;
 
     //----------------------------------------------------------------------------
     // Convenience Functions
