@@ -113,7 +113,7 @@ int Network::pollForMessages(void* inNetwork)
             // Extract the data from the header.
             Sint8 tickOffsetAdjustment =
                 header[ServerHeaderIndex::TickOffsetAdjustment];
-            DebugInfo("Received adjustment: %d", tickOffsetAdjustment);
+            DebugInfo("Received tick adjustment: %d", tickOffsetAdjustment);
             Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
 
             // Receive all of the expected messages.

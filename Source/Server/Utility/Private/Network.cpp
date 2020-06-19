@@ -147,8 +147,9 @@ void Network::sendWaitingMessagesInternal()
         Uint8 messageCount = client.getWaitingMessageCount();
         if (messageCount > 0) {
             // Build the batch header.
-            Sint8 adjustment = client.getTickAdjustment();
-            Uint8 header[SERVER_HEADER_SIZE] = {static_cast<Uint8>(adjustment), messageCount};
+            Sint8 tickAdjustment = client.getTickAdjustment();
+            Uint8 header[SERVER_HEADER_SIZE] = { static_cast<Uint8>(tickAdjustment),
+                    messageCount };
 
             // Send the batch header.
             client.sendHeader(
