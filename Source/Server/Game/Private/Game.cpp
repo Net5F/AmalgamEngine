@@ -18,7 +18,7 @@ Game::Game(Network& inNetwork)
 {
     world.setSpawnPoint({64, 64});
     Debug::registerCurrentTickPtr(&currentTick);
-    Network::registerCurrentTickPtr(&currentTick);
+    network.registerCurrentTickPtr(&currentTick);
 }
 
 void Game::tick(float deltaSeconds)
@@ -42,7 +42,8 @@ void Game::tick(float deltaSeconds)
 
         /* Prepare for the next tick. */
         accumulatedTime -= GAME_TICK_INTERVAL_S;
-        currentTick++;
+        currentTick.store(currentTick.load(std::memory_order_relaxed) + 1,
+            std::memory_order_release);
     }
 }
 
@@ -116,9 +117,15 @@ void Game::processDisconnectEvents()
     }
 }
 
-Uint32 Game::getCurrentTick()
+Uint32 Game::getCurrentTick(bool fromSameThread)
 {
-    return currentTick;
+    if (fromSameThread) {
+        // currentTick is only updated on the Game's thread, so we can
+        // safely load it.
+        return currentTick.load(std::memory_order_relaxed);
+    } else {
+        return currentTick.load(std::memory_order_acquire);
+    }
 }
 
 } // namespace Server

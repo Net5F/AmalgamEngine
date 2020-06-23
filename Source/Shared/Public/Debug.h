@@ -27,7 +27,7 @@ namespace AM
 class Debug
 {
 public:
-    static void registerCurrentTickPtr(Uint32* inCurrentTickPtr);
+    static void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
     /**
      * Prints the given info to stdout and flushes the buffer.
@@ -45,7 +45,7 @@ public:
     static void error(const char* fileName, int line, const char* expression, ...);
 
 private:
-    static Uint32* currentTickPtr;
+    static const std::atomic<Uint32>* currentTickPtr;
 };
 
 } /* End namespace AM */

@@ -63,13 +63,18 @@ public:
      *
      * Note: Blocks while a receive has been started, until the receive has ended.
      *
-     * @return The amount that tickNum is ahead or behind currentTick.
+     * @return True if tickNum was valid and the message was pushed, else false.
      */
-    Sint64 push(Uint32 tickNum, BinaryBufferPtr message);
+    bool push(Uint32 tickNum, BinaryBufferPtr message);
 
     /** Helper for checking if a tick number is within the bounds. */
     bool isTickValid(Uint32 tickNum);
 
+    /**
+     * Returns the MessageSorter's internal currentTick.
+     * NOTE: Should not be used to fetch the current tick, get a ref to the Game's
+     *       currentTick instead. This is just for unit testing.
+     */
     Uint32 getCurrentTick();
 
 private:

@@ -1,13 +1,14 @@
 #include "Debug.h"
 #include <cstdio>
 #include <cstdarg>
+#include <atomic>
 
 namespace AM
 {
 
-Uint32* Debug::currentTickPtr = nullptr;
+const std::atomic<Uint32>* Debug::currentTickPtr = nullptr;
 
-void Debug::registerCurrentTickPtr(Uint32* inCurrentTickPtr)
+void Debug::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr)
 {
     currentTickPtr = inCurrentTickPtr;
 }
@@ -18,7 +19,7 @@ void Debug::info(const char* expression, ...)
     // If the app hasn't registered a tick count, default to 0.
     Uint32 currentTick = 0;
     if (currentTickPtr != nullptr) {
-        currentTick = *currentTickPtr;
+        currentTick = currentTickPtr->load(std::memory_order_acquire);
     }
 
     std::va_list arg;
@@ -39,7 +40,7 @@ void Debug::error(const char* fileName, int line, const char* expression, ...)
     // If the app hasn't registered a tick count, default to 0.
     Uint32 currentTick = 0;
     if (currentTickPtr != nullptr) {
-        currentTick = *currentTickPtr;
+        currentTick = currentTickPtr->load(std::memory_order_acquire);
     }
 
     std::va_list arg;

@@ -42,7 +42,7 @@ public:
 
     float getAccumulatedTime();
 
-    Uint32 getCurrentTick();
+    Uint32 getCurrentTick(bool fromSameThread = false);
 
     std::atomic<bool> const* getExitRequestedPtr();
 
@@ -62,7 +62,7 @@ private:
      * The number of the tick that we're currently on.
      * Initialized to the number that the server tells us it's on.
      */
-    Uint32 currentTick;
+    std::atomic<Uint32> currentTick;
 
     // Temporary until a resource manager is created.
     const std::shared_ptr<SDL2pp::Texture>& sprites;

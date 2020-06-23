@@ -135,7 +135,8 @@ void ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& 
             ReceiveResult messageResult = client.receiveMessage();
             while (messageResult.result == NetworkResult::Success) {
                 // Queue the message (blocks if the queue is locked).
-                network.queueInputMessage(std::move(messageResult.message));
+                Sint64 diff = network.queueInputMessage(std::move(messageResult.message));
+                client.recordTickDiff(diff);
 
                 messageResult = client.receiveMessage();
             }

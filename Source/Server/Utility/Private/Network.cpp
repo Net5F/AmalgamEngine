@@ -4,6 +4,7 @@
 #include <SDL2/SDL_net.h>
 #include "NetworkHelpers.h"
 #include <algorithm>
+#include <atomic>
 #include "Debug.h"
 
 namespace AM
@@ -11,17 +12,11 @@ namespace AM
 namespace Server
 {
 
-Uint32* Network::currentTickPtr = nullptr;
-
-void Network::registerCurrentTickPtr(Uint32* inCurrentTickPtr)
-{
-    currentTickPtr = inCurrentTickPtr;
-}
-
 Network::Network()
 : accumulatedTime(0.0f)
 , clientHandler(*this)
 , builder(BUILDER_BUFFER_SIZE)
+, currentTickPtr(nullptr)
 {
 }
 
@@ -66,21 +61,24 @@ void Network::sendWaitingMessages(float deltaSeconds)
     }
 }
 
-void Network::queueInputMessage(BinaryBufferPtr messageBuffer)
+Sint64 Network::queueInputMessage(BinaryBufferPtr messageBuffer)
 {
     const fb::Message* message = fb::GetMessage(messageBuffer->data());
     if (message->content_type() != fb::MessageContent::EntityUpdate) {
         DebugError("Expected EntityUpdate but got something else.");
     }
+    Uint32 receivedTickTimestamp = message->tickTimestamp();
 
-    DebugInfo("Received message with tick: %u", message->tickTimestamp());
-
-    // Push the message into the MessageSorter.
-    bool result = inputMessageSorter.push(message->tickTimestamp(),
-        std::move(messageBuffer));
-    if (!result) {
-        DebugInfo("Message rejected from MessageSorter.");
+    // Check if the message is just a heartbeat, or if we need to push it.
+    auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
+    if (entityUpdate->entities()->size() != 0) {
+        inputMessageSorter.push(receivedTickTimestamp, std::move(messageBuffer));
     }
+
+    // Calc how far ahead or behind tickNum is in relation to currentTick.
+    Uint32 curTick = currentTickPtr->load(std::memory_order_acquire);
+    return static_cast<Sint64>(receivedTickTimestamp)
+           - static_cast<Sint64>(curTick);
 }
 
 std::queue<BinaryBufferPtr>& Network::startReceiveInputMessages(Uint32 tickNum)
@@ -111,7 +109,7 @@ void Network::queueConnectionResponses()
     /* Send all waiting ConnectionResponse messages. */
     unsigned int responseCount = connectionResponseQueue.size();
     if (responseCount > 0) {
-        Uint32 latestTickTimestamp = *currentTickPtr;
+        Uint32 latestTickTimestamp = currentTickPtr->load(std::memory_order_acquire);
 
         for (unsigned int i = 0; i < responseCount; ++i) {
             ConnectionResponseData& data = connectionResponseQueue.front();
@@ -147,9 +145,10 @@ void Network::sendWaitingMessagesInternal()
         Uint8 messageCount = client.getWaitingMessageCount();
         if (messageCount > 0) {
             // Build the batch header.
-            Sint8 tickAdjustment = client.getTickAdjustment();
-            Uint8 header[SERVER_HEADER_SIZE] = { static_cast<Uint8>(tickAdjustment),
-                    messageCount };
+            Client::AdjustmentData tickAdjustment = client.getTickAdjustment();
+            Uint8 header[SERVER_HEADER_SIZE] = {
+                    static_cast<Uint8>(tickAdjustment.adjustment),
+                    tickAdjustment.iteration, messageCount };
 
             // Send the batch header.
             client.sendHeader(
@@ -180,6 +179,11 @@ moodycamel::ReaderWriterQueue<NetworkID>& Network::getConnectEventQueue()
 moodycamel::ReaderWriterQueue<NetworkID>& Network::getDisconnectEventQueue()
 {
     return disconnectEventQueue;
+}
+
+void Network::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr)
+{
+    currentTickPtr = inCurrentTickPtr;
 }
 
 } // namespace Server

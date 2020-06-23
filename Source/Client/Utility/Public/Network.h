@@ -63,7 +63,7 @@ public:
      * Tries to retrieve a message from the server.
      * If successful, passes it to queueMessage().
      */
-    static int pollForMessages(void* inNetwork);
+    int pollForMessages();
 
     /**
      * Pushes a message into the appropriate queue, based on its contents.
@@ -72,16 +72,34 @@ public:
 
     std::shared_ptr<Peer> getServer();
 
+    Sint8 getTickOffset(bool fromSameThread = false);
+
     std::atomic<bool> const* getExitRequestedPtr();
 
 private:
     static const std::string SERVER_IP;
     static constexpr int SERVER_PORT = 41499;
 
+    /** Our best guess at a good starting place for the tick offset. */
+    static constexpr Sint8 STARTING_TICK_OFFSET = 5;
+
     std::shared_ptr<Peer> server;
 
     /** Local copy of the playerID so we can tell if we got a player message. */
     EntityID playerID;
+
+    /**
+     * The offset that we apply to the Game's currentTick when we build a message.
+     * Effectively puts us "in the future" from the Server's view, so that it can buffer
+     * our messages and have them ready when it's processing each tick.
+     */
+    std::atomic<Sint8> tickOffset;
+
+    /**
+     * The iteration number of the latest tick offset adjustment we've received.
+     * Used to make sure that we don't double-count adjustments.
+     */
+    std::atomic<Uint8> adjustmentIteration;
 
     /** Calls pollForMessages(). */
     std::thread receiveThreadObj;

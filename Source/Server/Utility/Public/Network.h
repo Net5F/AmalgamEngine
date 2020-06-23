@@ -36,19 +36,22 @@ public:
 
     static constexpr int SERVER_PORT = 41499;
 
-    static void registerCurrentTickPtr(Uint32* inCurrentTickPtr);
-
     Network();
 
     /**
      * Queues a message to be sent the next time sendWaitingMessages is called.
      * @throws std::out_of_range if id is not in the clients map.
+     *
+     * @param id  The client to send the message to.
+     * @param message  The message to send.
      */
     void send(NetworkID id, const BinaryBufferSharedPtr& message);
 
     /**
      * Queues a message to be sent to all connected clients the next time
      * sendWaitingMessages is called.
+     *
+     * @param message  The message to send.
      */
     void sendToAll(const BinaryBufferSharedPtr& message);
 
@@ -61,8 +64,11 @@ public:
     /**
      * Pushes a message into the inputMessageSorter.
      * For use in receiving input messages.
+     *
+     * @param message  The message to send.
+     * @return The amount that message's tickNum was ahead or behind the current tick.
      */
-    void queueInputMessage(BinaryBufferPtr message);
+    Sint64 queueInputMessage(BinaryBufferPtr message);
 
     /** Forwards to the inputMessageSorter's startReceive. */
     std::queue<BinaryBufferPtr>& startReceiveInputMessages(Uint32 tickNum);
@@ -90,6 +96,9 @@ public:
     moodycamel::ReaderWriterQueue<NetworkID>& getConnectEventQueue();
     moodycamel::ReaderWriterQueue<NetworkID>& getDisconnectEventQueue();
 
+    /** Used for passing us a pointer to the Game's currentTick. */
+    void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
+
 private:
     /** Holds data for a deferred send of a ConnectionResponse message. */
     struct ConnectionResponseData {
@@ -106,8 +115,9 @@ private:
     void queueConnectionResponses();
 
     /**
-     * Tries to send any messages in sendQueue over the network.
-     * If a send fails, leaves the message at the front of the queue and returns.
+     * Tries to send any messages in each client's queue over the network.
+     * If a send fails, leaves the message at the front of the queue and moves on to the
+     * next client's queue.
      */
     void sendWaitingMessagesInternal();
 
@@ -136,7 +146,7 @@ private:
     flatbuffers::FlatBufferBuilder builder;
 
     /** Pointer to the game's current tick. */
-    static Uint32* currentTickPtr;
+    const std::atomic<Uint32>* currentTickPtr;
 };
 
 } // namespace Server

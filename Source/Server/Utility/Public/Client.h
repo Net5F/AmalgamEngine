@@ -92,6 +92,13 @@ public:
     /** The average difference that we'll aim a client towards. */
     static constexpr Sint64 TARGET_TICKDIFF = 3;
 
+    struct AdjustmentData {
+        /** The amount of adjustment. */
+        Sint8 adjustment;
+        /** The adjustment iteration that we're on. */
+        Uint8 iteration;
+    };
+
     /**
      * Records the given tick diff in tickDiffHistory.
      *
@@ -104,10 +111,10 @@ public:
     void recordTickDiff(Sint64 tickDiff);
 
     /**
-     * Uses the tickDiffHistory to calculate an appropriate tick adjustment for
-     * this client to make.
+     * Calculates an appropriate tick adjustment for this client to make.
+     * Increments adjustmentIteration every time it's called.
      */
-    Sint8 getTickAdjustment();
+    AdjustmentData getTickAdjustment();
 
 private:
     /**
@@ -129,6 +136,15 @@ private:
      * Used to prevent tickDiffHistory changing while a getTickAdjustment is happening.
      */
     std::mutex tickDiffMutex;
+
+    /** Used to flag that we've recorded a tick diff. */
+    bool hasRecordedDiff;
+
+    /**
+     * An iteration count of tick offset adjustments that we've sent to this client.
+     * Used by the client to avoid double-counting adjustments.
+     */
+    Uint8 adjustmentIteration;
 };
 
 } // End namespace Server

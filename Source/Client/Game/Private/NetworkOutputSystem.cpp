@@ -21,12 +21,6 @@ NetworkOutputSystem::NetworkOutputSystem(Game& inGame, World& inWorld, Network& 
 
 void NetworkOutputSystem::sendInputState()
 {
-    if (!world.playerIsDirty) {
-        // If there's no change, don't send anything.
-        // TODO: Send a heartbeat here.
-        return;
-    }
-
     /* Send the updated state to the server. */
     // Prep the builder for a new message.
     builder.Clear();
@@ -35,18 +29,23 @@ void NetworkOutputSystem::sendInputState()
 
     // Create the vector of entity data.
     std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
-    entityVector.push_back(serializeEntity(playerID));
+    if (world.playerIsDirty) {
+        // Only send new data if we've changed. If we haven't, we'll still send the empty
+        // message as a heartbeat.
+        entityVector.push_back(serializeEntity(playerID));
+    }
     auto serializedEntity = builder.CreateVector(entityVector);
 
     // Build an EntityUpdate.
-    // TODO: Find the appropriate futureOffset through synchro timestamps.
-    Uint32 futureOffset = 5;
     flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder,
         serializedEntity);
 
     // Build a Message.
+    Sint8 futureOffset = network.getTickOffset();
+
     fb::MessageBuilder messageBuilder(builder);
-    messageBuilder.add_tickTimestamp(game.getCurrentTick() + futureOffset);
+    Uint32 currentTick = game.getCurrentTick(true);
+    messageBuilder.add_tickTimestamp(currentTick + futureOffset);
     messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
     messageBuilder.add_content(entityUpdate.Union());
     flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
@@ -55,8 +54,8 @@ void NetworkOutputSystem::sendInputState()
     // Send the message.
     network.send(
         NetworkHelpers::constructMessage(builder.GetSize(), builder.GetBufferPointer()));
-    DebugInfo("Queued message on tick %u with currentTick = %u", game.getCurrentTick(),
-        game.getCurrentTick() + futureOffset);
+    DebugInfo("Queued message on tick %u with currentTick = %u", currentTick,
+        currentTick + futureOffset);
 
     world.playerIsDirty = false;
 }

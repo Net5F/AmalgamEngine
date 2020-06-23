@@ -45,21 +45,23 @@ void MessageSorter::endReceive()
     mutex.unlock();
 }
 
-Sint64 MessageSorter::push(Uint32 tickNum, BinaryBufferPtr message)
+bool MessageSorter::push(Uint32 tickNum, BinaryBufferPtr message)
 {
+    bool result = false;
+
     // Acquire the mutex.
     mutex.lock();
 
     // If tickNum is valid, push the message.
     if (isTickValid(tickNum)) {
         queueBuffer[tickNum % BUFFER_SIZE].push(std::move(message));
+        result = true;
     }
 
     // Release the mutex.
     mutex.unlock();
 
-    // Return how far ahead or behind tickNum is in relation to currentTick.
-    return static_cast<Sint64>(tickNum) - static_cast<Sint64>(currentTick);
+    return result;
 }
 
 bool MessageSorter::isTickValid(Uint32 tickNum)

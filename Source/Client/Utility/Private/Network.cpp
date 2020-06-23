@@ -11,12 +11,14 @@ namespace AM
 namespace Client
 {
 
-const std::string Network::SERVER_IP = "127.0.0.1";
-//const std::string Network::SERVER_IP = "45.79.37.63";
+//const std::string Network::SERVER_IP = "127.0.0.1";
+const std::string Network::SERVER_IP = "45.79.37.63";
 
 Network::Network()
 : server(nullptr)
 , playerID(0)
+, tickOffset(STARTING_TICK_OFFSET)
+, adjustmentIteration(0)
 , receiveThreadObj()
 , exitRequested(false)
 {
@@ -39,7 +41,7 @@ bool Network::connect()
 
     // Spin up the receive thread.
     if (server != nullptr) {
-        receiveThreadObj = std::thread(Network::pollForMessages, this);
+        receiveThreadObj = std::thread(&Network::pollForMessages, this);
     }
 
     return (server != nullptr);
@@ -97,11 +99,10 @@ BinaryBufferSharedPtr Network::receive(MessageType type, Uint64 timeoutMs)
     return message;
 }
 
-int Network::pollForMessages(void* inNetwork)
+int Network::pollForMessages()
 {
-    Network* network = static_cast<Network*>(inNetwork);
-    std::shared_ptr<Peer> server = network->getServer();
-    std::atomic<bool> const* exitRequested = network->getExitRequestedPtr();
+    std::shared_ptr<Peer> server = getServer();
+    std::atomic<bool> const* exitRequested = getExitRequestedPtr();
 
     while (!(*exitRequested)) {
         // Wait for a server header.
@@ -110,19 +111,47 @@ int Network::pollForMessages(void* inNetwork)
         if (headerResult.result == NetworkResult::Success) {
             const BinaryBuffer& header = *(headerResult.message.get());
 
-            // Extract the data from the header.
+            // Check if we need to apply a tick offset adjustment.
             Sint8 tickOffsetAdjustment =
                 header[ServerHeaderIndex::TickOffsetAdjustment];
-            DebugInfo("Received tick adjustment: %d", tickOffsetAdjustment);
-            Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
+
+            // Check if we need to adjust the tick offset.
+            // TODO: Move this to a function.
+            if (tickOffsetAdjustment != 0) {
+                Uint8 receivedAdjIteration =
+                    header[ServerHeaderIndex::AdjustmentIteration];
+                Uint8 currentAdjIteration = adjustmentIteration.load(
+                    std::memory_order_relaxed);
+
+                // If we haven't already processed this adjustment iteration.
+                if (receivedAdjIteration != currentAdjIteration) {
+                    // Check if the adjustment iteration is valid.
+                    if (receivedAdjIteration
+                    == ((currentAdjIteration + 1) % SDL_MAX_UINT8)) {
+                        // Received next iteration, apply the offset adjustment.
+                        tickOffset.store(
+                            tickOffset.load(std::memory_order_relaxed) + tickOffsetAdjustment,
+                            std::memory_order_release);
+                        adjustmentIteration.store(receivedAdjIteration,
+                            std::memory_order_release);
+                        DebugInfo("Applied tick adjustment: %d", tickOffsetAdjustment);
+                    }
+                    else {
+                        DebugError(
+                            "Out of sequence adjustment iteration. current: %u, received: %u",
+                            currentAdjIteration, receivedAdjIteration);
+                    }
+                }
+            }
 
             // Receive all of the expected messages.
+            Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
             for (unsigned int i = 0; i < messageCount; ++i) {
                 ReceiveResult messageResult = server->receiveMessageWait();
 
                 // If we received a message, push it into the appropriate queue.
                 if (messageResult.result == NetworkResult::Success) {
-                    network->processReceivedMessage(std::move(messageResult.message));
+                    processReceivedMessage(std::move(messageResult.message));
                 }
             }
         }
@@ -147,7 +176,6 @@ void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
         // Pull out the vector of entities.
         auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
         auto entities = entityUpdate->entities();
-//        DebugInfo("Received message with tick = %u", entityUpdate->currentTick());
 
         // Iterate through the entities, checking if there's player or npc data.
         bool playerFound = false;
@@ -182,6 +210,17 @@ void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
 std::shared_ptr<Peer> Network::getServer()
 {
     return server;
+}
+
+Sint8 Network::getTickOffset(bool fromSameThread)
+{
+    if (fromSameThread) {
+        // tickOffset is only updated on the Game's thread, so we can
+        // safely load it.
+        return tickOffset.load(std::memory_order_relaxed);
+    } else {
+        return tickOffset.load(std::memory_order_acquire);
+    }
 }
 
 std::atomic<bool> const* Network::getExitRequestedPtr() {

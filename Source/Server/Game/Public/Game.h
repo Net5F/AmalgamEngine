@@ -5,6 +5,7 @@
 #include "NetworkInputSystem.h"
 #include "MovementSystem.h"
 #include "NetworkOutputSystem.h"
+#include <atomic>
 
 namespace AM
 {
@@ -39,7 +40,7 @@ public:
      */
     void processDisconnectEvents();
 
-    Uint32 getCurrentTick();
+    Uint32 getCurrentTick(bool fromSameThread = false);
 
 private:
     World world;
@@ -55,7 +56,7 @@ private:
     /**
      * The number of the tick that we're currently on.
      */
-    Uint32 currentTick;
+    std::atomic<Uint32> currentTick;
 };
 
 } // namespace Server

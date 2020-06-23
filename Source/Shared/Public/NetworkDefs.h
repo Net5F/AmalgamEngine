@@ -23,13 +23,15 @@ typedef std::shared_ptr<BinaryBuffer> BinaryBufferSharedPtr;
 
 /** Used for indexing into the parts of a server header. */
 enum ServerHeaderIndex : Uint8 {
-    // Sint8
+    /** Sint8, the adjustment that the server wants the client to make. */
     TickOffsetAdjustment = 0,
-    // Uint8
-    MessageCount = 1
+    /** Uint8, the iteration of tick offset adjustment that we're on. */
+    AdjustmentIteration = 1,
+    /** Uint8, the number of messages in this batch. */
+    MessageCount = 2
 };
 /** The size of a server header in bytes. */
-static constexpr unsigned int SERVER_HEADER_SIZE = 2;
+static constexpr unsigned int SERVER_HEADER_SIZE = 3;
 
 /** Used for indexing into the size or payload of a received message. */
 enum MessageIndex : Uint8 {
