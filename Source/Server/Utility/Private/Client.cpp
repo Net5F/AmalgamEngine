@@ -130,8 +130,10 @@ Client::AdjustmentData Client::getTickAdjustment() {
         }
         averageDiff /= TICKDIFF_HISTORY_LENGTH;
 
-        // Ignore lag spikes.
-        if (missedBy < (averageDiff * 2.0)) {
+        // If it wasn't a lag spike.
+        // (Best guess at detecting a lag spike, due for tweaking.)
+        int lagBound = averageDiff * 2.0 + 3;
+        if (missedBy < lagBound) {
             // Not a lag spike, use minor changes to walk the value in over time.
             if (missedBy > 0) {
                 // Positive
