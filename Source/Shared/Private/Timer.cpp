@@ -22,4 +22,9 @@ float Timer::getDeltaSeconds(bool updateSavedTime)
     return deltaTicks / static_cast<float>(TICKS_PER_SECOND);
 }
 
+void Timer::updateSavedTime()
+{
+    savedTimestamp = SDL_GetPerformanceCounter();
+}
+
 } // namespace AM

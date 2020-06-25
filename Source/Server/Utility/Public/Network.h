@@ -2,7 +2,6 @@
 #define NETWORK_H
 
 #include "NetworkDefs.h"
-#include "Client.h"
 #include "ClientHandler.h"
 #include "MessageSorter.h"
 #include "Message_generated.h"
@@ -31,9 +30,6 @@ namespace Server
 class Network
 {
 public:
-    /** 20 network ticks per second. */
-    static constexpr float NETWORK_TICK_INTERVAL_S = 1 / 20.0f;
-
     static constexpr int SERVER_PORT = 41499;
 
     Network();

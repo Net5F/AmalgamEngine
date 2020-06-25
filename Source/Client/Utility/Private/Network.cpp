@@ -125,12 +125,20 @@ int Network::pollForMessages()
 
                 // If we haven't already processed this adjustment iteration.
                 if (receivedAdjIteration != currentAdjIteration) {
+                    // Check that the adjustment is valid.
+                    Uint8 currentOffset = tickOffset.load(std::memory_order_relaxed);
+                    int adjustedOffset = currentOffset + tickOffsetAdjustment;
+                    if ((adjustedOffset < 0) || (adjustedOffset > SDL_MAX_UINT8)) {
+                        DebugError(
+                            "Offset became invalid. currentOffset: %u, adjustedOffset: %d",
+                            currentOffset, adjustedOffset);
+                    }
+
                     // Check if the adjustment iteration is valid.
                     if (receivedAdjIteration
                     == ((currentAdjIteration + 1) % SDL_MAX_UINT8)) {
                         // Received next iteration, apply the offset adjustment.
-                        tickOffset.store(
-                            tickOffset.load(std::memory_order_relaxed) + tickOffsetAdjustment,
+                        tickOffset.store(static_cast<Uint8>(adjustedOffset),
                             std::memory_order_release);
                         adjustmentIteration.store(receivedAdjIteration,
                             std::memory_order_release);
@@ -212,7 +220,7 @@ std::shared_ptr<Peer> Network::getServer()
     return server;
 }
 
-Sint8 Network::getTickOffset(bool fromSameThread)
+Uint8 Network::getTickOffset(bool fromSameThread)
 {
     if (fromSameThread) {
         // tickOffset is only updated on the Game's thread, so we can
@@ -221,6 +229,26 @@ Sint8 Network::getTickOffset(bool fromSameThread)
     } else {
         return tickOffset.load(std::memory_order_acquire);
     }
+}
+
+void Network::recordTickOffset(Uint32 currentTick, Uint8 tickOffset)
+{
+    tickOffsetHistory.push({currentTick, tickOffset});
+}
+
+Uint8 Network::retrieveOffsetAtTick(Uint32 tickNum)
+{
+    TickOffsetMapping mapping = tickOffsetHistory.front();
+    tickOffsetHistory.pop();
+    if ((mapping.tickNum + mapping.tickOffset) != tickNum) {
+        DebugError(
+            "Recorded tick num doesn't match requested. "
+                "Either send or receive must have happened out of order. "
+                "Recorded: %u, offset: %d, requested: %u",
+                mapping.tickNum, mapping.tickOffset, tickNum);
+    }
+
+    return mapping.tickOffset;
 }
 
 std::atomic<bool> const* Network::getExitRequestedPtr() {

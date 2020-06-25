@@ -57,7 +57,7 @@ try
 
         // Check if we overran.
         float executionSeconds = timer.getDeltaSeconds(false);
-        if (executionSeconds >= Game::GAME_TICK_INTERVAL_S) {
+        if (executionSeconds >= GAME_TICK_INTERVAL_S) {
             DebugInfo("Overran the game tick rate.");
         }
     }

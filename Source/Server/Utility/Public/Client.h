@@ -7,6 +7,7 @@
 #include <queue>
 #include "CircularBuffer.h"
 #include <mutex>
+#include "Timer.h"
 
 namespace AM
 {
@@ -117,6 +118,9 @@ public:
     AdjustmentData getTickAdjustment();
 
 private:
+    /** How long we should wait before considering the client to be timed out. */
+    static constexpr float TIMEOUT_S = NETWORK_TICK_INTERVAL_S * 2;
+
     /**
      * Our connection and interface to the client.
      */
@@ -145,6 +149,9 @@ private:
      * Used by the client to avoid double-counting adjustments.
      */
     Uint8 adjustmentIteration;
+
+    /** Tracks how long it's been since we've received a message from this client. */
+    Timer receiveTimer;
 };
 
 } // End namespace Server

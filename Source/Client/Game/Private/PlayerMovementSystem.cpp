@@ -82,7 +82,7 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
     // Only replay inputs if we received a message.
     if (latestReceivedTick != 0) {
         Uint32 currentTick = game.getCurrentTick(true);
-        Uint32 futureOffset = network.getTickOffset();
+        Uint32 futureOffset = network.retrieveOffsetAtTick(latestReceivedTick);
         if ((latestReceivedTick - futureOffset) > currentTick) {
             DebugError(
                 "Received data for tick %u on tick %u. Server is in the future, can't replay inputs.",

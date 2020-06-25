@@ -11,6 +11,8 @@
  */
 namespace AM
 {
+/** 20 network ticks per second. */
+static constexpr float NETWORK_TICK_INTERVAL_S = 1 / 20.0f;
 
 /** Represents a single network client. Will be reused if the client disconnects. */
 typedef Uint32 NetworkID;

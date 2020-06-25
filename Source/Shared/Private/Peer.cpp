@@ -86,7 +86,7 @@ AM::NetworkResult AM::Peer::send(const BinaryBufferSharedPtr& message)
         DebugError("Tried to send a too-large message. Size: %u, max: %u", messageSize, SDL_MAX_UINT16);
     }
 
-    unsigned int bytesSent = SDLNet_TCP_Send(socket, message->data(), messageSize);
+    int bytesSent = SDLNet_TCP_Send(socket, message->data(), messageSize);
     if (bytesSent < messageSize) {
         // The peer probably disconnected (could be a different issue).
         bIsConnected = false;

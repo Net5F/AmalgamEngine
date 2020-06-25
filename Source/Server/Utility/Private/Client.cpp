@@ -17,6 +17,9 @@ Client::Client(std::unique_ptr<Peer> inPeer)
     for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
         tickDiffHistory.push(0);
     }
+
+    // Init the timer to the current time.
+    receiveTimer.updateSavedTime();
 }
 
 void Client::queueMessage(const BinaryBufferSharedPtr& message)
@@ -61,7 +64,22 @@ ReceiveResult Client::receiveMessage()
     }
 
     // Receive the message.
-    return peer->receiveMessage(false);
+    ReceiveResult result = peer->receiveMessage(false);
+
+    // Check for timeouts.
+    if (result.result == NetworkResult::Success) {
+        // Got a message, update the receiveTimer.
+        receiveTimer.updateSavedTime();
+    }
+    else if ((result.result == NetworkResult::NoWaitingData)
+    && (receiveTimer.getDeltaSeconds(false) > TIMEOUT_S)) {
+        // Timed out, drop the connection.
+        peer = nullptr;
+        DebugInfo("Dropped connection, peer timed out.");
+        return {NetworkResult::Disconnected, nullptr};
+    }
+
+    return result;
 }
 
 Uint8 Client::getWaitingMessageCount() const
@@ -89,7 +107,7 @@ void Client::recordTickDiff(Sint64 tickDiff) {
     if ((tickDiff < LOWEST_VALID_TICKDIFF) || (tickDiff > HIGHEST_VALID_TICKDIFF)) {
         // Diff is outside our bounds. Drop the connection.
         peer = nullptr;
-        DebugInfo("Dropped connection, diff out of bounds.");
+        DebugInfo("Dropped connection, diff out of bounds. Diff: %lld", tickDiff);
     }
     else {
         // Diff is fine, record it.

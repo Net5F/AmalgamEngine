@@ -23,7 +23,7 @@ void RenderSystem::render(float deltaSeconds)
         renderer.Clear();
 
         // How far we are between game ticks in decimal percent.
-        float alpha = game.getAccumulatedTime() / Game::GAME_TICK_INTERVAL_S;
+        float alpha = game.getAccumulatedTime() / GAME_TICK_INTERVAL_S;
         for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
             if (world.entityExists(entityID)) {
                 const SpriteComponent& sprite = world.sprites[entityID];

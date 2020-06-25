@@ -22,9 +22,6 @@ class Network;
 class Game
 {
 public:
-    /** 30 game ticks per second. */
-    static constexpr float GAME_TICK_INTERVAL_S = 1 / 30.0f;
-
     Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites);
 
     /**

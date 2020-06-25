@@ -7,7 +7,7 @@
 #include <memory>
 #include <atomic>
 #include <thread>
-#include <deque>
+#include <queue>
 #include "readerwriterqueue.h"
 
 namespace AM
@@ -72,7 +72,12 @@ public:
 
     std::shared_ptr<Peer> getServer();
 
-    Sint8 getTickOffset(bool fromSameThread = false);
+    Uint8 getTickOffset(bool fromSameThread = false);
+
+    /** Records the tick offset associated with the iteration currentTick. */
+    void recordTickOffset(Uint32 currentTick, Uint8 tickOffset);
+    /** Returns the offset associated with the iteration tickNum. */
+    Uint8 retrieveOffsetAtTick(Uint32 tickNum);
 
     std::atomic<bool> const* getExitRequestedPtr();
 
@@ -93,13 +98,25 @@ private:
      * Effectively puts us "in the future" from the Server's view, so that it can buffer
      * our messages and have them ready when it's processing each tick.
      */
-    std::atomic<Sint8> tickOffset;
+    std::atomic<Uint8> tickOffset;
 
     /**
      * The iteration number of the latest tick offset adjustment we've received.
      * Used to make sure that we don't double-count adjustments.
      */
     std::atomic<Uint8> adjustmentIteration;
+
+    struct TickOffsetMapping {
+        /** The tick that this client was at during capture. */
+        Uint32 tickNum;
+        /** The forward-dated tick that was sent to the server. */
+        Uint8 tickOffset;
+    };
+    /**
+     * Tracks the tickOffset used in each message, so that it can later be reversed
+     * for client-side prediction.
+     */
+    std::queue<TickOffsetMapping> tickOffsetHistory;
 
     /** Calls pollForMessages(). */
     std::thread receiveThreadObj;

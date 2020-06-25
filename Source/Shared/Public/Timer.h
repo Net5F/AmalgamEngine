@@ -23,6 +23,11 @@ public:
      */
     float getDeltaSeconds(bool updateSavedTime);
 
+    /**
+     * Updates the internal timestamp to the current time.
+     */
+    void updateSavedTime();
+
 private:
     /**
      * How fast the processor is running.

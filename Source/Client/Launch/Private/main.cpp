@@ -63,7 +63,7 @@ try
                    < RenderSystem::RENDER_INTERVAL_S)
                  && ((game.getAccumulatedTime() + executionSeconds
                       + DELAY_LEEWAY_S)
-                     < Game::GAME_TICK_INTERVAL_S)) {
+                     < GAME_TICK_INTERVAL_S)) {
             // If we have enough time leftover to delay for 1ms, do it.
             SDL_Delay(1);
         }

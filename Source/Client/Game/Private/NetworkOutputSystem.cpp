@@ -40,11 +40,13 @@ void NetworkOutputSystem::sendInputState()
     flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder,
         serializedEntity);
 
-    // Build a Message.
-    Sint8 futureOffset = network.getTickOffset();
-
-    fb::MessageBuilder messageBuilder(builder);
+    // Record the offset so we can retrieve it later for replaying inputs.
     Uint32 currentTick = game.getCurrentTick(true);
+    Sint8 futureOffset = network.getTickOffset();
+    network.recordTickOffset(currentTick, futureOffset);
+
+    // Build a Message.
+    fb::MessageBuilder messageBuilder(builder);
     messageBuilder.add_tickTimestamp(currentTick + futureOffset);
     messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
     messageBuilder.add_content(entityUpdate.Union());
