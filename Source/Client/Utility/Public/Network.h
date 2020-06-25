@@ -9,6 +9,7 @@
 #include <thread>
 #include <queue>
 #include "readerwriterqueue.h"
+#include "Timer.h"
 
 namespace AM
 {
@@ -88,6 +89,9 @@ private:
     /** Our best guess at a good starting place for the tick offset. */
     static constexpr Sint8 STARTING_TICK_OFFSET = 5;
 
+    /** How long we should wait before considering the server to be timed out. */
+    static constexpr float TIMEOUT_S = NETWORK_TICK_INTERVAL_S * 2;
+
     std::shared_ptr<Peer> server;
 
     /** Local copy of the playerID so we can tell if we got a player message. */
@@ -117,6 +121,9 @@ private:
      * for client-side prediction.
      */
     std::queue<TickOffsetMapping> tickOffsetHistory;
+
+    /** Tracks how long it's been since we've received a message from the server. */
+    Timer receiveTimer;
 
     /** Calls pollForMessages(). */
     std::thread receiveThreadObj;

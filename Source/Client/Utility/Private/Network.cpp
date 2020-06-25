@@ -23,6 +23,9 @@ Network::Network()
 , exitRequested(false)
 {
     SDLNet_Init();
+
+    // Init the timer to the current time.
+    receiveTimer.updateSavedTime();
 }
 
 Network::~Network()
@@ -116,7 +119,7 @@ int Network::pollForMessages()
                 header[ServerHeaderIndex::TickOffsetAdjustment];
 
             // Check if we need to adjust the tick offset.
-            // TODO: Move this to a function.
+            // TODO: Move this to a function, or add a ServerHandler.
             if (tickOffsetAdjustment != 0) {
                 Uint8 receivedAdjIteration =
                     header[ServerHeaderIndex::AdjustmentIteration];
@@ -160,6 +163,13 @@ int Network::pollForMessages()
                 // If we received a message, push it into the appropriate queue.
                 if (messageResult.result == NetworkResult::Success) {
                     processReceivedMessage(std::move(messageResult.message));
+
+                    // Got a message, update the receiveTimer.
+                    receiveTimer.updateSavedTime();
+                }
+                else if ((messageResult.result == NetworkResult::NoWaitingData)
+                && (receiveTimer.getDeltaSeconds(false) > TIMEOUT_S)) {
+                    DebugError("Server connection timed out.");
                 }
             }
         }
