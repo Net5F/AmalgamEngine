@@ -3,7 +3,6 @@
 #include "NetworkHelpers.h"
 #include <SDL2/SDL_net.h>
 #include "Message_generated.h"
-#include "GameDefs.h"
 #include "Debug.h"
 
 namespace AM
@@ -61,10 +60,21 @@ void Network::send(const BinaryBufferSharedPtr& message)
         DebugError("Tried to send while server is disconnected.");
     }
 
-    // Send the message.
-    NetworkResult result = server->send(message);
+    // Build the header.
+    Uint8 header[CLIENT_HEADER_SIZE] = { adjustmentIteration.load(
+        std::memory_order_acquire) };
+
+    // Send the header.
+    NetworkResult result = server->send(
+        std::make_shared<BinaryBuffer>(header, header + CLIENT_HEADER_SIZE));
     if (result != NetworkResult::Success) {
-        DebugError("Send failed.");
+        DebugError("Header send failed.");
+    }
+
+    // Send the message.
+    result = server->send(message);
+    if (result != NetworkResult::Success) {
+        DebugError("Message send failed.");
     }
 }
 
@@ -127,7 +137,7 @@ int Network::pollForMessages()
                     std::memory_order_relaxed);
 
                 // If we haven't already processed this adjustment iteration.
-                if (receivedAdjIteration != currentAdjIteration) {
+                if (receivedAdjIteration == currentAdjIteration) {
                     // Check that the adjustment is valid.
                     Uint8 currentOffset = tickOffset.load(std::memory_order_relaxed);
                     int adjustedOffset = currentOffset + tickOffsetAdjustment;
@@ -137,21 +147,20 @@ int Network::pollForMessages()
                             currentOffset, adjustedOffset);
                     }
 
-                    // Check if the adjustment iteration is valid.
-                    if (receivedAdjIteration
-                    == ((currentAdjIteration + 1) % SDL_MAX_UINT8)) {
-                        // Received next iteration, apply the offset adjustment.
-                        tickOffset.store(static_cast<Uint8>(adjustedOffset),
-                            std::memory_order_release);
-                        adjustmentIteration.store(receivedAdjIteration,
-                            std::memory_order_release);
-                        DebugInfo("Applied tick adjustment: %d", tickOffsetAdjustment);
-                    }
-                    else {
-                        DebugError(
-                            "Out of sequence adjustment iteration. current: %u, received: %u",
-                            currentAdjIteration, receivedAdjIteration);
-                    }
+                    // Apply the offset adjustment.
+                    tickOffset.store(static_cast<Uint8>(adjustedOffset),
+                        std::memory_order_release);
+
+                    // Increment the iteration.
+                    adjustmentIteration.store(currentAdjIteration + 1,
+                        std::memory_order_release);
+                    DebugInfo("Applied tick adjustment: %d, for iteration: %u",
+                        tickOffsetAdjustment, receivedAdjIteration);
+                }
+                else if (receivedAdjIteration > currentAdjIteration){
+                    DebugError(
+                        "Out of sequence adjustment iteration. current: %u, received: %u",
+                        currentAdjIteration, receivedAdjIteration);
                 }
             }
 

@@ -11,7 +11,7 @@ namespace Server
 Client::Client(std::unique_ptr<Peer> inPeer)
 : peer(std::move(inPeer))
 , hasRecordedDiff(false)
-, adjustmentIteration(0)
+, latestAdjIteration(0)
 {
     // Init the history.
     for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
@@ -63,13 +63,32 @@ ReceiveResult Client::receiveMessage()
         return {NetworkResult::Disconnected, nullptr};
     }
 
-    // Receive the message.
-    ReceiveResult result = peer->receiveMessage(false);
+    // Receive the header.
+    ReceiveResult result = peer->receiveBytes(CLIENT_HEADER_SIZE, false);
 
     // Check for timeouts.
     if (result.result == NetworkResult::Success) {
+        // Process the adjustment iteration.
+        const BinaryBuffer& header = *(result.message.get());
+        Uint8 receivedAdjIteration = header[ClientHeaderIndex::AdjustmentIteration];
+        Uint8 expectedNextIteration = latestAdjIteration.load(
+                                          std::memory_order_relaxed)
+                                      + 1;
+
+        // If we received the next expected iteration, save it.
+        if (receivedAdjIteration == expectedNextIteration) {
+            latestAdjIteration.store(expectedNextIteration,
+                std::memory_order_release);
+        }
+        else if (receivedAdjIteration > expectedNextIteration) {
+            DebugError("Skipped an adjustment iteration. Logic must be flawed.");
+        }
+
         // Got a message, update the receiveTimer.
         receiveTimer.updateSavedTime();
+
+        // Wait for the message.
+        result = peer->receiveMessageWait();
     }
     else if ((result.result == NetworkResult::NoWaitingData)
     && (receiveTimer.getDeltaSeconds(false) > TIMEOUT_S)) {
@@ -128,8 +147,7 @@ void Client::recordTickDiff(Sint64 tickDiff) {
 Client::AdjustmentData Client::getTickAdjustment() {
     // If we haven't gotten any data, no adjustment should be made.
     if (!hasRecordedDiff) {
-        // No need to increment the iteration, we didn't do anything.
-        return {0, adjustmentIteration};
+        return {0, 0};
     }
 
     // Acquire a lock so the tickDiffHistory doesn't change while we're processing it.
@@ -174,12 +192,11 @@ Client::AdjustmentData Client::getTickAdjustment() {
         }
     }
 
-    if (adjustment != 0) {
-        adjustmentIteration++;
-    }
+    // TODO: Remove this var and directly call load in the return.
+    Uint8 latestAdjIt = latestAdjIteration.load(std::memory_order_acquire);
     DebugInfo("latest: %d, missedBy: %d, adjustment: %d, iteration: %u", latestDiff,
-        missedBy, adjustment, adjustmentIteration);
-    return {adjustment, adjustmentIteration};
+        missedBy, adjustment, latestAdjIt);
+    return {adjustment, latestAdjIt};
 }
 
 } // end namespace Server

@@ -7,6 +7,7 @@
 #include <queue>
 #include "CircularBuffer.h"
 #include <mutex>
+#include <atomic>
 #include "Timer.h"
 
 namespace AM
@@ -145,10 +146,10 @@ private:
     bool hasRecordedDiff;
 
     /**
-     * An iteration count of tick offset adjustments that we've sent to this client.
-     * Used by the client to avoid double-counting adjustments.
+     * Tracks the latest tick offset adjustment iteration we've received.
+     * Looped around from the client to avoid double-counting adjustments.
      */
-    Uint8 adjustmentIteration;
+    std::atomic<Uint8> latestAdjIteration;
 
     /** Tracks how long it's been since we've received a message from this client. */
     Timer receiveTimer;

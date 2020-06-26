@@ -105,7 +105,7 @@ private:
     std::atomic<Uint8> tickOffset;
 
     /**
-     * The iteration number of the latest tick offset adjustment we've received.
+     * Tracks what iteration of tick offset adjustments we're on.
      * Used to make sure that we don't double-count adjustments.
      */
     std::atomic<Uint8> adjustmentIteration;

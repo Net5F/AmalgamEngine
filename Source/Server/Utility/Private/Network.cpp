@@ -152,7 +152,7 @@ void Network::sendWaitingMessagesInternal()
 
             // Send the batch header.
             client.sendHeader(
-                std::make_shared<std::vector<Uint8>>(header,
+                std::make_shared<BinaryBuffer>(header,
                     header + SERVER_HEADER_SIZE));
 
             // Send all waiting messages.
