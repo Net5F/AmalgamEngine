@@ -25,13 +25,13 @@ void NetworkOutputSystem::sendInputState()
     // Prep the builder for a new message.
     builder.Clear();
 
-    EntityID playerID = world.playerID;
-
     // Create the vector of entity data.
     std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
+    EntityID playerID = world.playerID;
     if (world.playerIsDirty) {
         // Only send new data if we've changed. If we haven't, we'll still send the empty
         // message as a heartbeat.
+        // TODO: Don't send a message if we haven't changed, let the network do the heartbeat.
         entityVector.push_back(serializeEntity(playerID));
     }
     auto serializedEntity = builder.CreateVector(entityVector);
@@ -40,10 +40,14 @@ void NetworkOutputSystem::sendInputState()
     flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder,
         serializedEntity);
 
-    // Record the offset so we can retrieve it later for replaying inputs.
+    // If we're sending an input update, we can expect a PlayerUpdate back later.
+    // Record the offset so PlayerMovementSystem can retrieve it later for replaying
+    // inputs.
     Uint32 currentTick = game.getCurrentTick(true);
     Sint8 futureOffset = network.getTickOffset();
-    network.recordTickOffset(currentTick, futureOffset);
+    if (world.playerIsDirty) {
+        network.recordTickOffset(currentTick, futureOffset);
+    }
 
     // Build a Message.
     fb::MessageBuilder messageBuilder(builder);
