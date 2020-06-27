@@ -22,16 +22,33 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
     // Check for a message from the server.
     BinaryBufferSharedPtr responseBuffer = network.receive(MessageType::PlayerUpdate);
 
+    // Save the old position.
     EntityID playerID = world.playerID;
     PositionComponent& currentPosition = world.positions[playerID];
     MovementComponent& currentMovement = world.movements[playerID];
 
-    // Save the old position.
     world.oldPositions[playerID].x = currentPosition.x;
     world.oldPositions[playerID].y = currentPosition.y;
 
-    /* Receive any player entity updates from the server. */
-    // The tick of the newest message that we received.
+    // Receive any player entity updates from the server.
+    Uint32 latestReceivedTick = processReceivedUpdates(responseBuffer, playerID,
+        currentPosition, currentMovement);
+
+    // If we received messages, replay inputs newer than the latest.
+    if (latestReceivedTick != 0) {
+        replayInputs(latestReceivedTick, playerID, currentPosition, currentMovement,
+            deltaSeconds);
+    }
+
+    // Use the current input state to update movement for this tick.
+    MovementHelpers::moveEntity(currentPosition, currentMovement,
+        world.inputs[playerID].inputStates, deltaSeconds);
+}
+
+Uint32 PlayerMovementSystem::processReceivedUpdates(
+const BinaryBufferSharedPtr& responseBuffer, EntityID playerID,
+PositionComponent& currentPosition, MovementComponent& currentMovement)
+{
     Uint32 latestReceivedTick = 0;
     while (responseBuffer != nullptr) {
         // Ready the Message for reading.
@@ -77,44 +94,46 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
         currentPosition.y = receivedPosition->y();
 
         responseBuffer = network.receive(MessageType::PlayerUpdate);
-    } // End while
-
-    // Only replay inputs if we received a message.
-    if (latestReceivedTick != 0) {
-        Uint32 currentTick = game.getCurrentTick(true);
-        Uint32 futureOffset = network.retrieveOffsetAtTick(latestReceivedTick);
-        if ((latestReceivedTick - futureOffset) > currentTick) {
-            DebugError(
-                "Received data for tick %u on tick %u. Server is in the future, can't replay inputs.",
-                (latestReceivedTick - futureOffset), currentTick);
-        }
-
-        float recX = currentPosition.x;
-        float recY = currentPosition.y;
-        DebugInfo("Latest: %u, current: %u", latestReceivedTick, currentTick);
-
-        // Bring the server's tick number back into our local reference.
-        /* Relay all inputs since the received message, except the current. */
-        for (Uint32 i = (latestReceivedTick + 1 - futureOffset); i < currentTick; ++i) {
-            Uint32 tickDiff = currentTick - i;
-
-            if (tickDiff > World::INPUT_HISTORY_LENGTH) {
-                DebugError("Too few items in the player input history. "
-                           "Increase the length or reduce lag.");
-            }
-
-            /* Use the appropriate input state to update movement. */
-            MovementHelpers::moveEntity(currentPosition, currentMovement,
-                world.playerInputHistory[tickDiff].inputStates, deltaSeconds);
-            DebugInfo("Replayed tick %u", i);
-        }
-        DebugInfo("%d: Replayed to - (%f, %f) -> (%f, %f)", playerID, recX, recY,
-            currentPosition.x, currentPosition.y);
     }
 
-    /* Use the current input state to update movement for this tick. */
-    MovementHelpers::moveEntity(currentPosition, currentMovement,
-        world.inputs[playerID].inputStates, deltaSeconds);
+    return latestReceivedTick;
+}
+
+void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick, EntityID playerID,
+                                        PositionComponent& currentPosition,
+                                        MovementComponent& currentMovement,
+                                        float deltaSeconds)
+{
+    // Brings the server's tick number back into our local reference.
+    Uint32 futureOffset = network.retrieveOffsetAtTick(latestReceivedTick);
+
+    Uint32 currentTick = game.getCurrentTick(true);
+    if ((latestReceivedTick - futureOffset) > currentTick) {
+        DebugError(
+            "Received data for tick %u on tick %u. Server is in the future, can't replay inputs.",
+            (latestReceivedTick - futureOffset), currentTick);
+    }
+
+    float recX = currentPosition.x;
+    float recY = currentPosition.y;
+    DebugInfo("Latest: %u, current: %u", latestReceivedTick, currentTick);
+
+    /* Relay all inputs since the received message, except the current. */
+    for (Uint32 i = (latestReceivedTick + 1 - futureOffset); i < currentTick; ++i) {
+        Uint32 tickDiff = currentTick - i;
+
+        if (tickDiff > World::INPUT_HISTORY_LENGTH) {
+            DebugError("Too few items in the player input history. "
+                       "Increase the length or reduce lag.");
+        }
+
+        // Use the appropriate input state to update movement.
+        MovementHelpers::moveEntity(currentPosition, currentMovement,
+            world.playerInputHistory[tickDiff].inputStates, deltaSeconds);
+        DebugInfo("Replayed tick %u", i);
+    }
+    DebugInfo("%d: Replayed to - (%f, %f) -> (%f, %f)", playerID, recX, recY,
+        currentPosition.x, currentPosition.y);
 }
 
 } // namespace Client
