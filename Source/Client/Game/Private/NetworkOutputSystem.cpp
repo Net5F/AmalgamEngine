@@ -43,7 +43,7 @@ void NetworkOutputSystem::sendInputState()
     // If we're sending an input update, we can expect a PlayerUpdate back later.
     // Record the offset so PlayerMovementSystem can retrieve it later for replaying
     // inputs.
-    Uint32 currentTick = game.getCurrentTick(true);
+    Uint32 currentTick = game.getCurrentTick();
     Sint8 futureOffset = network.getTickOffset();
     if (world.playerIsDirty) {
         network.recordTickOffset(currentTick, futureOffset);

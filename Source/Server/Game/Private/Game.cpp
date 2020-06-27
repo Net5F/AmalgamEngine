@@ -42,8 +42,7 @@ void Game::tick(float deltaSeconds)
 
         /* Prepare for the next tick. */
         accumulatedTime -= GAME_TICK_INTERVAL_S;
-        currentTick.store(currentTick.load(std::memory_order_relaxed) + 1,
-            std::memory_order_release);
+        currentTick++;
     }
 }
 
@@ -117,15 +116,9 @@ void Game::processDisconnectEvents()
     }
 }
 
-Uint32 Game::getCurrentTick(bool fromSameThread)
+Uint32 Game::getCurrentTick()
 {
-    if (fromSameThread) {
-        // currentTick is only updated on the Game's thread, so we can
-        // safely load it.
-        return currentTick.load(std::memory_order_relaxed);
-    } else {
-        return currentTick.load(std::memory_order_acquire);
-    }
+    return currentTick;
 }
 
 } // namespace Server

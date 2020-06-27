@@ -19,9 +19,6 @@ PlayerMovementSystem::PlayerMovementSystem(Game& inGame, World& inWorld,
 
 void PlayerMovementSystem::processMovements(float deltaSeconds)
 {
-    // Check for a message from the server.
-    BinaryBufferSharedPtr responseBuffer = network.receive(MessageType::PlayerUpdate);
-
     // Save the old position.
     EntityID playerID = world.playerID;
     PositionComponent& currentPosition = world.positions[playerID];
@@ -31,8 +28,8 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
     world.oldPositions[playerID].y = currentPosition.y;
 
     // Receive any player entity updates from the server.
-    Uint32 latestReceivedTick = processReceivedUpdates(responseBuffer, playerID,
-        currentPosition, currentMovement);
+    Uint32 latestReceivedTick = processReceivedUpdates(playerID, currentPosition,
+        currentMovement);
 
     // If we received messages, replay inputs newer than the latest.
     if (latestReceivedTick != 0) {
@@ -45,11 +42,13 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
         world.inputs[playerID].inputStates, deltaSeconds);
 }
 
-Uint32 PlayerMovementSystem::processReceivedUpdates(
-const BinaryBufferSharedPtr& responseBuffer, EntityID playerID,
-PositionComponent& currentPosition, MovementComponent& currentMovement)
+Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
+                                                    PositionComponent& currentPosition,
+                                                    MovementComponent& currentMovement)
 {
+    // Check for a message from the server.
     Uint32 latestReceivedTick = 0;
+    BinaryBufferSharedPtr responseBuffer = network.receive(MessageType::PlayerUpdate);
     while (responseBuffer != nullptr) {
         // Ready the Message for reading.
         const fb::Message* message = fb::GetMessage(responseBuffer->data());
@@ -107,7 +106,7 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick, EntityID play
     // Brings the server's tick number back into our local reference.
     Uint32 futureOffset = network.retrieveOffsetAtTick(latestReceivedTick);
 
-    Uint32 currentTick = game.getCurrentTick(true);
+    Uint32 currentTick = game.getCurrentTick();
     if ((latestReceivedTick - futureOffset) > currentTick) {
         DebugError(
             "Received data for tick %u on tick %u. Server is in the future, can't replay inputs.",

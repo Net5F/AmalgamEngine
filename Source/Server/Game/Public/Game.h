@@ -37,7 +37,7 @@ public:
      */
     void processDisconnectEvents();
 
-    Uint32 getCurrentTick(bool fromSameThread = false);
+    Uint32 getCurrentTick();
 
 private:
     World world;

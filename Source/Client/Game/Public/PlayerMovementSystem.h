@@ -32,8 +32,7 @@ private:
      * Receives any player entity updates from the server.
      * @return The tick number of the newest message that we received.
      */
-    Uint32 processReceivedUpdates(const BinaryBufferSharedPtr& responseBuffer,
-                                  EntityID playerID, PositionComponent& currentPosition,
+    Uint32 processReceivedUpdates(EntityID playerID, PositionComponent& currentPosition,
                                   MovementComponent& currentMovement);
 
     /**

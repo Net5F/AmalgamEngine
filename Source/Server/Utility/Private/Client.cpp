@@ -71,14 +71,11 @@ ReceiveResult Client::receiveMessage()
         // Process the adjustment iteration.
         const BinaryBuffer& header = *(result.message.get());
         Uint8 receivedAdjIteration = header[ClientHeaderIndex::AdjustmentIteration];
-        Uint8 expectedNextIteration = latestAdjIteration.load(
-                                          std::memory_order_relaxed)
-                                      + 1;
+        Uint8 expectedNextIteration = (latestAdjIteration + 1);
 
         // If we received the next expected iteration, save it.
         if (receivedAdjIteration == expectedNextIteration) {
-            latestAdjIteration.store(expectedNextIteration,
-                std::memory_order_release);
+            latestAdjIteration = expectedNextIteration;
         }
         else if (receivedAdjIteration > expectedNextIteration) {
             DebugError("Skipped an adjustment iteration. Logic must be flawed.");
@@ -192,11 +189,11 @@ Client::AdjustmentData Client::getTickAdjustment() {
         }
     }
 
-    // TODO: Remove this var and directly call load in the return.
-    Uint8 latestAdjIt = latestAdjIteration.load(std::memory_order_acquire);
+    // TODO: Remove this. Just need it to avoid copy in DebugInfo call.
+    Uint8 tempLatestAdjIter = latestAdjIteration;
     DebugInfo("latest: %d, missedBy: %d, adjustment: %d, iteration: %u", latestDiff,
-        missedBy, adjustment, latestAdjIt);
-    return {adjustment, latestAdjIt};
+        missedBy, adjustment, tempLatestAdjIter);
+    return {adjustment, tempLatestAdjIter};
 }
 
 } // end namespace Server

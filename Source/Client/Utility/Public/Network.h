@@ -73,7 +73,7 @@ public:
 
     std::shared_ptr<Peer> getServer();
 
-    Uint8 getTickOffset(bool fromSameThread = false);
+    Uint8 getTickOffset();
 
     /** Records the tick offset associated with the iteration currentTick. */
     void recordTickOffset(Uint32 currentTick, Uint8 tickOffset);

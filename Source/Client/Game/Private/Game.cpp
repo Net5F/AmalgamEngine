@@ -42,7 +42,7 @@ void Game::connect()
     EntityID player = connectionResponse->entityID();
     DebugInfo("Received connection response. Tick = %u", message->tickTimestamp());
 
-    currentTick.store(message->tickTimestamp(), std::memory_order_release);
+    currentTick = message->tickTimestamp();
 
     // Set up our player.
     SDL2pp::Rect textureRect(0, 32, 16, 16);
@@ -104,7 +104,7 @@ void Game::tick(float deltaSeconds)
         networkOutputSystem.sendInputState();
 
         // Push the new input state into the player's history.
-        Uint32 curTick = currentTick.load(std::memory_order_relaxed);
+        Uint32 curTick = currentTick;
         playerInputSystem.addCurrentInputsToHistory(curTick);
 
         // Process player and NPC movements.
@@ -116,7 +116,7 @@ void Game::tick(float deltaSeconds)
 
         accumulatedTime -= GAME_TICK_INTERVAL_S;
 
-        currentTick.store(curTick + 1, std::memory_order_release);
+        currentTick++;
     }
 }
 
@@ -130,15 +130,9 @@ float Game::getAccumulatedTime()
     return accumulatedTime;
 }
 
-Uint32 Game::getCurrentTick(bool fromSameThread)
+Uint32 Game::getCurrentTick()
 {
-    if (fromSameThread) {
-        // currentTick is only updated on the Game's thread, so we can
-        // safely load it.
-        return currentTick.load(std::memory_order_relaxed);
-    } else {
-        return currentTick.load(std::memory_order_acquire);
-    }
+    return currentTick;
 }
 
 std::atomic<bool> const* Game::getExitRequestedPtr() {

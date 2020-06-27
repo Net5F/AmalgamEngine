@@ -39,7 +39,7 @@ public:
 
     float getAccumulatedTime();
 
-    Uint32 getCurrentTick(bool fromSameThread = false);
+    Uint32 getCurrentTick();
 
     std::atomic<bool> const* getExitRequestedPtr();
 

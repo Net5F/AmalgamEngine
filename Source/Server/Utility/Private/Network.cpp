@@ -76,9 +76,8 @@ Sint64 Network::queueInputMessage(BinaryBufferPtr messageBuffer)
     }
 
     // Calc how far ahead or behind tickNum is in relation to currentTick.
-    Uint32 curTick = currentTickPtr->load(std::memory_order_acquire);
     return static_cast<Sint64>(receivedTickTimestamp)
-           - static_cast<Sint64>(curTick);
+           - static_cast<Sint64>(*currentTickPtr);
 }
 
 std::queue<BinaryBufferPtr>& Network::startReceiveInputMessages(Uint32 tickNum)
@@ -109,7 +108,7 @@ void Network::queueConnectionResponses()
     /* Send all waiting ConnectionResponse messages. */
     unsigned int responseCount = connectionResponseQueue.size();
     if (responseCount > 0) {
-        Uint32 latestTickTimestamp = currentTickPtr->load(std::memory_order_acquire);
+        Uint32 latestTickTimestamp = *currentTickPtr;
 
         for (unsigned int i = 0; i < responseCount; ++i) {
             ConnectionResponseData& data = connectionResponseQueue.front();

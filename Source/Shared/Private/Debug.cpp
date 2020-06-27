@@ -19,7 +19,7 @@ void Debug::info(const char* expression, ...)
     // If the app hasn't registered a tick count, default to 0.
     Uint32 currentTick = 0;
     if (currentTickPtr != nullptr) {
-        currentTick = currentTickPtr->load(std::memory_order_acquire);
+        currentTick = *currentTickPtr;
     }
 
     std::va_list arg;
@@ -40,7 +40,7 @@ void Debug::error(const char* fileName, int line, const char* expression, ...)
     // If the app hasn't registered a tick count, default to 0.
     Uint32 currentTick = 0;
     if (currentTickPtr != nullptr) {
-        currentTick = currentTickPtr->load(std::memory_order_acquire);
+        currentTick = *currentTickPtr;
     }
 
     std::va_list arg;

@@ -61,8 +61,7 @@ void Network::send(const BinaryBufferSharedPtr& message)
     }
 
     // Build the header.
-    Uint8 header[CLIENT_HEADER_SIZE] = { adjustmentIteration.load(
-        std::memory_order_acquire) };
+    Uint8 header[CLIENT_HEADER_SIZE] = {adjustmentIteration};
 
     // Send the header.
     NetworkResult result = server->send(
@@ -133,13 +132,12 @@ int Network::pollForMessages()
             if (tickOffsetAdjustment != 0) {
                 Uint8 receivedAdjIteration =
                     header[ServerHeaderIndex::AdjustmentIteration];
-                Uint8 currentAdjIteration = adjustmentIteration.load(
-                    std::memory_order_relaxed);
+                Uint8 currentAdjIteration = adjustmentIteration;
 
                 // If we haven't already processed this adjustment iteration.
                 if (receivedAdjIteration == currentAdjIteration) {
                     // Check that the adjustment is valid.
-                    Uint8 currentOffset = tickOffset.load(std::memory_order_relaxed);
+                    Uint8 currentOffset = tickOffset;
                     int adjustedOffset = currentOffset + tickOffsetAdjustment;
                     if ((adjustedOffset < 0) || (adjustedOffset > SDL_MAX_UINT8)) {
                         DebugError(
@@ -148,12 +146,10 @@ int Network::pollForMessages()
                     }
 
                     // Apply the offset adjustment.
-                    tickOffset.store(static_cast<Uint8>(adjustedOffset),
-                        std::memory_order_release);
+                    tickOffset = static_cast<Uint8>(adjustedOffset);
 
                     // Increment the iteration.
-                    adjustmentIteration.store(currentAdjIteration + 1,
-                        std::memory_order_release);
+                    adjustmentIteration = (currentAdjIteration + 1);
                     DebugInfo("Applied tick adjustment: %d, for iteration: %u",
                         tickOffsetAdjustment, receivedAdjIteration);
                 }
@@ -239,15 +235,9 @@ std::shared_ptr<Peer> Network::getServer()
     return server;
 }
 
-Uint8 Network::getTickOffset(bool fromSameThread)
+Uint8 Network::getTickOffset()
 {
-    if (fromSameThread) {
-        // tickOffset is only updated on the Game's thread, so we can
-        // safely load it.
-        return tickOffset.load(std::memory_order_relaxed);
-    } else {
-        return tickOffset.load(std::memory_order_acquire);
-    }
+    return tickOffset;
 }
 
 void Network::recordTickOffset(Uint32 currentTick, Uint8 tickOffset)
