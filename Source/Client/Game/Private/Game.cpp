@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "Network.h"
 #include "Debug.h"
+#include <sstream>
 
 namespace AM
 {
@@ -42,7 +43,9 @@ void Game::connect()
     EntityID player = connectionResponse->entityID();
     DebugInfo("Received connection response. Tick = %u", message->tickTimestamp());
 
-    currentTick = message->tickTimestamp();
+    // Aim our tick for some reasonable point ahead of the server.
+    // The server will adjust us after the first message anyway.
+    currentTick = message->tickTimestamp() + Network::INITIAL_TICK_OFFSET;
 
     // Set up our player.
     SDL2pp::Rect textureRect(0, 32, 16, 16);
@@ -76,47 +79,60 @@ void Game::tick(float deltaSeconds)
 
     // Process as many game ticks as have accumulated.
     while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
-        /* Run all systems. */
-        // Process all waiting user input events.
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                exitRequested = true;
-            }
-            else if (event.type == SDL_WINDOWEVENT) {
-    //            switch(event.type) {
-    //                case SDL_WINDOWEVENT_SHOWN:
-    //                case SDL_WINDOWEVENT_EXPOSED:
-    //                case SDL_WINDOWEVENT_MOVED:
-    //                case SDL_WINDOWEVENT_MAXIMIZED:
-    //                case SDL_WINDOWEVENT_RESTORED:
-    //                case SDL_WINDOWEVENT_FOCUS_GAINED:
-    //                // Window was messed with, we've probably lost sync with the server.
-    //                // TODO: Handle the far-out-of-sync client.
-    //            }
-            }
-            else {
-                // Assume it's a key or mouse event.
-                playerInputSystem.processInputEvent(event);
-            }
+        // Calculate what tick the server wants us to be on.
+        Uint32 targetTick = currentTick + network.getTickAdjustment() + 1;
+
+        /* Process ticks until we match what the server wants.
+           This may cause us to not process any ticks, or to process multiple ticks. */
+        while (currentTick < targetTick) {
+            /* Run all systems. */
+            // Process all waiting user input events.
+            processUserInputEvents();
+
+            // Send input updates to the server.
+            networkOutputSystem.sendInputState();
+
+            // Push the new input state into the player's history.
+            Uint32 curTick = currentTick;
+            playerInputSystem.addCurrentInputsToHistory(curTick);
+
+            // Process player and NPC movements.
+            playerMovementSystem.processMovements(GAME_TICK_INTERVAL_S);
+
+            // Process network movement after normal movement to sync with server.
+            // (The server processes movement before sending updates.)
+//            networkMovementSystem.processServerMovements();
+
+            currentTick++;
         }
-        // Send input updates to the server.
-        networkOutputSystem.sendInputState();
-
-        // Push the new input state into the player's history.
-        Uint32 curTick = currentTick;
-        playerInputSystem.addCurrentInputsToHistory(curTick);
-
-        // Process player and NPC movements.
-        playerMovementSystem.processMovements(GAME_TICK_INTERVAL_S);
-
-        // Process network movement after normal movement to sync with server.
-        // (The server processes movement before sending updates.)
-//        networkMovementSystem.processServerMovements();
 
         accumulatedTime -= GAME_TICK_INTERVAL_S;
+    }
+}
 
-        currentTick++;
+void Game::processUserInputEvents()
+{
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            exitRequested = true;
+        }
+        else if (event.type == SDL_WINDOWEVENT) {
+//            switch(event.type) {
+//                case SDL_WINDOWEVENT_SHOWN:
+//                case SDL_WINDOWEVENT_EXPOSED:
+//                case SDL_WINDOWEVENT_MOVED:
+//                case SDL_WINDOWEVENT_MAXIMIZED:
+//                case SDL_WINDOWEVENT_RESTORED:
+//                case SDL_WINDOWEVENT_FOCUS_GAINED:
+//                // Window was messed with, we've probably lost sync with the server.
+//                // TODO: Handle the far-out-of-sync client.
+//            }
+        }
+        else {
+            // Assume it's a key or mouse event.
+            playerInputSystem.processInputEvent(event);
+        }
     }
 }
 

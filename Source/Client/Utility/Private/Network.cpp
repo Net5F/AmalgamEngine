@@ -16,7 +16,7 @@ const std::string Network::SERVER_IP = "45.79.37.63";
 Network::Network()
 : server(nullptr)
 , playerID(0)
-, tickOffset(STARTING_TICK_OFFSET)
+, tickAdjustment(0)
 , adjustmentIteration(0)
 , receiveThreadObj()
 , exitRequested(false)
@@ -123,35 +123,24 @@ int Network::pollForMessages()
         if (headerResult.result == NetworkResult::Success) {
             const BinaryBuffer& header = *(headerResult.message.get());
 
-            // Check if we need to apply a tick offset adjustment.
-            Sint8 tickOffsetAdjustment =
-                header[ServerHeaderIndex::TickOffsetAdjustment];
-
             // Check if we need to adjust the tick offset.
             // TODO: Move this to a function, or add a ServerHandler.
-            if (tickOffsetAdjustment != 0) {
+            Sint8 receivedTickAdj =
+                header[ServerHeaderIndex::TickAdjustment];
+            if (receivedTickAdj != 0) {
                 Uint8 receivedAdjIteration =
                     header[ServerHeaderIndex::AdjustmentIteration];
                 Uint8 currentAdjIteration = adjustmentIteration;
 
                 // If we haven't already processed this adjustment iteration.
                 if (receivedAdjIteration == currentAdjIteration) {
-                    // Check that the adjustment is valid.
-                    Uint8 currentOffset = tickOffset;
-                    int adjustedOffset = currentOffset + tickOffsetAdjustment;
-                    if ((adjustedOffset < 0) || (adjustedOffset > SDL_MAX_UINT8)) {
-                        DebugError(
-                            "Offset became invalid. currentOffset: %u, adjustedOffset: %d",
-                            currentOffset, adjustedOffset);
-                    }
-
-                    // Apply the offset adjustment.
-                    tickOffset = static_cast<Uint8>(adjustedOffset);
+                    // Apply the adjustment.
+                    tickAdjustment += receivedTickAdj;
 
                     // Increment the iteration.
                     adjustmentIteration = (currentAdjIteration + 1);
-                    DebugInfo("Applied tick adjustment: %d, for iteration: %u",
-                        tickOffsetAdjustment, receivedAdjIteration);
+                    DebugInfo("Received tick adjustment: %d, iteration: %u",
+                        receivedTickAdj, receivedAdjIteration);
                 }
                 else if (receivedAdjIteration > currentAdjIteration){
                     DebugError(
@@ -235,29 +224,22 @@ std::shared_ptr<Peer> Network::getServer()
     return server;
 }
 
-Uint8 Network::getTickOffset()
+int Network::getTickAdjustment()
 {
-    return tickOffset;
-}
-
-void Network::recordTickOffset(Uint32 currentTick, Uint8 tickOffset)
-{
-    tickOffsetHistory.push({currentTick, tickOffset});
-}
-
-Uint8 Network::retrieveOffsetAtTick(Uint32 tickNum)
-{
-    TickOffsetMapping mapping = tickOffsetHistory.front();
-    tickOffsetHistory.pop();
-    if ((mapping.tickNum + mapping.tickOffset) != tickNum) {
-        DebugError(
-            "Recorded tick num doesn't match requested. "
-                "Either send or receive must have happened out of order. "
-                "Recorded: %u, offset: %d, requested: %u",
-                mapping.tickNum, mapping.tickOffset, tickNum);
+    int currentAdjustment = tickAdjustment;
+    if (currentAdjustment < 0) {
+        // The sim can only freeze for 1 tick at a time.
+        tickAdjustment += 1;
+        return currentAdjustment;
     }
-
-    return mapping.tickOffset;
+    else if (currentAdjustment == 0){
+        return 0;
+    }
+    else {
+        // The sim can process multiple iterations to catch up.
+        tickAdjustment -= currentAdjustment;
+        return currentAdjustment;
+    }
 }
 
 std::atomic<bool> const* Network::getExitRequestedPtr() {

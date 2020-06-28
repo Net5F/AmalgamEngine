@@ -35,6 +35,12 @@ public:
      */
     void tick(float deltaSeconds);
 
+    /**
+     * Processes all waiting user input events, passing any relevant ones to the
+     * playerInputSystem.
+     */
+    void processUserInputEvents();
+
     World& getWorld();
 
     float getAccumulatedTime();
@@ -57,7 +63,7 @@ private:
 
     /**
      * The number of the tick that we're currently on.
-     * Initialized to the number that the server tells us it's on.
+     * Initialized based on the number that the server tells us it's on.
      */
     std::atomic<Uint32> currentTick;
 

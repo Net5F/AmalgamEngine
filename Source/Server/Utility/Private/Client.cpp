@@ -87,12 +87,14 @@ ReceiveResult Client::receiveMessage()
         // Wait for the message.
         result = peer->receiveMessageWait();
     }
-    else if ((result.result == NetworkResult::NoWaitingData)
-    && (receiveTimer.getDeltaSeconds(false) > TIMEOUT_S)) {
-        // Timed out, drop the connection.
-        peer = nullptr;
-        DebugInfo("Dropped connection, peer timed out.");
-        return {NetworkResult::Disconnected, nullptr};
+    else if (result.result == NetworkResult::NoWaitingData) {
+        // If we timed out, drop the connection.
+        if (float delta = receiveTimer.getDeltaSeconds(false) > TIMEOUT_S) {
+            peer = nullptr;
+            DebugInfo("Dropped connection, peer timed out. Time since last message: %f ms",
+                (delta * 1000));
+            return {NetworkResult::Disconnected, nullptr};
+        }
     }
 
     return result;
@@ -147,52 +149,40 @@ Client::AdjustmentData Client::getTickAdjustment() {
         return {0, 0};
     }
 
-    // Acquire a lock so the tickDiffHistory doesn't change while we're processing it.
-    std::unique_lock lock(tickDiffMutex);
-
     // Prep the adjustment that we'll return.
     Sint8 adjustment = 0;
 
-    // If we potentially need to make an adjustment.
-    Sint8 latestDiff = tickDiffHistory[0];
-    Sint8 missedBy = TARGET_TICKDIFF - latestDiff;
-    if (missedBy != 0) {
-        float averageDiff = 0;
-        for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
-            averageDiff += std::abs(tickDiffHistory[0]);
-        }
-        averageDiff /= TICKDIFF_HISTORY_LENGTH;
+    /* Get the average diff. */
+    std::unique_lock lock(tickDiffMutex);
 
-        // If it wasn't a lag spike.
-        // (Best guess at detecting a lag spike, due for tweaking.)
+    float averageDiff = 0;
+    for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
+        averageDiff += std::abs(tickDiffHistory[0]);
+    }
+    averageDiff /= TICKDIFF_HISTORY_LENGTH;
+
+    // We're done accessing tickDiffHistory after getting the latest.
+    Sint8 latestDiff = tickDiffHistory[0];
+    lock.unlock();
+
+    /* If we're outside the target bounds, calculate an adjustment. */
+    if ((latestDiff < TICKDIFF_TARGET_BOUND_LOWER)
+    || (latestDiff > TICKDIFF_TARGET_BOUND_UPPER)) {
+        // (Best guess at detecting a lag spike, can be tweaked.)
         int lagBound = averageDiff * 2.0 + 3;
-        if (missedBy < lagBound) {
-            // Not a lag spike, use minor changes to walk the value in over time.
-            if (missedBy > 0) {
-                // Positive
-                if (missedBy > 2) {
-                    adjustment = 2;
-                }
-                else {
-                    adjustment = 1;
-                }
-            }
-            else if (missedBy < 0) {
-                // Negative
-                if (missedBy < -2) {
-                    adjustment = -2;
-                }
-                else {
-                    adjustment = -1;
-                }
-            }
+
+        // If it wasn't a lag spike, give an adjustment.
+        if (latestDiff < lagBound) {
+            adjustment = TICKDIFF_TARGET_BOUND_LOWER - latestDiff;
         }
     }
 
     // TODO: Remove this. Just need it to avoid copy in DebugInfo call.
     Uint8 tempLatestAdjIter = latestAdjIteration;
-    DebugInfo("latest: %d, missedBy: %d, adjustment: %d, iteration: %u", latestDiff,
-        missedBy, adjustment, tempLatestAdjIter);
+    if (adjustment != 0) {
+        DebugInfo("latest: %d, adjustment: %d, iteration: %u", latestDiff,
+            adjustment, tempLatestAdjIter);
+    }
     return {adjustment, tempLatestAdjIter};
 }
 

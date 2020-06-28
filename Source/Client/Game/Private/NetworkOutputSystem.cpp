@@ -40,18 +40,10 @@ void NetworkOutputSystem::sendInputState()
     flatbuffers::Offset<fb::EntityUpdate> entityUpdate = fb::CreateEntityUpdate(builder,
         serializedEntity);
 
-    // If we're sending an input update, we can expect a PlayerUpdate back later.
-    // Record the offset so PlayerMovementSystem can retrieve it later for replaying
-    // inputs.
-    Uint32 currentTick = game.getCurrentTick();
-    Sint8 futureOffset = network.getTickOffset();
-    if (world.playerIsDirty) {
-        network.recordTickOffset(currentTick, futureOffset);
-    }
-
     // Build a Message.
+    Uint32 currentTick = game.getCurrentTick();
     fb::MessageBuilder messageBuilder(builder);
-    messageBuilder.add_tickTimestamp(currentTick + futureOffset);
+    messageBuilder.add_tickTimestamp(currentTick);
     messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
     messageBuilder.add_content(entityUpdate.Union());
     flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
@@ -60,8 +52,7 @@ void NetworkOutputSystem::sendInputState()
     // Send the message.
     network.send(
         NetworkHelpers::constructMessage(builder.GetSize(), builder.GetBufferPointer()));
-    DebugInfo("Queued message on tick %u with currentTick = %u", currentTick,
-        currentTick + futureOffset);
+    DebugInfo("Queued message on tick %u", currentTick);
 
     world.playerIsDirty = false;
 }

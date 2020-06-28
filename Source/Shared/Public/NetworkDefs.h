@@ -35,7 +35,7 @@ typedef std::shared_ptr<BinaryBuffer> BinaryBufferSharedPtr;
 struct ServerHeaderIndex {
     enum Index : Uint8 {
         /** Sint8, the adjustment that the server wants the client to make. */
-        TickOffsetAdjustment = 0,
+        TickAdjustment = 0,
         /** Uint8, the iteration of tick offset adjustment that we're on. */
         AdjustmentIteration = 1,
         /** Uint8, the number of messages in this batch. */

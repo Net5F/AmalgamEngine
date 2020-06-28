@@ -32,6 +32,9 @@ enum class MessageType {
 class Network
 {
 public:
+    /** Our best guess at a good starting place for the simulation's tick offset. */
+    static constexpr Sint8 INITIAL_TICK_OFFSET = 5;
+
     Network();
 
     virtual ~Network();
@@ -73,21 +76,19 @@ public:
 
     std::shared_ptr<Peer> getServer();
 
-    Uint8 getTickOffset();
-
-    /** Records the tick offset associated with the iteration currentTick. */
-    void recordTickOffset(Uint32 currentTick, Uint8 tickOffset);
-    /** Returns the offset associated with the iteration tickNum. */
-    Uint8 retrieveOffsetAtTick(Uint32 tickNum);
+    /**
+     * Subtracts an appropriate amount from the tickAdjustment based on its current value,
+     * and return the amount subtracted.
+     * @return 1 if there's a negative tickAdjustment (the sim can only freeze 1 tick at a
+     *         time), else 0 or a negative amount equal to the current tickAdjustment.
+     */
+    int getTickAdjustment();
 
     std::atomic<bool> const* getExitRequestedPtr();
 
 private:
     static const std::string SERVER_IP;
     static constexpr int SERVER_PORT = 41499;
-
-    /** Our best guess at a good starting place for the tick offset. */
-    static constexpr Sint8 STARTING_TICK_OFFSET = 5;
 
     /** How long we should wait before considering the server to be timed out. */
     static constexpr float TIMEOUT_S = NETWORK_TICK_INTERVAL_S * 2;
@@ -98,29 +99,15 @@ private:
     EntityID playerID;
 
     /**
-     * The offset that we apply to the Game's currentTick when we build a message.
-     * Effectively puts us "in the future" from the Server's view, so that it can buffer
-     * our messages and have them ready when it's processing each tick.
+     * The adjustment that the server has told us to apply to the tick.
      */
-    std::atomic<Uint8> tickOffset;
+    std::atomic<int> tickAdjustment;
 
     /**
      * Tracks what iteration of tick offset adjustments we're on.
      * Used to make sure that we don't double-count adjustments.
      */
     std::atomic<Uint8> adjustmentIteration;
-
-    struct TickOffsetMapping {
-        /** The tick that this client was at during capture. */
-        Uint32 tickNum;
-        /** The forward-dated tick that was sent to the server. */
-        Uint8 tickOffset;
-    };
-    /**
-     * Tracks the tickOffset used in each message, so that it can later be reversed
-     * for client-side prediction.
-     */
-    std::queue<TickOffsetMapping> tickOffsetHistory;
 
     /** Tracks how long it's been since we've received a message from the server. */
     Timer receiveTimer;
