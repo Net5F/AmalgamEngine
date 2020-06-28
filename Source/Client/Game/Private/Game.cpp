@@ -80,7 +80,7 @@ void Game::tick(float deltaSeconds)
     // Process as many game ticks as have accumulated.
     while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
         // Calculate what tick the server wants us to be on.
-        Uint32 targetTick = currentTick + network.getTickAdjustment() + 1;
+        Uint32 targetTick = currentTick + network.transferTickAdjustment() + 1;
 
         /* Process ticks until we match what the server wants.
            This may cause us to not process any ticks, or to process multiple ticks. */

@@ -224,7 +224,7 @@ std::shared_ptr<Peer> Network::getServer()
     return server;
 }
 
-int Network::getTickAdjustment()
+int Network::transferTickAdjustment()
 {
     int currentAdjustment = tickAdjustment;
     if (currentAdjustment < 0) {

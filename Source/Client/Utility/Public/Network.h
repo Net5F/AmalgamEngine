@@ -78,11 +78,11 @@ public:
 
     /**
      * Subtracts an appropriate amount from the tickAdjustment based on its current value,
-     * and return the amount subtracted.
+     * and returns the amount subtracted.
      * @return 1 if there's a negative tickAdjustment (the sim can only freeze 1 tick at a
      *         time), else 0 or a negative amount equal to the current tickAdjustment.
      */
-    int getTickAdjustment();
+    int transferTickAdjustment();
 
     std::atomic<bool> const* getExitRequestedPtr();
 
