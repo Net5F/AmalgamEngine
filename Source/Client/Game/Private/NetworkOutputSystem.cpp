@@ -52,7 +52,6 @@ void NetworkOutputSystem::sendInputState()
     // Send the message.
     network.send(
         NetworkHelpers::constructMessage(builder.GetSize(), builder.GetBufferPointer()));
-    DebugInfo("Queued message on tick %u", currentTick);
 
     world.playerIsDirty = false;
 }

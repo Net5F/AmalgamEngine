@@ -17,20 +17,23 @@ void MovementHelpers::moveEntity(PositionComponent& position, MovementComponent&
 void MovementHelpers::updateVelocity(MovementComponent& movement,
                                      InputStateArr& inputStates, float deltaSeconds)
 {
+    static constexpr float VELOCITY = 300.145;
     // Handle up/down (favors up).
     if (inputStates[Input::Up] == Input::Pressed) {
-        movement.velY -= (acceleration * deltaSeconds);
-
-        if (movement.velY < -(movement.maxVelY)) {
-            movement.velY = -(movement.maxVelY);
-        }
+        movement.velY = -VELOCITY;
+//        movement.velY -= (acceleration * deltaSeconds);
+//
+//        if (movement.velY < -(movement.maxVelY)) {
+//            movement.velY = -(movement.maxVelY);
+//        }
     }
     else if (inputStates[Input::Down] == Input::Pressed) {
-        movement.velY += (acceleration * deltaSeconds);
-
-        if (movement.velY > movement.maxVelY) {
-            movement.velY = movement.maxVelY;
-        }
+        movement.velY = VELOCITY;
+//        movement.velY += (acceleration * deltaSeconds);
+//
+//        if (movement.velY > movement.maxVelY) {
+//            movement.velY = movement.maxVelY;
+//        }
     }
     else {
 //        // Slow the entity down.
@@ -45,18 +48,20 @@ void MovementHelpers::updateVelocity(MovementComponent& movement,
 
     // Handle left/right (favors right).
     if (inputStates[Input::Left] == Input::Pressed) {
-        movement.velX -= (acceleration * deltaSeconds);
-
-        if (movement.velX < -(movement.maxVelX)) {
-            movement.velX = -(movement.maxVelX);
-        }
+        movement.velX = -VELOCITY;
+//        movement.velX -= (acceleration * deltaSeconds);
+//
+//        if (movement.velX < -(movement.maxVelX)) {
+//            movement.velX = -(movement.maxVelX);
+//        }
     }
     else if (inputStates[Input::Right] == Input::Pressed) {
-        movement.velX += (acceleration * deltaSeconds);
-
-        if (movement.velX > movement.maxVelX) {
-            movement.velX = movement.maxVelX;
-        }
+        movement.velX = VELOCITY;
+//        movement.velX += (acceleration * deltaSeconds);
+//
+//        if (movement.velX > movement.maxVelX) {
+//            movement.velX = movement.maxVelX;
+//        }
     }
     else {
 //        // Slow the entity down.

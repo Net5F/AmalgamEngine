@@ -81,18 +81,18 @@ ReceiveResult Client::receiveMessage()
             DebugError("Skipped an adjustment iteration. Logic must be flawed.");
         }
 
-        // Got a message, update the receiveTimer.
-        receiveTimer.updateSavedTime();
-
         // Wait for the message.
         result = peer->receiveMessageWait();
+
+        // Got a message, update the receiveTimer.
+        receiveTimer.updateSavedTime();
     }
     else if (result.result == NetworkResult::NoWaitingData) {
         // If we timed out, drop the connection.
         if (float delta = receiveTimer.getDeltaSeconds(false) > TIMEOUT_S) {
             peer = nullptr;
-            DebugInfo("Dropped connection, peer timed out. Time since last message: %f ms",
-                (delta * 1000));
+            DebugInfo("Dropped connection, peer timed out. Time since last message: %.6f "
+                "seconds. Timeout: %.6f", delta, TIMEOUT_S);
             return {NetworkResult::Disconnected, nullptr};
         }
     }
