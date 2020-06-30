@@ -6,7 +6,7 @@
 #include <thread>
 
 static constexpr int SERVER_PORT = 41499;
-static constexpr unsigned int NUM_BYTES = 100;
+static constexpr unsigned int NUM_BYTES = 16;
 
 int inputThread(std::atomic<bool>* exitRequested)
 {
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 
     TCPsocket clientSocket = nullptr;
     SDLNet_SocketSet clientSet = SDLNet_AllocSocketSet(1);
-    std::array<Uint8, 100> messageBuffer = {};
+    std::array<Uint8, NUM_BYTES> messageBuffer = {};
 
     // Spin up a thread to check for command line input.
     std::atomic<bool> exitRequested = false;
@@ -78,23 +78,26 @@ int main(int argc, char* argv[])
                 // Got a message, loop it back.
                 int bytesSent = SDLNet_TCP_Send(clientSocket, &messageBuffer, NUM_BYTES);
                 if (bytesSent < NUM_BYTES) {
+                    std::cout << "Failed to send all bytes. Cleaning up connection."
+                    << std::endl;
                     SDLNet_TCP_DelSocket(clientSet, clientSocket);
                     SDLNet_TCP_Close(clientSocket);
-                    std::cout << "Failed to send all bytes. Cleaned up connection."
-                    << std::endl;
+                    clientSocket = nullptr;
                 }
             }
             else if (result <= 0) {
                 // Disconnected
+                std::cout << "Detected disconnect. Cleaning up connection." << std::endl;
                 SDLNet_TCP_DelSocket(clientSet, clientSocket);
                 SDLNet_TCP_Close(clientSocket);
-                std::cout << "Detected disconnect. Cleaned up connection." << std::endl;
+                clientSocket = nullptr;
             }
             else {
+                std::cout << "Didn't get all expected bytes. Cleaning up connection."
+                << std::endl;
                 SDLNet_TCP_DelSocket(clientSet, clientSocket);
                 SDLNet_TCP_Close(clientSocket);
-                std::cout << "Didn't get all expected bytes. Cleaned up connection."
-                << std::endl;
+                clientSocket = nullptr;
             }
         }
     }
