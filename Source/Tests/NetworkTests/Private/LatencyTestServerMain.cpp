@@ -2,9 +2,24 @@
 #include "SDL_net.h"
 #include <iostream>
 #include <array>
+#include <atomic>
+#include <thread>
 
 static constexpr int SERVER_PORT = 41499;
 static constexpr unsigned int NUM_BYTES = 100;
+
+int inputThread(std::atomic<bool>* exitRequested)
+{
+    while (!(*exitRequested)) {
+        std::string userInput = "";
+        std::getline(std::cin, userInput);
+        if (userInput == "exit") {
+            *exitRequested = true;
+        }
+    }
+
+    return 0;
+}
 
 int main(int argc, char* argv[])
 {
@@ -32,8 +47,12 @@ int main(int argc, char* argv[])
     TCPsocket clientSocket = nullptr;
     SDLNet_SocketSet clientSet = SDLNet_AllocSocketSet(1);
     std::array<Uint8, 100> messageBuffer = {};
+
+    // Spin up a thread to check for command line input.
+    std::atomic<bool> exitRequested = false;
+    std::thread inputThreadObj(inputThread, &exitRequested);
+
     std::cout << "Server started." << std::endl;
-    bool exitRequested = false;
     while (!exitRequested) {
         // If we don't have a connection, try to get one.
         if (clientSocket == nullptr) {
@@ -79,6 +98,8 @@ int main(int argc, char* argv[])
             }
         }
     }
+
+    inputThreadObj.join();
 
     return 0;
 }
