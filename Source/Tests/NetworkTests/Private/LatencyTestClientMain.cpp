@@ -2,6 +2,7 @@
 #include "SDL_net.h"
 #include <iostream>
 #include <string>
+#include <vector>
 #include <array>
 #include <cstdio>
 #include "Timer.h"
@@ -15,6 +16,15 @@ using namespace AM;
 
 int main(int argc, char* argv[])
 {
+    int iterationsToRun = 0;
+    if (argc != 2) {
+        std::cout << "Usage: ./LatencyTestClient <number>" << std::endl;
+        return 0;
+    }
+    else {
+        iterationsToRun = std::stoi(argv[1]);
+    }
+
     if (SDL_Init(0) == -1) {
         std::cout << "SDLNet_Init: " << SDLNet_GetError() << std::endl;
         return 1;
@@ -38,16 +48,15 @@ int main(int argc, char* argv[])
         return 4;
     }
 
-    static constexpr int ITERATIONS_TO_RUN = 10;
     int iterationCount = 0;
-    std::array<float, ITERATIONS_TO_RUN> resultArray = {};
+    std::vector<float> resultArray(iterationsToRun, 0);
 
     std::array<Uint8, NUM_BYTES> messageBuffer = {};
 
     std::cout << "Running tests" << std::endl;
     Timer rttTimer;
     rttTimer.updateSavedTime();
-    while (iterationCount < ITERATIONS_TO_RUN) {
+    while (iterationCount < iterationsToRun) {
         // Send
         int bytesSent = SDLNet_TCP_Send(socket, &messageBuffer, NUM_BYTES);
         if (bytesSent < NUM_BYTES) {
@@ -79,7 +88,7 @@ int main(int argc, char* argv[])
     float min = 1000000;
     float average = 0;
 
-    for (int i = 0; i < ITERATIONS_TO_RUN; ++i) {
+    for (int i = 0; i < iterationsToRun; ++i) {
         average += resultArray[i];
 
         if (resultArray[i] < min) {
@@ -89,7 +98,7 @@ int main(int argc, char* argv[])
             max = resultArray[i];
         }
     }
-    average /= ITERATIONS_TO_RUN;
+    average /= iterationsToRun;
 
     std::cout << "## Latency calcs ##" << std::endl;
     printf("Min: %.6f", min);
