@@ -88,7 +88,7 @@ public:
 
 private:
     static const std::string SERVER_IP;
-    static constexpr int SERVER_PORT = 41499;
+    static constexpr unsigned int SERVER_PORT = 41499;
 
     /** How long we should wait before considering the server to be timed out. */
     static constexpr float TIMEOUT_S = NETWORK_TICK_INTERVAL_S * 2;

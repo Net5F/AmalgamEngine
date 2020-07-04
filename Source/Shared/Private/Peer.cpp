@@ -142,6 +142,7 @@ ReceiveResult AM::Peer::receiveBytesWait(Uint16 numBytes)
                    "Need to add logic for this scenario.");
     }
 
+    // TODO: Can we receive directly into the BinaryBuffer instead of copying?
     return {NetworkResult::Success,
             std::make_unique<std::vector<Uint8>>(messageBuffer.begin()
                 , (messageBuffer.begin() + numBytes))};

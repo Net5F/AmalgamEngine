@@ -20,6 +20,9 @@ Client::Client(std::unique_ptr<Peer> inPeer)
 
     // Init the timer to the current time.
     receiveTimer.updateSavedTime();
+    headTimer.updateSavedTime();
+    mesTimer.updateSavedTime();
+    inTimer.updateSavedTime();
 }
 
 void Client::queueMessage(const BinaryBufferSharedPtr& message)
@@ -68,6 +71,7 @@ ReceiveResult Client::receiveMessage()
 
     // Check for timeouts.
     if (result.result == NetworkResult::Success) {
+        DebugInfo("Received header after %f s", headTimer.getDeltaSeconds(true));
         // Process the adjustment iteration.
         const BinaryBuffer& header = *(result.message.get());
         Uint8 receivedAdjIteration = header[ClientHeaderIndex::AdjustmentIteration];
@@ -82,7 +86,10 @@ ReceiveResult Client::receiveMessage()
         }
 
         // Wait for the message.
+        mesTimer.updateSavedTime();
         result = peer->receiveMessageWait();
+        DebugInfo("Time waited for message after header: %f",
+            mesTimer.getDeltaSeconds(false));
 
         // Got a message, update the receiveTimer.
         receiveTimer.updateSavedTime();

@@ -10,7 +10,7 @@
 //const std::string SERVER_IP = "127.0.0.1";
 const std::string SERVER_IP = "45.79.37.63";
 static constexpr unsigned int SERVER_PORT = 41499;
-static constexpr unsigned int NUM_BYTES = 64;
+static constexpr unsigned int NUM_BYTES = 16;
 
 using namespace AM;
 
@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 {
     int iterationsToRun = 0;
     if (argc != 2) {
-        std::cout << "Usage: ./LatencyTestClient <number>" << std::endl;
+        std::cout << "Usage: ./LatencyTestClient <iterations>" << std::endl;
         return 0;
     }
     else {
@@ -47,49 +47,108 @@ int main(int argc, char* argv[])
         std::cout << "Could not open socket." << std::endl;
         return 4;
     }
+    std::cout << "Connected." << std::endl;
 
-    int iterationCount = 0;
+    // Build the string to send/receive.
+    std::array<Uint8, NUM_BYTES> dataBuffer = {};
+    for (unsigned int i = 0; i < NUM_BYTES; ++i) {
+        dataBuffer[i] = (i % SDL_MAX_UINT8);
+    }
 
-    std::array<Uint8, NUM_BYTES> messageBuffer = {};
-
-    std::cout << "Running tests" << std::endl;
+    /* Send first. */
+    std::cout << "Sending." << std::endl;
     Timer testTimer;
-    testTimer.updateSavedTime();
-    while (iterationCount < iterationsToRun) {
+    std::vector<float> timeVec;
+    for (int i = 0; i < iterationsToRun; ++i) {
         // Send
-        int bytesSent = SDLNet_TCP_Send(socket, &messageBuffer, NUM_BYTES);
+        testTimer.updateSavedTime();
+        int bytesSent = SDLNet_TCP_Send(socket, &dataBuffer, NUM_BYTES);
+        timeVec.push_back(testTimer.getDeltaSeconds(false));
         if (bytesSent < NUM_BYTES) {
             std::cout << "Failed to send all bytes." << std::endl;
             return 5;
         }
-
-        // Receive
-        int result = SDLNet_TCP_Recv(socket, &messageBuffer, NUM_BYTES);
-        if (result == NUM_BYTES) {
-            iterationCount++;
-        }
-        else if (result <= 0) {
-            // Disconnected
-            std::cout << "Detected disconnect." << std::endl;
-            return 7;
-        }
-        else {
-            std::cout << "Didn't get all expected bytes."
-            << std::endl;
-            return 8;
-        }
     }
-    float testTime = testTimer.getDeltaSeconds(true);
+    for (auto time : timeVec) {
+        printf("Time: %.6f KB/s", time);
+        std::cout << std::endl;
+    }
 
-    /* Done getting data. Display it. */
-    float bytesLooped = static_cast<float>(iterationsToRun) * static_cast<float>(NUM_BYTES);
-
-    // Throughput in KB/S
-    float throughput = (bytesLooped / 1000) / testTime;
-
-    std::cout << "## Throughput calcs ##" << std::endl;
-    printf("Throughput: %.6f KB/s", throughput);
-    std::cout << std::endl;
+    /* Wait for the other side to signal it's done receiving. */
+    std::cout << "Done sending. Waiting for done byte." << std::endl;
+    std::array<Uint8, NUM_BYTES> recBuffer = {};
+    int result = SDLNet_TCP_Recv(socket, &(recBuffer[0]), 1);
+    if (result <= 0) {
+        // Disconnected
+        std::cout << "Detected disconnect." << std::endl;
+        return 7;
+    }
+    else if (result > 1) {
+        std::cout << "Received more than just the done byte." << std::endl;
+        return 7;
+    }
+    else {
+        std::cout << "Done byte received." << std::endl;
+    }
+//
+//    Timer testTimer;
+//
+//    /* Receive. */
+//    std::array<Uint8, NUM_BYTES> recBuffer = {};
+//    std::cout << "Done sending. Waiting to receive:" << std::endl;
+//
+//    // TODO: After this is solved, add per-message timing and average/min/max on each side.
+//    bool receiveStarted = false;
+//    for (int i = 0; i < iterationsToRun; ++i) {
+//        // Receive
+//        int receivedBytes = 0;
+//        while (receivedBytes < NUM_BYTES) {
+//            int result = SDLNet_TCP_Recv(socket, &(recBuffer[receivedBytes]),
+//                (NUM_BYTES - receivedBytes));
+//            if (result <= 0) {
+//                // Disconnected
+//                std::cout << "Detected disconnect." << std::endl;
+//                return 7;
+//            }
+//
+//            receivedBytes += result;
+//
+//            if (!receiveStarted) {
+//                // If we received for the first time, start the timer.
+//                testTimer.updateSavedTime();
+//                receiveStarted = true;
+//            }
+//        }
+//
+//        // Check the integrity of the received data.
+//        if (receivedBytes == NUM_BYTES) {
+//            for (unsigned int i = 0; i < NUM_BYTES; ++i) {
+//                if (recBuffer[i] != dataBuffer[i]) {
+//                    std::cout << "Received data out of order. Rec : "
+//                    << std::to_string(recBuffer[i]) << " expected: "
+//                    << std::to_string(dataBuffer[i]) << std::endl;
+//                }
+//            }
+//        }
+//        else if (receivedBytes > NUM_BYTES){
+//            std::cout << "Received too many bytes. Something is broken." << std::endl;
+//            return 8;
+//        }
+//    }
+//    float testTime = testTimer.getDeltaSeconds(true);
+//
+//    /* Done getting data. Display it. */
+//    float totalBytes = static_cast<float>(iterationsToRun - 1)
+//    * static_cast<float>(NUM_BYTES);
+//
+//    // Throughput in KB/S
+//    float throughput = (totalBytes / 1000) / testTime;
+//
+//    std::cout << "## Throughput calcs ##" << std::endl;
+//    printf("%f bytes in %f seconds.", totalBytes, testTime);
+//    std::cout << std::endl;
+//    printf("Throughput: %.6f KB/s", throughput);
+//    std::cout << std::endl;
 
     return 0;
 }
