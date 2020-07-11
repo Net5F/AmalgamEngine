@@ -10,8 +10,8 @@ namespace AM
 namespace Client
 {
 
-//const std::string Network::SERVER_IP = "127.0.0.1";
-const std::string Network::SERVER_IP = "45.79.37.63";
+const std::string Network::SERVER_IP = "127.0.0.1";
+//const std::string Network::SERVER_IP = "45.79.37.63";
 
 Network::Network()
 : server(nullptr)
@@ -21,7 +21,9 @@ Network::Network()
 , receiveThreadObj()
 , exitRequested(false)
 {
-    SDLNet_Init();
+    if (!RUN_OFFLINE) {
+        SDLNet_Init();
+    }
 
     // Init the timer to the current time.
     receiveTimer.updateSavedTime();
@@ -30,8 +32,11 @@ Network::Network()
 Network::~Network()
 {
     exitRequested = true;
-    receiveThreadObj.join();
-    SDLNet_Quit();
+
+    if (!RUN_OFFLINE) {
+        receiveThreadObj.join();
+        SDLNet_Quit();
+    }
 }
 
 bool Network::connect()

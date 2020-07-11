@@ -25,6 +25,12 @@ Game::Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites
 
 void Game::connect()
 {
+    if (Network::RUN_OFFLINE) {
+        // No need to connect if we're running offline. Just need mock player data.
+        fakeConnection();
+        return;
+    }
+
     while (!(network.connect())) {
         DebugInfo("Network failed to connect. Retrying.");
     }
@@ -49,7 +55,6 @@ void Game::connect()
 
     // Set up our player.
     SDL2pp::Rect textureRect(0, 32, 16, 16);
-    SDL2pp::Rect worldRect(connectionResponse->x(), connectionResponse->y(), 64, 64);
 
     // Register the player ID with the world and the network.
     world.registerPlayerID(player);
@@ -73,14 +78,45 @@ void Game::connect()
     world.attachComponent(player, ComponentFlag::Sprite);
 }
 
+void Game::fakeConnection()
+{
+    // Set up our player.
+    SDL2pp::Rect textureRect(0, 32, 16, 16);
+
+    // Register the player ID with the world and the network.
+    EntityID player = 0;
+    world.registerPlayerID(player);
+
+    // Initialize the player state.
+    world.addEntity("Player", player);
+    world.positions[player].x = 64;
+    world.positions[player].y = 64;
+    world.oldPositions[player].x = world.positions[player].x;
+    world.oldPositions[player].y = world.positions[player].y;
+    world.movements[player].maxVelX = 250;
+    world.movements[player].maxVelY = 250;
+    world.sprites[player].texturePtr = sprites;
+    world.sprites[player].posInTexture = textureRect;
+    world.sprites[player].width = 64;
+    world.sprites[player].height = 64;
+    world.attachComponent(player, ComponentFlag::Input);
+    world.attachComponent(player, ComponentFlag::Movement);
+    world.attachComponent(player, ComponentFlag::Position);
+    world.attachComponent(player, ComponentFlag::Sprite);
+}
+
 void Game::tick(float deltaSeconds)
 {
     accumulatedTime += deltaSeconds;
 
     // Process as many game ticks as have accumulated.
     while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
-        // Calculate what tick the server wants us to be on.
-        Uint32 targetTick = currentTick + network.transferTickAdjustment() + 1;
+        // Calculate what tick we should be on.
+        Uint32 targetTick = currentTick + 1;
+        if (!Network::RUN_OFFLINE) {
+            // If we're online, apply any adjustments that we receive from the server.
+            targetTick += network.transferTickAdjustment();
+        }
 
         /* Process ticks until we match what the server wants.
            This may cause us to not process any ticks, or to process multiple ticks. */

@@ -32,6 +32,9 @@ enum class MessageType {
 class Network
 {
 public:
+    /** If true, the connection to the server will be mocked and we'll run without it. */
+    static constexpr bool RUN_OFFLINE = true;
+
     /** Our best guess at a good starting place for the simulation's tick offset. */
     static constexpr Sint8 INITIAL_TICK_OFFSET = 5;
 

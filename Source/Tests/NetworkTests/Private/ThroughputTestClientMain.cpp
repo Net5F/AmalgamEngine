@@ -10,7 +10,7 @@
 //const std::string SERVER_IP = "127.0.0.1";
 const std::string SERVER_IP = "45.79.37.63";
 static constexpr unsigned int SERVER_PORT = 41499;
-static constexpr unsigned int NUM_BYTES = 16;
+static constexpr unsigned int NUM_BYTES = 500;
 
 using namespace AM;
 

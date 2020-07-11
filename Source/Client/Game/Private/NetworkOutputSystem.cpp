@@ -21,6 +21,11 @@ NetworkOutputSystem::NetworkOutputSystem(Game& inGame, World& inWorld, Network& 
 
 void NetworkOutputSystem::sendInputState()
 {
+    if (Network::RUN_OFFLINE) {
+        // No need to send messages if we're running offline.
+        return;
+    }
+
     /* Send the updated state to the server. */
     // Prep the builder for a new message.
     builder.Clear();

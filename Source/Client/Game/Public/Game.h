@@ -31,6 +31,11 @@ public:
     void connect();
 
     /**
+     * Fills in player data as if we connected to the server.
+     */
+    void fakeConnection();
+
+    /**
      * Runs an iteration of the game loop.
      */
     void tick(float deltaSeconds);

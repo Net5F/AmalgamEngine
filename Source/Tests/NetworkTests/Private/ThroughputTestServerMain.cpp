@@ -7,7 +7,7 @@
 #include "Timer.h"
 
 static constexpr int SERVER_PORT = 41499;
-static constexpr unsigned int NUM_BYTES = 16;
+static constexpr unsigned int NUM_BYTES = 500;
 
 using namespace AM;
 

@@ -92,8 +92,10 @@ public:
     /** The highest difference we'll work with. */
     static constexpr Sint64 HIGHEST_VALID_TICKDIFF = 10;
     /** The range of tick difference (inclusive) that we won't send an adjustment for. */
-    static constexpr Sint64 TICKDIFF_TARGET_BOUND_LOWER = 1;
-    static constexpr Sint64 TICKDIFF_TARGET_BOUND_UPPER = 3;
+    static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_LOWER = 1;
+    static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_UPPER = 3;
+    /** The value that we'll adjust clients to if they fall outside the bounds. */
+    static constexpr Sint64 TICKDIFF_TARGET = 2;
 
     struct AdjustmentData {
         /** The amount of adjustment. */

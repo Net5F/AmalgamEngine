@@ -27,14 +27,16 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
     world.oldPositions[playerID].x = currentPosition.x;
     world.oldPositions[playerID].y = currentPosition.y;
 
-    // Receive any player entity updates from the server.
-    Uint32 latestReceivedTick = processReceivedUpdates(playerID, currentPosition,
-        currentMovement);
+    if (!Network::RUN_OFFLINE) {
+        // Receive any player entity updates from the server.
+        Uint32 latestReceivedTick = processReceivedUpdates(playerID, currentPosition,
+            currentMovement);
 
-    // If we received messages, replay inputs newer than the latest.
-    if (latestReceivedTick != 0) {
-        replayInputs(latestReceivedTick, playerID, currentPosition, currentMovement,
-            deltaSeconds);
+        // If we received messages, replay inputs newer than the latest.
+        if (latestReceivedTick != 0) {
+            replayInputs(latestReceivedTick, playerID, currentPosition, currentMovement,
+                deltaSeconds);
+        }
     }
 
     // Use the current input state to update movement for this tick.

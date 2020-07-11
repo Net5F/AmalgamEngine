@@ -10,7 +10,7 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(SDL2_ttf REQUIRED)
-find_package(SDL2_net REQUIRED)
+include("${PROJECT_SOURCE_DIR}/../CMake/SDL2_net.cmake")
 
 # Build static library dependency SDL2pp
 set(SDL2PP_WITH_IMAGE ON)
@@ -48,4 +48,4 @@ add_subdirectory(Server)
 
 # Build tests.
 # (No fancy flags since we aren't a lib, just uncomment when you want to build tests.)
-add_subdirectory(Tests)
+#add_subdirectory(Tests)

@@ -173,14 +173,14 @@ Client::AdjustmentData Client::getTickAdjustment() {
     lock.unlock();
 
     /* If we're outside the target bounds, calculate an adjustment. */
-    if ((latestDiff < TICKDIFF_TARGET_BOUND_LOWER)
-    || (latestDiff > TICKDIFF_TARGET_BOUND_UPPER)) {
+    if ((latestDiff < TICKDIFF_ACCEPTABLE_BOUND_LOWER)
+    || (latestDiff > TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
         // (Best guess at detecting a lag spike, can be tweaked.)
         int lagBound = averageDiff * 2.0 + 3;
 
         // If it wasn't a lag spike, give an adjustment.
         if (latestDiff < lagBound) {
-            adjustment = TICKDIFF_TARGET_BOUND_LOWER - latestDiff;
+            adjustment = TICKDIFF_TARGET - latestDiff;
         }
     }
 

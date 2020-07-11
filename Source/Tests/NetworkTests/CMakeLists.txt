@@ -9,7 +9,6 @@ add_executable(LatencyTestClient
 target_include_directories(LatencyTestClient
     PRIVATE
         ${SDL2_INCLUDE_DIRS}
-        ${SDL2_NET_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
 )
 target_link_libraries(LatencyTestClient
@@ -17,7 +16,7 @@ target_link_libraries(LatencyTestClient
         -static-libgcc
         -static-libstdc++
         ${SDL2_LIBRARIES}
-        ${SDL2_NET_LIBRARIES}
+        SDL2_net-static
         Shared
 )
 target_compile_features(LatencyTestClient PRIVATE cxx_std_17)
@@ -30,7 +29,6 @@ add_executable(LatencyTestServer
 target_include_directories(LatencyTestServer
     PRIVATE
         ${SDL2_INCLUDE_DIRS}
-        ${SDL2_NET_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
 )
 target_link_libraries(LatencyTestServer
@@ -38,7 +36,7 @@ target_link_libraries(LatencyTestServer
         -static-libgcc
         -static-libstdc++
         ${SDL2_LIBRARIES}
-        ${SDL2_NET_LIBRARIES}
+        SDL2_net-static
         Shared
 )
 target_compile_features(LatencyTestServer PRIVATE cxx_std_17)
@@ -52,7 +50,6 @@ add_executable(ThroughputTestClient
 target_include_directories(ThroughputTestClient
     PRIVATE
         ${SDL2_INCLUDE_DIRS}
-        ${SDL2_NET_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
 )
 target_link_libraries(ThroughputTestClient
@@ -60,7 +57,7 @@ target_link_libraries(ThroughputTestClient
         -static-libgcc
         -static-libstdc++
         ${SDL2_LIBRARIES}
-        ${SDL2_NET_LIBRARIES}
+        SDL2_net-static
         Shared
 )
 target_compile_features(ThroughputTestClient PRIVATE cxx_std_17)
@@ -73,7 +70,6 @@ add_executable(ThroughputTestServer
 target_include_directories(ThroughputTestServer
     PRIVATE
         ${SDL2_INCLUDE_DIRS}
-        ${SDL2_NET_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
 )
 target_link_libraries(ThroughputTestServer
@@ -81,7 +77,7 @@ target_link_libraries(ThroughputTestServer
         -static-libgcc
         -static-libstdc++
         ${SDL2_LIBRARIES}
-        ${SDL2_NET_LIBRARIES}
+        SDL2_net-static
         Shared
 )
 target_compile_features(ThroughputTestServer PRIVATE cxx_std_17)
