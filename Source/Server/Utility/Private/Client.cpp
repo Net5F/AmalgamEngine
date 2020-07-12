@@ -180,8 +180,14 @@ Client::AdjustmentData Client::getTickAdjustment() {
     // TODO: Remove this. Just need it to avoid copy in DebugInfo call.
     Uint8 tempLatestAdjIter = latestAdjIteration;
     if (adjustment != 0) {
-        DebugInfo("latest: %d, adjustment: %d, iteration: %u", latestDiff,
-            adjustment, tempLatestAdjIter);
+        DebugInfo("Sent adjustment. adjustment: %d, iteration: %u", adjustment,
+            tempLatestAdjIter);
+        DebugInfo("averageDif: %.8f. Values:", averageDiff);
+        printf("[");
+        for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
+            printf("%d, ", tickDiffHistory[i]);
+        }
+        printf("]\n");
     }
     return {adjustment, tempLatestAdjIter};
 }

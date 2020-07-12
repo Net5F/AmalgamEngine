@@ -47,7 +47,6 @@ try
     while (!(*exitRequested)) {
         // Calc the time delta.
         float deltaSeconds = timer.getDeltaSeconds(true);
-        DebugInfo("deltaSeconds: %f", deltaSeconds);
 
         // Run the game.
         game.tick(deltaSeconds);

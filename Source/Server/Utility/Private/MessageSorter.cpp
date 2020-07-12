@@ -22,7 +22,7 @@ std::queue<BinaryBufferPtr>& MessageSorter::startReceive(Uint32 tickNum)
     }
 
     // Check if the tick is valid.
-    if (!isTickValid(tickNum)) {
+    if (isTickValid(tickNum) != ValidityResult::Valid) {
         // tickNum is invalid, release the lock.
         mutex.unlock();
         DebugError("Tried to start receive for an invalid tick number.");
@@ -45,34 +45,41 @@ void MessageSorter::endReceive()
     mutex.unlock();
 }
 
-bool MessageSorter::push(Uint32 tickNum, BinaryBufferPtr message)
+MessageSorter::PushResult MessageSorter::push(Uint32 tickNum, BinaryBufferPtr message)
 {
-    bool result = false;
-
+    /** Try to push the message. */
     // Acquire the mutex.
     mutex.lock();
 
+    // Check validity of the message's tick.
+    ValidityResult validity = isTickValid(tickNum);
+
     // If tickNum is valid, push the message.
-    if (isTickValid(tickNum)) {
+    if (validity == ValidityResult::Valid) {
         queueBuffer[tickNum % BUFFER_SIZE].push(std::move(message));
-        result = true;
     }
+
+    // Calc the tick diff.
+    Sint64 diff = static_cast<Sint64>(tickNum) - static_cast<Sint64>(currentTick);
 
     // Release the mutex.
     mutex.unlock();
 
-    return result;
+    return {validity, diff};
 }
 
-bool MessageSorter::isTickValid(Uint32 tickNum)
+MessageSorter::ValidityResult MessageSorter::isTickValid(Uint32 tickNum)
 {
     // Check if tickNum is within our lower and upper bounds.
     Uint32 upperBound = (currentTick + BUFFER_SIZE - 1);
-    if ((tickNum < currentTick) || (tickNum > upperBound)) {
-        return false;
+    if (tickNum < currentTick) {
+        return ValidityResult::TooLow;
+    }
+    else if (tickNum > upperBound) {
+        return ValidityResult::TooHigh;
     }
     else {
-        return true;
+        return ValidityResult::Valid;
     }
 }
 

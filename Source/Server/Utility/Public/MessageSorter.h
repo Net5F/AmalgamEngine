@@ -25,6 +25,21 @@ namespace Server
 class MessageSorter
 {
 public:
+    /** Indicates the validity of a given message's tick in relation to the currentTick. */
+    enum class ValidityResult {
+        /** The given message's tick was less than the MessageSorter's currentTick. */
+        TooLow,
+        /** The message's tick is valid. */
+        Valid,
+        /** The given message's tick was beyond the end of the buffer. */
+        TooHigh
+    };
+    /** The ValidityResult and associated diff from a push() operation. */
+    struct PushResult {
+        ValidityResult result;
+        Sint64 diff;
+    };
+
     /**
      * The max valid positive difference between an incoming tickNum and our currentTick that
      * we'll accept. If 10, the valid range is [currentTick, currentTick + 10).
@@ -65,10 +80,10 @@ public:
      *
      * @return True if tickNum was valid and the message was pushed, else false.
      */
-    bool push(Uint32 tickNum, BinaryBufferPtr message);
+    PushResult push(Uint32 tickNum, BinaryBufferPtr message);
 
     /** Helper for checking if a tick number is within the bounds. */
-    bool isTickValid(Uint32 tickNum);
+    ValidityResult isTickValid(Uint32 tickNum);
 
     /**
      * Returns the MessageSorter's internal currentTick.

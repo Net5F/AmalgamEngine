@@ -24,8 +24,9 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
     PositionComponent& currentPosition = world.positions[playerID];
     MovementComponent& currentMovement = world.movements[playerID];
 
-    world.oldPositions[playerID].x = currentPosition.x;
-    world.oldPositions[playerID].y = currentPosition.y;
+    PositionComponent& oldPosition = world.oldPositions[playerID];
+    oldPosition.x = currentPosition.x;
+    oldPosition.y = currentPosition.y;
 
     if (!Network::RUN_OFFLINE) {
         // Receive any player entity updates from the server.
@@ -34,24 +35,16 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
 
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
-            if (world.oldPositions[playerID].x != world.positions[playerID].x
-            || world.oldPositions[playerID].y != world.positions[playerID].y) {
-                DebugInfo("Update received: (%.6f, %.6f) -> (%.6f, %.6f)",
-                    world.oldPositions[playerID].x, world.oldPositions[playerID].y,
-                    world.positions[playerID].x, world.positions[playerID].y);
-            }
-
             replayInputs(latestReceivedTick, playerID, currentPosition, currentMovement,
                 deltaSeconds);
         }
 
         // Check if there was a mismatch between the positions we had and where the
         // server thought we should be.
-        if (world.oldPositions[playerID].x != world.positions[playerID].x
-        || world.oldPositions[playerID].y != world.positions[playerID].y) {
-            DebugInfo("Predicted position mismatched authoritative: (%.6f, %.6f) -> (%.6f, %.6f)",
-                world.oldPositions[playerID].x, world.oldPositions[playerID].y,
-                world.positions[playerID].x, world.positions[playerID].y);
+        if (oldPosition.x != currentPosition.x || oldPosition.y != currentPosition.y) {
+            DebugInfo(
+                "Predicted position mismatched authoritative: (%.6f, %.6f) -> (%.6f, %.6f)",
+                oldPosition.x, oldPosition.y, currentPosition.x, currentPosition.y);
         }
     }
 

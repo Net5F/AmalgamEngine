@@ -138,6 +138,7 @@ void ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& 
                 Sint64 diff = network.queueInputMessage(std::move(messageResult.message));
                 client.recordTickDiff(diff);
 
+                DebugInfo("Diff: %d", diff);
                 messageResult = client.receiveMessage();
             }
         }
