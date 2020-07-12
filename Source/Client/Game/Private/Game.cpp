@@ -129,8 +129,7 @@ void Game::tick(float deltaSeconds)
             networkOutputSystem.sendInputState();
 
             // Push the new input state into the player's history.
-            Uint32 curTick = currentTick;
-            playerInputSystem.addCurrentInputsToHistory(curTick);
+            playerInputSystem.addCurrentInputsToHistory();
 
             // Process player and NPC movements.
             playerMovementSystem.processMovements(GAME_TICK_INTERVAL_S);

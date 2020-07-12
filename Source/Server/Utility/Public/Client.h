@@ -156,10 +156,6 @@ private:
 
     /** Tracks how long it's been since we've received a message from this client. */
     Timer receiveTimer;
-    // TODO: Temp, remove
-    Timer headTimer;
-    Timer mesTimer;
-    Timer inTimer;
 };
 
 } // End namespace Server

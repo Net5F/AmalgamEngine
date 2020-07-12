@@ -34,8 +34,24 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
 
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
+            if (world.oldPositions[playerID].x != world.positions[playerID].x
+            || world.oldPositions[playerID].y != world.positions[playerID].y) {
+                DebugInfo("Update received: (%.6f, %.6f) -> (%.6f, %.6f)",
+                    world.oldPositions[playerID].x, world.oldPositions[playerID].y,
+                    world.positions[playerID].x, world.positions[playerID].y);
+            }
+
             replayInputs(latestReceivedTick, playerID, currentPosition, currentMovement,
                 deltaSeconds);
+        }
+
+        // Check if there was a mismatch between the positions we had and where the
+        // server thought we should be.
+        if (world.oldPositions[playerID].x != world.positions[playerID].x
+        || world.oldPositions[playerID].y != world.positions[playerID].y) {
+            DebugInfo("Predicted position mismatched authoritative: (%.6f, %.6f) -> (%.6f, %.6f)",
+                world.oldPositions[playerID].x, world.oldPositions[playerID].y,
+                world.positions[playerID].x, world.positions[playerID].y);
         }
     }
 
@@ -88,8 +104,6 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
 
         /* Move to the received position. */
         auto receivedPosition = receivedData->positionComponent();
-        DebugInfo("%d: Jumped to - (%f, %f) -> (%f, %f)", playerID, currentPosition.x,
-            currentPosition.y, receivedPosition->x(), receivedPosition->y());
         currentPosition.x = receivedPosition->x();
         currentPosition.y = receivedPosition->y();
 
@@ -129,8 +143,6 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick, EntityID play
             world.playerInputHistory[tickDiff].inputStates, deltaSeconds);
         DebugInfo("Replayed tick %u", i);
     }
-    DebugInfo("%d: Replayed to - (%f, %f) -> (%f, %f)", playerID, recX, recY,
-        currentPosition.x, currentPosition.y);
 }
 
 } // namespace Client

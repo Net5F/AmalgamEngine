@@ -16,9 +16,9 @@
 using namespace AM;
 using namespace AM::Client;
 
-// We delay for 1ms when possible to reduce our CPU usage. We can't trust the scheduler
-// to come back to us after exactly 1ms though, so we need to give it some leeway.
-// Picked .003 = 3ms as a reasonable number. Open for tweaking.
+/** We delay for 1ms when possible to reduce our CPU usage. We can't trust the scheduler
+    to come back to us after exactly 1ms though, so we need to give it some leeway.
+    Picked .003 = 3ms as a reasonable number. Open for tweaking. */
 constexpr float DELAY_LEEWAY_S = .003;
 
 int main(int argc, char **argv)
@@ -47,6 +47,7 @@ try
     while (!(*exitRequested)) {
         // Calc the time delta.
         float deltaSeconds = timer.getDeltaSeconds(true);
+        DebugInfo("deltaSeconds: %f", deltaSeconds);
 
         // Run the game.
         game.tick(deltaSeconds);
@@ -54,19 +55,25 @@ try
         // Render at 60fps.
         renderSystem.render(deltaSeconds);
 
-        /* Act based on how long this tick took. */
-        float executionSeconds = timer.getDeltaSeconds(false);
-        if (executionSeconds >= RenderSystem::RENDER_INTERVAL_S) {
-            DebugInfo("Overran the render tick rate.");
-        }
-        else if (((renderSystem.getAccumulatedTime() + executionSeconds + DELAY_LEEWAY_S)
-                   < RenderSystem::RENDER_INTERVAL_S)
-                 && ((game.getAccumulatedTime() + executionSeconds
-                      + DELAY_LEEWAY_S)
-                     < GAME_TICK_INTERVAL_S)) {
-            // If we have enough time leftover to delay for 1ms, do it.
-            SDL_Delay(1);
-        }
+        // TODO: This is broken because executionSeconds is inconsistent depending on whether
+        //       ticks had to fire or not. Figure out a way to safely add delays, and test
+        //       that the solution doesn't cause the client to fall behind the server.
+//        /* Act based on how long this tick took. */
+//        float executionSeconds = timer.getDeltaSeconds(false);
+//        if (executionSeconds >= RenderSystem::RENDER_INTERVAL_S) {
+//            // A single loop took too long to sustain our render rate.
+//            DebugInfo("Overran the render tick rate.");
+//        }
+//        else if (((renderSystem.getAccumulatedTime() + executionSeconds + DELAY_LEEWAY_S)
+//                   < RenderSystem::RENDER_INTERVAL_S)
+//                 && ((game.getAccumulatedTime() + executionSeconds
+//                      + DELAY_LEEWAY_S)
+//                     < GAME_TICK_INTERVAL_S)) {
+//            // If we have enough time leftover to delay for a few ms, do it.
+//            // Note: We try to delay for 1ms because it will generally end up
+//            //       delaying for 1-2ms.
+//            SDL_Delay(1);
+//        }
     }
 
     return 0;

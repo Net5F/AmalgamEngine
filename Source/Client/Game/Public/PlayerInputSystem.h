@@ -29,7 +29,7 @@ public:
     /**
      * Adds the current player input state to the world's playerInputHistory.
      */
-    void addCurrentInputsToHistory(Uint32 tickNum);
+    void addCurrentInputsToHistory();
 
 private:
     Game& game;

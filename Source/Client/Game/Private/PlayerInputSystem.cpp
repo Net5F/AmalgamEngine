@@ -54,7 +54,7 @@ void PlayerInputSystem::processInputEvent(SDL_Event& event)
     }
 }
 
-void PlayerInputSystem::addCurrentInputsToHistory(Uint32 tickNum)
+void PlayerInputSystem::addCurrentInputsToHistory()
 {
     InputSnapshot snapshot;
 
