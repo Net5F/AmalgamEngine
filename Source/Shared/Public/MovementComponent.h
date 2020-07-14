@@ -11,7 +11,7 @@ public:
     static constexpr float DEFAULT_MAX_VEL = 5;
 
     MovementComponent()
-    : velX(0), velY(0), maxVelY(DEFAULT_MAX_VEL), maxVelX(DEFAULT_MAX_VEL)
+    : velX(0), velY(0), maxVelX(DEFAULT_MAX_VEL), maxVelY(DEFAULT_MAX_VEL)
     {
     }
 

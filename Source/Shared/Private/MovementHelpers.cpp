@@ -1,4 +1,5 @@
 #include "MovementHelpers.h"
+#include "Ignore.h"
 
 namespace AM
 {
@@ -17,6 +18,9 @@ void MovementHelpers::moveEntity(PositionComponent& position, MovementComponent&
 void MovementHelpers::updateVelocity(MovementComponent& movement,
                                      InputStateArr& inputStates, float deltaSeconds)
 {
+    // TODO: Ignoring while velocity is constant for testing.
+    ignore(deltaSeconds);
+
     static constexpr float VELOCITY = 300.145;
     // Handle up/down (favors up).
     if (inputStates[Input::Up] == Input::Pressed) {

@@ -63,9 +63,6 @@ EntityID entityID)
 {
     /* Fill the message with the latest PositionComponent, NetworkOutputComponent,
        and InputComponent data. */
-    // Translate the inputs to fb's enum.
-    InputComponent& input = world.inputs[entityID];
-
     fb::InputState fbInputStates[Input::Type::NumTypes];
     std::array<Input::State, Input::NumTypes>& playerInputStates =
         world.inputs[entityID].inputStates;

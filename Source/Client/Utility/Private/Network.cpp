@@ -41,8 +41,6 @@ Network::~Network()
 
 bool Network::connect()
 {
-    IPaddress ip;
-
     // Try to connect.
     server = Peer::initiate(SERVER_IP, SERVER_PORT);
 

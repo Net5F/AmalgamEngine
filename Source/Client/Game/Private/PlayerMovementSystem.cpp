@@ -35,7 +35,7 @@ void PlayerMovementSystem::processMovements(float deltaSeconds)
 
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
-            replayInputs(latestReceivedTick, playerID, currentPosition, currentMovement,
+            replayInputs(latestReceivedTick, currentPosition, currentMovement,
                 deltaSeconds);
         }
 
@@ -106,7 +106,7 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
     return latestReceivedTick;
 }
 
-void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick, EntityID playerID,
+void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
                                         PositionComponent& currentPosition,
                                         MovementComponent& currentMovement,
                                         float deltaSeconds)
@@ -118,8 +118,6 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick, EntityID play
                 "inputs.", latestReceivedTick, currentTick);
     }
 
-    float recX = currentPosition.x;
-    float recY = currentPosition.y;
     DebugInfo("Latest: %u, current: %u", latestReceivedTick, currentTick);
 
     /* Relay all inputs since the received message, except the current. */

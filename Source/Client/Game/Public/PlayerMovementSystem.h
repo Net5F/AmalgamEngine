@@ -38,8 +38,7 @@ private:
     /**
      * Replay any inputs that are from newer ticks than the latestReceivedTick.
      */
-    void replayInputs(Uint32 latestReceivedTick, EntityID playerID,
-                      PositionComponent& currentPosition,
+    void replayInputs(Uint32 latestReceivedTick, PositionComponent& currentPosition,
                       MovementComponent& currentMovement, float deltaSeconds);
 
     Game& game;

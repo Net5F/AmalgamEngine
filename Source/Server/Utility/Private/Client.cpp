@@ -1,6 +1,7 @@
 #include "Client.h"
 #include "Peer.h"
 #include "Debug.h"
+#include "MessageSorter.h"
 #include <cmath>
 
 namespace AM
@@ -157,24 +158,18 @@ Client::AdjustmentData Client::getTickAdjustment() {
 
     float averageDiff = 0;
     for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
-        averageDiff += std::abs(tickDiffHistory[0]);
+        averageDiff += tickDiffHistory[i];
     }
     averageDiff /= TICKDIFF_HISTORY_LENGTH;
 
-    // We're done accessing tickDiffHistory after getting the latest.
-    Sint8 latestDiff = tickDiffHistory[0];
+    // We're done accessing the tickDiffHistory.
     lock.unlock();
 
     /* If we're outside the target bounds, calculate an adjustment. */
-    if ((latestDiff < TICKDIFF_ACCEPTABLE_BOUND_LOWER)
-    || (latestDiff > TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
-        // (Best guess at detecting a lag spike, can be tweaked.)
-        int lagBound = static_cast<int>(averageDiff * 2.0 + 3.0);
-
-        // If it wasn't a lag spike, give an adjustment.
-        if (latestDiff < lagBound) {
-            adjustment = TICKDIFF_TARGET - latestDiff;
-        }
+    int truncatedAverage = static_cast<int>(averageDiff);
+    if ((truncatedAverage < TICKDIFF_ACCEPTABLE_BOUND_LOWER)
+    || (truncatedAverage > TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
+        adjustment = TICKDIFF_TARGET - truncatedAverage;
     }
 
     // TODO: Remove this. Just need it to avoid copy in DebugInfo call.
@@ -182,7 +177,7 @@ Client::AdjustmentData Client::getTickAdjustment() {
     if (adjustment != 0) {
         DebugInfo("Sent adjustment. adjustment: %d, iteration: %u", adjustment,
             tempLatestAdjIter);
-        DebugInfo("averageDif: %.8f. Values:", averageDiff);
+        DebugInfo("truncatedAverage: %d. Values:", truncatedAverage);
         printf("[");
         for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
             printf("%d, ", tickDiffHistory[i]);

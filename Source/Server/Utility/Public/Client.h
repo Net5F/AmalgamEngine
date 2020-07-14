@@ -91,7 +91,8 @@ public:
     static constexpr Sint64 LOWEST_VALID_TICKDIFF = -10;
     /** The highest difference we'll work with. */
     static constexpr Sint64 HIGHEST_VALID_TICKDIFF = 10;
-    /** The range of tick difference (inclusive) that we won't send an adjustment for. */
+    /** The range of difference (inclusive) between a received message's tickNum and our
+        current tickNum that we won't send an adjustment for. */
     static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_LOWER = 1;
     static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_UPPER = 3;
     /** The value that we'll adjust clients to if they fall outside the bounds. */

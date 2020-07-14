@@ -6,6 +6,7 @@
 #include "Network.h"
 #include "Timer.h"
 #include "Debug.h"
+#include "Ignore.h"
 
 #include <exception>
 #include <memory>
@@ -31,6 +32,10 @@ int inputThread(std::atomic<bool>* exitRequested)
 int main(int argc, char **argv)
 try
 {
+    // SDL2 needs this signature for main, but we don't use the parameters.
+    ignore(argc);
+    ignore(argv);
+
     // Set up the network utility.
     Network network;
 

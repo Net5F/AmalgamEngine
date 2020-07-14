@@ -47,6 +47,12 @@ public:
      */
     static constexpr Sint64 BUFFER_SIZE = 10;
 
+    /** The range of difference (inclusive) between a received message's tickNum and our
+        currentTick that we'll push a message for. Outside of the bounds, we will drop the
+        message. */
+    static constexpr int MESSAGE_DROP_BOUND_LOWER = 0;
+    static constexpr int MESSAGE_DROP_BOUND_UPPER = BUFFER_SIZE - 1;
+
     MessageSorter();
 
     /**

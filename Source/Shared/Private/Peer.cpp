@@ -22,8 +22,8 @@ std::unique_ptr<Peer> AM::Peer::initiate(std::string serverIP,
 }
 
 AM::Peer::Peer(TCPsocket inSocket)
-: bIsConnected(false)
-, set(nullptr)
+: set(nullptr)
+, bIsConnected(false)
 {
     set = std::make_shared<SDLNet_SocketSet>(SDLNet_AllocSocketSet(1));
     if (!(*set)) {
@@ -41,8 +41,8 @@ AM::Peer::Peer(TCPsocket inSocket)
 }
 
 AM::Peer::Peer(TCPsocket inSocket, const std::shared_ptr<SDLNet_SocketSet>& inSet)
-: bIsConnected(false)
-, set(inSet)
+: set(inSet)
+, bIsConnected(false)
 {
     if (!(*set)) {
         DebugInfo("Tried to init Peer with bad set.");
@@ -87,7 +87,12 @@ AM::NetworkResult AM::Peer::send(const BinaryBufferSharedPtr& message)
     }
 
     int bytesSent = SDLNet_TCP_Send(socket, message->data(), messageSize);
-    if (bytesSent < messageSize) {
+    if (bytesSent < 0) {
+        DebugError("TCP_Send returned < 0. This should never happen, the socket"
+                   "was likely misused.");
+    }
+
+    if (static_cast<unsigned int>(bytesSent) < messageSize) {
         // The peer probably disconnected (could be a different issue).
         bIsConnected = false;
         return NetworkResult::Disconnected;

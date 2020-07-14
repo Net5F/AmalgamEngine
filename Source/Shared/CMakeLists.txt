@@ -22,6 +22,7 @@ add_library(Shared STATIC
 		Public/NetworkDefs.h
 		Public/MessageUtil.h
 		Public/Debug.h
+		Public/Ignore.h
 
 		Public/InputComponent.h
 		Public/MovementComponent.h
@@ -51,6 +52,9 @@ target_link_libraries(Shared
 # Compile with C++17
 target_compile_features(Shared PRIVATE cxx_std_17)
 set_target_properties(Shared PROPERTIES CXX_EXTENSIONS OFF)
+
+# Enable compile warnings.
+target_compile_options(Shared PUBLIC -Wall -Wextra)
 
 # If debug, enable debug printing.
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

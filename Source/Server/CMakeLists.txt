@@ -31,6 +31,9 @@ target_link_libraries(Server
 target_compile_features(Server PRIVATE cxx_std_17)
 set_target_properties(Server PROPERTIES CXX_EXTENSIONS OFF)
 
+# Enable compile warnings.
+target_compile_options(Server PUBLIC -Wall -Wextra)
+
 # Build all of the subdirectories
 add_subdirectory(Launch)
 add_subdirectory(Game)

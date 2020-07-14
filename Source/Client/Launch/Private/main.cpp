@@ -8,6 +8,7 @@
 #include "Network.h"
 #include "Timer.h"
 #include "Debug.h"
+#include "Ignore.h"
 
 #include <exception>
 #include <memory>
@@ -24,6 +25,10 @@ constexpr float DELAY_LEEWAY_S = .003;
 int main(int argc, char **argv)
 try
 {
+    // SDL2 needs this signature for main, but we don't use the parameters.
+    ignore(argc);
+    ignore(argv);
+
     // Set up the SDL constructs.
     SDL2pp::SDL sdl(SDL_INIT_VIDEO);
     SDL2pp::Window window("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,

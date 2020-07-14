@@ -31,6 +31,9 @@ target_link_libraries(Client
 target_compile_features(Client PRIVATE cxx_std_17)
 set_target_properties(Client PROPERTIES CXX_EXTENSIONS OFF)
 
+# Enable compile warnings.
+target_compile_options(Client PUBLIC -Wall -Wextra)
+
 add_custom_command(
         TARGET Client POST_BUILD
         
