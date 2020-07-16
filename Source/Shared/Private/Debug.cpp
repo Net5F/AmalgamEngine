@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdarg>
 #include <atomic>
+#include "Ignore.h"
 
 namespace AM
 {
@@ -31,6 +32,9 @@ void Debug::info(const char* expression, ...)
     std::fflush(stdout);
 
     va_end(arg);
+#else
+    // Avoid unused parameter warnings in release.
+    ignore(expression);
 #endif // ENABLE_DEBUG_INFO
 }
 
@@ -53,6 +57,11 @@ void Debug::error(const char* fileName, int line, const char* expression, ...)
     std::fflush(stdout);
 
     va_end(arg);
+#else
+    // Avoid unused parameter warnings in release.
+    ignore(fileName);
+    ignore(line);
+    ignore(expression);
 #endif // ENABLE_DEBUG_INFO
 }
 

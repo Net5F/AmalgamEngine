@@ -142,6 +142,17 @@ void Game::tick(float deltaSeconds)
         }
 
         accumulatedTime -= GAME_TICK_INTERVAL_S;
+        if (accumulatedTime >= GAME_TICK_INTERVAL_S) {
+            DebugInfo(
+                "Detected a request for multiple game ticks in the same frame. Game tick "
+                "must have been massively delayed. Game tick was delayed by: %.8fs.",
+                accumulatedTime);
+        }
+        else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
+            // Delayed render could be caused by OS/system slowness, or too much printing.
+            DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
+                accumulatedTime);
+        }
     }
 }
 

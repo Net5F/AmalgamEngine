@@ -44,6 +44,10 @@ private:
     Game& game;
     World& world;
     Network& network;
+
+    // Temp
+    float lastReceivedX;
+    float lastReceivedY;
 };
 
 } // namespace Client

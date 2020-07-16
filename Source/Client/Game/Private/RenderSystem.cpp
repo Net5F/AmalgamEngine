@@ -21,7 +21,7 @@ void RenderSystem::render(float deltaSeconds)
 {
     accumulatedTime += deltaSeconds;
 
-    // Process as many game ticks as have accumulated.
+    // Process the rendering for this frame.
     if (accumulatedTime >= RENDER_INTERVAL_S) {
         renderer.Clear();
 
@@ -34,9 +34,8 @@ void RenderSystem::render(float deltaSeconds)
                 const PositionComponent& oldPosition = world.oldPositions[entityID];
 
                 // Lerp'd position based on how far we are between game ticks.
-                // TODO: Have a real conversion instead of casting to int here.
-                int lerpX = (position.x * alpha) + (oldPosition.x * (1.0 - alpha));
-                int lerpY = (position.y * alpha) + (oldPosition.y * (1.0 - alpha));
+                int lerpX = std::round((position.x * alpha) + (oldPosition.x * (1.0 - alpha)));
+                int lerpY = std::round((position.y * alpha) + (oldPosition.y * (1.0 - alpha)));
                 SDL2pp::Rect spriteWorldData = { lerpX, lerpY, sprite.width,
                         sprite.height };
 
@@ -49,14 +48,20 @@ void RenderSystem::render(float deltaSeconds)
 
         accumulatedTime -= RENDER_INTERVAL_S;
         if (accumulatedTime >= RENDER_INTERVAL_S) {
-            // If we've accumulated enough time to render more, something
+            // If we've accumulated enough time to render again, something
             // happened (probably a window event that stopped app execution.)
             // We still only want to render the latest data, but it's worth giving
             // debug output that we detected this.
             DebugInfo(
-                "Detected a delayed render. accumulatedTime: %f. Setting to 0.",
+                "Detected a request for two renders in the same frame. Render must have"
+                "been massively delayed. Render was delayed by: %.8fs. Setting to 0.",
                 accumulatedTime);
             accumulatedTime = 0;
+        }
+        else if (accumulatedTime >= RENDER_DELAYED_TIME_S) {
+            // Delayed render could be caused by the sim taking too long, or too much printing.
+            DebugInfo("Detected a delayed render. Render was delayed by: %.8fs.",
+                accumulatedTime);
         }
     }
 

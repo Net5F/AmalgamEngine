@@ -14,7 +14,13 @@ class World;
 class RenderSystem
 {
 public:
+    /** Our rendering framerate. */
     static constexpr float RENDER_INTERVAL_S = 1 / 60.0f;
+
+    /** An unreasonable amount of time for the render tick to be late by.
+        Late render ticks cause jittering, as the pacing between ticks becomes
+        inconsistent. */
+    static constexpr float RENDER_DELAYED_TIME_S = .001;
 
     RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame, SDL2pp::Window& inWindow);
 

@@ -27,4 +27,4 @@ if(MINGW)
 endif()
 
 # Disable Nagle's algorithm.
-target_compile_options(SDL2_net-static PUBLIC -DTCP_NODELAY)
+target_compile_options(SDL2_net-static PRIVATE -DTCP_NODELAY)

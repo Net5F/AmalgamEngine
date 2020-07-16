@@ -29,6 +29,6 @@ fi
 
 echo "Starting build."
 cd $BuildPath
-cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -G Ninja $BasePath/Source/
+cmake -DCMAKE_BUILD_TYPE:STRING=$Config -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -G Ninja $BasePath/Source/
 ninja all
     

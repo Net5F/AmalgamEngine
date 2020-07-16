@@ -40,6 +40,9 @@ public:
     Uint32 getCurrentTick();
 
 private:
+    /** An unreasonable amount of time for the game tick to be late by. */
+    static constexpr float GAME_DELAYED_TIME_S = .001;
+
     World world;
     Network& network;
 
