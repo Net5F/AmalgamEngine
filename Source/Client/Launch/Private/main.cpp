@@ -48,10 +48,10 @@ try
     game.connect();
 
     // Prime the timer so it doesn't start at 0.
-    timer.getDeltaSeconds(true);
+    timer.updateSavedTime();
     while (!(*exitRequested)) {
         // Calc the time delta.
-        float deltaSeconds = timer.getDeltaSeconds(true);
+        double deltaSeconds = timer.getDeltaSeconds(true);
 
         // Run the game.
         game.tick(deltaSeconds);

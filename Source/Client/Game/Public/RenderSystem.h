@@ -15,16 +15,16 @@ class RenderSystem
 {
 public:
     /** Our rendering framerate. */
-    static constexpr float RENDER_INTERVAL_S = 1 / 60.0f;
+    static constexpr double RENDER_INTERVAL_S = 1 / 60.0f;
 
     /** An unreasonable amount of time for the render tick to be late by.
         Late render ticks cause jittering, as the pacing between ticks becomes
         inconsistent. */
-    static constexpr float RENDER_DELAYED_TIME_S = .001;
+    static constexpr double RENDER_DELAYED_TIME_S = .001;
 
     RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame, SDL2pp::Window& inWindow);
 
-    void render(float deltaSeconds);
+    void render(double deltaSeconds);
 
     float getAccumulatedTime();
 
@@ -34,7 +34,7 @@ private:
     World& world;
 
     /** The aggregated time since we last processed a tick. */
-    float accumulatedTime;
+    double accumulatedTime;
 };
 
 } // namespace Client

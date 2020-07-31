@@ -17,7 +17,7 @@ RenderSystem::RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame,
     ignore(window);
 }
 
-void RenderSystem::render(float deltaSeconds)
+void RenderSystem::render(double deltaSeconds)
 {
     accumulatedTime += deltaSeconds;
 

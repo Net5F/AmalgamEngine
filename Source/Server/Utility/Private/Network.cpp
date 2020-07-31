@@ -36,7 +36,7 @@ void Network::sendToAll(const BinaryBufferSharedPtr& message)
     }
 }
 
-void Network::sendWaitingMessages(float deltaSeconds)
+void Network::sendWaitingMessages(double deltaSeconds)
 {
     accumulatedTime += deltaSeconds;
 

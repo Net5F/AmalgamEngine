@@ -21,7 +21,7 @@ Game::Game(Network& inNetwork)
     network.registerCurrentTickPtr(&currentTick);
 }
 
-void Game::tick(float deltaSeconds)
+void Game::tick(double deltaSeconds)
 {
     accumulatedTime += deltaSeconds;
 

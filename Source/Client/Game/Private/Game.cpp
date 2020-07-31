@@ -105,7 +105,7 @@ void Game::fakeConnection()
     world.attachComponent(player, ComponentFlag::Sprite);
 }
 
-void Game::tick(float deltaSeconds)
+void Game::tick(double deltaSeconds)
 {
     accumulatedTime += deltaSeconds;
 

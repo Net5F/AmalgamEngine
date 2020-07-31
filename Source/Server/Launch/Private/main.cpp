@@ -47,12 +47,13 @@ try
     std::thread inputThreadObj(inputThread, &exitRequested);
 
     DebugInfo("Starting main loop.");
+
     Timer timer;
     // Prime the timer so it doesn't start at 0.
-    timer.getDeltaSeconds(true);
+    timer.updateSavedTime();
     while (!exitRequested) {
         // Calc the time delta.
-        float deltaSeconds = timer.getDeltaSeconds(true);
+        double deltaSeconds = timer.getDeltaSeconds(true);
 
         // Run the game.
         game.tick(deltaSeconds);
@@ -61,7 +62,7 @@ try
         network.sendWaitingMessages(deltaSeconds);
 
         // Check if we overran.
-        float executionSeconds = timer.getDeltaSeconds(false);
+        double executionSeconds = timer.getDeltaSeconds(false);
         if (executionSeconds >= GAME_TICK_INTERVAL_S) {
             DebugInfo("Overran the game tick rate.");
         }

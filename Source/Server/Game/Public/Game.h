@@ -25,7 +25,7 @@ public:
     /**
      * Runs an iteration of the game loop.
      */
-    void tick(float deltaSeconds);
+    void tick(double deltaSeconds);
 
     /**
      * Processes all newly connected clients, adding them to the sim.
@@ -41,7 +41,7 @@ public:
 
 private:
     /** An unreasonable amount of time for the game tick to be late by. */
-    static constexpr float GAME_DELAYED_TIME_S = .001;
+    static constexpr double GAME_DELAYED_TIME_S = .001;
 
     World world;
     Network& network;
@@ -51,7 +51,7 @@ private:
     NetworkOutputSystem networkOutputSystem;
 
     /** The aggregated time since we last processed a tick. */
-    float accumulatedTime;
+    double accumulatedTime;
 
     /**
      * The number of the tick that we're currently on.

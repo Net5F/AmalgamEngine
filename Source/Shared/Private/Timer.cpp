@@ -10,7 +10,7 @@ Timer::Timer()
 {
 }
 
-float Timer::getDeltaSeconds(bool updateSavedTime)
+double Timer::getDeltaSeconds(bool updateSavedTime)
 {
     Uint64 currentTicks = SDL_GetPerformanceCounter();
     Uint64 deltaTicks =  currentTicks - savedTimestamp;
@@ -19,7 +19,7 @@ float Timer::getDeltaSeconds(bool updateSavedTime)
         savedTimestamp = currentTicks;
     }
 
-    return deltaTicks / static_cast<float>(TICKS_PER_SECOND);
+    return deltaTicks / static_cast<double>(TICKS_PER_SECOND);
 }
 
 void Timer::updateSavedTime()

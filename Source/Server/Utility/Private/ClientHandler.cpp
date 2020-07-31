@@ -116,6 +116,7 @@ int ClientHandler::serviceClients()
     return 0;
 }
 
+int diffCount = 0;
 void ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& clientMap)
 {
     // Check if there are any messages to receive.
@@ -138,7 +139,14 @@ void ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& 
                 Sint64 diff = network.queueInputMessage(std::move(messageResult.message));
                 client.recordTickDiff(diff);
 
-                DebugInfo("Diff: %d", diff);
+                // TODO: Temp, remove this.
+                if (diffCount == 100) {
+                    DebugInfo("Diff: %d", diff);
+                    diffCount = 0;
+                }
+                else {
+                    diffCount++;
+                }
                 messageResult = client.receiveMessage();
             }
         }

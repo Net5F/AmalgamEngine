@@ -21,7 +21,7 @@ public:
      * @param updateSavedTime  If true, updates the internal timestamp.
      * @return The time delta in seconds since the saved time was last updated.
      */
-    float getDeltaSeconds(bool updateSavedTime);
+    double getDeltaSeconds(bool updateSavedTime);
 
     /**
      * Updates the internal timestamp to the current time.

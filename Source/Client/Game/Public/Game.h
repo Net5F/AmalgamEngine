@@ -38,7 +38,7 @@ public:
     /**
      * Runs an iteration of the game loop.
      */
-    void tick(float deltaSeconds);
+    void tick(double deltaSeconds);
 
     /**
      * Processes all waiting user input events, passing any relevant ones to the
@@ -56,7 +56,7 @@ public:
 
 private:
     /** An unreasonable amount of time for the game tick to be late by. */
-    static constexpr float GAME_DELAYED_TIME_S = .001;
+    static constexpr double GAME_DELAYED_TIME_S = .001;
 
     World world;
     Network& network;
@@ -67,7 +67,7 @@ private:
 //    NpcMovementSystem networkMovementSystem;
 
     /** The aggregated time since we last processed a tick. */
-    float accumulatedTime;
+    double accumulatedTime;
 
     /**
      * The number of the tick that we're currently on.

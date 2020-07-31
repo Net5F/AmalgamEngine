@@ -55,7 +55,7 @@ public:
      * Sends any queued messages over the network.
      * Acts as the Network's tick.
      */
-    void sendWaitingMessages(float deltaSeconds);
+    void sendWaitingMessages(double deltaSeconds);
 
     /**
      * Pushes a message into the inputMessageSorter.
