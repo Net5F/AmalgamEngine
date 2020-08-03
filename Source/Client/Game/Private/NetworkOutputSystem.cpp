@@ -46,9 +46,8 @@ void NetworkOutputSystem::sendInputState()
         serializedEntity);
 
     // Build a Message.
-    Uint32 currentTick = game.getCurrentTick();
     fb::MessageBuilder messageBuilder(builder);
-    messageBuilder.add_tickTimestamp(currentTick);
+    messageBuilder.add_tickTimestamp(game.getCurrentTick());
     messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
     messageBuilder.add_content(entityUpdate.Union());
     flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();

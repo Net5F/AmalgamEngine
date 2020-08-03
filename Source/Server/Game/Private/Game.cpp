@@ -13,7 +13,7 @@ Game::Game(Network& inNetwork)
 , networkInputSystem(*this, world, network)
 , movementSystem(world)
 , networkOutputSystem(*this, world, network)
-, accumulatedTime(0.0f)
+, accumulatedTime(0.0)
 , currentTick(0)
 {
     world.setSpawnPoint({64, 64});

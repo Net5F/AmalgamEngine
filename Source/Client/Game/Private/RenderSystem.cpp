@@ -11,7 +11,7 @@ namespace Client
 
 RenderSystem::RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame,
                            SDL2pp::Window& window)
-: renderer(inRenderer), game(inGame), world(game.getWorld()), accumulatedTime(0.0f)
+: renderer(inRenderer), game(inGame), world(game.getWorld()), accumulatedTime(0.0)
 {
     // TODO: This will eventually be used when we get to variable window sizes.
     ignore(window);

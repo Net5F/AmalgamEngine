@@ -15,7 +15,7 @@ Game::Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites
 , networkOutputSystem(*this, world, network)
 //, networkMovementSystem(*this, world, network)
 , playerMovementSystem(*this, world, network)
-, accumulatedTime(0.0f)
+, accumulatedTime(0.0)
 , currentTick(0)
 , sprites(inSprites)
 , exitRequested(false)

@@ -126,7 +126,7 @@ void Client::recordTickDiff(Sint64 tickDiff) {
     if ((tickDiff < LOWEST_VALID_TICKDIFF) || (tickDiff > HIGHEST_VALID_TICKDIFF)) {
         // Diff is outside our bounds. Drop the connection.
         peer = nullptr;
-        DebugInfo("Dropped connection, diff out of bounds. Diff: %lld", tickDiff);
+        DebugInfo("Dropped connection, diff out of bounds. Diff: " PRId64 , tickDiff);
     }
     else {
         // Diff is fine, record it.

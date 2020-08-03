@@ -11,7 +11,7 @@
 namespace AM
 {
 /** 30 game ticks per second. */
-static constexpr double GAME_TICK_INTERVAL_S = 1 / 30.0f;
+static constexpr double GAME_TICK_INTERVAL_S = 1 / 30.0;
 
 /** Game constants. */
 static constexpr unsigned int MAX_ENTITIES = 100;

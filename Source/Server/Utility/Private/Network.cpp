@@ -13,7 +13,7 @@ namespace Server
 {
 
 Network::Network()
-: accumulatedTime(0.0f)
+: accumulatedTime(0.0)
 , clientHandler(*this)
 , builder(BUILDER_BUFFER_SIZE)
 , currentTickPtr(nullptr)

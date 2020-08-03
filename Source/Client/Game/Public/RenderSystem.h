@@ -14,8 +14,8 @@ class World;
 class RenderSystem
 {
 public:
-    /** Our rendering framerate. */
-    static constexpr double RENDER_INTERVAL_S = 1 / 60.0f;
+    /** 60 rendered frames per second. */
+    static constexpr double RENDER_INTERVAL_S = 1 / 60.0;
 
     /** An unreasonable amount of time for the render tick to be late by.
         Late render ticks cause jittering, as the pacing between ticks becomes
