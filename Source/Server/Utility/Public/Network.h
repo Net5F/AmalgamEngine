@@ -118,7 +118,7 @@ private:
     void sendWaitingMessagesInternal();
 
     /** The aggregated time since we last processed a tick. */
-    float accumulatedTime;
+    double accumulatedTime;
 
     /** Maps IDs to their connections. Allows the game to say "send this message
         to this entity" instead of needing to track the connection objects. */

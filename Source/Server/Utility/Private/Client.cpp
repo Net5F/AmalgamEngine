@@ -90,7 +90,7 @@ ReceiveResult Client::receiveMessage()
     }
     else if (result.result == NetworkResult::NoWaitingData) {
         // If we timed out, drop the connection.
-        if (float delta = receiveTimer.getDeltaSeconds(false) > TIMEOUT_S) {
+        if (double delta = receiveTimer.getDeltaSeconds(false) > TIMEOUT_S) {
             peer = nullptr;
             DebugInfo("Dropped connection, peer timed out. Time since last message: %.6f "
                 "seconds. Timeout: %.6f", delta, TIMEOUT_S);

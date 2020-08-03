@@ -187,7 +187,7 @@ World& Game::getWorld()
     return world;
 }
 
-float Game::getAccumulatedTime()
+double Game::getAccumulatedTime()
 {
     return accumulatedTime;
 }

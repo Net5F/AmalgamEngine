@@ -17,7 +17,7 @@ PlayerMovementSystem::PlayerMovementSystem(Game& inGame, World& inWorld,
 {
 }
 
-void PlayerMovementSystem::processMovements(float deltaSeconds)
+void PlayerMovementSystem::processMovements(double deltaSeconds)
 {
     // Save the old position.
     EntityID playerID = world.playerID;
@@ -114,7 +114,7 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
 void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
                                         PositionComponent& currentPosition,
                                         MovementComponent& currentMovement,
-                                        float deltaSeconds)
+                                        double deltaSeconds)
 {
     Uint32 currentTick = game.getCurrentTick();
     if (latestReceivedTick > currentTick) {

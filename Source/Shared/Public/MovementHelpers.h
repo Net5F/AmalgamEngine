@@ -29,7 +29,7 @@ public:
      * @post The given position and movement components are modified in-place to the new data.
      */
     static void moveEntity(PositionComponent& position, MovementComponent& movement,
-                           InputStateArr& inputStates, float deltaSeconds);
+                           InputStateArr& inputStates, double deltaSeconds);
 
 private:
     /**
@@ -38,7 +38,7 @@ private:
      * @post The given movement component is modified in-place to the new data.
      */
     static void updateVelocity(MovementComponent& movement, InputStateArr& inputStates,
-                               float deltaSeconds);
+                               double deltaSeconds);
 };
 
 } // namespace AM

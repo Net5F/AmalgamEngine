@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
             return 8;
         }
     }
-    float testTime = testTimer.getDeltaSeconds(true);
+    double testTime = testTimer.getDeltaSeconds(true);
 
     /* Done getting data. Display it. */
     float totalBytes = static_cast<float>(iterationsToRun - 1)

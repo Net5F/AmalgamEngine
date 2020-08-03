@@ -26,7 +26,7 @@ public:
 
     void render(double deltaSeconds);
 
-    float getAccumulatedTime();
+    double getAccumulatedTime();
 
 private:
     SDL2pp::Renderer& renderer;

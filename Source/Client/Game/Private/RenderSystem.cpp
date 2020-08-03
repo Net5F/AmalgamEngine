@@ -67,7 +67,7 @@ void RenderSystem::render(double deltaSeconds)
 
 }
 
-float RenderSystem::getAccumulatedTime()
+double RenderSystem::getAccumulatedTime()
 {
     return accumulatedTime;
 }

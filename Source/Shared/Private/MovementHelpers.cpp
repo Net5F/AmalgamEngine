@@ -5,7 +5,7 @@ namespace AM
 {
 
 void MovementHelpers::moveEntity(PositionComponent& position, MovementComponent& movement,
-                                 InputStateArr& inputStates, float deltaSeconds)
+                                 InputStateArr& inputStates, double deltaSeconds)
 {
     // Update the velocity.
     updateVelocity(movement, inputStates, deltaSeconds);
@@ -16,12 +16,12 @@ void MovementHelpers::moveEntity(PositionComponent& position, MovementComponent&
 }
 
 void MovementHelpers::updateVelocity(MovementComponent& movement,
-                                     InputStateArr& inputStates, float deltaSeconds)
+                                     InputStateArr& inputStates, double deltaSeconds)
 {
     // TODO: Ignoring while velocity is constant for testing.
     ignore(deltaSeconds);
 
-    static constexpr float VELOCITY = 300.145;
+    static constexpr double VELOCITY = 300.145;
     // Handle up/down (favors up).
     if (inputStates[Input::Up] == Input::Pressed) {
         movement.velY = -VELOCITY;

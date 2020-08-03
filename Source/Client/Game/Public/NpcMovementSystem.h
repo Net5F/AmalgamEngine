@@ -24,7 +24,7 @@ public:
      * Updates movement components based on input state, moves position components
      * based on movement, updates sprites based on position.
      */
-    void processMovements(float deltaSeconds);
+    void processMovements(double deltaSeconds);
 
 private:
     /**
@@ -33,7 +33,7 @@ private:
     void changeVelocity(
     EntityID entityID,
     std::array<Input::State, static_cast<int>(Input::Type::NumTypes)>& inputStates,
-    float deltaSeconds);
+    double deltaSeconds);
 
     // TODO: Can replace with a ring buffer if this ever is an issue.
     std::vector<BinaryBufferPtr> stateMessageQueue;

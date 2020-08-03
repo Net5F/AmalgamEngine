@@ -138,7 +138,7 @@ private:
     CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy);
 
     /** How long we should wait before considering the client to be timed out. */
-    static constexpr float TIMEOUT_S = NETWORK_TICK_INTERVAL_S * 2;
+    static constexpr double TIMEOUT_S = NETWORK_TICK_INTERVAL_S * 2;
 
     /**
      * Our connection and interface to the client.

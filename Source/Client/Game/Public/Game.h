@@ -48,7 +48,7 @@ public:
 
     World& getWorld();
 
-    float getAccumulatedTime();
+    double getAccumulatedTime();
 
     Uint32 getCurrentTick();
 

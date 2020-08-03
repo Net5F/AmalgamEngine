@@ -14,7 +14,7 @@ NpcMovementSystem::NpcMovementSystem(Game& inGame, World& inWorld,
 {
 }
 
-void NpcMovementSystem::processMovements(float deltaSeconds)
+void NpcMovementSystem::processMovements(double deltaSeconds)
 {
     for (unsigned int entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
         /* Move all NPCs that have an input, position, and movement component. */

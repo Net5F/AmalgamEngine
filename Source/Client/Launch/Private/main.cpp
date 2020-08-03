@@ -20,7 +20,7 @@ using namespace AM::Client;
 /** We delay for 1ms when possible to reduce our CPU usage. We can't trust the scheduler
     to come back to us after exactly 1ms though, so we need to give it some leeway.
     Picked .003 = 3ms as a reasonable number. Open for tweaking. */
-constexpr float DELAY_LEEWAY_S = .003;
+constexpr double DELAY_LEEWAY_S = .003;
 
 int main(int argc, char **argv)
 try
@@ -63,7 +63,7 @@ try
         //       ticks had to fire or not. Figure out a way to safely add delays, and test
         //       that the solution doesn't cause the client to fall behind the server.
 //        /* Act based on how long this tick took. */
-//        float executionSeconds = timer.getDeltaSeconds(false);
+//        double executionSeconds = timer.getDeltaSeconds(false);
 //        if (executionSeconds >= RenderSystem::RENDER_INTERVAL_S) {
 //            // A single loop took too long to sustain our render rate.
 //            DebugInfo("Overran the render tick rate.");

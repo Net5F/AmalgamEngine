@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     /* Send first. */
     std::cout << "Sending." << std::endl;
     Timer testTimer;
-    std::vector<float> timeVec;
+    std::vector<double> timeVec;
     for (int i = 0; i < iterationsToRun; ++i) {
         // Send
         testTimer.updateSavedTime();

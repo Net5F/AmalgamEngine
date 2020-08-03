@@ -25,7 +25,7 @@ public:
     /**
      * Receives state messages, moves the player, replays inputs.
      */
-    void processMovements(float deltaSeconds);
+    void processMovements(double deltaSeconds);
 
 private:
     /**
@@ -39,7 +39,7 @@ private:
      * Replay any inputs that are from newer ticks than the latestReceivedTick.
      */
     void replayInputs(Uint32 latestReceivedTick, PositionComponent& currentPosition,
-                      MovementComponent& currentMovement, float deltaSeconds);
+                      MovementComponent& currentMovement, double deltaSeconds);
 
     Game& game;
     World& world;
