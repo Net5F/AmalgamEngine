@@ -172,8 +172,6 @@ Client::AdjustmentData Client::getTickAdjustment() {
 Sint8 Client::calcAdjustment(
 float averageDiff, CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy)
 {
-    // TODO: It seems like this check isn't working? Getting adjustments when diff[0] = 2
-    // If we aren't outside the target bounds, no adjustment is needed.
     if ((tickDiffHistoryCopy[0] >= TICKDIFF_ACCEPTABLE_BOUND_LOWER)
     && (tickDiffHistoryCopy[0] <= TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
         return 0;
