@@ -150,41 +150,67 @@ Client::AdjustmentData Client::getTickAdjustment() {
         return {0, 0};
     }
 
-    // Prep the adjustment that we'll return.
-    Sint8 adjustment = 0;
-
-    /* Get the average diff. */
+    // Copy the history so we can work on it without staying locked.
     std::unique_lock lock(tickDiffMutex);
+    CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH> tickDiffHistoryCopy = tickDiffHistory;
 
+    lock.unlock();
+
+    // Calc the average diff.
     float averageDiff = 0;
     for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
         averageDiff += tickDiffHistory[i];
     }
     averageDiff /= TICKDIFF_HISTORY_LENGTH;
 
-    // We're done accessing the tickDiffHistory.
-    lock.unlock();
+    // Run through all checks and calc any necessary adjustment.
+    Sint8 adjustment = calcAdjustment(averageDiff, tickDiffHistoryCopy);
 
-    /* If we're outside the target bounds, calculate an adjustment. */
+    return {adjustment, latestAdjIteration};
+}
+
+Sint8 Client::calcAdjustment(
+float averageDiff, CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy)
+{
+    // TODO: It seems like this check isn't working? Getting adjustments when diff[0] = 2
+    // If we aren't outside the target bounds, no adjustment is needed.
+    if ((tickDiffHistoryCopy[0] >= TICKDIFF_ACCEPTABLE_BOUND_LOWER)
+    && (tickDiffHistoryCopy[0] <= TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
+        return 0;
+    }
+
+    // If the average isn't outside the target bounds, no adjustment is needed.
     int truncatedAverage = static_cast<int>(averageDiff);
-    if ((truncatedAverage < TICKDIFF_ACCEPTABLE_BOUND_LOWER)
-    || (truncatedAverage > TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
-        adjustment = TICKDIFF_TARGET - truncatedAverage;
+    if ((truncatedAverage >= TICKDIFF_ACCEPTABLE_BOUND_LOWER)
+    && (truncatedAverage <= TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
+        return 0;
     }
 
-    // TODO: Remove this. Just need it to avoid copy in DebugInfo call.
-    Uint8 tempLatestAdjIter = latestAdjIteration;
-    if (adjustment != 0) {
-        DebugInfo("Sent adjustment. adjustment: %d, iteration: %u", adjustment,
-            tempLatestAdjIter);
-        DebugInfo("truncatedAverage: %d. Values:", truncatedAverage);
-        printf("[");
-        for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
-            printf("%d, ", tickDiffHistory[i]);
+    /* Check for lag spikes.
+       Note: We check for lag spikes by seeing if we're ahead of the client (diff < target)
+             and moving back towards the target.
+             If we aren't, then we have to assume we had a long-term latency gain. */
+    // If we're ahead of the client.
+    if (tickDiffHistoryCopy[0] < TICKDIFF_TARGET) {
+        // If we're moving back towards the target.
+        if (tickDiffHistoryCopy[0] > tickDiffHistoryCopy[1]) {
+            // It seems like a spike occurred, instead of a long-term latency gain.
+            // No adjustment needed, it's going back to normal.
+            return 0;
         }
-        printf("]\n");
     }
-    return {adjustment, tempLatestAdjIter};
+
+    // TODO: Remove (debug)
+    DebugInfo("Sent adjustment. adjustment: %d", TICKDIFF_TARGET - truncatedAverage);
+    DebugInfo("truncatedAverage: %d. Values:", static_cast<int>(averageDiff));
+    printf("[");
+    for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
+        printf("%d, ", tickDiffHistoryCopy[i]);
+    }
+    printf("]\n");
+
+    // Make an adjustment back towards the target.
+    return TICKDIFF_TARGET - truncatedAverage;
 }
 
 } // end namespace Server

@@ -123,6 +123,20 @@ public:
     AdjustmentData getTickAdjustment();
 
 private:
+    /**
+     * Run through all checks necessary to determine if we should tell the client to adjust
+     * its tick.
+     * Note: The parameters could be obtained internally, but passing them in provides a
+     *       clear separation between setup and adjustment logic.
+     * @param averageDiff  The average tick difference, calculated from the tickDiffHistory.
+     * @param tickDiffHistoryCopy  A copy of the tickDiffHistory, so that we don't need to
+     *        lock it.
+     * @return The calculated adjustment. 0 if no adjustment was needed.
+     */
+    Sint8 calcAdjustment(
+    float averageDiff,
+    CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy);
+
     /** How long we should wait before considering the client to be timed out. */
     static constexpr float TIMEOUT_S = NETWORK_TICK_INTERVAL_S * 2;
 
