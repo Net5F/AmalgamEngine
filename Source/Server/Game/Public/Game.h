@@ -37,6 +37,8 @@ public:
      */
     void processDisconnectEvents();
 
+    double getAccumulatedTime();
+
     Uint32 getCurrentTick();
 
 private:

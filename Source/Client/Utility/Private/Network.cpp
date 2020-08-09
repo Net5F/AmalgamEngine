@@ -62,7 +62,7 @@ void Network::send(const BinaryBufferSharedPtr& message)
         DebugError("Tried to send while server is disconnected.");
     }
 
-    // Fill the message with the header (NetworkHelpers::constructMessage leaves
+    // Fill the message with the header (constructMessage() leaves
     // CLIENT_HEADER_SIZE bytes empty at the front for us to fill.)
     message->at(0) = adjustmentIteration;
 
@@ -71,6 +71,7 @@ void Network::send(const BinaryBufferSharedPtr& message)
     if (result != NetworkResult::Success) {
         DebugError("Message send failed.");
     }
+    DebugInfo("Sent message.");
 }
 
 BinaryBufferSharedPtr Network::receive(MessageType type, Uint64 timeoutMs)

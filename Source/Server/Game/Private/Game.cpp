@@ -128,6 +128,11 @@ void Game::processDisconnectEvents()
     }
 }
 
+double Game::getAccumulatedTime()
+{
+    return accumulatedTime;
+}
+
 Uint32 Game::getCurrentTick()
 {
     return currentTick;
