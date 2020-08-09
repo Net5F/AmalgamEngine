@@ -9,7 +9,6 @@ add_library(Shared STATIC
 		Private/Peer.cpp
 		Private/Timer.cpp
 		Private/MovementHelpers.cpp
-		Private/NetworkHelpers.cpp
 		Private/MessageUtil.cpp
 		Private/Debug.cpp
 	PUBLIC
@@ -17,7 +16,6 @@ add_library(Shared STATIC
 		Public/Peer.h
 		Public/Timer.h
 		Public/MovementHelpers.h
-		Public/NetworkHelpers.h
 		Public/GameDefs.h
 		Public/NetworkDefs.h
 		Public/MessageUtil.h

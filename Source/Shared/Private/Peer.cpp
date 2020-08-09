@@ -1,6 +1,7 @@
 #include "Peer.h"
 #include <SDL_stdinc.h>
 #include "Debug.h"
+#include "Message_generated.h"
 
 using namespace AM;
 
@@ -182,7 +183,7 @@ ReceiveResult AM::Peer::receiveMessageWait()
         return {NetworkResult::Disconnected, nullptr};
     }
 
-    // Receive the header (single byte, says the size of the upcoming message.)
+    // Receive the size.
     Uint8 sizeBuf[sizeof(Uint16)];
     if (SDLNet_TCP_Recv(socket, sizeBuf, sizeof(Uint16)) <= 0) {
         // Disconnected

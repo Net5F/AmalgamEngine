@@ -95,6 +95,18 @@ public:
     /** Used for passing us a pointer to the Game's currentTick. */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
+    /**
+     * Allocates and fills a dynamic buffer with message data.
+     *
+     * The first 2 bytes of the buffer will contain the message size as a Uint16,
+     * the rest will have the data at messageBuffer copied into it.
+     *
+     * For use with the Message type in our flatbuffer scheme. We aim to send the whole
+     * Message + size with one send call, so it's convenient to have it all in
+     * one buffer.
+     */
+    BinaryBufferSharedPtr constructMessage(std::size_t size, Uint8* messageBuffer) const;
+
 private:
     /** Holds data for a deferred send of a ConnectionResponse message. */
     struct ConnectionResponseData {

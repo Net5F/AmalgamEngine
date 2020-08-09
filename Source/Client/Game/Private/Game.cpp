@@ -149,7 +149,7 @@ void Game::tick(double deltaSeconds)
                 accumulatedTime);
         }
         else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
-            // Delayed render could be caused by OS/system slowness, or too much printing.
+            // Game missed its ideal call time, could be our issue or general system slowness.
             DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
                 accumulatedTime);
         }

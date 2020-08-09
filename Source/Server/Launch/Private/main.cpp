@@ -49,7 +49,9 @@ try
     DebugInfo("Starting main loop.");
 
     Timer timer;
+//    Timer exitTimer;
     // Prime the timer so it doesn't start at 0.
+//    exitTimer.updateSavedTime();
     timer.updateSavedTime();
     while (!exitRequested) {
         // Calc the time delta.
@@ -66,7 +68,13 @@ try
         if (executionSeconds >= GAME_TICK_INTERVAL_S) {
             DebugInfo("Overran the game tick rate.");
         }
+
+//        if (exitTimer.getDeltaSeconds(false) > 600) {
+//            break;
+//        }
     }
+
+//    DebugInfo("Done.");
 
     inputThreadObj.join();
 

@@ -89,6 +89,20 @@ public:
 
     std::atomic<bool> const* getExitRequestedPtr();
 
+    /**
+     * Allocates and fills a dynamic buffer with message data.
+     *
+     * The first CLIENT_HEADER_SIZE bytes of the buffer will be left empty to later be
+     * filled with the header.
+     * The 2 bytes following the header will contain the message size as a Uint16.
+     * The rest of the buffer will be filled with the data from the given messageBuffer.
+     *
+     * For use with the Message type in our flatbuffer scheme. We aim to send the whole
+     * Message + size + header with one send call, so it's convenient to have it all in
+     * one buffer.
+     */
+    BinaryBufferSharedPtr constructMessage(std::size_t size, Uint8* messageBuffer) const;
+
 private:
     static const std::string SERVER_IP;
     static constexpr unsigned int SERVER_PORT = 41499;

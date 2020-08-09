@@ -1,6 +1,5 @@
 #include "Network.h"
 #include "Peer.h"
-#include "NetworkHelpers.h"
 #include <SDL2/SDL_net.h>
 #include "Message_generated.h"
 #include "Debug.h"
@@ -63,18 +62,12 @@ void Network::send(const BinaryBufferSharedPtr& message)
         DebugError("Tried to send while server is disconnected.");
     }
 
-    // Build the header.
-    Uint8 header[CLIENT_HEADER_SIZE] = {adjustmentIteration};
-
-    // Send the header.
-    NetworkResult result = server->send(
-        std::make_shared<BinaryBuffer>(header, header + CLIENT_HEADER_SIZE));
-    if (result != NetworkResult::Success) {
-        DebugError("Header send failed.");
-    }
+    // Fill the message with the header (NetworkHelpers::constructMessage leaves
+    // CLIENT_HEADER_SIZE bytes empty at the front for us to fill.)
+    message->at(0) = adjustmentIteration;
 
     // Send the message.
-    result = server->send(message);
+    NetworkResult result = server->send(message);
     if (result != NetworkResult::Success) {
         DebugError("Message send failed.");
     }
@@ -247,6 +240,30 @@ int Network::transferTickAdjustment()
 
 std::atomic<bool> const* Network::getExitRequestedPtr() {
     return &exitRequested;
+}
+
+BinaryBufferSharedPtr Network::constructMessage(std::size_t size, Uint8* messageBuffer) const
+{
+    if ((sizeof(Uint16) + size) > Peer::MAX_MESSAGE_SIZE) {
+        DebugError("Tried to send a too-large message. Size: %u, max: %u", size,
+            Peer::MAX_MESSAGE_SIZE);
+    }
+
+    // Allocate a buffer that can hold the header, the Uint16 size bytes, and the
+    // message payload.
+    // NOTE: We leave CLIENT_HEADER_SIZE bytes empty at the front of the message to be
+    //       filled by the network before sending.
+    BinaryBufferSharedPtr dynamicBuffer = std::make_shared<std::vector<Uint8>>(
+        CLIENT_HEADER_SIZE + sizeof(Uint16) + size);
+
+    // Copy the size into the buffer.
+    _SDLNet_Write16(size, (dynamicBuffer->data() + CLIENT_HEADER_SIZE));
+
+    // Copy the message into the buffer.
+    std::copy(messageBuffer, messageBuffer + size,
+        (dynamicBuffer->data() + CLIENT_HEADER_SIZE + sizeof(Uint16)));
+
+    return dynamicBuffer;
 }
 
 } // namespace Client

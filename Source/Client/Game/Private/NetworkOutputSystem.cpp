@@ -3,7 +3,6 @@
 #include "World.h"
 #include "Network.h"
 #include "MessageUtil.h"
-#include "NetworkHelpers.h"
 #include "Debug.h"
 
 namespace AM
@@ -54,8 +53,7 @@ void NetworkOutputSystem::sendInputState()
     builder.Finish(message);
 
     // Send the message.
-    network.send(
-        NetworkHelpers::constructMessage(builder.GetSize(), builder.GetBufferPointer()));
+    network.send(network.constructMessage(builder.GetSize(), builder.GetBufferPointer()));
 
     world.playerIsDirty = false;
 }

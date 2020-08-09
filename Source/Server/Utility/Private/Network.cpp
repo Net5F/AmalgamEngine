@@ -2,7 +2,6 @@
 #include "Acceptor.h"
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
-#include "NetworkHelpers.h"
 #include <algorithm>
 #include <atomic>
 #include "Debug.h"
@@ -136,8 +135,7 @@ void Network::queueConnectionResponses()
 
             // Queue the message so it gets included in the next batch.
             send(data.networkID,
-                NetworkHelpers::constructMessage(builder.GetSize(),
-                    builder.GetBufferPointer()));
+                constructMessage(builder.GetSize(), builder.GetBufferPointer()));
             DebugInfo("Sent new client response with tick = %u", latestTickTimestamp);
 
             connectionResponseQueue.pop();
@@ -194,6 +192,28 @@ moodycamel::ReaderWriterQueue<NetworkID>& Network::getDisconnectEventQueue()
 void Network::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr)
 {
     currentTickPtr = inCurrentTickPtr;
+}
+
+BinaryBufferSharedPtr Network::constructMessage(std::size_t size,
+                                                Uint8* messageBuffer) const
+{
+    if ((sizeof(Uint16) + size) > Peer::MAX_MESSAGE_SIZE) {
+        DebugError("Tried to send a too-large message. Size: %u, max: %u", size,
+            Peer::MAX_MESSAGE_SIZE);
+    }
+
+    // Allocate a buffer that can hold the Uint16 size bytes and the message payload.
+    BinaryBufferSharedPtr dynamicBuffer = std::make_shared<std::vector<Uint8>>(
+        sizeof(Uint16) + size);
+
+    // Copy the size into the buffer.
+    _SDLNet_Write16(size, dynamicBuffer->data());
+
+    // Copy the message into the buffer.
+    std::copy(messageBuffer, messageBuffer + size,
+        dynamicBuffer->data() + sizeof(Uint16));
+
+    return dynamicBuffer;
 }
 
 } // namespace Server
