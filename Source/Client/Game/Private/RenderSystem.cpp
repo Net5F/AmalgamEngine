@@ -9,24 +9,28 @@ namespace AM
 namespace Client
 {
 
+const Uint64 RenderSystem::RENDER_INTERVAL_COUNT = Timer::ipsToCount(60);
+const Uint64 RenderSystem::RENDER_DELAYED_TIME_COUNT = Timer::secondsToCount(.001);
+
 RenderSystem::RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame,
                            SDL2pp::Window& window)
-: renderer(inRenderer), game(inGame), world(game.getWorld()), accumulatedTime(0.0)
+: renderer(inRenderer), game(inGame), world(game.getWorld()), accumulatedCount(0)
 {
     // TODO: This will eventually be used when we get to variable window sizes.
     ignore(window);
 }
 
-void RenderSystem::render(double deltaSeconds)
+void RenderSystem::render(Uint64 deltaCount)
 {
-    accumulatedTime += deltaSeconds;
+    accumulatedCount += deltaCount;
 
     // Process the rendering for this frame.
-    if (accumulatedTime >= RENDER_INTERVAL_S) {
+    if (accumulatedCount >= RENDER_INTERVAL_COUNT) {
         renderer.Clear();
 
         // How far we are between game ticks in decimal percent.
-        double alpha = game.getAccumulatedTime() / GAME_TICK_INTERVAL_S;
+        double alpha = static_cast<double>(game.getAccumulatedCount())
+        / GAME_TICK_INTERVAL_COUNT;
         for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
             if (world.entityExists(entityID)) {
                 const SpriteComponent& sprite = world.sprites[entityID];
@@ -46,8 +50,8 @@ void RenderSystem::render(double deltaSeconds)
 
         renderer.Present();
 
-        accumulatedTime -= RENDER_INTERVAL_S;
-        if (accumulatedTime >= RENDER_INTERVAL_S) {
+        accumulatedCount -= RENDER_INTERVAL_COUNT;
+        if (accumulatedCount >= RENDER_INTERVAL_COUNT) {
             // If we've accumulated enough time to render again, something
             // happened (probably a window event that stopped app execution.)
             // We still only want to render the latest data, but it's worth giving
@@ -55,21 +59,21 @@ void RenderSystem::render(double deltaSeconds)
             DebugInfo(
                 "Detected a request for two renders in the same frame. Render must have"
                 "been massively delayed. Render was delayed by: %.8fs. Setting to 0.",
-                accumulatedTime);
-            accumulatedTime = 0;
+                accumulatedCount);
+            accumulatedCount = 0;
         }
-        else if (accumulatedTime >= RENDER_DELAYED_TIME_S) {
+        else if (accumulatedCount >= RENDER_DELAYED_TIME_COUNT) {
             // Delayed render could be caused by the sim taking too long, or too much printing.
             DebugInfo("Detected a delayed render. Render was delayed by: %.8fs.",
-                accumulatedTime);
+                accumulatedCount);
         }
     }
 
 }
 
-double RenderSystem::getAccumulatedTime()
+Uint64 RenderSystem::getAccumulatedCount()
 {
-    return accumulatedTime;
+    return accumulatedCount;
 }
 
 } // namespace Client

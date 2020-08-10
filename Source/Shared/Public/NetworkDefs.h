@@ -1,6 +1,7 @@
 #ifndef NETWORKDEFS_H
 #define NETWORKDEFS_H
 
+#include "Timer.h"
 #include <SDL_stdinc.h>
 #include <memory>
 #include <vector>
@@ -15,7 +16,7 @@ namespace AM
 // Config
 //--------------------------------------------------------------------------
 /** 20 network ticks per second. */
-static constexpr double NETWORK_TICK_INTERVAL_S = 1 / 20.0;
+static const Uint64 NETWORK_TICK_INTERVAL_COUNT = Timer::ipsToCount(20);
 
 //--------------------------------------------------------------------------
 // Typedefs

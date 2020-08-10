@@ -2,6 +2,7 @@
 #define RENDERSYSTEM_H
 
 #include "SDL2pp/SDL2pp.hh"
+#include "Timer.h"
 
 namespace AM
 {
@@ -15,18 +16,18 @@ class RenderSystem
 {
 public:
     /** 60 rendered frames per second. */
-    static constexpr double RENDER_INTERVAL_S = 1 / 60.0;
+    static const Uint64 RENDER_INTERVAL_COUNT;
 
     /** An unreasonable amount of time for the render tick to be late by.
         Late render ticks cause jittering, as the pacing between ticks becomes
         inconsistent. */
-    static constexpr double RENDER_DELAYED_TIME_S = .001;
+    static const Uint64 RENDER_DELAYED_TIME_COUNT;
 
     RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame, SDL2pp::Window& inWindow);
 
-    void render(double deltaSeconds);
+    void render(Uint64 deltaCount);
 
-    double getAccumulatedTime();
+    Uint64 getAccumulatedCount();
 
 private:
     SDL2pp::Renderer& renderer;
@@ -34,7 +35,7 @@ private:
     World& world;
 
     /** The aggregated time since we last processed a tick. */
-    double accumulatedTime;
+    Uint64 accumulatedCount;
 };
 
 } // namespace Client

@@ -6,6 +6,7 @@
 #include "InputComponent.h"
 #include "GameDefs.h"
 #include <array>
+#include <SDL_stdinc.h>
 
 namespace AM
 {
@@ -29,7 +30,7 @@ public:
      * @post The given position and movement components are modified in-place to the new data.
      */
     static void moveEntity(PositionComponent& position, MovementComponent& movement,
-                           InputStateArr& inputStates, double deltaSeconds);
+                           InputStateArr& inputStates, Uint64 deltaCount);
 
 private:
     /**

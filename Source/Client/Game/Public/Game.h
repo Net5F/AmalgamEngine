@@ -38,7 +38,7 @@ public:
     /**
      * Runs an iteration of the game loop.
      */
-    void tick(double deltaSeconds);
+    void tick(Uint64 deltaCount);
 
     /**
      * Processes all waiting user input events, passing any relevant ones to the
@@ -48,7 +48,7 @@ public:
 
     World& getWorld();
 
-    double getAccumulatedTime();
+    Uint64 getAccumulatedCount();
 
     Uint32 getCurrentTick();
 
@@ -56,7 +56,7 @@ public:
 
 private:
     /** An unreasonable amount of time for the game tick to be late by. */
-    static constexpr double GAME_DELAYED_TIME_S = .001;
+    static const Uint64 GAME_DELAYED_TIME_COUNT;
 
     World world;
     Network& network;
@@ -67,7 +67,7 @@ private:
 //    NpcMovementSystem networkMovementSystem;
 
     /** The aggregated time since we last processed a tick. */
-    double accumulatedTime;
+    Uint64 accumulatedCount;
 
     /**
      * The number of the tick that we're currently on.

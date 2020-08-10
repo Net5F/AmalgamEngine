@@ -48,16 +48,16 @@ try
     game.connect();
 
     // Prime the timer so it doesn't start at 0.
-    timer.updateSavedTime();
+    timer.updateSavedCount();
     while (!(*exitRequested)) {
         // Calc the time delta.
-        double deltaSeconds = timer.getDeltaSeconds(true);
+        Uint64 deltaCount = timer.getDeltaCount(true);
 
         // Run the game.
-        game.tick(deltaSeconds);
+        game.tick(deltaCount);
 
         // Render at 60fps.
-        renderSystem.render(deltaSeconds);
+        renderSystem.render(deltaCount);
 
         // TODO: This is broken because executionSeconds is inconsistent depending on whether
         //       ticks had to fire or not. Figure out a way to safely add delays, and test

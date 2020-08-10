@@ -1,6 +1,7 @@
 #ifndef GAMEDEFS_H
 #define GAMEDEFS_H
 
+#include "Timer.h"
 #include <SDL_stdinc.h>
 #include <array>
 
@@ -11,7 +12,7 @@
 namespace AM
 {
 /** 30 game ticks per second. */
-static constexpr double GAME_TICK_INTERVAL_S = 1 / 30.0;
+static const Uint64 GAME_TICK_INTERVAL_COUNT = Timer::ipsToCount(30);
 
 /** Game constants. */
 static constexpr unsigned int MAX_ENTITIES = 100;

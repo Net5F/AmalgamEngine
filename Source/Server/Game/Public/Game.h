@@ -25,7 +25,7 @@ public:
     /**
      * Runs an iteration of the game loop.
      */
-    void tick(double deltaSeconds);
+    void tick(Uint64 deltaCount);
 
     /**
      * Processes all newly connected clients, adding them to the sim.
@@ -37,13 +37,13 @@ public:
      */
     void processDisconnectEvents();
 
-    double getAccumulatedTime();
+    Uint64 getAccumulatedCount();
 
     Uint32 getCurrentTick();
 
 private:
     /** An unreasonable amount of time for the game tick to be late by. */
-    static constexpr double GAME_DELAYED_TIME_S = .001;
+    static const Uint64 GAME_DELAYED_TIME_COUNT;
 
     World world;
     Network& network;
@@ -53,7 +53,7 @@ private:
     NetworkOutputSystem networkOutputSystem;
 
     /** The aggregated time since we last processed a tick. */
-    double accumulatedTime;
+    Uint64 accumulatedCount;
 
     /**
      * The number of the tick that we're currently on.

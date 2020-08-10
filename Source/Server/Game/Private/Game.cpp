@@ -7,13 +7,15 @@ namespace AM
 namespace Server
 {
 
+const Uint64 Game::GAME_DELAYED_TIME_COUNT = Timer::secondsToCount(.001);
+
 Game::Game(Network& inNetwork)
 : world()
 , network(inNetwork)
 , networkInputSystem(*this, world, network)
 , movementSystem(world)
 , networkOutputSystem(*this, world, network)
-, accumulatedTime(0.0)
+, accumulatedCount(0)
 , currentTick(0)
 {
     world.setSpawnPoint({64, 64});
@@ -21,12 +23,12 @@ Game::Game(Network& inNetwork)
     network.registerCurrentTickPtr(&currentTick);
 }
 
-void Game::tick(double deltaSeconds)
+void Game::tick(Uint64 deltaCount)
 {
-    accumulatedTime += deltaSeconds;
+    accumulatedCount += deltaCount;
 
     /* Process as many game ticks as have accumulated. */
-    while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
+    while (accumulatedCount >= GAME_TICK_INTERVAL_COUNT) {
         // Add any newly connected clients to the sim.
         processConnectEvents();
 
@@ -36,22 +38,22 @@ void Game::tick(double deltaSeconds)
         /* Run all systems. */
         networkInputSystem.processInputMessages();
 
-        movementSystem.processMovements(GAME_TICK_INTERVAL_S);
+        movementSystem.processMovements(GAME_TICK_INTERVAL_COUNT);
 
         networkOutputSystem.sendClientUpdates();
 
         /* Prepare for the next tick. */
-        accumulatedTime -= GAME_TICK_INTERVAL_S;
-        if (accumulatedTime >= GAME_TICK_INTERVAL_S) {
-            DebugInfo(
-                "Detected a request for multiple game ticks in the same frame. Game tick "
-                "must have been massively delayed. Game tick was delayed by: %.8fs.",
-                accumulatedTime);
+        accumulatedCount -= GAME_TICK_INTERVAL_COUNT;
+        if (accumulatedCount >= GAME_TICK_INTERVAL_COUNT) {
+//            DebugInfo(
+//                "Detected a request for multiple game ticks in the same frame. Game tick "
+//                "must have been massively delayed. Game tick was delayed by: %.8fs. Time per tick: %.8fs",
+//                Timer::countToSeconds(accumulatedCount), Timer::countToSeconds(GAME_TICK_INTERVAL_COUNT));
         }
-        else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
+        else if (accumulatedCount >= GAME_DELAYED_TIME_COUNT) {
             // Game missed its ideal call time, could be our issue or general system slowness.
-            DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
-                accumulatedTime);
+            DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs. Threshold: %.8fs",
+                Timer::countToSeconds(accumulatedCount), Timer::countToSeconds(GAME_DELAYED_TIME_COUNT));
         }
 
         currentTick++;
@@ -128,9 +130,9 @@ void Game::processDisconnectEvents()
     }
 }
 
-double Game::getAccumulatedTime()
+Uint64 Game::getAccumulatedCount()
 {
-    return accumulatedTime;
+    return accumulatedCount;
 }
 
 Uint32 Game::getCurrentTick()

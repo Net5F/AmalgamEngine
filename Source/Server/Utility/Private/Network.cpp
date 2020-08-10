@@ -12,7 +12,7 @@ namespace Server
 {
 
 Network::Network()
-: accumulatedTime(0.0)
+: accumulatedCount(0.0)
 , clientHandler(*this)
 , builder(BUILDER_BUFFER_SIZE)
 , currentTickPtr(nullptr)
@@ -35,27 +35,27 @@ void Network::sendToAll(const BinaryBufferSharedPtr& message)
     }
 }
 
-void Network::sendWaitingMessages(double deltaSeconds)
+void Network::sendWaitingMessages(Uint64 deltaCount)
 {
-    accumulatedTime += deltaSeconds;
+    accumulatedCount += deltaCount;
 
-    if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
+    if (accumulatedCount >= NETWORK_TICK_INTERVAL_COUNT) {
         // Queue connection responses before starting to send this batch.
         queueConnectionResponses();
 
         // Send all messages for this batch.
         sendWaitingMessagesInternal();
 
-        accumulatedTime -= NETWORK_TICK_INTERVAL_S;
-        if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
+        accumulatedCount -= NETWORK_TICK_INTERVAL_COUNT;
+        if (accumulatedCount >= NETWORK_TICK_INTERVAL_COUNT) {
             // If we've accumulated enough time to send more, something
             // happened to delay us.
             // We still only want to send what's in the queue, but it's worth giving
             // debug output that we detected this.
             DebugInfo(
                 "Detected a delayed network send. accumulatedTime: %f. Setting to 0.",
-                accumulatedTime);
-            accumulatedTime = 0;
+                accumulatedCount);
+            accumulatedCount = 0;
         }
     }
 }

@@ -55,7 +55,7 @@ public:
      * Sends any queued messages over the network.
      * Acts as the Network's tick.
      */
-    void sendWaitingMessages(double deltaSeconds);
+    void sendWaitingMessages(Uint64 deltaCount);
 
     /**
      * Pushes a message into the inputMessageSorter.
@@ -130,7 +130,7 @@ private:
     void sendWaitingMessagesInternal();
 
     /** The aggregated time since we last processed a tick. */
-    double accumulatedTime;
+    Uint64 accumulatedCount;
 
     /** Maps IDs to their connections. Allows the game to say "send this message
         to this entity" instead of needing to track the connection objects. */

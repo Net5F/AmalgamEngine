@@ -8,6 +8,8 @@ namespace AM
 namespace Client
 {
 
+const Uint64 Game::GAME_DELAYED_TIME_COUNT = Timer::secondsToCount(.001);
+
 Game::Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites)
 : world()
 , network(inNetwork)
@@ -15,7 +17,7 @@ Game::Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites
 , networkOutputSystem(*this, world, network)
 //, networkMovementSystem(*this, world, network)
 , playerMovementSystem(*this, world, network)
-, accumulatedTime(0.0)
+, accumulatedCount(0)
 , currentTick(0)
 , sprites(inSprites)
 , exitRequested(false)
@@ -105,12 +107,12 @@ void Game::fakeConnection()
     world.attachComponent(player, ComponentFlag::Sprite);
 }
 
-void Game::tick(double deltaSeconds)
+void Game::tick(Uint64 deltaCount)
 {
-    accumulatedTime += deltaSeconds;
+    accumulatedCount += deltaCount;
 
     // Process as many game ticks as have accumulated.
-    while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
+    while (accumulatedCount >= GAME_TICK_INTERVAL_COUNT) {
         // Calculate what tick we should be on.
         Uint32 targetTick = currentTick + 1;
         if (!Network::RUN_OFFLINE) {
@@ -132,7 +134,7 @@ void Game::tick(double deltaSeconds)
             playerInputSystem.addCurrentInputsToHistory();
 
             // Process player and NPC movements.
-            playerMovementSystem.processMovements(GAME_TICK_INTERVAL_S);
+            playerMovementSystem.processMovements(GAME_TICK_INTERVAL_COUNT);
 
             // Process network movement after normal movement to sync with server.
             // (The server processes movement before sending updates.)
@@ -141,17 +143,17 @@ void Game::tick(double deltaSeconds)
             currentTick++;
         }
 
-        accumulatedTime -= GAME_TICK_INTERVAL_S;
-        if (accumulatedTime >= GAME_TICK_INTERVAL_S) {
+        accumulatedCount -= GAME_TICK_INTERVAL_COUNT;
+        if (accumulatedCount >= GAME_TICK_INTERVAL_COUNT) {
             DebugInfo(
                 "Detected a request for multiple game ticks in the same frame. Game tick "
                 "must have been massively delayed. Game tick was delayed by: %.8fs.",
-                accumulatedTime);
+                Timer::countToSeconds(accumulatedCount));
         }
-        else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
+        else if (accumulatedCount >= GAME_DELAYED_TIME_COUNT) {
             // Game missed its ideal call time, could be our issue or general system slowness.
             DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
-                accumulatedTime);
+                Timer::countToSeconds(accumulatedCount));
         }
     }
 }
@@ -187,9 +189,9 @@ World& Game::getWorld()
     return world;
 }
 
-double Game::getAccumulatedTime()
+Uint64 Game::getAccumulatedCount()
 {
-    return accumulatedTime;
+    return accumulatedCount;
 }
 
 Uint32 Game::getCurrentTick()

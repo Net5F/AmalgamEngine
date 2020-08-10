@@ -5,9 +5,10 @@ namespace AM
 {
 
 void MovementHelpers::moveEntity(PositionComponent& position, MovementComponent& movement,
-                                 InputStateArr& inputStates, double deltaSeconds)
+                                 InputStateArr& inputStates, Uint64 deltaCount)
 {
     // Update the velocity.
+    double deltaSeconds = Timer::countToSeconds(deltaCount);
     updateVelocity(movement, inputStates, deltaSeconds);
 
     // Update the position.

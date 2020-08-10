@@ -17,7 +17,7 @@ PlayerMovementSystem::PlayerMovementSystem(Game& inGame, World& inWorld,
 {
 }
 
-void PlayerMovementSystem::processMovements(double deltaSeconds)
+void PlayerMovementSystem::processMovements(Uint64 deltaCount)
 {
     // Save the old position.
     EntityID playerID = world.playerID;
@@ -36,7 +36,7 @@ void PlayerMovementSystem::processMovements(double deltaSeconds)
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
             replayInputs(latestReceivedTick, currentPosition, currentMovement,
-                deltaSeconds);
+                deltaCount);
         }
 
         // Check if there was a mismatch between the positions we had and where the
@@ -52,7 +52,7 @@ void PlayerMovementSystem::processMovements(double deltaSeconds)
 
     // Use the current input state to update movement for this tick.
     MovementHelpers::moveEntity(currentPosition, currentMovement,
-        world.inputs[playerID].inputStates, deltaSeconds);
+        world.inputs[playerID].inputStates, deltaCount);
 }
 
 Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
@@ -114,7 +114,7 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
 void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
                                         PositionComponent& currentPosition,
                                         MovementComponent& currentMovement,
-                                        double deltaSeconds)
+                                        Uint64 deltaCount)
 {
     Uint32 currentTick = game.getCurrentTick();
     if (latestReceivedTick > currentTick) {
@@ -134,7 +134,7 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
 
         // Use the appropriate input state to update movement.
         MovementHelpers::moveEntity(currentPosition, currentMovement,
-            world.playerInputHistory[tickDiff].inputStates, deltaSeconds);
+            world.playerInputHistory[tickDiff].inputStates, deltaCount);
     }
 }
 

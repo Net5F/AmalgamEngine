@@ -108,7 +108,7 @@ private:
     static constexpr unsigned int SERVER_PORT = 41499;
 
     /** How long we should wait before considering the server to be timed out. */
-    static constexpr double TIMEOUT_S = NETWORK_TICK_INTERVAL_S * 2;
+    static const Uint64 TIMEOUT_COUNT;
 
     std::shared_ptr<Peer> server;
 

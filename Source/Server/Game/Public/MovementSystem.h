@@ -22,7 +22,7 @@ public:
      * Updates movement components based on input state, moves position components
      * based on movement, updates sprites based on position.
      */
-    void processMovements(double deltaSeconds);
+    void processMovements(Uint64 deltaCount);
 
 private:
     World& world;

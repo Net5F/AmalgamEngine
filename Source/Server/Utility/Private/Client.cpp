@@ -9,6 +9,8 @@ namespace AM
 namespace Server
 {
 
+const Uint64 Client::TIMEOUT_COUNT = NETWORK_TICK_INTERVAL_COUNT * 2;
+
 Client::Client(std::unique_ptr<Peer> inPeer)
 : peer(std::move(inPeer))
 , hasRecordedDiff(false)
@@ -20,7 +22,7 @@ Client::Client(std::unique_ptr<Peer> inPeer)
     }
 
     // Init the timer to the current time.
-    receiveTimer.updateSavedTime();
+    receiveTimer.updateSavedCount();
 }
 
 void Client::queueMessage(const BinaryBufferSharedPtr& message)
@@ -86,14 +88,15 @@ ReceiveResult Client::receiveMessage()
         result = peer->receiveMessageWait();
 
         // Got a message, update the receiveTimer.
-        receiveTimer.updateSavedTime();
+        receiveTimer.updateSavedCount();
     }
     else if (result.result == NetworkResult::NoWaitingData) {
         // If we timed out, drop the connection.
-        if (double delta = receiveTimer.getDeltaSeconds(false) > TIMEOUT_S) {
+        if (Uint64 delta = receiveTimer.getDeltaCount(false) > TIMEOUT_COUNT) {
             peer = nullptr;
             DebugInfo("Dropped connection, peer timed out. Time since last message: %.6f "
-                "seconds. Timeout: %.6f", delta, TIMEOUT_S);
+                "seconds. Timeout: %.6f", Timer::countToSeconds(delta),
+                Timer::countToSeconds(TIMEOUT_COUNT));
             return {NetworkResult::Disconnected, nullptr};
         }
     }

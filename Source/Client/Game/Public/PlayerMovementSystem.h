@@ -7,6 +7,7 @@
 #include "Message_generated.h"
 #include <array>
 #include <vector>
+#include <SDL_stdinc.h>
 
 namespace AM
 {
@@ -25,7 +26,7 @@ public:
     /**
      * Receives state messages, moves the player, replays inputs.
      */
-    void processMovements(double deltaSeconds);
+    void processMovements(Uint64 deltaCount);
 
 private:
     /**
@@ -39,7 +40,7 @@ private:
      * Replay any inputs that are from newer ticks than the latestReceivedTick.
      */
     void replayInputs(Uint32 latestReceivedTick, PositionComponent& currentPosition,
-                      MovementComponent& currentMovement, double deltaSeconds);
+                      MovementComponent& currentMovement, Uint64 deltaCount);
 
     Game& game;
     World& world;

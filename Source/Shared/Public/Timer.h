@@ -1,7 +1,8 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "SDL_stdinc.h"
+#include <SDL_stdinc.h>
+#include <SDL_timer.h>
 
 namespace AM
 {
@@ -21,22 +22,39 @@ public:
      * @param updateSavedTime  If true, updates the internal timestamp.
      * @return The time delta in seconds since the saved time was last updated.
      */
-    double getDeltaSeconds(bool updateSavedTime);
+    Uint64 getDeltaCount(bool updateSavedTime);
 
     /**
      * Updates the internal timestamp to the current time.
      */
-    void updateSavedTime();
+    void updateSavedCount();
+
+    /**
+     * Converts a high resolution timer count into an equivalent time in seconds.
+     */
+    static double countToSeconds(Uint64 count);
+
+    /**
+     * Converts a time in seconds to an equivalent high resolution timer count.
+     */
+    static Uint64 secondsToCount(double seconds);
+
+    /**
+     * Converts a desired number of iterations per second to an equivalent high resolution
+     * timer count.
+     */
+    static Uint64 ipsToCount(unsigned int iterationsPerSecond);
 
 private:
     /**
-     * How fast the processor is running.
-     * SDL sets this once on init and never changes it.
+     * The high resolution counter value equivalent to 1 second.
+     * Note: This variable is a singleton because it's used at static initialization time
+     *       and would otherwise potentially be used before it was initialized.
      */
-    const Uint64 TICKS_PER_SECOND;
+    static const Uint64& COUNT_PER_SECOND();
 
-    // The saved time in integer ticks from SDL_GetPerformanceCounter().
-    Uint64 savedTimestamp;
+    // The saved high resolution timer count from SDL_GetPerformanceCounter().
+    Uint64 savedCount;
 };
 
 } // namespace AM

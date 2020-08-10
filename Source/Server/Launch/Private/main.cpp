@@ -51,25 +51,25 @@ try
     Timer timer;
 //    Timer exitTimer;
     // Prime the timer so it doesn't start at 0.
-//    exitTimer.updateSavedTime();
-    timer.updateSavedTime();
+//    exitTimer.updateSavedCount();
+    timer.updateSavedCount();
     while (!exitRequested) {
         // Calc the time delta.
-        double deltaSeconds = timer.getDeltaSeconds(true);
+        Uint64 deltaCount = timer.getDeltaCount(true);
 
         // Run the game.
-        game.tick(deltaSeconds);
+        game.tick(deltaCount);
 
         // Send waiting messages.
-        network.sendWaitingMessages(deltaSeconds);
+        network.sendWaitingMessages(deltaCount);
 
         // Check if we overran.
-        double executionSeconds = timer.getDeltaSeconds(false);
-        if (executionSeconds >= GAME_TICK_INTERVAL_S) {
+        Uint64 executionCount = timer.getDeltaCount(false);
+        if (executionCount >= GAME_TICK_INTERVAL_COUNT) {
             DebugInfo("Overran the game tick rate.");
         }
 
-//        if (exitTimer.getDeltaSeconds(false) > 600) {
+//        if (exitTimer.getDeltaCount(false) > Timer::secondsToCount(600)) {
 //            break;
 //        }
     }
