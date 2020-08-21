@@ -43,16 +43,16 @@ target_compile_features(LatencyTestServer PRIVATE cxx_std_17)
 set_target_properties(LatencyTestServer PROPERTIES CXX_EXTENSIONS OFF)
 
 
-# Throughput test client
-add_executable(ThroughputTestClient
-    Private/ThroughputTestClientMain.cpp
+# Drift test client
+add_executable(DriftTestClient
+    Private/DriftTestClientMain.cpp
 )
-target_include_directories(ThroughputTestClient
+target_include_directories(DriftTestClient
     PRIVATE
         ${SDL2_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
 )
-target_link_libraries(ThroughputTestClient
+target_link_libraries(DriftTestClient
     PRIVATE
         -static-libgcc
         -static-libstdc++
@@ -60,19 +60,19 @@ target_link_libraries(ThroughputTestClient
         SDL2_net-static
         Shared
 )
-target_compile_features(ThroughputTestClient PRIVATE cxx_std_17)
-set_target_properties(ThroughputTestClient PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(DriftTestClient PRIVATE cxx_std_17)
+set_target_properties(DriftTestClient PROPERTIES CXX_EXTENSIONS OFF)
 
-# Throughput test server
-add_executable(ThroughputTestServer
-    Private/ThroughputTestServerMain.cpp
+# Drift test server
+add_executable(DriftTestServer
+    Private/DriftTestServerMain.cpp
 )
-target_include_directories(ThroughputTestServer
+target_include_directories(DriftTestServer
     PRIVATE
         ${SDL2_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
 )
-target_link_libraries(ThroughputTestServer
+target_link_libraries(DriftTestServer
     PRIVATE
         -static-libgcc
         -static-libstdc++
@@ -80,5 +80,5 @@ target_link_libraries(ThroughputTestServer
         SDL2_net-static
         Shared
 )
-target_compile_features(ThroughputTestServer PRIVATE cxx_std_17)
-set_target_properties(ThroughputTestServer PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(DriftTestServer PRIVATE cxx_std_17)
+set_target_properties(DriftTestServer PROPERTIES CXX_EXTENSIONS OFF)

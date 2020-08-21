@@ -10,7 +10,10 @@ namespace Client
 {
 
 //const std::string Network::SERVER_IP = "127.0.0.1";
-const std::string Network::SERVER_IP = "45.79.37.63";
+//const std::string Network::SERVER_IP = "45.79.37.63";
+//const std::string Network::SERVER_IP = "192.168.0.107";
+const std::string Network::SERVER_IP = "192.168.0.120";
+//const std::string Network::SERVER_IP = "68.2.215.167";
 
 Network::Network()
 : server(nullptr)
@@ -71,7 +74,6 @@ void Network::send(const BinaryBufferSharedPtr& message)
     if (result != NetworkResult::Success) {
         DebugError("Message send failed.");
     }
-    DebugInfo("Sent message.");
 }
 
 BinaryBufferSharedPtr Network::receive(MessageType type, Uint64 timeoutMs)

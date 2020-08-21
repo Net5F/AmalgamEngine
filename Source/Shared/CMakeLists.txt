@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-message(STATUS "Building Shared")
+message(STATUS "Configuring Shared")
 
 # Add our static library target
 add_library(Shared STATIC

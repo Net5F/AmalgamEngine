@@ -4,9 +4,12 @@
 #include <array>
 #include <atomic>
 #include <thread>
+#include "Ignore.h"
 
 static constexpr int SERVER_PORT = 41499;
 static constexpr unsigned int NUM_BYTES = 16;
+
+using namespace AM;
 
 int inputThread(std::atomic<bool>* exitRequested)
 {
@@ -23,6 +26,10 @@ int inputThread(std::atomic<bool>* exitRequested)
 
 int main(int argc, char* argv[])
 {
+    // SDL2 needs this signature for main, but we don't use the parameters.
+    ignore(argc);
+    ignore(argv);
+
     if (SDL_Init(0) == -1) {
         std::cout << "SDLNet_Init: " << SDLNet_GetError() << std::endl;
         return 1;
@@ -77,7 +84,7 @@ int main(int argc, char* argv[])
             if (result == NUM_BYTES) {
                 // Got a message, loop it back.
                 int bytesSent = SDLNet_TCP_Send(clientSocket, &messageBuffer, NUM_BYTES);
-                if (bytesSent < NUM_BYTES) {
+                if (bytesSent < static_cast<int>(NUM_BYTES)) {
                     std::cout << "Failed to send all bytes. Cleaning up connection."
                     << std::endl;
                     SDLNet_TCP_DelSocket(clientSet, clientSocket);

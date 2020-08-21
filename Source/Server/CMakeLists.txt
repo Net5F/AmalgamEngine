@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-message(STATUS "Building Server")
+message(STATUS "Configuring Server")
 
 add_executable(Server "")
 

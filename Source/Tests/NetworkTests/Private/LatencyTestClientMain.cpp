@@ -6,6 +6,7 @@
 #include <array>
 #include <cstdio>
 #include "Timer.h"
+#include "Ignore.h"
 
 //const std::string SERVER_IP = "127.0.0.1";
 const std::string SERVER_IP = "45.79.37.63";
@@ -16,6 +17,10 @@ using namespace AM;
 
 int main(int argc, char* argv[])
 {
+    // SDL2 needs this signature for main, but we don't use the parameters.
+    ignore(argc);
+    ignore(argv);
+
     int iterationsToRun = 0;
     if (argc != 2) {
         std::cout << "Usage: ./LatencyTestClient <number>" << std::endl;
