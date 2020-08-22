@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <atomic>
 #include <cstdio>
 #include "Timer.h"
 #include "Debug.h"
@@ -19,7 +20,7 @@ static constexpr unsigned int NUM_BYTES = 55;
 
 using namespace AM;
 
-bool waitForServer(TCPsocket& serverSocket, Uint32& currentTick) {
+bool waitForServer(TCPsocket& serverSocket, std::atomic<Uint32>& currentTick) {
     std::array<Uint8, sizeof(Uint32)> tickBuf = {};
 
     bool messageReceived = false;
@@ -35,8 +36,9 @@ bool waitForServer(TCPsocket& serverSocket, Uint32& currentTick) {
             return false;
         }
         else {
-            currentTick = _SDLNet_Read32(&tickBuf);
-            DebugInfo("Current tick received: %u", currentTick);
+            // +5 to put us in a reference frame ahead of the server.
+            currentTick = _SDLNet_Read32(&tickBuf) + 5;
+            Debug::info("Current tick received: %u", currentTick.load());
             return true;
         }
     }
@@ -78,7 +80,8 @@ int main(int argc, char* argv[])
     // The aggregated time since we last processed a tick.
     double accumulatedTime = 0;
     // The number of the tick that we're currently on.
-    Uint32 currentTick = 0;
+    std::atomic<Uint32> currentTick = 0;
+    Debug::registerCurrentTickPtr(&currentTick);
 
     /* Prepare the data */
     // The data to send. The first 4 bytes will be replaced with the current tick while

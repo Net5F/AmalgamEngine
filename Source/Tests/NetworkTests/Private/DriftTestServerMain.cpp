@@ -31,8 +31,13 @@ void updateConnection(TCPsocket& serverSocket, TCPsocket& clientSocket,
             }
             else {
                 // Connected, send our current tick.
-                int bytesSent = SDLNet_TCP_Send(clientSocket, &currentTick, sizeof(Uint32));
-                if (bytesSent < sizeof(Uint32)) {
+                // +1 because we'll have finished the tick by the time the client gets this.
+                Uint32 tickToSend = currentTick + 1;
+                std::array<Uint8, sizeof(Uint32)> sendBuffer = {};
+                _SDLNet_Write32(tickToSend, &sendBuffer);
+
+                int bytesSent = SDLNet_TCP_Send(clientSocket, &sendBuffer, sizeof(Uint32));
+                if (bytesSent < static_cast<int>(sizeof(Uint32))) {
                     DebugError("Failed to send current tick.");
                 }
 
@@ -47,27 +52,30 @@ std::array<Uint8, NUM_BYTES> recBuffer = {};
 // The number of bytes that we've received from the current message.
 unsigned int bytesReceived = 0;
 bool receiveAndHandle(SDLNet_SocketSet& clientSet, TCPsocket& clientSocket,
-                      Uint32 currentTick)
+                      std::atomic<Uint32>& currentTick)
 {
-    // Try to receive.
-    int result = SDLNet_TCP_Recv(clientSocket, &(recBuffer[bytesReceived]),
-        (NUM_BYTES - bytesReceived));
-    if (result < 0) {
-        DebugInfo("Detected disconnect.");
-        return false;
-    }
+    int numReady = SDLNet_CheckSockets(clientSet, 0);
+    if (numReady == 1) {
+        // Receive the waiting data.
+        int result = SDLNet_TCP_Recv(clientSocket, &(recBuffer[bytesReceived]),
+            (NUM_BYTES - bytesReceived));
+        if (result <= 0) {
+            DebugInfo("Detected disconnect.");
+            return false;
+        }
 
-    bytesReceived += result;
+        bytesReceived += result;
 
-    // If we finished receiving the message, compare it to currentTick and print the diff.
-    if (bytesReceived == NUM_BYTES) {
-        Sint64 clientTick = static_cast<Sint64>(_SDLNet_Read32(&recBuffer));
-        Sint64 serverTick = static_cast<Sint64>(currentTick);
+        // If we finished receiving the message, compare it to currentTick and print the diff.
+        if (bytesReceived == NUM_BYTES) {
+            Sint64 clientTick = static_cast<Sint64>(_SDLNet_Read32(&recBuffer));
+            Sint64 serverTick = static_cast<Sint64>(currentTick);
 
-        DebugInfo("Client tick: %d, Server tick: %d, Diff: %d", clientTick, serverTick,
-            (clientTick - serverTick));
+            DebugInfo("Client tick: %d, Server tick: %d, Diff: %d", clientTick,
+                serverTick, (clientTick - serverTick));
 
-        bytesReceived = 0;
+            bytesReceived = 0;
+        }
     }
 
     return true;
@@ -111,7 +119,8 @@ int main(int argc, char* argv[])
     /**
      * The number of the tick that we're currently on.
      */
-    Uint32 currentTick = 0;
+    std::atomic<Uint32> currentTick = 0;
+    Debug::registerCurrentTickPtr(&currentTick);
 
     // Prime the timer so it doesn't start at 0.
     Timer timer;
@@ -137,17 +146,19 @@ int main(int argc, char* argv[])
             else if (accumulatedTime >= TEST_GAME_DELAYED_TIME_S) {
                 // Game missed its ideal call time, could be our issue or general
                 // system slowness.
-                DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
-                    accumulatedTime);
+//                DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
+//                    accumulatedTime);
             }
 
             currentTick++;
         }
 
-        /* Try to receive. */
-        bool result = receiveAndHandle(clientSet, clientSocket, currentTick);
-        if (!result) {
-            DebugError("Disconnect or other error during receive.");
+        if (clientSocket != nullptr) {
+            /* Try to receive. */
+            bool result = receiveAndHandle(clientSet, clientSocket, currentTick);
+            if (!result) {
+                DebugError("Disconnect or other error during receive.");
+            }
         }
     }
 
