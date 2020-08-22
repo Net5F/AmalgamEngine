@@ -40,5 +40,6 @@ cmake -P $BasePath/CMake/copy_runtime_deps.cmake $BuildPath/Client/Client $Packa
 cmake -P $BasePath/CMake/copy_runtime_deps.cmake $BuildPath/Server/Server $PackagePath/Server/
 
 # Set the rpath of our executable and dependencies to $ORIGIN (effectively ./)
+find $PackagePath/Client/ -maxdepth 1 -type f -exec patchelf --set-rpath '$ORIGIN' {} \;
 find $PackagePath/Server/ -maxdepth 1 -type f -exec patchelf --set-rpath '$ORIGIN' {} \;
     
