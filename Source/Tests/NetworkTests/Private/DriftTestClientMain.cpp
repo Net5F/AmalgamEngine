@@ -20,6 +20,7 @@ static constexpr unsigned int NUM_BYTES = 55;
 
 using namespace AM;
 
+/** Waits for the server to send its current tick. */
 bool waitForServer(TCPsocket& serverSocket, std::atomic<Uint32>& currentTick) {
     std::array<Uint8, sizeof(Uint32)> tickBuf = {};
 

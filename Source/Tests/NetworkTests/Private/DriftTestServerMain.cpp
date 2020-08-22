@@ -17,6 +17,7 @@ static constexpr unsigned int NUM_BYTES = 55;
 
 using namespace AM;
 
+/** Exits if the user types exit. */
 int inputThread(std::atomic<bool>* exitRequested)
 {
     while (!(*exitRequested)) {
@@ -30,6 +31,7 @@ int inputThread(std::atomic<bool>* exitRequested)
     return 0;
 }
 
+/** Checks for new client connections, sends our current tick to new clients. */
 void updateConnection(TCPsocket& serverSocket, TCPsocket& clientSocket,
                         SDLNet_SocketSet& clientSet, Uint32 currentTick)
 {
@@ -65,6 +67,7 @@ void updateConnection(TCPsocket& serverSocket, TCPsocket& clientSocket,
 std::array<Uint8, NUM_BYTES> recBuffer = {};
 // The number of bytes that we've received from the current message.
 unsigned int bytesReceived = 0;
+/** Receives the message from the client and compares the given tick number to our current. */
 bool receiveAndHandle(SDLNet_SocketSet& clientSet, TCPsocket& clientSocket,
                       std::atomic<Uint32>& currentTick)
 {
@@ -125,16 +128,14 @@ int main(int argc, char* argv[])
     TCPsocket clientSocket = nullptr;
     SDLNet_SocketSet clientSet = SDLNet_AllocSocketSet(1);
 
-    // Prepare the simulation variables.
-    /** The aggregated time since we last processed a tick. */
+    /* Prepare the simulation variables. */
+    // The aggregated time since we last processed a tick.
     double accumulatedTime = 0;
-    /**
-     * The number of the tick that we're currently on.
-     */
+    // The number of the tick that we're currently on.
     std::atomic<Uint32> currentTick = 0;
     Debug::registerCurrentTickPtr(&currentTick);
 
-    // Spin up a thread to check for command line input.
+    /* Spin up a thread to check for command line input. */
     std::atomic<bool> exitRequested = false;
     std::thread inputThreadObj(inputThread, &exitRequested);
 
@@ -164,8 +165,8 @@ int main(int argc, char* argv[])
             else if (accumulatedTime >= TEST_GAME_DELAYED_TIME_S) {
                 // Game missed its ideal call time, could be our issue or general
                 // system slowness.
-//                DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
-//                    accumulatedTime);
+                DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
+                    accumulatedTime);
             }
 
             currentTick++;

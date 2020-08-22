@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     while (iterationCount < iterationsToRun) {
         // Send
         int bytesSent = SDLNet_TCP_Send(socket, &messageBuffer, NUM_BYTES);
-        if (bytesSent < NUM_BYTES) {
+        if (bytesSent < static_cast<int>(NUM_BYTES)) {
             std::cout << "Failed to send all bytes." << std::endl;
             return 5;
         }
