@@ -6,6 +6,7 @@
 #include "Timer.h"
 #include "Debug.h"
 #include "Ignore.h"
+#include <iostream>
 
 static constexpr int SERVER_PORT = 41499;
 
@@ -15,6 +16,19 @@ static constexpr double TEST_GAME_DELAYED_TIME_S = .001;
 static constexpr unsigned int NUM_BYTES = 55;
 
 using namespace AM;
+
+int inputThread(std::atomic<bool>* exitRequested)
+{
+    while (!(*exitRequested)) {
+        std::string userInput = "";
+        std::getline(std::cin, userInput);
+        if (userInput == "exit") {
+            *exitRequested = true;
+        }
+    }
+
+    return 0;
+}
 
 void updateConnection(TCPsocket& serverSocket, TCPsocket& clientSocket,
                         SDLNet_SocketSet& clientSet, Uint32 currentTick)
@@ -111,8 +125,6 @@ int main(int argc, char* argv[])
     TCPsocket clientSocket = nullptr;
     SDLNet_SocketSet clientSet = SDLNet_AllocSocketSet(1);
 
-    DebugInfo("Server started.");
-
     // Prepare the simulation variables.
     /** The aggregated time since we last processed a tick. */
     double accumulatedTime = 0;
@@ -122,10 +134,16 @@ int main(int argc, char* argv[])
     std::atomic<Uint32> currentTick = 0;
     Debug::registerCurrentTickPtr(&currentTick);
 
+    // Spin up a thread to check for command line input.
+    std::atomic<bool> exitRequested = false;
+    std::thread inputThreadObj(inputThread, &exitRequested);
+
+    DebugInfo("Server started.");
+
     // Prime the timer so it doesn't start at 0.
     Timer timer;
     timer.updateSavedTime();
-    while (true) {
+    while (!exitRequested) {
         // Connect or disconnect the client.
         updateConnection(serverSocket, clientSocket, clientSet, currentTick);
 
@@ -161,6 +179,8 @@ int main(int argc, char* argv[])
             }
         }
     }
+
+    inputThreadObj.join();
 
     return 0;
 }
