@@ -98,8 +98,6 @@ private:
      * was detected when trying to send or receive.
      */
     bool bIsConnected;
-
-    std::array<Uint8, MAX_MESSAGE_SIZE> messageBuffer;
 };
 
 } /* End namespace AM */

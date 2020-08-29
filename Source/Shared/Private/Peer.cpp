@@ -83,8 +83,9 @@ AM::NetworkResult AM::Peer::send(const BinaryBufferSharedPtr& message)
     }
 
     std::size_t messageSize = message->size();
-    if (messageSize > SDL_MAX_UINT16) {
-        DebugError("Tried to send a too-large message. Size: %u, max: %u", messageSize, SDL_MAX_UINT16);
+    if (messageSize > MAX_MESSAGE_SIZE) {
+        DebugError("Tried to send a too-large message. Size: %u, max: %u", messageSize,
+            MAX_MESSAGE_SIZE);
     }
 
     int bytesSent = SDLNet_TCP_Send(socket, message->data(), messageSize);
@@ -137,7 +138,8 @@ ReceiveResult AM::Peer::receiveBytesWait(Uint16 numBytes)
             numBytes, MAX_MESSAGE_SIZE);
     }
 
-    int result = SDLNet_TCP_Recv(socket, &messageBuffer, numBytes);
+    BinaryBufferPtr returnBuffer = std::make_unique<BinaryBuffer>(numBytes);
+    int result = SDLNet_TCP_Recv(socket, returnBuffer->data(), numBytes);
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
@@ -148,10 +150,7 @@ ReceiveResult AM::Peer::receiveBytesWait(Uint16 numBytes)
                    "Need to add logic for this scenario.");
     }
 
-    // TODO: Can we receive directly into the BinaryBuffer instead of copying?
-    return {NetworkResult::Success,
-            std::make_unique<std::vector<Uint8>>(messageBuffer.begin()
-                , (messageBuffer.begin() + numBytes))};
+    return {NetworkResult::Success, std::move(returnBuffer)};
 }
 
 ReceiveResult AM::Peer::receiveMessage(bool checkSockets)
@@ -193,14 +192,14 @@ ReceiveResult AM::Peer::receiveMessageWait()
 
     // The number of bytes in the upcoming message.
     Uint16 messageSize = _SDLNet_Read16(sizeBuf);
-
     if (messageSize > MAX_MESSAGE_SIZE) {
         DebugError(
             "Tried to receive too large of a message. messageSize: %u, MaxSize: %u",
             messageSize, MAX_MESSAGE_SIZE);
     }
 
-    int result = SDLNet_TCP_Recv(socket, &messageBuffer, messageSize);
+    BinaryBufferPtr returnBuffer = std::make_unique<BinaryBuffer>(messageSize);
+    int result = SDLNet_TCP_Recv(socket, returnBuffer->data(), messageSize);
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
@@ -211,8 +210,6 @@ ReceiveResult AM::Peer::receiveMessageWait()
                    "Need to add logic for this scenario.");
     }
 
-    return {NetworkResult::Success,
-            std::make_unique<std::vector<Uint8>>(messageBuffer.begin(),
-                (messageBuffer.begin() + messageSize))};
+    return {NetworkResult::Success, std::move(returnBuffer)};
 }
 

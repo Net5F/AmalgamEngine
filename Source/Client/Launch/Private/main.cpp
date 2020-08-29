@@ -37,6 +37,9 @@ try
     std::shared_ptr<SDL2pp::Texture> sprites = std::make_shared<SDL2pp::Texture>(
     renderer, "Resources/u4_tiles_pc_ega.png");
 
+    // Uncomment to enable fullscreen.
+//    window.SetFullscreen(SDL_WINDOW_FULLSCREEN);
+
     Network network;
     Game game(network, sprites);
     RenderSystem renderSystem(renderer, game, window);
