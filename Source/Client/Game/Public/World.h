@@ -21,8 +21,9 @@ class World
 public:
     /**
      * The number of input snapshots that we'll remember.
-     * TODO: Once we have a timeout set up, this can be set to a large enough value
-     *       to hold all inputs up to the timeout.
+     * TODO: This is dependent on latency to the server, but CircularBuffer can't be resized
+     *       at runtime. Modify CircularBuffer to be resizable and figure out where the
+     *       size should be calculated.
      */
     static constexpr unsigned int INPUT_HISTORY_LENGTH = 10;
 

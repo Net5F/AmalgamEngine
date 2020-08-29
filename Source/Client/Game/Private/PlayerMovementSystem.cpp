@@ -126,7 +126,8 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
 
         if (tickDiff > World::INPUT_HISTORY_LENGTH) {
             DebugError("Too few items in the player input history. "
-                       "Increase the length or reduce lag.");
+                "Increase the length or reduce lag. tickDiff: %u, historyLength: %u",
+                tickDiff, World::INPUT_HISTORY_LENGTH);
         }
 
         // Use the appropriate input state to update movement.
