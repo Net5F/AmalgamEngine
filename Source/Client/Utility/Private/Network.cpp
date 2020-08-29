@@ -120,30 +120,8 @@ int Network::pollForMessages()
             const BinaryBuffer& header = *(headerResult.message.get());
 
             // Check if we need to adjust the tick offset.
-            // TODO: Move this to a function, or add a ServerHandler.
-            Sint8 receivedTickAdj =
-                header[ServerHeaderIndex::TickAdjustment];
-            if (receivedTickAdj != 0) {
-                Uint8 receivedAdjIteration =
-                    header[ServerHeaderIndex::AdjustmentIteration];
-                Uint8 currentAdjIteration = adjustmentIteration;
-
-                // If we haven't already processed this adjustment iteration.
-                if (receivedAdjIteration == currentAdjIteration) {
-                    // Apply the adjustment.
-                    tickAdjustment += receivedTickAdj;
-
-                    // Increment the iteration.
-                    adjustmentIteration = (currentAdjIteration + 1);
-                    DebugInfo("Received tick adjustment: %d, iteration: %u",
-                        receivedTickAdj, receivedAdjIteration);
-                }
-                else if (receivedAdjIteration > currentAdjIteration){
-                    DebugError(
-                        "Out of sequence adjustment iteration. current: %u, received: %u",
-                        currentAdjIteration, receivedAdjIteration);
-                }
-            }
+            adjustIfNeeded(header[ServerHeaderIndex::TickAdjustment],
+                header[ServerHeaderIndex::AdjustmentIteration]);
 
             // Receive all of the expected messages.
             Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
@@ -166,6 +144,29 @@ int Network::pollForMessages()
     }
 
     return 0;
+}
+
+void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
+{
+    if (receivedTickAdj != 0) {
+        Uint8 currentAdjIteration = adjustmentIteration;
+
+        // If we haven't already processed this adjustment iteration.
+        if (receivedAdjIteration == currentAdjIteration) {
+            // Apply the adjustment.
+            tickAdjustment += receivedTickAdj;
+
+            // Increment the iteration.
+            adjustmentIteration = (currentAdjIteration + 1);
+            DebugInfo("Received tick adjustment: %d, iteration: %u",
+                receivedTickAdj, receivedAdjIteration);
+        }
+        else if (receivedAdjIteration > currentAdjIteration){
+            DebugError(
+                "Out of sequence adjustment iteration. current: %u, received: %u",
+                currentAdjIteration, receivedAdjIteration);
+        }
+    }
 }
 
 void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)

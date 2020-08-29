@@ -61,7 +61,6 @@ void updateConnection(TCPsocket& serverSocket, TCPsocket& clientSocket,
             }
         }
     }
-    // TODO: Add disconnect detection.
 }
 
 std::array<Uint8, NUM_BYTES> recBuffer = {};

@@ -104,6 +104,13 @@ public:
     BinaryBufferSharedPtr constructMessage(std::size_t size, Uint8* messageBuffer) const;
 
 private:
+    /**
+     * Checks if we need to process the received adjustment, does so if necessary.
+     * @param receivedTickAdj  The received tick adjustment.
+     * @param receivedAdjIteration  The adjustment iteration for the received adjustment.
+     */
+    void adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration);
+
     static const std::string SERVER_IP;
     static constexpr unsigned int SERVER_PORT = 41499;
 
