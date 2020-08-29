@@ -55,7 +55,7 @@ public:
      * Sends any queued messages over the network.
      * Acts as the Network's tick.
      */
-    void sendWaitingMessages(double deltaSeconds);
+    void sendWaitingMessages();
 
     /**
      * Pushes a message into the inputMessageSorter.
@@ -84,6 +84,9 @@ public:
      */
     void sendConnectionResponse(NetworkID networkID, EntityID newEntityID, float spawnX,
                                 float spawnY);
+
+    /** Initialize the send timer. */
+    void initTimer();
 
     // Returning non-const refs because they need to be modified. Be careful not to attempt
     // to re-assign the obtained ref (can't re-seat a reference once bound).
@@ -128,6 +131,9 @@ private:
      * next client's queue.
      */
     void sendWaitingMessagesInternal();
+
+    /** Used to time when we should send waiting messages. */
+    Timer sendTimer;
 
     /** The aggregated time since we last processed a tick. */
     double accumulatedTime;

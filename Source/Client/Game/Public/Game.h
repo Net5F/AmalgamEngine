@@ -7,6 +7,7 @@
 #include "PlayerInputSystem.h"
 #include "NetworkOutputSystem.h"
 #include "Message_generated.h"
+#include "Timer.h"
 #include <atomic>
 
 namespace AM
@@ -38,7 +39,7 @@ public:
     /**
      * Runs an iteration of the game loop.
      */
-    void tick(double deltaSeconds);
+    void tick();
 
     /**
      * Processes all waiting user input events, passing any relevant ones to the
@@ -46,9 +47,16 @@ public:
      */
     void processUserInputEvents();
 
+    /** Initialize the iteration timer. */
+    void initTimer();
+
     World& getWorld();
 
-    double getAccumulatedTime();
+    /**
+     * Returns how far we are temporally into our wait for the next iteration tick.
+     * e.g. .01 if we're 10% of the way to the next tick.
+     */
+    double getIterationProgress();
 
     Uint32 getCurrentTick();
 
@@ -65,6 +73,9 @@ private:
     NetworkOutputSystem networkOutputSystem;
     PlayerMovementSystem playerMovementSystem;
 //    NpcMovementSystem networkMovementSystem;
+
+    /** Used to time when we should process an iteration. */
+    Timer iterationTimer;
 
     /** The aggregated time since we last processed a tick. */
     double accumulatedTime;

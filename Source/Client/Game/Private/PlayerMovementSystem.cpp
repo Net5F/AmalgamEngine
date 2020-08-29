@@ -12,8 +12,8 @@ namespace Client
 {
 
 PlayerMovementSystem::PlayerMovementSystem(Game& inGame, World& inWorld,
-                                             Network& inNetwork)
-: game(inGame), world(inWorld), network(inNetwork), lastReceivedX(0), lastReceivedY(0)
+                                           Network& inNetwork)
+: game(inGame), world(inWorld), network(inNetwork)
 {
 }
 
@@ -37,16 +37,16 @@ void PlayerMovementSystem::processMovements(double deltaSeconds)
         if (latestReceivedTick != 0) {
             replayInputs(latestReceivedTick, currentPosition, currentMovement,
                 deltaSeconds);
-        }
 
-        // Check if there was a mismatch between the positions we had and where the
-        // server thought we should be.
-        if (oldPosition.x != currentPosition.x || oldPosition.y != currentPosition.y) {
-            DebugInfo(
-                "Predicted position mismatched after replay: (%.6f, %.6f) -> (%.6f, %.6f)"
-                    " -> (%.6f, %.6f)", oldPosition.x, oldPosition.y, lastReceivedX,
-                lastReceivedY, currentPosition.x, currentPosition.y);
-            DebugInfo("latestReceivedTick: %u", latestReceivedTick);
+            // Check if there was a mismatch between the positions we had and where the
+            // server thought we should be.
+            if (oldPosition.x != currentPosition.x
+            || oldPosition.y != currentPosition.y) {
+                DebugInfo(
+                    "Predicted position mismatched after replay: (%.6f, %.6f) -> (%.6f, %.6f)",
+                    oldPosition.x, oldPosition.y, currentPosition.x, currentPosition.y);
+                DebugInfo("latestReceivedTick: %u", latestReceivedTick);
+            }
         }
     }
 
@@ -101,9 +101,6 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
         auto receivedPosition = receivedData->positionComponent();
         currentPosition.x = receivedPosition->x();
         currentPosition.y = receivedPosition->y();
-
-        lastReceivedX = currentPosition.x;
-        lastReceivedY = currentPosition.y;
 
         responseBuffer = network.receive(MessageType::PlayerUpdate);
     }

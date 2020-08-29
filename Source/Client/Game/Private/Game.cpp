@@ -1,7 +1,6 @@
 #include "Game.h"
 #include "Network.h"
 #include "Debug.h"
-#include <sstream>
 
 namespace AM
 {
@@ -105,9 +104,9 @@ void Game::fakeConnection()
     world.attachComponent(player, ComponentFlag::Sprite);
 }
 
-void Game::tick(double deltaSeconds)
+void Game::tick()
 {
-    accumulatedTime += deltaSeconds;
+    accumulatedTime += iterationTimer.getDeltaSeconds(true);
 
     // Process as many game ticks as have accumulated.
     while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
@@ -153,6 +152,13 @@ void Game::tick(double deltaSeconds)
             DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
                 accumulatedTime);
         }
+
+        // Check our execution time.
+        double executionTime = iterationTimer.getDeltaSeconds(false);
+        if (executionTime > GAME_TICK_INTERVAL_S) {
+            DebugInfo("Overran our sim iteration time. executionTime: %.8f",
+                executionTime);
+        }
     }
 }
 
@@ -160,6 +166,7 @@ void Game::processUserInputEvents()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+
         if (event.type == SDL_QUIT) {
             exitRequested = true;
         }
@@ -182,14 +189,21 @@ void Game::processUserInputEvents()
     }
 }
 
+void Game::initTimer()
+{
+    iterationTimer.updateSavedTime();
+}
+
 World& Game::getWorld()
 {
     return world;
 }
 
-double Game::getAccumulatedTime()
+double Game::getIterationProgress()
 {
-    return accumulatedTime;
+    // The time since accumulatedTime was last updated.
+    double timeSinceIteration = iterationTimer.getDeltaSeconds(false);
+    return ((accumulatedTime + timeSinceIteration) / GAME_TICK_INTERVAL_S);
 }
 
 Uint32 Game::getCurrentTick()

@@ -11,22 +11,25 @@ namespace Client
 
 RenderSystem::RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame,
                            SDL2pp::Window& window)
-: renderer(inRenderer), game(inGame), world(game.getWorld()), accumulatedTime(0.0)
+: renderer(inRenderer)
+, game(inGame)
+, world(game.getWorld())
+, accumulatedTime(0.0)
 {
     // TODO: This will eventually be used when we get to variable window sizes.
     ignore(window);
 }
 
-void RenderSystem::render(double deltaSeconds)
+void RenderSystem::render()
 {
-    accumulatedTime += deltaSeconds;
+    accumulatedTime += frameTimer.getDeltaSeconds(true);
 
     // Process the rendering for this frame.
     if (accumulatedTime >= RENDER_INTERVAL_S) {
         renderer.Clear();
 
         // How far we are between game ticks in decimal percent.
-        double alpha = game.getAccumulatedTime() / GAME_TICK_INTERVAL_S;
+        double alpha = game.getIterationProgress();
         for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
             if (world.entityExists(entityID)) {
                 const SpriteComponent& sprite = world.sprites[entityID];
@@ -53,18 +56,17 @@ void RenderSystem::render(double deltaSeconds)
             // We still only want to render the latest data, but it's worth giving
             // debug output that we detected this.
             DebugInfo(
-                "Detected a request for two renders in the same frame. Render must have"
+                "Detected a request for two renders in the same frame. Render must have "
                 "been massively delayed. Render was delayed by: %.8fs. Setting to 0.",
                 accumulatedTime);
             accumulatedTime = 0;
         }
-        else if (accumulatedTime >= RENDER_DELAYED_TIME_S) {
-            // Delayed render could be caused by the sim taking too long, or too much printing.
-            DebugInfo("Detected a delayed render. Render was delayed by: %.8fs.",
-                accumulatedTime);
-        }
     }
+}
 
+void RenderSystem::initTimer()
+{
+    frameTimer.updateSavedTime();
 }
 
 double RenderSystem::getAccumulatedTime()

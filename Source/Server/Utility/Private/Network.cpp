@@ -17,6 +17,7 @@ Network::Network()
 , builder(BUILDER_BUFFER_SIZE)
 , currentTickPtr(nullptr)
 {
+    sendTimer.updateSavedTime();
 }
 
 void Network::send(NetworkID id, const BinaryBufferSharedPtr& message)
@@ -35,9 +36,9 @@ void Network::sendToAll(const BinaryBufferSharedPtr& message)
     }
 }
 
-void Network::sendWaitingMessages(double deltaSeconds)
+void Network::sendWaitingMessages()
 {
-    accumulatedTime += deltaSeconds;
+    accumulatedTime += sendTimer.getDeltaSeconds(true);
 
     if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
         // Queue connection responses before starting to send this batch.
@@ -111,6 +112,11 @@ void Network::sendConnectionResponse(NetworkID networkID, EntityID newEntityID,
     }
 
     connectionResponseQueue.push({networkID, newEntityID, spawnX, spawnY});
+}
+
+void Network::initTimer()
+{
+    sendTimer.updateSavedTime();
 }
 
 void Network::queueConnectionResponses()

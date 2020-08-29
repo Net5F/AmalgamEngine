@@ -5,6 +5,7 @@
 #include "NetworkInputSystem.h"
 #include "MovementSystem.h"
 #include "NetworkOutputSystem.h"
+#include "Timer.h"
 #include <atomic>
 
 namespace AM
@@ -25,7 +26,7 @@ public:
     /**
      * Runs an iteration of the game loop.
      */
-    void tick(double deltaSeconds);
+    void tick();
 
     /**
      * Processes all newly connected clients, adding them to the sim.
@@ -36,6 +37,9 @@ public:
      * Processes all newly disconnected clients, removing them from the sim.
      */
     void processDisconnectEvents();
+
+    /** Initialize the iteration timer. */
+    void initTimer();
 
     double getAccumulatedTime();
 
@@ -51,6 +55,9 @@ private:
     NetworkInputSystem networkInputSystem;
     MovementSystem movementSystem;
     NetworkOutputSystem networkOutputSystem;
+
+    /** Used to time when we should process an iteration. */
+    Timer iterationTimer;
 
     /** The aggregated time since we last processed a tick. */
     double accumulatedTime;

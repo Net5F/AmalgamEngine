@@ -2,6 +2,7 @@
 #define RENDERSYSTEM_H
 
 #include "SDL2pp/SDL2pp.hh"
+#include "Timer.h"
 
 namespace AM
 {
@@ -24,7 +25,10 @@ public:
 
     RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame, SDL2pp::Window& inWindow);
 
-    void render(double deltaSeconds);
+    void render();
+
+    /** Initialize the frame timer. */
+    void initTimer();
 
     double getAccumulatedTime();
 
@@ -32,6 +36,9 @@ private:
     SDL2pp::Renderer& renderer;
     Game& game;
     World& world;
+
+    /** Used to time when we should render a frame. */
+    Timer frameTimer;
 
     /** The aggregated time since we last processed a tick. */
     double accumulatedTime;

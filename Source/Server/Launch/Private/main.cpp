@@ -48,33 +48,16 @@ try
 
     DebugInfo("Starting main loop.");
 
-    Timer timer;
-//    Timer exitTimer;
-    // Prime the timer so it doesn't start at 0.
-//    exitTimer.updateSavedTime();
-    timer.updateSavedTime();
+    // Prime the timers so they don't start at 0.
+    game.initTimer();
+    network.initTimer();
     while (!exitRequested) {
-        // Calc the time delta.
-        double deltaSeconds = timer.getDeltaSeconds(true);
-
         // Run the game.
-        game.tick(deltaSeconds);
+        game.tick();
 
         // Send waiting messages.
-        network.sendWaitingMessages(deltaSeconds);
-
-        // Check if we overran.
-        double executionSeconds = timer.getDeltaSeconds(false);
-        if (executionSeconds >= GAME_TICK_INTERVAL_S) {
-            DebugInfo("Overran the game tick rate.");
-        }
-
-//        if (exitTimer.getDeltaSeconds(false) > 600) {
-//            break;
-//        }
+        network.sendWaitingMessages();
     }
-
-//    DebugInfo("Done.");
 
     inputThreadObj.join();
 

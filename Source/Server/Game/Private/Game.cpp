@@ -21,9 +21,9 @@ Game::Game(Network& inNetwork)
     network.registerCurrentTickPtr(&currentTick);
 }
 
-void Game::tick(double deltaSeconds)
+void Game::tick()
 {
-    accumulatedTime += deltaSeconds;
+    accumulatedTime += iterationTimer.getDeltaSeconds(true);
 
     /* Process as many game ticks as have accumulated. */
     while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
@@ -52,6 +52,13 @@ void Game::tick(double deltaSeconds)
             // Game missed its ideal call time, could be our issue or general system slowness.
             DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
                 accumulatedTime);
+        }
+
+        // Check our execution time.
+        double executionTime = iterationTimer.getDeltaSeconds(false);
+        if (executionTime > GAME_TICK_INTERVAL_S) {
+            DebugInfo("Overran our sim iteration time. executionTime: %.8f",
+                executionTime);
         }
 
         currentTick++;
@@ -126,6 +133,11 @@ void Game::processDisconnectEvents()
                 "Failed to find entity with netID: %u while erasing.", disconnectedClientID);
         }
     }
+}
+
+void Game::initTimer()
+{
+    iterationTimer.updateSavedTime();
 }
 
 double Game::getAccumulatedTime()

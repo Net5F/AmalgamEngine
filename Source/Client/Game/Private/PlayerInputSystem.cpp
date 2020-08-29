@@ -41,11 +41,10 @@ void PlayerInputSystem::processInputEvent(SDL_Event& event)
         }
 
         if (keyInput.type != Input::None) {
-            // Push the input to the player's InputComponent.
             EntityID player = world.playerID;
             Input::State& entityState = world.inputs[player].inputStates[keyInput.type];
 
-            // Track changes.
+            // If the state changed, save it and mark the player as dirty.
             if (entityState != keyInput.state) {
                 entityState = keyInput.state;
                 world.playerIsDirty = true;

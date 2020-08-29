@@ -40,34 +40,24 @@ try
     Network network;
     Game game(network, sprites);
     RenderSystem renderSystem(renderer, game, window);
-    Timer timer;
 
     std::atomic<bool> const* exitRequested = game.getExitRequestedPtr();
 
     // Connect to the server (waits for connection response).
     game.connect();
 
-    // Prime the timer so it doesn't start at 0.
-    timer.updateSavedTime();
+    // Prime the timers so they don't start at 0.
+    game.initTimer();
+    renderSystem.initTimer();
     while (!(*exitRequested)) {
-        // Calc the time delta.
-        double deltaSeconds = timer.getDeltaSeconds(true);
+        // Let the sim process an iteration if it needs to.
+        game.tick();
 
-        // Run the game.
-        game.tick(deltaSeconds);
+        // Let the render system render if it needs to.
+        renderSystem.render();
 
-        // Render at 60fps.
-        renderSystem.render(deltaSeconds);
-
-        // TODO: This is broken because executionSeconds is inconsistent depending on whether
-        //       ticks had to fire or not. Figure out a way to safely add delays, and test
+        // TODO: Figure out a way to safely add delays, and test
         //       that the solution doesn't cause the client to fall behind the server.
-//        /* Act based on how long this tick took. */
-//        double executionSeconds = timer.getDeltaSeconds(false);
-//        if (executionSeconds >= RenderSystem::RENDER_INTERVAL_S) {
-//            // A single loop took too long to sustain our render rate.
-//            DebugInfo("Overran the render tick rate.");
-//        }
 //        else if (((renderSystem.getAccumulatedTime() + executionSeconds + DELAY_LEEWAY_S)
 //                   < RenderSystem::RENDER_INTERVAL_S)
 //                 && ((game.getAccumulatedTime() + executionSeconds
