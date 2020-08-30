@@ -33,7 +33,7 @@ private:
      * How fast the processor is running.
      * SDL sets this once on init and never changes it.
      */
-    const Uint64 TICKS_PER_SECOND;
+    const double period;
 
     // The saved time in integer ticks from SDL_GetPerformanceCounter().
     Uint64 savedTimestamp;

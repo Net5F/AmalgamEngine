@@ -5,7 +5,7 @@ namespace AM
 {
 
 Timer::Timer()
-: TICKS_PER_SECOND(SDL_GetPerformanceFrequency())
+: period(1.0 / SDL_GetPerformanceFrequency())
 , savedTimestamp(0)
 {
 }
@@ -19,7 +19,7 @@ double Timer::getDeltaSeconds(bool updateSavedTime)
         savedTimestamp = currentTicks;
     }
 
-    return deltaTicks / static_cast<double>(TICKS_PER_SECOND);
+    return deltaTicks * period;
 }
 
 void Timer::updateSavedTime()
