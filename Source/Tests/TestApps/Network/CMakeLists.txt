@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-message(STATUS "Building Network Tests")
+message(STATUS "Configuring Network Test Apps")
 
 # Latency test client
 add_executable(LatencyTestClient

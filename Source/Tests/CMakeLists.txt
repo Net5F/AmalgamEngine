@@ -1,4 +1,4 @@
 # Build tests.
-#add_subdirectory(UnitTests)
+add_subdirectory(TestApps)
 
-add_subdirectory(NetworkTests)
+#add_subdirectory(UnitTests)

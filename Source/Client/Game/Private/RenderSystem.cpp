@@ -29,7 +29,7 @@ void RenderSystem::render()
         renderer.Clear();
 
         // How far we are between game ticks in decimal percent.
-        double alpha = game.getIterationProgress();
+        const double alpha = game.getIterationProgress();
         for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
             if (world.entityExists(entityID)) {
                 const SpriteComponent& sprite = world.sprites[entityID];
@@ -37,8 +37,10 @@ void RenderSystem::render()
                 const PositionComponent& oldPosition = world.oldPositions[entityID];
 
                 // Lerp'd position based on how far we are between game ticks.
-                int lerpX = std::round((position.x * alpha) + (oldPosition.x * (1.0 - alpha)));
-                int lerpY = std::round((position.y * alpha) + (oldPosition.y * (1.0 - alpha)));
+                const double interpX = (position.x * alpha) + (oldPosition.x * (1.0 - alpha));
+                const double interpY = (position.y * alpha) + (oldPosition.y * (1.0 - alpha));
+                const int lerpX = static_cast<int>(std::floor(interpX));
+                const int lerpY = static_cast<int>(std::floor(interpY));
                 SDL2pp::Rect spriteWorldData = { lerpX, lerpY, sprite.width,
                         sprite.height };
 
