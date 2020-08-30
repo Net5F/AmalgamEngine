@@ -36,6 +36,10 @@ try
     ignore(argc);
     ignore(argv);
 
+    // Init SDL2 before doing anything else.
+    SDL2pp::SDL sdl();
+    SDLNet_Init();
+
     // Set up the network utility.
     Network network;
 

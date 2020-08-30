@@ -2,7 +2,8 @@
 #define PEER_H_
 
 #include "NetworkDefs.h"
-#include <SDL2/SDL_net.h>
+#include "SocketSet.h"
+#include "TcpSocket.h"
 #include <memory>
 #include <array>
 
@@ -11,6 +12,9 @@ namespace AM
 
 /**
  * Represents a network peer for communication.
+ * TODO: Peer/acceptor seem like a redundant layer and should probably be removed.
+ *       A Client/Server class and the SocketSet/TcpSocket classes should be able to
+ *       cleanly handle all the responsibilities.
  */
 class Peer
 {
@@ -28,16 +32,19 @@ public:
     /**
      * Constructor for when you only need 1 peer (client connecting to server, anyone
      * connecting to chat server.)
-     * Constructs a socket set for this peer to use.
+     * Constructs a socket set for this peer to use and adds the socket to it.
      */
-    Peer(TCPsocket inSocket);
+    Peer(std::unique_ptr<TcpSocket> inSocket);
 
     /**
      * Constructor for when you need a set of peers (server connecting to clients).
      * Adds the socket to the given set.
      */
-    Peer(TCPsocket inSocket, const std::shared_ptr<SDLNet_SocketSet>& inSet);
+    Peer(std::unique_ptr<TcpSocket> inSocket, const std::shared_ptr<SocketSet>& inSet);
 
+    /**
+     * Removes the socket from the set.
+     */
     ~Peer();
 
     /**
@@ -90,8 +97,11 @@ public:
     ReceiveResult receiveMessageWait();
 
 private:
-    std::shared_ptr<SDLNet_SocketSet> set;
-    TCPsocket socket;
+    /** The socket for this peer. Must be a unique_ptr so we can move without copying. */
+    std::unique_ptr<TcpSocket> socket;
+    /** The set that this peer belongs to. Must be a shared_ptr since we may or may not
+        allocate it ourselves depending on which constructor is called. */
+    std::shared_ptr<SocketSet> set;
 
     /**
      * Tracks whether or not this peer is connected. Is set to false if a disconnect

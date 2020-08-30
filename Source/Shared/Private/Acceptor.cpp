@@ -1,38 +1,36 @@
 #include "Acceptor.h"
-#include <iostream>
+#include "Debug.h"
 
 namespace AM
 {
 
-Acceptor::Acceptor(unsigned int inPort, std::shared_ptr<SDLNet_SocketSet> inClientSet)
-: port(inPort)
+Acceptor::Acceptor(Uint16 port, const std::shared_ptr<SocketSet>& inClientSet)
+: socket(port)
+, listenerSet(1)
 , clientSet(inClientSet)
 {
-    IPaddress ip;
-    if (SDLNet_ResolveHost(&ip, NULL, port)) {
-        std::cerr << SDLNet_GetError() << std::endl;
-    }
-
-    socket = SDLNet_TCP_Open(&ip);
-    if (!socket) {
-        std::cerr << SDLNet_GetError() << std::endl;
-    }
+    listenerSet.addSocket(socket);
 }
 
-AM::Acceptor::~Acceptor()
+Acceptor::~Acceptor()
 {
-    SDLNet_TCP_Close(socket);
 }
 
-std::unique_ptr<Peer> AM::Acceptor::accept()
+std::unique_ptr<Peer> Acceptor::accept()
 {
-    TCPsocket client = SDLNet_TCP_Accept(socket);
-    if (client) {
-        return std::make_unique<Peer>(client, clientSet);
+    listenerSet.checkSockets(0);
+
+    if (socket.isReady()) {
+        std::unique_ptr<TcpSocket> newSocket = socket.accept();
+        if (newSocket == nullptr) {
+            DebugError("Listener socket showed ready, but accept() failed.");
+        }
+        else {
+            return std::make_unique<Peer>(std::move(newSocket), clientSet);
+        }
     }
-    else {
-        return nullptr;
-    }
+
+    return nullptr;
 }
 
 } // namespace AM

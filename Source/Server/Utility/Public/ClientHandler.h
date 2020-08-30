@@ -5,7 +5,6 @@
 #include "Client.h"
 #include "Acceptor.h"
 #include "IDPool.h"
-#include <memory>
 #include <thread>
 #include <unordered_map>
 #include <atomic>
@@ -28,7 +27,14 @@ class Network;
 class ClientHandler
 {
 public:
+    /** The maximum number of clients that we will accept connections from. */
     static constexpr unsigned int MAX_CLIENTS = 100;
+
+    /**
+     * When clients are connected, this determines how long we wait in the select() call
+     * before looping around to manage connections/disconnections.
+     */
+    static constexpr Uint32 SOCKET_RECEIVE_TIMEOUT_MS = 10;
 
     ClientHandler(Network& inNetwork);
 
@@ -65,11 +71,12 @@ private:
     /** Used for generating network IDs. */
     IDPool idPool;
 
-    std::unique_ptr<Acceptor> acceptor;
-
     /** The socket set used for all clients. Lets us do select()-like behavior,
         allowing our receive thread to not be constantly spinning. */
-    std::shared_ptr<SDLNet_SocketSet> clientSet;
+    std::shared_ptr<SocketSet> clientSet;
+
+    /** The listener that we use to accept new clients. */
+    Acceptor acceptor;
 
     /** Calls processClients(). */
     std::thread receiveThreadObj;
@@ -77,7 +84,7 @@ private:
     std::atomic<bool> exitRequested;
 };
 
-} /* End namespace Server */
-} /* End namespace AM */
+} // End namespace Server
+} // End namespace AM
 
 #endif /* End CLIENTHANDLER_H_ */

@@ -12,9 +12,6 @@
 #include <shared_mutex>
 #include "readerwriterqueue.h"
 
-struct _SDLNet_SocketSet;
-typedef struct _SDLNet_SocketSet* SDLNet_SocketSet;
-
 namespace AM
 {
 

@@ -1,82 +1,50 @@
 #include "Peer.h"
+#include "TcpSocket.h"
 #include <SDL_stdinc.h>
 #include "Debug.h"
-#include "Message_generated.h"
 
-using namespace AM;
-
-std::unique_ptr<Peer> AM::Peer::initiate(std::string serverIP,
-                                         unsigned int serverPort)
+namespace AM
 {
-    IPaddress ip;
 
-    if (SDLNet_ResolveHost(&ip, serverIP.c_str(), serverPort)) {
-        DebugInfo("Could not resolve host");
-    }
+std::unique_ptr<Peer> Peer::initiate(std::string serverIP, unsigned int serverPort)
+{
+    std::unique_ptr<TcpSocket> socket = std::make_unique<TcpSocket>(serverIP, serverPort);
 
-    TCPsocket socket = SDLNet_TCP_Open(&ip);
-    if (!socket) {
-        DebugInfo("Could not open socket");
-    }
-
-    return std::make_unique<Peer>(socket);
+    return std::make_unique<Peer>(std::move(socket));
 }
 
-AM::Peer::Peer(TCPsocket inSocket)
-: set(nullptr)
+Peer::Peer(std::unique_ptr<TcpSocket> inSocket)
+: socket(std::move(inSocket))
+, set(std::make_shared<SocketSet>(1)) // No set given, create a set of size 1 for this peer.
 , bIsConnected(false)
 {
-    set = std::make_shared<SDLNet_SocketSet>(SDLNet_AllocSocketSet(1));
-    if (!(*set)) {
-        DebugInfo("Error allocating socket set: %s", SDLNet_GetError());
-    }
-
-    int numAdded = SDLNet_TCP_AddSocket(*set, inSocket);
-    if (numAdded < 1) {
-        DebugInfo("Error while adding socket: %s", SDLNet_GetError());
-    }
-
-    socket = inSocket;
+    set->addSocket(*socket);
 
     bIsConnected = true;
 }
 
-AM::Peer::Peer(TCPsocket inSocket, const std::shared_ptr<SDLNet_SocketSet>& inSet)
-: set(inSet)
+Peer::Peer(std::unique_ptr<TcpSocket> inSocket,
+           const std::shared_ptr<SocketSet>& inSet)
+: socket(std::move(inSocket))
+, set(inSet)
 , bIsConnected(false)
 {
-    if (!(*set)) {
-        DebugInfo("Tried to init Peer with bad set.");
-    }
-
-    int numAdded = SDLNet_TCP_AddSocket(*set, inSocket);
-    if (numAdded < 1) {
-        DebugInfo("Error while adding socket: %s", SDLNet_GetError());
-    }
-
-    socket = inSocket;
+    set->addSocket(*socket);
 
     bIsConnected = true;
 }
 
-AM::Peer::~Peer()
+Peer::~Peer()
 {
-    SDLNet_TCP_DelSocket(*set, socket);
-
-    // If we're the only one using this set, free it.
-    if (set.use_count() == 1) {
-        SDLNet_FreeSocketSet(*set);
-    }
-
-    SDLNet_TCP_Close(socket);
+    set->remSocket(*socket);
 }
 
-bool AM::Peer::isConnected() const
+bool Peer::isConnected() const
 {
     return bIsConnected;
 }
 
-AM::NetworkResult AM::Peer::send(const BinaryBufferSharedPtr& message)
+NetworkResult Peer::send(const BinaryBufferSharedPtr& message)
 {
     if (!bIsConnected) {
         return NetworkResult::Disconnected;
@@ -88,7 +56,7 @@ AM::NetworkResult AM::Peer::send(const BinaryBufferSharedPtr& message)
             MAX_MESSAGE_SIZE);
     }
 
-    int bytesSent = SDLNet_TCP_Send(socket, message->data(), messageSize);
+    int bytesSent = socket->send(message->data(), messageSize);
     if (bytesSent < 0) {
         DebugError("TCP_Send returned < 0. This should never happen, the socket"
                    "was likely misused.");
@@ -104,22 +72,17 @@ AM::NetworkResult AM::Peer::send(const BinaryBufferSharedPtr& message)
     }
 }
 
-ReceiveResult AM::Peer::receiveBytes(Uint16 numBytes, bool checkSockets)
+ReceiveResult Peer::receiveBytes(Uint16 numBytes, bool checkSockets)
 {
     if (!bIsConnected) {
         return {NetworkResult::Disconnected, nullptr};
     }
     else if (checkSockets) {
         // Poll to see if there's data
-        int numReady = SDLNet_CheckSockets(*set, 0);
-        if (numReady == -1) {
-            DebugInfo("Error while checking sockets: %s", SDLNet_GetError());
-            // Most of the time this is a system error, where perror might help.
-            perror("SDLNet_CheckSockets");
-        }
+        set->checkSockets(0);
     }
 
-    if (!SDLNet_SocketReady(socket)) {
+    if (!(socket->isReady())) {
         return {NetworkResult::NoWaitingData, nullptr};
     }
     else {
@@ -127,7 +90,7 @@ ReceiveResult AM::Peer::receiveBytes(Uint16 numBytes, bool checkSockets)
     }
 }
 
-ReceiveResult AM::Peer::receiveBytesWait(Uint16 numBytes)
+ReceiveResult Peer::receiveBytesWait(Uint16 numBytes)
 {
     if (!bIsConnected) {
         return {NetworkResult::Disconnected, nullptr};
@@ -139,7 +102,7 @@ ReceiveResult AM::Peer::receiveBytesWait(Uint16 numBytes)
     }
 
     BinaryBufferPtr returnBuffer = std::make_unique<BinaryBuffer>(numBytes);
-    int result = SDLNet_TCP_Recv(socket, returnBuffer->data(), numBytes);
+    int result = socket->receive(returnBuffer->data(), numBytes);
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
@@ -153,22 +116,17 @@ ReceiveResult AM::Peer::receiveBytesWait(Uint16 numBytes)
     return {NetworkResult::Success, std::move(returnBuffer)};
 }
 
-ReceiveResult AM::Peer::receiveMessage(bool checkSockets)
+ReceiveResult Peer::receiveMessage(bool checkSockets)
 {
     if (!bIsConnected) {
         return {NetworkResult::Disconnected, nullptr};
     }
     else if (checkSockets) {
         // Poll to see if there's data
-        int numReady = SDLNet_CheckSockets(*set, 0);
-        if (numReady == -1) {
-            DebugInfo("Error while checking sockets: %s", SDLNet_GetError());
-            // Most of the time this is a system error, where perror might help.
-            perror("SDLNet_CheckSockets");
-        }
+        set->checkSockets(0);
     }
 
-    if (!SDLNet_SocketReady(socket)) {
+    if (!(socket->isReady())) {
         return {NetworkResult::NoWaitingData, nullptr};
     }
     else {
@@ -176,7 +134,7 @@ ReceiveResult AM::Peer::receiveMessage(bool checkSockets)
     }
 }
 
-ReceiveResult AM::Peer::receiveMessageWait()
+ReceiveResult Peer::receiveMessageWait()
 {
     if (!bIsConnected) {
         return {NetworkResult::Disconnected, nullptr};
@@ -184,7 +142,7 @@ ReceiveResult AM::Peer::receiveMessageWait()
 
     // Receive the size.
     Uint8 sizeBuf[sizeof(Uint16)];
-    if (SDLNet_TCP_Recv(socket, sizeBuf, sizeof(Uint16)) <= 0) {
+    if (socket->receive(sizeBuf, sizeof(Uint16)) <= 0) {
         // Disconnected
         bIsConnected = false;
         return {NetworkResult::Disconnected, nullptr};
@@ -199,7 +157,7 @@ ReceiveResult AM::Peer::receiveMessageWait()
     }
 
     BinaryBufferPtr returnBuffer = std::make_unique<BinaryBuffer>(messageSize);
-    int result = SDLNet_TCP_Recv(socket, returnBuffer->data(), messageSize);
+    int result = socket->receive(returnBuffer->data(), messageSize);
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
@@ -212,4 +170,6 @@ ReceiveResult AM::Peer::receiveMessageWait()
 
     return {NetworkResult::Success, std::move(returnBuffer)};
 }
+
+} // End namespace AM
 

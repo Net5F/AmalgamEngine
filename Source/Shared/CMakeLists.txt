@@ -11,6 +11,8 @@ add_library(Shared STATIC
 		Private/MovementHelpers.cpp
 		Private/MessageUtil.cpp
 		Private/Debug.cpp
+		Private/SocketSet.cpp
+		Private/TcpSocket.cpp
 	PUBLIC
 		Public/Acceptor.h
 		Public/Peer.h
@@ -21,6 +23,9 @@ add_library(Shared STATIC
 		Public/MessageUtil.h
 		Public/Debug.h
 		Public/Ignore.h
+
+		Public/SocketSet.h
+		Public/TcpSocket.h
 
 		Public/InputComponent.h
 		Public/MovementComponent.h

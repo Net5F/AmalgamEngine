@@ -1,7 +1,9 @@
 #include "ClientHandler.h"
 #include "Network.h"
+#include "SocketSet.h"
 #include <shared_mutex>
 #include <mutex>
+#include <memory>
 #include "Debug.h"
 
 namespace AM
@@ -12,16 +14,11 @@ namespace Server
 ClientHandler::ClientHandler(Network& inNetwork)
 : network(inNetwork)
 , idPool()
-, acceptor(nullptr)
-, clientSet(std::make_shared<SDLNet_SocketSet>(SDLNet_AllocSocketSet(MAX_CLIENTS)))
+, clientSet(std::make_shared<SocketSet>(MAX_CLIENTS))
+, acceptor(Network::SERVER_PORT, clientSet)
 , receiveThreadObj()
 , exitRequested(false)
 {
-    SDLNet_Init();
-
-    // We delay creating the acceptor because SDLNet_Init has to be called first.
-    acceptor = std::make_unique<Acceptor>(Network::SERVER_PORT, clientSet);
-
     // Start the receive thread.
     receiveThreadObj = std::thread(&ClientHandler::serviceClients, this);
 }
@@ -37,7 +34,7 @@ void ClientHandler::acceptNewClients(
 std::unordered_map<NetworkID, Client>& clientMap)
 {
     // Creates the new peer, which adds itself to the socket set.
-    std::unique_ptr<Peer> newPeer = acceptor->accept();
+    std::unique_ptr<Peer> newPeer = acceptor.accept();
 
     while (newPeer != nullptr) {
         NetworkID newID = idPool.reserveID();
@@ -54,7 +51,7 @@ std::unordered_map<NetworkID, Client>& clientMap)
         // Add an event to the Network's queue.
         network.getConnectEventQueue().enqueue(newID);
 
-        newPeer = acceptor->accept();
+        newPeer = acceptor.accept();
     }
 }
 
@@ -119,13 +116,8 @@ int ClientHandler::serviceClients()
 void ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& clientMap)
 {
     // Check if there are any messages to receive.
-    int numReady = SDLNet_CheckSockets(*clientSet, 100);
-    if (numReady == -1) {
-        DebugInfo("Error while checking sockets: %s", SDLNet_GetError());
-        // Most of the time this is a system error, where perror might help.
-        perror("SDLNet_CheckSockets");
-    }
-    else if (numReady > 0) {
+    int numReady = clientSet->checkSockets(SOCKET_RECEIVE_TIMEOUT_MS);
+    if (numReady > 0) {
         /* Iterate through all clients. */
         // Doesn't need a lock because serviceClients is still locking.
         for (auto& pair : clientMap) {
