@@ -12,8 +12,8 @@ Game::Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites
 , network(inNetwork)
 , playerInputSystem(*this, world)
 , networkOutputSystem(*this, world, network)
-//, networkMovementSystem(*this, world, network)
 , playerMovementSystem(*this, world, network)
+, npcMovementSystem(*this, world, network)
 , accumulatedTime(0.0)
 , currentTick(0)
 , sprites(inSprites)
@@ -135,7 +135,7 @@ void Game::tick()
 
             // Process network movement after normal movement to sync with server.
             // (The server processes movement before sending updates.)
-//            networkMovementSystem.processServerMovements();
+            npcMovementSystem.updateNpcs();
 
             currentTick++;
         }

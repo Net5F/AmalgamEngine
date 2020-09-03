@@ -61,28 +61,30 @@ void NetworkOutputSystem::sendInputState()
 flatbuffers::Offset<AM::fb::Entity> NetworkOutputSystem::serializeEntity(
 EntityID playerID)
 {
-    // Translate the inputs to fb's enum.
+    /* Translate the inputs to fb's enum. */
     fb::InputState fbInputStates[Input::Type::NumTypes];
     std::array<Input::State, Input::NumTypes>& playerInputStates =
-        world.inputs[playerID].inputStates;
+                                               world.inputs[playerID].inputStates;
+
     for (uint8_t i = 0; i < Input::Type::NumTypes; ++i) {
         // Translate the Input::State enum to fb::InputState.
         fbInputStates[i] = MessageUtil::convertToFbInputState(playerInputStates[i]);
     }
+
     flatbuffers::Offset<flatbuffers::Vector<fb::InputState>> inputVector =
         builder.CreateVector(fbInputStates, Input::Type::NumTypes);
 
-    // Build the inputComponent.
+    /* Build the inputComponent. */
     flatbuffers::Offset<fb::InputComponent> inputComponent = fb::CreateInputComponent(
         builder, inputVector);
 
-    // Build the Entity.
+    /* Build the Entity. */
     auto entityName = builder.CreateString(world.entityNames[playerID]);
     fb::EntityBuilder entityBuilder(builder);
     entityBuilder.add_id(playerID);
     entityBuilder.add_name(entityName);
 
-    // Mark that we only are sending the InputComponent.
+    /* Mark that we only are sending the InputComponent. */
     entityBuilder.add_flags(ComponentFlag::Input);
     entityBuilder.add_inputComponent(inputComponent);
 

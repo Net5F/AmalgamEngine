@@ -72,7 +72,7 @@ private:
     PlayerInputSystem playerInputSystem;
     NetworkOutputSystem networkOutputSystem;
     PlayerMovementSystem playerMovementSystem;
-//    NpcMovementSystem networkMovementSystem;
+    NpcMovementSystem npcMovementSystem;
 
     /** Used to time when we should process an iteration. */
     Timer iterationTimer;

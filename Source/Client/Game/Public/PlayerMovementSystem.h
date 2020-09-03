@@ -17,6 +17,9 @@ class Game;
 class World;
 class Network;
 
+/**
+ * Processes player entity update messages and moves the entity appropriately.
+ */
 class PlayerMovementSystem
 {
 public:

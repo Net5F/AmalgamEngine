@@ -19,11 +19,11 @@ PlayerMovementSystem::PlayerMovementSystem(Game& inGame, World& inWorld,
 
 void PlayerMovementSystem::processMovements(double deltaSeconds)
 {
-    // Save the old position.
     EntityID playerID = world.playerID;
     PositionComponent& currentPosition = world.positions[playerID];
     MovementComponent& currentMovement = world.movements[playerID];
 
+    // Save the old position.
     PositionComponent& oldPosition = world.oldPositions[playerID];
     oldPosition.x = currentPosition.x;
     oldPosition.y = currentPosition.y;
@@ -59,13 +59,14 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
                                                     PositionComponent& currentPosition,
                                                     MovementComponent& currentMovement)
 {
-    // Check for a message from the server.
+    /* Process any messages for us from the server. */
     Uint32 latestReceivedTick = 0;
-    BinaryBufferSharedPtr responseBuffer = network.receive(MessageType::PlayerUpdate);
-    while (responseBuffer != nullptr) {
+    BinaryBufferSharedPtr receivedBuffer = network.receive(MessageType::PlayerUpdate);
+    while (receivedBuffer != nullptr) {
         // Ready the Message for reading.
-        const fb::Message* message = fb::GetMessage(responseBuffer->data());
+        const fb::Message* message = fb::GetMessage(receivedBuffer->data());
 
+        // Track our latest received tick.
         Uint32 newTick = message->tickTimestamp();
         if (newTick > latestReceivedTick) {
             latestReceivedTick = newTick;
@@ -78,8 +79,7 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
         // Find the player data.
         const fb::Entity* receivedData = nullptr;
         for (auto entityIt = entities->begin(); entityIt != entities->end(); ++entityIt) {
-            EntityID entityID = (*entityIt)->id();
-            if (entityID == playerID) {
+            if ((*entityIt)->id() == playerID) {
                 receivedData = *entityIt;
                 break;
             }
@@ -94,6 +94,7 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
         auto newMovement = receivedData->movementComponent();
         currentMovement.velX = newMovement->velX();
         currentMovement.velY = newMovement->velY();
+        // TODO: Only send max when it changes.
         currentMovement.maxVelX = newMovement->maxVelX();
         currentMovement.maxVelY = newMovement->maxVelY();
 
@@ -102,7 +103,7 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
         currentPosition.x = receivedPosition->x();
         currentPosition.y = receivedPosition->y();
 
-        responseBuffer = network.receive(MessageType::PlayerUpdate);
+        receivedBuffer = network.receive(MessageType::PlayerUpdate);
     }
 
     return latestReceivedTick;

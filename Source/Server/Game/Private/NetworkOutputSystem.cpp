@@ -60,7 +60,7 @@ void NetworkOutputSystem::sendClientUpdates()
 flatbuffers::Offset<AM::fb::Entity> NetworkOutputSystem::serializeEntity(
 EntityID entityID)
 {
-    /* Fill the message with the latest PositionComponent, NetworkOutputComponent,
+    /* Fill the message with the latest PositionComponent, MovementComponent,
        and InputComponent data. */
     fb::InputState fbInputStates[Input::Type::NumTypes];
     std::array<Input::State, Input::NumTypes>& playerInputStates =

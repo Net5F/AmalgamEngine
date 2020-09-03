@@ -26,9 +26,6 @@ void SocketSet::addSocket(const TcpSocket& socket)
     if (numAdded < 1) {
         DebugError("Error while adding socket: %s", SDLNet_GetError());
     }
-    else if (numAdded != 1) {
-        DebugError("Unexpected value returned from AddSocket. numAdded: %d", numAdded);
-    }
     else {
         numSockets += numAdded;
     }

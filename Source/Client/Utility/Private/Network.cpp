@@ -9,8 +9,8 @@ namespace AM
 namespace Client
 {
 
-//const std::string Network::SERVER_IP = "127.0.0.1";
-const std::string Network::SERVER_IP = "45.79.37.63";
+const std::string Network::SERVER_IP = "127.0.0.1";
+//const std::string Network::SERVER_IP = "45.79.37.63";
 
 Network::Network()
 : server(nullptr)
@@ -196,16 +196,16 @@ void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
                 // Found the player.
                 if (!(playerUpdateQueue.enqueue(sharedBuffer))) {
                     DebugError("Ran out of room in queue and memory allocation failed.");
-                    playerFound = true;
                 }
+                playerFound = true;
             }
             else if (!npcFound){
                 // Found a non-player (npc).
-                // TODO: Add npc movement back in.
-//                if (!(npcUpdateQueue.enqueue(sharedBuffer))) {
-//                    DebugError("Ran out of room in queue and memory allocation failed.");
-//                    npcFound = true;
-//                }
+                // Queueing the message will let all npc updates within be processed.
+                if (!(npcUpdateQueue.enqueue(sharedBuffer))) {
+                    DebugError("Ran out of room in queue and memory allocation failed.");
+                }
+                npcFound = true;
             }
 
             // If we found the player and an npc, we can stop looking.

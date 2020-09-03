@@ -24,6 +24,7 @@ public:
      * TODO: This is dependent on latency to the server, but CircularBuffer can't be resized
      *       at runtime. Modify CircularBuffer to be resizable and figure out where the
      *       size should be calculated.
+     *       NpcMovementSystem::UPDATE_MESSAGE_BUFFER_LENGTH needs the same treatment.
      */
     static constexpr unsigned int INPUT_HISTORY_LENGTH = 10;
 
