@@ -50,9 +50,8 @@ public:
 
     /**
      * Sends any queued messages over the network.
-     * Acts as the Network's tick.
      */
-    void sendWaitingMessages();
+    void tick();
 
     /**
      * Pushes a message into the inputMessageSorter.
@@ -105,7 +104,7 @@ public:
      * Message + size with one send call, so it's convenient to have it all in
      * one buffer.
      */
-    BinaryBufferSharedPtr constructMessage(std::size_t size, Uint8* messageBuffer) const;
+    static BinaryBufferSharedPtr constructMessage(std::size_t size, Uint8* messageBuffer);
 
 private:
     /** Holds data for a deferred send of a ConnectionResponse message. */
@@ -126,8 +125,10 @@ private:
      * Tries to send any messages in each client's queue over the network.
      * If a send fails, leaves the message at the front of the queue and moves on to the
      * next client's queue.
+     * If there's no messages to send, sends a heartbeat instead, with a value that confirms
+     * that we've processed tick(s) with no changes to send.
      */
-    void sendWaitingMessagesInternal();
+    void sendClientUpdates();
 
     /** Used to time when we should send waiting messages. */
     Timer sendTimer;

@@ -109,7 +109,7 @@ void Game::tick()
     accumulatedTime += iterationTimer.getDeltaSeconds(true);
 
     // Process as many game ticks as have accumulated.
-    while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
+    while (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
         // Calculate what tick we should be on.
         Uint32 targetTick = currentTick + 1;
         if (!Network::RUN_OFFLINE) {
@@ -131,7 +131,7 @@ void Game::tick()
             playerInputSystem.addCurrentInputsToHistory();
 
             // Process player and NPC movements.
-            playerMovementSystem.processMovements(GAME_TICK_INTERVAL_S);
+            playerMovementSystem.processMovements();
 
             // Process network movement after normal movement to sync with server.
             // (The server processes movement before sending updates.)
@@ -140,8 +140,8 @@ void Game::tick()
             currentTick++;
         }
 
-        accumulatedTime -= GAME_TICK_INTERVAL_S;
-        if (accumulatedTime >= GAME_TICK_INTERVAL_S) {
+        accumulatedTime -= GAME_TICK_TIMESTEP_S;
+        if (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
             DebugInfo(
                 "Detected a request for multiple game ticks in the same frame. Game tick "
                 "must have been massively delayed. Game tick was delayed by: %.8fs.",
@@ -155,7 +155,7 @@ void Game::tick()
 
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);
-        if (executionTime > GAME_TICK_INTERVAL_S) {
+        if (executionTime > GAME_TICK_TIMESTEP_S) {
             DebugInfo("Overran our sim iteration time. executionTime: %.8f",
                 executionTime);
         }
@@ -203,7 +203,7 @@ double Game::getIterationProgress()
 {
     // The time since accumulatedTime was last updated.
     double timeSinceIteration = iterationTimer.getDeltaSeconds(false);
-    return ((accumulatedTime + timeSinceIteration) / GAME_TICK_INTERVAL_S);
+    return ((accumulatedTime + timeSinceIteration) / GAME_TICK_TIMESTEP_S);
 }
 
 Uint32 Game::getCurrentTick()

@@ -18,7 +18,7 @@ NpcMovementSystem::NpcMovementSystem(Game& inGame, World& inWorld, Network& inNe
   world(inWorld),
   network(inNetwork)
 {
-    if (static_cast<unsigned int>(PAST_TICK_OFFSET * -1) > UPDATE_MESSAGE_BUFFER_LENGTH) {
+    if (PAST_TICK_OFFSET > UPDATE_MESSAGE_BUFFER_LENGTH) {
         DebugError("Asking for ticks farther in the past than the buffer can hold."
                    "PAST_TICK_OFFSET: %u, UPDATE_MESSAGE_BUFFER_LENGTH: %u"
                    , PAST_TICK_OFFSET, UPDATE_MESSAGE_BUFFER_LENGTH);
@@ -34,39 +34,51 @@ void NpcMovementSystem::updateNpcs()
                    " messagesReceived: %u", messagesReceived);
     }
 
-    /* Move all NPCs appropriately. */
-    // Check if we've received an update for the desired tick.
-    Uint32 currentTick = game.getCurrentTick();
-    Uint32 desiredTick = currentTick - PAST_TICK_OFFSET;
-    if (latestReceivedTick < desiredTick) {
+    /* Determine if we have data to use. */
+    if (latestReceivedTick == lastProcessedTick) {
         // No data to process yet.
         return;
     }
 
-    // We may have to process more than one tick (might've missed some if there was lag.)
-    unsigned int ticksLeft = desiredTick - lastProcessedTick;
+    // We want to process updates until we've either hit the desired, or run out of data.
+    Uint32 currentTick = game.getCurrentTick();
+    Uint32 desiredTick = currentTick - PAST_TICK_OFFSET;
+    Uint32 endTick = (latestReceivedTick < desiredTick) ? latestReceivedTick : desiredTick;
 
-    // TODO: Fix it so that it processes unprocessed ticks, even if we haven't caught back
-    //       up to the desired yet.
+    // We may have to process more than one tick (might've missed some if there was lag.)
+    unsigned int ticksLeft = endTick - lastProcessedTick;
 
     // Check that all the desired data is still in the buffer.
-    Uint32 indexOfDesiredTick = latestReceivedTick - desiredTick;
-    if ((indexOfDesiredTick + ticksLeft) > UPDATE_MESSAGE_BUFFER_LENGTH) {
+    Uint32 indexOfEndTick = latestReceivedTick - endTick;
+    if ((indexOfEndTick + ticksLeft) > UPDATE_MESSAGE_BUFFER_LENGTH) {
         DebugError("Received too many NPC update messages at once, unprocessed data was"
-                   " pushed out of the buffer. indexOfDesiredTick: %u, ticksLeft: %u"
-                   , indexOfDesiredTick, ticksLeft);
+                   " pushed out of the buffer. latestReceivedTick: %u, lastProcessedTick: %u"
+                   ", endTick: %u", latestReceivedTick, lastProcessedTick, endTick);
     }
 
     /* We have data to use, apply updates for all unprocessed ticks including the
        desired tick. */
     while (ticksLeft > 0) {
-        Uint32 tickToProcess = indexOfDesiredTick + ticksLeft;
+        Uint32 indexToProcess = indexOfEndTick + (ticksLeft - 1);
 
-        // Apply the update.
-        BinaryBufferSharedPtr messageBuffer = updateBuffer[tickToProcess];
+        // Move all NPCs as if their inputs didn't change.
+        moveAllNpcs();
+
+        /* Correct any NPCs that did change inputs. */
+        BinaryBufferSharedPtr messageBuffer = updateBuffer[indexToProcess];
+        if (messageBuffer == nullptr) {
+            DebugError("Tried to retrieve NPC update message but got nullptr. desiredTick:"
+                       " %u, endTick: %u, indexOfEndTick: %u, ticksLeft: %u,"
+                       " lastProcessedTick: %u", desiredTick, endTick, indexOfEndTick
+                       , ticksLeft, lastProcessedTick);
+        }
+
         applyUpdateMessage(messageBuffer);
 
+        /* Prepare for the next iteration. */
+        updateBuffer[indexToProcess] = nullptr;
         ticksLeft--;
+        lastProcessedTick = endTick - ticksLeft;
     }
 }
 
@@ -79,22 +91,53 @@ unsigned int NpcMovementSystem::receiveEntityUpdates()
         // Ready the Message for reading.
         const fb::Message* message = fb::GetMessage(receivedBuffer->data());
 
-        // Check that the we received the expected tick.
+        // Check that we received the expected tick.
         Uint32 newTick = message->tickTimestamp();
-        if (newTick != (latestReceivedTick + 1)) {
-            DebugError("Didn't receive incrementally increasing ticks. latestReceivedTick:"
-                       " %u, newTick: %u", latestReceivedTick, newTick)
+        if (latestReceivedTick == 0) {
+            // Received our first message, init our values.
+            latestReceivedTick = newTick - 1;
+            lastProcessedTick = latestReceivedTick;
         }
 
         // Push the message into the buffer.
         updateBuffer.push(receivedBuffer);
-        latestReceivedTick = newTick;
+
+        // Update the latestReceivedTick.
+        if (newTick == 0) {
+            // Received a message confirming that a tick was processed with no update.
+            latestReceivedTick++;
+        }
+        else {
+            latestReceivedTick = newTick;
+        }
+
+        // Check that ticks are progressing incrementally.
+        if (latestReceivedTick != (lastProcessedTick + 1)){
+            DebugError("Received ticks aren't progressing incrementally. latestReceived:"
+                       " %u, lastProcessed: %u", latestReceivedTick, lastProcessedTick);
+        }
+        DebugInfo("Pushed message with tick: %u", newTick);
 
         messagesReceived++;
         receivedBuffer = network.receive(MessageType::PlayerUpdate);
     }
 
     return messagesReceived;
+}
+
+void NpcMovementSystem::moveAllNpcs() {
+    for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
+        /* Move all NPCs that have an input, position, and movement component. */
+        if (entityID != world.playerID
+        && (world.componentFlags[entityID] & ComponentFlag::Input)
+        && (world.componentFlags[entityID] & ComponentFlag::Position)
+        && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
+            // Process their movement.
+            MovementHelpers::moveEntity(world.positions[entityID],
+                world.movements[entityID], world.inputs[entityID].inputStates,
+                GAME_TICK_TIMESTEP_S);
+        }
+    }
 }
 
 void NpcMovementSystem::applyUpdateMessage(const BinaryBufferSharedPtr& messageBuffer)
@@ -104,7 +147,7 @@ void NpcMovementSystem::applyUpdateMessage(const BinaryBufferSharedPtr& messageB
     auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
     auto entities = entityUpdate->entities();
 
-    // Iterate through the entities, updating all local data.
+    /* Use the data in the message to correct any NPCs that did change inputs. */
     for (auto entityIt = entities->begin(); entityIt != entities->end(); ++entityIt) {
         // Skip the non-NPC.
         EntityID entityID = (*entityIt)->id();

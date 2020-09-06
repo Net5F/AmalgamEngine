@@ -15,7 +15,7 @@ namespace AM
 // Config
 //--------------------------------------------------------------------------
 /** 20 network ticks per second. */
-static constexpr double NETWORK_TICK_INTERVAL_S = 1 / 20.0;
+static constexpr double NETWORK_TICK_TIMESTEP_S = 1 / 20.0;
 
 //--------------------------------------------------------------------------
 // Typedefs
@@ -31,7 +31,12 @@ typedef std::shared_ptr<BinaryBuffer> BinaryBufferSharedPtr;
 //--------------------------------------------------------------------------
 // Headers
 //--------------------------------------------------------------------------
-/** Used for indexing into the parts of a server header. */
+/**
+ * Used for indexing into the parts of a server header.
+ *
+ * For header[2], if the MSB is not set, the field represents MessageCount.
+ * If it is set, the lower 7 bits in the field represent ConfirmedTicks.
+ */
 struct ServerHeaderIndex {
     enum Index : Uint8 {
         /** Sint8, the adjustment that the server wants the client to make. */
@@ -39,11 +44,15 @@ struct ServerHeaderIndex {
         /** Uint8, the iteration of tick offset adjustment that we're on. */
         AdjustmentIteration = 1,
         /** Uint8, the number of messages in this batch. */
-        MessageCount = 2
+        MessageCount = 2,
+        /** Uint8, the number of ticks that have passed with no update. */
+        ConfirmedTickCount = 2
     };
 };
 /** The size of a server header in bytes. */
 static constexpr unsigned int SERVER_HEADER_SIZE = 3;
+/** Used to check if ServerHeader[2] is a heartbeat or a batch header. */
+static constexpr unsigned int SERVER_HEARTBEAT_MASK = (1 << 7);
 
 /** Used for indexing into the parts of a client header. */
 struct ClientHeaderIndex {
@@ -84,6 +93,6 @@ struct ReceiveResult {
     BinaryBufferPtr message;
 };
 
-} /* End namespace AM */
+} // End namespace AM
 
 #endif /* End NETWORKDEFS_H */

@@ -26,7 +26,7 @@ void Game::tick()
     accumulatedTime += iterationTimer.getDeltaSeconds(true);
 
     /* Process as many game ticks as have accumulated. */
-    while (accumulatedTime >= GAME_TICK_INTERVAL_S) {
+    while (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
         // Add any newly connected clients to the sim.
         processConnectEvents();
 
@@ -36,13 +36,13 @@ void Game::tick()
         /* Run all systems. */
         networkInputSystem.processInputMessages();
 
-        movementSystem.processMovements(GAME_TICK_INTERVAL_S);
+        movementSystem.processMovements();
 
         networkOutputSystem.sendClientUpdates();
 
         /* Prepare for the next tick. */
-        accumulatedTime -= GAME_TICK_INTERVAL_S;
-        if (accumulatedTime >= GAME_TICK_INTERVAL_S) {
+        accumulatedTime -= GAME_TICK_TIMESTEP_S;
+        if (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
             DebugInfo(
                 "Detected a request for multiple game ticks in the same frame. Game tick "
                 "must have been massively delayed. Game tick was delayed by: %.8fs.",
@@ -56,7 +56,7 @@ void Game::tick()
 
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);
-        if (executionTime > GAME_TICK_INTERVAL_S) {
+        if (executionTime > GAME_TICK_TIMESTEP_S) {
             DebugInfo("Overran our sim iteration time. executionTime: %.8f",
                 executionTime);
         }

@@ -122,6 +122,8 @@ public:
      */
     AdjustmentData getTickAdjustment();
 
+    Uint32 getLatestSentSimTick();
+
 private:
     /**
      * Run through all checks necessary to determine if we should tell the client to adjust
@@ -138,7 +140,7 @@ private:
     CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy);
 
     /** How long we should wait before considering the client to be timed out. */
-    static constexpr double TIMEOUT_S = NETWORK_TICK_INTERVAL_S * 2;
+    static constexpr double TIMEOUT_S = NETWORK_TICK_TIMESTEP_S * 2;
 
     /**
      * Our connection and interface to the client.
@@ -149,6 +151,9 @@ private:
      * Holds messages to be sent with the next call to sendWaitingMessages.
      */
     std::deque<BinaryBufferSharedPtr> sendQueue;
+
+    /** The latest tick that we've sent an update to this client for. */
+    Uint32 latestSentSimTick;
 
     /**
      * Holds tick diffs that have been added through recordTickDiff.

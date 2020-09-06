@@ -26,9 +26,10 @@ public:
     PlayerMovementSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
     /**
+     * Moves the player entity 1 sim tick into the future.
      * Receives state messages, moves the player, replays inputs.
      */
-    void processMovements(double deltaSeconds);
+    void processMovements();
 
 private:
     /**
@@ -42,7 +43,7 @@ private:
      * Replay any inputs that are from newer ticks than the latestReceivedTick.
      */
     void replayInputs(Uint32 latestReceivedTick, PositionComponent& currentPosition,
-                      MovementComponent& currentMovement, double deltaSeconds);
+                      MovementComponent& currentMovement);
 
     Game& game;
     World& world;

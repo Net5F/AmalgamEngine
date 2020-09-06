@@ -33,8 +33,8 @@ public:
      */
     static constexpr unsigned int UPDATE_MESSAGE_BUFFER_LENGTH = 10;
 
-    /** Our best guess at a good amount of time in the past to replicate NPCs at. */
-    static constexpr int PAST_TICK_OFFSET = -2;
+    /** Our best guess at a good amount of ticks in the past to replicate NPCs at. */
+    static constexpr int PAST_TICK_OFFSET = 2;
 
     NpcMovementSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
@@ -43,6 +43,12 @@ public:
      * Else, does no updates, leaving NPCs where they are.
      */
     void updateNpcs();
+
+private:
+    /**
+     * Moves all NPCs using their current inputs.
+     */
+    void moveAllNpcs();
 
     /**
      * Receives NPC entity update messages from the network and pushes them into the
@@ -56,7 +62,6 @@ public:
      */
     void applyUpdateMessage(const BinaryBufferSharedPtr& messageBuffer);
 
-private:
     /** Holds NPC entity update message pointers. The message at updateBuffer[0] will
         always be for the tick value of latestReceivedTick. */
     CircularBuffer<BinaryBufferSharedPtr, UPDATE_MESSAGE_BUFFER_LENGTH> updateBuffer;

@@ -36,19 +36,19 @@ void Network::sendToAll(const BinaryBufferSharedPtr& message)
     }
 }
 
-void Network::sendWaitingMessages()
+void Network::tick()
 {
     accumulatedTime += sendTimer.getDeltaSeconds(true);
 
-    if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
+    if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
         // Queue connection responses before starting to send this batch.
         queueConnectionResponses();
 
         // Send all messages for this batch.
-        sendWaitingMessagesInternal();
+        sendClientUpdates();
 
-        accumulatedTime -= NETWORK_TICK_INTERVAL_S;
-        if (accumulatedTime >= NETWORK_TICK_INTERVAL_S) {
+        accumulatedTime -= NETWORK_TICK_TIMESTEP_S;
+        if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
             // If we've accumulated enough time to send more, something
             // happened to delay us.
             // We still only want to send what's in the queue, but it's worth giving
@@ -149,26 +149,40 @@ void Network::queueConnectionResponses()
     }
 }
 
-void Network::sendWaitingMessagesInternal()
+void Network::sendClientUpdates()
 {
-    /* Send the waiting messages in every client's queue. */
+    /* Run through the clients, sending their waiting messages or a heartbeat. */
     std::shared_lock readLock(clientMapMutex);
     for (auto& pair : clientMap) {
         Client& client = pair.second;
 
+        // Build the header.
+        Client::AdjustmentData tickAdjustment = client.getTickAdjustment();
+        Uint8 header[SERVER_HEADER_SIZE] = {
+                static_cast<Uint8>(tickAdjustment.adjustment),
+                tickAdjustment.iteration, 0 };
+
+        /* Determine if we have messages to send, or are sending a heartbeat. */
         Uint8 messageCount = client.getWaitingMessageCount();
         if (messageCount > 0) {
-            // Build the batch header.
-            Client::AdjustmentData tickAdjustment = client.getTickAdjustment();
-            Uint8 header[SERVER_HEADER_SIZE] = {
-                    static_cast<Uint8>(tickAdjustment.adjustment),
-                    tickAdjustment.iteration, messageCount };
+            // Fill in the message count to show we have a batch coming.
+            header[ServerHeaderIndex::MessageCount] = messageCount;
+        }
+        else {
+            // Calculate the number of ticks we've processed since the last update,
+            // including the current tick.
+            Uint8 confirmedTickCount = *currentTickPtr - client.getLatestSentSimTick() + 1;
+            confirmedTickCount += (1 << 7);
 
-            // Send the batch header.
-            client.sendHeader(
-                std::make_shared<BinaryBuffer>(header,
-                    header + SERVER_HEADER_SIZE));
+            header[ServerHeaderIndex::ConfirmedTickCount] = confirmedTickCount;
+        }
 
+        // Send the header.
+        client.sendHeader(
+            std::make_shared<BinaryBuffer>(header,
+                header + SERVER_HEADER_SIZE));
+
+        if (messageCount > 0) {
             // Send all waiting messages.
             client.sendWaitingMessages();
         }
@@ -201,7 +215,7 @@ void Network::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr
 }
 
 BinaryBufferSharedPtr Network::constructMessage(std::size_t size,
-                                                Uint8* messageBuffer) const
+                                                Uint8* messageBuffer)
 {
     if ((sizeof(Uint16) + size) > Peer::MAX_MESSAGE_SIZE) {
         DebugError("Tried to send a too-large message. Size: %u, max: %u", size,

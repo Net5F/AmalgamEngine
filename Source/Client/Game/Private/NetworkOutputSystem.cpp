@@ -53,7 +53,7 @@ void NetworkOutputSystem::sendInputState()
     builder.Finish(message);
 
     // Send the message.
-    network.send(network.constructMessage(builder.GetSize(), builder.GetBufferPointer()));
+    network.send(Network::constructMessage(builder.GetSize(), builder.GetBufferPointer()));
 
     world.playerIsDirty = false;
 }

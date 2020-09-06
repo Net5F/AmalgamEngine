@@ -2,6 +2,7 @@
 #include "Peer.h"
 #include "Debug.h"
 #include "MessageSorter.h"
+#include "Message_generated.h"
 #include <cmath>
 
 namespace AM
@@ -11,6 +12,7 @@ namespace Server
 
 Client::Client(std::unique_ptr<Peer> inPeer)
 : peer(std::move(inPeer))
+, latestSentSimTick(0)
 , hasRecordedDiff(false)
 , latestAdjIteration(0)
 {
@@ -44,13 +46,18 @@ NetworkResult Client::sendWaitingMessages()
     }
 
     while (!(sendQueue.empty())) {
-        BinaryBufferSharedPtr message = sendQueue.front();
+        BinaryBufferSharedPtr messageBuffer = sendQueue.front();
 
-        NetworkResult result = peer->send(message);
+        NetworkResult result = peer->send(messageBuffer);
         if (result != NetworkResult::Success) {
             // Some sort of failure, stop sending and return it.
             return result;
         }
+
+        /* Track the latest iteration we've sent. */
+        const fb::Message* message = fb::GetMessage(messageBuffer->data());
+        Uint32 simIteration = message->tickTimestamp();
+        latestSentSimTick = simIteration;
 
         sendQueue.pop_front();
     }
@@ -209,6 +216,11 @@ float averageDiff, CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHisto
 
     // Make an adjustment back towards the target.
     return TICKDIFF_TARGET - truncatedAverage;
+}
+
+Uint32 Client::getLatestSentSimTick()
+{
+    return latestSentSimTick;
 }
 
 } // end namespace Server

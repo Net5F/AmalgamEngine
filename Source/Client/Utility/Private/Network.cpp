@@ -1,7 +1,6 @@
 #include "Network.h"
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
-#include "Message_generated.h"
 #include "Debug.h"
 
 namespace AM
@@ -118,32 +117,58 @@ int Network::pollForMessages()
 
         if (headerResult.result == NetworkResult::Success) {
             const BinaryBuffer& header = *(headerResult.message.get());
-
-            // Check if we need to adjust the tick offset.
-            adjustIfNeeded(header[ServerHeaderIndex::TickAdjustment],
-                header[ServerHeaderIndex::AdjustmentIteration]);
-
-            // Receive all of the expected messages.
-            Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
-            for (unsigned int i = 0; i < messageCount; ++i) {
-                ReceiveResult messageResult = server->receiveMessageWait();
-
-                // If we received a message, push it into the appropriate queue.
-                if (messageResult.result == NetworkResult::Success) {
-                    processReceivedMessage(std::move(messageResult.message));
-
-                    // Got a message, update the receiveTimer.
-                    receiveTimer.updateSavedTime();
-                }
-                else if ((messageResult.result == NetworkResult::NoWaitingData)
-                && (receiveTimer.getDeltaSeconds(false) > TIMEOUT_S)) {
-                    DebugError("Server connection timed out.");
-                }
-            }
+            processHeader(header);
         }
     }
 
     return 0;
+}
+
+void Network::processHeader(const BinaryBuffer& header) {
+    // Check if we need to adjust the tick offset.
+    adjustIfNeeded(header[ServerHeaderIndex::TickAdjustment],
+        header[ServerHeaderIndex::AdjustmentIteration]);
+
+    /* Check if this is a batch or a heartbeat. */
+    if ((header[ServerHeaderIndex::ConfirmedTickCount]
+         & SERVER_HEARTBEAT_MASK) == 0) {
+        /* Batch header, receive all of the expected messages. */
+        Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
+        for (unsigned int i = 0; i < messageCount; ++i) {
+            ReceiveResult messageResult = server->receiveMessageWait();
+
+            // If we received a message, push it into the appropriate queue.
+            if (messageResult.result == NetworkResult::Success) {
+                // Got a message, process it and update the receiveTimer.
+                processReceivedMessage(std::move(messageResult.message));
+                receiveTimer.updateSavedTime();
+            }
+            else if ((messageResult.result == NetworkResult::NoWaitingData)
+                     && (receiveTimer.getDeltaSeconds(false) > TIMEOUT_S)) {
+                // Too long since we received a message, timed out.
+                DebugError("Server connection timed out.");
+            }
+        }
+    }
+    else {
+        /* Heartbeat, process the confirmed ticks. */
+        Uint8 confirmedTickCount = header[ServerHeaderIndex::ConfirmedTickCount]
+                                   ^ SERVER_HEARTBEAT_MASK;
+        for (unsigned int i = 0; i < confirmedTickCount; ++i) {
+            /* Construct a message with just the tick timestamp. */
+            builder.Clear();
+            fb::MessageBuilder messageBuilder(builder);
+            messageBuilder.add_tickTimestamp(0);
+            messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
+            flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
+            builder.Finish(message);
+
+            BinaryBufferSharedPtr buffer = std::make_shared<BinaryBuffer>(
+                builder.GetBufferPointer(),
+                (builder.GetBufferPointer() + builder.GetSize()));
+            npcUpdateQueue.enqueue(buffer);
+        }
+    }
 }
 
 void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
@@ -243,7 +268,7 @@ std::atomic<bool> const* Network::getExitRequestedPtr() {
     return &exitRequested;
 }
 
-BinaryBufferSharedPtr Network::constructMessage(std::size_t size, Uint8* messageBuffer) const
+BinaryBufferSharedPtr Network::constructMessage(std::size_t size, Uint8* messageBuffer)
 {
     if ((sizeof(Uint16) + size) > Peer::MAX_MESSAGE_SIZE) {
         DebugError("Tried to send a too-large message. Size: %u, max: %u", size,

@@ -3,6 +3,7 @@
 
 #include "GameDefs.h"
 #include "NetworkDefs.h"
+#include "Message_generated.h"
 #include <string>
 #include <memory>
 #include <atomic>
@@ -101,9 +102,16 @@ public:
      * Message + size + header with one send call, so it's convenient to have it all in
      * one buffer.
      */
-    BinaryBufferSharedPtr constructMessage(std::size_t size, Uint8* messageBuffer) const;
+    static BinaryBufferSharedPtr constructMessage(std::size_t size, Uint8* messageBuffer);
 
 private:
+    /**
+     * Processes the received header.
+     * If it was a batch header, receives the messages.
+     * If it was a heartbeat, updates the confirmed tick count.
+     */
+    void processHeader(const BinaryBuffer& header);
+
     /**
      * Checks if we need to process the received adjustment, does so if necessary.
      * @param receivedTickAdj  The received tick adjustment.
@@ -115,7 +123,7 @@ private:
     static constexpr unsigned int SERVER_PORT = 41499;
 
     /** How long we should wait before considering the server to be timed out. */
-    static constexpr double TIMEOUT_S = NETWORK_TICK_INTERVAL_S * 2;
+    static constexpr double TIMEOUT_S = NETWORK_TICK_TIMESTEP_S * 2;
 
     std::shared_ptr<Peer> server;
 
@@ -146,6 +154,9 @@ private:
     MessageQueue connectionResponseQueue;
     MessageQueue playerUpdateQueue;
     MessageQueue npcUpdateQueue;
+
+    static constexpr int BUILDER_BUFFER_SIZE = 512;
+    flatbuffers::FlatBufferBuilder builder;
 };
 
 } // namespace Client

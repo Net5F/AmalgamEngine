@@ -29,6 +29,8 @@ public:
     }
 
     NetworkID networkID;
+    // TODO: Add "has this client seen this entity?" tracking so we can send a full update
+    //       instead of just sending a confirmation.
 };
 
 } // namespace Server

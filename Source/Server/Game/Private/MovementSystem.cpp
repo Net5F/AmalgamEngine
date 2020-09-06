@@ -13,7 +13,7 @@ MovementSystem::MovementSystem(World& inWorld)
 {
 }
 
-void MovementSystem::processMovements(double deltaSeconds)
+void MovementSystem::processMovements()
 {
     for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
         /* Move all entities that have an input, position, and movement component. */
@@ -23,7 +23,7 @@ void MovementSystem::processMovements(double deltaSeconds)
             // Process their movement.
             MovementHelpers::moveEntity(world.positions[entityID],
                 world.movements[entityID], world.inputs[entityID].inputStates,
-                deltaSeconds);
+                GAME_TICK_TIMESTEP_S);
         }
     }
 }

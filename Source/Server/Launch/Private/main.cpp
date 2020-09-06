@@ -60,7 +60,7 @@ try
         game.tick();
 
         // Send waiting messages.
-        network.sendWaitingMessages();
+        network.tick();
     }
 
     inputThreadObj.join();
