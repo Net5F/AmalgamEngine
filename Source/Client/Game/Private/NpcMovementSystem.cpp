@@ -117,8 +117,8 @@ unsigned int NpcMovementSystem::receiveEntityUpdates()
         }
         else {
             if (newTick != (latestReceivedTick + 1)) {
-                DebugError("Received ticks aren't progressing incrementally. Latest: %u,"
-                           "new: %u", latestReceivedTick, newTick);
+                DebugError("Received ticks aren't progressing incrementally."
+                       " latestReceivedTick: %u, newTick: %u", latestReceivedTick, newTick);
             }
             latestReceivedTick = newTick;
         }

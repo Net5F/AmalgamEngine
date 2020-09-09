@@ -173,14 +173,14 @@ void Network::sendClientUpdates()
             // (the tick count increments at the end of a sim tick, so our latest sent
             //  data is from currentTick - 1).
             Uint32 latestSentSimTick = client.getLatestSentSimTick();
-            if (latestSentSimTick == 0) {
-                // This client hasn't been sent a response yet, skip it.
+            Uint8 confirmedTickCount = (*currentTickPtr - 1) - latestSentSimTick;
+            if ((latestSentSimTick == 0) || (confirmedTickCount == 0)) {
+                // We either haven't sent the connection response, or just sent it.
+                // Skip this client.
                 continue;
             }
 
-            Uint8 confirmedTickCount = (*currentTickPtr - 1) - latestSentSimTick;
-            confirmedTickCount += (1 << 7);
-
+            confirmedTickCount += SERVER_HEARTBEAT_MASK;
             header[ServerHeaderIndex::ConfirmedTickCount] = confirmedTickCount;
         }
 

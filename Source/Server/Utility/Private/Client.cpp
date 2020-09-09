@@ -63,7 +63,7 @@ NetworkResult Client::sendWaitingMessages()
             return result;
         }
 
-        /* Track the latest iteration we've sent. */
+        /* Track the latest tick we've sent. */
         // The message has a Uint16 messageSize in front of it.
         const fb::Message* message = fb::GetMessage(
             messageBuffer->data() + sizeof(Uint16));

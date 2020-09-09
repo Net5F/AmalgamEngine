@@ -155,7 +155,7 @@ void Network::processHeader(const BinaryBuffer& header) {
         /* Heartbeat, process the confirmed ticks. */
         Uint8 confirmedTickCount = header[ServerHeaderIndex::ConfirmedTickCount]
                                    ^ SERVER_HEARTBEAT_MASK;
-        if (confirmedTickCount > 2) {
+        if (confirmedTickCount > 2 || confirmedTickCount == 0) {
             DebugError("Received a heartbeat. confirmedTickCount: %u", confirmedTickCount);
         }
         for (unsigned int i = 0; i < confirmedTickCount; ++i) {

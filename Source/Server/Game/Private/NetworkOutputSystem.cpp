@@ -62,7 +62,6 @@ void NetworkOutputSystem::sendClientUpdates()
                 flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
                 builder.Finish(message);
 
-                DebugInfo("Sending to: %u", entityID);
                 // Send the message to all connected clients.
                 network.send(world.clients[entityID].networkID,
                     Network::constructMessage(builder.GetSize(), builder.GetBufferPointer()));
