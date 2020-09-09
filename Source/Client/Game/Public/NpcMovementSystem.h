@@ -10,6 +10,13 @@
 
 namespace AM
 {
+
+// Forward declaration.
+namespace fb
+{
+    class Message;
+}
+
 namespace Client
 {
 
@@ -60,7 +67,7 @@ private:
     /**
      * Applies the given update message to the entity world state.
      */
-    void applyUpdateMessage(const BinaryBufferSharedPtr& messageBuffer);
+    void applyUpdateMessage(const fb::Message* message);
 
     /** Holds NPC entity update message pointers. The message at updateBuffer[0] will
         always be for the tick value of latestReceivedTick. */

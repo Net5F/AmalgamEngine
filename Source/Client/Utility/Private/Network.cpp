@@ -134,6 +134,7 @@ void Network::processHeader(const BinaryBuffer& header) {
          & SERVER_HEARTBEAT_MASK) == 0) {
         /* Batch header, receive all of the expected messages. */
         Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
+        DebugInfo("Received a batch header. messageCount: %u", messageCount);
         for (unsigned int i = 0; i < messageCount; ++i) {
             ReceiveResult messageResult = server->receiveMessageWait();
 
@@ -154,6 +155,9 @@ void Network::processHeader(const BinaryBuffer& header) {
         /* Heartbeat, process the confirmed ticks. */
         Uint8 confirmedTickCount = header[ServerHeaderIndex::ConfirmedTickCount]
                                    ^ SERVER_HEARTBEAT_MASK;
+        if (confirmedTickCount > 2) {
+            DebugError("Received a heartbeat. confirmedTickCount: %u", confirmedTickCount);
+        }
         for (unsigned int i = 0; i < confirmedTickCount; ++i) {
             /* Construct a message with just the tick timestamp. */
             builder.Clear();
@@ -166,7 +170,9 @@ void Network::processHeader(const BinaryBuffer& header) {
             BinaryBufferSharedPtr buffer = std::make_shared<BinaryBuffer>(
                 builder.GetBufferPointer(),
                 (builder.GetBufferPointer() + builder.GetSize()));
-            npcUpdateQueue.enqueue(buffer);
+            if (!(npcUpdateQueue.enqueue(buffer))) {
+                DebugError("Ran out of room in queue and memory allocation failed.");
+            }
         }
     }
 }

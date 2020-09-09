@@ -4,6 +4,7 @@
 #include "World.h"
 #include "Network.h"
 #include "MessageUtil.h"
+#include "Message_generated.h"
 #include "Debug.h"
 
 namespace AM
@@ -34,6 +35,9 @@ void NpcMovementSystem::updateNpcs()
                    " messagesReceived: %u", messagesReceived);
     }
 
+    // TODO: Can we simplify this?
+    //       Maybe while (messagesLeft > 0 && latestProcessedTick <= desiredTick)
+
     /* Determine if we have data to use. */
     if (latestReceivedTick == lastProcessedTick) {
         // No data to process yet.
@@ -61,7 +65,7 @@ void NpcMovementSystem::updateNpcs()
     while (ticksLeft > 0) {
         Uint32 indexToProcess = indexOfEndTick + (ticksLeft - 1);
 
-        // Move all NPCs as if their inputs didn't change.
+        /* Move all NPCs as if their inputs didn't change. */
         moveAllNpcs();
 
         /* Correct any NPCs that did change inputs. */
@@ -73,7 +77,11 @@ void NpcMovementSystem::updateNpcs()
                        , ticksLeft, lastProcessedTick);
         }
 
-        applyUpdateMessage(messageBuffer);
+        // If the message was a real update, apply it.
+        const fb::Message* message = fb::GetMessage(messageBuffer->data());
+        if (message->tickTimestamp() != 0) {
+            applyUpdateMessage(message);
+        }
 
         /* Prepare for the next iteration. */
         updateBuffer[indexToProcess] = nullptr;
@@ -108,15 +116,12 @@ unsigned int NpcMovementSystem::receiveEntityUpdates()
             latestReceivedTick++;
         }
         else {
+            if (newTick != (latestReceivedTick + 1)) {
+                DebugError("Received ticks aren't progressing incrementally. Latest: %u,"
+                           "new: %u", latestReceivedTick, newTick);
+            }
             latestReceivedTick = newTick;
         }
-
-        // Check that ticks are progressing incrementally.
-        if (latestReceivedTick != (lastProcessedTick + 1)){
-            DebugError("Received ticks aren't progressing incrementally. latestReceived:"
-                       " %u, lastProcessed: %u", latestReceivedTick, lastProcessedTick);
-        }
-        DebugInfo("Pushed message with tick: %u", newTick);
 
         messagesReceived++;
         receivedBuffer = network.receive(MessageType::PlayerUpdate);
@@ -140,10 +145,9 @@ void NpcMovementSystem::moveAllNpcs() {
     }
 }
 
-void NpcMovementSystem::applyUpdateMessage(const BinaryBufferSharedPtr& messageBuffer)
+void NpcMovementSystem::applyUpdateMessage(const fb::Message* message)
 {
     // Pull out the vector of entities.
-    const fb::Message* message = fb::GetMessage(messageBuffer->data());
     auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
     auto entities = entityUpdate->entities();
 

@@ -46,7 +46,8 @@ void Game::connect()
     const fb::Message* message = fb::GetMessage(responseBuffer->data());
     auto connectionResponse = static_cast<const fb::ConnectionResponse*>(message->content());
     EntityID player = connectionResponse->entityID();
-    DebugInfo("Received connection response. Tick = %u", message->tickTimestamp());
+    DebugInfo("Received connection response. ID: %u, tick: %u"
+              , player, message->tickTimestamp());
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.

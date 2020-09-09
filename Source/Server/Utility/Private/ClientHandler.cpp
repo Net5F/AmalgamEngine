@@ -127,11 +127,11 @@ void ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& 
             ReceiveResult messageResult = client.receiveMessage();
             while (messageResult.result == NetworkResult::Success) {
                 // TEMP
-                Uint32 receivedTick = 0;
-                const fb::Message* message = fb::GetMessage(messageResult.message->data());
-                if (message->content_type() == fb::MessageContent::EntityUpdate) {
-                    receivedTick = message->tickTimestamp();
-                }
+//                Uint32 receivedTick = 0;
+//                const fb::Message* message = fb::GetMessage(messageResult.message->data());
+//                if (message->content_type() == fb::MessageContent::EntityUpdate) {
+//                    receivedTick = message->tickTimestamp();
+//                }
                 // TEMP
 
                 // Queue the message (blocks if the queue is locked).
@@ -139,13 +139,13 @@ void ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& 
                 client.recordTickDiff(diff);
 
                 // TEMP
-                if (receivedTick != 0) {
-                    DebugInfo("Received message for tick: %u. Diff: %d", receivedTick,
-                        diff);
-                }
-                else {
-                    DebugInfo("Received message. Diff: %d", diff);
-                }
+//                if (receivedTick != 0) {
+//                    DebugInfo("Received message for tick: %u. Diff: %d", receivedTick,
+//                        diff);
+//                }
+//                else {
+//                    DebugInfo("Received message. Diff: %d", diff);
+//                }
                 // TEMP
 
                 messageResult = client.receiveMessage();

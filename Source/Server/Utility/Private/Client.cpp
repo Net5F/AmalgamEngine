@@ -36,6 +36,15 @@ NetworkResult Client::sendHeader(const BinaryBufferSharedPtr& header)
         return NetworkResult::Disconnected;
     }
 
+    // If it's a heartbeat, update the latestSentSimTick.
+    if ((header->at(ServerHeaderIndex::ConfirmedTickCount)
+        & SERVER_HEARTBEAT_MASK) != 0) {
+        Uint8 confirmedTickCount = header->at(ServerHeaderIndex::ConfirmedTickCount)
+                                   ^ SERVER_HEARTBEAT_MASK;
+        latestSentSimTick += confirmedTickCount;
+        DebugInfo("(%p) Heartbeat: updated latestSent to: %u", this, latestSentSimTick);
+    }
+
     return peer->send(header);
 }
 
@@ -55,9 +64,11 @@ NetworkResult Client::sendWaitingMessages()
         }
 
         /* Track the latest iteration we've sent. */
-        const fb::Message* message = fb::GetMessage(messageBuffer->data());
-        Uint32 simIteration = message->tickTimestamp();
-        latestSentSimTick = simIteration;
+        // The message has a Uint16 messageSize in front of it.
+        const fb::Message* message = fb::GetMessage(
+            messageBuffer->data() + sizeof(Uint16));
+        latestSentSimTick = message->tickTimestamp();
+        DebugInfo("(%p) Batch: updated latestSent to: %u", this, latestSentSimTick);
 
         sendQueue.pop_front();
     }

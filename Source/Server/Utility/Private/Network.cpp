@@ -44,7 +44,7 @@ void Network::tick()
         // Queue connection responses before starting to send this batch.
         queueConnectionResponses();
 
-        // Send all messages for this batch.
+        // Send all messages for this batch or heartbeat.
         sendClientUpdates();
 
         accumulatedTime -= NETWORK_TICK_TIMESTEP_S;
@@ -169,9 +169,16 @@ void Network::sendClientUpdates()
             header[ServerHeaderIndex::MessageCount] = messageCount;
         }
         else {
-            // Calculate the number of ticks we've processed since the last update,
-            // including the current tick.
-            Uint8 confirmedTickCount = *currentTickPtr - client.getLatestSentSimTick() + 1;
+            // Fill in the number of ticks we've processed since the last update.
+            // (the tick count increments at the end of a sim tick, so our latest sent
+            //  data is from currentTick - 1).
+            Uint32 latestSentSimTick = client.getLatestSentSimTick();
+            if (latestSentSimTick == 0) {
+                // This client hasn't been sent a response yet, skip it.
+                continue;
+            }
+
+            Uint8 confirmedTickCount = (*currentTickPtr - 1) - latestSentSimTick;
             confirmedTickCount += (1 << 7);
 
             header[ServerHeaderIndex::ConfirmedTickCount] = confirmedTickCount;
