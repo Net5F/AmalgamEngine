@@ -129,50 +129,47 @@ void Network::processHeader(const BinaryBuffer& header) {
     adjustIfNeeded(header[ServerHeaderIndex::TickAdjustment],
         header[ServerHeaderIndex::AdjustmentIteration]);
 
-    /* Check if this is a batch or a heartbeat. */
-    if ((header[ServerHeaderIndex::ConfirmedTickCount]
-         & SERVER_HEARTBEAT_MASK) == 0) {
-        /* Batch header, receive all of the expected messages. */
-        Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
-        DebugInfo("Received a batch header. messageCount: %u", messageCount);
-        for (unsigned int i = 0; i < messageCount; ++i) {
-            ReceiveResult messageResult = server->receiveMessageWait();
+    /* Check if we need to process any messages. */
+    Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
+    DebugInfo("Messages incoming. messageCount: %u", messageCount);
+    for (unsigned int i = 0; i < messageCount; ++i) {
+        ReceiveResult messageResult = server->receiveMessageWait();
 
-            // If we received a message, push it into the appropriate queue.
-            if (messageResult.result == NetworkResult::Success) {
-                // Got a message, process it and update the receiveTimer.
-                processReceivedMessage(std::move(messageResult.message));
-                receiveTimer.updateSavedTime();
-            }
-            else if ((messageResult.result == NetworkResult::NoWaitingData)
-                     && (receiveTimer.getDeltaSeconds(false) > TIMEOUT_S)) {
-                // Too long since we received a message, timed out.
-                DebugError("Server connection timed out.");
-            }
+        // If we received a message, push it into the appropriate queue.
+        if (messageResult.result == NetworkResult::Success) {
+            // Got a message, process it and update the receiveTimer.
+            processReceivedMessage(std::move(messageResult.message));
+            receiveTimer.updateSavedTime();
+        }
+        else if ((messageResult.result == NetworkResult::NoWaitingData)
+                 && (receiveTimer.getDeltaSeconds(false) > TIMEOUT_S)) {
+            // Too long since we received a message, timed out.
+            DebugError("Server connection timed out.");
         }
     }
-    else {
-        /* Heartbeat, process the confirmed ticks. */
-        Uint8 confirmedTickCount = header[ServerHeaderIndex::ConfirmedTickCount]
-                                   ^ SERVER_HEARTBEAT_MASK;
-        if (confirmedTickCount > 2 || confirmedTickCount == 0) {
-            DebugError("Received a heartbeat. confirmedTickCount: %u", confirmedTickCount);
-        }
-        for (unsigned int i = 0; i < confirmedTickCount; ++i) {
-            /* Construct a message with just the tick timestamp. */
-            builder.Clear();
-            fb::MessageBuilder messageBuilder(builder);
-            messageBuilder.add_tickTimestamp(0);
-            messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
-            flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
-            builder.Finish(message);
 
-            BinaryBufferSharedPtr buffer = std::make_shared<BinaryBuffer>(
-                builder.GetBufferPointer(),
-                (builder.GetBufferPointer() + builder.GetSize()));
-            if (!(npcUpdateQueue.enqueue(buffer))) {
-                DebugError("Ran out of room in queue and memory allocation failed.");
-            }
+    /* Process any confirmed ticks. */
+    Uint8 confirmedTickCount = header[ServerHeaderIndex::ConfirmedTickCount];
+    // TEMP
+    if (confirmedTickCount > 2 || confirmedTickCount == 0) {
+        DebugError("Received a heartbeat. confirmedTickCount: %u", confirmedTickCount);
+    }
+    DebugInfo("Received a heartbeat. confirmedTickCount: %u", confirmedTickCount);
+    // TEMP
+    for (unsigned int i = 0; i < confirmedTickCount; ++i) {
+        /* Construct a message with just the tick timestamp. */
+        builder.Clear();
+        fb::MessageBuilder messageBuilder(builder);
+        messageBuilder.add_tickTimestamp(0);
+        messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
+        flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
+        builder.Finish(message);
+
+        BinaryBufferSharedPtr buffer = std::make_shared<BinaryBuffer>(
+            builder.GetBufferPointer(),
+            (builder.GetBufferPointer() + builder.GetSize()));
+        if (!(npcUpdateQueue.enqueue(buffer))) {
+            DebugError("Ran out of room in queue and memory allocation failed.");
         }
     }
 }

@@ -36,15 +36,6 @@ NetworkResult Client::sendHeader(const BinaryBufferSharedPtr& header)
         return NetworkResult::Disconnected;
     }
 
-    // If it's a heartbeat, update the latestSentSimTick.
-    if ((header->at(ServerHeaderIndex::ConfirmedTickCount)
-        & SERVER_HEARTBEAT_MASK) != 0) {
-        Uint8 confirmedTickCount = header->at(ServerHeaderIndex::ConfirmedTickCount)
-                                   ^ SERVER_HEARTBEAT_MASK;
-        latestSentSimTick += confirmedTickCount;
-        DebugInfo("(%p) Heartbeat: updated latestSent to: %u", this, latestSentSimTick);
-    }
-
     return peer->send(header);
 }
 
@@ -227,6 +218,11 @@ float averageDiff, CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHisto
 
     // Make an adjustment back towards the target.
     return TICKDIFF_TARGET - truncatedAverage;
+}
+
+void Client::addConfirmedTicks(Uint32 confirmedTickCount)
+{
+    latestSentSimTick += confirmedTickCount;
 }
 
 Uint32 Client::getLatestSentSimTick()

@@ -204,8 +204,8 @@ void NpcMovementSystem::applyUpdateMessage(const fb::Message* message)
 
         /* Update the currentPosition. */
         auto newPosition = (*entityIt)->positionComponent();
-        DebugInfo("%d: (%f, %f) -> (%f, %f)", entityID, currentPosition.x,
-            currentPosition.y, newPosition->x(), newPosition->y());
+//        DebugInfo("%d: (%f, %f) -> (%f, %f)", entityID, currentPosition.x,
+//            currentPosition.y, newPosition->x(), newPosition->y());
         currentPosition.x = newPosition->x();
         currentPosition.y = newPosition->y();
     }

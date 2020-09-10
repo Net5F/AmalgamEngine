@@ -151,7 +151,7 @@ void Network::queueConnectionResponses()
 
 void Network::sendClientUpdates()
 {
-    /* Run through the clients, sending their waiting messages or a heartbeat. */
+    /* Run through the clients, sending their waiting messages. */
     std::shared_lock readLock(clientMapMutex);
     for (auto& pair : clientMap) {
         Client& client = pair.second;
@@ -160,39 +160,39 @@ void Network::sendClientUpdates()
         Client::AdjustmentData tickAdjustment = client.getTickAdjustment();
         Uint8 header[SERVER_HEADER_SIZE] = {
                 static_cast<Uint8>(tickAdjustment.adjustment),
-                tickAdjustment.iteration, 0 };
+                tickAdjustment.iteration, 0, 0 };
 
-        /* Determine if we have messages to send, or are sending a heartbeat. */
+        // Fill in the message count (possibly 0).
         Uint8 messageCount = client.getWaitingMessageCount();
-        if (messageCount > 0) {
-            // Fill in the message count to show we have a batch coming.
-            header[ServerHeaderIndex::MessageCount] = messageCount;
-        }
-        else {
-            // Fill in the number of ticks we've processed since the last update.
-            // (the tick count increments at the end of a sim tick, so our latest sent
-            //  data is from currentTick - 1).
-            Uint32 latestSentSimTick = client.getLatestSentSimTick();
-            Uint8 confirmedTickCount = (*currentTickPtr - 1) - latestSentSimTick;
-            if ((latestSentSimTick == 0) || (confirmedTickCount == 0)) {
-                // We either haven't sent the connection response, or just sent it.
-                // Skip this client.
-                continue;
-            }
+        header[ServerHeaderIndex::MessageCount] = messageCount;
 
-            confirmedTickCount += SERVER_HEARTBEAT_MASK;
-            header[ServerHeaderIndex::ConfirmedTickCount] = confirmedTickCount;
+        // Fill in the number of ticks we've processed since the last update.
+        // (the tick count increments at the end of a sim tick, so our latest sent
+        //  data is from currentTick - 1).
+        Uint32 latestSentSimTick = client.getLatestSentSimTick();
+        Uint8 confirmedTickCount = (*currentTickPtr - 1) - latestSentSimTick;
+        if ((latestSentSimTick == 0) || (confirmedTickCount == 0)) {
+            // We either haven't sent the connection response, or just sent it.
+            // Skip this client.
+            continue;
         }
+        header[ServerHeaderIndex::ConfirmedTickCount] = confirmedTickCount;
 
         // Send the header.
         client.sendHeader(
             std::make_shared<BinaryBuffer>(header,
                 header + SERVER_HEADER_SIZE));
 
+        // If there are waiting messages, send them.
         if (messageCount > 0) {
-            // Send all waiting messages.
             client.sendWaitingMessages();
         }
+
+        // Update the client with the confirmed tick count.
+        // (must be done after sendWaitingMessages to avoid being overwritten)
+        client.addConfirmedTicks(confirmedTickCount);
+        DebugInfo("(%p) Heartbeat: updated latestSent to: %u", &client
+                  , client.getLatestSentSimTick());
     }
 }
 

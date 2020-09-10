@@ -33,9 +33,6 @@ typedef std::shared_ptr<BinaryBuffer> BinaryBufferSharedPtr;
 //--------------------------------------------------------------------------
 /**
  * Used for indexing into the parts of a server header.
- *
- * For header[2], if the MSB is not set, the field represents MessageCount.
- * If it is set, the lower 7 bits in the field represent ConfirmedTicks.
  */
 struct ServerHeaderIndex {
     enum Index : Uint8 {
@@ -46,13 +43,11 @@ struct ServerHeaderIndex {
         /** Uint8, the number of messages in this batch. */
         MessageCount = 2,
         /** Uint8, the number of ticks that have passed with no update. */
-        ConfirmedTickCount = 2
+        ConfirmedTickCount = 3
     };
 };
 /** The size of a server header in bytes. */
-static constexpr unsigned int SERVER_HEADER_SIZE = 3;
-/** Used to check if ServerHeader[2] is a heartbeat or a batch header. */
-static constexpr unsigned int SERVER_HEARTBEAT_MASK = (1 << 7);
+static constexpr unsigned int SERVER_HEADER_SIZE = 4;
 
 /** Used for indexing into the parts of a client header. */
 struct ClientHeaderIndex {

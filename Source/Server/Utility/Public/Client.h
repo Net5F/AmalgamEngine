@@ -122,6 +122,15 @@ public:
      */
     AdjustmentData getTickAdjustment();
 
+    /**
+     * Adds confirmedTickCount to our latestSentSimTick.
+     *
+     * Used to keep our latestSentSimTick up to date.
+     * We can't do it automatically in sendHeader, cause it has to be done after we send
+     * waiting messages.
+     */
+    void addConfirmedTicks(Uint32 confirmedTickCount);
+
     Uint32 getLatestSentSimTick();
 
 private:
