@@ -53,11 +53,18 @@ public:
     bool isConnected() const;
 
     /**
-     * Sends a message to this Peer.
+     * Sends the given message to this Peer.
      * Will error if the message size is larger than a Uint16 can hold.
      * @return Disconnected if the peer was found to be disconnected, else Success.
      */
     NetworkResult send(const BinaryBufferSharedPtr& message);
+
+    /**
+     * Sends the given message to this Peer.
+     * Will error if the message size is larger than a Uint16 can hold.
+     * @return Disconnected if the peer was found to be disconnected, else Success.
+     */
+    NetworkResult send(const Uint8* messageBuffer, unsigned int messageSize);
 
     /**
      * Tries to receive bytes over the network.

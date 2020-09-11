@@ -72,6 +72,33 @@ NetworkResult Peer::send(const BinaryBufferSharedPtr& message)
     }
 }
 
+NetworkResult Peer::send(const Uint8* messageBuffer, unsigned int messageSize)
+{
+    if (!bIsConnected) {
+        return NetworkResult::Disconnected;
+    }
+
+    if (messageSize > MAX_MESSAGE_SIZE) {
+        DebugError("Tried to send a too-large message. Size: %u, max: %u", messageSize,
+            MAX_MESSAGE_SIZE);
+    }
+
+    int bytesSent = socket->send(messageBuffer, messageSize);
+    if (bytesSent < 0) {
+        DebugError("TCP_Send returned < 0. This should never happen, the socket"
+                   "was likely misused.");
+    }
+
+    if (static_cast<unsigned int>(bytesSent) < messageSize) {
+        // The peer probably disconnected (could be a different issue).
+        bIsConnected = false;
+        return NetworkResult::Disconnected;
+    }
+    else {
+        return NetworkResult::Success;
+    }
+}
+
 ReceiveResult Peer::receiveBytes(Uint16 numBytes, bool checkSockets)
 {
     if (!bIsConnected) {

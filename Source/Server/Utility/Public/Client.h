@@ -3,8 +3,10 @@
 
 #include "GameDefs.h"
 #include "NetworkDefs.h"
+#include "Peer.h"
 #include <memory>
 #include <queue>
+#include <array>
 #include "CircularBuffer.h"
 #include <mutex>
 #include <atomic>
@@ -39,21 +41,11 @@ public:
     void queueMessage(const BinaryBufferSharedPtr& message);
 
     /**
-     * Immediately sends the given header to this Peer.
-     *
-     * Could technically send any message, but our use case is only for headers. All other
-     * messages should be queued through queueMessage.
-     *
-     * Will error if the message size is larger than a Uint16 can hold.
-     * @return Disconnected if the peer was found to be disconnected, else Success.
-     */
-    NetworkResult sendHeader(const BinaryBufferSharedPtr& header);
-
-    /**
      * Attempts to send all queued messages over the network.
+     * @param currentTick  The sim's current tick.
      * @return false if the client was found to be disconnected, else true.
      */
-    NetworkResult sendWaitingMessages();
+    NetworkResult sendWaitingMessages(Uint32 currentTick);
 
     /**
      * Tries to receive a message from the Peer.
@@ -122,18 +114,14 @@ public:
      */
     AdjustmentData getTickAdjustment();
 
-    /**
-     * Adds confirmedTickCount to our latestSentSimTick.
-     *
-     * Used to keep our latestSentSimTick up to date.
-     * We can't do it automatically in sendHeader, cause it has to be done after we send
-     * waiting messages.
-     */
-    void addConfirmedTicks(Uint32 confirmedTickCount);
-
-    Uint32 getLatestSentSimTick();
-
 private:
+    /**
+     * Fills in the header information for the batch currently being built.
+     * @param messageCount  The number of messages going into the current batch.
+     * @param currentTick  The sim's current tick number.
+     */
+    void fillHeader(Uint8 messageCount, Uint32 currentTick);
+
     /**
      * Run through all checks necessary to determine if we should tell the client to adjust
      * its tick.
@@ -160,6 +148,9 @@ private:
      * Holds messages to be sent with the next call to sendWaitingMessages.
      */
     std::deque<BinaryBufferSharedPtr> sendQueue;
+
+    /** Holds data while we're putting it together to be sent as a batch. */
+    std::array<Uint8, Peer::MAX_MESSAGE_SIZE> batchBuffer;
 
     /** The latest tick that we've sent an update to this client for. */
     Uint32 latestSentSimTick;

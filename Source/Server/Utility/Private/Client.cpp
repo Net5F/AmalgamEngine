@@ -4,6 +4,7 @@
 #include "MessageSorter.h"
 #include "Message_generated.h"
 #include <cmath>
+#include <array>
 
 namespace AM
 {
@@ -12,6 +13,7 @@ namespace Server
 
 Client::Client(std::unique_ptr<Peer> inPeer)
 : peer(std::move(inPeer))
+, batchBuffer{}
 , latestSentSimTick(0)
 , hasRecordedDiff(false)
 , latestAdjIteration(0)
@@ -30,31 +32,31 @@ void Client::queueMessage(const BinaryBufferSharedPtr& message)
     sendQueue.push_back(message);
 }
 
-NetworkResult Client::sendHeader(const BinaryBufferSharedPtr& header)
+NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
 {
     if (peer == nullptr) {
         return NetworkResult::Disconnected;
     }
 
-    return peer->send(header);
-}
-
-NetworkResult Client::sendWaitingMessages()
-{
-    if (peer == nullptr) {
-        return NetworkResult::Disconnected;
+    Uint8 messageCount = getWaitingMessageCount();
+    if ((latestSentSimTick == 0) && (messageCount == 0)) {
+        // We haven't sent any data yet and have none to send, prevent a heartbeat
+        // from being prematurely sent.
+        return NetworkResult::Success;
     }
 
-    while (!(sendQueue.empty())) {
+    /* Build the batch message. */
+    // Copy any waiting messages into the buffer.
+    unsigned int currentIndex = SERVER_HEADER_SIZE;
+    for (unsigned int i = 0; i < messageCount; ++i) {
+        /* Copy the message into the buffer. */
         BinaryBufferSharedPtr messageBuffer = sendQueue.front();
+        std::copy(messageBuffer->begin(), messageBuffer->end(),
+            &(batchBuffer[currentIndex]));
 
-        NetworkResult result = peer->send(messageBuffer);
-        if (result != NetworkResult::Success) {
-            // Some sort of failure, stop sending and return it.
-            return result;
-        }
+        currentIndex += messageBuffer->size();
 
-        /* Track the latest tick we've sent. */
+        /* Track the latest tick we've seen. */
         // The message has a Uint16 messageSize in front of it.
         const fb::Message* message = fb::GetMessage(
             messageBuffer->data() + sizeof(Uint16));
@@ -64,8 +66,34 @@ NetworkResult Client::sendWaitingMessages()
         sendQueue.pop_front();
     }
 
-    return NetworkResult::Success;
+    // Fill in the header.
+    fillHeader(messageCount, currentTick);
+
+    // Send the message.
+    return peer->send(&(batchBuffer[0]), currentIndex);
 }
+
+void Client::fillHeader(Uint8 messageCount, Uint32 currentTick)
+{
+    // Fill in the adjustment info.
+    AdjustmentData tickAdjustment = getTickAdjustment();
+    batchBuffer[ServerHeaderIndex::TickAdjustment] =
+        static_cast<Uint8>(tickAdjustment.adjustment);
+    batchBuffer[ServerHeaderIndex::AdjustmentIteration] = tickAdjustment.iteration;
+
+    // Fill in the message count.
+    batchBuffer[ServerHeaderIndex::MessageCount] = messageCount;
+
+    // Fill in the number of ticks we've processed since the last update.
+    // (the tick count increments at the end of a sim tick, so our latest sent
+    //  data is from currentTick - 1).
+    Uint8 confirmedTickCount = (currentTick - 1) - latestSentSimTick;
+    batchBuffer[ServerHeaderIndex::ConfirmedTickCount] = confirmedTickCount;
+
+    // Update our latestSent tracking to account for the confirmed ticks.
+    latestSentSimTick += confirmedTickCount;
+}
+
 
 ReceiveResult Client::receiveMessage()
 {
@@ -162,7 +190,6 @@ Client::AdjustmentData Client::getTickAdjustment() {
     // Copy the history so we can work on it without staying locked.
     std::unique_lock lock(tickDiffMutex);
     CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH> tickDiffHistoryCopy = tickDiffHistory;
-
     lock.unlock();
 
     // Calc the average diff.
@@ -218,16 +245,6 @@ float averageDiff, CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHisto
 
     // Make an adjustment back towards the target.
     return TICKDIFF_TARGET - truncatedAverage;
-}
-
-void Client::addConfirmedTicks(Uint32 confirmedTickCount)
-{
-    latestSentSimTick += confirmedTickCount;
-}
-
-Uint32 Client::getLatestSentSimTick()
-{
-    return latestSentSimTick;
 }
 
 } // end namespace Server

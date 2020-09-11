@@ -131,7 +131,11 @@ void Network::processHeader(const BinaryBuffer& header) {
 
     /* Check if we need to process any messages. */
     Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
-    DebugInfo("Messages incoming. messageCount: %u", messageCount);
+    // TEMP
+    if (messageCount > 0) {
+        DebugInfo("Messages incoming. messageCount: %u", messageCount);
+    }
+    // TEMP
     for (unsigned int i = 0; i < messageCount; ++i) {
         ReceiveResult messageResult = server->receiveMessageWait();
 
