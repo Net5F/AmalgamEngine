@@ -28,6 +28,9 @@ NpcMovementSystem::NpcMovementSystem(Game& inGame, World& inWorld, Network& inNe
 
 void NpcMovementSystem::updateNpcs()
 {
+    // TODO: Add an AOI system and make sure new connections get an update without
+    //       the other entities having to move first.
+
     // Receive any updates from the server.
     unsigned int messagesReceived = receiveEntityUpdates();
     if (messagesReceived > UPDATE_MESSAGE_BUFFER_LENGTH) {

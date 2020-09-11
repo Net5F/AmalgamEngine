@@ -124,7 +124,9 @@ void Network::queueConnectionResponses()
     /* Send all waiting ConnectionResponse messages. */
     unsigned int responseCount = connectionResponseQueue.size();
     if (responseCount > 0) {
-        Uint32 latestTickTimestamp = *currentTickPtr;
+        // (the tick count increments at the end of a sim tick, so our latest tick
+        //  is actually currentTick - 1).
+        Uint32 latestTickTimestamp = *currentTickPtr - 1;
 
         for (unsigned int i = 0; i < responseCount; ++i) {
             ConnectionResponseData& data = connectionResponseQueue.front();

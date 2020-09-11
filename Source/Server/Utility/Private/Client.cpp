@@ -56,7 +56,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
 
         currentIndex += messageBuffer->size();
 
-        /* Track the latest tick we've seen. */
+        /* Track the latest tick we've sent. */
         // The message has a Uint16 messageSize in front of it.
         const fb::Message* message = fb::GetMessage(
             messageBuffer->data() + sizeof(Uint16));
@@ -70,6 +70,9 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     fillHeader(messageCount, currentTick);
 
     // Send the message.
+    DebugInfo("Sending message with messageCount: %u, confirmedTickCount: %u",
+        batchBuffer[ServerHeaderIndex::MessageCount],
+        batchBuffer[ServerHeaderIndex::ConfirmedTickCount]);
     return peer->send(&(batchBuffer[0]), currentIndex);
 }
 
@@ -84,14 +87,28 @@ void Client::fillHeader(Uint8 messageCount, Uint32 currentTick)
     // Fill in the message count.
     batchBuffer[ServerHeaderIndex::MessageCount] = messageCount;
 
-    // Fill in the number of ticks we've processed since the last update.
-    // (the tick count increments at the end of a sim tick, so our latest sent
-    //  data is from currentTick - 1).
-    Uint8 confirmedTickCount = (currentTick - 1) - latestSentSimTick;
-    batchBuffer[ServerHeaderIndex::ConfirmedTickCount] = confirmedTickCount;
+    // If we haven't sent data or are caught up, don't try to confirm any ticks.
+    if ((latestSentSimTick == 0)
+        || (latestSentSimTick == currentTick)) {
+        batchBuffer[ServerHeaderIndex::ConfirmedTickCount] = 0;
+        return;
+    }
+    else {
+        // Fill in the number of ticks we've processed since the last update.
+        // (the tick count increments at the end of a sim tick, so our latest sent
+        //  data is from currentTick - 1).
+        Uint8 confirmedTickCount = (currentTick - 1) - latestSentSimTick;
+        batchBuffer[ServerHeaderIndex::ConfirmedTickCount] = confirmedTickCount;
 
-    // Update our latestSent tracking to account for the confirmed ticks.
-    latestSentSimTick += confirmedTickCount;
+        // Update our latestSent tracking to account for the confirmed ticks.
+        latestSentSimTick += confirmedTickCount;
+
+        // TEMP
+        if (confirmedTickCount > 0) {
+            DebugInfo("(%p) Confirm: updated latestSent to: %u", this, latestSentSimTick);
+        }
+        // TEMP
+    }
 }
 
 
@@ -234,14 +251,15 @@ float averageDiff, CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHisto
         }
     }
 
-    // TODO: Remove (debug)
-    DebugInfo("Sent adjustment. adjustment: %d", TICKDIFF_TARGET - truncatedAverage);
-    DebugInfo("truncatedAverage: %d. Values:", static_cast<int>(averageDiff));
-    printf("[");
-    for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
-        printf("%d, ", tickDiffHistoryCopy[i]);
-    }
-    printf("]\n");
+    // TEMP
+    DebugInfo("Calc'd adjustment. adjustment: %d", TICKDIFF_TARGET - truncatedAverage);
+//    DebugInfo("truncatedAverage: %d. Values:", static_cast<int>(averageDiff));
+//    printf("[");
+//    for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
+//        printf("%d, ", tickDiffHistoryCopy[i]);
+//    }
+//    printf("]\n");
+    // TEMP
 
     // Make an adjustment back towards the target.
     return TICKDIFF_TARGET - truncatedAverage;

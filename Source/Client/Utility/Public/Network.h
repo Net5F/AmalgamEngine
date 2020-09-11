@@ -106,11 +106,11 @@ public:
 
 private:
     /**
-     * Processes the received header.
-     * If it was a batch header, receives the messages.
-     * If it was a heartbeat, updates the confirmed tick count.
+     * Processes the received header and following batch.
+     * If any messages are expected, receives the messages.
+     * If it confirmed any ticks that had no changes, updates the confirmed tick count.
      */
-    void processHeader(const BinaryBuffer& header);
+    void processBatch(const BinaryBuffer& header);
 
     /**
      * Checks if we need to process the received adjustment, does so if necessary.

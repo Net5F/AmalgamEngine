@@ -117,25 +117,20 @@ int Network::pollForMessages()
 
         if (headerResult.result == NetworkResult::Success) {
             const BinaryBuffer& header = *(headerResult.message.get());
-            processHeader(header);
+            processBatch(header);
         }
     }
 
     return 0;
 }
 
-void Network::processHeader(const BinaryBuffer& header) {
+void Network::processBatch(const BinaryBuffer& header) {
     // Check if we need to adjust the tick offset.
     adjustIfNeeded(header[ServerHeaderIndex::TickAdjustment],
         header[ServerHeaderIndex::AdjustmentIteration]);
 
-    /* Check if we need to process any messages. */
+    /* Process messages, if we received any. */
     Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
-    // TEMP
-    if (messageCount > 0) {
-        DebugInfo("Messages incoming. messageCount: %u", messageCount);
-    }
-    // TEMP
     for (unsigned int i = 0; i < messageCount; ++i) {
         ReceiveResult messageResult = server->receiveMessageWait();
 
@@ -154,12 +149,6 @@ void Network::processHeader(const BinaryBuffer& header) {
 
     /* Process any confirmed ticks. */
     Uint8 confirmedTickCount = header[ServerHeaderIndex::ConfirmedTickCount];
-    // TEMP
-    if (confirmedTickCount > 2 || confirmedTickCount == 0) {
-        DebugError("Received a heartbeat. confirmedTickCount: %u", confirmedTickCount);
-    }
-    DebugInfo("Received a heartbeat. confirmedTickCount: %u", confirmedTickCount);
-    // TEMP
     for (unsigned int i = 0; i < confirmedTickCount; ++i) {
         /* Construct a message with just the tick timestamp. */
         builder.Clear();
@@ -176,6 +165,11 @@ void Network::processHeader(const BinaryBuffer& header) {
             DebugError("Ran out of room in queue and memory allocation failed.");
         }
     }
+
+    // TEMP
+    DebugInfo("Received a header with messageCount: %u, confirmedTickCount: %u",
+        messageCount, confirmedTickCount);
+    // TEMP
 }
 
 void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
