@@ -18,19 +18,14 @@ namespace Server
 struct ClientComponent
 {
 public:
-    ClientComponent()
-    : networkID(0)
-    {
-    }
+    NetworkID networkID = 0;
 
-    ClientComponent(NetworkID inNetworkID)
-    : networkID(inNetworkID)
-    {
-    }
-
-    NetworkID networkID;
-    // TODO: Add "has this client seen this entity?" tracking so we can send a full update
-    //       instead of just sending a confirmation.
+    /**
+     * true if the client has been sent the state of all entities that existed before it
+     * connected, else false.
+     * TODO: Remove this and add a real area of interest component/system.
+     */
+    bool isInitialized = false;
 };
 
 } // namespace Server

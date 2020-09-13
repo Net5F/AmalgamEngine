@@ -6,7 +6,7 @@
 #include "PositionComponent.h"
 #include "MovementComponent.h"
 #include "InputComponent.h"
-#include "CircularBuffer.h"
+#include <queue>
 
 namespace AM
 {
@@ -31,17 +31,8 @@ class Network;
 class NpcMovementSystem
 {
 public:
-    /*
-     * The number of NPC entity update messages that we'll remember.
-     * TODO: This is dependent on latency to the server, but CircularBuffer can't be resized
-     *       at runtime. Modify CircularBuffer to be resizable and figure out where the
-     *       size should be calculated.
-     *       World::INPUT_HISTORY_LENGTH needs the same treatment.
-     */
-    static constexpr unsigned int UPDATE_MESSAGE_BUFFER_LENGTH = 10;
-
     /** Our best guess at a good amount of ticks in the past to replicate NPCs at. */
-    static constexpr int PAST_TICK_OFFSET = 2;
+    static constexpr unsigned int PAST_TICK_OFFSET = 2;
 
     NpcMovementSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
@@ -52,6 +43,16 @@ public:
     void updateNpcs();
 
 private:
+    /** Represents what NPC changes happened on a single server tick. */
+    struct NpcStateUpdate {
+        /** The tick that this update refers to. */
+        Uint32 tickNum = 0;
+        /** Whether at least 1 NPC's state changed on this tick or not. */
+        bool dataChanged = false;
+        /** If dataChanged == true, contains the update message. */
+        BinaryBufferSharedPtr message = nullptr;
+    };
+
     /**
      * Moves all NPCs using their current inputs.
      */
@@ -59,19 +60,17 @@ private:
 
     /**
      * Receives NPC entity update messages from the network and pushes them into the
-     * updateBuffer.
-     * @return The number of received messages.
+     * stateUpdateQueue.
      */
-    unsigned int receiveEntityUpdates();
+    void receiveEntityUpdates();
 
     /**
      * Applies the given update message to the entity world state.
      */
     void applyUpdateMessage(const fb::Message* message);
 
-    /** Holds NPC entity update message pointers. The message at updateBuffer[0] will
-        always be for the tick value of latestReceivedTick. */
-    CircularBuffer<BinaryBufferSharedPtr, UPDATE_MESSAGE_BUFFER_LENGTH> updateBuffer;
+    /** Holds NPC state deltas that are waiting to be processed. */
+    std::queue<NpcStateUpdate> stateUpdateQueue;
 
     /** The latest tick that we've received an NPC update message for. */
     Uint32 latestReceivedTick;

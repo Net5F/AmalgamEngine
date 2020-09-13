@@ -19,84 +19,44 @@ NpcMovementSystem::NpcMovementSystem(Game& inGame, World& inWorld, Network& inNe
   world(inWorld),
   network(inNetwork)
 {
-    if (PAST_TICK_OFFSET > UPDATE_MESSAGE_BUFFER_LENGTH) {
-        DebugError("Asking for ticks farther in the past than the buffer can hold."
-                   "PAST_TICK_OFFSET: %u, UPDATE_MESSAGE_BUFFER_LENGTH: %u"
-                   , PAST_TICK_OFFSET, UPDATE_MESSAGE_BUFFER_LENGTH);
-    }
 }
 
 void NpcMovementSystem::updateNpcs()
 {
-    // TODO: Add an AOI system and make sure new connections get an update without
-    //       the other entities having to move first.
-
     // Receive any updates from the server.
-    unsigned int messagesReceived = receiveEntityUpdates();
-    if (messagesReceived > UPDATE_MESSAGE_BUFFER_LENGTH) {
-        DebugError("Received too many NPC update messages at once to fit in the buffer."
-                   " messagesReceived: %u", messagesReceived);
-    }
-
-    // TODO: Can we simplify this?
-    //       Maybe while (messagesLeft > 0 && latestProcessedTick <= desiredTick)
-
-    /* Determine if we have data to use. */
-    if (latestReceivedTick == lastProcessedTick) {
-        // No data to process yet.
-        return;
-    }
+    receiveEntityUpdates();
 
     // We want to process updates until we've either hit the desired, or run out of data.
-    Uint32 currentTick = game.getCurrentTick();
-    Uint32 desiredTick = currentTick - PAST_TICK_OFFSET;
-    Uint32 endTick = (latestReceivedTick < desiredTick) ? latestReceivedTick : desiredTick;
+    Uint32 desiredTick = game.getCurrentTick() - PAST_TICK_OFFSET;
 
-    // We may have to process more than one tick (might've missed some if there was lag.)
-    unsigned int ticksLeft = endTick - lastProcessedTick;
-
-    // Check that all the desired data is still in the buffer.
-    Uint32 indexOfEndTick = latestReceivedTick - endTick;
-    if ((indexOfEndTick + ticksLeft) > UPDATE_MESSAGE_BUFFER_LENGTH) {
-        DebugError("Received too many NPC update messages at once, unprocessed data was"
-                   " pushed out of the buffer. latestReceivedTick: %u, lastProcessedTick: %u"
-                   ", endTick: %u", latestReceivedTick, lastProcessedTick, endTick);
-    }
-
-    /* We have data to use, apply updates for all unprocessed ticks including the
+    /* While we have data to use, apply updates for all unprocessed ticks including the
        desired tick. */
-    while (ticksLeft > 0) {
-        Uint32 indexToProcess = indexOfEndTick + (ticksLeft - 1);
-
-        /* Move all NPCs as if their inputs didn't change. */
+    while ((lastProcessedTick <= desiredTick) && (stateUpdateQueue.size() > 0)) {
+        // Move all NPCs as if their inputs didn't change.
         moveAllNpcs();
 
-        /* Correct any NPCs that did change inputs. */
-        BinaryBufferSharedPtr messageBuffer = updateBuffer[indexToProcess];
-        if (messageBuffer == nullptr) {
-            DebugError("Tried to retrieve NPC update message but got nullptr. desiredTick:"
-                       " %u, endTick: %u, indexOfEndTick: %u, ticksLeft: %u,"
-                       " lastProcessedTick: %u", desiredTick, endTick, indexOfEndTick
-                       , ticksLeft, lastProcessedTick);
+        // Check that the processed tick is progressing incrementally.
+        NpcStateUpdate& stateUpdate = stateUpdateQueue.front();
+        if (stateUpdate.tickNum != (lastProcessedTick + 1)) {
+            DebugError("Processing NPC movement out of order. stateUpdate.tickNum: %u, "
+                       "lastProcessedTick: %u", stateUpdate.tickNum, lastProcessedTick);
         }
 
-        // If the message was a real update, apply it.
-        const fb::Message* message = fb::GetMessage(messageBuffer->data());
-        if (message->tickTimestamp() != 0) {
+        // If the update contained new data, apply it.
+        if (stateUpdate.dataChanged) {
+            const fb::Message* message = fb::GetMessage(stateUpdate.message->data());
             applyUpdateMessage(message);
         }
 
         /* Prepare for the next iteration. */
-        updateBuffer[indexToProcess] = nullptr;
-        ticksLeft--;
-        lastProcessedTick = endTick - ticksLeft;
+        lastProcessedTick++;
+        stateUpdateQueue.pop();
     }
 }
 
-unsigned int NpcMovementSystem::receiveEntityUpdates()
+void NpcMovementSystem::receiveEntityUpdates()
 {
-    /* Process any messages for us from the server. */
-    unsigned int messagesReceived = 0;
+    /* Process any NPC update messages from the Network. */
     BinaryBufferSharedPtr receivedBuffer = network.receive(MessageType::NpcUpdate);
     while (receivedBuffer != nullptr) {
         // Ready the Message for reading.
@@ -110,27 +70,32 @@ unsigned int NpcMovementSystem::receiveEntityUpdates()
             lastProcessedTick = latestReceivedTick;
         }
 
-        // Push the message into the buffer.
-        updateBuffer.push(receivedBuffer);
-
-        // Update the latestReceivedTick.
-        if (newTick == 0) {
-            // Received a message confirming that a tick was processed with no update.
-            latestReceivedTick++;
-        }
-        else {
-            if (newTick != (latestReceivedTick + 1)) {
-                DebugError("Received ticks aren't progressing incrementally."
-                       " latestReceivedTick: %u, newTick: %u", latestReceivedTick, newTick);
+        // If we received an update message.
+        if (newTick != 0) {
+            // If there's a gap > 1 between the latest received tick and this update's tick,
+            // we know that no changes happened on the in-between ticks and can push
+            // confirmations for them.
+            unsigned int implicitConfirmations = newTick - (latestReceivedTick + 1);
+            for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
+                stateUpdateQueue.push({(latestReceivedTick + 1), false, nullptr});
+                DebugInfo("Push1: %u", (latestReceivedTick + 1));
             }
+
+            // Push the update into the buffer.
+            stateUpdateQueue.push({newTick, true, receivedBuffer});
+            DebugInfo("Push2: %u", newTick);
+
             latestReceivedTick = newTick;
         }
+        else {
+            // Received a message confirming that a tick was processed with no update.
+            latestReceivedTick++;
+            stateUpdateQueue.push({latestReceivedTick, false, nullptr});
+            DebugInfo("Push3: %u", latestReceivedTick);
+        }
 
-        messagesReceived++;
         receivedBuffer = network.receive(MessageType::PlayerUpdate);
     }
-
-    return messagesReceived;
 }
 
 void NpcMovementSystem::moveAllNpcs() {

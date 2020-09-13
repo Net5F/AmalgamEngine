@@ -30,21 +30,29 @@ void NetworkOutputSystem::sendClientUpdates()
         }
     }
 
-    // No need to send any updates if nothing is dirty.
-    if (dirtyEntities.size() == 0) {
-        return;
-    }
-
     /* Update clients as necessary. */
     for (EntityID entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
         if ((world.componentFlags[entityID] & ComponentFlag::Client)) {
             // Clearing here because serializeEntity uses the builder.
             builder.Clear();
 
-            // Fill the vector of entity data.
+            // Check if this client needs the full world state.
+            ClientComponent& clientComponent = world.clients.find(entityID)->second;
             std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
-            for (EntityID dirtyEntity : dirtyEntities) {
-                entityVector.push_back(serializeEntity(dirtyEntity));
+            if (!clientComponent.isInitialized) {
+                // We need to send the client all entities.
+                for (EntityID unseenEntID = 0; unseenEntID < MAX_ENTITIES; ++unseenEntID) {
+                    if (world.componentFlags[unseenEntID] & ComponentFlag::Sprite) {
+                        entityVector.push_back(serializeEntity(unseenEntID));
+                    }
+                }
+                clientComponent.isInitialized = true;
+            }
+            else {
+                // We only need to update the client with dirty entities.
+                for (EntityID dirtyEntID : dirtyEntities) {
+                    entityVector.push_back(serializeEntity(dirtyEntID));
+                }
             }
 
             /* If there are updates to send, send an update message. */
@@ -63,7 +71,7 @@ void NetworkOutputSystem::sendClientUpdates()
                 builder.Finish(message);
 
                 // Send the message to all connected clients.
-                network.send(world.clients[entityID].networkID,
+                network.send(clientComponent.networkID,
                     Network::constructMessage(builder.GetSize(), builder.GetBufferPointer()));
             }
         }
