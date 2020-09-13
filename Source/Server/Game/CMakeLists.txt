@@ -2,14 +2,16 @@ target_sources(Server
 	PRIVATE
 		Private/World.cpp
 		Private/MovementSystem.cpp
+		Private/NetworkConnectionSystem.cpp
 		Private/NetworkInputSystem.cpp
-		Private/NetworkOutputSystem.cpp
+		Private/NetworkUpdateSystem.cpp
 		Private/Game.cpp
 	PUBLIC
 		Public/World.h
 		Public/MovementSystem.h
+		Public/NetworkConnectionSystem.h
 		Public/NetworkInputSystem.h
-		Public/NetworkOutputSystem.h
+		Public/NetworkUpdateSystem.h
 		Public/ClientComponent.h
 		Public/Game.h
 )

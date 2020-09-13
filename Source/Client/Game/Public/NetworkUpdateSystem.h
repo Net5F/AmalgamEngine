@@ -1,5 +1,5 @@
-#ifndef NETWORKOUTPUTSYSTEM_H
-#define NETWORKOUTPUTSYSTEM_H
+#ifndef NETWORKUPDATESYSTEM_H
+#define NETWORKUPDATESYSTEM_H
 
 #include "Message_generated.h"
 #include "GameDefs.h"
@@ -17,10 +17,10 @@ class Network;
  * This class is in charge of checking for data that needs to be sent, wrapping it
  * appropriately, and passing it to the Network's send queue.
  */
-class NetworkOutputSystem
+class NetworkUpdateSystem
 {
 public:
-    NetworkOutputSystem(Game& inGame, World& inWorld, Network& inNetwork);
+    NetworkUpdateSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
     /**
      * If the player inputs have changed, sends them to the server.
@@ -47,4 +47,4 @@ private:
 } // namespace Client
 } // namespace AM
 
-#endif /* NETWORKOUTPUTSYSTEM_H */
+#endif /* NETWORKUPDATESYSTEM_H */

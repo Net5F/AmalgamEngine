@@ -76,6 +76,17 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     return peer->send(&(batchBuffer[0]), currentIndex);
 }
 
+Uint8 Client::getWaitingMessageCount() const
+{
+    unsigned int size = sendQueue.size();
+    if (size > SDL_MAX_UINT8) {
+        DebugError("Client's sendQueue contains too many messages to return as"
+        "a Uint8.");
+    }
+
+    return size;
+}
+
 void Client::fillHeader(Uint8 messageCount, Uint32 currentTick)
 {
     // Fill in the adjustment info.
@@ -153,21 +164,6 @@ ReceiveResult Client::receiveMessage()
     }
 
     return result;
-}
-
-Uint8 Client::getWaitingMessageCount() const
-{
-    if (peer == nullptr) {
-        return 0;
-    }
-
-    unsigned int size = sendQueue.size();
-    if (size > SDL_MAX_UINT8) {
-        DebugError("Client's sendQueue contains too many messages to return as"
-        "a Uint8.");
-    }
-
-    return size;
 }
 
 bool Client::isConnected() {

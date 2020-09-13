@@ -11,7 +11,7 @@ Game::Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites
 : world()
 , network(inNetwork)
 , playerInputSystem(*this, world)
-, networkOutputSystem(*this, world, network)
+, networkUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, network)
 , npcMovementSystem(*this, world, network)
 , accumulatedTime(0.0)
@@ -58,7 +58,6 @@ void Game::connect()
 
     // Register the player ID with the world and the network.
     world.registerPlayerID(player);
-    network.registerPlayerID(player);
 
     // Initialize the player state.
     world.addEntity("Player", player);
@@ -126,7 +125,7 @@ void Game::tick()
             processUserInputEvents();
 
             // Send input updates to the server.
-            networkOutputSystem.sendInputState();
+            networkUpdateSystem.sendInputState();
 
             // Push the new input state into the player's history.
             playerInputSystem.addCurrentInputsToHistory();

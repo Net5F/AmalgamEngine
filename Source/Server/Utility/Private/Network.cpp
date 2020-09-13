@@ -20,30 +20,11 @@ Network::Network()
     sendTimer.updateSavedTime();
 }
 
-void Network::send(NetworkID id, const BinaryBufferSharedPtr& message)
-{
-    // Queue the message to be sent with the next batch.
-    std::shared_lock readLock(clientMapMutex);
-    clientMap.at(id).queueMessage(message);
-}
-
-void Network::sendToAll(const BinaryBufferSharedPtr& message)
-{
-    // Queue the message to be sent with the next batch.
-    std::shared_lock readLock(clientMapMutex);
-    for (auto& pair : clientMap) {
-        pair.second.queueMessage(message);
-    }
-}
-
 void Network::tick()
 {
     accumulatedTime += sendTimer.getDeltaSeconds(true);
 
     if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
-        // Queue connection responses before starting to send this batch.
-        queueConnectionResponses();
-
         // Send all messages for this network tick.
         sendClientUpdates();
 
@@ -58,6 +39,27 @@ void Network::tick()
                 accumulatedTime);
             accumulatedTime = 0;
         }
+    }
+}
+
+void Network::send(NetworkID networkID, const BinaryBufferSharedPtr& message)
+{
+    // Queue the message to be sent with the next batch.
+    std::shared_lock readLock(clientMapMutex);
+
+    // Check that the client still exists, queue the message if so.
+    auto clientPair = clientMap.find(networkID);
+    if (clientPair != clientMap.end()) {
+        clientPair->second.queueMessage(message);
+    }
+}
+
+void Network::sendToAll(const BinaryBufferSharedPtr& message)
+{
+    // Queue the message to be sent with the next batch.
+    std::shared_lock readLock(clientMapMutex);
+    for (auto& pair : clientMap) {
+        pair.second.queueMessage(message);
     }
 }
 
@@ -101,54 +103,9 @@ void Network::endReceiveInputMessages()
     inputMessageSorter.endReceive();
 }
 
-void Network::sendConnectionResponse(NetworkID networkID, EntityID newEntityID,
-                                     float spawnX, float spawnY)
-{
-    std::shared_lock readLock(clientMapMutex);
-    if (clientMap.find(networkID) == clientMap.end()) {
-        // Client disconnected or bug is present.
-        DebugInfo(
-            "Tried to send a connectionResponse to a client that isn't in the clients map.")
-    }
-
-    connectionResponseQueue.push({networkID, newEntityID, spawnX, spawnY});
-}
-
 void Network::initTimer()
 {
     sendTimer.updateSavedTime();
-}
-
-void Network::queueConnectionResponses()
-{
-    /* Send all waiting ConnectionResponse messages. */
-    unsigned int responseCount = connectionResponseQueue.size();
-    if (responseCount > 0) {
-        // (the tick count increments at the end of a sim tick, so our latest tick
-        //  is actually currentTick - 1).
-        Uint32 latestTickTimestamp = *currentTickPtr - 1;
-
-        for (unsigned int i = 0; i < responseCount; ++i) {
-            ConnectionResponseData& data = connectionResponseQueue.front();
-
-            // Prep the builder for a new message.
-            builder.Clear();
-
-            // Send them their ID and spawn point.
-            auto response = fb::CreateConnectionResponse(builder, data.entityID,
-                data.spawnX, data.spawnY);
-            auto encodedMessage = fb::CreateMessage(builder, latestTickTimestamp,
-                fb::MessageContent::ConnectionResponse, response.Union());
-            builder.Finish(encodedMessage);
-
-            // Queue the message so it gets included in the next batch.
-            send(data.networkID,
-                constructMessage(builder.GetSize(), builder.GetBufferPointer()));
-            DebugInfo("Sent new client response with tick = %u", latestTickTimestamp);
-
-            connectionResponseQueue.pop();
-        }
-    }
 }
 
 void Network::sendClientUpdates()
@@ -186,8 +143,8 @@ void Network::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr
     currentTickPtr = inCurrentTickPtr;
 }
 
-BinaryBufferSharedPtr Network::constructMessage(std::size_t size,
-                                                Uint8* messageBuffer)
+BinaryBufferSharedPtr Network::constructMessage(Uint8* messageBuffer,
+                                                std::size_t size)
 {
     if ((sizeof(Uint16) + size) > Peer::MAX_MESSAGE_SIZE) {
         DebugError("Tried to send a too-large message. Size: %u, max: %u", size,

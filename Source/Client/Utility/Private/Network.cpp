@@ -50,11 +50,6 @@ bool Network::connect()
     return (server != nullptr);
 }
 
-void Network::registerPlayerID(EntityID inPlayerID)
-{
-    playerID = inPlayerID;
-}
-
 void Network::send(const BinaryBufferSharedPtr& message)
 {
     if (!(server->isConnected())) {
@@ -124,6 +119,48 @@ int Network::pollForMessages()
     return 0;
 }
 
+int Network::transferTickAdjustment()
+{
+    int currentAdjustment = tickAdjustment;
+    if (currentAdjustment < 0) {
+        // The sim can only freeze for 1 tick at a time.
+        tickAdjustment += 1;
+        return currentAdjustment;
+    }
+    else if (currentAdjustment == 0){
+        return 0;
+    }
+    else {
+        // The sim can process multiple iterations to catch up.
+        tickAdjustment -= currentAdjustment;
+        return currentAdjustment;
+    }
+}
+
+BinaryBufferSharedPtr Network::constructMessage(Uint8* messageBuffer, std::size_t size)
+{
+    if ((sizeof(Uint16) + size) > Peer::MAX_MESSAGE_SIZE) {
+        DebugError("Tried to send a too-large message. Size: %u, max: %u", size,
+            Peer::MAX_MESSAGE_SIZE);
+    }
+
+    // Allocate a buffer that can hold the header, the Uint16 size bytes, and the
+    // message payload.
+    // NOTE: We leave CLIENT_HEADER_SIZE bytes empty at the front of the message to be
+    //       filled by the network before sending.
+    BinaryBufferSharedPtr dynamicBuffer = std::make_shared<std::vector<Uint8>>(
+        CLIENT_HEADER_SIZE + sizeof(Uint16) + size);
+
+    // Copy the size into the buffer.
+    _SDLNet_Write16(size, (dynamicBuffer->data() + CLIENT_HEADER_SIZE));
+
+    // Copy the message into the buffer.
+    std::copy(messageBuffer, messageBuffer + size,
+        (dynamicBuffer->data() + CLIENT_HEADER_SIZE + sizeof(Uint16)));
+
+    return dynamicBuffer;
+}
+
 void Network::processBatch(const BinaryBuffer& header) {
     // Check if we need to adjust the tick offset.
     adjustIfNeeded(header[ServerHeaderIndex::TickAdjustment],
@@ -172,6 +209,61 @@ void Network::processBatch(const BinaryBuffer& header) {
     // TEMP
 }
 
+void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
+{
+    // We might be sharing this message between queues, so convert it to shared.
+    BinaryBufferSharedPtr sharedBuffer = std::move(messageBuffer);
+    const fb::Message* message = fb::GetMessage(sharedBuffer->data());
+
+    /* Funnel the message into the appropriate queue. */
+    if (message->content_type() == fb::MessageContent::ConnectionResponse) {
+        // Grab our player ID so we can determine what update messages are for the player.
+        auto connectionResponse =
+            static_cast<const fb::ConnectionResponse*>(message->content());
+        playerID = connectionResponse->entityID();
+
+        // Queue the message.
+        if (!(connectionResponseQueue.enqueue(sharedBuffer))) {
+            DebugError("Ran out of room in queue and memory allocation failed.");
+        }
+        DebugInfo("Found connection response.");
+    }
+    else if (message->content_type() == fb::MessageContent::EntityUpdate) {
+        // Pull out the vector of entities.
+        auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
+        auto entities = entityUpdate->entities();
+
+        // Iterate through the entities, checking if there's player or npc data.
+        bool playerFound = false;
+        bool npcFound = false;
+        for (auto entityIt = entities->begin(); entityIt != entities->end(); ++entityIt) {
+            EntityID entityID = (*entityIt)->id();
+
+            if (entityID == playerID) {
+                // Found the player.
+                if (!(playerUpdateQueue.enqueue(sharedBuffer))) {
+                    DebugError("Ran out of room in queue and memory allocation failed.");
+                }
+                DebugInfo("Found player");
+                playerFound = true;
+            }
+            else if (!npcFound){
+                // Found a non-player (npc).
+                // Queueing the message will let all npc updates within be processed.
+                if (!(npcUpdateQueue.enqueue(sharedBuffer))) {
+                    DebugError("Ran out of room in queue and memory allocation failed.");
+                }
+                npcFound = true;
+            }
+
+            // If we found the player and an npc, we can stop looking.
+            if (playerFound && npcFound) {
+                return;
+            }
+        }
+    }
+}
+
 void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
 {
     if (receivedTickAdj != 0) {
@@ -195,102 +287,14 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
     }
 }
 
-void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
-{
-    // We might be sharing this message between queues, so convert it to shared.
-    BinaryBufferSharedPtr sharedBuffer = std::move(messageBuffer);
-    const fb::Message* message = fb::GetMessage(sharedBuffer->data());
-
-    /* Funnel the message into the appropriate queue. */
-    if (message->content_type() == fb::MessageContent::ConnectionResponse) {
-        if (!(connectionResponseQueue.enqueue(sharedBuffer))) {
-            DebugError("Ran out of room in queue and memory allocation failed.");
-        }
-    }
-    else if (message->content_type() == fb::MessageContent::EntityUpdate) {
-        // Pull out the vector of entities.
-        auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
-        auto entities = entityUpdate->entities();
-
-        // Iterate through the entities, checking if there's player or npc data.
-        bool playerFound = false;
-        bool npcFound = false;
-        for (auto entityIt = entities->begin(); entityIt != entities->end(); ++entityIt) {
-            EntityID entityID = (*entityIt)->id();
-
-            if (entityID == playerID) {
-                // Found the player.
-                if (!(playerUpdateQueue.enqueue(sharedBuffer))) {
-                    DebugError("Ran out of room in queue and memory allocation failed.");
-                }
-                playerFound = true;
-            }
-            else if (!npcFound){
-                // Found a non-player (npc).
-                // Queueing the message will let all npc updates within be processed.
-                if (!(npcUpdateQueue.enqueue(sharedBuffer))) {
-                    DebugError("Ran out of room in queue and memory allocation failed.");
-                }
-                npcFound = true;
-            }
-
-            // If we found the player and an npc, we can stop looking.
-            if (playerFound && npcFound) {
-                return;
-            }
-        }
-    }
-}
-
-std::shared_ptr<Peer> Network::getServer()
+std::shared_ptr<Peer> Network::getServer() const
 {
     return server;
 }
 
-int Network::transferTickAdjustment()
+std::atomic<bool> const* Network::getExitRequestedPtr() const
 {
-    int currentAdjustment = tickAdjustment;
-    if (currentAdjustment < 0) {
-        // The sim can only freeze for 1 tick at a time.
-        tickAdjustment += 1;
-        return currentAdjustment;
-    }
-    else if (currentAdjustment == 0){
-        return 0;
-    }
-    else {
-        // The sim can process multiple iterations to catch up.
-        tickAdjustment -= currentAdjustment;
-        return currentAdjustment;
-    }
-}
-
-std::atomic<bool> const* Network::getExitRequestedPtr() {
     return &exitRequested;
-}
-
-BinaryBufferSharedPtr Network::constructMessage(std::size_t size, Uint8* messageBuffer)
-{
-    if ((sizeof(Uint16) + size) > Peer::MAX_MESSAGE_SIZE) {
-        DebugError("Tried to send a too-large message. Size: %u, max: %u", size,
-            Peer::MAX_MESSAGE_SIZE);
-    }
-
-    // Allocate a buffer that can hold the header, the Uint16 size bytes, and the
-    // message payload.
-    // NOTE: We leave CLIENT_HEADER_SIZE bytes empty at the front of the message to be
-    //       filled by the network before sending.
-    BinaryBufferSharedPtr dynamicBuffer = std::make_shared<std::vector<Uint8>>(
-        CLIENT_HEADER_SIZE + sizeof(Uint16) + size);
-
-    // Copy the size into the buffer.
-    _SDLNet_Write16(size, (dynamicBuffer->data() + CLIENT_HEADER_SIZE));
-
-    // Copy the message into the buffer.
-    std::copy(messageBuffer, messageBuffer + size,
-        (dynamicBuffer->data() + CLIENT_HEADER_SIZE + sizeof(Uint16)));
-
-    return dynamicBuffer;
 }
 
 } // namespace Client

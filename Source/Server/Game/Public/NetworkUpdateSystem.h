@@ -1,5 +1,5 @@
-#ifndef NETWORKOUTPUTSYSTEM_H
-#define NETWORKOUTPUTSYSTEM_H
+#ifndef NETWORKUPDATESYSTEM_H
+#define NETWORKUPDATESYSTEM_H
 
 #include "Message_generated.h"
 #include "GameDefs.h"
@@ -14,12 +14,13 @@ class World;
 class Network;
 
 /**
- *
+ * This class is in charge of checking for data that needs to be sent, wrapping it
+ * appropriately, and passing it to the Network's send queue.
  */
-class NetworkOutputSystem
+class NetworkUpdateSystem
 {
 public:
-    NetworkOutputSystem(Game& inGame, World& inWorld, Network& inNetwork);
+    NetworkUpdateSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
     /**
      * Updates all connected clients with relevant world state.
@@ -28,7 +29,7 @@ public:
 
 private:
     /**
-     * Serializes the given entity's relevant world data.
+     * Serializes the given entity's relevant world
      * @param entityID  The entity to serialize.
      * @return An offset where the data was stored in the builder.
      */
@@ -45,4 +46,4 @@ private:
 } // namespace Server
 } // namespace AM
 
-#endif /* NETWORKOUTPUTSYSTEM_H */
+#endif /* NETWORKUPDATESYSTEM_H */

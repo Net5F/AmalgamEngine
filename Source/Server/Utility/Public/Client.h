@@ -58,12 +58,6 @@ public:
     ReceiveResult receiveMessage();
 
     /**
-     * Returns the number of messages waiting in sendQueue.
-     * The return type is Uint8 because it needs to fit in 1 byte of a message.
-     */
-    Uint8 getWaitingMessageCount() const;
-
-    /**
      * @return True if the client is connected, else false.
      *
      * Note: There's 2 places where a disconnect can occur:
@@ -115,6 +109,15 @@ public:
     AdjustmentData getTickAdjustment();
 
 private:
+    //--------------------------------------------------------------------------
+    // Private Functions
+    //--------------------------------------------------------------------------
+    /**
+     * Returns the number of messages waiting in the sendQueue.
+     * The return type is Uint8 because it needs to fit in 1 byte of a message.
+     */
+    Uint8 getWaitingMessageCount() const;
+
     /**
      * Fills in the header information for the batch currently being built.
      * @param messageCount  The number of messages going into the current batch.
@@ -136,6 +139,9 @@ private:
     float averageDiff,
     CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy);
 
+    //--------------------------------------------------------------------------
+    // Connection, Batching
+    //--------------------------------------------------------------------------
     /** How long we should wait before considering the client to be timed out. */
     static constexpr double TIMEOUT_S = NETWORK_TICK_TIMESTEP_S * 2;
 
@@ -155,6 +161,12 @@ private:
     /** The latest tick that we've sent an update to this client for. */
     Uint32 latestSentSimTick;
 
+    /** Tracks how long it's been since we've received a message from this client. */
+    Timer receiveTimer;
+
+    //--------------------------------------------------------------------------
+    // Synchronization
+    //--------------------------------------------------------------------------
     /**
      * Holds tick diffs that have been added through recordTickDiff.
      */
@@ -173,9 +185,6 @@ private:
      * Looped around from the client to avoid double-counting adjustments.
      */
     std::atomic<Uint8> latestAdjIteration;
-
-    /** Tracks how long it's been since we've received a message from this client. */
-    Timer receiveTimer;
 };
 
 } // End namespace Server

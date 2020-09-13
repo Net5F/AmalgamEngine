@@ -32,13 +32,18 @@ public:
     Network();
 
     /**
+     * Sends any queued messages over the network.
+     */
+    void tick();
+
+    /**
      * Queues a message to be sent the next time sendWaitingMessages is called.
      * @throws std::out_of_range if id is not in the clients map.
      *
-     * @param id  The client to send the message to.
+     * @param networkID  The client to send the message to.
      * @param message  The message to send.
      */
-    void send(NetworkID id, const BinaryBufferSharedPtr& message);
+    void send(NetworkID networkID, const BinaryBufferSharedPtr& message);
 
     /**
      * Queues a message to be sent to all connected clients the next time
@@ -47,11 +52,6 @@ public:
      * @param message  The message to send.
      */
     void sendToAll(const BinaryBufferSharedPtr& message);
-
-    /**
-     * Sends any queued messages over the network.
-     */
-    void tick();
 
     /**
      * Pushes a message into the inputMessageSorter.
@@ -67,19 +67,6 @@ public:
 
     /** Forward to the inputMessageSorter's endReceive. */
     void endReceiveInputMessages();
-
-    /**
-     * Queues the given data to be sent on the next network tick to the client associated
-     * with the given NetworkID.
-     *
-     * This must be done instead of queueing a message immediately to ensure that the
-     * client receives the latest tick (because messages are batched).
-     *
-     * @param networkID  The client's network ID to send the connection response to.
-     * @param newEntityID  The entity ID that the Game associated with the client.
-     */
-    void sendConnectionResponse(NetworkID networkID, EntityID newEntityID, float spawnX,
-                                float spawnY);
 
     /** Initialize the send timer. */
     void initTimer();
@@ -104,23 +91,9 @@ public:
      * Message + size with one send call, so it's convenient to have it all in
      * one buffer.
      */
-    static BinaryBufferSharedPtr constructMessage(std::size_t size, Uint8* messageBuffer);
+    static BinaryBufferSharedPtr constructMessage(Uint8* messageBuffer, std::size_t size);
 
 private:
-    /** Holds data for a deferred send of a ConnectionResponse message. */
-    struct ConnectionResponseData {
-        NetworkID networkID;
-        EntityID entityID;
-        float spawnX;
-        float spawnY;
-    };
-
-    /**
-     * Constructs any data in connectionResponseQueue into a message and
-     * queues it in the relevant client's send queue.
-     */
-    void queueConnectionResponses();
-
     /**
      * Tries to send any messages in each client's queue over the network.
      * If a send fails, leaves the message at the front of the queue and moves on to the
@@ -150,9 +123,6 @@ private:
 
     /** Stores input messages received from clients, sorted by tick number. */
     MessageSorter inputMessageSorter;
-
-    /** Holds data for ConnectionResponse messages that need to be sent. */
-    std::queue<ConnectionResponseData> connectionResponseQueue;
 
     static constexpr int BUILDER_BUFFER_SIZE = 512;
     flatbuffers::FlatBufferBuilder builder;

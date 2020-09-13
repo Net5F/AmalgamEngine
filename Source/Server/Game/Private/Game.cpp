@@ -10,9 +10,10 @@ namespace Server
 Game::Game(Network& inNetwork)
 : world()
 , network(inNetwork)
+, networkConnectionSystem(*this, world, network)
 , networkInputSystem(*this, world, network)
 , movementSystem(world)
-, networkOutputSystem(*this, world, network)
+, networkUpdateSystem(*this, world, network)
 , accumulatedTime(0.0)
 , currentTick(0)
 {
@@ -27,18 +28,14 @@ void Game::tick()
 
     /* Process as many game ticks as have accumulated. */
     while (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
-        // Add any newly connected clients to the sim.
-        processConnectEvents();
-
-        // Remove any newly disconnected clients from the sim.
-        processDisconnectEvents();
-
         /* Run all systems. */
+        networkConnectionSystem.processConnectionEvents();
+
         networkInputSystem.processInputMessages();
 
         movementSystem.processMovements();
 
-        networkOutputSystem.sendClientUpdates();
+        networkUpdateSystem.sendClientUpdates();
 
         /* Prepare for the next tick. */
         accumulatedTime -= GAME_TICK_TIMESTEP_S;
@@ -62,76 +59,6 @@ void Game::tick()
         }
 
         currentTick++;
-    }
-}
-
-void Game::processConnectEvents()
-{
-    moodycamel::ReaderWriterQueue<NetworkID>& connectEventQueue =
-        network.getConnectEventQueue();
-
-    // Add all newly connected client's entities to the sim.
-    for (unsigned int i = 0; i < connectEventQueue.size_approx(); ++i) {
-        NetworkID clientNetworkID = 0;
-        if (!(connectEventQueue.try_dequeue(clientNetworkID))) {
-            DebugError("Expected element in connectEventQueue but dequeue failed.");
-        }
-
-        // Build their entity.
-        EntityID newEntityID = world.addEntity("Player");
-        const Position& spawnPoint = world.getSpawnPoint();
-        world.positions[newEntityID].x = spawnPoint.x;
-        world.positions[newEntityID].y = spawnPoint.y;
-        world.movements[newEntityID].maxVelX = 250;
-        world.movements[newEntityID].maxVelY = 250;
-        world.clients.insert({newEntityID, {clientNetworkID}});
-        world.attachComponent(newEntityID, ComponentFlag::Input);
-        world.attachComponent(newEntityID, ComponentFlag::Movement);
-        world.attachComponent(newEntityID, ComponentFlag::Position);
-        world.attachComponent(newEntityID, ComponentFlag::Sprite);
-        world.attachComponent(newEntityID, ComponentFlag::Client);
-
-        DebugInfo("Constructed entity with netID: %u, entityID: %u", clientNetworkID,
-            newEntityID);
-
-        // Tell the network to send a connectionResponse on the next network tick.
-        network.sendConnectionResponse(clientNetworkID, newEntityID, spawnPoint.x,
-            spawnPoint.y);
-    }
-}
-
-void Game::processDisconnectEvents()
-{
-    moodycamel::ReaderWriterQueue<NetworkID>& disconnectEventQueue =
-        network.getDisconnectEventQueue();
-
-    // Remove all newly disconnected client's entities from the sim.
-    for (unsigned int i = 0; i < disconnectEventQueue.size_approx(); ++i) {
-        NetworkID disconnectedClientID = 0;
-        if (!(disconnectEventQueue.try_dequeue(disconnectedClientID))) {
-            DebugError("Expected element in disconnectEventQueue but dequeue failed.");
-        }
-
-        // Iterate through the connected clients, bailing early if we find the one we want.
-        bool entityFound = false;
-        auto it = world.clients.begin();
-        while ((it != world.clients.end()) && !entityFound) {
-            if (it->second.networkID == disconnectedClientID) {
-                // Found the ClientComponent we expected, remove the entity from everything.
-                entityFound = true;
-
-                world.removeEntity(it->first);
-                DebugInfo("Erased entity with netID: %u", it->first);
-                world.clients.erase(it);
-            } else {
-                ++it;
-            }
-        }
-
-        if (!entityFound) {
-            DebugError(
-                "Failed to find entity with netID: %u while erasing.", disconnectedClientID);
-        }
     }
 }
 

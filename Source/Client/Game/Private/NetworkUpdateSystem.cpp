@@ -1,4 +1,4 @@
-#include "NetworkOutputSystem.h"
+#include "NetworkUpdateSystem.h"
 #include "Game.h"
 #include "World.h"
 #include "Network.h"
@@ -10,7 +10,7 @@ namespace AM
 namespace Client
 {
 
-NetworkOutputSystem::NetworkOutputSystem(Game& inGame, World& inWorld, Network& inNetwork)
+NetworkUpdateSystem::NetworkUpdateSystem(Game& inGame, World& inWorld, Network& inNetwork)
 : game(inGame)
 , world(inWorld)
 , network(inNetwork)
@@ -18,7 +18,7 @@ NetworkOutputSystem::NetworkOutputSystem(Game& inGame, World& inWorld, Network& 
 {
 }
 
-void NetworkOutputSystem::sendInputState()
+void NetworkUpdateSystem::sendInputState()
 {
     if (Network::RUN_OFFLINE) {
         // No need to send messages if we're running offline.
@@ -53,12 +53,12 @@ void NetworkOutputSystem::sendInputState()
     builder.Finish(message);
 
     // Send the message.
-    network.send(Network::constructMessage(builder.GetSize(), builder.GetBufferPointer()));
+    network.send(Network::constructMessage(builder.GetBufferPointer(), builder.GetSize()));
 
     world.playerIsDirty = false;
 }
 
-flatbuffers::Offset<AM::fb::Entity> NetworkOutputSystem::serializeEntity(
+flatbuffers::Offset<AM::fb::Entity> NetworkUpdateSystem::serializeEntity(
 EntityID playerID)
 {
     /* Translate the inputs to fb's enum. */

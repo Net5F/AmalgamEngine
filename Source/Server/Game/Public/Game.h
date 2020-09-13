@@ -2,9 +2,10 @@
 #define GAME_H
 
 #include "World.h"
+#include "NetworkConnectionSystem.h"
 #include "NetworkInputSystem.h"
 #include "MovementSystem.h"
-#include "NetworkOutputSystem.h"
+#include "NetworkUpdateSystem.h"
 #include "Timer.h"
 #include <atomic>
 
@@ -28,16 +29,6 @@ public:
      */
     void tick();
 
-    /**
-     * Processes all newly connected clients, adding them to the sim.
-     */
-    void processConnectEvents();
-
-    /**
-     * Processes all newly disconnected clients, removing them from the sim.
-     */
-    void processDisconnectEvents();
-
     /** Initialize the iteration timer. */
     void initTimer();
 
@@ -52,9 +43,10 @@ private:
     World world;
     Network& network;
 
+    NetworkConnectionSystem networkConnectionSystem;
     NetworkInputSystem networkInputSystem;
     MovementSystem movementSystem;
-    NetworkOutputSystem networkOutputSystem;
+    NetworkUpdateSystem networkUpdateSystem;
 
     /** Used to time when we should process an iteration. */
     Timer iterationTimer;

@@ -32,6 +32,7 @@ void NpcMovementSystem::updateNpcs()
     /* While we have data to use, apply updates for all unprocessed ticks including the
        desired tick. */
     while ((lastProcessedTick <= desiredTick) && (stateUpdateQueue.size() > 0)) {
+        // TODO: This should be progressing, even if there's no npc update
         // Move all NPCs as if their inputs didn't change.
         moveAllNpcs();
 

@@ -46,11 +46,6 @@ public:
     bool connect();
 
     /**
-     * Registers an entity as being the player. Various systems will only apply to this entity.
-     */
-    void registerPlayerID(EntityID inPlayerID);
-
-    /**
      * Sends bytes over the network.
      * Errors if the server is disconnected.
      */
@@ -74,21 +69,12 @@ public:
     int pollForMessages();
 
     /**
-     * Pushes a message into the appropriate queue, based on its contents.
-     */
-    void processReceivedMessage(BinaryBufferPtr messageBuffer);
-
-    std::shared_ptr<Peer> getServer();
-
-    /**
      * Subtracts an appropriate amount from the tickAdjustment based on its current value,
      * and returns the amount subtracted.
      * @return 1 if there's a negative tickAdjustment (the sim can only freeze 1 tick at a
      *         time), else 0 or a negative amount equal to the current tickAdjustment.
      */
     int transferTickAdjustment();
-
-    std::atomic<bool> const* getExitRequestedPtr();
 
     /**
      * Allocates and fills a dynamic buffer with message data.
@@ -102,7 +88,7 @@ public:
      * Message + size + header with one send call, so it's convenient to have it all in
      * one buffer.
      */
-    static BinaryBufferSharedPtr constructMessage(std::size_t size, Uint8* messageBuffer);
+    static BinaryBufferSharedPtr constructMessage(Uint8* messageBuffer, std::size_t size);
 
 private:
     /**
@@ -113,11 +99,19 @@ private:
     void processBatch(const BinaryBuffer& header);
 
     /**
+     * Pushes a message into the appropriate queue, based on its contents.
+     */
+    void processReceivedMessage(BinaryBufferPtr messageBuffer);
+
+    /**
      * Checks if we need to process the received adjustment, does so if necessary.
      * @param receivedTickAdj  The received tick adjustment.
      * @param receivedAdjIteration  The adjustment iteration for the received adjustment.
      */
     void adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration);
+
+    std::shared_ptr<Peer> getServer() const;
+    std::atomic<bool> const* getExitRequestedPtr() const;
 
     static const std::string SERVER_IP;
     static constexpr unsigned int SERVER_PORT = 41499;

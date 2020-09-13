@@ -2,7 +2,7 @@ target_sources(Client
 	PRIVATE
 		Private/World.cpp
 		Private/PlayerInputSystem.cpp
-		Private/NetworkOutputSystem.cpp
+		Private/NetworkUpdateSystem.cpp
 		Private/PlayerMovementSystem.cpp
 		Private/NpcMovementSystem.cpp
 		Private/RenderSystem.cpp
@@ -10,7 +10,7 @@ target_sources(Client
 	PUBLIC
 		Public/World.h
 		Public/PlayerInputSystem.h
-		Public/NetworkOutputSystem.h
+		Public/NetworkUpdateSystem.h
 		Public/PlayerMovementSystem.h
 		Public/NpcMovementSystem.h
 		Public/RenderSystem.h

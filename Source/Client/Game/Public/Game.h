@@ -5,7 +5,7 @@
 #include "PlayerMovementSystem.h"
 #include "World.h"
 #include "PlayerInputSystem.h"
-#include "NetworkOutputSystem.h"
+#include "NetworkUpdateSystem.h"
 #include "Message_generated.h"
 #include "Timer.h"
 #include <atomic>
@@ -70,7 +70,7 @@ private:
     Network& network;
 
     PlayerInputSystem playerInputSystem;
-    NetworkOutputSystem networkOutputSystem;
+    NetworkUpdateSystem networkUpdateSystem;
     PlayerMovementSystem playerMovementSystem;
     NpcMovementSystem npcMovementSystem;
 

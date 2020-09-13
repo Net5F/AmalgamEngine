@@ -1,4 +1,4 @@
-#include "NetworkOutputSystem.h"
+#include "NetworkUpdateSystem.h"
 #include "Game.h"
 #include "World.h"
 #include "Network.h"
@@ -10,7 +10,7 @@ namespace AM
 namespace Server
 {
 
-NetworkOutputSystem::NetworkOutputSystem(Game& inGame, World& inWorld, Network& inNetwork)
+NetworkUpdateSystem::NetworkUpdateSystem(Game& inGame, World& inWorld, Network& inNetwork)
 : game(inGame)
 , world(inWorld)
 , network(inNetwork)
@@ -18,7 +18,7 @@ NetworkOutputSystem::NetworkOutputSystem(Game& inGame, World& inWorld, Network& 
 {
 }
 
-void NetworkOutputSystem::sendClientUpdates()
+void NetworkUpdateSystem::sendClientUpdates()
 {
 
     // Collect the dirty entities.
@@ -40,10 +40,12 @@ void NetworkOutputSystem::sendClientUpdates()
             ClientComponent& clientComponent = world.clients.find(entityID)->second;
             std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
             if (!clientComponent.isInitialized) {
-                // We need to send the client all entities.
-                for (EntityID unseenEntID = 0; unseenEntID < MAX_ENTITIES; ++unseenEntID) {
-                    if (world.componentFlags[unseenEntID] & ComponentFlag::Sprite) {
-                        entityVector.push_back(serializeEntity(unseenEntID));
+                // We need to send the client all other client entities.
+                for (EntityID i = 0; i < MAX_ENTITIES; ++i) {
+                    if ((i != entityID)
+                          && (world.componentFlags[i] & ComponentFlag::Client)) {
+                        entityVector.push_back(serializeEntity(i));
+                        DebugInfo("Pushing: %u", i);
                     }
                 }
                 clientComponent.isInitialized = true;
@@ -72,7 +74,7 @@ void NetworkOutputSystem::sendClientUpdates()
 
                 // Send the message to all connected clients.
                 network.send(clientComponent.networkID,
-                    Network::constructMessage(builder.GetSize(), builder.GetBufferPointer()));
+                    Network::constructMessage(builder.GetBufferPointer(), builder.GetSize()));
             }
         }
     }
@@ -83,7 +85,7 @@ void NetworkOutputSystem::sendClientUpdates()
     }
 }
 
-flatbuffers::Offset<AM::fb::Entity> NetworkOutputSystem::serializeEntity(
+flatbuffers::Offset<AM::fb::Entity> NetworkUpdateSystem::serializeEntity(
 EntityID entityID)
 {
     /* Fill the message with the latest PositionComponent, MovementComponent,
