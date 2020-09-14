@@ -29,6 +29,12 @@ public:
 
 private:
     /**
+     * Fills the given vector with the entities that must be sent to the given entityID
+     * on this tick.
+     */
+    void constructAndSendUpdate(EntityID entityID, std::vector<EntityID>& dirtyEntities);
+
+    /**
      * Serializes the given entity's relevant world
      * @param entityID  The entity to serialize.
      * @return An offset where the data was stored in the builder.

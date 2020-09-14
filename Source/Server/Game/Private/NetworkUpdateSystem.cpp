@@ -20,8 +20,7 @@ NetworkUpdateSystem::NetworkUpdateSystem(Game& inGame, World& inWorld, Network& 
 
 void NetworkUpdateSystem::sendClientUpdates()
 {
-
-    // Collect the dirty entities.
+    // Collect the dirty entities so we don't need to re-find them for every client.
     std::vector<EntityID> dirtyEntities;
     dirtyEntities.reserve(MAX_ENTITIES);
     for (EntityID i = 0; i < MAX_ENTITIES; ++i) {
@@ -36,52 +35,59 @@ void NetworkUpdateSystem::sendClientUpdates()
             // Clearing here because serializeEntity uses the builder.
             builder.Clear();
 
-            // Check if this client needs the full world state.
-            ClientComponent& clientComponent = world.clients.find(entityID)->second;
-            std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
-            if (!clientComponent.isInitialized) {
-                // We need to send the client all other client entities.
-                for (EntityID i = 0; i < MAX_ENTITIES; ++i) {
-                    if ((i != entityID)
-                          && (world.componentFlags[i] & ComponentFlag::Client)) {
-                        entityVector.push_back(serializeEntity(i));
-                        DebugInfo("Pushing: %u", i);
-                    }
-                }
-                clientComponent.isInitialized = true;
-            }
-            else {
-                // We only need to update the client with dirty entities.
-                for (EntityID dirtyEntID : dirtyEntities) {
-                    entityVector.push_back(serializeEntity(dirtyEntID));
-                }
-            }
-
-            /* If there are updates to send, send an update message. */
-            if (entityVector.size() > 0) {
-                // Build an EntityUpdate.
-                auto serializedEntities = builder.CreateVector(entityVector);
-                flatbuffers::Offset<fb::EntityUpdate> entityUpdate =
-                    fb::CreateEntityUpdate(builder, serializedEntities);
-
-                // Build a Message.
-                fb::MessageBuilder messageBuilder(builder);
-                messageBuilder.add_tickTimestamp(game.getCurrentTick());
-                messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
-                messageBuilder.add_content(entityUpdate.Union());
-                flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
-                builder.Finish(message);
-
-                // Send the message to all connected clients.
-                network.send(clientComponent.networkID,
-                    Network::constructMessage(builder.GetBufferPointer(), builder.GetSize()));
-            }
+            // Send the entity whatever data it needs.
+            constructAndSendUpdate(entityID, dirtyEntities);
         }
     }
 
     // Clean any dirty entities.
     for (EntityID dirtyEntity : dirtyEntities) {
         world.entityIsDirty[dirtyEntity] = false;
+    }
+}
+
+void NetworkUpdateSystem::constructAndSendUpdate(EntityID entityID,
+                                                 std::vector<EntityID>& dirtyEntities)
+{
+    /** Fill the vector of entities to send. */
+    std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
+    ClientComponent& clientComponent = world.clients.find(entityID)->second;
+    if (!clientComponent.isInitialized) {
+        // New client, we need to send it all relevant entities.
+        for (EntityID i = 0; i < MAX_ENTITIES; ++i) {
+            if ((i != entityID)
+                  && (world.componentFlags[i] & ComponentFlag::Client)) {
+                entityVector.push_back(serializeEntity(i));
+            }
+        }
+        clientComponent.isInitialized = true;
+    }
+    else {
+        // We only need to update the client with dirty entities.
+        for (EntityID dirtyEntID : dirtyEntities) {
+            entityVector.push_back(serializeEntity(dirtyEntID));
+        }
+    }
+
+    /* If there are updates to send, send an update message. */
+    if (entityVector.size() > 0) {
+        DebugInfo("Sending message with tick: %u", game.getCurrentTick());
+        // Build an EntityUpdate.
+        auto serializedEntities = builder.CreateVector(entityVector);
+        flatbuffers::Offset<fb::EntityUpdate> entityUpdate =
+            fb::CreateEntityUpdate(builder, serializedEntities);
+
+        // Build a Message.
+        fb::MessageBuilder messageBuilder(builder);
+        messageBuilder.add_tickTimestamp(game.getCurrentTick());
+        messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
+        messageBuilder.add_content(entityUpdate.Union());
+        flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
+        builder.Finish(message);
+
+        // Send the message to all connected clients.
+        network.send(clientComponent.networkID,
+            Network::constructMessage(builder.GetBufferPointer(), builder.GetSize()));
     }
 }
 

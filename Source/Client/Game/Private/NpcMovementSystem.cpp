@@ -67,8 +67,9 @@ void NpcMovementSystem::receiveEntityUpdates()
         Uint32 newTick = message->tickTimestamp();
         if (latestReceivedTick == 0) {
             // Received our first message, init our values.
-            latestReceivedTick = newTick - 1;
+            latestReceivedTick = game.getCurrentTick() - Network::INITIAL_TICK_OFFSET - 1;
             lastProcessedTick = latestReceivedTick;
+            DebugInfo("Init lastReceivedTick to: %u", latestReceivedTick);
         }
 
         // If we received an update message.
@@ -78,8 +79,8 @@ void NpcMovementSystem::receiveEntityUpdates()
             // confirmations for them.
             unsigned int implicitConfirmations = newTick - (latestReceivedTick + 1);
             for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
-                stateUpdateQueue.push({(latestReceivedTick + 1), false, nullptr});
-                DebugInfo("Push1: %u", (latestReceivedTick + 1));
+                stateUpdateQueue.push({(latestReceivedTick + i), false, nullptr});
+                DebugInfo("Push1: %u", (latestReceivedTick + i));
             }
 
             // Push the update into the buffer.
