@@ -32,9 +32,6 @@ void NetworkUpdateSystem::sendClientUpdates()
     /* Update clients as necessary. */
     for (EntityID entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
         if ((world.componentFlags[entityID] & ComponentFlag::Client)) {
-            // Clearing here because serializeEntity uses the builder.
-            builder.Clear();
-
             // Send the entity whatever data it needs.
             constructAndSendUpdate(entityID, dirtyEntities);
         }
@@ -49,6 +46,9 @@ void NetworkUpdateSystem::sendClientUpdates()
 void NetworkUpdateSystem::constructAndSendUpdate(EntityID entityID,
                                                  std::vector<EntityID>& dirtyEntities)
 {
+    // Clearing here because serializeEntity uses the builder.
+    builder.Clear();
+
     /** Fill the vector of entities to send. */
     std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
     ClientComponent& clientComponent = world.clients.find(entityID)->second;
@@ -71,7 +71,8 @@ void NetworkUpdateSystem::constructAndSendUpdate(EntityID entityID,
 
     /* If there are updates to send, send an update message. */
     if (entityVector.size() > 0) {
-        DebugInfo("Sending message with tick: %u", game.getCurrentTick());
+        DebugInfo("Queueing message for entity: %u with tick: %u", entityID,
+                  game.getCurrentTick());
         // Build an EntityUpdate.
         auto serializedEntities = builder.CreateVector(entityVector);
         flatbuffers::Offset<fb::EntityUpdate> entityUpdate =

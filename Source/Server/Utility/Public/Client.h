@@ -30,7 +30,7 @@ namespace Server
 class Client
 {
 public:
-    Client(std::unique_ptr<Peer> inPeer);
+    Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer);
 
     //--------------------------------------------------------------------------
     // Communication
@@ -144,6 +144,9 @@ private:
     //--------------------------------------------------------------------------
     /** How long we should wait before considering the client to be timed out. */
     static constexpr double TIMEOUT_S = NETWORK_TICK_TIMESTEP_S * 2;
+
+    /** Our Network-given ID. */
+    NetworkID netID;
 
     /**
      * Our connection and interface to the client.

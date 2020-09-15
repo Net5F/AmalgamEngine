@@ -42,10 +42,9 @@ std::unordered_map<NetworkID, Client>& clientMap)
 
         // Add the peer to the Network's clientMap, constructing a Client in-place.
         std::unique_lock writeLock(network.getClientMapMutex());
-        if (!(clientMap.emplace(newID, std::move(newPeer)).second)) {
+        if (!(clientMap.try_emplace(newID, newID, std::move(newPeer)).second)) {
             idPool.freeID(newID);
-            DebugError(
-                "Ran out of room in new client queue and memory allocation failed.");
+            DebugError("Ran out of room in client map or key already existed.");
         }
 
         // Add an event to the Network's queue.

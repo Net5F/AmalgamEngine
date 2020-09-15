@@ -11,8 +11,9 @@ namespace AM
 namespace Server
 {
 
-Client::Client(std::unique_ptr<Peer> inPeer)
-: peer(std::move(inPeer))
+Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
+: netID(inNetID)
+, peer(std::move(inPeer))
 , batchBuffer{}
 , latestSentSimTick(0)
 , hasRecordedDiff(false)
@@ -61,7 +62,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
         const fb::Message* message = fb::GetMessage(
             messageBuffer->data() + sizeof(Uint16));
         latestSentSimTick = message->tickTimestamp();
-        DebugInfo("(%p) Batch: updated latestSent to: %u", this, latestSentSimTick);
+        DebugInfo("(%u) Update: updated latestSent to: %u", netID, latestSentSimTick);
 
         sendQueue.pop_front();
     }
@@ -70,7 +71,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     fillHeader(messageCount, currentTick);
 
     // Send the message.
-    DebugInfo("Sending message with messageCount: %u, confirmedTickCount: %u",
+    DebugInfo("Sending batch with messageCount: %u, confirmedTickCount: %u",
         batchBuffer[ServerHeaderIndex::MessageCount],
         batchBuffer[ServerHeaderIndex::ConfirmedTickCount]);
     return peer->send(&(batchBuffer[0]), currentIndex);
@@ -116,7 +117,7 @@ void Client::fillHeader(Uint8 messageCount, Uint32 currentTick)
 
         // TEMP
         if (confirmedTickCount > 0) {
-            DebugInfo("(%p) Confirm: updated latestSent to: %u", this, latestSentSimTick);
+            DebugInfo("(%u) Confirm: updated latestSent to: %u", netID, latestSentSimTick);
         }
         // TEMP
     }

@@ -25,6 +25,20 @@ Network::Network()
 
     // Init the timer to the current time.
     receiveTimer.updateSavedTime();
+
+    /* Construct a message with just tickTimestamp == 0 to use for confirming that a tick
+       passed with no update. */
+    constexpr int BUILDER_BUFFER_SIZE = 512;
+    flatbuffers::FlatBufferBuilder builder(BUILDER_BUFFER_SIZE);
+
+    fb::MessageBuilder messageBuilder(builder);
+    messageBuilder.add_tickTimestamp(0);
+    messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
+    flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
+    builder.Finish(message);
+
+    confirmationMessage = std::make_shared<BinaryBuffer>(builder.GetBufferPointer(),
+        (builder.GetBufferPointer() + builder.GetSize()));
 }
 
 Network::~Network()
@@ -187,25 +201,12 @@ void Network::processBatch(const BinaryBuffer& header) {
     /* Process any confirmed ticks. */
     Uint8 confirmedTickCount = header[ServerHeaderIndex::ConfirmedTickCount];
     for (unsigned int i = 0; i < confirmedTickCount; ++i) {
-        /* Construct a message with just the tick timestamp. */
-        builder.Clear();
-        fb::MessageBuilder messageBuilder(builder);
-        messageBuilder.add_tickTimestamp(0);
-        messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
-        flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
-        builder.Finish(message);
-
-        BinaryBufferSharedPtr buffer = std::make_shared<BinaryBuffer>(
-            builder.GetBufferPointer(),
-            (builder.GetBufferPointer() + builder.GetSize()));
-        if (!(npcUpdateQueue.enqueue(buffer))) {
-            DebugError("Ran out of room in queue and memory allocation failed.");
-        }
+        pushNpcConfirmation();
     }
 
     // TEMP
-    DebugInfo("Received a header with messageCount: %u, confirmedTickCount: %u",
-        messageCount, confirmedTickCount);
+//    DebugInfo("Received a header with messageCount: %u, confirmedTickCount: %u",
+//        messageCount, confirmedTickCount);
     // TEMP
 }
 
@@ -226,7 +227,6 @@ void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
         if (!(connectionResponseQueue.enqueue(sharedBuffer))) {
             DebugError("Ran out of room in queue and memory allocation failed.");
         }
-        DebugInfo("Found connection response.");
     }
     else if (message->content_type() == fb::MessageContent::EntityUpdate) {
         // Pull out the vector of entities.
@@ -244,8 +244,8 @@ void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
                 if (!(playerUpdateQueue.enqueue(sharedBuffer))) {
                     DebugError("Ran out of room in queue and memory allocation failed.");
                 }
-                DebugInfo("Found player");
                 playerFound = true;
+                DebugInfo("Received player message.");
             }
             else if (!npcFound){
                 // Found a non-player (npc).
@@ -258,8 +258,14 @@ void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
 
             // If we found the player and an npc, we can stop looking.
             if (playerFound && npcFound) {
-                return;
+                break;
             }
+        }
+
+        // If we didn't find an NPC and queue an update message, push a confirmation
+        // to show that a message for this tick was received.
+        if (!npcFound) {
+            pushNpcConfirmation();
         }
     }
 }
@@ -284,6 +290,13 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
                 "Out of sequence adjustment iteration. current: %u, received: %u",
                 currentAdjIteration, receivedAdjIteration);
         }
+    }
+}
+
+void Network::pushNpcConfirmation()
+{
+    if (!(npcUpdateQueue.enqueue(confirmationMessage))) {
+        DebugError("Ran out of room in queue and memory allocation failed.");
     }
 }
 

@@ -80,12 +80,12 @@ void NpcMovementSystem::receiveEntityUpdates()
             unsigned int implicitConfirmations = newTick - (latestReceivedTick + 1);
             for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
                 stateUpdateQueue.push({(latestReceivedTick + i), false, nullptr});
-                DebugInfo("Push1: %u", (latestReceivedTick + i));
+                DebugInfo("Implicit push: %u", (latestReceivedTick + i));
             }
 
             // Push the update into the buffer.
             stateUpdateQueue.push({newTick, true, receivedBuffer});
-            DebugInfo("Push2: %u", newTick);
+            DebugInfo("Update push: %u", newTick);
 
             latestReceivedTick = newTick;
         }
@@ -93,7 +93,7 @@ void NpcMovementSystem::receiveEntityUpdates()
             // Received a message confirming that a tick was processed with no update.
             latestReceivedTick++;
             stateUpdateQueue.push({latestReceivedTick, false, nullptr});
-            DebugInfo("Push3: %u", latestReceivedTick);
+            DebugInfo("Explicit push: %u", latestReceivedTick);
         }
 
         receivedBuffer = network.receive(MessageType::PlayerUpdate);

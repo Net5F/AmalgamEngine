@@ -110,6 +110,12 @@ private:
      */
     void adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration);
 
+    /**
+     * Pushes an update message into the npcUpdateQueue with tickTimestamp == 0 to confirm
+     * that a tick passed with no NPC update.
+     */
+    void pushNpcConfirmation();
+
     std::shared_ptr<Peer> getServer() const;
     std::atomic<bool> const* getExitRequestedPtr() const;
 
@@ -149,8 +155,8 @@ private:
     MessageQueue playerUpdateQueue;
     MessageQueue npcUpdateQueue;
 
-    static constexpr int BUILDER_BUFFER_SIZE = 512;
-    flatbuffers::FlatBufferBuilder builder;
+    /** Holds the message that we push in pushNpcConfirmation. */
+    BinaryBufferSharedPtr confirmationMessage;
 };
 
 } // namespace Client
