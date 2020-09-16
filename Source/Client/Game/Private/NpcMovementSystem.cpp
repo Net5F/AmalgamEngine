@@ -69,7 +69,6 @@ void NpcMovementSystem::receiveEntityUpdates()
             // Received our first message, init our values.
             latestReceivedTick = game.getCurrentTick() - Network::INITIAL_TICK_OFFSET - 1;
             lastProcessedTick = latestReceivedTick;
-            DebugInfo("Init lastReceivedTick to: %u", latestReceivedTick);
         }
 
         // If we received an update message.
@@ -80,12 +79,12 @@ void NpcMovementSystem::receiveEntityUpdates()
             unsigned int implicitConfirmations = newTick - (latestReceivedTick + 1);
             for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
                 stateUpdateQueue.push({(latestReceivedTick + i), false, nullptr});
-                DebugInfo("Implicit push: %u", (latestReceivedTick + i));
+//                DebugInfo("Implicit push: %u", (latestReceivedTick + i));
             }
 
             // Push the update into the buffer.
             stateUpdateQueue.push({newTick, true, receivedBuffer});
-            DebugInfo("Update push: %u", newTick);
+//            DebugInfo("Update push: %u", newTick);
 
             latestReceivedTick = newTick;
         }
@@ -93,7 +92,7 @@ void NpcMovementSystem::receiveEntityUpdates()
             // Received a message confirming that a tick was processed with no update.
             latestReceivedTick++;
             stateUpdateQueue.push({latestReceivedTick, false, nullptr});
-            DebugInfo("Explicit push: %u", latestReceivedTick);
+//            DebugInfo("Explicit push: %u", latestReceivedTick);
         }
 
         receivedBuffer = network.receive(MessageType::PlayerUpdate);
@@ -107,10 +106,15 @@ void NpcMovementSystem::moveAllNpcs() {
         && (world.componentFlags[entityID] & ComponentFlag::Input)
         && (world.componentFlags[entityID] & ComponentFlag::Position)
         && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
+            // Save the old position.
+            PositionComponent& currentPosition = world.positions[entityID];
+            PositionComponent& oldPosition = world.oldPositions[entityID];
+            oldPosition.x = currentPosition.x;
+            oldPosition.y = currentPosition.y;
+
             // Process their movement.
-            MovementHelpers::moveEntity(world.positions[entityID],
-                world.movements[entityID], world.inputs[entityID].inputStates,
-                GAME_TICK_TIMESTEP_S);
+            MovementHelpers::moveEntity(currentPosition, world.movements[entityID],
+                world.inputs[entityID].inputStates, GAME_TICK_TIMESTEP_S);
         }
     }
 }
@@ -166,16 +170,11 @@ void NpcMovementSystem::applyUpdateMessage(const fb::Message* message)
         movement.maxVelX = newMovement->maxVelX();
         movement.maxVelY = newMovement->maxVelY();
 
-        /* Save the old position. */
-        PositionComponent& oldPosition = world.oldPositions[entityID];
-        PositionComponent& currentPosition = world.positions[entityID];
-        oldPosition.x = currentPosition.x;
-        oldPosition.y = currentPosition.y;
-
         /* Update the currentPosition. */
+        PositionComponent& currentPosition = world.positions[entityID];
         auto newPosition = (*entityIt)->positionComponent();
-//        DebugInfo("%d: (%f, %f) -> (%f, %f)", entityID, currentPosition.x,
-//            currentPosition.y, newPosition->x(), newPosition->y());
+        DebugInfo("Update: %d: (%f, %f) -> (%f, %f)", entityID, currentPosition.x,
+            currentPosition.y, newPosition->x(), newPosition->y());
         currentPosition.x = newPosition->x();
         currentPosition.y = newPosition->y();
     }

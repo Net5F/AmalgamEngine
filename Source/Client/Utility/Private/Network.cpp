@@ -245,7 +245,6 @@ void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
                     DebugError("Ran out of room in queue and memory allocation failed.");
                 }
                 playerFound = true;
-                DebugInfo("Received player message.");
             }
             else if (!npcFound){
                 // Found a non-player (npc).
