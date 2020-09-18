@@ -62,7 +62,6 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
         const fb::Message* message = fb::GetMessage(
             messageBuffer->data() + sizeof(Uint16));
         latestSentSimTick = message->tickTimestamp();
-        DebugInfo("(%u) Update: updated latestSent to: %u", netID, latestSentSimTick);
 
         sendQueue.pop_front();
     }
@@ -71,9 +70,6 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     fillHeader(messageCount, currentTick);
 
     // Send the message.
-    DebugInfo("Sending batch with messageCount: %u, confirmedTickCount: %u",
-        batchBuffer[ServerHeaderIndex::MessageCount],
-        batchBuffer[ServerHeaderIndex::ConfirmedTickCount]);
     return peer->send(&(batchBuffer[0]), currentIndex);
 }
 
@@ -114,15 +110,8 @@ void Client::fillHeader(Uint8 messageCount, Uint32 currentTick)
 
         // Update our latestSent tracking to account for the confirmed ticks.
         latestSentSimTick += confirmedTickCount;
-
-        // TEMP
-        if (confirmedTickCount > 0) {
-            DebugInfo("(%u) Confirm: updated latestSent to: %u", netID, latestSentSimTick);
-        }
-        // TEMP
     }
 }
-
 
 ReceiveResult Client::receiveMessage()
 {
@@ -133,7 +122,7 @@ ReceiveResult Client::receiveMessage()
     // Receive the header.
     ReceiveResult result = peer->receiveBytes(CLIENT_HEADER_SIZE, false);
 
-    // Check for timeouts.
+    // Receive the following message, or check for timeouts.
     if (result.result == NetworkResult::Success) {
         // Process the adjustment iteration.
         const BinaryBuffer& header = *(result.message.get());
@@ -148,7 +137,9 @@ ReceiveResult Client::receiveMessage()
             DebugError("Skipped an adjustment iteration. Logic must be flawed.");
         }
 
-        // Wait for the message.
+        // Get the message.
+        // Note: This is a blocking read, but the data should immediately be available
+        //       since we send it all in 1 packet.
         result = peer->receiveMessageWait();
 
         // Got a message, update the receiveTimer.
@@ -156,7 +147,8 @@ ReceiveResult Client::receiveMessage()
     }
     else if (result.result == NetworkResult::NoWaitingData) {
         // If we timed out, drop the connection.
-        if (double delta = receiveTimer.getDeltaSeconds(false) > TIMEOUT_S) {
+        double delta = receiveTimer.getDeltaSeconds(false);
+        if (delta > TIMEOUT_S) {
             peer = nullptr;
             DebugInfo("Dropped connection, peer timed out. Time since last message: %.6f "
                 "seconds. Timeout: %.6f", delta, TIMEOUT_S);

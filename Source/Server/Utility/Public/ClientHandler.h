@@ -30,17 +30,17 @@ public:
     /** The maximum number of clients that we will accept connections from. */
     static constexpr unsigned int MAX_CLIENTS = 100;
 
-    /**
-     * When clients are connected, this determines how long we wait in the select() call
-     * before looping around to manage connections/disconnections.
-     */
-    static constexpr Uint32 SOCKET_RECEIVE_TIMEOUT_MS = 10;
-
     ClientHandler(Network& inNetwork);
 
-    virtual ~ClientHandler();
+    ~ClientHandler();
 
 private:
+    /**
+     * How long the accept/disconnect/receive loop in serviceClients should delay if no
+     * socket activity was reported on the clientSet.
+     */
+    static constexpr unsigned int INACTIVE_DELAY_TIME_MS = 10;
+
     /**
      * Thread function, started from constructor.
      *
@@ -63,8 +63,9 @@ private:
 
     /**
      * Used by pollForMessages, checks for new messages and pushes them into their queues.
+     * @return The number of active sockets found by clientSet->checkSockets().
      */
-    void receiveClientMessages(std::unordered_map<NetworkID, Client>& clientMap);
+    int receiveClientMessages(std::unordered_map<NetworkID, Client>& clientMap);
 
     Network& network;
 

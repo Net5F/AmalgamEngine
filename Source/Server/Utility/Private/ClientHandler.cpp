@@ -30,6 +30,36 @@ ClientHandler::~ClientHandler()
     SDLNet_Quit();
 }
 
+int ClientHandler::serviceClients()
+{
+    std::unordered_map<EntityID, Client>& clientMap = network.getClientMap();
+
+    while (!exitRequested) {
+        // Check if there are any new clients to connect.
+        acceptNewClients(clientMap);
+
+        // Erase any clients who were detected to be disconnected.
+        eraseDisconnectedClients(clientMap);
+
+        // Check if there's any clients to receive from.
+        std::shared_lock readLock(network.getClientMapMutex());
+        int numActive = 0;
+        if (clientMap.size() != 0) {
+            numActive = receiveClientMessages(clientMap);
+        }
+
+        // Release the lock before we delay.
+        readLock.unlock();
+
+        // If there wasn't any activity, delay so we don't waste CPU spinning.
+        if (numActive == 0) {
+            SDL_Delay(INACTIVE_DELAY_TIME_MS);
+        }
+    }
+
+    return 0;
+}
+
 void ClientHandler::acceptNewClients(
 std::unordered_map<NetworkID, Client>& clientMap)
 {
@@ -84,60 +114,34 @@ std::unordered_map<NetworkID, Client>& clientMap)
     }
 }
 
-int ClientHandler::serviceClients()
+int ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& clientMap)
 {
-    std::unordered_map<EntityID, Client>& clientMap = network.getClientMap();
+    // Update each client's internal socket isReady().
+    // Note: We check all clients regardless of whether this returns > 0 because, even if
+    //       there's no activity, we need to check for timeouts.
+    int numActive = clientSet->checkSockets(0);
 
-    while (!exitRequested) {
-        // Check if there are any new clients to connect.
-        acceptNewClients(clientMap);
+    /* Iterate through all clients. */
+    // Note: Doesn't need a lock because serviceClients is still locking.
+    for (auto& pair : clientMap) {
+        Client& client = pair.second;
 
-        // Erase any clients who were detected to be disconnected.
-        eraseDisconnectedClients(clientMap);
-
-        // Check if there's any clients to receive from.
-        std::shared_lock readLock(network.getClientMapMutex());
-        if (clientMap.size() == 0) {
-            // Release the lock before we delay.
-            readLock.unlock();
-
-            // Delay so we don't waste CPU spinning.
-            SDL_Delay(1);
-        }
-        else {
-            receiveClientMessages(clientMap);
-        }
-    }
-
-    return 0;
-}
-
-void ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& clientMap)
-{
-    // Check if there are any messages to receive.
-    int numReady = clientSet->checkSockets(SOCKET_RECEIVE_TIMEOUT_MS);
-    if (numReady > 0) {
-        /* Iterate through all clients. */
-        // Doesn't need a lock because serviceClients is still locking.
-        for (auto& pair : clientMap) {
-            Client& client = pair.second;
-
-            /* Receive all messages from the client. */
-            ReceiveResult messageResult = client.receiveMessage();
-            while (messageResult.result == NetworkResult::Success) {
-                // TEMP
+        /* If there's potentially data, try to receive all messages from the client. */
+        ReceiveResult messageResult = client.receiveMessage();
+        while (messageResult.result == NetworkResult::Success) {
+            // TEMP
 //                Uint32 receivedTick = 0;
 //                const fb::Message* message = fb::GetMessage(messageResult.message->data());
 //                if (message->content_type() == fb::MessageContent::EntityUpdate) {
 //                    receivedTick = message->tickTimestamp();
 //                }
-                // TEMP
+            // TEMP
 
-                // Queue the message (blocks if the queue is locked).
-                Sint64 diff = network.queueInputMessage(std::move(messageResult.message));
-                client.recordTickDiff(diff);
+            // Queue the message (blocks if the queue is locked).
+            Sint64 diff = network.queueInputMessage(std::move(messageResult.message));
+            client.recordTickDiff(diff);
 
-                // TEMP
+            // TEMP
 //                if (receivedTick != 0) {
 //                    DebugInfo("Received message for tick: %u. Diff: %d", receivedTick,
 //                        diff);
@@ -145,12 +149,13 @@ void ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& 
 //                else {
 //                    DebugInfo("Received message. Diff: %d", diff);
 //                }
-                // TEMP
+            // TEMP
 
-                messageResult = client.receiveMessage();
-            }
+            messageResult = client.receiveMessage();
         }
     }
+
+    return numActive;
 }
 
 } // End namespace Server

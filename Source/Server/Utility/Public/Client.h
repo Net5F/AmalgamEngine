@@ -48,7 +48,8 @@ public:
     NetworkResult sendWaitingMessages(Uint32 currentTick);
 
     /**
-     * Tries to receive a message from the Peer.
+     * Tries to receive a message from this client.
+     * If no message is received, checks if this client has timed out.
      * Note: It's expected that you called SDLNet_CheckSockets() on the outside-managed
      *       socket set before calling this.
      *
@@ -143,7 +144,7 @@ private:
     // Connection, Batching
     //--------------------------------------------------------------------------
     /** How long we should wait before considering the client to be timed out. */
-    static constexpr double TIMEOUT_S = NETWORK_TICK_TIMESTEP_S * 2;
+    static constexpr double TIMEOUT_S = NETWORK_TICK_TIMESTEP_S * 10;
 
     /** Our Network-given ID. */
     NetworkID netID;

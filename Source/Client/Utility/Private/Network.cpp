@@ -8,8 +8,8 @@ namespace AM
 namespace Client
 {
 
-const std::string Network::SERVER_IP = "127.0.0.1";
-//const std::string Network::SERVER_IP = "45.79.37.63";
+//const std::string Network::SERVER_IP = "127.0.0.1";
+const std::string Network::SERVER_IP = "45.79.37.63";
 
 Network::Network()
 : server(nullptr)
@@ -128,6 +128,9 @@ int Network::pollForMessages()
             const BinaryBuffer& header = *(headerResult.message.get());
             processBatch(header);
         }
+        else if (headerResult.result == NetworkResult::Disconnected) {
+            DebugError("Found server to be disconnected while trying to receive header.");
+        }
     }
 
     return 0;
@@ -196,6 +199,9 @@ void Network::processBatch(const BinaryBuffer& header) {
             // Too long since we received a message, timed out.
             DebugError("Server connection timed out.");
         }
+        else if (messageResult.result == NetworkResult::Disconnected) {
+            DebugError("Found server to be disconnected while trying to receive message.");
+        }
     }
 
     /* Process any confirmed ticks. */
@@ -203,11 +209,6 @@ void Network::processBatch(const BinaryBuffer& header) {
     for (unsigned int i = 0; i < confirmedTickCount; ++i) {
         pushNpcConfirmation();
     }
-
-    // TEMP
-//    DebugInfo("Received a header with messageCount: %u, confirmedTickCount: %u",
-//        messageCount, confirmedTickCount);
-    // TEMP
 }
 
 void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
