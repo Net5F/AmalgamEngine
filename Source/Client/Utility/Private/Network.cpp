@@ -81,35 +81,55 @@ void Network::send(const BinaryBufferSharedPtr& message)
     }
 }
 
-BinaryBufferSharedPtr Network::receive(MessageType type, Uint64 timeoutMs)
+BinaryBufferSharedPtr Network::receiveConnectionResponse(Uint64 timeoutMs)
 {
     if (!(server->isConnected())) {
         DebugInfo("Tried to receive while server is disconnected.");
         return nullptr;
     }
 
-    MessageQueue* selectedQueue = nullptr;
-    switch (type)
-    {
-        case (MessageType::ConnectionResponse):
-            selectedQueue = &connectionResponseQueue;
-            break;
-        case (MessageType::PlayerUpdate):
-            selectedQueue = &playerUpdateQueue;
-            break;
-        case (MessageType::NpcUpdate):
-            selectedQueue = &npcUpdateQueue;
-            break;
-        default:
-            DebugError("Provided unexpected type.");
+    BinaryBufferSharedPtr message = nullptr;
+    if (timeoutMs == 0) {
+        connectionResponseQueue.try_dequeue(message);
+    }
+    else {
+        connectionResponseQueue.wait_dequeue_timed(message, timeoutMs * 1000);
+    }
+
+    return message;
+}
+
+BinaryBufferSharedPtr Network::receivePlayerUpdate(Uint64 timeoutMs)
+{
+    if (!(server->isConnected())) {
+        DebugInfo("Tried to receive while server is disconnected.");
+        return nullptr;
     }
 
     BinaryBufferSharedPtr message = nullptr;
     if (timeoutMs == 0) {
-        selectedQueue->try_dequeue(message);
+        playerUpdateQueue.try_dequeue(message);
     }
     else {
-        selectedQueue->wait_dequeue_timed(message, timeoutMs * 1000);
+        playerUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
+    }
+
+    return message;
+}
+
+BinaryBufferSharedPtr Network::receiveNpcUpdate(Uint64 timeoutMs)
+{
+    if (!(server->isConnected())) {
+        DebugInfo("Tried to receive while server is disconnected.");
+        return nullptr;
+    }
+
+    BinaryBufferSharedPtr message = nullptr;
+    if (timeoutMs == 0) {
+        npcUpdateQueue.try_dequeue(message);
+    }
+    else {
+        npcUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
     }
 
     return message;
@@ -265,6 +285,7 @@ void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
         // If we didn't find an NPC and queue an update message, push a confirmation
         // to show that a message for this tick was received.
         if (!npcFound) {
+            // TODO: Add tick gap checking, maybe we need to push multiple
             pushNpcConfirmation();
         }
     }

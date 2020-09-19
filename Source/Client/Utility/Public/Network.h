@@ -20,16 +20,6 @@ class Peer;
 namespace Client
 {
 
-/**
- * The various types of flatbuffer message that we receive.
- * Enum class because it doesn't read well from other namespaces.
- */
-enum class MessageType {
-    ConnectionResponse,
-    PlayerUpdate,
-    NpcUpdate
-};
-
 class Network
 {
 public:
@@ -41,7 +31,7 @@ public:
 
     Network();
 
-    virtual ~Network();
+    ~Network();
 
     bool connect();
 
@@ -52,14 +42,15 @@ public:
     void send(const BinaryBufferSharedPtr& message);
 
     /**
-     * Returns a message if there are any in the requested queue.
+     * Returns a message if there are any in the associated queue.
      * If there are none, waits for one up to the given timeout.
      *
-     * @param type  The type of message to receive.
      * @param timeoutMs  How long to wait. 0 for no wait, -1 for indefinite. Defaults to 0.
      * @return A waiting message, else nullptr.
      */
-    BinaryBufferSharedPtr receive(MessageType type, Uint64 timeoutMs = 0);
+    BinaryBufferSharedPtr receiveConnectionResponse(Uint64 timeoutMs = 0);
+    BinaryBufferSharedPtr receivePlayerUpdate(Uint64 timeoutMs = 0);
+    BinaryBufferSharedPtr receiveNpcUpdate(Uint64 timeoutMs = 0);
 
     /**
      * Thread function, started from connect().
@@ -149,11 +140,13 @@ private:
     /** Turn false to signal that the receive thread should end. */
     std::atomic<bool> exitRequested;
 
+    //--------------------------------------------------------------------------
+    // Config
+    //--------------------------------------------------------------------------
     /** These queues store received messages that are waiting to be consumed. */
-    typedef moodycamel::BlockingReaderWriterQueue<BinaryBufferSharedPtr> MessageQueue;
-    MessageQueue connectionResponseQueue;
-    MessageQueue playerUpdateQueue;
-    MessageQueue npcUpdateQueue;
+    moodycamel::BlockingReaderWriterQueue<BinaryBufferSharedPtr> connectionResponseQueue;
+    moodycamel::BlockingReaderWriterQueue<BinaryBufferSharedPtr> playerUpdateQueue;
+    moodycamel::BlockingReaderWriterQueue<BinaryBufferSharedPtr> npcUpdateQueue;
 
     /** Holds the message that we push in pushNpcConfirmation. */
     BinaryBufferSharedPtr confirmationMessage;

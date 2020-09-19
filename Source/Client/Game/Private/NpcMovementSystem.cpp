@@ -31,8 +31,9 @@ void NpcMovementSystem::updateNpcs()
 
     /* While we have data to use, apply updates for all unprocessed ticks including the
        desired tick. */
+    bool updated = false;
     while ((lastProcessedTick <= desiredTick) && (stateUpdateQueue.size() > 0)) {
-        // TODO: This should be progressing, even if there's no npc update
+        updated = true;
         // Move all NPCs as if their inputs didn't change.
         moveAllNpcs();
 
@@ -53,12 +54,16 @@ void NpcMovementSystem::updateNpcs()
         lastProcessedTick++;
         stateUpdateQueue.pop();
     }
+    if (!updated) {
+        DebugInfo("Tick passed with no update. last: %u, desired: %u, queueSize: %u",
+            lastProcessedTick, desiredTick, stateUpdateQueue.size());
+    }
 }
 
 void NpcMovementSystem::receiveEntityUpdates()
 {
     /* Process any NPC update messages from the Network. */
-    BinaryBufferSharedPtr receivedBuffer = network.receive(MessageType::NpcUpdate);
+    BinaryBufferSharedPtr receivedBuffer = network.receiveNpcUpdate();
     while (receivedBuffer != nullptr) {
         // Ready the Message for reading.
         const fb::Message* message = fb::GetMessage(receivedBuffer->data());
@@ -79,12 +84,12 @@ void NpcMovementSystem::receiveEntityUpdates()
             unsigned int implicitConfirmations = newTick - (latestReceivedTick + 1);
             for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
                 stateUpdateQueue.push({(latestReceivedTick + i), false, nullptr});
-//                DebugInfo("Implicit push: %u", (latestReceivedTick + i));
+                DebugInfo("Implicit push: %u", (latestReceivedTick + i));
             }
 
             // Push the update into the buffer.
             stateUpdateQueue.push({newTick, true, receivedBuffer});
-//            DebugInfo("Update push: %u", newTick);
+            DebugInfo("Update push: %u", newTick);
 
             latestReceivedTick = newTick;
         }
@@ -92,10 +97,10 @@ void NpcMovementSystem::receiveEntityUpdates()
             // Received a message confirming that a tick was processed with no update.
             latestReceivedTick++;
             stateUpdateQueue.push({latestReceivedTick, false, nullptr});
-//            DebugInfo("Explicit push: %u", latestReceivedTick);
+            DebugInfo("Explicit push: %u", latestReceivedTick);
         }
 
-        receivedBuffer = network.receive(MessageType::PlayerUpdate);
+        receivedBuffer = network.receiveNpcUpdate();
     }
 }
 

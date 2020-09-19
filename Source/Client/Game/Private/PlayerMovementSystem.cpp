@@ -60,7 +60,7 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
 {
     /* Process any messages for us from the server. */
     Uint32 latestReceivedTick = 0;
-    BinaryBufferSharedPtr receivedBuffer = network.receive(MessageType::PlayerUpdate);
+    BinaryBufferSharedPtr receivedBuffer = network.receivePlayerUpdate();
     while (receivedBuffer != nullptr) {
         // Ready the Message for reading.
         const fb::Message* message = fb::GetMessage(receivedBuffer->data());
@@ -102,7 +102,7 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
         currentPosition.x = receivedPosition->x();
         currentPosition.y = receivedPosition->y();
 
-        receivedBuffer = network.receive(MessageType::PlayerUpdate);
+        receivedBuffer = network.receivePlayerUpdate();
     }
 
     return latestReceivedTick;

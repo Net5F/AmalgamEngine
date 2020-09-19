@@ -32,7 +32,7 @@ class NpcMovementSystem
 {
 public:
     /** Our best guess at a good amount of ticks in the past to replicate NPCs at. */
-    static constexpr unsigned int PAST_TICK_OFFSET = 2;
+    static constexpr unsigned int PAST_TICK_OFFSET = 7;
 
     NpcMovementSystem(Game& inGame, World& inWorld, Network& inNetwork);
 

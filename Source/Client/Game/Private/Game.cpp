@@ -35,9 +35,8 @@ void Game::connect()
     }
 
     // Wait for the player's ID from the server.
-    BinaryBufferSharedPtr responseBuffer = network.receive(
-        MessageType::ConnectionResponse);
-    responseBuffer = network.receive(MessageType::ConnectionResponse, 1000);
+    BinaryBufferSharedPtr responseBuffer = network.receiveConnectionResponse(
+                                                   CONNECTION_RESPONSE_WAIT_MS);
     if (responseBuffer == nullptr) {
         DebugError("Server did not respond.");
     }
