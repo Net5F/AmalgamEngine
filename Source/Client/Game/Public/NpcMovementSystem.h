@@ -32,7 +32,7 @@ class NpcMovementSystem
 {
 public:
     /** Our best guess at a good amount of ticks in the past to replicate NPCs at. */
-    static constexpr unsigned int PAST_TICK_OFFSET = 7;
+    static constexpr unsigned int PAST_TICK_OFFSET = 10;
 
     NpcMovementSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
@@ -80,7 +80,7 @@ private:
     std::queue<NpcStateUpdate> stateUpdateQueue;
 
     /** The latest tick that we've received an NPC update message for. */
-    Uint32 latestReceivedTick;
+    Uint32 lastReceivedTick;
 
     /** The last tick that we processed update data for. */
     Uint32 lastProcessedTick;
