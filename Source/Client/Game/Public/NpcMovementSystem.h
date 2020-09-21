@@ -64,6 +64,13 @@ private:
      */
     void receiveEntityUpdates();
 
+    /** Pushes a message confirming that a tick was processed with no update. */
+    void handleExplicitConfirmation();
+    /** Pushes messages confirming ticks up to confirmedTick. */
+    void handleImplicitConfirmation(const Uint32 confirmedTick);
+    /** Handles an update message, including implicit confirmations based on it. */
+    void handleUpdate(const BinaryBufferSharedPtr& messageBuffer);
+
     /**
      * Applies the given update message to the entity world state.
      */

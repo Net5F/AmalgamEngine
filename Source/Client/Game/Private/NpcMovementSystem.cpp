@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "World.h"
 #include "Network.h"
+#include "ClientNetworkDefs.h"
 #include "MessageUtil.h"
 #include "Message_generated.h"
 #include "Debug.h"
@@ -63,48 +64,72 @@ void NpcMovementSystem::updateNpcs()
 void NpcMovementSystem::receiveEntityUpdates()
 {
     /* Process any NPC update messages from the Network. */
-    BinaryBufferSharedPtr receivedBuffer = network.receiveNpcUpdate();
-    while (receivedBuffer != nullptr) {
-        // Ready the Message for reading.
-        const fb::Message* message = fb::GetMessage(receivedBuffer->data());
+    NpcReceiveResult receiveResult = network.receiveNpcUpdate();
+    while (receiveResult.result == NetworkResult::Success) {
+        NpcUpdateMessage& npcUpdateMessage = receiveResult.message;
 
-        // Check that we received the expected tick.
-        Uint32 newTick = message->tickTimestamp();
+        // Init if this is our first received update.
         if (latestReceivedTick == 0) {
             // Received our first message, init our values.
-            latestReceivedTick = game.getCurrentTick() - Network::INITIAL_TICK_OFFSET - 1;
+            latestReceivedTick = game.getCurrentTick() - INITIAL_TICK_OFFSET - 1;
             lastProcessedTick = latestReceivedTick;
         }
 
-        // If we received an update message.
-        if (newTick != 0) {
-            // If there's a gap > 1 between the latest received tick and this update's tick,
-            // we know that no changes happened on the in-between ticks and can push
-            // confirmations for them.
-            unsigned int implicitConfirmations = newTick - (latestReceivedTick + 1);
-            for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
-                stateUpdateQueue.push({(latestReceivedTick + i), false, nullptr});
-                DebugInfo("Implicit push: %u", (latestReceivedTick + i));
-            }
-
-            // Push the update into the buffer.
-            stateUpdateQueue.push({newTick, true, receivedBuffer});
-            DebugInfo("Update push: %u", newTick);
-
-            latestReceivedTick = newTick;
-        }
-        else {
-            // Received a message confirming that a tick was processed with no update.
-            latestReceivedTick++;
-            stateUpdateQueue.push({latestReceivedTick, false, nullptr});
-            DebugInfo("Explicit push: %u", latestReceivedTick);
+        // Handle the message appropriately.
+        switch (npcUpdateMessage.updateType) {
+            case NpcUpdateType::ExplicitConfirmation:
+                handleExplicitConfirmation();
+                break;
+            case NpcUpdateType::ImplicitConfirmation:
+                handleImplicitConfirmation(npcUpdateMessage.tickNum);
+                break;
+            case NpcUpdateType::Update:
+                handleUpdate(npcUpdateMessage.message);
+                break;
         }
 
-        receivedBuffer = network.receiveNpcUpdate();
+        receiveResult = network.receiveNpcUpdate();
     }
 }
 
-void NpcMovementSystem::moveAllNpcs() {
+void NpcMovementSystem::handleExplicitConfirmation()
+{
+    latestReceivedTick++;
+    stateUpdateQueue.push({latestReceivedTick, false, nullptr});
+    DebugInfo("Explicit push: %u", latestReceivedTick);
+}
+
+void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
+{
+    // If there's a gap > 1 between the latest received tick and the confirmed tick,
+    // we know that no changes happened on the in-between ticks and can push
+    // confirmations for them.
+    unsigned int implicitConfirmations = confirmedTick - latestReceivedTick;
+    for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
+        stateUpdateQueue.push({(latestReceivedTick + i), false, nullptr});
+        DebugInfo("Implicit push: %u", (latestReceivedTick + i));
+    }
+
+    latestReceivedTick = confirmedTick;
+}
+
+void NpcMovementSystem::handleUpdate(const BinaryBufferSharedPtr& messageBuffer)
+{
+    const fb::Message* message = fb::GetMessage(messageBuffer->data());
+    Uint32 newReceivedTick = message->tickTimestamp();
+
+    // The update message implicitly confirms all ticks up to it.
+    handleImplicitConfirmation(newReceivedTick - 1);
+
+    // Push the update into the buffer.
+    stateUpdateQueue.push({newReceivedTick, true, messageBuffer});
+    DebugInfo("Update push: %u", newReceivedTick);
+
+    latestReceivedTick = newReceivedTick;
+}
+
+void NpcMovementSystem::moveAllNpcs()
+{
     for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
         /* Move all NPCs that have an input, position, and movement component. */
         if (entityID != world.playerID

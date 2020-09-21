@@ -70,7 +70,7 @@ struct MessageIndex {
 };
 
 //--------------------------------------------------------------------------
-// Return types
+// Structs
 //--------------------------------------------------------------------------
 /** All potential results for a network send or receive. */
 enum class NetworkResult {
@@ -81,11 +81,12 @@ enum class NetworkResult {
     /* Used for when a receive is attempted but there is no data waiting. */
     NoWaitingData
 };
+
 /** The NetworkResult and associated data from a network receive. */
 struct ReceiveResult {
     NetworkResult result;
     // message will be nullptr if result != Success.
-    BinaryBufferPtr message;
+    BinaryBufferPtr message = nullptr;
 };
 
 } // End namespace AM

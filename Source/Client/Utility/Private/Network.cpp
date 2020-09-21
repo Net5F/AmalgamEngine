@@ -1,15 +1,12 @@
 #include "Network.h"
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
-#include "Debug.h"
+#include "Message_generated.h"
 
 namespace AM
 {
 namespace Client
 {
-
-//const std::string Network::SERVER_IP = "127.0.0.1";
-const std::string Network::SERVER_IP = "45.79.37.63";
 
 Network::Network()
 : server(nullptr)
@@ -25,20 +22,6 @@ Network::Network()
 
     // Init the timer to the current time.
     receiveTimer.updateSavedTime();
-
-    /* Construct a message with just tickTimestamp == 0 to use for confirming that a tick
-       passed with no update. */
-    constexpr int BUILDER_BUFFER_SIZE = 512;
-    flatbuffers::FlatBufferBuilder builder(BUILDER_BUFFER_SIZE);
-
-    fb::MessageBuilder messageBuilder(builder);
-    messageBuilder.add_tickTimestamp(0);
-    messageBuilder.add_content_type(fb::MessageContent::EntityUpdate);
-    flatbuffers::Offset<fb::Message> message = messageBuilder.Finish();
-    builder.Finish(message);
-
-    confirmationMessage = std::make_shared<BinaryBuffer>(builder.GetBufferPointer(),
-        (builder.GetBufferPointer() + builder.GetSize()));
 }
 
 Network::~Network()
@@ -84,8 +67,7 @@ void Network::send(const BinaryBufferSharedPtr& message)
 BinaryBufferSharedPtr Network::receiveConnectionResponse(Uint64 timeoutMs)
 {
     if (!(server->isConnected())) {
-        DebugInfo("Tried to receive while server is disconnected.");
-        return nullptr;
+        DebugError("Tried to receive while server is disconnected.");
     }
 
     BinaryBufferSharedPtr message = nullptr;
@@ -102,8 +84,7 @@ BinaryBufferSharedPtr Network::receiveConnectionResponse(Uint64 timeoutMs)
 BinaryBufferSharedPtr Network::receivePlayerUpdate(Uint64 timeoutMs)
 {
     if (!(server->isConnected())) {
-        DebugInfo("Tried to receive while server is disconnected.");
-        return nullptr;
+        DebugError("Tried to receive while server is disconnected.");
     }
 
     BinaryBufferSharedPtr message = nullptr;
@@ -117,22 +98,28 @@ BinaryBufferSharedPtr Network::receivePlayerUpdate(Uint64 timeoutMs)
     return message;
 }
 
-BinaryBufferSharedPtr Network::receiveNpcUpdate(Uint64 timeoutMs)
+NpcReceiveResult Network::receiveNpcUpdate(Uint64 timeoutMs)
 {
     if (!(server->isConnected())) {
         DebugInfo("Tried to receive while server is disconnected.");
-        return nullptr;
+        return {NetworkResult::Disconnected, {}};
     }
 
-    BinaryBufferSharedPtr message = nullptr;
+    NpcUpdateMessage message;
+    bool messageWasReceived = false;
     if (timeoutMs == 0) {
-        npcUpdateQueue.try_dequeue(message);
+        messageWasReceived = npcUpdateQueue.try_dequeue(message);
     }
     else {
-        npcUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
+        messageWasReceived = npcUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
     }
 
-    return message;
+    if (!messageWasReceived) {
+        return {NetworkResult::NoWaitingData, {}};
+    }
+    else {
+        return {NetworkResult::Success, message};
+    }
 }
 
 int Network::pollForMessages()
@@ -215,7 +202,7 @@ void Network::processBatch(const BinaryBuffer& header) {
             receiveTimer.updateSavedTime();
         }
         else if ((messageResult.result == NetworkResult::NoWaitingData)
-                 && (receiveTimer.getDeltaSeconds(false) > TIMEOUT_S)) {
+                 && (receiveTimer.getDeltaSeconds(false) > SERVER_TIMEOUT_S)) {
             // Too long since we received a message, timed out.
             DebugError("Server connection timed out.");
         }
@@ -227,7 +214,9 @@ void Network::processBatch(const BinaryBuffer& header) {
     /* Process any confirmed ticks. */
     Uint8 confirmedTickCount = header[ServerHeaderIndex::ConfirmedTickCount];
     for (unsigned int i = 0; i < confirmedTickCount; ++i) {
-        pushNpcConfirmation();
+        if (!(npcUpdateQueue.enqueue({NpcUpdateType::ExplicitConfirmation}))) {
+            DebugError("Ran out of room in queue and memory allocation failed.");
+        }
     }
 }
 
@@ -270,7 +259,7 @@ void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
             else if (!npcFound){
                 // Found a non-player (npc).
                 // Queueing the message will let all npc updates within be processed.
-                if (!(npcUpdateQueue.enqueue(sharedBuffer))) {
+                if (!(npcUpdateQueue.enqueue({NpcUpdateType::Update, sharedBuffer}))) {
                     DebugError("Ran out of room in queue and memory allocation failed.");
                 }
                 npcFound = true;
@@ -282,11 +271,13 @@ void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
             }
         }
 
-        // If we didn't find an NPC and queue an update message, push a confirmation
-        // to show that a message for this tick was received.
+        // If we didn't find an NPC and queue an update message, push an implicit
+        // confirmation to show that we've confirmed up to this tick.
         if (!npcFound) {
-            // TODO: Add tick gap checking, maybe we need to push multiple
-            pushNpcConfirmation();
+            if (!(npcUpdateQueue.enqueue({NpcUpdateType::ImplicitConfirmation, nullptr,
+                    message->tickTimestamp()}))) {
+                DebugError("Ran out of room in queue and memory allocation failed.");
+            }
         }
     }
 }
@@ -311,13 +302,6 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
                 "Out of sequence adjustment iteration. current: %u, received: %u",
                 currentAdjIteration, receivedAdjIteration);
         }
-    }
-}
-
-void Network::pushNpcConfirmation()
-{
-    if (!(npcUpdateQueue.enqueue(confirmationMessage))) {
-        DebugError("Ran out of room in queue and memory allocation failed.");
     }
 }
 

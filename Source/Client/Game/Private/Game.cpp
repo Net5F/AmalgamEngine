@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Network.h"
+#include "ClientNetworkDefs.h"
 #include "Debug.h"
 
 namespace AM
@@ -24,7 +25,7 @@ Game::Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites
 
 void Game::connect()
 {
-    if (Network::RUN_OFFLINE) {
+    if (RUN_OFFLINE) {
         // No need to connect if we're running offline. Just need mock player data.
         fakeConnection();
         return;
@@ -50,7 +51,7 @@ void Game::connect()
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.
-    currentTick = message->tickTimestamp() + Network::INITIAL_TICK_OFFSET;
+    currentTick = message->tickTimestamp() + INITIAL_TICK_OFFSET;
 
     // Set up our player.
     SDL2pp::Rect textureRect(0, 32, 16, 16);
@@ -111,7 +112,7 @@ void Game::tick()
     while (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
         // Calculate what tick we should be on.
         Uint32 targetTick = currentTick + 1;
-        if (!Network::RUN_OFFLINE) {
+        if (!RUN_OFFLINE) {
             // If we're online, apply any adjustments that we receive from the server.
             targetTick += network.transferTickAdjustment();
         }

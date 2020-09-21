@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "World.h"
 #include "Network.h"
+#include "ClientNetworkDefs.h"
 #include "MessageUtil.h"
 #include "Debug.h"
 
@@ -20,7 +21,7 @@ NetworkUpdateSystem::NetworkUpdateSystem(Game& inGame, World& inWorld, Network& 
 
 void NetworkUpdateSystem::sendInputState()
 {
-    if (Network::RUN_OFFLINE) {
+    if (RUN_OFFLINE) {
         // No need to send messages if we're running offline.
         return;
     }

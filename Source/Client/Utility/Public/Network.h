@@ -3,14 +3,14 @@
 
 #include "GameDefs.h"
 #include "NetworkDefs.h"
-#include "Message_generated.h"
+#include "ClientNetworkDefs.h"
 #include <string>
 #include <memory>
 #include <atomic>
 #include <thread>
-#include <queue>
 #include "readerwriterqueue.h"
 #include "Timer.h"
+#include "Debug.h"
 
 namespace AM
 {
@@ -23,12 +23,6 @@ namespace Client
 class Network
 {
 public:
-    /** If true, the connection to the server will be mocked and we'll run without it. */
-    static constexpr bool RUN_OFFLINE = false;
-
-    /** Our best guess at a good starting place for the simulation's tick offset. */
-    static constexpr Sint8 INITIAL_TICK_OFFSET = 5;
-
     Network();
 
     ~Network();
@@ -50,7 +44,7 @@ public:
      */
     BinaryBufferSharedPtr receiveConnectionResponse(Uint64 timeoutMs = 0);
     BinaryBufferSharedPtr receivePlayerUpdate(Uint64 timeoutMs = 0);
-    BinaryBufferSharedPtr receiveNpcUpdate(Uint64 timeoutMs = 0);
+    NpcReceiveResult receiveNpcUpdate(Uint64 timeoutMs = 0);
 
     /**
      * Thread function, started from connect().
@@ -101,20 +95,8 @@ private:
      */
     void adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration);
 
-    /**
-     * Pushes an update message into the npcUpdateQueue with tickTimestamp == 0 to confirm
-     * that a tick passed with no NPC update.
-     */
-    void pushNpcConfirmation();
-
     std::shared_ptr<Peer> getServer() const;
     std::atomic<bool> const* getExitRequestedPtr() const;
-
-    static const std::string SERVER_IP;
-    static constexpr unsigned int SERVER_PORT = 41499;
-
-    /** How long we should wait before considering the server to be timed out. */
-    static constexpr double TIMEOUT_S = NETWORK_TICK_TIMESTEP_S * 2;
 
     std::shared_ptr<Peer> server;
 
@@ -140,16 +122,10 @@ private:
     /** Turn false to signal that the receive thread should end. */
     std::atomic<bool> exitRequested;
 
-    //--------------------------------------------------------------------------
-    // Config
-    //--------------------------------------------------------------------------
     /** These queues store received messages that are waiting to be consumed. */
     moodycamel::BlockingReaderWriterQueue<BinaryBufferSharedPtr> connectionResponseQueue;
     moodycamel::BlockingReaderWriterQueue<BinaryBufferSharedPtr> playerUpdateQueue;
-    moodycamel::BlockingReaderWriterQueue<BinaryBufferSharedPtr> npcUpdateQueue;
-
-    /** Holds the message that we push in pushNpcConfirmation. */
-    BinaryBufferSharedPtr confirmationMessage;
+    moodycamel::BlockingReaderWriterQueue<NpcUpdateMessage> npcUpdateQueue;
 };
 
 } // namespace Client

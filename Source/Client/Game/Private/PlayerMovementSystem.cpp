@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "World.h"
 #include "Network.h"
+#include "ClientNetworkDefs.h"
 #include "MessageUtil.h"
 #include "Debug.h"
 
@@ -28,7 +29,7 @@ void PlayerMovementSystem::processMovements()
     oldPosition.x = currentPosition.x;
     oldPosition.y = currentPosition.y;
 
-    if (!Network::RUN_OFFLINE) {
+    if (!RUN_OFFLINE) {
         // Receive any player entity updates from the server.
         Uint32 latestReceivedTick = processReceivedUpdates(playerID, currentPosition,
             currentMovement);
