@@ -1,5 +1,14 @@
 ## The Amalgam Engine
-#### A game engine for building virtual worlds.
+#### An engine for creating virtual worlds.
+
+## Status
+(Once things are more ready for outside developers, I'll link the trello.)
+### Current
+- [ ] Implementing, load testing, optimizing the netcode.
+
+### Future
+- [ ] Implementing the rest of the systems alongside a reference project.
+- [ ] Ready for other people to use.
 
 ## Building
 ### Windows
