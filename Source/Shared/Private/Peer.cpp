@@ -169,10 +169,15 @@ ReceiveResult Peer::receiveMessageWait()
 
     // Receive the size.
     Uint8 sizeBuf[sizeof(Uint16)];
-    if (socket->receive(sizeBuf, sizeof(Uint16)) <= 0) {
+    int result = socket->receive(sizeBuf, sizeof(Uint16));
+    if (result <= 0) {
         // Disconnected
         bIsConnected = false;
         return {NetworkResult::Disconnected, nullptr};
+    }
+    else if (result < sizeof(Uint16)) {
+        DebugError("Didn't receive all size bytes in one chunk."
+                   "Need to add logic for this scenario.");
     }
 
     // The number of bytes in the upcoming message.
@@ -184,14 +189,14 @@ ReceiveResult Peer::receiveMessageWait()
     }
 
     BinaryBufferPtr returnBuffer = std::make_unique<BinaryBuffer>(messageSize);
-    int result = socket->receive(returnBuffer->data(), messageSize);
+    result = socket->receive(returnBuffer->data(), messageSize);
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
         return {NetworkResult::Disconnected, nullptr};
     }
     else if (result < messageSize) {
-        DebugError("Didn't receive all the bytes in one chunk."
+        DebugError("Didn't receive all message bytes in one chunk."
                    "Need to add logic for this scenario.");
     }
 
