@@ -1,4 +1,4 @@
 # Build test apps.
-add_subdirectory(Graphics)
+#add_subdirectory(Graphics)
 
-#add_subdirectory(Network)
+add_subdirectory(Network)

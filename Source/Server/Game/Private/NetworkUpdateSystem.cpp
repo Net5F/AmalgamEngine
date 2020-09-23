@@ -97,6 +97,7 @@ EntityID entityID)
 {
     /* Fill the message with the latest PositionComponent, MovementComponent,
        and InputComponent data. */
+    // Prepare the inputs.
     fb::InputState fbInputStates[Input::Type::NumTypes];
     std::array<Input::State, Input::NumTypes>& playerInputStates =
         world.inputs[entityID].inputStates;

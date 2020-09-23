@@ -175,7 +175,7 @@ ReceiveResult Peer::receiveMessageWait()
         bIsConnected = false;
         return {NetworkResult::Disconnected, nullptr};
     }
-    else if (result < sizeof(Uint16)) {
+    else if (result < static_cast<int>(sizeof(Uint16))) {
         DebugError("Didn't receive all size bytes in one chunk."
                    "Need to add logic for this scenario.");
     }

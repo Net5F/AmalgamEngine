@@ -123,3 +123,22 @@ target_link_libraries(ClockTestServer
 )
 target_compile_features(ClockTestServer PRIVATE cxx_std_17)
 set_target_properties(ClockTestServer PROPERTIES CXX_EXTENSIONS OFF)
+
+
+# Serialization test
+add_executable(SerializationTest
+    Private/SerializationTestMain.cpp
+)
+target_include_directories(SerializationTest
+    PRIVATE
+        ${SDL2_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private
+)
+target_link_libraries(SerializationTest
+    PRIVATE
+        -static-libgcc
+        -static-libstdc++
+        Shared
+)
+target_compile_features(SerializationTest PRIVATE cxx_std_17)
+set_target_properties(SerializationTest PROPERTIES CXX_EXTENSIONS OFF)
