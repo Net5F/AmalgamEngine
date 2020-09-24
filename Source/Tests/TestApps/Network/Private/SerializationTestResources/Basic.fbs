@@ -1,0 +1,24 @@
+namespace AM.fb;
+
+enum InputState:byte {
+    Invalid,
+    Pressed,
+    Released
+}
+
+table Entity {
+    id:uint;
+    x:float;
+    y:float;
+    z:float;
+    velX:float;
+    velY:float;
+    velZ:float;
+    inputStates:[InputState];
+}
+
+table EntityUpdate {
+    entities:[Entity];
+}
+
+root_type EntityUpdate;
