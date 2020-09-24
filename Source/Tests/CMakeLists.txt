@@ -1,4 +1,4 @@
 # Build tests.
-add_subdirectory(TestApps)
+add_subdirectory(TestSandboxes)
 
 #add_subdirectory(UnitTests)
