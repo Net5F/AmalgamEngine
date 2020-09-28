@@ -21,7 +21,8 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/libSDL2pp/"
                  "${PROJECT_BINARY_DIR}/Libraries/libSDL2pp/")
 
 # Build bitsery 
-add_subdirectory(Lib/bitsery)
+add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/bitsery/"
+                 "${PROJECT_BINARY_DIR}/Libraries/bitsery/")
 
 # Include header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/../CMake/readerwriterqueue.cmake")

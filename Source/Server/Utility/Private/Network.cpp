@@ -14,7 +14,7 @@ namespace Server
 Network::Network()
 : accumulatedTime(0.0)
 , clientHandler(*this)
-, builder(BUILDER_BUFFER_SIZE)
+//, builder(BUILDER_BUFFER_SIZE)
 , currentTickPtr(nullptr)
 {
     sendTimer.updateSavedTime();
@@ -65,32 +65,32 @@ void Network::sendToAll(const BinaryBufferSharedPtr& message)
 
 Sint64 Network::queueInputMessage(BinaryBufferPtr messageBuffer)
 {
-    const fb::Message* message = fb::GetMessage(messageBuffer->data());
-    if (message->content_type() != fb::MessageContent::EntityUpdate) {
-        DebugError("Expected EntityUpdate but got something else.");
-    }
-    Uint32 receivedTickTimestamp = message->tickTimestamp();
-
-    // Check if the message is just a heartbeat, or if we need to push it.
-    auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
-    if (entityUpdate->entities()->size() != 0) {
-        /* Received a message, try to push it. */
-        MessageSorter::PushResult pushResult = inputMessageSorter.push(receivedTickTimestamp,
-            std::move(messageBuffer));
-        if (pushResult.result != MessageSorter::ValidityResult::Valid) {
-            DebugInfo("Message was dropped. Diff: %d", pushResult.diff);
-        }
-
-        return pushResult.diff;
-    }
-    else {
-        /* Received a heartbeat, just return the diff. */
-        // Calc how far ahead or behind the message's tick is in relation to the currentTick.
-        // Using the game's currentTick should be accurate since we didn't have to
-        // lock anything.
-        return static_cast<Sint64>(receivedTickTimestamp)
-               - static_cast<Sint64>(*currentTickPtr);
-    }
+//    const fb::Message* message = fb::GetMessage(messageBuffer->data());
+//    if (message->content_type() != fb::MessageContent::EntityUpdate) {
+//        DebugError("Expected EntityUpdate but got something else.");
+//    }
+//    Uint32 receivedTickTimestamp = message->tickTimestamp();
+//
+//    // Check if the message is just a heartbeat, or if we need to push it.
+//    auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
+//    if (entityUpdate->entities()->size() != 0) {
+//        /* Received a message, try to push it. */
+//        MessageSorter::PushResult pushResult = inputMessageSorter.push(receivedTickTimestamp,
+//            std::move(messageBuffer));
+//        if (pushResult.result != MessageSorter::ValidityResult::Valid) {
+//            DebugInfo("Message was dropped. Diff: %d", pushResult.diff);
+//        }
+//
+//        return pushResult.diff;
+//    }
+//    else {
+//        /* Received a heartbeat, just return the diff. */
+//        // Calc how far ahead or behind the message's tick is in relation to the currentTick.
+//        // Using the game's currentTick should be accurate since we didn't have to
+//        // lock anything.
+//        return static_cast<Sint64>(receivedTickTimestamp)
+//               - static_cast<Sint64>(*currentTickPtr);
+//    }
 }
 
 std::queue<BinaryBufferPtr>& Network::startReceiveInputMessages(Uint32 tickNum)

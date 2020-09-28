@@ -1,7 +1,5 @@
-#ifndef NETWORKCONNECTIONSYSTEM_H_
-#define NETWORKCONNECTIONSYSTEM_H_
+#pragma once
 
-#include "Message_generated.h"
 #include "NetworkDefs.h"
 #include "GameDefs.h"
 
@@ -49,12 +47,10 @@ private:
     Game& game;
     World& world;
     Network& network;
-
-    static constexpr int BUILDER_BUFFER_SIZE = 512;
-    flatbuffers::FlatBufferBuilder builder;
+//
+//    static constexpr int BUILDER_BUFFER_SIZE = 512;
+//    flatbuffers::FlatBufferBuilder builder;
 };
 
 } // End namespace Server
 } // End namespace AM
-
-#endif /* End NETWORKCONNECTIONSYSTEM_H_ */

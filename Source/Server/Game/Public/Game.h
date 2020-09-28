@@ -1,5 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #include "World.h"
 #include "NetworkConnectionSystem.h"
@@ -62,5 +61,3 @@ private:
 
 } // namespace Server
 } // namespace AM
-
-#endif /* GAME_H */

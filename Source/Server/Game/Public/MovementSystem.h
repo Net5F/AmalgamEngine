@@ -1,9 +1,7 @@
-#ifndef MOVEMENTSYSTEM_H
-#define MOVEMENTSYSTEM_H
+#pragma once
 
 #include "GameDefs.h"
 #include "InputComponent.h"
-#include "Message_generated.h"
 #include <array>
 
 namespace AM
@@ -31,5 +29,3 @@ private:
 
 } // namespace Server
 } // namespace AM
-
-#endif /* MOVEMENTSYSTEM_H */

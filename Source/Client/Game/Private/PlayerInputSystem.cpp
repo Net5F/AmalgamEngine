@@ -2,7 +2,6 @@
 #include "Game.h"
 #include "World.h"
 #include "Network.h"
-#include "MessageUtil.h"
 #include "Debug.h"
 
 namespace AM

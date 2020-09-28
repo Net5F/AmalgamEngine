@@ -1,5 +1,4 @@
-#ifndef CLIENTCOMPONENT_H_
-#define CLIENTCOMPONENT_H_
+#pragma once
 
 #include "NetworkDefs.h"
 
@@ -30,5 +29,3 @@ public:
 
 } // namespace Server
 } // namespace AM
-
-#endif /* End CLIENTCOMPONENT_H_ */

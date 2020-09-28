@@ -6,7 +6,6 @@
 #include "World.h"
 #include "PlayerInputSystem.h"
 #include "NetworkUpdateSystem.h"
-#include "Message_generated.h"
 #include "Timer.h"
 #include <atomic>
 

@@ -1,6 +1,4 @@
 target_sources(Shared
-    PRIVATE
-        Private/MessageUtil.cpp
     PUBLIC
         Public/ConnectionResponse.h
         Public/Entity.h
@@ -8,8 +6,6 @@ target_sources(Shared
 )
 
 target_include_directories(Shared
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/Private
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 )

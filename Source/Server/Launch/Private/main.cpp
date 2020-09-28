@@ -1,5 +1,4 @@
 #include <SDL2pp/SDL2pp.hh>
-#include "Message_generated.h"
 
 #include "GameDefs.h"
 #include "Game.h"

@@ -1,7 +1,6 @@
 #include "Network.h"
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
-#include "Message_generated.h"
 
 namespace AM
 {
@@ -224,62 +223,62 @@ void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
 {
     // We might be sharing this message between queues, so convert it to shared.
     BinaryBufferSharedPtr sharedBuffer = std::move(messageBuffer);
-    const fb::Message* message = fb::GetMessage(sharedBuffer->data());
-
-    /* Funnel the message into the appropriate queue. */
-    if (message->content_type() == fb::MessageContent::ConnectionResponse) {
-        // Grab our player ID so we can determine what update messages are for the player.
-        auto connectionResponse =
-            static_cast<const fb::ConnectionResponse*>(message->content());
-        playerID = connectionResponse->entityID();
-
-        // Queue the message.
-        if (!(connectionResponseQueue.enqueue(sharedBuffer))) {
-            DebugError("Ran out of room in queue and memory allocation failed.");
-        }
-    }
-    else if (message->content_type() == fb::MessageContent::EntityUpdate) {
-        // Pull out the vector of entities.
-        auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
-        auto entities = entityUpdate->entities();
-
-        // Iterate through the entities, checking if there's player or npc data.
-        bool playerFound = false;
-        bool npcFound = false;
-        for (auto entityIt = entities->begin(); entityIt != entities->end(); ++entityIt) {
-            EntityID entityID = (*entityIt)->id();
-
-            if (entityID == playerID) {
-                // Found the player.
-                if (!(playerUpdateQueue.enqueue(sharedBuffer))) {
-                    DebugError("Ran out of room in queue and memory allocation failed.");
-                }
-                playerFound = true;
-            }
-            else if (!npcFound){
-                // Found a non-player (npc).
-                // Queueing the message will let all npc updates within be processed.
-                if (!(npcUpdateQueue.enqueue({NpcUpdateType::Update, sharedBuffer}))) {
-                    DebugError("Ran out of room in queue and memory allocation failed.");
-                }
-                npcFound = true;
-            }
-
-            // If we found the player and an npc, we can stop looking.
-            if (playerFound && npcFound) {
-                break;
-            }
-        }
-
-        // If we didn't find an NPC and queue an update message, push an implicit
-        // confirmation to show that we've confirmed up to this tick.
-        if (!npcFound) {
-            if (!(npcUpdateQueue.enqueue({NpcUpdateType::ImplicitConfirmation, nullptr,
-                    message->tickTimestamp()}))) {
-                DebugError("Ran out of room in queue and memory allocation failed.");
-            }
-        }
-    }
+//    const fb::Message* message = fb::GetMessage(sharedBuffer->data());
+//
+//    /* Funnel the message into the appropriate queue. */
+//    if (message->content_type() == fb::MessageContent::ConnectionResponse) {
+//        // Grab our player ID so we can determine what update messages are for the player.
+//        auto connectionResponse =
+//            static_cast<const fb::ConnectionResponse*>(message->content());
+//        playerID = connectionResponse->entityID();
+//
+//        // Queue the message.
+//        if (!(connectionResponseQueue.enqueue(sharedBuffer))) {
+//            DebugError("Ran out of room in queue and memory allocation failed.");
+//        }
+//    }
+//    else if (message->content_type() == fb::MessageContent::EntityUpdate) {
+//        // Pull out the vector of entities.
+//        auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
+//        auto entities = entityUpdate->entities();
+//
+//        // Iterate through the entities, checking if there's player or npc data.
+//        bool playerFound = false;
+//        bool npcFound = false;
+//        for (auto entityIt = entities->begin(); entityIt != entities->end(); ++entityIt) {
+//            EntityID entityID = (*entityIt)->id();
+//
+//            if (entityID == playerID) {
+//                // Found the player.
+//                if (!(playerUpdateQueue.enqueue(sharedBuffer))) {
+//                    DebugError("Ran out of room in queue and memory allocation failed.");
+//                }
+//                playerFound = true;
+//            }
+//            else if (!npcFound){
+//                // Found a non-player (npc).
+//                // Queueing the message will let all npc updates within be processed.
+//                if (!(npcUpdateQueue.enqueue({NpcUpdateType::Update, sharedBuffer}))) {
+//                    DebugError("Ran out of room in queue and memory allocation failed.");
+//                }
+//                npcFound = true;
+//            }
+//
+//            // If we found the player and an npc, we can stop looking.
+//            if (playerFound && npcFound) {
+//                break;
+//            }
+//        }
+//
+//        // If we didn't find an NPC and queue an update message, push an implicit
+//        // confirmation to show that we've confirmed up to this tick.
+//        if (!npcFound) {
+//            if (!(npcUpdateQueue.enqueue({NpcUpdateType::ImplicitConfirmation, nullptr,
+//                    message->tickTimestamp()}))) {
+//                DebugError("Ran out of room in queue and memory allocation failed.");
+//            }
+//        }
+//    }
 }
 
 void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)

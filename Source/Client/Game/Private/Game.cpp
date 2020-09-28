@@ -43,38 +43,38 @@ void Game::connect()
     }
 
     // Get our info from the connection response.
-    const fb::Message* message = fb::GetMessage(responseBuffer->data());
-    auto connectionResponse = static_cast<const fb::ConnectionResponse*>(message->content());
-    EntityID player = connectionResponse->entityID();
-    DebugInfo("Received connection response. ID: %u, tick: %u"
-              , player, message->tickTimestamp());
-
-    // Aim our tick for some reasonable point ahead of the server.
-    // The server will adjust us after the first message anyway.
-    currentTick = message->tickTimestamp() + INITIAL_TICK_OFFSET;
-
-    // Set up our player.
-    SDL2pp::Rect textureRect(0, 32, 16, 16);
-
-    // Register the player ID with the world and the network.
-    world.registerPlayerID(player);
-
-    // Initialize the player state.
-    world.addEntity("Player", player);
-    world.positions[player].x = connectionResponse->x();
-    world.positions[player].y = connectionResponse->y();
-    world.oldPositions[player].x = world.positions[player].x;
-    world.oldPositions[player].y = world.positions[player].y;
-    world.movements[player].maxVelX = 250;
-    world.movements[player].maxVelY = 250;
-    world.sprites[player].texturePtr = sprites;
-    world.sprites[player].posInTexture = textureRect;
-    world.sprites[player].width = 64;
-    world.sprites[player].height = 64;
-    world.attachComponent(player, ComponentFlag::Input);
-    world.attachComponent(player, ComponentFlag::Movement);
-    world.attachComponent(player, ComponentFlag::Position);
-    world.attachComponent(player, ComponentFlag::Sprite);
+//    const fb::Message* message = fb::GetMessage(responseBuffer->data());
+//    auto connectionResponse = static_cast<const fb::ConnectionResponse*>(message->content());
+//    EntityID player = connectionResponse->entityID();
+//    DebugInfo("Received connection response. ID: %u, tick: %u"
+//              , player, message->tickTimestamp());
+//
+//    // Aim our tick for some reasonable point ahead of the server.
+//    // The server will adjust us after the first message anyway.
+//    currentTick = message->tickTimestamp() + INITIAL_TICK_OFFSET;
+//
+//    // Set up our player.
+//    SDL2pp::Rect textureRect(0, 32, 16, 16);
+//
+//    // Register the player ID with the world and the network.
+//    world.registerPlayerID(player);
+//
+//    // Initialize the player state.
+//    world.addEntity("Player", player);
+//    world.positions[player].x = connectionResponse->x();
+//    world.positions[player].y = connectionResponse->y();
+//    world.oldPositions[player].x = world.positions[player].x;
+//    world.oldPositions[player].y = world.positions[player].y;
+//    world.movements[player].maxVelX = 250;
+//    world.movements[player].maxVelY = 250;
+//    world.sprites[player].texturePtr = sprites;
+//    world.sprites[player].posInTexture = textureRect;
+//    world.sprites[player].width = 64;
+//    world.sprites[player].height = 64;
+//    world.attachComponent(player, ComponentFlag::Input);
+//    world.attachComponent(player, ComponentFlag::Movement);
+//    world.attachComponent(player, ComponentFlag::Position);
+//    world.attachComponent(player, ComponentFlag::Sprite);
 }
 
 void Game::fakeConnection()

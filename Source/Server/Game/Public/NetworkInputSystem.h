@@ -1,7 +1,5 @@
-#ifndef NETWORKINPUTSYSTEM_H
-#define NETWORKINPUTSYSTEM_H
+#pragma once
 
-#include "Message_generated.h"
 #include "InputComponent.h"
 
 namespace AM
@@ -31,5 +29,3 @@ private:
 
 } // namespace Server
 } // namespace AM
-
-#endif /* NETWORKINPUTSYSTEM_H */

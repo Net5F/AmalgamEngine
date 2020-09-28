@@ -2,7 +2,6 @@
 #include "Peer.h"
 #include "Debug.h"
 #include "MessageSorter.h"
-#include "Message_generated.h"
 #include <cmath>
 #include <array>
 
@@ -59,9 +58,9 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
 
         /* Track the latest tick we've sent. */
         // The message has a Uint16 messageSize in front of it.
-        const fb::Message* message = fb::GetMessage(
-            messageBuffer->data() + sizeof(Uint16));
-        latestSentSimTick = message->tickTimestamp();
+//        const fb::Message* message = fb::GetMessage(
+//            messageBuffer->data() + sizeof(Uint16));
+//        latestSentSimTick = message->tickTimestamp();
 
         sendQueue.pop_front();
     }

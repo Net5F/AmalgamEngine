@@ -13,3 +13,6 @@
 [submodule "Libraries/SDL_net"]
 	path = Libraries/SDL_net
 	url = git@github.com:SDL-mirror/SDL_net.git
+[submodule "Libraries/bitsery"]
+	path = Libraries/bitsery
+	url = git@github.com:fraillt/bitsery.git

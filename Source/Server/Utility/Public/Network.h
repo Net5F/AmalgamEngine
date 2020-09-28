@@ -4,7 +4,6 @@
 #include "NetworkDefs.h"
 #include "ClientHandler.h"
 #include "MessageSorter.h"
-#include "Message_generated.h"
 #include <string>
 #include <memory>
 #include <cstddef>
@@ -123,9 +122,9 @@ private:
 
     /** Stores input messages received from clients, sorted by tick number. */
     MessageSorter inputMessageSorter;
-
-    static constexpr int BUILDER_BUFFER_SIZE = 512;
-    flatbuffers::FlatBufferBuilder builder;
+//
+//    static constexpr int BUILDER_BUFFER_SIZE = 512;
+//    flatbuffers::FlatBufferBuilder builder;
 
     /** Pointer to the game's current tick. */
     const std::atomic<Uint32>* currentTickPtr;

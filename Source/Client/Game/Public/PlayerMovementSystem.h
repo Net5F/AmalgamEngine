@@ -4,7 +4,6 @@
 #include "MovementHelpers.h"
 #include "GameDefs.h"
 #include "InputComponent.h"
-#include "Message_generated.h"
 #include <array>
 #include <vector>
 

@@ -15,10 +15,10 @@ namespace AM
 struct Entity
 {
     /** This entity's sim ID. */
-    Uint32 id;
+    Uint32 id = 0;
 
     /** Bitflags showing which components this entity has. */
-    Uint32 flags;
+    Uint32 flags = 0;
 
     InputComponent& inputComponent;
     PositionComponent& positionComponent;

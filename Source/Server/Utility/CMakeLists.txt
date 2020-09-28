@@ -1,11 +1,11 @@
 target_sources(Server
-	PRIVATE
+    PRIVATE
         Private/IDPool.cpp
         Private/Network.cpp
         Private/Client.cpp
         Private/ClientHandler.cpp
         Private/MessageSorter.cpp
-	PUBLIC
+    PUBLIC
         Public/IDPool.h
         Public/Network.h
         Public/Client.h
