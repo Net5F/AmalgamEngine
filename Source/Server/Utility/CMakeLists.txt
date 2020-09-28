@@ -1,16 +1,16 @@
 target_sources(Server
 	PRIVATE
-		Private/IDPool.cpp
-		Private/Network.cpp
-		Private/Client.cpp
-		Private/ClientHandler.cpp
-		Private/MessageSorter.cpp
+        Private/IDPool.cpp
+        Private/Network.cpp
+        Private/Client.cpp
+        Private/ClientHandler.cpp
+        Private/MessageSorter.cpp
 	PUBLIC
-		Public/IDPool.h
-		Public/Network.h
-		Public/Client.h
-		Public/ClientHandler.h
-		Public/MessageSorter.h
+        Public/IDPool.h
+        Public/Network.h
+        Public/Client.h
+        Public/ClientHandler.h
+        Public/MessageSorter.h
 )
 
 target_include_directories(Server

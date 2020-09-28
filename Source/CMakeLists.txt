@@ -20,12 +20,8 @@ set(SDL2PP_WITH_NET ON)
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/libSDL2pp/"
                  "${PROJECT_BINARY_DIR}/Libraries/libSDL2pp/")
 
-# Build flatbuffers
-SET(FLATBUFFERS_BUILD_TESTS OFF CACHE BOOL "Enable the build of tests and samples." FORCE)
-SET(FLATBUFFERS_INSTALL OFF CACHE BOOL "Enable the installation of targets." FORCE)
-SET(FLATBUFFERS_BUILD_FLATHASH OFF CACHE BOOL "Enable the build of flathash" FORCE)
-add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/flatbuffers/"
-                 "${PROJECT_BINARY_DIR}/Libraries/flatbuffers/")
+# Build bitsery 
+add_subdirectory(Lib/bitsery)
 
 # Include header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/../CMake/readerwriterqueue.cmake")

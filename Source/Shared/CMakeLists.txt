@@ -3,53 +3,19 @@ cmake_minimum_required(VERSION 3.16)
 message(STATUS "Configuring Shared")
 
 # Add our static library target
-add_library(Shared STATIC
-	PRIVATE
-		Private/Acceptor.cpp
-		Private/Peer.cpp
-		Private/Timer.cpp
-		Private/MovementHelpers.cpp
-		Private/MessageUtil.cpp
-		Private/Debug.cpp
-		Private/SocketSet.cpp
-		Private/TcpSocket.cpp
-	PUBLIC
-		Public/Acceptor.h
-		Public/Peer.h
-		Public/Timer.h
-		Public/MovementHelpers.h
-		Public/GameDefs.h
-		Public/NetworkDefs.h
-		Public/MessageUtil.h
-		Public/Debug.h
-		Public/Ignore.h
-
-		Public/SocketSet.h
-		Public/TcpSocket.h
-
-		Public/InputComponent.h
-		Public/MovementComponent.h
-		Public/PositionComponent.h
-		Public/SpriteComponent.h
-)
+add_library(Shared STATIC "")
 
 target_include_directories(Shared
     PRIVATE
         ${SDL2_INCLUDE_DIRS}
-        ${CMAKE_CURRENT_SOURCE_DIR}/Private
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/Public
 )
-
-# Build our precompiled header.
-target_precompile_headers(Shared PRIVATE Private/pch.h)
 
 target_link_libraries(Shared
     PUBLIC
         ${SDL2_LIBRARIES}
         SDL2_net-static
         SDL2pp
-        flatbuffers
+        Bitsery::bitsery
 )
 
 # Compile with C++17
@@ -63,3 +29,10 @@ target_compile_options(Shared PUBLIC -Wall -Wextra)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_options(Shared PUBLIC -DENABLE_DEBUG_INFO)
 endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+# Build all of the subdirectories
+add_subdirectory(Components)
+add_subdirectory(Messages)
+add_subdirectory(Network)
+add_subdirectory(Sim)
+add_subdirectory(Utility)

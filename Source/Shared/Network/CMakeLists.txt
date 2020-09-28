@@ -1,0 +1,20 @@
+target_sources(Shared
+    PRIVATE
+        Private/Acceptor.cpp
+        Private/Peer.cpp
+        Private/SocketSet.cpp
+        Private/TcpSocket.cpp
+    PUBLIC
+        Public/Acceptor.h
+        Public/NetworkDefs.h
+        Public/Peer.h
+        Public/SocketSet.h
+        Public/TcpSocket.h
+)
+
+target_include_directories(Shared
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public
+)

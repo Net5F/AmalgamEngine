@@ -1,5 +1,4 @@
-#ifndef MESSAGEUTIL_H
-#define MESSAGEUTIL_H
+#pragma once
 
 #include "InputComponent.h"
 #include "Message_generated.h"
@@ -25,5 +24,3 @@ public:
 };
 
 } // namespace AM
-
-#endif /* MESSAGEUTIL_H */

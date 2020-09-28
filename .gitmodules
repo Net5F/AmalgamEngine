@@ -1,9 +1,6 @@
 [submodule "Libraries/libSDL2pp"]
 	path = Libraries/libSDL2pp
 	url = git@github.com:mmpuskas/libSDL2pp.git
-[submodule "Libraries/flatbuffers"]
-	path = Libraries/flatbuffers
-	url = git@github.com:google/flatbuffers.git
 [submodule "Libraries/readerwriterqueue"]
 	path = Libraries/readerwriterqueue
 	url = git@github.com:cameron314/readerwriterqueue.git

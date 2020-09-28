@@ -1,5 +1,4 @@
-#ifndef GAMEDEFS_H
-#define GAMEDEFS_H
+#pragma once
 
 #include <SDL_stdinc.h>
 #include <array>
@@ -53,7 +52,7 @@ struct Input
         NumTypes
     };
 
-    enum State
+    enum State : Uint8
     {
         Invalid,
         Pressed,
@@ -72,18 +71,11 @@ struct Input
 typedef std::array<Input::State, Input::Type::NumTypes> InputStateArr;
 struct InputSnapshot {
 public:
-    InputSnapshot()
-    : tickNum(0)
-    {
-    }
-
     /** The tick that this snapshot was taken at. */
-    Uint32 tickNum;
+    Uint32 tickNum = 0;
 
     /** Holds the current state of the inputs, indexed by Input::Type. */
-    InputStateArr inputStates;
+    InputStateArr inputStates = {};
 };
 
 } /* End namespace AM */
-
-#endif /* End GAMEDEFS_H */

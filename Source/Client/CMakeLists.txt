@@ -21,7 +21,7 @@ target_link_libraries(Client
         ${SDL2_MIXER_LIBRARIES} ${SDL2_TTF_LIBRARIES}
         SDL2_net-static
         SDL2pp
-        flatbuffers
+        Bitsery::bitsery
         Shared
         readerwriterqueue
         CircularBuffer
