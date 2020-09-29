@@ -127,8 +127,8 @@ int ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& c
         Client& client = pair.second;
 
         /* If there's potentially data, try to receive all messages from the client. */
-        ReceiveResult messageResult = client.receiveMessage();
-        while (messageResult.result == NetworkResult::Success) {
+        MessageResult messageResult = client.receiveMessage();
+        while (messageResult.networkResult == NetworkResult::Success) {
             // TEMP
 //                Uint32 receivedTick = 0;
 //                const fb::Message* message = fb::GetMessage(messageResult.message->data());
@@ -138,8 +138,8 @@ int ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& c
             // TEMP
 
             // Queue the message (blocks if the queue is locked).
-            Sint64 diff = network.queueInputMessage(std::move(messageResult.message));
-            client.recordTickDiff(diff);
+//            Sint64 diff = network.queueInputMessage(std::move(messageResult.message));
+//            client.recordTickDiff(diff);
 
             // TEMP
 //                if (receivedTick != 0) {

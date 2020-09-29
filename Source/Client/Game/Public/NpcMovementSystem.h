@@ -1,5 +1,4 @@
-#ifndef NPCMOVEMENTSYSTEM_H
-#define NPCMOVEMENTSYSTEM_H
+#pragma once
 
 #include "GameDefs.h"
 #include "NetworkDefs.h"
@@ -11,11 +10,7 @@
 namespace AM
 {
 
-// Forward declaration.
-namespace fb
-{
-    class Message;
-}
+class EntityUpdate;
 
 namespace Client
 {
@@ -49,8 +44,8 @@ private:
         Uint32 tickNum = 0;
         /** Whether at least 1 NPC's state changed on this tick or not. */
         bool dataChanged = false;
-        /** If dataChanged == true, contains the update message. */
-        BinaryBufferSharedPtr message = nullptr;
+        /** If dataChanged == true, contains the update message data. */
+        const std::shared_ptr<const EntityUpdate>& entityUpdate = nullptr;
     };
 
     /**
@@ -69,12 +64,12 @@ private:
     /** Pushes messages confirming ticks up to confirmedTick. */
     void handleImplicitConfirmation(const Uint32 confirmedTick);
     /** Handles an update message, including implicit confirmations based on it. */
-    void handleUpdate(const BinaryBufferSharedPtr& messageBuffer);
+    void handleUpdate(const std::shared_ptr<const EntityUpdate>& entityUpdate);
 
     /**
      * Applies the given update message to the entity world state.
      */
-    void applyUpdateMessage(const fb::Message* message);
+    void applyUpdateMessage(const std::shared_ptr<const EntityUpdate>& entityUpdate);
 
     /** Holds NPC state deltas that are waiting to be processed. */
     std::queue<NpcStateUpdate> stateUpdateQueue;
@@ -92,5 +87,3 @@ private:
 
 } // namespace Client
 } // namespace AM
-
-#endif /* NPCMOVEMENTSYSTEM_H */

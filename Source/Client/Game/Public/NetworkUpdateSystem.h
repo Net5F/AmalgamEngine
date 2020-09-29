@@ -1,7 +1,7 @@
-#ifndef NETWORKUPDATESYSTEM_H
-#define NETWORKUPDATESYSTEM_H
+#pragma once
 
 #include "GameDefs.h"
+#include <array>
 
 namespace AM
 {
@@ -28,22 +28,10 @@ public:
     void sendInputState();
 
 private:
-//    /**
-//     * Serializes the given entity's relevant world data.
-//     * @param entityID  The entity to serialize.
-//     * @return An offset where the data was stored in the builder.
-//     */
-//    flatbuffers::Offset<AM::fb::Entity> serializeEntity(EntityID entityID);
-
     Game& game;
     World& world;
     Network& network;
-//
-//    static constexpr int BUILDER_BUFFER_SIZE = 512;
-//    flatbuffers::FlatBufferBuilder builder;
 };
 
 } // namespace Client
 } // namespace AM
-
-#endif /* NETWORKUPDATESYSTEM_H */

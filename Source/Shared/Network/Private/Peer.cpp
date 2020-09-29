@@ -99,10 +99,10 @@ NetworkResult Peer::send(const Uint8* messageBuffer, unsigned int messageSize)
     }
 }
 
-ReceiveResult Peer::receiveBytes(Uint16 numBytes, bool checkSockets)
+NetworkResult Peer::receiveBytes(Uint8* messageBuffer, Uint16 numBytes, bool checkSockets)
 {
     if (!bIsConnected) {
-        return {NetworkResult::Disconnected, nullptr};
+        return NetworkResult::Disconnected;
     }
     else if (checkSockets) {
         // Poll to see if there's data
@@ -110,17 +110,17 @@ ReceiveResult Peer::receiveBytes(Uint16 numBytes, bool checkSockets)
     }
 
     if (!(socket->isReady())) {
-        return {NetworkResult::NoWaitingData, nullptr};
+        return NetworkResult::NoWaitingData;
     }
     else {
-        return receiveBytesWait(numBytes);
+        return receiveBytesWait(messageBuffer, numBytes);
     }
 }
 
-ReceiveResult Peer::receiveBytesWait(Uint16 numBytes)
+NetworkResult Peer::receiveBytesWait(Uint8* messageBuffer, Uint16 numBytes)
 {
     if (!bIsConnected) {
-        return {NetworkResult::Disconnected, nullptr};
+        return NetworkResult::Disconnected;
     }
     else if (numBytes > MAX_MESSAGE_SIZE) {
         DebugError(
@@ -128,25 +128,24 @@ ReceiveResult Peer::receiveBytesWait(Uint16 numBytes)
             numBytes, MAX_MESSAGE_SIZE);
     }
 
-    BinaryBufferPtr returnBuffer = std::make_unique<BinaryBuffer>(numBytes);
-    int result = socket->receive(returnBuffer->data(), numBytes);
+    int result = socket->receive(messageBuffer, numBytes);
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
-        return {NetworkResult::Disconnected, nullptr};
+        return NetworkResult::Disconnected;
     }
     else if (result < numBytes) {
         DebugError("Didn't receive all the bytes in one chunk."
                    "Need to add logic for this scenario.");
     }
 
-    return {NetworkResult::Success, std::move(returnBuffer)};
+    return NetworkResult::Success;
 }
 
-ReceiveResult Peer::receiveMessage(bool checkSockets)
+MessageResult Peer::receiveMessage(Uint8* messageBuffer, bool checkSockets)
 {
     if (!bIsConnected) {
-        return {NetworkResult::Disconnected, nullptr};
+        return {NetworkResult::Disconnected};
     }
     else if (checkSockets) {
         // Poll to see if there's data
@@ -154,53 +153,54 @@ ReceiveResult Peer::receiveMessage(bool checkSockets)
     }
 
     if (!(socket->isReady())) {
-        return {NetworkResult::NoWaitingData, nullptr};
+        return {NetworkResult::NoWaitingData};
     }
     else {
-        return receiveMessageWait();
+        return receiveMessageWait(messageBuffer);
     }
 }
 
-ReceiveResult Peer::receiveMessageWait()
+MessageResult Peer::receiveMessageWait(Uint8* messageBuffer)
 {
     if (!bIsConnected) {
-        return {NetworkResult::Disconnected, nullptr};
+        return {NetworkResult::Disconnected};
     }
 
-    // Receive the size.
-    Uint8 sizeBuf[sizeof(Uint16)];
-    int result = socket->receive(sizeBuf, sizeof(Uint16));
+    // Receive the message header.
+    Uint8 headerBuf[MESSAGE_HEADER_SIZE];
+    int result = socket->receive(headerBuf, MESSAGE_HEADER_SIZE);
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
-        return {NetworkResult::Disconnected, nullptr};
+        return {NetworkResult::Disconnected};
     }
-    else if (result < static_cast<int>(sizeof(Uint16))) {
+    else if (result < static_cast<int>(MESSAGE_HEADER_SIZE)) {
         DebugError("Didn't receive all size bytes in one chunk."
                    "Need to add logic for this scenario.");
     }
 
     // The number of bytes in the upcoming message.
-    Uint16 messageSize = _SDLNet_Read16(sizeBuf);
+    Uint16 messageSize = _SDLNet_Read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_MESSAGE_SIZE) {
         DebugError(
             "Tried to receive too large of a message. messageSize: %u, MaxSize: %u",
             messageSize, MAX_MESSAGE_SIZE);
     }
 
-    BinaryBufferPtr returnBuffer = std::make_unique<BinaryBuffer>(messageSize);
-    result = socket->receive(returnBuffer->data(), messageSize);
+    result = socket->receive(messageBuffer, messageSize);
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
-        return {NetworkResult::Disconnected, nullptr};
+        return {NetworkResult::Disconnected};
     }
     else if (result < messageSize) {
         DebugError("Didn't receive all message bytes in one chunk."
                    "Need to add logic for this scenario.");
     }
 
-    return {NetworkResult::Success, std::move(returnBuffer)};
+    MessageType messageType =
+        static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageID]);
+    return {NetworkResult::Success, messageType, messageSize};
 }
 
 } // End namespace AM

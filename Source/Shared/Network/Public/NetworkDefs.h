@@ -60,20 +60,26 @@ struct ClientHeaderIndex {
 static constexpr unsigned int CLIENT_HEADER_SIZE = 1;
 
 /** Used for indexing into the size or payload of a received message. */
-struct MessageIndex {
+struct MessageHeaderIndex {
     enum Index : Uint8 {
-        // Uint16
-        Size = 0,
-        // Uint8[]
-        MessageStart = 2
+        /** Uint8, identifies the type of message. */
+        MessageID = 0,
+        /** Uint16, the size of the message in bytes. */
+        Size = 1,
+        /** The start of the message bytes. */
+        MessageStart = 3
     };
 };
+static constexpr unsigned int MESSAGE_HEADER_SIZE = 3;
 
 //--------------------------------------------------------------------------
 // Structs
 //--------------------------------------------------------------------------
 /** All potential results for a network send or receive. */
 enum class NetworkResult {
+    /** Only used for initialization. */
+    Invalid,
+    /** Used for when a message was successfully sent or received. */
     Success,
     /* Used for when a send or receive was attempted and
      * the peer was found to be disconnected. */
@@ -82,11 +88,21 @@ enum class NetworkResult {
     NoWaitingData
 };
 
-/** The NetworkResult and associated data from a network receive. */
-struct ReceiveResult {
-    NetworkResult result;
-    // message will be nullptr if result != Success.
-    BinaryBufferPtr message = nullptr;
+/** The type of message to expect. */
+enum class MessageType : Uint8 {
+    Invalid = 0,
+    ConnectionResponse = 1,
+    EntityUpdate = 2,
+    ClientInputs = 3
+};
+
+/** Represents the result of trying to receive a message. */
+struct MessageResult {
+    NetworkResult networkResult = NetworkResult::Invalid;
+    /** messageType will be Invalid if networkResult != Success. */
+    MessageType messageType = MessageType::Invalid;
+    /** If networkResult == Success, contains the size of the received message. */
+    Uint16 messageSize = 0;
 };
 
 } // End namespace AM

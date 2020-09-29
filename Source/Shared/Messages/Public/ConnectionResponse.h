@@ -10,6 +10,9 @@ namespace AM
  */
 struct ConnectionResponse
 {
+    /** The tick that the server is telling the client to assume. */
+    Uint32 tickNum;
+
     /** The sim ID that the server has assigned to this client's player entity. */
     Uint32 entityID = 0;
 
@@ -21,6 +24,7 @@ struct ConnectionResponse
 template <typename S>
 void serialize(S& serializer, ConnectionResponse connectionResponse)
 {
+    serializer.value4b(connectionResponse.tickNum);
     serializer.value4b(connectionResponse.entityID);
     serializer.value4b(connectionResponse.x);
     serializer.value4b(connectionResponse.y);

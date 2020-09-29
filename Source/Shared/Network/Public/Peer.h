@@ -69,39 +69,46 @@ public:
     /**
      * Tries to receive bytes over the network.
      *
+     * @param messageBuffer  The buffer to fill with a message, if one was received.
+     * @param numBytes  The number of bytes to receive.
      * @param checkSockets  If true, will call CheckSockets() before checking
      *                      SocketReady(). Set this to false if you're going to call
      *                      CheckSockets() yourself.
-     * @param numBytes  The number of bytes to receive.
-     * @return An appropriate ReceiveResult if the receive failed, else a ReceiveResult with
-     *         result == Success and data in the message field.
+     * @return An appropriate ReceiveResult. If return == Success,
+     *         messageBuffer contains the received message.
      */
-    ReceiveResult receiveBytes(Uint16 numBytes, bool checkSockets);
+    NetworkResult receiveBytes(Uint8* messageBuffer, Uint16 numBytes,
+                               bool checkSockets);
 
     /**
      * Returns the requested number of bytes, waiting if they're not yet available.
+     * @param messageBuffer  The buffer to fill with a message, if one was received.
      * @param numBytes  The number of bytes to receive.
-     * @return A message.
+     * @return An appropriate ReceiveResult. If return == Success,
+     *         messageBuffer contains the received message.
      */
-    ReceiveResult receiveBytesWait(Uint16 numBytes);
+    NetworkResult receiveBytesWait(Uint8* messageBuffer, Uint16 numBytes);
 
     /**
      * Tries to receive a {size, message} pair over the network.
      *
+     * @param messageBuffer  The buffer to fill with a message, if one was received.
      * @param checkSockets  If true, will call CheckSockets() before checking
      *                      SocketReady(). Set this to false if you're going to call
      *                      CheckSockets() yourself.
-     * @return An appropriate ReceiveResult if the receive failed, else a ReceiveResult with
-     *         result == Success and data in the message field.
+     * @return An appropriate ReceiveResult. If return.networkResult == Success,
+     *         messageBuffer contains the received message.
      */
-    ReceiveResult receiveMessage(bool checkSockets);
+    MessageResult receiveMessage(Uint8* messageBuffer, bool checkSockets);
 
     /**
      * Receives a {size, message} pair and returns a message, waiting if the data is
      * not yet available.
-     * @return A message.
+     * @param messageBuffer  The buffer to fill with a message, if one was received.
+     * @return An appropriate ReceiveResult. If return.networkResult == Success,
+     *         messageBuffer contains the received message.
      */
-    ReceiveResult receiveMessageWait();
+    MessageResult receiveMessageWait(Uint8* messageBuffer);
 
 private:
     /** The socket for this peer. Must be a unique_ptr so we can move without copying. */

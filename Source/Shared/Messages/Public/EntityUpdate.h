@@ -2,8 +2,9 @@
 
 #include "Entity.h"
 #include "GameDefs.h"
-#include <vector>
 #include "SDL_stdinc.h"
+#include <vector>
+#include "bitsery/bitsery.h"
 
 namespace AM
 {
@@ -23,7 +24,8 @@ struct EntityUpdate
 template <typename S>
 void serialize(S& serializer, EntityUpdate entityUpdate)
 {
-    serializer.container(entityUpdate.entities, MAX_ENTITIES);
+    serializer.container(entityUpdate.entities,
+        static_cast<std::size_t>(MAX_ENTITIES));
 }
 
 } // End namespace AM

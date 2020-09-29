@@ -1,5 +1,4 @@
-#ifndef SPRITECOMPONENT_H_
-#define SPRITECOMPONENT_H_
+#pragma once
 
 #include <memory>
 #include <SDL2pp/SDL2pp.hh>
@@ -34,5 +33,3 @@ public:
 };
 
 } // namespace AM
-
-#endif /* End SPRITECOMPONENT_H_ */

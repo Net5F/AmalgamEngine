@@ -20,9 +20,9 @@ struct Entity
     /** Bitflags showing which components this entity has. */
     Uint32 flags = 0;
 
-    InputComponent& inputComponent;
-    PositionComponent& positionComponent;
-    MovementComponent& movementComponent;
+    InputComponent inputComponent;
+    PositionComponent positionComponent;
+    MovementComponent movementComponent;
 };
 
 template <typename S>

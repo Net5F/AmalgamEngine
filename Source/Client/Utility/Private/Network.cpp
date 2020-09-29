@@ -1,6 +1,9 @@
 #include "Network.h"
 #include "Peer.h"
+#include "ConnectionResponse.h"
+#include "EntityUpdate.h"
 #include <SDL2/SDL_net.h>
+#include "MessageTools.h"
 
 namespace AM
 {
@@ -14,6 +17,8 @@ Network::Network()
 , adjustmentIteration(0)
 , receiveThreadObj()
 , exitRequested(false)
+, headerRecBuffer(SERVER_HEADER_SIZE)
+, messageRecBuffer(Peer::MAX_MESSAGE_SIZE)
 {
     if (!RUN_OFFLINE) {
         SDLNet_Init();
@@ -63,13 +68,13 @@ void Network::send(const BinaryBufferSharedPtr& message)
     }
 }
 
-BinaryBufferSharedPtr Network::receiveConnectionResponse(Uint64 timeoutMs)
+std::unique_ptr<ConnectionResponse> Network::receiveConnectionResponse(Uint64 timeoutMs)
 {
     if (!(server->isConnected())) {
         DebugError("Tried to receive while server is disconnected.");
     }
 
-    BinaryBufferSharedPtr message = nullptr;
+    std::unique_ptr<ConnectionResponse> message = nullptr;
     if (timeoutMs == 0) {
         connectionResponseQueue.try_dequeue(message);
     }
@@ -80,13 +85,13 @@ BinaryBufferSharedPtr Network::receiveConnectionResponse(Uint64 timeoutMs)
     return message;
 }
 
-BinaryBufferSharedPtr Network::receivePlayerUpdate(Uint64 timeoutMs)
+std::shared_ptr<const EntityUpdate> Network::receivePlayerUpdate(Uint64 timeoutMs)
 {
     if (!(server->isConnected())) {
         DebugError("Tried to receive while server is disconnected.");
     }
 
-    BinaryBufferSharedPtr message = nullptr;
+    std::shared_ptr<const EntityUpdate> message = nullptr;
     if (timeoutMs == 0) {
         playerUpdateQueue.try_dequeue(message);
     }
@@ -128,13 +133,13 @@ int Network::pollForMessages()
 
     while (!(*exitRequested)) {
         // Wait for a server header.
-        ReceiveResult headerResult = server->receiveBytesWait(SERVER_HEADER_SIZE);
+        NetworkResult headerResult = server->receiveBytesWait(headerRecBuffer.data(),
+            SERVER_HEADER_SIZE);
 
-        if (headerResult.result == NetworkResult::Success) {
-            const BinaryBuffer& header = *(headerResult.message.get());
-            processBatch(header);
+        if (headerResult == NetworkResult::Success) {
+            processBatch();
         }
-        else if (headerResult.result == NetworkResult::Disconnected) {
+        else if (headerResult == NetworkResult::Disconnected) {
             DebugError("Found server to be disconnected while trying to receive header.");
         }
     }
@@ -184,34 +189,34 @@ BinaryBufferSharedPtr Network::constructMessage(Uint8* messageBuffer, std::size_
     return dynamicBuffer;
 }
 
-void Network::processBatch(const BinaryBuffer& header) {
+void Network::processBatch() {
     // Check if we need to adjust the tick offset.
-    adjustIfNeeded(header[ServerHeaderIndex::TickAdjustment],
-        header[ServerHeaderIndex::AdjustmentIteration]);
+    adjustIfNeeded(headerRecBuffer[ServerHeaderIndex::TickAdjustment],
+        headerRecBuffer[ServerHeaderIndex::AdjustmentIteration]);
 
     /* Process messages, if we received any. */
-    Uint8 messageCount = header[ServerHeaderIndex::MessageCount];
+    Uint8 messageCount = headerRecBuffer[ServerHeaderIndex::MessageCount];
     for (unsigned int i = 0; i < messageCount; ++i) {
-        ReceiveResult messageResult = server->receiveMessageWait();
+        MessageResult messageResult = server->receiveMessageWait(messageRecBuffer.data());
 
         // If we received a message, push it into the appropriate queue.
-        if (messageResult.result == NetworkResult::Success) {
+        if (messageResult.networkResult == NetworkResult::Success) {
             // Got a message, process it and update the receiveTimer.
-            processReceivedMessage(std::move(messageResult.message));
+            processReceivedMessage(messageResult.messageType, messageResult.messageSize);
             receiveTimer.updateSavedTime();
         }
-        else if ((messageResult.result == NetworkResult::NoWaitingData)
+        else if ((messageResult.networkResult == NetworkResult::NoWaitingData)
                  && (receiveTimer.getDeltaSeconds(false) > SERVER_TIMEOUT_S)) {
             // Too long since we received a message, timed out.
             DebugError("Server connection timed out.");
         }
-        else if (messageResult.result == NetworkResult::Disconnected) {
+        else if (messageResult.networkResult == NetworkResult::Disconnected) {
             DebugError("Found server to be disconnected while trying to receive message.");
         }
     }
 
     /* Process any confirmed ticks. */
-    Uint8 confirmedTickCount = header[ServerHeaderIndex::ConfirmedTickCount];
+    Uint8 confirmedTickCount = headerRecBuffer[ServerHeaderIndex::ConfirmedTickCount];
     for (unsigned int i = 0; i < confirmedTickCount; ++i) {
         if (!(npcUpdateQueue.enqueue({NpcUpdateType::ExplicitConfirmation}))) {
             DebugError("Ran out of room in queue and memory allocation failed.");
@@ -219,66 +224,69 @@ void Network::processBatch(const BinaryBuffer& header) {
     }
 }
 
-void Network::processReceivedMessage(BinaryBufferPtr messageBuffer)
+void Network::processReceivedMessage(MessageType messageType, Uint16 messageSize)
 {
-    // We might be sharing this message between queues, so convert it to shared.
-    BinaryBufferSharedPtr sharedBuffer = std::move(messageBuffer);
-//    const fb::Message* message = fb::GetMessage(sharedBuffer->data());
-//
-//    /* Funnel the message into the appropriate queue. */
-//    if (message->content_type() == fb::MessageContent::ConnectionResponse) {
-//        // Grab our player ID so we can determine what update messages are for the player.
-//        auto connectionResponse =
-//            static_cast<const fb::ConnectionResponse*>(message->content());
-//        playerID = connectionResponse->entityID();
-//
-//        // Queue the message.
-//        if (!(connectionResponseQueue.enqueue(sharedBuffer))) {
-//            DebugError("Ran out of room in queue and memory allocation failed.");
-//        }
-//    }
-//    else if (message->content_type() == fb::MessageContent::EntityUpdate) {
-//        // Pull out the vector of entities.
-//        auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
-//        auto entities = entityUpdate->entities();
-//
-//        // Iterate through the entities, checking if there's player or npc data.
-//        bool playerFound = false;
-//        bool npcFound = false;
-//        for (auto entityIt = entities->begin(); entityIt != entities->end(); ++entityIt) {
-//            EntityID entityID = (*entityIt)->id();
-//
-//            if (entityID == playerID) {
-//                // Found the player.
-//                if (!(playerUpdateQueue.enqueue(sharedBuffer))) {
-//                    DebugError("Ran out of room in queue and memory allocation failed.");
-//                }
-//                playerFound = true;
-//            }
-//            else if (!npcFound){
-//                // Found a non-player (npc).
-//                // Queueing the message will let all npc updates within be processed.
-//                if (!(npcUpdateQueue.enqueue({NpcUpdateType::Update, sharedBuffer}))) {
-//                    DebugError("Ran out of room in queue and memory allocation failed.");
-//                }
-//                npcFound = true;
-//            }
-//
-//            // If we found the player and an npc, we can stop looking.
-//            if (playerFound && npcFound) {
-//                break;
-//            }
-//        }
-//
-//        // If we didn't find an NPC and queue an update message, push an implicit
-//        // confirmation to show that we've confirmed up to this tick.
-//        if (!npcFound) {
-//            if (!(npcUpdateQueue.enqueue({NpcUpdateType::ImplicitConfirmation, nullptr,
-//                    message->tickTimestamp()}))) {
-//                DebugError("Ran out of room in queue and memory allocation failed.");
-//            }
-//        }
-//    }
+    /* Funnel the message into the appropriate queue. */
+    if (messageType == MessageType::ConnectionResponse) {
+        // Deserialize the message.
+        std::unique_ptr<ConnectionResponse> connectionResponse
+                                                = std::make_unique<ConnectionResponse>();
+        MessageTools::deserialize(messageRecBuffer, messageSize, *connectionResponse);
+
+        // Grab our player ID so we can determine what update messages are for the player.
+        playerID = connectionResponse->entityID;
+
+        // Queue the message.
+        if (!(connectionResponseQueue.enqueue(std::move(connectionResponse)))) {
+            DebugError("Ran out of room in queue and memory allocation failed.");
+        }
+    }
+    else if (messageType == MessageType::EntityUpdate) {
+        // Deserialize the message.
+        std::shared_ptr<const EntityUpdate> entityUpdate
+                                                = std::make_shared<EntityUpdate>();
+        MessageTools::deserialize(messageRecBuffer, messageSize, *entityUpdate);
+
+        // Pull out the vector of entities.
+        const std::vector<Entity>& entities = entityUpdate->entities;
+
+        // Iterate through the entities, checking if there's player or npc data.
+        bool playerFound = false;
+        bool npcFound = false;
+        for (auto entityIt = entities.begin(); entityIt != entities.end(); ++entityIt) {
+            EntityID entityID = (*entityIt).id;
+
+            if (entityID == playerID) {
+                // Found the player.
+                if (!(playerUpdateQueue.enqueue(entityUpdate))) {
+                    DebugError("Ran out of room in queue and memory allocation failed.");
+                }
+                playerFound = true;
+            }
+            else if (!npcFound){
+                // Found a non-player (npc).
+                // Queueing the message will let all npc updates within be processed.
+                if (!(npcUpdateQueue.enqueue({NpcUpdateType::Update, entityUpdate}))) {
+                    DebugError("Ran out of room in queue and memory allocation failed.");
+                }
+                npcFound = true;
+            }
+
+            // If we found the player and an npc, we can stop looking.
+            if (playerFound && npcFound) {
+                break;
+            }
+        }
+
+        // If we didn't find an NPC and queue an update message, push an implicit
+        // confirmation to show that we've confirmed up to this tick.
+        if (!npcFound) {
+            if (!(npcUpdateQueue.enqueue({NpcUpdateType::ImplicitConfirmation, nullptr,
+                    entityUpdate->tickNum}))) {
+                DebugError("Ran out of room in queue and memory allocation failed.");
+            }
+        }
+    }
 }
 
 void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)

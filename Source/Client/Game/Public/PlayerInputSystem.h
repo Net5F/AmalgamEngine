@@ -1,5 +1,4 @@
-#ifndef PLAYERINPUTSYSTEM_H
-#define PLAYERINPUTSYSTEM_H
+#pragma once
 
 #include "GameDefs.h"
 #include "Network.h"
@@ -37,5 +36,3 @@ private:
 
 } // namespace Client
 } // namespace AM
-
-#endif /* PLAYERINPUTSYSTEM_H */

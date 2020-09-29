@@ -1,5 +1,4 @@
-#ifndef PLAYERMOVEMENTSYSTEM_H
-#define PLAYERMOVEMENTSYSTEM_H
+#pragma once
 
 #include "MovementHelpers.h"
 #include "GameDefs.h"
@@ -51,5 +50,3 @@ private:
 
 } // namespace Client
 } // namespace AM
-
-#endif /* PLAYERMOVEMENTSYSTEM_H */

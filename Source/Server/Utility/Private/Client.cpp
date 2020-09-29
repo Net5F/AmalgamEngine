@@ -112,50 +112,52 @@ void Client::fillHeader(Uint8 messageCount, Uint32 currentTick)
     }
 }
 
-ReceiveResult Client::receiveMessage()
+// TODO: Add buffer for receiving/deserializing messages and have this return
+//       a smart ptr to an EntityUpdate (or make a pure input message)
+MessageResult Client::receiveMessage()
 {
-    if (peer == nullptr) {
-        return {NetworkResult::Disconnected, nullptr};
-    }
-
-    // Receive the header.
-    ReceiveResult result = peer->receiveBytes(CLIENT_HEADER_SIZE, false);
-
-    // Receive the following message, or check for timeouts.
-    if (result.result == NetworkResult::Success) {
-        // Process the adjustment iteration.
-        const BinaryBuffer& header = *(result.message.get());
-        Uint8 receivedAdjIteration = header[ClientHeaderIndex::AdjustmentIteration];
-        Uint8 expectedNextIteration = (latestAdjIteration + 1);
-
-        // If we received the next expected iteration, save it.
-        if (receivedAdjIteration == expectedNextIteration) {
-            latestAdjIteration = expectedNextIteration;
-        }
-        else if (receivedAdjIteration > expectedNextIteration) {
-            DebugError("Skipped an adjustment iteration. Logic must be flawed.");
-        }
-
-        // Get the message.
-        // Note: This is a blocking read, but the data should immediately be available
-        //       since we send it all in 1 packet.
-        result = peer->receiveMessageWait();
-
-        // Got a message, update the receiveTimer.
-        receiveTimer.updateSavedTime();
-    }
-    else if (result.result == NetworkResult::NoWaitingData) {
-        // If we timed out, drop the connection.
-        double delta = receiveTimer.getDeltaSeconds(false);
-        if (delta > TIMEOUT_S) {
-            peer = nullptr;
-            DebugInfo("Dropped connection, peer timed out. Time since last message: %.6f "
-                "seconds. Timeout: %.6f", delta, TIMEOUT_S);
-            return {NetworkResult::Disconnected, nullptr};
-        }
-    }
-
-    return result;
+//    if (peer == nullptr) {
+//        return {NetworkResult::Disconnected, MessageType::Invalid, 0};
+//    }
+//
+//    // Receive the header.
+//    MessageResult result = peer->receiveBytes(CLIENT_HEADER_SIZE, false);
+//
+//    // Receive the following message, or check for timeouts.
+//    if (result.result == NetworkResult::Success) {
+//        // Process the adjustment iteration.
+//        const BinaryBuffer& header = *(result.message.get());
+//        Uint8 receivedAdjIteration = header[ClientHeaderIndex::AdjustmentIteration];
+//        Uint8 expectedNextIteration = (latestAdjIteration + 1);
+//
+//        // If we received the next expected iteration, save it.
+//        if (receivedAdjIteration == expectedNextIteration) {
+//            latestAdjIteration = expectedNextIteration;
+//        }
+//        else if (receivedAdjIteration > expectedNextIteration) {
+//            DebugError("Skipped an adjustment iteration. Logic must be flawed.");
+//        }
+//
+//        // Get the message.
+//        // Note: This is a blocking read, but the data should immediately be available
+//        //       since we send it all in 1 packet.
+//        result = peer->receiveMessageWait();
+//
+//        // Got a message, update the receiveTimer.
+//        receiveTimer.updateSavedTime();
+//    }
+//    else if (result.result == NetworkResult::NoWaitingData) {
+//        // If we timed out, drop the connection.
+//        double delta = receiveTimer.getDeltaSeconds(false);
+//        if (delta > TIMEOUT_S) {
+//            peer = nullptr;
+//            DebugInfo("Dropped connection, peer timed out. Time since last message: %.6f "
+//                "seconds. Timeout: %.6f", delta, TIMEOUT_S);
+//            return {NetworkResult::Disconnected, nullptr};
+//        }
+//    }
+//
+//    return result;
 }
 
 bool Client::isConnected() {

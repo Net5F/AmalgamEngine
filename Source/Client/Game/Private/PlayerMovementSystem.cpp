@@ -3,8 +3,10 @@
 #include "Game.h"
 #include "World.h"
 #include "Network.h"
+#include "EntityUpdate.h"
 #include "ClientNetworkDefs.h"
 #include "Debug.h"
+#include <memory>
 
 namespace AM
 {
@@ -60,51 +62,44 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(EntityID playerID,
 {
     /* Process any messages for us from the server. */
     Uint32 latestReceivedTick = 0;
-    BinaryBufferSharedPtr receivedBuffer = network.receivePlayerUpdate();
-//    while (receivedBuffer != nullptr) {
-//        // Ready the Message for reading.
-//        const fb::Message* message = fb::GetMessage(receivedBuffer->data());
-//
-//        // Track our latest received tick.
-//        Uint32 newTick = message->tickTimestamp();
-//        if (newTick > latestReceivedTick) {
-//            latestReceivedTick = newTick;
-//        }
-//
-//        // Pull out the vector of entities.
-//        auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
-//        auto entities = entityUpdate->entities();
-//
-//        // Find the player data.
-//        const fb::Entity* receivedData = nullptr;
-//        for (auto entityIt = entities->begin(); entityIt != entities->end(); ++entityIt) {
-//            if ((*entityIt)->id() == playerID) {
-//                receivedData = *entityIt;
-//                break;
-//            }
-//        }
-//
-//        if (receivedData == nullptr) {
-//            DebugError(
-//                "Failed to find player entity in a message that should have contained one.");
-//        }
-//
-//        /* Update the movements. */
-//        auto newMovement = receivedData->movementComponent();
-//        currentMovement.velX = newMovement->velX();
-//        currentMovement.velY = newMovement->velY();
-//        // TODO: Only send max when it changes.
-//        currentMovement.maxVelX = newMovement->maxVelX();
-//        currentMovement.maxVelY = newMovement->maxVelY();
-//
-//        /* Move to the received position. */
-//        auto receivedPosition = receivedData->positionComponent();
-//        currentPosition.x = receivedPosition->x();
-//        currentPosition.y = receivedPosition->y();
-//
-//        receivedBuffer = network.receivePlayerUpdate();
-//    }
-//
+    std::shared_ptr<const EntityUpdate> receivedUpdate = network.receivePlayerUpdate();
+    while (receivedUpdate != nullptr) {
+        // Track our latest received tick.
+        Uint32 newTick = receivedUpdate->tickNum;
+        if (newTick > latestReceivedTick) {
+            latestReceivedTick = newTick;
+        }
+
+        // Pull out the vector of entities.
+        const std::vector<Entity>& entities = receivedUpdate->entities;
+
+        // Find the player data.
+        const Entity* playerUpdate = nullptr;
+        for (auto entityIt = entities.begin(); entityIt != entities.end(); ++entityIt) {
+            if (entityIt->id == playerID) {
+                playerUpdate = &(*entityIt);
+                break;
+            }
+        }
+
+        if (playerUpdate == nullptr) {
+            DebugError(
+                "Failed to find player entity in a message that should have contained one.");
+        }
+
+        /* Update the movements. */
+        const MovementComponent& newMovement = playerUpdate->movementComponent;
+        currentMovement.velX = newMovement.velX;
+        currentMovement.velY = newMovement.velY;
+
+        /* Move to the received position. */
+        const PositionComponent& receivedPosition = playerUpdate->positionComponent;
+        currentPosition.x = receivedPosition.x;
+        currentPosition.y = receivedPosition.y;
+
+        receivedUpdate = network.receivePlayerUpdate();
+    }
+
     return latestReceivedTick;
 }
 

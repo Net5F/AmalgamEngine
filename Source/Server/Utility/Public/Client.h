@@ -56,7 +56,7 @@ public:
      * @return An appropriate ReceiveResult if the receive failed, else a ReceiveResult with
      *         result == Success and data in the message field.
      */
-    ReceiveResult receiveMessage();
+    MessageResult receiveMessage();
 
     /**
      * @return True if the client is connected, else false.

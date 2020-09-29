@@ -4,7 +4,10 @@
 #include "World.h"
 #include "Network.h"
 #include "ClientNetworkDefs.h"
+#include "EntityUpdate.h"
 #include "Debug.h"
+#include <memory>
+#include <string>
 
 namespace AM
 {
@@ -45,8 +48,7 @@ void NpcMovementSystem::updateNpcs()
 
         // If the update contained new data, apply it.
         if (stateUpdate.dataChanged) {
-//            const fb::Message* message = fb::GetMessage(stateUpdate.message->data());
-//            applyUpdateMessage(message);
+            applyUpdateMessage(stateUpdate.entityUpdate);
         }
 
         /* Prepare for the next iteration. */
@@ -110,26 +112,25 @@ void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
     lastReceivedTick = confirmedTick;
 }
 
-void NpcMovementSystem::handleUpdate(const BinaryBufferSharedPtr& messageBuffer)
+void NpcMovementSystem::handleUpdate(const std::shared_ptr<const EntityUpdate>& entityUpdate)
 {
-//    const fb::Message* message = fb::GetMessage(messageBuffer->data());
-//    Uint32 newReceivedTick = message->tickTimestamp();
-//
-//    if (lastReceivedTick != 0) {
-//        // The update message implicitly confirms all ticks since our last received.
-//        handleImplicitConfirmation(newReceivedTick - 1);
-//    }
-//    else {
-//        // This is our first received update, set the last processed tick so things look
-//        // incrementally increasing.
-//        lastProcessedTick = newReceivedTick - 1;
-//    }
-//
-//    // Push the update into the buffer.
-//    stateUpdateQueue.push({newReceivedTick, true, messageBuffer});
-//    DebugInfo("Update push: %u", newReceivedTick);
-//
-//    lastReceivedTick = newReceivedTick;
+    Uint32 newReceivedTick = entityUpdate->tickNum;
+
+    if (lastReceivedTick != 0) {
+        // The update message implicitly confirms all ticks since our last received.
+        handleImplicitConfirmation(newReceivedTick - 1);
+    }
+    else {
+        // This is our first received update, set the last processed tick so things look
+        // incrementally increasing.
+        lastProcessedTick = newReceivedTick - 1;
+    }
+
+    // Push the update into the buffer.
+    stateUpdateQueue.push({newReceivedTick, true, entityUpdate});
+    DebugInfo("Update push: %u", newReceivedTick);
+
+    lastReceivedTick = newReceivedTick;
 }
 
 void NpcMovementSystem::moveAllNpcs()
@@ -153,65 +154,55 @@ void NpcMovementSystem::moveAllNpcs()
     }
 }
 
-void NpcMovementSystem::applyUpdateMessage(const fb::Message* message)
+void NpcMovementSystem::applyUpdateMessage(
+const std::shared_ptr<const EntityUpdate>& entityUpdate)
 {
-//    // Pull out the vector of entities.
-//    auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
-//    auto entities = entityUpdate->entities();
-//
-//    /* Use the data in the message to correct any NPCs that did change inputs. */
-//    for (auto entityIt = entities->begin(); entityIt != entities->end(); ++entityIt) {
-//        // Skip the non-NPC.
-//        EntityID entityID = (*entityIt)->id();
-//        if (entityID == world.playerID) {
-//            continue;
-//        }
-//
-//        // If the entity doesn't exist, add it to our list.
-//        if (!(world.entityExists(entityID))) {
-//            DebugInfo("New entity added. ID: %u", entityID);
-//            world.addEntity((*entityIt)->name()->str(), entityID);
-//
-//            // TODO: Get this info from the server.
-//            // Get the same texture as the player.
-//            world.sprites[entityID].texturePtr =
-//                world.sprites[world.playerID].texturePtr;
-//            world.sprites[entityID].posInTexture =
-//                world.sprites[world.playerID].posInTexture;
-//            world.sprites[entityID].width = 64;
-//            world.sprites[entityID].height = 64;
-//
-//            world.attachComponent(entityID, ComponentFlag::Input);
-//            world.attachComponent(entityID, ComponentFlag::Movement);
-//            world.attachComponent(entityID, ComponentFlag::Position);
-//            world.attachComponent(entityID, ComponentFlag::Sprite);
-//        }
-//
-//        /* Update the inputs. */
-//        std::array<Input::State, Input::NumTypes>& entityInputStates =
-//            world.inputs[entityID].inputStates;
-//        auto clientInputStates = (*entityIt)->inputComponent()->inputStates();
-//        for (unsigned int i = 0; i < Input::NumTypes; ++i) {
-//            entityInputStates[i] = MessageUtil::convertToAMInputState(
-//                clientInputStates->Get(i));
-//        }
-//
-//        /* Update the movements. */
-//        MovementComponent& movement = world.movements[entityID];
-//        auto newMovement = (*entityIt)->movementComponent();
-//        movement.velX = newMovement->velX();
-//        movement.velY = newMovement->velY();
-//        movement.maxVelX = newMovement->maxVelX();
-//        movement.maxVelY = newMovement->maxVelY();
-//
-//        /* Update the currentPosition. */
-//        PositionComponent& currentPosition = world.positions[entityID];
-//        auto newPosition = (*entityIt)->positionComponent();
-//        DebugInfo("Update: %d: (%f, %f) -> (%f, %f)", entityID, currentPosition.x,
-//            currentPosition.y, newPosition->x(), newPosition->y());
-//        currentPosition.x = newPosition->x();
-//        currentPosition.y = newPosition->y();
-//    }
+    const std::vector<Entity>& entities = entityUpdate->entities;
+
+    /* Use the data in the message to correct any NPCs that did change inputs. */
+    for (auto entityIt = entities.begin(); entityIt != entities.end(); ++entityIt) {
+        // Skip the non-NPC.
+        EntityID entityID = entityIt->id;
+        if (entityID == world.playerID) {
+            continue;
+        }
+
+        // If the entity doesn't exist, add it to our list.
+        if (!(world.entityExists(entityID))) {
+            DebugInfo("New entity added. ID: %u", entityID);
+            // TODO: Add names for real.
+            world.addEntity(std::to_string(entityID), entityID);
+
+            // TODO: Get this info from the server.
+            // Get the same texture as the player.
+            world.sprites[entityID].texturePtr =
+                world.sprites[world.playerID].texturePtr;
+            world.sprites[entityID].posInTexture =
+                world.sprites[world.playerID].posInTexture;
+            world.sprites[entityID].width = 64;
+            world.sprites[entityID].height = 64;
+
+            world.attachComponent(entityID, ComponentFlag::Input);
+            world.attachComponent(entityID, ComponentFlag::Movement);
+            world.attachComponent(entityID, ComponentFlag::Position);
+            world.attachComponent(entityID, ComponentFlag::Sprite);
+        }
+
+        // Update the inputs.
+        world.inputs[entityID] = entityIt->inputComponent;
+
+        // Update the movements.
+        world.movements[entityID] = entityIt->movementComponent;
+
+        // Update the currentPosition.
+        // TEMP
+        const PositionComponent& currentPosition = world.positions[entityID];
+        const PositionComponent& newPosition = entityIt->positionComponent;
+        DebugInfo("Update: %d: (%f, %f) -> (%f, %f)", entityID, currentPosition.x,
+            currentPosition.y, newPosition.x, newPosition.y);
+        // TEMP
+        world.positions[entityID] = entityIt->positionComponent;
+    }
 }
 
 } // namespace Client

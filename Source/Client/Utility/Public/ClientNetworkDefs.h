@@ -9,6 +9,9 @@
  */
 namespace AM
 {
+
+class EntityUpdate;
+
 namespace Client
 {
 //--------------------------------------------------------------------------
@@ -33,13 +36,6 @@ static constexpr double SERVER_TIMEOUT_S = NETWORK_TICK_TIMESTEP_S * 2;
 //--------------------------------------------------------------------------
 // Structs
 //--------------------------------------------------------------------------
-/** The various types of message that we receive. */
-enum class MessageType {
-    ConnectionResponse,
-    PlayerUpdate,
-    NpcUpdate
-};
-
 /** The kind of update information present in a particular NpcUpdate. */
 enum class NpcUpdateType {
     /** An update contains actual npc entity data. */
@@ -58,7 +54,7 @@ struct NpcUpdateMessage {
     /** The type of information contained in this update. */
     NpcUpdateType updateType = NpcUpdateType::ExplicitConfirmation;
     /** If informationType == Update, contains the update message. */
-    BinaryBufferSharedPtr message = nullptr;
+    std::shared_ptr<const EntityUpdate> message = nullptr;
     /** If informationType == ImplicitConfirmation, contains the confirmed tick. */
     Uint32 tickNum = 0;
 };
@@ -66,7 +62,7 @@ struct NpcUpdateMessage {
 /** The result of trying to receive an NPC update message. */
 struct NpcReceiveResult {
     NetworkResult result;
-    // message will be default if result != Success.
+    /** message will be default if result != Success. */
     NpcUpdateMessage message;
 };
 

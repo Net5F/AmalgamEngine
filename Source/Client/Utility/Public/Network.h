@@ -1,5 +1,4 @@
-#ifndef NETWORK_H
-#define NETWORK_H
+#pragma once
 
 #include "GameDefs.h"
 #include "NetworkDefs.h"
@@ -16,6 +15,8 @@ namespace AM
 {
 
 class Peer;
+class ConnectionResponse;
+class EntityUpdate;
 
 namespace Client
 {
@@ -42,8 +43,8 @@ public:
      * @param timeoutMs  How long to wait. 0 for no wait, -1 for indefinite. Defaults to 0.
      * @return A waiting message, else nullptr.
      */
-    BinaryBufferSharedPtr receiveConnectionResponse(Uint64 timeoutMs = 0);
-    BinaryBufferSharedPtr receivePlayerUpdate(Uint64 timeoutMs = 0);
+    std::unique_ptr<ConnectionResponse> receiveConnectionResponse(Uint64 timeoutMs = 0);
+    std::shared_ptr<const EntityUpdate> receivePlayerUpdate(Uint64 timeoutMs = 0);
     NpcReceiveResult receiveNpcUpdate(Uint64 timeoutMs = 0);
 
     /**
@@ -81,12 +82,14 @@ private:
      * If any messages are expected, receives the messages.
      * If it confirmed any ticks that had no changes, updates the confirmed tick count.
      */
-    void processBatch(const BinaryBuffer& header);
+    void processBatch();
 
     /**
      * Pushes a message into the appropriate queue, based on its contents.
+     * @param messageType  The type of the received message to process.
+     * @param messageSize  The size to use in deserializing the message in messageRecBuffer.
      */
-    void processReceivedMessage(BinaryBufferPtr messageBuffer);
+    void processReceivedMessage(MessageType messageType, Uint16 messageSize);
 
     /**
      * Checks if we need to process the received adjustment, does so if necessary.
@@ -123,12 +126,23 @@ private:
     std::atomic<bool> exitRequested;
 
     /** These queues store received messages that are waiting to be consumed. */
-    moodycamel::BlockingReaderWriterQueue<BinaryBufferSharedPtr> connectionResponseQueue;
-    moodycamel::BlockingReaderWriterQueue<BinaryBufferSharedPtr> playerUpdateQueue;
-    moodycamel::BlockingReaderWriterQueue<NpcUpdateMessage> npcUpdateQueue;
+    using ConnectionResponseQueue
+              = moodycamel::BlockingReaderWriterQueue<std::unique_ptr<ConnectionResponse>>;
+    ConnectionResponseQueue connectionResponseQueue;
+
+    using PlayerUpdateQueue
+              = moodycamel::BlockingReaderWriterQueue<std::shared_ptr<const EntityUpdate>>;
+    PlayerUpdateQueue playerUpdateQueue;
+
+    using NpcUpdateQueue
+              = moodycamel::BlockingReaderWriterQueue<NpcUpdateMessage>;
+    NpcUpdateQueue npcUpdateQueue;
+
+    /** Used to hold headers while we process them. */
+    BinaryBuffer headerRecBuffer;
+    /** Used to hold messages while we deserialize them. */
+    BinaryBuffer messageRecBuffer;
 };
 
 } // namespace Client
 } // namespace AM
-
-#endif /* NETWORK_H */

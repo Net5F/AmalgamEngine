@@ -1,5 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #include "NpcMovementSystem.h"
 #include "PlayerMovementSystem.h"
@@ -100,5 +99,3 @@ private:
 
 } // namespace Client
 } // namespace AM
-
-#endif /* GAME_H */
