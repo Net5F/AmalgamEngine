@@ -14,6 +14,7 @@ Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
 : netID(inNetID)
 , peer(std::move(inPeer))
 , batchBuffer{}
+, latestSentSimTick(0)
 , hasRecordedDiff(false)
 , latestAdjIteration(0)
 {
@@ -26,9 +27,9 @@ Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
     receiveTimer.updateSavedTime();
 }
 
-void Client::queueMessage(const BinaryBufferSharedPtr& message)
+void Client::queueMessage(const BinaryBufferSharedPtr& message, Uint32 messageTick)
 {
-    sendQueue.push_back(message);
+    sendQueue.emplace_back(message, messageTick);
 }
 
 NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
@@ -38,7 +39,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     }
 
     Uint8 messageCount = getWaitingMessageCount();
-    if (messageCount == 0) {
+    if ((latestSentSimTick == 0) && (messageCount == 0)) {
         // Nothing to send.
         return NetworkResult::Success;
     }
@@ -48,15 +49,31 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     unsigned int currentIndex = ServerHeaderIndex::MessageHeaderStart;
     for (unsigned int i = 0; i < messageCount; ++i) {
         /* Copy the message and message header into the buffer. */
-        BinaryBufferSharedPtr messageBuffer = sendQueue.front();
+        std::pair<BinaryBufferSharedPtr, Uint32> messagePair = sendQueue.front();
+        BinaryBufferSharedPtr& messageBuffer = messagePair.first;
         std::copy(messageBuffer->begin(), messageBuffer->end(),
             &(batchBuffer[currentIndex]));
 
         currentIndex += messageBuffer->size();
 
+        // Track the latest tick we've sent.
+        Uint32 messageTick = messagePair.second;
+        if (messageTick != 0) {
+            latestSentSimTick = messageTick;
+        }
+
         sendQueue.pop_front();
     }
 
+    // Fill in the header.
+    fillHeader(messageCount, currentTick);
+
+    // Send the message.
+    return peer->send(&(batchBuffer[0]), currentIndex);
+}
+
+void Client::fillHeader(Uint8 messageCount, Uint32 currentTick)
+{
     // Fill in the header adjustment info.
     AdjustmentData tickAdjustment = getTickAdjustment();
     batchBuffer[ServerHeaderIndex::TickAdjustment] =
@@ -66,8 +83,22 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     // Fill in the header message count.
     batchBuffer[ServerHeaderIndex::MessageCount] = messageCount;
 
-    // Send the message.
-    return peer->send(&(batchBuffer[0]), currentIndex);
+    // If we haven't sent data or are caught up, don't try to confirm any ticks.
+    if ((latestSentSimTick == 0)
+        || (latestSentSimTick == currentTick)) {
+        batchBuffer[ServerHeaderIndex::ConfirmedTickCount] = 0;
+        return;
+    }
+    else {
+        // Fill in the number of ticks we've processed since the last update.
+        // (the tick count increments at the end of a sim tick, so our latest sent
+        //  data is from currentTick - 1).
+        Uint8 confirmedTickCount = (currentTick - 1) - latestSentSimTick;
+        batchBuffer[ServerHeaderIndex::ConfirmedTickCount] = confirmedTickCount;
+
+        // Update our latestSent tracking to account for the confirmed ticks.
+        latestSentSimTick += confirmedTickCount;
+    }
 }
 
 Uint8 Client::getWaitingMessageCount() const
@@ -84,16 +115,16 @@ Uint8 Client::getWaitingMessageCount() const
 Message Client::receiveMessage()
 {
     if (peer == nullptr) {
-        return {NetworkResult::Disconnected, MessageType::NotSet, 0};
+        return {MessageType::NotSet, nullptr};
     }
 
     // Receive the header.
     Uint8 headerBuf[CLIENT_HEADER_SIZE];
-    MessageResult result = peer->receiveBytes(headerBuf, CLIENT_HEADER_SIZE,
+    NetworkResult headerResult = peer->receiveBytes(headerBuf, CLIENT_HEADER_SIZE,
         false);
 
     // Receive the following message, or check for timeouts.
-    if (result.networkResult == NetworkResult::Success) {
+    if (headerResult == NetworkResult::Success) {
         // Process the adjustment iteration.
         Uint8 receivedAdjIteration = headerBuf[ClientHeaderIndex::AdjustmentIteration];
         Uint8 expectedNextIteration = (latestAdjIteration + 1);
@@ -110,16 +141,16 @@ Message Client::receiveMessage()
         // Note: This is a blocking read, but the data should immediately be available
         //       since we send it all in 1 packet.
         BinaryBufferPtr messageBuffer = nullptr;
-        result = peer->receiveMessageWait(messageBuffer);
+        MessageResult messageResult = peer->receiveMessageWait(messageBuffer);
 
-        if (result.networkResult == NetworkResult::Success) {
+        if (messageResult.networkResult == NetworkResult::Success) {
             // Got a message, update the receiveTimer.
             receiveTimer.updateSavedTime();
 
-            return {result.messageType, messageBuffer};
+            return {messageResult.messageType, std::move(messageBuffer)};
         }
     }
-    else if (result.networkResult == NetworkResult::NoWaitingData) {
+    else if (headerResult == NetworkResult::NoWaitingData) {
         // If we timed out, drop the connection.
         double delta = receiveTimer.getDeltaSeconds(false);
         if (delta > TIMEOUT_S) {

@@ -118,7 +118,7 @@ struct MessageResult {
  */
 struct Message {
     MessageType messageType = MessageType::NotSet;
-    BinaryBufferPtr messageBuffer;
+    BinaryBufferPtr messageBuffer = nullptr;
 };
 
 } // End namespace AM

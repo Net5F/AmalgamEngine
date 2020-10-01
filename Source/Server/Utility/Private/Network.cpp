@@ -43,7 +43,8 @@ void Network::tick()
     }
 }
 
-void Network::send(NetworkID networkID, const BinaryBufferSharedPtr& message)
+void Network::send(NetworkID networkID, const BinaryBufferSharedPtr& message,
+                   Uint32 messageTick)
 {
     // Queue the message to be sent with the next batch.
     std::shared_lock readLock(clientMapMutex);
@@ -51,16 +52,7 @@ void Network::send(NetworkID networkID, const BinaryBufferSharedPtr& message)
     // Check that the client still exists, queue the message if so.
     auto clientPair = clientMap.find(networkID);
     if (clientPair != clientMap.end()) {
-        clientPair->second->queueMessage(message);
-    }
-}
-
-void Network::sendToAll(const BinaryBufferSharedPtr& message)
-{
-    // Queue the message to be sent with the next batch.
-    std::shared_lock readLock(clientMapMutex);
-    for (auto& pair : clientMap) {
-        pair.second->queueMessage(message);
+        clientPair->second->queueMessage(message, messageTick);
     }
 }
 

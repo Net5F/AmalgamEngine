@@ -4,7 +4,6 @@ target_sources(Server
         Private/Network.cpp
         Private/Client.cpp
         Private/ClientHandler.cpp
-        Private/MessageSorter.cpp
     PUBLIC
         Public/IDPool.h
         Public/Network.h

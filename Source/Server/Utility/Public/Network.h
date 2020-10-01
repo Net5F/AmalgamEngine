@@ -42,16 +42,11 @@ public:
      *
      * @param networkID  The client to send the message to.
      * @param message  The message to send.
+     * @param messageTick  Optional, for messages that are associated with a tick number.
+     *                     Used to update the client's latestSentSimTick.
      */
-    void send(NetworkID networkID, const BinaryBufferSharedPtr& message);
-
-    /**
-     * Queues a message to be sent to all connected clients the next time
-     * sendWaitingMessages is called.
-     *
-     * @param message  The message to send.
-     */
-    void sendToAll(const BinaryBufferSharedPtr& message);
+    void send(NetworkID networkID, const BinaryBufferSharedPtr& message,
+              Uint32 messageTick = 0);
 
     /**
      * Deserializes and routes received client messages.

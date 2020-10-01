@@ -27,8 +27,15 @@ typedef std::unordered_map<NetworkID, std::shared_ptr<Client>> ClientMap;
  * Client's tick diff info.
  */
 struct ClientMessage {
+    // TEMP: Only here until C++20 where emplacing brace lists is allowed.
+    ClientMessage(const std::weak_ptr<Client>& inClientPtr, Message inMessage)
+    : clientPtr(inClientPtr)
+    , message(std::move(inMessage))
+    {
+    }
+
     std::weak_ptr<Client> clientPtr;
-    Message message;
+    Message message = {MessageType::NotSet, nullptr};
 };
 
 } // End namespace Server

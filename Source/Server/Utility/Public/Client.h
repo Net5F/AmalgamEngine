@@ -36,8 +36,10 @@ public:
     //--------------------------------------------------------------------------
     /**
      * Queues a message to be sent the next time sendWaitingMessages is called.
+     * @param message  The message to queue.
+     * @param messageTick  If non-0, used to update our latestSentSimTick.
      */
-    void queueMessage(const BinaryBufferSharedPtr& message);
+    void queueMessage(const BinaryBufferSharedPtr& message, Uint32 messageTick);
 
     /**
      * Attempts to send all queued messages over the network.
@@ -53,7 +55,7 @@ public:
      *       socket set before calling this.
      *
      * @return A received Message. If no data was waiting, return.messageType will
-     *         == NotSet and return.messageBuffer will == null.
+     *         == NotSet and return.messageBuffer will == nullptr.
      */
     Message receiveMessage();
 
@@ -119,6 +121,13 @@ private:
     Uint8 getWaitingMessageCount() const;
 
     /**
+     * Fills in the header information for the batch currently being built.
+     * @param messageCount  The number of messages going into the current batch.
+     * @param currentTick  The sim's current tick number.
+     */
+    void fillHeader(Uint8 messageCount, Uint32 currentTick);
+
+    /**
      * Run through all checks necessary to determine if we should tell the client to adjust
      * its tick.
      * Note: The parameters could be obtained internally, but passing them in provides a
@@ -149,10 +158,13 @@ private:
     /**
      * Holds messages to be sent with the next call to sendWaitingMessages.
      */
-    std::deque<BinaryBufferSharedPtr> sendQueue;
+    std::deque<std::pair<BinaryBufferSharedPtr, Uint32>> sendQueue;
 
     /** Holds data while we're putting it together to be sent as a batch. */
     std::array<Uint8, Peer::MAX_MESSAGE_SIZE> batchBuffer;
+
+    /** The latest tick that we've sent an update to this client for. */
+    Uint32 latestSentSimTick;
 
     /** Tracks how long it's been since we've received a message from this client. */
     Timer receiveTimer;
