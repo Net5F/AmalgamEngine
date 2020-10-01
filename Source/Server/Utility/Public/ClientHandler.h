@@ -1,7 +1,7 @@
-#ifndef CLIENTHANDLER_H_
-#define CLIENTHANDLER_H_
+#pragma once
 
 #include "NetworkDefs.h"
+#include "ServerNetworkDefs.h"
 #include "Client.h"
 #include "Acceptor.h"
 #include "IDPool.h"
@@ -54,18 +54,18 @@ private:
     /**
      * Accepts any new clients, pushing them into the Network's client map.
      */
-    void acceptNewClients(std::unordered_map<NetworkID, Client>& clientMap);
+    void acceptNewClients(ClientMap& clientMap);
 
     /**
      * Erase any disconnected clients from the Network's clientMap.
      */
-    void eraseDisconnectedClients(std::unordered_map<NetworkID, Client>& clientMap);
+    void eraseDisconnectedClients(ClientMap& clientMap);
 
     /**
      * Used by pollForMessages, checks for new messages and pushes them into their queues.
-     * @return The number of active sockets found by clientSet->checkSockets().
+     * @return The number of messages that were received.
      */
-    int receiveClientMessages(std::unordered_map<NetworkID, Client>& clientMap);
+    int receiveClientMessages(ClientMap& clientMap);
 
     Network& network;
 
@@ -79,6 +79,10 @@ private:
     /** The listener that we use to accept new clients. */
     Acceptor acceptor;
 
+    /** A queue used for storing received messages until we can deserialize and
+        route them. */
+    std::queue<ClientMessage> receiveQueue;
+
     /** Calls processClients(). */
     std::thread receiveThreadObj;
     /** Turn false to signal that the receive thread should end. */
@@ -87,5 +91,3 @@ private:
 
 } // End namespace Server
 } // End namespace AM
-
-#endif /* End CLIENTHANDLER_H_ */

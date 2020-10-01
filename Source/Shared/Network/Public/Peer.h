@@ -1,5 +1,4 @@
-#ifndef PEER_H_
-#define PEER_H_
+#pragma once
 
 #include "NetworkDefs.h"
 #include "SocketSet.h"
@@ -109,6 +108,14 @@ public:
      *         messageBuffer contains the received message.
      */
     MessageResult receiveMessageWait(Uint8* messageBuffer);
+    /**
+     * Overload for allocating and filling a portable buffer.
+     * Useful if you'll need to move the message around before deserializing it.
+     * @param messageBuffer  A pointer to allocate the message at.
+     * @return An appropriate ReceiveResult. If return.networkResult == Success,
+     *         messageBuffer contains the received message.
+     */
+    MessageResult receiveMessageWait(BinaryBufferPtr& messageBuffer);
 
 private:
     /** The socket for this peer. Must be a unique_ptr so we can move without copying. */
@@ -125,5 +132,3 @@ private:
 };
 
 } /* End namespace AM */
-
-#endif /* End PEER_H_ */

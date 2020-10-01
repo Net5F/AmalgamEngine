@@ -32,7 +32,7 @@ ClientHandler::~ClientHandler()
 
 int ClientHandler::serviceClients()
 {
-    std::unordered_map<EntityID, Client>& clientMap = network.getClientMap();
+    ClientMap& clientMap = network.getClientMap();
 
     while (!exitRequested) {
         // Check if there are any new clients to connect.
@@ -41,18 +41,22 @@ int ClientHandler::serviceClients()
         // Erase any clients who were detected to be disconnected.
         eraseDisconnectedClients(clientMap);
 
-        // Check if there's any clients to receive from.
+        // Check if there's any clients with activity, and receive all their messages.
         std::shared_lock readLock(network.getClientMapMutex());
-        int numActive = 0;
+        int numReceived = 0;
         if (clientMap.size() != 0) {
-            numActive = receiveClientMessages(clientMap);
+            numReceived = receiveClientMessages(clientMap);
         }
 
-        // Release the lock before we delay.
+        // Release the lock since we're done with the clients.
         readLock.unlock();
 
-        // If there wasn't any activity, delay so we don't waste CPU spinning.
-        if (numActive == 0) {
+        // If we received messages, deserialize and route them.
+        if (numReceived != 0) {
+            network.processReceivedMessages(receiveQueue);
+        }
+        else {
+            // There wasn't any activity, delay so we don't waste CPU spinning.
             SDL_Delay(INACTIVE_DELAY_TIME_MS);
         }
     }
@@ -60,8 +64,7 @@ int ClientHandler::serviceClients()
     return 0;
 }
 
-void ClientHandler::acceptNewClients(
-std::unordered_map<NetworkID, Client>& clientMap)
+void ClientHandler::acceptNewClients(ClientMap& clientMap)
 {
     // Creates the new peer, which adds itself to the socket set.
     std::unique_ptr<Peer> newPeer = acceptor.accept();
@@ -72,7 +75,8 @@ std::unordered_map<NetworkID, Client>& clientMap)
 
         // Add the peer to the Network's clientMap, constructing a Client in-place.
         std::unique_lock writeLock(network.getClientMapMutex());
-        if (!(clientMap.try_emplace(newID, newID, std::move(newPeer)).second)) {
+        if (!(clientMap.try_emplace(newID,
+            std::make_shared<Client>(newID, std::move(newPeer))).second)) {
             idPool.freeID(newID);
             DebugError("Ran out of room in client map or key already existed.");
         }
@@ -84,8 +88,7 @@ std::unordered_map<NetworkID, Client>& clientMap)
     }
 }
 
-void ClientHandler::eraseDisconnectedClients(
-std::unordered_map<NetworkID, Client>& clientMap)
+void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
 {
     std::shared_mutex& clientMapMutex = network.getClientMapMutex();
 
@@ -93,9 +96,9 @@ std::unordered_map<NetworkID, Client>& clientMap)
     // Only need a read lock to check for disconnects.
     std::shared_lock readLock(clientMapMutex);
     for (auto it = clientMap.begin(); it != clientMap.end();) {
-        Client& client = it->second;
+        std::shared_ptr<Client>& client = it->second;
 
-        if (!(client.isConnected())) {
+        if (!(client->isConnected())) {
             // Need to modify the map, acquire a write lock.
             readLock.unlock();
             std::unique_lock writeLock(clientMapMutex);
@@ -114,48 +117,31 @@ std::unordered_map<NetworkID, Client>& clientMap)
     }
 }
 
-int ClientHandler::receiveClientMessages(std::unordered_map<EntityID, Client>& clientMap)
+int ClientHandler::receiveClientMessages(ClientMap& clientMap)
 {
     // Update each client's internal socket isReady().
     // Note: We check all clients regardless of whether this returns > 0 because, even if
     //       there's no activity, we need to check for timeouts.
-    int numActive = clientSet->checkSockets(0);
+    clientSet->checkSockets(0);
 
     /* Iterate through all clients. */
     // Note: Doesn't need a lock because serviceClients is still locking.
+    int numReceived = 0;
     for (auto& pair : clientMap) {
-        Client& client = pair.second;
+        const std::shared_ptr<Client>& clientPtr = pair.second;
 
         /* If there's potentially data, try to receive all messages from the client. */
-        MessageResult messageResult = client.receiveMessage();
-        while (messageResult.networkResult == NetworkResult::Success) {
-            // TEMP
-//                Uint32 receivedTick = 0;
-//                const fb::Message* message = fb::GetMessage(messageResult.message->data());
-//                if (message->content_type() == fb::MessageContent::EntityUpdate) {
-//                    receivedTick = message->tickTimestamp();
-//                }
-            // TEMP
+        Message resultMessage = clientPtr->receiveMessage();
+        while (resultMessage.messageType != MessageType::NotSet) {
+            // Queue the message.
+            receiveQueue.emplace(clientPtr, std::move(resultMessage));
 
-            // Queue the message (blocks if the queue is locked).
-//            Sint64 diff = network.queueInputMessage(std::move(messageResult.message));
-//            client.recordTickDiff(diff);
-
-            // TEMP
-//                if (receivedTick != 0) {
-//                    DebugInfo("Received message for tick: %u. Diff: %d", receivedTick,
-//                        diff);
-//                }
-//                else {
-//                    DebugInfo("Received message. Diff: %d", diff);
-//                }
-            // TEMP
-
-            messageResult = client.receiveMessage();
+            numReceived++;
+            resultMessage = clientPtr->receiveMessage();
         }
     }
 
-    return numActive;
+    return numReceived;
 }
 
 } // End namespace Server

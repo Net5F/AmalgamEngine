@@ -47,9 +47,6 @@ private:
     Game& game;
     World& world;
     Network& network;
-//
-//    static constexpr int BUILDER_BUFFER_SIZE = 512;
-//    flatbuffers::FlatBufferBuilder builder;
 };
 
 } // End namespace Server

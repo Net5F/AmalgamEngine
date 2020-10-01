@@ -2,6 +2,8 @@
 #include "Acceptor.h"
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
+#include "MessageTools.h"
+#include "ClientInputs.h"
 #include <algorithm>
 #include <atomic>
 #include "Debug.h"
@@ -14,15 +16,14 @@ namespace Server
 Network::Network()
 : accumulatedTime(0.0)
 , clientHandler(*this)
-//, builder(BUILDER_BUFFER_SIZE)
 , currentTickPtr(nullptr)
 {
-    sendTimer.updateSavedTime();
+    tickTimer.updateSavedTime();
 }
 
 void Network::tick()
 {
-    accumulatedTime += sendTimer.getDeltaSeconds(true);
+    accumulatedTime += tickTimer.getDeltaSeconds(true);
 
     if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
         // Send all messages for this network tick.
@@ -50,7 +51,7 @@ void Network::send(NetworkID networkID, const BinaryBufferSharedPtr& message)
     // Check that the client still exists, queue the message if so.
     auto clientPair = clientMap.find(networkID);
     if (clientPair != clientMap.end()) {
-        clientPair->second.queueMessage(message);
+        clientPair->second->queueMessage(message);
     }
 }
 
@@ -59,41 +60,55 @@ void Network::sendToAll(const BinaryBufferSharedPtr& message)
     // Queue the message to be sent with the next batch.
     std::shared_lock readLock(clientMapMutex);
     for (auto& pair : clientMap) {
-        pair.second.queueMessage(message);
+        pair.second->queueMessage(message);
     }
 }
 
-Sint64 Network::queueInputMessage(BinaryBufferPtr messageBuffer)
+void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
 {
-//    const fb::Message* message = fb::GetMessage(messageBuffer->data());
-//    if (message->content_type() != fb::MessageContent::EntityUpdate) {
-//        DebugError("Expected EntityUpdate but got something else.");
-//    }
-//    Uint32 receivedTickTimestamp = message->tickTimestamp();
-//
-//    // Check if the message is just a heartbeat, or if we need to push it.
-//    auto entityUpdate = static_cast<const fb::EntityUpdate*>(message->content());
-//    if (entityUpdate->entities()->size() != 0) {
-//        /* Received a message, try to push it. */
-//        MessageSorter::PushResult pushResult = inputMessageSorter.push(receivedTickTimestamp,
-//            std::move(messageBuffer));
-//        if (pushResult.result != MessageSorter::ValidityResult::Valid) {
-//            DebugInfo("Message was dropped. Diff: %d", pushResult.diff);
-//        }
-//
-//        return pushResult.diff;
-//    }
-//    else {
-//        /* Received a heartbeat, just return the diff. */
-//        // Calc how far ahead or behind the message's tick is in relation to the currentTick.
-//        // Using the game's currentTick should be accurate since we didn't have to
-//        // lock anything.
-//        return static_cast<Sint64>(receivedTickTimestamp)
-//               - static_cast<Sint64>(*currentTickPtr);
-//    }
+    /* Process all messages in the queue. */
+    while (!receiveQueue.empty()) {
+        ClientMessage& clientMessage = receiveQueue.front();
+        if (clientMessage.message.messageType == MessageType::ClientInputs) {
+            // Deserialize the message.
+            std::unique_ptr<ClientInputs> clientInputs = std::make_unique<ClientInputs>();
+            BinaryBufferPtr& messageBuffer = clientMessage.message.messageBuffer;
+            MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
+                *clientInputs);
+
+            // Push the message (blocks if the MessageSorter is locked).
+            MessageSorterBase::PushResult pushResult = inputMessageSorter.push(
+                clientInputs->tickNum, std::move(clientInputs));
+
+            // Record the diff.
+            if (pushResult.result == MessageSorterBase::ValidityResult::Valid) {
+                if (std::shared_ptr<Client> clientPtr = clientMessage.clientPtr.lock()) {
+                    clientPtr->recordTickDiff(pushResult.diff);
+                }
+                // Else, the client was destructed so we don't care.
+            }
+            else {
+                DebugInfo("Message was dropped. Diff: %d", pushResult.diff);
+            }
+        }
+        else if (clientMessage.message.messageType == MessageType::Heartbeat) {
+//            /* Received a heartbeat, just return the diff. */
+//            // Calc how far ahead or behind the message's tick is in relation to the currentTick.
+//            // Using the game's currentTick should be accurate since we didn't have to
+//            // lock anything.
+//            return static_cast<Sint64>(receivedTickTimestamp)
+//                   - static_cast<Sint64>(*currentTickPtr);
+        }
+        else {
+            DebugError("Received message type that we aren't handling.");
+        }
+
+        receiveQueue.pop();
+    }
 }
 
-std::queue<BinaryBufferPtr>& Network::startReceiveInputMessages(Uint32 tickNum)
+std::queue<std::unique_ptr<ClientInputs>>& Network::startReceiveInputMessages(
+Uint32 tickNum)
 {
     return inputMessageSorter.startReceive(tickNum);
 }
@@ -105,7 +120,7 @@ void Network::endReceiveInputMessages()
 
 void Network::initTimer()
 {
-    sendTimer.updateSavedTime();
+    tickTimer.updateSavedTime();
 }
 
 void Network::sendClientUpdates()
@@ -113,12 +128,11 @@ void Network::sendClientUpdates()
     /* Run through the clients, sending their waiting messages. */
     std::shared_lock readLock(clientMapMutex);
     for (auto& pair : clientMap) {
-        Client& client = pair.second;
-        client.sendWaitingMessages(*currentTickPtr);
+        pair.second->sendWaitingMessages(*currentTickPtr);
     }
 }
 
-std::unordered_map<NetworkID, Client>& Network::getClientMap()
+ClientMap& Network::getClientMap()
 {
     return clientMap;
 }
@@ -143,24 +157,27 @@ void Network::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr
     currentTickPtr = inCurrentTickPtr;
 }
 
-BinaryBufferSharedPtr Network::constructMessage(Uint8* messageBuffer,
+BinaryBufferSharedPtr Network::constructMessage(MessageType type, Uint8* messageBuffer,
                                                 std::size_t size)
 {
-    if ((sizeof(Uint16) + size) > Peer::MAX_MESSAGE_SIZE) {
+    if ((MESSAGE_HEADER_SIZE + size) > Peer::MAX_MESSAGE_SIZE) {
         DebugError("Tried to send a too-large message. Size: %u, max: %u", size,
             Peer::MAX_MESSAGE_SIZE);
     }
 
-    // Allocate a buffer that can hold the Uint16 size bytes and the message payload.
+    // Allocate a buffer that can hold the Uint8 type, Uint16 size, and the payload.
     BinaryBufferSharedPtr dynamicBuffer = std::make_shared<std::vector<Uint8>>(
-        sizeof(Uint16) + size);
+        MESSAGE_HEADER_SIZE + size);
+
+    // Copy the type into the buffer.
+    dynamicBuffer->at(0) = static_cast<Uint8>(type);
 
     // Copy the size into the buffer.
     _SDLNet_Write16(size, dynamicBuffer->data());
 
     // Copy the message into the buffer.
-    std::copy(messageBuffer, messageBuffer + size,
-        dynamicBuffer->data() + sizeof(Uint16));
+    std::copy(messageBuffer, (messageBuffer + size),
+        MESSAGE_HEADER_SIZE + dynamicBuffer->data());
 
     return dynamicBuffer;
 }

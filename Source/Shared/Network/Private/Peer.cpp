@@ -199,7 +199,51 @@ MessageResult Peer::receiveMessageWait(Uint8* messageBuffer)
     }
 
     MessageType messageType =
-        static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageID]);
+        static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageType]);
+    return {NetworkResult::Success, messageType, messageSize};
+}
+
+MessageResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
+{
+    if (!bIsConnected) {
+        return {NetworkResult::Disconnected};
+    }
+
+    // Receive the message header.
+    Uint8 headerBuf[MESSAGE_HEADER_SIZE];
+    int result = socket->receive(headerBuf, MESSAGE_HEADER_SIZE);
+    if (result <= 0) {
+        // Disconnected
+        bIsConnected = false;
+        return {NetworkResult::Disconnected};
+    }
+    else if (result < static_cast<int>(MESSAGE_HEADER_SIZE)) {
+        DebugError("Didn't receive all size bytes in one chunk."
+                   "Need to add logic for this scenario.");
+    }
+
+    // The number of bytes in the upcoming message.
+    Uint16 messageSize = _SDLNet_Read16(&(headerBuf[MessageHeaderIndex::Size]));
+    if (messageSize > MAX_MESSAGE_SIZE) {
+        DebugError(
+            "Tried to receive too large of a message. messageSize: %u, MaxSize: %u",
+            messageSize, MAX_MESSAGE_SIZE);
+    }
+
+    messageBuffer = std::make_unique<BinaryBuffer>(messageSize);
+    result = socket->receive(messageBuffer->data(), messageSize);
+    if (result <= 0) {
+        // Disconnected
+        bIsConnected = false;
+        return {NetworkResult::Disconnected};
+    }
+    else if (result < messageSize) {
+        DebugError("Didn't receive all message bytes in one chunk."
+                   "Need to add logic for this scenario.");
+    }
+
+    MessageType messageType =
+        static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageType]);
     return {NetworkResult::Success, messageType, messageSize};
 }
 

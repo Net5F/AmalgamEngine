@@ -165,28 +165,27 @@ int Network::transferTickAdjustment()
     }
 }
 
-BinaryBufferSharedPtr Network::constructMessage(Uint8* messageBuffer, std::size_t size)
+void Network::fillMessageHeader(MessageType type, std::size_t messageSize,
+                                const BinaryBufferSharedPtr& messageBuffer)
 {
-    if ((sizeof(Uint16) + size) > Peer::MAX_MESSAGE_SIZE) {
-        DebugError("Tried to send a too-large message. Size: %u, max: %u", size,
+    const unsigned int totalMessageSize = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE
+                                          + messageSize;
+    if ((totalMessageSize > Peer::MAX_MESSAGE_SIZE) || (messageSize > UINT16_MAX)) {
+        DebugError("Tried to send a too-large message. Size: %u, max: %u", messageSize,
             Peer::MAX_MESSAGE_SIZE);
     }
+    else if (totalMessageSize > messageBuffer->size()) {
+        DebugError("Given buffer is too small. Size: %u, required: %u",
+            messageBuffer->size(), totalMessageSize);
+    }
 
-    // Allocate a buffer that can hold the header, the Uint16 size bytes, and the
-    // message payload.
-    // NOTE: We leave CLIENT_HEADER_SIZE bytes empty at the front of the message to be
-    //       filled by the network before sending.
-    BinaryBufferSharedPtr dynamicBuffer = std::make_shared<std::vector<Uint8>>(
-        CLIENT_HEADER_SIZE + sizeof(Uint16) + size);
+    // Copy the type into the buffer.
+    messageBuffer->at(CLIENT_HEADER_SIZE + MessageHeaderIndex::MessageType) =
+        static_cast<Uint8>(type);
 
-    // Copy the size into the buffer.
-    _SDLNet_Write16(size, (dynamicBuffer->data() + CLIENT_HEADER_SIZE));
-
-    // Copy the message into the buffer.
-    std::copy(messageBuffer, messageBuffer + size,
-        (dynamicBuffer->data() + CLIENT_HEADER_SIZE + sizeof(Uint16)));
-
-    return dynamicBuffer;
+    // Copy the messageSize into the buffer.
+    _SDLNet_Write16(messageSize,
+        (messageBuffer->data() + CLIENT_HEADER_SIZE + MessageHeaderIndex::Size));
 }
 
 void Network::processBatch() {

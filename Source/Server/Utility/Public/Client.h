@@ -1,5 +1,4 @@
-#ifndef CLIENT_H_
-#define CLIENT_H_
+#pragma once
 
 #include "GameDefs.h"
 #include "NetworkDefs.h"
@@ -53,10 +52,10 @@ public:
      * Note: It's expected that you called SDLNet_CheckSockets() on the outside-managed
      *       socket set before calling this.
      *
-     * @return An appropriate ReceiveResult if the receive failed, else a ReceiveResult with
-     *         result == Success and data in the message field.
+     * @return A received Message. If no data was waiting, return.messageType will
+     *         == NotSet and return.messageBuffer will == null.
      */
-    MessageResult receiveMessage();
+    Message receiveMessage();
 
     /**
      * @return True if the client is connected, else false.
@@ -120,13 +119,6 @@ private:
     Uint8 getWaitingMessageCount() const;
 
     /**
-     * Fills in the header information for the batch currently being built.
-     * @param messageCount  The number of messages going into the current batch.
-     * @param currentTick  The sim's current tick number.
-     */
-    void fillHeader(Uint8 messageCount, Uint32 currentTick);
-
-    /**
      * Run through all checks necessary to determine if we should tell the client to adjust
      * its tick.
      * Note: The parameters could be obtained internally, but passing them in provides a
@@ -162,9 +154,6 @@ private:
     /** Holds data while we're putting it together to be sent as a batch. */
     std::array<Uint8, Peer::MAX_MESSAGE_SIZE> batchBuffer;
 
-    /** The latest tick that we've sent an update to this client for. */
-    Uint32 latestSentSimTick;
-
     /** Tracks how long it's been since we've received a message from this client. */
     Timer receiveTimer;
 
@@ -193,5 +182,3 @@ private:
 
 } // End namespace Server
 } // End namespace AM
-
-#endif /* End CLIENT_H_ */

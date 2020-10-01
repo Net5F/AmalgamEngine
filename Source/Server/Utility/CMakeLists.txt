@@ -11,6 +11,7 @@ target_sources(Server
         Public/Client.h
         Public/ClientHandler.h
         Public/MessageSorter.h
+        Public/ServerNetworkDefs.h
 )
 
 target_include_directories(Server

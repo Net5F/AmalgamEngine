@@ -63,18 +63,18 @@ public:
     int transferTickAdjustment();
 
     /**
-     * Allocates and fills a dynamic buffer with message data.
+     * Fills the message header (message type and size) into the given buffer.
+     * Also shrinks the buffer to fit the content, if it's over-sized.
      *
      * The first CLIENT_HEADER_SIZE bytes of the buffer will be left empty to later be
-     * filled with the header.
-     * The 2 bytes following the header will contain the message size as a Uint16.
-     * The rest of the buffer will be filled with the data from the given messageBuffer.
+     * filled with the client header by the network before sending.
      *
-     * For use with the Message type in our flatbuffer scheme. We aim to send the whole
-     * Message + size + header with one send call, so it's convenient to have it all in
-     * one buffer.
+     * The first byte following the client header will contain the message type as a Uint8.
+     * The next 2 bytes will contain the message size as a Uint16.
+     * The rest will have the data from the given messageBuffer copied into it.
      */
-    static BinaryBufferSharedPtr constructMessage(Uint8* messageBuffer, std::size_t size);
+    static void fillMessageHeader(MessageType type, std::size_t messageSize,
+                                  const BinaryBufferSharedPtr& messageBuffer);
 
 private:
     /**

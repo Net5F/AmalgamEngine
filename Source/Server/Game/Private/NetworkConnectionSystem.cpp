@@ -13,7 +13,6 @@ namespace Server
 NetworkConnectionSystem::NetworkConnectionSystem(Game& inGame, World& inWorld,
                                                  Network& inNetwork)
 : game(inGame), world(inWorld), network(inNetwork)
-//, builder(BUILDER_BUFFER_SIZE)
 {
 }
 

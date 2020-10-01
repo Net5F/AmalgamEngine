@@ -2,8 +2,8 @@
 #include "Game.h"
 #include "World.h"
 #include "Network.h"
-#include "ClientInputs.h"
 #include "MessageTools.h"
+#include "ClientInputs.h"
 #include "Peer.h"
 #include "Debug.h"
 #include <memory>
@@ -28,9 +28,8 @@ void NetworkUpdateSystem::sendInputState()
     }
 
     /* Send the updated state to the server. */
-//    if (world.playerIsDirty) {
+    if (world.playerIsDirty) {
         // Only send new data if we've changed.
-        // TODO: Don't send a message if we haven't changed, let the network do the heartbeat.
         EntityID playerID = world.playerID;
         ClientInputs clientInputs = {playerID, game.getCurrentTick(),
                 world.inputs[playerID]};
@@ -38,12 +37,20 @@ void NetworkUpdateSystem::sendInputState()
         // Serialize the client inputs message.
         BinaryBufferSharedPtr messageBuffer = std::make_shared<BinaryBuffer>(
             Peer::MAX_MESSAGE_SIZE);
-        std::size_t writtenSize = MessageTools::serialize(*messageBuffer, clientInputs);
+        std::size_t messageSize = MessageTools::serialize(*messageBuffer, clientInputs);
 
-        // Shrink the buffer to fit and send the message.
-        messageBuffer->resize(writtenSize);
+        // TEMP - Shift the elements of the vector to make room for the header.
+        // TODO: Replace this with serializing straight into the proper spot.
+        int numToShift = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
+        messageBuffer->insert(messageBuffer->begin(), numToShift, 0);
+
+        // Fill the buffer with the appropriate message header.
+        Network::fillMessageHeader(MessageType::ClientInputs, messageSize, messageBuffer);
+
+        // Send the message.
         network.send(messageBuffer);
-//    }
+    }
+    // TODO: Heartbeat from the network tick if no messages have been sent.
 
     world.playerIsDirty = false;
 }

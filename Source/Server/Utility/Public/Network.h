@@ -1,14 +1,14 @@
-#ifndef NETWORK_H
-#define NETWORK_H
+#pragma once
 
 #include "NetworkDefs.h"
+#include "ServerNetworkDefs.h"
 #include "ClientHandler.h"
 #include "MessageSorter.h"
-#include <string>
 #include <memory>
 #include <cstddef>
 #include <unordered_map>
 #include <shared_mutex>
+#include <queue>
 #include "readerwriterqueue.h"
 
 namespace AM
@@ -16,6 +16,7 @@ namespace AM
 
 class Acceptor;
 class Peer;
+class ClientInputs;
 
 namespace Server
 {
@@ -53,27 +54,29 @@ public:
     void sendToAll(const BinaryBufferSharedPtr& message);
 
     /**
-     * Pushes a message into the inputMessageSorter.
-     * For use in receiving input messages.
+     * Deserializes and routes received client messages.
      *
-     * @param message  The message to send.
-     * @return The amount that message's tickNum was ahead or behind the current tick.
+     * When a message with a tick number is received, updates the associated client's
+     * tick diff data.
+     *
+     * @param receiveQueue  A queue with messages to process.
      */
-    Sint64 queueInputMessage(BinaryBufferPtr message);
+    void processReceivedMessages(std::queue<ClientMessage>& receiveQueue);
 
     /** Forwards to the inputMessageSorter's startReceive. */
-    std::queue<BinaryBufferPtr>& startReceiveInputMessages(Uint32 tickNum);
+    std::queue<std::unique_ptr<ClientInputs>>& startReceiveInputMessages(Uint32 tickNum);
 
     /** Forward to the inputMessageSorter's endReceive. */
     void endReceiveInputMessages();
 
-    /** Initialize the send timer. */
+    /** Initialize the tick timer. */
     void initTimer();
 
     // Returning non-const refs because they need to be modified. Be careful not to attempt
     // to re-assign the obtained ref (can't re-seat a reference once bound).
-    std::unordered_map<NetworkID, Client>& getClientMap();
+    ClientMap& getClientMap();
     std::shared_mutex& getClientMapMutex();
+
     moodycamel::ReaderWriterQueue<NetworkID>& getConnectEventQueue();
     moodycamel::ReaderWriterQueue<NetworkID>& getDisconnectEventQueue();
 
@@ -81,16 +84,14 @@ public:
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
     /**
-     * Allocates and fills a dynamic buffer with message data.
+     * Allocates and fills a dynamic buffer with a message header and data payload.
      *
-     * The first 2 bytes of the buffer will contain the message size as a Uint16,
-     * the rest will have the data at messageBuffer copied into it.
-     *
-     * For use with the Message type in our flatbuffer scheme. We aim to send the whole
-     * Message + size with one send call, so it's convenient to have it all in
-     * one buffer.
+     * The first byte of the buffer will contain the message type as a Uint8.
+     * The next 2 bytes will contain the message size as a Uint16.
+     * The rest will have the data from the given messageBuffer copied into it.
      */
-    static BinaryBufferSharedPtr constructMessage(Uint8* messageBuffer, std::size_t size);
+    static BinaryBufferSharedPtr constructMessage(MessageType type, Uint8* messageBuffer,
+                                                  std::size_t size);
 
 private:
     /**
@@ -102,16 +103,15 @@ private:
      */
     void sendClientUpdates();
 
-    /** Used to time when we should send waiting messages. */
-    Timer sendTimer;
+    /** Used to time when we should process the network tick. */
+    Timer tickTimer;
 
     /** The aggregated time since we last processed a tick. */
     double accumulatedTime;
 
     /** Maps IDs to their connections. Allows the game to say "send this message
         to this entity" instead of needing to track the connection objects. */
-    std::unordered_map<NetworkID, Client> clientMap;
-
+    ClientMap clientMap;
     std::shared_mutex clientMapMutex;
 
     ClientHandler clientHandler;
@@ -121,10 +121,7 @@ private:
     moodycamel::ReaderWriterQueue<NetworkID> disconnectEventQueue;
 
     /** Stores input messages received from clients, sorted by tick number. */
-    MessageSorter inputMessageSorter;
-//
-//    static constexpr int BUILDER_BUFFER_SIZE = 512;
-//    flatbuffers::FlatBufferBuilder builder;
+    MessageSorter<std::unique_ptr<ClientInputs>> inputMessageSorter;
 
     /** Pointer to the game's current tick. */
     const std::atomic<Uint32>* currentTickPtr;
@@ -132,5 +129,3 @@ private:
 
 } // namespace Server
 } // namespace AM
-
-#endif /* NETWORK_H */
