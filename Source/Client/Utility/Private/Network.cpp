@@ -59,7 +59,7 @@ void Network::send(const BinaryBufferSharedPtr& message)
 
     // Fill the message with the header (constructMessage() leaves
     // CLIENT_HEADER_SIZE bytes empty at the front for us to fill.)
-    message->at(0) = adjustmentIteration;
+    message->at(ClientHeaderIndex::AdjustmentIteration) = adjustmentIteration;
 
     // Send the message.
     NetworkResult result = server->send(message);
@@ -163,29 +163,6 @@ int Network::transferTickAdjustment()
         tickAdjustment -= currentAdjustment;
         return currentAdjustment;
     }
-}
-
-void Network::fillMessageHeader(MessageType type, std::size_t messageSize,
-                                const BinaryBufferSharedPtr& messageBuffer)
-{
-    const unsigned int totalMessageSize = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE
-                                          + messageSize;
-    if ((totalMessageSize > Peer::MAX_MESSAGE_SIZE) || (messageSize > UINT16_MAX)) {
-        DebugError("Tried to send a too-large message. Size: %u, max: %u", messageSize,
-            Peer::MAX_MESSAGE_SIZE);
-    }
-    else if (totalMessageSize > messageBuffer->size()) {
-        DebugError("Given buffer is too small. Size: %u, required: %u",
-            messageBuffer->size(), totalMessageSize);
-    }
-
-    // Copy the type into the buffer.
-    messageBuffer->at(CLIENT_HEADER_SIZE + MessageHeaderIndex::MessageType) =
-        static_cast<Uint8>(type);
-
-    // Copy the messageSize into the buffer.
-    _SDLNet_Write16(messageSize,
-        (messageBuffer->data() + CLIENT_HEADER_SIZE + MessageHeaderIndex::Size));
 }
 
 void Network::processBatch() {

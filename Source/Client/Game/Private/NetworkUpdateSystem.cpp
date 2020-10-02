@@ -45,7 +45,8 @@ void NetworkUpdateSystem::sendInputState()
         messageBuffer->insert(messageBuffer->begin(), numToShift, 0);
 
         // Fill the buffer with the appropriate message header.
-        Network::fillMessageHeader(MessageType::ClientInputs, messageSize, messageBuffer);
+        MessageTools::fillMessageHeader(MessageType::ClientInputs, messageSize,
+            messageBuffer, CLIENT_HEADER_SIZE);
 
         // Send the message.
         network.send(messageBuffer);

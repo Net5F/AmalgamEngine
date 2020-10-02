@@ -62,20 +62,6 @@ public:
      */
     int transferTickAdjustment();
 
-    /**
-     * Fills the message header (message type and size) into the given buffer.
-     * Also shrinks the buffer to fit the content, if it's over-sized.
-     *
-     * The first CLIENT_HEADER_SIZE bytes of the buffer will be left empty to later be
-     * filled with the client header by the network before sending.
-     *
-     * The first byte following the client header will contain the message type as a Uint8.
-     * The next 2 bytes will contain the message size as a Uint16.
-     * The rest will have the data from the given messageBuffer copied into it.
-     */
-    static void fillMessageHeader(MessageType type, std::size_t messageSize,
-                                  const BinaryBufferSharedPtr& messageBuffer);
-
 private:
     /**
      * Processes the received header and following batch.

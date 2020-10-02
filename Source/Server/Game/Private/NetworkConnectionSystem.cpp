@@ -3,6 +3,8 @@
 #include "World.h"
 #include "Network.h"
 #include "GameDefs.h"
+#include "MessageTools.h"
+#include "ConnectionResponse.h"
 #include "Debug.h"
 
 namespace AM
@@ -96,20 +98,26 @@ void NetworkConnectionSystem::sendConnectionResponse(NetworkID networkID,
                                                      EntityID newEntityID, float spawnX,
                                                      float spawnY)
 {
-//    // Prep the builder for a new message.
-//    builder.Clear();
-//
-//    // Fill in their ID and spawn point.
-//    Uint32 latestTickTimestamp = game.getCurrentTick();
-//    auto response = fb::CreateConnectionResponse(builder, newEntityID,
-//        spawnX, spawnY);
-//    auto encodedMessage = fb::CreateMessage(builder, latestTickTimestamp,
-//        fb::MessageContent::ConnectionResponse, response.Union());
-//    builder.Finish(encodedMessage);
-//
-//    // Send the message.
-//    network.send(networkID,
-//        Network::constructMessage(builder.GetBufferPointer(), builder.GetSize()));
+    // Fill in their ID and spawn point.
+    Uint32 currentTick = game.getCurrentTick();
+    ConnectionResponse connectionResponse = {currentTick, newEntityID, spawnX, spawnY};
+
+    // Serialize the connection response message.
+    BinaryBufferSharedPtr messageBuffer = std::make_shared<BinaryBuffer>(
+        Peer::MAX_MESSAGE_SIZE);
+    std::size_t messageSize = MessageTools::serialize(*messageBuffer, connectionResponse);
+
+    // TEMP - Shift the elements of the vector to make room for the header.
+    // TODO: Replace this with serializing straight into the proper spot.
+    int numToShift = MESSAGE_HEADER_SIZE;
+    messageBuffer->insert(messageBuffer->begin(), numToShift, 0);
+
+    // Fill the buffer with the appropriate message header.
+    MessageTools::fillMessageHeader(MessageType::ConnectionResponse, messageSize,
+        messageBuffer, 0);
+
+    // Send the message.
+    network.send(networkID, messageBuffer, currentTick);
 }
 
 } // namespace Server

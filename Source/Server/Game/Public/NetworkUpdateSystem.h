@@ -1,6 +1,8 @@
 #pragma once
 
 #include "GameDefs.h"
+#include "Entity.h"
+#include <vector>
 
 namespace AM
 {
@@ -37,14 +39,11 @@ private:
      * @param entityID  The entity to serialize.
      * @return An offset where the data was stored in the builder.
      */
-//    flatbuffers::Offset<AM::fb::Entity> serializeEntity(EntityID entityID);
+    void serializeEntity(EntityID entityID, std::vector<Entity>& entities);
 
     Game& game;
     World& world;
     Network& network;
-
-//    static constexpr int BUILDER_BUFFER_SIZE = 512;
-//    flatbuffers::FlatBufferBuilder builder;
 };
 
 } // namespace Server

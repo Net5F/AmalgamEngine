@@ -3,7 +3,6 @@
 #include "Peer.h"
 #include <SDL2/SDL_net.h>
 #include "MessageTools.h"
-#include "ClientInputs.h"
 #include <algorithm>
 #include <atomic>
 #include "Debug.h"

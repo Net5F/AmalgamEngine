@@ -65,7 +65,21 @@ public:
         }
     }
 
-private:
+    /**
+     * Fills the message header (message type and size) into the given buffer.
+     * Also shrinks the buffer to fit the content, if it's over-sized.
+     *
+     * The first byte at startIndex will contain the message type as a Uint8.
+     * The next 2 bytes will contain the message size as a Uint16.
+     * The rest will have the data from the given messageBuffer copied into it.
+     *
+     * @param startIndex  Used to leave room at the front of the message to later be
+     *                    filled. The client uses this since it writes the client message
+     *                    header into the same buffer. The server doesn't.
+     */
+    static void fillMessageHeader(MessageType type, std::size_t messageSize,
+                                  const BinaryBufferSharedPtr& messageBuffer,
+                                  unsigned int startIndex);
 };
 
 } // End namespace AM

@@ -4,6 +4,7 @@
 #include "ServerNetworkDefs.h"
 #include "ClientHandler.h"
 #include "MessageSorter.h"
+#include "ClientInputs.h"
 #include <memory>
 #include <cstddef>
 #include <unordered_map>
@@ -16,7 +17,6 @@ namespace AM
 
 class Acceptor;
 class Peer;
-class ClientInputs;
 
 namespace Server
 {
