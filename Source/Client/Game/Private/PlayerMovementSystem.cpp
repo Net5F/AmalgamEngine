@@ -126,7 +126,7 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
 
         // Use the appropriate input state to update movement.
         MovementHelpers::moveEntity(currentPosition, currentMovement,
-            world.playerInputHistory[tickDiff].inputStates, GAME_TICK_TIMESTEP_S);
+            world.playerInputHistory[tickDiff], GAME_TICK_TIMESTEP_S);
     }
 }
 

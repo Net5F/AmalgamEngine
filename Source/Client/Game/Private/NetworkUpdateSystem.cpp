@@ -31,18 +31,15 @@ void NetworkUpdateSystem::sendInputState()
     if (world.playerIsDirty) {
         // Only send new data if we've changed.
         EntityID playerID = world.playerID;
-        ClientInputs clientInputs = {playerID, game.getCurrentTick(),
+        ClientInputs clientInputs{playerID, game.getCurrentTick(),
                 world.inputs[playerID]};
 
         // Serialize the client inputs message.
         BinaryBufferSharedPtr messageBuffer = std::make_shared<BinaryBuffer>(
             Peer::MAX_MESSAGE_SIZE);
-        std::size_t messageSize = MessageTools::serialize(*messageBuffer, clientInputs);
-
-        // TEMP - Shift the elements of the vector to make room for the header.
-        // TODO: Replace this with serializing straight into the proper spot.
-        int numToShift = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
-        messageBuffer->insert(messageBuffer->begin(), numToShift, 0);
+        unsigned int startIndex = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
+        std::size_t messageSize = MessageTools::serialize(*messageBuffer, clientInputs,
+            startIndex);
 
         // Fill the buffer with the appropriate message header.
         MessageTools::fillMessageHeader(MessageType::ClientInputs, messageSize,

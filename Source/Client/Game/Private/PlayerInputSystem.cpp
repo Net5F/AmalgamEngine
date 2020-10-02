@@ -54,15 +54,7 @@ void PlayerInputSystem::processInputEvent(SDL_Event& event)
 
 void PlayerInputSystem::addCurrentInputsToHistory()
 {
-    InputSnapshot snapshot;
-
-    std::array<Input::State, Input::NumTypes>& playerInputStates =
-        world.inputs[world.playerID].inputStates;
-    for (uint8_t i = 0; i < Input::Type::NumTypes; ++i) {
-        snapshot.inputStates[i] = playerInputStates[i];
-    }
-
-    world.playerInputHistory.push(snapshot);
+    world.playerInputHistory.push(world.inputs[world.playerID].inputStates);
 }
 
 } // namespace Client

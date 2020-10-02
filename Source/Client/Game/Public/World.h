@@ -60,7 +60,7 @@ public:
 
     /** Player-specific. */
     EntityID playerID;
-    CircularBuffer<InputSnapshot, INPUT_HISTORY_LENGTH> playerInputHistory;
+    CircularBuffer<InputStateArr, INPUT_HISTORY_LENGTH> playerInputHistory;
 
     // We don't need to track NPC dirty states because we don't give them input.
     bool playerIsDirty;

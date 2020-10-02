@@ -69,13 +69,5 @@ struct Input
 };
 
 typedef std::array<Input::State, Input::Type::NumTypes> InputStateArr;
-struct InputSnapshot {
-public:
-    /** The tick that this snapshot was taken at. */
-    Uint32 tickNum = 0;
-
-    /** Holds the current state of the inputs, indexed by Input::Type. */
-    InputStateArr inputStates = {};
-};
 
 } /* End namespace AM */

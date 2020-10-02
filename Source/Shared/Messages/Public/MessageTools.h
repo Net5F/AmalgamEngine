@@ -26,11 +26,22 @@ public:
      *
      * @param outputBuffer  The buffer to store the serialized object data in.
      * @param objectToSerialize  The object to serialize. Must be serializable.
+     * @param startIndex  Optional, how far into the buffer to start writing the
+     *                    serialized bytes.
+     * @return The number of bytes written into outputBuffer.
      */
     template <typename T>
-    static std::size_t serialize(BinaryBuffer& outputBuffer, T& objectToSerialize)
+    static std::size_t serialize(BinaryBuffer& outputBuffer, T& objectToSerialize,
+                                 std::size_t startIndex = 0)
     {
-        return bitsery::quickSerialization<OutputAdapter>(outputBuffer, objectToSerialize);
+        // Create the adapter manually so we can change the write offset.
+        OutputAdapter adapter{outputBuffer};
+        adapter.currentWritePos(startIndex);
+
+        // Return value will include the offset, so subtract it back out.
+        return (bitsery::quickSerialization<OutputAdapter>(std::move(adapter),
+                    objectToSerialize)
+                - startIndex);
     }
 
     template <typename T>

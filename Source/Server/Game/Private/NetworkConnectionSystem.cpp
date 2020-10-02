@@ -100,17 +100,13 @@ void NetworkConnectionSystem::sendConnectionResponse(NetworkID networkID,
 {
     // Fill in their ID and spawn point.
     Uint32 currentTick = game.getCurrentTick();
-    ConnectionResponse connectionResponse = {currentTick, newEntityID, spawnX, spawnY};
+    ConnectionResponse connectionResponse{currentTick, newEntityID, spawnX, spawnY};
 
     // Serialize the connection response message.
     BinaryBufferSharedPtr messageBuffer = std::make_shared<BinaryBuffer>(
         Peer::MAX_MESSAGE_SIZE);
-    std::size_t messageSize = MessageTools::serialize(*messageBuffer, connectionResponse);
-
-    // TEMP - Shift the elements of the vector to make room for the header.
-    // TODO: Replace this with serializing straight into the proper spot.
-    int numToShift = MESSAGE_HEADER_SIZE;
-    messageBuffer->insert(messageBuffer->begin(), numToShift, 0);
+    std::size_t messageSize = MessageTools::serialize(*messageBuffer, connectionResponse,
+        MESSAGE_HEADER_SIZE);
 
     // Fill the buffer with the appropriate message header.
     MessageTools::fillMessageHeader(MessageType::ConnectionResponse, messageSize,

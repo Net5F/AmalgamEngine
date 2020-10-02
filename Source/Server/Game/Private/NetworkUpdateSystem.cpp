@@ -47,7 +47,7 @@ void NetworkUpdateSystem::constructAndSendUpdate(EntityID entityID,
                                                  std::vector<EntityID>& dirtyEntities)
 {
     /** Fill the vector of entities to send. */
-    EntityUpdate entityUpdate = {};
+    EntityUpdate entityUpdate{};
     ClientComponent& clientComponent = world.clients.find(entityID)->second;
     if (!clientComponent.isInitialized) {
         // New client, we need to send it all relevant entities.
@@ -77,12 +77,8 @@ void NetworkUpdateSystem::constructAndSendUpdate(EntityID entityID,
         // Serialize the EntityUpdate.
         BinaryBufferSharedPtr messageBuffer = std::make_shared<BinaryBuffer>(
             Peer::MAX_MESSAGE_SIZE);
-        std::size_t messageSize = MessageTools::serialize(*messageBuffer, entityUpdate);
-
-        // TEMP - Shift the elements of the vector to make room for the header.
-        // TODO: Replace this with serializing straight into the proper spot.
-        int numToShift = MESSAGE_HEADER_SIZE;
-        messageBuffer->insert(messageBuffer->begin(), numToShift, 0);
+        std::size_t messageSize = MessageTools::serialize(*messageBuffer, entityUpdate,
+            MESSAGE_HEADER_SIZE);
 
         // Fill the buffer with the appropriate message header.
         MessageTools::fillMessageHeader(MessageType::ClientInputs, messageSize,
