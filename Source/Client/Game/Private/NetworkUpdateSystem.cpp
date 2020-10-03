@@ -28,7 +28,7 @@ void NetworkUpdateSystem::sendInputState()
     }
 
     /* Send the updated state to the server. */
-    if (world.playerIsDirty) {
+//    if (world.playerIsDirty) {
         // Only send new data if we've changed.
         EntityID playerID = world.playerID;
         ClientInputs clientInputs{playerID, game.getCurrentTick(),
@@ -47,7 +47,7 @@ void NetworkUpdateSystem::sendInputState()
 
         // Send the message.
         network.send(messageBuffer);
-    }
+//    }
     // TODO: Heartbeat from the network tick if no messages have been sent.
 
     world.playerIsDirty = false;

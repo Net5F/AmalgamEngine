@@ -61,6 +61,7 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
     while (!receiveQueue.empty()) {
         ClientMessage& clientMessage = receiveQueue.front();
         if (clientMessage.message.messageType == MessageType::ClientInputs) {
+            DebugInfo("Received message was clientinputs.");
             // Deserialize the message.
             std::unique_ptr<ClientInputs> clientInputs = std::make_unique<ClientInputs>();
             BinaryBufferPtr& messageBuffer = clientMessage.message.messageBuffer;
@@ -68,8 +69,10 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
                 *clientInputs);
 
             // Push the message (blocks if the MessageSorter is locked).
+            // Save the tickNum since the move might be optimized before the access.
+            Uint32 messageTickNum = clientInputs->tickNum;
             MessageSorterBase::PushResult pushResult = inputMessageSorter.push(
-                clientInputs->tickNum, std::move(clientInputs));
+                messageTickNum, std::move(clientInputs));
 
             // Record the diff.
             if (pushResult.result == MessageSorterBase::ValidityResult::Valid) {

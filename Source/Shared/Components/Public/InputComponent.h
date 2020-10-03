@@ -16,7 +16,7 @@ public:
 };
 
 template <typename S>
-void serialize(S& serializer, InputComponent inputComponent)
+void serialize(S& serializer, InputComponent& inputComponent)
 {
     serializer.container1b(inputComponent.inputStates);
 }

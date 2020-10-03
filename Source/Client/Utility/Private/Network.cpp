@@ -219,7 +219,7 @@ void Network::processReceivedMessage(MessageType messageType, Uint16 messageSize
     }
     else if (messageType == MessageType::EntityUpdate) {
         // Deserialize the message.
-        std::shared_ptr<const EntityUpdate> entityUpdate
+        std::shared_ptr<EntityUpdate> entityUpdate
                                                 = std::make_shared<EntityUpdate>();
         MessageTools::deserialize(messageRecBuffer, messageSize, *entityUpdate);
 

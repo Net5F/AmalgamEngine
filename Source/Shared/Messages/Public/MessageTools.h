@@ -44,12 +44,21 @@ public:
                 - startIndex);
     }
 
+    /**
+     * Deserializes the contents of the given buffer into the given object.
+     * Errors if deserialization fails.
+     *
+     * @param inputBuffer  A buffer containing the serialized bytes to deserialize.
+     * @param serializedSize  The size of the serialized message.
+     * @param outputObject  The object to store the deserialized message in.
+     * @param startIndex  Optional, how far into the buffer to start reading bytes from.
+     */
     template <typename T>
     static bool deserialize(BinaryBuffer& inputBuffer, std::size_t serializedSize,
-                            T& outputObject)
+                            T& outputObject, std::size_t startIndex = 0)
     {
         std::pair<bitsery::ReaderError, bool> result = bitsery::quickDeserialization<
-            InputAdapter>({inputBuffer.begin(), serializedSize}, outputObject);
+        InputAdapter>({inputBuffer.begin() + startIndex, serializedSize}, outputObject);
 
         if (!result.second) {
             std::string errorString = "Deserialization failed: ";
@@ -69,6 +78,7 @@ public:
                 default:
                     break;
             }
+            // TODO: Eventually change this to a DebugInfo and return false.
             DebugError("%s", errorString);
         }
         else {

@@ -26,7 +26,7 @@ struct Entity
 };
 
 template <typename S>
-void serialize(S& serializer, Entity entity)
+void serialize(S& serializer, Entity& entity)
 {
     serializer.value4b(entity.id);
     serializer.value4b(entity.flags);

@@ -22,8 +22,9 @@ struct EntityUpdate
 };
 
 template <typename S>
-void serialize(S& serializer, EntityUpdate entityUpdate)
+void serialize(S& serializer, EntityUpdate& entityUpdate)
 {
+    serializer.value4b(entityUpdate.tickNum);
     serializer.container(entityUpdate.entities,
         static_cast<std::size_t>(MAX_ENTITIES));
 }

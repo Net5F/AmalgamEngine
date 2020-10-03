@@ -19,7 +19,7 @@ public:
 };
 
 template <typename S>
-void serialize(S& serializer, MovementComponent movementComponent)
+void serialize(S& serializer, MovementComponent& movementComponent)
 {
     serializer.value4b(movementComponent.velX);
     serializer.value4b(movementComponent.velY);

@@ -19,7 +19,7 @@ public:
 };
 
 template <typename S>
-void serialize(S& serializer, PositionComponent positionComponent)
+void serialize(S& serializer, PositionComponent& positionComponent)
 {
     serializer.value4b(positionComponent.x);
     serializer.value4b(positionComponent.y);

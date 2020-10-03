@@ -21,7 +21,7 @@ struct ClientInputs
 };
 
 template <typename S>
-void serialize(S& serializer, ClientInputs clientInputs)
+void serialize(S& serializer, ClientInputs& clientInputs)
 {
     serializer.value4b(clientInputs.id);
     serializer.value4b(clientInputs.tickNum);

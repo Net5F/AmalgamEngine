@@ -25,6 +25,11 @@ NpcMovementSystem::NpcMovementSystem(Game& inGame, World& inWorld, Network& inNe
 
 void NpcMovementSystem::updateNpcs()
 {
+    if (RUN_OFFLINE) {
+        // No need to process NPCs if we're running offline.
+        return;
+    }
+
     // Receive any updates from the server.
     receiveEntityUpdates();
 
