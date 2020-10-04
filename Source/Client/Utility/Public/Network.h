@@ -21,6 +21,9 @@ class EntityUpdate;
 namespace Client
 {
 
+/**
+ * Provides Network functionality in the format that the Game wants.
+ */
 class Network
 {
 public:
@@ -83,9 +86,6 @@ private:
      * @param receivedAdjIteration  The adjustment iteration for the received adjustment.
      */
     void adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration);
-
-    std::shared_ptr<Peer> getServer() const;
-    std::atomic<bool> const* getExitRequestedPtr() const;
 
     std::shared_ptr<Peer> server;
 

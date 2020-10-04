@@ -128,10 +128,7 @@ NpcReceiveResult Network::receiveNpcUpdate(Uint64 timeoutMs)
 
 int Network::pollForMessages()
 {
-    std::shared_ptr<Peer> server = getServer();
-    std::atomic<bool> const* exitRequested = getExitRequestedPtr();
-
-    while (!(*exitRequested)) {
+    while (!exitRequested) {
         // Wait for a server header.
         NetworkResult headerResult = server->receiveBytesWait(headerRecBuffer.data(),
             SERVER_HEADER_SIZE);
@@ -286,16 +283,6 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
                 currentAdjIteration, receivedAdjIteration);
         }
     }
-}
-
-std::shared_ptr<Peer> Network::getServer() const
-{
-    return server;
-}
-
-std::atomic<bool> const* Network::getExitRequestedPtr() const
-{
-    return &exitRequested;
 }
 
 } // namespace Client
