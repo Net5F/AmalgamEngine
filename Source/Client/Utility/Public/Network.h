@@ -31,7 +31,18 @@ public:
 
     ~Network();
 
+    /**
+     * Attempts to establish a connection with the server.
+     * If successful, starts the receiver thread.
+     *
+     * @return true if a connection was successfully established, else false.
+     */
     bool connect();
+
+    /**
+     * If no messages have been sent since the last heartbeat, sends a message.
+     */
+    void tick();
 
     /**
      * Sends bytes over the network.
@@ -65,7 +76,16 @@ public:
      */
     int transferTickAdjustment();
 
+    /** Initialize the tick timer. */
+    void initTimer();
+
+    /** Used for passing us a pointer to the Game's currentTick. */
+    void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
+
 private:
+    /** If we haven't sent any messages since the last network tick, sends a heartbeat. */
+    void sendHeartbeatIfNecessary();
+
     /**
      * Processes the received header and following batch.
      * If any messages are expected, receives the messages.
@@ -87,6 +107,12 @@ private:
      */
     void adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration);
 
+    /** Used to time when we should process the network tick. */
+    Timer tickTimer;
+
+    /** The aggregated time since we last processed a tick. */
+    double accumulatedTime;
+
     std::shared_ptr<Peer> server;
 
     /** Local copy of the playerID so we can tell if we got a player message. */
@@ -102,6 +128,15 @@ private:
      * Used to make sure that we don't double-count adjustments.
      */
     std::atomic<Uint8> adjustmentIteration;
+
+    /**
+     * Tracks if we've sent a message since the last network tick.
+     * Used to determine if we need to heartbeat.
+     */
+    unsigned int messagesSentSinceTick;
+
+    /** Pointer to the game's current tick. */
+    const std::atomic<Uint32>* currentTickPtr;
 
     /** Tracks how long it's been since we've received a message from the server. */
     Timer receiveTimer;

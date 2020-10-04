@@ -15,7 +15,7 @@ struct ClientInputs
     Uint32 id = 0;
 
     /** The tick that these client input states correspond to. */
-    Uint32 tickNum;
+    Uint32 tickNum = 0;
 
     InputComponent inputComponent;
 };

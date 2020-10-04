@@ -23,6 +23,7 @@ Game::Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites
 , exitRequested(false)
 {
     Debug::registerCurrentTickPtr(&currentTick);
+    network.registerCurrentTickPtr(&currentTick);
 }
 
 void Game::connect()

@@ -1,9 +1,10 @@
 #include "Network.h"
 #include "Peer.h"
 #include "ConnectionResponse.h"
-#include "EntityUpdate.h"
-#include <SDL2/SDL_net.h>
 #include "MessageTools.h"
+#include "EntityUpdate.h"
+#include "Heartbeat.h"
+#include <SDL2/SDL_net.h>
 
 namespace AM
 {
@@ -11,10 +12,13 @@ namespace Client
 {
 
 Network::Network()
-: server(nullptr)
+: accumulatedTime(0.0)
+, server(nullptr)
 , playerID(0)
 , tickAdjustment(0)
 , adjustmentIteration(0)
+, messagesSentSinceTick(0)
+, currentTickPtr(nullptr)
 , receiveThreadObj()
 , exitRequested(false)
 , headerRecBuffer(SERVER_HEADER_SIZE)
@@ -51,6 +55,28 @@ bool Network::connect()
     return (server != nullptr);
 }
 
+void Network::tick()
+{
+    accumulatedTime += tickTimer.getDeltaSeconds(true);
+
+    if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
+        // Send a heartbeat if we need to.
+        sendHeartbeatIfNecessary();
+
+        accumulatedTime -= NETWORK_TICK_TIMESTEP_S;
+        if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
+            // If we've accumulated enough time to send more, something
+            // happened to delay us.
+            // We still only want to send what's in the queue, but it's worth giving
+            // debug output that we detected this.
+            DebugInfo(
+                "Detected a delayed network tick. accumulatedTime: %f. Setting to 0.",
+                accumulatedTime);
+            accumulatedTime = 0;
+        }
+    }
+}
+
 void Network::send(const BinaryBufferSharedPtr& message)
 {
     if (!(server->isConnected())) {
@@ -66,14 +92,13 @@ void Network::send(const BinaryBufferSharedPtr& message)
     if (result != NetworkResult::Success) {
         DebugError("Message send failed.");
     }
+    else {
+        messagesSentSinceTick++;
+    }
 }
 
 std::unique_ptr<ConnectionResponse> Network::receiveConnectionResponse(Uint64 timeoutMs)
 {
-    if (!(server->isConnected())) {
-        DebugError("Tried to receive while server is disconnected.");
-    }
-
     std::unique_ptr<ConnectionResponse> message = nullptr;
     if (timeoutMs == 0) {
         connectionResponseQueue.try_dequeue(message);
@@ -87,10 +112,6 @@ std::unique_ptr<ConnectionResponse> Network::receiveConnectionResponse(Uint64 ti
 
 std::shared_ptr<const EntityUpdate> Network::receivePlayerUpdate(Uint64 timeoutMs)
 {
-    if (!(server->isConnected())) {
-        DebugError("Tried to receive while server is disconnected.");
-    }
-
     std::shared_ptr<const EntityUpdate> message = nullptr;
     if (timeoutMs == 0) {
         playerUpdateQueue.try_dequeue(message);
@@ -104,11 +125,6 @@ std::shared_ptr<const EntityUpdate> Network::receivePlayerUpdate(Uint64 timeoutM
 
 NpcReceiveResult Network::receiveNpcUpdate(Uint64 timeoutMs)
 {
-    if (!(server->isConnected())) {
-        DebugInfo("Tried to receive while server is disconnected.");
-        return {NetworkResult::Disconnected, {}};
-    }
-
     NpcUpdateMessage message;
     bool messageWasReceived = false;
     if (timeoutMs == 0) {
@@ -162,7 +178,44 @@ int Network::transferTickAdjustment()
     }
 }
 
-void Network::processBatch() {
+void Network::initTimer()
+{
+    tickTimer.updateSavedTime();
+}
+
+void Network::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr)
+{
+    currentTickPtr = inCurrentTickPtr;
+}
+
+void Network::sendHeartbeatIfNecessary()
+{
+    if (messagesSentSinceTick == 0) {
+        // Prepare a heartbeat.
+        Heartbeat heartbeat{};
+        heartbeat.tickNum = *currentTickPtr;
+
+        // Serialize the heartbeat message.
+        BinaryBufferSharedPtr messageBuffer = std::make_shared<BinaryBuffer>(
+            Peer::MAX_MESSAGE_SIZE);
+        unsigned int startIndex = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
+        std::size_t messageSize = MessageTools::serialize(*messageBuffer, heartbeat,
+            startIndex);
+
+        // Fill the buffer with the appropriate message header.
+        MessageTools::fillMessageHeader(MessageType::Heartbeat, messageSize,
+            messageBuffer, CLIENT_HEADER_SIZE);
+
+        // Send the message.
+        send(messageBuffer);
+    }
+    else {
+        messagesSentSinceTick = 0;
+    }
+}
+
+void Network::processBatch()
+{
     // Check if we need to adjust the tick offset.
     adjustIfNeeded(headerRecBuffer[ServerHeaderIndex::TickAdjustment],
         headerRecBuffer[ServerHeaderIndex::AdjustmentIteration]);

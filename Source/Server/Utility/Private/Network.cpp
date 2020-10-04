@@ -1,8 +1,9 @@
 #include "Network.h"
 #include "Acceptor.h"
 #include "Peer.h"
-#include <SDL2/SDL_net.h>
 #include "MessageTools.h"
+#include "Heartbeat.h"
+#include <SDL2/SDL_net.h>
 #include <algorithm>
 #include <atomic>
 #include "Debug.h"
@@ -17,6 +18,7 @@ Network::Network()
 , clientHandler(*this)
 , currentTickPtr(nullptr)
 {
+    // Init the timer to the current time.
     tickTimer.updateSavedTime();
 }
 
@@ -61,7 +63,6 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
     while (!receiveQueue.empty()) {
         ClientMessage& clientMessage = receiveQueue.front();
         if (clientMessage.message.messageType == MessageType::ClientInputs) {
-            DebugInfo("Received message was clientinputs.");
             // Deserialize the message.
             std::unique_ptr<ClientInputs> clientInputs = std::make_unique<ClientInputs>();
             BinaryBufferPtr& messageBuffer = clientMessage.message.messageBuffer;
@@ -86,12 +87,20 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
             }
         }
         else if (clientMessage.message.messageType == MessageType::Heartbeat) {
-//            /* Received a heartbeat, just return the diff. */
-//            // Calc how far ahead or behind the message's tick is in relation to the currentTick.
-//            // Using the game's currentTick should be accurate since we didn't have to
-//            // lock anything.
-//            return static_cast<Sint64>(receivedTickTimestamp)
-//                   - static_cast<Sint64>(*currentTickPtr);
+            // Deserialize the message.
+            Heartbeat heartbeat{};
+            BinaryBufferPtr& messageBuffer = clientMessage.message.messageBuffer;
+            MessageTools::deserialize(*messageBuffer, messageBuffer->size(), heartbeat);
+
+            // Record the diff.
+            if (std::shared_ptr<Client> clientPtr = clientMessage.clientPtr.lock()) {
+                // Calc how far ahead or behind the message's tick is in relation
+                // to the currentTick.
+                // Using the game's currentTick should be accurate since we didn't have
+                // to lock anything.
+                clientPtr->recordTickDiff(static_cast<Sint64>(heartbeat.tickNum)
+                    - static_cast<Sint64>(*currentTickPtr));
+            }
         }
         else {
             DebugError("Received message type that we aren't handling.");

@@ -50,10 +50,14 @@ try
 
     // Prime the timers so they don't start at 0.
     game.initTimer();
+    network.initTimer();
     renderSystem.initTimer();
     while (!(*exitRequested)) {
         // Let the sim process an iteration if it needs to.
         game.tick();
+
+        // Send a heartbeat if necessary.
+        network.tick();
 
         // Let the render system render if it needs to.
         renderSystem.render();

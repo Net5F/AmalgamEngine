@@ -6,6 +6,7 @@ target_sources(Shared
         Public/ConnectionResponse.h
         Public/Entity.h
         Public/EntityUpdate.h
+        Public/Heartbeat.h
 )
 
 target_include_directories(Shared
