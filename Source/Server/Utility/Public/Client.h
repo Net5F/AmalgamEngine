@@ -22,9 +22,6 @@ namespace Server
 /**
  * This class represents a single client and facilitates the organization of our
  * communication with them.
- *
- * It's effectively an adapter for Peer with an added outgoing queue and some
- * storing of sync data.
  */
 class Client
 {

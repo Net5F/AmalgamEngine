@@ -30,7 +30,7 @@ ClientHandler::~ClientHandler()
     SDLNet_Quit();
 }
 
-int ClientHandler::serviceClients()
+void ClientHandler::serviceClients()
 {
     ClientMap& clientMap = network.getClientMap();
 
@@ -60,8 +60,6 @@ int ClientHandler::serviceClients()
             SDL_Delay(INACTIVE_DELAY_TIME_MS);
         }
     }
-
-    return 0;
 }
 
 void ClientHandler::acceptNewClients(ClientMap& clientMap)

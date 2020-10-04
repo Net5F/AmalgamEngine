@@ -49,7 +49,7 @@ private:
      *
      * Acts directly on the Network's client map.
      */
-    int serviceClients();
+    void serviceClients();
 
     /**
      * Accepts any new clients, pushing them into the Network's client map.
@@ -83,7 +83,7 @@ private:
         route them. */
     std::queue<ClientMessage> receiveQueue;
 
-    /** Calls processClients(). */
+    /** Calls serviceClients(). */
     std::thread receiveThreadObj;
     /** Turn false to signal that the receive thread should end. */
     std::atomic<bool> exitRequested;
