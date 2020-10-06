@@ -54,18 +54,12 @@ struct Input
 
     enum State : Uint8
     {
-        Invalid,
-        Pressed,
-        Released
+        Released,
+        Pressed
     };
 
-    Input(Type inType, State inState)
-    : type(inType), state(inState)
-    {
-    }
-
-    Type type;
-    State state;
+    Type type = Type::None;
+    State state = State::Released;
 };
 
 typedef std::array<Input::State, Input::Type::NumTypes> InputStateArr;
