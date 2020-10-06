@@ -41,8 +41,6 @@ void NetworkConnectionSystem::processConnectEvents()
         const Position& spawnPoint = world.getSpawnPoint();
         world.positions[newEntityID].x = spawnPoint.x;
         world.positions[newEntityID].y = spawnPoint.y;
-        world.movements[newEntityID].maxVelX = 250;
-        world.movements[newEntityID].maxVelY = 250;
         world.clients.insert({newEntityID, {clientNetworkID}});
         world.attachComponent(newEntityID, ComponentFlag::Input);
         world.attachComponent(newEntityID, ComponentFlag::Movement);
