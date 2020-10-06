@@ -1,5 +1,4 @@
-#ifndef WORLD_H
-#define WORLD_H
+#pragma once
 
 #include "GameDefs.h"
 #include "InputComponent.h"
@@ -11,7 +10,7 @@
 
 #include <array>
 #include <map>
-#include <string>
+#include <string_view>
 
 namespace AM
 {
@@ -23,7 +22,7 @@ class World
 public:
     World();
 
-    EntityID addEntity(const std::string& name);
+    EntityID addEntity(std::string_view name);
 
     void removeEntity(EntityID entityID);
 
@@ -67,5 +66,3 @@ private:
 
 } // namespace Server
 } // namespace AM
-
-#endif /* WORLD_H */

@@ -45,7 +45,7 @@ private:
         /** Whether at least 1 NPC's state changed on this tick or not. */
         bool dataChanged = false;
         /** If dataChanged == true, contains the update message data. */
-        const std::shared_ptr<const EntityUpdate>& entityUpdate = nullptr;
+        std::shared_ptr<const EntityUpdate> entityUpdate = nullptr;
     };
 
     /**

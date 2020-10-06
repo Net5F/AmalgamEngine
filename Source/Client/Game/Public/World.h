@@ -1,5 +1,4 @@
-#ifndef WORLD_H
-#define WORLD_H
+#pragma once
 
 #include "GameDefs.h"
 #include "InputComponent.h"
@@ -9,7 +8,7 @@
 #include "CircularBuffer.h"
 
 #include <array>
-#include <string>
+#include <string_view>
 
 namespace AM
 {
@@ -30,7 +29,7 @@ public:
 
     World();
 
-    void addEntity(const std::string& name, EntityID ID);
+    void addEntity(std::string_view name, EntityID entityID);
 
     void removeEntity(EntityID entityID);
 
@@ -72,5 +71,3 @@ public:
 
 } // namespace Client
 } // namespace AM
-
-#endif /* WORLD_H */

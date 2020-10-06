@@ -39,7 +39,7 @@ private:
      * @param entityID  The entity to serialize.
      * @return An offset where the data was stored in the builder.
      */
-    void serializeEntity(EntityID entityID, std::vector<Entity>& entities);
+    void fillEntityData(EntityID entityID, std::vector<Entity>& entities);
 
     Game& game;
     World& world;

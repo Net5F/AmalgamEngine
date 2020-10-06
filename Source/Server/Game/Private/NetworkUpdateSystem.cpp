@@ -37,7 +37,7 @@ void NetworkUpdateSystem::sendClientUpdates()
         }
     }
 
-    // Clean any dirty entities.
+    // Mark any dirty entities as clean
     for (EntityID dirtyEntity : dirtyEntities) {
         world.entityIsDirty[dirtyEntity] = false;
     }
@@ -54,7 +54,7 @@ void NetworkUpdateSystem::constructAndSendUpdate(EntityID entityID,
         for (EntityID i = 0; i < MAX_ENTITIES; ++i) {
             if ((i != entityID)
                   && (world.componentFlags[i] & ComponentFlag::Client)) {
-                serializeEntity(i, entityUpdate.entities);
+                fillEntityData(i, entityUpdate.entities);
             }
         }
         clientComponent.isInitialized = true;
@@ -62,7 +62,7 @@ void NetworkUpdateSystem::constructAndSendUpdate(EntityID entityID,
     else {
         // We only need to update the client with dirty entities.
         for (EntityID dirtyEntID : dirtyEntities) {
-            serializeEntity(dirtyEntID, entityUpdate.entities);
+            fillEntityData(dirtyEntID, entityUpdate.entities);
         }
     }
 
@@ -81,7 +81,7 @@ void NetworkUpdateSystem::constructAndSendUpdate(EntityID entityID,
             MESSAGE_HEADER_SIZE);
 
         // Fill the buffer with the appropriate message header.
-        MessageTools::fillMessageHeader(MessageType::ClientInputs, messageSize,
+        MessageTools::fillMessageHeader(MessageType::EntityUpdate, messageSize,
             messageBuffer, 0);
 
         // Send the message.
@@ -89,7 +89,7 @@ void NetworkUpdateSystem::constructAndSendUpdate(EntityID entityID,
     }
 }
 
-void NetworkUpdateSystem::serializeEntity(EntityID entityID, std::vector<Entity>& entities)
+void NetworkUpdateSystem::fillEntityData(EntityID entityID, std::vector<Entity>& entities)
 {
     /* Fill the message with the latest PositionComponent, MovementComponent,
        and InputComponent data. */

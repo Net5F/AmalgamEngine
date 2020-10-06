@@ -95,8 +95,9 @@ private:
 
     /**
      * Pushes a message into the appropriate queue, based on its contents.
+     * @pre A serialized message is in messageRecBuffer, starting at index 0.
      * @param messageType  The type of the received message to process.
-     * @param messageSize  The size to use in deserializing the message in messageRecBuffer.
+     * @param messageSize  The length in bytes of the message in messageRecBuffer.
      */
     void processReceivedMessage(MessageType messageType, Uint16 messageSize);
 

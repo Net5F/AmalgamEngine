@@ -163,10 +163,9 @@ void NpcMovementSystem::applyUpdateMessage(
 const std::shared_ptr<const EntityUpdate>& entityUpdate)
 {
     const std::vector<Entity>& entities = entityUpdate->entities;
-
     /* Use the data in the message to correct any NPCs that did change inputs. */
     for (auto entityIt = entities.begin(); entityIt != entities.end(); ++entityIt) {
-        // Skip the non-NPC.
+        // Skip the player (not an NPC).
         EntityID entityID = entityIt->id;
         if (entityID == world.playerID) {
             continue;
