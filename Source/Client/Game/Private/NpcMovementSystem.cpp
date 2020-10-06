@@ -190,6 +190,9 @@ const std::shared_ptr<const EntityUpdate>& entityUpdate)
             world.attachComponent(entityID, ComponentFlag::Movement);
             world.attachComponent(entityID, ComponentFlag::Position);
             world.attachComponent(entityID, ComponentFlag::Sprite);
+
+            // Init their old position so they don't lerp in from elsewhere.
+            world.oldPositions[entityID] = entityIt->positionComponent;
         }
 
         // Update the inputs.
