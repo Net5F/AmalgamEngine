@@ -66,6 +66,8 @@ void Game::connect()
     world.positions[player].y = connectionResponse->y;
     world.oldPositions[player].x = world.positions[player].x;
     world.oldPositions[player].y = world.positions[player].y;
+    world.movements[player].maxVelX = 250;
+    world.movements[player].maxVelY = 250;
     world.sprites[player].texturePtr = sprites;
     world.sprites[player].posInTexture = textureRect;
     world.sprites[player].width = 64;
@@ -91,6 +93,8 @@ void Game::fakeConnection()
     world.positions[player].y = 64;
     world.oldPositions[player].x = world.positions[player].x;
     world.oldPositions[player].y = world.positions[player].y;
+    world.movements[player].maxVelX = 250;
+    world.movements[player].maxVelY = 250;
     world.sprites[player].texturePtr = sprites;
     world.sprites[player].posInTexture = textureRect;
     world.sprites[player].width = 64;
