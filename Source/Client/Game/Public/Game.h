@@ -12,7 +12,6 @@ namespace AM
 {
 namespace Client
 {
-
 class Network;
 
 /**
@@ -51,8 +50,8 @@ public:
     World& getWorld();
 
     /**
-     * Returns how far we are temporally into our wait for the next iteration tick.
-     * e.g. .01 if we're 10% of the way to the next tick.
+     * Returns how far we are temporally into our wait for the next iteration
+     * tick. e.g. .01 if we're 10% of the way to the next tick.
      */
     double getIterationProgress();
 
@@ -61,7 +60,8 @@ public:
     std::atomic<bool> const* getExitRequestedPtr();
 
 private:
-    /** How long the game should wait for the server to send a connection response. */
+    /** How long the game should wait for the server to send a connection
+     * response. */
     static constexpr unsigned int CONNECTION_RESPONSE_WAIT_MS = 1000;
 
     /** An unreasonable amount of time for the game tick to be late by. */
@@ -92,7 +92,8 @@ private:
 
     /**
      * Turn false to signal that the main loop should end.
-     * The game processes the inputs, so it gets to be in charge of program lifespan.
+     * The game processes the inputs, so it gets to be in charge of program
+     * lifespan.
      */
     std::atomic<bool> exitRequested;
 };

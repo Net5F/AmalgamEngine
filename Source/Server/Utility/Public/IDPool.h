@@ -9,7 +9,6 @@ namespace AM
 {
 namespace Server
 {
-
 class IDPool
 {
 public:

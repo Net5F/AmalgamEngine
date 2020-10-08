@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 SocketSet::SocketSet(int maxSockets)
 : numSockets(0)
 {

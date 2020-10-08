@@ -16,8 +16,8 @@ TEST_CASE("TestMessageSorter")
     SECTION("Single message.")
     {
         // Push a message into tick 0.
-        messageSorter.push(0,
-            std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
+        messageSorter.push(
+            0, std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
 
         // Try to receive.
         std::queue<BinaryBufferPtr>& queue = messageSorter.startReceive(0);
@@ -35,8 +35,8 @@ TEST_CASE("TestMessageSorter")
     {
         // Push 10 messages into tick 0.
         for (Uint8 i = 0; i < 10; ++i) {
-            messageSorter.push(0,
-                std::make_unique<std::vector<Uint8>>(std::vector<Uint8>{i, i, i}));
+            messageSorter.push(0, std::make_unique<std::vector<Uint8>>(
+                                      std::vector<Uint8>{i, i, i}));
         }
 
         // Try to receive.
@@ -47,7 +47,8 @@ TEST_CASE("TestMessageSorter")
         while (!queue.empty()) {
             // Check that the message contents are correct.
             BinaryBufferPtr message = std::move(queue.front());
-            REQUIRE(*message == std::vector<Uint8>({counter, counter, counter}));
+            REQUIRE(*message
+                    == std::vector<Uint8>({counter, counter, counter}));
 
             // Prep for the next message.
             queue.pop();
@@ -67,8 +68,8 @@ TEST_CASE("TestMessageSorter")
         for (int tick : ticksToUse) {
             for (Uint8 i = 0; i < 10; ++i) {
                 temp++;
-                messageSorter.push(tick,
-                    std::make_unique<std::vector<Uint8>>(std::vector<Uint8>{i, i, i}));
+                messageSorter.push(tick, std::make_unique<std::vector<Uint8>>(
+                                             std::vector<Uint8>{i, i, i}));
             }
         }
 
@@ -80,7 +81,8 @@ TEST_CASE("TestMessageSorter")
         while (!(queue->empty())) {
             // Check that the message contents are correct.
             BinaryBufferPtr message = std::move(queue->front());
-            REQUIRE(*message == std::vector<Uint8>({counter, counter, counter}));
+            REQUIRE(*message
+                    == std::vector<Uint8>({counter, counter, counter}));
 
             // Prep for the next message.
             queue->pop();
@@ -108,7 +110,8 @@ TEST_CASE("TestMessageSorter")
             while (!(queue->empty())) {
                 // Check that the message contents are correct.
                 BinaryBufferPtr message = std::move(queue->front());
-                REQUIRE(*message == std::vector<Uint8>({counter, counter, counter}));
+                REQUIRE(*message
+                        == std::vector<Uint8>({counter, counter, counter}));
 
                 // Prep for the next message.
                 queue->pop();
@@ -130,12 +133,16 @@ TEST_CASE("TestMessageSorter")
         }
 
         // Check that we're on the correct tick and everything works.
-        REQUIRE(messageSorter.getCurrentTick() == (Server::MessageSorter::BUFFER_SIZE));
-        REQUIRE(!(messageSorter.isTickValid(Server::MessageSorter::BUFFER_SIZE - 1)));
-        REQUIRE((messageSorter.isTickValid(Server::MessageSorter::BUFFER_SIZE * 2 - 1)));
+        REQUIRE(messageSorter.getCurrentTick()
+                == (Server::MessageSorter::BUFFER_SIZE));
+        REQUIRE(!(
+            messageSorter.isTickValid(Server::MessageSorter::BUFFER_SIZE - 1)));
+        REQUIRE((messageSorter.isTickValid(
+            Server::MessageSorter::BUFFER_SIZE * 2 - 1)));
 
         // Push a message.
-        messageSorter.push(Server::MessageSorter::BUFFER_SIZE,
+        messageSorter.push(
+            Server::MessageSorter::BUFFER_SIZE,
             std::make_unique<std::vector<Uint8>>(std::vector<Uint8>{1, 2, 3}));
 
         // Try to receive.
@@ -148,7 +155,8 @@ TEST_CASE("TestMessageSorter")
 
         // Advance the tick.
         messageSorter.endReceive();
-        REQUIRE(!(messageSorter.isTickValid(Server::MessageSorter::BUFFER_SIZE)));
+        REQUIRE(
+            !(messageSorter.isTickValid(Server::MessageSorter::BUFFER_SIZE)));
     }
 
     SECTION("Wrap a lot.")
@@ -167,8 +175,8 @@ TEST_CASE("TestMessageSorter")
             tickNum + Server::MessageSorter::BUFFER_SIZE - 1)));
 
         // Push a message.
-        messageSorter.push(tickNum,
-            std::make_unique<std::vector<Uint8>>(std::vector<Uint8>{1, 2, 3}));
+        messageSorter.push(tickNum, std::make_unique<std::vector<Uint8>>(
+                                        std::vector<Uint8>{1, 2, 3}));
 
         // Try to receive.
         std::queue<BinaryBufferPtr>& queue
@@ -192,8 +200,8 @@ TEST_CASE("TestMessageSorter")
         }
 
         // Push a message into tick 7.
-        messageSorter.push(7,
-            std::make_unique<std::vector<Uint8>>(std::vector<Uint8>{1, 2, 3}));
+        messageSorter.push(7, std::make_unique<std::vector<Uint8>>(
+                                  std::vector<Uint8>{1, 2, 3}));
 
         // Advance to tick 7.
         for (unsigned int i = 2; i < 7; ++i) {
@@ -216,8 +224,8 @@ TEST_CASE("TestMessageSorter")
     SECTION("Large positive difference returns invalid.")
     {
         // Create a large diff.
-        Sint64 result = messageSorter.push(5000,
-            std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
+        Sint64 result = messageSorter.push(
+            5000, std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
 
         REQUIRE(result == 5000);
         REQUIRE(!(messageSorter.isTickValid(5000)));
@@ -231,8 +239,8 @@ TEST_CASE("TestMessageSorter")
             messageSorter.endReceive();
         }
 
-        Sint64 result = messageSorter.push(100,
-            std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
+        Sint64 result = messageSorter.push(
+            100, std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
 
         REQUIRE(result == -900);
         REQUIRE(!(messageSorter.isTickValid(100)));
@@ -241,16 +249,19 @@ TEST_CASE("TestMessageSorter")
     SECTION("Small positive difference returns invalid.")
     {
         // Create a small diff.
-        Sint64 result1 = messageSorter.push(0,
-            std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
+        Sint64 result1 = messageSorter.push(
+            0, std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
 
-        Sint64 result2 = messageSorter.push(Server::MessageSorter::BUFFER_SIZE - 1,
+        Sint64 result2 = messageSorter.push(
+            Server::MessageSorter::BUFFER_SIZE - 1,
             std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
 
         REQUIRE(result1 == 0);
         REQUIRE(result2 == (Server::MessageSorter::BUFFER_SIZE - 1));
-        REQUIRE(messageSorter.isTickValid(Server::MessageSorter::BUFFER_SIZE - 1));
-        REQUIRE(!(messageSorter.isTickValid(Server::MessageSorter::BUFFER_SIZE)));
+        REQUIRE(
+            messageSorter.isTickValid(Server::MessageSorter::BUFFER_SIZE - 1));
+        REQUIRE(
+            !(messageSorter.isTickValid(Server::MessageSorter::BUFFER_SIZE)));
     }
 
     SECTION("Small negative difference returns invalid.")
@@ -261,11 +272,11 @@ TEST_CASE("TestMessageSorter")
             messageSorter.endReceive();
         }
 
-        Sint64 result1 = messageSorter.push(1000,
-            std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
+        Sint64 result1 = messageSorter.push(
+            1000, std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
 
-        Sint64 result2 = messageSorter.push(1000 - 1,
-            std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
+        Sint64 result2 = messageSorter.push(
+            1000 - 1, std::make_unique<BinaryBuffer>(BinaryBuffer{1, 2, 3}));
 
         REQUIRE(result1 == 0);
         REQUIRE(result2 == -1);
@@ -276,26 +287,30 @@ TEST_CASE("TestMessageSorter")
     SECTION("Wrapping occurs at the expected point.")
     {
         // Push a message (we're going to leave it as a marker for wrapping.)
-        messageSorter.push(0,
-            std::make_unique<std::vector<Uint8>>(std::vector<Uint8>{1, 2, 3}));
+        messageSorter.push(0, std::make_unique<std::vector<Uint8>>(
+                                  std::vector<Uint8>{1, 2, 3}));
 
         // Advance until we're on the edge of wrapping.
-        for (unsigned int i = 0; i < (Server::MessageSorter::BUFFER_SIZE - 1); ++i) {
+        for (unsigned int i = 0; i < (Server::MessageSorter::BUFFER_SIZE - 1);
+             ++i) {
             messageSorter.startReceive(i);
             messageSorter.endReceive();
         }
-        REQUIRE(messageSorter.getCurrentTick() == (Server::MessageSorter::BUFFER_SIZE - 1));
+        REQUIRE(messageSorter.getCurrentTick()
+                == (Server::MessageSorter::BUFFER_SIZE - 1));
 
         // Try to receive, there should be nothing here.
-        std::queue<BinaryBufferPtr>* queue
-            = &(messageSorter.startReceive(Server::MessageSorter::BUFFER_SIZE - 1));
+        std::queue<BinaryBufferPtr>* queue = &(
+            messageSorter.startReceive(Server::MessageSorter::BUFFER_SIZE - 1));
         REQUIRE(queue->empty());
 
         // Advance over the edge of wrapping.
         messageSorter.endReceive();
 
-        // Try to receive, since we should have wrapped back to the original message.
-        queue = &(messageSorter.startReceive(Server::MessageSorter::BUFFER_SIZE));
+        // Try to receive, since we should have wrapped back to the original
+        // message.
+        queue
+            = &(messageSorter.startReceive(Server::MessageSorter::BUFFER_SIZE));
         REQUIRE(!(queue->empty()));
 
         BinaryBufferPtr message = std::move(queue->front());

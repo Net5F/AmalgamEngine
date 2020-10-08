@@ -70,8 +70,9 @@ int main(int argc, char* argv[])
             if (clientSocket != nullptr) {
                 int numAdded = SDLNet_TCP_AddSocket(clientSet, clientSocket);
                 if (numAdded < 1) {
-                    std::cout << "Error while adding socket: " << SDLNet_GetError()
-                    << std::endl;
+                    std::cout
+                        << "Error while adding socket: " << SDLNet_GetError()
+                        << std::endl;
                 }
                 else {
                     std::cout << "Connected new client." << std::endl;
@@ -80,13 +81,16 @@ int main(int argc, char* argv[])
         }
         else {
             // Wait for a message.
-            int result = SDLNet_TCP_Recv(clientSocket, &messageBuffer, NUM_BYTES);
+            int result
+                = SDLNet_TCP_Recv(clientSocket, &messageBuffer, NUM_BYTES);
             if (result == NUM_BYTES) {
                 // Got a message, loop it back.
-                int bytesSent = SDLNet_TCP_Send(clientSocket, &messageBuffer, NUM_BYTES);
+                int bytesSent
+                    = SDLNet_TCP_Send(clientSocket, &messageBuffer, NUM_BYTES);
                 if (bytesSent < static_cast<int>(NUM_BYTES)) {
-                    std::cout << "Failed to send all bytes. Cleaning up connection."
-                    << std::endl;
+                    std::cout
+                        << "Failed to send all bytes. Cleaning up connection."
+                        << std::endl;
                     SDLNet_TCP_DelSocket(clientSet, clientSocket);
                     SDLNet_TCP_Close(clientSocket);
                     clientSocket = nullptr;
@@ -94,14 +98,16 @@ int main(int argc, char* argv[])
             }
             else if (result <= 0) {
                 // Disconnected
-                std::cout << "Detected disconnect. Cleaning up connection." << std::endl;
+                std::cout << "Detected disconnect. Cleaning up connection."
+                          << std::endl;
                 SDLNet_TCP_DelSocket(clientSet, clientSocket);
                 SDLNet_TCP_Close(clientSocket);
                 clientSocket = nullptr;
             }
             else {
-                std::cout << "Didn't get all expected bytes. Cleaning up connection."
-                << std::endl;
+                std::cout
+                    << "Didn't get all expected bytes. Cleaning up connection."
+                    << std::endl;
                 SDLNet_TCP_DelSocket(clientSet, clientSocket);
                 SDLNet_TCP_Close(clientSocket);
                 clientSocket = nullptr;

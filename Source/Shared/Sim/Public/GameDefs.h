@@ -21,10 +21,8 @@ static constexpr unsigned int SCREEN_HEIGHT = 720;
 typedef Uint32 EntityID;
 
 /** Structs. */
-struct ComponentFlag
-{
-    enum FlagType
-    {
+struct ComponentFlag {
+    enum FlagType {
         Position = 1 << 0,
         Movement = 1 << 1,
         Input = 1 << 2,
@@ -33,16 +31,13 @@ struct ComponentFlag
     };
 };
 
-struct Position
-{
+struct Position {
     float x;
     float y;
 };
 
-struct Input
-{
-    enum Type
-    {
+struct Input {
+    enum Type {
         None,
         Up,
         Left,
@@ -52,11 +47,7 @@ struct Input
         NumTypes
     };
 
-    enum State : Uint8
-    {
-        Released,
-        Pressed
-    };
+    enum State : Uint8 { Released, Pressed };
 
     Type type = Type::None;
     State state = State::Released;

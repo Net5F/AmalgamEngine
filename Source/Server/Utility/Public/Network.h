@@ -14,13 +14,11 @@
 
 namespace AM
 {
-
 class Acceptor;
 class Peer;
 
 namespace Server
 {
-
 /**
  * Provides Network functionality in the format that the Game wants.
  */
@@ -42,8 +40,8 @@ public:
      *
      * @param networkID  The client to send the message to.
      * @param message  The message to send.
-     * @param messageTick  Optional, for messages that are associated with a tick number.
-     *                     Used to update the client's latestSentSimTick.
+     * @param messageTick  Optional, for messages that are associated with a
+     * tick number. Used to update the client's latestSentSimTick.
      */
     void send(NetworkID networkID, const BinaryBufferSharedPtr& message,
               Uint32 messageTick = 0);
@@ -51,15 +49,16 @@ public:
     /**
      * Deserializes and routes received client messages.
      *
-     * When a message with a tick number is received, updates the associated client's
-     * tick diff data.
+     * When a message with a tick number is received, updates the associated
+     * client's tick diff data.
      *
      * @param receiveQueue  A queue with messages to process.
      */
     void processReceivedMessages(std::queue<ClientMessage>& receiveQueue);
 
     /** Forwards to the inputMessageSorter's startReceive. */
-    std::queue<std::unique_ptr<ClientInputs>>& startReceiveInputMessages(Uint32 tickNum);
+    std::queue<std::unique_ptr<ClientInputs>>&
+        startReceiveInputMessages(Uint32 tickNum);
 
     /** Forward to the inputMessageSorter's endReceive. */
     void endReceiveInputMessages();
@@ -67,8 +66,9 @@ public:
     /** Initialize the tick timer. */
     void initTimer();
 
-    // Returning non-const refs because they need to be modified. Be careful not to attempt
-    // to re-assign the obtained ref (can't re-seat a reference once bound).
+    // Returning non-const refs because they need to be modified. Be careful not
+    // to attempt to re-assign the obtained ref (can't re-seat a reference once
+    // bound).
     ClientMap& getClientMap();
     std::shared_mutex& getClientMapMutex();
 
@@ -79,22 +79,24 @@ public:
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
     /**
-     * Allocates and fills a dynamic buffer with a message header and data payload.
+     * Allocates and fills a dynamic buffer with a message header and data
+     * payload.
      *
      * The first byte of the buffer will contain the message type as a Uint8.
      * The next 2 bytes will contain the message size as a Uint16.
      * The rest will have the data from the given messageBuffer copied into it.
      */
-    static BinaryBufferSharedPtr constructMessage(MessageType type, Uint8* messageBuffer,
+    static BinaryBufferSharedPtr constructMessage(MessageType type,
+                                                  Uint8* messageBuffer,
                                                   std::size_t size);
 
 private:
     /**
      * Tries to send any messages in each client's queue over the network.
-     * If a send fails, leaves the message at the front of the queue and moves on to the
-     * next client's queue.
-     * If there's no messages to send, sends a heartbeat instead, with a value that confirms
-     * that we've processed tick(s) with no changes to send.
+     * If a send fails, leaves the message at the front of the queue and moves
+     * on to the next client's queue. If there's no messages to send, sends a
+     * heartbeat instead, with a value that confirms that we've processed
+     * tick(s) with no changes to send.
      */
     void sendClientUpdates();
 

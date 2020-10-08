@@ -5,17 +5,19 @@
 
 namespace AM
 {
-
-std::unique_ptr<Peer> Peer::initiate(std::string serverIP, unsigned int serverPort)
+std::unique_ptr<Peer> Peer::initiate(std::string serverIP,
+                                     unsigned int serverPort)
 {
-    std::unique_ptr<TcpSocket> socket = std::make_unique<TcpSocket>(serverIP, serverPort);
+    std::unique_ptr<TcpSocket> socket
+        = std::make_unique<TcpSocket>(serverIP, serverPort);
 
     return std::make_unique<Peer>(std::move(socket));
 }
 
 Peer::Peer(std::unique_ptr<TcpSocket> inSocket)
 : socket(std::move(inSocket))
-, set(std::make_shared<SocketSet>(1)) // No set given, create a set of size 1 for this peer.
+, set(std::make_shared<SocketSet>(
+      1)) // No set given, create a set of size 1 for this peer.
 , bIsConnected(false)
 {
     set->addSocket(*socket);
@@ -52,8 +54,8 @@ NetworkResult Peer::send(const BinaryBufferSharedPtr& message)
 
     std::size_t messageSize = message->size();
     if (messageSize > MAX_MESSAGE_SIZE) {
-        DebugError("Tried to send a too-large message. Size: %u, max: %u", messageSize,
-            MAX_MESSAGE_SIZE);
+        DebugError("Tried to send a too-large message. Size: %u, max: %u",
+                   messageSize, MAX_MESSAGE_SIZE);
     }
 
     int bytesSent = socket->send(message->data(), messageSize);
@@ -79,8 +81,8 @@ NetworkResult Peer::send(const Uint8* messageBuffer, unsigned int messageSize)
     }
 
     if (messageSize > MAX_MESSAGE_SIZE) {
-        DebugError("Tried to send a too-large message. Size: %u, max: %u", messageSize,
-            MAX_MESSAGE_SIZE);
+        DebugError("Tried to send a too-large message. Size: %u, max: %u",
+                   messageSize, MAX_MESSAGE_SIZE);
     }
 
     int bytesSent = socket->send(messageBuffer, messageSize);
@@ -99,7 +101,8 @@ NetworkResult Peer::send(const Uint8* messageBuffer, unsigned int messageSize)
     }
 }
 
-NetworkResult Peer::receiveBytes(Uint8* messageBuffer, Uint16 numBytes, bool checkSockets)
+NetworkResult Peer::receiveBytes(Uint8* messageBuffer, Uint16 numBytes,
+                                 bool checkSockets)
 {
     if (!bIsConnected) {
         return NetworkResult::Disconnected;
@@ -123,9 +126,9 @@ NetworkResult Peer::receiveBytesWait(Uint8* messageBuffer, Uint16 numBytes)
         return NetworkResult::Disconnected;
     }
     else if (numBytes > MAX_MESSAGE_SIZE) {
-        DebugError(
-            "Tried to receive too large of a message. messageSize: %u, MaxSize: %u",
-            numBytes, MAX_MESSAGE_SIZE);
+        DebugError("Tried to receive too large of a message. messageSize: %u, "
+                   "MaxSize: %u",
+                   numBytes, MAX_MESSAGE_SIZE);
     }
 
     int result = socket->receive(messageBuffer, numBytes);
@@ -182,9 +185,9 @@ MessageResult Peer::receiveMessageWait(Uint8* messageBuffer)
     // The number of bytes in the upcoming message.
     Uint16 messageSize = _SDLNet_Read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_MESSAGE_SIZE) {
-        DebugError(
-            "Tried to receive too large of a message. messageSize: %u, MaxSize: %u",
-            messageSize, MAX_MESSAGE_SIZE);
+        DebugError("Tried to receive too large of a message. messageSize: %u, "
+                   "MaxSize: %u",
+                   messageSize, MAX_MESSAGE_SIZE);
     }
 
     result = socket->receive(messageBuffer, messageSize);
@@ -198,8 +201,8 @@ MessageResult Peer::receiveMessageWait(Uint8* messageBuffer)
                    "Need to add logic for this scenario.");
     }
 
-    MessageType messageType =
-        static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageType]);
+    MessageType messageType
+        = static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageType]);
     return {NetworkResult::Success, messageType, messageSize};
 }
 
@@ -225,9 +228,9 @@ MessageResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
     // The number of bytes in the upcoming message.
     Uint16 messageSize = _SDLNet_Read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_MESSAGE_SIZE) {
-        DebugError(
-            "Tried to receive too large of a message. messageSize: %u, MaxSize: %u",
-            messageSize, MAX_MESSAGE_SIZE);
+        DebugError("Tried to receive too large of a message. messageSize: %u, "
+                   "MaxSize: %u",
+                   messageSize, MAX_MESSAGE_SIZE);
     }
 
     messageBuffer = std::make_unique<BinaryBuffer>(messageSize);
@@ -242,10 +245,9 @@ MessageResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
                    "Need to add logic for this scenario.");
     }
 
-    MessageType messageType =
-        static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageType]);
+    MessageType messageType
+        = static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageType]);
     return {NetworkResult::Success, messageType, messageSize};
 }
 
 } // End namespace AM
-

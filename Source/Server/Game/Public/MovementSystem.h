@@ -8,7 +8,6 @@ namespace AM
 {
 namespace Server
 {
-
 class World;
 
 class MovementSystem
@@ -18,8 +17,8 @@ public:
 
     /**
      * Moves the all entities 1 sim tick into the future.
-     * Updates movement components based on input state, moves position components
-     * based on movement, updates sprites based on position.
+     * Updates movement components based on input state, moves position
+     * components based on movement, updates sprites based on position.
      */
     void processMovements();
 

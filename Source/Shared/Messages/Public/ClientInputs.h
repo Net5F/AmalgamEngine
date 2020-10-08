@@ -5,12 +5,10 @@
 
 namespace AM
 {
-
 /**
  * This struct represents a client's input states on a given tick.
  */
-struct ClientInputs
-{
+struct ClientInputs {
     /** This entity's sim ID. */
     Uint32 id = 0;
 
@@ -20,7 +18,7 @@ struct ClientInputs
     InputComponent inputComponent;
 };
 
-template <typename S>
+template<typename S>
 void serialize(S& serializer, ClientInputs& clientInputs)
 {
     serializer.value4b(clientInputs.id);

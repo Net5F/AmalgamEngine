@@ -8,14 +8,13 @@ namespace AM
 {
 namespace Server
 {
-
 class Game;
 class World;
 class Network;
 
 /**
- * This class is in charge of checking for data that needs to be sent, wrapping it
- * appropriately, and passing it to the Network's send queue.
+ * This class is in charge of checking for data that needs to be sent, wrapping
+ * it appropriately, and passing it to the Network's send queue.
  */
 class NetworkUpdateSystem
 {
@@ -29,10 +28,11 @@ public:
 
 private:
     /**
-     * Fills the given vector with the entities that must be sent to the given entityID
-     * on this tick.
+     * Fills the given vector with the entities that must be sent to the given
+     * entityID on this tick.
      */
-    void constructAndSendUpdate(EntityID entityID, std::vector<EntityID>& dirtyEntities);
+    void constructAndSendUpdate(EntityID entityID,
+                                std::vector<EntityID>& dirtyEntities);
 
     /**
      * Serializes the given entity's relevant world

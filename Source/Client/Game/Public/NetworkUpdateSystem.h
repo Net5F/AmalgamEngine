@@ -7,14 +7,13 @@ namespace AM
 {
 namespace Client
 {
-
 class Game;
 class World;
 class Network;
 
 /**
- * This class is in charge of checking for data that needs to be sent, wrapping it
- * appropriately, and passing it to the Network's send queue.
+ * This class is in charge of checking for data that needs to be sent, wrapping
+ * it appropriately, and passing it to the Network's send queue.
  */
 class NetworkUpdateSystem
 {

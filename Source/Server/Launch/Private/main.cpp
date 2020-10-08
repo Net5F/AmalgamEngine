@@ -28,9 +28,8 @@ int inputThread(std::atomic<bool>* exitRequested)
     return 0;
 }
 
-int main(int argc, char **argv)
-try
-{
+int main(int argc, char** argv)
+try {
     // SDL2 needs this signature for main, but we don't use the parameters.
     ignore(argc);
     ignore(argv);
@@ -65,13 +64,11 @@ try
     inputThreadObj.join();
 
     return 0;
-}
-catch (SDL2pp::Exception& e) {
+} catch (SDL2pp::Exception& e) {
     std::cerr << "Error in: " << e.GetSDLFunction() << std::endl;
     std::cerr << "  Reason:  " << e.GetSDLError() << std::endl;
     return 1;
-}
-catch (std::exception& e) {
+} catch (std::exception& e) {
     std::cerr << e.what() << std::endl;
     return 1;
 }

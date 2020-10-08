@@ -1,22 +1,21 @@
-#ifndef TIMER_H
-#define TIMER_H
+#pragma once
 
 #include "SDL_stdinc.h"
 
 namespace AM
 {
-
 /**
  * Uses the SDL high resolution timer to produce time deltas.
  */
-class Timer {
+class Timer
+{
 public:
     Timer();
 
     /**
      * Gets the time since the internally saved timestamp was last updated.
-     * Note: The first time you call this function, it will return a large number
-     *       (the time since SDL initialized the counter).
+     * Note: The first time you call this function, it will return a large
+     * number (the time since SDL initialized the counter).
      *
      * @param updateSavedTime  If true, updates the internal timestamp.
      * @return The time delta in seconds since the saved time was last updated.
@@ -40,5 +39,3 @@ private:
 };
 
 } // namespace AM
-
-#endif /* TIMER_H */

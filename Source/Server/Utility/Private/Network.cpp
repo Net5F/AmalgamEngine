@@ -12,7 +12,6 @@ namespace AM
 {
 namespace Server
 {
-
 Network::Network()
 : accumulatedTime(0.0)
 , clientHandler(*this)
@@ -34,11 +33,11 @@ void Network::tick()
         if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
             // If we've accumulated enough time to send more, something
             // happened to delay us.
-            // We still only want to send what's in the queue, but it's worth giving
-            // debug output that we detected this.
-            DebugInfo(
-                "Detected a delayed network send. accumulatedTime: %f. Setting to 0.",
-                accumulatedTime);
+            // We still only want to send what's in the queue, but it's worth
+            // giving debug output that we detected this.
+            DebugInfo("Detected a delayed network send. accumulatedTime: %f. "
+                      "Setting to 0.",
+                      accumulatedTime);
             accumulatedTime = 0;
         }
     }
@@ -64,20 +63,24 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
         ClientMessage& clientMessage = receiveQueue.front();
         if (clientMessage.message.messageType == MessageType::ClientInputs) {
             // Deserialize the message.
-            std::unique_ptr<ClientInputs> clientInputs = std::make_unique<ClientInputs>();
-            BinaryBufferPtr& messageBuffer = clientMessage.message.messageBuffer;
+            std::unique_ptr<ClientInputs> clientInputs
+                = std::make_unique<ClientInputs>();
+            BinaryBufferPtr& messageBuffer
+                = clientMessage.message.messageBuffer;
             MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
-                *clientInputs);
+                                      *clientInputs);
 
             // Push the message (blocks if the MessageSorter is locked).
-            // Save the tickNum since the move might be optimized before the access.
+            // Save the tickNum since the move might be optimized before the
+            // access.
             Uint32 messageTickNum = clientInputs->tickNum;
             MessageSorterBase::PushResult pushResult = inputMessageSorter.push(
                 messageTickNum, std::move(clientInputs));
 
             // Record the diff.
             if (pushResult.result == MessageSorterBase::ValidityResult::Valid) {
-                if (std::shared_ptr<Client> clientPtr = clientMessage.clientPtr.lock()) {
+                if (std::shared_ptr<Client> clientPtr
+                    = clientMessage.clientPtr.lock()) {
                     clientPtr->recordTickDiff(pushResult.diff);
                 }
                 // Else, the client was destructed so we don't care.
@@ -89,16 +92,19 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
         else if (clientMessage.message.messageType == MessageType::Heartbeat) {
             // Deserialize the message.
             Heartbeat heartbeat{};
-            BinaryBufferPtr& messageBuffer = clientMessage.message.messageBuffer;
-            MessageTools::deserialize(*messageBuffer, messageBuffer->size(), heartbeat);
+            BinaryBufferPtr& messageBuffer
+                = clientMessage.message.messageBuffer;
+            MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
+                                      heartbeat);
 
             // Record the diff.
-            if (std::shared_ptr<Client> clientPtr = clientMessage.clientPtr.lock()) {
-                // Calc how far ahead or behind the message's tick is in relation
-                // to the currentTick.
-                // Using the game's currentTick should be accurate since we didn't have
-                // to lock anything.
-                clientPtr->recordTickDiff(static_cast<Sint64>(heartbeat.tickNum)
+            if (std::shared_ptr<Client> clientPtr
+                = clientMessage.clientPtr.lock()) {
+                // Calc how far ahead or behind the message's tick is in
+                // relation to the currentTick. Using the game's currentTick
+                // should be accurate since we didn't have to lock anything.
+                clientPtr->recordTickDiff(
+                    static_cast<Sint64>(heartbeat.tickNum)
                     - static_cast<Sint64>(*currentTickPtr));
             }
         }
@@ -110,8 +116,8 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
     }
 }
 
-std::queue<std::unique_ptr<ClientInputs>>& Network::startReceiveInputMessages(
-Uint32 tickNum)
+std::queue<std::unique_ptr<ClientInputs>>&
+    Network::startReceiveInputMessages(Uint32 tickNum)
 {
     return inputMessageSorter.startReceive(tickNum);
 }
@@ -155,22 +161,25 @@ moodycamel::ReaderWriterQueue<NetworkID>& Network::getDisconnectEventQueue()
     return disconnectEventQueue;
 }
 
-void Network::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr)
+void Network::registerCurrentTickPtr(
+    const std::atomic<Uint32>* inCurrentTickPtr)
 {
     currentTickPtr = inCurrentTickPtr;
 }
 
-BinaryBufferSharedPtr Network::constructMessage(MessageType type, Uint8* messageBuffer,
+BinaryBufferSharedPtr Network::constructMessage(MessageType type,
+                                                Uint8* messageBuffer,
                                                 std::size_t size)
 {
     if ((MESSAGE_HEADER_SIZE + size) > Peer::MAX_MESSAGE_SIZE) {
         DebugError("Tried to send a too-large message. Size: %u, max: %u", size,
-            Peer::MAX_MESSAGE_SIZE);
+                   Peer::MAX_MESSAGE_SIZE);
     }
 
-    // Allocate a buffer that can hold the Uint8 type, Uint16 size, and the payload.
-    BinaryBufferSharedPtr dynamicBuffer = std::make_shared<std::vector<Uint8>>(
-        MESSAGE_HEADER_SIZE + size);
+    // Allocate a buffer that can hold the Uint8 type, Uint16 size, and the
+    // payload.
+    BinaryBufferSharedPtr dynamicBuffer
+        = std::make_shared<std::vector<Uint8>>(MESSAGE_HEADER_SIZE + size);
 
     // Copy the type into the buffer.
     dynamicBuffer->at(0) = static_cast<Uint8>(type);
@@ -180,7 +189,7 @@ BinaryBufferSharedPtr Network::constructMessage(MessageType type, Uint8* message
 
     // Copy the message into the buffer.
     std::copy(messageBuffer, (messageBuffer + size),
-        MESSAGE_HEADER_SIZE + dynamicBuffer->data());
+              MESSAGE_HEADER_SIZE + dynamicBuffer->data());
 
     return dynamicBuffer;
 }

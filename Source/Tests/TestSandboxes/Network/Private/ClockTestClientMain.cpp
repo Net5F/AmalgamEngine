@@ -9,7 +9,7 @@
 #include "Debug.h"
 #include "Ignore.h"
 
-//const std::string SERVER_IP = "127.0.0.1";
+// const std::string SERVER_IP = "127.0.0.1";
 const std::string SERVER_IP = "45.79.37.63";
 static constexpr unsigned int SERVER_PORT = 41499;
 
@@ -52,9 +52,10 @@ int main(int argc, char* argv[])
         SDL_Delay(1);
     }
 
-    /* Send the start byte, wait for the desired time, then send the end byte. */
+    /* Send the start byte, wait for the desired time, then send the end byte.
+     */
     // Send the start byte.
-    std::array<Uint8, 1> sendBuf = { 5 };
+    std::array<Uint8, 1> sendBuf = {5};
     int bytesSent = SDLNet_TCP_Send(serverSocket, &sendBuf, 1);
     if (bytesSent < 1) {
         DebugInfo("Failed to send all bytes.");

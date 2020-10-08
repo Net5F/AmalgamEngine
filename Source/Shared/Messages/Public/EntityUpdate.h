@@ -8,12 +8,10 @@
 
 namespace AM
 {
-
 /**
  * This struct represents all new entity data for a single sim tick.
  */
-struct EntityUpdate
-{
+struct EntityUpdate {
     /** The tick that this EntityUpdate corresponds to. */
     Uint32 tickNum;
 
@@ -21,12 +19,12 @@ struct EntityUpdate
     std::vector<Entity> entities;
 };
 
-template <typename S>
+template<typename S>
 void serialize(S& serializer, EntityUpdate& entityUpdate)
 {
     serializer.value4b(entityUpdate.tickNum);
     serializer.container(entityUpdate.entities,
-        static_cast<std::size_t>(MAX_ENTITIES));
+                         static_cast<std::size_t>(MAX_ENTITIES));
 }
 
 } // End namespace AM

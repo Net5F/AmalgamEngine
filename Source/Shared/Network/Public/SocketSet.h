@@ -6,7 +6,6 @@
 
 namespace AM
 {
-
 class TcpSocket;
 
 /**

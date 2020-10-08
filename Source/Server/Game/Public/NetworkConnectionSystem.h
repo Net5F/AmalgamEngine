@@ -7,7 +7,6 @@ namespace AM
 {
 namespace Server
 {
-
 class Game;
 class World;
 class Network;
@@ -38,8 +37,10 @@ private:
     /**
      * Sends a connection response to the client with the given networkID.
      *
-     * @param networkID  The client's network ID to send the connection response to.
-     * @param newEntityID  The entity ID that the Sim associated with the client.
+     * @param networkID  The client's network ID to send the connection response
+     * to.
+     * @param newEntityID  The entity ID that the Sim associated with the
+     * client.
      */
     void sendConnectionResponse(NetworkID networkID, EntityID newEntityID,
                                 float spawnX, float spawnY);

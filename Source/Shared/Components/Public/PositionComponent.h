@@ -2,13 +2,11 @@
 
 namespace AM
 {
-
 /**
  * Represents an entity's position in the world.
  * When used for rendering a sprite, represents the top left.
  */
-struct PositionComponent
-{
+struct PositionComponent {
 public:
     //--------------------------------------------------------------------------
     // Replicated data
@@ -18,7 +16,7 @@ public:
     float y = 0;
 };
 
-template <typename S>
+template<typename S>
 void serialize(S& serializer, PositionComponent& positionComponent)
 {
     serializer.value4b(positionComponent.x);

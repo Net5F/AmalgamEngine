@@ -6,7 +6,6 @@ namespace AM
 {
 namespace Server
 {
-
 Game::Game(Network& inNetwork)
 : world()
 , network(inNetwork)
@@ -40,22 +39,25 @@ void Game::tick()
         /* Prepare for the next tick. */
         accumulatedTime -= GAME_TICK_TIMESTEP_S;
         if (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
-            DebugInfo(
-                "Detected a request for multiple game ticks in the same frame. Game tick "
-                "must have been massively delayed. Game tick was delayed by: %.8fs.",
-                accumulatedTime);
+            DebugInfo("Detected a request for multiple game ticks in the same "
+                      "frame. Game tick "
+                      "must have been massively delayed. Game tick was delayed "
+                      "by: %.8fs.",
+                      accumulatedTime);
         }
         else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
-            // Game missed its ideal call time, could be our issue or general system slowness.
-            DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
-                accumulatedTime);
+            // Game missed its ideal call time, could be our issue or general
+            // system slowness.
+            DebugInfo("Detected a delayed game tick. Game tick was delayed by: "
+                      "%.8fs.",
+                      accumulatedTime);
         }
 
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);
         if (executionTime > GAME_TICK_TIMESTEP_S) {
             DebugInfo("Overran our sim iteration time. executionTime: %.8f",
-                executionTime);
+                      executionTime);
         }
 
         currentTick++;

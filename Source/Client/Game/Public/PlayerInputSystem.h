@@ -9,7 +9,6 @@ namespace AM
 {
 namespace Client
 {
-
 class Game;
 class World;
 class Network;

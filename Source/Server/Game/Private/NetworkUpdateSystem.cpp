@@ -10,8 +10,8 @@ namespace AM
 {
 namespace Server
 {
-
-NetworkUpdateSystem::NetworkUpdateSystem(Game& inGame, World& inWorld, Network& inNetwork)
+NetworkUpdateSystem::NetworkUpdateSystem(Game& inGame, World& inWorld,
+                                         Network& inNetwork)
 : game(inGame)
 , world(inWorld)
 , network(inNetwork)
@@ -20,7 +20,8 @@ NetworkUpdateSystem::NetworkUpdateSystem(Game& inGame, World& inWorld, Network& 
 
 void NetworkUpdateSystem::sendClientUpdates()
 {
-    // Collect the dirty entities so we don't need to re-find them for every client.
+    // Collect the dirty entities so we don't need to re-find them for every
+    // client.
     std::vector<EntityID> dirtyEntities;
     dirtyEntities.reserve(MAX_ENTITIES);
     for (EntityID i = 0; i < MAX_ENTITIES; ++i) {
@@ -43,8 +44,8 @@ void NetworkUpdateSystem::sendClientUpdates()
     }
 }
 
-void NetworkUpdateSystem::constructAndSendUpdate(EntityID entityID,
-                                                 std::vector<EntityID>& dirtyEntities)
+void NetworkUpdateSystem::constructAndSendUpdate(
+    EntityID entityID, std::vector<EntityID>& dirtyEntities)
 {
     /** Fill the vector of entities to send. */
     EntityUpdate entityUpdate{};
@@ -53,7 +54,7 @@ void NetworkUpdateSystem::constructAndSendUpdate(EntityID entityID,
         // New client, we need to send it all relevant entities.
         for (EntityID i = 0; i < MAX_ENTITIES; ++i) {
             if ((i != entityID)
-                  && (world.componentFlags[i] & ComponentFlag::Client)) {
+                && (world.componentFlags[i] & ComponentFlag::Client)) {
                 fillEntityData(i, entityUpdate.entities);
             }
         }
@@ -75,21 +76,23 @@ void NetworkUpdateSystem::constructAndSendUpdate(EntityID entityID,
         entityUpdate.tickNum = game.getCurrentTick();
 
         // Serialize the EntityUpdate.
-        BinaryBufferSharedPtr messageBuffer = std::make_shared<BinaryBuffer>(
-            Peer::MAX_MESSAGE_SIZE);
-        std::size_t messageSize = MessageTools::serialize(*messageBuffer, entityUpdate,
-            MESSAGE_HEADER_SIZE);
+        BinaryBufferSharedPtr messageBuffer
+            = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
+        std::size_t messageSize = MessageTools::serialize(
+            *messageBuffer, entityUpdate, MESSAGE_HEADER_SIZE);
 
         // Fill the buffer with the appropriate message header.
         MessageTools::fillMessageHeader(MessageType::EntityUpdate, messageSize,
-            messageBuffer, 0);
+                                        messageBuffer, 0);
 
         // Send the message.
-        network.send(clientComponent.networkID, messageBuffer, entityUpdate.tickNum);
+        network.send(clientComponent.networkID, messageBuffer,
+                     entityUpdate.tickNum);
     }
 }
 
-void NetworkUpdateSystem::fillEntityData(EntityID entityID, std::vector<Entity>& entities)
+void NetworkUpdateSystem::fillEntityData(EntityID entityID,
+                                         std::vector<Entity>& entities)
 {
     /* Fill the message with the latest PositionComponent, MovementComponent,
        and InputComponent data. */
@@ -103,8 +106,9 @@ void NetworkUpdateSystem::fillEntityData(EntityID entityID, std::vector<Entity>&
     // TEMP - Doing this until C++20 where we can emplace brace initializers.
     entities.push_back({entityID, flags, input, position, movement});
 
-//    DebugInfo("Sending: (%f, %f), (%f, %f)", position.x, position.y, movement.velX,
-//        movement.velY);
+    //    DebugInfo("Sending: (%f, %f), (%f, %f)", position.x, position.y,
+    //    movement.velX,
+    //        movement.velY);
 }
 
 } // namespace Server

@@ -4,16 +4,15 @@
 
 namespace AM
 {
-
 /**
  * This struct represents a connection response from the server to the client.
  */
-struct ConnectionResponse
-{
+struct ConnectionResponse {
     /** The tick that the server is telling the client to assume. */
     Uint32 tickNum = 0;
 
-    /** The sim ID that the server has assigned to this client's player entity. */
+    /** The sim ID that the server has assigned to this client's player entity.
+     */
     Uint32 entityID = 0;
 
     /** Position (spawn point or last logout). */
@@ -21,7 +20,7 @@ struct ConnectionResponse
     float y = 0;
 };
 
-template <typename S>
+template<typename S>
 void serialize(S& serializer, ConnectionResponse& connectionResponse)
 {
     serializer.value4b(connectionResponse.tickNum);

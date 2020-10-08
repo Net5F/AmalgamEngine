@@ -8,7 +8,7 @@
 #include "Timer.h"
 #include "Ignore.h"
 
-//const std::string SERVER_IP = "127.0.0.1";
+// const std::string SERVER_IP = "127.0.0.1";
 const std::string SERVER_IP = "45.79.37.63";
 static constexpr unsigned int SERVER_PORT = 41499;
 static constexpr unsigned int NUM_BYTES = 16;
@@ -82,8 +82,7 @@ int main(int argc, char* argv[])
             return 7;
         }
         else {
-            std::cout << "Didn't get all expected bytes."
-            << std::endl;
+            std::cout << "Didn't get all expected bytes." << std::endl;
             return 8;
         }
     }

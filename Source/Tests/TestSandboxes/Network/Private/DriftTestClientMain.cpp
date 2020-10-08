@@ -10,7 +10,7 @@
 #include "Ignore.h"
 
 const std::string SERVER_IP = "127.0.0.1";
-//const std::string SERVER_IP = "45.79.37.63";
+// const std::string SERVER_IP = "45.79.37.63";
 static constexpr unsigned int SERVER_PORT = 41499;
 
 static constexpr double TEST_GAME_TICK_INTERVAL_S = 1 / 30.0;
@@ -21,7 +21,8 @@ static constexpr unsigned int NUM_BYTES = 55;
 using namespace AM;
 
 /** Waits for the server to send its current tick. */
-bool waitForServer(TCPsocket& serverSocket, std::atomic<Uint32>& currentTick) {
+bool waitForServer(TCPsocket& serverSocket, std::atomic<Uint32>& currentTick)
+{
     std::array<Uint8, sizeof(Uint32)> tickBuf = {};
 
     bool messageReceived = false;
@@ -85,8 +86,8 @@ int main(int argc, char* argv[])
     Debug::registerCurrentTickPtr(&currentTick);
 
     /* Prepare the data */
-    // The data to send. The first 4 bytes will be replaced with the current tick while
-    // running, the rest is filler.
+    // The data to send. The first 4 bytes will be replaced with the current
+    // tick while running, the rest is filler.
     std::array<Uint8, NUM_BYTES> dataBuffer = {};
     for (unsigned int i = 0; i < NUM_BYTES; ++i) {
         dataBuffer[i] = NUM_BYTES % UINT8_MAX;
@@ -110,7 +111,8 @@ int main(int argc, char* argv[])
         while (accumulatedTime >= TEST_GAME_TICK_INTERVAL_S) {
             /* Send our message. */
             _SDLNet_Write32(currentTick, &dataBuffer);
-            int bytesSent = SDLNet_TCP_Send(serverSocket, &dataBuffer, NUM_BYTES);
+            int bytesSent
+                = SDLNet_TCP_Send(serverSocket, &dataBuffer, NUM_BYTES);
             if (bytesSent < static_cast<int>(NUM_BYTES)) {
                 DebugInfo("Failed to send all bytes.");
                 return 5;
@@ -119,16 +121,18 @@ int main(int argc, char* argv[])
             /* Prepare for the next tick. */
             accumulatedTime -= TEST_GAME_TICK_INTERVAL_S;
             if (accumulatedTime >= TEST_GAME_TICK_INTERVAL_S) {
-                DebugInfo(
-                    "Detected a request for multiple game ticks in the same frame. Game tick "
-                    "must have been massively delayed. Game tick was delayed by: %.8fs.",
-                    accumulatedTime);
+                DebugInfo("Detected a request for multiple game ticks in the "
+                          "same frame. Game tick "
+                          "must have been massively delayed. Game tick was "
+                          "delayed by: %.8fs.",
+                          accumulatedTime);
             }
             else if (accumulatedTime >= TEST_GAME_DELAYED_TIME_S) {
-                // Game missed its ideal call time, could be our issue or general
-                // system slowness.
-                DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
-                    accumulatedTime);
+                // Game missed its ideal call time, could be our issue or
+                // general system slowness.
+                DebugInfo("Detected a delayed game tick. Game tick was delayed "
+                          "by: %.8fs.",
+                          accumulatedTime);
             }
 
             currentTick++;

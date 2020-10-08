@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
             }
             else {
                 DebugInfo("Received end byte. Time passed: %.8f",
-                    timer.getDeltaSeconds(false));
+                          timer.getDeltaSeconds(false));
                 waitingForEnd = false;
             }
         }

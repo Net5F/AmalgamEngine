@@ -11,14 +11,16 @@ namespace AM
 {
 namespace Server
 {
-
 NetworkConnectionSystem::NetworkConnectionSystem(Game& inGame, World& inWorld,
                                                  Network& inNetwork)
-: game(inGame), world(inWorld), network(inNetwork)
+: game(inGame)
+, world(inWorld)
+, network(inNetwork)
 {
 }
 
-void NetworkConnectionSystem::processConnectionEvents() {
+void NetworkConnectionSystem::processConnectionEvents()
+{
     processConnectEvents();
 
     processDisconnectEvents();
@@ -26,14 +28,15 @@ void NetworkConnectionSystem::processConnectionEvents() {
 
 void NetworkConnectionSystem::processConnectEvents()
 {
-    moodycamel::ReaderWriterQueue<NetworkID>& connectEventQueue =
-        network.getConnectEventQueue();
+    moodycamel::ReaderWriterQueue<NetworkID>& connectEventQueue
+        = network.getConnectEventQueue();
 
     // Add all newly connected client's entities to the sim.
     for (unsigned int i = 0; i < connectEventQueue.size_approx(); ++i) {
         NetworkID clientNetworkID = 0;
         if (!(connectEventQueue.try_dequeue(clientNetworkID))) {
-            DebugError("Expected element in connectEventQueue but dequeue failed.");
+            DebugError(
+                "Expected element in connectEventQueue but dequeue failed.");
         }
 
         // Build their entity.
@@ -50,8 +53,8 @@ void NetworkConnectionSystem::processConnectEvents()
         world.attachComponent(newEntityID, ComponentFlag::Sprite);
         world.attachComponent(newEntityID, ComponentFlag::Client);
 
-        DebugInfo("Constructed entity with netID: %u, entityID: %u", clientNetworkID,
-            newEntityID);
+        DebugInfo("Constructed entity with netID: %u, entityID: %u",
+                  clientNetworkID, newEntityID);
 
         // Build and send the response.
         sendConnectionResponse(clientNetworkID, newEntityID, spawnPoint.x,
@@ -61,56 +64,61 @@ void NetworkConnectionSystem::processConnectEvents()
 
 void NetworkConnectionSystem::processDisconnectEvents()
 {
-    moodycamel::ReaderWriterQueue<NetworkID>& disconnectEventQueue =
-        network.getDisconnectEventQueue();
+    moodycamel::ReaderWriterQueue<NetworkID>& disconnectEventQueue
+        = network.getDisconnectEventQueue();
 
     // Remove all newly disconnected client's entities from the sim.
     for (unsigned int i = 0; i < disconnectEventQueue.size_approx(); ++i) {
         NetworkID disconnectedClientID = 0;
         if (!(disconnectEventQueue.try_dequeue(disconnectedClientID))) {
-            DebugError("Expected element in disconnectEventQueue but dequeue failed.");
+            DebugError(
+                "Expected element in disconnectEventQueue but dequeue failed.");
         }
 
-        // Iterate through the connected clients, bailing early if we find the one we want.
+        // Iterate through the connected clients, bailing early if we find the
+        // one we want.
         bool entityFound = false;
         auto it = world.clients.begin();
         while ((it != world.clients.end()) && !entityFound) {
             if (it->second.networkID == disconnectedClientID) {
-                // Found the ClientComponent we expected, remove the entity from everything.
+                // Found the ClientComponent we expected, remove the entity from
+                // everything.
                 entityFound = true;
 
                 world.removeEntity(it->first);
                 DebugInfo("Erased entity with netID: %u", it->first);
                 world.clients.erase(it);
-            } else {
+            }
+            else {
                 ++it;
             }
         }
 
         if (!entityFound) {
-            DebugError(
-                "Failed to find entity with netID: %u while erasing.", disconnectedClientID);
+            DebugError("Failed to find entity with netID: %u while erasing.",
+                       disconnectedClientID);
         }
     }
 }
 
 void NetworkConnectionSystem::sendConnectionResponse(NetworkID networkID,
-                                                     EntityID newEntityID, float spawnX,
-                                                     float spawnY)
+                                                     EntityID newEntityID,
+                                                     float spawnX, float spawnY)
 {
     // Fill in their ID and spawn point.
     Uint32 currentTick = game.getCurrentTick();
-    ConnectionResponse connectionResponse{currentTick, newEntityID, spawnX, spawnY};
+    ConnectionResponse connectionResponse{currentTick, newEntityID, spawnX,
+                                          spawnY};
 
     // Serialize the connection response message.
-    BinaryBufferSharedPtr messageBuffer = std::make_shared<BinaryBuffer>(
-        Peer::MAX_MESSAGE_SIZE);
-    std::size_t messageSize = MessageTools::serialize(*messageBuffer, connectionResponse,
-        MESSAGE_HEADER_SIZE);
+    BinaryBufferSharedPtr messageBuffer
+        = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
+    std::size_t messageSize = MessageTools::serialize(
+        *messageBuffer, connectionResponse, MESSAGE_HEADER_SIZE);
 
     // Fill the buffer with the appropriate message header.
-    MessageTools::fillMessageHeader(MessageType::ConnectionResponse, messageSize,
-        messageBuffer, 0);
+    MessageTools::fillMessageHeader(MessageType::ConnectionResponse,
+                                    messageSize, messageBuffer, 0);
 
     // Send the message.
     network.send(networkID, messageBuffer, currentTick);

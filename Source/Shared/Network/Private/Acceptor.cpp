@@ -3,7 +3,6 @@
 
 namespace AM
 {
-
 Acceptor::Acceptor(Uint16 port, const std::shared_ptr<SocketSet>& inClientSet)
 : socket(port)
 , listenerSet(1)
@@ -12,9 +11,7 @@ Acceptor::Acceptor(Uint16 port, const std::shared_ptr<SocketSet>& inClientSet)
     listenerSet.addSocket(socket);
 }
 
-Acceptor::~Acceptor()
-{
-}
+Acceptor::~Acceptor() {}
 
 std::unique_ptr<Peer> Acceptor::accept()
 {

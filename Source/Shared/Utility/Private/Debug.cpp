@@ -6,7 +6,6 @@
 
 namespace AM
 {
-
 const std::atomic<Uint32>* Debug::currentTickPtr = nullptr;
 
 void Debug::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr)
@@ -50,8 +49,8 @@ void Debug::error(const char* fileName, int line, const char* expression, ...)
     std::va_list arg;
     va_start(arg, expression);
 
-    std::printf(" Error at file: %s, line: %d, during tick: %u\n", fileName, line,
-        currentTick);
+    std::printf(" Error at file: %s, line: %d, during tick: %u\n", fileName,
+                line, currentTick);
     std::vprintf(expression, arg);
     std::printf("\n");
     std::fflush(stdout);
@@ -65,4 +64,4 @@ void Debug::error(const char* fileName, int line, const char* expression, ...)
 #endif // ENABLE_DEBUG_INFO
 }
 
-}
+} // namespace AM

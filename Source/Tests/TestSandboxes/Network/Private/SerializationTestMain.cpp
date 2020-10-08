@@ -16,8 +16,8 @@ int main()
         // Translate the Input::State enum to fb::InputState.
         fbInputStates[i] = fb::InputState::Pressed;
     }
-    flatbuffers::Offset<flatbuffers::Vector<fb::InputState>> inputVector =
-        builder.CreateVector(fbInputStates, numInputs);
+    flatbuffers::Offset<flatbuffers::Vector<fb::InputState>> inputVector
+        = builder.CreateVector(fbInputStates, numInputs);
 
     // Build the entities.
     std::vector<flatbuffers::Offset<fb::Entity>> entityVector;
@@ -39,8 +39,8 @@ int main()
 
     // Wrap the Entities in an EntityUpdate.
     auto serializedEntities = builder.CreateVector(entityVector);
-    flatbuffers::Offset<fb::EntityUpdate> entityUpdate =
-        fb::CreateEntityUpdate(builder, serializedEntities);
+    flatbuffers::Offset<fb::EntityUpdate> entityUpdate
+        = fb::CreateEntityUpdate(builder, serializedEntities);
 
     // Get the size.
     builder.Finish(entityUpdate);

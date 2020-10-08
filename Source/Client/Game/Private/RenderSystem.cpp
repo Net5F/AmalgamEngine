@@ -8,7 +8,6 @@ namespace AM
 {
 namespace Client
 {
-
 RenderSystem::RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame,
                            SDL2pp::Window& window)
 : renderer(inRenderer)
@@ -34,18 +33,22 @@ void RenderSystem::render()
             if (world.entityExists(entityID)) {
                 const SpriteComponent& sprite = world.sprites[entityID];
                 const PositionComponent& position = world.positions[entityID];
-                const PositionComponent& oldPosition = world.oldPositions[entityID];
+                const PositionComponent& oldPosition
+                    = world.oldPositions[entityID];
 
                 // Lerp'd position based on how far we are between game ticks.
-                const double interpX = (position.x * alpha) + (oldPosition.x * (1.0 - alpha));
-                const double interpY = (position.y * alpha) + (oldPosition.y * (1.0 - alpha));
+                const double interpX
+                    = (position.x * alpha) + (oldPosition.x * (1.0 - alpha));
+                const double interpY
+                    = (position.y * alpha) + (oldPosition.y * (1.0 - alpha));
                 const int lerpX = static_cast<int>(std::floor(interpX));
                 const int lerpY = static_cast<int>(std::floor(interpY));
-                SDL2pp::Rect spriteWorldData = { lerpX, lerpY, sprite.width,
-                        sprite.height };
+                SDL2pp::Rect spriteWorldData
+                    = {lerpX, lerpY, sprite.width, sprite.height};
 
                 renderer.Copy(*(world.sprites[entityID].texturePtr),
-                    world.sprites[entityID].posInTexture, spriteWorldData);
+                              world.sprites[entityID].posInTexture,
+                              spriteWorldData);
             }
         }
 
@@ -55,12 +58,12 @@ void RenderSystem::render()
         if (accumulatedTime >= RENDER_INTERVAL_S) {
             // If we've accumulated enough time to render again, something
             // happened (probably a window event that stopped app execution.)
-            // We still only want to render the latest data, but it's worth giving
-            // debug output that we detected this.
-            DebugInfo(
-                "Detected a request for two renders in the same frame. Render must have "
-                "been massively delayed. Render was delayed by: %.8fs. Setting to 0.",
-                accumulatedTime);
+            // We still only want to render the latest data, but it's worth
+            // giving debug output that we detected this.
+            DebugInfo("Detected a request for two renders in the same frame. "
+                      "Render must have been massively delayed. Render was "
+                      "delayed by: %.8fs. Setting to 0.",
+                      accumulatedTime);
             accumulatedTime = 0;
         }
     }

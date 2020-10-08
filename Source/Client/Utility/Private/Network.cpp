@@ -10,7 +10,6 @@ namespace AM
 {
 namespace Client
 {
-
 Network::Network()
 : accumulatedTime(0.0)
 , server(nullptr)
@@ -67,11 +66,11 @@ void Network::tick()
         if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
             // If we've accumulated enough time to send more, something
             // happened to delay us.
-            // We still only want to send what's in the queue, but it's worth giving
-            // debug output that we detected this.
-            DebugInfo(
-                "Detected a delayed network tick. accumulatedTime: %f. Setting to 0.",
-                accumulatedTime);
+            // We still only want to send what's in the queue, but it's worth
+            // giving debug output that we detected this.
+            DebugInfo("Detected a delayed network tick. accumulatedTime: %f. "
+                      "Setting to 0.",
+                      accumulatedTime);
             accumulatedTime = 0;
         }
     }
@@ -97,7 +96,8 @@ void Network::send(const BinaryBufferSharedPtr& message)
     }
 }
 
-std::unique_ptr<ConnectionResponse> Network::receiveConnectionResponse(Uint64 timeoutMs)
+std::unique_ptr<ConnectionResponse>
+    Network::receiveConnectionResponse(Uint64 timeoutMs)
 {
     std::unique_ptr<ConnectionResponse> message = nullptr;
     if (timeoutMs == 0) {
@@ -110,7 +110,8 @@ std::unique_ptr<ConnectionResponse> Network::receiveConnectionResponse(Uint64 ti
     return message;
 }
 
-std::shared_ptr<const EntityUpdate> Network::receivePlayerUpdate(Uint64 timeoutMs)
+std::shared_ptr<const EntityUpdate>
+    Network::receivePlayerUpdate(Uint64 timeoutMs)
 {
     std::shared_ptr<const EntityUpdate> message = nullptr;
     if (timeoutMs == 0) {
@@ -131,7 +132,8 @@ NpcReceiveResult Network::receiveNpcUpdate(Uint64 timeoutMs)
         messageWasReceived = npcUpdateQueue.try_dequeue(message);
     }
     else {
-        messageWasReceived = npcUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
+        messageWasReceived
+            = npcUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
     }
 
     if (!messageWasReceived) {
@@ -146,14 +148,15 @@ int Network::pollForMessages()
 {
     while (!exitRequested) {
         // Wait for a server header.
-        NetworkResult headerResult = server->receiveBytesWait(headerRecBuffer.data(),
-            SERVER_HEADER_SIZE);
+        NetworkResult headerResult = server->receiveBytesWait(
+            headerRecBuffer.data(), SERVER_HEADER_SIZE);
 
         if (headerResult == NetworkResult::Success) {
             processBatch();
         }
         else if (headerResult == NetworkResult::Disconnected) {
-            DebugError("Found server to be disconnected while trying to receive header.");
+            DebugError("Found server to be disconnected while trying to "
+                       "receive header.");
         }
     }
 
@@ -168,7 +171,7 @@ int Network::transferTickAdjustment()
         tickAdjustment += 1;
         return currentAdjustment;
     }
-    else if (currentAdjustment == 0){
+    else if (currentAdjustment == 0) {
         return 0;
     }
     else {
@@ -183,7 +186,8 @@ void Network::initTimer()
     tickTimer.updateSavedTime();
 }
 
-void Network::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr)
+void Network::registerCurrentTickPtr(
+    const std::atomic<Uint32>* inCurrentTickPtr)
 {
     currentTickPtr = inCurrentTickPtr;
 }
@@ -196,15 +200,15 @@ void Network::sendHeartbeatIfNecessary()
         heartbeat.tickNum = *currentTickPtr;
 
         // Serialize the heartbeat message.
-        BinaryBufferSharedPtr messageBuffer = std::make_shared<BinaryBuffer>(
-            Peer::MAX_MESSAGE_SIZE);
+        BinaryBufferSharedPtr messageBuffer
+            = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
         unsigned int startIndex = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
-        std::size_t messageSize = MessageTools::serialize(*messageBuffer, heartbeat,
-            startIndex);
+        std::size_t messageSize
+            = MessageTools::serialize(*messageBuffer, heartbeat, startIndex);
 
         // Fill the buffer with the appropriate message header.
         MessageTools::fillMessageHeader(MessageType::Heartbeat, messageSize,
-            messageBuffer, CLIENT_HEADER_SIZE);
+                                        messageBuffer, CLIENT_HEADER_SIZE);
 
         // Send the message.
         send(messageBuffer);
@@ -218,17 +222,19 @@ void Network::processBatch()
 {
     // Check if we need to adjust the tick offset.
     adjustIfNeeded(headerRecBuffer[ServerHeaderIndex::TickAdjustment],
-        headerRecBuffer[ServerHeaderIndex::AdjustmentIteration]);
+                   headerRecBuffer[ServerHeaderIndex::AdjustmentIteration]);
 
     /* Process messages, if we received any. */
     Uint8 messageCount = headerRecBuffer[ServerHeaderIndex::MessageCount];
     for (unsigned int i = 0; i < messageCount; ++i) {
-        MessageResult messageResult = server->receiveMessageWait(messageRecBuffer.data());
+        MessageResult messageResult
+            = server->receiveMessageWait(messageRecBuffer.data());
 
         // If we received a message, push it into the appropriate queue.
         if (messageResult.networkResult == NetworkResult::Success) {
             // Got a message, process it and update the receiveTimer.
-            processReceivedMessage(messageResult.messageType, messageResult.messageSize);
+            processReceivedMessage(messageResult.messageType,
+                                   messageResult.messageSize);
             receiveTimer.updateSavedTime();
         }
         else if ((messageResult.networkResult == NetworkResult::NoWaitingData)
@@ -237,40 +243,47 @@ void Network::processBatch()
             DebugError("Server connection timed out.");
         }
         else if (messageResult.networkResult == NetworkResult::Disconnected) {
-            DebugError("Found server to be disconnected while trying to receive message.");
+            DebugError("Found server to be disconnected while trying to "
+                       "receive message.");
         }
     }
 
     /* Process any confirmed ticks. */
-    Uint8 confirmedTickCount = headerRecBuffer[ServerHeaderIndex::ConfirmedTickCount];
+    Uint8 confirmedTickCount
+        = headerRecBuffer[ServerHeaderIndex::ConfirmedTickCount];
     for (unsigned int i = 0; i < confirmedTickCount; ++i) {
         if (!(npcUpdateQueue.enqueue({NpcUpdateType::ExplicitConfirmation}))) {
-            DebugError("Ran out of room in queue and memory allocation failed.");
+            DebugError(
+                "Ran out of room in queue and memory allocation failed.");
         }
     }
 }
 
-void Network::processReceivedMessage(MessageType messageType, Uint16 messageSize)
+void Network::processReceivedMessage(MessageType messageType,
+                                     Uint16 messageSize)
 {
     /* Funnel the message into the appropriate queue. */
     if (messageType == MessageType::ConnectionResponse) {
         // Deserialize the message.
         std::unique_ptr<ConnectionResponse> connectionResponse
-                                                = std::make_unique<ConnectionResponse>();
-        MessageTools::deserialize(messageRecBuffer, messageSize, *connectionResponse);
+            = std::make_unique<ConnectionResponse>();
+        MessageTools::deserialize(messageRecBuffer, messageSize,
+                                  *connectionResponse);
 
-        // Grab our player ID so we can determine what update messages are for the player.
+        // Grab our player ID so we can determine which update messages are for
+        // the player.
         playerID = connectionResponse->entityID;
 
         // Queue the message.
         if (!(connectionResponseQueue.enqueue(std::move(connectionResponse)))) {
-            DebugError("Ran out of room in queue and memory allocation failed.");
+            DebugError(
+                "Ran out of room in queue and memory allocation failed.");
         }
     }
     else if (messageType == MessageType::EntityUpdate) {
         // Deserialize the message.
         std::shared_ptr<EntityUpdate> entityUpdate
-                                                = std::make_shared<EntityUpdate>();
+            = std::make_shared<EntityUpdate>();
         MessageTools::deserialize(messageRecBuffer, messageSize, *entityUpdate);
 
         // Pull out the vector of entities.
@@ -279,21 +292,26 @@ void Network::processReceivedMessage(MessageType messageType, Uint16 messageSize
         // Iterate through the entities, checking if there's player or npc data.
         bool playerFound = false;
         bool npcFound = false;
-        for (auto entityIt = entities.begin(); entityIt != entities.end(); ++entityIt) {
+        for (auto entityIt = entities.begin(); entityIt != entities.end();
+             ++entityIt) {
             EntityID entityID = (*entityIt).id;
 
             if (entityID == playerID) {
                 // Found the player.
                 if (!(playerUpdateQueue.enqueue(entityUpdate))) {
-                    DebugError("Ran out of room in queue and memory allocation failed.");
+                    DebugError("Ran out of room in queue and memory allocation "
+                               "failed.");
                 }
                 playerFound = true;
             }
-            else if (!npcFound){
+            else if (!npcFound) {
                 // Found a non-player (npc).
-                // Queueing the message will let all npc updates within be processed.
-                if (!(npcUpdateQueue.enqueue({NpcUpdateType::Update, entityUpdate}))) {
-                    DebugError("Ran out of room in queue and memory allocation failed.");
+                // Queueing the message will let all npc updates within be
+                // processed.
+                if (!(npcUpdateQueue.enqueue(
+                        {NpcUpdateType::Update, entityUpdate}))) {
+                    DebugError("Ran out of room in queue and memory allocation "
+                               "failed.");
                 }
                 npcFound = true;
             }
@@ -304,12 +322,13 @@ void Network::processReceivedMessage(MessageType messageType, Uint16 messageSize
             }
         }
 
-        // If we didn't find an NPC and queue an update message, push an implicit
-        // confirmation to show that we've confirmed up to this tick.
+        // If we didn't find an NPC and queue an update message, push an
+        // implicit confirmation to show that we've confirmed up to this tick.
         if (!npcFound) {
-            if (!(npcUpdateQueue.enqueue({NpcUpdateType::ImplicitConfirmation, nullptr,
-                    entityUpdate->tickNum}))) {
-                DebugError("Ran out of room in queue and memory allocation failed.");
+            if (!(npcUpdateQueue.enqueue({NpcUpdateType::ImplicitConfirmation,
+                                          nullptr, entityUpdate->tickNum}))) {
+                DebugError(
+                    "Ran out of room in queue and memory allocation failed.");
             }
         }
     }
@@ -328,12 +347,12 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
             // Increment the iteration.
             adjustmentIteration = (currentAdjIteration + 1);
             DebugInfo("Received tick adjustment: %d, iteration: %u",
-                receivedTickAdj, receivedAdjIteration);
+                      receivedTickAdj, receivedAdjIteration);
         }
-        else if (receivedAdjIteration > currentAdjIteration){
-            DebugError(
-                "Out of sequence adjustment iteration. current: %u, received: %u",
-                currentAdjIteration, receivedAdjIteration);
+        else if (receivedAdjIteration > currentAdjIteration) {
+            DebugError("Out of sequence adjustment iteration. current: %u, "
+                       "received: %u",
+                       currentAdjIteration, receivedAdjIteration);
         }
     }
 }

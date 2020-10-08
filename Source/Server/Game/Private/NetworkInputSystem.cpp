@@ -12,25 +12,28 @@ namespace AM
 {
 namespace Server
 {
-
-NetworkInputSystem::NetworkInputSystem(Game& inGame, World& inWorld, Network& inNetwork)
-: game(inGame), world(inWorld), network(inNetwork)
+NetworkInputSystem::NetworkInputSystem(Game& inGame, World& inWorld,
+                                       Network& inNetwork)
+: game(inGame)
+, world(inWorld)
+, network(inNetwork)
 {
 }
 
 void NetworkInputSystem::processInputMessages()
 {
     // Get the queue reference for this tick's messages.
-    std::queue<std::unique_ptr<ClientInputs>>& messageQueue =
-        network.startReceiveInputMessages(game.getCurrentTick());
+    std::queue<std::unique_ptr<ClientInputs>>& messageQueue
+        = network.startReceiveInputMessages(game.getCurrentTick());
 
     // Process all messages.
     while (!(messageQueue.empty())) {
-        std::unique_ptr<ClientInputs> inputMessage = std::move(messageQueue.front());
+        std::unique_ptr<ClientInputs> inputMessage
+            = std::move(messageQueue.front());
         messageQueue.pop();
         if (inputMessage == nullptr) {
-            DebugInfo(
-                "Failed to receive input message after getting count (this shouldn't happen).")
+            DebugInfo("Failed to receive input message after getting count "
+                      "(this shouldn't happen).")
         }
 
         // Update the entity's InputComponent.
@@ -41,7 +44,7 @@ void NetworkInputSystem::processInputMessages()
         world.entityIsDirty[clientEntityID] = true;
 
         DebugInfo("Processed input message on tick %u. Message tick: %u",
-            game.getCurrentTick(), inputMessage->tickNum);
+                  game.getCurrentTick(), inputMessage->tickNum);
     }
 
     network.endReceiveInputMessages();

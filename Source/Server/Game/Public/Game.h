@@ -12,7 +12,6 @@ namespace AM
 {
 namespace Server
 {
-
 class Network;
 
 /**

@@ -16,7 +16,6 @@ namespace AM
 {
 namespace Server
 {
-
 class World
 {
 public:
@@ -28,11 +27,14 @@ public:
 
     /**
      * Registers the entity as possessing this component.
-     * The caller is in charge of making sure the state of the component is appropriate.
+     * The caller is in charge of making sure the state of the component is
+     * appropriate.
      */
-    void attachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag);
+    void attachComponent(EntityID entityID,
+                         ComponentFlag::FlagType componentFlag);
 
-    void removeComponent(EntityID entityID, ComponentFlag::FlagType componentFlag);
+    void removeComponent(EntityID entityID,
+                         ComponentFlag::FlagType componentFlag);
 
     /** Entity data lists. */
     std::array<std::string, MAX_ENTITIES> entityNames;
@@ -42,8 +44,8 @@ public:
     std::array<SpriteComponent, MAX_ENTITIES> sprites;
     std::map<EntityID, ClientComponent> clients;
     /**
-     * Bit flags for every component, indicating whether the object at a given index
-     * has that component.
+     * Bit flags for every component, indicating whether the object at a given
+     * index has that component.
      */
     std::array<Uint32, MAX_ENTITIES> componentFlags;
     /**

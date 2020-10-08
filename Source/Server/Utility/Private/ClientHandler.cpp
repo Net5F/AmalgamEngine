@@ -10,7 +10,6 @@ namespace AM
 {
 namespace Server
 {
-
 ClientHandler::ClientHandler(Network& inNetwork)
 : network(inNetwork)
 , idPool()
@@ -41,7 +40,8 @@ void ClientHandler::serviceClients()
         // Erase any clients who were detected to be disconnected.
         eraseDisconnectedClients(clientMap);
 
-        // Check if there's any clients with activity, and receive all their messages.
+        // Check if there's any clients with activity, and receive all their
+        // messages.
         std::shared_lock readLock(network.getClientMapMutex());
         int numReceived = 0;
         if (clientMap.size() != 0) {
@@ -71,10 +71,13 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
         NetworkID newID = idPool.reserveID();
         DebugInfo("New client connected. Assigning netID: %u", newID);
 
-        // Add the peer to the Network's clientMap, constructing a Client in-place.
+        // Add the peer to the Network's clientMap, constructing a Client
+        // in-place.
         std::unique_lock writeLock(network.getClientMapMutex());
-        if (!(clientMap.try_emplace(newID,
-            std::make_shared<Client>(newID, std::move(newPeer))).second)) {
+        if (!(clientMap
+                  .try_emplace(newID, std::make_shared<Client>(
+                                          newID, std::move(newPeer)))
+                  .second)) {
             idPool.freeID(newID);
             DebugError("Ran out of room in client map or key already existed.");
         }
@@ -118,7 +121,8 @@ void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
 int ClientHandler::receiveClientMessages(ClientMap& clientMap)
 {
     // Update each client's internal socket isReady().
-    // Note: We check all clients regardless of whether this returns > 0 because, even if
+    // Note: We check all clients regardless of whether this returns > 0
+    // because, even if
     //       there's no activity, we need to check for timeouts.
     clientSet->checkSockets(0);
 
@@ -128,12 +132,14 @@ int ClientHandler::receiveClientMessages(ClientMap& clientMap)
     for (auto& pair : clientMap) {
         const std::shared_ptr<Client>& clientPtr = pair.second;
 
-        /* If there's potentially data, try to receive all messages from the client. */
+        /* If there's potentially data, try to receive all messages from the
+         * client. */
         Message resultMessage = clientPtr->receiveMessage();
         while (resultMessage.messageType != MessageType::NotSet) {
             // Queue the message.
             std::weak_ptr<Client> clientWeakPtr = clientPtr;
-            receiveQueue.emplace(std::move(clientWeakPtr), std::move(resultMessage));
+            receiveQueue.emplace(std::move(clientWeakPtr),
+                                 std::move(resultMessage));
 
             numReceived++;
             resultMessage = clientPtr->receiveMessage();

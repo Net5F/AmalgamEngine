@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 TcpSocket::TcpSocket(Uint16 inPort)
 : ip("")
 , port(inPort)
@@ -91,7 +90,8 @@ std::string TcpSocket::getAddress()
         DebugError("Tried to call getAddress on a listener socket.");
     }
     else if (port == 0) {
-        // Socket was received through a listener and hasn't yet retrieved its address.
+        // Socket was received through a listener and hasn't yet retrieved its
+        // address.
         IPaddress* remoteIP = SDLNet_TCP_GetPeerAddress(socket);
         if (remoteIP == nullptr) {
             DebugError("Failed to get peer address: %s", SDLNet_GetError());

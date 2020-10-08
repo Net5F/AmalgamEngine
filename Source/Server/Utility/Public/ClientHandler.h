@@ -13,14 +13,13 @@ namespace AM
 {
 namespace Server
 {
-
 class Network;
 
 /**
  * Handles all asynchronous activity that the Clients require.
  *
- * Accepts new client connections, erases clients that have been detected as disconnected,
- * and receives available messages.
+ * Accepts new client connections, erases clients that have been detected as
+ * disconnected, and receives available messages.
  *
  * Acts directly on the Network's client map.
  */
@@ -36,16 +35,16 @@ public:
 
 private:
     /**
-     * How long the accept/disconnect/receive loop in serviceClients should delay if no
-     * socket activity was reported on the clientSet.
+     * How long the accept/disconnect/receive loop in serviceClients should
+     * delay if no socket activity was reported on the clientSet.
      */
     static constexpr unsigned int INACTIVE_DELAY_TIME_MS = 10;
 
     /**
      * Thread function, started from constructor.
      *
-     * Accepts new client connections, erases clients that have been detected as disconnected,
-     * and receives available messages.
+     * Accepts new client connections, erases clients that have been detected as
+     * disconnected, and receives available messages.
      *
      * Acts directly on the Network's client map.
      */
@@ -62,7 +61,8 @@ private:
     void eraseDisconnectedClients(ClientMap& clientMap);
 
     /**
-     * Used by pollForMessages, checks for new messages and pushes them into their queues.
+     * Used by pollForMessages, checks for new messages and pushes them into
+     * their queues.
      * @return The number of messages that were received.
      */
     int receiveClientMessages(ClientMap& clientMap);

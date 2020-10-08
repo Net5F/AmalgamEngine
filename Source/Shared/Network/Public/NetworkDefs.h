@@ -19,7 +19,8 @@ static constexpr double NETWORK_TICK_TIMESTEP_S = 1 / 20.0;
 //--------------------------------------------------------------------------
 // Typedefs
 //--------------------------------------------------------------------------
-/** Represents a single network client. Will be reused if the client disconnects. */
+/** Represents a single network client. Will be reused if the client
+ * disconnects. */
 typedef Uint32 NetworkID;
 
 /** Dynamically allocated, portable buffers for messages. */
@@ -48,7 +49,8 @@ struct ServerHeaderIndex {
     };
 };
 /** The size of a server header in bytes. */
-static constexpr unsigned int SERVER_HEADER_SIZE = ServerHeaderIndex::MessageHeaderStart;
+static constexpr unsigned int SERVER_HEADER_SIZE
+    = ServerHeaderIndex::MessageHeaderStart;
 
 /** Used for indexing into the parts of a client header. */
 struct ClientHeaderIndex {
@@ -60,7 +62,8 @@ struct ClientHeaderIndex {
     };
 };
 /** The size of a client header in bytes. */
-static constexpr unsigned int CLIENT_HEADER_SIZE = ClientHeaderIndex::MessageHeaderStart;
+static constexpr unsigned int CLIENT_HEADER_SIZE
+    = ClientHeaderIndex::MessageHeaderStart;
 
 /** Used for indexing into the size or payload of a received message. */
 struct MessageHeaderIndex {
@@ -73,7 +76,8 @@ struct MessageHeaderIndex {
         MessageStart = 3
     };
 };
-static constexpr unsigned int MESSAGE_HEADER_SIZE = MessageHeaderIndex::MessageStart;
+static constexpr unsigned int MESSAGE_HEADER_SIZE
+    = MessageHeaderIndex::MessageStart;
 
 //--------------------------------------------------------------------------
 // Structs
@@ -98,8 +102,8 @@ enum class MessageType : Uint8 {
     ConnectionResponse = 1,
     EntityUpdate = 2,
     ClientInputs = 3,
-    /** Heartbeat is sent from either side to show that a tick was processed but no
-        data needed to be sent. */
+    /** Heartbeat is sent from either side to show that a tick was processed but
+       no data needed to be sent. */
     Heartbeat = 4
 };
 
@@ -108,13 +112,14 @@ struct MessageResult {
     NetworkResult networkResult = NetworkResult::NotSet;
     /** messageType will be Invalid if networkResult != Success. */
     MessageType messageType = MessageType::NotSet;
-    /** If networkResult == Success, contains the size of the received message. */
+    /** If networkResult == Success, contains the size of the received message.
+     */
     Uint16 messageSize = 0;
 };
 
 /**
- * Represents a serialized message. Useful if we want to defer deserialization till
- * later, maybe because we're in a time-critical context.
+ * Represents a serialized message. Useful if we want to defer deserialization
+ * till later, maybe because we're in a time-critical context.
  */
 struct Message {
     MessageType messageType = MessageType::NotSet;

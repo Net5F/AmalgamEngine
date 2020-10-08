@@ -9,7 +9,6 @@
 
 namespace AM
 {
-
 /**
  * This class provides message-related static helper functions for things
  * like serialization and error checking.
@@ -21,8 +20,9 @@ public:
     using InputAdapter = bitsery::InputBufferAdapter<BinaryBuffer>;
 
     /**
-     * Serializes the given object, leaving the results in the given outputBuffer.
-     * Relies on the serialization implementation to complain if an invalid type is passed in.
+     * Serializes the given object, leaving the results in the given
+     * outputBuffer. Relies on the serialization implementation to complain if
+     * an invalid type is passed in.
      *
      * @param outputBuffer  The buffer to store the serialized object data in.
      * @param objectToSerialize  The object to serialize. Must be serializable.
@@ -30,8 +30,9 @@ public:
      *                    serialized bytes.
      * @return The number of bytes written into outputBuffer.
      */
-    template <typename T>
-    static std::size_t serialize(BinaryBuffer& outputBuffer, T& objectToSerialize,
+    template<typename T>
+    static std::size_t serialize(BinaryBuffer& outputBuffer,
+                                 T& objectToSerialize,
                                  std::size_t startIndex = 0)
     {
         // Create the adapter manually so we can change the write offset.
@@ -40,7 +41,7 @@ public:
 
         // Return value will include the offset, so subtract it back out.
         return (bitsery::quickSerialization<OutputAdapter>(std::move(adapter),
-                    objectToSerialize)
+                                                           objectToSerialize)
                 - startIndex);
     }
 
@@ -48,17 +49,22 @@ public:
      * Deserializes the contents of the given buffer into the given object.
      * Errors if deserialization fails.
      *
-     * @param inputBuffer  A buffer containing the serialized bytes to deserialize.
+     * @param inputBuffer  A buffer containing the serialized bytes to
+     * deserialize.
      * @param serializedSize  The size of the serialized message.
      * @param outputObject  The object to store the deserialized message in.
-     * @param startIndex  Optional, how far into the buffer to start reading bytes from.
+     * @param startIndex  Optional, how far into the buffer to start reading
+     * bytes from.
      */
-    template <typename T>
-    static bool deserialize(BinaryBuffer& inputBuffer, std::size_t serializedSize,
-                            T& outputObject, std::size_t startIndex = 0)
+    template<typename T>
+    static bool deserialize(BinaryBuffer& inputBuffer,
+                            std::size_t serializedSize, T& outputObject,
+                            std::size_t startIndex = 0)
     {
-        std::pair<bitsery::ReaderError, bool> result = bitsery::quickDeserialization<
-        InputAdapter>({inputBuffer.begin() + startIndex, serializedSize}, outputObject);
+        std::pair<bitsery::ReaderError, bool> result
+            = bitsery::quickDeserialization<InputAdapter>(
+                {inputBuffer.begin() + startIndex, serializedSize},
+                outputObject);
 
         if (!result.second) {
             std::string errorString = "Deserialization failed: ";
@@ -94,8 +100,8 @@ public:
      * The next 2 bytes will contain the message size as a Uint16.
      * The rest will have the data from the given messageBuffer copied into it.
      *
-     * @param startIndex  Used to leave room at the front of the message to later be
-     *                    filled. The client uses this since it writes the client message
+     * @param startIndex  Used to leave room at the front of the message to
+     * later be filled. The client uses this since it writes the client message
      *                    header into the same buffer. The server doesn't.
      */
     static void fillMessageHeader(MessageType type, std::size_t messageSize,

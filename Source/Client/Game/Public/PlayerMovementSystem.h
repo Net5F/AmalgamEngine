@@ -10,7 +10,6 @@ namespace AM
 {
 namespace Client
 {
-
 class Game;
 class World;
 class Network;
@@ -34,13 +33,15 @@ private:
      * Receives any player entity updates from the server.
      * @return The tick number of the newest message that we received.
      */
-    Uint32 processReceivedUpdates(EntityID playerID, PositionComponent& currentPosition,
+    Uint32 processReceivedUpdates(EntityID playerID,
+                                  PositionComponent& currentPosition,
                                   MovementComponent& currentMovement);
 
     /**
      * Replay any inputs that are from newer ticks than the latestReceivedTick.
      */
-    void replayInputs(Uint32 latestReceivedTick, PositionComponent& currentPosition,
+    void replayInputs(Uint32 latestReceivedTick,
+                      PositionComponent& currentPosition,
                       MovementComponent& currentMovement);
 
     Game& game;

@@ -8,7 +8,6 @@ namespace AM
 {
 namespace Client
 {
-
 class Game;
 class World;
 
@@ -23,7 +22,8 @@ public:
         inconsistent. */
     static constexpr double RENDER_DELAYED_TIME_S = .001;
 
-    RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame, SDL2pp::Window& inWindow);
+    RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame,
+                 SDL2pp::Window& inWindow);
 
     void render();
 

@@ -5,17 +5,16 @@ namespace AM
 {
 namespace Server
 {
-
 World::World()
-: entityNames {},
-  positions {},
-  movements {},
-  inputs {},
-  sprites {},
-  componentFlags {},
-  entityIsDirty {},
-  idPool(),
-  spawnPoint {0, 0}
+: entityNames{}
+, positions{}
+, movements{}
+, inputs{}
+, sprites{}
+, componentFlags{}
+, entityIsDirty{}
+, idPool()
+, spawnPoint{0, 0}
 {
 }
 
@@ -29,7 +28,8 @@ EntityID World::addEntity(std::string_view name)
 void World::removeEntity(EntityID entityID)
 {
     if (entityID > MAX_ENTITIES) {
-        DebugError("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES, entityID);
+        DebugError("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+                   entityID);
     }
 
     componentFlags[entityID] = 0;
@@ -38,10 +38,12 @@ void World::removeEntity(EntityID entityID)
     idPool.freeID(entityID);
 }
 
-void World::attachComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
+void World::attachComponent(EntityID entityID,
+                            ComponentFlag::FlagType componentFlag)
 {
     if (entityID > MAX_ENTITIES) {
-        DebugError("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES, entityID);
+        DebugError("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+                   entityID);
     }
 
     // If the entity doesn't have the component, add it.
@@ -53,10 +55,12 @@ void World::attachComponent(EntityID entityID, ComponentFlag::FlagType component
     }
 }
 
-void World::removeComponent(EntityID entityID, ComponentFlag::FlagType componentFlag)
+void World::removeComponent(EntityID entityID,
+                            ComponentFlag::FlagType componentFlag)
 {
     if (entityID > MAX_ENTITIES) {
-        DebugError("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES, entityID);
+        DebugError("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+                   entityID);
     }
 
     // If the entity has the component, remove it.

@@ -5,7 +5,6 @@ namespace AM
 {
 namespace Server
 {
-
 IDPool::IDPool()
 : IDs{}
 {

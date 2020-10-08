@@ -9,7 +9,6 @@
  */
 namespace AM
 {
-
 class EntityUpdate;
 
 namespace Client
@@ -19,14 +18,15 @@ namespace Client
 //--------------------------------------------------------------------------
 // TODO: Eventually, move this config out into a file and read it into
 //       a NetworkConfig class.
-/** If true, the connection to the server will be mocked and we'll run without it. */
+/** If true, the connection to the server will be mocked and we'll run without
+ * it. */
 static constexpr bool RUN_OFFLINE = false;
 
 /** Our best guess at a good starting place for the simulation's tick offset. */
 static constexpr Sint8 INITIAL_TICK_OFFSET = 5;
 
 static const std::string SERVER_IP = "127.0.0.1";
-//static const std::string SERVER_IP = "45.79.37.63";
+// static const std::string SERVER_IP = "45.79.37.63";
 
 static constexpr unsigned int SERVER_PORT = 41499;
 
@@ -42,20 +42,23 @@ enum class NpcUpdateType {
     Update,
     /** An implicit confirmation confirms all ticks up to the given tick. */
     ImplicitConfirmation,
-    /** An explicit confirmation confirms 1 tick, with no particular tick given. */
+    /** An explicit confirmation confirms 1 tick, with no particular tick given.
+     */
     ExplicitConfirmation
 };
 
 /**
- * Represents a received NPC update message and/or any information we could infer.
- * Could contain data, or an implicit or explicit confirmation that no changes occurred.
+ * Represents a received NPC update message and/or any information we could
+ * infer. Could contain data, or an implicit or explicit confirmation that no
+ * changes occurred.
  */
 struct NpcUpdateMessage {
     /** The type of information contained in this update. */
     NpcUpdateType updateType = NpcUpdateType::ExplicitConfirmation;
     /** If informationType == Update, contains the update message. */
     std::shared_ptr<const EntityUpdate> message = nullptr;
-    /** If informationType == ImplicitConfirmation, contains the confirmed tick. */
+    /** If informationType == ImplicitConfirmation, contains the confirmed tick.
+     */
     Uint32 tickNum = 0;
 };
 

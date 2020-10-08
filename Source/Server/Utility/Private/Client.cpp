@@ -9,7 +9,6 @@ namespace AM
 {
 namespace Server
 {
-
 Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
 : netID(inNetID)
 , peer(std::move(inPeer))
@@ -27,7 +26,8 @@ Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
     receiveTimer.updateSavedTime();
 }
 
-void Client::queueMessage(const BinaryBufferSharedPtr& message, Uint32 messageTick)
+void Client::queueMessage(const BinaryBufferSharedPtr& message,
+                          Uint32 messageTick)
 {
     sendQueue.emplace_back(message, messageTick);
 }
@@ -49,10 +49,11 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     unsigned int currentIndex = ServerHeaderIndex::MessageHeaderStart;
     for (unsigned int i = 0; i < messageCount; ++i) {
         /* Copy the message and message header into the buffer. */
-        std::pair<BinaryBufferSharedPtr, Uint32> messagePair = sendQueue.front();
+        std::pair<BinaryBufferSharedPtr, Uint32> messagePair
+            = sendQueue.front();
         BinaryBufferSharedPtr& messageBuffer = messagePair.first;
         std::copy(messageBuffer->begin(), messageBuffer->end(),
-            &(batchBuffer[currentIndex]));
+                  &(batchBuffer[currentIndex]));
 
         currentIndex += messageBuffer->size();
 
@@ -76,22 +77,23 @@ void Client::fillHeader(Uint8 messageCount, Uint32 currentTick)
 {
     // Fill in the header adjustment info.
     AdjustmentData tickAdjustment = getTickAdjustment();
-    batchBuffer[ServerHeaderIndex::TickAdjustment] =
-        static_cast<Uint8>(tickAdjustment.adjustment);
-    batchBuffer[ServerHeaderIndex::AdjustmentIteration] = tickAdjustment.iteration;
+    batchBuffer[ServerHeaderIndex::TickAdjustment]
+        = static_cast<Uint8>(tickAdjustment.adjustment);
+    batchBuffer[ServerHeaderIndex::AdjustmentIteration]
+        = tickAdjustment.iteration;
 
     // Fill in the header message count.
     batchBuffer[ServerHeaderIndex::MessageCount] = messageCount;
 
     // If we haven't sent data or are caught up, don't try to confirm any ticks.
-    if ((latestSentSimTick == 0)
-        || (latestSentSimTick == currentTick)) {
+    if ((latestSentSimTick == 0) || (latestSentSimTick == currentTick)) {
         batchBuffer[ServerHeaderIndex::ConfirmedTickCount] = 0;
         return;
     }
     else {
         // Fill in the number of ticks we've processed since the last update.
-        // (the tick count increments at the end of a sim tick, so our latest sent
+        // (the tick count increments at the end of a sim tick, so our latest
+        // sent
         //  data is from currentTick - 1).
         Uint8 confirmedTickCount = (currentTick - 1) - latestSentSimTick;
         batchBuffer[ServerHeaderIndex::ConfirmedTickCount] = confirmedTickCount;
@@ -106,7 +108,7 @@ Uint8 Client::getWaitingMessageCount() const
     unsigned int size = sendQueue.size();
     if (size > SDL_MAX_UINT8) {
         DebugError("Client's sendQueue contains too many messages to return as"
-        "a Uint8.");
+                   "a Uint8.");
     }
 
     return size;
@@ -120,13 +122,14 @@ Message Client::receiveMessage()
 
     // Receive the header.
     Uint8 headerBuf[CLIENT_HEADER_SIZE];
-    NetworkResult headerResult = peer->receiveBytes(headerBuf, CLIENT_HEADER_SIZE,
-        false);
+    NetworkResult headerResult
+        = peer->receiveBytes(headerBuf, CLIENT_HEADER_SIZE, false);
 
     // Receive the following message, or check for timeouts.
     if (headerResult == NetworkResult::Success) {
         // Process the adjustment iteration.
-        Uint8 receivedAdjIteration = headerBuf[ClientHeaderIndex::AdjustmentIteration];
+        Uint8 receivedAdjIteration
+            = headerBuf[ClientHeaderIndex::AdjustmentIteration];
         Uint8 expectedNextIteration = (latestAdjIteration + 1);
 
         // If we received the next expected iteration, save it.
@@ -134,11 +137,13 @@ Message Client::receiveMessage()
             latestAdjIteration = expectedNextIteration;
         }
         else if (receivedAdjIteration > expectedNextIteration) {
-            DebugError("Skipped an adjustment iteration. Logic must be flawed.");
+            DebugError(
+                "Skipped an adjustment iteration. Logic must be flawed.");
         }
 
         // Get the message.
-        // Note: This is a blocking read, but the data should immediately be available
+        // Note: This is a blocking read, but the data should immediately be
+        // available
         //       since we send it all in 1 packet.
         BinaryBufferPtr messageBuffer = nullptr;
         MessageResult messageResult = peer->receiveMessageWait(messageBuffer);
@@ -155,8 +160,10 @@ Message Client::receiveMessage()
         double delta = receiveTimer.getDeltaSeconds(false);
         if (delta > TIMEOUT_S) {
             peer = nullptr;
-            DebugInfo("Dropped connection, peer timed out. Time since last message: %.6f "
-                "seconds. Timeout: %.6f", delta, TIMEOUT_S);
+            DebugInfo("Dropped connection, peer timed out. Time since last "
+                      "message: %.6f "
+                      "seconds. Timeout: %.6f",
+                      delta, TIMEOUT_S);
             return {MessageType::NotSet, nullptr};
         }
     }
@@ -164,21 +171,26 @@ Message Client::receiveMessage()
     return {MessageType::NotSet, nullptr};
 }
 
-bool Client::isConnected() {
+bool Client::isConnected()
+{
     // Peer might've been force-disconnected by dropping the reference.
     // It also could have internally detected a client-initiated disconnect.
     return (peer == nullptr) ? false : peer->isConnected();
 }
 
-void Client::recordTickDiff(Sint64 tickDiff) {
-    if ((tickDiff < LOWEST_VALID_TICKDIFF) || (tickDiff > HIGHEST_VALID_TICKDIFF)) {
+void Client::recordTickDiff(Sint64 tickDiff)
+{
+    if ((tickDiff < LOWEST_VALID_TICKDIFF)
+        || (tickDiff > HIGHEST_VALID_TICKDIFF)) {
         // Diff is outside our bounds. Drop the connection.
         peer = nullptr;
-        DebugInfo("Dropped connection, diff out of bounds. Diff: %" PRId64 , tickDiff);
+        DebugInfo("Dropped connection, diff out of bounds. Diff: %" PRId64,
+                  tickDiff);
     }
     else {
         // Diff is fine, record it.
-        // Acquire a lock so a getTickAdjustment doesn't start while we're pushing.
+        // Acquire a lock so a getTickAdjustment doesn't start while we're
+        // pushing.
         std::unique_lock lock(tickDiffMutex);
         tickDiffHistory.push(tickDiff);
 
@@ -192,7 +204,8 @@ void Client::recordTickDiff(Sint64 tickDiff) {
     }
 }
 
-Client::AdjustmentData Client::getTickAdjustment() {
+Client::AdjustmentData Client::getTickAdjustment()
+{
     // If we haven't gotten any data, no adjustment should be made.
     if (!hasRecordedDiff) {
         return {0, 0};
@@ -200,7 +213,8 @@ Client::AdjustmentData Client::getTickAdjustment() {
 
     // Copy the history so we can work on it without staying locked.
     std::unique_lock lock(tickDiffMutex);
-    CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH> tickDiffHistoryCopy = tickDiffHistory;
+    CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH> tickDiffHistoryCopy
+        = tickDiffHistory;
     lock.unlock();
 
     // Calc the average diff.
@@ -217,42 +231,45 @@ Client::AdjustmentData Client::getTickAdjustment() {
 }
 
 Sint8 Client::calcAdjustment(
-float averageDiff, CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy)
+    float averageDiff,
+    CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy)
 {
     if ((tickDiffHistoryCopy[0] >= TICKDIFF_ACCEPTABLE_BOUND_LOWER)
-    && (tickDiffHistoryCopy[0] <= TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
+        && (tickDiffHistoryCopy[0] <= TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
         return 0;
     }
 
     // If the average isn't outside the target bounds, no adjustment is needed.
     int truncatedAverage = static_cast<int>(averageDiff);
     if ((truncatedAverage >= TICKDIFF_ACCEPTABLE_BOUND_LOWER)
-    && (truncatedAverage <= TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
+        && (truncatedAverage <= TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
         return 0;
     }
 
     /* Check for lag spikes.
-       Note: We check for lag spikes by seeing if we're ahead of the client (diff < target)
-             and moving back towards the target.
-             If we aren't, then we have to assume we had a long-term latency gain. */
+       Note: We check for lag spikes by seeing if we're ahead of the client
+       (diff < target) and moving back towards the target.
+             If we aren't, then we have to assume we had a long-term latency
+       gain. */
     // If we're ahead of the client.
     if (tickDiffHistoryCopy[0] < TICKDIFF_TARGET) {
         // If we're moving back towards the target.
         if (tickDiffHistoryCopy[0] > tickDiffHistoryCopy[1]) {
-            // It seems like a spike occurred, instead of a long-term latency gain.
-            // No adjustment needed, it's going back to normal.
+            // It seems like a spike occurred, instead of a long-term latency
+            // gain. No adjustment needed, it's going back to normal.
             return 0;
         }
     }
 
     // TEMP
-    DebugInfo("Calc'd adjustment. adjustment: %d", TICKDIFF_TARGET - truncatedAverage);
-//    DebugInfo("truncatedAverage: %d. Values:", static_cast<int>(averageDiff));
-//    printf("[");
-//    for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
-//        printf("%d, ", tickDiffHistoryCopy[i]);
-//    }
-//    printf("]\n");
+    DebugInfo("Calc'd adjustment. adjustment: %d",
+              TICKDIFF_TARGET - truncatedAverage);
+    //    DebugInfo("truncatedAverage: %d. Values:",
+    //    static_cast<int>(averageDiff)); printf("["); for (unsigned int i = 0;
+    //    i < TICKDIFF_HISTORY_LENGTH; ++i) {
+    //        printf("%d, ", tickDiffHistoryCopy[i]);
+    //    }
+    //    printf("]\n");
     // TEMP
 
     // Make an adjustment back towards the target.
@@ -261,4 +278,3 @@ float averageDiff, CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHisto
 
 } // end namespace Server
 } // end namespace AM
-

@@ -4,11 +4,12 @@
  *
  * Instructions:
  * The graph shows full frame time (green) and SDL_RenderPresent time (red).
- * The horizontal blue line is the 1/60 millisecond mark. You’d expect the green line to
- * be near that if vsync is enabled and the refresh rate is at 60 Hz. Additionally, in
- * its big version (toggle by pressing B), the graph shows event time (pink), update
- * time (white), clear time (yellow), draw time (light blue). Red, pink, white, yellow,
- * and light blue are stacked on top of each other and add up to the green line.
+ * The horizontal blue line is the 1/60 millisecond mark. You’d expect the green
+ * line to be near that if vsync is enabled and the refresh rate is at 60 Hz.
+ * Additionally, in its big version (toggle by pressing B), the graph shows
+ * event time (pink), update time (white), clear time (yellow), draw time (light
+ * blue). Red, pink, white, yellow, and light blue are stacked on top of each
+ * other and add up to the green line.
  *
  * Other controls:
  *
@@ -25,10 +26,11 @@
  * b: Toggle graph size
  * Escape: Quit
  *
- * Try setting the environment variable SDL_RENDER_VSYNC to 1 to force vsync on. You can
- * also try the other renderers with the environment variable SDL_RENDER_DRIVER.
- * Possible values are: opengl, opengles, opengles2, direct3d, direct3d11, software.
- * (Depends on the platform and if SDL was built with that renderer enabled.)
+ * Try setting the environment variable SDL_RENDER_VSYNC to 1 to force vsync on.
+ * You can also try the other renderers with the environment variable
+ * SDL_RENDER_DRIVER. Possible values are: opengl, opengles, opengles2,
+ * direct3d, direct3d11, software. (Depends on the platform and if SDL was built
+ * with that renderer enabled.)
  */
 
 #include <iostream>
@@ -44,12 +46,14 @@
 
 #define FRAMETIME_COUNT 200
 
-class Player {
+class Player
+{
 public:
     Player();
 
     void update(const double tick_rate);
-    void draw(SDL_Renderer * renderer, const double alpha, int width, int height);
+    void draw(SDL_Renderer* renderer, const double alpha, int width,
+              int height);
 
     double x, y, px, py, vx, vy, ax, ay;
 };
@@ -58,7 +62,8 @@ struct FrameTime {
     double full, event, update, clear, draw, swap;
 };
 
-class Window {
+class Window
+{
 public:
     Window();
 
@@ -72,8 +77,8 @@ public:
     void clear();
     void swap();
 
-    SDL_Window * handle;
-    SDL_Renderer * renderer;
+    SDL_Window* handle;
+    SDL_Renderer* renderer;
     int width, height;
     bool pause;
     bool interpolate;
@@ -98,17 +103,26 @@ public:
 };
 
 static Uint32 xstate = 905309021;
-static Uint32 xorshift() {
+static Uint32 xorshift()
+{
     xstate ^= xstate << 13;
     xstate ^= xstate >> 17;
     xstate ^= xstate << 5;
     return xstate;
 }
 
-Player::Player() : x(0.1), y(0.9), vx(0.35), vy(0), ax(0), ay(-0.5)
-{}
+Player::Player()
+: x(0.1)
+, y(0.9)
+, vx(0.35)
+, vy(0)
+, ax(0)
+, ay(-0.5)
+{
+}
 
-void Player::update(const double tick_rate) {
+void Player::update(const double tick_rate)
+{
     px = x;
     py = y;
 
@@ -128,9 +142,11 @@ void Player::update(const double tick_rate) {
     }
 }
 
-void Player::draw(SDL_Renderer * renderer, const double alpha, int width, int height) {
+void Player::draw(SDL_Renderer* renderer, const double alpha, int width,
+                  int height)
+{
     const double interp_x = x * alpha + px * (1.0 - alpha);
-    const double interp_y =  1 - (y * alpha + py * (1.0 - alpha));
+    const double interp_y = 1 - (y * alpha + py * (1.0 - alpha));
     const int int_x = static_cast<int>(floor(interp_x * (width - 20) + 0.5));
     const int int_y = static_cast<int>(floor(interp_y * (height - 20) + 0.5));
     const SDL_Rect draw_rect = {int_x, int_y, 20, 20};
@@ -139,17 +155,37 @@ void Player::draw(SDL_Renderer * renderer, const double alpha, int width, int he
     SDL_RenderFillRect(renderer, &draw_rect);
 }
 
-Window::Window() : handle(0), renderer(0), pause(false), interpolate(true), highprecision(false), randomdelay(false), biggraph(false),
-    showfullline(true), showeventline(true), showupdateline(true), showclearline(true), showdrawline(true), showswapline(true),
-    full_line(FRAMETIME_COUNT), event_line(FRAMETIME_COUNT), update_line(FRAMETIME_COUNT), clear_line(FRAMETIME_COUNT), draw_line(FRAMETIME_COUNT), swap_line(FRAMETIME_COUNT)
-{}
+Window::Window()
+: handle(0)
+, renderer(0)
+, pause(false)
+, interpolate(true)
+, highprecision(false)
+, randomdelay(false)
+, biggraph(false)
+, showfullline(true)
+, showeventline(true)
+, showupdateline(true)
+, showclearline(true)
+, showdrawline(true)
+, showswapline(true)
+, full_line(FRAMETIME_COUNT)
+, event_line(FRAMETIME_COUNT)
+, update_line(FRAMETIME_COUNT)
+, clear_line(FRAMETIME_COUNT)
+, draw_line(FRAMETIME_COUNT)
+, swap_line(FRAMETIME_COUNT)
+{
+}
 
-void Window::init() {
+void Window::init()
+{
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
         throw "Could not init SDL";
 
-    handle = SDL_CreateWindow("Loading...", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        800, 500, SDL_WINDOW_RESIZABLE);
+    handle = SDL_CreateWindow("Loading...", SDL_WINDOWPOS_CENTERED,
+                              SDL_WINDOWPOS_CENTERED, 800, 500,
+                              SDL_WINDOW_RESIZABLE);
     if (!handle)
         throw "Could not create window";
 
@@ -160,7 +196,7 @@ void Window::init() {
     SDL_GetWindowSize(handle, &width, &height);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-//    SDL_SetWindowFullscreen(handle, SDL_WINDOW_FULLSCREEN);
+    //    SDL_SetWindowFullscreen(handle, SDL_WINDOW_FULLSCREEN);
 
     settitle();
 
@@ -168,7 +204,8 @@ void Window::init() {
     swap();
 }
 
-void Window::quit() {
+void Window::quit()
+{
     if (renderer)
         SDL_DestroyRenderer(renderer);
     if (handle)
@@ -177,9 +214,11 @@ void Window::quit() {
         SDL_Quit();
 }
 
-void Window::drawgraph() {
-    double graph_x_step = width / (double)(FRAMETIME_COUNT - 1);
-    int graph_height = biggraph ? height : (int)floor(std::max(height * 0.15, 10.));
+void Window::drawgraph()
+{
+    double graph_x_step = width / (double) (FRAMETIME_COUNT - 1);
+    int graph_height
+        = biggraph ? height : (int) floor(std::max(height * 0.15, 10.));
     int graph_top_y = height - graph_height;
     int graph_mid_y = height - graph_height / 2;
 
@@ -191,15 +230,16 @@ void Window::drawgraph() {
     SDL_SetRenderDrawColor(renderer, 100, 100, 220, 200);
     SDL_RenderDrawLine(renderer, 0, graph_mid_y, width, graph_mid_y);
 
-#define TRANSFORM_X(I) ((int)floor((I) * graph_x_step + 0.5))
-#define TRANSFORM_Y(S) (height - 1 - (int)floor(((S) / (1. / 60. * 2)) * graph_height + 0.5))
+#define TRANSFORM_X(I) ((int) floor((I) *graph_x_step + 0.5))
+#define TRANSFORM_Y(S)                                                         \
+    (height - 1 - (int) floor(((S) / (1. / 60. * 2)) * graph_height + 0.5))
 
     size_t samplecount = frametime.size();
     if (samplecount < 2)
         return;
 
     for (size_t i = 0; i < samplecount; i++) {
-        FrameTime & times = frametime.at(i);
+        FrameTime& times = frametime.at(i);
 
         full_line[i].x = TRANSFORM_X(i);
         event_line[i].x = full_line[i].x;
@@ -233,48 +273,53 @@ void Window::drawgraph() {
     if (biggraph) {
         if (showeventline) {
             SDL_SetRenderDrawColor(renderer, 255, 102, 255, 200);
-            SDL_RenderDrawLines(renderer, event_line.data(), (int)samplecount);
+            SDL_RenderDrawLines(renderer, event_line.data(), (int) samplecount);
         }
         if (showupdateline) {
             SDL_SetRenderDrawColor(renderer, 255, 255, 255, 200);
-            SDL_RenderDrawLines(renderer, update_line.data(), (int)samplecount);
+            SDL_RenderDrawLines(renderer, update_line.data(),
+                                (int) samplecount);
         }
         if (showclearline) {
             SDL_SetRenderDrawColor(renderer, 255, 255, 0, 200);
-            SDL_RenderDrawLines(renderer, clear_line.data(), (int)samplecount);
+            SDL_RenderDrawLines(renderer, clear_line.data(), (int) samplecount);
         }
         if (showdrawline) {
             SDL_SetRenderDrawColor(renderer, 200, 200, 255, 200);
-            SDL_RenderDrawLines(renderer, draw_line.data(), (int)samplecount);
+            SDL_RenderDrawLines(renderer, draw_line.data(), (int) samplecount);
         }
     }
 
     if (showswapline) {
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 200);
-        SDL_RenderDrawLines(renderer, swap_line.data(), (int)samplecount);
+        SDL_RenderDrawLines(renderer, swap_line.data(), (int) samplecount);
     }
     if (showfullline) {
         SDL_SetRenderDrawColor(renderer, 0, 255, 0, 200);
-        SDL_RenderDrawLines(renderer, full_line.data(), (int)samplecount);
+        SDL_RenderDrawLines(renderer, full_line.data(), (int) samplecount);
     }
 }
 
-void Window::clear() {
+void Window::clear()
+{
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     SDL_RenderClear(renderer);
 }
 
-void Window::swap() {
+void Window::swap()
+{
     SDL_RenderPresent(renderer);
 }
 
-void Window::settitle() {
+void Window::settitle()
+{
     static std::string title(128, 0);
 
     SDL_RendererInfo info;
     SDL_GetRendererInfo(renderer, &info);
     title.assign(info.name);
-    title.append(interpolate ? ", interpolating position" : ", not interpolating");
+    title.append(interpolate ? ", interpolating position"
+                             : ", not interpolating");
     title.append(highprecision ? ", microsec counter" : ", millisec counter");
     if (randomdelay)
         title.append(", random delay");
@@ -282,7 +327,8 @@ void Window::settitle() {
     SDL_SetWindowTitle(handle, title.c_str());
 }
 
-static double Timer(bool highprecision) {
+static double Timer(bool highprecision)
+{
     if (highprecision) {
         static double period = 1. / SDL_GetPerformanceFrequency();
         return SDL_GetPerformanceCounter() * period;
@@ -290,7 +336,8 @@ static double Timer(bool highprecision) {
     return SDL_GetTicks() / 1000.0;
 }
 
-void Window::run() {
+void Window::run()
+{
     SDL_Event e;
     FrameTime ft;
 
@@ -306,41 +353,56 @@ void Window::run() {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT) {
                 run = 0;
-            } else if (e.type == SDL_KEYUP) {
+            }
+            else if (e.type == SDL_KEYUP) {
                 Uint32 sym = e.key.keysym.sym;
                 if (sym == SDLK_ESCAPE) {
                     run = 0;
-                } else if (sym == SDLK_SPACE) {
+                }
+                else if (sym == SDLK_SPACE) {
                     pause = !pause;
-                } else if (sym == SDLK_1) {
+                }
+                else if (sym == SDLK_1) {
                     showfullline = !showfullline;
-                } else if (sym == SDLK_2) {
+                }
+                else if (sym == SDLK_2) {
                     showeventline = !showeventline;
-                } else if (sym == SDLK_3) {
+                }
+                else if (sym == SDLK_3) {
                     showupdateline = !showupdateline;
-                } else if (sym == SDLK_4) {
+                }
+                else if (sym == SDLK_4) {
                     showclearline = !showclearline;
-                } else if (sym == SDLK_5) {
+                }
+                else if (sym == SDLK_5) {
                     showdrawline = !showdrawline;
-                } else if (sym == SDLK_6) {
+                }
+                else if (sym == SDLK_6) {
                     showswapline = !showswapline;
-                } else if (sym == SDLK_i) {
+                }
+                else if (sym == SDLK_i) {
                     interpolate = !interpolate;
                     settitle();
-                } else if (sym == SDLK_p) {
+                }
+                else if (sym == SDLK_p) {
                     highprecision = !highprecision;
-                    double difference = Timer(highprecision) - Timer(!highprecision);
+                    double difference
+                        = Timer(highprecision) - Timer(!highprecision);
                     time_frame_start += difference;
                     time_last_event += difference;
                     settitle();
-                } else if (sym == SDLK_r) {
+                }
+                else if (sym == SDLK_r) {
                     randomdelay = !randomdelay;
                     settitle();
-                } else if (sym == SDLK_b) {
+                }
+                else if (sym == SDLK_b) {
                     biggraph = !biggraph;
                 }
-            } else if (e.type == SDL_WINDOWEVENT) {
-                if (e.window.event == SDL_WINDOWEVENT_RESIZED || e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+            }
+            else if (e.type == SDL_WINDOWEVENT) {
+                if (e.window.event == SDL_WINDOWEVENT_RESIZED
+                    || e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
                     width = e.window.data1;
                     height = e.window.data2;
                 }
@@ -366,7 +428,8 @@ void Window::run() {
         const double alpha = accumulator / tick_rate;
 
         if (randomdelay) {
-            double delay_end = Timer(highprecision) + (xorshift() % 16 + 5) / 1000.;
+            double delay_end
+                = Timer(highprecision) + (xorshift() % 16 + 5) / 1000.;
             while (delay_end >= Timer(highprecision)) {
             }
         }
@@ -402,7 +465,8 @@ void Window::run() {
     }
 }
 
-int main(int argc, char * argv[]) {
+int main(int argc, char* argv[])
+{
     AM::ignore(argc);
     AM::ignore(argv);
 
@@ -414,9 +478,9 @@ int main(int argc, char * argv[]) {
     try {
         window.init();
         window.run();
-    } catch(const char * msg) {
+    } catch (const char* msg) {
         std::cout << msg << std::endl;
-    } catch(...) {
+    } catch (...) {
         std::cout << "Unexpected exception" << std::endl;
     }
 

@@ -10,12 +10,11 @@
 
 namespace AM
 {
-
 /**
  * This class owns a listener socket and can accept new Peers.
- * TODO: Peer/acceptor seem like a redundant layer and should probably be removed.
- *       A Client/Server class and the SocketSet/TcpSocket classes should be able to
- *       cleanly handle all the responsibilities.
+ * TODO: Peer/acceptor seem like a redundant layer and should probably be
+ * removed. A Client/Server class and the SocketSet/TcpSocket classes should be
+ * able to cleanly handle all the responsibilities.
  */
 class Acceptor
 {
@@ -36,7 +35,6 @@ private:
     /** A pointer to the set to add accepted clients to. */
     std::shared_ptr<SocketSet> clientSet;
 };
-
 
 } /* End namespace AM */
 

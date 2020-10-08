@@ -5,18 +5,19 @@
 
 namespace AM
 {
-
 /**
- * This struct represents all of the sprite data that the RenderSystem needs, except for
- * the world position.
+ * This struct represents all of the sprite data that the RenderSystem needs,
+ * except for the world position.
  *
  * World position should be pulled from an associated PositionComponent.
  */
-struct SpriteComponent
-{
+struct SpriteComponent {
 public:
     SpriteComponent()
-    : texturePtr(nullptr), posInTexture { 0, 0, 0, 0 }, width(0), height(0)
+    : texturePtr(nullptr)
+    , posInTexture{0, 0, 0, 0}
+    , width(0)
+    , height(0)
     {
     }
 

@@ -13,13 +13,13 @@ namespace AM
 {
 namespace Client
 {
-
-NpcMovementSystem::NpcMovementSystem(Game& inGame, World& inWorld, Network& inNetwork)
-: lastReceivedTick(0),
-  lastProcessedTick(0),
-  game(inGame),
-  world(inWorld),
-  network(inNetwork)
+NpcMovementSystem::NpcMovementSystem(Game& inGame, World& inWorld,
+                                     Network& inNetwork)
+: lastReceivedTick(0)
+, lastProcessedTick(0)
+, game(inGame)
+, world(inWorld)
+, network(inNetwork)
 {
 }
 
@@ -33,13 +33,15 @@ void NpcMovementSystem::updateNpcs()
     // Receive any updates from the server.
     receiveEntityUpdates();
 
-    // We want to process updates until we've either hit the desired, or run out of data.
+    // We want to process updates until we've either hit the desired, or run out
+    // of data.
     Uint32 desiredTick = game.getCurrentTick() - PAST_TICK_OFFSET;
 
-    /* While we have data to use, apply updates for all unprocessed ticks including the
-       desired tick. */
+    /* While we have data to use, apply updates for all unprocessed ticks
+       including the desired tick. */
     bool updated = false;
-    while ((lastProcessedTick <= desiredTick) && (stateUpdateQueue.size() > 0)) {
+    while ((lastProcessedTick <= desiredTick)
+           && (stateUpdateQueue.size() > 0)) {
         updated = true;
         // Move all NPCs as if their inputs didn't change.
         moveAllNpcs();
@@ -47,8 +49,10 @@ void NpcMovementSystem::updateNpcs()
         // Check that the processed tick is progressing incrementally.
         NpcStateUpdate& stateUpdate = stateUpdateQueue.front();
         if (stateUpdate.tickNum != (lastProcessedTick + 1)) {
-            DebugError("Processing NPC movement out of order. stateUpdate.tickNum: %u, "
-                       "lastProcessedTick: %u", stateUpdate.tickNum, lastProcessedTick);
+            DebugError("Processing NPC movement out of order. "
+                       "stateUpdate.tickNum: %u, "
+                       "lastProcessedTick: %u",
+                       stateUpdate.tickNum, lastProcessedTick);
         }
 
         // If the update contained new data, apply it.
@@ -61,7 +65,8 @@ void NpcMovementSystem::updateNpcs()
         stateUpdateQueue.pop();
     }
     if ((lastReceivedTick != 0) && !updated) {
-        DebugInfo("Tick passed with no update. last: %u, desired: %u, queueSize: %u",
+        DebugInfo(
+            "Tick passed with no update. last: %u, desired: %u, queueSize: %u",
             lastProcessedTick, desiredTick, stateUpdateQueue.size());
     }
 }
@@ -105,9 +110,9 @@ void NpcMovementSystem::handleExplicitConfirmation()
 
 void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
 {
-    // If there's a gap > 1 between the latest received tick and the confirmed tick,
-    // we know that no changes happened on the in-between ticks and can push
-    // confirmations for them.
+    // If there's a gap > 1 between the latest received tick and the confirmed
+    // tick, we know that no changes happened on the in-between ticks and can
+    // push confirmations for them.
     unsigned int implicitConfirmations = confirmedTick - lastReceivedTick;
     for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
         stateUpdateQueue.push({(lastReceivedTick + i), false, nullptr});
@@ -117,17 +122,19 @@ void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
     lastReceivedTick = confirmedTick;
 }
 
-void NpcMovementSystem::handleUpdate(const std::shared_ptr<const EntityUpdate>& entityUpdate)
+void NpcMovementSystem::handleUpdate(
+    const std::shared_ptr<const EntityUpdate>& entityUpdate)
 {
     Uint32 newReceivedTick = entityUpdate->tickNum;
 
     if (lastReceivedTick != 0) {
-        // The update message implicitly confirms all ticks since our last received.
+        // The update message implicitly confirms all ticks since our last
+        // received.
         handleImplicitConfirmation(newReceivedTick - 1);
     }
     else {
-        // This is our first received update, set the last processed tick so things look
-        // incrementally increasing.
+        // This is our first received update, set the last processed tick so
+        // things look incrementally increasing.
         lastProcessedTick = newReceivedTick - 1;
     }
 
@@ -141,11 +148,12 @@ void NpcMovementSystem::handleUpdate(const std::shared_ptr<const EntityUpdate>& 
 void NpcMovementSystem::moveAllNpcs()
 {
     for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
-        /* Move all NPCs that have an input, position, and movement component. */
+        /* Move all NPCs that have an input, position, and movement component.
+         */
         if (entityID != world.playerID
-        && (world.componentFlags[entityID] & ComponentFlag::Input)
-        && (world.componentFlags[entityID] & ComponentFlag::Position)
-        && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
+            && (world.componentFlags[entityID] & ComponentFlag::Input)
+            && (world.componentFlags[entityID] & ComponentFlag::Position)
+            && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
             // Save the old position.
             PositionComponent& currentPosition = world.positions[entityID];
             PositionComponent& oldPosition = world.oldPositions[entityID];
@@ -153,18 +161,21 @@ void NpcMovementSystem::moveAllNpcs()
             oldPosition.y = currentPosition.y;
 
             // Process their movement.
-            MovementHelpers::moveEntity(currentPosition, world.movements[entityID],
+            MovementHelpers::moveEntity(
+                currentPosition, world.movements[entityID],
                 world.inputs[entityID].inputStates, GAME_TICK_TIMESTEP_S);
         }
     }
 }
 
 void NpcMovementSystem::applyUpdateMessage(
-const std::shared_ptr<const EntityUpdate>& entityUpdate)
+    const std::shared_ptr<const EntityUpdate>& entityUpdate)
 {
     const std::vector<Entity>& entities = entityUpdate->entities;
-    /* Use the data in the message to correct any NPCs that did change inputs. */
-    for (auto entityIt = entities.begin(); entityIt != entities.end(); ++entityIt) {
+    /* Use the data in the message to correct any NPCs that did change inputs.
+     */
+    for (auto entityIt = entities.begin(); entityIt != entities.end();
+         ++entityIt) {
         // Skip the player (not an NPC).
         EntityID entityID = entityIt->id;
         if (entityID == world.playerID) {
@@ -179,10 +190,10 @@ const std::shared_ptr<const EntityUpdate>& entityUpdate)
 
             // TODO: Get this info from the server.
             // Get the same texture as the player.
-            world.sprites[entityID].texturePtr =
-                world.sprites[world.playerID].texturePtr;
-            world.sprites[entityID].posInTexture =
-                world.sprites[world.playerID].posInTexture;
+            world.sprites[entityID].texturePtr
+                = world.sprites[world.playerID].texturePtr;
+            world.sprites[entityID].posInTexture
+                = world.sprites[world.playerID].posInTexture;
             world.sprites[entityID].width = 64;
             world.sprites[entityID].height = 64;
 
@@ -205,8 +216,9 @@ const std::shared_ptr<const EntityUpdate>& entityUpdate)
         // TEMP
         const PositionComponent& currentPosition = world.positions[entityID];
         const PositionComponent& newPosition = entityIt->positionComponent;
-        DebugInfo("Update: %d: (%f, %f) -> (%f, %f)", entityID, currentPosition.x,
-            currentPosition.y, newPosition.x, newPosition.y);
+        DebugInfo("Update: %d: (%f, %f) -> (%f, %f)", entityID,
+                  currentPosition.x, currentPosition.y, newPosition.x,
+                  newPosition.y);
         // TEMP
         world.positions[entityID] = entityIt->positionComponent;
     }

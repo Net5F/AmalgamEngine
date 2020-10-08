@@ -19,7 +19,7 @@ mkdir -p $BuildPath
 if [ $# -eq 2 ] && [ $2 = "Clobber" ] ; then
     # Check if we're in the right directory.
     if ! [ -f "$BuildPath/CMakeCache.txt" ] ; then
-        echo "Clobber requested, but CMakeCache.txt was not found in the current directory. Aborting for safety."
+        echo "Clobber requested, but CMakeCache.txt was not found in the build directory. Aborting for safety."
         exit 1
     fi
     

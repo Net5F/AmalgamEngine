@@ -7,13 +7,12 @@
 
 namespace AM
 {
-
 /**
  * This struct represents the data for a single entity.
- * Normally an entity's data lives in the ECS, so this is only really useful for messaging.
+ * Normally an entity's data lives in the ECS, so this is only really useful for
+ * messaging.
  */
-struct Entity
-{
+struct Entity {
     /** This entity's sim ID. */
     Uint32 id = 0;
 
@@ -25,7 +24,7 @@ struct Entity
     MovementComponent movementComponent;
 };
 
-template <typename S>
+template<typename S>
 void serialize(S& serializer, Entity& entity)
 {
     serializer.value4b(entity.id);

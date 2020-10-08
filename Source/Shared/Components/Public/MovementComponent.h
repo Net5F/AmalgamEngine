@@ -2,9 +2,7 @@
 
 namespace AM
 {
-
-struct MovementComponent
-{
+struct MovementComponent {
 public:
     static constexpr float DEFAULT_MAX_VEL = 5;
 
@@ -21,7 +19,7 @@ public:
     float maxVelY = DEFAULT_MAX_VEL;
 };
 
-template <typename S>
+template<typename S>
 void serialize(S& serializer, MovementComponent& movementComponent)
 {
     serializer.value4b(movementComponent.velX);

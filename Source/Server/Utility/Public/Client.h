@@ -13,12 +13,10 @@
 
 namespace AM
 {
-
 class Peer;
 
 namespace Server
 {
-
 /**
  * This class represents a single client and facilitates the organization of our
  * communication with them.
@@ -48,10 +46,11 @@ public:
     /**
      * Tries to receive a message from this client.
      * If no message is received, checks if this client has timed out.
-     * Note: It's expected that you called SDLNet_CheckSockets() on the outside-managed
-     *       socket set before calling this.
+     * Note: It's expected that you called SDLNet_CheckSockets() on the
+     * outside-managed socket set before calling this.
      *
-     * @return A received Message. If no data was waiting, return.messageType will
+     * @return A received Message. If no data was waiting, return.messageType
+     * will
      *         == NotSet and return.messageBuffer will == nullptr.
      */
     Message receiveMessage();
@@ -60,9 +59,9 @@ public:
      * @return True if the client is connected, else false.
      *
      * Note: There's 2 places where a disconnect can occur:
-     *       If the client initiates a disconnect, the peer will internally set a flag.
-     *       If we initiated a disconnect, peer will be set to nullptr.
-     *       Both cases are detected by this method.
+     *       If the client initiates a disconnect, the peer will internally set
+     * a flag. If we initiated a disconnect, peer will be set to nullptr. Both
+     * cases are detected by this method.
      */
     bool isConnected();
 
@@ -76,11 +75,12 @@ public:
     static constexpr Sint64 LOWEST_VALID_TICKDIFF = -10;
     /** The highest difference we'll work with. */
     static constexpr Sint64 HIGHEST_VALID_TICKDIFF = 10;
-    /** The range of difference (inclusive) between a received message's tickNum and our
-        current tickNum that we won't send an adjustment for. */
+    /** The range of difference (inclusive) between a received message's tickNum
+       and our current tickNum that we won't send an adjustment for. */
     static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_LOWER = 1;
     static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_UPPER = 3;
-    /** The value that we'll adjust clients to if they fall outside the bounds. */
+    /** The value that we'll adjust clients to if they fall outside the bounds.
+     */
     static constexpr Sint64 TICKDIFF_TARGET = 2;
 
     struct AdjustmentData {
@@ -93,11 +93,12 @@ public:
     /**
      * Records the given tick diff in tickDiffHistory.
      *
-     * Diffs are generally obtained through the return value of MessageSorter.push(),
-     * and represent how far off the tickNum in a received message was from our current tick.
+     * Diffs are generally obtained through the return value of
+     * MessageSorter.push(), and represent how far off the tickNum in a received
+     * message was from our current tick.
      *
-     * If the diff isn't in our valid range, it's discarded and the client is forcibly
-     * disconnected.
+     * If the diff isn't in our valid range, it's discarded and the client is
+     * forcibly disconnected.
      */
     void recordTickDiff(Sint64 tickDiff);
 
@@ -125,23 +126,25 @@ private:
     void fillHeader(Uint8 messageCount, Uint32 currentTick);
 
     /**
-     * Run through all checks necessary to determine if we should tell the client to adjust
-     * its tick.
-     * Note: The parameters could be obtained internally, but passing them in provides a
-     *       clear separation between setup and adjustment logic.
-     * @param averageDiff  The average tick difference, calculated from the tickDiffHistory.
-     * @param tickDiffHistoryCopy  A copy of the tickDiffHistory, so that we don't need to
-     *        lock it.
+     * Run through all checks necessary to determine if we should tell the
+     * client to adjust its tick. Note: The parameters could be obtained
+     * internally, but passing them in provides a clear separation between setup
+     * and adjustment logic.
+     * @param averageDiff  The average tick difference, calculated from the
+     * tickDiffHistory.
+     * @param tickDiffHistoryCopy  A copy of the tickDiffHistory, so that we
+     * don't need to lock it.
      * @return The calculated adjustment. 0 if no adjustment was needed.
      */
     Sint8 calcAdjustment(
-    float averageDiff,
-    CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy);
+        float averageDiff,
+        CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy);
 
     //--------------------------------------------------------------------------
     // Connection, Batching
     //--------------------------------------------------------------------------
-    /** How long we should wait before considering the client to be timed out. */
+    /** How long we should wait before considering the client to be timed out.
+     */
     static constexpr double TIMEOUT_S = NETWORK_TICK_TIMESTEP_S * 10;
 
     /** Our Network-given ID. */
@@ -163,7 +166,8 @@ private:
     /** The latest tick that we've sent an update to this client for. */
     Uint32 latestSentSimTick;
 
-    /** Tracks how long it's been since we've received a message from this client. */
+    /** Tracks how long it's been since we've received a message from this
+     * client. */
     Timer receiveTimer;
 
     //--------------------------------------------------------------------------
@@ -175,7 +179,8 @@ private:
     CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH> tickDiffHistory;
 
     /**
-     * Used to prevent tickDiffHistory changing while a getTickAdjustment is happening.
+     * Used to prevent tickDiffHistory changing while a getTickAdjustment is
+     * happening.
      */
     std::mutex tickDiffMutex;
 

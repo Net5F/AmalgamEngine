@@ -9,24 +9,23 @@
 
 namespace AM
 {
-
 class EntityUpdate;
 
 namespace Client
 {
-
 class Game;
 class World;
 class Network;
 
 /**
- * Processes NPC (networked player and AI) entity update messages and moves their
- * entities appropriately.
+ * Processes NPC (networked player and AI) entity update messages and moves
+ * their entities appropriately.
  */
 class NpcMovementSystem
 {
 public:
-    /** Our best guess at a good amount of ticks in the past to replicate NPCs at. */
+    /** Our best guess at a good amount of ticks in the past to replicate NPCs
+     * at. */
     static constexpr unsigned int PAST_TICK_OFFSET = 10;
 
     NpcMovementSystem(Game& inGame, World& inWorld, Network& inNetwork);
@@ -54,8 +53,8 @@ private:
     void moveAllNpcs();
 
     /**
-     * Receives NPC entity update messages from the network and pushes them into the
-     * stateUpdateQueue.
+     * Receives NPC entity update messages from the network and pushes them into
+     * the stateUpdateQueue.
      */
     void receiveEntityUpdates();
 
@@ -63,13 +62,15 @@ private:
     void handleExplicitConfirmation();
     /** Pushes messages confirming ticks up to confirmedTick. */
     void handleImplicitConfirmation(const Uint32 confirmedTick);
-    /** Handles an update message, including implicit confirmations based on it. */
+    /** Handles an update message, including implicit confirmations based on it.
+     */
     void handleUpdate(const std::shared_ptr<const EntityUpdate>& entityUpdate);
 
     /**
      * Applies the given update message to the entity world state.
      */
-    void applyUpdateMessage(const std::shared_ptr<const EntityUpdate>& entityUpdate);
+    void applyUpdateMessage(
+        const std::shared_ptr<const EntityUpdate>& entityUpdate);
 
     /** Holds NPC state deltas that are waiting to be processed. */
     std::queue<NpcStateUpdate> stateUpdateQueue;

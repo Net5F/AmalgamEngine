@@ -13,14 +13,12 @@
 
 namespace AM
 {
-
 class Peer;
 class ConnectionResponse;
 class EntityUpdate;
 
 namespace Client
 {
-
 /**
  * Provides Network functionality in the format that the Game wants.
  */
@@ -54,11 +52,14 @@ public:
      * Returns a message if there are any in the associated queue.
      * If there are none, waits for one up to the given timeout.
      *
-     * @param timeoutMs  How long to wait. 0 for no wait, -1 for indefinite. Defaults to 0.
+     * @param timeoutMs  How long to wait. 0 for no wait, -1 for indefinite.
+     * Defaults to 0.
      * @return A waiting message, else nullptr.
      */
-    std::unique_ptr<ConnectionResponse> receiveConnectionResponse(Uint64 timeoutMs = 0);
-    std::shared_ptr<const EntityUpdate> receivePlayerUpdate(Uint64 timeoutMs = 0);
+    std::unique_ptr<ConnectionResponse>
+        receiveConnectionResponse(Uint64 timeoutMs = 0);
+    std::shared_ptr<const EntityUpdate> receivePlayerUpdate(Uint64 timeoutMs
+                                                            = 0);
     NpcReceiveResult receiveNpcUpdate(Uint64 timeoutMs = 0);
 
     /**
@@ -69,10 +70,11 @@ public:
     int pollForMessages();
 
     /**
-     * Subtracts an appropriate amount from the tickAdjustment based on its current value,
-     * and returns the amount subtracted.
-     * @return 1 if there's a negative tickAdjustment (the sim can only freeze 1 tick at a
-     *         time), else 0 or a negative amount equal to the current tickAdjustment.
+     * Subtracts an appropriate amount from the tickAdjustment based on its
+     * current value, and returns the amount subtracted.
+     * @return 1 if there's a negative tickAdjustment (the sim can only freeze 1
+     * tick at a time), else 0 or a negative amount equal to the current
+     * tickAdjustment.
      */
     int transferTickAdjustment();
 
@@ -83,13 +85,15 @@ public:
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
 private:
-    /** If we haven't sent any messages since the last network tick, sends a heartbeat. */
+    /** If we haven't sent any messages since the last network tick, sends a
+     * heartbeat. */
     void sendHeartbeatIfNecessary();
 
     /**
      * Processes the received header and following batch.
      * If any messages are expected, receives the messages.
-     * If it confirmed any ticks that had no changes, updates the confirmed tick count.
+     * If it confirmed any ticks that had no changes, updates the confirmed tick
+     * count.
      */
     void processBatch();
 
@@ -97,14 +101,17 @@ private:
      * Pushes a message into the appropriate queue, based on its contents.
      * @pre A serialized message is in messageRecBuffer, starting at index 0.
      * @param messageType  The type of the received message to process.
-     * @param messageSize  The length in bytes of the message in messageRecBuffer.
+     * @param messageSize  The length in bytes of the message in
+     * messageRecBuffer.
      */
     void processReceivedMessage(MessageType messageType, Uint16 messageSize);
 
     /**
-     * Checks if we need to process the received adjustment, does so if necessary.
+     * Checks if we need to process the received adjustment, does so if
+     * necessary.
      * @param receivedTickAdj  The received tick adjustment.
-     * @param receivedAdjIteration  The adjustment iteration for the received adjustment.
+     * @param receivedAdjIteration  The adjustment iteration for the received
+     * adjustment.
      */
     void adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration);
 
@@ -139,7 +146,8 @@ private:
     /** Pointer to the game's current tick. */
     const std::atomic<Uint32>* currentTickPtr;
 
-    /** Tracks how long it's been since we've received a message from the server. */
+    /** Tracks how long it's been since we've received a message from the
+     * server. */
     Timer receiveTimer;
 
     /** Calls pollForMessages(). */
@@ -148,16 +156,16 @@ private:
     std::atomic<bool> exitRequested;
 
     /** These queues store received messages that are waiting to be consumed. */
-    using ConnectionResponseQueue
-              = moodycamel::BlockingReaderWriterQueue<std::unique_ptr<ConnectionResponse>>;
+    using ConnectionResponseQueue = moodycamel::BlockingReaderWriterQueue<
+        std::unique_ptr<ConnectionResponse>>;
     ConnectionResponseQueue connectionResponseQueue;
 
-    using PlayerUpdateQueue
-              = moodycamel::BlockingReaderWriterQueue<std::shared_ptr<const EntityUpdate>>;
+    using PlayerUpdateQueue = moodycamel::BlockingReaderWriterQueue<
+        std::shared_ptr<const EntityUpdate>>;
     PlayerUpdateQueue playerUpdateQueue;
 
     using NpcUpdateQueue
-              = moodycamel::BlockingReaderWriterQueue<NpcUpdateMessage>;
+        = moodycamel::BlockingReaderWriterQueue<NpcUpdateMessage>;
     NpcUpdateQueue npcUpdateQueue;
 
     /** Used to hold headers while we process them. */

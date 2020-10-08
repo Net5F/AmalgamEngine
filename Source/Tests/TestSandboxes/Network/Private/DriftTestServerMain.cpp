@@ -33,7 +33,7 @@ int inputThread(std::atomic<bool>* exitRequested)
 
 /** Checks for new client connections, sends our current tick to new clients. */
 void updateConnection(TCPsocket& serverSocket, TCPsocket& clientSocket,
-                        SDLNet_SocketSet& clientSet, Uint32 currentTick)
+                      SDLNet_SocketSet& clientSet, Uint32 currentTick)
 {
     // Check for a connection.
     if (clientSocket == nullptr) {
@@ -47,12 +47,14 @@ void updateConnection(TCPsocket& serverSocket, TCPsocket& clientSocket,
             }
             else {
                 // Connected, send our current tick.
-                // +1 because we'll have finished the tick by the time the client gets this.
+                // +1 because we'll have finished the tick by the time the
+                // client gets this.
                 Uint32 tickToSend = currentTick + 1;
                 std::array<Uint8, sizeof(Uint32)> sendBuffer = {};
                 _SDLNet_Write32(tickToSend, &sendBuffer);
 
-                int bytesSent = SDLNet_TCP_Send(clientSocket, &sendBuffer, sizeof(Uint32));
+                int bytesSent = SDLNet_TCP_Send(clientSocket, &sendBuffer,
+                                                sizeof(Uint32));
                 if (bytesSent < static_cast<int>(sizeof(Uint32))) {
                     DebugError("Failed to send current tick.");
                 }
@@ -66,7 +68,8 @@ void updateConnection(TCPsocket& serverSocket, TCPsocket& clientSocket,
 std::array<Uint8, NUM_BYTES> recBuffer = {};
 // The number of bytes that we've received from the current message.
 unsigned int bytesReceived = 0;
-/** Receives the message from the client and compares the given tick number to our current. */
+/** Receives the message from the client and compares the given tick number to
+ * our current. */
 bool receiveAndHandle(SDLNet_SocketSet& clientSet, TCPsocket& clientSocket,
                       std::atomic<Uint32>& currentTick)
 {
@@ -74,7 +77,7 @@ bool receiveAndHandle(SDLNet_SocketSet& clientSet, TCPsocket& clientSocket,
     if (numReady == 1) {
         // Receive the waiting data.
         int result = SDLNet_TCP_Recv(clientSocket, &(recBuffer[bytesReceived]),
-            (NUM_BYTES - bytesReceived));
+                                     (NUM_BYTES - bytesReceived));
         if (result <= 0) {
             DebugInfo("Detected disconnect.");
             return false;
@@ -82,13 +85,14 @@ bool receiveAndHandle(SDLNet_SocketSet& clientSet, TCPsocket& clientSocket,
 
         bytesReceived += result;
 
-        // If we finished receiving the message, compare it to currentTick and print the diff.
+        // If we finished receiving the message, compare it to currentTick and
+        // print the diff.
         if (bytesReceived == NUM_BYTES) {
             Sint64 clientTick = static_cast<Sint64>(_SDLNet_Read32(&recBuffer));
             Sint64 serverTick = static_cast<Sint64>(currentTick);
 
             DebugInfo("Client tick: %d, Server tick: %d, Diff: %d", clientTick,
-                serverTick, (clientTick - serverTick));
+                      serverTick, (clientTick - serverTick));
 
             bytesReceived = 0;
         }
@@ -156,16 +160,18 @@ int main(int argc, char* argv[])
             /* Prepare for the next tick. */
             accumulatedTime -= TEST_GAME_TICK_INTERVAL_S;
             if (accumulatedTime >= TEST_GAME_TICK_INTERVAL_S) {
-                DebugInfo(
-                    "Detected a request for multiple game ticks in the same frame. Game tick "
-                    "must have been massively delayed. Game tick was delayed by: %.8fs.",
-                    accumulatedTime);
+                DebugInfo("Detected a request for multiple game ticks in the "
+                          "same frame. Game tick "
+                          "must have been massively delayed. Game tick was "
+                          "delayed by: %.8fs.",
+                          accumulatedTime);
             }
             else if (accumulatedTime >= TEST_GAME_DELAYED_TIME_S) {
-                // Game missed its ideal call time, could be our issue or general
-                // system slowness.
-                DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
-                    accumulatedTime);
+                // Game missed its ideal call time, could be our issue or
+                // general system slowness.
+                DebugInfo("Detected a delayed game tick. Game tick was delayed "
+                          "by: %.8fs.",
+                          accumulatedTime);
             }
 
             currentTick++;
@@ -173,7 +179,8 @@ int main(int argc, char* argv[])
 
         if (clientSocket != nullptr) {
             /* Try to receive. */
-            bool result = receiveAndHandle(clientSet, clientSocket, currentTick);
+            bool result
+                = receiveAndHandle(clientSet, clientSocket, currentTick);
             if (!result) {
                 DebugError("Disconnect or other error during receive.");
             }

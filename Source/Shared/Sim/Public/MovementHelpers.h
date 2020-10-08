@@ -9,7 +9,6 @@
 
 namespace AM
 {
-
 /**
  * Shared static functions for moving entities.
  */
@@ -23,22 +22,25 @@ public:
     static constexpr float acceleration = 750;
 
     /**
-     * Moves the given PositionComponent and MovementComponent based on the given inputStates
-     * and deltaSeconds.
+     * Moves the given PositionComponent and MovementComponent based on the
+     * given inputStates and deltaSeconds.
      *
-     * @post The given position and movement components are modified in-place to the new data.
+     * @post The given position and movement components are modified in-place to
+     * the new data.
      */
-    static void moveEntity(PositionComponent& position, MovementComponent& movement,
+    static void moveEntity(PositionComponent& position,
+                           MovementComponent& movement,
                            InputStateArr& inputStates, double deltaSeconds);
 
 private:
     /**
-     * Moves the given MovementComponent based on the given inputStates and deltaSeconds.
+     * Moves the given MovementComponent based on the given inputStates and
+     * deltaSeconds.
      *
      * @post The given movement component is modified in-place to the new data.
      */
-    static void updateVelocity(MovementComponent& movement, InputStateArr& inputStates,
-                               double deltaSeconds);
+    static void updateVelocity(MovementComponent& movement,
+                               InputStateArr& inputStates, double deltaSeconds);
 };
 
 } // namespace AM

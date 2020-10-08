@@ -9,8 +9,8 @@ namespace AM
 {
 namespace Client
 {
-
-Game::Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites)
+Game::Game(Network& inNetwork,
+           const std::shared_ptr<SDL2pp::Texture>& inSprites)
 : world()
 , network(inNetwork)
 , playerInputSystem(*this, world)
@@ -29,7 +29,8 @@ Game::Game(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites
 void Game::connect()
 {
     if (RUN_OFFLINE) {
-        // No need to connect if we're running offline. Just need mock player data.
+        // No need to connect if we're running offline. Just need mock player
+        // data.
         fakeConnection();
         return;
     }
@@ -39,16 +40,16 @@ void Game::connect()
     }
 
     // Wait for the player's ID from the server.
-    std::unique_ptr<ConnectionResponse> connectionResponse =
-        network.receiveConnectionResponse(CONNECTION_RESPONSE_WAIT_MS);
+    std::unique_ptr<ConnectionResponse> connectionResponse
+        = network.receiveConnectionResponse(CONNECTION_RESPONSE_WAIT_MS);
     if (connectionResponse == nullptr) {
         DebugError("Server did not respond.");
     }
 
     // Get our info from the connection response.
     EntityID player = connectionResponse->entityID;
-    DebugInfo("Received connection response. ID: %u, tick: %u"
-              , player, connectionResponse->tickNum);
+    DebugInfo("Received connection response. ID: %u, tick: %u", player,
+              connectionResponse->tickNum);
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.
@@ -114,12 +115,14 @@ void Game::tick()
         // Calculate what tick we should be on.
         Uint32 targetTick = currentTick + 1;
         if (!RUN_OFFLINE) {
-            // If we're online, apply any adjustments that we receive from the server.
+            // If we're online, apply any adjustments that we receive from the
+            // server.
             targetTick += network.transferTickAdjustment();
         }
 
         /* Process ticks until we match what the server wants.
-           This may cause us to not process any ticks, or to process multiple ticks. */
+           This may cause us to not process any ticks, or to process multiple
+           ticks. */
         while (currentTick < targetTick) {
             /* Run all systems. */
             // Process all waiting user input events.
@@ -134,8 +137,8 @@ void Game::tick()
             // Process player and NPC movements.
             playerMovementSystem.processMovements();
 
-            // Process network movement after normal movement to sync with server.
-            // (The server processes movement before sending updates.)
+            // Process network movement after normal movement to sync with
+            // server. (The server processes movement before sending updates.)
             npcMovementSystem.updateNpcs();
 
             currentTick++;
@@ -143,22 +146,25 @@ void Game::tick()
 
         accumulatedTime -= GAME_TICK_TIMESTEP_S;
         if (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
-            DebugInfo(
-                "Detected a request for multiple game ticks in the same frame. Game tick "
-                "must have been massively delayed. Game tick was delayed by: %.8fs.",
-                accumulatedTime);
+            DebugInfo("Detected a request for multiple game ticks in the same "
+                      "frame. Game tick "
+                      "must have been massively delayed. Game tick was delayed "
+                      "by: %.8fs.",
+                      accumulatedTime);
         }
         else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
-            // Game missed its ideal call time, could be our issue or general system slowness.
-            DebugInfo("Detected a delayed game tick. Game tick was delayed by: %.8fs.",
-                accumulatedTime);
+            // Game missed its ideal call time, could be our issue or general
+            // system slowness.
+            DebugInfo("Detected a delayed game tick. Game tick was delayed by: "
+                      "%.8fs.",
+                      accumulatedTime);
         }
 
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);
         if (executionTime > GAME_TICK_TIMESTEP_S) {
             DebugInfo("Overran our sim iteration time. executionTime: %.8f",
-                executionTime);
+                      executionTime);
         }
     }
 }
@@ -167,21 +173,21 @@ void Game::processUserInputEvents()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-
         if (event.type == SDL_QUIT) {
             exitRequested = true;
         }
         else if (event.type == SDL_WINDOWEVENT) {
-//            switch(event.type) {
-//                case SDL_WINDOWEVENT_SHOWN:
-//                case SDL_WINDOWEVENT_EXPOSED:
-//                case SDL_WINDOWEVENT_MOVED:
-//                case SDL_WINDOWEVENT_MAXIMIZED:
-//                case SDL_WINDOWEVENT_RESTORED:
-//                case SDL_WINDOWEVENT_FOCUS_GAINED:
-//                // Window was messed with, we've probably lost sync with the server.
-//                // TODO: Handle the far-out-of-sync client.
-//            }
+            //            switch(event.type) {
+            //                case SDL_WINDOWEVENT_SHOWN:
+            //                case SDL_WINDOWEVENT_EXPOSED:
+            //                case SDL_WINDOWEVENT_MOVED:
+            //                case SDL_WINDOWEVENT_MAXIMIZED:
+            //                case SDL_WINDOWEVENT_RESTORED:
+            //                case SDL_WINDOWEVENT_FOCUS_GAINED:
+            //                // Window was messed with, we've probably lost
+            //                sync with the server.
+            //                // TODO: Handle the far-out-of-sync client.
+            //            }
         }
         else {
             // Assume it's a key or mouse event.
@@ -212,7 +218,8 @@ Uint32 Game::getCurrentTick()
     return currentTick;
 }
 
-std::atomic<bool> const* Game::getExitRequestedPtr() {
+std::atomic<bool> const* Game::getExitRequestedPtr()
+{
     return &exitRequested;
 }
 

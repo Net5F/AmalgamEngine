@@ -6,7 +6,6 @@ namespace AM
 {
 namespace Server
 {
-
 class Game;
 class World;
 class Network;
