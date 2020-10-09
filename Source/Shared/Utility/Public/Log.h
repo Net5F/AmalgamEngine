@@ -10,20 +10,20 @@
  * to get the proper file and line number, so we choose to use both macros for
  * consistency.
  */
-#define DebugInfo(...)                                                         \
+#define LOG_INFO(...)                                                         \
     {                                                                          \
-        Debug::info(__VA_ARGS__);                                              \
+        Log::info(__VA_ARGS__);                                              \
     }
 
-#define DebugError(...)                                                        \
+#define LOG_ERROR(...)                                                        \
     {                                                                          \
-        Debug::error(__FILE__, __LINE__, __VA_ARGS__);                         \
+        Log::error(__FILE__, __LINE__, __VA_ARGS__);                         \
         abort();                                                               \
     }
 
 namespace AM
 {
-class Debug
+class Log
 {
 public:
     static void

@@ -5,7 +5,7 @@
 #include "MessageTools.h"
 #include "ClientInputs.h"
 #include "Peer.h"
-#include "Debug.h"
+#include "Log.h"
 #include <memory>
 
 namespace AM

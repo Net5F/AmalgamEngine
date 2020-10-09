@@ -5,7 +5,7 @@
 #include "Network.h"
 #include "ClientNetworkDefs.h"
 #include "EntityUpdate.h"
-#include "Debug.h"
+#include "Log.h"
 #include <memory>
 #include <string>
 
@@ -49,7 +49,7 @@ void NpcMovementSystem::updateNpcs()
         // Check that the processed tick is progressing incrementally.
         NpcStateUpdate& stateUpdate = stateUpdateQueue.front();
         if (stateUpdate.tickNum != (lastProcessedTick + 1)) {
-            DebugError("Processing NPC movement out of order. "
+            LOG_ERROR("Processing NPC movement out of order. "
                        "stateUpdate.tickNum: %u, "
                        "lastProcessedTick: %u",
                        stateUpdate.tickNum, lastProcessedTick);
@@ -65,7 +65,7 @@ void NpcMovementSystem::updateNpcs()
         stateUpdateQueue.pop();
     }
     if ((lastReceivedTick != 0) && !updated) {
-        DebugInfo(
+        LOG_INFO(
             "Tick passed with no update. last: %u, desired: %u, queueSize: %u",
             lastProcessedTick, desiredTick, stateUpdateQueue.size());
     }
@@ -105,7 +105,7 @@ void NpcMovementSystem::handleExplicitConfirmation()
 {
     lastReceivedTick++;
     stateUpdateQueue.push({lastReceivedTick, false, nullptr});
-    DebugInfo("Explicit push: %u", lastReceivedTick);
+    LOG_INFO("Explicit push: %u", lastReceivedTick);
 }
 
 void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
@@ -116,7 +116,7 @@ void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
     unsigned int implicitConfirmations = confirmedTick - lastReceivedTick;
     for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
         stateUpdateQueue.push({(lastReceivedTick + i), false, nullptr});
-        DebugInfo("Implicit push: %u", (lastReceivedTick + i));
+        LOG_INFO("Implicit push: %u", (lastReceivedTick + i));
     }
 
     lastReceivedTick = confirmedTick;
@@ -140,7 +140,7 @@ void NpcMovementSystem::handleUpdate(
 
     // Push the update into the buffer.
     stateUpdateQueue.push({newReceivedTick, true, entityUpdate});
-    DebugInfo("Update push: %u", newReceivedTick);
+    LOG_INFO("Update push: %u", newReceivedTick);
 
     lastReceivedTick = newReceivedTick;
 }
@@ -184,7 +184,7 @@ void NpcMovementSystem::applyUpdateMessage(
 
         // If the entity doesn't exist, add it to our list.
         if (!(world.entityExists(entityID))) {
-            DebugInfo("New entity added. ID: %u", entityID);
+            LOG_INFO("New entity added. ID: %u", entityID);
             // TODO: Add names for real.
             world.addEntity(std::to_string(entityID), entityID);
 
@@ -216,7 +216,7 @@ void NpcMovementSystem::applyUpdateMessage(
         // TEMP
         const PositionComponent& currentPosition = world.positions[entityID];
         const PositionComponent& newPosition = entityIt->positionComponent;
-        DebugInfo("Update: %d: (%f, %f) -> (%f, %f)", entityID,
+        LOG_INFO("Update: %d: (%f, %f) -> (%f, %f)", entityID,
                   currentPosition.x, currentPosition.y, newPosition.x,
                   newPosition.y);
         // TEMP

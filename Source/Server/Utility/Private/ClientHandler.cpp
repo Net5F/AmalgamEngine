@@ -4,7 +4,7 @@
 #include <shared_mutex>
 #include <mutex>
 #include <memory>
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -69,7 +69,7 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
 
     while (newPeer != nullptr) {
         NetworkID newID = idPool.reserveID();
-        DebugInfo("New client connected. Assigning netID: %u", newID);
+        LOG_INFO("New client connected. Assigning netID: %u", newID);
 
         // Add the peer to the Network's clientMap, constructing a Client
         // in-place.
@@ -79,7 +79,7 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
                                           newID, std::move(newPeer)))
                   .second)) {
             idPool.freeID(newID);
-            DebugError("Ran out of room in client map or key already existed.");
+            LOG_ERROR("Ran out of room in client map or key already existed.");
         }
 
         // Add an event to the Network's queue.
@@ -108,7 +108,7 @@ void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
             network.getDisconnectEventQueue().enqueue(it->first);
 
             // Erase the disconnected client.
-            DebugInfo("Erased disconnected client with netID: %u.", it->first);
+            LOG_INFO("Erased disconnected client with netID: %u.", it->first);
             idPool.freeID(it->first);
             it = clientMap.erase(it);
         }

@@ -2,7 +2,7 @@
 #include "Network.h"
 #include "ClientNetworkDefs.h"
 #include "ConnectionResponse.h"
-#include "Debug.h"
+#include "Log.h"
 #include <memory>
 
 namespace AM
@@ -22,7 +22,7 @@ Game::Game(Network& inNetwork,
 , sprites(inSprites)
 , exitRequested(false)
 {
-    Debug::registerCurrentTickPtr(&currentTick);
+    Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);
 }
 
@@ -36,19 +36,19 @@ void Game::connect()
     }
 
     while (!(network.connect())) {
-        DebugInfo("Network failed to connect. Retrying.");
+        LOG_INFO("Network failed to connect. Retrying.");
     }
 
     // Wait for the player's ID from the server.
     std::unique_ptr<ConnectionResponse> connectionResponse
         = network.receiveConnectionResponse(CONNECTION_RESPONSE_WAIT_MS);
     if (connectionResponse == nullptr) {
-        DebugError("Server did not respond.");
+        LOG_ERROR("Server did not respond.");
     }
 
     // Get our info from the connection response.
     EntityID player = connectionResponse->entityID;
-    DebugInfo("Received connection response. ID: %u, tick: %u", player,
+    LOG_INFO("Received connection response. ID: %u, tick: %u", player,
               connectionResponse->tickNum);
 
     // Aim our tick for some reasonable point ahead of the server.
@@ -146,7 +146,7 @@ void Game::tick()
 
         accumulatedTime -= GAME_TICK_TIMESTEP_S;
         if (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
-            DebugInfo("Detected a request for multiple game ticks in the same "
+            LOG_INFO("Detected a request for multiple game ticks in the same "
                       "frame. Game tick "
                       "must have been massively delayed. Game tick was delayed "
                       "by: %.8fs.",
@@ -155,7 +155,7 @@ void Game::tick()
         else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
             // Game missed its ideal call time, could be our issue or general
             // system slowness.
-            DebugInfo("Detected a delayed game tick. Game tick was delayed by: "
+            LOG_INFO("Detected a delayed game tick. Game tick was delayed by: "
                       "%.8fs.",
                       accumulatedTime);
         }
@@ -163,7 +163,7 @@ void Game::tick()
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);
         if (executionTime > GAME_TICK_TIMESTEP_S) {
-            DebugInfo("Overran our sim iteration time. executionTime: %.8f",
+            LOG_INFO("Overran our sim iteration time. executionTime: %.8f",
                       executionTime);
         }
     }

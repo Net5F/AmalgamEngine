@@ -1,7 +1,7 @@
 #include "RenderSystem.h"
 #include "World.h"
 #include "Game.h"
-#include "Debug.h"
+#include "Log.h"
 #include "Ignore.h"
 
 namespace AM
@@ -60,7 +60,7 @@ void RenderSystem::render()
             // happened (probably a window event that stopped app execution.)
             // We still only want to render the latest data, but it's worth
             // giving debug output that we detected this.
-            DebugInfo("Detected a request for two renders in the same frame. "
+            LOG_INFO("Detected a request for two renders in the same frame. "
                       "Render must have been massively delayed. Render was "
                       "delayed by: %.8fs. Setting to 0.",
                       accumulatedTime);

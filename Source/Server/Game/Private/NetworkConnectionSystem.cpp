@@ -5,7 +5,7 @@
 #include "GameDefs.h"
 #include "MessageTools.h"
 #include "ConnectionResponse.h"
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -35,7 +35,7 @@ void NetworkConnectionSystem::processConnectEvents()
     for (unsigned int i = 0; i < connectEventQueue.size_approx(); ++i) {
         NetworkID clientNetworkID = 0;
         if (!(connectEventQueue.try_dequeue(clientNetworkID))) {
-            DebugError(
+            LOG_ERROR(
                 "Expected element in connectEventQueue but dequeue failed.");
         }
 
@@ -53,7 +53,7 @@ void NetworkConnectionSystem::processConnectEvents()
         world.attachComponent(newEntityID, ComponentFlag::Sprite);
         world.attachComponent(newEntityID, ComponentFlag::Client);
 
-        DebugInfo("Constructed entity with netID: %u, entityID: %u",
+        LOG_INFO("Constructed entity with netID: %u, entityID: %u",
                   clientNetworkID, newEntityID);
 
         // Build and send the response.
@@ -71,7 +71,7 @@ void NetworkConnectionSystem::processDisconnectEvents()
     for (unsigned int i = 0; i < disconnectEventQueue.size_approx(); ++i) {
         NetworkID disconnectedClientID = 0;
         if (!(disconnectEventQueue.try_dequeue(disconnectedClientID))) {
-            DebugError(
+            LOG_ERROR(
                 "Expected element in disconnectEventQueue but dequeue failed.");
         }
 
@@ -86,7 +86,7 @@ void NetworkConnectionSystem::processDisconnectEvents()
                 entityFound = true;
 
                 world.removeEntity(it->first);
-                DebugInfo("Erased entity with netID: %u", it->first);
+                LOG_INFO("Erased entity with netID: %u", it->first);
                 world.clients.erase(it);
             }
             else {
@@ -95,7 +95,7 @@ void NetworkConnectionSystem::processDisconnectEvents()
         }
 
         if (!entityFound) {
-            DebugError("Failed to find entity with netID: %u while erasing.",
+            LOG_ERROR("Failed to find entity with netID: %u while erasing.",
                        disconnectedClientID);
         }
     }

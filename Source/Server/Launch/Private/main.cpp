@@ -4,7 +4,7 @@
 #include "Game.h"
 #include "Network.h"
 #include "Timer.h"
-#include "Debug.h"
+#include "Log.h"
 #include "Ignore.h"
 
 #include <exception>
@@ -48,7 +48,7 @@ try {
     std::atomic<bool> exitRequested = false;
     std::thread inputThreadObj(inputThread, &exitRequested);
 
-    DebugInfo("Starting main loop.");
+    LOG_INFO("Starting main loop.");
 
     // Prime the timers so they don't start at 0.
     game.initTimer();

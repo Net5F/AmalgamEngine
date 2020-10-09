@@ -9,7 +9,7 @@
 #include <thread>
 #include "readerwriterqueue.h"
 #include "Timer.h"
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {

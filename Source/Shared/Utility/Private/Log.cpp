@@ -1,4 +1,4 @@
-#include "Debug.h"
+#include "Log.h"
 #include <cstdio>
 #include <cstdarg>
 #include <atomic>
@@ -6,14 +6,14 @@
 
 namespace AM
 {
-const std::atomic<Uint32>* Debug::currentTickPtr = nullptr;
+const std::atomic<Uint32>* Log::currentTickPtr = nullptr;
 
-void Debug::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr)
+void Log::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr)
 {
     currentTickPtr = inCurrentTickPtr;
 }
 
-void Debug::info(const char* expression, ...)
+void Log::info(const char* expression, ...)
 {
 #if defined(ENABLE_DEBUG_INFO)
     // If the app hasn't registered a tick count, default to 0.
@@ -37,7 +37,7 @@ void Debug::info(const char* expression, ...)
 #endif // ENABLE_DEBUG_INFO
 }
 
-void Debug::error(const char* fileName, int line, const char* expression, ...)
+void Log::error(const char* fileName, int line, const char* expression, ...)
 {
 #if defined(ENABLE_DEBUG_INFO)
     // If the app hasn't registered a tick count, default to 0.

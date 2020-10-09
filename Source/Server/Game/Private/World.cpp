@@ -1,5 +1,5 @@
 #include "World.h"
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -28,7 +28,7 @@ EntityID World::addEntity(std::string_view name)
 void World::removeEntity(EntityID entityID)
 {
     if (entityID > MAX_ENTITIES) {
-        DebugError("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+        LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
                    entityID);
     }
 
@@ -42,7 +42,7 @@ void World::attachComponent(EntityID entityID,
                             ComponentFlag::FlagType componentFlag)
 {
     if (entityID > MAX_ENTITIES) {
-        DebugError("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+        LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
                    entityID);
     }
 
@@ -51,7 +51,7 @@ void World::attachComponent(EntityID entityID,
         componentFlags[entityID] |= componentFlag;
     }
     else {
-        DebugError("Tried to add component when entity already has it.");
+        LOG_ERROR("Tried to add component when entity already has it.");
     }
 }
 
@@ -59,7 +59,7 @@ void World::removeComponent(EntityID entityID,
                             ComponentFlag::FlagType componentFlag)
 {
     if (entityID > MAX_ENTITIES) {
-        DebugError("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+        LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
                    entityID);
     }
 
@@ -68,7 +68,7 @@ void World::removeComponent(EntityID entityID,
         componentFlags[entityID] |= componentFlag;
     }
     else {
-        DebugError("Tried to remove component when entity doesn't have it.");
+        LOG_ERROR("Tried to remove component when entity doesn't have it.");
     }
 }
 

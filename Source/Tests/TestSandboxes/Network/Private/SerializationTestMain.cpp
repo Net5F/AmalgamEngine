@@ -1,4 +1,4 @@
-#include "Debug.h"
+#include "Log.h"
 //#include "Message_generated.h"
 #include "SerializationTestResources/Basic_generated.h"
 
@@ -44,6 +44,6 @@ int main()
 
     // Get the size.
     builder.Finish(entityUpdate);
-    DebugInfo("Message size: %u", builder.GetSize());
+    LOG_INFO("Message size: %u", builder.GetSize());
     return 0;
 }

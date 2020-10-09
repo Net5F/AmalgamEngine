@@ -5,7 +5,7 @@
 #include "bitsery/traits/vector.h"
 #include "bitsery/traits/array.h"
 #include "NetworkDefs.h"
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -84,8 +84,8 @@ public:
                 default:
                     break;
             }
-            // TODO: Eventually change this to a DebugInfo and return false.
-            DebugError("%s", errorString);
+            // TODO: Eventually change this to a LOG_INFO and return false.
+            LOG_ERROR("%s", errorString);
         }
         else {
             return true;

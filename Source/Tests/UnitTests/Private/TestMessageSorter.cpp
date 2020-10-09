@@ -3,7 +3,7 @@
 #include "NetworkDefs.h"
 #include <memory>
 #include <queue>
-#include "Debug.h"
+#include "Log.h"
 
 using namespace AM;
 

@@ -1,9 +1,9 @@
 target_sources(Shared
     PRIVATE
-        Private/Debug.cpp
+        Private/Log.cpp
         Private/Timer.cpp
 	PUBLIC
-	    Public/Debug.h
+	    Public/Log.h
 	    Public/Ignore.h
 	    Public/Timer.h
 )

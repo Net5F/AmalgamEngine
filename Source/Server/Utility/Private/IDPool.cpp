@@ -1,5 +1,5 @@
 #include "IDPool.h"
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -20,7 +20,7 @@ Uint32 IDPool::reserveID()
         }
     }
 
-    DebugError("Tried to reserve ID when all were taken.");
+    LOG_ERROR("Tried to reserve ID when all were taken.");
     return 0;
 }
 
@@ -30,7 +30,7 @@ void IDPool::freeID(Uint32 ID)
         IDs[ID] = false;
     }
     else {
-        DebugError("Tried to free an unused ID.");
+        LOG_ERROR("Tried to free an unused ID.");
     }
 }
 

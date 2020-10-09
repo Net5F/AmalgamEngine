@@ -1,7 +1,7 @@
 #include "Peer.h"
 #include "TcpSocket.h"
 #include <SDL_stdinc.h>
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -54,13 +54,13 @@ NetworkResult Peer::send(const BinaryBufferSharedPtr& message)
 
     std::size_t messageSize = message->size();
     if (messageSize > MAX_MESSAGE_SIZE) {
-        DebugError("Tried to send a too-large message. Size: %u, max: %u",
+        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
                    messageSize, MAX_MESSAGE_SIZE);
     }
 
     int bytesSent = socket->send(message->data(), messageSize);
     if (bytesSent < 0) {
-        DebugError("TCP_Send returned < 0. This should never happen, the socket"
+        LOG_ERROR("TCP_Send returned < 0. This should never happen, the socket"
                    "was likely misused.");
     }
 
@@ -81,13 +81,13 @@ NetworkResult Peer::send(const Uint8* messageBuffer, unsigned int messageSize)
     }
 
     if (messageSize > MAX_MESSAGE_SIZE) {
-        DebugError("Tried to send a too-large message. Size: %u, max: %u",
+        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
                    messageSize, MAX_MESSAGE_SIZE);
     }
 
     int bytesSent = socket->send(messageBuffer, messageSize);
     if (bytesSent < 0) {
-        DebugError("TCP_Send returned < 0. This should never happen, the socket"
+        LOG_ERROR("TCP_Send returned < 0. This should never happen, the socket"
                    "was likely misused.");
     }
 
@@ -126,7 +126,7 @@ NetworkResult Peer::receiveBytesWait(Uint8* messageBuffer, Uint16 numBytes)
         return NetworkResult::Disconnected;
     }
     else if (numBytes > MAX_MESSAGE_SIZE) {
-        DebugError("Tried to receive too large of a message. messageSize: %u, "
+        LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
                    "MaxSize: %u",
                    numBytes, MAX_MESSAGE_SIZE);
     }
@@ -138,7 +138,7 @@ NetworkResult Peer::receiveBytesWait(Uint8* messageBuffer, Uint16 numBytes)
         return NetworkResult::Disconnected;
     }
     else if (result < numBytes) {
-        DebugError("Didn't receive all the bytes in one chunk."
+        LOG_ERROR("Didn't receive all the bytes in one chunk."
                    "Need to add logic for this scenario.");
     }
 
@@ -178,14 +178,14 @@ MessageResult Peer::receiveMessageWait(Uint8* messageBuffer)
         return {NetworkResult::Disconnected};
     }
     else if (result < static_cast<int>(MESSAGE_HEADER_SIZE)) {
-        DebugError("Didn't receive all size bytes in one chunk."
+        LOG_ERROR("Didn't receive all size bytes in one chunk."
                    "Need to add logic for this scenario.");
     }
 
     // The number of bytes in the upcoming message.
     Uint16 messageSize = _SDLNet_Read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_MESSAGE_SIZE) {
-        DebugError("Tried to receive too large of a message. messageSize: %u, "
+        LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
                    "MaxSize: %u",
                    messageSize, MAX_MESSAGE_SIZE);
     }
@@ -197,7 +197,7 @@ MessageResult Peer::receiveMessageWait(Uint8* messageBuffer)
         return {NetworkResult::Disconnected};
     }
     else if (result < messageSize) {
-        DebugError("Didn't receive all message bytes in one chunk."
+        LOG_ERROR("Didn't receive all message bytes in one chunk."
                    "Need to add logic for this scenario.");
     }
 
@@ -221,14 +221,14 @@ MessageResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
         return {NetworkResult::Disconnected};
     }
     else if (result < static_cast<int>(MESSAGE_HEADER_SIZE)) {
-        DebugError("Didn't receive all size bytes in one chunk."
+        LOG_ERROR("Didn't receive all size bytes in one chunk."
                    "Need to add logic for this scenario.");
     }
 
     // The number of bytes in the upcoming message.
     Uint16 messageSize = _SDLNet_Read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_MESSAGE_SIZE) {
-        DebugError("Tried to receive too large of a message. messageSize: %u, "
+        LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
                    "MaxSize: %u",
                    messageSize, MAX_MESSAGE_SIZE);
     }
@@ -241,7 +241,7 @@ MessageResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
         return {NetworkResult::Disconnected};
     }
     else if (result < messageSize) {
-        DebugError("Didn't receive all message bytes in one chunk."
+        LOG_ERROR("Didn't receive all message bytes in one chunk."
                    "Need to add logic for this scenario.");
     }
 

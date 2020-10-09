@@ -11,7 +11,7 @@
 #include <SDL_stdinc.h>
 
 // Ours
-#include "Debug.h"
+#include "Log.h"
 #include "NetworkDefs.h"
 #include "GameDefs.h"
 

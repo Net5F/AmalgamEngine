@@ -5,7 +5,7 @@
 #include "Peer.h"
 #include "GameDefs.h"
 #include "ClientInputs.h"
-#include "Debug.h"
+#include "Log.h"
 #include <memory>
 
 namespace AM
@@ -32,7 +32,7 @@ void NetworkInputSystem::processInputMessages()
             = std::move(messageQueue.front());
         messageQueue.pop();
         if (inputMessage == nullptr) {
-            DebugInfo("Failed to receive input message after getting count "
+            LOG_INFO("Failed to receive input message after getting count "
                       "(this shouldn't happen).")
         }
 
@@ -43,7 +43,7 @@ void NetworkInputSystem::processInputMessages()
         // Flag the entity as dirty.
         world.entityIsDirty[clientEntityID] = true;
 
-        DebugInfo("Processed input message on tick %u. Message tick: %u",
+        LOG_INFO("Processed input message on tick %u. Message tick: %u",
                   game.getCurrentTick(), inputMessage->tickNum);
     }
 

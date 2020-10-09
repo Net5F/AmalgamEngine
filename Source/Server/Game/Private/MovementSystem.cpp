@@ -1,7 +1,7 @@
 #include "MovementSystem.h"
 #include "MovementHelpers.h"
 #include "World.h"
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {

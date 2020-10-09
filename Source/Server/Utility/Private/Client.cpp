@@ -1,6 +1,6 @@
 #include "Client.h"
 #include "Peer.h"
-#include "Debug.h"
+#include "Log.h"
 #include "MessageSorter.h"
 #include <cmath>
 #include <array>
@@ -107,7 +107,7 @@ Uint8 Client::getWaitingMessageCount() const
 {
     unsigned int size = sendQueue.size();
     if (size > SDL_MAX_UINT8) {
-        DebugError("Client's sendQueue contains too many messages to return as"
+        LOG_ERROR("Client's sendQueue contains too many messages to return as"
                    "a Uint8.");
     }
 
@@ -137,7 +137,7 @@ Message Client::receiveMessage()
             latestAdjIteration = expectedNextIteration;
         }
         else if (receivedAdjIteration > expectedNextIteration) {
-            DebugError(
+            LOG_ERROR(
                 "Skipped an adjustment iteration. Logic must be flawed.");
         }
 
@@ -160,7 +160,7 @@ Message Client::receiveMessage()
         double delta = receiveTimer.getDeltaSeconds(false);
         if (delta > TIMEOUT_S) {
             peer = nullptr;
-            DebugInfo("Dropped connection, peer timed out. Time since last "
+            LOG_INFO("Dropped connection, peer timed out. Time since last "
                       "message: %.6f "
                       "seconds. Timeout: %.6f",
                       delta, TIMEOUT_S);
@@ -184,7 +184,7 @@ void Client::recordTickDiff(Sint64 tickDiff)
         || (tickDiff > HIGHEST_VALID_TICKDIFF)) {
         // Diff is outside our bounds. Drop the connection.
         peer = nullptr;
-        DebugInfo("Dropped connection, diff out of bounds. Diff: %" PRId64,
+        LOG_INFO("Dropped connection, diff out of bounds. Diff: %" PRId64,
                   tickDiff);
     }
     else {
@@ -262,9 +262,9 @@ Sint8 Client::calcAdjustment(
     }
 
     // TEMP
-    DebugInfo("Calc'd adjustment. adjustment: %d",
+    LOG_INFO("Calc'd adjustment. adjustment: %d",
               TICKDIFF_TARGET - truncatedAverage);
-    //    DebugInfo("truncatedAverage: %d. Values:",
+    //    LOG_INFO("truncatedAverage: %d. Values:",
     //    static_cast<int>(averageDiff)); printf("["); for (unsigned int i = 0;
     //    i < TICKDIFF_HISTORY_LENGTH; ++i) {
     //        printf("%d, ", tickDiffHistoryCopy[i]);

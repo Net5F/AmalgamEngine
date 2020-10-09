@@ -5,7 +5,7 @@
 #include "Network.h"
 #include "EntityUpdate.h"
 #include "ClientNetworkDefs.h"
-#include "Debug.h"
+#include "Log.h"
 #include <memory>
 
 namespace AM
@@ -44,11 +44,11 @@ void PlayerMovementSystem::processMovements()
             // where the server thought we should be.
             if (oldPosition.x != currentPosition.x
                 || oldPosition.y != currentPosition.y) {
-                DebugInfo("Predicted position mismatched after replay: (%.6f, "
+                LOG_INFO("Predicted position mismatched after replay: (%.6f, "
                           "%.6f) -> (%.6f, %.6f)",
                           oldPosition.x, oldPosition.y, currentPosition.x,
                           currentPosition.y);
-                DebugInfo("latestReceivedTick: %u", latestReceivedTick);
+                LOG_INFO("latestReceivedTick: %u", latestReceivedTick);
             }
         }
     }
@@ -88,7 +88,7 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(
         }
 
         if (playerUpdate == nullptr) {
-            DebugError("Failed to find player entity in a message that should "
+            LOG_ERROR("Failed to find player entity in a message that should "
                        "have contained one.");
         }
 
@@ -115,7 +115,7 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
 {
     Uint32 currentTick = game.getCurrentTick();
     if (latestReceivedTick > currentTick) {
-        DebugError("Received data for tick %u on tick %u. Server is in the "
+        LOG_ERROR("Received data for tick %u on tick %u. Server is in the "
                    "future, can't replay "
                    "inputs.",
                    latestReceivedTick, currentTick);
@@ -126,7 +126,7 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
         Uint32 tickDiff = currentTick - i;
 
         if (tickDiff > World::INPUT_HISTORY_LENGTH) {
-            DebugError("Too few items in the player input history. "
+            LOG_ERROR("Too few items in the player input history. "
                        "Increase the length or reduce lag. tickDiff: %u, "
                        "historyLength: %u",
                        tickDiff, World::INPUT_HISTORY_LENGTH);

@@ -1,6 +1,6 @@
 #include "Game.h"
 #include "Network.h"
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -17,7 +17,7 @@ Game::Game(Network& inNetwork)
 , currentTick(0)
 {
     world.setSpawnPoint({64, 64});
-    Debug::registerCurrentTickPtr(&currentTick);
+    Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);
 }
 
@@ -39,7 +39,7 @@ void Game::tick()
         /* Prepare for the next tick. */
         accumulatedTime -= GAME_TICK_TIMESTEP_S;
         if (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
-            DebugInfo("Detected a request for multiple game ticks in the same "
+            LOG_INFO("Detected a request for multiple game ticks in the same "
                       "frame. Game tick "
                       "must have been massively delayed. Game tick was delayed "
                       "by: %.8fs.",
@@ -48,7 +48,7 @@ void Game::tick()
         else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
             // Game missed its ideal call time, could be our issue or general
             // system slowness.
-            DebugInfo("Detected a delayed game tick. Game tick was delayed by: "
+            LOG_INFO("Detected a delayed game tick. Game tick was delayed by: "
                       "%.8fs.",
                       accumulatedTime);
         }
@@ -56,7 +56,7 @@ void Game::tick()
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);
         if (executionTime > GAME_TICK_TIMESTEP_S) {
-            DebugInfo("Overran our sim iteration time. executionTime: %.8f",
+            LOG_INFO("Overran our sim iteration time. executionTime: %.8f",
                       executionTime);
         }
 

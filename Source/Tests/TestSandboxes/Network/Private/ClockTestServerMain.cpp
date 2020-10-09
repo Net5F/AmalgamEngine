@@ -4,7 +4,7 @@
 #include <atomic>
 #include <thread>
 #include "Timer.h"
-#include "Debug.h"
+#include "Log.h"
 #include "Ignore.h"
 #include <iostream>
 
@@ -19,11 +19,11 @@ int main(int argc, char* argv[])
     ignore(argv);
 
     if (SDL_Init(0) == -1) {
-        DebugInfo("SDL_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDL_Init: %s", SDLNet_GetError());
         return 1;
     }
     if (SDLNet_Init() == -1) {
-        DebugInfo("SDLNet_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDLNet_Init: %s", SDLNet_GetError());
         return 2;
     }
 
@@ -31,21 +31,21 @@ int main(int argc, char* argv[])
     IPaddress ip;
     TCPsocket serverSocket = nullptr;
     if (SDLNet_ResolveHost(&ip, NULL, SERVER_PORT)) {
-        DebugInfo("%s", SDLNet_GetError());
+        LOG_INFO("%s", SDLNet_GetError());
     }
 
     serverSocket = SDLNet_TCP_Open(&ip);
     if (!serverSocket) {
-        DebugInfo("%s", SDLNet_GetError());
+        LOG_INFO("%s", SDLNet_GetError());
     }
 
     TCPsocket clientSocket = nullptr;
     SDLNet_SocketSet clientSet = SDLNet_AllocSocketSet(1);
 
     Timer timer;
-    DebugInfo("Server started.");
+    LOG_INFO("Server started.");
 
-    DebugInfo("Waiting for client connection.");
+    LOG_INFO("Waiting for client connection.");
     while (clientSocket == nullptr) {
         clientSocket = SDLNet_TCP_Accept(serverSocket);
 
@@ -53,13 +53,13 @@ int main(int argc, char* argv[])
         if (clientSocket != nullptr) {
             int numAdded = SDLNet_TCP_AddSocket(clientSet, clientSocket);
             if (numAdded < 1) {
-                DebugInfo("Error while adding socket: %s", SDLNet_GetError());
+                LOG_INFO("Error while adding socket: %s", SDLNet_GetError());
             }
         }
     }
 
     // Wait for the start byte.
-    DebugInfo("Received client connection. Waiting for start byte.");
+    LOG_INFO("Received client connection. Waiting for start byte.");
     std::array<Uint8, 1> recBuffer = {};
     bool waitingForStart = true;
     while (waitingForStart) {
@@ -68,16 +68,16 @@ int main(int argc, char* argv[])
             // Receive the waiting data.
             int result = SDLNet_TCP_Recv(clientSocket, &recBuffer, 1);
             if (result <= 0) {
-                DebugError("Detected disconnect.");
+                LOG_ERROR("Detected disconnect.");
             }
             else if (recBuffer[0] != 5) {
-                DebugError("Wrong start byte received.");
+                LOG_ERROR("Wrong start byte received.");
             }
             else {
                 // Got the start byte, start timing and proceed.
                 timer.updateSavedTime();
                 waitingForStart = false;
-                DebugInfo("Received start byte.");
+                LOG_INFO("Received start byte.");
             }
         }
     }
@@ -90,13 +90,13 @@ int main(int argc, char* argv[])
             // Receive the waiting data.
             int result = SDLNet_TCP_Recv(clientSocket, &recBuffer, 1);
             if (result <= 0) {
-                DebugError("Detected disconnect.");
+                LOG_ERROR("Detected disconnect.");
             }
             else if (recBuffer[0] != 6) {
-                DebugError("Wrong end byte received.");
+                LOG_ERROR("Wrong end byte received.");
             }
             else {
-                DebugInfo("Received end byte. Time passed: %.8f",
+                LOG_INFO("Received end byte. Time passed: %.8f",
                           timer.getDeltaSeconds(false));
                 waitingForEnd = false;
             }

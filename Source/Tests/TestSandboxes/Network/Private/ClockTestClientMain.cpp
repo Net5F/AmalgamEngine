@@ -6,7 +6,7 @@
 #include <atomic>
 #include <cstdio>
 #include "Timer.h"
-#include "Debug.h"
+#include "Log.h"
 #include "Ignore.h"
 
 // const std::string SERVER_IP = "127.0.0.1";
@@ -22,28 +22,28 @@ int main(int argc, char* argv[])
     ignore(argv);
 
     if (SDL_Init(0) == -1) {
-        DebugInfo("SDL_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDL_Init: %s", SDLNet_GetError());
         return 1;
     }
     if (SDLNet_Init() == -1) {
-        DebugInfo("SDLNet_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDLNet_Init: %s", SDLNet_GetError());
         return 2;
     }
 
-    DebugInfo("Connecting to server.");
+    LOG_INFO("Connecting to server.");
 
     IPaddress ip;
     if (SDLNet_ResolveHost(&ip, SERVER_IP.c_str(), SERVER_PORT)) {
-        DebugInfo("Could not resolve host.");
+        LOG_INFO("Could not resolve host.");
         return 3;
     }
 
     TCPsocket serverSocket = SDLNet_TCP_Open(&ip);
     if (!serverSocket) {
-        DebugInfo("Could not open serverSocket.");
+        LOG_INFO("Could not open serverSocket.");
         return 4;
     }
-    DebugInfo("Connected.");
+    LOG_INFO("Connected.");
 
     /* Wait for 5s to let the connection settle. */
     Timer timer;
@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     std::array<Uint8, 1> sendBuf = {5};
     int bytesSent = SDLNet_TCP_Send(serverSocket, &sendBuf, 1);
     if (bytesSent < 1) {
-        DebugInfo("Failed to send all bytes.");
+        LOG_INFO("Failed to send all bytes.");
         return 5;
     }
 
@@ -72,10 +72,10 @@ int main(int argc, char* argv[])
     sendBuf[0] = 6;
     bytesSent = SDLNet_TCP_Send(serverSocket, &sendBuf, 1);
     if (bytesSent < 1) {
-        DebugInfo("Failed to send all bytes.");
+        LOG_INFO("Failed to send all bytes.");
         return 5;
     }
-    DebugInfo("Sent end byte. Time passed: ~%.8f", timer.getDeltaSeconds(true));
+    LOG_INFO("Sent end byte. Time passed: ~%.8f", timer.getDeltaSeconds(true));
 
     return 0;
 }

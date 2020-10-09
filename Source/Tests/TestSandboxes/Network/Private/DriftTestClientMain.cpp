@@ -6,7 +6,7 @@
 #include <atomic>
 #include <cstdio>
 #include "Timer.h"
-#include "Debug.h"
+#include "Log.h"
 #include "Ignore.h"
 
 const std::string SERVER_IP = "127.0.0.1";
@@ -30,11 +30,11 @@ bool waitForServer(TCPsocket& serverSocket, std::atomic<Uint32>& currentTick)
         int result = SDLNet_TCP_Recv(serverSocket, &tickBuf, sizeof(Uint32));
         if (result < 0) {
             // Disconnected
-            DebugInfo("Detected disconnect.");
+            LOG_INFO("Detected disconnect.");
             return false;
         }
         else if (result != sizeof(Uint32)) {
-            DebugInfo("Didn't receive current tick properly.");
+            LOG_INFO("Didn't receive current tick properly.");
             return false;
         }
         else {
@@ -55,28 +55,28 @@ int main(int argc, char* argv[])
     ignore(argv);
 
     if (SDL_Init(0) == -1) {
-        DebugInfo("SDL_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDL_Init: %s", SDLNet_GetError());
         return 1;
     }
     if (SDLNet_Init() == -1) {
-        DebugInfo("SDLNet_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDLNet_Init: %s", SDLNet_GetError());
         return 2;
     }
 
-    DebugInfo("Connecting to server.");
+    LOG_INFO("Connecting to server.");
 
     IPaddress ip;
     if (SDLNet_ResolveHost(&ip, SERVER_IP.c_str(), SERVER_PORT)) {
-        DebugInfo("Could not resolve host.");
+        LOG_INFO("Could not resolve host.");
         return 3;
     }
 
     TCPsocket serverSocket = SDLNet_TCP_Open(&ip);
     if (!serverSocket) {
-        DebugInfo("Could not open serverSocket.");
+        LOG_INFO("Could not open serverSocket.");
         return 4;
     }
-    DebugInfo("Connected.");
+    LOG_INFO("Connected.");
 
     /* Prepare the simulation variables. */
     // The aggregated time since we last processed a tick.
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
     /* Wait to receive the server's current tick. */
     bool result = waitForServer(serverSocket, currentTick);
     if (!result) {
-        DebugError("Failed to get server's current tick.");
+        LOG_ERROR("Failed to get server's current tick.");
     }
 
     // Prime the timer so it doesn't start at 0.
@@ -114,14 +114,14 @@ int main(int argc, char* argv[])
             int bytesSent
                 = SDLNet_TCP_Send(serverSocket, &dataBuffer, NUM_BYTES);
             if (bytesSent < static_cast<int>(NUM_BYTES)) {
-                DebugInfo("Failed to send all bytes.");
+                LOG_INFO("Failed to send all bytes.");
                 return 5;
             }
 
             /* Prepare for the next tick. */
             accumulatedTime -= TEST_GAME_TICK_INTERVAL_S;
             if (accumulatedTime >= TEST_GAME_TICK_INTERVAL_S) {
-                DebugInfo("Detected a request for multiple game ticks in the "
+                LOG_INFO("Detected a request for multiple game ticks in the "
                           "same frame. Game tick "
                           "must have been massively delayed. Game tick was "
                           "delayed by: %.8fs.",
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
             else if (accumulatedTime >= TEST_GAME_DELAYED_TIME_S) {
                 // Game missed its ideal call time, could be our issue or
                 // general system slowness.
-                DebugInfo("Detected a delayed game tick. Game tick was delayed "
+                LOG_INFO("Detected a delayed game tick. Game tick was delayed "
                           "by: %.8fs.",
                           accumulatedTime);
             }

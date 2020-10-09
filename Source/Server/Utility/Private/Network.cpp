@@ -6,7 +6,7 @@
 #include <SDL2/SDL_net.h>
 #include <algorithm>
 #include <atomic>
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -35,7 +35,7 @@ void Network::tick()
             // happened to delay us.
             // We still only want to send what's in the queue, but it's worth
             // giving debug output that we detected this.
-            DebugInfo("Detected a delayed network send. accumulatedTime: %f. "
+            LOG_INFO("Detected a delayed network send. accumulatedTime: %f. "
                       "Setting to 0.",
                       accumulatedTime);
             accumulatedTime = 0;
@@ -86,7 +86,7 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
                 // Else, the client was destructed so we don't care.
             }
             else {
-                DebugInfo("Message was dropped. Diff: %d", pushResult.diff);
+                LOG_INFO("Message was dropped. Diff: %d", pushResult.diff);
             }
         }
         else if (clientMessage.message.messageType == MessageType::Heartbeat) {
@@ -109,7 +109,7 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
             }
         }
         else {
-            DebugError("Received message type that we aren't handling.");
+            LOG_ERROR("Received message type that we aren't handling.");
         }
 
         receiveQueue.pop();
@@ -172,7 +172,7 @@ BinaryBufferSharedPtr Network::constructMessage(MessageType type,
                                                 std::size_t size)
 {
     if ((MESSAGE_HEADER_SIZE + size) > Peer::MAX_MESSAGE_SIZE) {
-        DebugError("Tried to send a too-large message. Size: %u, max: %u", size,
+        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u", size,
                    Peer::MAX_MESSAGE_SIZE);
     }
 

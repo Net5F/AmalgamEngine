@@ -6,7 +6,7 @@
 #include "RenderSystem.h"
 #include "Network.h"
 #include "Timer.h"
-#include "Debug.h"
+#include "Log.h"
 #include "Ignore.h"
 
 #include <exception>
@@ -83,9 +83,9 @@ try {
 
     return 0;
 } catch (SDL2pp::Exception& e) {
-    DebugInfo("Error in: %s  Reason:  %s", e.GetSDLFunction(), e.GetSDLError());
+    LOG_INFO("Error in: %s  Reason:  %s", e.GetSDLFunction(), e.GetSDLError());
     return 1;
 } catch (std::exception& e) {
-    DebugInfo("%s", e.what());
+    LOG_INFO("%s", e.what());
     return 1;
 }

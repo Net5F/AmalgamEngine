@@ -1,5 +1,5 @@
 #include "Acceptor.h"
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -20,7 +20,7 @@ std::unique_ptr<Peer> Acceptor::accept()
     if (socket.isReady()) {
         std::unique_ptr<TcpSocket> newSocket = socket.accept();
         if (newSocket == nullptr) {
-            DebugError("Listener socket showed ready, but accept() failed.");
+            LOG_ERROR("Listener socket showed ready, but accept() failed.");
         }
         else {
             return std::make_unique<Peer>(std::move(newSocket), clientSet);

@@ -5,7 +5,7 @@
 #include <array>
 #include <queue>
 #include <mutex>
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -86,7 +86,7 @@ public:
         // Acquire the mutex.
         bool mutexWasFree = mutex.try_lock();
         if (!mutexWasFree) {
-            DebugError("Tried to startReceive twice in a row. You probably "
+            LOG_ERROR("Tried to startReceive twice in a row. You probably "
                        "forgot to call"
                        "endReceive.");
         }
@@ -95,7 +95,7 @@ public:
         if (isTickValid(tickNum) != ValidityResult::Valid) {
             // tickNum is invalid, release the lock.
             mutex.unlock();
-            DebugError("Tried to start receive for an invalid tick number.");
+            LOG_ERROR("Tried to start receive for an invalid tick number.");
         }
 
         return queueBuffer[tickNum % BUFFER_SIZE];
@@ -114,7 +114,7 @@ public:
     void endReceive()
     {
         if (mutex.try_lock()) {
-            DebugError("Tried to release mutex while it isn't locked.");
+            LOG_ERROR("Tried to release mutex while it isn't locked.");
         }
 
         // Advance the state.

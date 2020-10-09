@@ -4,7 +4,7 @@
 #include "Network.h"
 #include "MessageTools.h"
 #include "EntityUpdate.h"
-#include "Debug.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -69,7 +69,7 @@ void NetworkUpdateSystem::constructAndSendUpdate(
 
     /* If there are updates to send, send an update message. */
     if (entityUpdate.entities.size() > 0) {
-        DebugInfo("Queueing message for entity: %u with tick: %u", entityID,
+        LOG_INFO("Queueing message for entity: %u with tick: %u", entityID,
                   game.getCurrentTick());
 
         // Finish filling the EntityUpdate.
@@ -106,7 +106,7 @@ void NetworkUpdateSystem::fillEntityData(EntityID entityID,
     // TEMP - Doing this until C++20 where we can emplace brace initializers.
     entities.push_back({entityID, flags, input, position, movement});
 
-    //    DebugInfo("Sending: (%f, %f), (%f, %f)", position.x, position.y,
+    //    LOG_INFO("Sending: (%f, %f), (%f, %f)", position.x, position.y,
     //    movement.velX,
     //        movement.velY);
 }
