@@ -36,8 +36,8 @@ void Network::tick()
             // We still only want to send what's in the queue, but it's worth
             // giving debug output that we detected this.
             LOG_INFO("Detected a delayed network send. accumulatedTime: %f. "
-                      "Setting to 0.",
-                      accumulatedTime);
+                     "Setting to 0.",
+                     accumulatedTime);
             accumulatedTime = 0;
         }
     }
@@ -173,7 +173,7 @@ BinaryBufferSharedPtr Network::constructMessage(MessageType type,
 {
     if ((MESSAGE_HEADER_SIZE + size) > Peer::MAX_MESSAGE_SIZE) {
         LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u", size,
-                   Peer::MAX_MESSAGE_SIZE);
+                  Peer::MAX_MESSAGE_SIZE);
     }
 
     // Allocate a buffer that can hold the Uint8 type, Uint16 size, and the

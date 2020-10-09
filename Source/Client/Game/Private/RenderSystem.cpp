@@ -61,9 +61,9 @@ void RenderSystem::render()
             // We still only want to render the latest data, but it's worth
             // giving debug output that we detected this.
             LOG_INFO("Detected a request for two renders in the same frame. "
-                      "Render must have been massively delayed. Render was "
-                      "delayed by: %.8fs. Setting to 0.",
-                      accumulatedTime);
+                     "Render must have been massively delayed. Render was "
+                     "delayed by: %.8fs. Setting to 0.",
+                     accumulatedTime);
             accumulatedTime = 0;
         }
     }

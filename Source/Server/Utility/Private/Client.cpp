@@ -108,7 +108,7 @@ Uint8 Client::getWaitingMessageCount() const
     unsigned int size = sendQueue.size();
     if (size > SDL_MAX_UINT8) {
         LOG_ERROR("Client's sendQueue contains too many messages to return as"
-                   "a Uint8.");
+                  "a Uint8.");
     }
 
     return size;
@@ -137,8 +137,7 @@ Message Client::receiveMessage()
             latestAdjIteration = expectedNextIteration;
         }
         else if (receivedAdjIteration > expectedNextIteration) {
-            LOG_ERROR(
-                "Skipped an adjustment iteration. Logic must be flawed.");
+            LOG_ERROR("Skipped an adjustment iteration. Logic must be flawed.");
         }
 
         // Get the message.
@@ -161,9 +160,9 @@ Message Client::receiveMessage()
         if (delta > TIMEOUT_S) {
             peer = nullptr;
             LOG_INFO("Dropped connection, peer timed out. Time since last "
-                      "message: %.6f "
-                      "seconds. Timeout: %.6f",
-                      delta, TIMEOUT_S);
+                     "message: %.6f "
+                     "seconds. Timeout: %.6f",
+                     delta, TIMEOUT_S);
             return {MessageType::NotSet, nullptr};
         }
     }
@@ -185,7 +184,7 @@ void Client::recordTickDiff(Sint64 tickDiff)
         // Diff is outside our bounds. Drop the connection.
         peer = nullptr;
         LOG_INFO("Dropped connection, diff out of bounds. Diff: %" PRId64,
-                  tickDiff);
+                 tickDiff);
     }
     else {
         // Diff is fine, record it.
@@ -263,7 +262,7 @@ Sint8 Client::calcAdjustment(
 
     // TEMP
     LOG_INFO("Calc'd adjustment. adjustment: %d",
-              TICKDIFF_TARGET - truncatedAverage);
+             TICKDIFF_TARGET - truncatedAverage);
     //    LOG_INFO("truncatedAverage: %d. Values:",
     //    static_cast<int>(averageDiff)); printf("["); for (unsigned int i = 0;
     //    i < TICKDIFF_HISTORY_LENGTH; ++i) {

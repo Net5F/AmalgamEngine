@@ -87,8 +87,8 @@ public:
         bool mutexWasFree = mutex.try_lock();
         if (!mutexWasFree) {
             LOG_ERROR("Tried to startReceive twice in a row. You probably "
-                       "forgot to call"
-                       "endReceive.");
+                      "forgot to call"
+                      "endReceive.");
         }
 
         // Check if the tick is valid.

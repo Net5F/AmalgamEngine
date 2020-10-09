@@ -33,7 +33,7 @@ void NetworkInputSystem::processInputMessages()
         messageQueue.pop();
         if (inputMessage == nullptr) {
             LOG_INFO("Failed to receive input message after getting count "
-                      "(this shouldn't happen).")
+                     "(this shouldn't happen).")
         }
 
         // Update the entity's InputComponent.
@@ -44,7 +44,7 @@ void NetworkInputSystem::processInputMessages()
         world.entityIsDirty[clientEntityID] = true;
 
         LOG_INFO("Processed input message on tick %u. Message tick: %u",
-                  game.getCurrentTick(), inputMessage->tickNum);
+                 game.getCurrentTick(), inputMessage->tickNum);
     }
 
     network.endReceiveInputMessages();

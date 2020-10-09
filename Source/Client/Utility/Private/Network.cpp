@@ -69,8 +69,8 @@ void Network::tick()
             // We still only want to send what's in the queue, but it's worth
             // giving debug output that we detected this.
             LOG_INFO("Detected a delayed network tick. accumulatedTime: %f. "
-                      "Setting to 0.",
-                      accumulatedTime);
+                     "Setting to 0.",
+                     accumulatedTime);
             accumulatedTime = 0;
         }
     }
@@ -156,7 +156,7 @@ int Network::pollForMessages()
         }
         else if (headerResult == NetworkResult::Disconnected) {
             LOG_ERROR("Found server to be disconnected while trying to "
-                       "receive header.");
+                      "receive header.");
         }
     }
 
@@ -244,7 +244,7 @@ void Network::processBatch()
         }
         else if (messageResult.networkResult == NetworkResult::Disconnected) {
             LOG_ERROR("Found server to be disconnected while trying to "
-                       "receive message.");
+                      "receive message.");
         }
     }
 
@@ -253,8 +253,7 @@ void Network::processBatch()
         = headerRecBuffer[ServerHeaderIndex::ConfirmedTickCount];
     for (unsigned int i = 0; i < confirmedTickCount; ++i) {
         if (!(npcUpdateQueue.enqueue({NpcUpdateType::ExplicitConfirmation}))) {
-            LOG_ERROR(
-                "Ran out of room in queue and memory allocation failed.");
+            LOG_ERROR("Ran out of room in queue and memory allocation failed.");
         }
     }
 }
@@ -276,8 +275,7 @@ void Network::processReceivedMessage(MessageType messageType,
 
         // Queue the message.
         if (!(connectionResponseQueue.enqueue(std::move(connectionResponse)))) {
-            LOG_ERROR(
-                "Ran out of room in queue and memory allocation failed.");
+            LOG_ERROR("Ran out of room in queue and memory allocation failed.");
         }
     }
     else if (messageType == MessageType::EntityUpdate) {
@@ -300,7 +298,7 @@ void Network::processReceivedMessage(MessageType messageType,
                 // Found the player.
                 if (!(playerUpdateQueue.enqueue(entityUpdate))) {
                     LOG_ERROR("Ran out of room in queue and memory allocation "
-                               "failed.");
+                              "failed.");
                 }
                 playerFound = true;
             }
@@ -311,7 +309,7 @@ void Network::processReceivedMessage(MessageType messageType,
                 if (!(npcUpdateQueue.enqueue(
                         {NpcUpdateType::Update, entityUpdate}))) {
                     LOG_ERROR("Ran out of room in queue and memory allocation "
-                               "failed.");
+                              "failed.");
                 }
                 npcFound = true;
             }
@@ -347,12 +345,12 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
             // Increment the iteration.
             adjustmentIteration = (currentAdjIteration + 1);
             LOG_INFO("Received tick adjustment: %d, iteration: %u",
-                      receivedTickAdj, receivedAdjIteration);
+                     receivedTickAdj, receivedAdjIteration);
         }
         else if (receivedAdjIteration > currentAdjIteration) {
             LOG_ERROR("Out of sequence adjustment iteration. current: %u, "
-                       "received: %u",
-                       currentAdjIteration, receivedAdjIteration);
+                      "received: %u",
+                      currentAdjIteration, receivedAdjIteration);
         }
     }
 }

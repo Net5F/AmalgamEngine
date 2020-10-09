@@ -10,14 +10,14 @@
  * to get the proper file and line number, so we choose to use both macros for
  * consistency.
  */
-#define LOG_INFO(...)                                                         \
+#define LOG_INFO(...)                                                          \
     {                                                                          \
-        Log::info(__VA_ARGS__);                                              \
+        Log::info(__VA_ARGS__);                                                \
     }
 
-#define LOG_ERROR(...)                                                        \
+#define LOG_ERROR(...)                                                         \
     {                                                                          \
-        Log::error(__FILE__, __LINE__, __VA_ARGS__);                         \
+        Log::error(__FILE__, __LINE__, __VA_ARGS__);                           \
         abort();                                                               \
     }
 

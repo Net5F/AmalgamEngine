@@ -29,7 +29,7 @@ void World::removeEntity(EntityID entityID)
 {
     if (entityID > MAX_ENTITIES) {
         LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
-                   entityID);
+                  entityID);
     }
 
     componentFlags[entityID] = 0;
@@ -43,7 +43,7 @@ void World::attachComponent(EntityID entityID,
 {
     if (entityID > MAX_ENTITIES) {
         LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
-                   entityID);
+                  entityID);
     }
 
     // If the entity doesn't have the component, add it.
@@ -60,7 +60,7 @@ void World::removeComponent(EntityID entityID,
 {
     if (entityID > MAX_ENTITIES) {
         LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
-                   entityID);
+                  entityID);
     }
 
     // If the entity has the component, remove it.

@@ -122,17 +122,17 @@ int main(int argc, char* argv[])
             accumulatedTime -= TEST_GAME_TICK_INTERVAL_S;
             if (accumulatedTime >= TEST_GAME_TICK_INTERVAL_S) {
                 LOG_INFO("Detected a request for multiple game ticks in the "
-                          "same frame. Game tick "
-                          "must have been massively delayed. Game tick was "
-                          "delayed by: %.8fs.",
-                          accumulatedTime);
+                         "same frame. Game tick "
+                         "must have been massively delayed. Game tick was "
+                         "delayed by: %.8fs.",
+                         accumulatedTime);
             }
             else if (accumulatedTime >= TEST_GAME_DELAYED_TIME_S) {
                 // Game missed its ideal call time, could be our issue or
                 // general system slowness.
                 LOG_INFO("Detected a delayed game tick. Game tick was delayed "
-                          "by: %.8fs.",
-                          accumulatedTime);
+                         "by: %.8fs.",
+                         accumulatedTime);
             }
 
             currentTick++;

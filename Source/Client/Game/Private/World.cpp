@@ -26,7 +26,7 @@ void World::addEntity(std::string_view name, EntityID entityID)
 {
     if (entityID > MAX_ENTITIES) {
         LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
-                   entityID);
+                  entityID);
     }
 
     entityNames[entityID] = name;
@@ -36,7 +36,7 @@ void World::removeEntity(EntityID entityID)
 {
     if (entityID > MAX_ENTITIES) {
         LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
-                   entityID);
+                  entityID);
     }
 
     componentFlags[entityID] = 0;
@@ -47,7 +47,7 @@ bool World::entityExists(EntityID entityID) const
 {
     if (entityID > MAX_ENTITIES) {
         LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
-                   entityID);
+                  entityID);
     }
 
     return (componentFlags[entityID] == 0) ? false : true;
@@ -58,7 +58,7 @@ void World::attachComponent(EntityID entityID,
 {
     if (entityID > MAX_ENTITIES) {
         LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
-                   entityID);
+                  entityID);
     }
 
     // If the entity doesn't have the component, add it.
@@ -75,7 +75,7 @@ void World::removeComponent(EntityID entityID,
 {
     if (entityID > MAX_ENTITIES) {
         LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
-                   entityID);
+                  entityID);
     }
 
     // If the entity has the component, remove it.
@@ -91,7 +91,7 @@ void World::registerPlayerID(EntityID inPlayerID)
 {
     if (inPlayerID > MAX_ENTITIES) {
         LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
-                   inPlayerID);
+                  inPlayerID);
     }
 
     playerID = inPlayerID;

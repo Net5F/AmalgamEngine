@@ -55,13 +55,13 @@ NetworkResult Peer::send(const BinaryBufferSharedPtr& message)
     std::size_t messageSize = message->size();
     if (messageSize > MAX_MESSAGE_SIZE) {
         LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
-                   messageSize, MAX_MESSAGE_SIZE);
+                  messageSize, MAX_MESSAGE_SIZE);
     }
 
     int bytesSent = socket->send(message->data(), messageSize);
     if (bytesSent < 0) {
         LOG_ERROR("TCP_Send returned < 0. This should never happen, the socket"
-                   "was likely misused.");
+                  "was likely misused.");
     }
 
     if (static_cast<unsigned int>(bytesSent) < messageSize) {
@@ -82,13 +82,13 @@ NetworkResult Peer::send(const Uint8* messageBuffer, unsigned int messageSize)
 
     if (messageSize > MAX_MESSAGE_SIZE) {
         LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
-                   messageSize, MAX_MESSAGE_SIZE);
+                  messageSize, MAX_MESSAGE_SIZE);
     }
 
     int bytesSent = socket->send(messageBuffer, messageSize);
     if (bytesSent < 0) {
         LOG_ERROR("TCP_Send returned < 0. This should never happen, the socket"
-                   "was likely misused.");
+                  "was likely misused.");
     }
 
     if (static_cast<unsigned int>(bytesSent) < messageSize) {
@@ -127,8 +127,8 @@ NetworkResult Peer::receiveBytesWait(Uint8* messageBuffer, Uint16 numBytes)
     }
     else if (numBytes > MAX_MESSAGE_SIZE) {
         LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
-                   "MaxSize: %u",
-                   numBytes, MAX_MESSAGE_SIZE);
+                  "MaxSize: %u",
+                  numBytes, MAX_MESSAGE_SIZE);
     }
 
     int result = socket->receive(messageBuffer, numBytes);
@@ -139,7 +139,7 @@ NetworkResult Peer::receiveBytesWait(Uint8* messageBuffer, Uint16 numBytes)
     }
     else if (result < numBytes) {
         LOG_ERROR("Didn't receive all the bytes in one chunk."
-                   "Need to add logic for this scenario.");
+                  "Need to add logic for this scenario.");
     }
 
     return NetworkResult::Success;
@@ -179,15 +179,15 @@ MessageResult Peer::receiveMessageWait(Uint8* messageBuffer)
     }
     else if (result < static_cast<int>(MESSAGE_HEADER_SIZE)) {
         LOG_ERROR("Didn't receive all size bytes in one chunk."
-                   "Need to add logic for this scenario.");
+                  "Need to add logic for this scenario.");
     }
 
     // The number of bytes in the upcoming message.
     Uint16 messageSize = _SDLNet_Read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_MESSAGE_SIZE) {
         LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
-                   "MaxSize: %u",
-                   messageSize, MAX_MESSAGE_SIZE);
+                  "MaxSize: %u",
+                  messageSize, MAX_MESSAGE_SIZE);
     }
 
     result = socket->receive(messageBuffer, messageSize);
@@ -198,7 +198,7 @@ MessageResult Peer::receiveMessageWait(Uint8* messageBuffer)
     }
     else if (result < messageSize) {
         LOG_ERROR("Didn't receive all message bytes in one chunk."
-                   "Need to add logic for this scenario.");
+                  "Need to add logic for this scenario.");
     }
 
     MessageType messageType
@@ -222,15 +222,15 @@ MessageResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
     }
     else if (result < static_cast<int>(MESSAGE_HEADER_SIZE)) {
         LOG_ERROR("Didn't receive all size bytes in one chunk."
-                   "Need to add logic for this scenario.");
+                  "Need to add logic for this scenario.");
     }
 
     // The number of bytes in the upcoming message.
     Uint16 messageSize = _SDLNet_Read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_MESSAGE_SIZE) {
         LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
-                   "MaxSize: %u",
-                   messageSize, MAX_MESSAGE_SIZE);
+                  "MaxSize: %u",
+                  messageSize, MAX_MESSAGE_SIZE);
     }
 
     messageBuffer = std::make_unique<BinaryBuffer>(messageSize);
@@ -242,7 +242,7 @@ MessageResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
     }
     else if (result < messageSize) {
         LOG_ERROR("Didn't receive all message bytes in one chunk."
-                   "Need to add logic for this scenario.");
+                  "Need to add logic for this scenario.");
     }
 
     MessageType messageType

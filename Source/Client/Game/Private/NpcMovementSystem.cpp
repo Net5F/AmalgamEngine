@@ -50,9 +50,9 @@ void NpcMovementSystem::updateNpcs()
         NpcStateUpdate& stateUpdate = stateUpdateQueue.front();
         if (stateUpdate.tickNum != (lastProcessedTick + 1)) {
             LOG_ERROR("Processing NPC movement out of order. "
-                       "stateUpdate.tickNum: %u, "
-                       "lastProcessedTick: %u",
-                       stateUpdate.tickNum, lastProcessedTick);
+                      "stateUpdate.tickNum: %u, "
+                      "lastProcessedTick: %u",
+                      stateUpdate.tickNum, lastProcessedTick);
         }
 
         // If the update contained new data, apply it.
@@ -217,8 +217,8 @@ void NpcMovementSystem::applyUpdateMessage(
         const PositionComponent& currentPosition = world.positions[entityID];
         const PositionComponent& newPosition = entityIt->positionComponent;
         LOG_INFO("Update: %d: (%f, %f) -> (%f, %f)", entityID,
-                  currentPosition.x, currentPosition.y, newPosition.x,
-                  newPosition.y);
+                 currentPosition.x, currentPosition.y, newPosition.x,
+                 newPosition.y);
         // TEMP
         world.positions[entityID] = entityIt->positionComponent;
     }

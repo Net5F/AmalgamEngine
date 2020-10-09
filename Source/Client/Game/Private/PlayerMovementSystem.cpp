@@ -45,9 +45,9 @@ void PlayerMovementSystem::processMovements()
             if (oldPosition.x != currentPosition.x
                 || oldPosition.y != currentPosition.y) {
                 LOG_INFO("Predicted position mismatched after replay: (%.6f, "
-                          "%.6f) -> (%.6f, %.6f)",
-                          oldPosition.x, oldPosition.y, currentPosition.x,
-                          currentPosition.y);
+                         "%.6f) -> (%.6f, %.6f)",
+                         oldPosition.x, oldPosition.y, currentPosition.x,
+                         currentPosition.y);
                 LOG_INFO("latestReceivedTick: %u", latestReceivedTick);
             }
         }
@@ -89,7 +89,7 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(
 
         if (playerUpdate == nullptr) {
             LOG_ERROR("Failed to find player entity in a message that should "
-                       "have contained one.");
+                      "have contained one.");
         }
 
         /* Update the movements. */
@@ -116,9 +116,9 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
     Uint32 currentTick = game.getCurrentTick();
     if (latestReceivedTick > currentTick) {
         LOG_ERROR("Received data for tick %u on tick %u. Server is in the "
-                   "future, can't replay "
-                   "inputs.",
-                   latestReceivedTick, currentTick);
+                  "future, can't replay "
+                  "inputs.",
+                  latestReceivedTick, currentTick);
     }
 
     /* Replay all inputs since the received message, except the current. */
@@ -127,9 +127,9 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
 
         if (tickDiff > World::INPUT_HISTORY_LENGTH) {
             LOG_ERROR("Too few items in the player input history. "
-                       "Increase the length or reduce lag. tickDiff: %u, "
-                       "historyLength: %u",
-                       tickDiff, World::INPUT_HISTORY_LENGTH);
+                      "Increase the length or reduce lag. tickDiff: %u, "
+                      "historyLength: %u",
+                      tickDiff, World::INPUT_HISTORY_LENGTH);
         }
 
         // Use the appropriate input state to update movement.

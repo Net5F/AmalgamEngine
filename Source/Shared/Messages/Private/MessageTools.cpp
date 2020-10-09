@@ -13,11 +13,11 @@ void MessageTools::fillMessageHeader(MessageType type, std::size_t messageSize,
     if ((totalMessageSize > Peer::MAX_MESSAGE_SIZE)
         || (messageSize > UINT16_MAX)) {
         LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
-                   messageSize, Peer::MAX_MESSAGE_SIZE);
+                  messageSize, Peer::MAX_MESSAGE_SIZE);
     }
     else if (totalMessageSize > messageBuffer->size()) {
         LOG_ERROR("Given buffer is too small. Size: %u, required: %u",
-                   messageBuffer->size(), totalMessageSize);
+                  messageBuffer->size(), totalMessageSize);
     }
 
     // Copy the type into the buffer.
