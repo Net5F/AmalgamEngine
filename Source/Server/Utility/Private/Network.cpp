@@ -35,7 +35,7 @@ void Network::tick()
             // happened to delay us.
             // We still only want to send what's in the queue, but it's worth
             // giving debug output that we detected this.
-            LOG_INFO("Detected a delayed network send. accumulatedTime: %f. "
+            LOG_INFO("Detected a delayed network send. accumulatedTime: {:.8f}. "
                      "Setting to 0.",
                      accumulatedTime);
             accumulatedTime = 0;
@@ -86,7 +86,7 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
                 // Else, the client was destructed so we don't care.
             }
             else {
-                LOG_INFO("Message was dropped. Diff: %d", pushResult.diff);
+                LOG_INFO("Message was dropped. Diff: {}", pushResult.diff);
             }
         }
         else if (clientMessage.message.messageType == MessageType::Heartbeat) {
@@ -172,7 +172,7 @@ BinaryBufferSharedPtr Network::constructMessage(MessageType type,
                                                 std::size_t size)
 {
     if ((MESSAGE_HEADER_SIZE + size) > Peer::MAX_MESSAGE_SIZE) {
-        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u", size,
+        LOG_ERROR("Tried to send a too-large message. Size: {}, max: {}", size,
                   Peer::MAX_MESSAGE_SIZE);
     }
 

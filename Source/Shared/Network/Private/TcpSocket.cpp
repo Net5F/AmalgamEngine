@@ -15,12 +15,12 @@ TcpSocket::TcpSocket(Uint16 inPort)
 
     IPaddress ip;
     if (SDLNet_ResolveHost(&ip, nullptr, port) == -1) {
-        LOG_ERROR("Could not resolve host: %s", SDLNet_GetError());
+        LOG_ERROR("Could not resolve host: {}", SDLNet_GetError());
     }
 
     socket = SDLNet_TCP_Open(&ip);
     if (socket == nullptr) {
-        LOG_ERROR("Could not open TCP socket: %s", SDLNet_GetError());
+        LOG_ERROR("Could not open TCP socket: {}", SDLNet_GetError());
     }
 }
 
@@ -43,12 +43,12 @@ TcpSocket::TcpSocket(std::string inIp, Uint16 inPort)
     IPaddress ipObj;
 
     if (SDLNet_ResolveHost(&ipObj, ip.c_str(), port) == -1) {
-        LOG_ERROR("Could not resolve host: %s", SDLNet_GetError());
+        LOG_ERROR("Could not resolve host: {}", SDLNet_GetError());
     }
 
     socket = SDLNet_TCP_Open(&ipObj);
     if (socket == nullptr) {
-        LOG_ERROR("Could not open TCP socket: %s", SDLNet_GetError());
+        LOG_ERROR("Could not open TCP socket: {}", SDLNet_GetError());
     }
 }
 
@@ -94,7 +94,7 @@ std::string TcpSocket::getAddress()
         // address.
         IPaddress* remoteIP = SDLNet_TCP_GetPeerAddress(socket);
         if (remoteIP == nullptr) {
-            LOG_ERROR("Failed to get peer address: %s", SDLNet_GetError());
+            LOG_ERROR("Failed to get peer address: {}", SDLNet_GetError());
         }
         else {
             // Successfully got the address, save it in our members.

@@ -31,6 +31,11 @@ include("${PROJECT_SOURCE_DIR}/../CMake/readerwriterqueue.cmake")
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/CircularBuffer/"
                  "${PROJECT_BINARY_DIR}/Libraries/CircularBuffer/")
 
+# Build spdlog.
+option(SPDLOG_ENABLE_PCH "Build static or shared library using precompiled header to speed up compilation time" ON)
+add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/spdlog/"
+                 "${PROJECT_BINARY_DIR}/Libraries/spdlog/")
+
 # Build shared library
 add_subdirectory(Shared)
 

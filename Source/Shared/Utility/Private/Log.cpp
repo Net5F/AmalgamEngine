@@ -1,67 +1,36 @@
 #include "Log.h"
-#include <cstdio>
-#include <cstdarg>
-#include <atomic>
-#include "Ignore.h"
+#include <vector>
+
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 namespace AM
 {
+// Init the member vars.
+std::shared_ptr<spdlog::logger> Log::engineLogger;
 const std::atomic<Uint32>* Log::currentTickPtr = nullptr;
+Uint32 Log::lastLoggedTick = 0;
 
 void Log::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr)
 {
     currentTickPtr = inCurrentTickPtr;
 }
 
-void Log::info(const char* expression, ...)
+void Log::init()
 {
-#if defined(ENABLE_DEBUG_INFO)
-    // If the app hasn't registered a tick count, default to 0.
-    Uint32 currentTick = 0;
-    if (currentTickPtr != nullptr) {
-        currentTick = *currentTickPtr;
-    }
+    std::vector<spdlog::sink_ptr> logSinks;
+    logSinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
+    logSinks.emplace_back(
+        std::make_shared<spdlog::sinks::basic_file_sink_mt>("Amalgam.log", true));
 
-    std::va_list arg;
-    va_start(arg, expression);
+    logSinks[0]->set_pattern("%v");
+    logSinks[1]->set_pattern("%v");
 
-    std::printf(" %u: ", currentTick);
-    std::vprintf(expression, arg);
-    std::printf("\n");
-    std::fflush(stdout);
-
-    va_end(arg);
-#else
-    // Avoid unused parameter warnings in release.
-    ignore(expression);
-#endif // ENABLE_DEBUG_INFO
-}
-
-void Log::error(const char* fileName, int line, const char* expression, ...)
-{
-#if defined(ENABLE_DEBUG_INFO)
-    // If the app hasn't registered a tick count, default to 0.
-    Uint32 currentTick = 0;
-    if (currentTickPtr != nullptr) {
-        currentTick = *currentTickPtr;
-    }
-
-    std::va_list arg;
-    va_start(arg, expression);
-
-    std::printf(" Error at file: %s, line: %d, during tick: %u\n", fileName,
-                line, currentTick);
-    std::vprintf(expression, arg);
-    std::printf("\n");
-    std::fflush(stdout);
-
-    va_end(arg);
-#else
-    // Avoid unused parameter warnings in release.
-    ignore(fileName);
-    ignore(line);
-    ignore(expression);
-#endif // ENABLE_DEBUG_INFO
+    engineLogger = std::make_shared<spdlog::logger>("Engine", logSinks.begin(),
+        logSinks.end());
+    spdlog::register_logger(engineLogger);
+    engineLogger->set_level(spdlog::level::trace);
+    engineLogger->flush_on(spdlog::level::trace);
 }
 
 } // namespace AM

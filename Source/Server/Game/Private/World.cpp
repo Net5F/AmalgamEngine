@@ -28,7 +28,7 @@ EntityID World::addEntity(std::string_view name)
 void World::removeEntity(EntityID entityID)
 {
     if (entityID > MAX_ENTITIES) {
-        LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+        LOG_ERROR("Invalid entity ID. Max: {}, given: {}", MAX_ENTITIES,
                   entityID);
     }
 
@@ -42,7 +42,7 @@ void World::attachComponent(EntityID entityID,
                             ComponentFlag::FlagType componentFlag)
 {
     if (entityID > MAX_ENTITIES) {
-        LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+        LOG_ERROR("Invalid entity ID. Max: {}, given: {}", MAX_ENTITIES,
                   entityID);
     }
 
@@ -59,7 +59,7 @@ void World::removeComponent(EntityID entityID,
                             ComponentFlag::FlagType componentFlag)
 {
     if (entityID > MAX_ENTITIES) {
-        LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+        LOG_ERROR("Invalid entity ID. Max: {}, given: {}", MAX_ENTITIES,
                   entityID);
     }
 

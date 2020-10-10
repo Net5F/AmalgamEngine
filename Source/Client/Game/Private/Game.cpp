@@ -48,7 +48,7 @@ void Game::connect()
 
     // Get our info from the connection response.
     EntityID player = connectionResponse->entityID;
-    LOG_INFO("Received connection response. ID: %u, tick: %u", player,
+    LOG_INFO("Received connection response. ID: {}, tick: {}", player,
              connectionResponse->tickNum);
 
     // Aim our tick for some reasonable point ahead of the server.
@@ -149,21 +149,21 @@ void Game::tick()
             LOG_INFO("Detected a request for multiple game ticks in the same "
                      "frame. Game tick "
                      "must have been massively delayed. Game tick was delayed "
-                     "by: %.8fs.",
+                     "by: {:.8f}s.",
                      accumulatedTime);
         }
         else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
             // Game missed its ideal call time, could be our issue or general
             // system slowness.
             LOG_INFO("Detected a delayed game tick. Game tick was delayed by: "
-                     "%.8fs.",
+                     "{:.8f}s.",
                      accumulatedTime);
         }
 
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);
         if (executionTime > GAME_TICK_TIMESTEP_S) {
-            LOG_INFO("Overran our sim iteration time. executionTime: %.8f",
+            LOG_INFO("Overran our sim iteration time. executionTime: {:.8f}",
                      executionTime);
         }
     }

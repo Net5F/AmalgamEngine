@@ -1,54 +1,90 @@
 #pragma once
 
+#include "spdlog/spdlog.h"
+#include "spdlog/fmt/ostr.h"
 #include <SDL_stdinc.h>
 #include <atomic>
+#include <utility>
 
-/**
- * Use these macros instead of calling the functions directly.
- *
- * Debug::info could be called directly, but error must be called from the macro
- * to get the proper file and line number, so we choose to use both macros for
- * consistency.
- */
-#define LOG_INFO(...)                                                          \
-    {                                                                          \
-        Log::info(__VA_ARGS__);                                                \
-    }
+// Logging macros, use these instead of calling the Log functions directly.
+#define LOG_INFO(...)                                                     \
+{                                                                          \
+    ::AM::Log::info(__VA_ARGS__);                                          \
+}
 
-#define LOG_ERROR(...)                                                         \
-    {                                                                          \
-        Log::error(__FILE__, __LINE__, __VA_ARGS__);                           \
-        abort();                                                               \
-    }
+#define LOG_ERROR(...)                                                    \
+{                                                                          \
+    ::AM::Log::error(__FILE__, __LINE__, __VA_ARGS__);                     \
+    abort();                                                               \
+}
 
 namespace AM
 {
 class Log
 {
 public:
+    /**
+     * Used to register the sim tick. Current tick number will be added to the log.
+     */
     static void
         registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
     /**
-     * Prints the given info to stdout and flushes the buffer.
-     * Note: The implementation is hidden behind the ENABLE_DEBUG_INFO flag.
-     *       The cmake logic should be such that this only happens in debug
-     *       config.
+     * Initializes the logger, setting up the patterns and sinks.
      */
-    static void info(const char* expression, ...);
+    static void init();
 
     /**
-     * Prints the given info to stdout, flushes the buffer,
-     * then calls abort() to crash the program.
-     * Note: The implementation is hidden behind the ENABLE_DEBUG_INFO flag.
-     *       The cmake logic should be such that this only happens in debug
-     *       config.
      */
-    static void error(const char* fileName, int line, const char* expression,
-                      ...);
+    template<typename FormatString, typename... Args>
+    static void info(const FormatString& fmt, const Args& ...args)
+    {
+        // Get the latest sim tick.
+        Uint32 currentTick = 0;
+        if ((currentTickPtr != nullptr)) {
+            currentTick = *currentTickPtr;
+        }
+
+        // If the tick has changed since we last logged, log it.
+        if (currentTick > lastLoggedTick) {
+            engineLogger->info("Tick {} ----------", currentTick);
+        }
+
+        // Log the given info.
+        engineLogger->info(fmt, args...);
+    }
+
+    /**
+     */
+    template<typename FormatString, typename... Args>
+    static void error(const char* fileName, int line, const FormatString& fmt,
+                          const Args& ...args)
+    {
+        // Get the latest sim tick.
+        Uint32 currentTick = 0;
+        if ((currentTickPtr != nullptr)) {
+            currentTick = *currentTickPtr;
+        }
+
+        // Log the file name, line number, and tick number.
+        engineLogger->error("Error at file: {}, line: {}, during tick: {}",
+                fileName, line, currentTick);
+
+        // Log the given info.
+        engineLogger->error(fmt, args...);
+    }
 
 private:
+    static std::shared_ptr<spdlog::logger> engineLogger;
+
+    /**
+     * A pointer to the sim tick. Registered through registerCurrentTickPtr and
+     * used as a timestamp in the log.
+     */
     static const std::atomic<Uint32>* currentTickPtr;
+
+    /** Holds the last tick number that we logged. */
+    static Uint32 lastLoggedTick;
 };
 
 } /* End namespace AM */

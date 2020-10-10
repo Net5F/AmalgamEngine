@@ -69,7 +69,7 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
 
     while (newPeer != nullptr) {
         NetworkID newID = idPool.reserveID();
-        LOG_INFO("New client connected. Assigning netID: %u", newID);
+        LOG_INFO("New client connected. Assigning netID: {}", newID);
 
         // Add the peer to the Network's clientMap, constructing a Client
         // in-place.
@@ -108,7 +108,7 @@ void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
             network.getDisconnectEventQueue().enqueue(it->first);
 
             // Erase the disconnected client.
-            LOG_INFO("Erased disconnected client with netID: %u.", it->first);
+            LOG_INFO("Erased disconnected client with netID: {}.", it->first);
             idPool.freeID(it->first);
             it = clientMap.erase(it);
         }

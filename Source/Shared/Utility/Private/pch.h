@@ -1,5 +1,4 @@
-#ifndef PCH_H_
-#define PCH_H_
+#pragma once
 
 // STL
 #include <vector>
@@ -14,5 +13,3 @@
 #include "Log.h"
 #include "NetworkDefs.h"
 #include "GameDefs.h"
-
-#endif /* End PCH_H_ */

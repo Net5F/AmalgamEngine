@@ -22,11 +22,11 @@ int main(int argc, char* argv[])
     ignore(argv);
 
     if (SDL_Init(0) == -1) {
-        LOG_INFO("SDL_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDL_Init: {}", SDLNet_GetError());
         return 1;
     }
     if (SDLNet_Init() == -1) {
-        LOG_INFO("SDLNet_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDLNet_Init: {}", SDLNet_GetError());
         return 2;
     }
 
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
         LOG_INFO("Failed to send all bytes.");
         return 5;
     }
-    LOG_INFO("Sent end byte. Time passed: ~%.8f", timer.getDeltaSeconds(true));
+    LOG_INFO("Sent end byte. Time passed: ~{:.8f}", timer.getDeltaSeconds(true));
 
     return 0;
 }

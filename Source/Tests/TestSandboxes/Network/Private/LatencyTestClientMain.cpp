@@ -105,13 +105,13 @@ int main(int argc, char* argv[])
     average /= iterationsToRun;
 
     std::cout << "## Latency calcs ##" << std::endl;
-    printf("Min: %.6f", min);
+    printf("Min: {:.6f}", min);
     std::cout << std::endl;
 
-    printf("Max: %.6f", max);
+    printf("Max: {:.6f}", max);
     std::cout << std::endl;
 
-    printf("Average: %.6f", average);
+    printf("Average: {:.6f}", average);
     std::cout << std::endl;
 
     return 0;

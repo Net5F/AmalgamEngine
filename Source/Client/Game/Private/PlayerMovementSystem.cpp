@@ -44,11 +44,11 @@ void PlayerMovementSystem::processMovements()
             // where the server thought we should be.
             if (oldPosition.x != currentPosition.x
                 || oldPosition.y != currentPosition.y) {
-                LOG_INFO("Predicted position mismatched after replay: (%.6f, "
-                         "%.6f) -> (%.6f, %.6f)",
+                LOG_INFO("Predicted position mismatched after replay: ({:.6f}, "
+                         "{:.6f}) -> ({:.6f}, {:.6f})",
                          oldPosition.x, oldPosition.y, currentPosition.x,
                          currentPosition.y);
-                LOG_INFO("latestReceivedTick: %u", latestReceivedTick);
+                LOG_INFO("latestReceivedTick: {}", latestReceivedTick);
             }
         }
     }
@@ -115,7 +115,7 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
 {
     Uint32 currentTick = game.getCurrentTick();
     if (latestReceivedTick > currentTick) {
-        LOG_ERROR("Received data for tick %u on tick %u. Server is in the "
+        LOG_ERROR("Received data for tick {} on tick {}. Server is in the "
                   "future, can't replay "
                   "inputs.",
                   latestReceivedTick, currentTick);
@@ -127,8 +127,8 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
 
         if (tickDiff > World::INPUT_HISTORY_LENGTH) {
             LOG_ERROR("Too few items in the player input history. "
-                      "Increase the length or reduce lag. tickDiff: %u, "
-                      "historyLength: %u",
+                      "Increase the length or reduce lag. tickDiff: {}, "
+                      "historyLength: {}",
                       tickDiff, World::INPUT_HISTORY_LENGTH);
         }
 

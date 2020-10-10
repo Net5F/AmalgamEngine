@@ -62,7 +62,7 @@ void RenderSystem::render()
             // giving debug output that we detected this.
             LOG_INFO("Detected a request for two renders in the same frame. "
                      "Render must have been massively delayed. Render was "
-                     "delayed by: %.8fs. Setting to 0.",
+                     "delayed by: {:.8f}s. Setting to 0.",
                      accumulatedTime);
             accumulatedTime = 0;
         }

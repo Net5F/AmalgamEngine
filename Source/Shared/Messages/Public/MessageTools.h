@@ -85,7 +85,8 @@ public:
                     break;
             }
             // TODO: Eventually change this to a LOG_INFO and return false.
-            LOG_ERROR("%s", errorString);
+            LOG_ERROR("{}", errorString);
+            return false;
         }
         else {
             return true;

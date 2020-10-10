@@ -160,8 +160,8 @@ Message Client::receiveMessage()
         if (delta > TIMEOUT_S) {
             peer = nullptr;
             LOG_INFO("Dropped connection, peer timed out. Time since last "
-                     "message: %.6f "
-                     "seconds. Timeout: %.6f",
+                     "message: {:.6f} "
+                     "seconds. Timeout: {:.6f}",
                      delta, TIMEOUT_S);
             return {MessageType::NotSet, nullptr};
         }
@@ -183,7 +183,7 @@ void Client::recordTickDiff(Sint64 tickDiff)
         || (tickDiff > HIGHEST_VALID_TICKDIFF)) {
         // Diff is outside our bounds. Drop the connection.
         peer = nullptr;
-        LOG_INFO("Dropped connection, diff out of bounds. Diff: %" PRId64,
+        LOG_INFO("Dropped connection, diff out of bounds. Diff: {}",
                  tickDiff);
     }
     else {
@@ -261,14 +261,8 @@ Sint8 Client::calcAdjustment(
     }
 
     // TEMP
-    LOG_INFO("Calc'd adjustment. adjustment: %d",
+    LOG_INFO("Calc'd adjustment. adjustment: {}",
              TICKDIFF_TARGET - truncatedAverage);
-    //    LOG_INFO("truncatedAverage: %d. Values:",
-    //    static_cast<int>(averageDiff)); printf("["); for (unsigned int i = 0;
-    //    i < TICKDIFF_HISTORY_LENGTH; ++i) {
-    //        printf("%d, ", tickDiffHistoryCopy[i]);
-    //    }
-    //    printf("]\n");
     // TEMP
 
     // Make an adjustment back towards the target.

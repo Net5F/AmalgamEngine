@@ -68,7 +68,7 @@ void Network::tick()
             // happened to delay us.
             // We still only want to send what's in the queue, but it's worth
             // giving debug output that we detected this.
-            LOG_INFO("Detected a delayed network tick. accumulatedTime: %f. "
+            LOG_INFO("Detected a delayed network tick. accumulatedTime: {}. "
                      "Setting to 0.",
                      accumulatedTime);
             accumulatedTime = 0;
@@ -344,12 +344,12 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
 
             // Increment the iteration.
             adjustmentIteration = (currentAdjIteration + 1);
-            LOG_INFO("Received tick adjustment: %d, iteration: %u",
+            LOG_INFO("Received tick adjustment: {}, iteration: {}",
                      receivedTickAdj, receivedAdjIteration);
         }
         else if (receivedAdjIteration > currentAdjIteration) {
-            LOG_ERROR("Out of sequence adjustment iteration. current: %u, "
-                      "received: %u",
+            LOG_ERROR("Out of sequence adjustment iteration. current: {}, "
+                      "received: {}",
                       currentAdjIteration, receivedAdjIteration);
         }
     }

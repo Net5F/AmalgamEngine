@@ -53,7 +53,7 @@ void NetworkConnectionSystem::processConnectEvents()
         world.attachComponent(newEntityID, ComponentFlag::Sprite);
         world.attachComponent(newEntityID, ComponentFlag::Client);
 
-        LOG_INFO("Constructed entity with netID: %u, entityID: %u",
+        LOG_INFO("Constructed entity with netID: {}, entityID: {}",
                  clientNetworkID, newEntityID);
 
         // Build and send the response.
@@ -86,7 +86,7 @@ void NetworkConnectionSystem::processDisconnectEvents()
                 entityFound = true;
 
                 world.removeEntity(it->first);
-                LOG_INFO("Erased entity with netID: %u", it->first);
+                LOG_INFO("Erased entity with netID: {}", it->first);
                 world.clients.erase(it);
             }
             else {
@@ -95,7 +95,7 @@ void NetworkConnectionSystem::processDisconnectEvents()
         }
 
         if (!entityFound) {
-            LOG_ERROR("Failed to find entity with netID: %u while erasing.",
+            LOG_ERROR("Failed to find entity with netID: {} while erasing.",
                       disconnectedClientID);
         }
     }

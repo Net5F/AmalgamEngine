@@ -9,7 +9,7 @@ SocketSet::SocketSet(int maxSockets)
 {
     set = SDLNet_AllocSocketSet(maxSockets);
     if (set == nullptr) {
-        LOG_ERROR("Error allocating socket set: %s", SDLNet_GetError());
+        LOG_ERROR("Error allocating socket set: {}", SDLNet_GetError());
     }
 }
 
@@ -23,7 +23,7 @@ void SocketSet::addSocket(const TcpSocket& socket)
 {
     int numAdded = SDLNet_TCP_AddSocket(set, socket.getUnderlyingSocket());
     if (numAdded < 1) {
-        LOG_ERROR("Error while adding socket: %s", SDLNet_GetError());
+        LOG_ERROR("Error while adding socket: {}", SDLNet_GetError());
     }
     else {
         numSockets += numAdded;
@@ -39,7 +39,7 @@ int SocketSet::checkSockets(unsigned int timeoutMs)
 {
     int numReady = SDLNet_CheckSockets(set, timeoutMs);
     if (numReady == -1) {
-        LOG_INFO("Error while checking sockets: %s", SDLNet_GetError());
+        LOG_INFO("Error while checking sockets: {}", SDLNet_GetError());
         // Most of the time this is a system error, where perror might help.
         perror("SDLNet_CheckSockets");
     }

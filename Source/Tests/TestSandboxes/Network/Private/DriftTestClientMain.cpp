@@ -40,7 +40,7 @@ bool waitForServer(TCPsocket& serverSocket, std::atomic<Uint32>& currentTick)
         else {
             // +5 to put us in a reference frame ahead of the server.
             currentTick = _SDLNet_Read32(&tickBuf) + 5;
-            Debug::info("Current tick received: %u", currentTick.load());
+            Debug::info("Current tick received: {}", currentTick.load());
             return true;
         }
     }
@@ -55,11 +55,11 @@ int main(int argc, char* argv[])
     ignore(argv);
 
     if (SDL_Init(0) == -1) {
-        LOG_INFO("SDL_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDL_Init: {}", SDLNet_GetError());
         return 1;
     }
     if (SDLNet_Init() == -1) {
-        LOG_INFO("SDLNet_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDLNet_Init: {}", SDLNet_GetError());
         return 2;
     }
 
@@ -124,14 +124,14 @@ int main(int argc, char* argv[])
                 LOG_INFO("Detected a request for multiple game ticks in the "
                          "same frame. Game tick "
                          "must have been massively delayed. Game tick was "
-                         "delayed by: %.8fs.",
+                         "delayed by: {:.8f}s.",
                          accumulatedTime);
             }
             else if (accumulatedTime >= TEST_GAME_DELAYED_TIME_S) {
                 // Game missed its ideal call time, could be our issue or
                 // general system slowness.
                 LOG_INFO("Detected a delayed game tick. Game tick was delayed "
-                         "by: %.8fs.",
+                         "by: {:.8f}s.",
                          accumulatedTime);
             }
 

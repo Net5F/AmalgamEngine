@@ -54,7 +54,7 @@ NetworkResult Peer::send(const BinaryBufferSharedPtr& message)
 
     std::size_t messageSize = message->size();
     if (messageSize > MAX_MESSAGE_SIZE) {
-        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
+        LOG_ERROR("Tried to send a too-large message. Size: {}, max: {}",
                   messageSize, MAX_MESSAGE_SIZE);
     }
 
@@ -81,7 +81,7 @@ NetworkResult Peer::send(const Uint8* messageBuffer, unsigned int messageSize)
     }
 
     if (messageSize > MAX_MESSAGE_SIZE) {
-        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
+        LOG_ERROR("Tried to send a too-large message. Size: {}, max: {}",
                   messageSize, MAX_MESSAGE_SIZE);
     }
 
@@ -126,8 +126,8 @@ NetworkResult Peer::receiveBytesWait(Uint8* messageBuffer, Uint16 numBytes)
         return NetworkResult::Disconnected;
     }
     else if (numBytes > MAX_MESSAGE_SIZE) {
-        LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
-                  "MaxSize: %u",
+        LOG_ERROR("Tried to receive too large of a message. messageSize: {}, "
+                  "MaxSize: {}",
                   numBytes, MAX_MESSAGE_SIZE);
     }
 
@@ -185,8 +185,8 @@ MessageResult Peer::receiveMessageWait(Uint8* messageBuffer)
     // The number of bytes in the upcoming message.
     Uint16 messageSize = _SDLNet_Read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_MESSAGE_SIZE) {
-        LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
-                  "MaxSize: %u",
+        LOG_ERROR("Tried to receive too large of a message. messageSize: {}, "
+                  "MaxSize: {}",
                   messageSize, MAX_MESSAGE_SIZE);
     }
 
@@ -228,8 +228,8 @@ MessageResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
     // The number of bytes in the upcoming message.
     Uint16 messageSize = _SDLNet_Read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_MESSAGE_SIZE) {
-        LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
-                  "MaxSize: %u",
+        LOG_ERROR("Tried to receive too large of a message. messageSize: {}, "
+                  "MaxSize: {}",
                   messageSize, MAX_MESSAGE_SIZE);
     }
 

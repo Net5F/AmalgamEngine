@@ -69,7 +69,7 @@ void NetworkUpdateSystem::constructAndSendUpdate(
 
     /* If there are updates to send, send an update message. */
     if (entityUpdate.entities.size() > 0) {
-        LOG_INFO("Queueing message for entity: %u with tick: %u", entityID,
+        LOG_INFO("Queueing message for entity: {} with tick: {}", entityID,
                  game.getCurrentTick());
 
         // Finish filling the EntityUpdate.
@@ -106,7 +106,7 @@ void NetworkUpdateSystem::fillEntityData(EntityID entityID,
     // TEMP - Doing this until C++20 where we can emplace brace initializers.
     entities.push_back({entityID, flags, input, position, movement});
 
-    //    LOG_INFO("Sending: (%f, %f), (%f, %f)", position.x, position.y,
+    //    LOG_INFO("Sending: ({:.8f}, {:.8f}), ({:.8f}, {:.8f})", position.x, position.y,
     //    movement.velX,
     //        movement.velY);
 }

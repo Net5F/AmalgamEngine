@@ -43,7 +43,7 @@ void updateConnection(TCPsocket& serverSocket, TCPsocket& clientSocket,
         if (clientSocket != nullptr) {
             int numAdded = SDLNet_TCP_AddSocket(clientSet, clientSocket);
             if (numAdded < 1) {
-                LOG_INFO("Error while adding socket: %s", SDLNet_GetError());
+                LOG_INFO("Error while adding socket: {}", SDLNet_GetError());
             }
             else {
                 // Connected, send our current tick.
@@ -91,7 +91,7 @@ bool receiveAndHandle(SDLNet_SocketSet& clientSet, TCPsocket& clientSocket,
             Sint64 clientTick = static_cast<Sint64>(_SDLNet_Read32(&recBuffer));
             Sint64 serverTick = static_cast<Sint64>(currentTick);
 
-            LOG_INFO("Client tick: %d, Server tick: %d, Diff: %d", clientTick,
+            LOG_INFO("Client tick: {}, Server tick: {}, Diff: {}", clientTick,
                      serverTick, (clientTick - serverTick));
 
             bytesReceived = 0;
@@ -108,11 +108,11 @@ int main(int argc, char* argv[])
     ignore(argv);
 
     if (SDL_Init(0) == -1) {
-        LOG_INFO("SDL_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDL_Init: {}", SDLNet_GetError());
         return 1;
     }
     if (SDLNet_Init() == -1) {
-        LOG_INFO("SDLNet_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDLNet_Init: {}", SDLNet_GetError());
         return 2;
     }
 
@@ -120,12 +120,12 @@ int main(int argc, char* argv[])
     IPaddress ip;
     TCPsocket serverSocket = nullptr;
     if (SDLNet_ResolveHost(&ip, NULL, SERVER_PORT)) {
-        LOG_INFO("%s", SDLNet_GetError());
+        LOG_INFO("{}", SDLNet_GetError());
     }
 
     serverSocket = SDLNet_TCP_Open(&ip);
     if (!serverSocket) {
-        LOG_INFO("%s", SDLNet_GetError());
+        LOG_INFO("{}", SDLNet_GetError());
     }
 
     TCPsocket clientSocket = nullptr;
@@ -163,14 +163,14 @@ int main(int argc, char* argv[])
                 LOG_INFO("Detected a request for multiple game ticks in the "
                          "same frame. Game tick "
                          "must have been massively delayed. Game tick was "
-                         "delayed by: %.8fs.",
+                         "delayed by: {:.8f}s.",
                          accumulatedTime);
             }
             else if (accumulatedTime >= TEST_GAME_DELAYED_TIME_S) {
                 // Game missed its ideal call time, could be our issue or
                 // general system slowness.
                 LOG_INFO("Detected a delayed game tick. Game tick was delayed "
-                         "by: %.8fs.",
+                         "by: {:.8f}s.",
                          accumulatedTime);
             }
 

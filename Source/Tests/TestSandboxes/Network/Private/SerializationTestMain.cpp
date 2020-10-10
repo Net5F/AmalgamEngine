@@ -44,6 +44,6 @@ int main()
 
     // Get the size.
     builder.Finish(entityUpdate);
-    LOG_INFO("Message size: %u", builder.GetSize());
+    LOG_INFO("Message size: {}", builder.GetSize());
     return 0;
 }

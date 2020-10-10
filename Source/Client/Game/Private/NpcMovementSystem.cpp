@@ -50,8 +50,8 @@ void NpcMovementSystem::updateNpcs()
         NpcStateUpdate& stateUpdate = stateUpdateQueue.front();
         if (stateUpdate.tickNum != (lastProcessedTick + 1)) {
             LOG_ERROR("Processing NPC movement out of order. "
-                      "stateUpdate.tickNum: %u, "
-                      "lastProcessedTick: %u",
+                      "stateUpdate.tickNum: {}, "
+                      "lastProcesedTick: {}",
                       stateUpdate.tickNum, lastProcessedTick);
         }
 
@@ -66,7 +66,7 @@ void NpcMovementSystem::updateNpcs()
     }
     if ((lastReceivedTick != 0) && !updated) {
         LOG_INFO(
-            "Tick passed with no update. last: %u, desired: %u, queueSize: %u",
+            "Tick passed with no update. last: {}, desired: {}, queueSize: {}",
             lastProcessedTick, desiredTick, stateUpdateQueue.size());
     }
 }
@@ -105,7 +105,7 @@ void NpcMovementSystem::handleExplicitConfirmation()
 {
     lastReceivedTick++;
     stateUpdateQueue.push({lastReceivedTick, false, nullptr});
-    LOG_INFO("Explicit push: %u", lastReceivedTick);
+    LOG_INFO("Explicit push: {}", lastReceivedTick);
 }
 
 void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
@@ -116,7 +116,7 @@ void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
     unsigned int implicitConfirmations = confirmedTick - lastReceivedTick;
     for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
         stateUpdateQueue.push({(lastReceivedTick + i), false, nullptr});
-        LOG_INFO("Implicit push: %u", (lastReceivedTick + i));
+        LOG_INFO("Implicit push: {}", (lastReceivedTick + i));
     }
 
     lastReceivedTick = confirmedTick;
@@ -140,7 +140,7 @@ void NpcMovementSystem::handleUpdate(
 
     // Push the update into the buffer.
     stateUpdateQueue.push({newReceivedTick, true, entityUpdate});
-    LOG_INFO("Update push: %u", newReceivedTick);
+    LOG_INFO("Update push: {}", newReceivedTick);
 
     lastReceivedTick = newReceivedTick;
 }
@@ -184,7 +184,7 @@ void NpcMovementSystem::applyUpdateMessage(
 
         // If the entity doesn't exist, add it to our list.
         if (!(world.entityExists(entityID))) {
-            LOG_INFO("New entity added. ID: %u", entityID);
+            LOG_INFO("New entity added. ID: {}", entityID);
             // TODO: Add names for real.
             world.addEntity(std::to_string(entityID), entityID);
 
@@ -216,7 +216,7 @@ void NpcMovementSystem::applyUpdateMessage(
         // TEMP
         const PositionComponent& currentPosition = world.positions[entityID];
         const PositionComponent& newPosition = entityIt->positionComponent;
-        LOG_INFO("Update: %d: (%f, %f) -> (%f, %f)", entityID,
+        LOG_INFO("Update: {}: ({}, {}) -> ({}, {})", entityID,
                  currentPosition.x, currentPosition.y, newPosition.x,
                  newPosition.y);
         // TEMP

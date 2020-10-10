@@ -16,6 +16,7 @@ target_link_libraries(Shared
         SDL2_net-static
         SDL2pp
         Bitsery::bitsery
+        spdlog::spdlog
 )
 
 # Compile with C++17

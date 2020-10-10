@@ -25,7 +25,7 @@ World::World()
 void World::addEntity(std::string_view name, EntityID entityID)
 {
     if (entityID > MAX_ENTITIES) {
-        LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+        LOG_ERROR("Invalid entity ID. Max: {}, given: {}", MAX_ENTITIES,
                   entityID);
     }
 
@@ -35,7 +35,7 @@ void World::addEntity(std::string_view name, EntityID entityID)
 void World::removeEntity(EntityID entityID)
 {
     if (entityID > MAX_ENTITIES) {
-        LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+        LOG_ERROR("Invalid entity ID. Max: {}, given: {}", MAX_ENTITIES,
                   entityID);
     }
 
@@ -46,7 +46,7 @@ void World::removeEntity(EntityID entityID)
 bool World::entityExists(EntityID entityID) const
 {
     if (entityID > MAX_ENTITIES) {
-        LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+        LOG_ERROR("Invalid entity ID. Max: {}, given: {}", MAX_ENTITIES,
                   entityID);
     }
 
@@ -57,7 +57,7 @@ void World::attachComponent(EntityID entityID,
                             ComponentFlag::FlagType componentFlag)
 {
     if (entityID > MAX_ENTITIES) {
-        LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+        LOG_ERROR("Invalid entity ID. Max: {}, given: {}", MAX_ENTITIES,
                   entityID);
     }
 
@@ -74,7 +74,7 @@ void World::removeComponent(EntityID entityID,
                             ComponentFlag::FlagType componentFlag)
 {
     if (entityID > MAX_ENTITIES) {
-        LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+        LOG_ERROR("Invalid entity ID. Max: {}, given: {}", MAX_ENTITIES,
                   entityID);
     }
 
@@ -90,7 +90,7 @@ void World::removeComponent(EntityID entityID,
 void World::registerPlayerID(EntityID inPlayerID)
 {
     if (inPlayerID > MAX_ENTITIES) {
-        LOG_ERROR("Invalid entity ID. Max: %u, given: %u", MAX_ENTITIES,
+        LOG_ERROR("Invalid entity ID. Max: {}, given: {}", MAX_ENTITIES,
                   inPlayerID);
     }
 

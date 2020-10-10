@@ -19,11 +19,11 @@ int main(int argc, char* argv[])
     ignore(argv);
 
     if (SDL_Init(0) == -1) {
-        LOG_INFO("SDL_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDL_Init: {}", SDLNet_GetError());
         return 1;
     }
     if (SDLNet_Init() == -1) {
-        LOG_INFO("SDLNet_Init: %s", SDLNet_GetError());
+        LOG_INFO("SDLNet_Init: {}", SDLNet_GetError());
         return 2;
     }
 
@@ -31,12 +31,12 @@ int main(int argc, char* argv[])
     IPaddress ip;
     TCPsocket serverSocket = nullptr;
     if (SDLNet_ResolveHost(&ip, NULL, SERVER_PORT)) {
-        LOG_INFO("%s", SDLNet_GetError());
+        LOG_INFO("{}", SDLNet_GetError());
     }
 
     serverSocket = SDLNet_TCP_Open(&ip);
     if (!serverSocket) {
-        LOG_INFO("%s", SDLNet_GetError());
+        LOG_INFO("{}", SDLNet_GetError());
     }
 
     TCPsocket clientSocket = nullptr;
@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
         if (clientSocket != nullptr) {
             int numAdded = SDLNet_TCP_AddSocket(clientSet, clientSocket);
             if (numAdded < 1) {
-                LOG_INFO("Error while adding socket: %s", SDLNet_GetError());
+                LOG_INFO("Error while adding socket: {}", SDLNet_GetError());
             }
         }
     }
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
                 LOG_ERROR("Wrong end byte received.");
             }
             else {
-                LOG_INFO("Received end byte. Time passed: %.8f",
+                LOG_INFO("Received end byte. Time passed: {:.8f}",
                          timer.getDeltaSeconds(false));
                 waitingForEnd = false;
             }
