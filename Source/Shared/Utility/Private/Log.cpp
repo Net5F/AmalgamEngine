@@ -21,22 +21,29 @@ void Log::info(const char* expression, ...)
         currentTick = *currentTickPtr;
     }
 
+    // Get the va_list into arg.
     std::va_list arg;
     va_start(arg, expression);
+
+    // If enabled, write to file.
+    if (logFilePtr != nullptr) {
+        // Copy the va_list since it's undefined to use it twice.
+        std::va_list argCopy;
+        va_copy(argCopy, arg);
+
+        std::fprintf(logFilePtr, "Tick %u: ", currentTick);
+        std::vfprintf(logFilePtr, expression, argCopy);
+        std::fprintf(logFilePtr, "\n");
+        std::fflush(logFilePtr);
+
+        va_end(argCopy);
+    }
 
     // Write to stdout.
     std::printf("Tick %u: ", currentTick);
     std::vprintf(expression, arg);
     std::printf("\n");
     std::fflush(stdout);
-
-    // Write to file.
-    if (logFilePtr != nullptr) {
-        std::fprintf(logFilePtr, "Tick %u: ", currentTick);
-        std::vfprintf(logFilePtr, expression, arg);
-        std::fprintf(logFilePtr, "\n");
-        std::fflush(logFilePtr);
-    }
 
     va_end(arg);
 }
@@ -49,8 +56,24 @@ void Log::error(const char* fileName, int line, const char* expression, ...)
         currentTick = *currentTickPtr;
     }
 
+    // Get the va_list into arg.
     std::va_list arg;
     va_start(arg, expression);
+
+    // If enabled, write to file.
+    if (logFilePtr != nullptr) {
+        // Copy the va_list since it's undefined to use it twice.
+        std::va_list argCopy;
+        va_copy(argCopy, arg);
+
+        std::fprintf(logFilePtr, "Error at file: %s, line: %d, during tick: %u\n", fileName,
+                    line, currentTick);
+        std::vfprintf(logFilePtr, expression, argCopy);
+        std::fprintf(logFilePtr, "\n");
+        std::fflush(logFilePtr);
+
+        va_end(argCopy);
+    }
 
     // Write to stdout.
     std::printf("Error at file: %s, line: %d, during tick: %u\n", fileName,
@@ -58,15 +81,6 @@ void Log::error(const char* fileName, int line, const char* expression, ...)
     std::vprintf(expression, arg);
     std::printf("\n");
     std::fflush(stdout);
-
-    // Write to file.
-    if (logFilePtr != nullptr) {
-        std::fprintf(logFilePtr, "Error at file: %s, line: %d, during tick: %u\n", fileName,
-                    line, currentTick);
-        std::vfprintf(logFilePtr, expression, arg);
-        std::fprintf(logFilePtr, "\n");
-        std::fflush(logFilePtr);
-    }
 
     va_end(arg);
 }
