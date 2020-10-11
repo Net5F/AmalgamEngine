@@ -38,10 +38,13 @@ try {
     SDL2pp::SDL sdl();
     SDLNet_Init();
 
+    // Set up file logging.
+    Log::enableFileLogging("Server.log");
+
     // Set up the network utility.
     Network network;
 
-    // Set up our game.
+    // Set up the sim.
     Game game(network);
 
     // Spin up a thread to check for command line input.

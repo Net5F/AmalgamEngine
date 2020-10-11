@@ -40,14 +40,27 @@ try {
     // Uncomment to enable fullscreen.
     //    window.SetFullscreen(SDL_WINDOW_FULLSCREEN);
 
-    Network network;
-    Game game(network, sprites);
-    RenderSystem renderSystem(renderer, game, window);
+    // Set up file logging.
+    // TODO: This currently will do weird stuff if you have 2 clients open.
+    //       If we need a temporary solution we can use PIDs, but the real solution will
+    //       be to eventually use account IDs in the log name.
+//    Log::enableFileLogging("Client.log");
 
-    std::atomic<bool> const* exitRequested = game.getExitRequestedPtr();
+    // Set up the network utility.
+    Network network;
+
+    // Set up the sim.
+    Game game(network, sprites);
+
+    // Set up the rendering system.
+    RenderSystem renderSystem(renderer, game, window);
 
     // Connect to the server (waits for connection response).
     game.connect();
+
+    // Get a pointer to the sim exit flag.
+    // Triggered by things like window exit events.
+    std::atomic<bool> const* exitRequested = game.getExitRequestedPtr();
 
     // Prime the timers so they don't start at 0.
     game.initTimer();

@@ -2,6 +2,7 @@
 
 #include <SDL_stdinc.h>
 #include <atomic>
+#include <cstdlib>
 
 /**
  * Use these macros instead of calling the functions directly.
@@ -18,7 +19,7 @@
 #define LOG_ERROR(...)                                                         \
     {                                                                          \
         Log::error(__FILE__, __LINE__, __VA_ARGS__);                           \
-        abort();                                                               \
+        std::exit(1);                                                                \
     }
 
 namespace AM
@@ -46,6 +47,11 @@ public:
      */
     static void error(const char* fileName, int line, const char* expression,
                       ...);
+
+    /**
+     * Opens a file with the given file name and enables file logging.
+     */
+    static void enableFileLogging(const std::string& fileName);
 
 private:
     static const std::atomic<Uint32>* currentTickPtr;

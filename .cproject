@@ -107,7 +107,7 @@
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-			<storageModule buildDir="Build/Windows/Debug" moduleId="de.marw.cdt.cmake.core.settings">
+			<storageModule buildDir="Build/Windows/Release" moduleId="de.marw.cdt.cmake.core.settings">
 				<options/>
 				<linux command="cmake" generator="UnixMakefiles" use-default="true">
 					<defs/>
@@ -115,6 +115,10 @@
 				</linux>
 				<win32 command="cmake" generator="Ninja" use-default="true">
 				</win32>
+				<defs>
+					<def name="CMAKE_BUILD_TYPE" type="STRING" val="Release"/>
+				</defs>
+				<undefs/>
 			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="cdt.managedbuild.config.gnu.mingw.exe.debug.511478739.234147743">
