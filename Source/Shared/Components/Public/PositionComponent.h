@@ -14,6 +14,7 @@ public:
     /** Current position. */
     float x = 0;
     float y = 0;
+    float z = 0;
 };
 
 template<typename S>
@@ -21,6 +22,7 @@ void serialize(S& serializer, PositionComponent& positionComponent)
 {
     serializer.value4b(positionComponent.x);
     serializer.value4b(positionComponent.y);
+    serializer.value4b(positionComponent.z);
 }
 
 } // namespace AM

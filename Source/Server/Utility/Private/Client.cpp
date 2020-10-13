@@ -261,8 +261,8 @@ Sint8 Client::calcAdjustment(
     }
 
     // TEMP
-    LOG_INFO("Calc'd adjustment. adjustment: %d",
-             TICKDIFF_TARGET - truncatedAverage);
+    LOG_INFO("Calc'd adjustment. NetID: %u, adjustment: %d",
+             netID, (TICKDIFF_TARGET - truncatedAverage));
     //    LOG_INFO("truncatedAverage: %d. Values:",
     //    static_cast<int>(averageDiff)); printf("["); for (unsigned int i = 0;
     //    i < TICKDIFF_HISTORY_LENGTH; ++i) {

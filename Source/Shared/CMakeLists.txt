@@ -25,11 +25,6 @@ set_target_properties(Shared PROPERTIES CXX_EXTENSIONS OFF)
 # Enable compile warnings.
 target_compile_options(Shared PUBLIC -Wall -Wextra)
 
-# If debug, enable debug printing.
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(Shared PUBLIC -DENABLE_DEBUG_INFO)
-endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
-
 # Build all of the subdirectories
 add_subdirectory(Components)
 add_subdirectory(Messages)
