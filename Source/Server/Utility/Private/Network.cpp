@@ -3,10 +3,11 @@
 #include "Peer.h"
 #include "MessageTools.h"
 #include "Heartbeat.h"
+#include "Log.h"
+#include "NetworkStats.h"
 #include <SDL2/SDL_net.h>
 #include <algorithm>
 #include <atomic>
-#include "Log.h"
 
 namespace AM
 {
@@ -15,6 +16,7 @@ namespace Server
 Network::Network()
 : accumulatedTime(0.0)
 , clientHandler(*this)
+, ticksSinceNetstatsLog(0)
 , currentTickPtr(nullptr)
 {
     // Init the timer to the current time.
@@ -28,6 +30,13 @@ void Network::tick()
     if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
         // Send all messages for this network tick.
         sendClientUpdates();
+
+        // If it's time to log our network statistics, do so.
+        ticksSinceNetstatsLog++;
+        if (ticksSinceNetstatsLog == TICKS_TILL_STATS_DUMP) {
+            logNetworkStatistics();
+            ticksSinceNetstatsLog = 0;
+        }
 
         accumulatedTime -= NETWORK_TICK_TIMESTEP_S;
         if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
@@ -61,12 +70,12 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
     /* Process all messages in the queue. */
     while (!receiveQueue.empty()) {
         ClientMessage& clientMessage = receiveQueue.front();
+        BinaryBufferPtr& messageBuffer = clientMessage.message.messageBuffer;
+
         if (clientMessage.message.messageType == MessageType::ClientInputs) {
             // Deserialize the message.
             std::unique_ptr<ClientInputs> clientInputs
                 = std::make_unique<ClientInputs>();
-            BinaryBufferPtr& messageBuffer
-                = clientMessage.message.messageBuffer;
             MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
                                       *clientInputs);
 
@@ -92,8 +101,6 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
         else if (clientMessage.message.messageType == MessageType::Heartbeat) {
             // Deserialize the message.
             Heartbeat heartbeat{};
-            BinaryBufferPtr& messageBuffer
-                = clientMessage.message.messageBuffer;
             MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
                                       heartbeat);
 
@@ -130,15 +137,6 @@ void Network::endReceiveInputMessages()
 void Network::initTimer()
 {
     tickTimer.updateSavedTime();
-}
-
-void Network::sendClientUpdates()
-{
-    /* Run through the clients, sending their waiting messages. */
-    std::shared_lock readLock(clientMapMutex);
-    for (auto& pair : clientMap) {
-        pair.second->sendWaitingMessages(*currentTickPtr);
-    }
 }
 
 ClientMap& Network::getClientMap()
@@ -192,6 +190,27 @@ BinaryBufferSharedPtr Network::constructMessage(MessageType type,
               MESSAGE_HEADER_SIZE + dynamicBuffer->data());
 
     return dynamicBuffer;
+}
+
+void Network::sendClientUpdates()
+{
+    /* Run through the clients, sending their waiting messages. */
+    std::shared_lock readLock(clientMapMutex);
+    for (auto& pair : clientMap) {
+        pair.second->sendWaitingMessages(*currentTickPtr);
+    }
+}
+
+void Network::logNetworkStatistics()
+{
+    // Dump the stats from the tracker.
+    NetStatsDump netStats = NetworkStats::dumpStats();
+
+    // Log the stats.
+    float bytesSentPerSecond = netStats.bytesSent / SECONDS_TILL_STATS_DUMP;
+    float bytesReceivedPerSecond = netStats.bytesReceived / SECONDS_TILL_STATS_DUMP;
+    LOG_INFO("Bytes sent per second: %.0f, Bytes received per second: %.0f",
+        bytesSentPerSecond, bytesReceivedPerSecond);
 }
 
 } // namespace Server

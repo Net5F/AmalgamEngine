@@ -213,9 +213,8 @@ void Network::sendHeartbeatIfNecessary()
         // Send the message.
         send(messageBuffer);
     }
-    else {
-        messagesSentSinceTick = 0;
-    }
+
+    messagesSentSinceTick = 0;
 }
 
 void Network::processBatch()

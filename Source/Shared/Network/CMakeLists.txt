@@ -4,12 +4,14 @@ target_sources(Shared
         Private/Peer.cpp
         Private/SocketSet.cpp
         Private/TcpSocket.cpp
+        Private/NetworkStats.cpp
     PUBLIC
         Public/Acceptor.h
         Public/NetworkDefs.h
         Public/Peer.h
         Public/SocketSet.h
         Public/TcpSocket.h
+        Public/NetworkStats.h
 )
 
 target_include_directories(Shared

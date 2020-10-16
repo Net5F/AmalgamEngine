@@ -39,7 +39,7 @@ public:
     /**
      * Attempts to send all queued messages over the network.
      * @param currentTick  The sim's current tick.
-     * @return false if the client was found to be disconnected, else true.
+     * @return An appropriate NetworkResult.
      */
     NetworkResult sendWaitingMessages(Uint32 currentTick);
 
