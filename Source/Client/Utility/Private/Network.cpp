@@ -4,6 +4,7 @@
 #include "MessageTools.h"
 #include "EntityUpdate.h"
 #include "Heartbeat.h"
+#include "NetworkStats.h"
 #include <SDL2/SDL_net.h>
 
 namespace AM
@@ -22,6 +23,7 @@ Network::Network()
 , exitRequested(false)
 , headerRecBuffer(SERVER_HEADER_SIZE)
 , messageRecBuffer(Peer::MAX_MESSAGE_SIZE)
+, ticksSinceNetstatsLog(0)
 {
     if (!RUN_OFFLINE) {
         SDLNet_Init();
@@ -62,6 +64,13 @@ void Network::tick()
         // Send a heartbeat if we need to.
         sendHeartbeatIfNecessary();
 
+        // If it's time to log our network statistics, do so.
+        ticksSinceNetstatsLog++;
+        if (ticksSinceNetstatsLog == TICKS_TILL_STATS_DUMP) {
+            logNetworkStatistics();
+            ticksSinceNetstatsLog = 0;
+        }
+
         accumulatedTime -= NETWORK_TICK_TIMESTEP_S;
         if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
             // If we've accumulated enough time to send more, something
@@ -93,6 +102,9 @@ void Network::send(const BinaryBufferSharedPtr& message)
     }
     else {
         messagesSentSinceTick++;
+
+        // Record the number of sent bytes.
+        NetworkStats::recordBytesSent(message->size());
     }
 }
 
@@ -219,6 +231,9 @@ void Network::sendHeartbeatIfNecessary()
 
 void Network::processBatch()
 {
+    // Start tracking the number of received bytes.
+    unsigned int bytesReceived = SERVER_HEADER_SIZE;
+
     // Check if we need to adjust the tick offset.
     adjustIfNeeded(headerRecBuffer[ServerHeaderIndex::TickAdjustment],
                    headerRecBuffer[ServerHeaderIndex::AdjustmentIteration]);
@@ -235,6 +250,9 @@ void Network::processBatch()
             processReceivedMessage(messageResult.messageType,
                                    messageResult.messageSize);
             receiveTimer.updateSavedTime();
+
+            // Track the number of bytes we've received.
+            bytesReceived += MESSAGE_HEADER_SIZE + messageResult.messageSize;
         }
         else if ((messageResult.networkResult == NetworkResult::NoWaitingData)
                  && (receiveTimer.getDeltaSeconds(false) > SERVER_TIMEOUT_S)) {
@@ -255,6 +273,9 @@ void Network::processBatch()
             LOG_ERROR("Ran out of room in queue and memory allocation failed.");
         }
     }
+
+    // Record the number of received bytes.
+    NetworkStats::recordBytesReceived(bytesReceived);
 }
 
 void Network::processReceivedMessage(MessageType messageType,
@@ -352,6 +373,18 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
                       currentAdjIteration, receivedAdjIteration);
         }
     }
+}
+
+void Network::logNetworkStatistics()
+{
+    // Dump the stats from the tracker.
+    NetStatsDump netStats = NetworkStats::dumpStats();
+
+    // Log the stats.
+    float bytesSentPerSecond = netStats.bytesSent / SECONDS_TILL_STATS_DUMP;
+    float bytesReceivedPerSecond = netStats.bytesReceived / SECONDS_TILL_STATS_DUMP;
+    LOG_INFO("Bytes sent per second: %.0f, Bytes received per second: %.0f",
+        bytesSentPerSecond, bytesReceivedPerSecond);
 }
 
 } // namespace Client

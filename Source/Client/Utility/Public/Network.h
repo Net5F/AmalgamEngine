@@ -115,6 +115,11 @@ private:
      */
     void adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration);
 
+    /**
+     * Logs the network stats such as bytes sent/received per second.
+     */
+    void logNetworkStatistics();
+
     /** Used to time when we should process the network tick. */
     Timer tickTimer;
 
@@ -172,6 +177,14 @@ private:
     BinaryBuffer headerRecBuffer;
     /** Used to hold messages while we deserialize them. */
     BinaryBuffer messageRecBuffer;
+
+    /** The number of seconds we'll wait before logging our network statistics. */
+    static constexpr unsigned int SECONDS_TILL_STATS_DUMP = 5;
+    static constexpr unsigned int TICKS_TILL_STATS_DUMP = (1 / NETWORK_TICK_TIMESTEP_S)
+    * SECONDS_TILL_STATS_DUMP;
+
+    /** The number of ticks since we last logged our network statistics. */
+    unsigned int ticksSinceNetstatsLog;
 };
 
 } // namespace Client
