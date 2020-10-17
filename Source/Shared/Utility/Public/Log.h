@@ -3,6 +3,7 @@
 #include <SDL_stdinc.h>
 #include <atomic>
 #include <cstdlib>
+#include <string>
 
 /**
  * Use these macros instead of calling the functions directly.

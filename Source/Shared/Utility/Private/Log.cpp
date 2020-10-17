@@ -1,7 +1,6 @@
 #include "Log.h"
 #include <cstdio>
 #include <cstdarg>
-#include <string>
 
 namespace AM
 {
