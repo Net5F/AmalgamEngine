@@ -15,7 +15,8 @@ namespace Server
  */
 struct ClientComponent {
 public:
-    NetworkID networkID = 0;
+    /** The network ID associated with this client. */
+    NetworkID netID = 0;
 
     /**
      * true if the client has been sent the state of all entities that existed

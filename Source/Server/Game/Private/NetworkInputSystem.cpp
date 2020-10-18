@@ -36,15 +36,26 @@ void NetworkInputSystem::processInputMessages()
                      "(this shouldn't happen).")
         }
 
+        // Find the EntityID associated with the given NetID.
+        Uint32 clientEntityID = 0;
+        bool clientEntityFound = false;
+        for (auto& element : world.clients) {
+            if (element.second.netID == inputMessage->netID) {
+                clientEntityID = element.first;
+                clientEntityFound = true;
+            }
+        }
+
+        if (!clientEntityFound) {
+            LOG_ERROR(
+                "Tried to process input message for netID that doesn't exist in the world.");
+        }
+
         // Update the entity's InputComponent.
-        Uint32 clientEntityID = inputMessage->id;
         world.inputs[clientEntityID] = inputMessage->inputComponent;
 
         // Flag the entity as dirty.
         world.entityIsDirty[clientEntityID] = true;
-
-        LOG_INFO("Processed input message on tick %u. Message tick: %u",
-                 game.getCurrentTick(), inputMessage->tickNum);
     }
 
     network.endReceiveInputMessages();

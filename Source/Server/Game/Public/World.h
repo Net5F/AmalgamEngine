@@ -9,7 +9,7 @@
 #include "IDPool.h"
 
 #include <array>
-#include <map>
+#include <unordered_map>
 #include <string_view>
 
 namespace AM
@@ -42,7 +42,7 @@ public:
     std::array<MovementComponent, MAX_ENTITIES> movements;
     std::array<InputComponent, MAX_ENTITIES> inputs;
     std::array<SpriteComponent, MAX_ENTITIES> sprites;
-    std::map<EntityID, ClientComponent> clients;
+    std::unordered_map<EntityID, ClientComponent> clients;
     /**
      * Bit flags for every component, indicating whether the object at a given
      * index has that component.

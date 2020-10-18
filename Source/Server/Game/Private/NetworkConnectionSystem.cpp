@@ -80,7 +80,7 @@ void NetworkConnectionSystem::processDisconnectEvents()
         bool entityFound = false;
         auto it = world.clients.begin();
         while ((it != world.clients.end()) && !entityFound) {
-            if (it->second.networkID == disconnectedClientID) {
+            if (it->second.netID == disconnectedClientID) {
                 // Found the ClientComponent we expected, remove the entity from
                 // everything.
                 entityFound = true;

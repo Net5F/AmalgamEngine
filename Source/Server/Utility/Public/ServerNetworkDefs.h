@@ -27,12 +27,14 @@ typedef std::unordered_map<NetworkID, std::shared_ptr<Client>> ClientMap;
  */
 struct ClientMessage {
     // TEMP: Only here until C++20 where emplacing brace lists is allowed.
-    ClientMessage(const std::weak_ptr<Client>& inClientPtr, Message inMessage)
-    : clientPtr(inClientPtr)
+    ClientMessage(NetworkID inNetID, const std::weak_ptr<Client>& inClientPtr, Message inMessage)
+    : netID(inNetID)
+    , clientPtr(inClientPtr)
     , message(std::move(inMessage))
     {
     }
 
+    NetworkID netID = 0;
     std::weak_ptr<Client> clientPtr;
     Message message = {MessageType::NotSet, nullptr};
 };

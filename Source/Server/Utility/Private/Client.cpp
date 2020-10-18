@@ -235,6 +235,11 @@ Client::AdjustmentData Client::getTickAdjustment()
     return {adjustment, latestAdjIteration};
 }
 
+NetworkID Client::getNetID()
+{
+    return netID;
+}
+
 Sint8 Client::calcAdjustment(
     float averageDiff,
     CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy)

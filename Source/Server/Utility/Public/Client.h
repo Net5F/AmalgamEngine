@@ -108,6 +108,8 @@ public:
      */
     AdjustmentData getTickAdjustment();
 
+    NetworkID getNetID();
+
 private:
     //--------------------------------------------------------------------------
     // Private Functions
@@ -148,7 +150,7 @@ private:
     static constexpr double TIMEOUT_S = NETWORK_TICK_TIMESTEP_S * 10;
 
     /** Our Network-given ID. */
-    NetworkID netID;
+    const NetworkID netID;
 
     /**
      * Our connection and interface to the client.

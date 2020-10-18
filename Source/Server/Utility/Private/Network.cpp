@@ -79,6 +79,9 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
             MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
                                       *clientInputs);
 
+            // Fill in the network ID that we assigned to this client.
+            clientInputs->netID = clientMessage.netID;
+
             // Push the message (blocks if the MessageSorter is locked).
             // Save the tickNum since the move might be optimized before the
             // access.

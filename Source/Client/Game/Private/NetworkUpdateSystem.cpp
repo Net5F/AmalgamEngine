@@ -30,9 +30,8 @@ void NetworkUpdateSystem::sendInputState()
     /* Send the updated state to the server. */
     if (world.playerIsDirty) {
         // Only send new data if we've changed.
-        EntityID playerID = world.playerID;
-        ClientInputs clientInputs{playerID, game.getCurrentTick(),
-                                  world.inputs[playerID]};
+        ClientInputs clientInputs{game.getCurrentTick(),
+                                  world.inputs[world.playerID]};
 
         // Serialize the client inputs message.
         BinaryBufferSharedPtr messageBuffer

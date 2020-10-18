@@ -86,7 +86,7 @@ void NetworkUpdateSystem::constructAndSendUpdate(
                                         messageBuffer, 0);
 
         // Send the message.
-        network.send(clientComponent.networkID, messageBuffer,
+        network.send(clientComponent.netID, messageBuffer,
                      entityUpdate.tickNum);
     }
 }
@@ -107,8 +107,7 @@ void NetworkUpdateSystem::fillEntityData(EntityID entityID,
     entities.push_back({entityID, flags, input, position, movement});
 
     //    LOG_INFO("Sending: (%f, %f), (%f, %f)", position.x, position.y,
-    //    movement.velX,
-    //        movement.velY);
+    //    movement.velX, movement.velY);
 }
 
 } // namespace Server
