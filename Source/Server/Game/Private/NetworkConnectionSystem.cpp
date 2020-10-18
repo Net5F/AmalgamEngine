@@ -80,7 +80,7 @@ void NetworkConnectionSystem::processDisconnectEvents()
         bool entityFound = false;
         for (std::size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
             if ((world.componentFlags[entityID] & ComponentFlag::Client)
-            && (world.clients[entityID].netID == disconnectedClientID)) {
+                && (world.clients[entityID].netID == disconnectedClientID)) {
                 // Found the entity, remove it.
                 world.removeEntity(entityID);
                 entityFound = true;

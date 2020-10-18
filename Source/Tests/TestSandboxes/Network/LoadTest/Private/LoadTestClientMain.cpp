@@ -44,7 +44,8 @@ void serializeInputMessages()
 class Client
 {
 public:
-    void tick() {
+    void tick()
+    {
         accumulatedTime += iterationTimer.getDeltaSeconds(true);
 
         // If we're still waiting, don't do anything.
@@ -74,14 +75,14 @@ private:
     bool isMovingRight = false;
 };
 
-void logInvalidInput() {
+void logInvalidInput()
+{
     LOG_ERROR("Invalid input.\n"
-    "Usage: LoadTestClientMain.exe <number of clients>\n"
-    "If no number of clients is given, will default to 10.");
+              "Usage: LoadTestClientMain.exe <number of clients>\n"
+              "If no number of clients is given, will default to 10.");
 }
 
-void connectClients(unsigned int numClients,
-                    const std::vector<Client>& clients)
+void connectClients(unsigned int numClients, const std::vector<Client>& clients)
 {
     // Init our random number generator.
     std::random_device randDevice;

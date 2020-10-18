@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 /** Used to pass data out to the consumer. */
 struct NetStatsDump {
     unsigned int bytesSent = 0;
@@ -14,18 +13,20 @@ struct NetStatsDump {
 /**
  * This class is used for tracking relevant network statistics.
  *
- * Note: This is a static class instead of being injected because it would be very inconvenient
- *       to pass it from the consuming context down to the producing context.
+ * Note: This is a static class instead of being injected because it would be
+ * very inconvenient to pass it from the consuming context down to the producing
+ * context.
  *
- *       Additionally, this class is tangential to the data flow model of the program.
- *       Data enters wherever we're tracking from, and is dumped in either a rendering or
- *       logging context.
+ * Additionally, this class is tangential to the data flow model of the
+ * program. Data enters wherever we're tracking from, and is dumped in either a
+ * rendering or logging context.
  */
 class NetworkStats
 {
 public:
     /**
-     * Dumps all network stats to the returned object, resetting the current values.
+     * Dumps all network stats to the returned object, resetting the current
+     * values.
      */
     static NetStatsDump dumpStats();
 

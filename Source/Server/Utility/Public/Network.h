@@ -41,7 +41,8 @@ public:
      * @param networkID  The client to send the message to.
      * @param message  The message to send.
      * @param messageTick  Optional, for messages that are associated with a
-     * tick number. Used to update the client's latestSentSimTick.
+     *                     tick number. Used to update the client's
+     *                     latestSentSimTick.
      */
     void send(NetworkID networkID, const BinaryBufferSharedPtr& message,
               Uint32 messageTick = 0);
@@ -94,9 +95,9 @@ private:
     /**
      * Tries to send any messages in each client's queue over the network.
      * If a send fails, leaves the message at the front of the queue and moves
-     * on to the next client's queue. If there's no messages to send, sends a
-     * heartbeat instead, with a value that confirms that we've processed
-     * tick(s) with no changes to send.
+     * on to the next client's queue.
+     * If there's no messages to send, sends a heartbeat instead, with a value
+     * that confirms that we've processed tick(s) with no changes to send.
      */
     void sendClientUpdates();
 
@@ -125,10 +126,11 @@ private:
     /** Stores input messages received from clients, sorted by tick number. */
     MessageSorter<std::unique_ptr<ClientInputs>> inputMessageSorter;
 
-    /** The number of seconds we'll wait before logging our network statistics. */
+    /** The number of seconds we'll wait before logging our network
+        statistics. */
     static constexpr unsigned int SECONDS_TILL_STATS_DUMP = 5;
-    static constexpr unsigned int TICKS_TILL_STATS_DUMP = (1 / NETWORK_TICK_TIMESTEP_S)
-    * SECONDS_TILL_STATS_DUMP;
+    static constexpr unsigned int TICKS_TILL_STATS_DUMP
+        = (1 / NETWORK_TICK_TIMESTEP_S) * SECONDS_TILL_STATS_DUMP;
 
     /** The number of ticks since we last logged our network statistics. */
     unsigned int ticksSinceNetstatsLog;

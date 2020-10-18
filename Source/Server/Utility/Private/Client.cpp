@@ -154,8 +154,9 @@ Message Client::receiveMessage()
             receiveTimer.updateSavedTime();
 
             // Record the number of received bytes.
-            NetworkStats::recordBytesReceived(
-                CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE + messageBuffer->size());
+            NetworkStats::recordBytesReceived(CLIENT_HEADER_SIZE
+                                              + MESSAGE_HEADER_SIZE
+                                              + messageBuffer->size());
 
             return {messageResult.messageType, std::move(messageBuffer)};
         }
@@ -272,14 +273,14 @@ Sint8 Client::calcAdjustment(
     }
 
     // TEMP
-    LOG_INFO("Calc'd adjustment. NetID: %u, adjustment: %d",
-             netID, (TICKDIFF_TARGET - truncatedAverage));
-//    LOG_INFO("truncatedAverage: %d. Values:", static_cast<int>(averageDiff));
-//    std::printf("[");
-//    for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
-//        std::printf("%d, ", tickDiffHistoryCopy[i]);
-//    }
-//    std::printf("]\n");
+    LOG_INFO("Calc'd adjustment. NetID: %u, adjustment: %d", netID,
+             (TICKDIFF_TARGET - truncatedAverage));
+    //    LOG_INFO("truncatedAverage: %d. Values:",
+    //    static_cast<int>(averageDiff)); std::printf("["); for (unsigned int i
+    //    = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
+    //        std::printf("%d, ", tickDiffHistoryCopy[i]);
+    //    }
+    //    std::printf("]\n");
     // TEMP
 
     // Make an adjustment back towards the target.

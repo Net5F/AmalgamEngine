@@ -65,8 +65,9 @@ void Log::error(const char* fileName, int line, const char* expression, ...)
         std::va_list argCopy;
         va_copy(argCopy, arg);
 
-        std::fprintf(logFilePtr, "Error at file: %s, line: %d, during tick: %u\n", fileName,
-                    line, currentTick);
+        std::fprintf(logFilePtr,
+                     "Error at file: %s, line: %d, during tick: %u\n", fileName,
+                     line, currentTick);
         std::vfprintf(logFilePtr, expression, argCopy);
         std::fprintf(logFilePtr, "\n");
         std::fflush(logFilePtr);

@@ -16,7 +16,7 @@
 #define LOG_ERROR(...)                                                         \
     {                                                                          \
         Log::error(__FILE__, __LINE__, __VA_ARGS__);                           \
-        std::abort();                                                                \
+        std::abort();                                                          \
     }
 
 namespace AM
@@ -28,14 +28,14 @@ public:
         registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
     /**
-     * Prints the given info to stdout (and a file, if enableFileLogging() was called.),
-     * then flushes the buffer.
+     * Prints the given info to stdout (and a file, if enableFileLogging() was
+     * called.), then flushes the buffer.
      */
     static void info(const char* expression, ...);
 
     /**
-     * Prints the given info to stdout (and a file, if enableFileLogging() was called.),
-     * then flushes the buffer and calls abort().
+     * Prints the given info to stdout (and a file, if enableFileLogging() was
+     * called.), then flushes the buffer and calls abort().
      */
     static void error(const char* fileName, int line, const char* expression,
                       ...);

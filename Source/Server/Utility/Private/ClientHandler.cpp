@@ -138,8 +138,9 @@ int ClientHandler::receiveClientMessages(ClientMap& clientMap)
         while (resultMessage.messageType != MessageType::NotSet) {
             // Queue the message.
             std::weak_ptr<Client> clientWeakPtr = clientPtr;
-            receiveQueue.emplace(clientPtr->getNetID(), std::move(clientWeakPtr),
-                std::move(resultMessage));
+            receiveQueue.emplace(clientPtr->getNetID(),
+                                 std::move(clientWeakPtr),
+                                 std::move(resultMessage));
 
             numReceived++;
             resultMessage = clientPtr->receiveMessage();

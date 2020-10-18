@@ -211,9 +211,10 @@ void Network::logNetworkStatistics()
 
     // Log the stats.
     float bytesSentPerSecond = netStats.bytesSent / SECONDS_TILL_STATS_DUMP;
-    float bytesReceivedPerSecond = netStats.bytesReceived / SECONDS_TILL_STATS_DUMP;
+    float bytesReceivedPerSecond
+        = netStats.bytesReceived / SECONDS_TILL_STATS_DUMP;
     LOG_INFO("Bytes sent per second: %.0f, Bytes received per second: %.0f",
-        bytesSentPerSecond, bytesReceivedPerSecond);
+             bytesSentPerSecond, bytesReceivedPerSecond);
 }
 
 } // namespace Server

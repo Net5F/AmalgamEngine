@@ -53,7 +53,7 @@ public:
      * If there are none, waits for one up to the given timeout.
      *
      * @param timeoutMs  How long to wait. 0 for no wait, -1 for indefinite.
-     * Defaults to 0.
+     *                   Defaults to 0.
      * @return A waiting message, else nullptr.
      */
     std::unique_ptr<ConnectionResponse>
@@ -73,8 +73,8 @@ public:
      * Subtracts an appropriate amount from the tickAdjustment based on its
      * current value, and returns the amount subtracted.
      * @return 1 if there's a negative tickAdjustment (the sim can only freeze 1
-     * tick at a time), else 0 or a negative amount equal to the current
-     * tickAdjustment.
+     *         tick at a time), else 0 or a negative amount equal to the current
+     *         tickAdjustment.
      */
     int transferTickAdjustment();
 
@@ -85,8 +85,10 @@ public:
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
 private:
-    /** If we haven't sent any messages since the last network tick, sends a
-     * heartbeat. */
+    /**
+     * If we haven't sent any messages since the last network tick, sends a
+     * heartbeat.
+     */
     void sendHeartbeatIfNecessary();
 
     /**
@@ -102,7 +104,7 @@ private:
      * @pre A serialized message is in messageRecBuffer, starting at index 0.
      * @param messageType  The type of the received message to process.
      * @param messageSize  The length in bytes of the message in
-     * messageRecBuffer.
+     *                     messageRecBuffer.
      */
     void processReceivedMessage(MessageType messageType, Uint16 messageSize);
 
@@ -111,7 +113,7 @@ private:
      * necessary.
      * @param receivedTickAdj  The received tick adjustment.
      * @param receivedAdjIteration  The adjustment iteration for the received
-     * adjustment.
+     *                              adjustment.
      */
     void adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration);
 
@@ -131,9 +133,7 @@ private:
     /** Local copy of the playerID so we can tell if we got a player message. */
     EntityID playerID;
 
-    /**
-     * The adjustment that the server has told us to apply to the tick.
-     */
+    /** The adjustment that the server has told us to apply to the tick. */
     std::atomic<int> tickAdjustment;
 
     /**
@@ -152,7 +152,7 @@ private:
     const std::atomic<Uint32>* currentTickPtr;
 
     /** Tracks how long it's been since we've received a message from the
-     * server. */
+        server. */
     Timer receiveTimer;
 
     /** Calls pollForMessages(). */
@@ -178,10 +178,11 @@ private:
     /** Used to hold messages while we deserialize them. */
     BinaryBuffer messageRecBuffer;
 
-    /** The number of seconds we'll wait before logging our network statistics. */
+    /** The number of seconds we'll wait before logging our network
+        statistics. */
     static constexpr unsigned int SECONDS_TILL_STATS_DUMP = 5;
-    static constexpr unsigned int TICKS_TILL_STATS_DUMP = (1 / NETWORK_TICK_TIMESTEP_S)
-    * SECONDS_TILL_STATS_DUMP;
+    static constexpr unsigned int TICKS_TILL_STATS_DUMP
+        = (1 / NETWORK_TICK_TIMESTEP_S) * SECONDS_TILL_STATS_DUMP;
 
     /** The number of ticks since we last logged our network statistics. */
     unsigned int ticksSinceNetstatsLog;

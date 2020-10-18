@@ -41,7 +41,7 @@ void NetworkInputSystem::processInputMessages()
         bool clientEntityFound = false;
         for (std::size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
             if ((world.componentFlags[entityID] & ComponentFlag::Client)
-            && (world.clients[entityID].netID == inputMessage->netID)) {
+                && (world.clients[entityID].netID == inputMessage->netID)) {
                 clientEntityID = entityID;
                 clientEntityFound = true;
                 break;
@@ -49,8 +49,8 @@ void NetworkInputSystem::processInputMessages()
         }
 
         if (!clientEntityFound) {
-            LOG_ERROR(
-                "Tried to process input message for netID that doesn't have an associated entity.");
+            LOG_ERROR("Tried to process input message for netID that doesn't "
+                      "have an associated entity.");
         }
 
         // Update the entity's InputComponent.

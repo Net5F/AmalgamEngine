@@ -2,7 +2,6 @@
 
 namespace AM
 {
-
 // Initialize data.
 std::atomic<unsigned int> NetworkStats::bytesSent = 0;
 std::atomic<unsigned int> NetworkStats::bytesReceived = 0;
