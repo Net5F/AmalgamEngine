@@ -46,7 +46,8 @@ void NetworkConnectionSystem::processConnectEvents()
         world.positions[newEntityID].y = spawnPoint.y;
         world.movements[newEntityID].maxVelX = 250;
         world.movements[newEntityID].maxVelY = 250;
-        world.clients.insert({newEntityID, {clientNetworkID}});
+        world.clients[newEntityID].netID = clientNetworkID;
+        world.clients[newEntityID].isInitialized = false;
         world.attachComponent(newEntityID, ComponentFlag::Input);
         world.attachComponent(newEntityID, ComponentFlag::Movement);
         world.attachComponent(newEntityID, ComponentFlag::Position);
@@ -75,22 +76,15 @@ void NetworkConnectionSystem::processDisconnectEvents()
                 "Expected element in disconnectEventQueue but dequeue failed.");
         }
 
-        // Iterate through the connected clients, bailing early if we find the
-        // one we want.
+        // Find the client's associated entity.
         bool entityFound = false;
-        auto it = world.clients.begin();
-        while ((it != world.clients.end()) && !entityFound) {
-            if (it->second.netID == disconnectedClientID) {
-                // Found the ClientComponent we expected, remove the entity from
-                // everything.
+        for (std::size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
+            if ((world.componentFlags[entityID] & ComponentFlag::Client)
+            && (world.clients[entityID].netID == disconnectedClientID)) {
+                // Found the entity, remove it.
+                world.removeEntity(entityID);
                 entityFound = true;
-
-                world.removeEntity(it->first);
-                LOG_INFO("Erased entity with netID: %u", it->first);
-                world.clients.erase(it);
-            }
-            else {
-                ++it;
+                LOG_INFO("Removed entity with netID: %u", entityID);
             }
         }
 

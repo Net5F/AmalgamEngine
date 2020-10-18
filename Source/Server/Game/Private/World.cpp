@@ -11,6 +11,7 @@ World::World()
 , movements{}
 , inputs{}
 , sprites{}
+, clients{}
 , componentFlags{}
 , entityIsDirty{}
 , idPool()

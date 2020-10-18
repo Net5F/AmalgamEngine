@@ -147,7 +147,7 @@ void NpcMovementSystem::handleUpdate(
 
 void NpcMovementSystem::moveAllNpcs()
 {
-    for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
+    for (std::size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
         /* Move all NPCs that have an input, position, and movement component.
          */
         if (entityID != world.playerID

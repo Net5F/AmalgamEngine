@@ -49,7 +49,7 @@ void NetworkUpdateSystem::constructAndSendUpdate(
 {
     /** Fill the vector of entities to send. */
     EntityUpdate entityUpdate{};
-    ClientComponent& clientComponent = world.clients.find(entityID)->second;
+    ClientComponent& clientComponent = world.clients[entityID];
     if (!clientComponent.isInitialized) {
         // New client, we need to send it all relevant entities.
         for (EntityID i = 0; i < MAX_ENTITIES; ++i) {
