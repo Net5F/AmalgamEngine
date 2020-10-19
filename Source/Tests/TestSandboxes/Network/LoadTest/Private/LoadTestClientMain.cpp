@@ -1,15 +1,9 @@
 #include <SDL2pp/SDL2pp.hh>
 
-#include "Peer.h"
 #include "Timer.h"
 #include "Log.h"
-#include "Ignore.h"
 
-#include "NetworkDefs.h"
-#include "EntityUpdate.h"
-#include "ConnectionResponse.h"
-#include "ClientInputs.h"
-#include "MessageTools.h"
+#include "SimulatedClient.h"
 
 #include <exception>
 #include <atomic>
@@ -19,61 +13,10 @@
 #include <random>
 
 using namespace AM;
-
-static constexpr unsigned int SCREEN_WIDTH = 1280;
-static constexpr unsigned int SCREEN_HEIGHT = 720;
-
-static const std::string SERVER_IP = "45.79.37.63";
-static constexpr unsigned int SERVER_PORT = 41499;
+using namespace AM::LTC;
 
 /** Default number of simulated clients if no argument is given. */
 static constexpr unsigned int DEFAULT_NUM_CLIENTS = 10;
-
-/** Two movements per second. */
-static constexpr double TICK_TIMESTEP_S = (1 / 2.0);
-
-/** Pre-serialized input messages. */
-BinaryBufferSharedPtr leftInputMessage = nullptr;
-BinaryBufferSharedPtr rightInputMessage = nullptr;
-
-void serializeInputMessages()
-{
-    ClientInputs clientInputs{};
-}
-
-class Client
-{
-public:
-    void tick()
-    {
-        accumulatedTime += iterationTimer.getDeltaSeconds(true);
-
-        // If we're still waiting, don't do anything.
-        if (initialWait > 0) {
-            initialWait -= accumulatedTime;
-            accumulatedTime = 0;
-            return;
-        }
-
-        // If it's time, send an input.
-        while (accumulatedTime >= TICK_TIMESTEP_S) {
-            // TODO: Send the opposite input
-
-            accumulatedTime -= TICK_TIMESTEP_S;
-        }
-
-        // TODO: Receive messages if any are waiting and do nothing with them.
-    }
-
-    std::unique_ptr<Peer> connection = nullptr;
-
-    double initialWait = 0;
-    Timer iterationTimer;
-
-private:
-    double accumulatedTime = 0;
-    bool isMovingRight = false;
-};
 
 void logInvalidInput()
 {
@@ -82,26 +25,17 @@ void logInvalidInput()
               "If no number of clients is given, will default to 10.");
 }
 
-void connectClients(unsigned int numClients, const std::vector<Client>& clients)
+void connectClients(unsigned int numClients,
+                    std::vector<std::unique_ptr<SimulatedClient>>& clients)
 {
     // Init our random number generator.
     std::random_device randDevice;
-    std::mt19937 randGenerator(randDevice);
-    std::uniform_real_distribution<double> dist(0.0, 1000.0);
+    std::mt19937 randGenerator(randDevice());
+    // Generate a whole number of ticks corresponding to a range of 0 - 1 seconds.
+    std::uniform_int_distribution<unsigned int> dist(0, (1 / GAME_TICK_TIMESTEP_S));
 
     // Open all of the connections.
     for (unsigned int i = 0; i < numClients; ++i) {
-        clients[i].connection = Peer::initiate(SERVER_IP, SERVER_PORT);
-        if (clients[i].connection != nullptr) {
-            // Fill its initial wait.
-            clients[i].initialWait = dist(randGenerator);
-
-            // Init its timer.
-            clients[i].iterationTimer.updateSavedTime();
-        }
-        else {
-            LOG_ERROR("Failed to connect. i = %u", i);
-        }
     }
 }
 
@@ -117,9 +51,6 @@ try {
                           SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
                           SDL_WINDOW_SHOWN);
     SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-    // Uncomment to enable fullscreen.
-    //    window.SetFullscreen(SDL_WINDOW_FULLSCREEN);
 
     // Set up file logging.
     // TODO: This currently will do weird stuff if you have 2 clients open.
@@ -141,7 +72,7 @@ try {
 
     // Connect the clients.
     LOG_INFO("Connecting %u clients.", numClients);
-    std::vector<Client> clients;
+    std::vector<std::unique_ptr<SimulatedClient>> clients;
     connectClients(numClients, clients);
     LOG_INFO("%u clients connected.", numClients);
 
@@ -158,7 +89,7 @@ try {
 
         // Process the simulated clients.
         for (auto& client : clients) {
-            client.tick();
+            client->tick();
         }
     }
 

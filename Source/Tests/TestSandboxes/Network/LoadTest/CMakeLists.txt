@@ -5,12 +5,22 @@ message(STATUS "Configuring Load Test")
 # Load test client
 add_executable(LoadTestClient
     Private/LoadTestClientMain.cpp
+    Private/SimulatedClient.cpp
+    Public/SimulatedClient.h
+    
+    # Client objects
+    ${PROJECT_SOURCE_DIR}/Client/Utility/Private/Network.cpp
+    ${PROJECT_SOURCE_DIR}/Client/Utility/Public/Network.h
 )
 
 target_include_directories(LoadTestClient
     PRIVATE
         ${SDL2_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public
+
+        # Client objects
+        ${PROJECT_SOURCE_DIR}/Client/Utility/Public
 )
 
 target_link_libraries(LoadTestClient
@@ -20,6 +30,7 @@ target_link_libraries(LoadTestClient
         ${SDL2_LIBRARIES}
         SDL2_net-static
         Shared
+        readerwriterqueue
 )
 
 # Compile with C++17
