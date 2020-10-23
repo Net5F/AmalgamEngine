@@ -54,6 +54,9 @@ private:
 
     Client::Network& network;
 
+    /** The entity ID that we were given by the server. */
+    EntityID entityID;
+
     /** Used to time when we should process an iteration. */
     Timer iterationTimer;
 

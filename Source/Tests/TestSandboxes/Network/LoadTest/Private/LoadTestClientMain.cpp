@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <thread>
 
 using namespace AM;
 using namespace AM::LTC;
@@ -25,12 +26,16 @@ void logInvalidInput()
 }
 
 void connectClients(unsigned int numClients,
-                    std::vector<std::unique_ptr<SimulatedClient>>& clients)
+                    std::vector<std::unique_ptr<SimulatedClient>>* clients)
 {
+    LOG_INFO("Connecting %u clients.", numClients);
+
     // Open all of the connections.
     for (unsigned int i = 0; i < numClients; ++i) {
-        clients.push_back(std::make_unique<SimulatedClient>());
+        (*clients)[i]->connect();
     }
+
+    LOG_INFO("%u clients connected.", numClients);
 }
 
 int main(int argc, char** argv)
@@ -47,7 +52,7 @@ try {
     SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     // Set up file logging.
-    // TODO: This currently will do weird stuff if you have 2 clients open.
+    // TODO: This currently will do weird stuff if you have 2 instances of this app open.
     Log::enableFileLogging("LoadTestClient.log");
 
     // Check for an argument for non-default number of clients.
@@ -64,13 +69,14 @@ try {
         }
     }
 
-    // Connect the clients.
-    LOG_INFO("Connecting %u clients.", numClients);
+    // Construct the clients.
     std::vector<std::unique_ptr<SimulatedClient>> clients;
     for (unsigned int i = 0; i < numClients; ++i) {
         clients.push_back(std::make_unique<SimulatedClient>());
     }
-    LOG_INFO("%u clients connected.", numClients);
+
+    // Start the client connections thread.
+    std::thread connectionThreadObj(connectClients, numClients, &clients);
 
     // Start the main loop.
     std::atomic<bool> exitRequested = false;
@@ -88,6 +94,8 @@ try {
             client->tick();
         }
     }
+
+    connectionThreadObj.join();
 
     return 0;
 } catch (SDL2pp::Exception& e) {

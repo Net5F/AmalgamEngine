@@ -3,6 +3,7 @@
 #include "Network.h"
 #include "WorldSim.h"
 #include <SDL_stdinc.h>
+#include <atomic>
 
 namespace AM
 {
@@ -17,10 +18,12 @@ namespace LTC
 class SimulatedClient
 {
 public:
-    /**
-     * Inits the object and calls worldSim.connect().
-     */
     SimulatedClient();
+
+    /**
+     * Calls worldSim.connect().
+     */
+    void connect();
 
     /**
      * Calls the sim and network ticks.
@@ -31,6 +34,8 @@ private:
     Client::Network network;
 
     WorldSim worldSim;
+
+    std::atomic<bool> isConnected;
 };
 
 } // End namespace LTC

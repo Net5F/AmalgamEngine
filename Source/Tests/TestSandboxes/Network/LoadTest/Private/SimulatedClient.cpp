@@ -7,18 +7,30 @@ namespace LTC
 
 SimulatedClient::SimulatedClient()
 : worldSim(network)
+, isConnected(false)
+{
+}
+
+void SimulatedClient::connect()
 {
     // Connect to the server.
     worldSim.connect();
+
+    // Start the tick timer at the current time.
+    worldSim.initTimer();
+
+    isConnected = true;
 }
 
 void SimulatedClient::tick()
 {
-    // Process the world sim.
-    worldSim.tick();
+    if (isConnected) {
+        // Process the world sim.
+        worldSim.tick();
 
-    // Process the network.
-    network.tick();
+        // Process the network.
+        network.tick();
+    }
 }
 
 } // End namespace LTC
