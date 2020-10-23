@@ -67,11 +67,11 @@ void WorldSim::tick()
            ticks. */
         while (currentTick < targetTick) {
             // If it's time to move, send an input message.
-            ticksTillInput--;
             if (ticksTillInput == 0) {
                 sendNextInput();
                 ticksTillInput = INPUT_RATE_TICKS;
             }
+            ticksTillInput--;
 
             // Receive any waiting player messages.
             std::shared_ptr<const EntityUpdate> entityUpdate =
@@ -124,11 +124,11 @@ void WorldSim::sendNextInput()
     clientInputs.tickNum = currentTick;
 
     if (isMovingRight) {
-        clientInputs.inputComponent.inputStates[Input::Right] = Input::Pressed;
+        clientInputs.inputComponent.inputStates[Input::Left] = Input::Pressed;
         isMovingRight = false;
     }
     else {
-        clientInputs.inputComponent.inputStates[Input::Left] = Input::Pressed;
+        clientInputs.inputComponent.inputStates[Input::Right] = Input::Pressed;
         isMovingRight = true;
     }
 

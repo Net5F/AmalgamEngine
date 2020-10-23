@@ -53,9 +53,9 @@ try {
 
     // Set up file logging.
     // TODO: This currently will do weird stuff if you have 2 instances of this app open.
-    Log::enableFileLogging("LoadTestClient.log");
+//    Log::enableFileLogging("LoadTestClient.log");
 
-    // Check for an argument for non-default number of clients.
+    // Check for an argument with non-default number of clients.
     unsigned int numClients = DEFAULT_NUM_CLIENTS;
     if (argc > 1) {
         char* end;

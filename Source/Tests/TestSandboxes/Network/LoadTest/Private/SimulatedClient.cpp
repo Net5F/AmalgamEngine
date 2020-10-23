@@ -18,6 +18,7 @@ void SimulatedClient::connect()
 
     // Start the tick timer at the current time.
     worldSim.initTimer();
+    network.initTimer();
 
     isConnected = true;
 }
