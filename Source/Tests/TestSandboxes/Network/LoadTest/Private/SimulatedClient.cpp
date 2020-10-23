@@ -5,20 +5,20 @@ namespace AM
 namespace LTC
 {
 
+SimulatedClient::SimulatedClient()
+: worldSim(network)
+{
+    // Connect to the server.
+    worldSim.connect();
+}
+
 void SimulatedClient::tick()
 {
-    accumulatedTime += iterationTimer.getDeltaSeconds(true);
+    // Process the world sim.
+    worldSim.tick();
 
-    // If it's time, send an input.
-    while (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
-//        if (initialWaitTicks > 0) {
-//            initialWaitTicks--;
-//        }
-
-        accumulatedTime -= GAME_TICK_TIMESTEP_S;
-    }
-
-    // TODO: Receive messages if any are waiting and do nothing with them.
+    // Process the network.
+    network.tick();
 }
 
 } // End namespace LTC

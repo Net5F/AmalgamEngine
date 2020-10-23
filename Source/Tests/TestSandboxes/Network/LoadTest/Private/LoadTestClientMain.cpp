@@ -10,7 +10,6 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include <random>
 
 using namespace AM;
 using namespace AM::LTC;
@@ -28,14 +27,9 @@ void logInvalidInput()
 void connectClients(unsigned int numClients,
                     std::vector<std::unique_ptr<SimulatedClient>>& clients)
 {
-    // Init our random number generator.
-    std::random_device randDevice;
-    std::mt19937 randGenerator(randDevice());
-    // Generate a whole number of ticks corresponding to a range of 0 - 1 seconds.
-    std::uniform_int_distribution<unsigned int> dist(0, (1 / GAME_TICK_TIMESTEP_S));
-
     // Open all of the connections.
     for (unsigned int i = 0; i < numClients; ++i) {
+        clients.push_back(std::make_unique<SimulatedClient>());
     }
 }
 
@@ -73,7 +67,9 @@ try {
     // Connect the clients.
     LOG_INFO("Connecting %u clients.", numClients);
     std::vector<std::unique_ptr<SimulatedClient>> clients;
-    connectClients(numClients, clients);
+    for (unsigned int i = 0; i < numClients; ++i) {
+        clients.push_back(std::make_unique<SimulatedClient>());
+    }
     LOG_INFO("%u clients connected.", numClients);
 
     // Start the main loop.

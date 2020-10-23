@@ -14,7 +14,7 @@ World::World()
 , clients{}
 , componentFlags{}
 , entityIsDirty{}
-, idPool()
+, idPool(MAX_ENTITIES)
 , spawnPoint{0, 0}
 {
 }

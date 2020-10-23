@@ -27,7 +27,7 @@ class ClientHandler
 {
 public:
     /** The maximum number of clients that we will accept connections from. */
-    static constexpr unsigned int MAX_CLIENTS = 100;
+    static constexpr unsigned int MAX_CLIENTS = 1000;
 
     ClientHandler(Network& inNetwork);
 

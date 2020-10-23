@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Network.h"
+#include "WorldSim.h"
 #include <SDL_stdinc.h>
 
 namespace AM
@@ -16,9 +17,10 @@ namespace LTC
 class SimulatedClient
 {
 public:
-    // TODO: Make a sim class and move this stuff into it.
-    /** Two movements per second. */
-    static constexpr double TICK_TIMESTEP_S = (1 / 2.0);
+    /**
+     * Inits the object and calls worldSim.connect().
+     */
+    SimulatedClient();
 
     /**
      * Calls the sim and network ticks.
@@ -28,9 +30,7 @@ public:
 private:
     Client::Network network;
 
-    Timer iterationTimer;
-    Uint32 currentTick = 0;
-    double accumulatedTime = 0;
+    WorldSim worldSim;
 };
 
 } // End namespace LTC

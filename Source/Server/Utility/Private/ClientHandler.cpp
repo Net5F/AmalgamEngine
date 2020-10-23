@@ -12,7 +12,7 @@ namespace Server
 {
 ClientHandler::ClientHandler(Network& inNetwork)
 : network(inNetwork)
-, idPool()
+, idPool(MAX_CLIENTS)
 , clientSet(std::make_shared<SocketSet>(MAX_CLIENTS))
 , acceptor(Network::SERVER_PORT, clientSet)
 , receiveThreadObj()
@@ -42,14 +42,10 @@ void ClientHandler::serviceClients()
 
         // Check if there's any clients with activity, and receive all their
         // messages.
-        std::shared_lock readLock(network.getClientMapMutex());
         int numReceived = 0;
         if (clientMap.size() != 0) {
             numReceived = receiveClientMessages(clientMap);
         }
-
-        // Release the lock since we're done with the clients.
-        readLock.unlock();
 
         // If we received messages, deserialize and route them.
         if (numReceived != 0) {
@@ -91,18 +87,14 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
 
 void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
 {
-    std::shared_mutex& clientMapMutex = network.getClientMapMutex();
-
     /* Erase any disconnected clients. */
     // Only need a read lock to check for disconnects.
-    std::shared_lock readLock(clientMapMutex);
     for (auto it = clientMap.begin(); it != clientMap.end();) {
         std::shared_ptr<Client>& client = it->second;
 
         if (!(client->isConnected())) {
             // Need to modify the map, acquire a write lock.
-            readLock.unlock();
-            std::unique_lock writeLock(clientMapMutex);
+            std::unique_lock writeLock(network.getClientMapMutex());
 
             // Add an event to the Network's queue.
             network.getDisconnectEventQueue().enqueue(it->first);

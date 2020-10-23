@@ -11,7 +11,7 @@ public:
     // Replicated data
     //--------------------------------------------------------------------------
     /** Holds the current state of the inputs, indexed by Input::Type. */
-    InputStateArr inputStates = {};
+    InputStateArr inputStates{};
 };
 
 template<typename S>

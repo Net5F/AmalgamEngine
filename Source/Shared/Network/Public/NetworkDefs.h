@@ -13,8 +13,9 @@ namespace AM
 //--------------------------------------------------------------------------
 // Config
 //--------------------------------------------------------------------------
-/** 20 network ticks per second. */
-static constexpr double NETWORK_TICK_TIMESTEP_S = 1 / 20.0;
+static constexpr unsigned int NETWORK_TICKS_PER_SECOND = 20;
+static constexpr double NETWORK_TICK_TIMESTEP_S = 1.0
+/ static_cast<double>(NETWORK_TICKS_PER_SECOND);
 
 //--------------------------------------------------------------------------
 // Typedefs

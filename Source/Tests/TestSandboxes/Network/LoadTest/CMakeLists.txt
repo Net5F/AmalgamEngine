@@ -7,6 +7,8 @@ add_executable(LoadTestClient
     Private/LoadTestClientMain.cpp
     Private/SimulatedClient.cpp
     Public/SimulatedClient.h
+    Private/WorldSim.cpp
+    Public/WorldSim.h
     
     # Client objects
     ${PROJECT_SOURCE_DIR}/Client/Utility/Private/Network.cpp

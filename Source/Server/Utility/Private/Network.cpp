@@ -55,7 +55,7 @@ void Network::tick()
 void Network::send(NetworkID networkID, const BinaryBufferSharedPtr& message,
                    Uint32 messageTick)
 {
-    // Queue the message to be sent with the next batch.
+    // Acquire a read lock before running through the client map.
     std::shared_lock readLock(clientMapMutex);
 
     // Check that the client still exists, queue the message if so.
@@ -197,8 +197,10 @@ BinaryBufferSharedPtr Network::constructMessage(MessageType type,
 
 void Network::sendClientUpdates()
 {
-    /* Run through the clients, sending their waiting messages. */
+    // Acquire a read lock before running through the client map.
     std::shared_lock readLock(clientMapMutex);
+
+    // Run through the clients, sending their waiting messages.
     for (auto& pair : clientMap) {
         pair.second->sendWaitingMessages(*currentTickPtr);
     }

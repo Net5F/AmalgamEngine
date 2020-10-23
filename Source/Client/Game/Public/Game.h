@@ -61,7 +61,7 @@ public:
 
 private:
     /** How long the game should wait for the server to send a connection
-     * response. */
+        response. */
     static constexpr unsigned int CONNECTION_RESPONSE_WAIT_MS = 1000;
 
     /** An unreasonable amount of time for the game tick to be late by. */

@@ -1,5 +1,4 @@
-#ifndef RENDERSYSTEM_H
-#define RENDERSYSTEM_H
+#pragma once
 
 #include "SDL2pp/SDL2pp.hh"
 #include "Timer.h"
@@ -14,8 +13,9 @@ class World;
 class RenderSystem
 {
 public:
-    /** 60 rendered frames per second. */
-    static constexpr double RENDER_INTERVAL_S = 1 / 60.0;
+    static constexpr unsigned int RENDER_TICKS_PER_SECOND = 60;
+    static constexpr double RENDER_INTERVAL_S = 1.0
+    / static_cast<double>(RENDER_TICKS_PER_SECOND);
 
     /** An unreasonable amount of time for the render tick to be late by.
         Late render ticks cause jittering, as the pacing between ticks becomes
@@ -46,5 +46,3 @@ private:
 
 } // namespace Client
 } // namespace AM
-
-#endif /* RENDERSYSTEM_H */

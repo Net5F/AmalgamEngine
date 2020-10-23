@@ -28,8 +28,9 @@ void NetworkUpdateSystem::sendInputState()
     }
 
     /* Send the updated state to the server. */
+    // Only send new data if we've changed.
     if (world.playerIsDirty) {
-        // Only send new data if we've changed.
+        // Get the current input state.
         ClientInputs clientInputs{game.getCurrentTick(),
                                   world.inputs[world.playerID]};
 

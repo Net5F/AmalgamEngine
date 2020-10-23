@@ -115,6 +115,11 @@ private:
     /** Maps IDs to their connections. Allows the game to say "send this message
         to this entity" instead of needing to track the connection objects. */
     ClientMap clientMap;
+
+    /** Used to lock access to the clientMap.
+        Note: ClientHandler's thread is the only one that obtains exclusive access to
+              this mutex, so it doesn't bother obtaining shared access. If that changes,
+              it will need to be updated. */
     std::shared_mutex clientMapMutex;
 
     ClientHandler clientHandler;
