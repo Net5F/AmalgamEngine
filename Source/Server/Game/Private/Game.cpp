@@ -16,7 +16,6 @@ Game::Game(Network& inNetwork)
 , accumulatedTime(0.0)
 , currentTick(0)
 {
-    world.setSpawnPoint({64, 64});
     Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);
 }

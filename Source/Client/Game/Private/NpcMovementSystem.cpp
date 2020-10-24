@@ -105,7 +105,6 @@ void NpcMovementSystem::handleExplicitConfirmation()
 {
     lastReceivedTick++;
     stateUpdateQueue.push({lastReceivedTick, false, nullptr});
-    LOG_INFO("Explicit push: %u", lastReceivedTick);
 }
 
 void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
@@ -116,7 +115,6 @@ void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
     unsigned int implicitConfirmations = confirmedTick - lastReceivedTick;
     for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
         stateUpdateQueue.push({(lastReceivedTick + i), false, nullptr});
-        LOG_INFO("Implicit push: %u", (lastReceivedTick + i));
     }
 
     lastReceivedTick = confirmedTick;
@@ -140,7 +138,6 @@ void NpcMovementSystem::handleUpdate(
 
     // Push the update into the buffer.
     stateUpdateQueue.push({newReceivedTick, true, entityUpdate});
-    LOG_INFO("Update push: %u", newReceivedTick);
 
     lastReceivedTick = newReceivedTick;
 }
@@ -214,11 +211,11 @@ void NpcMovementSystem::applyUpdateMessage(
 
         // Update the currentPosition.
         // TEMP
-        const PositionComponent& currentPosition = world.positions[entityID];
-        const PositionComponent& newPosition = entityIt->positionComponent;
-        LOG_INFO("Update: %d: (%f, %f) -> (%f, %f)", entityID,
-                 currentPosition.x, currentPosition.y, newPosition.x,
-                 newPosition.y);
+//        const PositionComponent& currentPosition = world.positions[entityID];
+//        const PositionComponent& newPosition = entityIt->positionComponent;
+//        LOG_INFO("Update: %d: (%f, %f) -> (%f, %f)", entityID,
+//                 currentPosition.x, currentPosition.y, newPosition.x,
+//                 newPosition.y);
         // TEMP
         world.positions[entityID] = entityIt->positionComponent;
     }

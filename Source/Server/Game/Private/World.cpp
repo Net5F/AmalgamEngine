@@ -15,7 +15,10 @@ World::World()
 , componentFlags{}
 , entityIsDirty{}
 , idPool(MAX_ENTITIES)
-, spawnPoint{0, 0}
+, device()
+, generator(device())
+, xDistribution(64, (SCREEN_WIDTH - 64))
+, yDistribution(64, (SCREEN_HEIGHT - 64))
 {
 }
 
@@ -73,14 +76,9 @@ void World::removeComponent(EntityID entityID,
     }
 }
 
-void World::setSpawnPoint(const Position& newSpawnPoint)
+Position World::getSpawnPoint()
 {
-    spawnPoint = newSpawnPoint;
-}
-
-const Position& World::getSpawnPoint()
-{
-    return spawnPoint;
+    return {xDistribution(generator), yDistribution(generator)};
 }
 
 } // namespace Server

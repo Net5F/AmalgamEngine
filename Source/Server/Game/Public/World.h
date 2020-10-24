@@ -10,6 +10,7 @@
 
 #include <array>
 #include <string_view>
+#include <random>
 
 namespace AM
 {
@@ -54,15 +55,17 @@ public:
      */
     std::array<bool, MAX_ENTITIES> entityIsDirty;
 
-    void setSpawnPoint(const Position& position);
-    const Position& getSpawnPoint();
+    Position getSpawnPoint();
 
 private:
     /** Used for generating entity IDs. */
     IDPool idPool;
 
-    /** The initial spawn point for connecting players. */
-    Position spawnPoint;
+    // Temp: Putting entities at random positions within the screen bounds.
+    std::random_device device;
+    std::mt19937 generator;
+    std::uniform_real_distribution<float> xDistribution;
+    std::uniform_real_distribution<float> yDistribution;
 };
 
 } // namespace Server
