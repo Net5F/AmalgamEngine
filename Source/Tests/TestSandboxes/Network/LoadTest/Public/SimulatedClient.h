@@ -30,6 +30,8 @@ public:
      */
     void tick();
 
+    void setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled);
+
 private:
     Client::Network network;
 

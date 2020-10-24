@@ -23,6 +23,7 @@ Network::Network()
 , exitRequested(false)
 , headerRecBuffer(SERVER_HEADER_SIZE)
 , messageRecBuffer(Peer::MAX_MESSAGE_SIZE)
+, netstatsLoggingEnabled(true)
 , ticksSinceNetstatsLog(0)
 {
     if (!RUN_OFFLINE) {
@@ -65,10 +66,12 @@ void Network::tick()
         sendHeartbeatIfNecessary();
 
         // If it's time to log our network statistics, do so.
-        ticksSinceNetstatsLog++;
-        if (ticksSinceNetstatsLog == TICKS_TILL_STATS_DUMP) {
-            logNetworkStatistics();
-            ticksSinceNetstatsLog = 0;
+        if (netstatsLoggingEnabled) {
+            ticksSinceNetstatsLog++;
+            if (ticksSinceNetstatsLog == TICKS_TILL_STATS_DUMP) {
+                logNetworkStatistics();
+                ticksSinceNetstatsLog = 0;
+            }
         }
 
         accumulatedTime -= NETWORK_TICK_TIMESTEP_S;
@@ -202,6 +205,11 @@ void Network::registerCurrentTickPtr(
     const std::atomic<Uint32>* inCurrentTickPtr)
 {
     currentTickPtr = inCurrentTickPtr;
+}
+
+void Network::setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled)
+{
+    netstatsLoggingEnabled = inNetstatsLoggingEnabled;
 }
 
 void Network::sendHeartbeatIfNecessary()

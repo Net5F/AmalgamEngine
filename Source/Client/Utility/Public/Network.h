@@ -84,6 +84,8 @@ public:
     /** Used for passing us a pointer to the Game's currentTick. */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
+    void setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled);
+
 private:
     /**
      * If we haven't sent any messages since the last network tick, sends a
@@ -183,6 +185,9 @@ private:
     static constexpr unsigned int SECONDS_TILL_STATS_DUMP = 5;
     static constexpr unsigned int TICKS_TILL_STATS_DUMP
         = (1 / NETWORK_TICK_TIMESTEP_S) * SECONDS_TILL_STATS_DUMP;
+
+    /** Whether network statistics logging is enabled or not. */
+    bool netstatsLoggingEnabled;
 
     /** The number of ticks since we last logged our network statistics. */
     unsigned int ticksSinceNetstatsLog;

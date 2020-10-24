@@ -34,5 +34,10 @@ void SimulatedClient::tick()
     }
 }
 
+void SimulatedClient::setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled)
+{
+    network.setNetstatsLoggingEnabled(inNetstatsLoggingEnabled);
+}
+
 } // End namespace LTC
 } // End namespace AM

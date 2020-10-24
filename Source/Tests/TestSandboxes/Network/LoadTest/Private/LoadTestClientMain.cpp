@@ -73,7 +73,12 @@ try {
     std::vector<std::unique_ptr<SimulatedClient>> clients;
     for (unsigned int i = 0; i < numClients; ++i) {
         clients.push_back(std::make_unique<SimulatedClient>());
+        clients[i]->setNetstatsLoggingEnabled(false);
     }
+
+    // Enable only one client's logging so we don't get spammed.
+    // Netstats logging is static, so it'll get the data from all clients.
+    clients[0]->setNetstatsLoggingEnabled(true);
 
     // Start the client connections thread.
     std::thread connectionThreadObj(connectClients, numClients, &clients);
