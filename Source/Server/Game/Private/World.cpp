@@ -17,8 +17,8 @@ World::World()
 , idPool(MAX_ENTITIES)
 , device()
 , generator(device())
-, xDistribution(64, (SCREEN_WIDTH - 64))
-, yDistribution(64, (SCREEN_HEIGHT - 64))
+, xDistribution(0, (SCREEN_WIDTH - 128))
+, yDistribution(0, (SCREEN_HEIGHT - 128))
 {
 }
 

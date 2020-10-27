@@ -48,16 +48,16 @@ void NetworkInputSystem::processInputMessages()
             }
         }
 
-        if (!clientEntityFound) {
-            LOG_ERROR("Tried to process input message for netID that doesn't "
-                      "have an associated entity.");
+        if (clientEntityFound) {
+            // Update the entity's InputComponent.
+            world.inputs[clientEntityID] = inputMessage->inputComponent;
+
+            // Flag the entity as dirty.
+            world.entityIsDirty[clientEntityID] = true;
         }
-
-        // Update the entity's InputComponent.
-        world.inputs[clientEntityID] = inputMessage->inputComponent;
-
-        // Flag the entity as dirty.
-        world.entityIsDirty[clientEntityID] = true;
+        else {
+            // The entity was probably disconnected. Do nothing with the message.
+        }
     }
 
     network.endReceiveInputMessages();

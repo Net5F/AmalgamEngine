@@ -100,14 +100,14 @@ void Network::send(const BinaryBufferSharedPtr& message)
 
     // Send the message.
     NetworkResult result = server->send(message);
-    if (result != NetworkResult::Success) {
-        LOG_ERROR("Message send failed.");
-    }
-    else {
+    if (result == NetworkResult::Success) {
         messagesSentSinceTick++;
 
         // Record the number of sent bytes.
         NetworkStats::recordBytesSent(message->size());
+    }
+    else {
+        LOG_ERROR("Message send failed.");
     }
 }
 
