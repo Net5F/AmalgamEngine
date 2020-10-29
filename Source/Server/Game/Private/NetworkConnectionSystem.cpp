@@ -47,7 +47,6 @@ void NetworkConnectionSystem::processConnectEvents()
         world.movements[newEntityID].maxVelX = 250;
         world.movements[newEntityID].maxVelY = 250;
         world.clients[newEntityID].netID = clientNetworkID;
-        world.clients[newEntityID].isInitialized = false;
         world.attachComponent(newEntityID, ComponentFlag::Input);
         world.attachComponent(newEntityID, ComponentFlag::Movement);
         world.attachComponent(newEntityID, ComponentFlag::Position);

@@ -50,21 +50,8 @@ void NetworkUpdateSystem::constructAndSendUpdate(
     /** Fill the vector of entities to send. */
     EntityUpdate entityUpdate{};
     ClientComponent& clientComponent = world.clients[entityID];
-    if (!clientComponent.isInitialized) {
-        // New client, we need to send it all relevant entities.
-        for (EntityID i = 0; i < MAX_ENTITIES; ++i) {
-            if ((i != entityID)
-                && (world.componentFlags[i] & ComponentFlag::Client)) {
-                fillEntityData(i, entityUpdate.entities);
-            }
-        }
-        clientComponent.isInitialized = true;
-    }
-    else {
-        // We only need to update the client with dirty entities.
-        for (EntityID dirtyEntID : dirtyEntities) {
-            fillEntityData(dirtyEntID, entityUpdate.entities);
-        }
+    for (EntityID dirtyEntID : dirtyEntities) {
+        fillEntityData(dirtyEntID, entityUpdate.entities);
     }
 
     /* If there are updates to send, send an update message. */

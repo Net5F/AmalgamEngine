@@ -17,13 +17,6 @@ struct ClientComponent {
 public:
     /** The network ID associated with this client. */
     NetworkID netID = 0;
-
-    /**
-     * true if the client has been sent the state of all entities that existed
-     * before it connected, else false.
-     * TODO: Remove this and add a real area of interest component/system.
-     */
-    bool isInitialized = false;
 };
 
 } // namespace Server

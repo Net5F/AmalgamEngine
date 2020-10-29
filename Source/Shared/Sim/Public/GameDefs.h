@@ -14,7 +14,7 @@ static constexpr double GAME_TICK_TIMESTEP_S = 1.0
 / static_cast<double>(GAME_TICKS_PER_SECOND);
 
 /** Game constants. */
-static constexpr unsigned int MAX_ENTITIES = 100;
+static constexpr unsigned int MAX_ENTITIES = 200;
 
 // TODO: Move these out.
 static constexpr unsigned int SCREEN_WIDTH = 1280;
