@@ -9,7 +9,6 @@ namespace AM
 {
 namespace LTC
 {
-
 /**
  * Represents a single simulated client.
  * Maintains only as much state as is necessary to keep the connection going

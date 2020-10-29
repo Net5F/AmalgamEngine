@@ -117,9 +117,9 @@ private:
     ClientMap clientMap;
 
     /** Used to lock access to the clientMap.
-        Note: ClientHandler's thread is the only one that obtains exclusive access to
-              this mutex, so it doesn't bother obtaining shared access. If that changes,
-              it will need to be updated. */
+        Note: ClientHandler's thread is the only one that obtains exclusive
+              access to this mutex, so it doesn't bother obtaining shared
+              access. If that changes, it will need to be updated. */
     std::shared_mutex clientMapMutex;
 
     ClientHandler clientHandler;

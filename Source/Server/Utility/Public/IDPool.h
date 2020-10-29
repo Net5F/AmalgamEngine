@@ -17,7 +17,8 @@ public:
     void freeID(unsigned int ID);
 
 private:
-    /** Extra room so that we don't run into reuse issues when almost all IDs are reserved. */
+    /** Extra room so that we don't run into reuse issues when almost all IDs
+        are reserved. */
     static constexpr unsigned int SAFETY_BUFFER = 100;
 
     /** The maximum number of IDs that we can give out. */

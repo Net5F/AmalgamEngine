@@ -211,11 +211,12 @@ void NpcMovementSystem::applyUpdateMessage(
 
         // Update the currentPosition.
         // TEMP
-//        const PositionComponent& currentPosition = world.positions[entityID];
-//        const PositionComponent& newPosition = entityIt->positionComponent;
-//        LOG_INFO("Update: %d: (%f, %f) -> (%f, %f)", entityID,
-//                 currentPosition.x, currentPosition.y, newPosition.x,
-//                 newPosition.y);
+        //        const PositionComponent& currentPosition =
+        //        world.positions[entityID]; const PositionComponent&
+        //        newPosition = entityIt->positionComponent; LOG_INFO("Update:
+        //        %d: (%f, %f) -> (%f, %f)", entityID,
+        //                 currentPosition.x, currentPosition.y, newPosition.x,
+        //                 newPosition.y);
         // TEMP
         world.positions[entityID] = entityIt->positionComponent;
     }

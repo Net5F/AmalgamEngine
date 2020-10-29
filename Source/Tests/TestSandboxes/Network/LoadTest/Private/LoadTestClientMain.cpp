@@ -52,8 +52,9 @@ try {
     SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     // Set up file logging.
-    // TODO: This currently will do weird stuff if you have 2 instances of this app open.
-//    Log::enableFileLogging("LoadTestClient.log");
+    // TODO: This currently will do weird stuff if you have 2 instances of this
+    //       app open.
+    //    Log::enableFileLogging("LoadTestClient.log");
 
     // Check for an argument with non-default number of clients.
     unsigned int numClients = DEFAULT_NUM_CLIENTS;

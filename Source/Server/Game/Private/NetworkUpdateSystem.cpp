@@ -56,8 +56,9 @@ void NetworkUpdateSystem::constructAndSendUpdate(
 
     /* If there are updates to send, send an update message. */
     if (entityUpdate.entities.size() > 0) {
-//        LOG_INFO("Queueing message for entity: %u with tick: %u", entityID,
-//                 game.getCurrentTick());
+        //        LOG_INFO("Queueing message for entity: %u with tick: %u",
+        //        entityID,
+        //                 game.getCurrentTick());
 
         // Finish filling the EntityUpdate.
         entityUpdate.tickNum = game.getCurrentTick();

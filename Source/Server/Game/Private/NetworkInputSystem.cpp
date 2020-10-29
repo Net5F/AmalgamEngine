@@ -56,7 +56,8 @@ void NetworkInputSystem::processInputMessages()
             world.entityIsDirty[clientEntityID] = true;
         }
         else {
-            // The entity was probably disconnected. Do nothing with the message.
+            // The entity was probably disconnected. Do nothing with the
+            // message.
         }
     }
 

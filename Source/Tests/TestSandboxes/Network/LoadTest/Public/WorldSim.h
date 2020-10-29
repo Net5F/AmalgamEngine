@@ -7,7 +7,6 @@
 
 namespace AM
 {
-
 class ClientInputs;
 
 namespace Client
@@ -17,7 +16,6 @@ class Network;
 
 namespace LTC
 {
-
 /**
  *
  */
@@ -31,7 +29,8 @@ public:
      */
     void connect();
 
-    /** Processes one tick of the "sim", checking if we need to send inputs or not. */
+    /** Processes one tick of the "sim", checking if we need to send inputs or
+     * not. */
     void tick();
 
     /** Initialize the iteration timer. */
@@ -45,12 +44,13 @@ private:
     void sendNextInput();
 
     /** How long the game should wait for the server to send a connection
-     * response. */
+        response. */
     static constexpr unsigned int CONNECTION_RESPONSE_WAIT_MS = 1000;
 
     /** How often to send inputs. */
     static constexpr double INPUT_RATE_S = (1 / 2.0);
-    static constexpr unsigned int INPUT_RATE_TICKS = GAME_TICKS_PER_SECOND * INPUT_RATE_S;
+    static constexpr unsigned int INPUT_RATE_TICKS
+        = GAME_TICKS_PER_SECOND * INPUT_RATE_S;
 
     Client::Network& network;
 

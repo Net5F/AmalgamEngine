@@ -10,8 +10,8 @@
 namespace AM
 {
 static constexpr unsigned int GAME_TICKS_PER_SECOND = 30;
-static constexpr double GAME_TICK_TIMESTEP_S = 1.0
-/ static_cast<double>(GAME_TICKS_PER_SECOND);
+static constexpr double GAME_TICK_TIMESTEP_S
+    = 1.0 / static_cast<double>(GAME_TICKS_PER_SECOND);
 
 /** Game constants. */
 static constexpr unsigned int MAX_ENTITIES = 200;

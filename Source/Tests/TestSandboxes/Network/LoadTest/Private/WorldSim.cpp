@@ -13,7 +13,6 @@ namespace AM
 {
 namespace LTC
 {
-
 /** An unreasonable amount of time for the game tick to be late by. */
 static constexpr double GAME_DELAYED_TIME_S = .001;
 
@@ -74,8 +73,8 @@ void WorldSim::tick()
             ticksTillInput--;
 
             // Receive any waiting player messages.
-            std::shared_ptr<const EntityUpdate> entityUpdate =
-                network.receivePlayerUpdate(0);
+            std::shared_ptr<const EntityUpdate> entityUpdate
+                = network.receivePlayerUpdate(0);
             while (entityUpdate != nullptr) {
                 entityUpdate = network.receivePlayerUpdate(0);
             }
@@ -91,22 +90,27 @@ void WorldSim::tick()
 
         accumulatedTime -= GAME_TICK_TIMESTEP_S;
         if (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
-            LOG_INFO("Thread %u: Detected a request for multiple game ticks in the same "
+            LOG_INFO("Thread %u: Detected a request for multiple game ticks in "
+                     "the same "
                      "frame. Game tick "
                      "must have been massively delayed. Game tick was delayed "
-                     "by: %.8fs.", entityID, accumulatedTime);
+                     "by: %.8fs.",
+                     entityID, accumulatedTime);
         }
         else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
             // Game missed its ideal call time, could be our issue or general
             // system slowness.
-            LOG_INFO("Thread %u: Detected a delayed game tick. Game tick was delayed by: "
-                     "%.8fs.", entityID, accumulatedTime);
+            LOG_INFO("Thread %u: Detected a delayed game tick. Game tick was "
+                     "delayed by: "
+                     "%.8fs.",
+                     entityID, accumulatedTime);
         }
 
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);
         if (executionTime > GAME_TICK_TIMESTEP_S) {
-            LOG_INFO("Thread %u: Overran our sim iteration time. executionTime: %.8f",
+            LOG_INFO("Thread %u: Overran our sim iteration time. "
+                     "executionTime: %.8f",
                      entityID, executionTime);
         }
     }

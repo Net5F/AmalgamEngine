@@ -4,7 +4,6 @@ namespace AM
 {
 namespace LTC
 {
-
 SimulatedClient::SimulatedClient()
 : worldSim(network)
 , isConnected(false)
