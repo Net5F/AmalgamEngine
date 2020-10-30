@@ -14,7 +14,7 @@ namespace Client
 Network::Network()
 : accumulatedTime(0.0)
 , server(nullptr)
-, playerID(0)
+, playerID(INVALID_ENTITY_ID)
 , tickAdjustment(0)
 , adjustmentIteration(0)
 , messagesSentSinceTick(0)
@@ -320,7 +320,7 @@ void Network::processReceivedMessage(MessageType messageType,
         bool npcFound = false;
         for (auto entityIt = entities.begin(); entityIt != entities.end();
              ++entityIt) {
-            EntityID entityID = (*entityIt).id;
+            EntityID entityID = entityIt->id;
 
             if (entityID == playerID) {
                 // Found the player.

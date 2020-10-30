@@ -18,7 +18,7 @@ static constexpr double GAME_DELAYED_TIME_S = .001;
 
 WorldSim::WorldSim(Client::Network& inNetwork)
 : network(inNetwork)
-, entityID(0)
+, entityID(INVALID_ENTITY_ID)
 , accumulatedTime(0.0)
 , currentTick(0)
 , ticksTillInput(0)

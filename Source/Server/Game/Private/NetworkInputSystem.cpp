@@ -37,18 +37,16 @@ void NetworkInputSystem::processInputMessages()
         }
 
         // Find the EntityID associated with the given NetID.
-        Uint32 clientEntityID = 0;
-        bool clientEntityFound = false;
+        Uint32 clientEntityID = INVALID_ENTITY_ID;
         for (std::size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
             if ((world.componentFlags[entityID] & ComponentFlag::Client)
                 && (world.clients[entityID].netID == inputMessage->netID)) {
                 clientEntityID = entityID;
-                clientEntityFound = true;
                 break;
             }
         }
 
-        if (clientEntityFound) {
+        if (clientEntityID != INVALID_ENTITY_ID) {
             // Update the entity's InputComponent.
             world.inputs[clientEntityID] = inputMessage->inputComponent;
 

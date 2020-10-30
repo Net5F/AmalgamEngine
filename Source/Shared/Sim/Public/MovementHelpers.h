@@ -1,5 +1,4 @@
-#ifndef MOVEMENTHELPERS_H_
-#define MOVEMENTHELPERS_H_
+#pragma once
 
 #include "PositionComponent.h"
 #include "MovementComponent.h"
@@ -44,5 +43,3 @@ private:
 };
 
 } // namespace AM
-
-#endif /* MOVEMENTHELPERS_H_ */
