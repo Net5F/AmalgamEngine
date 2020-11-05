@@ -15,15 +15,12 @@ Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
 , peer(std::move(inPeer))
 , batchBuffer{}
 , latestSentSimTick(0)
-, hasRecordedDiff(false)
+, tickDiffHistory(TICKDIFF_TARGET)
+, numFreshDiffs(0)
+, diffHistoryIsStale(false)
 , latestAdjIteration(0)
 {
-    // Init the history.
-    for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
-        tickDiffHistory.push(0);
-    }
-
-    // Init the timer to the current time.
+    // Init the timers to the current time.
     receiveTimer.updateSavedTime();
 }
 
@@ -99,8 +96,7 @@ void Client::fillHeader(Uint8 messageCount, Uint32 currentTick)
     else {
         // Fill in the number of ticks we've processed since the last update.
         // (the tick count increments at the end of a sim tick, so our latest
-        // sent
-        //  data is from currentTick - 1).
+        //  sent data is from currentTick - 1).
         Uint8 confirmedTickCount = (currentTick - 1) - latestSentSimTick;
         batchBuffer[ServerHeaderIndex::ConfirmedTickCount] = confirmedTickCount;
 
@@ -141,6 +137,7 @@ Message Client::receiveMessage()
         // If we received the next expected iteration, save it.
         if (receivedAdjIteration == expectedNextIteration) {
             latestAdjIteration = expectedNextIteration;
+            diffHistoryIsStale = true;
         }
         else if (receivedAdjIteration > expectedNextIteration) {
             LOG_ERROR("Skipped an adjustment iteration. Logic must be flawed.");
@@ -196,44 +193,35 @@ void Client::recordTickDiff(Sint64 tickDiff)
                  tickDiff);
     }
     else {
-        // Diff is fine, record it.
-        // Acquire a lock so a getTickAdjustment doesn't start while we're
+        /* Diff is fine, record it. */
+        // Acquire a lock so a getTickAdjustment() doesn't start while we're
         // pushing.
         std::unique_lock lock(tickDiffMutex);
-        tickDiffHistory.push(tickDiff);
 
-        // If this is the first diff we've recorded, init the buffer with it.
-        if (!hasRecordedDiff) {
-            for (unsigned int i = 0; i < (TICKDIFF_HISTORY_LENGTH - 1); ++i) {
-                tickDiffHistory.push(tickDiff);
-            }
-            hasRecordedDiff = true;
+        // If the diff history is stale, reset our trackers.
+        if (diffHistoryIsStale) {
+            numFreshDiffs = 0;
+            diffHistoryIsStale = false;
+        }
+
+        // Add the new data.
+        tickDiffHistory.push(tickDiff);
+        if (numFreshDiffs < TICKDIFF_HISTORY_LENGTH) {
+            numFreshDiffs++;
         }
     }
 }
 
 Client::AdjustmentData Client::getTickAdjustment()
 {
-    // If we haven't gotten any data, no adjustment should be made.
-    if (!hasRecordedDiff) {
-        return {0, 0};
-    }
-
     // Copy the history so we can work on it without staying locked.
     std::unique_lock lock(tickDiffMutex);
-    CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH> tickDiffHistoryCopy
-        = tickDiffHistory;
+    CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH> tickDiffHistoryCopy(tickDiffHistory);
+    unsigned int numFreshDiffsCopy = numFreshDiffs;
     lock.unlock();
 
-    // Calc the average diff.
-    float averageDiff = 0;
-    for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
-        averageDiff += tickDiffHistory[i];
-    }
-    averageDiff /= TICKDIFF_HISTORY_LENGTH;
-
     // Run through all checks and calc any necessary adjustment.
-    Sint8 adjustment = calcAdjustment(averageDiff, tickDiffHistoryCopy);
+    Sint8 adjustment = calcAdjustment(tickDiffHistoryCopy, numFreshDiffsCopy);
 
     return {adjustment, latestAdjIteration};
 }
@@ -244,13 +232,26 @@ NetworkID Client::getNetID()
 }
 
 Sint8 Client::calcAdjustment(
-    float averageDiff,
-    CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy)
+    CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy,
+    unsigned int numFreshDiffsCopy)
 {
+    // If we don't have enough data, we won't make an adjustment.
+    if (numFreshDiffsCopy < MIN_FRESH_DIFFS) {
+        return 0;
+    }
+
+    // If the latest data isn't outside the target bounds, no adjustment is needed.
     if ((tickDiffHistoryCopy[0] >= TICKDIFF_ACCEPTABLE_BOUND_LOWER)
         && (tickDiffHistoryCopy[0] <= TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
         return 0;
     }
+
+    // Calc the average diff using only fresh data.
+    float averageDiff = 0;
+    for (unsigned int i = 0; i < numFreshDiffsCopy; ++i) {
+        averageDiff += tickDiffHistoryCopy[i];
+    }
+    averageDiff /= numFreshDiffsCopy;
 
     // If the average isn't outside the target bounds, no adjustment is needed.
     int truncatedAverage = static_cast<int>(averageDiff);
@@ -261,9 +262,9 @@ Sint8 Client::calcAdjustment(
 
     /* Check for lag spikes.
        Note: We check for lag spikes by seeing if we're ahead of the client
-       (diff < target) and moving back towards the target.
+             (diff < target) and moving back towards the target.
              If we aren't, then we have to assume we had a long-term latency
-       gain. */
+             gain. */
     // If we're ahead of the client.
     if (tickDiffHistoryCopy[0] < TICKDIFF_TARGET) {
         // If we're moving back towards the target.
@@ -274,19 +275,24 @@ Sint8 Client::calcAdjustment(
         }
     }
 
-    // TEMP
-    LOG_INFO("Calc'd adjustment. NetID: %u, adjustment: %d", netID,
-             (TICKDIFF_TARGET - truncatedAverage));
-    //    LOG_INFO("truncatedAverage: %d. Values:",
-    //    static_cast<int>(averageDiff)); std::printf("["); for (unsigned int i
-    //    = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
-    //        std::printf("%d, ", tickDiffHistoryCopy[i]);
-    //    }
-    //    std::printf("]\n");
-    // TEMP
+//    printAdjustmentInfo(tickDiffHistoryCopy, numFreshDiffsCopy, truncatedAverage);
 
     // Make an adjustment back towards the target.
     return TICKDIFF_TARGET - truncatedAverage;
+}
+
+void Client::printAdjustmentInfo(
+const CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy,
+unsigned int numFreshDiffsCopy, int truncatedAverage)
+{
+    LOG_INFO("Calc'd adjustment. NetID: %u, adjustment: %d, iteration: %u", netID,
+             (TICKDIFF_TARGET - truncatedAverage), latestAdjIteration.load());
+    LOG_INFO("truncatedAverage: %d, numFreshDiffs: %u. Values:", truncatedAverage, numFreshDiffsCopy);
+    std::printf("[");
+    for (unsigned int i = 0; i < TICKDIFF_HISTORY_LENGTH; ++i) {
+        std::printf("%d, ", tickDiffHistoryCopy[i]);
+    }
+    std::printf("]\n");
 }
 
 } // end namespace Server

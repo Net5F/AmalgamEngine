@@ -128,8 +128,7 @@ public:
     /**
      * If tickNum is valid, buffers the message.
      *
-     * Note: Blocks while a receive has been started, until the receive has
-     * ended.
+     * Note: Blocks on mutex if there's a receive ongoing.
      *
      * @return True if tickNum was valid and the message was pushed, else false.
      */

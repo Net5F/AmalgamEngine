@@ -72,55 +72,61 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
         ClientMessage& clientMessage = receiveQueue.front();
         BinaryBufferPtr& messageBuffer = clientMessage.message.messageBuffer;
 
-        if (clientMessage.message.messageType == MessageType::ClientInputs) {
-            // Deserialize the message.
-            std::unique_ptr<ClientInputs> clientInputs
-                = std::make_unique<ClientInputs>();
-            MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
-                                      *clientInputs);
+        // Used for recording how far ahead or behind the client's tick is.
+        Sint64 tickDiff = 0;
 
-            // Fill in the network ID that we assigned to this client.
-            clientInputs->netID = clientMessage.netID;
+        // Process the message.
+        switch (clientMessage.message.messageType) {
+            case MessageType::ClientInputs: {
+                // Deserialize the message.
+                std::unique_ptr<ClientInputs> clientInputs
+                    = std::make_unique<ClientInputs>();
+                MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
+                                          *clientInputs);
 
-            // Push the message (blocks if the MessageSorter is locked).
-            // Save the tickNum since the move might be optimized before the
-            // access.
-            Uint32 messageTickNum = clientInputs->tickNum;
-            MessageSorterBase::PushResult pushResult = inputMessageSorter.push(
-                messageTickNum, std::move(clientInputs));
+                // Fill in the network ID that we assigned to this client.
+                clientInputs->netID = clientMessage.netID;
 
-            // Record the diff.
-            if (pushResult.result == MessageSorterBase::ValidityResult::Valid) {
-                if (std::shared_ptr<Client> clientPtr
-                    = clientMessage.clientPtr.lock()) {
-                    clientPtr->recordTickDiff(pushResult.diff);
+                // Push the message (blocks if the MessageSorter is locked).
+                // Save the tickNum locally since the move might be optimized
+                // in front of the access (this does happen).
+                Uint32 messageTickNum = clientInputs->tickNum;
+                MessageSorterBase::PushResult pushResult = inputMessageSorter.push(
+                    messageTickNum, std::move(clientInputs));
+
+                // Log if the sorter dropped the message.
+                if (pushResult.result != MessageSorterBase::ValidityResult::Valid) {
+                    LOG_INFO("Message was dropped. Diff: %d, result: %u, tickNum: %u", pushResult.diff,
+                        pushResult.result, messageTickNum);
                 }
-                // Else, the client was destructed so we don't care.
-            }
-            else {
-                LOG_INFO("Message was dropped. Diff: %d", pushResult.diff);
-            }
-        }
-        else if (clientMessage.message.messageType == MessageType::Heartbeat) {
-            // Deserialize the message.
-            Heartbeat heartbeat{};
-            MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
-                                      heartbeat);
 
-            // Record the diff.
-            if (std::shared_ptr<Client> clientPtr
-                = clientMessage.clientPtr.lock()) {
-                // Calc how far ahead or behind the message's tick is in
-                // relation to the currentTick. Using the game's currentTick
-                // should be accurate since we didn't have to lock anything.
-                clientPtr->recordTickDiff(
-                    static_cast<Sint64>(heartbeat.tickNum)
-                    - static_cast<Sint64>(*currentTickPtr));
+                // Save the diff that the MessageSorter returned.
+                tickDiff = pushResult.diff;
+                break;
+            }
+            case MessageType::Heartbeat: {
+                // Deserialize the message.
+                Heartbeat heartbeat{};
+                MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
+                                          heartbeat);
+
+                // Calc the diff. Using the game's currentTick should be accurate
+                // since we didn't have to lock anything.
+                tickDiff = static_cast<Sint64>(heartbeat.tickNum) - static_cast<Sint64>(*currentTickPtr);
+                break;
+            }
+            default: {
+                LOG_ERROR("Received message type that we aren't handling.");
+                break;
             }
         }
-        else {
-            LOG_ERROR("Received message type that we aren't handling.");
+
+        // Record the diff.
+        if (std::shared_ptr<Client> clientPtr
+            = clientMessage.clientPtr.lock()) {
+            clientPtr->recordTickDiff(tickDiff);
         }
+        // Else, the client was destructed so we don't care.
 
         receiveQueue.pop();
     }

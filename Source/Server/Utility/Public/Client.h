@@ -3,13 +3,14 @@
 #include "GameDefs.h"
 #include "NetworkDefs.h"
 #include "Peer.h"
+#include "CircularBuffer.h"
+#include "Timer.h"
 #include <memory>
 #include <queue>
 #include <array>
-#include "CircularBuffer.h"
 #include <mutex>
 #include <atomic>
-#include "Timer.h"
+#include <cmath>
 
 namespace AM
 {
@@ -26,9 +27,6 @@ class Client
 public:
     Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer);
 
-    //--------------------------------------------------------------------------
-    // Communication
-    //--------------------------------------------------------------------------
     /**
      * Queues a message to be sent the next time sendWaitingMessages is called.
      * @param message  The message to queue.
@@ -65,31 +63,6 @@ public:
      */
     bool isConnected();
 
-    //--------------------------------------------------------------------------
-    // Synchronization
-    //--------------------------------------------------------------------------
-    /** The number of tick offsets that we'll remember. */
-    static constexpr int TICKDIFF_HISTORY_LENGTH = 10;
-
-    /** The lowest difference we'll work with. */
-    static constexpr Sint64 LOWEST_VALID_TICKDIFF = -10;
-    /** The highest difference we'll work with. */
-    static constexpr Sint64 HIGHEST_VALID_TICKDIFF = 10;
-    /** The range of difference (inclusive) between a received message's tickNum
-       and our current tickNum that we won't send an adjustment for. */
-    static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_LOWER = 1;
-    static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_UPPER = 3;
-    /** The value that we'll adjust clients to if they fall outside the bounds.
-     */
-    static constexpr Sint64 TICKDIFF_TARGET = 2;
-
-    struct AdjustmentData {
-        /** The amount of adjustment. */
-        Sint8 adjustment;
-        /** The adjustment iteration that we're on. */
-        Uint8 iteration;
-    };
-
     /**
      * Records the given tick diff in tickDiffHistory.
      *
@@ -102,17 +75,11 @@ public:
      */
     void recordTickDiff(Sint64 tickDiff);
 
-    /**
-     * Calculates an appropriate tick adjustment for this client to make.
-     * Increments adjustmentIteration every time it's called.
-     */
-    AdjustmentData getTickAdjustment();
-
     NetworkID getNetID();
 
 private:
     //--------------------------------------------------------------------------
-    // Private Functions
+    // Helpers
     //--------------------------------------------------------------------------
     /**
      * Returns the number of messages waiting in the sendQueue.
@@ -126,21 +93,6 @@ private:
      * @param currentTick  The sim's current tick number.
      */
     void fillHeader(Uint8 messageCount, Uint32 currentTick);
-
-    /**
-     * Run through all checks necessary to determine if we should tell the
-     * client to adjust its tick. Note: The parameters could be obtained
-     * internally, but passing them in provides a clear separation between setup
-     * and adjustment logic.
-     * @param averageDiff  The average tick difference, calculated from the
-     * tickDiffHistory.
-     * @param tickDiffHistoryCopy  A copy of the tickDiffHistory, so that we
-     * don't need to lock it.
-     * @return The calculated adjustment. 0 if no adjustment was needed.
-     */
-    Sint8 calcAdjustment(
-        float averageDiff,
-        CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy);
 
     //--------------------------------------------------------------------------
     // Connection, Batching
@@ -165,29 +117,104 @@ private:
     /** Holds data while we're putting it together to be sent as a batch. */
     std::array<Uint8, Peer::MAX_MESSAGE_SIZE> batchBuffer;
 
-    /** The latest tick that we've sent an update to this client for. */
-    Uint32 latestSentSimTick;
-
     /** Tracks how long it's been since we've received a message from this
-     * client. */
+        client. */
     Timer receiveTimer;
 
     //--------------------------------------------------------------------------
-    // Synchronization
+    // Synchronization Defs
     //--------------------------------------------------------------------------
+    /** The minimum amount of time worth of tick differences that we'll remember.
+        A tick diff is the diff between our current tick and a message's
+        intended tick, told to us by the MessageSorter. */
+    static constexpr double TICKDIFF_HISTORY_S = .5;
+    /** The integer number of fresh diffs related to TICKDIFF_HISTORY_S. */
+    static constexpr unsigned int TICKDIFF_HISTORY_LENGTH = std::ceil((TICKDIFF_HISTORY_S / GAME_TICK_TIMESTEP_S));
+
+    /** The lowest difference we'll work with. */
+    static constexpr Sint64 LOWEST_VALID_TICKDIFF = -10;
+    /** The highest difference we'll work with. */
+    static constexpr Sint64 HIGHEST_VALID_TICKDIFF = 10;
+    /** The range of difference (inclusive) between a received message's tickNum
+       and our current tickNum that we won't send an adjustment for. */
+    static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_LOWER = 1;
+    static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_UPPER = 3;
+    /** The value that we'll adjust clients to if they fall outside the bounds.
+     */
+    static constexpr Sint64 TICKDIFF_TARGET = 2;
+
+    /** The minimum number of fresh diffs we'll use to calculate an adjustment.
+        Aims to prevent thrashing. */
+    static constexpr unsigned int MIN_FRESH_DIFFS = 3;
+
+    struct AdjustmentData {
+        /** The amount of adjustment. */
+        Sint8 adjustment;
+        /** The adjustment iteration that we're on. */
+        Uint8 iteration;
+    };
+
+    //--------------------------------------------------------------------------
+    // Synchronization Functions
+    //--------------------------------------------------------------------------
+    /**
+     * Calculates an appropriate tick adjustment for this client to make.
+     * Increments adjustmentIteration every time it's called.
+     */
+    AdjustmentData getTickAdjustment();
+
+    /**
+     * Run through all checks necessary to determine if we should tell the
+     * client to adjust its tick. Note: The parameters could be obtained
+     * internally, but passing them in provides a clear separation between setup
+     * and adjustment logic.
+     * @param tickDiffHistoryCopy  A copy of the tickDiffHistory, so that we
+     *                             don't need to keep it locked.
+     * @param numFreshDiffsCopy  A copy of the numFreshDiffs, so that we don't
+     *                           need to keep it locked.
+     * @return The calculated adjustment. 0 if no adjustment was needed.
+     */
+    Sint8 calcAdjustment(
+        CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy,
+        unsigned int numFreshDiffsCopy);
+
+    /**
+     * Prints relevant information during an adjustment. Used for debugging.
+     */
+    void printAdjustmentInfo(
+    const CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy,
+    unsigned int numFreshDiffsCopy, int truncatedAverage);
+
+    //--------------------------------------------------------------------------
+    // Synchronization Members
+    //--------------------------------------------------------------------------
+    /** The latest tick that we've sent an update to this client for. */
+    Uint32 latestSentSimTick;
+
     /**
      * Holds tick diffs that have been added through recordTickDiff.
      */
     CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH> tickDiffHistory;
 
     /**
-     * Used to prevent tickDiffHistory changing while a getTickAdjustment is
-     * happening.
+     * The number of fresh diffs that we have in the history.
+     * Allows us to avoid using stale data when calculating adjustments.
+     */
+    unsigned int numFreshDiffs;
+
+    /**
+     * Used to prevent tickDiffHistory and numFreshData changing while a
+     * getTickAdjustment() is happening.
      */
     std::mutex tickDiffMutex;
 
-    /** Used to flag that we've recorded a tick diff. */
-    bool hasRecordedDiff;
+    /** Used to flag that the tickDiffHistory needs to be refreshed,
+        likely because an adjustment was accepted (we don't use old data to
+        calculate new adjustments.)
+        We refresh the history by filling it with TICKDIFF_TARGET, clearing out
+        any old data. This aims to prevent thrashing, as a significant diff
+        will now be required to trigger another adjustment. */
+    std::atomic<bool> diffHistoryIsStale;
 
     /**
      * Tracks the latest tick offset adjustment iteration we've received.
