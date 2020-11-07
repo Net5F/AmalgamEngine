@@ -144,6 +144,9 @@ private:
      */
     std::atomic<Uint8> adjustmentIteration;
 
+    /** True when we're waiting for the sim to finish applying an adjustment. */
+    std::atomic<bool> isApplyingTickAdjustment;
+
     /**
      * Tracks if we've sent a message since the last network tick.
      * Used to determine if we need to heartbeat.

@@ -91,13 +91,17 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
                 // Save the tickNum locally since the move might be optimized
                 // in front of the access (this does happen).
                 Uint32 messageTickNum = clientInputs->tickNum;
-                MessageSorterBase::PushResult pushResult = inputMessageSorter.push(
-                    messageTickNum, std::move(clientInputs));
+                MessageSorterBase::PushResult pushResult
+                    = inputMessageSorter.push(messageTickNum,
+                                              std::move(clientInputs));
 
                 // Log if the sorter dropped the message.
-                if (pushResult.result != MessageSorterBase::ValidityResult::Valid) {
-                    LOG_INFO("Message was dropped. Diff: %d, result: %u, tickNum: %u", pushResult.diff,
-                        pushResult.result, messageTickNum);
+                if (pushResult.result
+                    != MessageSorterBase::ValidityResult::Valid) {
+                    LOG_INFO("Message was dropped. Diff: %d, result: %u, "
+                             "tickNum: %u",
+                             pushResult.diff, pushResult.result,
+                             messageTickNum);
                 }
 
                 // Save the diff that the MessageSorter returned.
@@ -110,9 +114,10 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
                 MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
                                           heartbeat);
 
-                // Calc the diff. Using the game's currentTick should be accurate
-                // since we didn't have to lock anything.
-                tickDiff = static_cast<Sint64>(heartbeat.tickNum) - static_cast<Sint64>(*currentTickPtr);
+                // Calc the diff. Using the game's currentTick should be
+                // accurate since we didn't have to lock anything.
+                tickDiff = static_cast<Sint64>(heartbeat.tickNum)
+                           - static_cast<Sint64>(*currentTickPtr);
                 break;
             }
             default: {

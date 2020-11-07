@@ -114,8 +114,8 @@ int ClientHandler::receiveClientMessages(ClientMap& clientMap)
 {
     // Update each client's internal socket isReady().
     // Note: We check all clients regardless of whether this returns > 0
-    // because, even if
-    //       there's no activity, we need to check for timeouts.
+    //       because, even if there's no activity, we need to check for
+    //       timeouts.
     clientSet->checkSockets(0);
 
     /* Iterate through all clients. */

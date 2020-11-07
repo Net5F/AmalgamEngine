@@ -124,12 +124,13 @@ private:
     //--------------------------------------------------------------------------
     // Synchronization Defs
     //--------------------------------------------------------------------------
-    /** The minimum amount of time worth of tick differences that we'll remember.
-        A tick diff is the diff between our current tick and a message's
-        intended tick, told to us by the MessageSorter. */
+    /** The minimum amount of time worth of tick differences that we'll
+       remember. A tick diff is the diff between our current tick and a
+       message's intended tick, told to us by the MessageSorter. */
     static constexpr double TICKDIFF_HISTORY_S = .5;
     /** The integer number of fresh diffs related to TICKDIFF_HISTORY_S. */
-    static constexpr unsigned int TICKDIFF_HISTORY_LENGTH = std::ceil((TICKDIFF_HISTORY_S / GAME_TICK_TIMESTEP_S));
+    static constexpr unsigned int TICKDIFF_HISTORY_LENGTH
+        = std::ceil((TICKDIFF_HISTORY_S / GAME_TICK_TIMESTEP_S));
 
     /** The lowest difference we'll work with. */
     static constexpr Sint64 LOWEST_VALID_TICKDIFF = -10;
@@ -182,8 +183,9 @@ private:
      * Prints relevant information during an adjustment. Used for debugging.
      */
     void printAdjustmentInfo(
-    const CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy,
-    unsigned int numFreshDiffsCopy, int truncatedAverage);
+        const CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>&
+            tickDiffHistoryCopy,
+        unsigned int numFreshDiffsCopy, int truncatedAverage);
 
     //--------------------------------------------------------------------------
     // Synchronization Members
@@ -197,24 +199,16 @@ private:
     CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH> tickDiffHistory;
 
     /**
-     * The number of fresh diffs that we have in the history.
-     * Allows us to avoid using stale data when calculating adjustments.
-     */
-    unsigned int numFreshDiffs;
-
-    /**
      * Used to prevent tickDiffHistory and numFreshData changing while a
      * getTickAdjustment() is happening.
      */
     std::mutex tickDiffMutex;
 
-    /** Used to flag that the tickDiffHistory needs to be refreshed,
-        likely because an adjustment was accepted (we don't use old data to
-        calculate new adjustments.)
-        We refresh the history by filling it with TICKDIFF_TARGET, clearing out
-        any old data. This aims to prevent thrashing, as a significant diff
-        will now be required to trigger another adjustment. */
-    std::atomic<bool> diffHistoryIsStale;
+    /**
+     * The number of fresh diffs that we have in the history.
+     * Allows us to avoid using stale data when calculating adjustments.
+     */
+    std::atomic<unsigned int> numFreshDiffs;
 
     /**
      * Tracks the latest tick offset adjustment iteration we've received.

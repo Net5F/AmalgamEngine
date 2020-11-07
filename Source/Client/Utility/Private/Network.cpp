@@ -17,6 +17,7 @@ Network::Network()
 , playerID(INVALID_ENTITY_ID)
 , tickAdjustment(0)
 , adjustmentIteration(0)
+, isApplyingTickAdjustment(false)
 , messagesSentSinceTick(0)
 , currentTickPtr(nullptr)
 , receiveThreadObj()
@@ -180,19 +181,27 @@ int Network::pollForMessages()
 
 int Network::transferTickAdjustment()
 {
-    int currentAdjustment = tickAdjustment;
-    if (currentAdjustment < 0) {
-        // The sim can only freeze for 1 tick at a time.
-        tickAdjustment += 1;
-        return currentAdjustment;
-    }
-    else if (currentAdjustment == 0) {
-        return 0;
+    if (isApplyingTickAdjustment) {
+        int currentAdjustment = tickAdjustment;
+        if (currentAdjustment < 0) {
+            // The sim can only freeze for 1 tick at a time.
+            tickAdjustment += 1;
+            return currentAdjustment;
+        }
+        else if (currentAdjustment > 0) {
+            // The sim can process multiple iterations to catch up.
+            tickAdjustment -= currentAdjustment;
+            return currentAdjustment;
+        }
+        else {
+            // We finished applying the adjustment, increment the iteration.
+            adjustmentIteration++;
+            isApplyingTickAdjustment = false;
+            return 0;
+        }
     }
     else {
-        // The sim can process multiple iterations to catch up.
-        tickAdjustment -= currentAdjustment;
-        return currentAdjustment;
+        return 0;
     }
 }
 
@@ -365,20 +374,26 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
     if (receivedTickAdj != 0) {
         Uint8 currentAdjIteration = adjustmentIteration;
 
-        // If we haven't already processed this adjustment iteration.
-        if (receivedAdjIteration == currentAdjIteration) {
-            // Apply the adjustment.
+        // If it's the current iteration and we aren't already applying it.
+        if ((receivedAdjIteration == currentAdjIteration)
+            && !isApplyingTickAdjustment) {
+            // Set the adjustment to be applied.
             tickAdjustment += receivedTickAdj;
-
-            // Increment the iteration.
-            adjustmentIteration = (currentAdjIteration + 1);
+            isApplyingTickAdjustment = true;
             LOG_INFO("Received tick adjustment: %d, iteration: %u",
                      receivedTickAdj, receivedAdjIteration);
         }
         else if (receivedAdjIteration > currentAdjIteration) {
-            LOG_ERROR("Out of sequence adjustment iteration. current: %u, "
-                      "received: %u",
-                      currentAdjIteration, receivedAdjIteration);
+            if (isApplyingTickAdjustment) {
+                LOG_ERROR("Received future adjustment iteration while applying "
+                          "the last. current: %u, received: %u",
+                          currentAdjIteration, receivedAdjIteration);
+            }
+            else {
+                LOG_ERROR("Out of sequence adjustment iteration. current: %u, "
+                          "received: %u",
+                          currentAdjIteration, receivedAdjIteration);
+            }
         }
     }
 }
