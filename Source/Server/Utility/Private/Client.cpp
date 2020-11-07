@@ -144,7 +144,7 @@ Message Client::receiveMessage()
 
         // Get the message.
         // Note: This is a blocking read, but the data should immediately be
-        // available since we send it all in 1 packet.
+        //       available since we send it all in 1 packet.
         BinaryBufferPtr messageBuffer = nullptr;
         MessageResult messageResult = peer->receiveMessageWait(messageBuffer);
         if (messageResult.networkResult == NetworkResult::Success) {
