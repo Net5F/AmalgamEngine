@@ -5,6 +5,7 @@
 #include "TcpSocket.h"
 #include <memory>
 #include <array>
+#include <atomic>
 
 namespace AM
 {
@@ -139,7 +140,7 @@ private:
      * Tracks whether or not this peer is connected. Is set to false if a
      * disconnect was detected when trying to send or receive.
      */
-    bool bIsConnected;
+    std::atomic<bool> bIsConnected;
 };
 
 } /* End namespace AM */

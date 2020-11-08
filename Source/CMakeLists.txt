@@ -5,6 +5,9 @@ project(Amalgam)
 # Tell CMake where the CMake folder is, since our source dir isn't the base dir.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/../CMake/")
 
+# Make ThreadSanitizer available. Will only be used if AM_THREADSANITIZER == ON.
+include("${CMAKE_MODULE_PATH}/ThreadSanitizer.cmake")
+
 # Find SDL2 and associated libs
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)

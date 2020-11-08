@@ -5,18 +5,20 @@
 namespace AM
 {
 const std::atomic<Uint32>* Log::currentTickPtr = nullptr;
+std::atomic<bool> Log::tickPtrIsRegistered = false;
 FILE* logFilePtr = nullptr;
 
 void Log::registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr)
 {
     currentTickPtr = inCurrentTickPtr;
+    tickPtrIsRegistered = true;
 }
 
 void Log::info(const char* expression, ...)
 {
     // If the app hasn't registered a tick count, default to 0.
     Uint32 currentTick = 0;
-    if (currentTickPtr != nullptr) {
+    if (tickPtrIsRegistered) {
         currentTick = *currentTickPtr;
     }
 

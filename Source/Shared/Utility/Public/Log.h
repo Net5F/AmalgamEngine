@@ -46,7 +46,14 @@ public:
     static void enableFileLogging(const std::string& fileName);
 
 private:
+    /**
+     * Should be passed the sim's tick through registerCurrentTickPtr.
+     * Used to print a timestamp that's more relevant than wall time.
+     */
     static const std::atomic<Uint32>* currentTickPtr;
+
+    /** Used to safely test if currentTickPtr is ready to use. */
+    static std::atomic<bool> tickPtrIsRegistered;
 };
 
 } /* End namespace AM */
