@@ -1,4 +1,8 @@
-#include <SDL2pp/SDL2pp.hh>
+#include "SDL.h"
+#include "SDL2pp/SDL.hh"
+#include "SDL2pp/Window.hh"
+#include "SDL2pp/Renderer.hh"
+#include "SDL2pp/Exception.hh"
 
 #include "GameDefs.h"
 #include "World.h"

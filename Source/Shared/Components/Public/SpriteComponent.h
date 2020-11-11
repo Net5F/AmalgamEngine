@@ -1,7 +1,8 @@
 #pragma once
 
+#include "SDL2pp/Texture.hh"
+#include "SDL2pp/Rect.hh"
 #include <memory>
-#include <SDL2pp/SDL2pp.hh>
 
 namespace AM
 {

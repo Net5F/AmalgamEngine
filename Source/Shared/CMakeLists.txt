@@ -8,11 +8,13 @@ add_library(Shared STATIC "")
 target_include_directories(Shared
     PRIVATE
         ${SDL2_INCLUDE_DIRS}
+        ${SDL2PP_INCLUDE_DIRS}
 )
 
 target_link_libraries(Shared
     PUBLIC
         ${SDL2_LIBRARIES}
+        ${SDL2PP_LIBRARIES}
         SDL2_net-static
         SDL2pp
         Bitsery::bitsery

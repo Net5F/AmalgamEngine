@@ -1,6 +1,7 @@
 #pragma once
 
-#include "SDL2pp/SDL2pp.hh"
+#include "SDL2pp/Window.hh"
+#include "SDL2pp/Renderer.hh"
 #include "Timer.h"
 
 namespace AM

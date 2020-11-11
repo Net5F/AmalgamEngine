@@ -8,6 +8,7 @@ target_include_directories(Client
     PRIVATE
         ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} 
         ${SDL2_MIXER_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS}
+        ${SDL2PP_INCLUDE_DIRS}
 )
 
 # Inherit Shared's precompiled header.
@@ -19,6 +20,7 @@ target_link_libraries(Client
         -static-libstdc++
         ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}
         ${SDL2_MIXER_LIBRARIES} ${SDL2_TTF_LIBRARIES}
+        ${SDL2PP_LIBRARIES}
         SDL2_net-static
         SDL2pp
         Bitsery::bitsery

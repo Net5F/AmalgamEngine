@@ -17,6 +17,7 @@ NpcMovementSystem::NpcMovementSystem(Game& inGame, World& inWorld,
                                      Network& inNetwork)
 : lastReceivedTick(0)
 , lastProcessedTick(0)
+, tickReplicationOffset(-2 * INITIAL_TICK_OFFSET)
 , game(inGame)
 , world(inWorld)
 , network(inNetwork)
@@ -30,12 +31,12 @@ void NpcMovementSystem::updateNpcs()
         return;
     }
 
-    // Receive any updates from the server.
+    // Receive any updates from the server, update pastTickOffset.
     receiveEntityUpdates();
 
     // We want to process updates until we've either hit the desired, or run out
     // of data.
-    Uint32 desiredTick = game.getCurrentTick() - PAST_TICK_OFFSET;
+    Uint32 desiredTick = game.getCurrentTick() - tickReplicationOffset;
 
     /* While we have data to use, apply updates for all unprocessed ticks
        including the desired tick. */
@@ -64,10 +65,26 @@ void NpcMovementSystem::updateNpcs()
         lastProcessedTick++;
         stateUpdateQueue.pop();
     }
+
     if ((lastReceivedTick != 0) && !updated) {
         LOG_INFO(
             "Tick passed with no update. last: %u, desired: %u, queueSize: %u",
             lastProcessedTick, desiredTick, stateUpdateQueue.size());
+    }
+}
+
+void NpcMovementSystem::applyTickAdjustment(int adjustment)
+{
+    // If the server tells us to add 2 ticks of latency, it's saying that it
+    // needs 2 more ticks worth of time for our messages to arrive in time.
+    // NPC replication should now be delayed by an additional 4 ticks (2 for
+    // each direction).
+    // Thus, we negate and double the adjustment before applying.
+    tickReplicationOffset += (-2 * adjustment);
+
+    if (tickReplicationOffset >= 0) {
+        LOG_ERROR("Adjusted tickReplicationOffset too far into the future. offset: %u",
+            tickReplicationOffset);
     }
 }
 
@@ -131,8 +148,8 @@ void NpcMovementSystem::handleUpdate(
         handleImplicitConfirmation(newReceivedTick - 1);
     }
     else {
-        // This is our first received update, set the last processed tick so
-        // things look incrementally increasing.
+        // This is our first received update.
+        // Init the last processed tick so things look incrementally increasing.
         lastProcessedTick = newReceivedTick - 1;
     }
 

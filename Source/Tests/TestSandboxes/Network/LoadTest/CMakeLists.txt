@@ -18,6 +18,7 @@ add_executable(LoadTestClient
 target_include_directories(LoadTestClient
     PRIVATE
         ${SDL2_INCLUDE_DIRS}
+        ${SDL2PP_INCLUDE_DIRS}
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 
@@ -30,6 +31,7 @@ target_link_libraries(LoadTestClient
         -static-libgcc
         -static-libstdc++
         ${SDL2_LIBRARIES}
+        ${SDL2PP_LIBRARIES}
         SDL2_net-static
         Shared
         readerwriterqueue

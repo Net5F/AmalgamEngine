@@ -24,10 +24,6 @@ class Network;
 class NpcMovementSystem
 {
 public:
-    /** Our best guess at a good amount of ticks in the past to replicate NPCs
-     * at. */
-    static constexpr unsigned int PAST_TICK_OFFSET = 10;
-
     NpcMovementSystem(Game& inGame, World& inWorld, Network& inNetwork);
 
     /**
@@ -35,6 +31,12 @@ public:
      * Else, does no updates, leaving NPCs where they are.
      */
     void updateNpcs();
+
+    /**
+     * Takes a tick adjustment from the server and applies it to NPC
+     * replication through tickReplicationOffset.
+     */
+    void applyTickAdjustment(int adjustment);
 
 private:
     /** Represents what NPC changes happened on a single server tick. */
@@ -80,6 +82,16 @@ private:
 
     /** The last tick that we processed update data for. */
     Uint32 lastProcessedTick;
+
+    /**
+     * How far into the past to replicate NPCs at.
+     * e.g. If tickReplicationOffset == -5, on tick 15 we'll replicate NPC data
+     *      for tick 10.
+     *
+     * Initialized to -2 * INITIAL_TICK_OFFSET (see applyTickAdjustment()
+     * comment) and kept in line with sim tick adjustments.
+     */
+    int tickReplicationOffset;
 
     Game& game;
     World& world;

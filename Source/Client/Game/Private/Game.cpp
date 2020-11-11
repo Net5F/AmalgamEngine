@@ -112,12 +112,20 @@ void Game::tick()
 
     // Process as many game ticks as have accumulated.
     while (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
-        // Calculate what tick we should be on.
+        /* Calculate what tick we should be on. */
+        // Increment the tick to the next.
         Uint32 targetTick = currentTick + 1;
+
+        // If we're online, apply any adjustments that we receive from the
+        // server.
         if (!RUN_OFFLINE) {
-            // If we're online, apply any adjustments that we receive from the
-            // server.
-            targetTick += network.transferTickAdjustment();
+            int adjustment = network.transferTickAdjustment();
+            if (adjustment != 0) {
+                targetTick += adjustment;
+
+                // Make sure NPC replication takes the adjustment into account.
+                npcMovementSystem.applyTickAdjustment(adjustment);
+            }
         }
 
         /* Process ticks until we match what the server wants.

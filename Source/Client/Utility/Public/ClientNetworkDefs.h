@@ -19,10 +19,11 @@ namespace Client
 // TODO: Eventually, move this config out into a file and read it into
 //       a NetworkConfig class.
 /** If true, the connection to the server will be mocked and we'll run without
- * it. */
+    it. */
 static constexpr bool RUN_OFFLINE = false;
 
-/** Our best guess at a good starting place for the simulation's tick offset. */
+/** Our best guess at a good starting place for the simulation's tick offset.
+    Doesn't matter much since the server will quickly adjust us. */
 static constexpr Sint8 INITIAL_TICK_OFFSET = 5;
 
 // static const std::string SERVER_IP = "127.0.0.1";
