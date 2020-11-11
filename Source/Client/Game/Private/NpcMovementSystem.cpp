@@ -83,8 +83,9 @@ void NpcMovementSystem::applyTickAdjustment(int adjustment)
     tickReplicationOffset += (-2 * adjustment);
 
     if (tickReplicationOffset >= 0) {
-        LOG_ERROR("Adjusted tickReplicationOffset too far into the future. offset: %u",
-            tickReplicationOffset);
+        LOG_ERROR("Adjusted tickReplicationOffset too far into the future. "
+                  "offset: %u",
+                  tickReplicationOffset);
     }
 }
 

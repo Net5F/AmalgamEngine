@@ -273,7 +273,7 @@ Sint8 Client::calcAdjustment(
     }
 
     printAdjustmentInfo(tickDiffHistoryCopy, numFreshDiffsCopy,
-    truncatedAverage);
+                        truncatedAverage);
 
     // Make an adjustment back towards the target.
     return TICKDIFF_TARGET - truncatedAverage;
