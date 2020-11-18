@@ -75,7 +75,7 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(
         }
         else {
             LOG_ERROR("Received ticks out of order. latest: %u, new: %u",
-                latestReceivedTick, newTick);
+                      latestReceivedTick, newTick);
         }
 
         // Pull out the vector of entities.
@@ -125,8 +125,8 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
     }
 
     /* Replay all inputs since the received message, except the current. */
-    for (Uint32 tickToProcess = (latestReceivedTick + 1); tickToProcess < currentTick;
-    ++tickToProcess) {
+    for (Uint32 tickToProcess = (latestReceivedTick + 1);
+         tickToProcess < currentTick; ++tickToProcess) {
         Uint32 tickDiff = currentTick - tickToProcess;
 
         // The history includes the current tick, so we only have LENGTH - 1

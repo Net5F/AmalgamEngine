@@ -66,12 +66,14 @@ void NpcMovementSystem::updateNpcs()
         stateUpdateQueue.pop();
     }
 
-    // If we're initialized and needed to process a tick but didn't have data, log it.
-    if (!updated && (lastReceivedTick != 0) && (lastProcessedTick <= desiredTick)) {
-        LOG_INFO(
-            "Tick passed with no npc update. last: %u, desired: %u, queueSize: %u, offset: %d",
-            lastProcessedTick, desiredTick, stateUpdateQueue.size(),
-            tickReplicationOffset);
+    // If we're initialized and needed to process a tick but didn't have data,
+    // log it.
+    if (!updated && (lastReceivedTick != 0)
+        && (lastProcessedTick <= desiredTick)) {
+        LOG_INFO("Tick passed with no npc update. last: %u, desired: %u, "
+                 "queueSize: %u, offset: %d",
+                 lastProcessedTick, desiredTick, stateUpdateQueue.size(),
+                 tickReplicationOffset);
     }
 }
 
