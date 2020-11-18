@@ -67,29 +67,32 @@ public:
     MessageSorter()
     : currentTick(0)
     , head(0)
+    , isReceiving(false)
     {
     }
 
     /**
+     * Starts a receive operation.
+     *
+     * NOTE: If tickNum is valid, locks the MessageSorter until endReceive is
+     *       called.
+     *
      * Returns a pointer to the queue holding messages for the given tick
      * number. If tickNum < currentTick or tickNum > (currentTick +
      * VALID_DIFFERENCE), it is considered not valid and an error occurs.
      *
-     * NOTE: If tickNum is valid, locks the MessageSorter until endReceive is
-     * called.
-     *
      * @return If tickNum is valid (not too new or old), returns a pointer to a
-     * queue. Else, raises an error.
+     *         queue. Else, raises an error.
      */
     std::queue<value_type>& startReceive(Uint32 tickNum)
     {
-        // Acquire the mutex.
-        bool mutexWasFree = mutex.try_lock();
-        if (!mutexWasFree) {
+        if (isReceiving) {
             LOG_ERROR("Tried to startReceive twice in a row. You probably "
-                      "forgot to call"
-                      "endReceive.");
+                      "forgot to call endReceive.");
         }
+
+        // Acquire the mutex.
+        mutex.lock();
 
         // Check if the tick is valid.
         if (isTickValid(tickNum) != ValidityResult::Valid) {
@@ -98,28 +101,36 @@ public:
             LOG_ERROR("Tried to start receive for an invalid tick number.");
         }
 
+        // Flag that we've started the receive operation.
+        isReceiving = true;
+
         return queueBuffer[tickNum % BUFFER_SIZE];
     }
 
     /**
+     * Ends an ongoing receive operation.
+     *
+     * NOTE: This function releases the lock set by startReceive.
+     *
      * Increments currentTick and head, effectively removing the element at the
      * old currentTick and making messages at currentTick + BUFFER_SIZE - 1
      * valid to be pushed.
      *
-     * NOTE: This function releases the lock set by startReceive.
-     *
-     * @post the index previously pointed to by head is now head - 1,
-     * effectively making it the new end of the buffer.
+     * @post The index previously pointed to by head is now head - 1,
+     *       effectively making it the new end of the buffer.
      */
     void endReceive()
     {
-        if (mutex.try_lock()) {
-            LOG_ERROR("Tried to release mutex while it isn't locked.");
+        if (!isReceiving) {
+            LOG_ERROR("Tried to endReceive() while not receiving.");
         }
 
         // Advance the state.
         head++;
         currentTick++;
+
+        // Flag that we're ending the receive operation.
+        isReceiving = false;
 
         // Release the mutex.
         mutex.unlock();
@@ -175,7 +186,7 @@ public:
     /**
      * Returns the MessageSorter's internal currentTick.
      * NOTE: Should not be used to fetch the current tick, get a ref to the
-     * Game's currentTick instead. This is just for unit testing.
+     *       Game's currentTick instead. This is just for unit testing.
      */
     Uint32 getCurrentTick() { return currentTick; }
 
@@ -205,6 +216,13 @@ private:
      * happening.
      */
     std::mutex mutex;
+
+    /**
+     * Tracks whether a receive operation has been started or not.
+     * Note: Not thread safe. Only call from the same thread as startReceive()
+     *       and endReceive().
+     */
+    bool isReceiving;
 
     //----------------------------------------------------------------------------
     // Convenience Functions
