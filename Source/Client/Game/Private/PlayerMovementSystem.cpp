@@ -73,6 +73,10 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(
         if (newTick > latestReceivedTick) {
             latestReceivedTick = newTick;
         }
+        else {
+            LOG_ERROR("Received ticks out of order. latest: %u, new: %u",
+                latestReceivedTick, newTick);
+        }
 
         // Pull out the vector of entities.
         const std::vector<Entity>& entities = receivedUpdate->entities;
@@ -116,16 +120,18 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
     Uint32 currentTick = game.getCurrentTick();
     if (latestReceivedTick > currentTick) {
         LOG_ERROR("Received data for tick %u on tick %u. Server is in the "
-                  "future, can't replay "
-                  "inputs.",
+                  "future, can't replay inputs.",
                   latestReceivedTick, currentTick);
     }
 
     /* Replay all inputs since the received message, except the current. */
-    for (Uint32 i = (latestReceivedTick + 1); i < currentTick; ++i) {
-        Uint32 tickDiff = currentTick - i;
+    for (Uint32 tickToProcess = (latestReceivedTick + 1); tickToProcess < currentTick;
+    ++tickToProcess) {
+        Uint32 tickDiff = currentTick - tickToProcess;
 
-        if (tickDiff > World::INPUT_HISTORY_LENGTH) {
+        // The history includes the current tick, so we only have LENGTH - 1
+        // worth of previous data to use (i.e. it's 0-indexed).
+        if (tickDiff > (World::INPUT_HISTORY_LENGTH - 1)) {
             LOG_ERROR("Too few items in the player input history. "
                       "Increase the length or reduce lag. tickDiff: %u, "
                       "historyLength: %u",

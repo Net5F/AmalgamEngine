@@ -198,7 +198,12 @@ void Client::recordTickDiff(Sint64 tickDiff)
         std::unique_lock lock(tickDiffMutex);
 
         // Add the new data.
-        tickDiffHistory.push(tickDiff);
+        if ((tickDiff > SDL_MIN_SINT8) && (tickDiff < SDL_MAX_SINT8)) {
+            tickDiffHistory.push(tickDiff);
+        }
+        else {
+            LOG_ERROR("tickDiff out of Sint8 range. diff: %" PRId64, tickDiff);
+        }
 
         // Note: This is safe, only this thread modifies numFreshDiffs.
         if (numFreshDiffs < TICKDIFF_HISTORY_LENGTH) {

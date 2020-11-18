@@ -19,13 +19,10 @@ class World
 public:
     /**
      * The number of input snapshots that we'll remember.
-     * TODO: This is dependent on latency to the server, but CircularBuffer
-     * can't be resized at runtime. Modify CircularBuffer to be resizable and
-     * figure out where the size should be calculated.
-     *       NpcMovementSystem::UPDATE_MESSAGE_BUFFER_LENGTH needs the same
-     * treatment.
+     * TODO: If this is ever an issue, we can make CircularBuffer dynamic and
+     *       exponentially grow it, and remove this.
      */
-    static constexpr unsigned int INPUT_HISTORY_LENGTH = 10;
+    static constexpr unsigned int INPUT_HISTORY_LENGTH = 20;
 
     World();
 

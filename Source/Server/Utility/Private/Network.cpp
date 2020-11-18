@@ -98,9 +98,9 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
                 // Log if the sorter dropped the message.
                 if (pushResult.result
                     != MessageSorterBase::ValidityResult::Valid) {
-                    LOG_INFO("Message was dropped. Diff: %d, result: %u, "
+                    LOG_INFO("Message was dropped. NetID: %u, diff: %d, result: %u, "
                              "tickNum: %u",
-                             pushResult.diff, pushResult.result,
+                             clientMessage.netID, pushResult.diff, pushResult.result,
                              messageTickNum);
                 }
 

@@ -34,9 +34,9 @@ void NpcMovementSystem::updateNpcs()
     // Receive any updates from the server, update pastTickOffset.
     receiveEntityUpdates();
 
-    // We want to process updates until we've either hit the desired, or run out
-    // of data.
-    Uint32 desiredTick = game.getCurrentTick() - tickReplicationOffset;
+    // We want to process updates until we've either processed the desired, or
+    // run out of data.
+    Uint32 desiredTick = game.getCurrentTick() + tickReplicationOffset;
 
     /* While we have data to use, apply updates for all unprocessed ticks
        including the desired tick. */
@@ -66,10 +66,12 @@ void NpcMovementSystem::updateNpcs()
         stateUpdateQueue.pop();
     }
 
-    if ((lastReceivedTick != 0) && !updated) {
+    // If we're initialized and needed to process a tick but didn't have data, log it.
+    if (!updated && (lastReceivedTick != 0) && (lastProcessedTick <= desiredTick)) {
         LOG_INFO(
-            "Tick passed with no update. last: %u, desired: %u, queueSize: %u",
-            lastProcessedTick, desiredTick, stateUpdateQueue.size());
+            "Tick passed with no npc update. last: %u, desired: %u, queueSize: %u, offset: %d",
+            lastProcessedTick, desiredTick, stateUpdateQueue.size(),
+            tickReplicationOffset);
     }
 }
 

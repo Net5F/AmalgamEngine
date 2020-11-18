@@ -90,7 +90,7 @@ void WorldSim::tick()
 
         accumulatedTime -= GAME_TICK_TIMESTEP_S;
         if (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
-            LOG_INFO("Thread %u: Detected a request for multiple game ticks in "
+            LOG_INFO("EntityID %u: Detected a request for multiple game ticks in "
                      "the same "
                      "frame. Game tick "
                      "must have been massively delayed. Game tick was delayed "
@@ -100,7 +100,7 @@ void WorldSim::tick()
         else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
             // Game missed its ideal call time, could be our issue or general
             // system slowness.
-            LOG_INFO("Thread %u: Detected a delayed game tick. Game tick was "
+            LOG_INFO("EntityID %u: Detected a delayed game tick. Game tick was "
                      "delayed by: "
                      "%.8fs.",
                      entityID, accumulatedTime);
@@ -109,7 +109,7 @@ void WorldSim::tick()
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);
         if (executionTime > GAME_TICK_TIMESTEP_S) {
-            LOG_INFO("Thread %u: Overran our sim iteration time. "
+            LOG_INFO("EntityID %u: Overran our sim iteration time. "
                      "executionTime: %.8f",
                      entityID, executionTime);
         }
