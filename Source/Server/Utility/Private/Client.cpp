@@ -162,12 +162,11 @@ Message Client::receiveMessage()
     else if (headerResult == NetworkResult::NoWaitingData) {
         // If we timed out, drop the connection.
         double delta = receiveTimer.getDeltaSeconds(false);
-        if (delta > TIMEOUT_S) {
+        if (delta > CLIENT_TIMEOUT_S) {
             peer = nullptr;
             LOG_INFO("Dropped connection, peer timed out. Time since last "
-                     "message: %.6f "
-                     "seconds. Timeout: %.6f",
-                     delta, TIMEOUT_S);
+                     "message: %.6f seconds. Timeout: %.6f",
+                     delta, CLIENT_TIMEOUT_S);
             return {MessageType::NotSet, nullptr};
         }
     }
@@ -184,31 +183,21 @@ bool Client::isConnected()
 
 void Client::recordTickDiff(Sint64 tickDiff)
 {
-    if ((tickDiff < LOWEST_VALID_TICKDIFF)
-        || (tickDiff > HIGHEST_VALID_TICKDIFF)) {
-        // Diff is outside our bounds. Drop the connection.
-        peer = nullptr;
-        LOG_INFO("Dropped connection, diff out of bounds. Diff: %" PRId64,
-                 tickDiff);
+    // Acquire a lock so a getTickAdjustment() doesn't start while we're
+    // pushing.
+    std::unique_lock lock(tickDiffMutex);
+
+    // Add the new data.
+    if ((tickDiff > SDL_MIN_SINT8) && (tickDiff < SDL_MAX_SINT8)) {
+        tickDiffHistory.push(tickDiff);
     }
     else {
-        /* Diff is fine, record it. */
-        // Acquire a lock so a getTickAdjustment() doesn't start while we're
-        // pushing.
-        std::unique_lock lock(tickDiffMutex);
+        LOG_ERROR("tickDiff out of Sint8 range. diff: %" PRId64, tickDiff);
+    }
 
-        // Add the new data.
-        if ((tickDiff > SDL_MIN_SINT8) && (tickDiff < SDL_MAX_SINT8)) {
-            tickDiffHistory.push(tickDiff);
-        }
-        else {
-            LOG_ERROR("tickDiff out of Sint8 range. diff: %" PRId64, tickDiff);
-        }
-
-        // Note: This is safe, only this thread modifies numFreshDiffs.
-        if (numFreshDiffs < TICKDIFF_HISTORY_LENGTH) {
-            numFreshDiffs++;
-        }
+    // Note: This is safe, only this thread modifies numFreshDiffs.
+    if (numFreshDiffs < TICKDIFF_HISTORY_LENGTH) {
+        numFreshDiffs++;
     }
 }
 

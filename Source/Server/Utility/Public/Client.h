@@ -2,6 +2,7 @@
 
 #include "GameDefs.h"
 #include "NetworkDefs.h"
+#include "ServerNetworkDefs.h"
 #include "Peer.h"
 #include "CircularBuffer.h"
 #include "Timer.h"
@@ -10,7 +11,6 @@
 #include <array>
 #include <mutex>
 #include <atomic>
-#include <cmath>
 
 namespace AM
 {
@@ -97,21 +97,13 @@ private:
     //--------------------------------------------------------------------------
     // Connection, Batching
     //--------------------------------------------------------------------------
-    /** How long we should wait before considering the client to be timed out.
-     */
-    static constexpr double TIMEOUT_S = NETWORK_TICK_TIMESTEP_S * 10;
-
     /** Our Network-given ID. */
     const NetworkID netID;
 
-    /**
-     * Our connection and interface to the client.
-     */
+    /** Our connection and interface to the client. */
     std::unique_ptr<Peer> peer;
 
-    /**
-     * Holds messages to be sent with the next call to sendWaitingMessages.
-     */
+    /** Holds messages to be sent with the next call to sendWaitingMessages. */
     std::deque<std::pair<BinaryBufferSharedPtr, Uint32>> sendQueue;
 
     /** Holds data while we're putting it together to be sent as a batch. */
@@ -122,32 +114,8 @@ private:
     Timer receiveTimer;
 
     //--------------------------------------------------------------------------
-    // Synchronization Defs
+    // Synchronization Functions
     //--------------------------------------------------------------------------
-    /** The minimum amount of time worth of tick differences that we'll
-       remember. A tick diff is the diff between our current tick and a
-       message's intended tick, told to us by the MessageSorter. */
-    static constexpr double TICKDIFF_HISTORY_S = .5;
-    /** The integer number of fresh diffs related to TICKDIFF_HISTORY_S. */
-    static constexpr unsigned int TICKDIFF_HISTORY_LENGTH
-        = std::ceil((TICKDIFF_HISTORY_S / GAME_TICK_TIMESTEP_S));
-
-    /** The lowest difference we'll work with. */
-    static constexpr Sint64 LOWEST_VALID_TICKDIFF = -10;
-    /** The highest difference we'll work with. */
-    static constexpr Sint64 HIGHEST_VALID_TICKDIFF = 10;
-    /** The range of difference (inclusive) between a received message's tickNum
-       and our current tickNum that we won't send an adjustment for. */
-    static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_LOWER = 1;
-    static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_UPPER = 3;
-    /** The value that we'll adjust clients to if they fall outside the bounds.
-     */
-    static constexpr Sint64 TICKDIFF_TARGET = 2;
-
-    /** The minimum number of fresh diffs we'll use to calculate an adjustment.
-        Aims to prevent thrashing. */
-    static constexpr unsigned int MIN_FRESH_DIFFS = 3;
-
     struct AdjustmentData {
         /** The amount of adjustment. */
         Sint8 adjustment;
@@ -155,9 +123,6 @@ private:
         Uint8 iteration;
     };
 
-    //--------------------------------------------------------------------------
-    // Synchronization Functions
-    //--------------------------------------------------------------------------
     /**
      * Calculates an appropriate tick adjustment for this client to make.
      * Increments adjustmentIteration every time it's called.

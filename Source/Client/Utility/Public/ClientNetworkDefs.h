@@ -17,7 +17,7 @@ namespace Client
 // Config
 //--------------------------------------------------------------------------
 // TODO: Eventually, move this config out into a file and read it into
-//       a NetworkConfig class.
+//       a config class.
 /** If true, the connection to the server will be mocked and we'll run without
     it. */
 static constexpr bool RUN_OFFLINE = false;
