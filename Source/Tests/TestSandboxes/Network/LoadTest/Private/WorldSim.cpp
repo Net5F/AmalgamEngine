@@ -73,14 +73,13 @@ void WorldSim::tick()
             ticksTillInput--;
 
             // Receive any waiting player messages.
-            std::shared_ptr<const EntityUpdate> entityUpdate
-                = network.receivePlayerUpdate(0);
-            while (entityUpdate != nullptr) {
-                entityUpdate = network.receivePlayerUpdate(0);
+            Client::EUReceiveResult receiveResult = network.receivePlayerUpdate();
+            while (receiveResult.result == NetworkResult::Success) {
+                receiveResult = network.receivePlayerUpdate(0);
             }
 
             // Receive any waiting npc messages.
-            Client::NpcReceiveResult receiveResult = network.receiveNpcUpdate();
+            receiveResult = network.receiveNpcUpdate();
             while (receiveResult.result == NetworkResult::Success) {
                 receiveResult = network.receiveNpcUpdate();
             }

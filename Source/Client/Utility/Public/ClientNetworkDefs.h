@@ -37,37 +37,40 @@ static constexpr double SERVER_TIMEOUT_S = NETWORK_TICK_TIMESTEP_S * 2;
 //--------------------------------------------------------------------------
 // Structs
 //--------------------------------------------------------------------------
-/** The kind of update information present in a particular NpcUpdate. */
-enum class NpcUpdateType {
-    /** An update contains actual npc entity data. */
-    Update,
-    /** An implicit confirmation confirms all ticks up to the given tick. */
+/** The kind of entity update information present in a particular EUMessage. */
+enum class EUType {
+    /** A state update contains actual entity state data. */
+    StateUpdate,
+    /** An implicit confirmation confirms all ticks up to the given tick.
+        Used when we got a state update, but it was for a different system. */
     ImplicitConfirmation,
     /** An explicit confirmation confirms 1 tick, with no particular tick given.
-     */
+        Used when we know that ticks were processed with no state update. */
     ExplicitConfirmation
 };
 
 /**
- * Represents a received NPC update message and/or any information we could
- * infer. Could contain data, or an implicit or explicit confirmation that no
- * changes occurred.
+ * Represents a received EntityUpdate and/or any information we could infer.
+ * Could contain data, or an implicit or explicit confirmation that no changes
+ * occurred.
  */
-struct NpcUpdateMessage {
+struct EUMessage {
     /** The type of information contained in this update. */
-    NpcUpdateType updateType = NpcUpdateType::ExplicitConfirmation;
+    EUType updateType = EUType::ExplicitConfirmation;
+
     /** If informationType == Update, contains the update message. */
     std::shared_ptr<const EntityUpdate> message = nullptr;
+
     /** If informationType == ImplicitConfirmation, contains the confirmed tick.
      */
     Uint32 tickNum = 0;
 };
 
-/** The result of trying to receive an NPC update message. */
-struct NpcReceiveResult {
+/** The result of trying to receive an entity update message. */
+struct EUReceiveResult {
     NetworkResult result;
-    /** message will be default if result != Success. */
-    NpcUpdateMessage message;
+    /** Will be default if result != Success. */
+    EUMessage message;
 };
 
 } // End namespace Client

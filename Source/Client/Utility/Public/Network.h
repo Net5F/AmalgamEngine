@@ -58,9 +58,8 @@ public:
      */
     std::unique_ptr<ConnectionResponse>
         receiveConnectionResponse(Uint64 timeoutMs = 0);
-    std::shared_ptr<const EntityUpdate> receivePlayerUpdate(Uint64 timeoutMs
-                                                            = 0);
-    NpcReceiveResult receiveNpcUpdate(Uint64 timeoutMs = 0);
+    EUReceiveResult receivePlayerUpdate(Uint64 timeoutMs = 0);
+    EUReceiveResult receiveNpcUpdate(Uint64 timeoutMs = 0);
 
     /**
      * Thread function, started from connect().
@@ -170,13 +169,12 @@ private:
         std::unique_ptr<ConnectionResponse>>;
     ConnectionResponseQueue connectionResponseQueue;
 
-    using PlayerUpdateQueue = moodycamel::BlockingReaderWriterQueue<
-        std::shared_ptr<const EntityUpdate>>;
-    PlayerUpdateQueue playerUpdateQueue;
-
-    using NpcUpdateQueue
-        = moodycamel::BlockingReaderWriterQueue<NpcUpdateMessage>;
-    NpcUpdateQueue npcUpdateQueue;
+    using UpdateQueue
+        = moodycamel::BlockingReaderWriterQueue<EUMessage>;
+    /** Holds entity updates for the player entity. */
+    UpdateQueue playerUpdateQueue;
+    /** Holds entity updates for NPCs. */
+    UpdateQueue npcUpdateQueue;
 
     /** Used to hold headers while we process them. */
     BinaryBuffer headerRecBuffer;

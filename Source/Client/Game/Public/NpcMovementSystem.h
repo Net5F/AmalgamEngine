@@ -6,6 +6,7 @@
 #include "MovementComponent.h"
 #include "InputComponent.h"
 #include <queue>
+#include <memory>
 
 namespace AM
 {

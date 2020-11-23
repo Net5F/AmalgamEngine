@@ -38,14 +38,14 @@ void PlayerInputSystem::processInputEvent(SDL_Event& event)
         }
 
         if (keyInput.type != Input::None) {
-            EntityID player = world.playerID;
+            EntityID player = world.playerData.playerID;
             Input::State& entityState
                 = world.inputs[player].inputStates[keyInput.type];
 
             // If the state changed, save it and mark the player as dirty.
             if (entityState != keyInput.state) {
                 entityState = keyInput.state;
-                world.playerIsDirty = true;
+                world.playerData.playerIsDirty = true;
             }
         }
     }
@@ -53,7 +53,7 @@ void PlayerInputSystem::processInputEvent(SDL_Event& event)
 
 void PlayerInputSystem::addCurrentInputsToHistory()
 {
-    world.playerInputHistory.push(world.inputs[world.playerID].inputStates);
+    world.playerData.playerInputHistory.push(world.inputs[world.playerData.playerID].inputStates);
 }
 
 } // namespace Client

@@ -96,25 +96,25 @@ void NpcMovementSystem::applyTickAdjustment(int adjustment)
 void NpcMovementSystem::receiveEntityUpdates()
 {
     /* Process any NPC update messages from the Network. */
-    NpcReceiveResult receiveResult = network.receiveNpcUpdate();
+    EUReceiveResult receiveResult = network.receiveNpcUpdate();
     while (receiveResult.result == NetworkResult::Success) {
-        NpcUpdateMessage& npcUpdateMessage = receiveResult.message;
+        EUMessage& npcUpdateMessage = receiveResult.message;
 
         // Handle the message appropriately.
         switch (npcUpdateMessage.updateType) {
-            case NpcUpdateType::ExplicitConfirmation:
+            case EUType::ExplicitConfirmation:
                 // If we've been initialized, process the confirmation.
                 if (lastReceivedTick != 0) {
                     handleExplicitConfirmation();
                 }
                 break;
-            case NpcUpdateType::ImplicitConfirmation:
+            case EUType::ImplicitConfirmation:
                 // If we've been initialized, process the confirmation.
                 if (lastReceivedTick != 0) {
                     handleImplicitConfirmation(npcUpdateMessage.tickNum);
                 }
                 break;
-            case NpcUpdateType::Update:
+            case EUType::StateUpdate:
                 handleUpdate(npcUpdateMessage.message);
                 break;
         }
@@ -125,6 +125,7 @@ void NpcMovementSystem::receiveEntityUpdates()
 
 void NpcMovementSystem::handleExplicitConfirmation()
 {
+    // Increment the lastReceivedTick and push an explicit confirmation.
     lastReceivedTick++;
     stateUpdateQueue.push({lastReceivedTick, false, nullptr});
 }
@@ -169,7 +170,7 @@ void NpcMovementSystem::moveAllNpcs()
     for (std::size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
         /* Move all NPCs that have an input, position, and movement component.
          */
-        if (entityID != world.playerID
+        if (entityID != world.playerData.playerID
             && (world.componentFlags[entityID] & ComponentFlag::Input)
             && (world.componentFlags[entityID] & ComponentFlag::Position)
             && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
@@ -197,7 +198,8 @@ void NpcMovementSystem::applyUpdateMessage(
          ++entityIt) {
         // Skip the player (not an NPC).
         EntityID entityID = entityIt->id;
-        if (entityID == world.playerID) {
+        EntityID playerID = world.playerData.playerID;
+        if (entityID == playerID) {
             continue;
         }
 
@@ -210,9 +212,9 @@ void NpcMovementSystem::applyUpdateMessage(
             // TODO: Get this info from the server.
             // Get the same texture as the player.
             world.sprites[entityID].texturePtr
-                = world.sprites[world.playerID].texturePtr;
+                = world.sprites[playerID].texturePtr;
             world.sprites[entityID].posInTexture
-                = world.sprites[world.playerID].posInTexture;
+                = world.sprites[playerID].posInTexture;
             world.sprites[entityID].width = 64;
             world.sprites[entityID].height = 64;
 

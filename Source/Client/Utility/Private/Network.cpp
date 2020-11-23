@@ -126,23 +126,29 @@ std::unique_ptr<ConnectionResponse>
     return message;
 }
 
-std::shared_ptr<const EntityUpdate>
-    Network::receivePlayerUpdate(Uint64 timeoutMs)
+EUReceiveResult Network::receivePlayerUpdate(Uint64 timeoutMs)
 {
-    std::shared_ptr<const EntityUpdate> message = nullptr;
+    EUMessage message;
+    bool messageWasReceived = false;
     if (timeoutMs == 0) {
-        playerUpdateQueue.try_dequeue(message);
+        messageWasReceived = playerUpdateQueue.try_dequeue(message);
     }
     else {
-        playerUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
+        messageWasReceived
+            = playerUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
     }
 
-    return message;
+    if (!messageWasReceived) {
+        return {NetworkResult::NoWaitingData, {}};
+    }
+    else {
+        return {NetworkResult::Success, message};
+    }
 }
 
-NpcReceiveResult Network::receiveNpcUpdate(Uint64 timeoutMs)
+EUReceiveResult Network::receiveNpcUpdate(Uint64 timeoutMs)
 {
-    NpcUpdateMessage message;
+    EUMessage message;
     bool messageWasReceived = false;
     if (timeoutMs == 0) {
         messageWasReceived = npcUpdateQueue.try_dequeue(message);
@@ -286,7 +292,10 @@ void Network::processBatch()
     Uint8 confirmedTickCount
         = headerRecBuffer[ServerHeaderIndex::ConfirmedTickCount];
     for (unsigned int i = 0; i < confirmedTickCount; ++i) {
-        if (!(npcUpdateQueue.enqueue({NpcUpdateType::ExplicitConfirmation}))) {
+        if (!(playerUpdateQueue.enqueue({EUType::ExplicitConfirmation}))) {
+            LOG_ERROR("Ran out of room in queue and memory allocation failed.");
+        }
+        if (!(npcUpdateQueue.enqueue({EUType::ExplicitConfirmation}))) {
             LOG_ERROR("Ran out of room in queue and memory allocation failed.");
         }
     }
@@ -333,7 +342,8 @@ void Network::processReceivedMessage(MessageType messageType,
 
             if (entityID == playerID) {
                 // Found the player.
-                if (!(playerUpdateQueue.enqueue(entityUpdate))) {
+                if (!(playerUpdateQueue.enqueue(
+                        {EUType::StateUpdate, entityUpdate}))) {
                     LOG_ERROR("Ran out of room in queue and memory allocation "
                               "failed.");
                 }
@@ -344,7 +354,7 @@ void Network::processReceivedMessage(MessageType messageType,
                 // Queueing the message will let all npc updates within be
                 // processed.
                 if (!(npcUpdateQueue.enqueue(
-                        {NpcUpdateType::Update, entityUpdate}))) {
+                        {EUType::StateUpdate, entityUpdate}))) {
                     LOG_ERROR("Ran out of room in queue and memory allocation "
                               "failed.");
                 }
@@ -357,10 +367,18 @@ void Network::processReceivedMessage(MessageType messageType,
             }
         }
 
-        // If we didn't find an NPC and queue an update message, push an
-        // implicit confirmation to show that we've confirmed up to this tick.
+        // Handle implicit confirmations.
+        if (!playerFound) {
+            // Message was received but had no player data, confirm the tick.
+            if (!(playerUpdateQueue.enqueue({EUType::ImplicitConfirmation,
+                                          nullptr, entityUpdate->tickNum}))) {
+                LOG_ERROR(
+                    "Ran out of room in queue and memory allocation failed.");
+            }
+        }
         if (!npcFound) {
-            if (!(npcUpdateQueue.enqueue({NpcUpdateType::ImplicitConfirmation,
+            // Message was received but had no NPC data, confirm the tick.
+            if (!(npcUpdateQueue.enqueue({EUType::ImplicitConfirmation,
                                           nullptr, entityUpdate->tickNum}))) {
                 LOG_ERROR(
                     "Ran out of room in queue and memory allocation failed.");

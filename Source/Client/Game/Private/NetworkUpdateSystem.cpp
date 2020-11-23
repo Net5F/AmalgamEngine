@@ -29,10 +29,11 @@ void NetworkUpdateSystem::sendInputState()
 
     /* Send the updated state to the server. */
     // Only send new data if we've changed.
-    if (world.playerIsDirty) {
+    if (world.playerData.playerIsDirty) {
         // Get the current input state.
-        ClientInputs clientInputs{game.getCurrentTick(),
-                                  world.inputs[world.playerID]};
+        Uint32 currentTick = game.getCurrentTick();
+        ClientInputs clientInputs{currentTick,
+                                  world.inputs[world.playerData.playerID]};
 
         // Serialize the client inputs message.
         BinaryBufferSharedPtr messageBuffer
@@ -47,9 +48,12 @@ void NetworkUpdateSystem::sendInputState()
 
         // Send the message.
         network.send(messageBuffer);
+
+        // Track that we sent an input message on this tick.
+        world.playerData.synQueue.push(currentTick);
     }
 
-    world.playerIsDirty = false;
+    world.playerData.playerIsDirty = false;
 }
 
 } // namespace Client

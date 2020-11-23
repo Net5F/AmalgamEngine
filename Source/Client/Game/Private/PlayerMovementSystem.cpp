@@ -5,6 +5,7 @@
 #include "Network.h"
 #include "EntityUpdate.h"
 #include "ClientNetworkDefs.h"
+#include "PlayerData.h"
 #include "Log.h"
 #include <memory>
 
@@ -14,7 +15,8 @@ namespace Client
 {
 PlayerMovementSystem::PlayerMovementSystem(Game& inGame, World& inWorld,
                                            Network& inNetwork)
-: game(inGame)
+: lastConfirmedTick(0)
+, game(inGame)
 , world(inWorld)
 , network(inNetwork)
 {
@@ -22,7 +24,7 @@ PlayerMovementSystem::PlayerMovementSystem(Game& inGame, World& inWorld,
 
 void PlayerMovementSystem::processMovements()
 {
-    EntityID playerID = world.playerID;
+    EntityID playerID = world.playerData.playerID;
     PositionComponent& currentPosition = world.positions[playerID];
     MovementComponent& currentMovement = world.movements[playerID];
 
@@ -33,12 +35,11 @@ void PlayerMovementSystem::processMovements()
 
     if (!RUN_OFFLINE) {
         // Receive any player entity updates from the server.
-        Uint32 latestReceivedTick = processReceivedUpdates(
-            playerID, currentPosition, currentMovement);
+        Uint32 lastReceivedUpdate = processReceivedUpdates();
 
         // If we received messages, replay inputs newer than the latest.
-        if (latestReceivedTick != 0) {
-            replayInputs(latestReceivedTick, currentPosition, currentMovement);
+        if (lastReceivedUpdate != 0) {
+            replayInputs(lastReceivedUpdate);
 
             // Check if there was a mismatch between the positions we had and
             // where the server thought we should be.
@@ -48,7 +49,7 @@ void PlayerMovementSystem::processMovements()
                          "%.6f) -> (%.6f, %.6f)",
                          oldPosition.x, oldPosition.y, currentPosition.x,
                          currentPosition.y);
-                LOG_INFO("latestReceivedTick: %u", latestReceivedTick);
+                LOG_INFO("lastReceivedUpdate: %u", lastReceivedUpdate);
             }
         }
     }
@@ -59,88 +60,200 @@ void PlayerMovementSystem::processMovements()
                                 GAME_TICK_TIMESTEP_S);
 }
 
-Uint32 PlayerMovementSystem::processReceivedUpdates(
-    EntityID playerID, PositionComponent& currentPosition,
-    MovementComponent& currentMovement)
+Uint32 PlayerMovementSystem::processReceivedUpdates()
 {
     /* Process any messages for us from the server. */
-    Uint32 latestReceivedTick = 0;
-    std::shared_ptr<const EntityUpdate> receivedUpdate
-        = network.receivePlayerUpdate();
-    while (receivedUpdate != nullptr) {
-        // Track our latest received tick.
-        Uint32 newTick = receivedUpdate->tickNum;
-        if (newTick > latestReceivedTick) {
-            latestReceivedTick = newTick;
-        }
-        else {
-            LOG_ERROR("Received ticks out of order. latest: %u, new: %u",
-                      latestReceivedTick, newTick);
-        }
+    Uint32 lastReceivedUpdate = 0;
+    EUReceiveResult receiveResult = network.receivePlayerUpdate();
+    while (receiveResult.result == NetworkResult::Success) {
+        EUMessage& playerUpdateMessage = receiveResult.message;
 
-        // Pull out the vector of entities.
-        const std::vector<Entity>& entities = receivedUpdate->entities;
-
-        // Find the player data.
-        const Entity* playerUpdate = nullptr;
-        for (auto entityIt = entities.begin(); entityIt != entities.end();
-             ++entityIt) {
-            if (entityIt->id == playerID) {
-                playerUpdate = &(*entityIt);
+        // Handle the message appropriately.
+        switch (playerUpdateMessage.updateType) {
+            case EUType::ExplicitConfirmation:
+                // If we've been initialized, process the confirmation.
+                if (lastConfirmedTick != 0) {
+                    handleExplicitConfirmation();
+                }
                 break;
-            }
+            case EUType::ImplicitConfirmation:
+                // If we've been initialized, process the confirmation.
+                handleImplicitConfirmation(playerUpdateMessage.tickNum);
+                break;
+            case EUType::StateUpdate:
+                LOG_INFO("update: %u", playerUpdateMessage.message->tickNum);
+                handleUpdate(playerUpdateMessage.message);
+
+                // Track our latest received tick.
+                Uint32 newTick = playerUpdateMessage.message->tickNum;
+                if (newTick > lastReceivedUpdate) {
+                    lastReceivedUpdate = newTick;
+                }
+                else {
+                    LOG_ERROR("Received ticks out of order. latest: %u, new: %u",
+                              lastReceivedUpdate, newTick);
+                }
+                break;
         }
 
-        if (playerUpdate == nullptr) {
-            LOG_ERROR("Failed to find player entity in a message that should "
-                      "have contained one.");
-        }
-
-        /* Update the movements. */
-        const MovementComponent& newMovement = playerUpdate->movementComponent;
-        currentMovement.velX = newMovement.velX;
-        currentMovement.velY = newMovement.velY;
-
-        /* Move to the received position. */
-        const PositionComponent& receivedPosition
-            = playerUpdate->positionComponent;
-        currentPosition.x = receivedPosition.x;
-        currentPosition.y = receivedPosition.y;
-
-        receivedUpdate = network.receivePlayerUpdate();
+        receiveResult = network.receivePlayerUpdate();
     }
 
-    return latestReceivedTick;
+    return lastReceivedUpdate;
 }
 
-void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
-                                        PositionComponent& currentPosition,
-                                        MovementComponent& currentMovement)
+void PlayerMovementSystem::handleExplicitConfirmation()
+{
+    // Increment the confirmed tick and handle any dropped messages.
+    processTickConfirmation(lastConfirmedTick + 1);
+}
+
+void PlayerMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
+{
+    // If this is the first confirmation we've received, init lastConfirmedTick
+    // so things look incrementally increasing.
+    if (lastConfirmedTick == 0) {
+        lastConfirmedTick = (confirmedTick - 1);
+    }
+
+    // Update the confirmed tick and handle any dropped messages.
+    processTickConfirmation(confirmedTick);
+}
+
+void PlayerMovementSystem::handleUpdate(
+const std::shared_ptr<const EntityUpdate>& entityUpdate)
+{
+    // If this is the first confirmation we've received, init lastConfirmedTick
+    // so things look incrementally increasing.
+    if (lastConfirmedTick == 0) {
+        lastConfirmedTick = (entityUpdate->tickNum - 1);
+    }
+
+    // Update the confirmed tick and handle any dropped messages.
+    processTickConfirmation(entityUpdate->tickNum);
+
+    // Pull out the vector of entities.
+    const std::vector<Entity>& entities = entityUpdate->entities;
+
+    /* Find the player data. */
+    EntityID playerID = world.playerData.playerID;
+    PositionComponent& currentPosition = world.positions[playerID];
+    MovementComponent& currentMovement = world.movements[playerID];
+
+    const Entity* playerUpdate = nullptr;
+    for (auto entityIt = entities.begin(); entityIt != entities.end();
+         ++entityIt) {
+        if (entityIt->id == playerID) {
+            playerUpdate = &(*entityIt);
+            break;
+        }
+    }
+
+    if (playerUpdate == nullptr) {
+        LOG_ERROR("Failed to find player entity in a message that should "
+                  "have contained one.");
+    }
+
+    /* Update the velocities. */
+    const MovementComponent& newMovement = playerUpdate->movementComponent;
+    currentMovement.velX = newMovement.velX;
+    currentMovement.velY = newMovement.velY;
+
+    /* Move to the received position. */
+    const PositionComponent& receivedPosition
+        = playerUpdate->positionComponent;
+    currentPosition.x = receivedPosition.x;
+    currentPosition.y = receivedPosition.y;
+}
+
+void PlayerMovementSystem::processTickConfirmation(Uint32 confirmedTick)
 {
     Uint32 currentTick = game.getCurrentTick();
-    if (latestReceivedTick > currentTick) {
+    if (confirmedTick <= lastConfirmedTick) {
+        LOG_ERROR("Confirmed ticks are not increasing as expected. "
+        "confirmedTick: %u, lastConfirmedTick: %u", confirmedTick, lastConfirmedTick);
+    }
+    else if (confirmedTick > currentTick) {
         LOG_ERROR("Received data for tick %u on tick %u. Server is in the "
                   "future, can't replay inputs.",
-                  latestReceivedTick, currentTick);
+                  confirmedTick, currentTick);
+    }
+
+    // Update the confirmed tick, checking all ticks in-between.
+    while (lastConfirmedTick < confirmedTick) {
+        lastConfirmedTick++;
+
+        // If we have messages waiting to be acked.
+        std::queue<Uint32>& synQueue = world.playerData.synQueue;
+        if (synQueue.size() > 0) {
+            // Check if any messages were acked or found to be dropped.
+            Uint32 nextTickToConfirm = synQueue.front();
+            if (lastConfirmedTick < nextTickToConfirm) {
+                // Fine, nothing needs to be done.
+            }
+            else if (lastConfirmedTick == nextTickToConfirm) {
+                // Sent message is acked, pop it.
+                synQueue.pop();
+            }
+            else {
+                // TODO: Why is the next tick after the real drop showing as dropped?
+                LOG_INFO("Detected tick %u was dropped while confirming %u",
+                    nextTickToConfirm, lastConfirmedTick);
+                // Detected a dropped message, overwrite the offending input.
+                Uint32 droppedIndex = currentTick - lastConfirmedTick;
+                Uint32 previousIndex = droppedIndex + 1;
+                if (previousIndex <= (PlayerData::INPUT_HISTORY_LENGTH - 1)) {
+                    // Rewrite the dropped input with the input from the previous tick.
+                    world.playerData.playerInputHistory[droppedIndex] =
+                        world.playerData.playerInputHistory[previousIndex];
+                }
+                else {
+                    LOG_ERROR("Too few items in the player input history. "
+                              "Increase the length or reduce lag. droppedIndex: %u, "
+                              "historyLength: %u",
+                              droppedIndex, PlayerData::INPUT_HISTORY_LENGTH);
+                }
+
+                // Replay from the dropped input forward.
+                replayInputs(lastConfirmedTick);
+
+                // Pop the dropped tick.
+                synQueue.pop();
+            }
+        }
+    }
+}
+
+void PlayerMovementSystem::replayInputs(Uint32 lastReceivedUpdate)
+{
+    EntityID playerID = world.playerData.playerID;
+    PositionComponent& currentPosition = world.positions[playerID];
+    MovementComponent& currentMovement = world.movements[playerID];
+
+    Uint32 currentTick = game.getCurrentTick();
+    if (lastReceivedUpdate > currentTick) {
+        LOG_ERROR("Received data for tick %u on tick %u. Server is in the "
+                  "future, can't replay inputs.",
+                  lastReceivedUpdate, currentTick);
     }
 
     /* Replay all inputs since the received message, except the current. */
-    for (Uint32 tickToProcess = (latestReceivedTick + 1);
+    for (Uint32 tickToProcess = (lastReceivedUpdate + 1);
          tickToProcess < currentTick; ++tickToProcess) {
         Uint32 tickDiff = currentTick - tickToProcess;
 
         // The history includes the current tick, so we only have LENGTH - 1
         // worth of previous data to use (i.e. it's 0-indexed).
-        if (tickDiff > (World::INPUT_HISTORY_LENGTH - 1)) {
+        if (tickDiff > (PlayerData::INPUT_HISTORY_LENGTH - 1)) {
             LOG_ERROR("Too few items in the player input history. "
                       "Increase the length or reduce lag. tickDiff: %u, "
                       "historyLength: %u",
-                      tickDiff, World::INPUT_HISTORY_LENGTH);
+                      tickDiff, PlayerData::INPUT_HISTORY_LENGTH);
         }
 
         // Use the appropriate input state to update movement.
         MovementHelpers::moveEntity(currentPosition, currentMovement,
-                                    world.playerInputHistory[tickDiff],
+                                    world.playerData.playerInputHistory[tickDiff],
                                     GAME_TICK_TIMESTEP_S);
     }
 }
