@@ -96,16 +96,18 @@ enum class NetworkResult {
     NoWaitingData
 };
 
-/** The type of message to expect. */
+/**
+ * The type of message to expect. For descriptions, see their definitions in
+ * Shared/Messages/Public.
+ */
 enum class MessageType : Uint8 {
     /** Used for initialization, indicates the value hasn't been set. */
     NotSet = 0,
     ConnectionResponse = 1,
     EntityUpdate = 2,
     ClientInputs = 3,
-    /** Heartbeat is sent from either side to show that a tick was processed but
-       no data needed to be sent. */
-    Heartbeat = 4
+    Heartbeat = 4,
+    MessageDropInfo = 5
 };
 
 /** Represents the result of trying to receive a message. */

@@ -13,6 +13,8 @@ add_executable(LoadTestClient
     # Client objects
     ${PROJECT_SOURCE_DIR}/Client/Utility/Private/Network.cpp
     ${PROJECT_SOURCE_DIR}/Client/Utility/Public/Network.h
+    ${PROJECT_SOURCE_DIR}/Client/Utility/Private/MessageHandler.cpp
+    ${PROJECT_SOURCE_DIR}/Client/Utility/Public/MessageHandler.h
 )
 
 target_include_directories(LoadTestClient

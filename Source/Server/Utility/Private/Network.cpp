@@ -3,6 +3,7 @@
 #include "Peer.h"
 #include "MessageTools.h"
 #include "Heartbeat.h"
+#include "MessageDropInfo.h"
 #include "Log.h"
 #include "NetworkStats.h"
 #include <SDL2/SDL_net.h>
@@ -78,47 +79,11 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
         // Process the message.
         switch (clientMessage.message.messageType) {
             case MessageType::ClientInputs: {
-                // Deserialize the message.
-                std::unique_ptr<ClientInputs> clientInputs
-                    = std::make_unique<ClientInputs>();
-                MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
-                                          *clientInputs);
-
-                // Fill in the network ID that we assigned to this client.
-                clientInputs->netID = clientMessage.netID;
-
-                // Push the message (blocks if the MessageSorter is locked).
-                // Save the tickNum locally since the move might be optimized
-                // in front of the access (this does happen).
-                Uint32 messageTickNum = clientInputs->tickNum;
-                MessageSorterBase::PushResult pushResult
-                    = inputMessageSorter.push(messageTickNum,
-                                              std::move(clientInputs));
-
-                // Log if the sorter dropped the message.
-                if (pushResult.result
-                    != MessageSorterBase::ValidityResult::Valid) {
-                    LOG_INFO(
-                        "Message was dropped. NetID: %u, diff: %d, result: %u, "
-                        "tickNum: %u",
-                        clientMessage.netID, pushResult.diff, pushResult.result,
-                        messageTickNum);
-                }
-
-                // Save the diff that the MessageSorter returned.
-                tickDiff = pushResult.diff;
+                tickDiff = handleClientInputs(clientMessage, messageBuffer);
                 break;
             }
             case MessageType::Heartbeat: {
-                // Deserialize the message.
-                Heartbeat heartbeat{};
-                MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
-                                          heartbeat);
-
-                // Calc the diff. Using the game's currentTick should be
-                // accurate since we didn't have to lock anything.
-                tickDiff = static_cast<Sint64>(heartbeat.tickNum)
-                           - static_cast<Sint64>(*currentTickPtr);
+                tickDiff = handleHeartbeat(messageBuffer);
                 break;
             }
             default: {
@@ -229,6 +194,74 @@ void Network::logNetworkStatistics()
         = netStats.bytesReceived / SECONDS_TILL_STATS_DUMP;
     LOG_INFO("Bytes sent per second: %.0f, Bytes received per second: %.0f",
              bytesSentPerSecond, bytesReceivedPerSecond);
+}
+
+Sint64 Network::handleClientInputs(ClientMessage& clientMessage, BinaryBufferPtr& messageBuffer)
+{
+    // Deserialize the message.
+    std::unique_ptr<ClientInputs> clientInputs
+        = std::make_unique<ClientInputs>();
+    MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
+                              *clientInputs);
+
+    // Fill in the network ID that we assigned to this client.
+    clientInputs->netID = clientMessage.netID;
+
+    // Push the message (blocks if the MessageSorter is locked).
+    // Save the tickNum locally since the move might be optimized
+    // in front of the access (this does happen).
+    Uint32 messageTickNum = clientInputs->tickNum;
+    MessageSorterBase::PushResult pushResult
+        = inputMessageSorter.push(messageTickNum,
+                                  std::move(clientInputs));
+
+    // Log if the sorter dropped the message.
+    if (pushResult.result
+        != MessageSorterBase::ValidityResult::Valid) {
+        LOG_INFO(
+            "Message was dropped. NetID: %u, diff: %d, result: %u, "
+            "tickNum: %u",
+            clientMessage.netID, pushResult.diff, pushResult.result,
+            messageTickNum);
+
+        // Fill in the tick of the input that was dropped.
+        MessageDropInfo dropInfo{};
+        dropInfo.tickNum = messageTickNum;
+
+        // Serialize the drop info message.
+        BinaryBufferSharedPtr messageBuffer
+            = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
+        std::size_t messageSize = MessageTools::serialize(
+            *messageBuffer, dropInfo, MESSAGE_HEADER_SIZE);
+
+        // Fill the buffer with the appropriate message header.
+        MessageTools::fillMessageHeader(MessageType::MessageDropInfo,
+                                        messageSize, messageBuffer, 0);
+
+        // Send the message.
+        // Note: Doesn't need a lock because we only mutate the map
+        //       from this thread (remember, this function is
+        //       called by ClientHandler.)
+        if (std::shared_ptr<Client> clientPtr
+            = clientMessage.clientPtr.lock()) {
+            clientPtr->queueMessage(messageBuffer, 0);
+        }
+    }
+
+    // Save the diff that the MessageSorter returned.
+    return pushResult.diff;
+}
+
+Sint64 Network::handleHeartbeat(BinaryBufferPtr& messageBuffer)
+{
+    // Deserialize the message.
+    Heartbeat heartbeat{};
+    MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
+                              heartbeat);
+
+    // Calc the diff. Using the game's currentTick should be
+    // accurate since we didn't have to lock anything.
+    return static_cast<Sint64>(heartbeat.tickNum) - static_cast<Sint64>(*currentTickPtr);
 }
 
 } // namespace Server

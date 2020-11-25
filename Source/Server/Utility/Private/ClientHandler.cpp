@@ -42,6 +42,8 @@ void ClientHandler::serviceClients()
 
         // Check if there's any clients with activity, and receive all their
         // messages.
+        // Note: Doesn't need a lock because we only mutate the map from this
+        //       thread.
         int numReceived = 0;
         if (clientMap.size() != 0) {
             numReceived = receiveClientMessages(clientMap);
@@ -119,7 +121,8 @@ int ClientHandler::receiveClientMessages(ClientMap& clientMap)
     clientSet->checkSockets(0);
 
     /* Iterate through all clients. */
-    // Note: Doesn't need a lock because serviceClients is still locking.
+    // Note: Doesn't need a lock because we only mutate the map from this
+    //       thread.
     int numReceived = 0;
     for (auto& pair : clientMap) {
         const std::shared_ptr<Client>& clientPtr = pair.second;

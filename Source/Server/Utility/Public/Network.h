@@ -106,6 +106,18 @@ private:
      */
     void logNetworkStatistics();
 
+    /**
+     * Handles a received ClientInputs message.
+     * @return The tick diff that inputMessageSorter.push() returned.
+     */
+    Sint64 handleClientInputs(ClientMessage& clientMessage, BinaryBufferPtr& messageBuffer);
+
+    /**
+     * Handles a received Heartbeat message.
+     * @return The difference between the message's tick and our current tick.
+     */
+    Sint64 handleHeartbeat(BinaryBufferPtr& messageBuffer);
+
     /** Used to time when we should process the network tick. */
     Timer tickTimer;
 

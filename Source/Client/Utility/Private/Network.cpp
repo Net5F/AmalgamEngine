@@ -1,11 +1,12 @@
 #include "Network.h"
 #include "Peer.h"
-#include "ConnectionResponse.h"
 #include "MessageTools.h"
 #include "EntityUpdate.h"
+#include "ConnectionResponse.h"
 #include "Heartbeat.h"
+#include "MessageDropInfo.h"
 #include "NetworkStats.h"
-#include <SDL2/SDL_net.h>
+#include <SDL_net.h>
 
 namespace AM
 {
@@ -14,6 +15,7 @@ namespace Client
 Network::Network()
 : accumulatedTime(0.0)
 , server(nullptr)
+, messageHandler(*this)
 , playerID(INVALID_ENTITY_ID)
 , tickAdjustment(0)
 , adjustmentIteration(0)
@@ -117,10 +119,10 @@ std::unique_ptr<ConnectionResponse>
 {
     std::unique_ptr<ConnectionResponse> message = nullptr;
     if (timeoutMs == 0) {
-        connectionResponseQueue.try_dequeue(message);
+        messageHandler.connectionResponseQueue.try_dequeue(message);
     }
     else {
-        connectionResponseQueue.wait_dequeue_timed(message, timeoutMs * 1000);
+        messageHandler.connectionResponseQueue.wait_dequeue_timed(message, timeoutMs * 1000);
     }
 
     return message;
@@ -131,10 +133,10 @@ std::shared_ptr<const EntityUpdate>
 {
     std::shared_ptr<const EntityUpdate> message = nullptr;
     if (timeoutMs == 0) {
-        playerUpdateQueue.try_dequeue(message);
+        messageHandler.playerUpdateQueue.try_dequeue(message);
     }
     else {
-        playerUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
+        messageHandler.playerUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
     }
 
     return message;
@@ -145,11 +147,11 @@ NpcReceiveResult Network::receiveNpcUpdate(Uint64 timeoutMs)
     NpcUpdateMessage message;
     bool messageWasReceived = false;
     if (timeoutMs == 0) {
-        messageWasReceived = npcUpdateQueue.try_dequeue(message);
+        messageWasReceived = messageHandler.npcUpdateQueue.try_dequeue(message);
     }
     else {
         messageWasReceived
-            = npcUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
+            = messageHandler.npcUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
     }
 
     if (!messageWasReceived) {
@@ -214,6 +216,16 @@ void Network::registerCurrentTickPtr(
     const std::atomic<Uint32>* inCurrentTickPtr)
 {
     currentTickPtr = inCurrentTickPtr;
+}
+
+void Network::setPlayerID(EntityID inPlayerID)
+{
+    playerID = inPlayerID;
+}
+
+EntityID Network::getPlayerID()
+{
+    return playerID;
 }
 
 void Network::setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled)
@@ -286,7 +298,7 @@ void Network::processBatch()
     Uint8 confirmedTickCount
         = headerRecBuffer[ServerHeaderIndex::ConfirmedTickCount];
     for (unsigned int i = 0; i < confirmedTickCount; ++i) {
-        if (!(npcUpdateQueue.enqueue({NpcUpdateType::ExplicitConfirmation}))) {
+        if (!(messageHandler.npcUpdateQueue.enqueue({NpcUpdateType::ExplicitConfirmation}))) {
             LOG_ERROR("Ran out of room in queue and memory allocation failed.");
         }
     }
@@ -298,74 +310,19 @@ void Network::processBatch()
 void Network::processReceivedMessage(MessageType messageType,
                                      Uint16 messageSize)
 {
-    /* Funnel the message into the appropriate queue. */
-    if (messageType == MessageType::ConnectionResponse) {
-        // Deserialize the message.
-        std::unique_ptr<ConnectionResponse> connectionResponse
-            = std::make_unique<ConnectionResponse>();
-        MessageTools::deserialize(messageRecBuffer, messageSize,
-                                  *connectionResponse);
-
-        // Grab our player ID so we can determine which update messages are for
-        // the player.
-        playerID = connectionResponse->entityID;
-
-        // Queue the message.
-        if (!(connectionResponseQueue.enqueue(std::move(connectionResponse)))) {
-            LOG_ERROR("Ran out of room in queue and memory allocation failed.");
-        }
-    }
-    else if (messageType == MessageType::EntityUpdate) {
-        // Deserialize the message.
-        std::shared_ptr<EntityUpdate> entityUpdate
-            = std::make_shared<EntityUpdate>();
-        MessageTools::deserialize(messageRecBuffer, messageSize, *entityUpdate);
-
-        // Pull out the vector of entities.
-        const std::vector<Entity>& entities = entityUpdate->entities;
-
-        // Iterate through the entities, checking if there's player or npc data.
-        bool playerFound = false;
-        bool npcFound = false;
-        for (auto entityIt = entities.begin(); entityIt != entities.end();
-             ++entityIt) {
-            EntityID entityID = entityIt->id;
-
-            if (entityID == playerID) {
-                // Found the player.
-                if (!(playerUpdateQueue.enqueue(entityUpdate))) {
-                    LOG_ERROR("Ran out of room in queue and memory allocation "
-                              "failed.");
-                }
-                playerFound = true;
-            }
-            else if (!npcFound) {
-                // Found a non-player (npc).
-                // Queueing the message will let all npc updates within be
-                // processed.
-                if (!(npcUpdateQueue.enqueue(
-                        {NpcUpdateType::Update, entityUpdate}))) {
-                    LOG_ERROR("Ran out of room in queue and memory allocation "
-                              "failed.");
-                }
-                npcFound = true;
-            }
-
-            // If we found the player and an npc, we can stop looking.
-            if (playerFound && npcFound) {
-                break;
-            }
-        }
-
-        // If we didn't find an NPC and queue an update message, push an
-        // implicit confirmation to show that we've confirmed up to this tick.
-        if (!npcFound) {
-            if (!(npcUpdateQueue.enqueue({NpcUpdateType::ImplicitConfirmation,
-                                          nullptr, entityUpdate->tickNum}))) {
-                LOG_ERROR(
-                    "Ran out of room in queue and memory allocation failed.");
-            }
-        }
+    /* Route the message to the appropriate handler. */
+    switch(messageType) {
+        case MessageType::ConnectionResponse:
+            messageHandler.handleConnectionResponse(messageRecBuffer, messageSize);
+            break;
+        case MessageType::EntityUpdate:
+            messageHandler.handleEntityUpdate(messageRecBuffer, messageSize);
+            break;
+        case MessageType::MessageDropInfo:
+            messageHandler.handleMessageDropInfo(messageRecBuffer, messageSize);
+            break;
+        default:
+            LOG_ERROR("Received unexpected message type: %u", messageType);
     }
 }
 

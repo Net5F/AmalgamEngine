@@ -7,6 +7,7 @@ target_sources(Shared
         Public/Entity.h
         Public/EntityUpdate.h
         Public/Heartbeat.h
+        Public/MessageDropInfo.h
 )
 
 target_include_directories(Shared

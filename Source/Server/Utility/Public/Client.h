@@ -31,6 +31,8 @@ public:
      * Queues a message to be sent the next time sendWaitingMessages is called.
      * @param message  The message to queue.
      * @param messageTick  If non-0, used to update our latestSentSimTick.
+     *                     Use 0 if sending messages that aren't associated
+     *                     with a tick.
      */
     void queueMessage(const BinaryBufferSharedPtr& message, Uint32 messageTick);
 

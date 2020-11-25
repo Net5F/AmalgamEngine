@@ -6,8 +6,8 @@
 namespace AM
 {
 /**
- * This message is used by the client to send the server its sync information,
- * even if there was no other data queued to send.
+ * Heartbeat is sent from either side to show that a tick was processed but
+ * no data needed to be sent.
  */
 struct Heartbeat {
     /** The tick that this heartbeat was processed on. */

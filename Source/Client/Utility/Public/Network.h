@@ -3,13 +3,13 @@
 #include "GameDefs.h"
 #include "NetworkDefs.h"
 #include "ClientNetworkDefs.h"
+#include "MessageHandler.h"
+#include "Timer.h"
+#include "Log.h"
 #include <string>
 #include <memory>
 #include <atomic>
 #include <thread>
-#include "readerwriterqueue.h"
-#include "Timer.h"
-#include "Log.h"
 
 namespace AM
 {
@@ -65,7 +65,7 @@ public:
     /**
      * Thread function, started from connect().
      * Tries to retrieve a message from the server.
-     * If successful, passes it to queueMessage().
+     * If successful, calls processBatch().
      */
     int pollForMessages();
 
@@ -83,6 +83,9 @@ public:
 
     /** Used for passing us a pointer to the Game's currentTick. */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
+
+    void setPlayerID(EntityID inPlayerID);
+    EntityID getPlayerID();
 
     void setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled);
 
@@ -132,25 +135,25 @@ private:
 
     std::shared_ptr<Peer> server;
 
+    /** Handles messages that we receive from the server, queueing them for the
+        Systems. */
+    MessageHandler messageHandler;
+
     /** Local copy of the playerID so we can tell if we got a player message. */
     EntityID playerID;
 
     /** The adjustment that the server has told us to apply to the tick. */
     std::atomic<int> tickAdjustment;
 
-    /**
-     * Tracks what iteration of tick offset adjustments we're on.
-     * Used to make sure that we don't double-count adjustments.
-     */
+    /** Tracks what iteration of tick offset adjustments we're on.
+        Used to make sure that we don't double-count adjustments. */
     std::atomic<Uint8> adjustmentIteration;
 
     /** True when we're waiting for the sim to finish applying an adjustment. */
     std::atomic<bool> isApplyingTickAdjustment;
 
-    /**
-     * Tracks if we've sent a message since the last network tick.
-     * Used to determine if we need to heartbeat.
-     */
+    /** Tracks if we've sent a message since the last network tick.
+        Used to determine if we need to heartbeat. */
     unsigned int messagesSentSinceTick;
 
     /** Pointer to the game's current tick. */
@@ -164,19 +167,6 @@ private:
     std::thread receiveThreadObj;
     /** Turn false to signal that the receive thread should end. */
     std::atomic<bool> exitRequested;
-
-    /** These queues store received messages that are waiting to be consumed. */
-    using ConnectionResponseQueue = moodycamel::BlockingReaderWriterQueue<
-        std::unique_ptr<ConnectionResponse>>;
-    ConnectionResponseQueue connectionResponseQueue;
-
-    using PlayerUpdateQueue = moodycamel::BlockingReaderWriterQueue<
-        std::shared_ptr<const EntityUpdate>>;
-    PlayerUpdateQueue playerUpdateQueue;
-
-    using NpcUpdateQueue
-        = moodycamel::BlockingReaderWriterQueue<NpcUpdateMessage>;
-    NpcUpdateQueue npcUpdateQueue;
 
     /** Used to hold headers while we process them. */
     BinaryBuffer headerRecBuffer;
