@@ -4,7 +4,6 @@
 #include "EntityUpdate.h"
 #include "ConnectionResponse.h"
 #include "Heartbeat.h"
-#include "MessageDropInfo.h"
 #include "NetworkStats.h"
 #include <SDL_net.h>
 
@@ -317,9 +316,6 @@ void Network::processReceivedMessage(MessageType messageType,
             break;
         case MessageType::EntityUpdate:
             messageHandler.handleEntityUpdate(messageRecBuffer, messageSize);
-            break;
-        case MessageType::MessageDropInfo:
-            messageHandler.handleMessageDropInfo(messageRecBuffer, messageSize);
             break;
         default:
             LOG_ERROR("Received unexpected message type: %u", messageType);

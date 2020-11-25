@@ -22,7 +22,7 @@ PlayerMovementSystem::PlayerMovementSystem(Game& inGame, World& inWorld,
 
 void PlayerMovementSystem::processMovements()
 {
-    EntityID playerID = world.playerID;
+    EntityID playerID = world.playerData.ID;
     PositionComponent& currentPosition = world.positions[playerID];
     MovementComponent& currentMovement = world.movements[playerID];
 
@@ -33,12 +33,11 @@ void PlayerMovementSystem::processMovements()
 
     if (!RUN_OFFLINE) {
         // Receive any player entity updates from the server.
-        Uint32 latestReceivedTick = processReceivedUpdates(
-            playerID, currentPosition, currentMovement);
+        Uint32 latestReceivedTick = processPlayerUpdates();
 
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
-            replayInputs(latestReceivedTick, currentPosition, currentMovement);
+            replayInputs(latestReceivedTick);
 
             // Check if there was a mismatch between the positions we had and
             // where the server thought we should be.
@@ -59,10 +58,12 @@ void PlayerMovementSystem::processMovements()
                                 GAME_TICK_TIMESTEP_S);
 }
 
-Uint32 PlayerMovementSystem::processReceivedUpdates(
-    EntityID playerID, PositionComponent& currentPosition,
-    MovementComponent& currentMovement)
+Uint32 PlayerMovementSystem::processPlayerUpdates()
 {
+    EntityID playerID = world.playerData.ID;
+    PositionComponent& currentPosition = world.positions[playerID];
+    MovementComponent& currentMovement = world.movements[playerID];
+
     /* Process any messages for us from the server. */
     Uint32 latestReceivedTick = 0;
     std::shared_ptr<const EntityUpdate> receivedUpdate
@@ -113,10 +114,12 @@ Uint32 PlayerMovementSystem::processReceivedUpdates(
     return latestReceivedTick;
 }
 
-void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
-                                        PositionComponent& currentPosition,
-                                        MovementComponent& currentMovement)
+void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick)
 {
+    EntityID playerID = world.playerData.ID;
+    PositionComponent& currentPosition = world.positions[playerID];
+    MovementComponent& currentMovement = world.movements[playerID];
+
     Uint32 currentTick = game.getCurrentTick();
     if (latestReceivedTick > currentTick) {
         LOG_ERROR("Received data for tick %u on tick %u. Server is in the "
@@ -131,16 +134,16 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
 
         // The history includes the current tick, so we only have LENGTH - 1
         // worth of previous data to use (i.e. it's 0-indexed).
-        if (tickDiff > (World::INPUT_HISTORY_LENGTH - 1)) {
+        if (tickDiff > (PlayerData::INPUT_HISTORY_LENGTH - 1)) {
             LOG_ERROR("Too few items in the player input history. "
                       "Increase the length or reduce lag. tickDiff: %u, "
                       "historyLength: %u",
-                      tickDiff, World::INPUT_HISTORY_LENGTH);
+                      tickDiff, PlayerData::INPUT_HISTORY_LENGTH);
         }
 
         // Use the appropriate input state to update movement.
         MovementHelpers::moveEntity(currentPosition, currentMovement,
-                                    world.playerInputHistory[tickDiff],
+                                    world.playerData.inputHistory[tickDiff],
                                     GAME_TICK_TIMESTEP_S);
     }
 }

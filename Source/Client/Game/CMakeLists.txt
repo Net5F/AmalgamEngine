@@ -15,6 +15,7 @@ target_sources(Client
 		Public/NpcMovementSystem.h
 		Public/RenderSystem.h
 		Public/Game.h
+		Public/PlayerData.h
 )
 
 target_include_directories(Client

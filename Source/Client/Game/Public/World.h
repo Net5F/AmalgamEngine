@@ -5,6 +5,7 @@
 #include "PositionComponent.h"
 #include "MovementComponent.h"
 #include "SpriteComponent.h"
+#include "PlayerData.h"
 #include "CircularBuffer.h"
 
 #include <array>
@@ -17,13 +18,6 @@ namespace Client
 class World
 {
 public:
-    /**
-     * The number of input snapshots that we'll remember.
-     * TODO: If this is ever an issue, we can make CircularBuffer dynamic and
-     *       exponentially grow it, and remove this.
-     */
-    static constexpr unsigned int INPUT_HISTORY_LENGTH = 20;
-
     World();
 
     void addEntity(std::string_view name, EntityID entityID);
@@ -60,11 +54,7 @@ public:
     std::array<uint32_t, MAX_ENTITIES> componentFlags;
 
     /** Player-specific. */
-    EntityID playerID;
-    CircularBuffer<InputStateArr, INPUT_HISTORY_LENGTH> playerInputHistory;
-
-    // We don't need to track NPC dirty states because we don't give them input.
-    bool playerIsDirty;
+    PlayerData playerData;
 
     /** Additional data */
     // Position from the previous tick that the renderer can use to lerp.

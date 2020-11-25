@@ -28,8 +28,6 @@ public:
 
     void handleEntityUpdate(BinaryBuffer& messageRecBuffer, Uint16 messageSize);
 
-    void handleMessageDropInfo(BinaryBuffer& messageRecBuffer, Uint16 messageSize);
-
     /**
      * These queues store received messages that are waiting to be consumed.
      * TODO: These should be replaced with callbacks. Each system that cares

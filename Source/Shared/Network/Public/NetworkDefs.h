@@ -107,7 +107,6 @@ enum class MessageType : Uint8 {
     EntityUpdate = 2,
     ClientInputs = 3,
     Heartbeat = 4,
-    MessageDropInfo = 5
 };
 
 /** Represents the result of trying to receive a message. */

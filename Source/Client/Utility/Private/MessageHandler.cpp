@@ -3,7 +3,6 @@
 #include "MessageTools.h"
 #include "ConnectionResponse.h"
 #include "EntityUpdate.h"
-#include "MessageDropInfo.h"
 #include "Entity.h"
 #include "Log.h"
 
@@ -90,12 +89,6 @@ void MessageHandler::handleEntityUpdate(BinaryBuffer& messageRecBuffer,
                 "Ran out of room in queue and memory allocation failed.");
         }
     }
-}
-
-void MessageHandler::handleMessageDropInfo(BinaryBuffer& messageRecBuffer,
-                                           Uint16 messageSize)
-{
-    LOG_INFO("Received MessageDropInfo.");
 }
 
 } // End namespace Client

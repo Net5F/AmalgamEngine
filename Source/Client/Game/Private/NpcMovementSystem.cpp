@@ -169,7 +169,7 @@ void NpcMovementSystem::moveAllNpcs()
     for (std::size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
         /* Move all NPCs that have an input, position, and movement component.
          */
-        if (entityID != world.playerID
+        if (entityID != world.playerData.ID
             && (world.componentFlags[entityID] & ComponentFlag::Input)
             && (world.componentFlags[entityID] & ComponentFlag::Position)
             && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
@@ -197,7 +197,8 @@ void NpcMovementSystem::applyUpdateMessage(
          ++entityIt) {
         // Skip the player (not an NPC).
         EntityID entityID = entityIt->id;
-        if (entityID == world.playerID) {
+        EntityID playerID = world.playerData.ID;
+        if (entityID == playerID) {
             continue;
         }
 
@@ -210,9 +211,9 @@ void NpcMovementSystem::applyUpdateMessage(
             // TODO: Get this info from the server.
             // Get the same texture as the player.
             world.sprites[entityID].texturePtr
-                = world.sprites[world.playerID].texturePtr;
+                = world.sprites[playerID].texturePtr;
             world.sprites[entityID].posInTexture
-                = world.sprites[world.playerID].posInTexture;
+                = world.sprites[playerID].posInTexture;
             world.sprites[entityID].width = 64;
             world.sprites[entityID].height = 64;
 

@@ -23,7 +23,6 @@ void NetworkUpdateSystem::sendClientUpdates()
     // Collect the dirty entities so we don't need to re-find them for every
     // client.
     std::vector<EntityID> dirtyEntities;
-    dirtyEntities.reserve(MAX_ENTITIES);
     for (EntityID i = 0; i < MAX_ENTITIES; ++i) {
         if (world.entityIsDirty[i]) {
             dirtyEntities.push_back(i);

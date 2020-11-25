@@ -12,13 +12,11 @@ World::World()
 , inputs{}
 , sprites{}
 , componentFlags{}
-, playerID(0)
-, playerIsDirty(false)
 , oldPositions{}
 {
     // Init the history with default snapshots.
-    for (unsigned int i = 0; i < INPUT_HISTORY_LENGTH; ++i) {
-        playerInputHistory.push(InputStateArr{});
+    for (unsigned int i = 0; i < PlayerData::INPUT_HISTORY_LENGTH; ++i) {
+        playerData.inputHistory.push(InputStateArr{});
     }
 }
 
@@ -94,7 +92,7 @@ void World::registerPlayerID(EntityID inPlayerID)
                   inPlayerID);
     }
 
-    playerID = inPlayerID;
+    playerData.ID = inPlayerID;
 }
 
 } // namespace Client

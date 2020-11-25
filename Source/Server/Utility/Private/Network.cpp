@@ -3,7 +3,6 @@
 #include "Peer.h"
 #include "MessageTools.h"
 #include "Heartbeat.h"
-#include "MessageDropInfo.h"
 #include "Log.h"
 #include "NetworkStats.h"
 #include <SDL2/SDL_net.h>
@@ -223,29 +222,6 @@ Sint64 Network::handleClientInputs(ClientMessage& clientMessage, BinaryBufferPtr
             "tickNum: %u",
             clientMessage.netID, pushResult.diff, pushResult.result,
             messageTickNum);
-
-        // Fill in the tick of the input that was dropped.
-        MessageDropInfo dropInfo{};
-        dropInfo.tickNum = messageTickNum;
-
-        // Serialize the drop info message.
-        BinaryBufferSharedPtr messageBuffer
-            = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
-        std::size_t messageSize = MessageTools::serialize(
-            *messageBuffer, dropInfo, MESSAGE_HEADER_SIZE);
-
-        // Fill the buffer with the appropriate message header.
-        MessageTools::fillMessageHeader(MessageType::MessageDropInfo,
-                                        messageSize, messageBuffer, 0);
-
-        // Send the message.
-        // Note: Doesn't need a lock because we only mutate the map
-        //       from this thread (remember, this function is
-        //       called by ClientHandler.)
-        if (std::shared_ptr<Client> clientPtr
-            = clientMessage.clientPtr.lock()) {
-            clientPtr->queueMessage(messageBuffer, 0);
-        }
     }
 
     // Save the diff that the MessageSorter returned.
