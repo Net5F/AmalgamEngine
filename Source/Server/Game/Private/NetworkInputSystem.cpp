@@ -71,19 +71,21 @@ void NetworkInputSystem::processMessageDropEvents()
         NetworkID clientNetworkID = 0;
         if (messageDropEventQueue.try_dequeue(clientNetworkID)) {
             // Find the EntityID associated with the popped NetworkID.
-            EntityID clientEntityID = world.findEntityWithNetID(clientNetworkID);
+            EntityID clientEntityID
+                = world.findEntityWithNetID(clientNetworkID);
             if (clientEntityID != INVALID_ENTITY_ID) {
                 // We found the entity that dropped the message, handle it.
                 handleDropForEntity(clientEntityID);
             }
             else {
-                LOG_ERROR("Failed to find entity with netID: %u while processing a message drop event.",
+                LOG_ERROR("Failed to find entity with netID: %u while "
+                          "processing a message drop event.",
                           clientNetworkID);
             }
         }
         else {
-            LOG_ERROR(
-                "Expected element in messageDropEventQueue but dequeue failed.");
+            LOG_ERROR("Expected element in messageDropEventQueue but dequeue "
+                      "failed.");
         }
     }
 }

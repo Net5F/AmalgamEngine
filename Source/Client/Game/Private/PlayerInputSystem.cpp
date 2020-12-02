@@ -42,7 +42,8 @@ void PlayerInputSystem::processHeldInputs()
 
     // Update our saved input state.
     InputStateArr& playerInputs = world.inputs[world.playerData.ID].inputStates;
-    for (unsigned int inputType = 0; inputType < Input::Type::NumTypes; ++inputType) {
+    for (unsigned int inputType = 0; inputType < Input::Type::NumTypes;
+         ++inputType) {
         // If the saved state doesn't match the latest.
         if (newInputStates[inputType] != playerInputs[inputType]) {
             // Save the new state.
@@ -56,7 +57,8 @@ void PlayerInputSystem::processHeldInputs()
 
 void PlayerInputSystem::addCurrentInputsToHistory()
 {
-    world.playerData.inputHistory.push(world.inputs[world.playerData.ID].inputStates);
+    world.playerData.inputHistory.push(
+        world.inputs[world.playerData.ID].inputStates);
 }
 
 } // namespace Client

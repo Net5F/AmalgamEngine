@@ -33,5 +33,5 @@ public:
     bool isDirty{false};
 };
 
-} // namespace Server
+} // namespace Client
 } // namespace AM

@@ -10,7 +10,6 @@ namespace AM
 {
 namespace Client
 {
-
 MessageHandler::MessageHandler(Network& inNetwork)
 : network(inNetwork)
 {
@@ -85,8 +84,7 @@ void MessageHandler::handleEntityUpdate(BinaryBuffer& messageRecBuffer,
     if (!npcFound) {
         if (!(npcUpdateQueue.enqueue({NpcUpdateType::ImplicitConfirmation,
                                       nullptr, entityUpdate->tickNum}))) {
-            LOG_ERROR(
-                "Ran out of room in queue and memory allocation failed.");
+            LOG_ERROR("Ran out of room in queue and memory allocation failed.");
         }
     }
 }

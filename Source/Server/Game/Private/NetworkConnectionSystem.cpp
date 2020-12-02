@@ -76,7 +76,8 @@ void NetworkConnectionSystem::processDisconnectEvents()
         }
 
         // Find the client's associated entity.
-        EntityID clientEntityID = world.findEntityWithNetID(disconnectedClientID);
+        EntityID clientEntityID
+            = world.findEntityWithNetID(disconnectedClientID);
         if (clientEntityID != INVALID_ENTITY_ID) {
             // Found the entity, remove it.
             world.removeEntity(clientEntityID);

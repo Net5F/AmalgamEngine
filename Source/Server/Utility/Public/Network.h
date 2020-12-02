@@ -111,7 +111,8 @@ private:
      * Handles a received ClientInputs message.
      * @return The tick diff that inputMessageSorter.push() returned.
      */
-    Sint64 handleClientInputs(ClientMessage& clientMessage, BinaryBufferPtr& messageBuffer);
+    Sint64 handleClientInputs(ClientMessage& clientMessage,
+                              BinaryBufferPtr& messageBuffer);
 
     /**
      * Handles a received Heartbeat message.

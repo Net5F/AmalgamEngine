@@ -200,7 +200,8 @@ void Network::logNetworkStatistics()
              bytesSentPerSecond, bytesReceivedPerSecond);
 }
 
-Sint64 Network::handleClientInputs(ClientMessage& clientMessage, BinaryBufferPtr& messageBuffer)
+Sint64 Network::handleClientInputs(ClientMessage& clientMessage,
+                                   BinaryBufferPtr& messageBuffer)
 {
     // Deserialize the message.
     std::unique_ptr<ClientInputs> clientInputs
@@ -216,21 +217,18 @@ Sint64 Network::handleClientInputs(ClientMessage& clientMessage, BinaryBufferPtr
     // in front of the access (this does happen).
     Uint32 messageTickNum = clientInputs->tickNum;
     MessageSorterBase::PushResult pushResult
-        = inputMessageSorter.push(messageTickNum,
-                                  std::move(clientInputs));
+        = inputMessageSorter.push(messageTickNum, std::move(clientInputs));
 
     // If the sorter dropped the message, push a message drop event.
-    if (pushResult.result
-        != MessageSorterBase::ValidityResult::Valid) {
+    if (pushResult.result != MessageSorterBase::ValidityResult::Valid) {
         if (!messageDropEventQueue.enqueue(clientMessage.netID)) {
             LOG_ERROR("Ran out of room in queue and memory allocation failed.");
         }
 
-        LOG_INFO(
-            "Message was dropped. NetID: %u, diff: %d, result: %u, "
-            "tickNum: %u",
-            clientMessage.netID, pushResult.diff, pushResult.result,
-            messageTickNum);
+        LOG_INFO("Message was dropped. NetID: %u, diff: %d, result: %u, "
+                 "tickNum: %u",
+                 clientMessage.netID, pushResult.diff, pushResult.result,
+                 messageTickNum);
     }
 
     // Save the diff that the MessageSorter returned.
@@ -241,12 +239,12 @@ Sint64 Network::handleHeartbeat(BinaryBufferPtr& messageBuffer)
 {
     // Deserialize the message.
     Heartbeat heartbeat{};
-    MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
-                              heartbeat);
+    MessageTools::deserialize(*messageBuffer, messageBuffer->size(), heartbeat);
 
     // Calc the diff. Using the game's currentTick should be
     // accurate since we didn't have to lock anything.
-    return static_cast<Sint64>(heartbeat.tickNum) - static_cast<Sint64>(*currentTickPtr);
+    return static_cast<Sint64>(heartbeat.tickNum)
+           - static_cast<Sint64>(*currentTickPtr);
 }
 
 } // namespace Server

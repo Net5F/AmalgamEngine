@@ -121,7 +121,8 @@ std::unique_ptr<ConnectionResponse>
         messageHandler.connectionResponseQueue.try_dequeue(message);
     }
     else {
-        messageHandler.connectionResponseQueue.wait_dequeue_timed(message, timeoutMs * 1000);
+        messageHandler.connectionResponseQueue.wait_dequeue_timed(
+            message, timeoutMs * 1000);
     }
 
     return message;
@@ -135,7 +136,8 @@ std::shared_ptr<const EntityUpdate>
         messageHandler.playerUpdateQueue.try_dequeue(message);
     }
     else {
-        messageHandler.playerUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
+        messageHandler.playerUpdateQueue.wait_dequeue_timed(message,
+                                                            timeoutMs * 1000);
     }
 
     return message;
@@ -149,8 +151,8 @@ NpcReceiveResult Network::receiveNpcUpdate(Uint64 timeoutMs)
         messageWasReceived = messageHandler.npcUpdateQueue.try_dequeue(message);
     }
     else {
-        messageWasReceived
-            = messageHandler.npcUpdateQueue.wait_dequeue_timed(message, timeoutMs * 1000);
+        messageWasReceived = messageHandler.npcUpdateQueue.wait_dequeue_timed(
+            message, timeoutMs * 1000);
     }
 
     if (!messageWasReceived) {
@@ -297,7 +299,8 @@ void Network::processBatch()
     Uint8 confirmedTickCount
         = headerRecBuffer[ServerHeaderIndex::ConfirmedTickCount];
     for (unsigned int i = 0; i < confirmedTickCount; ++i) {
-        if (!(messageHandler.npcUpdateQueue.enqueue({NpcUpdateType::ExplicitConfirmation}))) {
+        if (!(messageHandler.npcUpdateQueue.enqueue(
+                {NpcUpdateType::ExplicitConfirmation}))) {
             LOG_ERROR("Ran out of room in queue and memory allocation failed.");
         }
     }
@@ -310,9 +313,10 @@ void Network::processReceivedMessage(MessageType messageType,
                                      Uint16 messageSize)
 {
     /* Route the message to the appropriate handler. */
-    switch(messageType) {
+    switch (messageType) {
         case MessageType::ConnectionResponse:
-            messageHandler.handleConnectionResponse(messageRecBuffer, messageSize);
+            messageHandler.handleConnectionResponse(messageRecBuffer,
+                                                    messageSize);
             break;
         case MessageType::EntityUpdate:
             messageHandler.handleEntityUpdate(messageRecBuffer, messageSize);

@@ -103,7 +103,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
         }
 
         /* Update the movements. */
-        const MovementComponent& receivedMovement = playerUpdate->movementComponent;
+        const MovementComponent& receivedMovement
+            = playerUpdate->movementComponent;
         currentMovement.velX = receivedMovement.velX;
         currentMovement.velY = receivedMovement.velY;
 
@@ -119,7 +120,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
         checkTickDiffValidity(tickDiff);
 
         const InputComponent& receivedInput = playerUpdate->inputComponent;
-        if (receivedInput.inputStates != world.playerData.inputHistory[tickDiff]) {
+        if (receivedInput.inputStates
+            != world.playerData.inputHistory[tickDiff]) {
             // Our prediction was wrong, accept the received input and set all
             // inputs in the history after the mismatched input to match it.
             world.inputs[playerID].inputStates = receivedInput.inputStates;
@@ -127,7 +129,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
                 world.playerData.inputHistory[i] = receivedInput.inputStates;
             }
 
-            // Set our old position to the current so we aren't oddly lerping back.
+            // Set our old position to the current so we aren't oddly lerping
+            // back.
             PositionComponent& oldPosition = world.oldPositions[playerID];
             oldPosition.x = currentPosition.x;
             oldPosition.y = currentPosition.y;
@@ -163,7 +166,8 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick)
     }
 }
 
-void PlayerMovementSystem::checkReceivedTickValidity(Uint32 receivedTick, Uint32 currentTick)
+void PlayerMovementSystem::checkReceivedTickValidity(Uint32 receivedTick,
+                                                     Uint32 currentTick)
 {
     if (receivedTick > currentTick) {
         LOG_ERROR("Received data for tick %u on tick %u. Server is in the "

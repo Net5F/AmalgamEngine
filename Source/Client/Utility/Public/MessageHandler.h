@@ -11,7 +11,6 @@ class EntityUpdate;
 
 namespace Client
 {
-
 class Network;
 class NpcUpdateMessage;
 
@@ -24,7 +23,8 @@ class MessageHandler
 public:
     MessageHandler(Network& inNetwork);
 
-    void handleConnectionResponse(BinaryBuffer& messageRecBuffer, Uint16 messageSize);
+    void handleConnectionResponse(BinaryBuffer& messageRecBuffer,
+                                  Uint16 messageSize);
 
     void handleEntityUpdate(BinaryBuffer& messageRecBuffer, Uint16 messageSize);
 

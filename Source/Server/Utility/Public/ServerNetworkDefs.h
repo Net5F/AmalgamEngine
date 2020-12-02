@@ -47,7 +47,7 @@ static constexpr unsigned int TICKDIFF_HISTORY_LENGTH
 static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_LOWER = 1;
 static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_UPPER = 3;
 /** The value that we'll adjust clients to if they fall outside the bounds.
-    */
+ */
 static constexpr Sint64 TICKDIFF_TARGET = 2;
 
 /** The minimum number of fresh diffs we'll use to calculate an adjustment.
