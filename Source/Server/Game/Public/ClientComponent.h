@@ -17,6 +17,10 @@ struct ClientComponent {
 public:
     /** The network ID associated with this client. */
     NetworkID netID = 0;
+
+    /** Tracks if a message from this client was received late and had to be
+        dropped. */
+    bool messageWasDropped = false;
 };
 
 } // namespace Server

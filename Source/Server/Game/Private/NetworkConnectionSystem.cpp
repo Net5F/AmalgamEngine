@@ -76,18 +76,13 @@ void NetworkConnectionSystem::processDisconnectEvents()
         }
 
         // Find the client's associated entity.
-        bool entityFound = false;
-        for (std::size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
-            if ((world.componentFlags[entityID] & ComponentFlag::Client)
-                && (world.clients[entityID].netID == disconnectedClientID)) {
-                // Found the entity, remove it.
-                world.removeEntity(entityID);
-                entityFound = true;
-                LOG_INFO("Removed entity with netID: %u", entityID);
-            }
+        EntityID clientEntityID = world.findEntityWithNetID(disconnectedClientID);
+        if (clientEntityID != INVALID_ENTITY_ID) {
+            // Found the entity, remove it.
+            world.removeEntity(clientEntityID);
+            LOG_INFO("Removed entity with netID: %u", clientEntityID);
         }
-
-        if (!entityFound) {
+        else {
             LOG_ERROR("Failed to find entity with netID: %u while erasing.",
                       disconnectedClientID);
         }

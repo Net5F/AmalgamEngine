@@ -40,6 +40,13 @@ private:
      */
     void replayInputs(Uint32 latestReceivedTick);
 
+    /** If receivedTick > currentTick, logs an error. */
+    void checkReceivedTickValidity(Uint32 receivedTick, Uint32 currentTick);
+
+    /** If tickDiff is larger than the number of elements we have in the
+        player's input history, logs an error. */
+    void checkTickDiffValidity(Uint32 tickDiff);
+
     Game& game;
     World& world;
     Network& network;

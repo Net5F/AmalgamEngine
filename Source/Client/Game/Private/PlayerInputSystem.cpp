@@ -16,7 +16,7 @@ PlayerInputSystem::PlayerInputSystem(Game& inGame, World& inWorld)
 
 void PlayerInputSystem::processInputEvent(SDL_Event& event)
 {
-    // Process all events.
+    // Process the input event.
     if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
         Input::State inputState
             = (event.type == SDL_KEYDOWN) ? Input::Pressed : Input::Released;
@@ -34,6 +34,9 @@ void PlayerInputSystem::processInputEvent(SDL_Event& event)
                 break;
             case SDLK_d:
                 keyInput.type = Input::Right;
+                // TEMP
+                LOG_INFO("Pressed right");
+                // TEMP
                 break;
         }
 

@@ -75,6 +75,7 @@ public:
 
     moodycamel::ReaderWriterQueue<NetworkID>& getConnectEventQueue();
     moodycamel::ReaderWriterQueue<NetworkID>& getDisconnectEventQueue();
+    moodycamel::ReaderWriterQueue<NetworkID>& getMessageDropEventQueue();
 
     /** Used for passing us a pointer to the Game's currentTick. */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
@@ -136,9 +137,14 @@ private:
 
     ClientHandler clientHandler;
 
-    /** These queues are used to inform the game of connection events. */
+    /** Used to inform the sim of client connections. */
     moodycamel::ReaderWriterQueue<NetworkID> connectEventQueue;
+    /** Used to inform the sim of client disconnects. */
     moodycamel::ReaderWriterQueue<NetworkID> disconnectEventQueue;
+    /** Used to inform the sim of clients that we dropped messages from.
+        The sim should re-send these clients their current state since they
+        predicted an input that was dropped. */
+    moodycamel::ReaderWriterQueue<NetworkID> messageDropEventQueue;
 
     /** Stores input messages received from clients, sorted by tick number. */
     MessageSorter<std::unique_ptr<ClientInputs>> inputMessageSorter;

@@ -55,6 +55,14 @@ public:
      */
     std::array<bool, MAX_ENTITIES> entityIsDirty;
 
+    /**
+     * Searches all entities with ClientComponents to find one associated with
+     * the given networkID.
+     * @return The EntityID of the entity associated with networkID if found,
+     *         else INVALID_ENTITY_ID.
+     */
+    EntityID findEntityWithNetID(NetworkID networkID);
+
     Position getSpawnPoint();
 
 private:

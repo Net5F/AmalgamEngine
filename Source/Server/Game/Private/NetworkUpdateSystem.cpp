@@ -20,8 +20,7 @@ NetworkUpdateSystem::NetworkUpdateSystem(Game& inGame, World& inWorld,
 
 void NetworkUpdateSystem::sendClientUpdates()
 {
-    // Collect the dirty entities so we don't need to re-find them for every
-    // client.
+    // Collect the dirty entities.
     std::vector<EntityID> dirtyEntities;
     for (EntityID i = 0; i < MAX_ENTITIES; ++i) {
         if (world.entityIsDirty[i]) {
@@ -32,33 +31,48 @@ void NetworkUpdateSystem::sendClientUpdates()
     /* Update clients as necessary. */
     for (EntityID entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
         if ((world.componentFlags[entityID] & ComponentFlag::Client)) {
+            // Build an array to flag which entities need to be sent to this
+            // client.
+            std::array<bool, MAX_ENTITIES> entitiesToSend = {};
+
+            // Add all the dirty entities.
+            // TODO: Check if the entity is in our AOI before adding.
+            for (EntityID dirtyEntityID : dirtyEntities) {
+                entitiesToSend[dirtyEntityID] = true;
+            }
+
+            // If this entity had a drop, add it.
+            // (It mispredicted, so it needs to know the actual state it's in.)
+            if (world.clients[entityID].messageWasDropped) {
+                entitiesToSend[entityID] = true;
+                world.clients[entityID].messageWasDropped = false;
+            }
+
             // Send the entity whatever data it needs.
-            constructAndSendUpdate(entityID, dirtyEntities);
+            constructAndSendUpdate(entityID, entitiesToSend);
         }
     }
 
     // Mark any dirty entities as clean
-    for (EntityID dirtyEntity : dirtyEntities) {
-        world.entityIsDirty[dirtyEntity] = false;
+    for (EntityID dirtyEntityID : dirtyEntities) {
+        world.entityIsDirty[dirtyEntityID] = false;
     }
 }
 
 void NetworkUpdateSystem::constructAndSendUpdate(
-    EntityID entityID, std::vector<EntityID>& dirtyEntities)
+    EntityID entityID, std::array<bool, MAX_ENTITIES>& entitiesToSend)
 {
     /** Fill the vector of entities to send. */
     EntityUpdate entityUpdate{};
     ClientComponent& clientComponent = world.clients[entityID];
-    for (EntityID dirtyEntID : dirtyEntities) {
-        fillEntityData(dirtyEntID, entityUpdate.entities);
+    for (EntityID i = 0; i < MAX_ENTITIES; ++i) {
+        if (entitiesToSend[i]) {
+            fillEntityData(i, entityUpdate.entities);
+        }
     }
 
     /* If there are updates to send, send an update message. */
     if (entityUpdate.entities.size() > 0) {
-        //        LOG_INFO("Queueing message for entity: %u with tick: %u",
-        //        entityID,
-        //                 game.getCurrentTick());
-
         // Finish filling the EntityUpdate.
         entityUpdate.tickNum = game.getCurrentTick();
 

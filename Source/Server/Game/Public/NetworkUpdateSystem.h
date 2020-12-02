@@ -13,8 +13,9 @@ class World;
 class Network;
 
 /**
- * This class is in charge of checking for data that needs to be sent, wrapping
- * it appropriately, and passing it to the Network's send queue.
+ * This class is in charge of checking for data that needs to be sent to
+ * clients, wrapping it appropriately, and passing it to the Network's send
+ * queue.
  */
 class NetworkUpdateSystem
 {
@@ -32,7 +33,7 @@ private:
      * entityID on this tick.
      */
     void constructAndSendUpdate(EntityID entityID,
-                                std::vector<EntityID>& dirtyEntities);
+                                std::array<bool, MAX_ENTITIES>& entitiesToSend);
 
     /**
      * Serializes the given entity's relevant world

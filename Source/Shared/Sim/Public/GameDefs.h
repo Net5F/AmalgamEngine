@@ -45,7 +45,8 @@ struct ComponentFlag {
         Movement = 1 << 1,
         Input = 1 << 2,
         Sprite = 1 << 3,
-        Client = 1 << 4
+        Client = 1 << 4,
+        DataState = 1 << 5
     };
 };
 

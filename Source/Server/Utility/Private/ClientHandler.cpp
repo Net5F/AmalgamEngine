@@ -81,7 +81,9 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
         }
 
         // Add an event to the Network's queue.
-        network.getConnectEventQueue().enqueue(newID);
+        if (!network.getConnectEventQueue().enqueue(newID)) {
+            LOG_ERROR("Ran out of room in queue and memory allocation failed.");
+        }
 
         newPeer = acceptor.accept();
     }

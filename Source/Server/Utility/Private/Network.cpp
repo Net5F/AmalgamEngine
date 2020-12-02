@@ -138,6 +138,11 @@ moodycamel::ReaderWriterQueue<NetworkID>& Network::getDisconnectEventQueue()
     return disconnectEventQueue;
 }
 
+moodycamel::ReaderWriterQueue<NetworkID>& Network::getMessageDropEventQueue()
+{
+    return messageDropEventQueue;
+}
+
 void Network::registerCurrentTickPtr(
     const std::atomic<Uint32>* inCurrentTickPtr)
 {
@@ -214,9 +219,13 @@ Sint64 Network::handleClientInputs(ClientMessage& clientMessage, BinaryBufferPtr
         = inputMessageSorter.push(messageTickNum,
                                   std::move(clientInputs));
 
-    // Log if the sorter dropped the message.
+    // If the sorter dropped the message, push a message drop event.
     if (pushResult.result
         != MessageSorterBase::ValidityResult::Valid) {
+        if (!messageDropEventQueue.enqueue(clientMessage.netID)) {
+            LOG_ERROR("Ran out of room in queue and memory allocation failed.");
+        }
+
         LOG_INFO(
             "Message was dropped. NetID: %u, diff: %d, result: %u, "
             "tickNum: %u",

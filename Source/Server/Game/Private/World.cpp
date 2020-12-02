@@ -81,6 +81,20 @@ void World::removeComponent(EntityID entityID,
     }
 }
 
+EntityID World::findEntityWithNetID(NetworkID networkID)
+{
+    // Find the EntityID associated with the popped NetworkID.
+    for (EntityID entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
+        if ((componentFlags[entityID] & ComponentFlag::Client)
+            && (clients[entityID].netID == networkID)) {
+            return entityID;
+        }
+    }
+
+    // Failed to find an entity associated with the given networkID.
+    return INVALID_ENTITY_ID;
+}
+
 Position World::getSpawnPoint()
 {
     return {xDistribution(generator), yDistribution(generator)};
