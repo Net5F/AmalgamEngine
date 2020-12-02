@@ -56,7 +56,7 @@ struct Position {
 };
 
 struct Input {
-    enum Type {
+    enum Type : Uint8 {
         None,
         Up,
         Left,

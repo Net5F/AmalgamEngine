@@ -3,6 +3,7 @@
 #include "World.h"
 #include "Network.h"
 #include "Log.h"
+#include "Ignore.h"
 
 namespace AM
 {
@@ -14,42 +15,41 @@ PlayerInputSystem::PlayerInputSystem(Game& inGame, World& inWorld)
 {
 }
 
-void PlayerInputSystem::processInputEvent(SDL_Event& event)
+void PlayerInputSystem::processMomentaryInput(SDL_Event& event)
 {
-    // Process the input event.
-    if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
-        Input::State inputState
-            = (event.type == SDL_KEYDOWN) ? Input::Pressed : Input::Released;
-        Input keyInput = {Input::None, inputState};
+    // We currently don't have any momentary inputs that we care about.
+    ignore(event);
+}
 
-        switch (event.key.keysym.sym) {
-            case SDLK_w:
-                keyInput.type = Input::Up;
-                break;
-            case SDLK_a:
-                keyInput.type = Input::Left;
-                break;
-            case SDLK_s:
-                keyInput.type = Input::Down;
-                break;
-            case SDLK_d:
-                keyInput.type = Input::Right;
-                // TEMP
-                LOG_INFO("Pressed right");
-                // TEMP
-                break;
-        }
+void PlayerInputSystem::processHeldInputs()
+{
+    const Uint8* keyStates = SDL_GetKeyboardState(nullptr);
+    InputStateArr newInputStates{};
 
-        if (keyInput.type != Input::None) {
-            EntityID player = world.playerData.ID;
-            Input::State& entityState
-                = world.inputs[player].inputStates[keyInput.type];
+    // Get the latest state of all the keys that we care about.
+    if (keyStates[SDL_SCANCODE_W]) {
+        newInputStates[Input::Up] = Input::Pressed;
+    }
+    if (keyStates[SDL_SCANCODE_A]) {
+        newInputStates[Input::Left] = Input::Pressed;
+    }
+    if (keyStates[SDL_SCANCODE_S]) {
+        newInputStates[Input::Down] = Input::Pressed;
+    }
+    if (keyStates[SDL_SCANCODE_D]) {
+        newInputStates[Input::Right] = Input::Pressed;
+    }
 
-            // If the state changed, save it and mark the player as dirty.
-            if (entityState != keyInput.state) {
-                entityState = keyInput.state;
-                world.playerData.isDirty = true;
-            }
+    // Update our saved input state.
+    InputStateArr& playerInputs = world.inputs[world.playerData.ID].inputStates;
+    for (unsigned int inputType = 0; inputType < Input::Type::NumTypes; ++inputType) {
+        // If the saved state doesn't match the latest.
+        if (newInputStates[inputType] != playerInputs[inputType]) {
+            // Save the new state.
+            playerInputs[inputType] = newInputStates[inputType];
+
+            // Mark the player as dirty.
+            world.playerData.isDirty = true;
         }
     }
 }

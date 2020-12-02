@@ -199,9 +199,12 @@ void Game::processUserInputEvents()
         }
         else {
             // Assume it's a key or mouse event.
-            playerInputSystem.processInputEvent(event);
+            playerInputSystem.processMomentaryInput(event);
         }
     }
+
+    // Process held inputs (movement, etc).
+    playerInputSystem.processHeldInputs();
 }
 
 void Game::initTimer()

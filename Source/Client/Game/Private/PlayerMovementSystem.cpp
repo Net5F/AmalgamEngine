@@ -56,15 +56,6 @@ void PlayerMovementSystem::processMovements()
     MovementHelpers::moveEntity(currentPosition, currentMovement,
                                 world.inputs[playerID].inputStates,
                                 GAME_TICK_TIMESTEP_S);
-    // TEMP
-    if (oldPosition.x == currentPosition.x
-        && oldPosition.y == currentPosition.y) {
-        LOG_INFO("Didn't move");
-    }
-    else {
-        LOG_INFO("Moved");
-    }
-    // TEMP
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates()
@@ -140,10 +131,6 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
             PositionComponent& oldPosition = world.oldPositions[playerID];
             oldPosition.x = currentPosition.x;
             oldPosition.y = currentPosition.y;
-
-            // TEMP
-            LOG_INFO("Inputs mismatched. Tick: %u, tickDiff: %u", receivedTick, tickDiff);
-            // TEMP
         }
 
         receivedUpdate = network.receivePlayerUpdate();
