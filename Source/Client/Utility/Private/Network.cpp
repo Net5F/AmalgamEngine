@@ -187,12 +187,14 @@ int Network::transferTickAdjustment()
     if (isApplyingTickAdjustment) {
         int currentAdjustment = tickAdjustment;
         if (currentAdjustment < 0) {
-            // The sim can only freeze for 1 tick at a time.
+            // The sim can only freeze for 1 tick at a time, transfer 1 from
+            // tickAdjustment.
             tickAdjustment += 1;
-            return currentAdjustment;
+            return -1;
         }
         else if (currentAdjustment > 0) {
-            // The sim can process multiple iterations to catch up.
+            // The sim can process multiple iterations to catch up, transfer
+            // all of tickAdjustment.
             tickAdjustment -= currentAdjustment;
             return currentAdjustment;
         }
