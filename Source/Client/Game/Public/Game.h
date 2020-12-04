@@ -34,7 +34,8 @@ public:
     void fakeConnection();
 
     /**
-     * Runs an iteration of the game loop.
+     * Updates accumulatedTime. If greater than the tick timestep, processes
+     * the next sim iteration.
      */
     void tick();
 
@@ -48,6 +49,11 @@ public:
     void initTimer();
 
     World& getWorld();
+
+    /**
+     * Returns how much time in seconds is left until the next iteration.
+     */
+    double getTimeTillNextIteration();
 
     /**
      * Returns how far we are temporally into our wait for the next iteration

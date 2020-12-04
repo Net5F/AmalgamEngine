@@ -61,7 +61,7 @@ bool Network::connect()
 
 void Network::tick()
 {
-    accumulatedTime += tickTimer.getDeltaSeconds(true);
+    accumulatedTime += heartbeatTimer.getDeltaSeconds(true);
 
     if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
         // Send a heartbeat if we need to.
@@ -210,7 +210,7 @@ int Network::transferTickAdjustment()
 
 void Network::initTimer()
 {
-    tickTimer.updateSavedTime();
+    heartbeatTimer.updateSavedTime();
 }
 
 void Network::registerCurrentTickPtr(
@@ -353,6 +353,13 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
             }
         }
     }
+}
+
+double Network::getTimeTillNextHeartbeat()
+{
+    // The time since accumulatedTime was last updated.
+    double timeSinceIteration = heartbeatTimer.getDeltaSeconds(false);
+    return (NETWORK_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
 }
 
 void Network::logNetworkStatistics()

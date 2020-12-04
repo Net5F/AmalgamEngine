@@ -38,7 +38,10 @@ public:
     bool connect();
 
     /**
-     * If no messages have been sent since the last heartbeat, sends a message.
+     * Updates accumulatedTime. If greater than the tick timestep and no
+     * messages have been sent since the last heartbeat, sends a message.
+     *
+     * Also logs network statistics if it's time to do so.
      */
     void tick();
 
@@ -87,6 +90,11 @@ public:
     void setPlayerID(EntityID inPlayerID);
     EntityID getPlayerID();
 
+    /**
+     * Returns how much time in seconds is left until the next heartbeat.
+     */
+    double getTimeTillNextHeartbeat();
+
     void setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled);
 
 private:
@@ -128,7 +136,7 @@ private:
     void logNetworkStatistics();
 
     /** Used to time when we should process the network tick. */
-    Timer tickTimer;
+    Timer heartbeatTimer;
 
     /** The aggregated time since we last processed a tick. */
     double accumulatedTime;

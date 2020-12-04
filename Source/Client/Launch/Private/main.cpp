@@ -23,7 +23,7 @@ using namespace AM::Client;
 /** We delay for 1ms when possible to reduce our CPU usage. We can't trust the
    scheduler to come back to us after exactly 1ms though, so we need to give it
    some leeway. Picked .003 = 3ms as a reasonable number. Open for tweaking. */
-constexpr double DELAY_LEEWAY_S = .003;
+constexpr double DELAY_MINIMUM_TIME_S = .003;
 
 int main(int argc, char** argv)
 try {
@@ -78,24 +78,20 @@ try {
         network.tick();
 
         // Let the render system render if it needs to.
-        renderSystem.render();
+        renderSystem.tick();
 
-        // TODO: Figure out a way to safely add delays, and test
-        //       that the solution doesn't cause the client to fall behind the
-        //       server.
-        //        else if (((renderSystem.getAccumulatedTime() +
-        //        executionSeconds + DELAY_LEEWAY_S)
-        //                   < RenderSystem::RENDER_INTERVAL_S)
-        //                 && ((game.getAccumulatedTime() + executionSeconds
-        //                      + DELAY_LEEWAY_S)
-        //                     < GAME_TICK_INTERVAL_S)) {
-        //            // If we have enough time leftover to delay for a few ms,
-        //            do it.
-        //            // Note: We try to delay for 1ms because it will generally
-        //            end up
-        //            //       delaying for 1-2ms.
-        //            SDL_Delay(1);
-        //        }
+        // See if we have enough time left to sleep.
+        double simTimeLeft = game.getTimeTillNextIteration();
+        double networkTimeLeft = network.getTimeTillNextHeartbeat();
+        double renderTimeLeft = renderSystem.getTimeTillNextFrame();
+        if ((simTimeLeft > DELAY_MINIMUM_TIME_S)
+            && (networkTimeLeft > DELAY_MINIMUM_TIME_S)
+            && (renderTimeLeft > DELAY_MINIMUM_TIME_S)) {
+            // We have enough time to sleep for a few ms.
+            // Note: We try to delay for 1ms because the OS will generally end
+            //       up delaying us for 1-3ms.
+            SDL_Delay(1);
+        }
     }
 
     return 0;

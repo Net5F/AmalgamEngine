@@ -217,6 +217,13 @@ World& Game::getWorld()
     return world;
 }
 
+double Game::getTimeTillNextIteration()
+{
+    // The time since accumulatedTime was last updated.
+    double timeSinceIteration = iterationTimer.getDeltaSeconds(false);
+    return (GAME_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
+}
+
 double Game::getIterationProgress()
 {
     // The time since accumulatedTime was last updated.

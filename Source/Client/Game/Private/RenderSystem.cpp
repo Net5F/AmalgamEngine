@@ -19,12 +19,12 @@ RenderSystem::RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame,
     ignore(window);
 }
 
-void RenderSystem::render()
+void RenderSystem::tick()
 {
     accumulatedTime += frameTimer.getDeltaSeconds(true);
 
-    // Process the rendering for this frame.
-    if (accumulatedTime >= RENDER_INTERVAL_S) {
+    if (accumulatedTime >= RENDER_TICK_TIMESTEP_S) {
+        /* Process the rendering for this frame. */
         renderer.Clear();
 
         // How far we are between game ticks in decimal percent.
@@ -54,8 +54,8 @@ void RenderSystem::render()
 
         renderer.Present();
 
-        accumulatedTime -= RENDER_INTERVAL_S;
-        if (accumulatedTime >= RENDER_INTERVAL_S) {
+        accumulatedTime -= RENDER_TICK_TIMESTEP_S;
+        if (accumulatedTime >= RENDER_TICK_TIMESTEP_S) {
             // If we've accumulated enough time to render again, something
             // happened (probably a window event that stopped app execution.)
             // We still only want to render the latest data, but it's worth
@@ -74,9 +74,11 @@ void RenderSystem::initTimer()
     frameTimer.updateSavedTime();
 }
 
-double RenderSystem::getAccumulatedTime()
+double RenderSystem::getTimeTillNextFrame()
 {
-    return accumulatedTime;
+    // The time since accumulatedTime was last updated.
+    double timeSinceIteration = frameTimer.getDeltaSeconds(false);
+    return (RENDER_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
 }
 
 } // namespace Client

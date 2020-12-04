@@ -68,9 +68,11 @@ void Game::initTimer()
     iterationTimer.updateSavedTime();
 }
 
-double Game::getAccumulatedTime()
+double Game::getTimeTillNextIteration()
 {
-    return accumulatedTime;
+    // The time since accumulatedTime was last updated.
+    double timeSinceIteration = iterationTimer.getDeltaSeconds(false);
+    return (GAME_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
 }
 
 Uint32 Game::getCurrentTick()

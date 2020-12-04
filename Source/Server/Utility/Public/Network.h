@@ -92,6 +92,11 @@ public:
                                                   Uint8* messageBuffer,
                                                   std::size_t size);
 
+    /**
+     * Returns how much time in seconds is left until the next heartbeat.
+     */
+    double getTimeTillNextHeartbeat();
+
 private:
     /**
      * Tries to send any messages in each client's queue over the network.
@@ -121,7 +126,7 @@ private:
     Sint64 handleHeartbeat(BinaryBufferPtr& messageBuffer);
 
     /** Used to time when we should process the network tick. */
-    Timer tickTimer;
+    Timer heartbeatTimer;
 
     /** The aggregated time since we last processed a tick. */
     double accumulatedTime;

@@ -15,6 +15,11 @@
 using namespace AM;
 using namespace AM::Server;
 
+/** We delay for 1ms when possible to reduce our CPU usage. We can't trust the
+   scheduler to come back to us after exactly 1ms though, so we need to give it
+   some leeway. Picked .003 = 3ms as a reasonable number. Open for tweaking. */
+constexpr double DELAY_MINIMUM_TIME_S = .003;
+
 int inputThread(std::atomic<bool>* exitRequested)
 {
     while (!(*exitRequested)) {
@@ -62,6 +67,17 @@ try {
 
         // Send waiting messages.
         network.tick();
+
+        // See if we have enough time left to sleep.
+        double simTimeLeft = game.getTimeTillNextIteration();
+        double networkTimeLeft = network.getTimeTillNextHeartbeat();
+        if ((simTimeLeft > DELAY_MINIMUM_TIME_S)
+            && (networkTimeLeft > DELAY_MINIMUM_TIME_S)) {
+            // We have enough time to sleep for a few ms.
+            // Note: We try to delay for 1ms because the OS will generally end
+            //       up delaying us for 1-3ms.
+            SDL_Delay(1);
+        }
     }
 
     inputThreadObj.join();

@@ -20,12 +20,12 @@ Network::Network()
 , currentTickPtr(nullptr)
 {
     // Init the timer to the current time.
-    tickTimer.updateSavedTime();
+    heartbeatTimer.updateSavedTime();
 }
 
 void Network::tick()
 {
-    accumulatedTime += tickTimer.getDeltaSeconds(true);
+    accumulatedTime += heartbeatTimer.getDeltaSeconds(true);
 
     if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
         // Send all messages for this network tick.
@@ -115,7 +115,7 @@ void Network::endReceiveInputMessages()
 
 void Network::initTimer()
 {
-    tickTimer.updateSavedTime();
+    heartbeatTimer.updateSavedTime();
 }
 
 ClientMap& Network::getClientMap()
@@ -174,6 +174,13 @@ BinaryBufferSharedPtr Network::constructMessage(MessageType type,
               MESSAGE_HEADER_SIZE + dynamicBuffer->data());
 
     return dynamicBuffer;
+}
+
+double Network::getTimeTillNextHeartbeat()
+{
+    // The time since accumulatedTime was last updated.
+    double timeSinceIteration = heartbeatTimer.getDeltaSeconds(false);
+    return (NETWORK_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
 }
 
 void Network::sendClientUpdates()

@@ -15,7 +15,7 @@ class RenderSystem
 {
 public:
     static constexpr unsigned int RENDER_TICKS_PER_SECOND = 60;
-    static constexpr double RENDER_INTERVAL_S
+    static constexpr double RENDER_TICK_TIMESTEP_S
         = 1.0 / static_cast<double>(RENDER_TICKS_PER_SECOND);
 
     /** An unreasonable amount of time for the render tick to be late by.
@@ -26,12 +26,16 @@ public:
     RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame,
                  SDL2pp::Window& inWindow);
 
-    void render();
+    void tick();
 
     /** Initialize the frame timer. */
     void initTimer();
 
-    double getAccumulatedTime();
+    /**
+     * Returns how far we are temporally into our wait for the next frame
+     * render. e.g. .01 if we're 10% of the way to the next frame.
+     */
+    double getTimeTillNextFrame();
 
 private:
     SDL2pp::Renderer& renderer;

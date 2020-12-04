@@ -30,7 +30,10 @@ public:
     /** Initialize the iteration timer. */
     void initTimer();
 
-    double getAccumulatedTime();
+    /**
+     * Returns how much time in seconds is left until the next iteration.
+     */
+    double getTimeTillNextIteration();
 
     Uint32 getCurrentTick();
 
