@@ -47,8 +47,8 @@ void Game::connect()
     }
 
     // Get our info from the connection response.
-    EntityID player = connectionResponse->entityID;
-    LOG_INFO("Received connection response. ID: %u, tick: %u", player,
+    EntityID playerID = connectionResponse->entityID;
+    LOG_INFO("Received connection response. ID: %u, tick: %u", playerID,
              connectionResponse->tickNum);
 
     // Aim our tick for some reasonable point ahead of the server.
@@ -59,24 +59,25 @@ void Game::connect()
     SDL2pp::Rect textureRect(0, 32, 16, 16);
 
     // Register the player ID with the world and the network.
-    world.registerPlayerID(player);
+    world.registerPlayerID(playerID);
 
     // Initialize the player state.
-    world.addEntity("Player", player);
-    world.positions[player].x = connectionResponse->x;
-    world.positions[player].y = connectionResponse->y;
-    world.oldPositions[player].x = world.positions[player].x;
-    world.oldPositions[player].y = world.positions[player].y;
-    world.movements[player].maxVelX = 250;
-    world.movements[player].maxVelY = 250;
-    world.sprites[player].texturePtr = sprites;
-    world.sprites[player].posInTexture = textureRect;
-    world.sprites[player].width = 64;
-    world.sprites[player].height = 64;
-    world.attachComponent(player, ComponentFlag::Input);
-    world.attachComponent(player, ComponentFlag::Movement);
-    world.attachComponent(player, ComponentFlag::Position);
-    world.attachComponent(player, ComponentFlag::Sprite);
+    world.addEntity("Player", playerID);
+    world.positions[playerID].x = connectionResponse->x;
+    world.positions[playerID].y = connectionResponse->y;
+    world.oldPositions[playerID].x = world.positions[playerID].x;
+    world.oldPositions[playerID].y = world.positions[playerID].y;
+    world.movements[playerID].maxVelX = 250;
+    world.movements[playerID].maxVelY = 250;
+    world.inputs[playerID].inputStates = {};
+    world.sprites[playerID].texturePtr = sprites;
+    world.sprites[playerID].posInTexture = textureRect;
+    world.sprites[playerID].width = 64;
+    world.sprites[playerID].height = 64;
+    world.attachComponent(playerID, ComponentFlag::Input);
+    world.attachComponent(playerID, ComponentFlag::Movement);
+    world.attachComponent(playerID, ComponentFlag::Position);
+    world.attachComponent(playerID, ComponentFlag::Sprite);
 }
 
 void Game::fakeConnection()

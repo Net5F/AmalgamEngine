@@ -41,11 +41,14 @@ void NetworkConnectionSystem::processConnectEvents()
 
         // Build their entity.
         EntityID newEntityID = world.addEntity("Player");
-        const Position& spawnPoint = world.getSpawnPoint();
+        const Position spawnPoint = world.getSpawnPoint();
         world.positions[newEntityID].x = spawnPoint.x;
         world.positions[newEntityID].y = spawnPoint.y;
+        world.movements[newEntityID].velX = 0;
+        world.movements[newEntityID].velY = 0;
         world.movements[newEntityID].maxVelX = 250;
         world.movements[newEntityID].maxVelY = 250;
+        world.inputs[newEntityID].inputStates = {};
         world.clients[newEntityID].netID = clientNetworkID;
         world.attachComponent(newEntityID, ComponentFlag::Input);
         world.attachComponent(newEntityID, ComponentFlag::Movement);

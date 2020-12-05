@@ -22,7 +22,7 @@ unsigned int IDPool::reserveID()
     }
 
     // Find the next empty index.
-    for (unsigned int i = 0; i < poolSize; ++i) {
+    for (unsigned int i = 1; i < poolSize; ++i) {
         // If this index is false (ID is unused).
         unsigned int index = (lastAddedIndex + i) % containerSize;
         if (!IDs[index]) {

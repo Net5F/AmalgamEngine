@@ -12,8 +12,19 @@ class IDPool
 public:
     IDPool(unsigned int inPoolSize);
 
+    /**
+     * Reserves and returns the next empty ID.
+     *
+     * Marches forward, e.g. if 0-10 were reserved and freed, 11 will be the
+     * next reserved ID. This, along with SAFETY_BUFFER, aims to remove
+     * situations where an ID was reserved, freed, and re-reserved while old
+     * data exists in the system.
+     */
     unsigned int reserveID();
 
+    /**
+     * Frees an ID for reuse.
+     */
     void freeID(unsigned int ID);
 
 private:
