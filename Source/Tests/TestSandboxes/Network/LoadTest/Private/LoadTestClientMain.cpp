@@ -49,11 +49,7 @@ try {
     }
 
     // Set up the SDL constructs.
-    SDL2pp::SDL sdl(SDL_INIT_VIDEO);
-    SDL2pp::Window window("Amalgam Load Test Client", SDL_WINDOWPOS_UNDEFINED,
-                          SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
-                          SDL_WINDOW_SHOWN);
-    SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL2pp::SDL sdl();
 
     // Set up file logging.
     // TODO: This currently will do weird stuff if you have 2 instances of this

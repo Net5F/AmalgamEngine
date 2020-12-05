@@ -17,7 +17,10 @@ class Network;
 namespace LTC
 {
 /**
+ * Represents the simulation for a single simulated client.
  *
+ * This is a minimal form of the sim, just maintaining tick timing and sending
+ * inputs once in a while.
  */
 class WorldSim
 {
