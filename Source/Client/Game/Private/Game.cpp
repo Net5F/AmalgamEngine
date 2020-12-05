@@ -97,6 +97,7 @@ void Game::fakeConnection()
     world.oldPositions[player].y = world.positions[player].y;
     world.movements[player].maxVelX = 250;
     world.movements[player].maxVelY = 250;
+    world.inputs[playerID].inputStates = {};
     world.sprites[player].texturePtr = sprites;
     world.sprites[player].posInTexture = textureRect;
     world.sprites[player].width = 64;
