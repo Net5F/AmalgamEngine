@@ -158,6 +158,9 @@ Message Client::receiveMessage()
 
             return {messageResult.messageType, std::move(messageBuffer)};
         }
+        else {
+            LOG_ERROR("Data was not present when expected.");
+        }
     }
     else if (headerResult == NetworkResult::NoWaitingData) {
         // If we timed out, drop the connection.
@@ -165,8 +168,8 @@ Message Client::receiveMessage()
         if (delta > CLIENT_TIMEOUT_S) {
             peer = nullptr;
             LOG_INFO("Dropped connection, peer timed out. Time since last "
-                     "message: %.6f seconds. Timeout: %.6f",
-                     delta, CLIENT_TIMEOUT_S);
+                     "message: %.6f seconds. Timeout: %.6f, NetID: %u",
+                     delta, CLIENT_TIMEOUT_S, netID);
             return {MessageType::NotSet, nullptr};
         }
     }
