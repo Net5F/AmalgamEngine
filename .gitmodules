@@ -16,3 +16,6 @@
 [submodule "Libraries/bitsery"]
 	path = Libraries/bitsery
 	url = git@github.com:Mmpuskas/bitsery.git
+[submodule "Libraries/entt"]
+	path = Libraries/entt
+	url = git@github.com:skypjack/entt.git

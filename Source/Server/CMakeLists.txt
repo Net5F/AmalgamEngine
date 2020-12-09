@@ -24,9 +24,10 @@ target_link_libraries(Server
         SDL2_net-static
         SDL2pp
         Bitsery::bitsery
-        Shared
         readerwriterqueue
         CircularBuffer
+        EnTT::EnTT
+        Shared
 )
 
 # Compile with C++17

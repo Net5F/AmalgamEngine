@@ -34,6 +34,10 @@ include("${PROJECT_SOURCE_DIR}/../CMake/readerwriterqueue.cmake")
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/CircularBuffer/"
                  "${PROJECT_BINARY_DIR}/Libraries/CircularBuffer/")
 
+# Include header-only EnTT.
+add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/entt/"
+                 "${PROJECT_BINARY_DIR}/Libraries/entt/")
+
 # Build shared library
 add_subdirectory(Shared)
 
