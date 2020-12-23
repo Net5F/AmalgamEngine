@@ -57,8 +57,8 @@ void Game::connect()
 
     // Get our info from the connection response.
     entt::entity playerEntity = connectionResponse->entity;
-    LOG_INFO("Received connection response. ID: %u, tick: %u", playerEntity,
-             connectionResponse->tickNum);
+    LOG_INFO("Received connection response. ID: %u, tick: %u, pos: (%.4f, %.4f)", playerEntity,
+             connectionResponse->tickNum, connectionResponse->x, connectionResponse->y);
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.

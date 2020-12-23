@@ -24,7 +24,7 @@ void MessageHandler::handleConnectionResponse(BinaryBuffer& messageRecBuffer,
     MessageTools::deserialize(messageRecBuffer, messageSize,
                               *connectionResponse);
 
-    // Grab our player ID so we can determine which update messages are for
+    // Save our player entity so we can determine which update messages are for
     // the player.
     network.setPlayerEntity(connectionResponse->entity);
 

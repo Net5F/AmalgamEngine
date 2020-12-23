@@ -11,6 +11,7 @@
 #include "Movement.h"
 #include "Input.h"
 #include "Sprite.h"
+#include "PlayerState.h"
 #include "Log.h"
 #include "Ignore.h"
 #include "entt/entity/registry.hpp"
@@ -31,7 +32,8 @@ NpcMovementSystem::NpcMovementSystem(Game& inGame, World& inWorld,
 , network(inNetwork)
 {
     // Init the groups that we'll be using.
-    auto group = world.registry.group<Input, Position, PreviousPosition, Movement>();
+    auto group = world.registry.group<Input, Position, PreviousPosition, Movement>(
+        entt::exclude<PlayerState>);
     ignore(group);
 }
 
@@ -178,7 +180,8 @@ void NpcMovementSystem::handleUpdate(
 void NpcMovementSystem::moveAllNpcs()
 {
     // Move all NPCs that have an input, position, and movement component.
-    auto group = world.registry.group<Input, Position, PreviousPosition, Movement>();
+    auto group = world.registry.group<Input, Position, PreviousPosition, Movement>(
+        entt::exclude<PlayerState>);
     for (entt::entity entity : group) {
         Input& input = group.get<Input>(entity);
         Position& position = group.get<Position>(entity);
