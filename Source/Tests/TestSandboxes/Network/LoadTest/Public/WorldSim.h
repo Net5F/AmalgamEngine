@@ -2,12 +2,13 @@
 
 #include "Timer.h"
 #include "GameDefs.h"
+#include "entt/entity/registry.hpp"
 #include <SDL_stdinc.h>
 #include <atomic>
 
 namespace AM
 {
-class ClientInputs;
+class ClientInput;
 
 namespace Client
 {
@@ -58,7 +59,7 @@ private:
     Client::Network& network;
 
     /** The entity ID that we were given by the server. */
-    EntityID entityID;
+    entt::entity clientEntity;
 
     /** Used to time when we should process an iteration. */
     Timer iterationTimer;

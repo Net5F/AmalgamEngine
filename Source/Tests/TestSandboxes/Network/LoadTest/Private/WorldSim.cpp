@@ -3,7 +3,7 @@
 #include "ClientNetworkDefs.h"
 #include "MessageTools.h"
 #include "ConnectionResponse.h"
-#include "ClientInputs.h"
+#include "ClientInput.h"
 #include "Peer.h"
 #include "Log.h"
 #include <memory>
@@ -18,7 +18,7 @@ static constexpr double GAME_DELAYED_TIME_S = .001;
 
 WorldSim::WorldSim(Client::Network& inNetwork)
 : network(inNetwork)
-, entityID(INVALID_ENTITY_ID)
+, clientEntity(entt::null)
 , accumulatedTime(0.0)
 , currentTick(0)
 , ticksTillInput(0)
@@ -41,8 +41,8 @@ void WorldSim::connect()
     }
 
     // Get our info from the connection response.
-    entityID = connectionResponse->entityID;
-    LOG_INFO("Received connection response. ID: %u, tick: %u", entityID,
+    clientEntity = connectionResponse->entity;
+    LOG_INFO("Received connection response. ID: %u, tick: %u", clientEntity,
              connectionResponse->tickNum);
 
     // Aim our tick for some reasonable point ahead of the server.
@@ -91,28 +91,28 @@ void WorldSim::tick()
         accumulatedTime -= GAME_TICK_TIMESTEP_S;
         if (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
             LOG_INFO(
-                "EntityID %u: Detected a request for multiple game ticks in "
+                "Entity %u: Detected a request for multiple game ticks in "
                 "the same "
                 "frame. Game tick "
                 "must have been massively delayed. Game tick was delayed "
                 "by: %.8fs.",
-                entityID, accumulatedTime);
+                clientEntity, accumulatedTime);
         }
         else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
             // Game missed its ideal call time, could be our issue or general
             // system slowness.
-            LOG_INFO("EntityID %u: Detected a delayed game tick. Game tick was "
+            LOG_INFO("Entity %u: Detected a delayed game tick. Game tick was "
                      "delayed by: "
                      "%.8fs.",
-                     entityID, accumulatedTime);
+                     clientEntity, accumulatedTime);
         }
 
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);
         if (executionTime > GAME_TICK_TIMESTEP_S) {
-            LOG_INFO("EntityID %u: Overran our sim iteration time. "
+            LOG_INFO("Entity %u: Overran our sim iteration time. "
                      "executionTime: %.8f",
-                     entityID, executionTime);
+                     clientEntity, executionTime);
         }
     }
 }
@@ -125,15 +125,15 @@ void WorldSim::initTimer()
 void WorldSim::sendNextInput()
 {
     // Construct the next input.
-    ClientInputs clientInputs{};
-    clientInputs.tickNum = currentTick;
+    ClientInput clientInput{};
+    clientInput.tickNum = currentTick;
 
     if (isMovingRight) {
-        clientInputs.inputComponent.inputStates[Input::Left] = Input::Pressed;
+        clientInput.input.inputStates[Input::Left] = Input::Pressed;
         isMovingRight = false;
     }
     else {
-        clientInputs.inputComponent.inputStates[Input::Right] = Input::Pressed;
+        clientInput.input.inputStates[Input::Right] = Input::Pressed;
         isMovingRight = true;
     }
 
@@ -142,7 +142,7 @@ void WorldSim::sendNextInput()
         = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
     unsigned int startIndex = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
     std::size_t messageSize
-        = MessageTools::serialize(*messageBuffer, clientInputs, startIndex);
+        = MessageTools::serialize(*messageBuffer, clientInput, startIndex);
 
     // Fill the buffer with the appropriate message header.
     MessageTools::fillMessageHeader(MessageType::ClientInputs, messageSize,

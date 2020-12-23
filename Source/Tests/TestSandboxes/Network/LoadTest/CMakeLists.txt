@@ -35,8 +35,9 @@ target_link_libraries(LoadTestClient
         ${SDL2_LIBRARIES}
         ${SDL2PP_LIBRARIES}
         SDL2_net-static
-        Shared
         readerwriterqueue
+        EnTT::EnTT
+        Shared
 )
 
 # Compile with C++17
