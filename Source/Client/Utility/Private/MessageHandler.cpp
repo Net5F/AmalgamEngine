@@ -3,7 +3,7 @@
 #include "MessageTools.h"
 #include "ConnectionResponse.h"
 #include "EntityUpdate.h"
-#include "Entity.h"
+#include "EntityState.h"
 #include "Log.h"
 
 namespace AM
@@ -26,7 +26,7 @@ void MessageHandler::handleConnectionResponse(BinaryBuffer& messageRecBuffer,
 
     // Grab our player ID so we can determine which update messages are for
     // the player.
-    network.setPlayerID(connectionResponse->entityID);
+    network.setPlayerEntity(connectionResponse->entity);
 
     // Queue the message.
     if (!(connectionResponseQueue.enqueue(std::move(connectionResponse)))) {
@@ -43,17 +43,17 @@ void MessageHandler::handleEntityUpdate(BinaryBuffer& messageRecBuffer,
     MessageTools::deserialize(messageRecBuffer, messageSize, *entityUpdate);
 
     // Pull out the vector of entities.
-    const std::vector<Entity>& entities = entityUpdate->entities;
+    const std::vector<EntityState>& entities = entityUpdate->entityStates;
 
     // Iterate through the entities, checking if there's player or npc data.
     bool playerFound = false;
     bool npcFound = false;
-    EntityID playerID = network.getPlayerID();
+    entt::entity playerEntity = network.getPlayerEntity();
     for (auto entityIt = entities.begin(); entityIt != entities.end();
          ++entityIt) {
-        EntityID entityID = entityIt->id;
+        entt::entity entity = entityIt->entity;
 
-        if (entityID == playerID) {
+        if (entity == playerEntity) {
             // Found the player.
             if (!(playerUpdateQueue.enqueue(entityUpdate))) {
                 LOG_ERROR("Ran out of room in queue and memory allocation "

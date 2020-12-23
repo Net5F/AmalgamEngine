@@ -3,9 +3,9 @@
 
 namespace AM
 {
-void MovementHelpers::moveEntity(PositionComponent& position,
-                                 MovementComponent& movement,
-                                 InputStateArr& inputStates,
+void MovementHelpers::moveEntity(Position& position,
+                                 Movement& movement,
+                                 Input::StateArr& inputStates,
                                  double deltaSeconds)
 {
     // Update the velocity.
@@ -16,8 +16,8 @@ void MovementHelpers::moveEntity(PositionComponent& position,
     position.y += (deltaSeconds * movement.velY);
 }
 
-void MovementHelpers::updateVelocity(MovementComponent& movement,
-                                     InputStateArr& inputStates,
+void MovementHelpers::updateVelocity(Movement& movement,
+                                     Input::StateArr& inputStates,
                                      double deltaSeconds)
 {
     // TODO: Ignoring while velocity is constant for testing.

@@ -6,6 +6,7 @@
 #include "PlayerInputSystem.h"
 #include "NetworkUpdateSystem.h"
 #include "Timer.h"
+#include <SDL2pp/Texture.hh>
 #include <atomic>
 
 namespace AM
@@ -15,7 +16,7 @@ namespace Client
 class Network;
 
 /**
- *
+ * Manages the simulation, including world state and system processing.
  */
 class Game
 {

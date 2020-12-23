@@ -15,7 +15,7 @@ Network::Network()
 : accumulatedTime(0.0)
 , server(nullptr)
 , messageHandler(*this)
-, playerID(INVALID_ENTITY_ID)
+, playerEntity(entt::null)
 , tickAdjustment(0)
 , adjustmentIteration(0)
 , isApplyingTickAdjustment(false)
@@ -221,14 +221,14 @@ void Network::registerCurrentTickPtr(
     currentTickPtr = inCurrentTickPtr;
 }
 
-void Network::setPlayerID(EntityID inPlayerID)
+void Network::setPlayerEntity(entt::entity inPlayerEntity)
 {
-    playerID = inPlayerID;
+    playerEntity = inPlayerEntity;
 }
 
-EntityID Network::getPlayerID()
+entt::entity Network::getPlayerEntity()
 {
-    return playerID;
+    return playerEntity;
 }
 
 void Network::setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled)

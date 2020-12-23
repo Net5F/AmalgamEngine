@@ -2,9 +2,6 @@
 
 #include "GameDefs.h"
 #include "NetworkDefs.h"
-#include "PositionComponent.h"
-#include "MovementComponent.h"
-#include "InputComponent.h"
 #include <queue>
 
 namespace AM

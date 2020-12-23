@@ -4,6 +4,12 @@
 #include "World.h"
 #include "Network.h"
 #include "EntityUpdate.h"
+#include "EntityState.h"
+#include "Position.h"
+#include "Movement.h"
+#include "Input.h"
+#include "PlayerState.h"
+#include "PreviousPosition.h"
 #include "ClientNetworkDefs.h"
 #include "Log.h"
 #include <memory>
@@ -22,48 +28,48 @@ PlayerMovementSystem::PlayerMovementSystem(Game& inGame, World& inWorld,
 
 void PlayerMovementSystem::processMovements()
 {
-    EntityID playerID = world.playerData.ID;
-    PositionComponent& currentPosition = world.positions[playerID];
-    MovementComponent& currentMovement = world.movements[playerID];
+    entt::registry& registry = world.registry;
+    Position& currentPosition = registry.get<Position>(world.playerEntity);
+    Movement& currentMovement = registry.get<Movement>(world.playerEntity);
+    Input& currentInput = registry.get<Input>(world.playerEntity);
 
     // Save the old position.
-    PositionComponent& oldPosition = world.oldPositions[playerID];
-    oldPosition.x = currentPosition.x;
-    oldPosition.y = currentPosition.y;
+    PreviousPosition& previousPosition = registry.get<PreviousPosition>(world.playerEntity);
+    previousPosition.x = currentPosition.x;
+    previousPosition.y = currentPosition.y;
 
     if (!RUN_OFFLINE) {
         // Receive any player entity updates from the server.
-        Uint32 latestReceivedTick = processPlayerUpdates();
+        PlayerState& playerState = registry.get<PlayerState>(world.playerEntity);
+        Uint32 latestReceivedTick = processPlayerUpdates(currentPosition, previousPosition, currentMovement, currentInput, playerState);
 
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
-            replayInputs(latestReceivedTick);
+            replayInputs(latestReceivedTick, currentPosition, currentMovement, playerState);
 
             // Check if there was a mismatch between the positions we had and
             // where the server thought we should be.
-            if (oldPosition.x != currentPosition.x
-                || oldPosition.y != currentPosition.y) {
+            if (previousPosition.x != currentPosition.x
+                || previousPosition.y != currentPosition.y) {
                 LOG_INFO("Predicted position mismatched after replay: (%.6f, "
                          "%.6f) -> (%.6f, %.6f)",
-                         oldPosition.x, oldPosition.y, currentPosition.x,
-                         currentPosition.y);
+                         previousPosition.x, previousPosition.y, currentPosition.x, currentPosition.y);
                 LOG_INFO("latestReceivedTick: %u", latestReceivedTick);
             }
         }
     }
 
     // Use the current input state to update movement for this tick.
-    MovementHelpers::moveEntity(currentPosition, currentMovement,
-                                world.inputs[playerID].inputStates,
-                                GAME_TICK_TIMESTEP_S);
+    MovementHelpers::moveEntity(currentPosition, currentMovement, currentInput.inputStates,
+        GAME_TICK_TIMESTEP_S);
 }
 
-Uint32 PlayerMovementSystem::processPlayerUpdates()
+Uint32 PlayerMovementSystem::processPlayerUpdates(Position& currentPosition,
+                                                  PreviousPosition& previousPosition,
+                                                  Movement& currentMovement,
+                                                  Input& currentInput,
+                                                  PlayerState& playerState)
 {
-    EntityID playerID = world.playerData.ID;
-    PositionComponent& currentPosition = world.positions[playerID];
-    MovementComponent& currentMovement = world.movements[playerID];
-
     /* Process any messages for us from the server. */
     Uint32 latestReceivedTick = 0;
     std::shared_ptr<const EntityUpdate> receivedUpdate
@@ -85,13 +91,13 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
         }
 
         // Pull out the vector of entities.
-        const std::vector<Entity>& entities = receivedUpdate->entities;
+        const std::vector<EntityState>& entities = receivedUpdate->entityStates;
 
         // Find the player data.
-        const Entity* playerUpdate = nullptr;
+        const EntityState* playerUpdate = nullptr;
         for (auto entityIt = entities.begin(); entityIt != entities.end();
              ++entityIt) {
-            if (entityIt->id == playerID) {
+            if (entityIt->entity == world.playerEntity) {
                 playerUpdate = &(*entityIt);
                 break;
             }
@@ -103,14 +109,12 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
         }
 
         /* Update the movements. */
-        const MovementComponent& receivedMovement
-            = playerUpdate->movementComponent;
+        const Movement& receivedMovement = playerUpdate->movement;
         currentMovement.velX = receivedMovement.velX;
         currentMovement.velY = receivedMovement.velY;
 
         /* Move to the received position. */
-        const PositionComponent& receivedPosition
-            = playerUpdate->positionComponent;
+        const Position& receivedPosition = playerUpdate->position;
         currentPosition.x = receivedPosition.x;
         currentPosition.y = receivedPosition.y;
 
@@ -119,21 +123,19 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
         Uint32 tickDiff = game.getCurrentTick() - receivedTick;
         checkTickDiffValidity(tickDiff);
 
-        const InputComponent& receivedInput = playerUpdate->inputComponent;
-        if (receivedInput.inputStates
-            != world.playerData.inputHistory[tickDiff]) {
+        const Input& receivedInput = playerUpdate->input;
+        if (receivedInput.inputStates != playerState.inputHistory[tickDiff]) {
             // Our prediction was wrong, accept the received input and set all
             // inputs in the history after the mismatched input to match it.
-            world.inputs[playerID].inputStates = receivedInput.inputStates;
+            currentInput.inputStates = receivedInput.inputStates;
             for (unsigned int i = 0; i <= tickDiff; ++i) {
-                world.playerData.inputHistory[i] = receivedInput.inputStates;
+                playerState.inputHistory[i] = receivedInput.inputStates;
             }
 
             // Set our old position to the current so we aren't oddly lerping
             // back.
-            PositionComponent& oldPosition = world.oldPositions[playerID];
-            oldPosition.x = currentPosition.x;
-            oldPosition.y = currentPosition.y;
+            previousPosition.x = currentPosition.x;
+            previousPosition.y = currentPosition.y;
         }
 
         receivedUpdate = network.receivePlayerUpdate();
@@ -142,12 +144,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
     return latestReceivedTick;
 }
 
-void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick)
+void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick, Position& currentPosition, Movement& currentMovement, PlayerState& playerState)
 {
-    EntityID playerID = world.playerData.ID;
-    PositionComponent& currentPosition = world.positions[playerID];
-    MovementComponent& currentMovement = world.movements[playerID];
-
     Uint32 currentTick = game.getCurrentTick();
     checkReceivedTickValidity(latestReceivedTick, currentTick);
 
@@ -161,7 +159,7 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick)
 
         // Use the appropriate input state to update movement.
         MovementHelpers::moveEntity(currentPosition, currentMovement,
-                                    world.playerData.inputHistory[tickDiff],
+                                    playerState.inputHistory[tickDiff],
                                     GAME_TICK_TIMESTEP_S);
     }
 }
@@ -180,11 +178,11 @@ void PlayerMovementSystem::checkTickDiffValidity(Uint32 tickDiff)
 {
     // The history includes the current tick, so we only have LENGTH - 1
     // worth of previous data to use (i.e. it's 0-indexed).
-    if (tickDiff > (PlayerData::INPUT_HISTORY_LENGTH - 1)) {
+    if (tickDiff > (PlayerState::INPUT_HISTORY_LENGTH - 1)) {
         LOG_ERROR("Too few items in the player input history. "
                   "Increase the length or reduce lag. tickDiff: %u, "
                   "historyLength: %u",
-                  tickDiff, PlayerData::INPUT_HISTORY_LENGTH);
+                  tickDiff, PlayerState::INPUT_HISTORY_LENGTH);
     }
 }
 

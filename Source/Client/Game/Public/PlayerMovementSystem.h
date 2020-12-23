@@ -2,17 +2,23 @@
 
 #include "MovementHelpers.h"
 #include "GameDefs.h"
-#include "InputComponent.h"
 #include <array>
 #include <vector>
 
 namespace AM
 {
+class Position;
+class PreviousPosition;
+class Movement;
+class Input;
+
 namespace Client
 {
 class Game;
 class World;
 class Network;
+
+class PlayerState;
 
 /**
  * Processes player entity update messages and moves the entity appropriately.
@@ -33,12 +39,16 @@ private:
      * Receives any player entity updates from the server.
      * @return The tick number of the newest message that we received.
      */
-    Uint32 processPlayerUpdates();
+    Uint32 processPlayerUpdates(Position& currentPosition,
+                                PreviousPosition& previousPosition,
+                                Movement& currentMovement, Input& currentInput,
+                                PlayerState& playerState);
 
     /**
      * Replay any inputs that are from newer ticks than the latestReceivedTick.
      */
-    void replayInputs(Uint32 latestReceivedTick);
+    void replayInputs(Uint32 latestReceivedTick, Position& currentPosition,
+                      Movement& currentMovement, PlayerState& playerState);
 
     /** If receivedTick > currentTick, logs an error. */
     void checkReceivedTickValidity(Uint32 receivedTick, Uint32 currentTick);

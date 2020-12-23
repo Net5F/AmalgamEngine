@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SDL_stdinc.h"
-#include "InputComponent.h"
 
 namespace AM
 {
@@ -11,7 +10,7 @@ namespace AM
  */
 struct Heartbeat {
     /** The tick that this heartbeat was processed on. */
-    Uint32 tickNum = 0;
+    Uint32 tickNum{0};
 };
 
 template<typename S>

@@ -3,9 +3,13 @@
 #include "World.h"
 #include "Network.h"
 #include "MessageTools.h"
-#include "ClientInputs.h"
+#include "ClientInput.h"
+#include "Input.h"
+#include "PlayerState.h"
 #include "Peer.h"
 #include "Log.h"
+#include "Ignore.h"
+#include "entt/entity/registry.hpp"
 #include <memory>
 
 namespace AM
@@ -18,6 +22,9 @@ NetworkUpdateSystem::NetworkUpdateSystem(Game& inGame, World& inWorld,
 , world(inWorld)
 , network(inNetwork)
 {
+    // Init the groups that we'll be using.
+    auto group = world.registry.group<PlayerState>(entt::get<Input>);
+    ignore(group);
 }
 
 void NetworkUpdateSystem::sendInputState()
@@ -29,27 +36,30 @@ void NetworkUpdateSystem::sendInputState()
 
     /* Send the updated state to the server. */
     // Only send new data if we've changed.
-    if (world.playerData.isDirty) {
-        // Get the current input state.
-        ClientInputs clientInputs{game.getCurrentTick(),
-                                  world.inputs[world.playerData.ID]};
+    auto group = world.registry.group<PlayerState>(entt::get<Input>);
+    for (entt::entity entity : group) {
+        Input& input = group.get<Input>(entity);
+        if (input.isDirty) {
+            // Get the current input state.
+            ClientInput clientInput {game.getCurrentTick(), input};
 
-        // Serialize the client inputs message.
-        BinaryBufferSharedPtr messageBuffer
-            = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
-        unsigned int startIndex = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
-        std::size_t messageSize
-            = MessageTools::serialize(*messageBuffer, clientInputs, startIndex);
+            // Serialize the client inputs message.
+            BinaryBufferSharedPtr messageBuffer
+                = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
+            unsigned int startIndex = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
+            std::size_t messageSize
+                = MessageTools::serialize(*messageBuffer, clientInput, startIndex);
 
-        // Fill the buffer with the appropriate message header.
-        MessageTools::fillMessageHeader(MessageType::ClientInputs, messageSize,
-                                        messageBuffer, CLIENT_HEADER_SIZE);
+            // Fill the buffer with the appropriate message header.
+            MessageTools::fillMessageHeader(MessageType::ClientInputs, messageSize,
+                                            messageBuffer, CLIENT_HEADER_SIZE);
 
-        // Send the message.
-        network.send(messageBuffer);
+            // Send the message.
+            network.send(messageBuffer);
+
+            input.isDirty = false;
+        }
     }
-
-    world.playerData.isDirty = false;
 }
 
 } // namespace Client

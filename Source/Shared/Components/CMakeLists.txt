@@ -1,9 +1,11 @@
 target_sources(Shared
     PUBLIC
-        Public/InputComponent.h
-        Public/MovementComponent.h
-        Public/PositionComponent.h
-        Public/SpriteComponent.h
+        Public/Input.h
+        Public/Movement.h
+        Public/Name.h
+        Public/Position.h
+        Public/PreviousPosition.h
+        Public/Sprite.h
 )
 
 target_include_directories(Shared

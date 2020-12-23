@@ -52,4 +52,4 @@ add_subdirectory(Server)
 
 # Build tests.
 # (No fancy flags since we aren't a lib, just uncomment when you want to build tests.)
-add_subdirectory(Tests)
+#add_subdirectory(Tests)

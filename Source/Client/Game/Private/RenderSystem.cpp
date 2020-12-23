@@ -1,6 +1,9 @@
 #include "RenderSystem.h"
 #include "World.h"
 #include "Game.h"
+#include "Position.h"
+#include "PreviousPosition.h"
+#include "Sprite.h"
 #include "Log.h"
 #include "Ignore.h"
 
@@ -15,6 +18,10 @@ RenderSystem::RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame,
 , world(game.getWorld())
 , accumulatedTime(0.0)
 {
+    // Init the groups that we'll be using.
+    auto group = world.registry.group<Sprite, PreviousPosition>(entt::get<Position>);
+    ignore(group);
+
     // TODO: This will eventually be used when we get to variable window sizes.
     ignore(window);
 }
@@ -29,27 +36,25 @@ void RenderSystem::tick()
 
         // How far we are between game ticks in decimal percent.
         const double alpha = game.getIterationProgress();
-        for (size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
-            if (world.entityExists(entityID)) {
-                const SpriteComponent& sprite = world.sprites[entityID];
-                const PositionComponent& position = world.positions[entityID];
-                const PositionComponent& oldPosition
-                    = world.oldPositions[entityID];
 
-                // Lerp'd position based on how far we are between game ticks.
-                const double interpX
-                    = (position.x * alpha) + (oldPosition.x * (1.0 - alpha));
-                const double interpY
-                    = (position.y * alpha) + (oldPosition.y * (1.0 - alpha));
-                const int lerpX = static_cast<int>(std::floor(interpX));
-                const int lerpY = static_cast<int>(std::floor(interpY));
-                SDL2pp::Rect spriteWorldData
-                    = {lerpX, lerpY, sprite.width, sprite.height};
+        // Render all entities with a Sprite, PreviousPosition and Position.
+        auto group = world.registry.group<Sprite, PreviousPosition>(entt::get<Position>);
+        for (entt::entity entity : group) {
+            const Sprite& sprite = group.get<Sprite>(entity);
+            const Position& position = group.get<Position>(entity);
+            const PreviousPosition& previousPos = group.get<PreviousPosition>(entity);
 
-                renderer.Copy(*(world.sprites[entityID].texturePtr),
-                              world.sprites[entityID].posInTexture,
-                              spriteWorldData);
-            }
+            // Lerp'd position based on how far we are between game ticks.
+            const double interpX
+                = (position.x * alpha) + (previousPos.x * (1.0 - alpha));
+            const double interpY
+                = (position.y * alpha) + (previousPos.y * (1.0 - alpha));
+            const int lerpX = static_cast<int>(std::floor(interpX));
+            const int lerpY = static_cast<int>(std::floor(interpY));
+            SDL2pp::Rect spriteWorldData
+                = {lerpX, lerpY, sprite.width, sprite.height};
+
+            renderer.Copy(*(sprite.texturePtr), sprite.posInTexture, spriteWorldData);
         }
 
         renderer.Present();

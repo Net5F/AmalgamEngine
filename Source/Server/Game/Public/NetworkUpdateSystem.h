@@ -1,7 +1,8 @@
 #pragma once
 
 #include "GameDefs.h"
-#include "Entity.h"
+#include "EntityState.h"
+#include "entt/entity/registry.hpp"
 #include <vector>
 
 namespace AM
@@ -13,7 +14,7 @@ class World;
 class Network;
 
 /**
- * This class is in charge of checking for data that needs to be sent to
+ * This system is in charge of checking for data that needs to be sent to
  * clients, wrapping it appropriately, and passing it to the Network's send
  * queue.
  */
@@ -32,15 +33,15 @@ private:
      * Fills the given vector with the entities that must be sent to the given
      * entityID on this tick.
      */
-    void constructAndSendUpdate(EntityID entityID,
-                                std::array<bool, MAX_ENTITIES>& entitiesToSend);
+    void constructAndSendUpdate(entt::entity entity,
+                                std::vector<entt::entity>& entitiesToSend);
 
     /**
      * Serializes the given entity's relevant world
-     * @param entityID  The entity to serialize.
+     * @param entity  The entity to serialize.
      * @return An offset where the data was stored in the builder.
      */
-    void fillEntityData(EntityID entityID, std::vector<Entity>& entities);
+    void fillEntityData(entt::entity entity, std::vector<EntityState>& entityStates);
 
     Game& game;
     World& world;

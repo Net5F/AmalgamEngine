@@ -2,8 +2,17 @@
 #include "Network.h"
 #include "ClientNetworkDefs.h"
 #include "ConnectionResponse.h"
+#include "Input.h"
+#include "Position.h"
+#include "PreviousPosition.h"
+#include "Movement.h"
+#include "Sprite.h"
+#include "PlayerState.h"
+#include "Name.h"
 #include "Log.h"
+#include "entt/entity/registry.hpp"
 #include <memory>
+#include <string>
 
 namespace AM
 {
@@ -47,65 +56,65 @@ void Game::connect()
     }
 
     // Get our info from the connection response.
-    EntityID playerID = connectionResponse->entityID;
-    LOG_INFO("Received connection response. ID: %u, tick: %u", playerID,
+    entt::entity playerEntity = connectionResponse->entity;
+    LOG_INFO("Received connection response. ID: %u, tick: %u", playerEntity,
              connectionResponse->tickNum);
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.
     currentTick = connectionResponse->tickNum + INITIAL_TICK_OFFSET;
 
-    // Set up our player.
+    // Create the player entity using the ID we received.
+    entt::registry& registry = world.registry;
+    entt::entity newEntity = registry.create(playerEntity);
+    if (newEntity != playerEntity) {
+        LOG_ERROR(
+            "Created entity doesn't match received entity. Created: %u, received: %u",
+            newEntity, playerEntity);
+    }
+
+    // Save the player entity ID for convenience.
+    world.playerEntity = newEntity;
+
+    // Set up the player's sim components.
+    registry.emplace<Name>(newEntity,
+        std::to_string(static_cast<Uint32>(registry.version(newEntity))));
+    registry.emplace<Position>(newEntity, connectionResponse->x, connectionResponse->y, 0.0f);
+    registry.emplace<PreviousPosition>(newEntity, connectionResponse->x, connectionResponse->y, 0.0f);
+    registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
+    registry.emplace<Input>(newEntity);
+
+    // Set up the player's sprite component.
     SDL2pp::Rect textureRect(0, 32, 16, 16);
+    registry.emplace<Sprite>(newEntity, sprites, textureRect, 64, 64);
 
-    // Register the player ID with the world and the network.
-    world.registerPlayerID(playerID);
-
-    // Initialize the player state.
-    world.addEntity("Player", playerID);
-    world.positions[playerID].x = connectionResponse->x;
-    world.positions[playerID].y = connectionResponse->y;
-    world.oldPositions[playerID].x = world.positions[playerID].x;
-    world.oldPositions[playerID].y = world.positions[playerID].y;
-    world.movements[playerID].maxVelX = 250;
-    world.movements[playerID].maxVelY = 250;
-    world.inputs[playerID].inputStates = {};
-    world.sprites[playerID].texturePtr = sprites;
-    world.sprites[playerID].posInTexture = textureRect;
-    world.sprites[playerID].width = 64;
-    world.sprites[playerID].height = 64;
-    world.attachComponent(playerID, ComponentFlag::Input);
-    world.attachComponent(playerID, ComponentFlag::Movement);
-    world.attachComponent(playerID, ComponentFlag::Position);
-    world.attachComponent(playerID, ComponentFlag::Sprite);
+    // Set up the player's PlayerState component.
+    registry.emplace<PlayerState>(newEntity);
 }
 
 void Game::fakeConnection()
 {
-    // Set up our player.
+    // Create the player entity.
+    entt::registry& registry = world.registry;
+    entt::entity newEntity = registry.create();
+
+    // Save the player entity ID for convenience.
+    world.playerEntity = newEntity;
+
+    // Set up the player's sim components.
+    registry.emplace<Name>(newEntity,
+        std::to_string(static_cast<Uint32>(registry.version(newEntity))));
+    registry.emplace<Position>(newEntity, 64.0f, 64.0f, 0.0f);
+    registry.emplace<PreviousPosition>(newEntity, 64.0f, 64.0f, 0.0f);
+    registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
+    registry.emplace<Input>(newEntity);
+
+    // Set up the player's sprite component.
     SDL2pp::Rect textureRect(0, 32, 16, 16);
+    registry.emplace<Sprite>(newEntity, sprites, textureRect, 64, 64);
 
-    // Register the player ID with the world and the network.
-    EntityID playerID = 0;
-    world.registerPlayerID(playerID);
-
-    // Initialize the player state.
-    world.addEntity("Player", playerID);
-    world.positions[playerID].x = 64;
-    world.positions[playerID].y = 64;
-    world.oldPositions[playerID].x = world.positions[playerID].x;
-    world.oldPositions[playerID].y = world.positions[playerID].y;
-    world.movements[playerID].maxVelX = 250;
-    world.movements[playerID].maxVelY = 250;
-    world.inputs[playerID].inputStates = {};
-    world.sprites[playerID].texturePtr = sprites;
-    world.sprites[playerID].posInTexture = textureRect;
-    world.sprites[playerID].width = 64;
-    world.sprites[playerID].height = 64;
-    world.attachComponent(playerID, ComponentFlag::Input);
-    world.attachComponent(playerID, ComponentFlag::Movement);
-    world.attachComponent(playerID, ComponentFlag::Position);
-    world.attachComponent(playerID, ComponentFlag::Sprite);
+    // Set up the player's PlayerState component.
+    registry.emplace<PlayerState>(newEntity);
 }
 
 void Game::tick()

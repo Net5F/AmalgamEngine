@@ -4,7 +4,9 @@
 #include "Network.h"
 #include "Peer.h"
 #include "GameDefs.h"
-#include "ClientInputs.h"
+#include "ClientInput.h"
+#include "Input.h"
+#include "ClientState.h"
 #include "Log.h"
 #include <memory>
 
@@ -26,12 +28,12 @@ void NetworkInputSystem::processInputMessages()
     processMessageDropEvents();
 
     // Get the queue reference for this tick's messages.
-    std::queue<std::unique_ptr<ClientInputs>>& messageQueue
+    std::queue<std::unique_ptr<ClientInput>>& messageQueue
         = network.startReceiveInputMessages(game.getCurrentTick());
 
     // Process all messages.
     while (!(messageQueue.empty())) {
-        std::unique_ptr<ClientInputs> inputMessage
+        std::unique_ptr<ClientInput> inputMessage
             = std::move(messageQueue.front());
         messageQueue.pop();
         if (inputMessage == nullptr) {
@@ -39,16 +41,17 @@ void NetworkInputSystem::processInputMessages()
                      "(this shouldn't happen).")
         }
 
-        // Find the EntityID associated with the given NetID.
-        Uint32 clientEntityID = world.findEntityWithNetID(inputMessage->netID);
+        // Find the entity associated with the given NetID.
+        entt::entity clientEntity = world.findEntityWithNetID(inputMessage->netID);
 
         // Update the client entity's inputs.
-        if (clientEntityID != INVALID_ENTITY_ID) {
-            // Update the entity's InputComponent.
-            world.inputs[clientEntityID] = inputMessage->inputComponent;
+        if (clientEntity != entt::null) {
+            // Update the entity's Input component.
+            Input& input = world.registry.get<Input>(clientEntity);
+            input = inputMessage->input;
 
             // Flag the entity as dirty.
-            world.entityIsDirty[clientEntityID] = true;
+            input.isDirty = true;
         }
         else {
             // The entity was probably disconnected. Do nothing with the
@@ -71,9 +74,9 @@ void NetworkInputSystem::processMessageDropEvents()
         NetworkID clientNetworkID = 0;
         if (messageDropEventQueue.try_dequeue(clientNetworkID)) {
             // Find the EntityID associated with the popped NetworkID.
-            EntityID clientEntityID
+            entt::entity clientEntityID
                 = world.findEntityWithNetID(clientNetworkID);
-            if (clientEntityID != INVALID_ENTITY_ID) {
+            if (clientEntityID != entt::null) {
                 // We found the entity that dropped the message, handle it.
                 handleDropForEntity(clientEntityID);
             }
@@ -90,19 +93,21 @@ void NetworkInputSystem::processMessageDropEvents()
     }
 }
 
-void NetworkInputSystem::handleDropForEntity(EntityID entityID)
+void NetworkInputSystem::handleDropForEntity(entt::entity entity)
 {
     // If the entity's inputs aren't default, mark it as dirty.
-    InputComponent defaultInputs{};
-    if (world.inputs[entityID].inputStates != defaultInputs.inputStates) {
-        world.entityIsDirty[entityID] = true;
+    entt::registry& registry = world.registry;
+    Input& entityInput = registry.get<Input>(entity);
+    Input defaultInput{};
+    if (entityInput.inputStates != defaultInput.inputStates) {
+        entityInput.isDirty = true;
     }
 
     // Default the entity's inputs.
-    world.inputs[entityID].inputStates = defaultInputs.inputStates;
+    entityInput.inputStates = defaultInput.inputStates;
 
     // Flag that a drop occurred for this entity.
-    world.clients[entityID].messageWasDropped = true;
+    registry.get<ClientState>(entity).messageWasDropped = true;
 }
 
 } // namespace Server

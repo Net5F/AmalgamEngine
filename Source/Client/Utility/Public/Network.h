@@ -6,6 +6,7 @@
 #include "MessageHandler.h"
 #include "Timer.h"
 #include "Log.h"
+#include "entt/entity/registry.hpp"
 #include <string>
 #include <memory>
 #include <atomic>
@@ -87,8 +88,8 @@ public:
     /** Used for passing us a pointer to the Game's currentTick. */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
-    void setPlayerID(EntityID inPlayerID);
-    EntityID getPlayerID();
+    void setPlayerEntity(entt::entity inPlayerEntity);
+    entt::entity getPlayerEntity();
 
     /**
      * Returns how much time in seconds is left until the next heartbeat.
@@ -147,8 +148,8 @@ private:
         Systems. */
     MessageHandler messageHandler;
 
-    /** Local copy of the playerID so we can tell if we got a player message. */
-    EntityID playerID;
+    /** Local copy of the playerEntity so we can tell if we got a player message. */
+    entt::entity playerEntity;
 
     /** The adjustment that the server has told us to apply to the tick. */
     std::atomic<int> tickAdjustment;

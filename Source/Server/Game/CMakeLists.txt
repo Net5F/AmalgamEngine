@@ -12,7 +12,7 @@ target_sources(Server
 		Public/NetworkConnectionSystem.h
 		Public/NetworkInputSystem.h
 		Public/NetworkUpdateSystem.h
-		Public/ClientComponent.h
+		Public/ClientState.h
 		Public/Game.h
 )
 

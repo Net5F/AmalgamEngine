@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.h"
+#include "EntityState.h"
 #include "GameDefs.h"
 #include "SDL_stdinc.h"
 #include <vector>
@@ -13,17 +13,17 @@ namespace AM
  */
 struct EntityUpdate {
     /** The tick that this EntityUpdate corresponds to. */
-    Uint32 tickNum;
+    Uint32 tickNum{0};
 
     /** All updated entity data. */
-    std::vector<Entity> entities;
+    std::vector<EntityState> entityStates;
 };
 
 template<typename S>
 void serialize(S& serializer, EntityUpdate& entityUpdate)
 {
     serializer.value4b(entityUpdate.tickNum);
-    serializer.container(entityUpdate.entities,
+    serializer.container(entityUpdate.entityStates,
                          static_cast<std::size_t>(MAX_ENTITIES));
 }
 

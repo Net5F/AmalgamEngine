@@ -10,28 +10,20 @@ namespace AM
  * This struct represents all of the sprite data that the RenderSystem needs,
  * except for the world position.
  *
- * World position should be pulled from an associated PositionComponent.
+ * World position should be read from an associated Position component.
  */
-struct SpriteComponent {
+struct Sprite {
 public:
-    SpriteComponent()
-    : texturePtr(nullptr)
-    , posInTexture{0, 0, 0, 0}
-    , width(0)
-    , height(0)
-    {
-    }
-
     // TODO: Switch to textureID and add a texture loader.
     /** A pointer to the texture that holds this sprite. */
-    std::shared_ptr<SDL2pp::Texture> texturePtr;
+    std::shared_ptr<SDL2pp::Texture> texturePtr{nullptr};
 
     /** UV position and size in texture. */
-    SDL2pp::Rect posInTexture;
+    SDL2pp::Rect posInTexture{0, 0, 0, 0};
 
     /** Width and height of sprite in the world. */
-    int width;
-    int height;
+    int width{0};
+    int height{0};
 };
 
 } // namespace AM

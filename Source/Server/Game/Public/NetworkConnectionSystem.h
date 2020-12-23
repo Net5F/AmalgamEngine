@@ -2,6 +2,7 @@
 
 #include "NetworkDefs.h"
 #include "GameDefs.h"
+#include "entt/entity/registry.hpp"
 
 namespace AM
 {
@@ -12,7 +13,7 @@ class World;
 class Network;
 
 /**
- * This class is in charge of processing connect/disconnect events and
+ * This system is in charge of processing connect/disconnect events and
  * updating the associated client entities.
  */
 class NetworkConnectionSystem
@@ -38,11 +39,10 @@ private:
      * Sends a connection response to the client with the given networkID.
      *
      * @param networkID  The client's network ID to send the connection response
-     * to.
-     * @param newEntityID  The entity ID that the Sim associated with the
-     * client.
+     *                   to.
+     * @param newEntity  The entity that was created for this client.
      */
-    void sendConnectionResponse(NetworkID networkID, EntityID newEntityID,
+    void sendConnectionResponse(NetworkID networkID, entt::entity newEntity,
                                 float spawnX, float spawnY);
 
     Game& game;

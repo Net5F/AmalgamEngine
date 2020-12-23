@@ -1,8 +1,8 @@
 #pragma once
 
-#include "PositionComponent.h"
-#include "MovementComponent.h"
-#include "InputComponent.h"
+#include "Position.h"
+#include "Movement.h"
+#include "Input.h"
 #include "GameDefs.h"
 #include <array>
 
@@ -27,9 +27,9 @@ public:
      * @post The given position and movement components are modified in-place to
      * the new data.
      */
-    static void moveEntity(PositionComponent& position,
-                           MovementComponent& movement,
-                           InputStateArr& inputStates, double deltaSeconds);
+    static void moveEntity(Position& position,
+                           Movement& movement,
+                           Input::StateArr& inputStates, double deltaSeconds);
 
 private:
     /**
@@ -38,8 +38,8 @@ private:
      *
      * @post The given movement component is modified in-place to the new data.
      */
-    static void updateVelocity(MovementComponent& movement,
-                               InputStateArr& inputStates, double deltaSeconds);
+    static void updateVelocity(Movement& movement,
+                               Input::StateArr& inputStates, double deltaSeconds);
 };
 
 } // namespace AM

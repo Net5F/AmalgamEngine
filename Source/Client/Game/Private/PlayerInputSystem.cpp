@@ -2,6 +2,8 @@
 #include "Game.h"
 #include "World.h"
 #include "Network.h"
+#include "Input.h"
+#include "PlayerState.h"
 #include "Log.h"
 #include "Ignore.h"
 
@@ -24,7 +26,7 @@ void PlayerInputSystem::processMomentaryInput(SDL_Event& event)
 void PlayerInputSystem::processHeldInputs()
 {
     const Uint8* keyStates = SDL_GetKeyboardState(nullptr);
-    InputStateArr newInputStates{};
+    Input::StateArr newInputStates{};
 
     // Get the latest state of all the keys that we care about.
     if (keyStates[SDL_SCANCODE_W]) {
@@ -41,7 +43,8 @@ void PlayerInputSystem::processHeldInputs()
     }
 
     // Update our saved input state.
-    InputStateArr& playerInputs = world.inputs[world.playerData.ID].inputStates;
+    entt::registry& registry = world.registry;
+    Input::StateArr& playerInputs = registry.get<Input>(world.playerEntity).inputStates;
     for (unsigned int inputType = 0; inputType < Input::Type::NumTypes;
          ++inputType) {
         // If the saved state doesn't match the latest.
@@ -50,15 +53,20 @@ void PlayerInputSystem::processHeldInputs()
             playerInputs[inputType] = newInputStates[inputType];
 
             // Mark the player as dirty.
-            world.playerData.isDirty = true;
+            registry.patch<PlayerState>(world.playerEntity,
+                [](PlayerState& state) {state.isDirty = true;});
         }
     }
 }
 
 void PlayerInputSystem::addCurrentInputsToHistory()
 {
-    world.playerData.inputHistory.push(
-        world.inputs[world.playerData.ID].inputStates);
+    CircularBuffer<Input::StateArr, PlayerState::INPUT_HISTORY_LENGTH>& playerInputHistory =
+        world.registry.get<PlayerState>(world.playerEntity).inputHistory;
+    Input::StateArr& playerInputs = world.registry.get<Input>(world.playerEntity).inputStates;
+
+    // Push the player's current inputs into the player's input history.
+    playerInputHistory.push(playerInputs);
 }
 
 } // namespace Client

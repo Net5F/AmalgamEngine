@@ -5,6 +5,12 @@
 #include "GameDefs.h"
 #include "MessageTools.h"
 #include "ConnectionResponse.h"
+#include "Input.h"
+#include "Position.h"
+#include "PreviousPosition.h"
+#include "Movement.h"
+#include "ClientState.h"
+#include "Name.h"
 #include "Log.h"
 
 namespace AM
@@ -40,27 +46,23 @@ void NetworkConnectionSystem::processConnectEvents()
         }
 
         // Build their entity.
-        EntityID newEntityID = world.addEntity("Player");
+        entt::registry& registry = world.registry;
         const Position spawnPoint = world.getSpawnPoint();
-        world.positions[newEntityID].x = spawnPoint.x;
-        world.positions[newEntityID].y = spawnPoint.y;
-        world.movements[newEntityID].velX = 0;
-        world.movements[newEntityID].velY = 0;
-        world.movements[newEntityID].maxVelX = 250;
-        world.movements[newEntityID].maxVelY = 250;
-        world.inputs[newEntityID].inputStates = {};
-        world.clients[newEntityID].netID = clientNetworkID;
-        world.attachComponent(newEntityID, ComponentFlag::Input);
-        world.attachComponent(newEntityID, ComponentFlag::Movement);
-        world.attachComponent(newEntityID, ComponentFlag::Position);
-        world.attachComponent(newEntityID, ComponentFlag::Sprite);
-        world.attachComponent(newEntityID, ComponentFlag::Client);
+
+        entt::entity newEntity = registry.create();
+        registry.emplace<Name>(newEntity,
+            std::to_string(static_cast<Uint32>(registry.version(newEntity))));
+        registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0);
+        registry.emplace<PreviousPosition>(newEntity, spawnPoint.x, spawnPoint.y, 0);
+        registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
+        registry.emplace<Input>(newEntity);
+        registry.emplace<ClientState>(newEntity, clientNetworkID);
 
         LOG_INFO("Constructed entity with netID: %u, entityID: %u",
-                 clientNetworkID, newEntityID);
+                 clientNetworkID, newEntity);
 
         // Build and send the response.
-        sendConnectionResponse(clientNetworkID, newEntityID, spawnPoint.x,
+        sendConnectionResponse(clientNetworkID, newEntity, spawnPoint.x,
                                spawnPoint.y);
     }
 }
@@ -79,12 +81,12 @@ void NetworkConnectionSystem::processDisconnectEvents()
         }
 
         // Find the client's associated entity.
-        EntityID clientEntityID
+        entt::entity clientEntity
             = world.findEntityWithNetID(disconnectedClientID);
-        if (clientEntityID != INVALID_ENTITY_ID) {
+        if (clientEntity != entt::null) {
             // Found the entity, remove it.
-            world.removeEntity(clientEntityID);
-            LOG_INFO("Removed entity with netID: %u", clientEntityID);
+            world.registry.destroy(clientEntity);
+            LOG_INFO("Removed entity with netID: %u", clientEntity);
         }
         else {
             LOG_ERROR("Failed to find entity with netID: %u while erasing.",
@@ -94,12 +96,12 @@ void NetworkConnectionSystem::processDisconnectEvents()
 }
 
 void NetworkConnectionSystem::sendConnectionResponse(NetworkID networkID,
-                                                     EntityID newEntityID,
+                                                     entt::entity newEntity,
                                                      float spawnX, float spawnY)
 {
     // Fill in their ID and spawn point.
     Uint32 currentTick = game.getCurrentTick();
-    ConnectionResponse connectionResponse{currentTick, newEntityID, spawnX,
+    ConnectionResponse connectionResponse{currentTick, newEntity, spawnX,
                                           spawnY};
 
     // Serialize the connection response message.

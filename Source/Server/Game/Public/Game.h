@@ -15,7 +15,7 @@ namespace Server
 class Network;
 
 /**
- *
+ * Manages the simulation, including world state and system processing.
  */
 class Game
 {

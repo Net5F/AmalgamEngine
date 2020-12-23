@@ -102,7 +102,7 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
     }
 }
 
-std::queue<std::unique_ptr<ClientInputs>>&
+std::queue<std::unique_ptr<ClientInput>>&
     Network::startReceiveInputMessages(Uint32 tickNum)
 {
     return inputMessageSorter.startReceive(tickNum);
@@ -211,20 +211,20 @@ Sint64 Network::handleClientInputs(ClientMessage& clientMessage,
                                    BinaryBufferPtr& messageBuffer)
 {
     // Deserialize the message.
-    std::unique_ptr<ClientInputs> clientInputs
-        = std::make_unique<ClientInputs>();
+    std::unique_ptr<ClientInput> clientInput
+        = std::make_unique<ClientInput>();
     MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
-                              *clientInputs);
+                              *clientInput);
 
     // Fill in the network ID that we assigned to this client.
-    clientInputs->netID = clientMessage.netID;
+    clientInput->netID = clientMessage.netID;
 
     // Push the message (blocks if the MessageSorter is locked).
     // Save the tickNum locally since the move might be optimized
     // in front of the access (this does happen).
-    Uint32 messageTickNum = clientInputs->tickNum;
+    Uint32 messageTickNum = clientInput->tickNum;
     MessageSorterBase::PushResult pushResult
-        = inputMessageSorter.push(messageTickNum, std::move(clientInputs));
+        = inputMessageSorter.push(messageTickNum, std::move(clientInput));
 
     // If the sorter dropped the message, push a message drop event.
     if (pushResult.result != MessageSorterBase::ValidityResult::Valid) {

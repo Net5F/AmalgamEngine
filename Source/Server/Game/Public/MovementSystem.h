@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GameDefs.h"
-#include "InputComponent.h"
 #include <array>
 
 namespace AM
@@ -10,6 +9,9 @@ namespace Server
 {
 class World;
 
+/**
+ * This system is in charge of moving entities.
+ */
 class MovementSystem
 {
 public:

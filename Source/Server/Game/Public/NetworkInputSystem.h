@@ -1,6 +1,6 @@
 #pragma once
 
-#include "InputComponent.h"
+#include "entt/entity/registry.hpp"
 
 namespace AM
 {
@@ -11,7 +11,7 @@ class World;
 class Network;
 
 /**
- * This class is in charge of receiving input messages from clients and
+ * This system is in charge of receiving input messages from clients and
  * applying them to the client's entity.
  */
 class NetworkInputSystem
@@ -38,7 +38,7 @@ private:
      * Defaults the entity's inputs and marks them dirty if their inputs
      * changed.
      */
-    void handleDropForEntity(EntityID entityID);
+    void handleDropForEntity(entt::entity entityID);
 
     Game& game;
     World& world;

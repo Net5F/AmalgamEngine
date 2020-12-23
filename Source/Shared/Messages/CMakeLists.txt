@@ -4,9 +4,10 @@ target_sources(Shared
     PUBLIC
         Public/MessageTools.h
         Public/ConnectionResponse.h
-        Public/Entity.h
+        Public/EntityState.h
         Public/EntityUpdate.h
         Public/Heartbeat.h
+        Public/ClientInput.h
 )
 
 target_include_directories(Shared

@@ -4,7 +4,7 @@
 #include "ServerNetworkDefs.h"
 #include "ClientHandler.h"
 #include "MessageSorter.h"
-#include "ClientInputs.h"
+#include "ClientInput.h"
 #include <memory>
 #include <cstddef>
 #include <unordered_map>
@@ -58,7 +58,7 @@ public:
     void processReceivedMessages(std::queue<ClientMessage>& receiveQueue);
 
     /** Forwards to the inputMessageSorter's startReceive. */
-    std::queue<std::unique_ptr<ClientInputs>>&
+    std::queue<std::unique_ptr<ClientInput>>&
         startReceiveInputMessages(Uint32 tickNum);
 
     /** Forward to the inputMessageSorter's endReceive. */
@@ -153,7 +153,7 @@ private:
     moodycamel::ReaderWriterQueue<NetworkID> messageDropEventQueue;
 
     /** Stores input messages received from clients, sorted by tick number. */
-    MessageSorter<std::unique_ptr<ClientInputs>> inputMessageSorter;
+    MessageSorter<std::unique_ptr<ClientInput>> inputMessageSorter;
 
     /** The number of seconds we'll wait before logging our network
         statistics. */

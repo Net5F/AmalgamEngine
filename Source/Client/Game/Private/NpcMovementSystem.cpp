@@ -5,7 +5,15 @@
 #include "Network.h"
 #include "ClientNetworkDefs.h"
 #include "EntityUpdate.h"
+#include "Name.h"
+#include "Position.h"
+#include "PreviousPosition.h"
+#include "Movement.h"
+#include "Input.h"
+#include "Sprite.h"
 #include "Log.h"
+#include "Ignore.h"
+#include "entt/entity/registry.hpp"
 #include <memory>
 #include <string>
 
@@ -22,6 +30,9 @@ NpcMovementSystem::NpcMovementSystem(Game& inGame, World& inWorld,
 , world(inWorld)
 , network(inNetwork)
 {
+    // Init the groups that we'll be using.
+    auto group = world.registry.group<Input, Position, Movement>();
+    ignore(group);
 }
 
 void NpcMovementSystem::updateNpcs()
@@ -166,74 +177,78 @@ void NpcMovementSystem::handleUpdate(
 
 void NpcMovementSystem::moveAllNpcs()
 {
-    for (std::size_t entityID = 0; entityID < MAX_ENTITIES; ++entityID) {
-        /* Move all NPCs that have an input, position, and movement component.
-         */
-        if (entityID != world.playerData.ID
-            && (world.componentFlags[entityID] & ComponentFlag::Input)
-            && (world.componentFlags[entityID] & ComponentFlag::Position)
-            && (world.componentFlags[entityID] & ComponentFlag::Movement)) {
-            // Save the old position.
-            PositionComponent& currentPosition = world.positions[entityID];
-            PositionComponent& oldPosition = world.oldPositions[entityID];
-            oldPosition.x = currentPosition.x;
-            oldPosition.y = currentPosition.y;
+    // Move all NPCs that have an input, position, and movement component.
+    auto group = world.registry.group<Input, Position, Movement>();
+    for (entt::entity entity : group) {
+        Input& input = group.get<Input>(entity);
+        Position& position = group.get<Position>(entity);
+        Movement& movement = group.get<Movement>(entity);
 
-            // Process their movement.
-            MovementHelpers::moveEntity(
-                currentPosition, world.movements[entityID],
-                world.inputs[entityID].inputStates, GAME_TICK_TIMESTEP_S);
-        }
+        // Save their old position.
+        position.oldX = position.x;
+        position.oldY = position.y;
+        position.oldZ = position.z;
+
+        // Process their movement.
+        MovementHelpers::moveEntity(position, movement, input.inputStates,
+            GAME_TICK_TIMESTEP_S);
     }
 }
 
 void NpcMovementSystem::applyUpdateMessage(
     const std::shared_ptr<const EntityUpdate>& entityUpdate)
 {
-    const std::vector<Entity>& entities = entityUpdate->entities;
-    /* Use the data in the message to correct any NPCs that did change inputs.
-     */
+    // Use the data in the message to correct any NPCs that changed inputs.
+    const std::vector<EntityState>& entities = entityUpdate->entityStates;
     for (auto entityIt = entities.begin(); entityIt != entities.end();
          ++entityIt) {
         // Skip the player (not an NPC).
-        EntityID entityID = entityIt->id;
-        EntityID playerID = world.playerData.ID;
-        if (entityID == playerID) {
+        entt::entity entity = entityIt->entity;
+        if (entity == world.playerEntity) {
             continue;
         }
 
-        // If the entity doesn't exist, add it to our list.
-        if (!(world.entityExists(entityID))) {
-            LOG_INFO("New entity added. ID: %u", entityID);
-            // TODO: Add names for real.
-            world.addEntity(std::to_string(entityID), entityID);
+        // If the entity doesn't exist, create it.
+        entt::registry& registry = world.registry;
+        if (!(registry.valid(entity))) {
+            LOG_INFO("New entity added. ID: %u", entity);
+            entt::entity newEntity = registry.create(entity);
+            if (entity != newEntity) {
+                LOG_ERROR(
+                    "Created entity doesn't match received entity. Created: %u, received: %u",
+                    newEntity, entity);
+            }
 
-            // TODO: Get this info from the server.
+            // Set the name.
+            registry.emplace<Name>(entity,
+                std::to_string(static_cast<Uint32>(registry.version(entity))));
+
+            // TODO: Get the sprite info from the server.
             // Get the same texture as the player.
-            world.sprites[entityID].texturePtr
-                = world.sprites[playerID].texturePtr;
-            world.sprites[entityID].posInTexture
-                = world.sprites[playerID].posInTexture;
-            world.sprites[entityID].width = 64;
-            world.sprites[entityID].height = 64;
-
-            world.attachComponent(entityID, ComponentFlag::Input);
-            world.attachComponent(entityID, ComponentFlag::Movement);
-            world.attachComponent(entityID, ComponentFlag::Position);
-            world.attachComponent(entityID, ComponentFlag::Sprite);
+            Sprite& playerSprite = registry.get<Sprite>(world.playerEntity);
+            registry.emplace<Sprite>(entity, playerSprite);
 
             // Init their old position so they don't lerp in from elsewhere.
-            world.oldPositions[entityID] = entityIt->positionComponent;
+            const Position& receivedPos = entityIt->position;
+            registry.emplace<PreviousPosition>(entity, receivedPos.x, receivedPos.y,
+                receivedPos.z);
+
+            // Create the rest of their components, to be set for real below.
+            registry.emplace<Input>(entity);
+            registry.emplace<Position>(entity);
+            registry.emplace<Movement>(entity);
         }
 
-        // Update the inputs.
-        world.inputs[entityID] = entityIt->inputComponent;
+        // Update their inputs.
+        registry.patch<Input>(entity, [entityIt](Input& input) {input = entityIt->input;});
 
-        // Update the movements.
-        world.movements[entityID] = entityIt->movementComponent;
+        // Update their position.
+        registry.patch<Position>(entity,
+            [entityIt](Position& position) {position = entityIt->position;});
 
-        // Update the currentPosition.
-        world.positions[entityID] = entityIt->positionComponent;
+        // Update their movements.
+        registry.patch<Movement>(entity,
+            [entityIt](Movement& movement) {movement = entityIt->movement;});
     }
 }
 
