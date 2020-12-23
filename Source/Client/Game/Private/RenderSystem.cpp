@@ -19,7 +19,7 @@ RenderSystem::RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame,
 , accumulatedTime(0.0)
 {
     // Init the groups that we'll be using.
-    auto group = world.registry.group<Sprite, PreviousPosition>(entt::get<Position>);
+    auto group = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
     ignore(group);
 
     // TODO: This will eventually be used when we get to variable window sizes.
@@ -38,7 +38,7 @@ void RenderSystem::tick()
         const double alpha = game.getIterationProgress();
 
         // Render all entities with a Sprite, PreviousPosition and Position.
-        auto group = world.registry.group<Sprite, PreviousPosition>(entt::get<Position>);
+        auto group = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
         for (entt::entity entity : group) {
             const Sprite& sprite = group.get<Sprite>(entity);
             const Position& position = group.get<Position>(entity);

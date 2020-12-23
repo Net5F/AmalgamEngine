@@ -31,7 +31,7 @@ NpcMovementSystem::NpcMovementSystem(Game& inGame, World& inWorld,
 , network(inNetwork)
 {
     // Init the groups that we'll be using.
-    auto group = world.registry.group<Input, Position, Movement>();
+    auto group = world.registry.group<Input, Position, PreviousPosition, Movement>();
     ignore(group);
 }
 
@@ -178,16 +178,17 @@ void NpcMovementSystem::handleUpdate(
 void NpcMovementSystem::moveAllNpcs()
 {
     // Move all NPCs that have an input, position, and movement component.
-    auto group = world.registry.group<Input, Position, Movement>();
+    auto group = world.registry.group<Input, Position, PreviousPosition, Movement>();
     for (entt::entity entity : group) {
         Input& input = group.get<Input>(entity);
         Position& position = group.get<Position>(entity);
+        PreviousPosition& previousPos = group.get<PreviousPosition>(entity);
         Movement& movement = group.get<Movement>(entity);
 
         // Save their old position.
-        position.oldX = position.x;
-        position.oldY = position.y;
-        position.oldZ = position.z;
+        previousPos.x = position.x;
+        previousPos.y = position.y;
+        previousPos.z = position.z;
 
         // Process their movement.
         MovementHelpers::moveEntity(position, movement, input.inputStates,

@@ -14,14 +14,6 @@ public:
     float x{0};
     float y{0};
     float z{0};
-
-    //--------------------------------------------------------------------------
-    // Non-replicated data
-    //--------------------------------------------------------------------------
-    /** Previous position, optional, used for lerping. */
-    float oldX{0};
-    float oldY{0};
-    float oldZ{0};
 };
 
 template<typename S>
