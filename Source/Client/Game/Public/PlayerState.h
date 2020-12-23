@@ -23,9 +23,6 @@ public:
     /** Tracks the player's inputs. If index 0 is the current tick, index 1
         will be the previous. */
     CircularBuffer<Input::StateArr, INPUT_HISTORY_LENGTH> inputHistory;
-
-    /** Tracks whether the player has new input state that needs to be sent. */
-    bool isDirty{false};
 };
 
 } // namespace Client

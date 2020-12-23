@@ -44,17 +44,16 @@ void PlayerInputSystem::processHeldInputs()
 
     // Update our saved input state.
     entt::registry& registry = world.registry;
-    Input::StateArr& playerInputs = registry.get<Input>(world.playerEntity).inputStates;
+    Input& playerInput = registry.get<Input>(world.playerEntity);
     for (unsigned int inputType = 0; inputType < Input::Type::NumTypes;
          ++inputType) {
         // If the saved state doesn't match the latest.
-        if (newInputStates[inputType] != playerInputs[inputType]) {
+        if (newInputStates[inputType] != playerInput.inputStates[inputType]) {
             // Save the new state.
-            playerInputs[inputType] = newInputStates[inputType];
+            playerInput.inputStates[inputType] = newInputStates[inputType];
 
             // Mark the player as dirty.
-            registry.patch<PlayerState>(world.playerEntity,
-                [](PlayerState& state) {state.isDirty = true;});
+            playerInput.isDirty = true;
         }
     }
 }

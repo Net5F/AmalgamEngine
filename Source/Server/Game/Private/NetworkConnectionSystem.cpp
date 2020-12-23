@@ -52,8 +52,8 @@ void NetworkConnectionSystem::processConnectEvents()
         entt::entity newEntity = registry.create();
         registry.emplace<Name>(newEntity,
             std::to_string(static_cast<Uint32>(registry.version(newEntity))));
-        registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0);
-        registry.emplace<PreviousPosition>(newEntity, spawnPoint.x, spawnPoint.y, 0);
+        registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0.0f);
+        registry.emplace<PreviousPosition>(newEntity, spawnPoint.x, spawnPoint.y, 0.0f);
         registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
         registry.emplace<Input>(newEntity);
         registry.emplace<ClientState>(newEntity, clientNetworkID);
