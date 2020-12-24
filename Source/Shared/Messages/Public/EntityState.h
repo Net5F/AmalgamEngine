@@ -23,12 +23,12 @@ struct EntityState {
 };
 
 template<typename S>
-void serialize(S& serializer, EntityState& entity)
+void serialize(S& serializer, EntityState& entityState)
 {
-    serializer.value4b(entity.entity);
-    serializer.object(entity.input);
-    serializer.object(entity.position);
-    serializer.object(entity.movement);
+    serializer.value4b(entityState.entity);
+    serializer.object(entityState.input);
+    serializer.object(entityState.position);
+    serializer.object(entityState.movement);
 }
 
 } // End namespace AM

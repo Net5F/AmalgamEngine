@@ -129,8 +129,8 @@ int ClientHandler::receiveClientMessages(ClientMap& clientMap)
     for (auto& pair : clientMap) {
         const std::shared_ptr<Client>& clientPtr = pair.second;
 
-        /* If there's potentially data, try to receive all messages from the
-         * client. */
+        /* If there's potentially data waiting, try to receive all messages
+           from the client. */
         Message resultMessage = clientPtr->receiveMessage();
         while (resultMessage.messageType != MessageType::NotSet) {
             // Queue the message.
