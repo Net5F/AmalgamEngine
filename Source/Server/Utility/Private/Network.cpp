@@ -211,8 +211,7 @@ Sint64 Network::handleClientInputs(ClientMessage& clientMessage,
                                    BinaryBufferPtr& messageBuffer)
 {
     // Deserialize the message.
-    std::unique_ptr<ClientInput> clientInput
-        = std::make_unique<ClientInput>();
+    std::unique_ptr<ClientInput> clientInput = std::make_unique<ClientInput>();
     MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
                               *clientInput);
 

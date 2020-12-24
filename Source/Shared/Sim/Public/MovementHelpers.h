@@ -6,7 +6,6 @@
 
 namespace AM
 {
-
 class Position;
 class PreviousPosition;
 class Movement;
@@ -30,15 +29,14 @@ public:
      * @post The given position and movement components are modified in-place to
      * the new data.
      */
-    static void moveEntity(Position& position,
-                           Movement& movement,
+    static void moveEntity(Position& position, Movement& movement,
                            Input::StateArr& inputStates, double deltaSeconds);
 
     /**
      * Returns a position interpolated between previousPos and position.
      */
-    static Position interpolatePosition(PreviousPosition& previousPos, Position& position,
-                                        double alpha);
+    static Position interpolatePosition(PreviousPosition& previousPos,
+                                        Position& position, double alpha);
 
 private:
     /**
@@ -47,8 +45,8 @@ private:
      *
      * @post The given movement component is modified in-place to the new data.
      */
-    static void updateVelocity(Movement& movement,
-                               Input::StateArr& inputStates, double deltaSeconds);
+    static void updateVelocity(Movement& movement, Input::StateArr& inputStates,
+                               double deltaSeconds);
 };
 
 } // namespace AM

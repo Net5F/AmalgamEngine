@@ -36,7 +36,7 @@ void NetworkUpdateSystem::sendInputState()
     Input& input = world.registry.get<Input>(world.playerEntity);
     if (input.isDirty) {
         // Get the current input state.
-        ClientInput clientInput {game.getCurrentTick(), input};
+        ClientInput clientInput{game.getCurrentTick(), input};
 
         // Serialize the client inputs message.
         BinaryBufferSharedPtr messageBuffer

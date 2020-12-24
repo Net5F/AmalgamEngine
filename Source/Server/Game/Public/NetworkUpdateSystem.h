@@ -41,7 +41,8 @@ private:
      * @param entity  The entity to serialize.
      * @return An offset where the data was stored in the builder.
      */
-    void fillEntityData(entt::entity entity, std::vector<EntityState>& entityStates);
+    void fillEntityData(entt::entity entity,
+                        std::vector<EntityState>& entityStates);
 
     Game& game;
     World& world;

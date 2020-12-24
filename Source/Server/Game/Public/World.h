@@ -11,7 +11,6 @@ namespace AM
 {
 namespace Server
 {
-
 /**
  * Holds world state and manages the persistence of that state.
  *

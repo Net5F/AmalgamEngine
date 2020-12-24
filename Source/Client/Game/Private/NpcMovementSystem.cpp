@@ -32,8 +32,9 @@ NpcMovementSystem::NpcMovementSystem(Game& inGame, World& inWorld,
 , network(inNetwork)
 {
     // Init the groups that we'll be using.
-    auto group = world.registry.group<Input, Position, PreviousPosition, Movement>(
-        entt::exclude<PlayerState>);
+    auto group
+        = world.registry.group<Input, Position, PreviousPosition, Movement>(
+            entt::exclude<PlayerState>);
     ignore(group);
 }
 
@@ -180,8 +181,9 @@ void NpcMovementSystem::handleUpdate(
 void NpcMovementSystem::moveAllNpcs()
 {
     // Move all NPCs that have an input, position, and movement component.
-    auto group = world.registry.group<Input, Position, PreviousPosition, Movement>(
-        entt::exclude<PlayerState>);
+    auto group
+        = world.registry.group<Input, Position, PreviousPosition, Movement>(
+            entt::exclude<PlayerState>);
     for (entt::entity entity : group) {
         Input& input = group.get<Input>(entity);
         Position& position = group.get<Position>(entity);
@@ -195,7 +197,7 @@ void NpcMovementSystem::moveAllNpcs()
 
         // Process their movement.
         MovementHelpers::moveEntity(position, movement, input.inputStates,
-            GAME_TICK_TIMESTEP_S);
+                                    GAME_TICK_TIMESTEP_S);
     }
 }
 
@@ -218,14 +220,14 @@ void NpcMovementSystem::applyUpdateMessage(
             LOG_INFO("New entity added. ID: %u", entity);
             entt::entity newEntity = registry.create(entity);
             if (entity != registry.entity(newEntity)) {
-                LOG_ERROR(
-                    "Created entity doesn't match received entity. Created: %u, received: %u",
-                    newEntity, entity);
+                LOG_ERROR("Created entity doesn't match received entity. "
+                          "Created: %u, received: %u",
+                          newEntity, entity);
             }
 
             // Set the name.
-            registry.emplace<Name>(entity,
-                std::to_string(static_cast<Uint32>(registry.version(entity))));
+            registry.emplace<Name>(entity, std::to_string(static_cast<Uint32>(
+                                               registry.version(entity))));
 
             // TODO: Get the sprite info from the server.
             // Get the same texture as the player.
@@ -234,8 +236,8 @@ void NpcMovementSystem::applyUpdateMessage(
 
             // Init their old position so they don't lerp in from elsewhere.
             const Position& receivedPos = entityIt->position;
-            registry.emplace<PreviousPosition>(entity, receivedPos.x, receivedPos.y,
-                receivedPos.z);
+            registry.emplace<PreviousPosition>(entity, receivedPos.x,
+                                               receivedPos.y, receivedPos.z);
 
             // Create the rest of their components, to be set for real below.
             registry.emplace<Input>(entity);
@@ -244,15 +246,18 @@ void NpcMovementSystem::applyUpdateMessage(
         }
 
         // Update their inputs.
-        registry.patch<Input>(entity, [entityIt](Input& input) {input = entityIt->input;});
+        registry.patch<Input>(
+            entity, [entityIt](Input& input) { input = entityIt->input; });
 
         // Update their position.
-        registry.patch<Position>(entity,
-            [entityIt](Position& position) {position = entityIt->position;});
+        registry.patch<Position>(entity, [entityIt](Position& position) {
+            position = entityIt->position;
+        });
 
         // Update their movements.
-        registry.patch<Movement>(entity,
-            [entityIt](Movement& movement) {movement = entityIt->movement;});
+        registry.patch<Movement>(entity, [entityIt](Movement& movement) {
+            movement = entityIt->movement;
+        });
     }
 }
 

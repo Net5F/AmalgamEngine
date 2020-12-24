@@ -42,7 +42,8 @@ void NetworkInputSystem::processInputMessages()
         }
 
         // Find the entity associated with the given NetID.
-        entt::entity clientEntity = world.findEntityWithNetID(inputMessage->netID);
+        entt::entity clientEntity
+            = world.findEntityWithNetID(inputMessage->netID);
 
         // Update the client entity's inputs.
         if (clientEntity != entt::null) {

@@ -33,8 +33,10 @@ public:
      */
     void connect();
 
-    /** Processes one tick of the "sim", checking if we need to send inputs or
-     * not. */
+    /**
+     * Processes one tick of the "sim", checking if we need to send inputs or
+     * not.
+     */
     void tick();
 
     /** Initialize the iteration timer. */

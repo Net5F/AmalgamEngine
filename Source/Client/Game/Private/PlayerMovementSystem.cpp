@@ -34,18 +34,23 @@ void PlayerMovementSystem::processMovements()
     Input& currentInput = registry.get<Input>(world.playerEntity);
 
     // Save the old position.
-    PreviousPosition& previousPosition = registry.get<PreviousPosition>(world.playerEntity);
+    PreviousPosition& previousPosition
+        = registry.get<PreviousPosition>(world.playerEntity);
     previousPosition.x = currentPosition.x;
     previousPosition.y = currentPosition.y;
 
     if (!RUN_OFFLINE) {
         // Receive any player entity updates from the server.
-        PlayerState& playerState = registry.get<PlayerState>(world.playerEntity);
-        Uint32 latestReceivedTick = processPlayerUpdates(currentPosition, previousPosition, currentMovement, currentInput, playerState);
+        PlayerState& playerState
+            = registry.get<PlayerState>(world.playerEntity);
+        Uint32 latestReceivedTick
+            = processPlayerUpdates(currentPosition, previousPosition,
+                                   currentMovement, currentInput, playerState);
 
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
-            replayInputs(latestReceivedTick, currentPosition, currentMovement, playerState);
+            replayInputs(latestReceivedTick, currentPosition, currentMovement,
+                         playerState);
 
             // Check if there was a mismatch between the positions we had and
             // where the server thought we should be.
@@ -53,22 +58,21 @@ void PlayerMovementSystem::processMovements()
                 || previousPosition.y != currentPosition.y) {
                 LOG_INFO("Predicted position mismatched after replay: (%.6f, "
                          "%.6f) -> (%.6f, %.6f)",
-                         previousPosition.x, previousPosition.y, currentPosition.x, currentPosition.y);
+                         previousPosition.x, previousPosition.y,
+                         currentPosition.x, currentPosition.y);
                 LOG_INFO("latestReceivedTick: %u", latestReceivedTick);
             }
         }
     }
 
     // Use the current input state to update movement for this tick.
-    MovementHelpers::moveEntity(currentPosition, currentMovement, currentInput.inputStates,
-        GAME_TICK_TIMESTEP_S);
+    MovementHelpers::moveEntity(currentPosition, currentMovement,
+                                currentInput.inputStates, GAME_TICK_TIMESTEP_S);
 }
 
-Uint32 PlayerMovementSystem::processPlayerUpdates(Position& currentPosition,
-                                                  PreviousPosition& previousPosition,
-                                                  Movement& currentMovement,
-                                                  Input& currentInput,
-                                                  PlayerState& playerState)
+Uint32 PlayerMovementSystem::processPlayerUpdates(
+    Position& currentPosition, PreviousPosition& previousPosition,
+    Movement& currentMovement, Input& currentInput, PlayerState& playerState)
 {
     /* Process any messages for us from the server. */
     Uint32 latestReceivedTick = 0;
@@ -144,7 +148,10 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(Position& currentPosition,
     return latestReceivedTick;
 }
 
-void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick, Position& currentPosition, Movement& currentMovement, PlayerState& playerState)
+void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
+                                        Position& currentPosition,
+                                        Movement& currentMovement,
+                                        PlayerState& playerState)
 {
     Uint32 currentTick = game.getCurrentTick();
     checkReceivedTickValidity(latestReceivedTick, currentTick);

@@ -6,8 +6,7 @@
 
 namespace AM
 {
-void MovementHelpers::moveEntity(Position& position,
-                                 Movement& movement,
+void MovementHelpers::moveEntity(Position& position, Movement& movement,
                                  Input::StateArr& inputStates,
                                  double deltaSeconds)
 {
@@ -22,10 +21,8 @@ void MovementHelpers::moveEntity(Position& position,
 Position MovementHelpers::interpolatePosition(PreviousPosition& previousPos,
                                               Position& position, double alpha)
 {
-    float interpX
-        = (position.x * alpha) + (previousPos.x * (1.0 - alpha));
-    float interpY
-        = (position.y * alpha) + (previousPos.y * (1.0 - alpha));
+    float interpX = (position.x * alpha) + (previousPos.x * (1.0 - alpha));
+    float interpY = (position.y * alpha) + (previousPos.y * (1.0 - alpha));
     return {interpX, interpY};
 }
 

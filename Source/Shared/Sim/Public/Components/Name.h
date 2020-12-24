@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 /**
  * Represents an entity's name.
  */

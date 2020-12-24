@@ -5,9 +5,7 @@ namespace AM
 {
 namespace Client
 {
-World::World()
-{
-}
+World::World() {}
 
 } // namespace Client
 } // namespace AM

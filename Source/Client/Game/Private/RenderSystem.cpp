@@ -21,7 +21,8 @@ RenderSystem::RenderSystem(SDL2pp::Renderer& inRenderer, Game& inGame,
 , accumulatedTime(0.0)
 {
     // Init the groups that we'll be using.
-    auto group = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
+    auto group
+        = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
     ignore(group);
 
     // TODO: This will eventually be used when we get to variable window sizes.
@@ -72,30 +73,39 @@ void RenderSystem::render(double alpha)
     renderer.Clear();
 
     // Get the offset between world and screen space.
-    auto [playerCamera, playerSprite, playerPosition, playerPreviousPos] = world.registry.get<Camera, Sprite, Position, PreviousPosition>(world.playerEntity);
-    Position playerLerp = MovementHelpers::interpolatePosition(playerPreviousPos, playerPosition, alpha);
+    auto [playerCamera, playerSprite, playerPosition, playerPreviousPos]
+        = world.registry.get<Camera, Sprite, Position, PreviousPosition>(
+            world.playerEntity);
+    Position playerLerp = MovementHelpers::interpolatePosition(
+        playerPreviousPos, playerPosition, alpha);
 
-    int worldToScreenOffsetX = playerLerp.x - (playerCamera.width / 2)
-                               + (playerSprite.width / 2);
-    int worldToScreenOffsetY = playerLerp.y - (playerCamera.height / 2)
-                               + (playerSprite.height / 2);
+    int worldToScreenOffsetX
+        = playerLerp.x - (playerCamera.width / 2) + (playerSprite.width / 2);
+    int worldToScreenOffsetY
+        = playerLerp.y - (playerCamera.height / 2) + (playerSprite.height / 2);
 
     // Render all entities with a Sprite, PreviousPosition and Position.
-    auto group = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
+    auto group
+        = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
     for (entt::entity entity : group) {
-        auto [sprite, position, previousPos] = group.get<Sprite, Position, PreviousPosition>(entity);
+        auto [sprite, position, previousPos]
+            = group.get<Sprite, Position, PreviousPosition>(entity);
 
         // Get the lerp'd world position and convert it to screen space.
-        Position lerp = MovementHelpers::interpolatePosition(previousPos, position, alpha);
-        int screenX = static_cast<int>(std::floor(lerp.x)) - worldToScreenOffsetX;
-        int screenY = static_cast<int>(std::floor(lerp.y)) - worldToScreenOffsetY;
+        Position lerp = MovementHelpers::interpolatePosition(previousPos,
+                                                             position, alpha);
+        int screenX
+            = static_cast<int>(std::floor(lerp.x)) - worldToScreenOffsetX;
+        int screenY
+            = static_cast<int>(std::floor(lerp.y)) - worldToScreenOffsetY;
 
         // If the sprite is within the camera bounds, render it.
         if ((screenX + sprite.width) > 0 && (screenY + sprite.height) > 0) {
             SDL2pp::Rect spriteRect
                 = {screenX, screenY, sprite.width, sprite.height};
 
-            renderer.Copy(*(sprite.texturePtr), sprite.posInTexture, spriteRect);
+            renderer.Copy(*(sprite.texturePtr), sprite.posInTexture,
+                          spriteRect);
         }
     }
 

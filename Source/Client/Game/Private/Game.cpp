@@ -58,8 +58,10 @@ void Game::connect()
 
     // Get our info from the connection response.
     entt::entity playerEntity = connectionResponse->entity;
-    LOG_INFO("Received connection response. ID: %u, tick: %u, pos: (%.4f, %.4f)", playerEntity,
-             connectionResponse->tickNum, connectionResponse->x, connectionResponse->y);
+    LOG_INFO(
+        "Received connection response. ID: %u, tick: %u, pos: (%.4f, %.4f)",
+        playerEntity, connectionResponse->tickNum, connectionResponse->x,
+        connectionResponse->y);
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.
@@ -69,26 +71,29 @@ void Game::connect()
     entt::registry& registry = world.registry;
     entt::entity newEntity = registry.create(playerEntity);
     if (newEntity != playerEntity) {
-        LOG_ERROR(
-            "Created entity doesn't match received entity. Created: %u, received: %u",
-            newEntity, playerEntity);
+        LOG_ERROR("Created entity doesn't match received entity. Created: %u, "
+                  "received: %u",
+                  newEntity, playerEntity);
     }
 
     // Save the player entity ID for convenience.
     world.playerEntity = newEntity;
 
     // Set up the player's sim components.
-    registry.emplace<Name>(newEntity,
-        std::to_string(static_cast<Uint32>(registry.version(newEntity))));
-    registry.emplace<Position>(newEntity, connectionResponse->x, connectionResponse->y, 0.0f);
-    registry.emplace<PreviousPosition>(newEntity, connectionResponse->x, connectionResponse->y, 0.0f);
+    registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(
+                                          registry.version(newEntity))));
+    registry.emplace<Position>(newEntity, connectionResponse->x,
+                               connectionResponse->y, 0.0f);
+    registry.emplace<PreviousPosition>(newEntity, connectionResponse->x,
+                                       connectionResponse->y, 0.0f);
     registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
     SDL2pp::Rect textureRect(0, 32, 16, 16);
     registry.emplace<Sprite>(newEntity, sprites, textureRect, 64, 64);
-    registry.emplace<Camera>(newEntity, Position{}, SCREEN_WIDTH, SCREEN_HEIGHT);
+    registry.emplace<Camera>(newEntity, Position{}, SCREEN_WIDTH,
+                             SCREEN_HEIGHT);
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
@@ -104,8 +109,8 @@ void Game::fakeConnection()
     world.playerEntity = newEntity;
 
     // Set up the player's sim components.
-    registry.emplace<Name>(newEntity,
-        std::to_string(static_cast<Uint32>(registry.version(newEntity))));
+    registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(
+                                          registry.version(newEntity))));
     registry.emplace<Position>(newEntity, 64.0f, 64.0f, 0.0f);
     registry.emplace<PreviousPosition>(newEntity, 64.0f, 64.0f, 0.0f);
     registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
@@ -114,7 +119,8 @@ void Game::fakeConnection()
     // Set up the player's visual components.
     SDL2pp::Rect textureRect(0, 32, 16, 16);
     registry.emplace<Sprite>(newEntity, sprites, textureRect, 64, 64);
-    registry.emplace<Camera>(newEntity, Position{}, SCREEN_WIDTH, SCREEN_HEIGHT);
+    registry.emplace<Camera>(newEntity, Position{}, SCREEN_WIDTH,
+                             SCREEN_HEIGHT);
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);

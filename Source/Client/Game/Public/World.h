@@ -6,7 +6,6 @@ namespace AM
 {
 namespace Client
 {
-
 /**
  * Holds world state and manages the persistence of that state.
  *
@@ -21,7 +20,8 @@ public:
     entt::registry registry;
 
     /** We save the player entity ID since it's more convenient than searching
-        for the PlayerState component and getting the entitty from that every time we need it. */
+        for the PlayerState component and getting the entity from that every
+        time we need it. */
     entt::entity playerEntity;
 };
 

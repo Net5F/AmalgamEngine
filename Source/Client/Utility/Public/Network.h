@@ -148,7 +148,8 @@ private:
         Systems. */
     MessageHandler messageHandler;
 
-    /** Local copy of the playerEntity so we can tell if we got a player message. */
+    /** Local copy of the playerEntity so we can tell if we got a player
+        message. */
     entt::entity playerEntity;
 
     /** The adjustment that the server has told us to apply to the tick. */

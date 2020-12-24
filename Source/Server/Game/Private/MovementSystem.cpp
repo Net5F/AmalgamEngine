@@ -31,7 +31,7 @@ void MovementSystem::processMovements()
 
         // Process their movement.
         MovementHelpers::moveEntity(position, movement, input.inputStates,
-            GAME_TICK_TIMESTEP_S);
+                                    GAME_TICK_TIMESTEP_S);
     }
 }
 
