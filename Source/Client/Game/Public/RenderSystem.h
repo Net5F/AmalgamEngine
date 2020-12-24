@@ -38,6 +38,12 @@ public:
     double getTimeTillNextFrame();
 
 private:
+    /**
+     * Renders all entities with Sprite, PreviousPosition, and Position
+     * components, using the given alpha to lerp their position.
+     */
+    void render(double alpha);
+
     SDL2pp::Renderer& renderer;
     Game& game;
     World& world;

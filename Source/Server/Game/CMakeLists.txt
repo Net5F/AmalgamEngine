@@ -12,12 +12,13 @@ target_sources(Server
 		Public/NetworkConnectionSystem.h
 		Public/NetworkInputSystem.h
 		Public/NetworkUpdateSystem.h
-		Public/ClientState.h
 		Public/Game.h
+		Public/Components/ClientState.h
 )
 
 target_include_directories(Server
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
 		${CMAKE_CURRENT_SOURCE_DIR}/Public
+		${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
 )

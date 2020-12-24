@@ -1,13 +1,16 @@
 #pragma once
 
-#include "Position.h"
-#include "Movement.h"
-#include "Input.h"
 #include "GameDefs.h"
+#include "Input.h"
 #include <array>
 
 namespace AM
 {
+
+class Position;
+class PreviousPosition;
+class Movement;
+
 /**
  * Shared static functions for moving entities.
  */
@@ -30,6 +33,12 @@ public:
     static void moveEntity(Position& position,
                            Movement& movement,
                            Input::StateArr& inputStates, double deltaSeconds);
+
+    /**
+     * Returns a position interpolated between previousPos and position.
+     */
+    static Position interpolatePosition(PreviousPosition& previousPos, Position& position,
+                                        double alpha);
 
 private:
     /**

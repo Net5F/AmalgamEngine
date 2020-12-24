@@ -2,7 +2,6 @@
 
 #include "Input.h"
 #include "CircularBuffer.h"
-#include "entt/entity/registry.hpp"
 
 namespace AM
 {

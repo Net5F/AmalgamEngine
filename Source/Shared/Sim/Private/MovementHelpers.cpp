@@ -1,4 +1,7 @@
 #include "MovementHelpers.h"
+#include "Position.h"
+#include "PreviousPosition.h"
+#include "Movement.h"
 #include "Ignore.h"
 
 namespace AM
@@ -14,6 +17,16 @@ void MovementHelpers::moveEntity(Position& position,
     // Update the position.
     position.x += (deltaSeconds * movement.velX);
     position.y += (deltaSeconds * movement.velY);
+}
+
+Position MovementHelpers::interpolatePosition(PreviousPosition& previousPos,
+                                              Position& position, double alpha)
+{
+    float interpX
+        = (position.x * alpha) + (previousPos.x * (1.0 - alpha));
+    float interpY
+        = (position.y * alpha) + (previousPos.y * (1.0 - alpha));
+    return {interpX, interpY};
 }
 
 void MovementHelpers::updateVelocity(Movement& movement,

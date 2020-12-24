@@ -15,11 +15,13 @@ target_sources(Client
 		Public/NpcMovementSystem.h
 		Public/RenderSystem.h
 		Public/Game.h
-		Public/PlayerState.h
+		Public/Components/Camera.h
+		Public/Components/PlayerState.h
 )
 
 target_include_directories(Client
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
 		${CMAKE_CURRENT_SOURCE_DIR}/Public
+		${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
 )

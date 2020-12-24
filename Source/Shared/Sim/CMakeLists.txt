@@ -4,6 +4,12 @@ target_sources(Shared
 	PUBLIC
         Public/GameDefs.h
         Public/MovementHelpers.h
+        Public/Components/Input.h
+        Public/Components/Movement.h
+        Public/Components/Name.h
+        Public/Components/Position.h
+        Public/Components/PreviousPosition.h
+        Public/Components/Sprite.h
 )
 
 target_include_directories(Shared
@@ -11,4 +17,5 @@ target_include_directories(Shared
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
+		${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
 )

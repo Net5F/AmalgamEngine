@@ -111,7 +111,7 @@ void NetworkUpdateSystem::fillEntityData(entt::entity entity,
     Movement& movement = registry.get<Movement>(entity);
 
     // TEMP - Doing this until C++20 where we can emplace brace initializers.
-    entityStates.push_back({entity, input, position, movement});
+    entityStates.push_back({registry.entity(entity), input, position, movement});
 
     //    LOG_INFO("Sending: (%f, %f), (%f, %f)", position.x, position.y,
     //    movement.velX, movement.velY);

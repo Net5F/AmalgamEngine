@@ -1,6 +1,9 @@
 #include "MovementSystem.h"
 #include "MovementHelpers.h"
 #include "World.h"
+#include "Input.h"
+#include "Position.h"
+#include "Movement.h"
 #include "Log.h"
 #include "Ignore.h"
 

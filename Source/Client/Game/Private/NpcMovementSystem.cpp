@@ -217,7 +217,7 @@ void NpcMovementSystem::applyUpdateMessage(
         if (!(registry.valid(entity))) {
             LOG_INFO("New entity added. ID: %u", entity);
             entt::entity newEntity = registry.create(entity);
-            if (entity != newEntity) {
+            if (entity != registry.entity(newEntity)) {
                 LOG_ERROR(
                     "Created entity doesn't match received entity. Created: %u, received: %u",
                     newEntity, entity);

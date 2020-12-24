@@ -4,6 +4,8 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Sprite.h"
+#include "Camera.h"
+#include "MovementHelpers.h"
 #include "Log.h"
 #include "Ignore.h"
 
@@ -31,33 +33,11 @@ void RenderSystem::tick()
     accumulatedTime += frameTimer.getDeltaSeconds(true);
 
     if (accumulatedTime >= RENDER_TICK_TIMESTEP_S) {
-        /* Process the rendering for this frame. */
-        renderer.Clear();
-
         // How far we are between game ticks in decimal percent.
-        const double alpha = game.getIterationProgress();
+        double alpha = game.getIterationProgress();
 
-        // Render all entities with a Sprite, PreviousPosition and Position.
-        auto group = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
-        for (entt::entity entity : group) {
-            const Sprite& sprite = group.get<Sprite>(entity);
-            const Position& position = group.get<Position>(entity);
-            const PreviousPosition& previousPos = group.get<PreviousPosition>(entity);
-
-            // Lerp'd position based on how far we are between game ticks.
-            const double interpX
-                = (position.x * alpha) + (previousPos.x * (1.0 - alpha));
-            const double interpY
-                = (position.y * alpha) + (previousPos.y * (1.0 - alpha));
-            const int lerpX = static_cast<int>(std::floor(interpX));
-            const int lerpY = static_cast<int>(std::floor(interpY));
-            SDL2pp::Rect spriteWorldData
-                = {lerpX, lerpY, sprite.width, sprite.height};
-
-            renderer.Copy(*(sprite.texturePtr), sprite.posInTexture, spriteWorldData);
-        }
-
-        renderer.Present();
+        // Process the rendering for this frame.
+        render(alpha);
 
         accumulatedTime -= RENDER_TICK_TIMESTEP_S;
         if (accumulatedTime >= RENDER_TICK_TIMESTEP_S) {
@@ -84,6 +64,42 @@ double RenderSystem::getTimeTillNextFrame()
     // The time since accumulatedTime was last updated.
     double timeSinceIteration = frameTimer.getDeltaSeconds(false);
     return (RENDER_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
+}
+
+void RenderSystem::render(double alpha)
+{
+    // Clear the screen to prepare for drawing.
+    renderer.Clear();
+
+    // Get the offset between world and screen space.
+    auto [playerCamera, playerSprite, playerPosition, playerPreviousPos] = world.registry.get<Camera, Sprite, Position, PreviousPosition>(world.playerEntity);
+    Position playerLerp = MovementHelpers::interpolatePosition(playerPreviousPos, playerPosition, alpha);
+
+    int worldToScreenOffsetX = playerLerp.x - (playerCamera.width / 2)
+                               + (playerSprite.width / 2);
+    int worldToScreenOffsetY = playerLerp.y - (playerCamera.height / 2)
+                               + (playerSprite.height / 2);
+
+    // Render all entities with a Sprite, PreviousPosition and Position.
+    auto group = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
+    for (entt::entity entity : group) {
+        auto [sprite, position, previousPos] = group.get<Sprite, Position, PreviousPosition>(entity);
+
+        // Get the lerp'd world position and convert it to screen space.
+        Position lerp = MovementHelpers::interpolatePosition(previousPos, position, alpha);
+        int screenX = static_cast<int>(std::floor(lerp.x)) - worldToScreenOffsetX;
+        int screenY = static_cast<int>(std::floor(lerp.y)) - worldToScreenOffsetY;
+
+        // If the sprite is within the camera bounds, render it.
+        if ((screenX + sprite.width) > 0 && (screenY + sprite.height) > 0) {
+            SDL2pp::Rect spriteRect
+                = {screenX, screenY, sprite.width, sprite.height};
+
+            renderer.Copy(*(sprite.texturePtr), sprite.posInTexture, spriteRect);
+        }
+    }
+
+    renderer.Present();
 }
 
 } // namespace Client

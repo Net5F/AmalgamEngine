@@ -14,7 +14,7 @@ namespace AM
  * messaging.
  */
 struct EntityState {
-    /** This entity's sim ID. */
+    /** The entity that this state belongs to. */
     entt::entity entity{entt::null};
 
     Input input;

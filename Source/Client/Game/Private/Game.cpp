@@ -7,6 +7,7 @@
 #include "PreviousPosition.h"
 #include "Movement.h"
 #include "Sprite.h"
+#include "Camera.h"
 #include "PlayerState.h"
 #include "Name.h"
 #include "Log.h"
@@ -84,9 +85,10 @@ void Game::connect()
     registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
     registry.emplace<Input>(newEntity);
 
-    // Set up the player's sprite component.
+    // Set up the player's visual components.
     SDL2pp::Rect textureRect(0, 32, 16, 16);
     registry.emplace<Sprite>(newEntity, sprites, textureRect, 64, 64);
+    registry.emplace<Camera>(newEntity, Position{}, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
@@ -109,9 +111,10 @@ void Game::fakeConnection()
     registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
     registry.emplace<Input>(newEntity);
 
-    // Set up the player's sprite component.
+    // Set up the player's visual components.
     SDL2pp::Rect textureRect(0, 32, 16, 16);
     registry.emplace<Sprite>(newEntity, sprites, textureRect, 64, 64);
+    registry.emplace<Camera>(newEntity, Position{}, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
