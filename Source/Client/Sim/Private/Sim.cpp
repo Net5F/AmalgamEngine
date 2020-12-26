@@ -19,8 +19,7 @@ namespace AM
 {
 namespace Client
 {
-Sim::Sim(Network& inNetwork,
-           const std::shared_ptr<SDL2pp::Texture>& inSprites)
+Sim::Sim(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites)
 : world()
 , network(inNetwork)
 , playerInputSystem(*this, world)

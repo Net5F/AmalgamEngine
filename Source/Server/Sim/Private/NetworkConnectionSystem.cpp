@@ -57,9 +57,10 @@ void NetworkConnectionSystem::processConnectEvents()
                                            spawnPoint.y, 0.0f);
         registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
         registry.emplace<Input>(newEntity);
-        registry.emplace<ClientSimData>(newEntity, clientNetworkID, false,
-            AreaOfInterest{(SCREEN_WIDTH + AOI_BUFFER_DISTANCE), (SCREEN_HEIGHT
-            + AOI_BUFFER_DISTANCE)});
+        registry.emplace<ClientSimData>(
+            newEntity, clientNetworkID, false,
+            AreaOfInterest{(SCREEN_WIDTH + AOI_BUFFER_DISTANCE),
+                           (SCREEN_HEIGHT + AOI_BUFFER_DISTANCE)});
 
         LOG_INFO("Constructed entity with netID: %u, entityID: %u",
                  clientNetworkID, newEntity);

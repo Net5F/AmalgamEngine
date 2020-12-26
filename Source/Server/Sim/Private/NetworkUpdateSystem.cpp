@@ -43,7 +43,8 @@ void NetworkUpdateSystem::sendClientUpdates()
     auto clientGroup = world.registry.group<ClientSimData>(entt::get<Position>);
     for (entt::entity entity : clientGroup) {
         // Center this entity's AoI on its current position.
-        auto [client, position] = clientGroup.get<ClientSimData, Position>(entity);
+        auto [client, position]
+            = clientGroup.get<ClientSimData, Position>(entity);
         client.aoi.setCenter(position);
 
         /* Collect the entities that need to be sent to this client. */
@@ -116,7 +117,8 @@ void NetworkUpdateSystem::fillEntityData(entt::entity entity,
     /* Fill the message with the latest PositionComponent, MovementComponent,
        and InputComponent data. */
     entt::registry& registry = world.registry;
-    auto [input, position, movement] = registry.get<Input, Position, Movement>(entity);
+    auto [input, position, movement]
+        = registry.get<Input, Position, Movement>(entity);
 
     // TEMP - Doing this until C++20 where we can emplace brace initializers.
     entityStates.push_back(

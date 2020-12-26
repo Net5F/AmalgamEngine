@@ -25,7 +25,8 @@ void MovementSystem::processMovements()
        component. */
     auto group = world.registry.group<Input, Position, Movement>();
     for (entt::entity entity : group) {
-        auto [input, position, movement] = group.get<Input, Position, Movement>(entity);
+        auto [input, position, movement]
+            = group.get<Input, Position, Movement>(entity);
 
         // Process their movement.
         MovementHelpers::moveEntity(position, movement, input.inputStates,

@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 /**
  * An area of interest in world space--that is, the area that entities must be
  * within in order to be replicated to a given client.
@@ -27,7 +26,8 @@ public:
     /**
      * Centers this AoI on the given position.
      */
-    void setCenter(const Position& position) {
+    void setCenter(const Position& position)
+    {
         origin.x = (position.x - (width / 2));
         origin.y = (position.y - (height / 2));
     }
@@ -35,9 +35,9 @@ public:
     /**
      * @return true if the given position is within this AoI, else false.
      */
-    bool contains(const Position& position) {
-        return (position.x >= origin.x)
-               && (position.y >= origin.y)
+    bool contains(const Position& position)
+    {
+        return (position.x >= origin.x) && (position.y >= origin.y)
                && (position.x <= (origin.x + width))
                && (position.y <= (origin.y + height));
     }
