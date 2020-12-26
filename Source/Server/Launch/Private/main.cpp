@@ -1,7 +1,7 @@
 #include <SDL2pp/SDL2pp.hh>
 
-#include "GameDefs.h"
-#include "Game.h"
+#include "SimDefs.h"
+#include "Sim.h"
 #include "Network.h"
 #include "Timer.h"
 #include "Log.h"
@@ -50,7 +50,7 @@ try {
     Network network;
 
     // Set up the sim.
-    Game game(network);
+    Sim sim(network);
 
     // Spin up a thread to check for command line input.
     std::atomic<bool> exitRequested = false;
@@ -59,17 +59,17 @@ try {
     LOG_INFO("Starting main loop.");
 
     // Prime the timers so they don't start at 0.
-    game.initTimer();
+    sim.initTimer();
     network.initTimer();
     while (!exitRequested) {
-        // Run the game.
-        game.tick();
+        // Run the sim.
+        sim.tick();
 
         // Send waiting messages.
         network.tick();
 
         // See if we have enough time left to sleep.
-        double simTimeLeft = game.getTimeTillNextIteration();
+        double simTimeLeft = sim.getTimeTillNextIteration();
         double networkTimeLeft = network.getTimeTillNextHeartbeat();
         if ((simTimeLeft > DELAY_MINIMUM_TIME_S)
             && (networkTimeLeft > DELAY_MINIMUM_TIME_S)) {

@@ -1,0 +1,27 @@
+target_sources(Client
+	PRIVATE
+		Private/World.cpp
+		Private/PlayerInputSystem.cpp
+		Private/NetworkUpdateSystem.cpp
+		Private/PlayerMovementSystem.cpp
+		Private/NpcMovementSystem.cpp
+		Private/RenderSystem.cpp
+		Private/Sim.cpp
+	PUBLIC
+		Public/World.h
+		Public/PlayerInputSystem.h
+		Public/NetworkUpdateSystem.h
+		Public/PlayerMovementSystem.h
+		Public/NpcMovementSystem.h
+		Public/RenderSystem.h
+		Public/Sim.h
+		Public/Components/Camera.h
+		Public/Components/PlayerState.h
+)
+
+target_include_directories(Client
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private
+		${CMAKE_CURRENT_SOURCE_DIR}/Public
+		${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+)

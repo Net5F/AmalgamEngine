@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GameDefs.h"
+#include "SimDefs.h"
 #include <SDL_stdinc.h>
 #include "bitsery/ext/value_range.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GameDefs.h"
+#include "SimDefs.h"
 #include "Input.h"
 #include <array>
 

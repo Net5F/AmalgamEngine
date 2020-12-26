@@ -2,7 +2,7 @@ target_sources(Shared
     PRIVATE
         Private/MovementHelpers.cpp
 	PUBLIC
-        Public/GameDefs.h
+        Public/SimDefs.h
         Public/MovementHelpers.h
         Public/AreaOfInterest.h
         Public/Components/Input.h

@@ -4,9 +4,9 @@
 #include "SDL2pp/Renderer.hh"
 #include "SDL2pp/Exception.hh"
 
-#include "GameDefs.h"
+#include "SimDefs.h"
 #include "World.h"
-#include "Game.h"
+#include "Sim.h"
 #include "RenderSystem.h"
 #include "Network.h"
 #include "Timer.h"
@@ -54,25 +54,25 @@ try {
     Network network;
 
     // Set up the sim.
-    Game game(network, sprites);
+    Sim sim(network, sprites);
 
     // Set up the rendering system.
-    RenderSystem renderSystem(renderer, game, window);
+    RenderSystem renderSystem(renderer, sim, window);
 
     // Connect to the server (waits for connection response).
-    game.connect();
+    sim.connect();
 
     // Get a pointer to the sim exit flag.
     // Triggered by things like window exit events.
-    std::atomic<bool> const* exitRequested = game.getExitRequestedPtr();
+    std::atomic<bool> const* exitRequested = sim.getExitRequestedPtr();
 
     // Prime the timers so they don't start at 0.
-    game.initTimer();
+    sim.initTimer();
     network.initTimer();
     renderSystem.initTimer();
     while (!(*exitRequested)) {
         // Let the sim process an iteration if it needs to.
-        game.tick();
+        sim.tick();
 
         // Send a heartbeat if necessary.
         network.tick();
@@ -81,7 +81,7 @@ try {
         renderSystem.tick();
 
         // See if we have enough time left to sleep.
-        double simTimeLeft = game.getTimeTillNextIteration();
+        double simTimeLeft = sim.getTimeTillNextIteration();
         double networkTimeLeft = network.getTimeTillNextHeartbeat();
         double renderTimeLeft = renderSystem.getTimeTillNextFrame();
         if ((simTimeLeft > DELAY_MINIMUM_TIME_S)

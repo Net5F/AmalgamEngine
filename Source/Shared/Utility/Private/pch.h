@@ -13,6 +13,6 @@
 // Ours
 #include "Log.h"
 #include "NetworkDefs.h"
-#include "GameDefs.h"
+#include "SimDefs.h"
 
 #endif /* End PCH_H_ */

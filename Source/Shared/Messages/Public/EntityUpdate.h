@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EntityState.h"
-#include "GameDefs.h"
+#include "SimDefs.h"
 #include "SDL_stdinc.h"
 #include <vector>
 #include "bitsery/bitsery.h"

@@ -55,7 +55,7 @@ void WorldSim::tick()
     accumulatedTime += iterationTimer.getDeltaSeconds(true);
 
     // Process as many game ticks as have accumulated.
-    while (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
+    while (accumulatedTime >= SIM_TICK_TIMESTEP_S) {
         Uint32 targetTick = currentTick + 1;
 
         // Apply any adjustments that we receive from the server.
@@ -88,8 +88,8 @@ void WorldSim::tick()
             currentTick++;
         }
 
-        accumulatedTime -= GAME_TICK_TIMESTEP_S;
-        if (accumulatedTime >= GAME_TICK_TIMESTEP_S) {
+        accumulatedTime -= SIM_TICK_TIMESTEP_S;
+        if (accumulatedTime >= SIM_TICK_TIMESTEP_S) {
             LOG_INFO("Entity %u: Detected a request for multiple game ticks in "
                      "the same frame. Game tick must have been massively "
                      "delayed. Game tick was delayed by: %.8fs.",
@@ -105,7 +105,7 @@ void WorldSim::tick()
 
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);
-        if (executionTime > GAME_TICK_TIMESTEP_S) {
+        if (executionTime > SIM_TICK_TIMESTEP_S) {
             LOG_INFO("Entity %u: Overran our sim iteration time. "
                      "executionTime: %.8f",
                      clientEntity, executionTime);

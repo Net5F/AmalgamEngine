@@ -11,10 +11,10 @@ add_executable(LoadTestClient
     Public/WorldSim.h
     
     # Client objects
-    ${PROJECT_SOURCE_DIR}/Client/Utility/Private/Network.cpp
-    ${PROJECT_SOURCE_DIR}/Client/Utility/Public/Network.h
-    ${PROJECT_SOURCE_DIR}/Client/Utility/Private/MessageHandler.cpp
-    ${PROJECT_SOURCE_DIR}/Client/Utility/Public/MessageHandler.h
+    ${PROJECT_SOURCE_DIR}/Client/Network/Private/Network.cpp
+    ${PROJECT_SOURCE_DIR}/Client/Network/Public/Network.h
+    ${PROJECT_SOURCE_DIR}/Client/Network/Private/MessageHandler.cpp
+    ${PROJECT_SOURCE_DIR}/Client/Network/Public/MessageHandler.h
 )
 
 target_include_directories(LoadTestClient
@@ -25,7 +25,7 @@ target_include_directories(LoadTestClient
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 
         # Client objects
-        ${PROJECT_SOURCE_DIR}/Client/Utility/Public
+        ${PROJECT_SOURCE_DIR}/Client/Network/Public
 )
 
 target_link_libraries(LoadTestClient
