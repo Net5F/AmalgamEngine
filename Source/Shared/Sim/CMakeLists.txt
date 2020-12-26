@@ -4,6 +4,7 @@ target_sources(Shared
 	PUBLIC
         Public/GameDefs.h
         Public/MovementHelpers.h
+        Public/AreaOfInterest.h
         Public/Components/Input.h
         Public/Components/Movement.h
         Public/Components/Name.h

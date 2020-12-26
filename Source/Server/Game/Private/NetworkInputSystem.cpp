@@ -6,7 +6,7 @@
 #include "GameDefs.h"
 #include "ClientInput.h"
 #include "Input.h"
-#include "ClientState.h"
+#include "ClientSimData.h"
 #include "Log.h"
 #include <memory>
 
@@ -108,7 +108,7 @@ void NetworkInputSystem::handleDropForEntity(entt::entity entity)
     entityInput.inputStates = defaultInput.inputStates;
 
     // Flag that a drop occurred for this entity.
-    registry.get<ClientState>(entity).messageWasDropped = true;
+    registry.get<ClientSimData>(entity).messageWasDropped = true;
 }
 
 } // namespace Server

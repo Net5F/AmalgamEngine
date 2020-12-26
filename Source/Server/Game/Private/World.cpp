@@ -1,5 +1,5 @@
 #include "World.h"
-#include "ClientState.h"
+#include "ClientSimData.h"
 #include "Log.h"
 #include "Ignore.h"
 
@@ -17,12 +17,12 @@ World::World()
 
 entt::entity World::findEntityWithNetID(NetworkID networkID)
 {
-    auto clientView = registry.view<ClientState>();
+    auto clientView = registry.view<ClientSimData>();
 
     // Find the entt::entity associated with the popped NetworkID.
     for (entt::entity entity : clientView) {
-        auto& clientState = clientView.get<ClientState>(entity);
-        if (clientState.netID == networkID) {
+        auto& clientSimData = clientView.get<ClientSimData>(entity);
+        if (clientSimData.netID == networkID) {
             return entity;
         }
     }

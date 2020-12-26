@@ -13,7 +13,7 @@ target_sources(Server
 		Public/NetworkInputSystem.h
 		Public/NetworkUpdateSystem.h
 		Public/Game.h
-		Public/Components/ClientState.h
+		Public/Components/ClientSimData.h
 )
 
 target_include_directories(Server

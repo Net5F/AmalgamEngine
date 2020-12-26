@@ -5,7 +5,9 @@
 #include "MessageTools.h"
 #include "EntityUpdate.h"
 #include "Input.h"
-#include "ClientState.h"
+#include "Position.h"
+#include "ClientSimData.h"
+#include "Ignore.h"
 #include "Log.h"
 #include <algorithm>
 
@@ -19,39 +21,47 @@ NetworkUpdateSystem::NetworkUpdateSystem(Game& inGame, World& inWorld,
 , world(inWorld)
 , network(inNetwork)
 {
+    // Init the groups that we'll be using.
+    auto clientGroup = world.registry.group<ClientSimData>(entt::get<Position>);
+    ignore(clientGroup);
+    auto dirtyGroup = world.registry.group<Input, Position>();
+    ignore(dirtyGroup);
 }
 
 void NetworkUpdateSystem::sendClientUpdates()
 {
     // Collect the dirty entities.
-    entt::registry& registry = world.registry;
-    auto inputView = registry.view<Input>();
+    auto dirtyGroup = world.registry.group<Input, Position>();
     std::vector<entt::entity> dirtyEntities;
-    for (entt::entity entity : inputView) {
-        if (inputView.get<Input>(entity).isDirty) {
+    for (entt::entity entity : dirtyGroup) {
+        if (dirtyGroup.get<Input>(entity).isDirty) {
             dirtyEntities.push_back(entity);
         }
     }
 
     /* Update clients as necessary. */
-    auto clientView = registry.view<ClientState>();
-    for (entt::entity entity : clientView) {
-        // Collect the entities that need to be sent to this client.
-        // Uses an array since we're adding in multiple passes and want unique
-        // elements.
+    auto clientGroup = world.registry.group<ClientSimData>(entt::get<Position>);
+    for (entt::entity entity : clientGroup) {
+        // Center this entity's AoI on its current position.
+        auto [client, position] = clientGroup.get<ClientSimData, Position>(entity);
+        client.aoi.setCenter(position);
+
+        /* Collect the entities that need to be sent to this client. */
         std::vector<entt::entity> entitiesToSend;
 
         // Add all the dirty entities.
-        // TODO: Check if the entity is in our AOI before adding.
-        for (entt::entity dirtyEntityID : dirtyEntities) {
-            entitiesToSend.push_back(dirtyEntityID);
+        for (entt::entity dirtyEntity : dirtyEntities) {
+            // Check if the dirty entity is in this client's AOI before adding.
+            Position& position = dirtyGroup.get<Position>(dirtyEntity);
+            if (client.aoi.contains(position)) {
+                entitiesToSend.push_back(dirtyEntity);
+            }
         }
 
         // If this entity had a drop, add it.
         // (It mispredicted, so it needs to know the actual state it's in.)
-        ClientState& client = clientView.get<ClientState>(entity);
         if (client.messageWasDropped) {
-            // Only add unique entities.
+            // Only add entities if they will be unique.
             if (std::find(entitiesToSend.begin(), entitiesToSend.end(), entity)
                 != entitiesToSend.end()) {
                 entitiesToSend.push_back(entity);
@@ -59,13 +69,13 @@ void NetworkUpdateSystem::sendClientUpdates()
             }
         }
 
-        // Send the entity whatever data it needs.
+        /* Send the collected entities to this client. */
         constructAndSendUpdate(entity, entitiesToSend);
     }
 
     // Mark any dirty entities as clean
     for (entt::entity dirtyEntity : dirtyEntities) {
-        inputView.get<Input>(dirtyEntity).isDirty = false;
+        dirtyGroup.get<Input>(dirtyEntity).isDirty = false;
     }
 }
 
@@ -74,8 +84,8 @@ void NetworkUpdateSystem::constructAndSendUpdate(
 {
     /** Fill the vector of entities to send. */
     EntityUpdate entityUpdate{};
-    auto clientView = world.registry.view<ClientState>();
-    ClientState& client = clientView.get<ClientState>(entity);
+    auto clientView = world.registry.view<ClientSimData>();
+    ClientSimData& client = clientView.get<ClientSimData>(entity);
     for (entt::entity entity : entitiesToSend) {
         fillEntityData(entity, entityUpdate.entityStates);
     }
@@ -106,9 +116,7 @@ void NetworkUpdateSystem::fillEntityData(entt::entity entity,
     /* Fill the message with the latest PositionComponent, MovementComponent,
        and InputComponent data. */
     entt::registry& registry = world.registry;
-    Input& input = registry.get<Input>(entity);
-    Position& position = registry.get<Position>(entity);
-    Movement& movement = registry.get<Movement>(entity);
+    auto [input, position, movement] = registry.get<Input, Position, Movement>(entity);
 
     // TEMP - Doing this until C++20 where we can emplace brace initializers.
     entityStates.push_back(

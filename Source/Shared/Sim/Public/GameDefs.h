@@ -23,4 +23,8 @@ static constexpr unsigned int SCREEN_HEIGHT = 720;
 /** The max number of entities that we are allowing. */
 static constexpr unsigned int MAX_ENTITIES = 200;
 
+/** The distance in world coordinates that we add to a player's AoI to let
+    peers load before they're in view. */
+static constexpr unsigned int AOI_BUFFER_DISTANCE = 700;
+
 } /* End namespace AM */

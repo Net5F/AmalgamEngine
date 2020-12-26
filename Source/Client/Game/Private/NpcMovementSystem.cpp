@@ -70,7 +70,7 @@ void NpcMovementSystem::updateNpcs()
                       stateUpdate.tickNum, lastProcessedTick);
         }
 
-        // If the update contained new data, apply it.
+        // If the update message contained new data, apply it.
         if (stateUpdate.dataChanged) {
             applyUpdateMessage(stateUpdate.entityUpdate);
         }
