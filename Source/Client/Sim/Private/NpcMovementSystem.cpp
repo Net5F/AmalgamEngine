@@ -95,9 +95,9 @@ void NpcMovementSystem::applyTickAdjustment(int adjustment)
 {
     // If the server tells us to add 2 ticks of latency, it's saying that it
     // needs 2 more ticks worth of time for our messages to arrive in time.
-    // NPC replication should now be delayed by an additional 4 ticks (2 for
-    // each direction).
-    // Thus, we negate and double the adjustment before applying.
+    // The effect of this is that NPC replication should be delayed by an
+    // additional 4 ticks (2 for each direction).
+    // To accomplish this, we negate and double the adjustment before applying.
     tickReplicationOffset += (-2 * adjustment);
 
     if (tickReplicationOffset >= 0) {
@@ -230,9 +230,10 @@ void NpcMovementSystem::applyUpdateMessage(
                                                registry.version(entity))));
 
             // TODO: Get the sprite info from the server.
-            // Get the same texture as the player.
+            // Note: Currently using an arbitrarily chosen non-player sprite.
             Sprite& playerSprite = registry.get<Sprite>(world.playerEntity);
-            registry.emplace<Sprite>(entity, playerSprite);
+            SDL2pp::Rect textureRect(224, 32, 16, 16);
+            registry.emplace<Sprite>(entity, playerSprite.texturePtr, textureRect, 64, 64);
 
             // Init their old position so they don't lerp in from elsewhere.
             const Position& receivedPos = entityIt->position;

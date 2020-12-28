@@ -38,7 +38,7 @@ private:
      * How long the accept/disconnect/receive loop in serviceClients should
      * delay if no socket activity was reported on the clientSet.
      */
-    static constexpr unsigned int INACTIVE_DELAY_TIME_MS = 10;
+    static constexpr unsigned int INACTIVE_DELAY_TIME_MS = 1;
 
     /**
      * Thread function, started from constructor.

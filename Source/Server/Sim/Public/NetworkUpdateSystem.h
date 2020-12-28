@@ -12,6 +12,7 @@ namespace Server
 class Sim;
 class World;
 class Network;
+class ClientSimData;
 
 /**
  * This system is in charge of checking for data that needs to be sent to
@@ -33,7 +34,7 @@ private:
      * Fills the given vector with the entities that must be sent to the given
      * entityID on this tick.
      */
-    void constructAndSendUpdate(entt::entity entity,
+    void constructAndSendUpdate(ClientSimData& client,
                                 std::vector<entt::entity>& entitiesToSend);
 
     /**

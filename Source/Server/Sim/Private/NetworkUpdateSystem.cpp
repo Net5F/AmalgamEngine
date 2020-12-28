@@ -71,7 +71,7 @@ void NetworkUpdateSystem::sendClientUpdates()
         }
 
         /* Send the collected entities to this client. */
-        constructAndSendUpdate(entity, entitiesToSend);
+        constructAndSendUpdate(client, entitiesToSend);
     }
 
     // Mark any dirty entities as clean
@@ -81,12 +81,10 @@ void NetworkUpdateSystem::sendClientUpdates()
 }
 
 void NetworkUpdateSystem::constructAndSendUpdate(
-    entt::entity entity, std::vector<entt::entity>& entitiesToSend)
+    ClientSimData& client, std::vector<entt::entity>& entitiesToSend)
 {
     /** Fill the vector of entities to send. */
     EntityUpdate entityUpdate{};
-    auto clientView = world.registry.view<ClientSimData>();
-    ClientSimData& client = clientView.get<ClientSimData>(entity);
     for (entt::entity entity : entitiesToSend) {
         fillEntityData(entity, entityUpdate.entityStates);
     }
@@ -116,16 +114,11 @@ void NetworkUpdateSystem::fillEntityData(entt::entity entity,
 {
     /* Fill the message with the latest PositionComponent, MovementComponent,
        and InputComponent data. */
-    entt::registry& registry = world.registry;
     auto [input, position, movement]
-        = registry.get<Input, Position, Movement>(entity);
+        = world.registry.get<Input, Position, Movement>(entity);
 
-    // TEMP - Doing this until C++20 where we can emplace brace initializers.
     entityStates.push_back(
-        {registry.entity(entity), input, position, movement});
-
-    //    LOG_INFO("Sending: (%f, %f), (%f, %f)", position.x, position.y,
-    //    movement.velX, movement.velY);
+        {world.registry.entity(entity), input, position, movement});
 }
 
 } // namespace Server

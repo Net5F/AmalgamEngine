@@ -48,7 +48,7 @@ try {
     // TODO: This currently will do weird stuff if you have 2 clients open.
     //       If we need a temporary solution we can use PIDs, but the real
     //       solution will be to eventually use account IDs in the log name.
-    //    Log::enableFileLogging("Client.log");
+    Log::enableFileLogging("Client.log");
 
     // Set up the network utility.
     Network network;

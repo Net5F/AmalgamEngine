@@ -94,10 +94,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
                       latestReceivedTick, receivedTick);
         }
 
-        // Pull out the vector of entities.
+        /* Find the player data. */
         const std::vector<EntityState>& entities = receivedUpdate->entityStates;
-
-        // Find the player data.
         const EntityState* playerUpdate = nullptr;
         for (auto entityIt = entities.begin(); entityIt != entities.end();
              ++entityIt) {
@@ -112,17 +110,16 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
                       "have contained one.");
         }
 
-        /* Update the movements. */
+        /* Apply the received movement and position. */
         const Movement& receivedMovement = playerUpdate->movement;
         currentMovement.velX = receivedMovement.velX;
         currentMovement.velY = receivedMovement.velY;
 
-        /* Move to the received position. */
         const Position& receivedPosition = playerUpdate->position;
         currentPosition.x = receivedPosition.x;
         currentPosition.y = receivedPosition.y;
 
-        /** Check if the input is mismatched. */
+        /* Check if the input is mismatched. */
         // Check that the diff is valid.
         Uint32 tickDiff = sim.getCurrentTick() - receivedTick;
         checkTickDiffValidity(tickDiff);
