@@ -210,12 +210,12 @@ void NpcMovementSystem::applyUpdateMessage(
          ++entityIt) {
         // Skip the player (not an NPC).
         entt::entity entity = entityIt->entity;
-        if (entity == world.playerEntity) {
+        entt::registry& registry = world.registry;
+        if (entity == registry.entity(world.playerEntity)) {
             continue;
         }
 
         // If the entity doesn't exist, create it.
-        entt::registry& registry = world.registry;
         if (!(registry.valid(entity))) {
             LOG_INFO("New entity added. ID: %u", entity);
             entt::entity newEntity = registry.create(entity);
