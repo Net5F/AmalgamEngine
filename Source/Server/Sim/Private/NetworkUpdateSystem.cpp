@@ -35,10 +35,11 @@ void NetworkUpdateSystem::sendClientUpdates()
 {
     // Collect the dirty entities.
     auto dirtyGroup = world.registry.group<Input, Position, Movement>();
-    std::vector<entt::entity> dirtyEntities;
-    for (entt::entity entity : dirtyGroup) {
-        if (dirtyGroup.get<Input>(entity).isDirty) {
-            dirtyEntities.push_back(entity);
+    std::vector<EntityState> dirtyEntities;
+    for (entt::entity dirtyEntity : dirtyGroup) {
+        auto [input, position, movement] = dirtyGroup.get(dirtyEntity);
+        if (input.isDirty) {
+            dirtyEntities.push_back({dirtyEntity, input, position, movement});
         }
     }
 
@@ -48,20 +49,19 @@ void NetworkUpdateSystem::sendClientUpdates()
     double tempTime2 = 0;
     for (entt::entity entity : clientGroup) {
         // Center this entity's AoI on its current position.
-        auto [client, position]
+        auto [client, clientPosition]
             = clientGroup.get<ClientSimData, Position>(entity);
-        client.aoi.setCenter(position);
+        client.aoi.setCenter(clientPosition);
 
         /* Collect the entities that need to be sent to this client. */
-        std::vector<MessageComponents> entitiesToSend;
+        EntityUpdate entityUpdate{};
 
         // Add all the dirty entities.
         timer.updateSavedTime();
-        for (entt::entity dirtyEntity : dirtyEntities) {
+        for (EntityState& entityState : dirtyEntities) {
             // Check if the dirty entity is in this client's AOI before adding.
-            auto [input, position, movement] = dirtyGroup.get(dirtyEntity);
-            if (client.aoi.contains(position)) {
-                entitiesToSend.push_back({dirtyEntity, input, position, movement});
+            if (client.aoi.contains(entityState.position)) {
+                entityUpdate.entityStates.push_back(entityState);
             }
         }
         tempTime1 += timer.getDeltaSeconds(false);
@@ -71,21 +71,21 @@ void NetworkUpdateSystem::sendClientUpdates()
         if (client.messageWasDropped) {
             // Only add entities if they will be unique.
             bool playerFound = false;
-            for (MessageComponents& messageComponents : entitiesToSend) {
-                if (messageComponents.entity == entity) {
+            for (EntityState& entityState : entityUpdate.entityStates) {
+                if (entityState.entity == entity) {
                     playerFound = true;
                 }
             }
             if (!playerFound) {
-                auto [input, position, movement] = dirtyGroup.get(entity);
-                entitiesToSend.push_back({entity, input, position, movement});
+                auto [input, position, movement] = world.registry.get<Input, Position, Movement>(entity);
+                entityUpdate.entityStates.push_back({entity, input, position, movement});
                 client.messageWasDropped = false;
             }
         }
 
         /* Send the collected entities to this client. */
         timer.updateSavedTime();
-        constructAndSendUpdate(client, entitiesToSend);
+        sendUpdate(client, entityUpdate);
         tempTime2 += timer.getDeltaSeconds(false);
     }
 
@@ -107,22 +107,15 @@ void NetworkUpdateSystem::sendClientUpdates()
     }
 
     // Mark any dirty entities as clean
-    for (entt::entity dirtyEntity : dirtyEntities) {
-        dirtyGroup.get<Input>(dirtyEntity).isDirty = false;
+    for (entt::entity dirtyEntity : dirtyGroup) {
+        Input& input = dirtyGroup.get<Input>(dirtyEntity);
+        input.isDirty = false;
     }
 }
 
-void NetworkUpdateSystem::constructAndSendUpdate(
-    ClientSimData& client, std::vector<MessageComponents>& entitiesToSend)
+void NetworkUpdateSystem::sendUpdate(
+    ClientSimData& client, EntityUpdate& entityUpdate)
 {
-    /** Fill the vector of entities to send. */
-    EntityUpdate entityUpdate{};
-    for (MessageComponents& messageComponents : entitiesToSend) {
-        entityUpdate.entityStates.push_back(
-            {messageComponents.entity, messageComponents.input,
-                    messageComponents.position, messageComponents.movement});
-    }
-
     /* If there are updates to send, send an update message. */
     if (entityUpdate.entityStates.size() > 0) {
         // Finish filling the EntityUpdate.

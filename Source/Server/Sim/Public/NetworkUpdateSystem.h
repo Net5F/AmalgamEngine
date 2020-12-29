@@ -7,9 +7,7 @@
 
 namespace AM
 {
-class Input;
-class Position;
-class Movement;
+class EntityUpdate;
 
 namespace Server
 {
@@ -34,19 +32,11 @@ public:
     void sendClientUpdates();
 
 private:
-    struct MessageComponents {
-        entt::entity entity;
-        Input& input;
-        Position& position;
-        Movement& movement;
-    };
-
     /**
      * Fills the given vector with the entities that must be sent to the given
      * entityID on this tick.
      */
-    void constructAndSendUpdate(ClientSimData& client,
-                                std::vector<MessageComponents>& entitiesToSend);
+    void sendUpdate(ClientSimData& client, EntityUpdate& entityUpdate);
 
     Sim& sim;
     World& world;
