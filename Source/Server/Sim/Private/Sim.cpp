@@ -20,12 +20,16 @@ Sim::Sim(Network& inNetwork)
     network.registerCurrentTickPtr(&currentTick);
 }
 
+Timer timer2;
+double longestTime2 = 0;
+int timerCounter2 = 0;
 void Sim::tick()
 {
     accumulatedTime += iterationTimer.getDeltaSeconds(true);
 
     /* Process as many game ticks as have accumulated. */
     while (accumulatedTime >= SIM_TICK_TIMESTEP_S) {
+        timer2.updateSavedTime();
         /* Run all systems. */
         networkConnectionSystem.processConnectionEvents();
 
@@ -34,6 +38,20 @@ void Sim::tick()
         movementSystem.processMovements();
 
         networkUpdateSystem.sendClientUpdates();
+
+        double timeSpent = timer2.getDeltaSeconds(false);
+        if (timeSpent > longestTime2) {
+            longestTime2 = timeSpent;
+        }
+
+        if (timerCounter2 == 150) {
+            LOG_INFO("Total time: %.6f", longestTime2);
+            longestTime2 = 0;
+            timerCounter2 = 0;
+        }
+        else {
+            timerCounter2++;
+        }
 
         /* Prepare for the next tick. */
         accumulatedTime -= SIM_TICK_TIMESTEP_S;

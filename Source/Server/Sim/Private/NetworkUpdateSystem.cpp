@@ -24,14 +24,17 @@ NetworkUpdateSystem::NetworkUpdateSystem(Sim& inSim, World& inWorld,
     // Init the groups that we'll be using.
     auto clientGroup = world.registry.group<ClientSimData>(entt::get<Position>);
     ignore(clientGroup);
-    auto dirtyGroup = world.registry.group<Input, Position>();
+    auto dirtyGroup = world.registry.group<Input, Position, Movement>();
     ignore(dirtyGroup);
 }
 
+Timer timer;
+double time1, time2 = 0;
+int timerCounter = 0;
 void NetworkUpdateSystem::sendClientUpdates()
 {
     // Collect the dirty entities.
-    auto dirtyGroup = world.registry.group<Input, Position>();
+    auto dirtyGroup = world.registry.group<Input, Position, Movement>();
     std::vector<entt::entity> dirtyEntities;
     for (entt::entity entity : dirtyGroup) {
         if (dirtyGroup.get<Input>(entity).isDirty) {
@@ -41,6 +44,8 @@ void NetworkUpdateSystem::sendClientUpdates()
 
     /* Update clients as necessary. */
     auto clientGroup = world.registry.group<ClientSimData>(entt::get<Position>);
+    double tempTime1 = 0;
+    double tempTime2 = 0;
     for (entt::entity entity : clientGroup) {
         // Center this entity's AoI on its current position.
         auto [client, position]
@@ -48,30 +53,57 @@ void NetworkUpdateSystem::sendClientUpdates()
         client.aoi.setCenter(position);
 
         /* Collect the entities that need to be sent to this client. */
-        std::vector<entt::entity> entitiesToSend;
+        std::vector<MessageComponents> entitiesToSend;
 
         // Add all the dirty entities.
+        timer.updateSavedTime();
         for (entt::entity dirtyEntity : dirtyEntities) {
             // Check if the dirty entity is in this client's AOI before adding.
-            Position& position = dirtyGroup.get<Position>(dirtyEntity);
+            auto [input, position, movement] = dirtyGroup.get(dirtyEntity);
             if (client.aoi.contains(position)) {
-                entitiesToSend.push_back(dirtyEntity);
+                entitiesToSend.push_back({dirtyEntity, input, position, movement});
             }
         }
+        tempTime1 += timer.getDeltaSeconds(false);
 
         // If this entity had a drop, add it.
         // (It mispredicted, so it needs to know the actual state it's in.)
         if (client.messageWasDropped) {
             // Only add entities if they will be unique.
-            if (std::find(entitiesToSend.begin(), entitiesToSend.end(), entity)
-                != entitiesToSend.end()) {
-                entitiesToSend.push_back(entity);
+            bool playerFound = false;
+            for (MessageComponents& messageComponents : entitiesToSend) {
+                if (messageComponents.entity == entity) {
+                    playerFound = true;
+                }
+            }
+            if (!playerFound) {
+                auto [input, position, movement] = dirtyGroup.get(entity);
+                entitiesToSend.push_back({entity, input, position, movement});
                 client.messageWasDropped = false;
             }
         }
 
         /* Send the collected entities to this client. */
+        timer.updateSavedTime();
         constructAndSendUpdate(client, entitiesToSend);
+        tempTime2 += timer.getDeltaSeconds(false);
+    }
+
+    if (tempTime1 > time1) {
+        time1 = tempTime1;
+    }
+    if (tempTime2 > time2) {
+        time2 = tempTime2;
+    }
+
+    if (timerCounter == 150) {
+        LOG_INFO("Time1: %.6f, Time2: %.6f", time1, time2);
+        time1 = 0;
+        time2 = 0;
+        timerCounter = 0;
+    }
+    else {
+        timerCounter++;
     }
 
     // Mark any dirty entities as clean
@@ -81,12 +113,14 @@ void NetworkUpdateSystem::sendClientUpdates()
 }
 
 void NetworkUpdateSystem::constructAndSendUpdate(
-    ClientSimData& client, std::vector<entt::entity>& entitiesToSend)
+    ClientSimData& client, std::vector<MessageComponents>& entitiesToSend)
 {
     /** Fill the vector of entities to send. */
     EntityUpdate entityUpdate{};
-    for (entt::entity entity : entitiesToSend) {
-        fillEntityData(entity, entityUpdate.entityStates);
+    for (MessageComponents& messageComponents : entitiesToSend) {
+        entityUpdate.entityStates.push_back(
+            {messageComponents.entity, messageComponents.input,
+                    messageComponents.position, messageComponents.movement});
     }
 
     /* If there are updates to send, send an update message. */
@@ -107,18 +141,6 @@ void NetworkUpdateSystem::constructAndSendUpdate(
         // Send the message.
         network.send(client.netID, messageBuffer, entityUpdate.tickNum);
     }
-}
-
-void NetworkUpdateSystem::fillEntityData(entt::entity entity,
-                                         std::vector<EntityState>& entityStates)
-{
-    /* Fill the message with the latest PositionComponent, MovementComponent,
-       and InputComponent data. */
-    auto [input, position, movement]
-        = world.registry.get<Input, Position, Movement>(entity);
-
-    entityStates.push_back(
-        {world.registry.entity(entity), input, position, movement});
 }
 
 } // namespace Server

@@ -7,6 +7,10 @@
 
 namespace AM
 {
+class Input;
+class Position;
+class Movement;
+
 namespace Server
 {
 class Sim;
@@ -30,20 +34,19 @@ public:
     void sendClientUpdates();
 
 private:
+    struct MessageComponents {
+        entt::entity entity;
+        Input& input;
+        Position& position;
+        Movement& movement;
+    };
+
     /**
      * Fills the given vector with the entities that must be sent to the given
      * entityID on this tick.
      */
     void constructAndSendUpdate(ClientSimData& client,
-                                std::vector<entt::entity>& entitiesToSend);
-
-    /**
-     * Serializes the given entity's relevant world
-     * @param entity  The entity to serialize.
-     * @return An offset where the data was stored in the builder.
-     */
-    void fillEntityData(entt::entity entity,
-                        std::vector<EntityState>& entityStates);
+                                std::vector<MessageComponents>& entitiesToSend);
 
     Sim& sim;
     World& world;
