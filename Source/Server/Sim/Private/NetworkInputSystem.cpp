@@ -97,16 +97,17 @@ void NetworkInputSystem::processMessageDropEvents()
 
 void NetworkInputSystem::handleDropForEntity(entt::entity entity)
 {
-    // If the entity's inputs aren't default, mark it as dirty.
     entt::registry& registry = world.registry;
     Input& entityInput = registry.get<Input>(entity);
-    Input defaultInput{};
-    if (entityInput.inputStates != defaultInput.inputStates) {
-        entityInput.isDirty = true;
-    }
 
     // Default the entity's inputs so they don't run off a cliff.
-    entityInput.inputStates = defaultInput.inputStates;
+    Input defaultInput{};
+    if (entityInput.inputStates != defaultInput.inputStates) {
+        entityInput.inputStates = defaultInput.inputStates;
+
+        // Flag the entity as dirty.
+        world.registry.emplace<IsDirty>(entity);
+    }
 
     // Flag that a drop occurred for this entity.
     registry.get<ClientSimData>(entity).messageWasDropped = true;

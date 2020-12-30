@@ -4,6 +4,7 @@
 #include "Network.h"
 #include "Input.h"
 #include "PlayerState.h"
+#include "IsDirty.h"
 #include "Log.h"
 #include "Ignore.h"
 
@@ -52,8 +53,8 @@ void PlayerInputSystem::processHeldInputs()
             // Save the new state.
             playerInput.inputStates[inputType] = newInputStates[inputType];
 
-            // Mark the player as dirty.
-            playerInput.isDirty = true;
+            // Flag the player as dirty.
+            registry.emplace<IsDirty>(world.playerEntity);
         }
     }
 }
