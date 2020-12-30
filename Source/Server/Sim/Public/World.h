@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SimDefs.h"
-#include "Position.h"
 
 #include "entt/entity/registry.hpp"
 
@@ -11,6 +10,7 @@ namespace AM
 {
 namespace Server
 {
+
 /**
  * Holds world state and manages the persistence of that state.
  *
@@ -32,6 +32,9 @@ public:
      */
     entt::entity findEntityWithNetID(NetworkID networkID);
 
+    /**
+     * Returns a random spawn point position.
+     */
     Position getSpawnPoint();
 
 private:

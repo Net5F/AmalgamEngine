@@ -1,12 +1,14 @@
 #pragma once
 
 #include "SimDefs.h"
-#include "EntityState.h"
 #include "entt/entity/registry.hpp"
 #include <vector>
 
 namespace AM
 {
+class Input;
+class Position;
+class Movement;
 class EntityUpdate;
 
 namespace Server
@@ -32,6 +34,18 @@ public:
     void sendClientUpdates();
 
 private:
+    /**
+     * Holds references to relevant entity state.
+     * Note: These references are potentially invalidated whenever the
+     *       component pool changes. We just use them locally here.
+     */
+    struct EntityStateRefs {
+        entt::entity entity;
+        Input& input;
+        Position& position;
+        Movement& movement;
+    };
+
     /**
      * Fills the given vector with the entities that must be sent to the given
      * entityID on this tick.
