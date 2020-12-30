@@ -21,18 +21,6 @@ public:
     /** Holds the current state of the inputs, indexed by Input::Type. */
     typedef std::array<State, Type::NumTypes> StateArr;
     StateArr inputStates{};
-
-    //--------------------------------------------------------------------------
-    // Non-replicated data
-    //--------------------------------------------------------------------------
-    /**
-     * Indicates whether we've received new input data for the entity since the
-     * last time it was processed.
-     *
-     * Since input gets processed before movement, we assume that this also
-     * shows which entities need to be broadcast after moving.
-     */
-    bool isDirty{false};
 };
 
 template<typename S>

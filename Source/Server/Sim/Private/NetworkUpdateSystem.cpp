@@ -6,7 +6,9 @@
 #include "EntityUpdate.h"
 #include "Input.h"
 #include "Position.h"
+#include "Movement.h"
 #include "ClientSimData.h"
+#include "IsDirty.h"
 #include "Ignore.h"
 #include "Log.h"
 #include <algorithm>
@@ -24,71 +26,100 @@ NetworkUpdateSystem::NetworkUpdateSystem(Sim& inSim, World& inWorld,
     // Init the groups that we'll be using.
     auto clientGroup = world.registry.group<ClientSimData>(entt::get<Position>);
     ignore(clientGroup);
-    auto dirtyGroup = world.registry.group<Input, Position>();
-    ignore(dirtyGroup);
+    auto movementGroup = world.registry.group<Input, Position, Movement>();
+    ignore(movementGroup);
 }
 
+Timer timer;
+double time[4]{};
+double tempTime[4]{};
+int timerCounter = 0;
 void NetworkUpdateSystem::sendClientUpdates()
 {
     // Collect the dirty entities.
-    auto dirtyGroup = world.registry.group<Input, Position>();
-    std::vector<entt::entity> dirtyEntities;
-    for (entt::entity entity : dirtyGroup) {
-        if (dirtyGroup.get<Input>(entity).isDirty) {
-            dirtyEntities.push_back(entity);
-        }
+    timer.updateSavedTime();
+    auto dirtyView = world.registry.view<IsDirty>();
+    auto movementGroup = world.registry.group<Input, Position, Movement>();
+    std::vector<EntityStateRefs> dirtyEntities;
+    for (entt::entity entity : dirtyView) {
+        auto [input, position, movement] = movementGroup.get<Input, Position, Movement>(entity);
+        dirtyEntities.push_back({entity, input, position, movement});
     }
+    tempTime[0] += timer.getDeltaSeconds(true);
 
     /* Update clients as necessary. */
     auto clientGroup = world.registry.group<ClientSimData>(entt::get<Position>);
     for (entt::entity entity : clientGroup) {
+        timer.updateSavedTime();
         // Center this entity's AoI on its current position.
-        auto [client, position]
+        auto [client, clientPosition]
             = clientGroup.get<ClientSimData, Position>(entity);
-        client.aoi.setCenter(position);
+        client.aoi.setCenter(clientPosition);
+        tempTime[1] += timer.getDeltaSeconds(true);
 
         /* Collect the entities that need to be sent to this client. */
-        std::vector<entt::entity> entitiesToSend;
+        EntityUpdate entityUpdate{};
 
+        timer.updateSavedTime();
         // Add all the dirty entities.
-        for (entt::entity dirtyEntity : dirtyEntities) {
+        for (EntityStateRefs& state : dirtyEntities) {
             // Check if the dirty entity is in this client's AOI before adding.
-            Position& position = dirtyGroup.get<Position>(dirtyEntity);
-            if (client.aoi.contains(position)) {
-                entitiesToSend.push_back(dirtyEntity);
+            if (client.aoi.contains(state.position)) {
+                entityUpdate.entityStates.push_back(
+                    {state.entity, state.input, state.position, state.movement});
             }
         }
+        tempTime[2] += timer.getDeltaSeconds(true);
 
         // If this entity had a drop, add it.
         // (It mispredicted, so it needs to know the actual state it's in.)
         if (client.messageWasDropped) {
             // Only add entities if they will be unique.
-            if (std::find(entitiesToSend.begin(), entitiesToSend.end(), entity)
-                != entitiesToSend.end()) {
-                entitiesToSend.push_back(entity);
+            bool playerFound = false;
+            for (EntityState& entityState : entityUpdate.entityStates) {
+                if (entityState.entity == entity) {
+                    playerFound = true;
+                }
+            }
+            if (!playerFound) {
+                auto [input, position, movement] = movementGroup.get<Input, Position, Movement>(entity);
+                entityUpdate.entityStates.push_back({entity, input, position, movement});
                 client.messageWasDropped = false;
             }
         }
 
         /* Send the collected entities to this client. */
-        constructAndSendUpdate(client, entitiesToSend);
+        timer.updateSavedTime();
+        sendUpdate(client, entityUpdate);
+        tempTime[3] += timer.getDeltaSeconds(true);
     }
 
-    // Mark any dirty entities as clean
-    for (entt::entity dirtyEntity : dirtyEntities) {
-        dirtyGroup.get<Input>(dirtyEntity).isDirty = false;
+    for (unsigned int i = 0; i < 4; ++i) {
+        if (tempTime[i] > time[i]) {
+            time[i] = tempTime[i];
+        }
+        tempTime[i] = 0;
     }
+
+    if (timerCounter == 150) {
+        LOG_INFO("Time0: %.6f, Time1: %.6f, Time2: %.6f, Time3: %.6f", time[0], time[1],
+            time[2], time[3]);
+        for (unsigned int i = 0; i < 4; ++i) {
+            time[i] = 0;
+        }
+        timerCounter = 0;
+    }
+    else {
+        timerCounter++;
+    }
+
+    // Mark any dirty entities as clean.
+    world.registry.clear<IsDirty>();
 }
 
-void NetworkUpdateSystem::constructAndSendUpdate(
-    ClientSimData& client, std::vector<entt::entity>& entitiesToSend)
+void NetworkUpdateSystem::sendUpdate(
+    ClientSimData& client, EntityUpdate& entityUpdate)
 {
-    /** Fill the vector of entities to send. */
-    EntityUpdate entityUpdate{};
-    for (entt::entity entity : entitiesToSend) {
-        fillEntityData(entity, entityUpdate.entityStates);
-    }
-
     /* If there are updates to send, send an update message. */
     if (entityUpdate.entityStates.size() > 0) {
         // Finish filling the EntityUpdate.
@@ -107,18 +138,6 @@ void NetworkUpdateSystem::constructAndSendUpdate(
         // Send the message.
         network.send(client.netID, messageBuffer, entityUpdate.tickNum);
     }
-}
-
-void NetworkUpdateSystem::fillEntityData(entt::entity entity,
-                                         std::vector<EntityState>& entityStates)
-{
-    /* Fill the message with the latest PositionComponent, MovementComponent,
-       and InputComponent data. */
-    auto [input, position, movement]
-        = world.registry.get<Input, Position, Movement>(entity);
-
-    entityStates.push_back(
-        {world.registry.entity(entity), input, position, movement});
 }
 
 } // namespace Server

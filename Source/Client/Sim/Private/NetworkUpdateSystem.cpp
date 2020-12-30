@@ -6,6 +6,7 @@
 #include "ClientInput.h"
 #include "Input.h"
 #include "PlayerState.h"
+#include "IsDirty.h"
 #include "Peer.h"
 #include "Log.h"
 #include "Ignore.h"
@@ -33,9 +34,10 @@ void NetworkUpdateSystem::sendInputState()
 
     /* Send the updated state to the server. */
     // Only send new data if we've changed.
-    Input& input = world.registry.get<Input>(world.playerEntity);
-    if (input.isDirty) {
+    entt::registry& registry = world.registry;
+    if (registry.has<IsDirty>(world.playerEntity)) {
         // Get the current input state.
+        Input& input = registry.get<Input>(world.playerEntity);
         ClientInput clientInput{sim.getCurrentTick(), input};
 
         // Serialize the client inputs message.
@@ -52,7 +54,7 @@ void NetworkUpdateSystem::sendInputState()
         // Send the message.
         network.send(messageBuffer);
 
-        input.isDirty = false;
+        registry.remove<IsDirty>(world.playerEntity);
     }
 }
 

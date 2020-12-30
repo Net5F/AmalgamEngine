@@ -6,6 +6,7 @@
 #include "SimDefs.h"
 #include "ClientInput.h"
 #include "Input.h"
+#include "IsDirty.h"
 #include "ClientSimData.h"
 #include "Log.h"
 #include <memory>
@@ -52,7 +53,7 @@ void NetworkInputSystem::processInputMessages()
             input = inputMessage->input;
 
             // Flag the entity as dirty.
-            input.isDirty = true;
+            world.registry.emplace<IsDirty>(clientEntity);
         }
         else {
             // The entity was probably disconnected. Do nothing with the
@@ -96,16 +97,17 @@ void NetworkInputSystem::processMessageDropEvents()
 
 void NetworkInputSystem::handleDropForEntity(entt::entity entity)
 {
-    // If the entity's inputs aren't default, mark it as dirty.
     entt::registry& registry = world.registry;
     Input& entityInput = registry.get<Input>(entity);
+
+    // Default the entity's inputs so they don't run off a cliff.
     Input defaultInput{};
     if (entityInput.inputStates != defaultInput.inputStates) {
-        entityInput.isDirty = true;
-    }
+        entityInput.inputStates = defaultInput.inputStates;
 
-    // Default the entity's inputs.
-    entityInput.inputStates = defaultInput.inputStates;
+        // Flag the entity as dirty.
+        world.registry.emplace<IsDirty>(entity);
+    }
 
     // Flag that a drop occurred for this entity.
     registry.get<ClientSimData>(entity).messageWasDropped = true;

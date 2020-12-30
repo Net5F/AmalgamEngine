@@ -11,6 +11,7 @@ namespace AM
 {
 namespace Server
 {
+
 /**
  * Holds world state and manages the persistence of that state.
  *
@@ -32,14 +33,31 @@ public:
      */
     entt::entity findEntityWithNetID(NetworkID networkID);
 
-    Position getSpawnPoint();
+    /**
+     * Returns a random spawn point position, with all points being within a
+     * single AoI.
+     */
+    Position getRandomSpawnPoint();
+
+    /**
+     * Returns the next spawn point, trying to build groups of 10.
+     */
+    Position getGroupedSpawnPoint();
 
 private:
-    // Temp: Putting entities at random positions within the screen bounds.
+    // For random spawn points.
     std::random_device device;
     std::mt19937 generator;
     std::uniform_real_distribution<float> xDistribution;
     std::uniform_real_distribution<float> yDistribution;
+
+    // For grouped spawn points.
+    static constexpr unsigned int GROUP_SIZE = 10;
+    float baseX;
+    float baseY;
+    std::array<float, GROUP_SIZE> groupOffsetsX;
+    std::array<float, GROUP_SIZE> groupOffsetsY;
+    unsigned int offsetSelector;
 };
 
 } // namespace Server
