@@ -6,7 +6,9 @@
 #include "EntityUpdate.h"
 #include "Input.h"
 #include "Position.h"
+#include "Movement.h"
 #include "ClientSimData.h"
+#include "IsDirty.h"
 #include "Ignore.h"
 #include "Log.h"
 #include <algorithm>
@@ -29,31 +31,31 @@ NetworkUpdateSystem::NetworkUpdateSystem(Sim& inSim, World& inWorld,
 }
 
 Timer timer;
-double time1, time2, time3 = 0;
-double tempTime1, tempTime2, tempTime3 = 0;
+double time[4]{};
+double tempTime[4]{};
 int timerCounter = 0;
 void NetworkUpdateSystem::sendClientUpdates()
 {
     // Collect the dirty entities.
     timer.updateSavedTime();
+    auto dirtyView = world.registry.view<IsDirty>();
     auto movementGroup = world.registry.group<Input, Position, Movement>();
     std::vector<EntityStateRefs> dirtyEntities;
-    for (entt::entity entity : movementGroup) {
-        Input& input = movementGroup.get<Input>(entity);
-        if (input.isDirty) {
-            auto [position, movement] = movementGroup.get<Position, Movement>(entity);
-            dirtyEntities.push_back({entity, input, position, movement});
-        }
+    for (entt::entity entity : dirtyView) {
+        auto [input, position, movement] = movementGroup.get<Input, Position, Movement>(entity);
+        dirtyEntities.push_back({entity, input, position, movement});
     }
-    tempTime1 += timer.getDeltaSeconds(true);
+    tempTime[0] += timer.getDeltaSeconds(true);
 
     /* Update clients as necessary. */
     auto clientGroup = world.registry.group<ClientSimData>(entt::get<Position>);
     for (entt::entity entity : clientGroup) {
+        timer.updateSavedTime();
         // Center this entity's AoI on its current position.
         auto [client, clientPosition]
             = clientGroup.get<ClientSimData, Position>(entity);
         client.aoi.setCenter(clientPosition);
+        tempTime[1] += timer.getDeltaSeconds(true);
 
         /* Collect the entities that need to be sent to this client. */
         EntityUpdate entityUpdate{};
@@ -67,7 +69,7 @@ void NetworkUpdateSystem::sendClientUpdates()
                     {state.entity, state.input, state.position, state.movement});
             }
         }
-        tempTime2 += timer.getDeltaSeconds(true);
+        tempTime[2] += timer.getDeltaSeconds(true);
 
         // If this entity had a drop, add it.
         // (It mispredicted, so it needs to know the actual state it's in.)
@@ -89,37 +91,30 @@ void NetworkUpdateSystem::sendClientUpdates()
         /* Send the collected entities to this client. */
         timer.updateSavedTime();
         sendUpdate(client, entityUpdate);
-        tempTime3 += timer.getDeltaSeconds(true);
+        tempTime[3] += timer.getDeltaSeconds(true);
     }
 
-    if (tempTime1 > time1) {
-        time1 = tempTime1;
+    for (unsigned int i = 0; i < 4; ++i) {
+        if (tempTime[i] > time[i]) {
+            time[i] = tempTime[i];
+        }
+        tempTime[i] = 0;
     }
-    if (tempTime2 > time2) {
-        time2 = tempTime2;
-    }
-    if (tempTime3 > time3) {
-        time3 = tempTime3;
-    }
-    tempTime1 = 0;
-    tempTime2 = 0;
-    tempTime3 = 0;
 
     if (timerCounter == 150) {
-        LOG_INFO("Time1: %.6f, Time2: %.6f, Time3: %.6f", time1, time2, time3);
-        time1 = 0;
-        time2 = 0;
-        time3 = 0;
+        LOG_INFO("Time0: %.6f, Time1: %.6f, Time2: %.6f, Time3: %.6f", time[0], time[1],
+            time[2], time[3]);
+        for (unsigned int i = 0; i < 4; ++i) {
+            time[i] = 0;
+        }
         timerCounter = 0;
     }
     else {
         timerCounter++;
     }
 
-    // Mark any dirty entities as clean
-    for (EntityStateRefs& state : dirtyEntities) {
-        state.input.isDirty = false;
-    }
+    // Mark any dirty entities as clean.
+    world.registry.clear<IsDirty>();
 }
 
 void NetworkUpdateSystem::sendUpdate(

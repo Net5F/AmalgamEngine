@@ -6,6 +6,7 @@
 #include "SimDefs.h"
 #include "ClientInput.h"
 #include "Input.h"
+#include "IsDirty.h"
 #include "ClientSimData.h"
 #include "Log.h"
 #include <memory>
@@ -52,7 +53,7 @@ void NetworkInputSystem::processInputMessages()
             input = inputMessage->input;
 
             // Flag the entity as dirty.
-            input.isDirty = true;
+            world.registry.emplace<IsDirty>(clientEntity);
         }
         else {
             // The entity was probably disconnected. Do nothing with the

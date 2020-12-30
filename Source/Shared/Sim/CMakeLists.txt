@@ -6,6 +6,7 @@ target_sources(Shared
         Public/MovementHelpers.h
         Public/AreaOfInterest.h
         Public/Components/Input.h
+        Public/Components/IsDirty.h
         Public/Components/Movement.h
         Public/Components/Name.h
         Public/Components/Position.h
