@@ -23,7 +23,8 @@ public:
     Sim(Network& inNetwork);
 
     /**
-     * Runs an iteration of the game loop.
+     * Updates accumulatedTime. If greater than the tick timestep, processes
+     * the next sim iteration.
      */
     void tick();
 

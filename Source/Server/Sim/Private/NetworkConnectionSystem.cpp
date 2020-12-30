@@ -47,7 +47,7 @@ void NetworkConnectionSystem::processConnectEvents()
 
         // Build their entity.
         entt::registry& registry = world.registry;
-        const Position spawnPoint = world.getSpawnPoint();
+        const Position spawnPoint = world.getRandomSpawnPoint();
 
         entt::entity newEntity = registry.create();
         registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(

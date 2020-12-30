@@ -104,7 +104,7 @@ void NetworkInputSystem::handleDropForEntity(entt::entity entity)
         entityInput.isDirty = true;
     }
 
-    // Default the entity's inputs.
+    // Default the entity's inputs so they don't run off a cliff.
     entityInput.inputStates = defaultInput.inputStates;
 
     // Flag that a drop occurred for this entity.

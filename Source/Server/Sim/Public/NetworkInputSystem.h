@@ -35,8 +35,8 @@ private:
     void processMessageDropEvents();
 
     /**
-     * Defaults the entity's inputs and marks them dirty if their inputs
-     * changed.
+     * Defaults the entity's inputs (so they don't run off a cliff) and marks
+     * them dirty if their inputs changed.
      */
     void handleDropForEntity(entt::entity entityID);
 
