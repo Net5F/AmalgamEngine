@@ -91,17 +91,16 @@ void WorldSim::tick()
         accumulatedTime -= SIM_TICK_TIMESTEP_S;
         if (accumulatedTime >= SIM_TICK_TIMESTEP_S) {
             LOG_INFO("Entity %u: Detected a request for multiple game ticks in "
-                     "the same frame. Game tick must have been massively "
-                     "delayed. Game tick was delayed by: %.8fs.",
+                     "the same frame. Game tick was delayed by: %.8fs.",
                      clientEntity, accumulatedTime);
         }
-        else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
-            // Game missed its ideal call time, could be our issue or general
-            // system slowness.
-            LOG_INFO("Entity %u: Detected a delayed game tick. Game tick was "
-                     "delayed by: %.8fs.",
-                     clientEntity, accumulatedTime);
-        }
+//        else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
+//            // Game missed its ideal call time, could be our issue or general
+//            // system slowness.
+//            LOG_INFO("Entity %u: Detected a delayed game tick. Game tick was "
+//                     "delayed by: %.8fs.",
+//                     clientEntity, accumulatedTime);
+//        }
 
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);

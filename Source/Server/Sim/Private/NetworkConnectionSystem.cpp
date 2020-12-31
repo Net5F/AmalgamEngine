@@ -47,7 +47,7 @@ void NetworkConnectionSystem::processConnectEvents()
 
         // Build their entity.
         entt::registry& registry = world.registry;
-        const Position spawnPoint = world.getRandomSpawnPoint();
+        const Position spawnPoint = world.getGroupedSpawnPoint();
 
         entt::entity newEntity = registry.create();
         registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(
@@ -61,6 +61,7 @@ void NetworkConnectionSystem::processConnectEvents()
             newEntity, clientNetworkID, false,
             AreaOfInterest{(SCREEN_WIDTH + AOI_BUFFER_DISTANCE),
                            (SCREEN_HEIGHT + AOI_BUFFER_DISTANCE)});
+        world.netIdMap[clientNetworkID] = newEntity;
 
         LOG_INFO("Constructed entity with netID: %u, entityID: %u",
                  clientNetworkID, newEntity);
@@ -85,11 +86,12 @@ void NetworkConnectionSystem::processDisconnectEvents()
         }
 
         // Find the client's associated entity.
-        entt::entity clientEntity
-            = world.findEntityWithNetID(disconnectedClientID);
-        if (clientEntity != entt::null) {
+        auto clientEntityIt = world.netIdMap.find(disconnectedClientID);
+        if (clientEntityIt != world.netIdMap.end()) {
             // Found the entity, remove it.
+            entt::entity clientEntity = clientEntityIt->second;
             world.registry.destroy(clientEntity);
+            world.netIdMap.erase(clientEntityIt);
             LOG_INFO("Removed entity with netID: %u", clientEntity);
         }
         else {

@@ -2,9 +2,11 @@
 
 #include "SimDefs.h"
 #include "Position.h"
+#include "NetworkDefs.h"
 
 #include "entt/entity/registry.hpp"
 
+#include <unordered_map>
 #include <random>
 
 namespace AM
@@ -25,13 +27,9 @@ public:
     /** Entity data registry. */
     entt::registry registry;
 
-    /**
-     * Searches all entities with ClientComponents to find one associated with
-     * the given networkID.
-     * @return The EntityID of the entity associated with networkID if found,
-     *         else INVALID_ENTITY_ID.
-     */
-    entt::entity findEntityWithNetID(NetworkID networkID);
+    /** Maps network IDs to entity IDs, used for interfacing with the
+        Network. */
+    std::unordered_map<NetworkID, entt::entity> netIdMap;
 
     /**
      * Returns a random spawn point position, with all points being within a

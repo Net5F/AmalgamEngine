@@ -102,7 +102,7 @@ void NetworkUpdateSystem::sendClientUpdates()
     }
 
     if (timerCounter == 150) {
-        LOG_INFO("Time0: %.6f, Time1: %.6f, Time2: %.6f, Time3: %.6f", time[0], time[1],
+        LOG_INFO("Collect: %.6f, Center: %.6f, AoI: %.6f, Serial: %.6f", time[0], time[1],
             time[2], time[3]);
         for (unsigned int i = 0; i < 4; ++i) {
             time[i] = 0;

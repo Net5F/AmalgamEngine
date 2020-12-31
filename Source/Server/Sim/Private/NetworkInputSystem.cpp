@@ -23,6 +23,10 @@ NetworkInputSystem::NetworkInputSystem(Sim& inSim, World& inWorld,
 {
 }
 
+Timer timer3;
+double time3[4]{};
+double tempTime3[4]{};
+int timerCounter3 = 0;
 void NetworkInputSystem::processInputMessages()
 {
     // Handle any dropped messages.
@@ -34,6 +38,7 @@ void NetworkInputSystem::processInputMessages()
 
     // Process all messages.
     while (!(messageQueue.empty())) {
+        timer3.updateSavedTime();
         std::unique_ptr<ClientInput> inputMessage
             = std::move(messageQueue.front());
         messageQueue.pop();
@@ -41,27 +46,51 @@ void NetworkInputSystem::processInputMessages()
             LOG_INFO("Failed to receive input message after getting count "
                      "(this shouldn't happen).")
         }
+        tempTime3[0] += timer3.getDeltaSeconds(true);
 
         // Find the entity associated with the given NetID.
-        entt::entity clientEntity
-            = world.findEntityWithNetID(inputMessage->netID);
+        auto clientEntityIt = world.netIdMap.find(inputMessage->netID);
+        tempTime3[1] += timer3.getDeltaSeconds(true);
 
         // Update the client entity's inputs.
-        if (clientEntity != entt::null) {
+        if (clientEntityIt != world.netIdMap.end()) {
             // Update the entity's Input component.
+            entt::entity clientEntity = clientEntityIt->second;
             Input& input = world.registry.get<Input>(clientEntity);
             input = inputMessage->input;
 
             // Flag the entity as dirty.
-            world.registry.emplace<IsDirty>(clientEntity);
+            // It might already be dirty from a drop, so check first.
+            if (!(world.registry.has<IsDirty>(clientEntity))) {
+                world.registry.emplace<IsDirty>(clientEntity);
+            }
         }
         else {
             // The entity was probably disconnected. Do nothing with the
             // message.
         }
+        tempTime3[2] += timer3.getDeltaSeconds(true);
     }
 
     network.endReceiveInputMessages();
+
+    for (unsigned int i = 0; i < 4; ++i) {
+        if (tempTime3[i] > time3[i]) {
+            time3[i] = tempTime3[i];
+        }
+        tempTime3[i] = 0;
+    }
+
+    if (timerCounter3 == 150) {
+        LOG_INFO("Pop: %.6f, Find: %.6f, Construct: %.6f", time3[0], time3[1], time3[2]);
+        for (unsigned int i = 0; i < 4; ++i) {
+            time3[i] = 0;
+        }
+        timerCounter3 = 0;
+    }
+    else {
+        timerCounter3++;
+    }
 }
 
 void NetworkInputSystem::processMessageDropEvents()
@@ -76,11 +105,11 @@ void NetworkInputSystem::processMessageDropEvents()
         NetworkID clientNetworkID = 0;
         if (messageDropEventQueue.try_dequeue(clientNetworkID)) {
             // Find the EntityID associated with the popped NetworkID.
-            entt::entity clientEntityID
-                = world.findEntityWithNetID(clientNetworkID);
-            if (clientEntityID != entt::null) {
+            auto clientEntityIt = world.netIdMap.find(clientNetworkID);
+            if (clientEntityIt != world.netIdMap.end()) {
                 // We found the entity that dropped the message, handle it.
-                handleDropForEntity(clientEntityID);
+                entt::entity clientEntity = clientEntityIt->second;
+                handleDropForEntity(clientEntity);
             }
             else {
                 LOG_ERROR("Failed to find entity with netID: %u while "
