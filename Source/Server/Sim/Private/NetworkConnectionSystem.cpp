@@ -41,8 +41,7 @@ void NetworkConnectionSystem::processConnectEvents()
     for (unsigned int i = 0; i < connectEventQueue.size_approx(); ++i) {
         NetworkID clientNetworkID = 0;
         if (!(connectEventQueue.try_dequeue(clientNetworkID))) {
-            LOG_ERROR(
-                "Expected element in connectEventQueue but dequeue failed.");
+            LOG_ERROR("Expected element but dequeue failed.");
         }
 
         // Build their entity.

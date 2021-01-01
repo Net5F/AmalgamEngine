@@ -28,8 +28,9 @@ void Network::tick()
     accumulatedTime += heartbeatTimer.getDeltaSeconds(true);
 
     if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
-        // Send all messages for this network tick.
-        sendClientUpdates();
+        // Flag the send thread to start sending all messages for this network
+        // tick.
+        clientHandler.beginSendClientUpdates();
 
         // If it's time to log our network statistics, do so.
         ticksSinceNetstatsLog++;
@@ -183,15 +184,9 @@ double Network::getTimeTillNextHeartbeat()
     return (NETWORK_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
 }
 
-void Network::sendClientUpdates()
+Uint32 Network::getCurrentTick()
 {
-    // Acquire a read lock before running through the client map.
-    std::shared_lock readLock(clientMapMutex);
-
-    // Run through the clients, sending their waiting messages.
-    for (auto& pair : clientMap) {
-        pair.second->sendWaitingMessages(*currentTickPtr);
-    }
+    return *currentTickPtr;
 }
 
 void Network::logNetworkStatistics()
@@ -228,7 +223,7 @@ Sint64 Network::handleClientInputs(ClientMessage& clientMessage,
     // If the sorter dropped the message, push a message drop event.
     if (pushResult.result != MessageSorterBase::ValidityResult::Valid) {
         if (!messageDropEventQueue.enqueue(clientMessage.netID)) {
-            LOG_ERROR("Ran out of room in queue and memory allocation failed.");
+            LOG_ERROR("Enqueue failed.");
         }
 
         LOG_INFO("Message was dropped. NetID: %u, diff: %d, result: %u, "

@@ -5,12 +5,12 @@
 #include "ClientHandler.h"
 #include "MessageSorter.h"
 #include "ClientInput.h"
+#include "readerwriterqueue.h"
 #include <memory>
 #include <cstddef>
 #include <unordered_map>
 #include <shared_mutex>
 #include <queue>
-#include "readerwriterqueue.h"
 
 namespace AM
 {
@@ -97,16 +97,10 @@ public:
      */
     double getTimeTillNextHeartbeat();
 
-private:
-    /**
-     * Tries to send any messages in each client's queue over the network.
-     * If a send fails, leaves the message at the front of the queue and moves
-     * on to the next client's queue.
-     * If there's no messages to send, sends a heartbeat instead, with a value
-     * that confirms that we've processed tick(s) with no changes to send.
-     */
-    void sendClientUpdates();
+    /** Convenience for network-owned objects to get the current tick. */
+    Uint32 getCurrentTick();
 
+private:
     /**
      * Logs the network stats such as bytes sent/received per second.
      */

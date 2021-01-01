@@ -6,8 +6,11 @@
 #include "Acceptor.h"
 #include "IDPool.h"
 #include <thread>
+#include <queue>
 #include <unordered_map>
 #include <atomic>
+#include <mutex>
+#include <condition_variable>
 
 namespace AM
 {
@@ -33,6 +36,11 @@ public:
 
     ~ClientHandler();
 
+    /**
+     * Flags the send thread to begin sending all waiting messages.
+     */
+    void beginSendClientUpdates();
+
 private:
     /**
      * How long the accept/disconnect/receive loop in serviceClients should
@@ -49,6 +57,18 @@ private:
      * Acts directly on the Network's client map.
      */
     void serviceClients();
+
+    /**
+     * Thread function, started from constructor.
+     * Waits for beginSendClientUpdates() to flag that a send should begin.
+     *
+     * Tries to send any messages in each client's queue over the network.
+     * If a send fails, leaves the message at the front of the queue and moves
+     * on to the next client's queue.
+     * If there's no messages to send, sends a heartbeat instead, with a value
+     * that confirms that we've processed tick(s) with no changes to send.
+     */
+    void sendClientUpdates();
 
     /**
      * Accepts any new clients, pushing them into the Network's client map.
@@ -85,8 +105,17 @@ private:
 
     /** Calls serviceClients(). */
     std::thread receiveThreadObj;
-    /** Turn false to signal that the receive thread should end. */
+    /** Turn false to signal that the send and receive threads should end. */
     std::atomic<bool> exitRequested;
+
+    /** Calls sendClientUpdates(). */
+    std::thread sendThreadObj;
+    /** Used for signaling the send thread. */
+    std::mutex sendMutex;
+    /** Used for signaling the send thread. */
+    std::condition_variable sendCondVar;
+    /** Used for signaling the send thread. */
+    bool sendRequested;
 };
 
 } // End namespace Server

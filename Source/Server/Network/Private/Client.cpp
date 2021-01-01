@@ -26,7 +26,9 @@ Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
 void Client::queueMessage(const BinaryBufferSharedPtr& message,
                           Uint32 messageTick)
 {
-    sendQueue.emplace_back(message, messageTick);
+    if (!sendQueue.emplace(message, messageTick)) {
+        LOG_ERROR("Queue emplace failed.");
+    }
 }
 
 NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
@@ -46,8 +48,11 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     unsigned int currentIndex = ServerHeaderIndex::MessageHeaderStart;
     for (unsigned int i = 0; i < messageCount; ++i) {
         /* Copy the message and message header into the buffer. */
-        std::pair<BinaryBufferSharedPtr, Uint32> messagePair
-            = sendQueue.front();
+        std::pair<BinaryBufferSharedPtr, Uint32> messagePair;
+        if (!sendQueue.try_dequeue(messagePair)) {
+            LOG_ERROR("Expected element but dequeue failed.");
+        }
+
         BinaryBufferSharedPtr& messageBuffer = messagePair.first;
         std::copy(messageBuffer->begin(), messageBuffer->end(),
                   &(batchBuffer[currentIndex]));
@@ -59,8 +64,6 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
         if (messageTick != 0) {
             latestSentSimTick = messageTick;
         }
-
-        sendQueue.pop_front();
     }
 
     // Fill in the header.
@@ -106,7 +109,7 @@ void Client::fillHeader(Uint8 messageCount, Uint32 currentTick)
 
 Uint8 Client::getWaitingMessageCount() const
 {
-    unsigned int size = sendQueue.size();
+    std::size_t size = sendQueue.size_approx();
     if (size > SDL_MAX_UINT8) {
         LOG_ERROR("Client's sendQueue contains too many messages to return as"
                   "a Uint8.");

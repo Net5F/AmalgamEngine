@@ -17,16 +17,36 @@ ClientHandler::ClientHandler(Network& inNetwork)
 , acceptor(Network::SERVER_PORT, clientSet)
 , receiveThreadObj()
 , exitRequested(false)
+, sendRequested(false)
 {
-    // Start the receive thread.
+    // Start the send and receive threads.
     receiveThreadObj = std::thread(&ClientHandler::serviceClients, this);
+    sendThreadObj = std::thread(&ClientHandler::sendClientUpdates, this);
 }
 
 ClientHandler::~ClientHandler()
 {
     exitRequested = true;
     receiveThreadObj.join();
+
+    {
+        std::unique_lock<std::mutex> lock(sendMutex);
+        sendRequested = true;
+    }
+    sendCondVar.notify_one();
+    sendThreadObj.join();
+
     SDLNet_Quit();
+}
+
+void ClientHandler::beginSendClientUpdates()
+{
+    // Wake the send thread.
+    {
+        std::unique_lock<std::mutex> lock(sendMutex);
+        sendRequested = true;
+    }
+    sendCondVar.notify_one();
 }
 
 void ClientHandler::serviceClients()
@@ -57,6 +77,29 @@ void ClientHandler::serviceClients()
             // There wasn't any activity, delay so we don't waste CPU spinning.
             SDL_Delay(INACTIVE_DELAY_TIME_MS);
         }
+    }
+}
+
+void ClientHandler::sendClientUpdates()
+{
+    std::shared_mutex& clientMapMutex = network.getClientMapMutex();
+    ClientMap& clientMap = network.getClientMap();
+
+    while (!exitRequested) {
+        // Wait until this thread is signaled by beginSendClientUpdates().
+        std::unique_lock<std::mutex> lock(sendMutex);
+        sendCondVar.wait(lock, [this]{return sendRequested;});
+
+        // Acquire a read lock before running through the client map.
+        std::shared_lock readLock(clientMapMutex);
+
+        // Run through the clients, sending their waiting messages.
+        Uint32 currentTick = network.getCurrentTick();
+        for (auto& pair : clientMap) {
+            pair.second->sendWaitingMessages(currentTick);
+        }
+
+        sendRequested = false;
     }
 }
 
