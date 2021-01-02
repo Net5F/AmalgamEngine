@@ -53,8 +53,10 @@ void PlayerInputSystem::processHeldInputs()
             // Save the new state.
             playerInput.inputStates[inputType] = newInputStates[inputType];
 
-            // Flag the player as dirty.
-            registry.emplace<IsDirty>(world.playerEntity);
+            // Flag the player as dirty if it isn't already.
+            if (!(world.registry.has<IsDirty>(world.playerEntity))) {
+                registry.emplace<IsDirty>(world.playerEntity);
+            }
         }
     }
 }

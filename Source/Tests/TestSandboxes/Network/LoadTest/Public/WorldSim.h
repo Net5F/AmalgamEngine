@@ -54,7 +54,7 @@ private:
     static constexpr unsigned int CONNECTION_RESPONSE_WAIT_MS = 1000;
 
     /** How often to send inputs. */
-    static constexpr double INPUT_RATE_S = (1 / 2.0);
+    static constexpr double INPUT_RATE_S = (1 / 4.0);
     static constexpr unsigned int INPUT_RATE_TICKS
         = SIM_TICKS_PER_SECOND * INPUT_RATE_S;
 
