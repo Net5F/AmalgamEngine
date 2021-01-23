@@ -30,14 +30,9 @@ NetworkUpdateSystem::NetworkUpdateSystem(Sim& inSim, World& inWorld,
     ignore(movementGroup);
 }
 
-Timer timer;
-double time[4]{};
-double tempTime[4]{};
-int timerCounter = 0;
 void NetworkUpdateSystem::sendClientUpdates()
 {
     // Collect the dirty entities.
-    timer.updateSavedTime();
     auto dirtyView = world.registry.view<IsDirty>();
     auto movementGroup = world.registry.group<Input, Position, Movement>();
     std::vector<EntityStateRefs> dirtyEntities;
@@ -45,22 +40,18 @@ void NetworkUpdateSystem::sendClientUpdates()
         auto [input, position, movement] = movementGroup.get<Input, Position, Movement>(entity);
         dirtyEntities.push_back({entity, input, position, movement});
     }
-    tempTime[0] += timer.getDeltaSeconds(true);
 
     /* Update clients as necessary. */
     auto clientGroup = world.registry.group<ClientSimData>(entt::get<Position>);
     for (entt::entity entity : clientGroup) {
-        timer.updateSavedTime();
         // Center this entity's AoI on its current position.
         auto [client, clientPosition]
             = clientGroup.get<ClientSimData, Position>(entity);
         client.aoi.setCenter(clientPosition);
-        tempTime[1] += timer.getDeltaSeconds(true);
 
         /* Collect the entities that need to be sent to this client. */
         EntityUpdate entityUpdate{};
 
-        timer.updateSavedTime();
         // Add all the dirty entities.
         for (EntityStateRefs& state : dirtyEntities) {
             // Check if the dirty entity is in this client's AOI before adding.
@@ -69,7 +60,6 @@ void NetworkUpdateSystem::sendClientUpdates()
                     {state.entity, state.input, state.position, state.movement});
             }
         }
-        tempTime[2] += timer.getDeltaSeconds(true);
 
         // If this entity had a drop, add it.
         // (It mispredicted, so it needs to know the actual state it's in.)
@@ -89,28 +79,7 @@ void NetworkUpdateSystem::sendClientUpdates()
         }
 
         /* Send the collected entities to this client. */
-        timer.updateSavedTime();
         sendUpdate(client, entityUpdate);
-        tempTime[3] += timer.getDeltaSeconds(true);
-    }
-
-    for (unsigned int i = 0; i < 4; ++i) {
-        if (tempTime[i] > time[i]) {
-            time[i] = tempTime[i];
-        }
-        tempTime[i] = 0;
-    }
-
-    if (timerCounter == 150) {
-        LOG_INFO("Collect: %.6f, Center: %.6f, AoI: %.6f, Serial: %.6f", time[0], time[1],
-            time[2], time[3]);
-        for (unsigned int i = 0; i < 4; ++i) {
-            time[i] = 0;
-        }
-        timerCounter = 0;
-    }
-    else {
-        timerCounter++;
     }
 
     // Mark any dirty entities as clean.

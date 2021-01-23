@@ -93,11 +93,11 @@ void NpcMovementSystem::updateNpcs()
 
 void NpcMovementSystem::applyTickAdjustment(int adjustment)
 {
-    // If the server tells us to add 2 ticks of latency, it's saying that it
-    // needs 2 more ticks worth of time for our messages to arrive in time.
-    // The effect of this is that NPC replication should be delayed by an
-    // additional 4 ticks (2 for each direction).
-    // To accomplish this, we negate and double the adjustment before applying.
+    // We set our client ahead of the server by an amount equal to our latency,
+    // but this means that received messages will appear to be doubly far into
+    // the past.
+    // To account for this, we double the adjustment before applying.
+    // We also negate it since we're reversing the direction.
     tickReplicationOffset += (-2 * adjustment);
 
     if (tickReplicationOffset >= 0) {

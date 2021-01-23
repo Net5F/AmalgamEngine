@@ -128,6 +128,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         if (receivedInput.inputStates != playerState.inputHistory[tickDiff]) {
             // Our prediction was wrong, accept the received input and set all
             // inputs in the history after the mismatched input to match it.
+            // TODO: This may be incorrect, but it's uncommon and hard to
+            // verify. We may want to more carefully overwrite existing inputs.
             currentInput.inputStates = receivedInput.inputStates;
             for (unsigned int i = 0; i <= tickDiff; ++i) {
                 playerState.inputHistory[i] = receivedInput.inputStates;
