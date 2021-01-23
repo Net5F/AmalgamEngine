@@ -1,4 +1,5 @@
 #include <SDL2pp/SDL2pp.hh>
+#include "Remotery.h"
 
 #include "SimDefs.h"
 #include "Sim.h"
@@ -45,6 +46,10 @@ try {
 
     // Set up file logging.
     Log::enableFileLogging("Server.log");
+
+    // Set up profiling.
+    Remotery* rmt;
+    rmt_CreateGlobalInstance(&rmt);
 
     // Set up the network utility.
     Network network;

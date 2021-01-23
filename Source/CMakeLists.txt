@@ -23,9 +23,13 @@ set(SDL2PP_WITH_NET ON)
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/libSDL2pp/"
                  "${PROJECT_BINARY_DIR}/Libraries/libSDL2pp/")
 
-# Build bitsery 
+# Build bitsery
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/bitsery/"
                  "${PROJECT_BINARY_DIR}/Libraries/bitsery/")
+
+# Build Remotery
+set(ENABLE_PROFILING ON CACHE BOOL "Enable Remotery profiling." FORCE)
+include("${PROJECT_SOURCE_DIR}/../CMake/Remotery.cmake")
 
 # Include header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/../CMake/readerwriterqueue.cmake")

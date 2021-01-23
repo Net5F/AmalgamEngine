@@ -12,6 +12,7 @@
 #include "ClientSimData.h"
 #include "Name.h"
 #include "Log.h"
+#include "Remotery.h"
 
 namespace AM
 {
@@ -27,6 +28,8 @@ NetworkConnectionSystem::NetworkConnectionSystem(Sim& inSim, World& inWorld,
 
 void NetworkConnectionSystem::processConnectionEvents()
 {
+    rmt_ScopedCPUSample(processConnectionEvents, 0);
+
     processConnectEvents();
 
     processDisconnectEvents();

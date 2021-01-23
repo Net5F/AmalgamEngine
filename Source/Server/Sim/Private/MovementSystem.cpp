@@ -6,6 +6,7 @@
 #include "Movement.h"
 #include "Log.h"
 #include "Ignore.h"
+#include "Remotery.h"
 
 namespace AM
 {
@@ -21,6 +22,8 @@ MovementSystem::MovementSystem(World& inWorld)
 
 void MovementSystem::processMovements()
 {
+    rmt_ScopedCPUSample(processMovements, 0);
+
     /* Move all entities that have an input, position, and movement
        component. */
     auto group = world.registry.group<Input, Position, Movement>();

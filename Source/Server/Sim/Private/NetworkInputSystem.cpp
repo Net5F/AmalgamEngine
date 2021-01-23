@@ -10,6 +10,7 @@
 #include "ClientSimData.h"
 #include "Log.h"
 #include <memory>
+#include "Remotery.h"
 
 namespace AM
 {
@@ -25,6 +26,8 @@ NetworkInputSystem::NetworkInputSystem(Sim& inSim, World& inWorld,
 
 void NetworkInputSystem::processInputMessages()
 {
+    rmt_ScopedCPUSample(processInputMessages, 0);
+
     // Handle any dropped messages.
     processMessageDropEvents();
 

@@ -6,7 +6,7 @@
 	url = git@github.com:cameron314/readerwriterqueue.git
 [submodule "Libraries/CircularBuffer"]
 	path = Libraries/CircularBuffer
-	url = git@github.com:Mmpuskas/CircularBuffer.git
+	url = git@github.com:Net5F/CircularBuffer.git
 [submodule "Libraries/Catch2"]
 	path = Libraries/Catch2
 	url = git@github.com:catchorg/Catch2.git
@@ -15,7 +15,10 @@
 	url = git@github.com:SDL-mirror/SDL_net.git
 [submodule "Libraries/bitsery"]
 	path = Libraries/bitsery
-	url = git@github.com:Mmpuskas/bitsery.git
+	url = git@github.com:fraillt/bitsery.git
 [submodule "Libraries/entt"]
 	path = Libraries/entt
 	url = git@github.com:skypjack/entt.git
+[submodule "Libraries/Remotery"]
+	path = Libraries/Remotery
+	url = git@github.com:Net5F/Remotery.git
