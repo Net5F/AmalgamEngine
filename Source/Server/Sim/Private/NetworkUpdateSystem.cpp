@@ -12,7 +12,7 @@
 #include "Ignore.h"
 #include "Log.h"
 #include <algorithm>
-#include "Remotery.h"
+#include "Profiler.h"
 
 namespace AM
 {
@@ -33,7 +33,7 @@ NetworkUpdateSystem::NetworkUpdateSystem(Sim& inSim, World& inWorld,
 
 void NetworkUpdateSystem::sendClientUpdates()
 {
-    rmt_ScopedCPUSample(sendClientUpdate, 0);
+    SCOPED_CPU_SAMPLE(sendClientUpdate);
 
     // Collect the dirty entities.
     auto dirtyView = world.registry.view<IsDirty>();

@@ -6,6 +6,7 @@ target_sources(Shared
 	    Public/Log.h
 	    Public/Ignore.h
 	    Public/Timer.h
+	    Public/Profiler.h
 )
 
 target_include_directories(Shared

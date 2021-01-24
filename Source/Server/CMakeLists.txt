@@ -27,7 +27,6 @@ target_link_libraries(Server
         readerwriterqueue
         CircularBuffer
         EnTT::EnTT
-        Remotery
         Shared
 )
 

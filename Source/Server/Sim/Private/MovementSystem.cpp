@@ -6,7 +6,7 @@
 #include "Movement.h"
 #include "Log.h"
 #include "Ignore.h"
-#include "Remotery.h"
+#include "Profiler.h"
 
 namespace AM
 {
@@ -22,7 +22,7 @@ MovementSystem::MovementSystem(World& inWorld)
 
 void MovementSystem::processMovements()
 {
-    rmt_ScopedCPUSample(processMovements, 0);
+    SCOPED_CPU_SAMPLE(processMovements);
 
     /* Move all entities that have an input, position, and movement
        component. */

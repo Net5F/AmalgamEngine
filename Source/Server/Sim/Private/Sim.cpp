@@ -1,7 +1,7 @@
 #include "Sim.h"
 #include "Network.h"
 #include "Log.h"
-#include "Remotery.h"
+#include "Profiler.h"
 
 namespace AM
 {
@@ -28,7 +28,7 @@ void Sim::tick()
     /* Process as many game ticks as have accumulated. */
     while (accumulatedTime >= SIM_TICK_TIMESTEP_S) {
         /* Run all systems. */
-        rmt_BeginCPUSample(SimTick, 0);
+        BEGIN_CPU_SAMPLE(SimTick);
         networkConnectionSystem.processConnectionEvents();
 
         networkInputSystem.processInputMessages();
@@ -36,7 +36,7 @@ void Sim::tick()
         movementSystem.processMovements();
 
         networkUpdateSystem.sendClientUpdates();
-        rmt_EndCPUSample();
+        END_CPU_SAMPLE();
 
         /* Prepare for the next tick. */
         accumulatedTime -= SIM_TICK_TIMESTEP_S;

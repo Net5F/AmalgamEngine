@@ -18,6 +18,7 @@ target_link_libraries(Shared
         SDL2_net-static
         SDL2pp
         Bitsery::bitsery
+        Remotery
 )
 
 # Compile with C++17
