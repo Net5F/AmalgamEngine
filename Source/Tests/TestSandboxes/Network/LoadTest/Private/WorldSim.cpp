@@ -94,13 +94,13 @@ void WorldSim::tick()
                      "the same frame. Game tick was delayed by: %.8fs.",
                      clientEntity, accumulatedTime);
         }
-//        else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
-//            // Game missed its ideal call time, could be our issue or general
-//            // system slowness.
-//            LOG_INFO("Entity %u: Detected a delayed game tick. Game tick was "
-//                     "delayed by: %.8fs.",
-//                     clientEntity, accumulatedTime);
-//        }
+        else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
+            // Game missed its ideal call time, could be our issue or general
+            // system slowness.
+            LOG_INFO("Entity %u: Detected a delayed game tick. Game tick was "
+                     "delayed by: %.8fs.",
+                     clientEntity, accumulatedTime);
+        }
 
         // Check our execution time.
         double executionTime = iterationTimer.getDeltaSeconds(false);

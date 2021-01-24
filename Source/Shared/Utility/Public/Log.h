@@ -21,7 +21,6 @@
 
 namespace AM
 {
-
 /**
  * Facilitates logging info and errors to stdout or a log file.
  */

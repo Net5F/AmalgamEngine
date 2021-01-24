@@ -106,7 +106,8 @@ private:
     std::unique_ptr<Peer> peer;
 
     /** Holds messages to be sent with the next call to sendWaitingMessages. */
-    moodycamel::ReaderWriterQueue<std::pair<BinaryBufferSharedPtr, Uint32>> sendQueue;
+    moodycamel::ReaderWriterQueue<std::pair<BinaryBufferSharedPtr, Uint32>>
+        sendQueue;
 
     /** Holds data while we're putting it together to be sent as a batch. */
     std::array<Uint8, Peer::MAX_MESSAGE_SIZE> batchBuffer;

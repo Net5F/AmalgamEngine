@@ -88,7 +88,7 @@ void ClientHandler::sendClientUpdates()
     while (!exitRequested) {
         // Wait until this thread is signaled by beginSendClientUpdates().
         std::unique_lock<std::mutex> lock(sendMutex);
-        sendCondVar.wait(lock, [this]{return sendRequested;});
+        sendCondVar.wait(lock, [this] { return sendRequested; });
 
         // Acquire a read lock before running through the client map.
         std::shared_lock readLock(clientMapMutex);

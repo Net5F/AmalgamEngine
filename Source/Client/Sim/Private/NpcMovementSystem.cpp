@@ -233,7 +233,8 @@ void NpcMovementSystem::applyUpdateMessage(
             // Note: Currently using an arbitrarily chosen non-player sprite.
             Sprite& playerSprite = registry.get<Sprite>(world.playerEntity);
             SDL2pp::Rect textureRect(224, 32, 16, 16);
-            registry.emplace<Sprite>(entity, playerSprite.texturePtr, textureRect, 64, 64);
+            registry.emplace<Sprite>(entity, playerSprite.texturePtr,
+                                     textureRect, 64, 64);
 
             // Init their old position so they don't lerp in from elsewhere.
             const Position& receivedPos = entityIt->position;

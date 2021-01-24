@@ -173,14 +173,16 @@ void Sim::tick()
 
         accumulatedTime -= SIM_TICK_TIMESTEP_S;
         if (accumulatedTime >= SIM_TICK_TIMESTEP_S) {
-            LOG_INFO("Detected a request for multiple sim ticks in the same frame. Sim tick was delayed by: %.8fs.",
+            LOG_INFO("Detected a request for multiple sim ticks in the same "
+                     "frame. Sim tick was delayed by: %.8fs.",
                      accumulatedTime);
         }
         else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
             // Game missed its ideal call time, could be our issue or general
             // system slowness.
-            LOG_INFO("Detected a delayed sim tick. Sim tick was delayed by: %.8fs.",
-                     accumulatedTime);
+            LOG_INFO(
+                "Detected a delayed sim tick. Sim tick was delayed by: %.8fs.",
+                accumulatedTime);
         }
 
         // Check our execution time.

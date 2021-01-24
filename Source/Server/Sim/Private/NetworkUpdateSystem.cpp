@@ -40,7 +40,8 @@ void NetworkUpdateSystem::sendClientUpdates()
     auto movementGroup = world.registry.group<Input, Position, Movement>();
     std::vector<EntityStateRefs> dirtyEntities;
     for (entt::entity entity : dirtyView) {
-        auto [input, position, movement] = movementGroup.get<Input, Position, Movement>(entity);
+        auto [input, position, movement]
+            = movementGroup.get<Input, Position, Movement>(entity);
         dirtyEntities.push_back({entity, input, position, movement});
     }
 
@@ -59,8 +60,9 @@ void NetworkUpdateSystem::sendClientUpdates()
         for (EntityStateRefs& state : dirtyEntities) {
             // Check if the dirty entity is in this client's AOI before adding.
             if (client.aoi.contains(state.position)) {
-                entityUpdate.entityStates.push_back(
-                    {state.entity, state.input, state.position, state.movement});
+                entityUpdate.entityStates.push_back({state.entity, state.input,
+                                                     state.position,
+                                                     state.movement});
             }
         }
 
@@ -75,8 +77,10 @@ void NetworkUpdateSystem::sendClientUpdates()
                 }
             }
             if (!playerFound) {
-                auto [input, position, movement] = movementGroup.get<Input, Position, Movement>(entity);
-                entityUpdate.entityStates.push_back({entity, input, position, movement});
+                auto [input, position, movement]
+                    = movementGroup.get<Input, Position, Movement>(entity);
+                entityUpdate.entityStates.push_back(
+                    {entity, input, position, movement});
                 client.messageWasDropped = false;
             }
         }
@@ -89,8 +93,8 @@ void NetworkUpdateSystem::sendClientUpdates()
     world.registry.clear<IsDirty>();
 }
 
-void NetworkUpdateSystem::sendUpdate(
-    ClientSimData& client, EntityUpdate& entityUpdate)
+void NetworkUpdateSystem::sendUpdate(ClientSimData& client,
+                                     EntityUpdate& entityUpdate)
 {
     /* If there are updates to send, send an update message. */
     if (entityUpdate.entityStates.size() > 0) {

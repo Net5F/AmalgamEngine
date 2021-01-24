@@ -8,32 +8,31 @@
  * Runs until END_CPU_SAMPLE is called.
  * @param sampleName  The name of the sample. Plain text, no quotes.
  */
-#define BEGIN_CPU_SAMPLE(sampleName)                                                          \
-{                                                                          \
-    rmt_BeginCPUSample(sampleName, 0); \
-}
+#define BEGIN_CPU_SAMPLE(sampleName)                                           \
+    {                                                                          \
+        rmt_BeginCPUSample(sampleName, 0);                                     \
+    }
 
 /**
  * Ends a BEGIN_CPU_SAMPLE that was called in the same scope.
  */
-#define END_CPU_SAMPLE()                                                          \
-{                                                                          \
-    rmt_EndCPUSample(); \
-}
+#define END_CPU_SAMPLE()                                                       \
+    {                                                                          \
+        rmt_EndCPUSample();                                                    \
+    }
 
 /**
  * Begins recording a CPU time sample of name sampleName.
  * Runs until the end of the enclosing scope.
  * @param sampleName  The name of the sample. Plain text, no quotes.
  */
-#define SCOPED_CPU_SAMPLE(sampleName)                                                          \
-{                                                                          \
-    rmt_ScopedCPUSample(sampleName, 0); \
-}
+#define SCOPED_CPU_SAMPLE(sampleName)                                          \
+    {                                                                          \
+        rmt_ScopedCPUSample(sampleName, 0);                                    \
+    }
 
 namespace AM
 {
-
 /**
  * Wraps our chosen profiling library to facilitate easy refactoring.
  *
@@ -47,7 +46,8 @@ public:
     /**
      * Initializes the profiler.
      */
-    static void init() {
+    static void init()
+    {
 #if defined(PROFILING_ENABLED)
         Remotery* rmt;
         rmt_CreateGlobalInstance(&rmt);
