@@ -28,7 +28,7 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/bitsery/"
                  "${PROJECT_BINARY_DIR}/Libraries/bitsery/")
 
 # Build Remotery
-set(ENABLE_PROFILING ON CACHE BOOL "Enable Remotery profiling." FORCE)
+set(ENABLE_PROFILING OFF CACHE BOOL "Enable Remotery profiling." FORCE)
 include("${PROJECT_SOURCE_DIR}/../CMake/Remotery.cmake")
 
 # Include header-only readerwriterqueue.
