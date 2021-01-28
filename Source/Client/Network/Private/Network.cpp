@@ -94,7 +94,7 @@ void Network::tick()
 
 void Network::send(const BinaryBufferSharedPtr& message)
 {
-    if (!(server->isConnected())) {
+    if ((server == nullptr) || !(server->isConnected())) {
         LOG_ERROR("Tried to send while server is disconnected.");
     }
 
