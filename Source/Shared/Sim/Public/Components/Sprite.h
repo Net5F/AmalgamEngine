@@ -21,7 +21,7 @@ public:
     /** UV position and size in texture. */
     SDL2pp::Rect posInTexture{0, 0, 0, 0};
 
-    /** Width and height of sprite in the world. */
+    /** Width and height of the sprite in world space. */
     int width{0};
     int height{0};
 };

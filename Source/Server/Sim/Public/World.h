@@ -3,18 +3,23 @@
 #include "SimDefs.h"
 #include "Position.h"
 #include "NetworkDefs.h"
+#include "Sprite.h"
 
 #include "entt/entity/registry.hpp"
 
 #include <unordered_map>
 #include <random>
+#include <vector>
 
 namespace AM
 {
 namespace Server
 {
 /**
- * Holds world state and manages the persistence of that state.
+ * Contains all of the state of our simulation, such as tiles and entities.
+ *
+ * Coordinates in our world state all refer to Cartesian space, as opposed to
+ * whatever space the renderer might be using.
  *
  * Also provides helpers for common uses of world state.
  */
@@ -42,6 +47,9 @@ public:
     Position getGroupedSpawnPoint();
 
 private:
+    /** The map of tiles that makes up our world's terrain. */
+    std::vector<Sprite> terrainMap;
+
     // For random spawn points.
     std::random_device device;
     std::mt19937 generator;

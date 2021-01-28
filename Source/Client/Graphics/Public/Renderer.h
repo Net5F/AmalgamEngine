@@ -11,7 +11,11 @@ namespace Client
 class Sim;
 class World;
 
-class RenderSystem
+/**
+ * Uses world information from the Sim to isometrically render the player's
+ * view.
+ */
+class Renderer
 {
 public:
     static constexpr unsigned int RENDER_TICKS_PER_SECOND = 60;
@@ -23,7 +27,7 @@ public:
         inconsistent. */
     static constexpr double RENDER_DELAYED_TIME_S = .001;
 
-    RenderSystem(SDL2pp::Renderer& inRenderer, Sim& inSim,
+    Renderer(SDL2pp::Renderer& inSdlRenderer, Sim& inSim,
                  SDL2pp::Window& inWindow);
 
     void tick();
@@ -44,7 +48,7 @@ private:
      */
     void render(double alpha);
 
-    SDL2pp::Renderer& renderer;
+    SDL2pp::Renderer& sdlRenderer;
     Sim& sim;
     World& world;
 

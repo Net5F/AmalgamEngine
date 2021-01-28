@@ -27,4 +27,14 @@ static constexpr unsigned int MAX_ENTITIES = 200;
     peers load before they're in view. */
 static constexpr unsigned int AOI_BUFFER_DISTANCE = 700;
 
+/** The width of the world tiles in cartesian coordinates. */
+static constexpr unsigned int TILE_WIDTH = 32;
+/** The height of the world tiles in cartesian coordinates. */
+static constexpr unsigned int TILE_HEIGHT = 32;
+
+/** The width of the world's terrain map in tiles. */
+static constexpr unsigned int WORLD_WIDTH = 10;
+/** The height of the world's terrain map in tiles. */
+static constexpr unsigned int WORLD_HEIGHT = 10;
+
 } /* End namespace AM */

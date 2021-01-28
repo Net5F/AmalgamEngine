@@ -1,4 +1,4 @@
-#include "RenderSystem.h"
+#include "Renderer.h"
 #include "World.h"
 #include "Sim.h"
 #include "Position.h"
@@ -13,9 +13,9 @@ namespace AM
 {
 namespace Client
 {
-RenderSystem::RenderSystem(SDL2pp::Renderer& inRenderer, Sim& inSim,
+Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, Sim& inSim,
                            SDL2pp::Window& window)
-: renderer(inRenderer)
+: sdlRenderer(inSdlRenderer)
 , sim(inSim)
 , world(sim.getWorld())
 , accumulatedTime(0.0)
@@ -29,7 +29,7 @@ RenderSystem::RenderSystem(SDL2pp::Renderer& inRenderer, Sim& inSim,
     ignore(window);
 }
 
-void RenderSystem::tick()
+void Renderer::tick()
 {
     accumulatedTime += frameTimer.getDeltaSeconds(true);
 
@@ -55,22 +55,22 @@ void RenderSystem::tick()
     }
 }
 
-void RenderSystem::initTimer()
+void Renderer::initTimer()
 {
     frameTimer.updateSavedTime();
 }
 
-double RenderSystem::getTimeTillNextFrame()
+double Renderer::getTimeTillNextFrame()
 {
     // The time since accumulatedTime was last updated.
     double timeSinceIteration = frameTimer.getDeltaSeconds(false);
     return (RENDER_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
 }
 
-void RenderSystem::render(double alpha)
+void Renderer::render(double alpha)
 {
     // Clear the screen to prepare for drawing.
-    renderer.Clear();
+    sdlRenderer.Clear();
 
     // Get the offset between world and screen space.
     auto [playerCamera, playerSprite, playerPosition, playerPreviousPos]
@@ -104,12 +104,12 @@ void RenderSystem::render(double alpha)
             SDL2pp::Rect spriteRect
                 = {screenX, screenY, sprite.width, sprite.height};
 
-            renderer.Copy(*(sprite.texturePtr), sprite.posInTexture,
+            sdlRenderer.Copy(*(sprite.texturePtr), sprite.posInTexture,
                           spriteRect);
         }
     }
 
-    renderer.Present();
+    sdlRenderer.Present();
 }
 
 } // namespace Client
