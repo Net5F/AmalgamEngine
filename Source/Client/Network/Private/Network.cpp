@@ -64,15 +64,17 @@ void Network::tick()
     accumulatedTime += heartbeatTimer.getDeltaSeconds(true);
 
     if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
-        // Send a heartbeat if we need to.
-        sendHeartbeatIfNecessary();
+        if (!RUN_OFFLINE) {
+            // Send a heartbeat if we need to.
+            sendHeartbeatIfNecessary();
 
-        // If it's time to log our network statistics, do so.
-        if (netstatsLoggingEnabled) {
-            ticksSinceNetstatsLog++;
-            if (ticksSinceNetstatsLog == TICKS_TILL_STATS_DUMP) {
-                logNetworkStatistics();
-                ticksSinceNetstatsLog = 0;
+            // If it's time to log our network statistics, do so.
+            if (netstatsLoggingEnabled) {
+                ticksSinceNetstatsLog++;
+                if (ticksSinceNetstatsLog == TICKS_TILL_STATS_DUMP) {
+                    logNetworkStatistics();
+                    ticksSinceNetstatsLog = 0;
+                }
             }
         }
 
