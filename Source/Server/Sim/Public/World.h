@@ -1,15 +1,13 @@
 #pragma once
 
 #include "SimDefs.h"
-#include "Position.h"
 #include "NetworkDefs.h"
-#include "Sprite.h"
+#include "Position.h"
 
 #include "entt/entity/registry.hpp"
 
 #include <unordered_map>
 #include <random>
-#include <vector>
 
 namespace AM
 {
@@ -47,9 +45,6 @@ public:
     Position getGroupedSpawnPoint();
 
 private:
-    /** The map of tiles that makes up our world's terrain. */
-    std::vector<Sprite> terrainMap;
-
     // For random spawn points.
     std::random_device device;
     std::mt19937 generator;

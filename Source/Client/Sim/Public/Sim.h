@@ -21,7 +21,7 @@ class Network;
 class Sim
 {
 public:
-    Sim(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites);
+    Sim(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSpriteTex);
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,
@@ -95,7 +95,7 @@ private:
     std::atomic<Uint32> currentTick;
 
     // Temporary until a resource manager is created.
-    const std::shared_ptr<SDL2pp::Texture>& sprites;
+    const std::shared_ptr<SDL2pp::Texture>& spriteTex;
 
     /**
      * Turn false to signal that the main loop should end.

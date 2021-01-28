@@ -39,9 +39,9 @@ try {
     SDL2pp::Renderer sdlRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     // TODO: Replace with a texture loader.
-    std::shared_ptr<SDL2pp::Texture> sprites
+    std::shared_ptr<SDL2pp::Texture> spriteTex
         = std::make_shared<SDL2pp::Texture>(sdlRenderer,
-                                            "Resources/u4_tiles_pc_ega.png");
+                                            "Resources/iso_test_sprites.png");
 
     // Uncomment to enable fullscreen.
     //    window.SetFullscreen(SDL_WINDOW_FULLSCREEN);
@@ -56,7 +56,7 @@ try {
     Network network;
 
     // Set up the sim.
-    Sim sim(network, sprites);
+    Sim sim(network, spriteTex);
 
     // Set up the rendering system.
     Renderer renderer(sdlRenderer, sim, window);

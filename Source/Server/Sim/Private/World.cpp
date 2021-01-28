@@ -8,8 +8,7 @@ namespace AM
 namespace Server
 {
 World::World()
-: terrainMap(WORLD_WIDTH * WORLD_HEIGHT)
-, device()
+: device()
 , generator(device())
 , xDistribution(0, (SCREEN_WIDTH - 128))
 , yDistribution(0, (SCREEN_HEIGHT - 128))
