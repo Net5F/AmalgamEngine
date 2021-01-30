@@ -19,9 +19,9 @@ public:
     std::shared_ptr<SDL2pp::Texture> texturePtr{nullptr};
 
     /** UV position and size in texture. */
-    SDL2pp::Rect posInTexture{0, 0, 0, 0};
+    SDL2pp::Rect texExtent{0, 0, 0, 0};
 
-    /** Width and height of the sprite in world space. */
+    /** Width and height of the sprite in screen space. */
     int width{0};
     int height{0};
 };

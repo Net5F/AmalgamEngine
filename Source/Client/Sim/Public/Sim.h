@@ -5,6 +5,7 @@
 #include "World.h"
 #include "PlayerInputSystem.h"
 #include "NetworkUpdateSystem.h"
+#include "CameraSystem.h"
 #include "Timer.h"
 #include <SDL2pp/Texture.hh>
 #include <atomic>
@@ -81,6 +82,7 @@ private:
     NetworkUpdateSystem networkUpdateSystem;
     PlayerMovementSystem playerMovementSystem;
     NpcMovementSystem npcMovementSystem;
+    CameraSystem cameraSystem;
 
     /** Used to time when we should process an iteration. */
     Timer iterationTimer;

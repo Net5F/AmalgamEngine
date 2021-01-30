@@ -21,16 +21,21 @@ static constexpr unsigned int SCREEN_WIDTH = 1280;
 static constexpr unsigned int SCREEN_HEIGHT = 720;
 
 /** The max number of entities that we are allowing. */
-static constexpr unsigned int MAX_ENTITIES = 200;
+static constexpr unsigned int MAX_ENTITIES = 1010;
 
 /** The distance in world coordinates that we add to a player's AoI to let
     peers load before they're in view. */
 static constexpr unsigned int AOI_BUFFER_DISTANCE = 700;
 
-/** The width of the world tiles in cartesian coordinates. */
-static constexpr unsigned int TILE_WIDTH = 32;
-/** The height of the world tiles in cartesian coordinates. */
-static constexpr unsigned int TILE_HEIGHT = 32;
+/** The width of the world tiles in world coordinates. */
+static constexpr unsigned int TILE_WORLD_WIDTH = 32;
+/** The height of the world tiles in world coordinates. */
+static constexpr unsigned int TILE_WORLD_HEIGHT = 32;
+
+/** The width of the screen tiles in screen coordinates. */
+static constexpr unsigned int TILE_SCREEN_WIDTH = 256;
+/** The height of the screen tiles in screen coordinates. */
+static constexpr unsigned int TILE_SCREEN_HEIGHT = 128;
 
 /** The width of the world's terrain map in tiles. */
 static constexpr unsigned int WORLD_WIDTH = 10;

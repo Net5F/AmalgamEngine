@@ -10,6 +10,7 @@ namespace Client
 {
 class Sim;
 class World;
+class Camera;
 
 /**
  * Uses world information from the Sim to isometrically render the player's
@@ -42,11 +43,36 @@ public:
     double getTimeTillNextFrame();
 
 private:
+    /** Convenience struct for representing a point in screen space. */
+    struct ScreenPoint {
+        int x;
+        int y;
+    };
+
     /**
-     * Renders all entities with Sprite, PreviousPosition, and Position
-     * components, using the given alpha to lerp their position.
+     * First renders all tiles in view, then renders all entities in view.
      */
-    void render(double alpha);
+    void render();
+
+    /**
+     * Renders the tiles from the World's tile map.
+     * @param camera  The camera to render with.
+     */
+    void renderTiles(Camera& camera);
+
+    /**
+     * Renders all entities that have Sprite, Position and PreviousPosition
+     * components.
+     * @param camera  The camera to render with.
+     * @param alpha  The alpha to lerp between positions with.
+     */
+    void renderEntities(Camera& camera, double alpha);
+
+    /**
+     * Converts a point from world space to screen space.
+     * @return The screen space point that corresponds to worldPos.
+     */
+    ScreenPoint tileToScreen(int x, int y);
 
     SDL2pp::Renderer& sdlRenderer;
     Sim& sim;

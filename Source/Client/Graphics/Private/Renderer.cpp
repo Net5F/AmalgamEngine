@@ -34,11 +34,8 @@ void Renderer::tick()
     accumulatedTime += frameTimer.getDeltaSeconds(true);
 
     if (accumulatedTime >= RENDER_TICK_TIMESTEP_S) {
-        // How far we are between game ticks in decimal percent.
-        double alpha = sim.getIterationProgress();
-
         // Process the rendering for this frame.
-        render(alpha);
+        render();
 
         accumulatedTime -= RENDER_TICK_TIMESTEP_S;
         if (accumulatedTime >= RENDER_TICK_TIMESTEP_S) {
@@ -67,23 +64,63 @@ double Renderer::getTimeTillNextFrame()
     return (RENDER_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
 }
 
-void Renderer::render(double alpha)
+void Renderer::render()
 {
-    // Clear the screen to prepare for drawing.
-    sdlRenderer.Clear();
+    /* Set up the camera for this frame. */
+    // Get how far we are between game ticks in decimal percent.
+    double alpha = sim.getIterationProgress();
 
-    // Get the offset between world and screen space.
+    // Get the lerped camera position based on the alpha.
     auto [playerCamera, playerSprite, playerPosition, playerPreviousPos]
         = world.registry.get<Camera, Sprite, Position, PreviousPosition>(
             world.playerEntity);
-    Position playerLerp = MovementHelpers::interpolatePosition(
-        playerPreviousPos, playerPosition, alpha);
+    Position cameraLerp = MovementHelpers::interpolatePosition(
+        playerCamera.prevPosition, playerCamera.position, alpha);
 
-    int worldToScreenOffsetX
-        = playerLerp.x - (playerCamera.width / 2) + (playerSprite.width / 2);
-    int worldToScreenOffsetY
-        = playerLerp.y - (playerCamera.height / 2) + (playerSprite.height / 2);
+    // Set the camera at the lerped position.
+    Camera lerpedCamera = playerCamera;
+    lerpedCamera.position.x = cameraLerp.x;
+    lerpedCamera.position.y = cameraLerp.y;
 
+    /* Render. */
+    // Clear the screen to prepare for drawing.
+    sdlRenderer.Clear();
+
+    // Render the world tiles first.
+    renderTiles(lerpedCamera);
+
+    // Render all entities, lerping between their previous and next positions.
+    renderEntities(lerpedCamera, alpha);
+
+    sdlRenderer.Present();
+}
+
+void Renderer::renderTiles(Camera& camera)
+{
+    for (unsigned int y = 0; y < WORLD_HEIGHT; ++y) {
+        for (unsigned int x = 0; x < WORLD_WIDTH; ++x) {
+            // Get screen coords for this tile.
+            ScreenPoint screenPos = tileToScreen(x, y);
+
+            // Get the sprite's vertical offset (iso sprites may have extra
+            // vertical space to show depth, we just want the tile.)
+            Sprite& sprite{world.terrainMap[y * WORLD_WIDTH + x]};
+            int spriteOffsetY = sprite.height - TILE_SCREEN_HEIGHT;
+
+            // Get the coordinates to render at, adjusted based on the camera.
+            int adjustedX = static_cast<int>((screenPos.x - camera.position.x));
+            int adjustedY = static_cast<int>((screenPos.y - spriteOffsetY - camera.position.y));
+
+            // Draw the tile.
+            SDL2pp::Rect screenExtent = {adjustedX, adjustedY, sprite.width,
+                    sprite.height};
+            sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent, screenExtent);
+        }
+    }
+}
+
+void Renderer::renderEntities(Camera& camera, double alpha)
+{
     // Render all entities with a Sprite, PreviousPosition and Position.
     auto group
         = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
@@ -95,21 +132,27 @@ void Renderer::render(double alpha)
         Position lerp = MovementHelpers::interpolatePosition(previousPos,
                                                              position, alpha);
         int screenX
-            = static_cast<int>(std::floor(lerp.x)) - worldToScreenOffsetX;
+            = static_cast<int>(lerp.x) - camera.position.x;
         int screenY
-            = static_cast<int>(std::floor(lerp.y)) - worldToScreenOffsetY;
+            = static_cast<int>(lerp.y) - camera.position.y;
 
         // If the sprite is within the camera bounds, render it.
         if ((screenX + sprite.width) > 0 && (screenY + sprite.height) > 0) {
-            SDL2pp::Rect spriteRect
+            SDL2pp::Rect screenExtent
                 = {screenX, screenY, sprite.width, sprite.height};
 
-            sdlRenderer.Copy(*(sprite.texturePtr), sprite.posInTexture,
-                          spriteRect);
+            sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
+                          screenExtent);
         }
     }
+}
 
-    sdlRenderer.Present();
+Renderer::ScreenPoint Renderer::tileToScreen(int x, int y) {
+    // Convert tile index to isometric screen position.
+    int screenX = (x - y) * (TILE_SCREEN_WIDTH / 2);
+    int screenY = (x + y) * (TILE_SCREEN_HEIGHT / 2);
+
+    return {screenX, screenY};
 }
 
 } // namespace Client

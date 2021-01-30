@@ -26,6 +26,7 @@ Sim::Sim(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSpriteTex
 , networkUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, network)
 , npcMovementSystem(*this, world, network)
+, cameraSystem(*this, world)
 , accumulatedTime(0.0)
 , currentTick(0)
 , spriteTex(inSpriteTex)
@@ -91,8 +92,8 @@ void Sim::connect()
     // Set up the player's visual components.
     SDL2pp::Rect spritePosInTexture((256 * 3), 0, 256, 512);
     registry.emplace<Sprite>(newEntity, spriteTex, spritePosInTexture, 64, 64);
-    registry.emplace<Camera>(newEntity, Position{}, SCREEN_WIDTH,
-                             SCREEN_HEIGHT);
+    registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
+        PreviousPosition{}, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
@@ -118,8 +119,8 @@ void Sim::fakeConnection()
     // Set up the player's visual components.
     SDL2pp::Rect spritePosInTexture((256 * 3 + 32), 256 + 96, 128, 128);
     registry.emplace<Sprite>(newEntity, spriteTex, spritePosInTexture, 64, 64);
-    registry.emplace<Camera>(newEntity, Position{}, SCREEN_WIDTH,
-                             SCREEN_HEIGHT);
+    registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
+        PreviousPosition{}, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
@@ -167,6 +168,9 @@ void Sim::tick()
             // Process network movement after normal movement to sync with
             // server. (The server processes movement before sending updates.)
             npcMovementSystem.updateNpcs();
+
+            // Move all cameras to their new positions.
+            cameraSystem.moveCameras();
 
             currentTick++;
         }

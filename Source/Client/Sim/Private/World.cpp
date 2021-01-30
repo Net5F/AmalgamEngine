@@ -12,7 +12,8 @@ World::World(const std::shared_ptr<SDL2pp::Texture>& inSpriteTex)
     // Init the terrainMap.
     // TODO: Load this from some storage format.
     SDL2pp::Rect spritePosInTexture{(256 * 6), 0, 256, 512};
-    std::fill(terrainMap.begin(), terrainMap.end(), Sprite{inSpriteTex, spritePosInTexture, 32, 32});
+    std::fill(terrainMap.begin(), terrainMap.end(), Sprite{inSpriteTex,
+            spritePosInTexture, 256, 512});
 }
 
 } // namespace Client
