@@ -93,7 +93,7 @@ void Sim::connect()
     SDL2pp::Rect spritePosInTexture((256 * 3), 0, 256, 512);
     registry.emplace<Sprite>(newEntity, spriteTex, spritePosInTexture, 64, 64);
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
-        PreviousPosition{}, SCREEN_WIDTH, SCREEN_HEIGHT);
+        PreviousPosition{}, SDL2pp::Rect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
@@ -119,8 +119,8 @@ void Sim::fakeConnection()
     // Set up the player's visual components.
     SDL2pp::Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
     registry.emplace<Sprite>(newEntity, spriteTex, spritePosInTexture, 64, 64);
-    registry.emplace<Camera>(newEntity, Camera::Fixed, Position{},
-        PreviousPosition{}, SCREEN_WIDTH, SCREEN_HEIGHT);
+    registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{0.0f, 0.0f, 0},
+        PreviousPosition{}, SDL2pp::Rect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);

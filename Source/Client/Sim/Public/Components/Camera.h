@@ -2,6 +2,7 @@
 
 #include "Position.h"
 #include "PreviousPosition.h"
+#include "SDL2pp/Rect.hh"
 
 namespace AM
 {
@@ -22,16 +23,15 @@ public:
     /** The camera's movement behavior. */
     MovementBehavior behavior;
 
-    /** Top left of the camera's view, in world coordinates. */
+    /** Center of the camera's view, in world coordinates. */
     Position position{};
 
     /** The camera's previous position. Used for lerping in the renderer. */
     PreviousPosition prevPosition{};
 
-    /** The camera's width in screen coordinates. */
-    unsigned int width{0};
-    /** The camera's height in screen coordinates. */
-    unsigned int height{0};
+    /** The camera's extent in screen space, calculated during the last render
+        tick. */
+    SDL2pp::Rect extent{0, 0, 0, 0};
 
     /** The amount that this camera is zoomed in or out. 1.0 is no zoom. */
     float zoomFactor{1.0};

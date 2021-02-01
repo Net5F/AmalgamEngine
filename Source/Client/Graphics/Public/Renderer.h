@@ -70,16 +70,16 @@ private:
     SDL2pp::Point tileToScreen(int xIndex, int yIndex);
 
     /**
-     * Converts a sprite's world position to a point in screen space.
+     * Converts a point in the world to a point in screen space.
      * @return The screen space point that corresponds to the given point.
      */
-    SDL2pp::Point spriteToScreen(float x, float y);
+    SDL2pp::Point worldToScreen(float x, float y);
 
     /**
      * Returns true if the given sprite at the given screen position is within
      * the given camera's bounds, else false.
      */
-    bool isWithinCameraBounds(int x, int y, Sprite& sprite, Camera& camera);
+    bool isWithinCameraBounds(int x, int y, Sprite& sprite, SDL2pp::Rect& cameraBounds);
 
     SDL2pp::Renderer& sdlRenderer;
     Sim& sim;

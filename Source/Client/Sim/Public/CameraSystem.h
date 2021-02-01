@@ -31,9 +31,8 @@ private:
      * If the given entity has a sprite, offsets the position to center on it.
      * @param camera  The camera to move.
      * @param position  The entity's Position.
-     * @param entity  The entity. Used to check if it has a Sprite to account for.
      */
-    void centerCameraOnEntity(Camera& camera, Position& position, entt::entity entity);
+    void moveCameraToPosition(Camera& camera, Position& position);
 
     Sim& sim;
     World& world;

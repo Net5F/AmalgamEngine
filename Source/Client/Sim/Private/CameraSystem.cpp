@@ -34,7 +34,7 @@ void CameraSystem::moveCameras()
                 // Doesn't move on its own.
                 break;
             case Camera::CenterOnEntity:
-                centerCameraOnEntity(camera, position, entity);
+                moveCameraToPosition(camera, position);
                 break;
             default:
                 break;
@@ -42,20 +42,11 @@ void CameraSystem::moveCameras()
     }
 }
 
-void CameraSystem::centerCameraOnEntity(Camera& camera, Position& position, entt::entity entity)
+void CameraSystem::moveCameraToPosition(Camera& camera, Position& position)
 {
-    // If the entity has a sprite, include its size in the centering.
-    unsigned int spriteWidth = 0;
-    unsigned int spriteHeight = 0;
-    if (world.registry.has<Sprite>(entity)) {
-        Sprite& sprite = world.registry.get<Sprite>(entity);
-        spriteWidth = sprite.width;
-        spriteHeight = sprite.height;
-    }
-
-    // Center the camera, accounting for the sprite if applicable.
-    camera.position.x = position.x - ((camera.width - spriteWidth) / 2);
-    camera.position.y = position.y - ((camera.height - spriteHeight) / 2);
+    // Move the camera.
+    camera.position.x = position.x;
+    camera.position.y = position.y;
 }
 
 } // namespace Client
