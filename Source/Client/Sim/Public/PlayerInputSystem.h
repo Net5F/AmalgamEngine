@@ -34,6 +34,11 @@ public:
     void addCurrentInputsToHistory();
 
 private:
+    /**
+     * Updates the player's camera's zoom level.
+     */
+    void processMouseWheel(SDL_MouseWheelEvent& wheelEvent);
+
     Sim& sim;
     World& world;
 };

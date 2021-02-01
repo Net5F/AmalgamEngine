@@ -202,25 +202,17 @@ void Sim::processUserInputEvents()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
-            exitRequested = true;
-        }
-        else if (event.type == SDL_WINDOWEVENT) {
-            //            switch(event.type) {
-            //                case SDL_WINDOWEVENT_SHOWN:
-            //                case SDL_WINDOWEVENT_EXPOSED:
-            //                case SDL_WINDOWEVENT_MOVED:
-            //                case SDL_WINDOWEVENT_MAXIMIZED:
-            //                case SDL_WINDOWEVENT_RESTORED:
-            //                case SDL_WINDOWEVENT_FOCUS_GAINED:
-            //                // Window was messed with, we've probably lost
-            //                sync with the server.
-            //                // TODO: Handle the far-out-of-sync client.
-            //            }
-        }
-        else {
-            // Assume it's a key or mouse event.
-            playerInputSystem.processMomentaryInput(event);
+        switch (event.type) {
+            case SDL_QUIT:
+                exitRequested = true;
+                break;
+            case SDL_WINDOWEVENT:
+                // TODO: Handle this.
+                break;
+            default:
+                // Default to assuming its a momentary input.
+                playerInputSystem.processMomentaryInput(event);
+                break;
         }
     }
 

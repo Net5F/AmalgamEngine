@@ -4,9 +4,9 @@
 #include "Network.h"
 #include "Input.h"
 #include "PlayerState.h"
+#include "Camera.h"
 #include "IsDirty.h"
 #include "Log.h"
-#include "Ignore.h"
 
 namespace AM
 {
@@ -20,8 +20,14 @@ PlayerInputSystem::PlayerInputSystem(Sim& inSim, World& inWorld)
 
 void PlayerInputSystem::processMomentaryInput(SDL_Event& event)
 {
-    // We currently don't have any momentary inputs that we care about.
-    ignore(event);
+    switch (event.type) {
+        case SDL_MOUSEWHEEL:
+            processMouseWheel(event.wheel);
+            break;
+        default:
+            // No default behavior.
+            break;
+    }
 }
 
 void PlayerInputSystem::processHeldInputs()
@@ -71,6 +77,27 @@ void PlayerInputSystem::addCurrentInputsToHistory()
 
     // Push the player's current inputs into the player's input history.
     playerInputHistory.push(playerInputs);
+}
+
+void PlayerInputSystem::processMouseWheel(SDL_MouseWheelEvent& wheelEvent)
+{
+    // Only process zoom if the player has a camera.
+    if (world.registry.has<Camera>(world.playerEntity)) {
+        /* Zoom the player's camera based on the mouse wheel movement. */
+        Camera& camera = world.registry.get<Camera>(world.playerEntity);
+
+        if (wheelEvent.y > 0) {
+            // Zoom in a set amount per tick regardless of how much they
+            // scrolled.
+            camera.zoomFactor += camera.zoomSensitivity;
+        }
+        else {
+            // Zoom out.
+            if (camera.zoomFactor > camera.zoomSensitivity) {
+                camera.zoomFactor -= camera.zoomSensitivity;
+            }
+        }
+    }
 }
 
 } // namespace Client
