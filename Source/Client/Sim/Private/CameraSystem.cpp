@@ -30,13 +30,19 @@ void CameraSystem::moveCameras()
 
         // Update the camera to its new position based on its behavior.
         switch (camera.behavior) {
+            case Camera::Fixed:
+                // Doesn't move on its own.
+                break;
             case Camera::CenterOnEntity:
-                centerCameraOnPosition(camera, position, entity);
+                centerCameraOnEntity(camera, position, entity);
+                break;
+            default:
+                break;
         }
     }
 }
 
-void CameraSystem::centerCameraOnPosition(Camera& camera, Position& position, entt::entity entity)
+void CameraSystem::centerCameraOnEntity(Camera& camera, Position& position, entt::entity entity)
 {
     // If the entity has a sprite, include its size in the centering.
     unsigned int spriteWidth = 0;
@@ -47,7 +53,7 @@ void CameraSystem::centerCameraOnPosition(Camera& camera, Position& position, en
         spriteHeight = sprite.height;
     }
 
-    // Center the camera.
+    // Center the camera, accounting for the sprite if applicable.
     camera.position.x = position.x - ((camera.width - spriteWidth) / 2);
     camera.position.y = position.y - ((camera.height - spriteHeight) / 2);
 }

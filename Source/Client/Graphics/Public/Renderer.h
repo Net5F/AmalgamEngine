@@ -6,6 +6,7 @@
 
 namespace AM
 {
+class Sprite;
 namespace Client
 {
 class Sim;
@@ -43,12 +44,6 @@ public:
     double getTimeTillNextFrame();
 
 private:
-    /** Convenience struct for representing a point in screen space. */
-    struct ScreenPoint {
-        int x;
-        int y;
-    };
-
     /**
      * First renders all tiles in view, then renders all entities in view.
      */
@@ -69,10 +64,22 @@ private:
     void renderEntities(Camera& camera, double alpha);
 
     /**
-     * Converts a point from world space to screen space.
-     * @return The screen space point that corresponds to worldPos.
+     * Converts a tile's x,y indices into screen space coordinates.
+     * @return The screen space point that corresponds to the given indices.
      */
-    ScreenPoint tileToScreen(int x, int y);
+    SDL2pp::Point tileToScreen(int xIndex, int yIndex);
+
+    /**
+     * Converts a sprite's world position to a point in screen space.
+     * @return The screen space point that corresponds to the given point.
+     */
+    SDL2pp::Point spriteToScreen(float x, float y);
+
+    /**
+     * Returns true if the given sprite at the given screen position is within
+     * the given camera's bounds, else false.
+     */
+    bool isWithinCameraBounds(int x, int y, Sprite& sprite, Camera& camera);
 
     SDL2pp::Renderer& sdlRenderer;
     Sim& sim;

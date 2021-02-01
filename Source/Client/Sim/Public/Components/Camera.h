@@ -13,6 +13,9 @@ namespace Client
 struct Camera {
 public:
     enum MovementBehavior {
+        // Camera will not move.
+        Fixed,
+        // Camera will center on its associated entity.
         CenterOnEntity
     };
 
@@ -29,6 +32,9 @@ public:
     unsigned int width{0};
     /** The camera's height in screen coordinates. */
     unsigned int height{0};
+
+    /** The amount that this camera is zoomed in or out. 1.0 is no zoom. */
+    float zoomFactor{1.0};
 };
 
 } // namespace Client

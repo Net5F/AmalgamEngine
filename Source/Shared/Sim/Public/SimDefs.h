@@ -32,10 +32,12 @@ static constexpr unsigned int TILE_WORLD_WIDTH = 32;
 /** The height of the world tiles in world coordinates. */
 static constexpr unsigned int TILE_WORLD_HEIGHT = 32;
 
-/** The width of the screen tiles in screen coordinates. */
+/** The width of a tile in screen coordinates. */
 static constexpr unsigned int TILE_SCREEN_WIDTH = 256;
-/** The height of the screen tiles in screen coordinates. */
+/** The height of the top face of a tile in screen coordinates. */
 static constexpr unsigned int TILE_SCREEN_HEIGHT = 128;
+/** The height of the edge of a tile in screen coordinates. */
+static constexpr unsigned int TILE_SCREEN_EDGE_HEIGHT = 10;
 
 /** The width of the world's terrain map in tiles. */
 static constexpr unsigned int WORLD_WIDTH = 10;

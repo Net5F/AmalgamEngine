@@ -111,15 +111,15 @@ void Sim::fakeConnection()
     // Set up the player's sim components.
     registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(
                                           registry.version(newEntity))));
-    registry.emplace<Position>(newEntity, 64.0f, 64.0f, 0.0f);
-    registry.emplace<PreviousPosition>(newEntity, 64.0f, 64.0f, 0.0f);
-    registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
+    registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f);
+    registry.emplace<PreviousPosition>(newEntity, 0.0f, 0.0f, 0.0f);
+    registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    SDL2pp::Rect spritePosInTexture((256 * 3 + 32), 256 + 96, 128, 128);
+    SDL2pp::Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
     registry.emplace<Sprite>(newEntity, spriteTex, spritePosInTexture, 64, 64);
-    registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
+    registry.emplace<Camera>(newEntity, Camera::Fixed, Position{},
         PreviousPosition{}, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     // Set up the player's PlayerState component.
