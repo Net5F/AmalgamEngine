@@ -67,13 +67,13 @@ private:
      * Converts a tile's x,y indices into screen space coordinates.
      * @return The screen space point that corresponds to the given indices.
      */
-    SDL2pp::Point tileToScreen(int xIndex, int yIndex);
+    SDL2pp::Point tileToScreen(int xIndex, int yIndex, float zoom);
 
     /**
      * Converts a point in the world to a point in screen space.
      * @return The screen space point that corresponds to the given point.
      */
-    SDL2pp::Point worldToScreen(float x, float y);
+    SDL2pp::Point worldToScreen(float x, float y, float zoom);
 
     /**
      * Returns true if the given sprite at the given screen position is within

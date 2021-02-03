@@ -68,7 +68,6 @@ void PlayerMovementSystem::processMovements()
     // Use the current input state to update movement for this tick.
     MovementHelpers::moveEntity(currentPosition, currentMovement,
                                 currentInput.inputStates, SIM_TICK_TIMESTEP_S);
-    LOG_INFO("Player: (%.4f, %.4f)", currentPosition.x, currentPosition.y);
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(
