@@ -5,6 +5,8 @@ target_sources(Client
 	PUBLIC
 		Public/Renderer.h
 		Public/IsoHelpers.h
+		Public/ScreenPoint.h
+		Public/ScreenRect.h
 )
 
 target_include_directories(Client

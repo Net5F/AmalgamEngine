@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "PlayerState.h"
 #include "Name.h"
+#include "ScreenRect.h"
 #include "Log.h"
 #include "entt/entity/registry.hpp"
 #include <memory>
@@ -93,7 +94,7 @@ void Sim::connect()
     SDL2pp::Rect spritePosInTexture((256 * 3), 0, 256, 512);
     registry.emplace<Sprite>(newEntity, spriteTex, spritePosInTexture, 64, 64);
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
-        PreviousPosition{}, SDL2pp::Rect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
+        PreviousPosition{}, ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
@@ -120,7 +121,7 @@ void Sim::fakeConnection()
     SDL2pp::Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
     registry.emplace<Sprite>(newEntity, spriteTex, spritePosInTexture, 64, 64);
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{0.0f, 0.0f, 0},
-        PreviousPosition{}, SDL2pp::Rect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
+        PreviousPosition{}, ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);

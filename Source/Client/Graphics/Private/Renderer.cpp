@@ -6,6 +6,8 @@
 #include "Sprite.h"
 #include "Camera.h"
 #include "MovementHelpers.h"
+#include "ScreenRect.h"
+#include "SDL2pp/Rect.hh"
 #include "Log.h"
 #include "Ignore.h"
 
@@ -83,11 +85,11 @@ void Renderer::render()
     lerpedCamera.position.y = cameraLerp.y;
 
     // Get iso screen coords for the center point of camera.
-    SDL2pp::Point lerpedCameraCenter = worldToScreen(lerpedCamera.position.x, lerpedCamera.position.y, lerpedCamera.zoomFactor);
+    ScreenPoint lerpedCameraCenter = worldToScreen(lerpedCamera.position.x, lerpedCamera.position.y, lerpedCamera.zoomFactor);
 
     // Calc where the top left of the lerpedCamera is in screen space.
-    lerpedCamera.extent.x = lerpedCameraCenter.x - (lerpedCamera.extent.w / 2);
-    lerpedCamera.extent.y = lerpedCameraCenter.y - (lerpedCamera.extent.h / 2);
+    lerpedCamera.extent.x = lerpedCameraCenter.x - (lerpedCamera.extent.width / 2);
+    lerpedCamera.extent.y = lerpedCameraCenter.y - (lerpedCamera.extent.height / 2);
 
     /* Render. */
     // Clear the screen to prepare for drawing.
@@ -107,26 +109,26 @@ void Renderer::renderTiles(Camera& camera)
     for (unsigned int y = 0; y < WORLD_HEIGHT; ++y) {
         for (unsigned int x = 0; x < WORLD_WIDTH; ++x) {
             // Get iso screen coords for this tile.
-            SDL2pp::Point tileScreenPos = tileToScreen(x, y, camera.zoomFactor);
+            ScreenPoint tileScreenPos = tileToScreen(x, y, camera.zoomFactor);
 
             // Get the sprite's vertical offset (iso sprites may have extra
             // vertical space to show depth, we just want the tile.)
             Sprite& sprite{world.terrainMap[y * WORLD_WIDTH + x]};
-            int spriteOffsetY = (sprite.height - TILE_SCREEN_HEIGHT
+            float spriteOffsetY = (sprite.height - TILE_SCREEN_HEIGHT
                                 - TILE_SCREEN_EDGE_HEIGHT) * camera.zoomFactor;
 
             // Apply the camera adjustment.
-            int adjustedX = static_cast<int>((tileScreenPos.x) - camera.extent.x);
-            int adjustedY = static_cast<int>((tileScreenPos.y) - spriteOffsetY - camera.extent.y);
+            int adjustedX = static_cast<int>(tileScreenPos.x - camera.extent.x);
+            int adjustedY = static_cast<int>(tileScreenPos.y - spriteOffsetY - camera.extent.y);
 
-            // Prep the sprite data, accounting for camera zoom.
+            // Apply the camera's zoom.
             int zoomedWidth = static_cast<int>(sprite.width * camera.zoomFactor);
             int zoomedHeight = static_cast<int>(sprite.height * camera.zoomFactor);
-            SDL2pp::Rect screenExtent =
-                {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 
             // Draw the tile.
-            sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent, screenExtent);
+            SDL2pp::Rect spriteScreenExtent =
+                {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
+            sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent, spriteScreenExtent);
         }
     }
 }
@@ -143,32 +145,30 @@ void Renderer::renderEntities(Camera& camera, double alpha)
         // Get the lerp'd world position and translate it to iso screen space.
         Position lerp = MovementHelpers::interpolatePosition(previousPos,
                                                              position, alpha);
-        SDL2pp::Point entityScreenPos = worldToScreen(lerp.x, lerp.y, camera.zoomFactor);
+        ScreenPoint entityScreenPos = worldToScreen(lerp.x, lerp.y, camera.zoomFactor);
 
         // Apply the camera adjustment to the entity.
-        int adjustedX
-            = static_cast<int>((entityScreenPos.x) - camera.extent.x);
-        int adjustedY
-            = static_cast<int>((entityScreenPos.y) - camera.extent.y);
+        float adjustedX = entityScreenPos.x - camera.extent.x;
+        float adjustedY = entityScreenPos.y - camera.extent.y;
+
+        // Prep the sprite data, accounting for camera zoom.
+        float zoomedWidth = sprite.width * camera.zoomFactor;
+        float zoomedHeight = sprite.height * camera.zoomFactor;
 
         // If the entity's sprite is within the camera bounds, render it.
-        if (isWithinCameraBounds(adjustedX, adjustedY, sprite, camera.extent)) {
-            // Prep the sprite data, accounting for camera zoom.
-            int zoomedWidth = static_cast<int>(sprite.width * camera.zoomFactor);
-            int zoomedHeight = static_cast<int>(sprite.height * camera.zoomFactor);
-            SDL2pp::Rect screenExtent
-                = {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
-
-            sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
-                          screenExtent);
+        if (isWithinCameraBounds(adjustedX, adjustedY, zoomedWidth, zoomedHeight, camera)) {
+            SDL2pp::Rect spriteScreenExtent {static_cast<int>(adjustedX),
+                    static_cast<int>(adjustedY), static_cast<int>(zoomedWidth),
+                    static_cast<int>(zoomedHeight)};
+            sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent, spriteScreenExtent);
         }
     }
 }
 
-SDL2pp::Point Renderer::tileToScreen(int xIndex, int yIndex, float zoom) {
+ScreenPoint Renderer::tileToScreen(int xIndex, int yIndex, float zoom) {
     // Convert tile index to isometric screen position.
-    int screenX = (xIndex - yIndex) * (TILE_SCREEN_WIDTH / 2);
-    int screenY = (xIndex + yIndex) * (TILE_SCREEN_HEIGHT / 2);
+    float screenX = (xIndex - yIndex) * (TILE_SCREEN_WIDTH / 2.f);
+    float screenY = (xIndex + yIndex) * (TILE_SCREEN_HEIGHT / 2.f);
 
     // Apply the camera zoom.
     screenX *= zoom;
@@ -177,14 +177,14 @@ SDL2pp::Point Renderer::tileToScreen(int xIndex, int yIndex, float zoom) {
     return {screenX, screenY};
 }
 
-SDL2pp::Point Renderer::worldToScreen(float x, float y, float zoom) {
+ScreenPoint Renderer::worldToScreen(float x, float y, float zoom) {
     // Calc the scaling factor between world tile and screen tile sizes.
-    static const float TILE_WIDTH_SCALE = TILE_SCREEN_WIDTH / TILE_WORLD_WIDTH;
-    static const float TILE_HEIGHT_SCALE = TILE_SCREEN_HEIGHT / TILE_WORLD_HEIGHT;
+    static const float TILE_WIDTH_SCALE = static_cast<float>(TILE_SCREEN_WIDTH) / TILE_WORLD_WIDTH;
+    static const float TILE_HEIGHT_SCALE = static_cast<float>(TILE_SCREEN_HEIGHT) / TILE_WORLD_HEIGHT;
 
     // Convert cartesian world point to isometric screen point.
-    int screenX = static_cast<int>((x - y) * TILE_WIDTH_SCALE / 2);
-    int screenY = static_cast<int>((x + y)  * TILE_HEIGHT_SCALE / 2);
+    float screenX = (x - y) * (TILE_WIDTH_SCALE / 2.f);
+    float screenY = (x + y)  * (TILE_HEIGHT_SCALE / 2.f);
 
     // Add a half tile X-axis offset, since (0, 0) starts at the midpoint in a
     // tile sprite, but doesn't in a non-tile sprite.
@@ -197,15 +197,15 @@ SDL2pp::Point Renderer::worldToScreen(float x, float y, float zoom) {
     return {screenX, screenY};
 }
 
-bool Renderer::isWithinCameraBounds(int x, int y, Sprite& sprite, SDL2pp::Rect& cameraBounds)
+bool Renderer::isWithinCameraBounds(float x, float y, float width, float height, Camera& camera)
 {
     // If the sprite is within view of the camera, return true.
-    if ((x + sprite.width > cameraBounds.x) && (x < static_cast<int>(cameraBounds.w))
-        && (y + sprite.height > cameraBounds.y) && (y < static_cast<int>(cameraBounds.h))) {
-        return true;
+    if ((x + width) < 0 || (camera.extent.width < x) || ((y + height) < 0)
+        || (camera.extent.height < y)) {
+        return false;
     }
     else {
-        return false;
+        return true;
     }
 }
 
