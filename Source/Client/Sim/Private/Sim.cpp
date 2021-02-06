@@ -210,6 +210,9 @@ void Sim::processUserInputEvents()
             case SDL_WINDOWEVENT:
                 // TODO: Handle this.
                 break;
+            case SDL_MOUSEMOTION:
+                playerInputSystem.processMouseState(event.motion);
+                break;
             default:
                 // Default to assuming its a momentary input.
                 playerInputSystem.processMomentaryInput(event);

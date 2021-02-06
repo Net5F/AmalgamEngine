@@ -23,6 +23,11 @@ public:
     void processMomentaryInput(SDL_Event& event);
 
     /**
+     * Processes the mouse's current position and click states.
+     */
+    void processMouseState(SDL_MouseMotionEvent& event);
+
+    /**
      * Processes held inputs (movement, etc).
      * @pre SDL_PollEvent or SDL_PumpEvents must have been recently called.
      */
@@ -35,7 +40,7 @@ public:
 
 private:
     /**
-     * Updates the player's camera's zoom level.
+     * Processes any mouse wheel movement since the last tick.
      */
     void processMouseWheel(SDL_MouseWheelEvent& wheelEvent);
 

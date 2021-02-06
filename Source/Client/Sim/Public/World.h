@@ -2,6 +2,7 @@
 
 #include "SimDefs.h"
 #include "Sprite.h"
+#include "ScreenPoint.h"
 
 #include "entt/entity/registry.hpp"
 
@@ -32,6 +33,9 @@ public:
 
     /** The map of tiles that makes up our world's terrain. */
     std::vector<Sprite> terrainMap;
+
+    /** The mouse's current position in screen space. */
+    ScreenPoint mouseScreenPoint;
 };
 
 } // namespace Client

@@ -10,6 +10,7 @@
 #include "SDL2pp/Rect.hh"
 #include "Log.h"
 #include "Ignore.h"
+#include <cmath>
 
 namespace AM
 {
@@ -118,12 +119,12 @@ void Renderer::renderTiles(Camera& camera)
                                 - TILE_SCREEN_EDGE_HEIGHT) * camera.zoomFactor;
 
             // Apply the camera adjustment.
-            int adjustedX = static_cast<int>(tileScreenPos.x - camera.extent.x);
-            int adjustedY = static_cast<int>(tileScreenPos.y - spriteOffsetY - camera.extent.y);
+            int adjustedX = static_cast<int>(round(tileScreenPos.x - camera.extent.x));
+            int adjustedY = static_cast<int>(round(tileScreenPos.y - spriteOffsetY - camera.extent.y));
 
             // Apply the camera's zoom.
-            int zoomedWidth = static_cast<int>(sprite.width * camera.zoomFactor);
-            int zoomedHeight = static_cast<int>(sprite.height * camera.zoomFactor);
+            int zoomedWidth = static_cast<int>(round(sprite.width * camera.zoomFactor));
+            int zoomedHeight = static_cast<int>(round(sprite.height * camera.zoomFactor));
 
             // Draw the tile.
             SDL2pp::Rect spriteScreenExtent =
@@ -157,9 +158,9 @@ void Renderer::renderEntities(Camera& camera, double alpha)
 
         // If the entity's sprite is within the camera bounds, render it.
         if (isWithinCameraBounds(adjustedX, adjustedY, zoomedWidth, zoomedHeight, camera)) {
-            SDL2pp::Rect spriteScreenExtent {static_cast<int>(adjustedX),
-                    static_cast<int>(adjustedY), static_cast<int>(zoomedWidth),
-                    static_cast<int>(zoomedHeight)};
+            SDL2pp::Rect spriteScreenExtent {static_cast<int>(round(adjustedX)),
+                    static_cast<int>(round(adjustedY)), static_cast<int>(round(zoomedWidth)),
+                    static_cast<int>(round(zoomedHeight))};
             sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent, spriteScreenExtent);
         }
     }

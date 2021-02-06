@@ -30,6 +30,13 @@ void PlayerInputSystem::processMomentaryInput(SDL_Event& event)
     }
 }
 
+void PlayerInputSystem::processMouseState(SDL_MouseMotionEvent& event)
+{
+    world.mouseScreenPoint.x = event.x;
+    world.mouseScreenPoint.y = event.y;
+    LOG_INFO("Mouse at: (%d, %d)", event.x, event.y);
+}
+
 void PlayerInputSystem::processHeldInputs()
 {
     const Uint8* keyStates = SDL_GetKeyboardState(nullptr);
