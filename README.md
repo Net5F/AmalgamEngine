@@ -4,7 +4,8 @@
 ## Status
 (Once things are more ready for outside developers, I'll link the trello.)
 ### Current
-- [ ] Implementing, load testing, optimizing the netcode.
+- [x] Implementing, load testing, optimizing the netcode.
+- [ ] Implenting tile maps, iso rendering, and figuring out architecture between the sim/rendering/UI.
 
 ### Future
 - [ ] Implementing the rest of the systems alongside a reference project.
