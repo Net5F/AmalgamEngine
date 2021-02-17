@@ -5,7 +5,7 @@ target_sources(Client
 		Private/NetworkUpdateSystem.cpp
 		Private/PlayerMovementSystem.cpp
 		Private/NpcMovementSystem.cpp
-		Private/RenderSystem.cpp
+		Private/CameraSystem.cpp
 		Private/Sim.cpp
 	PUBLIC
 		Public/World.h
@@ -13,7 +13,7 @@ target_sources(Client
 		Public/NetworkUpdateSystem.h
 		Public/PlayerMovementSystem.h
 		Public/NpcMovementSystem.h
-		Public/RenderSystem.h
+		Public/CameraSystem.h
 		Public/Sim.h
 		Public/Components/Camera.h
 		Public/Components/PlayerState.h

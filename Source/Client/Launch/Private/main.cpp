@@ -7,7 +7,7 @@
 #include "SimDefs.h"
 #include "World.h"
 #include "Sim.h"
-#include "RenderSystem.h"
+#include "Renderer.h"
 #include "Network.h"
 #include "Timer.h"
 #include "Log.h"
@@ -36,10 +36,12 @@ try {
     SDL2pp::Window window("Amalgam", SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
                           SDL_WINDOW_SHOWN);
-    SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
-    std::shared_ptr<SDL2pp::Texture> sprites
-        = std::make_shared<SDL2pp::Texture>(renderer,
-                                            "Resources/u4_tiles_pc_ega.png");
+    SDL2pp::Renderer sdlRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+    // TODO: Replace with a texture loader.
+    std::shared_ptr<SDL2pp::Texture> spriteTex
+        = std::make_shared<SDL2pp::Texture>(sdlRenderer,
+                                            "Resources/iso_test_sprites.png");
 
     // Uncomment to enable fullscreen.
     //    window.SetFullscreen(SDL_WINDOW_FULLSCREEN);
@@ -54,10 +56,10 @@ try {
     Network network;
 
     // Set up the sim.
-    Sim sim(network, sprites);
+    Sim sim(network, spriteTex);
 
     // Set up the rendering system.
-    RenderSystem renderSystem(renderer, sim, window);
+    Renderer renderer(sdlRenderer, sim, window);
 
     // Connect to the server (waits for connection response).
     sim.connect();
@@ -69,7 +71,7 @@ try {
     // Prime the timers so they don't start at 0.
     sim.initTimer();
     network.initTimer();
-    renderSystem.initTimer();
+    renderer.initTimer();
     while (!(*exitRequested)) {
         // Let the sim process an iteration if it needs to.
         sim.tick();
@@ -78,12 +80,12 @@ try {
         network.tick();
 
         // Let the render system render if it needs to.
-        renderSystem.tick();
+        renderer.tick();
 
         // See if we have enough time left to sleep.
         double simTimeLeft = sim.getTimeTillNextIteration();
         double networkTimeLeft = network.getTimeTillNextHeartbeat();
-        double renderTimeLeft = renderSystem.getTimeTillNextFrame();
+        double renderTimeLeft = renderer.getTimeTillNextFrame();
         if ((simTimeLeft > DELAY_MINIMUM_TIME_S)
             && (networkTimeLeft > DELAY_MINIMUM_TIME_S)
             && (renderTimeLeft > DELAY_MINIMUM_TIME_S)) {

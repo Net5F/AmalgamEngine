@@ -33,7 +33,7 @@ void MovementHelpers::updateVelocity(Movement& movement,
     // TODO: Ignoring while velocity is constant for testing.
     ignore(deltaSeconds);
 
-    static constexpr double VELOCITY = 300.145;
+    static constexpr double VELOCITY = 20;
     // Handle up/down (favors up).
     if (inputStates[Input::Up] == Input::Pressed) {
         movement.velY = -VELOCITY;

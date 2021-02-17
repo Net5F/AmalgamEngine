@@ -1,8 +1,8 @@
 #pragma once
 
 #include "SimDefs.h"
-#include "Position.h"
 #include "NetworkDefs.h"
+#include "Position.h"
 
 #include "entt/entity/registry.hpp"
 
@@ -14,7 +14,10 @@ namespace AM
 namespace Server
 {
 /**
- * Holds world state and manages the persistence of that state.
+ * Contains all of the state of our simulation, such as tiles and entities.
+ *
+ * Coordinates in our world state all refer to Cartesian space, as opposed to
+ * whatever space the renderer might be using.
  *
  * Also provides helpers for common uses of world state.
  */

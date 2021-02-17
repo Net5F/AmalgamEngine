@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "PlayerState.h"
 #include "Name.h"
+#include "ScreenRect.h"
 #include "Log.h"
 #include "entt/entity/registry.hpp"
 #include <memory>
@@ -19,16 +20,17 @@ namespace AM
 {
 namespace Client
 {
-Sim::Sim(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites)
-: world()
+Sim::Sim(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSpriteTex)
+: world(inSpriteTex)
 , network(inNetwork)
 , playerInputSystem(*this, world)
 , networkUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, network)
 , npcMovementSystem(*this, world, network)
+, cameraSystem(*this, world)
 , accumulatedTime(0.0)
 , currentTick(0)
-, sprites(inSprites)
+, spriteTex(inSpriteTex)
 , exitRequested(false)
 {
     Log::registerCurrentTickPtr(&currentTick);
@@ -89,10 +91,10 @@ void Sim::connect()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    SDL2pp::Rect textureRect(0, 32, 16, 16);
-    registry.emplace<Sprite>(newEntity, sprites, textureRect, 64, 64);
-    registry.emplace<Camera>(newEntity, Position{}, SCREEN_WIDTH,
-                             SCREEN_HEIGHT);
+    SDL2pp::Rect spritePosInTexture((256 * 3), 0, 256, 512);
+    registry.emplace<Sprite>(newEntity, spriteTex, spritePosInTexture, 64, 64);
+    registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
+        PreviousPosition{}, ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
@@ -110,16 +112,16 @@ void Sim::fakeConnection()
     // Set up the player's sim components.
     registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(
                                           registry.version(newEntity))));
-    registry.emplace<Position>(newEntity, 64.0f, 64.0f, 0.0f);
-    registry.emplace<PreviousPosition>(newEntity, 64.0f, 64.0f, 0.0f);
-    registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
+    registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f);
+    registry.emplace<PreviousPosition>(newEntity, 0.0f, 0.0f, 0.0f);
+    registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    SDL2pp::Rect textureRect(0, 32, 16, 16);
-    registry.emplace<Sprite>(newEntity, sprites, textureRect, 64, 64);
-    registry.emplace<Camera>(newEntity, Position{}, SCREEN_WIDTH,
-                             SCREEN_HEIGHT);
+    SDL2pp::Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
+    registry.emplace<Sprite>(newEntity, spriteTex, spritePosInTexture, 64, 64);
+    registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{0.0f, 0.0f, 0},
+        PreviousPosition{}, ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
@@ -168,6 +170,9 @@ void Sim::tick()
             // server. (The server processes movement before sending updates.)
             npcMovementSystem.updateNpcs();
 
+            // Move all cameras to their new positions.
+            cameraSystem.moveCameras();
+
             currentTick++;
         }
 
@@ -198,25 +203,20 @@ void Sim::processUserInputEvents()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
-            exitRequested = true;
-        }
-        else if (event.type == SDL_WINDOWEVENT) {
-            //            switch(event.type) {
-            //                case SDL_WINDOWEVENT_SHOWN:
-            //                case SDL_WINDOWEVENT_EXPOSED:
-            //                case SDL_WINDOWEVENT_MOVED:
-            //                case SDL_WINDOWEVENT_MAXIMIZED:
-            //                case SDL_WINDOWEVENT_RESTORED:
-            //                case SDL_WINDOWEVENT_FOCUS_GAINED:
-            //                // Window was messed with, we've probably lost
-            //                sync with the server.
-            //                // TODO: Handle the far-out-of-sync client.
-            //            }
-        }
-        else {
-            // Assume it's a key or mouse event.
-            playerInputSystem.processMomentaryInput(event);
+        switch (event.type) {
+            case SDL_QUIT:
+                exitRequested = true;
+                break;
+            case SDL_WINDOWEVENT:
+                // TODO: Handle this.
+                break;
+            case SDL_MOUSEMOTION:
+                playerInputSystem.processMouseState(event.motion);
+                break;
+            default:
+                // Default to assuming its a momentary input.
+                playerInputSystem.processMomentaryInput(event);
+                break;
         }
     }
 

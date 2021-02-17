@@ -5,6 +5,7 @@
 #include "World.h"
 #include "PlayerInputSystem.h"
 #include "NetworkUpdateSystem.h"
+#include "CameraSystem.h"
 #include "Timer.h"
 #include <SDL2pp/Texture.hh>
 #include <atomic>
@@ -21,7 +22,7 @@ class Network;
 class Sim
 {
 public:
-    Sim(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSprites);
+    Sim(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSpriteTex);
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,
@@ -81,6 +82,7 @@ private:
     NetworkUpdateSystem networkUpdateSystem;
     PlayerMovementSystem playerMovementSystem;
     NpcMovementSystem npcMovementSystem;
+    CameraSystem cameraSystem;
 
     /** Used to time when we should process an iteration. */
     Timer iterationTimer;
@@ -95,7 +97,7 @@ private:
     std::atomic<Uint32> currentTick;
 
     // Temporary until a resource manager is created.
-    const std::shared_ptr<SDL2pp::Texture>& sprites;
+    const std::shared_ptr<SDL2pp::Texture>& spriteTex;
 
     /**
      * Turn false to signal that the main loop should end.
