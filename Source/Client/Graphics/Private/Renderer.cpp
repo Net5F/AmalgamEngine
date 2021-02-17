@@ -92,6 +92,11 @@ void Renderer::render()
     lerpedCamera.extent.x = lerpedCameraCenter.x - (lerpedCamera.extent.width / 2);
     lerpedCamera.extent.y = lerpedCameraCenter.y - (lerpedCamera.extent.height / 2);
 
+    // Save the last calculated screen position of the camera for use in
+    // screen -> world calcs.
+    playerCamera.extent.x = lerpedCamera.extent.x;
+    playerCamera.extent.y = lerpedCamera.extent.y;
+
     /* Render. */
     // Clear the screen to prepare for drawing.
     sdlRenderer.Clear();
@@ -179,17 +184,17 @@ ScreenPoint Renderer::tileToScreen(int xIndex, int yIndex, float zoom) {
 }
 
 ScreenPoint Renderer::worldToScreen(float x, float y, float zoom) {
-    // Calc the scaling factor between world tile and screen tile sizes.
+    // Calc the scaling factor going from world tiles to screen tiles.
     static const float TILE_WIDTH_SCALE = static_cast<float>(TILE_SCREEN_WIDTH) / TILE_WORLD_WIDTH;
     static const float TILE_HEIGHT_SCALE = static_cast<float>(TILE_SCREEN_HEIGHT) / TILE_WORLD_HEIGHT;
 
     // Convert cartesian world point to isometric screen point.
     float screenX = (x - y) * (TILE_WIDTH_SCALE / 2.f);
-    float screenY = (x + y)  * (TILE_HEIGHT_SCALE / 2.f);
+    float screenY = (x + y) * (TILE_HEIGHT_SCALE / 2.f);
 
     // Add a half tile X-axis offset, since (0, 0) starts at the midpoint in a
     // tile sprite, but doesn't in a non-tile sprite.
-    screenX += (TILE_SCREEN_WIDTH / 2);
+    screenX += (TILE_SCREEN_WIDTH / 2.f);
 
     // Apply the camera zoom.
     screenX *= zoom;
