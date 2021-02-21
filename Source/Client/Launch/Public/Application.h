@@ -46,8 +46,6 @@ private:
 
     Renderer renderer;
     PeriodicCaller rendererCaller;
-
-    // Standard members
 };
 
 } // End namespace Client

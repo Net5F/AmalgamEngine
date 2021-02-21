@@ -64,7 +64,7 @@ void Application::start()
         // Send a heartbeat if necessary.
         networkCaller.update();
 
-        // Let the render system render if it needs to.
+        // Let the renderer render if it needs to.
         rendererCaller.update();
 
         // See if we have enough time left to sleep.
