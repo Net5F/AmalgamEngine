@@ -32,7 +32,6 @@ Application::Application()
 
 Application::~Application()
 {
-    exitRequested = true;
     inputThreadObj.join();
 }
 
@@ -71,10 +70,15 @@ void Application::start()
 
 void Application::receiveCliInput()
 {
+    // Block while waiting for user input.
     while (!exitRequested) {
         std::string userInput = "";
         std::getline(std::cin, userInput);
         if (userInput == "exit") {
+            //  Note: For now, we only support this method of exiting.
+            //        SDL2, by default, sends an SDL_QUIT event on SIGINT
+            //        (CTRL+C), but we would need to have a non-blocking
+            //        getline for this thread to shut down.
             exitRequested = true;
         }
     }
