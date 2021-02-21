@@ -35,8 +35,6 @@ ClientHandler::~ClientHandler()
     }
     sendCondVar.notify_one();
     sendThreadObj.join();
-
-    SDLNet_Quit();
 }
 
 void ClientHandler::beginSendClientUpdates()

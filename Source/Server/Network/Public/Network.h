@@ -119,12 +119,6 @@ private:
      */
     Sint64 handleHeartbeat(BinaryBufferPtr& messageBuffer);
 
-    /** Used to time when we should process the network tick. */
-    Timer heartbeatTimer;
-
-    /** The aggregated time since we last processed a tick. */
-    double accumulatedTime;
-
     /** Maps IDs to their connections. Allows the game to say "send this message
         to this entity" instead of needing to track the connection objects. */
     ClientMap clientMap;

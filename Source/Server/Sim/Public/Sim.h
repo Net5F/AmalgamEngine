@@ -5,7 +5,6 @@
 #include "NetworkInputSystem.h"
 #include "MovementSystem.h"
 #include "NetworkUpdateSystem.h"
-#include "Timer.h"
 #include <atomic>
 
 namespace AM
@@ -20,6 +19,9 @@ class Network;
 class Sim
 {
 public:
+    /** An unreasonable amount of time for the sim tick to be late by. */
+    static constexpr double SIM_DELAYED_TIME_S = .001;
+
     Sim(Network& inNetwork);
 
     /**
@@ -28,20 +30,9 @@ public:
      */
     void tick();
 
-    /** Initialize the iteration timer. */
-    void initTimer();
-
-    /**
-     * Returns how much time in seconds is left until the next iteration.
-     */
-    double getTimeTillNextIteration();
-
     Uint32 getCurrentTick();
 
 private:
-    /** An unreasonable amount of time for the sim tick to be late by. */
-    static constexpr double SIM_DELAYED_TIME_S = .001;
-
     World world;
     Network& network;
 
@@ -49,12 +40,6 @@ private:
     NetworkInputSystem networkInputSystem;
     MovementSystem movementSystem;
     NetworkUpdateSystem networkUpdateSystem;
-
-    /** Used to time when we should process an iteration. */
-    Timer iterationTimer;
-
-    /** The aggregated time since we last processed a tick. */
-    double accumulatedTime;
 
     /**
      * The number of the tick that we're currently on.

@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "Ignore.h"
+#include "Log.h"
 
 #include "SDL2pp/Exception.hh"
 
@@ -14,7 +15,7 @@ try {
     ignore(argc);
     ignore(argv);
 
-    // Start the application (assumes control of the thread.)
+    // Start the application (assumes control of the thread).
     Application app;
     app.start();
 

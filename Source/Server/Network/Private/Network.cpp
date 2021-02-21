@@ -14,42 +14,23 @@ namespace AM
 namespace Server
 {
 Network::Network()
-: accumulatedTime(0.0)
-, clientHandler(*this)
+: clientHandler(*this)
 , ticksSinceNetstatsLog(0)
 , currentTickPtr(nullptr)
 {
-    // Init the timer to the current time.
-    heartbeatTimer.updateSavedTime();
 }
 
 void Network::tick()
 {
-    accumulatedTime += heartbeatTimer.getDeltaSeconds(true);
+    // Flag the send thread to start sending all messages for this network
+    // tick.
+    clientHandler.beginSendClientUpdates();
 
-    if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
-        // Flag the send thread to start sending all messages for this network
-        // tick.
-        clientHandler.beginSendClientUpdates();
-
-        // If it's time to log our network statistics, do so.
-        ticksSinceNetstatsLog++;
-        if (ticksSinceNetstatsLog == TICKS_TILL_STATS_DUMP) {
-            logNetworkStatistics();
-            ticksSinceNetstatsLog = 0;
-        }
-
-        accumulatedTime -= NETWORK_TICK_TIMESTEP_S;
-        if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
-            // If we've accumulated enough time to send more, something
-            // happened to delay us.
-            // We still only want to send what's in the queue, but it's worth
-            // giving debug output that we detected this.
-            LOG_INFO("Detected a delayed network send. accumulatedTime: %f. "
-                     "Setting to 0.",
-                     accumulatedTime);
-            accumulatedTime = 0;
-        }
+    // If it's time to log our network statistics, do so.
+    ticksSinceNetstatsLog++;
+    if (ticksSinceNetstatsLog == TICKS_TILL_STATS_DUMP) {
+        logNetworkStatistics();
+        ticksSinceNetstatsLog = 0;
     }
 }
 
@@ -114,11 +95,6 @@ void Network::endReceiveInputMessages()
     inputMessageSorter.endReceive();
 }
 
-void Network::initTimer()
-{
-    heartbeatTimer.updateSavedTime();
-}
-
 ClientMap& Network::getClientMap()
 {
     return clientMap;
@@ -175,13 +151,6 @@ BinaryBufferSharedPtr Network::constructMessage(MessageType type,
               MESSAGE_HEADER_SIZE + dynamicBuffer->data());
 
     return dynamicBuffer;
-}
-
-double Network::getTimeTillNextHeartbeat()
-{
-    // The time since accumulatedTime was last updated.
-    double timeSinceIteration = heartbeatTimer.getDeltaSeconds(false);
-    return (NETWORK_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
 }
 
 Uint32 Network::getCurrentTick()
