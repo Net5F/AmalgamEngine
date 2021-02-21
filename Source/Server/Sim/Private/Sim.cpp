@@ -45,7 +45,7 @@ void Sim::tick()
                      "frame. Sim tick was delayed by: %.8fs.",
                      accumulatedTime);
         }
-        else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
+        else if (accumulatedTime >= SIM_DELAYED_TIME_S) {
             // Sim missed its ideal call time, could be our issue or general
             // system slowness.
             LOG_INFO(

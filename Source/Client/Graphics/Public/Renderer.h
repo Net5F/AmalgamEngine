@@ -1,9 +1,10 @@
 #pragma once
 
+#include "PeriodicCaller.h"
+#include "ScreenPoint.h"
+
 #include "SDL2pp/Window.hh"
 #include "SDL2pp/Renderer.hh"
-#include "Timer.h"
-#include "ScreenPoint.h"
 
 namespace AM
 {
@@ -26,31 +27,19 @@ public:
     static constexpr double RENDER_TICK_TIMESTEP_S
         = 1.0 / static_cast<double>(RENDER_TICKS_PER_SECOND);
 
-    /** An unreasonable amount of time for the render tick to be late by.
-        Late render ticks cause jittering, as the pacing between ticks becomes
-        inconsistent. */
-    static constexpr double RENDER_DELAYED_TIME_S = .001;
-
-    Renderer(SDL2pp::Renderer& inSdlRenderer, Sim& inSim,
-                 SDL2pp::Window& inWindow);
-
-    void tick();
-
-    /** Initialize the frame timer. */
-    void initTimer();
-
     /**
-     * Returns how far we are temporally into our wait for the next frame
-     * render. e.g. .01 if we're 10% of the way to the next frame.
+     * @param getProgress  A function that returns how far between sim ticks we
+     *                     are in decimal percent.
      */
-    double getTimeTillNextFrame();
+    Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& inWindow, Sim& inSim,
+             std::function<double(void)> inGetProgress);
 
-private:
     /**
      * First renders all tiles in view, then renders all entities in view.
      */
     void render();
 
+private:
     /**
      * Renders the tiles from the World's tile map.
      * @param camera  The camera to render with.
@@ -86,12 +75,7 @@ private:
     SDL2pp::Renderer& sdlRenderer;
     Sim& sim;
     World& world;
-
-    /** Used to time when we should render a frame. */
-    Timer frameTimer;
-
-    /** The aggregated time since we last processed a tick. */
-    double accumulatedTime;
+    std::function<double(void)> getProgress;
 };
 
 } // namespace Client

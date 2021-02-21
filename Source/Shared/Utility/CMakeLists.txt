@@ -1,12 +1,14 @@
 target_sources(Shared
     PRIVATE
         Private/Log.cpp
+        Private/PeriodicCaller.cpp
         Private/Timer.cpp
 	PUBLIC
 	    Public/Log.h
 	    Public/Ignore.h
-	    Public/Timer.h
+	    Public/PeriodicCaller.h
 	    Public/Profiler.h
+	    Public/Timer.h
 )
 
 target_include_directories(Shared

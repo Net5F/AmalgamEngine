@@ -12,8 +12,7 @@ namespace AM
 namespace Client
 {
 Network::Network()
-: accumulatedTime(0.0)
-, server(nullptr)
+: server(nullptr)
 , messageHandler(*this)
 , playerEntity(entt::null)
 , tickAdjustment(0)
@@ -61,33 +60,17 @@ bool Network::connect()
 
 void Network::tick()
 {
-    accumulatedTime += heartbeatTimer.getDeltaSeconds(true);
+    if (!RUN_OFFLINE) {
+        // Send a heartbeat if we need to.
+        sendHeartbeatIfNecessary();
 
-    if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
-        if (!RUN_OFFLINE) {
-            // Send a heartbeat if we need to.
-            sendHeartbeatIfNecessary();
-
-            // If it's time to log our network statistics, do so.
-            if (netstatsLoggingEnabled) {
-                ticksSinceNetstatsLog++;
-                if (ticksSinceNetstatsLog == TICKS_TILL_STATS_DUMP) {
-                    logNetworkStatistics();
-                    ticksSinceNetstatsLog = 0;
-                }
+        // If it's time to log our network statistics, do so.
+        if (netstatsLoggingEnabled) {
+            ticksSinceNetstatsLog++;
+            if (ticksSinceNetstatsLog == TICKS_TILL_STATS_DUMP) {
+                logNetworkStatistics();
+                ticksSinceNetstatsLog = 0;
             }
-        }
-
-        accumulatedTime -= NETWORK_TICK_TIMESTEP_S;
-        if (accumulatedTime >= NETWORK_TICK_TIMESTEP_S) {
-            // If we've accumulated enough time to send more, something
-            // happened to delay us.
-            // We still only want to send what's in the queue, but it's worth
-            // giving debug output that we detected this.
-            LOG_INFO("Detected a delayed network tick. accumulatedTime: %f. "
-                     "Setting to 0.",
-                     accumulatedTime);
-            accumulatedTime = 0;
         }
     }
 }
@@ -210,11 +193,6 @@ int Network::transferTickAdjustment()
     else {
         return 0;
     }
-}
-
-void Network::initTimer()
-{
-    heartbeatTimer.updateSavedTime();
 }
 
 void Network::registerCurrentTickPtr(
@@ -357,13 +335,6 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
             }
         }
     }
-}
-
-double Network::getTimeTillNextHeartbeat()
-{
-    // The time since accumulatedTime was last updated.
-    double timeSinceIteration = heartbeatTimer.getDeltaSeconds(false);
-    return (NETWORK_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
 }
 
 void Network::logNetworkStatistics()

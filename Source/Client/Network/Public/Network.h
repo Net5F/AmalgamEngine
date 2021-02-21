@@ -82,19 +82,11 @@ public:
      */
     int transferTickAdjustment();
 
-    /** Initialize the tick timer. */
-    void initTimer();
-
     /** Used for passing us a pointer to the Game's currentTick. */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
     void setPlayerEntity(entt::entity inPlayerEntity);
     entt::entity getPlayerEntity();
-
-    /**
-     * Returns how much time in seconds is left until the next heartbeat.
-     */
-    double getTimeTillNextHeartbeat();
 
     void setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled);
 
@@ -135,12 +127,6 @@ private:
      * Logs the network stats such as bytes sent/received per second.
      */
     void logNetworkStatistics();
-
-    /** Used to time when we should process the network tick. */
-    Timer heartbeatTimer;
-
-    /** The aggregated time since we last processed a tick. */
-    double accumulatedTime;
 
     std::shared_ptr<Peer> server;
 

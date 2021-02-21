@@ -28,7 +28,6 @@ Sim::Sim(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSpriteTex
 , playerMovementSystem(*this, world, network)
 , npcMovementSystem(*this, world, network)
 , cameraSystem(*this, world)
-, accumulatedTime(0.0)
 , currentTick(0)
 , spriteTex(inSpriteTex)
 , exitRequested(false)
@@ -129,73 +128,47 @@ void Sim::fakeConnection()
 
 void Sim::tick()
 {
-    accumulatedTime += iterationTimer.getDeltaSeconds(true);
+    /* Calculate what tick we should be on. */
+    // Increment the tick to the next.
+    Uint32 targetTick = currentTick + 1;
 
-    // Process as many game ticks as have accumulated.
-    while (accumulatedTime >= SIM_TICK_TIMESTEP_S) {
-        /* Calculate what tick we should be on. */
-        // Increment the tick to the next.
-        Uint32 targetTick = currentTick + 1;
+    // If we're online, apply any adjustments that we receive from the
+    // server.
+    if (!RUN_OFFLINE) {
+        int adjustment = network.transferTickAdjustment();
+        if (adjustment != 0) {
+            targetTick += adjustment;
 
-        // If we're online, apply any adjustments that we receive from the
-        // server.
-        if (!RUN_OFFLINE) {
-            int adjustment = network.transferTickAdjustment();
-            if (adjustment != 0) {
-                targetTick += adjustment;
-
-                // Make sure NPC replication takes the adjustment into account.
-                npcMovementSystem.applyTickAdjustment(adjustment);
-            }
+            // Make sure NPC replication takes the adjustment into account.
+            npcMovementSystem.applyTickAdjustment(adjustment);
         }
+    }
 
-        /* Process ticks until we match what the server wants.
-           This may cause us to not process any ticks, or to process multiple
-           ticks. */
-        while (currentTick < targetTick) {
-            /* Run all systems. */
-            // Process all waiting user input events.
-            processUserInputEvents();
+    /* Process ticks until we match what the server wants.
+       This may cause us to not process any ticks, or to process multiple
+       ticks. */
+    while (currentTick < targetTick) {
+        /* Run all systems. */
+        // Process all waiting user input events.
+        processUserInputEvents();
 
-            // Send input updates to the server.
-            networkUpdateSystem.sendInputState();
+        // Send input updates to the server.
+        networkUpdateSystem.sendInputState();
 
-            // Push the new input state into the player's history.
-            playerInputSystem.addCurrentInputsToHistory();
+        // Push the new input state into the player's history.
+        playerInputSystem.addCurrentInputsToHistory();
 
-            // Process player and NPC movements.
-            playerMovementSystem.processMovements();
+        // Process player and NPC movements.
+        playerMovementSystem.processMovements();
 
-            // Process network movement after normal movement to sync with
-            // server. (The server processes movement before sending updates.)
-            npcMovementSystem.updateNpcs();
+        // Process network movement after normal movement to sync with
+        // server. (The server processes movement before sending updates.)
+        npcMovementSystem.updateNpcs();
 
-            // Move all cameras to their new positions.
-            cameraSystem.moveCameras();
+        // Move all cameras to their new positions.
+        cameraSystem.moveCameras();
 
-            currentTick++;
-        }
-
-        accumulatedTime -= SIM_TICK_TIMESTEP_S;
-        if (accumulatedTime >= SIM_TICK_TIMESTEP_S) {
-            LOG_INFO("Detected a request for multiple sim ticks in the same "
-                     "frame. Sim tick was delayed by: %.8fs.",
-                     accumulatedTime);
-        }
-        else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
-            // Game missed its ideal call time, could be our issue or general
-            // system slowness.
-            LOG_INFO(
-                "Detected a delayed sim tick. Sim tick was delayed by: %.8fs.",
-                accumulatedTime);
-        }
-
-        // Check our execution time.
-        double executionTime = iterationTimer.getDeltaSeconds(false);
-        if (executionTime > SIM_TICK_TIMESTEP_S) {
-            LOG_INFO("Overran our sim iteration time. executionTime: %.8f",
-                     executionTime);
-        }
+        currentTick++;
     }
 }
 
@@ -224,28 +197,9 @@ void Sim::processUserInputEvents()
     playerInputSystem.processHeldInputs();
 }
 
-void Sim::initTimer()
-{
-    iterationTimer.updateSavedTime();
-}
-
 World& Sim::getWorld()
 {
     return world;
-}
-
-double Sim::getTimeTillNextIteration()
-{
-    // The time since accumulatedTime was last updated.
-    double timeSinceIteration = iterationTimer.getDeltaSeconds(false);
-    return (SIM_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
-}
-
-double Sim::getIterationProgress()
-{
-    // The time since accumulatedTime was last updated.
-    double timeSinceIteration = iterationTimer.getDeltaSeconds(false);
-    return ((accumulatedTime + timeSinceIteration) / SIM_TICK_TIMESTEP_S);
 }
 
 Uint32 Sim::getCurrentTick()

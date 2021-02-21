@@ -22,6 +22,9 @@ class Network;
 class Sim
 {
 public:
+    /** An unreasonable amount of time for the sim tick to be late by. */
+    static constexpr double SIM_DELAYED_TIME_S = .001;
+
     Sim(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSpriteTex);
 
     /**
@@ -47,33 +50,16 @@ public:
      */
     void processUserInputEvents();
 
-    /** Initialize the iteration timer. */
-    void initTimer();
-
     World& getWorld();
-
-    /**
-     * Returns how much time in seconds is left until the next iteration.
-     */
-    double getTimeTillNextIteration();
-
-    /**
-     * Returns how far we are temporally into our wait for the next iteration
-     * tick. e.g. .01 if we're 10% of the way to the next tick.
-     */
-    double getIterationProgress();
 
     Uint32 getCurrentTick();
 
     std::atomic<bool> const* getExitRequestedPtr();
 
 private:
-    /** How long the game should wait for the server to send a connection
-        response. */
+    /** How long the sim should wait to receive a connection response from the
+        server. */
     static constexpr unsigned int CONNECTION_RESPONSE_WAIT_MS = 1000;
-
-    /** An unreasonable amount of time for the game tick to be late by. */
-    static constexpr double GAME_DELAYED_TIME_S = .001;
 
     World world;
     Network& network;
@@ -84,12 +70,6 @@ private:
     NpcMovementSystem npcMovementSystem;
     CameraSystem cameraSystem;
 
-    /** Used to time when we should process an iteration. */
-    Timer iterationTimer;
-
-    /** The aggregated time since we last processed a tick. */
-    double accumulatedTime;
-
     /**
      * The number of the tick that we're currently on.
      * Initialized based on the number that the server tells us it's on.
@@ -97,7 +77,7 @@ private:
     std::atomic<Uint32> currentTick;
 
     // Temporary until a resource manager is created.
-    const std::shared_ptr<SDL2pp::Texture>& spriteTex;
+    std::shared_ptr<SDL2pp::Texture> spriteTex;
 
     /**
      * Turn false to signal that the main loop should end.

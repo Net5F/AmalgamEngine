@@ -16,12 +16,11 @@ namespace AM
 {
 namespace Client
 {
-Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, Sim& inSim,
-                           SDL2pp::Window& window)
+Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& window, Sim& inSim, std::function<double(void)> inGetProgress)
 : sdlRenderer(inSdlRenderer)
 , sim(inSim)
 , world(sim.getWorld())
-, accumulatedTime(0.0)
+, getProgress(inGetProgress)
 {
     // Init the groups that we'll be using.
     auto group
@@ -32,46 +31,11 @@ Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, Sim& inSim,
     ignore(window);
 }
 
-void Renderer::tick()
-{
-    accumulatedTime += frameTimer.getDeltaSeconds(true);
-
-    if (accumulatedTime >= RENDER_TICK_TIMESTEP_S) {
-        // Process the rendering for this frame.
-        render();
-
-        accumulatedTime -= RENDER_TICK_TIMESTEP_S;
-        if (accumulatedTime >= RENDER_TICK_TIMESTEP_S) {
-            // If we've accumulated enough time to render again, something
-            // happened (probably a window event that stopped app execution.)
-            // We still only want to render the latest data, but it's worth
-            // giving debug output that we detected this.
-            LOG_INFO("Detected a request for two renders in the same frame. "
-                     "Render must have been massively delayed. Render was "
-                     "delayed by: %.8fs. Setting to 0.",
-                     accumulatedTime);
-            accumulatedTime = 0;
-        }
-    }
-}
-
-void Renderer::initTimer()
-{
-    frameTimer.updateSavedTime();
-}
-
-double Renderer::getTimeTillNextFrame()
-{
-    // The time since accumulatedTime was last updated.
-    double timeSinceIteration = frameTimer.getDeltaSeconds(false);
-    return (RENDER_TICK_TIMESTEP_S - (accumulatedTime + timeSinceIteration));
-}
-
 void Renderer::render()
 {
     /* Set up the camera for this frame. */
-    // Get how far we are between game ticks in decimal percent.
-    double alpha = sim.getIterationProgress();
+    // Get how far we are between sim ticks in decimal percent.
+    double alpha = getProgress();
 
     // Get the lerped camera position based on the alpha.
     auto [playerCamera, playerSprite, playerPosition, playerPreviousPos]

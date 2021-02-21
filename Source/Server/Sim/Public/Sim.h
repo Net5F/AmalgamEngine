@@ -39,8 +39,8 @@ public:
     Uint32 getCurrentTick();
 
 private:
-    /** An unreasonable amount of time for the game tick to be late by. */
-    static constexpr double GAME_DELAYED_TIME_S = .001;
+    /** An unreasonable amount of time for the sim tick to be late by. */
+    static constexpr double SIM_DELAYED_TIME_S = .001;
 
     World world;
     Network& network;
