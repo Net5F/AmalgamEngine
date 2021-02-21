@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Timer.h"
 #include "SimDefs.h"
 #include "entt/entity/registry.hpp"
 #include <SDL_stdinc.h>
@@ -39,9 +38,6 @@ public:
      */
     void tick();
 
-    /** Initialize the iteration timer. */
-    void initTimer();
-
 private:
     /**
      * Sends the next input message.
@@ -62,12 +58,6 @@ private:
 
     /** The entity ID that we were given by the server. */
     entt::entity clientEntity;
-
-    /** Used to time when we should process an iteration. */
-    Timer iterationTimer;
-
-    /** The aggregated time since we last processed a tick. */
-    double accumulatedTime;
 
     /**
      * The number of the tick that we're currently on.

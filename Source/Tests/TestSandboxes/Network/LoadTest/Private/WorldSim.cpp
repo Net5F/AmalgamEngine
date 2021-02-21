@@ -13,13 +13,9 @@ namespace AM
 {
 namespace LTC
 {
-/** An unreasonable amount of time for the game tick to be late by. */
-static constexpr double GAME_DELAYED_TIME_S = .001;
-
 WorldSim::WorldSim(Client::Network& inNetwork)
 : network(inNetwork)
 , clientEntity(entt::null)
-, accumulatedTime(0.0)
 , currentTick(0)
 , ticksTillInput(0)
 , isMovingRight(false)
@@ -52,69 +48,37 @@ void WorldSim::connect()
 
 void WorldSim::tick()
 {
-    accumulatedTime += iterationTimer.getDeltaSeconds(true);
+    Uint32 targetTick = currentTick + 1;
 
-    // Process as many game ticks as have accumulated.
-    while (accumulatedTime >= SIM_TICK_TIMESTEP_S) {
-        Uint32 targetTick = currentTick + 1;
+    // Apply any adjustments that we receive from the server.
+    targetTick += network.transferTickAdjustment();
 
-        // Apply any adjustments that we receive from the server.
-        targetTick += network.transferTickAdjustment();
+    /* Process ticks until we match what the server wants.
+       This may cause us to not process any ticks, or to process multiple
+       ticks. */
+    while (currentTick < targetTick) {
+        // If it's time to move, send an input message.
+        if (ticksTillInput == 0) {
+            sendNextInput();
+            ticksTillInput = INPUT_RATE_TICKS;
+        }
+        ticksTillInput--;
 
-        /* Process ticks until we match what the server wants.
-           This may cause us to not process any ticks, or to process multiple
-           ticks. */
-        while (currentTick < targetTick) {
-            // If it's time to move, send an input message.
-            if (ticksTillInput == 0) {
-                sendNextInput();
-                ticksTillInput = INPUT_RATE_TICKS;
-            }
-            ticksTillInput--;
-
-            // Receive any waiting player messages.
-            std::shared_ptr<const EntityUpdate> entityUpdate
-                = network.receivePlayerUpdate(0);
-            while (entityUpdate != nullptr) {
-                entityUpdate = network.receivePlayerUpdate(0);
-            }
-
-            // Receive any waiting npc messages.
-            Client::NpcReceiveResult receiveResult = network.receiveNpcUpdate();
-            while (receiveResult.result == NetworkResult::Success) {
-                receiveResult = network.receiveNpcUpdate();
-            }
-
-            currentTick++;
+        // Receive any waiting player messages.
+        std::shared_ptr<const EntityUpdate> entityUpdate
+            = network.receivePlayerUpdate(0);
+        while (entityUpdate != nullptr) {
+            entityUpdate = network.receivePlayerUpdate(0);
         }
 
-        accumulatedTime -= SIM_TICK_TIMESTEP_S;
-        if (accumulatedTime >= SIM_TICK_TIMESTEP_S) {
-            LOG_INFO("Entity %u: Detected a request for multiple game ticks in "
-                     "the same frame. Game tick was delayed by: %.8fs.",
-                     clientEntity, accumulatedTime);
-        }
-        else if (accumulatedTime >= GAME_DELAYED_TIME_S) {
-            // Game missed its ideal call time, could be our issue or general
-            // system slowness.
-            LOG_INFO("Entity %u: Detected a delayed game tick. Game tick was "
-                     "delayed by: %.8fs.",
-                     clientEntity, accumulatedTime);
+        // Receive any waiting npc messages.
+        Client::NpcReceiveResult receiveResult = network.receiveNpcUpdate();
+        while (receiveResult.result == NetworkResult::Success) {
+            receiveResult = network.receiveNpcUpdate();
         }
 
-        // Check our execution time.
-        double executionTime = iterationTimer.getDeltaSeconds(false);
-        if (executionTime > SIM_TICK_TIMESTEP_S) {
-            LOG_INFO("Entity %u: Overran our sim iteration time. "
-                     "executionTime: %.8f",
-                     clientEntity, executionTime);
-        }
+        currentTick++;
     }
-}
-
-void WorldSim::initTimer()
-{
-    iterationTimer.updateSavedTime();
 }
 
 void WorldSim::sendNextInput()

@@ -5,7 +5,10 @@ namespace AM
 namespace LTC
 {
 SimulatedClient::SimulatedClient()
-: worldSim(network)
+: networkCaller(std::bind(&Client::Network::tick, &network), NETWORK_TICK_TIMESTEP_S,
+      "Network", true)
+, worldSim(network)
+, simCaller(std::bind(&WorldSim::tick, &worldSim), SIM_TICK_TIMESTEP_S, "Sim", false)
 , isConnected(false)
 {
 }
@@ -16,8 +19,8 @@ void SimulatedClient::connect()
     worldSim.connect();
 
     // Start the tick timer at the current time.
-    worldSim.initTimer();
-//    network.initTimer();
+    simCaller.initTimer();
+    networkCaller.initTimer();
 
     isConnected = true;
 }
@@ -26,10 +29,10 @@ void SimulatedClient::tick()
 {
     if (isConnected) {
         // Process the world sim.
-        worldSim.tick();
+        simCaller.update();
 
         // Process the network.
-        network.tick();
+        networkCaller.update();
     }
 }
 

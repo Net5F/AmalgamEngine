@@ -2,6 +2,7 @@
 
 #include "Network.h"
 #include "WorldSim.h"
+#include "PeriodicCaller.h"
 #include <SDL_stdinc.h>
 #include <atomic>
 
@@ -33,8 +34,10 @@ public:
 
 private:
     Client::Network network;
+    PeriodicCaller networkCaller;
 
     WorldSim worldSim;
+    PeriodicCaller simCaller;
 
     std::atomic<bool> isConnected;
 };

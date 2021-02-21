@@ -10,12 +10,12 @@ namespace Server
 World::World()
 : device()
 , generator(device())
-, xDistribution(0, (SCREEN_WIDTH - 128))
-, yDistribution(0, (SCREEN_HEIGHT - 128))
+, xDistribution(0, ((WORLD_WIDTH - 1) * TILE_WORLD_WIDTH))
+, yDistribution(0, ((WORLD_HEIGHT - 1) * TILE_WORLD_HEIGHT))
 , baseX{0}
 , baseY{0}
-, groupOffsetsX{-500, -250, 0, 100, 200, -500, -250, 0, 100, 200}
-, groupOffsetsY{0, 0, 0, 0, 0, -100, -100, -100, -100, -100}
+, groupOffsetsX{32, 64, 96, 128, 160, 32, 64, 96, 128, 160}
+, groupOffsetsY{32, 32, 32, 32, 32, 64, -100, -100, -100, -100}
 , offsetSelector{0}
 {
 }

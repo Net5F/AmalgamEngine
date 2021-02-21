@@ -232,7 +232,7 @@ void NpcMovementSystem::applyUpdateMessage(
             // TODO: Get the sprite info from the server.
             // Note: Currently using an arbitrarily chosen non-player sprite.
             Sprite& playerSprite = registry.get<Sprite>(world.playerEntity);
-            SDL2pp::Rect textureRect(224, 32, 16, 16);
+            SDL2pp::Rect textureRect((256 * 8 + 100), 256 + 140, 64, 64);
             registry.emplace<Sprite>(entity, playerSprite.texturePtr,
                                      textureRect, 64, 64);
 
