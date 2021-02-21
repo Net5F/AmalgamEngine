@@ -11,7 +11,7 @@ namespace AM
 class Sprite;
 namespace Client
 {
-class Sim;
+class Simulation;
 class World;
 class Camera;
 class ScreenRect;
@@ -31,7 +31,7 @@ public:
      * @param getProgress  A function that returns how far between sim ticks we
      *                     are in decimal percent.
      */
-    Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& inWindow, Sim& inSim,
+    Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& inWindow, Simulation& inSim,
              std::function<double(void)> inGetProgress);
 
     /**
@@ -73,7 +73,7 @@ private:
     bool isWithinCameraBounds(float x, float y, float width, float height, Camera& camera);
 
     SDL2pp::Renderer& sdlRenderer;
-    Sim& sim;
+    Simulation& sim;
     World& world;
     std::function<double(void)> getProgress;
 };

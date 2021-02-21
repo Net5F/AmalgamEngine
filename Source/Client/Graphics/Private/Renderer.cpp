@@ -1,6 +1,6 @@
 #include "Renderer.h"
 #include "World.h"
-#include "Sim.h"
+#include "Simulation.h"
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Sprite.h"
@@ -16,7 +16,7 @@ namespace AM
 {
 namespace Client
 {
-Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& window, Sim& inSim, std::function<double(void)> inGetProgress)
+Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& window, Simulation& inSim, std::function<double(void)> inGetProgress)
 : sdlRenderer(inSdlRenderer)
 , sim(inSim)
 , world(sim.getWorld())

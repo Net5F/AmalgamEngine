@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Network.h"
-#include "Sim.h"
+#include "Simulation.h"
 #include "PeriodicCaller.h"
 #include "SDLNetInitializer.h"
 
@@ -48,7 +48,7 @@ private:
     Network network;
     PeriodicCaller networkCaller;
 
-    Sim sim;
+    Simulation sim;
     PeriodicCaller simCaller;
 
     /** Flags when to end the application. */

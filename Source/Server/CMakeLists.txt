@@ -39,5 +39,5 @@ target_compile_options(Server PUBLIC -Wall -Wextra)
 
 # Build all of the subdirectories
 add_subdirectory(Launch)
-add_subdirectory(Sim)
+add_subdirectory(Simulation)
 add_subdirectory(Network)

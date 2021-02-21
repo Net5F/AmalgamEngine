@@ -1,6 +1,6 @@
 #include "NpcMovementSystem.h"
 #include "MovementHelpers.h"
-#include "Sim.h"
+#include "Simulation.h"
 #include "World.h"
 #include "Network.h"
 #include "ClientNetworkDefs.h"
@@ -22,7 +22,7 @@ namespace AM
 {
 namespace Client
 {
-NpcMovementSystem::NpcMovementSystem(Sim& inSim, World& inWorld,
+NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
                                      Network& inNetwork)
 : lastReceivedTick(0)
 , lastProcessedTick(0)

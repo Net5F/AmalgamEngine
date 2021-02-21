@@ -1,5 +1,5 @@
 #include "CameraSystem.h"
-#include "Sim.h"
+#include "Simulation.h"
 #include "World.h"
 #include "Camera.h"
 #include "Position.h"
@@ -10,7 +10,7 @@ namespace AM
 {
 namespace Client
 {
-CameraSystem::CameraSystem(Sim& inSim, World& inWorld)
+CameraSystem::CameraSystem(Simulation& inSim, World& inWorld)
 : sim(inSim)
 , world(inWorld)
 {

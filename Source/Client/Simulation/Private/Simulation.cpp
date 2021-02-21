@@ -1,4 +1,4 @@
-#include "Sim.h"
+#include "Simulation.h"
 #include "Network.h"
 #include "ClientNetworkDefs.h"
 #include "ConnectionResponse.h"
@@ -20,7 +20,7 @@ namespace AM
 {
 namespace Client
 {
-Sim::Sim(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSpriteTex)
+Simulation::Simulation(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSpriteTex)
 : world(inSpriteTex)
 , network(inNetwork)
 , playerInputSystem(*this, world)
@@ -36,7 +36,7 @@ Sim::Sim(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSpriteTex
     network.registerCurrentTickPtr(&currentTick);
 }
 
-void Sim::connect()
+void Simulation::connect()
 {
     if (RUN_OFFLINE) {
         // No need to connect if we're running offline. Just need mock player
@@ -99,7 +99,7 @@ void Sim::connect()
     registry.emplace<PlayerState>(newEntity);
 }
 
-void Sim::fakeConnection()
+void Simulation::fakeConnection()
 {
     // Create the player entity.
     entt::registry& registry = world.registry;
@@ -126,7 +126,7 @@ void Sim::fakeConnection()
     registry.emplace<PlayerState>(newEntity);
 }
 
-void Sim::tick()
+void Simulation::tick()
 {
     /* Calculate what tick we should be on. */
     // Increment the tick to the next.
@@ -172,7 +172,7 @@ void Sim::tick()
     }
 }
 
-void Sim::processUserInputEvents()
+void Simulation::processUserInputEvents()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -197,17 +197,17 @@ void Sim::processUserInputEvents()
     playerInputSystem.processHeldInputs();
 }
 
-World& Sim::getWorld()
+World& Simulation::getWorld()
 {
     return world;
 }
 
-Uint32 Sim::getCurrentTick()
+Uint32 Simulation::getCurrentTick()
 {
     return currentTick;
 }
 
-std::atomic<bool> const* Sim::getExitRequestedPtr()
+std::atomic<bool> const* Simulation::getExitRequestedPtr()
 {
     return &exitRequested;
 }

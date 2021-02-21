@@ -10,7 +10,7 @@ class EntityUpdate;
 
 namespace Client
 {
-class Sim;
+class Simulation;
 class World;
 class Network;
 
@@ -21,7 +21,7 @@ class Network;
 class NpcMovementSystem
 {
 public:
-    NpcMovementSystem(Sim& inSim, World& inWorld, Network& inNetwork);
+    NpcMovementSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
      * If we've received data for the appropriate ticks, updates all NPCs.
@@ -90,7 +90,7 @@ private:
      */
     int tickReplicationOffset;
 
-    Sim& sim;
+    Simulation& sim;
     World& world;
     Network& network;
 };

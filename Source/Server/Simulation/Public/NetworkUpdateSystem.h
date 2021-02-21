@@ -13,7 +13,7 @@ class EntityUpdate;
 
 namespace Server
 {
-class Sim;
+class Simulation;
 class World;
 class Network;
 class ClientSimData;
@@ -26,7 +26,7 @@ class ClientSimData;
 class NetworkUpdateSystem
 {
 public:
-    NetworkUpdateSystem(Sim& inSim, World& inWorld, Network& inNetwork);
+    NetworkUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
      * Updates all connected clients with relevant world state.
@@ -52,7 +52,7 @@ private:
      */
     void sendUpdate(ClientSimData& client, EntityUpdate& entityUpdate);
 
-    Sim& sim;
+    Simulation& sim;
     World& world;
     Network& network;
 };

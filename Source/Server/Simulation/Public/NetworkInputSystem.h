@@ -6,7 +6,7 @@ namespace AM
 {
 namespace Server
 {
-class Sim;
+class Simulation;
 class World;
 class Network;
 
@@ -17,7 +17,7 @@ class Network;
 class NetworkInputSystem
 {
 public:
-    NetworkInputSystem(Sim& inSim, World& inWorld, Network& inNetwork);
+    NetworkInputSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
      * Processes incoming EntityUpdate messages.
@@ -40,7 +40,7 @@ private:
      */
     void handleDropForEntity(entt::entity entityID);
 
-    Sim& sim;
+    Simulation& sim;
     World& world;
     Network& network;
 };

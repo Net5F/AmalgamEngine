@@ -8,7 +8,7 @@ namespace AM
 {
 namespace Server
 {
-class Sim;
+class Simulation;
 class World;
 class Network;
 
@@ -19,7 +19,7 @@ class Network;
 class NetworkConnectionSystem
 {
 public:
-    NetworkConnectionSystem(Sim& inSim, World& inWorld, Network& inNetwork);
+    NetworkConnectionSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /** Processes the effects of new connections and disconnects on the sim. */
     void processConnectionEvents();
@@ -45,7 +45,7 @@ private:
     void sendConnectionResponse(NetworkID networkID, entt::entity newEntity,
                                 float spawnX, float spawnY);
 
-    Sim& sim;
+    Simulation& sim;
     World& world;
     Network& network;
 };

@@ -8,14 +8,14 @@ namespace AM
 {
 namespace Client
 {
-class Sim;
+class Simulation;
 class World;
 class Network;
 
 class PlayerInputSystem
 {
 public:
-    PlayerInputSystem(Sim& inSim, World& inWorld);
+    PlayerInputSystem(Simulation& inSim, World& inWorld);
 
     /**
      * Updates the player's input state with the given event.
@@ -44,7 +44,7 @@ private:
      */
     void processMouseWheel(SDL_MouseWheelEvent& wheelEvent);
 
-    Sim& sim;
+    Simulation& sim;
     World& world;
 };
 

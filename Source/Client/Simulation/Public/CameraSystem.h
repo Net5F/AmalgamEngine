@@ -9,7 +9,7 @@ class Position;
 namespace Client
 {
 class Camera;
-class Sim;
+class Simulation;
 class World;
 
 /**
@@ -18,7 +18,7 @@ class World;
 class CameraSystem
 {
 public:
-    CameraSystem(Sim& inSim, World& inWorld);
+    CameraSystem(Simulation& inSim, World& inWorld);
 
     /**
      * Moves all cameras to their appropriate next positions.
@@ -34,7 +34,7 @@ private:
      */
     void moveCameraToPosition(Camera& camera, Position& position);
 
-    Sim& sim;
+    Simulation& sim;
     World& world;
 };
 

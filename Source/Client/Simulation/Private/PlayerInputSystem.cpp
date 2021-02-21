@@ -1,5 +1,5 @@
 #include "PlayerInputSystem.h"
-#include "Sim.h"
+#include "Simulation.h"
 #include "World.h"
 #include "Network.h"
 #include "Input.h"
@@ -12,7 +12,7 @@ namespace AM
 {
 namespace Client
 {
-PlayerInputSystem::PlayerInputSystem(Sim& inSim, World& inWorld)
+PlayerInputSystem::PlayerInputSystem(Simulation& inSim, World& inWorld)
 : sim(inSim)
 , world(inWorld)
 {

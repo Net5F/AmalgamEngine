@@ -1,5 +1,5 @@
 #include "NetworkConnectionSystem.h"
-#include "Sim.h"
+#include "Simulation.h"
 #include "World.h"
 #include "Network.h"
 #include "SimDefs.h"
@@ -18,7 +18,7 @@ namespace AM
 {
 namespace Server
 {
-NetworkConnectionSystem::NetworkConnectionSystem(Sim& inSim, World& inWorld,
+NetworkConnectionSystem::NetworkConnectionSystem(Simulation& inSim, World& inWorld,
                                                  Network& inNetwork)
 : sim(inSim)
 , world(inWorld)

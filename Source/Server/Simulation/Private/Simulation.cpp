@@ -1,4 +1,4 @@
-#include "Sim.h"
+#include "Simulation.h"
 #include "Network.h"
 #include "Log.h"
 #include "Profiler.h"
@@ -7,7 +7,7 @@ namespace AM
 {
 namespace Server
 {
-Sim::Sim(Network& inNetwork)
+Simulation::Simulation(Network& inNetwork)
 : world()
 , network(inNetwork)
 , networkConnectionSystem(*this, world, network)
@@ -20,10 +20,10 @@ Sim::Sim(Network& inNetwork)
     network.registerCurrentTickPtr(&currentTick);
 }
 
-void Sim::tick()
+void Simulation::tick()
 {
     /* Run all systems. */
-    BEGIN_CPU_SAMPLE(SimTick);
+    BEGIN_CPU_SAMPLE(SimulationTick);
     networkConnectionSystem.processConnectionEvents();
 
     networkInputSystem.processInputMessages();
@@ -36,7 +36,7 @@ void Sim::tick()
     currentTick++;
 }
 
-Uint32 Sim::getCurrentTick()
+Uint32 Simulation::getCurrentTick()
 {
     return currentTick;
 }

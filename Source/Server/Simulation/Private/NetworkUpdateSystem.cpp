@@ -1,5 +1,5 @@
 #include "NetworkUpdateSystem.h"
-#include "Sim.h"
+#include "Simulation.h"
 #include "World.h"
 #include "Network.h"
 #include "MessageTools.h"
@@ -18,7 +18,7 @@ namespace AM
 {
 namespace Server
 {
-NetworkUpdateSystem::NetworkUpdateSystem(Sim& inSim, World& inWorld,
+NetworkUpdateSystem::NetworkUpdateSystem(Simulation& inSim, World& inWorld,
                                          Network& inNetwork)
 : sim(inSim)
 , world(inWorld)

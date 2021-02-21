@@ -16,13 +16,13 @@ class Network;
 /**
  * Manages the simulation, including world state and system processing.
  */
-class Sim
+class Simulation
 {
 public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S = .001;
 
-    Sim(Network& inNetwork);
+    Simulation(Network& inNetwork);
 
     /**
      * Updates accumulatedTime. If greater than the tick timestep, processes

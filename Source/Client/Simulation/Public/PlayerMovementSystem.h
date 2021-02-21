@@ -14,7 +14,7 @@ class Input;
 
 namespace Client
 {
-class Sim;
+class Simulation;
 class World;
 class Network;
 
@@ -26,7 +26,7 @@ class PlayerState;
 class PlayerMovementSystem
 {
 public:
-    PlayerMovementSystem(Sim& inSim, World& inWorld, Network& inNetwork);
+    PlayerMovementSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
      * Moves the player entity 1 sim tick into the future.
@@ -57,7 +57,7 @@ private:
         player's input history, logs an error. */
     void checkTickDiffValidity(Uint32 tickDiff);
 
-    Sim& sim;
+    Simulation& sim;
     World& world;
     Network& network;
 };

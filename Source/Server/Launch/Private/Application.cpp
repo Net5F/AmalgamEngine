@@ -19,12 +19,12 @@ Application::Application()
 , networkCaller(std::bind(&Network::tick, &network)
             , NETWORK_TICK_TIMESTEP_S, "Network", true)
 , sim(network)
-, simCaller(std::bind(&Sim::tick, &sim)
+, simCaller(std::bind(&Simulation::tick, &sim)
             , SIM_TICK_TIMESTEP_S, "Sim", false)
 , exitRequested(false)
 {
     // Enable delay reporting.
-    simCaller.reportDelays(Sim::SIM_DELAYED_TIME_S);
+    simCaller.reportDelays(Simulation::SIM_DELAYED_TIME_S);
 
     // Spin up the thread to check for command line input.
     inputThreadObj = std::thread(&Application::receiveCliInput, this);

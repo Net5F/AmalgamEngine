@@ -5,14 +5,14 @@ target_sources(Server
 		Private/NetworkConnectionSystem.cpp
 		Private/NetworkInputSystem.cpp
 		Private/NetworkUpdateSystem.cpp
-		Private/Sim.cpp
+		Private/Simulation.cpp
 	PUBLIC
 		Public/World.h
 		Public/MovementSystem.h
 		Public/NetworkConnectionSystem.h
 		Public/NetworkInputSystem.h
 		Public/NetworkUpdateSystem.h
-		Public/Sim.h
+		Public/Simulation.h
 		Public/Components/ClientSimData.h
 )
 

@@ -25,7 +25,7 @@ Application::Application()
 // TODO: Replace texture pointer with texture loader.
 , sim(network, std::make_shared<SDL2pp::Texture>(sdlRenderer,
                                             "Resources/iso_test_sprites.png"))
-, simCaller(std::bind(&Sim::tick, &sim)
+, simCaller(std::bind(&Simulation::tick, &sim)
             , SIM_TICK_TIMESTEP_S, "Sim", false)
 , renderer(sdlRenderer, sdlWindow, sim, std::bind(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind(&Renderer::render, &renderer)
@@ -35,7 +35,7 @@ Application::Application()
     //    window.SetFullscreen(SDL_WINDOW_FULLSCREEN);
 
     // Enable delay reporting.
-    simCaller.reportDelays(Sim::SIM_DELAYED_TIME_S);
+    simCaller.reportDelays(Simulation::SIM_DELAYED_TIME_S);
 }
 
 void Application::start()

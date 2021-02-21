@@ -1,5 +1,5 @@
 #include "NetworkInputSystem.h"
-#include "Sim.h"
+#include "Simulation.h"
 #include "World.h"
 #include "Network.h"
 #include "Peer.h"
@@ -16,7 +16,7 @@ namespace AM
 {
 namespace Server
 {
-NetworkInputSystem::NetworkInputSystem(Sim& inSim, World& inWorld,
+NetworkInputSystem::NetworkInputSystem(Simulation& inSim, World& inWorld,
                                        Network& inNetwork)
 : sim(inSim)
 , world(inWorld)

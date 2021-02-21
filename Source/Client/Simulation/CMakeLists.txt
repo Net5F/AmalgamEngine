@@ -6,7 +6,7 @@ target_sources(Client
 		Private/PlayerMovementSystem.cpp
 		Private/NpcMovementSystem.cpp
 		Private/CameraSystem.cpp
-		Private/Sim.cpp
+		Private/Simulation.cpp
 	PUBLIC
 		Public/World.h
 		Public/PlayerInputSystem.h
@@ -14,7 +14,7 @@ target_sources(Client
 		Public/PlayerMovementSystem.h
 		Public/NpcMovementSystem.h
 		Public/CameraSystem.h
-		Public/Sim.h
+		Public/Simulation.h
 		Public/Components/Camera.h
 		Public/Components/PlayerState.h
 )

@@ -31,5 +31,5 @@ target_compile_options(Shared PUBLIC -Wall -Wextra)
 # Build all of the subdirectories
 add_subdirectory(Messages)
 add_subdirectory(Network)
-add_subdirectory(Sim)
+add_subdirectory(Simulation)
 add_subdirectory(Utility)

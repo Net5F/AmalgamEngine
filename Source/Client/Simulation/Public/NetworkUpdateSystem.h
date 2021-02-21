@@ -7,7 +7,7 @@ namespace AM
 {
 namespace Client
 {
-class Sim;
+class Simulation;
 class World;
 class Network;
 
@@ -18,7 +18,7 @@ class Network;
 class NetworkUpdateSystem
 {
 public:
-    NetworkUpdateSystem(Sim& inSim, World& inWorld, Network& inNetwork);
+    NetworkUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
      * If the player inputs have changed, sends them to the server.
@@ -27,7 +27,7 @@ public:
     void sendInputState();
 
 private:
-    Sim& sim;
+    Simulation& sim;
     World& world;
     Network& network;
 };

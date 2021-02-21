@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Network.h"
-#include "Sim.h"
+#include "Simulation.h"
 #include "Renderer.h"
 #include "PeriodicCaller.h"
 
@@ -41,7 +41,7 @@ private:
     Network network;
     PeriodicCaller networkCaller;
 
-    Sim sim;
+    Simulation sim;
     PeriodicCaller simCaller;
 
     Renderer renderer;
