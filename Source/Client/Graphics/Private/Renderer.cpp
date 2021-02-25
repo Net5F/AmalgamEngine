@@ -16,7 +16,8 @@ namespace AM
 {
 namespace Client
 {
-Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& window, Simulation& inSim, std::function<double(void)> inGetProgress)
+Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& window,
+                   Simulation& inSim, std::function<double(void)> inGetProgress)
 : sdlRenderer(inSdlRenderer)
 , sim(inSim)
 , world(sim.getWorld())
@@ -50,11 +51,15 @@ void Renderer::render()
     lerpedCamera.position.y = cameraLerp.y;
 
     // Get iso screen coords for the center point of camera.
-    ScreenPoint lerpedCameraCenter = worldToScreen(lerpedCamera.position.x, lerpedCamera.position.y, lerpedCamera.zoomFactor);
+    ScreenPoint lerpedCameraCenter
+        = worldToScreen(lerpedCamera.position.x, lerpedCamera.position.y,
+                        lerpedCamera.zoomFactor);
 
     // Calc where the top left of the lerpedCamera is in screen space.
-    lerpedCamera.extent.x = lerpedCameraCenter.x - (lerpedCamera.extent.width / 2);
-    lerpedCamera.extent.y = lerpedCameraCenter.y - (lerpedCamera.extent.height / 2);
+    lerpedCamera.extent.x
+        = lerpedCameraCenter.x - (lerpedCamera.extent.width / 2);
+    lerpedCamera.extent.y
+        = lerpedCameraCenter.y - (lerpedCamera.extent.height / 2);
 
     // Save the last calculated screen position of the camera for use in
     // screen -> world calcs.
@@ -94,21 +99,27 @@ void Renderer::renderTiles(Camera& camera)
             // Get the sprite's vertical offset (iso sprites may have extra
             // vertical space to show depth, we just want the tile.)
             Sprite& sprite{world.terrainMap[y * WORLD_WIDTH + x]};
-            float spriteOffsetY = (sprite.height - TILE_SCREEN_HEIGHT
-                                - TILE_SCREEN_EDGE_HEIGHT) * camera.zoomFactor;
+            float spriteOffsetY
+                = (sprite.height - TILE_SCREEN_HEIGHT - TILE_SCREEN_EDGE_HEIGHT)
+                  * camera.zoomFactor;
 
             // Apply the camera adjustment.
-            int adjustedX = static_cast<int>(round(tileScreenPos.x - camera.extent.x));
-            int adjustedY = static_cast<int>(round(tileScreenPos.y - spriteOffsetY - camera.extent.y));
+            int adjustedX
+                = static_cast<int>(round(tileScreenPos.x - camera.extent.x));
+            int adjustedY = static_cast<int>(
+                round(tileScreenPos.y - spriteOffsetY - camera.extent.y));
 
             // Apply the camera's zoom.
-            int zoomedWidth = static_cast<int>(round(sprite.width * camera.zoomFactor));
-            int zoomedHeight = static_cast<int>(round(sprite.height * camera.zoomFactor));
+            int zoomedWidth
+                = static_cast<int>(round(sprite.width * camera.zoomFactor));
+            int zoomedHeight
+                = static_cast<int>(round(sprite.height * camera.zoomFactor));
 
             // Draw the tile.
-            SDL2pp::Rect spriteScreenExtent =
-                {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
-            sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent, spriteScreenExtent);
+            SDL2pp::Rect spriteScreenExtent
+                = {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
+            sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
+                             spriteScreenExtent);
         }
     }
 }
@@ -125,7 +136,8 @@ void Renderer::renderEntities(Camera& camera, double alpha)
         // Get the lerp'd world position and translate it to iso screen space.
         Position lerp = MovementHelpers::interpolatePosition(previousPos,
                                                              position, alpha);
-        ScreenPoint entityScreenPos = worldToScreen(lerp.x, lerp.y, camera.zoomFactor);
+        ScreenPoint entityScreenPos
+            = worldToScreen(lerp.x, lerp.y, camera.zoomFactor);
 
         // Apply the camera adjustment to the entity.
         float adjustedX = entityScreenPos.x - camera.extent.x;
@@ -136,16 +148,21 @@ void Renderer::renderEntities(Camera& camera, double alpha)
         float zoomedHeight = sprite.height * camera.zoomFactor;
 
         // If the entity's sprite is within the camera bounds, render it.
-        if (isWithinCameraBounds(adjustedX, adjustedY, zoomedWidth, zoomedHeight, camera)) {
-            SDL2pp::Rect spriteScreenExtent {static_cast<int>(round(adjustedX)),
-                    static_cast<int>(round(adjustedY)), static_cast<int>(round(zoomedWidth)),
-                    static_cast<int>(round(zoomedHeight))};
-            sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent, spriteScreenExtent);
+        if (isWithinCameraBounds(adjustedX, adjustedY, zoomedWidth,
+                                 zoomedHeight, camera)) {
+            SDL2pp::Rect spriteScreenExtent{
+                static_cast<int>(round(adjustedX)),
+                static_cast<int>(round(adjustedY)),
+                static_cast<int>(round(zoomedWidth)),
+                static_cast<int>(round(zoomedHeight))};
+            sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
+                             spriteScreenExtent);
         }
     }
 }
 
-ScreenPoint Renderer::tileToScreen(int xIndex, int yIndex, float zoom) {
+ScreenPoint Renderer::tileToScreen(int xIndex, int yIndex, float zoom)
+{
     // Convert tile index to isometric screen position.
     float screenX = (xIndex - yIndex) * (TILE_SCREEN_WIDTH / 2.f);
     float screenY = (xIndex + yIndex) * (TILE_SCREEN_HEIGHT / 2.f);
@@ -157,10 +174,13 @@ ScreenPoint Renderer::tileToScreen(int xIndex, int yIndex, float zoom) {
     return {screenX, screenY};
 }
 
-ScreenPoint Renderer::worldToScreen(float x, float y, float zoom) {
+ScreenPoint Renderer::worldToScreen(float x, float y, float zoom)
+{
     // Calc the scaling factor going from world tiles to screen tiles.
-    static const float TILE_WIDTH_SCALE = static_cast<float>(TILE_SCREEN_WIDTH) / TILE_WORLD_WIDTH;
-    static const float TILE_HEIGHT_SCALE = static_cast<float>(TILE_SCREEN_HEIGHT) / TILE_WORLD_HEIGHT;
+    static const float TILE_WIDTH_SCALE
+        = static_cast<float>(TILE_SCREEN_WIDTH) / TILE_WORLD_WIDTH;
+    static const float TILE_HEIGHT_SCALE
+        = static_cast<float>(TILE_SCREEN_HEIGHT) / TILE_WORLD_HEIGHT;
 
     // Convert cartesian world point to isometric screen point.
     float screenX = (x - y) * (TILE_WIDTH_SCALE / 2.f);
@@ -177,7 +197,8 @@ ScreenPoint Renderer::worldToScreen(float x, float y, float zoom) {
     return {screenX, screenY};
 }
 
-bool Renderer::isWithinCameraBounds(float x, float y, float width, float height, Camera& camera)
+bool Renderer::isWithinCameraBounds(float x, float y, float width, float height,
+                                    Camera& camera)
 {
     // If the sprite is within view of the camera, return true.
     if ((x + width) < 0 || (camera.extent.width < x) || ((y + height) < 0)

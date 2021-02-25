@@ -11,16 +11,15 @@ namespace AM
 {
 namespace Server
 {
-
 Application::Application()
 : sdl(SDL_INIT_VIDEO)
 , sdlNetInit()
 , network()
-, networkCaller(std::bind(&Network::tick, &network)
-            , NETWORK_TICK_TIMESTEP_S, "Network", true)
+, networkCaller(std::bind(&Network::tick, &network), NETWORK_TICK_TIMESTEP_S,
+                "Network", true)
 , sim(network)
-, simCaller(std::bind(&Simulation::tick, &sim)
-            , SIM_TICK_TIMESTEP_S, "Sim", false)
+, simCaller(std::bind(&Simulation::tick, &sim), SIM_TICK_TIMESTEP_S, "Sim",
+            false)
 , exitRequested(false)
 {
     // Enable delay reporting.
@@ -58,8 +57,8 @@ void Application::start()
         // See if we have enough time left to sleep.
         double simTimeLeft = simCaller.getTimeTillNextCall();
         double networkTimeLeft = networkCaller.getTimeTillNextCall();
-        if ((simTimeLeft > DELAY_MINIMUM_TIME_S)
-            && (networkTimeLeft > DELAY_MINIMUM_TIME_S)) {
+        if ((simTimeLeft > SLEEP_MINIMUM_TIME_S)
+            && (networkTimeLeft > SLEEP_MINIMUM_TIME_S)) {
             // We have enough time to sleep for a few ms.
             // Note: We try to delay for 1ms because the OS will generally end
             //       up delaying us for 1-3ms.

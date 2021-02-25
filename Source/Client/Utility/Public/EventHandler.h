@@ -6,7 +6,6 @@ namespace AM
 {
 namespace Client
 {
-
 /**
  * Simple interface to facilitate event handling and propagation.
  *
@@ -16,7 +15,7 @@ namespace Client
 class EventHandler
 {
 public:
-    virtual ~EventHandler() {};
+    virtual ~EventHandler(){};
 
     /**
      * Handles the given event.

@@ -19,7 +19,8 @@ class Network;
 class NetworkConnectionSystem
 {
 public:
-    NetworkConnectionSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
+    NetworkConnectionSystem(Simulation& inSim, World& inWorld,
+                            Network& inNetwork);
 
     /** Processes the effects of new connections and disconnects on the sim. */
     void processConnectionEvents();

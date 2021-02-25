@@ -18,7 +18,8 @@ namespace AM
 {
 namespace Server
 {
-NetworkConnectionSystem::NetworkConnectionSystem(Simulation& inSim, World& inWorld,
+NetworkConnectionSystem::NetworkConnectionSystem(Simulation& inSim,
+                                                 World& inWorld,
                                                  Network& inNetwork)
 : sim(inSim)
 , world(inWorld)

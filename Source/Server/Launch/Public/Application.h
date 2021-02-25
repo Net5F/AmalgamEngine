@@ -14,7 +14,6 @@ namespace AM
 {
 namespace Server
 {
-
 /**
  *
  */
@@ -37,10 +36,11 @@ private:
      */
     void receiveCliInput();
 
-    /** We delay for 1ms when possible to reduce our CPU usage. We can't trust the
-       scheduler to come back to us after exactly 1ms though, so we need to give it
-       some leeway. Picked .003 = 3ms as a reasonable number. Open for tweaking. */
-    static constexpr double DELAY_MINIMUM_TIME_S = .003;
+    /** We sleep for 1ms when possible to reduce our CPU usage. We can't trust
+        the scheduler to come back to us after exactly 1ms though, so we need
+        to give it some leeway. Picked .003 = 3ms as a reasonable number. Open
+        for tweaking. */
+    static constexpr double SLEEP_MINIMUM_TIME_S = .003;
 
     SDL2pp::SDL sdl;
     SDLNetInitializer sdlNetInit;

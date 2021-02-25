@@ -4,6 +4,5 @@ namespace AM
 {
 namespace Client
 {
-
 } // namespace Client
 } // namespace AM

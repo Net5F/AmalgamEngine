@@ -3,9 +3,9 @@
 
 namespace AM
 {
-
-PeriodicCaller::PeriodicCaller(std::function<void(void)> inGivenFunct, double inTimestepS,
-                               std::string_view inDebugName, bool inSkipLateSteps)
+PeriodicCaller::PeriodicCaller(std::function<void(void)> inGivenFunct,
+                               double inTimestepS, std::string_view inDebugName,
+                               bool inSkipLateSteps)
 : givenFunct(std::move(inGivenFunct))
 , timestepS(inTimestepS)
 , debugName(inDebugName)
@@ -43,9 +43,10 @@ void PeriodicCaller::update()
         accumulatedTime -= timestepS;
         if (accumulatedTime >= timestepS) {
             // Update was delayed for longer than timestepS.
-            LOG_INFO("Detected a request for multiple %s update calls in the same "
-                     "frame. Update was delayed by: %.5fs.",
-                     debugName.c_str(), accumulatedTime);
+            LOG_INFO(
+                "Detected a request for multiple %s update calls in the same "
+                "frame. Update was delayed by: %.5fs.",
+                debugName.c_str(), accumulatedTime);
 
             // If we're skipping late steps, reset to a fresh state.
             if (skipLateSteps) {
@@ -55,8 +56,9 @@ void PeriodicCaller::update()
         }
         else if ((delayedTimeS > 0) && (accumulatedTime >= delayedTimeS)) {
             // Update was delayed for longer than delayedTimeS.
-            LOG_INFO("%s update missed its ideal call time. Update was delayed by %.5fs."
-                , debugName.c_str(), accumulatedTime);
+            LOG_INFO("%s update missed its ideal call time. Update was delayed "
+                     "by %.5fs.",
+                     debugName.c_str(), accumulatedTime);
         }
     }
 }

@@ -16,7 +16,6 @@ namespace AM
 {
 namespace Client
 {
-
 /**
  *
  */
@@ -25,7 +24,7 @@ class Application : public EventHandler
 public:
     Application();
 
-    ~Application() {};
+    ~Application(){};
 
     /**
      * Begins the application. Assumes control of the thread until the

@@ -4,7 +4,6 @@ namespace AM
 {
 namespace Client
 {
-
 /**
  * Static functions for translating between cartesian world space and
  * isometric screen space.

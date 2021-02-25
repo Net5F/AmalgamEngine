@@ -32,8 +32,8 @@ public:
      * @param getProgress  A function that returns how far between sim ticks we
      *                     are in decimal percent.
      */
-    Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& inWindow, Simulation& inSim,
-             std::function<double(void)> inGetProgress);
+    Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& inWindow,
+             Simulation& inSim, std::function<double(void)> inGetProgress);
 
     /**
      * First renders all tiles in view, then renders all entities in view.
@@ -76,7 +76,8 @@ private:
      * Returns true if the given extent is within the given camera's bounds,
      * else false.
      */
-    bool isWithinCameraBounds(float x, float y, float width, float height, Camera& camera);
+    bool isWithinCameraBounds(float x, float y, float width, float height,
+                              Camera& camera);
 
     SDL2pp::Renderer& sdlRenderer;
     Simulation& sim;

@@ -26,8 +26,8 @@ static constexpr bool RUN_OFFLINE = true;
     Doesn't matter much since the server will quickly adjust us. */
 static constexpr Sint8 INITIAL_TICK_OFFSET = 5;
 
- static const std::string SERVER_IP = "127.0.0.1";
-//static const std::string SERVER_IP = "45.79.1.191";
+static const std::string SERVER_IP = "127.0.0.1";
+// static const std::string SERVER_IP = "45.79.1.191";
 
 static constexpr unsigned int SERVER_PORT = 41499;
 

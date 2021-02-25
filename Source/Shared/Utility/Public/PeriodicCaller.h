@@ -16,7 +16,6 @@
 
 namespace AM
 {
-
 /**
  * A convenience class for calling a function at a particular time step.
  *

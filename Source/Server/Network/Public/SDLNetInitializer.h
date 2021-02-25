@@ -6,7 +6,6 @@ namespace AM
 {
 namespace Server
 {
-
 /**
  * Minimal helper class to facilitate calling SDLNet_Init from an initializer
  * list.
@@ -17,13 +16,9 @@ namespace Server
 class SDLNetInitializer
 {
 public:
-    SDLNetInitializer() {
-        SDLNet_Init();
-    }
+    SDLNetInitializer() { SDLNet_Init(); }
 
-    ~SDLNetInitializer() {
-        SDLNet_Quit();
-    }
+    ~SDLNetInitializer() { SDLNet_Quit(); }
 };
 
 } // End namespace Server

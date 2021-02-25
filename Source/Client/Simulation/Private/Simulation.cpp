@@ -22,7 +22,8 @@ namespace AM
 {
 namespace Client
 {
-Simulation::Simulation(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSpriteTex)
+Simulation::Simulation(Network& inNetwork,
+                       const std::shared_ptr<SDL2pp::Texture>& inSpriteTex)
 : world(inSpriteTex)
 , network(inNetwork)
 , playerInputSystem(*this, world)
@@ -94,7 +95,8 @@ void Simulation::connect()
     SDL2pp::Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
     registry.emplace<Sprite>(newEntity, spriteTex, spritePosInTexture, 64, 64);
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
-        PreviousPosition{}, ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
+                             PreviousPosition{},
+                             ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
@@ -121,7 +123,8 @@ void Simulation::fakeConnection()
     SDL2pp::Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
     registry.emplace<Sprite>(newEntity, spriteTex, spritePosInTexture, 64, 64);
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
-        PreviousPosition{}, ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
+                             PreviousPosition{},
+                             ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);

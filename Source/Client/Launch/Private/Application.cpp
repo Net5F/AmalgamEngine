@@ -13,29 +13,28 @@ namespace AM
 {
 namespace Client
 {
-
 Application::Application()
 : sdl(SDL_INIT_VIDEO)
-, sdlWindow("Amalgam", SDL_WINDOWPOS_UNDEFINED,
-          SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
-          SDL_WINDOW_SHOWN)
+, sdlWindow("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+            SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , network()
-, networkCaller(std::bind(&Network::tick, &network)
-            , NETWORK_TICK_TIMESTEP_S, "Network", true)
+, networkCaller(std::bind(&Network::tick, &network), NETWORK_TICK_TIMESTEP_S,
+                "Network", true)
 // TODO: Replace texture pointer with texture loader.
-, sim(network, std::make_shared<SDL2pp::Texture>(sdlRenderer,
-                                            "Resources/iso_test_sprites.png"))
-, simCaller(std::bind(&Simulation::tick, &sim)
-            , SIM_TICK_TIMESTEP_S, "Sim", false)
-, renderer(sdlRenderer, sdlWindow, sim, std::bind(&PeriodicCaller::getProgress, &simCaller))
-, rendererCaller(std::bind(&Renderer::render, &renderer)
-            , Renderer::RENDER_FRAME_TIMESTEP_S, "Renderer", true)
+, sim(network, std::make_shared<SDL2pp::Texture>(
+                   sdlRenderer, "Resources/iso_test_sprites.png"))
+, simCaller(std::bind(&Simulation::tick, &sim), SIM_TICK_TIMESTEP_S, "Sim",
+            false)
+, renderer(sdlRenderer, sdlWindow, sim,
+           std::bind(&PeriodicCaller::getProgress, &simCaller))
+, rendererCaller(std::bind(&Renderer::render, &renderer),
+                 Renderer::RENDER_FRAME_TIMESTEP_S, "Renderer", true)
 , eventHandlers{this, &renderer, &sim}
 , exitRequested(false)
 {
     // Uncomment to enable fullscreen.
-    //    window.SetFullscreen(SDL_WINDOW_FULLSCREEN);
+    // window.SetFullscreen(SDL_WINDOW_FULLSCREEN);
 
     // Enable delay reporting.
     simCaller.reportDelays(Simulation::SIM_DELAYED_TIME_S);
@@ -131,9 +130,9 @@ int Application::filterEvents(void* userData, SDL_Event* event)
     ignore(app);
 
     // Currently no events that we care to filter.
-//
-//    switch (event->type) {
-//    }
+    //
+    // switch (event->type) {
+    // }
 
     return 1;
 }

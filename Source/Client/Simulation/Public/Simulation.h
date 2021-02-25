@@ -26,7 +26,8 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S = .001;
 
-    Simulation(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture>& inSpriteTex);
+    Simulation(Network& inNetwork,
+               const std::shared_ptr<SDL2pp::Texture>& inSpriteTex);
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,
