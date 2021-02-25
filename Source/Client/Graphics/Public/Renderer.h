@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EventHandler.h"
 #include "PeriodicCaller.h"
 #include "ScreenPoint.h"
 
@@ -20,12 +21,12 @@ class ScreenRect;
  * Uses world information from the Sim to isometrically render the player's
  * view.
  */
-class Renderer
+class Renderer : public EventHandler
 {
 public:
-    static constexpr unsigned int RENDER_TICKS_PER_SECOND = 60;
-    static constexpr double RENDER_TICK_TIMESTEP_S
-        = 1.0 / static_cast<double>(RENDER_TICKS_PER_SECOND);
+    static constexpr unsigned int RENDER_FRAMES_PER_SECOND = 60;
+    static constexpr double RENDER_FRAME_TIMESTEP_S
+        = 1.0 / static_cast<double>(RENDER_FRAMES_PER_SECOND);
 
     /**
      * @param getProgress  A function that returns how far between sim ticks we
@@ -38,6 +39,11 @@ public:
      * First renders all tiles in view, then renders all entities in view.
      */
     void render();
+
+    /**
+     * Handles window events.
+     */
+    bool handleEvent(SDL_Event& event) override;
 
 private:
     /**

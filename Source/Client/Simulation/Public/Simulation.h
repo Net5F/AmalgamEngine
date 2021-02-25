@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EventHandler.h"
 #include "NpcMovementSystem.h"
 #include "PlayerMovementSystem.h"
 #include "World.h"
@@ -19,7 +20,7 @@ class Network;
 /**
  * Manages the simulation, including world state and system processing.
  */
-class Simulation
+class Simulation : public EventHandler
 {
 public:
     /** An unreasonable amount of time for the sim tick to be late by. */
@@ -44,17 +45,16 @@ public:
      */
     void tick();
 
-    /**
-     * Processes all waiting user input events, passing any relevant ones to the
-     * playerInputSystem.
-     */
-    void processUserInputEvents();
-
     World& getWorld();
 
     Uint32 getCurrentTick();
 
-    std::atomic<bool> const* getExitRequestedPtr();
+    /**
+     * Handles user input events, specifically mouse and momentary events.
+     * Note: If the pre-tick handling of these events ever becomes an issue,
+     *       we could instead queue them, to be processed during the tick.
+     */
+    bool handleEvent(SDL_Event& event) override;
 
 private:
     /** How long the sim should wait to receive a connection response from the
@@ -78,13 +78,6 @@ private:
 
     // Temporary until a resource manager is created.
     std::shared_ptr<SDL2pp::Texture> spriteTex;
-
-    /**
-     * Turn false to signal that the main loop should end.
-     * The game processes the inputs, so it gets to be in charge of program
-     * lifespan.
-     */
-    std::atomic<bool> exitRequested;
 };
 
 } // namespace Client

@@ -20,7 +20,7 @@ namespace Client
 //       a config class.
 /** If true, the connection to the server will be mocked and we'll run without
     it. */
-static constexpr bool RUN_OFFLINE = false;
+static constexpr bool RUN_OFFLINE = true;
 
 /** Our best guess at a good starting place for the simulation's tick offset.
     Doesn't matter much since the server will quickly adjust us. */

@@ -22,6 +22,8 @@
     }
 
 /**
+ * NOTE: We've seen issues with this being inaccurate. Use begin/end.
+ *
  * Begins recording a CPU time sample of name sampleName.
  * Runs until the end of the enclosing scope.
  * @param sampleName  The name of the sample. Plain text, no quotes.

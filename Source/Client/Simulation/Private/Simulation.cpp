@@ -13,8 +13,10 @@
 #include "ScreenRect.h"
 #include "Log.h"
 #include "entt/entity/registry.hpp"
+#include "Profiler.h"
 #include <memory>
 #include <string>
+#include "SDL_timer.h"
 
 namespace AM
 {
@@ -30,7 +32,6 @@ Simulation::Simulation(Network& inNetwork, const std::shared_ptr<SDL2pp::Texture
 , cameraSystem(*this, world)
 , currentTick(0)
 , spriteTex(inSpriteTex)
-, exitRequested(false)
 {
     Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);
@@ -128,6 +129,8 @@ void Simulation::fakeConnection()
 
 void Simulation::tick()
 {
+    BEGIN_CPU_SAMPLE(SimTick);
+
     /* Calculate what tick we should be on. */
     // Increment the tick to the next.
     Uint32 targetTick = currentTick + 1;
@@ -149,8 +152,9 @@ void Simulation::tick()
        ticks. */
     while (currentTick < targetTick) {
         /* Run all systems. */
-        // Process all waiting user input events.
-        processUserInputEvents();
+        // Process the held user input state.
+        // Note: Mouse and momentary inputs are processed prior to this tick.
+        playerInputSystem.processHeldInputs();
 
         // Send input updates to the server.
         networkUpdateSystem.sendInputState();
@@ -170,31 +174,8 @@ void Simulation::tick()
 
         currentTick++;
     }
-}
 
-void Simulation::processUserInputEvents()
-{
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-            case SDL_QUIT:
-                exitRequested = true;
-                break;
-            case SDL_WINDOWEVENT:
-                // TODO: Handle this.
-                break;
-            case SDL_MOUSEMOTION:
-                playerInputSystem.processMouseState(event.motion);
-                break;
-            default:
-                // Default to assuming its a momentary input.
-                playerInputSystem.processMomentaryInput(event);
-                break;
-        }
-    }
-
-    // Process held inputs (movement, etc).
-    playerInputSystem.processHeldInputs();
+    END_CPU_SAMPLE();
 }
 
 World& Simulation::getWorld()
@@ -207,9 +188,18 @@ Uint32 Simulation::getCurrentTick()
     return currentTick;
 }
 
-std::atomic<bool> const* Simulation::getExitRequestedPtr()
+bool Simulation::handleEvent(SDL_Event& event)
 {
-    return &exitRequested;
+    switch (event.type) {
+        case SDL_MOUSEMOTION:
+            playerInputSystem.processMouseState(event.motion);
+            return true;
+        default:
+            // Default to assuming it's a momentary input.
+            playerInputSystem.processMomentaryInput(event);
+            return true;
+    }
+    return false;
 }
 
 } // namespace Client

@@ -74,6 +74,16 @@ void Renderer::render()
     sdlRenderer.Present();
 }
 
+bool Renderer::handleEvent(SDL_Event& event)
+{
+    switch (event.type) {
+        case SDL_WINDOWEVENT:
+            // TODO: Handle this.
+            return true;
+    }
+    return false;
+}
+
 void Renderer::renderTiles(Camera& camera)
 {
     for (unsigned int y = 0; y < WORLD_HEIGHT; ++y) {

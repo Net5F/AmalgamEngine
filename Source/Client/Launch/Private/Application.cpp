@@ -1,12 +1,13 @@
 #include "Application.h"
 #include "SimDefs.h"
+#include "Profiler.h"
 #include "Log.h"
 
 #include "SDL.h"
 
 #include <memory>
-#include <atomic>
 #include <functional>
+#include "Ignore.h"
 
 namespace AM
 {
@@ -29,13 +30,18 @@ Application::Application()
             , SIM_TICK_TIMESTEP_S, "Sim", false)
 , renderer(sdlRenderer, sdlWindow, sim, std::bind(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind(&Renderer::render, &renderer)
-            , Renderer::RENDER_TICK_TIMESTEP_S, "Renderer", true)
+            , Renderer::RENDER_FRAME_TIMESTEP_S, "Renderer", true)
+, eventHandlers{this, &renderer, &sim}
+, exitRequested(false)
 {
     // Uncomment to enable fullscreen.
     //    window.SetFullscreen(SDL_WINDOW_FULLSCREEN);
 
     // Enable delay reporting.
     simCaller.reportDelays(Simulation::SIM_DELAYED_TIME_S);
+
+    // Set up our event filter.
+    SDL_SetEventFilter(&Application::filterEvents, this);
 }
 
 void Application::start()
@@ -46,18 +52,17 @@ void Application::start()
     //       solution will be to eventually use account IDs in the file name.
     Log::enableFileLogging("Client.log");
 
+    // Set up profiling.
+    Profiler::init();
+
     // Connect to the server (waits for connection response).
     sim.connect();
-
-    // Get a pointer to the sim exit flag.
-    // Triggered by things like window exit events.
-    std::atomic<bool> const* exitRequested = sim.getExitRequestedPtr();
 
     // Prime the timers so they don't start at 0.
     simCaller.initTimer();
     networkCaller.initTimer();
     rendererCaller.initTimer();
-    while (!(*exitRequested)) {
+    while (!exitRequested) {
         // Let the sim process an iteration if it needs to.
         simCaller.update();
 
@@ -67,19 +72,70 @@ void Application::start()
         // Let the renderer render if it needs to.
         rendererCaller.update();
 
-        // See if we have enough time left to sleep.
-        double simTimeLeft = simCaller.getTimeTillNextCall();
-        double networkTimeLeft = networkCaller.getTimeTillNextCall();
-        double renderTimeLeft = rendererCaller.getTimeTillNextCall();
-        if ((simTimeLeft > DELAY_MINIMUM_TIME_S)
-            && (networkTimeLeft > DELAY_MINIMUM_TIME_S)
-            && (renderTimeLeft > DELAY_MINIMUM_TIME_S)) {
+        // If we have enough time, dispatch events.
+        if (enoughTimeTillNextCall(DISPATCH_MINIMUM_TIME_S)) {
+            dispatchEvents();
+        }
+
+        // If we have enough time, sleep.
+        if (enoughTimeTillNextCall(SLEEP_MINIMUM_TIME_S)) {
             // We have enough time to sleep for a few ms.
             // Note: We try to delay for 1ms because the OS will generally end
             //       up delaying us for 1-3ms.
             SDL_Delay(1);
         }
     }
+}
+
+bool Application::handleEvent(SDL_Event& event)
+{
+    switch (event.type) {
+        case SDL_QUIT:
+            exitRequested = true;
+            return true;
+    }
+    return false;
+}
+
+void Application::dispatchEvents()
+{
+    // Dispatch all waiting SDL events.
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        // Pass the event to each handler in order, stopping if it returns as
+        // handled.
+        for (EventHandler* handler : eventHandlers) {
+            if (handler->handleEvent(event)) {
+                break;
+            }
+        }
+    }
+}
+
+bool Application::enoughTimeTillNextCall(double minimumTime)
+{
+    if ((simCaller.getTimeTillNextCall() > minimumTime)
+        && (networkCaller.getTimeTillNextCall() > minimumTime)
+        && (rendererCaller.getTimeTillNextCall() > minimumTime)) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+int Application::filterEvents(void* userData, SDL_Event* event)
+{
+    Application* app{static_cast<Application*>(userData)};
+    ignore(event);
+    ignore(app);
+
+    // Currently no events that we care to filter.
+//
+//    switch (event->type) {
+//    }
+
+    return 1;
 }
 
 } // End namespace Client
