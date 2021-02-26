@@ -30,7 +30,8 @@ Application::Application()
            std::bind(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind(&Renderer::render, &renderer),
                  Renderer::RENDER_FRAME_TIMESTEP_S, "Renderer", true)
-, eventHandlers{this, &renderer, &sim}
+, userInterface(sim.getWorld())
+, eventHandlers{this, &renderer, &userInterface, &sim}
 , exitRequested(false)
 {
     // Uncomment to enable fullscreen.
@@ -93,6 +94,7 @@ bool Application::handleEvent(SDL_Event& event)
             exitRequested = true;
             return true;
     }
+
     return false;
 }
 

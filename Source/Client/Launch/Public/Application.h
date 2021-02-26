@@ -4,6 +4,7 @@
 #include "Network.h"
 #include "Simulation.h"
 #include "Renderer.h"
+#include "UserInterface.h"
 #include "PeriodicCaller.h"
 
 #include "SDL2pp/SDL.hh"
@@ -17,7 +18,8 @@ namespace AM
 namespace Client
 {
 /**
- *
+ * Maintains the lifetime of all app modules (sim, network, etc) and manages
+ * the main thread's loop.
  */
 class Application : public EventHandler
 {
@@ -86,6 +88,8 @@ private:
     Renderer renderer;
     /** Calls renderer.render() at our frame rate. */
     PeriodicCaller rendererCaller;
+
+    UserInterface userInterface;
 
     /** An ordered vector of event handlers. */
     std::vector<EventHandler*> eventHandlers;

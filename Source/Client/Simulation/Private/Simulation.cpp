@@ -202,6 +202,7 @@ bool Simulation::handleEvent(SDL_Event& event)
             playerInputSystem.processMomentaryInput(event);
             return true;
     }
+
     return false;
 }
 

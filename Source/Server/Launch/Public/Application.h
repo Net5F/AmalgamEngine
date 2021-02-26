@@ -15,7 +15,8 @@ namespace AM
 namespace Server
 {
 /**
- *
+ * Maintains the lifetime of all app modules (sim, network, etc) and manages
+ * the main thread's loop.
  */
 class Application
 {

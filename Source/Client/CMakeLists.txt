@@ -47,8 +47,9 @@ add_custom_command(
 )
 
 # Build all of the subdirectories
-add_subdirectory(Graphics)
 add_subdirectory(Launch)
-add_subdirectory(Simulation)
 add_subdirectory(Network)
+add_subdirectory(Renderer)
+add_subdirectory(Simulation)
+add_subdirectory(UserInterface)
 add_subdirectory(Utility)

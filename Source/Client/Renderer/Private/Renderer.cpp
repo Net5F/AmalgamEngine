@@ -86,6 +86,7 @@ bool Renderer::handleEvent(SDL_Event& event)
             // TODO: Handle this.
             return true;
     }
+
     return false;
 }
 
