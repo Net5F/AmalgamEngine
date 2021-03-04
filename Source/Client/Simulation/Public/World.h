@@ -20,8 +20,8 @@ namespace Client
 class World
 {
 public:
-    // TODO: Replace inSpriteTex with a texture loader.
-    World(const std::shared_ptr<SDL2pp::Texture>& inSpriteTex);
+    // TODO: Replace inSpriteTexturePtr with a texture loader.
+    World(const std::shared_ptr<SDL2pp::Texture>& inSpriteTexturePtr);
 
     /** Entity data registry. */
     entt::registry registry;

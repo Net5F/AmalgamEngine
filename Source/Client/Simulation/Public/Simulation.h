@@ -27,7 +27,7 @@ public:
     static constexpr double SIM_DELAYED_TIME_S = .001;
 
     Simulation(Network& inNetwork,
-               const std::shared_ptr<SDL2pp::Texture>& inSpriteTex);
+               const std::shared_ptr<SDL2pp::Texture>& inSpriteTexturePtr);
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,
@@ -78,7 +78,7 @@ private:
     std::atomic<Uint32> currentTick;
 
     // Temporary until a resource manager is created.
-    std::shared_ptr<SDL2pp::Texture> spriteTex;
+    std::shared_ptr<SDL2pp::Texture> spriteTexturePtr;
 };
 
 } // namespace Client

@@ -2,7 +2,6 @@
 
 #include "EventHandler.h"
 #include "PeriodicCaller.h"
-#include "ScreenPoint.h"
 
 #include "SDL2pp/Window.hh"
 #include "SDL2pp/Renderer.hh"
@@ -14,6 +13,7 @@ namespace Client
 {
 class Simulation;
 class World;
+class UserInterface;
 class Camera;
 class ScreenRect;
 
@@ -33,7 +33,7 @@ public:
      *                     are in decimal percent.
      */
     Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& inWindow,
-             Simulation& inSim, std::function<double(void)> inGetProgress);
+             Simulation& inSim, UserInterface& inUI, std::function<double(void)> inGetProgress);
 
     /**
      * First renders all tiles in view, then renders all entities in view.
@@ -61,16 +61,10 @@ private:
     void renderEntities(Camera& camera, double alpha);
 
     /**
-     * Converts a tile's x,y indices into screen space coordinates.
-     * @return The screen space point that corresponds to the given indices.
+     * Renders all elements of the UserInterface.
+     * @param camera  The camera to render with.
      */
-    ScreenPoint tileToScreen(int xIndex, int yIndex, float zoom);
-
-    /**
-     * Converts a point in the world to a point in screen space.
-     * @return The screen space point that corresponds to the given point.
-     */
-    ScreenPoint worldToScreen(float x, float y, float zoom);
+    void renderUserInterface(Camera& camera);
 
     /**
      * Returns true if the given extent is within the given camera's bounds,
@@ -82,6 +76,7 @@ private:
     SDL2pp::Renderer& sdlRenderer;
     Simulation& sim;
     World& world;
+    UserInterface& ui;
     std::function<double(void)> getProgress;
 };
 

@@ -2,6 +2,7 @@
 #include "World.h"
 #include "Camera.h"
 #include "SimDefs.h"
+#include "TransformationHelpers.h"
 #include "Log.h"
 
 namespace AM
@@ -9,9 +10,21 @@ namespace AM
 namespace Client
 {
 
-UserInterface::UserInterface(World& inWorld)
-: world(inWorld)
+UserInterface::UserInterface(World& inWorld, const std::shared_ptr<SDL2pp::Texture>& inSpriteTexturePtr)
+: tileHighlightSprite{inSpriteTexturePtr, {(256 * 8), (512 * 0), 256, 512}, 256, 512}
+, tileHighlightIndex{0, 0}
+, world(inWorld)
+, spriteTexturePtr(inSpriteTexturePtr)
 {
+    // Push the terrain sprites to cycle through.
+    SDL2pp::Rect spritePosInTexture{(256 * 6), (512 * 0), 256, 512};
+    terrainSprites.push_back(Sprite{spriteTexturePtr, spritePosInTexture, 256, 512});
+
+    spritePosInTexture = {(256 * 6), (512 * 2), 256, 512};
+    terrainSprites.push_back(Sprite{spriteTexturePtr, spritePosInTexture, 256, 512});
+
+    spritePosInTexture = {(256 * 6), (512 * 3), 256, 512};
+    terrainSprites.push_back(Sprite{spriteTexturePtr, spritePosInTexture, 256, 512});
 }
 
 bool UserInterface::handleEvent(SDL_Event& event)
@@ -23,6 +36,9 @@ bool UserInterface::handleEvent(SDL_Event& event)
             // Temporarily consuming mouse events until the sim has some use
             // for them.
             return true;
+        case SDL_MOUSEBUTTONDOWN:
+            handleMouseButtonDown(event.button);
+            return true;
     }
 
     return false;
@@ -30,27 +46,49 @@ bool UserInterface::handleEvent(SDL_Event& event)
 
 void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
 {
-    // Account for the camera screen position and zoom factor.
+    // Save the tile index that the mouse is hovering over.
     Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
-    float screenX = (event.x + playerCamera.extent.x) / playerCamera.zoomFactor;
-    float screenY = (event.y + playerCamera.extent.y) / playerCamera.zoomFactor;
+    ScreenPoint screenPoint{static_cast<float>(event.x), static_cast<float>(event.y)};
+    tileHighlightIndex = TransformationHelpers::screenToTile(screenPoint, playerCamera);
+}
 
-    // Remove the half-tile X offset that we add to align tile sprites with
-    // non-tile sprites.
-    screenX -= (TILE_SCREEN_WIDTH / 2.f);
+void UserInterface::handleMouseButtonDown(SDL_MouseButtonEvent& event)
+{
+    switch(event.button) {
+        case SDL_BUTTON_LEFT:
+            cycleTile(event.x, event.y);
+            break;
+    }
+}
 
-    // Calc the scaling factor going from screen tiles to world tiles.
-    static const float TILE_WIDTH_SCALE
-        = static_cast<float>(TILE_WORLD_WIDTH) / TILE_SCREEN_WIDTH;
-    static const float TILE_HEIGHT_SCALE
-        = static_cast<float>(TILE_WORLD_HEIGHT) / TILE_SCREEN_HEIGHT;
+void UserInterface::cycleTile(int mouseX, int mouseY)
+{
+    // Find the tile index under the mouse's current position.
+    Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
+    ScreenPoint screenPoint{static_cast<float>(mouseX), static_cast<float>(mouseY)};
+    TileIndex tileIndex = TransformationHelpers::screenToTile(screenPoint, playerCamera);
 
-    // Calc the world position.
-    float worldX = ((2 * screenY) + screenX) * (TILE_WIDTH_SCALE);
-    float worldY = ((2 * screenY) - screenX) * (TILE_HEIGHT_SCALE) / 2;
+    // Determine which sprite the selected tile has.
+    unsigned int linearizedIndex = tileIndex.y * WORLD_WIDTH + tileIndex.x;
+    Sprite& tileSprite = world.terrainMap[linearizedIndex];
 
-    LOG_INFO("Mouse at screen: (%d, %d), world: (%.4f, %.4f)", event.x, event.y,
-             worldX, worldY);
+    unsigned int terrainSpriteIndex = 0;
+    switch (tileSprite.texExtent.y) {
+        case (512 * 0):
+            terrainSpriteIndex = 0;
+            break;
+        case (512 * 2):
+            terrainSpriteIndex = 1;
+            break;
+        case (512 * 3):
+            terrainSpriteIndex = 2;
+            break;
+    }
+
+    // Set the tile to the next sprite.
+    terrainSpriteIndex++;
+    terrainSpriteIndex %= 3;
+    world.terrainMap[linearizedIndex] = terrainSprites[terrainSpriteIndex];
 }
 
 } // End namespace Client

@@ -77,6 +77,9 @@ private:
     SDL2pp::Window sdlWindow;
     SDL2pp::Renderer sdlRenderer;
 
+    // TODO: Replace with texture loader.
+    std::shared_ptr<SDL2pp::Texture> spriteTexturePtr;
+
     Network network;
     /** Calls network.tick() at the network tick rate. */
     PeriodicCaller networkCaller;
@@ -85,11 +88,11 @@ private:
     /** Calls sim.tick() at the sim tick rate. */
     PeriodicCaller simCaller;
 
+    UserInterface userInterface;
+
     Renderer renderer;
     /** Calls renderer.render() at our frame rate. */
     PeriodicCaller rendererCaller;
-
-    UserInterface userInterface;
 
     /** An ordered vector of event handlers. */
     std::vector<EventHandler*> eventHandlers;

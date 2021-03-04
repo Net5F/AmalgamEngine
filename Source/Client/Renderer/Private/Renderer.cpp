@@ -1,26 +1,26 @@
 #include "Renderer.h"
-#include "World.h"
 #include "Simulation.h"
+#include "UserInterface.h"
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Sprite.h"
 #include "Camera.h"
 #include "MovementHelpers.h"
+#include "TransformationHelpers.h"
 #include "ScreenRect.h"
-#include "SDL2pp/Rect.hh"
 #include "Log.h"
 #include "Ignore.h"
-#include <cmath>
 
 namespace AM
 {
 namespace Client
 {
 Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& window,
-                   Simulation& inSim, std::function<double(void)> inGetProgress)
+                   Simulation& inSim, UserInterface& inUI, std::function<double(void)> inGetProgress)
 : sdlRenderer(inSdlRenderer)
 , sim(inSim)
 , world(sim.getWorld())
+, ui(inUI)
 , getProgress(inGetProgress)
 {
     // Init the groups that we'll be using.
@@ -52,7 +52,7 @@ void Renderer::render()
 
     // Get iso screen coords for the center point of camera.
     ScreenPoint lerpedCameraCenter
-        = worldToScreen(lerpedCamera.position.x, lerpedCamera.position.y,
+        = TransformationHelpers::worldToScreen(lerpedCamera.position,
                         lerpedCamera.zoomFactor);
 
     // Calc where the top left of the lerpedCamera is in screen space.
@@ -76,6 +76,9 @@ void Renderer::render()
     // Render all entities, lerping between their previous and next positions.
     renderEntities(lerpedCamera, alpha);
 
+    // Render all UI elements.
+    renderUserInterface(lerpedCamera);
+
     sdlRenderer.Present();
 }
 
@@ -92,35 +95,16 @@ bool Renderer::handleEvent(SDL_Event& event)
 
 void Renderer::renderTiles(Camera& camera)
 {
-    for (unsigned int y = 0; y < WORLD_HEIGHT; ++y) {
-        for (unsigned int x = 0; x < WORLD_WIDTH; ++x) {
-            // Get iso screen coords for this tile.
-            ScreenPoint tileScreenPos = tileToScreen(x, y, camera.zoomFactor);
-
-            // Get the sprite's vertical offset (iso sprites may have extra
-            // vertical space to show depth, we just want the tile.)
+    for (int y = 0; y < static_cast<int>(WORLD_HEIGHT); ++y) {
+        for (int x = 0; x < static_cast<int>(WORLD_WIDTH); ++x) {
+            // Get iso screen extent for this tile.
             Sprite& sprite{world.terrainMap[y * WORLD_WIDTH + x]};
-            float spriteOffsetY
-                = (sprite.height - TILE_SCREEN_HEIGHT - TILE_SCREEN_EDGE_HEIGHT)
-                  * camera.zoomFactor;
-
-            // Apply the camera adjustment.
-            int adjustedX
-                = static_cast<int>(round(tileScreenPos.x - camera.extent.x));
-            int adjustedY = static_cast<int>(
-                round(tileScreenPos.y - spriteOffsetY - camera.extent.y));
-
-            // Apply the camera's zoom.
-            int zoomedWidth
-                = static_cast<int>(round(sprite.width * camera.zoomFactor));
-            int zoomedHeight
-                = static_cast<int>(round(sprite.height * camera.zoomFactor));
+            SDL2pp::Rect screenExtent = TransformationHelpers::tileToScreenExtent(
+                {x, y}, camera, sprite);
 
             // Draw the tile.
-            SDL2pp::Rect spriteScreenExtent
-                = {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
             sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
-                             spriteScreenExtent);
+                             screenExtent);
         }
     }
 }
@@ -134,68 +118,41 @@ void Renderer::renderEntities(Camera& camera, double alpha)
         auto [sprite, position, previousPos]
             = group.get<Sprite, Position, PreviousPosition>(entity);
 
-        // Get the lerp'd world position and translate it to iso screen space.
+        // Get the lerp'd world position.
         Position lerp = MovementHelpers::interpolatePosition(previousPos,
                                                              position, alpha);
-        ScreenPoint entityScreenPos
-            = worldToScreen(lerp.x, lerp.y, camera.zoomFactor);
 
-        // Apply the camera adjustment to the entity.
-        float adjustedX = entityScreenPos.x - camera.extent.x;
-        float adjustedY = entityScreenPos.y - camera.extent.y;
-
-        // Prep the sprite data, accounting for camera zoom.
-        float zoomedWidth = sprite.width * camera.zoomFactor;
-        float zoomedHeight = sprite.height * camera.zoomFactor;
+        // Get the iso screen extent for the lerped sprite.
+        SDL2pp::Rect screenExtent
+            = TransformationHelpers::worldToScreenExtent(lerp, camera, sprite);
 
         // If the entity's sprite is within the camera bounds, render it.
-        if (isWithinCameraBounds(adjustedX, adjustedY, zoomedWidth,
-                                 zoomedHeight, camera)) {
-            SDL2pp::Rect spriteScreenExtent{
-                static_cast<int>(round(adjustedX)),
-                static_cast<int>(round(adjustedY)),
-                static_cast<int>(round(zoomedWidth)),
-                static_cast<int>(round(zoomedHeight))};
+        if (isWithinCameraBounds(screenExtent.x, screenExtent.y,
+            screenExtent.w, screenExtent.h, camera)) {
             sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
-                             spriteScreenExtent);
+                             screenExtent);
         }
     }
 }
 
-ScreenPoint Renderer::tileToScreen(int xIndex, int yIndex, float zoom)
+void Renderer::renderUserInterface(Camera& camera)
 {
-    // Convert tile index to isometric screen position.
-    float screenX = (xIndex - yIndex) * (TILE_SCREEN_WIDTH / 2.f);
-    float screenY = (xIndex + yIndex) * (TILE_SCREEN_HEIGHT / 2.f);
+    /* Render the mouse highlight (currently just a tile sprite.) */
+    // Get iso screen extent for this tile.
+    TileIndex& highlightIndex = ui.tileHighlightIndex;
+    Sprite& highlightSprite = ui.tileHighlightSprite;
+    SDL2pp::Rect screenExtent = TransformationHelpers::tileToScreenExtent(highlightIndex,
+        camera, highlightSprite);
 
-    // Apply the camera zoom.
-    screenX *= zoom;
-    screenY *= zoom;
+    // Set the texture's alpha to make the highlight transparent.
+    highlightSprite.texturePtr->SetAlphaMod(150);
 
-    return {screenX, screenY};
-}
+    // Draw the highlight.
+    sdlRenderer.Copy(*(highlightSprite.texturePtr), highlightSprite.texExtent,
+                     screenExtent);
 
-ScreenPoint Renderer::worldToScreen(float x, float y, float zoom)
-{
-    // Calc the scaling factor going from world tiles to screen tiles.
-    static const float TILE_WIDTH_SCALE
-        = static_cast<float>(TILE_SCREEN_WIDTH) / TILE_WORLD_WIDTH;
-    static const float TILE_HEIGHT_SCALE
-        = static_cast<float>(TILE_SCREEN_HEIGHT) / TILE_WORLD_HEIGHT;
-
-    // Convert cartesian world point to isometric screen point.
-    float screenX = (x - y) * (TILE_WIDTH_SCALE / 2.f);
-    float screenY = (x + y) * (TILE_HEIGHT_SCALE / 2.f);
-
-    // Add a half tile X-axis offset, since (0, 0) starts at the midpoint in a
-    // tile sprite, but doesn't in a non-tile sprite.
-    screenX += (TILE_SCREEN_WIDTH / 2.f);
-
-    // Apply the camera zoom.
-    screenX *= zoom;
-    screenY *= zoom;
-
-    return {screenX, screenY};
+    // Set the texture's alpha back.
+    highlightSprite.texturePtr->SetAlphaMod(255);
 }
 
 bool Renderer::isWithinCameraBounds(float x, float y, float width, float height,

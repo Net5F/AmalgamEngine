@@ -1,10 +1,8 @@
 target_sources(Client
 	PRIVATE
 		Private/Renderer.cpp
-		Private/IsoHelpers.cpp
 	PUBLIC
 		Public/Renderer.h
-		Public/IsoHelpers.h
 		Public/ScreenPoint.h
 		Public/ScreenRect.h
 )

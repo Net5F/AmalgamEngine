@@ -18,19 +18,19 @@ Application::Application()
 , sdlWindow("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
+, spriteTexturePtr(std::make_shared<SDL2pp::Texture>(
+                   sdlRenderer, "Resources/iso_test_sprites.png"))
 , network()
 , networkCaller(std::bind(&Network::tick, &network), NETWORK_TICK_TIMESTEP_S,
                 "Network", true)
-// TODO: Replace texture pointer with texture loader.
-, sim(network, std::make_shared<SDL2pp::Texture>(
-                   sdlRenderer, "Resources/iso_test_sprites.png"))
+, sim(network, spriteTexturePtr)
 , simCaller(std::bind(&Simulation::tick, &sim), SIM_TICK_TIMESTEP_S, "Sim",
             false)
-, renderer(sdlRenderer, sdlWindow, sim,
+, userInterface(sim.getWorld(), spriteTexturePtr)
+, renderer(sdlRenderer, sdlWindow, sim, userInterface,
            std::bind(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind(&Renderer::render, &renderer),
                  Renderer::RENDER_FRAME_TIMESTEP_S, "Renderer", true)
-, userInterface(sim.getWorld())
 , eventHandlers{this, &renderer, &userInterface, &sim}
 , exitRequested(false)
 {
