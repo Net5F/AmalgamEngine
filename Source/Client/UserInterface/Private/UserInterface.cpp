@@ -30,6 +30,8 @@ UserInterface::UserInterface(World& inWorld, const std::shared_ptr<SDL2pp::Textu
 bool UserInterface::handleEvent(SDL_Event& event)
 {
     switch (event.type) {
+        // TODO: If the player moves through key presses but doesn't move the
+        //       mouse, the highlight won't update. Decide how to handle it.
         case SDL_MOUSEMOTION:
             handleMouseMotion(event.motion);
 

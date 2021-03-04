@@ -29,7 +29,7 @@ public:
     /**
      * Converts a point in screen space to a position in world space.
      */
-    static Position screenToWorld(const ScreenPoint screenPoint);
+    static Position screenToWorld(const ScreenPoint screenPoint, const float zoom);
 
     /**
      * Returns a final screen space extent for the given position, camera,
