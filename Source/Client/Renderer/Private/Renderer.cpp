@@ -93,7 +93,7 @@ bool Renderer::handleEvent(SDL_Event& event)
     return false;
 }
 
-void Renderer::renderTiles(Camera& camera)
+void Renderer::renderTiles(const Camera& camera)
 {
     for (int y = 0; y < static_cast<int>(WORLD_HEIGHT); ++y) {
         for (int x = 0; x < static_cast<int>(WORLD_WIDTH); ++x) {
@@ -102,14 +102,16 @@ void Renderer::renderTiles(Camera& camera)
             SDL2pp::Rect screenExtent = TransformationHelpers::tileToScreenExtent(
                 {x, y}, camera, sprite);
 
-            // Draw the tile.
-            sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
-                             screenExtent);
+            // If the tile's sprite is within the screen bounds, draw it.
+            if (isWithinScreenBounds(screenExtent, camera)) {
+                sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
+                                 screenExtent);
+            }
         }
     }
 }
 
-void Renderer::renderEntities(Camera& camera, double alpha)
+void Renderer::renderEntities(const Camera& camera, const double alpha)
 {
     // Render all entities with a Sprite, PreviousPosition and Position.
     auto group
@@ -126,16 +128,15 @@ void Renderer::renderEntities(Camera& camera, double alpha)
         SDL2pp::Rect screenExtent
             = TransformationHelpers::worldToScreenExtent(lerp, camera, sprite);
 
-        // If the entity's sprite is within the camera bounds, render it.
-        if (isWithinCameraBounds(screenExtent.x, screenExtent.y,
-            screenExtent.w, screenExtent.h, camera)) {
+        // If the entity's sprite is within the screen bounds, draw it.
+        if (isWithinScreenBounds(screenExtent, camera)) {
             sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
                              screenExtent);
         }
     }
 }
 
-void Renderer::renderUserInterface(Camera& camera)
+void Renderer::renderUserInterface(const Camera& camera)
 {
     /* Render the mouse highlight (currently just a tile sprite.) */
     // Get iso screen extent for this tile.
@@ -155,15 +156,21 @@ void Renderer::renderUserInterface(Camera& camera)
     highlightSprite.texturePtr->SetAlphaMod(255);
 }
 
-bool Renderer::isWithinCameraBounds(float x, float y, float width, float height,
-                                    Camera& camera)
+bool Renderer::isWithinScreenBounds(const SDL2pp::Rect& extent, const Camera& camera)
 {
-    // If the sprite is within view of the camera, return true.
-    if ((x + width) < 0 || (camera.extent.width < x) || ((y + height) < 0)
-        || (camera.extent.height < y)) {
+    // The extent is in final screen coordinates, so we only need to check if
+    // it's within the rect formed by (0, 0) and (camera.width, camera.height).
+    bool pastLeftBound = ((extent.x + extent.w) < 0);
+    bool pastRightBound = (camera.extent.width < extent.x);
+    bool pastTopBound = ((extent.y + extent.h) < 0);
+    bool pastBottomBound = (camera.extent.height < extent.y);
+
+    // If the extent is outside of any camera bound, return false.
+    if (pastLeftBound || pastRightBound || pastTopBound || pastBottomBound) {
         return false;
     }
     else {
+        // Extent is within the camera bounds, return true.
         return true;
     }
 }

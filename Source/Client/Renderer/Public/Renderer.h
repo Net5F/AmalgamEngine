@@ -5,6 +5,7 @@
 
 #include "SDL2pp/Window.hh"
 #include "SDL2pp/Renderer.hh"
+#include "SDL2pp/Rect.hh"
 
 namespace AM
 {
@@ -50,7 +51,7 @@ private:
      * Renders the tiles from the World's tile map.
      * @param camera  The camera to render with.
      */
-    void renderTiles(Camera& camera);
+    void renderTiles(const Camera& camera);
 
     /**
      * Renders all entities that have Sprite, Position and PreviousPosition
@@ -58,20 +59,22 @@ private:
      * @param camera  The camera to render with.
      * @param alpha  The alpha to lerp between positions with.
      */
-    void renderEntities(Camera& camera, double alpha);
+    void renderEntities(const Camera& camera, const double alpha);
 
     /**
      * Renders all elements of the UserInterface.
      * @param camera  The camera to render with.
      */
-    void renderUserInterface(Camera& camera);
+    void renderUserInterface(const Camera& camera);
 
     /**
      * Returns true if the given extent is within the given camera's bounds,
      * else false.
+     *
+     * @param extent  An extent in final screen coordinates.
+     * @param camera  A camera to use for screen width/height checks.
      */
-    bool isWithinCameraBounds(float x, float y, float width, float height,
-                              Camera& camera);
+    bool isWithinScreenBounds(const SDL2pp::Rect& extent, const Camera& camera);
 
     SDL2pp::Renderer& sdlRenderer;
     Simulation& sim;
