@@ -31,8 +31,11 @@ public:
         time we need it. */
     entt::entity playerEntity;
 
-    /** The map of tiles that makes up our world's terrain. */
-    std::vector<Sprite> terrainMap;
+    using TileLayer = std::vector<Sprite>;
+    /** The layers of our tile map.
+        Layer 0 is always the base terrain, the rest will sequentially be drawn
+        on top. */
+    std::vector<TileLayer> mapLayers;
 
     /** The mouse's current position in screen space. */
     ScreenPoint mouseScreenPoint;

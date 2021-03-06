@@ -72,7 +72,7 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
 
     // Determine which sprite the selected tile has.
     unsigned int linearizedIndex = tileIndex.y * WORLD_WIDTH + tileIndex.x;
-    Sprite& tileSprite = world.terrainMap[linearizedIndex];
+    Sprite& tileSprite = world.mapLayers[0][linearizedIndex];
 
     unsigned int terrainSpriteIndex = 0;
     switch (tileSprite.texExtent.y) {
@@ -90,7 +90,7 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     // Set the tile to the next sprite.
     terrainSpriteIndex++;
     terrainSpriteIndex %= 3;
-    world.terrainMap[linearizedIndex] = terrainSprites[terrainSpriteIndex];
+    world.mapLayers[0][linearizedIndex] = terrainSprites[terrainSpriteIndex];
 }
 
 } // End namespace Client

@@ -70,14 +70,14 @@ void Renderer::render()
     // Clear the screen to prepare for drawing.
     sdlRenderer.Clear();
 
-    // Render the world tiles first.
-    renderTiles(lerpedCamera);
+    // Draw the world tiles first.
+    drawTiles(lerpedCamera);
 
-    // Render all entities, lerping between their previous and next positions.
-    renderEntities(lerpedCamera, alpha);
+    // Draw all entities, lerping between their previous and next positions.
+    drawEntities(lerpedCamera, alpha);
 
-    // Render all UI elements.
-    renderUserInterface(lerpedCamera);
+    // Draw all UI elements.
+    drawUserInterface(lerpedCamera);
 
     sdlRenderer.Present();
 }
@@ -93,25 +93,33 @@ bool Renderer::handleEvent(SDL_Event& event)
     return false;
 }
 
-void Renderer::renderTiles(const Camera& camera)
+void Renderer::drawTiles(const Camera& camera)
 {
-    for (int y = 0; y < static_cast<int>(WORLD_HEIGHT); ++y) {
-        for (int x = 0; x < static_cast<int>(WORLD_WIDTH); ++x) {
-            // Get iso screen extent for this tile.
-            Sprite& sprite{world.terrainMap[y * WORLD_WIDTH + x]};
-            SDL2pp::Rect screenExtent = TransformationHelpers::tileToScreenExtent(
-                {x, y}, camera, sprite);
+    for (World::TileLayer& layer : world.mapLayers) {
+        for (int y = 0; y < static_cast<int>(WORLD_HEIGHT); ++y) {
+            for (int x = 0; x < static_cast<int>(WORLD_WIDTH); ++x) {
+                // If there's nothing in this tile, skip it.
+                unsigned int linearizedIndex = y * WORLD_WIDTH + x;
+                if (layer[linearizedIndex].texturePtr == nullptr) {
+                    continue;
+                }
 
-            // If the tile's sprite is within the screen bounds, draw it.
-            if (isWithinScreenBounds(screenExtent, camera)) {
-                sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
-                                 screenExtent);
+                // Get iso screen extent for this tile.
+                Sprite& sprite{layer[linearizedIndex]};
+                SDL2pp::Rect screenExtent = TransformationHelpers::tileToScreenExtent(
+                    {x, y}, camera, sprite);
+
+                // If the tile's sprite is within the screen bounds, draw it.
+                if (isWithinScreenBounds(screenExtent, camera)) {
+                    sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
+                                     screenExtent);
+                }
             }
         }
     }
 }
 
-void Renderer::renderEntities(const Camera& camera, const double alpha)
+void Renderer::drawEntities(const Camera& camera, const double alpha)
 {
     // Render all entities with a Sprite, PreviousPosition and Position.
     auto group
@@ -136,7 +144,7 @@ void Renderer::renderEntities(const Camera& camera, const double alpha)
     }
 }
 
-void Renderer::renderUserInterface(const Camera& camera)
+void Renderer::drawUserInterface(const Camera& camera)
 {
     /* Render the mouse highlight (currently just a tile sprite.) */
     // Get iso screen extent for this tile.

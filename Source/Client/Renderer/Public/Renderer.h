@@ -48,24 +48,24 @@ public:
 
 private:
     /**
-     * Renders the tiles from the World's tile map.
-     * @param camera  The camera to render with.
+     * Draws the tiles from the World's tile map.
+     * @param camera  The camera to draw with.
      */
-    void renderTiles(const Camera& camera);
+    void drawTiles(const Camera& camera);
 
     /**
-     * Renders all entities that have Sprite, Position and PreviousPosition
+     * Draws all entities that have Sprite, Position and PreviousPosition
      * components.
-     * @param camera  The camera to render with.
+     * @param camera  The camera to draw with.
      * @param alpha  The alpha to lerp between positions with.
      */
-    void renderEntities(const Camera& camera, const double alpha);
+    void drawEntities(const Camera& camera, const double alpha);
 
     /**
-     * Renders all elements of the UserInterface.
-     * @param camera  The camera to render with.
+     * Draws all elements of the UserInterface.
+     * @param camera  The camera to draw with.
      */
-    void renderUserInterface(const Camera& camera);
+    void drawUserInterface(const Camera& camera);
 
     /**
      * Returns true if the given extent is within the given camera's bounds,
