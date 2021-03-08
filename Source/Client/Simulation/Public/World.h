@@ -12,6 +12,9 @@ namespace AM
 {
 namespace Client
 {
+
+class TileIndex;
+
 /**
  * Holds world state and manages the persistence of that state.
  *
@@ -39,6 +42,9 @@ public:
 
     /** The mouse's current position in screen space. */
     ScreenPoint mouseScreenPoint;
+
+private:
+    void addTile(unsigned int layer, const TileIndex& index, const Sprite& sprite);
 };
 
 } // namespace Client

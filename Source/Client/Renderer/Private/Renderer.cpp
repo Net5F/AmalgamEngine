@@ -70,15 +70,13 @@ void Renderer::render()
     // Clear the screen to prepare for drawing.
     sdlRenderer.Clear();
 
-    // Draw the world tiles first.
-    drawTiles(lerpedCamera);
-
-    // Draw all entities, lerping between their previous and next positions.
-    drawEntities(lerpedCamera, alpha);
+    // Draw all tiles and entities.
+    renderWorld(lerpedCamera, alpha);
 
     // Draw all UI elements.
-    drawUserInterface(lerpedCamera);
+    renderUserInterface(lerpedCamera);
 
+    // Render the finished buffer to the screen.
     sdlRenderer.Present();
 }
 
@@ -93,19 +91,20 @@ bool Renderer::handleEvent(SDL_Event& event)
     return false;
 }
 
-void Renderer::drawTiles(const Camera& camera)
+void Renderer::renderWorld(const Camera& camera, const double alpha)
 {
-    for (World::TileLayer& layer : world.mapLayers) {
+    // Draw all tiles, layer-by-layer.
+    for (unsigned int i = 0; i < world.mapLayers.size(); ++i) {
         for (int y = 0; y < static_cast<int>(WORLD_HEIGHT); ++y) {
             for (int x = 0; x < static_cast<int>(WORLD_WIDTH); ++x) {
                 // If there's nothing in this tile, skip it.
                 unsigned int linearizedIndex = y * WORLD_WIDTH + x;
-                if (layer[linearizedIndex].texturePtr == nullptr) {
+                if (world.mapLayers[i][linearizedIndex].texturePtr == nullptr) {
                     continue;
                 }
 
                 // Get iso screen extent for this tile.
-                Sprite& sprite{layer[linearizedIndex]};
+                Sprite& sprite{world.mapLayers[i][linearizedIndex]};
                 SDL2pp::Rect screenExtent = TransformationHelpers::tileToScreenExtent(
                     {x, y}, camera, sprite);
 
@@ -117,11 +116,8 @@ void Renderer::drawTiles(const Camera& camera)
             }
         }
     }
-}
 
-void Renderer::drawEntities(const Camera& camera, const double alpha)
-{
-    // Render all entities with a Sprite, PreviousPosition and Position.
+    // Draw all entities with a Sprite, PreviousPosition and Position.
     auto group
         = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
     for (entt::entity entity : group) {
@@ -144,7 +140,7 @@ void Renderer::drawEntities(const Camera& camera, const double alpha)
     }
 }
 
-void Renderer::drawUserInterface(const Camera& camera)
+void Renderer::renderUserInterface(const Camera& camera)
 {
     /* Render the mouse highlight (currently just a tile sprite.) */
     // Get iso screen extent for this tile.

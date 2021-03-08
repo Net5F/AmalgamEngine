@@ -2,6 +2,7 @@
 
 #include "EventHandler.h"
 #include "PeriodicCaller.h"
+#include "TileIndex.h"
 
 #include "SDL2pp/Window.hh"
 #include "SDL2pp/Renderer.hh"
@@ -48,24 +49,19 @@ public:
 
 private:
     /**
-     * Draws the tiles from the World's tile map.
+     * Render the tiles from the World's tile map, and all entities that have
+     * Sprite, Position, and PreviousPosition components.
+     *
      * @param camera  The camera to draw with.
+     * @param alpha  For entities, the alpha to lerp between positions with.
      */
-    void drawTiles(const Camera& camera);
+    void renderWorld(const Camera& camera, const double alpha);
 
     /**
-     * Draws all entities that have Sprite, Position and PreviousPosition
-     * components.
-     * @param camera  The camera to draw with.
-     * @param alpha  The alpha to lerp between positions with.
-     */
-    void drawEntities(const Camera& camera, const double alpha);
-
-    /**
-     * Draws all elements of the UserInterface.
+     * Render all elements of the UserInterface.
      * @param camera  The camera to draw with.
      */
-    void drawUserInterface(const Camera& camera);
+    void renderUserInterface(const Camera& camera);
 
     /**
      * Returns true if the given extent is within the given camera's bounds,
