@@ -88,11 +88,11 @@ void WorldSim::sendNextInput()
     clientInput.tickNum = currentTick;
 
     if (isMovingRight) {
-        clientInput.input.inputStates[Input::Left] = Input::Pressed;
+        clientInput.input.inputStates[Input::XUp] = Input::Pressed;
         isMovingRight = false;
     }
     else {
-        clientInput.input.inputStates[Input::Right] = Input::Pressed;
+        clientInput.input.inputStates[Input::XDown] = Input::Pressed;
         isMovingRight = true;
     }
 

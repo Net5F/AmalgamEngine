@@ -38,6 +38,7 @@ void PlayerMovementSystem::processMovements()
         = registry.get<PreviousPosition>(world.playerEntity);
     previousPosition.x = currentPosition.x;
     previousPosition.y = currentPosition.y;
+    previousPosition.z = currentPosition.z;
 
     if (!RUN_OFFLINE) {
         // Receive any player entity updates from the server.
@@ -54,8 +55,9 @@ void PlayerMovementSystem::processMovements()
 
             // Check if there was a mismatch between the positions we had and
             // where the server thought we should be.
-            if (previousPosition.x != currentPosition.x
-                || previousPosition.y != currentPosition.y) {
+            if ((previousPosition.x != currentPosition.x)
+                || (previousPosition.y != currentPosition.y)
+                || (previousPosition.z != currentPosition.z)) {
                 LOG_INFO("Predicted position mismatched after replay: (%.6f, "
                          "%.6f) -> (%.6f, %.6f)",
                          previousPosition.x, previousPosition.y,
@@ -114,10 +116,12 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         const Movement& receivedMovement = playerUpdate->movement;
         currentMovement.velX = receivedMovement.velX;
         currentMovement.velY = receivedMovement.velY;
+        currentMovement.velZ = receivedMovement.velZ;
 
         const Position& receivedPosition = playerUpdate->position;
         currentPosition.x = receivedPosition.x;
         currentPosition.y = receivedPosition.y;
+        currentPosition.z = receivedPosition.z;
 
         /* Check if the input is mismatched. */
         // Check that the diff is valid.
@@ -139,6 +143,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
             // back.
             previousPosition.x = currentPosition.x;
             previousPosition.y = currentPosition.y;
+            previousPosition.z = currentPosition.z;
         }
 
         receivedUpdate = network.receivePlayerUpdate();

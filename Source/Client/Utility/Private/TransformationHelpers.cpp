@@ -12,8 +12,6 @@ namespace Client
 
 ScreenPoint TransformationHelpers::worldToScreen(const Position position, const float zoom)
 {
-    // TODO: Figure out how to handle Z.
-
     // Calc the scaling factor going from world tiles to screen tiles.
     static const float TILE_WIDTH_SCALE
         = static_cast<float>(TILE_SCREEN_WIDTH) / TILE_WORLD_WIDTH;
@@ -22,7 +20,7 @@ ScreenPoint TransformationHelpers::worldToScreen(const Position position, const 
 
     // Convert cartesian world point to isometric screen point.
     float screenX = (position.x - position.y) * (TILE_WIDTH_SCALE / 2.f);
-    float screenY = (position.x + position.y) * (TILE_HEIGHT_SCALE / 2.f);
+    float screenY = (position.x + position.y + (position.z * 2)) * (TILE_HEIGHT_SCALE / 2.f);
 
     // Apply the camera zoom.
     screenX *= zoom;
@@ -104,7 +102,7 @@ SDL2pp::Rect TransformationHelpers::tileToScreenExtent(const TileIndex& index, c
 
 TileIndex TransformationHelpers::worldToTile(const Position& position)
 {
-    // TODO: Figure out how to handle Z.
+    // Our tiles are 2D, so Z doesn't matter.
     return {static_cast<int>(position.x / TILE_WORLD_WIDTH)
             , static_cast<int>(position.y / TILE_WORLD_HEIGHT)};
 }

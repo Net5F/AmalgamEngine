@@ -16,6 +16,7 @@ void MovementHelpers::moveEntity(Position& position, Movement& movement,
     // Update the position.
     position.x += (deltaSeconds * movement.velX);
     position.y += (deltaSeconds * movement.velY);
+    position.z += (deltaSeconds * movement.velZ);
 }
 
 Position MovementHelpers::interpolatePosition(PreviousPosition& previousPos,
@@ -23,7 +24,8 @@ Position MovementHelpers::interpolatePosition(PreviousPosition& previousPos,
 {
     float interpX = (position.x * alpha) + (previousPos.x * (1.0 - alpha));
     float interpY = (position.y * alpha) + (previousPos.y * (1.0 - alpha));
-    return {interpX, interpY};
+    float interpZ = (position.z * alpha) + (previousPos.z * (1.0 - alpha));
+    return {interpX, interpY, interpZ};
 }
 
 void MovementHelpers::updateVelocity(Movement& movement,
@@ -33,61 +35,38 @@ void MovementHelpers::updateVelocity(Movement& movement,
     // TODO: Ignoring while velocity is constant for testing.
     ignore(deltaSeconds);
 
-    static constexpr double VELOCITY = 20;
-    // Handle up/down (favors up).
-    if (inputStates[Input::Up] == Input::Pressed) {
+    static constexpr double VELOCITY = 30;
+    // Y-axis (favors up).
+    if (inputStates[Input::YUp] == Input::Pressed) {
         movement.velY = -VELOCITY;
-        //        movement.velY -= (acceleration * deltaSeconds);
-        //
-        //        if (movement.velY < -(movement.maxVelY)) {
-        //            movement.velY = -(movement.maxVelY);
-        //        }
     }
-    else if (inputStates[Input::Down] == Input::Pressed) {
+    else if (inputStates[Input::YDown] == Input::Pressed) {
         movement.velY = VELOCITY;
-        //        movement.velY += (acceleration * deltaSeconds);
-        //
-        //        if (movement.velY > movement.maxVelY) {
-        //            movement.velY = movement.maxVelY;
-        //        }
     }
     else {
-        //        // Slow the entity down.
-        //        if (movement.velY > 0) {
-        //            movement.velY -= (acceleration * deltaSeconds);
-        //        }
-        //        else if (movement.velY < 0) {
-        //            movement.velY += (acceleration * deltaSeconds);
-        //        }
         movement.velY = 0;
     }
 
-    // Handle left/right (favors right).
-    if (inputStates[Input::Left] == Input::Pressed) {
-        movement.velX = -VELOCITY;
-        //        movement.velX -= (acceleration * deltaSeconds);
-        //
-        //        if (movement.velX < -(movement.maxVelX)) {
-        //            movement.velX = -(movement.maxVelX);
-        //        }
-    }
-    else if (inputStates[Input::Right] == Input::Pressed) {
+    // X-axis (favors up).
+    if (inputStates[Input::XUp] == Input::Pressed) {
         movement.velX = VELOCITY;
-        //        movement.velX += (acceleration * deltaSeconds);
-        //
-        //        if (movement.velX > movement.maxVelX) {
-        //            movement.velX = movement.maxVelX;
-        //        }
+    }
+    else if (inputStates[Input::XDown] == Input::Pressed) {
+        movement.velX = -VELOCITY;
     }
     else {
-        //        // Slow the entity down.
-        //        if (movement.velX > 0) {
-        //            movement.velX -= (acceleration * deltaSeconds);
-        //        }
-        //        else if (movement.velX < 0) {
-        //            movement.velX += (acceleration * deltaSeconds);
-        //        }
         movement.velX = 0;
+    }
+
+    // Z-axis (favors up).
+    if (inputStates[Input::ZUp] == Input::Pressed) {
+        movement.velZ = -VELOCITY;
+    }
+    else if (inputStates[Input::ZDown] == Input::Pressed) {
+        movement.velZ = VELOCITY;
+    }
+    else {
+        movement.velZ = 0;
     }
 }
 

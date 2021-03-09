@@ -11,12 +11,14 @@ public:
     //--------------------------------------------------------------------------
     float velX{0};
     float velY{0};
+    float velZ{0};
 
     //--------------------------------------------------------------------------
     // Non-replicated data
     //--------------------------------------------------------------------------
     float maxVelX{DEFAULT_MAX_VEL};
     float maxVelY{DEFAULT_MAX_VEL};
+    float maxVelZ{DEFAULT_MAX_VEL};
 };
 
 template<typename S>
@@ -24,6 +26,7 @@ void serialize(S& serializer, Movement& movement)
 {
     serializer.value4b(movement.velX);
     serializer.value4b(movement.velY);
+    serializer.value4b(movement.velZ);
 }
 
 } // namespace AM

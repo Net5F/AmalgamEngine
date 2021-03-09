@@ -2,7 +2,6 @@
 
 #include "EventHandler.h"
 #include "PeriodicCaller.h"
-#include "TileIndex.h"
 
 #include "SDL2pp/Window.hh"
 #include "SDL2pp/Renderer.hh"
