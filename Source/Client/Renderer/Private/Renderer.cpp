@@ -5,11 +5,14 @@
 #include "PreviousPosition.h"
 #include "Sprite.h"
 #include "Camera.h"
+#include "BoundingBox.h"
 #include "MovementHelpers.h"
 #include "TransformationHelpers.h"
 #include "ScreenRect.h"
 #include "Log.h"
 #include "Ignore.h"
+
+#include <SDL2/SDL2_gfxPrimitives.h>
 
 namespace AM
 {
@@ -66,6 +69,9 @@ void Renderer::render()
     playerCamera.extent.x = lerpedCamera.extent.x;
     playerCamera.extent.y = lerpedCamera.extent.y;
 
+    /* Update the world bounds of sprites that are relevant to this frame. */
+    updateSpriteWorldBounds(alpha);
+
     /* Render. */
     // Clear the screen to prepare for drawing.
     sdlRenderer.Clear();
@@ -89,6 +95,24 @@ bool Renderer::handleEvent(SDL_Event& event)
     }
 
     return false;
+}
+
+void Renderer::updateSpriteWorldBounds(const double alpha)
+{
+    // Update all sprites that are on dynamic (moving) entities.
+    auto group
+        = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
+    for (entt::entity entity : group) {
+        auto [sprite, position, previousPos]
+            = group.get<Sprite, Position, PreviousPosition>(entity);
+
+        // Get the lerp'd world position.
+        Position lerp = MovementHelpers::interpolatePosition(previousPos,
+                                                             position, alpha);
+
+        // Update the sprite's world bounds.
+        MovementHelpers::moveSpriteWorldBounds(lerp, sprite);
+    }
 }
 
 void Renderer::renderWorld(const Camera& camera, const double alpha)
@@ -177,6 +201,49 @@ bool Renderer::isWithinScreenBounds(const SDL2pp::Rect& extent, const Camera& ca
         // Extent is within the camera bounds, return true.
         return true;
     }
+}
+
+void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
+{
+    // Transform all the vertices to screen space.
+    std::vector<ScreenPoint> verts;
+    Position position{box.minX, box.minY, box.minZ};
+    verts.push_back(TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    position = {box.maxX, box.minY, box.minZ};
+    verts.push_back(TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    position = {box.maxX, box.maxY, box.minZ};
+    verts.push_back(TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    position = {box.minX, box.maxY, box.minZ};
+    verts.push_back(TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+
+    position = {box.minX, box.minY, box.maxZ};
+    verts.push_back(TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    position = {box.maxX, box.minY, box.maxZ};
+    verts.push_back(TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    position = {box.maxX, box.maxY, box.maxZ};
+    verts.push_back(TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    position = {box.minX, box.maxY, box.maxZ};
+    verts.push_back(TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+
+    // Adjust all verts for the camera.
+    for (ScreenPoint& vert : verts) {
+        vert.x = std::round(vert.x - camera.extent.x);
+        vert.y = std::round(vert.y - camera.extent.y);
+    }
+
+    // Fill Sint arrays with the verts.
+    Sint16 xValues[8] = {};
+    Sint16 yValues[8] = {};
+    for (unsigned int i = 0; i < 8; ++i) {
+        xValues[i] = verts[i].x;
+        yValues[i] = verts[i].y;
+    }
+
+    // Print the faces.
+    filledPolygonRGBA(sdlRenderer.Get(), xValues, yValues, 4, 200, 0, 50, 150);
+    filledPolygonRGBA(sdlRenderer.Get(), &(xValues[4]), &(yValues[4]), 4, 255, 0, 0, 150);
+
+    sdlRenderer.SetDrawColor(0, 0, 0, 255);
 }
 
 } // namespace Client

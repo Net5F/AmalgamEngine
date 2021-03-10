@@ -10,6 +10,7 @@
 namespace AM
 {
 class Sprite;
+class BoundingBox;
 namespace Client
 {
 class Simulation;
@@ -48,6 +49,12 @@ public:
 
 private:
     /**
+     * Updates the world bounds for any dynamic entity that has a Sprite.
+     * (i.e. any entity with a Sprite, Position, and PreviousPosition)
+     */
+    void updateSpriteWorldBounds(const double alpha);
+
+    /**
      * Render the tiles from the World's tile map, and all entities that have
      * Sprite, Position, and PreviousPosition components.
      *
@@ -70,6 +77,12 @@ private:
      * @param camera  A camera to use for screen width/height checks.
      */
     bool isWithinScreenBounds(const SDL2pp::Rect& extent, const Camera& camera);
+
+    /**
+     * Draws the given box. Useful for debug visuals.
+     * Note: Don't use this for anything real, it's super slow.
+     */
+    void drawBoundingBox(const BoundingBox& box, const Camera& camera);
 
     SDL2pp::Renderer& sdlRenderer;
     Simulation& sim;

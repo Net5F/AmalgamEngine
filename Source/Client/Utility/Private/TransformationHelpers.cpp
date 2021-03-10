@@ -20,7 +20,7 @@ ScreenPoint TransformationHelpers::worldToScreen(const Position position, const 
 
     // Convert cartesian world point to isometric screen point.
     float screenX = (position.x - position.y) * (TILE_WIDTH_SCALE / 2.f);
-    float screenY = (position.x + position.y + (position.z * 2)) * (TILE_HEIGHT_SCALE / 2.f);
+    float screenY = (position.x + position.y - position.z) * (TILE_HEIGHT_SCALE / 2.f);
 
     // Apply the camera zoom.
     screenX *= zoom;

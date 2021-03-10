@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BoundingBox.h"
 #include "SDL2pp/Texture.hh"
 #include "SDL2pp/Rect.hh"
 #include <memory>
@@ -24,6 +25,13 @@ public:
     /** Width and height of the sprite in screen space. */
     int width{0};
     int height{0};
+
+    /** Model space bounds (relative, not positioned within the world). */
+    BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
+
+    /** World space bounds. Equal to modelBounds, adjusted for the entity's
+        current world Position. Used for determining draw order. */
+    BoundingBox worldBounds{0, 0, 0, 0, 0, 0};
 };
 
 } // namespace AM

@@ -2,6 +2,7 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Movement.h"
+#include "Sprite.h"
 #include "Ignore.h"
 
 namespace AM
@@ -60,14 +61,28 @@ void MovementHelpers::updateVelocity(Movement& movement,
 
     // Z-axis (favors up).
     if (inputStates[Input::ZUp] == Input::Pressed) {
-        movement.velZ = -VELOCITY;
+        movement.velZ = VELOCITY;
     }
     else if (inputStates[Input::ZDown] == Input::Pressed) {
-        movement.velZ = VELOCITY;
+        movement.velZ = -VELOCITY;
     }
     else {
         movement.velZ = 0;
     }
+}
+
+void MovementHelpers::moveSpriteWorldBounds(Position& position, Sprite& sprite)
+{
+    // Move the sprite's world bounds to the given position.
+    BoundingBox& modelBox = sprite.modelBounds;
+    BoundingBox& worldBox = sprite.worldBounds;
+
+    worldBox.minX = position.x + modelBox.minX;
+    worldBox.maxX = position.x + modelBox.maxX;
+    worldBox.minY = position.y + modelBox.minY;
+    worldBox.maxY = position.y + modelBox.maxY;
+    worldBox.minZ = position.z + modelBox.minZ;
+    worldBox.maxZ = position.z + modelBox.maxZ;
 }
 
 } // namespace AM

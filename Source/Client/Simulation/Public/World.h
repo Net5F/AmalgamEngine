@@ -10,6 +10,7 @@
 
 namespace AM
 {
+class BoundingBox;
 namespace Client
 {
 
@@ -44,7 +45,12 @@ public:
     ScreenPoint mouseScreenPoint;
 
 private:
-    void addTile(unsigned int layer, const TileIndex& index, const Sprite& sprite);
+    /**
+     * Adds a tile sprite to the tile map at the given layer and position.
+     */
+    void addTile(unsigned int layer, const TileIndex& index
+                 , const std::shared_ptr<SDL2pp::Texture>& texturePtr
+                 , const SDL2pp::Rect& extent, const BoundingBox& modelBounds);
 };
 
 } // namespace Client

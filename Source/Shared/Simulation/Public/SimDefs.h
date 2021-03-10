@@ -39,6 +39,11 @@ static constexpr unsigned int TILE_SCREEN_HEIGHT = 128;
 /** The height of the edge of a tile in screen coordinates. */
 static constexpr unsigned int TILE_SCREEN_EDGE_HEIGHT = 10;
 
+/** The total width of a standard tile sprite. */
+static constexpr unsigned int TILE_SPRITE_WIDTH = 256;
+/** The total height of a standard tile sprite. */
+static constexpr unsigned int TILE_SPRITE_HEIGHT = 512;
+
 /** The width of the world's terrain map in tiles. */
 static constexpr unsigned int WORLD_WIDTH = 10;
 /** The height of the world's terrain map in tiles. */

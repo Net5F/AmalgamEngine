@@ -93,7 +93,8 @@ void Simulation::connect()
 
     // Set up the player's visual components.
     SDL2pp::Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
-    registry.emplace<Sprite>(newEntity, spriteTexturePtr, spritePosInTexture, 64, 64);
+    registry.emplace<Sprite>(newEntity, spriteTexturePtr, spritePosInTexture, 64, 64,
+        BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
                              ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
@@ -120,8 +121,9 @@ void Simulation::fakeConnection()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    SDL2pp::Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
-    registry.emplace<Sprite>(newEntity, spriteTexturePtr, spritePosInTexture, 64, 64);
+    SDL2pp::Rect spritePosInTexture((256 * 4 + 110), 256 + 135, 64, 64);
+    registry.emplace<Sprite>(newEntity, spriteTexturePtr, spritePosInTexture, 64, 64,
+        BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
                              ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});

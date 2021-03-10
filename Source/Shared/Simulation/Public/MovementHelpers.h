@@ -9,6 +9,7 @@ namespace AM
 class Position;
 class PreviousPosition;
 class Movement;
+class Sprite;
 
 /**
  * Shared static functions for moving entities.
@@ -37,6 +38,11 @@ public:
      */
     static Position interpolatePosition(PreviousPosition& previousPos,
                                         Position& position, double alpha);
+
+    /**
+     * Moves a sprite's world bounds to the given position.
+     */
+    static void moveSpriteWorldBounds(Position& position, Sprite& sprite);
 
 private:
     /**
