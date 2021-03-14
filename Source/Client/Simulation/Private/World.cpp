@@ -35,17 +35,21 @@ World::World(const std::shared_ptr<SDL2pp::Texture>& inSpriteTexturePtr)
 
     // Add some walls to layer 2.
     SDL2pp::Rect wallPosInTexture{(256 * 8), (512 * 1), 256, 512};
-    addTile(2, {2, 0}, inSpriteTexturePtr, wallPosInTexture, BoundingBox{0, 13.5, 0, 32, 0, 73});
-    addTile(2, {2, 1}, inSpriteTexturePtr, wallPosInTexture, BoundingBox{0, 13.5, 0, 32, 0, 73});
-    addTile(2, {2, 2}, inSpriteTexturePtr, wallPosInTexture, BoundingBox{0, 13.5, 0, 32, 0, 73});
+    addTile(2, {2, 0}, inSpriteTexturePtr, wallPosInTexture,
+            BoundingBox{0, 13.5, 0, 32, 0, 73});
+    addTile(2, {2, 1}, inSpriteTexturePtr, wallPosInTexture,
+            BoundingBox{0, 13.5, 0, 32, 0, 73});
+    addTile(2, {2, 2}, inSpriteTexturePtr, wallPosInTexture,
+            BoundingBox{0, 13.5, 0, 32, 0, 73});
 
     SDL2pp::Rect wallPosInTexture2{(256 * 8), (512 * 2), 256, 512};
-    addTile(2, {0, 2}, inSpriteTexturePtr, wallPosInTexture2, BoundingBox{0, 32, 0, 13.5, 0, 73});
+    addTile(2, {0, 2}, inSpriteTexturePtr, wallPosInTexture2,
+            BoundingBox{0, 32, 0, 13.5, 0, 73});
 }
 
-void World::addTile(unsigned int layer, const TileIndex& index
-                 , const std::shared_ptr<SDL2pp::Texture>& texturePtr, const SDL2pp::Rect& extent
-                 , const BoundingBox& modelBounds)
+void World::addTile(unsigned int layer, const TileIndex& index,
+                    const std::shared_ptr<SDL2pp::Texture>& texturePtr,
+                    const SDL2pp::Rect& extent, const BoundingBox& modelBounds)
 {
     // Convert the 2d tile position into an index into the 1d array.
     unsigned int linearizedIndex = index.y * WORLD_WIDTH + index.x;
@@ -59,8 +63,8 @@ void World::addTile(unsigned int layer, const TileIndex& index
     sprite.modelBounds = modelBounds;
 
     // Move the sprite's world bounds to match the tile's world position.
-    Position tilePosition{static_cast<float>(index.x * TILE_WORLD_WIDTH)
-        , static_cast<float>(index.y * TILE_WORLD_HEIGHT), 0};
+    Position tilePosition{static_cast<float>(index.x * TILE_WORLD_WIDTH),
+                          static_cast<float>(index.y * TILE_WORLD_HEIGHT), 0};
     MovementHelpers::moveSpriteWorldBounds(tilePosition, sprite);
 }
 

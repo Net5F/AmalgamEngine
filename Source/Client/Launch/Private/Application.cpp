@@ -19,7 +19,7 @@ Application::Application()
             SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , spriteTexturePtr(std::make_shared<SDL2pp::Texture>(
-                   sdlRenderer, "Resources/iso_test_sprites.png"))
+      sdlRenderer, "Resources/iso_test_sprites.png"))
 , network()
 , networkCaller(std::bind(&Network::tick, &network), NETWORK_TICK_TIMESTEP_S,
                 "Network", true)

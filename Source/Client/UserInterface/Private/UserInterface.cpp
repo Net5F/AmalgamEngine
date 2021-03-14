@@ -9,22 +9,28 @@ namespace AM
 {
 namespace Client
 {
-
-UserInterface::UserInterface(World& inWorld, const std::shared_ptr<SDL2pp::Texture>& inSpriteTexturePtr)
-: tileHighlightSprite{inSpriteTexturePtr, {(256 * 8), (512 * 0), 256, 512}, 256, 512}
+UserInterface::UserInterface(
+    World& inWorld, const std::shared_ptr<SDL2pp::Texture>& inSpriteTexturePtr)
+: tileHighlightSprite{inSpriteTexturePtr,
+                      {(256 * 8), (512 * 0), 256, 512},
+                      256,
+                      512}
 , tileHighlightIndex{0, 0}
 , world(inWorld)
 , spriteTexturePtr(inSpriteTexturePtr)
 {
     // Push the terrain sprites to cycle through.
     SDL2pp::Rect spritePosInTexture{(256 * 6), (512 * 0), 256, 512};
-    terrainSprites.push_back(Sprite{spriteTexturePtr, spritePosInTexture, 256, 512});
+    terrainSprites.push_back(
+        Sprite{spriteTexturePtr, spritePosInTexture, 256, 512});
 
     spritePosInTexture = {(256 * 6), (512 * 2), 256, 512};
-    terrainSprites.push_back(Sprite{spriteTexturePtr, spritePosInTexture, 256, 512});
+    terrainSprites.push_back(
+        Sprite{spriteTexturePtr, spritePosInTexture, 256, 512});
 
     spritePosInTexture = {(256 * 6), (512 * 3), 256, 512};
-    terrainSprites.push_back(Sprite{spriteTexturePtr, spritePosInTexture, 256, 512});
+    terrainSprites.push_back(
+        Sprite{spriteTexturePtr, spritePosInTexture, 256, 512});
 }
 
 bool UserInterface::handleEvent(SDL_Event& event)
@@ -50,13 +56,15 @@ void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
 {
     // Save the tile index that the mouse is hovering over.
     Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
-    ScreenPoint screenPoint{static_cast<float>(event.x), static_cast<float>(event.y)};
-    tileHighlightIndex = TransformationHelpers::screenToTile(screenPoint, playerCamera);
+    ScreenPoint screenPoint{static_cast<float>(event.x),
+                            static_cast<float>(event.y)};
+    tileHighlightIndex
+        = TransformationHelpers::screenToTile(screenPoint, playerCamera);
 }
 
 void UserInterface::handleMouseButtonDown(SDL_MouseButtonEvent& event)
 {
-    switch(event.button) {
+    switch (event.button) {
         case SDL_BUTTON_LEFT:
             cycleTile(event.x, event.y);
             break;
@@ -67,8 +75,10 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
 {
     // Find the tile index under the mouse's current position.
     Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
-    ScreenPoint screenPoint{static_cast<float>(mouseX), static_cast<float>(mouseY)};
-    TileIndex tileIndex = TransformationHelpers::screenToTile(screenPoint, playerCamera);
+    ScreenPoint screenPoint{static_cast<float>(mouseX),
+                            static_cast<float>(mouseY)};
+    TileIndex tileIndex
+        = TransformationHelpers::screenToTile(screenPoint, playerCamera);
 
     // Determine which sprite the selected tile has.
     unsigned int linearizedIndex = tileIndex.y * WORLD_WIDTH + tileIndex.x;

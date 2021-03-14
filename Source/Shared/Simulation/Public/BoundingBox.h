@@ -2,7 +2,6 @@
 
 namespace AM
 {
-
 /**
  * This struct represents a set of axis-aligned 3D bounds, forming a box.
  */

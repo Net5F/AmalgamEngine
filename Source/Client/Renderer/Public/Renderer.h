@@ -36,7 +36,8 @@ public:
      *                     are in decimal percent.
      */
     Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& inWindow,
-             Simulation& inSim, UserInterface& inUI, std::function<double(void)> inGetProgress);
+             Simulation& inSim, UserInterface& inUI,
+             std::function<double(void)> inGetProgress);
 
     /**
      * First renders all tiles in view, then renders all entities in view.

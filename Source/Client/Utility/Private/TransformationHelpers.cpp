@@ -9,8 +9,8 @@ namespace AM
 {
 namespace Client
 {
-
-ScreenPoint TransformationHelpers::worldToScreen(const Position position, const float zoom)
+ScreenPoint TransformationHelpers::worldToScreen(const Position position,
+                                                 const float zoom)
 {
     // Calc the scaling factor going from world tiles to screen tiles.
     static const float TILE_WIDTH_SCALE
@@ -20,7 +20,8 @@ ScreenPoint TransformationHelpers::worldToScreen(const Position position, const 
 
     // Convert cartesian world point to isometric screen point.
     float screenX = (position.x - position.y) * (TILE_WIDTH_SCALE / 2.f);
-    float screenY = (position.x + position.y - position.z) * (TILE_HEIGHT_SCALE / 2.f);
+    float screenY
+        = (position.x + position.y - position.z) * (TILE_HEIGHT_SCALE / 2.f);
 
     // Apply the camera zoom.
     screenX *= zoom;
@@ -29,7 +30,8 @@ ScreenPoint TransformationHelpers::worldToScreen(const Position position, const 
     return {screenX, screenY};
 }
 
-Position TransformationHelpers::screenToWorld(const ScreenPoint screenPoint, const float zoom)
+Position TransformationHelpers::screenToWorld(const ScreenPoint screenPoint,
+                                              const float zoom)
 {
     // Remove the camera zoom.
     float x = screenPoint.x / zoom;
@@ -49,23 +51,30 @@ Position TransformationHelpers::screenToWorld(const ScreenPoint screenPoint, con
     return {worldX, worldY, 0};
 }
 
-SDL2pp::Rect TransformationHelpers::worldToScreenExtent(const Position& position, const Camera& camera, const Sprite& sprite)
+SDL2pp::Rect TransformationHelpers::worldToScreenExtent(
+    const Position& position, const Camera& camera, const Sprite& sprite)
 {
     // Get the point in screen space.
     ScreenPoint screenPoint = worldToScreen(position, camera.zoomFactor);
 
     // Apply the camera position adjustment.
-    int adjustedX = static_cast<int>(std::round(screenPoint.x - camera.extent.x));
-    int adjustedY = static_cast<int>(std::round(screenPoint.y - camera.extent.y));
+    int adjustedX
+        = static_cast<int>(std::round(screenPoint.x - camera.extent.x));
+    int adjustedY
+        = static_cast<int>(std::round(screenPoint.y - camera.extent.y));
 
     // Apply the camera's zoom to the sprite size.
-    int zoomedWidth = static_cast<int>(std::round(sprite.width * camera.zoomFactor));
-    int zoomedHeight = static_cast<int>(std::round(sprite.height * camera.zoomFactor));
+    int zoomedWidth
+        = static_cast<int>(std::round(sprite.width * camera.zoomFactor));
+    int zoomedHeight
+        = static_cast<int>(std::round(sprite.height * camera.zoomFactor));
 
     return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 }
 
-SDL2pp::Rect TransformationHelpers::tileToScreenExtent(const TileIndex& index, const Camera& camera, const Sprite& sprite)
+SDL2pp::Rect TransformationHelpers::tileToScreenExtent(const TileIndex& index,
+                                                       const Camera& camera,
+                                                       const Sprite& sprite)
 {
     // Convert tile index to isometric screen position.
     float screenX = (index.x - index.y) * (TILE_SCREEN_WIDTH / 2.f);
@@ -86,8 +95,7 @@ SDL2pp::Rect TransformationHelpers::tileToScreenExtent(const TileIndex& index, c
           * camera.zoomFactor;
 
     // Apply the camera adjustment.
-    int adjustedX
-        = static_cast<int>(std::round(screenX - camera.extent.x));
+    int adjustedX = static_cast<int>(std::round(screenX - camera.extent.x));
     int adjustedY = static_cast<int>(
         std::round(screenY - spriteOffsetY - camera.extent.y));
 
@@ -103,11 +111,12 @@ SDL2pp::Rect TransformationHelpers::tileToScreenExtent(const TileIndex& index, c
 TileIndex TransformationHelpers::worldToTile(const Position& position)
 {
     // Our tiles are 2D, so Z doesn't matter.
-    return {static_cast<int>(position.x / TILE_WORLD_WIDTH)
-            , static_cast<int>(position.y / TILE_WORLD_HEIGHT)};
+    return {static_cast<int>(position.x / TILE_WORLD_WIDTH),
+            static_cast<int>(position.y / TILE_WORLD_HEIGHT)};
 }
 
-TileIndex TransformationHelpers::screenToTile(const ScreenPoint& screenPoint, const Camera& camera)
+TileIndex TransformationHelpers::screenToTile(const ScreenPoint& screenPoint,
+                                              const Camera& camera)
 {
     // Remove the camera adjustment.
     ScreenPoint absolutePoint;

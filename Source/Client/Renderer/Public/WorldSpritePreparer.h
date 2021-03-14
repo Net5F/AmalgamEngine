@@ -8,7 +8,6 @@ namespace AM
 {
 namespace Client
 {
-
 class Camera;
 
 /**
@@ -20,7 +19,8 @@ class WorldSpritePreparer
 public:
     // TODO: Turn the map into its own data type.
     using TileLayer = std::vector<Sprite>;
-    WorldSpritePreparer(entt::registry& inRegistry, std::vector<TileLayer>& inMapLayers);
+    WorldSpritePreparer(entt::registry& inRegistry,
+                        std::vector<TileLayer>& inMapLayers);
 
     /**
      * Clears the stored sprite info and prepares the updated batch of sprites.
@@ -28,7 +28,8 @@ public:
      * @return A reference to a vector of all world sprites that should be
      *         drawn on this frame, sorted into ascending draw order.
      */
-    std::vector<SpriteRenderInfo>& prepareSprites(const Camera& camera, double alpha);
+    std::vector<SpriteRenderInfo>& prepareSprites(const Camera& camera,
+                                                  double alpha);
 
 private:
     /**

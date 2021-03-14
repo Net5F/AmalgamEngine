@@ -7,12 +7,10 @@
 
 namespace AM
 {
-
 class Sprite;
 
 namespace Client
 {
-
 class Camera;
 
 /**
@@ -29,13 +27,16 @@ public:
     /**
      * Converts a point in screen space to a position in world space.
      */
-    static Position screenToWorld(const ScreenPoint screenPoint, const float zoom);
+    static Position screenToWorld(const ScreenPoint screenPoint,
+                                  const float zoom);
 
     /**
      * Returns a final screen space extent for the given position, camera,
      * and sprite.
      */
-    static SDL2pp::Rect worldToScreenExtent(const Position& position, const Camera& camera, const Sprite& sprite);
+    static SDL2pp::Rect worldToScreenExtent(const Position& position,
+                                            const Camera& camera,
+                                            const Sprite& sprite);
 
     /**
      * Returns a final screen space extent for the given tile index, camera,
@@ -44,7 +45,9 @@ public:
      * Used as an alternative to worldToSpriteExtent() since tile sprites have
      * some extra offsets applied.
      */
-    static SDL2pp::Rect tileToScreenExtent(const TileIndex& index, const Camera& camera, const Sprite& sprite);
+    static SDL2pp::Rect tileToScreenExtent(const TileIndex& index,
+                                           const Camera& camera,
+                                           const Sprite& sprite);
 
     /**
      * Converts a position in world space to a tile index.
@@ -57,7 +60,8 @@ public:
      *
      * Mostly used for getting the tile that the mouse is over.
      */
-    static TileIndex screenToTile(const ScreenPoint& screenPoint, const Camera& camera);
+    static TileIndex screenToTile(const ScreenPoint& screenPoint,
+                                  const Camera& camera);
 };
 
 } // End namespace Client

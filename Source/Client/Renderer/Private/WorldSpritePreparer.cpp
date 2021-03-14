@@ -10,8 +10,8 @@ namespace AM
 {
 namespace Client
 {
-
-WorldSpritePreparer::WorldSpritePreparer(entt::registry& inRegistry, std::vector<TileLayer>& inMapLayers)
+WorldSpritePreparer::WorldSpritePreparer(entt::registry& inRegistry,
+                                         std::vector<TileLayer>& inMapLayers)
 : registry(inRegistry)
 , mapLayers(inMapLayers)
 , sprites{}
@@ -19,7 +19,8 @@ WorldSpritePreparer::WorldSpritePreparer(entt::registry& inRegistry, std::vector
 {
 }
 
-std::vector<SpriteRenderInfo>& WorldSpritePreparer::prepareSprites(const Camera& camera, double alpha)
+std::vector<SpriteRenderInfo>&
+    WorldSpritePreparer::prepareSprites(const Camera& camera, double alpha)
 {
     // Clear the old data.
     sprites.clear();
@@ -44,8 +45,7 @@ void WorldSpritePreparer::updateSpriteWorldBounds(double alpha)
     //       cull this to only update sprites that are relevant to this frame.
 
     // Update all sprites that are on dynamic (moving) entities.
-    auto group
-        = registry.group<Sprite>(entt::get<Position, PreviousPosition>);
+    auto group = registry.group<Sprite>(entt::get<Position, PreviousPosition>);
     for (entt::entity entity : group) {
         auto [sprite, position, previousPos]
             = group.get<Sprite, Position, PreviousPosition>(entity);
@@ -75,8 +75,9 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
                 else {
                     // Get iso screen extent for this tile.
                     Sprite& sprite{mapLayers[i][linearizedIndex]};
-                    SDL2pp::Rect screenExtent = TransformationHelpers::tileToScreenExtent(
-                    {x, y}, camera, sprite);
+                    SDL2pp::Rect screenExtent
+                        = TransformationHelpers::tileToScreenExtent(
+                            {x, y}, camera, sprite);
 
                     // If the sprite is on screen, push the sprite info.
                     if (isWithinScreenBounds(screenExtent, camera)) {
@@ -94,8 +95,7 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
     }
 
     // Gather all relevant dynamic sprites.
-    auto group
-        = registry.group<Sprite>(entt::get<Position, PreviousPosition>);
+    auto group = registry.group<Sprite>(entt::get<Position, PreviousPosition>);
     for (entt::entity entity : group) {
         auto [sprite, position, previousPos]
             = group.get<Sprite, Position, PreviousPosition>(entity);
@@ -127,17 +127,19 @@ void WorldSpritePreparer::sortSpritesByDepth()
     }
 
     // Sort heightful sprites by depth.
-    std::sort((sprites.begin() + heightfulSpriteStartIndex), sprites.end()
-          , [](const SpriteRenderInfo& lhs, const SpriteRenderInfo& rhs) -> bool {
-               return lhs.depthValue < rhs.depthValue;
-            });
+    std::sort(
+        (sprites.begin() + heightfulSpriteStartIndex), sprites.end(),
+        [](const SpriteRenderInfo& lhs, const SpriteRenderInfo& rhs) -> bool {
+            return lhs.depthValue < rhs.depthValue;
+        });
 }
 
 void WorldSpritePreparer::calcDepthDependencies()
 {
     // Calculate all dependencies.
     for (unsigned int i = heightfulSpriteStartIndex; i < sprites.size(); ++i) {
-        for (unsigned int j = heightfulSpriteStartIndex; j < sprites.size(); ++j) {
+        for (unsigned int j = heightfulSpriteStartIndex; j < sprites.size();
+             ++j) {
             if (i != j) {
                 Sprite& spriteA = *(sprites[i].sprite);
                 Sprite& spriteB = *(sprites[j].sprite);
@@ -153,7 +155,8 @@ void WorldSpritePreparer::calcDepthDependencies()
     }
 }
 
-void WorldSpritePreparer::visitSprite(SpriteRenderInfo& spriteInfo, int& depthValue)
+void WorldSpritePreparer::visitSprite(SpriteRenderInfo& spriteInfo,
+                                      int& depthValue)
 {
     if (!(spriteInfo.visited)) {
         spriteInfo.visited = true;
@@ -173,7 +176,8 @@ void WorldSpritePreparer::visitSprite(SpriteRenderInfo& spriteInfo, int& depthVa
     }
 }
 
-bool WorldSpritePreparer::isWithinScreenBounds(const SDL2pp::Rect& extent, const Camera& camera)
+bool WorldSpritePreparer::isWithinScreenBounds(const SDL2pp::Rect& extent,
+                                               const Camera& camera)
 {
     // The extent is in final screen coordinates, so we only need to check if
     // it's within the rect formed by (0, 0) and (camera.width, camera.height).
