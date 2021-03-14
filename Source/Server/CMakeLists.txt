@@ -31,7 +31,7 @@ target_link_libraries(Server
 )
 
 # Compile with C++17
-target_compile_features(Server PRIVATE cxx_std_17)
+target_compile_features(Server PRIVATE cxx_std_20)
 set_target_properties(Server PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable compile warnings.

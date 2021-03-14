@@ -35,6 +35,7 @@ public:
         time we need it. */
     entt::entity playerEntity;
 
+    // TODO: Turn the map into its own data type.
     using TileLayer = std::vector<Sprite>;
     /** The layers of our tile map.
         Layer 0 is always the base terrain, the rest will sequentially be drawn

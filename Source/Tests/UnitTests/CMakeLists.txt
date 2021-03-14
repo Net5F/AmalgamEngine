@@ -33,7 +33,7 @@ target_link_libraries(UnitTests
 )
 
 # Compile with C++17
-target_compile_features(UnitTests PRIVATE cxx_std_17)
+target_compile_features(UnitTests PRIVATE cxx_std_20)
 set_target_properties(UnitTests PROPERTIES CXX_EXTENSIONS OFF)
 
 # If debug, enable debug printing.

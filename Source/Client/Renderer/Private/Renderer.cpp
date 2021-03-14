@@ -5,8 +5,6 @@
 #include "PreviousPosition.h"
 #include "Sprite.h"
 #include "Camera.h"
-#include "BoundingBox.h"
-#include "MovementHelpers.h"
 #include "TransformationHelpers.h"
 #include "ScreenRect.h"
 #include "Log.h"
@@ -25,6 +23,7 @@ Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& window,
 , world(sim.getWorld())
 , ui(inUI)
 , getProgress(inGetProgress)
+, worldSpritePreparer(world.registry, world.mapLayers)
 {
     // Init the groups that we'll be using.
     auto group
@@ -69,17 +68,14 @@ void Renderer::render()
     playerCamera.extent.x = lerpedCamera.extent.x;
     playerCamera.extent.y = lerpedCamera.extent.y;
 
-    /* Update the world bounds of sprites that are relevant to this frame. */
-    updateSpriteWorldBounds(alpha);
-
     /* Render. */
     // Clear the screen to prepare for drawing.
     sdlRenderer.Clear();
 
-    // Draw all tiles and entities.
+    // Draw tiles and entities.
     renderWorld(lerpedCamera, alpha);
 
-    // Draw all UI elements.
+    // Draw UI elements.
     renderUserInterface(lerpedCamera);
 
     // Render the finished buffer to the screen.
@@ -97,70 +93,15 @@ bool Renderer::handleEvent(SDL_Event& event)
     return false;
 }
 
-void Renderer::updateSpriteWorldBounds(const double alpha)
+void Renderer::renderWorld(const Camera& camera, double alpha)
 {
-    // Update all sprites that are on dynamic (moving) entities.
-    auto group
-        = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
-    for (entt::entity entity : group) {
-        auto [sprite, position, previousPos]
-            = group.get<Sprite, Position, PreviousPosition>(entity);
+    // Prepare sprites (bounds updating, screen position calcs, depth sorting).
+    std::vector<SpriteRenderInfo>& sprites = worldSpritePreparer.prepareSprites(camera, alpha);
 
-        // Get the lerp'd world position.
-        Position lerp = MovementHelpers::interpolatePosition(previousPos,
-                                                             position, alpha);
-
-        // Update the sprite's world bounds.
-        MovementHelpers::moveSpriteWorldBounds(lerp, sprite);
-    }
-}
-
-void Renderer::renderWorld(const Camera& camera, const double alpha)
-{
-    // Draw all tiles, layer-by-layer.
-    for (unsigned int i = 0; i < world.mapLayers.size(); ++i) {
-        for (int y = 0; y < static_cast<int>(WORLD_HEIGHT); ++y) {
-            for (int x = 0; x < static_cast<int>(WORLD_WIDTH); ++x) {
-                // If there's nothing in this tile, skip it.
-                unsigned int linearizedIndex = y * WORLD_WIDTH + x;
-                if (world.mapLayers[i][linearizedIndex].texturePtr == nullptr) {
-                    continue;
-                }
-
-                // Get iso screen extent for this tile.
-                Sprite& sprite{world.mapLayers[i][linearizedIndex]};
-                SDL2pp::Rect screenExtent = TransformationHelpers::tileToScreenExtent(
-                    {x, y}, camera, sprite);
-
-                // If the tile's sprite is within the screen bounds, draw it.
-                if (isWithinScreenBounds(screenExtent, camera)) {
-                    sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
-                                     screenExtent);
-                }
-            }
-        }
-    }
-
-    // Draw all entities with a Sprite, PreviousPosition and Position.
-    auto group
-        = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
-    for (entt::entity entity : group) {
-        auto [sprite, position, previousPos]
-            = group.get<Sprite, Position, PreviousPosition>(entity);
-
-        // Get the lerp'd world position.
-        Position lerp = MovementHelpers::interpolatePosition(previousPos,
-                                                             position, alpha);
-
-        // Get the iso screen extent for the lerped sprite.
-        SDL2pp::Rect screenExtent
-            = TransformationHelpers::worldToScreenExtent(lerp, camera, sprite);
-
-        // If the entity's sprite is within the screen bounds, draw it.
-        if (isWithinScreenBounds(screenExtent, camera)) {
-            sdlRenderer.Copy(*(sprite.texturePtr), sprite.texExtent,
-                             screenExtent);
-        }
+    // Draw depth-sorted tiles and sprites.
+    // Note: These are already culled during the gather step.
+    for (SpriteRenderInfo& spriteInfo : sprites) {
+        sdlRenderer.Copy(*(spriteInfo.sprite->texturePtr), spriteInfo.sprite->texExtent, spriteInfo.screenExtent);
     }
 }
 
@@ -182,25 +123,6 @@ void Renderer::renderUserInterface(const Camera& camera)
 
     // Set the texture's alpha back.
     highlightSprite.texturePtr->SetAlphaMod(255);
-}
-
-bool Renderer::isWithinScreenBounds(const SDL2pp::Rect& extent, const Camera& camera)
-{
-    // The extent is in final screen coordinates, so we only need to check if
-    // it's within the rect formed by (0, 0) and (camera.width, camera.height).
-    bool pastLeftBound = ((extent.x + extent.w) < 0);
-    bool pastRightBound = (camera.extent.width < extent.x);
-    bool pastTopBound = ((extent.y + extent.h) < 0);
-    bool pastBottomBound = (camera.extent.height < extent.y);
-
-    // If the extent is outside of any camera bound, return false.
-    if (pastLeftBound || pastRightBound || pastTopBound || pastBottomBound) {
-        return false;
-    }
-    else {
-        // Extent is within the camera bounds, return true.
-        return true;
-    }
 }
 
 void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)

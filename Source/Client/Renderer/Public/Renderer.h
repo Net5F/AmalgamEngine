@@ -2,6 +2,7 @@
 
 #include "EventHandler.h"
 #include "PeriodicCaller.h"
+#include "WorldSpritePreparer.h"
 
 #include "SDL2pp/Window.hh"
 #include "SDL2pp/Renderer.hh"
@@ -49,34 +50,19 @@ public:
 
 private:
     /**
-     * Updates the world bounds for any dynamic entity that has a Sprite.
-     * (i.e. any entity with a Sprite, Position, and PreviousPosition)
-     */
-    void updateSpriteWorldBounds(const double alpha);
-
-    /**
-     * Render the tiles from the World's tile map, and all entities that have
-     * Sprite, Position, and PreviousPosition components.
+     * Renders the vector of sprites returned by
+     * worldSpritePreparer.prepareSprites().
      *
-     * @param camera  The camera to draw with.
+     * @param camera  The camera to calculate screen position with.
      * @param alpha  For entities, the alpha to lerp between positions with.
      */
-    void renderWorld(const Camera& camera, const double alpha);
+    void renderWorld(const Camera& camera, double alpha);
 
     /**
      * Render all elements of the UserInterface.
      * @param camera  The camera to draw with.
      */
     void renderUserInterface(const Camera& camera);
-
-    /**
-     * Returns true if the given extent is within the given camera's bounds,
-     * else false.
-     *
-     * @param extent  An extent in final screen coordinates.
-     * @param camera  A camera to use for screen width/height checks.
-     */
-    bool isWithinScreenBounds(const SDL2pp::Rect& extent, const Camera& camera);
 
     /**
      * Draws the given box. Useful for debug visuals.
@@ -89,6 +75,8 @@ private:
     World& world;
     UserInterface& ui;
     std::function<double(void)> getProgress;
+
+    WorldSpritePreparer worldSpritePreparer;
 };
 
 } // namespace Client

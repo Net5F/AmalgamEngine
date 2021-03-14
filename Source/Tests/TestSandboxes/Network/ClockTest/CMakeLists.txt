@@ -19,7 +19,7 @@ target_link_libraries(ClockTestClient
         SDL2_net-static
         Shared
 )
-target_compile_features(ClockTestClient PRIVATE cxx_std_17)
+target_compile_features(ClockTestClient PRIVATE cxx_std_20)
 set_target_properties(ClockTestClient PROPERTIES CXX_EXTENSIONS OFF)
 
 # Clock test server
@@ -39,5 +39,5 @@ target_link_libraries(ClockTestServer
         SDL2_net-static
         Shared
 )
-target_compile_features(ClockTestServer PRIVATE cxx_std_17)
+target_compile_features(ClockTestServer PRIVATE cxx_std_20)
 set_target_properties(ClockTestServer PROPERTIES CXX_EXTENSIONS OFF)

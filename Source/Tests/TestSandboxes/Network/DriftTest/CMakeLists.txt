@@ -19,7 +19,7 @@ target_link_libraries(DriftTestClient
         SDL2_net-static
         Shared
 )
-target_compile_features(DriftTestClient PRIVATE cxx_std_17)
+target_compile_features(DriftTestClient PRIVATE cxx_std_20)
 set_target_properties(DriftTestClient PROPERTIES CXX_EXTENSIONS OFF)
 
 # Drift test server
@@ -39,5 +39,5 @@ target_link_libraries(DriftTestServer
         SDL2_net-static
         Shared
 )
-target_compile_features(DriftTestServer PRIVATE cxx_std_17)
+target_compile_features(DriftTestServer PRIVATE cxx_std_20)
 set_target_properties(DriftTestServer PROPERTIES CXX_EXTENSIONS OFF)

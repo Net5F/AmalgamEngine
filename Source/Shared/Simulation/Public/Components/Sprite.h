@@ -26,11 +26,12 @@ public:
     int width{0};
     int height{0};
 
-    /** Model space bounds (relative, not positioned within the world). */
+    /** Model-space bounding box. Defines the sprite's 3D volume. */
     BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
 
-    /** World space bounds. Equal to modelBounds, adjusted for the entity's
-        current world Position. Used for determining draw order. */
+    /** World-space bounding box.
+        Equal to modelBounds adjusted for the associated entity's current world
+        Position. Used for depth order sorting. */
     BoundingBox worldBounds{0, 0, 0, 0, 0, 0};
 };
 

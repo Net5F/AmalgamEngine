@@ -19,7 +19,7 @@ target_link_libraries(LatencyTestClient
         SDL2_net-static
         Shared
 )
-target_compile_features(LatencyTestClient PRIVATE cxx_std_17)
+target_compile_features(LatencyTestClient PRIVATE cxx_std_20)
 set_target_properties(LatencyTestClient PROPERTIES CXX_EXTENSIONS OFF)
 
 # Latency test server
@@ -39,5 +39,5 @@ target_link_libraries(LatencyTestServer
         SDL2_net-static
         Shared
 )
-target_compile_features(LatencyTestServer PRIVATE cxx_std_17)
+target_compile_features(LatencyTestServer PRIVATE cxx_std_20)
 set_target_properties(LatencyTestServer PROPERTIES CXX_EXTENSIONS OFF)
