@@ -103,7 +103,8 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
     // Note: These are already culled during the gather step.
     for (SpriteRenderInfo& spriteInfo : sprites) {
         sdlRenderer.Copy(spriteInfo.sprite->textureHandle.get(),
-                         spriteInfo.sprite->textureExtent, spriteInfo.screenExtent);
+                         spriteInfo.sprite->textureExtent,
+                         spriteInfo.screenExtent);
     }
 }
 
@@ -120,8 +121,8 @@ void Renderer::renderUserInterface(const Camera& camera)
     highlightSprite.textureHandle.get().SetAlphaMod(150);
 
     // Draw the highlight.
-    sdlRenderer.Copy(highlightSprite.textureHandle, highlightSprite.textureExtent,
-                     screenExtent);
+    sdlRenderer.Copy(highlightSprite.textureHandle,
+                     highlightSprite.textureExtent, screenExtent);
 
     // Set the texture's alpha back.
     highlightSprite.textureHandle.get().SetAlphaMod(255);

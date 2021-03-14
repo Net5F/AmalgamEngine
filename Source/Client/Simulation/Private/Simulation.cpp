@@ -22,9 +22,7 @@ namespace AM
 {
 namespace Client
 {
-Simulation::Simulation(
-    Network& inNetwork,
-    ResourceManager& inResourceManager)
+Simulation::Simulation(Network& inNetwork, ResourceManager& inResourceManager)
 : world(inResourceManager)
 , network(inNetwork)
 , resourceManager(inResourceManager)
@@ -96,8 +94,8 @@ void Simulation::connect()
     entt::resource_handle<SDL2pp::Texture> textureHandle
         = resourceManager.getTexture("iso_test_sprites.png");
     SDL2pp::Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
-    registry.emplace<Sprite>(newEntity, textureHandle, spritePosInTexture,
-                             64, 64, BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
+    registry.emplace<Sprite>(newEntity, textureHandle, spritePosInTexture, 64,
+                             64, BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
                              ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
@@ -127,8 +125,8 @@ void Simulation::fakeConnection()
     entt::resource_handle<SDL2pp::Texture> textureHandle
         = resourceManager.getTexture("iso_test_sprites.png");
     SDL2pp::Rect spritePosInTexture((256 * 4 + 110), 256 + 135, 64, 64);
-    registry.emplace<Sprite>(newEntity, textureHandle, spritePosInTexture,
-                             64, 64, BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
+    registry.emplace<Sprite>(newEntity, textureHandle, spritePosInTexture, 64,
+                             64, BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
                              ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});

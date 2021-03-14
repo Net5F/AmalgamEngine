@@ -3,7 +3,6 @@
 
 namespace AM
 {
-
 ResourceManager::ResourceManager(SDL2pp::Renderer& sdlRenderer)
 {
     std::string path{"Resources/Textures/"};
@@ -11,7 +10,8 @@ ResourceManager::ResourceManager(SDL2pp::Renderer& sdlRenderer)
     textureCache.load<TextureLoader>(id, (path + id.data()), sdlRenderer);
 }
 
-entt::resource_handle<SDL2pp::Texture> ResourceManager::getTexture(const entt::hashed_string id)
+entt::resource_handle<SDL2pp::Texture>
+    ResourceManager::getTexture(const entt::hashed_string id)
 {
     entt::resource_handle<SDL2pp::Texture> handle = textureCache.handle(id);
     if (!handle) {

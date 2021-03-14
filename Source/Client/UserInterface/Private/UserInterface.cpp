@@ -9,8 +9,7 @@ namespace AM
 {
 namespace Client
 {
-UserInterface::UserInterface(
-    World& inWorld, ResourceManager& inResourceManager)
+UserInterface::UserInterface(World& inWorld, ResourceManager& inResourceManager)
 : tileHighlightSprite{}
 , tileHighlightIndex{0, 0}
 , world(inWorld)
@@ -19,7 +18,8 @@ UserInterface::UserInterface(
     // Set up the tile highlight sprite.
     entt::resource_handle<SDL2pp::Texture> textureHandle
         = resourceManager.getTexture("iso_test_sprites.png");
-    tileHighlightSprite = {textureHandle, {(256 * 8), (512 * 0), 256, 512}, 256, 512};
+    tileHighlightSprite
+        = {textureHandle, {(256 * 8), (512 * 0), 256, 512}, 256, 512};
 
     // Push the terrain sprites to cycle through.
     SDL2pp::Rect spritePosInTexture{(256 * 6), (512 * 0), 256, 512};
