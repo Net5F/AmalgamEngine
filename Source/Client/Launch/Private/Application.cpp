@@ -18,15 +18,14 @@ Application::Application()
 , sdlWindow("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
-, spriteTexturePtr(std::make_shared<SDL2pp::Texture>(
-      sdlRenderer, "Resources/iso_test_sprites.png"))
+, resourceManager(sdlRenderer)
 , network()
 , networkCaller(std::bind(&Network::tick, &network), NETWORK_TICK_TIMESTEP_S,
                 "Network", true)
-, sim(network, spriteTexturePtr)
+, sim(network, resourceManager)
 , simCaller(std::bind(&Simulation::tick, &sim), SIM_TICK_TIMESTEP_S, "Sim",
             false)
-, userInterface(sim.getWorld(), spriteTexturePtr)
+, userInterface(sim.getWorld(), resourceManager)
 , renderer(sdlRenderer, sdlWindow, sim, userInterface,
            std::bind(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind(&Renderer::render, &renderer),

@@ -17,6 +17,7 @@ target_link_libraries(Shared
         ${SDL2PP_LIBRARIES}
         SDL2_net-static
         SDL2pp
+        EnTT::EnTT
         Bitsery::bitsery
         Remotery
 )

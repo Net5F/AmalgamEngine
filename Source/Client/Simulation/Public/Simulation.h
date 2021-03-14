@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EventHandler.h"
+#include "ResourceManager.h"
 #include "NpcMovementSystem.h"
 #include "PlayerMovementSystem.h"
 #include "World.h"
@@ -26,8 +27,7 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S = .001;
 
-    Simulation(Network& inNetwork,
-               const std::shared_ptr<SDL2pp::Texture>& inSpriteTexturePtr);
+    Simulation(Network& inNetwork, ResourceManager& inResourceManager);
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,
@@ -65,6 +65,8 @@ private:
     World world;
     Network& network;
 
+    ResourceManager& resourceManager;
+
     PlayerInputSystem playerInputSystem;
     NetworkUpdateSystem networkUpdateSystem;
     PlayerMovementSystem playerMovementSystem;
@@ -76,9 +78,6 @@ private:
      * Initialized based on the number that the server tells us it's on.
      */
     std::atomic<Uint32> currentTick;
-
-    // Temporary until a resource manager is created.
-    std::shared_ptr<SDL2pp::Texture> spriteTexturePtr;
 };
 
 } // namespace Client

@@ -10,27 +10,29 @@ namespace AM
 namespace Client
 {
 UserInterface::UserInterface(
-    World& inWorld, const std::shared_ptr<SDL2pp::Texture>& inSpriteTexturePtr)
-: tileHighlightSprite{inSpriteTexturePtr,
-                      {(256 * 8), (512 * 0), 256, 512},
-                      256,
-                      512}
+    World& inWorld, ResourceManager& inResourceManager)
+: tileHighlightSprite{}
 , tileHighlightIndex{0, 0}
 , world(inWorld)
-, spriteTexturePtr(inSpriteTexturePtr)
+, resourceManager(inResourceManager)
 {
+    // Set up the tile highlight sprite.
+    entt::resource_handle<SDL2pp::Texture> textureHandle
+        = resourceManager.getTexture("iso_test_sprites.png");
+    tileHighlightSprite = {textureHandle, {(256 * 8), (512 * 0), 256, 512}, 256, 512};
+
     // Push the terrain sprites to cycle through.
     SDL2pp::Rect spritePosInTexture{(256 * 6), (512 * 0), 256, 512};
     terrainSprites.push_back(
-        Sprite{spriteTexturePtr, spritePosInTexture, 256, 512});
+        Sprite{textureHandle, spritePosInTexture, 256, 512});
 
     spritePosInTexture = {(256 * 6), (512 * 2), 256, 512};
     terrainSprites.push_back(
-        Sprite{spriteTexturePtr, spritePosInTexture, 256, 512});
+        Sprite{textureHandle, spritePosInTexture, 256, 512});
 
     spritePosInTexture = {(256 * 6), (512 * 3), 256, 512};
     terrainSprites.push_back(
-        Sprite{spriteTexturePtr, spritePosInTexture, 256, 512});
+        Sprite{textureHandle, spritePosInTexture, 256, 512});
 }
 
 bool UserInterface::handleEvent(SDL_Event& event)
@@ -85,7 +87,7 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     Sprite& tileSprite = world.mapLayers[0][linearizedIndex];
 
     unsigned int terrainSpriteIndex = 0;
-    switch (tileSprite.texExtent.y) {
+    switch (tileSprite.textureExtent.y) {
         case (512 * 0):
             terrainSpriteIndex = 0;
             break;

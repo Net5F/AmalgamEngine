@@ -24,16 +24,16 @@ namespace Client
 {
 Simulation::Simulation(
     Network& inNetwork,
-    const std::shared_ptr<SDL2pp::Texture>& inSpriteTexturePtr)
-: world(inSpriteTexturePtr)
+    ResourceManager& inResourceManager)
+: world(inResourceManager)
 , network(inNetwork)
+, resourceManager(inResourceManager)
 , playerInputSystem(*this, world)
 , networkUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, network)
 , npcMovementSystem(*this, world, network)
 , cameraSystem(*this, world)
 , currentTick(0)
-, spriteTexturePtr(inSpriteTexturePtr)
 {
     Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);
@@ -93,8 +93,10 @@ void Simulation::connect()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
+    entt::resource_handle<SDL2pp::Texture> textureHandle
+        = resourceManager.getTexture("iso_test_sprites.png");
     SDL2pp::Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
-    registry.emplace<Sprite>(newEntity, spriteTexturePtr, spritePosInTexture,
+    registry.emplace<Sprite>(newEntity, textureHandle, spritePosInTexture,
                              64, 64, BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
@@ -122,8 +124,10 @@ void Simulation::fakeConnection()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
+    entt::resource_handle<SDL2pp::Texture> textureHandle
+        = resourceManager.getTexture("iso_test_sprites.png");
     SDL2pp::Rect spritePosInTexture((256 * 4 + 110), 256 + 135, 64, 64);
-    registry.emplace<Sprite>(newEntity, spriteTexturePtr, spritePosInTexture,
+    registry.emplace<Sprite>(newEntity, textureHandle, spritePosInTexture,
                              64, 64, BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},

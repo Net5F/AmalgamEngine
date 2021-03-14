@@ -102,8 +102,8 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
     // Draw depth-sorted tiles and sprites.
     // Note: These are already culled during the gather step.
     for (SpriteRenderInfo& spriteInfo : sprites) {
-        sdlRenderer.Copy(*(spriteInfo.sprite->texturePtr),
-                         spriteInfo.sprite->texExtent, spriteInfo.screenExtent);
+        sdlRenderer.Copy(spriteInfo.sprite->textureHandle.get(),
+                         spriteInfo.sprite->textureExtent, spriteInfo.screenExtent);
     }
 }
 
@@ -117,14 +117,14 @@ void Renderer::renderUserInterface(const Camera& camera)
         highlightIndex, camera, highlightSprite);
 
     // Set the texture's alpha to make the highlight transparent.
-    highlightSprite.texturePtr->SetAlphaMod(150);
+    highlightSprite.textureHandle.get().SetAlphaMod(150);
 
     // Draw the highlight.
-    sdlRenderer.Copy(*(highlightSprite.texturePtr), highlightSprite.texExtent,
+    sdlRenderer.Copy(highlightSprite.textureHandle, highlightSprite.textureExtent,
                      screenExtent);
 
     // Set the texture's alpha back.
-    highlightSprite.texturePtr->SetAlphaMod(255);
+    highlightSprite.textureHandle.get().SetAlphaMod(255);
 }
 
 void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)

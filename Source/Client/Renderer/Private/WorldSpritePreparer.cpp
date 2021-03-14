@@ -69,7 +69,7 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
                 Sprite& sprite = mapLayers[i][linearizedIndex];
 
                 // If there's nothing in this tile, skip it.
-                if (sprite.texturePtr == nullptr) {
+                if (!sprite.textureHandle) {
                     continue;
                 }
                 else {

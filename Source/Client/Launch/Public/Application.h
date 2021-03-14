@@ -6,6 +6,7 @@
 #include "Renderer.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
+#include "ResourceManager.h"
 
 #include "SDL2pp/SDL.hh"
 #include "SDL2pp/Window.hh"
@@ -77,8 +78,7 @@ private:
     SDL2pp::Window sdlWindow;
     SDL2pp::Renderer sdlRenderer;
 
-    // TODO: Replace with texture loader.
-    std::shared_ptr<SDL2pp::Texture> spriteTexturePtr;
+    ResourceManager resourceManager;
 
     Network network;
     /** Calls network.tick() at the network tick rate. */

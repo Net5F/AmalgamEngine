@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EventHandler.h"
+#include "ResourceManager.h"
 #include "Sprite.h"
 #include "ScreenPoint.h"
 #include "TileIndex.h"
@@ -20,8 +21,7 @@ class World;
 class UserInterface : public EventHandler
 {
 public:
-    UserInterface(World& inWorld,
-                  const std::shared_ptr<SDL2pp::Texture>& inSpriteTexturePtr);
+    UserInterface(World& inWorld, ResourceManager& inResourceManager);
 
     /**
      * Handles user input events.
@@ -47,8 +47,7 @@ private:
 
     World& world;
 
-    // Temporary until a resource manager is created.
-    std::shared_ptr<SDL2pp::Texture> spriteTexturePtr;
+    ResourceManager& resourceManager;
 
     /** Holds the sprites that we cycle through on mouse click. */
     std::vector<Sprite> terrainSprites;

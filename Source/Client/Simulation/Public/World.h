@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SimDefs.h"
+#include "ResourceManager.h"
 #include "Sprite.h"
 #include "ScreenPoint.h"
 
@@ -23,8 +24,7 @@ class TileIndex;
 class World
 {
 public:
-    // TODO: Replace inSpriteTexturePtr with a texture loader.
-    World(const std::shared_ptr<SDL2pp::Texture>& inSpriteTexturePtr);
+    World(ResourceManager& inResourceManager);
 
     /** Entity data registry. */
     entt::registry registry;
@@ -49,8 +49,10 @@ private:
      * Adds a tile sprite to the tile map at the given layer and position.
      */
     void addTile(unsigned int layer, const TileIndex& index,
-                 const std::shared_ptr<SDL2pp::Texture>& texturePtr,
+                 entt::resource_handle<SDL2pp::Texture> textureHandle,
                  const SDL2pp::Rect& extent, const BoundingBox& modelBounds);
+
+    ResourceManager& resourceManager;
 };
 
 } // namespace Client

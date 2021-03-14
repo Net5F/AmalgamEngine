@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BoundingBox.h"
+#include "entt/resource/handle.hpp"
 #include "SDL2pp/Texture.hh"
 #include "SDL2pp/Rect.hh"
 #include <memory>
@@ -15,12 +16,11 @@ namespace AM
  */
 struct Sprite {
 public:
-    // TODO: Switch to textureID and add a texture loader.
-    /** A pointer to the texture that holds this sprite. */
-    std::shared_ptr<SDL2pp::Texture> texturePtr{nullptr};
+    /** A handle for the texture that contains this sprite. */
+    entt::resource_handle<SDL2pp::Texture> textureHandle{};
 
     /** UV position and size in texture. */
-    SDL2pp::Rect texExtent{0, 0, 0, 0};
+    SDL2pp::Rect textureExtent{0, 0, 0, 0};
 
     /** Width and height of the sprite in screen space. */
     int width{0};
