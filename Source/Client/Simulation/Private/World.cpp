@@ -27,7 +27,7 @@ World::World(ResourceManager& inResourceManager)
     // Fill layer 0 (terrain layer).
     // TODO: Load this from some storage format.
     SDL2pp::Rect floorPosInTexture{(256 * 6), 0, 256, 512};
-    entt::resource_handle<SDL2pp::Texture> textureHandle
+    TextureHandle textureHandle
         = resourceManager.getTexture("iso_test_sprites.png");
     std::fill(mapLayers[0].begin(), mapLayers[0].end(),
               Sprite{textureHandle, floorPosInTexture, 256, 512});
@@ -55,7 +55,7 @@ World::World(ResourceManager& inResourceManager)
 }
 
 void World::addTile(unsigned int layer, const TileIndex& index,
-                    entt::resource_handle<SDL2pp::Texture> textureHandle,
+                    TextureHandle textureHandle,
                     const SDL2pp::Rect& extent, const BoundingBox& modelBounds)
 {
     // Convert the 2d tile position into an index into the 1d array.

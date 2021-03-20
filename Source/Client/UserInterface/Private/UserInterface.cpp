@@ -16,7 +16,7 @@ UserInterface::UserInterface(World& inWorld, ResourceManager& inResourceManager)
 , resourceManager(inResourceManager)
 {
     // Set up the tile highlight sprite.
-    entt::resource_handle<SDL2pp::Texture> textureHandle
+    TextureHandle textureHandle
         = resourceManager.getTexture("iso_test_sprites.png");
     tileHighlightSprite
         = {textureHandle, {(256 * 8), (512 * 0), 256, 512}, 256, 512};

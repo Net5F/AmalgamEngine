@@ -1,8 +1,8 @@
 #pragma once
 
+#include "HandleDefs.h"
 #include "BoundingBox.h"
 #include "entt/resource/handle.hpp"
-#include "SDL2pp/Texture.hh"
 #include "SDL2pp/Rect.hh"
 #include <memory>
 
@@ -17,7 +17,7 @@ namespace AM
 struct Sprite {
 public:
     /** A handle for the texture that contains this sprite. */
-    entt::resource_handle<SDL2pp::Texture> textureHandle{};
+    TextureHandle textureHandle{};
 
     /** UV position and size in texture. */
     SDL2pp::Rect textureExtent{0, 0, 0, 0};

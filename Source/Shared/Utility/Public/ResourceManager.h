@@ -1,15 +1,16 @@
 #pragma once
 
+#include "HandleDefs.h"
 #include "entt/core/hashed_string.hpp"
 #include "entt/resource/cache.hpp"
 #include "entt/resource/loader.hpp"
-#include "SDL2pp/Texture.hh"
 #include "SDL2pp/Renderer.hh"
 #include <string_view>
 #include <memory>
 
 namespace AM
 {
+
 /**
  * This class facilitates loading and managing the lifetime of texture and
  * audio resources.
@@ -35,8 +36,7 @@ public:
      * @param id  The resource identifier, a path including the full file name,
      *            relative to "Resources/Textures/".
      */
-    entt::resource_handle<SDL2pp::Texture>
-        getTexture(const entt::hashed_string id);
+     TextureHandle getTexture(const entt::hashed_string id);
 
 private:
     /** SDL2 renderer reference, used for constructing textures. */

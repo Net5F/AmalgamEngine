@@ -91,7 +91,7 @@ void Simulation::connect()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    entt::resource_handle<SDL2pp::Texture> textureHandle
+    TextureHandle textureHandle
         = resourceManager.getTexture("iso_test_sprites.png");
     SDL2pp::Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
     registry.emplace<Sprite>(newEntity, textureHandle, spritePosInTexture, 64,
@@ -122,7 +122,7 @@ void Simulation::fakeConnection()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    entt::resource_handle<SDL2pp::Texture> textureHandle
+    TextureHandle textureHandle
         = resourceManager.getTexture("iso_test_sprites.png");
     SDL2pp::Rect spritePosInTexture((256 * 4 + 110), 256 + 135, 64, 64);
     registry.emplace<Sprite>(newEntity, textureHandle, spritePosInTexture, 64,

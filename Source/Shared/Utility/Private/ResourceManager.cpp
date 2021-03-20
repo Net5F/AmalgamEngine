@@ -17,7 +17,7 @@ bool ResourceManager::loadTexture(std::string_view path, const entt::hashed_stri
     }
     fullPath += filename.data();
 
-    entt::resource_handle<SDL2pp::Texture> handle = textureCache.load<TextureLoader>(filename, fullPath, sdlRenderer);
+    TextureHandle handle = textureCache.load<TextureLoader>(filename, fullPath, sdlRenderer);
     if (!handle) {
         LOG_ERROR("Failed to load texture at path: %s", (fullPath));
     }
@@ -25,10 +25,9 @@ bool ResourceManager::loadTexture(std::string_view path, const entt::hashed_stri
     return true;
 }
 
-entt::resource_handle<SDL2pp::Texture>
-    ResourceManager::getTexture(const entt::hashed_string id)
+TextureHandle ResourceManager::getTexture(const entt::hashed_string id)
 {
-    entt::resource_handle<SDL2pp::Texture> handle = textureCache.handle(id);
+    TextureHandle handle = textureCache.handle(id);
     if (!handle) {
         LOG_ERROR("Requested invalid texture resource. id: %s", id.data());
     }

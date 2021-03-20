@@ -49,7 +49,7 @@ private:
      * Adds a tile sprite to the tile map at the given layer and position.
      */
     void addTile(unsigned int layer, const TileIndex& index,
-                 entt::resource_handle<SDL2pp::Texture> textureHandle,
+                 TextureHandle textureHandle,
                  const SDL2pp::Rect& extent, const BoundingBox& modelBounds);
 
     ResourceManager& resourceManager;
