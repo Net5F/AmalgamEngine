@@ -8,9 +8,6 @@
 namespace AM
 {
 class Sprite;
-
-namespace Client
-{
 class Camera;
 
 /**
@@ -64,5 +61,4 @@ public:
                                   const Camera& camera);
 };
 
-} // End namespace Client
 } // End namespace AM

@@ -2,8 +2,6 @@
 
 namespace AM
 {
-namespace Client
-{
 /**
  * Holds the indices that identify a tile.
  *
@@ -15,5 +13,4 @@ public:
     int y{0};
 };
 
-} // namespace Client
 } // namespace AM

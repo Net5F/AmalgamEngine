@@ -15,6 +15,10 @@ World::World(ResourceManager& inResourceManager)
 , mouseScreenPoint{}
 , resourceManager(inResourceManager)
 {
+    // TODO: Load textures from a file, through a class that Application owns.
+    // Load our textures.
+    resourceManager.loadTexture("Resources/Textures", "iso_test_sprites.png");
+
     // Init our layers.
     for (TileLayer& layer : mapLayers) {
         layer.resize(WORLD_WIDTH * WORLD_HEIGHT);

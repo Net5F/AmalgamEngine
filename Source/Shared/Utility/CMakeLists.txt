@@ -4,13 +4,16 @@ target_sources(Shared
         Private/PeriodicCaller.cpp
 	    Private/ResourceManager.cpp
         Private/Timer.cpp
-	PUBLIC
-	    Public/Log.h
-	    Public/Ignore.h
-	    Public/PeriodicCaller.h
-	    Public/Profiler.h
-	    Public/ResourceManager.h
-	    Public/Timer.h
+        Private/TransformationHelpers.cpp
+    PUBLIC
+        Public/EventHandler.h
+        Public/Log.h
+        Public/Ignore.h
+        Public/PeriodicCaller.h
+        Public/Profiler.h
+        Public/ResourceManager.h
+        Public/Timer.h
+        Public/TransformationHelpers.h
 )
 
 target_include_directories(Shared

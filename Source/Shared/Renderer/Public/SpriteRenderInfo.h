@@ -5,8 +5,6 @@
 
 namespace AM
 {
-namespace Client
-{
 /**
  * Used for storing information relevant to sorting and rendering a sprite
  * on a given frame.
@@ -32,5 +30,4 @@ struct SpriteRenderInfo {
     bool visited{false};
 };
 
-} // End namespace Client
 } // End namespace AM

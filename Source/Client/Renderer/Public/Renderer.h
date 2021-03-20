@@ -12,13 +12,13 @@ namespace AM
 {
 class Sprite;
 class BoundingBox;
+class Camera;
+class ScreenRect;
 namespace Client
 {
 class Simulation;
 class World;
 class UserInterface;
-class Camera;
-class ScreenRect;
 
 /**
  * Uses world information from the Sim to isometrically render the player's

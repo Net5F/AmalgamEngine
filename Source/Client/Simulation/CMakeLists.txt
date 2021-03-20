@@ -15,8 +15,6 @@ target_sources(Client
 		Public/NpcMovementSystem.h
 		Public/CameraSystem.h
 		Public/Simulation.h
-		Public/TileIndex.h
-		Public/Components/Camera.h
 		Public/Components/PlayerState.h
 )
 

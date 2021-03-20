@@ -4,8 +4,6 @@ target_sources(Client
 		Private/WorldSpritePreparer.cpp
 	PUBLIC
 		Public/Renderer.h
-		Public/ScreenPoint.h
-		Public/ScreenRect.h
 		Public/WorldSpritePreparer.h
 )
 

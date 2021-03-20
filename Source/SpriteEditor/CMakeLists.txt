@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 
-message(STATUS "Configuring Client")
+message(STATUS "Configuring SpriteEditor")
 
-add_executable(Client "")
+add_executable(SpriteEditor "")
 
-target_include_directories(Client
+target_include_directories(SpriteEditor
     PRIVATE
         ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} 
         ${SDL2_MIXER_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS}
@@ -12,9 +12,9 @@ target_include_directories(Client
 )
 
 # Inherit Shared's precompiled header.
-target_precompile_headers(Client REUSE_FROM Shared)
+target_precompile_headers(SpriteEditor REUSE_FROM Shared)
 
-target_link_libraries(Client
+target_link_libraries(SpriteEditor
     PRIVATE
         -static-libgcc
         -static-libstdc++
@@ -22,32 +22,24 @@ target_link_libraries(Client
         ${SDL2_MIXER_LIBRARIES} ${SDL2_TTF_LIBRARIES}
         ${SDL2_GFX_LIBRARIES} ${SDL2PP_LIBRARIES}
         SDL2pp
-        Bitsery::bitsery
-        readerwriterqueue
-        CircularBuffer
-        EnTT::EnTT
         Shared
 )
 
 # Compile with C++17
-target_compile_features(Client PRIVATE cxx_std_20)
-set_target_properties(Client PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(SpriteEditor PRIVATE cxx_std_20)
+set_target_properties(SpriteEditor PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable compile warnings.
-target_compile_options(Client PUBLIC -Wall -Wextra)
+target_compile_options(SpriteEditor PUBLIC -Wall -Wextra)
 
 add_custom_command(
-        TARGET Client POST_BUILD
+        TARGET SpriteEditor POST_BUILD
         
         # Copy resource files to the build directory.
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${PROJECT_SOURCE_DIR}/../Resources/
-                ${CMAKE_CURRENT_BINARY_DIR}/Resources/
+                ${PROJECT_SOURCE_DIR}/../Resources/SpriteEditor/
+                ${CMAKE_CURRENT_BINARY_DIR}/Resources/SpriteEditor/
 )
 
 # Build all of the subdirectories
 add_subdirectory(Launch)
-add_subdirectory(Network)
-add_subdirectory(Renderer)
-add_subdirectory(Simulation)
-add_subdirectory(UserInterface)

@@ -52,8 +52,8 @@ add_subdirectory(Client)
 # Build server
 add_subdirectory(Server)
 
-# Build editor
-#add_subdirectory(Editor)
+# Build sprite editor
+add_subdirectory(SpriteEditor)
 
 # Build tests.
 # (No fancy flags since we aren't a lib, just uncomment when you want to build tests.)

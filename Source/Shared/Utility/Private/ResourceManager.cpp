@@ -3,11 +3,26 @@
 
 namespace AM
 {
-ResourceManager::ResourceManager(SDL2pp::Renderer& sdlRenderer)
+ResourceManager::ResourceManager(SDL2pp::Renderer& inSdlRenderer)
+: sdlRenderer(inSdlRenderer)
 {
-    std::string path{"Resources/Textures/"};
-    entt::hashed_string id{"iso_test_sprites.png"};
-    textureCache.load<TextureLoader>(id, (path + id.data()), sdlRenderer);
+}
+
+bool ResourceManager::loadTexture(std::string_view path, const entt::hashed_string& filename)
+{
+    // Prepare the path.
+    std::string fullPath{path};
+    if (!(fullPath.ends_with("/"))) {
+        fullPath += "/";
+    }
+    fullPath += filename.data();
+
+    entt::resource_handle<SDL2pp::Texture> handle = textureCache.load<TextureLoader>(filename, fullPath, sdlRenderer);
+    if (!handle) {
+        LOG_ERROR("Failed to load texture at path: %s", (fullPath));
+    }
+
+    return true;
 }
 
 entt::resource_handle<SDL2pp::Texture>

@@ -7,7 +7,7 @@
 #include <exception>
 
 using namespace AM;
-using namespace AM::Client;
+using namespace AM::SpriteEditor;
 
 int main(int argc, char** argv)
 try {

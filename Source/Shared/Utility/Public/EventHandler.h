@@ -4,8 +4,6 @@
 
 namespace AM
 {
-namespace Client
-{
 /**
  * Simple interface to facilitate event handling and propagation.
  *
@@ -31,5 +29,4 @@ public:
     virtual bool handleEvent(SDL_Event& event) = 0;
 };
 
-} // End namespace Client
 } // End namespace AM

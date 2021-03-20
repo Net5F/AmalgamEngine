@@ -2,9 +2,12 @@ target_sources(Shared
     PRIVATE
         Private/MovementHelpers.cpp
 	PUBLIC
-        Public/SimDefs.h
-        Public/MovementHelpers.h
         Public/AreaOfInterest.h
+        Public/BoundingBox.h
+        Public/MovementHelpers.h
+        Public/SimDefs.h
+        Public/TileIndex.h
+        Public/Components/Camera.h
         Public/Components/Input.h
         Public/Components/IsDirty.h
         Public/Components/Movement.h

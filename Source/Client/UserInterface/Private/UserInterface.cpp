@@ -56,10 +56,21 @@ bool UserInterface::handleEvent(SDL_Event& event)
 
 void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
 {
-    // Save the tile index that the mouse is hovering over.
+    // Get the tile index that the mouse is hovering over.
     Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
     ScreenPoint screenPoint{static_cast<float>(event.x),
                             static_cast<float>(event.y)};
+    TileIndex tileIndex = TransformationHelpers::screenToTile(screenPoint, playerCamera);
+
+    // If the index is outside of the world bounds, ignore this event.
+    if ((tileIndex.x < 0)
+        || (tileIndex.y < 0)
+        || (tileIndex.x >= static_cast<int>(WORLD_WIDTH))
+        || (tileIndex.y >= static_cast<int>(WORLD_HEIGHT))) {
+        return;
+    }
+
+    // Save the new index for the renderer to use.
     tileHighlightIndex
         = TransformationHelpers::screenToTile(screenPoint, playerCamera);
 }
@@ -81,6 +92,14 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
                             static_cast<float>(mouseY)};
     TileIndex tileIndex
         = TransformationHelpers::screenToTile(screenPoint, playerCamera);
+
+    // If the index is outside of the world bounds, ignore this event.
+    if ((tileIndex.x < 0)
+        || (tileIndex.y < 0)
+        || (tileIndex.x >= static_cast<int>(WORLD_WIDTH))
+        || (tileIndex.y >= static_cast<int>(WORLD_HEIGHT))) {
+        return;
+    }
 
     // Determine which sprite the selected tile has.
     unsigned int linearizedIndex = tileIndex.y * WORLD_WIDTH + tileIndex.x;

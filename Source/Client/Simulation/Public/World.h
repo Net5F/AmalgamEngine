@@ -12,9 +12,9 @@
 namespace AM
 {
 class BoundingBox;
+class TileIndex;
 namespace Client
 {
-class TileIndex;
 
 /**
  * Holds world state and manages the persistence of that state.

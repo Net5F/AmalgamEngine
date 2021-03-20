@@ -20,7 +20,7 @@ try {
 
     return 0;
 } catch (SDL2pp::Exception& e) {
-    LOG_INFO("Error in: %s  Reason:  %s", e.GetSDLFunction(), e.GetSDLError());
+    LOG_INFO("Error in: %s  Reason:  %s", e.GetSDLFunction().c_str(), e.GetSDLError().c_str());
     return 1;
 } catch (std::exception& e) {
     LOG_INFO("%s", e.what());

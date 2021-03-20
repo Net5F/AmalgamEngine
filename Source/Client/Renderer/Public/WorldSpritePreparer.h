@@ -6,9 +6,9 @@
 
 namespace AM
 {
+class Camera;
 namespace Client
 {
-class Camera;
 
 /**
  * This class is responsible for figuring out which sprites from the world are

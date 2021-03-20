@@ -2,8 +2,7 @@
 
 namespace AM
 {
-namespace Client
-{
+
 /**
  * Represents a 2D point in isometric screen space.
  * Fields are float to maintain precision. Cast right before rendering.
@@ -14,5 +13,4 @@ public:
     float y{0};
 };
 
-} // namespace Client
 } // namespace AM

@@ -5,10 +5,10 @@
 namespace AM
 {
 class Position;
+class Camera;
 
 namespace Client
 {
-class Camera;
 class Simulation;
 class World;
 

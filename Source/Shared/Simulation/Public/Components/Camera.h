@@ -6,8 +6,6 @@
 
 namespace AM
 {
-namespace Client
-{
 /**
  * Stores camera position, bounds, and behavior.
  */
@@ -40,5 +38,4 @@ public:
     float zoomSensitivity{0.1};
 };
 
-} // namespace Client
 } // namespace AM

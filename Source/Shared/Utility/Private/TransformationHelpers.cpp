@@ -7,8 +7,6 @@
 
 namespace AM
 {
-namespace Client
-{
 ScreenPoint TransformationHelpers::worldToScreen(const Position position,
                                                  const float zoom)
 {
@@ -130,5 +128,4 @@ TileIndex TransformationHelpers::screenToTile(const ScreenPoint& screenPoint,
     return worldToTile(worldPos);
 }
 
-} // End namespace Client
 } // End namespace AM

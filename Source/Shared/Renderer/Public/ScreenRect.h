@@ -2,8 +2,6 @@
 
 namespace AM
 {
-namespace Client
-{
 /**
  * Represents a 2D rectangle in isometric screen space.
  * Fields are float to maintain precision. Cast right before rendering.
@@ -16,5 +14,4 @@ public:
     float height{0};
 };
 
-} // namespace Client
 } // namespace AM
