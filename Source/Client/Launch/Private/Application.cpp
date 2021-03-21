@@ -34,7 +34,7 @@ Application::Application()
 , exitRequested(false)
 {
     // Uncomment to enable fullscreen.
-    // window.SetFullscreen(SDL_WINDOW_FULLSCREEN);
+//    sdlWindow.SetFullscreen(SDL_WINDOW_FULLSCREEN);
 
     // Enable delay reporting.
     simCaller.reportDelays(Simulation::SIM_DELAYED_TIME_S);

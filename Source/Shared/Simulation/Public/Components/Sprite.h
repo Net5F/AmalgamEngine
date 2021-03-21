@@ -1,8 +1,7 @@
 #pragma once
 
-#include "HandleDefs.h"
+#include "TextureHandle.h"
 #include "BoundingBox.h"
-#include "entt/resource/handle.hpp"
 #include "SDL2pp/Rect.hh"
 #include <memory>
 

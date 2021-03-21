@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HandleDefs.h"
+#include "TextureHandle.h"
 #include "entt/core/hashed_string.hpp"
 #include "entt/resource/cache.hpp"
 #include "entt/resource/loader.hpp"

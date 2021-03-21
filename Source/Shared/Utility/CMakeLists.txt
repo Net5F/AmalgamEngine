@@ -7,12 +7,12 @@ target_sources(Shared
         Private/TransformationHelpers.cpp
     PUBLIC
         Public/EventHandler.h
-        Public/HandleDefs.h
         Public/Log.h
         Public/Ignore.h
         Public/PeriodicCaller.h
         Public/Profiler.h
         Public/ResourceManager.h
+        Public/TextureHandle.h
         Public/Timer.h
         Public/TransformationHelpers.h
 )
