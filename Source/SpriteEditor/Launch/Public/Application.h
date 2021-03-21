@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EventHandler.h"
+#include "Configuration.h"
 #include "PeriodicCaller.h"
 #include "ResourceManager.h"
 
@@ -8,6 +9,7 @@
 #include "SDL2pp/Window.hh"
 #include "SDL2pp/Renderer.hh"
 
+#include <string>
 #include <atomic>
 
 namespace AM
@@ -21,7 +23,11 @@ namespace SpriteEditor
 class Application : public EventHandler
 {
 public:
-    Application();
+    /**
+     * @param runPath  The path that this application was ran from. Should be
+     *                 prepended to any resource paths.
+     */
+    Application(const std::string& runpath);
 
     ~Application(){};
 

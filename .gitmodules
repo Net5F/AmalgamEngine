@@ -22,3 +22,6 @@
 [submodule "Libraries/Remotery"]
 	path = Libraries/Remotery
 	url = git@github.com:Net5F/Remotery.git
+[submodule "Libraries/json"]
+	path = Libraries/json
+	url = git@github.com:nlohmann/json.git

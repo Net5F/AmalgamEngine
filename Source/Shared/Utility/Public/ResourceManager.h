@@ -20,13 +20,18 @@ class ResourceManager
 public:
     /**
      * Parses the resource file, loading all listed resources.
+     *
+     * @param inRunPath  The path that the executable was started from. Used when
+     *                   building the resource file path.
+     * @param sdlRenderer  The renderer to construct Texture resources with.
      */
-    ResourceManager(SDL2pp::Renderer& sdlRenderer);
+    ResourceManager(const std::string& inRunPath, SDL2pp::Renderer& sdlRenderer);
 
     /**
      * Attempts to load the texture at the given path.
      *
-     * @param path  The path to the directory that contains the texture.
+     * @param path  The path to the directory that contains the texture,
+     *              starting from the executable location.
      * @param filename  The filename of the texture. Used as the identifier.
      * @return true if the texture was successfully loaded, else false.
      */
@@ -39,6 +44,10 @@ public:
      TextureHandle getTexture(const entt::hashed_string id);
 
 private:
+    /* The path that the executable was started from. Used when constructing
+       the resource file path. */
+    const std::string runPath;
+
     /** SDL2 renderer reference, used for constructing textures. */
     SDL2pp::Renderer& sdlRenderer;
 

@@ -13,12 +13,12 @@ namespace AM
 {
 namespace Client
 {
-Application::Application()
+Application::Application(const std::string& runPath)
 : sdl(SDL_INIT_VIDEO)
 , sdlWindow("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
-, resourceManager(sdlRenderer)
+, resourceManager(runPath, sdlRenderer)
 , network()
 , networkCaller(std::bind(&Network::tick, &network), NETWORK_TICK_TIMESTEP_S,
                 "Network", true)

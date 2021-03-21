@@ -20,6 +20,7 @@ target_link_libraries(Shared
         EnTT::EnTT
         Bitsery::bitsery
         Remotery
+        nlohmann_json::nlohmann_json
 )
 
 # Compile with C++17

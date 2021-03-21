@@ -25,7 +25,11 @@ namespace Client
 class Application : public EventHandler
 {
 public:
-    Application();
+    /**
+     * @param runPath  The path that this application was ran from. Should be
+     *                 prepended to any resource paths.
+     */
+    Application(const std::string& runpath);
 
     ~Application(){};
 
