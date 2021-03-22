@@ -1,6 +1,5 @@
 #pragma once
 
-#include "SimDefs.h"
 #include "Network.h"
 #include "SDL_events.h"
 

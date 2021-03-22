@@ -4,6 +4,7 @@
 #include "EntityUpdate.h"
 #include "ConnectionResponse.h"
 #include "Heartbeat.h"
+#include "Config.h"
 #include "NetworkStats.h"
 #include <SDL_net.h>
 
@@ -27,7 +28,7 @@ Network::Network()
 , netstatsLoggingEnabled(true)
 , ticksSinceNetstatsLog(0)
 {
-    if (!RUN_OFFLINE) {
+    if (!Config::RUN_OFFLINE) {
         SDLNet_Init();
     }
 
@@ -39,7 +40,7 @@ Network::~Network()
 {
     exitRequested = true;
 
-    if (!RUN_OFFLINE) {
+    if (!Config::RUN_OFFLINE) {
         receiveThreadObj.join();
         SDLNet_Quit();
     }
@@ -48,7 +49,7 @@ Network::~Network()
 bool Network::connect()
 {
     // Try to connect.
-    server = Peer::initiate(SERVER_IP, SERVER_PORT);
+    server = Peer::initiate(Config::SERVER_IP, Config::SERVER_PORT);
 
     // Spin up the receive thread.
     if (server != nullptr) {
@@ -60,7 +61,7 @@ bool Network::connect()
 
 void Network::tick()
 {
-    if (!RUN_OFFLINE) {
+    if (!Config::RUN_OFFLINE) {
         // Send a heartbeat if we need to.
         sendHeartbeatIfNecessary();
 
@@ -267,7 +268,7 @@ void Network::processBatch()
             bytesReceived += MESSAGE_HEADER_SIZE + messageResult.messageSize;
         }
         else if ((messageResult.networkResult == NetworkResult::NoWaitingData)
-                 && (receiveTimer.getDeltaSeconds(false) > SERVER_TIMEOUT_S)) {
+                 && (receiveTimer.getDeltaSeconds(false) > Config::SERVER_TIMEOUT_S)) {
             // Too long since we received a message, timed out.
             LOG_ERROR("Server connection timed out.");
         }

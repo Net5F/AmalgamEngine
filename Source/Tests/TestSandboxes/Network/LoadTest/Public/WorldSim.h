@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SimDefs.h"
+#include "SharedConfig.h"
 #include "entt/entity/registry.hpp"
 #include <SDL_stdinc.h>
 #include <atomic>
@@ -52,7 +52,7 @@ private:
     /** How often to send inputs. */
     static constexpr double INPUT_RATE_S = (1 / 4.0);
     static constexpr unsigned int INPUT_RATE_TICKS
-        = SIM_TICKS_PER_SECOND * INPUT_RATE_S;
+        = SharedConfig::SIM_TICKS_PER_SECOND * INPUT_RATE_S;
 
     Client::Network& network;
 

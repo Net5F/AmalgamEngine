@@ -2,7 +2,7 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
-#include "SimDefs.h"
+#include "SharedConfig.h"
 #include "MessageTools.h"
 #include "ConnectionResponse.h"
 #include "Input.h"
@@ -62,8 +62,8 @@ void NetworkConnectionSystem::processConnectEvents()
         registry.emplace<Input>(newEntity);
         registry.emplace<ClientSimData>(
             newEntity, clientNetworkID, false,
-            AreaOfInterest{(SCREEN_WIDTH + AOI_BUFFER_DISTANCE),
-                           (SCREEN_HEIGHT + AOI_BUFFER_DISTANCE)});
+            AreaOfInterest{(SharedConfig::SCREEN_WIDTH + SharedConfig::AOI_BUFFER_DISTANCE),
+                           (SharedConfig::SCREEN_HEIGHT + SharedConfig::AOI_BUFFER_DISTANCE)});
         world.netIdMap[clientNetworkID] = newEntity;
 
         LOG_INFO("Constructed entity with netID: %u, entityID: %u",

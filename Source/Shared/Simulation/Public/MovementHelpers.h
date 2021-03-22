@@ -1,6 +1,5 @@
 #pragma once
 
-#include "SimDefs.h"
 #include "Input.h"
 #include <array>
 

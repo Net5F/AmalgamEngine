@@ -1,7 +1,6 @@
 #pragma once
 
 #include "EventHandler.h"
-#include "Configuration.h"
 #include "PeriodicCaller.h"
 #include "ResourceManager.h"
 

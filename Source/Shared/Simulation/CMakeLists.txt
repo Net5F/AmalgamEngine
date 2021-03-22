@@ -5,7 +5,6 @@ target_sources(Shared
         Public/AreaOfInterest.h
         Public/BoundingBox.h
         Public/MovementHelpers.h
-        Public/SimDefs.h
         Public/TileIndex.h
         Public/Components/Camera.h
         Public/Components/Input.h

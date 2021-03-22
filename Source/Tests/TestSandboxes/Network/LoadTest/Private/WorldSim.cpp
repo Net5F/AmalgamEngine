@@ -1,6 +1,7 @@
 #include "WorldSim.h"
 #include "Network.h"
 #include "ClientNetworkDefs.h"
+#include "Config.h"
 #include "MessageTools.h"
 #include "ConnectionResponse.h"
 #include "ClientInput.h"
@@ -43,7 +44,7 @@ void WorldSim::connect()
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.
-    currentTick = connectionResponse->tickNum + Client::INITIAL_TICK_OFFSET;
+    currentTick = connectionResponse->tickNum + Client::Config::INITIAL_TICK_OFFSET;
 }
 
 void WorldSim::tick()

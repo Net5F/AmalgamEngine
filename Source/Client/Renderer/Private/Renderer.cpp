@@ -6,6 +6,7 @@
 #include "Sprite.h"
 #include "Camera.h"
 #include "TransformationHelpers.h"
+#include "MovementHelpers.h"
 #include "ScreenRect.h"
 #include "Log.h"
 #include "Ignore.h"

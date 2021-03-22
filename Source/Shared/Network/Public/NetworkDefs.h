@@ -5,18 +5,11 @@
 #include <vector>
 
 /**
- * This file contains shared network definitions that should be
+ * This file contains shared network type definitions that should be
  * consistent between the server and client.
  */
 namespace AM
 {
-//--------------------------------------------------------------------------
-// Config
-//--------------------------------------------------------------------------
-static constexpr unsigned int NETWORK_TICKS_PER_SECOND = 20;
-static constexpr double NETWORK_TICK_TIMESTEP_S
-    = 1.0 / static_cast<double>(NETWORK_TICKS_PER_SECOND);
-
 //--------------------------------------------------------------------------
 // Typedefs
 //--------------------------------------------------------------------------

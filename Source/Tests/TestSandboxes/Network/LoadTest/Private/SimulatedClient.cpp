@@ -1,4 +1,5 @@
 #include "SimulatedClient.h"
+#include "SharedConfig.h"
 
 namespace AM
 {
@@ -6,9 +7,9 @@ namespace LTC
 {
 SimulatedClient::SimulatedClient()
 : networkCaller(std::bind(&Client::Network::tick, &network),
-                NETWORK_TICK_TIMESTEP_S, "Network", true)
+                SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
 , worldSim(network)
-, simCaller(std::bind(&WorldSim::tick, &worldSim), SIM_TICK_TIMESTEP_S, "Sim",
+, simCaller(std::bind(&WorldSim::tick, &worldSim), SharedConfig::SIM_TICK_TIMESTEP_S, "Sim",
             false)
 , isConnected(false)
 {

@@ -1,5 +1,5 @@
 #include "Application.h"
-#include "SimDefs.h"
+#include "SharedConfig.h"
 #include "Profiler.h"
 #include "Log.h"
 
@@ -16,26 +16,23 @@ namespace Client
 Application::Application(const std::string& runPath)
 : sdl(SDL_INIT_VIDEO)
 , sdlWindow("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-            SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
+            SharedConfig::SCREEN_WIDTH, SharedConfig::SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , resourceManager(runPath, sdlRenderer)
 , network()
-, networkCaller(std::bind(&Network::tick, &network), NETWORK_TICK_TIMESTEP_S,
+, networkCaller(std::bind(&Network::tick, &network), SharedConfig::NETWORK_TICK_TIMESTEP_S,
                 "Network", true)
 , sim(network, resourceManager)
-, simCaller(std::bind(&Simulation::tick, &sim), SIM_TICK_TIMESTEP_S, "Sim",
+, simCaller(std::bind(&Simulation::tick, &sim), SharedConfig::SIM_TICK_TIMESTEP_S, "Sim",
             false)
 , userInterface(sim.getWorld(), resourceManager)
 , renderer(sdlRenderer, sdlWindow, sim, userInterface,
            std::bind(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind(&Renderer::render, &renderer),
-                 Renderer::RENDER_FRAME_TIMESTEP_S, "Renderer", true)
+                 Renderer::FRAME_TIMESTEP_S, "Renderer", true)
 , eventHandlers{this, &renderer, &userInterface, &sim}
 , exitRequested(false)
 {
-    // Uncomment to enable fullscreen.
-//    sdlWindow.SetFullscreen(SDL_WINDOW_FULLSCREEN);
-
     // Enable delay reporting.
     simCaller.reportDelays(Simulation::SIM_DELAYED_TIME_S);
 

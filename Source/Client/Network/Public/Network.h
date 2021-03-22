@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SimDefs.h"
+#include "SharedConfig.h"
 #include "NetworkDefs.h"
 #include "ClientNetworkDefs.h"
 #include "MessageHandler.h"
@@ -173,7 +173,7 @@ private:
         statistics. */
     static constexpr unsigned int SECONDS_TILL_STATS_DUMP = 5;
     static constexpr unsigned int TICKS_TILL_STATS_DUMP
-        = (1 / NETWORK_TICK_TIMESTEP_S) * SECONDS_TILL_STATS_DUMP;
+        = (1 / SharedConfig::NETWORK_TICK_TIMESTEP_S) * SECONDS_TILL_STATS_DUMP;
 
     /** Whether network statistics logging is enabled or not. */
     bool netstatsLoggingEnabled;

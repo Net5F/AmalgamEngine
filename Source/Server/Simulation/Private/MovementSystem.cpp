@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "Position.h"
 #include "Movement.h"
+#include "SharedConfig.h"
 #include "Log.h"
 #include "Ignore.h"
 #include "Profiler.h"
@@ -33,7 +34,7 @@ void MovementSystem::processMovements()
 
         // Process their movement.
         MovementHelpers::moveEntity(position, movement, input.inputStates,
-                                    SIM_TICK_TIMESTEP_S);
+                                    SharedConfig::SIM_TICK_TIMESTEP_S);
     }
 }
 

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "SimDefs.h"
 #include "NetworkDefs.h"
-#include "ServerNetworkDefs.h"
+#include "Config.h"
 #include "Peer.h"
 #include "CircularBuffer.h"
 #include "Timer.h"
@@ -144,14 +143,14 @@ private:
      * @return The calculated adjustment. 0 if no adjustment was needed.
      */
     Sint8 calcAdjustment(
-        CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy,
+        CircularBuffer<Sint8, Config::TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy,
         unsigned int numFreshDiffsCopy);
 
     /**
      * Prints relevant information during an adjustment. Used for debugging.
      */
     void printAdjustmentInfo(
-        const CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH>&
+        const CircularBuffer<Sint8, Config::TICKDIFF_HISTORY_LENGTH>&
             tickDiffHistoryCopy,
         unsigned int numFreshDiffsCopy, int truncatedAverage);
 
@@ -164,7 +163,7 @@ private:
     /**
      * Holds tick diffs that have been added through recordTickDiff.
      */
-    CircularBuffer<Sint8, TICKDIFF_HISTORY_LENGTH> tickDiffHistory;
+    CircularBuffer<Sint8, Config::TICKDIFF_HISTORY_LENGTH> tickDiffHistory;
 
     /**
      * Used to prevent tickDiffHistory and numFreshData changing while a

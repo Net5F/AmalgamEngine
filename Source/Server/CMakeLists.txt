@@ -38,6 +38,7 @@ set_target_properties(Server PROPERTIES CXX_EXTENSIONS OFF)
 target_compile_options(Server PUBLIC -Wall -Wextra)
 
 # Build all of the subdirectories
+add_subdirectory(Config)
 add_subdirectory(Launch)
 add_subdirectory(Network)
 add_subdirectory(Simulation)

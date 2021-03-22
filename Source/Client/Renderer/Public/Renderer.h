@@ -27,9 +27,9 @@ class UserInterface;
 class Renderer : public EventHandler
 {
 public:
-    static constexpr unsigned int RENDER_FRAMES_PER_SECOND = 60;
-    static constexpr double RENDER_FRAME_TIMESTEP_S
-        = 1.0 / static_cast<double>(RENDER_FRAMES_PER_SECOND);
+    static constexpr unsigned int FRAMES_PER_SECOND = 60;
+    static constexpr double FRAME_TIMESTEP_S
+        = 1.0 / static_cast<double>(FRAMES_PER_SECOND);
 
     /**
      * @param getProgress  A function that returns how far between sim ticks we

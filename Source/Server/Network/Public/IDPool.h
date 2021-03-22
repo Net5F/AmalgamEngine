@@ -1,6 +1,5 @@
 #pragma once
 
-#include "SimDefs.h"
 #include <vector>
 
 namespace AM

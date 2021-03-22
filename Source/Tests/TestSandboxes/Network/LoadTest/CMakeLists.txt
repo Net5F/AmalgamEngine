@@ -11,6 +11,8 @@ add_executable(LoadTestClient
     Public/WorldSim.h
     
     # Client objects
+    ${PROJECT_SOURCE_DIR}/Client/Config/Private/Config.cpp
+    ${PROJECT_SOURCE_DIR}/Client/Config/Public/Config.h
     ${PROJECT_SOURCE_DIR}/Client/Network/Private/Network.cpp
     ${PROJECT_SOURCE_DIR}/Client/Network/Public/Network.h
     ${PROJECT_SOURCE_DIR}/Client/Network/Private/MessageHandler.cpp
@@ -26,6 +28,7 @@ target_include_directories(LoadTestClient
 
         # Client objects
         ${PROJECT_SOURCE_DIR}/Client/Network/Public
+        ${PROJECT_SOURCE_DIR}/Client/Config/Public
 )
 
 target_link_libraries(LoadTestClient

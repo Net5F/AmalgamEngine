@@ -1,6 +1,6 @@
 #include "WorldSpritePreparer.h"
 #include "Camera.h"
-#include "SimDefs.h"
+#include "SharedConfig.h"
 #include "MovementHelpers.h"
 #include "TransformationHelpers.h"
 
@@ -63,9 +63,9 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 {
     // Gather tiles.
     for (unsigned int i = 0; i < mapLayers.size(); ++i) {
-        for (int y = 0; y < static_cast<int>(WORLD_HEIGHT); ++y) {
-            for (int x = 0; x < static_cast<int>(WORLD_WIDTH); ++x) {
-                unsigned int linearizedIndex = y * WORLD_WIDTH + x;
+        for (int y = 0; y < static_cast<int>(SharedConfig::WORLD_HEIGHT); ++y) {
+            for (int x = 0; x < static_cast<int>(SharedConfig::WORLD_WIDTH); ++x) {
+                unsigned int linearizedIndex = y * SharedConfig::WORLD_WIDTH + x;
                 Sprite& sprite = mapLayers[i][linearizedIndex];
 
                 // If there's nothing in this tile, skip it.

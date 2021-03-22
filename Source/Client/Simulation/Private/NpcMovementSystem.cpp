@@ -3,7 +3,6 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
-#include "ClientNetworkDefs.h"
 #include "EntityUpdate.h"
 #include "Name.h"
 #include "Position.h"
@@ -12,6 +11,9 @@
 #include "Input.h"
 #include "Sprite.h"
 #include "PlayerState.h"
+#include "ClientNetworkDefs.h"
+#include "Config.h"
+#include "SharedConfig.h"
 #include "Log.h"
 #include "Ignore.h"
 #include "entt/entity/registry.hpp"
@@ -26,7 +28,7 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
                                      Network& inNetwork)
 : lastReceivedTick(0)
 , lastProcessedTick(0)
-, tickReplicationOffset(-2 * INITIAL_TICK_OFFSET)
+, tickReplicationOffset(-2 * Config::INITIAL_TICK_OFFSET)
 , sim(inSim)
 , world(inWorld)
 , network(inNetwork)
@@ -40,7 +42,7 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
 
 void NpcMovementSystem::updateNpcs()
 {
-    if (RUN_OFFLINE) {
+    if (Config::RUN_OFFLINE) {
         // No need to process NPCs if we're running offline.
         return;
     }
@@ -197,7 +199,7 @@ void NpcMovementSystem::moveAllNpcs()
 
         // Process their movement.
         MovementHelpers::moveEntity(position, movement, input.inputStates,
-                                    SIM_TICK_TIMESTEP_S);
+                                    SharedConfig::SIM_TICK_TIMESTEP_S);
     }
 }
 

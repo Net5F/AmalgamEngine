@@ -13,6 +13,6 @@
 // Ours
 #include "Log.h"
 #include "NetworkDefs.h"
-#include "SimDefs.h"
+#include "SharedConfig.h"
 
 #endif /* End PCH_H_ */

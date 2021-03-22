@@ -1,6 +1,5 @@
 #pragma once
 
-#include "SimDefs.h"
 #include <SDL_stdinc.h>
 #include "bitsery/ext/value_range.h"
 

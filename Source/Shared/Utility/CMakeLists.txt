@@ -1,13 +1,12 @@
 target_sources(Shared
     PRIVATE
-        Private/Configuration.cpp
         Private/Log.cpp
         Private/PeriodicCaller.cpp
 	    Private/ResourceManager.cpp
         Private/Timer.cpp
         Private/TransformationHelpers.cpp
     PUBLIC
-        Public/Configuration.h
+        Public/SharedConfig.h
         Public/EventHandler.h
         Public/Log.h
         Public/Ignore.h

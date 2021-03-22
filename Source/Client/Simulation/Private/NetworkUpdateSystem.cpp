@@ -8,6 +8,7 @@
 #include "PlayerState.h"
 #include "IsDirty.h"
 #include "Peer.h"
+#include "Config.h"
 #include "Log.h"
 #include "Ignore.h"
 #include "entt/entity/registry.hpp"
@@ -27,7 +28,7 @@ NetworkUpdateSystem::NetworkUpdateSystem(Simulation& inSim, World& inWorld,
 
 void NetworkUpdateSystem::sendInputState()
 {
-    if (RUN_OFFLINE) {
+    if (Config::RUN_OFFLINE) {
         // No need to send messages if we're running offline.
         return;
     }

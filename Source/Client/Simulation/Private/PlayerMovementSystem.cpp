@@ -10,7 +10,8 @@
 #include "Input.h"
 #include "PlayerState.h"
 #include "PreviousPosition.h"
-#include "ClientNetworkDefs.h"
+#include "SharedConfig.h"
+#include "Config.h"
 #include "Log.h"
 #include <memory>
 
@@ -40,7 +41,7 @@ void PlayerMovementSystem::processMovements()
     previousPosition.y = currentPosition.y;
     previousPosition.z = currentPosition.z;
 
-    if (!RUN_OFFLINE) {
+    if (!Config::RUN_OFFLINE) {
         // Receive any player entity updates from the server.
         PlayerState& playerState
             = registry.get<PlayerState>(world.playerEntity);
@@ -69,7 +70,7 @@ void PlayerMovementSystem::processMovements()
 
     // Use the current input state to update movement for this tick.
     MovementHelpers::moveEntity(currentPosition, currentMovement,
-                                currentInput.inputStates, SIM_TICK_TIMESTEP_S);
+                                currentInput.inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(
@@ -171,7 +172,7 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
         // Use the appropriate input state to update movement.
         MovementHelpers::moveEntity(currentPosition, currentMovement,
                                     playerState.inputHistory[tickDiff],
-                                    SIM_TICK_TIMESTEP_S);
+                                    SharedConfig::SIM_TICK_TIMESTEP_S);
     }
 }
 

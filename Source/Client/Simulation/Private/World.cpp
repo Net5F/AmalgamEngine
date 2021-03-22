@@ -3,6 +3,7 @@
 #include "BoundingBox.h"
 #include "Position.h"
 #include "MovementHelpers.h"
+#include "SharedConfig.h"
 #include "Log.h"
 
 namespace AM
@@ -21,7 +22,7 @@ World::World(ResourceManager& inResourceManager)
 
     // Init our layers.
     for (TileLayer& layer : mapLayers) {
-        layer.resize(WORLD_WIDTH * WORLD_HEIGHT);
+        layer.resize(SharedConfig::WORLD_WIDTH * SharedConfig::WORLD_HEIGHT);
     }
 
     // Fill layer 0 (terrain layer).
@@ -59,19 +60,19 @@ void World::addTile(unsigned int layer, const TileIndex& index,
                     const SDL2pp::Rect& extent, const BoundingBox& modelBounds)
 {
     // Convert the 2d tile position into an index into the 1d array.
-    unsigned int linearizedIndex = index.y * WORLD_WIDTH + index.x;
+    unsigned int linearizedIndex = index.y * SharedConfig::WORLD_WIDTH + index.x;
     Sprite& sprite = mapLayers[layer][linearizedIndex];
 
     // Build the sprite.
     sprite.textureHandle = textureHandle;
-    sprite.width = TILE_SPRITE_WIDTH;
-    sprite.height = TILE_SPRITE_HEIGHT;
+    sprite.width = SharedConfig::TILE_SPRITE_WIDTH;
+    sprite.height = SharedConfig::TILE_SPRITE_HEIGHT;
     sprite.textureExtent = extent;
     sprite.modelBounds = modelBounds;
 
     // Move the sprite's world bounds to match the tile's world position.
-    Position tilePosition{static_cast<float>(index.x * TILE_WORLD_WIDTH),
-                          static_cast<float>(index.y * TILE_WORLD_HEIGHT), 0};
+    Position tilePosition{static_cast<float>(index.x * SharedConfig::TILE_WORLD_WIDTH),
+                          static_cast<float>(index.y * SharedConfig::TILE_WORLD_HEIGHT), 0};
     MovementHelpers::moveSpriteWorldBounds(tilePosition, sprite);
 }
 

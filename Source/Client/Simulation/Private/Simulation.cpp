@@ -1,6 +1,5 @@
 #include "Simulation.h"
 #include "Network.h"
-#include "ClientNetworkDefs.h"
 #include "ConnectionResponse.h"
 #include "Input.h"
 #include "Position.h"
@@ -11,12 +10,13 @@
 #include "PlayerState.h"
 #include "Name.h"
 #include "ScreenRect.h"
+#include "Config.h"
+#include "SharedConfig.h"
 #include "Log.h"
 #include "entt/entity/registry.hpp"
 #include "Profiler.h"
 #include <memory>
 #include <string>
-#include "SDL_timer.h"
 
 namespace AM
 {
@@ -39,7 +39,7 @@ Simulation::Simulation(Network& inNetwork, ResourceManager& inResourceManager)
 
 void Simulation::connect()
 {
-    if (RUN_OFFLINE) {
+    if (Config::RUN_OFFLINE) {
         // No need to connect if we're running offline. Just need mock player
         // data.
         fakeConnection();
@@ -66,7 +66,7 @@ void Simulation::connect()
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.
-    currentTick = connectionResponse->tickNum + INITIAL_TICK_OFFSET;
+    currentTick = connectionResponse->tickNum + Config::INITIAL_TICK_OFFSET;
 
     // Create the player entity using the ID we received.
     entt::registry& registry = world.registry;
@@ -98,7 +98,7 @@ void Simulation::connect()
                              64, BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
-                             ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
+                             ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH, SharedConfig::SCREEN_HEIGHT});
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
@@ -129,7 +129,7 @@ void Simulation::fakeConnection()
                              64, BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
-                             ScreenRect{0, 0, SCREEN_WIDTH, SCREEN_HEIGHT});
+                             ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH, SharedConfig::SCREEN_HEIGHT});
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
@@ -145,7 +145,7 @@ void Simulation::tick()
 
     // If we're online, apply any adjustments that we receive from the
     // server.
-    if (!RUN_OFFLINE) {
+    if (!Config::RUN_OFFLINE) {
         int adjustment = network.transferTickAdjustment();
         if (adjustment != 0) {
             targetTick += adjustment;

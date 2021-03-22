@@ -1,7 +1,7 @@
 #include "UserInterface.h"
 #include "World.h"
 #include "Camera.h"
-#include "SimDefs.h"
+#include "SharedConfig.h"
 #include "TransformationHelpers.h"
 #include "Log.h"
 
@@ -65,8 +65,8 @@ void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
     // If the index is outside of the world bounds, ignore this event.
     if ((tileIndex.x < 0)
         || (tileIndex.y < 0)
-        || (tileIndex.x >= static_cast<int>(WORLD_WIDTH))
-        || (tileIndex.y >= static_cast<int>(WORLD_HEIGHT))) {
+        || (tileIndex.x >= static_cast<int>(SharedConfig::WORLD_WIDTH))
+        || (tileIndex.y >= static_cast<int>(SharedConfig::WORLD_HEIGHT))) {
         return;
     }
 
@@ -96,13 +96,13 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     // If the index is outside of the world bounds, ignore this event.
     if ((tileIndex.x < 0)
         || (tileIndex.y < 0)
-        || (tileIndex.x >= static_cast<int>(WORLD_WIDTH))
-        || (tileIndex.y >= static_cast<int>(WORLD_HEIGHT))) {
+        || (tileIndex.x >= static_cast<int>(SharedConfig::WORLD_WIDTH))
+        || (tileIndex.y >= static_cast<int>(SharedConfig::WORLD_HEIGHT))) {
         return;
     }
 
     // Determine which sprite the selected tile has.
-    unsigned int linearizedIndex = tileIndex.y * WORLD_WIDTH + tileIndex.x;
+    unsigned int linearizedIndex = tileIndex.y * SharedConfig::WORLD_WIDTH + tileIndex.x;
     Sprite& tileSprite = world.mapLayers[0][linearizedIndex];
 
     unsigned int terrainSpriteIndex = 0;

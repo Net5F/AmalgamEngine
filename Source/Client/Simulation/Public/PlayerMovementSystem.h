@@ -1,9 +1,6 @@
 #pragma once
 
-#include "MovementHelpers.h"
-#include "SimDefs.h"
-#include <array>
-#include <vector>
+#include <SDL_stdinc.h>
 
 namespace AM
 {

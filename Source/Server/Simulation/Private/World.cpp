@@ -1,5 +1,6 @@
 #include "World.h"
 #include "ClientSimData.h"
+#include "SharedConfig.h"
 #include "Log.h"
 #include "Ignore.h"
 
@@ -10,8 +11,8 @@ namespace Server
 World::World()
 : device()
 , generator(device())
-, xDistribution(0, ((WORLD_WIDTH - 1) * TILE_WORLD_WIDTH))
-, yDistribution(0, ((WORLD_HEIGHT - 1) * TILE_WORLD_HEIGHT))
+, xDistribution(0, ((SharedConfig::WORLD_WIDTH - 1) * SharedConfig::TILE_WORLD_WIDTH))
+, yDistribution(0, ((SharedConfig::WORLD_HEIGHT - 1) * SharedConfig::TILE_WORLD_HEIGHT))
 , baseX{0}
 , baseY{0}
 , groupOffsetsX{32, 64, 96, 128, 160, 32, 64, 96, 128, 160}

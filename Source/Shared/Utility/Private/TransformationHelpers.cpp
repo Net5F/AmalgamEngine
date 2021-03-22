@@ -1,7 +1,7 @@
 #include "TransformationHelpers.h"
 #include "Camera.h"
 #include "Sprite.h"
-#include "SimDefs.h"
+#include "SharedConfig.h"
 #include "Log.h"
 #include <cmath>
 
@@ -12,9 +12,9 @@ ScreenPoint TransformationHelpers::worldToScreen(const Position position,
 {
     // Calc the scaling factor going from world tiles to screen tiles.
     static const float TILE_WIDTH_SCALE
-        = static_cast<float>(TILE_SCREEN_WIDTH) / TILE_WORLD_WIDTH;
+        = static_cast<float>(SharedConfig::TILE_SCREEN_WIDTH) / SharedConfig::TILE_WORLD_WIDTH;
     static const float TILE_HEIGHT_SCALE
-        = static_cast<float>(TILE_SCREEN_HEIGHT) / TILE_WORLD_HEIGHT;
+        = static_cast<float>(SharedConfig::TILE_SCREEN_HEIGHT) / SharedConfig::TILE_WORLD_HEIGHT;
 
     // Convert cartesian world point to isometric screen point.
     float screenX = (position.x - position.y) * (TILE_WIDTH_SCALE / 2.f);
@@ -37,9 +37,9 @@ Position TransformationHelpers::screenToWorld(const ScreenPoint screenPoint,
 
     // Calc the scaling factor going from screen tiles to world tiles.
     static const float TILE_WIDTH_SCALE
-        = static_cast<float>(TILE_WORLD_WIDTH) / TILE_SCREEN_WIDTH;
+        = static_cast<float>(SharedConfig::TILE_WORLD_WIDTH) / SharedConfig::TILE_SCREEN_WIDTH;
     static const float TILE_HEIGHT_SCALE
-        = static_cast<float>(TILE_WORLD_HEIGHT) / TILE_SCREEN_HEIGHT;
+        = static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT) / SharedConfig::TILE_SCREEN_HEIGHT;
 
     // Calc the world position.
     float worldX = ((2 * y) + x) * (TILE_WIDTH_SCALE);
@@ -75,12 +75,12 @@ SDL2pp::Rect TransformationHelpers::tileToScreenExtent(const TileIndex& index,
                                                        const Sprite& sprite)
 {
     // Convert tile index to isometric screen position.
-    float screenX = (index.x - index.y) * (TILE_SCREEN_WIDTH / 2.f);
-    float screenY = (index.x + index.y) * (TILE_SCREEN_HEIGHT / 2.f);
+    float screenX = (index.x - index.y) * (SharedConfig::TILE_SCREEN_WIDTH / 2.f);
+    float screenY = (index.x + index.y) * (SharedConfig::TILE_SCREEN_HEIGHT / 2.f);
 
     // In an iso view, the (0, 0) point of a tile is halfway through the width
     // of the sprite. Thus, we have to shift the tile back to align it.
-    screenX -= (TILE_SCREEN_WIDTH / 2.f);
+    screenX -= (SharedConfig::TILE_SCREEN_WIDTH / 2.f);
 
     // Apply the camera zoom to the position.
     screenX *= camera.zoomFactor;
@@ -89,7 +89,7 @@ SDL2pp::Rect TransformationHelpers::tileToScreenExtent(const TileIndex& index,
     // Get the sprite's vertical offset (iso sprites may have extra
     // vertical space to show depth, we just want the tile.)
     float spriteOffsetY
-        = (sprite.height - TILE_SCREEN_HEIGHT - TILE_SCREEN_EDGE_HEIGHT)
+        = (sprite.height - SharedConfig::TILE_SCREEN_HEIGHT - SharedConfig::TILE_SCREEN_EDGE_HEIGHT)
           * camera.zoomFactor;
 
     // Apply the camera adjustment.
@@ -109,8 +109,8 @@ SDL2pp::Rect TransformationHelpers::tileToScreenExtent(const TileIndex& index,
 TileIndex TransformationHelpers::worldToTile(const Position& position)
 {
     // Our tiles are 2D, so Z doesn't matter.
-    return {static_cast<int>(position.x / TILE_WORLD_WIDTH),
-            static_cast<int>(position.y / TILE_WORLD_HEIGHT)};
+    return {static_cast<int>(position.x / SharedConfig::TILE_WORLD_WIDTH),
+            static_cast<int>(position.y / SharedConfig::TILE_WORLD_HEIGHT)};
 }
 
 TileIndex TransformationHelpers::screenToTile(const ScreenPoint& screenPoint,

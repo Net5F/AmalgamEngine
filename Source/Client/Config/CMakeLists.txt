@@ -1,9 +1,8 @@
 target_sources(Client
     PRIVATE
-        Private/main.cpp
-        Private/Application.cpp
+        Private/Config.cpp
     PUBLIC
-        Public/Application.h
+        Public/Config.h
 )
 
 target_include_directories(Client

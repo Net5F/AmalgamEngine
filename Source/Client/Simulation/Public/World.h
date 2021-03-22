@@ -1,6 +1,5 @@
 #pragma once
 
-#include "SimDefs.h"
 #include "ResourceManager.h"
 #include "Sprite.h"
 #include "ScreenPoint.h"

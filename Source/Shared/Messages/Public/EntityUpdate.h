@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EntityState.h"
-#include "SimDefs.h"
+#include "SharedConfig.h"
 #include "SDL_stdinc.h"
 #include <vector>
 #include "bitsery/bitsery.h"
@@ -24,7 +24,7 @@ void serialize(S& serializer, EntityUpdate& entityUpdate)
 {
     serializer.value4b(entityUpdate.tickNum);
     serializer.container(entityUpdate.entityStates,
-                         static_cast<std::size_t>(MAX_ENTITIES));
+                         static_cast<std::size_t>(SharedConfig::MAX_ENTITIES));
 }
 
 } // End namespace AM

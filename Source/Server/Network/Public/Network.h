@@ -2,6 +2,7 @@
 
 #include "NetworkDefs.h"
 #include "ServerNetworkDefs.h"
+#include "SharedConfig.h"
 #include "ClientHandler.h"
 #include "MessageSorter.h"
 #include "ClientInput.h"
@@ -147,7 +148,7 @@ private:
         statistics. */
     static constexpr unsigned int SECONDS_TILL_STATS_DUMP = 5;
     static constexpr unsigned int TICKS_TILL_STATS_DUMP
-        = (1 / NETWORK_TICK_TIMESTEP_S) * SECONDS_TILL_STATS_DUMP;
+        = (1 / SharedConfig::NETWORK_TICK_TIMESTEP_S) * SECONDS_TILL_STATS_DUMP;
 
     /** The number of ticks since we last logged our network statistics. */
     unsigned int ticksSinceNetstatsLog;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "NetworkDefs.h"
-#include "SimDefs.h"
 #include "entt/entity/registry.hpp"
 
 namespace AM
