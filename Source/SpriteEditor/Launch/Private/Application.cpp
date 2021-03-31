@@ -1,5 +1,5 @@
 #include "Application.h"
-#include "SharedConfig.h"
+#include "Config.h"
 #include "Profiler.h"
 #include "Log.h"
 
@@ -16,12 +16,18 @@ namespace SpriteEditor
 Application::Application(const std::string& runPath)
 : sdl(SDL_INIT_VIDEO)
 , sdlWindow("Amalgam Sprite Editor", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-            SharedConfig::SCREEN_WIDTH, SharedConfig::SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
+            Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , resourceManager(runPath, sdlRenderer)
 , eventHandlers{this}
 , exitRequested(false)
 {
+    // Set the logical app size.
+    sdlRenderer.SetLogicalSize(Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT);
+
+    // Set linear anti-aliasing.
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, Config::SCALING_QUALITY);
+
     // Set up our event filter.
     SDL_SetEventFilter(&Application::filterEvents, this);
 }

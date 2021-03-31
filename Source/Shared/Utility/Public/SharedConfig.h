@@ -20,6 +20,7 @@ public:
     /** The max number of entities that we will allow. */
     static constexpr unsigned int MAX_ENTITIES = 1010;
 
+    // TODO: This can get moved to the server config when AoI gets improved.
     /** The distance in world coordinates that we add to a player's AoI to let
         peers load before they're in view. */
     static constexpr unsigned int AOI_BUFFER_DISTANCE = 700;

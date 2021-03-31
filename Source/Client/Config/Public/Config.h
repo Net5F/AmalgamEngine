@@ -10,7 +10,7 @@ namespace Client
 {
 
 /**
- * This class contains configuration data for all modules.
+ * This class contains module-specific configuration data.
  *
  * All data is currently static, but eventually this class will be in charge
  * of loading some of the data dynamically from a config file.

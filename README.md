@@ -4,18 +4,27 @@
 ## Status
 (Once things are more ready for outside developers, I'll link the trello.)
 ### Current
-- [x] Implementing, load testing, optimizing the netcode.
-- [ ] Implenting tile maps, iso rendering, and figuring out architecture between the sim/rendering/UI.
+- [x] Implement, load test, optimize the netcode.
+- [x] Implement tile maps, iso rendering, and figure out architecture between the sim/rendering/UI.
+- [ ] Build sprite editor (lets you add 3d bounding boxes to sprites for draw order and collision calcs)
+- [ ] Build minimal UI library.
 
 ### Future
-- [ ] Implementing the rest of the systems alongside a reference project.
+- [ ] Add map streaming and live updates (in-world building).
+- [ ] Add collision.
+- [ ] Add sprite animation.
+- [ ] Add text chat, chat server.
+- [ ] Add login server, account db, account validation.
+- [ ] Add web server, account creation.
+- [ ] Add minimal UI for sprite selection from a set list.
+- [ ] Split single repo into engine and project repos.
 - [ ] Ready for other people to use.
 
 ## Building
 ### Windows
 I've been using MSYS2, but haven't yet scripted dependencies. Here's the list:
 
-    pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-gdb mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_image mingw-w64-x86_64-SDL2_mixer mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_net mingw-w64-x86_64-catch
+    pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-gdb mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_image mingw-w64-x86_64-SDL2_mixer mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_gfx mingw-w64-x86_64-SDL2_net mingw-w64-x86_64-catch
     
 Then, build through the Eclipse project or follow the linux instructions for a command line build.
 
