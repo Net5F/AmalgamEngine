@@ -1,6 +1,8 @@
 #pragma once
 
 #include "EventHandler.h"
+#include "UserInterface.h"
+#include "Renderer.h"
 #include "PeriodicCaller.h"
 #include "ResourceManager.h"
 
@@ -80,6 +82,12 @@ private:
     SDL2pp::Renderer sdlRenderer;
 
     ResourceManager resourceManager;
+
+    UserInterface userInterface;
+
+    Renderer renderer;
+    /** Calls renderer.render() at our frame rate. */
+    PeriodicCaller rendererCaller;
 
     /** An ordered vector of event handlers. */
     std::vector<EventHandler*> eventHandlers;

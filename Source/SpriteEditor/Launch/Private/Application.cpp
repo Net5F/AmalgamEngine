@@ -19,7 +19,11 @@ Application::Application(const std::string& runPath)
             Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , resourceManager(runPath, sdlRenderer)
-, eventHandlers{this}
+, userInterface(resourceManager)
+, renderer(sdlRenderer, sdlWindow, userInterface)
+, rendererCaller(std::bind(&Renderer::render, &renderer),
+                 Renderer::FRAME_TIMESTEP_S, "Renderer", true)
+, eventHandlers{this, &renderer}
 , exitRequested(false)
 {
     // Set the logical app size.
@@ -41,18 +45,10 @@ void Application::start()
     Profiler::init();
 
     // Prime the timers so they don't start at 0.
-//    simCaller.initTimer();
-//    networkCaller.initTimer();
-//    rendererCaller.initTimer();
+    rendererCaller.initTimer();
     while (!exitRequested) {
-//        // Let the sim process an iteration if it needs to.
-//        simCaller.update();
-//
-//        // Send a heartbeat if necessary.
-//        networkCaller.update();
-//
-//        // Let the renderer render if it needs to.
-//        rendererCaller.update();
+        // Let the renderer render if it needs to.
+        rendererCaller.update();
 
         // If we have enough time, dispatch events.
         if (enoughTimeTillNextCall(DISPATCH_MINIMUM_TIME_S)) {
