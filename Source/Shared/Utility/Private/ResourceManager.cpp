@@ -29,12 +29,7 @@ bool ResourceManager::loadTexture(std::string_view path, const entt::hashed_stri
 
 TextureHandle ResourceManager::getTexture(const entt::hashed_string id)
 {
-    TextureHandle handle = textureCache.handle(id);
-    if (!handle) {
-        LOG_ERROR("Requested invalid texture resource. id: %s", id.data());
-    }
-
-    return handle;
+    return textureCache.handle(id);
 }
 
 } // End namespace AM

@@ -26,10 +26,22 @@ Application::Application(const std::string& runPath)
 , eventHandlers{this, &renderer}
 , exitRequested(false)
 {
-    // Set the logical app size.
-    sdlRenderer.SetLogicalSize(Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT);
+    // Set fullscreen mode.
+    switch (Config::FULLSCREEN_MODE) {
+        case 0:
+            sdlWindow.SetFullscreen(0);
+            break;
+        case 1:
+            sdlWindow.SetFullscreen(SDL_WINDOW_FULLSCREEN);
+            break;
+        case 2:
+            sdlWindow.SetFullscreen(SDL_WINDOW_FULLSCREEN_DESKTOP);
+            break;
+        default:
+            LOG_ERROR("Invalid fullscreen value: %d", Config::FULLSCREEN_MODE);
+    }
 
-    // Set linear anti-aliasing.
+    // Set scaling quality.
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, Config::SCALING_QUALITY);
 
     // Set up our event filter.

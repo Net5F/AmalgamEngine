@@ -1,4 +1,5 @@
 #include "UserInterface.h"
+#include "AUI/Image.h"
 #include "Log.h"
 #include "Ignore.h"
 
@@ -7,8 +8,17 @@ namespace AM
 namespace SpriteEditor
 {
 UserInterface::UserInterface(ResourceManager& inResourceManager)
-: resourceManager(inResourceManager)
+: currentPage()
+, resourceManager(inResourceManager)
 {
+    // TODO: Load textures from a file, through a class that Application owns.
+    // Load our textures.
+    resourceManager.loadTexture("Resources/Textures", "TitleBackground_1080.png");
+    resourceManager.loadTexture("Resources/Textures", "TitleBackground_720.png");
+
+    AUI::Image backgroundImage(0, 0, 1080, 720
+        , resourceManager.getTexture("TitleBackground_720.png").getSharedPtr()->Get());
+    currentPage.addComponent(backgroundImage);
 }
 
 bool UserInterface::handleEvent(SDL_Event& event)

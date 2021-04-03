@@ -17,15 +17,15 @@ Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& window, User
     ignore(window);
 }
 
-unsigned int i = 0;
 void Renderer::render()
 {
     /* Render. */
     // Clear the screen to prepare for drawing.
     sdlRenderer.Clear();
 
-    sdlRenderer.SetDrawColor(i, i, i);
-    i = (i + 1) % 255;
+    for (const AUI::Component& component : ui.currentPage.components) {
+        component.renderCopy(sdlRenderer.Get());
+    }
 
     // Render the finished buffer to the screen.
     sdlRenderer.Present();

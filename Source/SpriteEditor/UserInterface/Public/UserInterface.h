@@ -2,6 +2,7 @@
 
 #include "EventHandler.h"
 #include "ResourceManager.h"
+#include "AUI/Page.h"
 
 namespace AM
 {
@@ -9,7 +10,9 @@ namespace SpriteEditor
 {
 
 /**
+ * This class handles creation and management of the user interface.
  *
+ * Additionally, it provides a way for the renderer to access the UI data.
  */
 class UserInterface : public EventHandler
 {
@@ -21,6 +24,8 @@ public:
      */
     bool handleEvent(SDL_Event& event) override;
 
+    AUI::Page currentPage;
+
 private:
     void handleMouseMotion(SDL_MouseMotionEvent& event);
 
@@ -29,5 +34,5 @@ private:
     ResourceManager& resourceManager;
 };
 
-} // End namespace SpriteEditor
-} // End namespace AM
+} // namespace SpriteEditor
+} // namespace AM

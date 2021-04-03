@@ -40,6 +40,10 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/json/"
                  "${PROJECT_BINARY_DIR}/Libraries/json/")
 
+# Build AmalgamUI.
+add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/AmalgamUI/"
+                 "${PROJECT_BINARY_DIR}/Libraries/AmalgamUI/")
+
 # Include header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/../CMake/readerwriterqueue.cmake")
 

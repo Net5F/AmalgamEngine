@@ -40,6 +40,7 @@ public:
     /**
      * @param id  The resource identifier, a path including the full file name,
      *            relative to "Resources/Textures/".
+     * @return A valid handle if the id exists, else an invalid handle.
      */
      TextureHandle getTexture(const entt::hashed_string id);
 

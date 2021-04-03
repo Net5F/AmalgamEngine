@@ -25,3 +25,6 @@
 [submodule "Libraries/json"]
 	path = Libraries/json
 	url = git@github.com:nlohmann/json.git
+[submodule "Libraries/AmalgamUI"]
+	path = Libraries/AmalgamUI
+	url = git@github.com:Net5F/AmalgamUI.git
