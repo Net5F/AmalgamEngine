@@ -1,24 +1,23 @@
 #include "UserInterface.h"
+#include "AUI/Core.h"
 #include "AUI/Image.h"
 #include "Log.h"
 #include "Ignore.h"
+#include <SDL_filesystem.h>
 
 namespace AM
 {
 namespace SpriteEditor
 {
-UserInterface::UserInterface(ResourceManager& inResourceManager)
-: currentPage()
-, resourceManager(inResourceManager)
+UserInterface::UserInterface(SDL_Renderer* renderer)
+: currentScreen()
 {
-    // TODO: Load textures from a file, through a class that Application owns.
-    // Load our textures.
-    resourceManager.loadTexture("Resources/Textures", "TitleBackground_1080.png");
-    resourceManager.loadTexture("Resources/Textures", "TitleBackground_720.png");
+    // Initialize AmalgamUI.
+    AUI::Core::Initialize(SDL_GetBasePath(), renderer);
 
-    AUI::Image backgroundImage(0, 0, 1080, 720
-        , resourceManager.getTexture("TitleBackground_720.png").getSharedPtr()->Get());
-    currentPage.addComponent(backgroundImage);
+    AUI::Image& background = currentScreen.addComponent<AUI::Image>(
+        "Background", {0, 0, 1280, 720});
+    background.setImage("Resources/Textures/TitleBackground_720.png");
 }
 
 bool UserInterface::handleEvent(SDL_Event& event)

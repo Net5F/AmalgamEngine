@@ -13,13 +13,12 @@ namespace AM
 {
 namespace SpriteEditor
 {
-Application::Application(const std::string& runPath)
+Application::Application()
 : sdl(SDL_INIT_VIDEO)
 , sdlWindow("Amalgam Sprite Editor", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
-, resourceManager(runPath, sdlRenderer)
-, userInterface(resourceManager)
+, userInterface(sdlRenderer.Get())
 , renderer(sdlRenderer, sdlWindow, userInterface)
 , rendererCaller(std::bind(&Renderer::render, &renderer),
                  Renderer::FRAME_TIMESTEP_S, "Renderer", true)

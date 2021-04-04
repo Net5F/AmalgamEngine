@@ -4,7 +4,6 @@
 #include "UserInterface.h"
 #include "Renderer.h"
 #include "PeriodicCaller.h"
-#include "ResourceManager.h"
 
 #include "SDL2pp/SDL.hh"
 #include "SDL2pp/Window.hh"
@@ -24,11 +23,7 @@ namespace SpriteEditor
 class Application : public EventHandler
 {
 public:
-    /**
-     * @param runPath  The path that this application was ran from. Should be
-     *                 prepended to any resource paths.
-     */
-    Application(const std::string& runpath);
+    Application();
 
     ~Application(){};
 
@@ -80,8 +75,6 @@ private:
     SDL2pp::SDL sdl;
     SDL2pp::Window sdlWindow;
     SDL2pp::Renderer sdlRenderer;
-
-    ResourceManager resourceManager;
 
     UserInterface userInterface;
 

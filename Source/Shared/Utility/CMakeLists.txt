@@ -6,13 +6,13 @@ target_sources(Shared
         Private/Timer.cpp
         Private/TransformationHelpers.cpp
     PUBLIC
-        Public/SharedConfig.h
         Public/EventHandler.h
-        Public/Log.h
         Public/Ignore.h
+        Public/Log.h
         Public/PeriodicCaller.h
         Public/Profiler.h
         Public/ResourceManager.h
+        Public/SharedConfig.h
         Public/TextureHandle.h
         Public/Timer.h
         Public/TransformationHelpers.h

@@ -1,8 +1,10 @@
 #pragma once
 
 #include "EventHandler.h"
-#include "ResourceManager.h"
-#include "AUI/Page.h"
+#include "AUI/Screen.h"
+
+// Forward declarations.
+struct SDL_Renderer;
 
 namespace AM
 {
@@ -17,21 +19,22 @@ namespace SpriteEditor
 class UserInterface : public EventHandler
 {
 public:
-    UserInterface(ResourceManager& inResourceManager);
+    UserInterface(SDL_Renderer* renderer);
 
     /**
      * Handles user input events.
      */
     bool handleEvent(SDL_Event& event) override;
 
-    AUI::Page currentPage;
+    /**
+     * The current active UI screen.
+     */
+    AUI::Screen currentScreen;
 
 private:
     void handleMouseMotion(SDL_MouseMotionEvent& event);
 
     void handleMouseButtonDown(SDL_MouseButtonEvent& event);
-
-    ResourceManager& resourceManager;
 };
 
 } // namespace SpriteEditor

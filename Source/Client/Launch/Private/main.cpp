@@ -16,7 +16,7 @@ try {
     ignore(argc);
     ignore(argv);
 
-    // The path that this executable was ran from, including the binary name.
+    // The path that this executable was ran from, excluding the binary name.
     std::string runPath{SDL_GetBasePath()};
 
     // Start the application (assumes control of the thread).

@@ -10,12 +10,12 @@
  */
 #define LOG_INFO(...)                                                          \
     {                                                                          \
-        Log::info(__VA_ARGS__);                                                \
+        AM::Log::info(__VA_ARGS__);                                                \
     }
 
 #define LOG_ERROR(...)                                                         \
     {                                                                          \
-        Log::error(__FILE__, __LINE__, __VA_ARGS__);                           \
+        AM::Log::error(__FILE__, __LINE__, __VA_ARGS__);                           \
         std::abort();                                                          \
     }
 

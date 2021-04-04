@@ -40,20 +40,20 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/json/"
                  "${PROJECT_BINARY_DIR}/Libraries/json/")
 
-# Build AmalgamUI.
-add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/AmalgamUI/"
-                 "${PROJECT_BINARY_DIR}/Libraries/AmalgamUI/")
-
-# Include header-only readerwriterqueue.
+# Provide header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/../CMake/readerwriterqueue.cmake")
 
-# Include header-only CircularBuffer.
+# Provide header-only CircularBuffer.
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/CircularBuffer/"
                  "${PROJECT_BINARY_DIR}/Libraries/CircularBuffer/")
 
-# Include header-only EnTT.
+# Provide header-only EnTT.
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/entt/"
                  "${PROJECT_BINARY_DIR}/Libraries/entt/")
+
+# Build AmalgamUI.
+add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/AmalgamUI/"
+                 "${PROJECT_BINARY_DIR}/Libraries/AmalgamUI/")
 
 ###############################################################################
 # Modules

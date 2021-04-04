@@ -23,8 +23,8 @@ void Renderer::render()
     // Clear the screen to prepare for drawing.
     sdlRenderer.Clear();
 
-    for (const AUI::Component& component : ui.currentPage.components) {
-        component.renderCopy(sdlRenderer.Get());
+    for (std::unique_ptr<AUI::Component>& component : ui.currentScreen.components) {
+        component->renderCopy();
     }
 
     // Render the finished buffer to the screen.
