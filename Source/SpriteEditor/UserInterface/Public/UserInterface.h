@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EventHandler.h"
+#include "AUI/Initializer.h"
 #include "AUI/Screen.h"
 
 // Forward declarations.
@@ -25,6 +26,12 @@ public:
      * Handles user input events.
      */
     bool handleEvent(SDL_Event& event) override;
+
+    /**
+     * AmalgamUI initializer, used to init/quit the library at the proper
+     * times.
+     */
+    AUI::Initializer initializer;
 
     /**
      * The current active UI screen.
