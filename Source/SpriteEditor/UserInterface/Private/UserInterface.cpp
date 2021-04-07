@@ -12,13 +12,13 @@ namespace SpriteEditor
 {
 UserInterface::UserInterface(SDL_Renderer* renderer)
 : initializer((std::string{SDL_GetBasePath()} + "Resources/"), renderer)
-, currentScreen()
+, currentScreen("TitleScreen")
 {
-    AUI::Image& background = currentScreen.addComponent<AUI::Image>(
+    AUI::Image& background = currentScreen.add<AUI::Image>(
         "Background", {0, 0, 1280, 720});
     background.setImage("Textures/TitleBackground_720.png");
 
-    AUI::Text& text = currentScreen.addComponent<AUI::Text>(
+    AUI::Text& text = currentScreen.add<AUI::Text>(
         "Text", {40, 40, 200, 200});
     text.setFont("Fonts/B612-Regular.ttf", 40);
     text.setColor({255, 255, 255, 255});
