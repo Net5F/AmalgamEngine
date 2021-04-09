@@ -20,14 +20,13 @@ Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& window, User
 void Renderer::render()
 {
     /* Render. */
-    // Clear the screen to prepare for drawing.
+    // Clear the current rendering target to prepare for rendering.
     sdlRenderer.Clear();
 
-    for (std::unique_ptr<AUI::Component>& component : ui.currentScreen.getComponents()) {
-        component->renderCopy();
-    }
+    // Render the current UI screen.
+    ui.currentScreen.render();
 
-    // Render the finished buffer to the screen.
+    // Present the finished back buffer to the user's screen.
     sdlRenderer.Present();
 }
 
