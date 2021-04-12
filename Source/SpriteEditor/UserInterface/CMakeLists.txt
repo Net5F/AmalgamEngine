@@ -1,7 +1,9 @@
 target_sources(SpriteEditor
 	PRIVATE
+		Private/TitleScreen.cpp
 		Private/UserInterface.cpp
 	PUBLIC
+		Public/TitleScreen.h
 		Public/UserInterface.h
 )
 

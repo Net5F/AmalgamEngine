@@ -1,8 +1,8 @@
 #pragma once
 
 #include "EventHandler.h"
+#include "TitleScreen.h"
 #include "AUI/Initializer.h"
-#include "AUI/Screen.h"
 
 // Forward declarations.
 struct SDL_Renderer;
@@ -36,12 +36,14 @@ public:
     /**
      * The current active UI screen.
      */
-    AUI::Screen currentScreen;
+    AUI::Screen* currentScreen;
 
 private:
     void handleMouseMotion(SDL_MouseMotionEvent& event);
 
     void handleMouseButtonDown(SDL_MouseButtonEvent& event);
+
+    TitleScreen titleScreen;
 };
 
 } // namespace SpriteEditor

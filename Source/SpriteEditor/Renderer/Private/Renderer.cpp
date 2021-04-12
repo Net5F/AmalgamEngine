@@ -24,7 +24,7 @@ void Renderer::render()
     sdlRenderer.Clear();
 
     // Render the current UI screen.
-    ui.currentScreen.render();
+    ui.currentScreen->render();
 
     // Present the finished back buffer to the user's screen.
     sdlRenderer.Present();
