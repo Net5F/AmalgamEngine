@@ -3,6 +3,7 @@
 #include "AUI/Screen.h"
 #include "AUI/Image.h"
 #include "AUI/Text.h"
+#include "AUI/Button.h"
 
 namespace AM
 {
@@ -23,6 +24,8 @@ private:
     AUI::Image background;
 
     AUI::Text text;
+
+    AUI::Button loadButton;
 };
 
 } // End namespace SpriteEditor
