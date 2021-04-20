@@ -22,7 +22,7 @@ Application::Application()
 , renderer(sdlRenderer, sdlWindow, userInterface)
 , rendererCaller(std::bind(&Renderer::render, &renderer),
                  Renderer::FRAME_TIMESTEP_S, "Renderer", true)
-, eventHandlers{this, &renderer}
+, eventHandlers{this, &userInterface, &renderer}
 , exitRequested(false)
 {
     // Set fullscreen mode.

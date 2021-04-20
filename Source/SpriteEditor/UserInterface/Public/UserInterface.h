@@ -39,10 +39,6 @@ public:
     AUI::Screen* currentScreen;
 
 private:
-    void handleMouseMotion(SDL_MouseMotionEvent& event);
-
-    void handleMouseButtonDown(SDL_MouseButtonEvent& event);
-
     TitleScreen titleScreen;
 };
 
