@@ -4,6 +4,7 @@
 #include "AUI/Image.h"
 #include "AUI/Text.h"
 #include "AUI/Button.h"
+#include "AUI/VerticalGridContainer.h"
 
 namespace AM
 {
@@ -26,6 +27,8 @@ private:
     AUI::Text text;
 
     AUI::Button loadButton;
+
+    AUI::VerticalGridContainer<AUI::Button> buttonContainer;
 };
 
 } // End namespace SpriteEditor
