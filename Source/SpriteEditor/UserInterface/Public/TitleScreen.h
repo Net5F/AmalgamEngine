@@ -3,8 +3,7 @@
 #include "AUI/Screen.h"
 #include "AUI/Image.h"
 #include "AUI/Text.h"
-#include "AUI/Button.h"
-#include "AUI/VerticalGridContainer.h"
+#include "TitleButton.h"
 
 namespace AM
 {
@@ -22,13 +21,15 @@ public:
     void render() override;
 
 private:
+    void onNewButtonPressed();
+
+    void onLoadButtonPressed();
+
     AUI::Image background;
 
-    AUI::Text text;
+    TitleButton newButton;
 
-    AUI::Button loadButton;
-
-    AUI::VerticalGridContainer<AUI::Button> buttonContainer;
+    TitleButton loadButton;
 };
 
 } // End namespace SpriteEditor
