@@ -36,6 +36,9 @@ private:
 
     UserInterface& userInterface;
 
+    /** The path to the sprite file that we're currently working on. */
+    std::string currentSpriteFilePath;
+
     AUI::Text tempText;
 };
 

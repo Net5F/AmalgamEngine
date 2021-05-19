@@ -21,6 +21,9 @@ MainScreen::MainScreen(UserInterface& inUserInterface)
 void MainScreen::loadSpriteFile(const std::string& filePath)
 {
     tempText.setText(filePath);
+
+    // Store the file path so we can eventually save back to it.
+    currentSpriteFilePath = filePath;
 }
 
 void MainScreen::render()

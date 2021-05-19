@@ -3,6 +3,7 @@
 #include "nfd.hpp"
 #include "Log.h"
 #include <cstring>
+#include <fstream>
 
 namespace AM
 {
@@ -15,7 +16,7 @@ TitleScreen::TitleScreen(UserInterface& inUserInterface)
 , background(*this, "Background", {0, 0, 1280, 720})
 , newButton(*this, "NewButton", {483, 288, 314, 64}, "New")
 , loadButton(*this, "LoadButton", {483, 393, 314, 64}, "Load")
-, errorText(*this, "ErrorText", {350, 481, 594, 32})
+, errorText(*this, "ErrorText", {0, 481, 1280, 32})
 {
     // Set up our components.
     background.addResolution({1280, 720}, "Textures/TitleBackground_720.png");
@@ -23,7 +24,8 @@ TitleScreen::TitleScreen(UserInterface& inUserInterface)
 
     errorText.setFont("Fonts/B612-Regular.ttf", 24);
     errorText.setColor({255, 255, 255, 255});
-    errorText.setText("Error: Must select a SpriteData.json file to load.");
+    errorText.setText("Uninitialized.");
+    errorText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Middle);
     errorText.setIsVisible(false);
 
     // Register our event handlers.
@@ -44,8 +46,34 @@ void TitleScreen::render()
 
 void TitleScreen::onNewButtonPressed()
 {
-    // TODO: Do a folder selection dialog here, create SpriteData.json in that folder.
-    LOG_INFO("Pressed New");
+    // Open the file select dialog and save the selected path.
+    nfdchar_t* selectedPath{nullptr};
+    nfdresult_t result = NFD::PickFolder(selectedPath);
+
+    if (result == NFD_OKAY) {
+        // Check if the file exists at the selected path.
+        std::string filePath{selectedPath};
+        filePath += "/SpriteData.json";
+        std::ifstream file{filePath};
+        if (!file) {
+            // File doesn't exist, create it and change to the main screen.
+            std::ofstream file{filePath};
+            userInterface.openMainScreen(filePath);
+        }
+        else {
+            // File already exists. Display the error text.
+            errorText.setText("Error: SpriteData.json already exists at the "
+                              "selected path.");
+            errorText.setIsVisible(true);
+        }
+
+        NFD::FreePath(selectedPath);
+    }
+    else if (result != NFD_CANCEL) {
+        // The dialog operation didn't succeed and the user didn't simply press
+        // cancel. Print the error.
+        LOG_INFO("Error: %s", NFD_GetError());
+    }
 }
 
 void TitleScreen::onLoadButtonPressed()
@@ -53,7 +81,7 @@ void TitleScreen::onLoadButtonPressed()
     // New attempt, make sure the error text is hidden.
     errorText.setIsVisible(false);
 
-    // Open the file select dialog, saving the selected path.
+    // Open the file select dialog and save the selected path.
     nfdchar_t* selectedPath{nullptr};
     nfdfilteritem_t filterItem[1] = {{"SpriteData.json", "json"}};
     nfdresult_t result = NFD::OpenDialog(selectedPath, filterItem, 1);
@@ -65,12 +93,15 @@ void TitleScreen::onLoadButtonPressed()
         if (std::strstr(selectedPath, "SpriteData.json") != 0) {
             // Correct file, pass the file path and change to the main screen.
             userInterface.openMainScreen(selectedPath);
-            NFD::FreePath(selectedPath);
         }
         else {
             // Incorrect file, display the error text.
+            errorText.setText("Error: Must select a SpriteData.json file to"
+                              " load.");
             errorText.setIsVisible(true);
         }
+
+        NFD::FreePath(selectedPath);
     }
     else if (result != NFD_CANCEL) {
         // The dialog operation didn't succeed and the user didn't simply press
