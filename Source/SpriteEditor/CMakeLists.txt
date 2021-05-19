@@ -23,6 +23,7 @@ target_link_libraries(SpriteEditor
         ${SDL2_GFX_LIBRARIES} ${SDL2PP_LIBRARIES}
         SDL2pp
         AmalgamUI
+        nfd
         Shared
 )
 

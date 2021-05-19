@@ -39,6 +39,10 @@ include("${PROJECT_SOURCE_DIR}/../CMake/Remotery.cmake")
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/json/"
                  "${PROJECT_BINARY_DIR}/Libraries/json/")
+                 
+# Build nativefiledialog-extended.
+add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/nativefiledialog-extended/"
+                 "${PROJECT_BINARY_DIR}/Libraries/nativefiledialog-extended/")
 
 # Provide header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/../CMake/readerwriterqueue.cmake")

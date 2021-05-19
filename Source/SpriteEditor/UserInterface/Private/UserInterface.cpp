@@ -10,11 +10,28 @@ namespace AM
 namespace SpriteEditor
 {
 UserInterface::UserInterface(SDL_Renderer* renderer)
-: initializer((std::string{SDL_GetBasePath()} + "Resources/"), renderer
+: auiInitializer((std::string{SDL_GetBasePath()} + "Resources/"), renderer
               , {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT})
 , currentScreen(&titleScreen)
+, titleScreen(*this)
+, mainScreen(*this)
 {
     AUI::Core::setActualScreenSize({Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT});
+}
+
+void UserInterface::openTitleScreen()
+{
+    // Switch to the title screen.
+    currentScreen = &titleScreen;
+}
+
+void UserInterface::openMainScreen(const std::string& spriteFilePath)
+{
+    // Load the given sprite file into the main screen.
+    mainScreen.loadSpriteFile(spriteFilePath);
+
+    // Switch to the main screen.
+    currentScreen = &mainScreen;
 }
 
 bool UserInterface::handleEvent(SDL_Event& event)

@@ -1,19 +1,30 @@
 #include "TitleScreen.h"
+#include "UserInterface.h"
+#include "nfd.hpp"
+#include "Log.h"
+#include <cstring>
 
 namespace AM
 {
 namespace SpriteEditor
 {
 
-TitleScreen::TitleScreen()
+TitleScreen::TitleScreen(UserInterface& inUserInterface)
 : Screen("TitleScreen")
+, userInterface(inUserInterface)
 , background(*this, "Background", {0, 0, 1280, 720})
 , newButton(*this, "NewButton", {483, 288, 314, 64}, "New")
 , loadButton(*this, "LoadButton", {483, 393, 314, 64}, "Load")
+, errorText(*this, "ErrorText", {350, 481, 594, 32})
 {
     // Set up our components.
     background.addResolution({1280, 720}, "Textures/TitleBackground_720.png");
     background.addResolution({1920, 1080}, "Textures/TitleBackground_1080.png");
+
+    errorText.setFont("Fonts/B612-Regular.ttf", 24);
+    errorText.setColor({255, 255, 255, 255});
+    errorText.setText("Error: Must select a SpriteData.json file to load.");
+    errorText.setIsVisible(false);
 
     // Register our event handlers.
     newButton.setOnPressed(std::bind(&TitleScreen::onNewButtonPressed, this));
@@ -27,16 +38,45 @@ void TitleScreen::render()
     newButton.render();
 
     loadButton.render();
+
+    errorText.render();
 }
 
 void TitleScreen::onNewButtonPressed()
 {
-    AUI_LOG_INFO("Pressed New");
+    // TODO: Do a folder selection dialog here, create SpriteData.json in that folder.
+    LOG_INFO("Pressed New");
 }
 
 void TitleScreen::onLoadButtonPressed()
 {
-    AUI_LOG_INFO("Pressed Load");
+    // New attempt, make sure the error text is hidden.
+    errorText.setIsVisible(false);
+
+    // Open the file select dialog, saving the selected path.
+    nfdchar_t* selectedPath{nullptr};
+    nfdfilteritem_t filterItem[1] = {{"SpriteData.json", "json"}};
+    nfdresult_t result = NFD::OpenDialog(selectedPath, filterItem, 1);
+
+    if (result == NFD_OKAY) {
+        // Validate the selected file.
+        // Note: All we do here is check the name. It'll be further validated
+        //       by the main screen.
+        if (std::strstr(selectedPath, "SpriteData.json") != 0) {
+            // Correct file, pass the file path and change to the main screen.
+            userInterface.openMainScreen(selectedPath);
+            NFD::FreePath(selectedPath);
+        }
+        else {
+            // Incorrect file, display the error text.
+            errorText.setIsVisible(true);
+        }
+    }
+    else if (result != NFD_CANCEL) {
+        // The dialog operation didn't succeed and the user didn't simply press
+        // cancel. Print the error.
+        LOG_INFO("Error: %s", NFD_GetError());
+    }
 }
 
 } // End namespace SpriteEditor

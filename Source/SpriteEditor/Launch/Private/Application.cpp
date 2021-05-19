@@ -3,7 +3,8 @@
 #include "Profiler.h"
 #include "Log.h"
 
-#include "SDL.h"
+#include <SDL.h>
+#include "nfd.hpp"
 
 #include <memory>
 #include <functional>
@@ -25,6 +26,11 @@ Application::Application()
 , eventHandlers{this, &userInterface, &renderer}
 , exitRequested(false)
 {
+    // Initialize nativefiledialog.
+    if (NFD_Init() != NFD_OKAY) {
+        LOG_ERROR("Nativefiledialog failed to initialize properly.");
+    }
+
     // Set fullscreen mode.
     switch (Config::FULLSCREEN_MODE) {
         case 0:
@@ -45,6 +51,12 @@ Application::Application()
 
     // Set up our event filter.
     SDL_SetEventFilter(&Application::filterEvents, this);
+}
+
+Application::~Application()
+{
+    // De-initialize nativefiledialog.
+    NFD_Quit();
 }
 
 void Application::start()

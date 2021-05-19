@@ -28,3 +28,6 @@
 [submodule "Libraries/AmalgamUI"]
 	path = Libraries/AmalgamUI
 	url = git@github.com:Net5F/AmalgamUI.git
+[submodule "Libraries/nativefiledialog-extended"]
+	path = Libraries/nativefiledialog-extended
+	url = git@github.com:btzy/nativefiledialog-extended.git
