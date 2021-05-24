@@ -2,6 +2,7 @@
 
 #include "AUI/Screen.h"
 #include "AUI/Text.h"
+#include "AUI/TextBox.h"
 #include <string>
 
 namespace AM
@@ -40,6 +41,8 @@ private:
     std::string currentSpriteFilePath;
 
     AUI::Text tempText;
+
+    AUI::TextBox textBox;
 };
 
 } // End namespace SpriteEditor
