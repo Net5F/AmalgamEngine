@@ -41,8 +41,7 @@ public:
     void fakeConnection();
 
     /**
-     * Updates accumulatedTime. If greater than the tick timestep, processes
-     * the next sim iteration.
+     * Processes the next sim iteration.
      */
     void tick();
 

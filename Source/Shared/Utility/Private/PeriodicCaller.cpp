@@ -24,7 +24,7 @@ void PeriodicCaller::initTimer()
 
 void PeriodicCaller::update()
 {
-    // Accumulate the time passed since last update().
+    // Accumulate the time passed since the last update().
     accumulatedTime += timer.getDeltaSeconds(true);
 
     // Process as many time steps as have accumulated.

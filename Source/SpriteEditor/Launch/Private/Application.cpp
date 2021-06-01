@@ -20,6 +20,8 @@ Application::Application()
             Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , userInterface(sdlRenderer.Get())
+, uiCaller(std::bind(&UserInterface::tick, &userInterface),
+           AUI::Screen::TICK_TIMESTEP_S, "UserInterface", true)
 , renderer(sdlRenderer, sdlWindow, userInterface)
 , rendererCaller(std::bind(&Renderer::render, &renderer),
                  Renderer::FRAME_TIMESTEP_S, "Renderer", true)
@@ -69,9 +71,13 @@ void Application::start()
 
     // Prime the timers so they don't start at 0.
     rendererCaller.initTimer();
+    uiCaller.initTimer();
     while (!exitRequested) {
         // Let the renderer render if it needs to.
         rendererCaller.update();
+
+        // Let the UI components update if they need to.
+        uiCaller.update();
 
         // If we have enough time, dispatch events.
         if (enoughTimeTillNextCall(DISPATCH_MINIMUM_TIME_S)) {
@@ -116,16 +122,13 @@ void Application::dispatchEvents()
 
 bool Application::enoughTimeTillNextCall(double minimumTime)
 {
-    ignore(minimumTime);
-//    if ((simCaller.getTimeTillNextCall() > minimumTime)
-//        && (networkCaller.getTimeTillNextCall() > minimumTime)
-//        && (rendererCaller.getTimeTillNextCall() > minimumTime)) {
-//        return true;
-//    }
-//    else {
-//        return false;
-//    }
-    return true;
+    if ((uiCaller.getTimeTillNextCall() > minimumTime)
+        && (rendererCaller.getTimeTillNextCall() > minimumTime)) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 int Application::filterEvents(void* userData, SDL_Event* event)

@@ -12,7 +12,7 @@ namespace SpriteEditor
 UserInterface::UserInterface(SDL_Renderer* renderer)
 : auiInitializer((std::string{SDL_GetBasePath()} + "Resources/"), renderer
               , {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT})
-, currentScreen(&titleScreen)
+, currentScreen(&mainScreen)
 , titleScreen(*this)
 , mainScreen(*this)
 {
@@ -37,6 +37,12 @@ void UserInterface::openMainScreen(const std::string& spriteFilePath)
 bool UserInterface::handleEvent(SDL_Event& event)
 {
     return currentScreen->handleEvent(event);
+}
+
+void UserInterface::tick()
+{
+    // Let AUI process the next tick.
+    currentScreen->tick();
 }
 
 } // End namespace SpriteEditor

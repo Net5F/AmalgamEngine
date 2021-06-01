@@ -77,6 +77,8 @@ private:
     SDL2pp::Renderer sdlRenderer;
 
     UserInterface userInterface;
+    /** Calls userInterface.tick() at AUI's tick rate. */
+    PeriodicCaller uiCaller;
 
     Renderer renderer;
     /** Calls renderer.render() at our frame rate. */

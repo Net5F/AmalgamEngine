@@ -42,6 +42,11 @@ public:
     bool handleEvent(SDL_Event& event) override;
 
     /**
+     * Calls AUI::Screen::tick() on the current screen.
+     */
+    void tick();
+
+    /**
      * AmalgamUI initializer, used to init/quit the library at the proper
      * times.
      */

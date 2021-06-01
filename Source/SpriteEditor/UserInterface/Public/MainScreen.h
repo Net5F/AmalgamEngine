@@ -40,7 +40,7 @@ private:
     /** The path to the sprite file that we're currently working on. */
     std::string currentSpriteFilePath;
 
-    AUI::Text tempText;
+//    AUI::Text tempText;
 
     AUI::TextBox textBox;
 };
