@@ -22,11 +22,11 @@ MainScreen::MainScreen(UserInterface& inUserInterface)
     textBox.setTextFont("Fonts/B612-Regular.ttf", 25);
     textBox.setTextColor({255, 0, 0, 255});
     textBox.setText("Hello thereqwjeoiqwjeoiqwejioqwe");
+    textBox.setMargins({10, 10, 10, 10});
     textBox.normalImage.addResolution({1280, 720}, "Textures/TextBox/Normal.png");
     textBox.hoveredImage.addResolution({1280, 720}, "Textures/TextBox/Hovered.png");
     textBox.selectedImage.addResolution({1280, 720}, "Textures/TextBox/Selected.png");
     textBox.disabledImage.addResolution({1280, 720}, "Textures/TextBox/Disabled.png");
-    textBox.setMargin({10, 10, 10, 10});
 }
 
 void MainScreen::loadSpriteFile(const std::string& filePath)
