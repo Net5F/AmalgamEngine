@@ -13,6 +13,7 @@ public:
     //-------------------------------------------------------------------------
     // Simulation
     //-------------------------------------------------------------------------
+    /** The rate at which the simulation will be processed. */
     static constexpr unsigned int SIM_TICKS_PER_SECOND = 30;
     static constexpr double SIM_TICK_TIMESTEP_S
         = 1.0 / static_cast<double>(SIM_TICKS_PER_SECOND);
@@ -38,6 +39,8 @@ public:
     //-------------------------------------------------------------------------
     // Network
     //-------------------------------------------------------------------------
+    /** The rate at which the network will send queued messages, or a heartbeat
+        if no messages are queued. */
     static constexpr unsigned int NETWORK_TICKS_PER_SECOND = 20;
     static constexpr double NETWORK_TICK_TIMESTEP_S
         = 1.0 / static_cast<double>(NETWORK_TICKS_PER_SECOND);

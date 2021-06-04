@@ -6,10 +6,10 @@ namespace AM
 namespace LTC
 {
 SimulatedClient::SimulatedClient()
-: networkCaller(std::bind(&Client::Network::tick, &network),
+: networkCaller(std::bind_front(&Client::Network::tick, &network),
                 SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
 , worldSim(network)
-, simCaller(std::bind(&WorldSim::tick, &worldSim), SharedConfig::SIM_TICK_TIMESTEP_S, "Sim",
+, simCaller(std::bind_front(&WorldSim::tick, &worldSim), SharedConfig::SIM_TICK_TIMESTEP_S, "Sim",
             false)
 , isConnected(false)
 {

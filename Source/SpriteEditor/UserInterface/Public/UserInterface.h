@@ -43,8 +43,11 @@ public:
 
     /**
      * Calls AUI::Screen::tick() on the current screen.
+     *
+     * @param timestepS  The amount of time that has passed since the last
+     *                   tick() call, in seconds.
      */
-    void tick();
+    void tick(double timestepS);
 
     /**
      * AmalgamUI initializer, used to init/quit the library at the proper

@@ -20,15 +20,15 @@ Application::Application(const std::string& runPath)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , resourceManager(runPath, sdlRenderer)
 , network()
-, networkCaller(std::bind(&Network::tick, &network), SharedConfig::NETWORK_TICK_TIMESTEP_S,
+, networkCaller(std::bind_front(&Network::tick, &network), SharedConfig::NETWORK_TICK_TIMESTEP_S,
                 "Network", true)
 , sim(network, resourceManager)
-, simCaller(std::bind(&Simulation::tick, &sim), SharedConfig::SIM_TICK_TIMESTEP_S, "Sim",
+, simCaller(std::bind_front(&Simulation::tick, &sim), SharedConfig::SIM_TICK_TIMESTEP_S, "Sim",
             false)
 , userInterface(sim.getWorld(), resourceManager)
 , renderer(sdlRenderer, sdlWindow, sim, userInterface,
-           std::bind(&PeriodicCaller::getProgress, &simCaller))
-, rendererCaller(std::bind(&Renderer::render, &renderer),
+           std::bind_front(&PeriodicCaller::getProgress, &simCaller))
+, rendererCaller(std::bind_front(&Renderer::render, &renderer),
                  Renderer::FRAME_TIMESTEP_S, "Renderer", true)
 , eventHandlers{this, &renderer, &userInterface, &sim}
 , exitRequested(false)

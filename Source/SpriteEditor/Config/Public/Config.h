@@ -37,6 +37,11 @@ public:
      * "best" = Ansiotropic filtering (supported by Direct3D).
      */
     static constexpr char SCALING_QUALITY[]{"linear"};
+
+    /** The rate at which the user interfaces fires off tick() events. */
+    static constexpr unsigned int UI_TICKS_PER_SECOND = 30;
+    static constexpr double UI_TICK_TIMESTEP_S
+        = 1.0 / static_cast<double>(UI_TICKS_PER_SECOND);
 };
 
 } // End namespace SpriteEditor

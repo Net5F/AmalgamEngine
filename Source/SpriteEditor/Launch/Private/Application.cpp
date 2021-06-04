@@ -20,10 +20,10 @@ Application::Application()
             Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , userInterface(sdlRenderer.Get())
-, uiCaller(std::bind(&UserInterface::tick, &userInterface),
-           AUI::Screen::TICK_TIMESTEP_S, "UserInterface", true)
+, uiCaller(std::bind_front(&UserInterface::tick, &userInterface),
+           Config::UI_TICK_TIMESTEP_S, "UserInterface", true)
 , renderer(sdlRenderer, sdlWindow, userInterface)
-, rendererCaller(std::bind(&Renderer::render, &renderer),
+, rendererCaller(std::bind_front(&Renderer::render, &renderer),
                  Renderer::FRAME_TIMESTEP_S, "Renderer", true)
 , eventHandlers{this, &userInterface, &renderer}
 , exitRequested(false)

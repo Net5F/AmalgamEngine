@@ -30,7 +30,14 @@ public:
     /**
      * See associated members for descriptions.
      */
-    PeriodicCaller(std::function<void(void)> inGivenFunct, double inTimestepS,
+    PeriodicCaller(std::function<void(void)> inGivenFunctNoTimestep, double inTimestepS,
+                   std::string_view inDebugName, bool inSkipLateSteps);
+
+    /**
+     * Overload for functions that take a timestep argument.
+     * The given function will be passed the timestep in seconds.
+     */
+    PeriodicCaller(std::function<void(double)> inGivenFunctTimestep, double inTimestepS,
                    std::string_view inDebugName, bool inSkipLateSteps);
 
     /**
@@ -67,8 +74,13 @@ public:
     void reportDelays(double inDelayedTimeS);
 
 private:
-    /** The function to call every timestepS seconds. */
-    const std::function<void(void)> givenFunct;
+    /** The function to call every timestepS seconds, if given a callback with
+        no arguments. */
+    const std::function<void(void)> givenFunctNoTimestep;
+
+    /** The function to call every timestepS seconds, if given a callback that
+        takes an argument of the time passed. */
+    const std::function<void(double)> givenFunctTimestep;
 
     /** The amount of time between calls of givenFunct, in seconds. */
     const double timestepS;

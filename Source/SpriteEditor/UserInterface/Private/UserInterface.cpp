@@ -39,10 +39,10 @@ bool UserInterface::handleEvent(SDL_Event& event)
     return currentScreen->handleEvent(event);
 }
 
-void UserInterface::tick()
+void UserInterface::tick(double timestepS)
 {
     // Let AUI process the next tick.
-    currentScreen->tick();
+    currentScreen->tick(timestepS);
 }
 
 } // End namespace SpriteEditor
