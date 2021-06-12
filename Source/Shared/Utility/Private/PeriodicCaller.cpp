@@ -44,10 +44,10 @@ void PeriodicCaller::update()
     // Process as many time steps as have accumulated.
     while (accumulatedTime >= timestepS) {
         // Call whichever function we were given on construction.
-        if (givenFunctNoTimestep) {
+        if (givenFunctNoTimestep != nullptr) {
             givenFunctNoTimestep();
         }
-        else if (givenFunctTimestep) {
+        else if (givenFunctTimestep != nullptr) {
             givenFunctTimestep(timestepS);
         }
 

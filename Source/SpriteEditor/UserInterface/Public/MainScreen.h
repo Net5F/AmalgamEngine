@@ -1,8 +1,9 @@
 #pragma once
 
 #include "AUI/Screen.h"
-#include "AUI/Text.h"
+#include "AUI/VerticalGridContainer.h"
 #include "AUI/TextInput.h"
+#include "TitleButton.h"
 #include <string>
 
 namespace AM
@@ -40,9 +41,11 @@ private:
     /** The path to the sprite file that we're currently working on. */
     std::string currentSpriteFilePath;
 
-    AUI::Text tempText;
+    AUI::VerticalGridContainer spritesheetContainer;
 
     AUI::TextInput textInput;
+
+    TitleButton removeButton;
 };
 
 } // End namespace SpriteEditor

@@ -25,7 +25,7 @@ TitleScreen::TitleScreen(UserInterface& inUserInterface)
     errorText.setFont("Fonts/B612-Regular.ttf", 24);
     errorText.setColor({255, 255, 255, 255});
     errorText.setText("Uninitialized.");
-    errorText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Middle);
+    errorText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
     errorText.setIsVisible(false);
 
     // Register our event handlers.
