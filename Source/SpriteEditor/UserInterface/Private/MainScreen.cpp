@@ -32,7 +32,8 @@ MainScreen::MainScreen(UserInterface& inUserInterface)
     removeButton.setOnPressed([&](){
         AUI::Container& spriteContainer{
             this->get<AUI::Container>("SpritesheetContainer")};
-        spriteContainer.erase(0);
+        AUI::Component* component = &(spriteContainer[0u]);
+        spriteContainer.erase(component);
     });
 
     textInput.setTextFont("Fonts/B612-Regular.ttf", 25);

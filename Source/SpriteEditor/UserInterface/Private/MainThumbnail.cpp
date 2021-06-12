@@ -7,9 +7,10 @@ MainThumbnail::MainThumbnail(AUI::Screen& screen, const char* key)
 : AUI::Thumbnail(screen, key, {0, 0, 150, 150})
 {
     // Add our backgrounds.
-    normalImage.addResolution({1280, 720}, "Textures/Thumbnail/Normal.png");
-    hoveredImage.addResolution({1280, 720}, "Textures/Thumbnail/Hovered.png");
-    activeImage.addResolution({1280, 720}, "Textures/Thumbnail/Active.png");
+    backgroundImage.addResolution({1920, 1080}, "Textures/Thumbnail/Background.png");
+    hoveredImage.addResolution({1920, 1080}, "Textures/Thumbnail/Hovered.png");
+    selectedImage.addResolution({1920, 1080}, "Textures/Thumbnail/Selected.png");
+    activeImage.addResolution({1920, 1080}, "Textures/Thumbnail/Active.png");
 
     // Move our thumbnail image to the right position.
     thumbnailImage.setLogicalExtent({27, 15, 96, 96});
