@@ -14,19 +14,18 @@ MainScreen::MainScreen(UserInterface& inUserInterface)
 , userInterface(inUserInterface)
 , spritesheetContainer(*this, "SpritesheetContainer", {100, 100, 350, 600})
 , textInput(*this, "", {400, 400, 300, 100})
-, removeButton(*this, "", {850, 300, 314, 64}, "Remove")
+, removeButton(*this, "", {850, 300, 472, 96}, "Remove")
 {
     // Set up our components.
     for (unsigned int i = 0; i < 3; ++i) {
         std::unique_ptr<AUI::Component> thumbnail{
-            std::make_unique<MainThumbnail>(*this, ""
-                , SDL_Rect{0, 0, 100, 100})};
+            std::make_unique<MainThumbnail>(*this, "")};
         MainThumbnail& thumbRef{static_cast<MainThumbnail&>(*thumbnail)};
 
         thumbRef.thumbnailImage.addResolution({1280, 720}, "Textures/Temp/iso_test_sprites.png");
         thumbRef.setText("Component " + std::to_string(i));
 
-        spritesheetContainer.add(std::move(thumbnail));
+        spritesheetContainer.push_back(std::move(thumbnail));
     }
 
     // Remove a component on button push

@@ -16,11 +16,11 @@ namespace SpriteEditor
 class Config
 {
 public:
-    static constexpr unsigned int ACTUAL_SCREEN_WIDTH{1280};
-    static constexpr unsigned int ACTUAL_SCREEN_HEIGHT{720};
+    static constexpr unsigned int ACTUAL_SCREEN_WIDTH{1600};
+    static constexpr unsigned int ACTUAL_SCREEN_HEIGHT{900};
 
-    static constexpr unsigned int LOGICAL_SCREEN_WIDTH{1280};
-    static constexpr unsigned int LOGICAL_SCREEN_HEIGHT{720};
+    static constexpr unsigned int LOGICAL_SCREEN_WIDTH{1920};
+    static constexpr unsigned int LOGICAL_SCREEN_HEIGHT{1080};
 
     /**
      * Sets full screen preference.

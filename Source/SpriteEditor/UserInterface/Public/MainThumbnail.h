@@ -14,7 +14,7 @@ namespace AM
 class MainThumbnail : public AUI::Thumbnail
 {
 public:
-    MainThumbnail(AUI::Screen& screen, const char* key, const SDL_Rect& screenExtent);
+    MainThumbnail(AUI::Screen& screen, const char* key);
 };
 
 } // End namespace AM

@@ -3,9 +3,8 @@
 namespace AM
 {
 
-MainThumbnail::MainThumbnail(AUI::Screen& screen, const char* key
-                         , const SDL_Rect& screenExtent)
-: AUI::Thumbnail(screen, key, screenExtent)
+MainThumbnail::MainThumbnail(AUI::Screen& screen, const char* key)
+: AUI::Thumbnail(screen, key, {0, 0, 150, 150})
 {
     // Add our backgrounds.
     normalImage.addResolution({1280, 720}, "Textures/Thumbnail/Normal.png");
@@ -13,11 +12,11 @@ MainThumbnail::MainThumbnail(AUI::Screen& screen, const char* key
     activeImage.addResolution({1280, 720}, "Textures/Thumbnail/Active.png");
 
     // Move our thumbnail image to the right position.
-    thumbnailImage.setLogicalExtent({18, 10, 64, 64});
+    thumbnailImage.setLogicalExtent({27, 15, 96, 96});
 
     // Set our text properties.
-    setTextLogicalExtent({9, 80, 82, 20});
-    setTextFont("Fonts/B612-Regular.ttf", 10);
+    setTextLogicalExtent({13, 120, 123, 20});
+    setTextFont("Fonts/B612-Regular.ttf", 15);
     setTextColor({255, 255, 255, 255});
 }
 

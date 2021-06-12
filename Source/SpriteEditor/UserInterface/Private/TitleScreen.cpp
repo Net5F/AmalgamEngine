@@ -13,16 +13,16 @@ namespace SpriteEditor
 TitleScreen::TitleScreen(UserInterface& inUserInterface)
 : Screen("TitleScreen")
 , userInterface(inUserInterface)
-, background(*this, "Background", {0, 0, 1280, 720})
-, newButton(*this, "NewButton", {483, 288, 314, 64}, "New")
-, loadButton(*this, "LoadButton", {483, 393, 314, 64}, "Load")
-, errorText(*this, "ErrorText", {0, 481, 1280, 32})
+, background(*this, "Background", {0, 0, 1920, 1080})
+, newButton(*this, "NewButton", {724, 432, 472, 96}, "New")
+, loadButton(*this, "LoadButton", {724, 589, 472, 96}, "Load")
+, errorText(*this, "ErrorText", {0, 721, 1920, 48})
 {
     // Set up our components.
     background.addResolution({1280, 720}, "Textures/TitleBackground_720.png");
     background.addResolution({1920, 1080}, "Textures/TitleBackground_1080.png");
 
-    errorText.setFont("Fonts/B612-Regular.ttf", 24);
+    errorText.setFont("Fonts/B612-Regular.ttf", 36);
     errorText.setColor({255, 255, 255, 255});
     errorText.setText("Uninitialized.");
     errorText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
