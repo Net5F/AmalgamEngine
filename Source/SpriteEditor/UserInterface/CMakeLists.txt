@@ -5,9 +5,11 @@ target_sources(SpriteEditor
 		Private/TitleButton.cpp
 		Private/TitleScreen.cpp
 		Private/UserInterface.cpp
+		Private/SpriteSheetPanel.cpp
 	PUBLIC
 		Public/MainScreen.h
 		Public/MainThumbnail.h
+		Public/SpriteSheetPanel.h
 		Public/TitleButton.h
 		Public/TitleScreen.h
 		Public/UserInterface.h

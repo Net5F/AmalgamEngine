@@ -1,6 +1,6 @@
 #include "TitleScreen.h"
 #include "UserInterface.h"
-#include "MainThumbnail.h"
+#include "AUI/Core.h"
 #include "nfd.h"
 #include "Log.h"
 
@@ -12,30 +12,9 @@ namespace SpriteEditor
 MainScreen::MainScreen(UserInterface& inUserInterface)
 : Screen("MainScreen")
 , userInterface(inUserInterface)
-, spritesheetContainer(*this, "SpritesheetContainer", {100, 100, 350, 600})
+, spritesheetPanel(*this)
 , textInput(*this, "", {400, 400, 300, 100})
-, removeButton(*this, "", {850, 300, 472, 96}, "Remove")
 {
-    // Set up our components.
-    for (unsigned int i = 0; i < 3; ++i) {
-        std::unique_ptr<AUI::Component> thumbnail{
-            std::make_unique<MainThumbnail>(*this, "")};
-        MainThumbnail& thumbRef{static_cast<MainThumbnail&>(*thumbnail)};
-
-        thumbRef.thumbnailImage.addResolution({1280, 720}, "Textures/Temp/iso_test_sprites.png");
-        thumbRef.setText("Component " + std::to_string(i));
-
-        spritesheetContainer.push_back(std::move(thumbnail));
-    }
-
-    // Remove a component on button push
-    removeButton.setOnPressed([&](){
-        AUI::Container& spriteContainer{
-            this->get<AUI::Container>("SpritesheetContainer")};
-        AUI::Component* component = &(spriteContainer[0u]);
-        spriteContainer.erase(component);
-    });
-
     textInput.setTextFont("Fonts/B612-Regular.ttf", 25);
     textInput.setText("Hello thereqwjeoiqwjeoiqwejioqwe");
     textInput.setMargins({10, 10, 10, 10});
@@ -60,11 +39,15 @@ void MainScreen::loadSpriteFile(const std::string& filePath)
 
 void MainScreen::render()
 {
-    spritesheetContainer.render();
+    // Fill the background with the correct color.
+    SDL_Renderer* renderer = AUI::Core::GetRenderer();
+    SDL_SetRenderDrawColor(renderer, 17, 17, 19, 255);
+    SDL_RenderClear(renderer);
+
+    // Render our children.
+    spritesheetPanel.render();
 
     textInput.render();
-
-    removeButton.render();
 }
 
 } // End namespace SpriteEditor

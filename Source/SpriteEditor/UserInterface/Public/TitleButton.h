@@ -2,8 +2,6 @@
 
 #include "AUI/Screen.h"
 #include "AUI/Button.h"
-#include <SDL_Rect.h>
-#include <string>
 
 namespace AM
 {
