@@ -7,7 +7,7 @@ namespace AM
 SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
 : AUI::Component(screen, "SpriteSheetPanel", {0, 0, 399, 708})
 , backgroundImage(screen, "", logicalExtent)
-, spritesheetContainer(screen, "SpriteSheetContainer", {100, 100, 350, 600})
+, spritesheetContainer(screen, "SpriteSheetContainer", {18, 24, 306, 636})
 , remSheetButton(screen, "", {342, 0, 45, 63})
 , addSheetButton(screen, "", {342, 63, 45, 88})
 {
@@ -20,7 +20,12 @@ SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
                                   , {3, 3, 266, 472});
 
     /* Container */
-    for (unsigned int i = 0; i < 3; ++i) {
+    spritesheetContainer.setNumColumns(2);
+    spritesheetContainer.setCellWidth(156);
+    spritesheetContainer.setCellHeight(162);
+
+    // Add temp sheets.
+    for (unsigned int i = 0; i < 7; ++i) {
         std::unique_ptr<AUI::Component> thumbnail{
             std::make_unique<MainThumbnail>(screen, "")};
         MainThumbnail& thumbRef{static_cast<MainThumbnail&>(*thumbnail)};
