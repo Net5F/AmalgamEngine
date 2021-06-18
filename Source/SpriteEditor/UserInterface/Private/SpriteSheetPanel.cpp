@@ -25,7 +25,7 @@ SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
     spritesheetContainer.setCellHeight(162);
 
     // Add temp sheets.
-    for (unsigned int i = 0; i < 7; ++i) {
+    for (unsigned int i = 0; i < 19; ++i) {
         std::unique_ptr<AUI::Component> thumbnail{
             std::make_unique<MainThumbnail>(screen, "")};
         MainThumbnail& thumbRef{static_cast<MainThumbnail&>(*thumbnail)};
