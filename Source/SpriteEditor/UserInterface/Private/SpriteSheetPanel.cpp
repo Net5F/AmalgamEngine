@@ -26,14 +26,26 @@ SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
 
     // Add temp sheets.
     for (unsigned int i = 0; i < 19; ++i) {
-        std::unique_ptr<AUI::Component> thumbnail{
+        std::unique_ptr<AUI::Component> thumbnailPtr{
             std::make_unique<MainThumbnail>(screen, "")};
-        MainThumbnail& thumbRef{static_cast<MainThumbnail&>(*thumbnail)};
+        MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
 
-        thumbRef.thumbnailImage.addResolution({1280, 720}, "Textures/Temp/iso_test_sprites.png");
-        thumbRef.setText("Component " + std::to_string(i));
+        thumbnail.thumbnailImage.addResolution({1280, 720}, "Textures/Temp/iso_test_sprites.png");
+        thumbnail.setText("Component " + std::to_string(i));
+        thumbnail.setIsActivateable(false);
 
-        spritesheetContainer.push_back(std::move(thumbnail));
+        // Add a callback to unselect all other components when this one
+        // is selected.
+        thumbnail.setOnSelected([this](AUI::Thumbnail* selectedThumb){
+            for (auto& componentPtr : spritesheetContainer) {
+                MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*componentPtr);
+                if (otherThumb.getIsSelected() && (&otherThumb != selectedThumb)) {
+                    otherThumb.deselect();
+                }
+            }
+        });
+
+        spritesheetContainer.push_back(std::move(thumbnailPtr));
     }
 
     /* Remove sheet button */
@@ -44,13 +56,22 @@ SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
     remSheetButton.text.setFont("Fonts/B612-Regular.ttf", 33);
     remSheetButton.text.setText("");
 
-    // Remove a component on button press.
-    remSheetButton.setOnPressed([&](){
-//        AUI::Container& spriteContainer{
-//            this->get<AUI::Container>("SpritesheetContainer")};
-//        AUI::Component* component = &(spriteContainer[0u]);
-//        spriteContainer.erase(component);
-        LOG_INFO("Hi");
+    // Remove the selected component on button press.
+    remSheetButton.setOnPressed([this](){
+        // Try to find a selected sprite sheet in the container.
+        AUI::Component* selectedSheet{nullptr};
+        for (auto& componentPtr : spritesheetContainer) {
+            MainThumbnail& thumbnail = static_cast<MainThumbnail&>(*componentPtr);
+            if (thumbnail.getIsSelected()) {
+                selectedSheet = &thumbnail;
+                break;
+            }
+        }
+
+        // If we found a selected sprite sheet, erase it.
+        if (selectedSheet != nullptr) {
+            spritesheetContainer.erase(selectedSheet);
+        }
     });
 
     /* Add sheet button */
