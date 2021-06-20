@@ -5,6 +5,7 @@
 #include "AUI/VerticalGridContainer.h"
 #include "AUI/Button.h"
 #include "RemSheetDialog.h"
+#include "AddSheetDialog.h"
 
 namespace AM
 {
@@ -32,6 +33,8 @@ private:
     AUI::Button addSheetButton;
 
     RemSheetDialog remSheetDialog;
+
+    AddSheetDialog addSheetDialog;
 };
 
 } // End namespace AM

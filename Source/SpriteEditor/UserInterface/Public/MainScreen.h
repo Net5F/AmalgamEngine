@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AUI/Screen.h"
-#include "AUI/TextInput.h"
 #include "SpriteSheetPanel.h"
 #include "TitleButton.h"
 #include <string>
@@ -42,8 +41,6 @@ private:
     std::string currentSpriteFilePath;
 
     SpriteSheetPanel spritesheetPanel;
-
-    AUI::TextInput textInput;
 };
 
 } // End namespace SpriteEditor

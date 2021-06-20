@@ -12,6 +12,7 @@ SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
 , remSheetButton(screen, "", {342, 0, 45, 63})
 , addSheetButton(screen, "", {342, 63, 45, 88})
 , remSheetDialog(screen, spritesheetContainer, remSheetButton)
+, addSheetDialog(screen, spritesheetContainer)
 {
     /* Background image */
     backgroundImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/Background_1920.png"
@@ -96,11 +97,13 @@ SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
     addSheetButton.text.setText("");
 
     addSheetButton.setOnPressed([&](){
-        LOG_INFO("Hi");
+        // Bring up the add dialog.
+        addSheetDialog.setIsVisible(true);
     });
 
-    /* Remove sheet dialog. */
+    /* Dialogs. */
     remSheetDialog.setIsVisible(false);
+    addSheetDialog.setIsVisible(false);
 
     // Register for the events that we want to listen for.
     registerListener(AUI::InternalEvent::MouseButtonDown);
@@ -148,6 +151,8 @@ void SpriteSheetPanel::render(const SDL_Point& parentOffset)
     addSheetButton.render(parentOffset);
 
     remSheetDialog.render(parentOffset);
+
+    addSheetDialog.render(parentOffset);
 }
 
 } // End namespace AM

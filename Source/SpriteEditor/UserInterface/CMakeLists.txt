@@ -1,17 +1,21 @@
 target_sources(SpriteEditor
     PRIVATE
+        Private/AddSheetDialog.cpp
         Private/ConfirmationButton.cpp
         Private/RemSheetDialog.cpp
         Private/MainScreen.cpp
+        Private/MainTextInput.cpp
         Private/MainThumbnail.cpp
         Private/TitleButton.cpp
         Private/TitleScreen.cpp
         Private/UserInterface.cpp
         Private/SpriteSheetPanel.cpp
     PUBLIC
+        Public/AddSheetDialog.h
         Public/ConfirmationButton.h
         Public/RemSheetDialog.h
         Public/MainScreen.h
+        Public/MainTextInput.h
         Public/MainThumbnail.h
         Public/SpriteSheetPanel.h
         Public/TitleButton.h
