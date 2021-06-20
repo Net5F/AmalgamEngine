@@ -1,5 +1,6 @@
 #include "SpriteSheetPanel.h"
 #include "MainThumbnail.h"
+#include "Ignore.h"
 
 namespace AM
 {
@@ -10,6 +11,7 @@ SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
 , spritesheetContainer(screen, "SpriteSheetContainer", {18, 24, 306, 636})
 , remSheetButton(screen, "", {342, 0, 45, 63})
 , addSheetButton(screen, "", {342, 63, 45, 88})
+, remSheetDialog(screen, spritesheetContainer, remSheetButton)
 {
     /* Background image */
     backgroundImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/Background_1920.png"
@@ -34,14 +36,37 @@ SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
         thumbnail.setText("Component " + std::to_string(i));
         thumbnail.setIsActivateable(false);
 
-        // Add a callback to unselect all other components when this one
+        // Add a callback to deselect all other components when this one
         // is selected.
-        thumbnail.setOnSelected([this](AUI::Thumbnail* selectedThumb){
+        thumbnail.setOnSelected([&](AUI::Thumbnail* selectedThumb){
+            // Deselect all other thumbnails.
             for (auto& componentPtr : spritesheetContainer) {
                 MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*componentPtr);
                 if (otherThumb.getIsSelected() && (&otherThumb != selectedThumb)) {
                     otherThumb.deselect();
                 }
+            }
+
+            // Make sure the remove button is enabled.
+            remSheetButton.enable();
+        });
+
+        // Add a callback to disable the remove button if nothing is selected.
+        thumbnail.setOnDeselected([&](AUI::Thumbnail* deselectedThumb){
+            ignore(deselectedThumb);
+
+            // Check if any thumbnails are selected.
+            bool thumbIsSelected{false};
+            for (auto& componentPtr : spritesheetContainer) {
+                MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*componentPtr);
+                if (otherThumb.getIsSelected()) {
+                    thumbIsSelected = true;
+                }
+            }
+
+            // If none of the thumbs are selected, disable the remove button.
+            if (!thumbIsSelected) {
+                remSheetButton.disable();
             }
         });
 
@@ -55,23 +80,12 @@ SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
     remSheetButton.disabledImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/RemoveDisabled.png");
     remSheetButton.text.setFont("Fonts/B612-Regular.ttf", 33);
     remSheetButton.text.setText("");
+    remSheetButton.disable();
 
-    // Remove the selected component on button press.
+    // Add a callback to remove a selected component on button press.
     remSheetButton.setOnPressed([this](){
-        // Try to find a selected sprite sheet in the container.
-        AUI::Component* selectedSheet{nullptr};
-        for (auto& componentPtr : spritesheetContainer) {
-            MainThumbnail& thumbnail = static_cast<MainThumbnail&>(*componentPtr);
-            if (thumbnail.getIsSelected()) {
-                selectedSheet = &thumbnail;
-                break;
-            }
-        }
-
-        // If we found a selected sprite sheet, erase it.
-        if (selectedSheet != nullptr) {
-            spritesheetContainer.erase(selectedSheet);
-        }
+        // Bring up the confirmation dialog.
+        remSheetDialog.setIsVisible(true);
     });
 
     /* Add sheet button */
@@ -84,12 +98,45 @@ SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
     addSheetButton.setOnPressed([&](){
         LOG_INFO("Hi");
     });
+
+    /* Remove sheet dialog. */
+    remSheetDialog.setIsVisible(false);
+
+    // Register for the events that we want to listen for.
+    registerListener(AUI::InternalEvent::MouseButtonDown);
+}
+
+bool SpriteSheetPanel::onMouseButtonDown(SDL_MouseButtonEvent& event)
+{
+    // If the click event was outside our extent.
+    if (!(containsPoint({event.x, event.y}))) {
+        // Deselect any selected component.
+        for (auto& componentPtr : spritesheetContainer) {
+            MainThumbnail& thumbnail = static_cast<MainThumbnail&>(*componentPtr);
+            if (thumbnail.getIsSelected()) {
+                thumbnail.deselect();
+                break;
+            }
+        }
+    }
+
+    return false;
 }
 
 void SpriteSheetPanel::render(const SDL_Point& parentOffset)
 {
     // Keep our scaling up to date.
     refreshScaling();
+
+    // Save the extent that we're going to render at.
+    lastRenderedExtent = scaledExtent;
+    lastRenderedExtent.x += parentOffset.x;
+    lastRenderedExtent.y += parentOffset.y;
+
+    // Children should render at the parent's offset + this component's offset.
+    SDL_Point childOffset{parentOffset};
+    childOffset.x += scaledExtent.x;
+    childOffset.y += scaledExtent.y;
 
     // Render our children.
     backgroundImage.render(parentOffset);
@@ -99,6 +146,8 @@ void SpriteSheetPanel::render(const SDL_Point& parentOffset)
     remSheetButton.render(parentOffset);
 
     addSheetButton.render(parentOffset);
+
+    remSheetDialog.render(parentOffset);
 }
 
 } // End namespace AM

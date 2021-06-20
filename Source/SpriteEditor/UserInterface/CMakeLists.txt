@@ -1,18 +1,22 @@
 target_sources(SpriteEditor
-	PRIVATE
-		Private/MainScreen.cpp
-		Private/MainThumbnail.cpp
-		Private/TitleButton.cpp
-		Private/TitleScreen.cpp
-		Private/UserInterface.cpp
-		Private/SpriteSheetPanel.cpp
-	PUBLIC
-		Public/MainScreen.h
-		Public/MainThumbnail.h
-		Public/SpriteSheetPanel.h
-		Public/TitleButton.h
-		Public/TitleScreen.h
-		Public/UserInterface.h
+    PRIVATE
+        Private/ConfirmationButton.cpp
+        Private/RemSheetDialog.cpp
+        Private/MainScreen.cpp
+        Private/MainThumbnail.cpp
+        Private/TitleButton.cpp
+        Private/TitleScreen.cpp
+        Private/UserInterface.cpp
+        Private/SpriteSheetPanel.cpp
+    PUBLIC
+        Public/ConfirmationButton.h
+        Public/RemSheetDialog.h
+        Public/MainScreen.h
+        Public/MainThumbnail.h
+        Public/SpriteSheetPanel.h
+        Public/TitleButton.h
+        Public/TitleScreen.h
+        Public/UserInterface.h
 )
 
 target_include_directories(SpriteEditor
