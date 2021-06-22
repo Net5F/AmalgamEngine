@@ -9,12 +9,12 @@ namespace AM
 {
 namespace SpriteEditor
 {
-UserInterface::UserInterface(SDL_Renderer* renderer)
+UserInterface::UserInterface(SDL_Renderer* renderer, SpriteData& spriteData)
 : auiInitializer((std::string{SDL_GetBasePath()} + "Resources/"), renderer
               , {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT})
-, currentScreen(&mainScreen)
-, titleScreen(*this)
-, mainScreen(*this)
+, currentScreen(&titleScreen)
+, titleScreen(*this, spriteData)
+, mainScreen(spriteData)
 {
     AUI::Core::setActualScreenSize({Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT});
 }
@@ -25,10 +25,10 @@ void UserInterface::openTitleScreen()
     currentScreen = &titleScreen;
 }
 
-void UserInterface::openMainScreen(const std::string& spriteFilePath)
+void UserInterface::openMainScreen()
 {
-    // Load the given sprite file into the main screen.
-    mainScreen.loadSpriteFile(spriteFilePath);
+    // Tell the main screen to load the current sprite data into its UI.
+    mainScreen.loadSpriteData();
 
     // Switch to the main screen.
     currentScreen = &mainScreen;

@@ -3,9 +3,10 @@
 #include "EventHandler.h"
 #include "TitleScreen.h"
 #include "MainScreen.h"
+#include "SpriteData.h"
 
 #include "AUI/Initializer.h"
-#include <string>
+#include <filesystem>
 
 // Forward declarations.
 struct SDL_Renderer;
@@ -23,7 +24,7 @@ namespace SpriteEditor
 class UserInterface : public EventHandler
 {
 public:
-    UserInterface(SDL_Renderer* renderer);
+    UserInterface(SDL_Renderer* renderer, SpriteData& spriteData);
 
     /**
      * Changes the currentScreen to titleScreen.
@@ -31,10 +32,10 @@ public:
     void openTitleScreen();
 
     /**
-     * Tells mainScreen to load the given file, and changes the currentScreen
-     * to mainScreen.
+     * Tells mainScreen to load the current sprite data into its UI, and changes
+     * the currentScreen to mainScreen.
      */
-    void openMainScreen(const std::string& spriteFilePath);
+    void openMainScreen();
 
     /**
      * Handles user input events.

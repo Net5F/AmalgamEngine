@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SpriteData.h"
 #include "AUI/Screen.h"
 #include "AUI/Image.h"
 #include "AUI/Text.h"
@@ -18,7 +19,7 @@ class UserInterface;
 class TitleScreen : public AUI::Screen
 {
 public:
-    TitleScreen(UserInterface& inUserInterface);
+    TitleScreen(UserInterface& inUserInterface, SpriteData& inSpriteData);
 
     void render() override;
 
@@ -27,7 +28,12 @@ private:
 
     void onLoadButtonPressed();
 
+    /** The user interface manager. Used for switching to the main screen. */
     UserInterface& userInterface;
+
+    /** The sprite data for this project. Used for loading the user-selected
+        file. */
+    SpriteData& spriteData;
 
     AUI::Image background;
 

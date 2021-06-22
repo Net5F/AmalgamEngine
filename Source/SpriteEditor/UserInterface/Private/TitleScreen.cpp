@@ -10,9 +10,10 @@ namespace AM
 namespace SpriteEditor
 {
 
-TitleScreen::TitleScreen(UserInterface& inUserInterface)
+TitleScreen::TitleScreen(UserInterface& inUserInterface, SpriteData& inSpriteData)
 : Screen("TitleScreen")
-, userInterface(inUserInterface)
+, userInterface{inUserInterface}
+, spriteData{inSpriteData}
 , background(*this, "Background", {0, 0, 1920, 1080})
 , newButton(*this, "NewButton", {724, 432, 472, 96}, "New")
 , loadButton(*this, "LoadButton", {724, 589, 472, 96}, "Load")
@@ -52,13 +53,13 @@ void TitleScreen::onNewButtonPressed()
 
     if (result == NFD_OKAY) {
         // Check if the file exists at the selected path.
-        std::string filePath{selectedPath};
-        filePath += "/SpriteData.json";
+        std::filesystem::path filePath{selectedPath};
+        filePath /= "SpriteData.json";
         std::ifstream file{filePath};
         if (!file) {
             // File doesn't exist, create it and change to the main screen.
             std::ofstream file{filePath};
-            userInterface.openMainScreen(filePath);
+            userInterface.openMainScreen();
         }
         else {
             // File already exists. Display the error text.
@@ -87,15 +88,21 @@ void TitleScreen::onLoadButtonPressed()
     nfdresult_t result = NFD::OpenDialog(selectedPath, filterItem, 1);
 
     if (result == NFD_OKAY) {
-        // Validate the selected file.
-        // Note: All we do here is check the name. It'll be further validated
-        //       by the main screen.
+        // Validate the selected file's name.
         if (std::strstr(selectedPath, "SpriteData.json") != 0) {
-            // Correct file, pass the file path and change to the main screen.
-            userInterface.openMainScreen(selectedPath);
+            // Valid file name.
+            // If it parses successfully, change to the main screen.
+            if (spriteData.parse(selectedPath)) {
+                userInterface.openMainScreen();
+            }
+            else {
+                // Failed to parse, display the error text.
+                errorText.setText("Error: Given file failed to parse.");
+                errorText.setIsVisible(true);
+            }
         }
         else {
-            // Incorrect file, display the error text.
+            // Invalid file name, display the error text.
             errorText.setText("Error: Must select a SpriteData.json file to"
                               " load.");
             errorText.setIsVisible(true);

@@ -1,9 +1,10 @@
 #pragma once
 
+#include "SpriteData.h"
 #include "AUI/Screen.h"
 #include "SpriteSheetPanel.h"
 #include "TitleButton.h"
-#include <string>
+#include <filesystem>
 
 namespace AM
 {
@@ -18,15 +19,12 @@ class UserInterface;
 class MainScreen : public AUI::Screen
 {
 public:
-    MainScreen(UserInterface& inUserInterface);
+    MainScreen(SpriteData& inSpriteData);
 
     /**
-     * Parses the given sprite file, loading its data into the UI.
-     *
-     * If the file fails to parse, tells userInterface to go back to the title
-     * screen.
+     * Loads the current state of spriteData into this screen's UI.
      */
-    void loadSpriteFile(const std::string& filePath);
+    void loadSpriteData();
 
     void render() override;
 
@@ -35,10 +33,8 @@ private:
 
     void onLoadButtonPressed();
 
-    UserInterface& userInterface;
-
-    /** The path to the sprite file that we're currently working on. */
-    std::string currentSpriteFilePath;
+    /** The sprite data for this project. Used by this screen's UI. */
+    SpriteData& spriteData;
 
     SpriteSheetPanel spritesheetPanel;
 };

@@ -9,17 +9,16 @@ namespace AM
 namespace SpriteEditor
 {
 
-MainScreen::MainScreen(UserInterface& inUserInterface)
+MainScreen::MainScreen(SpriteData& inSpriteData)
 : Screen("MainScreen")
-, userInterface(inUserInterface)
+, spriteData{inSpriteData}
 , spritesheetPanel(*this)
 {
 }
 
-void MainScreen::loadSpriteFile(const std::string& filePath)
+void MainScreen::loadSpriteData()
 {
-    // Store the file path so we can eventually save back to it.
-    currentSpriteFilePath = filePath;
+    // TODO: Load spriteData into the UI.
 }
 
 void MainScreen::render()

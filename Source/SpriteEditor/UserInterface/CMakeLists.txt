@@ -1,24 +1,24 @@
 target_sources(SpriteEditor
     PRIVATE
-        Private/AddSheetDialog.cpp
-        Private/ConfirmationButton.cpp
-        Private/RemSheetDialog.cpp
+        Private/Components/AddSheetDialog.cpp
+        Private/Components/ConfirmationButton.cpp
+        Private/Components/MainTextInput.cpp
+        Private/Components/MainThumbnail.cpp
+        Private/Components/RemSheetDialog.cpp
+        Private/Components/SpriteSheetPanel.cpp
+        Private/Components/TitleButton.cpp
         Private/MainScreen.cpp
-        Private/MainTextInput.cpp
-        Private/MainThumbnail.cpp
-        Private/TitleButton.cpp
         Private/TitleScreen.cpp
         Private/UserInterface.cpp
-        Private/SpriteSheetPanel.cpp
     PUBLIC
-        Public/AddSheetDialog.h
-        Public/ConfirmationButton.h
-        Public/RemSheetDialog.h
+        Public/Components/AddSheetDialog.h
+        Public/Components/ConfirmationButton.h
+        Public/Components/MainTextInput.h
+        Public/Components/MainThumbnail.h
+        Public/Components/RemSheetDialog.h
+        Public/Components/SpriteSheetPanel.h
+        Public/Components/TitleButton.h
         Public/MainScreen.h
-        Public/MainTextInput.h
-        Public/MainThumbnail.h
-        Public/SpriteSheetPanel.h
-        Public/TitleButton.h
         Public/TitleScreen.h
         Public/UserInterface.h
 )
@@ -28,4 +28,5 @@ target_include_directories(SpriteEditor
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
 )
