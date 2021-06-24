@@ -3,17 +3,16 @@
 #include "nfd.hpp"
 #include "Log.h"
 #include <cstring>
-#include <fstream>
 
 namespace AM
 {
 namespace SpriteEditor
 {
 
-TitleScreen::TitleScreen(UserInterface& inUserInterface, SpriteData& inSpriteData)
+TitleScreen::TitleScreen(UserInterface& inUserInterface, SpriteDataModel& inSpriteDataModel)
 : Screen("TitleScreen")
 , userInterface{inUserInterface}
-, spriteData{inSpriteData}
+, spriteDataModel{inSpriteDataModel}
 , background(*this, "Background", {0, 0, 1920, 1080})
 , newButton(*this, "NewButton", {724, 432, 472, 96}, "New")
 , loadButton(*this, "LoadButton", {724, 589, 472, 96}, "Load")
@@ -52,13 +51,8 @@ void TitleScreen::onNewButtonPressed()
     nfdresult_t result = NFD::PickFolder(selectedPath);
 
     if (result == NFD_OKAY) {
-        // Check if the file exists at the selected path.
-        std::filesystem::path filePath{selectedPath};
-        filePath /= "SpriteData.json";
-        std::ifstream file{filePath};
-        if (!file) {
-            // File doesn't exist, create it and change to the main screen.
-            std::ofstream file{filePath};
+        // If we successfully created a new file, change to the main screen.
+        if (spriteDataModel.create(selectedPath)) {
             userInterface.openMainScreen();
         }
         else {
@@ -92,12 +86,14 @@ void TitleScreen::onLoadButtonPressed()
         if (std::strstr(selectedPath, "SpriteData.json") != 0) {
             // Valid file name.
             // If it parses successfully, change to the main screen.
-            if (spriteData.parse(selectedPath)) {
+            std::string resultString = spriteDataModel.parse(selectedPath);
+            if (resultString == "") {
                 userInterface.openMainScreen();
             }
             else {
                 // Failed to parse, display the error text.
-                errorText.setText("Error: Given file failed to parse.");
+                resultString = "Error: " + resultString;
+                errorText.setText(resultString);
                 errorText.setIsVisible(true);
             }
         }

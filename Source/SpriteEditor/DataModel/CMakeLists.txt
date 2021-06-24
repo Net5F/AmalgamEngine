@@ -1,8 +1,10 @@
 target_sources(SpriteEditor
     PRIVATE
-        Private/SpriteData.cpp
+        Private/SpriteDataModel.cpp
     PUBLIC
-        Public/SpriteData.h
+        Public/SpriteDataModel.h
+        Public/SpriteSheet.h
+        Public/SpriteStaticData.h
 )
 
 target_include_directories(SpriteEditor

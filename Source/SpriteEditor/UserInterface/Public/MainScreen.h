@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SpriteData.h"
+#include "SpriteDataModel.h"
 #include "AUI/Screen.h"
 #include "SpriteSheetPanel.h"
 #include "TitleButton.h"
@@ -19,7 +19,7 @@ class UserInterface;
 class MainScreen : public AUI::Screen
 {
 public:
-    MainScreen(SpriteData& inSpriteData);
+    MainScreen(SpriteDataModel& inSpriteDataModel);
 
     /**
      * Loads the current state of spriteData into this screen's UI.
@@ -34,7 +34,7 @@ private:
     void onLoadButtonPressed();
 
     /** The sprite data for this project. Used by this screen's UI. */
-    SpriteData& spriteData;
+    SpriteDataModel& spriteDataModel;
 
     SpriteSheetPanel spritesheetPanel;
 };

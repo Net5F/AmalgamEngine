@@ -9,9 +9,9 @@ namespace AM
 namespace SpriteEditor
 {
 
-MainScreen::MainScreen(SpriteData& inSpriteData)
+MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 : Screen("MainScreen")
-, spriteData{inSpriteData}
+, spriteDataModel{inSpriteDataModel}
 , spritesheetPanel(*this)
 {
 }

@@ -3,7 +3,7 @@
 #include "EventHandler.h"
 #include "TitleScreen.h"
 #include "MainScreen.h"
-#include "SpriteData.h"
+#include "SpriteDataModel.h"
 
 #include "AUI/Initializer.h"
 #include <filesystem>
@@ -24,7 +24,7 @@ namespace SpriteEditor
 class UserInterface : public EventHandler
 {
 public:
-    UserInterface(SDL_Renderer* renderer, SpriteData& spriteData);
+    UserInterface(SDL_Renderer* renderer, SpriteDataModel& spriteDataModel);
 
     /**
      * Changes the currentScreen to titleScreen.

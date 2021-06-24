@@ -4,7 +4,7 @@
 #include "UserInterface.h"
 #include "Renderer.h"
 #include "PeriodicCaller.h"
-#include "SpriteData.h"
+#include "SpriteDataModel.h"
 
 #include "SDL2pp/SDL.hh"
 #include "SDL2pp/Window.hh"
@@ -78,7 +78,7 @@ private:
     SDL2pp::Renderer sdlRenderer;
 
     /** The data model that defines the user's project. */
-    SpriteData spriteData;
+    SpriteDataModel spriteDataModel;
 
     UserInterface userInterface;
     /** Calls userInterface.tick() at AUI's tick rate. */

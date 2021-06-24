@@ -8,8 +8,8 @@
 namespace AM
 {
 /**
- * This struct represents all of the sprite data that the RenderSystem needs,
- * except for the world position.
+ * Represents all of the sprite data that the RenderSystem needs, except for
+ * the world position.
  *
  * World position should be read from an associated Position component.
  */

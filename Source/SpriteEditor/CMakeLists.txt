@@ -24,6 +24,7 @@ target_link_libraries(SpriteEditor
         SDL2pp
         AmalgamUI
         nfd
+        nlohmann_json::nlohmann_json
         Shared
 )
 

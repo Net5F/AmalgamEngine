@@ -2,6 +2,9 @@
 
 namespace AM
 {
+/**
+ * Represents the current movement of an entity.
+ */
 struct Movement {
 public:
     static constexpr float DEFAULT_MAX_VEL = 5;
