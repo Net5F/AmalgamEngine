@@ -32,7 +32,7 @@ public:
      * @return An empty string if the file at the given path parses
      *         successfully, else a string containing the failure message.
      */
-    std::string parse(std::filesystem::path filePath);
+    std::string load(std::filesystem::path filePath);
 
     /**
      * Saves the current state of this data model into the SpriteData.json

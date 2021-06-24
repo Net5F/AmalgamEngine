@@ -85,8 +85,8 @@ void TitleScreen::onLoadButtonPressed()
         // Validate the selected file's name.
         if (std::strstr(selectedPath, "SpriteData.json") != 0) {
             // Valid file name.
-            // If it parses successfully, change to the main screen.
-            std::string resultString = spriteDataModel.parse(selectedPath);
+            // If it loads successfully, change to the main screen.
+            std::string resultString = spriteDataModel.load(selectedPath);
             if (resultString == "") {
                 userInterface.openMainScreen();
             }

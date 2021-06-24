@@ -34,7 +34,7 @@ bool SpriteDataModel::create(std::filesystem::path filePath)
     return true;
 }
 
-std::string SpriteDataModel::parse(std::filesystem::path filePath)
+std::string SpriteDataModel::load(std::filesystem::path filePath)
 {
     // Open the file.
     currentWorkingFile.open(filePath, (std::ios::in | std::ios::out));
