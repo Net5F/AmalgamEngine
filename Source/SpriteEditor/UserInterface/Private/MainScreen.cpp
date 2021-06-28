@@ -18,11 +18,14 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 
 void MainScreen::loadSpriteData()
 {
+    // Clear out the old components.
+    spritesheetPanel.clearSpriteSheets();
+
     // For every sprite sheet in the model.
-//    for (const SpriteSheet& sheet : spriteDataModel.getSpriteSheets()) {
-//        // Add a Thumbnail component that displays the sheet.
-//        spritesheetPanel.addSpriteSheet(sheet.relPath);
-//    }
+    for (const SpriteSheet& sheet : spriteDataModel.getSpriteSheets()) {
+        // Add a Thumbnail component that displays the sheet.
+        spritesheetPanel.addSpriteSheet(sheet.relPath);
+    }
 }
 
 void MainScreen::render()

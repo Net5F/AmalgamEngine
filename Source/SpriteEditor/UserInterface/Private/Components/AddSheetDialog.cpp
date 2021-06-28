@@ -15,7 +15,6 @@ AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer&
 , headerText(inScreen, "", {747, 228, 280, 60})
 , pathLabel(inScreen, "", {747, 300, 151, 38})
 , pathInput(inScreen, "", {919, 300, 180, 38})
-, browseButton(inScreen, "", {1128, 300, 92, 42}, "BROWSE")
 , widthLabel(inScreen, "", {747, 350, 151, 38})
 , widthInput(inScreen, "", {919, 350, 180, 38})
 , heightLabel(inScreen, "", {747, 400, 151, 38})
@@ -44,15 +43,6 @@ AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer&
 
     pathInput.setTextFont("Fonts/B612-Regular.ttf", 18);
     pathInput.setMargins({8, 0, 8, 0});
-
-    pathInput.setOnTextChanged([](){
-        LOG_INFO("Text changed.");
-    });
-    pathInput.setOnTextCommitted([](){
-        LOG_INFO("Text committed.");
-    });
-
-    browseButton.text.setFont("Fonts/B612-Regular.ttf", 16);
 
     /* Width entry. */
     widthLabel.setFont("Fonts/B612-Regular.ttf", 21);
@@ -93,6 +83,9 @@ AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer&
             // Refresh the UI.
             mainScreen.loadSpriteData();
 
+            // Clear the text inputs.
+            clearTextInputs();
+
             // Remove the dialog.
             setIsVisible(false);
         }
@@ -105,6 +98,9 @@ AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer&
 
     // Add a callback to remove the dialog on cancel.
     cancelButton.setOnPressed([&](){
+        // Clear the text inputs.
+        clearTextInputs();
+
         // Remove the dialog.
         setIsVisible(false);
     });
@@ -137,7 +133,6 @@ void AddSheetDialog::render(const SDL_Point& parentOffset)
 
     pathLabel.render(childOffset);
     pathInput.render(childOffset);
-    browseButton.render(childOffset);
 
     widthLabel.render(childOffset);
     widthInput.render(childOffset);
@@ -150,6 +145,14 @@ void AddSheetDialog::render(const SDL_Point& parentOffset)
 
     addButton.render(childOffset);
     cancelButton.render(childOffset);
+}
+
+void AddSheetDialog::clearTextInputs()
+{
+    pathInput.setText("");
+    widthInput.setText("");
+    heightInput.setText("");
+    nameInput.setText("");
 }
 
 } // End namespace SpriteEditor

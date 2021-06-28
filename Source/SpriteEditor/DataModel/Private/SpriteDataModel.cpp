@@ -50,12 +50,14 @@ std::string SpriteDataModel::load(const std::string& fullPath)
     // Open the file.
     currentWorkingFile.open(fullPath, (std::ios::in | std::ios::out));
     if (!(currentWorkingFile.is_open())) {
+        currentWorkingFile.close();
         return "File failed to open.";
     }
 
     // Parse the file into a json structure.
     nlohmann::json json = nlohmann::json::parse(currentWorkingFile, nullptr, false);
     if (json.is_discarded()) {
+        currentWorkingFile.close();
         return "File is not valid JSON.";
     }
 
@@ -95,6 +97,7 @@ std::string SpriteDataModel::load(const std::string& fullPath)
         }
     }
     catch (nlohmann::json::type_error& e) {
+        currentWorkingFile.close();
         std::string failureString{"Parse failure - "};
         failureString += e.what();
         return failureString;

@@ -31,53 +31,6 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& sprite
     spritesheetContainer.setCellWidth(156);
     spritesheetContainer.setCellHeight(162);
 
-    // Add temp sheets.
-    for (unsigned int i = 0; i < 19; ++i) {
-        std::unique_ptr<AUI::Component> thumbnailPtr{
-            std::make_unique<MainThumbnail>(screen, "")};
-        MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
-
-        thumbnail.thumbnailImage.addResolution({1280, 720}, "Textures/Temp/iso_test_sprites.png");
-        thumbnail.setText("Component " + std::to_string(i));
-        thumbnail.setIsActivateable(false);
-
-        // Add a callback to deselect all other components when this one
-        // is selected.
-        thumbnail.setOnSelected([&](AUI::Thumbnail* selectedThumb){
-            // Deselect all other thumbnails.
-            for (auto& componentPtr : spritesheetContainer) {
-                MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*componentPtr);
-                if (otherThumb.getIsSelected() && (&otherThumb != selectedThumb)) {
-                    otherThumb.deselect();
-                }
-            }
-
-            // Make sure the remove button is enabled.
-            remSheetButton.enable();
-        });
-
-        // Add a callback to disable the remove button if nothing is selected.
-        thumbnail.setOnDeselected([&](AUI::Thumbnail* deselectedThumb){
-            ignore(deselectedThumb);
-
-            // Check if any thumbnails are selected.
-            bool thumbIsSelected{false};
-            for (auto& componentPtr : spritesheetContainer) {
-                MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*componentPtr);
-                if (otherThumb.getIsSelected()) {
-                    thumbIsSelected = true;
-                }
-            }
-
-            // If none of the thumbs are selected, disable the remove button.
-            if (!thumbIsSelected) {
-                remSheetButton.disable();
-            }
-        });
-
-        spritesheetContainer.push_back(std::move(thumbnailPtr));
-    }
-
     /* Remove sheet button */
     remSheetButton.normalImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/RemoveNormal.png");
     remSheetButton.hoveredImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/RemoveHovered.png");
@@ -158,6 +111,11 @@ void SpriteSheetPanel::addSpriteSheet(const std::string& relPath)
     });
 
     spritesheetContainer.push_back(std::move(thumbnailPtr));
+}
+
+void SpriteSheetPanel::clearSpriteSheets()
+{
+    spritesheetContainer.clear();
 }
 
 bool SpriteSheetPanel::onMouseButtonDown(SDL_MouseButtonEvent& event)

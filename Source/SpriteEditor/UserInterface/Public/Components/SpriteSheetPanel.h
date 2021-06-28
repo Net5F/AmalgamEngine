@@ -32,6 +32,11 @@ public:
      */
     void addSpriteSheet(const std::string& relPath);
 
+    /**
+     * Clears spritesheetContainer, removing all the sprite sheet components.
+     */
+    void clearSpriteSheets();
+
     bool onMouseButtonDown(SDL_MouseButtonEvent& event) override;
 
     void render(const SDL_Point& parentOffset = {}) override;

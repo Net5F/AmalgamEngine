@@ -38,7 +38,6 @@ public:
     // Note: The path must be relative to Core::resourcePath.
     AUI::Text pathLabel;
     MainTextInput pathInput;
-    ConfirmationButton browseButton;
 
     // Sprite width entry
     AUI::Text widthLabel;
@@ -65,6 +64,11 @@ public:
     void render(const SDL_Point& parentOffset = {}) override;
 
 private:
+    /**
+     * Clears the text in all of this dialog's text inputs.
+     */
+    void clearTextInputs();
+
     /** Used to update the UI after sprite data changes. Component maintains an
         AUI::Screen reference that we could cast, but we want to explicitly
         model a dependency on MainScreen. */

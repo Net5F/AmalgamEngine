@@ -17,7 +17,6 @@ MainTextInput::MainTextInput(AUI::Screen& screen, const char* key
 
     // Set our text properties.
     setTextFont("Fonts/B612-Regular.ttf", 25);
-    setText("Hello");
 
     // Set our input box properties.
     setCursorWidth(2);
