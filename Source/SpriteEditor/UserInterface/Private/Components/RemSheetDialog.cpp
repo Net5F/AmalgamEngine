@@ -1,7 +1,10 @@
 #include "RemSheetDialog.h"
 #include "MainThumbnail.h"
 
-namespace AM {
+namespace AM
+{
+namespace SpriteEditor
+{
 
 RemSheetDialog::RemSheetDialog(AUI::Screen& screen, AUI::VerticalGridContainer& inSpritesheetContainer, AUI::Button& inRemSheetButton)
 : AUI::Component(screen, "", {0, 0, 1920, 1080})
@@ -79,4 +82,5 @@ void RemSheetDialog::render(const SDL_Point& parentOffset)
     cancelButton.render(childOffset);
 }
 
-} // namespace AUI
+} // End namespace SpriteEditor
+} // End namespace AM

@@ -1,27 +1,38 @@
 #include "SpriteDataModel.h"
 #include "Log.h"
+#include "Ignore.h"
+#include "AUI/Core.h"
 #include "nlohmann/json.hpp"
+#include "SDL2pp/Renderer.hh"
+#include "SDL2pp/Texture.hh"
+#include "SDL2pp/Exception.hh"
 
 namespace AM
 {
 namespace SpriteEditor
 {
 
-bool SpriteDataModel::create(std::filesystem::path filePath)
+SpriteDataModel::SpriteDataModel(SDL2pp::Renderer& inSdlRenderer)
+: sdlRenderer{inSdlRenderer}
+{
+}
+
+bool SpriteDataModel::create(const std::string& fullPath)
 {
     // If a SpriteData.json already exists at the given path, return false.
-    filePath /= "SpriteData.json";
-    std::ifstream existingFile{filePath};
+    std::string spriteDataPath{fullPath};
+    spriteDataPath += "SpriteData.json";
+    std::ifstream existingFile{spriteDataPath};
     if (existingFile) {
         return false;
     }
 
     // Create the file.
-    currentWorkingFile.open(filePath, std::ios::out);
+    currentWorkingFile.open(spriteDataPath, std::ios::out);
     currentWorkingFile.close();
 
     // Open the file for read and write.
-    currentWorkingFile.open(filePath, (std::ios::in | std::ios::out));
+    currentWorkingFile.open(spriteDataPath, (std::ios::in | std::ios::out));
     if (!(currentWorkingFile.is_open())) {
         // File creation failed for some reason. We're already checking for
         // file existence so this shouldn't happen.
@@ -34,10 +45,10 @@ bool SpriteDataModel::create(std::filesystem::path filePath)
     return true;
 }
 
-std::string SpriteDataModel::load(std::filesystem::path filePath)
+std::string SpriteDataModel::load(const std::string& fullPath)
 {
     // Open the file.
-    currentWorkingFile.open(filePath, (std::ios::in | std::ios::out));
+    currentWorkingFile.open(fullPath, (std::ios::in | std::ios::out));
     if (!(currentWorkingFile.is_open())) {
         return "File failed to open.";
     }
@@ -54,7 +65,7 @@ std::string SpriteDataModel::load(std::filesystem::path filePath)
         for (auto& sheetJson : json["spriteSheets"].items()) {
             // Add this sheet's relative path.
             SpriteSheet spriteSheet{};
-            spriteSheet.path = sheetJson.value()["path"].get<std::string>();
+            spriteSheet.relPath = sheetJson.value()["relPath"].get<std::string>();
 
             // For every sprite in the sheet.
             for (auto& spriteJson : sheetJson.value()["sprites"].items()) {
@@ -107,7 +118,7 @@ void SpriteDataModel::save()
     for (unsigned int i = 0; i < spriteSheets.size(); ++i) {
         // Add this sheet's relative path.
         SpriteSheet& spriteSheet{spriteSheets[i]};
-        json["spriteSheets"][i]["path"] = spriteSheet.path.string();
+        json["spriteSheets"][i]["relPath"] = spriteSheet.relPath;
 
         // For each sprite in this sheet.
         for (unsigned int j = 0; j < spriteSheet.sprites.size(); ++j) {
@@ -143,6 +154,59 @@ void SpriteDataModel::save()
 
     std::string jsonDump{json.dump(4)};
     currentWorkingFile.write(jsonDump.c_str(), jsonDump.length());
+}
+
+std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const std::string& spriteWidth
+                           , const std::string& spriteHeight, const std::string& baseName)
+{
+    /* Validate the data. */
+    // Validate that the file at the given path is a valid texture.
+    int sheetWidth{0};
+    int sheetHeight{0};
+    try {
+        // Append AUI::Core::resourcePath to the given relative path.
+        std::string fullPath{AUI::Core::GetResourcePath()};
+        fullPath += relPath;
+        SDL2pp::Texture sheetTexture(sdlRenderer, fullPath);
+
+        // Save the texture size for later.
+        SDL2pp::Point sheetSize = sheetTexture.GetSize();
+        sheetWidth = sheetSize.x;
+        sheetHeight = sheetSize.y;
+    }
+    catch (SDL2pp::Exception& e) {
+        std::string errorString{"Error: File at given path is not a valid image. Path: "};
+        errorString += AUI::Core::GetResourcePath();
+        errorString+= relPath;
+        return errorString;
+    }
+
+    // Validate the width/height.
+    int spriteWidthI{0};
+    int spriteHeightI{0};
+    try {
+        spriteWidthI = std::stoi(spriteWidth);
+        spriteHeightI = std::stoi(spriteHeight);
+    }
+    catch (std::exception& e) {
+        return "Error: Width or height is not a valid integer.";
+    }
+
+    // Validate the size of the texture.
+    if ((spriteWidthI > sheetWidth) || (spriteHeightI > sheetHeight)) {
+        return "Error: Sheet must be larger than sprite size.";
+    }
+
+    /* Add the sprite sheet and sprites. */
+    // TODO: Add the sprites to the sheet
+    spriteSheets.emplace_back(relPath);
+
+    return "";
+}
+
+const std::vector<SpriteSheet>& SpriteDataModel::getSpriteSheets()
+{
+    return spriteSheets;
 }
 
 } // End namespace SpriteEditor

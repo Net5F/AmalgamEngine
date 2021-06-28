@@ -2,6 +2,8 @@
 
 namespace AM
 {
+namespace SpriteEditor
+{
 
 TitleButton::TitleButton(AUI::Screen& screen, const char* key
                          , const SDL_Rect& screenExtent, const std::string& inText)
@@ -19,4 +21,5 @@ TitleButton::TitleButton(AUI::Screen& screen, const char* key
     text.setText(inText);
 }
 
+} // End namespace SpriteEditor
 } // End namespace AM

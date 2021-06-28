@@ -2,6 +2,8 @@
 
 namespace AM
 {
+namespace SpriteEditor
+{
 
 ConfirmationButton::ConfirmationButton(AUI::Screen& screen, const char* key
                          , const SDL_Rect& screenExtent, const std::string& inText)
@@ -18,4 +20,5 @@ ConfirmationButton::ConfirmationButton(AUI::Screen& screen, const char* key
     text.setText(inText);
 }
 
+} // End namespace SpriteEditor
 } // End namespace AM

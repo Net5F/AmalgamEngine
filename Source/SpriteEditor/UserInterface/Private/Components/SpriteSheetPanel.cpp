@@ -1,18 +1,22 @@
 #include "SpriteSheetPanel.h"
+#include "MainScreen.h"
 #include "MainThumbnail.h"
+#include "SpriteDataModel.h"
 #include "Ignore.h"
 
 namespace AM
 {
+namespace SpriteEditor
+{
 
-SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
-: AUI::Component(screen, "SpriteSheetPanel", {0, 0, 399, 708})
-, backgroundImage(screen, "", logicalExtent)
-, spritesheetContainer(screen, "SpriteSheetContainer", {18, 24, 306, 636})
-, remSheetButton(screen, "", {342, 0, 45, 63})
-, addSheetButton(screen, "", {342, 63, 45, 88})
-, remSheetDialog(screen, spritesheetContainer, remSheetButton)
-, addSheetDialog(screen, spritesheetContainer)
+SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& spriteDataModel)
+: AUI::Component(inScreen, "SpriteSheetPanel", {0, 0, 399, 708})
+, backgroundImage(inScreen, "", logicalExtent)
+, spritesheetContainer(inScreen, "SpriteSheetContainer", {18, 24, 306, 636})
+, remSheetButton(inScreen, "", {342, 0, 45, 63})
+, addSheetButton(inScreen, "", {342, 63, 45, 88})
+, remSheetDialog(inScreen, spritesheetContainer, remSheetButton)
+, addSheetDialog(inScreen, spritesheetContainer, spriteDataModel)
 {
     /* Background image */
     backgroundImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/Background_1920.png"
@@ -109,6 +113,53 @@ SpriteSheetPanel::SpriteSheetPanel(AUI::Screen& screen)
     registerListener(AUI::InternalEvent::MouseButtonDown);
 }
 
+void SpriteSheetPanel::addSpriteSheet(const std::string& relPath)
+{
+    std::unique_ptr<AUI::Component> thumbnailPtr{
+        std::make_unique<MainThumbnail>(screen, "")};
+    MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
+
+    thumbnail.thumbnailImage.addResolution({1280, 720}, relPath);
+    thumbnail.setText(relPath);
+    thumbnail.setIsActivateable(false);
+
+    // Add a callback to deselect all other components when this one
+    // is selected.
+    thumbnail.setOnSelected([&](AUI::Thumbnail* selectedThumb){
+        // Deselect all other thumbnails.
+        for (auto& componentPtr : spritesheetContainer) {
+            MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*componentPtr);
+            if (otherThumb.getIsSelected() && (&otherThumb != selectedThumb)) {
+                otherThumb.deselect();
+            }
+        }
+
+        // Make sure the remove button is enabled.
+        remSheetButton.enable();
+    });
+
+    // Add a callback to disable the remove button if nothing is selected.
+    thumbnail.setOnDeselected([&](AUI::Thumbnail* deselectedThumb){
+        ignore(deselectedThumb);
+
+        // Check if any thumbnails are selected.
+        bool thumbIsSelected{false};
+        for (auto& componentPtr : spritesheetContainer) {
+            MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*componentPtr);
+            if (otherThumb.getIsSelected()) {
+                thumbIsSelected = true;
+            }
+        }
+
+        // If none of the thumbs are selected, disable the remove button.
+        if (!thumbIsSelected) {
+            remSheetButton.disable();
+        }
+    });
+
+    spritesheetContainer.push_back(std::move(thumbnailPtr));
+}
+
 bool SpriteSheetPanel::onMouseButtonDown(SDL_MouseButtonEvent& event)
 {
     // If the click event was outside our extent.
@@ -155,4 +206,5 @@ void SpriteSheetPanel::render(const SDL_Point& parentOffset)
     addSheetDialog.render(parentOffset);
 }
 
+} // End namespace SpriteEditor
 } // End namespace AM

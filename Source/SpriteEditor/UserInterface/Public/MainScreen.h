@@ -4,7 +4,6 @@
 #include "AUI/Screen.h"
 #include "SpriteSheetPanel.h"
 #include "TitleButton.h"
-#include <filesystem>
 
 namespace AM
 {

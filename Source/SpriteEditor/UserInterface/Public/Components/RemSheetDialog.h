@@ -5,7 +5,10 @@
 #include "AUI/VerticalGridContainer.h"
 #include "ConfirmationButton.h"
 
-namespace AM {
+namespace AM
+{
+namespace SpriteEditor
+{
 
 /**
  * A confirmation dialog with header text, body text, and confirm/cancel
@@ -28,7 +31,7 @@ public:
         describes the decision they're making. */
     AUI::Text bodyText;
 
-    /** Right-side confirmation button. Performs the action in question. */
+    /** Right-side confirmation button. Removes the selected sprite sheet. */
     ConfirmationButton removeButton;
 
     /** Left-side cancel button. Closes the dialog without performing any
@@ -49,4 +52,5 @@ private:
     AUI::Button& remSheetButton;
 };
 
-} // namespace AM
+} // End namespace SpriteEditor
+} // End namespace AM

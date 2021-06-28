@@ -4,6 +4,8 @@
 
 namespace AM
 {
+namespace SpriteEditor
+{
 
 /**
  * The button style used for the title screen.
@@ -15,4 +17,5 @@ public:
                 , const std::string& inText);
 };
 
+} // End namespace SpriteEditor
 } // End namespace AM

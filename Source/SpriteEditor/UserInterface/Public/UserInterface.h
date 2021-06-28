@@ -6,7 +6,6 @@
 #include "SpriteDataModel.h"
 
 #include "AUI/Initializer.h"
-#include <filesystem>
 
 // Forward declarations.
 struct SDL_Renderer;

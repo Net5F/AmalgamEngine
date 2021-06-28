@@ -7,6 +7,8 @@
 
 namespace AM
 {
+namespace SpriteEditor
+{
 
 /**
  * The thumbnail style used for the main screen.
@@ -17,4 +19,5 @@ public:
     MainThumbnail(AUI::Screen& screen, const char* key);
 };
 
+} // End namespace SpriteEditor
 } // End namespace AM

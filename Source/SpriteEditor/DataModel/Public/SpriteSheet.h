@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SpriteStaticData.h"
-#include <filesystem>
+#include <string>
 #include <vector>
 
 namespace AM
@@ -15,7 +15,9 @@ namespace SpriteEditor
 struct SpriteSheet
 {
 public:
-    std::filesystem::path path;
+    /** The path to the sprite sheet image file, relative to the application's
+        base directory. */
+    std::string relPath;
 
     /** The static data for all sprites in this sheet. */
     std::vector<SpriteStaticData> sprites;

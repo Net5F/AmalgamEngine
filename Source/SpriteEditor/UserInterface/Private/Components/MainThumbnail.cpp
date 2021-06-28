@@ -2,6 +2,8 @@
 
 namespace AM
 {
+namespace SpriteEditor
+{
 
 MainThumbnail::MainThumbnail(AUI::Screen& screen, const char* key)
 : AUI::Thumbnail(screen, key, {0, 0, 150, 150})
@@ -21,4 +23,5 @@ MainThumbnail::MainThumbnail(AUI::Screen& screen, const char* key)
     setTextColor({255, 255, 255, 255});
 }
 
+} // End namespace SpriteEditor
 } // End namespace AM

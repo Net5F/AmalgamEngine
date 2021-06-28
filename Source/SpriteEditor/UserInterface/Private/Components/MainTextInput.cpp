@@ -2,6 +2,8 @@
 
 namespace AM
 {
+namespace SpriteEditor
+{
 
 MainTextInput::MainTextInput(AUI::Screen& screen, const char* key
                          , const SDL_Rect& screenExtent)
@@ -21,4 +23,5 @@ MainTextInput::MainTextInput(AUI::Screen& screen, const char* key
     setCursorWidth(2);
 }
 
+} // End namespace SpriteEditor
 } // End namespace AM

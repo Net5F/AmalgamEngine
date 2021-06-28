@@ -6,7 +6,13 @@
 #include "ConfirmationButton.h"
 #include "MainTextInput.h"
 
-namespace AM {
+namespace AM
+{
+namespace SpriteEditor
+{
+
+class MainScreen;
+class SpriteDataModel;
 
 /**
  * A confirmation dialog with header text, body text, and confirm/cancel
@@ -18,18 +24,18 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    AddSheetDialog(AUI::Screen& screen, AUI::VerticalGridContainer& inSpritesheetContainer);
+    AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer& inSpritesheetContainer, SpriteDataModel& inSpriteDataModel);
 
     virtual ~AddSheetDialog() = default;
 
-    /** Background image. */
+    /** The dialog's background */
     AUI::Image backgroundImage;
 
-    /** Header text. Typically will prompt the user with text that describes
-        the decision they're making. */
+    /** The header text at the top of the dialog. */
     AUI::Text headerText;
 
     // Path entry
+    // Note: The path must be relative to Core::resourcePath.
     AUI::Text pathLabel;
     MainTextInput pathInput;
     ConfirmationButton browseButton;
@@ -46,7 +52,7 @@ public:
     AUI::Text nameLabel;
     MainTextInput nameInput;
 
-    /** Right-side confirmation button. Performs the action in question. */
+    /** Right-side confirmation button. Adds the sheet. */
     ConfirmationButton addButton;
 
     /** Left-side cancel button. Closes the dialog without performing any
@@ -59,9 +65,18 @@ public:
     void render(const SDL_Point& parentOffset = {}) override;
 
 private:
+    /** Used to update the UI after sprite data changes. Component maintains an
+        AUI::Screen reference that we could cast, but we want to explicitly
+        model a dependency on MainScreen. */
+    MainScreen& mainScreen;
+
     /** Used to remove the currently selected thumbnail when removeButton is
         pressed. */
     AUI::VerticalGridContainer& spritesheetContainer;
+
+    /** Used to update the model when a sheet is added. */
+    SpriteDataModel& spriteDataModel;
 };
 
-} // namespace AM
+} // End namespace SpriteEditor
+} // End namespace AM

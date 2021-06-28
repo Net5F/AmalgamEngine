@@ -5,6 +5,8 @@
 
 namespace AM
 {
+namespace SpriteEditor
+{
 
 /**
  * The button style used for the confirm/cancel buttons in confirmation
@@ -17,4 +19,5 @@ public:
                 , const std::string& inText);
 };
 
+} // End namespace SpriteEditor
 } // End namespace AM

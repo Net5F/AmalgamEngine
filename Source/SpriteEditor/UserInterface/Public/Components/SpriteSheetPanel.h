@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AUI/Screen.h"
 #include "AUI/Image.h"
 #include "AUI/VerticalGridContainer.h"
 #include "AUI/Button.h"
@@ -9,6 +8,11 @@
 
 namespace AM
 {
+namespace SpriteEditor
+{
+
+class MainScreen;
+class SpriteDataModel;
 
 /**
  * The left-hand panel on the main screen. Allows the user to manage the
@@ -17,7 +21,16 @@ namespace AM
 class SpriteSheetPanel : public AUI::Component
 {
 public:
-    SpriteSheetPanel(AUI::Screen& screen);
+    SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& spriteDataModel);
+
+    /**
+     * Adds a MainThumbnail component to the spritesheetContainer, using the
+     * given data.
+     *
+     * @param relPath  The path to the sprite sheet file, relative to
+     *                 AUI::Core::resourcePath.
+     */
+    void addSpriteSheet(const std::string& relPath);
 
     bool onMouseButtonDown(SDL_MouseButtonEvent& event) override;
 
@@ -37,4 +50,5 @@ private:
     AddSheetDialog addSheetDialog;
 };
 
+} // End namespace SpriteEditor
 } // End namespace AM

@@ -19,7 +19,7 @@ Application::Application()
 , sdlWindow("Amalgam Sprite Editor", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
-, spriteDataModel()
+, spriteDataModel(sdlRenderer)
 , userInterface(sdlRenderer.Get(), spriteDataModel)
 , uiCaller(std::bind_front(&UserInterface::tick, &userInterface),
            Config::UI_TICK_TIMESTEP_S, "UserInterface", true)
