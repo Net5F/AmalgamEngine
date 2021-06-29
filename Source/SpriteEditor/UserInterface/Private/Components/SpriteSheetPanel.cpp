@@ -12,7 +12,7 @@ namespace SpriteEditor
 SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& spriteDataModel)
 : AUI::Component(inScreen, "SpriteSheetPanel", {0, 0, 399, 708})
 , backgroundImage(inScreen, "", logicalExtent)
-, spritesheetContainer(inScreen, "SpriteSheetContainer", {18, 24, 306, 636})
+, spritesheetContainer(inScreen, "SpriteSheetContainer", {18, 24, 306, 650})
 , remSheetButton(inScreen, "", {342, 0, 45, 63})
 , addSheetButton(inScreen, "", {342, 63, 45, 88})
 , remSheetDialog(inScreen, spritesheetContainer, remSheetButton)

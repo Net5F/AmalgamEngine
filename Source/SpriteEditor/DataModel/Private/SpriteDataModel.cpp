@@ -163,6 +163,13 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
                            , const std::string& spriteHeight, const std::string& baseName)
 {
     /* Validate the data. */
+    // Check if we already have the given sheet.
+    for (const SpriteSheet& spriteSheet : spriteSheets) {
+        if (spriteSheet.relPath == relPath) {
+            return "Error: Path conflicts with existing sprite sheet.";
+        }
+    }
+
     // Validate that the file at the given path is a valid texture.
     int sheetWidth{0};
     int sheetHeight{0};
