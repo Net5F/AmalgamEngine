@@ -10,11 +10,11 @@ namespace SpriteEditor
 
 RemSheetDialog::RemSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer& inSpriteSheetContainer
                                , AUI::Button& inRemSheetButton, SpriteDataModel& inSpriteDataModel)
-: AUI::Component(screen, "", {0, 0, 1920, 1080})
-, backgroundImage(screen, "", {0, 0, logicalExtent.w, logicalExtent.h})
-, bodyText(screen, "", {763, 400, 400, 60})
-, removeButton(screen, "", {1045, 520, 123, 56}, "REMOVE")
-, cancelButton(screen, "", {903, 520, 123, 56}, "CANCEL")
+: AUI::Component(inScreen, "", {0, 0, 1920, 1080})
+, backgroundImage(inScreen, "", {0, 0, logicalExtent.w, logicalExtent.h})
+, bodyText(inScreen, "", {763, 400, 400, 60})
+, removeButton(inScreen, "", {1045, 520, 123, 56}, "REMOVE")
+, cancelButton(inScreen, "", {903, 520, 123, 56}, "CANCEL")
 , mainScreen{inScreen}
 , spriteSheetContainer{inSpriteSheetContainer}
 , remSheetButton{inRemSheetButton}
