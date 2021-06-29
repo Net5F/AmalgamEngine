@@ -24,7 +24,8 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer& inSpritesheetContainer, SpriteDataModel& inSpriteDataModel);
+    AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer& inSpriteSheetContainer
+                   , SpriteDataModel& inSpriteDataModel);
 
     virtual ~AddSheetDialog() = default;
 
@@ -76,7 +77,7 @@ private:
 
     /** Used to remove the currently selected thumbnail when removeButton is
         pressed. */
-    AUI::VerticalGridContainer& spritesheetContainer;
+    AUI::VerticalGridContainer& spriteSheetContainer;
 
     /** Used to update the model when a sheet is added. */
     SpriteDataModel& spriteDataModel;

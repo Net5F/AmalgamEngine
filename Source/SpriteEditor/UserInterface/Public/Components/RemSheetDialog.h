@@ -10,6 +10,9 @@ namespace AM
 namespace SpriteEditor
 {
 
+class MainScreen;
+class SpriteDataModel;
+
 /**
  * A confirmation dialog with header text, body text, and confirm/cancel
  * buttons.
@@ -20,7 +23,8 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    RemSheetDialog(AUI::Screen& screen, AUI::VerticalGridContainer& inSpritesheetContainer, AUI::Button& inRemSheetButton);
+    RemSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer& inSpriteSheetContainer
+                   , AUI::Button& inRemSheetButton, SpriteDataModel& inSpriteDataModel);
 
     virtual ~RemSheetDialog() = default;
 
@@ -44,12 +48,20 @@ public:
     void render(const SDL_Point& parentOffset = {}) override;
 
 private:
+    /** Used to update the UI after sprite data changes. Component maintains an
+        AUI::Screen reference that we could cast, but we want to explicitly
+        model a dependency on MainScreen. */
+    MainScreen& mainScreen;
+
     /** Used to remove the currently selected thumbnail when removeButton is
         pressed. */
-    AUI::VerticalGridContainer& spritesheetContainer;
+    AUI::VerticalGridContainer& spriteSheetContainer;
 
     /** Used for disabling remSheetButton when the dialog closes. */
     AUI::Button& remSheetButton;
+
+    /** Used to update the model when a sheet is removed. */
+    SpriteDataModel& spriteDataModel;
 };
 
 } // End namespace SpriteEditor

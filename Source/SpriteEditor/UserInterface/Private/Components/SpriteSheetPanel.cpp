@@ -15,7 +15,7 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& sprite
 , spritesheetContainer(inScreen, "SpriteSheetContainer", {18, 24, 306, 650})
 , remSheetButton(inScreen, "", {342, 0, 45, 63})
 , addSheetButton(inScreen, "", {342, 63, 45, 88})
-, remSheetDialog(inScreen, spritesheetContainer, remSheetButton)
+, remSheetDialog(inScreen, spritesheetContainer, remSheetButton, spriteDataModel)
 , addSheetDialog(inScreen, spritesheetContainer, spriteDataModel)
 {
     /* Background image */

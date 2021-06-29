@@ -214,6 +214,15 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
     return "";
 }
 
+void SpriteDataModel::remSpriteSheet(unsigned int index)
+{
+    if (index >= spriteSheets.size()) {
+        LOG_ERROR("Index out of bounds while removing sprite sheet.");
+    }
+
+    spriteSheets.erase(spriteSheets.begin() + index);
+}
+
 const std::vector<SpriteSheet>& SpriteDataModel::getSpriteSheets()
 {
     return spriteSheets;

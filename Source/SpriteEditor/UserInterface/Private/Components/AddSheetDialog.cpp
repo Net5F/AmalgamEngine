@@ -2,14 +2,13 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
-#include "Log.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
 
-AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer& inSpritesheetContainer, SpriteDataModel& inSpriteDataModel)
+AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer& inSpriteSheetContainer, SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, "", {0, 0, 1920, 1080})
 , backgroundImage(inScreen, "", {0, 0, logicalExtent.w, logicalExtent.h})
 , headerText(inScreen, "", {747, 228, 280, 60})
@@ -24,7 +23,7 @@ AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer&
 , addButton(inScreen, "", {1099, 593, 123, 56}, "ADD")
 , cancelButton(inScreen, "", {958, 593, 123, 56}, "CANCEL")
 , mainScreen{inScreen}
-, spritesheetContainer{inSpritesheetContainer}
+, spriteSheetContainer{inSpriteSheetContainer}
 , spriteDataModel{inSpriteDataModel}
 {
     /* Background image. */

@@ -71,6 +71,13 @@ public:
     std::string addSpriteSheet(const std::string& relPath, const std::string& spriteWidth
                                , const std::string& spriteHeight, const std::string& baseName);
 
+    /**
+     * Removes the sprite sheet at the given index in the spriteSheets vector.
+     *
+     * Error if no sprite sheet is at the given index.
+     */
+    void remSpriteSheet(unsigned int index);
+
     const std::vector<SpriteSheet>& getSpriteSheets();
 
 private:

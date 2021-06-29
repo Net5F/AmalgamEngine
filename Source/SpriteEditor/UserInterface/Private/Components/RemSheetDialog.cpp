@@ -1,19 +1,24 @@
 #include "RemSheetDialog.h"
+#include "MainScreen.h"
 #include "MainThumbnail.h"
+#include "SpriteDataModel.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
 
-RemSheetDialog::RemSheetDialog(AUI::Screen& screen, AUI::VerticalGridContainer& inSpritesheetContainer, AUI::Button& inRemSheetButton)
+RemSheetDialog::RemSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer& inSpriteSheetContainer
+                               , AUI::Button& inRemSheetButton, SpriteDataModel& inSpriteDataModel)
 : AUI::Component(screen, "", {0, 0, 1920, 1080})
 , backgroundImage(screen, "", {0, 0, logicalExtent.w, logicalExtent.h})
 , bodyText(screen, "", {763, 400, 400, 60})
 , removeButton(screen, "", {1045, 520, 123, 56}, "REMOVE")
 , cancelButton(screen, "", {903, 520, 123, 56}, "CANCEL")
-, spritesheetContainer(inSpritesheetContainer)
-, remSheetButton(inRemSheetButton)
+, mainScreen{inScreen}
+, spriteSheetContainer{inSpriteSheetContainer}
+, remSheetButton{inRemSheetButton}
+, spriteDataModel{inSpriteDataModel}
 {
     /* Background image. */
     backgroundImage.addResolution({1920, 1080}, "Textures/Dialogs/RemSheetBackground.png");
@@ -27,18 +32,22 @@ RemSheetDialog::RemSheetDialog(AUI::Screen& screen, AUI::VerticalGridContainer& 
     // Add a callback to remove a selected component on confirmation.
     removeButton.setOnPressed([&](){
         // Try to find a selected sprite sheet in the container.
-        AUI::Component* selectedSheet{nullptr};
-        for (auto& componentPtr : spritesheetContainer) {
-            MainThumbnail& thumbnail = static_cast<MainThumbnail&>(*componentPtr);
+        int selectedIndex{-1};
+        for (unsigned int i = 0; i < spriteSheetContainer.size(); ++i) {
+            MainThumbnail& thumbnail = static_cast<MainThumbnail&>(spriteSheetContainer[i]);
             if (thumbnail.getIsSelected()) {
-                selectedSheet = &thumbnail;
+                selectedIndex = i;
                 break;
             }
         }
 
-        // If we found a selected sprite sheet, erase it.
-        if (selectedSheet != nullptr) {
-            spritesheetContainer.erase(selectedSheet);
+        // If we found a selected sprite sheet.
+        if (selectedIndex != -1) {
+            // Remove the sheet from the model.
+            spriteDataModel.remSpriteSheet(selectedIndex);
+
+            // Refresh the UI.
+            mainScreen.loadSpriteData();
 
             // Disable the button since nothing is selected.
             remSheetButton.disable();
