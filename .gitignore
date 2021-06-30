@@ -3,3 +3,4 @@ Binaries/
 /Build/
 *.tar.gz
 /Output/
+*.log
