@@ -3,6 +3,7 @@
 #include "SpriteDataModel.h"
 #include "AUI/Screen.h"
 #include "SpriteSheetPanel.h"
+#include "SpritePanel.h"
 #include "TitleButton.h"
 
 namespace AM
@@ -35,7 +36,9 @@ private:
     /** The sprite data for this project. Used by this screen's UI. */
     SpriteDataModel& spriteDataModel;
 
-    SpriteSheetPanel spritesheetPanel;
+    SpriteSheetPanel spriteSheetPanel;
+
+    SpritePanel spritePanel;
 };
 
 } // End namespace SpriteEditor

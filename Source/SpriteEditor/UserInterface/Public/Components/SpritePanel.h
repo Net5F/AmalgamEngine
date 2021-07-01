@@ -1,27 +1,22 @@
 #pragma once
 
+#include "AUI/Screen.h"
 #include "AUI/Image.h"
 #include "AUI/VerticalGridContainer.h"
-#include "AUI/Button.h"
-#include "RemSheetDialog.h"
-#include "AddSheetDialog.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
 
-class MainScreen;
-class SpriteDataModel;
-
 /**
  * The left-hand panel on the main screen. Allows the user to manage the
  * project's sprite sheets.
  */
-class SpriteSheetPanel : public AUI::Component
+class SpritePanel : public AUI::Component
 {
 public:
-    SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& spriteDataModel);
+    SpritePanel(AUI::Screen& inScreen);
 
     /**
      * Adds a MainThumbnail component to the spritesheetContainer, using the
@@ -30,12 +25,12 @@ public:
      * @param thumbPath  The path to the sprite sheet file to use as a
      *                   thumbnail, relative to AUI::Core::resourcePath.
      */
-    void addSpriteSheet(const std::string& thumbPath);
+    void addSprite(const std::string& thumbPath);
 
     /**
      * Clears spritesheetContainer, removing all the sprite sheet components.
      */
-    void clearSpriteSheets();
+    void clearSprites();
 
     bool onMouseButtonDown(SDL_MouseButtonEvent& event) override;
 
@@ -44,15 +39,7 @@ public:
 private:
     AUI::Image backgroundImage;
 
-    AUI::VerticalGridContainer spriteSheetContainer;
-
-    AUI::Button remSheetButton;
-
-    AUI::Button addSheetButton;
-
-    RemSheetDialog remSheetDialog;
-
-    AddSheetDialog addSheetDialog;
+    AUI::VerticalGridContainer spriteContainer;
 };
 
 } // End namespace SpriteEditor

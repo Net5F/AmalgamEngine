@@ -1,4 +1,4 @@
-#include "TitleScreen.h"
+#include "MainScreen.h"
 #include "UserInterface.h"
 #include "AUI/Core.h"
 #include "nfd.h"
@@ -12,19 +12,20 @@ namespace SpriteEditor
 MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 : Screen("MainScreen")
 , spriteDataModel{inSpriteDataModel}
-, spritesheetPanel(*this, spriteDataModel)
+, spriteSheetPanel(*this, spriteDataModel)
+, spritePanel(*this)
 {
 }
 
 void MainScreen::loadSpriteData()
 {
     // Clear out the old components.
-    spritesheetPanel.clearSpriteSheets();
+    spriteSheetPanel.clearSpriteSheets();
 
     // For every sprite sheet in the model.
     for (const SpriteSheet& sheet : spriteDataModel.getSpriteSheets()) {
         // Add a Thumbnail component that displays the sheet.
-        spritesheetPanel.addSpriteSheet(sheet.relPath);
+        spriteSheetPanel.addSpriteSheet(sheet.relPath);
     }
 }
 
@@ -36,7 +37,9 @@ void MainScreen::render()
     SDL_RenderClear(renderer);
 
     // Render our children.
-    spritesheetPanel.render();
+    spriteSheetPanel.render();
+
+    spritePanel.render();
 }
 
 } // End namespace SpriteEditor

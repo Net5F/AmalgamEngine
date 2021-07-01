@@ -12,11 +12,11 @@ namespace SpriteEditor
 SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& spriteDataModel)
 : AUI::Component(inScreen, "SpriteSheetPanel", {0, 0, 399, 708})
 , backgroundImage(inScreen, "", logicalExtent)
-, spritesheetContainer(inScreen, "SpriteSheetContainer", {18, 24, 306, 650})
+, spriteSheetContainer(inScreen, "SpriteSheetContainer", {18, 24, 306, 650})
 , remSheetButton(inScreen, "", {342, 0, 45, 63})
 , addSheetButton(inScreen, "", {342, 63, 45, 88})
-, remSheetDialog(inScreen, spritesheetContainer, remSheetButton, spriteDataModel)
-, addSheetDialog(inScreen, spritesheetContainer, spriteDataModel)
+, remSheetDialog(inScreen, spriteSheetContainer, remSheetButton, spriteDataModel)
+, addSheetDialog(inScreen, spriteSheetContainer, spriteDataModel)
 {
     /* Background image */
     backgroundImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/Background_1920.png"
@@ -27,9 +27,9 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& sprite
                                   , {3, 3, 266, 472});
 
     /* Container */
-    spritesheetContainer.setNumColumns(2);
-    spritesheetContainer.setCellWidth(156);
-    spritesheetContainer.setCellHeight(162);
+    spriteSheetContainer.setNumColumns(2);
+    spriteSheetContainer.setCellWidth(156);
+    spriteSheetContainer.setCellHeight(162);
 
     /* Remove sheet button */
     remSheetButton.normalImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/RemoveNormal.png");
@@ -66,21 +66,21 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& sprite
     registerListener(AUI::InternalEvent::MouseButtonDown);
 }
 
-void SpriteSheetPanel::addSpriteSheet(const std::string& relPath)
+void SpriteSheetPanel::addSpriteSheet(const std::string& thumbPath)
 {
     std::unique_ptr<AUI::Component> thumbnailPtr{
         std::make_unique<MainThumbnail>(screen, "")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
 
-    thumbnail.thumbnailImage.addResolution({1280, 720}, relPath);
-    thumbnail.setText(relPath);
+    thumbnail.thumbnailImage.addResolution({1280, 720}, thumbPath);
+    thumbnail.setText(thumbPath);
     thumbnail.setIsActivateable(false);
 
     // Add a callback to deselect all other components when this one
     // is selected.
     thumbnail.setOnSelected([&](AUI::Thumbnail* selectedThumb){
         // Deselect all other thumbnails.
-        for (auto& componentPtr : spritesheetContainer) {
+        for (auto& componentPtr : spriteSheetContainer) {
             MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*componentPtr);
             if (otherThumb.getIsSelected() && (&otherThumb != selectedThumb)) {
                 otherThumb.deselect();
@@ -97,7 +97,7 @@ void SpriteSheetPanel::addSpriteSheet(const std::string& relPath)
 
         // Check if any thumbnails are selected.
         bool thumbIsSelected{false};
-        for (auto& componentPtr : spritesheetContainer) {
+        for (auto& componentPtr : spriteSheetContainer) {
             MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*componentPtr);
             if (otherThumb.getIsSelected()) {
                 thumbIsSelected = true;
@@ -110,12 +110,12 @@ void SpriteSheetPanel::addSpriteSheet(const std::string& relPath)
         }
     });
 
-    spritesheetContainer.push_back(std::move(thumbnailPtr));
+    spriteSheetContainer.push_back(std::move(thumbnailPtr));
 }
 
 void SpriteSheetPanel::clearSpriteSheets()
 {
-    spritesheetContainer.clear();
+    spriteSheetContainer.clear();
 }
 
 bool SpriteSheetPanel::onMouseButtonDown(SDL_MouseButtonEvent& event)
@@ -123,7 +123,7 @@ bool SpriteSheetPanel::onMouseButtonDown(SDL_MouseButtonEvent& event)
     // If the click event was outside our extent.
     if (!(containsPoint({event.x, event.y}))) {
         // Deselect any selected component.
-        for (auto& componentPtr : spritesheetContainer) {
+        for (auto& componentPtr : spriteSheetContainer) {
             MainThumbnail& thumbnail = static_cast<MainThumbnail&>(*componentPtr);
             if (thumbnail.getIsSelected()) {
                 thumbnail.deselect();
@@ -153,7 +153,7 @@ void SpriteSheetPanel::render(const SDL_Point& parentOffset)
     // Render our children.
     backgroundImage.render(parentOffset);
 
-    spritesheetContainer.render(parentOffset);
+    spriteSheetContainer.render(parentOffset);
 
     remSheetButton.render(parentOffset);
 
