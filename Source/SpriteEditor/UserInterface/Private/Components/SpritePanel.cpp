@@ -2,15 +2,16 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
-#include "Log.h"
+#include "Ignore.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
 
-SpritePanel::SpritePanel(AUI::Screen& inScreen)
+SpritePanel::SpritePanel(MainScreen& inScreen)
 : AUI::Component(inScreen, "SpritePanel", {-8, 732, 1936, 352})
+, mainScreen{inScreen}
 , backgroundImage(inScreen, "", logicalExtent)
 , spriteContainer(inScreen, "SpriteContainer", {183, 756, 1737, 324})
 {
@@ -34,8 +35,7 @@ void SpritePanel::addSprite(const SpriteSheet& sheet, const SpriteStaticData& sp
     thumbnail.setText(sprite.displayName);
     thumbnail.setIsSelectable(false);
 
-    // Add a callback to deactivate all other components when this one
-    // is activated.
+    // Add a callback to deactivate all other thumbnails when one is activated.
     thumbnail.setOnActivated([&](AUI::Thumbnail* selectedThumb){
         // Deactivate all other thumbnails.
         for (auto& componentPtr : spriteContainer) {
@@ -44,6 +44,18 @@ void SpritePanel::addSprite(const SpriteSheet& sheet, const SpriteStaticData& sp
                 otherThumb.deactivate();
             }
         }
+
+        // Set ourselves as the active sprite.
+        mainScreen.setActiveSprite(&sprite);
+    });
+
+    // Add a callback to clear the active sprite when a thumbnail is
+    // deactivated.
+    thumbnail.setOnDeactivated([&](AUI::Thumbnail* selectedThumb){
+        ignore(selectedThumb);
+
+        // Clear the active sprite.
+        mainScreen.setActiveSprite(nullptr);
     });
 
     spriteContainer.push_back(std::move(thumbnailPtr));

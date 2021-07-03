@@ -11,6 +11,8 @@ namespace AM
 namespace SpriteEditor
 {
 
+class MainScreen;
+
 /**
  * The left-hand panel on the main screen. Allows the user to manage the
  * project's sprite sheets.
@@ -18,7 +20,7 @@ namespace SpriteEditor
 class SpritePanel : public AUI::Component
 {
 public:
-    SpritePanel(AUI::Screen& inScreen);
+    SpritePanel(MainScreen& inScreen);
 
     /**
      * Adds a MainThumbnail component to the spriteContainer, using the
@@ -34,6 +36,10 @@ public:
     void render(const SDL_Point& parentOffset = {}) override;
 
 private:
+    /** Used to save/clear the active sprite when a sprite thumbnail is
+        activated or deactivated. */
+    MainScreen& mainScreen;
+
     AUI::Image backgroundImage;
 
     AUI::VerticalGridContainer spriteContainer;

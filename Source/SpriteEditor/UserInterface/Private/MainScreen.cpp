@@ -12,6 +12,7 @@ namespace SpriteEditor
 MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 : Screen("MainScreen")
 , spriteDataModel{inSpriteDataModel}
+, activeSprite{nullptr}
 , spriteSheetPanel(*this, spriteDataModel)
 , spritePanel(*this)
 {
@@ -22,6 +23,7 @@ void MainScreen::loadSpriteData()
     // Clear out the old components.
     spriteSheetPanel.clearSpriteSheets();
     spritePanel.clearSprites();
+    activeSprite = nullptr;
 
     // For each sprite sheet in the model.
     for (const SpriteSheet& sheet : spriteDataModel.getSpriteSheets()) {
@@ -34,6 +36,16 @@ void MainScreen::loadSpriteData()
             spritePanel.addSprite(sheet, sprite);
         }
     }
+}
+
+void MainScreen::setActiveSprite(const SpriteStaticData* inActiveSprite)
+{
+    activeSprite = inActiveSprite;
+}
+
+const SpriteStaticData* MainScreen::getActiveSprite()
+{
+    return activeSprite;
 }
 
 void MainScreen::render()

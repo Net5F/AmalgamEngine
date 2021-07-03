@@ -280,7 +280,7 @@ const std::vector<SpriteSheet>& SpriteDataModel::getSpriteSheets()
 bool SpriteDataModel::idIsValid(int spriteId)
 {
     // Check if the ID is in range of a Uint16.
-    if ((spriteId > 0) && (spriteId <= SDL_MAX_UINT16)) {
+    if ((spriteId >= 0) && (static_cast<unsigned int>(spriteId) <= SDL_MAX_UINT16)) {
         return true;
     }
     else {

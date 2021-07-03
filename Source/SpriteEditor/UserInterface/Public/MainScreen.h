@@ -26,6 +26,9 @@ public:
      */
     void loadSpriteData();
 
+    void setActiveSprite(const SpriteStaticData* inActiveSprite);
+    const SpriteStaticData* getActiveSprite();
+
     void render() override;
 
 private:
@@ -36,8 +39,15 @@ private:
     /** The sprite data for this project. Used by this screen's UI. */
     SpriteDataModel& spriteDataModel;
 
+    /** If non-nullptr, this is the currently active sprite's data. The active
+        sprite's data is shown in the properties panel, and holds the extent
+        of the AABB control gizmo. */
+    const SpriteStaticData* activeSprite;
+
+    /** The left-side panel for managing sprite texture sheets. */
     SpriteSheetPanel spriteSheetPanel;
 
+    /** The bottom panel for selecting sprites. */
     SpritePanel spritePanel;
 };
 
