@@ -53,7 +53,7 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& sprite
     addSheetButton.text.setFont("Fonts/B612-Regular.ttf", 33);
     addSheetButton.text.setText("");
 
-    addSheetButton.setOnPressed([&](){
+    addSheetButton.setOnPressed([this](){
         // Bring up the add dialog.
         addSheetDialog.setIsVisible(true);
     });

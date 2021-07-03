@@ -2,6 +2,7 @@
 
 #include "SpriteDataModel.h"
 #include "AUI/Screen.h"
+#include "AUI/Button.h"
 #include "SpriteSheetPanel.h"
 #include "SpritePanel.h"
 #include "TitleButton.h"
@@ -49,6 +50,9 @@ private:
 
     /** The bottom panel for selecting sprites. */
     SpritePanel spritePanel;
+
+    /** The save button at the top of the screen, next to the properties. */
+    AUI::Button saveButton;
 };
 
 } // End namespace SpriteEditor

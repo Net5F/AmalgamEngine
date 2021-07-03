@@ -95,7 +95,7 @@ private:
     std::vector<SpriteSheet> spriteSheets;
 
     /** The file that we currently have loaded and are working on. */
-    std::fstream currentWorkingFile;
+    std::string currentWorkingFilePath;
 
     /** The next ID that we'll assign to a sprite. Must stay within the range
         of a Uint16, since that's what it will be in the map format. */

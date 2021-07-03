@@ -14,6 +14,7 @@ namespace SpriteEditor
 
 SpriteDataModel::SpriteDataModel(SDL2pp::Renderer& inSdlRenderer)
 : sdlRenderer{inSdlRenderer}
+, currentWorkingFilePath{""}
 , nextSpriteId{0}
 {
 }
@@ -21,24 +22,17 @@ SpriteDataModel::SpriteDataModel(SDL2pp::Renderer& inSdlRenderer)
 bool SpriteDataModel::create(const std::string& fullPath)
 {
     // If a SpriteData.json already exists at the given path, return false.
-    std::string spriteDataPath{fullPath};
-    spriteDataPath += "SpriteData.json";
-    std::ifstream existingFile{spriteDataPath};
+    currentWorkingFilePath = fullPath;
+    currentWorkingFilePath += "/SpriteData.json";
+    std::ifstream existingFile{currentWorkingFilePath};
     if (existingFile) {
+        currentWorkingFilePath = "";
         return false;
     }
 
     // Create the file.
-    currentWorkingFile.open(spriteDataPath, std::ios::out);
+    std::ofstream currentWorkingFile(currentWorkingFilePath, std::ios::app);
     currentWorkingFile.close();
-
-    // Open the file for read and write.
-    currentWorkingFile.open(spriteDataPath, (std::ios::in | std::ios::out));
-    if (!(currentWorkingFile.is_open())) {
-        // File creation failed for some reason. We're already checking for
-        // file existence so this shouldn't happen.
-        LOG_ERROR("Failed to open file.");
-    }
 
     // Save our empty model structure.
     save();
@@ -49,9 +43,11 @@ bool SpriteDataModel::create(const std::string& fullPath)
 std::string SpriteDataModel::load(const std::string& fullPath)
 {
     // Open the file.
-    currentWorkingFile.open(fullPath, (std::ios::in | std::ios::out));
-    if (!(currentWorkingFile.is_open())) {
-        currentWorkingFile.close();
+    std::ifstream currentWorkingFile(fullPath);
+    if (currentWorkingFile.is_open()) {
+        currentWorkingFilePath = fullPath;
+    }
+    else {
         return "File failed to open.";
     }
 
@@ -123,15 +119,11 @@ std::string SpriteDataModel::load(const std::string& fullPath)
 
 void SpriteDataModel::save()
 {
-    if (!(currentWorkingFile.is_open())) {
-        // Somehow got here with no file open.
-        LOG_ERROR("Tried to save while file wasn't open.");
-    }
-
     // Create a new json structure to fill.
     nlohmann::json json;
     json["spriteSheets"] = nlohmann::json::array();
 
+    // Fill the json with our current model data.
     // For each sprite sheet.
     for (unsigned int i = 0; i < spriteSheets.size(); ++i) {
         // Add this sheet's relative path.
@@ -173,8 +165,14 @@ void SpriteDataModel::save()
         }
     }
 
+    // Write the json to our working file.
+    std::ofstream currentWorkingFile(currentWorkingFilePath, std::ios::trunc);
+    if (!(currentWorkingFile.is_open())) {
+        LOG_ERROR("File failed to open: %s.", currentWorkingFilePath.c_str());
+    }
+
     std::string jsonDump{json.dump(4)};
-    currentWorkingFile.write(jsonDump.c_str(), jsonDump.length());
+    currentWorkingFile << jsonDump;
 }
 
 std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const std::string& spriteWidth
