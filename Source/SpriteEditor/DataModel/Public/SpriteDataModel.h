@@ -81,6 +81,13 @@ public:
     const std::vector<SpriteSheet>& getSpriteSheets();
 
 private:
+    /**
+     * Checks that spriteId is in range of a Uint16.
+     *
+     * Errors if spriteId is out of the range of a Uint16.
+     */
+    bool idIsValid(int spriteId);
+
     /** Used for validating user-selected sprite sheet textures. */
     SDL2pp::Renderer& sdlRenderer;
 
@@ -89,6 +96,10 @@ private:
 
     /** The file that we currently have loaded and are working on. */
     std::fstream currentWorkingFile;
+
+    /** The next ID that we'll assign to a sprite. Must stay within the range
+        of a Uint16, since that's what it will be in the map format. */
+    Uint16 nextSpriteId;
 };
 
 } // namespace SpriteEditor

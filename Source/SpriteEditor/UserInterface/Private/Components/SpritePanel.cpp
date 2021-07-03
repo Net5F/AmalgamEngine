@@ -2,7 +2,7 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
-#include "Ignore.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -21,27 +21,21 @@ SpritePanel::SpritePanel(AUI::Screen& inScreen)
     spriteContainer.setNumColumns(10);
     spriteContainer.setCellWidth(156);
     spriteContainer.setCellHeight(162);
-
-    for (unsigned int i = 0; i < 22; ++i) {
-        addSprite("Textures/Temp/iso_test_sprites.png");
-    }
-
-    // Register for the events that we want to listen for.
-    registerListener(AUI::InternalEvent::MouseButtonDown);
 }
 
-void SpritePanel::addSprite(const std::string& thumbPath)
+void SpritePanel::addSprite(const SpriteSheet& sheet, const SpriteStaticData& sprite)
 {
     std::unique_ptr<AUI::Component> thumbnailPtr{
         std::make_unique<MainThumbnail>(screen, "")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
 
-    thumbnail.thumbnailImage.addResolution({1280, 720}, thumbPath);
-    thumbnail.setText(thumbPath);
+    thumbnail.thumbnailImage.addResolution({1280, 720}, sheet.relPath
+        , sprite.textureExtent);
+    thumbnail.setText(sprite.displayName);
     thumbnail.setIsSelectable(false);
 
     // Add a callback to deactivate all other components when this one
-    // is selected.
+    // is activated.
     thumbnail.setOnActivated([&](AUI::Thumbnail* selectedThumb){
         // Deactivate all other thumbnails.
         for (auto& componentPtr : spriteContainer) {
@@ -58,23 +52,6 @@ void SpritePanel::addSprite(const std::string& thumbPath)
 void SpritePanel::clearSprites()
 {
     spriteContainer.clear();
-}
-
-bool SpritePanel::onMouseButtonDown(SDL_MouseButtonEvent& event)
-{
-    // If the click event was outside our extent.
-    if (!(containsPoint({event.x, event.y}))) {
-        // Deselect any selected component.
-        for (auto& componentPtr : spriteContainer) {
-            MainThumbnail& thumbnail = static_cast<MainThumbnail&>(*componentPtr);
-            if (thumbnail.getIsSelected()) {
-                thumbnail.deselect();
-                break;
-            }
-        }
-    }
-
-    return false;
 }
 
 void SpritePanel::render(const SDL_Point& parentOffset)

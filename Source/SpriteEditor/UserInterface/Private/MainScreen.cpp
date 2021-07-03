@@ -21,11 +21,18 @@ void MainScreen::loadSpriteData()
 {
     // Clear out the old components.
     spriteSheetPanel.clearSpriteSheets();
+    spritePanel.clearSprites();
 
-    // For every sprite sheet in the model.
+    // For each sprite sheet in the model.
     for (const SpriteSheet& sheet : spriteDataModel.getSpriteSheets()) {
         // Add a Thumbnail component that displays the sheet.
-        spriteSheetPanel.addSpriteSheet(sheet.relPath);
+        spriteSheetPanel.addSpriteSheet(sheet);
+
+        // For each sprite in the sheet.
+        for (const SpriteStaticData& sprite : sheet.sprites) {
+            // Add a Thumbnail component that displays the sprite.
+            spritePanel.addSprite(sheet, sprite);
+        }
     }
 }
 

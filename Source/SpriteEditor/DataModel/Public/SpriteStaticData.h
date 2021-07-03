@@ -15,9 +15,11 @@ namespace SpriteEditor
 struct SpriteStaticData
 {
 public:
-    /** This sprite's unique key. Will be saved in the json as a string, but
-        is kept as a hashed_string here to make comparisons faster. */
-    entt::hashed_string key;
+    /** Display name, shown in the sprite panel. */
+    std::string displayName;
+
+    /** Unique ID, this is what the map uses to reference sprites. */
+    Uint16 id;
 
     /** UV position and size in texture. */
     SDL2pp::Rect textureExtent{0, 0, 0, 0};

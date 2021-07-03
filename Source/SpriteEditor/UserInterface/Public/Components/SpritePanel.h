@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SpriteSheet.h"
+#include "SpriteStaticData.h"
 #include "AUI/Screen.h"
 #include "AUI/Image.h"
 #include "AUI/VerticalGridContainer.h"
@@ -19,20 +21,15 @@ public:
     SpritePanel(AUI::Screen& inScreen);
 
     /**
-     * Adds a MainThumbnail component to the spritesheetContainer, using the
+     * Adds a MainThumbnail component to the spriteContainer, using the
      * given data.
-     *
-     * @param thumbPath  The path to the sprite sheet file to use as a
-     *                   thumbnail, relative to AUI::Core::resourcePath.
      */
-    void addSprite(const std::string& thumbPath);
+    void addSprite(const SpriteSheet& sheet, const SpriteStaticData& sprite);
 
     /**
      * Clears spritesheetContainer, removing all the sprite sheet components.
      */
     void clearSprites();
-
-    bool onMouseButtonDown(SDL_MouseButtonEvent& event) override;
 
     void render(const SDL_Point& parentOffset = {}) override;
 

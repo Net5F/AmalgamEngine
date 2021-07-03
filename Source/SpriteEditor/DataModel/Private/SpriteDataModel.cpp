@@ -14,6 +14,7 @@ namespace SpriteEditor
 
 SpriteDataModel::SpriteDataModel(SDL2pp::Renderer& inSdlRenderer)
 : sdlRenderer{inSdlRenderer}
+, nextSpriteId{0}
 {
 }
 
@@ -65,16 +66,34 @@ std::string SpriteDataModel::load(const std::string& fullPath)
     try {
         // For every sprite sheet in the json.
         for (auto& sheetJson : json["spriteSheets"].items()) {
+            spriteSheets.push_back(SpriteSheet());
+            SpriteSheet& spriteSheet{spriteSheets.back()};
+
             // Add this sheet's relative path.
-            SpriteSheet spriteSheet{};
             spriteSheet.relPath = sheetJson.value()["relPath"].get<std::string>();
 
             // For every sprite in the sheet.
             for (auto& spriteJson : sheetJson.value()["sprites"].items()) {
+                spriteSheet.sprites.push_back(SpriteStaticData());
+                SpriteStaticData& sprite{spriteSheet.sprites.back()};
+
                 // Add this sprite's key.
-                SpriteStaticData sprite{};
-                std::string key{spriteJson.value()["key"].get<std::string>()};
-                sprite.key = entt::hashed_string{key.c_str()};
+                sprite.displayName = spriteJson.value()["displayName"].get<std::string>();
+
+                // If the parsed ID is valid.
+                int parsedId = spriteJson.value()["id"];
+                if (idIsValid(parsedId)) {
+                    // Add this sprite's ID.
+                    sprite.id = parsedId;
+
+                    // If it's greater than our saved ID, save it.
+                    if (sprite.id > nextSpriteId) {
+                        nextSpriteId = sprite.id;
+                    }
+                }
+                else {
+                    return "Sprite ID is not within range of Uint16.";
+                }
 
                 // Add this sprite's sprite sheet texture extent.
                 sprite.textureExtent.x = spriteJson.value()["textureExtent"]["x"];
@@ -89,11 +108,7 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 sprite.modelBounds.maxY = spriteJson.value()["modelBounds"]["maxY"];
                 sprite.modelBounds.minZ = spriteJson.value()["modelBounds"]["minZ"];
                 sprite.modelBounds.maxZ = spriteJson.value()["modelBounds"]["maxZ"];
-
-                spriteSheet.sprites.push_back(sprite);
             }
-
-            spriteSheets.push_back(spriteSheet);
         }
     }
     catch (nlohmann::json::type_error& e) {
@@ -125,9 +140,12 @@ void SpriteDataModel::save()
 
         // For each sprite in this sheet.
         for (unsigned int j = 0; j < spriteSheet.sprites.size(); ++j) {
-            // Add this sprite's key.
+            // Add this sprite's display name.
             SpriteStaticData& sprite{spriteSheet.sprites[j]};
-            json["spriteSheets"][i]["sprites"][j]["key"] = sprite.key.data();
+            json["spriteSheets"][i]["sprites"][j]["displayName"] = sprite.displayName;
+
+            // Add this sprite's ID.
+            json["spriteSheets"][i]["sprites"][j]["id"] = sprite.id;
 
             // Add this sprite's sprite sheet texture extent.
             json["spriteSheets"][i]["sprites"][j]["textureExtent"]["x"]
@@ -208,8 +226,39 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
     }
 
     /* Add the sprite sheet and sprites. */
-    // TODO: Add the sprites to the sheet
     spriteSheets.emplace_back(relPath);
+
+    // For each sprite in this texture.
+    SpriteSheet& sheet{*(spriteSheets.end() - 1)};
+    int spriteCount{0};
+    for (int y = 0; y <= (sheetHeight - spriteHeightI); y += spriteHeightI) {
+        for (int x = 0; x <= (sheetWidth - spriteWidthI); x += spriteWidthI) {
+            // Build the sprite's display name (baseName_count).
+            std::string displayName{baseName};
+            displayName += std::to_string(spriteCount);
+
+            // Find the sprite's extent within the sheet texture.
+            SDL2pp::Rect textureExtent{x, y, spriteWidthI, spriteHeightI};
+
+            // Default to a non-0 bounding box so it's easier to click.
+            static BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
+
+            // Add the sprite to the sheet.
+            sheet.sprites.emplace_back(displayName, nextSpriteId
+                , textureExtent, defaultBox);
+
+            // Increment the count (used for the display name).
+            spriteCount++;
+
+            // Increment the sprite ID and make sure it's still in range.
+            if (idIsValid(static_cast<int>(nextSpriteId) + 1)) {
+                nextSpriteId++;
+            }
+            else {
+                LOG_ERROR("Sprite ID went out of range of Uint16.");
+            }
+        }
+    }
 
     return "";
 }
@@ -226,6 +275,17 @@ void SpriteDataModel::remSpriteSheet(unsigned int index)
 const std::vector<SpriteSheet>& SpriteDataModel::getSpriteSheets()
 {
     return spriteSheets;
+}
+
+bool SpriteDataModel::idIsValid(int spriteId)
+{
+    // Check if the ID is in range of a Uint16.
+    if ((spriteId > 0) && (spriteId <= SDL_MAX_UINT16)) {
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 } // End namespace SpriteEditor

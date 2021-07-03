@@ -66,14 +66,14 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& sprite
     registerListener(AUI::InternalEvent::MouseButtonDown);
 }
 
-void SpriteSheetPanel::addSpriteSheet(const std::string& thumbPath)
+void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
 {
     std::unique_ptr<AUI::Component> thumbnailPtr{
         std::make_unique<MainThumbnail>(screen, "")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
 
-    thumbnail.thumbnailImage.addResolution({1280, 720}, thumbPath);
-    thumbnail.setText(thumbPath);
+    thumbnail.thumbnailImage.addResolution({1280, 720}, sheet.relPath);
+    thumbnail.setText(sheet.relPath);
     thumbnail.setIsActivateable(false);
 
     // Add a callback to deselect all other components when this one

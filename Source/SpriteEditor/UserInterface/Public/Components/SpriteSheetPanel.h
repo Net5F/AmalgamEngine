@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SpriteSheet.h"
 #include "AUI/Image.h"
 #include "AUI/VerticalGridContainer.h"
 #include "AUI/Button.h"
@@ -26,11 +27,8 @@ public:
     /**
      * Adds a MainThumbnail component to the spritesheetContainer, using the
      * given data.
-     *
-     * @param thumbPath  The path to the sprite sheet file to use as a
-     *                   thumbnail, relative to AUI::Core::resourcePath.
      */
-    void addSpriteSheet(const std::string& thumbPath);
+    void addSpriteSheet(const SpriteSheet& sheet);
 
     /**
      * Clears spritesheetContainer, removing all the sprite sheet components.
