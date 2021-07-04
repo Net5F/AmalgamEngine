@@ -1,5 +1,6 @@
 #include "TitleScreen.h"
 #include "UserInterface.h"
+#include "AUI/Core.h"
 #include "nfd.hpp"
 #include "Log.h"
 #include <cstring>
@@ -13,15 +14,18 @@ TitleScreen::TitleScreen(UserInterface& inUserInterface, SpriteDataModel& inSpri
 : Screen("TitleScreen")
 , userInterface{inUserInterface}
 , spriteDataModel{inSpriteDataModel}
-, background(*this, "Background", {0, 0, 1920, 1080})
+, titleText(*this, "TitleText", {0, 193, 1920, 75})
 , newButton(*this, "NewButton", {724, 432, 472, 96}, "New")
 , loadButton(*this, "LoadButton", {724, 589, 472, 96}, "Load")
 , errorText(*this, "ErrorText", {0, 721, 1920, 48})
 {
-    // Set up our components.
-    background.addResolution({1280, 720}, "Textures/TitleBackground_720.png");
-    background.addResolution({1920, 1080}, "Textures/TitleBackground_1080.png");
+    /* Title text. */
+    titleText.setFont("Fonts/B612-Regular.ttf", 54);
+    titleText.setColor({255, 255, 255, 255});
+    titleText.setText("Amalgam Engine Sprite Editor");
+    titleText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
 
+    /* Error text. */
     errorText.setFont("Fonts/B612-Regular.ttf", 36);
     errorText.setColor({255, 255, 255, 255});
     errorText.setText("Uninitialized.");
@@ -35,7 +39,12 @@ TitleScreen::TitleScreen(UserInterface& inUserInterface, SpriteDataModel& inSpri
 
 void TitleScreen::render()
 {
-    background.render();
+    // Fill the background with the background color.
+    SDL_Renderer* renderer = AUI::Core::GetRenderer();
+    SDL_SetRenderDrawColor(renderer, 37, 37, 52, 255);
+    SDL_RenderClear(renderer);
+
+    titleText.render();
 
     newButton.render();
 

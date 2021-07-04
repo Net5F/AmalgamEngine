@@ -146,7 +146,7 @@ const SpriteStaticData* MainScreen::getActiveSprite()
 
 void MainScreen::render()
 {
-    // Fill the background with the correct color.
+    // Fill the background with the background color.
     SDL_Renderer* renderer = AUI::Core::GetRenderer();
     SDL_SetRenderDrawColor(renderer, 17, 17, 19, 255);
     SDL_RenderClear(renderer);

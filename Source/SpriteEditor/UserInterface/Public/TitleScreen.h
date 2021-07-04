@@ -2,7 +2,6 @@
 
 #include "SpriteDataModel.h"
 #include "AUI/Screen.h"
-#include "AUI/Image.h"
 #include "AUI/Text.h"
 #include "TitleButton.h"
 
@@ -35,7 +34,7 @@ private:
         file. */
     SpriteDataModel& spriteDataModel;
 
-    AUI::Image background;
+    AUI::Text titleText;
 
     TitleButton newButton;
 
