@@ -15,7 +15,7 @@ class MainScreen;
 class SpriteDataModel;
 
 /**
- * The left-hand panel on the main screen. Allows the user to manage the
+ * The left-side panel on the main screen. Allows the user to manage the
  * project's sprite sheets.
  */
 class SpriteSheetPanel : public AUI::Component

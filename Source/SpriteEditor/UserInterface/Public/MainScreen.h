@@ -6,6 +6,7 @@
 #include "AUI/ConfirmationDialog.h"
 #include "SpriteSheetPanel.h"
 #include "SpritePanel.h"
+#include "PropertiesPanel.h"
 #include "TitleButton.h"
 
 namespace AM
@@ -65,6 +66,9 @@ private:
 
     /** The save button at the top of the screen, next to the properties. */
     AUI::Button saveButton;
+
+    /** The right-side panel for viewing and editing the active sprite data. */
+    PropertiesPanel propertiesPanel;
 
     /** Background semi-transparent shadow image to go behind the confirmation
         dialog. */

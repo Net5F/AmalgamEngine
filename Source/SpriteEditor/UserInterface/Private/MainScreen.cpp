@@ -16,6 +16,7 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 , spriteSheetPanel(*this, spriteDataModel)
 , spritePanel(*this)
 , saveButton(*this, "", {1537, 0, 58, 58})
+, propertiesPanel(*this)
 , dialogShadowImage(*this, "", {0, 0, 1920, 1080})
 , confirmationDialog(*this, "", {721, 358, 474, 248})
 {
@@ -158,6 +159,9 @@ void MainScreen::render()
 
     saveButton.render();
 
+    propertiesPanel.render();
+
+    // Render the confirmation dialog on top of everything else.
     dialogShadowImage.render();
     confirmationDialog.render();
 }

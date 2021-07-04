@@ -6,6 +6,7 @@ target_sources(SpriteEditor
         Private/Components/MainThumbnail.cpp
         Private/Components/SpriteSheetPanel.cpp
         Private/Components/SpritePanel.cpp
+        Private/Components/PropertiesPanel.cpp
         Private/Components/TitleButton.cpp
         Private/MainScreen.cpp
         Private/TitleScreen.cpp
@@ -17,6 +18,7 @@ target_sources(SpriteEditor
         Public/Components/MainThumbnail.h
         Public/Components/SpriteSheetPanel.h
         Public/Components/SpritePanel.h
+        Public/Components/PropertiesPanel.h
         Public/Components/TitleButton.h
         Public/MainScreen.h
         Public/TitleScreen.h
