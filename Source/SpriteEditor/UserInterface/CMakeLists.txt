@@ -4,7 +4,6 @@ target_sources(SpriteEditor
         Private/Components/ConfirmationButton.cpp
         Private/Components/MainTextInput.cpp
         Private/Components/MainThumbnail.cpp
-        Private/Components/RemSheetDialog.cpp
         Private/Components/SpriteSheetPanel.cpp
         Private/Components/SpritePanel.cpp
         Private/Components/TitleButton.cpp
@@ -16,7 +15,6 @@ target_sources(SpriteEditor
         Public/Components/ConfirmationButton.h
         Public/Components/MainTextInput.h
         Public/Components/MainThumbnail.h
-        Public/Components/RemSheetDialog.h
         Public/Components/SpriteSheetPanel.h
         Public/Components/SpritePanel.h
         Public/Components/TitleButton.h

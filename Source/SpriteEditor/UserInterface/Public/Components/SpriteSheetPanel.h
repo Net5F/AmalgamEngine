@@ -4,7 +4,6 @@
 #include "AUI/Image.h"
 #include "AUI/VerticalGridContainer.h"
 #include "AUI/Button.h"
-#include "RemSheetDialog.h"
 #include "AddSheetDialog.h"
 
 namespace AM
@@ -22,7 +21,7 @@ class SpriteDataModel;
 class SpriteSheetPanel : public AUI::Component
 {
 public:
-    SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& spriteDataModel);
+    SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
 
     /**
      * Adds a MainThumbnail component to the spritesheetContainer, using the
@@ -40,6 +39,12 @@ public:
     void render(const SDL_Point& parentOffset = {}) override;
 
 private:
+    /** Used to open the confirmation dialog when removing a sheet. */
+    MainScreen& mainScreen;
+
+    /** Used to update the model when a sheet is removed. */
+    SpriteDataModel& spriteDataModel;
+
     AUI::Image backgroundImage;
 
     AUI::VerticalGridContainer spriteSheetContainer;
@@ -47,8 +52,6 @@ private:
     AUI::Button remSheetButton;
 
     AUI::Button addSheetButton;
-
-    RemSheetDialog remSheetDialog;
 
     AddSheetDialog addSheetDialog;
 };

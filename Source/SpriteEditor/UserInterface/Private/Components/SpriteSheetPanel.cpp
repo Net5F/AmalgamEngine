@@ -9,13 +9,14 @@ namespace AM
 namespace SpriteEditor
 {
 
-SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& spriteDataModel)
+SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, "SpriteSheetPanel", {0, 0, 399, 708})
+, mainScreen{inScreen}
+, spriteDataModel{inSpriteDataModel}
 , backgroundImage(inScreen, "", logicalExtent)
 , spriteSheetContainer(inScreen, "SpriteSheetContainer", {18, 24, 306, 650})
 , remSheetButton(inScreen, "", {342, 0, 45, 63})
 , addSheetButton(inScreen, "", {342, 63, 45, 88})
-, remSheetDialog(inScreen, spriteSheetContainer, remSheetButton, spriteDataModel)
 , addSheetDialog(inScreen, spriteSheetContainer, spriteDataModel)
 {
     /* Background image */
@@ -41,9 +42,36 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& sprite
     remSheetButton.disable();
 
     // Add a callback to remove a selected component on button press.
-    remSheetButton.setOnPressed([this](){
+    remSheetButton.setOnPressed([&](){
+        // Set up our data for the confirmation dialog.
+        std::string bodyText{"Remove the selected sprite sheet and all associated sprites?"};
+
+        std::function<void(void)> onConfirmation = [&]() {
+            // Try to find a selected sprite sheet in the container.
+            int selectedIndex{-1};
+            for (unsigned int i = 0; i < spriteSheetContainer.size(); ++i) {
+                MainThumbnail& thumbnail = static_cast<MainThumbnail&>(spriteSheetContainer[i]);
+                if (thumbnail.getIsSelected()) {
+                    selectedIndex = i;
+                    break;
+                }
+            }
+
+            // If we found a selected sprite sheet.
+            if (selectedIndex != -1) {
+                // Remove the sheet from the model.
+                spriteDataModel.remSpriteSheet(selectedIndex);
+
+                // Refresh the UI.
+                mainScreen.loadSpriteData();
+
+                // Disable the button since nothing is selected.
+                remSheetButton.disable();
+            }
+        };
+
         // Bring up the confirmation dialog.
-        remSheetDialog.setIsVisible(true);
+        mainScreen.openConfirmationDialog(bodyText, "REMOVE", std::move(onConfirmation));
     });
 
     /* Add sheet button */
@@ -58,8 +86,7 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& sprite
         addSheetDialog.setIsVisible(true);
     });
 
-    /* Dialogs. */
-    remSheetDialog.setIsVisible(false);
+    /* Dialog. */
     addSheetDialog.setIsVisible(false);
 
     // Register for the events that we want to listen for.
@@ -120,17 +147,17 @@ void SpriteSheetPanel::clearSpriteSheets()
 
 bool SpriteSheetPanel::onMouseButtonDown(SDL_MouseButtonEvent& event)
 {
-    // If the click event was outside our extent.
-    if (!(containsPoint({event.x, event.y}))) {
-        // Deselect any selected component.
-        for (auto& componentPtr : spriteSheetContainer) {
-            MainThumbnail& thumbnail = static_cast<MainThumbnail&>(*componentPtr);
-            if (thumbnail.getIsSelected()) {
-                thumbnail.deselect();
-                break;
-            }
-        }
-    }
+//    // If the click event was outside our extent.
+//    if (!(containsPoint({event.x, event.y}))) {
+//        // Deselect any selected component.
+//        for (auto& componentPtr : spriteSheetContainer) {
+//            MainThumbnail& thumbnail = static_cast<MainThumbnail&>(*componentPtr);
+//            if (thumbnail.getIsSelected()) {
+//                thumbnail.deselect();
+//                break;
+//            }
+//        }
+//    }
 
     return false;
 }
@@ -158,8 +185,6 @@ void SpriteSheetPanel::render(const SDL_Point& parentOffset)
     remSheetButton.render(parentOffset);
 
     addSheetButton.render(parentOffset);
-
-    remSheetDialog.render(parentOffset);
 
     addSheetDialog.render(parentOffset);
 }

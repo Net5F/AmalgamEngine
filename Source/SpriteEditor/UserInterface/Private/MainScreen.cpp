@@ -16,6 +16,8 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 , spriteSheetPanel(*this, spriteDataModel)
 , spritePanel(*this)
 , saveButton(*this, "", {1537, 0, 58, 58})
+, dialogShadowImage(*this, "", {0, 0, 1920, 1080})
+, confirmationDialog(*this, "", {721, 358, 474, 248})
 {
     /* Save button. */
     saveButton.normalImage.addResolution({1920, 1080}, "Textures/SaveButton/Normal.png");
@@ -26,12 +28,65 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 
     // Add a callback to save the current sprite data when pressed.
     saveButton.setOnPressed([this]() {
-        // Save the data.
-        spriteDataModel.save();
+        // Create our callback.
+        std::function<void(void)> onConfirmation = [&]() {
+            // Save the data.
+            spriteDataModel.save();
+        };
 
-        // TODO: Open the confirmation dialog.
-        LOG_INFO("Saved");
+        // Open the confirmation dialog.
+        openConfirmationDialog("Save over existing SpriteData.json?", "SAVE"
+                               , std::move(onConfirmation));
     });
+
+    /* Confirmation dialog. */
+    // Background shadow image.
+    dialogShadowImage.addResolution({1920, 1080}, "Textures/Dialogs/Shadow.png");
+
+    // Background image.
+    confirmationDialog.backgroundImage.setLogicalExtent({0, 0, 474, 248});
+    confirmationDialog.backgroundImage.addResolution({1920, 1080}, "Textures/Dialogs/Background.png");
+
+    // Body text.
+    confirmationDialog.bodyText.setLogicalExtent({42, 42, 400, 60});
+    confirmationDialog.bodyText.setFont("Fonts/B612-Regular.ttf", 21);
+    confirmationDialog.bodyText.setColor({255, 255, 255, 255});
+
+    // Buttons.
+    confirmationDialog.confirmButton.setLogicalExtent({324, 162, 123, 56});
+    confirmationDialog.confirmButton.normalImage.setLogicalExtent({0, 0, 123, 56});
+    confirmationDialog.confirmButton.hoveredImage.setLogicalExtent({0, 0, 123, 56});
+    confirmationDialog.confirmButton.pressedImage.setLogicalExtent({0, 0, 123, 56});
+    confirmationDialog.confirmButton.text.setLogicalExtent({-1, -1, 123, 56});
+    confirmationDialog.confirmButton.normalImage.addResolution({1600, 900}, "Textures/ConfirmationButton/Normal.png");
+    confirmationDialog.confirmButton.hoveredImage.addResolution({1600, 900}, "Textures/ConfirmationButton/Hovered.png");
+    confirmationDialog.confirmButton.pressedImage.addResolution({1600, 900}, "Textures/ConfirmationButton/Pressed.png");
+    confirmationDialog.confirmButton.text.setFont("Fonts/B612-Regular.ttf", 18);
+    confirmationDialog.confirmButton.text.setColor({255, 255, 255, 255});
+
+    confirmationDialog.cancelButton.setLogicalExtent({182, 162, 123, 56});
+    confirmationDialog.cancelButton.normalImage.setLogicalExtent({0, 0, 123, 56});
+    confirmationDialog.cancelButton.hoveredImage.setLogicalExtent({0, 0, 123, 56});
+    confirmationDialog.cancelButton.pressedImage.setLogicalExtent({0, 0, 123, 56});
+    confirmationDialog.cancelButton.text.setLogicalExtent({-1, -1, 123, 56});
+    confirmationDialog.cancelButton.normalImage.addResolution({1600, 900}, "Textures/ConfirmationButton/Normal.png");
+    confirmationDialog.cancelButton.hoveredImage.addResolution({1600, 900}, "Textures/ConfirmationButton/Hovered.png");
+    confirmationDialog.cancelButton.pressedImage.addResolution({1600, 900}, "Textures/ConfirmationButton/Pressed.png");
+    confirmationDialog.cancelButton.text.setFont("Fonts/B612-Regular.ttf", 18);
+    confirmationDialog.cancelButton.text.setColor({255, 255, 255, 255});
+    confirmationDialog.cancelButton.text.setText("CANCEL");
+
+    // Set up the dialog's cancel button callback.
+    confirmationDialog.cancelButton.setOnPressed([this]() {
+        // Close the dialog.
+        dialogShadowImage.setIsVisible(false);
+        confirmationDialog.setIsVisible(false);
+    });
+
+    // Make the confirmationDialog invisible. Components that want to use it can set it up
+    // and control the visibility.
+    dialogShadowImage.setIsVisible(false);
+    confirmationDialog.setIsVisible(false);
 }
 
 void MainScreen::loadSpriteData()
@@ -41,6 +96,7 @@ void MainScreen::loadSpriteData()
     spritePanel.clearSprites();
     activeSprite = nullptr;
 
+    // Load the model's data into this screen's UI.
     // For each sprite sheet in the model.
     for (const SpriteSheet& sheet : spriteDataModel.getSpriteSheets()) {
         // Add a Thumbnail component that displays the sheet.
@@ -52,6 +108,30 @@ void MainScreen::loadSpriteData()
             spritePanel.addSprite(sheet, sprite);
         }
     }
+}
+
+void MainScreen::openConfirmationDialog(const std::string& bodyText
+                                , const std::string& confirmButtonText
+                                , std::function<void(void)> onConfirmation)
+{
+    // Set the dialog's text.
+    confirmationDialog.bodyText.setText(bodyText);
+    confirmationDialog.confirmButton.text.setText(confirmButtonText);
+
+    // Set the dialog's confirmation callback.
+    userOnConfirmation = std::move(onConfirmation);
+    confirmationDialog.confirmButton.setOnPressed([&]() {
+        // Call the user's callback.
+        userOnConfirmation();
+
+        // Close the dialog.
+        dialogShadowImage.setIsVisible(false);
+        confirmationDialog.setIsVisible(false);
+    });
+
+    // Open the dialog.
+    dialogShadowImage.setIsVisible(true);
+    confirmationDialog.setIsVisible(true);
 }
 
 void MainScreen::setActiveSprite(const SpriteStaticData* inActiveSprite)
@@ -77,6 +157,9 @@ void MainScreen::render()
     spritePanel.render();
 
     saveButton.render();
+
+    dialogShadowImage.render();
+    confirmationDialog.render();
 }
 
 } // End namespace SpriteEditor
