@@ -20,6 +20,9 @@ class MainScreen;
 class SpritePanel : public AUI::Component
 {
 public:
+    //-------------------------------------------------------------------------
+    // Public interface
+    //-------------------------------------------------------------------------
     SpritePanel(MainScreen& inScreen);
 
     /**
@@ -33,6 +36,9 @@ public:
      */
     void clearSprites();
 
+    //-------------------------------------------------------------------------
+    // Base class overrides
+    //-------------------------------------------------------------------------
     void render(const SDL_Point& parentOffset = {}) override;
 
 private:

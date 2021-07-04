@@ -125,7 +125,7 @@ void AddSheetDialog::render(const SDL_Point& parentOffset)
     childOffset.x += scaledExtent.x;
     childOffset.y += scaledExtent.y;
 
-    // Render the children.
+    // Render our children.
     backgroundImage.render(childOffset);
 
     headerText.render(childOffset);

@@ -21,6 +21,9 @@ class SpriteDataModel;
 class SpriteSheetPanel : public AUI::Component
 {
 public:
+    //-------------------------------------------------------------------------
+    // Public interface
+    //-------------------------------------------------------------------------
     SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
 
     /**
@@ -34,6 +37,9 @@ public:
      */
     void clearSpriteSheets();
 
+    //-------------------------------------------------------------------------
+    // Base class overrides
+    //-------------------------------------------------------------------------
     bool onMouseButtonDown(SDL_MouseButtonEvent& event) override;
 
     void render(const SDL_Point& parentOffset = {}) override;

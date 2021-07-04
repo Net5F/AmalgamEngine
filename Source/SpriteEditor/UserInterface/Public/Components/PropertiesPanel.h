@@ -1,6 +1,8 @@
 #pragma once
 
 #include "AUI/Image.h"
+#include "AUI/Text.h"
+#include "MainTextInput.h"
 
 namespace AM
 {
@@ -17,6 +19,9 @@ class SpriteStaticData;
 class PropertiesPanel : public AUI::Component
 {
 public:
+    //-------------------------------------------------------------------------
+    // Public interface
+    //-------------------------------------------------------------------------
     PropertiesPanel(MainScreen& inScreen);
 
     /**
@@ -24,9 +29,38 @@ public:
      */
     void loadSprite(const SpriteStaticData& sprite);
 
+    AUI::Text nameLabel;
+    MainTextInput nameInput;
+
+    AUI::Text minXLabel;
+    MainTextInput minXInput;
+
+    AUI::Text minYLabel;
+    MainTextInput minYInput;
+
+    AUI::Text minZLabel;
+    MainTextInput minZInput;
+
+    AUI::Text maxXLabel;
+    MainTextInput maxXInput;
+
+    AUI::Text maxYLabel;
+    MainTextInput maxYInput;
+
+    AUI::Text maxZLabel;
+    MainTextInput maxZInput;
+
+    //-------------------------------------------------------------------------
+    // Base class overrides
+    //-------------------------------------------------------------------------
     void render(const SDL_Point& parentOffset = {}) override;
 
 private:
+    /**
+     * Clears the text in all of this dialog's text inputs.
+     */
+    void clearTextInputs();
+
     /** Used to load and save sprite data. */
     MainScreen& mainScreen;
 

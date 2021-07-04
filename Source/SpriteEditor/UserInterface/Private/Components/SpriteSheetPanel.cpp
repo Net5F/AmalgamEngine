@@ -13,7 +13,7 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpri
 : AUI::Component(inScreen, "SpriteSheetPanel", {0, 0, 399, 708})
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
-, backgroundImage(inScreen, "", logicalExtent)
+, backgroundImage(inScreen, "", {0, 0, 399, 708})
 , spriteSheetContainer(inScreen, "SpriteSheetContainer", {18, 24, 306, 650})
 , remSheetButton(inScreen, "", {342, 0, 45, 63})
 , addSheetButton(inScreen, "", {342, 63, 45, 88})
@@ -178,15 +178,15 @@ void SpriteSheetPanel::render(const SDL_Point& parentOffset)
     childOffset.y += scaledExtent.y;
 
     // Render our children.
-    backgroundImage.render(parentOffset);
+    backgroundImage.render(childOffset);
 
-    spriteSheetContainer.render(parentOffset);
+    spriteSheetContainer.render(childOffset);
 
-    remSheetButton.render(parentOffset);
+    remSheetButton.render(childOffset);
 
-    addSheetButton.render(parentOffset);
+    addSheetButton.render(childOffset);
 
-    addSheetDialog.render(parentOffset);
+    addSheetDialog.render(childOffset);
 }
 
 } // End namespace SpriteEditor

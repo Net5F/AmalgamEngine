@@ -12,8 +12,8 @@ namespace SpriteEditor
 SpritePanel::SpritePanel(MainScreen& inScreen)
 : AUI::Component(inScreen, "SpritePanel", {-8, 732, 1936, 352})
 , mainScreen{inScreen}
-, backgroundImage(inScreen, "", logicalExtent)
-, spriteContainer(inScreen, "SpriteContainer", {183, 756, 1737, 324})
+, backgroundImage(inScreen, "", {0, 0, 1936, 352})
+, spriteContainer(inScreen, "SpriteContainer", {183, 24, 1737, 324})
 {
     /* Background image */
     backgroundImage.addResolution({1600, 900}, "Textures/SpritePanel/Background_1600.png");
@@ -82,9 +82,9 @@ void SpritePanel::render(const SDL_Point& parentOffset)
     childOffset.y += scaledExtent.y;
 
     // Render our children.
-    backgroundImage.render(parentOffset);
+    backgroundImage.render(childOffset);
 
-    spriteContainer.render(parentOffset);
+    spriteContainer.render(childOffset);
 }
 
 } // End namespace SpriteEditor
