@@ -24,7 +24,7 @@ SpritePanel::SpritePanel(MainScreen& inScreen)
     spriteContainer.setCellHeight(162);
 }
 
-void SpritePanel::addSprite(const SpriteSheet& sheet, const SpriteStaticData& sprite)
+void SpritePanel::addSprite(const SpriteSheet& sheet, SpriteStaticData& sprite)
 {
     std::unique_ptr<AUI::Component> thumbnailPtr{
         std::make_unique<MainThumbnail>(screen, "")};
@@ -47,15 +47,6 @@ void SpritePanel::addSprite(const SpriteSheet& sheet, const SpriteStaticData& sp
 
         // Set ourselves as the active sprite.
         mainScreen.setActiveSprite(&sprite);
-    });
-
-    // Add a callback to clear the active sprite when a thumbnail is
-    // deactivated.
-    thumbnail.setOnDeactivated([&](AUI::Thumbnail* selectedThumb){
-        ignore(selectedThumb);
-
-        // Clear the active sprite.
-        mainScreen.setActiveSprite(nullptr);
     });
 
     spriteContainer.push_back(std::move(thumbnailPtr));

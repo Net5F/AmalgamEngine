@@ -3,6 +3,7 @@
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
 #include "Ignore.h"
+#include <string>
 
 namespace AM
 {
@@ -27,11 +28,17 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
 , maxZInput(inScreen, "", {150, 376, 129, 38})
 , mainScreen{inScreen}
 , backgroundImage(inScreen, "", {-12, -4, 319, 456})
+, committedMinX{0.0}
+, committedMinY{0.0}
+, committedMinZ{0.0}
+, committedMaxX{0.0}
+, committedMaxY{0.0}
+, committedMaxZ{0.0}
 {
     /* Background image */
     backgroundImage.addResolution({1920, 1080}, "Textures/PropertiesPanel/Background.png");
 
-    /* Name entry. */
+    /* Display name entry. */
     nameLabel.setFont("Fonts/B612-Regular.ttf", 21);
     nameLabel.setColor({255, 255, 255, 255});
     nameLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
@@ -39,8 +46,11 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
 
     nameInput.setTextFont("Fonts/B612-Regular.ttf", 18);
     nameInput.setMargins({8, 0, 8, 0});
+    nameInput.setOnTextCommitted([this]() {
+        saveName();
+    });
 
-    /* Min X entry. */
+    /* Minimum X-axis bounds entry. */
     minXLabel.setFont("Fonts/B612-Regular.ttf", 21);
     minXLabel.setColor({255, 255, 255, 255});
     minXLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
@@ -48,8 +58,11 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
 
     minXInput.setTextFont("Fonts/B612-Regular.ttf", 18);
     minXInput.setMargins({8, 0, 8, 0});
+    minXInput.setOnTextCommitted([this]() {
+        saveMinX();
+    });
 
-    /* Min Y entry. */
+    /* Minimum Y-axis bounds entry. */
     minYLabel.setFont("Fonts/B612-Regular.ttf", 21);
     minYLabel.setColor({255, 255, 255, 255});
     minYLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
@@ -57,8 +70,11 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
 
     minYInput.setTextFont("Fonts/B612-Regular.ttf", 18);
     minYInput.setMargins({8, 0, 8, 0});
+    minYInput.setOnTextCommitted([this]() {
+        saveMinY();
+    });
 
-    /* Min Z entry. */
+    /* Minimum Z-axis bounds entry. */
     minZLabel.setFont("Fonts/B612-Regular.ttf", 21);
     minZLabel.setColor({255, 255, 255, 255});
     minZLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
@@ -66,8 +82,11 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
 
     minZInput.setTextFont("Fonts/B612-Regular.ttf", 18);
     minZInput.setMargins({8, 0, 8, 0});
+    minZInput.setOnTextCommitted([this]() {
+        saveMinZ();
+    });
 
-    /* Max X entry. */
+    /* Maximum X-axis bounds entry. */
     maxXLabel.setFont("Fonts/B612-Regular.ttf", 21);
     maxXLabel.setColor({255, 255, 255, 255});
     maxXLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
@@ -75,8 +94,11 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
 
     maxXInput.setTextFont("Fonts/B612-Regular.ttf", 18);
     maxXInput.setMargins({8, 0, 8, 0});
+    maxXInput.setOnTextCommitted([this]() {
+        saveMaxX();
+    });
 
-    /* Max Y entry. */
+    /* Maximum Y-axis bounds entry. */
     maxYLabel.setFont("Fonts/B612-Regular.ttf", 21);
     maxYLabel.setColor({255, 255, 255, 255});
     maxYLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
@@ -84,8 +106,11 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
 
     maxYInput.setTextFont("Fonts/B612-Regular.ttf", 18);
     maxYInput.setMargins({8, 0, 8, 0});
+    maxYInput.setOnTextCommitted([this]() {
+        saveMaxY();
+    });
 
-    /* Max Z entry. */
+    /* Maximum Z-axis bounds entry. */
     maxZLabel.setFont("Fonts/B612-Regular.ttf", 21);
     maxZLabel.setColor({255, 255, 255, 255});
     maxZLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
@@ -93,6 +118,32 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
 
     maxZInput.setTextFont("Fonts/B612-Regular.ttf", 18);
     maxZInput.setMargins({8, 0, 8, 0});
+    maxZInput.setOnTextCommitted([this]() {
+        saveMaxZ();
+    });
+}
+
+void PropertiesPanel::loadSprite(const SpriteStaticData& sprite)
+{
+    // Fill the fields with the sprite data.
+    nameInput.setText(sprite.displayName);
+    minXInput.setText(std::to_string(sprite.modelBounds.minX));
+    minYInput.setText(std::to_string(sprite.modelBounds.minY));
+    minZInput.setText(std::to_string(sprite.modelBounds.minZ));
+    maxXInput.setText(std::to_string(sprite.modelBounds.maxX));
+    maxYInput.setText(std::to_string(sprite.modelBounds.maxY));
+    maxZInput.setText(std::to_string(sprite.modelBounds.maxZ));
+}
+
+void PropertiesPanel::clear()
+{
+    nameInput.setText("");
+    minXInput.setText("");
+    minYInput.setText("");
+    minZInput.setText("");
+    maxXInput.setText("");
+    maxYInput.setText("");
+    maxZInput.setText("");
 }
 
 void PropertiesPanel::render(const SDL_Point& parentOffset)
@@ -135,15 +186,138 @@ void PropertiesPanel::render(const SDL_Point& parentOffset)
     maxZInput.render(childOffset);
 }
 
-void PropertiesPanel::clearTextInputs()
+void PropertiesPanel::saveName()
 {
-    nameInput.setText("");
-    minXInput.setText("");
-    minYInput.setText("");
-    minZInput.setText("");
-    maxXInput.setText("");
-    maxYInput.setText("");
-    maxZInput.setText("");
+    SpriteStaticData* sprite = mainScreen.getActiveSprite();
+    if (sprite != nullptr) {
+        // Save the display name.
+        // Note: All characters that a user can enter are valid in the display
+        //       name string, so we don't need to validate.
+        sprite->displayName = nameInput.getText();
+
+        // Re-load the UI since the name is shown in the sprite panel.
+        mainScreen.loadSpriteData();
+    }
+}
+
+void PropertiesPanel::saveMinX()
+{
+    SpriteStaticData* sprite = mainScreen.getActiveSprite();
+    if (sprite != nullptr) {
+        // Validate the user input as a valid float.
+        try {
+            // Convert the input string to a float.
+            float newMinX{std::stof(minXInput.getText())};
+
+            // The input was valid, save it.
+            sprite->modelBounds.minX = newMinX;
+            committedMinX = newMinX;
+        }
+        catch (std::exception& e) {
+            // Input was not valid, reset the field to what it was.
+            minXInput.setText(std::to_string(committedMinX));
+        }
+    }
+}
+
+void PropertiesPanel::saveMinY()
+{
+    SpriteStaticData* sprite = mainScreen.getActiveSprite();
+    if (sprite != nullptr) {
+        // Validate the user input as a valid float.
+        try {
+            // Convert the input string to a float.
+            float newMinY{std::stof(minYInput.getText())};
+
+            // The input was valid, save it.
+            sprite->modelBounds.minY = newMinY;
+            committedMinY = newMinY;
+        }
+        catch (std::exception& e) {
+            // Input was not valid, reset the field to what it was.
+            minYInput.setText(std::to_string(committedMinY));
+        }
+    }
+}
+
+void PropertiesPanel::saveMinZ()
+{
+    SpriteStaticData* sprite = mainScreen.getActiveSprite();
+    if (sprite != nullptr) {
+        // Validate the user input as a valid float.
+        try {
+            // Convert the input string to a float.
+            float newMinZ{std::stof(minZInput.getText())};
+
+            // The input was valid, save it.
+            sprite->modelBounds.minZ = newMinZ;
+            committedMinZ = newMinZ;
+        }
+        catch (std::exception& e) {
+            // Input was not valid, reset the field to what it was.
+            minZInput.setText(std::to_string(committedMinZ));
+        }
+    }
+}
+
+void PropertiesPanel::saveMaxX()
+{
+    SpriteStaticData* sprite = mainScreen.getActiveSprite();
+    if (sprite != nullptr) {
+        // Validate the user input as a valid float.
+        try {
+            // Convert the input string to a float.
+            float newMaxX{std::stof(maxXInput.getText())};
+
+            // The input was valid, save it.
+            sprite->modelBounds.maxX = newMaxX;
+            committedMaxX = newMaxX;
+        }
+        catch (std::exception& e) {
+            // Input was not valid, reset the field to what it was.
+            maxXInput.setText(std::to_string(committedMaxX));
+        }
+    }
+}
+
+void PropertiesPanel::saveMaxY()
+{
+    SpriteStaticData* sprite = mainScreen.getActiveSprite();
+    if (sprite != nullptr) {
+        // Validate the user input as a valid float.
+        try {
+            // Convert the input string to a float.
+            float newMaxY{std::stof(maxYInput.getText())};
+
+            // The input was valid, save it.
+            sprite->modelBounds.maxY = newMaxY;
+            committedMaxY = newMaxY;
+        }
+        catch (std::exception& e) {
+            // Input was not valid, reset the field to what it was.
+            maxYInput.setText(std::to_string(committedMaxY));
+        }
+    }
+}
+
+void PropertiesPanel::saveMaxZ()
+{
+    SpriteStaticData* sprite = mainScreen.getActiveSprite();
+    if (sprite != nullptr) {
+        // Validate the user input as a valid float.
+        try {
+            // Convert the input string to a float.
+            float newMaxZ{std::stof(maxZInput.getText())};
+
+            // The input was valid, save it.
+            sprite->modelBounds.maxZ = newMaxZ;
+            committedMaxZ = newMaxZ;
+        }
+        catch (std::exception& e) {
+            // Input was not valid, reset the field to what it was.
+            maxZInput.setText(std::to_string(committedMaxZ));
+        }
+    }
 }
 
 } // End namespace SpriteEditor

@@ -29,6 +29,14 @@ public:
      */
     void loadSprite(const SpriteStaticData& sprite);
 
+    /**
+     * Clears all of the text inputs, putting this panel back in its default
+     * state.
+     */
+    void clear();
+
+    /** All fields below directly match a data field in SpriteStaticData.
+        See its displayName and modelBounds fields for more information. */
     AUI::Text nameLabel;
     MainTextInput nameInput;
 
@@ -56,15 +64,29 @@ public:
     void render(const SDL_Point& parentOffset = {}) override;
 
 private:
-    /**
-     * Clears the text in all of this dialog's text inputs.
-     */
-    void clearTextInputs();
-
     /** Used to load and save sprite data. */
     MainScreen& mainScreen;
 
     AUI::Image backgroundImage;
+
+    /** The below functions are all for validating and saving the user's data
+        when the text is committed. */
+    void saveName();
+    void saveMinX();
+    void saveMinY();
+    void saveMinZ();
+    void saveMaxX();
+    void saveMaxY();
+    void saveMaxZ();
+
+    /** The below floats save the committed values, so we can revert to them
+        if the user inputs invalid characters. */
+    float committedMinX;
+    float committedMinY;
+    float committedMinZ;
+    float committedMaxX;
+    float committedMaxY;
+    float committedMaxZ;
 };
 
 } // End namespace SpriteEditor

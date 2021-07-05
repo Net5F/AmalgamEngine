@@ -270,7 +270,7 @@ void SpriteDataModel::remSpriteSheet(unsigned int index)
     spriteSheets.erase(spriteSheets.begin() + index);
 }
 
-const std::vector<SpriteSheet>& SpriteDataModel::getSpriteSheets()
+std::vector<SpriteSheet>& SpriteDataModel::getSpriteSheets()
 {
     return spriteSheets;
 }

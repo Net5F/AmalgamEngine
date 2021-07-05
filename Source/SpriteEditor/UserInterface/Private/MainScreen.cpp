@@ -95,16 +95,17 @@ void MainScreen::loadSpriteData()
     // Clear out the old components.
     spriteSheetPanel.clearSpriteSheets();
     spritePanel.clearSprites();
+    propertiesPanel.clear();
     activeSprite = nullptr;
 
     // Load the model's data into this screen's UI.
     // For each sprite sheet in the model.
-    for (const SpriteSheet& sheet : spriteDataModel.getSpriteSheets()) {
+    for (SpriteSheet& sheet : spriteDataModel.getSpriteSheets()) {
         // Add a Thumbnail component that displays the sheet.
         spriteSheetPanel.addSpriteSheet(sheet);
 
         // For each sprite in the sheet.
-        for (const SpriteStaticData& sprite : sheet.sprites) {
+        for (SpriteStaticData& sprite : sheet.sprites) {
             // Add a Thumbnail component that displays the sprite.
             spritePanel.addSprite(sheet, sprite);
         }
@@ -135,12 +136,16 @@ void MainScreen::openConfirmationDialog(const std::string& bodyText
     confirmationDialog.setIsVisible(true);
 }
 
-void MainScreen::setActiveSprite(const SpriteStaticData* inActiveSprite)
+void MainScreen::setActiveSprite(SpriteStaticData* inActiveSprite)
 {
+    // Save the sprite pointer.
     activeSprite = inActiveSprite;
+
+    // Load the sprite's data into the properties panel.
+    propertiesPanel.loadSprite(*activeSprite);
 }
 
-const SpriteStaticData* MainScreen::getActiveSprite()
+SpriteStaticData* MainScreen::getActiveSprite()
 {
     return activeSprite;
 }

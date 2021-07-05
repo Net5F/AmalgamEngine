@@ -40,8 +40,12 @@ public:
                                 , const std::string& confirmButtonText
                                 , std::function<void(void)> onConfirmation);
 
-    void setActiveSprite(const SpriteStaticData* inActiveSprite);
-    const SpriteStaticData* getActiveSprite();
+    /**
+     * Sets the active sprite, loads its data into PropertiesPanel, and
+     * displays it on the stage.
+     */
+    void setActiveSprite(SpriteStaticData* inActiveSprite);
+    SpriteStaticData* getActiveSprite();
 
     void render() override;
 
@@ -56,7 +60,7 @@ private:
     /** If non-nullptr, this is the currently active sprite's data. The active
         sprite's data is shown in the properties panel, and holds the extent
         of the AABB control gizmo. */
-    const SpriteStaticData* activeSprite;
+    SpriteStaticData* activeSprite;
 
     /** The left-side panel for managing sprite texture sheets. */
     SpriteSheetPanel spriteSheetPanel;

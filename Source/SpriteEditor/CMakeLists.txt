@@ -28,7 +28,7 @@ target_link_libraries(SpriteEditor
         Shared
 )
 
-# Compile with C++17
+# Compile with C++20
 target_compile_features(SpriteEditor PRIVATE cxx_std_20)
 set_target_properties(SpriteEditor PROPERTIES CXX_EXTENSIONS OFF)
 

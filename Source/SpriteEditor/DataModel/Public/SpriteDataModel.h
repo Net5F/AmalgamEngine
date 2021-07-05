@@ -78,7 +78,7 @@ public:
      */
     void remSpriteSheet(unsigned int index);
 
-    const std::vector<SpriteSheet>& getSpriteSheets();
+    std::vector<SpriteSheet>& getSpriteSheets();
 
 private:
     /**
