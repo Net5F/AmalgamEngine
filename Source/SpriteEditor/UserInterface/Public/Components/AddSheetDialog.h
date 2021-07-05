@@ -66,9 +66,9 @@ public:
 
 private:
     /**
-     * Clears the text in all of this dialog's text inputs.
+     * Clears the text in all of this dialog's text inputs and error text.
      */
-    void clearTextInputs();
+    void clear();
 
     /** Used to update the UI after sprite data changes. Component maintains an
         AUI::Screen reference that we could cast, but we want to explicitly
@@ -81,6 +81,9 @@ private:
 
     /** Used to update the model when a sheet is added. */
     SpriteDataModel& spriteDataModel;
+
+    /** Error text, appears if the user tries to submit an invalid input. */
+    AUI::Text errorText;
 };
 
 } // End namespace SpriteEditor

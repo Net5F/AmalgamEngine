@@ -25,6 +25,7 @@ AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer&
 , mainScreen{inScreen}
 , spriteSheetContainer{inSpriteSheetContainer}
 , spriteDataModel{inSpriteDataModel}
+, errorText(inScreen, "", {748, 508, 466, 60})
 {
     /* Background image. */
     backgroundImage.addResolution({1920, 1080}, "Textures/Dialogs/AddSheetBackground.png");
@@ -82,27 +83,34 @@ AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer&
             // Refresh the UI.
             mainScreen.loadSpriteData();
 
-            // Clear the text inputs.
-            clearTextInputs();
+            // Clear this dialog's text to prepare for the next usage.
+            clear();
 
             // Remove the dialog.
+            errorText.setIsVisible(false);
             setIsVisible(false);
         }
         else {
             // Data wasn't valid, display an error string.
-            // TODO: Add an error text
-            LOG_ERROR("%s", result.c_str());
+            errorText.setText(result);
+            errorText.setIsVisible(true);
         }
     });
 
     // Add a callback to remove the dialog on cancel.
     cancelButton.setOnPressed([&](){
         // Clear the text inputs.
-        clearTextInputs();
+        clear();
 
         // Remove the dialog.
         setIsVisible(false);
     });
+
+    /* Error text. */
+    errorText.setFont("Fonts/B612-Regular.ttf", 20);
+    errorText.setColor({255, 255, 255, 255});
+    errorText.setText("Uninitialized.");
+    errorText.setIsVisible(false);
 }
 
 void AddSheetDialog::render(const SDL_Point& parentOffset)
@@ -144,14 +152,17 @@ void AddSheetDialog::render(const SDL_Point& parentOffset)
 
     addButton.render(childOffset);
     cancelButton.render(childOffset);
+
+    errorText.render(childOffset);
 }
 
-void AddSheetDialog::clearTextInputs()
+void AddSheetDialog::clear()
 {
     pathInput.setText("");
     widthInput.setText("");
     heightInput.setText("");
     nameInput.setText("");
+    errorText.setText("");
 }
 
 } // End namespace SpriteEditor
