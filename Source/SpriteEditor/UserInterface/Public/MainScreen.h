@@ -5,6 +5,7 @@
 #include "AUI/Button.h"
 #include "AUI/ConfirmationDialog.h"
 #include "SpriteSheetPanel.h"
+#include "SpriteEditStage.h"
 #include "SpritePanel.h"
 #include "PropertiesPanel.h"
 #include "TitleButton.h"
@@ -64,6 +65,9 @@ private:
 
     /** The left-side panel for managing sprite texture sheets. */
     SpriteSheetPanel spriteSheetPanel;
+
+    /** The center stage for editing sprite bounding boxes. */
+    SpriteEditStage spriteEditStage;
 
     /** The bottom panel for selecting sprites. */
     SpritePanel spritePanel;

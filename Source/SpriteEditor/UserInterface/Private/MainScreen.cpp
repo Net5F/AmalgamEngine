@@ -14,6 +14,7 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 , spriteDataModel{inSpriteDataModel}
 , activeSprite{nullptr}
 , spriteSheetPanel(*this, spriteDataModel)
+, spriteEditStage(*this)
 , spritePanel(*this)
 , saveButton(*this, "", {1537, 0, 58, 58})
 , propertiesPanel(*this)
@@ -159,6 +160,8 @@ void MainScreen::render()
 
     // Render our children.
     spriteSheetPanel.render();
+
+    spriteEditStage.render();
 
     spritePanel.render();
 
