@@ -25,9 +25,9 @@ public:
     PropertiesPanel(MainScreen& inScreen);
 
     /**
-     * Loads the given sprite's data into this panel.
+     * Loads the MainScreen's current active sprite's data into this panel.
      */
-    void loadSprite(const SpriteStaticData& sprite);
+    void loadActiveSprite();
 
     /**
      * Clears all of the text inputs, putting this panel back in its default

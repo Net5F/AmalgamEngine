@@ -1,7 +1,7 @@
 #include "PropertiesPanel.h"
 #include "MainScreen.h"
 #include "MainThumbnail.h"
-#include "SpriteDataModel.h"
+#include "SpriteStaticData.h"
 #include "Ignore.h"
 #include <string>
 
@@ -123,16 +123,19 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
     });
 }
 
-void PropertiesPanel::loadSprite(const SpriteStaticData& sprite)
+void PropertiesPanel::loadActiveSprite()
 {
-    // Fill the fields with the sprite data.
-    nameInput.setText(sprite.displayName);
-    minXInput.setText(std::to_string(sprite.modelBounds.minX));
-    minYInput.setText(std::to_string(sprite.modelBounds.minY));
-    minZInput.setText(std::to_string(sprite.modelBounds.minZ));
-    maxXInput.setText(std::to_string(sprite.modelBounds.maxX));
-    maxYInput.setText(std::to_string(sprite.modelBounds.maxY));
-    maxZInput.setText(std::to_string(sprite.modelBounds.maxZ));
+    SpriteStaticData* sprite = mainScreen.getActiveSprite();
+    if (sprite != nullptr) {
+        // Fill the fields with the sprite data.
+        nameInput.setText(sprite->displayName);
+        minXInput.setText(std::to_string(sprite->modelBounds.minX));
+        minYInput.setText(std::to_string(sprite->modelBounds.minY));
+        minZInput.setText(std::to_string(sprite->modelBounds.minZ));
+        maxXInput.setText(std::to_string(sprite->modelBounds.maxX));
+        maxYInput.setText(std::to_string(sprite->modelBounds.maxY));
+        maxZInput.setText(std::to_string(sprite->modelBounds.maxZ));
+    }
 }
 
 void PropertiesPanel::clear()

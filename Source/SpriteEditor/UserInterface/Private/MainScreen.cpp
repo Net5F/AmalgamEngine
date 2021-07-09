@@ -143,7 +143,10 @@ void MainScreen::setActiveSprite(SpriteStaticData* inActiveSprite)
     activeSprite = inActiveSprite;
 
     // Load the sprite's data into the properties panel.
-    propertiesPanel.loadSprite(*activeSprite);
+    propertiesPanel.loadActiveSprite();
+
+    // Load the sprite onto the stage.
+    spriteEditStage.loadActiveSprite();
 }
 
 SpriteStaticData* MainScreen::getActiveSprite()
@@ -159,9 +162,9 @@ void MainScreen::render()
     SDL_RenderClear(renderer);
 
     // Render our children.
-    spriteSheetPanel.render();
-
     spriteEditStage.render();
+
+    spriteSheetPanel.render();
 
     spritePanel.render();
 

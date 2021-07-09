@@ -9,6 +9,7 @@ namespace SpriteEditor
 {
 
 class MainScreen;
+class SpriteStaticData;
 
 /**
  * The center stage on the main screen. Allows the user to edit a sprite's
@@ -22,6 +23,11 @@ public:
     //-------------------------------------------------------------------------
     SpriteEditStage(MainScreen& inScreen);
 
+    /**
+     * Loads the MainScreen's current active sprite onto the stage.
+     */
+    void loadActiveSprite();
+
     //-------------------------------------------------------------------------
     // Base class overrides
     //-------------------------------------------------------------------------
@@ -34,6 +40,9 @@ private:
 
     /** Checkerboard image, tiled as the background for the loaded sprite. */
     AUI::TiledImage checkerboardImage;
+
+    /** The sprite that is currently loaded onto the stage. */
+    AUI::Image spriteImage;
 };
 
 } // End namespace SpriteEditor

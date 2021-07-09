@@ -70,7 +70,7 @@ std::string SpriteDataModel::load(const std::string& fullPath)
 
             // For every sprite in the sheet.
             for (auto& spriteJson : sheetJson.value()["sprites"].items()) {
-                spriteSheet.sprites.push_back(SpriteStaticData());
+                spriteSheet.sprites.push_back(SpriteStaticData{spriteSheet});
                 SpriteStaticData& sprite{spriteSheet.sprites.back()};
 
                 // Add this sprite's key.
@@ -227,7 +227,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
     spriteSheets.emplace_back(relPath);
 
     // For each sprite in this texture.
-    SpriteSheet& sheet{*(spriteSheets.end() - 1)};
+    SpriteSheet& spriteSheet{*(spriteSheets.end() - 1)};
     int spriteCount{0};
     for (int y = 0; y <= (sheetHeight - spriteHeightI); y += spriteHeightI) {
         for (int x = 0; x <= (sheetWidth - spriteWidthI); x += spriteWidthI) {
@@ -242,8 +242,8 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
             static BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
 
             // Add the sprite to the sheet.
-            sheet.sprites.emplace_back(displayName, nextSpriteId
-                , textureExtent, defaultBox);
+            spriteSheet.sprites.emplace_back(spriteSheet, displayName
+                , nextSpriteId, textureExtent, defaultBox);
 
             // Increment the count (used for the display name).
             spriteCount++;

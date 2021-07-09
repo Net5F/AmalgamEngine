@@ -13,7 +13,7 @@ SpritePanel::SpritePanel(MainScreen& inScreen)
 : AUI::Component(inScreen, "SpritePanel", {-8, 732, 1936, 352})
 , mainScreen{inScreen}
 , backgroundImage(inScreen, "", {0, 0, 1936, 352})
-, spriteContainer(inScreen, "SpriteContainer", {183, 24, 1737, 324})
+, spriteContainer(inScreen, "SpriteContainer", {191, 24, 1737, 324})
 {
     /* Background image */
     backgroundImage.addResolution({1600, 900}, "Textures/SpritePanel/Background_1600.png");
