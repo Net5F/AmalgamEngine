@@ -99,6 +99,10 @@ void MainScreen::loadSpriteData()
     propertiesPanel.clear();
     activeSprite = nullptr;
 
+    // Hide the stage (we don't need to clear it since it won't be needed until
+    // we have another active sprite to load.)
+    spriteEditStage.setIsVisible(false);
+
     // Load the model's data into this screen's UI.
     // For each sprite sheet in the model.
     for (SpriteSheet& sheet : spriteDataModel.getSpriteSheets()) {
@@ -111,6 +115,18 @@ void MainScreen::loadSpriteData()
             spritePanel.addSprite(sheet, sprite);
         }
     }
+}
+
+void MainScreen::refreshActiveSpriteUi()
+{
+    // Refresh the sprite's Thumbnail's display name.
+    spritePanel.refreshActiveSprite(activeSprite->displayName);
+
+    // Refresh the properties panel.
+    propertiesPanel.refresh();
+
+    // Refresh the stage.
+    spriteEditStage.refresh();
 }
 
 void MainScreen::openConfirmationDialog(const std::string& bodyText
@@ -137,21 +153,16 @@ void MainScreen::openConfirmationDialog(const std::string& bodyText
     confirmationDialog.setIsVisible(true);
 }
 
-void MainScreen::setActiveSprite(SpriteStaticData* inActiveSprite)
+void MainScreen::loadActiveSprite(SpriteStaticData* inActiveSprite)
 {
-    // Save the sprite pointer.
-    activeSprite = inActiveSprite;
-
     // Load the sprite's data into the properties panel.
-    propertiesPanel.loadActiveSprite();
+    propertiesPanel.loadActiveSprite(inActiveSprite);
 
     // Load the sprite onto the stage.
-    spriteEditStage.loadActiveSprite();
-}
+    spriteEditStage.loadActiveSprite(inActiveSprite);
 
-SpriteStaticData* MainScreen::getActiveSprite()
-{
-    return activeSprite;
+    // Save a reference to the active sprite.
+    activeSprite = inActiveSprite;
 }
 
 void MainScreen::render()

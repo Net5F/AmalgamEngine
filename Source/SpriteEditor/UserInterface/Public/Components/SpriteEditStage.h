@@ -2,6 +2,7 @@
 
 #include "AUI/Screen.h"
 #include "AUI/TiledImage.h"
+#include "BoundingBoxGizmo.h"
 
 namespace AM
 {
@@ -24,9 +25,14 @@ public:
     SpriteEditStage(MainScreen& inScreen);
 
     /**
-     * Loads the MainScreen's current active sprite onto the stage.
+     * Loads the given sprite onto the stage.
      */
-    void loadActiveSprite();
+    void loadActiveSprite(SpriteStaticData* activeSprite);
+
+    /**
+     * Calls boundingBoxGizmo.refresh().
+     */
+    void refresh();
 
     //-------------------------------------------------------------------------
     // Base class overrides
@@ -43,6 +49,9 @@ private:
 
     /** The sprite that is currently loaded onto the stage. */
     AUI::Image spriteImage;
+
+    /** The gizmo for editing the sprite's bounding box. */
+    BoundingBoxGizmo boundingBoxGizmo;
 };
 
 } // End namespace SpriteEditor

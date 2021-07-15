@@ -27,6 +27,7 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
 , maxZLabel(inScreen, "", {24, 376, 110, 38})
 , maxZInput(inScreen, "", {150, 376, 129, 38})
 , mainScreen{inScreen}
+, activeSprite{nullptr}
 , backgroundImage(inScreen, "", {-12, -4, 319, 456})
 , committedMinX{0.0}
 , committedMinY{0.0}
@@ -123,23 +124,34 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
     });
 }
 
-void PropertiesPanel::loadActiveSprite()
+void PropertiesPanel::loadActiveSprite(SpriteStaticData* inActiveSprite)
 {
-    SpriteStaticData* sprite = mainScreen.getActiveSprite();
-    if (sprite != nullptr) {
-        // Fill the fields with the sprite data.
-        nameInput.setText(sprite->displayName);
-        minXInput.setText(std::to_string(sprite->modelBounds.minX));
-        minYInput.setText(std::to_string(sprite->modelBounds.minY));
-        minZInput.setText(std::to_string(sprite->modelBounds.minZ));
-        maxXInput.setText(std::to_string(sprite->modelBounds.maxX));
-        maxYInput.setText(std::to_string(sprite->modelBounds.maxY));
-        maxZInput.setText(std::to_string(sprite->modelBounds.maxZ));
+    // Set the new active sprite.
+    activeSprite = inActiveSprite;
+
+    // Refresh the UI with the newly set sprite's data.
+    refresh();
+}
+
+void PropertiesPanel::refresh()
+{
+    if (activeSprite == nullptr) {
+        LOG_ERROR("Tried to refresh with nullptr data.");
     }
+
+    // Fill the fields with the activeSprite data.
+    nameInput.setText(activeSprite->displayName);
+    minXInput.setText(std::to_string(activeSprite->modelBounds.minX));
+    minYInput.setText(std::to_string(activeSprite->modelBounds.minY));
+    minZInput.setText(std::to_string(activeSprite->modelBounds.minZ));
+    maxXInput.setText(std::to_string(activeSprite->modelBounds.maxX));
+    maxYInput.setText(std::to_string(activeSprite->modelBounds.maxY));
+    maxZInput.setText(std::to_string(activeSprite->modelBounds.maxZ));
 }
 
 void PropertiesPanel::clear()
 {
+    activeSprite = nullptr;
     nameInput.setText("");
     minXInput.setText("");
     minYInput.setText("");
@@ -191,30 +203,31 @@ void PropertiesPanel::render(const SDL_Point& parentOffset)
 
 void PropertiesPanel::saveName()
 {
-    SpriteStaticData* sprite = mainScreen.getActiveSprite();
-    if (sprite != nullptr) {
+    if (activeSprite != nullptr) {
         // Save the display name.
         // Note: All characters that a user can enter are valid in the display
         //       name string, so we don't need to validate.
-        sprite->displayName = nameInput.getText();
+        activeSprite->displayName = nameInput.getText();
 
-        // Re-load the UI since the name is shown in the sprite panel.
-        mainScreen.loadSpriteData();
+        // Refresh the UI since the name is shown in the activeSprite panel.
+        mainScreen.refreshActiveSpriteUi();
     }
 }
 
 void PropertiesPanel::saveMinX()
 {
-    SpriteStaticData* sprite = mainScreen.getActiveSprite();
-    if (sprite != nullptr) {
+    if (activeSprite != nullptr) {
         // Validate the user input as a valid float.
         try {
             // Convert the input string to a float.
             float newMinX{std::stof(minXInput.getText())};
 
             // The input was valid, save it.
-            sprite->modelBounds.minX = newMinX;
+            activeSprite->modelBounds.minX = newMinX;
             committedMinX = newMinX;
+
+            // Refresh the UI to reflect the new value;
+            mainScreen.refreshActiveSpriteUi();
         }
         catch (std::exception& e) {
             // Input was not valid, reset the field to what it was.
@@ -225,16 +238,18 @@ void PropertiesPanel::saveMinX()
 
 void PropertiesPanel::saveMinY()
 {
-    SpriteStaticData* sprite = mainScreen.getActiveSprite();
-    if (sprite != nullptr) {
+    if (activeSprite != nullptr) {
         // Validate the user input as a valid float.
         try {
             // Convert the input string to a float.
             float newMinY{std::stof(minYInput.getText())};
 
             // The input was valid, save it.
-            sprite->modelBounds.minY = newMinY;
+            activeSprite->modelBounds.minY = newMinY;
             committedMinY = newMinY;
+
+            // Refresh the UI to reflect the new value;
+            mainScreen.refreshActiveSpriteUi();
         }
         catch (std::exception& e) {
             // Input was not valid, reset the field to what it was.
@@ -245,16 +260,18 @@ void PropertiesPanel::saveMinY()
 
 void PropertiesPanel::saveMinZ()
 {
-    SpriteStaticData* sprite = mainScreen.getActiveSprite();
-    if (sprite != nullptr) {
+    if (activeSprite != nullptr) {
         // Validate the user input as a valid float.
         try {
             // Convert the input string to a float.
             float newMinZ{std::stof(minZInput.getText())};
 
             // The input was valid, save it.
-            sprite->modelBounds.minZ = newMinZ;
+            activeSprite->modelBounds.minZ = newMinZ;
             committedMinZ = newMinZ;
+
+            // Refresh the UI to reflect the new value;
+            mainScreen.refreshActiveSpriteUi();
         }
         catch (std::exception& e) {
             // Input was not valid, reset the field to what it was.
@@ -265,16 +282,18 @@ void PropertiesPanel::saveMinZ()
 
 void PropertiesPanel::saveMaxX()
 {
-    SpriteStaticData* sprite = mainScreen.getActiveSprite();
-    if (sprite != nullptr) {
+    if (activeSprite != nullptr) {
         // Validate the user input as a valid float.
         try {
             // Convert the input string to a float.
             float newMaxX{std::stof(maxXInput.getText())};
 
             // The input was valid, save it.
-            sprite->modelBounds.maxX = newMaxX;
+            activeSprite->modelBounds.maxX = newMaxX;
             committedMaxX = newMaxX;
+
+            // Refresh the UI to reflect the new value;
+            mainScreen.refreshActiveSpriteUi();
         }
         catch (std::exception& e) {
             // Input was not valid, reset the field to what it was.
@@ -285,16 +304,18 @@ void PropertiesPanel::saveMaxX()
 
 void PropertiesPanel::saveMaxY()
 {
-    SpriteStaticData* sprite = mainScreen.getActiveSprite();
-    if (sprite != nullptr) {
+    if (activeSprite != nullptr) {
         // Validate the user input as a valid float.
         try {
             // Convert the input string to a float.
             float newMaxY{std::stof(maxYInput.getText())};
 
             // The input was valid, save it.
-            sprite->modelBounds.maxY = newMaxY;
+            activeSprite->modelBounds.maxY = newMaxY;
             committedMaxY = newMaxY;
+
+            // Refresh the UI to reflect the new value;
+            mainScreen.refreshActiveSpriteUi();
         }
         catch (std::exception& e) {
             // Input was not valid, reset the field to what it was.
@@ -305,16 +326,18 @@ void PropertiesPanel::saveMaxY()
 
 void PropertiesPanel::saveMaxZ()
 {
-    SpriteStaticData* sprite = mainScreen.getActiveSprite();
-    if (sprite != nullptr) {
+    if (activeSprite != nullptr) {
         // Validate the user input as a valid float.
         try {
             // Convert the input string to a float.
             float newMaxZ{std::stof(maxZInput.getText())};
 
             // The input was valid, save it.
-            sprite->modelBounds.maxZ = newMaxZ;
+            activeSprite->modelBounds.maxZ = newMaxZ;
             committedMaxZ = newMaxZ;
+
+            // Refresh the UI to reflect the new value;
+            mainScreen.refreshActiveSpriteUi();
         }
         catch (std::exception& e) {
             // Input was not valid, reset the field to what it was.

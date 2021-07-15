@@ -1,6 +1,7 @@
 target_sources(SpriteEditor
     PRIVATE
         Private/Components/AddSheetDialog.cpp
+        Private/Components/BoundingBoxGizmo.cpp
         Private/Components/ConfirmationButton.cpp
         Private/Components/MainTextInput.cpp
         Private/Components/MainThumbnail.cpp
@@ -14,6 +15,7 @@ target_sources(SpriteEditor
         Private/UserInterface.cpp
     PUBLIC
         Public/Components/AddSheetDialog.h
+        Public/Components/BoundingBoxGizmo.h
         Public/Components/ConfirmationButton.h
         Public/Components/MainTextInput.h
         Public/Components/MainThumbnail.h

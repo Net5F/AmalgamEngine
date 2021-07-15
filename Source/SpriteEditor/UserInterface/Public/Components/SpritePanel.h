@@ -32,6 +32,12 @@ public:
     void addSprite(const SpriteSheet& sheet, SpriteStaticData& sprite);
 
     /**
+     * If a sprite is active, refreshes that sprite's UI to match its
+     * underlying data.
+     */
+    void refreshActiveSprite(const std::string& newDisplayName);
+
+    /**
      * Clears spritesheetContainer, removing all the sprite sheet components.
      */
     void clearSprites();

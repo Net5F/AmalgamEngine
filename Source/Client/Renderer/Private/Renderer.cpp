@@ -106,6 +106,7 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
         sdlRenderer.Copy(spriteInfo.sprite->textureHandle.get(),
                          spriteInfo.sprite->textureExtent,
                          spriteInfo.screenExtent);
+        drawBoundingBox(spriteInfo.sprite->worldBounds, camera);
     }
 }
 
@@ -173,7 +174,7 @@ void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
         yValues[i] = verts[i].y;
     }
 
-    // Print the faces.
+    // Draw the faces.
     filledPolygonRGBA(sdlRenderer.Get(), xValues, yValues, 4, 200, 0, 50, 150);
     filledPolygonRGBA(sdlRenderer.Get(), &(xValues[4]), &(yValues[4]), 4, 255,
                       0, 0, 150);

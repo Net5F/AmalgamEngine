@@ -25,13 +25,20 @@ public:
     PropertiesPanel(MainScreen& inScreen);
 
     /**
-     * Loads the MainScreen's current active sprite's data into this panel.
+     * Loads the given sprite's data into this panel.
      */
-    void loadActiveSprite();
+    void loadActiveSprite(SpriteStaticData* inActiveSprite);
 
     /**
-     * Clears all of the text inputs, putting this panel back in its default
-     * state.
+     * Refreshes this component's UI with the data from the currently set
+     * active sprite.
+     * Errors if activeSprite is nullptr.
+     */
+    void refresh();
+
+    /**
+     * Sets activeSprite to nullptr and clears all of the text inputs, putting
+     * this panel back to its default state.
      */
     void clear();
 
@@ -64,8 +71,11 @@ public:
     void render(const SDL_Point& parentOffset = {}) override;
 
 private:
-    /** Used to load and save sprite data. */
+    /** Used to save updated sprite data. */
     MainScreen& mainScreen;
+
+    /** The active sprite's data. */
+    SpriteStaticData* activeSprite;
 
     AUI::Image backgroundImage;
 

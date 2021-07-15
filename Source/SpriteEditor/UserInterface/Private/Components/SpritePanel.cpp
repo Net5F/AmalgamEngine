@@ -45,11 +45,23 @@ void SpritePanel::addSprite(const SpriteSheet& sheet, SpriteStaticData& sprite)
             }
         }
 
-        // Set ourselves as the active sprite.
-        mainScreen.setActiveSprite(&sprite);
+        // Load the data that this Thumbnail represents as the active sprite.
+        mainScreen.loadActiveSprite(&sprite);
     });
 
     spriteContainer.push_back(std::move(thumbnailPtr));
+}
+
+void SpritePanel::refreshActiveSprite(const std::string& newDisplayName)
+{
+    // Look for an active sprite.
+    for (unsigned int i = 0; i < spriteContainer.size(); ++i) {
+        AUI::Thumbnail& thumbnail{dynamic_cast<AUI::Thumbnail&>(spriteContainer[i])};
+        if (thumbnail.getIsActive()) {
+            // Refresh the sprite's display name.
+            thumbnail.setText(newDisplayName);
+        }
+    }
 }
 
 void SpritePanel::clearSprites()

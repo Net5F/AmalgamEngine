@@ -31,6 +31,13 @@ public:
     void loadSpriteData();
 
     /**
+     * Refreshes the UI with the current data from the active sprite.
+     *
+     * If there is no active sprite, errors.
+     */
+    void refreshActiveSpriteUi();
+
+    /**
      * Opens a confirmation dialog.
      *
      * @param bodyText  The main dialog text.
@@ -42,11 +49,10 @@ public:
                                 , std::function<void(void)> onConfirmation);
 
     /**
-     * Sets the active sprite, loads its data into PropertiesPanel, and
-     * displays it on the stage.
+     * Loads the given sprite data into PropertiesPanel, and displays it on
+     * the stage.
      */
-    void setActiveSprite(SpriteStaticData* inActiveSprite);
-    SpriteStaticData* getActiveSprite();
+    void loadActiveSprite(SpriteStaticData* activeSprite);
 
     void render() override;
 
@@ -59,8 +65,7 @@ private:
     SpriteDataModel& spriteDataModel;
 
     /** If non-nullptr, this is the currently active sprite's data. The active
-        sprite's data is shown in the properties panel, and holds the extent
-        of the AABB control gizmo. */
+        sprite's data is shown in the properties panel and on the stage. */
     SpriteStaticData* activeSprite;
 
     /** The left-side panel for managing sprite texture sheets. */
