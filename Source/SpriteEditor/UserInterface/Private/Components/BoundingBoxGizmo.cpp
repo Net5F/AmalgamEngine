@@ -153,13 +153,11 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
     /* Translate the mouse position to world space. */
     // Account for the sprite's empty vertical space.
     int yOffset = AUI::ScalingHelpers::logicalToActual(384);
-    yOffset += 50; // Stage's offset TODO
-    yOffset += scaledExtent.y;
+    yOffset += lastRenderedExtent.y;
 
     // Account for the sprite's half-tile offset.
     int xOffset = AUI::ScalingHelpers::logicalToActual(256 / 2);
-    xOffset += 324; // Stage's offset TODO
-    xOffset += scaledExtent.x;
+    xOffset += lastRenderedExtent.x;
 
     // Apply the offset to the mouse position and convert to logical space.
     SDL_Point offsetMousePoint{event.x - xOffset, event.y - yOffset};
@@ -174,17 +172,17 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
     switch (currentHeldControl) {
         case Control::Position: {
             // Note: The expected behavior is to move along the x/y plane and
-            //       leave the minZ at 0.
-
-            // Move the max bounds to their new position.
-            activeSprite->modelBounds.maxX = mouseWorldPos.x;
-            activeSprite->modelBounds.maxY = mouseWorldPos.y;
+            //       leave minZ where it was.
 
             // Move the min bounds to follow the max bounds.
             float diffX{mouseWorldPos.x - activeSprite->modelBounds.maxX};
             float diffY{mouseWorldPos.y - activeSprite->modelBounds.maxY};
             activeSprite->modelBounds.minX += diffX;
             activeSprite->modelBounds.minY += diffY;
+
+            // Move the max bounds to their new position.
+            activeSprite->modelBounds.maxX = mouseWorldPos.x;
+            activeSprite->modelBounds.maxY = mouseWorldPos.y;
             break;
         }
         case Control::X: {
