@@ -171,18 +171,7 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
     // Adjust the currently pressed control appropriately.
     switch (currentHeldControl) {
         case Control::Position: {
-            // Note: The expected behavior is to move along the x/y plane and
-            //       leave minZ where it was.
-
-            // Move the min bounds to follow the max bounds.
-            float diffX{mouseWorldPos.x - activeSprite->modelBounds.maxX};
-            float diffY{mouseWorldPos.y - activeSprite->modelBounds.maxY};
-            activeSprite->modelBounds.minX += diffX;
-            activeSprite->modelBounds.minY += diffY;
-
-            // Move the max bounds to their new position.
-            activeSprite->modelBounds.maxX = mouseWorldPos.x;
-            activeSprite->modelBounds.maxY = mouseWorldPos.y;
+            updatePositionBounds(mouseWorldPos);
             break;
         }
         case Control::X: {
@@ -194,24 +183,7 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
             break;
         }
         case Control::Z: {
-            // Note: The screenToWorld() transformation can't handle z-axis
-            // movement (not enough data from a 2d point), so we have to do it
-            // using our contextual information.
-
-            // Set maxZ relative to the distance between the mouse and the
-            // position control (the position control is always our reference
-            // for where z == 0 is.)
-            float mouseZHeight = lastRenderedPosExtent.y
-                + (scaledRectSize / 2.f) - event.y;
-
-            // Convert to logical space.
-            mouseZHeight = AUI::ScalingHelpers::actualToLogical(mouseZHeight);
-
-            // Apply our screen -> world Z scaling.
-            mouseZHeight = TransformationHelpers::screenYToWorldZ(mouseZHeight, 1);
-
-            activeSprite->modelBounds.maxZ = mouseZHeight;
-
+            updateZBounds(event.y);
             break;
         }
         default: {
@@ -237,6 +209,43 @@ bool BoundingBoxGizmo::refreshScaling()
     }
 
     return false;
+}
+
+void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
+{
+    // Note: The expected behavior is to move along the x/y plane and
+    //       leave minZ where it was.
+
+    // Move the min bounds to follow the max bounds.
+    float diffX{mouseWorldPos.x - activeSprite->modelBounds.maxX};
+    float diffY{mouseWorldPos.y - activeSprite->modelBounds.maxY};
+    activeSprite->modelBounds.minX += diffX;
+    activeSprite->modelBounds.minY += diffY;
+
+    // Move the max bounds to their new position.
+    activeSprite->modelBounds.maxX = mouseWorldPos.x;
+    activeSprite->modelBounds.maxY = mouseWorldPos.y;
+}
+
+void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
+{
+    // Note: The screenToWorld() transformation can't handle z-axis
+    // movement (not enough data from a 2d point), so we have to do it
+    // using our contextual information.
+
+    // Set maxZ relative to the distance between the mouse and the
+    // position control (the position control is always our reference
+    // for where z == 0 is.)
+    float mouseZHeight = lastRenderedPosExtent.y
+        + (scaledRectSize / 2.f) - mouseScreenYPos;
+
+    // Convert to logical space.
+    mouseZHeight = AUI::ScalingHelpers::actualToLogical(mouseZHeight);
+
+    // Apply our screen -> world Z scaling.
+    mouseZHeight = TransformationHelpers::screenYToWorldZ(mouseZHeight, 1);
+
+    activeSprite->modelBounds.maxZ = mouseZHeight;
 }
 
 void BoundingBoxGizmo::calcOffsetScreenPoints(std::vector<SDL_Point>& boundsScreenPoints)

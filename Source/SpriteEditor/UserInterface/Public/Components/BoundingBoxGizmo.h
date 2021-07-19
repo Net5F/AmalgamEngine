@@ -7,6 +7,7 @@
 namespace AM
 {
 
+class Position;
 class BoundingBox;
 
 namespace SpriteEditor
@@ -73,6 +74,17 @@ private:
         Y,
         Z
     };
+
+    /**
+     * Updates the active sprite's maxX and maxY bounds to match the given
+     * mouse position.
+     */
+    void updatePositionBounds(const Position& mouseWorldPos);
+
+    /**
+     * Updates the active sprite's maxZ bound to match the given mouse position.
+     */
+    void updateZBounds(int mouseScreenYPos);
 
     /**
      * Transforms the positions in the given sprite's bounding box from world
