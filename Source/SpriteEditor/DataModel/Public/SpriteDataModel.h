@@ -63,13 +63,16 @@ public:
      *                   the application's base directory.
      * @param spriteWidth  How wide each sprite is.
      * @param spriteHeight  How tall each sprite is.
+     * @param yOffset  How much each sprite should be offset in the Y direction
+     *                 to line up with their tile.
      * @param baseName  The name to prepend to each sprite's number. (e.g.
      *                  "mob_" results in "mob_0", "mob_1", etc.)
      *
      * @return "" if the given data is valid, else an appropriate error string.
      */
     std::string addSpriteSheet(const std::string& relPath, const std::string& spriteWidth
-                               , const std::string& spriteHeight, const std::string& baseName);
+                               , const std::string& spriteHeight, const std::string& yOffset
+                               , const std::string& baseName);
 
     /**
      * Removes the sprite sheet at the given index in the spriteSheets vector.

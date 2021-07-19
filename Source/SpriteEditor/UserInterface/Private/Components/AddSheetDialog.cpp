@@ -18,14 +18,16 @@ AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer&
 , widthInput(inScreen, "", {919, 350, 180, 38})
 , heightLabel(inScreen, "", {747, 400, 151, 38})
 , heightInput(inScreen, "", {919, 400, 180, 38})
-, nameLabel(inScreen, "", {747, 450, 151, 38})
-, nameInput(inScreen, "", {919, 450, 180, 38})
-, addButton(inScreen, "", {1099, 593, 123, 56}, "ADD")
-, cancelButton(inScreen, "", {958, 593, 123, 56}, "CANCEL")
+, offsetLabel(inScreen, "", {747, 450, 151, 38})
+, offsetInput(inScreen, "", {919, 450, 180, 38})
+, nameLabel(inScreen, "", {747, 500, 151, 38})
+, nameInput(inScreen, "", {919, 500, 180, 38})
+, addButton(inScreen, "", {1099, 640, 123, 56}, "ADD")
+, cancelButton(inScreen, "", {958, 640, 123, 56}, "CANCEL")
 , mainScreen{inScreen}
 , spriteSheetContainer{inSpriteSheetContainer}
 , spriteDataModel{inSpriteDataModel}
-, errorText(inScreen, "", {748, 508, 466, 60})
+, errorText(inScreen, "", {748, 556, 466, 60})
 {
     /* Background image. */
     backgroundImage.addResolution({1920, 1080}, "Textures/Dialogs/AddSheetBackground.png");
@@ -62,6 +64,15 @@ AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer&
     heightInput.setTextFont("Fonts/B612-Regular.ttf", 18);
     heightInput.setMargins({8, 0, 8, 0});
 
+    /* Y offset entry. */
+    offsetLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    offsetLabel.setColor({255, 255, 255, 255});
+    offsetLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
+    offsetLabel.setText("Y Offset");
+
+    offsetInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    offsetInput.setMargins({8, 0, 8, 0});
+
     /* Name entry. */
     nameLabel.setFont("Fonts/B612-Regular.ttf", 21);
     nameLabel.setColor({255, 255, 255, 255});
@@ -76,7 +87,7 @@ AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer&
     addButton.setOnPressed([this](){
         // Pass the user-inputted data to the model.
         std::string result = spriteDataModel.addSpriteSheet(pathInput.getText(), widthInput.getText()
-                    , heightInput.getText(), nameInput.getText());
+                    , heightInput.getText(), offsetInput.getText(), nameInput.getText());
 
         // If the data was valid.
         if (result == "") {
@@ -146,6 +157,9 @@ void AddSheetDialog::render(const SDL_Point& parentOffset)
 
     heightLabel.render(childOffset);
     heightInput.render(childOffset);
+
+    offsetLabel.render(childOffset);
+    offsetInput.render(childOffset);
 
     nameLabel.render(childOffset);
     nameInput.render(childOffset);

@@ -48,6 +48,10 @@ public:
     AUI::Text heightLabel;
     MainTextInput heightInput;
 
+    // Sprite Y offset entry
+    AUI::Text offsetLabel;
+    MainTextInput offsetInput;
+
     // Base name entry
     AUI::Text nameLabel;
     MainTextInput nameInput;

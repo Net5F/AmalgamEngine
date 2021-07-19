@@ -97,6 +97,9 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 sprite.textureExtent.w = spriteJson.value()["textureExtent"]["w"];
                 sprite.textureExtent.h = spriteJson.value()["textureExtent"]["h"];
 
+                // Add this sprite's Y offset.
+                sprite.yOffset = spriteJson.value()["yOffset"];
+
                 // Add this sprite's model-space bounds.
                 sprite.modelBounds.minX = spriteJson.value()["modelBounds"]["minX"];
                 sprite.modelBounds.maxX = spriteJson.value()["modelBounds"]["maxX"];
@@ -149,6 +152,10 @@ void SpriteDataModel::save()
             json["spriteSheets"][i]["sprites"][j]["textureExtent"]["h"]
                 = sprite.textureExtent.h;
 
+            // Add this sprite's Y offset.
+            json["spriteSheets"][i]["sprites"][j]["yOffset"]
+                = sprite.yOffset;
+
             // Add this sprite's model-space bounds.
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minX"]
                 = sprite.modelBounds.minX;
@@ -176,7 +183,7 @@ void SpriteDataModel::save()
 }
 
 std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const std::string& spriteWidth
-                           , const std::string& spriteHeight, const std::string& baseName)
+                           , const std::string& spriteHeight, const std::string& yOffset, const std::string& baseName)
 {
     /* Validate the data. */
     // Check if we already have the given sheet.
@@ -207,15 +214,17 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
         return errorString;
     }
 
-    // Validate the width/height.
+    // Validate the width/height/yOffset.
     int spriteWidthI{0};
     int spriteHeightI{0};
+    int yOffsetI{0};
     try {
         spriteWidthI = std::stoi(spriteWidth);
         spriteHeightI = std::stoi(spriteHeight);
+        yOffsetI = std::stoi(yOffset);
     }
     catch (std::exception& e) {
-        return "Error: Width or height is not a valid integer.";
+        return "Error: Width, height, or Y offset is not a valid integer.";
     }
 
     // Validate the size of the texture.
@@ -243,7 +252,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
 
             // Add the sprite to the sheet.
             spriteSheet.sprites.emplace_back(spriteSheet, displayName
-                , nextSpriteId, textureExtent, defaultBox);
+                , nextSpriteId, textureExtent, yOffsetI, defaultBox);
 
             // Increment the count (used for the display name).
             spriteCount++;

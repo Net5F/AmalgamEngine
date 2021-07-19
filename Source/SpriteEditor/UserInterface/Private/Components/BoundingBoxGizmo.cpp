@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "SpriteDataModel.h"
 #include "TransformationHelpers.h"
+#include "SharedConfig.h"
 #include "Ignore.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
@@ -152,11 +153,11 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
 
     /* Translate the mouse position to world space. */
     // Account for the sprite's empty vertical space.
-    int yOffset = AUI::ScalingHelpers::logicalToActual(384);
+    int yOffset = AUI::ScalingHelpers::logicalToActual(activeSprite->yOffset);
     yOffset += lastRenderedExtent.y;
 
     // Account for the sprite's half-tile offset.
-    int xOffset = AUI::ScalingHelpers::logicalToActual(256 / 2);
+    int xOffset = AUI::ScalingHelpers::logicalToActual(SharedConfig::TILE_SCREEN_WIDTH / 2.f);
     xOffset += lastRenderedExtent.x;
 
     // Apply the offset to the mouse position and convert to logical space.
@@ -283,7 +284,7 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(std::vector<SDL_Point>& boundsScre
     int yOffset = AUI::ScalingHelpers::logicalToActual(384);
 
     // Account for the sprite's half-tile offset.
-    int xOffset = AUI::ScalingHelpers::logicalToActual(256 / 2);
+    int xOffset = AUI::ScalingHelpers::logicalToActual(SharedConfig::TILE_SCREEN_WIDTH / 2.f);
 
     /* Scale and offset each point, then push it into the return vector. */
     for (ScreenPoint& point : floatPoints)
