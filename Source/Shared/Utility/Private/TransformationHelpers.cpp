@@ -8,7 +8,7 @@
 namespace AM
 {
 ScreenPoint TransformationHelpers::worldToScreen(const Position position,
-                                                 const float zoom)
+                                                 float zoomFactor)
 {
     // Calc the scaling factor going from world tiles to screen tiles.
     static const float TILE_WIDTH_SCALE
@@ -22,18 +22,18 @@ ScreenPoint TransformationHelpers::worldToScreen(const Position position,
         = (position.x + position.y - position.z) * (TILE_HEIGHT_SCALE / 2.f);
 
     // Apply the camera zoom.
-    screenX *= zoom;
-    screenY *= zoom;
+    screenX *= zoomFactor;
+    screenY *= zoomFactor;
 
     return {screenX, screenY};
 }
 
 Position TransformationHelpers::screenToWorld(const ScreenPoint screenPoint,
-                                              const float zoom)
+                                              float zoomFactor)
 {
     // Remove the camera zoom.
-    float x = screenPoint.x / zoom;
-    float y = screenPoint.y / zoom;
+    float x = screenPoint.x / zoomFactor;
+    float y = screenPoint.y / zoomFactor;
 
     // Calc the scaling factor going from screen tiles to world tiles.
     static const float TILE_WIDTH_SCALE
@@ -42,11 +42,16 @@ Position TransformationHelpers::screenToWorld(const ScreenPoint screenPoint,
         = static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT) / SharedConfig::TILE_SCREEN_HEIGHT;
 
     // Calc the world position.
-    float worldX = ((2 * y) + x) * (TILE_WIDTH_SCALE);
-    float worldY = ((2 * y) - x) * (TILE_HEIGHT_SCALE) / 2;
+    float worldX = ((2.f * y) + x) * TILE_WIDTH_SCALE;
+    float worldY = ((2.f * y) - x) * TILE_HEIGHT_SCALE / 2.f;
 
     // TODO: Figure out how to handle Z.
     return {worldX, worldY, 0};
+}
+
+float TransformationHelpers::screenYToWorldZ(float yCoord, float zoomFactor)
+{
+    return (yCoord * zoomFactor) / 2.f;
 }
 
 SDL2pp::Rect TransformationHelpers::worldToScreenExtent(

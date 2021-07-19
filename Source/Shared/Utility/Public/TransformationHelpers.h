@@ -18,14 +18,26 @@ class TransformationHelpers
 public:
     /**
      * Converts a position in world space to a point in screen space.
+     *
+     * @param zoomFactor  The camera's zoom factor.
      */
-    static ScreenPoint worldToScreen(const Position position, const float zoom);
+    static ScreenPoint worldToScreen(const Position position, float zoomFactor);
 
     /**
      * Converts a point in screen space to a position in world space.
+     *
+     * @param zoomFactor  The camera's zoom factor.
      */
     static Position screenToWorld(const ScreenPoint screenPoint,
-                                  const float zoom);
+                                  float zoomFactor);
+
+    /**
+     * Converts a Y-axis coordinate in screen space to a Z-axis coordinate in
+     * world space.
+     *
+     * @param zoomFactor  The camera's zoom factor.
+     */
+    static float screenYToWorldZ(float yCoord, float zoomFactor);
 
     /**
      * Returns a final screen space extent for the given position, camera,

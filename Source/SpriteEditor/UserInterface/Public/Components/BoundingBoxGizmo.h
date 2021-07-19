@@ -2,7 +2,7 @@
 
 #include "AUI/Component.h"
 #include "ScreenPoint.h"
-#include <vector>
+#include <array>
 
 namespace AM
 {
@@ -31,13 +31,12 @@ public:
 
     /**
      * Loads the given active sprite's data into this gizmo.
+     * Note: This gizmo depends on having its logical extent set to match the
+     *       sprite image that it will be overlaying.
      *
      * @param inActiveSprite  The active sprite's data.
-     * @param inActiveSpriteUiExtent  The sprite's extent on screen, relative
-     *                                to the stage.
      */
-    void loadActiveSprite(SpriteStaticData* inActiveSprite
-                          , SDL_Rect inActiveSpriteUiExtent);
+    void loadActiveSprite(SpriteStaticData* inActiveSprite);
 
     /**
      * Refreshes this component's UI with the data from the currently set
@@ -51,6 +50,12 @@ public:
     //-------------------------------------------------------------------------
     void render(const SDL_Point& parentOffset = {}) override;
 
+    bool onMouseButtonDown(SDL_MouseButtonEvent& event) override;
+
+    bool onMouseButtonUp(SDL_MouseButtonEvent& event) override;
+
+    void onMouseMove(SDL_MouseMotionEvent& event) override;
+
 protected:
     /**
      * Overridden to choose the proper resolution of texture to use.
@@ -58,6 +63,17 @@ protected:
     bool refreshScaling() override;
 
 private:
+    /**
+     * The list of our clickable controls.
+     */
+    enum class Control {
+        None,
+        Position,
+        X,
+        Y,
+        Z
+    };
+
     /**
      * Transforms the positions in the given sprite's bounding box from world
      * space to screen space, scales them to the current UI scaling, and
@@ -76,9 +92,29 @@ private:
     void moveControls(std::vector<SDL_Point>& boundsScreenPoints);
 
     /**
+     * Moves the line extents to their proper screen position.
+     */
+    void moveLines(std::vector<SDL_Point>& boundsScreenPoints);
+
+    /**
+     * Moves the plane extents to their proper screen position.
+     */
+    void movePlanes(std::vector<SDL_Point>& boundsScreenPoints);
+
+    /**
      * Renders the control rectangles.
      */
     void renderControls(const SDL_Point& childOffset);
+
+    /**
+     * Renders the line polygons.
+     */
+    void renderLines(const SDL_Point& childOffset);
+
+    /**
+     * Renders the plane polygons.
+     */
+    void renderPlanes(const SDL_Point& childOffset);
 
     /** Used to save updated sprite data. */
     MainScreen& mainScreen;
@@ -86,26 +122,55 @@ private:
     /** The active sprite's data. */
     SpriteStaticData* activeSprite;
 
-    /** The extent of the active sprite in the UI. */
-    SDL_Rect activeSpriteUiExtent;
-
     /** A reasonable size for the control rectangles. */
-    static constexpr int LOGICAL_RECT_SIZE = 10;
+    static constexpr int LOGICAL_RECT_SIZE = 12;
 
     /** The scaled size of the control rectangles. */
     int scaledRectSize;
 
+    /** A reasonable width for the lines. */
+    static constexpr int LOGICAL_LINE_WIDTH = 4;
+
+    /** The scaled width of the lines. */
+    int scaledLineWidth;
+
+    // Controls (scaled extents, without parent offsets)
     /** The extent of the box position control, (maxX, maxY, minZ). */
     SDL_Rect positionControlExtent;
+    /** positionControlExtent + offsets from the most recent render(). */
+    SDL_Rect lastRenderedPosExtent;
 
     /** The extent of the x-axis box length control, (minX, maxY, minZ). */
     SDL_Rect xControlExtent;
+    /** xControlExtent + offsets from the most recent render(). */
+    SDL_Rect lastRenderedXExtent;
 
     /** The extent of the y-axis box length control, (maxX, minY, minZ). */
     SDL_Rect yControlExtent;
+    /** yControlExtent + offsets from the most recent render(). */
+    SDL_Rect lastRenderedYExtent;
 
     /** The extent of the z-axis box length control, (maxX, maxY, maxZ). */
     SDL_Rect zControlExtent;
+    /** zControlExtent + offsets from the most recent render(). */
+    SDL_Rect lastRenderedZExtent;
+
+    // Lines
+    SDL_Point xMinPoint;
+    SDL_Point xMaxPoint;
+
+    SDL_Point yMinPoint;
+    SDL_Point yMaxPoint;
+
+    SDL_Point zMinPoint;
+    SDL_Point zMaxPoint;
+
+    // Planes (each polygon takes 4 coordinates)
+    std::array<Sint16, 12> planeXCoords;
+    std::array<Sint16, 12> planeYCoords;
+
+    /** Tracks which control, if any, is currently being held. */
+    Control currentHeldControl;
 };
 
 } // End namespace SpriteEditor

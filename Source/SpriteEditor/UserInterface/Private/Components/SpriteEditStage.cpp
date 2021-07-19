@@ -42,15 +42,16 @@ void SpriteEditStage::loadActiveSprite(SpriteStaticData* activeSprite)
         // Size the sprite image to the sprite extent size.
         spriteImage.setLogicalExtent(centeredSpriteExtent);
 
-        // Set the background to the size of the sprite.
+        // Set the background and gizmo to the size of the sprite.
         checkerboardImage.setLogicalExtent(spriteImage.getLogicalExtent());
+        boundingBoxGizmo.setLogicalExtent(spriteImage.getLogicalExtent());
 
         // Set the sprite and background to be visible.
         checkerboardImage.setIsVisible(true);
         spriteImage.setIsVisible(true);
 
         // Load the sprite into the gizmo and make it visible.
-        boundingBoxGizmo.loadActiveSprite(activeSprite, spriteImage.getScaledExtent());
+        boundingBoxGizmo.loadActiveSprite(activeSprite);
         boundingBoxGizmo.setIsVisible(true);
     }
 }
