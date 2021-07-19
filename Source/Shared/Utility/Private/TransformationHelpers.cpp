@@ -19,7 +19,11 @@ ScreenPoint TransformationHelpers::worldToScreen(const Position position,
     // Convert cartesian world point to isometric screen point.
     float screenX = (position.x - position.y) * (TILE_WIDTH_SCALE / 2.f);
     float screenY
-        = (position.x + position.y - position.z) * (TILE_HEIGHT_SCALE / 2.f);
+        = (position.x + position.y) * (TILE_HEIGHT_SCALE / 2.f);
+
+    // The Z coordinate scaling is independent of X/Y and only affects the
+    // screen's Y axis. Scale and apply it.
+    screenY -= (position.z * SharedConfig::Z_SCREEN_SCALE);
 
     // Apply the camera zoom.
     screenX *= zoomFactor;
@@ -51,7 +55,10 @@ Position TransformationHelpers::screenToWorld(const ScreenPoint screenPoint,
 
 float TransformationHelpers::screenYToWorldZ(float yCoord, float zoomFactor)
 {
-    return (yCoord * zoomFactor) / 2.f;
+    // Calc the scaling factor going from screen Y units to world Z units.
+    static const float Z_WORLD_SCALE = 1 / SharedConfig::Z_SCREEN_SCALE;
+
+    return yCoord * zoomFactor * Z_WORLD_SCALE;
 }
 
 SDL2pp::Rect TransformationHelpers::worldToScreenExtent(

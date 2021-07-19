@@ -67,6 +67,12 @@ public:
     static constexpr unsigned int TILE_SPRITE_WIDTH = 256;
     /** The total height of a standard tile sprite. */
     static constexpr unsigned int TILE_SPRITE_HEIGHT = 512;
+
+    // Note: This solution is temporary. Eventually, the Tile concept will be
+    //       replaced with 3D Blocks and this value will be derivable like the
+    //       others.
+    /** The value used to scale world Z-axis units to screen Y-axis units. */
+    static constexpr float Z_SCREEN_SCALE = 2.f;
 };
 
 } // End namespace AM
