@@ -79,6 +79,11 @@ private:
 
     AUI::Image backgroundImage;
 
+    /**
+     * Converts the given float to a string with 3 decimals of precision.
+     */
+    std::string toRoundedString(float value);
+
     /** The below functions are all for validating and saving the user's data
         when the text is committed. */
     void saveName();

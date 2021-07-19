@@ -4,6 +4,9 @@
 #include "SpriteStaticData.h"
 #include "Ignore.h"
 #include <string>
+#include <iomanip>
+#include <sstream>
+#include <iostream>
 
 namespace AM
 {
@@ -141,12 +144,12 @@ void PropertiesPanel::refresh()
 
     // Fill the fields with the activeSprite data.
     nameInput.setText(activeSprite->displayName);
-    minXInput.setText(std::to_string(activeSprite->modelBounds.minX));
-    minYInput.setText(std::to_string(activeSprite->modelBounds.minY));
-    minZInput.setText(std::to_string(activeSprite->modelBounds.minZ));
-    maxXInput.setText(std::to_string(activeSprite->modelBounds.maxX));
-    maxYInput.setText(std::to_string(activeSprite->modelBounds.maxY));
-    maxZInput.setText(std::to_string(activeSprite->modelBounds.maxZ));
+    minXInput.setText(toRoundedString(activeSprite->modelBounds.minX));
+    minYInput.setText(toRoundedString(activeSprite->modelBounds.minY));
+    minZInput.setText(toRoundedString(activeSprite->modelBounds.minZ));
+    maxXInput.setText(toRoundedString(activeSprite->modelBounds.maxX));
+    maxYInput.setText(toRoundedString(activeSprite->modelBounds.maxY));
+    maxZInput.setText(toRoundedString(activeSprite->modelBounds.maxZ));
 }
 
 void PropertiesPanel::clear()
@@ -199,6 +202,13 @@ void PropertiesPanel::render(const SDL_Point& parentOffset)
 
     maxZLabel.render(childOffset);
     maxZInput.render(childOffset);
+}
+
+std::string PropertiesPanel::toRoundedString(float value)
+{
+    std::stringstream stream;
+    stream << std::fixed << std::setprecision(3) << value;
+    return stream.str();
 }
 
 void PropertiesPanel::saveName()
