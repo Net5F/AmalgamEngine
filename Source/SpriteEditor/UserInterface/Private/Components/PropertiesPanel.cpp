@@ -2,11 +2,13 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteStaticData.h"
+#include "SharedConfig.h"
 #include "Ignore.h"
 #include <string>
 #include <iomanip>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 namespace AM
 {
@@ -232,6 +234,9 @@ void PropertiesPanel::saveMinX()
             // Convert the input string to a float.
             float newMinX{std::stof(minXInput.getText())};
 
+            // Clamp the value to its bounds.
+            newMinX = std::clamp(newMinX, 0.f, activeSprite->modelBounds.maxX);
+
             // The input was valid, save it.
             activeSprite->modelBounds.minX = newMinX;
             committedMinX = newMinX;
@@ -253,6 +258,9 @@ void PropertiesPanel::saveMinY()
         try {
             // Convert the input string to a float.
             float newMinY{std::stof(minYInput.getText())};
+
+            // Clamp the value to its bounds.
+            newMinY = std::clamp(newMinY, 0.f, activeSprite->modelBounds.maxY);
 
             // The input was valid, save it.
             activeSprite->modelBounds.minY = newMinY;
@@ -276,6 +284,9 @@ void PropertiesPanel::saveMinZ()
             // Convert the input string to a float.
             float newMinZ{std::stof(minZInput.getText())};
 
+            // Clamp the value to its bounds.
+            newMinZ = std::clamp(newMinZ, 0.f, activeSprite->modelBounds.maxZ);
+
             // The input was valid, save it.
             activeSprite->modelBounds.minZ = newMinZ;
             committedMinZ = newMinZ;
@@ -297,6 +308,10 @@ void PropertiesPanel::saveMaxX()
         try {
             // Convert the input string to a float.
             float newMaxX{std::stof(maxXInput.getText())};
+
+            // Clamp the value to its bounds.
+            newMaxX = std::clamp(newMaxX, activeSprite->modelBounds.minX
+                                 , static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
             // The input was valid, save it.
             activeSprite->modelBounds.maxX = newMaxX;
@@ -320,6 +335,10 @@ void PropertiesPanel::saveMaxY()
             // Convert the input string to a float.
             float newMaxY{std::stof(maxYInput.getText())};
 
+            // Clamp the value to its bounds.
+            newMaxY = std::clamp(newMaxY, activeSprite->modelBounds.minY
+                                 , static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT));
+
             // The input was valid, save it.
             activeSprite->modelBounds.maxY = newMaxY;
             committedMaxY = newMaxY;
@@ -341,6 +360,14 @@ void PropertiesPanel::saveMaxZ()
         try {
             // Convert the input string to a float.
             float newMaxZ{std::stof(maxZInput.getText())};
+
+            // Clamp the value to its lower bound.
+            // Note: We don't clamp to an upper bound cause it's hard to calc
+            //       and not very useful. Can add if we ever care to.
+            float minZ = activeSprite->modelBounds.minZ;
+            if (newMaxZ < minZ) {
+                newMaxZ = minZ;
+            }
 
             // The input was valid, save it.
             activeSprite->modelBounds.maxZ = newMaxZ;

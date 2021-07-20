@@ -32,6 +32,11 @@ ScreenPoint TransformationHelpers::worldToScreen(const Position position,
     return {screenX, screenY};
 }
 
+float TransformationHelpers::worldZToScreenY(float zCoord, float zoomFactor)
+{
+    return zCoord * zoomFactor * SharedConfig::Z_SCREEN_SCALE;
+}
+
 Position TransformationHelpers::screenToWorld(const ScreenPoint screenPoint,
                                               float zoomFactor)
 {
