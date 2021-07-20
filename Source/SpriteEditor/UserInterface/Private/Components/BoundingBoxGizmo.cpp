@@ -6,6 +6,7 @@
 #include "Ignore.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
+#include <algorithm>
 
 #include <SDL2/SDL2_gfxPrimitives.h>
 
@@ -176,11 +177,11 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
             break;
         }
         case Control::X: {
-            activeSprite->modelBounds.minX = mouseWorldPos.x;
+            updateXBounds(mouseWorldPos);
             break;
         }
         case Control::Y: {
-            activeSprite->modelBounds.minY = mouseWorldPos.y;
+            updateYBounds(mouseWorldPos);
             break;
         }
         case Control::Z: {
@@ -216,16 +217,52 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 {
     // Note: The expected behavior is to move along the x/y plane and
     //       leave minZ where it was.
+    float& minX = activeSprite->modelBounds.minX;
+    float& minY = activeSprite->modelBounds.minY;
+    float& maxX = activeSprite->modelBounds.maxX;
+    float& maxY = activeSprite->modelBounds.maxY;
 
     // Move the min bounds to follow the max bounds.
-    float diffX{mouseWorldPos.x - activeSprite->modelBounds.maxX};
-    float diffY{mouseWorldPos.y - activeSprite->modelBounds.maxY};
-    activeSprite->modelBounds.minX += diffX;
-    activeSprite->modelBounds.minY += diffY;
+    float diffX{mouseWorldPos.x - maxX};
+    float diffY{mouseWorldPos.y - maxY};
+    minX += diffX;
+    minY += diffY;
 
     // Move the max bounds to their new position.
-    activeSprite->modelBounds.maxX = mouseWorldPos.x;
-    activeSprite->modelBounds.maxY = mouseWorldPos.y;
+    maxX = mouseWorldPos.x;
+    maxY = mouseWorldPos.y;
+
+    // If we moved outside the tile bounds, bring the box bounds back in.
+    if (minX < 0) {
+        maxX += -minX;
+        minX = 0;
+    }
+    if (minY < 0) {
+        maxY += -minY;
+        minY = 0;
+    }
+    if (maxX > SharedConfig::TILE_WORLD_WIDTH) {
+        float diff = maxX - SharedConfig::TILE_WORLD_WIDTH;
+        minX -= diff;
+        maxX -= diff;
+    }
+    if (maxY > SharedConfig::TILE_WORLD_HEIGHT) {
+        float diff = maxY - SharedConfig::TILE_WORLD_HEIGHT;
+        minY -= diff;
+        maxY -= diff;
+    }
+}
+
+void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
+{
+    activeSprite->modelBounds.minX = std::clamp(mouseWorldPos.x
+                                                , 0.f, activeSprite->modelBounds.maxX);
+}
+
+void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
+{
+    activeSprite->modelBounds.minY = std::clamp(mouseWorldPos.y
+                                                , 0.f, activeSprite->modelBounds.maxY);
 }
 
 void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
@@ -244,9 +281,12 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     mouseZHeight = AUI::ScalingHelpers::actualToLogical(mouseZHeight);
 
     // Apply our screen -> world Z scaling.
-    mouseZHeight = TransformationHelpers::screenYToWorldZ(mouseZHeight, 1);
+    mouseZHeight = TransformationHelpers::screenYToWorldZ(mouseZHeight, 1.f);
 
-    activeSprite->modelBounds.maxZ = mouseZHeight;
+    // Set maxZ, making sure it doesn't go below minZ.
+    if (mouseZHeight > activeSprite->modelBounds.minZ) {
+        activeSprite->modelBounds.maxZ = mouseZHeight;
+    }
 }
 
 void BoundingBoxGizmo::calcOffsetScreenPoints(std::vector<SDL_Point>& boundsScreenPoints)

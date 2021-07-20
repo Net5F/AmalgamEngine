@@ -82,6 +82,16 @@ private:
     void updatePositionBounds(const Position& mouseWorldPos);
 
     /**
+     * Updates the active sprite's minX bound to match the given mouse position.
+     */
+    void updateXBounds(const Position& mouseWorldPos);
+
+    /**
+     * Updates the active sprite's minY bound to match the given mouse position.
+     */
+    void updateYBounds(const Position& mouseWorldPos);
+
+    /**
      * Updates the active sprite's maxZ bound to match the given mouse position.
      */
     void updateZBounds(int mouseScreenYPos);
