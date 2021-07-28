@@ -4,8 +4,6 @@
 
 namespace AM
 {
-namespace SpriteEditor
-{
 
 /**
  * Module-specific paths. Used for accessing files in expected directories.
@@ -13,6 +11,9 @@ namespace SpriteEditor
 class Paths
 {
 public:
+    /** The path that the application was ran from.
+        Note: Use this instead of SDL_GetBasePath() to easily avoid leaking
+              memory. */
     static const char* BASE_PATH;
 
     /** The expected path to the root of the Textures directory. */
@@ -22,5 +23,4 @@ public:
     static const std::string FONT_DIR;
 };
 
-} // End namespace SpriteEditor
 } // End namespace AM

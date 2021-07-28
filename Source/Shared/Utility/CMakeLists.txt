@@ -1,6 +1,7 @@
 target_sources(Shared
     PRIVATE
         Private/Log.cpp
+        Private/Paths.cpp
         Private/PeriodicCaller.cpp
 	    Private/ResourceManager.cpp
         Private/Timer.cpp
@@ -9,6 +10,7 @@ target_sources(Shared
         Public/EventHandler.h
         Public/Ignore.h
         Public/Log.h
+        Public/Paths.h
         Public/PeriodicCaller.h
         Public/Profiler.h
         Public/ResourceManager.h

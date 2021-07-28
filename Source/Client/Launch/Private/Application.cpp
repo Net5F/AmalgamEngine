@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "SharedConfig.h"
 #include "Profiler.h"
+#include "Paths.h"
 #include "Log.h"
 
 #include "SDL.h"
@@ -13,12 +14,12 @@ namespace AM
 {
 namespace Client
 {
-Application::Application(const std::string& runPath)
+Application::Application()
 : sdl(SDL_INIT_VIDEO)
 , sdlWindow("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             SharedConfig::SCREEN_WIDTH, SharedConfig::SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
-, resourceManager(runPath, sdlRenderer)
+, resourceManager(Paths::BASE_PATH, sdlRenderer)
 , network()
 , networkCaller(std::bind_front(&Network::tick, &network), SharedConfig::NETWORK_TICK_TIMESTEP_S,
                 "Network", true)
