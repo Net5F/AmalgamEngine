@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
+#include "Paths.h"
 #include "Ignore.h"
 
 namespace AM
@@ -20,11 +21,11 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpri
 , addSheetDialog(inScreen, spriteSheetContainer, spriteDataModel)
 {
     /* Background image */
-    backgroundImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/Background_1920.png"
+    backgroundImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/Background_1920.png")
                                   , {4, 4, 399, 708});
-    backgroundImage.addResolution({1600, 900}, "Textures/SpriteSheetPanel/Background_1600.png"
+    backgroundImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/Background_1600.png")
                                   , {4, 4, 333, 590});
-    backgroundImage.addResolution({1280, 720}, "Textures/SpriteSheetPanel/Background_1280.png"
+    backgroundImage.addResolution({1280, 720}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/Background_1280.png")
                                   , {3, 3, 266, 472});
 
     /* Container */
@@ -33,11 +34,11 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpri
     spriteSheetContainer.setCellHeight(162);
 
     /* Remove sheet button */
-    remSheetButton.normalImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/RemoveNormal.png");
-    remSheetButton.hoveredImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/RemoveHovered.png");
-    remSheetButton.pressedImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/RemoveNormal.png");
-    remSheetButton.disabledImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/RemoveDisabled.png");
-    remSheetButton.text.setFont("Fonts/B612-Regular.ttf", 33);
+    remSheetButton.normalImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveNormal.png"));
+    remSheetButton.hoveredImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveHovered.png"));
+    remSheetButton.pressedImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveNormal.png"));
+    remSheetButton.disabledImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveDisabled.png"));
+    remSheetButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     remSheetButton.text.setText("");
     remSheetButton.disable();
 
@@ -75,10 +76,10 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpri
     });
 
     /* Add sheet button */
-    addSheetButton.normalImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/AddNormal.png");
-    addSheetButton.hoveredImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/AddHovered.png");
-    addSheetButton.pressedImage.addResolution({1920, 1080}, "Textures/SpriteSheetPanel/AddNormal.png");
-    addSheetButton.text.setFont("Fonts/B612-Regular.ttf", 33);
+    addSheetButton.normalImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/AddNormal.png"));
+    addSheetButton.hoveredImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/AddHovered.png"));
+    addSheetButton.pressedImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/AddNormal.png"));
+    addSheetButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     addSheetButton.text.setText("");
 
     addSheetButton.setOnPressed([this](){
@@ -99,7 +100,7 @@ void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
         std::make_unique<MainThumbnail>(screen, "")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
 
-    thumbnail.thumbnailImage.addResolution({1280, 720}, sheet.relPath);
+    thumbnail.thumbnailImage.addResolution({1280, 720}, (spriteDataModel.getWorkingResourcesDir() + sheet.relPath));
     thumbnail.setText(sheet.relPath);
     thumbnail.setIsActivateable(false);
 

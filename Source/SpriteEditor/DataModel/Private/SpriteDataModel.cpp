@@ -6,6 +6,7 @@
 #include "SDL2pp/Renderer.hh"
 #include "SDL2pp/Texture.hh"
 #include "SDL2pp/Exception.hh"
+#include <filesystem>
 
 namespace AM
 {
@@ -14,47 +15,57 @@ namespace SpriteEditor
 
 SpriteDataModel::SpriteDataModel(SDL2pp::Renderer& inSdlRenderer)
 : sdlRenderer{inSdlRenderer}
-, currentWorkingFilePath{""}
+, workingFilePath{""}
+, workingResourcesDir{""}
 , nextSpriteId{0}
 {
 }
 
-bool SpriteDataModel::create(const std::string& fullPath)
+std::string SpriteDataModel::create(const std::string& fullPath)
 {
     // If a SpriteData.json already exists at the given path, return false.
-    currentWorkingFilePath = fullPath;
-    currentWorkingFilePath += "/SpriteData.json";
-    std::ifstream existingFile{currentWorkingFilePath};
-    if (existingFile) {
-        currentWorkingFilePath = "";
-        return false;
+    workingFilePath = fullPath;
+    workingFilePath += "/SpriteData.json";
+    if (std::filesystem::exists(workingFilePath)) {
+        workingFilePath = "";
+        return "SpriteData.json file already exists at the selected path.";
     }
 
     // Create the file.
-    std::ofstream currentWorkingFile(currentWorkingFilePath, std::ios::app);
-    currentWorkingFile.close();
+    std::ofstream workingFile(workingFilePath, std::ios::app);
+    workingFile.close();
+
+    // Set the working directory.
+    if (!setWorkingResourcesDir()) {
+        return "Failed to create Resources directory.";
+    }
 
     // Save our empty model structure.
     save();
 
-    return true;
+    return "";
 }
 
 std::string SpriteDataModel::load(const std::string& fullPath)
 {
     // Open the file.
-    std::ifstream currentWorkingFile(fullPath);
-    if (currentWorkingFile.is_open()) {
-        currentWorkingFilePath = fullPath;
+    std::ifstream workingFile(fullPath);
+    if (workingFile.is_open()) {
+        workingFilePath = fullPath;
+
+        // Set the working directory.
+        if (!setWorkingResourcesDir()) {
+            return "Failed to create Resources directory.";
+        }
     }
     else {
         return "File failed to open.";
     }
 
     // Parse the file into a json structure.
-    nlohmann::json json = nlohmann::json::parse(currentWorkingFile, nullptr, false);
+    nlohmann::json json = nlohmann::json::parse(workingFile, nullptr, false);
     if (json.is_discarded()) {
-        currentWorkingFile.close();
+        workingFile.close();
         return "File is not valid JSON.";
     }
 
@@ -67,6 +78,12 @@ std::string SpriteDataModel::load(const std::string& fullPath)
 
             // Add this sheet's relative path.
             spriteSheet.relPath = sheetJson.value()["relPath"].get<std::string>();
+            std::string resultString = validateRelPath(spriteSheet.relPath);
+            if (resultString != "") {
+                workingFile.close();
+                spriteSheets.clear();
+                return resultString;
+            }
 
             // For every sprite in the sheet.
             for (auto& spriteJson : sheetJson.value()["sprites"].items()) {
@@ -88,6 +105,8 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                     }
                 }
                 else {
+                    workingFile.close();
+                    spriteSheets.clear();
                     return "Sprite ID is not within range of Uint16.";
                 }
 
@@ -111,7 +130,8 @@ std::string SpriteDataModel::load(const std::string& fullPath)
         }
     }
     catch (nlohmann::json::type_error& e) {
-        currentWorkingFile.close();
+        workingFile.close();
+        spriteSheets.clear();
         std::string failureString{"Parse failure - "};
         failureString += e.what();
         return failureString;
@@ -173,13 +193,13 @@ void SpriteDataModel::save()
     }
 
     // Write the json to our working file.
-    std::ofstream currentWorkingFile(currentWorkingFilePath, std::ios::trunc);
-    if (!(currentWorkingFile.is_open())) {
-        LOG_ERROR("File failed to open: %s.", currentWorkingFilePath.c_str());
+    std::ofstream workingFile(workingFilePath, std::ios::trunc);
+    if (!(workingFile.is_open())) {
+        LOG_ERROR("File failed to open: %s.", workingFilePath.c_str());
     }
 
     std::string jsonDump{json.dump(4)};
-    currentWorkingFile << jsonDump;
+    workingFile << jsonDump;
 }
 
 std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const std::string& spriteWidth
@@ -197,8 +217,8 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
     int sheetWidth{0};
     int sheetHeight{0};
     try {
-        // Append AUI::Core::resourcePath to the given relative path.
-        std::string fullPath{AUI::Core::GetResourcePath()};
+        // Append the texture directory to the given relative path.
+        std::string fullPath{workingResourcesDir};
         fullPath += relPath;
         SDL2pp::Texture sheetTexture(sdlRenderer, fullPath);
 
@@ -209,7 +229,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
     }
     catch (SDL2pp::Exception& e) {
         std::string errorString{"Error: File at given path is not a valid image. Path: "};
-        errorString += AUI::Core::GetResourcePath();
+        errorString += workingResourcesDir;
         errorString+= relPath;
         return errorString;
     }
@@ -284,6 +304,29 @@ std::vector<SpriteSheet>& SpriteDataModel::getSpriteSheets()
     return spriteSheets;
 }
 
+const std::string& SpriteDataModel::getWorkingResourcesDir()
+{
+    return workingResourcesDir;
+}
+
+std::string SpriteDataModel::validateRelPath(const std::string& relPath)
+{
+    // Construct the file path.
+    std::filesystem::path filePath{workingResourcesDir};
+    filePath /= relPath;
+
+    // Check if the file exists.
+    if (std::filesystem::exists(filePath)) {
+        return "";
+    }
+    else {
+        // File doesn't exist, return an error string.
+        std::string returnString{"File not found at Resources/"};
+        returnString += relPath;
+        return returnString;
+    }
+}
+
 bool SpriteDataModel::idIsValid(int spriteId)
 {
     // Check if the ID is in range of a Uint16.
@@ -293,6 +336,30 @@ bool SpriteDataModel::idIsValid(int spriteId)
     else {
         return false;
     }
+}
+
+bool SpriteDataModel::setWorkingResourcesDir()
+{
+    // Construct the resources dir path.
+    std::filesystem::path resourcesDirPath{workingFilePath};
+    resourcesDirPath = resourcesDirPath.parent_path();
+    resourcesDirPath /= "Resources/";
+
+    // Check if the resources dir exists.
+    if (!std::filesystem::exists(resourcesDirPath)) {
+        // Resources dir doesn't exist, create it.
+        std::error_code errorCode;
+        if (!std::filesystem::create_directory(resourcesDirPath, errorCode)) {
+            // Failed to create dir, return false.
+            return false;
+        }
+    }
+
+    // Convert the path to UTF_8 string and save it.
+    const char8_t* u8StringPtr{resourcesDirPath.u8string().c_str()};
+    workingResourcesDir = std::string(reinterpret_cast<const char*>(u8StringPtr));
+
+    return true;
 }
 
 } // End namespace SpriteEditor

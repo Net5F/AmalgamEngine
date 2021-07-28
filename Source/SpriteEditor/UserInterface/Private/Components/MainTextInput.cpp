@@ -1,4 +1,5 @@
 #include "MainTextInput.h"
+#include "Paths.h"
 
 namespace AM
 {
@@ -10,13 +11,13 @@ MainTextInput::MainTextInput(AUI::Screen& screen, const char* key
 : AUI::TextInput(screen, key, screenExtent)
 {
     // Add our backgrounds.
-    normalImage.addResolution({1920, 1080}, "Textures/TextInput/Normal.png");
-    hoveredImage.addResolution({1920, 1080}, "Textures/TextInput/Hovered.png");
-    selectedImage.addResolution({1920, 1080}, "Textures/TextInput/Selected.png");
-    disabledImage.addResolution({1920, 1080}, "Textures/TextInput/Disabled.png");
+    normalImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "TextInput/Normal.png"));
+    hoveredImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "TextInput/Hovered.png"));
+    selectedImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "TextInput/Selected.png"));
+    disabledImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "TextInput/Disabled.png"));
 
     // Set our text properties.
-    setTextFont("Fonts/B612-Regular.ttf", 25);
+    setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 25);
 
     // Set our input box properties.
     setCursorWidth(2);

@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
+#include "Paths.h"
 
 namespace AM
 {
@@ -30,56 +31,56 @@ AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer&
 , errorText(inScreen, "", {748, 556, 466, 60})
 {
     /* Background image. */
-    backgroundImage.addResolution({1920, 1080}, "Textures/Dialogs/AddSheetBackground.png");
+    backgroundImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "Dialogs/AddSheetBackground.png"));
 
     /* Header text. */
-    headerText.setFont("Fonts/B612-Regular.ttf", 32);
+    headerText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 32);
     headerText.setColor({255, 255, 255, 255});
     headerText.setText("Add sprite sheet");
 
     /* Path entry. */
-    pathLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    pathLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     pathLabel.setColor({255, 255, 255, 255});
     pathLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     pathLabel.setText("Relative Path");
 
-    pathInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    pathInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     pathInput.setMargins({8, 0, 8, 0});
 
     /* Width entry. */
-    widthLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    widthLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     widthLabel.setColor({255, 255, 255, 255});
     widthLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     widthLabel.setText("Sprite Width");
 
-    widthInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    widthInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     widthInput.setMargins({8, 0, 8, 0});
 
     /* Height entry. */
-    heightLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    heightLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     heightLabel.setColor({255, 255, 255, 255});
     heightLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     heightLabel.setText("Sprite Height");
 
-    heightInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    heightInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     heightInput.setMargins({8, 0, 8, 0});
 
     /* Y offset entry. */
-    offsetLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    offsetLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     offsetLabel.setColor({255, 255, 255, 255});
     offsetLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     offsetLabel.setText("Y Offset");
 
-    offsetInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    offsetInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     offsetInput.setMargins({8, 0, 8, 0});
 
     /* Name entry. */
-    nameLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    nameLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     nameLabel.setColor({255, 255, 255, 255});
     nameLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     nameLabel.setText("Base Name");
 
-    nameInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    nameInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     nameInput.setMargins({8, 0, 8, 0});
 
     /* Confirmation buttons. */
@@ -118,7 +119,7 @@ AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer&
     });
 
     /* Error text. */
-    errorText.setFont("Fonts/B612-Regular.ttf", 20);
+    errorText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 20);
     errorText.setColor({255, 255, 255, 255});
     errorText.setText("Uninitialized.");
     errorText.setIsVisible(false);

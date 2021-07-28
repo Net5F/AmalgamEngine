@@ -1,4 +1,5 @@
 #include "ConfirmationButton.h"
+#include "Paths.h"
 
 namespace AM
 {
@@ -10,12 +11,12 @@ ConfirmationButton::ConfirmationButton(AUI::Screen& screen, const char* key
 : AUI::Button(screen, key, screenExtent)
 {
     // Add our backgrounds.
-    normalImage.addResolution({1600, 900}, "Textures/ConfirmationButton/Normal.png");
-    hoveredImage.addResolution({1600, 900}, "Textures/ConfirmationButton/Hovered.png");
-    pressedImage.addResolution({1600, 900}, "Textures/ConfirmationButton/Pressed.png");
+    normalImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Normal.png"));
+    hoveredImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Hovered.png"));
+    pressedImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Pressed.png"));
 
     // Set our text properties.
-    text.setFont("Fonts/B612-Regular.ttf", 18);
+    text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     text.setColor({255, 255, 255, 255});
     text.setText(inText);
 }

@@ -3,15 +3,13 @@
 #include "AUI/Core.h"
 #include "Log.h"
 #include "Ignore.h"
-#include <SDL_filesystem.h>
 
 namespace AM
 {
 namespace SpriteEditor
 {
 UserInterface::UserInterface(SDL_Renderer* renderer, SpriteDataModel& spriteDataModel)
-: auiInitializer((std::string{SDL_GetBasePath()} + "Resources/"), renderer
-              , {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT})
+: auiInitializer(renderer, {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT})
 , currentScreen(&titleScreen)
 , titleScreen(*this, spriteDataModel)
 , mainScreen(spriteDataModel)

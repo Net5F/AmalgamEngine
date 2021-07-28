@@ -8,7 +8,7 @@ namespace SpriteEditor
 {
 
 /**
- * This class contains module-specific configuration data.
+ * Module-specific configuration data.
  *
  * All data is currently static, but eventually this class will be in charge
  * of loading some of the data dynamically from a config file.

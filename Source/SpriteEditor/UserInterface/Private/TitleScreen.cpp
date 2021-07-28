@@ -1,5 +1,6 @@
 #include "TitleScreen.h"
 #include "UserInterface.h"
+#include "Paths.h"
 #include "AUI/Core.h"
 #include "nfd.hpp"
 #include "Log.h"
@@ -20,13 +21,13 @@ TitleScreen::TitleScreen(UserInterface& inUserInterface, SpriteDataModel& inSpri
 , errorText(*this, "ErrorText", {0, 721, 1920, 48})
 {
     /* Title text. */
-    titleText.setFont("Fonts/B612-Regular.ttf", 54);
+    titleText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 54);
     titleText.setColor({255, 255, 255, 255});
     titleText.setText("Amalgam Engine Sprite Editor");
     titleText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
 
     /* Error text. */
-    errorText.setFont("Fonts/B612-Regular.ttf", 36);
+    errorText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 36);
     errorText.setColor({255, 255, 255, 255});
     errorText.setText("Uninitialized.");
     errorText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
@@ -40,7 +41,7 @@ TitleScreen::TitleScreen(UserInterface& inUserInterface, SpriteDataModel& inSpri
 void TitleScreen::render()
 {
     // Fill the background with the background color.
-    SDL_Renderer* renderer = AUI::Core::GetRenderer();
+    SDL_Renderer* renderer = AUI::Core::getRenderer();
     SDL_SetRenderDrawColor(renderer, 37, 37, 52, 255);
     SDL_RenderClear(renderer);
 
@@ -61,13 +62,14 @@ void TitleScreen::onNewButtonPressed()
 
     if (result == NFD_OKAY) {
         // If we successfully created a new file, change to the main screen.
-        if (spriteDataModel.create(selectedPath)) {
+        std::string resultString = spriteDataModel.create(selectedPath);
+        if (resultString == "") {
             userInterface.openMainScreen();
         }
         else {
-            // File already exists. Display the error text.
-            errorText.setText("Error: SpriteData.json already exists at the "
-                              "selected path.");
+            // Failed to create file or dir, display the error text.
+            resultString = "Error: " + resultString;
+            errorText.setText(resultString);
             errorText.setIsVisible(true);
         }
 

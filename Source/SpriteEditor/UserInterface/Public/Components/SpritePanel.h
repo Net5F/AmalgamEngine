@@ -12,6 +12,7 @@ namespace SpriteEditor
 {
 
 class MainScreen;
+class SpriteDataModel;
 
 /**
  * The left-hand panel on the main screen. Allows the user to manage the
@@ -23,7 +24,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpritePanel(MainScreen& inScreen);
+    SpritePanel(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
 
     /**
      * Adds a MainThumbnail component to the spriteContainer, using the
@@ -51,6 +52,9 @@ private:
     /** Used to save/clear the active sprite when a sprite thumbnail is
         activated or deactivated. */
     MainScreen& mainScreen;
+
+    /** Used to get the current working dir when displaying the thumbnails. */
+    SpriteDataModel& spriteDataModel;
 
     AUI::Image backgroundImage;
 

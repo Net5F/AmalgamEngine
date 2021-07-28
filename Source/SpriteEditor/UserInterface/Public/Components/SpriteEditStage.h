@@ -11,6 +11,7 @@ namespace SpriteEditor
 
 class MainScreen;
 class SpriteStaticData;
+class SpriteDataModel;
 
 /**
  * The center stage on the main screen. Allows the user to edit a sprite's
@@ -22,7 +23,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteEditStage(MainScreen& inScreen);
+    SpriteEditStage(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
 
     /**
      * Loads the given sprite onto the stage.
@@ -43,6 +44,9 @@ private:
     /** Used to save/clear the active sprite when a sprite thumbnail is
         activated or deactivated. */
     MainScreen& mainScreen;
+
+    /** Used to get the current working dir when displaying the sprite. */
+    SpriteDataModel& spriteDataModel;
 
     /** Checkerboard image, tiled as the background for the loaded sprite. */
     AUI::TiledImage checkerboardImage;

@@ -28,10 +28,10 @@ public:
      *
      * @param fullPath  The full path to the directory where SpriteData.json
      *                  should be created.
-     * @return false if the given path already has a SpriteData.json, or file
-     *         creation fails.
+     * @return An empty string if the file at the given path parses
+     *         successfully, else a string containing the failure message.
      */
-    bool create(const std::string& fullPath);
+    std::string create(const std::string& fullPath);
 
     /**
      * Attempts to open the SpriteData.json at the given path, parse it,
@@ -82,8 +82,17 @@ public:
     void remSpriteSheet(unsigned int index);
 
     std::vector<SpriteSheet>& getSpriteSheets();
+    const std::string& getWorkingResourcesDir();
 
 private:
+    /**
+     * Checks that the given relative path corresponds to a valid sprite
+     * sheet image in the working Resources directory.
+     *
+     * @return "" if the given path is valid, else an appropriate error string.
+     */
+    std::string validateRelPath(const std::string& relPath);
+
     /**
      * Checks that spriteId is in range of a Uint16.
      *
@@ -91,14 +100,24 @@ private:
      */
     bool idIsValid(int spriteId);
 
+    /**
+     * Sets currentWorkingDir to the parent directory of
+     * currentWorkingFilePath.
+     */
+    bool setWorkingResourcesDir();
+
     /** Used for validating user-selected sprite sheet textures. */
     SDL2pp::Renderer& sdlRenderer;
 
     /** The sprite sheets that we currently have loaded. */
     std::vector<SpriteSheet> spriteSheets;
 
-    /** The file that we currently have loaded and are working on. */
-    std::string currentWorkingFilePath;
+    /** The SpriteData.json file that we currently have loaded and are working
+        on. */
+    std::string workingFilePath;
+
+    /** The parent directory of currentWorkingFilePath. */
+    std::string workingResourcesDir;
 
     /** The next ID that we'll assign to a sprite. Must stay within the range
         of a Uint16, since that's what it will be in the map format. */

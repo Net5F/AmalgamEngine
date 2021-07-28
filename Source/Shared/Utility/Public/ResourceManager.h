@@ -38,8 +38,7 @@ public:
     bool loadTexture(std::string_view path, const entt::hashed_string& filename);
 
     /**
-     * @param id  The resource identifier, a path including the full file name,
-     *            relative to "Resources/Textures/".
+     * @param id  The resource identifier, a path including the full file name
      * @return A valid handle if the id exists, else an invalid handle.
      */
      TextureHandle getTexture(const entt::hashed_string id);

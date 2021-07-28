@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
+#include "Paths.h"
 #include "Ignore.h"
 
 namespace AM
@@ -9,14 +10,15 @@ namespace AM
 namespace SpriteEditor
 {
 
-SpritePanel::SpritePanel(MainScreen& inScreen)
+SpritePanel::SpritePanel(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, "SpritePanel", {-8, 732, 1936, 352})
 , mainScreen{inScreen}
+, spriteDataModel{inSpriteDataModel}
 , backgroundImage(inScreen, "", {0, 0, 1936, 352})
 , spriteContainer(inScreen, "SpriteContainer", {191, 24, 1737, 324})
 {
     /* Background image */
-    backgroundImage.addResolution({1600, 900}, "Textures/SpritePanel/Background_1600.png");
+    backgroundImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "SpritePanel/Background_1600.png"));
 
     /* Container */
     spriteContainer.setNumColumns(10);
@@ -30,7 +32,7 @@ void SpritePanel::addSprite(const SpriteSheet& sheet, SpriteStaticData& sprite)
         std::make_unique<MainThumbnail>(screen, "")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
 
-    thumbnail.thumbnailImage.addResolution({1280, 720}, sheet.relPath
+    thumbnail.thumbnailImage.addResolution({1280, 720}, (spriteDataModel.getWorkingResourcesDir() + sheet.relPath)
         , sprite.textureExtent);
     thumbnail.setText(sprite.displayName);
     thumbnail.setIsSelectable(false);

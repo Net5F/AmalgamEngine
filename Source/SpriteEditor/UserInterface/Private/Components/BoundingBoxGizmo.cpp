@@ -419,8 +419,8 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
     offsetExtent.y += childOffset.y;
     lastRenderedPosExtent = offsetExtent;
 
-    SDL_SetRenderDrawColor(AUI::Core::GetRenderer(), 0, 0, 0, 255);
-    SDL_RenderFillRect(AUI::Core::GetRenderer(), &lastRenderedPosExtent);
+    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 0, 0, 255);
+    SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedPosExtent);
 
     // X control
     offsetExtent = xControlExtent;
@@ -428,8 +428,8 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
     offsetExtent.y += childOffset.y;
     lastRenderedXExtent = offsetExtent;
 
-    SDL_SetRenderDrawColor(AUI::Core::GetRenderer(), 148, 0, 0, 255);
-    SDL_RenderFillRect(AUI::Core::GetRenderer(), &lastRenderedXExtent);
+    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 148, 0, 0, 255);
+    SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedXExtent);
 
     // Y control
     offsetExtent = yControlExtent;
@@ -437,8 +437,8 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
     offsetExtent.y += childOffset.y;
     lastRenderedYExtent = offsetExtent;
 
-    SDL_SetRenderDrawColor(AUI::Core::GetRenderer(), 0, 149, 0, 255);
-    SDL_RenderFillRect(AUI::Core::GetRenderer(), &lastRenderedYExtent);
+    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 149, 0, 255);
+    SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedYExtent);
 
     // Z control
     offsetExtent = zControlExtent;
@@ -446,8 +446,8 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
     offsetExtent.y += childOffset.y;
     lastRenderedZExtent = offsetExtent;
 
-    SDL_SetRenderDrawColor(AUI::Core::GetRenderer(), 0, 82, 240, 255);
-    SDL_RenderFillRect(AUI::Core::GetRenderer(), &lastRenderedZExtent);
+    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 82, 240, 255);
+    SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedZExtent);
 }
 
 void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
@@ -460,7 +460,7 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
     offsetMaxPoint.x += childOffset.x;
     offsetMaxPoint.y += childOffset.y;
 
-    thickLineRGBA(AUI::Core::GetRenderer(), offsetMinPoint.x, offsetMinPoint.y,
+    thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
         offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 148, 0, 0, 255);
 
     // Y-axis line
@@ -471,7 +471,7 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
     offsetMaxPoint.x += childOffset.x;
     offsetMaxPoint.y += childOffset.y;
 
-    thickLineRGBA(AUI::Core::GetRenderer(), offsetMinPoint.x, offsetMinPoint.y,
+    thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
         offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 149, 0, 255);
 
     // Z-axis line
@@ -482,7 +482,7 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
     offsetMaxPoint.x += childOffset.x;
     offsetMaxPoint.y += childOffset.y;
 
-    thickLineRGBA(AUI::Core::GetRenderer(), offsetMinPoint.x, offsetMinPoint.y,
+    thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
         offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 82, 240, 255);
 }
 
@@ -501,15 +501,15 @@ void BoundingBoxGizmo::renderPlanes(const SDL_Point& childOffset)
 
     /* Draw the planes. */
     // X-axis plane
-    filledPolygonRGBA(AUI::Core::GetRenderer(), &(offsetXCoords[0])
+    filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[0])
         , &(offsetYCoords[0]), 4, 148, 0, 0, 127);
 
     // Y-axis plane
-    filledPolygonRGBA(AUI::Core::GetRenderer(), &(offsetXCoords[4])
+    filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[4])
         , &(offsetYCoords[4]), 4, 0, 149, 0, 127);
 
     // Z-axis plane
-    filledPolygonRGBA(AUI::Core::GetRenderer(), &(offsetXCoords[8])
+    filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[8])
         , &(offsetYCoords[8]), 4, 0, 82, 240, 127);
 }
 

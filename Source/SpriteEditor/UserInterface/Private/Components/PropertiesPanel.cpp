@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteStaticData.h"
+#include "Paths.h"
 #include "SharedConfig.h"
 #include "Ignore.h"
 #include <string>
@@ -42,87 +43,87 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
 , committedMaxZ{0.0}
 {
     /* Background image */
-    backgroundImage.addResolution({1920, 1080}, "Textures/PropertiesPanel/Background.png");
+    backgroundImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "PropertiesPanel/Background.png"));
 
     /* Display name entry. */
-    nameLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    nameLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     nameLabel.setColor({255, 255, 255, 255});
     nameLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     nameLabel.setText("Name");
 
-    nameInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    nameInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     nameInput.setMargins({8, 0, 8, 0});
     nameInput.setOnTextCommitted([this]() {
         saveName();
     });
 
     /* Minimum X-axis bounds entry. */
-    minXLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    minXLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     minXLabel.setColor({255, 255, 255, 255});
     minXLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     minXLabel.setText("Min X");
 
-    minXInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    minXInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     minXInput.setMargins({8, 0, 8, 0});
     minXInput.setOnTextCommitted([this]() {
         saveMinX();
     });
 
     /* Minimum Y-axis bounds entry. */
-    minYLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    minYLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     minYLabel.setColor({255, 255, 255, 255});
     minYLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     minYLabel.setText("Min Y");
 
-    minYInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    minYInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     minYInput.setMargins({8, 0, 8, 0});
     minYInput.setOnTextCommitted([this]() {
         saveMinY();
     });
 
     /* Minimum Z-axis bounds entry. */
-    minZLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    minZLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     minZLabel.setColor({255, 255, 255, 255});
     minZLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     minZLabel.setText("Min Z");
 
-    minZInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    minZInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     minZInput.setMargins({8, 0, 8, 0});
     minZInput.setOnTextCommitted([this]() {
         saveMinZ();
     });
 
     /* Maximum X-axis bounds entry. */
-    maxXLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    maxXLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     maxXLabel.setColor({255, 255, 255, 255});
     maxXLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     maxXLabel.setText("Max X");
 
-    maxXInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    maxXInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     maxXInput.setMargins({8, 0, 8, 0});
     maxXInput.setOnTextCommitted([this]() {
         saveMaxX();
     });
 
     /* Maximum Y-axis bounds entry. */
-    maxYLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    maxYLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     maxYLabel.setColor({255, 255, 255, 255});
     maxYLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     maxYLabel.setText("Max Y");
 
-    maxYInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    maxYInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     maxYInput.setMargins({8, 0, 8, 0});
     maxYInput.setOnTextCommitted([this]() {
         saveMaxY();
     });
 
     /* Maximum Z-axis bounds entry. */
-    maxZLabel.setFont("Fonts/B612-Regular.ttf", 21);
+    maxZLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     maxZLabel.setColor({255, 255, 255, 255});
     maxZLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     maxZLabel.setText("Max Z");
 
-    maxZInput.setTextFont("Fonts/B612-Regular.ttf", 18);
+    maxZInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     maxZInput.setMargins({8, 0, 8, 0});
     maxZInput.setOnTextCommitted([this]() {
         saveMaxZ();
