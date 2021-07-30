@@ -16,7 +16,7 @@ namespace SpriteEditor
 class MainThumbnail : public AUI::Thumbnail
 {
 public:
-    MainThumbnail(AUI::Screen& screen, const char* key);
+    MainThumbnail(AUI::Screen& inScreen, const std::string& inDebugName = "");
 };
 
 } // End namespace SpriteEditor

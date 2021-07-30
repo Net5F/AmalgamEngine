@@ -11,13 +11,13 @@ namespace SpriteEditor
 {
 
 SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
-: AUI::Component(inScreen, "SpriteSheetPanel", {0, 0, 399, 708})
+: AUI::Component(inScreen, {0, 0, 399, 708}, "SpriteSheetPanel")
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
-, backgroundImage(inScreen, "", {0, 0, 399, 708})
-, spriteSheetContainer(inScreen, "SpriteSheetContainer", {18, 24, 306, 650})
-, remSheetButton(inScreen, "", {342, 0, 45, 63})
-, addSheetButton(inScreen, "", {342, 63, 45, 88})
+, backgroundImage(inScreen, {0, 0, 399, 708})
+, spriteSheetContainer(inScreen, {18, 24, 306, 650}, "SpriteSheetContainer")
+, remSheetButton(inScreen, {342, 0, 45, 63})
+, addSheetButton(inScreen, {342, 63, 45, 88})
 , addSheetDialog(inScreen, spriteSheetContainer, spriteDataModel)
 {
     /* Background image */

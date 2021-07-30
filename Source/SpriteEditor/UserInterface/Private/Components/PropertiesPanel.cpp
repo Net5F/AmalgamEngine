@@ -17,24 +17,24 @@ namespace SpriteEditor
 {
 
 PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
-: AUI::Component(inScreen, "PropertiesPanel", {1617, 0, 303, 440})
-, nameLabel(inScreen, "", {24, 24, 65, 28})
-, nameInput(inScreen, "", {24, 56, 255, 38})
-, minXLabel(inScreen, "", {24, 126, 110, 38})
-, minXInput(inScreen, "", {150, 126, 129, 38})
-, minYLabel(inScreen, "", {24, 176, 110, 38})
-, minYInput(inScreen, "", {150, 176, 129, 38})
-, minZLabel(inScreen, "", {24, 226, 110, 38})
-, minZInput(inScreen, "", {150, 226, 129, 38})
-, maxXLabel(inScreen, "", {24, 276, 110, 38})
-, maxXInput(inScreen, "", {150, 276, 129, 38})
-, maxYLabel(inScreen, "", {24, 326, 110, 38})
-, maxYInput(inScreen, "", {150, 326, 129, 38})
-, maxZLabel(inScreen, "", {24, 376, 110, 38})
-, maxZInput(inScreen, "", {150, 376, 129, 38})
+: AUI::Component(inScreen, {1617, 0, 303, 440}, "PropertiesPanel")
+, nameLabel(inScreen, {24, 24, 65, 28})
+, nameInput(inScreen, {24, 56, 255, 38})
+, minXLabel(inScreen, {24, 126, 110, 38})
+, minXInput(inScreen, {150, 126, 129, 38})
+, minYLabel(inScreen, {24, 176, 110, 38})
+, minYInput(inScreen, {150, 176, 129, 38})
+, minZLabel(inScreen, {24, 226, 110, 38})
+, minZInput(inScreen, {150, 226, 129, 38})
+, maxXLabel(inScreen, {24, 276, 110, 38})
+, maxXInput(inScreen, {150, 276, 129, 38})
+, maxYLabel(inScreen, {24, 326, 110, 38})
+, maxYInput(inScreen, {150, 326, 129, 38})
+, maxZLabel(inScreen, {24, 376, 110, 38})
+, maxZInput(inScreen, {150, 376, 129, 38})
 , mainScreen{inScreen}
 , activeSprite{nullptr}
-, backgroundImage(inScreen, "", {-12, -4, 319, 456})
+, backgroundImage(inScreen, {-12, -4, 319, 456})
 , committedMinX{0.0}
 , committedMinY{0.0}
 , committedMinZ{0.0}

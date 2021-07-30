@@ -6,8 +6,8 @@ namespace AM
 namespace SpriteEditor
 {
 
-MainThumbnail::MainThumbnail(AUI::Screen& screen, const char* key)
-: AUI::Thumbnail(screen, key, {0, 0, 150, 150})
+MainThumbnail::MainThumbnail(AUI::Screen& inScreen, const std::string& inDebugName)
+: AUI::Thumbnail(inScreen, {0, 0, 150, 150}, inDebugName)
 {
     // Add our backgrounds.
     hoveredImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "Thumbnail/Hovered.png"));

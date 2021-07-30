@@ -10,11 +10,11 @@ namespace SpriteEditor
 {
 
 SpriteEditStage::SpriteEditStage(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
-: AUI::Component(inScreen, "SpriteEditStage", {389, 60, 1142, 684})
+: AUI::Component(inScreen, {389, 60, 1142, 684}, "SpriteEditStage")
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
-, checkerboardImage(inScreen, "", {0, 0, 100, 100})
-, spriteImage(inScreen, "", {0, 0, 100, 100})
+, checkerboardImage(inScreen, {0, 0, 100, 100})
+, spriteImage(inScreen, {0, 0, 100, 100})
 , boundingBoxGizmo(inScreen)
 {
     /* Active sprite and checkerboard background. */

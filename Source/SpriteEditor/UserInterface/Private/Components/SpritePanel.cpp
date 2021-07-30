@@ -11,11 +11,11 @@ namespace SpriteEditor
 {
 
 SpritePanel::SpritePanel(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
-: AUI::Component(inScreen, "SpritePanel", {-8, 732, 1936, 352})
+: AUI::Component(inScreen, {-8, 732, 1936, 352}, "SpritePanel")
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
-, backgroundImage(inScreen, "", {0, 0, 1936, 352})
-, spriteContainer(inScreen, "SpriteContainer", {191, 24, 1737, 324})
+, backgroundImage(inScreen, {0, 0, 1936, 352})
+, spriteContainer(inScreen, {191, 24, 1737, 324}, "SpriteContainer")
 {
     /* Background image */
     backgroundImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "SpritePanel/Background_1600.png"));

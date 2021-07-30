@@ -17,10 +17,10 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 , spriteSheetPanel(*this, spriteDataModel)
 , spriteEditStage(*this, spriteDataModel)
 , spritePanel(*this, spriteDataModel)
-, saveButton(*this, "", {1537, 0, 58, 58})
+, saveButton(*this, {1537, 0, 58, 58})
 , propertiesPanel(*this)
-, dialogShadowImage(*this, "", {0, 0, 1920, 1080})
-, confirmationDialog(*this, "", {721, 358, 474, 248})
+, dialogShadowImage(*this, {0, 0, 1920, 1080})
+, confirmationDialog(*this, {721, 358, 474, 248})
 {
     /* Save button. */
     saveButton.normalImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SaveButton/Normal.png"));

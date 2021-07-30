@@ -6,9 +6,9 @@ namespace AM
 namespace SpriteEditor
 {
 
-TitleButton::TitleButton(AUI::Screen& screen, const char* key
-                         , const SDL_Rect& screenExtent, const std::string& inText)
-: AUI::Button(screen, key, screenExtent)
+TitleButton::TitleButton(AUI::Screen& inScreen
+                         , const SDL_Rect& inScreenExtent, const std::string& inText, const std::string& inDebugName)
+: AUI::Button(inScreen, inScreenExtent, inDebugName)
 {
     // Add our backgrounds.
     normalImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "Button/Normal.png"));

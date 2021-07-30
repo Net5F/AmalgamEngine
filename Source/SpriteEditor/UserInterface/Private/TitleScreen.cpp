@@ -15,10 +15,10 @@ TitleScreen::TitleScreen(UserInterface& inUserInterface, SpriteDataModel& inSpri
 : Screen("TitleScreen")
 , userInterface{inUserInterface}
 , spriteDataModel{inSpriteDataModel}
-, titleText(*this, "TitleText", {0, 193, 1920, 75})
-, newButton(*this, "NewButton", {724, 432, 472, 96}, "New")
-, loadButton(*this, "LoadButton", {724, 589, 472, 96}, "Load")
-, errorText(*this, "ErrorText", {0, 721, 1920, 48})
+, titleText(*this, {0, 193, 1920, 75})
+, newButton(*this, {724, 432, 472, 96}, "New")
+, loadButton(*this, {724, 589, 472, 96}, "Load")
+, errorText(*this, {0, 721, 1920, 48})
 {
     /* Title text. */
     titleText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 54);

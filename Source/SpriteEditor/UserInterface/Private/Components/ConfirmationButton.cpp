@@ -6,9 +6,9 @@ namespace AM
 namespace SpriteEditor
 {
 
-ConfirmationButton::ConfirmationButton(AUI::Screen& screen, const char* key
-                         , const SDL_Rect& screenExtent, const std::string& inText)
-: AUI::Button(screen, key, screenExtent)
+ConfirmationButton::ConfirmationButton(AUI::Screen& inScreen
+                         , const SDL_Rect& inScreenExtent, const std::string& inText, const std::string& inDebugName)
+: AUI::Button(inScreen, inScreenExtent, inDebugName)
 {
     // Add our backgrounds.
     normalImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Normal.png"));

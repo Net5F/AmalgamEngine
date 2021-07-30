@@ -6,9 +6,9 @@ namespace AM
 namespace SpriteEditor
 {
 
-MainTextInput::MainTextInput(AUI::Screen& screen, const char* key
-                         , const SDL_Rect& screenExtent)
-: AUI::TextInput(screen, key, screenExtent)
+MainTextInput::MainTextInput(AUI::Screen& inScreen
+                         , const SDL_Rect& inScreenExtent, const std::string& inDebugName)
+: AUI::TextInput(inScreen, inScreenExtent, inDebugName)
 {
     // Add our backgrounds.
     normalImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "TextInput/Normal.png"));

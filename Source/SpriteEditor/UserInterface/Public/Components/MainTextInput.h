@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AUI/TextInput.h"
+#include <string>
 
 namespace AM
 {
@@ -13,7 +14,7 @@ namespace SpriteEditor
 class MainTextInput : public AUI::TextInput
 {
 public:
-    MainTextInput(AUI::Screen& screen, const char* key, const SDL_Rect& screenExtent);
+    MainTextInput(AUI::Screen& inScreen, const SDL_Rect& inScreenExtent, const std::string& inDebugName = "");
 };
 
 } // End namespace SpriteEditor

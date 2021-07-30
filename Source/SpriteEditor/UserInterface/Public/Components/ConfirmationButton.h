@@ -2,6 +2,7 @@
 
 #include "AUI/Screen.h"
 #include "AUI/Button.h"
+#include <string>
 
 namespace AM
 {
@@ -15,8 +16,8 @@ namespace SpriteEditor
 class ConfirmationButton : public AUI::Button
 {
 public:
-    ConfirmationButton(AUI::Screen& screen, const char* key, const SDL_Rect& screenExtent
-                , const std::string& inText);
+    ConfirmationButton(AUI::Screen& inScreen, const SDL_Rect& inScreenExtent
+                , const std::string& inText, const std::string& inDebugName = "");
 };
 
 } // End namespace SpriteEditor
