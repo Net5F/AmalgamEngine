@@ -1,0 +1,693 @@
+{
+    "spriteSheets": [
+        {
+            "relPath": "Textures/iso_test_sprites.png",
+            "sprites": [
+                {
+                    "displayName": "test_0",
+                    "id": 0,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 0,
+                        "y": 0
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_1",
+                    "id": 1,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 256,
+                        "y": 0
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_2",
+                    "id": 2,
+                    "modelBounds": {
+                        "maxX": 21.5,
+                        "maxY": 24.5,
+                        "maxZ": 67.19999694824219,
+                        "minX": 7.125,
+                        "minY": 6.75,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 512,
+                        "y": 0
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_3",
+                    "id": 3,
+                    "modelBounds": {
+                        "maxX": 19.125,
+                        "maxY": 19.375,
+                        "maxZ": 26.399999618530273,
+                        "minX": 12.25,
+                        "minY": 13.375,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 768,
+                        "y": 0
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_4",
+                    "id": 4,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1024,
+                        "y": 0
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_5",
+                    "id": 5,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1280,
+                        "y": 0
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_6",
+                    "id": 6,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1536,
+                        "y": 0
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_7",
+                    "id": 7,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1792,
+                        "y": 0
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_8",
+                    "id": 8,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 2048,
+                        "y": 0
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_9",
+                    "id": 9,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 0,
+                        "y": 512
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_10",
+                    "id": 10,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 256,
+                        "y": 512
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_11",
+                    "id": 11,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 512,
+                        "y": 512
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_12",
+                    "id": 12,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 768,
+                        "y": 512
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_13",
+                    "id": 13,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1024,
+                        "y": 512
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_14",
+                    "id": 14,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1280,
+                        "y": 512
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_15",
+                    "id": 15,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1536,
+                        "y": 512
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_16",
+                    "id": 16,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1792,
+                        "y": 512
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_17",
+                    "id": 17,
+                    "modelBounds": {
+                        "maxX": 10.875,
+                        "maxY": 32.0,
+                        "maxZ": 80.4000015258789,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 2048,
+                        "y": 512
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_18",
+                    "id": 18,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 0,
+                        "y": 1024
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_19",
+                    "id": 19,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 256,
+                        "y": 1024
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_20",
+                    "id": 20,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 512,
+                        "y": 1024
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_21",
+                    "id": 21,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 768,
+                        "y": 1024
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_22",
+                    "id": 22,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1024,
+                        "y": 1024
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_23",
+                    "id": 23,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1280,
+                        "y": 1024
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_24",
+                    "id": 24,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1536,
+                        "y": 1024
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_25",
+                    "id": 25,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1792,
+                        "y": 1024
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_26",
+                    "id": 26,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 2048,
+                        "y": 1024
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_27",
+                    "id": 27,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 0,
+                        "y": 1536
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_28",
+                    "id": 28,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 256,
+                        "y": 1536
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_29",
+                    "id": 29,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 512,
+                        "y": 1536
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_30",
+                    "id": 30,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 768,
+                        "y": 1536
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_31",
+                    "id": 31,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1024,
+                        "y": 1536
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_32",
+                    "id": 32,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1280,
+                        "y": 1536
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_33",
+                    "id": 33,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1536,
+                        "y": 1536
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_34",
+                    "id": 34,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 1792,
+                        "y": 1536
+                    },
+                    "yOffset": 384
+                },
+                {
+                    "displayName": "test_35",
+                    "id": 35,
+                    "modelBounds": {
+                        "maxX": 20.0,
+                        "maxY": 20.0,
+                        "maxZ": 20.0,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 2048,
+                        "y": 1536
+                    },
+                    "yOffset": 384
+                }
+            ]
+        }
+    ]
+}

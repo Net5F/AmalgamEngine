@@ -36,14 +36,13 @@ set_target_properties(Client PROPERTIES CXX_EXTENSIONS OFF)
 # Enable compile warnings.
 target_compile_options(Client PUBLIC -Wall -Wextra)
 
-add_custom_command(
-        TARGET Client POST_BUILD
-        
-        # Copy resource files to the build directory.
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${PROJECT_SOURCE_DIR}/../Assets/
-                ${CMAKE_CURRENT_BINARY_DIR}/Assets/
-)
+# Copy assets to the build directory.
+file(COPY ${PROJECT_SOURCE_DIR}/../Resources/Client/Assets/
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Assets/)
+
+# Copy SpriteData.json to the build directory.
+file(COPY ${PROJECT_SOURCE_DIR}/../Resources/Client/SpriteData.json
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 # Build all of the subdirectories
 add_subdirectory(Config)

@@ -35,14 +35,9 @@ set_target_properties(SpriteEditor PROPERTIES CXX_EXTENSIONS OFF)
 # Enable compile warnings.
 target_compile_options(SpriteEditor PUBLIC -Wall -Wextra)
 
-add_custom_command(
-        TARGET SpriteEditor POST_BUILD
-        
-        # Copy resource files to the build directory.
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${PROJECT_SOURCE_DIR}/SpriteEditor/Assets/
-                ${CMAKE_CURRENT_BINARY_DIR}/Assets/
-)
+# Copy assets to the build directory.
+file(COPY ${PROJECT_SOURCE_DIR}/../Resources/SpriteEditor/Assets/
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Assets/)
 
 # Build all of the subdirectories
 add_subdirectory(Config)
