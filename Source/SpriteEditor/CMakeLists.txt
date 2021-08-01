@@ -40,8 +40,8 @@ add_custom_command(
         
         # Copy resource files to the build directory.
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${PROJECT_SOURCE_DIR}/SpriteEditor/Resources/
-                ${CMAKE_CURRENT_BINARY_DIR}/Resources/
+                ${PROJECT_SOURCE_DIR}/SpriteEditor/Assets/
+                ${CMAKE_CURRENT_BINARY_DIR}/Assets/
 )
 
 # Build all of the subdirectories

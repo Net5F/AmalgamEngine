@@ -3,7 +3,7 @@
 #include "Network.h"
 #include "WorldSim.h"
 #include "PeriodicCaller.h"
-#include <SDL_stdinc.h>
+#include <SDL2/SDL_stdinc.h>
 #include <atomic>
 
 namespace AM

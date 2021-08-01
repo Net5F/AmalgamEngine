@@ -1,8 +1,8 @@
 #pragma once
 
-#include "TextureHandle.h"
+#include "AssetCache.h"
 #include "BoundingBox.h"
-#include "SDL2pp/Rect.hh"
+#include <SDL2/SDL_rect.h>
 #include <memory>
 
 namespace AM
@@ -15,11 +15,11 @@ namespace AM
  */
 struct Sprite {
 public:
-    /** A handle for the texture that contains this sprite. */
-    TextureHandle textureHandle{};
+    /** The texture that contains this sprite. */
+    TextureHandle texture{};
 
     /** UV position and size in texture. */
-    SDL2pp::Rect textureExtent{0, 0, 0, 0};
+    SDL_Rect textureExtent{0, 0, 0, 0};
 
     /** Width and height of the sprite in screen space. */
     int width{0};

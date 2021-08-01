@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ResourceManager.h"
 #include "Sprite.h"
 #include "ScreenPoint.h"
 
@@ -8,10 +7,14 @@
 
 #include <vector>
 
+class SDL_Rect;
+
 namespace AM
 {
+class AssetCache;
 class BoundingBox;
 class TileIndex;
+
 namespace Client
 {
 
@@ -23,7 +26,7 @@ namespace Client
 class World
 {
 public:
-    World(ResourceManager& inResourceManager);
+    World(AssetCache& inAssetCache);
 
     /** Entity data registry. */
     entt::registry registry;
@@ -48,10 +51,11 @@ private:
      * Adds a tile sprite to the tile map at the given layer and position.
      */
     void addTile(unsigned int layer, const TileIndex& index,
-                 TextureHandle textureHandle,
-                 const SDL2pp::Rect& extent, const BoundingBox& modelBounds);
+                 TextureHandle texture,
+                 const SDL_Rect& extent, const BoundingBox& modelBounds);
 
-    ResourceManager& resourceManager;
+    /** Used for loading map textures. */
+    AssetCache& assetCache;
 };
 
 } // namespace Client

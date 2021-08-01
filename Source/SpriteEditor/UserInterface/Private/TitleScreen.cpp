@@ -1,5 +1,6 @@
 #include "TitleScreen.h"
 #include "UserInterface.h"
+#include "AssetCache.h"
 #include "Paths.h"
 #include "AUI/Core.h"
 #include "nfd.hpp"
@@ -11,13 +12,13 @@ namespace AM
 namespace SpriteEditor
 {
 
-TitleScreen::TitleScreen(UserInterface& inUserInterface, SpriteDataModel& inSpriteDataModel)
+TitleScreen::TitleScreen(UserInterface& inUserInterface, AssetCache& assetCache, SpriteDataModel& inSpriteDataModel)
 : Screen("TitleScreen")
 , userInterface{inUserInterface}
 , spriteDataModel{inSpriteDataModel}
 , titleText(*this, {0, 193, 1920, 75})
-, newButton(*this, {724, 432, 472, 96}, "New")
-, loadButton(*this, {724, 589, 472, 96}, "Load")
+, newButton(assetCache, *this, {724, 432, 472, 96}, "New")
+, loadButton(assetCache, *this, {724, 589, 472, 96}, "Load")
 , errorText(*this, {0, 721, 1920, 48})
 {
     /* Title text. */

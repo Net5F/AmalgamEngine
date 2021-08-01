@@ -1,5 +1,4 @@
-#ifndef PCH_H_
-#define PCH_H_
+#pragma once
 
 // STL
 #include <vector>
@@ -8,11 +7,9 @@
 #include <string>
 
 // Libs
-#include <SDL_stdinc.h>
+#include <SDL2/SDL_stdinc.h>
 
 // Ours
 #include "Log.h"
 #include "NetworkDefs.h"
 #include "SharedConfig.h"
-
-#endif /* End PCH_H_ */

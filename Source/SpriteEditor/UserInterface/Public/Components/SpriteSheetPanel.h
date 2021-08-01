@@ -8,6 +8,8 @@
 
 namespace AM
 {
+class AssetCache;
+
 namespace SpriteEditor
 {
 
@@ -24,7 +26,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
+    SpriteSheetPanel(AssetCache& inAssetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
 
     /**
      * Adds a MainThumbnail component to the spritesheetContainer, using the
@@ -45,6 +47,9 @@ public:
     void render(const SDL_Point& parentOffset = {}) override;
 
 private:
+    /** Used to load the added sprite sheet's textures. */
+    AssetCache& assetCache;
+
     /** Used to open the confirmation dialog when removing a sheet. */
     MainScreen& mainScreen;
 

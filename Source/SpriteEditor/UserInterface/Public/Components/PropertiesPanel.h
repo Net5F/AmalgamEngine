@@ -6,6 +6,8 @@
 
 namespace AM
 {
+class AssetCache;
+
 namespace SpriteEditor
 {
 
@@ -22,7 +24,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    PropertiesPanel(MainScreen& inScreen);
+    PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen);
 
     /**
      * Loads the given sprite's data into this panel.

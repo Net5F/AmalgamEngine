@@ -15,7 +15,7 @@ struct SpriteRenderInfo {
 
     /** The screen extent that has been calculated for this sprite in the
         current frame. */
-    SDL2pp::Rect screenExtent{};
+    SDL_Rect screenExtent{};
 
     /** The depth value of the sprite in the current frame.
         Higher value means further in front. */

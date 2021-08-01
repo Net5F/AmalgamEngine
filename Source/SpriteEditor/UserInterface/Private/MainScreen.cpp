@@ -1,5 +1,5 @@
 #include "MainScreen.h"
-#include "UserInterface.h"
+#include "AssetCache.h"
 #include "Paths.h"
 #include "AUI/Core.h"
 #include "nfd.h"
@@ -10,22 +10,22 @@ namespace AM
 namespace SpriteEditor
 {
 
-MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
+MainScreen::MainScreen(AssetCache& assetCache, SpriteDataModel& inSpriteDataModel)
 : Screen("MainScreen")
 , spriteDataModel{inSpriteDataModel}
 , activeSprite{nullptr}
-, spriteSheetPanel(*this, spriteDataModel)
-, spriteEditStage(*this, spriteDataModel)
-, spritePanel(*this, spriteDataModel)
+, spriteSheetPanel(assetCache, *this, spriteDataModel)
+, spriteEditStage(assetCache, *this, spriteDataModel)
+, spritePanel(assetCache, *this, spriteDataModel)
 , saveButton(*this, {1537, 0, 58, 58})
-, propertiesPanel(*this)
+, propertiesPanel(assetCache, *this)
 , dialogShadowImage(*this, {0, 0, 1920, 1080})
 , confirmationDialog(*this, {721, 358, 474, 248})
 {
     /* Save button. */
-    saveButton.normalImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SaveButton/Normal.png"));
-    saveButton.hoveredImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SaveButton/Hovered.png"));
-    saveButton.pressedImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SaveButton/Pressed.png"));
+    saveButton.normalImage.addResolution({1920, 1080}, assetCache.loadTexture(Paths::TEXTURE_DIR + "SaveButton/Normal.png"));
+    saveButton.hoveredImage.addResolution({1920, 1080}, assetCache.loadTexture(Paths::TEXTURE_DIR + "SaveButton/Hovered.png"));
+    saveButton.pressedImage.addResolution({1920, 1080}, assetCache.loadTexture(Paths::TEXTURE_DIR + "SaveButton/Pressed.png"));
     saveButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     saveButton.text.setText("");
 
@@ -44,11 +44,11 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 
     /* Confirmation dialog. */
     // Background shadow image.
-    dialogShadowImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "Dialogs/Shadow.png"));
+    dialogShadowImage.addResolution({1920, 1080}, assetCache.loadTexture(Paths::TEXTURE_DIR + "Dialogs/Shadow.png"));
 
     // Background image.
     confirmationDialog.backgroundImage.setLogicalExtent({0, 0, 474, 248});
-    confirmationDialog.backgroundImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "Dialogs/Background.png"));
+    confirmationDialog.backgroundImage.addResolution({1920, 1080}, assetCache.loadTexture(Paths::TEXTURE_DIR + "Dialogs/Background.png"));
 
     // Body text.
     confirmationDialog.bodyText.setLogicalExtent({42, 42, 400, 60});
@@ -61,9 +61,9 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
     confirmationDialog.confirmButton.hoveredImage.setLogicalExtent({0, 0, 123, 56});
     confirmationDialog.confirmButton.pressedImage.setLogicalExtent({0, 0, 123, 56});
     confirmationDialog.confirmButton.text.setLogicalExtent({-1, -1, 123, 56});
-    confirmationDialog.confirmButton.normalImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Normal.png"));
-    confirmationDialog.confirmButton.hoveredImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Hovered.png"));
-    confirmationDialog.confirmButton.pressedImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Pressed.png"));
+    confirmationDialog.confirmButton.normalImage.addResolution({1600, 900}, assetCache.loadTexture(Paths::TEXTURE_DIR + "ConfirmationButton/Normal.png"));
+    confirmationDialog.confirmButton.hoveredImage.addResolution({1600, 900}, assetCache.loadTexture(Paths::TEXTURE_DIR + "ConfirmationButton/Hovered.png"));
+    confirmationDialog.confirmButton.pressedImage.addResolution({1600, 900}, assetCache.loadTexture(Paths::TEXTURE_DIR + "ConfirmationButton/Pressed.png"));
     confirmationDialog.confirmButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     confirmationDialog.confirmButton.text.setColor({255, 255, 255, 255});
 
@@ -72,9 +72,9 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
     confirmationDialog.cancelButton.hoveredImage.setLogicalExtent({0, 0, 123, 56});
     confirmationDialog.cancelButton.pressedImage.setLogicalExtent({0, 0, 123, 56});
     confirmationDialog.cancelButton.text.setLogicalExtent({-1, -1, 123, 56});
-    confirmationDialog.cancelButton.normalImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Normal.png"));
-    confirmationDialog.cancelButton.hoveredImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Hovered.png"));
-    confirmationDialog.cancelButton.pressedImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Pressed.png"));
+    confirmationDialog.cancelButton.normalImage.addResolution({1600, 900}, assetCache.loadTexture(Paths::TEXTURE_DIR + "ConfirmationButton/Normal.png"));
+    confirmationDialog.cancelButton.hoveredImage.addResolution({1600, 900}, assetCache.loadTexture(Paths::TEXTURE_DIR + "ConfirmationButton/Hovered.png"));
+    confirmationDialog.cancelButton.pressedImage.addResolution({1600, 900}, assetCache.loadTexture(Paths::TEXTURE_DIR + "ConfirmationButton/Pressed.png"));
     confirmationDialog.cancelButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     confirmationDialog.cancelButton.text.setColor({255, 255, 255, 255});
     confirmationDialog.cancelButton.text.setText("CANCEL");

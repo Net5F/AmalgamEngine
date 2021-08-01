@@ -1,7 +1,6 @@
-#ifndef TCPSOCKET_H_
-#define TCPSOCKET_H_
+#pragma once
 
-#include <SDL_stdinc.h>
+#include <SDL2/SDL_stdinc.h>
 #include <memory>
 #include <string>
 
@@ -119,5 +118,3 @@ private:
 };
 
 } // End namespace AM
-
-#endif /* End TCPSOCKET_H_ */

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SharedConfig.h"
-#include <SDL_stdinc.h>
+#include <SDL2/SDL_stdinc.h>
 #include <string>
 #include <cmath>
 

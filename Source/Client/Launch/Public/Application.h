@@ -6,7 +6,7 @@
 #include "Renderer.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
-#include "ResourceManager.h"
+#include "AssetCache.h"
 
 #include "SDL2pp/SDL.hh"
 #include "SDL2pp/Window.hh"
@@ -76,9 +76,13 @@ private:
 
     SDL2pp::SDL sdl;
     SDL2pp::Window sdlWindow;
+    /** The SDL renderer that we use to render the UI and world.
+        We use SDL2pp::Renderer for convenience of initialization here, but
+        all other parts of the engine directly use SDL_Renderer (so that we
+        can use SDL_Texture, which is better for the AssetCache.) */
     SDL2pp::Renderer sdlRenderer;
 
-    ResourceManager resourceManager;
+    AssetCache assetCache;
 
     Network network;
     /** Calls network.tick() at the network tick rate. */

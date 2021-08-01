@@ -11,19 +11,19 @@
 #include "Log.h"
 #include "Ignore.h"
 
+#include <SDL2/SDL_render.h>
 #include <SDL2/SDL2_gfxPrimitives.h>
 
 namespace AM
 {
 namespace Client
 {
-Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& window,
-                   Simulation& inSim, UserInterface& inUI,
+Renderer::Renderer(SDL_Renderer* inSdlRenderer,
+                   Simulation& sim, UserInterface& inUI,
                    std::function<double(void)> inGetProgress)
-: sdlRenderer(inSdlRenderer)
-, sim(inSim)
-, world(sim.getWorld())
-, ui(inUI)
+: sdlRenderer{inSdlRenderer}
+, world{sim.getWorld()}
+, ui{inUI}
 , getProgress(inGetProgress)
 , worldSpritePreparer(world.registry, world.mapLayers)
 {
@@ -31,9 +31,6 @@ Renderer::Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& window,
     auto group
         = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
     ignore(group);
-
-    // TODO: This will eventually be used when we get to variable window sizes.
-    ignore(window);
 }
 
 void Renderer::render()
@@ -71,7 +68,7 @@ void Renderer::render()
 
     /* Render. */
     // Clear the screen to prepare for drawing.
-    sdlRenderer.Clear();
+    SDL_RenderClear(sdlRenderer);
 
     // Draw tiles and entities.
     renderWorld(lerpedCamera, alpha);
@@ -80,7 +77,7 @@ void Renderer::render()
     renderUserInterface(lerpedCamera);
 
     // Render the finished buffer to the screen.
-    sdlRenderer.Present();
+    SDL_RenderPresent(sdlRenderer);
 }
 
 bool Renderer::handleEvent(SDL_Event& event)
@@ -103,9 +100,9 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
     // Draw depth-sorted tiles and sprites.
     // Note: These are already culled during the gather step.
     for (SpriteRenderInfo& spriteInfo : sprites) {
-        sdlRenderer.Copy(spriteInfo.sprite->textureHandle.get(),
-                         spriteInfo.sprite->textureExtent,
-                         spriteInfo.screenExtent);
+        SDL_RenderCopy(sdlRenderer, spriteInfo.sprite->texture.get(),
+                       &(spriteInfo.sprite->textureExtent),
+                       &(spriteInfo.screenExtent));
         drawBoundingBox(spriteInfo.sprite->worldBounds, camera);
     }
 }
@@ -116,18 +113,18 @@ void Renderer::renderUserInterface(const Camera& camera)
     // Get iso screen extent for this tile.
     TileIndex& highlightIndex = ui.tileHighlightIndex;
     Sprite& highlightSprite = ui.tileHighlightSprite;
-    SDL2pp::Rect screenExtent = TransformationHelpers::tileToScreenExtent(
+    SDL_Rect screenExtent = TransformationHelpers::tileToScreenExtent(
         highlightIndex, camera, highlightSprite);
 
     // Set the texture's alpha to make the highlight transparent.
-    highlightSprite.textureHandle.get().SetAlphaMod(150);
+    SDL_SetTextureAlphaMod(highlightSprite.texture.get(), 150);
 
     // Draw the highlight.
-    sdlRenderer.Copy(highlightSprite.textureHandle,
-                     highlightSprite.textureExtent, screenExtent);
+    SDL_RenderCopy(sdlRenderer, highlightSprite.texture.get(),
+                   &(highlightSprite.textureExtent), &screenExtent);
 
     // Set the texture's alpha back.
-    highlightSprite.textureHandle.get().SetAlphaMod(255);
+    SDL_SetTextureAlphaMod(highlightSprite.texture.get(), 255);
 }
 
 void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
@@ -175,11 +172,11 @@ void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
     }
 
     // Draw the faces.
-    filledPolygonRGBA(sdlRenderer.Get(), xValues, yValues, 4, 200, 0, 50, 150);
-    filledPolygonRGBA(sdlRenderer.Get(), &(xValues[4]), &(yValues[4]), 4, 255,
+    filledPolygonRGBA(sdlRenderer, xValues, yValues, 4, 200, 0, 50, 150);
+    filledPolygonRGBA(sdlRenderer, &(xValues[4]), &(yValues[4]), 4, 255,
                       0, 0, 150);
 
-    sdlRenderer.SetDrawColor(0, 0, 0, 255);
+    SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
 }
 
 } // namespace Client

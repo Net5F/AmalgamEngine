@@ -6,7 +6,14 @@ namespace AM
 {
 
 /**
- * Module-specific paths. Used for accessing files in expected directories.
+ * Used for accessing files in expected directories.
+ *
+ * The Client and SpriteEditor expect a particular resource directory
+ * structure, starting at the binary's location:
+ * .
+ * └── Resources
+ *     ├── Fonts
+ *     └── Textures
  */
 class Paths
 {
@@ -16,11 +23,11 @@ public:
               memory. */
     static const char* BASE_PATH;
 
-    /** The expected path to the root of the Textures directory. */
-    static const std::string TEXTURE_DIR;
-
     /** The expected path to the root of the Fonts directory. */
     static const std::string FONT_DIR;
+
+    /** The expected path to the root of the Textures directory. */
+    static const std::string TEXTURE_DIR;
 };
 
 } // End namespace AM

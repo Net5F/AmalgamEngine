@@ -1,5 +1,6 @@
 #include "Simulation.h"
 #include "Network.h"
+#include "AssetCache.h"
 #include "ConnectionResponse.h"
 #include "Input.h"
 #include "Position.h"
@@ -10,11 +11,12 @@
 #include "PlayerState.h"
 #include "Name.h"
 #include "ScreenRect.h"
+#include "Paths.h"
 #include "Config.h"
 #include "SharedConfig.h"
+#include "Profiler.h"
 #include "Log.h"
 #include "entt/entity/registry.hpp"
-#include "Profiler.h"
 #include <memory>
 #include <string>
 
@@ -22,10 +24,10 @@ namespace AM
 {
 namespace Client
 {
-Simulation::Simulation(Network& inNetwork, ResourceManager& inResourceManager)
-: world(inResourceManager)
-, network(inNetwork)
-, resourceManager(inResourceManager)
+Simulation::Simulation(Network& inNetwork, AssetCache& inAssetCache)
+: world(inAssetCache)
+, network{inNetwork}
+, assetCache{inAssetCache}
 , playerInputSystem(*this, world)
 , networkUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, network)
@@ -91,10 +93,9 @@ void Simulation::connect()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    TextureHandle textureHandle
-        = resourceManager.getTexture("iso_test_sprites.png");
-    SDL2pp::Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
-    registry.emplace<Sprite>(newEntity, textureHandle, spritePosInTexture, 64,
+    TextureHandle texture = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
+    SDL_Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
+    registry.emplace<Sprite>(newEntity, texture, spritePosInTexture, 64,
                              64, BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
@@ -122,10 +123,9 @@ void Simulation::fakeConnection()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    TextureHandle textureHandle
-        = resourceManager.getTexture("iso_test_sprites.png");
-    SDL2pp::Rect spritePosInTexture((256 * 4 + 110), 256 + 135, 64, 64);
-    registry.emplace<Sprite>(newEntity, textureHandle, spritePosInTexture, 64,
+    TextureHandle texture = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
+    SDL_Rect spritePosInTexture((256 * 4 + 110), 256 + 135, 64, 64);
+    registry.emplace<Sprite>(newEntity, texture, spritePosInTexture, 64,
                              64, BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},

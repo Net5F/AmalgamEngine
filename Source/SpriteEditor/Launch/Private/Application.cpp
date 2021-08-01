@@ -1,9 +1,10 @@
 #include "Application.h"
 #include "Config.h"
 #include "Profiler.h"
+#include "Paths.h"
 #include "Log.h"
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include "nfd.hpp"
 
 #include <memory>
@@ -19,11 +20,12 @@ Application::Application()
 , sdlWindow("Amalgam Sprite Editor", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
-, spriteDataModel(sdlRenderer)
-, userInterface(sdlRenderer.Get(), spriteDataModel)
+, assetCache(sdlRenderer.Get())
+, spriteDataModel(sdlRenderer.Get())
+, userInterface(sdlRenderer.Get(), assetCache, spriteDataModel)
 , uiCaller(std::bind_front(&UserInterface::tick, &userInterface),
            Config::UI_TICK_TIMESTEP_S, "UserInterface", true)
-, renderer(sdlRenderer, sdlWindow, userInterface)
+, renderer(sdlRenderer.Get(), userInterface)
 , rendererCaller(std::bind_front(&Renderer::render, &renderer),
                  Renderer::FRAME_TIMESTEP_S, "Renderer", true)
 , eventHandlers{this, &userInterface, &renderer}

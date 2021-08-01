@@ -1,6 +1,6 @@
 #include "Peer.h"
 #include "TcpSocket.h"
-#include <SDL_stdinc.h>
+#include <SDL2/SDL_stdinc.h>
 #include "Log.h"
 
 namespace AM

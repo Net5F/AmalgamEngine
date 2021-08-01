@@ -4,6 +4,8 @@
 #include "MovementHelpers.h"
 #include "TransformationHelpers.h"
 
+#include <SDL2/SDL_rect.h>
+
 #include <algorithm>
 
 namespace AM
@@ -69,13 +71,13 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
                 Sprite& sprite = mapLayers[i][linearizedIndex];
 
                 // If there's nothing in this tile, skip it.
-                if (!sprite.textureHandle) {
+                if (sprite.texture == nullptr) {
                     continue;
                 }
                 else {
                     // Get iso screen extent for this tile.
                     Sprite& sprite{mapLayers[i][linearizedIndex]};
-                    SDL2pp::Rect screenExtent
+                    SDL_Rect screenExtent
                         = TransformationHelpers::tileToScreenExtent(
                             {x, y}, camera, sprite);
 
@@ -105,7 +107,7 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
                                                              position, alpha);
 
         // Get the iso screen extent for the lerped sprite.
-        SDL2pp::Rect screenExtent
+        SDL_Rect screenExtent
             = TransformationHelpers::worldToScreenExtent(lerp, camera, sprite);
 
         // If the sprite is on screen, push the sprite info.
@@ -176,7 +178,7 @@ void WorldSpritePreparer::visitSprite(SpriteRenderInfo& spriteInfo,
     }
 }
 
-bool WorldSpritePreparer::isWithinScreenBounds(const SDL2pp::Rect& extent,
+bool WorldSpritePreparer::isWithinScreenBounds(const SDL_Rect& extent,
                                                const Camera& camera)
 {
     // The extent is in final screen coordinates, so we only need to check if

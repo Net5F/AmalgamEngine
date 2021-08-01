@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL_events.h>
+#include <SDL2/SDL_events.h>
 
 namespace AM
 {

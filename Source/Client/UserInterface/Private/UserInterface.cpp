@@ -1,6 +1,8 @@
 #include "UserInterface.h"
 #include "World.h"
+#include "AssetCache.h"
 #include "Camera.h"
+#include "Paths.h"
 #include "SharedConfig.h"
 #include "TransformationHelpers.h"
 #include "Log.h"
@@ -9,30 +11,29 @@ namespace AM
 {
 namespace Client
 {
-UserInterface::UserInterface(World& inWorld, ResourceManager& inResourceManager)
+UserInterface::UserInterface(World& inWorld, AssetCache& inAssetCache)
 : tileHighlightSprite{}
 , tileHighlightIndex{0, 0}
-, world(inWorld)
-, resourceManager(inResourceManager)
+, world{inWorld}
+, assetCache{inAssetCache}
 {
     // Set up the tile highlight sprite.
-    TextureHandle textureHandle
-        = resourceManager.getTexture("iso_test_sprites.png");
+    TextureHandle texture = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
     tileHighlightSprite
-        = {textureHandle, {(256 * 8), (512 * 0), 256, 512}, 256, 512};
+        = {texture, {(256 * 8), (512 * 0), 256, 512}, 256, 512};
 
     // Push the terrain sprites to cycle through.
     SDL2pp::Rect spritePosInTexture{(256 * 6), (512 * 0), 256, 512};
     terrainSprites.push_back(
-        Sprite{textureHandle, spritePosInTexture, 256, 512});
+        Sprite{texture, spritePosInTexture, 256, 512});
 
     spritePosInTexture = {(256 * 6), (512 * 2), 256, 512};
     terrainSprites.push_back(
-        Sprite{textureHandle, spritePosInTexture, 256, 512});
+        Sprite{texture, spritePosInTexture, 256, 512});
 
     spritePosInTexture = {(256 * 6), (512 * 3), 256, 512};
     terrainSprites.push_back(
-        Sprite{textureHandle, spritePosInTexture, 256, 512});
+        Sprite{texture, spritePosInTexture, 256, 512});
 }
 
 bool UserInterface::handleEvent(SDL_Event& event)

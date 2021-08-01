@@ -3,7 +3,7 @@ target_sources(Shared
         Private/Log.cpp
         Private/Paths.cpp
         Private/PeriodicCaller.cpp
-	    Private/ResourceManager.cpp
+	    Private/AssetCache.cpp
         Private/Timer.cpp
         Private/TransformationHelpers.cpp
     PUBLIC
@@ -13,9 +13,8 @@ target_sources(Shared
         Public/Paths.h
         Public/PeriodicCaller.h
         Public/Profiler.h
-        Public/ResourceManager.h
+        Public/AssetCache.h
         Public/SharedConfig.h
-        Public/TextureHandle.h
         Public/Timer.h
         Public/TransformationHelpers.h
 )

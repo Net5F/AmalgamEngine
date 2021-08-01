@@ -4,7 +4,7 @@
 #include "Paths.h"
 #include "Log.h"
 
-#include "SDL.h"
+#include <SDL2/SDL.h>
 
 #include <memory>
 #include <functional>
@@ -19,15 +19,15 @@ Application::Application()
 , sdlWindow("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             SharedConfig::SCREEN_WIDTH, SharedConfig::SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
-, resourceManager(Paths::BASE_PATH, sdlRenderer)
+, assetCache(sdlRenderer.Get())
 , network()
 , networkCaller(std::bind_front(&Network::tick, &network), SharedConfig::NETWORK_TICK_TIMESTEP_S,
                 "Network", true)
-, sim(network, resourceManager)
+, sim(network, assetCache)
 , simCaller(std::bind_front(&Simulation::tick, &sim), SharedConfig::SIM_TICK_TIMESTEP_S, "Sim",
             false)
-, userInterface(sim.getWorld(), resourceManager)
-, renderer(sdlRenderer, sdlWindow, sim, userInterface,
+, userInterface(sim.getWorld(), assetCache)
+, renderer(sdlRenderer.Get(), sim, userInterface,
            std::bind_front(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind_front(&Renderer::render, &renderer),
                  Renderer::FRAME_TIMESTEP_S, "Renderer", true)

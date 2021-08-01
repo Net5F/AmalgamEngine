@@ -1,4 +1,5 @@
 #include "MainThumbnail.h"
+#include "AssetCache.h"
 #include "Paths.h"
 
 namespace AM
@@ -6,14 +7,18 @@ namespace AM
 namespace SpriteEditor
 {
 
-MainThumbnail::MainThumbnail(AUI::Screen& inScreen, const std::string& inDebugName)
+MainThumbnail::MainThumbnail(AssetCache& assetCache, AUI::Screen& inScreen, const std::string& inDebugName)
 : AUI::Thumbnail(inScreen, {0, 0, 150, 150}, inDebugName)
 {
     // Add our backgrounds.
-    hoveredImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "Thumbnail/Hovered.png"));
-    activeImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "Thumbnail/Active.png"));
-    backdropImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "Thumbnail/Backdrop.png"));
-    selectedImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "Thumbnail/Selected.png"));
+    hoveredImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "Thumbnail/Hovered.png"));
+    activeImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "Thumbnail/Active.png"));
+    backdropImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "Thumbnail/Backdrop.png"));
+    selectedImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "Thumbnail/Selected.png"));
 
     // Move our thumbnail image to the right position.
     thumbnailImage.setLogicalExtent({27, 15, 96, 96});

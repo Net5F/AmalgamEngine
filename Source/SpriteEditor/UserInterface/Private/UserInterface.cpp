@@ -1,4 +1,5 @@
 #include "UserInterface.h"
+#include "AssetCache.h"
 #include "Config.h"
 #include "AUI/Core.h"
 #include "Log.h"
@@ -8,11 +9,11 @@ namespace AM
 {
 namespace SpriteEditor
 {
-UserInterface::UserInterface(SDL_Renderer* renderer, SpriteDataModel& spriteDataModel)
+UserInterface::UserInterface(SDL_Renderer* renderer, AssetCache& assetCache, SpriteDataModel& spriteDataModel)
 : auiInitializer(renderer, {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT})
 , currentScreen(&titleScreen)
-, titleScreen(*this, spriteDataModel)
-, mainScreen(spriteDataModel)
+, titleScreen(*this, assetCache, spriteDataModel)
+, mainScreen(assetCache, spriteDataModel)
 {
     AUI::Core::setActualScreenSize({Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT});
 }

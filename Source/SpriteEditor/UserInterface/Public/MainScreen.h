@@ -12,6 +12,8 @@
 
 namespace AM
 {
+class AssetCache;
+
 namespace SpriteEditor
 {
 
@@ -23,7 +25,7 @@ class UserInterface;
 class MainScreen : public AUI::Screen
 {
 public:
-    MainScreen(SpriteDataModel& inSpriteDataModel);
+    MainScreen(AssetCache& assetCache, SpriteDataModel& inSpriteDataModel);
 
     /**
      * Loads the current state of spriteData into this screen's UI.

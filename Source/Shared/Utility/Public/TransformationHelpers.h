@@ -3,7 +3,7 @@
 #include "ScreenPoint.h"
 #include "Position.h"
 #include "TileIndex.h"
-#include "SDL2pp/Rect.hh"
+#include <SDL2/SDL_rect.h>
 
 namespace AM
 {
@@ -49,7 +49,7 @@ public:
      * Returns a final screen space extent for the given position, camera,
      * and sprite.
      */
-    static SDL2pp::Rect worldToScreenExtent(const Position& position,
+    static SDL_Rect worldToScreenExtent(const Position& position,
                                             const Camera& camera,
                                             const Sprite& sprite);
 
@@ -60,7 +60,7 @@ public:
      * Used as an alternative to worldToSpriteExtent() since tile sprites have
      * some extra offsets applied.
      */
-    static SDL2pp::Rect tileToScreenExtent(const TileIndex& index,
+    static SDL_Rect tileToScreenExtent(const TileIndex& index,
                                            const Camera& camera,
                                            const Sprite& sprite);
 

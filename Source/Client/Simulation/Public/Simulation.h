@@ -1,7 +1,6 @@
 #pragma once
 
 #include "EventHandler.h"
-#include "ResourceManager.h"
 #include "NpcMovementSystem.h"
 #include "PlayerMovementSystem.h"
 #include "World.h"
@@ -9,11 +8,13 @@
 #include "NetworkUpdateSystem.h"
 #include "CameraSystem.h"
 #include "Timer.h"
-#include <SDL2pp/Texture.hh>
 #include <atomic>
 
 namespace AM
 {
+
+class AssetCache;
+
 namespace Client
 {
 class Network;
@@ -27,7 +28,7 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S = .001;
 
-    Simulation(Network& inNetwork, ResourceManager& inResourceManager);
+    Simulation(Network& inNetwork, AssetCache& inAssetCache);
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,
@@ -64,7 +65,9 @@ private:
     World world;
     Network& network;
 
-    ResourceManager& resourceManager;
+    /** Temporarily used for loading the player's sprite texture.
+        When that logic gets moved, this member can be removed. */
+    AssetCache& assetCache;
 
     PlayerInputSystem playerInputSystem;
     NetworkUpdateSystem networkUpdateSystem;

@@ -4,6 +4,8 @@
 #include "entt/entity/registry.hpp"
 #include <vector>
 
+class SDL_Rect;
+
 namespace AM
 {
 class Camera;
@@ -79,7 +81,7 @@ private:
      * @param extent  An extent in final screen coordinates.
      * @param camera  The camera to use for screen width/height checks.
      */
-    bool isWithinScreenBounds(const SDL2pp::Rect& extent, const Camera& camera);
+    bool isWithinScreenBounds(const SDL_Rect& extent, const Camera& camera);
 
     /** Registry reference used for gathering sprites. */
     entt::registry& registry;

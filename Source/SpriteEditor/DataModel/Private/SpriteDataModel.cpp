@@ -3,9 +3,10 @@
 #include "Ignore.h"
 #include "AUI/Core.h"
 #include "nlohmann/json.hpp"
-#include "SDL2pp/Renderer.hh"
-#include "SDL2pp/Texture.hh"
-#include "SDL2pp/Exception.hh"
+
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_image.h>
+
 #include <filesystem>
 
 namespace AM
@@ -13,7 +14,7 @@ namespace AM
 namespace SpriteEditor
 {
 
-SpriteDataModel::SpriteDataModel(SDL2pp::Renderer& inSdlRenderer)
+SpriteDataModel::SpriteDataModel(SDL_Renderer* inSdlRenderer)
 : sdlRenderer{inSdlRenderer}
 , workingFilePath{""}
 , workingResourcesDir{""}
@@ -213,25 +214,26 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
         }
     }
 
+    // Append the texture directory to the given relative path.
+    std::string fullPath{workingResourcesDir};
+    fullPath += relPath;
+
     // Validate that the file at the given path is a valid texture.
     int sheetWidth{0};
     int sheetHeight{0};
-    try {
-        // Append the texture directory to the given relative path.
-        std::string fullPath{workingResourcesDir};
-        fullPath += relPath;
-        SDL2pp::Texture sheetTexture(sdlRenderer, fullPath);
-
-        // Save the texture size for later.
-        SDL2pp::Point sheetSize = sheetTexture.GetSize();
-        sheetWidth = sheetSize.x;
-        sheetHeight = sheetSize.y;
-    }
-    catch (SDL2pp::Exception& e) {
+    SDL_Texture* sheetTexture = IMG_LoadTexture(sdlRenderer, fullPath.c_str());
+    if (sheetTexture == nullptr) {
         std::string errorString{"Error: File at given path is not a valid image. Path: "};
         errorString += workingResourcesDir;
         errorString+= relPath;
         return errorString;
+    }
+    else {
+        // Save the texture size for later.
+        SDL_QueryTexture(sheetTexture, nullptr, nullptr, &sheetWidth, &sheetHeight);
+
+        // We don't need the actual texture right now, destroy it.
+        SDL_DestroyTexture(sheetTexture);
     }
 
     // Validate the width/height/yOffset.
@@ -265,7 +267,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
             displayName += std::to_string(spriteCount);
 
             // Find the sprite's extent within the sheet texture.
-            SDL2pp::Rect textureExtent{x, y, spriteWidthI, spriteHeightI};
+            SDL_Rect textureExtent{x, y, spriteWidthI, spriteHeightI};
 
             // Default to a non-0 bounding box so it's easier to click.
             static BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
@@ -321,7 +323,7 @@ std::string SpriteDataModel::validateRelPath(const std::string& relPath)
     }
     else {
         // File doesn't exist, return an error string.
-        std::string returnString{"File not found at Resources/"};
+        std::string returnString{"File not found at Assets/"};
         returnString += relPath;
         return returnString;
     }
@@ -343,7 +345,7 @@ bool SpriteDataModel::setWorkingResourcesDir()
     // Construct the resources dir path.
     std::filesystem::path resourcesDirPath{workingFilePath};
     resourcesDirPath = resourcesDirPath.parent_path();
-    resourcesDirPath /= "Resources/";
+    resourcesDirPath /= "Assets/";
 
     // Check if the resources dir exists.
     if (!std::filesystem::exists(resourcesDirPath)) {

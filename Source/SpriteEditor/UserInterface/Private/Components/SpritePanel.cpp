@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
+#include "AssetCache.h"
 #include "Paths.h"
 #include "Ignore.h"
 
@@ -10,15 +11,17 @@ namespace AM
 namespace SpriteEditor
 {
 
-SpritePanel::SpritePanel(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
+SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, {-8, 732, 1936, 352}, "SpritePanel")
+, assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
 , backgroundImage(inScreen, {0, 0, 1936, 352})
 , spriteContainer(inScreen, {191, 24, 1737, 324}, "SpriteContainer")
 {
     /* Background image */
-    backgroundImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "SpritePanel/Background_1600.png"));
+    backgroundImage.addResolution({1600, 900}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "SpritePanel/Background_1600.png"));
 
     /* Container */
     spriteContainer.setNumColumns(10);
@@ -28,14 +31,18 @@ SpritePanel::SpritePanel(MainScreen& inScreen, SpriteDataModel& inSpriteDataMode
 
 void SpritePanel::addSprite(const SpriteSheet& sheet, SpriteStaticData& sprite)
 {
+    // Construct the new sprite thumbnail.
     std::unique_ptr<AUI::Component> thumbnailPtr{
-        std::make_unique<MainThumbnail>(screen, "")};
+        std::make_unique<MainThumbnail>(assetCache, screen, "")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
-
-    thumbnail.thumbnailImage.addResolution({1280, 720}, (spriteDataModel.getWorkingResourcesDir() + sheet.relPath)
-        , sprite.textureExtent);
     thumbnail.setText(sprite.displayName);
     thumbnail.setIsSelectable(false);
+
+    // Load the sprite's image.
+    std::string imagePath{spriteDataModel.getWorkingResourcesDir()};
+    imagePath += sheet.relPath;
+    thumbnail.thumbnailImage.addResolution({1280, 720}, assetCache.loadTexture(imagePath)
+        , sprite.textureExtent);
 
     // Add a callback to deactivate all other thumbnails when one is activated.
     thumbnail.setOnActivated([&](AUI::Thumbnail* selectedThumb){

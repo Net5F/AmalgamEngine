@@ -6,6 +6,8 @@
 
 namespace AM
 {
+class AssetCache;
+
 namespace SpriteEditor
 {
 
@@ -23,7 +25,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteEditStage(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
+    SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
 
     /**
      * Loads the given sprite onto the stage.
@@ -41,6 +43,9 @@ public:
     void render(const SDL_Point& parentOffset = {}) override;
 
 private:
+    /** Used to load the active sprite's texture. */
+    AssetCache& assetCache;
+
     /** Used to save/clear the active sprite when a sprite thumbnail is
         activated or deactivated. */
     MainScreen& mainScreen;

@@ -2,11 +2,12 @@
 
 #include "AUI/Screen.h"
 #include "AUI/Thumbnail.h"
-#include <SDL_Rect.h>
 #include <string>
 
 namespace AM
 {
+class AssetCache;
+
 namespace SpriteEditor
 {
 
@@ -16,7 +17,7 @@ namespace SpriteEditor
 class MainThumbnail : public AUI::Thumbnail
 {
 public:
-    MainThumbnail(AUI::Screen& inScreen, const std::string& inDebugName = "");
+    MainThumbnail(AssetCache& assetCache, AUI::Screen& inScreen, const std::string& inDebugName = "");
 };
 
 } // End namespace SpriteEditor

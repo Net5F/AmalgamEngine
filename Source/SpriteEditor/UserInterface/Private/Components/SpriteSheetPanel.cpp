@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
+#include "AssetCache.h"
 #include "Paths.h"
 #include "Ignore.h"
 
@@ -10,22 +11,26 @@ namespace AM
 namespace SpriteEditor
 {
 
-SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
+SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, {0, 0, 399, 708}, "SpriteSheetPanel")
+, assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
 , backgroundImage(inScreen, {0, 0, 399, 708})
 , spriteSheetContainer(inScreen, {18, 24, 306, 650}, "SpriteSheetContainer")
 , remSheetButton(inScreen, {342, 0, 45, 63})
 , addSheetButton(inScreen, {342, 63, 45, 88})
-, addSheetDialog(inScreen, spriteSheetContainer, spriteDataModel)
+, addSheetDialog(assetCache, inScreen, spriteSheetContainer, spriteDataModel)
 {
     /* Background image */
-    backgroundImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/Background_1920.png")
+    backgroundImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "SpriteSheetPanel/Background_1920.png")
                                   , {4, 4, 399, 708});
-    backgroundImage.addResolution({1600, 900}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/Background_1600.png")
+    backgroundImage.addResolution({1600, 900}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "SpriteSheetPanel/Background_1600.png")
                                   , {4, 4, 333, 590});
-    backgroundImage.addResolution({1280, 720}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/Background_1280.png")
+    backgroundImage.addResolution({1280, 720}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "SpriteSheetPanel/Background_1280.png")
                                   , {3, 3, 266, 472});
 
     /* Container */
@@ -34,10 +39,14 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpri
     spriteSheetContainer.setCellHeight(162);
 
     /* Remove sheet button */
-    remSheetButton.normalImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveNormal.png"));
-    remSheetButton.hoveredImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveHovered.png"));
-    remSheetButton.pressedImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveNormal.png"));
-    remSheetButton.disabledImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveDisabled.png"));
+    remSheetButton.normalImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveNormal.png"));
+    remSheetButton.hoveredImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveHovered.png"));
+    remSheetButton.pressedImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveNormal.png"));
+    remSheetButton.disabledImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveDisabled.png"));
     remSheetButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     remSheetButton.text.setText("");
     remSheetButton.disable();
@@ -76,9 +85,12 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpri
     });
 
     /* Add sheet button */
-    addSheetButton.normalImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/AddNormal.png"));
-    addSheetButton.hoveredImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/AddHovered.png"));
-    addSheetButton.pressedImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteSheetPanel/AddNormal.png"));
+    addSheetButton.normalImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "SpriteSheetPanel/AddNormal.png"));
+    addSheetButton.hoveredImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "SpriteSheetPanel/AddHovered.png"));
+    addSheetButton.pressedImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "SpriteSheetPanel/AddNormal.png"));
     addSheetButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     addSheetButton.text.setText("");
 
@@ -97,10 +109,11 @@ SpriteSheetPanel::SpriteSheetPanel(MainScreen& inScreen, SpriteDataModel& inSpri
 void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
 {
     std::unique_ptr<AUI::Component> thumbnailPtr{
-        std::make_unique<MainThumbnail>(screen, "")};
+        std::make_unique<MainThumbnail>(assetCache, screen, "")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
 
-    thumbnail.thumbnailImage.addResolution({1280, 720}, (spriteDataModel.getWorkingResourcesDir() + sheet.relPath));
+
+    thumbnail.thumbnailImage.addResolution({1280, 720}, assetCache.loadTexture(spriteDataModel.getWorkingResourcesDir() + sheet.relPath));
     thumbnail.setText(sheet.relPath);
     thumbnail.setIsActivateable(false);
 

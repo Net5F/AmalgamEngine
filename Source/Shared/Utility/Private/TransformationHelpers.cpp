@@ -66,7 +66,7 @@ float TransformationHelpers::screenYToWorldZ(float yCoord, float zoomFactor)
     return yCoord * zoomFactor * Z_WORLD_SCALE;
 }
 
-SDL2pp::Rect TransformationHelpers::worldToScreenExtent(
+SDL_Rect TransformationHelpers::worldToScreenExtent(
     const Position& position, const Camera& camera, const Sprite& sprite)
 {
     // Get the point in screen space.
@@ -87,7 +87,7 @@ SDL2pp::Rect TransformationHelpers::worldToScreenExtent(
     return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 }
 
-SDL2pp::Rect TransformationHelpers::tileToScreenExtent(const TileIndex& index,
+SDL_Rect TransformationHelpers::tileToScreenExtent(const TileIndex& index,
                                                        const Camera& camera,
                                                        const Sprite& sprite)
 {

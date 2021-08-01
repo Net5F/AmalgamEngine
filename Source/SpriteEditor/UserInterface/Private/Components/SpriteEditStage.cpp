@@ -1,6 +1,7 @@
 #include "SpriteEditStage.h"
 #include "MainScreen.h"
 #include "SpriteStaticData.h"
+#include "AssetCache.h"
 #include "Paths.h"
 #include "AUI/Core.h"
 
@@ -9,8 +10,9 @@ namespace AM
 namespace SpriteEditor
 {
 
-SpriteEditStage::SpriteEditStage(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
+SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, {389, 60, 1142, 684}, "SpriteEditStage")
+, assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
 , checkerboardImage(inScreen, {0, 0, 100, 100})
@@ -18,7 +20,8 @@ SpriteEditStage::SpriteEditStage(MainScreen& inScreen, SpriteDataModel& inSprite
 , boundingBoxGizmo(inScreen)
 {
     /* Active sprite and checkerboard background. */
-    checkerboardImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "SpriteEditStage/Checkerboard.png"));
+    checkerboardImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "SpriteEditStage/Checkerboard.png"));
     checkerboardImage.setIsVisible(false);
     spriteImage.setIsVisible(false);
 
@@ -29,12 +32,12 @@ SpriteEditStage::SpriteEditStage(MainScreen& inScreen, SpriteDataModel& inSprite
 void SpriteEditStage::loadActiveSprite(SpriteStaticData* activeSprite)
 {
     if (activeSprite != nullptr) {
-        // Load the new sprite image.
+        // Load the sprite's image.
         spriteImage.clearTextures();
-        std::string fullPath{spriteDataModel.getWorkingResourcesDir()};
-        fullPath += activeSprite->parentSpriteSheet.relPath;
+        std::string imagePath{spriteDataModel.getWorkingResourcesDir()};
+        imagePath += activeSprite->parentSpriteSheet.relPath;
         spriteImage.addResolution(AUI::Core::getLogicalScreenSize()
-            , fullPath, activeSprite->textureExtent);
+            , assetCache.loadTexture(imagePath), activeSprite->textureExtent);
 
         // Calc the centered sprite position.
         SDL_Rect centeredSpriteExtent{activeSprite->textureExtent};

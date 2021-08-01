@@ -5,6 +5,8 @@
 
 namespace AM
 {
+class AssetCache;
+
 namespace SpriteEditor
 {
 
@@ -14,7 +16,7 @@ namespace SpriteEditor
 class MainTextInput : public AUI::TextInput
 {
 public:
-    MainTextInput(AUI::Screen& inScreen, const SDL_Rect& inScreenExtent, const std::string& inDebugName = "");
+    MainTextInput(AssetCache& assetCache, AUI::Screen& inScreen, const SDL_Rect& inScreenExtent, const std::string& inDebugName = "");
 };
 
 } // End namespace SpriteEditor

@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteStaticData.h"
+#include "AssetCache.h"
 #include "Paths.h"
 #include "SharedConfig.h"
 #include "Ignore.h"
@@ -16,22 +17,22 @@ namespace AM
 namespace SpriteEditor
 {
 
-PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
+PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen)
 : AUI::Component(inScreen, {1617, 0, 303, 440}, "PropertiesPanel")
 , nameLabel(inScreen, {24, 24, 65, 28})
-, nameInput(inScreen, {24, 56, 255, 38})
+, nameInput(assetCache, inScreen, {24, 56, 255, 38})
 , minXLabel(inScreen, {24, 126, 110, 38})
-, minXInput(inScreen, {150, 126, 129, 38})
+, minXInput(assetCache, inScreen, {150, 126, 129, 38})
 , minYLabel(inScreen, {24, 176, 110, 38})
-, minYInput(inScreen, {150, 176, 129, 38})
+, minYInput(assetCache, inScreen, {150, 176, 129, 38})
 , minZLabel(inScreen, {24, 226, 110, 38})
-, minZInput(inScreen, {150, 226, 129, 38})
+, minZInput(assetCache, inScreen, {150, 226, 129, 38})
 , maxXLabel(inScreen, {24, 276, 110, 38})
-, maxXInput(inScreen, {150, 276, 129, 38})
+, maxXInput(assetCache, inScreen, {150, 276, 129, 38})
 , maxYLabel(inScreen, {24, 326, 110, 38})
-, maxYInput(inScreen, {150, 326, 129, 38})
+, maxYInput(assetCache, inScreen, {150, 326, 129, 38})
 , maxZLabel(inScreen, {24, 376, 110, 38})
-, maxZInput(inScreen, {150, 376, 129, 38})
+, maxZInput(assetCache, inScreen, {150, 376, 129, 38})
 , mainScreen{inScreen}
 , activeSprite{nullptr}
 , backgroundImage(inScreen, {-12, -4, 319, 456})
@@ -43,7 +44,8 @@ PropertiesPanel::PropertiesPanel(MainScreen& inScreen)
 , committedMaxZ{0.0}
 {
     /* Background image */
-    backgroundImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "PropertiesPanel/Background.png"));
+    backgroundImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "PropertiesPanel/Background.png"));
 
     /* Display name entry. */
     nameLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);

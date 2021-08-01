@@ -2,7 +2,7 @@
 
 #include "SharedConfig.h"
 #include "entt/entity/registry.hpp"
-#include <SDL_stdinc.h>
+#include <SDL2/SDL_stdinc.h>
 #include <atomic>
 
 namespace AM

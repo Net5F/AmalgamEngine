@@ -3,9 +3,7 @@
 #include "EventHandler.h"
 #include "PeriodicCaller.h"
 
-#include "SDL2pp/Window.hh"
-#include "SDL2pp/Renderer.hh"
-#include "SDL2pp/Rect.hh"
+struct SDL_Renderer;
 
 namespace AM
 {
@@ -14,7 +12,7 @@ namespace SpriteEditor
 class UserInterface;
 
 /**
- *
+ * Renders the UI.
  */
 class Renderer : public EventHandler
 {
@@ -27,7 +25,7 @@ public:
      * @param getProgress  A function that returns how far between sim ticks we
      *                     are in decimal percent.
      */
-    Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& inWindow, UserInterface& inUI);
+    Renderer(SDL_Renderer* inSdlRenderer, UserInterface& inUI);
 
     /**
      * First renders all tiles in view, then renders all entities in view.
@@ -40,7 +38,9 @@ public:
     bool handleEvent(SDL_Event& event) override;
 
 private:
-    SDL2pp::Renderer& sdlRenderer;
+    SDL_Renderer* sdlRenderer;
+
+    /** Used to begin the UI rendering. */
     UserInterface& ui;
 };
 

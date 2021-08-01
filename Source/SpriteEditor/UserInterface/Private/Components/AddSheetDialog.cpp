@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
+#include "AssetCache.h"
 #include "Paths.h"
 
 namespace AM
@@ -9,29 +10,30 @@ namespace AM
 namespace SpriteEditor
 {
 
-AddSheetDialog::AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer& inSpriteSheetContainer, SpriteDataModel& inSpriteDataModel)
+AddSheetDialog::AddSheetDialog(AssetCache& assetCache, MainScreen& inScreen, AUI::VerticalGridContainer& inSpriteSheetContainer, SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, {0, 0, 1920, 1080})
 , backgroundImage(inScreen, {0, 0, logicalExtent.w, logicalExtent.h})
 , headerText(inScreen, {747, 228, 280, 60})
 , pathLabel(inScreen, {747, 300, 151, 38})
-, pathInput(inScreen, {919, 300, 180, 38})
+, pathInput(assetCache, inScreen, {919, 300, 180, 38})
 , widthLabel(inScreen, {747, 350, 151, 38})
-, widthInput(inScreen, {919, 350, 180, 38})
+, widthInput(assetCache, inScreen, {919, 350, 180, 38})
 , heightLabel(inScreen, {747, 400, 151, 38})
-, heightInput(inScreen, {919, 400, 180, 38})
+, heightInput(assetCache, inScreen, {919, 400, 180, 38})
 , offsetLabel(inScreen, {747, 450, 151, 38})
-, offsetInput(inScreen, {919, 450, 180, 38})
+, offsetInput(assetCache, inScreen, {919, 450, 180, 38})
 , nameLabel(inScreen, {747, 500, 151, 38})
-, nameInput(inScreen, {919, 500, 180, 38})
-, addButton(inScreen, {1099, 640, 123, 56}, "ADD")
-, cancelButton(inScreen, {958, 640, 123, 56}, "CANCEL")
+, nameInput(assetCache, inScreen, {919, 500, 180, 38})
+, addButton(assetCache, inScreen, {1099, 640, 123, 56}, "ADD")
+, cancelButton(assetCache, inScreen, {958, 640, 123, 56}, "CANCEL")
 , mainScreen{inScreen}
 , spriteSheetContainer{inSpriteSheetContainer}
 , spriteDataModel{inSpriteDataModel}
 , errorText(inScreen, {748, 556, 466, 60})
 {
     /* Background image. */
-    backgroundImage.addResolution({1920, 1080}, (Paths::TEXTURE_DIR + "Dialogs/AddSheetBackground.png"));
+    backgroundImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "Dialogs/AddSheetBackground.png"));
 
     /* Header text. */
     headerText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 32);

@@ -12,6 +12,8 @@ struct SDL_Renderer;
 
 namespace AM
 {
+class AssetCache;
+
 namespace SpriteEditor
 {
 
@@ -23,7 +25,7 @@ namespace SpriteEditor
 class UserInterface : public EventHandler
 {
 public:
-    UserInterface(SDL_Renderer* renderer, SpriteDataModel& spriteDataModel);
+    UserInterface(SDL_Renderer* renderer, AssetCache& assetCache, SpriteDataModel& spriteDataModel);
 
     /**
      * Changes the currentScreen to titleScreen.

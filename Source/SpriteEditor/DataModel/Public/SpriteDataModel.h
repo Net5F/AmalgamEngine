@@ -5,10 +5,7 @@
 #include <vector>
 #include <string>
 
-namespace SDL2pp
-{
-    class Renderer;
-} // namespace SDL2pp
+struct SDL_Renderer;
 
 namespace AM
 {
@@ -21,7 +18,7 @@ namespace SpriteEditor
 class SpriteDataModel
 {
 public:
-    SpriteDataModel(SDL2pp::Renderer& inSdlRenderer);
+    SpriteDataModel(SDL_Renderer* inSdlRenderer);
 
     /**
      * Creates a new SpriteData.json file at the given path and saves to it.
@@ -107,7 +104,7 @@ private:
     bool setWorkingResourcesDir();
 
     /** Used for validating user-selected sprite sheet textures. */
-    SDL2pp::Renderer& sdlRenderer;
+    SDL_Renderer* sdlRenderer;
 
     /** The sprite sheets that we currently have loaded. */
     std::vector<SpriteSheet> spriteSheets;

@@ -8,6 +8,8 @@
 
 namespace AM
 {
+class AssetCache;
+
 namespace SpriteEditor
 {
 
@@ -24,7 +26,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    AddSheetDialog(MainScreen& inScreen, AUI::VerticalGridContainer& inSpriteSheetContainer
+    AddSheetDialog(AssetCache& assetCache, MainScreen& inScreen, AUI::VerticalGridContainer& inSpriteSheetContainer
                    , SpriteDataModel& inSpriteDataModel);
 
     virtual ~AddSheetDialog() = default;

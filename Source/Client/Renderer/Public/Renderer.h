@@ -4,9 +4,7 @@
 #include "PeriodicCaller.h"
 #include "WorldSpritePreparer.h"
 
-#include "SDL2pp/Window.hh"
-#include "SDL2pp/Renderer.hh"
-#include "SDL2pp/Rect.hh"
+struct SDL_Renderer;
 
 namespace AM
 {
@@ -35,8 +33,8 @@ public:
      * @param getProgress  A function that returns how far between sim ticks we
      *                     are in decimal percent.
      */
-    Renderer(SDL2pp::Renderer& inSdlRenderer, SDL2pp::Window& inWindow,
-             Simulation& inSim, UserInterface& inUI,
+    Renderer(SDL_Renderer* inSdlRenderer,
+             Simulation& sim, UserInterface& inUI,
              std::function<double(void)> inGetProgress);
 
     /**
@@ -71,10 +69,14 @@ private:
      */
     void drawBoundingBox(const BoundingBox& box, const Camera& camera);
 
-    SDL2pp::Renderer& sdlRenderer;
-    Simulation& sim;
+    SDL_Renderer* sdlRenderer;
+
+    /** Used to grab the entity data that we need to render. */
     World& world;
+
+    /** Used to begin the UI rendering. */
     UserInterface& ui;
+
     std::function<double(void)> getProgress;
 
     WorldSpritePreparer worldSpritePreparer;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "EventHandler.h"
-#include "ResourceManager.h"
 #include "Sprite.h"
 #include "ScreenPoint.h"
 #include "TileIndex.h"
@@ -11,6 +10,8 @@
 
 namespace AM
 {
+class AssetCache;
+
 namespace Client
 {
 class World;
@@ -21,7 +22,7 @@ class World;
 class UserInterface : public EventHandler
 {
 public:
-    UserInterface(World& inWorld, ResourceManager& inResourceManager);
+    UserInterface(World& inWorld, AssetCache& inAssetCache);
 
     /**
      * Handles user input events.
@@ -45,9 +46,11 @@ private:
      */
     void cycleTile(int mouseX, int mouseY);
 
+    /** Used to get the world state to populate the UI. */
     World& world;
 
-    ResourceManager& resourceManager;
+    /** Used for loading UI textures. */
+    AssetCache& assetCache;
 
     /** Holds the sprites that we cycle through on mouse click. */
     std::vector<Sprite> terrainSprites;
