@@ -57,7 +57,7 @@ void SpriteEditStage::loadActiveSprite(SpriteStaticData* activeSprite)
         checkerboardImage.setIsVisible(true);
         spriteImage.setIsVisible(true);
 
-        // Load the sprite into the gizmo and make it visible.
+        // Load the sprite into the gizmo.
         boundingBoxGizmo.loadActiveSprite(activeSprite);
         boundingBoxGizmo.setIsVisible(true);
     }

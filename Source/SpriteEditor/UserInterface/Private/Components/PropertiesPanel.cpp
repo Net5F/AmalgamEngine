@@ -22,22 +22,24 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, S
 : AUI::Component(inScreen, {1617, 0, 303, 440}, "PropertiesPanel")
 , nameLabel(inScreen, {24, 24, 65, 28})
 , nameInput(assetCache, inScreen, {24, 56, 255, 38})
-, minXLabel(inScreen, {24, 126, 110, 38})
-, minXInput(assetCache, inScreen, {150, 126, 129, 38})
-, minYLabel(inScreen, {24, 176, 110, 38})
-, minYInput(assetCache, inScreen, {150, 176, 129, 38})
-, minZLabel(inScreen, {24, 226, 110, 38})
-, minZInput(assetCache, inScreen, {150, 226, 129, 38})
-, maxXLabel(inScreen, {24, 276, 110, 38})
-, maxXInput(assetCache, inScreen, {150, 276, 129, 38})
-, maxYLabel(inScreen, {24, 326, 110, 38})
-, maxYInput(assetCache, inScreen, {150, 326, 129, 38})
-, maxZLabel(inScreen, {24, 376, 110, 38})
-, maxZInput(assetCache, inScreen, {150, 376, 129, 38})
+, hasBoundingBoxLabel(inScreen, {24, 126, 210, 38})
+, hasBoundingBoxInput(inScreen, {257, 134, 22, 22})
+, minXLabel(inScreen, {24, 176, 110, 38})
+, minXInput(assetCache, inScreen, {150, 176, 129, 38})
+, minYLabel(inScreen, {24, 226, 110, 38})
+, minYInput(assetCache, inScreen, {150, 226, 129, 38})
+, minZLabel(inScreen, {24, 276, 110, 38})
+, minZInput(assetCache, inScreen, {150, 276, 129, 38})
+, maxXLabel(inScreen, {24, 326, 110, 38})
+, maxXInput(assetCache, inScreen, {150, 326, 129, 38})
+, maxYLabel(inScreen, {24, 376, 110, 38})
+, maxYInput(assetCache, inScreen, {150, 376, 129, 38})
+, maxZLabel(inScreen, {24, 426, 110, 38})
+, maxZInput(assetCache, inScreen, {150, 426, 129, 38})
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
 , activeSprite{nullptr}
-, backgroundImage(inScreen, {-12, -4, 319, 456})
+, backgroundImage(inScreen, {-12, -4, 319, 506})
 , committedMinX{0.0}
 , committedMinY{0.0}
 , committedMinZ{0.0}
@@ -59,6 +61,23 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, S
     nameInput.setMargins({8, 0, 8, 0});
     nameInput.setOnTextCommitted([this]() {
         saveName();
+    });
+
+    /* Has bounding box entry. */
+    hasBoundingBoxLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
+    hasBoundingBoxLabel.setColor({255, 255, 255, 255});
+    hasBoundingBoxLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
+    hasBoundingBoxLabel.setText("Has bounding box");
+
+    hasBoundingBoxInput.uncheckedImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "Checkbox/Unchecked.png"));
+    hasBoundingBoxInput.checkedImage.addResolution({1920, 1080}, assetCache.loadTexture(
+        Paths::TEXTURE_DIR + "Checkbox/Checked.png"));
+    hasBoundingBoxInput.setOnChecked([this]() {
+        saveHasBoundingBox();
+    });
+    hasBoundingBoxInput.setOnUnchecked([this]() {
+        saveHasBoundingBox();
     });
 
     /* Minimum X-axis bounds entry. */
@@ -157,6 +176,13 @@ void PropertiesPanel::refresh()
     maxXInput.setText(toRoundedString(activeSprite->modelBounds.maxX));
     maxYInput.setText(toRoundedString(activeSprite->modelBounds.maxY));
     maxZInput.setText(toRoundedString(activeSprite->modelBounds.maxZ));
+
+    if (activeSprite->hasBoundingBox) {
+        hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Checked);
+    }
+    else {
+        hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Unchecked);
+    }
 }
 
 void PropertiesPanel::clear()
@@ -191,6 +217,9 @@ void PropertiesPanel::render(const SDL_Point& parentOffset)
 
     nameLabel.render(childOffset);
     nameInput.render(childOffset);
+
+    hasBoundingBoxLabel.render(childOffset);
+    hasBoundingBoxInput.render(childOffset);
 
     minXLabel.render(childOffset);
     minXInput.render(childOffset);
@@ -239,6 +268,14 @@ void PropertiesPanel::saveName()
 
         // Refresh the UI since the name is shown in the activeSprite panel.
         mainScreen.refreshActiveSpriteUi();
+    }
+}
+
+void PropertiesPanel::saveHasBoundingBox()
+{
+    if (activeSprite != nullptr) {
+        // Toggle hasBoundingBox.
+        activeSprite->hasBoundingBox = !(activeSprite->hasBoundingBox);
     }
 }
 

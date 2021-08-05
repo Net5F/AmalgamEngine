@@ -92,11 +92,9 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 spriteSheet.sprites.push_back(SpriteStaticData{spriteSheet});
                 SpriteStaticData& sprite{spriteSheet.sprites.back()};
 
-                // Add this sprite's display name.
-                sprite.displayName = spriteJson.value()["displayName"].get<std::string>();
-
                 // If the display name isn't unique, fail.
-                if (!displayNameIsUnique(sprite.displayName)) {
+                std::string displayName = spriteJson.value()["displayName"].get<std::string>();
+                if (!displayNameIsUnique(displayName)) {
                     std::string returnString{"Display name isn't unique: "};
                     returnString += sprite.displayName.c_str();
 
@@ -105,16 +103,19 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                     return returnString;
                 }
 
-                // Add this sprite's sprite sheet texture extent.
+                // Add the display name.
+                sprite.displayName = displayName;
+
+                // Add this sprite's extent within the sprite sheet.
                 sprite.textureExtent.x = spriteJson.value()["textureExtent"]["x"];
                 sprite.textureExtent.y = spriteJson.value()["textureExtent"]["y"];
                 sprite.textureExtent.w = spriteJson.value()["textureExtent"]["w"];
                 sprite.textureExtent.h = spriteJson.value()["textureExtent"]["h"];
 
-                // Add this sprite's Y offset.
+                // Add the Y offset.
                 sprite.yOffset = spriteJson.value()["yOffset"];
 
-                // Add this sprite's model-space bounds.
+                // Add the model-space bounds.
                 sprite.modelBounds.minX = spriteJson.value()["modelBounds"]["minX"];
                 sprite.modelBounds.maxX = spriteJson.value()["modelBounds"]["maxX"];
                 sprite.modelBounds.minY = spriteJson.value()["modelBounds"]["minY"];
@@ -175,6 +176,10 @@ void SpriteDataModel::save()
             // Add the Y offset.
             json["spriteSheets"][i]["sprites"][j]["yOffset"]
                 = sprite.yOffset;
+
+            // Add hasBoundingBox.
+            json["spriteSheets"][i]["sprites"][j]["hasBoundingBox"]
+                = sprite.hasBoundingBox;
 
             // Add the model-space bounds.
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minX"]
@@ -273,7 +278,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
 
             // Add the sprite to the sheet.
             spriteSheet.sprites.emplace_back(spriteSheet, displayName
-                , textureExtent, yOffsetI, defaultBox);
+                , textureExtent, yOffsetI, true, defaultBox);
 
             // Increment the count (used for the display name).
             spriteCount++;
@@ -330,7 +335,7 @@ std::string SpriteDataModel::validateRelPath(const std::string& relPath)
     }
     else {
         // File doesn't exist, return an error string.
-        std::string returnString{"File not found at Assets/"};
+        std::string returnString{"File not found at Assets/Textures/"};
         returnString += relPath;
         return returnString;
     }

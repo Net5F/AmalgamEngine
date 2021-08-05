@@ -413,13 +413,19 @@ void BoundingBoxGizmo::movePlanes(std::vector<SDL_Point>& boundsScreenPoints)
 
 void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
 {
+    // If the bounding box is disabled, show it at 1/4 alpha.
+    float alpha{255};
+    if (!(activeSprite->hasBoundingBox)) {
+        alpha /= 4.f;
+    }
+
     // Position control
     SDL_Rect offsetExtent{positionControlExtent};
     offsetExtent.x += childOffset.x;
     offsetExtent.y += childOffset.y;
     lastRenderedPosExtent = offsetExtent;
 
-    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 0, 0, alpha);
     SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedPosExtent);
 
     // X control
@@ -428,7 +434,7 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
     offsetExtent.y += childOffset.y;
     lastRenderedXExtent = offsetExtent;
 
-    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 148, 0, 0, 255);
+    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 148, 0, 0, alpha);
     SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedXExtent);
 
     // Y control
@@ -437,7 +443,7 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
     offsetExtent.y += childOffset.y;
     lastRenderedYExtent = offsetExtent;
 
-    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 149, 0, 255);
+    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 149, 0, alpha);
     SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedYExtent);
 
     // Z control
@@ -446,12 +452,18 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
     offsetExtent.y += childOffset.y;
     lastRenderedZExtent = offsetExtent;
 
-    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 82, 240, 255);
+    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 82, 240, alpha);
     SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedZExtent);
 }
 
 void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
 {
+    // If the bounding box is disabled, show it at 1/4 alpha.
+    float alpha{255};
+    if (!(activeSprite->hasBoundingBox)) {
+        alpha /= 4.f;
+    }
+
     // X-axis line
     SDL_Point offsetMinPoint{xMinPoint};
     SDL_Point offsetMaxPoint{xMaxPoint};
@@ -461,7 +473,7 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
     offsetMaxPoint.y += childOffset.y;
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
-        offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 148, 0, 0, 255);
+        offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 148, 0, 0, alpha);
 
     // Y-axis line
     offsetMinPoint = yMinPoint;
@@ -472,7 +484,7 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
     offsetMaxPoint.y += childOffset.y;
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
-        offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 149, 0, 255);
+        offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 149, 0, alpha);
 
     // Z-axis line
     offsetMinPoint = zMinPoint;
@@ -483,7 +495,7 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
     offsetMaxPoint.y += childOffset.y;
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
-        offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 82, 240, 255);
+        offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 82, 240, alpha);
 }
 
 void BoundingBoxGizmo::renderPlanes(const SDL_Point& childOffset)
@@ -500,17 +512,23 @@ void BoundingBoxGizmo::renderPlanes(const SDL_Point& childOffset)
     }
 
     /* Draw the planes. */
+    // If the bounding box is disabled, show it at 1/4 alpha.
+    float alpha{127};
+    if (!(activeSprite->hasBoundingBox)) {
+        alpha /= 4.f;
+    }
+
     // X-axis plane
     filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[0])
-        , &(offsetYCoords[0]), 4, 148, 0, 0, 127);
+        , &(offsetYCoords[0]), 4, 148, 0, 0, alpha);
 
     // Y-axis plane
     filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[4])
-        , &(offsetYCoords[4]), 4, 0, 149, 0, 127);
+        , &(offsetYCoords[4]), 4, 0, 149, 0, alpha);
 
     // Z-axis plane
     filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[8])
-        , &(offsetYCoords[8]), 4, 0, 82, 240, 127);
+        , &(offsetYCoords[8]), 4, 0, 82, 240, alpha);
 }
 
 } // End namespace SpriteEditor

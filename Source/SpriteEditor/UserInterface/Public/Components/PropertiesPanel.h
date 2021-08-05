@@ -2,6 +2,7 @@
 
 #include "AUI/Image.h"
 #include "AUI/Text.h"
+#include "AUI/Checkbox.h"
 #include "MainTextInput.h"
 
 namespace AM
@@ -46,9 +47,13 @@ public:
     void clear();
 
     /** All fields below directly match a data field in SpriteStaticData.
-        See its displayName and modelBounds fields for more information. */
+        See its displayName, hasBoundingBox, and modelBounds fields for more
+        information. */
     AUI::Text nameLabel;
     MainTextInput nameInput;
+
+    AUI::Text hasBoundingBoxLabel;
+    AUI::Checkbox hasBoundingBoxInput;
 
     AUI::Text minXLabel;
     MainTextInput minXInput;
@@ -93,6 +98,7 @@ private:
     /** The below functions are all for validating and saving the user's data
         when the text is committed. */
     void saveName();
+    void saveHasBoundingBox();
     void saveMinX();
     void saveMinY();
     void saveMinZ();
