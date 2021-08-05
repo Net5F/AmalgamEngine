@@ -12,7 +12,6 @@ class AssetCache;
 
 namespace SpriteEditor
 {
-
 class MainScreen;
 class SpriteDataModel;
 
@@ -26,7 +25,8 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteSheetPanel(AssetCache& inAssetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
+    SpriteSheetPanel(AssetCache& inAssetCache, MainScreen& inScreen,
+                     SpriteDataModel& inSpriteDataModel);
 
     /**
      * Adds a MainThumbnail component to the spritesheetContainer, using the

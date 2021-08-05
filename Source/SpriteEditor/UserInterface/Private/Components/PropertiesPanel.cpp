@@ -17,8 +17,8 @@ namespace AM
 {
 namespace SpriteEditor
 {
-
-PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
+PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
+                                 SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, {1617, 0, 303, 440}, "PropertiesPanel")
 , nameLabel(inScreen, {24, 24, 65, 28})
 , nameInput(assetCache, inScreen, {24, 56, 255, 38})
@@ -48,8 +48,10 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, S
 , committedMaxZ{0.0}
 {
     /* Background image */
-    backgroundImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "PropertiesPanel/Background.png"));
+    backgroundImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "PropertiesPanel/Background.png"));
 
     /* Display name entry. */
     nameLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -59,26 +61,23 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, S
 
     nameInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     nameInput.setMargins({8, 0, 8, 0});
-    nameInput.setOnTextCommitted([this]() {
-        saveName();
-    });
+    nameInput.setOnTextCommitted([this]() { saveName(); });
 
     /* Has bounding box entry. */
     hasBoundingBoxLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     hasBoundingBoxLabel.setColor({255, 255, 255, 255});
-    hasBoundingBoxLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
+    hasBoundingBoxLabel.setVerticalAlignment(
+        AUI::Text::VerticalAlignment::Center);
     hasBoundingBoxLabel.setText("Has bounding box");
 
-    hasBoundingBoxInput.uncheckedImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "Checkbox/Unchecked.png"));
-    hasBoundingBoxInput.checkedImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "Checkbox/Checked.png"));
-    hasBoundingBoxInput.setOnChecked([this]() {
-        saveHasBoundingBox();
-    });
-    hasBoundingBoxInput.setOnUnchecked([this]() {
-        saveHasBoundingBox();
-    });
+    hasBoundingBoxInput.uncheckedImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR + "Checkbox/Unchecked.png"));
+    hasBoundingBoxInput.checkedImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR + "Checkbox/Checked.png"));
+    hasBoundingBoxInput.setOnChecked([this]() { saveHasBoundingBox(); });
+    hasBoundingBoxInput.setOnUnchecked([this]() { saveHasBoundingBox(); });
 
     /* Minimum X-axis bounds entry. */
     minXLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -88,9 +87,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, S
 
     minXInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     minXInput.setMargins({8, 0, 8, 0});
-    minXInput.setOnTextCommitted([this]() {
-        saveMinX();
-    });
+    minXInput.setOnTextCommitted([this]() { saveMinX(); });
 
     /* Minimum Y-axis bounds entry. */
     minYLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -100,9 +97,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, S
 
     minYInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     minYInput.setMargins({8, 0, 8, 0});
-    minYInput.setOnTextCommitted([this]() {
-        saveMinY();
-    });
+    minYInput.setOnTextCommitted([this]() { saveMinY(); });
 
     /* Minimum Z-axis bounds entry. */
     minZLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -112,9 +107,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, S
 
     minZInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     minZInput.setMargins({8, 0, 8, 0});
-    minZInput.setOnTextCommitted([this]() {
-        saveMinZ();
-    });
+    minZInput.setOnTextCommitted([this]() { saveMinZ(); });
 
     /* Maximum X-axis bounds entry. */
     maxXLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -124,9 +117,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, S
 
     maxXInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     maxXInput.setMargins({8, 0, 8, 0});
-    maxXInput.setOnTextCommitted([this]() {
-        saveMaxX();
-    });
+    maxXInput.setOnTextCommitted([this]() { saveMaxX(); });
 
     /* Maximum Y-axis bounds entry. */
     maxYLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -136,9 +127,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, S
 
     maxYInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     maxYInput.setMargins({8, 0, 8, 0});
-    maxYInput.setOnTextCommitted([this]() {
-        saveMaxY();
-    });
+    maxYInput.setOnTextCommitted([this]() { saveMaxY(); });
 
     /* Maximum Z-axis bounds entry. */
     maxZLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -148,9 +137,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, S
 
     maxZInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     maxZInput.setMargins({8, 0, 8, 0});
-    maxZInput.setOnTextCommitted([this]() {
-        saveMaxZ();
-    });
+    maxZInput.setOnTextCommitted([this]() { saveMaxZ(); });
 }
 
 void PropertiesPanel::loadActiveSprite(SpriteStaticData* inActiveSprite)
@@ -296,8 +283,7 @@ void PropertiesPanel::saveMinX()
 
             // Refresh the UI to reflect the new value;
             mainScreen.refreshActiveSpriteUi();
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             // Input was not valid, reset the field to what it was.
             minXInput.setText(std::to_string(committedMinX));
         }
@@ -321,8 +307,7 @@ void PropertiesPanel::saveMinY()
 
             // Refresh the UI to reflect the new value;
             mainScreen.refreshActiveSpriteUi();
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             // Input was not valid, reset the field to what it was.
             minYInput.setText(std::to_string(committedMinY));
         }
@@ -346,8 +331,7 @@ void PropertiesPanel::saveMinZ()
 
             // Refresh the UI to reflect the new value;
             mainScreen.refreshActiveSpriteUi();
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             // Input was not valid, reset the field to what it was.
             minZInput.setText(std::to_string(committedMinZ));
         }
@@ -363,8 +347,9 @@ void PropertiesPanel::saveMaxX()
             float newMaxX{std::stof(maxXInput.getText())};
 
             // Clamp the value to its bounds.
-            newMaxX = std::clamp(newMaxX, activeSprite->modelBounds.minX
-                                 , static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
+            newMaxX = std::clamp(
+                newMaxX, activeSprite->modelBounds.minX,
+                static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
             // The input was valid, save it.
             activeSprite->modelBounds.maxX = newMaxX;
@@ -372,8 +357,7 @@ void PropertiesPanel::saveMaxX()
 
             // Refresh the UI to reflect the new value;
             mainScreen.refreshActiveSpriteUi();
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             // Input was not valid, reset the field to what it was.
             maxXInput.setText(std::to_string(committedMaxX));
         }
@@ -389,8 +373,9 @@ void PropertiesPanel::saveMaxY()
             float newMaxY{std::stof(maxYInput.getText())};
 
             // Clamp the value to its bounds.
-            newMaxY = std::clamp(newMaxY, activeSprite->modelBounds.minY
-                                 , static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT));
+            newMaxY = std::clamp(
+                newMaxY, activeSprite->modelBounds.minY,
+                static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT));
 
             // The input was valid, save it.
             activeSprite->modelBounds.maxY = newMaxY;
@@ -398,8 +383,7 @@ void PropertiesPanel::saveMaxY()
 
             // Refresh the UI to reflect the new value;
             mainScreen.refreshActiveSpriteUi();
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             // Input was not valid, reset the field to what it was.
             maxYInput.setText(std::to_string(committedMaxY));
         }
@@ -428,8 +412,7 @@ void PropertiesPanel::saveMaxZ()
 
             // Refresh the UI to reflect the new value;
             mainScreen.refreshActiveSpriteUi();
-        }
-        catch (std::exception& e) {
+        } catch (std::exception& e) {
             // Input was not valid, reset the field to what it was.
             maxZInput.setText(std::to_string(committedMaxZ));
         }

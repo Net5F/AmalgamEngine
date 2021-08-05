@@ -93,13 +93,15 @@ void Simulation::connect()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    TextureHandle texture = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
+    TextureHandle texture
+        = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
     SDL_Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
-    registry.emplace<Sprite>(newEntity, texture, spritePosInTexture, 64,
-                             64, BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
+    registry.emplace<Sprite>(newEntity, texture, spritePosInTexture, 64, 64,
+                             BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
-                             ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH, SharedConfig::SCREEN_HEIGHT});
+                             ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH,
+                                        SharedConfig::SCREEN_HEIGHT});
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);
@@ -123,13 +125,15 @@ void Simulation::fakeConnection()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    TextureHandle texture = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
+    TextureHandle texture
+        = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
     SDL_Rect spritePosInTexture((256 * 4 + 110), 256 + 135, 64, 64);
-    registry.emplace<Sprite>(newEntity, texture, spritePosInTexture, 64,
-                             64, BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
+    registry.emplace<Sprite>(newEntity, texture, spritePosInTexture, 64, 64,
+                             BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
-                             ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH, SharedConfig::SCREEN_HEIGHT});
+                             ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH,
+                                        SharedConfig::SCREEN_HEIGHT});
 
     // Set up the player's PlayerState component.
     registry.emplace<PlayerState>(newEntity);

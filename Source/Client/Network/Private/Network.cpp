@@ -268,7 +268,8 @@ void Network::processBatch()
             bytesReceived += MESSAGE_HEADER_SIZE + messageResult.messageSize;
         }
         else if ((messageResult.networkResult == NetworkResult::NoWaitingData)
-                 && (receiveTimer.getDeltaSeconds(false) > Config::SERVER_TIMEOUT_S)) {
+                 && (receiveTimer.getDeltaSeconds(false)
+                     > Config::SERVER_TIMEOUT_S)) {
             // Too long since we received a message, timed out.
             LOG_ERROR("Server connection timed out.");
         }

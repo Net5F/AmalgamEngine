@@ -14,7 +14,6 @@ namespace AM
 {
 namespace SpriteEditor
 {
-
 BoundingBoxGizmo::BoundingBoxGizmo(MainScreen& inScreen)
 : AUI::Component(inScreen, {0, 0, 1920, 1080})
 , mainScreen{inScreen}
@@ -158,7 +157,8 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
     yOffset += lastRenderedExtent.y;
 
     // Account for the sprite's half-tile offset.
-    int xOffset = AUI::ScalingHelpers::logicalToActual(SharedConfig::TILE_SCREEN_WIDTH / 2.f);
+    int xOffset = AUI::ScalingHelpers::logicalToActual(
+        SharedConfig::TILE_SCREEN_WIDTH / 2.f);
     xOffset += lastRenderedExtent.x;
 
     // Apply the offset to the mouse position and convert to logical space.
@@ -166,9 +166,10 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
     offsetMousePoint = AUI::ScalingHelpers::actualToLogical(offsetMousePoint);
 
     // Convert the screen-space mouse point to world space.
-    ScreenPoint offsetMousePointSP{static_cast<float>(offsetMousePoint.x)
-        , static_cast<float>(offsetMousePoint.y)};
-    Position mouseWorldPos = TransformationHelpers::screenToWorld(offsetMousePointSP, 1);
+    ScreenPoint offsetMousePointSP{static_cast<float>(offsetMousePoint.x),
+                                   static_cast<float>(offsetMousePoint.y)};
+    Position mouseWorldPos
+        = TransformationHelpers::screenToWorld(offsetMousePointSP, 1);
 
     // Adjust the currently pressed control appropriately.
     switch (currentHeldControl) {
@@ -202,10 +203,12 @@ bool BoundingBoxGizmo::refreshScaling()
     // If scaledExtent was refreshed, do our specialized refreshing.
     if (Component::refreshScaling()) {
         // Re-calculate our control rectangle size.
-        scaledRectSize = AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE);
+        scaledRectSize
+            = AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE);
 
         // Re-calculate our line width.
-        scaledLineWidth = AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH);
+        scaledLineWidth
+            = AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH);
 
         return true;
     }
@@ -255,14 +258,14 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 
 void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
 {
-    activeSprite->modelBounds.minX = std::clamp(mouseWorldPos.x
-                                                , 0.f, activeSprite->modelBounds.maxX);
+    activeSprite->modelBounds.minX
+        = std::clamp(mouseWorldPos.x, 0.f, activeSprite->modelBounds.maxX);
 }
 
 void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
 {
-    activeSprite->modelBounds.minY = std::clamp(mouseWorldPos.y
-                                                , 0.f, activeSprite->modelBounds.maxY);
+    activeSprite->modelBounds.minY
+        = std::clamp(mouseWorldPos.y, 0.f, activeSprite->modelBounds.maxY);
 }
 
 void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
@@ -274,8 +277,8 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     // Set maxZ relative to the distance between the mouse and the
     // position control (the position control is always our reference
     // for where z == 0 is.)
-    float mouseZHeight = lastRenderedPosExtent.y
-        + (scaledRectSize / 2.f) - mouseScreenYPos;
+    float mouseZHeight
+        = lastRenderedPosExtent.y + (scaledRectSize / 2.f) - mouseScreenYPos;
 
     // Convert to logical space.
     mouseZHeight = AUI::ScalingHelpers::actualToLogical(mouseZHeight);
@@ -289,7 +292,8 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     }
 }
 
-void BoundingBoxGizmo::calcOffsetScreenPoints(std::vector<SDL_Point>& boundsScreenPoints)
+void BoundingBoxGizmo::calcOffsetScreenPoints(
+    std::vector<SDL_Point>& boundsScreenPoints)
 {
     /* Transform the world positions to screen points. */
     // Set up a vector of float points so we can maintain precision until
@@ -324,11 +328,11 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(std::vector<SDL_Point>& boundsScre
     int yOffset = AUI::ScalingHelpers::logicalToActual(384);
 
     // Account for the sprite's half-tile offset.
-    int xOffset = AUI::ScalingHelpers::logicalToActual(SharedConfig::TILE_SCREEN_WIDTH / 2.f);
+    int xOffset = AUI::ScalingHelpers::logicalToActual(
+        SharedConfig::TILE_SCREEN_WIDTH / 2.f);
 
     /* Scale and offset each point, then push it into the return vector. */
-    for (ScreenPoint& point : floatPoints)
-    {
+    for (ScreenPoint& point : floatPoints) {
         // Scale and round the point.
         point.x = std::round(AUI::ScalingHelpers::logicalToActual(point.x));
         point.y = std::round(AUI::ScalingHelpers::logicalToActual(point.y));
@@ -338,8 +342,8 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(std::vector<SDL_Point>& boundsScre
         point.y += yOffset;
 
         // Cast to int and push into the return vector.
-        boundsScreenPoints.push_back({static_cast<int>(point.x)
-            , static_cast<int>(point.y)});
+        boundsScreenPoints.push_back(
+            {static_cast<int>(point.x), static_cast<int>(point.y)});
     }
 }
 
@@ -473,7 +477,8 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
     offsetMaxPoint.y += childOffset.y;
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
-        offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 148, 0, 0, alpha);
+                  offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 148, 0,
+                  0, alpha);
 
     // Y-axis line
     offsetMinPoint = yMinPoint;
@@ -484,7 +489,8 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
     offsetMaxPoint.y += childOffset.y;
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
-        offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 149, 0, alpha);
+                  offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 149,
+                  0, alpha);
 
     // Z-axis line
     offsetMinPoint = zMinPoint;
@@ -495,7 +501,8 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
     offsetMaxPoint.y += childOffset.y;
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
-        offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 82, 240, alpha);
+                  offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 82,
+                  240, alpha);
 }
 
 void BoundingBoxGizmo::renderPlanes(const SDL_Point& childOffset)
@@ -519,16 +526,16 @@ void BoundingBoxGizmo::renderPlanes(const SDL_Point& childOffset)
     }
 
     // X-axis plane
-    filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[0])
-        , &(offsetYCoords[0]), 4, 148, 0, 0, alpha);
+    filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[0]),
+                      &(offsetYCoords[0]), 4, 148, 0, 0, alpha);
 
     // Y-axis plane
-    filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[4])
-        , &(offsetYCoords[4]), 4, 0, 149, 0, alpha);
+    filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[4]),
+                      &(offsetYCoords[4]), 4, 0, 149, 0, alpha);
 
     // Z-axis plane
-    filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[8])
-        , &(offsetYCoords[8]), 4, 0, 82, 240, alpha);
+    filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[8]),
+                      &(offsetYCoords[8]), 4, 0, 82, 240, alpha);
 }
 
 } // End namespace SpriteEditor

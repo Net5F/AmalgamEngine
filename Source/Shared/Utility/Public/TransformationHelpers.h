@@ -50,8 +50,8 @@ public:
      * and sprite.
      */
     static SDL_Rect worldToScreenExtent(const Position& position,
-                                            const Camera& camera,
-                                            const Sprite& sprite);
+                                        const Camera& camera,
+                                        const Sprite& sprite);
 
     /**
      * Returns a final screen space extent for the given tile index, camera,
@@ -61,8 +61,8 @@ public:
      * some extra offsets applied.
      */
     static SDL_Rect tileToScreenExtent(const TileIndex& index,
-                                           const Camera& camera,
-                                           const Sprite& sprite);
+                                       const Camera& camera,
+                                       const Sprite& sprite);
 
     /**
      * Converts a position in world space to a tile index.

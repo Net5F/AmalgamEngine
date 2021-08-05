@@ -239,7 +239,8 @@ Sint8 Client::calcAdjustment(
     // If the latest data isn't outside the target bounds, no adjustment is
     // needed.
     if ((tickDiffHistoryCopy[0] >= Config::TICKDIFF_ACCEPTABLE_BOUND_LOWER)
-        && (tickDiffHistoryCopy[0] <= Config::TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
+        && (tickDiffHistoryCopy[0]
+            <= Config::TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
         return 0;
     }
 
@@ -280,7 +281,8 @@ Sint8 Client::calcAdjustment(
 }
 
 void Client::printAdjustmentInfo(
-    const CircularBuffer<Sint8, Config::TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy,
+    const CircularBuffer<Sint8, Config::TICKDIFF_HISTORY_LENGTH>&
+        tickDiffHistoryCopy,
     unsigned int numFreshDiffsCopy, int truncatedAverage)
 {
     LOG_INFO("Calc'd adjustment. NetID: %u, adjustment: %d, iteration: %u",

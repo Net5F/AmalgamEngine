@@ -33,8 +33,7 @@ public:
      * @param getProgress  A function that returns how far between sim ticks we
      *                     are in decimal percent.
      */
-    Renderer(SDL_Renderer* inSdlRenderer,
-             Simulation& sim, UserInterface& inUI,
+    Renderer(SDL_Renderer* inSdlRenderer, Simulation& sim, UserInterface& inUI,
              std::function<double(void)> inGetProgress);
 
     /**

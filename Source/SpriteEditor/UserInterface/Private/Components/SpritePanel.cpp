@@ -10,8 +10,8 @@ namespace AM
 {
 namespace SpriteEditor
 {
-
-SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
+SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen,
+                         SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, {-8, 732, 1936, 352}, "SpritePanel")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
@@ -20,8 +20,10 @@ SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen, SpriteD
 , spriteContainer(inScreen, {191, 24, 1737, 324}, "SpriteContainer")
 {
     /* Background image */
-    backgroundImage.addResolution({1600, 900}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "SpritePanel/Background_1600.png"));
+    backgroundImage.addResolution(
+        {1600, 900},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "SpritePanel/Background_1600.png"));
 
     /* Container */
     spriteContainer.setNumColumns(10);
@@ -41,14 +43,15 @@ void SpritePanel::addSprite(const SpriteSheet& sheet, SpriteStaticData& sprite)
     // Load the sprite's image.
     std::string imagePath{spriteDataModel.getWorkingResourcesDir()};
     imagePath += sheet.relPath;
-    thumbnail.thumbnailImage.addResolution({1280, 720}, assetCache.loadTexture(imagePath)
-        , sprite.textureExtent);
+    thumbnail.thumbnailImage.addResolution(
+        {1280, 720}, assetCache.loadTexture(imagePath), sprite.textureExtent);
 
     // Add a callback to deactivate all other thumbnails when one is activated.
-    thumbnail.setOnActivated([&](AUI::Thumbnail* selectedThumb){
+    thumbnail.setOnActivated([&](AUI::Thumbnail* selectedThumb) {
         // Deactivate all other thumbnails.
         for (auto& componentPtr : spriteContainer) {
-            MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*componentPtr);
+            MainThumbnail& otherThumb
+                = static_cast<MainThumbnail&>(*componentPtr);
             if (otherThumb.getIsActive() && (&otherThumb != selectedThumb)) {
                 otherThumb.deactivate();
             }
@@ -65,7 +68,8 @@ void SpritePanel::refreshActiveSprite(const std::string& newDisplayName)
 {
     // Look for an active sprite.
     for (unsigned int i = 0; i < spriteContainer.size(); ++i) {
-        AUI::Thumbnail& thumbnail{dynamic_cast<AUI::Thumbnail&>(spriteContainer[i])};
+        AUI::Thumbnail& thumbnail{
+            dynamic_cast<AUI::Thumbnail&>(spriteContainer[i])};
         if (thumbnail.getIsActive()) {
             // Refresh the sprite's display name.
             thumbnail.setText(newDisplayName);

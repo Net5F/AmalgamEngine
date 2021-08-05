@@ -11,7 +11,6 @@
 
 namespace AM
 {
-
 // I don't like obfuscating the shared_ptr, but this alias is useful in case
 // we decide to change the type.
 using TextureHandle = std::shared_ptr<SDL_Texture>;

@@ -18,8 +18,8 @@ namespace AM
 {
 namespace Client
 {
-Renderer::Renderer(SDL_Renderer* inSdlRenderer,
-                   Simulation& sim, UserInterface& inUI,
+Renderer::Renderer(SDL_Renderer* inSdlRenderer, Simulation& sim,
+                   UserInterface& inUI,
                    std::function<double(void)> inGetProgress)
 : sdlRenderer{inSdlRenderer}
 , world{sim.getWorld()}
@@ -173,8 +173,8 @@ void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
 
     // Draw the faces.
     filledPolygonRGBA(sdlRenderer, xValues, yValues, 4, 200, 0, 50, 150);
-    filledPolygonRGBA(sdlRenderer, &(xValues[4]), &(yValues[4]), 4, 255,
-                      0, 0, 150);
+    filledPolygonRGBA(sdlRenderer, &(xValues[4]), &(yValues[4]), 4, 255, 0, 0,
+                      150);
 
     SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 255);
 }

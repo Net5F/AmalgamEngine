@@ -6,13 +6,11 @@
 
 namespace AM
 {
-
 class Position;
 class BoundingBox;
 
 namespace SpriteEditor
 {
-
 class MainScreen;
 class SpriteStaticData;
 
@@ -67,13 +65,7 @@ private:
     /**
      * The list of our clickable controls.
      */
-    enum class Control {
-        None,
-        Position,
-        X,
-        Y,
-        Z
-    };
+    enum class Control { None, Position, X, Y, Z };
 
     /**
      * Updates the active sprite's maxX and maxY bounds to match the given

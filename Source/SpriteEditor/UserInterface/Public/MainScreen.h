@@ -16,7 +16,6 @@ class AssetCache;
 
 namespace SpriteEditor
 {
-
 class UserInterface;
 
 /**
@@ -46,9 +45,9 @@ public:
      * @param confirmButtonText  The text on the confirm button.
      * @param onConfirmation  Called when the user presses the confirm button.
      */
-    void openConfirmationDialog(const std::string& bodyText
-                                , const std::string& confirmButtonText
-                                , std::function<void(void)> onConfirmation);
+    void openConfirmationDialog(const std::string& bodyText,
+                                const std::string& confirmButtonText,
+                                std::function<void(void)> onConfirmation);
 
     /**
      * Loads the given sprite data into PropertiesPanel, and displays it on

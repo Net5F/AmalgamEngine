@@ -16,7 +16,6 @@ class AssetCache;
 
 namespace SpriteEditor
 {
-
 /**
  * This class handles creation and management of the user interface.
  *
@@ -29,7 +28,8 @@ namespace SpriteEditor
 class UserInterface : public EventHandler
 {
 public:
-    UserInterface(SDL_Renderer* renderer, AssetCache& assetCache, SpriteDataModel& spriteDataModel);
+    UserInterface(SDL_Renderer* renderer, AssetCache& assetCache,
+                  SpriteDataModel& spriteDataModel);
 
     /**
      * Changes the currentScreen to titleScreen.

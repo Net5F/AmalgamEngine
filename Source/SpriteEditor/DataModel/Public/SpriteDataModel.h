@@ -11,7 +11,6 @@ namespace AM
 {
 namespace SpriteEditor
 {
-
 /**
  * A data model that holds our SpriteData.json project file in memory.
  */
@@ -67,9 +66,11 @@ public:
      *
      * @return "" if the given data is valid, else an appropriate error string.
      */
-    std::string addSpriteSheet(const std::string& relPath, const std::string& spriteWidth
-                               , const std::string& spriteHeight, const std::string& yOffset
-                               , const std::string& baseName);
+    std::string addSpriteSheet(const std::string& relPath,
+                               const std::string& spriteWidth,
+                               const std::string& spriteHeight,
+                               const std::string& yOffset,
+                               const std::string& baseName);
 
     /**
      * Removes the sprite sheet at the given index in the spriteSheets vector.

@@ -10,7 +10,6 @@ class AssetCache;
 
 namespace SpriteEditor
 {
-
 class MainScreen;
 class SpriteStaticData;
 class SpriteDataModel;
@@ -25,7 +24,8 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
+    SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
+                    SpriteDataModel& inSpriteDataModel);
 
     /**
      * Loads the given sprite onto the stage.

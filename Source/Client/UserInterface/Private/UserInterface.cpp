@@ -18,22 +18,19 @@ UserInterface::UserInterface(World& inWorld, AssetCache& inAssetCache)
 , assetCache{inAssetCache}
 {
     // Set up the tile highlight sprite.
-    TextureHandle texture = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
-    tileHighlightSprite
-        = {texture, {(256 * 8), (512 * 0), 256, 512}, 256, 512};
+    TextureHandle texture
+        = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
+    tileHighlightSprite = {texture, {(256 * 8), (512 * 0), 256, 512}, 256, 512};
 
     // Push the terrain sprites to cycle through.
     SDL2pp::Rect spritePosInTexture{(256 * 6), (512 * 0), 256, 512};
-    terrainSprites.push_back(
-        Sprite{texture, spritePosInTexture, 256, 512});
+    terrainSprites.push_back(Sprite{texture, spritePosInTexture, 256, 512});
 
     spritePosInTexture = {(256 * 6), (512 * 2), 256, 512};
-    terrainSprites.push_back(
-        Sprite{texture, spritePosInTexture, 256, 512});
+    terrainSprites.push_back(Sprite{texture, spritePosInTexture, 256, 512});
 
     spritePosInTexture = {(256 * 6), (512 * 3), 256, 512};
-    terrainSprites.push_back(
-        Sprite{texture, spritePosInTexture, 256, 512});
+    terrainSprites.push_back(Sprite{texture, spritePosInTexture, 256, 512});
 }
 
 bool UserInterface::handleEvent(SDL_Event& event)
@@ -61,11 +58,11 @@ void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
     Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
     ScreenPoint screenPoint{static_cast<float>(event.x),
                             static_cast<float>(event.y)};
-    TileIndex tileIndex = TransformationHelpers::screenToTile(screenPoint, playerCamera);
+    TileIndex tileIndex
+        = TransformationHelpers::screenToTile(screenPoint, playerCamera);
 
     // If the index is outside of the world bounds, ignore this event.
-    if ((tileIndex.x < 0)
-        || (tileIndex.y < 0)
+    if ((tileIndex.x < 0) || (tileIndex.y < 0)
         || (tileIndex.x >= static_cast<int>(SharedConfig::WORLD_WIDTH))
         || (tileIndex.y >= static_cast<int>(SharedConfig::WORLD_HEIGHT))) {
         return;
@@ -95,15 +92,15 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
         = TransformationHelpers::screenToTile(screenPoint, playerCamera);
 
     // If the index is outside of the world bounds, ignore this event.
-    if ((tileIndex.x < 0)
-        || (tileIndex.y < 0)
+    if ((tileIndex.x < 0) || (tileIndex.y < 0)
         || (tileIndex.x >= static_cast<int>(SharedConfig::WORLD_WIDTH))
         || (tileIndex.y >= static_cast<int>(SharedConfig::WORLD_HEIGHT))) {
         return;
     }
 
     // Determine which sprite the selected tile has.
-    unsigned int linearizedIndex = tileIndex.y * SharedConfig::WORLD_WIDTH + tileIndex.x;
+    unsigned int linearizedIndex
+        = tileIndex.y * SharedConfig::WORLD_WIDTH + tileIndex.x;
     Sprite& tileSprite = world.mapLayers[0][linearizedIndex];
 
     unsigned int terrainSpriteIndex = 0;

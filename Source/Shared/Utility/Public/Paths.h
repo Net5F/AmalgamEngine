@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 /**
  * Used for accessing files in expected directories.
  *

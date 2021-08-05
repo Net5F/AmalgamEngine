@@ -10,8 +10,9 @@ namespace AM
 {
 namespace SpriteEditor
 {
-
-SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
+SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
+                                   MainScreen& inScreen,
+                                   SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, {0, 0, 399, 708}, "SpriteSheetPanel")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
@@ -23,15 +24,21 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache, MainScreen& inScree
 , addSheetDialog(assetCache, inScreen, spriteSheetContainer, spriteDataModel)
 {
     /* Background image */
-    backgroundImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "SpriteSheetPanel/Background_1920.png")
-                                  , {4, 4, 399, 708});
-    backgroundImage.addResolution({1600, 900}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "SpriteSheetPanel/Background_1600.png")
-                                  , {4, 4, 333, 590});
-    backgroundImage.addResolution({1280, 720}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "SpriteSheetPanel/Background_1280.png")
-                                  , {3, 3, 266, 472});
+    backgroundImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "SpriteSheetPanel/Background_1920.png"),
+        {4, 4, 399, 708});
+    backgroundImage.addResolution(
+        {1600, 900},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "SpriteSheetPanel/Background_1600.png"),
+        {4, 4, 333, 590});
+    backgroundImage.addResolution(
+        {1280, 720},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "SpriteSheetPanel/Background_1280.png"),
+        {3, 3, 266, 472});
 
     /* Container */
     spriteSheetContainer.setNumColumns(2);
@@ -39,28 +46,38 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache, MainScreen& inScree
     spriteSheetContainer.setCellHeight(162);
 
     /* Remove sheet button */
-    remSheetButton.normalImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveNormal.png"));
-    remSheetButton.hoveredImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveHovered.png"));
-    remSheetButton.pressedImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveNormal.png"));
-    remSheetButton.disabledImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "SpriteSheetPanel/RemoveDisabled.png"));
+    remSheetButton.normalImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "SpriteSheetPanel/RemoveNormal.png"));
+    remSheetButton.hoveredImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "SpriteSheetPanel/RemoveHovered.png"));
+    remSheetButton.pressedImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "SpriteSheetPanel/RemoveNormal.png"));
+    remSheetButton.disabledImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "SpriteSheetPanel/RemoveDisabled.png"));
     remSheetButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     remSheetButton.text.setText("");
     remSheetButton.disable();
 
     // Add a callback to remove a selected component on button press.
-    remSheetButton.setOnPressed([&](){
+    remSheetButton.setOnPressed([&]() {
         // Set up our data for the confirmation dialog.
-        std::string bodyText{"Remove the selected sprite sheet and all associated sprites?"};
+        std::string bodyText{
+            "Remove the selected sprite sheet and all associated sprites?"};
 
         std::function<void(void)> onConfirmation = [&]() {
             // Try to find a selected sprite sheet in the container.
             int selectedIndex{-1};
             for (unsigned int i = 0; i < spriteSheetContainer.size(); ++i) {
-                MainThumbnail& thumbnail = static_cast<MainThumbnail&>(spriteSheetContainer[i]);
+                MainThumbnail& thumbnail
+                    = static_cast<MainThumbnail&>(spriteSheetContainer[i]);
                 if (thumbnail.getIsSelected()) {
                     selectedIndex = i;
                     break;
@@ -81,20 +98,27 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache, MainScreen& inScree
         };
 
         // Bring up the confirmation dialog.
-        mainScreen.openConfirmationDialog(bodyText, "REMOVE", std::move(onConfirmation));
+        mainScreen.openConfirmationDialog(bodyText, "REMOVE",
+                                          std::move(onConfirmation));
     });
 
     /* Add sheet button */
-    addSheetButton.normalImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "SpriteSheetPanel/AddNormal.png"));
-    addSheetButton.hoveredImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "SpriteSheetPanel/AddHovered.png"));
-    addSheetButton.pressedImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "SpriteSheetPanel/AddNormal.png"));
+    addSheetButton.normalImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "SpriteSheetPanel/AddNormal.png"));
+    addSheetButton.hoveredImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "SpriteSheetPanel/AddHovered.png"));
+    addSheetButton.pressedImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "SpriteSheetPanel/AddNormal.png"));
     addSheetButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     addSheetButton.text.setText("");
 
-    addSheetButton.setOnPressed([this](){
+    addSheetButton.setOnPressed([this]() {
         // Bring up the add dialog.
         addSheetDialog.setIsVisible(true);
     });
@@ -112,17 +136,20 @@ void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
         std::make_unique<MainThumbnail>(assetCache, screen, "")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
 
-
-    thumbnail.thumbnailImage.addResolution({1280, 720}, assetCache.loadTexture(spriteDataModel.getWorkingResourcesDir() + sheet.relPath));
+    thumbnail.thumbnailImage.addResolution(
+        {1280, 720},
+        assetCache.loadTexture(spriteDataModel.getWorkingResourcesDir()
+                               + sheet.relPath));
     thumbnail.setText(sheet.relPath);
     thumbnail.setIsActivateable(false);
 
     // Add a callback to deselect all other components when this one
     // is selected.
-    thumbnail.setOnSelected([&](AUI::Thumbnail* selectedThumb){
+    thumbnail.setOnSelected([&](AUI::Thumbnail* selectedThumb) {
         // Deselect all other thumbnails.
         for (auto& componentPtr : spriteSheetContainer) {
-            MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*componentPtr);
+            MainThumbnail& otherThumb
+                = static_cast<MainThumbnail&>(*componentPtr);
             if (otherThumb.getIsSelected() && (&otherThumb != selectedThumb)) {
                 otherThumb.deselect();
             }
@@ -133,13 +160,14 @@ void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
     });
 
     // Add a callback to disable the remove button if nothing is selected.
-    thumbnail.setOnDeselected([&](AUI::Thumbnail* deselectedThumb){
+    thumbnail.setOnDeselected([&](AUI::Thumbnail* deselectedThumb) {
         ignore(deselectedThumb);
 
         // Check if any thumbnails are selected.
         bool thumbIsSelected{false};
         for (auto& componentPtr : spriteSheetContainer) {
-            MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*componentPtr);
+            MainThumbnail& otherThumb
+                = static_cast<MainThumbnail&>(*componentPtr);
             if (otherThumb.getIsSelected()) {
                 thumbIsSelected = true;
             }
@@ -161,17 +189,18 @@ void SpriteSheetPanel::clearSpriteSheets()
 
 bool SpriteSheetPanel::onMouseButtonDown(SDL_MouseButtonEvent& event)
 {
-//    // If the click event was outside our extent.
-//    if (!(containsPoint({event.x, event.y}))) {
-//        // Deselect any selected component.
-//        for (auto& componentPtr : spriteSheetContainer) {
-//            MainThumbnail& thumbnail = static_cast<MainThumbnail&>(*componentPtr);
-//            if (thumbnail.getIsSelected()) {
-//                thumbnail.deselect();
-//                break;
-//            }
-//        }
-//    }
+    //    // If the click event was outside our extent.
+    //    if (!(containsPoint({event.x, event.y}))) {
+    //        // Deselect any selected component.
+    //        for (auto& componentPtr : spriteSheetContainer) {
+    //            MainThumbnail& thumbnail =
+    //            static_cast<MainThumbnail&>(*componentPtr); if
+    //            (thumbnail.getIsSelected()) {
+    //                thumbnail.deselect();
+    //                break;
+    //            }
+    //        }
+    //    }
 
     return false;
 }

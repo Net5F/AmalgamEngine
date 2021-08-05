@@ -3,7 +3,6 @@
 
 namespace AM
 {
-
 AssetCache::AssetCache(SDL_Renderer* inSdlRenderer)
 : sdlRenderer{inSdlRenderer}
 {
@@ -24,7 +23,8 @@ TextureHandle AssetCache::loadTexture(const std::string& filePath)
     }
 
     // Wrap the texture in a shared_ptr.
-    TextureHandle handle = TextureHandle(texture, [](SDL_Texture* p){SDL_DestroyTexture(p);});
+    TextureHandle handle
+        = TextureHandle(texture, [](SDL_Texture* p) { SDL_DestroyTexture(p); });
 
     // Save the texture in the cache.
     textureCache[filePath] = handle;

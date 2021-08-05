@@ -12,14 +12,15 @@ ScreenPoint TransformationHelpers::worldToScreen(const Position position,
 {
     // Calc the scaling factor going from world tiles to screen tiles.
     static const float TILE_WIDTH_SCALE
-        = static_cast<float>(SharedConfig::TILE_SCREEN_WIDTH) / SharedConfig::TILE_WORLD_WIDTH;
+        = static_cast<float>(SharedConfig::TILE_SCREEN_WIDTH)
+          / SharedConfig::TILE_WORLD_WIDTH;
     static const float TILE_HEIGHT_SCALE
-        = static_cast<float>(SharedConfig::TILE_SCREEN_HEIGHT) / SharedConfig::TILE_WORLD_HEIGHT;
+        = static_cast<float>(SharedConfig::TILE_SCREEN_HEIGHT)
+          / SharedConfig::TILE_WORLD_HEIGHT;
 
     // Convert cartesian world point to isometric screen point.
     float screenX = (position.x - position.y) * (TILE_WIDTH_SCALE / 2.f);
-    float screenY
-        = (position.x + position.y) * (TILE_HEIGHT_SCALE / 2.f);
+    float screenY = (position.x + position.y) * (TILE_HEIGHT_SCALE / 2.f);
 
     // The Z coordinate scaling is independent of X/Y and only affects the
     // screen's Y axis. Scale and apply it.
@@ -46,9 +47,11 @@ Position TransformationHelpers::screenToWorld(const ScreenPoint screenPoint,
 
     // Calc the scaling factor going from screen tiles to world tiles.
     static const float TILE_WIDTH_SCALE
-        = static_cast<float>(SharedConfig::TILE_WORLD_WIDTH) / SharedConfig::TILE_SCREEN_WIDTH;
+        = static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
+          / SharedConfig::TILE_SCREEN_WIDTH;
     static const float TILE_HEIGHT_SCALE
-        = static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT) / SharedConfig::TILE_SCREEN_HEIGHT;
+        = static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)
+          / SharedConfig::TILE_SCREEN_HEIGHT;
 
     // Calc the world position.
     float worldX = ((2.f * y) + x) * TILE_WIDTH_SCALE;
@@ -66,8 +69,9 @@ float TransformationHelpers::screenYToWorldZ(float yCoord, float zoomFactor)
     return yCoord * zoomFactor * Z_WORLD_SCALE;
 }
 
-SDL_Rect TransformationHelpers::worldToScreenExtent(
-    const Position& position, const Camera& camera, const Sprite& sprite)
+SDL_Rect TransformationHelpers::worldToScreenExtent(const Position& position,
+                                                    const Camera& camera,
+                                                    const Sprite& sprite)
 {
     // Get the point in screen space.
     ScreenPoint screenPoint = worldToScreen(position, camera.zoomFactor);
@@ -88,12 +92,14 @@ SDL_Rect TransformationHelpers::worldToScreenExtent(
 }
 
 SDL_Rect TransformationHelpers::tileToScreenExtent(const TileIndex& index,
-                                                       const Camera& camera,
-                                                       const Sprite& sprite)
+                                                   const Camera& camera,
+                                                   const Sprite& sprite)
 {
     // Convert tile index to isometric screen position.
-    float screenX = (index.x - index.y) * (SharedConfig::TILE_SCREEN_WIDTH / 2.f);
-    float screenY = (index.x + index.y) * (SharedConfig::TILE_SCREEN_HEIGHT / 2.f);
+    float screenX
+        = (index.x - index.y) * (SharedConfig::TILE_SCREEN_WIDTH / 2.f);
+    float screenY
+        = (index.x + index.y) * (SharedConfig::TILE_SCREEN_HEIGHT / 2.f);
 
     // In an iso view, the (0, 0) point of a tile is halfway through the width
     // of the sprite. Thus, we have to shift the tile back to align it.
@@ -105,9 +111,9 @@ SDL_Rect TransformationHelpers::tileToScreenExtent(const TileIndex& index,
 
     // Get the sprite's vertical offset (iso sprites may have extra
     // vertical space to show depth, we just want the tile.)
-    float spriteOffsetY
-        = (sprite.height - SharedConfig::TILE_SCREEN_HEIGHT - SharedConfig::TILE_SCREEN_EDGE_HEIGHT)
-          * camera.zoomFactor;
+    float spriteOffsetY = (sprite.height - SharedConfig::TILE_SCREEN_HEIGHT
+                           - SharedConfig::TILE_SCREEN_EDGE_HEIGHT)
+                          * camera.zoomFactor;
 
     // Apply the camera adjustment.
     int adjustedX = static_cast<int>(std::round(screenX - camera.extent.x));

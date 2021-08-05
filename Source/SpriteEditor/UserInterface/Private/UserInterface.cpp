@@ -9,13 +9,16 @@ namespace AM
 {
 namespace SpriteEditor
 {
-UserInterface::UserInterface(SDL_Renderer* renderer, AssetCache& assetCache, SpriteDataModel& spriteDataModel)
-: auiInitializer(renderer, {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT})
+UserInterface::UserInterface(SDL_Renderer* renderer, AssetCache& assetCache,
+                             SpriteDataModel& spriteDataModel)
+: auiInitializer(renderer,
+                 {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT})
 , currentScreen(&titleScreen)
 , titleScreen(*this, assetCache, spriteDataModel)
 , mainScreen(assetCache, spriteDataModel)
 {
-    AUI::Core::setActualScreenSize({Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT});
+    AUI::Core::setActualScreenSize(
+        {Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT});
 }
 
 void UserInterface::openTitleScreen()

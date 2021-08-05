@@ -15,11 +15,11 @@ Application::Application()
 : sdl(SDL_INIT_VIDEO)
 , sdlNetInit()
 , network()
-, networkCaller(std::bind_front(&Network::tick, &network), SharedConfig::NETWORK_TICK_TIMESTEP_S,
-                "Network", true)
+, networkCaller(std::bind_front(&Network::tick, &network),
+                SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
 , sim(network)
-, simCaller(std::bind_front(&Simulation::tick, &sim), SharedConfig::SIM_TICK_TIMESTEP_S, "Sim",
-            false)
+, simCaller(std::bind_front(&Simulation::tick, &sim),
+            SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
 , exitRequested(false)
 {
     // Enable delay reporting.

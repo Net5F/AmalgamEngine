@@ -9,8 +9,10 @@ namespace AM
 {
 namespace SpriteEditor
 {
-
-AddSheetDialog::AddSheetDialog(AssetCache& assetCache, MainScreen& inScreen, AUI::VerticalGridContainer& inSpriteSheetContainer, SpriteDataModel& inSpriteDataModel)
+AddSheetDialog::AddSheetDialog(
+    AssetCache& assetCache, MainScreen& inScreen,
+    AUI::VerticalGridContainer& inSpriteSheetContainer,
+    SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, {0, 0, 1920, 1080})
 , backgroundImage(inScreen, {0, 0, logicalExtent.w, logicalExtent.h})
 , headerText(inScreen, {747, 228, 280, 60})
@@ -32,8 +34,10 @@ AddSheetDialog::AddSheetDialog(AssetCache& assetCache, MainScreen& inScreen, AUI
 , errorText(inScreen, {748, 556, 466, 60})
 {
     /* Background image. */
-    backgroundImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "Dialogs/AddSheetBackground.png"));
+    backgroundImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "Dialogs/AddSheetBackground.png"));
 
     /* Header text. */
     headerText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 32);
@@ -87,10 +91,11 @@ AddSheetDialog::AddSheetDialog(AssetCache& assetCache, MainScreen& inScreen, AUI
 
     /* Confirmation buttons. */
     // Add a callback to validate the input and add the new sprite sheet.
-    addButton.setOnPressed([this](){
+    addButton.setOnPressed([this]() {
         // Pass the user-inputted data to the model.
-        std::string result = spriteDataModel.addSpriteSheet(pathInput.getText(), widthInput.getText()
-                    , heightInput.getText(), offsetInput.getText(), nameInput.getText());
+        std::string result = spriteDataModel.addSpriteSheet(
+            pathInput.getText(), widthInput.getText(), heightInput.getText(),
+            offsetInput.getText(), nameInput.getText());
 
         // If the data was valid.
         if (result == "") {
@@ -112,7 +117,7 @@ AddSheetDialog::AddSheetDialog(AssetCache& assetCache, MainScreen& inScreen, AUI
     });
 
     // Add a callback to remove the dialog on cancel.
-    cancelButton.setOnPressed([&](){
+    cancelButton.setOnPressed([&]() {
         // Clear the text inputs.
         clear();
 

@@ -11,8 +11,8 @@ namespace AM
 {
 namespace SpriteEditor
 {
-
-TitleScreen::TitleScreen(UserInterface& inUserInterface, AssetCache& assetCache, SpriteDataModel& inSpriteDataModel)
+TitleScreen::TitleScreen(UserInterface& inUserInterface, AssetCache& assetCache,
+                         SpriteDataModel& inSpriteDataModel)
 : Screen("TitleScreen")
 , userInterface{inUserInterface}
 , spriteDataModel{inSpriteDataModel}

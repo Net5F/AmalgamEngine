@@ -9,8 +9,8 @@ namespace AM
 {
 namespace SpriteEditor
 {
-
-SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
+SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
+                                 SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, {389, 60, 1142, 684}, "SpriteEditStage")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
@@ -20,8 +20,10 @@ SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
 , boundingBoxGizmo(inScreen)
 {
     /* Active sprite and checkerboard background. */
-    checkerboardImage.addResolution({1920, 1080}, assetCache.loadTexture(
-        Paths::TEXTURE_DIR + "SpriteEditStage/Checkerboard.png"));
+    checkerboardImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "SpriteEditStage/Checkerboard.png"));
     checkerboardImage.setIsVisible(false);
     spriteImage.setIsVisible(false);
 
@@ -36,8 +38,9 @@ void SpriteEditStage::loadActiveSprite(SpriteStaticData* activeSprite)
         spriteImage.clearTextures();
         std::string imagePath{spriteDataModel.getWorkingResourcesDir()};
         imagePath += activeSprite->parentSpriteSheet.relPath;
-        spriteImage.addResolution(AUI::Core::getLogicalScreenSize()
-            , assetCache.loadTexture(imagePath), activeSprite->textureExtent);
+        spriteImage.addResolution(AUI::Core::getLogicalScreenSize(),
+                                  assetCache.loadTexture(imagePath),
+                                  activeSprite->textureExtent);
 
         // Calc the centered sprite position.
         SDL_Rect centeredSpriteExtent{activeSprite->textureExtent};

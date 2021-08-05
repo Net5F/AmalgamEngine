@@ -2,7 +2,6 @@
 
 namespace AM
 {
-
 /**
  * This class contains shared configuration that should be consistent between
  * the server and client.

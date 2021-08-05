@@ -30,15 +30,17 @@ public:
     /**
      * See associated members for descriptions.
      */
-    PeriodicCaller(std::function<void(void)> inGivenFunctNoTimestep, double inTimestepS,
-                   std::string_view inDebugName, bool inSkipLateSteps);
+    PeriodicCaller(std::function<void(void)> inGivenFunctNoTimestep,
+                   double inTimestepS, std::string_view inDebugName,
+                   bool inSkipLateSteps);
 
     /**
      * Overload for functions that take a timestep argument.
      * The given function will be passed the timestep in seconds.
      */
-    PeriodicCaller(std::function<void(double)> inGivenFunctTimestep, double inTimestepS,
-                   std::string_view inDebugName, bool inSkipLateSteps);
+    PeriodicCaller(std::function<void(double)> inGivenFunctTimestep,
+                   double inTimestepS, std::string_view inDebugName,
+                   bool inSkipLateSteps);
 
     /**
      * Initializes the timer to the current time.

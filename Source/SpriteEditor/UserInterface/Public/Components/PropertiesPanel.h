@@ -11,7 +11,6 @@ class AssetCache;
 
 namespace SpriteEditor
 {
-
 class MainScreen;
 class SpriteDataModel;
 class SpriteStaticData;
@@ -26,7 +25,8 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
+    PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
+                    SpriteDataModel& inSpriteDataModel);
 
     /**
      * Loads the given sprite's data into this panel.

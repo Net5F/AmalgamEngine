@@ -17,15 +17,16 @@ namespace Client
 Application::Application()
 : sdl(SDL_INIT_VIDEO)
 , sdlWindow("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-            SharedConfig::SCREEN_WIDTH, SharedConfig::SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
+            SharedConfig::SCREEN_WIDTH, SharedConfig::SCREEN_HEIGHT,
+            SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , assetCache(sdlRenderer.Get())
 , network()
-, networkCaller(std::bind_front(&Network::tick, &network), SharedConfig::NETWORK_TICK_TIMESTEP_S,
-                "Network", true)
+, networkCaller(std::bind_front(&Network::tick, &network),
+                SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
 , sim(network, assetCache)
-, simCaller(std::bind_front(&Simulation::tick, &sim), SharedConfig::SIM_TICK_TIMESTEP_S, "Sim",
-            false)
+, simCaller(std::bind_front(&Simulation::tick, &sim),
+            SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
 , userInterface(sim.getWorld(), assetCache)
 , renderer(sdlRenderer.Get(), sim, userInterface,
            std::bind_front(&PeriodicCaller::getProgress, &simCaller))

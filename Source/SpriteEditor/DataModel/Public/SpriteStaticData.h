@@ -9,14 +9,12 @@ namespace AM
 {
 namespace SpriteEditor
 {
-
 class SpriteSheet;
 
 /**
  * Holds the static data for a single sprite.
  */
-struct SpriteStaticData
-{
+struct SpriteStaticData {
 public:
     /** The sprite sheet that this sprite is from. */
     SpriteSheet& parentSpriteSheet;

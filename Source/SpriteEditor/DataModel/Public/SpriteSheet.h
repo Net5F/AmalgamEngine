@@ -8,12 +8,10 @@ namespace AM
 {
 namespace SpriteEditor
 {
-
 /**
  * Holds the path to a sprite sheet and all associated sprite data.
  */
-struct SpriteSheet
-{
+struct SpriteSheet {
 public:
     /** The path to the sprite sheet image file, relative to the application's
         base directory. */

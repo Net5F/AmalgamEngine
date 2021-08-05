@@ -17,7 +17,6 @@ class TileIndex;
 
 namespace Client
 {
-
 /**
  * Holds world state and manages the persistence of that state.
  *
@@ -51,8 +50,8 @@ private:
      * Adds a tile sprite to the tile map at the given layer and position.
      */
     void addTile(unsigned int layer, const TileIndex& index,
-                 TextureHandle texture,
-                 const SDL_Rect& extent, const BoundingBox& modelBounds);
+                 TextureHandle texture, const SDL_Rect& extent,
+                 const BoundingBox& modelBounds);
 
     /** Used for loading map textures. */
     AssetCache& assetCache;

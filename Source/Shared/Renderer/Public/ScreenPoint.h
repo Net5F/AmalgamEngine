@@ -2,7 +2,6 @@
 
 namespace AM
 {
-
 /**
  * Represents a 2D point in isometric screen space.
  * Fields are float to maintain precision. Cast right before rendering.

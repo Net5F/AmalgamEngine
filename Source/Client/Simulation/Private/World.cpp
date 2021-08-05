@@ -30,7 +30,8 @@ World::World(AssetCache& inAssetCache)
     // Fill layer 0 (terrain layer).
     // TODO: Load this from some storage format.
     SDL_Rect floorPosInTexture{(256 * 6), 0, 256, 512};
-    TextureHandle texture = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
+    TextureHandle texture
+        = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
     std::fill(mapLayers[0].begin(), mapLayers[0].end(),
               Sprite{texture, floorPosInTexture, 256, 512});
 
@@ -57,11 +58,12 @@ World::World(AssetCache& inAssetCache)
 }
 
 void World::addTile(unsigned int layer, const TileIndex& index,
-                    TextureHandle texture,
-                    const SDL_Rect& extent, const BoundingBox& modelBounds)
+                    TextureHandle texture, const SDL_Rect& extent,
+                    const BoundingBox& modelBounds)
 {
     // Convert the 2d tile position into an index into the 1d array.
-    unsigned int linearizedIndex = index.y * SharedConfig::WORLD_WIDTH + index.x;
+    unsigned int linearizedIndex
+        = index.y * SharedConfig::WORLD_WIDTH + index.x;
     Sprite& sprite = mapLayers[layer][linearizedIndex];
 
     // Build the sprite.
@@ -72,8 +74,9 @@ void World::addTile(unsigned int layer, const TileIndex& index,
     sprite.modelBounds = modelBounds;
 
     // Move the sprite's world bounds to match the tile's world position.
-    Position tilePosition{static_cast<float>(index.x * SharedConfig::TILE_WORLD_WIDTH),
-                          static_cast<float>(index.y * SharedConfig::TILE_WORLD_HEIGHT), 0};
+    Position tilePosition{
+        static_cast<float>(index.x * SharedConfig::TILE_WORLD_WIDTH),
+        static_cast<float>(index.y * SharedConfig::TILE_WORLD_HEIGHT), 0};
     MovementHelpers::moveSpriteWorldBounds(tilePosition, sprite);
 }
 

@@ -62,8 +62,10 @@ void NetworkConnectionSystem::processConnectEvents()
         registry.emplace<Input>(newEntity);
         registry.emplace<ClientSimData>(
             newEntity, clientNetworkID, false,
-            AreaOfInterest{(SharedConfig::SCREEN_WIDTH + SharedConfig::AOI_BUFFER_DISTANCE),
-                           (SharedConfig::SCREEN_HEIGHT + SharedConfig::AOI_BUFFER_DISTANCE)});
+            AreaOfInterest{(SharedConfig::SCREEN_WIDTH
+                            + SharedConfig::AOI_BUFFER_DISTANCE),
+                           (SharedConfig::SCREEN_HEIGHT
+                            + SharedConfig::AOI_BUFFER_DISTANCE)});
         world.netIdMap[clientNetworkID] = newEntity;
 
         LOG_INFO("Constructed entity with netID: %u, entityID: %u",

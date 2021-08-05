@@ -142,9 +142,9 @@ private:
      *                           need to keep it locked.
      * @return The calculated adjustment. 0 if no adjustment was needed.
      */
-    Sint8 calcAdjustment(
-        CircularBuffer<Sint8, Config::TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy,
-        unsigned int numFreshDiffsCopy);
+    Sint8 calcAdjustment(CircularBuffer<Sint8, Config::TICKDIFF_HISTORY_LENGTH>&
+                             tickDiffHistoryCopy,
+                         unsigned int numFreshDiffsCopy);
 
     /**
      * Prints relevant information during an adjustment. Used for debugging.

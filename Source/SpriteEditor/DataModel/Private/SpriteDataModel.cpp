@@ -15,7 +15,6 @@ namespace AM
 {
 namespace SpriteEditor
 {
-
 SpriteDataModel::SpriteDataModel(SDL_Renderer* inSdlRenderer)
 : sdlRenderer{inSdlRenderer}
 , workingFilePath{""}
@@ -79,7 +78,8 @@ std::string SpriteDataModel::load(const std::string& fullPath)
             SpriteSheet& spriteSheet{spriteSheets.back()};
 
             // Add this sheet's relative path.
-            spriteSheet.relPath = sheetJson.value()["relPath"].get<std::string>();
+            spriteSheet.relPath
+                = sheetJson.value()["relPath"].get<std::string>();
             std::string resultString = validateRelPath(spriteSheet.relPath);
             if (resultString != "") {
                 workingFile.close();
@@ -93,7 +93,8 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 SpriteStaticData& sprite{spriteSheet.sprites.back()};
 
                 // If the display name isn't unique, fail.
-                std::string displayName = spriteJson.value()["displayName"].get<std::string>();
+                std::string displayName
+                    = spriteJson.value()["displayName"].get<std::string>();
                 if (!displayNameIsUnique(displayName)) {
                     std::string returnString{"Display name isn't unique: "};
                     returnString += sprite.displayName.c_str();
@@ -107,25 +108,34 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 sprite.displayName = displayName;
 
                 // Add this sprite's extent within the sprite sheet.
-                sprite.textureExtent.x = spriteJson.value()["textureExtent"]["x"];
-                sprite.textureExtent.y = spriteJson.value()["textureExtent"]["y"];
-                sprite.textureExtent.w = spriteJson.value()["textureExtent"]["w"];
-                sprite.textureExtent.h = spriteJson.value()["textureExtent"]["h"];
+                sprite.textureExtent.x
+                    = spriteJson.value()["textureExtent"]["x"];
+                sprite.textureExtent.y
+                    = spriteJson.value()["textureExtent"]["y"];
+                sprite.textureExtent.w
+                    = spriteJson.value()["textureExtent"]["w"];
+                sprite.textureExtent.h
+                    = spriteJson.value()["textureExtent"]["h"];
 
                 // Add the Y offset.
                 sprite.yOffset = spriteJson.value()["yOffset"];
 
                 // Add the model-space bounds.
-                sprite.modelBounds.minX = spriteJson.value()["modelBounds"]["minX"];
-                sprite.modelBounds.maxX = spriteJson.value()["modelBounds"]["maxX"];
-                sprite.modelBounds.minY = spriteJson.value()["modelBounds"]["minY"];
-                sprite.modelBounds.maxY = spriteJson.value()["modelBounds"]["maxY"];
-                sprite.modelBounds.minZ = spriteJson.value()["modelBounds"]["minZ"];
-                sprite.modelBounds.maxZ = spriteJson.value()["modelBounds"]["maxZ"];
+                sprite.modelBounds.minX
+                    = spriteJson.value()["modelBounds"]["minX"];
+                sprite.modelBounds.maxX
+                    = spriteJson.value()["modelBounds"]["maxX"];
+                sprite.modelBounds.minY
+                    = spriteJson.value()["modelBounds"]["minY"];
+                sprite.modelBounds.maxY
+                    = spriteJson.value()["modelBounds"]["maxY"];
+                sprite.modelBounds.minZ
+                    = spriteJson.value()["modelBounds"]["minZ"];
+                sprite.modelBounds.maxZ
+                    = spriteJson.value()["modelBounds"]["maxZ"];
             }
         }
-    }
-    catch (nlohmann::json::type_error& e) {
+    } catch (nlohmann::json::type_error& e) {
         workingFile.close();
         spriteSheets.clear();
         std::string failureString{"Parse failure - "};
@@ -154,10 +164,12 @@ void SpriteDataModel::save()
         for (unsigned int j = 0; j < spriteSheet.sprites.size(); ++j) {
             // Add the display name.
             SpriteStaticData& sprite{spriteSheet.sprites[j]};
-            json["spriteSheets"][i]["sprites"][j]["displayName"] = sprite.displayName;
+            json["spriteSheets"][i]["sprites"][j]["displayName"]
+                = sprite.displayName;
 
             // Derive the string ID from the display name and add it.
-            json["spriteSheets"][i]["sprites"][j]["stringId"] = deriveStringId(sprite.displayName);
+            json["spriteSheets"][i]["sprites"][j]["stringId"]
+                = deriveStringId(sprite.displayName);
 
             // Add the numeric ID.
             json["spriteSheets"][i]["sprites"][j]["numericId"] = nextNumericId;
@@ -174,8 +186,7 @@ void SpriteDataModel::save()
                 = sprite.textureExtent.h;
 
             // Add the Y offset.
-            json["spriteSheets"][i]["sprites"][j]["yOffset"]
-                = sprite.yOffset;
+            json["spriteSheets"][i]["sprites"][j]["yOffset"] = sprite.yOffset;
 
             // Add hasBoundingBox.
             json["spriteSheets"][i]["sprites"][j]["hasBoundingBox"]
@@ -207,8 +218,11 @@ void SpriteDataModel::save()
     workingFile << jsonDump;
 }
 
-std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const std::string& spriteWidth
-                           , const std::string& spriteHeight, const std::string& yOffset, const std::string& baseName)
+std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
+                                            const std::string& spriteWidth,
+                                            const std::string& spriteHeight,
+                                            const std::string& yOffset,
+                                            const std::string& baseName)
 {
     /* Validate the data. */
     // Check if we already have the given sheet.
@@ -227,14 +241,16 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
     int sheetHeight{0};
     SDL_Texture* sheetTexture = IMG_LoadTexture(sdlRenderer, fullPath.c_str());
     if (sheetTexture == nullptr) {
-        std::string errorString{"Error: File at given path is not a valid image. Path: "};
+        std::string errorString{
+            "Error: File at given path is not a valid image. Path: "};
         errorString += workingResourcesDir;
-        errorString+= relPath;
+        errorString += relPath;
         return errorString;
     }
     else {
         // Save the texture size for later.
-        SDL_QueryTexture(sheetTexture, nullptr, nullptr, &sheetWidth, &sheetHeight);
+        SDL_QueryTexture(sheetTexture, nullptr, nullptr, &sheetWidth,
+                         &sheetHeight);
 
         // We don't need the actual texture right now, destroy it.
         SDL_DestroyTexture(sheetTexture);
@@ -248,8 +264,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
         spriteWidthI = std::stoi(spriteWidth);
         spriteHeightI = std::stoi(spriteHeight);
         yOffsetI = std::stoi(yOffset);
-    }
-    catch (std::exception& e) {
+    } catch (std::exception& e) {
         return "Error: Width, height, or Y offset is not a valid integer.";
     }
 
@@ -277,8 +292,9 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
             static BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
 
             // Add the sprite to the sheet.
-            spriteSheet.sprites.emplace_back(spriteSheet, displayName
-                , textureExtent, yOffsetI, true, defaultBox);
+            spriteSheet.sprites.emplace_back(spriteSheet, displayName,
+                                             textureExtent, yOffsetI, true,
+                                             defaultBox);
 
             // Increment the count (used for the display name).
             spriteCount++;
@@ -360,7 +376,8 @@ bool SpriteDataModel::setWorkingResourcesDir()
 
     // Convert the path to UTF_8 string and save it.
     const char8_t* u8StringPtr{resourcesDirPath.u8string().c_str()};
-    workingResourcesDir = std::string(reinterpret_cast<const char*>(u8StringPtr));
+    workingResourcesDir
+        = std::string(reinterpret_cast<const char*>(u8StringPtr));
 
     return true;
 }
@@ -370,7 +387,7 @@ std::string SpriteDataModel::deriveStringId(const std::string& displayName)
     // Make the string all lowercase.
     std::string stringId{displayName};
     std::transform(stringId.begin(), stringId.end(), stringId.begin(),
-        [](unsigned char c){ return std::tolower(c); });
+                   [](unsigned char c) { return std::tolower(c); });
 
     // Replace spaces with underscores.
     std::replace(stringId.begin(), stringId.end(), ' ', '_');

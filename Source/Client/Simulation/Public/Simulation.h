@@ -12,7 +12,6 @@
 
 namespace AM
 {
-
 class AssetCache;
 
 namespace Client

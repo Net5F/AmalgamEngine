@@ -10,14 +10,14 @@ class AssetCache;
 
 namespace SpriteEditor
 {
-
 /**
  * The thumbnail style used for the main screen.
  */
 class MainThumbnail : public AUI::Thumbnail
 {
 public:
-    MainThumbnail(AssetCache& assetCache, AUI::Screen& inScreen, const std::string& inDebugName = "");
+    MainThumbnail(AssetCache& assetCache, AUI::Screen& inScreen,
+                  const std::string& inDebugName = "");
 };
 
 } // End namespace SpriteEditor

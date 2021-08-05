@@ -11,7 +11,6 @@ namespace AM
 class Camera;
 namespace Client
 {
-
 /**
  * This class is responsible for figuring out which sprites from the world are
  * relevant to the current frame and providing them in a sorted, prepared form.
