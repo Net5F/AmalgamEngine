@@ -12,6 +12,7 @@ namespace SpriteEditor
 {
 
 class MainScreen;
+class SpriteDataModel;
 class SpriteStaticData;
 
 /**
@@ -24,7 +25,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen);
+    PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
 
     /**
      * Loads the given sprite's data into this panel.
@@ -75,6 +76,9 @@ public:
 private:
     /** Used to save updated sprite data. */
     MainScreen& mainScreen;
+
+    /** Used while setting user-inputted sprite data. */
+    SpriteDataModel& spriteDataModel;
 
     /** The active sprite's data. */
     SpriteStaticData* activeSprite;

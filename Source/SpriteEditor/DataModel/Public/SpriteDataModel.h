@@ -78,6 +78,11 @@ public:
      */
     void remSpriteSheet(unsigned int index);
 
+    /**
+     * Checks if the given name is unique among all sprites in the model.
+     */
+    bool displayNameIsUnique(const std::string& displayName);
+
     std::vector<SpriteSheet>& getSpriteSheets();
     const std::string& getWorkingResourcesDir();
 
@@ -91,17 +96,16 @@ private:
     std::string validateRelPath(const std::string& relPath);
 
     /**
-     * Checks that spriteId is in range of a Uint16.
-     *
-     * Errors if spriteId is out of the range of a Uint16.
-     */
-    bool idIsValid(int spriteId);
-
-    /**
      * Sets currentWorkingDir to the parent directory of
      * currentWorkingFilePath.
      */
     bool setWorkingResourcesDir();
+
+    /**
+     * Derives a string ID from a display name by making it all lowercase and
+     * replacing spaces with underscores.
+     */
+    std::string deriveStringId(const std::string& displayName);
 
     /** Used for validating user-selected sprite sheet textures. */
     SDL_Renderer* sdlRenderer;
@@ -115,10 +119,6 @@ private:
 
     /** The parent directory of currentWorkingFilePath. */
     std::string workingResourcesDir;
-
-    /** The next ID that we'll assign to a sprite. Must stay within the range
-        of a Uint16, since that's what it will be in the map format. */
-    Uint16 nextSpriteId;
 };
 
 } // namespace SpriteEditor

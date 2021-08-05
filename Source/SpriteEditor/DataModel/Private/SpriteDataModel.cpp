@@ -8,6 +8,8 @@
 #include <SDL2/SDL_image.h>
 
 #include <filesystem>
+#include <algorithm>
+#include <cctype>
 
 namespace AM
 {
@@ -18,7 +20,6 @@ SpriteDataModel::SpriteDataModel(SDL_Renderer* inSdlRenderer)
 : sdlRenderer{inSdlRenderer}
 , workingFilePath{""}
 , workingResourcesDir{""}
-, nextSpriteId{0}
 {
 }
 
@@ -91,24 +92,17 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 spriteSheet.sprites.push_back(SpriteStaticData{spriteSheet});
                 SpriteStaticData& sprite{spriteSheet.sprites.back()};
 
-                // Add this sprite's key.
+                // Add this sprite's display name.
                 sprite.displayName = spriteJson.value()["displayName"].get<std::string>();
 
-                // If the parsed ID is valid.
-                int parsedId = spriteJson.value()["id"];
-                if (idIsValid(parsedId)) {
-                    // Add this sprite's ID.
-                    sprite.id = parsedId;
+                // If the display name isn't unique, fail.
+                if (!displayNameIsUnique(sprite.displayName)) {
+                    std::string returnString{"Display name isn't unique: "};
+                    returnString += sprite.displayName.c_str();
 
-                    // If it's greater than our saved ID, save it.
-                    if (sprite.id > nextSpriteId) {
-                        nextSpriteId = sprite.id;
-                    }
-                }
-                else {
                     workingFile.close();
                     spriteSheets.clear();
-                    return "Sprite ID is not within range of Uint16.";
+                    return returnString;
                 }
 
                 // Add this sprite's sprite sheet texture extent.
@@ -149,6 +143,7 @@ void SpriteDataModel::save()
 
     // Fill the json with our current model data.
     // For each sprite sheet.
+    int nextNumericId{0};
     for (unsigned int i = 0; i < spriteSheets.size(); ++i) {
         // Add this sheet's relative path.
         SpriteSheet& spriteSheet{spriteSheets[i]};
@@ -156,14 +151,18 @@ void SpriteDataModel::save()
 
         // For each sprite in this sheet.
         for (unsigned int j = 0; j < spriteSheet.sprites.size(); ++j) {
-            // Add this sprite's display name.
+            // Add the display name.
             SpriteStaticData& sprite{spriteSheet.sprites[j]};
             json["spriteSheets"][i]["sprites"][j]["displayName"] = sprite.displayName;
 
-            // Add this sprite's ID.
-            json["spriteSheets"][i]["sprites"][j]["id"] = sprite.id;
+            // Derive the string ID from the display name and add it.
+            json["spriteSheets"][i]["sprites"][j]["stringId"] = deriveStringId(sprite.displayName);
 
-            // Add this sprite's sprite sheet texture extent.
+            // Add the numeric ID.
+            json["spriteSheets"][i]["sprites"][j]["numericId"] = nextNumericId;
+            nextNumericId++;
+
+            // Add the sprite sheet texture extent.
             json["spriteSheets"][i]["sprites"][j]["textureExtent"]["x"]
                 = sprite.textureExtent.x;
             json["spriteSheets"][i]["sprites"][j]["textureExtent"]["y"]
@@ -173,11 +172,11 @@ void SpriteDataModel::save()
             json["spriteSheets"][i]["sprites"][j]["textureExtent"]["h"]
                 = sprite.textureExtent.h;
 
-            // Add this sprite's Y offset.
+            // Add the Y offset.
             json["spriteSheets"][i]["sprites"][j]["yOffset"]
                 = sprite.yOffset;
 
-            // Add this sprite's model-space bounds.
+            // Add the model-space bounds.
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minX"]
                 = sprite.modelBounds.minX;
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxX"]
@@ -274,18 +273,10 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath, const st
 
             // Add the sprite to the sheet.
             spriteSheet.sprites.emplace_back(spriteSheet, displayName
-                , nextSpriteId, textureExtent, yOffsetI, defaultBox);
+                , textureExtent, yOffsetI, defaultBox);
 
             // Increment the count (used for the display name).
             spriteCount++;
-
-            // Increment the sprite ID and make sure it's still in range.
-            if (idIsValid(static_cast<int>(nextSpriteId) + 1)) {
-                nextSpriteId++;
-            }
-            else {
-                LOG_ERROR("Sprite ID went out of range of Uint16.");
-            }
         }
     }
 
@@ -299,6 +290,22 @@ void SpriteDataModel::remSpriteSheet(unsigned int index)
     }
 
     spriteSheets.erase(spriteSheets.begin() + index);
+}
+
+bool SpriteDataModel::displayNameIsUnique(const std::string& displayName)
+{
+    // Dumbly look through all names for a match.
+    // Note: Eventually, this should change to a map that we keep updated.
+    bool isUnique{true};
+    for (const SpriteSheet& sheet : spriteSheets) {
+        for (const SpriteStaticData& sprite : sheet.sprites) {
+            if (displayName == sprite.displayName) {
+                isUnique = false;
+            }
+        }
+    }
+
+    return isUnique;
 }
 
 std::vector<SpriteSheet>& SpriteDataModel::getSpriteSheets()
@@ -329,23 +336,12 @@ std::string SpriteDataModel::validateRelPath(const std::string& relPath)
     }
 }
 
-bool SpriteDataModel::idIsValid(int spriteId)
-{
-    // Check if the ID is in range of a Uint16.
-    if ((spriteId >= 0) && (static_cast<unsigned int>(spriteId) <= SDL_MAX_UINT16)) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
 bool SpriteDataModel::setWorkingResourcesDir()
 {
     // Construct the resources dir path.
     std::filesystem::path resourcesDirPath{workingFilePath};
     resourcesDirPath = resourcesDirPath.parent_path();
-    resourcesDirPath /= "Assets/";
+    resourcesDirPath /= "Assets/Textures/";
 
     // Check if the resources dir exists.
     if (!std::filesystem::exists(resourcesDirPath)) {
@@ -362,6 +358,19 @@ bool SpriteDataModel::setWorkingResourcesDir()
     workingResourcesDir = std::string(reinterpret_cast<const char*>(u8StringPtr));
 
     return true;
+}
+
+std::string SpriteDataModel::deriveStringId(const std::string& displayName)
+{
+    // Make the string all lowercase.
+    std::string stringId{displayName};
+    std::transform(stringId.begin(), stringId.end(), stringId.begin(),
+        [](unsigned char c){ return std::tolower(c); });
+
+    // Replace spaces with underscores.
+    std::replace(stringId.begin(), stringId.end(), ' ', '_');
+
+    return stringId;
 }
 
 } // End namespace SpriteEditor

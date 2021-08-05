@@ -21,11 +21,8 @@ public:
     /** The sprite sheet that this sprite is from. */
     SpriteSheet& parentSpriteSheet;
 
-    /** Display name, shown in the sprite panel. */
+    /** Display name, shown in the UI.  */
     std::string displayName{""};
-
-    /** Unique ID, this is what the map uses to reference sprites. */
-    Uint16 id{0};
 
     /** UV position and size in texture. */
     SDL_Rect textureExtent{0, 0, 0, 0};

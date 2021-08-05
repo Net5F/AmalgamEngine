@@ -1,6 +1,7 @@
 #include "PropertiesPanel.h"
 #include "MainScreen.h"
 #include "MainThumbnail.h"
+#include "SpriteDataModel.h"
 #include "SpriteStaticData.h"
 #include "AssetCache.h"
 #include "Paths.h"
@@ -17,7 +18,7 @@ namespace AM
 namespace SpriteEditor
 {
 
-PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen)
+PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
 : AUI::Component(inScreen, {1617, 0, 303, 440}, "PropertiesPanel")
 , nameLabel(inScreen, {24, 24, 65, 28})
 , nameInput(assetCache, inScreen, {24, 56, 255, 38})
@@ -34,6 +35,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen)
 , maxZLabel(inScreen, {24, 376, 110, 38})
 , maxZInput(assetCache, inScreen, {150, 376, 129, 38})
 , mainScreen{inScreen}
+, spriteDataModel{inSpriteDataModel}
 , activeSprite{nullptr}
 , backgroundImage(inScreen, {-12, -4, 319, 456})
 , committedMinX{0.0}
@@ -219,10 +221,21 @@ std::string PropertiesPanel::toRoundedString(float value)
 void PropertiesPanel::saveName()
 {
     if (activeSprite != nullptr) {
+        // Make the display name unique.
+        // Note: This really should be done by having a setName() function
+        //       either on the sprite or on the SpriteDataModel that does
+        //       this check, but this works for now.
+        std::string displayName{nameInput.getText()};
+        int appendedNum{0};
+        while (!(spriteDataModel.displayNameIsUnique(displayName))) {
+            displayName = nameInput.getText() + std::to_string(appendedNum);
+            appendedNum++;
+        }
+
         // Save the display name.
         // Note: All characters that a user can enter are valid in the display
         //       name string, so we don't need to validate.
-        activeSprite->displayName = nameInput.getText();
+        activeSprite->displayName = displayName;
 
         // Refresh the UI since the name is shown in the activeSprite panel.
         mainScreen.refreshActiveSpriteUi();

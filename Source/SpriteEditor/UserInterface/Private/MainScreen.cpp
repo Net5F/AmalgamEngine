@@ -18,7 +18,7 @@ MainScreen::MainScreen(AssetCache& assetCache, SpriteDataModel& inSpriteDataMode
 , spriteEditStage(assetCache, *this, spriteDataModel)
 , spritePanel(assetCache, *this, spriteDataModel)
 , saveButton(*this, {1537, 0, 58, 58})
-, propertiesPanel(assetCache, *this)
+, propertiesPanel(assetCache, *this, spriteDataModel)
 , dialogShadowImage(*this, {0, 0, 1920, 1080})
 , confirmationDialog(*this, {721, 358, 474, 248})
 {
