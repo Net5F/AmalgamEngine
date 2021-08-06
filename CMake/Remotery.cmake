@@ -11,8 +11,6 @@ add_library(Remotery STATIC
 )
 
 target_include_directories(Remotery
-    PRIVATE
-        ${SDL2_INCLUDE_DIRS}
     PUBLIC
         ${PROJECT_SOURCE_DIR}/../Libraries/Remotery/lib
 )
