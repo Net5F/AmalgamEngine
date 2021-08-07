@@ -6,11 +6,13 @@
 ### Current
 - [x] Implement, load test, optimize the netcode.
 - [x] Implement tile maps, iso rendering, and figure out architecture between the sim/rendering/UI.
-- [ ] Build sprite editor (lets you add 3d bounding boxes to sprites for draw order and collision calcs)
-- [ ] Build minimal UI library.
+- [x] Build minimal UI library. (MVP working, needs refactoring later)
+- [x] Build sprite editor. (lets you add 3d bounding boxes to sprites for draw order and collision calcs)
+- [ ] Import sprite bounds data into engine, add world map file and spatial partitioning.
 
 ### Future
-- [ ] Add map streaming and live updates (in-world building).
+- [ ] Add world streaming and live updates (in-world building).
+- [ ] Add World editing UI.
 - [ ] Add collision.
 - [ ] Add sprite animation.
 - [ ] Add text chat, chat server.
@@ -29,7 +31,8 @@ I've been using MSYS2, but haven't yet scripted dependencies. Here's the list:
 Then, build through the Eclipse project or follow the linux instructions for a command line build.
 
 ### Linux
-Tested on Ubuntu 20.0.4. Older distros may run into issues with package versions. I haven't yet locked down an SDL2 or CMake version, we'll see where it ends up.
+Had to update to Ubuntu 21.04 for g++ 10.3.0 (older versions didn't have support for some C++20 features I needed.)
+I haven't yet locked down an SDL2 or CMake version, we'll see where it ends up.
 
 1. Run `Scripts/Linux/InstallDependencies.sh`, then build through the Eclipse project, or:
 2. (From the base of the repo) `mkdir Build Build/Linux Build/Linux/Debug`
