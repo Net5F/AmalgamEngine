@@ -1,6 +1,14 @@
 ## The Amalgam Engine
 #### An engine for creating virtual worlds.
-This engine aims to make it easy to create 
+This engine aims to make it easy to create 2D isometric virtual worlds. It'll be ready when you're able to pull it down, build it, and immediately have a working world that you can start building on top of.
+
+Everything you need will be provided, including:
+* Client
+* Server
+* Minimal editor (most editing happens in-world)
+* Login server
+* Web server (to host the website where users can register accounts)
+* Text chat server
 
 ## Status
 (Once things are more ready for outside developers, I'll link the trello.)
