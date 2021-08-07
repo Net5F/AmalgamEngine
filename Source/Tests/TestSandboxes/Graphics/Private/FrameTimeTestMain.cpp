@@ -471,7 +471,7 @@ int main(int argc, char* argv[])
     AM::ignore(argv);
 
     Uint64 t = SDL_GetPerformanceCounter();
-    xstate = (Uint32)(t | (t >> 32));
+    xstate = (Uint32) (t | (t >> 32));
 
     Window window;
 

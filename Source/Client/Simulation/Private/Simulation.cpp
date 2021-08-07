@@ -95,7 +95,7 @@ void Simulation::connect()
     // Set up the player's visual components.
     TextureHandle texture
         = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
-    SDL_Rect spritePosInTexture((256 * 8 + 100), 256 + 140, 64, 64);
+    SDL_Rect spritePosInTexture{(256 * 8 + 100), 256 + 140, 64, 64};
     registry.emplace<Sprite>(newEntity, texture, spritePosInTexture, 64, 64,
                              BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
@@ -127,7 +127,7 @@ void Simulation::fakeConnection()
     // Set up the player's visual components.
     TextureHandle texture
         = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
-    SDL_Rect spritePosInTexture((256 * 4 + 110), 256 + 135, 64, 64);
+    SDL_Rect spritePosInTexture{(256 * 4 + 110), 256 + 135, 64, 64};
     registry.emplace<Sprite>(newEntity, texture, spritePosInTexture, 64, 64,
                              BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},

@@ -24,7 +24,7 @@ if [ $# -eq 2 ] && [ $2 = "Clobber" ] ; then
     fi
     
     rm -r $BuildPath/*
-    echo "Clobbered $BuildPath."
+    echo "Clobbered $BuildPath"
 fi
 
 echo "Starting build."

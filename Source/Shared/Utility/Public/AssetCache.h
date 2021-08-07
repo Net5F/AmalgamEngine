@@ -2,7 +2,7 @@
 
 #include "Log.h"
 
-#include <SDL2/SDL_Render.h>
+#include <SDL2/SDL_render.h>
 #include <SDL2/SDL_image.h>
 
 #include <memory>
