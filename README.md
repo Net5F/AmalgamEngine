@@ -21,7 +21,7 @@ Everything you need will be provided, including:
 
 ### Future
 - [ ] Implement world streaming and live updates (in-world building).
-- [ ] Implement World editing UI.
+- [ ] Implement world editing UI.
 - [ ] Implement collision.
 - [ ] Implement sprite animation.
 - [ ] Implement text chat, chat server.
