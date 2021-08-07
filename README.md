@@ -1,5 +1,6 @@
 ## The Amalgam Engine
 #### An engine for creating virtual worlds.
+This engine aims to make it easy to create 
 
 ## Status
 (Once things are more ready for outside developers, I'll link the trello.)
@@ -8,17 +9,17 @@
 - [x] Implement tile maps, iso rendering, and figure out architecture between the sim/rendering/UI.
 - [x] Build minimal UI library. (MVP working, needs refactoring later)
 - [x] Build sprite editor. (lets you add 3d bounding boxes to sprites for draw order and collision calcs)
-- [ ] Import sprite bounds data into engine, add world map file and spatial partitioning.
+- [ ] Import sprite bounds data into engine, implement world map file and spatial partitioning.
 
 ### Future
-- [ ] Add world streaming and live updates (in-world building).
-- [ ] Add World editing UI.
-- [ ] Add collision.
-- [ ] Add sprite animation.
-- [ ] Add text chat, chat server.
-- [ ] Add login server, account db, account validation.
-- [ ] Add web server, account creation.
-- [ ] Add minimal UI for sprite selection from a set list.
+- [ ] Implement world streaming and live updates (in-world building).
+- [ ] Implement World editing UI.
+- [ ] Implement collision.
+- [ ] Implement sprite animation.
+- [ ] Implement text chat, chat server.
+- [ ] Implement login server, account db, account validation.
+- [ ] Implement web server, account creation.
+- [ ] Implement minimal UI for sprite selection from a set list.
 - [ ] Split single repo into engine and project repos.
 - [ ] Ready for other people to use.
 
