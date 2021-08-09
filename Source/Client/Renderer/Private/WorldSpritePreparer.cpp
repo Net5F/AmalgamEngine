@@ -2,7 +2,6 @@
 #include "Camera.h"
 #include "SharedConfig.h"
 #include "MovementHelpers.h"
-#include "ClientMovementHelpers.h"
 #include "Transforms.h"
 #include "ClientTransforms.h"
 
@@ -30,9 +29,6 @@ std::vector<SpriteRenderInfo>&
     sprites.clear();
     heightfulSpriteStartIndex = 0;
 
-    // Update the world bounds of all dynamic sprites.
-    updateSpriteWorldBounds(alpha);
-
     // Gather sprites relevant to this frame and calc their screen extents.
     gatherSpriteInfo(camera, alpha);
 
@@ -50,34 +46,8 @@ std::vector<SpriteRenderInfo>&
 //       Move worldBounds out of the sprite, since it's render-specific. Save it
 //       in SpriteRenderInfo instead.
 //
-//       width/height are set on construction, but never modified. There also
-//       isn't really a place to set them. Maybe just remove them and use
-//       textureExtent.
-//
 //       Once sprite has the dynamic stuff pulled out, we can make everything
 //       const and put the rest of the fields in.
-//
-//       Still a question: do we need separate structs for client/server?
-//           Server only really cares about IDs, hasBoundingBox, and modelBounds
-//               Should have separate SpriteData classes, using separate
-//               structs.
-
-void WorldSpritePreparer::updateSpriteWorldBounds(double alpha)
-{
-    // Update all sprites that are on dynamic (moving) entities.
-    auto group = registry.group<Sprite>(entt::get<Position, PreviousPosition>);
-    for (entt::entity entity : group) {
-        auto [sprite, position, previousPos]
-            = group.get<Sprite, Position, PreviousPosition>(entity);
-
-        // Get the lerp'd world position.
-        Position lerp = MovementHelpers::interpolatePosition(previousPos,
-                                                             position, alpha);
-
-        // Update the sprite's world bounds.
-        ClientMovementHelpers::moveSpriteWorldBounds(lerp, sprite);
-    }
-}
 
 void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 {
@@ -103,7 +73,13 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 
                     // If the sprite is on screen, push the sprite info.
                     if (isWithinScreenBounds(screenExtent, camera)) {
-                        sprites.emplace_back(&sprite, screenExtent);
+                        // Get an updated bounding box for this entity.
+                        Position tilePosition{
+                                static_cast<float>(x * SharedConfig::TILE_WORLD_WIDTH),
+                                static_cast<float>(y * SharedConfig::TILE_WORLD_HEIGHT), 0};
+                        BoundingBox movedBox = MovementHelpers::moveBoundingBox(
+                            tilePosition, sprite.modelBounds);
+                        sprites.emplace_back(&sprite, movedBox, screenExtent);
 
                         // If the tile has no height, increment the index.
                         // TODO: Get this number from the map object.
@@ -130,9 +106,13 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
         SDL_Rect screenExtent
             = ClientTransforms::worldToScreenExtent(lerp, sprite, camera);
 
-        // If the sprite is on screen, push the sprite info.
+        // If the sprite is on screen, push the render info.
         if (isWithinScreenBounds(screenExtent, camera)) {
-            sprites.emplace_back(&sprite, screenExtent);
+            // Get an updated bounding box for this entity.
+            BoundingBox movedBox = MovementHelpers::moveBoundingBox(position, sprite.modelBounds);
+
+            // Push the entity's render info for this frame.
+            sprites.emplace_back(&sprite, movedBox, screenExtent);
         }
     }
 }
@@ -163,8 +143,8 @@ void WorldSpritePreparer::calcDepthDependencies()
         for (unsigned int j = heightfulSpriteStartIndex; j < sprites.size();
              ++j) {
             if (i != j) {
-                Sprite& spriteA = *(sprites[i].sprite);
-                Sprite& spriteB = *(sprites[j].sprite);
+                SpriteRenderInfo& spriteA = sprites[i];
+                SpriteRenderInfo& spriteB = sprites[j];
 
                 if ((spriteB.worldBounds.minX < spriteA.worldBounds.maxX)
                     && (spriteB.worldBounds.minY < spriteA.worldBounds.maxY)

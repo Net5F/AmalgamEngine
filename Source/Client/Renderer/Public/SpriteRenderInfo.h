@@ -15,10 +15,23 @@ struct SpriteRenderInfo {
     /** The sprite that is associated with this render information. */
     Sprite* sprite;
 
+    //-------------------------------------------------------------------------
+    // Render data
+    //-------------------------------------------------------------------------
+    /** The world-space bounding box that has been calculated for this sprite
+        in the current frame, based on the associated entity's lerped
+        position.
+        Used during topological sorting. */
+    BoundingBox worldBounds{0, 0, 0, 0, 0, 0};
+
     /** The screen extent that has been calculated for this sprite in the
-        current frame. */
+        current frame, based on the associated entity's lerped position.
+        Used during rendering. */
     SDL_Rect screenExtent{};
 
+    //-------------------------------------------------------------------------
+    // Topological sort data
+    //-------------------------------------------------------------------------
     /** The depth value of the sprite in the current frame.
         Higher value means further in front. */
     int depthValue{0};

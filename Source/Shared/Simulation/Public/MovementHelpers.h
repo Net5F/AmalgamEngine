@@ -9,6 +9,7 @@ class Position;
 class PreviousPosition;
 class Movement;
 class Sprite;
+class BoundingBox;
 
 /**
  * Shared static functions for moving entities.
@@ -37,6 +38,10 @@ public:
      */
     static Position interpolatePosition(PreviousPosition& previousPos,
                                         Position& position, double alpha);
+    /**
+     * Returns the given BoundingBox, moved to the given position.
+     */
+    static BoundingBox moveBoundingBox(const Position& position, const BoundingBox& boundingBox);
 
 private:
     /**

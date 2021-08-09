@@ -26,9 +26,9 @@ SDL_Rect ClientTransforms::worldToScreenExtent(const Position& position,
 
     // Apply the camera's zoom to the sprite size.
     int zoomedWidth
-        = static_cast<int>(std::round(sprite.width * camera.zoomFactor));
+        = static_cast<int>(std::round(sprite.textureExtent.w * camera.zoomFactor));
     int zoomedHeight
-        = static_cast<int>(std::round(sprite.height * camera.zoomFactor));
+        = static_cast<int>(std::round(sprite.textureExtent.h * camera.zoomFactor));
 
     return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 }
@@ -53,7 +53,7 @@ SDL_Rect ClientTransforms::tileToScreenExtent(const TileIndex& index,
 
     // Get the sprite's vertical offset (iso sprites may have extra
     // vertical space to show depth, we just want the tile.)
-    float spriteOffsetY = (sprite.height - SharedConfig::TILE_SCREEN_HEIGHT
+    float spriteOffsetY = (sprite.textureExtent.h - SharedConfig::TILE_SCREEN_HEIGHT
                            - SharedConfig::TILE_SCREEN_EDGE_HEIGHT)
                           * camera.zoomFactor;
 
@@ -64,9 +64,9 @@ SDL_Rect ClientTransforms::tileToScreenExtent(const TileIndex& index,
 
     // Apply the camera's zoom to the sprite size.
     int zoomedWidth
-        = static_cast<int>(std::round(sprite.width * camera.zoomFactor));
+        = static_cast<int>(std::round(sprite.textureExtent.w * camera.zoomFactor));
     int zoomedHeight
-        = static_cast<int>(std::round(sprite.height * camera.zoomFactor));
+        = static_cast<int>(std::round(sprite.textureExtent.h * camera.zoomFactor));
 
     return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 }

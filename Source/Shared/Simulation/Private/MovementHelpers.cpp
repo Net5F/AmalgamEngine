@@ -2,6 +2,7 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Movement.h"
+#include "Boundingbox.h"
 #include "Ignore.h"
 
 namespace AM
@@ -26,6 +27,20 @@ Position MovementHelpers::interpolatePosition(PreviousPosition& previousPos,
     float interpY = (position.y * alpha) + (previousPos.y * (1.0 - alpha));
     float interpZ = (position.z * alpha) + (previousPos.z * (1.0 - alpha));
     return {interpX, interpY, interpZ};
+}
+
+BoundingBox MovementHelpers::moveBoundingBox(const Position& position, const BoundingBox& boundingBox)
+{
+    // Move the given box to the given position.
+    BoundingBox movedBox{};
+    movedBox.minX = position.x + boundingBox.minX;
+    movedBox.maxX = position.x + boundingBox.maxX;
+    movedBox.minY = position.y + boundingBox.minY;
+    movedBox.maxY = position.y + boundingBox.maxY;
+    movedBox.minZ = position.z + boundingBox.minZ;
+    movedBox.maxZ = position.z + boundingBox.maxZ;
+
+    return movedBox;
 }
 
 void MovementHelpers::updateVelocity(Movement& movement,
@@ -69,4 +84,5 @@ void MovementHelpers::updateVelocity(Movement& movement,
         movement.velZ = 0;
     }
 }
+
 } // End namespace AM

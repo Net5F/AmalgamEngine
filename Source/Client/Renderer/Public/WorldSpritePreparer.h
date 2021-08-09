@@ -34,14 +34,9 @@ public:
 
 private:
     /**
-     * Updates the world bounds for any dynamic entity that has a Sprite.
-     * (i.e. any entity with a Sprite, Position, and PreviousPosition)
-     */
-    void updateSpriteWorldBounds(double alpha);
-
-    /**
      * Gathers the sprites that should be drawn on this frame, calculates their
-     * screen position, and pushes their data into the given vector.
+     * screen position and bounding box for this frame, and pushes their data
+     * into the sprites vector.
      *
      * @param camera  The camera to calculate screen position with.
      * @param alpha  For entities, the alpha to lerp between positions with.

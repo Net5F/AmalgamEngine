@@ -1,9 +1,7 @@
 target_sources(Client
     PRIVATE
-        Private/ClientMovementHelpers.cpp
         Private/ClientTransforms.cpp
     PUBLIC
-        Public/ClientMovementHelpers.h
         Public/ClientTransforms.h
 )
 
