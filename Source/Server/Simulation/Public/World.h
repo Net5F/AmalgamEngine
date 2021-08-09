@@ -13,10 +13,14 @@ namespace AM
 namespace Server
 {
 /**
- * Contains all of the state of our simulation, such as tiles and entities.
+ * Owns and manages the persistence of all world state.
  *
- * Coordinates in our world state all refer to Cartesian space, as opposed to
- * whatever space the renderer might be using.
+ * The server's world state consists of:
+ *   Map data
+ *     See WorldMap.h
+ *   Entity data
+ *     Maintained at runtime in an ECS registry.
+ *     Eventually will be persisted in a database.
  *
  * Also provides helpers for common uses of world state.
  */

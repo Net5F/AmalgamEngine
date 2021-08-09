@@ -18,7 +18,13 @@ class TileIndex;
 namespace Client
 {
 /**
- * Holds world state and manages the persistence of that state.
+ * Owns and manages the persistence of all world state.
+ *
+ * The client's world state consists of:
+ *   Map data
+ *     See WorldMap.h
+ *   Entity data
+ *     Maintained at runtime in an ECS registry.
  *
  * Also provides helpers for common uses of world state.
  */

@@ -28,9 +28,10 @@ public:
     /** Model-space bounding box. Defines the sprite's 3D volume. */
     BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
 
-    /** World-space bounding box.
-        Equal to modelBounds adjusted for the associated entity's current world
-        Position. Used for depth order sorting. */
+    /** World-space bounding box, maintained by the renderer.
+        Updated to the associated entity's lerped position during a render
+        tick.
+        Used for depth order sorting. */
     BoundingBox worldBounds{0, 0, 0, 0, 0, 0};
 };
 

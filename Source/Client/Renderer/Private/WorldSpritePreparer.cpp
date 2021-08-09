@@ -41,11 +41,25 @@ std::vector<SpriteRenderInfo>&
     return sprites;
 }
 
+// TODO: Combine the update and gather steps. Update is more of a
+//       calcLerpedSpriteWorldBounds(), we can re-use the calc'd lerp to do both the
+//       update and the screen conversion to check isWithinScreenBounds().
+//
+//       Move worldBounds out of the sprite, since it's render-specific. Save it in
+//       SpriteRenderInfo instead.
+//
+//       width/height are set on construction, but never modified. There also isn't really
+//       a place to set them. Maybe just remove them and use textureExtent.
+//
+//       Once sprite has the dynamic stuff pulled out, we can make everything const and
+//       put the rest of the fields in.
+//
+//       Still a question: do we need separate structs for client/server?
+//           Server only really cares about IDs, hasBoundingBox, and modelBounds
+//               Should have separate SpriteData classes, using separate structs.
+
 void WorldSpritePreparer::updateSpriteWorldBounds(double alpha)
 {
-    // Note: If this becomes a performance bottleneck, we could find a way to
-    //       cull this to only update sprites that are relevant to this frame.
-
     // Update all sprites that are on dynamic (moving) entities.
     auto group = registry.group<Sprite>(entt::get<Position, PreviousPosition>);
     for (entt::entity entity : group) {

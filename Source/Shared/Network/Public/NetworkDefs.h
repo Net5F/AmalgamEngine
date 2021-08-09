@@ -14,7 +14,7 @@ namespace AM
 // Typedefs
 //--------------------------------------------------------------------------
 /** Represents a single network client. Will be reused if the client
- * disconnects. */
+    disconnects. */
 typedef Uint32 NetworkID;
 
 /** Dynamically allocated, portable buffers for messages. */
@@ -83,7 +83,7 @@ enum class NetworkResult {
     /** Used for when a message was successfully sent or received. */
     Success,
     /* Used for when a send or receive was attempted and
-     * the peer was found to be disconnected. */
+       the peer was found to be disconnected. */
     Disconnected,
     /* Used for when a receive is attempted but there is no data waiting. */
     NoWaitingData

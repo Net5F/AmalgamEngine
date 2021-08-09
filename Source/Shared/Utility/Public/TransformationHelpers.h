@@ -57,7 +57,7 @@ public:
      * Returns a final screen space extent for the given tile index, camera,
      * and sprite.
      *
-     * Used as an alternative to worldToSpriteExtent() since tile sprites have
+     * Used as an alternative to worldToScreenExtent() since tile sprites have
      * some extra offsets applied.
      */
     static SDL_Rect tileToScreenExtent(const TileIndex& index,
