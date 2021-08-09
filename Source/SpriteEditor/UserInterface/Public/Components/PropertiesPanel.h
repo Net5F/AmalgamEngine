@@ -13,7 +13,7 @@ namespace SpriteEditor
 {
 class MainScreen;
 class SpriteDataModel;
-class SpriteStaticData;
+class Sprite;
 
 /**
  * The right-side panel on the main screen. Allows the user to view and
@@ -31,7 +31,7 @@ public:
     /**
      * Loads the given sprite's data into this panel.
      */
-    void loadActiveSprite(SpriteStaticData* inActiveSprite);
+    void loadActiveSprite(Sprite* inActiveSprite);
 
     /**
      * Refreshes this component's UI with the data from the currently set
@@ -46,7 +46,7 @@ public:
      */
     void clear();
 
-    /** All fields below directly match a data field in SpriteStaticData.
+    /** All fields below directly match a data field in Sprite.
         See its displayName, hasBoundingBox, and modelBounds fields for more
         information. */
     AUI::Text nameLabel;
@@ -86,7 +86,7 @@ private:
     SpriteDataModel& spriteDataModel;
 
     /** The active sprite's data. */
-    SpriteStaticData* activeSprite;
+    Sprite* activeSprite;
 
     AUI::Image backgroundImage;
 

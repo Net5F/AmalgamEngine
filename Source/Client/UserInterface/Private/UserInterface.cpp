@@ -4,7 +4,7 @@
 #include "Camera.h"
 #include "Paths.h"
 #include "SharedConfig.h"
-#include "TransformationHelpers.h"
+#include "Transforms.h"
 #include "Log.h"
 
 namespace AM
@@ -58,8 +58,7 @@ void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
     Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
     ScreenPoint screenPoint{static_cast<float>(event.x),
                             static_cast<float>(event.y)};
-    TileIndex tileIndex
-        = TransformationHelpers::screenToTile(screenPoint, playerCamera);
+    TileIndex tileIndex = Transforms::screenToTile(screenPoint, playerCamera);
 
     // If the index is outside of the world bounds, ignore this event.
     if ((tileIndex.x < 0) || (tileIndex.y < 0)
@@ -69,8 +68,7 @@ void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
     }
 
     // Save the new index for the renderer to use.
-    tileHighlightIndex
-        = TransformationHelpers::screenToTile(screenPoint, playerCamera);
+    tileHighlightIndex = Transforms::screenToTile(screenPoint, playerCamera);
 }
 
 void UserInterface::handleMouseButtonDown(SDL_MouseButtonEvent& event)
@@ -88,8 +86,7 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
     ScreenPoint screenPoint{static_cast<float>(mouseX),
                             static_cast<float>(mouseY)};
-    TileIndex tileIndex
-        = TransformationHelpers::screenToTile(screenPoint, playerCamera);
+    TileIndex tileIndex = Transforms::screenToTile(screenPoint, playerCamera);
 
     // If the index is outside of the world bounds, ignore this event.
     if ((tileIndex.x < 0) || (tileIndex.y < 0)

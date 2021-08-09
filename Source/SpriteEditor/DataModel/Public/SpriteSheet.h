@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SpriteStaticData.h"
+#include "Sprite.h"
 #include <string>
 #include <vector>
 
@@ -18,7 +18,7 @@ public:
     std::string relPath;
 
     /** The static data for all sprites in this sheet. */
-    std::vector<SpriteStaticData> sprites;
+    std::vector<Sprite> sprites;
 };
 
 } // namespace SpriteEditor

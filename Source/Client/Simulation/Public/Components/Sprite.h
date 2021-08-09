@@ -7,6 +7,8 @@
 
 namespace AM
 {
+namespace Client
+{
 /**
  * Represents all of the sprite data that the RenderSystem needs, except for
  * the world position.
@@ -35,4 +37,5 @@ public:
     BoundingBox worldBounds{0, 0, 0, 0, 0, 0};
 };
 
+} // namespace Client
 } // namespace AM

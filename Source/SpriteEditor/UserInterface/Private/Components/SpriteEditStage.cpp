@@ -1,6 +1,6 @@
 #include "SpriteEditStage.h"
 #include "MainScreen.h"
-#include "SpriteStaticData.h"
+#include "Sprite.h"
 #include "AssetCache.h"
 #include "Paths.h"
 #include "AUI/Core.h"
@@ -31,7 +31,7 @@ SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
     boundingBoxGizmo.setIsVisible(false);
 }
 
-void SpriteEditStage::loadActiveSprite(SpriteStaticData* activeSprite)
+void SpriteEditStage::loadActiveSprite(Sprite* activeSprite)
 {
     if (activeSprite != nullptr) {
         // Load the sprite's image.

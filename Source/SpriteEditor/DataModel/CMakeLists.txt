@@ -4,7 +4,7 @@ target_sources(SpriteEditor
     PUBLIC
         Public/SpriteDataModel.h
         Public/SpriteSheet.h
-        Public/SpriteStaticData.h
+        Public/Sprite.h
 )
 
 target_include_directories(SpriteEditor

@@ -14,6 +14,7 @@ target_sources(Server
 		Public/NetworkUpdateSystem.h
 		Public/Simulation.h
 		Public/Components/ClientSimData.h
+		Public/Components/Sprite.h
 )
 
 target_include_directories(Server

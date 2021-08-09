@@ -53,7 +53,7 @@ public:
      * Loads the given sprite data into PropertiesPanel, and displays it on
      * the stage.
      */
-    void loadActiveSprite(SpriteStaticData* activeSprite);
+    void loadActiveSprite(Sprite* activeSprite);
 
     void render() override;
 
@@ -67,7 +67,7 @@ private:
 
     /** If non-nullptr, this is the currently active sprite's data. The active
         sprite's data is shown in the properties panel and on the stage. */
-    SpriteStaticData* activeSprite;
+    Sprite* activeSprite;
 
     /** The left-side panel for managing sprite texture sheets. */
     SpriteSheetPanel spriteSheetPanel;

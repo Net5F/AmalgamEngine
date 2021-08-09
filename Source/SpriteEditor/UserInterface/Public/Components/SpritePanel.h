@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SpriteSheet.h"
-#include "SpriteStaticData.h"
+#include "Sprite.h"
 #include "AUI/Screen.h"
 #include "AUI/Image.h"
 #include "AUI/VerticalGridContainer.h"
@@ -32,7 +32,7 @@ public:
      * Adds a MainThumbnail component to the spriteContainer, using the
      * given data.
      */
-    void addSprite(const SpriteSheet& sheet, SpriteStaticData& sprite);
+    void addSprite(const SpriteSheet& sheet, Sprite& sprite);
 
     /**
      * If a sprite is active, refreshes that sprite's UI to match its

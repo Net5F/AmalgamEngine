@@ -5,7 +5,7 @@ target_sources(Shared
         Private/PeriodicCaller.cpp
 	    Private/AssetCache.cpp
         Private/Timer.cpp
-        Private/TransformationHelpers.cpp
+        Private/Transforms.cpp
     PUBLIC
         Public/EventHandler.h
         Public/Ignore.h
@@ -16,7 +16,7 @@ target_sources(Shared
         Public/AssetCache.h
         Public/SharedConfig.h
         Public/Timer.h
-        Public/TransformationHelpers.h
+        Public/Transforms.h
 )
 
 target_include_directories(Shared

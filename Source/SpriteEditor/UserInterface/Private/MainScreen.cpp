@@ -146,7 +146,7 @@ void MainScreen::loadSpriteData()
         spriteSheetPanel.addSpriteSheet(sheet);
 
         // For each sprite in the sheet.
-        for (SpriteStaticData& sprite : sheet.sprites) {
+        for (Sprite& sprite : sheet.sprites) {
             // Add a Thumbnail component that displays the sprite.
             spritePanel.addSprite(sheet, sprite);
         }
@@ -189,7 +189,7 @@ void MainScreen::openConfirmationDialog(
     confirmationDialog.setIsVisible(true);
 }
 
-void MainScreen::loadActiveSprite(SpriteStaticData* inActiveSprite)
+void MainScreen::loadActiveSprite(Sprite* inActiveSprite)
 {
     // Load the sprite's data into the properties panel.
     propertiesPanel.loadActiveSprite(inActiveSprite);

@@ -2,7 +2,6 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Movement.h"
-#include "Sprite.h"
 #include "Ignore.h"
 
 namespace AM
@@ -70,19 +69,4 @@ void MovementHelpers::updateVelocity(Movement& movement,
         movement.velZ = 0;
     }
 }
-
-void MovementHelpers::moveSpriteWorldBounds(Position& position, Sprite& sprite)
-{
-    // Move the sprite's world bounds to the given position.
-    BoundingBox& modelBox = sprite.modelBounds;
-    BoundingBox& worldBox = sprite.worldBounds;
-
-    worldBox.minX = position.x + modelBox.minX;
-    worldBox.maxX = position.x + modelBox.maxX;
-    worldBox.minY = position.y + modelBox.minY;
-    worldBox.maxY = position.y + modelBox.maxY;
-    worldBox.minZ = position.z + modelBox.minZ;
-    worldBox.maxZ = position.z + modelBox.maxZ;
-}
-
-} // namespace AM
+} // End namespace AM

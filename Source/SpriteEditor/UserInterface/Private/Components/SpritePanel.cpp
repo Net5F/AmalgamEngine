@@ -31,7 +31,7 @@ SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen,
     spriteContainer.setCellHeight(162);
 }
 
-void SpritePanel::addSprite(const SpriteSheet& sheet, SpriteStaticData& sprite)
+void SpritePanel::addSprite(const SpriteSheet& sheet, Sprite& sprite)
 {
     // Construct the new sprite thumbnail.
     std::unique_ptr<AUI::Component> thumbnailPtr{

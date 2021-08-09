@@ -13,7 +13,7 @@ class Camera;
 /**
  * Static functions for transforming between world and screen space.
  */
-class TransformationHelpers
+class Transforms
 {
 public:
     /**
@@ -44,25 +44,6 @@ public:
      * @param zoomFactor  The camera's zoom factor.
      */
     static float screenYToWorldZ(float yCoord, float zoomFactor);
-
-    /**
-     * Returns a final screen space extent for the given position, camera,
-     * and sprite.
-     */
-    static SDL_Rect worldToScreenExtent(const Position& position,
-                                        const Camera& camera,
-                                        const Sprite& sprite);
-
-    /**
-     * Returns a final screen space extent for the given tile index, camera,
-     * and sprite.
-     *
-     * Used as an alternative to worldToScreenExtent() since tile sprites have
-     * some extra offsets applied.
-     */
-    static SDL_Rect tileToScreenExtent(const TileIndex& index,
-                                       const Camera& camera,
-                                       const Sprite& sprite);
 
     /**
      * Converts a position in world space to a tile index.

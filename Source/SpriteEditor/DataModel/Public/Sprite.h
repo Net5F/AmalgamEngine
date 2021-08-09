@@ -13,15 +13,9 @@ class SpriteSheet;
 
 /**
  * Holds the data for a single sprite.
- * Note: This class's weird name is to avoid a conflict with Shared's Sprite
- * Note: This data is "static" from the point of view of the eventual consumers
- *       (the client and server). In the SpriteEditor, this data is all
- *       mutable.
- *
- * Used as part of SpriteEditor's data model. Don't confuse this with the
- * actual Sprite concept in Shared, or the Client's SpriteStaticData.
+ * Used as part of SpriteEditor's data model.
  */
-struct SpriteStaticData {
+struct Sprite {
 public:
     /** The sprite sheet that this sprite is from. */
     SpriteSheet& parentSpriteSheet;

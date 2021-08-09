@@ -3,7 +3,7 @@
 #include "TileIndex.h"
 #include "BoundingBox.h"
 #include "Position.h"
-#include "MovementHelpers.h"
+#include "ClientMovementHelpers.h"
 #include "Paths.h"
 #include "SharedConfig.h"
 #include "Log.h"
@@ -77,7 +77,7 @@ void World::addTile(unsigned int layer, const TileIndex& index,
     Position tilePosition{
         static_cast<float>(index.x * SharedConfig::TILE_WORLD_WIDTH),
         static_cast<float>(index.y * SharedConfig::TILE_WORLD_HEIGHT), 0};
-    MovementHelpers::moveSpriteWorldBounds(tilePosition, sprite);
+    ClientMovementHelpers::moveSpriteWorldBounds(tilePosition, sprite);
 }
 
 } // namespace Client

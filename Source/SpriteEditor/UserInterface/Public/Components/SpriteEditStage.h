@@ -11,7 +11,7 @@ class AssetCache;
 namespace SpriteEditor
 {
 class MainScreen;
-class SpriteStaticData;
+class Sprite;
 class SpriteDataModel;
 
 /**
@@ -30,7 +30,7 @@ public:
     /**
      * Loads the given sprite onto the stage.
      */
-    void loadActiveSprite(SpriteStaticData* activeSprite);
+    void loadActiveSprite(Sprite* activeSprite);
 
     /**
      * Calls boundingBoxGizmo.refresh().

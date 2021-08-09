@@ -12,7 +12,7 @@ class BoundingBox;
 namespace SpriteEditor
 {
 class MainScreen;
-class SpriteStaticData;
+class Sprite;
 
 /**
  * A confirmation dialog with header text, body text, and confirm/cancel
@@ -35,7 +35,7 @@ public:
      *
      * @param inActiveSprite  The active sprite's data.
      */
-    void loadActiveSprite(SpriteStaticData* inActiveSprite);
+    void loadActiveSprite(Sprite* inActiveSprite);
 
     /**
      * Refreshes this component's UI with the data from the currently set
@@ -134,7 +134,7 @@ private:
     MainScreen& mainScreen;
 
     /** The active sprite's data. */
-    SpriteStaticData* activeSprite;
+    Sprite* activeSprite;
 
     /** A reasonable size for the control rectangles. */
     static constexpr int LOGICAL_RECT_SIZE = 12;

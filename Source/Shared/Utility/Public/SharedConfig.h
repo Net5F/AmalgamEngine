@@ -53,7 +53,7 @@ public:
     static constexpr unsigned int SCREEN_HEIGHT = 720;
 
     // TODO: These are shared between client/editor because
-    //       TransformationHelpers uses them. Should they be dynamically
+    //       Transforms uses them. Should they be dynamically
     //       passed in or something?
     /** The width of a tile in screen coordinates. */
     static constexpr unsigned int TILE_SCREEN_WIDTH = 256;

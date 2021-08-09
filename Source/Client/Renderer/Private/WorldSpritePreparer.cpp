@@ -2,7 +2,9 @@
 #include "Camera.h"
 #include "SharedConfig.h"
 #include "MovementHelpers.h"
-#include "TransformationHelpers.h"
+#include "ClientMovementHelpers.h"
+#include "Transforms.h"
+#include "ClientTransforms.h"
 
 #include <SDL2/SDL_rect.h>
 
@@ -42,21 +44,23 @@ std::vector<SpriteRenderInfo>&
 }
 
 // TODO: Combine the update and gather steps. Update is more of a
-//       calcLerpedSpriteWorldBounds(), we can re-use the calc'd lerp to do both the
-//       update and the screen conversion to check isWithinScreenBounds().
+//       calcLerpedSpriteWorldBounds(), we can re-use the calc'd lerp to do both
+//       the update and the screen conversion to check isWithinScreenBounds().
 //
-//       Move worldBounds out of the sprite, since it's render-specific. Save it in
-//       SpriteRenderInfo instead.
+//       Move worldBounds out of the sprite, since it's render-specific. Save it
+//       in SpriteRenderInfo instead.
 //
-//       width/height are set on construction, but never modified. There also isn't really
-//       a place to set them. Maybe just remove them and use textureExtent.
+//       width/height are set on construction, but never modified. There also
+//       isn't really a place to set them. Maybe just remove them and use
+//       textureExtent.
 //
-//       Once sprite has the dynamic stuff pulled out, we can make everything const and
-//       put the rest of the fields in.
+//       Once sprite has the dynamic stuff pulled out, we can make everything
+//       const and put the rest of the fields in.
 //
 //       Still a question: do we need separate structs for client/server?
 //           Server only really cares about IDs, hasBoundingBox, and modelBounds
-//               Should have separate SpriteData classes, using separate structs.
+//               Should have separate SpriteData classes, using separate
+//               structs.
 
 void WorldSpritePreparer::updateSpriteWorldBounds(double alpha)
 {
@@ -71,7 +75,7 @@ void WorldSpritePreparer::updateSpriteWorldBounds(double alpha)
                                                              position, alpha);
 
         // Update the sprite's world bounds.
-        MovementHelpers::moveSpriteWorldBounds(lerp, sprite);
+        ClientMovementHelpers::moveSpriteWorldBounds(lerp, sprite);
     }
 }
 
@@ -94,8 +98,8 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
                     // Get iso screen extent for this tile.
                     Sprite& sprite{mapLayers[i][linearizedIndex]};
                     SDL_Rect screenExtent
-                        = TransformationHelpers::tileToScreenExtent(
-                            {x, y}, camera, sprite);
+                        = ClientTransforms::tileToScreenExtent({x, y}, sprite,
+                                                               camera);
 
                     // If the sprite is on screen, push the sprite info.
                     if (isWithinScreenBounds(screenExtent, camera)) {
@@ -124,7 +128,7 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 
         // Get the iso screen extent for the lerped sprite.
         SDL_Rect screenExtent
-            = TransformationHelpers::worldToScreenExtent(lerp, camera, sprite);
+            = ClientTransforms::worldToScreenExtent(lerp, sprite, camera);
 
         // If the sprite is on screen, push the sprite info.
         if (isWithinScreenBounds(screenExtent, camera)) {

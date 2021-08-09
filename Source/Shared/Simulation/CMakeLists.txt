@@ -13,7 +13,6 @@ target_sources(Shared
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
-        Public/Components/Sprite.h
 )
 
 target_include_directories(Shared

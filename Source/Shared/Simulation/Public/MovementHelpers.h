@@ -38,11 +38,6 @@ public:
     static Position interpolatePosition(PreviousPosition& previousPos,
                                         Position& position, double alpha);
 
-    /**
-     * Moves a sprite's world bounds to the given position.
-     */
-    static void moveSpriteWorldBounds(Position& position, Sprite& sprite);
-
 private:
     /**
      * Moves the given MovementComponent based on the given inputStates and
@@ -54,4 +49,4 @@ private:
                                double deltaSeconds);
 };
 
-} // namespace AM
+} // End namespace AM

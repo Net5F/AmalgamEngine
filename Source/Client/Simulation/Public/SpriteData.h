@@ -4,7 +4,6 @@ namespace AM
 {
 namespace Client
 {
-
 /**
  * Loads the sprite data from SpriteData.json into memory and provides an
  * interface for accessing it.

@@ -16,6 +16,7 @@ target_sources(Client
 		Public/CameraSystem.h
 		Public/Simulation.h
 		Public/Components/PlayerState.h
+		Public/Components/Sprite.h
 )
 
 target_include_directories(Client

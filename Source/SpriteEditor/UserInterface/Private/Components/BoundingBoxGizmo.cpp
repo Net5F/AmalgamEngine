@@ -1,7 +1,7 @@
 #include "BoundingBoxGizmo.h"
 #include "MainScreen.h"
 #include "SpriteDataModel.h"
-#include "TransformationHelpers.h"
+#include "Transforms.h"
 #include "SharedConfig.h"
 #include "Ignore.h"
 #include "AUI/Core.h"
@@ -44,7 +44,7 @@ BoundingBoxGizmo::BoundingBoxGizmo(MainScreen& inScreen)
     registerListener(AUI::InternalEvent::MouseButtonUp);
 }
 
-void BoundingBoxGizmo::loadActiveSprite(SpriteStaticData* inActiveSprite)
+void BoundingBoxGizmo::loadActiveSprite(Sprite* inActiveSprite)
 {
     // Set the new active sprite.
     activeSprite = inActiveSprite;
@@ -168,8 +168,7 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
     // Convert the screen-space mouse point to world space.
     ScreenPoint offsetMousePointSP{static_cast<float>(offsetMousePoint.x),
                                    static_cast<float>(offsetMousePoint.y)};
-    Position mouseWorldPos
-        = TransformationHelpers::screenToWorld(offsetMousePointSP, 1);
+    Position mouseWorldPos = Transforms::screenToWorld(offsetMousePointSP, 1);
 
     // Adjust the currently pressed control appropriately.
     switch (currentHeldControl) {
@@ -284,7 +283,7 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     mouseZHeight = AUI::ScalingHelpers::actualToLogical(mouseZHeight);
 
     // Apply our screen -> world Z scaling.
-    mouseZHeight = TransformationHelpers::screenYToWorldZ(mouseZHeight, 1.f);
+    mouseZHeight = Transforms::screenYToWorldZ(mouseZHeight, 1.f);
 
     // Set maxZ, making sure it doesn't go below minZ.
     if (mouseZHeight > activeSprite->modelBounds.minZ) {
@@ -303,25 +302,25 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
     // Push the points in the correct order.
     BoundingBox& modelBounds = activeSprite->modelBounds;
     Position position{modelBounds.minX, modelBounds.maxY, modelBounds.minZ};
-    floatPoints[0] = TransformationHelpers::worldToScreen(position, 1);
+    floatPoints[0] = Transforms::worldToScreen(position, 1);
 
     position = {modelBounds.maxX, modelBounds.maxY, modelBounds.minZ};
-    floatPoints[1] = TransformationHelpers::worldToScreen(position, 1);
+    floatPoints[1] = Transforms::worldToScreen(position, 1);
 
     position = {modelBounds.maxX, modelBounds.minY, modelBounds.minZ};
-    floatPoints[2] = TransformationHelpers::worldToScreen(position, 1);
+    floatPoints[2] = Transforms::worldToScreen(position, 1);
 
     position = {modelBounds.minX, modelBounds.maxY, modelBounds.maxZ};
-    floatPoints[3] = TransformationHelpers::worldToScreen(position, 1);
+    floatPoints[3] = Transforms::worldToScreen(position, 1);
 
     position = {modelBounds.maxX, modelBounds.maxY, modelBounds.maxZ};
-    floatPoints[4] = TransformationHelpers::worldToScreen(position, 1);
+    floatPoints[4] = Transforms::worldToScreen(position, 1);
 
     position = {modelBounds.maxX, modelBounds.minY, modelBounds.maxZ};
-    floatPoints[5] = TransformationHelpers::worldToScreen(position, 1);
+    floatPoints[5] = Transforms::worldToScreen(position, 1);
 
     position = {modelBounds.minX, modelBounds.minY, modelBounds.maxZ};
-    floatPoints[6] = TransformationHelpers::worldToScreen(position, 1);
+    floatPoints[6] = Transforms::worldToScreen(position, 1);
 
     /* Build the offsets. */
     // Account for the sprite's empty vertical space.

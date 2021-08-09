@@ -89,8 +89,8 @@ std::string SpriteDataModel::load(const std::string& fullPath)
 
             // For every sprite in the sheet.
             for (auto& spriteJson : sheetJson.value()["sprites"].items()) {
-                spriteSheet.sprites.push_back(SpriteStaticData{spriteSheet});
-                SpriteStaticData& sprite{spriteSheet.sprites.back()};
+                spriteSheet.sprites.push_back(Sprite{spriteSheet});
+                Sprite& sprite{spriteSheet.sprites.back()};
 
                 // If the display name isn't unique, fail.
                 std::string displayName
@@ -163,7 +163,7 @@ void SpriteDataModel::save()
         // For each sprite in this sheet.
         for (unsigned int j = 0; j < spriteSheet.sprites.size(); ++j) {
             // Add the display name.
-            SpriteStaticData& sprite{spriteSheet.sprites[j]};
+            Sprite& sprite{spriteSheet.sprites[j]};
             json["spriteSheets"][i]["sprites"][j]["displayName"]
                 = sprite.displayName;
 
@@ -319,7 +319,7 @@ bool SpriteDataModel::displayNameIsUnique(const std::string& displayName)
     // Note: Eventually, this should change to a map that we keep updated.
     bool isUnique{true};
     for (const SpriteSheet& sheet : spriteSheets) {
-        for (const SpriteStaticData& sprite : sheet.sprites) {
+        for (const Sprite& sprite : sheet.sprites) {
             if (displayName == sprite.displayName) {
                 isUnique = false;
             }

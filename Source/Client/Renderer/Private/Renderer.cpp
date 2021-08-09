@@ -5,7 +5,8 @@
 #include "PreviousPosition.h"
 #include "Sprite.h"
 #include "Camera.h"
-#include "TransformationHelpers.h"
+#include "Transforms.h"
+#include "ClientTransforms.h"
 #include "MovementHelpers.h"
 #include "ScreenRect.h"
 #include "Log.h"
@@ -52,7 +53,7 @@ void Renderer::render()
     lerpedCamera.position.y = cameraLerp.y;
 
     // Get iso screen coords for the center point of camera.
-    ScreenPoint lerpedCameraCenter = TransformationHelpers::worldToScreen(
+    ScreenPoint lerpedCameraCenter = Transforms::worldToScreen(
         lerpedCamera.position, lerpedCamera.zoomFactor);
 
     // Calc where the top left of the lerpedCamera is in screen space.
@@ -103,7 +104,7 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
         SDL_RenderCopy(sdlRenderer, spriteInfo.sprite->texture.get(),
                        &(spriteInfo.sprite->textureExtent),
                        &(spriteInfo.screenExtent));
-//        drawBoundingBox(spriteInfo.sprite->worldBounds, camera);
+        //        drawBoundingBox(spriteInfo.sprite->worldBounds, camera);
     }
 }
 
@@ -113,8 +114,8 @@ void Renderer::renderUserInterface(const Camera& camera)
     // Get iso screen extent for this tile.
     TileIndex& highlightIndex = ui.tileHighlightIndex;
     Sprite& highlightSprite = ui.tileHighlightSprite;
-    SDL_Rect screenExtent = TransformationHelpers::tileToScreenExtent(
-        highlightIndex, camera, highlightSprite);
+    SDL_Rect screenExtent = ClientTransforms::tileToScreenExtent(
+        highlightIndex, highlightSprite, camera);
 
     // Set the texture's alpha to make the highlight transparent.
     SDL_SetTextureAlphaMod(highlightSprite.texture.get(), 150);
@@ -132,30 +133,22 @@ void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
     // Transform all the vertices to screen space.
     std::vector<ScreenPoint> verts;
     Position position{box.minX, box.minY, box.minZ};
-    verts.push_back(
-        TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
     position = {box.maxX, box.minY, box.minZ};
-    verts.push_back(
-        TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
     position = {box.maxX, box.maxY, box.minZ};
-    verts.push_back(
-        TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
     position = {box.minX, box.maxY, box.minZ};
-    verts.push_back(
-        TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
 
     position = {box.minX, box.minY, box.maxZ};
-    verts.push_back(
-        TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
     position = {box.maxX, box.minY, box.maxZ};
-    verts.push_back(
-        TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
     position = {box.maxX, box.maxY, box.maxZ};
-    verts.push_back(
-        TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
     position = {box.minX, box.maxY, box.maxZ};
-    verts.push_back(
-        TransformationHelpers::worldToScreen(position, camera.zoomFactor));
+    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
 
     // Adjust all verts for the camera.
     for (ScreenPoint& vert : verts) {

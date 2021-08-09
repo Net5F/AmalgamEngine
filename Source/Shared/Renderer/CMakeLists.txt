@@ -2,7 +2,6 @@ target_sources(Shared
 	PUBLIC
 		Public/ScreenPoint.h
 		Public/ScreenRect.h
-		Public/SpriteRenderInfo.h
 )
 
 target_include_directories(Shared

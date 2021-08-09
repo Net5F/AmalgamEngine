@@ -2,7 +2,7 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
-#include "SpriteStaticData.h"
+#include "Sprite.h"
 #include "AssetCache.h"
 #include "Paths.h"
 #include "SharedConfig.h"
@@ -140,7 +140,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
     maxZInput.setOnTextCommitted([this]() { saveMaxZ(); });
 }
 
-void PropertiesPanel::loadActiveSprite(SpriteStaticData* inActiveSprite)
+void PropertiesPanel::loadActiveSprite(Sprite* inActiveSprite)
 {
     // Set the new active sprite.
     activeSprite = inActiveSprite;
