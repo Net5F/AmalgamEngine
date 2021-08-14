@@ -17,7 +17,7 @@ namespace Server
  *
  * The server's world state consists of:
  *   Map data
- *     See WorldMap.h
+ *     See TileMap.h
  *   Entity data
  *     Maintained at runtime in an ECS registry.
  *     Eventually will be persisted in a database.

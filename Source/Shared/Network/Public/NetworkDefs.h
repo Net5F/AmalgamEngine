@@ -102,11 +102,17 @@ enum class MessageType : Uint8 {
     Heartbeat = 4,
 };
 
-/** Represents the result of trying to receive a message. */
+/**
+ * Represents the result of trying to receive a message.
+ */
 struct MessageResult {
+    /** The result of the receive attempt. */
     NetworkResult networkResult = NetworkResult::NotSet;
-    /** messageType will be Invalid if networkResult != Success. */
+
+    /** The type of the received message. Will be Invalid if networkResult
+        != Success. */
     MessageType messageType = MessageType::NotSet;
+
     /** If networkResult == Success, contains the size of the received message.
      */
     Uint16 messageSize = 0;

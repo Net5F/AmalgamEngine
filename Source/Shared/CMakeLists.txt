@@ -31,6 +31,7 @@ set_target_properties(Shared PROPERTIES CXX_EXTENSIONS OFF)
 target_compile_options(Shared PUBLIC -Wall -Wextra)
 
 # Build all of the subdirectories
+add_subdirectory(Config)
 add_subdirectory(Messages)
 add_subdirectory(Network)
 add_subdirectory(Renderer)

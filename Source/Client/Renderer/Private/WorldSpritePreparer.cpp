@@ -1,4 +1,5 @@
 #include "WorldSpritePreparer.h"
+#include "TileMap.h"
 #include "Camera.h"
 #include "SharedConfig.h"
 #include "MovementHelpers.h"
@@ -14,11 +15,11 @@ namespace AM
 namespace Client
 {
 WorldSpritePreparer::WorldSpritePreparer(entt::registry& inRegistry,
-                                         std::vector<TileLayer>& inMapLayers)
+                                         const TileMap& inTileMap)
 : registry(inRegistry)
-, mapLayers(inMapLayers)
-, sprites{}
-, heightfulSpriteStartIndex{0}
+, tileMap{inTileMap}
+, sortedSprites{}
+, spritesToSort{}
 {
 }
 
@@ -26,8 +27,8 @@ std::vector<SpriteRenderInfo>&
     WorldSpritePreparer::prepareSprites(const Camera& camera, double alpha)
 {
     // Clear the old data.
-    sprites.clear();
-    heightfulSpriteStartIndex = 0;
+    sortedSprites.clear();
+    spritesToSort.clear();
 
     // Gather sprites relevant to this frame and calc their screen extents.
     gatherSpriteInfo(camera, alpha);
@@ -36,59 +37,39 @@ std::vector<SpriteRenderInfo>&
     sortSpritesByDepth();
 
     // Return the sorted vector of sprites.
-    return sprites;
+    return sortedSprites;
 }
-
-// TODO: Combine the update and gather steps. Update is more of a
-//       calcLerpedSpriteWorldBounds(), we can re-use the calc'd lerp to do both
-//       the update and the screen conversion to check isWithinScreenBounds().
-//
-//       Move worldBounds out of the sprite, since it's render-specific. Save it
-//       in SpriteRenderInfo instead.
-//
-//       Once sprite has the dynamic stuff pulled out, we can make everything
-//       const and put the rest of the fields in.
 
 void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 {
     // Gather tiles.
-    for (unsigned int i = 0; i < mapLayers.size(); ++i) {
-        for (int y = 0; y < static_cast<int>(SharedConfig::WORLD_HEIGHT); ++y) {
-            for (int x = 0; x < static_cast<int>(SharedConfig::WORLD_WIDTH);
+    for (int y = 0; y < static_cast<int>(SharedConfig::WORLD_HEIGHT); ++y) {
+        for (int x = 0; x < static_cast<int>(SharedConfig::WORLD_WIDTH);
                  ++x) {
-                unsigned int linearizedIndex
-                    = y * SharedConfig::WORLD_WIDTH + x;
-                Sprite& sprite = mapLayers[i][linearizedIndex];
+                // Figure out which tile we're looking at.
+                const Tile& tile = tileMap.get(x, y);
 
-                // If there's nothing in this tile, skip it.
-                if (sprite.texture == nullptr) {
-                    continue;
-                }
-                else {
-                    // Get iso screen extent for this tile.
-                    Sprite& sprite{mapLayers[i][linearizedIndex]};
+                // Push all of this tile's sprites into the appropriate vector.
+                for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
+                    // Get iso screen extent for this sprite.
                     SDL_Rect screenExtent
-                        = ClientTransforms::tileToScreenExtent({x, y}, sprite,
-                                                               camera);
+                        = ClientTransforms::tileToScreenExtent({x, y}, *(layer.sprite), camera);
 
-                    // If the sprite is on screen, push the sprite info.
+                    // If this sprite isn't on screen, skip it.
                     if (isWithinScreenBounds(screenExtent, camera)) {
-                        // Get an updated bounding box for this entity.
-                        Position tilePosition{
-                                static_cast<float>(x * SharedConfig::TILE_WORLD_WIDTH),
-                                static_cast<float>(y * SharedConfig::TILE_WORLD_HEIGHT), 0};
-                        BoundingBox movedBox = MovementHelpers::moveBoundingBox(
-                            tilePosition, sprite.modelBounds);
-                        sprites.emplace_back(&sprite, movedBox, screenExtent);
+                        continue;
+                    }
 
-                        // If the tile has no height, increment the index.
-                        // TODO: Get this number from the map object.
-                        if (i < 2) {
-                            heightfulSpriteStartIndex++;
-                        }
+                    // If this sprite has a bounding box, push it to be sorted.
+                    if (layer.sprite->hasBoundingBox) {
+                        spritesToSort.emplace_back(layer.sprite, layer.fixedBounds, screenExtent);
+                    }
+                    else {
+                        // No bounding box, push it straight into the sorted
+                        // sprites vector.
+                        sortedSprites.emplace_back(layer.sprite, BoundingBox{}, screenExtent);
                     }
                 }
-            }
         }
     }
 
@@ -98,7 +79,7 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
         auto [sprite, position, previousPos]
             = group.get<Sprite, Position, PreviousPosition>(entity);
 
-        // Get the lerp'd world position.
+        // Get the entity's lerp'd world position.
         Position lerp = MovementHelpers::interpolatePosition(previousPos,
                                                              position, alpha);
 
@@ -112,7 +93,7 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
             BoundingBox movedBox = MovementHelpers::moveBoundingBox(position, sprite.modelBounds);
 
             // Push the entity's render info for this frame.
-            sprites.emplace_back(&sprite, movedBox, screenExtent);
+            spritesToSort.emplace_back(&sprite, movedBox, screenExtent);
         }
     }
 }
@@ -122,15 +103,15 @@ void WorldSpritePreparer::sortSpritesByDepth()
     // Calculate dependencies (who is behind who).
     calcDepthDependencies();
 
-    // Calculate depth values for heightful sprites.
+    // Calculate depth values.
     int depthValue = 0;
-    for (unsigned int i = heightfulSpriteStartIndex; i < sprites.size(); ++i) {
-        visitSprite(sprites[i], depthValue);
+    for (SpriteRenderInfo& spriteInfo : spritesToSort) {
+        visitSprite(spriteInfo, depthValue);
     }
 
-    // Sort heightful sprites by depth.
+    // Sort sprites by depth.
     std::sort(
-        (sprites.begin() + heightfulSpriteStartIndex), sprites.end(),
+        spritesToSort.begin(), spritesToSort.end(),
         [](const SpriteRenderInfo& lhs, const SpriteRenderInfo& rhs) -> bool {
             return lhs.depthValue < rhs.depthValue;
         });
@@ -139,18 +120,18 @@ void WorldSpritePreparer::sortSpritesByDepth()
 void WorldSpritePreparer::calcDepthDependencies()
 {
     // Calculate all dependencies.
-    for (unsigned int i = heightfulSpriteStartIndex; i < sprites.size(); ++i) {
-        for (unsigned int j = heightfulSpriteStartIndex; j < sprites.size();
+    for (unsigned int i = 0; i < spritesToSort.size(); ++i) {
+        for (unsigned int j = 0; j < spritesToSort.size();
              ++j) {
             if (i != j) {
-                SpriteRenderInfo& spriteA = sprites[i];
-                SpriteRenderInfo& spriteB = sprites[j];
+                SpriteRenderInfo& spriteA = spritesToSort[i];
+                SpriteRenderInfo& spriteB = spritesToSort[j];
 
                 if ((spriteB.worldBounds.minX < spriteA.worldBounds.maxX)
                     && (spriteB.worldBounds.minY < spriteA.worldBounds.maxY)
                     && (spriteB.worldBounds.minZ < spriteA.worldBounds.maxZ)) {
                     // B is behind A, push it into A.spritesBehind.
-                    sprites[i].spritesBehind.push_back(&(sprites[j]));
+                    spriteA.spritesBehind.push_back(&spriteB);
                 }
             }
         }

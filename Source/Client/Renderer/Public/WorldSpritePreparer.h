@@ -11,6 +11,7 @@ namespace AM
 class Camera;
 namespace Client
 {
+class TileMap;
 /**
  * This class is responsible for figuring out which sprites from the world are
  * relevant to the current frame and providing them in a sorted, prepared form.
@@ -18,16 +19,14 @@ namespace Client
 class WorldSpritePreparer
 {
 public:
-    // TODO: Turn the map into its own data type.
-    using TileLayer = std::vector<Sprite>;
     WorldSpritePreparer(entt::registry& inRegistry,
-                        std::vector<TileLayer>& inMapLayers);
+                        const TileMap& inTileMap);
 
     /**
      * Clears the stored sprite info and prepares the updated batch of sprites.
      *
-     * @return A reference to a vector of all world sprites that should be
-     *         drawn on this frame, sorted into ascending draw order.
+     * @return A reference to a vector of all sprites that should be drawn
+     *         on this frame, sorted in their proper draw order.
      */
     std::vector<SpriteRenderInfo>& prepareSprites(const Camera& camera,
                                                   double alpha);
@@ -79,17 +78,18 @@ private:
 
     /** Registry reference used for gathering sprites. */
     entt::registry& registry;
-    /** Tile map reference used for gathering tiles. */
-    std::vector<TileLayer>& mapLayers;
+    /** World map reference used for gathering tiles. */
+    const TileMap& tileMap;
 
     /** Stores the sorted sprite info from the last prepareSprites() call.
         Calculations and sorting are done in-place.
-        Indices 0 - heightfulSpriteStartIndex are heightless (flat tiles),
-        the rest are sprites with height. */
-    std::vector<SpriteRenderInfo> sprites;
+        Indices 0 - boxSpriteStartIndex have no bounding boxes (floors,
+        carpets, etc). The rest are sprites with bounding boxes. */
+    std::vector<SpriteRenderInfo> sortedSprites;
 
-    /** The start index for sprites in the sprites vector that have height. */
-    unsigned int heightfulSpriteStartIndex;
+    /** Holds sprites that need to be sorted. Sprites are pushed during
+        gatherSpriteInfo() and sorted during sortSpritesByDepth(). */
+    std::vector<SpriteRenderInfo> spritesToSort;
 };
 
 } // End namespace Client

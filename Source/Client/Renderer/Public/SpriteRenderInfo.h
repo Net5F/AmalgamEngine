@@ -13,7 +13,7 @@ namespace Client
  */
 struct SpriteRenderInfo {
     /** The sprite that is associated with this render information. */
-    Sprite* sprite;
+    const Sprite* sprite;
 
     //-------------------------------------------------------------------------
     // Render data

@@ -10,11 +10,10 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace Client
 {
 class World;
+class SpriteData;
 
 /**
  * Uses user input and sim data to manage the state of the user interface.
@@ -22,7 +21,7 @@ class World;
 class UserInterface : public EventHandler
 {
 public:
-    UserInterface(World& inWorld, AssetCache& inAssetCache);
+    UserInterface(World& inWorld, SpriteData& spriteData);
 
     /**
      * Handles user input events.
@@ -49,11 +48,8 @@ private:
     /** Used to get the world state to populate the UI. */
     World& world;
 
-    /** Used for loading UI textures. */
-    AssetCache& assetCache;
-
     /** Holds the sprites that we cycle through on mouse click. */
-    std::vector<Sprite> terrainSprites;
+    std::vector<const Sprite*> terrainSprites;
 };
 
 } // End namespace Client

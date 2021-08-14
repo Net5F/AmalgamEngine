@@ -14,7 +14,6 @@ target_sources(Shared
         Public/PeriodicCaller.h
         Public/Profiler.h
         Public/AssetCache.h
-        Public/SharedConfig.h
         Public/Timer.h
         Public/Transforms.h
 )

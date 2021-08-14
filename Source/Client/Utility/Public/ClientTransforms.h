@@ -35,7 +35,7 @@ public:
      * some extra offsets applied.
      */
     static SDL_Rect tileToScreenExtent(const TileIndex& index,
-                                       const Sprite& sprite,
+                                        const Sprite& sprite,
                                        const Camera& camera);
 };
 

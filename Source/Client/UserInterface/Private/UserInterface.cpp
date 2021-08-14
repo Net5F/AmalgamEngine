@@ -1,6 +1,6 @@
 #include "UserInterface.h"
 #include "World.h"
-#include "AssetCache.h"
+#include "SpriteData.h"
 #include "Camera.h"
 #include "Paths.h"
 #include "SharedConfig.h"
@@ -11,26 +11,15 @@ namespace AM
 {
 namespace Client
 {
-UserInterface::UserInterface(World& inWorld, AssetCache& inAssetCache)
+UserInterface::UserInterface(World& inWorld, SpriteData& spriteData)
 : tileHighlightSprite{}
 , tileHighlightIndex{0, 0}
 , world{inWorld}
-, assetCache{inAssetCache}
 {
-    // Set up the tile highlight sprite.
-    TextureHandle texture
-        = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
-    tileHighlightSprite = {texture, {(256 * 8), (512 * 0), 256, 512}, 256, 512};
-
     // Push the terrain sprites to cycle through.
-    SDL2pp::Rect spritePosInTexture{(256 * 6), (512 * 0), 256, 512};
-    terrainSprites.push_back(Sprite{texture, spritePosInTexture, 256, 512});
-
-    spritePosInTexture = {(256 * 6), (512 * 2), 256, 512};
-    terrainSprites.push_back(Sprite{texture, spritePosInTexture, 256, 512});
-
-    spritePosInTexture = {(256 * 6), (512 * 3), 256, 512};
-    terrainSprites.push_back(Sprite{texture, spritePosInTexture, 256, 512});
+    terrainSprites.push_back(&(spriteData.get("test_6")));
+    terrainSprites.push_back(&(spriteData.get("test_8")));
+    terrainSprites.push_back(&(spriteData.get("test_24")));
 }
 
 bool UserInterface::handleEvent(SDL_Event& event)
@@ -96,27 +85,24 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     }
 
     // Determine which sprite the selected tile has.
-    unsigned int linearizedIndex
-        = tileIndex.y * SharedConfig::WORLD_WIDTH + tileIndex.x;
-    Sprite& tileSprite = world.mapLayers[0][linearizedIndex];
+    const Tile& tile = world.tileMap.get(tileIndex.x, tileIndex.y);
 
     unsigned int terrainSpriteIndex = 0;
-    switch (tileSprite.textureExtent.y) {
-        case (512 * 0):
-            terrainSpriteIndex = 0;
-            break;
-        case (512 * 2):
-            terrainSpriteIndex = 1;
-            break;
-        case (512 * 3):
-            terrainSpriteIndex = 2;
-            break;
+    if (tile.spriteLayers[0].sprite->stringId == "test_6") {
+        terrainSpriteIndex = 0;
+    }
+    else if (tile.spriteLayers[0].sprite->stringId == "test_8") {
+        terrainSpriteIndex = 1;
+    }
+    else if (tile.spriteLayers[0].sprite->stringId == "test_24") {
+        terrainSpriteIndex = 2;
     }
 
     // Set the tile to the next sprite.
     terrainSpriteIndex++;
     terrainSpriteIndex %= 3;
-    world.mapLayers[0][linearizedIndex] = terrainSprites[terrainSpriteIndex];
+    world.tileMap.replaceSpriteLayer(tileIndex.x, tileIndex.y
+        , 0, *(terrainSprites[terrainSpriteIndex]));
 }
 
 } // End namespace Client

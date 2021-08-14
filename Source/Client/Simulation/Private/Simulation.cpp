@@ -1,6 +1,6 @@
 #include "Simulation.h"
 #include "Network.h"
-#include "AssetCache.h"
+#include "SpriteData.h"
 #include "ConnectionResponse.h"
 #include "Input.h"
 #include "Position.h"
@@ -24,10 +24,10 @@ namespace AM
 {
 namespace Client
 {
-Simulation::Simulation(Network& inNetwork, AssetCache& inAssetCache)
-: world(inAssetCache)
+Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
+: world(inSpriteData)
 , network{inNetwork}
-, assetCache{inAssetCache}
+, spriteData{inSpriteData}
 , playerInputSystem(*this, world)
 , networkUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, network)
@@ -93,11 +93,9 @@ void Simulation::connect()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    TextureHandle texture
-        = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
-    SDL_Rect spritePosInTexture{(256 * 8 + 100), 256 + 140, 64, 64};
-    registry.emplace<Sprite>(newEntity, texture, spritePosInTexture,
-                             BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
+    // TODO: Since sprite components hold static data, do we want them to
+    //       just contain a ref to the actual data? Or is this copy better?
+    registry.emplace<Sprite>(newEntity, spriteData.get("test_31"));
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
                              ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH,
@@ -125,11 +123,7 @@ void Simulation::fakeConnection()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    TextureHandle texture
-        = assetCache.loadTexture(Paths::TEXTURE_DIR + "iso_test_sprites.png");
-    SDL_Rect spritePosInTexture{(256 * 4 + 110), 256 + 135, 64, 64};
-    registry.emplace<Sprite>(newEntity, texture, spritePosInTexture,
-                             BoundingBox{12.5, 18.75, 8.5, 14, 0, 23});
+    registry.emplace<Sprite>(newEntity, spriteData.get("test_31"));
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
                              ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH,

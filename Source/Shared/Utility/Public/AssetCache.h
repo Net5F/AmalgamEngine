@@ -16,7 +16,7 @@ namespace AM
 using TextureHandle = std::shared_ptr<SDL_Texture>;
 
 /**
- * This class facilitates loading and managing the lifetime of assets.
+ * Facilitates loading and managing the lifetime of assets.
  */
 class AssetCache
 {

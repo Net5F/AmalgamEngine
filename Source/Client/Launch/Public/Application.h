@@ -4,9 +4,10 @@
 #include "Network.h"
 #include "Simulation.h"
 #include "Renderer.h"
+#include "AssetCache.h"
+#include "SpriteData.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
-#include "AssetCache.h"
 
 #include "SDL2pp/SDL.hh"
 #include "SDL2pp/Window.hh"
@@ -83,6 +84,8 @@ private:
     SDL2pp::Renderer sdlRenderer;
 
     AssetCache assetCache;
+
+    SpriteData spriteData;
 
     Network network;
     /** Calls network.tick() at the network tick rate. */

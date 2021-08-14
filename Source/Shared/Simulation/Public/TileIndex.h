@@ -5,7 +5,7 @@ namespace AM
 /**
  * Holds the indices that identify a tile.
  *
- * The indices are in reference to the World's tile map.
+ * The indices are in reference to the TileMap's tiles.
  */
 struct TileIndex {
 public:

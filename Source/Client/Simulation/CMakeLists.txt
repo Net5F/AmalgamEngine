@@ -1,22 +1,25 @@
 target_sources(Client
 	PRIVATE
-		Private/World.cpp
-		Private/PlayerInputSystem.cpp
-		Private/NetworkUpdateSystem.cpp
-		Private/PlayerMovementSystem.cpp
-		Private/NpcMovementSystem.cpp
 		Private/CameraSystem.cpp
+		Private/NetworkUpdateSystem.cpp
+		Private/NpcMovementSystem.cpp
+		Private/PlayerInputSystem.cpp
+		Private/PlayerMovementSystem.cpp
 		Private/Simulation.cpp
+		Private/World.cpp
+		Private/TileMap/TileMap.cpp
 	PUBLIC
-		Public/World.h
-		Public/PlayerInputSystem.h
-		Public/NetworkUpdateSystem.h
-		Public/PlayerMovementSystem.h
-		Public/NpcMovementSystem.h
 		Public/CameraSystem.h
+		Public/NetworkUpdateSystem.h
+		Public/NpcMovementSystem.h
+		Public/PlayerInputSystem.h
+		Public/PlayerMovementSystem.h
 		Public/Simulation.h
+		Public/World.h
 		Public/Components/PlayerState.h
 		Public/Components/Sprite.h
+		Public/TileMap/Tile.h
+		Public/TileMap/TileMap.h
 )
 
 target_include_directories(Client
@@ -24,4 +27,5 @@ target_include_directories(Client
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
 		${CMAKE_CURRENT_SOURCE_DIR}/Public
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+		${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
 )

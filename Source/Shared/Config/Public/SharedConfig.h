@@ -4,7 +4,7 @@ namespace AM
 {
 /**
  * This class contains shared configuration that should be consistent between
- * the server and client.
+ * the client, server, and sprite editor.
  */
 class SharedConfig
 {
@@ -34,6 +34,9 @@ public:
     static constexpr unsigned int WORLD_WIDTH = 10;
     /** The height of the world's terrain map in tiles. */
     static constexpr unsigned int WORLD_HEIGHT = 10;
+
+    /** The maximum number of sprite layers a tile can have. */
+    static constexpr unsigned int MAX_TILE_LAYERS = 8;
 
     //-------------------------------------------------------------------------
     // Network

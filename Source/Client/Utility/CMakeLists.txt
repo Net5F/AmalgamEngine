@@ -1,8 +1,10 @@
 target_sources(Client
     PRIVATE
         Private/ClientTransforms.cpp
+        Private/SpriteData.cpp
     PUBLIC
         Public/ClientTransforms.h
+        Public/SpriteData.h
 )
 
 target_include_directories(Client

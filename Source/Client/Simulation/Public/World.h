@@ -1,28 +1,27 @@
 #pragma once
 
-#include "Sprite.h"
+#include "TileMap.h"
 #include "ScreenPoint.h"
 
 #include "entt/entity/registry.hpp"
-
-#include <vector>
 
 class SDL_Rect;
 
 namespace AM
 {
-class AssetCache;
 class BoundingBox;
 class TileIndex;
 
 namespace Client
 {
+class SpriteData;
+
 /**
  * Owns and manages the persistence of all world state.
  *
  * The client's world state consists of:
  *   Map data
- *     See WorldMap.h
+ *     See TileMap.h
  *   Entity data
  *     Maintained at runtime in an ECS registry.
  *
@@ -31,7 +30,7 @@ namespace Client
 class World
 {
 public:
-    World(AssetCache& inAssetCache);
+    World(SpriteData& spriteData);
 
     /** Entity data registry. */
     entt::registry registry;
@@ -41,26 +40,12 @@ public:
         time we need it. */
     entt::entity playerEntity;
 
-    // TODO: Turn the map into its own data type.
-    using TileLayer = std::vector<Sprite>;
-    /** The layers of our tile map.
-        Layer 0 is always the base terrain, the rest will sequentially be drawn
-        on top. */
-    std::vector<TileLayer> mapLayers;
+    /** The tile map that makes up the world. */
+    TileMap tileMap;
 
-    /** The mouse's current position in screen space. */
+    /** The mouse's current position in screen space.
+        Temporarily here, should be removed eventually. */
     ScreenPoint mouseScreenPoint;
-
-private:
-    /**
-     * Adds a tile sprite to the tile map at the given layer and position.
-     */
-    void addTile(unsigned int layer, const TileIndex& index,
-                 TextureHandle texture, const SDL_Rect& extent,
-                 const BoundingBox& modelBounds);
-
-    /** Used for loading map textures. */
-    AssetCache& assetCache;
 };
 
 } // namespace Client

@@ -12,11 +12,10 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace Client
 {
 class Network;
+class SpriteData;
 
 /**
  * Manages the simulation, including world state and system processing.
@@ -27,7 +26,7 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S = .001;
 
-    Simulation(Network& inNetwork, AssetCache& inAssetCache);
+    Simulation(Network& inNetwork, SpriteData& inSpriteData);
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,
@@ -66,7 +65,7 @@ private:
 
     /** Temporarily used for loading the player's sprite texture.
         When that logic gets moved, this member can be removed. */
-    AssetCache& assetCache;
+    SpriteData& spriteData;
 
     PlayerInputSystem playerInputSystem;
     NetworkUpdateSystem networkUpdateSystem;

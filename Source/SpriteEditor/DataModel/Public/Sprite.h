@@ -20,7 +20,7 @@ public:
     /** The sprite sheet that this sprite is from. */
     SpriteSheet& parentSpriteSheet;
 
-    /** Display name, shown in the UI.  */
+    /** Unique display name, shown in the UI.  */
     std::string displayName{""};
 
     /** UV position and size in texture. */

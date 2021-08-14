@@ -26,7 +26,7 @@ Renderer::Renderer(SDL_Renderer* inSdlRenderer, Simulation& sim,
 , world{sim.getWorld()}
 , ui{inUI}
 , getProgress(inGetProgress)
-, worldSpritePreparer(world.registry, world.mapLayers)
+, worldSpritePreparer(world.registry, world.tileMap)
 {
     // Init the groups that we'll be using.
     auto group
