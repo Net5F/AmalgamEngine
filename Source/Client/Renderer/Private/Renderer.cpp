@@ -113,8 +113,8 @@ void Renderer::renderUserInterface(const Camera& camera)
 {
     /* Render the mouse highlight (currently just a tile sprite.) */
     // Get iso screen extent for this tile.
-    TileIndex& highlightIndex = ui.tileHighlightIndex;
-    Sprite& highlightSprite = ui.tileHighlightSprite;
+    const TileIndex& highlightIndex = ui.tileHighlightIndex;
+    const Sprite& highlightSprite = *(ui.tileHighlightSprite);
     SDL_Rect screenExtent = ClientTransforms::tileToScreenExtent(
         highlightIndex, highlightSprite, camera);
 

@@ -29,7 +29,7 @@ public:
     bool handleEvent(SDL_Event& event) override;
 
     /** Sprite for the mouse-following tile highlight. */
-    Sprite tileHighlightSprite;
+    const Sprite* tileHighlightSprite;
 
     /** Index of the tile to be highlighted. */
     TileIndex tileHighlightIndex;

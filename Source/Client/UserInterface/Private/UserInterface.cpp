@@ -16,6 +16,9 @@ UserInterface::UserInterface(World& inWorld, SpriteData& spriteData)
 , tileHighlightIndex{0, 0}
 , world{inWorld}
 {
+    // Set up the tile highlight sprite.
+    tileHighlightSprite = &(spriteData.get("test_8"));
+
     // Push the terrain sprites to cycle through.
     terrainSprites.push_back(&(spriteData.get("test_6")));
     terrainSprites.push_back(&(spriteData.get("test_8")));
