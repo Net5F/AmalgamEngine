@@ -5,8 +5,7 @@ namespace AM
 /**
  * This struct represents a set of axis-aligned 3D bounds, forming a box.
  */
-class BoundingBox
-{
+struct BoundingBox {
 public:
     float minX{0};
     float maxX{0};

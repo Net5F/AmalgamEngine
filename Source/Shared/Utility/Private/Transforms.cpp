@@ -1,12 +1,16 @@
 #include "Transforms.h"
+#include "Position.h"
+#include "ScreenPoint.h"
 #include "Camera.h"
+#include "BoundingBox.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include <cmath>
 
 namespace AM
 {
-ScreenPoint Transforms::worldToScreen(const Position position, float zoomFactor)
+ScreenPoint Transforms::worldToScreen(const Position& position,
+                                      float zoomFactor)
 {
     // Calc the scaling factor going from world tiles to screen tiles.
     static const float TILE_WIDTH_SCALE
@@ -36,7 +40,7 @@ float Transforms::worldZToScreenY(float zCoord, float zoomFactor)
     return zCoord * zoomFactor * SharedConfig::Z_SCREEN_SCALE;
 }
 
-Position Transforms::screenToWorld(const ScreenPoint screenPoint,
+Position Transforms::screenToWorld(const ScreenPoint& screenPoint,
                                    float zoomFactor)
 {
     // Remove the camera zoom.
@@ -87,6 +91,21 @@ TileIndex Transforms::screenToTile(const ScreenPoint& screenPoint,
 
     // Convert to tile index.
     return worldToTile(worldPos);
+}
+
+BoundingBox Transforms::modelToWorld(const BoundingBox& modelBounds,
+                                     const Position& position)
+{
+    // Move the model-space bounding box to the given position.
+    BoundingBox movedBox{};
+    movedBox.minX = position.x + modelBounds.minX;
+    movedBox.maxX = position.x + modelBounds.maxX;
+    movedBox.minY = position.y + modelBounds.minY;
+    movedBox.maxY = position.y + modelBounds.maxY;
+    movedBox.minZ = position.z + modelBounds.minZ;
+    movedBox.maxZ = position.z + modelBounds.maxZ;
+
+    return movedBox;
 }
 
 } // End namespace AM

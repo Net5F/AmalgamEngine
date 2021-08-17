@@ -1,13 +1,12 @@
 #include "TileMap.h"
 #include "SpriteData.h"
 #include "Position.h"
-#include "MovementHelpers.h"
+#include "Transforms.h"
 
 namespace AM
 {
 namespace Client
 {
-
 TileMap::TileMap(SpriteData& inSpriteData)
 : spriteData{inSpriteData}
 {
@@ -36,47 +35,47 @@ TileMap::TileMap(SpriteData& inSpriteData)
     addSpriteLayer(0, 2, wall2);
 }
 
-void TileMap::addSpriteLayer(unsigned int tileX, unsigned int tileY, const Sprite& sprite)
+void TileMap::addSpriteLayer(unsigned int tileX, unsigned int tileY,
+                             const Sprite& sprite)
 {
     // If the sprite has a bounding box, calculate its position.
-    BoundingBox fixedBounds{};
+    BoundingBox worldBounds{};
     if (sprite.hasBoundingBox) {
         Position tilePosition{
             static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),
             static_cast<float>(tileY * SharedConfig::TILE_WORLD_HEIGHT), 0};
-        MovementHelpers::moveBoundingBox(tilePosition, fixedBounds);
+        worldBounds
+            = Transforms::modelToWorld(sprite.modelBounds, tilePosition);
     }
 
     // Push the sprite into the tile's layers vector.
-    unsigned int linearizedIndex
-        = tileY * SharedConfig::WORLD_WIDTH + tileX;
+    unsigned int linearizedIndex = tileY * SharedConfig::WORLD_WIDTH + tileX;
     Tile& tile = tiles[linearizedIndex];
-    tile.spriteLayers.emplace_back(&sprite, fixedBounds);
+    tile.spriteLayers.emplace_back(&sprite, worldBounds);
 }
 
-void TileMap::replaceSpriteLayer(unsigned int tileX, unsigned int tileY
-                                 , unsigned int layerIndex, const Sprite& sprite)
+void TileMap::replaceSpriteLayer(unsigned int tileX, unsigned int tileY,
+                                 unsigned int layerIndex, const Sprite& sprite)
 {
     // If the sprite has a bounding box, calculate its position.
-    BoundingBox fixedBounds{};
+    BoundingBox worldBounds{};
     if (sprite.hasBoundingBox) {
         Position tilePosition{
             static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),
             static_cast<float>(tileY * SharedConfig::TILE_WORLD_HEIGHT), 0};
-        MovementHelpers::moveBoundingBox(tilePosition, fixedBounds);
+        worldBounds
+            = Transforms::modelToWorld(sprite.modelBounds, tilePosition);
     }
 
     // Replace the sprite.
-    unsigned int linearizedIndex
-        = tileY * SharedConfig::WORLD_WIDTH + tileX;
+    unsigned int linearizedIndex = tileY * SharedConfig::WORLD_WIDTH + tileX;
     Tile& tile = tiles[linearizedIndex];
-    tile.spriteLayers[layerIndex] = {&sprite, fixedBounds};
+    tile.spriteLayers[layerIndex] = {&sprite, worldBounds};
 }
 
 const Tile& TileMap::get(int x, int y) const
 {
-    unsigned int linearizedIndex
-        = y * SharedConfig::WORLD_WIDTH + x;
+    unsigned int linearizedIndex = y * SharedConfig::WORLD_WIDTH + x;
     return tiles[linearizedIndex];
 }
 

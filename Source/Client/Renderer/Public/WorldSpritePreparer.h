@@ -19,8 +19,7 @@ class TileMap;
 class WorldSpritePreparer
 {
 public:
-    WorldSpritePreparer(entt::registry& inRegistry,
-                        const TileMap& inTileMap);
+    WorldSpritePreparer(entt::registry& inRegistry, const TileMap& inTileMap);
 
     /**
      * Clears the stored sprite info and prepares the updated batch of sprites.
@@ -42,6 +41,8 @@ private:
      *
      * @post sprites is filled with the sprites that are relevant to this
      *       frame.
+     * @post sortedSprites is filled with the ground sprites, and spritesToSort
+     *       is filled with the sprites that need to be sorted.
      */
     void gatherSpriteInfo(const Camera& camera, double alpha);
 
@@ -68,8 +69,8 @@ private:
     void visitSprite(SpriteRenderInfo& spriteInfo, int& depthValue);
 
     /**
-     * Returns true if the given extent is within the given camera's bounds,
-     * else false.
+     * Returns true if any part of the given extent is within the given
+     * camera's bounds, else false.
      *
      * @param extent  An extent in final screen coordinates.
      * @param camera  The camera to use for screen width/height checks.

@@ -36,6 +36,11 @@ std::vector<SpriteRenderInfo>&
     // Sort the sprites by visual depth.
     sortSpritesByDepth();
 
+    // Push the now-sorted sprites into the sorted vector.
+    for (SpriteRenderInfo& sprite : spritesToSort) {
+        sortedSprites.push_back(sprite);
+    }
+
     // Return the sorted vector of sprites.
     return sortedSprites;
 }
@@ -44,32 +49,33 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 {
     // Gather tiles.
     for (int y = 0; y < static_cast<int>(SharedConfig::WORLD_HEIGHT); ++y) {
-        for (int x = 0; x < static_cast<int>(SharedConfig::WORLD_WIDTH);
-                 ++x) {
-                // Figure out which tile we're looking at.
-                const Tile& tile = tileMap.get(x, y);
+        for (int x = 0; x < static_cast<int>(SharedConfig::WORLD_WIDTH); ++x) {
+            // Figure out which tile we're looking at.
+            const Tile& tile = tileMap.get(x, y);
 
-                // Push all of this tile's sprites into the appropriate vector.
-                for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
-                    // Get iso screen extent for this sprite.
-                    SDL_Rect screenExtent
-                        = ClientTransforms::tileToScreenExtent({x, y}, *(layer.sprite), camera);
+            // Push all of this tile's sprites into the appropriate vector.
+            for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
+                // Get iso screen extent for this sprite.
+                SDL_Rect screenExtent = ClientTransforms::tileToScreenExtent(
+                    {x, y}, *(layer.sprite), camera);
 
-                    // If this sprite isn't on screen, skip it.
-                    if (isWithinScreenBounds(screenExtent, camera)) {
-                        continue;
-                    }
-
-                    // If this sprite has a bounding box, push it to be sorted.
-                    if (layer.sprite->hasBoundingBox) {
-                        spritesToSort.emplace_back(layer.sprite, layer.fixedBounds, screenExtent);
-                    }
-                    else {
-                        // No bounding box, push it straight into the sorted
-                        // sprites vector.
-                        sortedSprites.emplace_back(layer.sprite, BoundingBox{}, screenExtent);
-                    }
+                // If this sprite isn't on screen, skip it.
+                if (!isWithinScreenBounds(screenExtent, camera)) {
+                    continue;
                 }
+
+                // If this sprite has a bounding box, push it to be sorted.
+                if (layer.sprite->hasBoundingBox) {
+                    spritesToSort.emplace_back(layer.sprite, layer.fixedBounds,
+                                               screenExtent);
+                }
+                else {
+                    // No bounding box, push it straight into the sorted
+                    // sprites vector.
+                    sortedSprites.emplace_back(layer.sprite, BoundingBox{},
+                                               screenExtent);
+                }
+            }
         }
     }
 
@@ -85,15 +91,16 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 
         // Get the iso screen extent for the lerped sprite.
         SDL_Rect screenExtent
-            = ClientTransforms::worldToScreenExtent(lerp, sprite, camera);
+            = ClientTransforms::entityToScreenExtent(lerp, sprite, camera);
 
         // If the sprite is on screen, push the render info.
         if (isWithinScreenBounds(screenExtent, camera)) {
             // Get an updated bounding box for this entity.
-            BoundingBox movedBox = MovementHelpers::moveBoundingBox(position, sprite.modelBounds);
+            BoundingBox worldBox
+                = Transforms::modelToWorld(sprite.modelBounds, lerp);
 
             // Push the entity's render info for this frame.
-            spritesToSort.emplace_back(&sprite, movedBox, screenExtent);
+            spritesToSort.emplace_back(&sprite, worldBox, screenExtent);
         }
     }
 }
@@ -121,8 +128,7 @@ void WorldSpritePreparer::calcDepthDependencies()
 {
     // Calculate all dependencies.
     for (unsigned int i = 0; i < spritesToSort.size(); ++i) {
-        for (unsigned int j = 0; j < spritesToSort.size();
-             ++j) {
+        for (unsigned int j = 0; j < spritesToSort.size(); ++j) {
             if (i != j) {
                 SpriteRenderInfo& spriteA = spritesToSort[i];
                 SpriteRenderInfo& spriteB = spritesToSort[j];
@@ -164,19 +170,9 @@ bool WorldSpritePreparer::isWithinScreenBounds(const SDL_Rect& extent,
 {
     // The extent is in final screen coordinates, so we only need to check if
     // it's within the rect formed by (0, 0) and (camera.width, camera.height).
-    bool pastLeftBound = ((extent.x + extent.w) < 0);
-    bool pastRightBound = (camera.extent.width < extent.x);
-    bool pastTopBound = ((extent.y + extent.h) < 0);
-    bool pastBottomBound = (camera.extent.height < extent.y);
-
-    // If the extent is outside of any camera bound, return false.
-    if (pastLeftBound || pastRightBound || pastTopBound || pastBottomBound) {
-        return false;
-    }
-    else {
-        // Extent is within the camera bounds, return true.
-        return true;
-    }
+    SDL_Rect cameraExtent{0, 0, static_cast<int>(camera.extent.width),
+                          static_cast<int>(camera.extent.height)};
+    return (SDL_HasIntersection(&extent, &cameraExtent) == SDL_TRUE);
 }
 
 } // End namespace Client

@@ -11,7 +11,6 @@ namespace AM
 {
 namespace Client
 {
-
 SpriteData::SpriteData(AssetCache& assetCache)
 {
     // Open the file.
@@ -56,70 +55,71 @@ const Sprite& SpriteData::get(int numericId)
 
 void SpriteData::parseJson(nlohmann::json& json, AssetCache& assetCache)
 {
+    // Parse the json and catch any parsing errors.
     try {
         // For every sprite sheet in the json.
         for (auto& sheetJson : json["spriteSheets"].items()) {
             // Get this sheet's texture.
-            std::string texturePath { Paths::TEXTURE_DIR };
+            std::string texturePath{Paths::TEXTURE_DIR};
             texturePath += sheetJson.value()["relPath"].get<std::string>();
             TextureHandle texture{assetCache.loadTexture(texturePath)};
 
             // For every sprite in the sheet.
             for (auto& spriteJson : sheetJson.value()["sprites"].items()) {
-                // Add the parent sprite sheet's texture.
-                Sprite sprite{};
-                sprite.texture = texture;
-
-                // Add the display name.
-                sprite.displayName
-                    = spriteJson.value()["displayName"].get<std::string>();
-
-                // Add the string identifier.
-                sprite.stringId
-                    = spriteJson.value()["stringId"].get<std::string>();
-
-                // Add the numeric identifier.
-                sprite.numericId = spriteJson.value()["numericId"];
-
-                // Add this sprite's extent within the sprite sheet.
-                sprite.textureExtent.x
-                    = spriteJson.value()["textureExtent"]["x"];
-                sprite.textureExtent.y
-                    = spriteJson.value()["textureExtent"]["y"];
-                sprite.textureExtent.w
-                    = spriteJson.value()["textureExtent"]["w"];
-                sprite.textureExtent.h
-                    = spriteJson.value()["textureExtent"]["h"];
-
-                // Add the Y offset.
-                sprite.yOffset = spriteJson.value()["yOffset"];
-
-                // Add the model-space bounds.
-                sprite.modelBounds.minX
-                    = spriteJson.value()["modelBounds"]["minX"];
-                sprite.modelBounds.maxX
-                    = spriteJson.value()["modelBounds"]["maxX"];
-                sprite.modelBounds.minY
-                    = spriteJson.value()["modelBounds"]["minY"];
-                sprite.modelBounds.maxY
-                    = spriteJson.value()["modelBounds"]["maxY"];
-                sprite.modelBounds.minZ
-                    = spriteJson.value()["modelBounds"]["minZ"];
-                sprite.modelBounds.maxZ
-                    = spriteJson.value()["modelBounds"]["maxZ"];
-
-                // Save the sprite in the sprites vector.
-                sprites.push_back(sprite);
-
-                // Add pointers to the new sprite to the maps.
-                const Sprite* spritePtr{&(sprites.back())};
-                stringMap.emplace(spritePtr->stringId, spritePtr);
-                numericMap.emplace(spritePtr->numericId, spritePtr);
+                parseSprite(spriteJson.value(), texture);
             }
         }
     } catch (nlohmann::json::type_error& e) {
         LOG_ERROR("Parse failure - %s", e.what());
     }
+
+    // Fill the maps with pointers to all the sprites.
+    // Note: This must be done after filling the sprites vector, since a
+    //       push_back() can cause a re-allocation which invalidates pointers.
+    for (Sprite& sprite : sprites) {
+        stringMap.emplace(sprite.stringId, &sprite);
+        numericMap.emplace(sprite.numericId, &sprite);
+    }
+}
+
+void SpriteData::parseSprite(const nlohmann::json& spriteJson,
+                             const TextureHandle& texture)
+{
+    // Add the parent sprite sheet's texture.
+    Sprite sprite{};
+    sprite.texture = texture;
+
+    // Add the display name.
+    sprite.displayName = spriteJson["displayName"].get<std::string>();
+
+    // Add the string identifier.
+    sprite.stringId = spriteJson["stringId"].get<std::string>();
+
+    // Add the numeric identifier.
+    sprite.numericId = spriteJson["numericId"];
+
+    // Add this sprite's extent within the sprite sheet.
+    sprite.textureExtent.x = spriteJson["textureExtent"]["x"];
+    sprite.textureExtent.y = spriteJson["textureExtent"]["y"];
+    sprite.textureExtent.w = spriteJson["textureExtent"]["w"];
+    sprite.textureExtent.h = spriteJson["textureExtent"]["h"];
+
+    // Add the Y offset.
+    sprite.yOffset = spriteJson["yOffset"];
+
+    // Add whether the sprite has a bounding box or not.
+    sprite.hasBoundingBox = spriteJson["hasBoundingBox"];
+
+    // Add the model-space bounds.
+    sprite.modelBounds.minX = spriteJson["modelBounds"]["minX"];
+    sprite.modelBounds.maxX = spriteJson["modelBounds"]["maxX"];
+    sprite.modelBounds.minY = spriteJson["modelBounds"]["minY"];
+    sprite.modelBounds.maxY = spriteJson["modelBounds"]["maxY"];
+    sprite.modelBounds.minZ = spriteJson["modelBounds"]["minZ"];
+    sprite.modelBounds.maxZ = spriteJson["modelBounds"]["maxZ"];
+
+    // Save the sprite in the sprites vector.
+    sprites.push_back(sprite);
 }
 
 } // End namespace Client

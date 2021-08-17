@@ -1,14 +1,15 @@
 #pragma once
 
-#include "ScreenPoint.h"
-#include "Position.h"
 #include "TileIndex.h"
 #include <SDL2/SDL_rect.h>
 
 namespace AM
 {
+class Position;
+class ScreenPoint;
 class Sprite;
 class Camera;
+class BoundingBox;
 
 /**
  * Static functions for transforming between world and screen space.
@@ -21,7 +22,8 @@ public:
      *
      * @param zoomFactor  The camera's zoom factor.
      */
-    static ScreenPoint worldToScreen(const Position position, float zoomFactor);
+    static ScreenPoint worldToScreen(const Position& position,
+                                     float zoomFactor);
 
     /**
      * Converts a Z coordinate in world space to a Y coordinate in screen space.
@@ -35,7 +37,7 @@ public:
      *
      * @param zoomFactor  The camera's zoom factor.
      */
-    static Position screenToWorld(const ScreenPoint screenPoint,
+    static Position screenToWorld(const ScreenPoint& screenPoint,
                                   float zoomFactor);
 
     /**
@@ -58,6 +60,13 @@ public:
      */
     static TileIndex screenToTile(const ScreenPoint& screenPoint,
                                   const Camera& camera);
+
+    /**
+     * Converts a model-space bounding box to a world-space box, placed at the
+     * given position.
+     */
+    static BoundingBox modelToWorld(const BoundingBox& modelBounds,
+                                    const Position& position);
 };
 
 } // End namespace AM

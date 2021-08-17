@@ -11,7 +11,6 @@ class AssetCache;
 
 namespace Client
 {
-
 /**
  * Loads the sprite data from SpriteData.json into memory and provides an
  * interface for accessing it.
@@ -42,10 +41,20 @@ public:
 
 private:
     /**
+     * Parses the given sprite json and adds the resulting sprite to the
+     * sprites vector.
+     *
+     * @param spriteJson  The json to parse. Must be a valid sprite section
+     *                    from SpriteData.json.
+     * @param texture  The texture of the spritesheet that contains the sprite.
+     */
+    void parseSprite(const nlohmann::json& spriteJson, const TextureHandle& texture);
+
+    /**
      * Parses the given json, constructing sprites and pushing them into the
      * sprites vector.
      *
-     * @param json  The json to load, should be build from a valid
+     * @param json  The json to parse. Must be loaded from a valid
      *              SpriteData.json.
      * @param assetCache  The asset cache to load sprite sheet textures into.
      */

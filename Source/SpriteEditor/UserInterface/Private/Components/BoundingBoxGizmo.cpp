@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "SpriteDataModel.h"
 #include "Transforms.h"
+#include "Position.h"
 #include "SharedConfig.h"
 #include "Ignore.h"
 #include "AUI/Core.h"
