@@ -325,11 +325,11 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
 
     /* Build the offsets. */
     // Account for the sprite's empty vertical space.
-    int yOffset = AUI::ScalingHelpers::logicalToActual(384);
+    int yOffset = AUI::ScalingHelpers::logicalToActual(activeSprite->yOffset);
 
     // Account for the sprite's half-tile offset.
     int xOffset = AUI::ScalingHelpers::logicalToActual(
-        SharedConfig::TILE_SCREEN_WIDTH / 2.f);
+        activeSprite->textureExtent.w / 2.f);
 
     /* Scale and offset each point, then push it into the return vector. */
     for (ScreenPoint& point : floatPoints) {
