@@ -110,7 +110,7 @@
                 },
                 {
                     "displayName": "test 5",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -131,7 +131,7 @@
                 },
                 {
                     "displayName": "test 6",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -152,7 +152,7 @@
                 },
                 {
                     "displayName": "test 7",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -173,7 +173,7 @@
                 },
                 {
                     "displayName": "test 8",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -194,7 +194,7 @@
                 },
                 {
                     "displayName": "test 9",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -215,7 +215,7 @@
                 },
                 {
                     "displayName": "test 10",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -236,7 +236,7 @@
                 },
                 {
                     "displayName": "test 11",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -257,7 +257,7 @@
                 },
                 {
                     "displayName": "test 12",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -278,7 +278,7 @@
                 },
                 {
                     "displayName": "test 13",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -299,7 +299,7 @@
                 },
                 {
                     "displayName": "test 14",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -320,7 +320,7 @@
                 },
                 {
                     "displayName": "test 15",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -341,7 +341,7 @@
                 },
                 {
                     "displayName": "test 16",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -383,7 +383,7 @@
                 },
                 {
                     "displayName": "test 18",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -404,7 +404,7 @@
                 },
                 {
                     "displayName": "test 19",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -425,7 +425,7 @@
                 },
                 {
                     "displayName": "test 20",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -488,7 +488,7 @@
                 },
                 {
                     "displayName": "test 23",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -509,7 +509,7 @@
                 },
                 {
                     "displayName": "test 24",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -530,7 +530,7 @@
                 },
                 {
                     "displayName": "test 25",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -572,7 +572,7 @@
                 },
                 {
                     "displayName": "test 27",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -677,7 +677,7 @@
                 },
                 {
                     "displayName": "test 32",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -698,7 +698,7 @@
                 },
                 {
                     "displayName": "test 33",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -719,7 +719,7 @@
                 },
                 {
                     "displayName": "test 34",
-                    "hasBoundingBox": true,
+                    "hasBoundingBox": false,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,

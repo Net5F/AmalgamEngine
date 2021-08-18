@@ -120,6 +120,9 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 // Add the Y offset.
                 sprite.yOffset = spriteJson.value()["yOffset"];
 
+                // Add hasBoundingBox.
+                sprite.hasBoundingBox = spriteJson.value()["hasBoundingBox"];
+
                 // Add the model-space bounds.
                 sprite.modelBounds.minX
                     = spriteJson.value()["modelBounds"]["minX"];

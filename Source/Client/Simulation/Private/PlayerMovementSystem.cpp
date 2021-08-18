@@ -72,7 +72,6 @@ void PlayerMovementSystem::processMovements()
     MovementHelpers::moveEntity(currentPosition, currentMovement,
                                 currentInput.inputStates,
                                 SharedConfig::SIM_TICK_TIMESTEP_S);
-    LOG_INFO("%.2f, %.2f", currentPosition.x, currentPosition.y);
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(
