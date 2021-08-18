@@ -36,8 +36,8 @@ void SpriteEditStage::loadActiveSprite(Sprite* activeSprite)
     if (activeSprite != nullptr) {
         // Load the sprite's image.
         spriteImage.clearTextures();
-        std::string imagePath{spriteDataModel.getWorkingResourcesDir()};
-        imagePath += activeSprite->parentSpriteSheet.relPath;
+        std::string imagePath{spriteDataModel.getWorkingTexturesDir()};
+        imagePath += activeSprite->parentSpriteSheetPath;
         spriteImage.addResolution(AUI::Core::getLogicalScreenSize(),
                                   assetCache.loadTexture(imagePath),
                                   activeSprite->textureExtent);
@@ -80,6 +80,11 @@ void SpriteEditStage::render(const SDL_Point& parentOffset)
     lastRenderedExtent = scaledExtent;
     lastRenderedExtent.x += parentOffset.x;
     lastRenderedExtent.y += parentOffset.y;
+
+    // If the component isn't visible, return without rendering.
+    if (!isVisible) {
+        return;
+    }
 
     // Children should render at the parent's offset + this component's offset.
     SDL_Point childOffset{parentOffset};

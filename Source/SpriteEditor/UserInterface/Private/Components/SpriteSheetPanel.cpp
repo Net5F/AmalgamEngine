@@ -138,7 +138,7 @@ void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
 
     thumbnail.thumbnailImage.addResolution(
         {1280, 720},
-        assetCache.loadTexture(spriteDataModel.getWorkingResourcesDir()
+        assetCache.loadTexture(spriteDataModel.getWorkingTexturesDir()
                                + sheet.relPath));
     thumbnail.setText(sheet.relPath);
     thumbnail.setIsActivateable(false);

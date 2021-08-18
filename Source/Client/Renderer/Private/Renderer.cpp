@@ -100,7 +100,6 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
 
     // Draw depth-sorted tiles and sprites.
     // Note: These are already culled during the gather step.
-    LOG_INFO("Rendering %u sprites", sprites.size());
     for (SpriteRenderInfo& spriteInfo : sprites) {
         SDL_RenderCopy(sdlRenderer, spriteInfo.sprite->texture.get(),
                        &(spriteInfo.sprite->textureExtent),

@@ -18,7 +18,7 @@ namespace SpriteEditor
 SpriteDataModel::SpriteDataModel(SDL_Renderer* inSdlRenderer)
 : sdlRenderer{inSdlRenderer}
 , workingFilePath{""}
-, workingResourcesDir{""}
+, workingTexturesDir{""}
 {
 }
 
@@ -37,7 +37,7 @@ std::string SpriteDataModel::create(const std::string& fullPath)
     workingFile.close();
 
     // Set the working directory.
-    if (!setWorkingResourcesDir()) {
+    if (!setWorkingTexturesDir()) {
         return "Failed to create Resources directory.";
     }
 
@@ -55,7 +55,7 @@ std::string SpriteDataModel::load(const std::string& fullPath)
         workingFilePath = fullPath;
 
         // Set the working directory.
-        if (!setWorkingResourcesDir()) {
+        if (!setWorkingTexturesDir()) {
             return "Failed to create Resources directory.";
         }
     }
@@ -89,7 +89,7 @@ std::string SpriteDataModel::load(const std::string& fullPath)
 
             // For every sprite in the sheet.
             for (auto& spriteJson : sheetJson.value()["sprites"].items()) {
-                spriteSheet.sprites.push_back(Sprite{spriteSheet});
+                spriteSheet.sprites.push_back(Sprite{spriteSheet.relPath});
                 Sprite& sprite{spriteSheet.sprites.back()};
 
                 // If the display name isn't unique, fail.
@@ -233,7 +233,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
     }
 
     // Append the texture directory to the given relative path.
-    std::string fullPath{workingResourcesDir};
+    std::string fullPath{workingTexturesDir};
     fullPath += relPath;
 
     // Validate that the file at the given path is a valid texture.
@@ -243,7 +243,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
     if (sheetTexture == nullptr) {
         std::string errorString{
             "Error: File at given path is not a valid image. Path: "};
-        errorString += workingResourcesDir;
+        errorString += workingTexturesDir;
         errorString += relPath;
         return errorString;
     }
@@ -277,7 +277,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
     spriteSheets.emplace_back(relPath);
 
     // For each sprite in this texture.
-    SpriteSheet& spriteSheet{*(spriteSheets.end() - 1)};
+    SpriteSheet& spriteSheet{spriteSheets.back()};
     int spriteCount{0};
     for (int y = 0; y <= (sheetHeight - spriteHeightI); y += spriteHeightI) {
         for (int x = 0; x <= (sheetWidth - spriteWidthI); x += spriteWidthI) {
@@ -292,7 +292,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
             static BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
 
             // Add the sprite to the sheet.
-            spriteSheet.sprites.emplace_back(spriteSheet, displayName,
+            spriteSheet.sprites.emplace_back(spriteSheet.relPath, displayName,
                                              textureExtent, yOffsetI, true,
                                              defaultBox);
 
@@ -334,15 +334,15 @@ std::vector<SpriteSheet>& SpriteDataModel::getSpriteSheets()
     return spriteSheets;
 }
 
-const std::string& SpriteDataModel::getWorkingResourcesDir()
+const std::string& SpriteDataModel::getWorkingTexturesDir()
 {
-    return workingResourcesDir;
+    return workingTexturesDir;
 }
 
 std::string SpriteDataModel::validateRelPath(const std::string& relPath)
 {
     // Construct the file path.
-    std::filesystem::path filePath{workingResourcesDir};
+    std::filesystem::path filePath{workingTexturesDir};
     filePath /= relPath;
 
     // Check if the file exists.
@@ -357,26 +357,28 @@ std::string SpriteDataModel::validateRelPath(const std::string& relPath)
     }
 }
 
-bool SpriteDataModel::setWorkingResourcesDir()
+bool SpriteDataModel::setWorkingTexturesDir()
 {
-    // Construct the resources dir path.
-    std::filesystem::path resourcesDirPath{workingFilePath};
-    resourcesDirPath = resourcesDirPath.parent_path();
-    resourcesDirPath /= "Assets/Textures/";
+    // Construct the assets dir path.
+    std::filesystem::path texturesDirPath{workingFilePath};
+    texturesDirPath = texturesDirPath.parent_path();
+    texturesDirPath /= "Assets/Textures/";
 
-    // Check if the resources dir exists.
-    if (!std::filesystem::exists(resourcesDirPath)) {
+    // Check if the textures dir exists.
+    if (!std::filesystem::exists(texturesDirPath)) {
         // Resources dir doesn't exist, create it.
         std::error_code errorCode;
-        if (!std::filesystem::create_directory(resourcesDirPath, errorCode)) {
+        if (!std::filesystem::create_directories(texturesDirPath, errorCode)) {
             // Failed to create dir, return false.
+            LOG_INFO("Failed to create Textures dir. Path: %s, Error: %s"
+                , texturesDirPath.string().c_str(), errorCode.message().c_str());
             return false;
         }
     }
 
     // Convert the path to UTF_8 string and save it.
-    const char8_t* u8StringPtr{resourcesDirPath.u8string().c_str()};
-    workingResourcesDir
+    const char8_t* u8StringPtr{texturesDirPath.u8string().c_str()};
+    workingTexturesDir
         = std::string(reinterpret_cast<const char*>(u8StringPtr));
 
     return true;

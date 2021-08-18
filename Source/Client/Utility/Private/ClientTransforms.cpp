@@ -59,7 +59,7 @@ SDL_Rect ClientTransforms::tileToScreenExtent(const TileIndex& index,
 
     // An iso sprite may have extra vertical space to show depth, we subtract
     // that space to align it.
-    screenY -= sprite.yOffset;
+    screenY -= (sprite.yOffset - SharedConfig::TILE_SCREEN_EDGE_HEIGHT);
 
     // Apply the camera zoom to the position.
     screenX *= camera.zoomFactor;

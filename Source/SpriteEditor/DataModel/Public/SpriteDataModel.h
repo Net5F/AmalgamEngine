@@ -85,7 +85,7 @@ public:
     bool displayNameIsUnique(const std::string& displayName);
 
     std::vector<SpriteSheet>& getSpriteSheets();
-    const std::string& getWorkingResourcesDir();
+    const std::string& getWorkingTexturesDir();
 
 private:
     /**
@@ -98,9 +98,9 @@ private:
 
     /**
      * Sets currentWorkingDir to the parent directory of
-     * currentWorkingFilePath.
+     * currentWorkingFilePath + "/Assets/Textures".
      */
-    bool setWorkingResourcesDir();
+    bool setWorkingTexturesDir();
 
     /**
      * Derives a string ID from a display name by making it all lowercase and
@@ -118,8 +118,8 @@ private:
         on. */
     std::string workingFilePath;
 
-    /** The parent directory of currentWorkingFilePath. */
-    std::string workingResourcesDir;
+    /** The parent directory of currentWorkingFilePath + "/Assets/Textures". */
+    std::string workingTexturesDir;
 };
 
 } // namespace SpriteEditor

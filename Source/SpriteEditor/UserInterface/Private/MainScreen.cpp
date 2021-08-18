@@ -196,6 +196,7 @@ void MainScreen::loadActiveSprite(Sprite* inActiveSprite)
 
     // Load the sprite onto the stage.
     spriteEditStage.loadActiveSprite(inActiveSprite);
+    spriteEditStage.setIsVisible(true);
 
     // Save a reference to the active sprite.
     activeSprite = inActiveSprite;

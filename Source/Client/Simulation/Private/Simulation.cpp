@@ -123,7 +123,7 @@ void Simulation::fakeConnection()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    registry.emplace<Sprite>(newEntity, spriteData.get("test_31"));
+    registry.emplace<Sprite>(newEntity, spriteData.get("test_6"));
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
                              ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH,

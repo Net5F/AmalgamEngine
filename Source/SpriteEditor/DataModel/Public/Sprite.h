@@ -17,8 +17,8 @@ class SpriteSheet;
  */
 struct Sprite {
 public:
-    /** The sprite sheet that this sprite is from. */
-    SpriteSheet& parentSpriteSheet;
+    /** The unique relPath of the sprite sheet that this sprite is from. */
+    std::string parentSpriteSheetPath{""};
 
     /** Unique display name, shown in the UI.  */
     std::string displayName{""};

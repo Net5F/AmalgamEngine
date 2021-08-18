@@ -183,6 +183,7 @@ void AddSheetDialog::clear()
     pathInput.setText("");
     widthInput.setText("");
     heightInput.setText("");
+    offsetInput.setText("");
     nameInput.setText("");
     errorText.setText("");
 }

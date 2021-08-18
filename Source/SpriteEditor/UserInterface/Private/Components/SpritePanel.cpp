@@ -41,7 +41,7 @@ void SpritePanel::addSprite(const SpriteSheet& sheet, Sprite& sprite)
     thumbnail.setIsSelectable(false);
 
     // Load the sprite's image.
-    std::string imagePath{spriteDataModel.getWorkingResourcesDir()};
+    std::string imagePath{spriteDataModel.getWorkingTexturesDir()};
     imagePath += sheet.relPath;
     thumbnail.thumbnailImage.addResolution(
         {1280, 720}, assetCache.loadTexture(imagePath), sprite.textureExtent);
