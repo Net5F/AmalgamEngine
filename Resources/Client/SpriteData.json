@@ -110,7 +110,7 @@
                 },
                 {
                     "displayName": "test 5",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -131,7 +131,7 @@
                 },
                 {
                     "displayName": "test 6",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -152,7 +152,7 @@
                 },
                 {
                     "displayName": "test 7",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -173,7 +173,7 @@
                 },
                 {
                     "displayName": "test 8",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -194,7 +194,7 @@
                 },
                 {
                     "displayName": "test 9",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -215,7 +215,7 @@
                 },
                 {
                     "displayName": "test 10",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -236,7 +236,7 @@
                 },
                 {
                     "displayName": "test 11",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -257,7 +257,7 @@
                 },
                 {
                     "displayName": "test 12",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -278,7 +278,7 @@
                 },
                 {
                     "displayName": "test 13",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -299,7 +299,7 @@
                 },
                 {
                     "displayName": "test 14",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -320,7 +320,7 @@
                 },
                 {
                     "displayName": "test 15",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -341,7 +341,7 @@
                 },
                 {
                     "displayName": "test 16",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -383,7 +383,7 @@
                 },
                 {
                     "displayName": "test 18",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -404,7 +404,7 @@
                 },
                 {
                     "displayName": "test 19",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -425,7 +425,7 @@
                 },
                 {
                     "displayName": "test 20",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -488,7 +488,7 @@
                 },
                 {
                     "displayName": "test 23",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -509,7 +509,7 @@
                 },
                 {
                     "displayName": "test 24",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -530,7 +530,7 @@
                 },
                 {
                     "displayName": "test 25",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -572,7 +572,7 @@
                 },
                 {
                     "displayName": "test 27",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -677,7 +677,7 @@
                 },
                 {
                     "displayName": "test 32",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -698,7 +698,7 @@
                 },
                 {
                     "displayName": "test 33",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -719,7 +719,7 @@
                 },
                 {
                     "displayName": "test 34",
-                    "hasBoundingBox": false,
+                    "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 20.0,
                         "maxY": 20.0,
@@ -758,6 +758,58 @@
                         "y": 1536
                     },
                     "yOffset": 384
+                }
+            ]
+        },
+        {
+            "relPath": "Male_4_Idle0.png",
+            "sprites": [
+                {
+                    "displayName": "Char 0",
+                    "hasBoundingBox": true,
+                    "modelBounds": {
+                        "maxX": 8.0,
+                        "maxY": 6.0,
+                        "maxZ": 56.400001525878906,
+                        "minX": 0.0,
+                        "minY": 2.25,
+                        "minZ": 0.0
+                    },
+                    "numericId": 36,
+                    "stringId": "char_0",
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 0,
+                        "y": 0
+                    },
+                    "yOffset": 430
+                }
+            ]
+        },
+        {
+            "relPath": "stoneColumn_N.png",
+            "sprites": [
+                {
+                    "displayName": "col 0",
+                    "hasBoundingBox": true,
+                    "modelBounds": {
+                        "maxX": 7.5,
+                        "maxY": 7.5,
+                        "maxZ": 78.5999984741211,
+                        "minX": 0.0,
+                        "minY": 0.0,
+                        "minZ": 0.0
+                    },
+                    "numericId": 37,
+                    "stringId": "col_0",
+                    "textureExtent": {
+                        "h": 512,
+                        "w": 256,
+                        "x": 0,
+                        "y": 0
+                    },
+                    "yOffset": 432
                 }
             ]
         }
