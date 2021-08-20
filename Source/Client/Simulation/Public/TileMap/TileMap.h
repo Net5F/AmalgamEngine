@@ -9,6 +9,10 @@ namespace Client
 {
 class SpriteData;
 
+// TODO: The map format, as-is--will it work?
+//       What does parsing look like?
+//       What does incremental saving look like?
+
 /**
  * Represents the world map.
  * Loads World.map and owns its data.

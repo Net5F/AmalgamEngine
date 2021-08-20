@@ -1,10 +1,12 @@
 #include <SDL2/SDL.h>
 
 #include "MapGenerator.h"
+#include "Timer.h"
 #include "Ignore.h"
 
 #include <iostream>
 
+using namespace AM;
 using namespace AM::MG;
 
 void printUsage()
@@ -46,11 +48,20 @@ int main(int argc, char* argv[])
     // Parse fill sprite ID.
     std::string fillSpriteId{argv[3]};
 
+    // Prime a timer.
+    Timer timer;
+    timer.updateSavedTime();
+
     // Generate the map and save it.
+    double startTime{timer.getDeltaSeconds(true)};
     MapGenerator mapGenerator(static_cast<unsigned int>(mapXLength)
                               , static_cast<unsigned int>(mapYLength), fillSpriteId);
     mapGenerator.generate();
     mapGenerator.save("World.map");
+
+    double timeTaken = timer.getDeltaSeconds(false) - startTime;
+    std::printf("Map generated and saved in %.6fs", timeTaken);
+    std::fflush(stdout);
 
     return 0;
 }

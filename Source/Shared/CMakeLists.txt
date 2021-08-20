@@ -6,7 +6,7 @@ message(STATUS "Configuring Shared")
 add_library(Shared STATIC "")
 
 target_include_directories(Shared
-    PRIVATE
+    PUBLIC
         ${SDL2_INCLUDE_DIRS}
         ${SDL2PP_INCLUDE_DIRS}
 )
