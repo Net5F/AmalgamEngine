@@ -47,22 +47,22 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     // Copy any waiting messages into the buffer.
     unsigned int currentIndex = ServerHeaderIndex::MessageHeaderStart;
     for (unsigned int i = 0; i < messageCount; ++i) {
-        /* Copy the message and message header into the buffer. */
-        std::pair<BinaryBufferSharedPtr, Uint32> messagePair;
-        if (!sendQueue.try_dequeue(messagePair)) {
+        // Pop the message.
+        QueuedMessage queuedMessage;
+        if (!sendQueue.try_dequeue(queuedMessage)) {
             LOG_ERROR("Expected element but dequeue failed.");
         }
 
-        BinaryBufferSharedPtr& messageBuffer = messagePair.first;
-        std::copy(messageBuffer->begin(), messageBuffer->end(),
+        // Copy the message data into the batchBuffer.
+        std::copy(queuedMessage.message->begin(), queuedMessage.message->end(),
                   &(batchBuffer[currentIndex]));
 
-        currentIndex += messageBuffer->size();
+        // Increment the index.
+        currentIndex += queuedMessage.message->size();
 
         // Track the latest tick we've sent.
-        Uint32 messageTick = messagePair.second;
-        if (messageTick != 0) {
-            latestSentSimTick = messageTick;
+        if (queuedMessage.tick != 0) {
+            latestSentSimTick = queuedMessage.tick;
         }
     }
 

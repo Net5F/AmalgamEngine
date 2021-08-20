@@ -25,6 +25,7 @@ void MessageTools::fillMessageHeader(MessageType type, std::size_t messageSize,
         = static_cast<Uint8>(type);
 
     // Copy the messageSize into the buffer.
+    // TODO: Change this to ByteHelpers::write16() when we can test it.
     _SDLNet_Write16(messageSize, (messageBuffer->data() + startIndex
                                   + MessageHeaderIndex::Size));
 

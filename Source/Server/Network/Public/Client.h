@@ -104,9 +104,16 @@ private:
     /** Our connection and interface to the client. */
     std::unique_ptr<Peer> peer;
 
+    /** Convenience struct for passing data through the sendQueue. */
+    struct QueuedMessage {
+        /** The message to send. */
+        BinaryBufferSharedPtr message;
+
+        /** The tick that the message corresponds to. */
+        Uint32 tick;
+    };
     /** Holds messages to be sent with the next call to sendWaitingMessages. */
-    moodycamel::ReaderWriterQueue<std::pair<BinaryBufferSharedPtr, Uint32>>
-        sendQueue;
+    moodycamel::ReaderWriterQueue<QueuedMessage> sendQueue;
 
     /** Holds data while we're putting it together to be sent as a batch. */
     std::array<Uint8, Peer::MAX_MESSAGE_SIZE> batchBuffer;

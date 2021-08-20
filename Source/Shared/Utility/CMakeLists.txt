@@ -1,19 +1,21 @@
 target_sources(Shared
     PRIVATE
+        Private/AssetCache.cpp
+        Private/ByteTools.cpp
         Private/Log.cpp
         Private/Paths.cpp
         Private/PeriodicCaller.cpp
-	    Private/AssetCache.cpp
         Private/Timer.cpp
         Private/Transforms.cpp
     PUBLIC
+        Public/AssetCache.h
+        Public/ByteTools.h
         Public/EventHandler.h
         Public/Ignore.h
         Public/Log.h
         Public/Paths.h
         Public/PeriodicCaller.h
         Public/Profiler.h
-        Public/AssetCache.h
         Public/Timer.h
         Public/Transforms.h
 )

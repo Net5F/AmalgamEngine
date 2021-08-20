@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.16)
 message(STATUS "Configuring MapGenerator")
 
 add_executable(MapGenerator
+    Private/MapGenerator.cpp
+    Private/MapGenerator.h
     Private/MapGeneratorMain.cpp
 )
 

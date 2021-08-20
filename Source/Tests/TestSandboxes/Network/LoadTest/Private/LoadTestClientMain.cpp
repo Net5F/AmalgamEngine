@@ -1,4 +1,4 @@
-#include "SDL.h"
+#include <SDL2/SDL.h>
 #include "SDL2pp/SDL.hh"
 #include "SDL2pp/Window.hh"
 #include "SDL2pp/Renderer.hh"
@@ -22,11 +22,10 @@ using namespace AM::LTC;
 /** Default number of simulated clients if no argument is given. */
 static constexpr unsigned int DEFAULT_NUM_CLIENTS = 10;
 
-void logInvalidInput()
+void printUsage()
 {
-    LOG_ERROR("Invalid input.\n"
-              "Usage: LoadTestClientMain.exe <number of clients>\n"
-              "If no number of clients is given, will default to 10.");
+    std::printf("Usage: LoadTestClientMain.exe <number of clients>\n"
+             "If no number of clients is given, will default to 10.");
 }
 
 void connectClients(unsigned int numClients,
@@ -45,7 +44,9 @@ void connectClients(unsigned int numClients,
 int main(int argc, char** argv)
 try {
     if (argc > 2) {
-        logInvalidInput();
+        std::printf("Too many arguments.\n");
+        printUsage();
+        return 1;
     }
 
     // Set up the SDL constructs.
@@ -63,7 +64,9 @@ try {
         int input = std::strtol(argv[1], &end, 10);
         if ((*end != '\0') || (input < 1)) {
             // Input didn't parse into an integer, or integer was 0 or negative.
-            logInvalidInput();
+            std::printf("Invalid input: %s\n", argv[1]);
+            printUsage();
+            return 1;
         }
         else {
             numClients = static_cast<unsigned int>(input);
