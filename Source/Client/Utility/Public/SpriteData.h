@@ -15,6 +15,9 @@ namespace Client
  * Loads the sprite data from SpriteData.json into memory and provides an
  * interface for accessing it.
  *
+ * Note: This class expects a SpriteData.json file to be present in the same
+ *       directory as the application executable.
+ *
  * The data in this class is immutable. To modify it, edit SpriteData.json in
  * the SpriteEditor.
  */

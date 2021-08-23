@@ -11,10 +11,15 @@ namespace Server
 World::World()
 : device()
 , generator(device())
+// TODO: When TileMap goes in here, replace this hardcoding with getters.
+//, xDistribution(
+//      0, ((SharedConfig::WORLD_WIDTH - 1) * SharedConfig::TILE_WORLD_WIDTH))
+//, yDistribution(
+//      0, ((SharedConfig::WORLD_HEIGHT - 1) * SharedConfig::TILE_WORLD_HEIGHT))
 , xDistribution(
-      0, ((SharedConfig::WORLD_WIDTH - 1) * SharedConfig::TILE_WORLD_WIDTH))
+      0, ((16 - 1) * SharedConfig::TILE_WORLD_WIDTH))
 , yDistribution(
-      0, ((SharedConfig::WORLD_HEIGHT - 1) * SharedConfig::TILE_WORLD_HEIGHT))
+      0, ((16 - 1) * SharedConfig::TILE_WORLD_HEIGHT))
 , baseX{0}
 , baseY{0}
 , groupOffsetsX{32, 64, 96, 128, 160, 32, 64, 96, 128, 160}

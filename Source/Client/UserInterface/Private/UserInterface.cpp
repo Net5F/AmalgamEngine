@@ -54,8 +54,8 @@ void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
 
     // If the index is outside of the world bounds, ignore this event.
     if ((tileIndex.x < 0) || (tileIndex.y < 0)
-        || (tileIndex.x >= static_cast<int>(SharedConfig::WORLD_WIDTH))
-        || (tileIndex.y >= static_cast<int>(SharedConfig::WORLD_HEIGHT))) {
+        || (tileIndex.x >= static_cast<int>(world.tileMap.xLengthTiles()))
+        || (tileIndex.y >= static_cast<int>(world.tileMap.yLengthTiles()))) {
         return;
     }
 
@@ -82,8 +82,8 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
 
     // If the index is outside of the world bounds, ignore this event.
     if ((tileIndex.x < 0) || (tileIndex.y < 0)
-        || (tileIndex.x >= static_cast<int>(SharedConfig::WORLD_WIDTH))
-        || (tileIndex.y >= static_cast<int>(SharedConfig::WORLD_HEIGHT))) {
+        || (tileIndex.x >= static_cast<int>(world.tileMap.xLengthTiles()))
+        || (tileIndex.y >= static_cast<int>(world.tileMap.yLengthTiles()))) {
         return;
     }
 

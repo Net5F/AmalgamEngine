@@ -30,10 +30,11 @@ public:
     /** The height of the world tiles in world coordinates. */
     static constexpr unsigned int TILE_WORLD_HEIGHT = 32;
 
-    /** The width of the world's terrain map in tiles. */
-    static constexpr unsigned int WORLD_WIDTH = 10;
-    /** The height of the world's terrain map in tiles. */
-    static constexpr unsigned int WORLD_HEIGHT = 10;
+    /** The width of our 16x16 chunks. */
+    static constexpr unsigned int CHUNK_WIDTH = 16;
+
+    /** The number of tiles in a chunk. */
+    static constexpr unsigned int CHUNK_TILE_COUNT = CHUNK_WIDTH * CHUNK_WIDTH;
 
     /** The maximum number of sprite layers a tile can have. */
     static constexpr unsigned int MAX_TILE_LAYERS = 8;

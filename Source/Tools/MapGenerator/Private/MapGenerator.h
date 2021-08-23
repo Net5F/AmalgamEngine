@@ -15,7 +15,7 @@ namespace MG
 class MapGenerator
 {
 public:
-    MapGenerator(unsigned int inMapXLength, unsigned int inMapYLength, const std::string& inFillSpriteId);
+    MapGenerator(unsigned int inMapLengthX, unsigned int inMapLengthY, const std::string& inFillSpriteId);
 
     /**
      * Generates the map, kept in memory as a string.
@@ -33,16 +33,10 @@ private:
         can see later if we care to make it more complicated. */
     static constexpr uint16_t MAP_FORMAT_VERSION = 0;
 
-    /** The width of our 16x16 chunks. */
-    static constexpr int CHUNK_WIDTH = 16;
-
-    /** The number of tiles in a chunk. */
-    static constexpr int CHUNK_TILE_COUNT = CHUNK_WIDTH * CHUNK_WIDTH;
-
-    /** The x-axis length of the map in tiles. Must be a multiple of 16. */
+    /** The length, in chunks, of the map's X axis. */
     unsigned int mapXLength;
 
-    /** The y-axis length of the map in tiles. Must be a multiple of 16. */
+    /** The length, in chunks, of the map's Y axis. */
     unsigned int mapYLength;
 
     /** The ID of the sprite to fill the map with. */
