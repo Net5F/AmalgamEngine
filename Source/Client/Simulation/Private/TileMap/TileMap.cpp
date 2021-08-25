@@ -224,5 +224,28 @@ void TileMap::parseChunk(const std::vector<Uint8>& mapData, unsigned long& buffe
     }
 }
 
+void TileMap::save(const std::string& fileName)
+{
+    std::vector<Uint8> mapData;
+    unsigned long bufferIndex{0};
+
+    // Add the version number.
+    ByteTools::write16(MAP_FORMAT_VERSION, &mapData[bufferIndex]);
+    bufferIndex += 2;
+
+    // Add the lengths.
+    ByteTools::write32(mapXLengthChunks, &mapData[bufferIndex]);
+    bufferIndex += 4;
+    ByteTools::write32(mapYLengthChunks, &mapData[bufferIndex]);
+    bufferIndex += 4;
+
+
+    // Open or create the file.
+    std::ofstream workingFile((Paths::BASE_PATH + fileName), std::ios::binary);
+
+    // Write our buffer contents to the file.
+//    workingFile.write(reinterpret_cast<char*>(mapData.data()), bufferIndex);
+}
+
 } // End namespace Client
 } // End namespace AM

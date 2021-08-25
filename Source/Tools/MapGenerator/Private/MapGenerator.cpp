@@ -57,7 +57,7 @@ void MapGenerator::generate()
     ByteTools::write32(mapYLength, &mapData[bufferIndex]);
     bufferIndex += 4;
 
-    /* Add the chunks. */
+    /* Add the tiles. */
     // For each row of chunks.
     for (unsigned int y = 0; y < mapYLength; ++y) {
         // For each chunk in this row.

@@ -77,7 +77,17 @@ public:
      */
     unsigned long int getTileCount() const;
 
+    /**
+     * Saves the map to a file with the given name, placed in the same
+     * directory as the program binary.
+     */
+    void save(const std::string& fileName);
+
 private:
+    /** The version of the map format. Kept as just a 16-bit int for now, we
+        can see later if we care to make it more complicated. */
+    static constexpr uint16_t MAP_FORMAT_VERSION = 0;
+
     /**
      * Parses the given data from a World.map file.
      *

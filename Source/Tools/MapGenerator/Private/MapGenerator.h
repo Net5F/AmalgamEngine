@@ -46,7 +46,7 @@ private:
     std::vector<uint8_t> mapData;
 
     /** The first empty element index in our mapData buffer. */
-    std::size_t bufferIndex;
+    unsigned long bufferIndex;
 };
 
 } // End namespace MG
