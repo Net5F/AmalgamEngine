@@ -19,7 +19,7 @@ find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_gfx REQUIRED)
 include("${PROJECT_SOURCE_DIR}/../CMake/SDL2_net.cmake")
 
-# Build static library SDL2pp.
+# Configure static library SDL2pp.
 set(SDL2PP_WITH_IMAGE ON)
 set(SDL2PP_WITH_MIXER ON)
 set(SDL2PP_WITH_TTF ON)
@@ -27,21 +27,21 @@ set(SDL2PP_WITH_NET ON)
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/libSDL2pp/"
                  "${PROJECT_BINARY_DIR}/Libraries/libSDL2pp/")
 
-# Build bitsery.
+# Configure bitsery.
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/bitsery/"
                  "${PROJECT_BINARY_DIR}/Libraries/bitsery/")
 
-# Build Remotery.
+# Configure Remotery.
 set(ENABLE_PROFILING OFF CACHE BOOL "Enable Remotery profiling." FORCE)
 include("${PROJECT_SOURCE_DIR}/../CMake/Remotery.cmake")
 
-# Build nlohmann json.
-set(JSON_BuildTests OFF CACHE INTERNAL "")
+# Configure nlohmann json.
+set(JSON_ConfigureTests OFF CACHE INTERNAL "")
 set(JSON_MultipleHeaders ON CACHE INTERNAL "Enable forward declaration.")
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/json/"
                  "${PROJECT_BINARY_DIR}/Libraries/json/")
                  
-# Build nativefiledialog-extended.
+# Configure nativefiledialog-extended.
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/nativefiledialog-extended/"
                  "${PROJECT_BINARY_DIR}/Libraries/nativefiledialog-extended/")
 
@@ -56,28 +56,28 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/CircularBuffer/"
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/entt/"
                  "${PROJECT_BINARY_DIR}/Libraries/entt/")
 
-# Build AmalgamUI.
+# Configure AmalgamUI.
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/AmalgamUI/"
                  "${PROJECT_BINARY_DIR}/Libraries/AmalgamUI/")
 
 ###############################################################################
 # Modules
 ###############################################################################
-# Build shared library
+# Configure shared library
 add_subdirectory(Shared)
 
-# Build client
+# Configure client
 add_subdirectory(Client)
 
-# Build server
+# Configure server
 add_subdirectory(Server)
 
-# Build sprite editor
+# Configure sprite editor
 add_subdirectory(SpriteEditor)
 
-# Build tests.
+# Configure tests.
 # (No fancy flags since we aren't yet a lib, just uncomment when you want to build tests.)
 # add_subdirectory(Tests)
 
-# Build tools.
+# Configure tools.
 add_subdirectory(Tools)

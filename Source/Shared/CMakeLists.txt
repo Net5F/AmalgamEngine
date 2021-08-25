@@ -23,7 +23,7 @@ target_link_libraries(Shared
         nlohmann_json::nlohmann_json
 )
 
-# Compile with C++17
+# Compile with C++20
 target_compile_features(Shared PRIVATE cxx_std_20)
 set_target_properties(Shared PROPERTIES CXX_EXTENSIONS OFF)
 
