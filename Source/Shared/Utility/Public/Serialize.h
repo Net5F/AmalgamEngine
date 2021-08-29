@@ -4,7 +4,7 @@
 #include "Log.h"
 #include "bitsery/bitsery.h"
 #include "bitsery/adapter/buffer.h"
-#include <bitsery/adapter/stream.h>
+#include "bitsery/adapter/stream.h"
 #include "bitsery/adapter/measure_size.h"
 #include "bitsery/traits/vector.h"
 #include "bitsery/traits/array.h"
@@ -20,9 +20,11 @@ public:
     using OutputAdapter = bitsery::OutputBufferAdapter<BinaryBuffer>;
 
     /**
-     * Serializes the given object, leaving the results in the given
-     * outputBuffer. Relies on the serialization implementation to complain if
-     * an invalid type is passed in.
+     * Serializes the given object, writing the serialized bytes into the given
+     * outputBuffer.
+     *
+     * Relies on the serialization implementation to complain if an invalid
+     * type is passed in.
      *
      * @param outputBuffer  The buffer to store the serialized object data in.
      * @param objectToSerialize  The object to serialize. Must be serializable.
@@ -39,12 +41,23 @@ public:
         OutputAdapter adapter{outputBuffer};
         adapter.currentWritePos(startIndex);
 
-        // Return value will include the offset, so subtract it back out.
+        // Serialize and return.
+        // Note: The return value will include the offset, so subtract it back
+        //       out.
         return (bitsery::quickSerialization<OutputAdapter>(std::move(adapter),
                                                            objectToSerialize)
                 - startIndex);
     }
 
+    /**
+     * Serializes the given object, writing the serialized bytes into the
+     * given file.
+     *
+     * Errors if the file cannot be opened.
+     *
+     * @param filePath  The file to write to.
+     * @param objectToSerialize  The object to serialize. Must be serializable.
+     */
     template<typename T>
     static void toFile(const std::string& filePath, T& objectToSerialize)
     {

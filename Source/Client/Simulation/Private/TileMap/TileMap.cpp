@@ -45,38 +45,14 @@ TileMap::TileMap(SpriteData& inSpriteData)
 //
 //    const Sprite& wall2{spriteData.get("test_26")};
 //    addSpriteLayer(0, 2, wall2);
+
     // Prime a timer.
     Timer timer;
     timer.updateSavedTime();
 
-    // Open the map file.
-    std::string fullPath{Paths::BASE_PATH};
-    fullPath += "TileMap.bin";
-    std::ifstream mapFile(fullPath, std::ios::binary);
-
-    // Load the map data into memory.
-    BinaryBuffer mapData;
-    if (mapFile.is_open()) {
-        // Determine the size of the file.
-        mapFile.seekg(0, std::ios::end);
-        unsigned int fileSize{static_cast<unsigned int>(mapFile.tellg())};
-        mapData.resize(fileSize);
-        LOG_INFO("Allocated memory for map: %u bytes.", fileSize);
-
-        // Load the file's data into the buffer.
-        mapFile.seekg(0, std::ios::beg);
-        mapFile.read(reinterpret_cast<char*>(&mapData[0]), fileSize);
-
-        // Close the file.
-        mapFile.close();
-    }
-    else {
-        LOG_ERROR("TileMap.bin failed to open.");
-    }
-
-    // Deserialize the data into a snapshot.
+    // Deserialize the file into a snapshot.
     TileMapSnapshot mapSnapshot;
-    Deserialize::fromBuffer(mapData, mapData.size(), mapSnapshot);
+    Deserialize::fromFile((Paths::BASE_PATH + "TileMap.bin"), mapSnapshot);
 
     // Load the map snapshot.
     loadMap(mapSnapshot);
