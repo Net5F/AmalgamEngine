@@ -9,13 +9,16 @@ target_sources(Shared
         Private/Transforms.cpp
     PUBLIC
         Public/AssetCache.h
+        Public/BinaryBuffer.h
         Public/ByteTools.h
+        Public/Deserialize.h
         Public/EventHandler.h
         Public/Ignore.h
         Public/Log.h
         Public/Paths.h
         Public/PeriodicCaller.h
         Public/Profiler.h
+        Public/Serialize.h
         Public/Timer.h
         Public/Transforms.h
 )

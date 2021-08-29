@@ -1,6 +1,7 @@
 #include "Network.h"
 #include "Peer.h"
 #include "MessageTools.h"
+#include "Serialize.h"
 #include "EntityUpdate.h"
 #include "ConnectionResponse.h"
 #include "Heartbeat.h"
@@ -229,7 +230,7 @@ void Network::sendHeartbeatIfNecessary()
             = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
         unsigned int startIndex = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
         std::size_t messageSize
-            = MessageTools::serialize(*messageBuffer, heartbeat, startIndex);
+            = Serialize::toBuffer(*messageBuffer, heartbeat, startIndex);
 
         // Fill the buffer with the appropriate message header.
         MessageTools::fillMessageHeader(MessageType::Heartbeat, messageSize,

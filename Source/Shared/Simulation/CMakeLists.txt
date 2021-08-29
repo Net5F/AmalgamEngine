@@ -13,6 +13,9 @@ target_sources(Shared
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
+        Public/TileMap/ChunkSnapshot.h
+        Public/TileMap/TileMapSnapshot.h
+        Public/TileMap/TileSnapshot.h
 )
 
 target_include_directories(Shared
@@ -21,4 +24,5 @@ target_include_directories(Shared
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+		${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
 )

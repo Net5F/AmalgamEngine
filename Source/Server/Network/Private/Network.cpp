@@ -1,7 +1,7 @@
 #include "Network.h"
 #include "Acceptor.h"
 #include "Peer.h"
-#include "MessageTools.h"
+#include "Deserialize.h"
 #include "Heartbeat.h"
 #include "Log.h"
 #include "NetworkStats.h"
@@ -176,7 +176,7 @@ Sint64 Network::handleClientInputs(ClientMessage& clientMessage,
 {
     // Deserialize the message.
     std::unique_ptr<ClientInput> clientInput = std::make_unique<ClientInput>();
-    MessageTools::deserialize(*messageBuffer, messageBuffer->size(),
+    Deserialize::fromBuffer(*messageBuffer, messageBuffer->size(),
                               *clientInput);
 
     // Fill in the network ID that we assigned to this client.
@@ -209,7 +209,7 @@ Sint64 Network::handleHeartbeat(BinaryBufferPtr& messageBuffer)
 {
     // Deserialize the message.
     Heartbeat heartbeat{};
-    MessageTools::deserialize(*messageBuffer, messageBuffer->size(), heartbeat);
+    Deserialize::fromBuffer(*messageBuffer, messageBuffer->size(), heartbeat);
 
     // Calc the diff. Using the game's currentTick should be
     // accurate since we didn't have to lock anything.

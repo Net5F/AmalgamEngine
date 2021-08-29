@@ -17,6 +17,7 @@ target_link_libraries(MapGenerator
     PRIVATE
         -static-libgcc
         -static-libstdc++
+        Bitsery::bitsery
         Shared
 )
 

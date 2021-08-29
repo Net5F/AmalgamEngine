@@ -1,6 +1,6 @@
 #include "MessageHandler.h"
 #include "Network.h"
-#include "MessageTools.h"
+#include "Deserialize.h"
 #include "ConnectionResponse.h"
 #include "EntityUpdate.h"
 #include "EntityState.h"
@@ -21,7 +21,7 @@ void MessageHandler::handleConnectionResponse(BinaryBuffer& messageRecBuffer,
     // Deserialize the message.
     std::unique_ptr<ConnectionResponse> connectionResponse
         = std::make_unique<ConnectionResponse>();
-    MessageTools::deserialize(messageRecBuffer, messageSize,
+    Deserialize::fromBuffer(messageRecBuffer, messageSize,
                               *connectionResponse);
 
     // Save our player entity so we can determine which update messages are for
@@ -40,7 +40,7 @@ void MessageHandler::handleEntityUpdate(BinaryBuffer& messageRecBuffer,
     // Deserialize the message.
     std::shared_ptr<EntityUpdate> entityUpdate
         = std::make_shared<EntityUpdate>();
-    MessageTools::deserialize(messageRecBuffer, messageSize, *entityUpdate);
+    Deserialize::fromBuffer(messageRecBuffer, messageSize, *entityUpdate);
 
     // Pull out the vector of entities.
     const std::vector<EntityState>& entities = entityUpdate->entityStates;

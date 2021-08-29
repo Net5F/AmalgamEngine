@@ -2,6 +2,7 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
+#include "Serialize.h"
 #include "MessageTools.h"
 #include "ClientInput.h"
 #include "Input.h"
@@ -46,7 +47,7 @@ void NetworkUpdateSystem::sendInputState()
             = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
         unsigned int startIndex = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
         std::size_t messageSize
-            = MessageTools::serialize(*messageBuffer, clientInput, startIndex);
+            = Serialize::toBuffer(*messageBuffer, clientInput, startIndex);
 
         // Fill the buffer with the appropriate message header.
         MessageTools::fillMessageHeader(MessageType::ClientInputs, messageSize,

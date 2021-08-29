@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BinaryBuffer.h"
 #include <SDL2/SDL_stdinc.h>
 #include <memory>
 #include <vector>
@@ -16,11 +17,6 @@ namespace AM
 /** Represents a single network client. Will be reused if the client
     disconnects. */
 typedef Uint32 NetworkID;
-
-/** Dynamically allocated, portable buffers for messages. */
-typedef std::vector<Uint8> BinaryBuffer;
-typedef std::unique_ptr<BinaryBuffer> BinaryBufferPtr;
-typedef std::shared_ptr<BinaryBuffer> BinaryBufferSharedPtr;
 
 //--------------------------------------------------------------------------
 // Headers

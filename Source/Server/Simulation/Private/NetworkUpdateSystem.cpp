@@ -2,6 +2,7 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
+#include "Serialize.h"
 #include "MessageTools.h"
 #include "EntityUpdate.h"
 #include "Input.h"
@@ -104,7 +105,7 @@ void NetworkUpdateSystem::sendUpdate(ClientSimData& client,
         // Serialize the EntityUpdate.
         BinaryBufferSharedPtr messageBuffer
             = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
-        std::size_t messageSize = MessageTools::serialize(
+        std::size_t messageSize = Serialize::toBuffer(
             *messageBuffer, entityUpdate, MESSAGE_HEADER_SIZE);
 
         // Fill the buffer with the appropriate message header.

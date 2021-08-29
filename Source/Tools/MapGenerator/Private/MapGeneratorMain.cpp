@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
     MapGenerator mapGenerator(static_cast<unsigned int>(mapLengthX)
                               , static_cast<unsigned int>(mapLengthY), fillSpriteId);
     mapGenerator.generate();
-    mapGenerator.save("World.map");
+    mapGenerator.save("TileMap.bin");
 
     double timeTaken = timer.getDeltaSeconds(false) - startTime;
     std::printf("Map generated and saved in %.6fs", timeTaken);

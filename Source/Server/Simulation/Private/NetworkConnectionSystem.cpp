@@ -3,6 +3,7 @@
 #include "World.h"
 #include "Network.h"
 #include "SharedConfig.h"
+#include "Serialize.h"
 #include "MessageTools.h"
 #include "ConnectionResponse.h"
 #include "Input.h"
@@ -118,7 +119,7 @@ void NetworkConnectionSystem::sendConnectionResponse(NetworkID networkID,
     // Serialize the connection response message.
     BinaryBufferSharedPtr messageBuffer
         = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
-    std::size_t messageSize = MessageTools::serialize(
+    std::size_t messageSize = Serialize::toBuffer(
         *messageBuffer, connectionResponse, MESSAGE_HEADER_SIZE);
 
     // Fill the buffer with the appropriate message header.

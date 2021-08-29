@@ -1,31 +1,33 @@
 #pragma once
 
 #include "Tile.h"
+#include "BinaryBuffer.h"
 #include <array>
 #include <fstream>
 
 namespace AM
 {
+class TileMapSnapshot;
 namespace Client
 {
 class SpriteData;
 
 /**
- * Represents the world map.
- * Loads World.map and owns its data.
+ * Represents a tile map.
+ * Loads TileMap.bin and owns its data.
  *
- * Note: This class expects a World.map file to be present in the same
+ * Note: This class expects a TileMap.bin file to be present in the same
  *       directory as the application executable.
  *
- * The world map is composed of tiles, organized into 16x16 chunks.
+ * The map is composed of tiles, organized into 16x16 chunks.
  */
 class TileMap
 {
 public:
     /**
-     * Attempts to parse World.map and construct the tile map.
+     * Attempts to parse TileMap.bin and construct the tile map.
      *
-     * Errors if World.map doesn't exist or it fails to parse.
+     * Errors if TileMap.bin doesn't exist or it fails to parse.
      */
     TileMap(SpriteData& inSpriteData);
 
@@ -75,7 +77,7 @@ public:
     /**
      * Returns the total number of tiles in the map.
      */
-    unsigned long int getTileCount() const;
+    unsigned int getTileCount() const;
 
     /**
      * Saves the map to a file with the given name, placed in the same
@@ -89,23 +91,9 @@ private:
     static constexpr uint16_t MAP_FORMAT_VERSION = 0;
 
     /**
-     * Parses the given data from a World.map file.
-     *
-     * Note: This will error if the data is invalid.
+     * Loads the given snapshot's data into this map.
      */
-    void parseMap(const std::vector<Uint8>& mapData);
-
-    /**
-     * Parses a single chunk, pushing its data into the tiles vector.
-     *
-     * @param mapData  The data from a loaded World.map file.
-     * @param bufferIndex  An index into mapData, pointing at the start of the
-     *                     desired chunk's data.
-     * @param chunkX  The X index of this chunk.
-     * @param chunkY  The Y index of this chunk.
-     */
-    void parseChunk(const std::vector<Uint8>& mapData, unsigned long& bufferIndex
-                    , unsigned int chunkX, unsigned int chunkY);
+    void loadMap(TileMapSnapshot& mapSnapshot);
 
     /** The length, in chunks, of the map's X axis. */
     unsigned int mapXLengthChunks;
@@ -120,7 +108,7 @@ private:
     unsigned int mapYLengthTiles;
 
     /** The total number of tiles that are in this map. */
-    unsigned long int tileCount;
+    unsigned int tileCount;
 
     /** The tiles that make up this map. */
     std::vector<Tile> tiles;

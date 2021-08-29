@@ -1,5 +1,6 @@
 #pragma once
 
+#include "NetworkDefs.h"
 #include <string>
 #include <cstdint>
 #include <vector>
@@ -43,10 +44,11 @@ private:
     std::string fillSpriteId;
 
     /** The string that we store the generated map data in. */
-    std::vector<uint8_t> mapData;
+    BinaryBuffer mapData;
 
-    /** The first empty element index in our mapData buffer. */
-    unsigned long bufferIndex;
+    /** Used to store the size of the serialized data, once mapData is
+        filled. */
+    unsigned long int dataSize;
 };
 
 } // End namespace MG

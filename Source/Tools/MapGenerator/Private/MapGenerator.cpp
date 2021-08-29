@@ -2,6 +2,8 @@
 #include "ByteTools.h"
 #include "Paths.h"
 #include "SharedConfig.h"
+#include "TileMapSnapshot.h"
+#include "Serialize.h"
 #include <iostream>
 #include <cstring>
 #include <fstream>
@@ -16,73 +18,41 @@ MapGenerator::MapGenerator(unsigned int inMapLengthX
 : mapXLength{inMapLengthX}
 , mapYLength{inMapLengthY}
 , fillSpriteId{inFillSpriteId}
-, bufferIndex{0}
+, dataSize{0}
 {
-    /* Allocate the map data buffer's required size. */
-    // Version + xlen + ylen.
-    unsigned int headerSize{2 + 4 + 4};
-
-    // Length of X * length of Y.
-    unsigned int palletCount{mapXLength * mapYLength};
-    // ID chars + '\0', + another '\0' to mark the end.
-    unsigned int palletSize{static_cast<unsigned int>(fillSpriteId.length()) + 1 + 1};
-
-    // Length of X * length of Y * tiles per chunk.
-    unsigned int tileCount{mapXLength * mapYLength * SharedConfig::CHUNK_TILE_COUNT};
-    // 1B number of sprites + 1B palette index.
-    unsigned int tileSize{1 + 1};
-
-    // Allocate the map data buffer.
-    unsigned int requiredSize = headerSize + (palletCount * palletSize)
-      + (tileCount * tileSize);
-    mapData.resize(requiredSize);
-
-    std::printf("Allocated memory for map: %u bytes\n", requiredSize);
-    std::fflush(stdout);
 }
 
 void MapGenerator::generate()
 {
     // Clear the map before starting.
     mapData.clear();
-    bufferIndex = 0;
 
-    // Add the version number.
-    ByteTools::write16(MAP_FORMAT_VERSION, &mapData[bufferIndex]);
-    bufferIndex += 2;
+    // Fill the map's version and size.
+    TileMapSnapshot tileMap;
+    tileMap.version = MAP_FORMAT_VERSION;
+    tileMap.xLengthChunks = mapXLength;
+    tileMap.yLengthChunks = mapYLength;
 
-    // Add the lengths.
-    ByteTools::write32(mapXLength, &mapData[bufferIndex]);
-    bufferIndex += 4;
-    ByteTools::write32(mapYLength, &mapData[bufferIndex]);
-    bufferIndex += 4;
+    // Fill the chunks.
+    tileMap.chunks.resize(mapXLength * mapYLength);
+    for (ChunkSnapshot& chunk : tileMap.chunks) {
+        // Push the sprite ID that we're filling the map with into the palette.
+        chunk.palette.push_back(fillSpriteId);
 
-    /* Add the tiles. */
-    // For each row of chunks.
-    for (unsigned int y = 0; y < mapYLength; ++y) {
-        // For each chunk in this row.
-        for (unsigned int x = 0; x < mapXLength; ++x) {
-            // Add the fill sprite to the palette.
-            std::memcpy(&mapData[bufferIndex], fillSpriteId.c_str()
-                        , (fillSpriteId.length() + 1));
-            bufferIndex += (fillSpriteId.length() + 1);
-
-            // End the palette with '\0'.
-            mapData[bufferIndex] = '\0';
-            bufferIndex++;
-
-            // Add the tiles.
-            for (unsigned int i = 0; i < SharedConfig::CHUNK_TILE_COUNT; ++i) {
-                // Add the number of layers in this tile.
-                mapData[bufferIndex] = 1;
-                bufferIndex++;
-
-                // Add the palette index of the sprite in layer 0.
-                mapData[bufferIndex] = 0;
-                bufferIndex++;
-            }
+        // Push the palette index of the sprite into each tile.
+        for (unsigned int i = 0; i < 256; ++i) {
+            chunk.tiles[i].spriteLayers.push_back(0);
         }
     }
+
+    // Allocate a buffer for the data.
+    std::size_t requiredSize{Serialize::measureSize(tileMap)};
+    mapData.resize(requiredSize);
+    std::printf("Allocated memory for map: %llu bytes.\n", requiredSize);
+    std::fflush(stdout);
+
+    // Serialize the data into the mapData buffer.
+    dataSize = Serialize::toBuffer(mapData, tileMap);
 }
 
 void MapGenerator::save(const std::string& fileName)
@@ -91,7 +61,7 @@ void MapGenerator::save(const std::string& fileName)
     std::ofstream workingFile((Paths::BASE_PATH + fileName), std::ios::binary);
 
     // Write our buffer contents to the file.
-    workingFile.write(reinterpret_cast<char*>(mapData.data()), bufferIndex);
+    workingFile.write(reinterpret_cast<char*>(mapData.data()), dataSize);
 }
 
 } // End namespace MG

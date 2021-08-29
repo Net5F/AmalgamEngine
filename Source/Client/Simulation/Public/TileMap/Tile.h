@@ -10,7 +10,7 @@ namespace AM
 namespace Client
 {
 /**
- * Represents a 32x32-unit tile in the world.
+ * Represents a 32x32-unit tile in the tile map.
  *
  * A tile consists of layers of sprites, which can be floors, grass, walls,
  * etc.
