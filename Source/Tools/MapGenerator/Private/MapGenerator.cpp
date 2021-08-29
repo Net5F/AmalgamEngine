@@ -22,7 +22,7 @@ MapGenerator::MapGenerator(unsigned int inMapLengthX
 {
 }
 
-void MapGenerator::generate()
+void MapGenerator::generateAndSave(const std::string& fileName)
 {
     // Clear the map before starting.
     mapData.clear();
@@ -45,23 +45,8 @@ void MapGenerator::generate()
         }
     }
 
-    // Allocate a buffer for the data.
-    std::size_t requiredSize{Serialize::measureSize(tileMap)};
-    mapData.resize(requiredSize);
-    std::printf("Allocated memory for map: %llu bytes.\n", requiredSize);
-    std::fflush(stdout);
-
-    // Serialize the data into the mapData buffer.
-    dataSize = Serialize::toBuffer(mapData, tileMap);
-}
-
-void MapGenerator::save(const std::string& fileName)
-{
-    // Create the file.
-    std::ofstream workingFile((Paths::BASE_PATH + fileName), std::ios::binary);
-
-    // Write our buffer contents to the file.
-    workingFile.write(reinterpret_cast<char*>(mapData.data()), dataSize);
+    // Serialize the map snapshot and write it to the file.
+    Serialize::toFile((Paths::BASE_PATH + fileName), tileMap);
 }
 
 } // End namespace MG

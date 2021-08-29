@@ -1,13 +1,15 @@
 #pragma once
 
 #include "BinaryBuffer.h"
+#include "Log.h"
 #include "bitsery/bitsery.h"
 #include "bitsery/adapter/buffer.h"
+#include <bitsery/adapter/stream.h>
 #include "bitsery/adapter/measure_size.h"
 #include "bitsery/traits/vector.h"
 #include "bitsery/traits/array.h"
 #include "bitsery/traits/string.h"
-#include "Log.h"
+#include <fstream>
 
 namespace AM
 {
@@ -41,6 +43,23 @@ public:
         return (bitsery::quickSerialization<OutputAdapter>(std::move(adapter),
                                                            objectToSerialize)
                 - startIndex);
+    }
+
+    template<typename T>
+    static void toFile(const std::string& filePath, T& objectToSerialize)
+    {
+        // Open or create the file.
+        std::ofstream file(filePath, std::ios::binary);
+        if (!(file.is_open())) {
+            LOG_ERROR("Could not open file for serialization: %s", filePath.c_str());
+        }
+
+        // Initialize the stream serializer.
+        bitsery::Serializer<bitsery::OutputBufferedStreamAdapter> serializer{file};
+        serializer.object(objectToSerialize);
+
+        // Serialize the object.
+        serializer.adapter().flush();
     }
 
     /**

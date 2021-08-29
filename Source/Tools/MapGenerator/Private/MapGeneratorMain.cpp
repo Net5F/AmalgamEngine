@@ -56,8 +56,7 @@ int main(int argc, char* argv[])
     double startTime{timer.getDeltaSeconds(true)};
     MapGenerator mapGenerator(static_cast<unsigned int>(mapLengthX)
                               , static_cast<unsigned int>(mapLengthY), fillSpriteId);
-    mapGenerator.generate();
-    mapGenerator.save("TileMap.bin");
+    mapGenerator.generateAndSave("TileMap.bin");
 
     double timeTaken = timer.getDeltaSeconds(false) - startTime;
     std::printf("Map generated and saved in %.6fs", timeTaken);

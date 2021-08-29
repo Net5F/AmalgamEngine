@@ -19,15 +19,10 @@ public:
     MapGenerator(unsigned int inMapLengthX, unsigned int inMapLengthY, const std::string& inFillSpriteId);
 
     /**
-     * Generates the map, kept in memory as a string.
+     * Generates the map and saves it to a file with the given name, placed in
+     * the same directory as the program binary.
      */
-    void generate();
-
-    /**
-     * Saves the map to a file with the given name, placed in the same
-     * directory as the program binary.
-     */
-    void save(const std::string& fileName);
+    void generateAndSave(const std::string& fileName);
 
 private:
     /** The version of the map format. Kept as just a 16-bit int for now, we
