@@ -3,6 +3,7 @@
 #include "Paths.h"
 #include "Position.h"
 #include "Transforms.h"
+#include "Serialize.h"
 #include "Deserialize.h"
 #include "ByteTools.h"
 #include "TileMapSnapshot.h"
@@ -100,9 +101,9 @@ void TileMap::replaceSpriteLayer(unsigned int tileX, unsigned int tileY,
     tile.spriteLayers[layerIndex] = {&sprite, worldBounds};
 }
 
-const Tile& TileMap::get(int x, int y) const
+const Tile& TileMap::get(unsigned int x, unsigned int y) const
 {
-    unsigned int linearizedIndex = (y * mapYLengthTiles) + x;
+    unsigned int linearizedIndex = (y * mapXLengthTiles) + x;
     return tiles[linearizedIndex];
 }
 
@@ -133,7 +134,7 @@ unsigned int TileMap::getTileCount() const
 
 void TileMap::loadMap(TileMapSnapshot& mapSnapshot)
 {
-    /* Load the data into this map. */
+    /* Load the snapshot into this map. */
     // Load the header data.
     mapXLengthChunks = mapSnapshot.xLengthChunks;
     mapYLengthChunks = mapSnapshot.yLengthChunks;
@@ -159,7 +160,6 @@ void TileMap::loadMap(TileMapSnapshot& mapSnapshot)
         for (unsigned int i = 0; i < SharedConfig::CHUNK_TILE_COUNT; ++i) {
             // Push all of the snapshot's sprites into the tile.
             TileSnapshot& tileSnapshot{chunk.tiles[i]};
-
             for (unsigned int paletteId : tileSnapshot.spriteLayers) {
                 const Sprite& sprite{spriteData.get(chunk.palette[paletteId])};
                 addSpriteLayer((startX + relativeX), (startY + relativeY), sprite);
@@ -177,25 +177,68 @@ void TileMap::loadMap(TileMapSnapshot& mapSnapshot)
 
 void TileMap::save(const std::string& fileName)
 {
-    std::vector<Uint8> mapData;
-    unsigned bufferIndex{0};
+    // Prime a timer.
+    Timer timer;
+    timer.updateSavedTime();
 
-    // Add the version number.
-    ByteTools::write16(MAP_FORMAT_VERSION, &mapData[bufferIndex]);
-    bufferIndex += 2;
+    /* Save this map's state into a snapshot. */
+    // Save the header data.
+    TileMapSnapshot mapSnapshot{};
+    mapSnapshot.version = MAP_FORMAT_VERSION;
+    mapSnapshot.xLengthChunks = mapXLengthChunks;
+    mapSnapshot.yLengthChunks = mapYLengthChunks;
 
-    // Add the lengths.
-    ByteTools::write32(mapXLengthChunks, &mapData[bufferIndex]);
-    bufferIndex += 4;
-    ByteTools::write32(mapYLengthChunks, &mapData[bufferIndex]);
-    bufferIndex += 4;
+    // Allocate room for our chunks.
+    unsigned int chunkCount{mapXLengthChunks * mapYLengthChunks};
+    mapSnapshot.chunks.resize(chunkCount);
 
+    // Save our tiles into the snapshot as chunks.
+    unsigned int startIndex{0};
+    unsigned int chunksProcessed{0};
+    for (unsigned int i = 0; i < chunkCount; ++i) {
+        ChunkSnapshot& chunk{mapSnapshot.chunks[i]};
 
-    // Open or create the file.
-    std::ofstream workingFile((Paths::BASE_PATH + fileName), std::ios::binary);
+        // Process each tile in this chunk.
+        unsigned int nextTileIndex{startIndex};
+        unsigned int tilesProcessed{0};
+        for (unsigned int j = 0; j < SharedConfig::CHUNK_TILE_COUNT; ++j) {
+            // Copy all of this tile's layers.
+            TileSnapshot& tile{chunk.tiles[j]};
+            for (Tile::SpriteLayer& layer : tiles[nextTileIndex].spriteLayers) {
+                unsigned int paletteId{chunk.getPaletteIndex(layer.sprite->stringId)};
+                tile.spriteLayers.push_back(paletteId);
+            }
 
-    // Write our buffer contents to the file.
-//    workingFile.write(reinterpret_cast<char*>(mapData.data()), bufferIndex);
+            // Increment to the next tile.
+            nextTileIndex++;
+
+            // If we've processed all the tiles in this row, increment to the
+            // next row.
+            tilesProcessed++;
+            if (tilesProcessed == SharedConfig::CHUNK_WIDTH) {
+                nextTileIndex += (mapXLengthTiles - SharedConfig::CHUNK_WIDTH);
+                tilesProcessed = 0;
+            }
+        }
+
+        // Increment to the next chunk.
+        startIndex += SharedConfig::CHUNK_WIDTH;
+
+        // If we've processed all the chunks in this row, increment to the
+        // next row.
+        chunksProcessed++;
+        if (chunksProcessed == mapXLengthChunks) {
+            startIndex += ((SharedConfig::CHUNK_WIDTH - 1) * mapXLengthTiles);
+            chunksProcessed = 0;
+        }
+    }
+
+    // Serialize the map snapshot and write it to the file.
+    Serialize::toFile((Paths::BASE_PATH + fileName), mapSnapshot);
+
+    // Print the time taken.
+    double timeTaken = timer.getDeltaSeconds(false);
+    LOG_INFO("Map saved in %.6fs.", timeTaken);
 }
 
 } // End namespace Client

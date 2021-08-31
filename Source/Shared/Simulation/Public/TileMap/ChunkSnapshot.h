@@ -27,6 +27,22 @@ public:
 
     /** The tiles that make up this chunk. */
     std::array<TileSnapshot, SharedConfig::CHUNK_TILE_COUNT> tiles;
+
+    /**
+     * Returns the palette index for the given string.
+     * If the string is not in the palette, it will be added.
+     */
+    unsigned int getPaletteIndex(const std::string& stringId)
+    {
+        for (unsigned int i = 0; i < palette.size(); ++i) {
+            if (palette[i] == stringId) {
+                return i;
+            }
+        }
+
+        palette.push_back(stringId);
+        return palette.size() - 1;
+    }
 };
 
 template<typename S>

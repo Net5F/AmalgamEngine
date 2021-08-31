@@ -52,7 +52,7 @@ public:
     /**
      * Gets a const reference to the tile at the given coordinates.
      */
-    const Tile& get(int x, int y) const;
+    const Tile& get(unsigned int x, unsigned int y) const;
 
     /**
      * Returns the length, in chunks, of the map's X axis.

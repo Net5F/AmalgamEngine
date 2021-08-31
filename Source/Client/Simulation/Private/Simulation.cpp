@@ -197,13 +197,22 @@ Uint32 Simulation::getCurrentTick()
 bool Simulation::handleEvent(SDL_Event& event)
 {
     switch (event.type) {
-        case SDL_MOUSEMOTION:
+        case SDL_MOUSEMOTION: {
             playerInputSystem.processMouseState(event.motion);
             return true;
-        default:
+        }
+        case SDL_KEYDOWN: {
+            if (event.key.keysym.sym == SDLK_k) {
+                world.tileMap.save("TileMap.bin");
+                return true;
+            }
+            return false;
+        }
+        default: {
             // Default to assuming it's a momentary input.
             playerInputSystem.processMomentaryInput(event);
             return true;
+        }
     }
 
     return false;
