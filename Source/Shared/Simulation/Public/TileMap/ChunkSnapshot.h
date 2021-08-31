@@ -34,12 +34,19 @@ public:
      */
     unsigned int getPaletteIndex(const std::string& stringId)
     {
+        // TODO: If this gets to be a performance issue, we can look into
+        //       switching palette to a map. Serialization will be more
+        //       complicated, though.
+
+        // Check if we already have this string.
         for (unsigned int i = 0; i < palette.size(); ++i) {
             if (palette[i] == stringId) {
+                // We already have the string, returns its index.
                 return i;
             }
         }
 
+        // We didn't have the string, add it.
         palette.push_back(stringId);
         return palette.size() - 1;
     }
