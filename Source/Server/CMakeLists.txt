@@ -37,6 +37,14 @@ set_target_properties(Server PROPERTIES CXX_EXTENSIONS OFF)
 # Enable compile warnings.
 target_compile_options(Server PUBLIC -Wall -Wextra)
 
+# Copy SpriteData.json to the build directory.
+file(COPY ${PROJECT_SOURCE_DIR}/../Resources/Shared/SpriteData.json
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+
+# Copy TileMap.bin to the build directory.
+file(COPY ${PROJECT_SOURCE_DIR}/../Resources/Server/TileMap.bin
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+
 # Build all of the subdirectories
 add_subdirectory(Config)
 add_subdirectory(Launch)

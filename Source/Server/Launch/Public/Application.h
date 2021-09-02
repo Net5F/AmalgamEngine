@@ -2,6 +2,7 @@
 
 #include "Network.h"
 #include "Simulation.h"
+#include "SpriteData.h"
 #include "PeriodicCaller.h"
 #include "SDLNetInitializer.h"
 
@@ -45,6 +46,8 @@ private:
 
     SDL2pp::SDL sdl;
     SDLNetInitializer sdlNetInit;
+
+    SpriteData spriteData;
 
     Network network;
     PeriodicCaller networkCaller;

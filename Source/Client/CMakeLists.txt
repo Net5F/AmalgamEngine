@@ -41,7 +41,7 @@ file(COPY ${PROJECT_SOURCE_DIR}/../Resources/Client/Assets/
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Assets/)
 
 # Copy SpriteData.json to the build directory.
-file(COPY ${PROJECT_SOURCE_DIR}/../Resources/Client/SpriteData.json
+file(COPY ${PROJECT_SOURCE_DIR}/../Resources/Shared/SpriteData.json
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 # Build all of the subdirectories

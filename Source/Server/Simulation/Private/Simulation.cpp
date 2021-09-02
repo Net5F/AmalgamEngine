@@ -7,8 +7,8 @@ namespace AM
 {
 namespace Server
 {
-Simulation::Simulation(Network& inNetwork)
-: world()
+Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
+: world(inSpriteData)
 , network(inNetwork)
 , networkConnectionSystem(*this, world, network)
 , networkInputSystem(*this, world, network)

@@ -14,10 +14,11 @@ namespace Server
 Application::Application()
 : sdl(SDL_INIT_VIDEO)
 , sdlNetInit()
+, spriteData()
 , network()
 , networkCaller(std::bind_front(&Network::tick, &network),
                 SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
-, sim(network)
+, sim(network, spriteData)
 , simCaller(std::bind_front(&Simulation::tick, &sim),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
 , exitRequested(false)

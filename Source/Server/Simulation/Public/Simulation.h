@@ -12,6 +12,7 @@ namespace AM
 namespace Server
 {
 class Network;
+class SpriteData;
 
 /**
  * Manages the simulation, including world state and system processing.
@@ -22,7 +23,7 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S = .001;
 
-    Simulation(Network& inNetwork);
+    Simulation(Network& inNetwork, SpriteData& inSpriteData);
 
     /**
      * Updates accumulatedTime. If greater than the tick timestep, processes

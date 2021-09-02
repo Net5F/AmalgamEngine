@@ -8,8 +8,9 @@ namespace AM
 {
 namespace Server
 {
-World::World()
-: device()
+World::World(SpriteData& spriteData)
+: tileMap(spriteData)
+, device()
 , generator(device())
 // TODO: When TileMap goes in here, replace this hardcoding with getters.
 //, xDistribution(

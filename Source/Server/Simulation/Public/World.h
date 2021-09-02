@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TileMap.h"
 #include "NetworkDefs.h"
 #include "Position.h"
 
@@ -12,6 +13,7 @@ namespace AM
 {
 namespace Server
 {
+class SpriteData;
 /**
  * Owns and manages the persistence of all world state.
  *
@@ -27,13 +29,16 @@ namespace Server
 class World
 {
 public:
-    World();
+    World(SpriteData& spriteData);
 
     /** Entity data registry. */
     entt::registry registry;
 
-    /** Maps network IDs to entity IDs, used for interfacing with the
-        Network. */
+    /** The tile map that makes up the world. */
+    TileMap tileMap;
+
+    /** Maps network IDs to entity IDs.
+        Used for interfacing with the Network. */
     std::unordered_map<NetworkID, entt::entity> netIdMap;
 
     /**
