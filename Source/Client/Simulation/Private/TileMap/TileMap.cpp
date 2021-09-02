@@ -7,6 +7,7 @@
 #include "Deserialize.h"
 #include "ByteTools.h"
 #include "TileMapSnapshot.h"
+#include "Config.h"
 #include "SharedConfig.h"
 #include "Timer.h"
 #include "Log.h"
@@ -24,43 +25,41 @@ TileMap::TileMap(SpriteData& inSpriteData)
 , tileCount{0}
 , spriteData{inSpriteData}
 {
-//    // Fill every tile with a ground layer.
-//    const Sprite& ground{spriteData.get("test_6")};
-//    for (Tile& tile : tiles) {
-//        tile.spriteLayers.emplace_back(&ground, BoundingBox{});
-//    }
-//
-//    // Add some rugs to layer 1.
-//    const Sprite& rug{spriteData.get("test_15")};
-//    addSpriteLayer(0, 3, rug);
-//    addSpriteLayer(4, 3, rug);
-//    addSpriteLayer(3, 6, rug);
-//    addSpriteLayer(2, 9, rug);
-//    addSpriteLayer(1, 5, rug);
-//
-//    // Add some walls to layer 2.
-//    const Sprite& wall1{spriteData.get("test_17")};
-//    addSpriteLayer(2, 0, wall1);
-//    addSpriteLayer(2, 1, wall1);
-//    addSpriteLayer(2, 2, wall1);
-//
-//    const Sprite& wall2{spriteData.get("test_26")};
-//    addSpriteLayer(0, 2, wall2);
+    if (Config::RUN_OFFLINE) {
+        LOG_INFO("Offline mode. Constructing default tile map.");
 
-    // Prime a timer.
-    Timer timer;
-    timer.updateSavedTime();
+        // Set our map size.
+        mapXLengthChunks = 1;
+        mapYLengthChunks = 1;
+        mapXLengthTiles = mapXLengthChunks * SharedConfig::CHUNK_WIDTH;
+        mapYLengthTiles = mapYLengthChunks * SharedConfig::CHUNK_WIDTH;
 
-    // Deserialize the file into a snapshot.
-    TileMapSnapshot mapSnapshot;
-    Deserialize::fromFile((Paths::BASE_PATH + "TileMap.bin"), mapSnapshot);
+        // Resize the tiles vector to fit the map.
+        tiles.resize(mapXLengthTiles * mapYLengthTiles);
 
-    // Load the map snapshot.
-    loadMap(mapSnapshot);
+        // Fill every tile with a ground layer.
+        const Sprite& ground{spriteData.get("test_6")};
+        for (Tile& tile : tiles) {
+            tile.spriteLayers.emplace_back(&ground, BoundingBox{});
+        }
 
-    // Print the time taken.
-    double timeTaken = timer.getDeltaSeconds(false);
-    LOG_INFO("Map loaded in %.6fs.", timeTaken);
+        // Add some rugs to layer 1.
+        const Sprite& rug{spriteData.get("test_15")};
+        addSpriteLayer(0, 3, rug);
+        addSpriteLayer(4, 3, rug);
+        addSpriteLayer(3, 6, rug);
+        addSpriteLayer(2, 9, rug);
+        addSpriteLayer(1, 5, rug);
+
+        // Add some walls to layer 2.
+        const Sprite& wall1{spriteData.get("test_17")};
+        addSpriteLayer(2, 0, wall1);
+        addSpriteLayer(2, 1, wall1);
+        addSpriteLayer(2, 2, wall1);
+
+        const Sprite& wall2{spriteData.get("test_26")};
+        addSpriteLayer(0, 2, wall2);
+    }
 }
 
 void TileMap::addSpriteLayer(unsigned int tileX, unsigned int tileY,
@@ -130,115 +129,6 @@ unsigned int TileMap::yLengthTiles() const
 unsigned int TileMap::getTileCount() const
 {
     return tileCount;
-}
-
-void TileMap::loadMap(TileMapSnapshot& mapSnapshot)
-{
-    /* Load the snapshot into this map. */
-    // Load the header data.
-    mapXLengthChunks = mapSnapshot.xLengthChunks;
-    mapYLengthChunks = mapSnapshot.yLengthChunks;
-    mapXLengthTiles = mapXLengthChunks * SharedConfig::CHUNK_WIDTH;
-    mapYLengthTiles = mapYLengthChunks * SharedConfig::CHUNK_WIDTH;
-
-    // Resize the tiles vector to fit the map.
-    tiles.resize(mapXLengthTiles * mapYLengthTiles);
-
-    // Load the chunks into the tiles vector.
-    for (unsigned int chunkIndex = 0; chunkIndex < mapSnapshot.chunks.size(); ++chunkIndex) {
-        // Calc the coordinates of this chunk's first tile.
-        unsigned int startX{(chunkIndex % mapXLengthChunks) * SharedConfig::CHUNK_WIDTH};
-        unsigned int startY{(chunkIndex / mapXLengthChunks) * SharedConfig::CHUNK_WIDTH};
-        ChunkSnapshot& chunk{mapSnapshot.chunks[chunkIndex]};
-
-        // These vars track which tile we're looking at, with respect to the
-        // top left of the chunk.
-        unsigned int relativeX{0};
-        unsigned int relativeY{0};
-
-        // Add all of this chunk's tiles to the tiles vector.
-        for (unsigned int i = 0; i < SharedConfig::CHUNK_TILE_COUNT; ++i) {
-            // Push all of the snapshot's sprites into the tile.
-            TileSnapshot& tileSnapshot{chunk.tiles[i]};
-            for (unsigned int paletteId : tileSnapshot.spriteLayers) {
-                const Sprite& sprite{spriteData.get(chunk.palette[paletteId])};
-                addSpriteLayer((startX + relativeX), (startY + relativeY), sprite);
-            }
-
-            // Increment the relative indices, wrapping at the chunk width.
-            relativeX++;
-            if (relativeX == SharedConfig::CHUNK_WIDTH) {
-                relativeY++;
-                relativeX = 0;
-            }
-        }
-    }
-}
-
-void TileMap::save(const std::string& fileName)
-{
-    // Prime a timer.
-    Timer timer;
-    timer.updateSavedTime();
-
-    /* Save this map's state into a snapshot. */
-    // Save the header data.
-    TileMapSnapshot mapSnapshot{};
-    mapSnapshot.version = MAP_FORMAT_VERSION;
-    mapSnapshot.xLengthChunks = mapXLengthChunks;
-    mapSnapshot.yLengthChunks = mapYLengthChunks;
-
-    // Allocate room for our chunks.
-    unsigned int chunkCount{mapXLengthChunks * mapYLengthChunks};
-    mapSnapshot.chunks.resize(chunkCount);
-
-    // Save our tiles into the snapshot as chunks.
-    unsigned int startIndex{0};
-    unsigned int chunksProcessed{0};
-    for (unsigned int i = 0; i < chunkCount; ++i) {
-        ChunkSnapshot& chunk{mapSnapshot.chunks[i]};
-
-        // Process each tile in this chunk.
-        unsigned int nextTileIndex{startIndex};
-        unsigned int tilesProcessed{0};
-        for (unsigned int j = 0; j < SharedConfig::CHUNK_TILE_COUNT; ++j) {
-            // Copy all of this tile's layers.
-            TileSnapshot& tile{chunk.tiles[j]};
-            for (Tile::SpriteLayer& layer : tiles[nextTileIndex].spriteLayers) {
-                unsigned int paletteId{chunk.getPaletteIndex(layer.sprite->stringId)};
-                tile.spriteLayers.push_back(paletteId);
-            }
-
-            // Increment to the next tile.
-            nextTileIndex++;
-
-            // If we've processed all the tiles in this row, increment to the
-            // next row.
-            tilesProcessed++;
-            if (tilesProcessed == SharedConfig::CHUNK_WIDTH) {
-                nextTileIndex += (mapXLengthTiles - SharedConfig::CHUNK_WIDTH);
-                tilesProcessed = 0;
-            }
-        }
-
-        // Increment to the next chunk.
-        startIndex += SharedConfig::CHUNK_WIDTH;
-
-        // If we've processed all the chunks in this row, increment to the
-        // next row.
-        chunksProcessed++;
-        if (chunksProcessed == mapXLengthChunks) {
-            startIndex += ((SharedConfig::CHUNK_WIDTH - 1) * mapXLengthTiles);
-            chunksProcessed = 0;
-        }
-    }
-
-    // Serialize the map snapshot and write it to the file.
-    Serialize::toFile((Paths::BASE_PATH + fileName), mapSnapshot);
-
-    // Print the time taken.
-    double timeTaken = timer.getDeltaSeconds(false);
-    LOG_INFO("Map saved in %.6fs.", timeTaken);
 }
 
 } // End namespace Client

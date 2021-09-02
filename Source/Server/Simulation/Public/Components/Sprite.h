@@ -1,9 +1,8 @@
 #pragma once
 
-#include "AssetCache.h"
 #include "BoundingBox.h"
 #include <SDL2/SDL_rect.h>
-#include <memory>
+#include <string>
 
 namespace AM
 {
@@ -17,24 +16,27 @@ namespace Server
  */
 struct Sprite {
 public:
-    /** The texture that contains this sprite. */
-    TextureHandle texture{};
+    /** Unique display name, shown in the UI.  */
+    std::string displayName{""};
 
-    /** UV position and size in texture. */
-    SDL_Rect textureExtent{0, 0, 0, 0};
+    /** The sprite's unique string ID. Derived from displayName by replacing
+        spaces with underscores and making everything lowercase.
+        This ID will be consistent, and can be used for persistent state. */
+    std::string stringId{""};
 
-    /** Width and height of the sprite in screen space. */
-    int width{0};
-    int height{0};
+    /** The sprite's unique numeric identifier.
+        This value can be used safely at runtime, but shouldn't be used for
+        persistent state since it may change when SpriteData.json is
+        modified. */
+    int numericId{0};
+
+    /** True if this sprite has a bounding box, else false.
+        Things like floors and carpets share bounds with their tile, so they
+        don't need a separate bounding box. */
+    bool hasBoundingBox{true};
 
     /** Model-space bounding box. Defines the sprite's 3D volume. */
     BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
-
-    /** World-space bounding box, maintained by the renderer.
-        Updated to the associated entity's lerped position during a render
-        tick.
-        Used for depth order sorting. */
-    BoundingBox worldBounds{0, 0, 0, 0, 0, 0};
 };
 
 } // namespace Server

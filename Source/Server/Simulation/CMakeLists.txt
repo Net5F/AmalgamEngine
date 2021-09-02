@@ -1,20 +1,23 @@
 target_sources(Server
 	PRIVATE
-		Private/World.cpp
 		Private/MovementSystem.cpp
 		Private/NetworkConnectionSystem.cpp
 		Private/NetworkInputSystem.cpp
 		Private/NetworkUpdateSystem.cpp
 		Private/Simulation.cpp
+		Private/World.cpp
+		Private/TileMap/TileMap.cpp
 	PUBLIC
-		Public/World.h
 		Public/MovementSystem.h
 		Public/NetworkConnectionSystem.h
 		Public/NetworkInputSystem.h
 		Public/NetworkUpdateSystem.h
 		Public/Simulation.h
+		Public/World.h
 		Public/Components/ClientSimData.h
 		Public/Components/Sprite.h
+		Public/TileMap/Tile.h
+		Public/TileMap/TileMap.h
 )
 
 target_include_directories(Server
@@ -22,4 +25,5 @@ target_include_directories(Server
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
 		${CMAKE_CURRENT_SOURCE_DIR}/Public
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+		${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
 )

@@ -8,7 +8,7 @@
 namespace AM
 {
 class TileMapSnapshot;
-namespace Client
+namespace Server
 {
 class SpriteData;
 
@@ -79,7 +79,22 @@ public:
      */
     unsigned int getTileCount() const;
 
+    /**
+     * Saves the map to a file with the given name, placed in the same
+     * directory as the program binary.
+     */
+    void save(const std::string& fileName);
+
 private:
+    /** The version of the map format. Kept as just a 16-bit int for now, we
+        can see later if we care to make it more complicated. */
+    static constexpr uint16_t MAP_FORMAT_VERSION = 0;
+
+    /**
+     * Loads the given snapshot's data into this map.
+     */
+    void loadMap(TileMapSnapshot& mapSnapshot);
+
     /** The length, in chunks, of the map's X axis. */
     unsigned int mapXLengthChunks;
 
@@ -102,5 +117,5 @@ private:
     SpriteData& spriteData;
 };
 
-} // End namespace Client
+} // End namespace Server
 } // End namespace AM

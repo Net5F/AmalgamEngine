@@ -201,13 +201,6 @@ bool Simulation::handleEvent(SDL_Event& event)
             playerInputSystem.processMouseState(event.motion);
             return true;
         }
-        case SDL_KEYDOWN: {
-            if (event.key.keysym.sym == SDLK_k) {
-                world.tileMap.save("TileMap.bin");
-                return true;
-            }
-            return false;
-        }
         default: {
             // Default to assuming it's a momentary input.
             playerInputSystem.processMomentaryInput(event);
