@@ -1,5 +1,6 @@
 target_sources(Server
 	PRIVATE
+		Private/ChunkStreamingSystem.cpp
 		Private/MovementSystem.cpp
 		Private/NetworkConnectionSystem.cpp
 		Private/NetworkInputSystem.cpp
@@ -8,6 +9,7 @@ target_sources(Server
 		Private/World.cpp
 		Private/TileMap/TileMap.cpp
 	PUBLIC
+		Public/ChunkStreamingSystem.h
 		Public/MovementSystem.h
 		Public/NetworkConnectionSystem.h
 		Public/NetworkInputSystem.h

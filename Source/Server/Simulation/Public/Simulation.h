@@ -5,6 +5,7 @@
 #include "NetworkInputSystem.h"
 #include "MovementSystem.h"
 #include "NetworkUpdateSystem.h"
+#include "ChunkStreamingSystem.h"
 #include <atomic>
 
 namespace AM
@@ -41,6 +42,7 @@ private:
     NetworkInputSystem networkInputSystem;
     MovementSystem movementSystem;
     NetworkUpdateSystem networkUpdateSystem;
+    ChunkStreamingSystem chunkStreamingSystem;
 
     /**
      * The number of the tick that we're currently on.

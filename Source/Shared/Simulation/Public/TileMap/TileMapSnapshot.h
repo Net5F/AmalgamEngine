@@ -9,7 +9,7 @@ namespace AM
 /**
  * Holds tile map data in a persistable form.
  *
- * Used in serialization/deserialization.
+ * Used in saving/loading the tile map.
  *
  * This struct is fairly similar to the normal representation of the tile map,
  * see ChunkSnapshot and TileSnapshot for more obvious differences.
@@ -31,7 +31,7 @@ public:
     /** The length, in chunks, of the map's Y axis. */
     unsigned int yLengthChunks{0};
 
-    /** The chunks of tiles that make up this map. */
+    /** The chunks that make up this map, stored in row-major order. */
     std::vector<ChunkSnapshot> chunks;
 };
 

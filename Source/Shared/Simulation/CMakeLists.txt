@@ -1,11 +1,11 @@
 target_sources(Shared
     PRIVATE
         Private/MovementHelpers.cpp
+        Private/TileMap/ChunkRange.cpp
 	PUBLIC
         Public/AreaOfInterest.h
         Public/BoundingBox.h
         Public/MovementHelpers.h
-        Public/TileIndex.h
         Public/Components/Camera.h
         Public/Components/Input.h
         Public/Components/IsDirty.h
@@ -13,7 +13,10 @@ target_sources(Shared
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
+        Public/TileMap/ChunkIndex.h
+        Public/TileMap/ChunkRange.h
         Public/TileMap/ChunkSnapshot.h
+        Public/TileMap/TileIndex.h
         Public/TileMap/TileMapSnapshot.h
         Public/TileMap/TileSnapshot.h
 )
@@ -21,6 +24,7 @@ target_sources(Shared
 target_include_directories(Shared
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/TileMap
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/Components

@@ -51,7 +51,7 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
     for (int y = 0; y < static_cast<int>(tileMap.yLengthTiles()); ++y) {
         for (int x = 0; x < static_cast<int>(tileMap.xLengthTiles()); ++x) {
             // Figure out which tile we're looking at.
-            const Tile& tile = tileMap.get(x, y);
+            const Tile& tile = tileMap.getTile(x, y);
 
             // Push all of this tile's sprites into the appropriate vector.
             for (const Tile::SpriteLayer& layer : tile.spriteLayers) {

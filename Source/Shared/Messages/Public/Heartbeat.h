@@ -5,7 +5,7 @@
 namespace AM
 {
 /**
- * Heartbeat is sent from either side to show that a tick was processed but
+ * A heartbeat is sent from either side to show that a tick was processed but
  * no data needed to be sent.
  */
 struct Heartbeat {

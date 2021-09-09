@@ -6,7 +6,7 @@
 namespace AM
 {
 /**
- * This struct represents a connection response from the server to the client.
+ * Contains a connection response, sent from the server to the client.
  */
 struct ConnectionResponse {
     /** The tick that the server is telling the client to assume. */

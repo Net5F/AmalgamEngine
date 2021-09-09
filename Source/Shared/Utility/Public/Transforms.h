@@ -48,13 +48,8 @@ public:
     static float screenYToWorldZ(float yCoord, float zoomFactor);
 
     /**
-     * Converts a position in world space to a tile index.
-     */
-    static TileIndex worldToTile(const Position& position);
-
-    /**
-     * Helper function, converts a camera-relative screen point to a tile
-     * index.
+     * Helper function, converts a camera-relative screen point to a tile's
+     * coordinates.
      *
      * Mostly used for getting the tile that the mouse is over.
      */

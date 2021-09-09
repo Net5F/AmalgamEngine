@@ -20,7 +20,7 @@ World::World(SpriteData& spriteData)
 , xDistribution(
       0, ((16 - 1) * SharedConfig::TILE_WORLD_WIDTH))
 , yDistribution(
-      0, ((16 - 1) * SharedConfig::TILE_WORLD_HEIGHT))
+      0, ((16 - 1) * SharedConfig::TILE_WORLD_WIDTH))
 , baseX{0}
 , baseY{0}
 , groupOffsetsX{32, 64, 96, 128, 160, 32, 64, 96, 128, 160}

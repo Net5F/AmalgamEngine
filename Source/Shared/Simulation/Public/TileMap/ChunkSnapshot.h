@@ -12,7 +12,7 @@ namespace AM
 /**
  * Holds chunk data in a persistable form (palette IDs instead of pointers).
  *
- * Used in serialization/deserialization.
+ * Used in saving/loading the tile map.
  */
 struct ChunkSnapshot
 {
@@ -21,16 +21,20 @@ public:
         palette. Only checked in debug builds. */
     static constexpr unsigned int MAX_IDS = 1000;
 
+    /** Used as a "we should never hit this" cap on the size of each ID string
+        in the palette. Only checked in debug builds. */
+    static constexpr unsigned int MAX_ID_LENGTH = 50;
+
     /** Holds the string IDs of all the sprites used in this chunk's tiles.
         Tile layers hold indices into this palette. */
     std::vector<std::string> palette;
 
-    /** The tiles that make up this chunk. */
+    /** The tiles that make up this chunk, stored in row-major order. */
     std::array<TileSnapshot, SharedConfig::CHUNK_TILE_COUNT> tiles;
 
     /**
-     * Returns the palette index for the given string.
-     * If the string is not in the palette, it will be added.
+     * Returns the palette index for the given ID.
+     * If the ID is not in the palette, it will be added.
      */
     unsigned int getPaletteIndex(const std::string& stringId)
     {
@@ -48,15 +52,15 @@ public:
 
         // We didn't have the string, add it.
         palette.push_back(stringId);
-        return palette.size() - 1;
+        return (palette.size() - 1);
     }
 };
 
 template<typename S>
 void serialize(S& serializer, ChunkSnapshot& testChunk)
 {
-    serializer.container(testChunk.palette, SharedConfig::CHUNK_TILE_COUNT, [](S& serializer, std::string& string) {
-        serializer.text1b(string, ChunkSnapshot::MAX_IDS);
+    serializer.container(testChunk.palette, ChunkSnapshot::MAX_IDS, [](S& serializer, std::string& string) {
+        serializer.text1b(string, ChunkSnapshot::MAX_ID_LENGTH);
     });
 
     serializer.container(testChunk.tiles);

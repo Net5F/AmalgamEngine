@@ -1,6 +1,5 @@
 #include "World.h"
 #include "AssetCache.h"
-#include "TileIndex.h"
 #include "BoundingBox.h"
 #include "Position.h"
 #include "Paths.h"

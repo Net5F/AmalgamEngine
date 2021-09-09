@@ -375,7 +375,7 @@ void PropertiesPanel::saveMaxY()
             // Clamp the value to its bounds.
             newMaxY = std::clamp(
                 newMaxY, activeSprite->modelBounds.minY,
-                static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT));
+                static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
             // The input was valid, save it.
             activeSprite->modelBounds.maxY = newMaxY;

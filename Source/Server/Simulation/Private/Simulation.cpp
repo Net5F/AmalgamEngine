@@ -14,6 +14,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , networkInputSystem(*this, world, network)
 , movementSystem(world)
 , networkUpdateSystem(*this, world, network)
+, chunkStreamingSystem(world, network)
 , currentTick(0)
 {
     Log::registerCurrentTickPtr(&currentTick);
@@ -31,6 +32,8 @@ void Simulation::tick()
     movementSystem.processMovements();
 
     networkUpdateSystem.sendClientUpdates();
+
+    chunkStreamingSystem.sendChunks();
     END_CPU_SAMPLE();
 
     currentTick++;

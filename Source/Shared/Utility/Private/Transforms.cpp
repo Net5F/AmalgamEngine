@@ -18,7 +18,7 @@ ScreenPoint Transforms::worldToScreen(const Position& position,
           / SharedConfig::TILE_WORLD_WIDTH;
     static const float TILE_HEIGHT_SCALE
         = static_cast<float>(SharedConfig::TILE_SCREEN_HEIGHT)
-          / SharedConfig::TILE_WORLD_HEIGHT;
+          / SharedConfig::TILE_WORLD_WIDTH;
 
     // Convert cartesian world point to isometric screen point.
     float screenX = (position.x - position.y) * (TILE_WIDTH_SCALE / 2.f);
@@ -52,7 +52,7 @@ Position Transforms::screenToWorld(const ScreenPoint& screenPoint,
         = static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
           / SharedConfig::TILE_SCREEN_WIDTH;
     static const float TILE_HEIGHT_SCALE
-        = static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)
+        = static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
           / SharedConfig::TILE_SCREEN_HEIGHT;
 
     // Calc the world position.
@@ -71,13 +71,6 @@ float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)
     return yCoord * zoomFactor * Z_WORLD_SCALE;
 }
 
-TileIndex Transforms::worldToTile(const Position& position)
-{
-    // Our tiles are 2D, so Z doesn't matter.
-    return {static_cast<int>(position.x / SharedConfig::TILE_WORLD_WIDTH),
-            static_cast<int>(position.y / SharedConfig::TILE_WORLD_HEIGHT)};
-}
-
 TileIndex Transforms::screenToTile(const ScreenPoint& screenPoint,
                                    const Camera& camera)
 {
@@ -90,7 +83,7 @@ TileIndex Transforms::screenToTile(const ScreenPoint& screenPoint,
     Position worldPos = screenToWorld(absolutePoint, camera.zoomFactor);
 
     // Convert to tile index.
-    return worldToTile(worldPos);
+    return worldPos.asTileIndex();
 }
 
 BoundingBox Transforms::modelToWorld(const BoundingBox& modelBounds,

@@ -70,14 +70,13 @@ void TileMap::addSpriteLayer(unsigned int tileX, unsigned int tileY,
     if (sprite.hasBoundingBox) {
         Position tilePosition{
             static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),
-            static_cast<float>(tileY * SharedConfig::TILE_WORLD_HEIGHT), 0};
+            static_cast<float>(tileY * SharedConfig::TILE_WORLD_WIDTH), 0};
         worldBounds
             = Transforms::modelToWorld(sprite.modelBounds, tilePosition);
     }
 
     // Push the sprite into the tile's layers vector.
-    unsigned int linearizedIndex = (tileY * mapXLengthTiles) + tileX;
-    Tile& tile = tiles[linearizedIndex];
+    Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
     tile.spriteLayers.emplace_back(&sprite, worldBounds);
 }
 
@@ -89,21 +88,19 @@ void TileMap::replaceSpriteLayer(unsigned int tileX, unsigned int tileY,
     if (sprite.hasBoundingBox) {
         Position tilePosition{
             static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),
-            static_cast<float>(tileY * SharedConfig::TILE_WORLD_HEIGHT), 0};
+            static_cast<float>(tileY * SharedConfig::TILE_WORLD_WIDTH), 0};
         worldBounds
             = Transforms::modelToWorld(sprite.modelBounds, tilePosition);
     }
 
     // Replace the sprite.
-    unsigned int linearizedIndex = (tileY * mapXLengthTiles) + tileX;
-    Tile& tile = tiles[linearizedIndex];
+    Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
     tile.spriteLayers[layerIndex] = {&sprite, worldBounds};
 }
 
-const Tile& TileMap::get(unsigned int x, unsigned int y) const
+const Tile& TileMap::getTile(unsigned int x, unsigned int y) const
 {
-    unsigned int linearizedIndex = (y * mapXLengthTiles) + x;
-    return tiles[linearizedIndex];
+    return tiles[linearizeTileIndex(x, y)];
 }
 
 unsigned int TileMap::xLengthChunks() const

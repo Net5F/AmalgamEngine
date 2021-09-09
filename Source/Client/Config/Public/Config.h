@@ -22,7 +22,7 @@ public:
     //-------------------------------------------------------------------------
     /** If true, the connection to the server will be mocked and we'll run
        without it. */
-    static constexpr bool RUN_OFFLINE = true;
+    static constexpr bool RUN_OFFLINE = false;
 
     static const std::string SERVER_IP;
     static constexpr unsigned int SERVER_PORT = 41499;

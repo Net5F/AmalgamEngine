@@ -249,8 +249,8 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
         minX -= diff;
         maxX -= diff;
     }
-    if (maxY > SharedConfig::TILE_WORLD_HEIGHT) {
-        float diff = maxY - SharedConfig::TILE_WORLD_HEIGHT;
+    if (maxY > SharedConfig::TILE_WORLD_WIDTH) {
+        float diff = maxY - SharedConfig::TILE_WORLD_WIDTH;
         minY -= diff;
         maxY -= diff;
     }

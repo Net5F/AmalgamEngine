@@ -3,6 +3,7 @@
 #include "World.h"
 #include "Input.h"
 #include "Position.h"
+#include "PreviousPosition.h"
 #include "Movement.h"
 #include "SharedConfig.h"
 #include "Log.h"
@@ -17,7 +18,8 @@ MovementSystem::MovementSystem(World& inWorld)
 : world(inWorld)
 {
     // Init the groups that we'll be using.
-    auto group = world.registry.group<Input, Position, Movement>();
+    auto group
+        = world.registry.group<Input, Position, PreviousPosition, Movement>();
     ignore(group);
 }
 
@@ -27,10 +29,14 @@ void MovementSystem::processMovements()
 
     /* Move all entities that have an input, position, and movement
        component. */
-    auto group = world.registry.group<Input, Position, Movement>();
+    auto group
+        = world.registry.group<Input, Position, PreviousPosition, Movement>();
     for (entt::entity entity : group) {
-        auto [input, position, movement]
-            = group.get<Input, Position, Movement>(entity);
+        auto [input, position, previousPosition, movement]
+            = group.get<Input, Position, PreviousPosition, Movement>(entity);
+
+        // Save their old position.
+        previousPosition = position;
 
         // Process their movement.
         MovementHelpers::moveEntity(position, movement, input.inputStates,

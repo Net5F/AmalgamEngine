@@ -25,12 +25,10 @@ public:
         peers load before they're in view. */
     static constexpr unsigned int AOI_BUFFER_DISTANCE = 700;
 
-    /** The width of the world tiles in world coordinates. */
+    /** The x and y axis width, in world units, of our tiles. */
     static constexpr unsigned int TILE_WORLD_WIDTH = 32;
-    /** The height of the world tiles in world coordinates. */
-    static constexpr unsigned int TILE_WORLD_HEIGHT = 32;
 
-    /** The width of our 16x16 chunks. */
+    /** The x and y axis width, in tiles, of our chunks. */
     static constexpr unsigned int CHUNK_WIDTH = 16;
 
     /** The number of tiles in a chunk. */

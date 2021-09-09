@@ -88,7 +88,7 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     }
 
     // Determine which sprite the selected tile has.
-    const Tile& tile = world.tileMap.get(tileIndex.x, tileIndex.y);
+    const Tile& tile = world.tileMap.getTile(tileIndex.x, tileIndex.y);
 
     unsigned int terrainSpriteIndex = 0;
     if (tile.spriteLayers[0].sprite->stringId == "test_6") {

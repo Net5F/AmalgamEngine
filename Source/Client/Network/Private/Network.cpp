@@ -299,15 +299,24 @@ void Network::processReceivedMessage(MessageType messageType,
 {
     /* Route the message to the appropriate handler. */
     switch (messageType) {
-        case MessageType::ConnectionResponse:
+        case MessageType::ConnectionResponse: {
             messageHandler.handleConnectionResponse(messageRecBuffer,
                                                     messageSize);
             break;
-        case MessageType::EntityUpdate:
+        }
+        case MessageType::EntityUpdate: {
             messageHandler.handleEntityUpdate(messageRecBuffer, messageSize);
             break;
-        default:
+        }
+        case MessageType::UpdateChunks: {
+            // TODO: Test this. It should happen when we cross chunk boundaries
+            //       and be safe at the edges.
+            LOG_INFO("Received UpdateChunks");
+            break;
+        }
+        default: {
             LOG_ERROR("Received unexpected message type: %u", messageType);
+        }
     }
 }
 

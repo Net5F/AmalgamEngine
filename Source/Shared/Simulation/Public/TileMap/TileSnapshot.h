@@ -9,7 +9,8 @@ namespace AM
 /**
  * Holds tile data in a persistable form (palette IDs instead of pointers).
  *
- * Used in serialization/deserialization.
+ * Used in saving/loading the tile map and in sending map data over the
+ * network.
  */
 struct TileSnapshot
 {

@@ -37,9 +37,7 @@ void PlayerMovementSystem::processMovements()
     // Save the old position.
     PreviousPosition& previousPosition
         = registry.get<PreviousPosition>(world.playerEntity);
-    previousPosition.x = currentPosition.x;
-    previousPosition.y = currentPosition.y;
-    previousPosition.z = currentPosition.z;
+    previousPosition = currentPosition;
 
     if (!Config::RUN_OFFLINE) {
         // Receive any player entity updates from the server.
@@ -56,9 +54,7 @@ void PlayerMovementSystem::processMovements()
 
             // Check if there was a mismatch between the positions we had and
             // where the server thought we should be.
-            if ((previousPosition.x != currentPosition.x)
-                || (previousPosition.y != currentPosition.y)
-                || (previousPosition.z != currentPosition.z)) {
+            if (previousPosition != currentPosition) {
                 LOG_INFO("Predicted position mismatched after replay: (%.6f, "
                          "%.6f) -> (%.6f, %.6f)",
                          previousPosition.x, previousPosition.y,

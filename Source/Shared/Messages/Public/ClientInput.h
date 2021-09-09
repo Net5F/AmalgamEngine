@@ -6,7 +6,9 @@
 namespace AM
 {
 /**
- * This struct represents a client's input state on a given tick.
+ * Contains a client's input state on a given tick.
+ *
+ * Used by clients for requesting input changes on the server.
  */
 struct ClientInput {
     //--------------------------------------------------------------------------

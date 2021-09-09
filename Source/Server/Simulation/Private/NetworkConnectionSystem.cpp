@@ -62,7 +62,7 @@ void NetworkConnectionSystem::processConnectEvents()
         registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
         registry.emplace<Input>(newEntity);
         registry.emplace<ClientSimData>(
-            newEntity, clientNetworkID, false,
+            newEntity, clientNetworkID, false, true,
             AreaOfInterest{(SharedConfig::SCREEN_WIDTH
                             + SharedConfig::AOI_BUFFER_DISTANCE),
                            (SharedConfig::SCREEN_HEIGHT

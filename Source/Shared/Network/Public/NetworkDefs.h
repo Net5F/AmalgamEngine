@@ -92,10 +92,11 @@ enum class NetworkResult {
 enum class MessageType : Uint8 {
     /** Used for initialization, indicates the value hasn't been set. */
     NotSet = 0,
-    ConnectionResponse = 1,
-    EntityUpdate = 2,
-    ClientInputs = 3,
-    Heartbeat = 4,
+    Heartbeat = 1,
+    ConnectionResponse = 2,
+    EntityUpdate = 3,
+    ClientInputs = 4,
+    UpdateChunks = 5,
 };
 
 /**

@@ -52,7 +52,7 @@ public:
     /**
      * Gets a const reference to the tile at the given coordinates.
      */
-    const Tile& get(unsigned int x, unsigned int y) const;
+    const Tile& getTile(unsigned int x, unsigned int y) const;
 
     /**
      * Returns the length, in chunks, of the map's X axis.
@@ -86,6 +86,15 @@ public:
     void save(const std::string& fileName);
 
 private:
+    /**
+     * Returns the index in the tiles vector where the tile with the given
+     * coordinates can be found.
+     */
+    inline unsigned int linearizeTileIndex(int x, int y) const
+    {
+        return (y * mapXLengthTiles) + x;
+    }
+
     /** The version of the map format. Kept as just a 16-bit int for now, we
         can see later if we care to make it more complicated. */
     static constexpr uint16_t MAP_FORMAT_VERSION = 0;
@@ -110,7 +119,7 @@ private:
     /** The total number of tiles that are in this map. */
     unsigned int tileCount;
 
-    /** The tiles that make up this map. */
+    /** The tiles that make up this map, stored in row-major order. */
     std::vector<Tile> tiles;
 
     /** Used to get sprites while constructing tiles. */

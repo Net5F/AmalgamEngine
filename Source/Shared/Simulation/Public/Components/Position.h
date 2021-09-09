@@ -1,7 +1,12 @@
 #pragma once
 
+#include "TileIndex.h"
+#include "ChunkIndex.h"
+#include "SharedConfig.h"
+
 namespace AM
 {
+
 /**
  * Represents the top left point of an entity's position in the world.
  */
@@ -14,6 +19,36 @@ public:
     float x{0};
     float y{0};
     float z{0};
+
+    /**
+     * Returns the coordinates of the tile that this position is within.
+     */
+    TileIndex asTileIndex()
+    {
+        return {(static_cast<int>(x / SharedConfig::TILE_WORLD_WIDTH))
+            , (static_cast<int>(y / SharedConfig::TILE_WORLD_WIDTH))};
+    }
+
+    /**
+     * Returns the coordinates of the chunk that this position is within.
+     */
+    ChunkIndex asChunkIndex()
+    {
+        return {(static_cast<int>((x / SharedConfig::TILE_WORLD_WIDTH)
+                 / SharedConfig::CHUNK_WIDTH))
+            , (static_cast<int>((y / SharedConfig::TILE_WORLD_WIDTH)
+                / SharedConfig::CHUNK_WIDTH))};
+    }
+
+    bool operator==(const Position& other)
+    {
+        return (x == other.x) && (y == other.y) && (z == other.z);
+    }
+
+    bool operator!=(const Position& other)
+    {
+        return (x != other.x) || (y != other.y) || (z != other.z);
+    }
 };
 
 template<typename S>

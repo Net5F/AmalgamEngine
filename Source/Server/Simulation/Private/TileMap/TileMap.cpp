@@ -48,14 +48,13 @@ void TileMap::addSpriteLayer(unsigned int tileX, unsigned int tileY,
     if (sprite.hasBoundingBox) {
         Position tilePosition{
             static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),
-            static_cast<float>(tileY * SharedConfig::TILE_WORLD_HEIGHT), 0};
+            static_cast<float>(tileY * SharedConfig::TILE_WORLD_WIDTH), 0};
         worldBounds
             = Transforms::modelToWorld(sprite.modelBounds, tilePosition);
     }
 
     // Push the sprite into the tile's layers vector.
-    unsigned int linearizedIndex = (tileY * mapXLengthTiles) + tileX;
-    Tile& tile = tiles[linearizedIndex];
+    Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
     tile.spriteLayers.emplace_back(&sprite, worldBounds);
 }
 
@@ -67,21 +66,19 @@ void TileMap::replaceSpriteLayer(unsigned int tileX, unsigned int tileY,
     if (sprite.hasBoundingBox) {
         Position tilePosition{
             static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),
-            static_cast<float>(tileY * SharedConfig::TILE_WORLD_HEIGHT), 0};
+            static_cast<float>(tileY * SharedConfig::TILE_WORLD_WIDTH), 0};
         worldBounds
             = Transforms::modelToWorld(sprite.modelBounds, tilePosition);
     }
 
     // Replace the sprite.
-    unsigned int linearizedIndex = (tileY * mapXLengthTiles) + tileX;
-    Tile& tile = tiles[linearizedIndex];
+    Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
     tile.spriteLayers[layerIndex] = {&sprite, worldBounds};
 }
 
-const Tile& TileMap::get(unsigned int x, unsigned int y) const
+const Tile& TileMap::getTile(unsigned int x, unsigned int y) const
 {
-    unsigned int linearizedIndex = (y * mapXLengthTiles) + x;
-    return tiles[linearizedIndex];
+    return tiles[linearizeTileIndex(x, y)];
 }
 
 unsigned int TileMap::xLengthChunks() const
@@ -170,42 +167,42 @@ void TileMap::save(const std::string& fileName)
     mapSnapshot.chunks.resize(chunkCount);
 
     // Save our tiles into the snapshot as chunks.
-    unsigned int startIndex{0};
+    unsigned int startLinearTileIndex{0};
     unsigned int chunksProcessed{0};
     for (unsigned int i = 0; i < chunkCount; ++i) {
         ChunkSnapshot& chunk{mapSnapshot.chunks[i]};
 
         // Process each tile in this chunk.
-        unsigned int nextTileIndex{startIndex};
+        unsigned int nextLinearTileIndex{startLinearTileIndex};
         unsigned int tilesProcessed{0};
         for (unsigned int j = 0; j < SharedConfig::CHUNK_TILE_COUNT; ++j) {
-            // Copy all of this tile's layers.
+            // Copy all of the tile's layers to the snapshot.
             TileSnapshot& tile{chunk.tiles[j]};
-            for (Tile::SpriteLayer& layer : tiles[nextTileIndex].spriteLayers) {
+            for (Tile::SpriteLayer& layer : tiles[nextLinearTileIndex].spriteLayers) {
                 unsigned int paletteId{chunk.getPaletteIndex(layer.sprite->stringId)};
                 tile.spriteLayers.push_back(paletteId);
             }
 
             // Increment to the next tile.
-            nextTileIndex++;
+            nextLinearTileIndex++;
 
             // If we've processed all the tiles in this row, increment to the
             // next row.
             tilesProcessed++;
             if (tilesProcessed == SharedConfig::CHUNK_WIDTH) {
-                nextTileIndex += (mapXLengthTiles - SharedConfig::CHUNK_WIDTH);
+                nextLinearTileIndex += (mapXLengthTiles - SharedConfig::CHUNK_WIDTH);
                 tilesProcessed = 0;
             }
         }
 
         // Increment to the next chunk.
-        startIndex += SharedConfig::CHUNK_WIDTH;
+        startLinearTileIndex += SharedConfig::CHUNK_WIDTH;
 
         // If we've processed all the chunks in this row, increment to the
         // next row.
         chunksProcessed++;
         if (chunksProcessed == mapXLengthChunks) {
-            startIndex += ((SharedConfig::CHUNK_WIDTH - 1) * mapXLengthTiles);
+            startLinearTileIndex += ((SharedConfig::CHUNK_WIDTH - 1) * mapXLengthTiles);
             chunksProcessed = 0;
         }
     }

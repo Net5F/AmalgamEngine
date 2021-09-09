@@ -2,12 +2,14 @@ target_sources(Shared
     PRIVATE
         Private/MessageTools.cpp
     PUBLIC
-        Public/MessageTools.h
+        Public/ChunkWireSnapshot.h
+        Public/ClientInput.h
         Public/ConnectionResponse.h
         Public/EntityState.h
         Public/EntityUpdate.h
         Public/Heartbeat.h
-        Public/ClientInput.h
+        Public/MessageTools.h
+        Public/UpdateChunks.h
 )
 
 target_include_directories(Shared

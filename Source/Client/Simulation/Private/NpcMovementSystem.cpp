@@ -189,13 +189,11 @@ void NpcMovementSystem::moveAllNpcs()
     for (entt::entity entity : group) {
         Input& input = group.get<Input>(entity);
         Position& position = group.get<Position>(entity);
-        PreviousPosition& previousPos = group.get<PreviousPosition>(entity);
+        PreviousPosition& previousPosition = group.get<PreviousPosition>(entity);
         Movement& movement = group.get<Movement>(entity);
 
         // Save their old position.
-        previousPos.x = position.x;
-        previousPos.y = position.y;
-        previousPos.z = position.z;
+        previousPosition = position;
 
         // Process their movement.
         MovementHelpers::moveEntity(position, movement, input.inputStates,

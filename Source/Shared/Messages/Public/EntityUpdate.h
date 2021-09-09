@@ -9,7 +9,7 @@
 namespace AM
 {
 /**
- * This struct represents all new entity data for a single sim tick.
+ * Contains all new entity data for a single sim tick.
  */
 struct EntityUpdate {
     /** The tick that this EntityUpdate corresponds to. */

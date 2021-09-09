@@ -9,9 +9,9 @@
 namespace AM
 {
 /**
- * This struct represents the data for a single entity.
- * Normally an entity's data lives in the ECS, so this is only really useful for
- * messaging.
+ * Contains the state data for a single entity.
+ *
+ * Used for sending state updates to clients.
  */
 struct EntityState {
     /** The entity that this state belongs to. */
