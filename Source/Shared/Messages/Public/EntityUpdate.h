@@ -15,7 +15,7 @@ struct EntityUpdate {
     /** The tick that this EntityUpdate corresponds to. */
     Uint32 tickNum{0};
 
-    /** All updated entity data. */
+    /** Data for all of the entities that updated on this tick. */
     std::vector<EntityState> entityStates;
 };
 

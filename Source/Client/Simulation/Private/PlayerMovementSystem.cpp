@@ -40,7 +40,7 @@ void PlayerMovementSystem::processMovements()
     previousPosition = currentPosition;
 
     if (!Config::RUN_OFFLINE) {
-        // Receive any player entity updates from the server.
+        // Apply any player entity updates from the server.
         PlayerState& playerState
             = registry.get<PlayerState>(world.playerEntity);
         Uint32 latestReceivedTick
@@ -111,15 +111,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         }
 
         /* Apply the received movement and position. */
-        const Movement& receivedMovement = playerUpdate->movement;
-        currentMovement.velX = receivedMovement.velX;
-        currentMovement.velY = receivedMovement.velY;
-        currentMovement.velZ = receivedMovement.velZ;
-
-        const Position& receivedPosition = playerUpdate->position;
-        currentPosition.x = receivedPosition.x;
-        currentPosition.y = receivedPosition.y;
-        currentPosition.z = receivedPosition.z;
+        currentMovement = playerUpdate->movement;
+        currentPosition = playerUpdate->position;
 
         /* Check if the input is mismatched. */
         // Check that the diff is valid.

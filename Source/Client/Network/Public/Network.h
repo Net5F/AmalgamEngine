@@ -58,7 +58,7 @@ public:
      *
      * @param timeoutMs  How long to wait. 0 for no wait, -1 for indefinite.
      *                   Defaults to 0.
-     * @return A waiting message, else nullptr.
+     * @return A message if one is waiting, else nullptr.
      */
     std::unique_ptr<ConnectionResponse>
         receiveConnectionResponse(Uint64 timeoutMs = 0);
