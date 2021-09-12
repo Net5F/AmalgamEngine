@@ -8,6 +8,7 @@ target_sources(Shared
         Public/EntityState.h
         Public/EntityUpdate.h
         Public/Heartbeat.h
+        Public/Message.h
         Public/MessageTools.h
         Public/UpdateChunks.h
 )

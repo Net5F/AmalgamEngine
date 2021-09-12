@@ -2,6 +2,7 @@
 #include "Network.h"
 #include "ClientNetworkDefs.h"
 #include "Config.h"
+#include "Serialize.h"
 #include "MessageTools.h"
 #include "ConnectionResponse.h"
 #include "ClientInput.h"
@@ -103,7 +104,7 @@ void WorldSim::sendNextInput()
         = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
     unsigned int startIndex = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
     std::size_t messageSize
-        = MessageTools::serialize(*messageBuffer, clientInput, startIndex);
+        = Serialize::toBuffer(*messageBuffer, clientInput, startIndex);
 
     // Fill the buffer with the appropriate message header.
     MessageTools::fillMessageHeader(MessageType::ClientInputs, messageSize,

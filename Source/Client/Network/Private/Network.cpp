@@ -83,7 +83,7 @@ void Network::send(const BinaryBufferSharedPtr& message)
         LOG_ERROR("Tried to send while server is disconnected.");
     }
 
-    // Fill the message with the header (constructMessage() leaves
+    // Fill the message with the header (fillMessageHeader() leaves
     // CLIENT_HEADER_SIZE bytes empty at the front for us to fill.)
     message->at(ClientHeaderIndex::AdjustmentIteration) = adjustmentIteration;
 
