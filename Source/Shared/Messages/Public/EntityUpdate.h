@@ -1,7 +1,6 @@
 #pragma once
 
 #include "EntityState.h"
-#include "Message.h"
 #include "SharedConfig.h"
 #include <SDL2/SDL_stdinc.h>
 #include <vector>
