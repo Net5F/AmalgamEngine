@@ -1,7 +1,4 @@
 #include "Network.h"
-#include "Peer.h"
-#include "MessageTools.h"
-#include "Serialize.h"
 #include "EntityUpdate.h"
 #include "ConnectionResponse.h"
 #include "Heartbeat.h"
@@ -74,29 +71,6 @@ void Network::tick()
                 ticksSinceNetstatsLog = 0;
             }
         }
-    }
-}
-
-void Network::send(const BinaryBufferSharedPtr& message)
-{
-    if ((server == nullptr) || !(server->isConnected())) {
-        LOG_ERROR("Tried to send while server is disconnected.");
-    }
-
-    // Fill the message with the header (fillMessageHeader() leaves
-    // CLIENT_HEADER_SIZE bytes empty at the front for us to fill.)
-    message->at(ClientHeaderIndex::AdjustmentIteration) = adjustmentIteration;
-
-    // Send the message.
-    NetworkResult result = server->send(message);
-    if (result == NetworkResult::Success) {
-        messagesSentSinceTick++;
-
-        // Record the number of sent bytes.
-        NetworkStats::recordBytesSent(message->size());
-    }
-    else {
-        LOG_ERROR("Message send failed.");
     }
 }
 
@@ -218,26 +192,30 @@ void Network::setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled)
     netstatsLoggingEnabled = inNetstatsLoggingEnabled;
 }
 
+void Network::send(const BinaryBufferSharedPtr& message)
+{
+    if ((server == nullptr) || !(server->isConnected())) {
+        LOG_ERROR("Tried to send while server is disconnected.");
+    }
+
+    // Send the message.
+    NetworkResult result = server->send(message);
+    if (result == NetworkResult::Success) {
+        messagesSentSinceTick++;
+
+        // Record the number of sent bytes.
+        NetworkStats::recordBytesSent(message->size());
+    }
+    else {
+        LOG_ERROR("Message send failed.");
+    }
+}
+
 void Network::sendHeartbeatIfNecessary()
 {
     if (messagesSentSinceTick == 0) {
-        // Prepare a heartbeat.
-        Heartbeat heartbeat{};
-        heartbeat.tickNum = *currentTickPtr;
-
-        // Serialize the heartbeat message.
-        BinaryBufferSharedPtr messageBuffer
-            = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
-        unsigned int startIndex = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
-        std::size_t messageSize
-            = Serialize::toBuffer(*messageBuffer, heartbeat, startIndex);
-
-        // Fill the buffer with the appropriate message header.
-        MessageTools::fillMessageHeader(MessageType::Heartbeat, messageSize,
-                                        messageBuffer, CLIENT_HEADER_SIZE);
-
-        // Send the message.
-        send(messageBuffer);
+        // Send the heartbeat message.
+        serializeAndSend<Heartbeat>({*currentTickPtr});
     }
 
     messagesSentSinceTick = 0;

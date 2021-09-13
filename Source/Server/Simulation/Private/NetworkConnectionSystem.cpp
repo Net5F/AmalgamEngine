@@ -4,7 +4,6 @@
 #include "Network.h"
 #include "SharedConfig.h"
 #include "Serialize.h"
-#include "MessageTools.h"
 #include "ConnectionResponse.h"
 #include "Input.h"
 #include "Position.h"
@@ -116,18 +115,8 @@ void NetworkConnectionSystem::sendConnectionResponse(NetworkID networkID,
     ConnectionResponse connectionResponse{currentTick, newEntity, spawnX,
                                           spawnY};
 
-    // Serialize the connection response message.
-    BinaryBufferSharedPtr messageBuffer
-        = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
-    std::size_t messageSize = Serialize::toBuffer(
-        *messageBuffer, connectionResponse, MESSAGE_HEADER_SIZE);
-
-    // Fill the buffer with the appropriate message header.
-    MessageTools::fillMessageHeader(MessageType::ConnectionResponse,
-                                    messageSize, messageBuffer, 0);
-
-    // Send the message.
-    network.send(networkID, messageBuffer, currentTick);
+    // Send the connection response message.
+    network.serializeAndSend(networkID, connectionResponse, currentTick);
 }
 
 } // namespace Server

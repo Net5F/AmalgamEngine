@@ -12,6 +12,10 @@ namespace AM
  * Contains all new entity data for a single sim tick.
  */
 struct EntityUpdate {
+    // The MessageType enum value that this message corresponds to.
+    // Declares this struct as a message that the Network can send and receive.
+    static constexpr MessageType MESSAGE_TYPE = MessageType::EntityUpdate;
+
     /** The tick that this EntityUpdate corresponds to. */
     Uint32 tickNum{0};
 

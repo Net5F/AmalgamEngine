@@ -34,19 +34,6 @@ void Network::tick()
     }
 }
 
-void Network::send(NetworkID networkID, const BinaryBufferSharedPtr& message,
-                   Uint32 messageTick)
-{
-    // Acquire a read lock before running through the client map.
-    std::shared_lock readLock(clientMapMutex);
-
-    // Check that the client still exists, queue the message if so.
-    auto clientPair = clientMap.find(networkID);
-    if (clientPair != clientMap.end()) {
-        clientPair->second->queueMessage(message, messageTick);
-    }
-}
-
 void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
 {
     /* Process all messages in the queue. */
@@ -59,8 +46,8 @@ void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
 
         // Process the message.
         switch (clientMessage.message.messageType) {
-            case MessageType::ClientInputs: {
-                tickDiff = handleClientInputs(clientMessage, messageBuffer);
+            case MessageType::ClientInput: {
+                tickDiff = handleClientInput(clientMessage, messageBuffer);
                 break;
             }
             case MessageType::Heartbeat: {
@@ -126,36 +113,22 @@ void Network::registerCurrentTickPtr(
     currentTickPtr = inCurrentTickPtr;
 }
 
-BinaryBufferSharedPtr Network::constructMessage(MessageType type,
-                                                Uint8* messageBuffer,
-                                                std::size_t size)
-{
-    if ((MESSAGE_HEADER_SIZE + size) > Peer::MAX_MESSAGE_SIZE) {
-        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u", size,
-                  Peer::MAX_MESSAGE_SIZE);
-    }
-
-    // Allocate a buffer that can hold the Uint8 type, Uint16 size, and the
-    // payload.
-    BinaryBufferSharedPtr dynamicBuffer
-        = std::make_shared<std::vector<Uint8>>(MESSAGE_HEADER_SIZE + size);
-
-    // Copy the type into the buffer.
-    dynamicBuffer->at(0) = static_cast<Uint8>(type);
-
-    // Copy the size into the buffer.
-    _SDLNet_Write16(size, dynamicBuffer->data());
-
-    // Copy the message into the buffer.
-    std::copy(messageBuffer, (messageBuffer + size),
-              MESSAGE_HEADER_SIZE + dynamicBuffer->data());
-
-    return dynamicBuffer;
-}
-
 Uint32 Network::getCurrentTick()
 {
     return *currentTickPtr;
+}
+
+void Network::send(NetworkID networkID, const BinaryBufferSharedPtr& message,
+                   Uint32 messageTick)
+{
+    // Acquire a read lock before running through the client map.
+    std::shared_lock readLock(clientMapMutex);
+
+    // Check that the client still exists, queue the message if so.
+    auto clientPair = clientMap.find(networkID);
+    if (clientPair != clientMap.end()) {
+        clientPair->second->queueMessage(message, messageTick);
+    }
 }
 
 void Network::logNetworkStatistics()
@@ -171,8 +144,8 @@ void Network::logNetworkStatistics()
              bytesSentPerSecond, bytesReceivedPerSecond);
 }
 
-Sint64 Network::handleClientInputs(ClientMessage& clientMessage,
-                                   BinaryBufferPtr& messageBuffer)
+Sint64 Network::handleClientInput(ClientMessage& clientMessage,
+                                  BinaryBufferPtr& messageBuffer)
 {
     // Deserialize the message.
     std::unique_ptr<ClientInput> clientInput = std::make_unique<ClientInput>();

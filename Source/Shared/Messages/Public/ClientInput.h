@@ -1,7 +1,8 @@
 #pragma once
 
-#include "SDL_stdinc.h"
+#include "NetworkDefs.h"
 #include "Input.h"
+#include <SDL2/SDL_stdinc.h>
 
 namespace AM
 {
@@ -11,6 +12,10 @@ namespace AM
  * Used by clients for requesting input changes on the server.
  */
 struct ClientInput {
+    // The enum value that this message corresponds to.
+    // Declares this struct as a message that the Network can send and receive.
+    static constexpr MessageType MESSAGE_TYPE = MessageType::ClientInput;
+
     //--------------------------------------------------------------------------
     // Replicated data
     //--------------------------------------------------------------------------

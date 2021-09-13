@@ -1,6 +1,4 @@
 target_sources(Shared
-    PRIVATE
-        Private/MessageTools.cpp
     PUBLIC
         Public/ChunkWireSnapshot.h
         Public/ClientInput.h
@@ -9,13 +7,10 @@ target_sources(Shared
         Public/EntityUpdate.h
         Public/ExplicitConfirmation.h
         Public/Heartbeat.h
-        Public/MessageTools.h
         Public/UpdateChunks.h
 )
 
 target_include_directories(Shared
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/Private
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 )

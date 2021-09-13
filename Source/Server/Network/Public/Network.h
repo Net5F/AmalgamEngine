@@ -4,6 +4,9 @@
 #include "ServerNetworkDefs.h"
 #include "SharedConfig.h"
 #include "ClientHandler.h"
+#include "Peer.h"
+#include "Serialize.h"
+#include "ByteTools.h"
 #include "MessageSorter.h"
 #include "ClientInput.h"
 #include "readerwriterqueue.h"
@@ -16,7 +19,6 @@
 namespace AM
 {
 class Acceptor;
-class Peer;
 
 namespace Server
 {
@@ -31,22 +33,24 @@ public:
     Network();
 
     /**
-     * Sends any queued messages over the network.
+     * Sends all queued messages over the network.
+     *
+     * Also logs network statistics if it's time to do so.
      */
     void tick();
 
     /**
-     * Queues a message to be sent the next time sendWaitingMessages is called.
-     * @throws std::out_of_range if id is not in the clients map.
+     * Sends bytes over the network.
+     * Errors if the server is disconnected.
      *
      * @param networkID  The client to send the message to.
-     * @param message  The message to send.
-     * @param messageTick  Optional, for messages that are associated with a
-     *                     tick number. Used to update the client's
-     *                     latestSentSimTick.
+     * @param messageStruct  A structure that defines MESSAGE_TYPE and has an
+     *                       associated serialize() function.
+     * @param messageTick  Optional, used in certain cases to update the
+     *                     Client's latestSentSimTick.
      */
-    void send(NetworkID networkID, const BinaryBufferSharedPtr& message,
-              Uint32 messageTick = 0);
+    template<typename T>
+    void serializeAndSend(NetworkID networkID, const T& messageStruct, Uint32 messageTick = 0);
 
     /**
      * Deserializes and routes received client messages.
@@ -82,18 +86,6 @@ public:
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
     /**
-     * Allocates and fills a dynamic buffer with a message header and data
-     * payload.
-     *
-     * The first byte of the buffer will contain the message type as a Uint8.
-     * The next 2 bytes will contain the message size as a Uint16.
-     * The rest will have the data from the given messageBuffer copied into it.
-     */
-    static BinaryBufferSharedPtr constructMessage(MessageType type,
-                                                  Uint8* messageBuffer,
-                                                  std::size_t size);
-
-    /**
      * Returns how much time in seconds is left until the next heartbeat.
      */
     double getTimeTillNextHeartbeat();
@@ -103,16 +95,28 @@ public:
 
 private:
     /**
+     * Queues a message to be sent the next time sendWaitingMessages is called.
+     * @throws std::out_of_range if id is not in the clients map.
+     *
+     * @param networkID  The client to send the message to.
+     * @param message  The message to send.
+     * @param messageTick  Optional, used when sending entity movement updates
+     *                     to update the Client's latestSentSimTick.
+     */
+    void send(NetworkID networkID, const BinaryBufferSharedPtr& message,
+              Uint32 messageTick = 0);
+
+    /**
      * Logs the network stats such as bytes sent/received per second.
      */
     void logNetworkStatistics();
 
     /**
-     * Handles a received ClientInputs message.
+     * Handles a received ClientInput message.
      * @return The tick diff that inputMessageSorter.push() returned.
      */
-    Sint64 handleClientInputs(ClientMessage& clientMessage,
-                              BinaryBufferPtr& messageBuffer);
+    Sint64 handleClientInput(ClientMessage& clientMessage,
+                             BinaryBufferPtr& messageBuffer);
 
     /**
      * Handles a received Heartbeat message.
@@ -156,6 +160,43 @@ private:
     /** Pointer to the game's current tick. */
     const std::atomic<Uint32>* currentTickPtr;
 };
+
+template<typename T>
+void Network::serializeAndSend(NetworkID networkID, const T& messageStruct, Uint32 messageTick)
+{
+    // Allocate the buffer.
+    BinaryBufferSharedPtr messageBuffer
+            = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
+
+    // Serialize the message struct into the buffer, leaving room for the
+    // header.
+    std::size_t messageSize
+            = Serialize::toBuffer(*messageBuffer, messageStruct, MESSAGE_HEADER_SIZE);
+
+    // Check that the message isn't too big.
+    const unsigned int totalMessageSize
+        = MESSAGE_HEADER_SIZE + messageSize;
+    if ((totalMessageSize > Peer::MAX_MESSAGE_SIZE)
+        || (messageSize > UINT16_MAX)) {
+        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
+                  totalMessageSize, Peer::MAX_MESSAGE_SIZE);
+    }
+
+    // Copy the type into the buffer.
+    // TODO: Add a nice compile-time message if T doesn't have MESSAGE_TYPE.
+    messageBuffer->at(MessageHeaderIndex::MessageType)
+        = static_cast<Uint8>(T::MESSAGE_TYPE);
+
+    // Copy the messageSize into the buffer.
+    ByteTools::write16(messageSize, (messageBuffer->data()
+                                  + MessageHeaderIndex::Size));
+
+    // Shrink the buffer to fit.
+    messageBuffer->resize(totalMessageSize);
+
+    // Send the message.
+    send(networkID, messageBuffer, messageTick);
+}
 
 } // namespace Server
 } // namespace AM

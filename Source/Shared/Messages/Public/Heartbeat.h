@@ -1,6 +1,7 @@
 #pragma once
 
-#include "SDL_stdinc.h"
+#include "NetworkDefs.h"
+#include <SDL2/SDL_stdinc.h>
 
 namespace AM
 {
@@ -9,6 +10,10 @@ namespace AM
  * no data needed to be sent.
  */
 struct Heartbeat {
+    // The MessageType enum value that this message corresponds to.
+    // Declares this struct as a message that the Network can send and receive.
+    static constexpr MessageType MESSAGE_TYPE = MessageType::Heartbeat;
+
     /** The tick that this heartbeat was processed on. */
     Uint32 tickNum{0};
 };

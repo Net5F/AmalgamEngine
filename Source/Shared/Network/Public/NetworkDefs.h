@@ -94,7 +94,7 @@ enum class MessageType : Uint8 {
     Heartbeat = 2,
     ConnectionResponse = 3,
     EntityUpdate = 4,
-    ClientInputs = 5,
+    ClientInput = 5,
     UpdateChunks = 6,
 };
 

@@ -9,7 +9,6 @@
 #include "UpdateChunks.h"
 #include "SharedConfig.h"
 #include "Serialize.h"
-#include "MessageTools.h"
 #include "Log.h"
 #include "Ignore.h"
 #include <SDL2/SDL_rect.h>
@@ -81,18 +80,8 @@ void ChunkStreamingSystem::sendAllInRangeChunks(const ChunkIndex& currentChunk
         }
     }
 
-    // Serialize the UpdateChunks message.
-    BinaryBufferSharedPtr messageBuffer
-        = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
-    std::size_t messageSize = Serialize::toBuffer(
-        *messageBuffer, updateChunks, MESSAGE_HEADER_SIZE);
-
-    // Fill the buffer with the appropriate message header.
-    MessageTools::fillMessageHeader(MessageType::UpdateChunks, messageSize,
-                                    messageBuffer, 0);
-
-    // Send the message.
-    network.send(netID, messageBuffer);
+    // Send the chunk update message.
+    network.serializeAndSend(netID, updateChunks);
     LOG_INFO("Sent initial UpdateChunks.");
 }
 
@@ -129,18 +118,8 @@ void ChunkStreamingSystem::sendNewInRangeChunks(const ChunkIndex& previousChunk
         }
     }
 
-    // Serialize the UpdateChunks message.
-    BinaryBufferSharedPtr messageBuffer
-        = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
-    std::size_t messageSize = Serialize::toBuffer(
-        *messageBuffer, updateChunks, MESSAGE_HEADER_SIZE);
-
-    // Fill the buffer with the appropriate message header.
-    MessageTools::fillMessageHeader(MessageType::UpdateChunks, messageSize,
-                                    messageBuffer, 0);
-
-    // Send the message.
-    network.send(netID, messageBuffer);
+    // Send the chunk update message.
+    network.serializeAndSend(netID, updateChunks);
     LOG_INFO("Sent UpdateChunks.");
 }
 

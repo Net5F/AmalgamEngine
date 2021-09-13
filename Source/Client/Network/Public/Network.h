@@ -4,6 +4,9 @@
 #include "NetworkDefs.h"
 #include "ClientNetworkDefs.h"
 #include "MessageHandler.h"
+#include "Peer.h"
+#include "Serialize.h"
+#include "ByteTools.h"
 #include "Timer.h"
 #include "Log.h"
 #include "entt/entity/registry.hpp"
@@ -14,7 +17,6 @@
 
 namespace AM
 {
-class Peer;
 class ConnectionResponse;
 class EntityUpdate;
 
@@ -49,8 +51,12 @@ public:
     /**
      * Sends bytes over the network.
      * Errors if the server is disconnected.
+     *
+     * @param messageStruct  A structure that defines MESSAGE_TYPE and has an
+     *                       associated serialize() function.
      */
-    void send(const BinaryBufferSharedPtr& message);
+    template<typename T>
+    void serializeAndSend(const T& messageStruct);
 
     /**
      * Returns a message if there are any in the associated queue.
@@ -91,6 +97,12 @@ public:
     void setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled);
 
 private:
+    /**
+     * Sends bytes over the network.
+     * Errors if the server is disconnected.
+     */
+    void send(const BinaryBufferSharedPtr& message);
+
     /**
      * If we haven't sent any messages since the last network tick, sends a
      * heartbeat.
@@ -181,6 +193,46 @@ private:
     /** The number of ticks since we last logged our network statistics. */
     unsigned int ticksSinceNetstatsLog;
 };
+
+template<typename T>
+void Network::serializeAndSend(const T& messageStruct)
+{
+    // Allocate the buffer.
+    BinaryBufferSharedPtr messageBuffer
+            = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
+
+    // Serialize the message struct into the buffer, leaving room for the
+    // headers.
+    std::size_t messageSize
+            = Serialize::toBuffer(*messageBuffer, messageStruct, (CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE));
+
+    // Check that the message isn't too big.
+    const unsigned int totalMessageSize
+        = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE + messageSize;
+    if ((totalMessageSize > Peer::MAX_MESSAGE_SIZE)
+        || (messageSize > UINT16_MAX)) {
+        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
+                  totalMessageSize, Peer::MAX_MESSAGE_SIZE);
+    }
+
+    // Copy the adjustment iteration into the client header.
+    messageBuffer->at(ClientHeaderIndex::AdjustmentIteration) = adjustmentIteration;
+
+    // Copy the message type into the message header.
+    // TODO: Add a nice compile-time message if T doesn't have MESSAGE_TYPE.
+    messageBuffer->at(CLIENT_HEADER_SIZE + MessageHeaderIndex::MessageType)
+        = static_cast<Uint8>(T::MESSAGE_TYPE);
+
+    // Copy the message size into the message header.
+    ByteTools::write16(messageSize, (messageBuffer->data() + CLIENT_HEADER_SIZE
+                                  + MessageHeaderIndex::Size));
+
+    // Shrink the buffer to fit.
+    messageBuffer->resize(totalMessageSize);
+
+    // Send the message.
+    send(messageBuffer);
+}
 
 } // namespace Client
 } // namespace AM

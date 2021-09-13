@@ -3,7 +3,6 @@
 #include "World.h"
 #include "Network.h"
 #include "Serialize.h"
-#include "MessageTools.h"
 #include "EntityUpdate.h"
 #include "Input.h"
 #include "Position.h"
@@ -102,18 +101,8 @@ void NetworkUpdateSystem::sendUpdate(ClientSimData& client,
         // Finish filling the EntityUpdate.
         entityUpdate.tickNum = sim.getCurrentTick();
 
-        // Serialize the EntityUpdate.
-        BinaryBufferSharedPtr messageBuffer
-            = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
-        std::size_t messageSize = Serialize::toBuffer(
-            *messageBuffer, entityUpdate, MESSAGE_HEADER_SIZE);
-
-        // Fill the buffer with the appropriate message header.
-        MessageTools::fillMessageHeader(MessageType::EntityUpdate, messageSize,
-                                        messageBuffer, 0);
-
-        // Send the message.
-        network.send(client.netID, messageBuffer, entityUpdate.tickNum);
+        // Send the entity update message.
+        network.serializeAndSend(client.netID, entityUpdate, entityUpdate.tickNum);
     }
 }
 

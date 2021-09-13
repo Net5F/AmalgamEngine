@@ -80,8 +80,6 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     NetworkStats::recordBytesSent(currentIndex);
 
     // Send the message.
-    // Note: If there were no waiting messages, we still send the batch header
-    // to confirm that no changes occurred.
     return peer->send(&(batchBuffer[0]), currentIndex);
 }
 

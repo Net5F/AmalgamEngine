@@ -1,5 +1,6 @@
 #pragma once
 
+#include "NetworkDefs.h"
 #include "ChunkWireSnapshot.h"
 #include <vector>
 
@@ -12,6 +13,10 @@ namespace AM
 struct UpdateChunks
 {
 public:
+    // The MessageType enum value that this message corresponds to.
+    // Declares this struct as a message that the Network can send and receive.
+    static constexpr MessageType MESSAGE_TYPE = MessageType::UpdateChunks;
+
     /** Used as a "we should never hit this" cap on the number of chunks that
         we send at once. Only checked in debug builds. */
     static constexpr unsigned int MAX_CHUNKS = 50;

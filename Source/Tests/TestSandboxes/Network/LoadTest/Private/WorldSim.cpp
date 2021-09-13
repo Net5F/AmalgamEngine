@@ -3,7 +3,6 @@
 #include "ClientNetworkDefs.h"
 #include "Config.h"
 #include "Serialize.h"
-#include "MessageTools.h"
 #include "ConnectionResponse.h"
 #include "ClientInput.h"
 #include "Peer.h"
@@ -99,19 +98,8 @@ void WorldSim::sendNextInput()
         isMovingRight = true;
     }
 
-    // Serialize the client inputs message.
-    BinaryBufferSharedPtr messageBuffer
-        = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
-    unsigned int startIndex = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE;
-    std::size_t messageSize
-        = Serialize::toBuffer(*messageBuffer, clientInput, startIndex);
-
-    // Fill the buffer with the appropriate message header.
-    MessageTools::fillMessageHeader(MessageType::ClientInputs, messageSize,
-                                    messageBuffer, CLIENT_HEADER_SIZE);
-
-    // Send the message.
-    network.send(messageBuffer);
+    // Send the client input message.
+    network.serializeAndSend<ClientInput>(clientInput);
 }
 
 } // End namespace LTC
