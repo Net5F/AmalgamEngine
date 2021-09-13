@@ -2,7 +2,6 @@
 
 #include "NetworkDefs.h"
 #include "Config.h"
-#include "Peer.h"
 #include "CircularBuffer.h"
 #include "Timer.h"
 #include "readerwriterqueue.h"
@@ -89,11 +88,15 @@ private:
     Uint8 getWaitingMessageCount() const;
 
     /**
+     * Adds an explicit confirmation to the current batch.
+     */
+    void addExplicitConfirmation(unsigned int& currentIndex, Uint32 currentTick, Uint8& messageCount);
+
+    /**
      * Fills in the header information for the batch currently being built.
      * @param messageCount  The number of messages going into the current batch.
-     * @param currentTick  The sim's current tick number.
      */
-    void fillHeader(Uint8 messageCount, Uint32 currentTick);
+    void fillBatchHeader(Uint8 messageCount);
 
     //--------------------------------------------------------------------------
     // Connection, Batching
@@ -116,7 +119,7 @@ private:
     moodycamel::ReaderWriterQueue<QueuedMessage> sendQueue;
 
     /** Holds data while we're putting it together to be sent as a batch. */
-    std::array<Uint8, Peer::MAX_MESSAGE_SIZE> batchBuffer;
+    BinaryBuffer batchBuffer;
 
     /** Tracks how long it's been since we've received a message from this
         client. */

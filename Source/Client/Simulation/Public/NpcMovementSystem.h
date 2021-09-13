@@ -12,6 +12,7 @@ namespace Client
 class Simulation;
 class World;
 class Network;
+class SpriteData;
 
 /**
  * Processes NPC (networked player and AI) entity update messages and moves
@@ -20,7 +21,8 @@ class Network;
 class NpcMovementSystem
 {
 public:
-    NpcMovementSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
+    NpcMovementSystem(Simulation& inSim, World& inWorld
+                      , Network& inNetwork, SpriteData& inSpriteData);
 
     /**
      * If we've received data for the appropriate ticks, updates all NPCs.
@@ -70,6 +72,14 @@ private:
     void applyUpdateMessage(
         const std::shared_ptr<const EntityUpdate>& entityUpdate);
 
+    Simulation& sim;
+    World& world;
+    Network& network;
+
+    /** Temporarily used for loading NPC sprite data.
+        When that logic gets moved, this member can be removed. */
+    SpriteData& spriteData;
+
     /** Holds NPC state deltas that are waiting to be processed. */
     std::queue<NpcStateUpdate> stateUpdateQueue;
 
@@ -88,10 +98,6 @@ private:
      * comment) and kept in line with sim tick adjustments.
      */
     int tickReplicationOffset;
-
-    Simulation& sim;
-    World& world;
-    Network& network;
 };
 
 } // namespace Client

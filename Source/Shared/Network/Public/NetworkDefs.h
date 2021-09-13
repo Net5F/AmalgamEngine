@@ -32,10 +32,8 @@ struct ServerHeaderIndex {
         AdjustmentIteration = 1,
         /** Uint8, the number of messages in this batch. */
         MessageCount = 2,
-        /** Uint8, the number of ticks that have passed with no update. */
-        ConfirmedTickCount = 3,
         /** The start of the first message header if one is present. */
-        MessageHeaderStart = 4
+        MessageHeaderStart = 3
     };
 };
 /** The size of a server header in bytes. */
@@ -92,11 +90,12 @@ enum class NetworkResult {
 enum class MessageType : Uint8 {
     /** Used for initialization, indicates the value hasn't been set. */
     NotSet = 0,
-    Heartbeat = 1,
-    ConnectionResponse = 2,
-    EntityUpdate = 3,
-    ClientInputs = 4,
-    UpdateChunks = 5,
+    ExplicitConfirmation = 1,
+    Heartbeat = 2,
+    ConnectionResponse = 3,
+    EntityUpdate = 4,
+    ClientInputs = 5,
+    UpdateChunks = 6,
 };
 
 /**

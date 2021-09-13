@@ -1,6 +1,7 @@
 #include "Client.h"
 #include "Peer.h"
 #include "Log.h"
+#include "ByteTools.h"
 #include "MessageSorter.h"
 #include "NetworkStats.h"
 #include <cmath>
@@ -13,7 +14,7 @@ namespace Server
 Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
 : netID(inNetID)
 , peer(std::move(inPeer))
-, batchBuffer{}
+, batchBuffer(Peer::MAX_MESSAGE_SIZE)
 , latestSentSimTick(0)
 , tickDiffHistory(Config::TICKDIFF_TARGET)
 , numFreshDiffs(0)
@@ -66,8 +67,14 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
         }
     }
 
+    // If we've started talking to this client and don't have any messages to
+    // send on this tick, add an explicit confirmation to this batch.
+    if ((latestSentSimTick != 0) && (latestSentSimTick != (currentTick - 1))) {
+        addExplicitConfirmation(currentIndex, currentTick, messageCount);
+    }
+
     // Fill in the header.
-    fillHeader(messageCount, currentTick);
+    fillBatchHeader(messageCount);
 
     // Record the number of sent bytes.
     NetworkStats::recordBytesSent(currentIndex);
@@ -78,7 +85,36 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     return peer->send(&(batchBuffer[0]), currentIndex);
 }
 
-void Client::fillHeader(Uint8 messageCount, Uint32 currentTick)
+void Client::addExplicitConfirmation(unsigned int& currentIndex
+                                     , Uint32 currentTick, Uint8& messageCount)
+{
+    /* Add the ExplicitConfirmation to the batch.
+       Note: We add it by hand instead of using the normal functions because
+             they're meant for queueing messages and this is post-queue. */
+
+    // Write the message type.
+    batchBuffer[currentIndex] = static_cast<unsigned int>(MessageType::ExplicitConfirmation);
+    currentIndex++;
+
+    // Write the message size.
+    ByteTools::write16(1, &(batchBuffer[currentIndex]));
+    currentIndex += 2;
+
+    // Write the number of ticks we've processed since the last update.
+    // (the tick count increments at the end of a sim tick, so our latest
+    //  sent data is from currentTick - 1).
+    Uint8 confirmedTickCount = (currentTick - 1) - latestSentSimTick;
+    batchBuffer[currentIndex] = confirmedTickCount;
+    currentIndex++;
+
+    // Increment the message count.
+    messageCount++;
+
+    // Update our latestSent tracking to account for the confirmed ticks.
+    latestSentSimTick += confirmedTickCount;
+}
+
+void Client::fillBatchHeader(Uint8 messageCount)
 {
     // Fill in the header adjustment info.
     AdjustmentData tickAdjustment = getTickAdjustment();
@@ -89,22 +125,6 @@ void Client::fillHeader(Uint8 messageCount, Uint32 currentTick)
 
     // Fill in the header message count.
     batchBuffer[ServerHeaderIndex::MessageCount] = messageCount;
-
-    // If we haven't sent data or are caught up, don't try to confirm any ticks.
-    if ((latestSentSimTick == 0) || (latestSentSimTick == currentTick)) {
-        batchBuffer[ServerHeaderIndex::ConfirmedTickCount] = 0;
-        return;
-    }
-    else {
-        // Fill in the number of ticks we've processed since the last update.
-        // (the tick count increments at the end of a sim tick, so our latest
-        //  sent data is from currentTick - 1).
-        Uint8 confirmedTickCount = (currentTick - 1) - latestSentSimTick;
-        batchBuffer[ServerHeaderIndex::ConfirmedTickCount] = confirmedTickCount;
-
-        // Update our latestSent tracking to account for the confirmed ticks.
-        latestSentSimTick += confirmedTickCount;
-    }
 }
 
 Uint8 Client::getWaitingMessageCount() const

@@ -31,7 +31,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , playerInputSystem(*this, world)
 , networkUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, network)
-, npcMovementSystem(*this, world, network)
+, npcMovementSystem(*this, world, network, inSpriteData)
 , cameraSystem(*this, world)
 , currentTick(0)
 {

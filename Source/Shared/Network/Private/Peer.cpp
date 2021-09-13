@@ -1,7 +1,8 @@
 #include "Peer.h"
 #include "TcpSocket.h"
-#include <SDL2/SDL_stdinc.h>
+#include "ByteTools.h"
 #include "Log.h"
+#include <SDL2/SDL_stdinc.h>
 
 namespace AM
 {
@@ -183,7 +184,7 @@ MessageResult Peer::receiveMessageWait(Uint8* messageBuffer)
     }
 
     // The number of bytes in the upcoming message.
-    Uint16 messageSize = _SDLNet_Read16(&(headerBuf[MessageHeaderIndex::Size]));
+    Uint16 messageSize = ByteTools::read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_MESSAGE_SIZE) {
         LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
                   "MaxSize: %u",
@@ -226,7 +227,7 @@ MessageResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
     }
 
     // The number of bytes in the upcoming message.
-    Uint16 messageSize = _SDLNet_Read16(&(headerBuf[MessageHeaderIndex::Size]));
+    Uint16 messageSize = ByteTools::read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_MESSAGE_SIZE) {
         LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
                   "MaxSize: %u",

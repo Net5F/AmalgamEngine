@@ -7,8 +7,6 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace Server
 {
 /**

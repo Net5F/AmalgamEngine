@@ -280,16 +280,6 @@ void Network::processBatch()
         }
     }
 
-    /* Process any confirmed ticks. */
-    Uint8 confirmedTickCount
-        = headerRecBuffer[ServerHeaderIndex::ConfirmedTickCount];
-    for (unsigned int i = 0; i < confirmedTickCount; ++i) {
-        if (!(messageHandler.npcUpdateQueue.enqueue(
-                {NpcUpdateType::ExplicitConfirmation}))) {
-            LOG_ERROR("Ran out of room in queue and memory allocation failed.");
-        }
-    }
-
     // Record the number of received bytes.
     NetworkStats::recordBytesReceived(bytesReceived);
 }
@@ -306,6 +296,10 @@ void Network::processReceivedMessage(MessageType messageType,
         }
         case MessageType::EntityUpdate: {
             messageHandler.handleEntityUpdate(messageRecBuffer, messageSize);
+            break;
+        }
+        case MessageType::ExplicitConfirmation: {
+            messageHandler.handleExplicitConfirmation(messageRecBuffer, messageSize);
             break;
         }
         case MessageType::UpdateChunks: {

@@ -89,5 +89,24 @@ void MessageHandler::handleEntityUpdate(BinaryBuffer& messageRecBuffer,
     }
 }
 
+void MessageHandler::handleExplicitConfirmation(BinaryBuffer& messageRecBuffer,
+                                        Uint16 messageSize)
+{
+    // We know that ExplicitConfirmation only has a 1B int, but it doesn't
+    // hurt to validate it in debug builds since we're handling it by hand.
+    assert(messageSize == 1);
+
+    // Push confirmations into the NPC update system's queue.
+    // Note: We skip the normal deserialization call since there's just 1
+    //       byte in this message and we're going to handle it immediately.
+    Uint8 confirmedTickCount = messageRecBuffer[0];
+    for (unsigned int i = 0; i < confirmedTickCount; ++i) {
+        if (!(npcUpdateQueue.enqueue(
+                  {NpcUpdateType::ExplicitConfirmation}))) {
+            LOG_ERROR("Ran out of room in queue and memory allocation failed.");
+        }
+    }
+}
+
 } // End namespace Client
 } // End namespace AM

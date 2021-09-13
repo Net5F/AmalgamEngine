@@ -3,6 +3,7 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
+#include "SpriteData.h"
 #include "EntityUpdate.h"
 #include "Name.h"
 #include "Position.h"
@@ -25,13 +26,14 @@ namespace AM
 namespace Client
 {
 NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
-                                     Network& inNetwork)
-: lastReceivedTick(0)
-, lastProcessedTick(0)
-, tickReplicationOffset(-2 * Config::INITIAL_TICK_OFFSET)
-, sim(inSim)
+                                     Network& inNetwork, SpriteData& inSpriteData)
+: sim(inSim)
 , world(inWorld)
 , network(inNetwork)
+, spriteData{inSpriteData}
+, lastReceivedTick(0)
+, lastProcessedTick(0)
+, tickReplicationOffset(-2 * Config::INITIAL_TICK_OFFSET)
 {
     // Init the groups that we'll be using.
     auto group
@@ -231,10 +233,7 @@ void NpcMovementSystem::applyUpdateMessage(
 
             // TODO: Get the sprite info from the server.
             // Note: Currently using an arbitrarily chosen non-player sprite.
-            Sprite& playerSprite = registry.get<Sprite>(world.playerEntity);
-            SDL_Rect textureRect{(256 * 8 + 100), 256 + 140, 64, 64};
-            registry.emplace<Sprite>(entity, playerSprite.texture, "", "", 0,
-                                     textureRect, 0, true);
+            registry.emplace<Sprite>(entity, spriteData.get("test_31"));
 
             // Init their old position so they don't lerp in from elsewhere.
             const Position& receivedPos = entityIt->position;
