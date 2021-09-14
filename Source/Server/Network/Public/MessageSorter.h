@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NetworkDefs.h"
-#include "SDL_stdinc.h"
+#include <SDL2/SDL_stdinc.h>
 #include <array>
 #include <queue>
 #include <mutex>

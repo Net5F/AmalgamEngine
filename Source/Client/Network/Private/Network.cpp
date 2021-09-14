@@ -213,6 +213,7 @@ void Network::send(const BinaryBufferSharedPtr& message)
 
 void Network::sendHeartbeatIfNecessary()
 {
+    // If we haven't sent any relevant messages since the last tick.
     if (messagesSentSinceTick == 0) {
         // Send the heartbeat message.
         serializeAndSend<Heartbeat>({*currentTickPtr});
