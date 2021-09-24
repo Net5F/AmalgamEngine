@@ -104,7 +104,7 @@ void Application::dispatchEvents()
     while (SDL_PollEvent(&event)) {
         // Pass the event to each handler in order, stopping if it returns as
         // handled.
-        for (EventHandler* handler : eventHandlers) {
+        for (OSEventHandler* handler : eventHandlers) {
             if (handler->handleEvent(event)) {
                 break;
             }

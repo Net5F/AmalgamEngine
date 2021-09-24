@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EventHandler.h"
+#include "OSEventHandler.h"
 #include "Network.h"
 #include "Simulation.h"
 #include "Renderer.h"
@@ -23,7 +23,7 @@ namespace Client
  * Maintains the lifetime of all app modules (sim, network, etc) and manages
  * the main thread's loop.
  */
-class Application : public EventHandler
+class Application : public OSEventHandler
 {
 public:
     Application();
@@ -102,7 +102,7 @@ private:
     PeriodicCaller rendererCaller;
 
     /** An ordered vector of event handlers. */
-    std::vector<EventHandler*> eventHandlers;
+    std::vector<OSEventHandler*> eventHandlers;
 
     /** True if there has been a request to exit the program, else false. */
     std::atomic<bool> exitRequested;

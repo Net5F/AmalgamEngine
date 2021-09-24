@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EventHandler.h"
+#include "OSEventHandler.h"
 #include "NpcMovementSystem.h"
 #include "PlayerMovementSystem.h"
 #include "World.h"
@@ -20,7 +20,7 @@ class SpriteData;
 /**
  * Manages the simulation, including world state and system processing.
  */
-class Simulation : public EventHandler
+class Simulation : public OSEventHandler
 {
 public:
     /** An unreasonable amount of time for the sim tick to be late by. */

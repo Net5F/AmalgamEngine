@@ -31,3 +31,6 @@
 [submodule "Libraries/nativefiledialog-extended"]
 	path = Libraries/nativefiledialog-extended
 	url = git@github.com:btzy/nativefiledialog-extended.git
+[submodule "Libraries/QueuedEvents"]
+	path = Libraries/QueuedEvents
+	url = git@github.com:Net5F/QueuedEvents.git

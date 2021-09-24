@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
-message(STATUS "Building Unit Tests")
+message(STATUS "Configuring Unit Tests")
 
-# Catch2 settings.
+# Configure Catch2.
 SET(CATCH_BUILD_TESTING OFF CACHE BOOL "Build SelfTest project")
 SET(CATCH_INSTALL_DOCS OFF CACHE BOOL "Install documentation alongside library")
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/Catch2/"
@@ -12,17 +12,15 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/Catch2/"
 add_executable(UnitTests
     Private/TestMain.cpp
     Private/TestMessageSorter.cpp
-    ${PROJECT_SOURCE_DIR}/Server/Utility/Private/MessageSorter.cpp
-    ${PROJECT_SOURCE_DIR}/Server/Utility/Public/MessageSorter.h
+    ${PROJECT_SOURCE_DIR}/Server/Network/Public/MessageSorter.h
 )
 
 # Include our source dir.
 target_include_directories(UnitTests
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
-        ${PROJECT_SOURCE_DIR}/Server/Utility/Private
     PUBLIC
-        ${PROJECT_SOURCE_DIR}/Server/Utility/Public
+        ${PROJECT_SOURCE_DIR}/Server/Network/Public
 )
 
 # Link our dependencies.
@@ -32,7 +30,7 @@ target_link_libraries(UnitTests
         Catch2::Catch2
 )
 
-# Compile with C++17
+# Compile with C++20
 target_compile_features(UnitTests PRIVATE cxx_std_20)
 set_target_properties(UnitTests PROPERTIES CXX_EXTENSIONS OFF)
 

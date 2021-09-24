@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EventHandler.h"
+#include "OSEventHandler.h"
 #include "Sprite.h"
 #include "ScreenPoint.h"
 #include "TileIndex.h"
@@ -18,7 +18,7 @@ class SpriteData;
 /**
  * Uses user input and sim data to manage the state of the user interface.
  */
-class UserInterface : public EventHandler
+class UserInterface : public OSEventHandler
 {
 public:
     UserInterface(World& inWorld, SpriteData& spriteData);

@@ -45,14 +45,18 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/json/"
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/nativefiledialog-extended/"
                  "${PROJECT_BINARY_DIR}/Libraries/nativefiledialog-extended/")
 
-# Provide header-only readerwriterqueue.
+# Configure header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/../CMake/readerwriterqueue.cmake")
 
-# Provide header-only CircularBuffer.
+# Configure header-only CircularBuffer.
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/CircularBuffer/"
                  "${PROJECT_BINARY_DIR}/Libraries/CircularBuffer/")
 
-# Provide header-only EnTT.
+# Configure header-only QueuedEvents.
+#add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/QueuedEvents/"
+#                 "${PROJECT_BINARY_DIR}/Libraries/QueuedEvents/")
+
+# Configure header-only EnTT.
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/entt/"
                  "${PROJECT_BINARY_DIR}/Libraries/entt/")
 

@@ -12,7 +12,7 @@ target_sources(Shared
         Public/BinaryBuffer.h
         Public/ByteTools.h
         Public/Deserialize.h
-        Public/EventHandler.h
+        Public/OSEventHandler.h
         Public/Ignore.h
         Public/Log.h
         Public/Paths.h

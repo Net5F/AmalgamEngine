@@ -10,10 +10,10 @@ namespace AM
  * Specifically meant for OS events, provided by SDL2. Intra-app events have
  * other data flow paths.
  */
-class EventHandler
+class OSEventHandler
 {
 public:
-    virtual ~EventHandler(){};
+    virtual ~OSEventHandler(){};
 
     /**
      * Handles the given event.

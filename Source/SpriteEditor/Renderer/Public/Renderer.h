@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EventHandler.h"
+#include "OSEventHandler.h"
 #include "PeriodicCaller.h"
 
 struct SDL_Renderer;
@@ -14,7 +14,7 @@ class UserInterface;
 /**
  * Renders the UI.
  */
-class Renderer : public EventHandler
+class Renderer : public OSEventHandler
 {
 public:
     static constexpr unsigned int FRAMES_PER_SECOND = 60;

@@ -23,7 +23,7 @@ class Acceptor;
 namespace Server
 {
 /**
- * Provides Network functionality in the format that the Game wants.
+ * Provides network functionality in the format that the Simulation wants.
  */
 class Network
 {

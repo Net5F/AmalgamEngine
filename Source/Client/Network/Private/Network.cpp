@@ -3,6 +3,7 @@
 #include "ConnectionResponse.h"
 #include "Heartbeat.h"
 #include "Config.h"
+#include "Deserialize.h"
 #include "NetworkStats.h"
 #include <SDL_net.h>
 
@@ -74,15 +75,15 @@ void Network::tick()
     }
 }
 
-std::unique_ptr<ConnectionResponse>
+std::shared_ptr<ConnectionResponse>
     Network::receiveConnectionResponse(Uint64 timeoutMs)
 {
-    std::unique_ptr<ConnectionResponse> message = nullptr;
+    std::shared_ptr<ConnectionResponse> message{nullptr};
     if (timeoutMs == 0) {
-        messageHandler.connectionResponseQueue.try_dequeue(message);
+        messageHandler.getQueue<ConnectionResponse>().try_dequeue(message);
     }
     else {
-        messageHandler.connectionResponseQueue.wait_dequeue_timed(
+        messageHandler.getQueue<ConnectionResponse>().wait_dequeue_timed(
             message, timeoutMs * 1000);
     }
 
@@ -269,8 +270,13 @@ void Network::processReceivedMessage(MessageType messageType,
     /* Route the message to the appropriate handler. */
     switch (messageType) {
         case MessageType::ConnectionResponse: {
-            messageHandler.handleConnectionResponse(messageRecBuffer,
-                                                    messageSize);
+            // Deserialize the message.
+            std::shared_ptr<ConnectionResponse> connectionResponse
+                = std::make_shared<ConnectionResponse>();
+            Deserialize::fromBuffer(messageRecBuffer, messageSize,
+                                      *connectionResponse);
+
+            messageHandler.handle(connectionResponse);
             break;
         }
         case MessageType::EntityUpdate: {

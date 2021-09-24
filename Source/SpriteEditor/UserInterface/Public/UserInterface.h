@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EventHandler.h"
+#include "OSEventHandler.h"
 #include "TitleScreen.h"
 #include "MainScreen.h"
 #include "SpriteDataModel.h"
@@ -25,7 +25,7 @@ namespace SpriteEditor
  *       Eventually, this will be updated to use signals for better separation
  *       between the UI and back-end logic.
  */
-class UserInterface : public EventHandler
+class UserInterface : public OSEventHandler
 {
 public:
     UserInterface(SDL_Renderer* renderer, AssetCache& assetCache,

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EventHandler.h"
+#include "OSEventHandler.h"
 #include "PeriodicCaller.h"
 #include "WorldSpritePreparer.h"
 
@@ -22,7 +22,7 @@ class UserInterface;
  * Uses world information from the Sim to isometrically render the player's
  * view.
  */
-class Renderer : public EventHandler
+class Renderer : public OSEventHandler
 {
 public:
     static constexpr unsigned int FRAMES_PER_SECOND = 60;

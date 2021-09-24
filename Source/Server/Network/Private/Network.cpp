@@ -174,7 +174,7 @@ Sint64 Network::handleClientInput(ClientMessage& clientMessage,
                  messageTickNum);
     }
 
-    // Save the diff that the MessageSorter returned.
+    // Return the diff that the MessageSorter returned.
     return pushResult.diff;
 }
 

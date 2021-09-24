@@ -23,7 +23,7 @@ class EntityUpdate;
 namespace Client
 {
 /**
- * Provides Network functionality in the format that the Game wants.
+ * Provides network functionality in the format that the Simulation wants.
  */
 class Network
 {
@@ -66,7 +66,8 @@ public:
      *                   Defaults to 0.
      * @return A message if one is waiting, else nullptr.
      */
-    std::unique_ptr<ConnectionResponse>
+    // TODO: Can get rid of timeout, we shouldn't wait like that.
+    std::shared_ptr<ConnectionResponse>
         receiveConnectionResponse(Uint64 timeoutMs = 0);
     std::shared_ptr<const EntityUpdate> receivePlayerUpdate(Uint64 timeoutMs
                                                             = 0);
@@ -219,7 +220,7 @@ void Network::serializeAndSend(const T& messageStruct)
     messageBuffer->at(ClientHeaderIndex::AdjustmentIteration) = adjustmentIteration;
 
     // Copy the message type into the message header.
-    // TODO: Add a nice compile-time message if T doesn't have MESSAGE_TYPE.
+    // TODO: Add a nice compile-time message if T doesn't define MESSAGE_TYPE.
     messageBuffer->at(CLIENT_HEADER_SIZE + MessageHeaderIndex::MessageType)
         = static_cast<Uint8>(T::MESSAGE_TYPE);
 

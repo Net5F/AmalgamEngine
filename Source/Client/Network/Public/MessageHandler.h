@@ -23,6 +23,20 @@ class MessageHandler
 public:
     MessageHandler(Network& inNetwork);
 
+    template <typename T>
+    static moodycamel::BlockingReaderWriterQueue<std::shared_ptr<T>>& getQueue()
+    {
+        static moodycamel::BlockingReaderWriterQueue<std::shared_ptr<T>> queue;
+        return queue;
+    }
+
+    template <typename T>
+    void handle(const std::shared_ptr<T>& message)
+    {
+        // Push the message into its queue.
+        getQueue<T>().enqueue(message);
+    }
+
     void handleConnectionResponse(BinaryBuffer& messageRecBuffer,
                                   Uint16 messageSize);
 

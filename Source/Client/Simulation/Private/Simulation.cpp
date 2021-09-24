@@ -53,7 +53,7 @@ void Simulation::connect()
     }
 
     // Wait for the player's ID from the server.
-    std::unique_ptr<ConnectionResponse> connectionResponse
+    std::shared_ptr<ConnectionResponse> connectionResponse
         = network.receiveConnectionResponse(CONNECTION_RESPONSE_WAIT_MS);
     if (connectionResponse == nullptr) {
         LOG_ERROR("Server did not respond.");
