@@ -24,6 +24,8 @@ NetworkConnectionSystem::NetworkConnectionSystem(Simulation& inSim,
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)
+, clientConnectedQueue(inNetwork.getDispatcher())
+, clientDisconnectedQueue(inNetwork.getDispatcher())
 {
 }
 
@@ -38,14 +40,11 @@ void NetworkConnectionSystem::processConnectionEvents()
 
 void NetworkConnectionSystem::processConnectEvents()
 {
-    moodycamel::ReaderWriterQueue<NetworkID>& connectEventQueue
-        = network.getConnectEventQueue();
-
     // Add all newly connected client's entities to the sim.
-    for (unsigned int i = 0; i < connectEventQueue.size_approx(); ++i) {
-        NetworkID clientNetworkID = 0;
-        if (!(connectEventQueue.try_dequeue(clientNetworkID))) {
-            LOG_ERROR("Expected element but dequeue failed.");
+    for (unsigned int i = 0; i < clientConnectedQueue.size(); ++i) {
+        ClientConnected clientConnected{};
+        if (!(clientConnectedQueue.pop(clientConnected))) {
+            LOG_ERROR("Expected element but pop failed.");
         }
 
         // Build their entity.
@@ -61,37 +60,33 @@ void NetworkConnectionSystem::processConnectEvents()
         registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
         registry.emplace<Input>(newEntity);
         registry.emplace<ClientSimData>(
-            newEntity, clientNetworkID, false, true,
+            newEntity, clientConnected.clientID, false, true,
             AreaOfInterest{(SharedConfig::SCREEN_WIDTH
                             + SharedConfig::AOI_BUFFER_DISTANCE),
                            (SharedConfig::SCREEN_HEIGHT
                             + SharedConfig::AOI_BUFFER_DISTANCE)});
-        world.netIdMap[clientNetworkID] = newEntity;
+        world.netIdMap[clientConnected.clientID] = newEntity;
 
         LOG_INFO("Constructed entity with netID: %u, entityID: %u",
-                 clientNetworkID, newEntity);
+                 clientConnected.clientID, newEntity);
 
         // Build and send the response.
-        sendConnectionResponse(clientNetworkID, newEntity, spawnPoint.x,
+        sendConnectionResponse(clientConnected.clientID, newEntity, spawnPoint.x,
                                spawnPoint.y);
     }
 }
 
 void NetworkConnectionSystem::processDisconnectEvents()
 {
-    moodycamel::ReaderWriterQueue<NetworkID>& disconnectEventQueue
-        = network.getDisconnectEventQueue();
-
     // Remove all newly disconnected client's entities from the sim.
-    for (unsigned int i = 0; i < disconnectEventQueue.size_approx(); ++i) {
-        NetworkID disconnectedClientID = 0;
-        if (!(disconnectEventQueue.try_dequeue(disconnectedClientID))) {
-            LOG_ERROR(
-                "Expected element in disconnectEventQueue but dequeue failed.");
+    for (unsigned int i = 0; i < clientDisconnectedQueue.size(); ++i) {
+        ClientDisconnected clientDisconnected{};
+        if (!(clientDisconnectedQueue.pop(clientDisconnected))) {
+            LOG_ERROR("Expected element but pop failed.");
         }
 
         // Find the client's associated entity.
-        auto clientEntityIt = world.netIdMap.find(disconnectedClientID);
+        auto clientEntityIt = world.netIdMap.find(clientDisconnected.clientID);
         if (clientEntityIt != world.netIdMap.end()) {
             // Found the entity, remove it.
             entt::entity clientEntity = clientEntityIt->second;
@@ -101,7 +96,7 @@ void NetworkConnectionSystem::processDisconnectEvents()
         }
         else {
             LOG_ERROR("Failed to find entity with netID: %u while erasing.",
-                      disconnectedClientID);
+                      clientDisconnected.clientID);
         }
     }
 }

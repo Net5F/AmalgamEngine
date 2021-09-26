@@ -12,6 +12,7 @@ namespace Server
 {
 ClientHandler::ClientHandler(Network& inNetwork)
 : network(inNetwork)
+, dispatcher(inNetwork.getDispatcher())
 , idPool(MAX_CLIENTS)
 , clientSet(std::make_shared<SocketSet>(MAX_CLIENTS))
 , acceptor(Network::SERVER_PORT, clientSet)
@@ -121,10 +122,8 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
             LOG_ERROR("Ran out of room in client map or key already existed.");
         }
 
-        // Add an event to the Network's queue.
-        if (!network.getConnectEventQueue().enqueue(newID)) {
-            LOG_ERROR("Ran out of room in queue and memory allocation failed.");
-        }
+        // Notify the sim that a client was connected.
+        dispatcher.emplace<ClientConnected>(newID);
 
         newPeer = acceptor.accept();
     }
@@ -141,8 +140,8 @@ void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
             // Need to modify the map, acquire a write lock.
             std::unique_lock writeLock(network.getClientMapMutex());
 
-            // Add an event to the Network's queue.
-            network.getDisconnectEventQueue().enqueue(it->first);
+            // Notify the sim that a client was disconnected.
+            dispatcher.emplace<ClientDisconnected>(it->first);
 
             // Erase the disconnected client.
             LOG_INFO("Erased disconnected client with netID: %u.", it->first);

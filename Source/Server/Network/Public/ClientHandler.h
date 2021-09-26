@@ -14,6 +14,8 @@
 
 namespace AM
 {
+class EventDispatcher;
+
 namespace Server
 {
 class Network;
@@ -88,6 +90,9 @@ private:
     int receiveClientMessages(ClientMap& clientMap);
 
     Network& network;
+
+    /** Used to push network events like connections/disconnections. */
+    EventDispatcher& dispatcher;
 
     /** Used for generating network IDs. */
     IDPool idPool;

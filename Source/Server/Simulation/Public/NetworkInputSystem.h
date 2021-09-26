@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ServerNetworkDefs.h"
+#include "QueuedEvents.h"
 #include "entt/entity/registry.hpp"
 
 namespace AM
@@ -40,9 +42,14 @@ private:
      */
     void handleDropForEntity(entt::entity entityID);
 
+    /** Used to get the current tick. */
     Simulation& sim;
+    /** Used to access components. */
     World& world;
+    /** Used to access the ClientInput MessageSorter. */
     Network& network;
+
+    EventQueue<ClientMessageDropped> messageDroppedQueue;
 };
 
 } // namespace Server

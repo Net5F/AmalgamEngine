@@ -27,18 +27,37 @@ typedef std::unordered_map<NetworkID, std::shared_ptr<Client>> ClientMap;
  * Client's tick diff info.
  */
 struct ClientMessage {
-    // TEMP: Only here until C++20 where emplacing brace lists is allowed.
-    ClientMessage(NetworkID inNetID, const std::weak_ptr<Client>& inClientPtr,
-                  Message inMessage)
-    : netID(inNetID)
-    , clientPtr(inClientPtr)
-    , message(std::move(inMessage))
-    {
-    }
-
-    NetworkID netID = 0;
+    NetworkID netID{0};
     std::weak_ptr<Client> clientPtr;
-    Message message = {MessageType::NotSet, nullptr};
+    Message message{MessageType::NotSet, nullptr};
+};
+
+/**
+ * Used to tell the simulation that a client was connected.
+ */
+struct ClientConnected
+{
+    /** The ID of the client that connected. */
+    NetworkID clientID{0};
+};
+
+/**
+ * Used to tell the simulation that a client was disconnected.
+ */
+struct ClientDisconnected
+{
+    /** The ID of the client that disconnected. */
+    NetworkID clientID{0};
+};
+
+/**
+ * Used to tell the simulation that a client's message arrived late and we
+ * had to drop it.
+ */
+struct ClientMessageDropped
+{
+    /** The ID of the client that we had to drop a message from. */
+    NetworkID clientID{0};
 };
 
 } // End namespace Server

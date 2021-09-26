@@ -25,7 +25,7 @@ TileMap::TileMap(SpriteData& inSpriteData)
 , tileCount{0}
 , spriteData{inSpriteData}
 {
-    if (Config::RUN_OFFLINE) {
+//    if (Config::RUN_OFFLINE) {
         LOG_INFO("Offline mode. Constructing default tile map.");
 
         // Set our map size.
@@ -59,7 +59,7 @@ TileMap::TileMap(SpriteData& inSpriteData)
 
         const Sprite& wall2{spriteData.get("test_26")};
         addSpriteLayer(0, 2, wall2);
-    }
+//    }
 }
 
 void TileMap::addSpriteLayer(unsigned int tileX, unsigned int tileY,

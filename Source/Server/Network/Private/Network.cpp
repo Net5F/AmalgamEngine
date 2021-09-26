@@ -15,6 +15,7 @@ namespace Server
 {
 Network::Network()
 : clientHandler(*this)
+, dispatcher()
 , ticksSinceNetstatsLog(0)
 , currentTickPtr(nullptr)
 {
@@ -92,19 +93,9 @@ std::shared_mutex& Network::getClientMapMutex()
     return clientMapMutex;
 }
 
-moodycamel::ReaderWriterQueue<NetworkID>& Network::getConnectEventQueue()
+EventDispatcher& Network::getDispatcher()
 {
-    return connectEventQueue;
-}
-
-moodycamel::ReaderWriterQueue<NetworkID>& Network::getDisconnectEventQueue()
-{
-    return disconnectEventQueue;
-}
-
-moodycamel::ReaderWriterQueue<NetworkID>& Network::getMessageDropEventQueue()
-{
-    return messageDropEventQueue;
+    return dispatcher;
 }
 
 void Network::registerCurrentTickPtr(
@@ -164,9 +155,7 @@ Sint64 Network::handleClientInput(ClientMessage& clientMessage,
 
     // If the sorter dropped the message, push a message drop event.
     if (pushResult.result != MessageSorterBase::ValidityResult::Valid) {
-        if (!messageDropEventQueue.enqueue(clientMessage.netID)) {
-            LOG_ERROR("Enqueue failed.");
-        }
+        dispatcher.emplace<ClientMessageDropped>(clientMessage.netID);
 
         LOG_INFO("Message was dropped. NetID: %u, diff: %d, result: %u, "
                  "tickNum: %u",

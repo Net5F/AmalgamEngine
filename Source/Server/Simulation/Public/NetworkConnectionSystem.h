@@ -1,7 +1,9 @@
 #pragma once
 
 #include "NetworkDefs.h"
-#include "entt/entity/registry.hpp"
+#include "ServerNetworkDefs.h"
+#include "QueuedEvents.h"
+#include "entt/fwd.hpp"
 
 namespace AM
 {
@@ -45,9 +47,15 @@ private:
     void sendConnectionResponse(NetworkID networkID, entt::entity newEntity,
                                 float spawnX, float spawnY);
 
+    /** Used to get the current tick. */
     Simulation& sim;
+    /** Used to access components. */
     World& world;
+    /** Used to send connection responses and receive connection events. */
     Network& network;
+
+    EventQueue<ClientConnected> clientConnectedQueue;
+    EventQueue<ClientDisconnected> clientDisconnectedQueue;
 };
 
 } // End namespace Server

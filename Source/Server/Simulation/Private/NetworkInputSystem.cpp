@@ -20,6 +20,7 @@ NetworkInputSystem::NetworkInputSystem(Simulation& inSim, World& inWorld,
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)
+, messageDroppedQueue(inNetwork.getDispatcher())
 {
 }
 
@@ -71,17 +72,13 @@ void NetworkInputSystem::processInputMessages()
 
 void NetworkInputSystem::processMessageDropEvents()
 {
-    // Get the queue reference for any dropped message events.
-    moodycamel::ReaderWriterQueue<NetworkID>& messageDropEventQueue
-        = network.getMessageDropEventQueue();
-
     // Process any message drop events.
-    for (unsigned int i = 0; i < messageDropEventQueue.size_approx(); ++i) {
+    for (unsigned int i = 0; i < messageDroppedQueue.size(); ++i) {
         // Pop the NetworkID of the client that we dropped a message from.
-        NetworkID clientNetworkID = 0;
-        if (messageDropEventQueue.try_dequeue(clientNetworkID)) {
+        ClientMessageDropped messageDropped{};
+        if (messageDroppedQueue.pop(messageDropped)) {
             // Find the EntityID associated with the popped NetworkID.
-            auto clientEntityIt = world.netIdMap.find(clientNetworkID);
+            auto clientEntityIt = world.netIdMap.find(messageDropped.clientID);
             if (clientEntityIt != world.netIdMap.end()) {
                 // We found the entity that dropped the message, handle it.
                 entt::entity clientEntity = clientEntityIt->second;
@@ -90,7 +87,7 @@ void NetworkInputSystem::processMessageDropEvents()
             else {
                 LOG_ERROR("Failed to find entity with netID: %u while "
                           "processing a message drop event.",
-                          clientNetworkID);
+                          messageDropped.clientID);
             }
         }
         else {
