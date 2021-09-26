@@ -3,13 +3,14 @@
 #include "SharedConfig.h"
 #include "NetworkDefs.h"
 #include "ClientNetworkDefs.h"
-#include "MessageHandler.h"
+#include "MessageProcessor.h"
+#include "QueuedEvents.h"
 #include "Peer.h"
 #include "Serialize.h"
+#include "Deserialize.h"
 #include "ByteTools.h"
 #include "Timer.h"
 #include "Log.h"
-#include "entt/entity/registry.hpp"
 #include <string>
 #include <memory>
 #include <atomic>
@@ -59,28 +60,6 @@ public:
     void serializeAndSend(const T& messageStruct);
 
     /**
-     * Returns a message if there are any in the associated queue.
-     * If there are none, waits for one up to the given timeout.
-     *
-     * @param timeoutMs  How long to wait. 0 for no wait, -1 for indefinite.
-     *                   Defaults to 0.
-     * @return A message if one is waiting, else nullptr.
-     */
-    // TODO: Can get rid of timeout, we shouldn't wait like that.
-    std::shared_ptr<ConnectionResponse>
-        receiveConnectionResponse(Uint64 timeoutMs = 0);
-    std::shared_ptr<const EntityUpdate> receivePlayerUpdate(Uint64 timeoutMs
-                                                            = 0);
-    NpcReceiveResult receiveNpcUpdate(Uint64 timeoutMs = 0);
-
-    /**
-     * Thread function, started from connect().
-     * Tries to retrieve a message from the server.
-     * If successful, calls processBatch().
-     */
-    int pollForMessages();
-
-    /**
      * Subtracts an appropriate amount from the tickAdjustment based on its
      * current value, and returns the amount subtracted.
      * @return 1 if there's a negative tickAdjustment (the sim can only freeze 1
@@ -89,12 +68,21 @@ public:
      */
     int transferTickAdjustment();
 
-    /** Used for passing us a pointer to the Game's currentTick. */
+    /**
+     * Returns the event dispatcher.
+     *
+     * Used by the simulation's systems to subscribe their event queues.
+     */
+    EventDispatcher& getDispatcher();
+
+    /**
+     * Used for passing us a pointer to the Game's currentTick.
+     */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
-    void setPlayerEntity(entt::entity inPlayerEntity);
-    entt::entity getPlayerEntity();
-
+    /**
+     * Enables the periodic printing and logging of network stats.
+     */
     void setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled);
 
 private:
@@ -111,21 +99,17 @@ private:
     void sendHeartbeatIfNecessary();
 
     /**
-     * Processes the received header and following batch.
-     * If any messages are expected, receives the messages.
-     * If it confirmed any ticks that had no changes, updates the confirmed tick
-     * count.
+     * Thread function, started from connect().
+     * Tries to retrieve a message batch from the server.
+     * If successful, calls processBatch().
      */
-    void processBatch();
+    int pollForMessages();
 
     /**
-     * Pushes a message into the appropriate queue, based on its contents.
-     * @pre A serialized message is in messageRecBuffer, starting at index 0.
-     * @param messageType  The type of the received message to process.
-     * @param messageSize  The length in bytes of the message in
-     *                     messageRecBuffer.
+     * Processes the received header and following batch.
+     * If any messages are expected, receives the messages.
      */
-    void processReceivedMessage(MessageType messageType, Uint16 messageSize);
+    void processBatch();
 
     /**
      * Checks if we need to process the received adjustment, does so if
@@ -143,13 +127,13 @@ private:
 
     std::shared_ptr<Peer> server;
 
-    /** Handles messages that we receive from the server, queueing them for the
-        Systems. */
-    MessageHandler messageHandler;
+    /** Used to send received messages and network events to the subscribed
+        systems. */
+    EventDispatcher dispatcher;
 
-    /** Local copy of the playerEntity so we can tell if we got a player
-        message. */
-    entt::entity playerEntity;
+    /** Deserializes messages, does any network-layer message handling, and
+        passes messages down to the simulation. */
+    MessageProcessor messageProcessor;
 
     /** The adjustment that the server has told us to apply to the tick. */
     std::atomic<int> tickAdjustment;
@@ -179,7 +163,7 @@ private:
 
     /** Used to hold headers while we process them. */
     BinaryBuffer headerRecBuffer;
-    /** Used to hold messages while we deserialize them. */
+    /** Used to hold messages while MessageProcessor processes them. */
     BinaryBuffer messageRecBuffer;
 
     /** The number of seconds we'll wait before logging our network

@@ -43,12 +43,5 @@ struct NpcUpdateMessage {
     Uint32 tickNum = 0;
 };
 
-/** The result of trying to receive an NPC update message. */
-struct NpcReceiveResult {
-    NetworkResult result;
-    /** message will be default if result != Success. */
-    NpcUpdateMessage message;
-};
-
 } // End namespace Client
 } // End namespace AM

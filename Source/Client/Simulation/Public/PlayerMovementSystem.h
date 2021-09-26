@@ -1,6 +1,8 @@
 #pragma once
 
 #include <SDL2/SDL_stdinc.h>
+#include "QueuedEvents.h"
+#include "EntityUpdate.h"
 
 namespace AM
 {
@@ -54,9 +56,12 @@ private:
         player's input history, logs an error. */
     void checkTickDiffValidity(Uint32 tickDiff);
 
+    /** Used to get the current tick. */
     Simulation& sim;
+    /** Used to access components. */
     World& world;
-    Network& network;
+
+    EventQueue<std::shared_ptr<const EntityUpdate>> playerUpdateQueue;
 };
 
 } // namespace Client

@@ -1,7 +1,6 @@
 #include "Simulation.h"
 #include "Network.h"
 #include "SpriteData.h"
-#include "ConnectionResponse.h"
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
@@ -27,6 +26,7 @@ namespace Client
 Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 : world(inSpriteData)
 , network{inNetwork}
+, connectionResponseQueue(inNetwork.getDispatcher())
 , spriteData{inSpriteData}
 , playerInputSystem(*this, world)
 , networkUpdateSystem(*this, world, network)
@@ -53,22 +53,21 @@ void Simulation::connect()
     }
 
     // Wait for the player's ID from the server.
-    std::shared_ptr<ConnectionResponse> connectionResponse
-        = network.receiveConnectionResponse(CONNECTION_RESPONSE_WAIT_MS);
-    if (connectionResponse == nullptr) {
+    ConnectionResponse connectionResponse{};
+    if (!(connectionResponseQueue.waitPop(connectionResponse, CONNECTION_RESPONSE_WAIT_US))) {
         LOG_ERROR("Server did not respond.");
     }
 
     // Get our info from the connection response.
-    entt::entity playerEntity = connectionResponse->entity;
+    entt::entity playerEntity = connectionResponse.entity;
     LOG_INFO(
         "Received connection response. ID: %u, tick: %u, pos: (%.4f, %.4f)",
-        playerEntity, connectionResponse->tickNum, connectionResponse->x,
-        connectionResponse->y);
+        playerEntity, connectionResponse.tickNum, connectionResponse.x,
+        connectionResponse.y);
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.
-    currentTick = connectionResponse->tickNum + Config::INITIAL_TICK_OFFSET;
+    currentTick = connectionResponse.tickNum + Config::INITIAL_TICK_OFFSET;
 
     // Create the player entity using the ID we received.
     entt::registry& registry = world.registry;
@@ -85,10 +84,10 @@ void Simulation::connect()
     // Set up the player's sim components.
     registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(
                                           registry.version(newEntity))));
-    registry.emplace<Position>(newEntity, connectionResponse->x,
-                               connectionResponse->y, 0.0f);
-    registry.emplace<PreviousPosition>(newEntity, connectionResponse->x,
-                                       connectionResponse->y, 0.0f);
+    registry.emplace<Position>(newEntity, connectionResponse.x,
+                               connectionResponse.y, 0.0f);
+    registry.emplace<PreviousPosition>(newEntity, connectionResponse.x,
+                                       connectionResponse.y, 0.0f);
     registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
     registry.emplace<Input>(newEntity);
 

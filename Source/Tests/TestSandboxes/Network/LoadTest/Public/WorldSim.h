@@ -1,6 +1,9 @@
 #pragma once
 
+#include "ClientNetworkDefs.h"
 #include "SharedConfig.h"
+#include "QueuedEvents.h"
+#include "ConnectionResponse.h"
 #include "entt/entity/registry.hpp"
 #include <SDL2/SDL_stdinc.h>
 #include <atomic>
@@ -46,8 +49,8 @@ private:
     void sendNextInput();
 
     /** How long the game should wait for the server to send a connection
-        response. */
-    static constexpr unsigned int CONNECTION_RESPONSE_WAIT_MS = 1000;
+        response, in microseconds. */
+    static constexpr int CONNECTION_RESPONSE_WAIT_US = 1 * 1000 * 1000;
 
     /** How often to send inputs. */
     static constexpr double INPUT_RATE_S = (1 / 4.0);
@@ -55,6 +58,11 @@ private:
         = SharedConfig::SIM_TICKS_PER_SECOND * INPUT_RATE_S;
 
     Client::Network& network;
+
+    // Event queues.
+    EventQueue<ConnectionResponse> connectionResponseQueue;
+    EventQueue<std::shared_ptr<const EntityUpdate>> playerUpdateQueue;
+    EventQueue<Client::NpcUpdateMessage> npcUpdateQueue;
 
     /** The entity ID that we were given by the server. */
     entt::entity clientEntity;

@@ -1,6 +1,8 @@
 #pragma once
 
+#include "ClientNetworkDefs.h"
 #include "NetworkDefs.h"
+#include "QueuedEvents.h"
 #include <queue>
 
 namespace AM
@@ -72,9 +74,12 @@ private:
     void applyUpdateMessage(
         const std::shared_ptr<const EntityUpdate>& entityUpdate);
 
+    /** Used to get the current tick. */
     Simulation& sim;
+    /** Used to access components. */
     World& world;
-    Network& network;
+
+    EventQueue<NpcUpdateMessage> npcUpdateQueue;
 
     /** Temporarily used for loading NPC sprite data.
         When that logic gets moved, this member can be removed. */

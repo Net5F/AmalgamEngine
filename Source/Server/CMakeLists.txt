@@ -27,6 +27,7 @@ target_link_libraries(Server
         readerwriterqueue
         CircularBuffer
         EnTT::EnTT
+        QueuedEvents
         Shared
 )
 

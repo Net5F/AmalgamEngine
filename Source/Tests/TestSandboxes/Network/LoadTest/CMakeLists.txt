@@ -15,8 +15,8 @@ add_executable(LoadTestClient
     ${PROJECT_SOURCE_DIR}/Client/Config/Public/Config.h
     ${PROJECT_SOURCE_DIR}/Client/Network/Private/Network.cpp
     ${PROJECT_SOURCE_DIR}/Client/Network/Public/Network.h
-    ${PROJECT_SOURCE_DIR}/Client/Network/Private/MessageHandler.cpp
-    ${PROJECT_SOURCE_DIR}/Client/Network/Public/MessageHandler.h
+    ${PROJECT_SOURCE_DIR}/Client/Network/Private/MessageProcessor.cpp
+    ${PROJECT_SOURCE_DIR}/Client/Network/Public/MessageProcessor.h
 )
 
 target_include_directories(LoadTestClient
@@ -40,6 +40,7 @@ target_link_libraries(LoadTestClient
         SDL2_net-static
         readerwriterqueue
         EnTT::EnTT
+        QueuedEvents
         Shared
 )
 

@@ -1,15 +1,21 @@
 #pragma once
 
+#include <SDL2/SDL_stdinc.h>
+
 /**
- * This message would normally have a struct and all, but because it's created
- * in the network layer and our normal message send/receive path involves
- * BinaryBufferSharedPtr (which would be a waste to allocate when we're
- * already dealing with the batch buffer), we instead just write/read it by
- * hand.
+ * An explicit confirmation that ticks have passed.
  *
- * Over the wire, it still has the normal message header and uses
- * MessageType::ExplicitConfirmation.
- *
- * See Server::Client::addExplicitConfirmation() for the send code, and
- * Client::MessageHandler::handleExplicitConfirmation for the receive code.
+ * Sent from Server -> Client when a tick passes with no entity movement
+ * updates. The client needs these confirmations before it can progress
+ * NPC movement forward.
  */
+struct ExplicitConfirmation
+{
+    Uint8 confirmedTickCount{0};
+};
+
+template<typename S>
+void serialize(S& serializer, ExplicitConfirmation& explicitConfirmation)
+{
+    serializer.value1b(explicitConfirmation.confirmedTickCount);
+}

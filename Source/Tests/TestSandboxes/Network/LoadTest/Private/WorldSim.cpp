@@ -1,9 +1,7 @@
 #include "WorldSim.h"
 #include "Network.h"
-#include "ClientNetworkDefs.h"
 #include "Config.h"
 #include "Serialize.h"
-#include "ConnectionResponse.h"
 #include "ClientInput.h"
 #include "Peer.h"
 #include "Log.h"
@@ -16,6 +14,9 @@ namespace LTC
 {
 WorldSim::WorldSim(Client::Network& inNetwork)
 : network(inNetwork)
+, connectionResponseQueue(inNetwork.getDispatcher())
+, playerUpdateQueue(inNetwork.getDispatcher())
+, npcUpdateQueue(inNetwork.getDispatcher())
 , clientEntity(entt::null)
 , currentTick(0)
 , ticksTillInput(0)
@@ -31,21 +32,20 @@ void WorldSim::connect()
     }
 
     // Wait for the player's ID from the server.
-    std::shared_ptr<ConnectionResponse> connectionResponse
-        = network.receiveConnectionResponse(CONNECTION_RESPONSE_WAIT_MS);
-    if (connectionResponse == nullptr) {
+    ConnectionResponse connectionResponse{};;
+    if (!(connectionResponseQueue.waitPop(connectionResponse, CONNECTION_RESPONSE_WAIT_US))) {
         LOG_ERROR("Server did not respond.");
     }
 
     // Get our info from the connection response.
-    clientEntity = connectionResponse->entity;
+    clientEntity = connectionResponse.entity;
     LOG_INFO("Received connection response. ID: %u, tick: %u", clientEntity,
-             connectionResponse->tickNum);
+             connectionResponse.tickNum);
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.
     currentTick
-        = connectionResponse->tickNum + Client::Config::INITIAL_TICK_OFFSET;
+        = connectionResponse.tickNum + Client::Config::INITIAL_TICK_OFFSET;
 }
 
 void WorldSim::tick()
@@ -66,17 +66,12 @@ void WorldSim::tick()
         }
         ticksTillInput--;
 
-        // Receive any waiting player messages.
-        std::shared_ptr<const EntityUpdate> entityUpdate
-            = network.receivePlayerUpdate(0);
-        while (entityUpdate != nullptr) {
-            entityUpdate = network.receivePlayerUpdate(0);
+        // Discard any waiting player messages.
+        while (playerUpdateQueue.pop()) {
         }
 
-        // Receive any waiting npc messages.
-        Client::NpcReceiveResult receiveResult = network.receiveNpcUpdate();
-        while (receiveResult.result == NetworkResult::Success) {
-            receiveResult = network.receiveNpcUpdate();
+        // Discard any waiting npc messages.
+        while (npcUpdateQueue.pop()) {
         }
 
         currentTick++;

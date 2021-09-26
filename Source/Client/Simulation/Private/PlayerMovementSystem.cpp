@@ -3,8 +3,6 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
-#include "EntityUpdate.h"
-#include "EntityState.h"
 #include "Position.h"
 #include "Movement.h"
 #include "Input.h"
@@ -23,7 +21,7 @@ PlayerMovementSystem::PlayerMovementSystem(Simulation& inSim, World& inWorld,
                                            Network& inNetwork)
 : sim(inSim)
 , world(inWorld)
-, network(inNetwork)
+, playerUpdateQueue(inNetwork.getDispatcher())
 {
 }
 
@@ -76,9 +74,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
 {
     /* Process any messages for us from the server. */
     Uint32 latestReceivedTick = 0;
-    std::shared_ptr<const EntityUpdate> receivedUpdate
-        = network.receivePlayerUpdate();
-    while (receivedUpdate != nullptr) {
+    std::shared_ptr<const EntityUpdate> receivedUpdate{nullptr};
+    while (playerUpdateQueue.pop(receivedUpdate)) {
         /* Validate the received tick. */
         Uint32 receivedTick = receivedUpdate->tickNum;
 
@@ -136,8 +133,6 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
             previousPosition.y = currentPosition.y;
             previousPosition.z = currentPosition.z;
         }
-
-        receivedUpdate = network.receivePlayerUpdate();
     }
 
     return latestReceivedTick;

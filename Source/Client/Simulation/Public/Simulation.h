@@ -1,9 +1,10 @@
 #pragma once
 
 #include "OSEventHandler.h"
+#include "World.h"
+#include "ConnectionResponse.h"
 #include "NpcMovementSystem.h"
 #include "PlayerMovementSystem.h"
-#include "World.h"
 #include "PlayerInputSystem.h"
 #include "NetworkUpdateSystem.h"
 #include "CameraSystem.h"
@@ -56,12 +57,14 @@ public:
     bool handleEvent(SDL_Event& event) override;
 
 private:
-    /** How long the sim should wait to receive a connection response from the
-        server. */
-    static constexpr unsigned int CONNECTION_RESPONSE_WAIT_MS = 1000;
+    /** How long the game should wait for the server to send a connection
+        response, in microseconds. */
+    static constexpr int CONNECTION_RESPONSE_WAIT_US = 1 * 1000 * 1000;
 
     World world;
     Network& network;
+
+    EventQueue<ConnectionResponse> connectionResponseQueue;
 
     /** Temporarily used for loading the player's sprite texture.
         When that logic gets moved, this member can be removed. */

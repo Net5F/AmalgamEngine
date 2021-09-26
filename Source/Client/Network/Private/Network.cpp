@@ -1,9 +1,6 @@
 #include "Network.h"
-#include "EntityUpdate.h"
-#include "ConnectionResponse.h"
 #include "Heartbeat.h"
 #include "Config.h"
-#include "Deserialize.h"
 #include "NetworkStats.h"
 #include <SDL_net.h>
 
@@ -13,8 +10,8 @@ namespace Client
 {
 Network::Network()
 : server(nullptr)
-, messageHandler(*this)
-, playerEntity(entt::null)
+, dispatcher()
+, messageProcessor(dispatcher)
 , tickAdjustment(0)
 , adjustmentIteration(0)
 , isApplyingTickAdjustment(false)
@@ -75,75 +72,6 @@ void Network::tick()
     }
 }
 
-std::shared_ptr<ConnectionResponse>
-    Network::receiveConnectionResponse(Uint64 timeoutMs)
-{
-    std::shared_ptr<ConnectionResponse> message{nullptr};
-    if (timeoutMs == 0) {
-        messageHandler.getQueue<ConnectionResponse>().try_dequeue(message);
-    }
-    else {
-        messageHandler.getQueue<ConnectionResponse>().wait_dequeue_timed(
-            message, timeoutMs * 1000);
-    }
-
-    return message;
-}
-
-std::shared_ptr<const EntityUpdate>
-    Network::receivePlayerUpdate(Uint64 timeoutMs)
-{
-    std::shared_ptr<const EntityUpdate> message = nullptr;
-    if (timeoutMs == 0) {
-        messageHandler.playerUpdateQueue.try_dequeue(message);
-    }
-    else {
-        messageHandler.playerUpdateQueue.wait_dequeue_timed(message,
-                                                            timeoutMs * 1000);
-    }
-
-    return message;
-}
-
-NpcReceiveResult Network::receiveNpcUpdate(Uint64 timeoutMs)
-{
-    NpcUpdateMessage message;
-    bool messageWasReceived = false;
-    if (timeoutMs == 0) {
-        messageWasReceived = messageHandler.npcUpdateQueue.try_dequeue(message);
-    }
-    else {
-        messageWasReceived = messageHandler.npcUpdateQueue.wait_dequeue_timed(
-            message, timeoutMs * 1000);
-    }
-
-    if (!messageWasReceived) {
-        return {NetworkResult::NoWaitingData, {}};
-    }
-    else {
-        return {NetworkResult::Success, message};
-    }
-}
-
-int Network::pollForMessages()
-{
-    while (!exitRequested) {
-        // Wait for a server header.
-        NetworkResult headerResult = server->receiveBytesWait(
-            headerRecBuffer.data(), SERVER_HEADER_SIZE);
-
-        if (headerResult == NetworkResult::Success) {
-            processBatch();
-        }
-        else if (headerResult == NetworkResult::Disconnected) {
-            LOG_ERROR("Found server to be disconnected while trying to "
-                      "receive header.");
-        }
-    }
-
-    return 0;
-}
-
 int Network::transferTickAdjustment()
 {
     if (isApplyingTickAdjustment) {
@@ -172,20 +100,15 @@ int Network::transferTickAdjustment()
     }
 }
 
+EventDispatcher& Network::getDispatcher()
+{
+    return dispatcher;
+}
+
 void Network::registerCurrentTickPtr(
     const std::atomic<Uint32>* inCurrentTickPtr)
 {
     currentTickPtr = inCurrentTickPtr;
-}
-
-void Network::setPlayerEntity(entt::entity inPlayerEntity)
-{
-    playerEntity = inPlayerEntity;
-}
-
-entt::entity Network::getPlayerEntity()
-{
-    return playerEntity;
 }
 
 void Network::setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled)
@@ -223,6 +146,26 @@ void Network::sendHeartbeatIfNecessary()
     messagesSentSinceTick = 0;
 }
 
+
+int Network::pollForMessages()
+{
+    while (!exitRequested) {
+        // Wait for a server header.
+        NetworkResult headerResult = server->receiveBytesWait(
+            headerRecBuffer.data(), SERVER_HEADER_SIZE);
+
+        if (headerResult == NetworkResult::Success) {
+            processBatch();
+        }
+        else if (headerResult == NetworkResult::Disconnected) {
+            LOG_ERROR("Found server to be disconnected while trying to "
+                      "receive header.");
+        }
+    }
+
+    return 0;
+}
+
 void Network::processBatch()
 {
     // Start tracking the number of received bytes.
@@ -238,11 +181,11 @@ void Network::processBatch()
         MessageResult messageResult
             = server->receiveMessageWait(messageRecBuffer.data());
 
-        // If we received a message, push it into the appropriate queue.
+        // If we received a message, pass it to the processor.
         if (messageResult.networkResult == NetworkResult::Success) {
             // Got a message, process it and update the receiveTimer.
-            processReceivedMessage(messageResult.messageType,
-                                   messageResult.messageSize);
+            messageProcessor.processReceivedMessage(messageResult.messageType
+                , messageRecBuffer, messageResult.messageSize);
             receiveTimer.updateSavedTime();
 
             // Track the number of bytes we've received.
@@ -262,41 +205,6 @@ void Network::processBatch()
 
     // Record the number of received bytes.
     NetworkStats::recordBytesReceived(bytesReceived);
-}
-
-void Network::processReceivedMessage(MessageType messageType,
-                                     Uint16 messageSize)
-{
-    /* Route the message to the appropriate handler. */
-    switch (messageType) {
-        case MessageType::ConnectionResponse: {
-            // Deserialize the message.
-            std::shared_ptr<ConnectionResponse> connectionResponse
-                = std::make_shared<ConnectionResponse>();
-            Deserialize::fromBuffer(messageRecBuffer, messageSize,
-                                      *connectionResponse);
-
-            messageHandler.handle(connectionResponse);
-            break;
-        }
-        case MessageType::EntityUpdate: {
-            messageHandler.handleEntityUpdate(messageRecBuffer, messageSize);
-            break;
-        }
-        case MessageType::ExplicitConfirmation: {
-            messageHandler.handleExplicitConfirmation(messageRecBuffer, messageSize);
-            break;
-        }
-        case MessageType::UpdateChunks: {
-            // TODO: Test this. It should happen when we cross chunk boundaries
-            //       and be safe at the edges.
-            LOG_INFO("Received UpdateChunks");
-            break;
-        }
-        default: {
-            LOG_ERROR("Received unexpected message type: %u", messageType);
-        }
-    }
 }
 
 void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)

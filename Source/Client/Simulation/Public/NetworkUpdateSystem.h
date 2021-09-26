@@ -26,8 +26,11 @@ public:
     void sendInputState();
 
 private:
+    /** Used to get the current tick. */
     Simulation& sim;
+    /** Used to access components. */
     World& world;
+    /** Used to send update messages. */
     Network& network;
 };
 

@@ -29,7 +29,7 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
                                      Network& inNetwork, SpriteData& inSpriteData)
 : sim(inSim)
 , world(inWorld)
-, network(inNetwork)
+, npcUpdateQueue(inNetwork.getDispatcher())
 , spriteData{inSpriteData}
 , lastReceivedTick(0)
 , lastProcessedTick(0)
@@ -114,10 +114,8 @@ void NpcMovementSystem::applyTickAdjustment(int adjustment)
 void NpcMovementSystem::receiveEntityUpdates()
 {
     /* Process any NPC update messages from the Network. */
-    NpcReceiveResult receiveResult = network.receiveNpcUpdate();
-    while (receiveResult.result == NetworkResult::Success) {
-        NpcUpdateMessage& npcUpdateMessage = receiveResult.message;
-
+    NpcUpdateMessage npcUpdateMessage{};
+    while (npcUpdateQueue.pop(npcUpdateMessage)) {
         // Handle the message appropriately.
         switch (npcUpdateMessage.updateType) {
             case NpcUpdateType::ExplicitConfirmation:
@@ -136,8 +134,6 @@ void NpcMovementSystem::receiveEntityUpdates()
                 handleUpdate(npcUpdateMessage.message);
                 break;
         }
-
-        receiveResult = network.receiveNpcUpdate();
     }
 }
 

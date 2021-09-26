@@ -53,8 +53,8 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/CircularBuffer/"
                  "${PROJECT_BINARY_DIR}/Libraries/CircularBuffer/")
 
 # Configure header-only QueuedEvents.
-#add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/QueuedEvents/"
-#                 "${PROJECT_BINARY_DIR}/Libraries/QueuedEvents/")
+add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/QueuedEvents/"
+                 "${PROJECT_BINARY_DIR}/Libraries/QueuedEvents/")
 
 # Configure header-only EnTT.
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/entt/"

@@ -1,10 +1,10 @@
 target_sources(Client
 	PRIVATE
 		Private/Network.cpp
-		Private/MessageHandler.cpp
+		Private/MessageProcessor.cpp
 	PUBLIC
 		Public/Network.h
-		Public/MessageHandler.h
+		Public/MessageProcessor.h
 		Public/ClientNetworkDefs.h
 )
 
