@@ -73,7 +73,7 @@ void Simulation::connect()
     // Create the player entity using the ID we received.
     entt::registry& registry = world.registry;
     entt::entity newEntity = registry.create(playerEntity);
-    if (newEntity != playerEntity) {
+    if (registry.entity(newEntity) != registry.entity(playerEntity)) {
         LOG_ERROR("Created entity doesn't match received entity. Created: %u, "
                   "received: %u",
                   newEntity, playerEntity);

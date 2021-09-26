@@ -69,7 +69,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
 
     // If we've started talking to this client and none of this batch's
     // messages confirm the latest tick, add an explicit confirmation message.
-    if ((latestSentSimTick != 0) && (latestSentSimTick != (currentTick - 1))) {
+    if ((latestSentSimTick != 0) && (latestSentSimTick < (currentTick - 1))) {
         addExplicitConfirmation(currentIndex, currentTick, messageCount);
     }
 

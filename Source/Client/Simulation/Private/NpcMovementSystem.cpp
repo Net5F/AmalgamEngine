@@ -119,21 +119,24 @@ void NpcMovementSystem::receiveEntityUpdates()
     while (npcUpdateQueue.pop(npcUpdateMessage)) {
         // Handle the message appropriately.
         switch (npcUpdateMessage.updateType) {
-            case NpcUpdateType::ExplicitConfirmation:
+            case NpcUpdateType::ExplicitConfirmation: {
                 // If we've been initialized, process the confirmation.
                 if (lastReceivedTick != 0) {
                     handleExplicitConfirmation();
                 }
                 break;
-            case NpcUpdateType::ImplicitConfirmation:
+            }
+            case NpcUpdateType::ImplicitConfirmation: {
                 // If we've been initialized, process the confirmation.
                 if (lastReceivedTick != 0) {
                     handleImplicitConfirmation(npcUpdateMessage.tickNum);
                 }
                 break;
-            case NpcUpdateType::Update:
+            }
+            case NpcUpdateType::Update: {
                 handleUpdate(npcUpdateMessage.message);
                 break;
+            }
         }
     }
 }
@@ -219,7 +222,7 @@ void NpcMovementSystem::applyUpdateMessage(
         if (!(registry.valid(entity))) {
             LOG_INFO("New entity added. ID: %u", entity);
             entt::entity newEntity = registry.create(entity);
-            if (entity != registry.entity(newEntity)) {
+            if (registry.entity(entity) != registry.entity(newEntity)) {
                 LOG_ERROR("Created entity doesn't match received entity. "
                           "Created: %u, received: %u",
                           newEntity, entity);

@@ -92,7 +92,7 @@ void NetworkConnectionSystem::processDisconnectEvents()
             entt::entity clientEntity = clientEntityIt->second;
             world.registry.destroy(clientEntity);
             world.netIdMap.erase(clientEntityIt);
-            LOG_INFO("Removed entity with netID: %u", clientEntity);
+            LOG_INFO("Removed entity with entityID: %u", clientEntity);
         }
         else {
             LOG_ERROR("Failed to find entity with netID: %u while erasing.",
