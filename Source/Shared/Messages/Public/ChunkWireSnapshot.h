@@ -8,7 +8,6 @@
 
 namespace AM
 {
-
 /**
  * Similar to ChunkSnapshot, but to save space uses the numeric ID of sprites
  * in the palette instead of their string ID.
@@ -16,8 +15,7 @@ namespace AM
  * Since the integer ID isn't persistable, this struct is only suitable for
  * sending chunk data to clients.
  */
-struct ChunkWireSnapshot
-{
+struct ChunkWireSnapshot {
 public:
     /** Holds the numeric IDs of all the sprites used in this chunk's tiles.
         Tile layers hold indices into this palette. */

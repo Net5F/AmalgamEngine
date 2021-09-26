@@ -2,7 +2,6 @@
 
 namespace AM
 {
-
 void ChunkRange::setToUnion(const ChunkRange& other)
 {
     // Note: We can add some special fast cases for empty ranges if we

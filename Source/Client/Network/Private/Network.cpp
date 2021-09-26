@@ -146,7 +146,6 @@ void Network::sendHeartbeatIfNecessary()
     messagesSentSinceTick = 0;
 }
 
-
 int Network::pollForMessages()
 {
     while (!exitRequested) {
@@ -184,8 +183,9 @@ void Network::processBatch()
         // If we received a message, pass it to the processor.
         if (messageResult.networkResult == NetworkResult::Success) {
             // Got a message, process it and update the receiveTimer.
-            messageProcessor.processReceivedMessage(messageResult.messageType
-                , messageRecBuffer, messageResult.messageSize);
+            messageProcessor.processReceivedMessage(messageResult.messageType,
+                                                    messageRecBuffer,
+                                                    messageResult.messageSize);
             receiveTimer.updateSavedTime();
 
             // Track the number of bytes we've received.

@@ -83,15 +83,16 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     return peer->send(&(batchBuffer[0]), currentIndex);
 }
 
-void Client::addExplicitConfirmation(unsigned int& currentIndex
-                                     , Uint32 currentTick, Uint8& messageCount)
+void Client::addExplicitConfirmation(unsigned int& currentIndex,
+                                     Uint32 currentTick, Uint8& messageCount)
 {
     /* Add the ExplicitConfirmation to the batch.
        Note: We add it by hand instead of using the normal functions because
              they're meant for queueing messages and this is post-queue. */
 
     // Write the message type.
-    batchBuffer[currentIndex] = static_cast<unsigned int>(MessageType::ExplicitConfirmation);
+    batchBuffer[currentIndex]
+        = static_cast<unsigned int>(MessageType::ExplicitConfirmation);
     currentIndex++;
 
     // Write the message size.

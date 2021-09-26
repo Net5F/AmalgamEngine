@@ -17,8 +17,9 @@ MessageProcessor::MessageProcessor(EventDispatcher& inDispatcher)
 {
 }
 
-void MessageProcessor::processReceivedMessage(MessageType messageType
-                            , BinaryBuffer& messageBuffer, unsigned int messageSize)
+void MessageProcessor::processReceivedMessage(MessageType messageType,
+                                              BinaryBuffer& messageBuffer,
+                                              unsigned int messageSize)
 {
     /* Match the enum values to their event types. */
     switch (messageType) {
@@ -44,8 +45,9 @@ void MessageProcessor::processReceivedMessage(MessageType messageType
     }
 }
 
-template <typename T>
-void MessageProcessor::pushEvent(BinaryBuffer& messageBuffer, unsigned int messageSize)
+template<typename T>
+void MessageProcessor::pushEvent(BinaryBuffer& messageBuffer,
+                                 unsigned int messageSize)
 {
     // Deserialize the message.
     T message{};
@@ -55,8 +57,9 @@ void MessageProcessor::pushEvent(BinaryBuffer& messageBuffer, unsigned int messa
     dispatcher.push<T>(message);
 }
 
-template <typename T>
-void MessageProcessor::pushEventSharedPtr(BinaryBuffer& messageBuffer, unsigned int messageSize)
+template<typename T>
+void MessageProcessor::pushEventSharedPtr(BinaryBuffer& messageBuffer,
+                                          unsigned int messageSize)
 {
     // Deserialize the message.
     std::shared_ptr<T> message{std::make_shared<T>()};
@@ -66,7 +69,8 @@ void MessageProcessor::pushEventSharedPtr(BinaryBuffer& messageBuffer, unsigned 
     dispatcher.push<std::shared_ptr<const T>>(message);
 }
 
-void MessageProcessor::handleExplicitConfirmation(BinaryBuffer& messageBuffer, Uint16 messageSize)
+void MessageProcessor::handleExplicitConfirmation(BinaryBuffer& messageBuffer,
+                                                  Uint16 messageSize)
 {
     // Deserialize the message.
     ExplicitConfirmation explicitConfirmation{};
@@ -74,11 +78,13 @@ void MessageProcessor::handleExplicitConfirmation(BinaryBuffer& messageBuffer, U
 
     // Push confirmations into the NPC update system's queue.
     for (unsigned int i = 0; i < explicitConfirmation.confirmedTickCount; ++i) {
-        dispatcher.emplace<NpcUpdateMessage>(NpcUpdateType::ExplicitConfirmation);
+        dispatcher.emplace<NpcUpdateMessage>(
+            NpcUpdateType::ExplicitConfirmation);
     }
 }
 
-void MessageProcessor::handleEntityUpdate(BinaryBuffer& messageBuffer, Uint16 messageSize)
+void MessageProcessor::handleEntityUpdate(BinaryBuffer& messageBuffer,
+                                          Uint16 messageSize)
 {
     // Deserialize the message.
     std::shared_ptr<EntityUpdate> entityUpdate
@@ -102,7 +108,8 @@ void MessageProcessor::handleEntityUpdate(BinaryBuffer& messageBuffer, Uint16 me
         }
         else if (!npcFound) {
             // Found a non-player (npc).
-            dispatcher.emplace<NpcUpdateMessage>(NpcUpdateType::Update, entityUpdate);
+            dispatcher.emplace<NpcUpdateMessage>(NpcUpdateType::Update,
+                                                 entityUpdate);
             npcFound = true;
         }
 
@@ -116,12 +123,13 @@ void MessageProcessor::handleEntityUpdate(BinaryBuffer& messageBuffer, Uint16 me
     // implicit confirmation to show that we've confirmed up to this tick.
     if (!npcFound) {
         dispatcher.emplace<NpcUpdateMessage>(
-                NpcUpdateType::ImplicitConfirmation, nullptr, entityUpdate->tickNum);
+            NpcUpdateType::ImplicitConfirmation, nullptr,
+            entityUpdate->tickNum);
     }
 }
 
 void MessageProcessor::handleConnectionResponse(BinaryBuffer& messageBuffer,
-                                  Uint16 messageSize)
+                                                Uint16 messageSize)
 {
     // Deserialize the message.
     ConnectionResponse connectionResponse{};

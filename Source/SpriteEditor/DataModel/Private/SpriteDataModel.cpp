@@ -373,8 +373,9 @@ bool SpriteDataModel::setWorkingTexturesDir()
         std::error_code errorCode;
         if (!std::filesystem::create_directories(texturesDirPath, errorCode)) {
             // Failed to create dir, return false.
-            LOG_INFO("Failed to create Textures dir. Path: %s, Error: %s"
-                , texturesDirPath.string().c_str(), errorCode.message().c_str());
+            LOG_INFO("Failed to create Textures dir. Path: %s, Error: %s",
+                     texturesDirPath.string().c_str(),
+                     errorCode.message().c_str());
             return false;
         }
     }

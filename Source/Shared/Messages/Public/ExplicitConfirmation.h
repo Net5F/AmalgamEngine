@@ -9,8 +9,7 @@
  * updates. The client needs these confirmations before it can progress
  * NPC movement forward.
  */
-struct ExplicitConfirmation
-{
+struct ExplicitConfirmation {
     Uint8 confirmedTickCount{0};
 };
 

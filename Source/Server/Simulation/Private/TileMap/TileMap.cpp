@@ -119,10 +119,13 @@ void TileMap::loadMap(TileMapSnapshot& mapSnapshot)
     tiles.resize(mapXLengthTiles * mapYLengthTiles);
 
     // Load the chunks into the tiles vector.
-    for (unsigned int chunkIndex = 0; chunkIndex < mapSnapshot.chunks.size(); ++chunkIndex) {
+    for (unsigned int chunkIndex = 0; chunkIndex < mapSnapshot.chunks.size();
+         ++chunkIndex) {
         // Calc the coordinates of this chunk's first tile.
-        unsigned int startX{(chunkIndex % mapXLengthChunks) * SharedConfig::CHUNK_WIDTH};
-        unsigned int startY{(chunkIndex / mapXLengthChunks) * SharedConfig::CHUNK_WIDTH};
+        unsigned int startX{(chunkIndex % mapXLengthChunks)
+                            * SharedConfig::CHUNK_WIDTH};
+        unsigned int startY{(chunkIndex / mapXLengthChunks)
+                            * SharedConfig::CHUNK_WIDTH};
         ChunkSnapshot& chunk{mapSnapshot.chunks[chunkIndex]};
 
         // These vars track which tile we're looking at, with respect to the
@@ -136,7 +139,8 @@ void TileMap::loadMap(TileMapSnapshot& mapSnapshot)
             TileSnapshot& tileSnapshot{chunk.tiles[i]};
             for (unsigned int paletteId : tileSnapshot.spriteLayers) {
                 const Sprite& sprite{spriteData.get(chunk.palette[paletteId])};
-                addSpriteLayer((startX + relativeX), (startY + relativeY), sprite);
+                addSpriteLayer((startX + relativeX), (startY + relativeY),
+                               sprite);
             }
 
             // Increment the relative indices, wrapping at the chunk width.
@@ -178,8 +182,10 @@ void TileMap::save(const std::string& fileName)
         for (unsigned int j = 0; j < SharedConfig::CHUNK_TILE_COUNT; ++j) {
             // Copy all of the tile's layers to the snapshot.
             TileSnapshot& tile{chunk.tiles[j]};
-            for (Tile::SpriteLayer& layer : tiles[nextLinearTileIndex].spriteLayers) {
-                unsigned int paletteId{chunk.getPaletteIndex(layer.sprite->stringId)};
+            for (Tile::SpriteLayer& layer :
+                 tiles[nextLinearTileIndex].spriteLayers) {
+                unsigned int paletteId{
+                    chunk.getPaletteIndex(layer.sprite->stringId)};
                 tile.spriteLayers.push_back(paletteId);
             }
 
@@ -190,7 +196,8 @@ void TileMap::save(const std::string& fileName)
             // next row.
             tilesProcessed++;
             if (tilesProcessed == SharedConfig::CHUNK_WIDTH) {
-                nextLinearTileIndex += (mapXLengthTiles - SharedConfig::CHUNK_WIDTH);
+                nextLinearTileIndex
+                    += (mapXLengthTiles - SharedConfig::CHUNK_WIDTH);
                 tilesProcessed = 0;
             }
         }
@@ -202,7 +209,8 @@ void TileMap::save(const std::string& fileName)
         // next row.
         chunksProcessed++;
         if (chunksProcessed == mapXLengthChunks) {
-            startLinearTileIndex += ((SharedConfig::CHUNK_WIDTH - 1) * mapXLengthTiles);
+            startLinearTileIndex
+                += ((SharedConfig::CHUNK_WIDTH - 1) * mapXLengthTiles);
             chunksProcessed = 0;
         }
     }

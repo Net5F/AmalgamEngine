@@ -32,8 +32,10 @@ void WorldSim::connect()
     }
 
     // Wait for the player's ID from the server.
-    ConnectionResponse connectionResponse{};;
-    if (!(connectionResponseQueue.waitPop(connectionResponse, CONNECTION_RESPONSE_WAIT_US))) {
+    ConnectionResponse connectionResponse{};
+    ;
+    if (!(connectionResponseQueue.waitPop(connectionResponse,
+                                          CONNECTION_RESPONSE_WAIT_US))) {
         LOG_ERROR("Server did not respond.");
     }
 

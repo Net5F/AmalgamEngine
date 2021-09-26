@@ -11,10 +11,11 @@ using namespace AM::MG;
 
 void printUsage()
 {
-    std::printf("Usage: MapGenerator.exe <XLength> <YLength> <FillSpriteId>\n"
-             "  XLength: The map's x-axis length in chunks.\n"
-             "  YLength: The map's y-axis length in chunks.\n"
-             "  FillSpriteId: The string ID of the sprite to fill the map with.");
+    std::printf(
+        "Usage: MapGenerator.exe <XLength> <YLength> <FillSpriteId>\n"
+        "  XLength: The map's x-axis length in chunks.\n"
+        "  YLength: The map's y-axis length in chunks.\n"
+        "  FillSpriteId: The string ID of the sprite to fill the map with.");
     std::fflush(stdout);
 }
 
@@ -54,8 +55,9 @@ int main(int argc, char* argv[])
 
     // Generate the map and save it.
     double startTime{timer.getDeltaSeconds(true)};
-    MapGenerator mapGenerator(static_cast<unsigned int>(mapLengthX)
-                              , static_cast<unsigned int>(mapLengthY), fillSpriteId);
+    MapGenerator mapGenerator(static_cast<unsigned int>(mapLengthX),
+                              static_cast<unsigned int>(mapLengthY),
+                              fillSpriteId);
     mapGenerator.generateAndSave("TileMap.bin");
 
     double timeTaken = timer.getDeltaSeconds(false) - startTime;

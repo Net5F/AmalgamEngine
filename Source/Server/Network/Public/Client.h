@@ -90,7 +90,8 @@ private:
     /**
      * Adds an explicit confirmation to the current batch.
      */
-    void addExplicitConfirmation(unsigned int& currentIndex, Uint32 currentTick, Uint8& messageCount);
+    void addExplicitConfirmation(unsigned int& currentIndex, Uint32 currentTick,
+                                 Uint8& messageCount);
 
     /**
      * Fills in the header information for the batch currently being built.

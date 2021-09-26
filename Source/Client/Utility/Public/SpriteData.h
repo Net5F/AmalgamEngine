@@ -51,7 +51,8 @@ private:
      *                    from SpriteData.json.
      * @param texture  The texture of the spritesheet that contains the sprite.
      */
-    void parseSprite(const nlohmann::json& spriteJson, const TextureHandle& texture);
+    void parseSprite(const nlohmann::json& spriteJson,
+                     const TextureHandle& texture);
 
     /**
      * Parses the given json, constructing sprites and pushing them into the

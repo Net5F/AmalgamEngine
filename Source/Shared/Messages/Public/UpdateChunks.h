@@ -6,12 +6,10 @@
 
 namespace AM
 {
-
 /**
  * Used by the server to stream chunks to a client.
  */
-struct UpdateChunks
-{
+struct UpdateChunks {
 public:
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
@@ -28,7 +26,8 @@ public:
 template<typename S>
 void serialize(S& serializer, UpdateChunks& chunkUpdates)
 {
-    serializer.container(chunkUpdates.chunks, static_cast<std::size_t>(UpdateChunks::MAX_CHUNKS));
+    serializer.container(chunkUpdates.chunks,
+                         static_cast<std::size_t>(UpdateChunks::MAX_CHUNKS));
 }
 
 } // End namespace AM

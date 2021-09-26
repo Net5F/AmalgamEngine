@@ -8,14 +8,12 @@
 
 namespace AM
 {
-
 /**
  * Holds chunk data in a persistable form (palette IDs instead of pointers).
  *
  * Used in saving/loading the tile map.
  */
-struct ChunkSnapshot
-{
+struct ChunkSnapshot {
 public:
     /** Used as a "we should never hit this" cap on the number of IDs in a
         palette. Only checked in debug builds. */
@@ -59,9 +57,11 @@ public:
 template<typename S>
 void serialize(S& serializer, ChunkSnapshot& testChunk)
 {
-    serializer.container(testChunk.palette, ChunkSnapshot::MAX_IDS, [](S& serializer, std::string& string) {
-        serializer.text1b(string, ChunkSnapshot::MAX_ID_LENGTH);
-    });
+    serializer.container(testChunk.palette, ChunkSnapshot::MAX_IDS,
+                         [](S& serializer, std::string& string) {
+                             serializer.text1b(string,
+                                               ChunkSnapshot::MAX_ID_LENGTH);
+                         });
 
     serializer.container(testChunk.tiles);
 }

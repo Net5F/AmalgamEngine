@@ -25,7 +25,7 @@ static constexpr unsigned int DEFAULT_NUM_CLIENTS = 10;
 void printUsage()
 {
     std::printf("Usage: LoadTestClientMain.exe <number of clients>\n"
-             "If no number of clients is given, will default to 10.");
+                "If no number of clients is given, will default to 10.");
 }
 
 void connectClients(unsigned int numClients,

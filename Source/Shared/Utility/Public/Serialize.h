@@ -13,7 +13,6 @@
 
 namespace AM
 {
-
 class Serialize
 {
 public:
@@ -34,8 +33,8 @@ public:
      */
     template<typename T>
     static std::size_t toBuffer(BinaryBuffer& outputBuffer,
-                                 T& objectToSerialize,
-                                 std::size_t startIndex = 0)
+                                T& objectToSerialize,
+                                std::size_t startIndex = 0)
     {
         // Create the adapter manually so we can change the write offset.
         OutputAdapter adapter{outputBuffer};
@@ -64,11 +63,13 @@ public:
         // Open or create the file.
         std::ofstream file(filePath, std::ios::binary);
         if (!(file.is_open())) {
-            LOG_ERROR("Could not open file for serialization: %s", filePath.c_str());
+            LOG_ERROR("Could not open file for serialization: %s",
+                      filePath.c_str());
         }
 
         // Initialize the stream serializer.
-        bitsery::Serializer<bitsery::OutputBufferedStreamAdapter> serializer{file};
+        bitsery::Serializer<bitsery::OutputBufferedStreamAdapter> serializer{
+            file};
         serializer.object(objectToSerialize);
 
         // Serialize the object.
@@ -82,7 +83,8 @@ public:
     template<typename T>
     static std::size_t measureSize(T& objectToSerialize)
     {
-        return bitsery::quickSerialization(bitsery::MeasureSize{}, objectToSerialize);
+        return bitsery::quickSerialization(bitsery::MeasureSize{},
+                                           objectToSerialize);
     }
 };
 

@@ -6,7 +6,6 @@
 
 namespace AM
 {
-
 /**
  * Represents the top left point of an entity's position in the world.
  */
@@ -25,8 +24,8 @@ public:
      */
     TileIndex asTileIndex()
     {
-        return {(static_cast<int>(x / SharedConfig::TILE_WORLD_WIDTH))
-            , (static_cast<int>(y / SharedConfig::TILE_WORLD_WIDTH))};
+        return {(static_cast<int>(x / SharedConfig::TILE_WORLD_WIDTH)),
+                (static_cast<int>(y / SharedConfig::TILE_WORLD_WIDTH))};
     }
 
     /**
@@ -35,9 +34,9 @@ public:
     ChunkIndex asChunkIndex()
     {
         return {(static_cast<int>((x / SharedConfig::TILE_WORLD_WIDTH)
-                 / SharedConfig::CHUNK_WIDTH))
-            , (static_cast<int>((y / SharedConfig::TILE_WORLD_WIDTH)
-                / SharedConfig::CHUNK_WIDTH))};
+                                  / SharedConfig::CHUNK_WIDTH)),
+                (static_cast<int>((y / SharedConfig::TILE_WORLD_WIDTH)
+                                  / SharedConfig::CHUNK_WIDTH))};
     }
 
     bool operator==(const Position& other)

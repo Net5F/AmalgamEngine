@@ -102,7 +102,8 @@ void NetworkUpdateSystem::sendUpdate(ClientSimData& client,
         entityUpdate.tickNum = sim.getCurrentTick();
 
         // Send the entity update message.
-        network.serializeAndSend(client.netID, entityUpdate, entityUpdate.tickNum);
+        network.serializeAndSend(client.netID, entityUpdate,
+                                 entityUpdate.tickNum);
     }
 }
 

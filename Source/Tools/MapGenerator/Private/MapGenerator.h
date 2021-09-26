@@ -9,14 +9,14 @@ namespace AM
 {
 namespace MG
 {
-
 /**
  * Generates the World.map file based on the given parameters.
  */
 class MapGenerator
 {
 public:
-    MapGenerator(unsigned int inMapLengthX, unsigned int inMapLengthY, const std::string& inFillSpriteId);
+    MapGenerator(unsigned int inMapLengthX, unsigned int inMapLengthY,
+                 const std::string& inFillSpriteId);
 
     /**
      * Generates the map and saves it to a file with the given name, placed in

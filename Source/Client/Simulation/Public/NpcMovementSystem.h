@@ -23,8 +23,8 @@ class SpriteData;
 class NpcMovementSystem
 {
 public:
-    NpcMovementSystem(Simulation& inSim, World& inWorld
-                      , Network& inNetwork, SpriteData& inSpriteData);
+    NpcMovementSystem(Simulation& inSim, World& inWorld, Network& inNetwork,
+                      SpriteData& inSpriteData);
 
     /**
      * If we've received data for the appropriate ticks, updates all NPCs.

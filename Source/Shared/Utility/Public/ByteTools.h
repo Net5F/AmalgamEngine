@@ -10,8 +10,8 @@
  */
 namespace AM
 {
-
-class ByteTools {
+class ByteTools
+{
 public:
     /**
      * Writes the given 16 byte value to the given buffer address.

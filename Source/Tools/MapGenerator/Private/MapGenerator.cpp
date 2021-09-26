@@ -12,9 +12,8 @@ namespace AM
 {
 namespace MG
 {
-
-MapGenerator::MapGenerator(unsigned int inMapLengthX
-                           , unsigned int inMapLengthY, const std::string& inFillSpriteId)
+MapGenerator::MapGenerator(unsigned int inMapLengthX, unsigned int inMapLengthY,
+                           const std::string& inFillSpriteId)
 : mapXLength{inMapLengthX}
 , mapYLength{inMapLengthY}
 , fillSpriteId{inFillSpriteId}

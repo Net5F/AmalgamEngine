@@ -5,7 +5,6 @@
 
 namespace AM
 {
-
 /**
  * Holds tile map data in a persistable form.
  *
@@ -14,8 +13,7 @@ namespace AM
  * This struct is fairly similar to the normal representation of the tile map,
  * see ChunkSnapshot and TileSnapshot for more obvious differences.
  */
-struct TileMapSnapshot
-{
+struct TileMapSnapshot {
 public:
     /** Used as a "we should never hit this" cap on the number of chunks in a
         map. Only checked in debug builds. */
@@ -43,7 +41,8 @@ void serialize(S& serializer, TileMapSnapshot& testTileMap)
     serializer.value4b(testTileMap.yLengthChunks);
 
     // Note: The SFINAE here breaks unless we use a size_t.
-    serializer.container(testTileMap.chunks, static_cast<std::size_t>(TileMapSnapshot::MAX_CHUNKS));
+    serializer.container(testTileMap.chunks,
+                         static_cast<std::size_t>(TileMapSnapshot::MAX_CHUNKS));
 }
 
 } // End namespace AM

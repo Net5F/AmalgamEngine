@@ -18,24 +18,26 @@ namespace AM
 {
 namespace Server
 {
-
 ChunkStreamingSystem::ChunkStreamingSystem(World& inWorld, Network& inNetwork)
 : registry{inWorld.registry}
 , tileMap{inWorld.tileMap}
 , network{inNetwork}
 {
     // Init the groups that we'll be using.
-    auto clientGroup = registry.group<ClientSimData>(entt::get<Position, PreviousPosition>);
+    auto clientGroup
+        = registry.group<ClientSimData>(entt::get<Position, PreviousPosition>);
     ignore(clientGroup);
 }
 
 void ChunkStreamingSystem::sendChunks()
 {
     // Iterate through the clients, checking if they need to be sent map data.
-    auto clientGroup = registry.group<ClientSimData>(entt::get<Position, PreviousPosition>);
+    auto clientGroup
+        = registry.group<ClientSimData>(entt::get<Position, PreviousPosition>);
     for (entt::entity entity : clientGroup) {
         auto [client, position, previousPosition]
-            = clientGroup.get<ClientSimData, Position, PreviousPosition>(entity);
+            = clientGroup.get<ClientSimData, Position, PreviousPosition>(
+                entity);
 
         // If the client just joined and needs all their chunks.
         if (client.needsInitialChunks) {
@@ -44,8 +46,8 @@ void ChunkStreamingSystem::sendChunks()
         }
         // Else if the client moved on this tick.
         else if (position != previousPosition) {
-            LOG_INFO("Check: (%.4f, %.4f), (%.4f, %.4f)", previousPosition.x
-                , previousPosition.y, position.x, position.y);
+            LOG_INFO("Check: (%.4f, %.4f), (%.4f, %.4f)", previousPosition.x,
+                     previousPosition.y, position.x, position.y);
             // If they moved into a new chunk.
             ChunkIndex previousChunk{previousPosition.asChunkIndex()};
             ChunkIndex currentChunk{position.asChunkIndex()};
@@ -57,8 +59,8 @@ void ChunkStreamingSystem::sendChunks()
     }
 }
 
-void ChunkStreamingSystem::sendAllInRangeChunks(const ChunkIndex& currentChunk
-                                                , NetworkID netID)
+void ChunkStreamingSystem::sendAllInRangeChunks(const ChunkIndex& currentChunk,
+                                                NetworkID netID)
 {
     // Sends all chunks in range of the current chunk.
     // Note: This is hardcoded to assume the range is all chunks directly
@@ -66,8 +68,8 @@ void ChunkStreamingSystem::sendAllInRangeChunks(const ChunkIndex& currentChunk
     ChunkRange currentRange{(currentChunk.x - 1), (currentChunk.y - 1), 3, 3};
 
     // Bound the range to the map boundaries.
-    ChunkRange mapBounds{0, 0, static_cast<int>(tileMap.xLengthChunks())
-        , static_cast<int>(tileMap.yLengthChunks())};
+    ChunkRange mapBounds{0, 0, static_cast<int>(tileMap.xLengthChunks()),
+                         static_cast<int>(tileMap.yLengthChunks())};
     currentRange.setToIntersect(mapBounds);
 
     // Build the chunk update message.
@@ -85,19 +87,20 @@ void ChunkStreamingSystem::sendAllInRangeChunks(const ChunkIndex& currentChunk
     LOG_INFO("Sent initial UpdateChunks.");
 }
 
-void ChunkStreamingSystem::sendNewInRangeChunks(const ChunkIndex& previousChunk
-                                                , const ChunkIndex& currentChunk
-                                                , NetworkID netID)
+void ChunkStreamingSystem::sendNewInRangeChunks(const ChunkIndex& previousChunk,
+                                                const ChunkIndex& currentChunk,
+                                                NetworkID netID)
 {
     // Determine what chunks are in range of each chunk.
     // Note: This is hardcoded to assume the range is all chunks directly
     //       surrounding the given chunk.
-    ChunkRange previousRange{(previousChunk.x - 1), (previousChunk.y - 1), 3, 3};
+    ChunkRange previousRange{(previousChunk.x - 1), (previousChunk.y - 1), 3,
+                             3};
     ChunkRange currentRange{(currentChunk.x - 1), (currentChunk.y - 1), 3, 3};
 
     // Bound each range to the map boundaries.
-    ChunkRange mapBounds{0, 0, static_cast<int>(tileMap.xLengthChunks())
-        , static_cast<int>(tileMap.yLengthChunks())};
+    ChunkRange mapBounds{0, 0, static_cast<int>(tileMap.xLengthChunks()),
+                         static_cast<int>(tileMap.yLengthChunks())};
     previousRange.setToIntersect(mapBounds);
     currentRange.setToIntersect(mapBounds);
 
@@ -123,7 +126,8 @@ void ChunkStreamingSystem::sendNewInRangeChunks(const ChunkIndex& previousChunk
     LOG_INFO("Sent UpdateChunks.");
 }
 
-void ChunkStreamingSystem::addChunkToMessage(const ChunkIndex& chunkIndex, UpdateChunks& updateChunks)
+void ChunkStreamingSystem::addChunkToMessage(const ChunkIndex& chunkIndex,
+                                             UpdateChunks& updateChunks)
 {
     // Push the new chunk and get a ref to it.
     updateChunks.chunks.emplace_back();
@@ -140,7 +144,8 @@ void ChunkStreamingSystem::addChunkToMessage(const ChunkIndex& chunkIndex, Updat
             // Copy all of the tile's layers to the snapshot.
             const Tile& tile{tileMap.getTile((startX + x), (startY + y))};
             for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
-                unsigned int paletteId{chunk.getPaletteIndex(layer.sprite->numericId)};
+                unsigned int paletteId{
+                    chunk.getPaletteIndex(layer.sprite->numericId)};
                 chunk.tiles[tileIndex].spriteLayers.push_back(paletteId);
             }
 

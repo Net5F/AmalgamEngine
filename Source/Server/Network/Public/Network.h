@@ -50,7 +50,8 @@ public:
      *                     Client's latestSentSimTick.
      */
     template<typename T>
-    void serializeAndSend(NetworkID networkID, const T& messageStruct, Uint32 messageTick = 0);
+    void serializeAndSend(NetworkID networkID, const T& messageStruct,
+                          Uint32 messageTick = 0);
 
     /**
      * Deserializes and routes received client messages.
@@ -162,20 +163,20 @@ private:
 };
 
 template<typename T>
-void Network::serializeAndSend(NetworkID networkID, const T& messageStruct, Uint32 messageTick)
+void Network::serializeAndSend(NetworkID networkID, const T& messageStruct,
+                               Uint32 messageTick)
 {
     // Allocate the buffer.
     BinaryBufferSharedPtr messageBuffer
-            = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
+        = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
 
     // Serialize the message struct into the buffer, leaving room for the
     // header.
-    std::size_t messageSize
-            = Serialize::toBuffer(*messageBuffer, messageStruct, MESSAGE_HEADER_SIZE);
+    std::size_t messageSize = Serialize::toBuffer(*messageBuffer, messageStruct,
+                                                  MESSAGE_HEADER_SIZE);
 
     // Check that the message isn't too big.
-    const unsigned int totalMessageSize
-        = MESSAGE_HEADER_SIZE + messageSize;
+    const unsigned int totalMessageSize = MESSAGE_HEADER_SIZE + messageSize;
     if ((totalMessageSize > Peer::MAX_MESSAGE_SIZE)
         || (messageSize > UINT16_MAX)) {
         LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
@@ -188,8 +189,8 @@ void Network::serializeAndSend(NetworkID networkID, const T& messageStruct, Uint
         = static_cast<Uint8>(T::MESSAGE_TYPE);
 
     // Copy the messageSize into the buffer.
-    ByteTools::write16(messageSize, (messageBuffer->data()
-                                  + MessageHeaderIndex::Size));
+    ByteTools::write16(messageSize,
+                       (messageBuffer->data() + MessageHeaderIndex::Size));
 
     // Shrink the buffer to fit.
     messageBuffer->resize(totalMessageSize);

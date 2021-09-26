@@ -5,15 +5,13 @@
 
 namespace AM
 {
-
 /**
  * Holds tile data in a persistable form (palette IDs instead of pointers).
  *
  * Used in saving/loading the tile map and in sending map data over the
  * network.
  */
-struct TileSnapshot
-{
+struct TileSnapshot {
 public:
     /** Used as a "we should never hit this" cap on the number of layers in a
         tile. Only checked in debug builds. */
@@ -28,7 +26,8 @@ public:
 template<typename S>
 void serialize(S& serializer, TileSnapshot& testTile)
 {
-    serializer.container1b(testTile.spriteLayers, TileSnapshot::MAX_SPRITE_LAYERS);
+    serializer.container1b(testTile.spriteLayers,
+                           TileSnapshot::MAX_SPRITE_LAYERS);
 }
 
 } // End namespace AM

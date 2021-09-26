@@ -26,7 +26,8 @@ namespace AM
 namespace Client
 {
 NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
-                                     Network& inNetwork, SpriteData& inSpriteData)
+                                     Network& inNetwork,
+                                     SpriteData& inSpriteData)
 : sim(inSim)
 , world(inWorld)
 , npcUpdateQueue(inNetwork.getDispatcher())
@@ -187,7 +188,8 @@ void NpcMovementSystem::moveAllNpcs()
     for (entt::entity entity : group) {
         Input& input = group.get<Input>(entity);
         Position& position = group.get<Position>(entity);
-        PreviousPosition& previousPosition = group.get<PreviousPosition>(entity);
+        PreviousPosition& previousPosition
+            = group.get<PreviousPosition>(entity);
         Movement& movement = group.get<Movement>(entity);
 
         // Save their old position.

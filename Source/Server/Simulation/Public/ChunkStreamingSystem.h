@@ -47,8 +47,8 @@ private:
      * @param currentChunk  The chunk that the client is now in.
      * @param netID  The network ID of the client to send chunks to.
      */
-    void sendNewInRangeChunks(const ChunkIndex& previousChunk
-                              , const ChunkIndex& currentChunk, NetworkID netID);
+    void sendNewInRangeChunks(const ChunkIndex& previousChunk,
+                              const ChunkIndex& currentChunk, NetworkID netID);
 
     /**
      * Adds the given chunk to the given UpdateChunks message.
@@ -56,7 +56,8 @@ private:
      * @param chunkIndex  The index of the chunk to add.
      * @param updateChunks  The message struct to add the chunk to.
      */
-    void addChunkToMessage(const ChunkIndex& chunkIndex, UpdateChunks& updateChunks);
+    void addChunkToMessage(const ChunkIndex& chunkIndex,
+                           UpdateChunks& updateChunks);
 
     /** Used for fetching entity data. */
     entt::registry& registry;

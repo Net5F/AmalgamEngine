@@ -150,7 +150,7 @@ Sint64 Network::handleClientInput(ClientMessage& clientMessage,
     // Deserialize the message.
     std::unique_ptr<ClientInput> clientInput = std::make_unique<ClientInput>();
     Deserialize::fromBuffer(*messageBuffer, messageBuffer->size(),
-                              *clientInput);
+                            *clientInput);
 
     // Fill in the network ID that we assigned to this client.
     clientInput->netID = clientMessage.netID;

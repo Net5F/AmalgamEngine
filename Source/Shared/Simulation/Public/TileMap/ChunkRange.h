@@ -4,12 +4,10 @@
 
 namespace AM
 {
-
 /**
  * A rectangle that encompasses a 2d range of chunks.
  */
-struct ChunkRange
-{
+struct ChunkRange {
 public:
     /** The X-axis coordinate of the top left of the range. */
     int x{0};
@@ -38,8 +36,8 @@ public:
               any harder than that. Might be worth revisiting. */
     inline bool containsIndex(const ChunkIndex& index)
     {
-        return ((index.x >= x) && (index.x < (x + xLength))
-              && (index.y >= y) && (index.y < (y + yLength)));
+        return ((index.x >= x) && (index.x < (x + xLength)) && (index.y >= y)
+                && (index.y < (y + yLength)));
     }
 };
 

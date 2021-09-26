@@ -10,7 +10,6 @@ class EventDispatcher;
 
 namespace Client
 {
-
 /**
  * Processes received messages.
  *
@@ -33,8 +32,9 @@ public:
      *                      at index 0.
      * @param messageSize  The length in bytes of the message in messageBuffer.
      */
-    void processReceivedMessage(MessageType messageType
-                                , BinaryBuffer& messageBuffer, unsigned int messageSize);
+    void processReceivedMessage(MessageType messageType,
+                                BinaryBuffer& messageBuffer,
+                                unsigned int messageSize);
 
 private:
     /**
@@ -46,7 +46,7 @@ private:
      *
      * The event can be received in a system using EventQueue<T>.
      */
-    template <typename T>
+    template<typename T>
     void pushEvent(BinaryBuffer& messageBuffer, unsigned int messageSize);
 
     /**
@@ -59,14 +59,16 @@ private:
      * The event can be received in a system using
      * EventQueue<std::shared_ptr<const T>>.
      */
-    template <typename T>
-    void pushEventSharedPtr(BinaryBuffer& messageBuffer, unsigned int messageSize);
+    template<typename T>
+    void pushEventSharedPtr(BinaryBuffer& messageBuffer,
+                            unsigned int messageSize);
 
     //-------------------------------------------------------------------------
     // Handlers for messages relevant to the network layer.
     //-------------------------------------------------------------------------
     /** Pushes ExplicitConfirmation event. */
-    void handleExplicitConfirmation(BinaryBuffer& messageBuffer, Uint16 messageSize);
+    void handleExplicitConfirmation(BinaryBuffer& messageBuffer,
+                                    Uint16 messageSize);
 
     /** Pushes ConnectionResponse event. */
     void handleConnectionResponse(BinaryBuffer& messageBuffer,

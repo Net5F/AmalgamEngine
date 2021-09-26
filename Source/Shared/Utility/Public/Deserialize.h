@@ -12,7 +12,6 @@
 
 namespace AM
 {
-
 class Deserialize
 {
 public:
@@ -32,8 +31,8 @@ public:
      */
     template<typename T>
     static bool fromBuffer(const BinaryBuffer& inputBuffer,
-                            std::size_t serializedSize, T& outputObject,
-                            std::size_t startIndex = 0)
+                           std::size_t serializedSize, T& outputObject,
+                           std::size_t startIndex = 0)
     {
         // Deserialize the buffer contents into outputObject.
         std::pair<bitsery::ReaderError, bool> result
@@ -67,12 +66,14 @@ public:
         // Open the file.
         std::ifstream file(filePath, std::ios::binary);
         if (!(file.is_open())) {
-            LOG_ERROR("Could not open file for deserialization: %s", filePath.c_str());
+            LOG_ERROR("Could not open file for deserialization: %s",
+                      filePath.c_str());
         }
 
         // Deserialize the file contents into outputObject.
         std::pair<bitsery::ReaderError, bool> result
-            = bitsery::quickDeserialization<bitsery::InputStreamAdapter>(file, outputObject);
+            = bitsery::quickDeserialization<bitsery::InputStreamAdapter>(
+                file, outputObject);
 
         // If there was an error, print it and fail.
         if (!result.second) {
