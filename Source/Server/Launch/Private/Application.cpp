@@ -12,7 +12,7 @@ namespace AM
 namespace Server
 {
 Application::Application()
-: sdl(SDL_INIT_VIDEO)
+: sdl(0)
 , sdlNetInit()
 , spriteData()
 , network()
