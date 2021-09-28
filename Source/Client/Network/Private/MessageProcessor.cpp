@@ -103,7 +103,7 @@ void MessageProcessor::handleEntityUpdate(BinaryBuffer& messageBuffer,
 
         if (entity == playerEntity) {
             // Found the player.
-            dispatcher.push<std::shared_ptr<EntityUpdate>>(entityUpdate);
+            dispatcher.push<std::shared_ptr<const EntityUpdate>>(entityUpdate);
             playerFound = true;
         }
         else if (!npcFound) {
