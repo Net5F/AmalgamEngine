@@ -49,11 +49,17 @@ private:
     void replayInputs(Uint32 latestReceivedTick, Position& currentPosition,
                       Movement& currentMovement, PlayerState& playerState);
 
-    /** If receivedTick > currentTick, logs an error. */
+    /**
+     * If receivedTick > currentTick, logs an error.
+     * Used to move a large error print out of a long function.
+     */
     void checkReceivedTickValidity(Uint32 receivedTick, Uint32 currentTick);
 
-    /** If tickDiff is larger than the number of elements we have in the
-        player's input history, logs an error. */
+    /**
+     * If tickDiff is larger than the number of elements we have in the
+     * player's input history, logs an error.
+     * Used to move a large error print out of a long function.
+     */
     void checkTickDiffValidity(Uint32 tickDiff);
 
     /** Used to get the current tick. */

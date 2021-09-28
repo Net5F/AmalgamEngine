@@ -214,7 +214,7 @@ void NpcMovementSystem::applyUpdateMessage(
         // Skip the player (not an NPC).
         entt::entity entity = entityIt->entity;
         entt::registry& registry = world.registry;
-        if (entity == registry.entity(world.playerEntity)) {
+        if (entity == world.playerEntity) {
             continue;
         }
 
@@ -222,15 +222,14 @@ void NpcMovementSystem::applyUpdateMessage(
         if (!(registry.valid(entity))) {
             LOG_INFO("New entity added. ID: %u", entity);
             entt::entity newEntity = registry.create(entity);
-            if (registry.entity(entity) != registry.entity(newEntity)) {
+            if (entity != newEntity) {
                 LOG_ERROR("Created entity doesn't match received entity. "
                           "Created: %u, received: %u",
                           newEntity, entity);
             }
 
             // Set the name.
-            registry.emplace<Name>(entity, std::to_string(static_cast<Uint32>(
-                                               registry.version(entity))));
+            registry.emplace<Name>(entity, std::to_string(static_cast<Uint32>(entity)));
 
             // TODO: Get the sprite info from the server.
             // Note: Currently using an arbitrarily chosen non-player sprite.

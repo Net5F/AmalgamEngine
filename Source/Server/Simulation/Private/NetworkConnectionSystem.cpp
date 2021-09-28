@@ -52,8 +52,7 @@ void NetworkConnectionSystem::processConnectEvents()
         const Position spawnPoint = world.getRandomSpawnPoint();
 
         entt::entity newEntity = registry.create();
-        registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(
-                                              registry.version(newEntity))));
+        registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(newEntity)));
         registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0.0f);
         registry.emplace<PreviousPosition>(newEntity, spawnPoint.x,
                                            spawnPoint.y, 0.0f);

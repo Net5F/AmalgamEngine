@@ -48,7 +48,7 @@ void NetworkUpdateSystem::sendClientUpdates()
     /* Update clients as necessary. */
     auto clientGroup = world.registry.group<ClientSimData>(entt::get<Position>);
     for (entt::entity entity : clientGroup) {
-        // Center this entity's AoI on its current position.
+        // Center this client's AoI on its current position.
         auto [client, clientPosition]
             = clientGroup.get<ClientSimData, Position>(entity);
         client.aoi.setCenter(clientPosition);
@@ -69,7 +69,7 @@ void NetworkUpdateSystem::sendClientUpdates()
         // If this entity had a drop, add it.
         // (It mispredicted, so it needs to know the actual state it's in.)
         if (client.messageWasDropped) {
-            // Only add entities if they will be unique.
+            // Only add the player entity if it isn't already included.
             bool playerFound = false;
             for (EntityState& entityState : entityUpdate.entityStates) {
                 if (entityState.entity == entity) {

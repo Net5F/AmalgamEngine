@@ -73,7 +73,7 @@ void Simulation::connect()
     // Create the player entity using the ID we received.
     entt::registry& registry = world.registry;
     entt::entity newEntity = registry.create(playerEntity);
-    if (registry.entity(newEntity) != registry.entity(playerEntity)) {
+    if (newEntity != playerEntity) {
         LOG_ERROR("Created entity doesn't match received entity. Created: %u, "
                   "received: %u",
                   newEntity, playerEntity);
@@ -83,8 +83,7 @@ void Simulation::connect()
     world.playerEntity = newEntity;
 
     // Set up the player's sim components.
-    registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(
-                                          registry.version(newEntity))));
+    registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(newEntity)));
     registry.emplace<Position>(newEntity, connectionResponse.x,
                                connectionResponse.y, 0.0f);
     registry.emplace<PreviousPosition>(newEntity, connectionResponse.x,
@@ -115,8 +114,7 @@ void Simulation::fakeConnection()
     world.playerEntity = newEntity;
 
     // Set up the player's sim components.
-    registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(
-                                          registry.version(newEntity))));
+    registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(newEntity)));
     registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<PreviousPosition>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);

@@ -73,7 +73,7 @@ void PlayerInputSystem::processHeldInputs()
             playerInput.inputStates[inputType] = newInputStates[inputType];
 
             // Flag the player as dirty if it isn't already.
-            if (!(world.registry.has<IsDirty>(world.playerEntity))) {
+            if (!(world.registry.all_of<IsDirty>(world.playerEntity))) {
                 registry.emplace<IsDirty>(world.playerEntity);
             }
         }
@@ -95,7 +95,7 @@ void PlayerInputSystem::addCurrentInputsToHistory()
 void PlayerInputSystem::processMouseWheel(SDL_MouseWheelEvent& wheelEvent)
 {
     // Only process zoom if the player has a camera.
-    if (world.registry.has<Camera>(world.playerEntity)) {
+    if (world.registry.all_of<Camera>(world.playerEntity)) {
         /* Zoom the player's camera based on the mouse wheel movement. */
         Camera& camera = world.registry.get<Camera>(world.playerEntity);
 

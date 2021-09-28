@@ -13,7 +13,8 @@ namespace AM
 namespace Client
 {
 World::World(SpriteData& spriteData)
-: playerEntity(entt::null)
+: registry()
+, playerEntity(entt::null)
 , tileMap(spriteData)
 , mouseScreenPoint{}
 {

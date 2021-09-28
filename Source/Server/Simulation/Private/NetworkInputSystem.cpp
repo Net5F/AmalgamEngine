@@ -57,7 +57,7 @@ void NetworkInputSystem::processInputMessages()
 
             // Flag the entity as dirty.
             // It might already be dirty from a drop, so check first.
-            if (!(world.registry.has<IsDirty>(clientEntity))) {
+            if (!(world.registry.all_of<IsDirty>(clientEntity))) {
                 world.registry.emplace<IsDirty>(clientEntity);
             }
         }

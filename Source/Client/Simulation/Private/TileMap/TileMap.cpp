@@ -26,7 +26,7 @@ TileMap::TileMap(SpriteData& inSpriteData)
 , spriteData{inSpriteData}
 {
 //    if (Config::RUN_OFFLINE) {
-        LOG_INFO("Offline mode. Constructing default tile map.");
+//        LOG_INFO("Offline mode. Constructing default tile map.");
 
         // Set our map size.
         mapXLengthChunks = 1;

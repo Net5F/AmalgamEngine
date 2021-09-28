@@ -36,7 +36,7 @@ void NetworkUpdateSystem::sendInputState()
     /* Send the updated state to the server. */
     // Only send new data if we've changed.
     entt::registry& registry = world.registry;
-    if (registry.has<IsDirty>(world.playerEntity)) {
+    if (registry.all_of<IsDirty>(world.playerEntity)) {
         // Get the current input state.
         Input& input = registry.get<Input>(world.playerEntity);
 

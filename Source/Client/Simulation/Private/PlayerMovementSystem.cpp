@@ -50,7 +50,7 @@ void PlayerMovementSystem::processMovements()
             replayInputs(latestReceivedTick, currentPosition, currentMovement,
                          playerState);
 
-            // Check if there was a mismatch between the positions we had and
+            // Check if there was a mismatch between the position we had and
             // where the server thought we should be.
             if (previousPosition != currentPosition) {
                 LOG_INFO("Predicted position mismatched after replay: (%.6f, "
@@ -77,19 +77,19 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
     std::shared_ptr<const EntityUpdate> receivedUpdate{nullptr};
     while (playerUpdateQueue.pop(receivedUpdate)) {
         /* Validate the received tick. */
+        // Check that the received tick is in the past.
         Uint32 receivedTick = receivedUpdate->tickNum;
-
         Uint32 currentTick = sim.getCurrentTick();
-        checkReceivedTickValidity(latestReceivedTick, currentTick);
+        checkReceivedTickValidity(receivedTick, currentTick);
 
-        if (receivedTick > latestReceivedTick) {
-            // Track our latest received tick.
-            latestReceivedTick = receivedTick;
-        }
-        else {
+        // Check that the received tick is ahead of our latest.
+        if (receivedTick <= latestReceivedTick) {
             LOG_ERROR("Received ticks out of order. latest: %u, new: %u",
                       latestReceivedTick, receivedTick);
         }
+
+        // Track our latest received tick.
+        latestReceivedTick = receivedTick;
 
         /* Find the player data. */
         const std::vector<EntityState>& entities = receivedUpdate->entityStates;
@@ -116,6 +116,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         Uint32 tickDiff = sim.getCurrentTick() - receivedTick;
         checkTickDiffValidity(tickDiff);
 
+        // Check if the received input disagrees with what we predicted.
         const Input& receivedInput = playerUpdate->input;
         if (receivedInput.inputStates != playerState.inputHistory[tickDiff]) {
             // Our prediction was wrong, accept the received input and set all
@@ -129,9 +130,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
 
             // Set our old position to the current so we aren't oddly lerping
             // back.
-            previousPosition.x = currentPosition.x;
-            previousPosition.y = currentPosition.y;
-            previousPosition.z = currentPosition.z;
+            previousPosition = currentPosition;
         }
     }
 
