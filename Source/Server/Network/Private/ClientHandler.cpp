@@ -198,8 +198,8 @@ void ClientHandler::processReceivedMessage(Client& client, MessageType messageTy
     Sint64 messageTick = messageProcessor.processReceivedMessage(client.getNetID()
         , messageType, messageRecBuffer, messageSize);
 
-    // If the message carried a sim tick, use it to see calc a diff and give
-    // it to the client.
+    // If the message carried a tick number, use it to calc a diff and give it
+    // to the client.
     if (messageTick != -1) {
         // Calc the difference between the current tick and the message's tick.
         Sint64 tickDiff{messageTick

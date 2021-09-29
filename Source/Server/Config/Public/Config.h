@@ -22,15 +22,16 @@ public:
     // Network
     //-------------------------------------------------------------------------
     ////////////////////////////////////////////////////////////////////////////
-    // A tick diff is the diff between our current tick and a message's
-    // intended tick, told to us by the MessageSorter.
+    // A tick diff is the difference between a message's intended tick and our
+    // current tick (a positive diff means the client is ahead of the server).
     //
     // Client connection management works as such:
     // 1. If the client is too far ahead or behind, send an adjustment.
     //    (TICKDIFF config entries mostly relate to this.)
+    //
     // 2. If a single tickdiff is lower than LOWEST_VALID_TICKDIFF or higher
-    // than
-    //    HIGHEST_VALID_TICKDIFF, disconnect them.
+    //    than HIGHEST_VALID_TICKDIFF, disconnect them.
+    //
     // 3. If we haven't received data from the client within CLIENT_TIMEOUT_S
     //    seconds, disconnect them.
     ////////////////////////////////////////////////////////////////////////////

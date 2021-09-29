@@ -27,6 +27,7 @@ public:
 
     /**
      * Queues a message to be sent the next time sendWaitingMessages is called.
+     *
      * @param message  The message to queue.
      * @param messageTick  If non-0, used to update our latestSentSimTick.
      *                     Use 0 if sending messages that aren't associated
@@ -36,6 +37,7 @@ public:
 
     /**
      * Attempts to send all queued messages over the network.
+     *
      * @param currentTick  The sim's current tick.
      * @return An appropriate NetworkResult.
      */
@@ -61,17 +63,17 @@ public:
      *
      * Note: There's 2 places where a disconnect can occur:
      *       If the client initiates a disconnect, the peer will internally set
-     * a flag. If we initiated a disconnect, peer will be set to nullptr. Both
-     * cases are detected by this method.
+     *       a flag.
+     *       If we initiated a disconnect, peer will be set to nullptr.
+     *       Both cases are detected by this method.
      */
     bool isConnected();
 
     /**
      * Records the given tick diff in tickDiffHistory.
      *
-     * Diffs are generally obtained through the return value of
-     * MessageSorter.push(), and represent how far off the tickNum in a received
-     * message was from our current tick.
+     * Diffs represent how late a message was received (the difference between
+     * the message's contained tick number and our current tick).
      *
      * If the diff isn't in our valid range, it's discarded and the client is
      * forcibly disconnected.
@@ -147,9 +149,11 @@ private:
 
     /**
      * Run through all checks necessary to determine if we should tell the
-     * client to adjust its tick. Note: The parameters could be obtained
-     * internally, but passing them in provides a clear separation between setup
-     * and adjustment logic.
+     * client to adjust its tick.
+     *
+     * Note: The parameters could be obtained internally, but passing them
+     * in provides a clear separation between setup and adjustment logic.
+     *
      * @param tickDiffHistoryCopy  A copy of the tickDiffHistory, so that we
      *                             don't need to keep it locked.
      * @param numFreshDiffsCopy  A copy of the numFreshDiffs, so that we don't
