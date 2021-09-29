@@ -146,7 +146,7 @@ NetworkResult Peer::receiveBytesWait(Uint8* messageBuffer, Uint16 numBytes)
     return NetworkResult::Success;
 }
 
-MessageResult Peer::receiveMessage(Uint8* messageBuffer, bool checkSockets)
+ReceiveResult Peer::receiveMessage(Uint8* messageBuffer, bool checkSockets)
 {
     if (!bIsConnected) {
         return {NetworkResult::Disconnected};
@@ -164,7 +164,7 @@ MessageResult Peer::receiveMessage(Uint8* messageBuffer, bool checkSockets)
     }
 }
 
-MessageResult Peer::receiveMessageWait(Uint8* messageBuffer)
+ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
 {
     if (!bIsConnected) {
         return {NetworkResult::Disconnected};
@@ -208,7 +208,7 @@ MessageResult Peer::receiveMessageWait(Uint8* messageBuffer)
     return {NetworkResult::Success, messageType, messageSize};
 }
 
-MessageResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
+ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
 {
     if (!bIsConnected) {
         return {NetworkResult::Disconnected};

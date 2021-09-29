@@ -10,12 +10,14 @@ namespace AM
 {
 namespace Server
 {
-ClientHandler::ClientHandler(Network& inNetwork)
-: network(inNetwork)
-, dispatcher(inNetwork.getDispatcher())
+ClientHandler::ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher, MessageProcessor& inMessageProcessor)
+: network{inNetwork}
+, dispatcher{inDispatcher}
+, messageProcessor{inMessageProcessor}
 , idPool(MAX_CLIENTS)
 , clientSet(std::make_shared<SocketSet>(MAX_CLIENTS))
 , acceptor(Network::SERVER_PORT, clientSet)
+, messageRecBuffer(Peer::MAX_MESSAGE_SIZE)
 , receiveThreadObj()
 , exitRequested(false)
 , sendRequested(false)
@@ -65,14 +67,11 @@ void ClientHandler::serviceClients()
         //       thread.
         int numReceived = 0;
         if (clientMap.size() != 0) {
-            numReceived = receiveClientMessages(clientMap);
+            numReceived = receiveAndProcessClientMessages(clientMap);
         }
 
-        // If we received messages, deserialize and route them.
-        if (numReceived != 0) {
-            network.processReceivedMessages(receiveQueue);
-        }
-        else {
+        // If we received messages, process them.
+        if (numReceived == 0) {
             // There wasn't any activity, delay so we don't waste CPU spinning.
             SDL_Delay(INACTIVE_DELAY_TIME_MS);
         }
@@ -111,15 +110,16 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
         NetworkID newID = idPool.reserveID();
         LOG_INFO("New client connected. Assigning netID: %u", newID);
 
-        // Add the peer to the Network's clientMap, constructing a Client
-        // in-place.
-        std::unique_lock writeLock(network.getClientMapMutex());
-        if (!(clientMap
-                  .try_emplace(newID, std::make_shared<Client>(
-                                          newID, std::move(newPeer)))
-                  .second)) {
-            idPool.freeID(newID);
-            LOG_ERROR("Ran out of room in client map or key already existed.");
+        {
+            // Add the peer to the Network's clientMap.
+            std::unique_lock writeLock(network.getClientMapMutex());
+            if (!(clientMap
+                      .try_emplace(newID, std::make_shared<Client>(
+                                              newID, std::move(newPeer)))
+                      .second)) {
+                idPool.freeID(newID);
+                LOG_ERROR("Ran out of room in client map or key already existed.");
+            }
         }
 
         // Notify the sim that a client was connected.
@@ -132,21 +132,25 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
 void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
 {
     /* Erase any disconnected clients. */
-    // Only need a read lock to check for disconnects.
     for (auto it = clientMap.begin(); it != clientMap.end();) {
         std::shared_ptr<Client>& client = it->second;
 
         if (!(client->isConnected())) {
-            // Need to modify the map, acquire a write lock.
-            std::unique_lock writeLock(network.getClientMapMutex());
+            // Save the ID since we're going to erase this client.
+            NetworkID clientID{it->first};
+
+            {
+                // Need to modify the map, acquire a write lock.
+                std::unique_lock writeLock(network.getClientMapMutex());
+
+                // Erase the disconnected client.
+                idPool.freeID(it->first);
+                it = clientMap.erase(it);
+            }
 
             // Notify the sim that a client was disconnected.
-            dispatcher.emplace<ClientDisconnected>(it->first);
-
-            // Erase the disconnected client.
-            LOG_INFO("Erased disconnected client with netID: %u.", it->first);
-            idPool.freeID(it->first);
-            it = clientMap.erase(it);
+            LOG_INFO("Erased disconnected client with netID: %u.", clientID);
+            dispatcher.emplace<ClientDisconnected>(clientID);
         }
         else {
             ++it;
@@ -154,7 +158,7 @@ void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
     }
 }
 
-int ClientHandler::receiveClientMessages(ClientMap& clientMap)
+int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
 {
     // Update each client's internal socket isReady().
     // Note: We check all clients regardless of whether this returns > 0
@@ -171,22 +175,39 @@ int ClientHandler::receiveClientMessages(ClientMap& clientMap)
 
         /* If there's potentially data waiting, try to receive all messages
            from the client. */
-        Message resultMessage = clientPtr->receiveMessage();
-        while (resultMessage.messageType != MessageType::NotSet) {
+        ReceiveResult result = clientPtr->receiveMessage(messageRecBuffer.data());
+        while (result.networkResult == NetworkResult::Success) {
             numReceived++;
 
-            // Queue the message.
-            std::weak_ptr<Client> clientWeakPtr = clientPtr;
-            receiveQueue.emplace(clientPtr->getNetID(),
-                                 std::move(clientWeakPtr),
-                                 std::move(resultMessage));
+            // Process the message.
+            processReceivedMessage(*clientPtr, result.messageType, result.messageSize);
 
             // Try to receive the next message.
-            resultMessage = clientPtr->receiveMessage();
+            result = clientPtr->receiveMessage(messageRecBuffer.data());
         }
     }
 
     return numReceived;
+}
+
+void ClientHandler::processReceivedMessage(Client& client, MessageType messageType,
+                                unsigned int messageSize)
+{
+    // Process the message.
+    // Note: messageTick will be > -1 if the message contained a tick number.
+    Sint64 messageTick = messageProcessor.processReceivedMessage(client.getNetID()
+        , messageType, messageRecBuffer, messageSize);
+
+    // If the message carried a sim tick, use it to see calc a diff and give
+    // it to the client.
+    if (messageTick != -1) {
+        // Calc the difference between the current tick and the message's tick.
+        Sint64 tickDiff{messageTick
+            - static_cast<Sint64>(network.getCurrentTick())};
+
+        // Record the diff.
+        client.recordTickDiff(tickDiff);
+    }
 }
 
 } // End namespace Server

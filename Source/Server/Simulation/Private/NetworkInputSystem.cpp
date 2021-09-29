@@ -3,7 +3,6 @@
 #include "World.h"
 #include "Network.h"
 #include "Peer.h"
-#include "ClientInput.h"
 #include "Input.h"
 #include "IsDirty.h"
 #include "ClientSimData.h"
@@ -20,7 +19,7 @@ NetworkInputSystem::NetworkInputSystem(Simulation& inSim, World& inWorld,
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)
-, messageDroppedQueue(inNetwork.getDispatcher())
+, clientInputQueue(inNetwork.getDispatcher())
 {
 }
 
@@ -28,32 +27,30 @@ void NetworkInputSystem::processInputMessages()
 {
     SCOPED_CPU_SAMPLE(processInputMessages);
 
-    // Handle any dropped messages.
-    processMessageDropEvents();
-
-    // Get the queue reference for this tick's messages.
-    std::queue<std::unique_ptr<ClientInput>>& messageQueue
-        = network.startReceiveInputMessages(sim.getCurrentTick());
-
-    // Process all messages.
-    while (!(messageQueue.empty())) {
-        std::unique_ptr<ClientInput> inputMessage
-            = std::move(messageQueue.front());
-        messageQueue.pop();
-        if (inputMessage == nullptr) {
-            LOG_INFO("Failed to receive input message after getting count "
-                     "(this shouldn't happen).")
+    // Process any client input messages.
+    while (ClientInput* clientInput = clientInputQueue.peek()) {
+        // If the input is from an earlier tick, drop it and continue.
+        if (clientInput->tickNum < sim.getCurrentTick()) {
+            LOG_INFO("Dropped message from %u. Tick: %u, received: %u"
+                , clientInput->netID, sim.getCurrentTick(), clientInput->tickNum);
+            handleDroppedMessage(clientInput->netID);
+            clientInputQueue.pop();
+            continue;
+        }
+        // If the message is from a later tick, we're done.
+        else if (clientInput->tickNum > sim.getCurrentTick()) {
+            break;
         }
 
         // Find the entity associated with the given NetID.
-        auto clientEntityIt = world.netIdMap.find(inputMessage->netID);
+        auto clientEntityIt = world.netIdMap.find(clientInput->netID);
 
         // Update the client entity's inputs.
         if (clientEntityIt != world.netIdMap.end()) {
             // Update the entity's Input component.
             entt::entity clientEntity = clientEntityIt->second;
             Input& input = world.registry.get<Input>(clientEntity);
-            input = inputMessage->input;
+            input = clientInput->input;
 
             // Flag the entity as dirty.
             // It might already be dirty from a drop, so check first.
@@ -65,42 +62,24 @@ void NetworkInputSystem::processInputMessages()
             // The entity was probably disconnected. Do nothing with the
             // message.
         }
-    }
 
-    network.endReceiveInputMessages();
-}
-
-void NetworkInputSystem::processMessageDropEvents()
-{
-    // Process any message drop events.
-    for (unsigned int i = 0; i < messageDroppedQueue.size(); ++i) {
-        // Pop the NetworkID of the client that we dropped a message from.
-        ClientMessageDropped messageDropped{};
-        if (messageDroppedQueue.pop(messageDropped)) {
-            // Find the EntityID associated with the popped NetworkID.
-            auto clientEntityIt = world.netIdMap.find(messageDropped.clientID);
-            if (clientEntityIt != world.netIdMap.end()) {
-                // We found the entity that dropped the message, handle it.
-                entt::entity clientEntity = clientEntityIt->second;
-                handleDropForEntity(clientEntity);
-            }
-            else {
-                LOG_ERROR("Failed to find entity with netID: %u while "
-                          "processing a message drop event.",
-                          messageDropped.clientID);
-            }
-        }
-        else {
-            LOG_ERROR("Expected element in messageDropEventQueue but dequeue "
-                      "failed.");
-        }
+        clientInputQueue.pop();
     }
 }
 
-void NetworkInputSystem::handleDropForEntity(entt::entity entity)
+void NetworkInputSystem::handleDroppedMessage(NetworkID clientID)
 {
+    // Find the entity ID of the client that we dropped a message from.
+    auto clientEntityIt = world.netIdMap.find(clientID);
+    if (clientEntityIt == world.netIdMap.end()) {
+        // TODO: Think about this. It may be a normal thing that we should just
+        //       return early from instead of erroring.
+        LOG_ERROR("Failed to find entity with netID: %u while "
+                  "processing a message drop event.", clientID);
+    }
+
     entt::registry& registry = world.registry;
-    Input& entityInput = registry.get<Input>(entity);
+    Input& entityInput = registry.get<Input>(clientEntityIt->second);
 
     // Default the entity's inputs so they don't run off a cliff.
     Input defaultInput{};
@@ -108,11 +87,11 @@ void NetworkInputSystem::handleDropForEntity(entt::entity entity)
         entityInput.inputStates = defaultInput.inputStates;
 
         // Flag the entity as dirty.
-        world.registry.emplace<IsDirty>(entity);
+        registry.emplace<IsDirty>(clientEntityIt->second);
     }
 
     // Flag that a drop occurred for this entity.
-    registry.get<ClientSimData>(entity).messageWasDropped = true;
+    registry.get<ClientSimData>(clientEntityIt->second).messageWasDropped = true;
 }
 
 } // namespace Server

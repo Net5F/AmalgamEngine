@@ -8,8 +8,9 @@ namespace AM
 {
 class EventDispatcher;
 
-namespace Client
+namespace Server
 {
+class Network;
 /**
  * Processes received messages.
  *
@@ -29,12 +30,16 @@ public:
      *
      * See class comment.
      *
+     * @param netID  The network ID of the client that the message came from.
      * @param messageType  The type of the received message.
      * @param messageBuffer A buffer containing a serialized message, starting
      *                      at index 0.
      * @param messageSize  The length in bytes of the message in messageBuffer.
+     *
+     * @return If the message corresponds to a particular simulation tick,
+     *         returns that tick number. If not, returns -1.
      */
-    void processReceivedMessage(MessageType messageType,
+    Sint64 processReceivedMessage(NetworkID netID, MessageType messageType,
                                 BinaryBuffer& messageBuffer,
                                 unsigned int messageSize);
 
@@ -68,26 +73,22 @@ private:
     //-------------------------------------------------------------------------
     // Handlers for messages relevant to the network layer.
     //-------------------------------------------------------------------------
-    /** Pushes ExplicitConfirmation event. */
-    void handleExplicitConfirmation(BinaryBuffer& messageBuffer,
-                                    Uint16 messageSize);
+    /**
+     * Pushes nothing - Handled in network layer.
+     * @return The tick number that the message contained.
+     */
+    Uint32 handleHeartbeat(BinaryBuffer& messageBuffer, unsigned int messageSize);
 
-    /** Pushes ConnectionResponse event. */
-    void handleConnectionResponse(BinaryBuffer& messageBuffer,
-                                  Uint16 messageSize);
-
-    /** Pushes std::shared_ptr<const EntityUpdate> event. **/
-    void handleEntityUpdate(BinaryBuffer& messageBuffer, Uint16 messageSize);
+    /**
+     * @return The tick number that the message contained.
+     */
+    Uint32 handleClientInput(NetworkID netID, BinaryBuffer& messageBuffer, unsigned int messageSize);
     //-------------------------------------------------------------------------
 
     /** The network's event dispatcher. Used to send events to the subscribed
         queues. */
     EventDispatcher& dispatcher;
-
-    /** Local copy of the playerEntity so we can tell if we got a player
-        message. */
-    entt::entity playerEntity;
 };
 
-} // End namespace Client
+} // End namespace Server
 } // End namespace AM

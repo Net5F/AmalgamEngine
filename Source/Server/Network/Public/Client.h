@@ -44,14 +44,17 @@ public:
     /**
      * Tries to receive a message from this client.
      * If no message is received, checks if this client has timed out.
-     * Note: It's expected that you called SDLNet_CheckSockets() on the
-     * outside-managed socket set before calling this.
      *
-     * @return A received Message. If no data was waiting, return.messageType
-     * will
-     *         == NotSet and return.messageBuffer will == nullptr.
+     * Note: It's expected that you called SDLNet_CheckSockets() on the
+     *       outside-managed socket set before calling this.
+     *
+     * @param messageBuffer  The buffer to fill with a message, if one was
+     *                       received.
+     *
+     * @return An appropriate ReceiveResult. If return.networkResult == Success,
+     *         messageBuffer contains the received message.
      */
-    Message receiveMessage();
+    ReceiveResult receiveMessage(Uint8* messageBuffer);
 
     /**
      * @return True if the client is connected, else false.

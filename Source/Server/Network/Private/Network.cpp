@@ -14,8 +14,9 @@ namespace AM
 namespace Server
 {
 Network::Network()
-: clientHandler(*this)
-, dispatcher()
+: dispatcher()
+, messageProcessor(dispatcher)
+, clientHandler(*this, dispatcher, messageProcessor)
 , ticksSinceNetstatsLog(0)
 , currentTickPtr(nullptr)
 {
@@ -33,54 +34,6 @@ void Network::tick()
         logNetworkStatistics();
         ticksSinceNetstatsLog = 0;
     }
-}
-
-void Network::processReceivedMessages(std::queue<ClientMessage>& receiveQueue)
-{
-    /* Process all messages in the queue. */
-    while (!receiveQueue.empty()) {
-        ClientMessage& clientMessage = receiveQueue.front();
-        BinaryBufferPtr& messageBuffer = clientMessage.message.messageBuffer;
-
-        // Used for recording how far ahead or behind the client's tick is.
-        Sint64 tickDiff = 0;
-
-        // Process the message.
-        switch (clientMessage.message.messageType) {
-            case MessageType::ClientInput: {
-                tickDiff = handleClientInput(clientMessage, messageBuffer);
-                break;
-            }
-            case MessageType::Heartbeat: {
-                tickDiff = handleHeartbeat(messageBuffer);
-                break;
-            }
-            default: {
-                LOG_ERROR("Received message type that we aren't handling.");
-                break;
-            }
-        }
-
-        // Record the diff.
-        if (std::shared_ptr<Client> clientPtr
-            = clientMessage.clientPtr.lock()) {
-            clientPtr->recordTickDiff(tickDiff);
-        }
-        // Else, the client was destructed so we don't care.
-
-        receiveQueue.pop();
-    }
-}
-
-std::queue<std::unique_ptr<ClientInput>>&
-    Network::startReceiveInputMessages(Uint32 tickNum)
-{
-    return inputMessageSorter.startReceive(tickNum);
-}
-
-void Network::endReceiveInputMessages()
-{
-    inputMessageSorter.endReceive();
 }
 
 ClientMap& Network::getClientMap()
@@ -133,50 +86,6 @@ void Network::logNetworkStatistics()
         = netStats.bytesReceived / SECONDS_TILL_STATS_DUMP;
     LOG_INFO("Bytes sent per second: %.0f, Bytes received per second: %.0f",
              bytesSentPerSecond, bytesReceivedPerSecond);
-}
-
-Sint64 Network::handleClientInput(ClientMessage& clientMessage,
-                                  BinaryBufferPtr& messageBuffer)
-{
-    // Deserialize the message.
-    std::unique_ptr<ClientInput> clientInput = std::make_unique<ClientInput>();
-    Deserialize::fromBuffer(*messageBuffer, messageBuffer->size(),
-                            *clientInput);
-
-    // Fill in the network ID that we assigned to this client.
-    clientInput->netID = clientMessage.netID;
-
-    // Push the message (blocks if the MessageSorter is locked).
-    // Save the tickNum locally since the move might be optimized
-    // in front of the access (this does happen).
-    Uint32 messageTickNum = clientInput->tickNum;
-    MessageSorterBase::PushResult pushResult
-        = inputMessageSorter.push(messageTickNum, std::move(clientInput));
-
-    // If the sorter dropped the message, push a message drop event.
-    if (pushResult.result != MessageSorterBase::ValidityResult::Valid) {
-        dispatcher.emplace<ClientMessageDropped>(clientMessage.netID);
-
-        LOG_INFO("Message was dropped. NetID: %u, diff: %d, result: %u, "
-                 "tickNum: %u",
-                 clientMessage.netID, pushResult.diff, pushResult.result,
-                 messageTickNum);
-    }
-
-    // Return the diff that the MessageSorter returned.
-    return pushResult.diff;
-}
-
-Sint64 Network::handleHeartbeat(BinaryBufferPtr& messageBuffer)
-{
-    // Deserialize the message.
-    Heartbeat heartbeat{};
-    Deserialize::fromBuffer(*messageBuffer, messageBuffer->size(), heartbeat);
-
-    // Calc the diff. Using the game's currentTick should be
-    // accurate since we didn't have to lock anything.
-    return static_cast<Sint64>(heartbeat.tickNum)
-           - static_cast<Sint64>(*currentTickPtr);
 }
 
 } // namespace Server

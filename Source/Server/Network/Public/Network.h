@@ -1,21 +1,18 @@
 #pragma once
 
+#include "SharedConfig.h"
 #include "NetworkDefs.h"
 #include "ServerNetworkDefs.h"
-#include "SharedConfig.h"
+#include "MessageProcessor.h"
 #include "ClientHandler.h"
-#include "Peer.h"
 #include "Serialize.h"
+#include "Peer.h"
 #include "ByteTools.h"
 #include "QueuedEvents.h"
-#include "MessageSorter.h"
-#include "ClientInput.h"
-#include "readerwriterqueue.h"
 #include <memory>
 #include <cstddef>
 #include <unordered_map>
 #include <shared_mutex>
-#include <queue>
 
 namespace AM
 {
@@ -53,23 +50,6 @@ public:
     template<typename T>
     void serializeAndSend(NetworkID networkID, const T& messageStruct,
                           Uint32 messageTick = 0);
-
-    /**
-     * Deserializes and routes received client messages.
-     *
-     * When a message with a tick number is received, updates the associated
-     * client's tick diff data.
-     *
-     * @param receiveQueue  A queue with messages to process.
-     */
-    void processReceivedMessages(std::queue<ClientMessage>& receiveQueue);
-
-    /** Forwards to the inputMessageSorter's startReceive. */
-    std::queue<std::unique_ptr<ClientInput>>&
-        startReceiveInputMessages(Uint32 tickNum);
-
-    /** Forward to the inputMessageSorter's endReceive. */
-    void endReceiveInputMessages();
 
     /** Initialize the tick timer. */
     void initTimer();
@@ -117,38 +97,23 @@ private:
      */
     void logNetworkStatistics();
 
-    /**
-     * Handles a received ClientInput message.
-     * @return The tick diff that inputMessageSorter.push() returned.
-     */
-    Sint64 handleClientInput(ClientMessage& clientMessage,
-                             BinaryBufferPtr& messageBuffer);
-
-    /**
-     * Handles a received Heartbeat message.
-     * @return The difference between the message's tick and our current tick.
-     */
-    Sint64 handleHeartbeat(BinaryBufferPtr& messageBuffer);
-
     /** Maps IDs to their connections. Allows the game to say "send this message
         to this entity" instead of needing to track the connection objects. */
     ClientMap clientMap;
 
-    /** Used to lock access to the clientMap.
-        Note: ClientHandler's thread is the only one that obtains exclusive
-              access to this mutex, so it doesn't bother obtaining shared
-              access. If that changes, it will need to be updated. */
+    /** Used to lock access to the clientMap. */
     std::shared_mutex clientMapMutex;
-
-    /** Handles asynchronous client activity. */
-    ClientHandler clientHandler;
 
     /** Used to send received messages and network events to the subscribed
         systems. */
     EventDispatcher dispatcher;
 
-    /** Stores input messages received from clients, sorted by tick number. */
-    MessageSorter<std::unique_ptr<ClientInput>> inputMessageSorter;
+    /** Deserializes messages, does any network-layer message handling, and
+        passes messages down to the simulation. */
+    MessageProcessor messageProcessor;
+
+    /** Handles asynchronous client activity. */
+    ClientHandler clientHandler;
 
     /** The number of seconds we'll wait before logging our network
         statistics. */

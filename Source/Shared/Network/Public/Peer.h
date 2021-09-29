@@ -107,17 +107,18 @@ public:
      * @return An appropriate ReceiveResult. If return.networkResult == Success,
      *         messageBuffer contains the received message.
      */
-    MessageResult receiveMessage(Uint8* messageBuffer, bool checkSockets);
+    ReceiveResult receiveMessage(Uint8* messageBuffer, bool checkSockets);
 
     /**
      * Receives a {size, message} pair and returns a message, waiting if the
      * data is not yet available.
      * @param messageBuffer  The buffer to fill with a message, if one was
-     * received.
+     *                       received.
      * @return An appropriate ReceiveResult. If return.networkResult == Success,
      *         messageBuffer contains the received message.
      */
-    MessageResult receiveMessageWait(Uint8* messageBuffer);
+    ReceiveResult receiveMessageWait(Uint8* messageBuffer);
+
     /**
      * Overload for allocating and filling a portable buffer.
      * Useful if you'll need to move the message around before deserializing it.
@@ -125,7 +126,7 @@ public:
      * @return An appropriate ReceiveResult. If return.networkResult == Success,
      *         messageBuffer contains the received message.
      */
-    MessageResult receiveMessageWait(BinaryBufferPtr& messageBuffer);
+    ReceiveResult receiveMessageWait(BinaryBufferPtr& messageBuffer);
 
 private:
     /** The socket for this peer. Must be a unique_ptr so we can move without

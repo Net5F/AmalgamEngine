@@ -177,27 +177,27 @@ void Network::processBatch()
     /* Process messages, if we received any. */
     Uint8 messageCount = headerRecBuffer[ServerHeaderIndex::MessageCount];
     for (unsigned int i = 0; i < messageCount; ++i) {
-        MessageResult messageResult
+        ReceiveResult receiveResult
             = server->receiveMessageWait(messageRecBuffer.data());
 
         // If we received a message, pass it to the processor.
-        if (messageResult.networkResult == NetworkResult::Success) {
+        if (receiveResult.networkResult == NetworkResult::Success) {
             // Got a message, process it and update the receiveTimer.
-            messageProcessor.processReceivedMessage(messageResult.messageType,
+            messageProcessor.processReceivedMessage(receiveResult.messageType,
                                                     messageRecBuffer,
-                                                    messageResult.messageSize);
+                                                    receiveResult.messageSize);
             receiveTimer.updateSavedTime();
 
             // Track the number of bytes we've received.
-            bytesReceived += MESSAGE_HEADER_SIZE + messageResult.messageSize;
+            bytesReceived += MESSAGE_HEADER_SIZE + receiveResult.messageSize;
         }
-        else if ((messageResult.networkResult == NetworkResult::NoWaitingData)
+        else if ((receiveResult.networkResult == NetworkResult::NoWaitingData)
                  && (receiveTimer.getDeltaSeconds(false)
                      > Config::SERVER_TIMEOUT_S)) {
             // Too long since we received a message, timed out.
             LOG_ERROR("Server connection timed out.");
         }
-        else if (messageResult.networkResult == NetworkResult::Disconnected) {
+        else if (receiveResult.networkResult == NetworkResult::Disconnected) {
             LOG_ERROR("Found server to be disconnected while trying to "
                       "receive message.");
         }

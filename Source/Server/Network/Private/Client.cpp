@@ -2,7 +2,6 @@
 #include "Peer.h"
 #include "Log.h"
 #include "ByteTools.h"
-#include "MessageSorter.h"
 #include "NetworkStats.h"
 #include <cmath>
 #include <array>
@@ -137,10 +136,10 @@ Uint8 Client::getWaitingMessageCount() const
     return size;
 }
 
-Message Client::receiveMessage()
+ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
 {
     if (peer == nullptr) {
-        return {MessageType::NotSet, nullptr};
+        return {NetworkResult::Disconnected};
     }
 
     // Receive the header.
@@ -167,18 +166,17 @@ Message Client::receiveMessage()
         // Get the message.
         // Note: This is a blocking read, but the data should immediately be
         //       available since we send it all in 1 packet.
-        BinaryBufferPtr messageBuffer = nullptr;
-        MessageResult messageResult = peer->receiveMessageWait(messageBuffer);
-        if (messageResult.networkResult == NetworkResult::Success) {
+        ReceiveResult receiveResult = peer->receiveMessageWait(messageBuffer);
+        if (receiveResult.networkResult == NetworkResult::Success) {
             // Got a message, update the receiveTimer.
             receiveTimer.updateSavedTime();
 
             // Record the number of received bytes.
             NetworkStats::recordBytesReceived(CLIENT_HEADER_SIZE
                                               + MESSAGE_HEADER_SIZE
-                                              + messageBuffer->size());
+                                              + receiveResult.messageSize);
 
-            return {messageResult.messageType, std::move(messageBuffer)};
+            return receiveResult;
         }
         else {
             LOG_ERROR("Data was not present when expected.");
@@ -192,11 +190,11 @@ Message Client::receiveMessage()
             LOG_INFO("Dropped connection, peer timed out. Time since last "
                      "message: %.6f seconds. Timeout: %.6f, NetID: %u",
                      delta, Config::CLIENT_TIMEOUT_S, netID);
-            return {MessageType::NotSet, nullptr};
+            return {NetworkResult::TimedOut};
         }
     }
 
-    return {MessageType::NotSet, nullptr};
+    return {NetworkResult::NoWaitingData};
 }
 
 bool Client::isConnected()

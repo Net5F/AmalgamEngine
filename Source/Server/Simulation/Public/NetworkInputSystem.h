@@ -1,7 +1,8 @@
 #pragma once
 
-#include "ServerNetworkDefs.h"
+#include "NetworkDefs.h"
 #include "QueuedEvents.h"
+#include "ClientInput.h"
 #include "entt/entity/registry.hpp"
 
 namespace AM
@@ -33,14 +34,10 @@ private:
      *
      * We default the client's inputs (so they don't run off a cliff) and set
      * a flag so the NetworkUpdateSystem knows that a drop occurred.
+     *
+     * @param clientID  The ID of the client that we had to drop a message from.
      */
-    void processMessageDropEvents();
-
-    /**
-     * Defaults the entity's inputs (so they don't run off a cliff) and marks
-     * them dirty if their inputs changed.
-     */
-    void handleDropForEntity(entt::entity entityID);
+    void handleDroppedMessage(NetworkID clientID);
 
     /** Used to get the current tick. */
     Simulation& sim;
@@ -49,7 +46,7 @@ private:
     /** Used to access the ClientInput MessageSorter. */
     Network& network;
 
-    EventQueue<ClientMessageDropped> messageDroppedQueue;
+    EventQueue<ClientInput> clientInputQueue;
 };
 
 } // namespace Server

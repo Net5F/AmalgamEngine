@@ -11,8 +11,6 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/Catch2/"
 # Add the executable.
 add_executable(UnitTests
     Private/TestMain.cpp
-    Private/TestMessageSorter.cpp
-    ${PROJECT_SOURCE_DIR}/Server/Network/Public/MessageSorter.h
 )
 
 # Include our source dir.

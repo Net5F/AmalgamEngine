@@ -70,17 +70,19 @@ static constexpr unsigned int MESSAGE_HEADER_SIZE
 //--------------------------------------------------------------------------
 // Structs
 //--------------------------------------------------------------------------
-/** All potential results for a network send or receive. */
+/** All potential results for a network-layer send or receive. */
 enum class NetworkResult {
-    /** Used for initialization, indicates the value hasn't been set. */
+    /** Indicates the value hasn't been set. Used for initialization. */
     NotSet,
-    /** Used for when a message was successfully sent or received. */
+    /** A message was successfully sent or received. */
     Success,
-    /* Used for when a send or receive was attempted and
-       the peer was found to be disconnected. */
+    /* A send or receive was attempted and the peer was found to be
+       disconnected. */
     Disconnected,
-    /* Used for when a receive is attempted but there is no data waiting. */
-    NoWaitingData
+    /* A receive was attempted but there was no data waiting. */
+    NoWaitingData,
+    /* We timed out while waiting for a send or receive. */
+    TimedOut,
 };
 
 /**
@@ -88,7 +90,7 @@ enum class NetworkResult {
  * Shared/Messages/Public.
  */
 enum class MessageType : Uint8 {
-    /** Used for initialization, indicates the value hasn't been set. */
+    /** Indicates the value hasn't been set. Used for initialization. */
     NotSet = 0,
     ExplicitConfirmation = 1,
     Heartbeat = 2,
@@ -99,28 +101,19 @@ enum class MessageType : Uint8 {
 };
 
 /**
- * Represents the result of trying to receive a message.
+ * Info resulting from an attempt to receive a message.
  */
-struct MessageResult {
+struct ReceiveResult {
     /** The result of the receive attempt. */
-    NetworkResult networkResult = NetworkResult::NotSet;
+    NetworkResult networkResult{NetworkResult::NotSet};
 
     /** The type of the received message. Will be Invalid if networkResult
         != Success. */
-    MessageType messageType = MessageType::NotSet;
+    MessageType messageType{MessageType::NotSet};
 
     /** If networkResult == Success, contains the size of the received message.
      */
-    Uint16 messageSize = 0;
-};
-
-/**
- * Represents a serialized message. Useful if we want to defer deserialization
- * till later, maybe because we're in a time-critical context.
- */
-struct Message {
-    MessageType messageType = MessageType::NotSet;
-    BinaryBufferPtr messageBuffer = nullptr;
+    Uint16 messageSize{0};
 };
 
 } // End namespace AM

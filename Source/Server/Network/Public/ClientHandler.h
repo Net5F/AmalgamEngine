@@ -19,6 +19,7 @@ class EventDispatcher;
 namespace Server
 {
 class Network;
+class MessageProcessor;
 
 /**
  * Handles all asynchronous activity that the Clients require.
@@ -34,7 +35,8 @@ public:
     /** The maximum number of clients that we will accept connections from. */
     static constexpr unsigned int MAX_CLIENTS = 1000;
 
-    ClientHandler(Network& inNetwork);
+    ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher
+                  , MessageProcessor& inMessageProcessor);
 
     ~ClientHandler();
 
@@ -83,16 +85,34 @@ private:
     void eraseDisconnectedClients(ClientMap& clientMap);
 
     /**
-     * Used by pollForMessages, checks for new messages and pushes them into
-     * their queues.
+     * Receives any waiting client messages and passes them to
+     * processReceivedMessage().
+     *
      * @return The number of messages that were received.
      */
-    int receiveClientMessages(ClientMap& clientMap);
+    int receiveAndProcessClientMessages(ClientMap& clientMap);
 
+    /**
+     * Passes received client messages to the MessageProcessor.
+     *
+     * When a message with a tick number is received, updates the associated
+     * client's tick diff data.
+     *
+     * @param client  The client that we received this message from.
+     * @param messageType  The type of the received message.
+     * @param messageSize  The length in bytes of the message in messageBuffer.
+     */
+    void processReceivedMessage(Client& client, MessageType messageType,
+                                unsigned int messageSize);
+
+    /** Used to get the client map and current tick. */
     Network& network;
 
     /** Used to push network events like connections/disconnections. */
     EventDispatcher& dispatcher;
+
+    /** Used to process received messages. */
+    MessageProcessor& messageProcessor;
 
     /** Used for generating network IDs. */
     IDPool idPool;
@@ -104,9 +124,8 @@ private:
     /** The listener that we use to accept new clients. */
     Acceptor acceptor;
 
-    /** A queue used for storing received messages until we can deserialize and
-        route them. */
-    std::queue<ClientMessage> receiveQueue;
+    /** Used to hold messages while MessageProcessor processes them. */
+    BinaryBuffer messageRecBuffer;
 
     /** Calls serviceClients(). */
     std::thread receiveThreadObj;
