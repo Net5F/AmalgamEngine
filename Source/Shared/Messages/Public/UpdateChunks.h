@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NetworkDefs.h"
+#include "MessageType.h"
 #include "ChunkWireSnapshot.h"
 #include <vector>
 

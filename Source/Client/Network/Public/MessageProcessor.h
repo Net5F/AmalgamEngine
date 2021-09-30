@@ -1,6 +1,7 @@
 #pragma once
 
-#include "NetworkDefs.h"
+#include "BinaryBuffer.h"
+#include "MessageType.h"
 #include "entt/fwd.hpp"
 #include <memory>
 

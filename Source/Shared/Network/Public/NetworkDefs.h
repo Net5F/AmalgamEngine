@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BinaryBuffer.h"
+#include "MessageType.h"
 #include <SDL2/SDL_stdinc.h>
 #include <memory>
 #include <vector>
@@ -83,21 +84,6 @@ enum class NetworkResult {
     NoWaitingData,
     /* We timed out while waiting for a send or receive. */
     TimedOut,
-};
-
-/**
- * The type of message to expect. For descriptions, see their definitions in
- * Shared/Messages/Public.
- */
-enum class MessageType : Uint8 {
-    /** Indicates the value hasn't been set. Used for initialization. */
-    NotSet = 0,
-    ExplicitConfirmation = 1,
-    Heartbeat = 2,
-    ConnectionResponse = 3,
-    EntityUpdate = 4,
-    ClientInput = 5,
-    UpdateChunks = 6,
 };
 
 /**

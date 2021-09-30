@@ -1,5 +1,6 @@
 #pragma once
 
+#include "MessageType.h"
 #include <SDL2/SDL_stdinc.h>
 #include "entt/entity/registry.hpp"
 

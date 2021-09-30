@@ -1,5 +1,6 @@
 #include "ClientHandler.h"
 #include "Network.h"
+#include "NetworkDefs.h"
 #include "SocketSet.h"
 #include <shared_mutex>
 #include <mutex>

@@ -33,7 +33,7 @@ struct ClientInput {
      * No IDs are accepted from the client because we can't trust it,
      * so we fill in the ID based on which socket the message came from.
      */
-    Uint32 netID{0};
+    NetworkID netID{0};
 };
 
 template<typename S>

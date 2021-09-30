@@ -7,6 +7,7 @@ target_sources(Shared
         Public/EntityUpdate.h
         Public/ExplicitConfirmation.h
         Public/Heartbeat.h
+        Public/MessageType.h
         Public/UpdateChunks.h
 )
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NetworkDefs.h"
+#include "MessageType.h"
 #include <SDL2/SDL_stdinc.h>
 
 namespace AM
