@@ -36,6 +36,11 @@ public:
  * A specialized container that sorts events into an appropriate queue based
  * on the tick number they're associated with.
  *
+ * Events need to be sorted instead of directly processing them out of the
+ * queue, because we may receive them out of order from clients. E.g.,
+ * if we're on tick 39 and we receive a message with tickNum = 42 from client 1,
+ * and another with tickNum = 40 from client 2.
+ *
  * Not thread safe, use an EventQueue first to move events across threads.
  */
 template<typename T>
