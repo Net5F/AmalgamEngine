@@ -10,6 +10,7 @@ target_sources(Server
 		Private/TileMap/TileMap.cpp
 	PUBLIC
 		Public/ChunkStreamingSystem.h
+		Public/EventSorter.h
 		Public/MovementSystem.h
 		Public/NetworkConnectionSystem.h
 		Public/NetworkInputSystem.h

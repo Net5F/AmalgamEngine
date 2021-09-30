@@ -27,30 +27,47 @@ void NetworkInputSystem::processInputMessages()
 {
     SCOPED_CPU_SAMPLE(processInputMessages);
 
-    // Process any client input messages.
+    // Sort any waiting client input events.
     while (ClientInput* clientInput = clientInputQueue.peek()) {
-        // If the input is from an earlier tick, drop it and continue.
-        if (clientInput->tickNum < sim.getCurrentTick()) {
-            LOG_INFO("Dropped message from %u. Tick: %u, received: %u"
-                , clientInput->netID, sim.getCurrentTick(), clientInput->tickNum);
+        // Push the event into the sorter.
+        SorterBase::ValidityResult result = clientInputSorter.push(*clientInput, clientInput->tickNum);
+
+        // If we had to drop an event, handle it.
+        if (result != SorterBase::ValidityResult::Valid) {
             handleDroppedMessage(clientInput->netID);
+        }
+
+        clientInputQueue.pop();
+    }
+
+    // Process all client input events for this tick.
+    std::queue<ClientInput>* queue = clientInputSorter.getCurrentQueue();
+    while (!(queue->empty())) {
+        // Get the next event.
+        ClientInput& clientInput = queue->front();
+
+        // If the input is from an earlier tick, drop it and continue.
+        if (clientInput.tickNum < sim.getCurrentTick()) {
+            LOG_INFO("Dropped message from %u. Tick: %u, received: %u"
+                , clientInput.netID, sim.getCurrentTick(), clientInput.tickNum);
+            handleDroppedMessage(clientInput.netID);
             clientInputQueue.pop();
             continue;
         }
         // If the message is from a later tick, we're done.
-        else if (clientInput->tickNum > sim.getCurrentTick()) {
+        else if (clientInput.tickNum > sim.getCurrentTick()) {
             break;
         }
 
         // Find the entity associated with the given NetID.
-        auto clientEntityIt = world.netIdMap.find(clientInput->netID);
+        auto clientEntityIt = world.netIdMap.find(clientInput.netID);
 
         // Update the client entity's inputs.
         if (clientEntityIt != world.netIdMap.end()) {
             // Update the entity's Input component.
             entt::entity clientEntity = clientEntityIt->second;
             Input& input = world.registry.get<Input>(clientEntity);
-            input = clientInput->input;
+            input = clientInput.input;
 
             // Flag the entity as dirty.
             // It might already be dirty from a drop, so check first.
@@ -63,8 +80,11 @@ void NetworkInputSystem::processInputMessages()
             // message.
         }
 
-        clientInputQueue.pop();
+        queue->pop();
     }
+
+    // Advance the sorter to the next tick.
+    clientInputSorter.advance();
 }
 
 void NetworkInputSystem::handleDroppedMessage(NetworkID clientID)

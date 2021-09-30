@@ -3,6 +3,7 @@
 #include "NetworkDefs.h"
 #include "QueuedEvents.h"
 #include "ClientInput.h"
+#include "EventSorter.h"
 #include "entt/entity/registry.hpp"
 
 namespace AM
@@ -43,10 +44,11 @@ private:
     Simulation& sim;
     /** Used to access components. */
     World& world;
-    /** Used to access the ClientInput MessageSorter. */
+    /** Used to access the dispatcher. */
     Network& network;
 
     EventQueue<ClientInput> clientInputQueue;
+    EventSorter<ClientInput> clientInputSorter;
 };
 
 } // namespace Server
