@@ -19,7 +19,7 @@ NetworkInputSystem::NetworkInputSystem(Simulation& inSim, World& inWorld,
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)
-, clientInputQueue(inNetwork.getDispatcher())
+, inputChangeRequestQueue(inNetwork.getDispatcher())
 {
 }
 
@@ -28,46 +28,46 @@ void NetworkInputSystem::processInputMessages()
     SCOPED_CPU_SAMPLE(processInputMessages);
 
     // Sort any waiting client input events.
-    while (ClientInput* clientInput = clientInputQueue.peek()) {
+    while (InputChangeRequest* inputChangeRequest = inputChangeRequestQueue.peek()) {
         // Push the event into the sorter.
-        SorterBase::ValidityResult result = clientInputSorter.push(*clientInput, clientInput->tickNum);
+        SorterBase::ValidityResult result = inputChangeRequestSorter.push(*inputChangeRequest, inputChangeRequest->tickNum);
 
         // If we had to drop an event, handle it.
         if (result != SorterBase::ValidityResult::Valid) {
-            handleDroppedMessage(clientInput->netID);
+            handleDroppedMessage(inputChangeRequest->netID);
         }
 
-        clientInputQueue.pop();
+        inputChangeRequestQueue.pop();
     }
 
     // Process all client input events for this tick.
-    std::queue<ClientInput>* queue = clientInputSorter.getCurrentQueue();
+    std::queue<InputChangeRequest>* queue = inputChangeRequestSorter.getCurrentQueue();
     while (!(queue->empty())) {
         // Get the next event.
-        ClientInput& clientInput = queue->front();
+        InputChangeRequest& inputChangeRequest = queue->front();
 
         // If the input is from an earlier tick, drop it and continue.
-        if (clientInput.tickNum < sim.getCurrentTick()) {
+        if (inputChangeRequest.tickNum < sim.getCurrentTick()) {
             LOG_INFO("Dropped message from %u. Tick: %u, received: %u"
-                , clientInput.netID, sim.getCurrentTick(), clientInput.tickNum);
-            handleDroppedMessage(clientInput.netID);
-            clientInputQueue.pop();
+                , inputChangeRequest.netID, sim.getCurrentTick(), inputChangeRequest.tickNum);
+            handleDroppedMessage(inputChangeRequest.netID);
+            inputChangeRequestQueue.pop();
             continue;
         }
         // If the message is from a later tick, we're done.
-        else if (clientInput.tickNum > sim.getCurrentTick()) {
+        else if (inputChangeRequest.tickNum > sim.getCurrentTick()) {
             break;
         }
 
         // Find the entity associated with the given NetID.
-        auto clientEntityIt = world.netIdMap.find(clientInput.netID);
+        auto clientEntityIt = world.netIdMap.find(inputChangeRequest.netID);
 
         // Update the client entity's inputs.
         if (clientEntityIt != world.netIdMap.end()) {
             // Update the entity's Input component.
             entt::entity clientEntity = clientEntityIt->second;
             Input& input = world.registry.get<Input>(clientEntity);
-            input = clientInput.input;
+            input = inputChangeRequest.input;
 
             // Flag the entity as dirty.
             // It might already be dirty from a drop, so check first.
@@ -84,7 +84,7 @@ void NetworkInputSystem::processInputMessages()
     }
 
     // Advance the sorter to the next tick.
-    clientInputSorter.advance();
+    inputChangeRequestSorter.advance();
 }
 
 void NetworkInputSystem::handleDroppedMessage(NetworkID clientID)

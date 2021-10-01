@@ -13,12 +13,17 @@ namespace AM
 enum class MessageType : Uint8 {
     /** Indicates the value hasn't been set. Used for initialization. */
     NotSet = 0,
-    ExplicitConfirmation = 1,
-    Heartbeat = 2,
-    ConnectionResponse = 3,
-    EntityUpdate = 4,
-    ClientInput = 5,
-    UpdateChunks = 6,
+
+    // Client -> Server Messages
+    Heartbeat = 1,
+    ConnectionRequest = 2,
+    InputChangeRequest = 3,
+
+    // Server -> Client Messages
+    ExplicitConfirmation = 30,
+    ConnectionResponse = 31,
+    EntityUpdate = 32,
+    ChunkUpdate = 33,
 };
 
 } // End namespace AM

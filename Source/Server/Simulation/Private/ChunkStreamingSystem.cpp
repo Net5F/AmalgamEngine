@@ -6,7 +6,7 @@
 #include "PreviousPosition.h"
 #include "ChunkIndex.h"
 #include "ChunkRange.h"
-#include "UpdateChunks.h"
+#include "ChunkUpdate.h"
 #include "SharedConfig.h"
 #include "Serialize.h"
 #include "Log.h"
@@ -31,7 +31,8 @@ ChunkStreamingSystem::ChunkStreamingSystem(World& inWorld, Network& inNetwork)
 
 void ChunkStreamingSystem::sendChunks()
 {
-    // Iterate through the clients, checking if they need to be sent map data.
+    // Iterate through all client entities that moved on this tick, checking
+    // if they need to be sent map data.
     auto clientGroup
         = registry.group<ClientSimData>(entt::get<Position, PreviousPosition>);
     for (entt::entity entity : clientGroup) {
@@ -73,17 +74,17 @@ void ChunkStreamingSystem::sendAllInRangeChunks(const ChunkIndex& currentChunk,
     currentRange.setToIntersect(mapBounds);
 
     // Build the chunk update message.
-    UpdateChunks updateChunks;
+    ChunkUpdate chunkUpdate;
     for (int i = 0; i < currentRange.yLength; ++i) {
         for (int j = 0; j < currentRange.xLength; ++j) {
             // Add the chunk to the message.
             ChunkIndex chunkIndex{(currentRange.x + j), (currentRange.y + i)};
-            addChunkToMessage(chunkIndex, updateChunks);
+            addChunkToMessage(chunkIndex, chunkUpdate);
         }
     }
 
     // Send the chunk update message.
-    network.serializeAndSend(netID, updateChunks);
+    network.serializeAndSend(netID, chunkUpdate);
     LOG_INFO("Sent initial UpdateChunks.");
 }
 
@@ -105,7 +106,7 @@ void ChunkStreamingSystem::sendNewInRangeChunks(const ChunkIndex& previousChunk,
     currentRange.setToIntersect(mapBounds);
 
     // Build the chunk update message.
-    UpdateChunks updateChunks;
+    ChunkUpdate chunkUpdate;
     for (int i = 0; i < currentRange.yLength; ++i) {
         for (int j = 0; j < currentRange.xLength; ++j) {
             // Skip the current chunk.
@@ -116,22 +117,22 @@ void ChunkStreamingSystem::sendNewInRangeChunks(const ChunkIndex& previousChunk,
             // If this chunk isn't in range of the previous chunk, add it.
             ChunkIndex chunkIndex{(currentRange.x + j), (currentRange.y + i)};
             if (!(previousRange.containsIndex(chunkIndex))) {
-                addChunkToMessage(chunkIndex, updateChunks);
+                addChunkToMessage(chunkIndex, chunkUpdate);
             }
         }
     }
 
     // Send the chunk update message.
-    network.serializeAndSend(netID, updateChunks);
+    network.serializeAndSend(netID, chunkUpdate);
     LOG_INFO("Sent UpdateChunks.");
 }
 
 void ChunkStreamingSystem::addChunkToMessage(const ChunkIndex& chunkIndex,
-                                             UpdateChunks& updateChunks)
+                                             ChunkUpdate& chunkUpdate)
 {
     // Push the new chunk and get a ref to it.
-    updateChunks.chunks.emplace_back();
-    ChunkWireSnapshot& chunk{updateChunks.chunks.back()};
+    chunkUpdate.chunks.emplace_back();
+    ChunkWireSnapshot& chunk{chunkUpdate.chunks.back()};
 
     // Calc what the chunk's starting tile is.
     unsigned int startX{chunkIndex.x * SharedConfig::CHUNK_WIDTH};

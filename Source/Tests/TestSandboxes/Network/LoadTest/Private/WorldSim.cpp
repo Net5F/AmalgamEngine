@@ -2,7 +2,7 @@
 #include "Network.h"
 #include "Config.h"
 #include "Serialize.h"
-#include "ClientInput.h"
+#include "InputChangeRequest.h"
 #include "Peer.h"
 #include "Log.h"
 #include <memory>
@@ -83,20 +83,20 @@ void WorldSim::tick()
 void WorldSim::sendNextInput()
 {
     // Construct the next input.
-    ClientInput clientInput{};
-    clientInput.tickNum = currentTick;
+    InputChangeRequest inputChangeRequest{};
+    inputChangeRequest.tickNum = currentTick;
 
     if (isMovingRight) {
-        clientInput.input.inputStates[Input::XUp] = Input::Pressed;
+        inputChangeRequest.input.inputStates[Input::XUp] = Input::Pressed;
         isMovingRight = false;
     }
     else {
-        clientInput.input.inputStates[Input::XDown] = Input::Pressed;
+        inputChangeRequest.input.inputStates[Input::XDown] = Input::Pressed;
         isMovingRight = true;
     }
 
     // Send the client input message.
-    network.serializeAndSend<ClientInput>(clientInput);
+    network.serializeAndSend<InputChangeRequest>(inputChangeRequest);
 }
 
 } // End namespace LTC

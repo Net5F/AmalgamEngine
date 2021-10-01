@@ -2,7 +2,7 @@
 
 #include "NetworkDefs.h"
 #include "QueuedEvents.h"
-#include "ClientInput.h"
+#include "InputChangeRequest.h"
 #include "EventSorter.h"
 #include "entt/entity/registry.hpp"
 
@@ -47,8 +47,8 @@ private:
     /** Used to access the dispatcher. */
     Network& network;
 
-    EventQueue<ClientInput> clientInputQueue;
-    EventSorter<ClientInput> clientInputSorter;
+    EventQueue<InputChangeRequest> inputChangeRequestQueue;
+    EventSorter<InputChangeRequest> inputChangeRequestSorter;
 };
 
 } // namespace Server

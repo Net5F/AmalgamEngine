@@ -115,10 +115,10 @@ void NpcMovementSystem::applyTickAdjustment(int adjustment)
 void NpcMovementSystem::receiveEntityUpdates()
 {
     /* Process any NPC update messages from the Network. */
-    NpcUpdateMessage npcUpdateMessage{};
-    while (npcUpdateQueue.pop(npcUpdateMessage)) {
+    NpcUpdate npcUpdate{};
+    while (npcUpdateQueue.pop(npcUpdate)) {
         // Handle the message appropriately.
-        switch (npcUpdateMessage.updateType) {
+        switch (npcUpdate.updateType) {
             case NpcUpdateType::ExplicitConfirmation: {
                 // If we've been initialized, process the confirmation.
                 if (lastReceivedTick != 0) {
@@ -129,12 +129,12 @@ void NpcMovementSystem::receiveEntityUpdates()
             case NpcUpdateType::ImplicitConfirmation: {
                 // If we've been initialized, process the confirmation.
                 if (lastReceivedTick != 0) {
-                    handleImplicitConfirmation(npcUpdateMessage.tickNum);
+                    handleImplicitConfirmation(npcUpdate.tickNum);
                 }
                 break;
             }
             case NpcUpdateType::Update: {
-                handleUpdate(npcUpdateMessage.message);
+                handleUpdate(npcUpdate.message);
                 break;
             }
         }

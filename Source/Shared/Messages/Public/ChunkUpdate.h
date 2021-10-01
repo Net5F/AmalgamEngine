@@ -9,11 +9,11 @@ namespace AM
 /**
  * Used by the server to stream chunks to a client.
  */
-struct UpdateChunks {
+struct ChunkUpdate {
 public:
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE = MessageType::UpdateChunks;
+    static constexpr MessageType MESSAGE_TYPE = MessageType::ChunkUpdate;
 
     /** Used as a "we should never hit this" cap on the number of chunks that
         we send at once. Only checked in debug builds. */
@@ -24,10 +24,10 @@ public:
 };
 
 template<typename S>
-void serialize(S& serializer, UpdateChunks& chunkUpdates)
+void serialize(S& serializer, ChunkUpdate& chunkUpdates)
 {
     serializer.container(chunkUpdates.chunks,
-                         static_cast<std::size_t>(UpdateChunks::MAX_CHUNKS));
+                         static_cast<std::size_t>(ChunkUpdate::MAX_CHUNKS));
 }
 
 } // End namespace AM

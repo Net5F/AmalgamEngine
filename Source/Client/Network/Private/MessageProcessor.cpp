@@ -4,7 +4,7 @@
 #include "ExplicitConfirmation.h"
 #include "ConnectionResponse.h"
 #include "EntityUpdate.h"
-#include "UpdateChunks.h"
+#include "ChunkUpdate.h"
 #include "Log.h"
 
 namespace AM
@@ -35,8 +35,8 @@ void MessageProcessor::processReceivedMessage(MessageType messageType,
             handleEntityUpdate(messageBuffer, messageSize);
             break;
         }
-        case MessageType::UpdateChunks: {
-            pushEventSharedPtr<UpdateChunks>(messageBuffer, messageSize);
+        case MessageType::ChunkUpdate: {
+            pushEventSharedPtr<ChunkUpdate>(messageBuffer, messageSize);
             break;
         }
         default: {
@@ -78,7 +78,7 @@ void MessageProcessor::handleExplicitConfirmation(BinaryBuffer& messageBuffer,
 
     // Push confirmations into the NPC update system's queue.
     for (unsigned int i = 0; i < explicitConfirmation.confirmedTickCount; ++i) {
-        dispatcher.emplace<NpcUpdateMessage>(
+        dispatcher.emplace<NpcUpdate>(
             NpcUpdateType::ExplicitConfirmation);
     }
 }
@@ -108,7 +108,7 @@ void MessageProcessor::handleEntityUpdate(BinaryBuffer& messageBuffer,
         }
         else if (!npcFound) {
             // Found a non-player (npc).
-            dispatcher.emplace<NpcUpdateMessage>(NpcUpdateType::Update,
+            dispatcher.emplace<NpcUpdate>(NpcUpdateType::Update,
                                                  entityUpdate);
             npcFound = true;
         }
@@ -122,7 +122,7 @@ void MessageProcessor::handleEntityUpdate(BinaryBuffer& messageBuffer,
     // If we didn't find an NPC and queue an update message, push an
     // implicit confirmation to show that we've confirmed up to this tick.
     if (!npcFound) {
-        dispatcher.emplace<NpcUpdateMessage>(
+        dispatcher.emplace<NpcUpdate>(
             NpcUpdateType::ImplicitConfirmation, nullptr,
             entityUpdate->tickNum);
     }

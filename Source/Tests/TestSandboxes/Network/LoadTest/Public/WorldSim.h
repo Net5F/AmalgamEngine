@@ -10,7 +10,7 @@
 
 namespace AM
 {
-class ClientInput;
+class InputChangeRequest;
 
 namespace Client
 {
@@ -62,7 +62,7 @@ private:
     // Event queues.
     EventQueue<ConnectionResponse> connectionResponseQueue;
     EventQueue<std::shared_ptr<const EntityUpdate>> playerUpdateQueue;
-    EventQueue<Client::NpcUpdateMessage> npcUpdateQueue;
+    EventQueue<Client::NpcUpdate> npcUpdateQueue;
 
     /** The entity ID that we were given by the server. */
     entt::entity clientEntity;

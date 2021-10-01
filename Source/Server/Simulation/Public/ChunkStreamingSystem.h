@@ -6,7 +6,7 @@
 namespace AM
 {
 struct ChunkIndex;
-struct UpdateChunks;
+struct ChunkUpdate;
 
 namespace Server
 {
@@ -54,10 +54,10 @@ private:
      * Adds the given chunk to the given UpdateChunks message.
      *
      * @param chunkIndex  The index of the chunk to add.
-     * @param updateChunks  The message struct to add the chunk to.
+     * @param chunkUpdate  The message struct to add the chunk to.
      */
     void addChunkToMessage(const ChunkIndex& chunkIndex,
-                           UpdateChunks& updateChunks);
+                           ChunkUpdate& chunkUpdate);
 
     /** Used for fetching entity data. */
     entt::registry& registry;

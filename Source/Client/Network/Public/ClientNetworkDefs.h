@@ -33,7 +33,7 @@ enum class NpcUpdateType {
  * infer. Could contain data, or an implicit or explicit confirmation that no
  * changes occurred.
  */
-struct NpcUpdateMessage {
+struct NpcUpdate {
     /** The type of information contained in this update. */
     NpcUpdateType updateType = NpcUpdateType::ExplicitConfirmation;
     /** If informationType == Update, contains the update message. */

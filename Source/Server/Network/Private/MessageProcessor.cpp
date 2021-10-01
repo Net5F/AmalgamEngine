@@ -3,7 +3,7 @@
 #include "Network.h"
 #include "Deserialize.h"
 #include "Heartbeat.h"
-#include "ClientInput.h"
+#include "InputChangeRequest.h"
 #include "Log.h"
 
 namespace AM
@@ -30,8 +30,8 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID, MessageType mes
                 static_cast<Sint64>(handleHeartbeat(messageBuffer, messageSize));
             break;
         }
-        case MessageType::ClientInput: {
-            messageTick = static_cast<Sint64>(handleClientInput(netID, messageBuffer,
+        case MessageType::InputChangeRequest: {
+            messageTick = static_cast<Sint64>(handleInputChangeRequest(netID, messageBuffer,
                 messageSize));
             break;
         }
@@ -75,21 +75,21 @@ Uint32 MessageProcessor::handleHeartbeat(BinaryBuffer& messageBuffer, unsigned i
     return heartbeat.tickNum;
 }
 
-Uint32 MessageProcessor::handleClientInput(NetworkID netID, BinaryBuffer& messageBuffer, unsigned int messageSize)
+Uint32 MessageProcessor::handleInputChangeRequest(NetworkID netID, BinaryBuffer& messageBuffer, unsigned int messageSize)
 {
     // Deserialize the message.
-    ClientInput clientInput{};
+    InputChangeRequest inputChangeRequest{};
     Deserialize::fromBuffer(messageBuffer, messageSize,
-                            clientInput);
+                            inputChangeRequest);
 
     // Fill in the network ID that we assigned to this client.
-    clientInput.netID = netID;
+    inputChangeRequest.netID = netID;
 
     // Push the message into any subscribed queues.
-    dispatcher.push<ClientInput>(clientInput);
+    dispatcher.push<InputChangeRequest>(inputChangeRequest);
 
     // Return the tick number associated with this message.
-    return clientInput.tickNum;
+    return inputChangeRequest.tickNum;
 }
 
 } // End namespace Server

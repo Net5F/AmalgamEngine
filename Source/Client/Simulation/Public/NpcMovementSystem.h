@@ -79,7 +79,7 @@ private:
     /** Used to access components. */
     World& world;
 
-    EventQueue<NpcUpdateMessage> npcUpdateQueue;
+    EventQueue<NpcUpdate> npcUpdateQueue;
 
     /** Temporarily used for loading NPC sprite data.
         When that logic gets moved, this member can be removed. */

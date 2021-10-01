@@ -9,12 +9,12 @@ namespace AM
 /**
  * Contains a client's input state on a given tick.
  *
- * Used by clients for requesting input changes on the server.
+ * Used by clients to request input changes on the server.
  */
-struct ClientInput {
+struct InputChangeRequest {
     // The enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE = MessageType::ClientInput;
+    static constexpr MessageType MESSAGE_TYPE = MessageType::InputChangeRequest;
 
     //--------------------------------------------------------------------------
     // Replicated data
@@ -37,10 +37,10 @@ struct ClientInput {
 };
 
 template<typename S>
-void serialize(S& serializer, ClientInput& clientInputs)
+void serialize(S& serializer, InputChangeRequest& inputChangeRequest)
 {
-    serializer.value4b(clientInputs.tickNum);
-    serializer.object(clientInputs.input);
+    serializer.value4b(inputChangeRequest.tickNum);
+    serializer.object(inputChangeRequest.input);
 }
 
 } // End namespace AM

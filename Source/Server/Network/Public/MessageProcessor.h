@@ -82,7 +82,7 @@ private:
     /**
      * @return The tick number that the message contained.
      */
-    Uint32 handleClientInput(NetworkID netID, BinaryBuffer& messageBuffer, unsigned int messageSize);
+    Uint32 handleInputChangeRequest(NetworkID netID, BinaryBuffer& messageBuffer, unsigned int messageSize);
     //-------------------------------------------------------------------------
 
     /** The network's event dispatcher. Used to send events to the subscribed

@@ -3,7 +3,7 @@
 #include "World.h"
 #include "Network.h"
 #include "Serialize.h"
-#include "ClientInput.h"
+#include "InputChangeRequest.h"
 #include "Input.h"
 #include "PlayerState.h"
 #include "IsDirty.h"
@@ -41,7 +41,7 @@ void NetworkUpdateSystem::sendInputState()
         Input& input = registry.get<Input>(world.playerEntity);
 
         // Send the client input message.
-        network.serializeAndSend<ClientInput>({sim.getCurrentTick(), input});
+        network.serializeAndSend<InputChangeRequest>({sim.getCurrentTick(), input});
 
         registry.remove<IsDirty>(world.playerEntity);
     }
