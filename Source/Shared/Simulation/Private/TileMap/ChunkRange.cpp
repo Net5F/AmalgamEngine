@@ -2,7 +2,7 @@
 
 namespace AM
 {
-void ChunkRange::setToUnion(const ChunkRange& other)
+void ChunkRange::unionWith(const ChunkRange& other)
 {
     // Note: We can add some special fast cases for empty ranges if we
     //       ever care to, but they likely wouldn't be exercised much.
@@ -32,7 +32,7 @@ void ChunkRange::setToUnion(const ChunkRange& other)
     }
 }
 
-void ChunkRange::setToIntersect(const ChunkRange& other)
+void ChunkRange::intersectWith(const ChunkRange& other)
 {
     // Note: We can add some special fast cases for empty ranges if we
     //       ever care to, but they likely wouldn't be exercised much.

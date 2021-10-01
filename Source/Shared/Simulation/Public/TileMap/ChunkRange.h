@@ -24,12 +24,12 @@ public:
     /**
      * Sets this range to the union between itself and the given range.
      */
-    void setToUnion(const ChunkRange& other);
+    void unionWith(const ChunkRange& other);
 
     /**
      * Sets this range to the intersection between itself and the given range.
      */
-    void setToIntersect(const ChunkRange& other);
+    void intersectWith(const ChunkRange& other);
 
     /** Returns true if the given index is within this range, else false.
         Note: This was made inline to follow what SDL does, without thinking

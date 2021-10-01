@@ -71,7 +71,7 @@ void ChunkStreamingSystem::sendAllInRangeChunks(const ChunkIndex& currentChunk,
     // Bound the range to the map boundaries.
     ChunkRange mapBounds{0, 0, static_cast<int>(tileMap.xLengthChunks()),
                          static_cast<int>(tileMap.yLengthChunks())};
-    currentRange.setToIntersect(mapBounds);
+    currentRange.intersectWith(mapBounds);
 
     // Build the chunk update message.
     ChunkUpdate chunkUpdate;
@@ -102,8 +102,8 @@ void ChunkStreamingSystem::sendNewInRangeChunks(const ChunkIndex& previousChunk,
     // Bound each range to the map boundaries.
     ChunkRange mapBounds{0, 0, static_cast<int>(tileMap.xLengthChunks()),
                          static_cast<int>(tileMap.yLengthChunks())};
-    previousRange.setToIntersect(mapBounds);
-    currentRange.setToIntersect(mapBounds);
+    previousRange.intersectWith(mapBounds);
+    currentRange.intersectWith(mapBounds);
 
     // Build the chunk update message.
     ChunkUpdate chunkUpdate;
