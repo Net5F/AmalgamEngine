@@ -1,4 +1,4 @@
-#include "NetworkUpdateSystem.h"
+#include "ServerUpdateSystem.h"
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
@@ -18,15 +18,15 @@ namespace AM
 {
 namespace Client
 {
-NetworkUpdateSystem::NetworkUpdateSystem(Simulation& inSim, World& inWorld,
-                                         Network& inNetwork)
+ServerUpdateSystem::ServerUpdateSystem(Simulation& inSim, World& inWorld,
+                                         Network& inServer)
 : sim(inSim)
 , world(inWorld)
-, network(inNetwork)
+, network(inServer)
 {
 }
 
-void NetworkUpdateSystem::sendInputState()
+void ServerUpdateSystem::sendInputState()
 {
     if (Config::RUN_OFFLINE) {
         // No need to send messages if we're running offline.

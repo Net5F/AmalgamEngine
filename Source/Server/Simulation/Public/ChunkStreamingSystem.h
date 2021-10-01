@@ -15,7 +15,7 @@ class Network;
 class TileMap;
 
 /**
- * This system handles sending chunk data to clients.
+ * This system handles streaming chunk data to clients.
  *
  * A client may require chunks to be sent when it logs in, moves into a new
  * chunk, or teleports.

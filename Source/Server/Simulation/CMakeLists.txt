@@ -1,20 +1,20 @@
 target_sources(Server
 	PRIVATE
 		Private/ChunkStreamingSystem.cpp
+		Private/ClientConnectionSystem.cpp
+		Private/ClientUpdateSystem.cpp
+		Private/InputUpdateSystem.cpp
 		Private/MovementSystem.cpp
-		Private/NetworkConnectionSystem.cpp
-		Private/NetworkInputSystem.cpp
-		Private/NetworkUpdateSystem.cpp
 		Private/Simulation.cpp
 		Private/World.cpp
 		Private/TileMap/TileMap.cpp
 	PUBLIC
 		Public/ChunkStreamingSystem.h
+		Public/ClientConnectionSystem.h
+		Public/ClientUpdateSystem.h
 		Public/EventSorter.h
+		Public/InputUpdateSystem.h
 		Public/MovementSystem.h
-		Public/NetworkConnectionSystem.h
-		Public/NetworkInputSystem.h
-		Public/NetworkUpdateSystem.h
 		Public/Simulation.h
 		Public/World.h
 		Public/Components/ClientSimData.h

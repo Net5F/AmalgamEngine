@@ -1,4 +1,4 @@
-#include "NetworkUpdateSystem.h"
+#include "ClientUpdateSystem.h"
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
@@ -18,7 +18,7 @@ namespace AM
 {
 namespace Server
 {
-NetworkUpdateSystem::NetworkUpdateSystem(Simulation& inSim, World& inWorld,
+ClientUpdateSystem::ClientUpdateSystem(Simulation& inSim, World& inWorld,
                                          Network& inNetwork)
 : sim(inSim)
 , world(inWorld)
@@ -31,7 +31,7 @@ NetworkUpdateSystem::NetworkUpdateSystem(Simulation& inSim, World& inWorld,
     ignore(movementGroup);
 }
 
-void NetworkUpdateSystem::sendClientUpdates()
+void ClientUpdateSystem::sendClientUpdates()
 {
     SCOPED_CPU_SAMPLE(sendClientUpdate);
 
@@ -93,7 +93,7 @@ void NetworkUpdateSystem::sendClientUpdates()
     world.registry.clear<IsDirty>();
 }
 
-void NetworkUpdateSystem::sendUpdate(ClientSimData& client,
+void ClientUpdateSystem::sendUpdate(ClientSimData& client,
                                      EntityUpdate& entityUpdate)
 {
     /* If there are updates to send, send an update message. */

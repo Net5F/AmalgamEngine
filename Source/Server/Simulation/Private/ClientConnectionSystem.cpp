@@ -1,4 +1,4 @@
-#include "NetworkConnectionSystem.h"
+#include "ClientConnectionSystem.h"
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
@@ -18,7 +18,7 @@ namespace AM
 {
 namespace Server
 {
-NetworkConnectionSystem::NetworkConnectionSystem(Simulation& inSim,
+ClientConnectionSystem::ClientConnectionSystem(Simulation& inSim,
                                                  World& inWorld,
                                                  Network& inNetwork)
 : sim(inSim)
@@ -29,7 +29,7 @@ NetworkConnectionSystem::NetworkConnectionSystem(Simulation& inSim,
 {
 }
 
-void NetworkConnectionSystem::processConnectionEvents()
+void ClientConnectionSystem::processConnectionEvents()
 {
     SCOPED_CPU_SAMPLE(processConnectionEvents);
 
@@ -38,7 +38,7 @@ void NetworkConnectionSystem::processConnectionEvents()
     processDisconnectEvents();
 }
 
-void NetworkConnectionSystem::processConnectEvents()
+void ClientConnectionSystem::processConnectEvents()
 {
     // Add all newly connected client's entities to the sim.
     for (unsigned int i = 0; i < clientConnectedQueue.size(); ++i) {
@@ -75,7 +75,7 @@ void NetworkConnectionSystem::processConnectEvents()
     }
 }
 
-void NetworkConnectionSystem::processDisconnectEvents()
+void ClientConnectionSystem::processDisconnectEvents()
 {
     // Remove all newly disconnected client's entities from the sim.
     for (unsigned int i = 0; i < clientDisconnectedQueue.size(); ++i) {
@@ -100,7 +100,7 @@ void NetworkConnectionSystem::processDisconnectEvents()
     }
 }
 
-void NetworkConnectionSystem::sendConnectionResponse(NetworkID networkID,
+void ClientConnectionSystem::sendConnectionResponse(NetworkID networkID,
                                                      entt::entity newEntity,
                                                      float spawnX, float spawnY)
 {

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "World.h"
-#include "NetworkConnectionSystem.h"
-#include "NetworkInputSystem.h"
+#include "ClientConnectionSystem.h"
+#include "ClientUpdateSystem.h"
+#include "InputUpdateSystem.h"
 #include "MovementSystem.h"
-#include "NetworkUpdateSystem.h"
 #include "ChunkStreamingSystem.h"
 #include <atomic>
 
@@ -38,10 +38,10 @@ private:
     World world;
     Network& network;
 
-    NetworkConnectionSystem networkConnectionSystem;
-    NetworkInputSystem networkInputSystem;
+    ClientConnectionSystem clientConnectionSystem;
+    InputUpdateSystem inputUpdateSystem;
     MovementSystem movementSystem;
-    NetworkUpdateSystem networkUpdateSystem;
+    ClientUpdateSystem clientUpdateSystem;
     ChunkStreamingSystem chunkStreamingSystem;
 
     /**

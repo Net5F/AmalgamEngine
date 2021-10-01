@@ -1,19 +1,19 @@
 target_sources(Client
 	PRIVATE
 		Private/CameraSystem.cpp
-		Private/NetworkUpdateSystem.cpp
 		Private/NpcMovementSystem.cpp
 		Private/PlayerInputSystem.cpp
 		Private/PlayerMovementSystem.cpp
+		Private/ServerUpdateSystem.cpp
 		Private/Simulation.cpp
 		Private/World.cpp
 		Private/TileMap/TileMap.cpp
 	PUBLIC
 		Public/CameraSystem.h
-		Public/NetworkUpdateSystem.h
 		Public/NpcMovementSystem.h
 		Public/PlayerInputSystem.h
 		Public/PlayerMovementSystem.h
+		Public/ServerUpdateSystem.h
 		Public/Simulation.h
 		Public/World.h
 		Public/Components/PlayerState.h

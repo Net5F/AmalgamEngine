@@ -6,7 +6,7 @@
 #include "NpcMovementSystem.h"
 #include "PlayerMovementSystem.h"
 #include "PlayerInputSystem.h"
-#include "NetworkUpdateSystem.h"
+#include "ServerUpdateSystem.h"
 #include "CameraSystem.h"
 #include "Timer.h"
 #include <atomic>
@@ -71,7 +71,7 @@ private:
     SpriteData& spriteData;
 
     PlayerInputSystem playerInputSystem;
-    NetworkUpdateSystem networkUpdateSystem;
+    ServerUpdateSystem serverUpdateSystem;
     PlayerMovementSystem playerMovementSystem;
     NpcMovementSystem npcMovementSystem;
     CameraSystem cameraSystem;

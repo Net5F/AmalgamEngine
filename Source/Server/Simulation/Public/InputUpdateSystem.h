@@ -18,10 +18,10 @@ class Network;
  * This system is in charge of receiving input messages from clients and
  * applying them to the client's entity.
  */
-class NetworkInputSystem
+class InputUpdateSystem
 {
 public:
-    NetworkInputSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
+    InputUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
      * Processes incoming EntityUpdate messages.

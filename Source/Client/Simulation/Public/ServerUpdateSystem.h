@@ -14,10 +14,10 @@ class Network;
  * This class is in charge of checking for data that needs to be sent, wrapping
  * it appropriately, and passing it to the Network's send queue.
  */
-class NetworkUpdateSystem
+class ServerUpdateSystem
 {
 public:
-    NetworkUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
+    ServerUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
      * If the player inputs have changed, sends them to the server.

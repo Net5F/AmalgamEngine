@@ -1,4 +1,4 @@
-#include "NetworkInputSystem.h"
+#include "InputUpdateSystem.h"
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
@@ -14,7 +14,7 @@ namespace AM
 {
 namespace Server
 {
-NetworkInputSystem::NetworkInputSystem(Simulation& inSim, World& inWorld,
+InputUpdateSystem::InputUpdateSystem(Simulation& inSim, World& inWorld,
                                        Network& inNetwork)
 : sim(inSim)
 , world(inWorld)
@@ -23,7 +23,7 @@ NetworkInputSystem::NetworkInputSystem(Simulation& inSim, World& inWorld,
 {
 }
 
-void NetworkInputSystem::processInputMessages()
+void InputUpdateSystem::processInputMessages()
 {
     SCOPED_CPU_SAMPLE(processInputMessages);
 
@@ -87,7 +87,7 @@ void NetworkInputSystem::processInputMessages()
     inputChangeRequestSorter.advance();
 }
 
-void NetworkInputSystem::handleDroppedMessage(NetworkID clientID)
+void InputUpdateSystem::handleDroppedMessage(NetworkID clientID)
 {
     // Find the entity ID of the client that we dropped a message from.
     auto clientEntityIt = world.netIdMap.find(clientID);

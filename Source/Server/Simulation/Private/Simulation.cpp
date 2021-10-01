@@ -10,10 +10,10 @@ namespace Server
 Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 : world(inSpriteData)
 , network(inNetwork)
-, networkConnectionSystem(*this, world, network)
-, networkInputSystem(*this, world, network)
+, clientConnectionSystem(*this, world, network)
+, inputUpdateSystem(*this, world, network)
 , movementSystem(world)
-, networkUpdateSystem(*this, world, network)
+, clientUpdateSystem(*this, world, network)
 , chunkStreamingSystem(world, network)
 , currentTick(0)
 {
@@ -25,13 +25,13 @@ void Simulation::tick()
 {
     /* Run all systems. */
     BEGIN_CPU_SAMPLE(SimulationTick);
-    networkConnectionSystem.processConnectionEvents();
+    clientConnectionSystem.processConnectionEvents();
 
-    networkInputSystem.processInputMessages();
+    inputUpdateSystem.processInputMessages();
 
     movementSystem.processMovements();
 
-    networkUpdateSystem.sendClientUpdates();
+    clientUpdateSystem.sendClientUpdates();
 
     //    chunkStreamingSystem.sendChunks();
     END_CPU_SAMPLE();

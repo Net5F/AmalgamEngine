@@ -29,7 +29,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , connectionResponseQueue(inNetwork.getDispatcher())
 , spriteData{inSpriteData}
 , playerInputSystem(*this, world)
-, networkUpdateSystem(*this, world, network)
+, serverUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, network)
 , npcMovementSystem(*this, world, network, inSpriteData)
 , cameraSystem(*this, world)
@@ -160,8 +160,8 @@ void Simulation::tick()
         // Note: Mouse and momentary inputs are processed prior to this tick.
         playerInputSystem.processHeldInputs();
 
-        // Send input updates to the server.
-        networkUpdateSystem.sendInputState();
+        // Send input change requests to the server.
+        serverUpdateSystem.sendInputState();
 
         // Push the new input state into the player's history.
         playerInputSystem.addCurrentInputsToHistory();

@@ -14,13 +14,13 @@ class World;
 class Network;
 
 /**
- * This system is in charge of processing connect/disconnect events and
- * updating the associated client entities.
+ * This system is in charge of processing client connect/disconnect events and
+ * updating the client's entity.
  */
-class NetworkConnectionSystem
+class ClientConnectionSystem
 {
 public:
-    NetworkConnectionSystem(Simulation& inSim, World& inWorld,
+    ClientConnectionSystem(Simulation& inSim, World& inWorld,
                             Network& inNetwork);
 
     /** Processes the effects of new connections and disconnects on the sim. */

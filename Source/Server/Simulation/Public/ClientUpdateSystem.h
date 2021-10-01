@@ -22,10 +22,10 @@ class ClientSimData;
  * clients, wrapping it appropriately, and passing it to the Network's send
  * queue.
  */
-class NetworkUpdateSystem
+class ClientUpdateSystem
 {
 public:
-    NetworkUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
+    ClientUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
      * Updates all connected clients with relevant world state.
