@@ -13,7 +13,7 @@ target_sources(Shared
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
-        Public/TileMap/ChunkIndex.h
+        Public/TileMap/ChunkPosition.h
         Public/TileMap/ChunkRange.h
         Public/TileMap/ChunkSnapshot.h
         Public/TileMap/TileIndex.h

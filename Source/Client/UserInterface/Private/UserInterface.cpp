@@ -91,13 +91,13 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     const Tile& tile = world.tileMap.getTile(tileIndex.x, tileIndex.y);
 
     unsigned int terrainSpriteIndex = 0;
-    if (tile.spriteLayers[0].sprite->stringId == "test_6") {
+    if (tile.spriteLayers[0].sprite->stringID == "test_6") {
         terrainSpriteIndex = 0;
     }
-    else if (tile.spriteLayers[0].sprite->stringId == "test_8") {
+    else if (tile.spriteLayers[0].sprite->stringID == "test_8") {
         terrainSpriteIndex = 1;
     }
-    else if (tile.spriteLayers[0].sprite->stringId == "test_24") {
+    else if (tile.spriteLayers[0].sprite->stringID == "test_24") {
         terrainSpriteIndex = 2;
     }
 

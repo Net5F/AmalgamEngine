@@ -14,8 +14,8 @@
                         "minY": 5.5,
                         "minZ": 0.0
                     },
-                    "numericId": 0,
-                    "stringId": "test_0",
+                    "numericID": 0,
+                    "stringID": "test_0",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -35,8 +35,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 1,
-                    "stringId": "test_1",
+                    "numericID": 1,
+                    "stringID": "test_1",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -56,8 +56,8 @@
                         "minY": 6.875,
                         "minZ": 0.0
                     },
-                    "numericId": 2,
-                    "stringId": "test_2",
+                    "numericID": 2,
+                    "stringID": "test_2",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -77,8 +77,8 @@
                         "minY": 12.625,
                         "minZ": 0.0
                     },
-                    "numericId": 3,
-                    "stringId": "test_3",
+                    "numericID": 3,
+                    "stringID": "test_3",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -98,8 +98,8 @@
                         "minY": 12.0,
                         "minZ": 0.0
                     },
-                    "numericId": 4,
-                    "stringId": "test_4",
+                    "numericID": 4,
+                    "stringID": "test_4",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -119,8 +119,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 5,
-                    "stringId": "test_5",
+                    "numericID": 5,
+                    "stringID": "test_5",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -140,8 +140,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 6,
-                    "stringId": "test_6",
+                    "numericID": 6,
+                    "stringID": "test_6",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -161,8 +161,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 7,
-                    "stringId": "test_7",
+                    "numericID": 7,
+                    "stringID": "test_7",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -182,8 +182,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 8,
-                    "stringId": "test_8",
+                    "numericID": 8,
+                    "stringID": "test_8",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -203,8 +203,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 9,
-                    "stringId": "test_9",
+                    "numericID": 9,
+                    "stringID": "test_9",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -224,8 +224,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 10,
-                    "stringId": "test_10",
+                    "numericID": 10,
+                    "stringID": "test_10",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -245,8 +245,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 11,
-                    "stringId": "test_11",
+                    "numericID": 11,
+                    "stringID": "test_11",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -266,8 +266,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 12,
-                    "stringId": "test_12",
+                    "numericID": 12,
+                    "stringID": "test_12",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -287,8 +287,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 13,
-                    "stringId": "test_13",
+                    "numericID": 13,
+                    "stringID": "test_13",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -308,8 +308,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 14,
-                    "stringId": "test_14",
+                    "numericID": 14,
+                    "stringID": "test_14",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -329,8 +329,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 15,
-                    "stringId": "test_15",
+                    "numericID": 15,
+                    "stringID": "test_15",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -350,8 +350,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 16,
-                    "stringId": "test_16",
+                    "numericID": 16,
+                    "stringID": "test_16",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -371,8 +371,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 17,
-                    "stringId": "test_17",
+                    "numericID": 17,
+                    "stringID": "test_17",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -392,8 +392,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 18,
-                    "stringId": "test_18",
+                    "numericID": 18,
+                    "stringID": "test_18",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -413,8 +413,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 19,
-                    "stringId": "test_19",
+                    "numericID": 19,
+                    "stringID": "test_19",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -434,8 +434,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 20,
-                    "stringId": "test_20",
+                    "numericID": 20,
+                    "stringID": "test_20",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -455,8 +455,8 @@
                         "minY": 7.375,
                         "minZ": 0.0
                     },
-                    "numericId": 21,
-                    "stringId": "test_21",
+                    "numericID": 21,
+                    "stringID": "test_21",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -476,8 +476,8 @@
                         "minY": 9.625,
                         "minZ": 0.0
                     },
-                    "numericId": 22,
-                    "stringId": "test_22",
+                    "numericID": 22,
+                    "stringID": "test_22",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -497,8 +497,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 23,
-                    "stringId": "test_23",
+                    "numericID": 23,
+                    "stringID": "test_23",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -518,8 +518,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 24,
-                    "stringId": "test_24",
+                    "numericID": 24,
+                    "stringID": "test_24",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -539,8 +539,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 25,
-                    "stringId": "test_25",
+                    "numericID": 25,
+                    "stringID": "test_25",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -560,8 +560,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 26,
-                    "stringId": "test_26",
+                    "numericID": 26,
+                    "stringID": "test_26",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -581,8 +581,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 27,
-                    "stringId": "test_27",
+                    "numericID": 27,
+                    "stringID": "test_27",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -602,8 +602,8 @@
                         "minY": 12.5,
                         "minZ": 0.0
                     },
-                    "numericId": 28,
-                    "stringId": "test_28",
+                    "numericID": 28,
+                    "stringID": "test_28",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -623,8 +623,8 @@
                         "minY": 11.5,
                         "minZ": 0.0
                     },
-                    "numericId": 29,
-                    "stringId": "test_29",
+                    "numericID": 29,
+                    "stringID": "test_29",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -644,8 +644,8 @@
                         "minY": 11.625,
                         "minZ": 0.0
                     },
-                    "numericId": 30,
-                    "stringId": "test_30",
+                    "numericID": 30,
+                    "stringID": "test_30",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -665,8 +665,8 @@
                         "minY": 11.625,
                         "minZ": 0.0
                     },
-                    "numericId": 31,
-                    "stringId": "test_31",
+                    "numericID": 31,
+                    "stringID": "test_31",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -686,8 +686,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 32,
-                    "stringId": "test_32",
+                    "numericID": 32,
+                    "stringID": "test_32",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -707,8 +707,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 33,
-                    "stringId": "test_33",
+                    "numericID": 33,
+                    "stringID": "test_33",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -728,8 +728,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 34,
-                    "stringId": "test_34",
+                    "numericID": 34,
+                    "stringID": "test_34",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -749,8 +749,8 @@
                         "minY": 7.125,
                         "minZ": 0.0
                     },
-                    "numericId": 35,
-                    "stringId": "test_35",
+                    "numericID": 35,
+                    "stringID": "test_35",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -775,8 +775,8 @@
                         "minY": 2.25,
                         "minZ": 0.0
                     },
-                    "numericId": 36,
-                    "stringId": "char_0",
+                    "numericID": 36,
+                    "stringID": "char_0",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,
@@ -801,8 +801,8 @@
                         "minY": 0.0,
                         "minZ": 0.0
                     },
-                    "numericId": 37,
-                    "stringId": "col_0",
+                    "numericID": 37,
+                    "stringID": "col_0",
                     "textureExtent": {
                         "h": 512,
                         "w": 256,

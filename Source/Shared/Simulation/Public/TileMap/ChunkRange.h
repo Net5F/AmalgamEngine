@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ChunkIndex.h"
+#include "ChunkPosition.h"
 
 namespace AM
 {
@@ -31,13 +31,13 @@ public:
      */
     void intersectWith(const ChunkRange& other);
 
-    /** Returns true if the given index is within this range, else false.
+    /** Returns true if the given position is within this range, else false.
         Note: This was made inline to follow what SDL does, without thinking
               any harder than that. Might be worth revisiting. */
-    inline bool containsIndex(const ChunkIndex& index)
+    inline bool containsPosition(const ChunkPosition& position)
     {
-        return ((index.x >= x) && (index.x < (x + xLength)) && (index.y >= y)
-                && (index.y < (y + yLength)));
+        return ((position.x >= x) && (position.x < (x + xLength)) && (position.y >= y)
+                && (position.y < (y + yLength)));
     }
 };
 

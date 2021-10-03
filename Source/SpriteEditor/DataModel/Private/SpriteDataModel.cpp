@@ -171,11 +171,11 @@ void SpriteDataModel::save()
                 = sprite.displayName;
 
             // Derive the string ID from the display name and add it.
-            json["spriteSheets"][i]["sprites"][j]["stringId"]
+            json["spriteSheets"][i]["sprites"][j]["stringID"]
                 = deriveStringId(sprite.displayName);
 
             // Add the numeric ID.
-            json["spriteSheets"][i]["sprites"][j]["numericId"] = nextNumericId;
+            json["spriteSheets"][i]["sprites"][j]["numericID"] = nextNumericId;
             nextNumericId++;
 
             // Add the sprite sheet texture extent.
@@ -391,14 +391,14 @@ bool SpriteDataModel::setWorkingTexturesDir()
 std::string SpriteDataModel::deriveStringId(const std::string& displayName)
 {
     // Make the string all lowercase.
-    std::string stringId{displayName};
-    std::transform(stringId.begin(), stringId.end(), stringId.begin(),
+    std::string stringID{displayName};
+    std::transform(stringID.begin(), stringID.end(), stringID.begin(),
                    [](unsigned char c) { return std::tolower(c); });
 
     // Replace spaces with underscores.
-    std::replace(stringId.begin(), stringId.end(), ' ', '_');
+    std::replace(stringID.begin(), stringID.end(), ' ', '_');
 
-    return stringId;
+    return stringID;
 }
 
 } // End namespace SpriteEditor

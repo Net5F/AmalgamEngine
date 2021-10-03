@@ -34,7 +34,7 @@ public:
      * Returns the palette index for the given ID.
      * If the ID is not in the palette, it will be added.
      */
-    unsigned int getPaletteIndex(const std::string& stringId)
+    unsigned int getPaletteIndex(const std::string& stringID)
     {
         // TODO: If this gets to be a performance issue, we can look into
         //       switching palette to a map. Serialization will be more
@@ -42,14 +42,14 @@ public:
 
         // Check if we already have this string.
         for (unsigned int i = 0; i < palette.size(); ++i) {
-            if (palette[i] == stringId) {
+            if (palette[i] == stringID) {
                 // We already have the string, returns its index.
                 return i;
             }
         }
 
         // We didn't have the string, add it.
-        palette.push_back(stringId);
+        palette.push_back(stringID);
         return (palette.size() - 1);
     }
 };

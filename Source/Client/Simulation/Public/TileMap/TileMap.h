@@ -14,10 +14,8 @@ class SpriteData;
 
 /**
  * Represents a tile map.
- * Loads TileMap.bin and owns its data.
  *
- * Note: This class expects a TileMap.bin file to be present in the same
- *       directory as the application executable.
+ * Tile map data is streamed from the server at runtime.
  *
  * The map is composed of tiles, organized into 16x16 chunks.
  */
@@ -30,6 +28,11 @@ public:
      * Errors if TileMap.bin doesn't exist or it fails to parse.
      */
     TileMap(SpriteData& inSpriteData);
+
+    /**
+     * Sets the size of the map and resizes the tiles vector.
+     */
+    void setMapSize(unsigned int inMapXLengthChunks, unsigned int inMapYLengthChunks);
 
     /**
      * Adds the given sprite to a new layer on the tile at the given position.
@@ -48,6 +51,11 @@ public:
      */
     void replaceSpriteLayer(unsigned int tileX, unsigned int tileY,
                             unsigned int layerIndex, const Sprite& sprite);
+
+    /**
+     * Clears all sprite layers out of the tile at the given index.
+     */
+    void clearTile(unsigned int tileX, unsigned int tileY);
 
     /**
      * Gets a const reference to the tile at the given coordinates.

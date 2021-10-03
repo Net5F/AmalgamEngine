@@ -25,17 +25,11 @@ TileMap::TileMap(SpriteData& inSpriteData)
 , tileCount{0}
 , spriteData{inSpriteData}
 {
-//    if (Config::RUN_OFFLINE) {
-//        LOG_INFO("Offline mode. Constructing default tile map.");
+    if (Config::RUN_OFFLINE) {
+        LOG_INFO("Offline mode. Constructing default tile map.");
 
         // Set our map size.
-        mapXLengthChunks = 1;
-        mapYLengthChunks = 1;
-        mapXLengthTiles = mapXLengthChunks * SharedConfig::CHUNK_WIDTH;
-        mapYLengthTiles = mapYLengthChunks * SharedConfig::CHUNK_WIDTH;
-
-        // Resize the tiles vector to fit the map.
-        tiles.resize(mapXLengthTiles * mapYLengthTiles);
+        setMapSize(1, 1);
 
         // Fill every tile with a ground layer.
         const Sprite& ground{spriteData.get("test_6")};
@@ -59,7 +53,19 @@ TileMap::TileMap(SpriteData& inSpriteData)
 
         const Sprite& wall2{spriteData.get("test_26")};
         addSpriteLayer(0, 2, wall2);
-//    }
+    }
+}
+
+void TileMap::setMapSize(unsigned int inMapXLengthChunks, unsigned int inMapYLengthChunks)
+{
+    // Set our map size.
+    mapXLengthChunks = inMapXLengthChunks;
+    mapYLengthChunks = inMapYLengthChunks;
+    mapXLengthTiles = mapXLengthChunks * SharedConfig::CHUNK_WIDTH;
+    mapYLengthTiles = mapYLengthChunks * SharedConfig::CHUNK_WIDTH;
+
+    // Resize the tiles vector to fit the map.
+    tiles.resize(mapXLengthTiles * mapYLengthTiles);
 }
 
 void TileMap::addSpriteLayer(unsigned int tileX, unsigned int tileY,
@@ -96,6 +102,12 @@ void TileMap::replaceSpriteLayer(unsigned int tileX, unsigned int tileY,
     // Replace the sprite.
     Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
     tile.spriteLayers[layerIndex] = {&sprite, worldBounds};
+}
+
+void TileMap::clearTile(unsigned int tileX, unsigned int tileY)
+{
+    Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
+    tile.spriteLayers.clear();
 }
 
 const Tile& TileMap::getTile(unsigned int x, unsigned int y) const

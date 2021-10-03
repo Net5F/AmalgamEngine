@@ -28,6 +28,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , network{inNetwork}
 , connectionResponseQueue(inNetwork.getDispatcher())
 , spriteData{inSpriteData}
+, chunkUpdateSystem(*this, world, network, inSpriteData)
 , playerInputSystem(*this, world)
 , serverUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, network)
@@ -52,19 +53,25 @@ void Simulation::connect()
         LOG_INFO("Network failed to connect. Retrying.");
     }
 
-    // Wait for the player's ID from the server.
+    // Wait for the data from the server.
     ConnectionResponse connectionResponse{};
     if (!(connectionResponseQueue.waitPop(connectionResponse,
                                           CONNECTION_RESPONSE_WAIT_US))) {
         LOG_ERROR("Server did not respond.");
     }
 
-    // Get our info from the connection response.
+    // Save our player entity info.
     entt::entity playerEntity = connectionResponse.entity;
     LOG_INFO(
         "Received connection response. ID: %u, tick: %u, pos: (%.4f, %.4f)",
         playerEntity, connectionResponse.tickNum, connectionResponse.x,
         connectionResponse.y);
+
+    // Resize the world's tile map.
+    world.tileMap.setMapSize(connectionResponse.mapXLengthChunks
+        , connectionResponse.mapYLengthChunks);
+    LOG_INFO("Setting map size to: (%u, %u).", connectionResponse.mapXLengthChunks
+        , connectionResponse.mapYLengthChunks);
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.
@@ -156,6 +163,9 @@ void Simulation::tick()
        ticks. */
     while (currentTick < targetTick) {
         /* Run all systems. */
+        // Process received chunk updates.
+        chunkUpdateSystem.updateChunks();
+
         // Process the held user input state.
         // Note: Mouse and momentary inputs are processed prior to this tick.
         playerInputSystem.processHeldInputs();

@@ -4,7 +4,7 @@
 #include "ClientSimData.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "ChunkIndex.h"
+#include "ChunkPosition.h"
 #include "ChunkRange.h"
 #include "ChunkUpdate.h"
 #include "SharedConfig.h"
@@ -42,7 +42,7 @@ void ChunkStreamingSystem::sendChunks()
 
         // If the client just joined and needs all their chunks.
         if (client.needsInitialChunks) {
-            sendAllInRangeChunks(position.asChunkIndex(), client.netID);
+            sendAllInRangeChunks(position.asChunkPosition(), client.netID);
             client.needsInitialChunks = false;
         }
         // Else if the client moved on this tick.
@@ -50,8 +50,8 @@ void ChunkStreamingSystem::sendChunks()
             LOG_INFO("Check: (%.4f, %.4f), (%.4f, %.4f)", previousPosition.x,
                      previousPosition.y, position.x, position.y);
             // If they moved into a new chunk.
-            ChunkIndex previousChunk{previousPosition.asChunkIndex()};
-            ChunkIndex currentChunk{position.asChunkIndex()};
+            ChunkPosition previousChunk{previousPosition.asChunkPosition()};
+            ChunkPosition currentChunk{position.asChunkPosition()};
             if (previousChunk != currentChunk) {
                 // Send the chunks that they're now in range of.
                 sendNewInRangeChunks(previousChunk, currentChunk, client.netID);
@@ -60,7 +60,7 @@ void ChunkStreamingSystem::sendChunks()
     }
 }
 
-void ChunkStreamingSystem::sendAllInRangeChunks(const ChunkIndex& currentChunk,
+void ChunkStreamingSystem::sendAllInRangeChunks(const ChunkPosition& currentChunk,
                                                 NetworkID netID)
 {
     // Sends all chunks in range of the current chunk.
@@ -78,18 +78,18 @@ void ChunkStreamingSystem::sendAllInRangeChunks(const ChunkIndex& currentChunk,
     for (int i = 0; i < currentRange.yLength; ++i) {
         for (int j = 0; j < currentRange.xLength; ++j) {
             // Add the chunk to the message.
-            ChunkIndex chunkIndex{(currentRange.x + j), (currentRange.y + i)};
-            addChunkToMessage(chunkIndex, chunkUpdate);
+            ChunkPosition chunkPosition{(currentRange.x + j), (currentRange.y + i)};
+            addChunkToMessage(chunkPosition, chunkUpdate);
         }
     }
 
     // Send the chunk update message.
     network.serializeAndSend(netID, chunkUpdate);
-    LOG_INFO("Sent initial UpdateChunks.");
+    LOG_INFO("Sent initial ChunkUpdate.");
 }
 
-void ChunkStreamingSystem::sendNewInRangeChunks(const ChunkIndex& previousChunk,
-                                                const ChunkIndex& currentChunk,
+void ChunkStreamingSystem::sendNewInRangeChunks(const ChunkPosition& previousChunk,
+                                                const ChunkPosition& currentChunk,
                                                 NetworkID netID)
 {
     // Determine what chunks are in range of each chunk.
@@ -115,39 +115,43 @@ void ChunkStreamingSystem::sendNewInRangeChunks(const ChunkIndex& previousChunk,
             }
 
             // If this chunk isn't in range of the previous chunk, add it.
-            ChunkIndex chunkIndex{(currentRange.x + j), (currentRange.y + i)};
-            if (!(previousRange.containsIndex(chunkIndex))) {
-                addChunkToMessage(chunkIndex, chunkUpdate);
+            ChunkPosition chunkPosition{(currentRange.x + j), (currentRange.y + i)};
+            if (!(previousRange.containsPosition(chunkPosition))) {
+                addChunkToMessage(chunkPosition, chunkUpdate);
             }
         }
     }
 
     // Send the chunk update message.
     network.serializeAndSend(netID, chunkUpdate);
-    LOG_INFO("Sent UpdateChunks.");
+    LOG_INFO("Sent ChunkUpdate.");
 }
 
-void ChunkStreamingSystem::addChunkToMessage(const ChunkIndex& chunkIndex,
+void ChunkStreamingSystem::addChunkToMessage(const ChunkPosition& chunkPosition,
                                              ChunkUpdate& chunkUpdate)
 {
     // Push the new chunk and get a ref to it.
     chunkUpdate.chunks.emplace_back();
     ChunkWireSnapshot& chunk{chunkUpdate.chunks.back()};
 
+    // Save the chunk's position.
+    chunk.x = chunkPosition.x;
+    chunk.y = chunkPosition.y;
+
     // Calc what the chunk's starting tile is.
-    unsigned int startX{chunkIndex.x * SharedConfig::CHUNK_WIDTH};
-    unsigned int startY{chunkIndex.y * SharedConfig::CHUNK_WIDTH};
+    unsigned int startX{chunk.x * SharedConfig::CHUNK_WIDTH};
+    unsigned int startY{chunk.y * SharedConfig::CHUNK_WIDTH};
 
     // For each tile in the chunk.
     int tileIndex{0};
-    for (unsigned int y = 0; y < SharedConfig::CHUNK_WIDTH; ++y) {
-        for (unsigned int x = 0; x < SharedConfig::CHUNK_WIDTH; ++x) {
+    for (unsigned int tileY = 0; tileY < SharedConfig::CHUNK_WIDTH; ++tileY) {
+        for (unsigned int tileX = 0; tileX < SharedConfig::CHUNK_WIDTH; ++tileX) {
             // Copy all of the tile's layers to the snapshot.
-            const Tile& tile{tileMap.getTile((startX + x), (startY + y))};
+            const Tile& tile = tileMap.getTile((startX + tileX), (startY + tileY));
             for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
-                unsigned int paletteId{
-                    chunk.getPaletteIndex(layer.sprite->numericId)};
-                chunk.tiles[tileIndex].spriteLayers.push_back(paletteId);
+                unsigned int paletteID{
+                    chunk.getPaletteIndex(layer.sprite->numericID)};
+                chunk.tiles[tileIndex].spriteLayers.push_back(paletteID);
             }
 
             // Increment to the next linear index.

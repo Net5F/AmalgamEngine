@@ -30,23 +30,23 @@ SpriteData::SpriteData()
     parseJson(json);
 }
 
-const Sprite& SpriteData::get(const std::string& stringId)
+const Sprite& SpriteData::get(const std::string& stringID)
 {
     // Attempt to find the given string ID.
-    auto it = stringMap.find(stringId);
+    auto it = stringMap.find(stringID);
     if (it == stringMap.end()) {
-        LOG_ERROR("Failed to find sprite string ID: %s", stringId.c_str());
+        LOG_ERROR("Failed to find sprite string ID: %s", stringID.c_str());
     }
 
     return *(it->second);
 }
 
-const Sprite& SpriteData::get(int numericId)
+const Sprite& SpriteData::get(int numericID)
 {
     // Attempt to find the given string ID.
-    auto it = numericMap.find(numericId);
+    auto it = numericMap.find(numericID);
     if (it == numericMap.end()) {
-        LOG_ERROR("Failed to find sprite numeric ID: %d", numericId);
+        LOG_ERROR("Failed to find sprite numeric ID: %d", numericID);
     }
 
     return *(it->second);
@@ -71,8 +71,8 @@ void SpriteData::parseJson(nlohmann::json& json)
     // Note: This must be done after filling the sprites vector, since a
     //       push_back() can cause a re-allocation which invalidates pointers.
     for (Sprite& sprite : sprites) {
-        stringMap.emplace(sprite.stringId, &sprite);
-        numericMap.emplace(sprite.numericId, &sprite);
+        stringMap.emplace(sprite.stringID, &sprite);
+        numericMap.emplace(sprite.numericID, &sprite);
     }
 }
 
@@ -85,10 +85,10 @@ void SpriteData::parseSprite(const nlohmann::json& spriteJson)
     sprite.displayName = spriteJson["displayName"].get<std::string>();
 
     // Add the string identifier.
-    sprite.stringId = spriteJson["stringId"].get<std::string>();
+    sprite.stringID = spriteJson["stringID"].get<std::string>();
 
     // Add the numeric identifier.
-    sprite.numericId = spriteJson["numericId"];
+    sprite.numericID = spriteJson["numericID"];
 
     // Add whether the sprite has a bounding box or not.
     sprite.hasBoundingBox = spriteJson["hasBoundingBox"];

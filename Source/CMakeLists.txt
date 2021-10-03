@@ -36,7 +36,6 @@ set(ENABLE_PROFILING OFF CACHE BOOL "Enable Remotery profiling." FORCE)
 include("${PROJECT_SOURCE_DIR}/../CMake/Remotery.cmake")
 
 # Configure nlohmann json.
-set(JSON_ConfigureTests OFF CACHE INTERNAL "")
 set(JSON_MultipleHeaders ON CACHE INTERNAL "Enable forward declaration.")
 add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/json/"
                  "${PROJECT_BINARY_DIR}/Libraries/json/")

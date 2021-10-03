@@ -104,10 +104,19 @@ void ClientConnectionSystem::sendConnectionResponse(NetworkID networkID,
                                                      entt::entity newEntity,
                                                      float spawnX, float spawnY)
 {
-    // Fill in their ID and spawn point.
+    // Fill in the current tick and their entity's ID.
+    ConnectionResponse connectionResponse{};
     Uint32 currentTick = sim.getCurrentTick();
-    ConnectionResponse connectionResponse{currentTick, newEntity, spawnX,
-                                          spawnY};
+    connectionResponse.entity = newEntity;
+    connectionResponse.tickNum = currentTick;
+
+    // Fill in their spawn point.
+    connectionResponse.x = spawnX;
+    connectionResponse.y = spawnY;
+
+    // Fill in the map's size.
+    connectionResponse.mapXLengthChunks = world.tileMap.xLengthChunks();
+    connectionResponse.mapYLengthChunks = world.tileMap.yLengthChunks();
 
     // Send the connection response message.
     network.serializeAndSend(networkID, connectionResponse, currentTick);

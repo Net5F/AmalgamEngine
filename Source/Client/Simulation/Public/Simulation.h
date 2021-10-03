@@ -3,10 +3,11 @@
 #include "OSEventHandler.h"
 #include "World.h"
 #include "ConnectionResponse.h"
-#include "NpcMovementSystem.h"
-#include "PlayerMovementSystem.h"
+#include "ChunkUpdateSystem.h"
 #include "PlayerInputSystem.h"
 #include "ServerUpdateSystem.h"
+#include "PlayerMovementSystem.h"
+#include "NpcMovementSystem.h"
 #include "CameraSystem.h"
 #include "Timer.h"
 #include <atomic>
@@ -70,6 +71,7 @@ private:
         When that logic gets moved, this member can be removed. */
     SpriteData& spriteData;
 
+    ChunkUpdateSystem chunkUpdateSystem;
     PlayerInputSystem playerInputSystem;
     ServerUpdateSystem serverUpdateSystem;
     PlayerMovementSystem playerMovementSystem;

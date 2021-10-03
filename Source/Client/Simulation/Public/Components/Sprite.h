@@ -26,13 +26,13 @@ public:
     /** The sprite's unique string ID. Derived from displayName by replacing
         spaces with underscores and making everything lowercase.
         This ID will be consistent, and can be used for persistent state. */
-    std::string stringId{""};
+    std::string stringID{""};
 
     /** The sprite's unique numeric identifier.
         This value can be used safely at runtime, but shouldn't be used for
         persistent state since it may change when SpriteData.json is
         modified. */
-    int numericId{0};
+    int numericID{0};
 
     /** UV position and size in texture. */
     SDL_Rect textureExtent{0, 0, 0, 0};

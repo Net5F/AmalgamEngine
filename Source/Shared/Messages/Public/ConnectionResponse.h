@@ -21,6 +21,12 @@ struct ConnectionResponse {
      */
     entt::entity entity{entt::null};
 
+    /** The length, in tiles, of the tile map's X axis. */
+    unsigned int mapXLengthChunks{0};
+
+    /** The length, in tiles, of the tile map's Y axis. */
+    unsigned int mapYLengthChunks{0};
+
     /** Position (spawn point or last logout). */
     float x{0};
     float y{0};
@@ -31,6 +37,8 @@ void serialize(S& serializer, ConnectionResponse& connectionResponse)
 {
     serializer.value4b(connectionResponse.tickNum);
     serializer.value4b(connectionResponse.entity);
+    serializer.value4b(connectionResponse.mapXLengthChunks);
+    serializer.value4b(connectionResponse.mapYLengthChunks);
     serializer.value4b(connectionResponse.x);
     serializer.value4b(connectionResponse.y);
 }

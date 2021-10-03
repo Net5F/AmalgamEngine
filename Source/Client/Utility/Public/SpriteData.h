@@ -35,12 +35,12 @@ public:
     /**
      * Get a sprite, using its string ID.
      */
-    const Sprite& get(const std::string& stringId);
+    const Sprite& get(const std::string& stringID);
 
     /**
      * Get a sprite, using its numeric ID.
      */
-    const Sprite& get(int numericId);
+    const Sprite& get(int numericID);
 
 private:
     /**

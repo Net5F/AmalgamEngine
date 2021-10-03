@@ -1,6 +1,7 @@
 target_sources(Client
 	PRIVATE
 		Private/CameraSystem.cpp
+		Private/ChunkUpdateSystem.cpp
 		Private/NpcMovementSystem.cpp
 		Private/PlayerInputSystem.cpp
 		Private/PlayerMovementSystem.cpp
@@ -10,6 +11,7 @@ target_sources(Client
 		Private/TileMap/TileMap.cpp
 	PUBLIC
 		Public/CameraSystem.h
+		Public/ChunkUpdateSystem.h
 		Public/NpcMovementSystem.h
 		Public/PlayerInputSystem.h
 		Public/PlayerMovementSystem.h

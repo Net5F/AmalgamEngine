@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TileIndex.h"
-#include "ChunkIndex.h"
+#include "ChunkPosition.h"
 #include "SharedConfig.h"
 
 namespace AM
@@ -31,7 +31,7 @@ public:
     /**
      * Returns the coordinates of the chunk that this position is within.
      */
-    ChunkIndex asChunkIndex()
+    ChunkPosition asChunkPosition()
     {
         return {(static_cast<int>((x / SharedConfig::TILE_WORLD_WIDTH)
                                   / SharedConfig::CHUNK_WIDTH)),

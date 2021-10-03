@@ -13,7 +13,7 @@ class Simulation;
 class World;
 
 /**
- * Processes player entity update messages and moves the entity appropriately.
+ * Moves camera entities according to their behavior.
  */
 class CameraSystem
 {

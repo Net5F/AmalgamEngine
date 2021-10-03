@@ -5,7 +5,7 @@
 
 namespace AM
 {
-struct ChunkIndex;
+struct ChunkPosition;
 struct ChunkUpdate;
 
 namespace Server
@@ -37,7 +37,7 @@ private:
      * @param currentChunk  The chunk that the client is now in.
      * @param netID  The network ID of the client to send chunks to.
      */
-    void sendAllInRangeChunks(const ChunkIndex& currentChunk, NetworkID netID);
+    void sendAllInRangeChunks(const ChunkPosition& currentChunk, NetworkID netID);
 
     /**
      * Determines which chunks the given client entity just got in range of
@@ -47,16 +47,16 @@ private:
      * @param currentChunk  The chunk that the client is now in.
      * @param netID  The network ID of the client to send chunks to.
      */
-    void sendNewInRangeChunks(const ChunkIndex& previousChunk,
-                              const ChunkIndex& currentChunk, NetworkID netID);
+    void sendNewInRangeChunks(const ChunkPosition& previousChunk,
+                              const ChunkPosition& currentChunk, NetworkID netID);
 
     /**
      * Adds the given chunk to the given UpdateChunks message.
      *
-     * @param chunkIndex  The index of the chunk to add.
+     * @param chunkPosition  The position of the chunk to add.
      * @param chunkUpdate  The message struct to add the chunk to.
      */
-    void addChunkToMessage(const ChunkIndex& chunkIndex,
+    void addChunkToMessage(const ChunkPosition& chunkPosition,
                            ChunkUpdate& chunkUpdate);
 
     /** Used for fetching entity data. */

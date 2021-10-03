@@ -37,7 +37,7 @@ TileMap::TileMap(SpriteData& inSpriteData)
 
     // Print the time taken.
     double timeTaken = timer.getDeltaSeconds(false);
-    LOG_INFO("Map loaded in %.6fs.", timeTaken);
+    LOG_INFO("Map loaded in %.6fs. Size: (%u, %u).", timeTaken, mapXLengthTiles, mapYLengthTiles);
 }
 
 void TileMap::addSpriteLayer(unsigned int tileX, unsigned int tileY,
@@ -137,8 +137,8 @@ void TileMap::loadMap(TileMapSnapshot& mapSnapshot)
         for (unsigned int i = 0; i < SharedConfig::CHUNK_TILE_COUNT; ++i) {
             // Push all of the snapshot's sprites into the tile.
             TileSnapshot& tileSnapshot{chunk.tiles[i]};
-            for (unsigned int paletteId : tileSnapshot.spriteLayers) {
-                const Sprite& sprite{spriteData.get(chunk.palette[paletteId])};
+            for (unsigned int paletteID : tileSnapshot.spriteLayers) {
+                const Sprite& sprite{spriteData.get(chunk.palette[paletteID])};
                 addSpriteLayer((startX + relativeX), (startY + relativeY),
                                sprite);
             }
@@ -184,9 +184,9 @@ void TileMap::save(const std::string& fileName)
             TileSnapshot& tile{chunk.tiles[j]};
             for (Tile::SpriteLayer& layer :
                  tiles[nextLinearTileIndex].spriteLayers) {
-                unsigned int paletteId{
-                    chunk.getPaletteIndex(layer.sprite->stringId)};
-                tile.spriteLayers.push_back(paletteId);
+                unsigned int paletteID =
+                    chunk.getPaletteIndex(layer.sprite->stringID);
+                tile.spriteLayers.push_back(paletteID);
             }
 
             // Increment to the next tile.
