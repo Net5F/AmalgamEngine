@@ -52,15 +52,12 @@ void ChunkUpdateSystem::applyChunkSnapshot(const ChunkWireSnapshot& chunk)
             unsigned int currentTileY{((chunk.y * SharedConfig::CHUNK_WIDTH) + tileY)};
 
             // Clear the tile.
-            LOG_INFO("Adding tile: %d, %d", currentTileX, currentTileY);
             tileMap.clearTile(currentTileX, currentTileY);
 
             // Copy all of the snapshot tile's sprite layers to our map tile.
             const TileSnapshot& tileSnapshot = chunk.tiles[tileIndex];
             for (Uint8 paletteID : tileSnapshot.spriteLayers) {
                 // Get the sprite that this palette ID is referring to.
-                LOG_INFO("Getting palette[%u]: %d, Size: %u", paletteID
-                    , chunk.palette[paletteID], chunk.palette.size());
                 const Sprite& sprite{spriteData.get(chunk.palette[paletteID])};
 
                 // Add the sprite layer to the tile.

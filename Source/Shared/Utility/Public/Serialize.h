@@ -36,6 +36,11 @@ public:
                                 T& objectToSerialize,
                                 std::size_t startIndex = 0)
     {
+        // In debug, check if the buffer is too small.
+        assert(measureSize<T>(objectToSerialize) <= outputBuffer.size());
+
+        // TODO: Switch to Uint8* + size
+
         // Create the adapter manually so we can change the write offset.
         OutputAdapter adapter{outputBuffer};
         adapter.currentWritePos(startIndex);
