@@ -19,7 +19,8 @@ class Peer
 {
 public:
     /** Largest message we'll accept. Kept at 1450 for now to try to avoid IP
-     * fragmentation. Can rethink if we need larger. */
+        fragmentation. Can rethink if we need larger.
+        Must also be kept below UINT16_MAX. */
     static constexpr unsigned int MAX_MESSAGE_SIZE = 1450;
 
     /**

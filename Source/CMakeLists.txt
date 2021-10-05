@@ -19,7 +19,14 @@ find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_gfx REQUIRED)
 include("${PROJECT_SOURCE_DIR}/../CMake/SDL2_net.cmake")
 
-# Configure static library SDL2pp.
+# Configure zlib-ng.
+set(ZLIB_ENABLE_TESTS OFF CACHE BOOL "Build test binaries." FORCE)
+set(WITH_SANITIZER "" CACHE STRING "Build with sanitizer (Memory, Address, Thread, Undefined)." FORCE)
+set(WITH_GZFILEOP OFF CACHE BOOL "Compile with support for .gz file saving/reading functions." FORCE)
+add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/zlib-ng/"
+                 "${PROJECT_BINARY_DIR}/Libraries/zlib-ng/")
+
+# Configure SDL2pp.
 set(SDL2PP_WITH_IMAGE ON)
 set(SDL2PP_WITH_MIXER ON)
 set(SDL2PP_WITH_TTF ON)

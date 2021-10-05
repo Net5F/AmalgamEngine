@@ -34,3 +34,6 @@
 [submodule "Libraries/QueuedEvents"]
 	path = Libraries/QueuedEvents
 	url = git@github.com:Net5F/QueuedEvents.git
+[submodule "Libraries/zlib-ng"]
+	path = Libraries/zlib-ng
+	url = git@github.com:zlib-ng/zlib-ng.git

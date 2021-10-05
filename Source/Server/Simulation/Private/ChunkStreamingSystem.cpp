@@ -47,8 +47,8 @@ void ChunkStreamingSystem::sendChunks()
         }
         // Else if the client moved on this tick.
         else if (position != previousPosition) {
-            LOG_INFO("Check: (%.4f, %.4f), (%.4f, %.4f)", previousPosition.x,
-                     previousPosition.y, position.x, position.y);
+//            LOG_INFO("Check: (%.4f, %.4f), (%.4f, %.4f)", previousPosition.x,
+//                     previousPosition.y, position.x, position.y);
             // If they moved into a new chunk.
             ChunkPosition previousChunk{previousPosition.asChunkPosition()};
             ChunkPosition currentChunk{position.asChunkPosition()};
@@ -85,7 +85,7 @@ void ChunkStreamingSystem::sendAllInRangeChunks(const ChunkPosition& currentChun
 
     // Send the chunk update message.
     network.serializeAndSend(netID, chunkUpdate);
-    LOG_INFO("Sent initial ChunkUpdate.");
+    LOG_INFO("Sent initial ChunkUpdate with %u chunks.", chunkUpdate.chunks.size());
 }
 
 void ChunkStreamingSystem::sendNewInRangeChunks(const ChunkPosition& previousChunk,
@@ -124,7 +124,7 @@ void ChunkStreamingSystem::sendNewInRangeChunks(const ChunkPosition& previousChu
 
     // Send the chunk update message.
     network.serializeAndSend(netID, chunkUpdate);
-    LOG_INFO("Sent ChunkUpdate.");
+    LOG_INFO("Sent ChunkUpdate with %u chunks.", chunkUpdate.chunks.size());
 }
 
 void ChunkStreamingSystem::addChunkToMessage(const ChunkPosition& chunkPosition,
