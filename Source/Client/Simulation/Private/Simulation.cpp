@@ -164,7 +164,7 @@ void Simulation::tick()
     while (currentTick < targetTick) {
         /* Run all systems. */
         // Process received chunk updates.
-        chunkUpdateSystem.updateChunks();
+//        chunkUpdateSystem.updateChunks();
 
         // Process the held user input state.
         // Note: Mouse and momentary inputs are processed prior to this tick.

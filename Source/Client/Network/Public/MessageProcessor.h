@@ -36,7 +36,7 @@ public:
      * @param messageSize  The length in bytes of the message in messageBuffer.
      */
     void processReceivedMessage(MessageType messageType,
-                                BinaryBuffer& messageBuffer,
+                                Uint8* messageBuffer,
                                 unsigned int messageSize);
 
 private:
@@ -50,7 +50,7 @@ private:
      * The event can be received in a system using EventQueue<T>.
      */
     template<typename T>
-    void pushEvent(BinaryBuffer& messageBuffer, unsigned int messageSize);
+    void pushEvent(Uint8* messageBuffer, unsigned int messageSize);
 
     /**
      * Similar to pushEvent(), but allocates the event to the heap through a
@@ -63,22 +63,22 @@ private:
      * EventQueue<std::shared_ptr<const T>>.
      */
     template<typename T>
-    void pushEventSharedPtr(BinaryBuffer& messageBuffer,
+    void pushEventSharedPtr(Uint8* messageBuffer,
                             unsigned int messageSize);
 
     //-------------------------------------------------------------------------
     // Handlers for messages relevant to the network layer.
     //-------------------------------------------------------------------------
     /** Pushes ExplicitConfirmation event. */
-    void handleExplicitConfirmation(BinaryBuffer& messageBuffer,
-                                    Uint16 messageSize);
+    void handleExplicitConfirmation(Uint8* messageBuffer,
+                                    unsigned int messageSize);
 
     /** Pushes ConnectionResponse event. */
-    void handleConnectionResponse(BinaryBuffer& messageBuffer,
-                                  Uint16 messageSize);
+    void handleConnectionResponse(Uint8* messageBuffer,
+                                  unsigned int messageSize);
 
     /** Pushes std::shared_ptr<const EntityUpdate> event. **/
-    void handleEntityUpdate(BinaryBuffer& messageBuffer, Uint16 messageSize);
+    void handleEntityUpdate(Uint8* messageBuffer, unsigned int messageSize);
     //-------------------------------------------------------------------------
 
     /** The network's event dispatcher. Used to send events to the subscribed

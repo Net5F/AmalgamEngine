@@ -40,7 +40,7 @@ public:
      *         returns that tick number. If not, returns -1.
      */
     Sint64 processReceivedMessage(NetworkID netID, MessageType messageType,
-                                BinaryBuffer& messageBuffer,
+                                Uint8* messageBuffer,
                                 unsigned int messageSize);
 
 private:
@@ -54,7 +54,7 @@ private:
      * The event can be received in a system using EventQueue<T>.
      */
     template<typename T>
-    void pushEvent(BinaryBuffer& messageBuffer, unsigned int messageSize);
+    void pushEvent(Uint8* messageBuffer, unsigned int messageSize);
 
     /**
      * Similar to pushEvent(), but allocates the event to the heap through a
@@ -67,7 +67,7 @@ private:
      * EventQueue<std::shared_ptr<const T>>.
      */
     template<typename T>
-    void pushEventSharedPtr(BinaryBuffer& messageBuffer,
+    void pushEventSharedPtr(Uint8* messageBuffer,
                             unsigned int messageSize);
 
     //-------------------------------------------------------------------------
@@ -77,12 +77,12 @@ private:
      * Pushes nothing - Handled in network layer.
      * @return The tick number that the message contained.
      */
-    Uint32 handleHeartbeat(BinaryBuffer& messageBuffer, unsigned int messageSize);
+    Uint32 handleHeartbeat(Uint8* messageBuffer, unsigned int messageSize);
 
     /**
      * @return The tick number that the message contained.
      */
-    Uint32 handleInputChangeRequest(NetworkID netID, BinaryBuffer& messageBuffer, unsigned int messageSize);
+    Uint32 handleInputChangeRequest(NetworkID netID, Uint8* messageBuffer, unsigned int messageSize);
     //-------------------------------------------------------------------------
 
     /** The network's event dispatcher. Used to send events to the subscribed

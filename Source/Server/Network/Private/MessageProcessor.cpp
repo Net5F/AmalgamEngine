@@ -16,7 +16,7 @@ MessageProcessor::MessageProcessor(EventDispatcher& inDispatcher)
 }
 
 Sint64 MessageProcessor::processReceivedMessage(NetworkID netID, MessageType messageType,
-                                BinaryBuffer& messageBuffer,
+                                Uint8* messageBuffer,
                                 unsigned int messageSize)
 {
     // The tick that the received message corresponds to.
@@ -44,7 +44,7 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID, MessageType mes
 }
 
 template<typename T>
-void MessageProcessor::pushEvent(BinaryBuffer& messageBuffer, unsigned int messageSize)
+void MessageProcessor::pushEvent(Uint8* messageBuffer, unsigned int messageSize)
 {
     // Deserialize the message.
     T message{};
@@ -55,7 +55,7 @@ void MessageProcessor::pushEvent(BinaryBuffer& messageBuffer, unsigned int messa
 }
 
 template<typename T>
-void MessageProcessor::pushEventSharedPtr(BinaryBuffer& messageBuffer, unsigned int messageSize)
+void MessageProcessor::pushEventSharedPtr(Uint8* messageBuffer, unsigned int messageSize)
 {
     // Deserialize the message.
     std::shared_ptr<T> message{std::make_shared<T>()};
@@ -65,7 +65,7 @@ void MessageProcessor::pushEventSharedPtr(BinaryBuffer& messageBuffer, unsigned 
     dispatcher.push<std::shared_ptr<const T>>(message);
 }
 
-Uint32 MessageProcessor::handleHeartbeat(BinaryBuffer& messageBuffer, unsigned int messageSize)
+Uint32 MessageProcessor::handleHeartbeat(Uint8* messageBuffer, unsigned int messageSize)
 {
     // Deserialize the message.
     Heartbeat heartbeat{};
@@ -75,7 +75,7 @@ Uint32 MessageProcessor::handleHeartbeat(BinaryBuffer& messageBuffer, unsigned i
     return heartbeat.tickNum;
 }
 
-Uint32 MessageProcessor::handleInputChangeRequest(NetworkID netID, BinaryBuffer& messageBuffer, unsigned int messageSize)
+Uint32 MessageProcessor::handleInputChangeRequest(NetworkID netID, Uint8* messageBuffer, unsigned int messageSize)
 {
     // Deserialize the message.
     InputChangeRequest inputChangeRequest{};

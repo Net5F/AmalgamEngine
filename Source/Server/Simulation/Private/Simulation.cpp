@@ -33,7 +33,7 @@ void Simulation::tick()
 
     clientUpdateSystem.sendClientUpdates();
 
-    chunkStreamingSystem.sendChunks();
+//    chunkStreamingSystem.sendChunks();
     END_CPU_SAMPLE();
 
     currentTick++;

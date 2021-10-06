@@ -18,7 +18,7 @@ MessageProcessor::MessageProcessor(EventDispatcher& inDispatcher)
 }
 
 void MessageProcessor::processReceivedMessage(MessageType messageType,
-                                              BinaryBuffer& messageBuffer,
+                                              Uint8* messageBuffer,
                                               unsigned int messageSize)
 {
     /* Match the enum values to their event types. */
@@ -46,7 +46,7 @@ void MessageProcessor::processReceivedMessage(MessageType messageType,
 }
 
 template<typename T>
-void MessageProcessor::pushEvent(BinaryBuffer& messageBuffer,
+void MessageProcessor::pushEvent(Uint8* messageBuffer,
                                  unsigned int messageSize)
 {
     // Deserialize the message.
@@ -58,7 +58,7 @@ void MessageProcessor::pushEvent(BinaryBuffer& messageBuffer,
 }
 
 template<typename T>
-void MessageProcessor::pushEventSharedPtr(BinaryBuffer& messageBuffer,
+void MessageProcessor::pushEventSharedPtr(Uint8* messageBuffer,
                                           unsigned int messageSize)
 {
     // Deserialize the message.
@@ -69,8 +69,8 @@ void MessageProcessor::pushEventSharedPtr(BinaryBuffer& messageBuffer,
     dispatcher.push<std::shared_ptr<const T>>(message);
 }
 
-void MessageProcessor::handleExplicitConfirmation(BinaryBuffer& messageBuffer,
-                                                  Uint16 messageSize)
+void MessageProcessor::handleExplicitConfirmation(Uint8* messageBuffer,
+                                                  unsigned int messageSize)
 {
     // Deserialize the message.
     ExplicitConfirmation explicitConfirmation{};
@@ -83,8 +83,8 @@ void MessageProcessor::handleExplicitConfirmation(BinaryBuffer& messageBuffer,
     }
 }
 
-void MessageProcessor::handleEntityUpdate(BinaryBuffer& messageBuffer,
-                                          Uint16 messageSize)
+void MessageProcessor::handleEntityUpdate(Uint8* messageBuffer,
+                                          unsigned int messageSize)
 {
     // Deserialize the message.
     std::shared_ptr<EntityUpdate> entityUpdate
@@ -128,8 +128,8 @@ void MessageProcessor::handleEntityUpdate(BinaryBuffer& messageBuffer,
     }
 }
 
-void MessageProcessor::handleConnectionResponse(BinaryBuffer& messageBuffer,
-                                                Uint16 messageSize)
+void MessageProcessor::handleConnectionResponse(Uint8* messageBuffer,
+                                                unsigned int messageSize)
 {
     // Deserialize the message.
     ConnectionResponse connectionResponse{};

@@ -15,7 +15,7 @@ namespace AM
 class Deserialize
 {
 public:
-    using InputAdapter = bitsery::InputBufferAdapter<BinaryBuffer>;
+    using InputAdapter = bitsery::InputBufferAdapter<const Uint8*>;
 
     /**
      * Deserializes the contents of the given buffer into the given object.
@@ -30,14 +30,14 @@ public:
      *                    bytes from.
      */
     template<typename T>
-    static bool fromBuffer(const BinaryBuffer& inputBuffer,
+    static bool fromBuffer(const Uint8* inputBuffer,
                            std::size_t serializedSize, T& outputObject,
                            std::size_t startIndex = 0)
     {
         // Deserialize the buffer contents into outputObject.
         std::pair<bitsery::ReaderError, bool> result
             = bitsery::quickDeserialization<InputAdapter>(
-                {inputBuffer.begin() + startIndex, serializedSize},
+                {inputBuffer + startIndex, serializedSize},
                 outputObject);
 
         // If there was an error, print it and fail.
@@ -45,7 +45,7 @@ public:
             std::string errorString{getErrorString(result.first)};
 
             // TODO: Eventually change this to a LOG_INFO and return false.
-            LOG_ERROR("%s", errorString);
+            LOG_ERROR("%s", errorString.c_str());
         }
         else {
             return true;
@@ -80,7 +80,7 @@ public:
             std::string errorString{getErrorString(result.first)};
 
             // TODO: Eventually change this to a LOG_INFO and return false.
-            LOG_ERROR("%s", errorString);
+            LOG_ERROR("%s", errorString.c_str());
         }
         else {
             return true;

@@ -184,7 +184,7 @@ void Network::processBatch()
         if (receiveResult.networkResult == NetworkResult::Success) {
             // Got a message, process it and update the receiveTimer.
             messageProcessor.processReceivedMessage(receiveResult.messageType,
-                                                    messageRecBuffer,
+                                                    messageRecBuffer.data(),
                                                     receiveResult.messageSize);
             receiveTimer.updateSavedTime();
 

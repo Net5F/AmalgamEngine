@@ -58,16 +58,16 @@ public:
                                   Uint8* destBuffer, std::size_t destLength);
 
     /**
-     * Decompresses data.
+     * Uncompresses data.
      *
-     * @param sourceBuffer  A buffer containing the data to decompress.
+     * @param sourceBuffer  A buffer containing the data to uncompress.
      * @param sourceLength  The length of the source data.
-     * @param destBuffer  The buffer to write the decompressed data to. Must be
+     * @param destBuffer  The buffer to write the uncompressed data to. Must be
      *                    long enough to hold the original data.
      * @param destLength  The length of the destination buffer.
-     * @return The length of the decompressed data.
+     * @return The length of the uncompressed data.
      */
-    static std::size_t decompress(const Uint8* sourceBuffer, std::size_t sourceLength,
+    static std::size_t uncompress(const Uint8* sourceBuffer, std::size_t sourceLength,
                                   Uint8* destBuffer, std::size_t destLength);
 };
 

@@ -197,7 +197,7 @@ void ClientHandler::processReceivedMessage(Client& client, MessageType messageTy
     // Process the message.
     // Note: messageTick will be > -1 if the message contained a tick number.
     Sint64 messageTick = messageProcessor.processReceivedMessage(client.getNetID()
-        , messageType, messageRecBuffer, messageSize);
+        , messageType, messageRecBuffer.data(), messageSize);
 
     // If the message carried a tick number, use it to calc a diff and give it
     // to the client.

@@ -60,7 +60,7 @@ std::size_t ByteTools::compress(const Uint8* sourceBuffer, std::size_t sourceLen
     return destLengthReturn;
 }
 
-std::size_t ByteTools::decompress(const Uint8* sourceBuffer, std::size_t sourceLength,
+std::size_t ByteTools::uncompress(const Uint8* sourceBuffer, std::size_t sourceLength,
                                   Uint8* destBuffer, std::size_t destLength)
 {
     // Compress the data.
@@ -70,16 +70,16 @@ std::size_t ByteTools::decompress(const Uint8* sourceBuffer, std::size_t sourceL
 
     // Check for errors.
     if (result == Z_MEM_ERROR) {
-        LOG_ERROR("Ran out of memory while decompressing.");
+        LOG_ERROR("Ran out of memory while uncompressing.");
     }
     else if (result == Z_BUF_ERROR) {
-        LOG_ERROR("Ran out of room in destBuffer while decompressing.");
+        LOG_ERROR("Ran out of room in destBuffer while uncompressing.");
     }
     else if (result == Z_DATA_ERROR) {
-        LOG_ERROR("Data corrupted or incomplete while decompressing.");
+        LOG_ERROR("Data corrupted or incomplete while uncompressing.");
     }
 
-    // Return the decompressed data length.
+    // Return the uncompressed data length.
     return destLengthReturn;
 }
 
