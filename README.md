@@ -17,7 +17,9 @@ Everything you need will be provided, including:
 - [x] Implement tile maps, iso rendering, and figure out architecture between the sim/rendering/UI.
 - [x] Build minimal UI library. (MVP working, needs refactoring later)
 - [x] Build sprite editor. (lets you add 3d bounding boxes to sprites for draw order and collision calcs)
-- [ ] Import sprite bounds data into engine, implement world map file and spatial partitioning.
+- [x] Import sprite bounds data into engine, implement world map file.
+- [ ] Implement chunk and tile update streaming.
+- [ ] Implement spatial partitioning.
 
 ### Future
 - [ ] Implement world streaming and live updates (in-world building).
