@@ -20,7 +20,8 @@ Network::Network()
 , receiveThreadObj()
 , exitRequested(false)
 , headerRecBuffer(SERVER_HEADER_SIZE)
-, messageRecBuffer(Peer::MAX_MESSAGE_SIZE)
+, batchRecBuffer(Peer::MAX_WIRE_SIZE)
+, uncompressedBatchRecBuffer(SharedConfig::MAX_BATCH_SIZE)
 , netstatsLoggingEnabled(true)
 , ticksSinceNetstatsLog(0)
 {
@@ -174,32 +175,61 @@ void Network::processBatch()
     adjustIfNeeded(headerRecBuffer[ServerHeaderIndex::TickAdjustment],
                    headerRecBuffer[ServerHeaderIndex::AdjustmentIteration]);
 
-    /* Process messages, if we received any. */
-    Uint8 messageCount = headerRecBuffer[ServerHeaderIndex::MessageCount];
-    for (unsigned int i = 0; i < messageCount; ++i) {
-        ReceiveResult receiveResult
-            = server->receiveMessageWait(messageRecBuffer.data());
+    /* Process the BatchSize header field. */
+    // Read the high bit of batchSize to tell whether the batch is compressed
+    // or not. If the high bit is set, the batch is compressed.
+    Uint16 batchSize
+            = ByteTools::read16(&(headerRecBuffer[ServerHeaderIndex::BatchSize]));
+    bool batchIsCompressed{(batchSize & (1U << 15)) != 0};
 
-        // If we received a message, pass it to the processor.
-        if (receiveResult.networkResult == NetworkResult::Success) {
-            // Got a message, process it and update the receiveTimer.
-            messageProcessor.processReceivedMessage(receiveResult.messageType,
-                                                    messageRecBuffer.data(),
-                                                    receiveResult.messageSize);
-            receiveTimer.updateSavedTime();
+    // Reset the high bit of batchSize to get the real size.
+    batchSize &= ~(1U << 15);
 
-            // Track the number of bytes we've received.
-            bytesReceived += MESSAGE_HEADER_SIZE + receiveResult.messageSize;
+    /* Process the batch, if it contains any data. */
+    if (batchSize > 0) {
+        // Receive the expected bytes.
+        NetworkResult result = server->receiveBytesWait(&(batchRecBuffer[0])
+            , batchSize);
+        if (result != NetworkResult::Success) {
+            LOG_ERROR("Failed to receive expected bytes.");
         }
-        else if ((receiveResult.networkResult == NetworkResult::NoWaitingData)
-                 && (receiveTimer.getDeltaSeconds(false)
-                     > Config::SERVER_TIMEOUT_S)) {
-            // Too long since we received a message, timed out.
-            LOG_ERROR("Server connection timed out.");
+
+        // Track the number of bytes we've received.
+        bytesReceived += MESSAGE_HEADER_SIZE + batchSize;
+
+        // If the payload is compressed, uncompress it.
+        Uint8* bufferToUse{&(batchRecBuffer[0])};
+        if (batchIsCompressed) {
+            batchSize = ByteTools::uncompress(&(batchRecBuffer[0]),
+                batchSize, &(uncompressedBatchRecBuffer[0]), 10000);
+
+            bufferToUse = &(uncompressedBatchRecBuffer[0]);
         }
-        else if (receiveResult.networkResult == NetworkResult::Disconnected) {
-            LOG_ERROR("Found server to be disconnected while trying to "
-                      "receive message.");
+
+        // Process the messages.
+        std::size_t bufferIndex{0};
+        while (bufferIndex < batchSize) {
+            MessageType messageType = static_cast<MessageType>(
+                bufferToUse[bufferIndex + MessageHeaderIndex::MessageType]);
+            Uint16 messageSize
+                = ByteTools::read16(&(bufferToUse[bufferIndex + MessageHeaderIndex::Size]));
+
+            messageProcessor.processReceivedMessage(messageType,
+                            &(bufferToUse[bufferIndex + MessageHeaderIndex::MessageStart]),
+                            messageSize);
+
+            bufferIndex += MESSAGE_HEADER_SIZE + messageSize;
+            // TODO: Replace with a nice assert that prints.
+            if (bufferIndex > batchSize) {
+                LOG_ERROR("Buffer index is wrong. %u, %u",
+                    bufferIndex, batchSize);
+            }
+        }
+
+        // TODO: Replace with a nice assert that prints.
+        if (bufferIndex != batchSize) {
+            LOG_ERROR("Didn't process correct number of bytes. %u, %u",
+                bufferIndex, batchSize);
         }
     }
 

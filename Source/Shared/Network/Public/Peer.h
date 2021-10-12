@@ -18,10 +18,12 @@ namespace AM
 class Peer
 {
 public:
-    /** Largest message we'll accept. Kept at 1450 for now to try to avoid IP
-        fragmentation. Can rethink if we need larger.
-        Must also be kept below UINT16_MAX. */
-    static constexpr unsigned int MAX_MESSAGE_SIZE = 1450;
+    /** Largest number of bytes that we'll send over the wire.
+        Kept at 1450 for now to try to avoid IP fragmentation. Can rethink if
+        we need larger.
+        BE AWARE: Must be kept below 32768 (2^15) since we store it in a Uint16
+                  and use the high bit to indicate compression. */
+    static constexpr unsigned int MAX_WIRE_SIZE = 1450;
 
     /**
      * Initiates a TCP connection that the other side can then accept.
@@ -32,14 +34,15 @@ public:
 
     /**
      * Constructor for when you only need 1 peer (client connecting to server,
-     * anyone connecting to chat server.) Constructs a socket set for this peer
-     * to use and adds the socket to it.
+     * anyone connecting to chat server.)
+     * Constructs a socket set for this peer to use and adds the socket to it.
      */
     Peer(std::unique_ptr<TcpSocket> inSocket);
 
     /**
      * Constructor for when you need a set of peers (server connecting to
-     * clients). Adds the socket to the given set.
+     * clients).
+     * Adds the socket to the given set.
      */
     Peer(std::unique_ptr<TcpSocket> inSocket,
          const std::shared_ptr<SocketSet>& inSet);
@@ -56,46 +59,49 @@ public:
     bool isConnected() const;
 
     /**
-     * Sends the given message to this Peer.
-     * Will error if the message size is larger than a Uint16 can hold.
+     * Sends the data in the given buffer to this Peer.
+     *
+     * Will error if the buffer size is larger than MAX_WIRE_SIZE.
+     *
      * @return Disconnected if the peer was found to be disconnected, else
      * Success.
      */
-    NetworkResult send(const BinaryBufferSharedPtr& message);
+    NetworkResult send(const BinaryBufferSharedPtr& buffer);
 
     /**
-     * Sends the given message to this Peer.
-     * Will error if the message size is larger than a Uint16 can hold.
+     * Sends the data in the given buffer to this Peer.
+     *
+     * Will error if numBytes is larger than MAX_WIRE_SIZE.
+     *
      * @return Disconnected if the peer was found to be disconnected, else
      * Success.
      */
-    NetworkResult send(const Uint8* messageBuffer, unsigned int messageSize);
+    NetworkResult send(const Uint8* buffer, unsigned int numBytesToSend);
 
     /**
      * Tries to receive bytes over the network.
      *
-     * @param messageBuffer  The buffer to fill with a message, if one was
-     * received.
+     * @param buffer  The buffer to fill with data, if any was received.
      * @param numBytes  The number of bytes to receive.
      * @param checkSockets  If true, will call CheckSockets() before checking
      *                      SocketReady(). Set this to false if you're going to
-     * call CheckSockets() yourself.
+     *                      call CheckSockets() yourself.
      * @return An appropriate ReceiveResult. If return == Success,
-     *         messageBuffer contains the received message.
+     *         buffer contains the received data.
      */
-    NetworkResult receiveBytes(Uint8* messageBuffer, Uint16 numBytes,
+    NetworkResult receiveBytes(Uint8* buffer, Uint16 numBytes,
                                bool checkSockets);
 
     /**
      * Returns the requested number of bytes, waiting if they're not yet
      * available.
-     * @param messageBuffer  The buffer to fill with a message, if one was
-     * received.
+     *
+     * @param buffer  The buffer to fill with data, if any was received.
      * @param numBytes  The number of bytes to receive.
      * @return An appropriate ReceiveResult. If return == Success,
-     *         messageBuffer contains the received message.
+     *         buffer contains the received data.
      */
-    NetworkResult receiveBytesWait(Uint8* messageBuffer, Uint16 numBytes);
+    NetworkResult receiveBytesWait(Uint8* buffer, Uint16 numBytes);
 
     /**
      * Tries to receive a {size, message} pair over the network.
@@ -113,6 +119,7 @@ public:
     /**
      * Receives a {size, message} pair and returns a message, waiting if the
      * data is not yet available.
+     *
      * @param messageBuffer  The buffer to fill with a message, if one was
      *                       received.
      * @return An appropriate ReceiveResult. If return.networkResult == Success,
@@ -123,6 +130,7 @@ public:
     /**
      * Overload for allocating and filling a portable buffer.
      * Useful if you'll need to move the message around before deserializing it.
+     *
      * @param messageBuffer  A pointer to allocate the message at.
      * @return An appropriate ReceiveResult. If return.networkResult == Success,
      *         messageBuffer contains the received message.
@@ -131,17 +139,16 @@ public:
 
 private:
     /** The socket for this peer. Must be a unique_ptr so we can move without
-     * copying. */
+        copying. */
     std::unique_ptr<TcpSocket> socket;
-    /** The set that this peer belongs to. Must be a shared_ptr since we may or
-       may not allocate it ourselves depending on which constructor is called.
-     */
+
+    /** The set that this peer belongs to.
+        Must be a shared_ptr since we may or may not allocate it ourselves
+        depending on which constructor is called. */
     std::shared_ptr<SocketSet> set;
 
-    /**
-     * Tracks whether or not this peer is connected. Is set to false if a
-     * disconnect was detected when trying to send or receive.
-     */
+    /** Tracks whether or not this peer is connected. Is set to false if a
+        disconnect was detected when trying to send or receive. */
     std::atomic<bool> bIsConnected;
 };
 

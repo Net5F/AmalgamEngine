@@ -10,10 +10,12 @@ namespace AM
 {
 namespace Server
 {
+BinaryBuffer Client::batchBuffer(SharedConfig::MAX_BATCH_SIZE);
+BinaryBuffer Client::compressedBatchBuffer(Client::COMPRESSED_BUFFER_SIZE);
+
 Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
 : netID(inNetID)
 , peer(std::move(inPeer))
-, batchBuffer(Peer::MAX_MESSAGE_SIZE)
 , latestSentSimTick(0)
 , tickDiffHistory(Config::TICKDIFF_TARGET)
 , numFreshDiffs(0)
@@ -37,13 +39,12 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
         return NetworkResult::Disconnected;
     }
 
+    // If we have no messages to send, return early.
     Uint8 messageCount = getWaitingMessageCount();
     if ((latestSentSimTick == 0) && (messageCount == 0)) {
-        // Nothing to send.
         return NetworkResult::Success;
     }
 
-    /* Build the batch message. */
     // Copy any waiting messages into the buffer.
     unsigned int currentIndex = ServerHeaderIndex::MessageHeaderStart;
     for (unsigned int i = 0; i < messageCount; ++i) {
@@ -72,14 +73,42 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
         addExplicitConfirmation(currentIndex, currentTick, messageCount);
     }
 
+    // If the batch + header is too large, error.
+    if (currentIndex > SharedConfig::MAX_BATCH_SIZE) {
+        LOG_ERROR("Batch too large to fit into buffers. Increase "
+            "MAX_BATCH_SIZE. Size: %u, Max: %u", currentIndex,
+            SharedConfig::MAX_BATCH_SIZE);
+    }
+
+    // If we have a large enough payload, compress it.
+    std::size_t batchSize{currentIndex - SERVER_HEADER_SIZE};
+    Uint8* bufferToSend{&(batchBuffer[0])};
+    bool isCompressed{false};
+    if (batchSize > SharedConfig::BATCH_COMPRESSION_THRESHOLD) {
+        batchSize = ByteTools::compress(
+            &(batchBuffer[ServerHeaderIndex::MessageHeaderStart]),
+            batchSize,
+            &(compressedBatchBuffer[ServerHeaderIndex::MessageHeaderStart]),
+            COMPRESSED_BUFFER_SIZE);
+        if (batchSize > Peer::MAX_WIRE_SIZE) {
+            LOG_ERROR("Batch too large, even after compression.");
+        }
+
+        isCompressed = true;
+
+        // Use the compressed buffer.
+        bufferToSend = &(compressedBatchBuffer[0]);
+    }
+
     // Fill in the header.
-    fillBatchHeader(messageCount);
+    fillHeader(bufferToSend, static_cast<Uint16>(batchSize), isCompressed);
 
     // Record the number of sent bytes.
-    NetworkStats::recordBytesSent(currentIndex);
+    std::size_t totalSize{SERVER_HEADER_SIZE + batchSize};
+    NetworkStats::recordBytesSent(totalSize);
 
-    // Send the message.
-    return peer->send(&(batchBuffer[0]), currentIndex);
+    // Send the header and batch.
+    return peer->send(bufferToSend, totalSize);
 }
 
 void Client::addExplicitConfirmation(unsigned int& currentIndex,
@@ -112,17 +141,23 @@ void Client::addExplicitConfirmation(unsigned int& currentIndex,
     latestSentSimTick += confirmedTickCount;
 }
 
-void Client::fillBatchHeader(Uint8 messageCount)
+void Client::fillHeader(Uint8* bufferToFill, Uint16 batchSize, bool isCompressed)
 {
     // Fill in the header adjustment info.
     AdjustmentData tickAdjustment = getTickAdjustment();
-    batchBuffer[ServerHeaderIndex::TickAdjustment]
+    bufferToFill[ServerHeaderIndex::TickAdjustment]
         = static_cast<Uint8>(tickAdjustment.adjustment);
-    batchBuffer[ServerHeaderIndex::AdjustmentIteration]
+    bufferToFill[ServerHeaderIndex::AdjustmentIteration]
         = tickAdjustment.iteration;
 
-    // Fill in the header message count.
-    batchBuffer[ServerHeaderIndex::MessageCount] = messageCount;
+    // If the payload is compressed, set the high bit.
+    if (isCompressed) {
+        batchSize |= (1U << 15);
+    }
+
+    // Fill in the compressed batch size.
+    ByteTools::write16(batchSize
+              , &(bufferToFill[ServerHeaderIndex::BatchSize]));
 }
 
 Uint8 Client::getWaitingMessageCount() const

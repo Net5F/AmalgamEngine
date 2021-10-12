@@ -124,7 +124,7 @@ private:
     /** The listener that we use to accept new clients. */
     Acceptor acceptor;
 
-    /** Used to hold messages while MessageProcessor processes them. */
+    /** Holds a received message while we pass it to MessageProcessor. */
     BinaryBuffer messageRecBuffer;
 
     /** Calls serviceClients(). */

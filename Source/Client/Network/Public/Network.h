@@ -161,10 +161,14 @@ private:
     /** Turn false to signal that the receive thread should end. */
     std::atomic<bool> exitRequested;
 
-    /** Used to hold headers while we process them. */
+    /** Holds a received server header while we process it. */
     BinaryBuffer headerRecBuffer;
-    /** Used to hold messages while MessageProcessor processes them. */
-    BinaryBuffer messageRecBuffer;
+    /** Holds a received message batch while we pass its messages to
+        MessageProcessor. */
+    BinaryBuffer batchRecBuffer;
+    /** If a batch is compressed, it's uncompressed into this buffer before
+        processing. */
+    BinaryBuffer uncompressedBatchRecBuffer;
 
     /** The number of seconds we'll wait before logging our network
         statistics. */
@@ -184,7 +188,7 @@ void Network::serializeAndSend(const T& messageStruct)
 {
     // Allocate the buffer.
     BinaryBufferSharedPtr messageBuffer
-        = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
+        = std::make_shared<BinaryBuffer>(Peer::MAX_WIRE_SIZE);
 
     // Serialize the message struct into the buffer, leaving room for the
     // headers.
@@ -195,10 +199,10 @@ void Network::serializeAndSend(const T& messageStruct)
     // Check that the message isn't too big.
     const unsigned int totalMessageSize
         = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE + messageSize;
-    if ((totalMessageSize > Peer::MAX_MESSAGE_SIZE)
+    if ((totalMessageSize > Peer::MAX_WIRE_SIZE)
         || (messageSize > UINT16_MAX)) {
         LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
-                  totalMessageSize, Peer::MAX_MESSAGE_SIZE);
+                  totalMessageSize, Peer::MAX_WIRE_SIZE);
     }
 
     // Copy the adjustment iteration into the client header.

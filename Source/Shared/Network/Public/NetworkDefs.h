@@ -22,8 +22,15 @@ typedef Uint32 NetworkID;
 //--------------------------------------------------------------------------
 // Headers
 //--------------------------------------------------------------------------
+// TODO: Do we just want to replace these with bitsery? Their only restriction
+//       is that they have to be a known length so we can receive them first.
+//       It'll let us hide the bit operations in BatchSize.
+
 /**
  * Used for indexing into the parts of a server header.
+ *
+ * The server sends a header, followed by a (potentially compressed) batch of
+ * messages.
  */
 struct ServerHeaderIndex {
     enum Index : Uint8 {
@@ -31,17 +38,20 @@ struct ServerHeaderIndex {
         TickAdjustment = 0,
         /** Uint8, the iteration of tick offset adjustment that we're on. */
         AdjustmentIteration = 1,
-        /** Uint8, the number of messages in this batch. */
-        MessageCount = 2,
+        /** Uint16. The low 15 bits hold the size of the message batch in
+            bytes, the high bit is set if the batch is compressed. */
+        BatchSize = 2,
         /** The start of the first message header if one is present. */
-        MessageHeaderStart = 3
+        MessageHeaderStart = 4
     };
 };
 /** The size of a server header in bytes. */
 static constexpr unsigned int SERVER_HEADER_SIZE
     = ServerHeaderIndex::MessageHeaderStart;
 
-/** Used for indexing into the parts of a client header. */
+/**
+ * Used for indexing into the parts of a client header.
+ */
 struct ClientHeaderIndex {
     enum Index : Uint8 {
         /** Uint8, the iteration of tick offset adjustment that we're on. */
@@ -54,7 +64,9 @@ struct ClientHeaderIndex {
 static constexpr unsigned int CLIENT_HEADER_SIZE
     = ClientHeaderIndex::MessageHeaderStart;
 
-/** Used for indexing into the size or payload of a received message. */
+/**
+ * Used for indexing into the size or payload of a received message.
+ */
 struct MessageHeaderIndex {
     enum Index : Uint8 {
         /** Uint8, identifies the type of message. */
@@ -69,7 +81,7 @@ static constexpr unsigned int MESSAGE_HEADER_SIZE
     = MessageHeaderIndex::MessageStart;
 
 //--------------------------------------------------------------------------
-// Structs
+// Enums, Structs
 //--------------------------------------------------------------------------
 /** All potential results for a network-layer send or receive. */
 enum class NetworkResult {

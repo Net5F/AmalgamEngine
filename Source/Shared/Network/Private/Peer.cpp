@@ -47,19 +47,19 @@ bool Peer::isConnected() const
     return bIsConnected;
 }
 
-NetworkResult Peer::send(const BinaryBufferSharedPtr& message)
+NetworkResult Peer::send(const BinaryBufferSharedPtr& buffer)
 {
     if (!bIsConnected) {
         return NetworkResult::Disconnected;
     }
 
-    std::size_t messageSize = message->size();
-    if (messageSize > MAX_MESSAGE_SIZE) {
-        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
-                  messageSize, MAX_MESSAGE_SIZE);
+    std::size_t messageSize = buffer->size();
+    if (messageSize > MAX_WIRE_SIZE) {
+        LOG_ERROR("Tried to send too many bytes. Size: %u, MAX_WIRE_SIZE: %u",
+                  messageSize, MAX_WIRE_SIZE);
     }
 
-    int bytesSent = socket->send(message->data(), messageSize);
+    int bytesSent = socket->send(buffer->data(), messageSize);
     if (bytesSent < 0) {
         LOG_ERROR("TCP_Send returned < 0. This should never happen, the socket"
                   "was likely misused.");
@@ -75,24 +75,24 @@ NetworkResult Peer::send(const BinaryBufferSharedPtr& message)
     }
 }
 
-NetworkResult Peer::send(const Uint8* messageBuffer, unsigned int messageSize)
+NetworkResult Peer::send(const Uint8* buffer, unsigned int numBytesToSend)
 {
     if (!bIsConnected) {
         return NetworkResult::Disconnected;
     }
 
-    if (messageSize > MAX_MESSAGE_SIZE) {
-        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
-                  messageSize, MAX_MESSAGE_SIZE);
+    if (numBytesToSend > MAX_WIRE_SIZE) {
+        LOG_ERROR("Tried to send too many bytes. Size: %u, MAX_WIRE_SIZE: %u",
+                  numBytesToSend, MAX_WIRE_SIZE);
     }
 
-    int bytesSent = socket->send(messageBuffer, messageSize);
+    int bytesSent = socket->send(buffer, numBytesToSend);
     if (bytesSent < 0) {
         LOG_ERROR("TCP_Send returned < 0. This should never happen, the socket"
                   "was likely misused.");
     }
 
-    if (static_cast<unsigned int>(bytesSent) < messageSize) {
+    if (static_cast<unsigned int>(bytesSent) < numBytesToSend) {
         // The peer probably disconnected (could be a different issue).
         bIsConnected = false;
         return NetworkResult::Disconnected;
@@ -102,7 +102,7 @@ NetworkResult Peer::send(const Uint8* messageBuffer, unsigned int messageSize)
     }
 }
 
-NetworkResult Peer::receiveBytes(Uint8* messageBuffer, Uint16 numBytes,
+NetworkResult Peer::receiveBytes(Uint8* buffer, Uint16 numBytes,
                                  bool checkSockets)
 {
     if (!bIsConnected) {
@@ -117,22 +117,22 @@ NetworkResult Peer::receiveBytes(Uint8* messageBuffer, Uint16 numBytes,
         return NetworkResult::NoWaitingData;
     }
     else {
-        return receiveBytesWait(messageBuffer, numBytes);
+        return receiveBytesWait(buffer, numBytes);
     }
 }
 
-NetworkResult Peer::receiveBytesWait(Uint8* messageBuffer, Uint16 numBytes)
+NetworkResult Peer::receiveBytesWait(Uint8* buffer, Uint16 numBytes)
 {
     if (!bIsConnected) {
         return NetworkResult::Disconnected;
     }
-    else if (numBytes > MAX_MESSAGE_SIZE) {
-        LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
-                  "MaxSize: %u",
-                  numBytes, MAX_MESSAGE_SIZE);
+    else if (numBytes > MAX_WIRE_SIZE) {
+        LOG_ERROR("Tried to receive too many bytes. Bytes requested: %u, "
+                  "MAX_WIRE_SIZE: %u",
+                  numBytes, MAX_WIRE_SIZE);
     }
 
-    int result = socket->receive(messageBuffer, numBytes);
+    int result = socket->receive(buffer, numBytes);
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
@@ -186,10 +186,10 @@ ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
     // The number of bytes in the upcoming message.
     Uint16 messageSize
         = ByteTools::read16(&(headerBuf[MessageHeaderIndex::Size]));
-    if (messageSize > MAX_MESSAGE_SIZE) {
+    if (messageSize > MAX_WIRE_SIZE) {
         LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
-                  "MaxSize: %u",
-                  messageSize, MAX_MESSAGE_SIZE);
+                  "MAX_WIRE_SIZE: %u",
+                  messageSize, MAX_WIRE_SIZE);
     }
 
     result = socket->receive(messageBuffer, messageSize);
@@ -230,10 +230,10 @@ ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
     // The number of bytes in the upcoming message.
     Uint16 messageSize
         = ByteTools::read16(&(headerBuf[MessageHeaderIndex::Size]));
-    if (messageSize > MAX_MESSAGE_SIZE) {
+    if (messageSize > MAX_WIRE_SIZE) {
         LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
-                  "MaxSize: %u",
-                  messageSize, MAX_MESSAGE_SIZE);
+                  "MAX_WIRE_SIZE: %u",
+                  messageSize, MAX_WIRE_SIZE);
     }
 
     messageBuffer = std::make_unique<BinaryBuffer>(messageSize);

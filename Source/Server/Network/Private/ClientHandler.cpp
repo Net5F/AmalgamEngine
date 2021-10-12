@@ -18,7 +18,7 @@ ClientHandler::ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher, 
 , idPool(MAX_CLIENTS)
 , clientSet(std::make_shared<SocketSet>(MAX_CLIENTS))
 , acceptor(Network::SERVER_PORT, clientSet)
-, messageRecBuffer(Peer::MAX_MESSAGE_SIZE)
+, messageRecBuffer(Peer::MAX_WIRE_SIZE)
 , receiveThreadObj()
 , exitRequested(false)
 , sendRequested(false)

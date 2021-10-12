@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Peer.h"
 #include "NetworkDefs.h"
 #include "Config.h"
 #include "CircularBuffer.h"
@@ -12,8 +13,6 @@
 
 namespace AM
 {
-class Peer;
-
 namespace Server
 {
 /**
@@ -99,10 +98,14 @@ private:
                                  Uint8& messageCount);
 
     /**
-     * Fills in the header information for the batch currently being built.
-     * @param messageCount  The number of messages going into the current batch.
+     * Fills in the header information for the message batch currently being
+     * built.
+     *
+     * @param bufferToFill  The buffer that should have its header filled.
+     * @param batchSize  The size, in bytes, of the current batch.
+     * @param isCompressed  True if the batch is compressed, else false.
      */
-    void fillBatchHeader(Uint8 messageCount);
+    void fillHeader(Uint8* bufferToFill, Uint16 batchSize, bool isCompressed);
 
     //--------------------------------------------------------------------------
     // Connection, Batching
@@ -124,8 +127,20 @@ private:
     /** Holds messages to be sent with the next call to sendWaitingMessages. */
     moodycamel::ReaderWriterQueue<QueuedMessage> sendQueue;
 
-    /** Holds data while we're putting it together to be sent as a batch. */
-    BinaryBuffer batchBuffer;
+    /** Holds header and message data while we're putting the next batch
+        together.
+        If the batch does not need to be compressed, it will be sent directly
+        from this buffer. */
+    static BinaryBuffer batchBuffer;
+
+    /** The size of our compressed batch buffer.
+        Zlib requires at least ((dataSize * 1.1) + 12) bytes of space during
+        compression. We just double the max message size to be safe. */
+    static const unsigned int COMPRESSED_BUFFER_SIZE = Peer::MAX_WIRE_SIZE * 2;
+    /** If a batch needs to be compressed, the compressed bytes will be written
+        to and sent from this buffer.
+        See SharedConfig::BATCH_COMPRESSION_THRESHOLD for more info. */
+    static BinaryBuffer compressedBatchBuffer;
 
     /** Tracks how long it's been since we've received a message from this
         client. */

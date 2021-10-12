@@ -134,20 +134,12 @@ void Network::serializeAndSend(NetworkID networkID, const T& messageStruct,
 {
     // Allocate the buffer.
     BinaryBufferSharedPtr messageBuffer
-        = std::make_shared<BinaryBuffer>(Peer::MAX_MESSAGE_SIZE);
+        = std::make_shared<BinaryBuffer>(Peer::MAX_WIRE_SIZE);
 
     // Serialize the message struct into the buffer, leaving room for the
     // header.
     std::size_t messageSize = Serialize::toBuffer(*messageBuffer, messageStruct,
                                                   MESSAGE_HEADER_SIZE);
-
-    // Check that the message isn't too big.
-    const unsigned int totalMessageSize = MESSAGE_HEADER_SIZE + messageSize;
-    if ((totalMessageSize > Peer::MAX_MESSAGE_SIZE)
-        || (messageSize > UINT16_MAX)) {
-        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
-                  totalMessageSize, Peer::MAX_MESSAGE_SIZE);
-    }
 
     // Copy the type into the buffer.
     // TODO: Add a nice compile-time message if T doesn't have MESSAGE_TYPE.
@@ -155,6 +147,7 @@ void Network::serializeAndSend(NetworkID networkID, const T& messageStruct,
         = static_cast<Uint8>(T::MESSAGE_TYPE);
 
     // Copy the messageSize into the buffer.
+    const unsigned int totalMessageSize = MESSAGE_HEADER_SIZE + messageSize;
     ByteTools::write16(messageSize,
                        (messageBuffer->data() + MessageHeaderIndex::Size));
 

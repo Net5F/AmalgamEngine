@@ -46,6 +46,29 @@ public:
     static constexpr double NETWORK_TICK_TIMESTEP_S
         = 1.0 / static_cast<double>(NETWORK_TICKS_PER_SECOND);
 
+    /** Message batches larger than this size (in bytes) will be compressed
+        before sending. */
+    static constexpr unsigned int BATCH_COMPRESSION_THRESHOLD = 50;
+
+    /** The "level" value passed to zlib's compression function when
+        compressing message batches.
+        Can be 0 - 9, with 0 being no compression, 1 being fastest, and 9 being
+        most compressed. 6 is the default. */
+    static constexpr int BATCH_COMPRESSION_LEVEL = 9;
+
+    /** The max size that an uncompressed message batch can be.
+        Used to allocate our message buffers.
+
+        If it was free, we would just send the actual uncompressed size of
+        each message batch over the wire. To save bytes, we instead configure
+        this constant.
+        Our message buffers are very small relative to available RAM, so there
+        isn't much harm in raising this to be well above what we actually need.
+
+        Note: Each simulated client in LoadTestClient instantiates a buffer,
+              so you may need to be conscious of this size in that case. */
+    static constexpr unsigned int MAX_BATCH_SIZE = 10'000;
+
     //-------------------------------------------------------------------------
     // Renderer
     //-------------------------------------------------------------------------
