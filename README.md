@@ -18,7 +18,7 @@ Everything you need will be provided, including:
 - [x] Build minimal UI library. (MVP working, needs refactoring later)
 - [x] Build sprite editor. (lets you add 3d bounding boxes to sprites for draw order and collision calcs)
 - [x] Import sprite bounds data into engine, implement world map file.
-- [ ] Implement chunk and tile update streaming.
+- [ ] Implement chunk and tile update streaming (in-world map editing).
 - [ ] Implement spatial partitioning.
 
 ### Future
