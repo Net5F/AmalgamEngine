@@ -1,4 +1,5 @@
 #include "ChunkRange.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -7,29 +8,44 @@ void ChunkRange::unionWith(const ChunkRange& other)
     // Note: We can add some special fast cases for empty ranges if we
     //       ever care to, but they likely wouldn't be exercised much.
 
-    // If the other min x is lower, use it.
-    if (other.x < x) {
-        x = other.x;
+    /* Horizontal union. */
+    // Calc the min and max X coordinates for both ranges.
+    int selfMin{x};
+    int selfMax{x + xLength};
+    int otherMin{other.x};
+    int otherMax{other.x + other.xLength};
+
+    // Determine which min and max are the least constrained.
+    if (otherMin < selfMin) {
+        selfMin = otherMin;
     }
 
-    // If the other max x is higher, use it.
-    int selfMax = x + xLength;
-    int otherMax = other.x + other.xLength;
     if (otherMax > selfMax) {
-        xLength = (otherMax - x);
+        selfMax = otherMax;
     }
 
-    // If the other min y is lower, use it.
-    if (other.y < y) {
-        y = other.y;
-    }
+    // Save the new min and length.
+    x = selfMin;
+    xLength = (selfMax - selfMin);
 
-    // If the other max Y is higher, use it.
+    /* Vertical union. */
+    // Copy the logic from above, replacing X with Y.
+
+    selfMin = y;
     selfMax = y + yLength;
+    otherMin = other.y;
     otherMax = other.y + other.yLength;
-    if (otherMax > selfMax) {
-        yLength = (otherMax - y);
+
+    if (otherMin < selfMin) {
+        selfMin = otherMin;
     }
+
+    if (otherMax > selfMax) {
+        selfMax = otherMax;
+    }
+
+    y = selfMin;
+    yLength = (selfMax - selfMin);
 }
 
 void ChunkRange::intersectWith(const ChunkRange& other)
@@ -37,29 +53,44 @@ void ChunkRange::intersectWith(const ChunkRange& other)
     // Note: We can add some special fast cases for empty ranges if we
     //       ever care to, but they likely wouldn't be exercised much.
 
-    // If the other min x is higher, use it.
-    if (other.x > x) {
-        x = other.x;
+    /* Horizontal intersection. */
+    // Calc the min and max X coordinates for both ranges.
+    int selfMin{x};
+    int selfMax{x + xLength};
+    int otherMin{other.x};
+    int otherMax{other.x + other.xLength};
+
+    // Determine which min and max are the most constrained.
+    if (otherMin > selfMin) {
+        selfMin = otherMin;
     }
 
-    // If the other max x is lower, use it.
-    int selfMax = x + xLength;
-    int otherMax = other.x + other.xLength;
     if (otherMax < selfMax) {
-        xLength = (otherMax - x);
+        selfMax = otherMax;
     }
 
-    // If the other min y is higher, use it.
-    if (other.y > y) {
-        y = other.y;
-    }
+    // Save the new min and length.
+    x = selfMin;
+    xLength = (selfMax - selfMin);
 
-    // If the other max Y is lower, use it.
+    /* Vertical intersection. */
+    // Copy the logic from above, replacing X with Y.
+
+    selfMin = y;
     selfMax = y + yLength;
+    otherMin = other.y;
     otherMax = other.y + other.yLength;
-    if (otherMax < selfMax) {
-        yLength = (otherMax - y);
+
+    if (otherMin > selfMin) {
+        selfMin = otherMin;
     }
+
+    if (otherMax < selfMax) {
+        selfMax = otherMax;
+    }
+
+    y = selfMin;
+    yLength = (selfMax - selfMin);
 }
 
 } // End namespace AM
