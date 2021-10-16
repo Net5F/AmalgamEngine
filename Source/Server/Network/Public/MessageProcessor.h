@@ -80,9 +80,13 @@ private:
     Uint32 handleHeartbeat(Uint8* messageBuffer, unsigned int messageSize);
 
     /**
+     * Pushes InputChangeRequest event.
      * @return The tick number that the message contained.
      */
     Uint32 handleInputChangeRequest(NetworkID netID, Uint8* messageBuffer, unsigned int messageSize);
+
+    /** Pushes ChunkUpdateRequest event. */
+    void handleChunkUpdateRequest(NetworkID netID, Uint8* messageBuffer, unsigned int messageSize);
     //-------------------------------------------------------------------------
 
     /** The network's event dispatcher. Used to send events to the subscribed

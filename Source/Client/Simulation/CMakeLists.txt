@@ -18,7 +18,8 @@ target_sources(Client
 		Public/ServerUpdateSystem.h
 		Public/Simulation.h
 		Public/World.h
-		Public/Components/PlayerState.h
+		Public/Components/InputHistory.h
+		Public/Components/NeedsAdjacentChunks.h
 		Public/Components/Sprite.h
 		Public/TileMap/Tile.h
 		Public/TileMap/TileMap.h

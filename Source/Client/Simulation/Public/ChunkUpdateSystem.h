@@ -1,11 +1,12 @@
 #pragma once
 
-#include <SDL2/SDL_stdinc.h>
 #include "QueuedEvents.h"
 #include "ChunkUpdate.h"
+#include <SDL2/SDL_stdinc.h>
 
 namespace AM
 {
+struct ChunkPosition;
 
 namespace Client
 {
@@ -26,11 +27,40 @@ public:
                       , Network& inNetwork, SpriteData& inSpriteData);
 
     /**
-     * Checks for ChunkUpdate events and updates the tile map.
+     * Requests any needed chunk data and applies received chunk updates.
      */
     void updateChunks();
 
 private:
+    /**
+     * Checks if we need new chunk data. If so, sends a ChunkUpdateRequest to
+     * the server.
+     */
+    void requestNeededUpdates();
+
+    /**
+     * Requests all currently in-range chunks from the server.
+     *
+     * @param currentChunk  The chunk that we are currently in.
+     */
+    void requestAllInRangeChunks(const ChunkPosition& currentChunk);
+
+    /**
+     * Determines which chunks we just got in range of and requests them from
+     * the server.
+     *
+     * @param previousChunk  The chunk that we were previously in.
+     * @param currentChunk  The chunk that we are now in.
+     */
+    void requestNewInRangeChunks(const ChunkPosition& previousChunk,
+                              const ChunkPosition& currentChunk);
+
+    /**
+     * Receives any waiting chunk updates from the queue and applies them
+     * to our tile map.
+     */
+    void receiveAndApplyUpdates();
+
     /**
      * Applies the given chunk snapshot's state to our tile map.
      */
@@ -38,8 +68,10 @@ private:
 
     /** Used to get the current tick. */
     Simulation& sim;
-    /** Used to access map chunks. */
-    TileMap& tileMap;
+    /** Used to access the player entity and components. */
+    World& world;
+    /** Used to send chunk update request messages. */
+    Network& network;
     /** Used to access sprite while adding tiles to the map. */
     SpriteData& spriteData;
 

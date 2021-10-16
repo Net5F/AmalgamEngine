@@ -7,7 +7,8 @@
 #include "Movement.h"
 #include "Sprite.h"
 #include "Camera.h"
-#include "PlayerState.h"
+#include "InputHistory.h"
+#include "NeedsAdjacentChunks.h"
 #include "Name.h"
 #include "ScreenRect.h"
 #include "Paths.h"
@@ -107,8 +108,11 @@ void Simulation::connect()
                              ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH,
                                         SharedConfig::SCREEN_HEIGHT});
 
-    // Set up the player's PlayerState component.
-    registry.emplace<PlayerState>(newEntity);
+    // Set up the player's InputHistory component.
+    registry.emplace<InputHistory>(newEntity);
+
+    // Flag that we just moved and need to request all map data.
+    registry.emplace<NeedsAdjacentChunks>(newEntity);
 }
 
 void Simulation::fakeConnection()
@@ -134,8 +138,8 @@ void Simulation::fakeConnection()
                              ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH,
                                         SharedConfig::SCREEN_HEIGHT});
 
-    // Set up the player's PlayerState component.
-    registry.emplace<PlayerState>(newEntity);
+    // Set up the player's InputHistory component.
+    registry.emplace<InputHistory>(newEntity);
 }
 
 void Simulation::tick()

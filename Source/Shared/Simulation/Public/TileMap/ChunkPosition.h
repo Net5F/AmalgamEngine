@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 namespace AM
 {
 /**
@@ -34,6 +36,27 @@ public:
         y += other.y;
         return *this;
     }
+
+    bool isAdjacentTo(const ChunkPosition& other)
+    {
+        // Get the differences between the positions.
+        int xDif{other.x - x};
+        int yDif{other.y - y};
+
+        // Square the differences.
+        xDif *= xDif;
+        yDif *= yDif;
+
+        // Return the absolute squared distance.
+        return (std::abs(xDif + yDif) <= 1);
+    }
 };
+
+template<typename S>
+void serialize(S& serializer, ChunkPosition& chunkPosition)
+{
+    serializer.value4b(chunkPosition.x);
+    serializer.value4b(chunkPosition.y);
+}
 
 } // namespace AM

@@ -11,7 +11,7 @@
 #include "Movement.h"
 #include "Input.h"
 #include "Sprite.h"
-#include "PlayerState.h"
+#include "InputHistory.h"
 #include "ClientNetworkDefs.h"
 #include "Config.h"
 #include "SharedConfig.h"
@@ -39,7 +39,7 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
     // Init the groups that we'll be using.
     auto group
         = world.registry.group<Input, Position, PreviousPosition, Movement>(
-            entt::exclude<PlayerState>);
+            entt::exclude<InputHistory>);
     ignore(group);
 }
 
@@ -187,7 +187,7 @@ void NpcMovementSystem::moveAllNpcs()
     // Move all NPCs that have an input, position, and movement component.
     auto group
         = world.registry.group<Input, Position, PreviousPosition, Movement>(
-            entt::exclude<PlayerState>);
+            entt::exclude<InputHistory>);
     for (entt::entity entity : group) {
         Input& input = group.get<Input>(entity);
         Position& position = group.get<Position>(entity);

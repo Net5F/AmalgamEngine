@@ -24,9 +24,9 @@ public:
 };
 
 template<typename S>
-void serialize(S& serializer, ChunkUpdate& chunkUpdates)
+void serialize(S& serializer, ChunkUpdate& chunkUpdate)
 {
-    serializer.container(chunkUpdates.chunks,
+    serializer.container(chunkUpdate.chunks,
                          static_cast<std::size_t>(ChunkUpdate::MAX_CHUNKS));
 }
 

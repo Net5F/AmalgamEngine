@@ -17,7 +17,7 @@ class Simulation;
 class World;
 class Network;
 
-class PlayerState;
+class InputHistory;
 
 /**
  * Processes player entity update messages and moves the entity appropriately.
@@ -41,13 +41,13 @@ private:
     Uint32 processPlayerUpdates(Position& currentPosition,
                                 PreviousPosition& previousPosition,
                                 Movement& currentMovement, Input& currentInput,
-                                PlayerState& playerState);
+                                InputHistory& inputHistory);
 
     /**
      * Replay any inputs that are from newer ticks than the latestReceivedTick.
      */
     void replayInputs(Uint32 latestReceivedTick, Position& currentPosition,
-                      Movement& currentMovement, PlayerState& playerState);
+                      Movement& currentMovement, InputHistory& inputHistory);
 
     /**
      * If receivedTick > currentTick, logs an error.

@@ -5,7 +5,6 @@
 #include "Serialize.h"
 #include "InputChangeRequest.h"
 #include "Input.h"
-#include "PlayerState.h"
 #include "IsDirty.h"
 #include "Peer.h"
 #include "Config.h"

@@ -4,6 +4,7 @@
 #include "Deserialize.h"
 #include "Heartbeat.h"
 #include "InputChangeRequest.h"
+#include "ChunkUpdateRequest.h"
 #include "Log.h"
 
 namespace AM
@@ -33,6 +34,10 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID, MessageType mes
         case MessageType::InputChangeRequest: {
             messageTick = static_cast<Sint64>(handleInputChangeRequest(netID, messageBuffer,
                 messageSize));
+            break;
+        }
+        case MessageType::ChunkUpdateRequest: {
+            handleChunkUpdateRequest(netID, messageBuffer, messageSize);
             break;
         }
         default: {
@@ -90,6 +95,20 @@ Uint32 MessageProcessor::handleInputChangeRequest(NetworkID netID, Uint8* messag
 
     // Return the tick number associated with this message.
     return inputChangeRequest.tickNum;
+}
+
+void MessageProcessor::handleChunkUpdateRequest(NetworkID netID, Uint8* messageBuffer, unsigned int messageSize)
+{
+    // Deserialize the message.
+    ChunkUpdateRequest chunkUpdateRequest{};
+    Deserialize::fromBuffer(messageBuffer, messageSize,
+                            chunkUpdateRequest);
+
+    // Fill in the network ID that we assigned to this client.
+    chunkUpdateRequest.netID = netID;
+
+    // Push the message into any subscribed queues.
+    dispatcher.push<ChunkUpdateRequest>(chunkUpdateRequest);
 }
 
 } // End namespace Server

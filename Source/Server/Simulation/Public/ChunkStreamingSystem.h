@@ -1,7 +1,8 @@
 #pragma once
 
 #include "NetworkDefs.h"
-#include "entt/fwd.hpp"
+#include "QueuedEvents.h"
+#include "ChunkUpdateRequest.h"
 
 namespace AM
 {
@@ -12,13 +13,17 @@ namespace Server
 {
 class World;
 class Network;
-class TileMap;
 
 /**
  * This system handles streaming chunk data to clients.
  *
  * A client may require chunks to be sent when it logs in, moves into a new
  * chunk, or teleports.
+ *
+ * Note: We have no validation to see if client entities are in range of the
+ *       requested chunks, but the worlds are all open source so it doesn't
+ *       matter anyway. If someone wants to see the map, they can already get
+ *       it from github.
  */
 class ChunkStreamingSystem
 {
@@ -26,29 +31,16 @@ public:
     ChunkStreamingSystem(World& inWorld, Network& inNetwork);
 
     /**
-     * Sends chunks to any client that needs them.
+     * Processes chunk update requests, sending chunk data if the request is
+     * valid.
      */
     void sendChunks();
 
 private:
     /**
-     * Sends all chunks that are in range of the given index.
-     *
-     * @param currentChunk  The chunk that the client is now in.
-     * @param netID  The network ID of the client to send chunks to.
+     * Send a chunk update, containing the chunks from the given request.
      */
-    void sendAllInRangeChunks(const ChunkPosition& currentChunk, NetworkID netID);
-
-    /**
-     * Determines which chunks the given client entity just got in range of
-     * and sends them.
-     *
-     * @param previousChunk  The chunk that the client was previously in.
-     * @param currentChunk  The chunk that the client is now in.
-     * @param netID  The network ID of the client to send chunks to.
-     */
-    void sendNewInRangeChunks(const ChunkPosition& previousChunk,
-                              const ChunkPosition& currentChunk, NetworkID netID);
+    void sendChunkUpdate(const ChunkUpdateRequest& chunkUpdateRequest);
 
     /**
      * Adds the given chunk to the given UpdateChunks message.
@@ -59,14 +51,12 @@ private:
     void addChunkToMessage(const ChunkPosition& chunkPosition,
                            ChunkUpdate& chunkUpdate);
 
-    /** Used for fetching entity data. */
-    entt::registry& registry;
-
-    /** Used for fetching map data. */
-    TileMap& tileMap;
-
+    /** Used for fetching entity, component, and map data. */
+    World& world;
     /** Used for sending chunks to clients. */
     Network& network;
+
+    EventQueue<ChunkUpdateRequest> chunkUpdateRequestQueue;
 };
 
 } // End namespace Server

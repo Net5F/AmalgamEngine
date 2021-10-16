@@ -1,6 +1,7 @@
 target_sources(Shared
     PUBLIC
         Public/ChunkUpdate.h
+        Public/ChunkUpdateRequest.h
         Public/ChunkWireSnapshot.h
         Public/ConnectionResponse.h
         Public/EntityState.h

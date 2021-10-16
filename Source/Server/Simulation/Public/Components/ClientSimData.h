@@ -25,9 +25,6 @@ public:
         dropped. */
     bool messageWasDropped{false};
 
-    /** Tracks if this entity needs to be sent its initial chunk data. */
-    bool needsInitialChunks{false};
-
     /** Area of interest bounds. Used to determine if entities are close enough
         to the client entity to be replicated.
         Note: width and height should be set, but the NetworkUpdateSystem

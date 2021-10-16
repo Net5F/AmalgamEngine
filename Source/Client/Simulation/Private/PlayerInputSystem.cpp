@@ -3,7 +3,7 @@
 #include "World.h"
 #include "Network.h"
 #include "Input.h"
-#include "PlayerState.h"
+#include "InputHistory.h"
 #include "Camera.h"
 #include "IsDirty.h"
 #include "Log.h"
@@ -82,9 +82,9 @@ void PlayerInputSystem::processHeldInputs()
 
 void PlayerInputSystem::addCurrentInputsToHistory()
 {
-    CircularBuffer<Input::StateArr, PlayerState::INPUT_HISTORY_LENGTH>&
+    CircularBuffer<Input::StateArr, InputHistory::LENGTH>&
         playerInputHistory
-        = world.registry.get<PlayerState>(world.playerEntity).inputHistory;
+        = world.registry.get<InputHistory>(world.playerEntity).inputHistory;
     Input::StateArr& playerInputs
         = world.registry.get<Input>(world.playerEntity).inputStates;
 

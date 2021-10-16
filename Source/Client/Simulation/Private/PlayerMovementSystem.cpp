@@ -6,7 +6,7 @@
 #include "Position.h"
 #include "Movement.h"
 #include "Input.h"
-#include "PlayerState.h"
+#include "InputHistory.h"
 #include "PreviousPosition.h"
 #include "SharedConfig.h"
 #include "Config.h"
@@ -39,16 +39,16 @@ void PlayerMovementSystem::processMovements()
 
     if (!Config::RUN_OFFLINE) {
         // Apply any player entity updates from the server.
-        PlayerState& playerState
-            = registry.get<PlayerState>(world.playerEntity);
+        InputHistory& inputHistory
+            = registry.get<InputHistory>(world.playerEntity);
         Uint32 latestReceivedTick
             = processPlayerUpdates(currentPosition, previousPosition,
-                                   currentMovement, currentInput, playerState);
+                                   currentMovement, currentInput, inputHistory);
 
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
             replayInputs(latestReceivedTick, currentPosition, currentMovement,
-                         playerState);
+                         inputHistory);
 
             // Check if there was a mismatch between the position we had and
             // where the server thought we should be.
@@ -70,7 +70,7 @@ void PlayerMovementSystem::processMovements()
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(
     Position& currentPosition, PreviousPosition& previousPosition,
-    Movement& currentMovement, Input& currentInput, PlayerState& playerState)
+    Movement& currentMovement, Input& currentInput, InputHistory& inputHistory)
 {
     /* Process any messages for us from the server. */
     Uint32 latestReceivedTick = 0;
@@ -118,14 +118,14 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
 
         // Check if the received input disagrees with what we predicted.
         const Input& receivedInput = playerUpdate->input;
-        if (receivedInput.inputStates != playerState.inputHistory[tickDiff]) {
+        if (receivedInput.inputStates != inputHistory.inputHistory[tickDiff]) {
             // Our prediction was wrong, accept the received input and set all
             // inputs in the history after the mismatched input to match it.
             // TODO: This may be incorrect, but it's uncommon and hard to
             // verify. We may want to more carefully overwrite existing inputs.
             currentInput.inputStates = receivedInput.inputStates;
             for (unsigned int i = 0; i <= tickDiff; ++i) {
-                playerState.inputHistory[i] = receivedInput.inputStates;
+                inputHistory.inputHistory[i] = receivedInput.inputStates;
             }
 
             // Set our old position to the current so we aren't oddly lerping
@@ -140,7 +140,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
 void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
                                         Position& currentPosition,
                                         Movement& currentMovement,
-                                        PlayerState& playerState)
+                                        InputHistory& inputHistory)
 {
     Uint32 currentTick = sim.getCurrentTick();
     checkReceivedTickValidity(latestReceivedTick, currentTick);
@@ -155,7 +155,7 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
 
         // Use the appropriate input state to update movement.
         MovementHelpers::moveEntity(currentPosition, currentMovement,
-                                    playerState.inputHistory[tickDiff],
+                                    inputHistory.inputHistory[tickDiff],
                                     SharedConfig::SIM_TICK_TIMESTEP_S);
     }
 }
@@ -174,11 +174,11 @@ void PlayerMovementSystem::checkTickDiffValidity(Uint32 tickDiff)
 {
     // The history includes the current tick, so we only have LENGTH - 1
     // worth of previous data to use (i.e. it's 0-indexed).
-    if (tickDiff > (PlayerState::INPUT_HISTORY_LENGTH - 1)) {
+    if (tickDiff > (InputHistory::LENGTH - 1)) {
         LOG_ERROR("Too few items in the player input history. "
                   "Increase the length or reduce lag. tickDiff: %u, "
                   "historyLength: %u",
-                  tickDiff, PlayerState::INPUT_HISTORY_LENGTH);
+                  tickDiff, InputHistory::LENGTH);
     }
 }
 

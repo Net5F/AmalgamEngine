@@ -18,6 +18,7 @@ enum class MessageType : Uint8 {
     Heartbeat = 1,
     ConnectionRequest = 2,
     InputChangeRequest = 3,
+    ChunkUpdateRequest = 4,
 
     // Server -> Client Messages
     ExplicitConfirmation = 30,
