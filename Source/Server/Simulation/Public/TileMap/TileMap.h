@@ -32,22 +32,17 @@ public:
     TileMap(SpriteData& inSpriteData);
 
     /**
-     * Adds the given sprite to a new layer on the tile at the given position.
+     * Sets the specified sprite layer to the given sprite.
      *
-     * Note: There is no bounds checking on the given values. It's on you to
-     *       make sure they're valid.
-     */
-    void addSpriteLayer(unsigned int tileX, unsigned int tileY,
-                        const Sprite& sprite);
-
-    /**
-     * Replaces the specified sprite layer with the given sprite.
+     * If the specified tile's spriteLayers vector isn't big enough, resizes
+     * it. Any tiles added during resizing will be default initialized to
+     * the "empty sprite".
      *
-     * Note: There is no bounds checking on the given values. It's on you to
-     *       make sure they're valid.
+     * Note: There's no bounds checking on tileX/tileY. It's on you to make
+     *       sure they're valid.
      */
-    void replaceSpriteLayer(unsigned int tileX, unsigned int tileY,
-                            unsigned int layerIndex, const Sprite& sprite);
+    void setSpriteLayer(unsigned int tileX, unsigned int tileY,
+                        unsigned int layerIndex, const Sprite& sprite);
 
     /**
      * Gets a const reference to the tile at the given coordinates.

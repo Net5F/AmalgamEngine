@@ -40,8 +40,8 @@ TileMap::TileMap(SpriteData& inSpriteData)
     LOG_INFO("Map loaded in %.6fs. Size: (%u, %u).", timeTaken, mapXLengthTiles, mapYLengthTiles);
 }
 
-void TileMap::addSpriteLayer(unsigned int tileX, unsigned int tileY,
-                             const Sprite& sprite)
+void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
+                             unsigned int layerIndex, const Sprite& sprite)
 {
     // If the sprite has a bounding box, calculate its position.
     BoundingBox worldBounds{};
@@ -53,26 +53,15 @@ void TileMap::addSpriteLayer(unsigned int tileX, unsigned int tileY,
             = Transforms::modelToWorld(sprite.modelBounds, tilePosition);
     }
 
-    // Push the sprite into the tile's layers vector.
+    // If the tile's layers vector isn't big enough, resize it.
+    // Note: This sets new layers to the "empty sprite".
     Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
-    tile.spriteLayers.emplace_back(&sprite, worldBounds);
-}
-
-void TileMap::replaceSpriteLayer(unsigned int tileX, unsigned int tileY,
-                                 unsigned int layerIndex, const Sprite& sprite)
-{
-    // If the sprite has a bounding box, calculate its position.
-    BoundingBox worldBounds{};
-    if (sprite.hasBoundingBox) {
-        Position tilePosition{
-            static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),
-            static_cast<float>(tileY * SharedConfig::TILE_WORLD_WIDTH), 0};
-        worldBounds
-            = Transforms::modelToWorld(sprite.modelBounds, tilePosition);
+    if (tile.spriteLayers.size() <= layerIndex) {
+        const Sprite& emptySprite{spriteData.get(-1)};
+        tile.spriteLayers.resize((layerIndex + 1), {&emptySprite, BoundingBox{}});
     }
 
     // Replace the sprite.
-    Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
     tile.spriteLayers[layerIndex] = {&sprite, worldBounds};
 }
 
@@ -137,10 +126,11 @@ void TileMap::loadMap(TileMapSnapshot& mapSnapshot)
         for (unsigned int i = 0; i < SharedConfig::CHUNK_TILE_COUNT; ++i) {
             // Push all of the snapshot's sprites into the tile.
             TileSnapshot& tileSnapshot{chunk.tiles[i]};
+            unsigned int layerIndex{0};
             for (unsigned int paletteID : tileSnapshot.spriteLayers) {
                 const Sprite& sprite{spriteData.get(chunk.palette[paletteID])};
-                addSpriteLayer((startX + relativeX), (startY + relativeY),
-                               sprite);
+                setSpriteLayer((startX + relativeX), (startY + relativeY),
+                               layerIndex++, sprite);
             }
 
             // Increment the relative indices, wrapping at the chunk width.

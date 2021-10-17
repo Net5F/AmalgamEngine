@@ -55,6 +55,11 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 
             // Push all of this tile's sprites into the appropriate vector.
             for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
+                // If the layer is empty, skip it.
+                if (layer.sprite->numericID == -1) {
+                    continue;
+                }
+
                 // Get iso screen extent for this sprite.
                 SDL_Rect screenExtent = ClientTransforms::tileToScreenExtent(
                     {x, y}, *(layer.sprite), camera);

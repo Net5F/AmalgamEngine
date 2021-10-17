@@ -104,7 +104,7 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     // Set the tile to the next sprite.
     terrainSpriteIndex++;
     terrainSpriteIndex %= 3;
-    world.tileMap.replaceSpriteLayer(tileIndex.x, tileIndex.y, 0,
+    world.tileMap.setSpriteLayer(tileIndex.x, tileIndex.y, 0,
                                      *(terrainSprites[terrainSpriteIndex]));
 }
 

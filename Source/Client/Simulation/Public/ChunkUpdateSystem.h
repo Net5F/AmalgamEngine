@@ -17,8 +17,7 @@ class SpriteData;
 class TileMap;
 
 /**
- * Processes tile map chunk update messages and update the map chunks
- * appropriately.
+ * Requests needed tile map chunk data, and applies received chunk updates.
  */
 class ChunkUpdateSystem
 {
@@ -72,7 +71,7 @@ private:
     World& world;
     /** Used to send chunk update request messages. */
     Network& network;
-    /** Used to access sprite while adding tiles to the map. */
+    /** Used to access sprites while adding tiles to the map. */
     SpriteData& spriteData;
 
     EventQueue<std::shared_ptr<const ChunkUpdate>> chunkUpdateQueue;

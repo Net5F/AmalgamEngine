@@ -20,12 +20,10 @@ namespace Client
  */
 struct Tile {
 public:
-    /**
-     * Represents a sprite, placed on a tile.
-     */
+    /** Represents a sprite, placed on a tile. */
     struct SpriteLayer {
-        /** The sprite's data. */
-        const Sprite* sprite;
+        /** The sprite that this layer contains. */
+        const Sprite* sprite{nullptr};
 
         /** If sprite.hasBoundingBox == true, this is the sprite's modelBounds
             moved to match the tile's world position.
@@ -34,7 +32,8 @@ public:
         BoundingBox fixedBounds;
     };
 
-    /** The layers of sprites that are on this tile.
+    /** The layers of sprites that make up this tile, ordered bottom to top.
+
         Sprites with bounding boxes will be rendered in an order corresponding
         to their box extent, but sprites with no box will be rendered by order
         of appearance in this vector, from begin -> end. */

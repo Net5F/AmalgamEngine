@@ -29,6 +29,16 @@ SpriteData::SpriteData(AssetCache& assetCache)
 
     // Parse the json structure to construct our sprites.
     parseJson(json, assetCache);
+
+    // Add the empty sprite.
+    sprites.push_back(Sprite{});
+    Sprite& emptySprite{sprites.back()};
+    emptySprite.displayName = "Empty";
+    emptySprite.stringID = "empty";
+    emptySprite.numericID = -1;
+
+    stringMap.emplace(emptySprite.stringID, &emptySprite);
+    numericMap.emplace(emptySprite.numericID, &emptySprite);
 }
 
 const Sprite& SpriteData::get(const std::string& stringID)

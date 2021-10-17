@@ -39,7 +39,7 @@ struct ServerHeaderIndex {
         /** Uint8, the iteration of tick offset adjustment that we're on. */
         AdjustmentIteration = 1,
         /** Uint16. The low 15 bits hold the size of the message batch in
-            bytes, the high bit is set if the batch is compressed. */
+            bytes. The high bit is set if the batch is compressed. */
         BatchSize = 2,
         /** The start of the first message header if one is present. */
         MessageHeaderStart = 4

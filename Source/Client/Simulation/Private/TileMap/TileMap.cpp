@@ -39,20 +39,20 @@ TileMap::TileMap(SpriteData& inSpriteData)
 
         // Add some rugs to layer 1.
         const Sprite& rug{spriteData.get("test_15")};
-        addSpriteLayer(0, 3, rug);
-        addSpriteLayer(4, 3, rug);
-        addSpriteLayer(3, 6, rug);
-        addSpriteLayer(2, 9, rug);
-        addSpriteLayer(1, 5, rug);
+        setSpriteLayer(0, 3, 1, rug);
+        setSpriteLayer(4, 3, 1, rug);
+        setSpriteLayer(3, 6, 1, rug);
+        setSpriteLayer(2, 9, 1, rug);
+        setSpriteLayer(1, 5, 1, rug);
 
         // Add some walls to layer 2.
         const Sprite& wall1{spriteData.get("test_17")};
-        addSpriteLayer(2, 0, wall1);
-        addSpriteLayer(2, 1, wall1);
-        addSpriteLayer(2, 2, wall1);
+        setSpriteLayer(2, 0, 2, wall1);
+        setSpriteLayer(2, 1, 2, wall1);
+        setSpriteLayer(2, 2, 2, wall1);
 
         const Sprite& wall2{spriteData.get("test_26")};
-        addSpriteLayer(0, 2, wall2);
+        setSpriteLayer(0, 2, 2, wall2);
     }
 }
 
@@ -68,8 +68,8 @@ void TileMap::setMapSize(unsigned int inMapXLengthChunks, unsigned int inMapYLen
     tiles.resize(mapXLengthTiles * mapYLengthTiles);
 }
 
-void TileMap::addSpriteLayer(unsigned int tileX, unsigned int tileY,
-                             const Sprite& sprite)
+void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
+                             unsigned int layerIndex, const Sprite& sprite)
 {
     // If the sprite has a bounding box, calculate its position.
     BoundingBox worldBounds{};
@@ -81,26 +81,15 @@ void TileMap::addSpriteLayer(unsigned int tileX, unsigned int tileY,
             = Transforms::modelToWorld(sprite.modelBounds, tilePosition);
     }
 
-    // Push the sprite into the tile's layers vector.
+    // If the tile's layers vector isn't big enough, resize it.
+    // Note: This sets new layers to the "empty sprite".
     Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
-    tile.spriteLayers.emplace_back(&sprite, worldBounds);
-}
-
-void TileMap::replaceSpriteLayer(unsigned int tileX, unsigned int tileY,
-                                 unsigned int layerIndex, const Sprite& sprite)
-{
-    // If the sprite has a bounding box, calculate its position.
-    BoundingBox worldBounds{};
-    if (sprite.hasBoundingBox) {
-        Position tilePosition{
-            static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),
-            static_cast<float>(tileY * SharedConfig::TILE_WORLD_WIDTH), 0};
-        worldBounds
-            = Transforms::modelToWorld(sprite.modelBounds, tilePosition);
+    if (tile.spriteLayers.size() <= layerIndex) {
+        const Sprite& emptySprite{spriteData.get(-1)};
+        tile.spriteLayers.resize((layerIndex + 1), {&emptySprite, BoundingBox{}});
     }
 
     // Replace the sprite.
-    Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
     tile.spriteLayers[layerIndex] = {&sprite, worldBounds};
 }
 

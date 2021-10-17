@@ -154,12 +154,13 @@ void ChunkUpdateSystem::applyChunkSnapshot(const ChunkWireSnapshot& chunk)
 
             // Copy all of the snapshot tile's sprite layers to our map tile.
             const TileSnapshot& tileSnapshot = chunk.tiles[tileIndex];
+            unsigned int layerIndex{0};
             for (Uint8 paletteID : tileSnapshot.spriteLayers) {
                 // Get the sprite that this palette ID is referring to.
                 const Sprite& sprite{spriteData.get(chunk.palette[paletteID])};
 
                 // Add the sprite layer to the tile.
-                world.tileMap.addSpriteLayer(currentTileX, currentTileY, sprite);
+                world.tileMap.setSpriteLayer(currentTileX, currentTileY, layerIndex++, sprite);
             }
 
             // Increment to the next linear index.
