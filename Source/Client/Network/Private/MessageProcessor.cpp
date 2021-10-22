@@ -1,6 +1,7 @@
 #include "MessageProcessor.h"
-#include "Network.h"
+#include "QueuedEvents.h"
 #include "Deserialize.h"
+#include "ClientNetworkDefs.h"
 #include "ExplicitConfirmation.h"
 #include "ConnectionResponse.h"
 #include "EntityUpdate.h"
@@ -11,8 +12,8 @@ namespace AM
 {
 namespace Client
 {
-MessageProcessor::MessageProcessor(EventDispatcher& inDispatcher)
-: dispatcher{inDispatcher}
+MessageProcessor::MessageProcessor(EventDispatcher& inNetworkEventDispatcher)
+: networkEventDispatcher{inNetworkEventDispatcher}
 , playerEntity{entt::null}
 {
 }
@@ -54,7 +55,7 @@ void MessageProcessor::pushEvent(Uint8* messageBuffer,
     Deserialize::fromBuffer(messageBuffer, messageSize, message);
 
     // Push the message into any subscribed queues.
-    dispatcher.push<T>(message);
+    networkEventDispatcher.push<T>(message);
 }
 
 template<typename T>
@@ -66,7 +67,7 @@ void MessageProcessor::pushEventSharedPtr(Uint8* messageBuffer,
     Deserialize::fromBuffer(messageBuffer, messageSize, *message);
 
     // Push the message into any subscribed queues.
-    dispatcher.push<std::shared_ptr<const T>>(message);
+    networkEventDispatcher.push<std::shared_ptr<const T>>(message);
 }
 
 void MessageProcessor::handleExplicitConfirmation(Uint8* messageBuffer,
@@ -78,7 +79,7 @@ void MessageProcessor::handleExplicitConfirmation(Uint8* messageBuffer,
 
     // Push confirmations into the NPC update system's queue.
     for (unsigned int i = 0; i < explicitConfirmation.confirmedTickCount; ++i) {
-        dispatcher.emplace<NpcUpdate>(
+        networkEventDispatcher.emplace<NpcUpdate>(
             NpcUpdateType::ExplicitConfirmation);
     }
 }
@@ -103,12 +104,12 @@ void MessageProcessor::handleEntityUpdate(Uint8* messageBuffer,
 
         if (entity == playerEntity) {
             // Found the player.
-            dispatcher.push<std::shared_ptr<const EntityUpdate>>(entityUpdate);
+            networkEventDispatcher.push<std::shared_ptr<const EntityUpdate>>(entityUpdate);
             playerFound = true;
         }
         else if (!npcFound) {
             // Found a non-player (npc).
-            dispatcher.emplace<NpcUpdate>(NpcUpdateType::Update,
+            networkEventDispatcher.emplace<NpcUpdate>(NpcUpdateType::Update,
                                                  entityUpdate);
             npcFound = true;
         }
@@ -122,7 +123,7 @@ void MessageProcessor::handleEntityUpdate(Uint8* messageBuffer,
     // If we didn't find an NPC and queue an update message, push an
     // implicit confirmation to show that we've confirmed up to this tick.
     if (!npcFound) {
-        dispatcher.emplace<NpcUpdate>(
+        networkEventDispatcher.emplace<NpcUpdate>(
             NpcUpdateType::ImplicitConfirmation, nullptr,
             entityUpdate->tickNum);
     }
@@ -140,7 +141,7 @@ void MessageProcessor::handleConnectionResponse(Uint8* messageBuffer,
     playerEntity = connectionResponse.entity;
 
     // Push the message into any subscribed queues.
-    dispatcher.push<ConnectionResponse>(connectionResponse);
+    networkEventDispatcher.push<ConnectionResponse>(connectionResponse);
 }
 
 } // End namespace Client

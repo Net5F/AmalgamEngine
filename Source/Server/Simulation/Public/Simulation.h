@@ -24,7 +24,7 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S = .001;
 
-    Simulation(Network& inNetwork, SpriteData& inSpriteData);
+    Simulation(EventDispatcher& inNetworkEventDispatcher, Network& inNetwork, SpriteData& inSpriteData);
 
     /**
      * Updates accumulatedTime. If greater than the tick timestep, processes
@@ -35,8 +35,11 @@ public:
     Uint32 getCurrentTick();
 
 private:
-    World world;
+    /** Used to receive events (through the Network's dispatcher) and to
+        send messages. */
     Network& network;
+
+    World world;
 
     ClientConnectionSystem clientConnectionSystem;
     InputUpdateSystem inputUpdateSystem;

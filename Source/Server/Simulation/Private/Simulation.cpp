@@ -7,14 +7,14 @@ namespace AM
 {
 namespace Server
 {
-Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
-: world(inSpriteData)
-, network(inNetwork)
-, clientConnectionSystem(*this, world, network)
-, inputUpdateSystem(*this, world, network)
+Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher, Network& inNetwork, SpriteData& inSpriteData)
+: network(inNetwork)
+, world(inSpriteData)
+, clientConnectionSystem(*this, world, inNetworkEventDispatcher, network)
+, inputUpdateSystem(*this, world, inNetworkEventDispatcher, network)
 , movementSystem(world)
 , clientUpdateSystem(*this, world, network)
-, chunkStreamingSystem(world, network)
+, chunkStreamingSystem(world, inNetworkEventDispatcher, network)
 , currentTick(0)
 {
     Log::registerCurrentTickPtr(&currentTick);

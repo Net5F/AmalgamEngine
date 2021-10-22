@@ -4,7 +4,6 @@
 #include "NetworkDefs.h"
 #include "ClientNetworkDefs.h"
 #include "MessageProcessor.h"
-#include "QueuedEvents.h"
 #include "Serialize.h"
 #include "Peer.h"
 #include "Deserialize.h"
@@ -18,6 +17,7 @@
 
 namespace AM
 {
+class EventDispatcher;
 class ConnectionResponse;
 class EntityUpdate;
 
@@ -29,7 +29,7 @@ namespace Client
 class Network
 {
 public:
-    Network();
+    Network(EventDispatcher& inNetworkEventDispatcher);
 
     ~Network();
 
@@ -67,13 +67,6 @@ public:
      *         tickAdjustment.
      */
     int transferTickAdjustment();
-
-    /**
-     * Returns the event dispatcher.
-     *
-     * Used by the simulation's systems to subscribe their event queues.
-     */
-    EventDispatcher& getDispatcher();
 
     /**
      * Used for passing us a pointer to the Game's currentTick.
@@ -126,10 +119,6 @@ private:
     void logNetworkStatistics();
 
     std::shared_ptr<Peer> server;
-
-    /** Used to send received messages and network events to the subscribed
-        systems. */
-    EventDispatcher dispatcher;
 
     /** Deserializes messages, does any network-layer message handling, and
         passes messages down to the simulation. */

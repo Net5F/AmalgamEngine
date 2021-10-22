@@ -21,7 +21,7 @@ class Network;
 class InputUpdateSystem
 {
 public:
-    InputUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
+    InputUpdateSystem(Simulation& inSim, World& inWorld, EventDispatcher& inNetworkEventDispatcher, Network& inNetwork);
 
     /**
      * Processes incoming EntityUpdate messages.

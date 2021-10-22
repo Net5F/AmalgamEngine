@@ -15,10 +15,11 @@ Application::Application()
 : sdl(0)
 , sdlNetInit()
 , spriteData()
-, network()
+, networkEventDispatcher()
+, network(networkEventDispatcher)
 , networkCaller(std::bind_front(&Network::tick, &network),
                 SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
-, sim(network, spriteData)
+, sim(networkEventDispatcher, network, spriteData)
 , simCaller(std::bind_front(&Simulation::tick, &sim),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
 , exitRequested(false)

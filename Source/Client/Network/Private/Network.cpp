@@ -1,4 +1,5 @@
 #include "Network.h"
+#include "QueuedEvents.h"
 #include "Heartbeat.h"
 #include "Config.h"
 #include "NetworkStats.h"
@@ -8,10 +9,9 @@ namespace AM
 {
 namespace Client
 {
-Network::Network()
+Network::Network(EventDispatcher& inNetworkEventDispatcher)
 : server(nullptr)
-, dispatcher()
-, messageProcessor(dispatcher)
+, messageProcessor(inNetworkEventDispatcher)
 , tickAdjustment(0)
 , adjustmentIteration(0)
 , isApplyingTickAdjustment(false)
@@ -99,11 +99,6 @@ int Network::transferTickAdjustment()
     else {
         return 0;
     }
-}
-
-EventDispatcher& Network::getDispatcher()
-{
-    return dispatcher;
 }
 
 void Network::registerCurrentTickPtr(

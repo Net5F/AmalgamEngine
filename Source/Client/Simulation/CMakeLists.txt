@@ -7,6 +7,7 @@ target_sources(Client
 		Private/PlayerMovementSystem.cpp
 		Private/ServerUpdateSystem.cpp
 		Private/Simulation.cpp
+		Private/TileUpdateSystem.cpp
 		Private/World.cpp
 		Private/TileMap/TileMap.cpp
 	PUBLIC
@@ -17,6 +18,7 @@ target_sources(Client
 		Public/PlayerMovementSystem.h
 		Public/ServerUpdateSystem.h
 		Public/Simulation.h
+		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/Components/InputHistory.h
 		Public/Components/NeedsAdjacentChunks.h

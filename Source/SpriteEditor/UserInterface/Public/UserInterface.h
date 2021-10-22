@@ -45,7 +45,7 @@ public:
     /**
      * Handles user input events.
      */
-    bool handleEvent(SDL_Event& event) override;
+    bool handleOSEvent(SDL_Event& event) override;
 
     /**
      * Calls AUI::Screen::tick() on the current screen.

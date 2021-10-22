@@ -20,12 +20,13 @@ namespace Server
 {
 ClientConnectionSystem::ClientConnectionSystem(Simulation& inSim,
                                                  World& inWorld,
+                                                 EventDispatcher& inNetworkEventDispatcher,
                                                  Network& inNetwork)
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)
-, clientConnectedQueue(inNetwork.getDispatcher())
-, clientDisconnectedQueue(inNetwork.getDispatcher())
+, clientConnectedQueue(inNetworkEventDispatcher)
+, clientDisconnectedQueue(inNetworkEventDispatcher)
 {
 }
 

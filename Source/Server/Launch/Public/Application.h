@@ -13,6 +13,8 @@
 
 namespace AM
 {
+class EventDispatcher;
+
 namespace Server
 {
 /**
@@ -44,10 +46,20 @@ private:
         for tweaking. */
     static constexpr double SLEEP_MINIMUM_TIME_S = .003;
 
+    //-------------------------------------------------------------------------
+    // SDL Objects
+    //-------------------------------------------------------------------------
     SDL2pp::SDL sdl;
     SDLNetInitializer sdlNetInit;
 
+    //-------------------------------------------------------------------------
+    // Modules, Dependencies, PeriodicCallers
+    //-------------------------------------------------------------------------
     SpriteData spriteData;
+
+    /** This is owned by the Application to follow the pattern of the Client's
+        UI event dispatcher. */
+    EventDispatcher networkEventDispatcher;
 
     Network network;
     PeriodicCaller networkCaller;
@@ -55,6 +67,9 @@ private:
     Simulation sim;
     PeriodicCaller simCaller;
 
+    //-------------------------------------------------------------------------
+    // Additional, used during the loop
+    //-------------------------------------------------------------------------
     /** Flags when to end the application. */
     std::atomic<bool> exitRequested;
 

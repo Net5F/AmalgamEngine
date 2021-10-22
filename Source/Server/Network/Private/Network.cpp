@@ -13,10 +13,9 @@ namespace AM
 {
 namespace Server
 {
-Network::Network()
-: dispatcher()
-, messageProcessor(dispatcher)
-, clientHandler(*this, dispatcher, messageProcessor)
+Network::Network(EventDispatcher& inNetworkEventDispatcher)
+: messageProcessor(inNetworkEventDispatcher)
+, clientHandler(*this, inNetworkEventDispatcher, messageProcessor)
 , ticksSinceNetstatsLog(0)
 , currentTickPtr(nullptr)
 {
@@ -44,11 +43,6 @@ ClientMap& Network::getClientMap()
 std::shared_mutex& Network::getClientMapMutex()
 {
     return clientMapMutex;
-}
-
-EventDispatcher& Network::getDispatcher()
-{
-    return dispatcher;
 }
 
 void Network::registerCurrentTickPtr(

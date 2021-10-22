@@ -1,9 +1,11 @@
 #pragma once
 
 #include "OSEventHandler.h"
+#include "QueuedEvents.h"
 #include "World.h"
 #include "ConnectionResponse.h"
 #include "ChunkUpdateSystem.h"
+#include "TileUpdateSystem.h"
 #include "PlayerInputSystem.h"
 #include "ServerUpdateSystem.h"
 #include "PlayerMovementSystem.h"
@@ -14,6 +16,8 @@
 
 namespace AM
 {
+class EventDispatcher;
+
 namespace Client
 {
 class Network;
@@ -28,7 +32,9 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S = .001;
 
-    Simulation(Network& inNetwork, SpriteData& inSpriteData);
+    Simulation(EventDispatcher& inUiEventDispatcher
+               , EventDispatcher& inNetworkEventDispatcher
+               , Network& inNetwork, SpriteData& inSpriteData);
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,
@@ -55,23 +61,27 @@ public:
      * Note: If the pre-tick handling of these events ever becomes an issue,
      *       we could instead queue them, to be processed during the tick.
      */
-    bool handleEvent(SDL_Event& event) override;
+    bool handleOSEvent(SDL_Event& event) override;
 
 private:
     /** How long the game should wait for the server to send a connection
         response, in microseconds. */
     static constexpr int CONNECTION_RESPONSE_WAIT_US = 1 * 1000 * 1000;
 
-    World world;
+    /** Used to receive events (through the Network's dispatcher) and to
+        send messages. */
     Network& network;
-
-    EventQueue<ConnectionResponse> connectionResponseQueue;
 
     /** Temporarily used for loading the player's sprite texture.
         When that logic gets moved, this member can be removed. */
     SpriteData& spriteData;
 
+    World world;
+
+    EventQueue<ConnectionResponse> connectionResponseQueue;
+
     ChunkUpdateSystem chunkUpdateSystem;
+    TileUpdateSystem tileUpdateSystem;
     PlayerInputSystem playerInputSystem;
     ServerUpdateSystem serverUpdateSystem;
     PlayerMovementSystem playerMovementSystem;

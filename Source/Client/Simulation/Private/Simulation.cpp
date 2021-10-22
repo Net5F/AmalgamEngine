@@ -24,16 +24,19 @@ namespace AM
 {
 namespace Client
 {
-Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
-: world(inSpriteData)
-, network{inNetwork}
-, connectionResponseQueue(inNetwork.getDispatcher())
+Simulation::Simulation(EventDispatcher& inUiEventDispatcher
+               , EventDispatcher& inNetworkEventDispatcher
+               , Network& inNetwork, SpriteData& inSpriteData)
+: network{inNetwork}
 , spriteData{inSpriteData}
-, chunkUpdateSystem(*this, world, network, inSpriteData)
+, world(inSpriteData)
+, connectionResponseQueue(inNetworkEventDispatcher)
+, chunkUpdateSystem(*this, world, inNetworkEventDispatcher, network, inSpriteData)
+, tileUpdateSystem(*this, world, inUiEventDispatcher, inNetworkEventDispatcher, network, inSpriteData)
 , playerInputSystem(*this, world)
 , serverUpdateSystem(*this, world, network)
-, playerMovementSystem(*this, world, network)
-, npcMovementSystem(*this, world, network, inSpriteData)
+, playerMovementSystem(*this, world, inNetworkEventDispatcher)
+, npcMovementSystem(*this, world, inNetworkEventDispatcher, inSpriteData)
 , cameraSystem(*this, world)
 , currentTick(0)
 {
@@ -206,7 +209,7 @@ Uint32 Simulation::getCurrentTick()
     return currentTick;
 }
 
-bool Simulation::handleEvent(SDL_Event& event)
+bool Simulation::handleOSEvent(SDL_Event& event)
 {
     switch (event.type) {
         case SDL_MOUSEMOTION: {

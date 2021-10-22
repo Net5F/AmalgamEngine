@@ -81,7 +81,7 @@ void Renderer::render()
     SDL_RenderPresent(sdlRenderer);
 }
 
-bool Renderer::handleEvent(SDL_Event& event)
+bool Renderer::handleOSEvent(SDL_Event& event)
 {
     switch (event.type) {
         case SDL_WINDOWEVENT:

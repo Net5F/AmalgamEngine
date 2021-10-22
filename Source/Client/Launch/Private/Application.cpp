@@ -22,13 +22,15 @@ Application::Application()
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , assetCache(sdlRenderer.Get())
 , spriteData(assetCache)
-, network()
+, uiEventDispatcher()
+, networkEventDispatcher()
+, network(networkEventDispatcher)
 , networkCaller(std::bind_front(&Network::tick, &network),
                 SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
-, sim(network, spriteData)
+, sim(uiEventDispatcher, networkEventDispatcher, network, spriteData)
 , simCaller(std::bind_front(&Simulation::tick, &sim),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
-, userInterface(sim.getWorld(), spriteData)
+, userInterface(uiEventDispatcher, sim.getWorld(), spriteData)
 , renderer(sdlRenderer.Get(), sim, userInterface,
            std::bind_front(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind_front(&Renderer::render, &renderer),
@@ -86,7 +88,7 @@ void Application::start()
     }
 }
 
-bool Application::handleEvent(SDL_Event& event)
+bool Application::handleOSEvent(SDL_Event& event)
 {
     switch (event.type) {
         case SDL_QUIT:
@@ -105,7 +107,7 @@ void Application::dispatchEvents()
         // Pass the event to each handler in order, stopping if it returns as
         // handled.
         for (OSEventHandler* handler : eventHandlers) {
-            if (handler->handleEvent(event)) {
+            if (handler->handleOSEvent(event)) {
                 break;
             }
         }

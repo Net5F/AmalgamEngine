@@ -10,6 +10,8 @@
 
 namespace AM
 {
+class EventDispatcher;
+
 namespace Client
 {
 class World;
@@ -21,12 +23,12 @@ class SpriteData;
 class UserInterface : public OSEventHandler
 {
 public:
-    UserInterface(World& inWorld, SpriteData& spriteData);
+    UserInterface(EventDispatcher& inUiEventDispatcher, const World& inWorld, SpriteData& spriteData);
 
     /**
      * Handles user input events.
      */
-    bool handleEvent(SDL_Event& event) override;
+    bool handleOSEvent(SDL_Event& event) override;
 
     /** Sprite for the mouse-following tile highlight. */
     const Sprite* tileHighlightSprite;
@@ -45,8 +47,11 @@ private:
      */
     void cycleTile(int mouseX, int mouseY);
 
+    /** Used to send UI events to the subscribed Simulation systems. */
+    EventDispatcher& uiEventDispatcher;
+
     /** Used to get the world state to populate the UI. */
-    World& world;
+    const World& world;
 
     /** Holds the sprites that we cycle through on mouse click. */
     std::vector<const Sprite*> terrainSprites;

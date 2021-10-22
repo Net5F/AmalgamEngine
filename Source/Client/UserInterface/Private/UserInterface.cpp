@@ -1,19 +1,23 @@
 #include "UserInterface.h"
+#include "QueuedEvents.h"
 #include "World.h"
 #include "SpriteData.h"
 #include "Camera.h"
 #include "Paths.h"
 #include "SharedConfig.h"
 #include "Transforms.h"
+#include "TileUpdateRequest.h"
 #include "Log.h"
 
 namespace AM
 {
 namespace Client
 {
-UserInterface::UserInterface(World& inWorld, SpriteData& spriteData)
+UserInterface::UserInterface(EventDispatcher& inUiEventDispatcher, const World& inWorld
+                             , SpriteData& spriteData)
 : tileHighlightSprite{}
 , tileHighlightIndex{0, 0}
+, uiEventDispatcher{inUiEventDispatcher}
 , world{inWorld}
 {
     // Set up the tile highlight sprite.
@@ -25,7 +29,7 @@ UserInterface::UserInterface(World& inWorld, SpriteData& spriteData)
     terrainSprites.push_back(&(spriteData.get("test_24")));
 }
 
-bool UserInterface::handleEvent(SDL_Event& event)
+bool UserInterface::handleOSEvent(SDL_Event& event)
 {
     switch (event.type) {
         // TODO: If the player moves through key presses but doesn't move the
@@ -47,7 +51,7 @@ bool UserInterface::handleEvent(SDL_Event& event)
 void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
 {
     // Get the tile index that the mouse is hovering over.
-    Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
+    const Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
     ScreenPoint screenPoint{static_cast<float>(event.x),
                             static_cast<float>(event.y)};
     TileIndex tileIndex = Transforms::screenToTile(screenPoint, playerCamera);
@@ -75,7 +79,7 @@ void UserInterface::handleMouseButtonDown(SDL_MouseButtonEvent& event)
 void UserInterface::cycleTile(int mouseX, int mouseY)
 {
     // Find the tile index under the mouse's current position.
-    Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
+    const Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
     ScreenPoint screenPoint{static_cast<float>(mouseX),
                             static_cast<float>(mouseY)};
     TileIndex tileIndex = Transforms::screenToTile(screenPoint, playerCamera);
@@ -104,8 +108,8 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     // Set the tile to the next sprite.
     terrainSpriteIndex++;
     terrainSpriteIndex %= 3;
-    world.tileMap.setSpriteLayer(tileIndex.x, tileIndex.y, 0,
-                                     *(terrainSprites[terrainSpriteIndex]));
+    uiEventDispatcher.emplace<TileUpdateRequest>(tileIndex.x, tileIndex.y, 0,
+        terrainSprites[terrainSpriteIndex]->numericID);
 }
 
 } // End namespace Client

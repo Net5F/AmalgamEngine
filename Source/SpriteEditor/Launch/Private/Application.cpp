@@ -98,7 +98,7 @@ void Application::start()
     }
 }
 
-bool Application::handleEvent(SDL_Event& event)
+bool Application::handleOSEvent(SDL_Event& event)
 {
     switch (event.type) {
         case SDL_QUIT:
@@ -117,7 +117,7 @@ void Application::dispatchEvents()
         // Pass the event to each handler in order, stopping if it returns as
         // handled.
         for (OSEventHandler* handler : eventHandlers) {
-            if (handler->handleEvent(event)) {
+            if (handler->handleOSEvent(event)) {
                 break;
             }
         }

@@ -23,6 +23,7 @@ class ChunkUpdateSystem
 {
 public:
     ChunkUpdateSystem(Simulation& inSim, World& inWorld
+                      , EventDispatcher& inNetworkEventDispatcher
                       , Network& inNetwork, SpriteData& inSpriteData);
 
     /**

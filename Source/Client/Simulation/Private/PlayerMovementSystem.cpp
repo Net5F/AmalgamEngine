@@ -18,10 +18,10 @@ namespace AM
 namespace Client
 {
 PlayerMovementSystem::PlayerMovementSystem(Simulation& inSim, World& inWorld,
-                                           Network& inNetwork)
+                                           EventDispatcher& inNetworkEventDispatcher)
 : sim(inSim)
 , world(inWorld)
-, playerUpdateQueue(inNetwork.getDispatcher())
+, playerUpdateQueue(inNetworkEventDispatcher)
 {
 }
 

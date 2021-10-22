@@ -10,6 +10,8 @@ target_sources(Shared
         Public/Heartbeat.h
         Public/InputChangeRequest.h
         Public/MessageType.h
+        Public/TileUpdate.h
+        Public/TileUpdateRequest.h
 )
 
 target_include_directories(Shared

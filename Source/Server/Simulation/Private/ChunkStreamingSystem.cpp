@@ -17,10 +17,10 @@ namespace AM
 {
 namespace Server
 {
-ChunkStreamingSystem::ChunkStreamingSystem(World& inWorld, Network& inNetwork)
+ChunkStreamingSystem::ChunkStreamingSystem(World& inWorld, EventDispatcher& inNetworkEventDispatcher, Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
-, chunkUpdateRequestQueue(inNetwork.getDispatcher())
+, chunkUpdateRequestQueue(inNetworkEventDispatcher)
 {
 }
 

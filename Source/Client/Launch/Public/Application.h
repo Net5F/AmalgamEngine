@@ -17,6 +17,8 @@
 
 namespace AM
 {
+class EventDispatcher;
+
 namespace Client
 {
 /**
@@ -39,13 +41,14 @@ public:
     /**
      * Handles application-relevant events, such as exit requests.
      */
-    bool handleEvent(SDL_Event& event) override;
+    bool handleOSEvent(SDL_Event& event) override;
 
 private:
     /**
      * Dispatches waiting events to the eventHandlers.
      * Events are propagated through the vector in order, starting at index 0.
-     * If an event is handled (handleEvent() returns true), propagation stops.
+     * If an event is handled (handleOSEvent() returns true), propagation
+     * stops.
      */
     void dispatchEvents();
 
@@ -75,6 +78,9 @@ private:
         for tweaking. */
     static constexpr double SLEEP_MINIMUM_TIME_S = .003;
 
+    //-------------------------------------------------------------------------
+    // SDL Objects
+    //-------------------------------------------------------------------------
     SDL2pp::SDL sdl;
     SDL2pp::Window sdlWindow;
     /** The SDL renderer that we use to render the UI and world.
@@ -83,9 +89,19 @@ private:
         can use SDL_Texture, which is better for the AssetCache.) */
     SDL2pp::Renderer sdlRenderer;
 
+    //-------------------------------------------------------------------------
+    // Modules, Dependencies, PeriodicCallers
+    //-------------------------------------------------------------------------
     AssetCache assetCache;
 
     SpriteData spriteData;
+
+    /** This is owned by the Application to remove a circular dependency
+        between the Simulation and the UI. */
+    EventDispatcher uiEventDispatcher;
+    /** This is owned by the Application to follow the pattern of the UI event
+        dispatcher. */
+    EventDispatcher networkEventDispatcher;
 
     Network network;
     /** Calls network.tick() at the network tick rate. */
@@ -101,7 +117,10 @@ private:
     /** Calls renderer.render() at our frame rate. */
     PeriodicCaller rendererCaller;
 
-    /** An ordered vector of event handlers. */
+    //-------------------------------------------------------------------------
+    // Additional, used during the loop
+    //-------------------------------------------------------------------------
+    /** An ordered vector of OS-event-handling objects. */
     std::vector<OSEventHandler*> eventHandlers;
 
     /** True if there has been a request to exit the program, else false. */

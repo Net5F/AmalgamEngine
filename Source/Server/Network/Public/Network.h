@@ -28,7 +28,7 @@ class Network
 public:
     static constexpr unsigned int SERVER_PORT = 41499;
 
-    Network();
+    Network(EventDispatcher& inNetworkEventDispatcher);
 
     /**
      * Sends all queued messages over the network.
@@ -59,14 +59,6 @@ public:
     // bound).
     ClientMap& getClientMap();
     std::shared_mutex& getClientMapMutex();
-
-    /**
-     * Returns the event dispatcher.
-     *
-     * Used by the simulation's systems to subscribe their event queues,
-     * and the ClientHandler to push connection events.
-     */
-    EventDispatcher& getDispatcher();
 
     /** Used for passing us a pointer to the Game's currentTick. */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
@@ -103,10 +95,6 @@ private:
 
     /** Used to lock access to the clientMap. */
     std::shared_mutex clientMapMutex;
-
-    /** Used to send received messages and network events to the subscribed
-        systems. */
-    EventDispatcher dispatcher;
 
     /** Deserializes messages, does any network-layer message handling, and
         passes messages down to the simulation. */

@@ -15,11 +15,11 @@ namespace AM
 namespace Server
 {
 InputUpdateSystem::InputUpdateSystem(Simulation& inSim, World& inWorld,
-                                       Network& inNetwork)
+                                      EventDispatcher& inNetworkEventDispatcher,  Network& inNetwork)
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)
-, inputChangeRequestQueue(inNetwork.getDispatcher())
+, inputChangeRequestQueue(inNetworkEventDispatcher)
 {
 }
 

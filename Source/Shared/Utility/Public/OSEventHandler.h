@@ -26,7 +26,7 @@ public:
      * @return true if the event has been handled and should stop propagating,
      *         else false.
      */
-    virtual bool handleEvent(SDL_Event& event) = 0;
+    virtual bool handleOSEvent(SDL_Event& event) = 0;
 };
 
 } // End namespace AM

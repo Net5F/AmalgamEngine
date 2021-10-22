@@ -38,13 +38,13 @@ public:
     /**
      * Handles application-relevant events, such as exit requests.
      */
-    bool handleEvent(SDL_Event& event) override;
+    bool handleOSEvent(SDL_Event& event) override;
 
 private:
     /**
      * Dispatches waiting events to the eventHandlers.
      * Events are propagated through the vector in order, starting at index 0.
-     * If an event is handled (handleEvent() returns true), propagation stops.
+     * If an event is handled (handleOSEvent() returns true), propagation stops.
      */
     void dispatchEvents();
 

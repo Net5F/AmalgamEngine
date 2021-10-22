@@ -23,7 +23,7 @@ namespace Client
 class MessageProcessor
 {
 public:
-    MessageProcessor(EventDispatcher& inDispatcher);
+    MessageProcessor(EventDispatcher& inNetworkEventDispatcher);
 
     /**
      * Deserializes and handles received messages.
@@ -81,9 +81,9 @@ private:
     void handleEntityUpdate(Uint8* messageBuffer, unsigned int messageSize);
     //-------------------------------------------------------------------------
 
-    /** The network's event dispatcher. Used to send events to the subscribed
-        queues. */
-    EventDispatcher& dispatcher;
+    /** The dispatcher for network events. Used to send events to the
+        subscribed queues. */
+    EventDispatcher& networkEventDispatcher;
 
     /** Local copy of the playerEntity so we can tell if we got a player
         message. */

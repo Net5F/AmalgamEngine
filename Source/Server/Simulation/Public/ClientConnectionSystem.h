@@ -21,7 +21,7 @@ class ClientConnectionSystem
 {
 public:
     ClientConnectionSystem(Simulation& inSim, World& inWorld,
-                            Network& inNetwork);
+                           EventDispatcher& inNetworkEventDispatcher, Network& inNetwork);
 
     /** Processes the effects of new connections and disconnects on the sim. */
     void processConnectionEvents();

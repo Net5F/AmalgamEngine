@@ -1,5 +1,6 @@
 #pragma once
 
+#include "QueuedEvents.h"
 #include "Network.h"
 #include "WorldSim.h"
 #include "PeriodicCaller.h"
@@ -33,6 +34,8 @@ public:
     void setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled);
 
 private:
+    EventDispatcher networkEventDispatcher;
+
     Client::Network network;
     PeriodicCaller networkCaller;
 

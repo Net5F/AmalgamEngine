@@ -36,9 +36,9 @@ void UserInterface::openMainScreen()
     currentScreen = &mainScreen;
 }
 
-bool UserInterface::handleEvent(SDL_Event& event)
+bool UserInterface::handleOSEvent(SDL_Event& event)
 {
-    return currentScreen->handleEvent(event);
+    return currentScreen->handleOSEvent(event);
 }
 
 void UserInterface::tick(double timestepS)

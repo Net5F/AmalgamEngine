@@ -19,12 +19,14 @@ enum class MessageType : Uint8 {
     ConnectionRequest = 2,
     InputChangeRequest = 3,
     ChunkUpdateRequest = 4,
+    TileUpdateRequest = 5,
 
     // Server -> Client Messages
     ExplicitConfirmation = 30,
     ConnectionResponse = 31,
     EntityUpdate = 32,
     ChunkUpdate = 33,
+    TileUpdate = 34,
 };
 
 } // End namespace AM

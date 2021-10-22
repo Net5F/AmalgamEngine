@@ -44,7 +44,7 @@ public:
     /**
      * Handles window events.
      */
-    bool handleEvent(SDL_Event& event) override;
+    bool handleOSEvent(SDL_Event& event) override;
 
 private:
     /**

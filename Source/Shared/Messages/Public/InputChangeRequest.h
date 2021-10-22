@@ -29,7 +29,8 @@ struct InputChangeRequest {
     // Non-replicated data
     //--------------------------------------------------------------------------
     /**
-     * The client's network ID, assigned by the server.
+     * The network ID of the client that sent this message.
+     * Set by the server.
      * No IDs are accepted from the client because we can't trust it,
      * so we fill in the ID based on which socket the message came from.
      */

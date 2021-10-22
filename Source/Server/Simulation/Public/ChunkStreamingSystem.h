@@ -28,7 +28,7 @@ class Network;
 class ChunkStreamingSystem
 {
 public:
-    ChunkStreamingSystem(World& inWorld, Network& inNetwork);
+    ChunkStreamingSystem(World& inWorld, EventDispatcher& inNetworkEventDispatcher, Network& inNetwork);
 
     /**
      * Processes chunk update requests, sending chunk data if the request is

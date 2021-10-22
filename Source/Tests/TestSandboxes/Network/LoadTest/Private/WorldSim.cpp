@@ -12,11 +12,11 @@ namespace AM
 {
 namespace LTC
 {
-WorldSim::WorldSim(Client::Network& inNetwork)
+WorldSim::WorldSim(EventDispatcher& inNetworkEventDispatcher, Client::Network& inNetwork)
 : network(inNetwork)
-, connectionResponseQueue(inNetwork.getDispatcher())
-, playerUpdateQueue(inNetwork.getDispatcher())
-, npcUpdateQueue(inNetwork.getDispatcher())
+, connectionResponseQueue(inNetworkEventDispatcher)
+, playerUpdateQueue(inNetworkEventDispatcher)
+, npcUpdateQueue(inNetworkEventDispatcher)
 , clientEntity(entt::null)
 , currentTick(0)
 , ticksTillInput(0)
