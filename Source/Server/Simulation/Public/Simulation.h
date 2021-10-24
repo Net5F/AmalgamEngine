@@ -2,10 +2,12 @@
 
 #include "World.h"
 #include "ClientConnectionSystem.h"
-#include "ClientUpdateSystem.h"
+#include "TileUpdateSystem.h"
 #include "InputUpdateSystem.h"
 #include "MovementSystem.h"
+#include "ClientUpdateSystem.h"
 #include "ChunkStreamingSystem.h"
+#include <SDL2/SDL_stdinc.h>
 #include <atomic>
 
 namespace AM
@@ -42,6 +44,7 @@ private:
     World world;
 
     ClientConnectionSystem clientConnectionSystem;
+    TileUpdateSystem tileUpdateSystem;
     InputUpdateSystem inputUpdateSystem;
     MovementSystem movementSystem;
     ClientUpdateSystem clientUpdateSystem;

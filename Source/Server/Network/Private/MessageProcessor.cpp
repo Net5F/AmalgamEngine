@@ -5,6 +5,7 @@
 #include "Heartbeat.h"
 #include "InputChangeRequest.h"
 #include "ChunkUpdateRequest.h"
+#include "TileUpdateRequest.h"
 #include "Log.h"
 
 namespace AM
@@ -38,6 +39,10 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID, MessageType mes
         }
         case MessageType::ChunkUpdateRequest: {
             handleChunkUpdateRequest(netID, messageBuffer, messageSize);
+            break;
+        }
+        case MessageType::TileUpdateRequest: {
+            pushEvent<TileUpdateRequest>(messageBuffer, messageSize);
             break;
         }
         default: {

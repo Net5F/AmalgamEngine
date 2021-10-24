@@ -4,7 +4,6 @@
 #include "QueuedEvents.h"
 #include "InputChangeRequest.h"
 #include "EventSorter.h"
-#include "entt/entity/registry.hpp"
 
 namespace AM
 {
@@ -24,7 +23,7 @@ public:
     InputUpdateSystem(Simulation& inSim, World& inWorld, EventDispatcher& inNetworkEventDispatcher, Network& inNetwork);
 
     /**
-     * Processes incoming EntityUpdate messages.
+     * Processes incoming InputChangeRequest messages.
      */
     void processInputMessages();
 

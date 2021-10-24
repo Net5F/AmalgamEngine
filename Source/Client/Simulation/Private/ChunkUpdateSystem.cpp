@@ -3,7 +3,6 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
-#include "SpriteData.h"
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "NeedsAdjacentChunks.h"
@@ -20,11 +19,10 @@ namespace AM
 namespace Client
 {
 ChunkUpdateSystem::ChunkUpdateSystem(Simulation& inSim, World& inWorld,
-                                           EventDispatcher& inNetworkEventDispatcher, Network& inNetwork, SpriteData& inSpriteData)
+                                           EventDispatcher& inNetworkEventDispatcher, Network& inNetwork)
 : sim{inSim}
 , world{inWorld}
 , network{inNetwork}
-, spriteData{inSpriteData}
 , chunkUpdateQueue{inNetworkEventDispatcher}
 {
 }
@@ -156,11 +154,9 @@ void ChunkUpdateSystem::applyChunkSnapshot(const ChunkWireSnapshot& chunk)
             const TileSnapshot& tileSnapshot = chunk.tiles[tileIndex];
             unsigned int layerIndex{0};
             for (Uint8 paletteID : tileSnapshot.spriteLayers) {
-                // Get the sprite that this palette ID is referring to.
-                const Sprite& sprite{spriteData.get(chunk.palette[paletteID])};
-
                 // Add the sprite layer to the tile.
-                world.tileMap.setSpriteLayer(currentTileX, currentTileY, layerIndex++, sprite);
+                world.tileMap.setSpriteLayer(currentTileX, currentTileY
+                    , layerIndex++, chunk.palette[paletteID]);
             }
 
             // Increment to the next linear index.

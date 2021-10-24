@@ -6,6 +6,7 @@
 #include "ConnectionResponse.h"
 #include "EntityUpdate.h"
 #include "ChunkUpdate.h"
+#include "TileUpdate.h"
 #include "Log.h"
 
 namespace AM
@@ -38,6 +39,10 @@ void MessageProcessor::processReceivedMessage(MessageType messageType,
         }
         case MessageType::ChunkUpdate: {
             pushEventSharedPtr<ChunkUpdate>(messageBuffer, messageSize);
+            break;
+        }
+        case MessageType::TileUpdate: {
+            pushEvent<TileUpdate>(messageBuffer, messageSize);
             break;
         }
         default: {

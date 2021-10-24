@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 namespace AM
 {
 namespace Server

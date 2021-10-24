@@ -93,6 +93,18 @@ void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
     tile.spriteLayers[layerIndex] = {&sprite, worldBounds};
 }
 
+void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
+                             unsigned int layerIndex, const std::string& stringID)
+{
+    setSpriteLayer(tileX, tileY, layerIndex, spriteData.get(stringID));
+}
+
+void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
+                             unsigned int layerIndex, int numericID)
+{
+    setSpriteLayer(tileX, tileY, layerIndex, spriteData.get(numericID));
+}
+
 void TileMap::clearTile(unsigned int tileX, unsigned int tileY)
 {
     Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];

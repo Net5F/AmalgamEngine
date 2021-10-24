@@ -66,9 +66,9 @@ void ClientUpdateSystem::sendClientUpdates()
             }
         }
 
-        // If this entity had a drop, add it.
+        // If this entity had an input drop, add it.
         // (It mispredicted, so it needs to know the actual state it's in.)
-        if (client.messageWasDropped) {
+        if (client.inputWasDropped) {
             // Only add the player entity if it isn't already included.
             bool playerFound = false;
             for (EntityState& entityState : entityUpdate.entityStates) {
@@ -81,7 +81,7 @@ void ClientUpdateSystem::sendClientUpdates()
                     = movementGroup.get<Input, Position, Movement>(entity);
                 entityUpdate.entityStates.push_back(
                     {entity, input, position, movement});
-                client.messageWasDropped = false;
+                client.inputWasDropped = false;
             }
         }
 

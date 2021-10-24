@@ -31,8 +31,8 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher
 , spriteData{inSpriteData}
 , world(inSpriteData)
 , connectionResponseQueue(inNetworkEventDispatcher)
-, chunkUpdateSystem(*this, world, inNetworkEventDispatcher, network, inSpriteData)
-, tileUpdateSystem(*this, world, inUiEventDispatcher, inNetworkEventDispatcher, network, inSpriteData)
+, chunkUpdateSystem(*this, world, inNetworkEventDispatcher, network)
+, tileUpdateSystem(world, inUiEventDispatcher, inNetworkEventDispatcher, network)
 , playerInputSystem(*this, world)
 , serverUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, inNetworkEventDispatcher)
@@ -170,8 +170,11 @@ void Simulation::tick()
        ticks. */
     while (currentTick < targetTick) {
         /* Run all systems. */
-        // Process received chunk updates.
+        // Process chunk updates from the server.
         chunkUpdateSystem.updateChunks();
+
+        // Process tile updates from the UI and server.
+        tileUpdateSystem.updateTiles();
 
         // Process the held user input state.
         // Note: Mouse and momentary inputs are processed prior to this tick.

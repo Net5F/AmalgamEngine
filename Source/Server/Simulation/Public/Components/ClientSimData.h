@@ -21,9 +21,9 @@ public:
     /** The network ID associated with this client. */
     NetworkID netID{0};
 
-    /** Tracks if a message from this client was received late and had to be
+    /** Tracks if an input from this client was received late and had to be
         dropped. */
-    bool messageWasDropped{false};
+    bool inputWasDropped{false};
 
     /** Area of interest bounds. Used to determine if entities are close enough
         to the client entity to be replicated.

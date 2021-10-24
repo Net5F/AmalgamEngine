@@ -6,6 +6,7 @@ target_sources(Server
 		Private/InputUpdateSystem.cpp
 		Private/MovementSystem.cpp
 		Private/Simulation.cpp
+		Private/TileUpdateSystem.cpp
 		Private/World.cpp
 		Private/TileMap/TileMap.cpp
 	PUBLIC
@@ -16,6 +17,7 @@ target_sources(Server
 		Public/InputUpdateSystem.h
 		Public/MovementSystem.h
 		Public/Simulation.h
+		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/Components/ClientSimData.h
 		Public/Components/Sprite.h

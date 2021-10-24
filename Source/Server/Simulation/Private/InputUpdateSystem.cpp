@@ -111,7 +111,7 @@ void InputUpdateSystem::handleDroppedMessage(NetworkID clientID)
     }
 
     // Flag that a drop occurred for this entity.
-    registry.get<ClientSimData>(clientEntityIt->second).messageWasDropped = true;
+    registry.get<ClientSimData>(clientEntityIt->second).inputWasDropped = true;
 }
 
 } // namespace Server

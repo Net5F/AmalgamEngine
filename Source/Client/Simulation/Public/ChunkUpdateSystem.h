@@ -24,7 +24,7 @@ class ChunkUpdateSystem
 public:
     ChunkUpdateSystem(Simulation& inSim, World& inWorld
                       , EventDispatcher& inNetworkEventDispatcher
-                      , Network& inNetwork, SpriteData& inSpriteData);
+                      , Network& inNetwork);
 
     /**
      * Requests any needed chunk data and applies received chunk updates.
@@ -72,8 +72,6 @@ private:
     World& world;
     /** Used to send chunk update request messages. */
     Network& network;
-    /** Used to access sprites while adding tiles to the map. */
-    SpriteData& spriteData;
 
     EventQueue<std::shared_ptr<const ChunkUpdate>> chunkUpdateQueue;
 };

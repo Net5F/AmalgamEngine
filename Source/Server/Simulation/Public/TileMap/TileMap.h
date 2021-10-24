@@ -45,6 +45,18 @@ public:
                         unsigned int layerIndex, const Sprite& sprite);
 
     /**
+     * Overload for sprite string IDs.
+     */
+    void setSpriteLayer(unsigned int tileX, unsigned int tileY,
+                        unsigned int layerIndex, const std::string& stringID);
+
+    /**
+     * Overload for sprite numeric IDs.
+     */
+    void setSpriteLayer(unsigned int tileX, unsigned int tileY,
+                        unsigned int layerIndex, int numericID);
+
+    /**
      * Gets a const reference to the tile at the given coordinates.
      */
     const Tile& getTile(unsigned int x, unsigned int y) const;

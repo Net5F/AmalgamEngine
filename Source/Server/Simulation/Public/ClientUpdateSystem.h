@@ -1,7 +1,6 @@
 #pragma once
 
 #include "entt/entity/registry.hpp"
-#include <vector>
 
 namespace AM
 {
@@ -18,8 +17,8 @@ class Network;
 class ClientSimData;
 
 /**
- * This system is in charge of checking for data that needs to be sent to
- * clients, wrapping it appropriately, and passing it to the Network's send
+ * This system is in charge of checking for entity state that needs to be sent
+ * to clients, wrapping it appropriately, and passing it to the Network's send
  * queue.
  */
 class ClientUpdateSystem
@@ -28,7 +27,7 @@ public:
     ClientUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
-     * Updates all connected clients with relevant world state.
+     * Updates all connected clients with relevant entity state.
      */
     void sendClientUpdates();
 

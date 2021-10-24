@@ -17,7 +17,7 @@ struct EntityUpdate {
     // Declares this struct as a message that the Network can send and receive.
     static constexpr MessageType MESSAGE_TYPE = MessageType::EntityUpdate;
 
-    /** The tick that this EntityUpdate corresponds to. */
+    /** The tick that this update corresponds to. */
     Uint32 tickNum{0};
 
     /** Data for all of the entities that updated on this tick. */
