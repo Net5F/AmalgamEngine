@@ -1,7 +1,8 @@
 #pragma once
 
-#include "BinaryBuffer.h"
+#include "SerializeBuffer.h"
 #include "Log.h"
+#include <SDL2/SDL_stdinc.h>
 #include "bitsery/bitsery.h"
 #include "bitsery/adapter/buffer.h"
 #include "bitsery/adapter/stream.h"
@@ -16,8 +17,7 @@ namespace AM
 class Serialize
 {
 public:
-    // TODO: Switch BinaryBuffer to Uint8*
-    using OutputAdapter = bitsery::OutputBufferAdapter<BinaryBuffer>;
+    using OutputAdapter = bitsery::OutputBufferAdapter<SerializeBuffer>;
 
     /**
      * Serializes the given object, writing the serialized bytes into the given
@@ -27,21 +27,24 @@ public:
      * type is passed in.
      *
      * @param outputBuffer  The buffer to store the serialized object data in.
+     * @param bufferSize  The size of the output buffer.
      * @param objectToSerialize  The object to serialize. Must be serializable.
      * @param startIndex  Optional, how far into the buffer to start writing the
      *                    serialized bytes.
      * @return The number of bytes written into outputBuffer.
      */
     template<typename T>
-    static std::size_t toBuffer(BinaryBuffer& outputBuffer,
+    static std::size_t toBuffer(Uint8* outputBuffer,
+                                std::size_t bufferSize,
                                 T& objectToSerialize,
                                 std::size_t startIndex = 0)
     {
-        // In debug, check that the buffer is large enough.
-        assert(outputBuffer.size() >= measureSize(objectToSerialize));
+        // Note: In Debug, Bitsery will assert if the serialized object size
+        //       is larger than bufferSize.
 
         // Create the adapter manually so we can change the write offset.
-        OutputAdapter adapter{outputBuffer};
+        SerializeBuffer buffer{outputBuffer, bufferSize};
+        OutputAdapter adapter{buffer};
         adapter.currentWritePos(startIndex);
 
         // Serialize and return.

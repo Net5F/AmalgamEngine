@@ -19,6 +19,7 @@ target_sources(Shared
         Public/PeriodicCaller.h
         Public/Profiler.h
         Public/Serialize.h
+        Public/SerializeBuffer.h
         Public/Timer.h
         Public/Transforms.h
 )

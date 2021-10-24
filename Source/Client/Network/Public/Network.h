@@ -182,7 +182,7 @@ void Network::serializeAndSend(const T& messageStruct)
     // Serialize the message struct into the buffer, leaving room for the
     // headers.
     std::size_t messageSize
-        = Serialize::toBuffer(*messageBuffer, messageStruct,
+        = Serialize::toBuffer(messageBuffer->data(), messageBuffer->size(), messageStruct,
                               (CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE));
 
     // Check that the message isn't too big.

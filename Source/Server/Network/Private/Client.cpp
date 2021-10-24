@@ -2,6 +2,8 @@
 #include "Peer.h"
 #include "Log.h"
 #include "ByteTools.h"
+#include "ExplicitConfirmation.h"
+#include "Serialize.h"
 #include "NetworkStats.h"
 #include <cmath>
 #include <array>
@@ -127,12 +129,17 @@ void Client::addExplicitConfirmation(unsigned int& currentIndex,
     ByteTools::write16(1, &(batchBuffer[currentIndex]));
     currentIndex += 2;
 
-    // Write the number of ticks we've processed since the last update.
+    // Calc the number of ticks we've processed since the last update.
     // (the tick count increments at the end of a sim tick, so our latest
     //  sent data is from currentTick - 1).
-    Uint8 confirmedTickCount = (currentTick - 1) - latestSentSimTick;
-    batchBuffer[currentIndex] = confirmedTickCount;
-    currentIndex++;
+    unsigned int confirmedTickCount{(currentTick - 1) - latestSentSimTick};
+    assert(confirmedTickCount <= UINT8_MAX);
+
+    // Write the explicit confirmation message.
+    ExplicitConfirmation explicitConfirmation{static_cast<Uint8>(confirmedTickCount)};
+    currentIndex += Serialize::toBuffer(batchBuffer.data()
+                        , (SharedConfig::MAX_BATCH_SIZE - currentIndex)
+                        , explicitConfirmation, currentIndex);
 
     // Increment the message count.
     messageCount++;
