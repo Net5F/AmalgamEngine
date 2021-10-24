@@ -22,10 +22,9 @@ class Network;
 class TileUpdateSystem
 {
 public:
-    TileUpdateSystem(World& inWorld
-                     , EventDispatcher& inUiEventDispatcher
-                     , EventDispatcher& inNetworkEventDispatcher
-                     , Network& inNetwork);
+    TileUpdateSystem(World& inWorld, EventDispatcher& inUiEventDispatcher,
+                     EventDispatcher& inNetworkEventDispatcher,
+                     Network& inNetwork);
 
     /**
      * Processes tile updates.

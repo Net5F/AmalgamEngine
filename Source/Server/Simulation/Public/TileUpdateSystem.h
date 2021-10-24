@@ -21,9 +21,8 @@ class Network;
 class TileUpdateSystem
 {
 public:
-    TileUpdateSystem(World& inWorld
-                     , EventDispatcher& inNetworkEventDispatcher
-                     , Network& inNetwork);
+    TileUpdateSystem(World& inWorld, EventDispatcher& inNetworkEventDispatcher,
+                     Network& inNetwork);
 
     /**
      * Processes tile updates, updating the map and sending the new map state

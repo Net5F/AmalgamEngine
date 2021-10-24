@@ -54,8 +54,9 @@ public:
      * @param destLength  The length of the destination buffer.
      * @return The length of the compressed data.
      */
-    static std::size_t compress(const Uint8* sourceBuffer, std::size_t sourceLength,
-                                  Uint8* destBuffer, std::size_t destLength);
+    static std::size_t compress(const Uint8* sourceBuffer,
+                                std::size_t sourceLength, Uint8* destBuffer,
+                                std::size_t destLength);
 
     /**
      * Uncompresses data.
@@ -67,8 +68,9 @@ public:
      * @param destLength  The length of the destination buffer.
      * @return The length of the uncompressed data.
      */
-    static std::size_t uncompress(const Uint8* sourceBuffer, std::size_t sourceLength,
-                                  Uint8* destBuffer, std::size_t destLength);
+    static std::size_t uncompress(const Uint8* sourceBuffer,
+                                  std::size_t sourceLength, Uint8* destBuffer,
+                                  std::size_t destLength);
 };
 
 } // End namespace AM

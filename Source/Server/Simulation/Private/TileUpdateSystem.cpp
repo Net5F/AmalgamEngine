@@ -9,10 +9,9 @@ namespace AM
 {
 namespace Server
 {
-
-TileUpdateSystem::TileUpdateSystem(World& inWorld
-                 , EventDispatcher& inNetworkEventDispatcher
-                 , Network& inNetwork)
+TileUpdateSystem::TileUpdateSystem(World& inWorld,
+                                   EventDispatcher& inNetworkEventDispatcher,
+                                   Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
 , tileUpdateRequestQueue(inNetworkEventDispatcher)
@@ -29,11 +28,13 @@ void TileUpdateSystem::updateTiles()
         //       range of the tile or anything. We can add that if it's
         //       useful, I just couldn't immediately think of a use case for it.
         world.tileMap.setSpriteLayer(updateRequest.tileX, updateRequest.tileY,
-            updateRequest.layerIndex, updateRequest.numericID);
+                                     updateRequest.layerIndex,
+                                     updateRequest.numericID);
 
         // Construct the new tile update.
         TileUpdate tileUpdate{updateRequest.tileX, updateRequest.tileY,
-            updateRequest.layerIndex, updateRequest.numericID};
+                              updateRequest.layerIndex,
+                              updateRequest.numericID};
 
         // Broadcast the tile update to all clients.
         auto clientView = world.registry.view<ClientSimData>();

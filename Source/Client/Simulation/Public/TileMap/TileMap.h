@@ -32,7 +32,8 @@ public:
     /**
      * Sets the size of the map and resizes the tiles vector.
      */
-    void setMapSize(unsigned int inMapXLengthChunks, unsigned int inMapYLengthChunks);
+    void setMapSize(unsigned int inMapXLengthChunks,
+                    unsigned int inMapYLengthChunks);
 
     /**
      * Sets the specified sprite layer to the given sprite.

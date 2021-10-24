@@ -18,10 +18,9 @@ namespace AM
 {
 namespace Server
 {
-ClientConnectionSystem::ClientConnectionSystem(Simulation& inSim,
-                                                 World& inWorld,
-                                                 EventDispatcher& inNetworkEventDispatcher,
-                                                 Network& inNetwork)
+ClientConnectionSystem::ClientConnectionSystem(
+    Simulation& inSim, World& inWorld,
+    EventDispatcher& inNetworkEventDispatcher, Network& inNetwork)
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)
@@ -53,7 +52,8 @@ void ClientConnectionSystem::processConnectEvents()
         const Position spawnPoint = world.getGroupedSpawnPoint();
 
         entt::entity newEntity = registry.create();
-        registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(newEntity)));
+        registry.emplace<Name>(newEntity,
+                               std::to_string(static_cast<Uint32>(newEntity)));
         registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0.0f);
         registry.emplace<PreviousPosition>(newEntity, spawnPoint.x,
                                            spawnPoint.y, 0.0f);
@@ -71,8 +71,8 @@ void ClientConnectionSystem::processConnectEvents()
                  clientConnected.clientID, newEntity);
 
         // Build and send the response.
-        sendConnectionResponse(clientConnected.clientID, newEntity, spawnPoint.x,
-                               spawnPoint.y);
+        sendConnectionResponse(clientConnected.clientID, newEntity,
+                               spawnPoint.x, spawnPoint.y);
     }
 }
 
@@ -102,8 +102,8 @@ void ClientConnectionSystem::processDisconnectEvents()
 }
 
 void ClientConnectionSystem::sendConnectionResponse(NetworkID networkID,
-                                                     entt::entity newEntity,
-                                                     float spawnX, float spawnY)
+                                                    entt::entity newEntity,
+                                                    float spawnX, float spawnY)
 {
     // Fill in the current tick and their entity's ID.
     ConnectionResponse connectionResponse{};

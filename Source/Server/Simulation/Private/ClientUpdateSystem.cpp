@@ -19,7 +19,7 @@ namespace AM
 namespace Server
 {
 ClientUpdateSystem::ClientUpdateSystem(Simulation& inSim, World& inWorld,
-                                         Network& inNetwork)
+                                       Network& inNetwork)
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)
@@ -94,7 +94,7 @@ void ClientUpdateSystem::sendClientUpdates()
 }
 
 void ClientUpdateSystem::sendUpdate(ClientSimData& client,
-                                     EntityUpdate& entityUpdate)
+                                    EntityUpdate& entityUpdate)
 {
     /* If there are updates to send, send an update message. */
     if (entityUpdate.entityStates.size() > 0) {

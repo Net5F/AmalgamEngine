@@ -24,15 +24,16 @@ namespace AM
 {
 namespace Client
 {
-Simulation::Simulation(EventDispatcher& inUiEventDispatcher
-               , EventDispatcher& inNetworkEventDispatcher
-               , Network& inNetwork, SpriteData& inSpriteData)
+Simulation::Simulation(EventDispatcher& inUiEventDispatcher,
+                       EventDispatcher& inNetworkEventDispatcher,
+                       Network& inNetwork, SpriteData& inSpriteData)
 : network{inNetwork}
 , spriteData{inSpriteData}
 , world(inSpriteData)
 , connectionResponseQueue(inNetworkEventDispatcher)
 , chunkUpdateSystem(*this, world, inNetworkEventDispatcher, network)
-, tileUpdateSystem(world, inUiEventDispatcher, inNetworkEventDispatcher, network)
+, tileUpdateSystem(world, inUiEventDispatcher, inNetworkEventDispatcher,
+                   network)
 , playerInputSystem(*this, world)
 , serverUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, inNetworkEventDispatcher)
@@ -72,10 +73,11 @@ void Simulation::connect()
         connectionResponse.y);
 
     // Resize the world's tile map.
-    world.tileMap.setMapSize(connectionResponse.mapXLengthChunks
-        , connectionResponse.mapYLengthChunks);
-    LOG_INFO("Setting map size to: (%u, %u).", connectionResponse.mapXLengthChunks
-        , connectionResponse.mapYLengthChunks);
+    world.tileMap.setMapSize(connectionResponse.mapXLengthChunks,
+                             connectionResponse.mapYLengthChunks);
+    LOG_INFO("Setting map size to: (%u, %u).",
+             connectionResponse.mapXLengthChunks,
+             connectionResponse.mapYLengthChunks);
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.
@@ -94,7 +96,8 @@ void Simulation::connect()
     world.playerEntity = newEntity;
 
     // Set up the player's sim components.
-    registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(newEntity)));
+    registry.emplace<Name>(newEntity,
+                           std::to_string(static_cast<Uint32>(newEntity)));
     registry.emplace<Position>(newEntity, connectionResponse.x,
                                connectionResponse.y, 0.0f);
     registry.emplace<PreviousPosition>(newEntity, connectionResponse.x,
@@ -128,7 +131,8 @@ void Simulation::fakeConnection()
     world.playerEntity = newEntity;
 
     // Set up the player's sim components.
-    registry.emplace<Name>(newEntity, std::to_string(static_cast<Uint32>(newEntity)));
+    registry.emplace<Name>(newEntity,
+                           std::to_string(static_cast<Uint32>(newEntity)));
     registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<PreviousPosition>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);

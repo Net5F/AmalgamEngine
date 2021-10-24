@@ -40,8 +40,8 @@ public:
      *         returns that tick number. If not, returns -1.
      */
     Sint64 processReceivedMessage(NetworkID netID, MessageType messageType,
-                                Uint8* messageBuffer,
-                                unsigned int messageSize);
+                                  Uint8* messageBuffer,
+                                  unsigned int messageSize);
 
 private:
     /**
@@ -67,8 +67,7 @@ private:
      * EventQueue<std::shared_ptr<const T>>.
      */
     template<typename T>
-    void pushEventSharedPtr(Uint8* messageBuffer,
-                            unsigned int messageSize);
+    void pushEventSharedPtr(Uint8* messageBuffer, unsigned int messageSize);
 
     //-------------------------------------------------------------------------
     // Handlers for messages relevant to the network layer.
@@ -83,10 +82,12 @@ private:
      * Pushes InputChangeRequest event.
      * @return The tick number that the message contained.
      */
-    Uint32 handleInputChangeRequest(NetworkID netID, Uint8* messageBuffer, unsigned int messageSize);
+    Uint32 handleInputChangeRequest(NetworkID netID, Uint8* messageBuffer,
+                                    unsigned int messageSize);
 
     /** Pushes ChunkUpdateRequest event. */
-    void handleChunkUpdateRequest(NetworkID netID, Uint8* messageBuffer, unsigned int messageSize);
+    void handleChunkUpdateRequest(NetworkID netID, Uint8* messageBuffer,
+                                  unsigned int messageSize);
     //-------------------------------------------------------------------------
 
     /** The network's event dispatcher. Used to send events to the subscribed

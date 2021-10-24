@@ -229,7 +229,8 @@ void NpcMovementSystem::applyUpdateMessage(
             }
 
             // Set the name.
-            registry.emplace<Name>(entity, std::to_string(static_cast<Uint32>(entity)));
+            registry.emplace<Name>(entity,
+                                   std::to_string(static_cast<Uint32>(entity)));
 
             // TODO: Get the sprite info from the server.
             // Note: Currently using an arbitrarily chosen non-player sprite.

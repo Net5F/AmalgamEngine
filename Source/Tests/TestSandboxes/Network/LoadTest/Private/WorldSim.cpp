@@ -12,7 +12,8 @@ namespace AM
 {
 namespace LTC
 {
-WorldSim::WorldSim(EventDispatcher& inNetworkEventDispatcher, Client::Network& inNetwork)
+WorldSim::WorldSim(EventDispatcher& inNetworkEventDispatcher,
+                   Client::Network& inNetwork)
 : network(inNetwork)
 , connectionResponseQueue(inNetworkEventDispatcher)
 , playerUpdateQueue(inNetworkEventDispatcher)

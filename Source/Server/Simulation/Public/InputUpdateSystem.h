@@ -20,7 +20,9 @@ class Network;
 class InputUpdateSystem
 {
 public:
-    InputUpdateSystem(Simulation& inSim, World& inWorld, EventDispatcher& inNetworkEventDispatcher, Network& inNetwork);
+    InputUpdateSystem(Simulation& inSim, World& inWorld,
+                      EventDispatcher& inNetworkEventDispatcher,
+                      Network& inNetwork);
 
     /**
      * Processes incoming InputChangeRequest messages.

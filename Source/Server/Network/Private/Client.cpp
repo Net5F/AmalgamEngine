@@ -78,8 +78,8 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     // If the batch + header is too large, error.
     if (currentIndex > SharedConfig::MAX_BATCH_SIZE) {
         LOG_ERROR("Batch too large to fit into buffers. Increase "
-            "MAX_BATCH_SIZE. Size: %u, Max: %u", currentIndex,
-            SharedConfig::MAX_BATCH_SIZE);
+                  "MAX_BATCH_SIZE. Size: %u, Max: %u",
+                  currentIndex, SharedConfig::MAX_BATCH_SIZE);
     }
 
     // If we have a large enough payload, compress it.
@@ -88,8 +88,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     bool isCompressed{false};
     if (batchSize > SharedConfig::BATCH_COMPRESSION_THRESHOLD) {
         batchSize = ByteTools::compress(
-            &(batchBuffer[ServerHeaderIndex::MessageHeaderStart]),
-            batchSize,
+            &(batchBuffer[ServerHeaderIndex::MessageHeaderStart]), batchSize,
             &(compressedBatchBuffer[ServerHeaderIndex::MessageHeaderStart]),
             COMPRESSED_BUFFER_SIZE);
         if (batchSize > Peer::MAX_WIRE_SIZE) {
@@ -136,10 +135,11 @@ void Client::addExplicitConfirmation(unsigned int& currentIndex,
     assert(confirmedTickCount <= UINT8_MAX);
 
     // Write the explicit confirmation message.
-    ExplicitConfirmation explicitConfirmation{static_cast<Uint8>(confirmedTickCount)};
-    currentIndex += Serialize::toBuffer(batchBuffer.data()
-                        , (SharedConfig::MAX_BATCH_SIZE - currentIndex)
-                        , explicitConfirmation, currentIndex);
+    ExplicitConfirmation explicitConfirmation{
+        static_cast<Uint8>(confirmedTickCount)};
+    currentIndex += Serialize::toBuffer(
+        batchBuffer.data(), (SharedConfig::MAX_BATCH_SIZE - currentIndex),
+        explicitConfirmation, currentIndex);
 
     // Increment the message count.
     messageCount++;
@@ -148,7 +148,8 @@ void Client::addExplicitConfirmation(unsigned int& currentIndex,
     latestSentSimTick += confirmedTickCount;
 }
 
-void Client::fillHeader(Uint8* bufferToFill, Uint16 batchSize, bool isCompressed)
+void Client::fillHeader(Uint8* bufferToFill, Uint16 batchSize,
+                        bool isCompressed)
 {
     // Fill in the header adjustment info.
     AdjustmentData tickAdjustment = getTickAdjustment();
@@ -163,8 +164,8 @@ void Client::fillHeader(Uint8* bufferToFill, Uint16 batchSize, bool isCompressed
     }
 
     // Fill in the compressed batch size.
-    ByteTools::write16(batchSize
-              , &(bufferToFill[ServerHeaderIndex::BatchSize]));
+    ByteTools::write16(batchSize,
+                       &(bufferToFill[ServerHeaderIndex::BatchSize]));
 }
 
 Uint8 Client::getWaitingMessageCount() const

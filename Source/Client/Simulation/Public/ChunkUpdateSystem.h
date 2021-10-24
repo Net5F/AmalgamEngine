@@ -22,9 +22,9 @@ class TileMap;
 class ChunkUpdateSystem
 {
 public:
-    ChunkUpdateSystem(Simulation& inSim, World& inWorld
-                      , EventDispatcher& inNetworkEventDispatcher
-                      , Network& inNetwork);
+    ChunkUpdateSystem(Simulation& inSim, World& inWorld,
+                      EventDispatcher& inNetworkEventDispatcher,
+                      Network& inNetwork);
 
     /**
      * Requests any needed chunk data and applies received chunk updates.
@@ -53,7 +53,7 @@ private:
      * @param currentChunk  The chunk that we are now in.
      */
     void requestNewInRangeChunks(const ChunkPosition& previousChunk,
-                              const ChunkPosition& currentChunk);
+                                 const ChunkPosition& currentChunk);
 
     /**
      * Receives any waiting chunk updates from the queue and applies them

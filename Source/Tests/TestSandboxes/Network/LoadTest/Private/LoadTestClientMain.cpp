@@ -27,16 +27,18 @@ static constexpr unsigned int DEFAULT_CONNECTION_WAIT_TIME_MS = 1;
 
 void printUsage()
 {
-    std::printf("Usage: LoadTestClientMain.exe <NumClients> <ConnectionWaitTime>\n"
-                "NumClients: How many clients to simulate. Defaults to 10.\n"
-                "ConnectionWaitTime: How long, in milliseconds, to wait between"
-                " connecting clients. Defaults to 1ms.");
+    std::printf(
+        "Usage: LoadTestClientMain.exe <NumClients> <ConnectionWaitTime>\n"
+        "NumClients: How many clients to simulate. Defaults to 10.\n"
+        "ConnectionWaitTime: How long, in milliseconds, to wait between"
+        " connecting clients. Defaults to 1ms.");
 }
 
-void connectClients(unsigned int numClients, unsigned int connectionWaitTimeMs
-                    , std::vector<std::unique_ptr<SimulatedClient>>* clients)
+void connectClients(unsigned int numClients, unsigned int connectionWaitTimeMs,
+                    std::vector<std::unique_ptr<SimulatedClient>>* clients)
 {
-    LOG_INFO("Connecting %u clients with a %ums wait time.", numClients, connectionWaitTimeMs);
+    LOG_INFO("Connecting %u clients with a %ums wait time.", numClients,
+             connectionWaitTimeMs);
 
     // Open all of the connections.
     for (unsigned int i = 0; i < numClients; ++i) {
@@ -110,8 +112,8 @@ try {
     clients[0]->setNetstatsLoggingEnabled(true);
 
     // Start the client connections thread.
-    std::thread connectionThreadObj(connectClients, numClients
-                                    , connectionWaitTimeMs, &clients);
+    std::thread connectionThreadObj(connectClients, numClients,
+                                    connectionWaitTimeMs, &clients);
 
     // Start the main loop.
     std::atomic<bool> exitRequested = false;

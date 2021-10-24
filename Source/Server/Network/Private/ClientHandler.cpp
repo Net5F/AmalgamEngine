@@ -11,7 +11,8 @@ namespace AM
 {
 namespace Server
 {
-ClientHandler::ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher, MessageProcessor& inMessageProcessor)
+ClientHandler::ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher,
+                             MessageProcessor& inMessageProcessor)
 : network{inNetwork}
 , dispatcher{inDispatcher}
 , messageProcessor{inMessageProcessor}
@@ -119,7 +120,8 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
                                               newID, std::move(newPeer)))
                       .second)) {
                 idPool.freeID(newID);
-                LOG_ERROR("Ran out of room in client map or key already existed.");
+                LOG_ERROR(
+                    "Ran out of room in client map or key already existed.");
             }
         }
 
@@ -176,12 +178,14 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
 
         /* If there's potentially data waiting, try to receive all messages
            from the client. */
-        ReceiveResult result = clientPtr->receiveMessage(messageRecBuffer.data());
+        ReceiveResult result
+            = clientPtr->receiveMessage(messageRecBuffer.data());
         while (result.networkResult == NetworkResult::Success) {
             numReceived++;
 
             // Process the message.
-            processReceivedMessage(*clientPtr, result.messageType, result.messageSize);
+            processReceivedMessage(*clientPtr, result.messageType,
+                                   result.messageSize);
 
             // Try to receive the next message.
             result = clientPtr->receiveMessage(messageRecBuffer.data());
@@ -191,20 +195,21 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
     return numReceived;
 }
 
-void ClientHandler::processReceivedMessage(Client& client, MessageType messageType,
-                                unsigned int messageSize)
+void ClientHandler::processReceivedMessage(Client& client,
+                                           MessageType messageType,
+                                           unsigned int messageSize)
 {
     // Process the message.
     // Note: messageTick will be > -1 if the message contained a tick number.
-    Sint64 messageTick = messageProcessor.processReceivedMessage(client.getNetID()
-        , messageType, messageRecBuffer.data(), messageSize);
+    Sint64 messageTick = messageProcessor.processReceivedMessage(
+        client.getNetID(), messageType, messageRecBuffer.data(), messageSize);
 
     // If the message carried a tick number, use it to calc a diff and give it
     // to the client.
     if (messageTick != -1) {
         // Calc the difference between the current tick and the message's tick.
         Sint64 tickDiff{messageTick
-            - static_cast<Sint64>(network.getCurrentTick())};
+                        - static_cast<Sint64>(network.getCurrentTick())};
 
         // Record the diff.
         client.recordTickDiff(tickDiff);

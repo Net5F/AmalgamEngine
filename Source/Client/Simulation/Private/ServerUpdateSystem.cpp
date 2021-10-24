@@ -18,7 +18,7 @@ namespace AM
 namespace Client
 {
 ServerUpdateSystem::ServerUpdateSystem(Simulation& inSim, World& inWorld,
-                                         Network& inServer)
+                                       Network& inServer)
 : sim(inSim)
 , world(inWorld)
 , network(inServer)
@@ -40,7 +40,8 @@ void ServerUpdateSystem::sendInputState()
         Input& input = registry.get<Input>(world.playerEntity);
 
         // Send the client input message.
-        network.serializeAndSend<InputChangeRequest>({sim.getCurrentTick(), input});
+        network.serializeAndSend<InputChangeRequest>(
+            {sim.getCurrentTick(), input});
 
         registry.remove<IsDirty>(world.playerEntity);
     }

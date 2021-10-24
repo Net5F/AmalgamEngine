@@ -7,11 +7,10 @@ namespace AM
 {
 namespace Client
 {
-
-TileUpdateSystem::TileUpdateSystem(World& inWorld
-                 , EventDispatcher& inUiEventDispatcher
-                 , EventDispatcher& inNetworkEventDispatcher
-                 , Network& inNetwork)
+TileUpdateSystem::TileUpdateSystem(World& inWorld,
+                                   EventDispatcher& inUiEventDispatcher,
+                                   EventDispatcher& inNetworkEventDispatcher,
+                                   Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
 , tileUpdateRequestQueue(inUiEventDispatcher)
@@ -36,7 +35,7 @@ void TileUpdateSystem::processUiRequests()
         // Update the map locally.
         // Note: This assumes that the server will accept the request.
         world.tileMap.setSpriteLayer(uiRequest.tileX, uiRequest.tileY,
-            uiRequest.layerIndex, uiRequest.numericID);
+                                     uiRequest.layerIndex, uiRequest.numericID);
 
         // Send the request to the server.
         network.serializeAndSend<TileUpdateRequest>(uiRequest);
@@ -50,7 +49,8 @@ void TileUpdateSystem::processNetworkUpdates()
     while (tileUpdateQueue.pop(tileUpdate)) {
         // Update the map.
         world.tileMap.setSpriteLayer(tileUpdate.tileX, tileUpdate.tileY,
-            tileUpdate.layerIndex, tileUpdate.numericID);
+                                     tileUpdate.layerIndex,
+                                     tileUpdate.numericID);
     }
 }
 

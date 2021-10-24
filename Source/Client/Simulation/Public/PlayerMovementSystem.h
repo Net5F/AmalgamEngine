@@ -25,8 +25,8 @@ class InputHistory;
 class PlayerMovementSystem
 {
 public:
-    PlayerMovementSystem(Simulation& inSim, World& inWorld
-                         , EventDispatcher& inNetworkEventDispatcher);
+    PlayerMovementSystem(Simulation& inSim, World& inWorld,
+                         EventDispatcher& inNetworkEventDispatcher);
 
     /**
      * Moves the player entity 1 sim tick into the future.

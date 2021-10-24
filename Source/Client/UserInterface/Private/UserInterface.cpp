@@ -13,8 +13,8 @@ namespace AM
 {
 namespace Client
 {
-UserInterface::UserInterface(EventDispatcher& inUiEventDispatcher, const World& inWorld
-                             , SpriteData& spriteData)
+UserInterface::UserInterface(EventDispatcher& inUiEventDispatcher,
+                             const World& inWorld, SpriteData& spriteData)
 : tileHighlightSprite{}
 , tileHighlightIndex{0, 0}
 , uiEventDispatcher{inUiEventDispatcher}
@@ -108,7 +108,8 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     // Set the tile to the next sprite.
     terrainSpriteIndex++;
     terrainSpriteIndex %= 3;
-    uiEventDispatcher.emplace<TileUpdateRequest>(tileIndex.x, tileIndex.y, 0,
+    uiEventDispatcher.emplace<TileUpdateRequest>(
+        tileIndex.x, tileIndex.y, 0,
         terrainSprites[terrainSpriteIndex]->numericID);
 }
 

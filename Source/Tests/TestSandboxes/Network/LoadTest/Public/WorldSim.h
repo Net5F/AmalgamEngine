@@ -28,7 +28,8 @@ namespace LTC
 class WorldSim
 {
 public:
-    WorldSim(EventDispatcher& inNetworkEventDispatcher, Client::Network& inNetwork);
+    WorldSim(EventDispatcher& inNetworkEventDispatcher,
+             Client::Network& inNetwork);
 
     /**
      * Requests to connect to the game server, waits for a ConnectionResponse.

@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 /**
  * The types of messages that we send across the network.
  *

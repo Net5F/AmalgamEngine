@@ -23,7 +23,8 @@ class SpriteData;
 class UserInterface : public OSEventHandler
 {
 public:
-    UserInterface(EventDispatcher& inUiEventDispatcher, const World& inWorld, SpriteData& spriteData);
+    UserInterface(EventDispatcher& inUiEventDispatcher, const World& inWorld,
+                  SpriteData& spriteData);
 
     /**
      * Handles user input events.

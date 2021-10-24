@@ -37,7 +37,8 @@ TileMap::TileMap(SpriteData& inSpriteData)
 
     // Print the time taken.
     double timeTaken = timer.getDeltaSeconds(false);
-    LOG_INFO("Map loaded in %.6fs. Size: (%u, %u).", timeTaken, mapXLengthTiles, mapYLengthTiles);
+    LOG_INFO("Map loaded in %.6fs. Size: (%u, %u).", timeTaken, mapXLengthTiles,
+             mapYLengthTiles);
 }
 
 TileMap::~TileMap()
@@ -64,7 +65,8 @@ void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
     Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
     if (tile.spriteLayers.size() <= layerIndex) {
         const Sprite& emptySprite{spriteData.get(-1)};
-        tile.spriteLayers.resize((layerIndex + 1), {&emptySprite, BoundingBox{}});
+        tile.spriteLayers.resize((layerIndex + 1),
+                                 {&emptySprite, BoundingBox{}});
     }
 
     // Replace the sprite.
@@ -72,7 +74,8 @@ void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
 }
 
 void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
-                             unsigned int layerIndex, const std::string& stringID)
+                             unsigned int layerIndex,
+                             const std::string& stringID)
 {
     setSpriteLayer(tileX, tileY, layerIndex, spriteData.get(stringID));
 }
@@ -192,8 +195,8 @@ void TileMap::save(const std::string& fileName)
             TileSnapshot& tile{chunk.tiles[j]};
             for (Tile::SpriteLayer& layer :
                  tiles[nextLinearTileIndex].spriteLayers) {
-                unsigned int paletteID =
-                    chunk.getPaletteIndex(layer.sprite->stringID);
+                unsigned int paletteID
+                    = chunk.getPaletteIndex(layer.sprite->stringID);
                 tile.spriteLayers.push_back(paletteID);
             }
 

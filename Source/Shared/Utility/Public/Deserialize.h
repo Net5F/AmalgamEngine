@@ -30,15 +30,13 @@ public:
      *                    bytes from.
      */
     template<typename T>
-    static bool fromBuffer(const Uint8* inputBuffer,
-                           std::size_t serializedSize, T& outputObject,
-                           std::size_t startIndex = 0)
+    static bool fromBuffer(const Uint8* inputBuffer, std::size_t serializedSize,
+                           T& outputObject, std::size_t startIndex = 0)
     {
         // Deserialize the buffer contents into outputObject.
         std::pair<bitsery::ReaderError, bool> result
             = bitsery::quickDeserialization<InputAdapter>(
-                {inputBuffer + startIndex, serializedSize},
-                outputObject);
+                {inputBuffer + startIndex, serializedSize}, outputObject);
 
         // If there was an error, print it and fail.
         if (!result.second) {

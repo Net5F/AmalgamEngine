@@ -56,7 +56,8 @@ TileMap::TileMap(SpriteData& inSpriteData)
     }
 }
 
-void TileMap::setMapSize(unsigned int inMapXLengthChunks, unsigned int inMapYLengthChunks)
+void TileMap::setMapSize(unsigned int inMapXLengthChunks,
+                         unsigned int inMapYLengthChunks)
 {
     // Set our map size.
     mapXLengthChunks = inMapXLengthChunks;
@@ -86,7 +87,8 @@ void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
     Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
     if (tile.spriteLayers.size() <= layerIndex) {
         const Sprite& emptySprite{spriteData.get(-1)};
-        tile.spriteLayers.resize((layerIndex + 1), {&emptySprite, BoundingBox{}});
+        tile.spriteLayers.resize((layerIndex + 1),
+                                 {&emptySprite, BoundingBox{}});
     }
 
     // Replace the sprite.
@@ -94,7 +96,8 @@ void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
 }
 
 void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
-                             unsigned int layerIndex, const std::string& stringID)
+                             unsigned int layerIndex,
+                             const std::string& stringID)
 {
     setSpriteLayer(tileX, tileY, layerIndex, spriteData.get(stringID));
 }

@@ -19,7 +19,8 @@ namespace AM
 namespace Client
 {
 ChunkUpdateSystem::ChunkUpdateSystem(Simulation& inSim, World& inWorld,
-                                           EventDispatcher& inNetworkEventDispatcher, Network& inNetwork)
+                                     EventDispatcher& inNetworkEventDispatcher,
+                                     Network& inNetwork)
 : sim{inSim}
 , world{inWorld}
 , network{inNetwork}
@@ -61,7 +62,8 @@ void ChunkUpdateSystem::requestNeededUpdates()
     }
 }
 
-void ChunkUpdateSystem::requestAllInRangeChunks(const ChunkPosition& currentChunk)
+void ChunkUpdateSystem::requestAllInRangeChunks(
+    const ChunkPosition& currentChunk)
 {
     // Determine which chunks are in range of each chunk position.
     // Note: This is hardcoded to assume the range is all chunks directly
@@ -89,8 +91,8 @@ void ChunkUpdateSystem::requestAllInRangeChunks(const ChunkPosition& currentChun
     network.serializeAndSend(chunkUpdateRequest);
 }
 
-void ChunkUpdateSystem::requestNewInRangeChunks(const ChunkPosition& previousChunk,
-                                                const ChunkPosition& currentChunk)
+void ChunkUpdateSystem::requestNewInRangeChunks(
+    const ChunkPosition& previousChunk, const ChunkPosition& currentChunk)
 {
     // Determine which chunks are in range of each chunk position.
     // Note: This is hardcoded to assume the range is all chunks directly
@@ -142,10 +144,13 @@ void ChunkUpdateSystem::applyChunkSnapshot(const ChunkWireSnapshot& chunk)
     // to our map.
     int tileIndex{0};
     for (unsigned int tileY = 0; tileY < SharedConfig::CHUNK_WIDTH; ++tileY) {
-        for (unsigned int tileX = 0; tileX < SharedConfig::CHUNK_WIDTH; ++tileX) {
+        for (unsigned int tileX = 0; tileX < SharedConfig::CHUNK_WIDTH;
+             ++tileX) {
             // Calculate where this tile is.
-            unsigned int currentTileX{((chunk.x * SharedConfig::CHUNK_WIDTH) + tileX)};
-            unsigned int currentTileY{((chunk.y * SharedConfig::CHUNK_WIDTH) + tileY)};
+            unsigned int currentTileX{
+                ((chunk.x * SharedConfig::CHUNK_WIDTH) + tileX)};
+            unsigned int currentTileY{
+                ((chunk.y * SharedConfig::CHUNK_WIDTH) + tileY)};
 
             // Clear the tile.
             world.tileMap.clearTile(currentTileX, currentTileY);
@@ -155,8 +160,9 @@ void ChunkUpdateSystem::applyChunkSnapshot(const ChunkWireSnapshot& chunk)
             unsigned int layerIndex{0};
             for (Uint8 paletteID : tileSnapshot.spriteLayers) {
                 // Add the sprite layer to the tile.
-                world.tileMap.setSpriteLayer(currentTileX, currentTileY
-                    , layerIndex++, chunk.palette[paletteID]);
+                world.tileMap.setSpriteLayer(currentTileX, currentTileY,
+                                             layerIndex++,
+                                             chunk.palette[paletteID]);
             }
 
             // Increment to the next linear index.

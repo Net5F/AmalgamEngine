@@ -17,9 +17,10 @@ MessageProcessor::MessageProcessor(EventDispatcher& inDispatcher)
 {
 }
 
-Sint64 MessageProcessor::processReceivedMessage(NetworkID netID, MessageType messageType,
-                                Uint8* messageBuffer,
-                                unsigned int messageSize)
+Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
+                                                MessageType messageType,
+                                                Uint8* messageBuffer,
+                                                unsigned int messageSize)
 {
     // The tick that the received message corresponds to.
     // Will be -1 if the message doesn't correspond to any tick.
@@ -28,13 +29,13 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID, MessageType mes
     /* Match the enum values to their event types. */
     switch (messageType) {
         case MessageType::Heartbeat: {
-            messageTick =
-                static_cast<Sint64>(handleHeartbeat(messageBuffer, messageSize));
+            messageTick = static_cast<Sint64>(
+                handleHeartbeat(messageBuffer, messageSize));
             break;
         }
         case MessageType::InputChangeRequest: {
-            messageTick = static_cast<Sint64>(handleInputChangeRequest(netID, messageBuffer,
-                messageSize));
+            messageTick = static_cast<Sint64>(
+                handleInputChangeRequest(netID, messageBuffer, messageSize));
             break;
         }
         case MessageType::ChunkUpdateRequest: {
@@ -65,7 +66,8 @@ void MessageProcessor::pushEvent(Uint8* messageBuffer, unsigned int messageSize)
 }
 
 template<typename T>
-void MessageProcessor::pushEventSharedPtr(Uint8* messageBuffer, unsigned int messageSize)
+void MessageProcessor::pushEventSharedPtr(Uint8* messageBuffer,
+                                          unsigned int messageSize)
 {
     // Deserialize the message.
     std::shared_ptr<T> message{std::make_shared<T>()};
@@ -75,7 +77,8 @@ void MessageProcessor::pushEventSharedPtr(Uint8* messageBuffer, unsigned int mes
     dispatcher.push<std::shared_ptr<const T>>(message);
 }
 
-Uint32 MessageProcessor::handleHeartbeat(Uint8* messageBuffer, unsigned int messageSize)
+Uint32 MessageProcessor::handleHeartbeat(Uint8* messageBuffer,
+                                         unsigned int messageSize)
 {
     // Deserialize the message.
     Heartbeat heartbeat{};
@@ -85,12 +88,13 @@ Uint32 MessageProcessor::handleHeartbeat(Uint8* messageBuffer, unsigned int mess
     return heartbeat.tickNum;
 }
 
-Uint32 MessageProcessor::handleInputChangeRequest(NetworkID netID, Uint8* messageBuffer, unsigned int messageSize)
+Uint32 MessageProcessor::handleInputChangeRequest(NetworkID netID,
+                                                  Uint8* messageBuffer,
+                                                  unsigned int messageSize)
 {
     // Deserialize the message.
     InputChangeRequest inputChangeRequest{};
-    Deserialize::fromBuffer(messageBuffer, messageSize,
-                            inputChangeRequest);
+    Deserialize::fromBuffer(messageBuffer, messageSize, inputChangeRequest);
 
     // Fill in the network ID that we assigned to this client.
     inputChangeRequest.netID = netID;
@@ -102,12 +106,13 @@ Uint32 MessageProcessor::handleInputChangeRequest(NetworkID netID, Uint8* messag
     return inputChangeRequest.tickNum;
 }
 
-void MessageProcessor::handleChunkUpdateRequest(NetworkID netID, Uint8* messageBuffer, unsigned int messageSize)
+void MessageProcessor::handleChunkUpdateRequest(NetworkID netID,
+                                                Uint8* messageBuffer,
+                                                unsigned int messageSize)
 {
     // Deserialize the message.
     ChunkUpdateRequest chunkUpdateRequest{};
-    Deserialize::fromBuffer(messageBuffer, messageSize,
-                            chunkUpdateRequest);
+    Deserialize::fromBuffer(messageBuffer, messageSize, chunkUpdateRequest);
 
     // Fill in the network ID that we assigned to this client.
     chunkUpdateRequest.netID = netID;

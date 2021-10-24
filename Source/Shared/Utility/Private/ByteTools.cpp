@@ -40,13 +40,14 @@ void ByteTools::write32(Uint32 value, Uint8* buffer)
     *reinterpret_cast<Uint32*>(buffer) = SDL_SwapLE32(value);
 }
 
-std::size_t ByteTools::compress(const Uint8* sourceBuffer, std::size_t sourceLength,
-                                  Uint8* destBuffer, std::size_t destLength)
+std::size_t ByteTools::compress(const Uint8* sourceBuffer,
+                                std::size_t sourceLength, Uint8* destBuffer,
+                                std::size_t destLength)
 {
     // Compress the data.
     std::size_t destLengthReturn{destLength};
     int32_t result = zng_compress2(destBuffer, &destLengthReturn, sourceBuffer,
-        sourceLength, COMPRESSION_LEVEL);
+                                   sourceLength, COMPRESSION_LEVEL);
 
     // Check for errors.
     if (result == Z_MEM_ERROR) {
@@ -60,13 +61,14 @@ std::size_t ByteTools::compress(const Uint8* sourceBuffer, std::size_t sourceLen
     return destLengthReturn;
 }
 
-std::size_t ByteTools::uncompress(const Uint8* sourceBuffer, std::size_t sourceLength,
-                                  Uint8* destBuffer, std::size_t destLength)
+std::size_t ByteTools::uncompress(const Uint8* sourceBuffer,
+                                  std::size_t sourceLength, Uint8* destBuffer,
+                                  std::size_t destLength)
 {
     // Compress the data.
     std::size_t destLengthReturn{destLength};
     int32_t result = zng_uncompress(destBuffer, &destLengthReturn, sourceBuffer,
-        sourceLength);
+                                    sourceLength);
 
     // Check for errors.
     if (result == Z_MEM_ERROR) {

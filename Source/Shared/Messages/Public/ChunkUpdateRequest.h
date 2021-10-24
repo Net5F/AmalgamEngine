@@ -41,8 +41,9 @@ public:
 template<typename S>
 void serialize(S& serializer, ChunkUpdateRequest& chunkUpdateRequest)
 {
-    serializer.container(chunkUpdateRequest.requestedChunks,
-                         static_cast<std::size_t>(ChunkUpdateRequest::MAX_CHUNKS));
+    serializer.container(
+        chunkUpdateRequest.requestedChunks,
+        static_cast<std::size_t>(ChunkUpdateRequest::MAX_CHUNKS));
 }
 
 } // End namespace AM

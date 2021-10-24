@@ -15,7 +15,8 @@ namespace AM
 namespace Server
 {
 InputUpdateSystem::InputUpdateSystem(Simulation& inSim, World& inWorld,
-                                      EventDispatcher& inNetworkEventDispatcher,  Network& inNetwork)
+                                     EventDispatcher& inNetworkEventDispatcher,
+                                     Network& inNetwork)
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)
@@ -28,9 +29,11 @@ void InputUpdateSystem::processInputMessages()
     SCOPED_CPU_SAMPLE(processInputMessages);
 
     // Sort any waiting client input events.
-    while (InputChangeRequest* inputChangeRequest = inputChangeRequestQueue.peek()) {
+    while (InputChangeRequest* inputChangeRequest
+           = inputChangeRequestQueue.peek()) {
         // Push the event into the sorter.
-        SorterBase::ValidityResult result = inputChangeRequestSorter.push(*inputChangeRequest, inputChangeRequest->tickNum);
+        SorterBase::ValidityResult result = inputChangeRequestSorter.push(
+            *inputChangeRequest, inputChangeRequest->tickNum);
 
         // If we had to drop an event, handle it.
         if (result != SorterBase::ValidityResult::Valid) {
@@ -41,15 +44,17 @@ void InputUpdateSystem::processInputMessages()
     }
 
     // Process all client input events for this tick.
-    std::queue<InputChangeRequest>* queue = inputChangeRequestSorter.getCurrentQueue();
+    std::queue<InputChangeRequest>* queue
+        = inputChangeRequestSorter.getCurrentQueue();
     while (!(queue->empty())) {
         // Get the next event.
         InputChangeRequest& inputChangeRequest = queue->front();
 
         // If the input is from an earlier tick, drop it and continue.
         if (inputChangeRequest.tickNum < sim.getCurrentTick()) {
-            LOG_INFO("Dropped message from %u. Tick: %u, received: %u"
-                , inputChangeRequest.netID, sim.getCurrentTick(), inputChangeRequest.tickNum);
+            LOG_INFO("Dropped message from %u. Tick: %u, received: %u",
+                     inputChangeRequest.netID, sim.getCurrentTick(),
+                     inputChangeRequest.tickNum);
             handleDroppedMessage(inputChangeRequest.netID);
             inputChangeRequestQueue.pop();
             continue;
@@ -95,7 +100,8 @@ void InputUpdateSystem::handleDroppedMessage(NetworkID clientID)
         // TODO: Think about this. It may be a normal thing that we should just
         //       return early from instead of erroring.
         LOG_ERROR("Failed to find entity with netID: %u while "
-                  "processing a message drop event.", clientID);
+                  "processing a message drop event.",
+                  clientID);
     }
 
     entt::registry& registry = world.registry;

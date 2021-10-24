@@ -32,9 +32,9 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S = .001;
 
-    Simulation(EventDispatcher& inUiEventDispatcher
-               , EventDispatcher& inNetworkEventDispatcher
-               , Network& inNetwork, SpriteData& inSpriteData);
+    Simulation(EventDispatcher& inUiEventDispatcher,
+               EventDispatcher& inNetworkEventDispatcher, Network& inNetwork,
+               SpriteData& inSpriteData);
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,

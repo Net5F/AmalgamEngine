@@ -35,8 +35,7 @@ public:
      *                      at index 0.
      * @param messageSize  The length in bytes of the message in messageBuffer.
      */
-    void processReceivedMessage(MessageType messageType,
-                                Uint8* messageBuffer,
+    void processReceivedMessage(MessageType messageType, Uint8* messageBuffer,
                                 unsigned int messageSize);
 
 private:
@@ -63,8 +62,7 @@ private:
      * EventQueue<std::shared_ptr<const T>>.
      */
     template<typename T>
-    void pushEventSharedPtr(Uint8* messageBuffer,
-                            unsigned int messageSize);
+    void pushEventSharedPtr(Uint8* messageBuffer, unsigned int messageSize);
 
     //-------------------------------------------------------------------------
     // Handlers for messages relevant to the network layer.

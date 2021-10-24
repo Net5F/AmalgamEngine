@@ -36,8 +36,8 @@ public:
               any harder than that. Might be worth revisiting. */
     inline bool containsPosition(const ChunkPosition& position)
     {
-        return ((position.x >= x) && (position.x < (x + xLength)) && (position.y >= y)
-                && (position.y < (y + yLength)));
+        return ((position.x >= x) && (position.x < (x + xLength))
+                && (position.y >= y) && (position.y < (y + yLength)));
     }
 };
 

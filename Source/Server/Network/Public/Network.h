@@ -126,8 +126,9 @@ void Network::serializeAndSend(NetworkID networkID, const T& messageStruct,
 
     // Serialize the message struct into the buffer, leaving room for the
     // header.
-    std::size_t messageSize = Serialize::toBuffer(messageBuffer->data(), messageBuffer->size(), messageStruct,
-                                                  MESSAGE_HEADER_SIZE);
+    std::size_t messageSize
+        = Serialize::toBuffer(messageBuffer->data(), messageBuffer->size(),
+                              messageStruct, MESSAGE_HEADER_SIZE);
 
     // Copy the type into the buffer.
     // TODO: Add a nice compile-time message if T doesn't have MESSAGE_TYPE.

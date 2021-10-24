@@ -52,8 +52,7 @@ void MessageProcessor::processReceivedMessage(MessageType messageType,
 }
 
 template<typename T>
-void MessageProcessor::pushEvent(Uint8* messageBuffer,
-                                 unsigned int messageSize)
+void MessageProcessor::pushEvent(Uint8* messageBuffer, unsigned int messageSize)
 {
     // Deserialize the message.
     T message{};
@@ -109,13 +108,14 @@ void MessageProcessor::handleEntityUpdate(Uint8* messageBuffer,
 
         if (entity == playerEntity) {
             // Found the player.
-            networkEventDispatcher.push<std::shared_ptr<const EntityUpdate>>(entityUpdate);
+            networkEventDispatcher.push<std::shared_ptr<const EntityUpdate>>(
+                entityUpdate);
             playerFound = true;
         }
         else if (!npcFound) {
             // Found a non-player (npc).
             networkEventDispatcher.emplace<NpcUpdate>(NpcUpdateType::Update,
-                                                 entityUpdate);
+                                                      entityUpdate);
             npcFound = true;
         }
 

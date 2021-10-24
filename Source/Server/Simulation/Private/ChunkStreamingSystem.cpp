@@ -17,7 +17,9 @@ namespace AM
 {
 namespace Server
 {
-ChunkStreamingSystem::ChunkStreamingSystem(World& inWorld, EventDispatcher& inNetworkEventDispatcher, Network& inNetwork)
+ChunkStreamingSystem::ChunkStreamingSystem(
+    World& inWorld, EventDispatcher& inNetworkEventDispatcher,
+    Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
 , chunkUpdateRequestQueue(inNetworkEventDispatcher)
@@ -38,7 +40,8 @@ void ChunkStreamingSystem::sendChunkUpdate(
 {
     // Add the requested chunks to the message.
     ChunkUpdate chunkUpdate{};
-    for (const ChunkPosition& requestedChunk : chunkUpdateRequest.requestedChunks) {
+    for (const ChunkPosition& requestedChunk :
+         chunkUpdateRequest.requestedChunks) {
         addChunkToMessage(requestedChunk, chunkUpdate);
     }
 
@@ -64,9 +67,11 @@ void ChunkStreamingSystem::addChunkToMessage(const ChunkPosition& chunkPosition,
     // For each tile in the chunk.
     int tileIndex{0};
     for (unsigned int tileY = 0; tileY < SharedConfig::CHUNK_WIDTH; ++tileY) {
-        for (unsigned int tileX = 0; tileX < SharedConfig::CHUNK_WIDTH; ++tileX) {
+        for (unsigned int tileX = 0; tileX < SharedConfig::CHUNK_WIDTH;
+             ++tileX) {
             // Copy all of the tile's layers to the snapshot.
-            const Tile& tile = world.tileMap.getTile((startX + tileX), (startY + tileY));
+            const Tile& tile
+                = world.tileMap.getTile((startX + tileX), (startY + tileY));
             for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
                 unsigned int paletteID{
                     chunk.getPaletteIndex(layer.sprite->numericID)};

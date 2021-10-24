@@ -24,8 +24,7 @@ typedef std::unordered_map<NetworkID, std::shared_ptr<Client>> ClientMap;
 /**
  * Used to tell the simulation that a client was connected.
  */
-struct ClientConnected
-{
+struct ClientConnected {
     /** The ID of the client that connected. */
     NetworkID clientID{0};
 };
@@ -33,8 +32,7 @@ struct ClientConnected
 /**
  * Used to tell the simulation that a client was disconnected.
  */
-struct ClientDisconnected
-{
+struct ClientDisconnected {
     /** The ID of the client that disconnected. */
     NetworkID clientID{0};
 };

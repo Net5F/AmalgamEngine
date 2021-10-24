@@ -34,8 +34,7 @@ public:
      * @return The number of bytes written into outputBuffer.
      */
     template<typename T>
-    static std::size_t toBuffer(Uint8* outputBuffer,
-                                std::size_t bufferSize,
+    static std::size_t toBuffer(Uint8* outputBuffer, std::size_t bufferSize,
                                 T& objectToSerialize,
                                 std::size_t startIndex = 0)
     {
