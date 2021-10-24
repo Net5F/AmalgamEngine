@@ -40,6 +40,12 @@ TileMap::TileMap(SpriteData& inSpriteData)
     LOG_INFO("Map loaded in %.6fs. Size: (%u, %u).", timeTaken, mapXLengthTiles, mapYLengthTiles);
 }
 
+TileMap::~TileMap()
+{
+    // Save the map state to TileMap.bin.
+    save("TileMap.bin");
+}
+
 void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
                              unsigned int layerIndex, const Sprite& sprite)
 {

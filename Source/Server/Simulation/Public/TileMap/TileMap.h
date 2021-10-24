@@ -32,6 +32,11 @@ public:
     TileMap(SpriteData& inSpriteData);
 
     /**
+     * Attempts to save the current tile map state to TileMap.bin.
+     */
+    ~TileMap();
+
+    /**
      * Sets the specified sprite layer to the given sprite.
      *
      * If the specified tile's spriteLayers vector isn't big enough, resizes
@@ -89,6 +94,8 @@ public:
     /**
      * Saves the map to a file with the given name, placed in the same
      * directory as the program binary.
+     *
+     * @param fileName  The file name to save to, with no path prepended.
      */
     void save(const std::string& fileName);
 
