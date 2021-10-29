@@ -3,7 +3,7 @@
 namespace AM
 {
 /**
- * This struct represents a set of axis-aligned 3D bounds, forming a box.
+ * Represents a set of axis-aligned 3D bounds, forming a box.
  */
 struct BoundingBox {
 public:

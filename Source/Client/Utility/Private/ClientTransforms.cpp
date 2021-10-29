@@ -14,7 +14,7 @@ SDL_Rect ClientTransforms::entityToScreenExtent(const Position& position,
                                                 const Sprite& sprite,
                                                 const Camera& camera)
 {
-    // Get the point in screen space.
+    // Transform the position to a point in screen space.
     // Note: This applies the camera's zoom to the position, so we don't need
     //       to do it again.
     ScreenPoint screenPoint

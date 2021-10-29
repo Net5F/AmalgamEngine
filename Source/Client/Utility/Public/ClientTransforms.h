@@ -20,7 +20,7 @@ class ClientTransforms
 {
 public:
     /**
-     * Used to figure out where an entity should be drawn on screen.
+     * Calculates where an entity should be drawn on screen.
      *
      * Returns a final screen space extent for the given position, camera,
      * and sprite.
@@ -30,7 +30,7 @@ public:
                                          const Camera& camera);
 
     /**
-     * Used to figure out where a tile should be drawn on screen.
+     * Calculates where a tile should be drawn on screen.
      *
      * Returns a final screen space extent for the given tile index, camera,
      * and sprite.

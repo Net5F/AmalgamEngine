@@ -7,7 +7,10 @@
 namespace AM
 {
 /**
- * Represents the top left point of an entity's position in the world.
+ * Represents a position in the world.
+ *
+ * Generally, this will be a component attached to an entity, and will
+ * represent a centered point directly beneath the entity.
  */
 struct Position {
 public:
