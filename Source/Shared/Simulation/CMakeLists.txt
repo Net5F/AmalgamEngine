@@ -1,10 +1,11 @@
 target_sources(Shared
     PRIVATE
         Private/MovementHelpers.cpp
-        Private/TileMap/ChunkRange.cpp
 	PUBLIC
         Public/AreaOfInterest.h
         Public/BoundingBox.h
+        Public/DiscretePositionTools.h
+        Public/DiscreteRangeTools.h
         Public/MovementHelpers.h
         Public/Components/Camera.h
         Public/Components/Input.h
@@ -16,8 +17,9 @@ target_sources(Shared
         Public/TileMap/ChunkPosition.h
         Public/TileMap/ChunkRange.h
         Public/TileMap/ChunkSnapshot.h
-        Public/TileMap/TileIndex.h
         Public/TileMap/TileMapSnapshot.h
+        Public/TileMap/TilePosition.h
+        Public/TileMap/TileRange.h
         Public/TileMap/TileSnapshot.h
 )
 

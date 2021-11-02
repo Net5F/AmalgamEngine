@@ -71,7 +71,7 @@ float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)
     return yCoord * zoomFactor * Z_WORLD_SCALE;
 }
 
-TileIndex Transforms::screenToTile(const ScreenPoint& screenPoint,
+TilePosition Transforms::screenToTile(const ScreenPoint& screenPoint,
                                    const Camera& camera)
 {
     // Remove the camera adjustment.
@@ -83,7 +83,7 @@ TileIndex Transforms::screenToTile(const ScreenPoint& screenPoint,
     Position worldPos = screenToWorld(absolutePoint, camera.zoomFactor);
 
     // Convert to tile index.
-    return worldPos.asTileIndex();
+    return worldPos.asTilePosition();
 }
 
 BoundingBox Transforms::modelToWorld(const BoundingBox& modelBounds,

@@ -16,7 +16,7 @@ namespace Client
 UserInterface::UserInterface(EventDispatcher& inUiEventDispatcher,
                              const World& inWorld, SpriteData& spriteData)
 : tileHighlightSprite{}
-, tileHighlightIndex{0, 0}
+, tileHighlightPosition{0, 0}
 , uiEventDispatcher{inUiEventDispatcher}
 , world{inWorld}
 {
@@ -54,17 +54,17 @@ void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
     const Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
     ScreenPoint screenPoint{static_cast<float>(event.x),
                             static_cast<float>(event.y)};
-    TileIndex tileIndex = Transforms::screenToTile(screenPoint, playerCamera);
+    TilePosition tilePosition = Transforms::screenToTile(screenPoint, playerCamera);
 
     // If the index is outside of the world bounds, ignore this event.
-    if ((tileIndex.x < 0) || (tileIndex.y < 0)
-        || (tileIndex.x >= static_cast<int>(world.tileMap.xLengthTiles()))
-        || (tileIndex.y >= static_cast<int>(world.tileMap.yLengthTiles()))) {
+    if ((tilePosition.x < 0) || (tilePosition.y < 0)
+        || (tilePosition.x >= static_cast<int>(world.tileMap.xLengthTiles()))
+        || (tilePosition.y >= static_cast<int>(world.tileMap.yLengthTiles()))) {
         return;
     }
 
-    // Save the new index for the renderer to use.
-    tileHighlightIndex = Transforms::screenToTile(screenPoint, playerCamera);
+    // Save the new tile position for the renderer to use.
+    tileHighlightPosition = Transforms::screenToTile(screenPoint, playerCamera);
 }
 
 void UserInterface::handleMouseButtonDown(SDL_MouseButtonEvent& event)
@@ -82,17 +82,17 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     const Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
     ScreenPoint screenPoint{static_cast<float>(mouseX),
                             static_cast<float>(mouseY)};
-    TileIndex tileIndex = Transforms::screenToTile(screenPoint, playerCamera);
+    TilePosition tilePosition = Transforms::screenToTile(screenPoint, playerCamera);
 
     // If the index is outside of the world bounds, ignore this event.
-    if ((tileIndex.x < 0) || (tileIndex.y < 0)
-        || (tileIndex.x >= static_cast<int>(world.tileMap.xLengthTiles()))
-        || (tileIndex.y >= static_cast<int>(world.tileMap.yLengthTiles()))) {
+    if ((tilePosition.x < 0) || (tilePosition.y < 0)
+        || (tilePosition.x >= static_cast<int>(world.tileMap.xLengthTiles()))
+        || (tilePosition.y >= static_cast<int>(world.tileMap.yLengthTiles()))) {
         return;
     }
 
     // Determine which sprite the selected tile has.
-    const Tile& tile = world.tileMap.getTile(tileIndex.x, tileIndex.y);
+    const Tile& tile = world.tileMap.getTile(tilePosition.x, tilePosition.y);
 
     unsigned int terrainSpriteIndex = 0;
     if (tile.spriteLayers[0].sprite->stringID == "test_6") {
@@ -109,7 +109,7 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     terrainSpriteIndex++;
     terrainSpriteIndex %= 3;
     uiEventDispatcher.emplace<TileUpdateRequest>(
-        tileIndex.x, tileIndex.y, 0,
+        tilePosition.x, tilePosition.y, 0,
         terrainSprites[terrainSpriteIndex]->numericID);
 }
 

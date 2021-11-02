@@ -112,10 +112,10 @@ void Renderer::renderUserInterface(const Camera& camera)
 {
     /* Render the mouse highlight (currently just a tile sprite.) */
     // Get iso screen extent for this tile.
-    const TileIndex& highlightIndex = ui.tileHighlightIndex;
+    const TilePosition& highlightPosition = ui.tileHighlightPosition;
     const Sprite& highlightSprite = *(ui.tileHighlightSprite);
     SDL_Rect screenExtent = ClientTransforms::tileToScreenExtent(
-        highlightIndex, highlightSprite, camera);
+        highlightPosition, highlightSprite, camera);
 
     // Set the texture's alpha to make the highlight transparent.
     SDL_SetTextureAlphaMod(highlightSprite.texture.get(), 150);

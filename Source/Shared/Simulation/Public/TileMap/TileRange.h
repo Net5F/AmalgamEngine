@@ -1,12 +1,12 @@
 #pragma once
 
 #include "DiscreteRangeTools.h"
-#include "ChunkPosition.h"
+#include "TilePosition.h"
 
 namespace AM
 {
 /**
- * A rectangle that encompasses a range of map chunks.
+ * A rectangle that encompasses a range of map tiles.
  *
  * Note: Ideally this would be a strong alias of a DiscreteRange class, but
  *       there isn't a way to accomplish that without making the interface
@@ -14,7 +14,7 @@ namespace AM
  *       Instead, we've factored the hard-to-maintain logic out into a set of
  *       free functions that act on an isDiscreteRange concept.
  */
-struct ChunkRange {
+struct TileRange {
 public:
     /** The X-axis coordinate of the top left of the range. */
     int x{0};
@@ -31,19 +31,19 @@ public:
     /**
      * Sets this range to the union between itself and the given range.
      */
-    void unionWith(const ChunkRange& other) {
+    void unionWith(const TileRange& other) {
         DiscreteRangeTools::unionRange(*this, other);
     }
 
     /**
      * Sets this range to the intersection between itself and the given range.
      */
-    void intersectWith(const ChunkRange& other){
+    void intersectWith(const TileRange& other){
         DiscreteRangeTools::intersectRange(*this, other);
     }
 
     /** Returns true if the given position is within this range, else false. */
-    inline bool containsPosition(const ChunkPosition& position)
+    inline bool containsPosition(const TilePosition& position)
     {
         return DiscreteRangeTools::containsPosition(*this, position);
     }

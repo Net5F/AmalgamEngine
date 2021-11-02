@@ -3,7 +3,7 @@
 #include "OSEventHandler.h"
 #include "Sprite.h"
 #include "ScreenPoint.h"
-#include "TileIndex.h"
+#include "TilePosition.h"
 #include "SDL2pp/Texture.hh"
 #include <memory>
 #include <vector>
@@ -34,8 +34,8 @@ public:
     /** Sprite for the mouse-following tile highlight. */
     const Sprite* tileHighlightSprite;
 
-    /** Index of the tile to be highlighted. */
-    TileIndex tileHighlightIndex;
+    /** Position of the tile to be highlighted. */
+    TilePosition tileHighlightPosition;
 
 private:
     void handleMouseMotion(SDL_MouseMotionEvent& event);

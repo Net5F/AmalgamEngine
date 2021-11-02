@@ -9,8 +9,6 @@ class SDL_Rect;
 
 namespace AM
 {
-class BoundingBox;
-class TileIndex;
 
 namespace Client
 {

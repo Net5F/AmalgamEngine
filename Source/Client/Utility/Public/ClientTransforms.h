@@ -2,7 +2,7 @@
 
 #include "ScreenPoint.h"
 #include "Position.h"
-#include "TileIndex.h"
+#include "TilePosition.h"
 #include <SDL2/SDL_rect.h>
 
 namespace AM
@@ -32,10 +32,10 @@ public:
     /**
      * Calculates where a tile should be drawn on screen.
      *
-     * Returns a final screen space extent for the given tile index, camera,
+     * Returns a final screen space extent for the given tile position, camera,
      * and sprite.
      */
-    static SDL_Rect tileToScreenExtent(const TileIndex& index,
+    static SDL_Rect tileToScreenExtent(const TilePosition& position,
                                        const Sprite& sprite,
                                        const Camera& camera);
 };

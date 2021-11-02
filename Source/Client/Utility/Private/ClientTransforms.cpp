@@ -43,15 +43,15 @@ SDL_Rect ClientTransforms::entityToScreenExtent(const Position& position,
     return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 }
 
-SDL_Rect ClientTransforms::tileToScreenExtent(const TileIndex& index,
+SDL_Rect ClientTransforms::tileToScreenExtent(const TilePosition& position,
                                               const Sprite& sprite,
                                               const Camera& camera)
 {
-    // Convert tile index to isometric screen position.
+    // Convert tile position to isometric screen position.
     float screenX
-        = (index.x - index.y) * (SharedConfig::TILE_SCREEN_WIDTH / 2.f);
+        = (position.x - position.y) * (SharedConfig::TILE_SCREEN_WIDTH / 2.f);
     float screenY
-        = (index.x + index.y) * (SharedConfig::TILE_SCREEN_HEIGHT / 2.f);
+        = (position.x + position.y) * (SharedConfig::TILE_SCREEN_HEIGHT / 2.f);
 
     // In an iso view, the (0, 0) point of a tile is halfway through the width
     // of the sprite. Thus, we have to shift the tile back to align it.

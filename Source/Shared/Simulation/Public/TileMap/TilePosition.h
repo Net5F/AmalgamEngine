@@ -5,7 +5,7 @@
 namespace AM
 {
 /**
- * The position of a particular map chunk.
+ * The position of a particular tile.
  *
  * Note: Ideally this would be a strong alias of a DiscretePosition class, but
  *       there isn't a way to accomplish that without making the interface
@@ -13,8 +13,7 @@ namespace AM
  *       Instead, we've factored the hard-to-maintain logic out into a set of
  *       free functions that act on an isDiscretePosition concept.
  */
-struct ChunkPosition {
-public:
+struct TilePosition {
     // Note: Screens and maps start at (0, 0) so we could make these unsigned,
     //       but these are signed to facilitate using this struct for things
     //       like negative offsets.
@@ -24,22 +23,22 @@ public:
     /** The Y-axis coordinate of this position. */
     int y{0};
 
-    bool operator==(const ChunkPosition& other)
+    bool operator==(const TilePosition& other)
     {
         return (x == other.x) && (y == other.y);
     }
 
-    bool operator!=(const ChunkPosition& other)
+    bool operator!=(const TilePosition& other)
     {
         return (x != other.x) || (y != other.y);
     }
 
-    ChunkPosition operator+(const ChunkPosition& other)
+    TilePosition operator+(const TilePosition& other)
     {
         return {(x + other.x), (y + other.y)};
     }
 
-    ChunkPosition& operator+=(const ChunkPosition& other)
+    TilePosition& operator+=(const TilePosition& other)
     {
         x += other.x;
         y += other.y;
@@ -47,19 +46,12 @@ public:
     }
 
     /**
-     * If this position is within 1 chunk of the given position, returns true.
+     * If this position is within 1 tile of the given position, returns true.
      */
-    bool isAdjacentTo(const ChunkPosition& other)
+    bool isAdjacentTo(const TilePosition& other)
     {
         return DiscretePositionTools::isAdjacent(*this, other);
     }
 };
-
-template<typename S>
-void serialize(S& serializer, ChunkPosition& chunkPosition)
-{
-    serializer.value4b(chunkPosition.x);
-    serializer.value4b(chunkPosition.y);
-}
 
 } // namespace AM

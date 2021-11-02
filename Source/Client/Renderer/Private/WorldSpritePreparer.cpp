@@ -47,6 +47,8 @@ std::vector<SpriteRenderInfo>&
 
 void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 {
+    // TODO: Find the tile range that the camera is viewing.
+
     // Gather tiles.
     for (int y = 0; y < static_cast<int>(tileMap.yLengthTiles()); ++y) {
         for (int x = 0; x < static_cast<int>(tileMap.xLengthTiles()); ++x) {

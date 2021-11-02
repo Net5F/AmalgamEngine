@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TileIndex.h"
+#include "TilePosition.h"
 #include "ChunkPosition.h"
 #include "SharedConfig.h"
 
@@ -25,7 +25,7 @@ public:
     /**
      * Returns the coordinates of the tile that this position is within.
      */
-    TileIndex asTileIndex()
+    TilePosition asTilePosition()
     {
         return {(static_cast<int>(x / SharedConfig::TILE_WORLD_WIDTH)),
                 (static_cast<int>(y / SharedConfig::TILE_WORLD_WIDTH))};

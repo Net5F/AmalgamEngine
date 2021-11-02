@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TileIndex.h"
+#include "TilePosition.h"
 #include <SDL2/SDL_rect.h>
 
 namespace AM
@@ -48,12 +48,12 @@ public:
     static float screenYToWorldZ(float yCoord, float zoomFactor);
 
     /**
-     * Helper function, converts a camera-relative screen point to a tile's
-     * coordinates.
+     * Helper function, converts a camera-relative screen point to a tile
+     * position.
      *
      * Mostly used for getting the tile that the mouse is over.
      */
-    static TileIndex screenToTile(const ScreenPoint& screenPoint,
+    static TilePosition screenToTile(const ScreenPoint& screenPoint,
                                   const Camera& camera);
 
     /**
