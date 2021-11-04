@@ -6,8 +6,6 @@
 
 namespace AM
 {
-struct ChunkPosition;
-
 namespace Client
 {
 class Simulation;

@@ -116,8 +116,9 @@ void ClientConnectionSystem::sendConnectionResponse(NetworkID networkID,
     connectionResponse.y = spawnY;
 
     // Fill in the map's size.
-    connectionResponse.mapXLengthChunks = world.tileMap.xLengthChunks();
-    connectionResponse.mapYLengthChunks = world.tileMap.yLengthChunks();
+    const ChunkExtent& mapChunkExtent{world.tileMap.getChunkExtent()};
+    connectionResponse.mapXLengthChunks = mapChunkExtent.xLength;
+    connectionResponse.mapYLengthChunks = mapChunkExtent.yLength;
 
     // Send the connection response message.
     network.serializeAndSend(networkID, connectionResponse, currentTick);

@@ -3,10 +3,10 @@
 #include "NetworkDefs.h"
 #include "QueuedEvents.h"
 #include "ChunkUpdateRequest.h"
+#include "ChunkPosition.h"
 
 namespace AM
 {
-struct ChunkPosition;
 struct ChunkUpdate;
 
 namespace Server

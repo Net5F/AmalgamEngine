@@ -18,11 +18,8 @@ namespace AM
 namespace Client
 {
 TileMap::TileMap(SpriteData& inSpriteData)
-: mapXLengthChunks{0}
-, mapYLengthChunks{0}
-, mapXLengthTiles{0}
-, mapYLengthTiles{0}
-, tileCount{0}
+: chunkExtent{}
+, tileExtent{}
 , spriteData{inSpriteData}
 {
     if (Config::RUN_OFFLINE) {
@@ -60,13 +57,13 @@ void TileMap::setMapSize(unsigned int inMapXLengthChunks,
                          unsigned int inMapYLengthChunks)
 {
     // Set our map size.
-    mapXLengthChunks = inMapXLengthChunks;
-    mapYLengthChunks = inMapYLengthChunks;
-    mapXLengthTiles = mapXLengthChunks * SharedConfig::CHUNK_WIDTH;
-    mapYLengthTiles = mapYLengthChunks * SharedConfig::CHUNK_WIDTH;
+    chunkExtent.xLength = inMapXLengthChunks;
+    chunkExtent.yLength = inMapYLengthChunks;
+    tileExtent.xLength = (chunkExtent.xLength * SharedConfig::CHUNK_WIDTH);
+    tileExtent.yLength = (chunkExtent.yLength * SharedConfig::CHUNK_WIDTH);
 
     // Resize the tiles vector to fit the map.
-    tiles.resize(mapXLengthTiles * mapYLengthTiles);
+    tiles.resize(tileExtent.xLength * tileExtent.yLength);
 }
 
 void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
@@ -119,29 +116,14 @@ const Tile& TileMap::getTile(unsigned int x, unsigned int y) const
     return tiles[linearizeTileIndex(x, y)];
 }
 
-unsigned int TileMap::xLengthChunks() const
+const ChunkExtent& TileMap::getChunkExtent() const
 {
-    return mapXLengthChunks;
+    return chunkExtent;
 }
 
-unsigned int TileMap::yLengthChunks() const
+const TileExtent& TileMap::getTileExtent() const
 {
-    return mapYLengthChunks;
-}
-
-unsigned int TileMap::xLengthTiles() const
-{
-    return mapXLengthTiles;
-}
-
-unsigned int TileMap::yLengthTiles() const
-{
-    return mapYLengthTiles;
-}
-
-unsigned int TileMap::getTileCount() const
-{
-    return tileCount;
+    return tileExtent;
 }
 
 } // End namespace Client

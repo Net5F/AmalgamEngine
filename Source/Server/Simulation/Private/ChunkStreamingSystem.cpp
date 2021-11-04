@@ -4,8 +4,6 @@
 #include "ClientSimData.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "ChunkPosition.h"
-#include "ChunkRange.h"
 #include "ChunkUpdate.h"
 #include "SharedConfig.h"
 #include "Serialize.h"

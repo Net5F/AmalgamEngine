@@ -2,12 +2,11 @@
 
 #include "QueuedEvents.h"
 #include "ChunkUpdate.h"
+#include "ChunkPosition.h"
 #include <SDL2/SDL_stdinc.h>
 
 namespace AM
 {
-struct ChunkPosition;
-
 namespace Client
 {
 class Simulation;

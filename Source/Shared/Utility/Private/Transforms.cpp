@@ -21,8 +21,8 @@ ScreenPoint Transforms::worldToScreen(const Position& position,
           / SharedConfig::TILE_WORLD_WIDTH;
 
     // Convert cartesian world point to isometric screen point.
-    float screenX = (position.x - position.y) * (TILE_WIDTH_SCALE / 2.f);
-    float screenY = (position.x + position.y) * (TILE_HEIGHT_SCALE / 2.f);
+    float screenX{(position.x - position.y) * (TILE_WIDTH_SCALE / 2.f)};
+    float screenY{(position.x + position.y) * (TILE_HEIGHT_SCALE / 2.f)};
 
     // The Z coordinate scaling is independent of X/Y and only affects the
     // screen's Y axis. Scale and apply it.
@@ -44,8 +44,8 @@ Position Transforms::screenToWorld(const ScreenPoint& screenPoint,
                                    float zoomFactor)
 {
     // Remove the camera zoom.
-    float x = screenPoint.x / zoomFactor;
-    float y = screenPoint.y / zoomFactor;
+    float x{screenPoint.x / zoomFactor};
+    float y{screenPoint.y / zoomFactor};
 
     // Calc the scaling factor going from screen tiles to world tiles.
     static const float TILE_WIDTH_SCALE
@@ -56,8 +56,8 @@ Position Transforms::screenToWorld(const ScreenPoint& screenPoint,
           / SharedConfig::TILE_SCREEN_HEIGHT;
 
     // Calc the world position.
-    float worldX = ((2.f * y) + x) * TILE_WIDTH_SCALE;
-    float worldY = ((2.f * y) - x) * TILE_HEIGHT_SCALE / 2.f;
+    float worldX{((2.f * y) + x) * TILE_WIDTH_SCALE};
+    float worldY{((2.f * y) - x) * TILE_HEIGHT_SCALE / 2.f};
 
     // TODO: Figure out how to handle Z.
     return {worldX, worldY, 0};

@@ -6,8 +6,7 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "NeedsAdjacentChunks.h"
-#include "ChunkPosition.h"
-#include "ChunkRange.h"
+#include "ChunkExtent.h"
 #include "ChunkUpdateRequest.h"
 #include "SharedConfig.h"
 #include "Config.h"
@@ -68,20 +67,21 @@ void ChunkUpdateSystem::requestAllInRangeChunks(
     // Determine which chunks are in range of each chunk position.
     // Note: This is hardcoded to assume the range is all chunks directly
     //       surrounding a given chunk.
-    ChunkRange currentRange{(currentChunk.x - 1), (currentChunk.y - 1), 3, 3};
+    ChunkExtent currentExtent{(currentChunk.x - 1), (currentChunk.y - 1), 3, 3};
 
     // Bound the range to the map boundaries.
-    ChunkRange mapBounds{0, 0, static_cast<int>(world.tileMap.xLengthChunks()),
-                         static_cast<int>(world.tileMap.yLengthChunks())};
-    currentRange.intersectWith(mapBounds);
+    const ChunkExtent& mapChunkExtent{world.tileMap.getChunkExtent()};
+    ChunkExtent mapBounds{0, 0, static_cast<int>(mapChunkExtent.xLength),
+                         static_cast<int>(mapChunkExtent.yLength)};
+    currentExtent.intersectWith(mapBounds);
 
     // Iterate over the current range, adding any new chunks to a request.
     ChunkUpdateRequest chunkUpdateRequest{};
-    for (int i = 0; i < currentRange.yLength; ++i) {
-        for (int j = 0; j < currentRange.xLength; ++j) {
+    for (int i = 0; i < currentExtent.yLength; ++i) {
+        for (int j = 0; j < currentExtent.xLength; ++j) {
             // If this chunk isn't in range of the previous chunk, add it.
-            int chunkX{currentRange.x + j};
-            int chunkY{currentRange.y + i};
+            int chunkX{currentExtent.x + j};
+            int chunkY{currentExtent.y + i};
 
             chunkUpdateRequest.requestedChunks.emplace_back(chunkX, chunkY);
         }
@@ -97,26 +97,27 @@ void ChunkUpdateSystem::requestNewInRangeChunks(
     // Determine which chunks are in range of each chunk position.
     // Note: This is hardcoded to assume the range is all chunks directly
     //       surrounding a given chunk.
-    ChunkRange previousRange{(previousChunk.x - 1), (previousChunk.y - 1), 3,
+    ChunkExtent previousExtent{(previousChunk.x - 1), (previousChunk.y - 1), 3,
                              3};
-    ChunkRange currentRange{(currentChunk.x - 1), (currentChunk.y - 1), 3, 3};
+    ChunkExtent currentExtent{(currentChunk.x - 1), (currentChunk.y - 1), 3, 3};
 
     // Bound each range to the map boundaries.
-    ChunkRange mapBounds{0, 0, static_cast<int>(world.tileMap.xLengthChunks()),
-                         static_cast<int>(world.tileMap.yLengthChunks())};
-    previousRange.intersectWith(mapBounds);
-    currentRange.intersectWith(mapBounds);
+    const ChunkExtent& mapChunkExtent{world.tileMap.getChunkExtent()};
+    ChunkExtent mapBounds{0, 0, static_cast<int>(mapChunkExtent.xLength),
+                         static_cast<int>(mapChunkExtent.yLength)};
+    previousExtent.intersectWith(mapBounds);
+    currentExtent.intersectWith(mapBounds);
 
-    // Iterate over the current range, adding any new chunks to a request.
+    // Iterate over the current extent, adding any new chunks to a request.
     ChunkUpdateRequest chunkUpdateRequest;
-    for (int i = 0; i < currentRange.yLength; ++i) {
-        for (int j = 0; j < currentRange.xLength; ++j) {
+    for (int i = 0; i < currentExtent.yLength; ++i) {
+        for (int j = 0; j < currentExtent.xLength; ++j) {
             // If this chunk isn't in range of the previous chunk, add it.
-            int chunkX{currentRange.x + j};
-            int chunkY{currentRange.y + i};
+            int chunkX{currentExtent.x + j};
+            int chunkY{currentExtent.y + i};
             ChunkPosition chunkPosition{chunkX, chunkY};
 
-            if (!(previousRange.containsPosition(chunkPosition))) {
+            if (!(previousExtent.containsPosition(chunkPosition))) {
                 chunkUpdateRequest.requestedChunks.emplace_back(chunkX, chunkY);
             }
         }

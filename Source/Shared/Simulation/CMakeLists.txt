@@ -4,8 +4,9 @@ target_sources(Shared
 	PUBLIC
         Public/AreaOfInterest.h
         Public/BoundingBox.h
-        Public/DiscretePositionTools.h
-        Public/DiscreteRangeTools.h
+        Public/DiscreteExtent.h
+        Public/DiscretePosition.h
+        Public/DiscreteTagTypes.h
         Public/MovementHelpers.h
         Public/Components/Camera.h
         Public/Components/Input.h
@@ -14,12 +15,12 @@ target_sources(Shared
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
+        Public/TileMap/ChunkExtent.h
         Public/TileMap/ChunkPosition.h
-        Public/TileMap/ChunkRange.h
         Public/TileMap/ChunkSnapshot.h
+        Public/TileMap/TileExtent.h
         Public/TileMap/TileMapSnapshot.h
         Public/TileMap/TilePosition.h
-        Public/TileMap/TileRange.h
         Public/TileMap/TileSnapshot.h
 )
 

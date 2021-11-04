@@ -5,6 +5,7 @@
 #include "MovementHelpers.h"
 #include "Transforms.h"
 #include "ClientTransforms.h"
+#include "TileExtent.h"
 
 #include <SDL2/SDL_rect.h>
 
@@ -47,11 +48,17 @@ std::vector<SpriteRenderInfo>&
 
 void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 {
-    // TODO: Find the tile range that the camera is viewing.
+    // Find the tile that the camera is centered on.
+    ScreenPoint centerPoint{(camera.extent.width / 2), (camera.extent.height / 2)};
+    TilePosition centerTile{Transforms::screenToTile(centerPoint, camera)};
+
+    // Calc the camera's tile extent, clipped to the world bounds.
+    TileExtent tileViewExtent{centerTile, SharedConfig::AOI_RADIUS_TILES};
+    tileViewExtent.intersectWith(tileMap.getTileExtent());
 
     // Gather tiles.
-    for (int y = 0; y < static_cast<int>(tileMap.yLengthTiles()); ++y) {
-        for (int x = 0; x < static_cast<int>(tileMap.xLengthTiles()); ++x) {
+    for (int y = tileViewExtent.y; y < tileViewExtent.yMax(); ++y) {
+        for (int x = tileViewExtent.x; x < tileViewExtent.xMax(); ++x) {
             // Figure out which tile we're looking at.
             const Tile& tile = tileMap.getTile(x, y);
 

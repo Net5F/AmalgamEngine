@@ -15,7 +15,7 @@ void printUsage()
         "Usage: MapGenerator.exe <XLength> <YLength> <FillSpriteId>\n"
         "  XLength: The map's x-axis length in chunks.\n"
         "  YLength: The map's y-axis length in chunks.\n"
-        "  FillSpriteId: The string ID of the sprite to fill the map with.");
+        "  FillSpriteId: The string ID of the sprite to fill the map with.\n");
     std::fflush(stdout);
 }
 
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
     mapGenerator.generateAndSave("TileMap.bin");
 
     double timeTaken = timer.getDeltaSeconds(false) - startTime;
-    std::printf("Map generated and saved in %.6fs", timeTaken);
+    std::printf("Map generated and saved in %.6fs.\n", timeTaken);
     std::fflush(stdout);
 
     return 0;

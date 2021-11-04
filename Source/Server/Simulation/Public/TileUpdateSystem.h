@@ -5,8 +5,6 @@
 
 namespace AM
 {
-struct ChunkPosition;
-
 namespace Server
 {
 class Simulation;

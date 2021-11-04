@@ -48,7 +48,7 @@ void Renderer::render()
         playerCamera.prevPosition, playerCamera.position, alpha);
 
     // Set the camera at the lerped position.
-    Camera lerpedCamera = playerCamera;
+    Camera lerpedCamera{playerCamera};
     lerpedCamera.position.x = cameraLerp.x;
     lerpedCamera.position.y = cameraLerp.y;
 

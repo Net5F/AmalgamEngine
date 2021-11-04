@@ -57,9 +57,10 @@ void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
     TilePosition tilePosition = Transforms::screenToTile(screenPoint, playerCamera);
 
     // If the index is outside of the world bounds, ignore this event.
+    const TileExtent& mapTileExtent{world.tileMap.getTileExtent()};
     if ((tilePosition.x < 0) || (tilePosition.y < 0)
-        || (tilePosition.x >= static_cast<int>(world.tileMap.xLengthTiles()))
-        || (tilePosition.y >= static_cast<int>(world.tileMap.yLengthTiles()))) {
+        || (tilePosition.x >= mapTileExtent.xLength)
+        || (tilePosition.y >= mapTileExtent.yLength)) {
         return;
     }
 
@@ -85,9 +86,10 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     TilePosition tilePosition = Transforms::screenToTile(screenPoint, playerCamera);
 
     // If the index is outside of the world bounds, ignore this event.
+    const TileExtent& mapTileExtent{world.tileMap.getTileExtent()};
     if ((tilePosition.x < 0) || (tilePosition.y < 0)
-        || (tilePosition.x >= static_cast<int>(world.tileMap.xLengthTiles()))
-        || (tilePosition.y >= static_cast<int>(world.tileMap.yLengthTiles()))) {
+        || (tilePosition.x >= mapTileExtent.xLength)
+        || (tilePosition.y >= mapTileExtent.yLength)) {
         return;
     }
 

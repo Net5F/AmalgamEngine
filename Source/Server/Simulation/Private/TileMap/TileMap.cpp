@@ -17,11 +17,8 @@ namespace AM
 namespace Server
 {
 TileMap::TileMap(SpriteData& inSpriteData)
-: mapXLengthChunks{0}
-, mapYLengthChunks{0}
-, mapXLengthTiles{0}
-, mapYLengthTiles{0}
-, tileCount{0}
+: chunkExtent{}
+, tileExtent{}
 , spriteData{inSpriteData}
 {
     // Prime a timer.
@@ -37,8 +34,8 @@ TileMap::TileMap(SpriteData& inSpriteData)
 
     // Print the time taken.
     double timeTaken = timer.getDeltaSeconds(false);
-    LOG_INFO("Map loaded in %.6fs. Size: (%u, %u).", timeTaken, mapXLengthTiles,
-             mapYLengthTiles);
+    LOG_INFO("Map loaded in %.6fs. Size: (%u, %u).", timeTaken, tileExtent.xLength,
+             tileExtent.yLength);
 }
 
 TileMap::~TileMap()
@@ -91,50 +88,35 @@ const Tile& TileMap::getTile(unsigned int x, unsigned int y) const
     return tiles[linearizeTileIndex(x, y)];
 }
 
-unsigned int TileMap::xLengthChunks() const
+const ChunkExtent& TileMap::getChunkExtent() const
 {
-    return mapXLengthChunks;
+    return chunkExtent;
 }
 
-unsigned int TileMap::yLengthChunks() const
+const TileExtent& TileMap::getTileExtent() const
 {
-    return mapYLengthChunks;
-}
-
-unsigned int TileMap::xLengthTiles() const
-{
-    return mapXLengthTiles;
-}
-
-unsigned int TileMap::yLengthTiles() const
-{
-    return mapYLengthTiles;
-}
-
-unsigned int TileMap::getTileCount() const
-{
-    return tileCount;
+    return tileExtent;
 }
 
 void TileMap::loadMap(TileMapSnapshot& mapSnapshot)
 {
     /* Load the snapshot into this map. */
     // Load the header data.
-    mapXLengthChunks = mapSnapshot.xLengthChunks;
-    mapYLengthChunks = mapSnapshot.yLengthChunks;
-    mapXLengthTiles = mapXLengthChunks * SharedConfig::CHUNK_WIDTH;
-    mapYLengthTiles = mapYLengthChunks * SharedConfig::CHUNK_WIDTH;
+    chunkExtent.xLength = mapSnapshot.xLengthChunks;
+    chunkExtent.yLength = mapSnapshot.yLengthChunks;
+    tileExtent.xLength = (chunkExtent.xLength * SharedConfig::CHUNK_WIDTH);
+    tileExtent.yLength = (chunkExtent.yLength * SharedConfig::CHUNK_WIDTH);
 
     // Resize the tiles vector to fit the map.
-    tiles.resize(mapXLengthTiles * mapYLengthTiles);
+    tiles.resize(tileExtent.xLength * tileExtent.yLength);
 
     // Load the chunks into the tiles vector.
     for (unsigned int chunkIndex = 0; chunkIndex < mapSnapshot.chunks.size();
          ++chunkIndex) {
         // Calc the coordinates of this chunk's first tile.
-        unsigned int startX{(chunkIndex % mapXLengthChunks)
+        unsigned int startX{(chunkIndex % chunkExtent.xLength)
                             * SharedConfig::CHUNK_WIDTH};
-        unsigned int startY{(chunkIndex / mapXLengthChunks)
+        unsigned int startY{(chunkIndex / chunkExtent.xLength)
                             * SharedConfig::CHUNK_WIDTH};
         ChunkSnapshot& chunk{mapSnapshot.chunks[chunkIndex]};
 
@@ -174,17 +156,16 @@ void TileMap::save(const std::string& fileName)
     // Save the header data.
     TileMapSnapshot mapSnapshot{};
     mapSnapshot.version = MAP_FORMAT_VERSION;
-    mapSnapshot.xLengthChunks = mapXLengthChunks;
-    mapSnapshot.yLengthChunks = mapYLengthChunks;
+    mapSnapshot.xLengthChunks = chunkExtent.xLength;
+    mapSnapshot.yLengthChunks = chunkExtent.yLength;
 
     // Allocate room for our chunks.
-    unsigned int chunkCount{mapXLengthChunks * mapYLengthChunks};
-    mapSnapshot.chunks.resize(chunkCount);
+    mapSnapshot.chunks.resize(chunkExtent.getCount());
 
     // Save our tiles into the snapshot as chunks.
     unsigned int startLinearTileIndex{0};
-    unsigned int chunksProcessed{0};
-    for (unsigned int i = 0; i < chunkCount; ++i) {
+    int chunksProcessed{0};
+    for (unsigned int i = 0; i < chunkExtent.getCount(); ++i) {
         ChunkSnapshot& chunk{mapSnapshot.chunks[i]};
 
         // Process each tile in this chunk.
@@ -208,7 +189,7 @@ void TileMap::save(const std::string& fileName)
             tilesProcessed++;
             if (tilesProcessed == SharedConfig::CHUNK_WIDTH) {
                 nextLinearTileIndex
-                    += (mapXLengthTiles - SharedConfig::CHUNK_WIDTH);
+                    += (tileExtent.xLength - SharedConfig::CHUNK_WIDTH);
                 tilesProcessed = 0;
             }
         }
@@ -219,9 +200,9 @@ void TileMap::save(const std::string& fileName)
         // If we've processed all the chunks in this row, increment to the
         // next row.
         chunksProcessed++;
-        if (chunksProcessed == mapXLengthChunks) {
+        if (chunksProcessed == chunkExtent.xLength) {
             startLinearTileIndex
-                += ((SharedConfig::CHUNK_WIDTH - 1) * mapXLengthTiles);
+                += ((SharedConfig::CHUNK_WIDTH - 1) * tileExtent.xLength);
             chunksProcessed = 0;
         }
     }

@@ -2,6 +2,8 @@
 
 #include "Tile.h"
 #include "BinaryBuffer.h"
+#include "ChunkExtent.h"
+#include "TileExtent.h"
 #include <array>
 #include <fstream>
 
@@ -71,29 +73,14 @@ public:
     const Tile& getTile(unsigned int x, unsigned int y) const;
 
     /**
-     * Returns the length, in chunks, of the map's X axis.
+     * Returns the map extent, with chunks as the unit.
      */
-    unsigned int xLengthChunks() const;
+    const ChunkExtent& getChunkExtent() const;
 
     /**
-     * Returns the length, in chunks, of the map's Y axis.
+     * Returns the map extent, with tiles as the unit.
      */
-    unsigned int yLengthChunks() const;
-
-    /**
-     * Returns the length, in tiles, of the map's X axis.
-     */
-    unsigned int xLengthTiles() const;
-
-    /**
-     * Returns the length, in tiles, of the map's Y axis.
-     */
-    unsigned int yLengthTiles() const;
-
-    /**
-     * Returns the total number of tiles in the map.
-     */
-    unsigned int getTileCount() const;
+    const TileExtent& getTileExtent() const;
 
 private:
     /**
@@ -102,23 +89,14 @@ private:
      */
     inline unsigned int linearizeTileIndex(int x, int y) const
     {
-        return (y * mapXLengthTiles) + x;
+        return (y * tileExtent.xLength) + x;
     }
 
-    /** The length, in chunks, of the map's X axis. */
-    unsigned int mapXLengthChunks;
+    /** The map's extent, with chunks as the unit. */
+    ChunkExtent chunkExtent;
 
-    /** The length, in chunks, of the map's Y axis. */
-    unsigned int mapYLengthChunks;
-
-    /** The length, in tiles, of the map's X axis. */
-    unsigned int mapXLengthTiles;
-
-    /** The length, in tiles, of the map's Y axis. */
-    unsigned int mapYLengthTiles;
-
-    /** The total number of tiles that are in this map. */
-    unsigned int tileCount;
+    /** The map's extent, with tiles as the unit. */
+    TileExtent tileExtent;
 
     /** The tiles that make up this map, stored in row-major order. */
     std::vector<Tile> tiles;

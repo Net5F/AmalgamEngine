@@ -97,6 +97,20 @@ public:
     //       others.
     /** The value used to scale world Z-axis units to screen Y-axis units. */
     static constexpr float Z_SCREEN_SCALE = 2.f;
+
+    //-------------------------------------------------------------------------
+    // All
+    //-------------------------------------------------------------------------
+    /** The number of tiles around an entity that are considered to be within
+        the entity's "Area of Interest".
+        Used in the simulation to limit what gets sent to each client, and in
+        rendering to limit what gets rendered.
+
+        Note: The AOI is a square surrounding a center tile, meaning the width
+              will be 1 greater than radius * 2. E.g. if the radius is 3, the
+              width will be 1 (center) + 3 (left radius) + 3 (right radius).
+     */
+    static constexpr unsigned int AOI_RADIUS_TILES = 8;
 };
 
 } // End namespace AM
