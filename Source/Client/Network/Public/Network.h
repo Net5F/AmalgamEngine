@@ -176,18 +176,18 @@ template<typename T>
 void Network::serializeAndSend(const T& messageStruct)
 {
     // Allocate the buffer.
-    BinaryBufferSharedPtr messageBuffer
-        = std::make_shared<BinaryBuffer>(Peer::MAX_WIRE_SIZE);
+    std::size_t totalMessageSize{CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE + Serialize::measureSize(messageStruct)};
+    BinaryBufferSharedPtr messageBuffer{std::make_shared<BinaryBuffer>(totalMessageSize)};
 
     // Serialize the message struct into the buffer, leaving room for the
     // headers.
-    std::size_t messageSize = Serialize::toBuffer(
+    std::size_t messageSize{Serialize::toBuffer(
         messageBuffer->data(), messageBuffer->size(), messageStruct,
-        (CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE));
+        (CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE))};
 
     // Check that the message isn't too big.
-    const unsigned int totalMessageSize
-        = CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE + messageSize;
+    // Note: We don't compress messages on this side, so we know the final
+    //       message size at this point.
     if ((totalMessageSize > Peer::MAX_WIRE_SIZE)
         || (messageSize > UINT16_MAX)) {
         LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
@@ -206,9 +206,6 @@ void Network::serializeAndSend(const T& messageStruct)
     // Copy the message size into the message header.
     ByteTools::write16(messageSize, (messageBuffer->data() + CLIENT_HEADER_SIZE
                                      + MessageHeaderIndex::Size));
-
-    // Shrink the buffer to fit.
-    messageBuffer->resize(totalMessageSize);
 
     // Send the message.
     send(messageBuffer);
