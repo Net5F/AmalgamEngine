@@ -15,13 +15,18 @@ namespace Server
 class SpriteData;
 
 /**
- * Represents a tile map.
- * Loads TileMap.bin and owns its data.
+ * Owns and manages the world's tile map state.
+ * Tiles are conceptually organized into 16x16 chunks.
+ *
+ * Persisted tile map data is loaded from TileMap.bin.
  *
  * Note: This class expects a TileMap.bin file to be present in the same
  *       directory as the application executable.
  *
- * The map is composed of tiles, organized into 16x16 chunks.
+ * TODO: Server::TileMap and Client::TileMap use different Sprite classes (
+ *       and those Sprite classes are fundamentally different), so they can't
+ *       be a single shared class. However, they do share a lot of code, so
+ *       we should find a way to factor that code out into a shared class.
  */
 class TileMap
 {

@@ -15,11 +15,15 @@ namespace Client
 class SpriteData;
 
 /**
- * Represents a tile map.
+ * Owns and manages the world's tile map state.
+ * Tiles are conceptually organized into 16x16 chunks.
  *
  * Tile map data is streamed from the server at runtime.
  *
- * The map is composed of tiles, organized into 16x16 chunks.
+ * TODO: Server::TileMap and Client::TileMap use different Sprite classes (
+ *       and those Sprite classes are fundamentally different), so they can't
+ *       be a single shared class. However, they do share a lot of code, so
+ *       we should find a way to factor that code out into a shared class.
  */
 class TileMap
 {

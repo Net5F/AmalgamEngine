@@ -10,4 +10,6 @@ namespace AM
  */
 using ChunkExtent = DiscreteExtent<ChunkTag>;
 
+// TODO: Can we change this to a class and add an asTileExtent()?
+
 } // End namespace AM

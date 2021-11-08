@@ -10,7 +10,7 @@ namespace AM
 namespace Client
 {
 /**
- * Represents a 32x32-unit tile in the tile map.
+ * A 32x32-unit tile in the tile map.
  *
  * A tile consists of layers of sprites, which can be floors, grass, walls,
  * etc.
@@ -20,7 +20,9 @@ namespace Client
  */
 struct Tile {
 public:
-    /** Represents a sprite, placed on a tile. */
+    /**
+     * Represents a sprite, placed on a tile.
+     */
     struct SpriteLayer {
         /** The sprite that this layer contains. */
         const Sprite* sprite{nullptr};
