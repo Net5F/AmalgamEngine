@@ -7,7 +7,6 @@ namespace AM
 {
 namespace Server
 {
-class Simulation;
 class World;
 class Network;
 

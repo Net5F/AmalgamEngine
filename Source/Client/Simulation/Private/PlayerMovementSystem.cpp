@@ -8,6 +8,7 @@
 #include "Input.h"
 #include "InputHistory.h"
 #include "PreviousPosition.h"
+#include "Transforms.h"
 #include "SharedConfig.h"
 #include "Config.h"
 #include "Log.h"
@@ -28,59 +29,64 @@ PlayerMovementSystem::PlayerMovementSystem(
 
 void PlayerMovementSystem::processMovements()
 {
-    entt::registry& registry = world.registry;
-    Position& currentPosition = registry.get<Position>(world.playerEntity);
-    Movement& currentMovement = registry.get<Movement>(world.playerEntity);
-    Input& currentInput = registry.get<Input>(world.playerEntity);
-
     // Save the old position.
-    PreviousPosition& previousPosition
-        = registry.get<PreviousPosition>(world.playerEntity);
-    previousPosition = currentPosition;
+    Position& position{world.registry.get<Position>(world.playerEntity)};
+    PreviousPosition& previousPosition{world.registry.get<PreviousPosition>(world.playerEntity)};
+    previousPosition = position;
 
+    // If we're online, process any updates from the server.
+    Movement& movement{world.registry.get<Movement>(world.playerEntity)};
+    Input& input{world.registry.get<Input>(world.playerEntity)};
     if (!Config::RUN_OFFLINE) {
         // Apply any player entity updates from the server.
-        InputHistory& inputHistory
-            = registry.get<InputHistory>(world.playerEntity);
-        Uint32 latestReceivedTick
-            = processPlayerUpdates(currentPosition, previousPosition,
-                                   currentMovement, currentInput, inputHistory);
+        InputHistory& inputHistory{world.registry.get<InputHistory>(world.playerEntity)};
+        Uint32 latestReceivedTick{processPlayerUpdates(position, previousPosition, movement, input, inputHistory)};
 
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
-            replayInputs(latestReceivedTick, currentPosition, currentMovement,
+            replayInputs(latestReceivedTick, position, movement,
                          inputHistory);
 
             // Check if there was a mismatch between the position we had and
             // where the server thought we should be.
-            if (previousPosition != currentPosition) {
+            if (previousPosition != position) {
                 LOG_INFO("Predicted position mismatched after replay: (%.6f, "
                          "%.6f) -> (%.6f, %.6f)",
                          previousPosition.x, previousPosition.y,
-                         currentPosition.x, currentPosition.y);
+                         position.x, position.y);
                 LOG_INFO("latestReceivedTick: %u", latestReceivedTick);
             }
         }
     }
 
-    // Use the current input state to update movement for this tick.
-    MovementHelpers::moveEntity(currentPosition, currentMovement,
-                                currentInput.inputStates,
+    // Use the current input state to update our velocity for this tick.
+    MovementHelpers::updateVelocity(movement, input.inputStates,
                                 SharedConfig::SIM_TICK_TIMESTEP_S);
+
+    // Update our position, using the new velocity.
+    MovementHelpers::updatePosition(position, movement,
+                                SharedConfig::SIM_TICK_TIMESTEP_S);
+
+    // Update our bounding box to match the new position.
+    Sprite& sprite{world.registry.get<Sprite>(world.playerEntity)};
+    BoundingBox& boundingBox{world.registry.get<BoundingBox>(world.playerEntity)};
+    boundingBox = Transforms::modelToWorld(sprite.modelBounds, position);
+
+    // TODO: Update our placement in the spatial partition.
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(
-    Position& currentPosition, PreviousPosition& previousPosition,
-    Movement& currentMovement, Input& currentInput, InputHistory& inputHistory)
+    Position& position, PreviousPosition& previousPosition,
+    Movement& movement, Input& input, InputHistory& inputHistory)
 {
     /* Process any messages for us from the server. */
-    Uint32 latestReceivedTick = 0;
+    Uint32 latestReceivedTick{0};
     std::shared_ptr<const EntityUpdate> receivedUpdate{nullptr};
     while (playerUpdateQueue.pop(receivedUpdate)) {
         /* Validate the received tick. */
         // Check that the received tick is in the past.
-        Uint32 receivedTick = receivedUpdate->tickNum;
-        Uint32 currentTick = sim.getCurrentTick();
+        Uint32 receivedTick{receivedUpdate->tickNum};
+        Uint32 currentTick{sim.getCurrentTick()};
         checkReceivedTickValidity(receivedTick, currentTick);
 
         // Check that the received tick is ahead of our latest.
@@ -93,8 +99,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         latestReceivedTick = receivedTick;
 
         /* Find the player data. */
-        const std::vector<EntityState>& entities = receivedUpdate->entityStates;
-        const EntityState* playerUpdate = nullptr;
+        const std::vector<EntityState>& entities{receivedUpdate->entityStates};
+        const EntityState* playerUpdate{nullptr};
         for (auto entityIt = entities.begin(); entityIt != entities.end();
              ++entityIt) {
             if (entityIt->entity == world.playerEntity) {
@@ -109,29 +115,29 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         }
 
         /* Apply the received movement and position. */
-        currentMovement = playerUpdate->movement;
-        currentPosition = playerUpdate->position;
+        movement = playerUpdate->movement;
+        position = playerUpdate->position;
 
         /* Check if the input is mismatched. */
         // Check that the diff is valid.
-        Uint32 tickDiff = sim.getCurrentTick() - receivedTick;
+        Uint32 tickDiff{sim.getCurrentTick() - receivedTick};
         checkTickDiffValidity(tickDiff);
 
         // Check if the received input disagrees with what we predicted.
-        const Input& receivedInput = playerUpdate->input;
+        const Input& receivedInput{playerUpdate->input};
         if (receivedInput.inputStates != inputHistory.inputHistory[tickDiff]) {
             // Our prediction was wrong, accept the received input and set all
             // inputs in the history after the mismatched input to match it.
             // TODO: This may be incorrect, but it's uncommon and hard to
             // verify. We may want to more carefully overwrite existing inputs.
-            currentInput.inputStates = receivedInput.inputStates;
+            input.inputStates = receivedInput.inputStates;
             for (unsigned int i = 0; i <= tickDiff; ++i) {
                 inputHistory.inputHistory[i] = receivedInput.inputStates;
             }
 
             // Set our old position to the current so we aren't oddly lerping
             // back.
-            previousPosition = currentPosition;
+            previousPosition = position;
         }
     }
 
@@ -139,11 +145,11 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
 }
 
 void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
-                                        Position& currentPosition,
-                                        Movement& currentMovement,
+                                        Position& position,
+                                        Movement& movement,
                                         InputHistory& inputHistory)
 {
-    Uint32 currentTick = sim.getCurrentTick();
+    Uint32 currentTick{sim.getCurrentTick()};
     checkReceivedTickValidity(latestReceivedTick, currentTick);
 
     /* Replay all inputs newer than latestReceivedTick, except the current
@@ -151,12 +157,16 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
     for (Uint32 tickToProcess = (latestReceivedTick + 1);
          tickToProcess < currentTick; ++tickToProcess) {
         // Check that the diff is valid.
-        Uint32 tickDiff = currentTick - tickToProcess;
+        Uint32 tickDiff{currentTick - tickToProcess};
         checkTickDiffValidity(tickDiff);
 
-        // Use the appropriate input state to update movement.
-        MovementHelpers::moveEntity(currentPosition, currentMovement,
+        // Use the appropriate input state to update our velocity.
+        MovementHelpers::updateVelocity(movement,
                                     inputHistory.inputHistory[tickDiff],
+                                    SharedConfig::SIM_TICK_TIMESTEP_S);
+
+        // Update our position, using the new velocity.
+        MovementHelpers::updatePosition(position, movement,
                                     SharedConfig::SIM_TICK_TIMESTEP_S);
     }
 }

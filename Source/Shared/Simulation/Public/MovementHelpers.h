@@ -23,14 +23,19 @@ public:
     static constexpr float acceleration = 750;
 
     /**
-     * Moves the given PositionComponent and MovementComponent based on the
-     * given inputStates and deltaSeconds.
+     * Uses the given input state and time delta to update the given movement.
      *
-     * @post The given position and movement components are modified in-place to
-     * the new data.
+     * @post The given movement component is modified in-place to the new data.
      */
-    static void moveEntity(Position& position, Movement& movement,
-                           Input::StateArr& inputStates, double deltaSeconds);
+    static void updateVelocity(Movement& movement, Input::StateArr& inputStates,
+                               double deltaSeconds);
+
+    /**
+     * Uses the given time delta and movement to update the given position.
+     *
+     * @post The given position component is modified in-place to the new data.
+     */
+    static void updatePosition(Position& position, Movement& movement, double deltaSeconds);
 
     /**
      * Returns a position interpolated between previousPos and position.
@@ -39,14 +44,6 @@ public:
                                         Position& position, double alpha);
 
 private:
-    /**
-     * Moves the given MovementComponent based on the given inputStates and
-     * deltaSeconds.
-     *
-     * @post The given movement component is modified in-place to the new data.
-     */
-    static void updateVelocity(Movement& movement, Input::StateArr& inputStates,
-                               double deltaSeconds);
 };
 
 } // End namespace AM

@@ -10,7 +10,7 @@ namespace AM
  * Represents a position in the world.
  *
  * Generally, this will be a component attached to an entity, and will
- * correspond to the minimum x/y/z point on the entity's bounding box.
+ * correspond to the minimum x/y/z point (origin) of the entity's bounding box.
  */
 struct Position {
 public:

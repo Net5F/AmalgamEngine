@@ -8,7 +8,6 @@ namespace AM
 {
 namespace Client
 {
-class Simulation;
 class World;
 class Network;
 
@@ -49,7 +48,7 @@ private:
 
     /** Used to access the player entity and components. */
     World& world;
-    /** Used to send chunk update request messages. */
+    /** Used to send tile update request messages. */
     Network& network;
 
     /** Tile update requests, received from the UI. */

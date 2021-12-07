@@ -2,6 +2,7 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
+#include "SpriteData.h"
 #include "SharedConfig.h"
 #include "Serialize.h"
 #include "ConnectionResponse.h"
@@ -10,7 +11,9 @@
 #include "PreviousPosition.h"
 #include "Movement.h"
 #include "ClientSimData.h"
+#include "BoundingBox.h"
 #include "Name.h"
+#include "Transforms.h"
 #include "Log.h"
 #include "Profiler.h"
 
@@ -20,10 +23,12 @@ namespace Server
 {
 ClientConnectionSystem::ClientConnectionSystem(
     Simulation& inSim, World& inWorld,
-    EventDispatcher& inNetworkEventDispatcher, Network& inNetwork)
+    EventDispatcher& inNetworkEventDispatcher, Network& inNetwork
+    , SpriteData& inSpriteData)
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)
+, spriteData{inSpriteData}
 , clientConnectedQueue(inNetworkEventDispatcher)
 , clientDisconnectedQueue(inNetworkEventDispatcher)
 {
@@ -54,7 +59,7 @@ void ClientConnectionSystem::processConnectEvents()
         entt::entity newEntity = registry.create();
         registry.emplace<Name>(newEntity,
                                std::to_string(static_cast<Uint32>(newEntity)));
-        registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0.0f);
+        Position& newPosition{registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0.0f)};
         registry.emplace<PreviousPosition>(newEntity, spawnPoint.x,
                                            spawnPoint.y, 0.0f);
         registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
@@ -65,6 +70,8 @@ void ClientConnectionSystem::processConnectEvents()
                             + SharedConfig::AOI_BUFFER_DISTANCE),
                            (SharedConfig::SCREEN_HEIGHT
                             + SharedConfig::AOI_BUFFER_DISTANCE)});
+        Sprite& newSprite{registry.emplace<Sprite>(newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
+        registry.emplace<BoundingBox>(newEntity, Transforms::modelToWorld(newSprite.modelBounds, newPosition));
         world.netIdMap[clientConnected.clientID] = newEntity;
 
         LOG_INFO("Constructed entity with netID: %u, entityID: %u",

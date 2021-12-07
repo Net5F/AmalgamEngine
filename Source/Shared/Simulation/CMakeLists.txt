@@ -1,5 +1,6 @@
 target_sources(Shared
     PRIVATE
+        Private/EntityTracker.cpp
         Private/MovementHelpers.cpp
 	PUBLIC
         Public/AreaOfInterest.h
@@ -7,6 +8,7 @@ target_sources(Shared
         Public/DiscreteExtent.h
         Public/DiscretePosition.h
         Public/DiscreteTagTypes.h
+        Public/EntityTracker.h
         Public/MovementHelpers.h
         Public/Components/Camera.h
         Public/Components/Input.h

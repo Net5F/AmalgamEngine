@@ -37,6 +37,9 @@ public:
     /** The maximum number of sprite layers a tile can have. */
     static constexpr unsigned int MAX_TILE_LAYERS = 8;
 
+    /** The string ID of our default sprite for character entities. */
+    static constexpr char DEFAULT_CHARACTER_SPRITE[] = "test_31";
+
     //-------------------------------------------------------------------------
     // Network
     //-------------------------------------------------------------------------

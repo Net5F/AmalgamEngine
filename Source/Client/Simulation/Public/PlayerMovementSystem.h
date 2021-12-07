@@ -29,26 +29,29 @@ public:
                          EventDispatcher& inNetworkEventDispatcher);
 
     /**
-     * Moves the player entity 1 sim tick into the future.
-     * Receives state messages, moves the player, replays inputs.
+     * Processes the player entity's movement for this tick.
+     *
+     * If we received any player entity movement updates from the server,
+     * applies them and replays inputs.
      */
     void processMovements();
 
 private:
     /**
-     * Receives any player entity updates from the server.
+     * Processes any waiting player entity updates (sent by the server).
+     *
      * @return The tick number of the newest message that we received.
      */
-    Uint32 processPlayerUpdates(Position& currentPosition,
+    Uint32 processPlayerUpdates(Position& position,
                                 PreviousPosition& previousPosition,
-                                Movement& currentMovement, Input& currentInput,
+                                Movement& movement, Input& input,
                                 InputHistory& inputHistory);
 
     /**
      * Replay any inputs that are from newer ticks than the latestReceivedTick.
      */
-    void replayInputs(Uint32 latestReceivedTick, Position& currentPosition,
-                      Movement& currentMovement, InputHistory& inputHistory);
+    void replayInputs(Uint32 latestReceivedTick, Position& position,
+                      Movement& movement, InputHistory& inputHistory);
 
     /**
      * If receivedTick > currentTick, logs an error.

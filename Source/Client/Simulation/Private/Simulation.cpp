@@ -11,6 +11,7 @@
 #include "NeedsAdjacentChunks.h"
 #include "Name.h"
 #include "ScreenRect.h"
+#include "Transforms.h"
 #include "Paths.h"
 #include "Config.h"
 #include "SharedConfig.h"
@@ -37,7 +38,7 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher,
 , playerInputSystem(*this, world)
 , serverUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, inNetworkEventDispatcher)
-, npcMovementSystem(*this, world, inNetworkEventDispatcher, inSpriteData)
+, npcMovementSystem(*this, world, inNetworkEventDispatcher, network, spriteData)
 , cameraSystem(*this, world)
 , currentTick(0)
 {
@@ -98,8 +99,8 @@ void Simulation::connect()
     // Set up the player's sim components.
     registry.emplace<Name>(newEntity,
                            std::to_string(static_cast<Uint32>(newEntity)));
-    registry.emplace<Position>(newEntity, connectionResponse.x,
-                               connectionResponse.y, 0.0f);
+    Position& playerPosition{registry.emplace<Position>(newEntity, connectionResponse.x,
+                               connectionResponse.y, 0.0f)};
     registry.emplace<PreviousPosition>(newEntity, connectionResponse.x,
                                        connectionResponse.y, 0.0f);
     registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
@@ -108,11 +109,16 @@ void Simulation::connect()
     // Set up the player's visual components.
     // TODO: Since sprite components hold static data, do we want them to
     //       just contain a ref to the actual data? Or is this copy better?
-    registry.emplace<Sprite>(newEntity, spriteData.get("test_31"));
+    Sprite& playerSprite{registry.emplace<Sprite>(newEntity, spriteData.get("test_31"))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
                              ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH,
                                         SharedConfig::SCREEN_HEIGHT});
+
+    // Set up the player's bounding box, based on their sprite.
+    registry.emplace<BoundingBox>(newEntity
+        , Transforms::modelToWorld(playerSprite.modelBounds, playerPosition));
+    // TODO: Update our placement in the spatial partition.
 
     // Set up the player's InputHistory component.
     registry.emplace<InputHistory>(newEntity);
@@ -133,17 +139,23 @@ void Simulation::fakeConnection()
     // Set up the player's sim components.
     registry.emplace<Name>(newEntity,
                            std::to_string(static_cast<Uint32>(newEntity)));
-    registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f);
+    Position& playerPosition{registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f)};
     registry.emplace<PreviousPosition>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
     registry.emplace<Sprite>(newEntity, spriteData.get("col_0"));
+    Sprite& playerSprite{registry.emplace<Sprite>(newEntity, spriteData.get("test_31"))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
                              ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH,
                                         SharedConfig::SCREEN_HEIGHT});
+
+    // Set up the player's bounding box, based on their sprite.
+    registry.emplace<BoundingBox>(newEntity
+        , Transforms::modelToWorld(playerSprite.modelBounds, playerPosition));
+    // TODO: Update our placement in the spatial partition.
 
     // Set up the player's InputHistory component.
     registry.emplace<InputHistory>(newEntity);

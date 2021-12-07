@@ -7,28 +7,6 @@
 
 namespace AM
 {
-void MovementHelpers::moveEntity(Position& position, Movement& movement,
-                                 Input::StateArr& inputStates,
-                                 double deltaSeconds)
-{
-    // Update the velocity.
-    updateVelocity(movement, inputStates, deltaSeconds);
-
-    // Update the position.
-    position.x += (deltaSeconds * movement.velX);
-    position.y += (deltaSeconds * movement.velY);
-    position.z += (deltaSeconds * movement.velZ);
-}
-
-Position MovementHelpers::interpolatePosition(PreviousPosition& previousPos,
-                                              Position& position, double alpha)
-{
-    float interpX = (position.x * alpha) + (previousPos.x * (1.0 - alpha));
-    float interpY = (position.y * alpha) + (previousPos.y * (1.0 - alpha));
-    float interpZ = (position.z * alpha) + (previousPos.z * (1.0 - alpha));
-    return {interpX, interpY, interpZ};
-}
-
 void MovementHelpers::updateVelocity(Movement& movement,
                                      Input::StateArr& inputStates,
                                      double deltaSeconds)
@@ -36,7 +14,7 @@ void MovementHelpers::updateVelocity(Movement& movement,
     // TODO: Ignoring while velocity is constant for testing.
     ignore(deltaSeconds);
 
-    static constexpr double VELOCITY = 30;
+    static constexpr double VELOCITY{30};
     // Y-axis (favors up).
     if (inputStates[Input::YUp] == Input::Pressed) {
         movement.velY = -VELOCITY;
@@ -69,6 +47,24 @@ void MovementHelpers::updateVelocity(Movement& movement,
     else {
         movement.velZ = 0;
     }
+}
+
+void MovementHelpers::updatePosition(Position& position, Movement& movement,
+                                 double deltaSeconds)
+{
+    // Update the position.
+    position.x += (deltaSeconds * movement.velX);
+    position.y += (deltaSeconds * movement.velY);
+    position.z += (deltaSeconds * movement.velZ);
+}
+
+Position MovementHelpers::interpolatePosition(PreviousPosition& previousPos,
+                                              Position& position, double alpha)
+{
+    double interpX{(position.x * alpha) + (previousPos.x * (1.0 - alpha))};
+    double interpY{(position.y * alpha) + (previousPos.y * (1.0 - alpha))};
+    double interpZ{(position.z * alpha) + (previousPos.z * (1.0 - alpha))};
+    return {static_cast<float>(interpX), static_cast<float>(interpY), static_cast<float>(interpZ)};
 }
 
 } // End namespace AM

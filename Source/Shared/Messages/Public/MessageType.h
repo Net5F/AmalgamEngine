@@ -26,6 +26,7 @@ enum class MessageType : Uint8 {
     EntityUpdate = 32,
     ChunkUpdate = 33,
     TileUpdate = 34,
+    EntityInfo = 35,
 };
 
 } // End namespace AM

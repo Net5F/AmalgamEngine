@@ -10,9 +10,11 @@
 #include "PreviousPosition.h"
 #include "Movement.h"
 #include "Input.h"
+#include "BoundingBox.h"
 #include "Sprite.h"
 #include "InputHistory.h"
 #include "ClientNetworkDefs.h"
+#include "Transforms.h"
 #include "Config.h"
 #include "SharedConfig.h"
 #include "Log.h"
@@ -27,10 +29,11 @@ namespace Client
 {
 NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
                                      EventDispatcher& inNetworkEventDispatcher,
-                                     SpriteData& inSpriteData)
-: sim(inSim)
-, world(inWorld)
-, npcUpdateQueue(inNetworkEventDispatcher)
+                                     Network& inNetwork, SpriteData& inSpriteData)
+: sim{inSim}
+, world{inWorld}
+, network{inNetwork}
+, npcUpdateQueue{inNetworkEventDispatcher}
 , spriteData{inSpriteData}
 , lastReceivedTick(0)
 , lastProcessedTick(0)
@@ -38,7 +41,7 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
 {
     // Init the groups that we'll be using.
     auto group
-        = world.registry.group<Input, Position, PreviousPosition, Movement>(
+        = world.registry.group<Input, Position, PreviousPosition, Movement, BoundingBox, Sprite>(
             entt::exclude<InputHistory>);
     ignore(group);
 }
@@ -57,8 +60,8 @@ void NpcMovementSystem::updateNpcs()
     // run out of data.
     Uint32 desiredTick = sim.getCurrentTick() + tickReplicationOffset;
 
-    /* While we have data to use, apply updates for all unprocessed ticks
-       including the desired tick. */
+    /* While we have authoritative data to use, apply updates for all
+       unprocessed ticks including the desired tick. */
     bool updated = false;
     while ((lastProcessedTick <= desiredTick)
            && (stateUpdateQueue.size() > 0)) {
@@ -166,7 +169,7 @@ void NpcMovementSystem::handleUpdate(
     Uint32 newReceivedTick = entityUpdate->tickNum;
 
     if (lastReceivedTick != 0) {
-        // The update message implicitly confirms all ticks since our last
+        // The update message implicitly confirmed all ticks since our last
         // received.
         handleImplicitConfirmation(newReceivedTick - 1);
     }
@@ -186,27 +189,36 @@ void NpcMovementSystem::moveAllNpcs()
 {
     // Move all NPCs that have an input, position, and movement component.
     auto group
-        = world.registry.group<Input, Position, PreviousPosition, Movement>(
+        = world.registry.group<Input, Position, PreviousPosition, Movement, BoundingBox, Sprite>(
             entt::exclude<InputHistory>);
     for (entt::entity entity : group) {
-        Input& input = group.get<Input>(entity);
-        Position& position = group.get<Position>(entity);
-        PreviousPosition& previousPosition
-            = group.get<PreviousPosition>(entity);
-        Movement& movement = group.get<Movement>(entity);
+        auto [input, position, previousPosition, movement, boundingBox, sprite]
+            = group.get<Input, Position, PreviousPosition, Movement, BoundingBox, Sprite>(entity);
 
         // Save their old position.
         previousPosition = position;
 
-        // Process their movement.
-        MovementHelpers::moveEntity(position, movement, input.inputStates,
+        // Use the current input state to update their velocity for this tick.
+        MovementHelpers::updateVelocity(movement, input.inputStates,
                                     SharedConfig::SIM_TICK_TIMESTEP_S);
+
+        // Update their position, using the new velocity.
+        MovementHelpers::updatePosition(position, movement,
+                                    SharedConfig::SIM_TICK_TIMESTEP_S);
+
+        // Update their bounding box to match the new position.
+        boundingBox = Transforms::modelToWorld(sprite.modelBounds, position);
+
+        // TODO: Update their placement in the spatial partition.
     }
 }
 
 void NpcMovementSystem::applyUpdateMessage(
     const std::shared_ptr<const EntityUpdate>& entityUpdate)
 {
+    // Prepare the sprite view that we'll use for moving bounding boxes.
+    auto spriteView{world.registry.view<Sprite>()};
+
     // Use the data in the message to correct any NPCs that changed inputs.
     const std::vector<EntityState>& entities = entityUpdate->entityStates;
     for (auto entityIt = entities.begin(); entityIt != entities.end();
@@ -218,7 +230,10 @@ void NpcMovementSystem::applyUpdateMessage(
             continue;
         }
 
+        // TODO: Get this info from the server, handle it in another
+        //       system, remove this.
         // If the entity doesn't exist, create it.
+        Sprite* entitySprite{nullptr};
         if (!(registry.valid(entity))) {
             LOG_INFO("New entity added. ID: %u", entity);
             entt::entity newEntity = registry.create(entity);
@@ -227,33 +242,42 @@ void NpcMovementSystem::applyUpdateMessage(
                           "Created: %u, received: %u",
                           newEntity, entity);
             }
-
-            // Set the name.
-            registry.emplace<Name>(entity,
-                                   std::to_string(static_cast<Uint32>(entity)));
-
-            // TODO: Get the sprite info from the server.
-            // Note: Currently using an arbitrarily chosen non-player sprite.
-            registry.emplace<Sprite>(entity, spriteData.get("test_31"));
-
             // Init their old position so they don't lerp in from elsewhere.
             const Position& receivedPos = entityIt->position;
             registry.emplace<PreviousPosition>(entity, receivedPos.x,
                                                receivedPos.y, receivedPos.z);
 
-            // Create the rest of their components, to be set for real below.
+            // Init the movement-related components, to be set for real below.
             registry.emplace<Input>(entity);
             registry.emplace<Position>(entity);
             registry.emplace<Movement>(entity);
+
+            // Set defaults for the data that we'll get from the EntityInfo.
+            registry.emplace<Name>(entity,
+                                   std::to_string(static_cast<Uint32>(entity)));
+            entitySprite = &(registry.emplace<Sprite>(entity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE)));
+            registry.emplace<BoundingBox>(entity, BoundingBox{});
+        }
+        else {
+            // Get the entity's sprite.
+            auto& sprite{spriteView.get<Sprite>(entity)};
+            entitySprite = &sprite;
         }
 
+        // TODO: When another system starts handling creating the entity,
+        //       switch this to use the group.
         // Update their inputs.
         registry.patch<Input>(
             entity, [entityIt](Input& input) { input = entityIt->input; });
 
         // Update their position.
-        registry.patch<Position>(entity, [entityIt](Position& position) {
+        Position& newPosition = registry.patch<Position>(entity, [entityIt](Position& position) {
             position = entityIt->position;
+        });
+
+        // Move their bounding box to their new position.
+        registry.patch<BoundingBox>(entity, [entitySprite, newPosition](BoundingBox& boundingBox) {
+            boundingBox = Transforms::modelToWorld(entitySprite->modelBounds, newPosition);
         });
 
         // Update their movements.

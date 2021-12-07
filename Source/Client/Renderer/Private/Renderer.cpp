@@ -28,10 +28,6 @@ Renderer::Renderer(SDL_Renderer* inSdlRenderer, Simulation& sim,
 , getProgress(inGetProgress)
 , worldSpritePreparer(world.registry, world.tileMap)
 {
-    // Init the groups that we'll be using.
-    auto group
-        = world.registry.group<Sprite>(entt::get<Position, PreviousPosition>);
-    ignore(group);
 }
 
 void Renderer::render()

@@ -25,7 +25,7 @@ class NpcMovementSystem
 public:
     NpcMovementSystem(Simulation& inSim, World& inWorld,
                       EventDispatcher& inNetworkEventDispatcher,
-                      SpriteData& inSpriteData);
+                      Network& inNetwork, SpriteData& inSpriteData);
 
     /**
      * If we've received data for the appropriate ticks, updates all NPCs.
@@ -43,11 +43,11 @@ private:
     /** Represents what NPC changes happened on a single server tick. */
     struct NpcStateUpdate {
         /** The tick that this update refers to. */
-        Uint32 tickNum = 0;
-        /** Whether at least 1 NPC's state changed on this tick or not. */
-        bool dataChanged = false;
+        Uint32 tickNum{0};
+        /** True if at least 1 NPC's state changed on this tick. */
+        bool dataChanged{false};
         /** If dataChanged == true, contains the update message data. */
-        std::shared_ptr<const EntityUpdate> entityUpdate = nullptr;
+        std::shared_ptr<const EntityUpdate> entityUpdate{nullptr};
     };
 
     /**
@@ -79,6 +79,8 @@ private:
     Simulation& sim;
     /** Used to access components. */
     World& world;
+    /** Used to send entity info request messages. */
+    Network& network;
 
     EventQueue<NpcUpdate> npcUpdateQueue;
 

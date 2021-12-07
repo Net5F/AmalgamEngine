@@ -6,6 +6,7 @@
 #include "Transforms.h"
 #include "ClientTransforms.h"
 #include "TileExtent.h"
+#include "Ignore.h"
 
 #include <SDL2/SDL_rect.h>
 
@@ -22,6 +23,9 @@ WorldSpritePreparer::WorldSpritePreparer(entt::registry& inRegistry,
 , sortedSprites{}
 , spritesToSort{}
 {
+    // Init the groups that we'll be using.
+    auto group = registry.group<Position, PreviousPosition, Sprite>();
+    ignore(group);
 }
 
 std::vector<SpriteRenderInfo>&
@@ -94,7 +98,7 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
     }
 
     // Gather all relevant dynamic sprites.
-    auto group = registry.group<Sprite>(entt::get<Position, PreviousPosition>);
+    auto group = registry.group<Position, PreviousPosition, Sprite>();
     for (entt::entity entity : group) {
         auto [sprite, position, previousPos]
             = group.get<Sprite, Position, PreviousPosition>(entity);

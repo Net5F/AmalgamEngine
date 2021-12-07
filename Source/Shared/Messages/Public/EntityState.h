@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SDL_stdinc.h"
+#include <SDL2/SDL_stdinc.h>
 #include "Input.h"
 #include "Position.h"
 #include "Movement.h"
@@ -9,7 +9,7 @@
 namespace AM
 {
 /**
- * Contains the state data for a single entity.
+ * Contains state data for a single entity.
  *
  * Used for sending state updates to clients.
  */
