@@ -41,8 +41,7 @@ public:
 
     /** The number of world units around an entity that are considered to be
         within the entity's "Area of Interest".
-        Used in the simulation to limit what gets sent to each client, and in
-        rendering to limit what gets rendered. */
+        Used in the simulation to tell if data is relevant to a client. */
     static constexpr float AOI_RADIUS = TILE_WORLD_WIDTH * 8;
 
     /** The maximum number of sprite layers a tile can have. */
