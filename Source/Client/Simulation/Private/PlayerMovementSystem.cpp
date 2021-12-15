@@ -71,8 +71,6 @@ void PlayerMovementSystem::processMovements()
     Sprite& sprite{world.registry.get<Sprite>(world.playerEntity)};
     BoundingBox& boundingBox{world.registry.get<BoundingBox>(world.playerEntity)};
     boundingBox = Transforms::modelToWorld(sprite.modelBounds, position);
-
-    // TODO: Update our placement in the spatial partition.
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(

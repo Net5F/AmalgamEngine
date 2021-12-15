@@ -20,7 +20,7 @@ public:
     /** The max number of entities that we will allow. */
     static constexpr unsigned int MAX_ENTITIES = 1010;
 
-    // TODO: This can get moved to the server config when AoI gets improved.
+    // TODO: Remove this when AOI is removed.
     /** The distance in world coordinates that we add to a player's AoI to let
         peers load before they're in view. */
     static constexpr unsigned int AOI_BUFFER_DISTANCE = 700;
@@ -33,6 +33,17 @@ public:
 
     /** The number of tiles in a chunk. */
     static constexpr unsigned int CHUNK_TILE_COUNT = CHUNK_WIDTH * CHUNK_WIDTH;
+
+    /** The x and y axis width, in tiles, of a cell in our spatial
+        partitioning grid.
+        Note: The map's size must be evenly divisible by this number. */
+    static constexpr unsigned int CELL_WIDTH = 4;
+
+    /** The number of world units around an entity that are considered to be
+        within the entity's "Area of Interest".
+        Used in the simulation to limit what gets sent to each client, and in
+        rendering to limit what gets rendered. */
+    static constexpr float AOI_RADIUS = TILE_WORLD_WIDTH * 8;
 
     /** The maximum number of sprite layers a tile can have. */
     static constexpr unsigned int MAX_TILE_LAYERS = 8;
@@ -101,19 +112,10 @@ public:
     /** The value used to scale world Z-axis units to screen Y-axis units. */
     static constexpr float Z_SCREEN_SCALE = 2.f;
 
-    //-------------------------------------------------------------------------
-    // All
-    //-------------------------------------------------------------------------
-    /** The number of tiles around an entity that are considered to be within
-        the entity's "Area of Interest".
-        Used in the simulation to limit what gets sent to each client, and in
-        rendering to limit what gets rendered.
-
-        Note: The AOI is a square surrounding a center tile, meaning the width
-              will be 1 greater than radius * 2. E.g. if the radius is 3, the
-              width will be 1 (center) + 3 (left radius) + 3 (right radius).
-     */
-    static constexpr unsigned int AOI_RADIUS_TILES = 8;
+    /** The number of world units around the player that are considered to be
+        within the player's view range.
+        Used to determine how much of the world should be rendered. */
+    static constexpr float VIEW_RADIUS = TILE_WORLD_WIDTH * 8;
 };
 
 } // End namespace AM

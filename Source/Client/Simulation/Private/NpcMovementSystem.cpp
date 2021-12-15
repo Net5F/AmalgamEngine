@@ -266,11 +266,16 @@ void NpcMovementSystem::applyUpdateMessage(
 
         // TODO: When another system starts handling creating the entity,
         //       switch this to use the group.
-        // Update their inputs.
+        // Apply the received inputs.
         registry.patch<Input>(
             entity, [entityIt](Input& input) { input = entityIt->input; });
 
-        // Update their position.
+        // Apply the received velocity.
+        registry.patch<Movement>(entity, [entityIt](Movement& movement) {
+            movement = entityIt->movement;
+        });
+
+        // Apply the received position.
         Position& newPosition = registry.patch<Position>(entity, [entityIt](Position& position) {
             position = entityIt->position;
         });
@@ -278,11 +283,6 @@ void NpcMovementSystem::applyUpdateMessage(
         // Move their bounding box to their new position.
         registry.patch<BoundingBox>(entity, [entitySprite, newPosition](BoundingBox& boundingBox) {
             boundingBox = Transforms::modelToWorld(entitySprite->modelBounds, newPosition);
-        });
-
-        // Update their movements.
-        registry.patch<Movement>(entity, [entityIt](Movement& movement) {
-            movement = entityIt->movement;
         });
     }
 }

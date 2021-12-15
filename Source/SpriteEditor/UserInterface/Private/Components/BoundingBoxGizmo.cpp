@@ -3,8 +3,10 @@
 #include "SpriteDataModel.h"
 #include "Transforms.h"
 #include "Position.h"
+#include "Camera.h"
 #include "SharedConfig.h"
 #include "Ignore.h"
+#include "Log.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
 #include <algorithm>
@@ -169,7 +171,7 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
     // Convert the screen-space mouse point to world space.
     ScreenPoint offsetMousePointSP{static_cast<float>(offsetMousePoint.x),
                                    static_cast<float>(offsetMousePoint.y)};
-    Position mouseWorldPos = Transforms::screenToWorld(offsetMousePointSP, 1);
+    Position mouseWorldPos = Transforms::screenToWorld(offsetMousePointSP, {});
 
     // Adjust the currently pressed control appropriately.
     switch (currentHeldControl) {

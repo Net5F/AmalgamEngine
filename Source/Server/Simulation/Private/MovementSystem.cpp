@@ -51,7 +51,7 @@ void MovementSystem::processMovements()
         // Update their bounding box to match the new position.
         boundingBox = Transforms::modelToWorld(sprite.modelBounds, position);
 
-        // TODO: Update their placement in the spatial partition.
+        // TODO: Tag the entity as having moved
     }
 }
 

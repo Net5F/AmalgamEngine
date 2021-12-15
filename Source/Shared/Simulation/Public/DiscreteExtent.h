@@ -32,21 +32,6 @@ public:
     }
 
     /**
-     * Constructor that takes a center-point and a radius to form an extent.
-     *
-     * Note: This forms a square surrounding a center, meaning the width will
-     *       be 1 greater than radius * 2. E.g. if the radius is 3, the width
-     *       will be 1 (center) + 3 (left radius) + 3 (right radius) = 7.
-     */
-    DiscreteExtent(DiscretePosition<T> center, unsigned int radius)
-    : x{center.x - static_cast<int>(radius)}
-    , y{center.y - static_cast<int>(radius)}
-    , xLength{(static_cast<int>(radius) * 2) + 1}
-    , yLength{(static_cast<int>(radius) * 2) + 1}
-    {
-    }
-
-    /**
      * Constructor that takes a top left and bottom right point to form a range.
      */
     DiscreteExtent(DiscretePosition<T> topLeft, DiscretePosition<T> bottomRight)

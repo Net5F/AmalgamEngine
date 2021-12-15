@@ -6,10 +6,10 @@
 #include "Transforms.h"
 #include "ClientTransforms.h"
 #include "TileExtent.h"
+#include "SharedConfig.h"
 #include "Ignore.h"
-
 #include <SDL2/SDL_rect.h>
-
+#include <cmath>
 #include <algorithm>
 
 namespace AM
@@ -52,15 +52,33 @@ std::vector<SpriteRenderInfo>&
 
 void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 {
-    // Find the tile that the camera is centered on.
+    // Find the world position that the camera is centered on.
     ScreenPoint centerPoint{(camera.extent.width / 2), (camera.extent.height / 2)};
-    TilePosition centerTile{Transforms::screenToTile(centerPoint, camera)};
+    Position centerPosition{Transforms::screenToWorld(centerPoint, camera)};
 
-    // Calc the camera's tile extent, clipped to the world bounds.
-    TileExtent tileViewExtent{centerTile, SharedConfig::AOI_RADIUS_TILES};
+    // Issues with float precision can cause flickering tiles. Round to the
+    // nearest whole number to avoid this.
+    centerPosition.x = std::round(centerPosition.x);
+    centerPosition.y = std::round(centerPosition.y);
+
+    // Find the lowest x/y tile indices that the player can see.
+    TileExtent tileViewExtent{};
+    tileViewExtent.x = std::floor(
+        (centerPosition.x - SharedConfig::VIEW_RADIUS) / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
+    tileViewExtent.y = std::floor(
+        (centerPosition.y - SharedConfig::VIEW_RADIUS) / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
+
+    // Calc how far the player's view extends.
+    // Note: We add 1 to the view radius to keep all sides even, since the
+    //       player occupies a tile.
+    tileViewExtent.xLength = std::ceil(
+        ((SharedConfig::VIEW_RADIUS * 2) + 1) / SharedConfig::TILE_WORLD_WIDTH);
+    tileViewExtent.yLength = tileViewExtent.xLength;
+
+    // Clip the view to the world bounds.
     tileViewExtent.intersectWith(tileMap.getTileExtent());
 
-    // Gather tiles.
+    // Gather all tiles that are in view.
     for (int y = tileViewExtent.y; y < tileViewExtent.yMax(); ++y) {
         for (int x = tileViewExtent.x; x < tileViewExtent.xMax(); ++x) {
             // Figure out which tile we're looking at.

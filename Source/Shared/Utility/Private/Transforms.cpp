@@ -41,11 +41,16 @@ float Transforms::worldZToScreenY(float zCoord, float zoomFactor)
 }
 
 Position Transforms::screenToWorld(const ScreenPoint& screenPoint,
-                                   float zoomFactor)
+                                   const Camera& camera)
 {
+    // Remove the camera adjustment.
+    ScreenPoint absolutePoint;
+    absolutePoint.x = screenPoint.x + camera.extent.x;
+    absolutePoint.y = screenPoint.y + camera.extent.y;
+
     // Remove the camera zoom.
-    float x{screenPoint.x / zoomFactor};
-    float y{screenPoint.y / zoomFactor};
+    float x{absolutePoint.x / camera.zoomFactor};
+    float y{absolutePoint.y / camera.zoomFactor};
 
     // Calc the scaling factor going from screen tiles to world tiles.
     static const float TILE_WIDTH_SCALE
@@ -74,13 +79,8 @@ float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)
 TilePosition Transforms::screenToTile(const ScreenPoint& screenPoint,
                                    const Camera& camera)
 {
-    // Remove the camera adjustment.
-    ScreenPoint absolutePoint;
-    absolutePoint.x = screenPoint.x + camera.extent.x;
-    absolutePoint.y = screenPoint.y + camera.extent.y;
-
     // Convert to world space.
-    Position worldPos = screenToWorld(absolutePoint, camera.zoomFactor);
+    Position worldPos = screenToWorld(screenPoint, camera);
 
     // Convert to tile index.
     return worldPos.asTilePosition();

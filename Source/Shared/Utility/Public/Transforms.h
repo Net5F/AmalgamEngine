@@ -34,11 +34,9 @@ public:
 
     /**
      * Converts a point in screen space to a position in world space.
-     *
-     * @param zoomFactor  The camera's zoom factor.
      */
     static Position screenToWorld(const ScreenPoint& screenPoint,
-                                  float zoomFactor);
+                                  const Camera& camera);
 
     /**
      * Converts a Y coordinate in screen space to a Z coordinate in world space.
