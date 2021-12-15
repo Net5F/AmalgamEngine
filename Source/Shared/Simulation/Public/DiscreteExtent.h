@@ -146,7 +146,6 @@ public:
 
         /* Vertical intersection. */
         // Copy the logic from above, replacing X with Y.
-
         selfMin = y;
         selfMax = y + yLength;
         otherMin = other.y;

@@ -35,6 +35,7 @@ void TileUpdateSystem::updateTiles()
                               updateRequest.layerIndex,
                               updateRequest.numericID};
 
+        // TODO: Limit this to entities that are in range.
         // Broadcast the tile update to all clients.
         auto clientView = world.registry.view<ClientSimData>();
         for (entt::entity entity : clientView) {

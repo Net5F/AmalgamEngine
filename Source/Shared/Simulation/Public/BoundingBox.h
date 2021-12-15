@@ -52,7 +52,7 @@ public:
      * Returns true if this box intersects the given cylinder.
      *
      * Note: This treats the given data as a cylinder with infinite length
-     *       along the Z axis. If we want it to treat it as a sphere, we can
+     *       along the Z axis. If we want to treat it as a sphere, we can
      *       change it.
      */
     bool intersects(const Position& cylinderCenter, unsigned int radius)
@@ -84,6 +84,23 @@ public:
         float cornerDistanceSquared{(xDif * xDif) + (yDif * yDif)};
 
         return (cornerDistanceSquared <= (radius * radius));
+    }
+
+    /**
+     * Returns true if this box intersects the given tile extent.
+     *
+     * Note: This treats the tile extent as having infinite length along the
+     *       Z axis.
+     */
+    bool intersects(const TileExtent& tileExtent)
+    {
+        float tileMinX{static_cast<float>(tileExtent.x)};
+        float tileMaxX{static_cast<float>(tileExtent.x + tileExtent.xLength)};
+        float tileMinY{static_cast<float>(tileExtent.y)};
+        float tileMaxY{static_cast<float>(tileExtent.y + tileExtent.yLength)};
+
+        return ((maxX >= tileMinX) && (tileMaxX >= minX)
+               && (maxY >= tileMinY) && (tileMaxY >= minY));
     }
 
     /**

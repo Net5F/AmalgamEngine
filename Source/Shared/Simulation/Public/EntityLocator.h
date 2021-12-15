@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CellExtent.h"
+#include "TileExtent.h"
 #include "entt/fwd.hpp"
 #include <vector>
 #include <unordered_map>
@@ -47,7 +48,7 @@ public:
     void setEntityLocation(entt::entity entity, const BoundingBox& boundingBox);
 
     /**
-     * Performs a coarse pass to return all entities in cells intersected by
+     * Performs a coarse pass to get all entities in cells intersected by
      * the given cylinder.
      *
      * Note: All entities in the intersected cells are returned, which may
@@ -56,7 +57,7 @@ public:
      * @param cylinderCenter  The position to cast the radius from.
      * @param radius  The length of the radius to cast.
      */
-    std::vector<entt::entity>& getEntitiesInCylinderCoarse(const Position& cylinderCenter
+    std::vector<entt::entity>& getEntitiesCoarse(const Position& cylinderCenter
         , unsigned int radius);
 
     /**
@@ -66,8 +67,18 @@ public:
      * @param cylinderCenter  The position to cast the radius from.
      * @param radius  The length of the radius to cast.
      */
-    std::vector<entt::entity>& getEntitiesInCylinderFine(const Position& cylinderCenter
+    std::vector<entt::entity>& getEntitiesFine(const Position& cylinderCenter
         , unsigned int radius);
+
+    /**
+     * Overload for TileExtent.
+     */
+    std::vector<entt::entity>& getEntitiesCoarse(const TileExtent& tileExtent);
+
+    /**
+     * Overload for TileExtent.
+     */
+    std::vector<entt::entity>& getEntitiesFine(const TileExtent& tileExtent);
 
     /**
      * If we're tracking the given entity, removes it from the entityGrid and
