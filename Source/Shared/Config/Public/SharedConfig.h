@@ -20,11 +20,6 @@ public:
     /** The max number of entities that we will allow. */
     static constexpr unsigned int MAX_ENTITIES = 1010;
 
-    // TODO: Remove this when AOI is removed.
-    /** The distance in world coordinates that we add to a player's AoI to let
-        peers load before they're in view. */
-    static constexpr unsigned int AOI_BUFFER_DISTANCE = 700;
-
     /** The x and y axis width, in world units, of our tiles. */
     static constexpr unsigned int TILE_WORLD_WIDTH = 32;
 
@@ -43,6 +38,10 @@ public:
         within the entity's "Area of Interest".
         Used in the simulation to tell if data is relevant to a client. */
     static constexpr float AOI_RADIUS = TILE_WORLD_WIDTH * 8;
+
+    /** The squared AOI radius. Useful for checking if things are in range
+        of an entity without doing a square root. */
+    static constexpr float AOI_RADIUS_SQUARED = AOI_RADIUS * AOI_RADIUS;
 
     /** The maximum number of sprite layers a tile can have. */
     static constexpr unsigned int MAX_TILE_LAYERS = 8;

@@ -1,14 +1,13 @@
 target_sources(Shared
     PRIVATE
-        Private/EntityTracker.cpp
+        Private/EntityLocator.cpp
         Private/MovementHelpers.cpp
 	PUBLIC
-        Public/AreaOfInterest.h
         Public/BoundingBox.h
         Public/DiscreteExtent.h
         Public/DiscretePosition.h
         Public/DiscreteTagTypes.h
-        Public/EntityTracker.h
+        Public/EntityLocator.h
         Public/MovementHelpers.h
         Public/Components/Camera.h
         Public/Components/Input.h
@@ -17,6 +16,7 @@ target_sources(Shared
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
+        Public/TileMap/CellExtent.h
         Public/TileMap/ChunkExtent.h
         Public/TileMap/ChunkPosition.h
         Public/TileMap/ChunkSnapshot.h

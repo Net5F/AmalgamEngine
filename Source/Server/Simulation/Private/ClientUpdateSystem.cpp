@@ -51,15 +51,22 @@ void ClientUpdateSystem::sendClientUpdates()
         // Center this client's AoI on its current position.
         auto [client, clientPosition]
             = clientGroup.get<ClientSimData, Position>(entity);
-        client.aoi.setCenter(clientPosition);
 
         /* Collect the entities that need to be sent to this client. */
         EntityUpdate entityUpdate{};
 
-        // Add all the dirty entities.
+        // Add all the dirty entities that are in range.
         for (EntityStateRefs& state : dirtyEntities) {
-            // Check if the dirty entity is in this client's AOI before adding.
-            if (client.aoi.contains(state.position)) {
+            // Calc the distance from this dirty entity to the client entity.
+            // Note: This uses the top left of the entity's position instead of
+            //       the center since it's easy and seems fine. We can change
+            //       to the center if we need to.
+            Position diff{clientPosition - state.position};
+            double distanceSquared { std::abs(
+                (diff.x * diff.x) + (diff.y * diff.y) + (diff.z * diff.z)) };
+
+            // If the dirty entity is in the client entity's AOI, push it.
+            if (distanceSquared <= SharedConfig::AOI_RADIUS_SQUARED) {
                 entityUpdate.entityStates.push_back({state.entity, state.input,
                                                      state.position,
                                                      state.movement});

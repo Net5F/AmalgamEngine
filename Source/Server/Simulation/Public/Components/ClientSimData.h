@@ -1,7 +1,6 @@
 #pragma once
 
 #include "NetworkDefs.h"
-#include "AreaOfInterest.h"
 
 namespace AM
 {
@@ -24,12 +23,6 @@ public:
     /** Tracks if an input from this client was received late and had to be
         dropped. */
     bool inputWasDropped{false};
-
-    /** Area of interest bounds. Used to determine if entities are close enough
-        to the client entity to be replicated.
-        Note: width and height should be set, but the NetworkUpdateSystem
-              manages the x/y position. */
-    AreaOfInterest aoi{};
 };
 
 } // namespace Server

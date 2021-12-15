@@ -65,11 +65,7 @@ void ClientConnectionSystem::processConnectEvents()
         registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
         registry.emplace<Input>(newEntity);
         registry.emplace<ClientSimData>(
-            newEntity, clientConnected.clientID, false,
-            AreaOfInterest{(SharedConfig::SCREEN_WIDTH
-                            + SharedConfig::AOI_BUFFER_DISTANCE),
-                           (SharedConfig::SCREEN_HEIGHT
-                            + SharedConfig::AOI_BUFFER_DISTANCE)});
+            newEntity, clientConnected.clientID, false);
         Sprite& newSprite{registry.emplace<Sprite>(newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
         registry.emplace<BoundingBox>(newEntity, Transforms::modelToWorld(newSprite.modelBounds, newPosition));
         world.netIdMap[clientConnected.clientID] = newEntity;
