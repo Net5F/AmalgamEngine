@@ -1,28 +1,37 @@
 #pragma once
 
 #include "NetworkDefs.h"
+#include "entt/fwd.hpp"
+#include <vector>
 
 namespace AM
 {
 namespace Server
 {
 /**
- * Holds any Client data that is relevant to the sim systems.
+ * Acts as a tag to say "this entity belongs to a client". Entities without
+ * this component are dummies or are AI-controlled.
  *
- * Tracks the Client's NetworkID so the sim knows where to send messages
- * related to the entity. Also uses the netID to remove the entity from the sim
- * when the Client disconnects.
+ * Also holds all client-related sim data.
  *
- * Additionally, manages any other client-specific data like AoI bounds.
+ * Note: If this ever gets too big, we can change it to "IsClient" or
+ *       "ClientNetID" and split the sim data out into other components.
  */
 struct ClientSimData {
 public:
-    /** The network ID associated with this client. */
+    /** The network ID associated with this client.
+        We track this here so the sim knows where to send messages related to
+        the entity.
+        We also use this to remove the entity from the sim when the Client
+        disconnects.*/
     NetworkID netID{0};
 
     /** Tracks if an input from this client was received late and had to be
         dropped. */
     bool inputWasDropped{false};
+
+    /** Tracks the entities that are in range of this client's entity. */
+    std::vector<entt::entity> entitiesInAOI{};
 };
 
 } // namespace Server

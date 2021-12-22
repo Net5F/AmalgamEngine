@@ -120,7 +120,7 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
                                               newID, std::move(newPeer)))
                       .second)) {
                 idPool.freeID(newID);
-                LOG_ERROR(
+                LOG_FATAL(
                     "Ran out of room in client map or key already existed.");
             }
         }

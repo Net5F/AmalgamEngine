@@ -69,7 +69,7 @@ public:
         // Open or create the file.
         std::ofstream file(filePath, std::ios::binary);
         if (!(file.is_open())) {
-            LOG_ERROR("Could not open file for serialization: %s",
+            LOG_FATAL("Could not open file for serialization: %s",
                       filePath.c_str());
         }
 

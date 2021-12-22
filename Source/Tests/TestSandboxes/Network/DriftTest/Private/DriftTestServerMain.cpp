@@ -56,7 +56,7 @@ void updateConnection(TCPsocket& serverSocket, TCPsocket& clientSocket,
                 int bytesSent = SDLNet_TCP_Send(clientSocket, &sendBuffer,
                                                 sizeof(Uint32));
                 if (bytesSent < static_cast<int>(sizeof(Uint32))) {
-                    LOG_ERROR("Failed to send current tick.");
+                    LOG_FATAL("Failed to send current tick.");
                 }
 
                 LOG_INFO("Connected new client and sent current tick.");
@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
             bool result
                 = receiveAndHandle(clientSet, clientSocket, currentTick);
             if (!result) {
-                LOG_ERROR("Disconnect or other error during receive.");
+                LOG_FATAL("Disconnect or other error during receive.");
             }
         }
     }

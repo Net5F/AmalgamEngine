@@ -37,7 +37,7 @@ void WorldSim::connect()
     ;
     if (!(connectionResponseQueue.waitPop(connectionResponse,
                                           CONNECTION_RESPONSE_WAIT_US))) {
-        LOG_ERROR("Server did not respond.");
+        LOG_FATAL("Server did not respond.");
     }
 
     // Get our info from the connection response.

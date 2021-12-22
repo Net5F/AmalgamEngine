@@ -35,6 +35,7 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher,
 , chunkUpdateSystem(*this, world, inNetworkEventDispatcher, network)
 , tileUpdateSystem(world, inUiEventDispatcher, inNetworkEventDispatcher,
                    network)
+, entityLifespanSystem(*this, world, spriteData, inNetworkEventDispatcher)
 , playerInputSystem(*this, world)
 , serverUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, inNetworkEventDispatcher)
@@ -63,7 +64,7 @@ void Simulation::connect()
     ConnectionResponse connectionResponse{};
     if (!(connectionResponseQueue.waitPop(connectionResponse,
                                           CONNECTION_RESPONSE_WAIT_US))) {
-        LOG_ERROR("Server did not respond.");
+        LOG_FATAL("Server did not respond.");
     }
 
     // Save our player entity info.
@@ -88,7 +89,7 @@ void Simulation::connect()
     entt::registry& registry = world.registry;
     entt::entity newEntity = registry.create(playerEntity);
     if (newEntity != playerEntity) {
-        LOG_ERROR("Created entity doesn't match received entity. Created: %u, "
+        LOG_FATAL("Created entity doesn't match received entity. Created: %u, "
                   "received: %u",
                   newEntity, playerEntity);
     }
@@ -191,6 +192,9 @@ void Simulation::tick()
 
         // Process tile updates from the UI and server.
         tileUpdateSystem.updateTiles();
+
+        // Process entities that need to be constructed or destructed.
+        entityLifespanSystem.processUpdates();
 
         // Process the held user input state.
         // Note: Mouse and momentary inputs are processed prior to this tick.

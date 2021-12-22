@@ -17,7 +17,7 @@ IDPool::IDPool(unsigned int inPoolSize)
 unsigned int IDPool::reserveID()
 {
     if (reservedIDCount > poolSize) {
-        LOG_ERROR("Tried to reserve ID when all were taken.");
+        LOG_FATAL("Tried to reserve ID when all were taken.");
         return 0;
     }
 
@@ -34,7 +34,7 @@ unsigned int IDPool::reserveID()
         }
     }
 
-    LOG_ERROR("Couldn't find an empty index when one should exist.");
+    LOG_FATAL("Couldn't find an empty index when one should exist.");
     return 0;
 }
 
@@ -45,7 +45,7 @@ void IDPool::freeID(unsigned int ID)
         reservedIDCount--;
     }
     else {
-        LOG_ERROR("Tried to free an unused ID.");
+        LOG_FATAL("Tried to free an unused ID.");
     }
 }
 

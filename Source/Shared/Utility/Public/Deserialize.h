@@ -42,8 +42,8 @@ public:
         if (!result.second) {
             std::string errorString{getErrorString(result.first)};
 
-            // TODO: Eventually change this to a LOG_INFO and return false.
             LOG_ERROR("%s", errorString.c_str());
+            return false;
         }
         else {
             return true;
@@ -64,7 +64,7 @@ public:
         // Open the file.
         std::ifstream file(filePath, std::ios::binary);
         if (!(file.is_open())) {
-            LOG_ERROR("Could not open file for deserialization: %s",
+            LOG_FATAL("Could not open file for deserialization: %s",
                       filePath.c_str());
         }
 
@@ -77,8 +77,8 @@ public:
         if (!result.second) {
             std::string errorString{getErrorString(result.first)};
 
-            // TODO: Eventually change this to a LOG_INFO and return false.
             LOG_ERROR("%s", errorString.c_str());
+            return false;
         }
         else {
             return true;

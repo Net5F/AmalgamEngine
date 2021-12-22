@@ -11,7 +11,7 @@ target_sources(Shared
         Public/MovementHelpers.h
         Public/Components/Camera.h
         Public/Components/Input.h
-        Public/Components/IsDirty.h
+        Public/Components/InputHasChanged.h
         Public/Components/Movement.h
         Public/Components/Name.h
         Public/Components/Position.h

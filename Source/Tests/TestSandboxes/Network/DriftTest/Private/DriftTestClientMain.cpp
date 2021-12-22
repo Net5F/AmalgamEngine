@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
     /* Wait to receive the server's current tick. */
     bool result = waitForServer(serverSocket, currentTick);
     if (!result) {
-        LOG_ERROR("Failed to get server's current tick.");
+        LOG_FATAL("Failed to get server's current tick.");
     }
 
     // Prime the timer so it doesn't start at 0.

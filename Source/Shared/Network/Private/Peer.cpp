@@ -55,13 +55,13 @@ NetworkResult Peer::send(const BinaryBufferSharedPtr& buffer)
 
     std::size_t messageSize = buffer->size();
     if (messageSize > MAX_WIRE_SIZE) {
-        LOG_ERROR("Tried to send too many bytes. Size: %u, MAX_WIRE_SIZE: %u",
+        LOG_FATAL("Tried to send too many bytes. Size: %u, MAX_WIRE_SIZE: %u",
                   messageSize, MAX_WIRE_SIZE);
     }
 
     int bytesSent = socket->send(buffer->data(), messageSize);
     if (bytesSent < 0) {
-        LOG_ERROR("TCP_Send returned < 0. This should never happen, the socket"
+        LOG_FATAL("TCP_Send returned < 0. This should never happen, the socket"
                   "was likely misused.");
     }
 
@@ -82,13 +82,13 @@ NetworkResult Peer::send(const Uint8* buffer, unsigned int numBytesToSend)
     }
 
     if (numBytesToSend > MAX_WIRE_SIZE) {
-        LOG_ERROR("Tried to send too many bytes. Size: %u, MAX_WIRE_SIZE: %u",
+        LOG_FATAL("Tried to send too many bytes. Size: %u, MAX_WIRE_SIZE: %u",
                   numBytesToSend, MAX_WIRE_SIZE);
     }
 
     int bytesSent = socket->send(buffer, numBytesToSend);
     if (bytesSent < 0) {
-        LOG_ERROR("TCP_Send returned < 0. This should never happen, the socket"
+        LOG_FATAL("TCP_Send returned < 0. This should never happen, the socket"
                   "was likely misused.");
     }
 
@@ -127,7 +127,7 @@ NetworkResult Peer::receiveBytesWait(Uint8* buffer, Uint16 numBytes)
         return NetworkResult::Disconnected;
     }
     else if (numBytes > MAX_WIRE_SIZE) {
-        LOG_ERROR("Tried to receive too many bytes. Bytes requested: %u, "
+        LOG_FATAL("Tried to receive too many bytes. Bytes requested: %u, "
                   "MAX_WIRE_SIZE: %u",
                   numBytes, MAX_WIRE_SIZE);
     }
@@ -139,7 +139,7 @@ NetworkResult Peer::receiveBytesWait(Uint8* buffer, Uint16 numBytes)
         return NetworkResult::Disconnected;
     }
     else if (result < numBytes) {
-        LOG_ERROR("Didn't receive all the bytes in one chunk."
+        LOG_FATAL("Didn't receive all the bytes in one chunk."
                   "Need to add logic for this scenario.");
     }
 
@@ -179,7 +179,7 @@ ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
         return {NetworkResult::Disconnected};
     }
     else if (result < static_cast<int>(MESSAGE_HEADER_SIZE)) {
-        LOG_ERROR("Didn't receive all size bytes in one chunk."
+        LOG_FATAL("Didn't receive all size bytes in one chunk."
                   "Need to add logic for this scenario.");
     }
 
@@ -187,7 +187,7 @@ ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
     Uint16 messageSize
         = ByteTools::read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_WIRE_SIZE) {
-        LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
+        LOG_FATAL("Tried to receive too large of a message. messageSize: %u, "
                   "MAX_WIRE_SIZE: %u",
                   messageSize, MAX_WIRE_SIZE);
     }
@@ -199,7 +199,7 @@ ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
         return {NetworkResult::Disconnected};
     }
     else if (result < messageSize) {
-        LOG_ERROR("Didn't receive all message bytes in one chunk."
+        LOG_FATAL("Didn't receive all message bytes in one chunk."
                   "Need to add logic for this scenario.");
     }
 
@@ -223,7 +223,7 @@ ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
         return {NetworkResult::Disconnected};
     }
     else if (result < static_cast<int>(MESSAGE_HEADER_SIZE)) {
-        LOG_ERROR("Didn't receive all size bytes in one chunk."
+        LOG_FATAL("Didn't receive all size bytes in one chunk."
                   "Need to add logic for this scenario.");
     }
 
@@ -231,7 +231,7 @@ ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
     Uint16 messageSize
         = ByteTools::read16(&(headerBuf[MessageHeaderIndex::Size]));
     if (messageSize > MAX_WIRE_SIZE) {
-        LOG_ERROR("Tried to receive too large of a message. messageSize: %u, "
+        LOG_FATAL("Tried to receive too large of a message. messageSize: %u, "
                   "MAX_WIRE_SIZE: %u",
                   messageSize, MAX_WIRE_SIZE);
     }
@@ -244,7 +244,7 @@ ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
         return {NetworkResult::Disconnected};
     }
     else if (result < messageSize) {
-        LOG_ERROR("Didn't receive all message bytes in one chunk."
+        LOG_FATAL("Didn't receive all message bytes in one chunk."
                   "Need to add logic for this scenario.");
     }
 

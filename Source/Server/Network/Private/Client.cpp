@@ -31,7 +31,7 @@ void Client::queueMessage(const BinaryBufferSharedPtr& message,
                           Uint32 messageTick)
 {
     if (!sendQueue.emplace(message, messageTick)) {
-        LOG_ERROR("Queue emplace failed.");
+        LOG_FATAL("Queue emplace failed.");
     }
 }
 
@@ -53,7 +53,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
         // Pop the message.
         QueuedMessage queuedMessage;
         if (!sendQueue.try_dequeue(queuedMessage)) {
-            LOG_ERROR("Expected element but dequeue failed.");
+            LOG_FATAL("Expected element but dequeue failed.");
         }
 
         // Copy the message data into the batchBuffer.
@@ -77,7 +77,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
 
     // If the batch + header is too large, error.
     if (currentIndex > SharedConfig::MAX_BATCH_SIZE) {
-        LOG_ERROR("Batch too large to fit into buffers. Increase "
+        LOG_FATAL("Batch too large to fit into buffers. Increase "
                   "MAX_BATCH_SIZE. Size: %u, Max: %u",
                   currentIndex, SharedConfig::MAX_BATCH_SIZE);
     }
@@ -92,7 +92,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
             &(compressedBatchBuffer[ServerHeaderIndex::MessageHeaderStart]),
             COMPRESSED_BUFFER_SIZE);
         if (batchSize > Peer::MAX_WIRE_SIZE) {
-            LOG_ERROR("Batch too large, even after compression.");
+            LOG_FATAL("Batch too large, even after compression.");
         }
 
         isCompressed = true;
@@ -172,7 +172,7 @@ Uint8 Client::getWaitingMessageCount() const
 {
     std::size_t size = sendQueue.size_approx();
     if (size > SDL_MAX_UINT8) {
-        LOG_ERROR("Client's sendQueue contains too many messages to return as"
+        LOG_FATAL("Client's sendQueue contains too many messages to return as"
                   "a Uint8.");
     }
 
@@ -203,7 +203,7 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
             numFreshDiffs = 0;
         }
         else if (receivedAdjIteration > expectedNextIteration) {
-            LOG_ERROR("Skipped an adjustment iteration. Logic must be flawed.");
+            LOG_FATAL("Skipped an adjustment iteration. Logic must be flawed.");
         }
 
         // Get the message.
@@ -222,7 +222,7 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
             return receiveResult;
         }
         else {
-            LOG_ERROR("Data was not present when expected.");
+            LOG_FATAL("Data was not present when expected.");
         }
     }
     else if (headerResult == NetworkResult::NoWaitingData) {
@@ -258,7 +258,7 @@ void Client::recordTickDiff(Sint64 tickDiff)
         tickDiffHistory.push(tickDiff);
     }
     else {
-        LOG_ERROR("tickDiff out of Sint8 range. diff: %" PRId64, tickDiff);
+        LOG_FATAL("tickDiff out of Sint8 range. diff: %" PRId64, tickDiff);
     }
 
     // Note: This is safe, only this thread modifies numFreshDiffs.

@@ -10,17 +10,17 @@ TcpSocket::TcpSocket(Uint16 inPort)
 {
     // We explicitly guard against this since we use port == 0 as a flag.
     if (port == 0) {
-        LOG_ERROR("Tried to use port 0.");
+        LOG_FATAL("Tried to use port 0.");
     }
 
     IPaddress ip;
     if (SDLNet_ResolveHost(&ip, nullptr, port) == -1) {
-        LOG_ERROR("Could not resolve host: %s", SDLNet_GetError());
+        LOG_FATAL("Could not resolve host: %s", SDLNet_GetError());
     }
 
     socket = SDLNet_TCP_Open(&ip);
     if (socket == nullptr) {
-        LOG_ERROR("Could not open TCP socket: %s", SDLNet_GetError());
+        LOG_FATAL("Could not open TCP socket: %s", SDLNet_GetError());
     }
 }
 
@@ -37,18 +37,18 @@ TcpSocket::TcpSocket(std::string inIp, Uint16 inPort)
 {
     // We explicitly guard against this since we use port == 0 as a flag.
     if (port == 0) {
-        LOG_ERROR("Tried to use port 0.");
+        LOG_FATAL("Tried to use port 0.");
     }
 
     IPaddress ipObj;
 
     if (SDLNet_ResolveHost(&ipObj, ip.c_str(), port) == -1) {
-        LOG_ERROR("Could not resolve host: %s", SDLNet_GetError());
+        LOG_FATAL("Could not resolve host: %s", SDLNet_GetError());
     }
 
     socket = SDLNet_TCP_Open(&ipObj);
     if (socket == nullptr) {
-        LOG_ERROR("Could not open TCP socket: %s", SDLNet_GetError());
+        LOG_FATAL("Could not open TCP socket: %s", SDLNet_GetError());
     }
 }
 
@@ -87,14 +87,14 @@ std::string TcpSocket::getAddress()
 {
     if (ip.empty() && (port != 0)) {
         // Listener socket.
-        LOG_ERROR("Tried to call getAddress on a listener socket.");
+        LOG_FATAL("Tried to call getAddress on a listener socket.");
     }
     else if (port == 0) {
         // Socket was received through a listener and hasn't yet retrieved its
         // address.
         IPaddress* remoteIP = SDLNet_TCP_GetPeerAddress(socket);
         if (remoteIP == nullptr) {
-            LOG_ERROR("Failed to get peer address: %s", SDLNet_GetError());
+            LOG_FATAL("Failed to get peer address: %s", SDLNet_GetError());
         }
         else {
             // Successfully got the address, save it in our members.

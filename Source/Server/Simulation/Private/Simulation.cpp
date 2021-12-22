@@ -1,5 +1,6 @@
 #include "Simulation.h"
 #include "Network.h"
+#include "EnttGroups.h"
 #include "Log.h"
 #include "Profiler.h"
 
@@ -13,6 +14,7 @@ Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher,
 , world(inSpriteData)
 , clientConnectionSystem(*this, world, inNetworkEventDispatcher, network, inSpriteData)
 , tileUpdateSystem(world, inNetworkEventDispatcher, network)
+, clientAOISystem(*this, world, network)
 , inputUpdateSystem(*this, world, inNetworkEventDispatcher, network)
 , movementSystem(world)
 , clientUpdateSystem(*this, world, network)
@@ -21,6 +23,9 @@ Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher,
 {
     Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);
+
+    // Initialize our entt groups.
+    EnttGroups::init(world.registry);
 }
 
 void Simulation::tick()
@@ -34,6 +39,9 @@ void Simulation::tick()
     // Note: We do this before running the rest of the sim, so that any updated
     //       tiles are considered.
     tileUpdateSystem.updateTiles();
+
+    // Update our local lists of entities in each client's AOI.
+    clientAOISystem.updateAOILists();
 
     // Receive and process client input messages.
     inputUpdateSystem.processInputMessages();

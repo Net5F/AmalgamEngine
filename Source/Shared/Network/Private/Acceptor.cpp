@@ -20,7 +20,7 @@ std::unique_ptr<Peer> Acceptor::accept()
     if (socket.isReady()) {
         std::unique_ptr<TcpSocket> newSocket = socket.accept();
         if (newSocket == nullptr) {
-            LOG_ERROR("Listener socket showed ready, but accept() failed.");
+            LOG_FATAL("Listener socket showed ready, but accept() failed.");
         }
         else {
             return std::make_unique<Peer>(std::move(newSocket), clientSet);

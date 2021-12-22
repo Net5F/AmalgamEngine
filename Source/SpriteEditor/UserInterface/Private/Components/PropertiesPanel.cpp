@@ -152,7 +152,7 @@ void PropertiesPanel::loadActiveSprite(Sprite* inActiveSprite)
 void PropertiesPanel::refresh()
 {
     if (activeSprite == nullptr) {
-        LOG_ERROR("Tried to refresh with nullptr data.");
+        LOG_FATAL("Tried to refresh with nullptr data.");
     }
 
     // Fill the fields with the activeSprite data.

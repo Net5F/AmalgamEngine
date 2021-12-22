@@ -51,10 +51,10 @@ std::size_t ByteTools::compress(const Uint8* sourceBuffer,
 
     // Check for errors.
     if (result == Z_MEM_ERROR) {
-        LOG_ERROR("Ran out of memory while compressing.");
+        LOG_FATAL("Ran out of memory while compressing.");
     }
     else if (result == Z_BUF_ERROR) {
-        LOG_ERROR("Ran out of room in destBuffer while compressing.");
+        LOG_FATAL("Ran out of room in destBuffer while compressing.");
     }
 
     // Return the compressed data length.
@@ -72,13 +72,13 @@ std::size_t ByteTools::uncompress(const Uint8* sourceBuffer,
 
     // Check for errors.
     if (result == Z_MEM_ERROR) {
-        LOG_ERROR("Ran out of memory while uncompressing.");
+        LOG_FATAL("Ran out of memory while uncompressing.");
     }
     else if (result == Z_BUF_ERROR) {
-        LOG_ERROR("Ran out of room in destBuffer while uncompressing.");
+        LOG_FATAL("Ran out of room in destBuffer while uncompressing.");
     }
     else if (result == Z_DATA_ERROR) {
-        LOG_ERROR("Data corrupted or incomplete while uncompressing.");
+        LOG_FATAL("Data corrupted or incomplete while uncompressing.");
     }
 
     // Return the uncompressed data length.

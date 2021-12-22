@@ -59,7 +59,7 @@ void BoundingBoxGizmo::loadActiveSprite(Sprite* inActiveSprite)
 void BoundingBoxGizmo::refresh()
 {
     if (activeSprite == nullptr) {
-        LOG_ERROR("Tried to refresh with nullptr data.");
+        LOG_FATAL("Tried to refresh with nullptr data.");
     }
 
     // Calculate where the sprite's model bounds are on the screen.

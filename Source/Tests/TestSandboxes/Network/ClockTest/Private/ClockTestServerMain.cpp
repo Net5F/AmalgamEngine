@@ -68,10 +68,10 @@ int main(int argc, char* argv[])
             // Receive the waiting data.
             int result = SDLNet_TCP_Recv(clientSocket, &recBuffer, 1);
             if (result <= 0) {
-                LOG_ERROR("Detected disconnect.");
+                LOG_FATAL("Detected disconnect.");
             }
             else if (recBuffer[0] != 5) {
-                LOG_ERROR("Wrong start byte received.");
+                LOG_FATAL("Wrong start byte received.");
             }
             else {
                 // Got the start byte, start timing and proceed.
@@ -90,10 +90,10 @@ int main(int argc, char* argv[])
             // Receive the waiting data.
             int result = SDLNet_TCP_Recv(clientSocket, &recBuffer, 1);
             if (result <= 0) {
-                LOG_ERROR("Detected disconnect.");
+                LOG_FATAL("Detected disconnect.");
             }
             else if (recBuffer[0] != 6) {
-                LOG_ERROR("Wrong end byte received.");
+                LOG_FATAL("Wrong end byte received.");
             }
             else {
                 LOG_INFO("Received end byte. Time passed: %.8f",

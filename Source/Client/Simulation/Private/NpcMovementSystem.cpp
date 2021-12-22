@@ -72,7 +72,7 @@ void NpcMovementSystem::updateNpcs()
         // Check that the processed tick is progressing incrementally.
         NpcStateUpdate& stateUpdate = stateUpdateQueue.front();
         if (stateUpdate.tickNum != (lastProcessedTick + 1)) {
-            LOG_ERROR("Processing NPC movement out of order. "
+            LOG_FATAL("Processing NPC movement out of order. "
                       "stateUpdate.tickNum: %u, "
                       "lastProcessedTick: %u",
                       stateUpdate.tickNum, lastProcessedTick);
@@ -109,7 +109,7 @@ void NpcMovementSystem::applyTickAdjustment(int adjustment)
     tickReplicationOffset += (-2 * adjustment);
 
     if (tickReplicationOffset >= 0) {
-        LOG_ERROR("Adjusted tickReplicationOffset too far into the future. "
+        LOG_FATAL("Adjusted tickReplicationOffset too far into the future. "
                   "offset: %u",
                   tickReplicationOffset);
     }
@@ -216,74 +216,42 @@ void NpcMovementSystem::moveAllNpcs()
 void NpcMovementSystem::applyUpdateMessage(
     const std::shared_ptr<const EntityUpdate>& entityUpdate)
 {
-    // Prepare the sprite view that we'll use for moving bounding boxes.
-    auto spriteView{world.registry.view<Sprite>()};
+    auto group
+        = world.registry.group<Input, Position, PreviousPosition, Movement, BoundingBox, Sprite>(
+            entt::exclude<InputHistory>);
 
     // Use the data in the message to correct any NPCs that changed inputs.
-    const std::vector<EntityState>& entities = entityUpdate->entityStates;
-    for (auto entityIt = entities.begin(); entityIt != entities.end();
-         ++entityIt) {
+    for (const EntityState& entityState : entityUpdate->entityStates) {
         // Skip the player (not an NPC).
-        entt::entity entity = entityIt->entity;
-        entt::registry& registry = world.registry;
+        entt::registry& registry{world.registry};
+        entt::entity entity{entityState.entity};
         if (entity == world.playerEntity) {
             continue;
         }
 
-        // TODO: Get this info from the server, handle it in another
-        //       system, remove this.
-        // If the entity doesn't exist, create it.
-        Sprite* entitySprite{nullptr};
+        // Check that the entity exists.
         if (!(registry.valid(entity))) {
-            LOG_INFO("New entity added. ID: %u", entity);
-            entt::entity newEntity = registry.create(entity);
-            if (entity != newEntity) {
-                LOG_ERROR("Created entity doesn't match received entity. "
-                          "Created: %u, received: %u",
-                          newEntity, entity);
-            }
-            // Init their old position so they don't lerp in from elsewhere.
-            const Position& receivedPos = entityIt->position;
-            registry.emplace<PreviousPosition>(entity, receivedPos.x,
-                                               receivedPos.y, receivedPos.z);
-
-            // Init the movement-related components, to be set for real below.
-            registry.emplace<Input>(entity);
-            registry.emplace<Position>(entity);
-            registry.emplace<Movement>(entity);
-
-            // Set defaults for the data that we'll get from the EntityInfo.
-            registry.emplace<Name>(entity,
-                                   std::to_string(static_cast<Uint32>(entity)));
-            entitySprite = &(registry.emplace<Sprite>(entity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE)));
-            registry.emplace<BoundingBox>(entity, BoundingBox{});
-        }
-        else {
-            // Get the entity's sprite.
-            auto& sprite{spriteView.get<Sprite>(entity)};
-            entitySprite = &sprite;
+            LOG_FATAL("Received update for invalid entity: %u", entity);
         }
 
-        // TODO: When another system starts handling creating the entity,
-        //       switch this to use the group.
-        // Apply the received inputs.
-        registry.patch<Input>(
-            entity, [entityIt](Input& input) { input = entityIt->input; });
+        // Get the entity's components.
+        auto [input, position, previousPosition, movement, boundingBox, sprite]
+            = group.get<Input, Position, PreviousPosition, Movement, BoundingBox, Sprite>(entity);
 
-        // Apply the received velocity.
-        registry.patch<Movement>(entity, [entityIt](Movement& movement) {
-            movement = entityIt->movement;
-        });
+        // Apply the received component updates.
+        input = entityState.input;
+        movement = entityState.movement;
+        position = entityState.position;
 
-        // Apply the received position.
-        Position& newPosition = registry.patch<Position>(entity, [entityIt](Position& position) {
-            position = entityIt->position;
-        });
+        // If the previous position hasn't been initialized, set it to the
+        // current position so we don't lerp in from the origin.
+        if (!(previousPosition.isInitialized)) {
+            previousPosition = position;
+            previousPosition.isInitialized = true;
+        }
 
         // Move their bounding box to their new position.
-        registry.patch<BoundingBox>(entity, [entitySprite, newPosition](BoundingBox& boundingBox) {
-            boundingBox = Transforms::modelToWorld(entitySprite->modelBounds, newPosition);
-        });
+        boundingBox = Transforms::modelToWorld(sprite.modelBounds, position);
     }
 }
 

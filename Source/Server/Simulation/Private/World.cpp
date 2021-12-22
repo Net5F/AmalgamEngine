@@ -9,14 +9,12 @@ namespace AM
 namespace Server
 {
 World::World(SpriteData& spriteData)
-: tileMap(spriteData)
+: registry()
+, tileMap(spriteData)
+, entityLocator(registry)
 , device()
 , generator(device())
-// TODO: When TileMap goes in here, replace this hardcoding with getters.
-//, xDistribution(
-//      0, ((SharedConfig::WORLD_WIDTH - 1) * SharedConfig::TILE_WORLD_WIDTH))
-//, yDistribution(
-//      0, ((SharedConfig::WORLD_HEIGHT - 1) * SharedConfig::TILE_WORLD_HEIGHT))
+// TODO: Replace this hardcoding with getters from TileMap.
 , xDistribution(0, ((16 - 1) * SharedConfig::TILE_WORLD_WIDTH))
 , yDistribution(0, ((16 - 1) * SharedConfig::TILE_WORLD_WIDTH))
 , baseX{0}
@@ -25,6 +23,9 @@ World::World(SpriteData& spriteData)
 , groupOffsetsY{32, 32, 32, 32, 32, 64, -100, -100, -100, -100}
 , offsetSelector{0}
 {
+    // Allocate the entity locator's grid.
+    entityLocator.setGridSize(tileMap.getTileExtent().xLength,
+        tileMap.getTileExtent().yLength);
 }
 
 Position World::getRandomSpawnPoint()

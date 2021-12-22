@@ -5,7 +5,7 @@
 #include "Serialize.h"
 #include "InputChangeRequest.h"
 #include "Input.h"
-#include "IsDirty.h"
+#include "InputHasChanged.h"
 #include "Peer.h"
 #include "Config.h"
 #include "Log.h"
@@ -19,9 +19,9 @@ namespace Client
 {
 ServerUpdateSystem::ServerUpdateSystem(Simulation& inSim, World& inWorld,
                                        Network& inServer)
-: sim(inSim)
-, world(inWorld)
-, network(inServer)
+: sim{inSim}
+, world{inWorld}
+, network{inServer}
 {
 }
 
@@ -35,7 +35,7 @@ void ServerUpdateSystem::sendInputState()
     /* Send the updated state to the server. */
     // Only send new data if we've changed.
     entt::registry& registry = world.registry;
-    if (registry.all_of<IsDirty>(world.playerEntity)) {
+    if (registry.all_of<InputHasChanged>(world.playerEntity)) {
         // Get the current input state.
         Input& input = registry.get<Input>(world.playerEntity);
 
@@ -43,7 +43,7 @@ void ServerUpdateSystem::sendInputState()
         network.serializeAndSend<InputChangeRequest>(
             {sim.getCurrentTick(), input});
 
-        registry.remove<IsDirty>(world.playerEntity);
+        registry.remove<InputHasChanged>(world.playerEntity);
     }
 }
 

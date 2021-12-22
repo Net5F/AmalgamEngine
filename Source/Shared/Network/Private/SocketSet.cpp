@@ -9,7 +9,7 @@ SocketSet::SocketSet(int maxSockets)
 {
     set = SDLNet_AllocSocketSet(maxSockets);
     if (set == nullptr) {
-        LOG_ERROR("Error allocating socket set: %s", SDLNet_GetError());
+        LOG_FATAL("Error allocating socket set: %s", SDLNet_GetError());
     }
 }
 
@@ -23,7 +23,7 @@ void SocketSet::addSocket(const TcpSocket& socket)
 {
     int numAdded = SDLNet_TCP_AddSocket(set, socket.getUnderlyingSocket());
     if (numAdded < 1) {
-        LOG_ERROR("Error while adding socket: %s", SDLNet_GetError());
+        LOG_FATAL("Error while adding socket: %s", SDLNet_GetError());
     }
     else {
         numSockets += numAdded;

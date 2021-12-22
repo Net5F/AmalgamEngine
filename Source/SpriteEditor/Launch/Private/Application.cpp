@@ -34,7 +34,7 @@ Application::Application()
 {
     // Initialize nativefiledialog.
     if (NFD_Init() != NFD_OKAY) {
-        LOG_ERROR("Nativefiledialog failed to initialize properly.");
+        LOG_FATAL("Nativefiledialog failed to initialize properly.");
     }
 
     // Set fullscreen mode.
@@ -49,7 +49,7 @@ Application::Application()
             sdlWindow.SetFullscreen(SDL_WINDOW_FULLSCREEN_DESKTOP);
             break;
         default:
-            LOG_ERROR("Invalid fullscreen value: %d", Config::FULLSCREEN_MODE);
+            LOG_FATAL("Invalid fullscreen value: %d", Config::FULLSCREEN_MODE);
     }
 
     // Set scaling quality.

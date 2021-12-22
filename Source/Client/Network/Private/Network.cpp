@@ -115,7 +115,7 @@ void Network::setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled)
 void Network::send(const BinaryBufferSharedPtr& message)
 {
     if ((server == nullptr) || !(server->isConnected())) {
-        LOG_ERROR("Tried to send while server is disconnected.");
+        LOG_FATAL("Tried to send while server is disconnected.");
     }
 
     // Send the message.
@@ -127,7 +127,7 @@ void Network::send(const BinaryBufferSharedPtr& message)
         NetworkStats::recordBytesSent(message->size());
     }
     else {
-        LOG_ERROR("Message send failed.");
+        LOG_FATAL("Message send failed.");
     }
 }
 
@@ -153,7 +153,7 @@ int Network::pollForMessages()
             processBatch();
         }
         else if (headerResult == NetworkResult::Disconnected) {
-            LOG_ERROR("Found server to be disconnected while trying to "
+            LOG_FATAL("Found server to be disconnected while trying to "
                       "receive header.");
         }
     }
@@ -186,7 +186,7 @@ void Network::processBatch()
         NetworkResult result
             = server->receiveBytesWait(&(batchRecBuffer[0]), batchSize);
         if (result != NetworkResult::Success) {
-            LOG_ERROR("Failed to receive expected bytes.");
+            LOG_FATAL("Failed to receive expected bytes.");
         }
 
         // Track the number of bytes we've received.
@@ -218,14 +218,14 @@ void Network::processBatch()
             bufferIndex += MESSAGE_HEADER_SIZE + messageSize;
             // TODO: Replace with a nice assert that prints.
             if (bufferIndex > batchSize) {
-                LOG_ERROR("Buffer index is wrong. %u, %u", bufferIndex,
+                LOG_FATAL("Buffer index is wrong. %u, %u", bufferIndex,
                           batchSize);
             }
         }
 
         // TODO: Replace with a nice assert that prints.
         if (bufferIndex != batchSize) {
-            LOG_ERROR("Didn't process correct number of bytes. %u, %u",
+            LOG_FATAL("Didn't process correct number of bytes. %u, %u",
                       bufferIndex, batchSize);
         }
     }
@@ -250,12 +250,12 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
         }
         else if (receivedAdjIteration > currentAdjIteration) {
             if (isApplyingTickAdjustment) {
-                LOG_ERROR("Received future adjustment iteration while applying "
+                LOG_FATAL("Received future adjustment iteration while applying "
                           "the last. current: %u, received: %u",
                           currentAdjIteration, receivedAdjIteration);
             }
             else {
-                LOG_ERROR("Out of sequence adjustment iteration. current: %u, "
+                LOG_FATAL("Out of sequence adjustment iteration. current: %u, "
                           "received: %u",
                           currentAdjIteration, receivedAdjIteration);
             }

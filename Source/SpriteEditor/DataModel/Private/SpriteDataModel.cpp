@@ -214,7 +214,7 @@ void SpriteDataModel::save()
     // Write the json to our working file.
     std::ofstream workingFile(workingFilePath, std::ios::trunc);
     if (!(workingFile.is_open())) {
-        LOG_ERROR("File failed to open: %s.", workingFilePath.c_str());
+        LOG_FATAL("File failed to open: %s.", workingFilePath.c_str());
     }
 
     std::string jsonDump{json.dump(4)};
@@ -310,7 +310,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
 void SpriteDataModel::remSpriteSheet(unsigned int index)
 {
     if (index >= spriteSheets.size()) {
-        LOG_ERROR("Index out of bounds while removing sprite sheet.");
+        LOG_FATAL("Index out of bounds while removing sprite sheet.");
     }
 
     spriteSheets.erase(spriteSheets.begin() + index);

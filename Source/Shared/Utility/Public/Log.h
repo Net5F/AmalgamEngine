@@ -13,7 +13,20 @@
         AM::Log::info(__VA_ARGS__);                                            \
     }
 
+#ifndef NDEBUG
 #define LOG_ERROR(...)                                                         \
+    {                                                                          \
+        AM::Log::error(__FILE__, __LINE__, __VA_ARGS__);                       \
+    }
+#else
+#define LOG_ERROR(...)                                                         \
+    {                                                                          \
+        AM::Log::error(__FILE__, __LINE__, __VA_ARGS__);                       \
+        std::abort();                                                          \
+    }
+#endif
+
+#define LOG_FATAL(...)                                                         \
     {                                                                          \
         AM::Log::error(__FILE__, __LINE__, __VA_ARGS__);                       \
         std::abort();                                                          \
@@ -23,6 +36,19 @@ namespace AM
 {
 /**
  * Facilitates logging info and errors to stdout or a log file.
+ *
+ * Our logging system has 3 levels:
+ *   LOG_INFO: Print the given string in release and debug.
+ *   LOG_ERROR: Print file name, line number, and the given string. In debug
+  *             this will also std::abort().
+ *   LOG_FATAL: Print file name, line number, and the given string. In debug
+ *              and release this will also std::abort().
+ *
+ * Use LOG_INFO for general printing, LOG_ERROR for recoverable errors (make
+ * sure you write appropriate recovery logic), and LOG_FATAL for unrecoverable
+ * errors.
+ * Generally, we'll start error cases as LOG_FATAL, then switch them to
+ * LOG_ERROR if there's some expected failure that we can't yet fix.
  */
 class Log
 {
@@ -38,7 +64,7 @@ public:
 
     /**
      * Prints the given info to stdout (and a file, if enableFileLogging() was
-     * called.), then flushes the buffer and calls abort().
+     * called.), then flushes the buffer.
      */
     static void error(const char* fileName, int line, const char* expression,
                       ...);

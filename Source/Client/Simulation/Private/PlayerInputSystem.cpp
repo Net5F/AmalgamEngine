@@ -5,7 +5,7 @@
 #include "Input.h"
 #include "InputHistory.h"
 #include "Camera.h"
-#include "IsDirty.h"
+#include "InputHasChanged.h"
 #include "Log.h"
 
 namespace AM
@@ -72,9 +72,9 @@ void PlayerInputSystem::processHeldInputs()
             // Save the new state.
             playerInput.inputStates[inputType] = newInputStates[inputType];
 
-            // Flag the player as dirty if it isn't already.
-            if (!(world.registry.all_of<IsDirty>(world.playerEntity))) {
-                registry.emplace<IsDirty>(world.playerEntity);
+            // Tag the player as having dirty input state if it isn't already.
+            if (!(world.registry.all_of<InputHasChanged>(world.playerEntity))) {
+                registry.emplace<InputHasChanged>(world.playerEntity);
             }
         }
     }

@@ -93,7 +93,7 @@ private:
      * Note: This leaves the entity's ID in the entityMap. Only the tracked
      *       location is cleared out.
      */
-    void clearEntityLocation(entt::entity entity, CellExtent& cellExtent);
+    void clearEntityLocation(entt::entity entity, CellExtent& clearExtent);
 
     /**
      * Returns the index in the entityGrid vector where the cell with the given

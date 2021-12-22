@@ -19,7 +19,7 @@ TextureHandle AssetCache::loadTexture(const std::string& filePath)
     // Load the texture.
     SDL_Texture* texture = IMG_LoadTexture(sdlRenderer, filePath.c_str());
     if (texture == nullptr) {
-        LOG_ERROR("Failed to load texture: %s", filePath.c_str());
+        LOG_FATAL("Failed to load texture: %s", filePath.c_str());
     }
 
     // Wrap the texture in a shared_ptr.

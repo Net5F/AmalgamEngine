@@ -8,11 +8,10 @@
 #include "Position.h"
 #include "Movement.h"
 #include "ClientSimData.h"
-#include "IsDirty.h"
-#include "Ignore.h"
+#include "InputHasChanged.h"
 #include "Log.h"
-#include <algorithm>
 #include "Profiler.h"
+#include <algorithm>
 
 namespace AM
 {
@@ -24,11 +23,6 @@ ClientUpdateSystem::ClientUpdateSystem(Simulation& inSim, World& inWorld,
 , world(inWorld)
 , network(inNetwork)
 {
-    // Init the groups that we'll be using.
-    auto clientGroup = world.registry.group<ClientSimData>(entt::get<Position>);
-    ignore(clientGroup);
-    auto movementGroup = world.registry.group<Input, Position, Movement>();
-    ignore(movementGroup);
 }
 
 void ClientUpdateSystem::sendClientUpdates()
@@ -36,8 +30,8 @@ void ClientUpdateSystem::sendClientUpdates()
     SCOPED_CPU_SAMPLE(sendClientUpdate);
 
     // Collect the dirty entities.
-    auto dirtyView = world.registry.view<IsDirty>();
-    auto movementGroup = world.registry.group<Input, Position, Movement>();
+    auto dirtyView{world.registry.view<InputHasChanged>()};
+    auto movementGroup{world.registry.group<Input, Position, Movement>()};
     std::vector<EntityStateRefs> dirtyEntities;
     for (entt::entity entity : dirtyView) {
         auto [input, position, movement]
@@ -46,13 +40,11 @@ void ClientUpdateSystem::sendClientUpdates()
     }
 
     /* Update clients as necessary. */
-    auto clientGroup = world.registry.group<ClientSimData>(entt::get<Position>);
-    for (entt::entity entity : clientGroup) {
-        // Center this client's AoI on its current position.
-        auto [client, clientPosition]
-            = clientGroup.get<ClientSimData, Position>(entity);
-
+    auto clientView{world.registry.view<ClientSimData, Position>()};
+    for (entt::entity entity : clientView) {
         /* Collect the entities that need to be sent to this client. */
+        auto [client, clientPosition]
+            = clientView.get<ClientSimData, Position>(entity);
         EntityUpdate entityUpdate{};
 
         // Add all the dirty entities that are in range.
@@ -97,7 +89,7 @@ void ClientUpdateSystem::sendClientUpdates()
     }
 
     // Mark any dirty entities as clean.
-    world.registry.clear<IsDirty>();
+    world.registry.clear<InputHasChanged>();
 }
 
 void ClientUpdateSystem::sendUpdate(ClientSimData& client,

@@ -190,7 +190,7 @@ void Network::serializeAndSend(const T& messageStruct)
     //       message size at this point.
     if ((totalMessageSize > Peer::MAX_WIRE_SIZE)
         || (messageSize > UINT16_MAX)) {
-        LOG_ERROR("Tried to send a too-large message. Size: %u, max: %u",
+        LOG_FATAL("Tried to send a too-large message. Size: %u, max: %u",
                   totalMessageSize, Peer::MAX_WIRE_SIZE);
     }
 

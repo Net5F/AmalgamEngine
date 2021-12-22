@@ -17,13 +17,13 @@ SpriteData::SpriteData()
     fullPath += "SpriteData.json";
     std::ifstream workingFile(fullPath);
     if (!(workingFile.is_open())) {
-        LOG_ERROR("Failed to open SpriteData.json");
+        LOG_FATAL("Failed to open SpriteData.json");
     }
 
     // Parse the file into a json structure.
     nlohmann::json json = nlohmann::json::parse(workingFile, nullptr, false);
     if (json.is_discarded()) {
-        LOG_ERROR("SpriteData.json is not valid JSON.");
+        LOG_FATAL("SpriteData.json is not valid JSON.");
     }
 
     // Parse the json structure to construct our sprites.
@@ -45,7 +45,7 @@ const Sprite& SpriteData::get(const std::string& stringID)
     // Attempt to find the given string ID.
     auto it = stringMap.find(stringID);
     if (it == stringMap.end()) {
-        LOG_ERROR("Failed to find sprite string ID: %s", stringID.c_str());
+        LOG_FATAL("Failed to find sprite string ID: %s", stringID.c_str());
     }
 
     return *(it->second);
@@ -56,7 +56,7 @@ const Sprite& SpriteData::get(int numericID)
     // Attempt to find the given string ID.
     auto it = numericMap.find(numericID);
     if (it == numericMap.end()) {
-        LOG_ERROR("Failed to find sprite numeric ID: %d", numericID);
+        LOG_FATAL("Failed to find sprite numeric ID: %d", numericID);
     }
 
     return *(it->second);
@@ -74,7 +74,7 @@ void SpriteData::parseJson(nlohmann::json& json)
             }
         }
     } catch (nlohmann::json::type_error& e) {
-        LOG_ERROR("Parse failure - %s", e.what());
+        LOG_FATAL("Parse failure - %s", e.what());
     }
 
     // Fill the maps with pointers to all the sprites.

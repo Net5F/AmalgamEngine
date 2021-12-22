@@ -1,6 +1,7 @@
 target_sources(Server
 	PRIVATE
 		Private/ChunkStreamingSystem.cpp
+		Private/ClientAOISystem.cpp
 		Private/ClientConnectionSystem.cpp
 		Private/ClientUpdateSystem.cpp
 		Private/InputUpdateSystem.cpp
@@ -11,8 +12,10 @@ target_sources(Server
 		Private/TileMap/TileMap.cpp
 	PUBLIC
 		Public/ChunkStreamingSystem.h
+		Public/ClientAOISystem.h
 		Public/ClientConnectionSystem.h
 		Public/ClientUpdateSystem.h
+		Public/EnttGroups.h
 		Public/EventSorter.h
 		Public/InputUpdateSystem.h
 		Public/MovementSystem.h
@@ -20,6 +23,7 @@ target_sources(Server
 		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/Components/ClientSimData.h
+		Public/Components/PositionHasChanged.h
 		Public/Components/Sprite.h
 		Public/TileMap/Tile.h
 		Public/TileMap/TileMap.h

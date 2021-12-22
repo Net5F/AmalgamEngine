@@ -4,7 +4,7 @@
 #include "Network.h"
 #include "Peer.h"
 #include "Input.h"
-#include "IsDirty.h"
+#include "InputHasChanged.h"
 #include "ClientSimData.h"
 #include "Log.h"
 #include <memory>
@@ -74,10 +74,10 @@ void InputUpdateSystem::processInputMessages()
             Input& input = world.registry.get<Input>(clientEntity);
             input = inputChangeRequest.input;
 
-            // Flag the entity as dirty.
+            // Tag the entity as dirty.
             // It might already be dirty from a drop, so check first.
-            if (!(world.registry.all_of<IsDirty>(clientEntity))) {
-                world.registry.emplace<IsDirty>(clientEntity);
+            if (!(world.registry.all_of<InputHasChanged>(clientEntity))) {
+                world.registry.emplace<InputHasChanged>(clientEntity);
             }
         }
         else {
@@ -99,7 +99,7 @@ void InputUpdateSystem::handleDroppedMessage(NetworkID clientID)
     if (clientEntityIt == world.netIdMap.end()) {
         // TODO: Think about this. It may be a normal thing that we should just
         //       return early from instead of erroring.
-        LOG_ERROR("Failed to find entity with netID: %u while "
+        LOG_FATAL("Failed to find entity with netID: %u while "
                   "processing a message drop event.",
                   clientID);
     }
@@ -113,7 +113,7 @@ void InputUpdateSystem::handleDroppedMessage(NetworkID clientID)
         entityInput.inputStates = defaultInput.inputStates;
 
         // Flag the entity as dirty.
-        registry.emplace<IsDirty>(clientEntityIt->second);
+        registry.emplace<InputHasChanged>(clientEntityIt->second);
     }
 
     // Flag that a drop occurred for this entity.

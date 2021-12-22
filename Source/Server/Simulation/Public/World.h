@@ -3,6 +3,7 @@
 #include "TileMap.h"
 #include "NetworkDefs.h"
 #include "Position.h"
+#include "EntityLocator.h"
 
 #include "entt/entity/registry.hpp"
 
@@ -36,6 +37,10 @@ public:
 
     /** The tile map that makes up the world. */
     TileMap tileMap;
+
+    /** Spatial partitioning grid for efficiently locating entities by
+        position. */
+    EntityLocator entityLocator;
 
     /** Maps network IDs to entity IDs.
         Used for interfacing with the Network. */

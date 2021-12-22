@@ -21,9 +21,9 @@ namespace Client
 PlayerMovementSystem::PlayerMovementSystem(
     Simulation& inSim, World& inWorld,
     EventDispatcher& inNetworkEventDispatcher)
-: sim(inSim)
-, world(inWorld)
-, playerUpdateQueue(inNetworkEventDispatcher)
+: sim{inSim}
+, world{inWorld}
+, playerUpdateQueue{inNetworkEventDispatcher}
 {
 }
 
@@ -89,7 +89,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
 
         // Check that the received tick is ahead of our latest.
         if (receivedTick <= latestReceivedTick) {
-            LOG_ERROR("Received ticks out of order. latest: %u, new: %u",
+            LOG_FATAL("Received ticks out of order. latest: %u, new: %u",
                       latestReceivedTick, receivedTick);
         }
 
@@ -108,7 +108,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         }
 
         if (playerUpdate == nullptr) {
-            LOG_ERROR("Failed to find player entity in a message that should "
+            LOG_FATAL("Failed to find player entity in a message that should "
                       "have contained one.");
         }
 
@@ -173,7 +173,7 @@ void PlayerMovementSystem::checkReceivedTickValidity(Uint32 receivedTick,
                                                      Uint32 currentTick)
 {
     if (receivedTick > currentTick) {
-        LOG_ERROR("Received data for tick %u on tick %u. Server is in the "
+        LOG_FATAL("Received data for tick %u on tick %u. Server is in the "
                   "future, can't replay inputs.",
                   receivedTick, currentTick);
     }
@@ -184,7 +184,7 @@ void PlayerMovementSystem::checkTickDiffValidity(Uint32 tickDiff)
     // The history includes the current tick, so we only have LENGTH - 1
     // worth of previous data to use (i.e. it's 0-indexed).
     if (tickDiff > (InputHistory::LENGTH - 1)) {
-        LOG_ERROR("Too few items in the player input history. "
+        LOG_FATAL("Too few items in the player input history. "
                   "Increase the length or reduce lag. tickDiff: %u, "
                   "historyLength: %u",
                   tickDiff, InputHistory::LENGTH);

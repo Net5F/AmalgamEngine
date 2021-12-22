@@ -47,7 +47,7 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             break;
         }
         default: {
-            LOG_ERROR("Received unexpected message type: %u", messageType);
+            LOG_FATAL("Received unexpected message type: %u", messageType);
         }
     }
 

@@ -7,6 +7,8 @@
 #include "EntityUpdate.h"
 #include "ChunkUpdate.h"
 #include "TileUpdate.h"
+#include "EntityInit.h"
+#include "EntityDelete.h"
 #include "Log.h"
 
 namespace AM
@@ -43,6 +45,14 @@ void MessageProcessor::processReceivedMessage(MessageType messageType,
         }
         case MessageType::TileUpdate: {
             pushEvent<TileUpdate>(messageBuffer, messageSize);
+            break;
+        }
+        case MessageType::EntityInit: {
+            pushEvent<EntityInit>(messageBuffer, messageSize);
+            break;
+        }
+        case MessageType::EntityDelete: {
+            pushEvent<EntityDelete>(messageBuffer, messageSize);
             break;
         }
         default: {

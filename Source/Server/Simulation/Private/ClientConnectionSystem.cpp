@@ -13,6 +13,8 @@
 #include "ClientSimData.h"
 #include "BoundingBox.h"
 #include "Name.h"
+#include "PositionHasChanged.h"
+#include "EntityDelete.h"
 #include "Transforms.h"
 #include "Log.h"
 #include "Profiler.h"
@@ -49,14 +51,16 @@ void ClientConnectionSystem::processConnectEvents()
     for (unsigned int i = 0; i < clientConnectedQueue.size(); ++i) {
         ClientConnected clientConnected{};
         if (!(clientConnectedQueue.pop(clientConnected))) {
-            LOG_ERROR("Expected element but pop failed.");
+            LOG_FATAL("Expected element but pop failed.");
         }
 
-        // Build their entity.
-        entt::registry& registry = world.registry;
-        const Position spawnPoint = world.getGroupedSpawnPoint();
+        /* Build their entity. */
+        // Find their spawn point.
+        entt::registry& registry{world.registry};
+        const Position spawnPoint{world.getGroupedSpawnPoint()};
 
-        entt::entity newEntity = registry.create();
+        // Create the entity and construct its standard components.
+        entt::entity newEntity{registry.create()};
         registry.emplace<Name>(newEntity,
                                std::to_string(static_cast<Uint32>(newEntity)));
         Position& newPosition{registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0.0f)};
@@ -65,9 +69,18 @@ void ClientConnectionSystem::processConnectEvents()
         registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
         registry.emplace<Input>(newEntity);
         registry.emplace<ClientSimData>(
-            newEntity, clientConnected.clientID, false);
+            newEntity, clientConnected.clientID, false, std::vector<entt::entity>());
         Sprite& newSprite{registry.emplace<Sprite>(newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
-        registry.emplace<BoundingBox>(newEntity, Transforms::modelToWorld(newSprite.modelBounds, newPosition));
+        BoundingBox& boundingBox { registry.emplace<BoundingBox>(newEntity,
+            Transforms::modelToWorld(newSprite.modelBounds, newPosition)) };
+
+        // Start tracking the entity in the locator.
+        world.entityLocator.setEntityLocation(newEntity, boundingBox);
+
+        // Tag the entity as having moved, so the AOI system picks it up.
+        registry.emplace<PositionHasChanged>(newEntity);
+
+        // Register the entity with the network ID map.
         world.netIdMap[clientConnected.clientID] = newEntity;
 
         LOG_INFO("Constructed entity with netID: %u, entityID: %u",
@@ -81,24 +94,56 @@ void ClientConnectionSystem::processConnectEvents()
 
 void ClientConnectionSystem::processDisconnectEvents()
 {
+    auto view{world.registry.view<ClientSimData>()};
+
     // Remove all newly disconnected client's entities from the sim.
     for (unsigned int i = 0; i < clientDisconnectedQueue.size(); ++i) {
         ClientDisconnected clientDisconnected{};
         if (!(clientDisconnectedQueue.pop(clientDisconnected))) {
-            LOG_ERROR("Expected element but pop failed.");
+            LOG_FATAL("Expected element but pop failed.");
         }
 
-        // Find the client's associated entity.
-        auto clientEntityIt = world.netIdMap.find(clientDisconnected.clientID);
-        if (clientEntityIt != world.netIdMap.end()) {
-            // Found the entity, remove it.
-            entt::entity clientEntity = clientEntityIt->second;
-            world.registry.destroy(clientEntity);
-            world.netIdMap.erase(clientEntityIt);
-            LOG_INFO("Removed entity with entityID: %u", clientEntity);
+        // Find the disconnected client's associated entity.
+        auto disconnectedEntityIt{world.netIdMap.find(clientDisconnected.clientID)};
+        if (disconnectedEntityIt != world.netIdMap.end()) {
+            // Found the entity, remove it from the entity locator.
+            entt::entity disconnectedEntity{disconnectedEntityIt->second};
+            world.entityLocator.removeEntity(disconnectedEntity);
+
+            // Remove it from the AOI lists of all client entities in its
+            // range and send them EntityDeletes.
+            ClientSimData& disconnectedClient{view.get<ClientSimData>(disconnectedEntity)};
+            for (entt::entity entityInRange : disconnectedClient.entitiesInAOI) {
+                // If entityInRange isn't a client entity, skip it.
+                if (!(world.registry.all_of<ClientSimData>(entityInRange))) {
+                    continue;
+                }
+
+                // Find disconnectedEntity in entityInRange's list.
+                ClientSimData& clientInRange{view.get<ClientSimData>(entityInRange)};
+                auto eraseIt { std::find(clientInRange.entitiesInAOI.begin(),
+                    clientInRange.entitiesInAOI.end(), disconnectedEntity) };
+
+                // Remove disconnectedEntity from entityInRange's list.
+                if (eraseIt != clientInRange.entitiesInAOI.end()) {
+                    clientInRange.entitiesInAOI.erase(eraseIt);
+                }
+                else {
+                    LOG_FATAL("Failed to find expected entity when erasing.");
+                }
+
+                // Tell clientInRange that disconnectedEntity has been deleted.
+                network.serializeAndSend(clientInRange.netID,
+                    EntityDelete { sim.getCurrentTick(), disconnectedEntity });
+            }
+
+            // Remove it from the registry and network ID map.
+            world.registry.destroy(disconnectedEntity);
+            world.netIdMap.erase(disconnectedEntityIt);
+            LOG_INFO("Removed entity with entityID: %u", disconnectedEntity);
         }
         else {
-            LOG_ERROR("Failed to find entity with netID: %u while erasing.",
+            LOG_FATAL("Failed to find entity with netID: %u while erasing.",
                       clientDisconnected.clientID);
         }
     }
@@ -110,7 +155,7 @@ void ClientConnectionSystem::sendConnectionResponse(NetworkID networkID,
 {
     // Fill in the current tick and their entity's ID.
     ConnectionResponse connectionResponse{};
-    Uint32 currentTick = sim.getCurrentTick();
+    Uint32 currentTick{sim.getCurrentTick()};
     connectionResponse.entity = newEntity;
     connectionResponse.tickNum = currentTick;
 
