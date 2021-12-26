@@ -19,7 +19,9 @@ class BoundingBox;
  * Used to quickly determine which entities are located within a given extent
  * of the world.
  *
- * Entities are put into "bins", each of which has a siz
+ * Internally, entities are organized into "cells", each of which has a size
+ * corresponding to SharedConfig::CELL_WIDTH. This value can be tweaked to
+ * affect performance.
  */
 class EntityLocator
 {

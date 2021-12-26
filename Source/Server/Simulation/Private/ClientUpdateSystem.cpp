@@ -29,39 +29,24 @@ void ClientUpdateSystem::sendClientUpdates()
 {
     SCOPED_CPU_SAMPLE(sendClientUpdate);
 
-    // Collect the dirty entities.
+    auto clientView{world.registry.view<ClientSimData, Position>()};
     auto dirtyView{world.registry.view<InputHasChanged>()};
     auto movementGroup{world.registry.group<Input, Position, Movement>()};
-    std::vector<EntityStateRefs> dirtyEntities;
-    for (entt::entity entity : dirtyView) {
-        auto [input, position, movement]
-            = movementGroup.get<Input, Position, Movement>(entity);
-        dirtyEntities.push_back({entity, input, position, movement});
-    }
 
-    /* Update clients as necessary. */
-    auto clientView{world.registry.view<ClientSimData, Position>()};
+    // Update clients as necessary.
     for (entt::entity entity : clientView) {
         /* Collect the entities that need to be sent to this client. */
         auto [client, clientPosition]
             = clientView.get<ClientSimData, Position>(entity);
         EntityUpdate entityUpdate{};
 
-        // Add all the dirty entities that are in range.
-        for (EntityStateRefs& state : dirtyEntities) {
-            // Calc the distance from this dirty entity to the client entity.
-            // Note: This uses the top left of the entity's position instead of
-            //       the center since it's easy and seems fine. We can change
-            //       to the center if we need to.
-            Position diff{clientPosition - state.position};
-            double distanceSquared { std::abs(
-                (diff.x * diff.x) + (diff.y * diff.y) + (diff.z * diff.z)) };
-
-            // If the dirty entity is in the client entity's AOI, push it.
-            if (distanceSquared <= SharedConfig::AOI_RADIUS_SQUARED) {
-                entityUpdate.entityStates.push_back({state.entity, state.input,
-                                                     state.position,
-                                                     state.movement});
+        // If any entities in this client's AOI have dirty inputs, add them
+        // to the message.
+        for (entt::entity entityInAOI : client.entitiesInAOI) {
+            if (world.registry.all_of<InputHasChanged>(entityInAOI)) {
+                auto [input, position, movement]
+                    = movementGroup.get<Input, Position, Movement>(entityInAOI);
+                entityUpdate.entityStates.push_back({entityInAOI, input, position, movement});
             }
         }
 

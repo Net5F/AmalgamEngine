@@ -37,12 +37,12 @@ void EntityLocator::setEntityLocation(entt::entity entity, const BoundingBox& bo
 {
     // Find the cells that the bounding box intersects.
     CellExtent boxCellExtent{};
-    boxCellExtent.x = static_cast<int>(boundingBox.minX / cellWorldWidth);
-    boxCellExtent.y = static_cast<int>(boundingBox.minY / cellWorldWidth);
-    boxCellExtent.xLength = static_cast<int>((boundingBox.maxX
-        - boundingBox.minX) / cellWorldWidth);
-    boxCellExtent.yLength = static_cast<int>((boundingBox.maxY
-        - boundingBox.minY) / cellWorldWidth);
+    boxCellExtent.x = std::floor(boundingBox.minX / cellWorldWidth);
+    boxCellExtent.y = std::floor(boundingBox.minY / cellWorldWidth);
+    boxCellExtent.xLength = (std::ceil(boundingBox.maxX / cellWorldWidth)
+        - boxCellExtent.x);
+    boxCellExtent.yLength = (std::ceil(boundingBox.maxY / cellWorldWidth)
+        - boxCellExtent.y);
 
     // Clip the extent to the grid's bounds.
     boxCellExtent.intersectWith(cellExtent);
@@ -60,8 +60,8 @@ void EntityLocator::setEntityLocation(entt::entity entity, const BoundingBox& bo
     // Add the entity to all the cells that it occupies.
     int xMax{boxCellExtent.x + boxCellExtent.xLength};
     int yMax{boxCellExtent.y + boxCellExtent.yLength};
-    for (int x = boxCellExtent.x; x <= xMax; ++x) {
-        for (int y = boxCellExtent.y; y <= yMax; ++y) {
+    for (int x = boxCellExtent.x; x < xMax; ++x) {
+        for (int y = boxCellExtent.y; y < yMax; ++y) {
             // Add the entity to this cell's entity array.
             unsigned int linearizedIndex{linearizeCellIndex(x, y)};
             std::vector<entt::entity>& entityArr{entityGrid[linearizedIndex]};
@@ -81,8 +81,10 @@ std::vector<entt::entity>& EntityLocator::getEntitiesCoarse(const Position& cyli
     CellExtent cylinderCellExtent{};
     cylinderCellExtent.x = std::floor((cylinderCenter.x - radius) / cellWorldWidth);
     cylinderCellExtent.y = std::floor((cylinderCenter.y - radius) / cellWorldWidth);
-    cylinderCellExtent.xLength = std::ceil((radius * 2) / cellWorldWidth);
-    cylinderCellExtent.yLength = std::ceil((radius * 2) / cellWorldWidth);
+    cylinderCellExtent.xLength = (std::ceil((cylinderCenter.x + radius) / cellWorldWidth)
+        - cylinderCellExtent.x);
+    cylinderCellExtent.yLength = (std::ceil((cylinderCenter.y + radius) / cellWorldWidth)
+        - cylinderCellExtent.y);
 
     // Clip the extent to the grid's bounds.
     cylinderCellExtent.intersectWith(cellExtent);
@@ -90,14 +92,19 @@ std::vector<entt::entity>& EntityLocator::getEntitiesCoarse(const Position& cyli
     // Add the entities in every intersected cell to the return vector.
     int xMax{cylinderCellExtent.x + cylinderCellExtent.xLength};
     int yMax{cylinderCellExtent.y + cylinderCellExtent.yLength};
-    for (int x = cylinderCellExtent.x; x <= xMax; ++x) {
-        for (int y = cylinderCellExtent.y; y <= yMax; ++y) {
+    for (int x = cylinderCellExtent.x; x < xMax; ++x) {
+        for (int y = cylinderCellExtent.y; y < yMax; ++y) {
             // Add the entities in this cell to the return vector.
             unsigned int linearizedIndex{linearizeCellIndex(x, y)};
             std::vector<entt::entity>& entityArr{entityGrid[linearizedIndex]};
             returnVector.insert(returnVector.end(), entityArr.begin(), entityArr.end());
         }
     }
+
+    // Remove duplicates from the return vector.
+    std::sort(returnVector.begin(), returnVector.end());
+    returnVector.erase(std::unique(returnVector.begin(), returnVector.end()),
+        returnVector.end());
 
     return returnVector;
 }
@@ -136,14 +143,19 @@ std::vector<entt::entity>& EntityLocator::getEntitiesCoarse(const TileExtent& ti
     // Add the entities in every intersected cell to the return vector.
     int xMax{tileCellExtent.x + tileCellExtent.xLength};
     int yMax{tileCellExtent.y + tileCellExtent.yLength};
-    for (int x = tileCellExtent.x; x <= xMax; ++x) {
-        for (int y = tileCellExtent.y; y <= yMax; ++y) {
+    for (int x = tileCellExtent.x; x < xMax; ++x) {
+        for (int y = tileCellExtent.y; y < yMax; ++y) {
             // Add the entities in this cell to the return vector.
             unsigned int linearizedIndex{linearizeCellIndex(x, y)};
             std::vector<entt::entity>& entityArr{entityGrid[linearizedIndex]};
             returnVector.insert(returnVector.end(), entityArr.begin(), entityArr.end());
         }
     }
+
+    // Remove duplicates from the return vector.
+    std::sort(returnVector.begin(), returnVector.end());
+    returnVector.erase(std::unique(returnVector.begin(), returnVector.end()),
+        returnVector.end());
 
     return returnVector;
 }
@@ -177,8 +189,8 @@ void EntityLocator::clearEntityLocation(entt::entity entity, CellExtent& clearEx
     // Iterate through all the cells that the entity occupies.
     int xMax{clearExtent.x + clearExtent.xLength};
     int yMax{clearExtent.y + clearExtent.yLength};
-    for (int x = clearExtent.x; x <= xMax; ++x) {
-        for (int y = clearExtent.y; y <= yMax; ++y) {
+    for (int x = clearExtent.x; x < xMax; ++x) {
+        for (int y = clearExtent.y; y < yMax; ++y) {
             // Find the entity in this cell's entity array.
             unsigned int linearizedIndex{linearizeCellIndex(x, y)};
             std::vector<entt::entity>& entityArr{entityGrid[linearizedIndex]};

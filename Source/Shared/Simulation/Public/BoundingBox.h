@@ -2,6 +2,7 @@
 
 #include "TileExtent.h"
 #include "Position.h"
+#include "Log.h"
 #include <cmath>
 
 namespace AM
@@ -41,9 +42,9 @@ public:
     Position getCenterPosition()
     {
         Position centerPosition{};
-        centerPosition.x = ((maxX - minX) / 2);
-        centerPosition.y = ((maxY - minY) / 2);
-        centerPosition.z = ((maxZ - minZ) / 2);
+        centerPosition.x = minX + ((maxX - minX) / 2);
+        centerPosition.y = minY + ((maxY - minY) / 2);
+        centerPosition.z = minZ + ((maxZ - minZ) / 2);
 
         return centerPosition;
     }
@@ -54,17 +55,21 @@ public:
      * Note: This treats the given data as a cylinder with infinite length
      *       along the Z axis. If we want to treat it as a sphere, we can
      *       change it.
+     *
+     * Reference: https://stackoverflow.com/a/402010/4258629
      */
     bool intersects(const Position& cylinderCenter, unsigned int radius)
     {
-        // TODO: If this works, comment it.
         Position boxCenter{getCenterPosition()};
         float xLength{getXLength()};
         float yLength{getYLength()};
 
+        // Get the X and Y distances between the centers.
         float circleDistanceX{std::abs(cylinderCenter.x - boxCenter.x)};
         float circleDistanceY{std::abs(cylinderCenter.y - boxCenter.y)};
 
+        // If the circle is far enough away that no intersection is possible,
+        // return false.
         if (circleDistanceX > ((xLength / 2) + radius)) {
             return false;
         }
@@ -72,6 +77,8 @@ public:
             return false;
         }
 
+        // If the circle is close enough that an intersection is guaranteed,
+        // return true.
         if (circleDistanceX <= (xLength / 2)) {
             return true;
         }
@@ -79,10 +86,13 @@ public:
             return true;
         }
 
+        // Calculate the distance from the center of the circle to the corner
+        // of the box.
         float xDif{circleDistanceX - (xLength / 2)};
         float yDif{circleDistanceY - (yLength / 2)};
         float cornerDistanceSquared{(xDif * xDif) + (yDif * yDif)};
 
+        // If the distance is less than the radius, return true.
         return (cornerDistanceSquared <= (radius * radius));
     }
 

@@ -58,11 +58,11 @@ void NpcMovementSystem::updateNpcs()
 
     // We want to process updates until we've either processed the desired, or
     // run out of data.
-    Uint32 desiredTick = sim.getCurrentTick() + tickReplicationOffset;
+    Uint32 desiredTick{sim.getCurrentTick() + tickReplicationOffset};
 
     /* While we have authoritative data to use, apply updates for all
        unprocessed ticks including the desired tick. */
-    bool updated = false;
+    bool updated{false};
     while ((lastProcessedTick <= desiredTick)
            && (stateUpdateQueue.size() > 0)) {
         updated = true;
@@ -231,7 +231,8 @@ void NpcMovementSystem::applyUpdateMessage(
 
         // Check that the entity exists.
         if (!(registry.valid(entity))) {
-            LOG_FATAL("Received update for invalid entity: %u", entity);
+            LOG_FATAL("Received update for invalid entity: %u. Message tick: %u", entity,
+                entityUpdate->tickNum);
         }
 
         // Get the entity's components.

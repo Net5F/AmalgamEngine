@@ -36,18 +36,16 @@ void Simulation::tick()
     clientConnectionSystem.processConnectionEvents();
 
     // Receive and process tile update requests.
-    // Note: We do this before running the rest of the sim, so that any updated
-    //       tiles are considered.
     tileUpdateSystem.updateTiles();
-
-    // Update our local lists of entities in each client's AOI.
-    clientAOISystem.updateAOILists();
 
     // Receive and process client input messages.
     inputUpdateSystem.processInputMessages();
 
     // Move all of our entities.
     movementSystem.processMovements();
+
+    // Update each client entity's "entities in my AOI" list.
+    clientAOISystem.updateAOILists();
 
     // Send any dirty entity state to the clients.
     clientUpdateSystem.sendClientUpdates();

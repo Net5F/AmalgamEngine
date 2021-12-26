@@ -40,7 +40,7 @@ void EntityLifespanSystem::processUpdates()
             LOG_INFO("Entity removed: %u", entityDelete->entity);
         }
         else {
-            LOG_FATAL("Asked to delete invalid entity.");
+            LOG_FATAL("Asked to delete invalid entity: %u", entityDelete->entity);
         }
 
         entityDeleteQueue.pop();

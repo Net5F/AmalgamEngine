@@ -44,14 +44,15 @@ void MovementSystem::processMovements()
         MovementHelpers::updatePosition(position, movement,
                                     SharedConfig::SIM_TICK_TIMESTEP_S);
 
-        // Update their bounding box to match the new position.
-        boundingBox = Transforms::modelToWorld(sprite.modelBounds, position);
-
-        // Update the entity's position in the locator.
-        world.entityLocator.setEntityLocation(entity, boundingBox);
-
-        // If the entity moved, tag it.
+        // If the entity moved.
         if (position != previousPosition) {
+            // Update their bounding box to match their new position.
+            boundingBox = Transforms::modelToWorld(sprite.modelBounds, position);
+
+            // Update the entity's position in the locator.
+            world.entityLocator.setEntityLocation(entity, boundingBox);
+
+            // Tag the entity as having moved.
             world.registry.emplace<PositionHasChanged>(entity);
         }
     }

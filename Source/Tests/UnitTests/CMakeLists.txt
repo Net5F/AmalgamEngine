@@ -10,6 +10,8 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/../Libraries/Catch2/"
 
 # Add the executable.
 add_executable(UnitTests
+    Private/TestBoundingBox.cpp
+    Private/TestEntityLocator.cpp
     Private/TestMain.cpp
 )
 
