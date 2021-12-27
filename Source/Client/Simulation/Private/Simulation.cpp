@@ -35,7 +35,7 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher,
 , chunkUpdateSystem(*this, world, inNetworkEventDispatcher, network)
 , tileUpdateSystem(world, inUiEventDispatcher, inNetworkEventDispatcher,
                    network)
-, entityLifespanSystem(*this, world, spriteData, inNetworkEventDispatcher)
+, npcLifetimeSystem(*this, world, spriteData, inNetworkEventDispatcher)
 , playerInputSystem(*this, world)
 , serverUpdateSystem(*this, world, network)
 , playerMovementSystem(*this, world, inNetworkEventDispatcher)
@@ -178,6 +178,7 @@ void Simulation::tick()
             targetTick += adjustment;
 
             // Make sure NPC replication takes the adjustment into account.
+            npcLifetimeSystem.applyTickAdjustment(adjustment);
             npcMovementSystem.applyTickAdjustment(adjustment);
         }
     }
@@ -194,7 +195,7 @@ void Simulation::tick()
         tileUpdateSystem.updateTiles();
 
         // Process entities that need to be constructed or destructed.
-        entityLifespanSystem.processUpdates();
+        npcLifetimeSystem.processUpdates();
 
         // Process the held user input state.
         // Note: Mouse and momentary inputs are processed prior to this tick.

@@ -6,7 +6,7 @@
 #include "ConnectionResponse.h"
 #include "ChunkUpdateSystem.h"
 #include "TileUpdateSystem.h"
-#include "EntityLifespanSystem.h"
+#include "NpcLifetimeSystem.h"
 #include "PlayerInputSystem.h"
 #include "ServerUpdateSystem.h"
 #include "PlayerMovementSystem.h"
@@ -83,7 +83,7 @@ private:
 
     ChunkUpdateSystem chunkUpdateSystem;
     TileUpdateSystem tileUpdateSystem;
-    EntityLifespanSystem entityLifespanSystem;
+    NpcLifetimeSystem npcLifetimeSystem;
     PlayerInputSystem playerInputSystem;
     ServerUpdateSystem serverUpdateSystem;
     PlayerMovementSystem playerMovementSystem;

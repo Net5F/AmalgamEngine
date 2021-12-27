@@ -25,6 +25,7 @@ struct EntityDelete {
 template<typename S>
 void serialize(S& serializer, EntityDelete& entityDelete)
 {
+    serializer.value4b(entityDelete.tickNum);
     serializer.value4b(entityDelete.entity);
 }
 

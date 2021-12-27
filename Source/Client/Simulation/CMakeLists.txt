@@ -2,10 +2,10 @@ target_sources(Client
 	PRIVATE
 		Private/CameraSystem.cpp
 		Private/ChunkUpdateSystem.cpp
+		Private/NpcLifetimeSystem.cpp
 		Private/NpcMovementSystem.cpp
 		Private/PlayerInputSystem.cpp
 		Private/PlayerMovementSystem.cpp
-		Private/EntityLifespanSystem.cpp
 		Private/ServerUpdateSystem.cpp
 		Private/Simulation.cpp
 		Private/TileUpdateSystem.cpp
@@ -14,10 +14,10 @@ target_sources(Client
 	PUBLIC
 		Public/CameraSystem.h
 		Public/ChunkUpdateSystem.h
+		Public/NpcLifetimeSystem.h
 		Public/NpcMovementSystem.h
 		Public/PlayerInputSystem.h
 		Public/PlayerMovementSystem.h
-		Public/EntityLifespanSystem.h
 		Public/ServerUpdateSystem.h
 		Public/Simulation.h
 		Public/TileUpdateSystem.h

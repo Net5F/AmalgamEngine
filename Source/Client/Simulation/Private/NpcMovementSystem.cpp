@@ -37,7 +37,7 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
 , spriteData{inSpriteData}
 , lastReceivedTick(0)
 , lastProcessedTick(0)
-, tickReplicationOffset(-2 * Config::INITIAL_TICK_OFFSET)
+, tickReplicationOffset(Config::INITIAL_REPLICATION_OFFSET)
 {
     // Init the groups that we'll be using.
     auto group
@@ -53,24 +53,24 @@ void NpcMovementSystem::updateNpcs()
         return;
     }
 
-    // Receive any updates from the server, update pastTickOffset.
+    // Receive any updates from the server, update lastReceivedTick.
     receiveEntityUpdates();
 
-    // We want to process updates until we've either processed the desired, or
-    // run out of data.
+    // We want to process updates until we've either processed the desired
+    // tick, or run out of data.
     Uint32 desiredTick{sim.getCurrentTick() + tickReplicationOffset};
 
     /* While we have authoritative data to use, apply updates for all
        unprocessed ticks including the desired tick. */
     bool updated{false};
-    while ((lastProcessedTick <= desiredTick)
+    while ((lastProcessedTick < desiredTick)
            && (stateUpdateQueue.size() > 0)) {
         updated = true;
         // Move all NPCs as if their inputs didn't change.
         moveAllNpcs();
 
         // Check that the processed tick is progressing incrementally.
-        NpcStateUpdate& stateUpdate = stateUpdateQueue.front();
+        NpcStateUpdate& stateUpdate{stateUpdateQueue.front()};
         if (stateUpdate.tickNum != (lastProcessedTick + 1)) {
             LOG_FATAL("Processing NPC movement out of order. "
                       "stateUpdate.tickNum: %u, "
@@ -230,6 +230,10 @@ void NpcMovementSystem::applyUpdateMessage(
         }
 
         // Check that the entity exists.
+        // TODO: There's possibly an issue here if we receive an EntityUpdate
+        //       while the sim happens to be at this system, and the update's
+        //       tick is up for processing. We might end up here before
+        //       NpcLifetimeSystem was able to construct the entity.
         if (!(registry.valid(entity))) {
             LOG_FATAL("Received update for invalid entity: %u. Message tick: %u", entity,
                 entityUpdate->tickNum);

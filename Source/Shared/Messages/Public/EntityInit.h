@@ -36,6 +36,7 @@ struct EntityInit {
 template<typename S>
 void serialize(S& serializer, EntityInit& entityInit)
 {
+    serializer.value4b(entityInit.tickNum);
     serializer.value4b(entityInit.entity);
     serializer.text1b(entityInit.name, EntityInit::NAME_LENGTH);
     serializer.value4b(entityInit.numericID);

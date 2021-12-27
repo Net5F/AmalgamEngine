@@ -34,8 +34,8 @@ public:
     void updateNpcs();
 
     /**
-     * Takes a tick adjustment from the server and applies it to NPC
-     * replication through tickReplicationOffset.
+     * Applies the given tick adjustment (received from the server) to
+     * tickReplicationOffset.
      */
     void applyTickAdjustment(int adjustment);
 
@@ -101,9 +101,6 @@ private:
      * How far into the past to replicate NPCs at.
      * e.g. If tickReplicationOffset == -5, on tick 15 we'll replicate NPC data
      *      for tick 10.
-     *
-     * Initialized to -2 * INITIAL_TICK_OFFSET (see applyTickAdjustment()
-     * comment) and kept in line with sim tick adjustments.
      */
     int tickReplicationOffset;
 };

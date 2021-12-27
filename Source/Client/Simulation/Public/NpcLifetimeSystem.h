@@ -17,17 +17,33 @@ class SpriteData;
  * Maintains the entity registry, constructing and deleting entities based
  * on messages from the server.
  */
-class EntityLifespanSystem
+class NpcLifetimeSystem
 {
 public:
-    EntityLifespanSystem(Simulation& inSim, World& inWorld, SpriteData& inSpriteData, EventDispatcher& inNetworkEventDispatcher);
+    NpcLifetimeSystem(Simulation& inSim, World& inWorld, SpriteData& inSpriteData, EventDispatcher& inNetworkEventDispatcher);
 
     /**
      * Processes any waiting EntityInit or EntityDelete messages.
      */
     void processUpdates();
 
+    /**
+     * Applies the given tick adjustment (received from the server) to
+     * tickReplicationOffset.
+     */
+    void applyTickAdjustment(int adjustment);
+
 private:
+    /**
+     * Processes waiting EntityDelete messages, up to desiredTick.
+     */
+    void processEntityDeletes(Uint32 desiredTick);
+
+    /**
+     * Processes waiting EntityInit messages, up to desiredTick.
+     */
+    void processEntityInits(Uint32 desiredTick);
+
     /** Used to get the current tick number. */
     Simulation& sim;
     /** Used to access components. */
@@ -37,6 +53,13 @@ private:
 
     EventQueue<EntityInit> entityInitQueue;
     EventQueue<EntityDelete> entityDeleteQueue;
+
+    /**
+     * How far into the past to replicate NPCs at.
+     * e.g. If tickReplicationOffset == -5, on tick 15 we'll replicate NPC data
+     *      for tick 10.
+     */
+    int tickReplicationOffset;
 };
 
 } // End namespace Client
