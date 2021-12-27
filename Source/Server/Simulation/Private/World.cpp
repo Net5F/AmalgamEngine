@@ -20,7 +20,7 @@ World::World(SpriteData& spriteData)
 , baseX{0}
 , baseY{0}
 , groupOffsetsX{32, 64, 96, 128, 160, 32, 64, 96, 128, 160}
-, groupOffsetsY{32, 32, 32, 32, 32, 64, -100, -100, -100, -100}
+, groupOffsetsY{32, 32, 32, 32, 32, 64, 64, 64, 64, 64}
 , offsetSelector{0}
 {
     // Allocate the entity locator's grid.
@@ -46,7 +46,7 @@ Position World::getGroupedSpawnPoint()
         offsetSelector = 0;
 
         // Move up to the next position.
-        baseY -= 1000;
+        baseY += 400;
     }
 
     return position;
