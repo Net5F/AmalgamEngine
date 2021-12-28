@@ -14,9 +14,8 @@ World::World(SpriteData& spriteData)
 , entityLocator(registry)
 , device()
 , generator(device())
-// TODO: Replace this hardcoding with getters from TileMap.
-, xDistribution(0, ((16 - 1) * SharedConfig::TILE_WORLD_WIDTH))
-, yDistribution(0, ((16 - 1) * SharedConfig::TILE_WORLD_WIDTH))
+, xDistribution(0, static_cast<unsigned int>(SharedConfig::AOI_RADIUS))
+, yDistribution(0, static_cast<unsigned int>(SharedConfig::AOI_RADIUS))
 , baseX{0}
 , baseY{0}
 , groupOffsetsX{32, 64, 96, 128, 160, 32, 64, 96, 128, 160}

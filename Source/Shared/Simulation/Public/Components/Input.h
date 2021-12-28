@@ -10,7 +10,7 @@ namespace AM
  */
 struct Input {
 public:
-    enum Type : Uint8 { None, YUp, YDown, XUp, XDown, ZUp, ZDown, NumTypes };
+    enum Type : Uint8 { XUp, XDown, YUp, YDown, ZUp, ZDown, NumTypes, None };
 
     enum State : Uint8 { Released, Pressed };
 

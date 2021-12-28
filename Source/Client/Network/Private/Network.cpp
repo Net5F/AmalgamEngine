@@ -197,7 +197,7 @@ void Network::processBatch()
         if (batchIsCompressed) {
             batchSize = ByteTools::uncompress(&(batchRecBuffer[0]), batchSize,
                                               &(uncompressedBatchRecBuffer[0]),
-                                              10000);
+                                              SharedConfig::MAX_BATCH_SIZE);
 
             bufferToUse = &(uncompressedBatchRecBuffer[0]);
         }
