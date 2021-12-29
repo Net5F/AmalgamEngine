@@ -32,7 +32,7 @@ public:
     }
 
     /**
-     * Constructor that takes a top left and bottom right point to form a range.
+     * Constructor that takes a top left and bottom right point to form a extent.
      */
     DiscreteExtent(DiscretePosition<T> topLeft, DiscretePosition<T> bottomRight)
     : x{topLeft.x}
@@ -42,20 +42,20 @@ public:
     {
     }
 
-    /** The X-axis coordinate of the top left of the range. */
+    /** The X-axis coordinate of the top left of the extent. */
     int x{0};
 
-    /** The Y-axis coordinate of the top left of the range. */
+    /** The Y-axis coordinate of the top left of the extent. */
     int y{0};
 
-    /** The X-axis length of this range. */
+    /** The X-axis length of this extent. */
     int xLength{0};
 
-    /** The Y-axis length of this range. */
+    /** The Y-axis length of this extent. */
     int yLength{0};
 
     /**
-     * Returns the max X position in this range.
+     * Returns the max X position in this extent.
      * Kept as a function instead of a variable for brevity of initialization.
      */
     int xMax() {
@@ -63,7 +63,7 @@ public:
     }
 
     /**
-     * Returns the max Y position in this range.
+     * Returns the max Y position in this extent.
      * Kept as a function instead of a variable for brevity of initialization.
      */
     int yMax() {
@@ -71,10 +71,12 @@ public:
     }
 
     /**
-     * Sets this range to the union between itself and the given range.
+     * Sets this extent to the union between itself and the given extent.
+     *
+     * @return false if the resulting extent is empty (has no area), else true.
      */
-    void unionWith(const DiscreteExtent<T>& other) {
-        // Note: We can add some special fast cases for empty ranges if we
+    bool unionWith(const DiscreteExtent<T>& other) {
+        // Note: We can add some special fast cases for empty extents if we
         //       ever care to, but they likely wouldn't be exercised much.
 
         /* Horizontal union. */
@@ -115,13 +117,17 @@ public:
 
         y = selfMin;
         yLength = (selfMax - selfMin);
+
+        return isEmpty();
     }
 
     /**
-     * Sets this range to the intersection between itself and the given range.
+     * Sets this extent to the intersection between itself and the given extent.
+     *
+     * @return false if the resulting extent is empty (has no area), else true.
      */
-    void intersectWith(const DiscreteExtent<T>& other){
-        // Note: We can add some special fast cases for empty ranges if we
+    bool intersectWith(const DiscreteExtent<T>& other){
+        // Note: We can add some special fast cases for empty extents if we
         //       ever care to, but they likely wouldn't be exercised much.
 
         /* Horizontal intersection. */
@@ -161,10 +167,12 @@ public:
 
         y = selfMin;
         yLength = (selfMax - selfMin);
+
+        return isEmpty();
     }
 
     /**
-     * Returns true if the given position is within this range, else false.
+     * Returns true if the given position is within this extent, else false.
      */
     bool containsPosition(const DiscretePosition<T>& position) const
     {
@@ -173,7 +181,15 @@ public:
     }
 
     /**
-     * Returns the number of things in this extent.
+     * Returns true if this extent has no area.
+     */
+    bool isEmpty()
+    {
+        return ((xLength <= 0) || (yLength <= 0));
+    }
+
+    /**
+     * Returns the area of this extent.
      */
     std::size_t getCount() const
     {
