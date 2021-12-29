@@ -45,14 +45,28 @@ private:
     };
 
     /**
-     * Fills the given vector with the entities that must be sent to the given
-     * entityID on this tick.
+     * Determines which entity's data needs to be sent to the given client and
+     * adds them to entitiesToSend.
+     *
+     * Will add any entities that have just entered the client's AOI, and any
+     * entities already within the client's AOI that have changed input state.
      */
-    void sendUpdate(ClientSimData& client, EntityUpdate& entityUpdate);
+    void collectEntitiesToSend(ClientSimData& client, entt::entity clientEntity);
+
+    /**
+     * Adds the movement state of all entities in entitiesToSend to an
+     * EntityUpdate message and sends it to the given client.
+     */
+    void sendEntityUpdate(ClientSimData& client);
 
     Simulation& sim;
     World& world;
     Network& network;
+
+    /** Holds the entities that a particular client needs to be sent updates
+        for.
+        Used during updateClient(). */
+    std::vector<entt::entity> entitiesToSend;
 };
 
 } // namespace Server

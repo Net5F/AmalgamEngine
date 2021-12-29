@@ -29,66 +29,77 @@ void ClientUpdateSystem::sendClientUpdates()
 {
     SCOPED_CPU_SAMPLE(sendClientUpdate);
 
-    auto clientView{world.registry.view<ClientSimData, Position>()};
-    auto dirtyView{world.registry.view<InputHasChanged>()};
-    auto movementGroup{world.registry.group<Input, Position, Movement>()};
+    // Send clients the updated movement state of any nearby entities that
+    // have moved.
+    auto clientView{world.registry.view<ClientSimData>()};
+    for (entt::entity clientEntity : clientView) {
+        // Collect the entities that have updated state that is relevant to
+        // this client.
+        ClientSimData& client{clientView.get<ClientSimData>(clientEntity)};
+        collectEntitiesToSend(client, clientEntity);
 
-    // Update clients as necessary.
-    for (entt::entity entity : clientView) {
-        /* Collect the entities that need to be sent to this client. */
-        auto [client, clientPosition]
-            = clientView.get<ClientSimData, Position>(entity);
-        EntityUpdate entityUpdate{};
-
-        // If any entities in this client's AOI have dirty inputs, add them
-        // to the message.
-        for (entt::entity entityInAOI : client.entitiesInAOI) {
-            if (world.registry.all_of<InputHasChanged>(entityInAOI)) {
-                auto [input, position, movement]
-                    = movementGroup.get<Input, Position, Movement>(entityInAOI);
-                entityUpdate.entityStates.push_back({entityInAOI, input, position, movement});
-            }
+        // If there is updated state to send, send an update message.
+        if (entitiesToSend.size() > 0) {
+            sendEntityUpdate(client);
         }
-
-        // If this entity had an input drop, add it.
-        // (It mispredicted, so it needs to know the actual state it's in.)
-        if (client.inputWasDropped) {
-            // Only add the player entity if it isn't already included.
-            bool playerFound = false;
-            for (EntityState& entityState : entityUpdate.entityStates) {
-                if (entityState.entity == entity) {
-                    playerFound = true;
-                }
-            }
-            if (!playerFound) {
-                auto [input, position, movement]
-                    = movementGroup.get<Input, Position, Movement>(entity);
-                entityUpdate.entityStates.push_back(
-                    {entity, input, position, movement});
-                client.inputWasDropped = false;
-            }
-        }
-
-        /* Send the collected entities to this client. */
-        sendUpdate(client, entityUpdate);
     }
 
-    // Mark any dirty entities as clean.
+    // Mark any entities with dirty inputs as clean.
     world.registry.clear<InputHasChanged>();
 }
 
-void ClientUpdateSystem::sendUpdate(ClientSimData& client,
-                                    EntityUpdate& entityUpdate)
+void ClientUpdateSystem::collectEntitiesToSend(ClientSimData& client, entt::entity clientEntity)
 {
-    /* If there are updates to send, send an update message. */
-    if (entityUpdate.entityStates.size() > 0) {
-        // Finish filling the EntityUpdate.
-        entityUpdate.tickNum = sim.getCurrentTick();
+    /* Collect the entities that need to be sent to the client. */
+    // Clear the vector.
+    entitiesToSend.clear();
 
-        // Send the entity update message.
-        network.serializeAndSend(client.netID, entityUpdate,
-                                 entityUpdate.tickNum);
+    // Add all of the entities that just entered this client's AOI.
+    entitiesToSend.insert(entitiesToSend.end(), client.entitiesThatEnteredAOI.begin(),
+        client.entitiesThatEnteredAOI.end());
+
+    // Add any entities in this client's AOI that have dirty inputs.
+    for (entt::entity entityInAOI : client.entitiesInAOI) {
+        if (world.registry.all_of<InputHasChanged>(entityInAOI)) {
+            entitiesToSend.push_back(entityInAOI);
+        }
     }
+
+    // If the client entity had an input drop, add it.
+    // (It mispredicted, so it needs to know the actual state it's in.)
+    if (client.inputWasDropped) {
+        entitiesToSend.push_back(clientEntity);
+        client.inputWasDropped = false;
+    }
+
+    // Remove duplicates from the vector.
+    std::sort(entitiesToSend.begin(), entitiesToSend.end());
+    entitiesToSend.erase(std::unique(entitiesToSend.begin(),
+        entitiesToSend.end()), entitiesToSend.end());
+
+    // Clear entitiesThatEnteredAOI so they don't get added again next tick.
+    client.entitiesThatEnteredAOI.clear();
+}
+
+void ClientUpdateSystem::sendEntityUpdate(ClientSimData& client)
+{
+    auto movementGroup{world.registry.group<Input, Position, Movement>()};
+    EntityUpdate entityUpdate{};
+
+    // Add the entities to the message.
+    for (entt::entity entityToSend : entitiesToSend) {
+        auto [input, position, movement]
+            = movementGroup.get<Input, Position, Movement>(entityToSend);
+        entityUpdate.entityStates.push_back(
+            {entityToSend, input, position, movement});
+    }
+
+    // Finish filling the other fields.
+    entityUpdate.tickNum = sim.getCurrentTick();
+
+    // Send the message.
+    network.serializeAndSend(client.netID, entityUpdate,
+                             entityUpdate.tickNum);
 }
 
 } // namespace Server
