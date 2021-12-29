@@ -26,7 +26,11 @@ template<typename S>
 void serialize(S& serializer, EntityState& entityState)
 {
     serializer.value4b(entityState.entity);
-    serializer.object(entityState.input);
+
+    serializer.enableBitPacking([&entityState](typename S::BPEnabledType& sbp) {
+            sbp.object(entityState.input);
+        });
+
     serializer.object(entityState.position);
     serializer.object(entityState.movement);
 }

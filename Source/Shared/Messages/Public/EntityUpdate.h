@@ -28,8 +28,10 @@ template<typename S>
 void serialize(S& serializer, EntityUpdate& entityUpdate)
 {
     serializer.value4b(entityUpdate.tickNum);
-    serializer.container(entityUpdate.entityStates,
-                         static_cast<std::size_t>(SharedConfig::MAX_ENTITIES));
+    serializer.enableBitPacking([&entityUpdate](typename S::BPEnabledType& sbp) {
+            sbp.container(entityUpdate.entityStates,
+                             static_cast<std::size_t>(SharedConfig::MAX_ENTITIES));
+        });
 }
 
 } // End namespace AM
