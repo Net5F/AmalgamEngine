@@ -14,7 +14,10 @@ World::World(SpriteData& spriteData)
 , entityLocator(registry)
 , device()
 , generator(device())
-, xDistribution(0, static_cast<unsigned int>(SharedConfig::AOI_RADIUS))
+// Note: We restrict the x-axis positions to keep them in bounds while moving.
+, xDistribution(SharedConfig::TILE_WORLD_WIDTH
+                , (static_cast<unsigned int>(SharedConfig::AOI_RADIUS)
+                      - SharedConfig::TILE_WORLD_WIDTH))
 , yDistribution(0, static_cast<unsigned int>(SharedConfig::AOI_RADIUS))
 , baseX{0}
 , baseY{0}
