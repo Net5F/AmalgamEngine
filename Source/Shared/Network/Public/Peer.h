@@ -83,13 +83,13 @@ public:
      *
      * @param buffer  The buffer to fill with data, if any was received.
      * @param numBytes  The number of bytes to receive.
-     * @param checkSockets  If true, will call CheckSockets() before checking
-     *                      SocketReady(). Set this to false if you're going to
-     *                      call CheckSockets() yourself.
-     * @return An appropriate ReceiveResult. If return == Success,
+     * @param checkSockets  If true, will call checkSockets() before checking
+     *                      socketReady(). Set this to false if you're going to
+     *                      call checkSockets() yourself.
+     * @return An appropriate NetworkResult. If return == Success,
      *         buffer contains the received data.
      */
-    NetworkResult receiveBytes(Uint8* buffer, Uint16 numBytes,
+    NetworkResult receiveBytes(Uint8* buffer, unsigned int numBytes,
                                bool checkSockets);
 
     /**
@@ -98,19 +98,19 @@ public:
      *
      * @param buffer  The buffer to fill with data, if any was received.
      * @param numBytes  The number of bytes to receive.
-     * @return An appropriate ReceiveResult. If return == Success,
+     * @return An appropriate NetworkResult. If return == Success,
      *         buffer contains the received data.
      */
-    NetworkResult receiveBytesWait(Uint8* buffer, Uint16 numBytes);
+    NetworkResult receiveBytesWait(Uint8* buffer, unsigned int numBytes);
 
     /**
      * Tries to receive a {size, message} pair over the network.
      *
      * @param messageBuffer  The buffer to fill with a message, if one was
      * received.
-     * @param checkSockets  If true, will call CheckSockets() before checking
-     *                      SocketReady(). Set this to false if you're going to
-     * call CheckSockets() yourself.
+     * @param checkSockets  If true, will call checkSockets() before checking
+     *                      socketReady(). Set this to false if you're going to
+     * call checkSockets() yourself.
      * @return An appropriate ReceiveResult. If return.networkResult == Success,
      *         messageBuffer contains the received message.
      */

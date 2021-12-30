@@ -72,12 +72,12 @@ void Network::send(NetworkID networkID, const BinaryBufferSharedPtr& message,
 void Network::logNetworkStatistics()
 {
     // Dump the stats from the tracker.
-    NetStatsDump netStats = NetworkStats::dumpStats();
+    NetStatsDump netStats{NetworkStats::dumpStats()};
 
     // Log the stats.
-    float bytesSentPerSecond = netStats.bytesSent / SECONDS_TILL_STATS_DUMP;
-    float bytesReceivedPerSecond
-        = netStats.bytesReceived / SECONDS_TILL_STATS_DUMP;
+    float bytesSentPerSecond{netStats.bytesSent / static_cast<float>(SECONDS_TILL_STATS_DUMP)};
+    float bytesReceivedPerSecond{
+        netStats.bytesReceived / static_cast<float>(SECONDS_TILL_STATS_DUMP)};
     LOG_INFO("Bytes sent per second: %.0f, Bytes received per second: %.0f",
              bytesSentPerSecond, bytesReceivedPerSecond);
 }

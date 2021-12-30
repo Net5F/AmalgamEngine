@@ -119,7 +119,7 @@ void Network::send(const BinaryBufferSharedPtr& message)
     }
 
     // Send the message.
-    NetworkResult result = server->send(message);
+    NetworkResult result{server->send(message)};
     if (result == NetworkResult::Success) {
         messagesSentSinceTick++;
 
@@ -146,8 +146,8 @@ int Network::pollForMessages()
 {
     while (!exitRequested) {
         // Wait for a server header.
-        NetworkResult headerResult = server->receiveBytesWait(
-            headerRecBuffer.data(), SERVER_HEADER_SIZE);
+        NetworkResult headerResult{server->receiveBytesWait(
+            headerRecBuffer.data(), SERVER_HEADER_SIZE)};
 
         if (headerResult == NetworkResult::Success) {
             processBatch();
@@ -235,7 +235,7 @@ void Network::processBatch()
 void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
 {
     if (receivedTickAdj != 0) {
-        Uint8 currentAdjIteration = adjustmentIteration;
+        Uint8 currentAdjIteration{adjustmentIteration};
 
         // If it's the current iteration and we aren't already applying it.
         if ((receivedAdjIteration == currentAdjIteration)
@@ -264,12 +264,12 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
 void Network::logNetworkStatistics()
 {
     // Dump the stats from the tracker.
-    NetStatsDump netStats = NetworkStats::dumpStats();
+    NetStatsDump netStats{NetworkStats::dumpStats()};
 
     // Log the stats.
-    float bytesSentPerSecond = netStats.bytesSent / SECONDS_TILL_STATS_DUMP;
-    float bytesReceivedPerSecond
-        = netStats.bytesReceived / SECONDS_TILL_STATS_DUMP;
+    float bytesSentPerSecond{netStats.bytesSent / static_cast<float>(SECONDS_TILL_STATS_DUMP)};
+    float bytesReceivedPerSecond{
+        netStats.bytesReceived / static_cast<float>(SECONDS_TILL_STATS_DUMP)};
     LOG_INFO("Bytes sent per second: %.0f, Bytes received per second: %.0f",
              bytesSentPerSecond, bytesReceivedPerSecond);
 }

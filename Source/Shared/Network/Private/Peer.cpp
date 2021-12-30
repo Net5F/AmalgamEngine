@@ -102,7 +102,7 @@ NetworkResult Peer::send(const Uint8* buffer, unsigned int numBytesToSend)
     }
 }
 
-NetworkResult Peer::receiveBytes(Uint8* buffer, Uint16 numBytes,
+NetworkResult Peer::receiveBytes(Uint8* buffer, unsigned int numBytes,
                                  bool checkSockets)
 {
     if (!bIsConnected) {
@@ -121,7 +121,7 @@ NetworkResult Peer::receiveBytes(Uint8* buffer, Uint16 numBytes,
     }
 }
 
-NetworkResult Peer::receiveBytesWait(Uint8* buffer, Uint16 numBytes)
+NetworkResult Peer::receiveBytesWait(Uint8* buffer, unsigned int numBytes)
 {
     if (!bIsConnected) {
         return NetworkResult::Disconnected;
@@ -132,15 +132,19 @@ NetworkResult Peer::receiveBytesWait(Uint8* buffer, Uint16 numBytes)
                   numBytes, MAX_WIRE_SIZE);
     }
 
-    int result = socket->receive(buffer, numBytes);
-    if (result <= 0) {
-        // Disconnected
-        bIsConnected = false;
-        return NetworkResult::Disconnected;
-    }
-    else if (result < numBytes) {
-        LOG_FATAL("Didn't receive all the bytes in one chunk."
-                  "Need to add logic for this scenario.");
+    // Loop until we've received all of the bytes.
+    int bytesReceived{0};
+    while (static_cast<unsigned int>(bytesReceived) < numBytes) {
+        // Try to receive bytes.
+        int result{socket->receive((buffer + bytesReceived), numBytes)};
+        if (result > 0) {
+            bytesReceived += result;
+        }
+        else {
+            // Disconnected
+            bIsConnected = false;
+            return NetworkResult::Disconnected;
+        }
     }
 
     return NetworkResult::Success;

@@ -52,24 +52,24 @@ public:
     /**
      * Sends len bytes from the given dataBuffer over this socket.
      * @return The number of bytes sent. If the number returned is less than
-     * len, then an error occurred, such as the client disconnecting.
+     *         len, an error occurred, such as the client disconnecting.
      */
     int send(const void* dataBuffer, int len);
 
     /**
-     * Receive data of exactly maxLen bytes from this socket, into the memory
-     * pointed to by dataBuffer.
+     * Receives data from this socket.
      *
-     * Unless there is an error, or the connection is closed, the buffer will
-     * read maxLen bytes. If you read more than is sent from the other end, then
-     * it will wait until the full requested length is sent, or until the
-     * connection is closed from the other end.
+     * Note: This call will wait indefinitely for bytes to be available on this
+     *       socket. Once bytes are available, it will immediately return them,
+     *       even if the amount available is less than maxLen.
      *
      * Note: This function is not used for server (listener) sockets.
      *
+     * @param dataBuffer  The buffer to use.
+     * @param maxLen  The maximum number of bytes to receive.
      * @return The number of bytes received.
-     *         If the number returned is <= 0, then an error occurred, or the
-     * remote host has closed the connection.
+     *         If the number returned is <= 0, an error occurred, or the remote
+     *         host has closed the connection.
      */
     int receive(void* dataBuffer, int maxLen);
 
@@ -77,7 +77,7 @@ public:
      * Checks if a socket has been marked as active.
      *
      * Note: Only call this on a socket in a set, after calling checkSockets()
-     * on that set.
+     *       on that set.
      */
     bool isReady();
 
@@ -88,8 +88,8 @@ public:
      *
      * @return A valid TcpSocket unique pointer on success.
      *         nullptr is returned on errors, such as failure to create a
-     * socket, failure to finish connecting, or if there is no waiting
-     * connection.
+     *         socket, failure to finish connecting, or if there is no waiting
+     *         connection.
      */
     std::unique_ptr<TcpSocket> accept();
 
