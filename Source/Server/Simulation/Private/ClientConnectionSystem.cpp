@@ -57,7 +57,7 @@ void ClientConnectionSystem::processConnectEvents()
         /* Build their entity. */
         // Find their spawn point.
         entt::registry& registry{world.registry};
-        const Position spawnPoint{world.getGroupedSpawnPoint()};
+        const Position spawnPoint{world.getRandomSpawnPoint()};
 
         // Create the entity and construct its standard components.
         entt::entity newEntity{registry.create()};

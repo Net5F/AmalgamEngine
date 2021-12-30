@@ -11,7 +11,7 @@ namespace AM
 /**
  * Contains state data for a single entity.
  *
- * Used for sending state updates to clients.
+ * Used for sending movement state updates to clients.
  */
 struct EntityState {
     /** The entity that this state belongs to. */

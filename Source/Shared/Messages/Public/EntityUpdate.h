@@ -10,7 +10,10 @@
 namespace AM
 {
 /**
- * Contains all new entity data for a single sim tick.
+ * Contains new entity state for a single sim tick.
+ *
+ * Each client is only sent the state of entities that are in their area of
+ * interest.
  */
 struct EntityUpdate {
     // The MessageType enum value that this message corresponds to.
@@ -20,7 +23,7 @@ struct EntityUpdate {
     /** The tick that this update corresponds to. */
     Uint32 tickNum{0};
 
-    /** Data for all of the entities that updated on this tick. */
+    /** The new state of all relevant entities that updated on this tick. */
     std::vector<EntityState> entityStates;
 };
 
