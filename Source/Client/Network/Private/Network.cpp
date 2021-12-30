@@ -164,7 +164,7 @@ int Network::pollForMessages()
 void Network::processBatch()
 {
     // Start tracking the number of received bytes.
-    unsigned int bytesReceived = SERVER_HEADER_SIZE;
+    unsigned int bytesReceived{SERVER_HEADER_SIZE};
 
     // Check if we need to adjust the tick offset.
     adjustIfNeeded(headerRecBuffer[ServerHeaderIndex::TickAdjustment],
@@ -173,8 +173,7 @@ void Network::processBatch()
     /* Process the BatchSize header field. */
     // Read the high bit of batchSize to tell whether the batch is compressed
     // or not. If the high bit is set, the batch is compressed.
-    Uint16 batchSize
-        = ByteTools::read16(&(headerRecBuffer[ServerHeaderIndex::BatchSize]));
+    Uint16 batchSize{ByteTools::read16(&(headerRecBuffer[ServerHeaderIndex::BatchSize]))};
     bool batchIsCompressed{(batchSize & (1U << 15)) != 0};
 
     // Reset the high bit of batchSize to get the real size.
@@ -183,8 +182,7 @@ void Network::processBatch()
     /* Process the batch, if it contains any data. */
     if (batchSize > 0) {
         // Receive the expected bytes.
-        NetworkResult result
-            = server->receiveBytesWait(&(batchRecBuffer[0]), batchSize);
+        NetworkResult result{server->receiveBytesWait(&(batchRecBuffer[0]), batchSize)};
         if (result != NetworkResult::Success) {
             LOG_FATAL("Failed to receive expected bytes.");
         }
@@ -205,10 +203,10 @@ void Network::processBatch()
         // Process the messages.
         std::size_t bufferIndex{0};
         while (bufferIndex < batchSize) {
-            MessageType messageType = static_cast<MessageType>(
-                bufferToUse[bufferIndex + MessageHeaderIndex::MessageType]);
-            Uint16 messageSize = ByteTools::read16(
-                &(bufferToUse[bufferIndex + MessageHeaderIndex::Size]));
+            MessageType messageType{static_cast<MessageType>(
+                bufferToUse[bufferIndex + MessageHeaderIndex::MessageType])};
+            Uint16 messageSize{ByteTools::read16(
+                &(bufferToUse[bufferIndex + MessageHeaderIndex::Size]))};
 
             messageProcessor.processReceivedMessage(
                 messageType,

@@ -27,14 +27,18 @@ void serialize(S& serializer, Input& input)
 {
     // Bit pack the input array.
     // It's an array of 2-value enums, so we can make it pretty small.
-    serializer.enableBitPacking([&input](typename S::BPEnabledType& sbp) {
-        sbp.container(input.inputStates, [](typename S::BPEnabledType& sbp,
-                                            Input::State& inputState) {
-            constexpr bitsery::ext::ValueRange<Input::State> range{
-                Input::State::Released, Input::State::Pressed};
-            sbp.ext(inputState, range);
-        });
+    // Note: We expect the outer context (such as EntityUpdate) to
+    //       enable bit packing.
+    serializer.container(input.inputStates, [](typename S::BPEnabledType& sbp,
+                                        Input::State& inputState) {
+        constexpr bitsery::ext::ValueRange<Input::State> range{
+            Input::State::Released, Input::State::Pressed};
+        sbp.ext(inputState, range);
     });
+
+    // Align after bit-packing to make sure the following bytes can be easily
+    // processed.
+    serializer.adapter().align();
 }
 
 } // namespace AM

@@ -27,9 +27,9 @@ void serialize(S& serializer, EntityState& entityState)
 {
     serializer.value4b(entityState.entity);
 
-    serializer.enableBitPacking([&entityState](typename S::BPEnabledType& sbp) {
-            sbp.object(entityState.input);
-        });
+    // Note: Input needs bit packing enabled, but we expect EntityUpdate to
+    //       enable it.
+    serializer.object(entityState.input);
 
     serializer.object(entityState.position);
     serializer.object(entityState.movement);

@@ -41,7 +41,10 @@ template<typename S>
 void serialize(S& serializer, InputChangeRequest& inputChangeRequest)
 {
     serializer.value4b(inputChangeRequest.tickNum);
-    serializer.object(inputChangeRequest.input);
+
+    serializer.enableBitPacking([&inputChangeRequest](typename S::BPEnabledType& sbp) {
+            sbp.object(inputChangeRequest.input);
+        });
 }
 
 } // End namespace AM
