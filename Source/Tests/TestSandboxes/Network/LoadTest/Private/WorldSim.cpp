@@ -16,8 +16,6 @@ WorldSim::WorldSim(EventDispatcher& inNetworkEventDispatcher,
                    Client::Network& inNetwork)
 : network(inNetwork)
 , connectionResponseQueue(inNetworkEventDispatcher)
-, playerUpdateQueue(inNetworkEventDispatcher)
-, npcUpdateQueue(inNetworkEventDispatcher)
 , clientEntity(entt::null)
 , currentTick(0)
 , ticksTillInput(0)
@@ -68,14 +66,6 @@ void WorldSim::tick()
             ticksTillInput = INPUT_RATE_TICKS;
         }
         ticksTillInput--;
-
-        // Discard any waiting player messages.
-        while (playerUpdateQueue.pop()) {
-        }
-
-        // Discard any waiting npc messages.
-        while (npcUpdateQueue.pop()) {
-        }
 
         currentTick++;
     }
