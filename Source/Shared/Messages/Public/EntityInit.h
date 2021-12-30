@@ -10,6 +10,9 @@ namespace AM
 /**
  * Sent by the server to tell a client that an entity has entered its area
  * of interest and must be constructed.
+ *
+ * Contains the entity's "static data"--that is, the data that doesn't change
+ * often (such as the entity's name).
  */
 struct EntityInit {
     // The MessageType enum value that this message corresponds to.
