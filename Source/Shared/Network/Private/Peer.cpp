@@ -86,7 +86,7 @@ NetworkResult Peer::send(const Uint8* buffer, unsigned int numBytesToSend)
                   numBytesToSend, MAX_WIRE_SIZE);
     }
 
-    int bytesSent = socket->send(buffer, numBytesToSend);
+    int bytesSent{socket->send(buffer, numBytesToSend)};
     if (bytesSent < 0) {
         LOG_FATAL("TCP_Send returned < 0. This should never happen, the socket"
                   "was likely misused.");
@@ -125,11 +125,6 @@ NetworkResult Peer::receiveBytesWait(Uint8* buffer, unsigned int numBytes)
 {
     if (!bIsConnected) {
         return NetworkResult::Disconnected;
-    }
-    else if (numBytes > MAX_WIRE_SIZE) {
-        LOG_FATAL("Tried to receive too many bytes. Bytes requested: %u, "
-                  "MAX_WIRE_SIZE: %u",
-                  numBytes, MAX_WIRE_SIZE);
     }
 
     // Loop until we've received all of the bytes.
@@ -188,8 +183,8 @@ ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
     }
 
     // The number of bytes in the upcoming message.
-    Uint16 messageSize
-        = ByteTools::read16(&(headerBuf[MessageHeaderIndex::Size]));
+    Uint16 messageSize{
+        ByteTools::read16(&(headerBuf[MessageHeaderIndex::Size]))};
     if (messageSize > MAX_WIRE_SIZE) {
         LOG_FATAL("Tried to receive too large of a message. messageSize: %u, "
                   "MAX_WIRE_SIZE: %u",

@@ -48,7 +48,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     }
 
     // Copy any waiting messages into the buffer.
-    unsigned int currentIndex = ServerHeaderIndex::MessageHeaderStart;
+    unsigned int currentIndex{ServerHeaderIndex::MessageHeaderStart};
     for (unsigned int i = 0; i < messageCount; ++i) {
         // Pop the message.
         QueuedMessage queuedMessage;
@@ -91,7 +91,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
             &(batchBuffer[ServerHeaderIndex::MessageHeaderStart]), batchSize,
             &(compressedBatchBuffer[ServerHeaderIndex::MessageHeaderStart]),
             COMPRESSED_BUFFER_SIZE);
-        if (batchSize > Peer::MAX_WIRE_SIZE) {
+        if (batchSize > MAX_BATCH_SIZE) {
             LOG_FATAL("Batch too large, even after compression. Size: %u", batchSize);
         }
 
@@ -109,7 +109,27 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     NetworkStats::recordBytesSent(totalSize);
 
     // Send the header and batch.
-    return peer->send(bufferToSend, totalSize);
+    std::size_t sendIndex{0};
+    NetworkResult result{NetworkResult::Success};
+    while (sendIndex < totalSize) {
+        // Calc how many bytes we have left to send.
+        std::size_t bytesToSend{totalSize - sendIndex};
+
+        // Only send up to MAX_WIRE_SIZE bytes per send() call.
+        if (bytesToSend > Peer::MAX_WIRE_SIZE) {
+            bytesToSend = Peer::MAX_WIRE_SIZE;
+        }
+
+        // Send the bytes.
+        result = peer->send((bufferToSend + sendIndex), bytesToSend);
+        if (result == NetworkResult::Disconnected) {
+            break;
+        }
+
+        sendIndex += bytesToSend;
+    }
+
+    return result;
 }
 
 void Client::addExplicitConfirmation(unsigned int& currentIndex,

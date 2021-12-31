@@ -13,6 +13,18 @@
 namespace AM
 {
 //--------------------------------------------------------------------------
+// Constants
+//--------------------------------------------------------------------------
+// Note: These are non-configurable constants. Configurable constants should
+//       go into SharedConfig.
+
+/** The max size that a message batch can be.
+    2^15 because the BatchSize field is 16 bits long, and the high bit is
+    reserved. */
+static constexpr unsigned int MAX_BATCH_SIZE{2 << 14};
+
+
+//--------------------------------------------------------------------------
 // Typedefs
 //--------------------------------------------------------------------------
 /** Represents a single network client. Will be reused if the client
