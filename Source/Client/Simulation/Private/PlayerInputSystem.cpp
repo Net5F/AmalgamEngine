@@ -4,17 +4,19 @@
 #include "Network.h"
 #include "Input.h"
 #include "InputHistory.h"
+#include "InputChangeRequest.h"
 #include "Camera.h"
-#include "InputHasChanged.h"
+#include "Config.h"
 #include "Log.h"
 
 namespace AM
 {
 namespace Client
 {
-PlayerInputSystem::PlayerInputSystem(Simulation& inSim, World& inWorld)
-: sim(inSim)
-, world(inWorld)
+PlayerInputSystem::PlayerInputSystem(Simulation& inSim, World& inWorld, Network& inNetwork)
+: sim{inSim}
+, world{inWorld}
+, network{inNetwork}
 {
 }
 
@@ -63,20 +65,22 @@ void PlayerInputSystem::processHeldInputs()
     }
 
     // Update our saved input state.
-    entt::registry& registry = world.registry;
-    Input& playerInput = registry.get<Input>(world.playerEntity);
+    Input& playerInput{world.registry.get<Input>(world.playerEntity)};
+    bool inputHasChanged{false};
     for (unsigned int inputType = 0; inputType < Input::Type::NumTypes;
          ++inputType) {
         // If the saved state doesn't match the latest.
         if (newInputStates[inputType] != playerInput.inputStates[inputType]) {
             // Save the new state.
             playerInput.inputStates[inputType] = newInputStates[inputType];
-
-            // Tag the player as having dirty input state if it isn't already.
-            if (!(world.registry.all_of<InputHasChanged>(world.playerEntity))) {
-                registry.emplace<InputHasChanged>(world.playerEntity);
-            }
+            inputHasChanged = true;
         }
+    }
+
+    // If our input state has changed, ask the server to apply the new state.
+    if (inputHasChanged && !Config::RUN_OFFLINE) {
+        network.serializeAndSend<InputChangeRequest>(
+            {sim.getCurrentTick(), playerInput});
     }
 }
 

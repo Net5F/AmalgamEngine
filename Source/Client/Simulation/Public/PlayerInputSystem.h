@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Network.h"
-#include "SDL_events.h"
+#include <SDL2/SDL_events.h>
 
 namespace AM
 {
@@ -11,10 +11,17 @@ class Simulation;
 class World;
 class Network;
 
+/**
+ * Processes the player's input state.
+ *
+ * Performs updates locally, and sends state change requests to the server.
+ * If a change is refused, PlayerMovementSystem will handle the resolution of
+ * our local state.
+ */
 class PlayerInputSystem
 {
 public:
-    PlayerInputSystem(Simulation& inSim, World& inWorld);
+    PlayerInputSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
      * Updates the player's input state with the given event.
@@ -45,6 +52,7 @@ private:
 
     Simulation& sim;
     World& world;
+    Network& network;
 };
 
 } // namespace Client

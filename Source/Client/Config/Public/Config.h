@@ -21,7 +21,7 @@ public:
     // Network
     //-------------------------------------------------------------------------
     /** If true, the connection to the server will be mocked and we'll run
-       without it. */
+        without it. */
     static constexpr bool RUN_OFFLINE = false;
 
     static const std::string SERVER_IP;

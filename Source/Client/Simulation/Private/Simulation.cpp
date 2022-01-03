@@ -36,8 +36,7 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher,
 , tileUpdateSystem(world, inUiEventDispatcher, inNetworkEventDispatcher,
                    network)
 , npcLifetimeSystem(*this, world, spriteData, inNetworkEventDispatcher)
-, playerInputSystem(*this, world)
-, serverUpdateSystem(*this, world, network)
+, playerInputSystem(*this, world, network)
 , playerMovementSystem(*this, world, inNetworkEventDispatcher)
 , npcMovementSystem(*this, world, inNetworkEventDispatcher, network, spriteData)
 , cameraSystem(*this, world)
@@ -197,12 +196,11 @@ void Simulation::tick()
         // Process entities that need to be constructed or destructed.
         npcLifetimeSystem.processUpdates();
 
-        // Process the held user input state.
-        // Note: Mouse and momentary inputs are processed prior to this tick.
+        // Process the held user input state and send change requests to the
+        // server.
+        // Note: Mouse and momentary inputs are processed through our OS event
+        //       handling, prior to this tick.
         playerInputSystem.processHeldInputs();
-
-        // Send input change requests to the server.
-        serverUpdateSystem.sendInputState();
 
         // Push the new input state into the player's history.
         playerInputSystem.addCurrentInputsToHistory();

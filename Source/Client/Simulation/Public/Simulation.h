@@ -8,7 +8,6 @@
 #include "TileUpdateSystem.h"
 #include "NpcLifetimeSystem.h"
 #include "PlayerInputSystem.h"
-#include "ServerUpdateSystem.h"
 #include "PlayerMovementSystem.h"
 #include "NpcMovementSystem.h"
 #include "CameraSystem.h"
@@ -85,7 +84,6 @@ private:
     TileUpdateSystem tileUpdateSystem;
     NpcLifetimeSystem npcLifetimeSystem;
     PlayerInputSystem playerInputSystem;
-    ServerUpdateSystem serverUpdateSystem;
     PlayerMovementSystem playerMovementSystem;
     NpcMovementSystem npcMovementSystem;
     CameraSystem cameraSystem;
