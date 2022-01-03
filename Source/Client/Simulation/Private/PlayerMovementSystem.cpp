@@ -4,7 +4,7 @@
 #include "World.h"
 #include "Network.h"
 #include "Position.h"
-#include "Movement.h"
+#include "Velocity.h"
 #include "Input.h"
 #include "InputHistory.h"
 #include "PreviousPosition.h"
@@ -27,7 +27,7 @@ PlayerMovementSystem::PlayerMovementSystem(
 {
 }
 
-void PlayerMovementSystem::processMovements()
+void PlayerMovementSystem::processMovement()
 {
     // Save the old position.
     Position& position{world.registry.get<Position>(world.playerEntity)};
@@ -35,16 +35,16 @@ void PlayerMovementSystem::processMovements()
     previousPosition = position;
 
     // If we're online, process any updates from the server.
-    Movement& movement{world.registry.get<Movement>(world.playerEntity)};
+    Velocity& velocity{world.registry.get<Velocity>(world.playerEntity)};
     Input& input{world.registry.get<Input>(world.playerEntity)};
     if (!Config::RUN_OFFLINE) {
         // Apply any player entity updates from the server.
         InputHistory& inputHistory{world.registry.get<InputHistory>(world.playerEntity)};
-        Uint32 latestReceivedTick{processPlayerUpdates(position, previousPosition, movement, input, inputHistory)};
+        Uint32 latestReceivedTick{processPlayerUpdates(position, previousPosition, velocity, input, inputHistory)};
 
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
-            replayInputs(latestReceivedTick, position, movement,
+            replayInputs(latestReceivedTick, position, velocity,
                          inputHistory);
 
             // Check if there was a mismatch between the position we had and
@@ -60,11 +60,11 @@ void PlayerMovementSystem::processMovements()
     }
 
     // Use the current input state to update our velocity for this tick.
-    MovementHelpers::updateVelocity(movement, input.inputStates,
+    MovementHelpers::updateVelocity(velocity, input.inputStates,
                                 SharedConfig::SIM_TICK_TIMESTEP_S);
 
     // Update our position, using the new velocity.
-    MovementHelpers::updatePosition(position, movement,
+    MovementHelpers::updatePosition(position, velocity,
                                 SharedConfig::SIM_TICK_TIMESTEP_S);
 
     // Update our bounding box to match the new position.
@@ -75,7 +75,7 @@ void PlayerMovementSystem::processMovements()
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(
     Position& position, PreviousPosition& previousPosition,
-    Movement& movement, Input& input, InputHistory& inputHistory)
+    Velocity& velocity, Input& input, InputHistory& inputHistory)
 {
     /* Process any messages for us from the server. */
     Uint32 latestReceivedTick{0};
@@ -112,8 +112,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
                       "have contained one.");
         }
 
-        /* Apply the received movement and position. */
-        movement = playerUpdate->movement;
+        /* Apply the received velocity and position. */
+        velocity = playerUpdate->velocity;
         position = playerUpdate->position;
 
         /* Check if the input is mismatched. */
@@ -144,7 +144,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
 
 void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
                                         Position& position,
-                                        Movement& movement,
+                                        Velocity& velocity,
                                         InputHistory& inputHistory)
 {
     Uint32 currentTick{sim.getCurrentTick()};
@@ -159,12 +159,12 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
         checkTickDiffValidity(tickDiff);
 
         // Use the appropriate input state to update our velocity.
-        MovementHelpers::updateVelocity(movement,
+        MovementHelpers::updateVelocity(velocity,
                                     inputHistory.inputHistory[tickDiff],
                                     SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update our position, using the new velocity.
-        MovementHelpers::updatePosition(position, movement,
+        MovementHelpers::updatePosition(position, velocity,
                                     SharedConfig::SIM_TICK_TIMESTEP_S);
     }
 }

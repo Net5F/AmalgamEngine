@@ -3,33 +3,33 @@
 namespace AM
 {
 /**
- * Represents the current movement of an entity.
+ * Represents the current velocity of an entity.
  */
-struct Movement {
+struct Velocity {
 public:
-    static constexpr float DEFAULT_MAX_VEL = 5;
+    static constexpr float DEFAULT_MAX_VELOCITY = 5;
 
     //--------------------------------------------------------------------------
     // Replicated data
     //--------------------------------------------------------------------------
-    float velX{0};
-    float velY{0};
-    float velZ{0};
+    float x{0};
+    float y{0};
+    float z{0};
 
     //--------------------------------------------------------------------------
     // Non-replicated data
     //--------------------------------------------------------------------------
-    float maxVelX{DEFAULT_MAX_VEL};
-    float maxVelY{DEFAULT_MAX_VEL};
-    float maxVelZ{DEFAULT_MAX_VEL};
+    float maxX{DEFAULT_MAX_VELOCITY};
+    float maxY{DEFAULT_MAX_VELOCITY};
+    float maxZ{DEFAULT_MAX_VELOCITY};
 };
 
 template<typename S>
-void serialize(S& serializer, Movement& movement)
+void serialize(S& serializer, Velocity& velocity)
 {
-    serializer.value4b(movement.velX);
-    serializer.value4b(movement.velY);
-    serializer.value4b(movement.velZ);
+    serializer.value4b(velocity.x);
+    serializer.value4b(velocity.y);
+    serializer.value4b(velocity.z);
 }
 
 } // namespace AM

@@ -8,7 +8,7 @@ namespace AM
 {
 class Position;
 class PreviousPosition;
-class Movement;
+class Velocity;
 class Input;
 
 namespace Client
@@ -34,7 +34,7 @@ public:
      * If we received any player entity movement updates from the server,
      * applies them and replays inputs.
      */
-    void processMovements();
+    void processMovement();
 
 private:
     /**
@@ -44,14 +44,14 @@ private:
      */
     Uint32 processPlayerUpdates(Position& position,
                                 PreviousPosition& previousPosition,
-                                Movement& movement, Input& input,
+                                Velocity& velocity, Input& input,
                                 InputHistory& inputHistory);
 
     /**
      * Replay any inputs that are from newer ticks than the latestReceivedTick.
      */
     void replayInputs(Uint32 latestReceivedTick, Position& position,
-                      Movement& movement, InputHistory& inputHistory);
+                      Velocity& velocity, InputHistory& inputHistory);
 
     /**
      * If receivedTick > currentTick, logs an error.

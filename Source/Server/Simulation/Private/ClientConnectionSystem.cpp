@@ -9,7 +9,7 @@
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Movement.h"
+#include "Velocity.h"
 #include "ClientSimData.h"
 #include "BoundingBox.h"
 #include "Name.h"
@@ -66,7 +66,7 @@ void ClientConnectionSystem::processConnectEvents()
         Position& newPosition{registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0.0f)};
         registry.emplace<PreviousPosition>(newEntity, spawnPoint.x,
                                            spawnPoint.y, 0.0f);
-        registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
+        registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
         registry.emplace<Input>(newEntity);
         registry.emplace<ClientSimData>(
             newEntity, clientConnected.clientID, false, std::vector<entt::entity>());

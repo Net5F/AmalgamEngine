@@ -3,7 +3,7 @@
 #include <SDL2/SDL_stdinc.h>
 #include "Input.h"
 #include "Position.h"
-#include "Movement.h"
+#include "Velocity.h"
 #include "entt/entity/registry.hpp"
 
 namespace AM
@@ -19,7 +19,7 @@ struct EntityState {
 
     Input input;
     Position position;
-    Movement movement;
+    Velocity velocity;
 };
 
 template<typename S>
@@ -32,7 +32,7 @@ void serialize(S& serializer, EntityState& entityState)
     serializer.object(entityState.input);
 
     serializer.object(entityState.position);
-    serializer.object(entityState.movement);
+    serializer.object(entityState.velocity);
 }
 
 } // End namespace AM

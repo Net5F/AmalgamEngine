@@ -1,13 +1,13 @@
 #include "MovementHelpers.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Movement.h"
+#include "Velocity.h"
 #include "Boundingbox.h"
 #include "Ignore.h"
 
 namespace AM
 {
-void MovementHelpers::updateVelocity(Movement& movement,
+void MovementHelpers::updateVelocity(Velocity& velocity,
                                      Input::StateArr& inputStates,
                                      double deltaSeconds)
 {
@@ -17,45 +17,45 @@ void MovementHelpers::updateVelocity(Movement& movement,
     static constexpr double VELOCITY{30};
     // Y-axis (favors up).
     if (inputStates[Input::YUp] == Input::Pressed) {
-        movement.velY = -VELOCITY;
+        velocity.y = -VELOCITY;
     }
     else if (inputStates[Input::YDown] == Input::Pressed) {
-        movement.velY = VELOCITY;
+        velocity.y = VELOCITY;
     }
     else {
-        movement.velY = 0;
+        velocity.y = 0;
     }
 
     // X-axis (favors up).
     if (inputStates[Input::XUp] == Input::Pressed) {
-        movement.velX = VELOCITY;
+        velocity.x = VELOCITY;
     }
     else if (inputStates[Input::XDown] == Input::Pressed) {
-        movement.velX = -VELOCITY;
+        velocity.x = -VELOCITY;
     }
     else {
-        movement.velX = 0;
+        velocity.x = 0;
     }
 
     // Z-axis (favors up).
     if (inputStates[Input::ZUp] == Input::Pressed) {
-        movement.velZ = VELOCITY;
+        velocity.z = VELOCITY;
     }
     else if (inputStates[Input::ZDown] == Input::Pressed) {
-        movement.velZ = -VELOCITY;
+        velocity.z = -VELOCITY;
     }
     else {
-        movement.velZ = 0;
+        velocity.z = 0;
     }
 }
 
-void MovementHelpers::updatePosition(Position& position, Movement& movement,
+void MovementHelpers::updatePosition(Position& position, Velocity& velocity,
                                  double deltaSeconds)
 {
     // Update the position.
-    position.x += (deltaSeconds * movement.velX);
-    position.y += (deltaSeconds * movement.velY);
-    position.z += (deltaSeconds * movement.velZ);
+    position.x += (deltaSeconds * velocity.x);
+    position.y += (deltaSeconds * velocity.y);
+    position.z += (deltaSeconds * velocity.z);
 }
 
 Position MovementHelpers::interpolatePosition(PreviousPosition& previousPos,

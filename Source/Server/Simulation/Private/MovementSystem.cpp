@@ -4,7 +4,7 @@
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Movement.h"
+#include "Velocity.h"
 #include "BoundingBox.h"
 #include "PositionHasChanged.h"
 #include "SharedConfig.h"
@@ -25,23 +25,22 @@ void MovementSystem::processMovements()
 {
     SCOPED_CPU_SAMPLE(processMovements);
 
-    /* Move all entities that have an input, position, and movement
-       component. */
+    // Move all entities that have an input, position, and velocity component.
     auto group
-        = world.registry.group<Input, Position, PreviousPosition, Movement, BoundingBox, Sprite>();
+        = world.registry.group<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>();
     for (entt::entity entity : group) {
-        auto [input, position, previousPosition, movement, boundingBox, sprite]
-            = group.get<Input, Position, PreviousPosition, Movement, BoundingBox, Sprite>(entity);
+        auto [input, position, previousPosition, velocity, boundingBox, sprite]
+            = group.get<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(entity);
 
         // Save their old position.
         previousPosition = position;
 
         // Use the current input state to update their velocity for this tick.
-        MovementHelpers::updateVelocity(movement, input.inputStates,
+        MovementHelpers::updateVelocity(velocity, input.inputStates,
                                     SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update their position, using the new velocity.
-        MovementHelpers::updatePosition(position, movement,
+        MovementHelpers::updatePosition(position, velocity,
                                     SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // If the entity moved.

@@ -4,7 +4,7 @@
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Movement.h"
+#include "Velocity.h"
 #include "Sprite.h"
 #include "Camera.h"
 #include "InputHistory.h"
@@ -103,7 +103,7 @@ void Simulation::connect()
                                connectionResponse.y, 0.0f)};
     registry.emplace<PreviousPosition>(newEntity, connectionResponse.x,
                                        connectionResponse.y, 0.0f);
-    registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
+    registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
@@ -141,7 +141,7 @@ void Simulation::fakeConnection()
                            std::to_string(static_cast<Uint32>(newEntity)));
     Position& playerPosition{registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f)};
     registry.emplace<PreviousPosition>(newEntity, 0.0f, 0.0f, 0.0f);
-    registry.emplace<Movement>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
+    registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
@@ -205,11 +205,10 @@ void Simulation::tick()
         // Push the new input state into the player's history.
         playerInputSystem.addCurrentInputsToHistory();
 
-        // Process player and NPC movements.
-        playerMovementSystem.processMovements();
+        // Process player movement.
+        playerMovementSystem.processMovement();
 
-        // Process network movement after normal movement to sync with
-        // server. (The server processes movement before sending updates.)
+        // Process NPC movement.
         npcMovementSystem.updateNpcs();
 
         // Move all cameras to their new positions.

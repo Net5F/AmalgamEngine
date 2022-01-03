@@ -8,7 +8,7 @@
 #include "Name.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Movement.h"
+#include "Velocity.h"
 #include "Input.h"
 #include "BoundingBox.h"
 #include "Sprite.h"
@@ -41,7 +41,7 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
 {
     // Init the groups that we'll be using.
     auto group
-        = world.registry.group<Input, Position, PreviousPosition, Movement, BoundingBox, Sprite>(
+        = world.registry.group<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(
             entt::exclude<InputHistory>);
     ignore(group);
 }
@@ -187,23 +187,23 @@ void NpcMovementSystem::handleUpdate(
 
 void NpcMovementSystem::moveAllNpcs()
 {
-    // Move all NPCs that have an input, position, and movement component.
+    // Move all NPCs that have an input, position, and velocity component.
     auto group
-        = world.registry.group<Input, Position, PreviousPosition, Movement, BoundingBox, Sprite>(
+        = world.registry.group<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(
             entt::exclude<InputHistory>);
     for (entt::entity entity : group) {
-        auto [input, position, previousPosition, movement, boundingBox, sprite]
-            = group.get<Input, Position, PreviousPosition, Movement, BoundingBox, Sprite>(entity);
+        auto [input, position, previousPosition, velocity, boundingBox, sprite]
+            = group.get<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(entity);
 
         // Save their old position.
         previousPosition = position;
 
         // Use the current input state to update their velocity for this tick.
-        MovementHelpers::updateVelocity(movement, input.inputStates,
+        MovementHelpers::updateVelocity(velocity, input.inputStates,
                                     SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update their position, using the new velocity.
-        MovementHelpers::updatePosition(position, movement,
+        MovementHelpers::updatePosition(position, velocity,
                                     SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update their bounding box to match the new position.
@@ -217,7 +217,7 @@ void NpcMovementSystem::applyUpdateMessage(
     const std::shared_ptr<const EntityUpdate>& entityUpdate)
 {
     auto group
-        = world.registry.group<Input, Position, PreviousPosition, Movement, BoundingBox, Sprite>(
+        = world.registry.group<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(
             entt::exclude<InputHistory>);
 
     // Use the data in the message to correct any NPCs that changed inputs.
@@ -240,12 +240,12 @@ void NpcMovementSystem::applyUpdateMessage(
         }
 
         // Get the entity's components.
-        auto [input, position, previousPosition, movement, boundingBox, sprite]
-            = group.get<Input, Position, PreviousPosition, Movement, BoundingBox, Sprite>(entity);
+        auto [input, position, previousPosition, velocity, boundingBox, sprite]
+            = group.get<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(entity);
 
         // Apply the received component updates.
         input = entityState.input;
-        movement = entityState.movement;
+        velocity = entityState.velocity;
         position = entityState.position;
 
         // If the previous position hasn't been initialized, set it to the

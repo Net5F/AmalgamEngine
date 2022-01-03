@@ -3,7 +3,7 @@
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Movement.h"
+#include "Velocity.h"
 #include "BoundingBox.h"
 #include "Sprite.h"
 #include "ClientSimData.h"
@@ -34,7 +34,7 @@ public:
         // Used for moving an entity.
         // Sprite is needed to get the model-space bounding box so we can
         // move BoundingBox.
-        auto movementGroup = registry.group<Input, Position, PreviousPosition, Movement,
+        auto movementGroup = registry.group<Input, Position, PreviousPosition, Velocity,
             Sprite, BoundingBox>();
         ignore(movementGroup);
     }

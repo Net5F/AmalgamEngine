@@ -7,7 +7,7 @@ namespace AM
 {
 class Position;
 class PreviousPosition;
-class Movement;
+class Velocity;
 class Sprite;
 
 /**
@@ -23,19 +23,19 @@ public:
     static constexpr float acceleration = 750;
 
     /**
-     * Uses the given input state and time delta to update the given movement.
+     * Uses the given input state and time delta to update the given velocity.
      *
-     * @post The given movement component is modified in-place to the new data.
+     * @post The given velocity component is modified in-place to the new data.
      */
-    static void updateVelocity(Movement& movement, Input::StateArr& inputStates,
+    static void updateVelocity(Velocity& velocity, Input::StateArr& inputStates,
                                double deltaSeconds);
 
     /**
-     * Uses the given time delta and movement to update the given position.
+     * Uses the given time delta and velocity to update the given position.
      *
      * @post The given position component is modified in-place to the new data.
      */
-    static void updatePosition(Position& position, Movement& movement, double deltaSeconds);
+    static void updatePosition(Position& position, Velocity& velocity, double deltaSeconds);
 
     /**
      * Returns a position interpolated between previousPos and position.

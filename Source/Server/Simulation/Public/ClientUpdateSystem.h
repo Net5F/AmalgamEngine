@@ -6,7 +6,7 @@ namespace AM
 {
 class Input;
 class Position;
-class Movement;
+class Velocity;
 class EntityUpdate;
 
 namespace Server
@@ -41,7 +41,7 @@ private:
         entt::entity entity;
         Input& input;
         Position& position;
-        Movement& movement;
+        Velocity& velocity;
     };
 
     /**

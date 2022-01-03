@@ -12,10 +12,10 @@ target_sources(Shared
         Public/Components/Camera.h
         Public/Components/Input.h
         Public/Components/InputHasChanged.h
-        Public/Components/Movement.h
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
+        Public/Components/Velocity.h
         Public/TileMap/CellExtent.h
         Public/TileMap/ChunkExtent.h
         Public/TileMap/ChunkPosition.h
