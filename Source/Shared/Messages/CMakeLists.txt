@@ -4,12 +4,12 @@ target_sources(Shared
         Public/ChunkUpdateRequest.h
         Public/ChunkWireSnapshot.h
         Public/ConnectionResponse.h
-        Public/EntityState.h
-        Public/EntityUpdate.h
         Public/ExplicitConfirmation.h
         Public/Heartbeat.h
         Public/InputChangeRequest.h
         Public/MessageType.h
+        Public/MovementState.h
+        Public/MovementUpdate.h
         Public/TileUpdate.h
         Public/TileUpdateRequest.h
 )

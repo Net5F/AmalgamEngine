@@ -2,7 +2,7 @@
 
 #include <SDL2/SDL_stdinc.h>
 #include "QueuedEvents.h"
-#include "EntityUpdate.h"
+#include "MovementUpdate.h"
 
 namespace AM
 {
@@ -71,7 +71,7 @@ private:
     /** Used to access components. */
     World& world;
 
-    EventQueue<std::shared_ptr<const EntityUpdate>> playerUpdateQueue;
+    EventQueue<std::shared_ptr<const MovementUpdate>> playerUpdateQueue;
 };
 
 } // namespace Client

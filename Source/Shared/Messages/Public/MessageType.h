@@ -23,7 +23,7 @@ enum class MessageType : Uint8 {
     // Server -> Client Messages
     ExplicitConfirmation = 30,
     ConnectionResponse = 31,
-    EntityUpdate = 32,
+    MovementUpdate = 32,
     ChunkUpdate = 33,
     TileUpdate = 34,
     EntityInit = 35,

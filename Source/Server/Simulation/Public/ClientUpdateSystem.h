@@ -17,9 +17,8 @@ class Network;
 class ClientSimData;
 
 /**
- * This system is in charge of checking for entity state that needs to be sent
- * to clients, wrapping it appropriately, and passing it to the Network's send
- * queue.
+ * Checks for entity movement state that needs to be sent to clients, wraps it
+ * appropriately, and passes it to the Network's send queue.
  */
 class ClientUpdateSystem
 {
@@ -27,23 +26,11 @@ public:
     ClientUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
-     * Updates all connected clients with relevant entity state.
+     * Updates all connected clients with relevant entity movement state.
      */
     void sendClientUpdates();
 
 private:
-    /**
-     * Holds references to relevant entity state.
-     * Note: These references are potentially invalidated whenever the
-     *       component pool changes. We just use them locally here.
-     */
-    struct EntityStateRefs {
-        entt::entity entity;
-        Input& input;
-        Position& position;
-        Velocity& velocity;
-    };
-
     /**
      * Determines which entity's data needs to be sent to the given client and
      * adds them to entitiesToSend.

@@ -75,8 +75,8 @@ private:
     void handleConnectionResponse(Uint8* messageBuffer,
                                   unsigned int messageSize);
 
-    /** Pushes std::shared_ptr<const EntityUpdate> event. **/
-    void handleEntityUpdate(Uint8* messageBuffer, unsigned int messageSize);
+    /** Pushes std::shared_ptr<const MovementUpdate> event. **/
+    void handleMovementUpdate(Uint8* messageBuffer, unsigned int messageSize);
     //-------------------------------------------------------------------------
 
     /** The dispatcher for network events. Used to send events to the

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EntityUpdate.h"
+#include "MovementUpdate.h"
 #include "NetworkDefs.h"
 #include <SDL2/SDL_stdinc.h>
 #include <memory>
@@ -37,7 +37,7 @@ struct NpcUpdate {
     /** The type of information contained in this update. */
     NpcUpdateType updateType = NpcUpdateType::ExplicitConfirmation;
     /** If informationType == Update, contains the update message. */
-    std::shared_ptr<const EntityUpdate> message = nullptr;
+    std::shared_ptr<const MovementUpdate> message = nullptr;
     /** If informationType == ImplicitConfirmation, contains the confirmed tick.
      */
     Uint32 tickNum = 0;

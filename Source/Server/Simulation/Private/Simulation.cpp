@@ -47,7 +47,7 @@ void Simulation::tick()
     // Update each client entity's "entities in my AOI" list.
     clientAOISystem.updateAOILists();
 
-    // Send any dirty entity state to the clients.
+    // Send any dirty entity movement state to the clients.
     clientUpdateSystem.sendClientUpdates();
 
     // Respond to chunk data requests.

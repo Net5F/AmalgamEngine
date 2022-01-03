@@ -3,7 +3,7 @@
 #include "World.h"
 #include "Network.h"
 #include "Serialize.h"
-#include "EntityUpdate.h"
+#include "MovementUpdate.h"
 #include "Input.h"
 #include "Position.h"
 #include "Velocity.h"
@@ -84,22 +84,22 @@ void ClientUpdateSystem::collectEntitiesToSend(ClientSimData& client, entt::enti
 void ClientUpdateSystem::sendEntityUpdate(ClientSimData& client)
 {
     auto movementGroup{world.registry.group<Input, Position, Velocity>()};
-    EntityUpdate entityUpdate{};
+    MovementUpdate movementUpdate{};
 
     // Add the entities to the message.
     for (entt::entity entityToSend : entitiesToSend) {
         auto [input, position, velocity]
             = movementGroup.get<Input, Position, Velocity>(entityToSend);
-        entityUpdate.entityStates.push_back(
+        movementUpdate.movementStates.push_back(
             {entityToSend, input, position, velocity});
     }
 
     // Finish filling the other fields.
-    entityUpdate.tickNum = sim.getCurrentTick();
+    movementUpdate.tickNum = sim.getCurrentTick();
 
     // Send the message.
-    network.serializeAndSend(client.netID, entityUpdate,
-                             entityUpdate.tickNum);
+    network.serializeAndSend(client.netID, movementUpdate,
+                             movementUpdate.tickNum);
 }
 
 } // namespace Server

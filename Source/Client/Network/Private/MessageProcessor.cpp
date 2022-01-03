@@ -4,7 +4,7 @@
 #include "ClientNetworkDefs.h"
 #include "ExplicitConfirmation.h"
 #include "ConnectionResponse.h"
-#include "EntityUpdate.h"
+#include "MovementUpdate.h"
 #include "ChunkUpdate.h"
 #include "TileUpdate.h"
 #include "EntityInit.h"
@@ -35,8 +35,8 @@ void MessageProcessor::processReceivedMessage(MessageType messageType,
             handleConnectionResponse(messageBuffer, messageSize);
             break;
         }
-        case MessageType::EntityUpdate: {
-            handleEntityUpdate(messageBuffer, messageSize);
+        case MessageType::MovementUpdate: {
+            handleMovementUpdate(messageBuffer, messageSize);
             break;
         }
         case MessageType::ChunkUpdate: {
@@ -98,34 +98,34 @@ void MessageProcessor::handleExplicitConfirmation(Uint8* messageBuffer,
     }
 }
 
-void MessageProcessor::handleEntityUpdate(Uint8* messageBuffer,
+void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer,
                                           unsigned int messageSize)
 {
     // Deserialize the message.
-    std::shared_ptr<EntityUpdate> entityUpdate
-        = std::make_shared<EntityUpdate>();
-    Deserialize::fromBuffer(messageBuffer, messageSize, *entityUpdate);
+    std::shared_ptr<MovementUpdate> movementUpdate{
+        std::make_shared<MovementUpdate>()};
+    Deserialize::fromBuffer(messageBuffer, messageSize, *movementUpdate);
 
     // Pull out the vector of entities.
-    const std::vector<EntityState>& entities = entityUpdate->entityStates;
+    const std::vector<MovementState>& entities{movementUpdate->movementStates};
 
     // Iterate through the entities, checking if there's player or npc data.
-    bool playerFound = false;
-    bool npcFound = false;
+    bool playerFound{false};
+    bool npcFound{false};
     for (auto entityIt = entities.begin(); entityIt != entities.end();
          ++entityIt) {
-        entt::entity entity = entityIt->entity;
+        entt::entity entity{entityIt->entity};
 
         if (entity == playerEntity) {
             // Found the player.
-            networkEventDispatcher.push<std::shared_ptr<const EntityUpdate>>(
-                entityUpdate);
+            networkEventDispatcher.push<std::shared_ptr<const MovementUpdate>>(
+                movementUpdate);
             playerFound = true;
         }
         else if (!npcFound) {
             // Found a non-player (npc).
             networkEventDispatcher.emplace<NpcUpdate>(NpcUpdateType::Update,
-                                                      entityUpdate);
+                                                      movementUpdate);
             npcFound = true;
         }
 
@@ -140,7 +140,7 @@ void MessageProcessor::handleEntityUpdate(Uint8* messageBuffer,
     if (!npcFound) {
         networkEventDispatcher.emplace<NpcUpdate>(
             NpcUpdateType::ImplicitConfirmation, nullptr,
-            entityUpdate->tickNum);
+            movementUpdate->tickNum);
     }
 }
 

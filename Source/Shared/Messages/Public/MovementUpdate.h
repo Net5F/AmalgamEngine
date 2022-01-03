@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EntityState.h"
+#include "MovementState.h"
 #include "MessageType.h"
 #include "SharedConfig.h"
 #include <SDL2/SDL_stdinc.h>
@@ -18,24 +18,24 @@ namespace AM
  * Each client is only sent the state of entities that are in their area of
  * interest.
  */
-struct EntityUpdate {
+struct MovementUpdate {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE = MessageType::EntityUpdate;
+    static constexpr MessageType MESSAGE_TYPE = MessageType::MovementUpdate;
 
     /** The tick that this update corresponds to. */
     Uint32 tickNum{0};
 
     /** The new state of all relevant entities that updated on this tick. */
-    std::vector<EntityState> entityStates;
+    std::vector<MovementState> movementStates;
 };
 
 template<typename S>
-void serialize(S& serializer, EntityUpdate& entityUpdate)
+void serialize(S& serializer, MovementUpdate& movementUpdate)
 {
-    serializer.value4b(entityUpdate.tickNum);
-    serializer.enableBitPacking([&entityUpdate](typename S::BPEnabledType& sbp) {
-            sbp.container(entityUpdate.entityStates,
+    serializer.value4b(movementUpdate.tickNum);
+    serializer.enableBitPacking([&movementUpdate](typename S::BPEnabledType& sbp) {
+            sbp.container(movementUpdate.movementStates,
                              static_cast<std::size_t>(SharedConfig::MAX_ENTITIES));
         });
 }

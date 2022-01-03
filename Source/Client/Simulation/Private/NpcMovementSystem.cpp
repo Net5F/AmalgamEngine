@@ -4,7 +4,7 @@
 #include "World.h"
 #include "Network.h"
 #include "SpriteData.h"
-#include "EntityUpdate.h"
+#include "MovementUpdate.h"
 #include "Name.h"
 #include "Position.h"
 #include "PreviousPosition.h"
@@ -54,7 +54,7 @@ void NpcMovementSystem::updateNpcs()
     }
 
     // Receive any updates from the server, update lastReceivedTick.
-    receiveEntityUpdates();
+    receiveMovementUpdates();
 
     // We want to process updates until we've either processed the desired
     // tick, or run out of data.
@@ -64,28 +64,28 @@ void NpcMovementSystem::updateNpcs()
        unprocessed ticks including the desired tick. */
     bool updated{false};
     while ((lastProcessedTick < desiredTick)
-           && (stateUpdateQueue.size() > 0)) {
+           && (movementUpdateQueue.size() > 0)) {
         updated = true;
         // Move all NPCs as if their inputs didn't change.
         moveAllNpcs();
 
         // Check that the processed tick is progressing incrementally.
-        NpcStateUpdate& stateUpdate{stateUpdateQueue.front()};
-        if (stateUpdate.tickNum != (lastProcessedTick + 1)) {
+        NpcMovementUpdate& movementUpdate{movementUpdateQueue.front()};
+        if (movementUpdate.tickNum != (lastProcessedTick + 1)) {
             LOG_FATAL("Processing NPC movement out of order. "
-                      "stateUpdate.tickNum: %u, "
+                      "movementUpdate.tickNum: %u, "
                       "lastProcessedTick: %u",
-                      stateUpdate.tickNum, lastProcessedTick);
+                      movementUpdate.tickNum, lastProcessedTick);
         }
 
         // If the update message contained new data, apply it.
-        if (stateUpdate.dataChanged) {
-            applyUpdateMessage(stateUpdate.entityUpdate);
+        if (movementUpdate.dataChanged) {
+            applyUpdateMessage(movementUpdate.movementUpdate);
         }
 
         /* Prepare for the next iteration. */
         lastProcessedTick++;
-        stateUpdateQueue.pop();
+        movementUpdateQueue.pop();
     }
 
     // If we're initialized and needed to process a tick but didn't have data,
@@ -94,7 +94,7 @@ void NpcMovementSystem::updateNpcs()
         && (lastProcessedTick < desiredTick)) {
         LOG_INFO("Tick passed with no npc update. last: %u, desired: %u, "
                  "queueSize: %u, offset: %d",
-                 lastProcessedTick, desiredTick, stateUpdateQueue.size(),
+                 lastProcessedTick, desiredTick, movementUpdateQueue.size(),
                  tickReplicationOffset);
     }
 }
@@ -115,7 +115,7 @@ void NpcMovementSystem::applyTickAdjustment(int adjustment)
     }
 }
 
-void NpcMovementSystem::receiveEntityUpdates()
+void NpcMovementSystem::receiveMovementUpdates()
 {
     /* Process any NPC update messages from the Network. */
     NpcUpdate npcUpdate{};
@@ -147,7 +147,7 @@ void NpcMovementSystem::receiveEntityUpdates()
 void NpcMovementSystem::handleExplicitConfirmation()
 {
     lastReceivedTick++;
-    stateUpdateQueue.push({lastReceivedTick, false, nullptr});
+    movementUpdateQueue.push({lastReceivedTick, false, nullptr});
 }
 
 void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
@@ -157,16 +157,16 @@ void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
     // push confirmations for them.
     unsigned int implicitConfirmations = confirmedTick - lastReceivedTick;
     for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
-        stateUpdateQueue.push({(lastReceivedTick + i), false, nullptr});
+        movementUpdateQueue.push({(lastReceivedTick + i), false, nullptr});
     }
 
     lastReceivedTick = confirmedTick;
 }
 
 void NpcMovementSystem::handleUpdate(
-    const std::shared_ptr<const EntityUpdate>& entityUpdate)
+    const std::shared_ptr<const MovementUpdate>& movementUpdate)
 {
-    Uint32 newReceivedTick = entityUpdate->tickNum;
+    Uint32 newReceivedTick = movementUpdate->tickNum;
 
     if (lastReceivedTick != 0) {
         // The update message implicitly confirmed all ticks since our last
@@ -180,7 +180,7 @@ void NpcMovementSystem::handleUpdate(
     }
 
     // Push the update into the buffer.
-    stateUpdateQueue.push({newReceivedTick, true, entityUpdate});
+    movementUpdateQueue.push({newReceivedTick, true, movementUpdate});
 
     lastReceivedTick = newReceivedTick;
 }
@@ -214,29 +214,29 @@ void NpcMovementSystem::moveAllNpcs()
 }
 
 void NpcMovementSystem::applyUpdateMessage(
-    const std::shared_ptr<const EntityUpdate>& entityUpdate)
+    const std::shared_ptr<const MovementUpdate>& movementUpdate)
 {
     auto group
         = world.registry.group<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(
             entt::exclude<InputHistory>);
 
     // Use the data in the message to correct any NPCs that changed inputs.
-    for (const EntityState& entityState : entityUpdate->entityStates) {
+    for (const MovementState& movementState : movementUpdate->movementStates) {
         // Skip the player (not an NPC).
         entt::registry& registry{world.registry};
-        entt::entity entity{entityState.entity};
+        entt::entity entity{movementState.entity};
         if (entity == world.playerEntity) {
             continue;
         }
 
         // Check that the entity exists.
-        // TODO: There's possibly an issue here if we receive an EntityUpdate
+        // TODO: There's possibly an issue here if we receive a MovementUpdate
         //       while the sim happens to be at this system, and the update's
         //       tick is up for processing. We might end up here before
         //       NpcLifetimeSystem was able to construct the entity.
         if (!(registry.valid(entity))) {
             LOG_FATAL("Received update for invalid entity: %u. Message tick: %u", entity,
-                entityUpdate->tickNum);
+                movementUpdate->tickNum);
         }
 
         // Get the entity's components.
@@ -244,9 +244,9 @@ void NpcMovementSystem::applyUpdateMessage(
             = group.get<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(entity);
 
         // Apply the received component updates.
-        input = entityState.input;
-        velocity = entityState.velocity;
-        position = entityState.position;
+        input = movementState.input;
+        velocity = movementState.velocity;
+        position = movementState.position;
 
         // If the previous position hasn't been initialized, set it to the
         // current position so we don't lerp in from the origin.

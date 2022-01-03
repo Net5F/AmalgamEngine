@@ -9,11 +9,11 @@
 namespace AM
 {
 /**
- * Contains state data for a single entity.
+ * Contains movement state data for a single entity.
  *
  * Used for sending movement state updates to clients.
  */
-struct EntityState {
+struct MovementState {
     /** The entity that this state belongs to. */
     entt::entity entity{entt::null};
 
@@ -23,16 +23,16 @@ struct EntityState {
 };
 
 template<typename S>
-void serialize(S& serializer, EntityState& entityState)
+void serialize(S& serializer, MovementState& movementState)
 {
-    serializer.value4b(entityState.entity);
+    serializer.value4b(movementState.entity);
 
     // Note: Input needs bit packing enabled, but we expect EntityUpdate to
     //       enable it.
-    serializer.object(entityState.input);
+    serializer.object(movementState.input);
 
-    serializer.object(entityState.position);
-    serializer.object(entityState.velocity);
+    serializer.object(movementState.position);
+    serializer.object(movementState.velocity);
 }
 
 } // End namespace AM

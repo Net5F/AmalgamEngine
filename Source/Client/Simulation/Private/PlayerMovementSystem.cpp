@@ -79,7 +79,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
 {
     /* Process any messages for us from the server. */
     Uint32 latestReceivedTick{0};
-    std::shared_ptr<const EntityUpdate> receivedUpdate{nullptr};
+    std::shared_ptr<const MovementUpdate> receivedUpdate{nullptr};
     while (playerUpdateQueue.pop(receivedUpdate)) {
         /* Validate the received tick. */
         // Check that the received tick is in the past.
@@ -97,8 +97,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         latestReceivedTick = receivedTick;
 
         /* Find the player data. */
-        const std::vector<EntityState>& entities{receivedUpdate->entityStates};
-        const EntityState* playerUpdate{nullptr};
+        const std::vector<MovementState>& entities{receivedUpdate->movementStates};
+        const MovementState* playerUpdate{nullptr};
         for (auto entityIt = entities.begin(); entityIt != entities.end();
              ++entityIt) {
             if (entityIt->entity == world.playerEntity) {

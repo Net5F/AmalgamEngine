@@ -40,14 +40,15 @@ public:
     void applyTickAdjustment(int adjustment);
 
 private:
-    /** Represents what NPC changes happened on a single server tick. */
-    struct NpcStateUpdate {
+    /** Represents what NPC movement changes happened on a single server
+        tick. */
+    struct NpcMovementUpdate {
         /** The tick that this update refers to. */
         Uint32 tickNum{0};
         /** True if at least 1 NPC's state changed on this tick. */
         bool dataChanged{false};
         /** If dataChanged == true, contains the update message data. */
-        std::shared_ptr<const EntityUpdate> entityUpdate{nullptr};
+        std::shared_ptr<const MovementUpdate> movementUpdate{nullptr};
     };
 
     /**
@@ -56,10 +57,10 @@ private:
     void moveAllNpcs();
 
     /**
-     * Receives NPC entity update messages from the network and pushes them into
+     * Receives NPC movement update messages from the network and pushes them into
      * the stateUpdateQueue.
      */
-    void receiveEntityUpdates();
+    void receiveMovementUpdates();
 
     /** Pushes a message confirming that a tick was processed with no update. */
     void handleExplicitConfirmation();
@@ -67,13 +68,13 @@ private:
     void handleImplicitConfirmation(const Uint32 confirmedTick);
     /** Handles an update message, including implicit confirmations based on it.
      */
-    void handleUpdate(const std::shared_ptr<const EntityUpdate>& entityUpdate);
+    void handleUpdate(const std::shared_ptr<const MovementUpdate>& entityUpdate);
 
     /**
      * Applies the given update message to the entity world state.
      */
     void applyUpdateMessage(
-        const std::shared_ptr<const EntityUpdate>& entityUpdate);
+        const std::shared_ptr<const MovementUpdate>& entityUpdate);
 
     /** Used to get the current tick. */
     Simulation& sim;
@@ -88,8 +89,8 @@ private:
         When that logic gets moved, this member can be removed. */
     SpriteData& spriteData;
 
-    /** Holds NPC state deltas that are waiting to be processed. */
-    std::queue<NpcStateUpdate> stateUpdateQueue;
+    /** Holds NPC movement state updates that are waiting to be processed. */
+    std::queue<NpcMovementUpdate> movementUpdateQueue;
 
     /** The latest tick that we've received an NPC update message for. */
     Uint32 lastReceivedTick;
