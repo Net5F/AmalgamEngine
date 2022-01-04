@@ -7,7 +7,7 @@ namespace Server
 class World;
 
 /**
- * This system is in charge of moving entities.
+ * Moves entities.
  */
 class MovementSystem
 {
@@ -15,7 +15,8 @@ public:
     MovementSystem(World& inWorld);
 
     /**
-     * Moves the all entities 1 sim tick into the future.
+     * Processes 1 tick of entity movement.
+     *
      * Updates velocity components based on input state, moves position
      * components based on velocity, updates sprites based on position.
      */

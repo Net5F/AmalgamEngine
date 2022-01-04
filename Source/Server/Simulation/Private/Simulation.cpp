@@ -15,9 +15,9 @@ Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher,
 , clientConnectionSystem(*this, world, inNetworkEventDispatcher, network, inSpriteData)
 , tileUpdateSystem(world, inNetworkEventDispatcher, network)
 , clientAOISystem(*this, world, network)
-, inputUpdateSystem(*this, world, inNetworkEventDispatcher, network)
+, inputSystem(*this, world, inNetworkEventDispatcher, network)
 , movementSystem(world)
-, clientUpdateSystem(*this, world, network)
+, movementUpdateSystem(*this, world, network)
 , chunkStreamingSystem(world, inNetworkEventDispatcher, network)
 , currentTick(0)
 {
@@ -39,7 +39,7 @@ void Simulation::tick()
     tileUpdateSystem.updateTiles();
 
     // Receive and process client input messages.
-    inputUpdateSystem.processInputMessages();
+    inputSystem.processInputMessages();
 
     // Move all of our entities.
     movementSystem.processMovements();
@@ -48,7 +48,7 @@ void Simulation::tick()
     clientAOISystem.updateAOILists();
 
     // Send any dirty entity movement state to the clients.
-    clientUpdateSystem.sendClientUpdates();
+    movementUpdateSystem.sendMovementUpdates();
 
     // Respond to chunk data requests.
     chunkStreamingSystem.sendChunks();

@@ -3,9 +3,9 @@ target_sources(Server
 		Private/ChunkStreamingSystem.cpp
 		Private/ClientAOISystem.cpp
 		Private/ClientConnectionSystem.cpp
-		Private/ClientUpdateSystem.cpp
-		Private/InputUpdateSystem.cpp
+		Private/InputSystem.cpp
 		Private/MovementSystem.cpp
+		Private/MovementUpdateSystem.cpp
 		Private/Simulation.cpp
 		Private/TileUpdateSystem.cpp
 		Private/World.cpp
@@ -14,11 +14,11 @@ target_sources(Server
 		Public/ChunkStreamingSystem.h
 		Public/ClientAOISystem.h
 		Public/ClientConnectionSystem.h
-		Public/ClientUpdateSystem.h
 		Public/EnttGroups.h
 		Public/EventSorter.h
-		Public/InputUpdateSystem.h
+		Public/InputSystem.h
 		Public/MovementSystem.h
+		Public/MovementUpdateSystem.h
 		Public/Simulation.h
 		Public/TileUpdateSystem.h
 		Public/World.h

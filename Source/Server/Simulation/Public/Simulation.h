@@ -4,9 +4,9 @@
 #include "ClientConnectionSystem.h"
 #include "TileUpdateSystem.h"
 #include "ClientAOISystem.h"
-#include "InputUpdateSystem.h"
+#include "InputSystem.h"
 #include "MovementSystem.h"
-#include "ClientUpdateSystem.h"
+#include "MovementUpdateSystem.h"
 #include "ChunkStreamingSystem.h"
 #include <SDL2/SDL_stdinc.h>
 #include <atomic>
@@ -48,9 +48,9 @@ private:
     ClientConnectionSystem clientConnectionSystem;
     TileUpdateSystem tileUpdateSystem;
     ClientAOISystem clientAOISystem;
-    InputUpdateSystem inputUpdateSystem;
+    InputSystem inputSystem;
     MovementSystem movementSystem;
-    ClientUpdateSystem clientUpdateSystem;
+    MovementUpdateSystem movementUpdateSystem;
     ChunkStreamingSystem chunkStreamingSystem;
 
     /**

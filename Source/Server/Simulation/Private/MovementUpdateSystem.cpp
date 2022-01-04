@@ -1,4 +1,4 @@
-#include "ClientUpdateSystem.h"
+#include "MovementUpdateSystem.h"
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
@@ -17,7 +17,7 @@ namespace AM
 {
 namespace Server
 {
-ClientUpdateSystem::ClientUpdateSystem(Simulation& inSim, World& inWorld,
+MovementUpdateSystem::MovementUpdateSystem(Simulation& inSim, World& inWorld,
                                        Network& inNetwork)
 : sim(inSim)
 , world(inWorld)
@@ -25,9 +25,9 @@ ClientUpdateSystem::ClientUpdateSystem(Simulation& inSim, World& inWorld,
 {
 }
 
-void ClientUpdateSystem::sendClientUpdates()
+void MovementUpdateSystem::sendMovementUpdates()
 {
-    SCOPED_CPU_SAMPLE(sendClientUpdate);
+    SCOPED_CPU_SAMPLE(sendMovementUpdate);
 
     // Send clients the updated movement state of any nearby entities that
     // have moved.
@@ -48,7 +48,7 @@ void ClientUpdateSystem::sendClientUpdates()
     world.registry.clear<InputHasChanged>();
 }
 
-void ClientUpdateSystem::collectEntitiesToSend(ClientSimData& client, entt::entity clientEntity)
+void MovementUpdateSystem::collectEntitiesToSend(ClientSimData& client, entt::entity clientEntity)
 {
     /* Collect the entities that need to be sent to the client. */
     // Clear the vector.
@@ -81,7 +81,7 @@ void ClientUpdateSystem::collectEntitiesToSend(ClientSimData& client, entt::enti
     client.entitiesThatEnteredAOI.clear();
 }
 
-void ClientUpdateSystem::sendEntityUpdate(ClientSimData& client)
+void MovementUpdateSystem::sendEntityUpdate(ClientSimData& client)
 {
     auto movementGroup{world.registry.group<Input, Position, Velocity>()};
     MovementUpdate movementUpdate{};

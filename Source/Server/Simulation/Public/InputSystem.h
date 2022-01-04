@@ -14,13 +14,13 @@ class World;
 class Network;
 
 /**
- * This system is in charge of receiving input messages from clients and
- * applying them to the client's entity.
+ * Receives input messages from clients and applies them to the client's
+ * entity.
  */
-class InputUpdateSystem
+class InputSystem
 {
 public:
-    InputUpdateSystem(Simulation& inSim, World& inWorld,
+    InputSystem(Simulation& inSim, World& inWorld,
                       EventDispatcher& inNetworkEventDispatcher,
                       Network& inNetwork);
 

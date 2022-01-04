@@ -17,18 +17,17 @@ class Network;
 class ClientSimData;
 
 /**
- * Checks for entity movement state that needs to be sent to clients, wraps it
- * appropriately, and passes it to the Network's send queue.
+ * Sends each client the new movement state of any nearby entities that moved.
  */
-class ClientUpdateSystem
+class MovementUpdateSystem
 {
 public:
-    ClientUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
+    MovementUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
      * Updates all connected clients with relevant entity movement state.
      */
-    void sendClientUpdates();
+    void sendMovementUpdates();
 
 private:
     /**

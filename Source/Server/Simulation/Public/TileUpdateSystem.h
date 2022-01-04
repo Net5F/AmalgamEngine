@@ -11,9 +11,8 @@ class World;
 class Network;
 
 /**
- * Processes tile updates.
- *
- * See updateTiles() comment for more info.
+ * Processes tile update requests. If the request is valid, updates the
+ * map and sends the new map state to all nearby clients.
  */
 class TileUpdateSystem
 {
