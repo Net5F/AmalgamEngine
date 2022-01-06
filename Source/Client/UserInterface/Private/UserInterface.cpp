@@ -80,10 +80,10 @@ void UserInterface::handleMouseButtonDown(SDL_MouseButtonEvent& event)
 void UserInterface::cycleTile(int mouseX, int mouseY)
 {
     // Find the tile index under the mouse's current position.
-    const Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
+    const Camera& playerCamera{world.registry.get<Camera>(world.playerEntity)};
     ScreenPoint screenPoint{static_cast<float>(mouseX),
                             static_cast<float>(mouseY)};
-    TilePosition tilePosition = Transforms::screenToTile(screenPoint, playerCamera);
+    TilePosition tilePosition{Transforms::screenToTile(screenPoint, playerCamera)};
 
     // If the index is outside of the world bounds, ignore this event.
     const TileExtent& mapTileExtent{world.tileMap.getTileExtent()};
@@ -94,9 +94,9 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     }
 
     // Determine which sprite the selected tile has.
-    const Tile& tile = world.tileMap.getTile(tilePosition.x, tilePosition.y);
+    const Tile& tile{world.tileMap.getTile(tilePosition.x, tilePosition.y)};
 
-    unsigned int terrainSpriteIndex = 0;
+    unsigned int terrainSpriteIndex{0};
     if (tile.spriteLayers[0].sprite->stringID == "test_6") {
         terrainSpriteIndex = 0;
     }

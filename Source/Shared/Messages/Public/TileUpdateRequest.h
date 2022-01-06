@@ -16,10 +16,10 @@ public:
     static constexpr MessageType MESSAGE_TYPE = MessageType::TileUpdateRequest;
 
     /** The X coordinate of the tile to update. */
-    unsigned int tileX{0};
+    int tileX{0};
 
     /** The Y coordinate of the tile to update. */
-    unsigned int tileY{0};
+    int tileY{0};
 
     /** The index of the sprite layer that should be modified. */
     Uint8 layerIndex{0};

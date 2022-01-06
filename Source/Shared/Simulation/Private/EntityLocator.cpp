@@ -175,6 +175,22 @@ std::vector<entt::entity>& EntityLocator::getEntitiesFine(const TileExtent& tile
     return returnVector;
 }
 
+std::vector<entt::entity>& EntityLocator::getEntitiesCoarse(const ChunkExtent& chunkExtent)
+{
+    // Convert to TileExtent.
+    TileExtent tileExtent{chunkExtent};
+
+    return getEntitiesCoarse(tileExtent);
+}
+
+std::vector<entt::entity>& EntityLocator::getEntitiesFine(const ChunkExtent& chunkExtent)
+{
+    // Convert to TileExtent.
+    TileExtent tileExtent{chunkExtent};
+
+    return getEntitiesFine(tileExtent);
+}
+
 void EntityLocator::removeEntity(entt::entity entity)
 {
     auto entityIt{entityMap.find(entity)};

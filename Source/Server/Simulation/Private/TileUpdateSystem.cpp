@@ -19,6 +19,8 @@ TileUpdateSystem::TileUpdateSystem(World& inWorld,
 
 void TileUpdateSystem::updateTiles()
 {
+    auto clientView = world.registry.view<ClientSimData>();
+
     // Process any waiting update requests.
     TileUpdateRequest updateRequest;
     while (tileUpdateRequestQueue.pop(updateRequest)) {
@@ -35,10 +37,16 @@ void TileUpdateSystem::updateTiles()
                               updateRequest.layerIndex,
                               updateRequest.numericID};
 
-        // TODO: Limit this to entities that are in range.
-        // Broadcast the tile update to all clients.
-        auto clientView = world.registry.view<ClientSimData>();
-        for (entt::entity entity : clientView) {
+        // Get the list of clients that are in range of the updated tile.
+        // Note: This is hardcoded to match ChunkUpdateSystem.
+        ChunkPosition centerChunk{TilePosition{updateRequest.tileX, updateRequest.tileY}};
+        ChunkExtent chunkExtent{(centerChunk.x - 1), (centerChunk.y - 1), 3, 3};
+        chunkExtent.intersectWith(world.tileMap.getChunkExtent());
+
+        // Send the tile update to all clients that are in range.
+        std::vector<entt::entity>& entitiesInRange{
+            world.entityLocator.getEntitiesFine(chunkExtent)};
+        for (entt::entity entity : entitiesInRange) {
             ClientSimData& client{clientView.get<ClientSimData>(entity)};
             network.serializeAndSend<TileUpdate>(client.netID, tileUpdate);
         }

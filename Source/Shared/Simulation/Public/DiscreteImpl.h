@@ -3,6 +3,9 @@
 namespace AM
 {
 
+namespace DiscreteImpl
+{
+
 /**
  * A tag type to express that a DiscreteRange or DiscretePosition is using
  * tiles as its unit.
@@ -20,5 +23,7 @@ struct ChunkTag{};
  * spatial partitioning grid cells as its unit.
  */
 struct CellTag{};
+
+}
 
 } // End namespace AM

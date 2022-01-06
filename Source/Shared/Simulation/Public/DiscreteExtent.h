@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DiscreteTagTypes.h"
+#include "DiscreteImpl.h"
 #include "DiscretePosition.h"
 
 namespace AM
@@ -15,6 +15,18 @@ public:
     // Note: Screens and maps start at (0, 0) so we could make these unsigned,
     //       but these are signed to facilitate using this struct for things
     //       like negative offsets.
+    /** The X-axis coordinate of the top left of the extent. */
+    int x{0};
+
+    /** The Y-axis coordinate of the top left of the extent. */
+    int y{0};
+
+    /** The X-axis length of this extent. */
+    int xLength{0};
+
+    /** The Y-axis length of this extent. */
+    int yLength{0};
+
     DiscreteExtent()
     : x{0}
     , y{0}
@@ -34,25 +46,13 @@ public:
     /**
      * Constructor that takes a top left and bottom right point to form a extent.
      */
-    DiscreteExtent(DiscretePosition<T> topLeft, DiscretePosition<T> bottomRight)
+    explicit DiscreteExtent(DiscretePosition<T> topLeft, DiscretePosition<T> bottomRight)
     : x{topLeft.x}
     , y{topLeft.y}
     , xLength{bottomRight.x - topLeft.x}
     , yLength{bottomRight.y - topLeft.y}
     {
     }
-
-    /** The X-axis coordinate of the top left of the extent. */
-    int x{0};
-
-    /** The Y-axis coordinate of the top left of the extent. */
-    int y{0};
-
-    /** The X-axis length of this extent. */
-    int xLength{0};
-
-    /** The Y-axis length of this extent. */
-    int yLength{0};
 
     /**
      * Returns the max X position in this extent.

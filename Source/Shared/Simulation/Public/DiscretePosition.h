@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DiscreteTagTypes.h"
+#include "DiscreteImpl.h"
 #include <cmath>
 
 namespace AM

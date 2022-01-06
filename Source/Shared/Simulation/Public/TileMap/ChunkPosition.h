@@ -5,10 +5,20 @@
 namespace AM
 {
 
+class TilePosition;
+
 /**
  * A strong type alias, describing the position of a particular map chunk.
  */
-using ChunkPosition = DiscretePosition<ChunkTag>;
+class ChunkPosition : public DiscretePosition<DiscreteImpl::ChunkTag>
+{
+public:
+    ChunkPosition();
+
+    ChunkPosition(int inX, int inY);
+
+    explicit ChunkPosition(const TilePosition& tilePosition);
+};
 
 template<typename S>
 void serialize(S& serializer, ChunkPosition& chunkPosition)

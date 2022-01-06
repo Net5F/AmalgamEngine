@@ -2,6 +2,7 @@
 
 #include "CellExtent.h"
 #include "TileExtent.h"
+#include "ChunkExtent.h"
 #include "entt/fwd.hpp"
 #include <vector>
 #include <unordered_map>
@@ -81,6 +82,16 @@ public:
      * Overload for TileExtent.
      */
     std::vector<entt::entity>& getEntitiesFine(const TileExtent& tileExtent);
+
+    /**
+     * Overload for ChunkExtent.
+     */
+    std::vector<entt::entity>& getEntitiesCoarse(const ChunkExtent& chunkExtent);
+
+    /**
+     * Overload for ChunkExtent.
+     */
+    std::vector<entt::entity>& getEntitiesFine(const ChunkExtent& chunkExtent);
 
     /**
      * If we're tracking the given entity, removes it from the entityGrid and

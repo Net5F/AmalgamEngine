@@ -2,11 +2,15 @@ target_sources(Shared
     PRIVATE
         Private/EntityLocator.cpp
         Private/MovementHelpers.cpp
+        Private/TileMap/ChunkExtent.cpp
+        Private/TileMap/ChunkPosition.cpp
+        Private/TileMap/TileExtent.cpp
+        Private/TileMap/TilePosition.cpp
 	PUBLIC
         Public/BoundingBox.h
         Public/DiscreteExtent.h
         Public/DiscretePosition.h
-        Public/DiscreteTagTypes.h
+        Public/DiscreteImpl.h
         Public/EntityLocator.h
         Public/MovementHelpers.h
         Public/Components/Camera.h

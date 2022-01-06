@@ -1,6 +1,7 @@
 #include "catch2/catch_all.hpp"
 #include "Position.h"
 #include "BoundingBox.h"
+#include "TileExtent.h"
 #include "Log.h"
 
 using namespace AM;
@@ -19,7 +20,7 @@ TEST_CASE("TestBoundingBox")
 
     SECTION("Intersects cylinder")
     {
-        // Using the origin.
+        // Centered on the origin.
         Position position{0, 0, 0};
         unsigned int radius{256};
 
@@ -42,5 +43,26 @@ TEST_CASE("TestBoundingBox")
         // Fully outside the cylinder.
         BoundingBox box5{300, 310, 300, 310, 0, 1};
         REQUIRE(!(box5.intersects(position, radius)));
+    }
+
+    SECTION("Intersects tile extent")
+    {
+        TileExtent tileExtent{0, 0, 1, 1};
+
+        // Fully inside the extent.
+        BoundingBox box1{10, 15, 10, 15, 0, 1};
+        REQUIRE(box1.intersects(tileExtent));
+
+        // Partially inside the extent.
+        BoundingBox box2{30, 35, 30, 35, 0, 1};
+        REQUIRE(box2.intersects(tileExtent));
+
+        // Edge shared with extent.
+        BoundingBox box3{32, 37, 30, 35, 0, 1};
+        REQUIRE(!(box3.intersects(tileExtent)));
+
+        // Fully outside the extent.
+        BoundingBox box4{33, 38, 30, 35, 0, 1};
+        REQUIRE(!(box4.intersects(tileExtent)));
     }
 }

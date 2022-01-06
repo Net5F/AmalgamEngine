@@ -55,6 +55,7 @@ public:
      * Note: This treats the given data as a cylinder with infinite length
      *       along the Z axis. If we want to treat it as a sphere, we can
      *       change it.
+     * Note: Shared edges are not considered to be intersecting.
      *
      * Reference: https://stackoverflow.com/a/402010/4258629
      */
@@ -101,16 +102,21 @@ public:
      *
      * Note: This treats the tile extent as having infinite length along the
      *       Z axis.
+     * Note: Shared edges are not considered to be intersecting.
      */
     bool intersects(const TileExtent& tileExtent)
     {
-        float tileMinX{static_cast<float>(tileExtent.x)};
-        float tileMaxX{static_cast<float>(tileExtent.x + tileExtent.xLength)};
-        float tileMinY{static_cast<float>(tileExtent.y)};
-        float tileMaxY{static_cast<float>(tileExtent.y + tileExtent.yLength)};
+        const int TILE_WORLD_WIDTH{static_cast<int>(SharedConfig::TILE_WORLD_WIDTH)};
 
-        return ((maxX >= tileMinX) && (tileMaxX >= minX)
-               && (maxY >= tileMinY) && (tileMaxY >= minY));
+        float tileMinX{static_cast<float>(tileExtent.x * TILE_WORLD_WIDTH)};
+        float tileMaxX {static_cast<float>((tileExtent.x + tileExtent.xLength)
+            * TILE_WORLD_WIDTH)};
+        float tileMinY {static_cast<float>(tileExtent.y) * TILE_WORLD_WIDTH};
+        float tileMaxY {static_cast<float>((tileExtent.y + tileExtent.yLength)
+            * TILE_WORLD_WIDTH)};
+
+        return ((maxX > tileMinX) && (tileMaxX > minX)
+               && (maxY > tileMinY) && (tileMaxY > minY));
     }
 
     /**

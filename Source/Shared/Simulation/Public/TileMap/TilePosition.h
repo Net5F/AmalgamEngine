@@ -5,9 +5,19 @@
 namespace AM
 {
 
+class ChunkPosition;
+
 /**
  * A strong type alias, describing the position of a particular map tile.
  */
-using TilePosition = DiscretePosition<TileTag>;
+class TilePosition : public DiscretePosition<DiscreteImpl::TileTag>
+{
+public:
+    TilePosition();
+
+    TilePosition(int inX, int inY);
+
+    explicit TilePosition(const ChunkPosition& chunkPosition);
+};
 
 } // namespace AM

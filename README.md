@@ -17,9 +17,11 @@ Everything you need will be provided, including:
 - [x] Implement tile maps, iso rendering, and figure out architecture between the sim/rendering/UI.
 - [x] Build minimal UI library. (MVP working, needs refactoring later)
 - [x] Build sprite editor. (lets you add 3d bounding boxes to sprites for draw order and collision calcs)
-- [x] Import sprite bounds data into engine, implement world map file.
-- [x] Implement chunk and tile update streaming (in-world map editing).
-- [x] Implement spatial partitioning.
+- [x] Import sprite bounds data into engine.
+- [x] Implement world map file.
+- [x] Implement chunk and tile update streaming (live, in-world map editing).
+- [x] Implement spatial partitioning grid.
+- [x] Implement interest management system.
 - [ ] Implement world editing UI.
 
 ### Future
@@ -28,7 +30,6 @@ Everything you need will be provided, including:
 - [ ] Implement text chat, chat server.
 - [ ] Implement login server, account db, account validation.
 - [ ] Implement web server, account creation.
-- [ ] Implement minimal UI for sprite selection from a set list.
 - [ ] Split single repo into engine and project repos.
 - [ ] Ready for other people to use.
 
