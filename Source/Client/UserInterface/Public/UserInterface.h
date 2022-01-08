@@ -44,7 +44,7 @@ private:
 
     /**
      * Cycles the tile under the given mouse position to the next sprite in
-     * tileHighlightSprites.
+     * terrainSprites.
      */
     void cycleTile(int mouseX, int mouseY);
 

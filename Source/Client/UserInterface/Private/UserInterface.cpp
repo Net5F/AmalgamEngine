@@ -27,6 +27,8 @@ UserInterface::UserInterface(EventDispatcher& inUiEventDispatcher,
     terrainSprites.push_back(&(spriteData.get("test_6")));
     terrainSprites.push_back(&(spriteData.get("test_8")));
     terrainSprites.push_back(&(spriteData.get("test_24")));
+    terrainSprites.push_back(&(spriteData.get("test_17")));
+    terrainSprites.push_back(&(spriteData.get("test_26")));
 }
 
 bool UserInterface::handleOSEvent(SDL_Event& event)
@@ -106,10 +108,16 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     else if (tile.spriteLayers[0].sprite->stringID == "test_24") {
         terrainSpriteIndex = 2;
     }
+    else if (tile.spriteLayers[0].sprite->stringID == "test_17") {
+        terrainSpriteIndex = 3;
+    }
+    else if (tile.spriteLayers[0].sprite->stringID == "test_26") {
+        terrainSpriteIndex = 4;
+    }
 
     // Set the tile to the next sprite.
     terrainSpriteIndex++;
-    terrainSpriteIndex %= 3;
+    terrainSpriteIndex %= terrainSprites.size();
     uiEventDispatcher.emplace<TileUpdateRequest>(
         tilePosition.x, tilePosition.y, 0,
         terrainSprites[terrainSpriteIndex]->numericID);
