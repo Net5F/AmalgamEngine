@@ -117,7 +117,7 @@ void Simulation::connect()
 
     // Set up the player's bounding box, based on their sprite.
     registry.emplace<BoundingBox>(newEntity
-        , Transforms::modelToWorld(playerSprite.modelBounds, playerPosition));
+        , Transforms::modelToWorldCentered(playerSprite.modelBounds, playerPosition));
     // TODO: Update our placement in the spatial partition.
 
     // Set up the player's InputHistory component.
@@ -154,7 +154,7 @@ void Simulation::fakeConnection()
 
     // Set up the player's bounding box, based on their sprite.
     registry.emplace<BoundingBox>(newEntity
-        , Transforms::modelToWorld(playerSprite.modelBounds, playerPosition));
+        , Transforms::modelToWorldCentered(playerSprite.modelBounds, playerPosition));
     // TODO: Update our placement in the spatial partition.
 
     // Set up the player's InputHistory component.

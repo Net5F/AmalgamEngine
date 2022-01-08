@@ -40,8 +40,8 @@ void Renderer::render()
     auto [playerCamera, playerSprite, playerPosition, playerPreviousPos]
         = world.registry.get<Camera, Sprite, Position, PreviousPosition>(
             world.playerEntity);
-    Position cameraLerp = MovementHelpers::interpolatePosition(
-        playerCamera.prevPosition, playerCamera.position, alpha);
+    Position cameraLerp{MovementHelpers::interpolatePosition(
+        playerCamera.prevPosition, playerCamera.position, alpha)};
 
     // Set the camera at the lerped position.
     Camera lerpedCamera{playerCamera};
@@ -49,8 +49,8 @@ void Renderer::render()
     lerpedCamera.position.y = cameraLerp.y;
 
     // Get iso screen coords for the center point of camera.
-    ScreenPoint lerpedCameraCenter = Transforms::worldToScreen(
-        lerpedCamera.position, lerpedCamera.zoomFactor);
+    ScreenPoint lerpedCameraCenter{Transforms::worldToScreen(
+        lerpedCamera.position, lerpedCamera.zoomFactor)};
 
     // Calc where the top left of the lerpedCamera is in screen space.
     lerpedCamera.extent.x
@@ -100,7 +100,7 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
         SDL_RenderCopy(sdlRenderer, spriteInfo.sprite->texture.get(),
                        &(spriteInfo.sprite->textureExtent),
                        &(spriteInfo.screenExtent));
-        //        drawBoundingBox(spriteInfo.worldBounds, camera);
+//        drawBoundingBox(spriteInfo.worldBounds, camera);
     }
 }
 

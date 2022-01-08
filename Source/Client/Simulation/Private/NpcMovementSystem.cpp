@@ -207,7 +207,7 @@ void NpcMovementSystem::moveAllNpcs()
                                     SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update their bounding box to match the new position.
-        boundingBox = Transforms::modelToWorld(sprite.modelBounds, position);
+        boundingBox = Transforms::modelToWorldCentered(sprite.modelBounds, position);
 
         // TODO: Update their placement in the spatial partition.
     }
@@ -256,7 +256,7 @@ void NpcMovementSystem::applyUpdateMessage(
         }
 
         // Move their bounding box to their new position.
-        boundingBox = Transforms::modelToWorld(sprite.modelBounds, position);
+        boundingBox = Transforms::modelToWorldCentered(sprite.modelBounds, position);
     }
 }
 

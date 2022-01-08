@@ -73,9 +73,10 @@ void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
 void UserInterface::handleMouseButtonDown(SDL_MouseButtonEvent& event)
 {
     switch (event.button) {
-        case SDL_BUTTON_LEFT:
+        case SDL_BUTTON_LEFT: {
             cycleTile(event.x, event.y);
             break;
+        }
     }
 }
 

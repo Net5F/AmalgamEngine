@@ -37,8 +37,8 @@ TEST_CASE("TestBoundingBox")
         REQUIRE(box3.intersects(position, radius));
 
         // Edge shared with cylinder.
-        BoundingBox box4{256, 266, 246, 266, 0, 1};
-        REQUIRE(!(box4.intersects(position, radius)));
+        BoundingBox box4{256, 266, 0, 10, 0, 1};
+        REQUIRE(box4.intersects(position, radius));
 
         // Fully outside the cylinder.
         BoundingBox box5{300, 310, 300, 310, 0, 1};
@@ -59,7 +59,7 @@ TEST_CASE("TestBoundingBox")
 
         // Edge shared with extent.
         BoundingBox box3{32, 37, 30, 35, 0, 1};
-        REQUIRE(!(box3.intersects(tileExtent)));
+        REQUIRE(box3.intersects(tileExtent));
 
         // Fully outside the extent.
         BoundingBox box4{33, 38, 30, 35, 0, 1};

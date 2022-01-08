@@ -72,7 +72,7 @@ void ClientConnectionSystem::processConnectEvents()
             newEntity, clientConnected.clientID, false, std::vector<entt::entity>());
         Sprite& newSprite{registry.emplace<Sprite>(newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
         BoundingBox& boundingBox { registry.emplace<BoundingBox>(newEntity,
-            Transforms::modelToWorld(newSprite.modelBounds, newPosition)) };
+            Transforms::modelToWorldCentered(newSprite.modelBounds, newPosition)) };
 
         // Start tracking the entity in the locator.
         world.entityLocator.setEntityLocation(newEntity, boundingBox);

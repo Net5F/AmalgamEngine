@@ -82,7 +82,7 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
     for (int y = tileViewExtent.y; y < tileViewExtent.yMax(); ++y) {
         for (int x = tileViewExtent.x; x < tileViewExtent.xMax(); ++x) {
             // Figure out which tile we're looking at.
-            const Tile& tile = tileMap.getTile(x, y);
+            const Tile& tile{tileMap.getTile(x, y)};
 
             // Push all of this tile's sprites into the appropriate vector.
             for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
@@ -92,8 +92,8 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
                 }
 
                 // Get iso screen extent for this sprite.
-                SDL_Rect screenExtent = ClientTransforms::tileToScreenExtent(
-                    {x, y}, *(layer.sprite), camera);
+                SDL_Rect screenExtent{ClientTransforms::tileToScreenExtent(
+                    {x, y}, *(layer.sprite), camera)};
 
                 // If this sprite isn't on screen, skip it.
                 if (!isWithinScreenBounds(screenExtent, camera)) {
@@ -122,18 +122,18 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
             = group.get<Sprite, Position, PreviousPosition>(entity);
 
         // Get the entity's lerp'd world position.
-        Position lerp = MovementHelpers::interpolatePosition(previousPos,
-                                                             position, alpha);
+        Position lerp{MovementHelpers::interpolatePosition(previousPos,
+                                                           position, alpha)};
 
         // Get the iso screen extent for the lerped sprite.
-        SDL_Rect screenExtent
-            = ClientTransforms::entityToScreenExtent(lerp, sprite, camera);
+        SDL_Rect screenExtent{
+            ClientTransforms::entityToScreenExtent(lerp, sprite, camera)};
 
         // If the sprite is on screen, push the render info.
         if (isWithinScreenBounds(screenExtent, camera)) {
             // Get an updated bounding box for this entity.
-            BoundingBox worldBox
-                = Transforms::modelToWorld(sprite.modelBounds, lerp);
+            BoundingBox worldBox{
+                Transforms::modelToWorldCentered(sprite.modelBounds, lerp)};
 
             // Push the entity's render info for this frame.
             spritesToSort.emplace_back(&sprite, worldBox, screenExtent);

@@ -70,7 +70,7 @@ void PlayerMovementSystem::processMovement()
     // Update our bounding box to match the new position.
     Sprite& sprite{world.registry.get<Sprite>(world.playerEntity)};
     BoundingBox& boundingBox{world.registry.get<BoundingBox>(world.playerEntity)};
-    boundingBox = Transforms::modelToWorld(sprite.modelBounds, position);
+    boundingBox = Transforms::modelToWorldCentered(sprite.modelBounds, position);
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(

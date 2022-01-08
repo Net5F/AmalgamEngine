@@ -101,4 +101,26 @@ BoundingBox Transforms::modelToWorld(const BoundingBox& modelBounds,
     return movedBox;
 }
 
+BoundingBox Transforms::modelToWorldCentered(const BoundingBox& modelBounds,
+                                     const Position& position)
+{
+    // Center the model-space bounding box on the given position.
+    BoundingBox movedBox{};
+    float halfXLength{(modelBounds.maxX - modelBounds.minX) / 2};
+    float halfYLength{(modelBounds.maxY - modelBounds.minY) / 2};
+
+    movedBox.minX = position.x - halfXLength;
+    movedBox.maxX = position.x + halfXLength;
+    movedBox.minY = position.y - halfYLength;
+    movedBox.maxY = position.y + halfYLength;
+
+    // Place the bottom of the box at the given position.
+    // (e.g. if this is a character's position, the bottom of the box is at
+    // their feet).
+    movedBox.minZ = position.z + modelBounds.minZ;
+    movedBox.maxZ = position.z + modelBounds.maxZ;
+
+    return movedBox;
+}
+
 } // End namespace AM

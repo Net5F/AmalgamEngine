@@ -38,6 +38,11 @@ public:
 
     /**
      * Returns a position at the center of this bounding box.
+     *
+     * Note: This center position is different than the Position component
+     *       that is attached to an entity. This one is centered in all axis,
+     *       while an entity's Position's Z axis starts at the bottom of the
+     *       entity.
      */
     Position getCenterPosition()
     {
@@ -55,7 +60,7 @@ public:
      * Note: This treats the given data as a cylinder with infinite length
      *       along the Z axis. If we want to treat it as a sphere, we can
      *       change it.
-     * Note: Shared edges are not considered to be intersecting.
+     * Note: Shared edges are considered to be intersecting.
      *
      * Reference: https://stackoverflow.com/a/402010/4258629
      */
@@ -102,7 +107,7 @@ public:
      *
      * Note: This treats the tile extent as having infinite length along the
      *       Z axis.
-     * Note: Shared edges are not considered to be intersecting.
+     * Note: Shared edges are considered to be intersecting.
      */
     bool intersects(const TileExtent& tileExtent)
     {
@@ -115,8 +120,8 @@ public:
         float tileMaxY {static_cast<float>((tileExtent.y + tileExtent.yLength)
             * TILE_WORLD_WIDTH)};
 
-        return ((maxX > tileMinX) && (tileMaxX > minX)
-               && (maxY > tileMinY) && (tileMaxY > minY));
+        return ((maxX >= tileMinX) && (tileMaxX >= minX)
+               && (maxY >= tileMinY) && (tileMaxY >= minY));
     }
 
     /**

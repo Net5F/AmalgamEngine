@@ -57,8 +57,19 @@ public:
     /**
      * Converts a model-space bounding box to a world-space box, placed at the
      * given position.
+     *
+     * Mostly used to place a bounding box associated with a tile.
      */
     static BoundingBox modelToWorld(const BoundingBox& modelBounds,
+                                    const Position& position);
+
+    /**
+     * Converts a model-space bounding box to a world-space box, centered on
+     * the given position.
+     *
+     * Mostly used to center a bounding box on an entity's position.
+     */
+    static BoundingBox modelToWorldCentered(const BoundingBox& modelBounds,
                                     const Position& position);
 };
 

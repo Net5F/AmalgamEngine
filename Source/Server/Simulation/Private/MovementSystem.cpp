@@ -46,7 +46,7 @@ void MovementSystem::processMovements()
         // If the entity moved.
         if (position != previousPosition) {
             // Update their bounding box to match their new position.
-            boundingBox = Transforms::modelToWorld(sprite.modelBounds, position);
+            boundingBox = Transforms::modelToWorldCentered(sprite.modelBounds, position);
 
             // Update the entity's position in the locator.
             world.entityLocator.setEntityLocation(entity, boundingBox);

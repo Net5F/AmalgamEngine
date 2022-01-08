@@ -29,9 +29,9 @@ ClientAOISystem::ClientAOISystem(Simulation& inSim, World& inWorld,
 void ClientAOISystem::updateAOILists()
 {
     // Process the entities that have recently moved.
-    auto view{world.registry.view<ClientSimData, PositionHasChanged, BoundingBox>()};
+    auto view{world.registry.view<ClientSimData, PositionHasChanged, Position>()};
     for (entt::entity entityThatMoved : view) {
-        auto [clientThatMoved, boundingBox] = view.get<ClientSimData, BoundingBox>(entityThatMoved);
+        auto [clientThatMoved, position] = view.get<ClientSimData, Position>(entityThatMoved);
 
         // Clear our lists.
         entitiesThatLeft.clear();
@@ -39,7 +39,7 @@ void ClientAOISystem::updateAOILists()
 
         // Get the list of entities that are in entityThatMoved's AOI.
         std::vector<entt::entity>& currentAOIEntities {
-                world.entityLocator.getEntitiesFine(boundingBox.getCenterPosition(),
+                world.entityLocator.getEntitiesFine(position,
                     SharedConfig::AOI_RADIUS) };
 
         // Remove entityThatMoved from the list, if it's in there.
@@ -68,25 +68,6 @@ void ClientAOISystem::updateAOILists()
         std::set_difference(currentAOIEntities.begin(), currentAOIEntities.end(),
             oldAOIEntities.begin(), oldAOIEntities.end()
             , std::back_inserter(clientThatMoved.entitiesThatEnteredAOI));
-//
-//        std::string priorList{};
-//        for (entt::entity entity : oldAOIEntities) {
-//            priorList += (std::to_string(static_cast<unsigned int>(entity)) + ", ");
-//        }
-//        std::string currentList{};
-//        for (entt::entity entity : currentAOIEntities) {
-//            currentList += (std::to_string(static_cast<unsigned int>(entity)) + ", ");
-//        }
-//        std::string leftList{};
-//        for (entt::entity entity : entitiesThatLeft) {
-//            leftList += (std::to_string(static_cast<unsigned int>(entity)) + ", ");
-//        }
-//        std::string enteredList{};
-//        for (entt::entity entity : clientThatMoved.entitiesThatEnteredAOI) {
-//            enteredList += (std::to_string(static_cast<unsigned int>(entity)) + ", ");
-//        }
-//        LOG_INFO("List for %u: (%s) -> (%s). Left: (%s), Entered: (%s)", entityThatMoved, priorList.c_str()
-//                 , currentList.c_str(), leftList.c_str(), enteredList.c_str());
 
         // Process the entities that entered entityThatMoved's AOI.
         if (clientThatMoved.entitiesThatEnteredAOI.size() > 0) {
@@ -110,7 +91,6 @@ void ClientAOISystem::processEntitiesThatLeft(entt::entity entityThatMoved,
     for (entt::entity entityThatLeft : entitiesThatLeft) {
         // Tell clientThatMoved that entityThatLeft is now out of range.
         network.serializeAndSend(clientThatMoved.netID, EntityDelete{sim.getCurrentTick(), entityThatLeft});
-//        LOG_INFO("Sent EntityDelete to %u about %u", entityThatMoved, entityThatLeft);
 
         // If entityThatLeft is a client entity and hasn't moved on this tick,
         // update its list and send it a EntityDelete for entityThatMoved.
@@ -134,11 +114,8 @@ void ClientAOISystem::processEntitiesThatLeft(entt::entity entityThatMoved,
             // Tell clientThatLeft that entityThatMoved is now out of range.
             network.serializeAndSend(clientThatLeft.netID,
                 EntityDelete { sim.getCurrentTick(), entityThatMoved });
-//            LOG_INFO("Sent EntityDelete to %u about %u", entityThatLeft, entityThatMoved);
         }
     }
-//    LOG_INFO("Processed %u entities that left the AOI of entity %u",
-//        entitiesThatLeft.size(), entityThatMoved);
 }
 
 void ClientAOISystem::processEntitiesThatEntered(entt::entity entityThatMoved,
@@ -153,7 +130,6 @@ void ClientAOISystem::processEntitiesThatEntered(entt::entity entityThatMoved,
         Sprite& movedSprite{view.get<Sprite>(entityThatMoved)};
         network.serializeAndSend(clientThatMoved.netID, EntityInit { sim.getCurrentTick(),
                 entityThatEntered, movedName.name, movedSprite.numericID });
-//        LOG_INFO("Sent EntityInit to %u about %u", entityThatMoved, entityThatEntered);
 
         // If entityThatEntered is a client entity and hasn't moved on this
         // tick, update its list and send it an EntityInit.
@@ -178,11 +154,8 @@ void ClientAOISystem::processEntitiesThatEntered(entt::entity entityThatMoved,
             network.serializeAndSend(clientThatEntered.netID,
                 EntityInit { sim.getCurrentTick(), entityThatMoved, enteredName.name,
                         enteredSprite.numericID });
-//            LOG_INFO("Sent EntityInit to %u about %u", entityThatEntered, entityThatMoved);
         }
     }
-//    LOG_INFO("Processed %u entities that entered the AOI of entity %u",
-//        entitiesThatEntered.size(), entityThatMoved);
 }
 
 } // namespace Server
