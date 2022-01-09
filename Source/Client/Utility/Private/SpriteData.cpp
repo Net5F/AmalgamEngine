@@ -22,7 +22,7 @@ SpriteData::SpriteData(AssetCache& assetCache)
     }
 
     // Parse the file into a json structure.
-    nlohmann::json json = nlohmann::json::parse(workingFile, nullptr, false);
+    nlohmann::json json{nlohmann::json::parse(workingFile, nullptr, false)};
     if (json.is_discarded()) {
         LOG_FATAL("SpriteData.json is not valid JSON.");
     }
@@ -44,7 +44,7 @@ SpriteData::SpriteData(AssetCache& assetCache)
 const Sprite& SpriteData::get(const std::string& stringID)
 {
     // Attempt to find the given string ID.
-    auto it = stringMap.find(stringID);
+    auto it{stringMap.find(stringID)};
     if (it == stringMap.end()) {
         LOG_FATAL("Failed to find sprite string ID: %s", stringID.c_str());
     }
@@ -55,7 +55,7 @@ const Sprite& SpriteData::get(const std::string& stringID)
 const Sprite& SpriteData::get(int numericID)
 {
     // Attempt to find the given string ID.
-    auto it = numericMap.find(numericID);
+    auto it{numericMap.find(numericID)};
     if (it == numericMap.end()) {
         LOG_FATAL("Failed to find sprite numeric ID: %d", numericID);
     }
