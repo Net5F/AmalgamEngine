@@ -30,7 +30,7 @@ void serialize(S& serializer, Input& input)
     // Note: We expect the outer context (such as EntityUpdate) to
     //       enable bit packing.
     serializer.container(input.inputStates, [](typename S::BPEnabledType& sbp,
-                                        Input::State& inputState) {
+                                               Input::State& inputState) {
         constexpr bitsery::ext::ValueRange<Input::State> range{
             Input::State::Released, Input::State::Pressed};
         sbp.ext(inputState, range);

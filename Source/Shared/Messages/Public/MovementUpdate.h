@@ -34,9 +34,10 @@ template<typename S>
 void serialize(S& serializer, MovementUpdate& movementUpdate)
 {
     serializer.value4b(movementUpdate.tickNum);
-    serializer.enableBitPacking([&movementUpdate](typename S::BPEnabledType& sbp) {
+    serializer.enableBitPacking(
+        [&movementUpdate](typename S::BPEnabledType& sbp) {
             sbp.container(movementUpdate.movementStates,
-                             static_cast<std::size_t>(SharedConfig::MAX_ENTITIES));
+                          static_cast<std::size_t>(SharedConfig::MAX_ENTITIES));
         });
 }
 

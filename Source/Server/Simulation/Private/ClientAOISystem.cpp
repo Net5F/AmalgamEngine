@@ -19,7 +19,7 @@ namespace AM
 namespace Server
 {
 ClientAOISystem::ClientAOISystem(Simulation& inSim, World& inWorld,
-                                       Network& inNetwork)
+                                 Network& inNetwork)
 : sim{inSim}
 , world(inWorld)
 , network(inNetwork)
@@ -29,23 +29,25 @@ ClientAOISystem::ClientAOISystem(Simulation& inSim, World& inWorld,
 void ClientAOISystem::updateAOILists()
 {
     // Process the entities that have recently moved.
-    auto view{world.registry.view<ClientSimData, PositionHasChanged, Position>()};
+    auto view{
+        world.registry.view<ClientSimData, PositionHasChanged, Position>()};
     for (entt::entity entityThatMoved : view) {
-        auto [clientThatMoved, position] = view.get<ClientSimData, Position>(entityThatMoved);
+        auto [clientThatMoved, position]
+            = view.get<ClientSimData, Position>(entityThatMoved);
 
         // Clear our lists.
         entitiesThatLeft.clear();
         clientThatMoved.entitiesThatEnteredAOI.clear();
 
         // Get the list of entities that are in entityThatMoved's AOI.
-        std::vector<entt::entity>& currentAOIEntities {
-                world.entityLocator.getEntitiesFine(position,
-                    SharedConfig::AOI_RADIUS) };
+        std::vector<entt::entity>& currentAOIEntities{
+            world.entityLocator.getEntitiesFine(position,
+                                                SharedConfig::AOI_RADIUS)};
 
         // Remove entityThatMoved from the list, if it's in there.
         // (We don't want to add it to its own list.)
-        auto entityIt { std::find(currentAOIEntities.begin(), currentAOIEntities.end(),
-            entityThatMoved) };
+        auto entityIt{std::find(currentAOIEntities.begin(),
+                                currentAOIEntities.end(), entityThatMoved)};
         if (entityIt != currentAOIEntities.end()) {
             currentAOIEntities.erase(entityIt);
         }
@@ -53,21 +55,26 @@ void ClientAOISystem::updateAOILists()
         // Sort the list.
         std::sort(currentAOIEntities.begin(), currentAOIEntities.end());
 
-        // Fill entitiesThatLeft with the entities that left entityThatMoved's AOI.
-        std::vector<entt::entity>& oldAOIEntities{clientThatMoved.entitiesInAOI};
+        // Fill entitiesThatLeft with the entities that left entityThatMoved's
+        // AOI.
+        std::vector<entt::entity>& oldAOIEntities{
+            clientThatMoved.entitiesInAOI};
         std::set_difference(oldAOIEntities.begin(), oldAOIEntities.end(),
-            currentAOIEntities.begin(), currentAOIEntities.end()
-            , std::back_inserter(entitiesThatLeft));
+                            currentAOIEntities.begin(),
+                            currentAOIEntities.end(),
+                            std::back_inserter(entitiesThatLeft));
 
         // Process the entities that left entityThatMoved's AOI.
         if (entitiesThatLeft.size() > 0) {
             processEntitiesThatLeft(entityThatMoved, clientThatMoved);
         }
 
-        // Fill entitiesThatEntered with entities that entered entityThatMoved's AOI.
-        std::set_difference(currentAOIEntities.begin(), currentAOIEntities.end(),
-            oldAOIEntities.begin(), oldAOIEntities.end()
-            , std::back_inserter(clientThatMoved.entitiesThatEnteredAOI));
+        // Fill entitiesThatEntered with entities that entered entityThatMoved's
+        // AOI.
+        std::set_difference(
+            currentAOIEntities.begin(), currentAOIEntities.end(),
+            oldAOIEntities.begin(), oldAOIEntities.end(),
+            std::back_inserter(clientThatMoved.entitiesThatEnteredAOI));
 
         // Process the entities that entered entityThatMoved's AOI.
         if (clientThatMoved.entitiesThatEnteredAOI.size() > 0) {
@@ -83,14 +90,16 @@ void ClientAOISystem::updateAOILists()
 }
 
 void ClientAOISystem::processEntitiesThatLeft(entt::entity entityThatMoved,
-                                                    ClientSimData& clientThatMoved)
+                                              ClientSimData& clientThatMoved)
 {
     auto view{world.registry.view<ClientSimData>()};
 
     // Process the entities that entered entityThatMoved's AOI.
     for (entt::entity entityThatLeft : entitiesThatLeft) {
         // Tell clientThatMoved that entityThatLeft is now out of range.
-        network.serializeAndSend(clientThatMoved.netID, EntityDelete{sim.getCurrentTick(), entityThatLeft});
+        network.serializeAndSend(
+            clientThatMoved.netID,
+            EntityDelete{sim.getCurrentTick(), entityThatLeft});
 
         // If entityThatLeft is a client entity and hasn't moved on this tick,
         // update its list and send it a EntityDelete for entityThatMoved.
@@ -99,9 +108,11 @@ void ClientAOISystem::processEntitiesThatLeft(entt::entity entityThatMoved,
         if (world.registry.any_of<ClientSimData>(entityThatLeft)
             && !(world.registry.any_of<PositionHasChanged>(entityThatLeft))) {
             // Find entityThatMoved in entityThatLeft's list.
-            ClientSimData& clientThatLeft{view.get<ClientSimData>(entityThatLeft)};
-            auto eraseIt { std::find(clientThatLeft.entitiesInAOI.begin(),
-                clientThatLeft.entitiesInAOI.end(), entityThatMoved) };
+            ClientSimData& clientThatLeft{
+                view.get<ClientSimData>(entityThatLeft)};
+            auto eraseIt{std::find(clientThatLeft.entitiesInAOI.begin(),
+                                   clientThatLeft.entitiesInAOI.end(),
+                                   entityThatMoved)};
 
             // Remove entityThatMoved from entityThatLeft's list.
             if (eraseIt != clientThatLeft.entitiesInAOI.end()) {
@@ -112,48 +123,55 @@ void ClientAOISystem::processEntitiesThatLeft(entt::entity entityThatMoved,
             }
 
             // Tell clientThatLeft that entityThatMoved is now out of range.
-            network.serializeAndSend(clientThatLeft.netID,
-                EntityDelete { sim.getCurrentTick(), entityThatMoved });
+            network.serializeAndSend(
+                clientThatLeft.netID,
+                EntityDelete{sim.getCurrentTick(), entityThatMoved});
         }
     }
 }
 
 void ClientAOISystem::processEntitiesThatEntered(entt::entity entityThatMoved,
-                                                    ClientSimData& clientThatMoved)
+                                                 ClientSimData& clientThatMoved)
 {
     auto view{world.registry.view<ClientSimData, Name, Sprite>()};
 
     // Process the entities that entered entityThatMoved's AOI.
-    for (entt::entity entityThatEntered : clientThatMoved.entitiesThatEnteredAOI) {
+    for (entt::entity entityThatEntered :
+         clientThatMoved.entitiesThatEnteredAOI) {
         // Tell clientThatMoved that entityThatEntered is now in range.
         Name& movedName{view.get<Name>(entityThatMoved)};
         Sprite& movedSprite{view.get<Sprite>(entityThatMoved)};
-        network.serializeAndSend(clientThatMoved.netID, EntityInit { sim.getCurrentTick(),
-                entityThatEntered, movedName.name, movedSprite.numericID });
+        network.serializeAndSend(clientThatMoved.netID,
+                                 EntityInit{sim.getCurrentTick(),
+                                            entityThatEntered, movedName.name,
+                                            movedSprite.numericID});
 
         // If entityThatEntered is a client entity and hasn't moved on this
         // tick, update its list and send it an EntityInit.
         // Note: If it moved, it's already going to update its lists so we
         //       don't have to.
         if (world.registry.any_of<ClientSimData>(entityThatEntered)
-            && !(world.registry.any_of<PositionHasChanged>(entityThatEntered))) {
+            && !(
+                world.registry.any_of<PositionHasChanged>(entityThatEntered))) {
             // Add entityThatMoved to entityThatEntered's lists.
-            ClientSimData& clientThatEntered{view.get<ClientSimData>(entityThatEntered)};
+            ClientSimData& clientThatEntered{
+                view.get<ClientSimData>(entityThatEntered)};
             clientThatEntered.entitiesInAOI.push_back(entityThatMoved);
             clientThatEntered.entitiesThatEnteredAOI.push_back(entityThatMoved);
 
             // Re-sort clientThatEntered's lists.
             std::sort(clientThatEntered.entitiesInAOI.begin(),
-                clientThatEntered.entitiesInAOI.end());
+                      clientThatEntered.entitiesInAOI.end());
             std::sort(clientThatEntered.entitiesThatEnteredAOI.begin(),
-                clientThatEntered.entitiesThatEnteredAOI.end());
+                      clientThatEntered.entitiesThatEnteredAOI.end());
 
             // Tell clientThatEntered that entityThatMoved is now in range.
             Name& enteredName{view.get<Name>(entityThatEntered)};
             Sprite& enteredSprite{view.get<Sprite>(entityThatEntered)};
-            network.serializeAndSend(clientThatEntered.netID,
-                EntityInit { sim.getCurrentTick(), entityThatMoved, enteredName.name,
-                        enteredSprite.numericID });
+            network.serializeAndSend(
+                clientThatEntered.netID,
+                EntityInit{sim.getCurrentTick(), entityThatMoved,
+                           enteredName.name, enteredSprite.numericID});
         }
     }
 }

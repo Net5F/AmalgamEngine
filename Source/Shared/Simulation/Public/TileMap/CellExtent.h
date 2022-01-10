@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 /**
  * A strong type alias, describing an extent of spatial partitioning grid
  * cells.

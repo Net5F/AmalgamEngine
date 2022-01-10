@@ -50,7 +50,7 @@ void MovementHelpers::updateVelocity(Velocity& velocity,
 }
 
 void MovementHelpers::updatePosition(Position& position, Velocity& velocity,
-                                 double deltaSeconds)
+                                     double deltaSeconds)
 {
     // Update the position.
     position.x += (deltaSeconds * velocity.x);
@@ -64,7 +64,8 @@ Position MovementHelpers::interpolatePosition(PreviousPosition& previousPos,
     double interpX{(position.x * alpha) + (previousPos.x * (1.0 - alpha))};
     double interpY{(position.y * alpha) + (previousPos.y * (1.0 - alpha))};
     double interpZ{(position.z * alpha) + (previousPos.z * (1.0 - alpha))};
-    return {static_cast<float>(interpX), static_cast<float>(interpY), static_cast<float>(interpZ)};
+    return {static_cast<float>(interpX), static_cast<float>(interpY),
+            static_cast<float>(interpZ)};
 }
 
 } // End namespace AM

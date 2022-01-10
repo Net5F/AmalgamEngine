@@ -56,7 +56,8 @@ void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
     const Camera& playerCamera{world.registry.get<Camera>(world.playerEntity)};
     ScreenPoint screenPoint{static_cast<float>(event.x),
                             static_cast<float>(event.y)};
-    TilePosition tilePosition{Transforms::screenToTile(screenPoint, playerCamera)};
+    TilePosition tilePosition{
+        Transforms::screenToTile(screenPoint, playerCamera)};
 
     // If the index is outside of the world bounds, ignore this event.
     const TileExtent& mapTileExtent{world.tileMap.getTileExtent()};
@@ -86,7 +87,8 @@ void UserInterface::cycleTile(int mouseX, int mouseY)
     const Camera& playerCamera{world.registry.get<Camera>(world.playerEntity)};
     ScreenPoint screenPoint{static_cast<float>(mouseX),
                             static_cast<float>(mouseY)};
-    TilePosition tilePosition{Transforms::screenToTile(screenPoint, playerCamera)};
+    TilePosition tilePosition{
+        Transforms::screenToTile(screenPoint, playerCamera)};
 
     // If the index is outside of the world bounds, ignore this event.
     const TileExtent& mapTileExtent{world.tileMap.getTileExtent()};

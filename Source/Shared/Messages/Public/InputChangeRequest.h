@@ -42,7 +42,8 @@ void serialize(S& serializer, InputChangeRequest& inputChangeRequest)
 {
     serializer.value4b(inputChangeRequest.tickNum);
 
-    serializer.enableBitPacking([&inputChangeRequest](typename S::BPEnabledType& sbp) {
+    serializer.enableBitPacking(
+        [&inputChangeRequest](typename S::BPEnabledType& sbp) {
             sbp.object(inputChangeRequest.input);
         });
 }

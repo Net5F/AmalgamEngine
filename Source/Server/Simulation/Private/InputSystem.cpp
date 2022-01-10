@@ -15,8 +15,8 @@ namespace AM
 namespace Server
 {
 InputSystem::InputSystem(Simulation& inSim, World& inWorld,
-                                     EventDispatcher& inNetworkEventDispatcher,
-                                     Network& inNetwork)
+                         EventDispatcher& inNetworkEventDispatcher,
+                         Network& inNetwork)
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)

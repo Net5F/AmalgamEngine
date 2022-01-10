@@ -9,7 +9,6 @@
 
 namespace AM
 {
-
 EntityLocator::EntityLocator(entt::registry& inRegistry)
 : registry{inRegistry}
 , cellExtent{}
@@ -33,16 +32,17 @@ void EntityLocator::setGridSize(unsigned int inMapXLengthTiles,
     entityGrid.resize(cellExtent.xLength * cellExtent.yLength);
 }
 
-void EntityLocator::setEntityLocation(entt::entity entity, const BoundingBox& boundingBox)
+void EntityLocator::setEntityLocation(entt::entity entity,
+                                      const BoundingBox& boundingBox)
 {
     // Find the cells that the bounding box intersects.
     CellExtent boxCellExtent{};
     boxCellExtent.x = std::floor(boundingBox.minX / cellWorldWidth);
     boxCellExtent.y = std::floor(boundingBox.minY / cellWorldWidth);
-    boxCellExtent.xLength = (std::ceil(boundingBox.maxX / cellWorldWidth)
-        - boxCellExtent.x);
-    boxCellExtent.yLength = (std::ceil(boundingBox.maxY / cellWorldWidth)
-        - boxCellExtent.y);
+    boxCellExtent.xLength
+        = (std::ceil(boundingBox.maxX / cellWorldWidth) - boxCellExtent.x);
+    boxCellExtent.yLength
+        = (std::ceil(boundingBox.maxY / cellWorldWidth) - boxCellExtent.y);
 
     // Clip the extent to the grid's bounds.
     boxCellExtent.intersectWith(cellExtent);
@@ -71,20 +71,25 @@ void EntityLocator::setEntityLocation(entt::entity entity, const BoundingBox& bo
     }
 }
 
-std::vector<entt::entity>& EntityLocator::getEntitiesCoarse(const Position& cylinderCenter
-        , unsigned int radius)
+std::vector<entt::entity>&
+    EntityLocator::getEntitiesCoarse(const Position& cylinderCenter,
+                                     unsigned int radius)
 {
     // Clear the return vector.
     returnVector.clear();
 
     // Calc the cell extent that is intersected by the cylinder.
     CellExtent cylinderCellExtent{};
-    cylinderCellExtent.x = std::floor((cylinderCenter.x - radius) / cellWorldWidth);
-    cylinderCellExtent.y = std::floor((cylinderCenter.y - radius) / cellWorldWidth);
-    cylinderCellExtent.xLength = (std::ceil((cylinderCenter.x + radius) / cellWorldWidth)
-        - cylinderCellExtent.x);
-    cylinderCellExtent.yLength = (std::ceil((cylinderCenter.y + radius) / cellWorldWidth)
-        - cylinderCellExtent.y);
+    cylinderCellExtent.x
+        = std::floor((cylinderCenter.x - radius) / cellWorldWidth);
+    cylinderCellExtent.y
+        = std::floor((cylinderCenter.y - radius) / cellWorldWidth);
+    cylinderCellExtent.xLength
+        = (std::ceil((cylinderCenter.x + radius) / cellWorldWidth)
+           - cylinderCellExtent.x);
+    cylinderCellExtent.yLength
+        = (std::ceil((cylinderCenter.y + radius) / cellWorldWidth)
+           - cylinderCellExtent.y);
 
     // Clip the extent to the grid's bounds.
     cylinderCellExtent.intersectWith(cellExtent);
@@ -97,35 +102,39 @@ std::vector<entt::entity>& EntityLocator::getEntitiesCoarse(const Position& cyli
             // Add the entities in this cell to the return vector.
             unsigned int linearizedIndex{linearizeCellIndex(x, y)};
             std::vector<entt::entity>& entityArr{entityGrid[linearizedIndex]};
-            returnVector.insert(returnVector.end(), entityArr.begin(), entityArr.end());
+            returnVector.insert(returnVector.end(), entityArr.begin(),
+                                entityArr.end());
         }
     }
 
     // Remove duplicates from the return vector.
     std::sort(returnVector.begin(), returnVector.end());
     returnVector.erase(std::unique(returnVector.begin(), returnVector.end()),
-        returnVector.end());
+                       returnVector.end());
 
     return returnVector;
 }
 
-std::vector<entt::entity>& EntityLocator::getEntitiesFine(const Position& cylinderCenter
-        , unsigned int radius)
+std::vector<entt::entity>&
+    EntityLocator::getEntitiesFine(const Position& cylinderCenter,
+                                   unsigned int radius)
 {
     // Run a coarse pass.
     getEntitiesCoarse(cylinderCenter, radius);
 
     // Erase any entities that don't actually intersect the cylinder.
     auto view{registry.view<BoundingBox>()};
-    std::erase_if(returnVector, [&view, &cylinderCenter, radius](entt::entity entity) {
-        BoundingBox& boundingBox{view.get<BoundingBox>(entity)};
-        return !(boundingBox.intersects(cylinderCenter, radius));
-    });
+    std::erase_if(returnVector,
+                  [&view, &cylinderCenter, radius](entt::entity entity) {
+                      BoundingBox& boundingBox{view.get<BoundingBox>(entity)};
+                      return !(boundingBox.intersects(cylinderCenter, radius));
+                  });
 
     return returnVector;
 }
 
-std::vector<entt::entity>& EntityLocator::getEntitiesCoarse(const TileExtent& tileExtent)
+std::vector<entt::entity>&
+    EntityLocator::getEntitiesCoarse(const TileExtent& tileExtent)
 {
     // Clear the return vector.
     returnVector.clear();
@@ -134,8 +143,10 @@ std::vector<entt::entity>& EntityLocator::getEntitiesCoarse(const TileExtent& ti
     CellExtent tileCellExtent{};
     tileCellExtent.x = std::floor(tileExtent.x / SharedConfig::CELL_WIDTH);
     tileCellExtent.y = std::floor(tileExtent.y / SharedConfig::CELL_WIDTH);
-    tileCellExtent.xLength = std::ceil(tileExtent.xLength / SharedConfig::CELL_WIDTH);
-    tileCellExtent.yLength = std::ceil(tileExtent.yLength / SharedConfig::CELL_WIDTH);
+    tileCellExtent.xLength
+        = std::ceil(tileExtent.xLength / SharedConfig::CELL_WIDTH);
+    tileCellExtent.yLength
+        = std::ceil(tileExtent.yLength / SharedConfig::CELL_WIDTH);
 
     // Clip the extent to the grid's bounds.
     tileCellExtent.intersectWith(cellExtent);
@@ -148,19 +159,21 @@ std::vector<entt::entity>& EntityLocator::getEntitiesCoarse(const TileExtent& ti
             // Add the entities in this cell to the return vector.
             unsigned int linearizedIndex{linearizeCellIndex(x, y)};
             std::vector<entt::entity>& entityArr{entityGrid[linearizedIndex]};
-            returnVector.insert(returnVector.end(), entityArr.begin(), entityArr.end());
+            returnVector.insert(returnVector.end(), entityArr.begin(),
+                                entityArr.end());
         }
     }
 
     // Remove duplicates from the return vector.
     std::sort(returnVector.begin(), returnVector.end());
     returnVector.erase(std::unique(returnVector.begin(), returnVector.end()),
-        returnVector.end());
+                       returnVector.end());
 
     return returnVector;
 }
 
-std::vector<entt::entity>& EntityLocator::getEntitiesFine(const TileExtent& tileExtent)
+std::vector<entt::entity>&
+    EntityLocator::getEntitiesFine(const TileExtent& tileExtent)
 {
     // Run a coarse pass.
     getEntitiesCoarse(tileExtent);
@@ -175,7 +188,8 @@ std::vector<entt::entity>& EntityLocator::getEntitiesFine(const TileExtent& tile
     return returnVector;
 }
 
-std::vector<entt::entity>& EntityLocator::getEntitiesCoarse(const ChunkExtent& chunkExtent)
+std::vector<entt::entity>&
+    EntityLocator::getEntitiesCoarse(const ChunkExtent& chunkExtent)
 {
     // Convert to TileExtent.
     TileExtent tileExtent{chunkExtent};
@@ -183,7 +197,8 @@ std::vector<entt::entity>& EntityLocator::getEntitiesCoarse(const ChunkExtent& c
     return getEntitiesCoarse(tileExtent);
 }
 
-std::vector<entt::entity>& EntityLocator::getEntitiesFine(const ChunkExtent& chunkExtent)
+std::vector<entt::entity>&
+    EntityLocator::getEntitiesFine(const ChunkExtent& chunkExtent)
 {
     // Convert to TileExtent.
     TileExtent tileExtent{chunkExtent};
@@ -200,7 +215,8 @@ void EntityLocator::removeEntity(entt::entity entity)
     }
 }
 
-void EntityLocator::clearEntityLocation(entt::entity entity, CellExtent& clearExtent)
+void EntityLocator::clearEntityLocation(entt::entity entity,
+                                        CellExtent& clearExtent)
 {
     // Iterate through all the cells that the entity occupies.
     int xMax{clearExtent.x + clearExtent.xLength};
@@ -210,7 +226,8 @@ void EntityLocator::clearEntityLocation(entt::entity entity, CellExtent& clearEx
             // Find the entity in this cell's entity array.
             unsigned int linearizedIndex{linearizeCellIndex(x, y)};
             std::vector<entt::entity>& entityArr{entityGrid[linearizedIndex]};
-            auto entityIt{std::find(entityArr.begin(), entityArr.end(), entity)};
+            auto entityIt{
+                std::find(entityArr.begin(), entityArr.end(), entity)};
 
             // Remove the entity from this cell's entity array.
             if (entityIt != entityArr.end()) {

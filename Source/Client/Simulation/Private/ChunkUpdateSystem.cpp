@@ -72,7 +72,7 @@ void ChunkUpdateSystem::requestAllInRangeChunks(
     // Bound the range to the map boundaries.
     const ChunkExtent& mapChunkExtent{world.tileMap.getChunkExtent()};
     ChunkExtent mapBounds{0, 0, static_cast<int>(mapChunkExtent.xLength),
-                         static_cast<int>(mapChunkExtent.yLength)};
+                          static_cast<int>(mapChunkExtent.yLength)};
     currentExtent.intersectWith(mapBounds);
 
     // Iterate over the current range, adding any new chunks to a request.
@@ -98,13 +98,13 @@ void ChunkUpdateSystem::requestNewInRangeChunks(
     // Note: This is hardcoded to assume the range is all chunks directly
     //       surrounding a given chunk.
     ChunkExtent previousExtent{(previousChunk.x - 1), (previousChunk.y - 1), 3,
-                             3};
+                               3};
     ChunkExtent currentExtent{(currentChunk.x - 1), (currentChunk.y - 1), 3, 3};
 
     // Bound each range to the map boundaries.
     const ChunkExtent& mapChunkExtent{world.tileMap.getChunkExtent()};
     ChunkExtent mapBounds{0, 0, static_cast<int>(mapChunkExtent.xLength),
-                         static_cast<int>(mapChunkExtent.yLength)};
+                          static_cast<int>(mapChunkExtent.yLength)};
     previousExtent.intersectWith(mapBounds);
     currentExtent.intersectWith(mapBounds);
 

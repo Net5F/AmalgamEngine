@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 class ChunkPosition;
 
 /**

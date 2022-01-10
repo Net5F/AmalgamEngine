@@ -170,8 +170,9 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
 
     // Convert the screen-space mouse point to world space.
     ScreenPoint offsetMouseScreenPoint{static_cast<float>(offsetMousePoint.x),
-                                   static_cast<float>(offsetMousePoint.y)};
-    Position mouseWorldPos{Transforms::screenToWorld(offsetMouseScreenPoint, {})};
+                                       static_cast<float>(offsetMousePoint.y)};
+    Position mouseWorldPos{
+        Transforms::screenToWorld(offsetMouseScreenPoint, {})};
 
     // Adjust the currently pressed control appropriately.
     switch (currentHeldControl) {
@@ -251,10 +252,14 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
        size). */
     // Calc the screen-space offsets from the tile's origin to the bottom
     // right and left of the sprite image.
-    ScreenPoint bottomRightOffset{static_cast<float>(activeSprite->textureExtent.w / 2.f)
-        , static_cast<float>(activeSprite->textureExtent.h - activeSprite->yOffset)};
-    ScreenPoint bottomLeftOffset{static_cast<float>(-(activeSprite->textureExtent.w / 2.f))
-            , static_cast<float>(activeSprite->textureExtent.h - activeSprite->yOffset)};
+    ScreenPoint bottomRightOffset{
+        static_cast<float>(activeSprite->textureExtent.w / 2.f),
+        static_cast<float>(activeSprite->textureExtent.h
+                           - activeSprite->yOffset)};
+    ScreenPoint bottomLeftOffset{
+        static_cast<float>(-(activeSprite->textureExtent.w / 2.f)),
+        static_cast<float>(activeSprite->textureExtent.h
+                           - activeSprite->yOffset)};
 
     // Convert the offsets to world space.
     float maxXBound{Transforms::screenToWorld(bottomRightOffset, {}).x};
@@ -294,8 +299,8 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     // Set maxZ relative to the distance between the mouse and the
     // position control (the position control is always our reference
     // for where z == 0 is.)
-    float mouseZHeight{
-        lastRenderedPosExtent.y + (scaledRectSize / 2.f) - mouseScreenYPos};
+    float mouseZHeight{lastRenderedPosExtent.y + (scaledRectSize / 2.f)
+                       - mouseScreenYPos};
 
     // Convert to logical space.
     mouseZHeight = AUI::ScalingHelpers::actualToLogical(mouseZHeight);

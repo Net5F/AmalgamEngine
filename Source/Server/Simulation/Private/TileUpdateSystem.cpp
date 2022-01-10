@@ -39,7 +39,8 @@ void TileUpdateSystem::updateTiles()
 
         // Get the list of clients that are in range of the updated tile.
         // Note: This is hardcoded to match ChunkUpdateSystem.
-        ChunkPosition centerChunk{TilePosition{updateRequest.tileX, updateRequest.tileY}};
+        ChunkPosition centerChunk{
+            TilePosition{updateRequest.tileX, updateRequest.tileY}};
         ChunkExtent chunkExtent{(centerChunk.x - 1), (centerChunk.y - 1), 3, 3};
         chunkExtent.intersectWith(world.tileMap.getChunkExtent());
 

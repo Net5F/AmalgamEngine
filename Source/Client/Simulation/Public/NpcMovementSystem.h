@@ -57,8 +57,8 @@ private:
     void moveAllNpcs();
 
     /**
-     * Receives NPC movement update messages from the network and pushes them into
-     * the stateUpdateQueue.
+     * Receives NPC movement update messages from the network and pushes them
+     * into the stateUpdateQueue.
      */
     void receiveMovementUpdates();
 
@@ -68,7 +68,8 @@ private:
     void handleImplicitConfirmation(const Uint32 confirmedTick);
     /** Handles an update message, including implicit confirmations based on it.
      */
-    void handleUpdate(const std::shared_ptr<const MovementUpdate>& entityUpdate);
+    void
+        handleUpdate(const std::shared_ptr<const MovementUpdate>& entityUpdate);
 
     /**
      * Applies the given update message to the entity world state.

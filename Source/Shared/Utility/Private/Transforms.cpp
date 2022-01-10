@@ -77,7 +77,7 @@ float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)
 }
 
 TilePosition Transforms::screenToTile(const ScreenPoint& screenPoint,
-                                   const Camera& camera)
+                                      const Camera& camera)
 {
     // Convert to world space.
     Position worldPos = screenToWorld(screenPoint, camera);
@@ -102,15 +102,17 @@ BoundingBox Transforms::modelToWorld(const BoundingBox& modelBounds,
 }
 
 BoundingBox Transforms::modelToWorldCentered(const BoundingBox& modelBounds,
-                                     const Position& position)
+                                             const Position& position)
 {
     // Place the model-space bounding box at the given position, shifted back
     // by a half tile to center it.
     // Note: This assumes that the sprite is 1 tile large. When we add support
     //       for other sizes, this will need to be updated.
     BoundingBox movedBox{};
-    movedBox.minX = position.x + modelBounds.minX - (SharedConfig::TILE_WORLD_WIDTH / 2);
-    movedBox.minY = position.y + modelBounds.minY - (SharedConfig::TILE_WORLD_WIDTH / 2);
+    movedBox.minX
+        = position.x + modelBounds.minX - (SharedConfig::TILE_WORLD_WIDTH / 2);
+    movedBox.minY
+        = position.y + modelBounds.minY - (SharedConfig::TILE_WORLD_WIDTH / 2);
     movedBox.maxX = movedBox.minX + modelBounds.getXLength();
     movedBox.maxY = movedBox.minY + modelBounds.getYLength();
 

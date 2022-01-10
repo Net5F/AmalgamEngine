@@ -16,7 +16,6 @@ namespace AM
 {
 namespace Server
 {
-
 class EnttGroups
 {
 public:
@@ -30,12 +29,13 @@ public:
      * It's useful to have them all in one spot, since the ordering of their
      * components affects what other groups are possible.
      */
-    static void init(entt::registry& registry) {
+    static void init(entt::registry& registry)
+    {
         // Used for moving an entity.
         // Sprite is needed to get the model-space bounding box so we can
         // move BoundingBox.
-        auto movementGroup = registry.group<Input, Position, PreviousPosition, Velocity,
-            Sprite, BoundingBox>();
+        auto movementGroup = registry.group<Input, Position, PreviousPosition,
+                                            Velocity, Sprite, BoundingBox>();
         ignore(movementGroup);
     }
 };

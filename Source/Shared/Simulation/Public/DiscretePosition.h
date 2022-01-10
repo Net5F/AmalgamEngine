@@ -8,7 +8,7 @@ namespace AM
 /**
  * The position of a particular discrete unit (e.g. tiles, chunks).
  */
-template <typename T>
+template<typename T>
 struct DiscretePosition {
 public:
     // Note: Screens and maps start at (0, 0) so we could make these unsigned,

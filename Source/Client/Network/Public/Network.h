@@ -176,8 +176,10 @@ template<typename T>
 void Network::serializeAndSend(const T& messageStruct)
 {
     // Allocate the buffer.
-    std::size_t totalMessageSize{CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE + Serialize::measureSize(messageStruct)};
-    BinaryBufferSharedPtr messageBuffer{std::make_shared<BinaryBuffer>(totalMessageSize)};
+    std::size_t totalMessageSize{CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE
+                                 + Serialize::measureSize(messageStruct)};
+    BinaryBufferSharedPtr messageBuffer{
+        std::make_shared<BinaryBuffer>(totalMessageSize)};
 
     // Serialize the message struct into the buffer, leaving room for the
     // headers.

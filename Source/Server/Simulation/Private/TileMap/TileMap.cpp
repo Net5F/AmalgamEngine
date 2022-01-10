@@ -34,8 +34,8 @@ TileMap::TileMap(SpriteData& inSpriteData)
 
     // Print the time taken.
     double timeTaken = timer.getDeltaSeconds(false);
-    LOG_INFO("Map loaded in %.6fs. Size: (%u, %u).", timeTaken, tileExtent.xLength,
-             tileExtent.yLength);
+    LOG_INFO("Map loaded in %.6fs. Size: (%u, %u).", timeTaken,
+             tileExtent.xLength, tileExtent.yLength);
 }
 
 TileMap::~TileMap()

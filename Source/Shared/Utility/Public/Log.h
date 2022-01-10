@@ -40,7 +40,7 @@ namespace AM
  * Our logging system has 3 levels:
  *   LOG_INFO: Print the given string in release and debug.
  *   LOG_ERROR: Print file name, line number, and the given string. In debug
-  *             this will also std::abort().
+ *             this will also std::abort().
  *   LOG_FATAL: Print file name, line number, and the given string. In debug
  *              and release this will also std::abort().
  *

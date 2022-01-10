@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 TilePosition::TilePosition()
 : DiscretePosition<DiscreteImpl::TileTag>()
 {

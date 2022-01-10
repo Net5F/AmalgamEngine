@@ -15,9 +15,9 @@ World::World(SpriteData& spriteData)
 , device()
 , generator(device())
 // Note: We restrict the x-axis positions to keep them in bounds while moving.
-, xDistribution(SharedConfig::TILE_WORLD_WIDTH
-                , (static_cast<unsigned int>(SharedConfig::AOI_RADIUS)
-                      - SharedConfig::TILE_WORLD_WIDTH))
+, xDistribution(SharedConfig::TILE_WORLD_WIDTH,
+                (static_cast<unsigned int>(SharedConfig::AOI_RADIUS)
+                 - SharedConfig::TILE_WORLD_WIDTH))
 , yDistribution(0, static_cast<unsigned int>(SharedConfig::AOI_RADIUS))
 , baseX{0}
 , baseY{0}
@@ -27,7 +27,7 @@ World::World(SpriteData& spriteData)
 {
     // Allocate the entity locator's grid.
     entityLocator.setGridSize(tileMap.getTileExtent().xLength,
-        tileMap.getTileExtent().yLength);
+                              tileMap.getTileExtent().yLength);
 }
 
 Position World::getRandomSpawnPoint()

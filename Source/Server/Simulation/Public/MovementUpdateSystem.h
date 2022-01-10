@@ -37,7 +37,8 @@ private:
      * Will add any entities that have just entered the client's AOI, and any
      * entities already within the client's AOI that have changed input state.
      */
-    void collectEntitiesToSend(ClientSimData& client, entt::entity clientEntity);
+    void collectEntitiesToSend(ClientSimData& client,
+                               entt::entity clientEntity);
 
     /**
      * Adds the movement state of all entities in entitiesToSend to an

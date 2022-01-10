@@ -5,11 +5,10 @@
 
 namespace AM
 {
-
 /**
  * A rectangle that encloses discretely-positioned things (e.g. tiles, chunks).
  */
-template <typename T>
+template<typename T>
 struct DiscreteExtent {
 public:
     // Note: Screens and maps start at (0, 0) so we could make these unsigned,
@@ -44,9 +43,11 @@ public:
     }
 
     /**
-     * Constructor that takes a top left and bottom right point to form a extent.
+     * Constructor that takes a top left and bottom right point to form a
+     * extent.
      */
-    explicit DiscreteExtent(DiscretePosition<T> topLeft, DiscretePosition<T> bottomRight)
+    explicit DiscreteExtent(DiscretePosition<T> topLeft,
+                            DiscretePosition<T> bottomRight)
     : x{topLeft.x}
     , y{topLeft.y}
     , xLength{bottomRight.x - topLeft.x}
@@ -58,24 +59,21 @@ public:
      * Returns the max X position in this extent.
      * Kept as a function instead of a variable for brevity of initialization.
      */
-    int xMax() {
-        return (x + xLength);
-    }
+    int xMax() { return (x + xLength); }
 
     /**
      * Returns the max Y position in this extent.
      * Kept as a function instead of a variable for brevity of initialization.
      */
-    int yMax() {
-        return (y + yLength);
-    }
+    int yMax() { return (y + yLength); }
 
     /**
      * Sets this extent to the union between itself and the given extent.
      *
      * @return false if the resulting extent is empty (has no area), else true.
      */
-    bool unionWith(const DiscreteExtent<T>& other) {
+    bool unionWith(const DiscreteExtent<T>& other)
+    {
         // Note: We can add some special fast cases for empty extents if we
         //       ever care to, but they likely wouldn't be exercised much.
 
@@ -126,7 +124,8 @@ public:
      *
      * @return false if the resulting extent is empty (has no area), else true.
      */
-    bool intersectWith(const DiscreteExtent<T>& other){
+    bool intersectWith(const DiscreteExtent<T>& other)
+    {
         // Note: We can add some special fast cases for empty extents if we
         //       ever care to, but they likely wouldn't be exercised much.
 
@@ -183,18 +182,12 @@ public:
     /**
      * Returns true if this extent has no area.
      */
-    bool isEmpty()
-    {
-        return ((xLength <= 0) || (yLength <= 0));
-    }
+    bool isEmpty() { return ((xLength <= 0) || (yLength <= 0)); }
 
     /**
      * Returns the area of this extent.
      */
-    std::size_t getCount() const
-    {
-        return (xLength * yLength);
-    }
+    std::size_t getCount() const { return (xLength * yLength); }
 };
 
 } // End namespace AM

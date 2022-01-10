@@ -21,8 +21,7 @@ class InputSystem
 {
 public:
     InputSystem(Simulation& inSim, World& inWorld,
-                      EventDispatcher& inNetworkEventDispatcher,
-                      Network& inNetwork);
+                EventDispatcher& inNetworkEventDispatcher, Network& inNetwork);
 
     /**
      * Processes incoming InputChangeRequest messages.

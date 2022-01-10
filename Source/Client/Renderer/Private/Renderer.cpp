@@ -100,7 +100,7 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
         SDL_RenderCopy(sdlRenderer, spriteInfo.sprite->texture.get(),
                        &(spriteInfo.sprite->textureExtent),
                        &(spriteInfo.screenExtent));
-//        drawBoundingBox(spriteInfo.worldBounds, camera);
+        //        drawBoundingBox(spriteInfo.worldBounds, camera);
     }
 }
 

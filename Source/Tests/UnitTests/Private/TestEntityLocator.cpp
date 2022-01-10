@@ -15,7 +15,8 @@ TEST_CASE("TestEntityLocator")
     EntityLocator entityLocator(registry);
 
     // Calc the cell world width, since it's private in the EntityLocator.
-    const float CELL_WORLD_WIDTH{SharedConfig::CELL_WIDTH * SharedConfig::TILE_WORLD_WIDTH};
+    const float CELL_WORLD_WIDTH{SharedConfig::CELL_WIDTH
+                                 * SharedConfig::TILE_WORLD_WIDTH};
 
     // Set grid size.
     const unsigned int GRID_X_LENGTH{32};
@@ -38,22 +39,24 @@ TEST_CASE("TestEntityLocator")
 
         // Touching 1 intersected cell outside the cylinder.
         Position position{HALF_TILE, HALF_TILE, 0};
-        BoundingBox boundingBox{Transforms::modelToWorldCentered(modelBounds, position)};
+        BoundingBox boundingBox{
+            Transforms::modelToWorldCentered(modelBounds, position)};
         entityLocator.setEntityLocation(entity, boundingBox);
 
-        std::vector<entt::entity>* returnVector{&(entityLocator.getEntitiesCoarse(
-            cylinderCenter, radius))};
+        std::vector<entt::entity>* returnVector{
+            &(entityLocator.getEntitiesCoarse(cylinderCenter, radius))};
 
         REQUIRE(returnVector->size() == 1);
         REQUIRE(returnVector->at(0) == entity);
 
         // Touching 1 intersected cell inside the cylinder.
-        position = {(CELL_WORLD_WIDTH + TILE_WORLD_WIDTH), (CELL_WORLD_WIDTH + TILE_WORLD_WIDTH), 0};
+        position = {(CELL_WORLD_WIDTH + TILE_WORLD_WIDTH),
+                    (CELL_WORLD_WIDTH + TILE_WORLD_WIDTH), 0};
         boundingBox = Transforms::modelToWorldCentered(modelBounds, position);
         entityLocator.setEntityLocation(entity, boundingBox);
 
-        returnVector = &(entityLocator.getEntitiesCoarse(
-            cylinderCenter, radius));
+        returnVector
+            = &(entityLocator.getEntitiesCoarse(cylinderCenter, radius));
 
         REQUIRE(returnVector->size() == 1);
         REQUIRE(returnVector->at(0) == entity);
@@ -65,11 +68,12 @@ TEST_CASE("TestEntityLocator")
 
         // Touching 2 intersected cells outside the cylinder.
         Position position{HALF_TILE, CELL_WORLD_WIDTH, 0};
-        BoundingBox boundingBox{Transforms::modelToWorldCentered(modelBounds, position)};
+        BoundingBox boundingBox{
+            Transforms::modelToWorldCentered(modelBounds, position)};
         entityLocator.setEntityLocation(entity, boundingBox);
 
-        std::vector<entt::entity>* returnVector{&(entityLocator.getEntitiesCoarse(
-            cylinderCenter, radius))};
+        std::vector<entt::entity>* returnVector{
+            &(entityLocator.getEntitiesCoarse(cylinderCenter, radius))};
 
         REQUIRE(returnVector->size() == 1);
         REQUIRE(returnVector->at(0) == entity);
@@ -79,8 +83,8 @@ TEST_CASE("TestEntityLocator")
         boundingBox = Transforms::modelToWorldCentered(modelBounds, position);
         entityLocator.setEntityLocation(entity, boundingBox);
 
-        returnVector = &(entityLocator.getEntitiesCoarse(
-            cylinderCenter, radius));
+        returnVector
+            = &(entityLocator.getEntitiesCoarse(cylinderCenter, radius));
 
         REQUIRE(returnVector->size() == 1);
         REQUIRE(returnVector->at(0) == entity);
@@ -92,11 +96,12 @@ TEST_CASE("TestEntityLocator")
 
         // On the border of an intersected cell.
         Position position{(CELL_WORLD_WIDTH * 2), 0, 0};
-        BoundingBox boundingBox{Transforms::modelToWorldCentered(modelBounds, position)};
+        BoundingBox boundingBox{
+            Transforms::modelToWorldCentered(modelBounds, position)};
         entityLocator.setEntityLocation(entity, boundingBox);
 
-        std::vector<entt::entity> returnVector{entityLocator.getEntitiesCoarse(
-            cylinderCenter, radius)};
+        std::vector<entt::entity> returnVector{
+            entityLocator.getEntitiesCoarse(cylinderCenter, radius)};
 
         REQUIRE(returnVector.size() == 1);
         REQUIRE(returnVector.at(0) == entity);
@@ -108,11 +113,12 @@ TEST_CASE("TestEntityLocator")
 
         // Not touching any intersected cells.
         Position position{(CELL_WORLD_WIDTH * 3), 0, 0};
-        BoundingBox boundingBox{Transforms::modelToWorldCentered(modelBounds, position)};
+        BoundingBox boundingBox{
+            Transforms::modelToWorldCentered(modelBounds, position)};
         entityLocator.setEntityLocation(entity, boundingBox);
 
-        std::vector<entt::entity> returnVector{entityLocator.getEntitiesCoarse(
-            cylinderCenter, radius)};
+        std::vector<entt::entity> returnVector{
+            entityLocator.getEntitiesCoarse(cylinderCenter, radius)};
 
         REQUIRE(returnVector.size() == 0);
     }
@@ -123,7 +129,8 @@ TEST_CASE("TestEntityLocator")
         // Outside any intersected cells.
         entt::entity entity{registry.create()};
         Position position{(CELL_WORLD_WIDTH * 3), 0, 0};
-        BoundingBox boundingBox{Transforms::modelToWorldCentered(modelBounds, position)};
+        BoundingBox boundingBox{
+            Transforms::modelToWorldCentered(modelBounds, position)};
         entityLocator.setEntityLocation(entity, boundingBox);
 
         // Outside any intersected cells.
@@ -144,14 +151,14 @@ TEST_CASE("TestEntityLocator")
         boundingBox = Transforms::modelToWorldCentered(modelBounds, position);
         entityLocator.setEntityLocation(entity4, boundingBox);
 
-        std::vector<entt::entity> returnVector{entityLocator.getEntitiesCoarse(
-            cylinderCenter, radius)};
+        std::vector<entt::entity> returnVector{
+            entityLocator.getEntitiesCoarse(cylinderCenter, radius)};
 
         REQUIRE(returnVector.size() == 2);
         REQUIRE(((returnVector.at(0) == entity3)
-                || (returnVector.at(0) == entity4)));
+                 || (returnVector.at(0) == entity4)));
         REQUIRE(((returnVector.at(1) == entity3)
-                || (returnVector.at(1) == entity4)));
+                 || (returnVector.at(1) == entity4)));
     }
 
     SECTION("Fine cylinder - Single cell inside")
@@ -159,15 +166,15 @@ TEST_CASE("TestEntityLocator")
         entt::entity entity{registry.create()};
 
         // Single cell inside the cylinder.
-        Position& position{registry.emplace<Position>(entity,
-            (CELL_WORLD_WIDTH - TILE_WORLD_WIDTH)
-            , (CELL_WORLD_WIDTH - TILE_WORLD_WIDTH), 0.f)};
-        BoundingBox& boundingBox{registry.emplace<BoundingBox>(entity
-            , Transforms::modelToWorldCentered(modelBounds, position))};
+        Position& position{registry.emplace<Position>(
+            entity, (CELL_WORLD_WIDTH - TILE_WORLD_WIDTH),
+            (CELL_WORLD_WIDTH - TILE_WORLD_WIDTH), 0.f)};
+        BoundingBox& boundingBox{registry.emplace<BoundingBox>(
+            entity, Transforms::modelToWorldCentered(modelBounds, position))};
         entityLocator.setEntityLocation(entity, boundingBox);
 
-        std::vector<entt::entity> returnVector{entityLocator.getEntitiesFine(
-            cylinderCenter, radius)};
+        std::vector<entt::entity> returnVector{
+            entityLocator.getEntitiesFine(cylinderCenter, radius)};
 
         REQUIRE(returnVector.size() == 1);
         REQUIRE(returnVector.at(0) == entity);
@@ -178,14 +185,14 @@ TEST_CASE("TestEntityLocator")
         entt::entity entity{registry.create()};
 
         // Touching 4 cells inside the cylinder.
-        Position& position{registry.emplace<Position>(entity,
-            CELL_WORLD_WIDTH, CELL_WORLD_WIDTH, 0.f)};
-        BoundingBox& boundingBox{registry.emplace<BoundingBox>(entity
-            , Transforms::modelToWorldCentered(modelBounds, position))};
+        Position& position{registry.emplace<Position>(entity, CELL_WORLD_WIDTH,
+                                                      CELL_WORLD_WIDTH, 0.f)};
+        BoundingBox& boundingBox{registry.emplace<BoundingBox>(
+            entity, Transforms::modelToWorldCentered(modelBounds, position))};
         entityLocator.setEntityLocation(entity, boundingBox);
 
-        std::vector<entt::entity> returnVector{entityLocator.getEntitiesFine(
-            cylinderCenter, radius)};
+        std::vector<entt::entity> returnVector{
+            entityLocator.getEntitiesFine(cylinderCenter, radius)};
 
         REQUIRE(returnVector.size() == 1);
         REQUIRE(returnVector.at(0) == entity);
@@ -198,15 +205,15 @@ TEST_CASE("TestEntityLocator")
         // On the border of the cylinder.
         // Note: This is right on the edge (same value), which still counts
         //       as being inside.
-        Position& position{registry.emplace<Position>(entity,
-            (CELL_WORLD_WIDTH + HALF_CELL + (HALF_TILE / 2))
-            , CELL_WORLD_WIDTH, 0.f)};
-        BoundingBox& boundingBox{registry.emplace<BoundingBox>(entity
-            , Transforms::modelToWorldCentered(modelBounds, position))};
+        Position& position{registry.emplace<Position>(
+            entity, (CELL_WORLD_WIDTH + HALF_CELL + (HALF_TILE / 2)),
+            CELL_WORLD_WIDTH, 0.f)};
+        BoundingBox& boundingBox{registry.emplace<BoundingBox>(
+            entity, Transforms::modelToWorldCentered(modelBounds, position))};
         entityLocator.setEntityLocation(entity, boundingBox);
 
-        std::vector<entt::entity> returnVector{entityLocator.getEntitiesFine(
-            cylinderCenter, radius)};
+        std::vector<entt::entity> returnVector{
+            entityLocator.getEntitiesFine(cylinderCenter, radius)};
 
         REQUIRE(returnVector.size() == 1);
         REQUIRE(returnVector.at(0) == entity);
@@ -217,14 +224,14 @@ TEST_CASE("TestEntityLocator")
         entt::entity entity{registry.create()};
 
         // Inside an intersected cell, but outside the cylinder.
-        Position& position{registry.emplace<Position>(entity,
-            HALF_TILE, HALF_TILE, 0.f)};
-        BoundingBox& boundingBox{registry.emplace<BoundingBox>(entity
-            , Transforms::modelToWorldCentered(modelBounds, position))};
+        Position& position{
+            registry.emplace<Position>(entity, HALF_TILE, HALF_TILE, 0.f)};
+        BoundingBox& boundingBox{registry.emplace<BoundingBox>(
+            entity, Transforms::modelToWorldCentered(modelBounds, position))};
         entityLocator.setEntityLocation(entity, boundingBox);
 
-        std::vector<entt::entity> returnVector{entityLocator.getEntitiesFine(
-            cylinderCenter, radius)};
+        std::vector<entt::entity> returnVector{
+            entityLocator.getEntitiesFine(cylinderCenter, radius)};
 
         REQUIRE(returnVector.size() == 0);
     }
@@ -234,43 +241,44 @@ TEST_CASE("TestEntityLocator")
         // 2 out, 2 in.
         // Inside an intersected cell, but outside the cylinder.
         entt::entity entity{registry.create()};
-        Position& position{registry.emplace<Position>(entity,
-            HALF_TILE, HALF_TILE, 0.f)};
-        BoundingBox& boundingBox{registry.emplace<BoundingBox>(entity
-            , Transforms::modelToWorldCentered(modelBounds, position))};
+        Position& position{
+            registry.emplace<Position>(entity, HALF_TILE, HALF_TILE, 0.f)};
+        BoundingBox& boundingBox{registry.emplace<BoundingBox>(
+            entity, Transforms::modelToWorldCentered(modelBounds, position))};
         entityLocator.setEntityLocation(entity, boundingBox);
 
         // Outside any intersected cells.
         entt::entity entity2{registry.create()};
-        Position& position2{registry.emplace<Position>(entity2,
-            (CELL_WORLD_WIDTH * 3), 0.f, 0.f)};
-        BoundingBox& boundingBox2{registry.emplace<BoundingBox>(entity2
-            , Transforms::modelToWorldCentered(modelBounds, position2))};
+        Position& position2{registry.emplace<Position>(
+            entity2, (CELL_WORLD_WIDTH * 3), 0.f, 0.f)};
+        BoundingBox& boundingBox2{registry.emplace<BoundingBox>(
+            entity2, Transforms::modelToWorldCentered(modelBounds, position2))};
         entityLocator.setEntityLocation(entity2, boundingBox2);
 
         // Inside the cylinder, touching a single intersected cell.
         entt::entity entity3{registry.create()};
-        Position& position3{registry.emplace<Position>(entity3,
-            (CELL_WORLD_WIDTH + HALF_TILE), (CELL_WORLD_WIDTH + HALF_TILE), 0.f)};
-        BoundingBox& boundingBox3{registry.emplace<BoundingBox>(entity3
-            , Transforms::modelToWorldCentered(modelBounds, position3))};
+        Position& position3{
+            registry.emplace<Position>(entity3, (CELL_WORLD_WIDTH + HALF_TILE),
+                                       (CELL_WORLD_WIDTH + HALF_TILE), 0.f)};
+        BoundingBox& boundingBox3{registry.emplace<BoundingBox>(
+            entity3, Transforms::modelToWorldCentered(modelBounds, position3))};
         entityLocator.setEntityLocation(entity3, boundingBox3);
 
         // Inside the cylinder, touching 2 intersected cells.
         entt::entity entity4{registry.create()};
-        Position& position4{registry.emplace<Position>(entity4,
-            (CELL_WORLD_WIDTH + HALF_TILE), CELL_WORLD_WIDTH, 0.f)};
-        BoundingBox& boundingBox4{registry.emplace<BoundingBox>(entity4
-            , Transforms::modelToWorldCentered(modelBounds, position4))};
+        Position& position4{registry.emplace<Position>(
+            entity4, (CELL_WORLD_WIDTH + HALF_TILE), CELL_WORLD_WIDTH, 0.f)};
+        BoundingBox& boundingBox4{registry.emplace<BoundingBox>(
+            entity4, Transforms::modelToWorldCentered(modelBounds, position4))};
         entityLocator.setEntityLocation(entity4, boundingBox4);
 
-        std::vector<entt::entity> returnVector{entityLocator.getEntitiesFine(
-            cylinderCenter, radius)};
+        std::vector<entt::entity> returnVector{
+            entityLocator.getEntitiesFine(cylinderCenter, radius)};
 
         REQUIRE(returnVector.size() == 2);
         REQUIRE(((returnVector.at(0) == entity3)
-                || (returnVector.at(0) == entity4)));
+                 || (returnVector.at(0) == entity4)));
         REQUIRE(((returnVector.at(1) == entity3)
-                || (returnVector.at(1) == entity4)));
+                 || (returnVector.at(1) == entity4)));
     }
 }

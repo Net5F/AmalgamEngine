@@ -14,11 +14,9 @@ namespace AM
 {
 namespace Client
 {
-
-NpcLifetimeSystem::NpcLifetimeSystem(Simulation& inSim,
-    World& inWorld,
-    SpriteData& inSpriteData,
-    EventDispatcher& inNetworkEventDispatcher)
+NpcLifetimeSystem::NpcLifetimeSystem(Simulation& inSim, World& inWorld,
+                                     SpriteData& inSpriteData,
+                                     EventDispatcher& inNetworkEventDispatcher)
 : sim{inSim}
 , world{inWorld}
 , spriteData{inSpriteData}
@@ -69,10 +67,11 @@ void NpcLifetimeSystem::processEntityDeletes(Uint32 desiredTick)
             registry.destroy(entityDelete->entity);
 
             LOG_INFO("Entity removed: %u. Desired tick: %u, Message tick: %u",
-                entityDelete->entity, desiredTick, entityDelete->tickNum);
+                     entityDelete->entity, desiredTick, entityDelete->tickNum);
         }
         else {
-            LOG_FATAL("Asked to delete invalid entity: %u", entityDelete->entity);
+            LOG_FATAL("Asked to delete invalid entity: %u",
+                      entityDelete->entity);
         }
 
         entityDeleteQueue.pop();
@@ -87,8 +86,7 @@ void NpcLifetimeSystem::processEntityInits(Uint32 desiredTick)
     // Construct the entities that entered our AOI on this tick (or previous
     // ticks).
     EntityInit* entityInit{entityInitQueue.peek()};
-    while ((entityInit != nullptr)
-           && (entityInit->tickNum <= desiredTick)) {
+    while ((entityInit != nullptr) && (entityInit->tickNum <= desiredTick)) {
         if (!(registry.valid(entityInit->entity))) {
             // Create the entity.
             entt::entity newEntity{registry.create(entityInit->entity)};
@@ -109,17 +107,19 @@ void NpcLifetimeSystem::processEntityInits(Uint32 desiredTick)
             registry.emplace<Name>(entityInit->entity, entityInit->name);
 
             // Construct their sprite using the received numericID.
-            registry.emplace<Sprite>(entityInit->entity, spriteData.get(entityInit->numericID));
+            registry.emplace<Sprite>(entityInit->entity,
+                                     spriteData.get(entityInit->numericID));
 
             // Construct a placeholder bounding box. (they'll get a real
             // bounding box once they get a position update.)
             registry.emplace<BoundingBox>(entityInit->entity, BoundingBox{});
 
             LOG_INFO("Entity added: %u. Desired tick: %u, Message tick: %u",
-                entityInit->entity, desiredTick, entityInit->tickNum);
+                     entityInit->entity, desiredTick, entityInit->tickNum);
         }
         else {
-            LOG_FATAL("Asked to construct entity that already exists: %u", entityInit->entity);
+            LOG_FATAL("Asked to construct entity that already exists: %u",
+                      entityInit->entity);
         }
 
         entityInitQueue.pop();

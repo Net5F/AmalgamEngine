@@ -13,7 +13,8 @@ namespace AM
 {
 namespace Client
 {
-PlayerInputSystem::PlayerInputSystem(Simulation& inSim, World& inWorld, Network& inNetwork)
+PlayerInputSystem::PlayerInputSystem(Simulation& inSim, World& inWorld,
+                                     Network& inNetwork)
 : sim{inSim}
 , world{inWorld}
 , network{inNetwork}

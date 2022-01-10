@@ -52,7 +52,7 @@ public:
      * Mostly used for getting the tile that the mouse is over.
      */
     static TilePosition screenToTile(const ScreenPoint& screenPoint,
-                                  const Camera& camera);
+                                     const Camera& camera);
 
     /**
      * Converts a model-space bounding box to a world-space box, placed at the
@@ -70,7 +70,7 @@ public:
      * Mostly used to center a bounding box on an entity's position.
      */
     static BoundingBox modelToWorldCentered(const BoundingBox& modelBounds,
-                                    const Position& position);
+                                            const Position& position);
 };
 
 } // End namespace AM

@@ -10,7 +10,6 @@
 
 namespace AM
 {
-
 class Position;
 class BoundingBox;
 
@@ -60,8 +59,8 @@ public:
      * @param cylinderCenter  The position to cast the radius from.
      * @param radius  The length of the radius to cast.
      */
-    std::vector<entt::entity>& getEntitiesCoarse(const Position& cylinderCenter
-        , unsigned int radius);
+    std::vector<entt::entity>& getEntitiesCoarse(const Position& cylinderCenter,
+                                                 unsigned int radius);
 
     /**
      * Performs a fine pass to return all entities that are strictly within
@@ -70,8 +69,8 @@ public:
      * @param cylinderCenter  The position to cast the radius from.
      * @param radius  The length of the radius to cast.
      */
-    std::vector<entt::entity>& getEntitiesFine(const Position& cylinderCenter
-        , unsigned int radius);
+    std::vector<entt::entity>& getEntitiesFine(const Position& cylinderCenter,
+                                               unsigned int radius);
 
     /**
      * Overload for TileExtent.
@@ -86,7 +85,8 @@ public:
     /**
      * Overload for ChunkExtent.
      */
-    std::vector<entt::entity>& getEntitiesCoarse(const ChunkExtent& chunkExtent);
+    std::vector<entt::entity>&
+        getEntitiesCoarse(const ChunkExtent& chunkExtent);
 
     /**
      * Overload for ChunkExtent.

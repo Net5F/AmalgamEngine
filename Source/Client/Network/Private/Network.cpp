@@ -173,7 +173,8 @@ void Network::processBatch()
     /* Process the BatchSize header field. */
     // Read the high bit of batchSize to tell whether the batch is compressed
     // or not. If the high bit is set, the batch is compressed.
-    Uint16 batchSize{ByteTools::read16(&(headerRecBuffer[ServerHeaderIndex::BatchSize]))};
+    Uint16 batchSize{
+        ByteTools::read16(&(headerRecBuffer[ServerHeaderIndex::BatchSize]))};
     bool batchIsCompressed{(batchSize & (1U << 15)) != 0};
 
     // Reset the high bit of batchSize to get the real size.
@@ -182,7 +183,8 @@ void Network::processBatch()
     /* Process the batch, if it contains any data. */
     if (batchSize > 0) {
         // Receive the expected bytes.
-        NetworkResult result{server->receiveBytesWait(&(batchRecBuffer[0]), batchSize)};
+        NetworkResult result{
+            server->receiveBytesWait(&(batchRecBuffer[0]), batchSize)};
         if (result != NetworkResult::Success) {
             LOG_FATAL("Failed to receive expected bytes.");
         }
@@ -267,9 +269,10 @@ void Network::logNetworkStatistics()
     NetStatsDump netStats{NetworkStats::dumpStats()};
 
     // Log the stats.
-    float bytesSentPerSecond{netStats.bytesSent / static_cast<float>(SECONDS_TILL_STATS_DUMP)};
-    float bytesReceivedPerSecond{
-        netStats.bytesReceived / static_cast<float>(SECONDS_TILL_STATS_DUMP)};
+    float bytesSentPerSecond{netStats.bytesSent
+                             / static_cast<float>(SECONDS_TILL_STATS_DUMP)};
+    float bytesReceivedPerSecond{netStats.bytesReceived
+                                 / static_cast<float>(SECONDS_TILL_STATS_DUMP)};
     LOG_INFO("Bytes sent per second: %.0f, Bytes received per second: %.0f",
              bytesSentPerSecond, bytesReceivedPerSecond);
 }

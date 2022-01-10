@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 TileExtent::TileExtent()
 : DiscreteExtent<DiscreteImpl::TileTag>()
 {

@@ -35,7 +35,8 @@ public:
      *
      * @post The given position component is modified in-place to the new data.
      */
-    static void updatePosition(Position& position, Velocity& velocity, double deltaSeconds);
+    static void updatePosition(Position& position, Velocity& velocity,
+                               double deltaSeconds);
 
     /**
      * Returns a position interpolated between previousPos and position.

@@ -33,7 +33,8 @@ SDL_Rect ClientTransforms::entityToScreenExtent(const Position& position,
     // tile to center the rect.
     // Note: This assumes that the sprite is 1 tile large. When we add support
     //       for other sizes, this will need to be updated.
-    screenPoint.y -= ((SharedConfig::TILE_SCREEN_HEIGHT / 2.f) * camera.zoomFactor);
+    screenPoint.y
+        -= ((SharedConfig::TILE_SCREEN_HEIGHT / 2.f) * camera.zoomFactor);
 
     // Apply the camera position adjustment.
     int adjustedX{
@@ -55,10 +56,10 @@ SDL_Rect ClientTransforms::tileToScreenExtent(const TilePosition& position,
                                               const Camera& camera)
 {
     // Convert tile position to isometric screen position.
-    float screenX{
-        (position.x - position.y) * (SharedConfig::TILE_SCREEN_WIDTH / 2.f)};
-    float screenY{
-        (position.x + position.y) * (SharedConfig::TILE_SCREEN_HEIGHT / 2.f)};
+    float screenX{(position.x - position.y)
+                  * (SharedConfig::TILE_SCREEN_WIDTH / 2.f)};
+    float screenY{(position.x + position.y)
+                  * (SharedConfig::TILE_SCREEN_HEIGHT / 2.f)};
 
     // In an iso view, the (0, 0) point of a tile is halfway through the width
     // of the sprite. Thus, we have to shift the tile back to align it.

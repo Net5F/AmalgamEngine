@@ -12,7 +12,8 @@ Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher,
                        Network& inNetwork, SpriteData& inSpriteData)
 : network(inNetwork)
 , world(inSpriteData)
-, clientConnectionSystem(*this, world, inNetworkEventDispatcher, network, inSpriteData)
+, clientConnectionSystem(*this, world, inNetworkEventDispatcher, network,
+                         inSpriteData)
 , tileUpdateSystem(world, inNetworkEventDispatcher, network)
 , clientAOISystem(*this, world, network)
 , inputSystem(*this, world, inNetworkEventDispatcher, network)

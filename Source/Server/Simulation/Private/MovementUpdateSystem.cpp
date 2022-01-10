@@ -18,7 +18,7 @@ namespace AM
 namespace Server
 {
 MovementUpdateSystem::MovementUpdateSystem(Simulation& inSim, World& inWorld,
-                                       Network& inNetwork)
+                                           Network& inNetwork)
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)
@@ -48,15 +48,17 @@ void MovementUpdateSystem::sendMovementUpdates()
     world.registry.clear<InputHasChanged>();
 }
 
-void MovementUpdateSystem::collectEntitiesToSend(ClientSimData& client, entt::entity clientEntity)
+void MovementUpdateSystem::collectEntitiesToSend(ClientSimData& client,
+                                                 entt::entity clientEntity)
 {
     /* Collect the entities that need to be sent to the client. */
     // Clear the vector.
     entitiesToSend.clear();
 
     // Add all of the entities that just entered this client's AOI.
-    entitiesToSend.insert(entitiesToSend.end(), client.entitiesThatEnteredAOI.begin(),
-        client.entitiesThatEnteredAOI.end());
+    entitiesToSend.insert(entitiesToSend.end(),
+                          client.entitiesThatEnteredAOI.begin(),
+                          client.entitiesThatEnteredAOI.end());
 
     // Add any entities in this client's AOI that have dirty inputs.
     for (entt::entity entityInAOI : client.entitiesInAOI) {
@@ -74,8 +76,9 @@ void MovementUpdateSystem::collectEntitiesToSend(ClientSimData& client, entt::en
 
     // Remove duplicates from the vector.
     std::sort(entitiesToSend.begin(), entitiesToSend.end());
-    entitiesToSend.erase(std::unique(entitiesToSend.begin(),
-        entitiesToSend.end()), entitiesToSend.end());
+    entitiesToSend.erase(
+        std::unique(entitiesToSend.begin(), entitiesToSend.end()),
+        entitiesToSend.end());
 
     // Clear entitiesThatEnteredAOI so they don't get added again next tick.
     client.entitiesThatEnteredAOI.clear();

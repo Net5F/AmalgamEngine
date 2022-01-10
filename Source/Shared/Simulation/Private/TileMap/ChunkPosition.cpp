@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 ChunkPosition::ChunkPosition()
 : DiscretePosition<DiscreteImpl::ChunkTag>()
 {

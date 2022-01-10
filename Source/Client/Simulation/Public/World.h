@@ -9,7 +9,6 @@ class SDL_Rect;
 
 namespace AM
 {
-
 namespace Client
 {
 class SpriteData;

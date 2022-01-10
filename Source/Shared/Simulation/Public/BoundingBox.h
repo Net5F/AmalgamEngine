@@ -21,20 +21,11 @@ public:
     float minZ{0};
     float maxZ{0};
 
-    float getXLength() const
-    {
-        return (maxX - minX);
-    }
+    float getXLength() const { return (maxX - minX); }
 
-    float getYLength() const
-    {
-        return (maxY - minY);
-    }
+    float getYLength() const { return (maxY - minY); }
 
-    float getZLength() const
-    {
-        return (maxZ - minZ);
-    }
+    float getZLength() const { return (maxZ - minZ); }
 
     /**
      * Returns a position at the center of this bounding box.
@@ -111,17 +102,18 @@ public:
      */
     bool intersects(const TileExtent& tileExtent) const
     {
-        const int TILE_WORLD_WIDTH{static_cast<int>(SharedConfig::TILE_WORLD_WIDTH)};
+        const int TILE_WORLD_WIDTH{
+            static_cast<int>(SharedConfig::TILE_WORLD_WIDTH)};
 
         float tileMinX{static_cast<float>(tileExtent.x * TILE_WORLD_WIDTH)};
-        float tileMaxX {static_cast<float>((tileExtent.x + tileExtent.xLength)
-            * TILE_WORLD_WIDTH)};
-        float tileMinY {static_cast<float>(tileExtent.y) * TILE_WORLD_WIDTH};
-        float tileMaxY {static_cast<float>((tileExtent.y + tileExtent.yLength)
-            * TILE_WORLD_WIDTH)};
+        float tileMaxX{static_cast<float>((tileExtent.x + tileExtent.xLength)
+                                          * TILE_WORLD_WIDTH)};
+        float tileMinY{static_cast<float>(tileExtent.y) * TILE_WORLD_WIDTH};
+        float tileMaxY{static_cast<float>((tileExtent.y + tileExtent.yLength)
+                                          * TILE_WORLD_WIDTH)};
 
-        return ((maxX >= tileMinX) && (tileMaxX >= minX)
-               && (maxY >= tileMinY) && (tileMaxY >= minY));
+        return ((maxX >= tileMinX) && (tileMaxX >= minX) && (maxY >= tileMinY)
+                && (tileMaxY >= minY));
     }
 
     /**
@@ -132,7 +124,8 @@ public:
     TileExtent asTileExtent() const
     {
         TileExtent tileExtent{};
-        const float tileWorldWidth{static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
+        const float tileWorldWidth{
+            static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
         tileExtent.x = static_cast<int>(minX / tileWorldWidth);
         tileExtent.y = static_cast<int>(minY / tileWorldWidth);
         tileExtent.xLength = static_cast<int>(maxX - minX / tileWorldWidth);

@@ -20,7 +20,9 @@ class SpriteData;
 class NpcLifetimeSystem
 {
 public:
-    NpcLifetimeSystem(Simulation& inSim, World& inWorld, SpriteData& inSpriteData, EventDispatcher& inNetworkEventDispatcher);
+    NpcLifetimeSystem(Simulation& inSim, World& inWorld,
+                      SpriteData& inSpriteData,
+                      EventDispatcher& inNetworkEventDispatcher);
 
     /**
      * Processes any waiting EntityInit or EntityDelete messages.

@@ -4,7 +4,6 @@
 
 namespace AM
 {
-
 ChunkExtent::ChunkExtent()
 : DiscreteExtent<DiscreteImpl::ChunkTag>()
 {

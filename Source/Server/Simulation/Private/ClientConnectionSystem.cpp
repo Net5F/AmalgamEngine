@@ -25,8 +25,8 @@ namespace Server
 {
 ClientConnectionSystem::ClientConnectionSystem(
     Simulation& inSim, World& inWorld,
-    EventDispatcher& inNetworkEventDispatcher, Network& inNetwork
-    , SpriteData& inSpriteData)
+    EventDispatcher& inNetworkEventDispatcher, Network& inNetwork,
+    SpriteData& inSpriteData)
 : sim(inSim)
 , world(inWorld)
 , network(inNetwork)
@@ -63,16 +63,19 @@ void ClientConnectionSystem::processConnectEvents()
         entt::entity newEntity{registry.create()};
         registry.emplace<Name>(newEntity,
                                std::to_string(static_cast<Uint32>(newEntity)));
-        Position& newPosition{registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0.0f)};
+        Position& newPosition{registry.emplace<Position>(
+            newEntity, spawnPoint.x, spawnPoint.y, 0.0f)};
         registry.emplace<PreviousPosition>(newEntity, spawnPoint.x,
                                            spawnPoint.y, 0.0f);
         registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
         registry.emplace<Input>(newEntity);
-        registry.emplace<ClientSimData>(
-            newEntity, clientConnected.clientID, false, std::vector<entt::entity>());
-        Sprite& newSprite{registry.emplace<Sprite>(newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
-        BoundingBox& boundingBox { registry.emplace<BoundingBox>(newEntity,
-            Transforms::modelToWorldCentered(newSprite.modelBounds, newPosition)) };
+        registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
+                                        false, std::vector<entt::entity>());
+        Sprite& newSprite{registry.emplace<Sprite>(
+            newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
+        BoundingBox& boundingBox{registry.emplace<BoundingBox>(
+            newEntity, Transforms::modelToWorldCentered(newSprite.modelBounds,
+                                                        newPosition))};
 
         // Start tracking the entity in the locator.
         world.entityLocator.setEntityLocation(newEntity, boundingBox);
@@ -104,7 +107,8 @@ void ClientConnectionSystem::processDisconnectEvents()
         }
 
         // Find the disconnected client's associated entity.
-        auto disconnectedEntityIt{world.netIdMap.find(clientDisconnected.clientID)};
+        auto disconnectedEntityIt{
+            world.netIdMap.find(clientDisconnected.clientID)};
         if (disconnectedEntityIt != world.netIdMap.end()) {
             // Found the entity, remove it from the entity locator.
             entt::entity disconnectedEntity{disconnectedEntityIt->second};
@@ -112,17 +116,21 @@ void ClientConnectionSystem::processDisconnectEvents()
 
             // Remove it from the AOI lists of all client entities in its
             // range and send them EntityDeletes.
-            ClientSimData& disconnectedClient{view.get<ClientSimData>(disconnectedEntity)};
-            for (entt::entity entityInRange : disconnectedClient.entitiesInAOI) {
+            ClientSimData& disconnectedClient{
+                view.get<ClientSimData>(disconnectedEntity)};
+            for (entt::entity entityInRange :
+                 disconnectedClient.entitiesInAOI) {
                 // If entityInRange isn't a client entity, skip it.
                 if (!(world.registry.all_of<ClientSimData>(entityInRange))) {
                     continue;
                 }
 
                 // Find disconnectedEntity in entityInRange's list.
-                ClientSimData& clientInRange{view.get<ClientSimData>(entityInRange)};
-                auto eraseIt { std::find(clientInRange.entitiesInAOI.begin(),
-                    clientInRange.entitiesInAOI.end(), disconnectedEntity) };
+                ClientSimData& clientInRange{
+                    view.get<ClientSimData>(entityInRange)};
+                auto eraseIt{std::find(clientInRange.entitiesInAOI.begin(),
+                                       clientInRange.entitiesInAOI.end(),
+                                       disconnectedEntity)};
 
                 // Remove disconnectedEntity from entityInRange's list.
                 if (eraseIt != clientInRange.entitiesInAOI.end()) {
@@ -133,8 +141,9 @@ void ClientConnectionSystem::processDisconnectEvents()
                 }
 
                 // Tell clientInRange that disconnectedEntity has been deleted.
-                network.serializeAndSend(clientInRange.netID,
-                    EntityDelete { sim.getCurrentTick(), disconnectedEntity });
+                network.serializeAndSend(
+                    clientInRange.netID,
+                    EntityDelete{sim.getCurrentTick(), disconnectedEntity});
             }
 
             // Remove it from the registry and network ID map.

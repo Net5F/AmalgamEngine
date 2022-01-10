@@ -39,7 +39,8 @@ public:
         of in the future. Additionally, we double it since the messages we
         receive will appear to be doubly far into the past (since we're in the
         future.) */
-    static constexpr Sint8 INITIAL_REPLICATION_OFFSET = -2 * INITIAL_TICK_OFFSET;
+    static constexpr Sint8 INITIAL_REPLICATION_OFFSET
+        = -2 * INITIAL_TICK_OFFSET;
 
     /** How long we should wait before considering the server to be timed out.
      */

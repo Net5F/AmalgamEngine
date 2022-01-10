@@ -29,7 +29,8 @@ namespace Client
 {
 NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
                                      EventDispatcher& inNetworkEventDispatcher,
-                                     Network& inNetwork, SpriteData& inSpriteData)
+                                     Network& inNetwork,
+                                     SpriteData& inSpriteData)
 : sim{inSim}
 , world{inWorld}
 , network{inNetwork}
@@ -40,9 +41,9 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
 , tickReplicationOffset(Config::INITIAL_REPLICATION_OFFSET)
 {
     // Init the groups that we'll be using.
-    auto group
-        = world.registry.group<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(
-            entt::exclude<InputHistory>);
+    auto group = world.registry.group<Input, Position, PreviousPosition,
+                                      Velocity, BoundingBox, Sprite>(
+        entt::exclude<InputHistory>);
     ignore(group);
 }
 
@@ -188,26 +189,28 @@ void NpcMovementSystem::handleUpdate(
 void NpcMovementSystem::moveAllNpcs()
 {
     // Move all NPCs that have an input, position, and velocity component.
-    auto group
-        = world.registry.group<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(
-            entt::exclude<InputHistory>);
+    auto group = world.registry.group<Input, Position, PreviousPosition,
+                                      Velocity, BoundingBox, Sprite>(
+        entt::exclude<InputHistory>);
     for (entt::entity entity : group) {
         auto [input, position, previousPosition, velocity, boundingBox, sprite]
-            = group.get<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(entity);
+            = group.get<Input, Position, PreviousPosition, Velocity,
+                        BoundingBox, Sprite>(entity);
 
         // Save their old position.
         previousPosition = position;
 
         // Use the current input state to update their velocity for this tick.
         MovementHelpers::updateVelocity(velocity, input.inputStates,
-                                    SharedConfig::SIM_TICK_TIMESTEP_S);
+                                        SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update their position, using the new velocity.
         MovementHelpers::updatePosition(position, velocity,
-                                    SharedConfig::SIM_TICK_TIMESTEP_S);
+                                        SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update their bounding box to match the new position.
-        boundingBox = Transforms::modelToWorldCentered(sprite.modelBounds, position);
+        boundingBox
+            = Transforms::modelToWorldCentered(sprite.modelBounds, position);
 
         // TODO: Update their placement in the spatial partition.
     }
@@ -216,9 +219,9 @@ void NpcMovementSystem::moveAllNpcs()
 void NpcMovementSystem::applyUpdateMessage(
     const std::shared_ptr<const MovementUpdate>& movementUpdate)
 {
-    auto group
-        = world.registry.group<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(
-            entt::exclude<InputHistory>);
+    auto group = world.registry.group<Input, Position, PreviousPosition,
+                                      Velocity, BoundingBox, Sprite>(
+        entt::exclude<InputHistory>);
 
     // Use the data in the message to correct any NPCs that changed inputs.
     for (const MovementState& movementState : movementUpdate->movementStates) {
@@ -235,13 +238,15 @@ void NpcMovementSystem::applyUpdateMessage(
         //       tick is up for processing. We might end up here before
         //       NpcLifetimeSystem was able to construct the entity.
         if (!(registry.valid(entity))) {
-            LOG_FATAL("Received update for invalid entity: %u. Message tick: %u", entity,
-                movementUpdate->tickNum);
+            LOG_FATAL(
+                "Received update for invalid entity: %u. Message tick: %u",
+                entity, movementUpdate->tickNum);
         }
 
         // Get the entity's components.
         auto [input, position, previousPosition, velocity, boundingBox, sprite]
-            = group.get<Input, Position, PreviousPosition, Velocity, BoundingBox, Sprite>(entity);
+            = group.get<Input, Position, PreviousPosition, Velocity,
+                        BoundingBox, Sprite>(entity);
 
         // Apply the received component updates.
         input = movementState.input;
@@ -256,7 +261,8 @@ void NpcMovementSystem::applyUpdateMessage(
         }
 
         // Move their bounding box to their new position.
-        boundingBox = Transforms::modelToWorldCentered(sprite.modelBounds, position);
+        boundingBox
+            = Transforms::modelToWorldCentered(sprite.modelBounds, position);
     }
 }
 

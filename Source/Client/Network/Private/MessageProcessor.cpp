@@ -99,7 +99,7 @@ void MessageProcessor::handleExplicitConfirmation(Uint8* messageBuffer,
 }
 
 void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer,
-                                          unsigned int messageSize)
+                                            unsigned int messageSize)
 {
     // Deserialize the message.
     std::shared_ptr<MovementUpdate> movementUpdate{

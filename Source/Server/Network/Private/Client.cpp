@@ -92,7 +92,8 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
             &(compressedBatchBuffer[ServerHeaderIndex::MessageHeaderStart]),
             COMPRESSED_BUFFER_SIZE);
         if (batchSize > MAX_BATCH_SIZE) {
-            LOG_FATAL("Batch too large, even after compression. Size: %u", batchSize);
+            LOG_FATAL("Batch too large, even after compression. Size: %u",
+                      batchSize);
         }
 
         isCompressed = true;

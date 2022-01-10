@@ -53,7 +53,8 @@ std::vector<SpriteRenderInfo>&
 void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 {
     // Find the world position that the camera is centered on.
-    ScreenPoint centerPoint{(camera.extent.width / 2), (camera.extent.height / 2)};
+    ScreenPoint centerPoint{(camera.extent.width / 2),
+                            (camera.extent.height / 2)};
     Position centerPosition{Transforms::screenToWorld(centerPoint, camera)};
 
     // Issues with float precision can cause flickering tiles. Round to the
@@ -63,16 +64,18 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 
     // Find the lowest x/y tile indices that the player can see.
     TileExtent tileViewExtent{};
-    tileViewExtent.x = std::floor(
-        (centerPosition.x - SharedConfig::VIEW_RADIUS) / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
-    tileViewExtent.y = std::floor(
-        (centerPosition.y - SharedConfig::VIEW_RADIUS) / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
+    tileViewExtent.x
+        = std::floor((centerPosition.x - SharedConfig::VIEW_RADIUS)
+                     / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
+    tileViewExtent.y
+        = std::floor((centerPosition.y - SharedConfig::VIEW_RADIUS)
+                     / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
     // Calc how far the player's view extends.
     // Note: We add 1 to the view radius to keep all sides even, since the
     //       player occupies a tile.
-    tileViewExtent.xLength = std::ceil(
-        ((SharedConfig::VIEW_RADIUS * 2) + 1) / SharedConfig::TILE_WORLD_WIDTH);
+    tileViewExtent.xLength = std::ceil(((SharedConfig::VIEW_RADIUS * 2) + 1)
+                                       / SharedConfig::TILE_WORLD_WIDTH);
     tileViewExtent.yLength = tileViewExtent.xLength;
 
     // Clip the view to the world bounds.
@@ -122,8 +125,8 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
             = group.get<Sprite, Position, PreviousPosition>(entity);
 
         // Get the entity's lerp'd world position.
-        Position lerp{MovementHelpers::interpolatePosition(previousPos,
-                                                           position, alpha)};
+        Position lerp{
+            MovementHelpers::interpolatePosition(previousPos, position, alpha)};
 
         // Get the iso screen extent for the lerped sprite.
         SDL_Rect screenExtent{
