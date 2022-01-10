@@ -96,8 +96,6 @@ public:
     static constexpr unsigned int TILE_SCREEN_WIDTH = 256;
     /** The height of the top face of a tile in screen coordinates. */
     static constexpr unsigned int TILE_SCREEN_HEIGHT = 128;
-    /** The height of the edge of a tile in screen coordinates. */
-    static constexpr unsigned int TILE_SCREEN_EDGE_HEIGHT = 10;
 
     /** The total width of a standard tile sprite. */
     static constexpr unsigned int TILE_SPRITE_WIDTH = 256;

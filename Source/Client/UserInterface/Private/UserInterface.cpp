@@ -53,10 +53,10 @@ bool UserInterface::handleOSEvent(SDL_Event& event)
 void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
 {
     // Get the tile index that the mouse is hovering over.
-    const Camera& playerCamera = world.registry.get<Camera>(world.playerEntity);
+    const Camera& playerCamera{world.registry.get<Camera>(world.playerEntity)};
     ScreenPoint screenPoint{static_cast<float>(event.x),
                             static_cast<float>(event.y)};
-    TilePosition tilePosition = Transforms::screenToTile(screenPoint, playerCamera);
+    TilePosition tilePosition{Transforms::screenToTile(screenPoint, playerCamera)};
 
     // If the index is outside of the world bounds, ignore this event.
     const TileExtent& mapTileExtent{world.tileMap.getTileExtent()};

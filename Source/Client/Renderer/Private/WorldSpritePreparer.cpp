@@ -81,7 +81,7 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
     // Gather all tiles that are in view.
     for (int y = tileViewExtent.y; y < tileViewExtent.yMax(); ++y) {
         for (int x = tileViewExtent.x; x < tileViewExtent.xMax(); ++x) {
-            // Figure out which tile we're looking at.
+            // Get the tile data that we want to process.
             const Tile& tile{tileMap.getTile(x, y)};
 
             // Push all of this tile's sprites into the appropriate vector.
@@ -102,7 +102,7 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 
                 // If this sprite has a bounding box, push it to be sorted.
                 if (layer.sprite->hasBoundingBox) {
-                    spritesToSort.emplace_back(layer.sprite, layer.fixedBounds,
+                    spritesToSort.emplace_back(layer.sprite, layer.worldBounds,
                                                screenExtent);
                 }
                 else {

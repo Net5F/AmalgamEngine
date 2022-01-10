@@ -30,10 +30,10 @@ SDL_Rect ClientTransforms::entityToScreenExtent(const Position& position,
 
     // screenPoint currently would give us a rect that starts at the given
     // position instead of being centered on it. Pull the point back by a half
-    // tile (in world coordinates) to center the rect.
+    // tile to center the rect.
     // Note: This assumes that the sprite is 1 tile large. When we add support
     //       for other sizes, this will need to be updated.
-    screenPoint.y -= ((SharedConfig::TILE_SCREEN_HEIGHT / 2) * camera.zoomFactor);
+    screenPoint.y -= ((SharedConfig::TILE_SCREEN_HEIGHT / 2.f) * camera.zoomFactor);
 
     // Apply the camera position adjustment.
     int adjustedX{
@@ -66,9 +66,9 @@ SDL_Rect ClientTransforms::tileToScreenExtent(const TilePosition& position,
 
     // An iso sprite may have extra vertical space to show depth, we subtract
     // that space to align it.
-    screenY -= (sprite.yOffset - SharedConfig::TILE_SCREEN_EDGE_HEIGHT);
+    screenY -= sprite.yOffset;
 
-    // Apply the camera zoom to the position.
+    // Apply the camera zoom.
     screenX *= camera.zoomFactor;
     screenY *= camera.zoomFactor;
 

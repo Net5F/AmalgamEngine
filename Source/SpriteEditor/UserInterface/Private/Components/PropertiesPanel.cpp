@@ -5,6 +5,8 @@
 #include "Sprite.h"
 #include "AssetCache.h"
 #include "Paths.h"
+#include "Camera.h"
+#include "Transforms.h"
 #include "SharedConfig.h"
 #include "Ignore.h"
 #include <string>
@@ -347,9 +349,12 @@ void PropertiesPanel::saveMaxX()
             float newMaxX{std::stof(maxXInput.getText())};
 
             // Clamp the value to its bounds.
+            ScreenPoint bottomRightOffset{static_cast<float>(activeSprite->textureExtent.w / 2.f)
+                , static_cast<float>(activeSprite->textureExtent.h - activeSprite->yOffset)};
+            float maxXBound{Transforms::screenToWorld(bottomRightOffset, {}).x};
+
             newMaxX = std::clamp(
-                newMaxX, activeSprite->modelBounds.minX,
-                static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
+                newMaxX, activeSprite->modelBounds.minX, maxXBound);
 
             // The input was valid, save it.
             activeSprite->modelBounds.maxX = newMaxX;
@@ -373,9 +378,12 @@ void PropertiesPanel::saveMaxY()
             float newMaxY{std::stof(maxYInput.getText())};
 
             // Clamp the value to its bounds.
+            ScreenPoint bottomLeftOffset{static_cast<float>(-(activeSprite->textureExtent.w / 2.f))
+                    , static_cast<float>(activeSprite->textureExtent.h - activeSprite->yOffset)};
+            float maxYBound{Transforms::screenToWorld(bottomLeftOffset, {}).y};
+
             newMaxY = std::clamp(
-                newMaxY, activeSprite->modelBounds.minY,
-                static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
+                newMaxY, activeSprite->modelBounds.minY, maxYBound);
 
             // The input was valid, save it.
             activeSprite->modelBounds.maxY = newMaxY;

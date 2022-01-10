@@ -22,7 +22,7 @@
                         "x": 0,
                         "y": 0
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 1",
@@ -43,7 +43,7 @@
                         "x": 256,
                         "y": 0
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 2",
@@ -64,7 +64,7 @@
                         "x": 512,
                         "y": 0
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 3",
@@ -85,7 +85,7 @@
                         "x": 768,
                         "y": 0
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 4",
@@ -106,7 +106,7 @@
                         "x": 1024,
                         "y": 0
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 5",
@@ -127,7 +127,7 @@
                         "x": 1280,
                         "y": 0
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 6",
@@ -148,7 +148,7 @@
                         "x": 1536,
                         "y": 0
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 7",
@@ -169,7 +169,7 @@
                         "x": 1792,
                         "y": 0
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 8",
@@ -190,7 +190,7 @@
                         "x": 2048,
                         "y": 0
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 9",
@@ -211,7 +211,7 @@
                         "x": 0,
                         "y": 512
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 10",
@@ -232,7 +232,7 @@
                         "x": 256,
                         "y": 512
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 11",
@@ -253,7 +253,7 @@
                         "x": 512,
                         "y": 512
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 12",
@@ -274,7 +274,7 @@
                         "x": 768,
                         "y": 512
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 13",
@@ -295,7 +295,7 @@
                         "x": 1024,
                         "y": 512
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 14",
@@ -316,7 +316,7 @@
                         "x": 1280,
                         "y": 512
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 15",
@@ -337,7 +337,7 @@
                         "x": 1536,
                         "y": 512
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 16",
@@ -358,17 +358,17 @@
                         "x": 1792,
                         "y": 512
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 17",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 12.125,
-                        "maxY": 31.875,
+                        "maxX": 14.0,
+                        "maxY": 34.5,
                         "maxZ": 80.4000015258789,
-                        "minX": 0.0,
-                        "minY": 0.0,
+                        "minX": 1.875,
+                        "minY": 2.625,
                         "minZ": 0.0
                     },
                     "numericID": 17,
@@ -379,7 +379,7 @@
                         "x": 2048,
                         "y": 512
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 18",
@@ -400,7 +400,7 @@
                         "x": 0,
                         "y": 1024
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 19",
@@ -421,7 +421,7 @@
                         "x": 256,
                         "y": 1024
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 20",
@@ -442,7 +442,7 @@
                         "x": 512,
                         "y": 1024
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 21",
@@ -463,7 +463,7 @@
                         "x": 768,
                         "y": 1024
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 22",
@@ -484,7 +484,7 @@
                         "x": 1024,
                         "y": 1024
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 23",
@@ -505,7 +505,7 @@
                         "x": 1280,
                         "y": 1024
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 24",
@@ -526,7 +526,7 @@
                         "x": 1536,
                         "y": 1024
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 25",
@@ -547,17 +547,17 @@
                         "x": 1792,
                         "y": 1024
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 26",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.0,
-                        "maxY": 11.5,
+                        "maxX": 34.0,
+                        "maxY": 14.0,
                         "maxZ": 85.80000305175781,
-                        "minX": 3.0,
-                        "minY": 0.0,
+                        "minX": 5.0,
+                        "minY": 2.5,
                         "minZ": 0.0
                     },
                     "numericID": 26,
@@ -568,7 +568,7 @@
                         "x": 2048,
                         "y": 1024
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 27",
@@ -589,17 +589,17 @@
                         "x": 0,
                         "y": 1536
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 28",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 20.75,
-                        "maxY": 20.25,
+                        "maxX": 22.625,
+                        "maxY": 22.375,
                         "maxZ": 78.5999984741211,
-                        "minX": 12.375,
-                        "minY": 12.5,
+                        "minX": 14.25,
+                        "minY": 14.625,
                         "minZ": 0.0
                     },
                     "numericID": 28,
@@ -610,17 +610,17 @@
                         "x": 256,
                         "y": 1536
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 29",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 19.375,
-                        "maxY": 19.625,
+                        "maxX": 21.5,
+                        "maxY": 21.5,
                         "maxZ": 76.80000305175781,
-                        "minX": 11.25,
-                        "minY": 11.5,
+                        "minX": 13.375,
+                        "minY": 13.375,
                         "minZ": 0.0
                     },
                     "numericID": 29,
@@ -631,17 +631,17 @@
                         "x": 512,
                         "y": 1536
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 30",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 20.0,
-                        "maxY": 20.0,
+                        "maxX": 22.25,
+                        "maxY": 22.25,
                         "maxZ": 78.0,
-                        "minX": 11.625,
-                        "minY": 11.625,
+                        "minX": 13.875,
+                        "minY": 13.875,
                         "minZ": 0.0
                     },
                     "numericID": 30,
@@ -652,17 +652,17 @@
                         "x": 768,
                         "y": 1536
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 31",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 20.0,
-                        "maxY": 20.0,
+                        "maxX": 22.375,
+                        "maxY": 22.625,
                         "maxZ": 78.0,
-                        "minX": 11.625,
-                        "minY": 11.625,
+                        "minX": 14.0,
+                        "minY": 14.25,
                         "minZ": 0.0
                     },
                     "numericID": 31,
@@ -673,7 +673,7 @@
                         "x": 1024,
                         "y": 1536
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 32",
@@ -694,7 +694,7 @@
                         "x": 1280,
                         "y": 1536
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 33",
@@ -715,7 +715,7 @@
                         "x": 1536,
                         "y": 1536
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 34",
@@ -736,7 +736,7 @@
                         "x": 1792,
                         "y": 1536
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 },
                 {
                     "displayName": "test 35",
@@ -757,7 +757,7 @@
                         "x": 2048,
                         "y": 1536
                     },
-                    "yOffset": 384
+                    "yOffset": 374
                 }
             ]
         },

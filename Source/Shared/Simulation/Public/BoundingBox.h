@@ -21,17 +21,17 @@ public:
     float minZ{0};
     float maxZ{0};
 
-    float getXLength()
+    float getXLength() const
     {
         return (maxX - minX);
     }
 
-    float getYLength()
+    float getYLength() const
     {
         return (maxY - minY);
     }
 
-    float getZLength()
+    float getZLength() const
     {
         return (maxZ - minZ);
     }
@@ -44,7 +44,7 @@ public:
      *       while an entity's Position's Z axis starts at the bottom of the
      *       entity.
      */
-    Position getCenterPosition()
+    Position getCenterPosition() const
     {
         Position centerPosition{};
         centerPosition.x = minX + ((maxX - minX) / 2);
@@ -64,7 +64,7 @@ public:
      *
      * Reference: https://stackoverflow.com/a/402010/4258629
      */
-    bool intersects(const Position& cylinderCenter, unsigned int radius)
+    bool intersects(const Position& cylinderCenter, unsigned int radius) const
     {
         Position boxCenter{getCenterPosition()};
         float xLength{getXLength()};
@@ -109,7 +109,7 @@ public:
      *       Z axis.
      * Note: Shared edges are considered to be intersecting.
      */
-    bool intersects(const TileExtent& tileExtent)
+    bool intersects(const TileExtent& tileExtent) const
     {
         const int TILE_WORLD_WIDTH{static_cast<int>(SharedConfig::TILE_WORLD_WIDTH)};
 

@@ -24,14 +24,14 @@ public:
      * Represents a sprite, placed on a tile.
      */
     struct SpriteLayer {
-        /** The sprite's data. */
+        /** The sprite that this layer contains. */
         const Sprite* sprite{nullptr};
 
         /** If sprite.hasBoundingBox == true, this is the sprite's modelBounds
             moved to match the tile's world position.
             Tiles don't move, so we can calculate this ahead of time and save
             it here. */
-        BoundingBox fixedBounds;
+        BoundingBox worldBounds;
     };
 
     /** The layers of sprites that make up this tile, ordered bottom to top.

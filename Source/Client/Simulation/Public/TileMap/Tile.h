@@ -31,7 +31,7 @@ public:
             moved to match the tile's world position.
             Tiles don't move, so we can calculate this ahead of time and save
             it here. */
-        BoundingBox fixedBounds;
+        BoundingBox worldBounds;
     };
 
     /** The layers of sprites that make up this tile, ordered bottom to top.

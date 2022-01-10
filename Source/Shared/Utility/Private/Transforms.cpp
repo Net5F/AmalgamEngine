@@ -89,7 +89,7 @@ TilePosition Transforms::screenToTile(const ScreenPoint& screenPoint,
 BoundingBox Transforms::modelToWorld(const BoundingBox& modelBounds,
                                      const Position& position)
 {
-    // Move the model-space bounding box to the given position.
+    // Place the model-space bounding box at the given position.
     BoundingBox movedBox{};
     movedBox.minX = position.x + modelBounds.minX;
     movedBox.maxX = position.x + modelBounds.maxX;
@@ -104,17 +104,17 @@ BoundingBox Transforms::modelToWorld(const BoundingBox& modelBounds,
 BoundingBox Transforms::modelToWorldCentered(const BoundingBox& modelBounds,
                                      const Position& position)
 {
-    // Center the model-space bounding box on the given position.
+    // Place the model-space bounding box at the given position, shifted back
+    // by a half tile to center it.
+    // Note: This assumes that the sprite is 1 tile large. When we add support
+    //       for other sizes, this will need to be updated.
     BoundingBox movedBox{};
-    float halfXLength{(modelBounds.maxX - modelBounds.minX) / 2};
-    float halfYLength{(modelBounds.maxY - modelBounds.minY) / 2};
+    movedBox.minX = position.x + modelBounds.minX - (SharedConfig::TILE_WORLD_WIDTH / 2);
+    movedBox.minY = position.y + modelBounds.minY - (SharedConfig::TILE_WORLD_WIDTH / 2);
+    movedBox.maxX = movedBox.minX + modelBounds.getXLength();
+    movedBox.maxY = movedBox.minY + modelBounds.getYLength();
 
-    movedBox.minX = position.x - halfXLength;
-    movedBox.maxX = position.x + halfXLength;
-    movedBox.minY = position.y - halfYLength;
-    movedBox.maxY = position.y + halfYLength;
-
-    // Place the bottom of the box at the given position.
+    // Place the bottom of the box flush with the given position.
     // (e.g. if this is a character's position, the bottom of the box is at
     // their feet).
     movedBox.minZ = position.z + modelBounds.minZ;

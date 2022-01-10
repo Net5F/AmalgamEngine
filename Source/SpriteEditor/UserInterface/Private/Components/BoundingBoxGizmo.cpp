@@ -156,12 +156,12 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
 
     /* Translate the mouse position to world space. */
     // Account for the sprite's empty vertical space.
-    int yOffset = AUI::ScalingHelpers::logicalToActual(activeSprite->yOffset);
+    int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite->yOffset)};
     yOffset += lastRenderedExtent.y;
 
     // Account for the sprite's half-tile offset.
-    int xOffset = AUI::ScalingHelpers::logicalToActual(
-        SharedConfig::TILE_SCREEN_WIDTH / 2.f);
+    int xOffset{AUI::ScalingHelpers::logicalToActual(
+        static_cast<int>(SharedConfig::TILE_SCREEN_WIDTH / 2.f))};
     xOffset += lastRenderedExtent.x;
 
     // Apply the offset to the mouse position and convert to logical space.
@@ -169,9 +169,9 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
     offsetMousePoint = AUI::ScalingHelpers::actualToLogical(offsetMousePoint);
 
     // Convert the screen-space mouse point to world space.
-    ScreenPoint offsetMousePointSP{static_cast<float>(offsetMousePoint.x),
+    ScreenPoint offsetMouseScreenPoint{static_cast<float>(offsetMousePoint.x),
                                    static_cast<float>(offsetMousePoint.y)};
-    Position mouseWorldPos = Transforms::screenToWorld(offsetMousePointSP, {});
+    Position mouseWorldPos{Transforms::screenToWorld(offsetMouseScreenPoint, {})};
 
     // Adjust the currently pressed control appropriately.
     switch (currentHeldControl) {
@@ -222,10 +222,10 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 {
     // Note: The expected behavior is to move along the x/y plane and
     //       leave minZ where it was.
-    float& minX = activeSprite->modelBounds.minX;
-    float& minY = activeSprite->modelBounds.minY;
-    float& maxX = activeSprite->modelBounds.maxX;
-    float& maxY = activeSprite->modelBounds.maxY;
+    float& minX{activeSprite->modelBounds.minX};
+    float& minY{activeSprite->modelBounds.minY};
+    float& maxX{activeSprite->modelBounds.maxX};
+    float& maxY{activeSprite->modelBounds.maxY};
 
     // Move the min bounds to follow the max bounds.
     float diffX{mouseWorldPos.x - maxX};
@@ -237,7 +237,7 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
     maxX = mouseWorldPos.x;
     maxY = mouseWorldPos.y;
 
-    // If we moved outside the tile bounds, bring the box bounds back in.
+    // Don't let the gizmo go below the model-space origin (0, 0).
     if (minX < 0) {
         maxX += -minX;
         minX = 0;
@@ -246,13 +246,28 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
         maxY += -minY;
         minY = 0;
     }
-    if (maxX > SharedConfig::TILE_WORLD_WIDTH) {
-        float diff = maxX - SharedConfig::TILE_WORLD_WIDTH;
+
+    /* Don't let the gizmo go beyond the max possible x/y (based on the sprite
+       size). */
+    // Calc the screen-space offsets from the tile's origin to the bottom
+    // right and left of the sprite image.
+    ScreenPoint bottomRightOffset{static_cast<float>(activeSprite->textureExtent.w / 2.f)
+        , static_cast<float>(activeSprite->textureExtent.h - activeSprite->yOffset)};
+    ScreenPoint bottomLeftOffset{static_cast<float>(-(activeSprite->textureExtent.w / 2.f))
+            , static_cast<float>(activeSprite->textureExtent.h - activeSprite->yOffset)};
+
+    // Convert the offsets to world space.
+    float maxXBound{Transforms::screenToWorld(bottomRightOffset, {}).x};
+    float maxYBound{Transforms::screenToWorld(bottomLeftOffset, {}).y};
+
+    // Don't let the gizmo go beyond the max bounds.
+    if (maxX > maxXBound) {
+        float diff{maxX - maxXBound};
         minX -= diff;
         maxX -= diff;
     }
-    if (maxY > SharedConfig::TILE_WORLD_WIDTH) {
-        float diff = maxY - SharedConfig::TILE_WORLD_WIDTH;
+    if (maxY > maxYBound) {
+        float diff{maxY - maxYBound};
         minY -= diff;
         maxY -= diff;
     }
@@ -279,8 +294,8 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     // Set maxZ relative to the distance between the mouse and the
     // position control (the position control is always our reference
     // for where z == 0 is.)
-    float mouseZHeight
-        = lastRenderedPosExtent.y + (scaledRectSize / 2.f) - mouseScreenYPos;
+    float mouseZHeight{
+        lastRenderedPosExtent.y + (scaledRectSize / 2.f) - mouseScreenYPos};
 
     // Convert to logical space.
     mouseZHeight = AUI::ScalingHelpers::actualToLogical(mouseZHeight);
@@ -303,7 +318,7 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
     std::array<ScreenPoint, 7> floatPoints{};
 
     // Push the points in the correct order.
-    BoundingBox& modelBounds = activeSprite->modelBounds;
+    BoundingBox& modelBounds{activeSprite->modelBounds};
     Position position{modelBounds.minX, modelBounds.maxY, modelBounds.minZ};
     floatPoints[0] = Transforms::worldToScreen(position, 1);
 
@@ -327,11 +342,11 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
 
     /* Build the offsets. */
     // Account for the sprite's empty vertical space.
-    int yOffset = AUI::ScalingHelpers::logicalToActual(activeSprite->yOffset);
+    int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite->yOffset)};
 
     // Account for the sprite's half-tile offset.
-    int xOffset = AUI::ScalingHelpers::logicalToActual(
-        activeSprite->textureExtent.w / 2.f);
+    int xOffset{AUI::ScalingHelpers::logicalToActual(
+        static_cast<int>(activeSprite->textureExtent.w / 2.f))};
 
     /* Scale and offset each point, then push it into the return vector. */
     for (ScreenPoint& point : floatPoints) {
@@ -352,7 +367,7 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
 void BoundingBoxGizmo::moveControls(std::vector<SDL_Point>& boundsScreenPoints)
 {
     // Calc half the control rectangle size so we can center the controls.
-    int halfRectSize = static_cast<int>(scaledRectSize / 2.f);
+    int halfRectSize{static_cast<int>(scaledRectSize / 2.f)};
 
     // Move the control extents.
     positionControlExtent.x = boundsScreenPoints[1].x - halfRectSize;
