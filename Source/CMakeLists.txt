@@ -87,7 +87,7 @@ add_subdirectory(SpriteEditor)
 
 # Configure tests.
 # (No fancy flags since we aren't yet a lib, just uncomment when you want to build tests.)
-add_subdirectory(Tests)
+#add_subdirectory(Tests)
 
 # Configure tools.
 add_subdirectory(Tools)
