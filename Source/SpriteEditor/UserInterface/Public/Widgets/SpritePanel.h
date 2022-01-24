@@ -61,6 +61,9 @@ private:
     /** Used to get the current working dir when displaying the thumbnails. */
     SpriteDataModel& spriteDataModel;
 
+    //-------------------------------------------------------------------------
+    // Private child widgets
+    //-------------------------------------------------------------------------
     AUI::Image backgroundImage;
 
     AUI::VerticalGridContainer spriteContainer;

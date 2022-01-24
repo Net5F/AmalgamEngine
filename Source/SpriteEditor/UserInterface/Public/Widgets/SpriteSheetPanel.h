@@ -56,6 +56,9 @@ private:
     /** Used to update the model when a sheet is removed. */
     SpriteDataModel& spriteDataModel;
 
+    //-------------------------------------------------------------------------
+    // Private child widgets
+    //-------------------------------------------------------------------------
     AUI::Image backgroundImage;
 
     AUI::VerticalGridContainer spriteSheetContainer;

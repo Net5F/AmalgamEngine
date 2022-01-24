@@ -41,13 +41,13 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
 , activeSprite{nullptr}
-, backgroundImage(inScreen, {-12, -4, 319, 506})
 , committedMinX{0.0}
 , committedMinY{0.0}
 , committedMinZ{0.0}
 , committedMaxX{0.0}
 , committedMaxY{0.0}
 , committedMaxZ{0.0}
+, backgroundImage(inScreen, {-12, -4, 319, 506})
 {
     /* Background image */
     backgroundImage.addResolution(

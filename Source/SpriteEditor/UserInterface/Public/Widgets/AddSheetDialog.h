@@ -22,15 +22,15 @@ class SpriteDataModel;
 class AddSheetDialog : public AUI::Widget
 {
 public:
-    //-------------------------------------------------------------------------
-    // Public interface
-    //-------------------------------------------------------------------------
     AddSheetDialog(AssetCache& assetCache, MainScreen& inScreen,
                    AUI::VerticalGridContainer& inSpriteSheetContainer,
                    SpriteDataModel& inSpriteDataModel);
 
     virtual ~AddSheetDialog() = default;
 
+    //-------------------------------------------------------------------------
+    // Public child widgets
+    //-------------------------------------------------------------------------
     /** The dialog's background */
     AUI::Image backgroundImage;
 
@@ -88,6 +88,9 @@ private:
     /** Used to update the model when a sheet is added. */
     SpriteDataModel& spriteDataModel;
 
+    //-------------------------------------------------------------------------
+    // Private child widgets
+    //-------------------------------------------------------------------------
     /** Error text, appears if the user tries to submit an invalid input. */
     AUI::Text errorText;
 };

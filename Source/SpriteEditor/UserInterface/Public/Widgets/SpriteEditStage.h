@@ -53,6 +53,9 @@ private:
     /** Used to get the current working dir when displaying the sprite. */
     SpriteDataModel& spriteDataModel;
 
+    //-------------------------------------------------------------------------
+    // Private child widgets
+    //-------------------------------------------------------------------------
     /** Checkerboard image, tiled as the background for the loaded sprite. */
     AUI::TiledImage checkerboardImage;
 

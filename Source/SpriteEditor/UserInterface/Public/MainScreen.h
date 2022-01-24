@@ -69,6 +69,12 @@ private:
         sprite's data is shown in the properties panel and on the stage. */
     Sprite* activeSprite;
 
+    /** The confirmationDialog user's callback. Set while opening the dialog. */
+    std::function<void(void)> userOnConfirmation;
+
+    //-------------------------------------------------------------------------
+    // Child widgets
+    //-------------------------------------------------------------------------
     /** The left-side panel for managing sprite texture sheets. */
     SpriteSheetPanel spriteSheetPanel;
 
@@ -91,9 +97,6 @@ private:
     /** Confirmation dialog. Child widgets can call openConfirmationDialog()
         to use it. */
     AUI::ConfirmationDialog confirmationDialog;
-
-    /** The confirmationDialog user's callback. Set while opening the dialog. */
-    std::function<void(void)> userOnConfirmation;
 };
 
 } // End namespace SpriteEditor

@@ -46,6 +46,9 @@ public:
      */
     void clear();
 
+    //-------------------------------------------------------------------------
+    // Public child widgets
+    //-------------------------------------------------------------------------
     /** All fields below directly match a data field in Sprite.
         See its displayName, hasBoundingBox, and modelBounds fields for more
         information. */
@@ -88,8 +91,6 @@ private:
     /** The active sprite's data. */
     Sprite* activeSprite;
 
-    AUI::Image backgroundImage;
-
     /**
      * Converts the given float to a string with 3 decimals of precision.
      */
@@ -114,6 +115,11 @@ private:
     float committedMaxX;
     float committedMaxY;
     float committedMaxZ;
+
+    //-------------------------------------------------------------------------
+    // Private child widgets
+    //-------------------------------------------------------------------------
+    AUI::Image backgroundImage;
 };
 
 } // End namespace SpriteEditor

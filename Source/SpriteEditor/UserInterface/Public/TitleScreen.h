@@ -36,6 +36,9 @@ private:
         file. */
     SpriteDataModel& spriteDataModel;
 
+    //-------------------------------------------------------------------------
+    // Child widgets
+    //-------------------------------------------------------------------------
     AUI::Text titleText;
 
     TitleButton newButton;
