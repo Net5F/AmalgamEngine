@@ -121,7 +121,7 @@ MainScreen::MainScreen(AssetCache& assetCache,
         confirmationDialog.setIsVisible(false);
     });
 
-    // Make the confirmationDialog invisible. Components that want to use it can
+    // Make the confirmationDialog invisible. Widgets that want to use it can
     // set it up and control the visibility.
     dialogShadowImage.setIsVisible(false);
     confirmationDialog.setIsVisible(false);
@@ -129,7 +129,7 @@ MainScreen::MainScreen(AssetCache& assetCache,
 
 void MainScreen::loadSpriteData()
 {
-    // Clear out the old components.
+    // Clear out the old widgets.
     spriteSheetPanel.clearSpriteSheets();
     spritePanel.clearSprites();
     propertiesPanel.clear();
@@ -142,12 +142,12 @@ void MainScreen::loadSpriteData()
     // Load the model's data into this screen's UI.
     // For each sprite sheet in the model.
     for (SpriteSheet& sheet : spriteDataModel.getSpriteSheets()) {
-        // Add a Thumbnail component that displays the sheet.
+        // Add a Thumbnail widget that displays the sheet.
         spriteSheetPanel.addSpriteSheet(sheet);
 
         // For each sprite in the sheet.
         for (Sprite& sprite : sheet.sprites) {
-            // Add a Thumbnail component that displays the sprite.
+            // Add a Thumbnail widget that displays the sprite.
             spritePanel.addSprite(sheet, sprite);
         }
     }

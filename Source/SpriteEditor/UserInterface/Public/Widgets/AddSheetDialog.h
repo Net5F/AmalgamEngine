@@ -19,7 +19,7 @@ class SpriteDataModel;
  * A confirmation dialog with header text, body text, and confirm/cancel
  * buttons.
  */
-class AddSheetDialog : public AUI::Component
+class AddSheetDialog : public AUI::Widget
 {
 public:
     //-------------------------------------------------------------------------
@@ -76,7 +76,7 @@ private:
      */
     void clear();
 
-    /** Used to update the UI after sprite data changes. Component maintains an
+    /** Used to update the UI after sprite data changes. Widget maintains an
         AUI::Screen reference that we could cast, but we want to explicitly
         model a dependency on MainScreen. */
     MainScreen& mainScreen;

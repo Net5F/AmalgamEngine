@@ -1,29 +1,29 @@
 target_sources(SpriteEditor
     PRIVATE
-        Private/Components/AddSheetDialog.cpp
-        Private/Components/BoundingBoxGizmo.cpp
-        Private/Components/ConfirmationButton.cpp
-        Private/Components/MainTextInput.cpp
-        Private/Components/MainThumbnail.cpp
-        Private/Components/PropertiesPanel.cpp
-        Private/Components/SpriteEditStage.cpp
-        Private/Components/SpritePanel.cpp
-        Private/Components/SpriteSheetPanel.cpp
-        Private/Components/TitleButton.cpp
+        Private/Widgets/AddSheetDialog.cpp
+        Private/Widgets/BoundingBoxGizmo.cpp
+        Private/Widgets/ConfirmationButton.cpp
+        Private/Widgets/MainTextInput.cpp
+        Private/Widgets/MainThumbnail.cpp
+        Private/Widgets/PropertiesPanel.cpp
+        Private/Widgets/SpriteEditStage.cpp
+        Private/Widgets/SpritePanel.cpp
+        Private/Widgets/SpriteSheetPanel.cpp
+        Private/Widgets/TitleButton.cpp
         Private/MainScreen.cpp
         Private/TitleScreen.cpp
         Private/UserInterface.cpp
     PUBLIC
-        Public/Components/AddSheetDialog.h
-        Public/Components/BoundingBoxGizmo.h
-        Public/Components/ConfirmationButton.h
-        Public/Components/MainTextInput.h
-        Public/Components/MainThumbnail.h
-        Public/Components/PropertiesPanel.h
-        Public/Components/SpriteEditStage.h
-        Public/Components/SpritePanel.h
-        Public/Components/SpriteSheetPanel.h
-        Public/Components/TitleButton.h
+        Public/Widgets/AddSheetDialog.h
+        Public/Widgets/BoundingBoxGizmo.h
+        Public/Widgets/ConfirmationButton.h
+        Public/Widgets/MainTextInput.h
+        Public/Widgets/MainThumbnail.h
+        Public/Widgets/PropertiesPanel.h
+        Public/Widgets/SpriteEditStage.h
+        Public/Widgets/SpritePanel.h
+        Public/Widgets/SpriteSheetPanel.h
+        Public/Widgets/TitleButton.h
         Public/MainScreen.h
         Public/TitleScreen.h
         Public/UserInterface.h
@@ -34,5 +34,5 @@ target_include_directories(SpriteEditor
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
-        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Widgets
 )

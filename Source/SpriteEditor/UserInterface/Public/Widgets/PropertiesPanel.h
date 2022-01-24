@@ -19,7 +19,7 @@ class Sprite;
  * The right-side panel on the main screen. Allows the user to view and
  * modify the active sprite's properties.
  */
-class PropertiesPanel : public AUI::Component
+class PropertiesPanel : public AUI::Widget
 {
 public:
     //-------------------------------------------------------------------------
@@ -34,7 +34,7 @@ public:
     void loadActiveSprite(Sprite* inActiveSprite);
 
     /**
-     * Refreshes this component's UI with the data from the currently set
+     * Refreshes this widget's UI with the data from the currently set
      * active sprite.
      * Errors if activeSprite is nullptr.
      */

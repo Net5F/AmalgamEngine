@@ -13,7 +13,7 @@ namespace SpriteEditor
 SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
                                    MainScreen& inScreen,
                                    SpriteDataModel& inSpriteDataModel)
-: AUI::Component(inScreen, {0, 0, 399, 708}, "SpriteSheetPanel")
+: AUI::Widget(inScreen, {0, 0, 399, 708}, "SpriteSheetPanel")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
@@ -66,7 +66,7 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
     remSheetButton.text.setText("");
     remSheetButton.disable();
 
-    // Add a callback to remove a selected component on button press.
+    // Add a callback to remove a selected widget on button press.
     remSheetButton.setOnPressed([&]() {
         // Set up our data for the confirmation dialog.
         std::string bodyText{
@@ -132,7 +132,7 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
 
 void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
 {
-    std::unique_ptr<AUI::Component> thumbnailPtr{
+    std::unique_ptr<AUI::Widget> thumbnailPtr{
         std::make_unique<MainThumbnail>(assetCache, screen, "")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
 
@@ -143,13 +143,13 @@ void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
     thumbnail.setText(sheet.relPath);
     thumbnail.setIsActivateable(false);
 
-    // Add a callback to deselect all other components when this one
+    // Add a callback to deselect all other widgets when this one
     // is selected.
     thumbnail.setOnSelected([&](AUI::Thumbnail* selectedThumb) {
         // Deselect all other thumbnails.
-        for (auto& componentPtr : spriteSheetContainer) {
+        for (auto& widgetPtr : spriteSheetContainer) {
             MainThumbnail& otherThumb
-                = static_cast<MainThumbnail&>(*componentPtr);
+                = static_cast<MainThumbnail&>(*widgetPtr);
             if (otherThumb.getIsSelected() && (&otherThumb != selectedThumb)) {
                 otherThumb.deselect();
             }
@@ -165,9 +165,9 @@ void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
 
         // Check if any thumbnails are selected.
         bool thumbIsSelected{false};
-        for (auto& componentPtr : spriteSheetContainer) {
+        for (auto& widgetPtr : spriteSheetContainer) {
             MainThumbnail& otherThumb
-                = static_cast<MainThumbnail&>(*componentPtr);
+                = static_cast<MainThumbnail&>(*widgetPtr);
             if (otherThumb.getIsSelected()) {
                 thumbIsSelected = true;
             }
@@ -191,10 +191,10 @@ bool SpriteSheetPanel::onMouseButtonDown(SDL_MouseButtonEvent& event)
 {
     //    // If the click event was outside our extent.
     //    if (!(containsPoint({event.x, event.y}))) {
-    //        // Deselect any selected component.
-    //        for (auto& componentPtr : spriteSheetContainer) {
+    //        // Deselect any selected widget.
+    //        for (auto& widgetPtr : spriteSheetContainer) {
     //            MainThumbnail& thumbnail =
-    //            static_cast<MainThumbnail&>(*componentPtr); if
+    //            static_cast<MainThumbnail&>(*widgetPtr); if
     //            (thumbnail.getIsSelected()) {
     //                thumbnail.deselect();
     //                break;
@@ -215,7 +215,7 @@ void SpriteSheetPanel::render(const SDL_Point& parentOffset)
     lastRenderedExtent.x += parentOffset.x;
     lastRenderedExtent.y += parentOffset.y;
 
-    // Children should render at the parent's offset + this component's offset.
+    // Children should render at the parent's offset + this widget's offset.
     SDL_Point childOffset{parentOffset};
     childOffset.x += scaledExtent.x;
     childOffset.y += scaledExtent.y;

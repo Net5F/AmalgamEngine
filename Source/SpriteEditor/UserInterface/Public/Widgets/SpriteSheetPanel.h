@@ -19,7 +19,7 @@ class SpriteDataModel;
  * The left-side panel on the main screen. Allows the user to manage the
  * project's sprite sheets.
  */
-class SpriteSheetPanel : public AUI::Component
+class SpriteSheetPanel : public AUI::Widget
 {
 public:
     //-------------------------------------------------------------------------
@@ -29,13 +29,13 @@ public:
                      SpriteDataModel& inSpriteDataModel);
 
     /**
-     * Adds a MainThumbnail component to the spritesheetContainer, using the
+     * Adds a MainThumbnail widget to the spritesheetContainer, using the
      * given data.
      */
     void addSpriteSheet(const SpriteSheet& sheet);
 
     /**
-     * Clears spritesheetContainer, removing all the sprite sheet components.
+     * Clears spritesheetContainer, removing all the sprite sheet widgets.
      */
     void clearSpriteSheets();
 

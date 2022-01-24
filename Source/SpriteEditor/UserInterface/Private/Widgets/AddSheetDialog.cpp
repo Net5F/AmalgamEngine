@@ -13,7 +13,7 @@ AddSheetDialog::AddSheetDialog(
     AssetCache& assetCache, MainScreen& inScreen,
     AUI::VerticalGridContainer& inSpriteSheetContainer,
     SpriteDataModel& inSpriteDataModel)
-: AUI::Component(inScreen, {0, 0, 1920, 1080})
+: AUI::Widget(inScreen, {0, 0, 1920, 1080})
 , backgroundImage(inScreen, {0, 0, logicalExtent.w, logicalExtent.h})
 , headerText(inScreen, {747, 228, 280, 60})
 , pathLabel(inScreen, {747, 300, 151, 38})
@@ -142,12 +142,12 @@ void AddSheetDialog::render(const SDL_Point& parentOffset)
     lastRenderedExtent.x += parentOffset.x;
     lastRenderedExtent.y += parentOffset.y;
 
-    // If the component isn't visible, return without rendering.
+    // If the widget isn't visible, return without rendering.
     if (!isVisible) {
         return;
     }
 
-    // Children should render at the parent's offset + this component's offset.
+    // Children should render at the parent's offset + this widget's offset.
     SDL_Point childOffset{parentOffset};
     childOffset.x += scaledExtent.x;
     childOffset.y += scaledExtent.y;

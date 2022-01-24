@@ -12,7 +12,7 @@ namespace SpriteEditor
 {
 SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen,
                          SpriteDataModel& inSpriteDataModel)
-: AUI::Component(inScreen, {-8, 732, 1936, 352}, "SpritePanel")
+: AUI::Widget(inScreen, {-8, 732, 1936, 352}, "SpritePanel")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
@@ -34,7 +34,7 @@ SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen,
 void SpritePanel::addSprite(const SpriteSheet& sheet, Sprite& sprite)
 {
     // Construct the new sprite thumbnail.
-    std::unique_ptr<AUI::Component> thumbnailPtr{
+    std::unique_ptr<AUI::Widget> thumbnailPtr{
         std::make_unique<MainThumbnail>(assetCache, screen, "")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
     thumbnail.setText(sprite.displayName);
@@ -49,9 +49,9 @@ void SpritePanel::addSprite(const SpriteSheet& sheet, Sprite& sprite)
     // Add a callback to deactivate all other thumbnails when one is activated.
     thumbnail.setOnActivated([&](AUI::Thumbnail* selectedThumb) {
         // Deactivate all other thumbnails.
-        for (auto& componentPtr : spriteContainer) {
+        for (auto& widgetPtr : spriteContainer) {
             MainThumbnail& otherThumb
-                = static_cast<MainThumbnail&>(*componentPtr);
+                = static_cast<MainThumbnail&>(*widgetPtr);
             if (otherThumb.getIsActive() && (&otherThumb != selectedThumb)) {
                 otherThumb.deactivate();
             }
@@ -92,7 +92,7 @@ void SpritePanel::render(const SDL_Point& parentOffset)
     lastRenderedExtent.x += parentOffset.x;
     lastRenderedExtent.y += parentOffset.y;
 
-    // Children should render at the parent's offset + this component's offset.
+    // Children should render at the parent's offset + this widget's offset.
     SDL_Point childOffset{parentOffset};
     childOffset.x += scaledExtent.x;
     childOffset.y += scaledExtent.y;

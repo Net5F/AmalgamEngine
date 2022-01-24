@@ -21,7 +21,7 @@ namespace SpriteEditor
 {
 PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
                                  SpriteDataModel& inSpriteDataModel)
-: AUI::Component(inScreen, {1617, 0, 303, 440}, "PropertiesPanel")
+: AUI::Widget(inScreen, {1617, 0, 303, 440}, "PropertiesPanel")
 , nameLabel(inScreen, {24, 24, 65, 28})
 , nameInput(assetCache, inScreen, {24, 56, 255, 38})
 , hasBoundingBoxLabel(inScreen, {24, 126, 210, 38})
@@ -196,7 +196,7 @@ void PropertiesPanel::render(const SDL_Point& parentOffset)
     lastRenderedExtent.x += parentOffset.x;
     lastRenderedExtent.y += parentOffset.y;
 
-    // Children should render at the parent's offset + this component's offset.
+    // Children should render at the parent's offset + this widget's offset.
     SDL_Point childOffset{parentOffset};
     childOffset.x += scaledExtent.x;
     childOffset.y += scaledExtent.y;

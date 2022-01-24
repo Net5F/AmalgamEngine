@@ -11,7 +11,7 @@ namespace SpriteEditor
 {
 SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
                                  SpriteDataModel& inSpriteDataModel)
-: AUI::Component(inScreen, {389, 60, 1142, 684}, "SpriteEditStage")
+: AUI::Widget(inScreen, {389, 60, 1142, 684}, "SpriteEditStage")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
@@ -81,12 +81,12 @@ void SpriteEditStage::render(const SDL_Point& parentOffset)
     lastRenderedExtent.x += parentOffset.x;
     lastRenderedExtent.y += parentOffset.y;
 
-    // If the component isn't visible, return without rendering.
+    // If the widget isn't visible, return without rendering.
     if (!isVisible) {
         return;
     }
 
-    // Children should render at the parent's offset + this component's offset.
+    // Children should render at the parent's offset + this widget's offset.
     SDL_Point childOffset{parentOffset};
     childOffset.x += scaledExtent.x;
     childOffset.y += scaledExtent.y;

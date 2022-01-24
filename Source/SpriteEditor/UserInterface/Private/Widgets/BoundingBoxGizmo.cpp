@@ -18,7 +18,7 @@ namespace AM
 namespace SpriteEditor
 {
 BoundingBoxGizmo::BoundingBoxGizmo(MainScreen& inScreen)
-: AUI::Component(inScreen, {0, 0, 1920, 1080})
+: AUI::Widget(inScreen, {0, 0, 1920, 1080})
 , mainScreen{inScreen}
 , activeSprite{nullptr}
 , scaledRectSize{AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE)}
@@ -88,12 +88,12 @@ void BoundingBoxGizmo::render(const SDL_Point& parentOffset)
     lastRenderedExtent.x += parentOffset.x;
     lastRenderedExtent.y += parentOffset.y;
 
-    // If the component isn't visible, return without rendering.
+    // If the widget isn't visible, return without rendering.
     if (!isVisible) {
         return;
     }
 
-    // Children should render at the parent's offset + this component's offset.
+    // Children should render at the parent's offset + this widget's offset.
     SDL_Point childOffset{parentOffset};
     childOffset.x += scaledExtent.x;
     childOffset.y += scaledExtent.y;
@@ -204,7 +204,7 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
 bool BoundingBoxGizmo::refreshScaling()
 {
     // If scaledExtent was refreshed, do our specialized refreshing.
-    if (Component::refreshScaling()) {
+    if (Widget::refreshScaling()) {
         // Re-calculate our control rectangle size.
         scaledRectSize
             = AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE);

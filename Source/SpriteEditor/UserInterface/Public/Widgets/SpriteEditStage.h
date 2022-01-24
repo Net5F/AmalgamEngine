@@ -18,7 +18,7 @@ class SpriteDataModel;
  * The center stage on the main screen. Allows the user to edit a sprite's
  * bounding box.
  */
-class SpriteEditStage : public AUI::Component
+class SpriteEditStage : public AUI::Widget
 {
 public:
     //-------------------------------------------------------------------------

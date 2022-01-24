@@ -80,7 +80,7 @@ void Application::start()
         // Let the renderer render if it needs to.
         rendererCaller.update();
 
-        // Let the UI components update if they need to.
+        // Let the UI widgets update if they need to.
         uiCaller.update();
 
         // If we have enough time, dispatch events.

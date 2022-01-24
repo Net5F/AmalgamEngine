@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AUI/Component.h"
+#include "AUI/Widget.h"
 #include "ScreenPoint.h"
 #include <array>
 
@@ -18,7 +18,7 @@ class Sprite;
  * A confirmation dialog with header text, body text, and confirm/cancel
  * buttons.
  */
-class BoundingBoxGizmo : public AUI::Component
+class BoundingBoxGizmo : public AUI::Widget
 {
 public:
     //-------------------------------------------------------------------------
@@ -38,7 +38,7 @@ public:
     void loadActiveSprite(Sprite* inActiveSprite);
 
     /**
-     * Refreshes this component's UI with the data from the currently set
+     * Refreshes this widget's UI with the data from the currently set
      * active sprite.
      * Errors if activeSprite is nullptr.
      */

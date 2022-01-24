@@ -88,7 +88,7 @@ private:
         dialog. */
     AUI::Image dialogShadowImage;
 
-    /** Confirmation dialog. Child components can call openConfirmationDialog()
+    /** Confirmation dialog. Child widgets can call openConfirmationDialog()
         to use it. */
     AUI::ConfirmationDialog confirmationDialog;
 
