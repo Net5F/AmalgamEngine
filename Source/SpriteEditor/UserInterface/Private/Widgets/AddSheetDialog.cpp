@@ -33,6 +33,23 @@ AddSheetDialog::AddSheetDialog(
 , spriteDataModel{inSpriteDataModel}
 , errorText(inScreen, {748, 556, 466, 60})
 {
+    // Add our children so they're included in rendering, etc.
+    children.push_back(backgroundImage);
+    children.push_back(headerText);
+    children.push_back(pathLabel);
+    children.push_back(pathInput);
+    children.push_back(widthLabel);
+    children.push_back(widthInput);
+    children.push_back(heightLabel);
+    children.push_back(heightInput);
+    children.push_back(offsetLabel);
+    children.push_back(offsetInput);
+    children.push_back(nameLabel);
+    children.push_back(nameInput);
+    children.push_back(addButton);
+    children.push_back(cancelButton);
+    children.push_back(errorText);
+
     /* Background image. */
     backgroundImage.addResolution(
         {1920, 1080},
@@ -153,29 +170,10 @@ void AddSheetDialog::render(const SDL_Point& parentOffset)
     childOffset.y += scaledExtent.y;
 
     // Render our children.
-    backgroundImage.render(childOffset);
-
-    headerText.render(childOffset);
-
-    pathLabel.render(childOffset);
-    pathInput.render(childOffset);
-
-    widthLabel.render(childOffset);
-    widthInput.render(childOffset);
-
-    heightLabel.render(childOffset);
-    heightInput.render(childOffset);
-
-    offsetLabel.render(childOffset);
-    offsetInput.render(childOffset);
-
-    nameLabel.render(childOffset);
-    nameInput.render(childOffset);
-
-    addButton.render(childOffset);
-    cancelButton.render(childOffset);
-
-    errorText.render(childOffset);
+    for (Widget& child : children)
+    {
+        child.render(childOffset);
+    }
 }
 
 void AddSheetDialog::clear()

@@ -23,6 +23,13 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
 , addSheetButton(inScreen, {342, 63, 45, 88})
 , addSheetDialog(assetCache, inScreen, spriteSheetContainer, spriteDataModel)
 {
+    // Add our children so they're included in rendering, etc.
+    children.push_back(backgroundImage);
+    children.push_back(spriteSheetContainer);
+    children.push_back(remSheetButton);
+    children.push_back(addSheetButton);
+    children.push_back(addSheetDialog);
+
     /* Background image */
     backgroundImage.addResolution(
         {1920, 1080},
@@ -221,15 +228,10 @@ void SpriteSheetPanel::render(const SDL_Point& parentOffset)
     childOffset.y += scaledExtent.y;
 
     // Render our children.
-    backgroundImage.render(childOffset);
-
-    spriteSheetContainer.render(childOffset);
-
-    remSheetButton.render(childOffset);
-
-    addSheetButton.render(childOffset);
-
-    addSheetDialog.render(childOffset);
+    for (Widget& child : children)
+    {
+        child.render(childOffset);
+    }
 }
 
 } // End namespace SpriteEditor

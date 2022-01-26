@@ -19,6 +19,10 @@ SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen,
 , backgroundImage(inScreen, {0, 0, 1936, 352})
 , spriteContainer(inScreen, {191, 24, 1737, 324}, "SpriteContainer")
 {
+    // Add our children so they're included in rendering, etc.
+    children.push_back(backgroundImage);
+    children.push_back(spriteContainer);
+
     /* Background image */
     backgroundImage.addResolution(
         {1600, 900},
@@ -98,9 +102,10 @@ void SpritePanel::render(const SDL_Point& parentOffset)
     childOffset.y += scaledExtent.y;
 
     // Render our children.
-    backgroundImage.render(childOffset);
-
-    spriteContainer.render(childOffset);
+    for (Widget& child : children)
+    {
+        child.render(childOffset);
+    }
 }
 
 } // End namespace SpriteEditor

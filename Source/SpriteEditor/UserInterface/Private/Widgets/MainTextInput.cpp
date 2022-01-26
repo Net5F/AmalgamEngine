@@ -18,7 +18,7 @@ MainTextInput::MainTextInput(AssetCache& assetCache, AUI::Screen& inScreen,
     hoveredImage.addResolution(
         {1920, 1080},
         assetCache.loadTexture(Paths::TEXTURE_DIR + "TextInput/Hovered.png"));
-    selectedImage.addResolution(
+    focusedImage.addResolution(
         {1920, 1080},
         assetCache.loadTexture(Paths::TEXTURE_DIR + "TextInput/Selected.png"));
     disabledImage.addResolution(

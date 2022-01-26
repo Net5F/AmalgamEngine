@@ -49,6 +49,25 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
 , committedMaxZ{0.0}
 , backgroundImage(inScreen, {-12, -4, 319, 506})
 {
+    // Add our children so they're included in rendering, etc.
+    children.push_back(backgroundImage);
+    children.push_back(nameLabel);
+    children.push_back(nameInput);
+    children.push_back(hasBoundingBoxLabel);
+    children.push_back(hasBoundingBoxInput);
+    children.push_back(minXLabel);
+    children.push_back(minXInput);
+    children.push_back(minYLabel);
+    children.push_back(minYInput);
+    children.push_back(minZLabel);
+    children.push_back(minZInput);
+    children.push_back(maxXLabel);
+    children.push_back(maxXInput);
+    children.push_back(maxYLabel);
+    children.push_back(maxYInput);
+    children.push_back(maxZLabel);
+    children.push_back(maxZInput);
+
     /* Background image */
     backgroundImage.addResolution(
         {1920, 1080},
@@ -202,31 +221,10 @@ void PropertiesPanel::render(const SDL_Point& parentOffset)
     childOffset.y += scaledExtent.y;
 
     // Render our children.
-    backgroundImage.render(childOffset);
-
-    nameLabel.render(childOffset);
-    nameInput.render(childOffset);
-
-    hasBoundingBoxLabel.render(childOffset);
-    hasBoundingBoxInput.render(childOffset);
-
-    minXLabel.render(childOffset);
-    minXInput.render(childOffset);
-
-    minYLabel.render(childOffset);
-    minYInput.render(childOffset);
-
-    minZLabel.render(childOffset);
-    minZInput.render(childOffset);
-
-    maxXLabel.render(childOffset);
-    maxXInput.render(childOffset);
-
-    maxYLabel.render(childOffset);
-    maxYInput.render(childOffset);
-
-    maxZLabel.render(childOffset);
-    maxZInput.render(childOffset);
+    for (Widget& child : children)
+    {
+        child.render(childOffset);
+    }
 }
 
 std::string PropertiesPanel::toRoundedString(float value)

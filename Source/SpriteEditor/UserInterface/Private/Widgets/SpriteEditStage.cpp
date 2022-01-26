@@ -19,6 +19,11 @@ SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
 , spriteImage(inScreen, {0, 0, 100, 100})
 , boundingBoxGizmo(inScreen)
 {
+    // Add our children so they're included in rendering, etc.
+    children.push_back(checkerboardImage);
+    children.push_back(spriteImage);
+    children.push_back(boundingBoxGizmo);
+
     /* Active sprite and checkerboard background. */
     checkerboardImage.addResolution(
         {1920, 1080},
@@ -92,11 +97,10 @@ void SpriteEditStage::render(const SDL_Point& parentOffset)
     childOffset.y += scaledExtent.y;
 
     // Render our children.
-    checkerboardImage.render(childOffset);
-
-    spriteImage.render(childOffset);
-
-    boundingBoxGizmo.render(childOffset);
+    for (Widget& child : children)
+    {
+        child.render(childOffset);
+    }
 }
 
 } // End namespace SpriteEditor
