@@ -76,11 +76,6 @@ public:
     AUI::Text maxZLabel;
     MainTextInput maxZInput;
 
-    //-------------------------------------------------------------------------
-    // Base class overrides
-    //-------------------------------------------------------------------------
-    void render(const SDL_Point& parentOffset = {}) override;
-
 private:
     /** Used to save updated sprite data. */
     MainScreen& mainScreen;

@@ -21,6 +21,12 @@ TitleScreen::TitleScreen(UserInterface& inUserInterface, AssetCache& assetCache,
 , loadButton(assetCache, *this, {724, 589, 472, 96}, "Load")
 , errorText(*this, {0, 721, 1920, 48})
 {
+    // Add our children so they're included in rendering, etc.
+    children.push_back(titleText);
+    children.push_back(newButton);
+    children.push_back(loadButton);
+    children.push_back(errorText);
+
     /* Title text. */
     titleText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 54);
     titleText.setColor({255, 255, 255, 255});
@@ -42,17 +48,12 @@ TitleScreen::TitleScreen(UserInterface& inUserInterface, AssetCache& assetCache,
 void TitleScreen::render()
 {
     // Fill the background with the background color.
-    SDL_Renderer* renderer = AUI::Core::getRenderer();
+    SDL_Renderer* renderer{AUI::Core::getRenderer()};
     SDL_SetRenderDrawColor(renderer, 37, 37, 52, 255);
     SDL_RenderClear(renderer);
 
-    titleText.render();
-
-    newButton.render();
-
-    loadButton.render();
-
-    errorText.render();
+    // Update our child widget's layouts and render them.
+    Screen::render();
 }
 
 void TitleScreen::onNewButtonPressed()
@@ -63,7 +64,7 @@ void TitleScreen::onNewButtonPressed()
 
     if (result == NFD_OKAY) {
         // If we successfully created a new file, change to the main screen.
-        std::string resultString = spriteDataModel.create(selectedPath);
+        std::string resultString{spriteDataModel.create(selectedPath)};
         if (resultString == "") {
             userInterface.openMainScreen();
         }
@@ -98,7 +99,7 @@ void TitleScreen::onLoadButtonPressed()
         if (std::strstr(selectedPath, "SpriteData.json") != 0) {
             // Valid file name.
             // If it loads successfully, change to the main screen.
-            std::string resultString = spriteDataModel.load(selectedPath);
+            std::string resultString{spriteDataModel.load(selectedPath)};
             if (resultString == "") {
                 userInterface.openMainScreen();
             }

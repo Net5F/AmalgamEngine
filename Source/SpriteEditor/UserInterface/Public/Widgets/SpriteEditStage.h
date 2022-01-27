@@ -37,11 +37,6 @@ public:
      */
     void refresh();
 
-    //-------------------------------------------------------------------------
-    // Base class overrides
-    //-------------------------------------------------------------------------
-    void render(const SDL_Point& parentOffset = {}) override;
-
 private:
     /** Used to load the active sprite's texture. */
     AssetCache& assetCache;

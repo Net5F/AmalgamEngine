@@ -47,7 +47,7 @@ public:
     //-------------------------------------------------------------------------
     // Base class overrides
     //-------------------------------------------------------------------------
-    void render(const SDL_Point& parentOffset = {}) override;
+    void render() override;
 
     bool onMouseButtonDown(SDL_MouseButtonEvent& event) override;
 
@@ -118,17 +118,17 @@ private:
     /**
      * Renders the control rectangles.
      */
-    void renderControls(const SDL_Point& childOffset);
+    void renderControls();
 
     /**
      * Renders the line polygons.
      */
-    void renderLines(const SDL_Point& childOffset);
+    void renderLines();
 
     /**
      * Renders the plane polygons.
      */
-    void renderPlanes(const SDL_Point& childOffset);
+    void renderPlanes();
 
     /** Used to save updated sprite data. */
     MainScreen& mainScreen;

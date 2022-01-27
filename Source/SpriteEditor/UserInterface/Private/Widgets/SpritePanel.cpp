@@ -86,27 +86,5 @@ void SpritePanel::clearSprites()
     spriteContainer.clear();
 }
 
-void SpritePanel::render(const SDL_Point& parentOffset)
-{
-    // Keep our scaling up to date.
-    refreshScaling();
-
-    // Save the extent that we're going to render at.
-    lastRenderedExtent = scaledExtent;
-    lastRenderedExtent.x += parentOffset.x;
-    lastRenderedExtent.y += parentOffset.y;
-
-    // Children should render at the parent's offset + this widget's offset.
-    SDL_Point childOffset{parentOffset};
-    childOffset.x += scaledExtent.x;
-    childOffset.y += scaledExtent.y;
-
-    // Render our children.
-    for (Widget& child : children)
-    {
-        child.render(childOffset);
-    }
-}
-
 } // End namespace SpriteEditor
 } // End namespace AM

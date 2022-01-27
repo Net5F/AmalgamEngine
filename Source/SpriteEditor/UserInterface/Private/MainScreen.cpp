@@ -22,6 +22,15 @@ MainScreen::MainScreen(AssetCache& assetCache,
 , dialogShadowImage(*this, {0, 0, 1920, 1080})
 , confirmationDialog(*this, {721, 358, 474, 248})
 {
+    // Add our children so they're included in rendering, etc.
+    children.push_back(spriteEditStage);
+    children.push_back(spriteSheetPanel);
+    children.push_back(spritePanel);
+    children.push_back(saveButton);
+    children.push_back(propertiesPanel);
+    children.push_back(dialogShadowImage);
+    children.push_back(confirmationDialog);
+
     /* Save button. */
     saveButton.normalImage.addResolution(
         {1920, 1080},
@@ -209,20 +218,8 @@ void MainScreen::render()
     SDL_SetRenderDrawColor(renderer, 17, 17, 19, 255);
     SDL_RenderClear(renderer);
 
-    // Render our children.
-    spriteEditStage.render();
-
-    spriteSheetPanel.render();
-
-    spritePanel.render();
-
-    saveButton.render();
-
-    propertiesPanel.render();
-
-    // Render the confirmation dialog on top of everything else.
-    dialogShadowImage.render();
-    confirmationDialog.render();
+    // Update our child widget's layouts and render them.
+    Screen::render();
 }
 
 } // End namespace SpriteEditor

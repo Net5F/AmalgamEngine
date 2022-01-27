@@ -78,34 +78,16 @@ void BoundingBoxGizmo::refresh()
     movePlanes(boundsScreenPoints);
 }
 
-void BoundingBoxGizmo::render(const SDL_Point& parentOffset)
+void BoundingBoxGizmo::render()
 {
-    // Keep our extent up to date.
-    refreshScaling();
-
-    // Save the extent that we're going to render at.
-    lastRenderedExtent = scaledExtent;
-    lastRenderedExtent.x += parentOffset.x;
-    lastRenderedExtent.y += parentOffset.y;
-
-    // If the widget isn't visible, return without rendering.
-    if (!isVisible) {
-        return;
-    }
-
-    // Children should render at the parent's offset + this widget's offset.
-    SDL_Point childOffset{parentOffset};
-    childOffset.x += scaledExtent.x;
-    childOffset.y += scaledExtent.y;
-
     // Render the planes.
-    renderPlanes(childOffset);
+    renderPlanes();
 
     // Render the lines.
-    renderLines(childOffset);
+    renderLines();
 
     // Render the control rectangles.
-    renderControls(childOffset);
+    renderControls();
 }
 
 bool BoundingBoxGizmo::onMouseButtonDown(SDL_MouseButtonEvent& event)
@@ -157,12 +139,12 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
     /* Translate the mouse position to world space. */
     // Account for the sprite's empty vertical space.
     int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite->yOffset)};
-    yOffset += lastRenderedExtent.y;
+    yOffset += renderExtent.y;
 
     // Account for the sprite's half-tile offset.
     int xOffset{AUI::ScalingHelpers::logicalToActual(
         static_cast<int>(SharedConfig::TILE_SCREEN_WIDTH / 2.f))};
-    xOffset += lastRenderedExtent.x;
+    xOffset += renderExtent.x;
 
     // Apply the offset to the mouse position and convert to logical space.
     SDL_Point offsetMousePoint{event.x - xOffset, event.y - yOffset};
@@ -437,7 +419,7 @@ void BoundingBoxGizmo::movePlanes(std::vector<SDL_Point>& boundsScreenPoints)
     planeYCoords[11] = boundsScreenPoints[3].y;
 }
 
-void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
+void BoundingBoxGizmo::renderControls()
 {
     // If the bounding box is disabled, show it at 1/4 alpha.
     float alpha{255};
@@ -447,8 +429,8 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
 
     // Position control
     SDL_Rect offsetExtent{positionControlExtent};
-    offsetExtent.x += childOffset.x;
-    offsetExtent.y += childOffset.y;
+    offsetExtent.x += renderExtent.x;
+    offsetExtent.y += renderExtent.y;
     lastRenderedPosExtent = offsetExtent;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 0, 0, alpha);
@@ -456,8 +438,8 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
 
     // X control
     offsetExtent = xControlExtent;
-    offsetExtent.x += childOffset.x;
-    offsetExtent.y += childOffset.y;
+    offsetExtent.x += renderExtent.x;
+    offsetExtent.y += renderExtent.y;
     lastRenderedXExtent = offsetExtent;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 148, 0, 0, alpha);
@@ -465,8 +447,8 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
 
     // Y control
     offsetExtent = yControlExtent;
-    offsetExtent.x += childOffset.x;
-    offsetExtent.y += childOffset.y;
+    offsetExtent.x += renderExtent.x;
+    offsetExtent.y += renderExtent.y;
     lastRenderedYExtent = offsetExtent;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 149, 0, alpha);
@@ -474,15 +456,15 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& childOffset)
 
     // Z control
     offsetExtent = zControlExtent;
-    offsetExtent.x += childOffset.x;
-    offsetExtent.y += childOffset.y;
+    offsetExtent.x += renderExtent.x;
+    offsetExtent.y += renderExtent.y;
     lastRenderedZExtent = offsetExtent;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 82, 240, alpha);
     SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedZExtent);
 }
 
-void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
+void BoundingBoxGizmo::renderLines()
 {
     // If the bounding box is disabled, show it at 1/4 alpha.
     float alpha{255};
@@ -493,10 +475,10 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
     // X-axis line
     SDL_Point offsetMinPoint{xMinPoint};
     SDL_Point offsetMaxPoint{xMaxPoint};
-    offsetMinPoint.x += childOffset.x;
-    offsetMinPoint.y += childOffset.y;
-    offsetMaxPoint.x += childOffset.x;
-    offsetMaxPoint.y += childOffset.y;
+    offsetMinPoint.x += renderExtent.x;
+    offsetMinPoint.y += renderExtent.y;
+    offsetMaxPoint.x += renderExtent.x;
+    offsetMaxPoint.y += renderExtent.y;
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 148, 0,
@@ -505,10 +487,10 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
     // Y-axis line
     offsetMinPoint = yMinPoint;
     offsetMaxPoint = yMaxPoint;
-    offsetMinPoint.x += childOffset.x;
-    offsetMinPoint.y += childOffset.y;
-    offsetMaxPoint.x += childOffset.x;
-    offsetMaxPoint.y += childOffset.y;
+    offsetMinPoint.x += renderExtent.x;
+    offsetMinPoint.y += renderExtent.y;
+    offsetMaxPoint.x += renderExtent.x;
+    offsetMaxPoint.y += renderExtent.y;
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 149,
@@ -517,27 +499,27 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& childOffset)
     // Z-axis line
     offsetMinPoint = zMinPoint;
     offsetMaxPoint = zMaxPoint;
-    offsetMinPoint.x += childOffset.x;
-    offsetMinPoint.y += childOffset.y;
-    offsetMaxPoint.x += childOffset.x;
-    offsetMaxPoint.y += childOffset.y;
+    offsetMinPoint.x += renderExtent.x;
+    offsetMinPoint.y += renderExtent.y;
+    offsetMaxPoint.x += renderExtent.x;
+    offsetMaxPoint.y += renderExtent.y;
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 82,
                   240, alpha);
 }
 
-void BoundingBoxGizmo::renderPlanes(const SDL_Point& childOffset)
+void BoundingBoxGizmo::renderPlanes()
 {
     /* Offset all the points. */
     std::array<Sint16, 12> offsetXCoords{};
     for (unsigned int i = 0; i < offsetXCoords.size(); ++i) {
-        offsetXCoords[i] = planeXCoords[i] + childOffset.x;
+        offsetXCoords[i] = planeXCoords[i] + renderExtent.x;
     }
 
     std::array<Sint16, 12> offsetYCoords{};
     for (unsigned int i = 0; i < offsetYCoords.size(); ++i) {
-        offsetYCoords[i] = planeYCoords[i] + childOffset.y;
+        offsetYCoords[i] = planeYCoords[i] + renderExtent.y;
     }
 
     /* Draw the planes. */

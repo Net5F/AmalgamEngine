@@ -65,11 +65,6 @@ public:
         action. */
     ConfirmationButton cancelButton;
 
-    //-------------------------------------------------------------------------
-    // Base class overrides
-    //-------------------------------------------------------------------------
-    void render(const SDL_Point& parentOffset = {}) override;
-
 private:
     /**
      * Clears the text in all of this dialog's text inputs and error text.

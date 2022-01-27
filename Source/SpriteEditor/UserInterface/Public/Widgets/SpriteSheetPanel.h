@@ -44,8 +44,6 @@ public:
     //-------------------------------------------------------------------------
     bool onMouseButtonDown(SDL_MouseButtonEvent& event) override;
 
-    void render(const SDL_Point& parentOffset = {}) override;
-
 private:
     /** Used to load the added sprite sheet's textures. */
     AssetCache& assetCache;
