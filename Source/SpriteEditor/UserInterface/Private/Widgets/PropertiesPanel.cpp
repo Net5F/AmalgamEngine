@@ -215,11 +215,16 @@ std::string PropertiesPanel::toRoundedString(float value)
 void PropertiesPanel::saveName()
 {
     if (activeSprite != nullptr) {
+        // If the name hasn't changed, do nothing.
+        std::string displayName{nameInput.getText()};
+        if (displayName == activeSprite->displayName) {
+            return;
+        }
+
         // Make the display name unique.
         // Note: This really should be done by having a setName() function
         //       either on the sprite or on the SpriteDataModel that does
         //       this check, but this works for now.
-        std::string displayName{nameInput.getText()};
         int appendedNum{0};
         while (!(spriteDataModel.displayNameIsUnique(displayName))) {
             displayName = nameInput.getText() + std::to_string(appendedNum);
