@@ -41,10 +41,6 @@ BoundingBoxGizmo::BoundingBoxGizmo(MainScreen& inScreen)
 , planeYCoords{}
 , currentHeldControl{Control::None}
 {
-    // Register for the events that we want to listen for.
-    registerListener(AUI::InternalEvent::MouseButtonDown);
-    registerListener(AUI::InternalEvent::MouseMove);
-    registerListener(AUI::InternalEvent::MouseButtonUp);
 }
 
 void BoundingBoxGizmo::loadActiveSprite(Sprite* inActiveSprite)

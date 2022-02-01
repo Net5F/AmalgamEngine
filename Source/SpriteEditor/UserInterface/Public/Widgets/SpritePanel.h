@@ -16,8 +16,8 @@ class MainScreen;
 class SpriteDataModel;
 
 /**
- * The left-hand panel on the main screen. Allows the user to manage the
- * project's sprite sheets.
+ * The bottom panel on the main screen. Allows the user to select sprites to
+ * load onto the stage.
  */
 class SpritePanel : public AUI::Widget
 {

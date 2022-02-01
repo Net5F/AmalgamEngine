@@ -214,7 +214,7 @@ void MainScreen::loadActiveSprite(Sprite* inActiveSprite)
 void MainScreen::render()
 {
     // Fill the background with the background color.
-    SDL_Renderer* renderer = AUI::Core::getRenderer();
+    SDL_Renderer* renderer{AUI::Core::getRenderer()};
     SDL_SetRenderDrawColor(renderer, 17, 17, 19, 255);
     SDL_RenderClear(renderer);
 

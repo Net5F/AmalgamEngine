@@ -132,9 +132,6 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
 
     /* Dialog. */
     addSheetDialog.setIsVisible(false);
-
-    // Register for the events that we want to listen for.
-    registerListener(AUI::InternalEvent::MouseButtonDown);
 }
 
 void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
