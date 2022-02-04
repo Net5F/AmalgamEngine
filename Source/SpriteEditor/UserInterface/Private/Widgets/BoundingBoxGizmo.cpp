@@ -86,50 +86,52 @@ void BoundingBoxGizmo::render()
     renderControls();
 }
 
-bool BoundingBoxGizmo::onMouseButtonDown(SDL_MouseButtonEvent& event)
+AUI::Widget* BoundingBoxGizmo::onMouseButtonDown(SDL_MouseButtonEvent& event)
 {
     // Check if the mouse press hit any of our controls.
     SDL_Point mousePress{event.x, event.y};
     if (SDL_PointInRect(&mousePress, &lastRenderedPosExtent)) {
         currentHeldControl = Control::Position;
-        return true;
     }
     else if (SDL_PointInRect(&mousePress, &lastRenderedXExtent)) {
         currentHeldControl = Control::X;
-        return true;
     }
     else if (SDL_PointInRect(&mousePress, &lastRenderedYExtent)) {
         currentHeldControl = Control::Y;
-        return true;
     }
     else if (SDL_PointInRect(&mousePress, &lastRenderedZExtent)) {
         currentHeldControl = Control::Z;
-        return true;
     }
 
-    return false;
+    // If the click was inside our bounds, consume it.
+    if (containsPoint({event.x, event.y})) {
+        return this;
+    }
+    else {
+        return nullptr;
+    }
 }
 
-bool BoundingBoxGizmo::onMouseButtonUp(SDL_MouseButtonEvent& event)
+AUI::Widget* BoundingBoxGizmo::onMouseButtonUp(SDL_MouseButtonEvent& event)
 {
     ignore(event);
 
     // If we were being pressed, release it.
     if (currentHeldControl != Control::None) {
         currentHeldControl = Control::None;
-        return true;
+        return this;
     }
     else {
         // We weren't being pressed.
-        return false;
+        return nullptr;
     }
 }
 
-void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
+AUI::Widget* BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
 {
     // If we aren't being pressed, ignore the event.
     if (currentHeldControl == Control::None) {
-        return;
+        return nullptr;
     }
 
     /* Translate the mouse position to world space. */
@@ -177,6 +179,8 @@ void BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
 
     // Refresh the UI so it reflects the changed position.
     mainScreen.refreshActiveSpriteUi();
+
+    return this;
 }
 
 bool BoundingBoxGizmo::refreshScaling()

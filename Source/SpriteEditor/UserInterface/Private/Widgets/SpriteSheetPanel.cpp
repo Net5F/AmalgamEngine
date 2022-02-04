@@ -191,7 +191,7 @@ void SpriteSheetPanel::clearSpriteSheets()
     spriteSheetContainer.clear();
 }
 
-bool SpriteSheetPanel::onMouseButtonDown(SDL_MouseButtonEvent& event)
+AUI::Widget* SpriteSheetPanel::onMouseButtonDown(SDL_MouseButtonEvent& event)
 {
     //    // If the click event was outside our extent.
     //    if (!(containsPoint({event.x, event.y}))) {
@@ -206,7 +206,7 @@ bool SpriteSheetPanel::onMouseButtonDown(SDL_MouseButtonEvent& event)
     //        }
     //    }
 
-    return false;
+    return nullptr;
 }
 
 } // End namespace SpriteEditor
