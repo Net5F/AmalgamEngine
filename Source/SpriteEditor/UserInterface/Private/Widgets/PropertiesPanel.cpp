@@ -245,6 +245,8 @@ void PropertiesPanel::saveHasBoundingBox()
 {
     if (activeSprite != nullptr) {
         // Toggle hasBoundingBox.
+        // (We don't have to refresh the UI since hasBoundingBox is read during
+        //  rendering).
         activeSprite->hasBoundingBox = !(activeSprite->hasBoundingBox);
     }
 }
