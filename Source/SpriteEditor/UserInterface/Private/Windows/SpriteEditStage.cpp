@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "Sprite.h"
 #include "AssetCache.h"
+#include "SpriteDataModel.h"
 #include "Paths.h"
 #include "AUI/Core.h"
 
@@ -11,7 +12,7 @@ namespace SpriteEditor
 {
 SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
                                  SpriteDataModel& inSpriteDataModel)
-: AUI::Widget(inScreen, {389, 60, 1142, 684}, "SpriteEditStage")
+: AUI::Window(inScreen, {389, 60, 1142, 684}, "SpriteEditStage")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AUI/Window.h"
 #include "AUI/Image.h"
 #include "AUI/Text.h"
 #include "AUI/Checkbox.h"
@@ -19,7 +20,7 @@ class Sprite;
  * The right-side panel on the main screen. Allows the user to view and
  * modify the active sprite's properties.
  */
-class PropertiesPanel : public AUI::Widget
+class PropertiesPanel : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------

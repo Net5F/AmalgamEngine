@@ -2,6 +2,7 @@
 
 #include "SpriteSheet.h"
 #include "Sprite.h"
+#include "AUI/Window.h"
 #include "AUI/Screen.h"
 #include "AUI/Image.h"
 #include "AUI/VerticalGridContainer.h"
@@ -19,7 +20,7 @@ class SpriteDataModel;
  * The bottom panel on the main screen. Allows the user to select sprites to
  * load onto the stage.
  */
-class SpritePanel : public AUI::Widget
+class SpritePanel : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------

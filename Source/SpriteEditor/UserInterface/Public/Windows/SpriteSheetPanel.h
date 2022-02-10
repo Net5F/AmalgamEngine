@@ -1,10 +1,10 @@
 #pragma once
 
 #include "SpriteSheet.h"
+#include "AUI/Window.h"
 #include "AUI/Image.h"
 #include "AUI/VerticalGridContainer.h"
 #include "AUI/Button.h"
-#include "AddSheetDialog.h"
 
 namespace AM
 {
@@ -19,7 +19,7 @@ class SpriteDataModel;
  * The left-side panel on the main screen. Allows the user to manage the
  * project's sprite sheets.
  */
-class SpriteSheetPanel : public AUI::Widget
+class SpriteSheetPanel : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
@@ -64,8 +64,6 @@ private:
     AUI::Button remSheetButton;
 
     AUI::Button addSheetButton;
-
-    AddSheetDialog addSheetDialog;
 };
 
 } // End namespace SpriteEditor

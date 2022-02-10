@@ -13,7 +13,7 @@ namespace SpriteEditor
 SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
                                    MainScreen& inScreen,
                                    SpriteDataModel& inSpriteDataModel)
-: AUI::Widget(inScreen, {0, 0, 399, 708}, "SpriteSheetPanel")
+: AUI::Window(inScreen, {0, 0, 399, 708}, "SpriteSheetPanel")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
@@ -21,14 +21,12 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
 , spriteSheetContainer(inScreen, {18, 24, 306, 650}, "SpriteSheetContainer")
 , remSheetButton(inScreen, {342, 0, 45, 63})
 , addSheetButton(inScreen, {342, 63, 45, 88})
-, addSheetDialog(assetCache, inScreen, spriteSheetContainer, spriteDataModel)
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
     children.push_back(spriteSheetContainer);
     children.push_back(remSheetButton);
     children.push_back(addSheetButton);
-    children.push_back(addSheetDialog);
 
     /* Background image */
     backgroundImage.addResolution(
@@ -83,8 +81,8 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
             // Try to find a selected sprite sheet in the container.
             int selectedIndex{-1};
             for (unsigned int i = 0; i < spriteSheetContainer.size(); ++i) {
-                MainThumbnail& thumbnail
-                    = static_cast<MainThumbnail&>(spriteSheetContainer[i]);
+                MainThumbnail& thumbnail{
+                    static_cast<MainThumbnail&>(spriteSheetContainer[i])};
                 if (thumbnail.getIsSelected()) {
                     selectedIndex = i;
                     break;
@@ -101,6 +99,9 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
 
                 // Disable the button since nothing is selected.
                 remSheetButton.disable();
+            }
+            else {
+                LOG_INFO("Failed to find selected sheet during remove.");
             }
         };
 
@@ -127,11 +128,8 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
 
     addSheetButton.setOnPressed([this]() {
         // Bring up the add dialog.
-        addSheetDialog.setIsVisible(true);
+        mainScreen.openAddSheetDialog();
     });
-
-    /* Dialog. */
-    addSheetDialog.setIsVisible(false);
 }
 
 void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)

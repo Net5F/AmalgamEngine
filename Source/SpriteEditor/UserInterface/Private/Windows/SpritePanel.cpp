@@ -12,7 +12,7 @@ namespace SpriteEditor
 {
 SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen,
                          SpriteDataModel& inSpriteDataModel)
-: AUI::Widget(inScreen, {-8, 732, 1936, 352}, "SpritePanel")
+: AUI::Window(inScreen, {-8, 732, 1936, 352}, "SpritePanel")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}

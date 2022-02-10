@@ -21,7 +21,7 @@ namespace SpriteEditor
 {
 PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
                                  SpriteDataModel& inSpriteDataModel)
-: AUI::Widget(inScreen, {1617, 0, 303, 440}, "PropertiesPanel")
+: AUI::Window(inScreen, {1617, 0, 303, 440}, "PropertiesPanel")
 , nameLabel(inScreen, {24, 24, 65, 28})
 , nameInput(assetCache, inScreen, {24, 56, 255, 38})
 , hasBoundingBoxLabel(inScreen, {24, 126, 210, 38})

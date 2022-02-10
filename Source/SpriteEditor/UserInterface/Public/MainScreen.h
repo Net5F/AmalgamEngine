@@ -1,14 +1,15 @@
 #pragma once
 
-#include "SpriteDataModel.h"
 #include "AUI/Screen.h"
 #include "AUI/Button.h"
 #include "AUI/ConfirmationDialog.h"
 #include "SpriteSheetPanel.h"
 #include "SpriteEditStage.h"
 #include "SpritePanel.h"
+#include "SaveButtonWindow.h"
 #include "PropertiesPanel.h"
 #include "TitleButton.h"
+#include "AddSheetDialog.h"
 
 namespace AM
 {
@@ -16,7 +17,7 @@ class AssetCache;
 
 namespace SpriteEditor
 {
-class UserInterface;
+class SpriteDataModel;
 
 /**
  * The main screen for doing work.
@@ -48,6 +49,10 @@ public:
     void openConfirmationDialog(const std::string& bodyText,
                                 const std::string& confirmButtonText,
                                 std::function<void(void)> onConfirmation);
+    /**
+     * Opens the "Add Sheet" dialog.
+     */
+    void openAddSheetDialog();
 
     /**
      * Loads the given sprite data into PropertiesPanel, and displays it on
@@ -73,7 +78,7 @@ private:
     std::function<void(void)> userOnConfirmation;
 
     //-------------------------------------------------------------------------
-    // Child widgets
+    // Windows
     //-------------------------------------------------------------------------
     /** The left-side panel for managing sprite texture sheets. */
     SpriteSheetPanel spriteSheetPanel;
@@ -85,18 +90,18 @@ private:
     SpritePanel spritePanel;
 
     /** The save button at the top of the screen, next to the properties. */
-    AUI::Button saveButton;
+    SaveButtonWindow saveButtonWindow;
 
     /** The right-side panel for viewing and editing the active sprite data. */
     PropertiesPanel propertiesPanel;
 
-    /** Background semi-transparent shadow image to go behind the confirmation
-        dialog. */
-    AUI::Image dialogShadowImage;
-
     /** Confirmation dialog. Child widgets can call openConfirmationDialog()
         to use it. */
     AUI::ConfirmationDialog confirmationDialog;
+
+    /** Dialog for adding a sprite sheet to the SpriteSheetPanel. Child widgets
+        can call openAddSheetDialog() to use it. */
+    AddSheetDialog addSheetDialog;
 };
 
 } // End namespace SpriteEditor
