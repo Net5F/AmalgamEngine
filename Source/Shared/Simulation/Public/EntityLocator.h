@@ -63,8 +63,8 @@ public:
                                                  unsigned int radius);
 
     /**
-     * Performs a fine pass to return all entities that are strictly within
-     * the given cylinder.
+     * Performs a fine pass to return all entities that intersect the given
+     * cylinder.
      *
      * @param cylinderCenter  The position to cast the radius from.
      * @param radius  The length of the radius to cast.
