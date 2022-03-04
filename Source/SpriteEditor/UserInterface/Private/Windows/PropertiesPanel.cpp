@@ -21,23 +21,23 @@ namespace SpriteEditor
 {
 PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
                                  SpriteDataModel& inSpriteDataModel)
-: AUI::Window(inScreen, {1617, 0, 303, 440}, "PropertiesPanel")
-, nameLabel(inScreen, {24, 24, 65, 28})
-, nameInput(assetCache, inScreen, {24, 56, 255, 38})
-, hasBoundingBoxLabel(inScreen, {24, 126, 210, 38})
-, hasBoundingBoxInput(inScreen, {257, 134, 22, 22})
-, minXLabel(inScreen, {24, 176, 110, 38})
-, minXInput(assetCache, inScreen, {150, 176, 129, 38})
-, minYLabel(inScreen, {24, 226, 110, 38})
-, minYInput(assetCache, inScreen, {150, 226, 129, 38})
-, minZLabel(inScreen, {24, 276, 110, 38})
-, minZInput(assetCache, inScreen, {150, 276, 129, 38})
-, maxXLabel(inScreen, {24, 326, 110, 38})
-, maxXInput(assetCache, inScreen, {150, 326, 129, 38})
-, maxYLabel(inScreen, {24, 376, 110, 38})
-, maxYInput(assetCache, inScreen, {150, 376, 129, 38})
-, maxZLabel(inScreen, {24, 426, 110, 38})
-, maxZInput(assetCache, inScreen, {150, 426, 129, 38})
+: AUI::Window(inScreen, {1605, 0, 315, 502}, "PropertiesPanel")
+, nameLabel(inScreen, {36, 24, 65, 28}, "NameLabel")
+, nameInput(assetCache, inScreen, {36, 56, 255, 38}, "NameInput")
+, hasBoundingBoxLabel(inScreen, {36, 126, 210, 38}, "HasBBLabel")
+, hasBoundingBoxInput(inScreen, {269, 134, 22, 22}, "HasBBInput")
+, minXLabel(inScreen, {36, 176, 110, 38}, "MinXLabel")
+, minXInput(assetCache, inScreen, {162, 176, 129, 38}, "MinXInput")
+, minYLabel(inScreen, {36, 226, 110, 38}, "MinYLabel")
+, minYInput(assetCache, inScreen, {162, 226, 129, 38}, "MinYInput")
+, minZLabel(inScreen, {36, 276, 110, 38}, "MinZLabel")
+, minZInput(assetCache, inScreen, {162, 276, 129, 38}, "MinZInput")
+, maxXLabel(inScreen, {36, 326, 110, 38}, "MaxXLabel")
+, maxXInput(assetCache, inScreen, {162, 326, 129, 38}, "MaxXInput")
+, maxYLabel(inScreen, {36, 376, 110, 38}, "MaxYLabel")
+, maxYInput(assetCache, inScreen, {162, 376, 129, 38}, "MaxYInput")
+, maxZLabel(inScreen, {36, 426, 110, 38}, "MaxZLabel")
+, maxZInput(assetCache, inScreen, {162, 426, 129, 38}, "MaxZInput")
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
 , activeSprite{nullptr}
@@ -47,7 +47,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
 , committedMaxX{0.0}
 , committedMaxY{0.0}
 , committedMaxZ{0.0}
-, backgroundImage(inScreen, {-12, -4, 319, 506})
+, backgroundImage(inScreen, {0, 0, 315, 502}, "BackgroundImage")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
@@ -72,7 +72,8 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
     backgroundImage.addResolution(
         {1920, 1080},
         assetCache.loadTexture(Paths::TEXTURE_DIR
-                               + "PropertiesPanel/Background.png"));
+                               + "PropertiesPanel/Background.png"),
+        {0, 4, 315, 502});
 
     /* Display name entry. */
     nameLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);

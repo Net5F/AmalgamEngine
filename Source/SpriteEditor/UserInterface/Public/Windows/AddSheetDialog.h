@@ -64,17 +64,6 @@ public:
         action. */
     ConfirmationButton cancelButton;
 
-    //-------------------------------------------------------------------------
-    // Base class overrides
-    //-------------------------------------------------------------------------
-    // This dialog blocks all events.
-    AUI::Widget* onMouseButtonDown(SDL_MouseButtonEvent& event) override;
-    AUI::Widget* onMouseButtonUp(SDL_MouseButtonEvent& event) override;
-    AUI::Widget* onMouseWheel(SDL_MouseWheelEvent& event) override;
-    AUI::Widget* onMouseMove(SDL_MouseMotionEvent& event) override;
-    AUI::Widget* onKeyDown(SDL_KeyboardEvent& event) override;
-    AUI::Widget* onTextInput(SDL_TextInputEvent& event) override;
-
 private:
     /**
      * Clears the text in all of this dialog's text inputs and error text.

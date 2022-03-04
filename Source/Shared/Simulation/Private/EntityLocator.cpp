@@ -35,6 +35,8 @@ void EntityLocator::setGridSize(unsigned int inMapXLengthTiles,
 void EntityLocator::setEntityLocation(entt::entity entity,
                                       const BoundingBox& boundingBox)
 {
+    // TODO: This can be incorrect in some cases. Calc top left/bottom right
+    //       instead (see WidgetLocator::screenToCellExtent()).
     // Find the cells that the bounding box intersects.
     CellExtent boxCellExtent{};
     boxCellExtent.x = std::floor(boundingBox.minX / cellWorldWidth);
@@ -45,6 +47,8 @@ void EntityLocator::setEntityLocation(entt::entity entity,
         = (std::ceil(boundingBox.maxY / cellWorldWidth) - boxCellExtent.y);
 
     // Clip the extent to the grid's bounds.
+    // Note: We just do this to be nice. We already require all entities to be
+    //       within the grid's bounds, so we can remove this to optimize.
     boxCellExtent.intersectWith(cellExtent);
 
     // If we already have a location for the entity, clear it.
@@ -62,11 +66,11 @@ void EntityLocator::setEntityLocation(entt::entity entity,
     int yMax{boxCellExtent.y + boxCellExtent.yLength};
     for (int x = boxCellExtent.x; x < xMax; ++x) {
         for (int y = boxCellExtent.y; y < yMax; ++y) {
-            // Add the entity to this cell's entity array.
+            // Add the entity to this cell's entity vector.
             unsigned int linearizedIndex{linearizeCellIndex(x, y)};
-            std::vector<entt::entity>& entityArr{entityGrid[linearizedIndex]};
+            std::vector<entt::entity>& entityVec{entityGrid[linearizedIndex]};
 
-            entityArr.push_back(entity);
+            entityVec.push_back(entity);
         }
     }
 }
@@ -101,9 +105,9 @@ std::vector<entt::entity>&
         for (int y = cylinderCellExtent.y; y < yMax; ++y) {
             // Add the entities in this cell to the return vector.
             unsigned int linearizedIndex{linearizeCellIndex(x, y)};
-            std::vector<entt::entity>& entityArr{entityGrid[linearizedIndex]};
-            returnVector.insert(returnVector.end(), entityArr.begin(),
-                                entityArr.end());
+            std::vector<entt::entity>& entityVec{entityGrid[linearizedIndex]};
+            returnVector.insert(returnVector.end(), entityVec.begin(),
+                                entityVec.end());
         }
     }
 
@@ -158,9 +162,9 @@ std::vector<entt::entity>&
         for (int y = tileCellExtent.y; y < yMax; ++y) {
             // Add the entities in this cell to the return vector.
             unsigned int linearizedIndex{linearizeCellIndex(x, y)};
-            std::vector<entt::entity>& entityArr{entityGrid[linearizedIndex]};
-            returnVector.insert(returnVector.end(), entityArr.begin(),
-                                entityArr.end());
+            std::vector<entt::entity>& entityVec{entityGrid[linearizedIndex]};
+            returnVector.insert(returnVector.end(), entityVec.begin(),
+                                entityVec.end());
         }
     }
 
@@ -212,6 +216,9 @@ void EntityLocator::removeEntity(entt::entity entity)
     if (entityIt != entityMap.end()) {
         // Remove the entity from each cell that it's located in.
         clearEntityLocation(entity, entityIt->second);
+
+        // Remove the entity from the map.
+        entityMap.erase(entityIt);
     }
 }
 
@@ -223,15 +230,15 @@ void EntityLocator::clearEntityLocation(entt::entity entity,
     int yMax{clearExtent.y + clearExtent.yLength};
     for (int x = clearExtent.x; x < xMax; ++x) {
         for (int y = clearExtent.y; y < yMax; ++y) {
-            // Find the entity in this cell's entity array.
+            // Find the entity in this cell's entity vector.
             unsigned int linearizedIndex{linearizeCellIndex(x, y)};
-            std::vector<entt::entity>& entityArr{entityGrid[linearizedIndex]};
+            std::vector<entt::entity>& entityVec{entityGrid[linearizedIndex]};
             auto entityIt{
-                std::find(entityArr.begin(), entityArr.end(), entity)};
+                std::find(entityVec.begin(), entityVec.end(), entity)};
 
-            // Remove the entity from this cell's entity array.
-            if (entityIt != entityArr.end()) {
-                entityArr.erase(entityIt);
+            // Remove the entity from this cell's entity vector.
+            if (entityIt != entityVec.end()) {
+                entityVec.erase(entityIt);
             }
         }
     }

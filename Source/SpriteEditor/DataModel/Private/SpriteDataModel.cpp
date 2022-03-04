@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <algorithm>
 #include <cctype>
+#include <iostream>
 
 namespace AM
 {
@@ -380,10 +381,10 @@ bool SpriteDataModel::setWorkingTexturesDir()
         }
     }
 
-    // Convert the path to UTF_8 string and save it.
-    const char8_t* u8StringPtr{texturesDirPath.u8string().c_str()};
-    workingTexturesDir
-        = std::string(reinterpret_cast<const char*>(u8StringPtr));
+    // Save the path as a UTF-8 string.
+    // Note: We've had trouble consistently getting a UTF-8 string from a
+    //       fs::path. If this breaks on some platform, we'll have to revisit.
+    workingTexturesDir = texturesDirPath.generic_string();
 
     return true;
 }

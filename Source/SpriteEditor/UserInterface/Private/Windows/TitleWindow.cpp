@@ -18,10 +18,10 @@ TitleWindow::TitleWindow(UserInterface& inUserInterface, AssetCache& inAssetCach
 , userInterface{inUserInterface}
 , assetCache{inAssetCache}
 , spriteDataModel{inSpriteDataModel}
-, titleText(inScreen, {0, 193, 1920, 75})
-, newButton(assetCache, inScreen, {724, 432, 472, 96}, "New")
-, loadButton(assetCache, inScreen, {724, 589, 472, 96}, "Load")
-, errorText(inScreen, {0, 721, 1920, 48})
+, titleText(inScreen, {0, 193, 1920, 75}, "TitleText")
+, newButton(assetCache, inScreen, {724, 432, 472, 96}, "New", "NewButton")
+, loadButton(assetCache, inScreen, {724, 589, 472, 96}, "Load", "LoadButton")
+, errorText(inScreen, {0, 721, 1920, 48}, "ErrorText")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(titleText);

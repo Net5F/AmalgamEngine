@@ -189,23 +189,5 @@ void SpriteSheetPanel::clearSpriteSheets()
     spriteSheetContainer.clear();
 }
 
-AUI::Widget* SpriteSheetPanel::onMouseButtonDown(SDL_MouseButtonEvent& event)
-{
-    //    // If the click event was outside our extent.
-    //    if (!(containsPoint({event.x, event.y}))) {
-    //        // Deselect any selected widget.
-    //        for (auto& widgetPtr : spriteSheetContainer) {
-    //            MainThumbnail& thumbnail =
-    //            static_cast<MainThumbnail&>(*widgetPtr); if
-    //            (thumbnail.getIsSelected()) {
-    //                thumbnail.deselect();
-    //                break;
-    //            }
-    //        }
-    //    }
-
-    return nullptr;
-}
-
 } // End namespace SpriteEditor
 } // End namespace AM

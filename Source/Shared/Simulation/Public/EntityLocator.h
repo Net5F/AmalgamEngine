@@ -6,7 +6,6 @@
 #include "entt/fwd.hpp"
 #include <vector>
 #include <unordered_map>
-#include <array>
 
 namespace AM
 {
@@ -127,7 +126,7 @@ private:
     float cellWorldWidth;
 
     /** The outer vector is a 2D grid stored in row-major order, holding the
-        grid's cells (sized to SPATIAL_CELL_SIZE).
+        grid's cells.
         Each element in the grid is a vector of entities--the entities that
         currently intersect with that cell. */
     std::vector<std::vector<entt::entity>> entityGrid;

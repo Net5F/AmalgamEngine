@@ -15,6 +15,8 @@ namespace SpriteEditor
 class MainScreen;
 class SpriteDataModel;
 
+// TODO: Make this obtain focus and deselect all selected thumbnails when
+//       focus is lost.
 /**
  * The left-side panel on the main screen. Allows the user to manage the
  * project's sprite sheets.
@@ -38,11 +40,6 @@ public:
      * Clears spritesheetContainer, removing all the sprite sheet widgets.
      */
     void clearSpriteSheets();
-
-    //-------------------------------------------------------------------------
-    // Base class overrides
-    //-------------------------------------------------------------------------
-    Widget* onMouseButtonDown(SDL_MouseButtonEvent& event) override;
 
 private:
     /** Used to load the added sprite sheet's textures. */

@@ -158,41 +158,5 @@ void AddSheetDialog::clear()
     errorText.setText("");
 }
 
-AUI::Widget* AddSheetDialog::onMouseButtonDown(SDL_MouseButtonEvent& event)
-{
-    ignore(event);
-    return this;
-}
-
-AUI::Widget* AddSheetDialog::onMouseButtonUp(SDL_MouseButtonEvent& event)
-{
-    ignore(event);
-    return this;
-}
-
-AUI::Widget* AddSheetDialog::onMouseWheel(SDL_MouseWheelEvent& event)
-{
-    ignore(event);
-    return this;
-}
-
-AUI::Widget* AddSheetDialog::onMouseMove(SDL_MouseMotionEvent& event)
-{
-    ignore(event);
-    return this;
-}
-
-AUI::Widget* AddSheetDialog::onKeyDown(SDL_KeyboardEvent& event)
-{
-    ignore(event);
-    return this;
-}
-
-AUI::Widget* AddSheetDialog::onTextInput(SDL_TextInputEvent& event)
-{
-    ignore(event);
-    return this;
-}
-
 } // End namespace SpriteEditor
 } // End namespace AM

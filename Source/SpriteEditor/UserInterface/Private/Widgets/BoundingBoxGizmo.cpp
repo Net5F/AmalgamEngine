@@ -9,6 +9,7 @@
 #include "Log.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
+#include "AUI/SDLHelpers.h"
 #include <algorithm>
 
 #include <SDL2/SDL2_gfxPrimitives.h>
@@ -86,54 +87,65 @@ void BoundingBoxGizmo::render()
     renderControls();
 }
 
-AUI::Widget* BoundingBoxGizmo::onMouseButtonDown(SDL_MouseButtonEvent& event)
+AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType, const SDL_Point& cursorPosition)
 {
+    // Only respond to the left mouse button.
+    if (buttonType != AUI::MouseButtonType::Left) {
+        return AUI::EventResult{.wasConsumed{false}};
+    }
+
     // Check if the mouse press hit any of our controls.
-    SDL_Point mousePress{event.x, event.y};
-    if (SDL_PointInRect(&mousePress, &lastRenderedPosExtent)) {
+    if (AUI::SDLHelpers::pointInRect(cursorPosition, lastRenderedPosExtent)) {
         currentHeldControl = Control::Position;
     }
-    else if (SDL_PointInRect(&mousePress, &lastRenderedXExtent)) {
+    else if (AUI::SDLHelpers::pointInRect(cursorPosition, lastRenderedXExtent)) {
         currentHeldControl = Control::X;
     }
-    else if (SDL_PointInRect(&mousePress, &lastRenderedYExtent)) {
+    else if (AUI::SDLHelpers::pointInRect(cursorPosition, lastRenderedYExtent)) {
         currentHeldControl = Control::Y;
     }
-    else if (SDL_PointInRect(&mousePress, &lastRenderedZExtent)) {
+    else if (AUI::SDLHelpers::pointInRect(cursorPosition, lastRenderedZExtent)) {
         currentHeldControl = Control::Z;
     }
 
-    // If the click was inside our bounds, consume it.
-    if (containsPoint({event.x, event.y})) {
-        return this;
+    // If we're holding a control, set mouse capture so we get the associated
+    // MouseUp.
+    if (currentHeldControl != Control::None) {
+        return AUI::EventResult{.wasConsumed{true}, .setMouseCapture{this}};
     }
     else {
-        return nullptr;
+        return AUI::EventResult{.wasConsumed{true}};
     }
 }
 
-AUI::Widget* BoundingBoxGizmo::onMouseButtonUp(SDL_MouseButtonEvent& event)
+AUI::EventResult BoundingBoxGizmo::onMouseUp(AUI::MouseButtonType buttonType, const SDL_Point& cursorPosition)
 {
-    ignore(event);
+    ignore(cursorPosition);
 
-    // If we were being pressed, release it.
+    // Only respond to the left mouse button.
+    if (buttonType != AUI::MouseButtonType::Left) {
+        return AUI::EventResult{.wasConsumed{false}};
+    }
+
+    // If we're holding a control, release it and release mouse capture.
     if (currentHeldControl != Control::None) {
         currentHeldControl = Control::None;
-        return this;
+        return AUI::EventResult{.wasConsumed{true}, .releaseMouseCapture{true}};
     }
     else {
-        // We weren't being pressed.
-        return nullptr;
+        return AUI::EventResult{.wasConsumed{true}};
     }
 }
 
-AUI::Widget* BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
+AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
 {
     // If we aren't being pressed, ignore the event.
     if (currentHeldControl == Control::None) {
-        return nullptr;
+        return AUI::EventResult{.wasConsumed{false}};
     }
 
+    // TODO: When we change cursorPosition to be relative to widget 0,0,
+    //       update this math.
     /* Translate the mouse position to world space. */
     // Account for the sprite's empty vertical space.
     int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite->yOffset)};
@@ -145,7 +157,7 @@ AUI::Widget* BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
     xOffset += renderExtent.x;
 
     // Apply the offset to the mouse position and convert to logical space.
-    SDL_Point offsetMousePoint{event.x - xOffset, event.y - yOffset};
+    SDL_Point offsetMousePoint{cursorPosition.x - xOffset, cursorPosition.y - yOffset};
     offsetMousePoint = AUI::ScalingHelpers::actualToLogical(offsetMousePoint);
 
     // Convert the screen-space mouse point to world space.
@@ -169,7 +181,7 @@ AUI::Widget* BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
             break;
         }
         case Control::Z: {
-            updateZBounds(event.y);
+            updateZBounds(cursorPosition.y);
             break;
         }
         default: {
@@ -180,7 +192,7 @@ AUI::Widget* BoundingBoxGizmo::onMouseMove(SDL_MouseMotionEvent& event)
     // Refresh the UI so it reflects the changed position.
     mainScreen.refreshActiveSpriteUi();
 
-    return this;
+    return AUI::EventResult{.wasConsumed{true}};
 }
 
 bool BoundingBoxGizmo::refreshScaling()
