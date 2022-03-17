@@ -91,7 +91,7 @@ AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType, 
 {
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
-        return AUI::EventResult{.wasConsumed{false}};
+        return AUI::EventResult{.wasHandled{false}};
     }
 
     // Check if the mouse press hit any of our controls.
@@ -111,10 +111,10 @@ AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType, 
     // If we're holding a control, set mouse capture so we get the associated
     // MouseUp.
     if (currentHeldControl != Control::None) {
-        return AUI::EventResult{.wasConsumed{true}, .setMouseCapture{this}};
+        return AUI::EventResult{.wasHandled{true}, .setMouseCapture{this}};
     }
     else {
-        return AUI::EventResult{.wasConsumed{true}};
+        return AUI::EventResult{.wasHandled{true}};
     }
 }
 
@@ -124,16 +124,16 @@ AUI::EventResult BoundingBoxGizmo::onMouseUp(AUI::MouseButtonType buttonType, co
 
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
-        return AUI::EventResult{.wasConsumed{false}};
+        return AUI::EventResult{.wasHandled{false}};
     }
 
     // If we're holding a control, release it and release mouse capture.
     if (currentHeldControl != Control::None) {
         currentHeldControl = Control::None;
-        return AUI::EventResult{.wasConsumed{true}, .releaseMouseCapture{true}};
+        return AUI::EventResult{.wasHandled{true}, .releaseMouseCapture{true}};
     }
     else {
-        return AUI::EventResult{.wasConsumed{true}};
+        return AUI::EventResult{.wasHandled{true}};
     }
 }
 
@@ -141,7 +141,7 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
 {
     // If we aren't being pressed, ignore the event.
     if (currentHeldControl == Control::None) {
-        return AUI::EventResult{.wasConsumed{false}};
+        return AUI::EventResult{.wasHandled{false}};
     }
 
     // TODO: When we change cursorPosition to be relative to widget 0,0,
@@ -192,7 +192,7 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
     // Refresh the UI so it reflects the changed position.
     mainScreen.refreshActiveSpriteUi();
 
-    return AUI::EventResult{.wasConsumed{true}};
+    return AUI::EventResult{.wasHandled{true}};
 }
 
 bool BoundingBoxGizmo::refreshScaling()
