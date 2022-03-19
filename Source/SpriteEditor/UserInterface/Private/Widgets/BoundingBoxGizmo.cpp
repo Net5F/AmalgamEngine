@@ -144,8 +144,6 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
         return AUI::EventResult{.wasHandled{false}};
     }
 
-    // TODO: When we change cursorPosition to be relative to widget 0,0,
-    //       update this math.
     /* Translate the mouse position to world space. */
     // Account for the sprite's empty vertical space.
     int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite->yOffset)};
