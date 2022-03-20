@@ -12,11 +12,11 @@ namespace SpriteEditor
 {
 SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen,
                          SpriteDataModel& inSpriteDataModel)
-: AUI::Widget(inScreen, {-8, 732, 1936, 352}, "SpritePanel")
+: AUI::Window(inScreen, {-8, 732, 1936, 352}, "SpritePanel")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
-, backgroundImage(inScreen, {0, 0, 1936, 352})
+, backgroundImage(inScreen, {0, 0, 1936, 352}, "SpritePanelBackground")
 , spriteContainer(inScreen, {191, 24, 1737, 324}, "SpriteContainer")
 {
     // Add our children so they're included in rendering, etc.
@@ -39,7 +39,7 @@ void SpritePanel::addSprite(const SpriteSheet& sheet, Sprite& sprite)
 {
     // Construct the new sprite thumbnail.
     std::unique_ptr<AUI::Widget> thumbnailPtr{
-        std::make_unique<MainThumbnail>(assetCache, screen, "")};
+        std::make_unique<MainThumbnail>(assetCache, screen, "SpritePanelThumbnail")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
     thumbnail.setText(sprite.displayName);
     thumbnail.setIsSelectable(false);

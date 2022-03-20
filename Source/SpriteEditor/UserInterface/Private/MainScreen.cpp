@@ -1,5 +1,6 @@
 #include "MainScreen.h"
 #include "AssetCache.h"
+#include "SpriteDataModel.h"
 #include "Paths.h"
 #include "AUI/Core.h"
 #include "nfd.h"
@@ -11,72 +12,47 @@ namespace SpriteEditor
 {
 MainScreen::MainScreen(AssetCache& assetCache,
                        SpriteDataModel& inSpriteDataModel)
-: Screen("MainScreen")
+: AUI::Screen("MainScreen")
 , spriteDataModel{inSpriteDataModel}
 , activeSprite{nullptr}
 , spriteSheetPanel(assetCache, *this, spriteDataModel)
 , spriteEditStage(assetCache, *this, spriteDataModel)
 , spritePanel(assetCache, *this, spriteDataModel)
-, saveButton(*this, {1537, 0, 58, 58})
+, saveButtonWindow(assetCache, *this, spriteDataModel)
 , propertiesPanel(assetCache, *this, spriteDataModel)
-, dialogShadowImage(*this, {0, 0, 1920, 1080})
-, confirmationDialog(*this, {721, 358, 474, 248})
+, confirmationDialog(*this, {0, 0, 1920, 1080}, "ConfirmationDialog")
+, addSheetDialog(assetCache, *this, spriteDataModel)
 {
-    // Add our children so they're included in rendering, etc.
-    children.push_back(spriteEditStage);
-    children.push_back(spriteSheetPanel);
-    children.push_back(spritePanel);
-    children.push_back(saveButton);
-    children.push_back(propertiesPanel);
-    children.push_back(dialogShadowImage);
-    children.push_back(confirmationDialog);
-
-    /* Save button. */
-    saveButton.normalImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "SaveButton/Normal.png"));
-    saveButton.hoveredImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "SaveButton/Hovered.png"));
-    saveButton.pressedImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "SaveButton/Pressed.png"));
-    saveButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
-    saveButton.text.setText("");
-
-    // Add a callback to save the current sprite data when pressed.
-    saveButton.setOnPressed([this]() {
-        // Create our callback.
-        std::function<void(void)> onConfirmation = [&]() {
-            // Save the data.
-            spriteDataModel.save();
-        };
-
-        // Open the confirmation dialog.
-        openConfirmationDialog("Save over existing SpriteData.json?", "SAVE",
-                               std::move(onConfirmation));
-    });
+    // Add our windows so they're included in rendering, etc.
+    windows.push_back(spriteEditStage);
+    windows.push_back(spriteSheetPanel);
+    windows.push_back(spritePanel);
+    windows.push_back(saveButtonWindow);
+    windows.push_back(propertiesPanel);
+    windows.push_back(confirmationDialog);
+    windows.push_back(addSheetDialog);
 
     /* Confirmation dialog. */
     // Background shadow image.
-    dialogShadowImage.addResolution(
+    confirmationDialog.shadowImage.setLogicalExtent({0, 0, 1920, 1080});
+    confirmationDialog.shadowImage.addResolution(
         {1920, 1080},
         assetCache.loadTexture(Paths::TEXTURE_DIR + "Dialogs/Shadow.png"));
 
     // Background image.
-    confirmationDialog.backgroundImage.setLogicalExtent({0, 0, 474, 248});
+    confirmationDialog.backgroundImage.setLogicalExtent({721, 358, 474, 248});
     confirmationDialog.backgroundImage.addResolution(
         {1920, 1080},
         assetCache.loadTexture(Paths::TEXTURE_DIR + "Dialogs/Background.png"));
 
     // Body text.
-    confirmationDialog.bodyText.setLogicalExtent({42, 42, 400, 60});
+    confirmationDialog.bodyText.setLogicalExtent({763, 400, 400, 60});
     confirmationDialog.bodyText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"),
                                         21);
     confirmationDialog.bodyText.setColor({255, 255, 255, 255});
 
     // Buttons.
-    confirmationDialog.confirmButton.setLogicalExtent({324, 162, 123, 56});
+    confirmationDialog.confirmButton.setLogicalExtent({1045, 520, 123, 56});
     confirmationDialog.confirmButton.normalImage.setLogicalExtent(
         {0, 0, 123, 56});
     confirmationDialog.confirmButton.hoveredImage.setLogicalExtent(
@@ -99,7 +75,7 @@ MainScreen::MainScreen(AssetCache& assetCache,
         (Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     confirmationDialog.confirmButton.text.setColor({255, 255, 255, 255});
 
-    confirmationDialog.cancelButton.setLogicalExtent({182, 162, 123, 56});
+    confirmationDialog.cancelButton.setLogicalExtent({903, 520, 123, 56});
     confirmationDialog.cancelButton.normalImage.setLogicalExtent(
         {0, 0, 123, 56});
     confirmationDialog.cancelButton.hoveredImage.setLogicalExtent(
@@ -126,14 +102,12 @@ MainScreen::MainScreen(AssetCache& assetCache,
     // Set up the dialog's cancel button callback.
     confirmationDialog.cancelButton.setOnPressed([this]() {
         // Close the dialog.
-        dialogShadowImage.setIsVisible(false);
         confirmationDialog.setIsVisible(false);
     });
 
-    // Make the confirmationDialog invisible. Widgets that want to use it can
-    // set it up and control the visibility.
-    dialogShadowImage.setIsVisible(false);
+    // Make the modal dialogs invisible.
     confirmationDialog.setIsVisible(false);
+    addSheetDialog.setIsVisible(false);
 }
 
 void MainScreen::loadSpriteData()
@@ -189,13 +163,17 @@ void MainScreen::openConfirmationDialog(
         userOnConfirmation();
 
         // Close the dialog.
-        dialogShadowImage.setIsVisible(false);
         confirmationDialog.setIsVisible(false);
     });
 
     // Open the dialog.
-    dialogShadowImage.setIsVisible(true);
     confirmationDialog.setIsVisible(true);
+}
+
+void MainScreen::openAddSheetDialog()
+{
+    // Open the dialog.
+    addSheetDialog.setIsVisible(true);
 }
 
 void MainScreen::loadActiveSprite(Sprite* inActiveSprite)

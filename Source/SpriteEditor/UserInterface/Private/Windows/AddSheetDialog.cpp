@@ -4,6 +4,7 @@
 #include "SpriteDataModel.h"
 #include "AssetCache.h"
 #include "Paths.h"
+#include "Ignore.h"
 
 namespace AM
 {
@@ -11,9 +12,8 @@ namespace SpriteEditor
 {
 AddSheetDialog::AddSheetDialog(
     AssetCache& assetCache, MainScreen& inScreen,
-    AUI::VerticalGridContainer& inSpriteSheetContainer,
     SpriteDataModel& inSpriteDataModel)
-: AUI::Widget(inScreen, {0, 0, 1920, 1080})
+: AUI::Window(inScreen, {0, 0, 1920, 1080}, "AddSheetDialog")
 , backgroundImage(inScreen, {0, 0, logicalExtent.w, logicalExtent.h})
 , headerText(inScreen, {747, 228, 280, 60})
 , pathLabel(inScreen, {747, 300, 151, 38})
@@ -29,7 +29,6 @@ AddSheetDialog::AddSheetDialog(
 , addButton(assetCache, inScreen, {1099, 640, 123, 56}, "ADD")
 , cancelButton(assetCache, inScreen, {958, 640, 123, 56}, "CANCEL")
 , mainScreen{inScreen}
-, spriteSheetContainer{inSpriteSheetContainer}
 , spriteDataModel{inSpriteDataModel}
 , errorText(inScreen, {748, 556, 466, 60})
 {

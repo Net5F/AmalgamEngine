@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AUI/Window.h"
 #include "AUI/Screen.h"
 #include "AUI/TiledImage.h"
 #include "BoundingBoxGizmo.h"
@@ -18,7 +19,7 @@ class SpriteDataModel;
  * The center stage on the main screen. Allows the user to edit a sprite's
  * bounding box.
  */
-class SpriteEditStage : public AUI::Widget
+class SpriteEditStage : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------

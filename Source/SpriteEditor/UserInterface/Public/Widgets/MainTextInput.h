@@ -17,7 +17,7 @@ class MainTextInput : public AUI::TextInput
 public:
     MainTextInput(AssetCache& assetCache, AUI::Screen& inScreen,
                   const SDL_Rect& inScreenExtent,
-                  const std::string& inDebugName = "");
+                  const std::string& inDebugName = "MainTextInput");
 };
 
 } // End namespace SpriteEditor

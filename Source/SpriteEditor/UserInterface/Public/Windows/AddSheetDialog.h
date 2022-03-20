@@ -1,8 +1,8 @@
 #pragma once
 
+#include "AUI/Window.h"
 #include "AUI/Image.h"
 #include "AUI/Text.h"
-#include "AUI/VerticalGridContainer.h"
 #include "ConfirmationButton.h"
 #include "MainTextInput.h"
 
@@ -19,11 +19,10 @@ class SpriteDataModel;
  * A confirmation dialog with header text, body text, and confirm/cancel
  * buttons.
  */
-class AddSheetDialog : public AUI::Widget
+class AddSheetDialog : public AUI::Window
 {
 public:
     AddSheetDialog(AssetCache& assetCache, MainScreen& inScreen,
-                   AUI::VerticalGridContainer& inSpriteSheetContainer,
                    SpriteDataModel& inSpriteDataModel);
 
     virtual ~AddSheetDialog() = default;
@@ -75,10 +74,6 @@ private:
         AUI::Screen reference that we could cast, but we want to explicitly
         model a dependency on MainScreen. */
     MainScreen& mainScreen;
-
-    /** Used to remove the currently selected thumbnail when removeButton is
-        pressed. */
-    AUI::VerticalGridContainer& spriteSheetContainer;
 
     /** Used to update the model when a sheet is added. */
     SpriteDataModel& spriteDataModel;
