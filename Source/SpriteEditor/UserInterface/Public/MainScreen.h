@@ -49,6 +49,7 @@ public:
     void openConfirmationDialog(const std::string& bodyText,
                                 const std::string& confirmButtonText,
                                 std::function<void(void)> onConfirmation);
+
     /**
      * Opens the "Add Sheet" dialog.
      */
