@@ -17,7 +17,7 @@ class MainThumbnail : public AUI::Thumbnail
 {
 public:
     MainThumbnail(AssetCache& assetCache, AUI::Screen& inScreen,
-                  const std::string& inDebugName = "");
+                  const std::string& inDebugName = "MainThumbnail");
 };
 
 } // End namespace SpriteEditor

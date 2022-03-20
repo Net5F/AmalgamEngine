@@ -20,7 +20,7 @@ public:
     ConfirmationButton(AssetCache& assetCache, AUI::Screen& inScreen,
                        const SDL_Rect& inScreenExtent,
                        const std::string& inText,
-                       const std::string& inDebugName = "");
+                       const std::string& inDebugName = "ConfirmationButton");
 };
 
 } // End namespace SpriteEditor
