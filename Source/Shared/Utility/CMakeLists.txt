@@ -8,6 +8,7 @@ target_sources(Shared
         Private/Timer.cpp
         Private/Transforms.cpp
     PUBLIC
+        Public/AMAssert.h
         Public/AssetCache.h
         Public/BinaryBuffer.h
         Public/ByteTools.h
