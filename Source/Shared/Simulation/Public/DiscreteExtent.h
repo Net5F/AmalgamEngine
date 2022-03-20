@@ -171,21 +171,34 @@ public:
     }
 
     /**
-     * Returns true if the given position is within this extent, else false.
+     * @return true if the given position is within this extent, else false.
      */
     bool containsPosition(const DiscretePosition<T>& position) const
     {
-        return ((position.x >= x) && (position.x < (x + xLength))
-                && (position.y >= y) && (position.y < (y + yLength)));
+        return ((position.x >= x) && (position.x <= (x + xLength))
+                && (position.y >= y) && (position.y <= (y + yLength)));
     }
 
     /**
-     * Returns true if this extent has no area.
+     * @return true if the given extent is fully within this extent, else
+     *         false.
+     */
+    bool containsExtent(const DiscreteExtent<T>& extent) const
+    {
+        DiscretePosition<T> topLeft{extent.x, extent.y};
+        DiscretePosition<T> bottomRight{(extent.x + extent.xLength)
+            , (extent.y + extent.yLength)};
+        return (containsPosition(topLeft) && containsPosition(bottomRight));
+    }
+
+    /**
+     * @return true if this extent has no area.
      */
     bool isEmpty() { return ((xLength <= 0) || (yLength <= 0)); }
 
     /**
-     * Returns the area of this extent.
+     * @return A count of the number of discrete elements within this extent.
+     *         Can also be thought of as the area of this extent.
      */
     std::size_t getCount() const { return (xLength * yLength); }
 };

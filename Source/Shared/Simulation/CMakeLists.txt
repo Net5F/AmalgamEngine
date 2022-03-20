@@ -21,6 +21,7 @@ target_sources(Shared
         Public/Components/PreviousPosition.h
         Public/Components/Velocity.h
         Public/TileMap/CellExtent.h
+        Public/TileMap/CellPosition.h
         Public/TileMap/ChunkExtent.h
         Public/TileMap/ChunkPosition.h
         Public/TileMap/ChunkSnapshot.h

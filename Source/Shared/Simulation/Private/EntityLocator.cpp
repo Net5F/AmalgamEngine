@@ -2,7 +2,9 @@
 #include "SharedConfig.h"
 #include "Position.h"
 #include "BoundingBox.h"
+#include "CellPosition.h"
 #include "Log.h"
+#include "AMAssert.h"
 #include "entt/entity/registry.hpp"
 #include <cmath>
 #include <algorithm>
@@ -35,8 +37,6 @@ void EntityLocator::setGridSize(unsigned int inMapXLengthTiles,
 void EntityLocator::setEntityLocation(entt::entity entity,
                                       const BoundingBox& boundingBox)
 {
-    // TODO: This can be incorrect in some cases. Calc top left/bottom right
-    //       instead (see WidgetLocator::screenToCellExtent()).
     // Find the cells that the bounding box intersects.
     CellExtent boxCellExtent{};
     boxCellExtent.x = std::floor(boundingBox.minX / cellWorldWidth);
@@ -46,10 +46,8 @@ void EntityLocator::setEntityLocation(entt::entity entity,
     boxCellExtent.yLength
         = (std::ceil(boundingBox.maxY / cellWorldWidth) - boxCellExtent.y);
 
-    // Clip the extent to the grid's bounds.
-    // Note: We just do this to be nice. We already require all entities to be
-    //       within the grid's bounds, so we can remove this to optimize.
-    boxCellExtent.intersectWith(cellExtent);
+    AM_ASSERT(cellExtent.containsExtent(boxCellExtent), "Tried to track entity "
+        "that is outside of the locator's grid.");
 
     // If we already have a location for the entity, clear it.
     auto entityIt{entityMap.find(entity)};
@@ -144,13 +142,7 @@ std::vector<entt::entity>&
     returnVector.clear();
 
     // Calc the cell extent that is intersected by the tile extent.
-    CellExtent tileCellExtent{};
-    tileCellExtent.x = std::floor(tileExtent.x / SharedConfig::CELL_WIDTH);
-    tileCellExtent.y = std::floor(tileExtent.y / SharedConfig::CELL_WIDTH);
-    tileCellExtent.xLength
-        = std::ceil(tileExtent.xLength / SharedConfig::CELL_WIDTH);
-    tileCellExtent.yLength
-        = std::ceil(tileExtent.yLength / SharedConfig::CELL_WIDTH);
+    CellExtent tileCellExtent{tileToCellExtent(tileExtent)};
 
     // Clip the extent to the grid's bounds.
     tileCellExtent.intersectWith(cellExtent);
@@ -242,6 +234,25 @@ void EntityLocator::clearEntityLocation(entt::entity entity,
             }
         }
     }
+}
+
+CellExtent EntityLocator::tileToCellExtent(const TileExtent& tileExtent)
+{
+    // Cast CELL_WIDTH to a float so we get float division below.
+    float cellWidth{SharedConfig::CELL_WIDTH};
+
+    CellPosition topLeft{};
+    topLeft.x = static_cast<int>(std::floor(tileExtent.x / cellWidth));
+    topLeft.y = static_cast<int>(std::floor(tileExtent.y / cellWidth));
+
+    CellPosition bottomRight{};
+    bottomRight.x = static_cast<int>(std::ceil((tileExtent.x
+        + tileExtent.xLength) / cellWidth));
+    bottomRight.y = static_cast<int>(std::ceil((tileExtent.y
+        + tileExtent.yLength) / cellWidth));
+
+    return {topLeft.x, topLeft.y, (bottomRight.x - topLeft.x),
+            (bottomRight.y - topLeft.y)};
 }
 
 } // End namespace AM

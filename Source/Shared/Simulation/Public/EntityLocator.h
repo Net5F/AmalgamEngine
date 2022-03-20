@@ -116,6 +116,11 @@ private:
         return (y * cellExtent.xLength) + x;
     }
 
+    /**
+     * Converts the given tile extent to a cell extent.
+     */
+    CellExtent tileToCellExtent(const TileExtent& tileExtent);
+
     /** Used for fetching entity bounding boxes while doing a fine pass. */
     entt::registry& registry;
 
