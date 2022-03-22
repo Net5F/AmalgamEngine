@@ -71,7 +71,7 @@ void Renderer::render()
     renderWorld(lerpedCamera, alpha);
 
     // Draw UI elements.
-    renderUserInterface(lerpedCamera);
+    ui.render(lerpedCamera);
 
     // Render the finished buffer to the screen.
     SDL_RenderPresent(sdlRenderer);
@@ -102,26 +102,6 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
                        &(spriteInfo.screenExtent));
         //        drawBoundingBox(spriteInfo.worldBounds, camera);
     }
-}
-
-void Renderer::renderUserInterface(const Camera& camera)
-{
-    /* Render the mouse highlight (currently just a tile sprite.) */
-    // Get iso screen extent for this tile.
-    const TilePosition& highlightPosition = ui.tileHighlightPosition;
-    const Sprite& highlightSprite = *(ui.tileHighlightSprite);
-    SDL_Rect screenExtent = ClientTransforms::tileToScreenExtent(
-        highlightPosition, highlightSprite, camera);
-
-    // Set the texture's alpha to make the highlight transparent.
-    SDL_SetTextureAlphaMod(highlightSprite.texture.get(), 150);
-
-    // Draw the highlight.
-    SDL_RenderCopy(sdlRenderer, highlightSprite.texture.get(),
-                   &(highlightSprite.textureExtent), &screenExtent);
-
-    // Set the texture's alpha back.
-    SDL_SetTextureAlphaMod(highlightSprite.texture.get(), 255);
 }
 
 void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)

@@ -21,6 +21,9 @@ class UserInterface;
 /**
  * Uses world information from the Sim to isometrically render the player's
  * view.
+ *
+ * Also kicks off the UI's rendering, but the UI manages its render logic
+ * itself.
  */
 class Renderer : public OSEventHandler
 {
@@ -55,12 +58,6 @@ private:
      * @param alpha  For entities, the alpha to lerp between positions with.
      */
     void renderWorld(const Camera& camera, double alpha);
-
-    /**
-     * Render all elements of the UserInterface.
-     * @param camera  The camera to draw with.
-     */
-    void renderUserInterface(const Camera& camera);
 
     /**
      * Draws the given box. Useful for debug visuals.

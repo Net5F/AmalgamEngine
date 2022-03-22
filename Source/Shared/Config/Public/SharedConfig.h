@@ -84,11 +84,6 @@ public:
     //-------------------------------------------------------------------------
     // Renderer
     //-------------------------------------------------------------------------
-    // TODO: These should be in the client config only, but the server uses
-    //       them for AoI at the moment.
-    static constexpr unsigned int SCREEN_WIDTH = 1280;
-    static constexpr unsigned int SCREEN_HEIGHT = 720;
-
     // TODO: These are shared between client/editor because
     //       Transforms uses them. Should they be dynamically
     //       passed in or something?

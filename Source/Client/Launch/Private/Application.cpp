@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "Config.h"
 #include "SharedConfig.h"
 #include "Profiler.h"
 #include "Paths.h"
@@ -17,7 +18,7 @@ namespace Client
 Application::Application()
 : sdl(SDL_INIT_VIDEO)
 , sdlWindow("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-            SharedConfig::SCREEN_WIDTH, SharedConfig::SCREEN_HEIGHT,
+            Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT,
             SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , assetCache(sdlRenderer.Get())
@@ -30,7 +31,7 @@ Application::Application()
 , sim(uiEventDispatcher, networkEventDispatcher, network, spriteData)
 , simCaller(std::bind_front(&Simulation::tick, &sim),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
-, userInterface(uiEventDispatcher, sim.getWorld(), spriteData)
+, userInterface(uiEventDispatcher, sim.getWorld(), sdlRenderer.Get(), assetCache, spriteData)
 , renderer(sdlRenderer.Get(), sim, userInterface,
            std::bind_front(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind_front(&Renderer::render, &renderer),

@@ -109,12 +109,13 @@ void Simulation::connect()
     // Set up the player's visual components.
     // TODO: Since sprite components hold static data, do we want them to
     //       just contain a ref to the actual data? Or is this copy better?
+    // TODO: Switch to logical screen size and do scaling in Renderer.
     Sprite& playerSprite{
         registry.emplace<Sprite>(newEntity, spriteData.get("test_31"))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
-                             ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH,
-                                        SharedConfig::SCREEN_HEIGHT});
+                             ScreenRect{0, 0, Config::ACTUAL_SCREEN_WIDTH,
+                                        Config::ACTUAL_SCREEN_HEIGHT});
 
     // Set up the player's bounding box, based on their sprite.
     registry.emplace<BoundingBox>(
@@ -148,13 +149,14 @@ void Simulation::fakeConnection()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
+    // TODO: Switch to logical screen size and do scaling in Renderer.
     registry.emplace<Sprite>(newEntity, spriteData.get("col_0"));
     Sprite& playerSprite{
         registry.emplace<Sprite>(newEntity, spriteData.get("test_31"))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
-                             ScreenRect{0, 0, SharedConfig::SCREEN_WIDTH,
-                                        SharedConfig::SCREEN_HEIGHT});
+                             ScreenRect{0, 0, Config::ACTUAL_SCREEN_WIDTH,
+                                        Config::ACTUAL_SCREEN_HEIGHT});
 
     // Set up the player's bounding box, based on their sprite.
     registry.emplace<BoundingBox>(

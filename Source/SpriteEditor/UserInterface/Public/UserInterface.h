@@ -28,8 +28,8 @@ namespace SpriteEditor
 class UserInterface : public OSEventHandler
 {
 public:
-    UserInterface(SDL_Renderer* renderer, AssetCache& assetCache,
-                  SpriteDataModel& spriteDataModel);
+    UserInterface(SDL_Renderer* inRenderer, AssetCache& inAssetCache,
+                  SpriteDataModel& inSpriteDataModel);
 
     /**
      * Changes the currentScreen to titleScreen.
@@ -56,6 +56,13 @@ public:
     void tick(double timestepS);
 
     /**
+     * Renders all UI graphics for the current screen to the current rendering
+     * target.
+     */
+    void render();
+
+private:
+    /**
      * AmalgamUI initializer, used to init/quit the library at the proper
      * times.
      */
@@ -66,7 +73,6 @@ public:
      */
     AUI::Screen* currentScreen;
 
-private:
     TitleScreen titleScreen;
 
     MainScreen mainScreen;

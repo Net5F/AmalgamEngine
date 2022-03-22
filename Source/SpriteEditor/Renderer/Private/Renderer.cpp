@@ -23,7 +23,7 @@ void Renderer::render()
     SDL_RenderClear(sdlRenderer);
 
     // Render the current UI screen.
-    ui.currentScreen->render();
+    ui.render();
 
     // Present the finished back buffer to the user's screen.
     SDL_RenderPresent(sdlRenderer);

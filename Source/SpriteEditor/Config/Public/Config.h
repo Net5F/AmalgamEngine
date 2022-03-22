@@ -15,13 +15,16 @@ namespace SpriteEditor
 class Config
 {
 public:
-    //    static constexpr unsigned int ACTUAL_SCREEN_WIDTH{1920};
-    //    static constexpr unsigned int ACTUAL_SCREEN_HEIGHT{1080};
+    /** The actual size of the window we're rendering to. */
     static constexpr unsigned int ACTUAL_SCREEN_WIDTH{1600};
     static constexpr unsigned int ACTUAL_SCREEN_HEIGHT{900};
-    //    static constexpr unsigned int ACTUAL_SCREEN_WIDTH{1280};
-    //    static constexpr unsigned int ACTUAL_SCREEN_HEIGHT{720};
 
+    /**
+     * The logical screen size that we're targeting.
+     *
+     * The developer can write layout logic in reference to this logical size,
+     * and it will be scaled to match the actual size above.
+     */
     static constexpr unsigned int LOGICAL_SCREEN_WIDTH{1920};
     static constexpr unsigned int LOGICAL_SCREEN_HEIGHT{1080};
 

@@ -9,13 +9,13 @@ namespace AM
 {
 namespace SpriteEditor
 {
-UserInterface::UserInterface(SDL_Renderer* renderer, AssetCache& assetCache,
-                             SpriteDataModel& spriteDataModel)
-: auiInitializer(renderer,
+UserInterface::UserInterface(SDL_Renderer* inRenderer, AssetCache& inAssetCache,
+                             SpriteDataModel& inSpriteDataModel)
+: auiInitializer(inRenderer,
                  {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT})
 , currentScreen(&titleScreen)
-, titleScreen(*this, assetCache, spriteDataModel)
-, mainScreen(assetCache, spriteDataModel)
+, titleScreen(*this, inAssetCache, inSpriteDataModel)
+, mainScreen(inAssetCache, inSpriteDataModel)
 {
     AUI::Core::setActualScreenSize(
         {Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT});
@@ -45,6 +45,13 @@ void UserInterface::tick(double timestepS)
 {
     // Let AUI process the next tick.
     currentScreen->tick(timestepS);
+}
+
+void UserInterface::render()
+{
+    if (currentScreen != nullptr) {
+        currentScreen->render();
+    }
 }
 
 } // End namespace SpriteEditor

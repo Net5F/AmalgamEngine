@@ -1,34 +1,42 @@
 #include "UserInterface.h"
-#include "QueuedEvents.h"
+#include "Config.h"
 #include "World.h"
+#include "AssetCache.h"
 #include "SpriteData.h"
 #include "Camera.h"
-#include "Paths.h"
 #include "SharedConfig.h"
 #include "Transforms.h"
+#include "ClientTransforms.h"
 #include "TileUpdateRequest.h"
 #include "Log.h"
+#include "QueuedEvents.h"
 
 namespace AM
 {
 namespace Client
 {
-UserInterface::UserInterface(EventDispatcher& inUiEventDispatcher,
-                             const World& inWorld, SpriteData& spriteData)
-: tileHighlightSprite{}
-, tileHighlightPosition{0, 0}
-, uiEventDispatcher{inUiEventDispatcher}
+UserInterface::UserInterface(EventDispatcher& inUiEventDispatcher, const World& inWorld,
+                             SDL_Renderer* inSDLRenderer, AssetCache& inAssetCache,
+                             SpriteData& inSpriteData)
+: uiEventDispatcher{inUiEventDispatcher}
 , world{inWorld}
+, sdlRenderer{inSDLRenderer}
+, assetCache{inAssetCache}
+, auiInitializer(inSDLRenderer,
+                 {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT})
+, currentScreen{nullptr}
+, tileHighlightSprite{nullptr}
+, tileHighlightPosition{0, 0}
 {
     // Set up the tile highlight sprite.
-    tileHighlightSprite = &(spriteData.get("test_8"));
+    tileHighlightSprite = &(inSpriteData.get("test_8"));
 
-    // Push the terrain sprites to cycle through.
-    terrainSprites.push_back(&(spriteData.get("test_6")));
-    terrainSprites.push_back(&(spriteData.get("test_8")));
-    terrainSprites.push_back(&(spriteData.get("test_24")));
-    terrainSprites.push_back(&(spriteData.get("test_17")));
-    terrainSprites.push_back(&(spriteData.get("test_26")));
+    // Push the terrain inSprites to cycle through.
+    terrainSprites.push_back(&(inSpriteData.get("test_6")));
+    terrainSprites.push_back(&(inSpriteData.get("test_8")));
+    terrainSprites.push_back(&(inSpriteData.get("test_24")));
+    terrainSprites.push_back(&(inSpriteData.get("test_17")));
+    terrainSprites.push_back(&(inSpriteData.get("test_26")));
 }
 
 bool UserInterface::handleOSEvent(SDL_Event& event)
@@ -48,6 +56,26 @@ bool UserInterface::handleOSEvent(SDL_Event& event)
     }
 
     return false;
+}
+
+void UserInterface::render(const Camera& camera)
+{
+    /* Render the mouse highlight (currently just a tile sprite.) */
+    // Get iso screen extent for this tile.
+    const TilePosition& highlightPosition = tileHighlightPosition;
+    const Sprite& highlightSprite = *(tileHighlightSprite);
+    SDL_Rect screenExtent = ClientTransforms::tileToScreenExtent(
+        highlightPosition, highlightSprite, camera);
+
+    // Set the texture's alpha to make the highlight transparent.
+    SDL_SetTextureAlphaMod(highlightSprite.texture.get(), 150);
+
+    // Draw the highlight.
+    SDL_RenderCopy(sdlRenderer, highlightSprite.texture.get(),
+                   &(highlightSprite.textureExtent), &screenExtent);
+
+    // Set the texture's alpha back.
+    SDL_SetTextureAlphaMod(highlightSprite.texture.get(), 255);
 }
 
 void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
