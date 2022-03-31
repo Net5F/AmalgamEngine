@@ -7,7 +7,7 @@
 namespace AM
 {
 /**
- * Used by the server to stream updated tile data to a client.
+ * Used to request that a tile be updated.
  */
 struct TileUpdateRequest {
 public:

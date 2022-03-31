@@ -20,7 +20,6 @@ class TileUpdateSystem
 {
 public:
     TileUpdateSystem(World& inWorld, EventDispatcher& inUiEventDispatcher,
-                     EventDispatcher& inNetworkEventDispatcher,
                      Network& inNetwork);
 
     /**

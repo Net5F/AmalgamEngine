@@ -132,5 +132,10 @@ void SpriteData::parseSprite(const nlohmann::json& spriteJson,
     sprites.push_back(sprite);
 }
 
+const std::vector<Sprite>& SpriteData::getAllSprites() const
+{
+    return sprites;
+}
+
 } // End namespace Client
 } // End namespace AM

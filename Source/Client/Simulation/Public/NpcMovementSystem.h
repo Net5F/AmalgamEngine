@@ -24,7 +24,6 @@ class NpcMovementSystem
 {
 public:
     NpcMovementSystem(Simulation& inSim, World& inWorld,
-                      EventDispatcher& inNetworkEventDispatcher,
                       Network& inNetwork, SpriteData& inSpriteData);
 
     /**

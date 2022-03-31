@@ -11,11 +11,11 @@ namespace SpriteEditor
 {
 UserInterface::UserInterface(SDL_Renderer* inRenderer, AssetCache& inAssetCache,
                              SpriteDataModel& inSpriteDataModel)
-: auiInitializer(inRenderer,
-                 {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT})
-, currentScreen(&titleScreen)
-, titleScreen(*this, inAssetCache, inSpriteDataModel)
-, mainScreen(inAssetCache, inSpriteDataModel)
+: auiInitializer{inRenderer,
+                 {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT}}
+, titleScreen{*this, inAssetCache, inSpriteDataModel}
+, mainScreen{inAssetCache, inSpriteDataModel}
+, currentScreen{&titleScreen}
 {
     AUI::Core::setActualScreenSize(
         {Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT});

@@ -32,8 +32,7 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S = .001;
 
-    Simulation(EventDispatcher& inUiEventDispatcher,
-               EventDispatcher& inNetworkEventDispatcher, Network& inNetwork,
+    Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
                SpriteData& inSpriteData);
 
     /**

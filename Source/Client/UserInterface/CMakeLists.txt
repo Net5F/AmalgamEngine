@@ -1,8 +1,16 @@
 target_sources(Client
-	PRIVATE
-		Private/UserInterface.cpp
-	PUBLIC
-		Public/UserInterface.h
+    PRIVATE
+        Private/MainScreen.cpp
+        Private/UserInterface.cpp
+        Private/Widgets/MainThumbnail.cpp
+        Private/Windows/BuildOverlay.cpp
+        Private/Windows/BuildPanel.cpp
+    PUBLIC
+        Public/MainScreen.h
+        Public/UserInterface.h
+        Public/Widgets/MainThumbnail.h
+        Public/Windows/BuildOverlay.h
+        Public/Windows/BuildPanel.h
 )
 
 target_include_directories(Client
@@ -10,4 +18,6 @@ target_include_directories(Client
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Widgets
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Windows
 )

@@ -28,6 +28,8 @@ public:
      * Attempts to parse SpriteData.json and construct all of the sprite
      * objects.
      *
+     * Also adds an "Empty" sprite, for use as a default.
+     *
      * Errors if SpriteData.json doesn't exist or it fails to parse.
      */
     SpriteData(AssetCache& assetCache);
@@ -41,6 +43,11 @@ public:
      * Get a sprite, using its numeric ID.
      */
     const Sprite& get(int numericID);
+
+    /**
+     * Get a reference to a vector of all the sprites.
+     */
+    const std::vector<Sprite>& getAllSprites() const;
 
 private:
     /**

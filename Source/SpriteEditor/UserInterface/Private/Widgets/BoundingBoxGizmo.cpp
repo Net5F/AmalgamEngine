@@ -19,7 +19,7 @@ namespace AM
 namespace SpriteEditor
 {
 BoundingBoxGizmo::BoundingBoxGizmo(MainScreen& inScreen)
-: AUI::Widget(inScreen, {0, 0, 1920, 1080})
+: AUI::Widget(inScreen, {0, 0, 1920, 1080}, "BoundingBoxGizmo")
 , mainScreen{inScreen}
 , activeSprite{nullptr}
 , scaledRectSize{AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE)}

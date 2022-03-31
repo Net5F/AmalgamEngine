@@ -15,8 +15,7 @@ class MainScreen;
 class Sprite;
 
 /**
- * A confirmation dialog with header text, body text, and confirm/cancel
- * buttons.
+ * A gizmo that allows the user to draw 3D bounding boxes for their 2D sprites.
  */
 class BoundingBoxGizmo : public AUI::Widget
 {

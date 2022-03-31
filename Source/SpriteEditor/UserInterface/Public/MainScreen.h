@@ -25,7 +25,7 @@ class SpriteDataModel;
 class MainScreen : public AUI::Screen
 {
 public:
-    MainScreen(AssetCache& assetCache, SpriteDataModel& inSpriteDataModel);
+    MainScreen(AssetCache& inAssetCache, SpriteDataModel& inSpriteDataModel);
 
     /**
      * Loads the current state of spriteData into this screen's UI.

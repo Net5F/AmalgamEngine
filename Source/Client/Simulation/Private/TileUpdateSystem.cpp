@@ -8,12 +8,11 @@ namespace Client
 {
 TileUpdateSystem::TileUpdateSystem(World& inWorld,
                                    EventDispatcher& inUiEventDispatcher,
-                                   EventDispatcher& inNetworkEventDispatcher,
                                    Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
 , tileUpdateRequestQueue(inUiEventDispatcher)
-, tileUpdateQueue(inNetworkEventDispatcher)
+, tileUpdateQueue(network.getEventDispatcher())
 {
 }
 
@@ -31,11 +30,6 @@ void TileUpdateSystem::processUiRequests()
     // Process any waiting update requests from the UI.
     TileUpdateRequest uiRequest;
     while (tileUpdateRequestQueue.pop(uiRequest)) {
-        // Update the map locally.
-        // Note: This assumes that the server will accept the request.
-        world.tileMap.setSpriteLayer(uiRequest.tileX, uiRequest.tileY,
-                                     uiRequest.layerIndex, uiRequest.numericID);
-
         // Send the request to the server.
         network.serializeAndSend<TileUpdateRequest>(uiRequest);
     }

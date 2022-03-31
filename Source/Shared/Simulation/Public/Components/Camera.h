@@ -7,7 +7,8 @@
 namespace AM
 {
 /**
- * Stores camera position, bounds, and behavior.
+ * The player's camera viewport. Tracks where in the world the player is
+ * currently viewing.
  */
 struct Camera {
 public:

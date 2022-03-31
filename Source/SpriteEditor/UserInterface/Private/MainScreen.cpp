@@ -10,18 +10,18 @@ namespace AM
 {
 namespace SpriteEditor
 {
-MainScreen::MainScreen(AssetCache& assetCache,
+MainScreen::MainScreen(AssetCache& inAssetCache,
                        SpriteDataModel& inSpriteDataModel)
 : AUI::Screen("MainScreen")
 , spriteDataModel{inSpriteDataModel}
 , activeSprite{nullptr}
-, spriteSheetPanel(assetCache, *this, spriteDataModel)
-, spriteEditStage(assetCache, *this, spriteDataModel)
-, spritePanel(assetCache, *this, spriteDataModel)
-, saveButtonWindow(assetCache, *this, spriteDataModel)
-, propertiesPanel(assetCache, *this, spriteDataModel)
+, spriteSheetPanel(inAssetCache, *this, spriteDataModel)
+, spriteEditStage(inAssetCache, *this, spriteDataModel)
+, spritePanel(inAssetCache, *this, spriteDataModel)
+, saveButtonWindow(inAssetCache, *this, spriteDataModel)
+, propertiesPanel(inAssetCache, *this, spriteDataModel)
 , confirmationDialog(*this, {0, 0, 1920, 1080}, "ConfirmationDialog")
-, addSheetDialog(assetCache, *this, spriteDataModel)
+, addSheetDialog(inAssetCache, *this, spriteDataModel)
 {
     // Add our windows so they're included in rendering, etc.
     windows.push_back(spriteEditStage);
@@ -37,13 +37,13 @@ MainScreen::MainScreen(AssetCache& assetCache,
     confirmationDialog.shadowImage.setLogicalExtent({0, 0, 1920, 1080});
     confirmationDialog.shadowImage.addResolution(
         {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "Dialogs/Shadow.png"));
+        inAssetCache.loadTexture(Paths::TEXTURE_DIR + "Dialogs/Shadow.png"));
 
     // Background image.
     confirmationDialog.backgroundImage.setLogicalExtent({721, 358, 474, 248});
     confirmationDialog.backgroundImage.addResolution(
         {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "Dialogs/Background.png"));
+        inAssetCache.loadTexture(Paths::TEXTURE_DIR + "Dialogs/Background.png"));
 
     // Body text.
     confirmationDialog.bodyText.setLogicalExtent({763, 400, 400, 60});
@@ -61,15 +61,15 @@ MainScreen::MainScreen(AssetCache& assetCache,
         {0, 0, 123, 56});
     confirmationDialog.confirmButton.text.setLogicalExtent({-1, -1, 123, 56});
     confirmationDialog.confirmButton.normalImage.addResolution(
-        {1600, 900}, assetCache.loadTexture(Paths::TEXTURE_DIR
+        {1600, 900}, inAssetCache.loadTexture(Paths::TEXTURE_DIR
                                             + "ConfirmationButton/Normal.png"));
     confirmationDialog.confirmButton.hoveredImage.addResolution(
         {1600, 900},
-        assetCache.loadTexture(Paths::TEXTURE_DIR
+        inAssetCache.loadTexture(Paths::TEXTURE_DIR
                                + "ConfirmationButton/Hovered.png"));
     confirmationDialog.confirmButton.pressedImage.addResolution(
         {1600, 900},
-        assetCache.loadTexture(Paths::TEXTURE_DIR
+        inAssetCache.loadTexture(Paths::TEXTURE_DIR
                                + "ConfirmationButton/Pressed.png"));
     confirmationDialog.confirmButton.text.setFont(
         (Paths::FONT_DIR + "B612-Regular.ttf"), 18);
@@ -84,15 +84,15 @@ MainScreen::MainScreen(AssetCache& assetCache,
         {0, 0, 123, 56});
     confirmationDialog.cancelButton.text.setLogicalExtent({-1, -1, 123, 56});
     confirmationDialog.cancelButton.normalImage.addResolution(
-        {1600, 900}, assetCache.loadTexture(Paths::TEXTURE_DIR
+        {1600, 900}, inAssetCache.loadTexture(Paths::TEXTURE_DIR
                                             + "ConfirmationButton/Normal.png"));
     confirmationDialog.cancelButton.hoveredImage.addResolution(
         {1600, 900},
-        assetCache.loadTexture(Paths::TEXTURE_DIR
+        inAssetCache.loadTexture(Paths::TEXTURE_DIR
                                + "ConfirmationButton/Hovered.png"));
     confirmationDialog.cancelButton.pressedImage.addResolution(
         {1600, 900},
-        assetCache.loadTexture(Paths::TEXTURE_DIR
+        inAssetCache.loadTexture(Paths::TEXTURE_DIR
                                + "ConfirmationButton/Pressed.png"));
     confirmationDialog.cancelButton.text.setFont(
         (Paths::FONT_DIR + "B612-Regular.ttf"), 18);

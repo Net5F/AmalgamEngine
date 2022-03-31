@@ -1,9 +1,7 @@
 #pragma once
 
 #include "OSEventHandler.h"
-#include "Sprite.h"
-#include "ScreenPoint.h"
-#include "TilePosition.h"
+#include "MainScreen.h"
 #include "AUI/Initializer.h"
 #include "SDL2pp/Texture.hh"
 #include <memory>
@@ -35,13 +33,21 @@ class UserInterface : public OSEventHandler
 {
 public:
     UserInterface(EventDispatcher& inUiEventDispatcher, const World& inWorld,
-                  SDL_Renderer* inSDLRenderer, AssetCache& inAssetCache
-                  , SpriteData& inSpriteData);
+                  SDL_Renderer* inSDLRenderer, AssetCache& inAssetCache,
+                  SpriteData& inSpriteData);
 
     /**
      * Handles user input events.
      */
     bool handleOSEvent(SDL_Event& event) override;
+
+    /**
+     * Calls AUI::Screen::tick() on the current screen.
+     *
+     * @param timestepS  The amount of time that has passed since the last
+     *                   tick() call, in seconds.
+     */
+    void tick(double timestepS);
 
     /**
      * Renders all UI graphics for the current screen to the current rendering
@@ -52,49 +58,24 @@ public:
     void render(const Camera& camera);
 
 private:
-    void handleMouseMotion(SDL_MouseMotionEvent& event);
-
-    void handleMouseButtonDown(SDL_MouseButtonEvent& event);
-
     /**
      * Cycles the tile under the given mouse position to the next sprite in
      * terrainSprites.
      */
     void cycleTile(int mouseX, int mouseY);
 
-    /** Used to send UI events to the subscribed Simulation systems. */
-    EventDispatcher& uiEventDispatcher;
-
     /** Used to get the world state to populate the UI. */
     const World& world;
 
-    // TODO: Remove this member when we stop rendering in this class
-    /** Used to render UI graphics. */
-    SDL_Renderer* sdlRenderer;
-
-    // TODO: Remove this member when we start passing it to a screen
-    /** Used to get UI textures. */
-    AssetCache& assetCache;
-
-    /**
-     * AmalgamUI initializer, used to init/quit the library at the proper
-     * times.
-     */
+    /** AmalgamUI initializer, used to init/quit the library at the proper
+        times. */
     AUI::Initializer auiInitializer;
 
-    /**
-     * The current active UI screen.
-     */
+    /** The main UI that overlays the world. */
+    MainScreen mainScreen;
+
+    /** The current active UI screen. */
     AUI::Screen* currentScreen;
-
-    /** Holds the sprites that we cycle through on mouse click. */
-    std::vector<const Sprite*> terrainSprites;
-
-    /** Sprite for the mouse-following tile highlight. */
-    const Sprite* tileHighlightSprite;
-
-    /** Position of the tile to be highlighted. */
-    TilePosition tileHighlightPosition;
 };
 
 } // End namespace Client

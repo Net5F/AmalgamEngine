@@ -24,14 +24,15 @@ Application::Application()
 , assetCache(sdlRenderer.Get())
 , spriteData(assetCache)
 , uiEventDispatcher()
-, networkEventDispatcher()
-, network(networkEventDispatcher)
+, network()
 , networkCaller(std::bind_front(&Network::tick, &network),
                 SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
-, sim(uiEventDispatcher, networkEventDispatcher, network, spriteData)
+, sim(uiEventDispatcher, network, spriteData)
 , simCaller(std::bind_front(&Simulation::tick, &sim),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
 , userInterface(uiEventDispatcher, sim.getWorld(), sdlRenderer.Get(), assetCache, spriteData)
+, uiCaller(std::bind_front(&UserInterface::tick, &userInterface),
+           Config::UI_TICK_TIMESTEP_S, "UserInterface", true)
 , renderer(sdlRenderer.Get(), sim, userInterface,
            std::bind_front(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind_front(&Renderer::render, &renderer),
@@ -62,11 +63,15 @@ void Application::start()
 
     // Prime the timers so they don't start at 0.
     simCaller.initTimer();
+    uiCaller.initTimer();
     networkCaller.initTimer();
     rendererCaller.initTimer();
     while (!exitRequested) {
         // Let the sim process an iteration if it needs to.
         simCaller.update();
+
+        // Let the UI widgets tick if they need to.
+        uiCaller.update();
 
         // Send a heartbeat if necessary.
         networkCaller.update();
@@ -76,7 +81,7 @@ void Application::start()
 
         // If we have enough time, dispatch events.
         if (enoughTimeTillNextCall(DISPATCH_MINIMUM_TIME_S)) {
-            dispatchEvents();
+            dispatchOSEvents();
         }
 
         // If we have enough time, sleep.
@@ -100,7 +105,7 @@ bool Application::handleOSEvent(SDL_Event& event)
     return false;
 }
 
-void Application::dispatchEvents()
+void Application::dispatchOSEvents()
 {
     // Dispatch all waiting SDL events.
     SDL_Event event;

@@ -26,19 +26,17 @@ namespace AM
 namespace Client
 {
 Simulation::Simulation(EventDispatcher& inUiEventDispatcher,
-                       EventDispatcher& inNetworkEventDispatcher,
                        Network& inNetwork, SpriteData& inSpriteData)
 : network{inNetwork}
 , spriteData{inSpriteData}
 , world(inSpriteData)
-, connectionResponseQueue(inNetworkEventDispatcher)
-, chunkUpdateSystem(*this, world, inNetworkEventDispatcher, network)
-, tileUpdateSystem(world, inUiEventDispatcher, inNetworkEventDispatcher,
-                   network)
-, npcLifetimeSystem(*this, world, spriteData, inNetworkEventDispatcher)
+, connectionResponseQueue(network.getEventDispatcher())
+, chunkUpdateSystem(*this, world, network)
+, tileUpdateSystem(world, inUiEventDispatcher, network)
+, npcLifetimeSystem(*this, world, spriteData, network.getEventDispatcher())
 , playerInputSystem(*this, world, network)
-, playerMovementSystem(*this, world, inNetworkEventDispatcher)
-, npcMovementSystem(*this, world, inNetworkEventDispatcher, network, spriteData)
+, playerMovementSystem(*this, world, network.getEventDispatcher())
+, npcMovementSystem(*this, world, network, spriteData)
 , cameraSystem(*this, world)
 , currentTick(0)
 {

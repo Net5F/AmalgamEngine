@@ -62,20 +62,18 @@ public:
     void render();
 
 private:
-    /**
-     * AmalgamUI initializer, used to init/quit the library at the proper
-     * times.
-     */
+    /** AmalgamUI initializer, used to init/quit the library at the proper
+        times. */
     AUI::Initializer auiInitializer;
 
-    /**
-     * The current active UI screen.
-     */
-    AUI::Screen* currentScreen;
-
+    /** The opening title screen, seen on app launch. */
     TitleScreen titleScreen;
 
+    /** The main screen for doing work. */
     MainScreen mainScreen;
+
+    /** The current active UI screen. */
+    AUI::Screen* currentScreen;
 };
 
 } // namespace SpriteEditor

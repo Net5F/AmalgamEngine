@@ -7,8 +7,8 @@
 #include "SharedConfig.h"
 #include "Transforms.h"
 #include "ClientTransforms.h"
-#include "TileUpdateRequest.h"
 #include "Log.h"
+#include "AUI/Core.h"
 #include "QueuedEvents.h"
 
 namespace AM
@@ -18,140 +18,32 @@ namespace Client
 UserInterface::UserInterface(EventDispatcher& inUiEventDispatcher, const World& inWorld,
                              SDL_Renderer* inSDLRenderer, AssetCache& inAssetCache,
                              SpriteData& inSpriteData)
-: uiEventDispatcher{inUiEventDispatcher}
-, world{inWorld}
-, sdlRenderer{inSDLRenderer}
-, assetCache{inAssetCache}
-, auiInitializer(inSDLRenderer,
-                 {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT})
-, currentScreen{nullptr}
-, tileHighlightSprite{nullptr}
-, tileHighlightPosition{0, 0}
+: world{inWorld}
+, auiInitializer{inSDLRenderer,
+                 {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT}}
+, mainScreen{inUiEventDispatcher, inAssetCache, inSpriteData}
+, currentScreen{&mainScreen}
 {
-    // Set up the tile highlight sprite.
-    tileHighlightSprite = &(inSpriteData.get("test_8"));
-
-    // Push the terrain inSprites to cycle through.
-    terrainSprites.push_back(&(inSpriteData.get("test_6")));
-    terrainSprites.push_back(&(inSpriteData.get("test_8")));
-    terrainSprites.push_back(&(inSpriteData.get("test_24")));
-    terrainSprites.push_back(&(inSpriteData.get("test_17")));
-    terrainSprites.push_back(&(inSpriteData.get("test_26")));
+    AUI::Core::setActualScreenSize(
+        {Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT});
 }
 
 bool UserInterface::handleOSEvent(SDL_Event& event)
 {
-    switch (event.type) {
-        // TODO: If the player moves through key presses but doesn't move the
-        //       mouse, the highlight won't update. Decide how to handle it.
-        case SDL_MOUSEMOTION:
-            handleMouseMotion(event.motion);
+    return currentScreen->handleOSEvent(event);
+}
 
-            // Temporarily consuming mouse events until the sim has some use
-            // for them.
-            return true;
-        case SDL_MOUSEBUTTONDOWN:
-            handleMouseButtonDown(event.button);
-            return true;
-    }
-
-    return false;
+void UserInterface::tick(double timestepS) {
+    currentScreen->tick(timestepS);
 }
 
 void UserInterface::render(const Camera& camera)
 {
-    /* Render the mouse highlight (currently just a tile sprite.) */
-    // Get iso screen extent for this tile.
-    const TilePosition& highlightPosition = tileHighlightPosition;
-    const Sprite& highlightSprite = *(tileHighlightSprite);
-    SDL_Rect screenExtent = ClientTransforms::tileToScreenExtent(
-        highlightPosition, highlightSprite, camera);
+    mainScreen.setCamera(camera);
+    // TODO: This needs to be changed to a signal.
+    mainScreen.setTileMapExtent(world.tileMap.getTileExtent());
 
-    // Set the texture's alpha to make the highlight transparent.
-    SDL_SetTextureAlphaMod(highlightSprite.texture.get(), 150);
-
-    // Draw the highlight.
-    SDL_RenderCopy(sdlRenderer, highlightSprite.texture.get(),
-                   &(highlightSprite.textureExtent), &screenExtent);
-
-    // Set the texture's alpha back.
-    SDL_SetTextureAlphaMod(highlightSprite.texture.get(), 255);
-}
-
-void UserInterface::handleMouseMotion(SDL_MouseMotionEvent& event)
-{
-    // Get the tile index that the mouse is hovering over.
-    const Camera& playerCamera{world.registry.get<Camera>(world.playerEntity)};
-    ScreenPoint screenPoint{static_cast<float>(event.x),
-                            static_cast<float>(event.y)};
-    TilePosition tilePosition{
-        Transforms::screenToTile(screenPoint, playerCamera)};
-
-    // If the index is outside of the world bounds, ignore this event.
-    const TileExtent& mapTileExtent{world.tileMap.getTileExtent()};
-    if ((tilePosition.x < 0) || (tilePosition.y < 0)
-        || (tilePosition.x >= mapTileExtent.xLength)
-        || (tilePosition.y >= mapTileExtent.yLength)) {
-        return;
-    }
-
-    // Save the new tile position for the renderer to use.
-    tileHighlightPosition = Transforms::screenToTile(screenPoint, playerCamera);
-}
-
-void UserInterface::handleMouseButtonDown(SDL_MouseButtonEvent& event)
-{
-    switch (event.button) {
-        case SDL_BUTTON_LEFT: {
-            cycleTile(event.x, event.y);
-            break;
-        }
-    }
-}
-
-void UserInterface::cycleTile(int mouseX, int mouseY)
-{
-    // Find the tile index under the mouse's current position.
-    const Camera& playerCamera{world.registry.get<Camera>(world.playerEntity)};
-    ScreenPoint screenPoint{static_cast<float>(mouseX),
-                            static_cast<float>(mouseY)};
-    TilePosition tilePosition{
-        Transforms::screenToTile(screenPoint, playerCamera)};
-
-    // If the index is outside of the world bounds, ignore this event.
-    const TileExtent& mapTileExtent{world.tileMap.getTileExtent()};
-    if ((tilePosition.x < 0) || (tilePosition.y < 0)
-        || (tilePosition.x >= mapTileExtent.xLength)
-        || (tilePosition.y >= mapTileExtent.yLength)) {
-        return;
-    }
-
-    // Determine which sprite the selected tile has.
-    const Tile& tile{world.tileMap.getTile(tilePosition.x, tilePosition.y)};
-
-    unsigned int terrainSpriteIndex{0};
-    if (tile.spriteLayers[0].sprite->stringID == "test_6") {
-        terrainSpriteIndex = 0;
-    }
-    else if (tile.spriteLayers[0].sprite->stringID == "test_8") {
-        terrainSpriteIndex = 1;
-    }
-    else if (tile.spriteLayers[0].sprite->stringID == "test_24") {
-        terrainSpriteIndex = 2;
-    }
-    else if (tile.spriteLayers[0].sprite->stringID == "test_17") {
-        terrainSpriteIndex = 3;
-    }
-    else if (tile.spriteLayers[0].sprite->stringID == "test_26") {
-        terrainSpriteIndex = 4;
-    }
-
-    // Set the tile to the next sprite.
-    terrainSpriteIndex++;
-    terrainSpriteIndex %= terrainSprites.size();
-    uiEventDispatcher.emplace<TileUpdateRequest>(
-        tilePosition.x, tilePosition.y, 0,
-        terrainSprites[terrainSpriteIndex]->numericID);
+    currentScreen->render();
 }
 
 } // End namespace Client

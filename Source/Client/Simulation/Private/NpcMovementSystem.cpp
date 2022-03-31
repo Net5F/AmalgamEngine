@@ -28,13 +28,12 @@ namespace AM
 namespace Client
 {
 NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
-                                     EventDispatcher& inNetworkEventDispatcher,
                                      Network& inNetwork,
                                      SpriteData& inSpriteData)
 : sim{inSim}
 , world{inWorld}
 , network{inNetwork}
-, npcUpdateQueue{inNetworkEventDispatcher}
+, npcUpdateQueue{network.getEventDispatcher()}
 , spriteData{inSpriteData}
 , lastReceivedTick(0)
 , lastProcessedTick(0)

@@ -9,9 +9,10 @@ namespace AM
 {
 namespace Client
 {
-Network::Network(EventDispatcher& inNetworkEventDispatcher)
+Network::Network()
 : server(nullptr)
-, messageProcessor(inNetworkEventDispatcher)
+, messageProcessor(eventDispatcher)
+, eventDispatcher()
 , tickAdjustment(0)
 , adjustmentIteration(0)
 , isApplyingTickAdjustment(false)
@@ -71,6 +72,11 @@ void Network::tick()
             }
         }
     }
+}
+
+EventDispatcher& Network::getEventDispatcher()
+{
+    return eventDispatcher;
 }
 
 int Network::transferTickAdjustment()

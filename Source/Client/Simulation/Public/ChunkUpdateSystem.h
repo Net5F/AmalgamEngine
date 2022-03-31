@@ -21,9 +21,7 @@ class TileMap;
 class ChunkUpdateSystem
 {
 public:
-    ChunkUpdateSystem(Simulation& inSim, World& inWorld,
-                      EventDispatcher& inNetworkEventDispatcher,
-                      Network& inNetwork);
+    ChunkUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
 
     /**
      * Requests any needed chunk data and applies received chunk updates.

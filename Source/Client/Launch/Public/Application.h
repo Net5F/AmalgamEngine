@@ -6,6 +6,7 @@
 #include "Renderer.h"
 #include "AssetCache.h"
 #include "SpriteData.h"
+#include "QueuedEvents.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
 
@@ -17,8 +18,6 @@
 
 namespace AM
 {
-class EventDispatcher;
-
 namespace Client
 {
 /**
@@ -50,7 +49,7 @@ private:
      * If an event is handled (handleOSEvent() returns true), propagation
      * stops.
      */
-    void dispatchEvents();
+    void dispatchOSEvents();
 
     /**
      * Returns true if all PeriodicCallers have at least minimumTime left until
@@ -96,12 +95,9 @@ private:
 
     SpriteData spriteData;
 
-    /** This is owned by the Application to remove a circular dependency
-        between the Simulation and the UI. */
+    /** Used to dispatch events from the UI to the simulation.
+        Owned by the Application to break the sim's dependency on the UI. */
     EventDispatcher uiEventDispatcher;
-    /** This is owned by the Application to follow the pattern of the UI event
-        dispatcher. */
-    EventDispatcher networkEventDispatcher;
 
     Network network;
     /** Calls network.tick() at the network tick rate. */
@@ -112,6 +108,8 @@ private:
     PeriodicCaller simCaller;
 
     UserInterface userInterface;
+    /** Calls userInterface.tick() at our UI tick rate. */
+    PeriodicCaller uiCaller;
 
     Renderer renderer;
     /** Calls renderer.render() at our frame rate. */

@@ -4,6 +4,7 @@
 #include "NetworkDefs.h"
 #include "ClientNetworkDefs.h"
 #include "MessageProcessor.h"
+#include "QueuedEvents.h"
 #include "Serialize.h"
 #include "Peer.h"
 #include "Deserialize.h"
@@ -17,7 +18,6 @@
 
 namespace AM
 {
-class EventDispatcher;
 class ConnectionResponse;
 class EntityUpdate;
 
@@ -29,7 +29,7 @@ namespace Client
 class Network
 {
 public:
-    Network(EventDispatcher& inNetworkEventDispatcher);
+    Network();
 
     ~Network();
 
@@ -60,8 +60,18 @@ public:
     void serializeAndSend(const T& messageStruct);
 
     /**
-     * Subtracts an appropriate amount from the tickAdjustment based on its
-     * current value, and returns the amount subtracted.
+     * Returns the Network event dispatcher. All messages that we receive
+     * from the server are pushed into this dispatcher.
+     */
+    EventDispatcher& getEventDispatcher();
+
+    // TODO: Just return the total adjustment and let the sim figure it out.
+    /**
+     * Returns the amount that the sim tick should be adjusted by.
+     *
+     * The server adds to our tickAdjustment when we're too far ahead or behind
+     * it.
+     *
      * @return 1 if there's a negative tickAdjustment (the sim can only freeze 1
      *         tick at a time), else 0 or a negative amount equal to the current
      *         tickAdjustment.
@@ -121,8 +131,11 @@ private:
     std::shared_ptr<Peer> server;
 
     /** Deserializes messages, does any network-layer message handling, and
-        passes messages down to the simulation. */
+        pushes messages into the eventDispatcher. */
     MessageProcessor messageProcessor;
+
+    /** Used to dispatch events from the network to the simulation. */
+    EventDispatcher eventDispatcher;
 
     /** The adjustment that the server has told us to apply to the tick. */
     std::atomic<int> tickAdjustment;

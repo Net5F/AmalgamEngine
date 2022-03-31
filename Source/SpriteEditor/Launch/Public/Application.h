@@ -89,7 +89,7 @@ private:
     SpriteDataModel spriteDataModel;
 
     UserInterface userInterface;
-    /** Calls userInterface.tick() at AUI's tick rate. */
+    /** Calls userInterface.tick() at our UI tick rate. */
     PeriodicCaller uiCaller;
 
     Renderer renderer;
