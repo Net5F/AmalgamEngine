@@ -1,8 +1,10 @@
 #pragma once
 
+#include "MainButton.h"
 #include "AUI/Window.h"
 #include "AUI/Image.h"
 #include "AUI/VerticalGridContainer.h"
+#include "AUI/Text.h"
 
 namespace AM
 {
@@ -41,6 +43,9 @@ private:
     /** Used to tell the build overlay which sprite to display. */
     BuildOverlay& buildOverlay;
 
+    /** The currently selected tile layer index. */
+    unsigned int tileLayerIndex;
+
     //-------------------------------------------------------------------------
     // Private child widgets
     //-------------------------------------------------------------------------
@@ -48,8 +53,11 @@ private:
 
     AUI::VerticalGridContainer tileContainer;
 
-    // TODO: Add buttons and a label for layer selection
-    //       Cap it to MAX_TILE_LAYERS
+    AUI::Text layerLabel;
+
+    MainButton layerDownButton;
+
+    MainButton layerUpButton;
 };
 
 } // End namespace Client

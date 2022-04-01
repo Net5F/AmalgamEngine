@@ -44,7 +44,7 @@ public:
     static constexpr float AOI_RADIUS_SQUARED = AOI_RADIUS * AOI_RADIUS;
 
     /** The maximum number of sprite layers a tile can have. */
-    static constexpr unsigned int MAX_TILE_LAYERS = 8;
+    static constexpr unsigned int MAX_TILE_LAYERS = 5;
 
     /** The string ID of our default sprite for character entities. */
     static constexpr char DEFAULT_CHARACTER_SPRITE[] = "test_31";

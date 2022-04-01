@@ -4,6 +4,7 @@
 #include "SpriteData.h"
 #include "BuildOverlay.h"
 #include "MainThumbnail.h"
+#include "SharedConfig.h"
 #include "Paths.h"
 #include "Ignore.h"
 #include "AMAssert.h"
@@ -15,15 +16,22 @@ namespace Client
 {
 BuildPanel::BuildPanel(AssetCache& inAssetCache, MainScreen& inScreen,
                        SpriteData& inSpriteData, BuildOverlay& inBuildOverlay)
-: AUI::Window(inScreen, {0, 734, 1920, 346}, "BuildPanel")
+: AUI::Window{inScreen, {0, 734, 1920, 346}, "BuildPanel"}
 , assetCache{inAssetCache}
 , buildOverlay{inBuildOverlay}
-, backgroundImage(inScreen, {0, 0, 1920, 346}, "BuildPanelBackground")
-, tileContainer(inScreen, {183, 22, 1554, 324}, "TileContainer")
+, tileLayerIndex{0}
+, backgroundImage{inScreen, {0, 0, 1920, 346}, "BuildPanelBackground"}
+, tileContainer{inScreen, {183, 22, 1554, 324}, "TileContainer"}
+, layerLabel{inScreen, {1792, 22, 90, 28}, "LayerLabel"}
+, layerDownButton{inAssetCache, inScreen, {1767, 62, 64, 28}, "<", "LayerDownButton"}
+, layerUpButton{inAssetCache, inScreen, {1844, 62, 64, 28}, ">", "LayerUpButton"}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
     children.push_back(tileContainer);
+    children.push_back(layerLabel);
+    children.push_back(layerDownButton);
+    children.push_back(layerUpButton);
 
     /* Background image */
     backgroundImage.addResolution(
@@ -50,6 +58,35 @@ BuildPanel::BuildPanel(AssetCache& inAssetCache, MainScreen& inScreen,
 
         addTile(sprite);
     }
+
+    /* Layer label */
+    layerLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
+    layerLabel.setColor({255, 255, 255, 255});
+    layerLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
+    layerLabel.setText("Layer " + std::to_string(tileLayerIndex));
+
+    /* Layer buttons */
+    layerDownButton.setOnPressed([&]() {
+        if (tileLayerIndex > 0) {
+            // Update our label.
+            tileLayerIndex--;
+            layerLabel.setText("Layer " + std::to_string(tileLayerIndex));
+
+            // Update BuildOverlay.
+            buildOverlay.setSelectedLayer(tileLayerIndex);
+        }
+    });
+
+    layerUpButton.setOnPressed([&]() {
+        if (tileLayerIndex < SharedConfig::MAX_TILE_LAYERS) {
+            // Update our label.
+            tileLayerIndex++;
+            layerLabel.setText("Layer " + std::to_string(tileLayerIndex));
+
+            // Update BuildOverlay.
+            buildOverlay.setSelectedLayer(tileLayerIndex);
+        }
+    });
 }
 
 void BuildPanel::addTile(const Sprite& sprite)

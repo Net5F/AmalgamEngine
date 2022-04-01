@@ -3,6 +3,7 @@ target_sources(Client
         Private/MainScreen.cpp
         Private/UserInterface.cpp
         Private/WorldSinks.cpp
+        Private/Widgets/MainButton.cpp
         Private/Widgets/MainThumbnail.cpp
         Private/Windows/BuildOverlay.cpp
         Private/Windows/BuildPanel.cpp
@@ -10,6 +11,7 @@ target_sources(Client
         Public/MainScreen.h
         Public/UserInterface.h
         Public/WorldSinks.h
+        Public/Widgets/MainButton.h
         Public/Widgets/MainThumbnail.h
         Public/Windows/BuildOverlay.h
         Public/Windows/BuildPanel.h
