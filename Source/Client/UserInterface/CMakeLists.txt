@@ -2,12 +2,14 @@ target_sources(Client
     PRIVATE
         Private/MainScreen.cpp
         Private/UserInterface.cpp
+        Private/WorldSinks.cpp
         Private/Widgets/MainThumbnail.cpp
         Private/Windows/BuildOverlay.cpp
         Private/Windows/BuildPanel.cpp
     PUBLIC
         Public/MainScreen.h
         Public/UserInterface.h
+        Public/WorldSinks.h
         Public/Widgets/MainThumbnail.h
         Public/Windows/BuildOverlay.h
         Public/Windows/BuildPanel.h

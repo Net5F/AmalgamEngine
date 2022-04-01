@@ -4,6 +4,7 @@
 #include "Paths.h"
 #include "Transforms.h"
 #include "ClientTransforms.h"
+#include "WorldSinks.h"
 #include "QueuedEvents.h"
 #include "TileUpdateRequest.h"
 #include "Ignore.h"
@@ -13,7 +14,8 @@ namespace AM
 {
 namespace Client
 {
-BuildOverlay::BuildOverlay(MainScreen& inScreen, EventDispatcher& inUiEventDispatcher)
+BuildOverlay::BuildOverlay(MainScreen& inScreen, WorldSinks& inWorldSinks
+                           , EventDispatcher& inUiEventDispatcher)
 : AUI::Window(inScreen, {0, 0, 1920, 744}, "BuildOverlay")
 , uiEventDispatcher{inUiEventDispatcher}
 , selectedTile{nullptr}
@@ -22,6 +24,9 @@ BuildOverlay::BuildOverlay(MainScreen& inScreen, EventDispatcher& inUiEventDispa
 , mapTileExtent{}
 , mouseTilePosition{}
 {
+    // We need to know when the map size changes so we can bound the cursor
+    // appropriately.
+    inWorldSinks.tileMapExtentChanged.connect<&BuildOverlay::onTileMapExtentChanged>(*this);
 }
 
 void BuildOverlay::setSelectedTile(const Sprite& inSelectedTile)
@@ -37,11 +42,6 @@ void BuildOverlay::setSelectedLayer(unsigned int inTileLayerIndex)
 void BuildOverlay::setCamera(const Camera& inCamera)
 {
     camera = inCamera;
-}
-
-void BuildOverlay::setTileMapExtent(TileExtent inTileExtent)
-{
-    mapTileExtent = inTileExtent;
 }
 
 void BuildOverlay::render()
@@ -66,12 +66,10 @@ AUI::EventResult BuildOverlay::onMouseDown(AUI::MouseButtonType buttonType, cons
 {
     ignore(cursorPosition);
 
-    LOG_INFO("Click");
     // If the mouse is outside of the world bounds, ignore this event.
     if (!(mapTileExtent.containsPosition(mouseTilePosition))) {
         return AUI::EventResult{.wasHandled{false}};
     }
-    LOG_INFO("Past click");
 
     // Only respond to the left mouse button.
     if (buttonType == AUI::MouseButtonType::Left) {
@@ -86,18 +84,26 @@ AUI::EventResult BuildOverlay::onMouseDown(AUI::MouseButtonType buttonType, cons
 
 AUI::EventResult BuildOverlay::onMouseMove(const SDL_Point& cursorPosition)
 {
-    // If the mouse is outside of the world bounds, ignore this event.
-    if (!(mapTileExtent.containsPosition(mouseTilePosition))) {
-        return AUI::EventResult{.wasHandled{false}};
-    }
-
     // Get the tile coordinate that the mouse is hovering over.
     ScreenPoint screenPoint{static_cast<float>(cursorPosition.x),
                             static_cast<float>(cursorPosition.y)};
-    mouseTilePosition =
+    TilePosition newTilePosition =
         Transforms::screenToTile(screenPoint, camera);
 
-    return AUI::EventResult{.wasHandled{true}};
+    // If the mouse is outside of the world bounds, ignore this event.
+    if (!(mapTileExtent.containsPosition(newTilePosition))) {
+        return AUI::EventResult{.wasHandled{false}};
+    }
+    else {
+        // The mouse is in bounds, save the new tile position.
+        mouseTilePosition = newTilePosition;
+        return AUI::EventResult{.wasHandled{true}};
+    }
+}
+
+void BuildOverlay::onTileMapExtentChanged(TileExtent inTileExtent)
+{
+    mapTileExtent = inTileExtent;
 }
 
 } // End namespace Client

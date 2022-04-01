@@ -23,7 +23,7 @@ class Camera;
 
 namespace Client
 {
-class World;
+class WorldSinks;
 class SpriteData;
 
 /**
@@ -32,7 +32,7 @@ class SpriteData;
 class UserInterface : public OSEventHandler
 {
 public:
-    UserInterface(EventDispatcher& inUiEventDispatcher, const World& inWorld,
+    UserInterface(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher,
                   SDL_Renderer* inSDLRenderer, AssetCache& inAssetCache,
                   SpriteData& inSpriteData);
 
@@ -63,9 +63,6 @@ private:
      * terrainSprites.
      */
     void cycleTile(int mouseX, int mouseY);
-
-    /** Used to get the world state to populate the UI. */
-    const World& world;
 
     /** AmalgamUI initializer, used to init/quit the library at the proper
         times. */

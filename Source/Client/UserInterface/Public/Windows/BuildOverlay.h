@@ -11,6 +11,7 @@ class EventDispatcher;
 namespace Client
 {
 class MainScreen;
+class WorldSinks;
 class Sprite;
 
 /**
@@ -25,7 +26,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BuildOverlay(MainScreen& inScreen, EventDispatcher& inUiEventDispatcher);
+    BuildOverlay(MainScreen& inScreen, WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher);
 
     /**
      * Used by the BuildPanel to tell us which sprite is selected.
@@ -52,14 +53,6 @@ public:
      */
     void setCamera(const Camera& inCamera);
 
-    /**
-     * Sets the size of the world map in any widgets that care.
-     *
-     * Used in build mode to make sure we aren't rendering or requesting
-     * changes to tiles that are out of bounds.
-     */
-    void setTileMapExtent(TileExtent inTileExtent);
-
     //-------------------------------------------------------------------------
     // Widget class overrides
     //-------------------------------------------------------------------------
@@ -70,6 +63,11 @@ public:
     AUI::EventResult onMouseMove(const SDL_Point& cursorPosition) override;
 
 private:
+    /**
+     * Sets mapTileExtent to the new extent of the tile map.
+     */
+    void onTileMapExtentChanged(TileExtent inTileExtent);
+
     /** Used to send TileUpdateRequest events when a tile is selected. */
     EventDispatcher& uiEventDispatcher;
 

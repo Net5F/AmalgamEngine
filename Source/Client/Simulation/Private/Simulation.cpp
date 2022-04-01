@@ -74,6 +74,7 @@ void Simulation::connect()
     // Resize the world's tile map.
     world.tileMap.setMapSize(connectionResponse.mapXLengthChunks,
                              connectionResponse.mapYLengthChunks);
+    world.worldSignals.tileMapExtentChanged.publish(world.tileMap.getTileExtent());
     LOG_INFO("Setting map size to: (%u, %u).",
              connectionResponse.mapXLengthChunks,
              connectionResponse.mapYLengthChunks);

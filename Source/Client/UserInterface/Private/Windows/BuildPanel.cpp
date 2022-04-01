@@ -59,20 +59,20 @@ void BuildPanel::addTile(const Sprite& sprite)
         std::make_unique<MainThumbnail>(assetCache, screen, "BuildPanelThumbnail")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
     thumbnail.setText(sprite.displayName);
-    thumbnail.setIsSelectable(false);
+    thumbnail.setIsActivateable(false);
 
     // Load the sprite's image.
     thumbnail.thumbnailImage.addResolution(
         {1280, 720}, sprite.texture, sprite.textureExtent);
 
     // Add a callback to deactivate all other thumbnails when one is activated.
-    thumbnail.setOnActivated([this, &sprite](AUI::Thumbnail* selectedThumb) {
+    thumbnail.setOnSelected([this, &sprite](AUI::Thumbnail* selectedThumb) {
         // Deactivate all other thumbnails.
         for (auto& widgetPtr : tileContainer) {
             MainThumbnail& otherThumb
                 = static_cast<MainThumbnail&>(*widgetPtr);
-            if (otherThumb.getIsActive() && (&otherThumb != selectedThumb)) {
-                otherThumb.deactivate();
+            if (otherThumb.getIsSelected() && (&otherThumb != selectedThumb)) {
+                otherThumb.deselect();
             }
         }
 

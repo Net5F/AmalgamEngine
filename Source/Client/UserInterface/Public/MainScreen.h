@@ -13,6 +13,7 @@ class AssetCache;
 
 namespace Client
 {
+class WorldSinks;
 class SpriteData;
 
 /**
@@ -21,8 +22,8 @@ class SpriteData;
 class MainScreen : public AUI::Screen
 {
 public:
-    MainScreen(EventDispatcher& inUiEventDispatcher, AssetCache& inAssetCache
-               , SpriteData& inSpriteData);
+    MainScreen(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher
+               , AssetCache& inAssetCache, SpriteData& inSpriteData);
 
     /**
      * Sets the camera to use when rendering.
@@ -31,14 +32,6 @@ public:
      * frame.
      */
     void setCamera(const Camera& inCamera);
-
-    /**
-     * Sets the size of the world map in any widgets that care.
-     *
-     * Used in build mode to make sure we aren't rendering or requesting
-     * changes to tiles that are out of bounds.
-     */
-    void setTileMapExtent(TileExtent inTileExtent);
 
     void render() override;
 

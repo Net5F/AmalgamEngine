@@ -7,6 +7,7 @@
 #include "AssetCache.h"
 #include "SpriteData.h"
 #include "QueuedEvents.h"
+#include "WorldSinks.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
 
@@ -106,6 +107,10 @@ private:
     Simulation sim;
     /** Calls sim.tick() at the sim tick rate. */
     PeriodicCaller simCaller;
+
+    /** Used to signal world state changes from the simulation to the UI.
+        Owned by the Application to break the UI's dependency on the sim. */
+    WorldSinks worldSinks;
 
     UserInterface userInterface;
     /** Calls userInterface.tick() at our UI tick rate. */

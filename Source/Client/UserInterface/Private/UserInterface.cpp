@@ -1,6 +1,6 @@
 #include "UserInterface.h"
 #include "Config.h"
-#include "World.h"
+#include "WorldSinks.h"
 #include "AssetCache.h"
 #include "SpriteData.h"
 #include "Camera.h"
@@ -15,13 +15,12 @@ namespace AM
 {
 namespace Client
 {
-UserInterface::UserInterface(EventDispatcher& inUiEventDispatcher, const World& inWorld,
+UserInterface::UserInterface(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher,
                              SDL_Renderer* inSDLRenderer, AssetCache& inAssetCache,
                              SpriteData& inSpriteData)
-: world{inWorld}
-, auiInitializer{inSDLRenderer,
+: auiInitializer{inSDLRenderer,
                  {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT}}
-, mainScreen{inUiEventDispatcher, inAssetCache, inSpriteData}
+, mainScreen{inWorldSinks, inUiEventDispatcher, inAssetCache, inSpriteData}
 , currentScreen{&mainScreen}
 {
     AUI::Core::setActualScreenSize(
@@ -40,8 +39,6 @@ void UserInterface::tick(double timestepS) {
 void UserInterface::render(const Camera& camera)
 {
     mainScreen.setCamera(camera);
-    // TODO: This needs to be changed to a signal.
-    mainScreen.setTileMapExtent(world.tileMap.getTileExtent());
 
     currentScreen->render();
 }

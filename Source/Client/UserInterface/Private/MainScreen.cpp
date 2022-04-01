@@ -9,10 +9,10 @@ namespace AM
 {
 namespace Client
 {
-MainScreen::MainScreen(EventDispatcher& inUiEventDispatcher, AssetCache& inAssetCache
+MainScreen::MainScreen(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher, AssetCache& inAssetCache
                        , SpriteData& inSpriteData)
 : AUI::Screen("MainScreen")
-, buildOverlay{*this, inUiEventDispatcher}
+, buildOverlay{*this, inWorldSinks, inUiEventDispatcher}
 , buildPanel{inAssetCache, *this, inSpriteData, buildOverlay}
 {
     // Add our windows so they're included in rendering, etc.
@@ -23,11 +23,6 @@ MainScreen::MainScreen(EventDispatcher& inUiEventDispatcher, AssetCache& inAsset
 void MainScreen::setCamera(const Camera& inCamera)
 {
     buildOverlay.setCamera(inCamera);
-}
-
-void MainScreen::setTileMapExtent(TileExtent inTileExtent)
-{
-    buildOverlay.setTileMapExtent(inTileExtent);
 }
 
 void MainScreen::render()

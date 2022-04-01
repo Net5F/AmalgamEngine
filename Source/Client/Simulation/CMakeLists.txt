@@ -20,6 +20,7 @@ target_sources(Client
 		Public/Simulation.h
 		Public/TileUpdateSystem.h
 		Public/World.h
+		Public/WorldSignals.h
 		Public/Components/InputHistory.h
 		Public/Components/NeedsAdjacentChunks.h
 		Public/Components/Sprite.h
