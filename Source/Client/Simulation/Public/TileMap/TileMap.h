@@ -42,7 +42,7 @@ public:
                     unsigned int inMapYLengthChunks);
 
     /**
-     * Sets the specified sprite layer to the given sprite.
+     * Sets the specified tile sprite layer to the given sprite.
      *
      * If the specified tile's spriteLayers vector isn't big enough, resizes
      * it. Any tiles added during resizing will be default initialized to
@@ -51,19 +51,19 @@ public:
      * Note: There's no bounds checking on tileX/tileY. It's on you to make
      *       sure they're valid.
      */
-    void setSpriteLayer(unsigned int tileX, unsigned int tileY,
+    void setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
                         unsigned int layerIndex, const Sprite& sprite);
 
     /**
      * Overload for sprite string IDs.
      */
-    void setSpriteLayer(unsigned int tileX, unsigned int tileY,
+    void setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
                         unsigned int layerIndex, const std::string& stringID);
 
     /**
      * Overload for sprite numeric IDs.
      */
-    void setSpriteLayer(unsigned int tileX, unsigned int tileY,
+    void setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
                         unsigned int layerIndex, int numericID);
 
     /**

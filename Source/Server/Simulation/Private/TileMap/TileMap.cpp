@@ -44,7 +44,7 @@ TileMap::~TileMap()
     save("TileMap.bin");
 }
 
-void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
+void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
                              unsigned int layerIndex, const Sprite& sprite)
 {
     // If the sprite has a bounding box, calculate its position.
@@ -70,17 +70,17 @@ void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
     tile.spriteLayers[layerIndex] = {&sprite, worldBounds};
 }
 
-void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
+void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
                              unsigned int layerIndex,
                              const std::string& stringID)
 {
-    setSpriteLayer(tileX, tileY, layerIndex, spriteData.get(stringID));
+    setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(stringID));
 }
 
-void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
+void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
                              unsigned int layerIndex, int numericID)
 {
-    setSpriteLayer(tileX, tileY, layerIndex, spriteData.get(numericID));
+    setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(numericID));
 }
 
 const Tile& TileMap::getTile(unsigned int x, unsigned int y) const
@@ -132,7 +132,7 @@ void TileMap::loadMap(TileMapSnapshot& mapSnapshot)
             unsigned int layerIndex{0};
             for (unsigned int paletteID : tileSnapshot.spriteLayers) {
                 const Sprite& sprite{spriteData.get(chunk.palette[paletteID])};
-                setSpriteLayer((startX + relativeX), (startY + relativeY),
+                setTileSpriteLayer((startX + relativeX), (startY + relativeY),
                                layerIndex++, sprite);
             }
 

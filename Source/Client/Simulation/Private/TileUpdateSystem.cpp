@@ -41,7 +41,7 @@ void TileUpdateSystem::processNetworkUpdates()
     TileUpdate tileUpdate;
     while (tileUpdateQueue.pop(tileUpdate)) {
         // Update the map.
-        world.tileMap.setSpriteLayer(tileUpdate.tileX, tileUpdate.tileY,
+        world.tileMap.setTileSpriteLayer(tileUpdate.tileX, tileUpdate.tileY,
                                      tileUpdate.layerIndex,
                                      tileUpdate.numericID);
     }

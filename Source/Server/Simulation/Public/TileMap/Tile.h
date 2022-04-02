@@ -21,7 +21,7 @@ namespace Server
 struct Tile {
 public:
     /**
-     * Represents a sprite, placed on a tile.
+     * Represents a sprite, placed on one of a tile's layers.
      */
     struct SpriteLayer {
         /** The sprite that this layer contains. */

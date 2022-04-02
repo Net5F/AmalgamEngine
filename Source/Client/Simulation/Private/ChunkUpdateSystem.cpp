@@ -160,7 +160,7 @@ void ChunkUpdateSystem::applyChunkSnapshot(const ChunkWireSnapshot& chunk)
             unsigned int layerIndex{0};
             for (Uint8 paletteID : tileSnapshot.spriteLayers) {
                 // Add the sprite layer to the tile.
-                world.tileMap.setSpriteLayer(currentTileX, currentTileY,
+                world.tileMap.setTileSpriteLayer(currentTileX, currentTileY,
                                              layerIndex++,
                                              chunk.palette[paletteID]);
             }

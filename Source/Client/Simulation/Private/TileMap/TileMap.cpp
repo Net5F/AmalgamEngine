@@ -36,20 +36,20 @@ TileMap::TileMap(SpriteData& inSpriteData)
 
         // Add some rugs to layer 1.
         const Sprite& rug{spriteData.get("test_15")};
-        setSpriteLayer(0, 3, 1, rug);
-        setSpriteLayer(4, 3, 1, rug);
-        setSpriteLayer(3, 6, 1, rug);
-        setSpriteLayer(2, 9, 1, rug);
-        setSpriteLayer(1, 5, 1, rug);
+        setTileSpriteLayer(0, 3, 1, rug);
+        setTileSpriteLayer(4, 3, 1, rug);
+        setTileSpriteLayer(3, 6, 1, rug);
+        setTileSpriteLayer(2, 9, 1, rug);
+        setTileSpriteLayer(1, 5, 1, rug);
 
         // Add some walls to layer 2.
         const Sprite& wall1{spriteData.get("test_17")};
-        setSpriteLayer(2, 0, 2, wall1);
-        setSpriteLayer(2, 1, 2, wall1);
-        setSpriteLayer(2, 2, 2, wall1);
+        setTileSpriteLayer(2, 0, 2, wall1);
+        setTileSpriteLayer(2, 1, 2, wall1);
+        setTileSpriteLayer(2, 2, 2, wall1);
 
         const Sprite& wall2{spriteData.get("test_26")};
-        setSpriteLayer(0, 2, 2, wall2);
+        setTileSpriteLayer(0, 2, 2, wall2);
     }
 }
 
@@ -66,7 +66,7 @@ void TileMap::setMapSize(unsigned int inMapXLengthChunks,
     tiles.resize(tileExtent.xLength * tileExtent.yLength);
 }
 
-void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
+void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
                              unsigned int layerIndex, const Sprite& sprite)
 {
     // If the sprite has a bounding box, calculate its position.
@@ -92,17 +92,17 @@ void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
     tile.spriteLayers[layerIndex] = {&sprite, worldBounds};
 }
 
-void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
+void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
                              unsigned int layerIndex,
                              const std::string& stringID)
 {
-    setSpriteLayer(tileX, tileY, layerIndex, spriteData.get(stringID));
+    setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(stringID));
 }
 
-void TileMap::setSpriteLayer(unsigned int tileX, unsigned int tileY,
+void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
                              unsigned int layerIndex, int numericID)
 {
-    setSpriteLayer(tileX, tileY, layerIndex, spriteData.get(numericID));
+    setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(numericID));
 }
 
 void TileMap::clearTile(unsigned int tileX, unsigned int tileY)
