@@ -28,8 +28,8 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BuildPanel(AssetCache& inAssetCache
-               , SpriteData& inSpriteData, BuildOverlay& inBuildOverlay);
+    BuildPanel(AssetCache& inAssetCache, SpriteData& inSpriteData,
+               BuildOverlay& inBuildOverlay);
 
 private:
     /**

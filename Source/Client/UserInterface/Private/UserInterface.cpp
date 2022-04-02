@@ -15,9 +15,10 @@ namespace AM
 {
 namespace Client
 {
-UserInterface::UserInterface(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher,
-                             SDL_Renderer* inSDLRenderer, AssetCache& inAssetCache,
-                             SpriteData& inSpriteData)
+UserInterface::UserInterface(WorldSinks& inWorldSinks,
+                             EventDispatcher& inUiEventDispatcher,
+                             SDL_Renderer* inSDLRenderer,
+                             AssetCache& inAssetCache, SpriteData& inSpriteData)
 : auiInitializer{inSDLRenderer,
                  {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT}}
 , mainScreen{inWorldSinks, inUiEventDispatcher, inAssetCache, inSpriteData}
@@ -32,7 +33,8 @@ bool UserInterface::handleOSEvent(SDL_Event& event)
     return currentScreen->handleOSEvent(event);
 }
 
-void UserInterface::tick(double timestepS) {
+void UserInterface::tick(double timestepS)
+{
     currentScreen->tick(timestepS);
 }
 

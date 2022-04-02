@@ -9,8 +9,9 @@ namespace AM
 {
 namespace Client
 {
-MainScreen::MainScreen(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher, AssetCache& inAssetCache
-                       , SpriteData& inSpriteData)
+MainScreen::MainScreen(WorldSinks& inWorldSinks,
+                       EventDispatcher& inUiEventDispatcher,
+                       AssetCache& inAssetCache, SpriteData& inSpriteData)
 : AUI::Screen("MainScreen")
 , buildOverlay{inWorldSinks, inUiEventDispatcher}
 , buildPanel{inAssetCache, inSpriteData, buildOverlay}

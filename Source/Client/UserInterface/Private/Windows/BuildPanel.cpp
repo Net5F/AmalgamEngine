@@ -14,8 +14,8 @@ namespace AM
 {
 namespace Client
 {
-BuildPanel::BuildPanel(AssetCache& inAssetCache,
-                       SpriteData& inSpriteData, BuildOverlay& inBuildOverlay)
+BuildPanel::BuildPanel(AssetCache& inAssetCache, SpriteData& inSpriteData,
+                       BuildOverlay& inBuildOverlay)
 : AUI::Window{{0, 734, 1920, 346}, "BuildPanel"}
 , assetCache{inAssetCache}
 , buildOverlay{inBuildOverlay}
@@ -37,8 +37,8 @@ BuildPanel::BuildPanel(AssetCache& inAssetCache,
     backgroundImage.addResolution(
         {1600, 900},
         inAssetCache.loadTexture(Paths::TEXTURE_DIR
-                               + "SpritePanel/Background_1600.png"),
-                               {7, 0, 1600, 290});
+                                 + "SpritePanel/Background_1600.png"),
+        {7, 0, 1600, 290});
 
     /* Container */
     tileContainer.setNumColumns(10);
@@ -99,15 +99,14 @@ void BuildPanel::addTile(const Sprite& sprite)
     thumbnail.setIsActivateable(false);
 
     // Load the sprite's image.
-    thumbnail.thumbnailImage.addResolution(
-        {1280, 720}, sprite.texture, sprite.textureExtent);
+    thumbnail.thumbnailImage.addResolution({1280, 720}, sprite.texture,
+                                           sprite.textureExtent);
 
     // Add a callback to deactivate all other thumbnails when one is activated.
     thumbnail.setOnSelected([this, &sprite](AUI::Thumbnail* selectedThumb) {
         // Deactivate all other thumbnails.
         for (auto& widgetPtr : tileContainer) {
-            MainThumbnail& otherThumb
-                = static_cast<MainThumbnail&>(*widgetPtr);
+            MainThumbnail& otherThumb{static_cast<MainThumbnail&>(*widgetPtr)};
             if (otherThumb.getIsSelected() && (&otherThumb != selectedThumb)) {
                 otherThumb.deselect();
             }

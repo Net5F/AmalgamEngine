@@ -25,8 +25,8 @@ namespace AM
 {
 namespace Client
 {
-Simulation::Simulation(EventDispatcher& inUiEventDispatcher,
-                       Network& inNetwork, SpriteData& inSpriteData)
+Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
+                       SpriteData& inSpriteData)
 : network{inNetwork}
 , spriteData{inSpriteData}
 , world(inSpriteData)
@@ -74,7 +74,8 @@ void Simulation::connect()
     // Resize the world's tile map.
     world.tileMap.setMapSize(connectionResponse.mapXLengthChunks,
                              connectionResponse.mapYLengthChunks);
-    world.worldSignals.tileMapExtentChanged.publish(world.tileMap.getTileExtent());
+    world.worldSignals.tileMapExtentChanged.publish(
+        world.tileMap.getTileExtent());
     LOG_INFO("Setting map size to: (%u, %u).",
              connectionResponse.mapXLengthChunks,
              connectionResponse.mapYLengthChunks);

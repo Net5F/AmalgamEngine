@@ -32,7 +32,8 @@ class SpriteData;
 class UserInterface : public OSEventHandler
 {
 public:
-    UserInterface(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher,
+    UserInterface(WorldSinks& inWorldSinks,
+                  EventDispatcher& inUiEventDispatcher,
                   SDL_Renderer* inSDLRenderer, AssetCache& inAssetCache,
                   SpriteData& inSpriteData);
 

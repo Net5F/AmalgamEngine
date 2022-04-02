@@ -33,5 +33,5 @@ MainThumbnail::MainThumbnail(AssetCache& assetCache,
     setTextColor({255, 255, 255, 255});
 }
 
-} // End namespace SpriteEditor
+} // End namespace Client
 } // End namespace AM

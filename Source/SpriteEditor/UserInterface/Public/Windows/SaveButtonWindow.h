@@ -20,8 +20,8 @@ class SpriteDataModel;
 class SaveButtonWindow : public AUI::Window
 {
 public:
-    SaveButtonWindow(AssetCache& inAssetCache, MainScreen& inScreen
-                     , SpriteDataModel& inSpriteDataModel);
+    SaveButtonWindow(AssetCache& inAssetCache, MainScreen& inScreen,
+                     SpriteDataModel& inSpriteDataModel);
 
 private:
     /** Used to load the button's textures. */

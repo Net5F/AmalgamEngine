@@ -150,8 +150,7 @@ void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
     thumbnail.setOnSelected([&](AUI::Thumbnail* selectedThumb) {
         // Deselect all other thumbnails.
         for (auto& widgetPtr : spriteSheetContainer) {
-            MainThumbnail& otherThumb
-                = static_cast<MainThumbnail&>(*widgetPtr);
+            MainThumbnail& otherThumb{static_cast<MainThumbnail&>(*widgetPtr)};
             if (otherThumb.getIsSelected() && (&otherThumb != selectedThumb)) {
                 otherThumb.deselect();
             }
@@ -168,8 +167,7 @@ void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
         // Check if any thumbnails are selected.
         bool thumbIsSelected{false};
         for (auto& widgetPtr : spriteSheetContainer) {
-            MainThumbnail& otherThumb
-                = static_cast<MainThumbnail&>(*widgetPtr);
+            MainThumbnail& otherThumb = static_cast<MainThumbnail&>(*widgetPtr);
             if (otherThumb.getIsSelected()) {
                 thumbIsSelected = true;
             }

@@ -6,24 +6,21 @@ namespace AM
 {
 namespace Client
 {
-MainButton::MainButton(AssetCache& assetCache,
-                                       const SDL_Rect& inScreenExtent,
-                                       const std::string& inText,
-                                       const std::string& inDebugName)
+MainButton::MainButton(AssetCache& assetCache, const SDL_Rect& inScreenExtent,
+                       const std::string& inText,
+                       const std::string& inDebugName)
 : AUI::Button(inScreenExtent, inDebugName)
 {
     // Add our backgrounds.
     normalImage.addResolution(
-        {1600, 900}, assetCache.loadTexture(Paths::TEXTURE_DIR
-                                            + "MainButton/Normal.png"));
+        {1600, 900},
+        assetCache.loadTexture(Paths::TEXTURE_DIR + "MainButton/Normal.png"));
     hoveredImage.addResolution(
         {1600, 900},
-        assetCache.loadTexture(Paths::TEXTURE_DIR
-                               + "MainButton/Hovered.png"));
+        assetCache.loadTexture(Paths::TEXTURE_DIR + "MainButton/Hovered.png"));
     pressedImage.addResolution(
         {1600, 900},
-        assetCache.loadTexture(Paths::TEXTURE_DIR
-                               + "MainButton/Pressed.png"));
+        assetCache.loadTexture(Paths::TEXTURE_DIR + "MainButton/Pressed.png"));
 
     // Set our text properties.
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);

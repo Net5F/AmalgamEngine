@@ -25,7 +25,8 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BuildOverlay(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher);
+    BuildOverlay(WorldSinks& inWorldSinks,
+                 EventDispatcher& inUiEventDispatcher);
 
     /**
      * Used by the BuildPanel to tell us which sprite is selected.
@@ -57,7 +58,8 @@ public:
     //-------------------------------------------------------------------------
     void render() override;
 
-    AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType, const SDL_Point& cursorPosition) override;
+    AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
+                                 const SDL_Point& cursorPosition) override;
 
     AUI::EventResult onMouseMove(const SDL_Point& cursorPosition) override;
 

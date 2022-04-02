@@ -20,5 +20,5 @@ public:
                   const std::string& inDebugName = "MainThumbnail");
 };
 
-} // End namespace SpriteEditor
+} // End namespace Client
 } // End namespace AM

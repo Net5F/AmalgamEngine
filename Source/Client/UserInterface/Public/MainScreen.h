@@ -22,8 +22,8 @@ class SpriteData;
 class MainScreen : public AUI::Screen
 {
 public:
-    MainScreen(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher
-               , AssetCache& inAssetCache, SpriteData& inSpriteData);
+    MainScreen(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher,
+               AssetCache& inAssetCache, SpriteData& inSpriteData);
 
     /**
      * Sets the camera to use when rendering.

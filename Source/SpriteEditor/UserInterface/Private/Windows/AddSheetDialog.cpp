@@ -10,9 +10,8 @@ namespace AM
 {
 namespace SpriteEditor
 {
-AddSheetDialog::AddSheetDialog(
-    AssetCache& assetCache, MainScreen& inScreen,
-    SpriteDataModel& inSpriteDataModel)
+AddSheetDialog::AddSheetDialog(AssetCache& assetCache, MainScreen& inScreen,
+                               SpriteDataModel& inSpriteDataModel)
 : AUI::Window({0, 0, 1920, 1080}, "AddSheetDialog")
 , backgroundImage({0, 0, logicalExtent.w, logicalExtent.h})
 , headerText({747, 228, 280, 60})

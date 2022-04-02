@@ -5,7 +5,6 @@ namespace AM
 {
 namespace Client
 {
-
 WorldSinks::WorldSinks(WorldSignals& worldSignals)
 : tileMapExtentChanged{worldSignals.tileMapExtentChanged}
 {

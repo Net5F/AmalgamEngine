@@ -46,8 +46,9 @@ void EntityLocator::setEntityLocation(entt::entity entity,
     boxCellExtent.yLength
         = (std::ceil(boundingBox.maxY / cellWorldWidth) - boxCellExtent.y);
 
-    AM_ASSERT(cellExtent.containsExtent(boxCellExtent), "Tried to track entity "
-        "that is outside of the locator's grid.");
+    AM_ASSERT(cellExtent.containsExtent(boxCellExtent),
+              "Tried to track entity "
+              "that is outside of the locator's grid.");
 
     // If we already have a location for the entity, clear it.
     auto entityIt{entityMap.find(entity)};
@@ -246,10 +247,10 @@ CellExtent EntityLocator::tileToCellExtent(const TileExtent& tileExtent)
     topLeft.y = static_cast<int>(std::floor(tileExtent.y / cellWidth));
 
     CellPosition bottomRight{};
-    bottomRight.x = static_cast<int>(std::ceil((tileExtent.x
-        + tileExtent.xLength) / cellWidth));
-    bottomRight.y = static_cast<int>(std::ceil((tileExtent.y
-        + tileExtent.yLength) / cellWidth));
+    bottomRight.x = static_cast<int>(
+        std::ceil((tileExtent.x + tileExtent.xLength) / cellWidth));
+    bottomRight.y = static_cast<int>(
+        std::ceil((tileExtent.y + tileExtent.yLength) / cellWidth));
 
     return {topLeft.x, topLeft.y, (bottomRight.x - topLeft.x),
             (bottomRight.y - topLeft.y)};

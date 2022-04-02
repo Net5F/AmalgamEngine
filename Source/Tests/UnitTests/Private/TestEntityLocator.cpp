@@ -292,15 +292,14 @@ TEST_CASE("TestEntityLocator")
 
         // In the second cell
         entt::entity entity2{registry.create()};
-        Position& position2{
-            registry.emplace<Position>(entity2, (CELL_WORLD_WIDTH + HALF_TILE)
-                , HALF_TILE, 0.f)};
+        Position& position2{registry.emplace<Position>(
+            entity2, (CELL_WORLD_WIDTH + HALF_TILE), HALF_TILE, 0.f)};
         BoundingBox& boundingBox2{registry.emplace<BoundingBox>(
             entity2, Transforms::modelToWorldCentered(modelBounds, position2))};
         entityLocator.setEntityLocation(entity2, boundingBox2);
 
-        TileExtent tileExtent{(SharedConfig::CELL_WIDTH / 2), 0
-            , SharedConfig::CELL_WIDTH, 1};
+        TileExtent tileExtent{(SharedConfig::CELL_WIDTH / 2), 0,
+                              SharedConfig::CELL_WIDTH, 1};
         std::vector<entt::entity>* returnVector{
             &(entityLocator.getEntitiesCoarse(tileExtent))};
 

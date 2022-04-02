@@ -8,7 +8,6 @@ namespace AM
 {
 namespace Client
 {
-
 /**
  * Owns the World's signals.
  *

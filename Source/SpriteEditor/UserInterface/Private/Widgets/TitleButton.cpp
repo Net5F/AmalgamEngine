@@ -6,8 +6,7 @@ namespace AM
 {
 namespace SpriteEditor
 {
-TitleButton::TitleButton(AssetCache& assetCache,
-                         const SDL_Rect& inScreenExtent,
+TitleButton::TitleButton(AssetCache& assetCache, const SDL_Rect& inScreenExtent,
                          const std::string& inText,
                          const std::string& inDebugName)
 : AUI::Button(inScreenExtent, inDebugName)

@@ -12,8 +12,9 @@ namespace AM
 {
 namespace SpriteEditor
 {
-TitleWindow::TitleWindow(UserInterface& inUserInterface, AssetCache& inAssetCache
-                         , SpriteDataModel& inSpriteDataModel)
+TitleWindow::TitleWindow(UserInterface& inUserInterface,
+                         AssetCache& inAssetCache,
+                         SpriteDataModel& inSpriteDataModel)
 : AUI::Window({0, 0, 1920, 1080}, "TitleWindow")
 , userInterface{inUserInterface}
 , assetCache{inAssetCache}

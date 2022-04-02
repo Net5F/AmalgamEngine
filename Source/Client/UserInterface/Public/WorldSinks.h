@@ -8,7 +8,6 @@ namespace AM
 {
 namespace Client
 {
-
 class WorldSignals;
 
 /**

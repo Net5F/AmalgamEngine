@@ -9,25 +9,25 @@
  * Use these macros instead of calling the functions directly.
  */
 #define LOG_INFO(...)                                                          \
-    do {                                                                          \
+    do {                                                                       \
         AM::Log::info(__VA_ARGS__);                                            \
     } while (false)
 
 #ifndef NDEBUG
 #define LOG_ERROR(...)                                                         \
-    do {                                                                          \
+    do {                                                                       \
         AM::Log::error(__FILE__, __LINE__, __VA_ARGS__);                       \
         std::abort();                                                          \
     } while (false)
 #else
 #define LOG_ERROR(...)                                                         \
-    do {                                                                          \
+    do {                                                                       \
         AM::Log::error(__FILE__, __LINE__, __VA_ARGS__);                       \
     } while (false)
 #endif
 
 #define LOG_FATAL(...)                                                         \
-    do {                                                                          \
+    do {                                                                       \
         AM::Log::error(__FILE__, __LINE__, __VA_ARGS__);                       \
         std::abort();                                                          \
     } while (false)

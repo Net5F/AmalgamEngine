@@ -14,8 +14,8 @@ namespace AM
 {
 namespace Client
 {
-BuildOverlay::BuildOverlay(WorldSinks& inWorldSinks
-                           , EventDispatcher& inUiEventDispatcher)
+BuildOverlay::BuildOverlay(WorldSinks& inWorldSinks,
+                           EventDispatcher& inUiEventDispatcher)
 : AUI::Window({0, 0, 1920, 744}, "BuildOverlay")
 , uiEventDispatcher{inUiEventDispatcher}
 , selectedTile{nullptr}
@@ -26,7 +26,8 @@ BuildOverlay::BuildOverlay(WorldSinks& inWorldSinks
 {
     // We need to know when the map size changes so we can bound the cursor
     // appropriately.
-    inWorldSinks.tileMapExtentChanged.connect<&BuildOverlay::onTileMapExtentChanged>(*this);
+    inWorldSinks.tileMapExtentChanged
+        .connect<&BuildOverlay::onTileMapExtentChanged>(*this);
 }
 
 void BuildOverlay::setSelectedTile(const Sprite& inSelectedTile)
@@ -48,7 +49,7 @@ void BuildOverlay::render()
 {
     if (selectedTile != nullptr) {
         SDL_Rect screenExtent{ClientTransforms::tileToScreenExtent(
-                mouseTilePosition, *selectedTile, camera)};
+            mouseTilePosition, *selectedTile, camera)};
 
         // Set the texture's alpha to make the tile semi-transparent.
         SDL_SetTextureAlphaMod(selectedTile->texture.get(), 150);
@@ -62,7 +63,8 @@ void BuildOverlay::render()
     }
 }
 
-AUI::EventResult BuildOverlay::onMouseDown(AUI::MouseButtonType buttonType, const SDL_Point& cursorPosition)
+AUI::EventResult BuildOverlay::onMouseDown(AUI::MouseButtonType buttonType,
+                                           const SDL_Point& cursorPosition)
 {
     ignore(cursorPosition);
 
@@ -87,8 +89,8 @@ AUI::EventResult BuildOverlay::onMouseMove(const SDL_Point& cursorPosition)
     // Get the tile coordinate that the mouse is hovering over.
     ScreenPoint screenPoint{static_cast<float>(cursorPosition.x),
                             static_cast<float>(cursorPosition.y)};
-    TilePosition newTilePosition =
-        Transforms::screenToTile(screenPoint, camera);
+    TilePosition newTilePosition
+        = Transforms::screenToTile(screenPoint, camera);
 
     // If the mouse is outside of the world bounds, ignore this event.
     if (!(mapTileExtent.containsPosition(newTilePosition))) {

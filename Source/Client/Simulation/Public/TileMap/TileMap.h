@@ -52,19 +52,20 @@ public:
      *       sure they're valid.
      */
     void setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
-                        unsigned int layerIndex, const Sprite& sprite);
+                            unsigned int layerIndex, const Sprite& sprite);
 
     /**
      * Overload for sprite string IDs.
      */
     void setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
-                        unsigned int layerIndex, const std::string& stringID);
+                            unsigned int layerIndex,
+                            const std::string& stringID);
 
     /**
      * Overload for sprite numeric IDs.
      */
     void setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
-                        unsigned int layerIndex, int numericID);
+                            unsigned int layerIndex, int numericID);
 
     /**
      * Clears all sprite layers out of the tile at the given index.

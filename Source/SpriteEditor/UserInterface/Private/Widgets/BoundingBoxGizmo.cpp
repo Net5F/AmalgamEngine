@@ -87,7 +87,8 @@ void BoundingBoxGizmo::render()
     renderControls();
 }
 
-AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType, const SDL_Point& cursorPosition)
+AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType,
+                                               const SDL_Point& cursorPosition)
 {
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
@@ -98,13 +99,16 @@ AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType, 
     if (AUI::SDLHelpers::pointInRect(cursorPosition, lastRenderedPosExtent)) {
         currentHeldControl = Control::Position;
     }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition, lastRenderedXExtent)) {
+    else if (AUI::SDLHelpers::pointInRect(cursorPosition,
+                                          lastRenderedXExtent)) {
         currentHeldControl = Control::X;
     }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition, lastRenderedYExtent)) {
+    else if (AUI::SDLHelpers::pointInRect(cursorPosition,
+                                          lastRenderedYExtent)) {
         currentHeldControl = Control::Y;
     }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition, lastRenderedZExtent)) {
+    else if (AUI::SDLHelpers::pointInRect(cursorPosition,
+                                          lastRenderedZExtent)) {
         currentHeldControl = Control::Z;
     }
 
@@ -118,7 +122,8 @@ AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType, 
     }
 }
 
-AUI::EventResult BoundingBoxGizmo::onMouseUp(AUI::MouseButtonType buttonType, const SDL_Point& cursorPosition)
+AUI::EventResult BoundingBoxGizmo::onMouseUp(AUI::MouseButtonType buttonType,
+                                             const SDL_Point& cursorPosition)
 {
     ignore(cursorPosition);
 
@@ -155,7 +160,8 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
     xOffset += renderExtent.x;
 
     // Apply the offset to the mouse position and convert to logical space.
-    SDL_Point offsetMousePoint{cursorPosition.x - xOffset, cursorPosition.y - yOffset};
+    SDL_Point offsetMousePoint{cursorPosition.x - xOffset,
+                               cursorPosition.y - yOffset};
     offsetMousePoint = AUI::ScalingHelpers::actualToLogical(offsetMousePoint);
 
     // Convert the screen-space mouse point to world space.

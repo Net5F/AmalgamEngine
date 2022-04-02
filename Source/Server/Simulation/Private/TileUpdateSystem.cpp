@@ -28,9 +28,9 @@ void TileUpdateSystem::updateTiles()
         // Note: This doesn't check if the client entity is within any certain
         //       range of the tile or anything. We can add that if it's
         //       useful, I just couldn't immediately think of a use case for it.
-        world.tileMap.setTileSpriteLayer(updateRequest.tileX, updateRequest.tileY,
-                                     updateRequest.layerIndex,
-                                     updateRequest.numericID);
+        world.tileMap.setTileSpriteLayer(
+            updateRequest.tileX, updateRequest.tileY, updateRequest.layerIndex,
+            updateRequest.numericID);
 
         // Construct the new tile update.
         TileUpdate tileUpdate{updateRequest.tileX, updateRequest.tileY,

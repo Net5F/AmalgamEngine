@@ -54,8 +54,7 @@ void SpritePanel::addSprite(const SpriteSheet& sheet, Sprite& sprite)
     thumbnail.setOnActivated([&](AUI::Thumbnail* selectedThumb) {
         // Deactivate all other thumbnails.
         for (auto& widgetPtr : spriteContainer) {
-            MainThumbnail& otherThumb
-                = static_cast<MainThumbnail&>(*widgetPtr);
+            MainThumbnail& otherThumb{static_cast<MainThumbnail&>(*widgetPtr)};
             if (otherThumb.getIsActive() && (&otherThumb != selectedThumb)) {
                 otherThumb.deactivate();
             }

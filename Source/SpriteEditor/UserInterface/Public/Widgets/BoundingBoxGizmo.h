@@ -48,9 +48,11 @@ public:
     //-------------------------------------------------------------------------
     void render() override;
 
-    AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType, const SDL_Point& cursorPosition) override;
+    AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
+                                 const SDL_Point& cursorPosition) override;
 
-    AUI::EventResult onMouseUp(AUI::MouseButtonType buttonType, const SDL_Point& cursorPosition) override;
+    AUI::EventResult onMouseUp(AUI::MouseButtonType buttonType,
+                               const SDL_Point& cursorPosition) override;
 
     AUI::EventResult onMouseMove(const SDL_Point& cursorPosition) override;
 

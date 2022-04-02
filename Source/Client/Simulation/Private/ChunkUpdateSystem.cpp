@@ -161,8 +161,8 @@ void ChunkUpdateSystem::applyChunkSnapshot(const ChunkWireSnapshot& chunk)
             for (Uint8 paletteID : tileSnapshot.spriteLayers) {
                 // Add the sprite layer to the tile.
                 world.tileMap.setTileSpriteLayer(currentTileX, currentTileY,
-                                             layerIndex++,
-                                             chunk.palette[paletteID]);
+                                                 layerIndex++,
+                                                 chunk.palette[paletteID]);
             }
 
             // Increment to the next linear index.

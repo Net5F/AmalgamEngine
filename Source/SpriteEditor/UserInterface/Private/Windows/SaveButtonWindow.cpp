@@ -8,8 +8,9 @@ namespace AM
 {
 namespace SpriteEditor
 {
-SaveButtonWindow::SaveButtonWindow(AssetCache& inAssetCache, MainScreen& inScreen
-                                   , SpriteDataModel& inSpriteDataModel)
+SaveButtonWindow::SaveButtonWindow(AssetCache& inAssetCache,
+                                   MainScreen& inScreen,
+                                   SpriteDataModel& inSpriteDataModel)
 : AUI::Window({1537, 0, 58, 58}, "SaveButtonWindow")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
@@ -41,8 +42,8 @@ SaveButtonWindow::SaveButtonWindow(AssetCache& inAssetCache, MainScreen& inScree
         };
 
         // Open the confirmation dialog.
-        mainScreen.openConfirmationDialog("Save over existing SpriteData.json?", "SAVE",
-                               std::move(onConfirmation));
+        mainScreen.openConfirmationDialog("Save over existing SpriteData.json?",
+                                          "SAVE", std::move(onConfirmation));
     });
 }
 

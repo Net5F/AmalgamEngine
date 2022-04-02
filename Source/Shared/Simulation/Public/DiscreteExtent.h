@@ -186,8 +186,8 @@ public:
     bool containsExtent(const DiscreteExtent<T>& extent) const
     {
         DiscretePosition<T> topLeft{extent.x, extent.y};
-        DiscretePosition<T> bottomRight{(extent.x + extent.xLength)
-            , (extent.y + extent.yLength)};
+        DiscretePosition<T> bottomRight{(extent.x + extent.xLength),
+                                        (extent.y + extent.yLength)};
         return (containsPosition(topLeft) && containsPosition(bottomRight));
     }
 
