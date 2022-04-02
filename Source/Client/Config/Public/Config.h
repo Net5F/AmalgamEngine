@@ -51,8 +51,8 @@ public:
     // Renderer, User Interface
     //-------------------------------------------------------------------------
     /** The actual size of the window we're rendering to. */
-    static constexpr unsigned int ACTUAL_SCREEN_WIDTH{1280};
-    static constexpr unsigned int ACTUAL_SCREEN_HEIGHT{720};
+    static constexpr unsigned int ACTUAL_SCREEN_WIDTH{1600};
+    static constexpr unsigned int ACTUAL_SCREEN_HEIGHT{900};
 
     /**
      * The logical screen size that we're targeting.
