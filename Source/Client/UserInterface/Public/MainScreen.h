@@ -33,6 +33,11 @@ public:
      */
     void setCamera(const Camera& inCamera);
 
+    //-------------------------------------------------------------------------
+    // Screen class overrides
+    //-------------------------------------------------------------------------
+    bool onKeyDown(SDL_Keycode keyCode) override;
+
     void render() override;
 
 private:

@@ -18,11 +18,30 @@ MainScreen::MainScreen(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispa
     // Add our windows so they're included in rendering, etc.
     windows.push_back(buildOverlay);
     windows.push_back(buildPanel);
+
+    // Deactivate build mode.
+    buildOverlay.setIsVisible(false);
+    buildPanel.setIsVisible(false);
 }
 
 void MainScreen::setCamera(const Camera& inCamera)
 {
     buildOverlay.setCamera(inCamera);
+}
+
+bool MainScreen::onKeyDown(SDL_Keycode keyCode)
+{
+    // If the 'b' key is pressed, toggle build mode.
+    if (keyCode == SDLK_b) {
+        bool buildModeIsActive{buildOverlay.getIsVisible()};
+
+        buildOverlay.setIsVisible(!buildModeIsActive);
+        buildPanel.setIsVisible(!buildModeIsActive);
+
+        return true;
+    }
+
+    return false;
 }
 
 void MainScreen::render()
