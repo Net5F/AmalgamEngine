@@ -14,7 +14,7 @@ namespace SpriteEditor
 class TitleButton : public AUI::Button
 {
 public:
-    TitleButton(AssetCache& assetCache, AUI::Screen& inScreen,
+    TitleButton(AssetCache& assetCache,
                 const SDL_Rect& inScreenExtent, const std::string& inText,
                 const std::string& inDebugName = "TitleButton");
 };

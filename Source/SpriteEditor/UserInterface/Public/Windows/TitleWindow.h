@@ -21,7 +21,7 @@ class TitleWindow : public AUI::Window
 {
 public:
     TitleWindow(UserInterface& inUserInterface, AssetCache& inAssetCache,
-                TitleScreen& inScreen, SpriteDataModel& inSpriteDataModel);
+                SpriteDataModel& inSpriteDataModel);
 
 private:
     void onNewButtonPressed();

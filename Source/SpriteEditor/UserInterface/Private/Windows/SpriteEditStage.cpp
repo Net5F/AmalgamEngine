@@ -12,12 +12,11 @@ namespace SpriteEditor
 {
 SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
                                  SpriteDataModel& inSpriteDataModel)
-: AUI::Window(inScreen, {389, 60, 1142, 684}, "SpriteEditStage")
+: AUI::Window({389, 60, 1142, 684}, "SpriteEditStage")
 , assetCache{inAssetCache}
-, mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
-, checkerboardImage(inScreen, {0, 0, 100, 100})
-, spriteImage(inScreen, {0, 0, 100, 100})
+, checkerboardImage({0, 0, 100, 100})
+, spriteImage({0, 0, 100, 100})
 , boundingBoxGizmo(inScreen)
 {
     // Add our children so they're included in rendering, etc.

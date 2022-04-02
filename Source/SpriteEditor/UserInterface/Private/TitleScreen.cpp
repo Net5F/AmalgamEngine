@@ -10,7 +10,7 @@ namespace SpriteEditor
 TitleScreen::TitleScreen(UserInterface& inUserInterface, AssetCache& assetCache,
                          SpriteDataModel& inSpriteDataModel)
 : AUI::Screen("TitleScreen")
-, titleWindow{inUserInterface, assetCache, *this, inSpriteDataModel}
+, titleWindow{inUserInterface, assetCache, inSpriteDataModel}
 {
     // Add our windows so they're included in rendering, etc.
     windows.push_back(titleWindow);

@@ -12,8 +12,8 @@ namespace Client
 MainScreen::MainScreen(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher, AssetCache& inAssetCache
                        , SpriteData& inSpriteData)
 : AUI::Screen("MainScreen")
-, buildOverlay{*this, inWorldSinks, inUiEventDispatcher}
-, buildPanel{inAssetCache, *this, inSpriteData, buildOverlay}
+, buildOverlay{inWorldSinks, inUiEventDispatcher}
+, buildPanel{inAssetCache, inSpriteData, buildOverlay}
 {
     // Add our windows so they're included in rendering, etc.
     windows.push_back(buildOverlay);

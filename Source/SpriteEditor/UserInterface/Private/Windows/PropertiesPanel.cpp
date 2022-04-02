@@ -21,23 +21,23 @@ namespace SpriteEditor
 {
 PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
                                  SpriteDataModel& inSpriteDataModel)
-: AUI::Window(inScreen, {1605, 0, 315, 502}, "PropertiesPanel")
-, nameLabel(inScreen, {36, 24, 65, 28}, "NameLabel")
-, nameInput(assetCache, inScreen, {36, 56, 255, 38}, "NameInput")
-, hasBoundingBoxLabel(inScreen, {36, 126, 210, 38}, "HasBBLabel")
-, hasBoundingBoxInput(inScreen, {269, 134, 22, 22}, "HasBBInput")
-, minXLabel(inScreen, {36, 176, 110, 38}, "MinXLabel")
-, minXInput(assetCache, inScreen, {162, 176, 129, 38}, "MinXInput")
-, minYLabel(inScreen, {36, 226, 110, 38}, "MinYLabel")
-, minYInput(assetCache, inScreen, {162, 226, 129, 38}, "MinYInput")
-, minZLabel(inScreen, {36, 276, 110, 38}, "MinZLabel")
-, minZInput(assetCache, inScreen, {162, 276, 129, 38}, "MinZInput")
-, maxXLabel(inScreen, {36, 326, 110, 38}, "MaxXLabel")
-, maxXInput(assetCache, inScreen, {162, 326, 129, 38}, "MaxXInput")
-, maxYLabel(inScreen, {36, 376, 110, 38}, "MaxYLabel")
-, maxYInput(assetCache, inScreen, {162, 376, 129, 38}, "MaxYInput")
-, maxZLabel(inScreen, {36, 426, 110, 38}, "MaxZLabel")
-, maxZInput(assetCache, inScreen, {162, 426, 129, 38}, "MaxZInput")
+: AUI::Window({1605, 0, 315, 502}, "PropertiesPanel")
+, nameLabel({36, 24, 65, 28}, "NameLabel")
+, nameInput(assetCache, {36, 56, 255, 38}, "NameInput")
+, hasBoundingBoxLabel({36, 126, 210, 38}, "HasBBLabel")
+, hasBoundingBoxInput({269, 134, 22, 22}, "HasBBInput")
+, minXLabel({36, 176, 110, 38}, "MinXLabel")
+, minXInput(assetCache, {162, 176, 129, 38}, "MinXInput")
+, minYLabel({36, 226, 110, 38}, "MinYLabel")
+, minYInput(assetCache, {162, 226, 129, 38}, "MinYInput")
+, minZLabel({36, 276, 110, 38}, "MinZLabel")
+, minZInput(assetCache, {162, 276, 129, 38}, "MinZInput")
+, maxXLabel({36, 326, 110, 38}, "MaxXLabel")
+, maxXInput(assetCache, {162, 326, 129, 38}, "MaxXInput")
+, maxYLabel({36, 376, 110, 38}, "MaxYLabel")
+, maxYInput(assetCache, {162, 376, 129, 38}, "MaxYInput")
+, maxZLabel({36, 426, 110, 38}, "MaxZLabel")
+, maxZInput(assetCache, {162, 426, 129, 38}, "MaxZInput")
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
 , activeSprite{nullptr}
@@ -47,7 +47,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
 , committedMaxX{0.0}
 , committedMaxY{0.0}
 , committedMaxZ{0.0}
-, backgroundImage(inScreen, {0, 0, 315, 502}, "BackgroundImage")
+, backgroundImage({0, 0, 315, 502}, "BackgroundImage")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);

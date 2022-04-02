@@ -6,9 +6,9 @@ namespace AM
 {
 namespace Client
 {
-MainThumbnail::MainThumbnail(AssetCache& assetCache, AUI::Screen& inScreen,
+MainThumbnail::MainThumbnail(AssetCache& assetCache,
                              const std::string& inDebugName)
-: AUI::Thumbnail(inScreen, {0, 0, 150, 150}, inDebugName)
+: AUI::Thumbnail({0, 0, 150, 150}, inDebugName)
 {
     // Add our backgrounds.
     hoveredImage.addResolution(

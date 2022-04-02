@@ -10,7 +10,6 @@ class EventDispatcher;
 
 namespace Client
 {
-class MainScreen;
 class WorldSinks;
 class Sprite;
 
@@ -26,7 +25,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BuildOverlay(MainScreen& inScreen, WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher);
+    BuildOverlay(WorldSinks& inWorldSinks, EventDispatcher& inUiEventDispatcher);
 
     /**
      * Used by the BuildPanel to tell us which sprite is selected.

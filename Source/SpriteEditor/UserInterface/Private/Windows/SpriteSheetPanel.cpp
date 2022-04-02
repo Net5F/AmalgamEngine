@@ -13,14 +13,14 @@ namespace SpriteEditor
 SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
                                    MainScreen& inScreen,
                                    SpriteDataModel& inSpriteDataModel)
-: AUI::Window(inScreen, {0, 0, 399, 708}, "SpriteSheetPanel")
+: AUI::Window({0, 0, 399, 708}, "SpriteSheetPanel")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
-, backgroundImage(inScreen, {0, 0, 399, 708})
-, spriteSheetContainer(inScreen, {18, 24, 306, 650}, "SpriteSheetContainer")
-, remSheetButton(inScreen, {342, 0, 45, 63})
-, addSheetButton(inScreen, {342, 63, 45, 88})
+, backgroundImage({0, 0, 399, 708})
+, spriteSheetContainer({18, 24, 306, 650}, "SpriteSheetContainer")
+, remSheetButton({342, 0, 45, 63})
+, addSheetButton({342, 63, 45, 88})
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
@@ -135,7 +135,7 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
 void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
 {
     std::unique_ptr<AUI::Widget> thumbnailPtr{
-        std::make_unique<MainThumbnail>(assetCache, screen, "")};
+        std::make_unique<MainThumbnail>(assetCache, "")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
 
     thumbnail.thumbnailImage.addResolution(

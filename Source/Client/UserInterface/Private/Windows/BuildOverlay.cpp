@@ -14,9 +14,9 @@ namespace AM
 {
 namespace Client
 {
-BuildOverlay::BuildOverlay(MainScreen& inScreen, WorldSinks& inWorldSinks
+BuildOverlay::BuildOverlay(WorldSinks& inWorldSinks
                            , EventDispatcher& inUiEventDispatcher)
-: AUI::Window(inScreen, {0, 0, 1920, 744}, "BuildOverlay")
+: AUI::Window({0, 0, 1920, 744}, "BuildOverlay")
 , uiEventDispatcher{inUiEventDispatcher}
 , selectedTile{nullptr}
 , tileLayerIndex{0}

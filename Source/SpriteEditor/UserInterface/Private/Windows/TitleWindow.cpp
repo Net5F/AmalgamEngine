@@ -13,15 +13,15 @@ namespace AM
 namespace SpriteEditor
 {
 TitleWindow::TitleWindow(UserInterface& inUserInterface, AssetCache& inAssetCache
-                         , TitleScreen& inScreen, SpriteDataModel& inSpriteDataModel)
-: AUI::Window(inScreen, {0, 0, 1920, 1080}, "TitleWindow")
+                         , SpriteDataModel& inSpriteDataModel)
+: AUI::Window({0, 0, 1920, 1080}, "TitleWindow")
 , userInterface{inUserInterface}
 , assetCache{inAssetCache}
 , spriteDataModel{inSpriteDataModel}
-, titleText(inScreen, {0, 193, 1920, 75}, "TitleText")
-, newButton(assetCache, inScreen, {724, 432, 472, 96}, "New", "NewButton")
-, loadButton(assetCache, inScreen, {724, 589, 472, 96}, "Load", "LoadButton")
-, errorText(inScreen, {0, 721, 1920, 48}, "ErrorText")
+, titleText({0, 193, 1920, 75}, "TitleText")
+, newButton(assetCache, {724, 432, 472, 96}, "New", "NewButton")
+, loadButton(assetCache, {724, 589, 472, 96}, "Load", "LoadButton")
+, errorText({0, 721, 1920, 48}, "ErrorText")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(titleText);

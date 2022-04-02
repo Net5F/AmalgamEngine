@@ -17,7 +17,7 @@ namespace SpriteEditor
 class ConfirmationButton : public AUI::Button
 {
 public:
-    ConfirmationButton(AssetCache& assetCache, AUI::Screen& inScreen,
+    ConfirmationButton(AssetCache& assetCache,
                        const SDL_Rect& inScreenExtent,
                        const std::string& inText,
                        const std::string& inDebugName = "ConfirmationButton");

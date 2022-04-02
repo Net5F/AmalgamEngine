@@ -13,24 +13,24 @@ namespace SpriteEditor
 AddSheetDialog::AddSheetDialog(
     AssetCache& assetCache, MainScreen& inScreen,
     SpriteDataModel& inSpriteDataModel)
-: AUI::Window(inScreen, {0, 0, 1920, 1080}, "AddSheetDialog")
-, backgroundImage(inScreen, {0, 0, logicalExtent.w, logicalExtent.h})
-, headerText(inScreen, {747, 228, 280, 60})
-, pathLabel(inScreen, {747, 300, 151, 38})
-, pathInput(assetCache, inScreen, {919, 300, 180, 38})
-, widthLabel(inScreen, {747, 350, 151, 38})
-, widthInput(assetCache, inScreen, {919, 350, 180, 38})
-, heightLabel(inScreen, {747, 400, 151, 38})
-, heightInput(assetCache, inScreen, {919, 400, 180, 38})
-, offsetLabel(inScreen, {747, 450, 151, 38})
-, offsetInput(assetCache, inScreen, {919, 450, 180, 38})
-, nameLabel(inScreen, {747, 500, 151, 38})
-, nameInput(assetCache, inScreen, {919, 500, 180, 38})
-, addButton(assetCache, inScreen, {1099, 640, 123, 56}, "ADD")
-, cancelButton(assetCache, inScreen, {958, 640, 123, 56}, "CANCEL")
+: AUI::Window({0, 0, 1920, 1080}, "AddSheetDialog")
+, backgroundImage({0, 0, logicalExtent.w, logicalExtent.h})
+, headerText({747, 228, 280, 60})
+, pathLabel({747, 300, 151, 38})
+, pathInput(assetCache, {919, 300, 180, 38})
+, widthLabel({747, 350, 151, 38})
+, widthInput(assetCache, {919, 350, 180, 38})
+, heightLabel({747, 400, 151, 38})
+, heightInput(assetCache, {919, 400, 180, 38})
+, offsetLabel({747, 450, 151, 38})
+, offsetInput(assetCache, {919, 450, 180, 38})
+, nameLabel({747, 500, 151, 38})
+, nameInput(assetCache, {919, 500, 180, 38})
+, addButton(assetCache, {1099, 640, 123, 56}, "ADD")
+, cancelButton(assetCache, {958, 640, 123, 56}, "CANCEL")
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
-, errorText(inScreen, {748, 556, 466, 60})
+, errorText({748, 556, 466, 60})
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);

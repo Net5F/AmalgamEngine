@@ -70,9 +70,7 @@ private:
      */
     void clear();
 
-    /** Used to update the UI after sprite data changes. Widget maintains an
-        AUI::Screen reference that we could cast, but we want to explicitly
-        model a dependency on MainScreen. */
+    /** Used to update the UI after sprite data changes. */
     MainScreen& mainScreen;
 
     /** Used to update the model when a sheet is added. */

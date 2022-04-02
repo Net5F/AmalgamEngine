@@ -17,7 +17,7 @@ namespace Client
 class MainButton : public AUI::Button
 {
 public:
-    MainButton(AssetCache& assetCache, AUI::Screen& inScreen,
+    MainButton(AssetCache& assetCache,
                        const SDL_Rect& inScreenExtent,
                        const std::string& inText,
                        const std::string& inDebugName = "MainButton");

@@ -10,11 +10,11 @@ namespace SpriteEditor
 {
 SaveButtonWindow::SaveButtonWindow(AssetCache& inAssetCache, MainScreen& inScreen
                                    , SpriteDataModel& inSpriteDataModel)
-: AUI::Window(inScreen, {1537, 0, 58, 58}, "SaveButtonWindow")
+: AUI::Window({1537, 0, 58, 58}, "SaveButtonWindow")
 , assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
-, saveButton(mainScreen, {0, 0, 58, 58})
+, saveButton({0, 0, 58, 58})
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(saveButton);

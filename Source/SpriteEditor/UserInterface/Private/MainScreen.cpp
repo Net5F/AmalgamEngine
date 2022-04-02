@@ -20,7 +20,7 @@ MainScreen::MainScreen(AssetCache& inAssetCache,
 , spritePanel(inAssetCache, *this, spriteDataModel)
 , saveButtonWindow(inAssetCache, *this, spriteDataModel)
 , propertiesPanel(inAssetCache, *this, spriteDataModel)
-, confirmationDialog(*this, {0, 0, 1920, 1080}, "ConfirmationDialog")
+, confirmationDialog({0, 0, 1920, 1080}, "ConfirmationDialog")
 , addSheetDialog(inAssetCache, *this, spriteDataModel)
 {
     // Add our windows so they're included in rendering, etc.

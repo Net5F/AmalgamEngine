@@ -14,17 +14,17 @@ namespace AM
 {
 namespace Client
 {
-BuildPanel::BuildPanel(AssetCache& inAssetCache, MainScreen& inScreen,
+BuildPanel::BuildPanel(AssetCache& inAssetCache,
                        SpriteData& inSpriteData, BuildOverlay& inBuildOverlay)
-: AUI::Window{inScreen, {0, 734, 1920, 346}, "BuildPanel"}
+: AUI::Window{{0, 734, 1920, 346}, "BuildPanel"}
 , assetCache{inAssetCache}
 , buildOverlay{inBuildOverlay}
 , tileLayerIndex{0}
-, backgroundImage{inScreen, {0, 0, 1920, 346}, "BuildPanelBackground"}
-, tileContainer{inScreen, {183, 22, 1554, 324}, "TileContainer"}
-, layerLabel{inScreen, {1792, 22, 90, 28}, "LayerLabel"}
-, layerDownButton{inAssetCache, inScreen, {1767, 62, 64, 28}, "<", "LayerDownButton"}
-, layerUpButton{inAssetCache, inScreen, {1844, 62, 64, 28}, ">", "LayerUpButton"}
+, backgroundImage{{0, 0, 1920, 346}, "BuildPanelBackground"}
+, tileContainer{{183, 22, 1554, 324}, "TileContainer"}
+, layerLabel{{1792, 22, 90, 28}, "LayerLabel"}
+, layerDownButton{inAssetCache, {1767, 62, 64, 28}, "<", "LayerDownButton"}
+, layerUpButton{inAssetCache, {1844, 62, 64, 28}, ">", "LayerUpButton"}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
@@ -93,7 +93,7 @@ void BuildPanel::addTile(const Sprite& sprite)
 {
     // Construct the new sprite thumbnail.
     std::unique_ptr<AUI::Widget> thumbnailPtr{
-        std::make_unique<MainThumbnail>(assetCache, screen, "BuildPanelThumbnail")};
+        std::make_unique<MainThumbnail>(assetCache, "BuildPanelThumbnail")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
     thumbnail.setText(sprite.displayName);
     thumbnail.setIsActivateable(false);

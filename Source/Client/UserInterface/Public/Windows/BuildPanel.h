@@ -12,7 +12,6 @@ class AssetCache;
 
 namespace Client
 {
-class MainScreen;
 class SpriteData;
 class Sprite;
 class BuildOverlay;
@@ -29,7 +28,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BuildPanel(AssetCache& inAssetCache, MainScreen& inScreen
+    BuildPanel(AssetCache& inAssetCache
                , SpriteData& inSpriteData, BuildOverlay& inBuildOverlay);
 
 private:

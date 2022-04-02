@@ -16,7 +16,7 @@ namespace Client
 class MainThumbnail : public AUI::Thumbnail
 {
 public:
-    MainThumbnail(AssetCache& assetCache, AUI::Screen& inScreen,
+    MainThumbnail(AssetCache& assetCache,
                   const std::string& inDebugName = "MainThumbnail");
 };
 
