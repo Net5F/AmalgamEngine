@@ -4,3 +4,4 @@ Binaries/
 *.tar.gz
 /Output/
 *.log
+*.swp
