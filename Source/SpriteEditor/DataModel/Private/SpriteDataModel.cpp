@@ -22,6 +22,8 @@ SpriteDataModel::SpriteDataModel(SDL_Renderer* inSdlRenderer)
 , sdlRenderer{inSdlRenderer}
 , workingFilePath{""}
 , workingTexturesDir{""}
+, sheetIDPool{MAX_SPRITE_SHEETS}
+, spriteIDPool{MAX_SPRITES}
 {
 }
 

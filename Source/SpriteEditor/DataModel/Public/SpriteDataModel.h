@@ -103,6 +103,10 @@ public:
     entt::sink<void(const Sprite&)> spriteAdded;
 
 private:
+    // Note: These were arbitrarily chosen and can be increased if necessary.
+    static constexpr unsigned int MAX_SPRITE_SHEETS = 1000;
+    static constexpr unsigned int MAX_SPRITES = MAX_SPRITE_SHEETS * 100;
+
     /**
      * Checks that the given relative path corresponds to a valid sprite
      * sheet image in the working Resources directory.
@@ -142,8 +146,13 @@ private:
     /** The sprite sheets that we currently have loaded. */
     std::vector<SpriteSheet> spriteSheets;
 
-    /** Used for generating sprite sheet IDs. */
+    /** Used for generating temporary sprite sheet IDs that are only used
+        internally by this editor. */
     IDPool sheetIDPool;
+
+    /** Used for generating temporary sprite sheet IDs that are only used
+        internally by this editor. */
+    IDPool spriteIDPool;
 
     //-------------------------------------------------------------------------
     // Signals

@@ -4,8 +4,6 @@
 
 namespace AM
 {
-namespace Server
-{
 class IDPool
 {
 public:
@@ -52,5 +50,4 @@ private:
     std::vector<bool> IDs;
 };
 
-} // namespace Server
 } // namespace AM

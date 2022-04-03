@@ -3,8 +3,6 @@
 
 namespace AM
 {
-namespace Server
-{
 IDPool::IDPool(unsigned int inPoolSize)
 : poolSize(inPoolSize)
 , containerSize(poolSize + SAFETY_BUFFER)
@@ -49,5 +47,4 @@ void IDPool::freeID(unsigned int ID)
     }
 }
 
-} // namespace Server
 } // namespace AM
