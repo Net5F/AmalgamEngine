@@ -14,10 +14,11 @@ public:
     /**
      * Reserves and returns the next empty ID.
      *
-     * Marches forward, e.g. if 0-10 were reserved and freed, 11 will be the
-     * next reserved ID. This, along with SAFETY_BUFFER, aims to remove
-     * situations where an ID was reserved, freed, and re-reserved while old
-     * data exists in the system.
+     * Marches forward, e.g. if 0-10 were reserved and freed, 11 will still be
+     * the next reserved ID. After we reserve the last ID, we wrap back around.
+     * This, along with SAFETY_BUFFER, aims to remove situations where an ID
+     * was reserved, freed, and re-reserved while old data exists in the
+     * system.
      */
     unsigned int reserveID();
 
@@ -28,7 +29,9 @@ public:
 
 private:
     /** Extra room so that we don't run into reuse issues when almost all IDs
-        are reserved. */
+        are reserved.
+        Note: If this isn't sufficient, you can just make your pool much
+              larger than the number of IDs you plan on using. */
     static constexpr unsigned int SAFETY_BUFFER = 100;
 
     /** The maximum number of IDs that we can give out. */

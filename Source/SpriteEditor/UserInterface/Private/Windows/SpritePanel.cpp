@@ -33,9 +33,12 @@ SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen,
     spriteContainer.setNumColumns(10);
     spriteContainer.setCellWidth(156);
     spriteContainer.setCellHeight(162);
+
+    // When a sprite is added to the model, add it to this widget.
+    spriteDataModel.spriteAdded.connect<&SpritePanel::addSprite>(*this);
 }
 
-void SpritePanel::addSprite(const SpriteSheet& sheet, Sprite& sprite)
+void SpritePanel::addSprite(const Sprite& sprite)
 {
     // Construct the new sprite thumbnail.
     std::unique_ptr<AUI::Widget> thumbnailPtr{
@@ -46,7 +49,7 @@ void SpritePanel::addSprite(const SpriteSheet& sheet, Sprite& sprite)
 
     // Load the sprite's image.
     std::string imagePath{spriteDataModel.getWorkingTexturesDir()};
-    imagePath += sheet.relPath;
+    imagePath += sprite.parentSpriteSheetPath;
     thumbnail.thumbnailImage.addResolution(
         {1280, 720}, assetCache.loadTexture(imagePath), sprite.textureExtent);
 
@@ -61,7 +64,7 @@ void SpritePanel::addSprite(const SpriteSheet& sheet, Sprite& sprite)
         }
 
         // Load the data that this Thumbnail represents as the active sprite.
-        mainScreen.loadActiveSprite(&sprite);
+//        mainScreen.loadActiveSprite(&sprite);
     });
 
     spriteContainer.push_back(std::move(thumbnailPtr));

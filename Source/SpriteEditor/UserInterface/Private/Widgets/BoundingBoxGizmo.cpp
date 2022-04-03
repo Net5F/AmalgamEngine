@@ -49,7 +49,7 @@ void BoundingBoxGizmo::loadActiveSprite(Sprite* inActiveSprite)
     // Set the new active sprite.
     activeSprite = inActiveSprite;
 
-    // Refresh the UI with the newly set sprite's data.
+    // Refresh our UI with the newly set sprite's data.
     refresh();
 }
 

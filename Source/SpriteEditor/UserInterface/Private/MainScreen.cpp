@@ -131,7 +131,7 @@ void MainScreen::loadSpriteData()
         // For each sprite in the sheet.
         for (Sprite& sprite : sheet.sprites) {
             // Add a Thumbnail widget that displays the sprite.
-            spritePanel.addSprite(sheet, sprite);
+            spritePanel.addSprite(sprite);
         }
     }
 }

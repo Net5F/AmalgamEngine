@@ -227,7 +227,7 @@ void PropertiesPanel::saveName()
         //       either on the sprite or on the SpriteDataModel that does
         //       this check, but this works for now.
         int appendedNum{0};
-        while (!(spriteDataModel.displayNameIsUnique(displayName))) {
+        while (!(spriteDataModel.spriteNameIsUnique(displayName))) {
             displayName = nameInput.getText() + std::to_string(appendedNum);
             appendedNum++;
         }

@@ -130,6 +130,9 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
         // Bring up the add dialog.
         mainScreen.openAddSheetDialog();
     });
+
+    // When a sprite sheet is added to the model, add it to this widget.
+    spriteDataModel.sheetAdded.connect<&SpriteSheetPanel::addSpriteSheet>(*this);
 }
 
 void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)

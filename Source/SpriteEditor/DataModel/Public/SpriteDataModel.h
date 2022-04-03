@@ -1,6 +1,8 @@
 #pragma once
 
 #include "SpriteSheet.h"
+#include "IDPool.h"
+#include "entt/signal/sigh.hpp"
 #include <fstream>
 #include <vector>
 #include <string>
@@ -79,13 +81,26 @@ public:
      */
     void remSpriteSheet(unsigned int index);
 
+    void setActiveSprite();
+
+    void setActiveSpriteName();
+
     /**
      * Checks if the given name is unique among all sprites in the model.
      */
-    bool displayNameIsUnique(const std::string& displayName);
+    bool spriteNameIsUnique(const std::string& displayName);
 
     std::vector<SpriteSheet>& getSpriteSheets();
     const std::string& getWorkingTexturesDir();
+
+    //-------------------------------------------------------------------------
+    // Signal Sinks
+    //-------------------------------------------------------------------------
+    /** A sprite sheet has been added to the model. */
+    entt::sink<void(const SpriteSheet&)> sheetAdded;
+
+    /** A sprite has been added to the model. */
+    entt::sink<void(const Sprite&)> spriteAdded;
 
 private:
     /**
@@ -108,11 +123,14 @@ private:
      */
     std::string deriveStringId(const std::string& displayName);
 
+    /**
+     * Called once we've fully loaded a SpriteData.json file.
+     * Signals all loaded sprite sheets and sprites to the UI.
+     */
+    void postLoadSendSignals();
+
     /** Used for validating user-selected sprite sheet textures. */
     SDL_Renderer* sdlRenderer;
-
-    /** The sprite sheets that we currently have loaded. */
-    std::vector<SpriteSheet> spriteSheets;
 
     /** The SpriteData.json file that we currently have loaded and are working
         on. */
@@ -120,6 +138,19 @@ private:
 
     /** The parent directory of currentWorkingFilePath + "/Assets/Textures". */
     std::string workingTexturesDir;
+
+    /** The sprite sheets that we currently have loaded. */
+    std::vector<SpriteSheet> spriteSheets;
+
+    /** Used for generating sprite sheet IDs. */
+    IDPool sheetIDPool;
+
+    //-------------------------------------------------------------------------
+    // Signals
+    //-------------------------------------------------------------------------
+    entt::sigh<void(const SpriteSheet&)> sheetAddedSig;
+
+    entt::sigh<void(const Sprite&)> spriteAddedSig;
 };
 
 } // namespace SpriteEditor

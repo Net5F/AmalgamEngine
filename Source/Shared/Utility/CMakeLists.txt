@@ -2,6 +2,7 @@ target_sources(Shared
     PRIVATE
         Private/AssetCache.cpp
         Private/ByteTools.cpp
+        Private/IDPool.cpp
         Private/Log.cpp
         Private/Paths.cpp
         Private/PeriodicCaller.cpp
@@ -13,6 +14,7 @@ target_sources(Shared
         Public/BinaryBuffer.h
         Public/ByteTools.h
         Public/Deserialize.h
+        Public/IDPool.h
         Public/OSEventHandler.h
         Public/Ignore.h
         Public/Log.h

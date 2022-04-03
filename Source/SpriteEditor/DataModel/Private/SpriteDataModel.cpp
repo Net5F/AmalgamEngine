@@ -17,7 +17,9 @@ namespace AM
 namespace SpriteEditor
 {
 SpriteDataModel::SpriteDataModel(SDL_Renderer* inSdlRenderer)
-: sdlRenderer{inSdlRenderer}
+: sheetAdded{sheetAddedSig}
+, spriteAdded{spriteAddedSig}
+, sdlRenderer{inSdlRenderer}
 , workingFilePath{""}
 , workingTexturesDir{""}
 {
@@ -96,8 +98,8 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 // If the display name isn't unique, fail.
                 std::string displayName
                     = spriteJson.value()["displayName"].get<std::string>();
-                if (!displayNameIsUnique(displayName)) {
-                    std::string returnString{"Display name isn't unique: "};
+                if (!spriteNameIsUnique(displayName)) {
+                    std::string returnString{"Sprite display name isn't unique: "};
                     returnString += sprite.displayName.c_str();
 
                     workingFile.close();
@@ -146,6 +148,9 @@ std::string SpriteDataModel::load(const std::string& fullPath)
         failureString += e.what();
         return failureString;
     }
+
+    // The data loaded successfully. Signal the model state to the UI.
+    postLoadSendSignals();
 
     return "";
 }
@@ -317,7 +322,7 @@ void SpriteDataModel::remSpriteSheet(unsigned int index)
     spriteSheets.erase(spriteSheets.begin() + index);
 }
 
-bool SpriteDataModel::displayNameIsUnique(const std::string& displayName)
+bool SpriteDataModel::spriteNameIsUnique(const std::string& displayName)
 {
     // Dumbly look through all names for a match.
     // Note: Eventually, this should change to a map that we keep updated.
@@ -400,6 +405,18 @@ std::string SpriteDataModel::deriveStringId(const std::string& displayName)
     std::replace(stringID.begin(), stringID.end(), ' ', '_');
 
     return stringID;
+}
+
+void SpriteDataModel::postLoadSendSignals()
+{
+    // Signal every sprite sheet and sprite to the UI.
+    for (SpriteSheet& sheet : spriteSheets) {
+        sheetAddedSig.publish(sheet);
+
+        for (Sprite& sprite : sheet.sprites) {
+            spriteAddedSig.publish(sprite);
+        }
+    }
 }
 
 } // End namespace SpriteEditor

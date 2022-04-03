@@ -33,7 +33,7 @@ public:
      * Adds a MainThumbnail widget to the spriteContainer, using the
      * given data.
      */
-    void addSprite(const SpriteSheet& sheet, Sprite& sprite);
+    void addSprite(const Sprite& sprite);
 
     /**
      * If a sprite is active, refreshes that sprite's UI to match its

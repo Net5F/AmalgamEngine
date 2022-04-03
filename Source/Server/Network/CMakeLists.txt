@@ -2,13 +2,11 @@ target_sources(Server
     PRIVATE
         Private/Client.cpp
         Private/ClientHandler.cpp
-        Private/IDPool.cpp
         Private/MessageProcessor.cpp
         Private/Network.cpp
     PUBLIC
         Public/Client.h
         Public/ClientHandler.h
-        Public/IDPool.h
         Public/MessageProcessor.h
         Public/Network.h
         Public/SDLNetInitializer.h
