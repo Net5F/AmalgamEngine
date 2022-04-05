@@ -17,8 +17,9 @@ public:
         base directory. */
     std::string relPath;
 
-    /** The static data for all sprites in this sheet. */
-    std::vector<Sprite> sprites;
+    /** The editor IDs for each sprite in this sheet.
+        Refers to SpriteDataModel::spriteMap. */
+    std::vector<unsigned int> spriteIDs;
 };
 
 } // namespace SpriteEditor

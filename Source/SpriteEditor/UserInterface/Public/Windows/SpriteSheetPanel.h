@@ -14,6 +14,7 @@ namespace SpriteEditor
 {
 class MainScreen;
 class SpriteDataModel;
+class MainThumbnail;
 
 // TODO: Make this obtain focus and deselect all selected thumbnails when
 //       focus is lost.
@@ -30,18 +31,18 @@ public:
     SpriteSheetPanel(AssetCache& inAssetCache, MainScreen& inScreen,
                      SpriteDataModel& inSpriteDataModel);
 
-    /**
-     * Adds a MainThumbnail widget to the spritesheetContainer, using the
-     * given data.
-     */
-    void addSpriteSheet(const SpriteSheet& sheet);
-
-    /**
-     * Clears spritesheetContainer, removing all the sprite sheet widgets.
-     */
-    void clearSpriteSheets();
-
 private:
+    /**
+     * Adds a new MainThumbnail for the given sheet to the
+     * spriteSheetContainer.
+     */
+    void onSheetAdded(unsigned int sheetID, const SpriteSheet& sheet);
+
+    /**
+     * Removes the thumbnail associated with the given sheet.
+     */
+    void onSheetRemoved(unsigned int sheetID);
+
     /** Used to load the added sprite sheet's textures. */
     AssetCache& assetCache;
 
@@ -50,6 +51,9 @@ private:
 
     /** Used to update the model when a sheet is removed. */
     SpriteDataModel& spriteDataModel;
+
+    /** Maps sprite sheet IDs to their associated thumbnails. */
+    std::unordered_map<unsigned int, MainThumbnail*> thumbnailMap;
 
     //-------------------------------------------------------------------------
     // Private child widgets

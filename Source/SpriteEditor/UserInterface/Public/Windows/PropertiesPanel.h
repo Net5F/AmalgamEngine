@@ -9,6 +9,7 @@
 namespace AM
 {
 class AssetCache;
+class BoundingBox;
 
 namespace SpriteEditor
 {
@@ -28,24 +29,6 @@ public:
     //-------------------------------------------------------------------------
     PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
                     SpriteDataModel& inSpriteDataModel);
-
-    /**
-     * Loads the given sprite's data into this panel.
-     */
-    void loadActiveSprite(Sprite* inActiveSprite);
-
-    /**
-     * Refreshes this widget's UI with the data from the currently set
-     * active sprite.
-     * Errors if activeSprite is nullptr.
-     */
-    void refresh();
-
-    /**
-     * Sets activeSprite to nullptr and clears all of the text inputs, putting
-     * this panel back to its default state.
-     */
-    void clear();
 
     //-------------------------------------------------------------------------
     // Public child widgets
@@ -78,14 +61,33 @@ public:
     MainTextInput maxZInput;
 
 private:
+    /**
+     * Loads the new active sprite's data into this panel.
+     */
+    void onActiveSpriteChanged(unsigned int newSpriteID, const Sprite& newActiveSprite);
+
+    /**
+     * (If active sprite was removed) Sets activeSprite to invalid and clears
+     * all of the text inputs, putting this panel back to its default state.
+     */
+    void onSpriteRemoved(unsigned int spriteID);
+
+    /**
+     * (If active sprite changed) Updates this panel with the active sprite's
+     * new properties.
+     */
+    void onSpriteDisplayNameChanged(unsigned int spriteID, const std::string& newDisplayName);
+    void onSpriteHasBoundingBoxChanged(unsigned int spriteID, bool newHasBoundingBox);
+    void onSpriteModelBoundsChanged(unsigned int spriteID, const BoundingBox& newModelBounds);
+
     /** Used to save updated sprite data. */
     MainScreen& mainScreen;
 
     /** Used while setting user-inputted sprite data. */
     SpriteDataModel& spriteDataModel;
 
-    /** The active sprite's data. */
-    Sprite* activeSprite;
+    /** The active sprite's ID. */
+    unsigned int activeSpriteID;
 
     /**
      * Converts the given float to a string with 3 decimals of precision.

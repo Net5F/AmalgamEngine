@@ -13,6 +13,7 @@ namespace SpriteEditor
 {
 class MainScreen;
 class Sprite;
+class SpriteDataModel;
 
 /**
  * A gizmo that allows the user to draw 3D bounding boxes for their 2D sprites.
@@ -23,25 +24,9 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BoundingBoxGizmo(MainScreen& inScreen);
+    BoundingBoxGizmo(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
 
     virtual ~BoundingBoxGizmo() = default;
-
-    /**
-     * Loads the given active sprite's data into this gizmo.
-     * Note: This gizmo depends on having its logical extent set to match the
-     *       sprite image that it will be overlaying.
-     *
-     * @param inActiveSprite  The active sprite's data.
-     */
-    void loadActiveSprite(Sprite* inActiveSprite);
-
-    /**
-     * Refreshes this widget's UI with the data from the currently set
-     * active sprite.
-     * Errors if activeSprite is nullptr.
-     */
-    void refresh();
 
     //-------------------------------------------------------------------------
     // Base class overrides
@@ -67,6 +52,24 @@ private:
      * The list of our clickable controls.
      */
     enum class Control { None, Position, X, Y, Z };
+
+    /**
+     * Saves the new active sprite's ID.
+     */
+    void onActiveSpriteChanged(unsigned int newSpriteID, const Sprite& newActiveSprite);
+
+    /**
+     * Updates this panel with the active sprite's new properties.
+     * Note: This gizmo depends on having its logical extent set to match the
+     *       sprite image that it will be overlaying.
+     */
+    void onSpriteHasBoundingBoxChanged(unsigned int spriteID, bool newHasBoundingBox);
+    void onSpriteModelBoundsChanged(unsigned int spriteID, const BoundingBox& newModelBounds);
+
+    /**
+     * Refreshes this widget's UI with the given active sprite's data.
+     */
+    void refresh(const Sprite& activeSprite);
 
     /**
      * Updates the active sprite's maxX and maxY bounds to match the given
@@ -99,7 +102,7 @@ private:
      *     (minX, maxY, maxZ), (maxX, maxY, maxZ), (maxX, minY, maxZ),
      *     (minX, minY, maxZ)
      */
-    void calcOffsetScreenPoints(std::vector<SDL_Point>& boundsScreenPoints);
+    void calcOffsetScreenPoints(const Sprite& activeSprite, std::vector<SDL_Point>& boundsScreenPoints);
 
     /**
      * Moves the control extents to their proper screen position.
@@ -134,8 +137,11 @@ private:
     /** Used to save updated sprite data. */
     MainScreen& mainScreen;
 
-    /** The active sprite's data. */
-    Sprite* activeSprite;
+    /** Used while setting user-inputted sprite data. */
+    SpriteDataModel& spriteDataModel;
+
+    /** The active sprite's ID. */
+    unsigned int activeSpriteID;
 
     /** A reasonable size for the control rectangles. */
     static constexpr int LOGICAL_RECT_SIZE = 12;
@@ -148,6 +154,9 @@ private:
 
     /** The scaled width of the lines. */
     int scaledLineWidth;
+
+    /** Tracks whether the active sprite has a bounding box or not. */
+    bool hasBoundingBox;
 
     // Controls (scaled extents, without parent offsets)
     /** The extent of the box position control, (maxX, maxY, minZ). */

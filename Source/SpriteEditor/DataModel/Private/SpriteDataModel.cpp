@@ -18,13 +18,22 @@ namespace SpriteEditor
 {
 SpriteDataModel::SpriteDataModel(SDL_Renderer* inSdlRenderer)
 : sheetAdded{sheetAddedSig}
+, sheetRemoved{sheetRemovedSig}
 , spriteAdded{spriteAddedSig}
+, spriteRemoved{spriteRemovedSig}
+, activeSpriteChanged{activeSpriteChangedSig}
+, spriteDisplayNameChanged{spriteDisplayNameChangedSig}
+, spriteHasBoundingBoxChanged{spriteHasBoundingBoxChangedSig}
+, spriteModelBoundsChanged{spriteModelBoundsChangedSig}
 , sdlRenderer{inSdlRenderer}
 , workingFilePath{""}
 , workingTexturesDir{""}
+, activeSpriteID{INVALID_SPRITE_ID}
 , sheetIDPool{MAX_SPRITE_SHEETS}
 , spriteIDPool{MAX_SPRITES}
 {
+    // Burn '0' since we reserve it for our invalid ID.
+    spriteIDPool.reserveID();
 }
 
 std::string SpriteDataModel::create(const std::string& fullPath)
@@ -79,8 +88,9 @@ std::string SpriteDataModel::load(const std::string& fullPath)
     try {
         // For every sprite sheet in the json.
         for (auto& sheetJson : json["spriteSheets"].items()) {
-            spriteSheets.push_back(SpriteSheet());
-            SpriteSheet& spriteSheet{spriteSheets.back()};
+            unsigned int sheetID{sheetIDPool.reserveID()};
+            spriteSheetMap.emplace(sheetID, SpriteSheet{});
+            SpriteSheet& spriteSheet{spriteSheetMap[sheetID]};
 
             // Add this sheet's relative path.
             spriteSheet.relPath
@@ -88,14 +98,17 @@ std::string SpriteDataModel::load(const std::string& fullPath)
             std::string resultString = validateRelPath(spriteSheet.relPath);
             if (resultString != "") {
                 workingFile.close();
-                spriteSheets.clear();
+                spriteSheetMap.clear();
+                spriteMap.clear();
                 return resultString;
             }
 
             // For every sprite in the sheet.
             for (auto& spriteJson : sheetJson.value()["sprites"].items()) {
-                spriteSheet.sprites.push_back(Sprite{spriteSheet.relPath});
-                Sprite& sprite{spriteSheet.sprites.back()};
+                unsigned int spriteID{spriteIDPool.reserveID()};
+                spriteMap.emplace(spriteID, Sprite{spriteSheet.relPath});
+                spriteSheet.spriteIDs.push_back(spriteID);
+                Sprite& sprite{spriteMap[spriteID]};
 
                 // If the display name isn't unique, fail.
                 std::string displayName
@@ -105,7 +118,8 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                     returnString += sprite.displayName.c_str();
 
                     workingFile.close();
-                    spriteSheets.clear();
+                    spriteSheetMap.clear();
+                    spriteMap.clear();
                     return returnString;
                 }
 
@@ -141,18 +155,22 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                     = spriteJson.value()["modelBounds"]["minZ"];
                 sprite.modelBounds.maxZ
                     = spriteJson.value()["modelBounds"]["maxZ"];
+
+                // Signal the new sprite to the UI.
+                spriteAddedSig.publish(spriteID, sprite);
             }
+
+            // Signal the new sheet to the UI.
+            sheetAddedSig.publish(sheetID, spriteSheet);
         }
     } catch (nlohmann::json::type_error& e) {
         workingFile.close();
-        spriteSheets.clear();
+        spriteSheetMap.clear();
+        spriteMap.clear();
         std::string failureString{"Parse failure - "};
         failureString += e.what();
         return failureString;
     }
-
-    // The data loaded successfully. Signal the model state to the UI.
-    postLoadSendSignals();
 
     return "";
 }
@@ -166,15 +184,16 @@ void SpriteDataModel::save()
     // Fill the json with our current model data.
     // For each sprite sheet.
     int nextNumericId{0};
-    for (unsigned int i = 0; i < spriteSheets.size(); ++i) {
+    int i{0};
+    for (auto& sheetPair : spriteSheetMap) {
         // Add this sheet's relative path.
-        SpriteSheet& spriteSheet{spriteSheets[i]};
+        SpriteSheet& spriteSheet{sheetPair.second};
         json["spriteSheets"][i]["relPath"] = spriteSheet.relPath;
 
         // For each sprite in this sheet.
-        for (unsigned int j = 0; j < spriteSheet.sprites.size(); ++j) {
+        for (unsigned int j = 0; j < spriteSheet.spriteIDs.size(); ++j) {
             // Add the display name.
-            Sprite& sprite{spriteSheet.sprites[j]};
+            Sprite& sprite{spriteMap[spriteSheet.spriteIDs[j]]};
             json["spriteSheets"][i]["sprites"][j]["displayName"]
                 = sprite.displayName;
 
@@ -217,6 +236,8 @@ void SpriteDataModel::save()
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxZ"]
                 = sprite.modelBounds.maxZ;
         }
+
+        i++;
     }
 
     // Write the json to our working file.
@@ -237,8 +258,8 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
 {
     /* Validate the data. */
     // Check if we already have the given sheet.
-    for (const SpriteSheet& spriteSheet : spriteSheets) {
-        if (spriteSheet.relPath == relPath) {
+    for (const auto& sheetPair : spriteSheetMap) {
+        if (sheetPair.second.relPath == relPath) {
             return "Error: Path conflicts with existing sprite sheet.";
         }
     }
@@ -250,7 +271,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
     // Validate that the file at the given path is a valid texture.
     int sheetWidth{0};
     int sheetHeight{0};
-    SDL_Texture* sheetTexture = IMG_LoadTexture(sdlRenderer, fullPath.c_str());
+    SDL_Texture* sheetTexture{IMG_LoadTexture(sdlRenderer, fullPath.c_str())};
     if (sheetTexture == nullptr) {
         std::string errorString{
             "Error: File at given path is not a valid image. Path: "};
@@ -285,10 +306,11 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
     }
 
     /* Add the sprite sheet and sprites. */
-    spriteSheets.emplace_back(relPath);
+    unsigned int sheetID{sheetIDPool.reserveID()};
+    spriteSheetMap.emplace(sheetID, SpriteSheet{relPath, {}});
 
     // For each sprite in this texture.
-    SpriteSheet& spriteSheet{spriteSheets.back()};
+    SpriteSheet& spriteSheet{spriteSheetMap[sheetID]};
     int spriteCount{0};
     for (int y = 0; y <= (sheetHeight - spriteHeightI); y += spriteHeightI) {
         for (int x = 0; x <= (sheetWidth - spriteWidthI); x += spriteWidthI) {
@@ -302,52 +324,153 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
             // Default to a non-0 bounding box so it's easier to click.
             static BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
 
-            // Add the sprite to the sheet.
-            spriteSheet.sprites.emplace_back(spriteSheet.relPath, displayName,
-                                             textureExtent, yOffsetI, true,
-                                             defaultBox);
+            // Add the sprite to the map and sheet.
+            unsigned int spriteID{spriteIDPool.reserveID()};
+            spriteMap.emplace(spriteID, Sprite{spriteSheet.relPath, displayName,
+                    textureExtent, yOffsetI, true, defaultBox});
+            spriteSheet.spriteIDs.push_back(spriteID);
+
+            // Signal the new sprite to the UI.
+            spriteAddedSig.publish(spriteID, spriteMap[spriteID]);
 
             // Increment the count (used for the display name).
             spriteCount++;
         }
     }
 
+    // Signal the new sheet to the UI.
+    sheetAddedSig.publish(sheetID, spriteSheet);
+
     return "";
 }
 
-void SpriteDataModel::remSpriteSheet(unsigned int index)
+void SpriteDataModel::remSpriteSheet(unsigned int sheetID)
 {
-    if (index >= spriteSheets.size()) {
-        LOG_FATAL("Index out of bounds while removing sprite sheet.");
+    // Find the sheet in the map.
+    auto sheetIt{spriteSheetMap.find(sheetID)};
+    if (sheetIt == spriteSheetMap.end()) {
+        LOG_FATAL("Invalid ID while removing sprite sheet.");
     }
 
-    spriteSheets.erase(spriteSheets.begin() + index);
-}
-
-bool SpriteDataModel::spriteNameIsUnique(const std::string& displayName)
-{
-    // Dumbly look through all names for a match.
-    // Note: Eventually, this should change to a map that we keep updated.
-    bool isUnique{true};
-    for (const SpriteSheet& sheet : spriteSheets) {
-        for (const Sprite& sprite : sheet.sprites) {
-            if (displayName == sprite.displayName) {
-                isUnique = false;
-            }
-        }
+    // Erase all of the sheet's sprites.
+    for (unsigned int spriteID : sheetIt->second.spriteIDs) {
+        remSprite(spriteID);
     }
 
-    return isUnique;
+    // Erase the sheet.
+    spriteSheetMap.erase(sheetIt);
+
+    // Signal that the sheet was erased.
+    sheetRemovedSig.publish(sheetID);
 }
 
-std::vector<SpriteSheet>& SpriteDataModel::getSpriteSheets()
+void SpriteDataModel::remSprite(unsigned int spriteID)
 {
-    return spriteSheets;
+    // Find the sprite in the map.
+    auto spriteIt{spriteMap.find(spriteID)};
+    if (spriteIt == spriteMap.end()) {
+        LOG_FATAL("Invalid ID while removing sprite.");
+    }
+
+    // Erase the sprite.
+    spriteMap.erase(spriteIt);
+
+    // Signal that the sprite was erased.
+    spriteRemovedSig.publish(spriteID);
+}
+
+const Sprite& SpriteDataModel::getSprite(unsigned int spriteID)
+{
+    auto spriteIt{spriteMap.find(spriteID)};
+    if (spriteIt == spriteMap.end()) {
+        LOG_FATAL("Tried to get sprite with invalid ID.");
+    }
+
+    return spriteIt->second;
 }
 
 const std::string& SpriteDataModel::getWorkingTexturesDir()
 {
     return workingTexturesDir;
+}
+
+void SpriteDataModel::setActiveSprite(unsigned int newActiveSpriteID)
+{
+    auto spritePair{spriteMap.find(newActiveSpriteID)};
+    if (spritePair == spriteMap.end()) {
+        LOG_FATAL("Tried to set active sprite to invalid ID.");
+    }
+
+    // Set the active sprite and signal it to the UI.
+    activeSpriteID = newActiveSpriteID;
+    activeSpriteChangedSig.publish(activeSpriteID, spritePair->second);
+}
+
+void SpriteDataModel::setSpriteDisplayName(unsigned int spriteID, const std::string& newDisplayName)
+{
+    auto spritePair{spriteMap.find(spriteID)};
+    if (spritePair == spriteMap.end()) {
+        LOG_FATAL("Tried to set active sprite to invalid ID.");
+    }
+
+    // If the name hasn't changed, do nothing.
+    Sprite& sprite{spritePair->second};
+    if (newDisplayName == sprite.displayName) {
+        return;
+    }
+
+    // Set the new display name and make it unique.
+    // Note: All characters that a user can enter are valid in the display
+    //       name string, so we don't need to validate.
+    int appendedNum{0};
+    std::string uniqueDisplayName{newDisplayName};
+    while (!(spriteNameIsUnique(uniqueDisplayName))) {
+        uniqueDisplayName = newDisplayName + std::to_string(appendedNum);
+        appendedNum++;
+    }
+
+    sprite.displayName = newDisplayName;
+
+    // Signal the change.
+    spriteDisplayNameChangedSig.publish(spriteID, sprite.displayName);
+}
+
+void SpriteDataModel::setSpriteHasBoundingBox(unsigned int spriteID, bool newHasBoundingBox)
+{
+    auto spritePair{spriteMap.find(spriteID)};
+    if (spritePair == spriteMap.end()) {
+        LOG_FATAL("Tried to set sprite hasBoundingBox using invalid ID.");
+    }
+
+    // If it hasn't changed, do nothing.
+    Sprite& sprite{spritePair->second};
+    if (newHasBoundingBox == sprite.hasBoundingBox) {
+        return;
+    }
+
+    // Set the new hasBoundingBox and signal the change.
+    sprite.hasBoundingBox = newHasBoundingBox;
+
+    spriteHasBoundingBoxChangedSig.publish(spriteID, newHasBoundingBox);
+}
+
+void SpriteDataModel::setSpriteModelBounds(unsigned int spriteID, const BoundingBox& newModelBounds)
+{
+    auto spritePair{spriteMap.find(spriteID)};
+    if (spritePair == spriteMap.end()) {
+        LOG_FATAL("Tried to set sprite boundingBox using invalid ID.");
+    }
+
+    // If it hasn't changed, do nothing.
+    Sprite& sprite{spritePair->second};
+    if (newModelBounds == sprite.modelBounds) {
+        return;
+    }
+
+    // Set the new model bounds and signal the change.
+    sprite.modelBounds = newModelBounds;
+
+    spriteModelBoundsChangedSig.publish(spriteID, newModelBounds);
 }
 
 std::string SpriteDataModel::validateRelPath(const std::string& relPath)
@@ -409,16 +532,21 @@ std::string SpriteDataModel::deriveStringId(const std::string& displayName)
     return stringID;
 }
 
-void SpriteDataModel::postLoadSendSignals()
+bool SpriteDataModel::spriteNameIsUnique(const std::string& displayName)
 {
-    // Signal every sprite sheet and sprite to the UI.
-    for (SpriteSheet& sheet : spriteSheets) {
-        sheetAddedSig.publish(sheet);
-
-        for (Sprite& sprite : sheet.sprites) {
-            spriteAddedSig.publish(sprite);
+    // Dumbly look through all names for a match.
+    // Note: Eventually, this should change to a name map that we keep updated.
+    bool isUnique{true};
+    for (const auto& sheetPair : spriteSheetMap) {
+        for (unsigned int spriteID : sheetPair.second.spriteIDs) {
+            const Sprite& sprite{spriteMap[spriteID]};
+            if (displayName == sprite.displayName) {
+                isUnique = false;
+            }
         }
     }
+
+    return isUnique;
 }
 
 } // End namespace SpriteEditor

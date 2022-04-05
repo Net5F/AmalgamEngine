@@ -4,6 +4,7 @@
 #include "AssetCache.h"
 #include "SpriteDataModel.h"
 #include "Paths.h"
+#include "Ignore.h"
 #include "AUI/Core.h"
 
 namespace AM
@@ -15,9 +16,10 @@ SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
 : AUI::Window({389, 60, 1142, 684}, "SpriteEditStage")
 , assetCache{inAssetCache}
 , spriteDataModel{inSpriteDataModel}
+, activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
 , checkerboardImage({0, 0, 100, 100})
 , spriteImage({0, 0, 100, 100})
-, boundingBoxGizmo(inScreen)
+, boundingBoxGizmo(inScreen, inSpriteDataModel)
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(checkerboardImage);
@@ -34,46 +36,56 @@ SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
 
     /* Bounding box gizmo. */
     boundingBoxGizmo.setIsVisible(false);
+
+    // When the active sprite is updated, update it in this widget.
+    spriteDataModel.activeSpriteChanged.connect<&SpriteEditStage::onActiveSpriteChanged>(*this);
+    spriteDataModel.spriteRemoved.connect<&SpriteEditStage::onSpriteRemoved>(*this);
 }
 
-void SpriteEditStage::loadActiveSprite(Sprite* activeSprite)
+void SpriteEditStage::onActiveSpriteChanged(unsigned int newActiveSpriteID, const Sprite& newActiveSprite)
 {
-    if (activeSprite != nullptr) {
-        // Load the sprite's image.
-        spriteImage.clearTextures();
-        std::string imagePath{spriteDataModel.getWorkingTexturesDir()};
-        imagePath += activeSprite->parentSpriteSheetPath;
-        spriteImage.addResolution(AUI::Core::getLogicalScreenSize(),
-                                  assetCache.loadTexture(imagePath),
-                                  activeSprite->textureExtent);
+    activeSpriteID = newActiveSpriteID;
 
-        // Calc the centered sprite position.
-        SDL_Rect centeredSpriteExtent{activeSprite->textureExtent};
-        centeredSpriteExtent.x = logicalExtent.w / 2;
-        centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
-        centeredSpriteExtent.y = logicalExtent.h / 2;
-        centeredSpriteExtent.y -= (centeredSpriteExtent.h / 2);
+    // Load the sprite's image.
+    spriteImage.clearTextures();
+    std::string imagePath{spriteDataModel.getWorkingTexturesDir()};
+    imagePath += newActiveSprite.parentSpriteSheetPath;
+    spriteImage.addResolution(AUI::Core::getLogicalScreenSize(),
+                              assetCache.loadTexture(imagePath),
+                              newActiveSprite.textureExtent);
 
-        // Size the sprite image to the sprite extent size.
-        spriteImage.setLogicalExtent(centeredSpriteExtent);
+    // Calc the centered sprite position.
+    SDL_Rect centeredSpriteExtent{newActiveSprite.textureExtent};
+    centeredSpriteExtent.x = logicalExtent.w / 2;
+    centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
+    centeredSpriteExtent.y = logicalExtent.h / 2;
+    centeredSpriteExtent.y -= (centeredSpriteExtent.h / 2);
 
-        // Set the background and gizmo to the size of the sprite.
-        checkerboardImage.setLogicalExtent(spriteImage.getLogicalExtent());
-        boundingBoxGizmo.setLogicalExtent(spriteImage.getLogicalExtent());
+    // Size the sprite image to the sprite extent size.
+    spriteImage.setLogicalExtent(centeredSpriteExtent);
 
-        // Set the sprite and background to be visible.
-        checkerboardImage.setIsVisible(true);
-        spriteImage.setIsVisible(true);
+    // Set the background and gizmo to the size of the sprite.
+    checkerboardImage.setLogicalExtent(spriteImage.getLogicalExtent());
+    boundingBoxGizmo.setLogicalExtent(spriteImage.getLogicalExtent());
 
-        // Load the sprite into the gizmo.
-        boundingBoxGizmo.loadActiveSprite(activeSprite);
-        boundingBoxGizmo.setIsVisible(true);
+    // Set the sprite and background to be visible.
+    checkerboardImage.setIsVisible(true);
+    spriteImage.setIsVisible(true);
+
+    // If the gizmo isn't visible, make it visible.
+    boundingBoxGizmo.setIsVisible(true);
+}
+
+void SpriteEditStage::onSpriteRemoved(unsigned int spriteID)
+{
+    if (spriteID == activeSpriteID) {
+        activeSpriteID = SpriteDataModel::INVALID_SPRITE_ID;
+
+        // Set everything back to being invisible.
+        checkerboardImage.setIsVisible(false);
+        spriteImage.setIsVisible(false);
+        boundingBoxGizmo.setIsVisible(false);
     }
-}
-
-void SpriteEditStage::refresh()
-{
-    boundingBoxGizmo.refresh();
 }
 
 } // End namespace SpriteEditor

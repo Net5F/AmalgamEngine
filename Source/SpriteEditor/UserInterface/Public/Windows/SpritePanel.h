@@ -15,6 +15,7 @@ namespace SpriteEditor
 {
 class MainScreen;
 class SpriteDataModel;
+class MainThumbnail;
 
 /**
  * The bottom panel on the main screen. Allows the user to select sprites to
@@ -29,24 +30,22 @@ public:
     SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen,
                 SpriteDataModel& inSpriteDataModel);
 
-    /**
-     * Adds a MainThumbnail widget to the spriteContainer, using the
-     * given data.
-     */
-    void addSprite(const Sprite& sprite);
-
-    /**
-     * If a sprite is active, refreshes that sprite's UI to match its
-     * underlying data.
-     */
-    void refreshActiveSprite(const std::string& newDisplayName);
-
-    /**
-     * Clears spritesheetContainer, removing all the sprite sheet widgets.
-     */
-    void clearSprites();
-
 private:
+    /**
+     * Adds a new MainThumbnail for the given sprite to the spriteContainer.
+     */
+    void onSpriteAdded(unsigned int spriteID, const Sprite& sprite);
+
+    /**
+     * Removes the thumbnail associated with the given sprite.
+     */
+    void onSpriteRemoved(unsigned int sheetID);
+
+    /**
+     * Updates the display name on the thumbnail of the given sprite.
+     */
+    void onSpriteDisplayNameChanged(unsigned int spriteID, const std::string& newDisplayName);
+
     /** Used to load the active sprite's texture. */
     AssetCache& assetCache;
 
@@ -56,6 +55,9 @@ private:
 
     /** Used to get the current working dir when displaying the thumbnails. */
     SpriteDataModel& spriteDataModel;
+
+    /** Maps sprite IDs to their associated thumbnails. */
+    std::unordered_map<unsigned int, MainThumbnail*> thumbnailMap;
 
     //-------------------------------------------------------------------------
     // Private child widgets

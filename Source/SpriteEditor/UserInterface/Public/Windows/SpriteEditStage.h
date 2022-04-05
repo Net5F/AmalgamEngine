@@ -28,22 +28,26 @@ public:
     SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
                     SpriteDataModel& inSpriteDataModel);
 
-    /**
-     * Loads the given sprite onto the stage.
-     */
-    void loadActiveSprite(Sprite* activeSprite);
-
-    /**
-     * Calls boundingBoxGizmo.refresh().
-     */
-    void refresh();
-
 private:
+    /**
+     * Loads the new active sprite's data onto the stage.
+     */
+    void onActiveSpriteChanged(unsigned int newSpriteID, const Sprite& newSprite);
+
+    /**
+     * (If active sprite was removed) Sets activeSprite to invalid and returns
+     * the stage to its default state.
+     */
+    void onSpriteRemoved(unsigned int spriteID);
+
     /** Used to load the active sprite's texture. */
     AssetCache& assetCache;
 
     /** Used to get the current working dir when displaying the sprite. */
     SpriteDataModel& spriteDataModel;
+
+    /** The active sprite's ID. */
+    unsigned int activeSpriteID;
 
     //-------------------------------------------------------------------------
     // Private child widgets

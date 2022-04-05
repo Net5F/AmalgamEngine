@@ -40,7 +40,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
 , maxZInput(assetCache, {162, 426, 129, 38}, "MaxZInput")
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
-, activeSprite{nullptr}
+, activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
 , committedMinX{0.0}
 , committedMinY{0.0}
 , committedMinZ{0.0}
@@ -160,50 +160,81 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
     maxZInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     maxZInput.setMargins({8, 0, 8, 0});
     maxZInput.setOnTextCommitted([this]() { saveMaxZ(); });
+
+    // When the active sprite is updated, update it in this widget.
+    spriteDataModel.activeSpriteChanged.connect<&PropertiesPanel::onActiveSpriteChanged>(*this);
+    spriteDataModel.spriteDisplayNameChanged.connect<&PropertiesPanel::onSpriteDisplayNameChanged>(*this);
+    spriteDataModel.spriteHasBoundingBoxChanged.connect<&PropertiesPanel::onSpriteHasBoundingBoxChanged>(*this);
+    spriteDataModel.spriteModelBoundsChanged.connect<&PropertiesPanel::onSpriteModelBoundsChanged>(*this);
+    spriteDataModel.spriteRemoved.connect<&PropertiesPanel::onSpriteRemoved>(*this);
 }
 
-void PropertiesPanel::loadActiveSprite(Sprite* inActiveSprite)
+void PropertiesPanel::onActiveSpriteChanged(unsigned int newActiveSpriteID,
+                                            const Sprite& newActiveSprite)
 {
-    // Set the new active sprite.
-    activeSprite = inActiveSprite;
+    activeSpriteID = newActiveSpriteID;
 
-    // Refresh the UI with the newly set sprite's data.
-    refresh();
-}
+    // Update all of our property fields to match the new active sprite's data.
+    nameInput.setText(newActiveSprite.displayName);
 
-void PropertiesPanel::refresh()
-{
-    if (activeSprite == nullptr) {
-        LOG_FATAL("Tried to refresh with nullptr data.");
-    }
-
-    // Fill the fields with the activeSprite data.
-    nameInput.setText(activeSprite->displayName);
-    minXInput.setText(toRoundedString(activeSprite->modelBounds.minX));
-    minYInput.setText(toRoundedString(activeSprite->modelBounds.minY));
-    minZInput.setText(toRoundedString(activeSprite->modelBounds.minZ));
-    maxXInput.setText(toRoundedString(activeSprite->modelBounds.maxX));
-    maxYInput.setText(toRoundedString(activeSprite->modelBounds.maxY));
-    maxZInput.setText(toRoundedString(activeSprite->modelBounds.maxZ));
-
-    if (activeSprite->hasBoundingBox) {
+    if (newActiveSprite.hasBoundingBox) {
         hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Checked);
     }
     else {
         hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Unchecked);
     }
+
+    minXInput.setText(toRoundedString(newActiveSprite.modelBounds.minX));
+    minYInput.setText(toRoundedString(newActiveSprite.modelBounds.minY));
+    minZInput.setText(toRoundedString(newActiveSprite.modelBounds.minZ));
+    maxXInput.setText(toRoundedString(newActiveSprite.modelBounds.maxX));
+    maxYInput.setText(toRoundedString(newActiveSprite.modelBounds.maxY));
+    maxZInput.setText(toRoundedString(newActiveSprite.modelBounds.maxZ));
 }
 
-void PropertiesPanel::clear()
+void PropertiesPanel::onSpriteRemoved(unsigned int spriteID)
 {
-    activeSprite = nullptr;
-    nameInput.setText("");
-    minXInput.setText("");
-    minYInput.setText("");
-    minZInput.setText("");
-    maxXInput.setText("");
-    maxYInput.setText("");
-    maxZInput.setText("");
+    if (spriteID == activeSpriteID) {
+        activeSpriteID = SpriteDataModel::INVALID_SPRITE_ID;
+        nameInput.setText("");
+        minXInput.setText("");
+        minYInput.setText("");
+        minZInput.setText("");
+        maxXInput.setText("");
+        maxYInput.setText("");
+        maxZInput.setText("");
+    }
+}
+
+void PropertiesPanel::onSpriteDisplayNameChanged(unsigned int spriteID, const std::string& newDisplayName)
+{
+    if (spriteID == activeSpriteID) {
+        nameInput.setText(newDisplayName);
+    }
+}
+
+void PropertiesPanel::onSpriteHasBoundingBoxChanged(unsigned int spriteID, bool newHasBoundingBox)
+{
+    if (spriteID == activeSpriteID) {
+        if (newHasBoundingBox) {
+            hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Checked);
+        }
+        else {
+            hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Unchecked);
+        }
+    }
+}
+
+void PropertiesPanel::onSpriteModelBoundsChanged(unsigned int spriteID, const BoundingBox& newModelBounds)
+{
+    if (spriteID == activeSpriteID) {
+        minXInput.setText(toRoundedString(newModelBounds.minX));
+        minYInput.setText(toRoundedString(newModelBounds.minY));
+        minZInput.setText(toRoundedString(newModelBounds.minZ));
+        maxXInput.setText(toRoundedString(newModelBounds.maxX));
+        maxYInput.setText(toRoundedString(newModelBounds.maxY));
+        maxZInput.setText(toRoundedString(newModelBounds.maxZ));
+    }
 }
 
 std::string PropertiesPanel::toRoundedString(float value)
@@ -215,203 +246,154 @@ std::string PropertiesPanel::toRoundedString(float value)
 
 void PropertiesPanel::saveName()
 {
-    if (activeSprite != nullptr) {
-        // If the name hasn't changed, do nothing.
-        std::string displayName{nameInput.getText()};
-        if (displayName == activeSprite->displayName) {
-            return;
-        }
-
-        // Make the display name unique.
-        // Note: This really should be done by having a setName() function
-        //       either on the sprite or on the SpriteDataModel that does
-        //       this check, but this works for now.
-        int appendedNum{0};
-        while (!(spriteDataModel.spriteNameIsUnique(displayName))) {
-            displayName = nameInput.getText() + std::to_string(appendedNum);
-            appendedNum++;
-        }
-
-        // Save the display name.
-        // Note: All characters that a user can enter are valid in the display
-        //       name string, so we don't need to validate.
-        activeSprite->displayName = displayName;
-
-        // Refresh the UI since the name is shown in the activeSprite panel.
-        mainScreen.refreshActiveSpriteUi();
-    }
+    spriteDataModel.setSpriteDisplayName(activeSpriteID, nameInput.getText());
 }
 
 void PropertiesPanel::saveHasBoundingBox()
 {
-    if (activeSprite != nullptr) {
-        // Toggle hasBoundingBox.
-        // (We don't have to refresh the UI since hasBoundingBox is read during
-        //  rendering).
-        activeSprite->hasBoundingBox = !(activeSprite->hasBoundingBox);
-    }
+    bool hasBoundingBox{(hasBoundingBoxInput.getCurrentState()
+                       == AUI::Checkbox::State::Checked)};
+    spriteDataModel.setSpriteHasBoundingBox(activeSpriteID, hasBoundingBox);
 }
 
 void PropertiesPanel::saveMinX()
 {
-    if (activeSprite != nullptr) {
-        // Validate the user input as a valid float.
-        try {
-            // Convert the input string to a float.
-            float newMinX{std::stof(minXInput.getText())};
+    // Validate the user input as a valid float.
+    try {
+        // Convert the input string to a float.
+        float newMinX{std::stof(minXInput.getText())};
 
-            // Clamp the value to its bounds.
-            newMinX = std::clamp(newMinX, 0.f, activeSprite->modelBounds.maxX);
+        // Clamp the value to its bounds.
+        BoundingBox newModelBounds{
+                spriteDataModel.getSprite(activeSpriteID).modelBounds};
+        newModelBounds.minX = std::clamp(newMinX, 0.f, newModelBounds.maxX);
 
-            // The input was valid, save it.
-            activeSprite->modelBounds.minX = newMinX;
-            committedMinX = newMinX;
-
-            // Refresh the UI to reflect the new value;
-            mainScreen.refreshActiveSpriteUi();
-        } catch (std::exception& e) {
-            // Input was not valid, reset the field to what it was.
-            minXInput.setText(std::to_string(committedMinX));
-        }
+        // Apply the new value.
+        spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
+    } catch (std::exception& e) {
+        // Input was not valid, reset the field to what it was.
+        minXInput.setText(std::to_string(committedMinX));
     }
 }
 
 void PropertiesPanel::saveMinY()
 {
-    if (activeSprite != nullptr) {
-        // Validate the user input as a valid float.
-        try {
-            // Convert the input string to a float.
-            float newMinY{std::stof(minYInput.getText())};
+    // Validate the user input as a valid float.
+    try {
+        // Convert the input string to a float.
+        float newMinY{std::stof(minYInput.getText())};
 
-            // Clamp the value to its bounds.
-            newMinY = std::clamp(newMinY, 0.f, activeSprite->modelBounds.maxY);
+        // Clamp the value to its bounds.
+        BoundingBox newModelBounds{
+                spriteDataModel.getSprite(activeSpriteID).modelBounds};
+        newModelBounds.minY = std::clamp(newMinY, 0.f, newModelBounds.maxY);
 
-            // The input was valid, save it.
-            activeSprite->modelBounds.minY = newMinY;
-            committedMinY = newMinY;
-
-            // Refresh the UI to reflect the new value;
-            mainScreen.refreshActiveSpriteUi();
-        } catch (std::exception& e) {
-            // Input was not valid, reset the field to what it was.
-            minYInput.setText(std::to_string(committedMinY));
-        }
+        // Apply the new value.
+        spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
+    } catch (std::exception& e) {
+        // Input was not valid, reset the field to what it was.
+        minXInput.setText(std::to_string(committedMinY));
     }
 }
 
 void PropertiesPanel::saveMinZ()
 {
-    if (activeSprite != nullptr) {
-        // Validate the user input as a valid float.
-        try {
-            // Convert the input string to a float.
-            float newMinZ{std::stof(minZInput.getText())};
+    // Validate the user input as a valid float.
+    try {
+        // Convert the input string to a float.
+        float newMinZ{std::stof(minZInput.getText())};
 
-            // Clamp the value to its bounds.
-            newMinZ = std::clamp(newMinZ, 0.f, activeSprite->modelBounds.maxZ);
+        // Clamp the value to its bounds.
+        BoundingBox newModelBounds{
+                spriteDataModel.getSprite(activeSpriteID).modelBounds};
+        newModelBounds.minY = std::clamp(newMinZ, 0.f, newModelBounds.maxZ);
 
-            // The input was valid, save it.
-            activeSprite->modelBounds.minZ = newMinZ;
-            committedMinZ = newMinZ;
-
-            // Refresh the UI to reflect the new value;
-            mainScreen.refreshActiveSpriteUi();
-        } catch (std::exception& e) {
-            // Input was not valid, reset the field to what it was.
-            minZInput.setText(std::to_string(committedMinZ));
-        }
+        // Apply the new value.
+        spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
+    } catch (std::exception& e) {
+        // Input was not valid, reset the field to what it was.
+        minXInput.setText(std::to_string(committedMinZ));
     }
 }
 
 void PropertiesPanel::saveMaxX()
 {
-    if (activeSprite != nullptr) {
-        // Validate the user input as a valid float.
-        try {
-            // Convert the input string to a float.
-            float newMaxX{std::stof(maxXInput.getText())};
+    // Validate the user input as a valid float.
+    try {
+        // Convert the input string to a float.
+        float newMaxX{std::stof(maxXInput.getText())};
 
-            // Clamp the value to its bounds.
-            ScreenPoint bottomRightOffset{
-                static_cast<float>(activeSprite->textureExtent.w / 2.f),
-                static_cast<float>(activeSprite->textureExtent.h
-                                   - activeSprite->yOffset)};
-            float maxXBound{Transforms::screenToWorld(bottomRightOffset, {}).x};
+        // Clamp the value to its bounds.
+        const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+        ScreenPoint bottomRightOffset{
+            static_cast<float>(activeSprite.textureExtent.w / 2.f),
+            static_cast<float>(activeSprite.textureExtent.h
+                               - activeSprite.yOffset)};
+        float maxXBound{Transforms::screenToWorld(bottomRightOffset, {}).x};
 
-            newMaxX = std::clamp(newMaxX, activeSprite->modelBounds.minX,
-                                 maxXBound);
+        BoundingBox newModelBounds{activeSprite.modelBounds};
+        newModelBounds.maxX = std::clamp(newMaxX, activeSprite.modelBounds.minX,
+                             maxXBound);
 
-            // The input was valid, save it.
-            activeSprite->modelBounds.maxX = newMaxX;
-            committedMaxX = newMaxX;
-
-            // Refresh the UI to reflect the new value;
-            mainScreen.refreshActiveSpriteUi();
-        } catch (std::exception& e) {
-            // Input was not valid, reset the field to what it was.
-            maxXInput.setText(std::to_string(committedMaxX));
-        }
+        // Apply the new value.
+        spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
+    } catch (std::exception& e) {
+        // Input was not valid, reset the field to what it was.
+        maxXInput.setText(std::to_string(committedMaxX));
     }
 }
 
 void PropertiesPanel::saveMaxY()
 {
-    if (activeSprite != nullptr) {
-        // Validate the user input as a valid float.
-        try {
-            // Convert the input string to a float.
-            float newMaxY{std::stof(maxYInput.getText())};
+    // Validate the user input as a valid float.
+    try {
+        // Convert the input string to a float.
+        float newMaxY{std::stof(maxYInput.getText())};
 
-            // Clamp the value to its bounds.
-            ScreenPoint bottomLeftOffset{
-                static_cast<float>(-(activeSprite->textureExtent.w / 2.f)),
-                static_cast<float>(activeSprite->textureExtent.h
-                                   - activeSprite->yOffset)};
-            float maxYBound{Transforms::screenToWorld(bottomLeftOffset, {}).y};
+        // Clamp the value to its bounds.
+        const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+        ScreenPoint bottomLeftOffset{
+            static_cast<float>(-(activeSprite.textureExtent.w / 2.f)),
+            static_cast<float>(activeSprite.textureExtent.h
+                               - activeSprite.yOffset)};
+        float maxYBound{Transforms::screenToWorld(bottomLeftOffset, {}).y};
 
-            newMaxY = std::clamp(newMaxY, activeSprite->modelBounds.minY,
-                                 maxYBound);
+        BoundingBox newModelBounds{activeSprite.modelBounds};
+        newModelBounds.maxY = std::clamp(newMaxY, activeSprite.modelBounds.minY,
+                              maxYBound);
 
-            // The input was valid, save it.
-            activeSprite->modelBounds.maxY = newMaxY;
-            committedMaxY = newMaxY;
-
-            // Refresh the UI to reflect the new value;
-            mainScreen.refreshActiveSpriteUi();
-        } catch (std::exception& e) {
-            // Input was not valid, reset the field to what it was.
-            maxYInput.setText(std::to_string(committedMaxY));
-        }
+        // Apply the new value.
+        spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
+    } catch (std::exception& e) {
+        // Input was not valid, reset the field to what it was.
+        maxYInput.setText(std::to_string(committedMaxY));
     }
 }
 
 void PropertiesPanel::saveMaxZ()
 {
-    if (activeSprite != nullptr) {
-        // Validate the user input as a valid float.
-        try {
-            // Convert the input string to a float.
-            float newMaxZ{std::stof(maxZInput.getText())};
+    // Validate the user input as a valid float.
+    try {
+        // Convert the input string to a float.
+        float newMaxZ{std::stof(maxZInput.getText())};
 
-            // Clamp the value to its lower bound.
-            // Note: We don't clamp to an upper bound cause it's hard to calc
-            //       and not very useful. Can add if we ever care to.
-            float minZ = activeSprite->modelBounds.minZ;
-            if (newMaxZ < minZ) {
-                newMaxZ = minZ;
-            }
-
-            // The input was valid, save it.
-            activeSprite->modelBounds.maxZ = newMaxZ;
-            committedMaxZ = newMaxZ;
-
-            // Refresh the UI to reflect the new value;
-            mainScreen.refreshActiveSpriteUi();
-        } catch (std::exception& e) {
-            // Input was not valid, reset the field to what it was.
-            maxZInput.setText(std::to_string(committedMaxZ));
+        // Clamp the value to its lower bound.
+        // Note: We don't clamp to an upper bound cause it's hard to calc
+        //       and not very useful. Can add if we ever care to.
+        const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+        float minZ{activeSprite.modelBounds.minZ};
+        if (newMaxZ < minZ) {
+            newMaxZ = minZ;
         }
+
+        BoundingBox newModelBounds{activeSprite.modelBounds};
+        newModelBounds.maxZ = newMaxZ;
+
+        // Apply the new value.
+        spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
+    } catch (std::exception& e) {
+        // Input was not valid, reset the field to what it was.
+        maxYInput.setText(std::to_string(committedMaxY));
     }
 }
 

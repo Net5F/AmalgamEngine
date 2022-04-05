@@ -34,11 +34,15 @@ SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen,
     spriteContainer.setCellWidth(156);
     spriteContainer.setCellHeight(162);
 
-    // When a sprite is added to the model, add it to this widget.
-    spriteDataModel.spriteAdded.connect<&SpritePanel::addSprite>(*this);
+    // When a sprite is added or removed from the model, update this widget.
+    spriteDataModel.spriteAdded.connect<&SpritePanel::onSpriteAdded>(*this);
+    spriteDataModel.spriteRemoved.connect<&SpritePanel::onSpriteRemoved>(*this);
+
+    // When a sprite's display name is updated, update the matching thumbnail.
+    spriteDataModel.spriteDisplayNameChanged.connect<&SpritePanel::onSpriteDisplayNameChanged>(*this);
 }
 
-void SpritePanel::addSprite(const Sprite& sprite)
+void SpritePanel::onSpriteAdded(unsigned int spriteID, const Sprite& sprite)
 {
     // Construct the new sprite thumbnail.
     std::unique_ptr<AUI::Widget> thumbnailPtr{
@@ -54,7 +58,7 @@ void SpritePanel::addSprite(const Sprite& sprite)
         {1280, 720}, assetCache.loadTexture(imagePath), sprite.textureExtent);
 
     // Add a callback to deactivate all other thumbnails when one is activated.
-    thumbnail.setOnActivated([&](AUI::Thumbnail* selectedThumb) {
+    thumbnail.setOnActivated([this, spriteID](AUI::Thumbnail* selectedThumb) {
         // Deactivate all other thumbnails.
         for (auto& widgetPtr : spriteContainer) {
             MainThumbnail& otherThumb{static_cast<MainThumbnail&>(*widgetPtr)};
@@ -64,28 +68,39 @@ void SpritePanel::addSprite(const Sprite& sprite)
         }
 
         // Load the data that this Thumbnail represents as the active sprite.
-//        mainScreen.loadActiveSprite(&sprite);
+        spriteDataModel.setActiveSprite(spriteID);
     });
 
     spriteContainer.push_back(std::move(thumbnailPtr));
+    thumbnailMap.emplace(spriteID, &thumbnail);
 }
 
-void SpritePanel::refreshActiveSprite(const std::string& newDisplayName)
+void SpritePanel::onSpriteRemoved(unsigned int sheetID)
 {
-    // Look for an active sprite.
-    for (unsigned int i = 0; i < spriteContainer.size(); ++i) {
-        AUI::Thumbnail& thumbnail{
-            dynamic_cast<AUI::Thumbnail&>(spriteContainer[i])};
-        if (thumbnail.getIsActive()) {
-            // Refresh the sprite's display name.
-            thumbnail.setText(newDisplayName);
-        }
+    auto spriteIt{thumbnailMap.find(sheetID)};
+    if (spriteIt == thumbnailMap.end()) {
+        LOG_FATAL("Failed to find sprite during removal.");
     }
+
+    // Remove the thumbnail from the container.
+    spriteContainer.erase(spriteIt->second);
+
+    // Remove the thumbnail from the map.
+    thumbnailMap.erase(spriteIt);
 }
 
-void SpritePanel::clearSprites()
+void SpritePanel::onSpriteDisplayNameChanged(unsigned int spriteID, const std::string& newDisplayName)
 {
-    spriteContainer.clear();
+    auto thumbnailIt{thumbnailMap.find(spriteID)};
+    if (thumbnailIt == thumbnailMap.end()) {
+        LOG_FATAL("Failed to find a thumbnail for the given sprite.");
+    }
+
+    MainThumbnail& thumbnail{*(thumbnailIt->second)};
+    if (thumbnail.getIsActive()) {
+        // Update the thumbnail to use the sprite's new display name.
+        thumbnail.setText(newDisplayName);
+    }
 }
 
 } // End namespace SpriteEditor

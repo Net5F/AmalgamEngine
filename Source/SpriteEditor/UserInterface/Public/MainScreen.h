@@ -28,18 +28,6 @@ public:
     MainScreen(AssetCache& inAssetCache, SpriteDataModel& inSpriteDataModel);
 
     /**
-     * Loads the current state of spriteData into this screen's UI.
-     */
-    void loadSpriteData();
-
-    /**
-     * Refreshes the UI with the current data from the active sprite.
-     *
-     * If there is no active sprite, errors.
-     */
-    void refreshActiveSpriteUi();
-
-    /**
      * Opens a confirmation dialog.
      *
      * @param bodyText  The main dialog text.
@@ -55,12 +43,6 @@ public:
      */
     void openAddSheetDialog();
 
-    /**
-     * Loads the given sprite data into PropertiesPanel, and displays it on
-     * the stage.
-     */
-    void loadActiveSprite(Sprite* activeSprite);
-
     void render() override;
 
 private:
@@ -70,10 +52,6 @@ private:
 
     /** The sprite data for this project. Used by this screen's UI. */
     SpriteDataModel& spriteDataModel;
-
-    /** If non-nullptr, this is the currently active sprite's data. The active
-        sprite's data is shown in the properties panel and on the stage. */
-    Sprite* activeSprite;
 
     /** The confirmationDialog user's callback. Set while opening the dialog. */
     std::function<void(void)> userOnConfirmation;

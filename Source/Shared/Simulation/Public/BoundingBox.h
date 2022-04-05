@@ -21,6 +21,13 @@ public:
     float minZ{0};
     float maxZ{0};
 
+    bool operator==(const BoundingBox& other)
+    {
+        return (minX == other.minX) && (maxX == other.maxX)
+               && (minY == other.minY) && (maxY == other.maxY)
+               && (minZ == other.minZ) && (maxZ == other.maxZ);
+    }
+
     float getXLength() const { return (maxX - minX); }
 
     float getYLength() const { return (maxY - minY); }

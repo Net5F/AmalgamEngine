@@ -79,30 +79,20 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
 
         std::function<void(void)> onConfirmation = [&]() {
             // Try to find a selected sprite sheet in the container.
-            int selectedIndex{-1};
-            for (unsigned int i = 0; i < spriteSheetContainer.size(); ++i) {
-                MainThumbnail& thumbnail{
-                    static_cast<MainThumbnail&>(spriteSheetContainer[i])};
-                if (thumbnail.getIsSelected()) {
-                    selectedIndex = i;
-                    break;
+            for (auto& thumbnailPair : thumbnailMap) {
+                // If we found a selected sprite sheet.
+                if (thumbnailPair.second->getIsSelected()) {
+                    // Remove the sheet from the model.
+                    spriteDataModel.remSpriteSheet(thumbnailPair.first);
+
+                    // Disable the button since nothing is selected.
+                    remSheetButton.disable();
+
+                    return;
                 }
             }
 
-            // If we found a selected sprite sheet.
-            if (selectedIndex != -1) {
-                // Remove the sheet from the model.
-                spriteDataModel.remSpriteSheet(selectedIndex);
-
-                // Refresh the UI.
-                mainScreen.loadSpriteData();
-
-                // Disable the button since nothing is selected.
-                remSheetButton.disable();
-            }
-            else {
-                LOG_INFO("Failed to find selected sheet during remove.");
-            }
+            LOG_INFO("Failed to find selected sheet during remove.");
         };
 
         // Bring up the confirmation dialog.
@@ -131,11 +121,13 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
         mainScreen.openAddSheetDialog();
     });
 
-    // When a sprite sheet is added to the model, add it to this widget.
-    spriteDataModel.sheetAdded.connect<&SpriteSheetPanel::addSpriteSheet>(*this);
+    // When a sprite sheet is added or removed from the model, update this
+    // widget.
+    spriteDataModel.sheetAdded.connect<&SpriteSheetPanel::onSheetAdded>(*this);
+    spriteDataModel.sheetRemoved.connect<&SpriteSheetPanel::onSheetRemoved>(*this);
 }
 
-void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
+void SpriteSheetPanel::onSheetAdded(unsigned int sheetID, const SpriteSheet& sheet)
 {
     std::unique_ptr<AUI::Widget> thumbnailPtr{
         std::make_unique<MainThumbnail>(assetCache, "")};
@@ -183,11 +175,21 @@ void SpriteSheetPanel::addSpriteSheet(const SpriteSheet& sheet)
     });
 
     spriteSheetContainer.push_back(std::move(thumbnailPtr));
+    thumbnailMap.emplace(sheetID, &thumbnail);
 }
 
-void SpriteSheetPanel::clearSpriteSheets()
+void SpriteSheetPanel::onSheetRemoved(unsigned int sheetID)
 {
-    spriteSheetContainer.clear();
+    auto sheetIt{thumbnailMap.find(sheetID)};
+    if (sheetIt == thumbnailMap.end()) {
+        LOG_FATAL("Failed to find sprite sheet during removal.");
+    }
+
+    // Remove the thumbnail from the container.
+    spriteSheetContainer.erase(sheetIt->second);
+
+    // Remove the thumbnail from the map.
+    thumbnailMap.erase(sheetIt);
 }
 
 } // End namespace SpriteEditor

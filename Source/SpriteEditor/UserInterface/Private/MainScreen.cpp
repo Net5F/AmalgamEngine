@@ -14,7 +14,6 @@ MainScreen::MainScreen(AssetCache& inAssetCache,
                        SpriteDataModel& inSpriteDataModel)
 : AUI::Screen("MainScreen")
 , spriteDataModel{inSpriteDataModel}
-, activeSprite{nullptr}
 , spriteSheetPanel(inAssetCache, *this, spriteDataModel)
 , spriteEditStage(inAssetCache, *this, spriteDataModel)
 , spritePanel(inAssetCache, *this, spriteDataModel)
@@ -110,44 +109,6 @@ MainScreen::MainScreen(AssetCache& inAssetCache,
     addSheetDialog.setIsVisible(false);
 }
 
-void MainScreen::loadSpriteData()
-{
-    // Clear out the old widgets.
-    spriteSheetPanel.clearSpriteSheets();
-    spritePanel.clearSprites();
-    propertiesPanel.clear();
-    activeSprite = nullptr;
-
-    // Hide the stage (we don't need to clear it since it won't be needed until
-    // we have another active sprite to load.)
-    spriteEditStage.setIsVisible(false);
-
-    // Load the model's data into this screen's UI.
-    // For each sprite sheet in the model.
-    for (SpriteSheet& sheet : spriteDataModel.getSpriteSheets()) {
-        // Add a Thumbnail widget that displays the sheet.
-        spriteSheetPanel.addSpriteSheet(sheet);
-
-        // For each sprite in the sheet.
-        for (Sprite& sprite : sheet.sprites) {
-            // Add a Thumbnail widget that displays the sprite.
-            spritePanel.addSprite(sprite);
-        }
-    }
-}
-
-void MainScreen::refreshActiveSpriteUi()
-{
-    // Refresh the sprite's Thumbnail's display name.
-    spritePanel.refreshActiveSprite(activeSprite->displayName);
-
-    // Refresh the properties panel.
-    propertiesPanel.refresh();
-
-    // Refresh the stage.
-    spriteEditStage.refresh();
-}
-
 void MainScreen::openConfirmationDialog(
     const std::string& bodyText, const std::string& confirmButtonText,
     std::function<void(void)> onConfirmation)
@@ -174,19 +135,6 @@ void MainScreen::openAddSheetDialog()
 {
     // Open the dialog.
     addSheetDialog.setIsVisible(true);
-}
-
-void MainScreen::loadActiveSprite(Sprite* inActiveSprite)
-{
-    // Load the sprite's data into the properties panel.
-    propertiesPanel.loadActiveSprite(inActiveSprite);
-
-    // Load the sprite onto the stage.
-    spriteEditStage.loadActiveSprite(inActiveSprite);
-    spriteEditStage.setIsVisible(true);
-
-    // Save a reference to the active sprite.
-    activeSprite = inActiveSprite;
 }
 
 void MainScreen::render()

@@ -29,9 +29,6 @@ void UserInterface::openTitleScreen()
 
 void UserInterface::openMainScreen()
 {
-    // Tell the main screen to load the current sprite data into its UI.
-    mainScreen.loadSpriteData();
-
     // Switch to the main screen.
     currentScreen = &mainScreen;
 }

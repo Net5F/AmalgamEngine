@@ -4,7 +4,7 @@
 #include "IDPool.h"
 #include "entt/signal/sigh.hpp"
 #include <fstream>
-#include <vector>
+#include <map>
 #include <string>
 
 struct SDL_Renderer;
@@ -19,6 +19,9 @@ namespace SpriteEditor
 class SpriteDataModel
 {
 public:
+    /** Can be used as an invalid ID for initialization purposes and such. */
+    static constexpr unsigned int INVALID_SPRITE_ID = 0;
+
     SpriteDataModel(SDL_Renderer* inSdlRenderer);
 
     /**
@@ -75,32 +78,65 @@ public:
                                const std::string& baseName);
 
     /**
-     * Removes the sprite sheet at the given index in the spriteSheets vector.
+     * Removes the sprite sheet with the given ID from the sprite sheet map.
      *
-     * Error if no sprite sheet is at the given index.
+     * Errors if the given ID isn't present in spriteSheetMap.
+     *
+     * @param sheetID  The editor ID of the sheet to be removed.
      */
-    void remSpriteSheet(unsigned int index);
-
-    void setActiveSprite();
-
-    void setActiveSpriteName();
+    void remSpriteSheet(unsigned int sheetID);
 
     /**
-     * Checks if the given name is unique among all sprites in the model.
+     * Removes the sprite with the given ID from the sprite map.
+     *
+     * Errors if the given ID isn't present in spriteMap.
+     *
+     * @param spriteID  The editor ID of the sprite to be removed.
      */
-    bool spriteNameIsUnique(const std::string& displayName);
+    void remSprite(unsigned int spriteID);
 
-    std::vector<SpriteSheet>& getSpriteSheets();
+    const Sprite& getSprite(unsigned int spriteID);
+
+    // TODO: Can this be made private?
     const std::string& getWorkingTexturesDir();
+
+    //-------------------------------------------------------------------------
+    // Active Sprite
+    //-------------------------------------------------------------------------
+    void setActiveSprite(unsigned int newActiveSpriteID);
+
+    void setSpriteDisplayName(unsigned int spriteID, const std::string& newDisplayName);
+
+    void setSpriteHasBoundingBox(unsigned int spriteID, bool newHasBoundingBox);
+
+    void setSpriteModelBounds(unsigned int spriteID, const BoundingBox& newModelBounds);
 
     //-------------------------------------------------------------------------
     // Signal Sinks
     //-------------------------------------------------------------------------
-    /** A sprite sheet has been added to the model. */
-    entt::sink<void(const SpriteSheet&)> sheetAdded;
+    /** A sprite sheet was added to the model. */
+    entt::sink<void(unsigned int sheetID, const SpriteSheet& sheet)> sheetAdded;
 
-    /** A sprite has been added to the model. */
-    entt::sink<void(const Sprite&)> spriteAdded;
+    /** A sprite sheet was removed from the model. */
+    entt::sink<void(unsigned int sheetID)> sheetRemoved;
+
+    /** A sprite was added to the model. */
+    entt::sink<void(unsigned int spriteID, const Sprite& sprite)> spriteAdded;
+
+    /** A sprite was removed from the model. */
+    entt::sink<void(unsigned int spriteID)> spriteRemoved;
+
+    /** The active sprite has changed to a new sprite. */
+    entt::sink<void(unsigned int newActiveSpriteID, const Sprite& newActiveSprite)> activeSpriteChanged;
+
+    /** A sprite's display name has changed. */
+    entt::sink<void(unsigned int spriteID, const std::string& newDisplayName)> spriteDisplayNameChanged;
+
+    /** A sprite's "has bounding box" field has changed. */
+    entt::sink<void(unsigned int spriteID, bool hasBoundingBox)> spriteHasBoundingBoxChanged;
+
+    /** A sprite's bounding box has changed. */
+    entt::sink<void(unsigned int spriteID, const BoundingBox& newModelBounds)> spriteModelBoundsChanged;
 
 private:
     // Note: These were arbitrarily chosen and can be increased if necessary.
@@ -128,10 +164,9 @@ private:
     std::string deriveStringId(const std::string& displayName);
 
     /**
-     * Called once we've fully loaded a SpriteData.json file.
-     * Signals all loaded sprite sheets and sprites to the UI.
+     * Checks if the given name is unique among all sprites in the model.
      */
-    void postLoadSendSignals();
+    bool spriteNameIsUnique(const std::string& displayName);
 
     /** Used for validating user-selected sprite sheet textures. */
     SDL_Renderer* sdlRenderer;
@@ -144,7 +179,13 @@ private:
     std::string workingTexturesDir;
 
     /** The sprite sheets that we currently have loaded. */
-    std::vector<SpriteSheet> spriteSheets;
+    std::map<unsigned int, SpriteSheet> spriteSheetMap;
+
+    /** The sprites that we currently have loaded. */
+    std::map<unsigned int, Sprite> spriteMap;
+
+    /** The ID of the active sprite. */
+    unsigned int activeSpriteID;
 
     /** Used for generating temporary sprite sheet IDs that are only used
         internally by this editor. */
@@ -157,9 +198,21 @@ private:
     //-------------------------------------------------------------------------
     // Signals
     //-------------------------------------------------------------------------
-    entt::sigh<void(const SpriteSheet&)> sheetAddedSig;
+    entt::sigh<void(unsigned int sheetID, const SpriteSheet& sheet)> sheetAddedSig;
 
-    entt::sigh<void(const Sprite&)> spriteAddedSig;
+    entt::sigh<void(unsigned int sheetID)> sheetRemovedSig;
+
+    entt::sigh<void(unsigned int spriteID, const Sprite& sprite)> spriteAddedSig;
+
+    entt::sigh<void(unsigned int spriteID)> spriteRemovedSig;
+
+    entt::sigh<void(unsigned int newActiveSpriteID, const Sprite& newActiveSprite)> activeSpriteChangedSig;
+
+    entt::sigh<void(unsigned int spriteID, const std::string& newDisplayName)> spriteDisplayNameChangedSig;
+
+    entt::sigh<void(unsigned int spriteID, bool hasBoundingBox)> spriteHasBoundingBoxChangedSig;
+
+    entt::sigh<void(unsigned int spriteID, const BoundingBox& newModelBounds)> spriteModelBoundsChangedSig;
 };
 
 } // namespace SpriteEditor

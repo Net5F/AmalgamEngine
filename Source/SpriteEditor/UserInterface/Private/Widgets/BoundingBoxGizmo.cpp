@@ -18,12 +18,14 @@ namespace AM
 {
 namespace SpriteEditor
 {
-BoundingBoxGizmo::BoundingBoxGizmo(MainScreen& inScreen)
+BoundingBoxGizmo::BoundingBoxGizmo(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
 : AUI::Widget({0, 0, 1920, 1080}, "BoundingBoxGizmo")
 , mainScreen{inScreen}
-, activeSprite{nullptr}
+, spriteDataModel{inSpriteDataModel}
+, activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
 , scaledRectSize{AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE)}
 , scaledLineWidth{AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH)}
+, hasBoundingBox{false}
 , positionControlExtent{0, 0, scaledRectSize, scaledRectSize}
 , lastRenderedPosExtent{}
 , xControlExtent{0, 0, scaledRectSize, scaledRectSize}
@@ -42,37 +44,10 @@ BoundingBoxGizmo::BoundingBoxGizmo(MainScreen& inScreen)
 , planeYCoords{}
 , currentHeldControl{Control::None}
 {
-}
-
-void BoundingBoxGizmo::loadActiveSprite(Sprite* inActiveSprite)
-{
-    // Set the new active sprite.
-    activeSprite = inActiveSprite;
-
-    // Refresh our UI with the newly set sprite's data.
-    refresh();
-}
-
-void BoundingBoxGizmo::refresh()
-{
-    if (activeSprite == nullptr) {
-        LOG_FATAL("Tried to refresh with nullptr data.");
-    }
-
-    // Calculate where the sprite's model bounds are on the screen.
-    // Note: The ordering of the points in this vector is listed in the comment
-    //       for calcOffsetScreenPoints().
-    std::vector<SDL_Point> boundsScreenPoints;
-    calcOffsetScreenPoints(boundsScreenPoints);
-
-    // Move the controls to the correct positions.
-    moveControls(boundsScreenPoints);
-
-    // Move the lines to the correct positions.
-    moveLines(boundsScreenPoints);
-
-    // Move the planes to the correct positions.
-    movePlanes(boundsScreenPoints);
+    // When the active sprite is updated, update it in this widget.
+    spriteDataModel.activeSpriteChanged.connect<&BoundingBoxGizmo::onActiveSpriteChanged>(*this);
+    spriteDataModel.spriteHasBoundingBoxChanged.connect<&BoundingBoxGizmo::onSpriteHasBoundingBoxChanged>(*this);
+    spriteDataModel.spriteModelBoundsChanged.connect<&BoundingBoxGizmo::onSpriteModelBoundsChanged>(*this);
 }
 
 void BoundingBoxGizmo::render()
@@ -151,7 +126,8 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
 
     /* Translate the mouse position to world space. */
     // Account for the sprite's empty vertical space.
-    int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite->yOffset)};
+    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite.yOffset)};
     yOffset += renderExtent.y;
 
     // Account for the sprite's half-tile offset.
@@ -193,9 +169,6 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
         }
     }
 
-    // Refresh the UI so it reflects the changed position.
-    mainScreen.refreshActiveSpriteUi();
-
     return AUI::EventResult{.wasHandled{true}};
 }
 
@@ -217,14 +190,57 @@ bool BoundingBoxGizmo::refreshScaling()
     return false;
 }
 
+void BoundingBoxGizmo::onActiveSpriteChanged(unsigned int newActiveSpriteID, const Sprite& newActiveSprite)
+{
+    activeSpriteID = newActiveSpriteID;
+    hasBoundingBox = newActiveSprite.hasBoundingBox;
+    refresh(newActiveSprite);
+}
+
+void BoundingBoxGizmo::onSpriteHasBoundingBoxChanged(unsigned int spriteID, bool newHasBoundingBox)
+{
+    if (spriteID == activeSpriteID) {
+        hasBoundingBox = newHasBoundingBox;
+    }
+}
+
+void BoundingBoxGizmo::onSpriteModelBoundsChanged(unsigned int spriteID, const BoundingBox& newModelBounds)
+{
+    ignore(newModelBounds);
+
+    if (spriteID == activeSpriteID) {
+        refresh(spriteDataModel.getSprite(spriteID));
+    }
+}
+
+void BoundingBoxGizmo::refresh(const Sprite& activeSprite)
+{
+    // Calculate where the sprite's model bounds are on the screen.
+    // Note: The ordering of the points in this vector is listed in the comment
+    //       for calcOffsetScreenPoints().
+    std::vector<SDL_Point> boundsScreenPoints;
+    calcOffsetScreenPoints(activeSprite, boundsScreenPoints);
+
+    // Move the controls to the correct positions.
+    moveControls(boundsScreenPoints);
+
+    // Move the lines to the correct positions.
+    moveLines(boundsScreenPoints);
+
+    // Move the planes to the correct positions.
+    movePlanes(boundsScreenPoints);
+}
+
 void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 {
     // Note: The expected behavior is to move along the x/y plane and
     //       leave minZ where it was.
-    float& minX{activeSprite->modelBounds.minX};
-    float& minY{activeSprite->modelBounds.minY};
-    float& maxX{activeSprite->modelBounds.maxX};
-    float& maxY{activeSprite->modelBounds.maxY};
+    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    BoundingBox modelBounds{activeSprite.modelBounds};
+    float& minX{modelBounds.minX};
+    float& minY{modelBounds.minY};
+    float& maxX{modelBounds.maxX};
+    float& maxY{modelBounds.maxY};
 
     // Move the min bounds to follow the max bounds.
     float diffX{mouseWorldPos.x - maxX};
@@ -251,13 +267,13 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
     // Calc the screen-space offsets from the tile's origin to the bottom
     // right and left of the sprite image.
     ScreenPoint bottomRightOffset{
-        static_cast<float>(activeSprite->textureExtent.w / 2.f),
-        static_cast<float>(activeSprite->textureExtent.h
-                           - activeSprite->yOffset)};
+        static_cast<float>(activeSprite.textureExtent.w / 2.f),
+        static_cast<float>(activeSprite.textureExtent.h
+                           - activeSprite.yOffset)};
     ScreenPoint bottomLeftOffset{
-        static_cast<float>(-(activeSprite->textureExtent.w / 2.f)),
-        static_cast<float>(activeSprite->textureExtent.h
-                           - activeSprite->yOffset)};
+        static_cast<float>(-(activeSprite.textureExtent.w / 2.f)),
+        static_cast<float>(activeSprite.textureExtent.h
+                           - activeSprite.yOffset)};
 
     // Convert the offsets to world space.
     float maxXBound{Transforms::screenToWorld(bottomRightOffset, {}).x};
@@ -274,18 +290,33 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
         minY -= diff;
         maxY -= diff;
     }
+
+    // Apply the new model bounds.
+    spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
 }
 
 void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
 {
-    activeSprite->modelBounds.minX
-        = std::clamp(mouseWorldPos.x, 0.f, activeSprite->modelBounds.maxX);
+    // Clamp the new value to its bounds.
+    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    BoundingBox modelBounds{activeSprite.modelBounds};
+    modelBounds.minX
+        = std::clamp(mouseWorldPos.x, 0.f, modelBounds.maxX);
+
+    // Apply the new model bound.
+    spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
 }
 
 void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
 {
-    activeSprite->modelBounds.minY
-        = std::clamp(mouseWorldPos.y, 0.f, activeSprite->modelBounds.maxY);
+    // Clamp the new value to its bounds.
+    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    BoundingBox modelBounds{activeSprite.modelBounds};
+    modelBounds.minY
+        = std::clamp(mouseWorldPos.y, 0.f, modelBounds.maxY);
+
+    // Apply the new model bound.
+    spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
 }
 
 void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
@@ -307,12 +338,17 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     mouseZHeight = Transforms::screenYToWorldZ(mouseZHeight, 1.f);
 
     // Set maxZ, making sure it doesn't go below minZ.
-    if (mouseZHeight > activeSprite->modelBounds.minZ) {
-        activeSprite->modelBounds.maxZ = mouseZHeight;
+    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    BoundingBox modelBounds{activeSprite.modelBounds};
+    if (mouseZHeight > modelBounds.minZ) {
+        modelBounds.maxZ = mouseZHeight;
+
+        // Apply the new model bound.
+        spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
     }
 }
 
-void BoundingBoxGizmo::calcOffsetScreenPoints(
+void BoundingBoxGizmo::calcOffsetScreenPoints(const Sprite& activeSprite,
     std::vector<SDL_Point>& boundsScreenPoints)
 {
     /* Transform the world positions to screen points. */
@@ -321,7 +357,7 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
     std::array<ScreenPoint, 7> floatPoints{};
 
     // Push the points in the correct order.
-    BoundingBox& modelBounds{activeSprite->modelBounds};
+    const BoundingBox& modelBounds{activeSprite.modelBounds};
     Position position{modelBounds.minX, modelBounds.maxY, modelBounds.minZ};
     floatPoints[0] = Transforms::worldToScreen(position, 1);
 
@@ -345,11 +381,11 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
 
     /* Build the offsets. */
     // Account for the sprite's empty vertical space.
-    int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite->yOffset)};
+    int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite.yOffset)};
 
     // Account for the sprite's half-tile offset.
     int xOffset{AUI::ScalingHelpers::logicalToActual(
-        static_cast<int>(activeSprite->textureExtent.w / 2.f))};
+        static_cast<int>(activeSprite.textureExtent.w / 2.f))};
 
     /* Scale and offset each point, then push it into the return vector. */
     for (ScreenPoint& point : floatPoints) {
@@ -439,7 +475,7 @@ void BoundingBoxGizmo::renderControls()
 {
     // If the bounding box is disabled, show it at 1/4 alpha.
     float alpha{255};
-    if (!(activeSprite->hasBoundingBox)) {
+    if (!hasBoundingBox) {
         alpha /= 4.f;
     }
 
@@ -484,7 +520,7 @@ void BoundingBoxGizmo::renderLines()
 {
     // If the bounding box is disabled, show it at 1/4 alpha.
     float alpha{255};
-    if (!(activeSprite->hasBoundingBox)) {
+    if (!hasBoundingBox) {
         alpha /= 4.f;
     }
 
@@ -541,7 +577,7 @@ void BoundingBoxGizmo::renderPlanes()
     /* Draw the planes. */
     // If the bounding box is disabled, show it at 1/4 alpha.
     float alpha{127};
-    if (!(activeSprite->hasBoundingBox)) {
+    if (!hasBoundingBox) {
         alpha /= 4.f;
     }
 
