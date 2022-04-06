@@ -19,7 +19,7 @@ namespace AM
 {
 namespace SpriteEditor
 {
-PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
+PropertiesPanel::PropertiesPanel(AssetCache& assetCache,
                                  SpriteDataModel& inSpriteDataModel)
 : AUI::Window({1605, 0, 315, 502}, "PropertiesPanel")
 , nameLabel({36, 24, 65, 28}, "NameLabel")
@@ -38,7 +38,6 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
 , maxYInput(assetCache, {162, 376, 129, 38}, "MaxYInput")
 , maxZLabel({36, 426, 110, 38}, "MaxZLabel")
 , maxZInput(assetCache, {162, 426, 129, 38}, "MaxZInput")
-, mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
 , activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
 , committedMinX{0.0}

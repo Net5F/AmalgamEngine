@@ -11,7 +11,7 @@ namespace AM
 {
 namespace SpriteEditor
 {
-SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
+SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache,
                                  SpriteDataModel& inSpriteDataModel)
 : AUI::Window({389, 60, 1142, 684}, "SpriteEditStage")
 , assetCache{inAssetCache}
@@ -19,7 +19,7 @@ SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
 , activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
 , checkerboardImage({0, 0, 100, 100})
 , spriteImage({0, 0, 100, 100})
-, boundingBoxGizmo(inScreen, inSpriteDataModel)
+, boundingBoxGizmo(inSpriteDataModel)
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(checkerboardImage);

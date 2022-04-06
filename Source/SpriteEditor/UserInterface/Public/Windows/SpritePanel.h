@@ -13,7 +13,6 @@ class AssetCache;
 
 namespace SpriteEditor
 {
-class MainScreen;
 class SpriteDataModel;
 class MainThumbnail;
 
@@ -27,7 +26,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen,
+    SpritePanel(AssetCache& inAssetCache,
                 SpriteDataModel& inSpriteDataModel);
 
 private:
@@ -48,10 +47,6 @@ private:
 
     /** Used to load the active sprite's texture. */
     AssetCache& assetCache;
-
-    /** Used to save/clear the active sprite when a sprite thumbnail is
-        activated or deactivated. */
-    MainScreen& mainScreen;
 
     /** Used to get the current working dir when displaying the thumbnails. */
     SpriteDataModel& spriteDataModel;

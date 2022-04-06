@@ -12,7 +12,6 @@ class AssetCache;
 
 namespace SpriteEditor
 {
-class MainScreen;
 class SpriteDataModel;
 
 /**
@@ -22,7 +21,7 @@ class SpriteDataModel;
 class AddSheetDialog : public AUI::Window
 {
 public:
-    AddSheetDialog(AssetCache& assetCache, MainScreen& inScreen,
+    AddSheetDialog(AssetCache& assetCache,
                    SpriteDataModel& inSpriteDataModel);
 
     virtual ~AddSheetDialog() = default;
@@ -69,9 +68,6 @@ private:
      * Clears the text in all of this dialog's text inputs and error text.
      */
     void clear();
-
-    /** Used to update the UI after sprite data changes. */
-    MainScreen& mainScreen;
 
     /** Used to update the model when a sheet is added. */
     SpriteDataModel& spriteDataModel;

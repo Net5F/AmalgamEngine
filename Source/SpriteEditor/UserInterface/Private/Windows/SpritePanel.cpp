@@ -10,11 +10,10 @@ namespace AM
 {
 namespace SpriteEditor
 {
-SpritePanel::SpritePanel(AssetCache& inAssetCache, MainScreen& inScreen,
+SpritePanel::SpritePanel(AssetCache& inAssetCache,
                          SpriteDataModel& inSpriteDataModel)
 : AUI::Window({-8, 732, 1936, 352}, "SpritePanel")
 , assetCache{inAssetCache}
-, mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
 , backgroundImage({0, 0, 1936, 352}, "SpritePanelBackground")
 , spriteContainer({191, 24, 1737, 324}, "SpriteContainer")

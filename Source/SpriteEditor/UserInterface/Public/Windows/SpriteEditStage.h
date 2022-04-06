@@ -11,7 +11,6 @@ class AssetCache;
 
 namespace SpriteEditor
 {
-class MainScreen;
 class Sprite;
 class SpriteDataModel;
 
@@ -25,7 +24,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteEditStage(AssetCache& inAssetCache, MainScreen& inScreen,
+    SpriteEditStage(AssetCache& inAssetCache,
                     SpriteDataModel& inSpriteDataModel);
 
 private:

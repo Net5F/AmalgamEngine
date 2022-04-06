@@ -13,7 +13,6 @@ class BoundingBox;
 
 namespace SpriteEditor
 {
-class MainScreen;
 class SpriteDataModel;
 class Sprite;
 
@@ -27,7 +26,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    PropertiesPanel(AssetCache& assetCache, MainScreen& inScreen,
+    PropertiesPanel(AssetCache& assetCache,
                     SpriteDataModel& inSpriteDataModel);
 
     //-------------------------------------------------------------------------
@@ -79,9 +78,6 @@ private:
     void onSpriteDisplayNameChanged(unsigned int spriteID, const std::string& newDisplayName);
     void onSpriteHasBoundingBoxChanged(unsigned int spriteID, bool newHasBoundingBox);
     void onSpriteModelBoundsChanged(unsigned int spriteID, const BoundingBox& newModelBounds);
-
-    /** Used to save updated sprite data. */
-    MainScreen& mainScreen;
 
     /** Used while setting user-inputted sprite data. */
     SpriteDataModel& spriteDataModel;

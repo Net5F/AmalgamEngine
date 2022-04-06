@@ -11,7 +11,6 @@ class BoundingBox;
 
 namespace SpriteEditor
 {
-class MainScreen;
 class Sprite;
 class SpriteDataModel;
 
@@ -24,7 +23,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BoundingBoxGizmo(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
+    BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel);
 
     virtual ~BoundingBoxGizmo() = default;
 
@@ -133,9 +132,6 @@ private:
      * Renders the plane polygons.
      */
     void renderPlanes();
-
-    /** Used to save updated sprite data. */
-    MainScreen& mainScreen;
 
     /** Used while setting user-inputted sprite data. */
     SpriteDataModel& spriteDataModel;

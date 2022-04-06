@@ -15,12 +15,12 @@ MainScreen::MainScreen(AssetCache& inAssetCache,
 : AUI::Screen("MainScreen")
 , spriteDataModel{inSpriteDataModel}
 , spriteSheetPanel(inAssetCache, *this, spriteDataModel)
-, spriteEditStage(inAssetCache, *this, spriteDataModel)
-, spritePanel(inAssetCache, *this, spriteDataModel)
+, spriteEditStage(inAssetCache, spriteDataModel)
+, spritePanel(inAssetCache, spriteDataModel)
 , saveButtonWindow(inAssetCache, *this, spriteDataModel)
-, propertiesPanel(inAssetCache, *this, spriteDataModel)
+, propertiesPanel(inAssetCache, spriteDataModel)
 , confirmationDialog({0, 0, 1920, 1080}, "ConfirmationDialog")
-, addSheetDialog(inAssetCache, *this, spriteDataModel)
+, addSheetDialog(inAssetCache, spriteDataModel)
 {
     // Add our windows so they're included in rendering, etc.
     windows.push_back(spriteEditStage);

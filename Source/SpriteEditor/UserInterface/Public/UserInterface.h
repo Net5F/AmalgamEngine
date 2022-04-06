@@ -37,8 +37,7 @@ public:
     void openTitleScreen();
 
     /**
-     * Tells mainScreen to load the current sprite data into its UI, and changes
-     * the currentScreen to mainScreen.
+     * Changes the currentScreen to mainScreen.
      */
     void openMainScreen();
 

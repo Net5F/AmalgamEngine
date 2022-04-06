@@ -10,7 +10,7 @@ namespace AM
 {
 namespace SpriteEditor
 {
-AddSheetDialog::AddSheetDialog(AssetCache& assetCache, MainScreen& inScreen,
+AddSheetDialog::AddSheetDialog(AssetCache& assetCache,
                                SpriteDataModel& inSpriteDataModel)
 : AUI::Window({0, 0, 1920, 1080}, "AddSheetDialog")
 , backgroundImage({0, 0, logicalExtent.w, logicalExtent.h})
@@ -27,7 +27,6 @@ AddSheetDialog::AddSheetDialog(AssetCache& assetCache, MainScreen& inScreen,
 , nameInput(assetCache, {919, 500, 180, 38})
 , addButton(assetCache, {1099, 640, 123, 56}, "ADD")
 , cancelButton(assetCache, {958, 640, 123, 56}, "CANCEL")
-, mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
 , errorText({748, 556, 466, 60})
 {

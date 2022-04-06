@@ -18,9 +18,8 @@ namespace AM
 {
 namespace SpriteEditor
 {
-BoundingBoxGizmo::BoundingBoxGizmo(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel)
+BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
 : AUI::Widget({0, 0, 1920, 1080}, "BoundingBoxGizmo")
-, mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
 , activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
 , scaledRectSize{AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE)}
