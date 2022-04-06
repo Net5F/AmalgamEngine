@@ -105,11 +105,13 @@ public:
     //-------------------------------------------------------------------------
     void setActiveSprite(unsigned int newActiveSpriteID);
 
-    void setSpriteDisplayName(unsigned int spriteID, const std::string& newDisplayName);
+    void setSpriteDisplayName(unsigned int spriteID,
+                              const std::string& newDisplayName);
 
     void setSpriteHasBoundingBox(unsigned int spriteID, bool newHasBoundingBox);
 
-    void setSpriteModelBounds(unsigned int spriteID, const BoundingBox& newModelBounds);
+    void setSpriteModelBounds(unsigned int spriteID,
+                              const BoundingBox& newModelBounds);
 
     //-------------------------------------------------------------------------
     // Signal Sinks
@@ -127,16 +129,21 @@ public:
     entt::sink<void(unsigned int spriteID)> spriteRemoved;
 
     /** The active sprite has changed to a new sprite. */
-    entt::sink<void(unsigned int newActiveSpriteID, const Sprite& newActiveSprite)> activeSpriteChanged;
+    entt::sink<void(unsigned int newActiveSpriteID,
+                    const Sprite& newActiveSprite)>
+        activeSpriteChanged;
 
     /** A sprite's display name has changed. */
-    entt::sink<void(unsigned int spriteID, const std::string& newDisplayName)> spriteDisplayNameChanged;
+    entt::sink<void(unsigned int spriteID, const std::string& newDisplayName)>
+        spriteDisplayNameChanged;
 
     /** A sprite's "has bounding box" field has changed. */
-    entt::sink<void(unsigned int spriteID, bool hasBoundingBox)> spriteHasBoundingBoxChanged;
+    entt::sink<void(unsigned int spriteID, bool hasBoundingBox)>
+        spriteHasBoundingBoxChanged;
 
     /** A sprite's bounding box has changed. */
-    entt::sink<void(unsigned int spriteID, const BoundingBox& newModelBounds)> spriteModelBoundsChanged;
+    entt::sink<void(unsigned int spriteID, const BoundingBox& newModelBounds)>
+        spriteModelBoundsChanged;
 
 private:
     // Note: These were arbitrarily chosen and can be increased if necessary.
@@ -198,21 +205,28 @@ private:
     //-------------------------------------------------------------------------
     // Signals
     //-------------------------------------------------------------------------
-    entt::sigh<void(unsigned int sheetID, const SpriteSheet& sheet)> sheetAddedSig;
+    entt::sigh<void(unsigned int sheetID, const SpriteSheet& sheet)>
+        sheetAddedSig;
 
     entt::sigh<void(unsigned int sheetID)> sheetRemovedSig;
 
-    entt::sigh<void(unsigned int spriteID, const Sprite& sprite)> spriteAddedSig;
+    entt::sigh<void(unsigned int spriteID, const Sprite& sprite)>
+        spriteAddedSig;
 
     entt::sigh<void(unsigned int spriteID)> spriteRemovedSig;
 
-    entt::sigh<void(unsigned int newActiveSpriteID, const Sprite& newActiveSprite)> activeSpriteChangedSig;
+    entt::sigh<void(unsigned int newActiveSpriteID,
+                    const Sprite& newActiveSprite)>
+        activeSpriteChangedSig;
 
-    entt::sigh<void(unsigned int spriteID, const std::string& newDisplayName)> spriteDisplayNameChangedSig;
+    entt::sigh<void(unsigned int spriteID, const std::string& newDisplayName)>
+        spriteDisplayNameChangedSig;
 
-    entt::sigh<void(unsigned int spriteID, bool hasBoundingBox)> spriteHasBoundingBoxChangedSig;
+    entt::sigh<void(unsigned int spriteID, bool hasBoundingBox)>
+        spriteHasBoundingBoxChangedSig;
 
-    entt::sigh<void(unsigned int spriteID, const BoundingBox& newModelBounds)> spriteModelBoundsChangedSig;
+    entt::sigh<void(unsigned int spriteID, const BoundingBox& newModelBounds)>
+        spriteModelBoundsChangedSig;
 };
 
 } // namespace SpriteEditor

@@ -26,8 +26,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpritePanel(AssetCache& inAssetCache,
-                SpriteDataModel& inSpriteDataModel);
+    SpritePanel(AssetCache& inAssetCache, SpriteDataModel& inSpriteDataModel);
 
 private:
     /**
@@ -43,7 +42,8 @@ private:
     /**
      * Updates the display name on the thumbnail of the given sprite.
      */
-    void onSpriteDisplayNameChanged(unsigned int spriteID, const std::string& newDisplayName);
+    void onSpriteDisplayNameChanged(unsigned int spriteID,
+                                    const std::string& newDisplayName);
 
     /** Used to load the active sprite's texture. */
     AssetCache& assetCache;

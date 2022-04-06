@@ -44,9 +44,12 @@ BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
 , currentHeldControl{Control::None}
 {
     // When the active sprite is updated, update it in this widget.
-    spriteDataModel.activeSpriteChanged.connect<&BoundingBoxGizmo::onActiveSpriteChanged>(*this);
-    spriteDataModel.spriteHasBoundingBoxChanged.connect<&BoundingBoxGizmo::onSpriteHasBoundingBoxChanged>(*this);
-    spriteDataModel.spriteModelBoundsChanged.connect<&BoundingBoxGizmo::onSpriteModelBoundsChanged>(*this);
+    spriteDataModel.activeSpriteChanged
+        .connect<&BoundingBoxGizmo::onActiveSpriteChanged>(*this);
+    spriteDataModel.spriteHasBoundingBoxChanged
+        .connect<&BoundingBoxGizmo::onSpriteHasBoundingBoxChanged>(*this);
+    spriteDataModel.spriteModelBoundsChanged
+        .connect<&BoundingBoxGizmo::onSpriteModelBoundsChanged>(*this);
 }
 
 void BoundingBoxGizmo::render()
@@ -189,21 +192,24 @@ bool BoundingBoxGizmo::refreshScaling()
     return false;
 }
 
-void BoundingBoxGizmo::onActiveSpriteChanged(unsigned int newActiveSpriteID, const Sprite& newActiveSprite)
+void BoundingBoxGizmo::onActiveSpriteChanged(unsigned int newActiveSpriteID,
+                                             const Sprite& newActiveSprite)
 {
     activeSpriteID = newActiveSpriteID;
     hasBoundingBox = newActiveSprite.hasBoundingBox;
     refresh(newActiveSprite);
 }
 
-void BoundingBoxGizmo::onSpriteHasBoundingBoxChanged(unsigned int spriteID, bool newHasBoundingBox)
+void BoundingBoxGizmo::onSpriteHasBoundingBoxChanged(unsigned int spriteID,
+                                                     bool newHasBoundingBox)
 {
     if (spriteID == activeSpriteID) {
         hasBoundingBox = newHasBoundingBox;
     }
 }
 
-void BoundingBoxGizmo::onSpriteModelBoundsChanged(unsigned int spriteID, const BoundingBox& newModelBounds)
+void BoundingBoxGizmo::onSpriteModelBoundsChanged(
+    unsigned int spriteID, const BoundingBox& newModelBounds)
 {
     ignore(newModelBounds);
 
@@ -299,8 +305,7 @@ void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
     // Clamp the new value to its bounds.
     const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
     BoundingBox modelBounds{activeSprite.modelBounds};
-    modelBounds.minX
-        = std::clamp(mouseWorldPos.x, 0.f, modelBounds.maxX);
+    modelBounds.minX = std::clamp(mouseWorldPos.x, 0.f, modelBounds.maxX);
 
     // Apply the new model bound.
     spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
@@ -311,8 +316,7 @@ void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
     // Clamp the new value to its bounds.
     const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
     BoundingBox modelBounds{activeSprite.modelBounds};
-    modelBounds.minY
-        = std::clamp(mouseWorldPos.y, 0.f, modelBounds.maxY);
+    modelBounds.minY = std::clamp(mouseWorldPos.y, 0.f, modelBounds.maxY);
 
     // Apply the new model bound.
     spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
@@ -347,8 +351,8 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     }
 }
 
-void BoundingBoxGizmo::calcOffsetScreenPoints(const Sprite& activeSprite,
-    std::vector<SDL_Point>& boundsScreenPoints)
+void BoundingBoxGizmo::calcOffsetScreenPoints(
+    const Sprite& activeSprite, std::vector<SDL_Point>& boundsScreenPoints)
 {
     /* Transform the world positions to screen points. */
     // Set up a vector of float points so we can maintain precision until

@@ -26,8 +26,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    PropertiesPanel(AssetCache& assetCache,
-                    SpriteDataModel& inSpriteDataModel);
+    PropertiesPanel(AssetCache& assetCache, SpriteDataModel& inSpriteDataModel);
 
     //-------------------------------------------------------------------------
     // Public child widgets
@@ -63,7 +62,8 @@ private:
     /**
      * Loads the new active sprite's data into this panel.
      */
-    void onActiveSpriteChanged(unsigned int newSpriteID, const Sprite& newActiveSprite);
+    void onActiveSpriteChanged(unsigned int newSpriteID,
+                               const Sprite& newActiveSprite);
 
     /**
      * (If active sprite was removed) Sets activeSprite to invalid and clears
@@ -75,9 +75,12 @@ private:
      * (If active sprite changed) Updates this panel with the active sprite's
      * new properties.
      */
-    void onSpriteDisplayNameChanged(unsigned int spriteID, const std::string& newDisplayName);
-    void onSpriteHasBoundingBoxChanged(unsigned int spriteID, bool newHasBoundingBox);
-    void onSpriteModelBoundsChanged(unsigned int spriteID, const BoundingBox& newModelBounds);
+    void onSpriteDisplayNameChanged(unsigned int spriteID,
+                                    const std::string& newDisplayName);
+    void onSpriteHasBoundingBoxChanged(unsigned int spriteID,
+                                       bool newHasBoundingBox);
+    void onSpriteModelBoundsChanged(unsigned int spriteID,
+                                    const BoundingBox& newModelBounds);
 
     /** Used while setting user-inputted sprite data. */
     SpriteDataModel& spriteDataModel;

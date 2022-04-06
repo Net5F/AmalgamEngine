@@ -55,15 +55,18 @@ private:
     /**
      * Saves the new active sprite's ID.
      */
-    void onActiveSpriteChanged(unsigned int newSpriteID, const Sprite& newActiveSprite);
+    void onActiveSpriteChanged(unsigned int newSpriteID,
+                               const Sprite& newActiveSprite);
 
     /**
      * Updates this panel with the active sprite's new properties.
      * Note: This gizmo depends on having its logical extent set to match the
      *       sprite image that it will be overlaying.
      */
-    void onSpriteHasBoundingBoxChanged(unsigned int spriteID, bool newHasBoundingBox);
-    void onSpriteModelBoundsChanged(unsigned int spriteID, const BoundingBox& newModelBounds);
+    void onSpriteHasBoundingBoxChanged(unsigned int spriteID,
+                                       bool newHasBoundingBox);
+    void onSpriteModelBoundsChanged(unsigned int spriteID,
+                                    const BoundingBox& newModelBounds);
 
     /**
      * Refreshes this widget's UI with the given active sprite's data.
@@ -101,7 +104,8 @@ private:
      *     (minX, maxY, maxZ), (maxX, maxY, maxZ), (maxX, minY, maxZ),
      *     (minX, minY, maxZ)
      */
-    void calcOffsetScreenPoints(const Sprite& activeSprite, std::vector<SDL_Point>& boundsScreenPoints);
+    void calcOffsetScreenPoints(const Sprite& activeSprite,
+                                std::vector<SDL_Point>& boundsScreenPoints);
 
     /**
      * Moves the control extents to their proper screen position.

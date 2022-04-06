@@ -31,7 +31,8 @@ private:
     /**
      * Loads the new active sprite's data onto the stage.
      */
-    void onActiveSpriteChanged(unsigned int newSpriteID, const Sprite& newSprite);
+    void onActiveSpriteChanged(unsigned int newSpriteID,
+                               const Sprite& newSprite);
 
     /**
      * (If active sprite was removed) Sets activeSprite to invalid and returns

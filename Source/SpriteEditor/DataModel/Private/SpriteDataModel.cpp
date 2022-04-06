@@ -114,7 +114,8 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 std::string displayName
                     = spriteJson.value()["displayName"].get<std::string>();
                 if (!spriteNameIsUnique(displayName)) {
-                    std::string returnString{"Sprite display name isn't unique: "};
+                    std::string returnString{
+                        "Sprite display name isn't unique: "};
                     returnString += sprite.displayName.c_str();
 
                     workingFile.close();
@@ -327,7 +328,8 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
             // Add the sprite to the map and sheet.
             unsigned int spriteID{spriteIDPool.reserveID()};
             spriteMap.emplace(spriteID, Sprite{spriteSheet.relPath, displayName,
-                    textureExtent, yOffsetI, true, defaultBox});
+                                               textureExtent, yOffsetI, true,
+                                               defaultBox});
             spriteSheet.spriteIDs.push_back(spriteID);
 
             // Signal the new sprite to the UI.
@@ -406,7 +408,8 @@ void SpriteDataModel::setActiveSprite(unsigned int newActiveSpriteID)
     activeSpriteChangedSig.publish(activeSpriteID, spritePair->second);
 }
 
-void SpriteDataModel::setSpriteDisplayName(unsigned int spriteID, const std::string& newDisplayName)
+void SpriteDataModel::setSpriteDisplayName(unsigned int spriteID,
+                                           const std::string& newDisplayName)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
@@ -435,7 +438,8 @@ void SpriteDataModel::setSpriteDisplayName(unsigned int spriteID, const std::str
     spriteDisplayNameChangedSig.publish(spriteID, sprite.displayName);
 }
 
-void SpriteDataModel::setSpriteHasBoundingBox(unsigned int spriteID, bool newHasBoundingBox)
+void SpriteDataModel::setSpriteHasBoundingBox(unsigned int spriteID,
+                                              bool newHasBoundingBox)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
@@ -454,7 +458,8 @@ void SpriteDataModel::setSpriteHasBoundingBox(unsigned int spriteID, bool newHas
     spriteHasBoundingBoxChangedSig.publish(spriteID, newHasBoundingBox);
 }
 
-void SpriteDataModel::setSpriteModelBounds(unsigned int spriteID, const BoundingBox& newModelBounds)
+void SpriteDataModel::setSpriteModelBounds(unsigned int spriteID,
+                                           const BoundingBox& newModelBounds)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {

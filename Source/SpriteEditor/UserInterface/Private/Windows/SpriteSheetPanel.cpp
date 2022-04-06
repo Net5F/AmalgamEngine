@@ -124,10 +124,12 @@ SpriteSheetPanel::SpriteSheetPanel(AssetCache& inAssetCache,
     // When a sprite sheet is added or removed from the model, update this
     // widget.
     spriteDataModel.sheetAdded.connect<&SpriteSheetPanel::onSheetAdded>(*this);
-    spriteDataModel.sheetRemoved.connect<&SpriteSheetPanel::onSheetRemoved>(*this);
+    spriteDataModel.sheetRemoved.connect<&SpriteSheetPanel::onSheetRemoved>(
+        *this);
 }
 
-void SpriteSheetPanel::onSheetAdded(unsigned int sheetID, const SpriteSheet& sheet)
+void SpriteSheetPanel::onSheetAdded(unsigned int sheetID,
+                                    const SpriteSheet& sheet)
 {
     std::unique_ptr<AUI::Widget> thumbnailPtr{
         std::make_unique<MainThumbnail>(assetCache, "")};

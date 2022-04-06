@@ -38,11 +38,14 @@ SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache,
     boundingBoxGizmo.setIsVisible(false);
 
     // When the active sprite is updated, update it in this widget.
-    spriteDataModel.activeSpriteChanged.connect<&SpriteEditStage::onActiveSpriteChanged>(*this);
-    spriteDataModel.spriteRemoved.connect<&SpriteEditStage::onSpriteRemoved>(*this);
+    spriteDataModel.activeSpriteChanged
+        .connect<&SpriteEditStage::onActiveSpriteChanged>(*this);
+    spriteDataModel.spriteRemoved.connect<&SpriteEditStage::onSpriteRemoved>(
+        *this);
 }
 
-void SpriteEditStage::onActiveSpriteChanged(unsigned int newActiveSpriteID, const Sprite& newActiveSprite)
+void SpriteEditStage::onActiveSpriteChanged(unsigned int newActiveSpriteID,
+                                            const Sprite& newActiveSprite)
 {
     activeSpriteID = newActiveSpriteID;
 

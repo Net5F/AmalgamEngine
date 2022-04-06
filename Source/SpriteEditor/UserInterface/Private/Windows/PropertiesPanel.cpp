@@ -161,11 +161,16 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache,
     maxZInput.setOnTextCommitted([this]() { saveMaxZ(); });
 
     // When the active sprite is updated, update it in this widget.
-    spriteDataModel.activeSpriteChanged.connect<&PropertiesPanel::onActiveSpriteChanged>(*this);
-    spriteDataModel.spriteDisplayNameChanged.connect<&PropertiesPanel::onSpriteDisplayNameChanged>(*this);
-    spriteDataModel.spriteHasBoundingBoxChanged.connect<&PropertiesPanel::onSpriteHasBoundingBoxChanged>(*this);
-    spriteDataModel.spriteModelBoundsChanged.connect<&PropertiesPanel::onSpriteModelBoundsChanged>(*this);
-    spriteDataModel.spriteRemoved.connect<&PropertiesPanel::onSpriteRemoved>(*this);
+    spriteDataModel.activeSpriteChanged
+        .connect<&PropertiesPanel::onActiveSpriteChanged>(*this);
+    spriteDataModel.spriteDisplayNameChanged
+        .connect<&PropertiesPanel::onSpriteDisplayNameChanged>(*this);
+    spriteDataModel.spriteHasBoundingBoxChanged
+        .connect<&PropertiesPanel::onSpriteHasBoundingBoxChanged>(*this);
+    spriteDataModel.spriteModelBoundsChanged
+        .connect<&PropertiesPanel::onSpriteModelBoundsChanged>(*this);
+    spriteDataModel.spriteRemoved.connect<&PropertiesPanel::onSpriteRemoved>(
+        *this);
 }
 
 void PropertiesPanel::onActiveSpriteChanged(unsigned int newActiveSpriteID,
@@ -205,26 +210,30 @@ void PropertiesPanel::onSpriteRemoved(unsigned int spriteID)
     }
 }
 
-void PropertiesPanel::onSpriteDisplayNameChanged(unsigned int spriteID, const std::string& newDisplayName)
+void PropertiesPanel::onSpriteDisplayNameChanged(
+    unsigned int spriteID, const std::string& newDisplayName)
 {
     if (spriteID == activeSpriteID) {
         nameInput.setText(newDisplayName);
     }
 }
 
-void PropertiesPanel::onSpriteHasBoundingBoxChanged(unsigned int spriteID, bool newHasBoundingBox)
+void PropertiesPanel::onSpriteHasBoundingBoxChanged(unsigned int spriteID,
+                                                    bool newHasBoundingBox)
 {
     if (spriteID == activeSpriteID) {
         if (newHasBoundingBox) {
             hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Checked);
         }
         else {
-            hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Unchecked);
+            hasBoundingBoxInput.setCurrentState(
+                AUI::Checkbox::State::Unchecked);
         }
     }
 }
 
-void PropertiesPanel::onSpriteModelBoundsChanged(unsigned int spriteID, const BoundingBox& newModelBounds)
+void PropertiesPanel::onSpriteModelBoundsChanged(
+    unsigned int spriteID, const BoundingBox& newModelBounds)
 {
     if (spriteID == activeSpriteID) {
         minXInput.setText(toRoundedString(newModelBounds.minX));
@@ -251,7 +260,7 @@ void PropertiesPanel::saveName()
 void PropertiesPanel::saveHasBoundingBox()
 {
     bool hasBoundingBox{(hasBoundingBoxInput.getCurrentState()
-                       == AUI::Checkbox::State::Checked)};
+                         == AUI::Checkbox::State::Checked)};
     spriteDataModel.setSpriteHasBoundingBox(activeSpriteID, hasBoundingBox);
 }
 
@@ -264,7 +273,7 @@ void PropertiesPanel::saveMinX()
 
         // Clamp the value to its bounds.
         BoundingBox newModelBounds{
-                spriteDataModel.getSprite(activeSpriteID).modelBounds};
+            spriteDataModel.getSprite(activeSpriteID).modelBounds};
         newModelBounds.minX = std::clamp(newMinX, 0.f, newModelBounds.maxX);
 
         // Apply the new value.
@@ -284,7 +293,7 @@ void PropertiesPanel::saveMinY()
 
         // Clamp the value to its bounds.
         BoundingBox newModelBounds{
-                spriteDataModel.getSprite(activeSpriteID).modelBounds};
+            spriteDataModel.getSprite(activeSpriteID).modelBounds};
         newModelBounds.minY = std::clamp(newMinY, 0.f, newModelBounds.maxY);
 
         // Apply the new value.
@@ -304,7 +313,7 @@ void PropertiesPanel::saveMinZ()
 
         // Clamp the value to its bounds.
         BoundingBox newModelBounds{
-                spriteDataModel.getSprite(activeSpriteID).modelBounds};
+            spriteDataModel.getSprite(activeSpriteID).modelBounds};
         newModelBounds.minY = std::clamp(newMinZ, 0.f, newModelBounds.maxZ);
 
         // Apply the new value.
@@ -331,8 +340,8 @@ void PropertiesPanel::saveMaxX()
         float maxXBound{Transforms::screenToWorld(bottomRightOffset, {}).x};
 
         BoundingBox newModelBounds{activeSprite.modelBounds};
-        newModelBounds.maxX = std::clamp(newMaxX, activeSprite.modelBounds.minX,
-                             maxXBound);
+        newModelBounds.maxX
+            = std::clamp(newMaxX, activeSprite.modelBounds.minX, maxXBound);
 
         // Apply the new value.
         spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
@@ -358,8 +367,8 @@ void PropertiesPanel::saveMaxY()
         float maxYBound{Transforms::screenToWorld(bottomLeftOffset, {}).y};
 
         BoundingBox newModelBounds{activeSprite.modelBounds};
-        newModelBounds.maxY = std::clamp(newMaxY, activeSprite.modelBounds.minY,
-                              maxYBound);
+        newModelBounds.maxY
+            = std::clamp(newMaxY, activeSprite.modelBounds.minY, maxYBound);
 
         // Apply the new value.
         spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);

@@ -21,8 +21,7 @@ class SpriteDataModel;
 class AddSheetDialog : public AUI::Window
 {
 public:
-    AddSheetDialog(AssetCache& assetCache,
-                   SpriteDataModel& inSpriteDataModel);
+    AddSheetDialog(AssetCache& assetCache, SpriteDataModel& inSpriteDataModel);
 
     virtual ~AddSheetDialog() = default;
 

@@ -38,7 +38,8 @@ SpritePanel::SpritePanel(AssetCache& inAssetCache,
     spriteDataModel.spriteRemoved.connect<&SpritePanel::onSpriteRemoved>(*this);
 
     // When a sprite's display name is updated, update the matching thumbnail.
-    spriteDataModel.spriteDisplayNameChanged.connect<&SpritePanel::onSpriteDisplayNameChanged>(*this);
+    spriteDataModel.spriteDisplayNameChanged
+        .connect<&SpritePanel::onSpriteDisplayNameChanged>(*this);
 }
 
 void SpritePanel::onSpriteAdded(unsigned int spriteID, const Sprite& sprite)
@@ -88,7 +89,8 @@ void SpritePanel::onSpriteRemoved(unsigned int sheetID)
     thumbnailMap.erase(spriteIt);
 }
 
-void SpritePanel::onSpriteDisplayNameChanged(unsigned int spriteID, const std::string& newDisplayName)
+void SpritePanel::onSpriteDisplayNameChanged(unsigned int spriteID,
+                                             const std::string& newDisplayName)
 {
     auto thumbnailIt{thumbnailMap.find(spriteID)};
     if (thumbnailIt == thumbnailMap.end()) {
