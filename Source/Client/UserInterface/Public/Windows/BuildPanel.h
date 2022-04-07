@@ -33,11 +33,21 @@ public:
 
 private:
     /**
+     * Adds the eraser thumbnail to the tileContainer.
+     * Used for clearing tile sprite layers.
+     */
+    void addEraser();
+
+    /**
      * Adds a tile thumbnail to the tileContainer.
      */
     void addTile(const Sprite& sprite);
 
+    /** Used to load textures for new thumbnails. */
     AssetCache& assetCache;
+
+    /** Used to get the empty sprite when adding the eraser thumbnail. */
+    SpriteData& spriteData;
 
     /** Used to tell the build overlay which sprite to display. */
     BuildOverlay& buildOverlay;

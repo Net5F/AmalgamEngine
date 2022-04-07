@@ -91,8 +91,8 @@ bool Renderer::handleOSEvent(SDL_Event& event)
 void Renderer::renderWorld(const Camera& camera, double alpha)
 {
     // Prepare sprites (bounds updating, screen position calcs, depth sorting).
-    std::vector<SpriteRenderInfo>& sprites
-        = worldSpritePreparer.prepareSprites(camera, alpha);
+    std::vector<SpriteRenderInfo>& sprites{
+        worldSpritePreparer.prepareSprites(camera, alpha)};
 
     // Draw depth-sorted tiles and sprites.
     // Note: These are already culled during the gather step.

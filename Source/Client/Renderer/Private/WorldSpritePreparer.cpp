@@ -7,6 +7,7 @@
 #include "ClientTransforms.h"
 #include "TileExtent.h"
 #include "SharedConfig.h"
+#include "EmptySpriteID.h"
 #include "Ignore.h"
 #include <SDL2/SDL_rect.h>
 #include <cmath>
@@ -90,7 +91,7 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
             // Push all of this tile's sprites into the appropriate vector.
             for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
                 // If the layer is empty, skip it.
-                if (layer.sprite->numericID == -1) {
+                if (layer.sprite->numericID == EMPTY_SPRITE_ID) {
                     continue;
                 }
 

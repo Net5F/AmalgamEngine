@@ -5,6 +5,7 @@
 #include "BuildOverlay.h"
 #include "MainThumbnail.h"
 #include "SharedConfig.h"
+#include "EmptySpriteID.h"
 #include "Paths.h"
 #include "Ignore.h"
 #include "AMAssert.h"
@@ -18,6 +19,7 @@ BuildPanel::BuildPanel(AssetCache& inAssetCache, SpriteData& inSpriteData,
                        BuildOverlay& inBuildOverlay)
 : AUI::Window{{0, 734, 1920, 346}, "BuildPanel"}
 , assetCache{inAssetCache}
+, spriteData{inSpriteData}
 , buildOverlay{inBuildOverlay}
 , tileLayerIndex{0}
 , backgroundImage{{0, 0, 1920, 346}, "BuildPanelBackground"}
@@ -37,7 +39,7 @@ BuildPanel::BuildPanel(AssetCache& inAssetCache, SpriteData& inSpriteData,
     backgroundImage.addResolution(
         {1600, 900},
         inAssetCache.loadTexture(Paths::TEXTURE_DIR
-                                 + "SpritePanel/Background_1600.png"),
+                                 + "BuildPanel/Background_1600.png"),
         {7, 0, 1600, 290});
 
     /* Container */
@@ -45,10 +47,13 @@ BuildPanel::BuildPanel(AssetCache& inAssetCache, SpriteData& inSpriteData,
     tileContainer.setCellWidth(156);
     tileContainer.setCellHeight(162);
 
+    // Add the eraser as the first thumbnail.
+    addEraser();
+
     // TODO: We need some tags on our sprites to tell us which ones can be
     //       used as tiles.
     // Fill the container with the available tiles.
-    for (const Sprite& sprite : inSpriteData.getAllSprites()) {
+    for (const Sprite& sprite : spriteData.getAllSprites()) {
         // Skip the empty sprite.
         // TODO: Once tags are added, we can remove this check since the
         //       empty sprite will be naturally filtered out.
@@ -87,6 +92,40 @@ BuildPanel::BuildPanel(AssetCache& inAssetCache, SpriteData& inSpriteData,
             buildOverlay.setSelectedLayer(tileLayerIndex);
         }
     });
+}
+
+void BuildPanel::addEraser()
+{
+    // Construct the new eraser thumbnail.
+    std::unique_ptr<AUI::Widget> thumbnailPtr{
+        std::make_unique<MainThumbnail>(assetCache, "EraserThumbnail")};
+    MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
+    thumbnail.setText("Eraser");
+    thumbnail.setIsActivateable(false);
+
+    // Load the eraser's image.
+    thumbnail.thumbnailImage.addResolution({1280, 720},
+        assetCache.loadTexture(Paths::TEXTURE_DIR + "BuildPanel/EraserIcon_1280.png"));
+    thumbnail.thumbnailImage.addResolution({1600, 900},
+        assetCache.loadTexture(Paths::TEXTURE_DIR + "BuildPanel/EraserIcon_1600.png"));
+    thumbnail.thumbnailImage.addResolution({1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR + "BuildPanel/EraserIcon_1920.png"));
+
+    // Add a callback to deactivate all other thumbnails when one is activated.
+    thumbnail.setOnSelected([this](AUI::Thumbnail* selectedThumb) {
+        // Deactivate all other thumbnails.
+        for (auto& widgetPtr : tileContainer) {
+            MainThumbnail& otherThumb{static_cast<MainThumbnail&>(*widgetPtr)};
+            if (otherThumb.getIsSelected() && (&otherThumb != selectedThumb)) {
+                otherThumb.deselect();
+            }
+        }
+
+        // Tell BuildOverlay that the active tile changed to the empty tile.
+        buildOverlay.setSelectedTile(spriteData.get(EMPTY_SPRITE_ID));
+    });
+
+    tileContainer.push_back(std::move(thumbnailPtr));
 }
 
 void BuildPanel::addTile(const Sprite& sprite)

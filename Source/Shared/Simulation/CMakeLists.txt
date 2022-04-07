@@ -25,6 +25,7 @@ target_sources(Shared
         Public/TileMap/ChunkExtent.h
         Public/TileMap/ChunkPosition.h
         Public/TileMap/ChunkSnapshot.h
+        Public/TileMap/EmptySpriteID.h
         Public/TileMap/TileExtent.h
         Public/TileMap/TileMapSnapshot.h
         Public/TileMap/TilePosition.h

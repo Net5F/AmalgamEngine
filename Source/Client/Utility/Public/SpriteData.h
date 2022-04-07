@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Sprite.h"
+#include "EmptySpriteID.h"
 #include <vector>
 #include <unordered_map>
 #include "nlohmann/json_fwd.hpp"

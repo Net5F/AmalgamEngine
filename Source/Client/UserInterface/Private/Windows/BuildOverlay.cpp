@@ -20,6 +20,7 @@ BuildOverlay::BuildOverlay(WorldSinks& inWorldSinks,
 , uiEventDispatcher{inUiEventDispatcher}
 , selectedTile{nullptr}
 , tileLayerIndex{0}
+, showTile{false}
 , camera{}
 , mapTileExtent{}
 , mouseTilePosition{}
@@ -47,7 +48,7 @@ void BuildOverlay::setCamera(const Camera& inCamera)
 
 void BuildOverlay::render()
 {
-    if (selectedTile != nullptr) {
+    if (showTile && (selectedTile != nullptr)) {
         SDL_Rect screenExtent{ClientTransforms::tileToScreenExtent(
             mouseTilePosition, *selectedTile, camera)};
 
@@ -89,8 +90,7 @@ AUI::EventResult BuildOverlay::onMouseMove(const SDL_Point& cursorPosition)
     // Get the tile coordinate that the mouse is hovering over.
     ScreenPoint screenPoint{static_cast<float>(cursorPosition.x),
                             static_cast<float>(cursorPosition.y)};
-    TilePosition newTilePosition
-        = Transforms::screenToTile(screenPoint, camera);
+    TilePosition newTilePosition{Transforms::screenToTile(screenPoint, camera)};
 
     // If the mouse is outside of the world bounds, ignore this event.
     if (!(mapTileExtent.containsPosition(newTilePosition))) {
@@ -99,8 +99,14 @@ AUI::EventResult BuildOverlay::onMouseMove(const SDL_Point& cursorPosition)
     else {
         // The mouse is in bounds, save the new tile position.
         mouseTilePosition = newTilePosition;
+        showTile = true;
         return AUI::EventResult{.wasHandled{true}};
     }
+}
+
+void BuildOverlay::onMouseLeave()
+{
+    showTile = false;
 }
 
 void BuildOverlay::onTileMapExtentChanged(TileExtent inTileExtent)

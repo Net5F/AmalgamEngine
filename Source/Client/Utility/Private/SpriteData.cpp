@@ -35,7 +35,7 @@ SpriteData::SpriteData(AssetCache& assetCache)
     Sprite& emptySprite{sprites.back()};
     emptySprite.displayName = "Empty";
     emptySprite.stringID = "empty";
-    emptySprite.numericID = -1;
+    emptySprite.numericID = EMPTY_SPRITE_ID;
 
     stringMap.emplace(emptySprite.stringID, &emptySprite);
     numericMap.emplace(emptySprite.numericID, &emptySprite);

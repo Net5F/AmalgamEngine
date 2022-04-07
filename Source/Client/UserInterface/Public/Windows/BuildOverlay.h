@@ -63,6 +63,8 @@ public:
 
     AUI::EventResult onMouseMove(const SDL_Point& cursorPosition) override;
 
+    void onMouseLeave() override;
+
 private:
     /**
      * Sets mapTileExtent to the new extent of the tile map.
@@ -77,6 +79,11 @@ private:
 
     /** The layer to place the selected tile at. */
     unsigned int tileLayerIndex;
+
+    /** If true, show the selected tile. Else, don't render it.
+        Used to get rid of the tile rendering when the mouse is outside of
+        the overlay.*/
+    bool showTile;
 
     /** The camera to use when rendering or doing screen -> world calcs. */
     Camera camera;
