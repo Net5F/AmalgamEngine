@@ -20,10 +20,10 @@ elseif(${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
     # Note: This produces a minimal list. If some of these libs are missing on some
     #       systems, they can be added back in.
     message(STATUS "Using Linux lib exclude regex.")
-    set(EXCLUDE_SYSLIBS_REGEX ld- libasound libbsd libc libdbus libdl
-                              libgcrypt libgpg-err liblz4 liblzma libnsl libogg
-                              libpthread libresolv librt libsystemd libvorbis\\. libwrap
-                              libX11 libXau libxcb libXdmcp libXext)
+    set(EXCLUDE_SYSLIBS_REGEX ld- libbsd libc libdbus libdl
+                              libgcrypt libgpg-err liblz4 liblzma libnsl
+                              libpthread libresolv librt libsystemd libwrap
+                              libXau libxcb libXdmcp libXext)
 else()
     message(FATAL_ERROR "Unknown platform. Only Windows and Linux are supported.")
 endif()

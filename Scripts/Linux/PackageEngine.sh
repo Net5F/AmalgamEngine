@@ -36,9 +36,12 @@ cp $BuildPath/Client/Client $PackagePath/Client/
 cp $BuildPath/Server/Server $PackagePath/Server/
 cp $BuildPath/SpriteEditor/SpriteEditor $PackagePath/SpriteEditor/
 
-# Copy the resource files to the client and sprite editor.
+# Copy the resource files.
 cp -r $BasePath/Resources/Client/* $PackagePath/Client/
+cp -r $BasePath/Resources/Server/* $PackagePath/Server/
 cp -r $BasePath/Resources/SpriteEditor/* $PackagePath/SpriteEditor/
+cp -r $BasePath/Resources/Shared/* $PackagePath/Client/
+cp -r $BasePath/Resources/Shared/* $PackagePath/Server/
 
 # Detect and copy dependencies.
 cmake -P $BasePath/CMake/copy_runtime_deps.cmake $BuildPath/Client/Client $PackagePath/Client/
@@ -47,6 +50,6 @@ cmake -P $BasePath/CMake/copy_runtime_deps.cmake $BuildPath/SpriteEditor/SpriteE
 
 # Set the rpath of our executable and dependencies to $ORIGIN (effectively ./)
 find $PackagePath/Client/ -maxdepth 1 -type f ! -name '*.json' -exec patchelf --set-rpath '$ORIGIN' {} \;
-find $PackagePath/Server/ -maxdepth 1 -type f -exec patchelf --set-rpath '$ORIGIN' {} \;
+find $PackagePath/Server/ -maxdepth 1 -type f ! -name '*.json' ! -name '*.bin' -exec patchelf --set-rpath '$ORIGIN' {} \;
 find $PackagePath/SpriteEditor/ -maxdepth 1 -type f -exec patchelf --set-rpath '$ORIGIN' {} \;
     
