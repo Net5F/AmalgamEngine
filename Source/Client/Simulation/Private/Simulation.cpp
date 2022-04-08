@@ -111,7 +111,7 @@ void Simulation::connect()
     //       just contain a ref to the actual data? Or is this copy better?
     // TODO: Switch to logical screen size and do scaling in Renderer.
     Sprite& playerSprite{
-        registry.emplace<Sprite>(newEntity, spriteData.get("test_31"))};
+        registry.emplace<Sprite>(newEntity, spriteData.get("roberto_0"))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
                              ScreenRect{0, 0, Config::ACTUAL_SCREEN_WIDTH,
@@ -150,9 +150,8 @@ void Simulation::fakeConnection()
 
     // Set up the player's visual components.
     // TODO: Switch to logical screen size and do scaling in Renderer.
-    registry.emplace<Sprite>(newEntity, spriteData.get("col_0"));
     Sprite& playerSprite{
-        registry.emplace<Sprite>(newEntity, spriteData.get("test_31"))};
+        registry.emplace<Sprite>(newEntity, spriteData.get("roberto_0"))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
                              ScreenRect{0, 0, Config::ACTUAL_SCREEN_WIDTH,

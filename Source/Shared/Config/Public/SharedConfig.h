@@ -47,7 +47,7 @@ public:
     static constexpr unsigned int MAX_TILE_LAYERS = 5;
 
     /** The string ID of our default sprite for character entities. */
-    static constexpr char DEFAULT_CHARACTER_SPRITE[] = "test_31";
+    static constexpr char DEFAULT_CHARACTER_SPRITE[] = "roberto_0";
 
     //-------------------------------------------------------------------------
     // Network
