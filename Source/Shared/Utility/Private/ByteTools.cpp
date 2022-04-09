@@ -46,8 +46,8 @@ std::size_t ByteTools::compress(const Uint8* sourceBuffer,
 {
     // Compress the data.
     std::size_t destLengthReturn{destLength};
-    int32_t result = zng_compress2(destBuffer, &destLengthReturn, sourceBuffer,
-                                   sourceLength, COMPRESSION_LEVEL);
+    int32_t result{zng_compress2(destBuffer, &destLengthReturn, sourceBuffer,
+                                 sourceLength, COMPRESSION_LEVEL)};
 
     // Check for errors.
     if (result == Z_MEM_ERROR) {
@@ -67,8 +67,8 @@ std::size_t ByteTools::uncompress(const Uint8* sourceBuffer,
 {
     // Compress the data.
     std::size_t destLengthReturn{destLength};
-    int32_t result = zng_uncompress(destBuffer, &destLengthReturn, sourceBuffer,
-                                    sourceLength);
+    int32_t result{zng_uncompress(destBuffer, &destLengthReturn, sourceBuffer,
+                                  sourceLength)};
 
     // Check for errors.
     if (result == Z_MEM_ERROR) {

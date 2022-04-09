@@ -3,6 +3,7 @@
 #include "Heartbeat.h"
 #include "Config.h"
 #include "NetworkStats.h"
+#include "AMAssert.h"
 #include <SDL_net.h>
 
 namespace AM
@@ -191,9 +192,7 @@ void Network::processBatch()
         // Receive the expected bytes.
         NetworkResult result{
             server->receiveBytesWait(&(batchRecBuffer[0]), batchSize)};
-        if (result != NetworkResult::Success) {
-            LOG_FATAL("Failed to receive expected bytes.");
-        }
+        AM_ASSERT((result == NetworkResult::Success), "Failed to receive expected bytes.");
 
         // Track the number of bytes we've received.
         bytesReceived += MESSAGE_HEADER_SIZE + batchSize;
@@ -222,18 +221,12 @@ void Network::processBatch()
                 messageSize);
 
             bufferIndex += MESSAGE_HEADER_SIZE + messageSize;
-            // TODO: Replace with a nice assert that prints.
-            if (bufferIndex > batchSize) {
-                LOG_FATAL("Buffer index is wrong. %u, %u", bufferIndex,
-                          batchSize);
-            }
+            AM_ASSERT((bufferIndex <= batchSize), "Buffer index is wrong. %u, %u",
+                bufferIndex, batchSize);
         }
 
-        // TODO: Replace with a nice assert that prints.
-        if (bufferIndex != batchSize) {
-            LOG_FATAL("Didn't process correct number of bytes. %u, %u",
-                      bufferIndex, batchSize);
-        }
+        AM_ASSERT((bufferIndex == batchSize),
+            "Didn't process correct number of bytes. %u, %u", bufferIndex, batchSize);
     }
 
     // Record the number of received bytes.

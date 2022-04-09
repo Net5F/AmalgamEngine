@@ -5,6 +5,7 @@
 #include "ExplicitConfirmation.h"
 #include "Serialize.h"
 #include "NetworkStats.h"
+#include "AMAssert.h"
 #include <cmath>
 #include <array>
 
@@ -30,9 +31,8 @@ Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
 void Client::queueMessage(const BinaryBufferSharedPtr& message,
                           Uint32 messageTick)
 {
-    if (!sendQueue.emplace(message, messageTick)) {
-        LOG_FATAL("Queue emplace failed.");
-    }
+    bool emplaceSucceeded{sendQueue.emplace(message, messageTick)};
+    AM_ASSERT(emplaceSucceeded, "Queue emplace failed.");
 }
 
 NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
@@ -42,7 +42,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     }
 
     // If we have no messages to send, return early.
-    Uint8 messageCount = getWaitingMessageCount();
+    Uint8 messageCount{getWaitingMessageCount()};
     if ((latestSentSimTick == 0) && (messageCount == 0)) {
         return NetworkResult::Success;
     }
@@ -52,9 +52,8 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     for (unsigned int i = 0; i < messageCount; ++i) {
         // Pop the message.
         QueuedMessage queuedMessage;
-        if (!sendQueue.try_dequeue(queuedMessage)) {
-            LOG_FATAL("Expected element but dequeue failed.");
-        }
+        bool dequeueSuceeded{sendQueue.try_dequeue(queuedMessage)};
+        AM_ASSERT(dequeueSuceeded, "Expected element but dequeue failed.");
 
         // Copy the message data into the batchBuffer.
         std::copy(queuedMessage.message->begin(), queuedMessage.message->end(),
@@ -76,11 +75,9 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     }
 
     // If the batch + header is too large, error.
-    if (currentIndex > SharedConfig::MAX_BATCH_SIZE) {
-        LOG_FATAL("Batch too large to fit into buffers. Increase "
-                  "MAX_BATCH_SIZE. Size: %u, Max: %u",
-                  currentIndex, SharedConfig::MAX_BATCH_SIZE);
-    }
+    AM_ASSERT((currentIndex <= SharedConfig::MAX_BATCH_SIZE),
+        "Batch too large to fit into buffers. Increase MAX_BATCH_SIZE. Size: %u, Max: %u"
+        , currentIndex, SharedConfig::MAX_BATCH_SIZE);
 
     // If we have a large enough payload, compress it.
     std::size_t batchSize{currentIndex - SERVER_HEADER_SIZE};
@@ -91,10 +88,8 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
             &(batchBuffer[ServerHeaderIndex::MessageHeaderStart]), batchSize,
             &(compressedBatchBuffer[ServerHeaderIndex::MessageHeaderStart]),
             COMPRESSED_BUFFER_SIZE);
-        if (batchSize > MAX_BATCH_SIZE) {
-            LOG_FATAL("Batch too large, even after compression. Size: %u",
-                      batchSize);
-        }
+        AM_ASSERT((batchSize <= MAX_BATCH_SIZE),
+            "Batch too large, even after compression. Size: %u", batchSize);
 
         isCompressed = true;
 
@@ -173,7 +168,7 @@ void Client::fillHeader(Uint8* bufferToFill, Uint16 batchSize,
                         bool isCompressed)
 {
     // Fill in the header adjustment info.
-    AdjustmentData tickAdjustment = getTickAdjustment();
+    AdjustmentData tickAdjustment{getTickAdjustment()};
     bufferToFill[ServerHeaderIndex::TickAdjustment]
         = static_cast<Uint8>(tickAdjustment.adjustment);
     bufferToFill[ServerHeaderIndex::AdjustmentIteration]
@@ -191,11 +186,9 @@ void Client::fillHeader(Uint8* bufferToFill, Uint16 batchSize,
 
 Uint8 Client::getWaitingMessageCount() const
 {
-    std::size_t size = sendQueue.size_approx();
-    if (size > SDL_MAX_UINT8) {
-        LOG_FATAL("Client's sendQueue contains too many messages to return as"
-                  "a Uint8.");
-    }
+    std::size_t size{sendQueue.size_approx()};
+    AM_ASSERT((size <= SDL_MAX_UINT8),
+        "Client's sendQueue contains too many messages to return as a Uint8.");
 
     return size;
 }
@@ -208,15 +201,13 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
 
     // Receive the header.
     Uint8 headerBuf[CLIENT_HEADER_SIZE];
-    NetworkResult headerResult
-        = peer->receiveBytes(headerBuf, CLIENT_HEADER_SIZE, false);
+    NetworkResult headerResult{peer->receiveBytes(headerBuf, CLIENT_HEADER_SIZE, false)};
 
     // Receive the following message, or check for timeouts.
     if (headerResult == NetworkResult::Success) {
         // Process the adjustment iteration.
-        Uint8 receivedAdjIteration
-            = headerBuf[ClientHeaderIndex::AdjustmentIteration];
-        Uint8 expectedNextIteration = (latestAdjIteration + 1);
+        Uint8 receivedAdjIteration{headerBuf[ClientHeaderIndex::AdjustmentIteration]};
+        Uint8 expectedNextIteration{static_cast<Uint8>(latestAdjIteration + 1)};
 
         // If we received the next expected iteration, save it.
         if (receivedAdjIteration == expectedNextIteration) {
@@ -230,7 +221,7 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
         // Get the message.
         // Note: This is a blocking read, but the data should immediately be
         //       available since we send it all in 1 packet.
-        ReceiveResult receiveResult = peer->receiveMessageWait(messageBuffer);
+        ReceiveResult receiveResult{peer->receiveMessageWait(messageBuffer)};
         if (receiveResult.networkResult == NetworkResult::Success) {
             // Got a message, update the receiveTimer.
             receiveTimer.updateSavedTime();
@@ -248,7 +239,7 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
     }
     else if (headerResult == NetworkResult::NoWaitingData) {
         // If we timed out, drop the connection.
-        double delta = receiveTimer.getDeltaSeconds(false);
+        double delta{receiveTimer.getDeltaSeconds(false)};
         if (delta > Config::CLIENT_TIMEOUT_S) {
             peer = nullptr;
             LOG_INFO("Dropped connection, peer timed out. Time since last "
@@ -298,7 +289,7 @@ Client::AdjustmentData Client::getTickAdjustment()
     lock.unlock();
 
     // Run through all checks and calc any necessary adjustment.
-    Sint8 adjustment = calcAdjustment(tickDiffHistoryCopy, numFreshDiffsCopy);
+    Sint8 adjustment{calcAdjustment(tickDiffHistoryCopy, numFreshDiffsCopy)};
 
     return {adjustment, latestAdjIteration};
 }
@@ -326,14 +317,14 @@ Sint8 Client::calcAdjustment(
     }
 
     // Calc the average diff using only fresh data.
-    float averageDiff = 0;
+    float averageDiff{0};
     for (unsigned int i = 0; i < numFreshDiffsCopy; ++i) {
         averageDiff += tickDiffHistoryCopy[i];
     }
     averageDiff /= numFreshDiffsCopy;
 
     // If the average isn't outside the target bounds, no adjustment is needed.
-    int truncatedAverage = static_cast<int>(averageDiff);
+    int truncatedAverage{static_cast<int>(averageDiff)};
     if ((truncatedAverage >= Config::TICKDIFF_ACCEPTABLE_BOUND_LOWER)
         && (truncatedAverage <= Config::TICKDIFF_ACCEPTABLE_BOUND_UPPER)) {
         return 0;
@@ -358,7 +349,7 @@ Sint8 Client::calcAdjustment(
                         truncatedAverage);
 
     // Make an adjustment back towards the target.
-    return Config::TICKDIFF_TARGET - truncatedAverage;
+    return (Config::TICKDIFF_TARGET - truncatedAverage);
 }
 
 void Client::printAdjustmentInfo(
