@@ -2054,9 +2054,9 @@
                     "displayName": "Wall 10",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.25,
-                        "maxY": 8.75,
-                        "maxZ": 81.0,
+                        "maxX": 32.0,
+                        "maxY": 7.5,
+                        "maxZ": 79.19999694824219,
                         "minX": 0.0,
                         "minY": 0.0,
                         "minZ": 0.0
@@ -4196,8 +4196,8 @@
                     "displayName": "Wall 112",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 12.5,
-                        "maxY": 32.5,
+                        "maxX": 11.75,
+                        "maxY": 32.0,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
                         "minY": 0.0,
