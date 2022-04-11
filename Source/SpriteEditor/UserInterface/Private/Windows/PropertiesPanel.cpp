@@ -333,15 +333,10 @@ void PropertiesPanel::saveMaxX()
 
         // Clamp the value to its bounds.
         const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
-        ScreenPoint bottomRightOffset{
-            static_cast<float>(activeSprite.textureExtent.w / 2.f),
-            static_cast<float>(activeSprite.textureExtent.h
-                               - activeSprite.yOffset)};
-        float maxXBound{Transforms::screenToWorld(bottomRightOffset, {}).x};
 
         BoundingBox newModelBounds{activeSprite.modelBounds};
-        newModelBounds.maxX
-            = std::clamp(newMaxX, activeSprite.modelBounds.minX, maxXBound);
+        newModelBounds.maxX = std::clamp(newMaxX, newModelBounds.minX,
+                         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
         // Apply the new value.
         spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
@@ -360,15 +355,10 @@ void PropertiesPanel::saveMaxY()
 
         // Clamp the value to its bounds.
         const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
-        ScreenPoint bottomLeftOffset{
-            static_cast<float>(-(activeSprite.textureExtent.w / 2.f)),
-            static_cast<float>(activeSprite.textureExtent.h
-                               - activeSprite.yOffset)};
-        float maxYBound{Transforms::screenToWorld(bottomLeftOffset, {}).y};
 
         BoundingBox newModelBounds{activeSprite.modelBounds};
-        newModelBounds.maxY
-            = std::clamp(newMaxY, activeSprite.modelBounds.minY, maxYBound);
+        newModelBounds.maxY = std::clamp(newMaxY, newModelBounds.minY,
+                            static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
         // Apply the new value.
         spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);

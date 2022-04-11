@@ -257,7 +257,8 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
     maxX = mouseWorldPos.x;
     maxY = mouseWorldPos.y;
 
-    // Don't let the gizmo go below the model-space origin (0, 0).
+    // If we moved below the model-space origin (0, 0), bring the box bounds
+    // back in.
     if (minX < 0) {
         maxX += -minX;
         minX = 0;
@@ -267,31 +268,14 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
         minY = 0;
     }
 
-    /* Don't let the gizmo go beyond the max possible x/y (based on the sprite
-       size). */
-    // Calc the screen-space offsets from the tile's origin to the bottom
-    // right and left of the sprite image.
-    ScreenPoint bottomRightOffset{
-        static_cast<float>(activeSprite.textureExtent.w / 2.f),
-        static_cast<float>(activeSprite.textureExtent.h
-                           - activeSprite.yOffset)};
-    ScreenPoint bottomLeftOffset{
-        static_cast<float>(-(activeSprite.textureExtent.w / 2.f)),
-        static_cast<float>(activeSprite.textureExtent.h
-                           - activeSprite.yOffset)};
-
-    // Convert the offsets to world space.
-    float maxXBound{Transforms::screenToWorld(bottomRightOffset, {}).x};
-    float maxYBound{Transforms::screenToWorld(bottomLeftOffset, {}).y};
-
-    // Don't let the gizmo go beyond the max bounds.
-    if (maxX > maxXBound) {
-        float diff{maxX - maxXBound};
+    // If we moved outside the tile bounds, bring the box bounds back in.
+    if (maxX > SharedConfig::TILE_WORLD_WIDTH) {
+        float diff{maxX - SharedConfig::TILE_WORLD_WIDTH};
         minX -= diff;
         maxX -= diff;
     }
-    if (maxY > maxYBound) {
-        float diff{maxY - maxYBound};
+    if (maxY > SharedConfig::TILE_WORLD_WIDTH) {
+        float diff{maxY - SharedConfig::TILE_WORLD_WIDTH};
         minY -= diff;
         maxY -= diff;
     }

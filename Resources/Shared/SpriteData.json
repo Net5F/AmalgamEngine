@@ -1844,11 +1844,11 @@
                     "displayName": "Wall 0",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 9.0,
-                        "maxY": 32.75,
+                        "maxX": 8.25,
+                        "maxY": 32.0,
                         "maxZ": 79.80000305175781,
                         "minX": 0.0,
-                        "minY": 0.875,
+                        "minY": 0.0,
                         "minZ": 0.0
                     },
                     "numericID": 87,
@@ -1865,11 +1865,11 @@
                     "displayName": "Wall 1",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
-                        "maxY": 32.375,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 79.19999694824219,
                         "minX": 0.0,
-                        "minY": 24.375,
+                        "minY": 24.0,
                         "minZ": 0.0
                     },
                     "numericID": 88,
@@ -1907,10 +1907,10 @@
                     "displayName": "Wall 3",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
-                        "maxY": 32.375,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 79.80000305175781,
-                        "minX": 23.75,
+                        "minX": 23.125,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -1949,11 +1949,11 @@
                     "displayName": "Wall 5",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.375,
-                        "maxY": 31.625,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 75.5999984741211,
                         "minX": 0.0,
-                        "minY": 22.75,
+                        "minY": 23.125,
                         "minZ": 0.0
                     },
                     "numericID": 92,
@@ -1970,7 +1970,7 @@
                     "displayName": "Wall 6",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
+                        "maxX": 32.0,
                         "maxY": 8.25,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
@@ -2013,7 +2013,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.625,
-                        "maxY": 32.375,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -2033,11 +2033,11 @@
                     "displayName": "Wall 9",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
-                        "maxY": 32.875,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 79.80000305175781,
                         "minX": 0.0,
-                        "minY": 24.125,
+                        "minY": 23.25,
                         "minZ": 0.0
                     },
                     "numericID": 96,
@@ -2075,10 +2075,10 @@
                     "displayName": "Wall 11",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.125,
-                        "maxY": 32.875,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 80.4000015258789,
-                        "minX": 24.0,
+                        "minX": 23.625,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -2097,7 +2097,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 7.375,
-                        "maxY": 32.625,
+                        "maxY": 32.0,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -2138,7 +2138,7 @@
                     "displayName": "Wall 14",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
+                        "maxX": 32.0,
                         "maxY": 8.375,
                         "maxZ": 79.80000305175781,
                         "minX": 0.0,
@@ -2159,11 +2159,11 @@
                     "displayName": "Wall 15",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.25,
-                        "maxY": 32.75,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.5999984741211,
                         "minX": 0.0,
-                        "minY": 24.875,
+                        "minY": 24.125,
                         "minZ": 0.0
                     },
                     "numericID": 102,
@@ -2180,10 +2180,10 @@
                     "displayName": "Wall 16",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 33.125,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.5999984741211,
-                        "minX": 24.5,
+                        "minX": 24.625,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -2202,7 +2202,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.625,
-                        "maxY": 32.875,
+                        "maxY": 32.0,
                         "maxZ": 79.19999694824219,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -2222,11 +2222,11 @@
                     "displayName": "Wall 18",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.25,
-                        "maxY": 32.25,
-                        "maxZ": 78.0,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
+                        "maxZ": 79.80000305175781,
                         "minX": 0.0,
-                        "minY": 22.375,
+                        "minY": 22.125,
                         "minZ": 0.0
                     },
                     "numericID": 105,
@@ -2243,7 +2243,7 @@
                     "displayName": "Wall 19",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.75,
+                        "maxX": 32.0,
                         "maxY": 7.75,
                         "maxZ": 79.19999694824219,
                         "minX": 0.0,
@@ -2264,10 +2264,10 @@
                     "displayName": "Wall 20",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.875,
-                        "maxY": 33.125,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 78.0,
-                        "minX": 24.125,
+                        "minX": 23.25,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -2306,11 +2306,11 @@
                     "displayName": "Wall 22",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
-                        "maxY": 32.375,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 78.0,
                         "minX": 0.0,
-                        "minY": 23.875,
+                        "minY": 24.625,
                         "minZ": 0.0
                     },
                     "numericID": 109,
@@ -2327,7 +2327,7 @@
                     "displayName": "Wall 23",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.75,
+                        "maxX": 32.0,
                         "maxY": 7.75,
                         "maxZ": 79.19999694824219,
                         "minX": 0.0,
@@ -2370,7 +2370,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 13.375,
-                        "maxY": 31.75,
+                        "maxY": 32.0,
                         "maxZ": 78.5999984741211,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -2390,11 +2390,11 @@
                     "displayName": "Wall 26",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
-                        "maxY": 32.5,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 79.19999694824219,
                         "minX": 0.0,
-                        "minY": 21.75,
+                        "minY": 21.25,
                         "minZ": 0.0
                     },
                     "numericID": 113,
@@ -2411,11 +2411,11 @@
                     "displayName": "Wall 27",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.5,
-                        "maxY": 9.5,
+                        "maxX": 32.0,
+                        "maxY": 8.75,
                         "maxZ": 81.0,
-                        "minX": 0.5,
-                        "minY": 0.75,
+                        "minX": 0.0,
+                        "minY": 0.0,
                         "minZ": 0.0
                     },
                     "numericID": 114,
@@ -2432,10 +2432,10 @@
                     "displayName": "Wall 28",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 32.25,
-                        "maxZ": 75.5999984741211,
-                        "minX": 22.875,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
+                        "maxZ": 78.5999984741211,
+                        "minX": 22.125,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -2454,7 +2454,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 11.0,
-                        "maxY": 33.0,
+                        "maxY": 32.0,
                         "maxZ": 79.80000305175781,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -2474,11 +2474,11 @@
                     "displayName": "Wall 30",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 32.375,
-                        "maxZ": 89.4000015258789,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
+                        "maxZ": 92.4000015258789,
                         "minX": 0.0,
-                        "minY": 24.25,
+                        "minY": 24.875,
                         "minZ": 0.0
                     },
                     "numericID": 117,
@@ -2495,7 +2495,7 @@
                     "displayName": "Wall 31",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
+                        "maxX": 32.0,
                         "maxY": 8.25,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
@@ -2516,10 +2516,10 @@
                     "displayName": "Wall 32",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 34.125,
-                        "maxY": 9.875,
+                        "maxX": 32.0,
+                        "maxY": 10.75,
                         "maxZ": 80.4000015258789,
-                        "minX": 0.875,
+                        "minX": 0.0,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -2537,10 +2537,10 @@
                     "displayName": "Wall 33",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.875,
-                        "maxY": 33.125,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 89.4000015258789,
-                        "minX": 24.25,
+                        "minX": 24.0,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -2559,10 +2559,10 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.5,
-                        "maxY": 32.5,
+                        "maxY": 32.0,
                         "maxZ": 78.0,
                         "minX": 0.0,
-                        "minY": 24.375,
+                        "minY": 24.5,
                         "minZ": 0.0
                     },
                     "numericID": 121,
@@ -2579,11 +2579,11 @@
                     "displayName": "Wall 35",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 32.25,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 78.0,
                         "minX": 23.5,
-                        "minY": 24.375,
+                        "minY": 23.75,
                         "minZ": 0.0
                     },
                     "numericID": 122,
@@ -2621,10 +2621,10 @@
                     "displayName": "Wall 37",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
+                        "maxX": 32.0,
                         "maxY": 8.5,
                         "maxZ": 78.0,
-                        "minX": 23.75,
+                        "minX": 24.0,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -2642,11 +2642,11 @@
                     "displayName": "Wall 38",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 31.875,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
-                        "minY": 1.5,
+                        "minY": 0.0,
                         "minZ": 0.0
                     },
                     "numericID": 125,
@@ -2663,8 +2663,8 @@
                     "displayName": "Wall 39",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.25,
-                        "maxY": 32.75,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.5999984741211,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -2684,8 +2684,8 @@
                     "displayName": "Wall 40",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.125,
-                        "maxY": 32.875,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 79.80000305175781,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -2705,9 +2705,9 @@
                     "displayName": "Wall 41",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 33.125,
-                        "maxZ": 80.4000015258789,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
+                        "maxZ": 79.19999694824219,
                         "minX": 0.0,
                         "minY": 0.0,
                         "minZ": 0.0
@@ -2727,7 +2727,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.5,
-                        "maxY": 32.5,
+                        "maxY": 32.0,
                         "maxZ": 79.80000305175781,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -2747,11 +2747,11 @@
                     "displayName": "Wall 43",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.0,
-                        "maxY": 32.5,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 79.19999694824219,
                         "minX": 0.0,
-                        "minY": 24.25,
+                        "minY": 23.75,
                         "minZ": 0.0
                     },
                     "numericID": 130,
@@ -2768,7 +2768,7 @@
                     "displayName": "Wall 44",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.25,
+                        "maxX": 32.0,
                         "maxY": 7.75,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
@@ -2789,10 +2789,10 @@
                     "displayName": "Wall 45",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.5,
-                        "maxY": 32.5,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 79.19999694824219,
-                        "minX": 23.625,
+                        "minX": 24.125,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -2811,7 +2811,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.0,
-                        "maxY": 33.0,
+                        "maxY": 32.0,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -2831,10 +2831,10 @@
                     "displayName": "Wall 47",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.0,
+                        "maxX": 32.0,
                         "maxY": 32.0,
                         "maxZ": 79.19999694824219,
-                        "minX": 23.5,
+                        "minX": 24.5,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -2852,11 +2852,11 @@
                     "displayName": "Wall 48",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
-                        "maxY": 32.375,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
-                        "minY": 24.0,
+                        "minY": 24.75,
                         "minZ": 0.0
                     },
                     "numericID": 135,
@@ -2894,10 +2894,10 @@
                     "displayName": "Wall 50",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
-                        "maxY": 33.0,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.5999984741211,
-                        "minX": 24.375,
+                        "minX": 23.875,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -2916,7 +2916,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.375,
-                        "maxY": 32.625,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -2936,11 +2936,11 @@
                     "displayName": "Wall 52",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.0,
-                        "maxY": 33.0,
-                        "maxZ": 79.80000305175781,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
+                        "maxZ": 81.5999984741211,
                         "minX": 0.0,
-                        "minY": 23.5,
+                        "minY": 22.5,
                         "minZ": 0.0
                     },
                     "numericID": 139,
@@ -2957,7 +2957,7 @@
                     "displayName": "Wall 53",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
+                        "maxX": 32.0,
                         "maxY": 8.625,
                         "maxZ": 79.19999694824219,
                         "minX": 0.0,
@@ -2978,10 +2978,10 @@
                     "displayName": "Wall 54",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
-                        "maxY": 33.0,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 80.4000015258789,
-                        "minX": 24.0,
+                        "minX": 23.5,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -3000,7 +3000,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.25,
-                        "maxY": 32.25,
+                        "maxY": 32.0,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3020,11 +3020,11 @@
                     "displayName": "Wall 56",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.875,
-                        "maxY": 32.625,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
-                        "minY": 24.0,
+                        "minY": 23.375,
                         "minZ": 0.0
                     },
                     "numericID": 143,
@@ -3041,7 +3041,7 @@
                     "displayName": "Wall 57",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.125,
+                        "maxX": 32.0,
                         "maxY": 8.875,
                         "maxZ": 79.80000305175781,
                         "minX": 0.0,
@@ -3062,10 +3062,10 @@
                     "displayName": "Wall 58",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.25,
-                        "maxY": 33.25,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.5999984741211,
-                        "minX": 24.75,
+                        "minX": 24.5,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -3084,7 +3084,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.25,
-                        "maxY": 33.25,
+                        "maxY": 32.0,
                         "maxZ": 81.5999984741211,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3104,8 +3104,8 @@
                     "displayName": "Wall 60",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
-                        "maxY": 32.875,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 82.19999694824219,
                         "minX": 0.0,
                         "minY": 24.625,
@@ -3125,7 +3125,7 @@
                     "displayName": "Wall 61",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.25,
+                        "maxX": 32.0,
                         "maxY": 7.75,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
@@ -3146,10 +3146,10 @@
                     "displayName": "Wall 62",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
-                        "maxY": 32.5,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 80.4000015258789,
-                        "minX": 24.25,
+                        "minX": 23.75,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -3168,7 +3168,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 7.5,
-                        "maxY": 32.5,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3189,7 +3189,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 7.25,
-                        "maxY": 32.25,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3209,11 +3209,11 @@
                     "displayName": "Wall 65",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.875,
-                        "maxY": 32.625,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 82.19999694824219,
                         "minX": 0.0,
-                        "minY": 24.5,
+                        "minY": 23.875,
                         "minZ": 0.0
                     },
                     "numericID": 152,
@@ -3230,7 +3230,7 @@
                     "displayName": "Wall 66",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.875,
+                        "maxX": 32.0,
                         "maxY": 8.625,
                         "maxZ": 81.0,
                         "minX": 0.0,
@@ -3251,10 +3251,10 @@
                     "displayName": "Wall 67",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
-                        "maxY": 32.5,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 79.80000305175781,
-                        "minX": 23.75,
+                        "minX": 23.25,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -3273,7 +3273,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.0,
-                        "maxY": 33.0,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3293,11 +3293,11 @@
                     "displayName": "Wall 69",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
-                        "maxY": 32.875,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
-                        "minY": 24.375,
+                        "minY": 23.5,
                         "minZ": 0.0
                     },
                     "numericID": 156,
@@ -3314,11 +3314,11 @@
                     "displayName": "Wall 70",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.125,
-                        "maxY": 8.875,
-                        "maxZ": 82.80000305175781,
+                        "maxX": 32.0,
+                        "maxY": 7.625,
+                        "maxZ": 81.0,
                         "minX": 0.0,
-                        "minY": 1.25,
+                        "minY": 0.0,
                         "minZ": 0.0
                     },
                     "numericID": 157,
@@ -3336,7 +3336,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 32.0,
-                        "maxY": 33.0,
+                        "maxY": 32.0,
                         "maxZ": 82.19999694824219,
                         "minX": 24.375,
                         "minY": 0.0,
@@ -3357,7 +3357,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.25,
-                        "maxY": 32.5,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3377,11 +3377,11 @@
                     "displayName": "Wall 73",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 32.125,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
-                        "minY": 23.75,
+                        "minY": 23.625,
                         "minZ": 0.0
                     },
                     "numericID": 160,
@@ -3398,7 +3398,7 @@
                     "displayName": "Wall 74",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
+                        "maxX": 32.0,
                         "maxY": 8.375,
                         "maxZ": 81.5999984741211,
                         "minX": 0.0,
@@ -3419,10 +3419,10 @@
                     "displayName": "Wall 75",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.5,
-                        "maxY": 32.5,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 79.19999694824219,
-                        "minX": 23.5,
+                        "minX": 24.0,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -3441,7 +3441,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.5,
-                        "maxY": 33.0,
+                        "maxY": 32.0,
                         "maxZ": 42.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3461,11 +3461,11 @@
                     "displayName": "Wall 77",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
-                        "maxY": 32.375,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 39.599998474121094,
                         "minX": 0.0,
-                        "minY": 24.125,
+                        "minY": 23.75,
                         "minZ": 0.0
                     },
                     "numericID": 164,
@@ -3482,7 +3482,7 @@
                     "displayName": "Wall 78",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.125,
+                        "maxX": 32.0,
                         "maxY": 8.875,
                         "maxZ": 41.400001525878906,
                         "minX": 0.0,
@@ -3503,11 +3503,11 @@
                     "displayName": "Wall 79",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 32.75,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
-                        "minY": 24.5,
+                        "minY": 23.75,
                         "minZ": 0.0
                     },
                     "numericID": 166,
@@ -3524,10 +3524,10 @@
                     "displayName": "Wall 80",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.125,
-                        "maxY": 33.375,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 42.0,
-                        "minX": 24.75,
+                        "minX": 24.625,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -3546,7 +3546,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 7.875,
-                        "maxY": 33.125,
+                        "maxY": 32.0,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3566,11 +3566,11 @@
                     "displayName": "Wall 82",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.25,
-                        "maxY": 33.25,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
-                        "minY": 23.875,
+                        "minY": 22.625,
                         "minZ": 0.0
                     },
                     "numericID": 169,
@@ -3587,7 +3587,7 @@
                     "displayName": "Wall 83",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.875,
+                        "maxX": 32.0,
                         "maxY": 8.625,
                         "maxZ": 81.0,
                         "minX": 0.0,
@@ -3608,10 +3608,10 @@
                     "displayName": "Wall 84",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.25,
-                        "maxY": 33.25,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
-                        "minX": 24.125,
+                        "minX": 23.875,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -3629,7 +3629,7 @@
                     "displayName": "Wall 85",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.0,
+                        "maxX": 32.0,
                         "maxY": 32.0,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
@@ -3650,11 +3650,11 @@
                     "displayName": "Wall 86",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.125,
-                        "maxY": 31.875,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 92.4000015258789,
-                        "minX": 8.875,
-                        "minY": 6.125,
+                        "minX": 8.75,
+                        "minY": 6.25,
                         "minZ": 0.0
                     },
                     "numericID": 173,
@@ -3671,11 +3671,11 @@
                     "displayName": "Wall 87",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.5,
+                        "maxX": 32.0,
                         "maxY": 32.0,
                         "maxZ": 123.5999984741211,
-                        "minX": 22.0,
-                        "minY": 15.625,
+                        "minX": 22.5,
+                        "minY": 19.25,
                         "minZ": 0.0
                     },
                     "numericID": 174,
@@ -3692,11 +3692,11 @@
                     "displayName": "Wall 88",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 25.25,
-                        "maxY": 25.25,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 64.19999694824219,
-                        "minX": 5.25,
-                        "minY": 5.25,
+                        "minX": 0.0,
+                        "minY": 0.0,
                         "minZ": 0.0
                     },
                     "numericID": 175,
@@ -3714,7 +3714,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.375,
-                        "maxY": 32.625,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3734,11 +3734,11 @@
                     "displayName": "Wall 90",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.125,
-                        "maxY": 32.875,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
-                        "minY": 24.625,
+                        "minY": 23.75,
                         "minZ": 0.0
                     },
                     "numericID": 177,
@@ -3755,7 +3755,7 @@
                     "displayName": "Wall 91",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
+                        "maxX": 32.0,
                         "maxY": 8.75,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
@@ -3776,10 +3776,10 @@
                     "displayName": "Wall 92",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 33.125,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.5999984741211,
-                        "minX": 24.875,
+                        "minX": 25.0,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -3797,9 +3797,9 @@
                     "displayName": "Wall 93",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 20.0,
-                        "maxY": 20.0,
-                        "maxZ": 20.0,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
+                        "maxZ": 78.0,
                         "minX": 0.0,
                         "minY": 0.0,
                         "minZ": 0.0
@@ -3818,9 +3818,9 @@
                     "displayName": "Wall 94",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 20.0,
-                        "maxY": 20.0,
-                        "maxZ": 20.0,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
+                        "maxZ": 79.80000305175781,
                         "minX": 0.0,
                         "minY": 0.0,
                         "minZ": 0.0
@@ -3839,9 +3839,9 @@
                     "displayName": "Wall 95",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 20.0,
-                        "maxY": 20.0,
-                        "maxZ": 20.0,
+                        "maxX": 32.0,
+                        "maxY": 8.625,
+                        "maxZ": 79.19999694824219,
                         "minX": 0.0,
                         "minY": 0.0,
                         "minZ": 0.0
@@ -3860,9 +3860,9 @@
                     "displayName": "Wall 96",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 20.0,
-                        "maxY": 20.0,
-                        "maxZ": 20.0,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
+                        "maxZ": 79.19999694824219,
                         "minX": 0.0,
                         "minY": 0.0,
                         "minZ": 0.0
@@ -3881,9 +3881,9 @@
                     "displayName": "Wall 97",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 20.0,
-                        "maxY": 20.0,
-                        "maxZ": 20.0,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
+                        "maxZ": 78.5999984741211,
                         "minX": 0.0,
                         "minY": 0.0,
                         "minZ": 0.0
@@ -3902,8 +3902,8 @@
                     "displayName": "Wall 98",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 32.75,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3923,8 +3923,8 @@
                     "displayName": "Wall 99",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.25,
-                        "maxY": 32.75,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3944,8 +3944,8 @@
                     "displayName": "Wall 100",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 31.625,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 79.80000305175781,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3965,8 +3965,8 @@
                     "displayName": "Wall 101",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.375,
-                        "maxY": 32.625,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 77.4000015258789,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -3987,7 +3987,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 7.75,
-                        "maxY": 32.25,
+                        "maxY": 32.0,
                         "maxZ": 35.400001525878906,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -4007,11 +4007,11 @@
                     "displayName": "Wall 103",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 32.25,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 37.20000076293945,
                         "minX": 0.0,
-                        "minY": 24.0,
+                        "minY": 23.75,
                         "minZ": 0.0
                     },
                     "numericID": 190,
@@ -4028,11 +4028,11 @@
                     "displayName": "Wall 104",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
-                        "maxY": 8.5,
+                        "maxX": 32.0,
+                        "maxY": 7.75,
                         "maxZ": 36.0,
                         "minX": 0.0,
-                        "minY": 0.75,
+                        "minY": 0.0,
                         "minZ": 0.0
                     },
                     "numericID": 191,
@@ -4049,10 +4049,10 @@
                     "displayName": "Wall 105",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.375,
-                        "maxY": 32.625,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 36.599998474121094,
-                        "minX": 23.375,
+                        "minX": 22.75,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -4071,7 +4071,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.5,
-                        "maxY": 33.0,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -4091,11 +4091,11 @@
                     "displayName": "Wall 107",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 32.75,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.5999984741211,
                         "minX": 0.0,
-                        "minY": 24.375,
+                        "minY": 23.625,
                         "minZ": 0.0
                     },
                     "numericID": 194,
@@ -4112,7 +4112,7 @@
                     "displayName": "Wall 108",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.875,
+                        "maxX": 32.0,
                         "maxY": 8.625,
                         "maxZ": 79.80000305175781,
                         "minX": 0.0,
@@ -4133,10 +4133,10 @@
                     "displayName": "Wall 109",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.75,
-                        "maxY": 32.25,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
-                        "minX": 23.75,
+                        "minX": 24.0,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -4155,7 +4155,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.25,
-                        "maxY": 33.25,
+                        "maxY": 32.0,
                         "maxZ": 81.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -4217,11 +4217,11 @@
                     "displayName": "Wall 113",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.125,
-                        "maxY": 32.875,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
-                        "minY": 24.0,
+                        "minY": 23.125,
                         "minZ": 0.0
                     },
                     "numericID": 200,
@@ -4238,7 +4238,7 @@
                     "displayName": "Wall 114",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.875,
+                        "maxX": 32.0,
                         "maxY": 12.125,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
@@ -4259,10 +4259,10 @@
                     "displayName": "Wall 115",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.125,
-                        "maxY": 33.375,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 82.19999694824219,
-                        "minX": 24.5,
+                        "minX": 24.375,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -4281,7 +4281,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 8.625,
-                        "maxY": 32.875,
+                        "maxY": 32.0,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -4301,11 +4301,11 @@
                     "displayName": "Wall 117",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.375,
-                        "maxY": 32.625,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 79.19999694824219,
                         "minX": 0.0,
-                        "minY": 23.75,
+                        "minY": 23.125,
                         "minZ": 0.0
                     },
                     "numericID": 204,
@@ -4322,7 +4322,7 @@
                     "displayName": "Wall 118",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.625,
+                        "maxX": 32.0,
                         "maxY": 7.375,
                         "maxZ": 80.4000015258789,
                         "minX": 0.0,
@@ -4343,10 +4343,10 @@
                     "displayName": "Wall 119",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 32.75,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 81.5999984741211,
-                        "minX": 24.0,
+                        "minX": 23.25,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -5356,10 +5356,10 @@
                     "displayName": "Bookcase 39",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 18.375,
-                        "maxY": 32.125,
+                        "maxX": 17.625,
+                        "maxY": 32.0,
                         "maxZ": 38.400001525878906,
-                        "minX": 8.25,
+                        "minX": 7.5,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -5377,11 +5377,11 @@
                     "displayName": "Bookcase 40",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 24.25,
+                        "maxX": 32.0,
+                        "maxY": 23.25,
                         "maxZ": 39.599998474121094,
                         "minX": 0.0,
-                        "minY": 14.0,
+                        "minY": 13.0,
                         "minZ": 0.0
                     },
                     "numericID": 255,
@@ -5398,11 +5398,11 @@
                     "displayName": "Bookcase 41",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.75,
-                        "maxY": 18.25,
+                        "maxX": 32.0,
+                        "maxY": 18.0,
                         "maxZ": 38.400001525878906,
                         "minX": 0.0,
-                        "minY": 8.125,
+                        "minY": 7.875,
                         "minZ": 0.0
                     },
                     "numericID": 256,
@@ -5419,10 +5419,10 @@
                     "displayName": "Bookcase 42",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 24.375,
-                        "maxY": 32.125,
+                        "maxX": 23.75,
+                        "maxY": 32.0,
                         "maxZ": 38.400001525878906,
-                        "minX": 13.375,
+                        "minX": 12.75,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -5440,10 +5440,10 @@
                     "displayName": "Bookcase 43",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 17.875,
-                        "maxY": 31.125,
+                        "maxX": 18.0,
+                        "maxY": 32.0,
                         "maxZ": 38.400001525878906,
-                        "minX": 7.0,
+                        "minX": 7.125,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -5461,7 +5461,7 @@
                     "displayName": "Bookcase 44",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.25,
+                        "maxX": 32.0,
                         "maxY": 24.25,
                         "maxZ": 40.79999923706055,
                         "minX": 0.0,
@@ -5482,11 +5482,11 @@
                     "displayName": "Bookcase 45",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.75,
-                        "maxY": 18.25,
+                        "maxX": 32.0,
+                        "maxY": 18.5,
                         "maxZ": 39.599998474121094,
                         "minX": 0.0,
-                        "minY": 8.25,
+                        "minY": 8.5,
                         "minZ": 0.0
                     },
                     "numericID": 260,
@@ -5503,10 +5503,10 @@
                     "displayName": "Bookcase 46",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 24.0,
-                        "maxY": 32.5,
+                        "maxX": 23.5,
+                        "maxY": 32.0,
                         "maxZ": 38.400001525878906,
-                        "minX": 13.5,
+                        "minX": 13.0,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -5524,11 +5524,11 @@
                     "displayName": "Bookcase 47",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 19.625,
+                        "maxX": 32.0,
+                        "maxY": 19.125,
                         "maxZ": 69.0,
                         "minX": 0.0,
-                        "minY": 8.25,
+                        "minY": 7.75,
                         "minZ": 0.0
                     },
                     "numericID": 262,
@@ -5545,10 +5545,10 @@
                     "displayName": "Bookcase 48",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 28.0,
-                        "maxY": 31.5,
+                        "maxX": 27.875,
+                        "maxY": 32.0,
                         "maxZ": 67.80000305175781,
-                        "minX": 7.75,
+                        "minX": 7.625,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -5566,11 +5566,11 @@
                     "displayName": "Bookcase 49",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 24.125,
+                        "maxX": 32.0,
+                        "maxY": 24.0,
                         "maxZ": 68.4000015258789,
                         "minX": 0.0,
-                        "minY": 8.125,
+                        "minY": 8.0,
                         "minZ": 0.0
                     },
                     "numericID": 264,
@@ -5587,11 +5587,11 @@
                     "displayName": "Bookcase 50",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
-                        "maxY": 22.5,
+                        "maxX": 32.0,
+                        "maxY": 23.0,
                         "maxZ": 69.5999984741211,
                         "minX": 0.0,
-                        "minY": 8.125,
+                        "minY": 8.625,
                         "minZ": 0.0
                     },
                     "numericID": 265,
@@ -5608,10 +5608,10 @@
                     "displayName": "Bookcase 51",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 24.25,
-                        "maxY": 32.75,
+                        "maxX": 23.625,
+                        "maxY": 32.0,
                         "maxZ": 68.4000015258789,
-                        "minX": 7.0,
+                        "minX": 6.375,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -5629,10 +5629,10 @@
                     "displayName": "Bookcase 52",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 20.5,
-                        "maxY": 31.5,
-                        "maxZ": 67.80000305175781,
-                        "minX": 7.5,
+                        "maxX": 21.125,
+                        "maxY": 32.0,
+                        "maxZ": 69.0,
+                        "minX": 8.125,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -5650,11 +5650,11 @@
                     "displayName": "Bookcase 53",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
-                        "maxY": 24.5,
+                        "maxX": 32.0,
+                        "maxY": 23.75,
                         "maxZ": 69.5999984741211,
                         "minX": 0.0,
-                        "minY": 12.75,
+                        "minY": 12.0,
                         "minZ": 0.0
                     },
                     "numericID": 268,
@@ -5671,11 +5671,11 @@
                     "displayName": "Bookcase 54",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
-                        "maxY": 20.375,
+                        "maxX": 32.0,
+                        "maxY": 19.75,
                         "maxZ": 69.5999984741211,
                         "minX": 0.0,
-                        "minY": 9.125,
+                        "minY": 8.5,
                         "minZ": 0.0
                     },
                     "numericID": 269,
@@ -5692,10 +5692,10 @@
                     "displayName": "Bookcase 55",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 24.0,
-                        "maxY": 32.5,
+                        "maxX": 23.875,
+                        "maxY": 32.0,
                         "maxZ": 69.0,
-                        "minX": 13.75,
+                        "minX": 13.625,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -5713,8 +5713,8 @@
                     "displayName": "Bookcase 56",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 18.375,
-                        "maxY": 32.125,
+                        "maxX": 17.625,
+                        "maxY": 32.0,
                         "maxZ": 68.4000015258789,
                         "minX": 8.0,
                         "minY": 0.0,
@@ -5734,11 +5734,11 @@
                     "displayName": "Bookcase 57",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 24.125,
+                        "maxX": 32.0,
+                        "maxY": 24.0,
                         "maxZ": 69.0,
                         "minX": 0.0,
-                        "minY": 13.625,
+                        "minY": 13.5,
                         "minZ": 0.0
                     },
                     "numericID": 272,
@@ -5755,11 +5755,11 @@
                     "displayName": "Bookcase 58",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.25,
-                        "maxY": 18.25,
-                        "maxZ": 67.80000305175781,
+                        "maxX": 32.0,
+                        "maxY": 18.125,
+                        "maxZ": 69.0,
                         "minX": 0.0,
-                        "minY": 8.625,
+                        "minY": 8.5,
                         "minZ": 0.0
                     },
                     "numericID": 273,
@@ -5776,8 +5776,8 @@
                     "displayName": "Bookcase 59",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 23.25,
-                        "maxY": 32.75,
+                        "maxX": 23.875,
+                        "maxY": 32.0,
                         "maxZ": 67.80000305175781,
                         "minX": 13.125,
                         "minY": 0.0,
@@ -5797,10 +5797,10 @@
                     "displayName": "Bookcase 60",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 18.25,
-                        "maxY": 31.75,
+                        "maxX": 17.75,
+                        "maxY": 32.0,
                         "maxZ": 68.4000015258789,
-                        "minX": 7.875,
+                        "minX": 7.375,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -5818,11 +5818,11 @@
                     "displayName": "Bookcase 61",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 24.25,
+                        "maxX": 32.0,
+                        "maxY": 23.875,
                         "maxZ": 70.19999694824219,
                         "minX": 0.0,
-                        "minY": 14.25,
+                        "minY": 13.875,
                         "minZ": 0.0
                     },
                     "numericID": 276,
@@ -5839,11 +5839,11 @@
                     "displayName": "Bookcase 62",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.375,
-                        "maxY": 18.625,
+                        "maxX": 32.0,
+                        "maxY": 18.375,
                         "maxZ": 68.4000015258789,
                         "minX": 0.0,
-                        "minY": 8.5,
+                        "minY": 8.25,
                         "minZ": 0.0
                     },
                     "numericID": 277,
@@ -5860,10 +5860,10 @@
                     "displayName": "Bookcase 63",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 23.75,
-                        "maxY": 32.25,
+                        "maxX": 23.5,
+                        "maxY": 32.0,
                         "maxZ": 69.5999984741211,
-                        "minX": 13.625,
+                        "minX": 13.375,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -6228,7 +6228,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 3.75,
-                        "maxY": 32.75,
+                        "maxY": 32.0,
                         "maxZ": 78.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -6248,11 +6248,11 @@
                     "displayName": "Support 1",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.375,
-                        "maxY": 32.625,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 78.5999984741211,
                         "minX": 0.0,
-                        "minY": 29.75,
+                        "minY": 29.125,
                         "minZ": 0.0
                     },
                     "numericID": 296,
@@ -6269,7 +6269,7 @@
                     "displayName": "Support 2",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.375,
+                        "maxX": 32.0,
                         "maxY": 3.25,
                         "maxZ": 76.80000305175781,
                         "minX": 0.0,
@@ -6290,10 +6290,10 @@
                     "displayName": "Support 3",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
-                        "maxY": 32.375,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 78.0,
-                        "minX": 28.75,
+                        "minX": 28.125,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -6332,8 +6332,8 @@
                     "displayName": "Support 5",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 32.25,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 78.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -6353,11 +6353,11 @@
                     "displayName": "Support 6",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.625,
-                        "maxY": 31.875,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 76.80000305175781,
                         "minX": 0.0,
-                        "minY": 28.5,
+                        "minY": 28.625,
                         "minZ": 0.0
                     },
                     "numericID": 301,
@@ -6374,7 +6374,7 @@
                     "displayName": "Support 7",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
+                        "maxX": 32.0,
                         "maxY": 3.875,
                         "maxZ": 77.4000015258789,
                         "minX": 0.0,
@@ -6395,10 +6395,10 @@
                     "displayName": "Support 8",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
-                        "maxY": 33.0,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 78.0,
-                        "minX": 29.25,
+                        "minX": 28.75,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -6416,8 +6416,8 @@
                     "displayName": "Support 9",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 32.75,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 78.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -6437,8 +6437,8 @@
                     "displayName": "Support 10",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 32.75,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 76.19999694824219,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -6458,8 +6458,8 @@
                     "displayName": "Support 11",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 32.125,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 78.5999984741211,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -6480,7 +6480,7 @@
                     "hasBoundingBox": true,
                     "modelBounds": {
                         "maxX": 4.0,
-                        "maxY": 32.75,
+                        "maxY": 32.0,
                         "maxZ": 79.19999694824219,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -6500,11 +6500,11 @@
                     "displayName": "Support 13",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.625,
-                        "maxY": 32.875,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 78.0,
                         "minX": 0.0,
-                        "minY": 29.0,
+                        "minY": 28.125,
                         "minZ": 0.0
                     },
                     "numericID": 308,
@@ -6542,10 +6542,10 @@
                     "displayName": "Support 15",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 32.125,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 78.5999984741211,
-                        "minX": 28.75,
+                        "minX": 28.875,
                         "minY": 0.0,
                         "minZ": 0.0
                     },
@@ -9380,8 +9380,8 @@
                     "displayName": "Stair 0",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 33.0,
-                        "maxY": 32.5,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 40.79999923706055,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -9401,8 +9401,8 @@
                     "displayName": "Stair 1",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
-                        "maxY": 33.0,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 36.0,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -9422,8 +9422,8 @@
                     "displayName": "Stair 2",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
-                        "maxY": 33.0,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 39.599998474121094,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -9443,8 +9443,8 @@
                     "displayName": "Stair 3",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.75,
-                        "maxY": 32.75,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 40.20000076293945,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -9464,8 +9464,8 @@
                     "displayName": "Stair 4",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 32.125,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 41.400001525878906,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -9506,8 +9506,8 @@
                     "displayName": "Stair 6",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.5,
-                        "maxY": 33.0,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 41.400001525878906,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -9527,8 +9527,8 @@
                     "displayName": "Stair 7",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 32.125,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 39.599998474121094,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -9548,8 +9548,8 @@
                     "displayName": "Stair 8",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.75,
-                        "maxY": 32.25,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 38.400001525878906,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -9632,8 +9632,8 @@
                     "displayName": "Stair 12",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 31.875,
-                        "maxY": 32.125,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 39.599998474121094,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -9653,8 +9653,8 @@
                     "displayName": "Stair 13",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.375,
-                        "maxY": 32.625,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 41.400001525878906,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -9674,8 +9674,8 @@
                     "displayName": "Stair 14",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.25,
-                        "maxY": 31.75,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 40.20000076293945,
                         "minX": 0.0,
                         "minY": 0.0,
@@ -9695,8 +9695,8 @@
                     "displayName": "Stair 15",
                     "hasBoundingBox": true,
                     "modelBounds": {
-                        "maxX": 32.375,
-                        "maxY": 32.625,
+                        "maxX": 32.0,
+                        "maxY": 32.0,
                         "maxZ": 39.599998474121094,
                         "minX": 0.0,
                         "minY": 0.0,

@@ -84,9 +84,6 @@ public:
     //-------------------------------------------------------------------------
     // Renderer
     //-------------------------------------------------------------------------
-    // TODO: These are shared between client/editor because
-    //       Transforms uses them. Should they be dynamically
-    //       passed in or something?
     /** The width of a tile in screen coordinates. */
     static constexpr unsigned int TILE_SCREEN_WIDTH = 256;
     /** The height of the top face of a tile in screen coordinates. */
