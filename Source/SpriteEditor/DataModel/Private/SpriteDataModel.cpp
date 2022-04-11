@@ -113,7 +113,7 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 // If the display name isn't unique, fail.
                 std::string displayName
                     = spriteJson.value()["displayName"].get<std::string>();
-                if (!spriteNameIsUnique(displayName)) {
+                if (!spriteNameIsUnique(spriteID, displayName)) {
                     std::string returnString{
                         "Sprite display name isn't unique: "};
                     returnString += sprite.displayName.c_str();
@@ -416,23 +416,18 @@ void SpriteDataModel::setSpriteDisplayName(unsigned int spriteID,
         LOG_FATAL("Tried to set active sprite to invalid ID.");
     }
 
-    // If the name hasn't changed, do nothing.
-    Sprite& sprite{spritePair->second};
-    if (newDisplayName == sprite.displayName) {
-        return;
-    }
-
     // Set the new display name and make it unique.
     // Note: All characters that a user can enter are valid in the display
     //       name string, so we don't need to validate.
     int appendedNum{0};
     std::string uniqueDisplayName{newDisplayName};
-    while (!(spriteNameIsUnique(uniqueDisplayName))) {
+    while (!spriteNameIsUnique(spriteID, uniqueDisplayName)) {
         uniqueDisplayName = newDisplayName + std::to_string(appendedNum);
         appendedNum++;
     }
 
-    sprite.displayName = newDisplayName;
+    Sprite& sprite{spritePair->second};
+    sprite.displayName = uniqueDisplayName;
 
     // Signal the change.
     spriteDisplayNameChangedSig.publish(spriteID, sprite.displayName);
@@ -446,13 +441,8 @@ void SpriteDataModel::setSpriteHasBoundingBox(unsigned int spriteID,
         LOG_FATAL("Tried to set sprite hasBoundingBox using invalid ID.");
     }
 
-    // If it hasn't changed, do nothing.
-    Sprite& sprite{spritePair->second};
-    if (newHasBoundingBox == sprite.hasBoundingBox) {
-        return;
-    }
-
     // Set the new hasBoundingBox and signal the change.
+    Sprite& sprite{spritePair->second};
     sprite.hasBoundingBox = newHasBoundingBox;
 
     spriteHasBoundingBoxChangedSig.publish(spriteID, newHasBoundingBox);
@@ -466,13 +456,8 @@ void SpriteDataModel::setSpriteModelBounds(unsigned int spriteID,
         LOG_FATAL("Tried to set sprite boundingBox using invalid ID.");
     }
 
-    // If it hasn't changed, do nothing.
-    Sprite& sprite{spritePair->second};
-    if (newModelBounds == sprite.modelBounds) {
-        return;
-    }
-
     // Set the new model bounds and signal the change.
+    Sprite& sprite{spritePair->second};
     sprite.modelBounds = newModelBounds;
 
     spriteModelBoundsChangedSig.publish(spriteID, newModelBounds);
@@ -537,17 +522,17 @@ std::string SpriteDataModel::deriveStringId(const std::string& displayName)
     return stringID;
 }
 
-bool SpriteDataModel::spriteNameIsUnique(const std::string& displayName)
+bool SpriteDataModel::spriteNameIsUnique(unsigned int spriteID, const std::string& displayName)
 {
     // Dumbly look through all names for a match.
     // Note: Eventually, this should change to a name map that we keep updated.
     bool isUnique{true};
-    for (const auto& sheetPair : spriteSheetMap) {
-        for (unsigned int spriteID : sheetPair.second.spriteIDs) {
-            const Sprite& sprite{spriteMap[spriteID]};
-            if (displayName == sprite.displayName) {
-                isUnique = false;
-            }
+    for (const auto& spritePair : spriteMap) {
+        unsigned int idToCheck{spritePair.first};
+        const Sprite& sprite{spritePair.second};
+
+        if ((idToCheck != spriteID) && (displayName == sprite.displayName)) {
+            isUnique = false;
         }
     }
 

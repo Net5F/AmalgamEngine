@@ -172,8 +172,13 @@ private:
 
     /**
      * Checks if the given name is unique among all sprites in the model.
+     *
+     * @param spriteID  The ID of the sprite that might get displayName. If it
+     *                  already is set to displayName, it won't be counted as
+     *                  non-unique.
+     * @param displayName  The display name that the sprite will be set to.
      */
-    bool spriteNameIsUnique(const std::string& displayName);
+    bool spriteNameIsUnique(unsigned int spriteID, const std::string& displayName);
 
     /** Used for validating user-selected sprite sheet textures. */
     SDL_Renderer* sdlRenderer;
