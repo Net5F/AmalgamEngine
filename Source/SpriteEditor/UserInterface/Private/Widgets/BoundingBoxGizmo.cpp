@@ -186,6 +186,9 @@ bool BoundingBoxGizmo::refreshScaling()
         scaledLineWidth
             = AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH);
 
+        // Refresh our controls to reflect the new sizes.
+        refresh(spriteDataModel.getSprite(activeSpriteID));
+
         return true;
     }
 
