@@ -1,3 +1,4 @@
+#include "Log.h"
 #include "Application.h"
 #include "Ignore.h"
 
@@ -13,6 +14,9 @@ try {
     // SDL2 needs this signature for main, but we don't use the parameters.
     ignore(argc);
     ignore(argv);
+
+    // Set up file logging.
+    Log::enableFileLogging("Server.log");
 
     // Start the application (assumes control of the thread).
     Application app;

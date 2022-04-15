@@ -37,11 +37,11 @@ void MovementSystem::processMovements()
         previousPosition = position;
 
         // Use the current input state to update their velocity for this tick.
-        MovementHelpers::updateVelocity(velocity, input.inputStates,
+        velocity = MovementHelpers::updateVelocity(velocity, input.inputStates,
                                         SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update their position, using the new velocity.
-        MovementHelpers::updatePosition(position, velocity,
+        position = MovementHelpers::updatePosition(position, velocity,
                                         SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // If the entity moved.

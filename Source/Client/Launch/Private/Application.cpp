@@ -51,12 +51,6 @@ Application::Application()
 
 void Application::start()
 {
-    // Set up file logging.
-    // TODO: This currently will do weird stuff if you have 2 clients open.
-    //       If we need a temporary solution we can use PIDs, but the real
-    //       solution will be to eventually use account IDs in the file name.
-    Log::enableFileLogging("Client.log");
-
     // Set up profiling.
     Profiler::init();
 

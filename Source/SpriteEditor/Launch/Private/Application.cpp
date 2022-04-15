@@ -67,9 +67,6 @@ Application::~Application()
 
 void Application::start()
 {
-    // Set up file logging.
-    Log::enableFileLogging("SpriteEditor.log");
-
     // Set up profiling.
     Profiler::init();
 

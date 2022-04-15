@@ -37,12 +37,11 @@ public:
     /**
      * Returns a position at the center of this bounding box.
      *
-     * Note: This center position is different than the Position component
-     *       that is attached to an entity. This one is centered in all axis,
-     *       while an entity's Position's Z axis starts at the bottom of the
-     *       entity.
+     * Note: This center position is different than the one returned by
+     *       asEntityPosition(). This one is centered in all axis, while an
+     *       entity's Position is centered in the X/Y but is at the minimum Z.
      */
-    Position getCenterPosition() const
+    Position get3dCenter() const
     {
         Position centerPosition{};
         centerPosition.x = minX + ((maxX - minX) / 2);
@@ -50,6 +49,16 @@ public:
         centerPosition.z = minZ + ((maxZ - minZ) / 2);
 
         return centerPosition;
+    }
+
+    /**
+     * Returns true if this box intersects the given other bounding box.
+     */
+    bool intersects(const BoundingBox& other) const
+    {
+        return ((minX < other.maxX) && (maxX > other.minX) &&
+            (minY < other.maxY) && (maxY > other.minY) &&
+            (minZ < other.maxZ) && (maxZ > other.minZ));
     }
 
     /**
@@ -64,7 +73,7 @@ public:
      */
     bool intersects(const Position& cylinderCenter, unsigned int radius) const
     {
-        Position boxCenter{getCenterPosition()};
+        Position boxCenter{get3dCenter()};
         float xLength{getXLength()};
         float yLength{getYLength()};
 
@@ -133,12 +142,32 @@ public:
         TileExtent tileExtent{};
         const float tileWorldWidth{
             static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
-        tileExtent.x = static_cast<int>(minX / tileWorldWidth);
-        tileExtent.y = static_cast<int>(minY / tileWorldWidth);
-        tileExtent.xLength = static_cast<int>(maxX - minX / tileWorldWidth);
-        tileExtent.yLength = static_cast<int>(maxY - minY / tileWorldWidth);
+
+        tileExtent.x = static_cast<int>(std::floor(minX / tileWorldWidth));
+        tileExtent.y = static_cast<int>(std::floor(minY / tileWorldWidth));
+        tileExtent.xLength = (static_cast<int>(std::ceil(maxX / tileWorldWidth)) - tileExtent.x);
+        tileExtent.yLength = (static_cast<int>(std::ceil(maxY / tileWorldWidth)) - tileExtent.y);
 
         return tileExtent;
+    }
+
+    /**
+     * Returns a position at the bottom center of this bounding box.
+     *
+     * Note: An entity's position is defined as being centered in the X/Y axis
+     *       and at the lowest point in the Z axis (under the entity's feet).
+     */
+    Position asEntityPosition() const
+    {
+        Position centerPosition{};
+        centerPosition.x = minX + ((maxX - minX) / 2);
+        centerPosition.y = minY + ((maxY - minY) / 2);
+
+        // Note: We set z to minZ because an entity's position is defined as
+        //       being under its feet.
+        centerPosition.z = minZ;
+
+        return centerPosition;
     }
 };
 

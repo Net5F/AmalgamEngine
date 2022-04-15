@@ -200,18 +200,16 @@ void NpcMovementSystem::moveAllNpcs()
         previousPosition = position;
 
         // Use the current input state to update their velocity for this tick.
-        MovementHelpers::updateVelocity(velocity, input.inputStates,
+        velocity = MovementHelpers::updateVelocity(velocity, input.inputStates,
                                         SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update their position, using the new velocity.
-        MovementHelpers::updatePosition(position, velocity,
+        position = MovementHelpers::updatePosition(position, velocity,
                                         SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update their bounding box to match the new position.
         boundingBox
             = Transforms::modelToWorldCentered(sprite.modelBounds, position);
-
-        // TODO: Update their placement in the spatial partition.
     }
 }
 
@@ -253,7 +251,7 @@ void NpcMovementSystem::applyUpdateMessage(
         position = movementState.position;
 
         // If the previous position hasn't been initialized, set it to the
-        // current position so we don't lerp in from the origin.
+        // current position so they don't lerp in from the origin.
         if (!(previousPosition.isInitialized)) {
             previousPosition = position;
             previousPosition.isInitialized = true;

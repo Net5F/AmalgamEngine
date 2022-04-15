@@ -10,6 +10,7 @@
 #include "SharedConfig.h"
 #include "Timer.h"
 #include "Log.h"
+#include "AMAssert.h"
 #include "Ignore.h"
 
 namespace AM
@@ -85,7 +86,12 @@ void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
 
 const Tile& TileMap::getTile(unsigned int x, unsigned int y) const
 {
-    return tiles[linearizeTileIndex(x, y)];
+    unsigned int tileIndex{linearizeTileIndex(x, y)};
+    unsigned int maxTileIndex{static_cast<unsigned int>(tileExtent.xLength * tileExtent.yLength)};
+    AM_ASSERT((tileIndex < maxTileIndex)
+        , "Tried to get an out of bounds tile. tileIndex: %u, max: %u", tileIndex, maxTileIndex);
+
+    return tiles[tileIndex];
 }
 
 const ChunkExtent& TileMap::getChunkExtent() const

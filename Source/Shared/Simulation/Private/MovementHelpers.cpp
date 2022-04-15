@@ -7,65 +7,91 @@
 
 namespace AM
 {
-void MovementHelpers::updateVelocity(Velocity& velocity,
-                                     Input::StateArr& inputStates,
+Velocity MovementHelpers::updateVelocity(const Velocity& velocity,
+                                     const Input::StateArr& inputStates,
                                      double deltaSeconds)
 {
     // TODO: Ignoring while velocity is constant for testing.
     ignore(deltaSeconds);
 
+    Velocity updatedVelocity{velocity};
+
     static constexpr double VELOCITY{30};
     // Y-axis (favors up).
     if (inputStates[Input::YUp] == Input::Pressed) {
-        velocity.y = -VELOCITY;
+        updatedVelocity.y = -VELOCITY;
     }
     else if (inputStates[Input::YDown] == Input::Pressed) {
-        velocity.y = VELOCITY;
+        updatedVelocity.y = VELOCITY;
     }
     else {
-        velocity.y = 0;
+        updatedVelocity.y = 0;
     }
 
     // X-axis (favors up).
     if (inputStates[Input::XUp] == Input::Pressed) {
-        velocity.x = VELOCITY;
+        updatedVelocity.x = VELOCITY;
     }
     else if (inputStates[Input::XDown] == Input::Pressed) {
-        velocity.x = -VELOCITY;
+        updatedVelocity.x = -VELOCITY;
     }
     else {
-        velocity.x = 0;
+        updatedVelocity.x = 0;
     }
 
     // Z-axis (favors up).
     if (inputStates[Input::ZUp] == Input::Pressed) {
-        velocity.z = VELOCITY;
+        updatedVelocity.z = VELOCITY;
     }
     else if (inputStates[Input::ZDown] == Input::Pressed) {
-        velocity.z = -VELOCITY;
+        updatedVelocity.z = -VELOCITY;
     }
     else {
-        velocity.z = 0;
+        updatedVelocity.z = 0;
     }
+
+    return updatedVelocity;
 }
 
-void MovementHelpers::updatePosition(Position& position, Velocity& velocity,
+Position MovementHelpers::updatePosition(const Position& position, const Velocity& velocity,
                                      double deltaSeconds)
 {
     // Update the position.
-    position.x += (deltaSeconds * velocity.x);
-    position.y += (deltaSeconds * velocity.y);
-    position.z += (deltaSeconds * velocity.z);
+    Position newPosition{position};
+    newPosition.x += (deltaSeconds * velocity.x);
+    newPosition.y += (deltaSeconds * velocity.y);
+    newPosition.z += (deltaSeconds * velocity.z);
+
+    return newPosition;
 }
 
-Position MovementHelpers::interpolatePosition(PreviousPosition& previousPos,
-                                              Position& position, double alpha)
+Position MovementHelpers::interpolatePosition(const PreviousPosition& previousPos,
+                                              const Position& position, double alpha)
 {
     double interpX{(position.x * alpha) + (previousPos.x * (1.0 - alpha))};
     double interpY{(position.y * alpha) + (previousPos.y * (1.0 - alpha))};
     double interpZ{(position.z * alpha) + (previousPos.z * (1.0 - alpha))};
     return {static_cast<float>(interpX), static_cast<float>(interpY),
             static_cast<float>(interpZ)};
+}
+
+BoundingBox MovementHelpers::moveBoundingBox(const BoundingBox& boundingBox,
+                                             const Position& oldPosition,
+                                             const Position& newPosition)
+{
+    // Get the difference between the old position and the new position.
+    Position diff{newPosition - oldPosition};
+
+    // Use the diff to move the given box to the new position.
+    BoundingBox newBox{boundingBox};
+    newBox.minX += diff.x;
+    newBox.maxX += diff.x;
+    newBox.minY += diff.y;
+    newBox.maxY += diff.y;
+    newBox.minZ += diff.z;
+    newBox.maxZ += diff.z;
+
+    return newBox;
 }
 
 } // End namespace AM

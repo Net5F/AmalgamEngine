@@ -38,9 +38,6 @@ Application::~Application()
 
 void Application::start()
 {
-    // Set up file logging.
-    Log::enableFileLogging("Server.log");
-
     // Set up profiling.
     Profiler::init();
 

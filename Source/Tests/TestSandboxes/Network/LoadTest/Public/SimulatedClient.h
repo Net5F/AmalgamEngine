@@ -34,8 +34,6 @@ public:
     void setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled);
 
 private:
-    EventDispatcher networkEventDispatcher;
-
     Client::Network network;
     PeriodicCaller networkCaller;
 

@@ -9,10 +9,10 @@ namespace AM
 namespace Server
 {
 /**
- * Represents all of the sprite data that the RenderSystem needs, except for
- * the world position.
+ * Holds the data for a single sprite from SpriteData.json.
  *
- * World position should be read from an associated Position component.
+ * World position should be read from an associated Position component (if
+ * this sprite is attached to an entity), or derived from an associated Tile.
  */
 struct Sprite {
 public:

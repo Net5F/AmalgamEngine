@@ -53,9 +53,12 @@ robocopy "%BuildPath%\Client" "%PackagePath%\Client" "Client.exe" >nul 2>&1
 robocopy "%BuildPath%\Server" "%PackagePath%\Server" "Server.exe" >nul 2>&1
 robocopy "%BuildPath%\SpriteEditor" "%PackagePath%\SpriteEditor" "SpriteEditor.exe" >nul 2>&1
 
-rem Copy the resource files to the client and sprite editor.
+rem Copy the resource files.
 robocopy "%BasePath%\Resources\Client" "%PackagePath%\Client" /E >nul 2>&1
+robocopy "%BasePath%\Resources\Server" "%PackagePath%\Server" /E >nul 2>&1
 robocopy "%BasePath%\Resources\SpriteEditor" "%PackagePath%\SpriteEditor" /E >nul 2>&1
+robocopy "%BasePath%\Resources\Shared" "%PackagePath%\Client" /E >nul 2>&1
+robocopy "%BasePath%\Resources\Shared" "%PackagePath%\Server" /E >nul 2>&1
 
 rem Detect and copy dependencies.
 cmake -P "%BasePath%\CMake\copy_runtime_deps.cmake" "%BuildPath%\Client\Client.exe" "%PackagePath%\Client"

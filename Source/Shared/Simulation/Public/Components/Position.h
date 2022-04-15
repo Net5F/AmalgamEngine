@@ -45,12 +45,12 @@ public:
                                   / SharedConfig::CHUNK_WIDTH))};
     }
 
-    Position operator+(const Position& other)
+    Position operator+(const Position& other) const
     {
         return {(x + other.x), (y + other.y), (z + other.z)};
     }
 
-    Position operator-(const Position& other)
+    Position operator-(const Position& other) const
     {
         return {(x - other.x), (y - other.y), (z - other.z)};
     }

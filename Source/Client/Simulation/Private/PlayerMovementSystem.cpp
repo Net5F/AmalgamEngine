@@ -12,6 +12,7 @@
 #include "SharedConfig.h"
 #include "Config.h"
 #include "Log.h"
+#include "AMAssert.h"
 #include <memory>
 
 namespace AM
@@ -62,19 +63,30 @@ void PlayerMovementSystem::processMovement()
     }
 
     // Use the current input state to update our velocity for this tick.
-    MovementHelpers::updateVelocity(velocity, input.inputStates,
+    velocity = MovementHelpers::updateVelocity(velocity, input.inputStates,
+                                               SharedConfig::SIM_TICK_TIMESTEP_S);
+
+    // Calculate our desired position, using the new velocity.
+    Position desiredPosition{position};
+    desiredPosition = MovementHelpers::updatePosition(desiredPosition, velocity,
                                     SharedConfig::SIM_TICK_TIMESTEP_S);
 
-    // Update our position, using the new velocity.
-    MovementHelpers::updatePosition(position, velocity,
-                                    SharedConfig::SIM_TICK_TIMESTEP_S);
+    // If we're trying to move, resolve the movement.
+    if (desiredPosition != position) {
+        // Calculate a new bounding box to match our desired position.
+        BoundingBox& boundingBox{
+            world.registry.get<BoundingBox>(world.playerEntity)};
+        BoundingBox desiredBounds{MovementHelpers::moveBoundingBox(boundingBox, position,
+            desiredPosition)};
 
-    // Update our bounding box to match the new position.
-    Sprite& sprite{world.registry.get<Sprite>(world.playerEntity)};
-    BoundingBox& boundingBox{
-        world.registry.get<BoundingBox>(world.playerEntity)};
-    boundingBox
-        = Transforms::modelToWorldCentered(sprite.modelBounds, position);
+        // Resolve any collisions with the surrounding bounding boxes.
+        BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(boundingBox,
+            desiredBounds, world.tileMap)};
+
+        // Update our bounding box to match the new position.
+        boundingBox = resolvedBounds;
+        position = resolvedBounds.asEntityPosition();
+    }
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(
@@ -92,10 +104,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         checkReceivedTickValidity(receivedTick, currentTick);
 
         // Check that the received tick is ahead of our latest.
-        if (receivedTick <= latestReceivedTick) {
-            LOG_FATAL("Received ticks out of order. latest: %u, new: %u",
+        AM_ASSERT((receivedTick > latestReceivedTick), "Received ticks out of order. latest: %u, new: %u",
                       latestReceivedTick, receivedTick);
-        }
 
         // Track our latest received tick.
         latestReceivedTick = receivedTick;
@@ -112,10 +122,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
             }
         }
 
-        if (playerUpdate == nullptr) {
-            LOG_FATAL("Failed to find player entity in a message that should "
-                      "have contained one.");
-        }
+        AM_ASSERT((playerUpdate != nullptr), "Failed to find player entity in a message that should have contained one.");
 
         /* Apply the received velocity and position. */
         velocity = playerUpdate->velocity;
@@ -176,11 +183,8 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
 void PlayerMovementSystem::checkReceivedTickValidity(Uint32 receivedTick,
                                                      Uint32 currentTick)
 {
-    if (receivedTick > currentTick) {
-        LOG_FATAL("Received data for tick %u on tick %u. Server is in the "
-                  "future, can't replay inputs.",
-                  receivedTick, currentTick);
-    }
+    AM_ASSERT((receivedTick <= currentTick), "Received data for tick %u on tick %u. Server is in the future, can't replay inputs.",
+              receivedTick, currentTick);
 }
 
 void PlayerMovementSystem::checkTickDiffValidity(Uint32 tickDiff)

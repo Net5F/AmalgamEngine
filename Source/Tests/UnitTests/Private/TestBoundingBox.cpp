@@ -8,16 +8,6 @@ using namespace AM;
 
 TEST_CASE("TestBoundingBox")
 {
-    SECTION("Get center position")
-    {
-        BoundingBox box{300, 310, 300, 310, 0, 10};
-        Position center{box.getCenterPosition()};
-
-        REQUIRE(center.x == 305);
-        REQUIRE(center.y == 305);
-        REQUIRE(center.z == 5);
-    }
-
     SECTION("Intersects cylinder")
     {
         // Centered on the origin.
@@ -64,5 +54,39 @@ TEST_CASE("TestBoundingBox")
         // Fully outside the extent.
         BoundingBox box4{33, 38, 30, 35, 0, 1};
         REQUIRE(!(box4.intersects(tileExtent)));
+    }
+
+    SECTION("As tile extent")
+    {
+        const float TILE_WIDTH{SharedConfig::TILE_WORLD_WIDTH};
+
+        BoundingBox box{(TILE_WIDTH * 1.25), (TILE_WIDTH * 4), (TILE_WIDTH * 0.75)
+            , (TILE_WIDTH * 4), 0, TILE_WIDTH};
+        TileExtent tileExtent{box.asTileExtent()};
+
+        REQUIRE(tileExtent.x == 1);
+        REQUIRE(tileExtent.xLength == 3);
+        REQUIRE(tileExtent.y == 0);
+        REQUIRE(tileExtent.yLength == 4);
+    }
+
+    SECTION("Get 3d center")
+    {
+        BoundingBox box{300, 310, 300, 310, 0, 10};
+        Position center{box.get3dCenter()};
+
+        REQUIRE(center.x == 305);
+        REQUIRE(center.y == 305);
+        REQUIRE(center.z == 5);
+    }
+
+    SECTION("As entity position")
+    {
+        BoundingBox box{300, 310, 300, 310, 0, 10};
+        Position center{box.asEntityPosition()};
+
+        REQUIRE(center.x == 305);
+        REQUIRE(center.y == 305);
+        REQUIRE(center.z == 0);
     }
 }
