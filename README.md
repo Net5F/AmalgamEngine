@@ -1,6 +1,6 @@
 ## The Amalgam Engine
 #### An engine for creating virtual worlds.
-This engine aims to make it easy to create 2D isometric virtual worlds. It'll be ready when you're able to pull it down, build it, and immediately have a working world that you can start building on top of.
+This engine aims to make it easy to create sprite-based isometric virtual worlds. It'll be ready when you're able to pull it down, build it, and immediately have a working world that you can start building on top of.
 
 Everything you need will be provided, including:
 * Client
@@ -13,7 +13,7 @@ Everything you need will be provided, including:
 ## Status
 (Once things are more ready for outside developers, I'll link the trello.)
 ### Current
-- [x] Implement, load test, optimize the netcode.
+- [x] Implement, load test, and optimize the netcode.
 - [x] Implement tile maps, iso rendering, and figure out architecture between the sim/rendering/UI.
 - [x] Build minimal UI library. (MVP working, needs refactoring later)
 - [x] Build sprite editor. (lets you add 3d bounding boxes to sprites for draw order and collision calcs)
@@ -22,15 +22,16 @@ Everything you need will be provided, including:
 - [x] Implement chunk and tile update streaming (live, in-world map editing).
 - [x] Implement spatial partitioning grid.
 - [x] Implement interest management system.
-- [ ] Implement world editing UI.
+- [x] Refactor UI library (make it really nice).
+- [x] Implement world editing UI.
+- [ ] Implement collision.
 
 ### Future
-- [ ] Implement collision.
-- [ ] Implement sprite animation.
+- [ ] Split single repo into engine and project repos.
 - [ ] Implement text chat, chat server.
+- [ ] Implement sprite animation.
 - [ ] Implement login server, account db, account validation.
 - [ ] Implement web server, account creation.
-- [ ] Split single repo into engine and project repos.
 - [ ] Ready for other people to use.
 
 ## Building

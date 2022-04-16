@@ -62,31 +62,8 @@ void PlayerMovementSystem::processMovement()
         }
     }
 
-    // Use the current input state to update our velocity for this tick.
-    velocity = MovementHelpers::updateVelocity(velocity, input.inputStates,
-                                               SharedConfig::SIM_TICK_TIMESTEP_S);
-
-    // Calculate our desired position, using the new velocity.
-    Position desiredPosition{position};
-    desiredPosition = MovementHelpers::updatePosition(desiredPosition, velocity,
-                                    SharedConfig::SIM_TICK_TIMESTEP_S);
-
-    // If we're trying to move, resolve the movement.
-    if (desiredPosition != position) {
-        // Calculate a new bounding box to match our desired position.
-        BoundingBox& boundingBox{
-            world.registry.get<BoundingBox>(world.playerEntity)};
-        BoundingBox desiredBounds{MovementHelpers::moveBoundingBox(boundingBox, position,
-            desiredPosition)};
-
-        // Resolve any collisions with the surrounding bounding boxes.
-        BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(boundingBox,
-            desiredBounds, world.tileMap)};
-
-        // Update our bounding box to match the new position.
-        boundingBox = resolvedBounds;
-        position = resolvedBounds.asEntityPosition();
-    }
+    // Process the player entity's movement for this tick.
+    movePlayerEntity(input, velocity, position);
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(
@@ -196,6 +173,36 @@ void PlayerMovementSystem::checkTickDiffValidity(Uint32 tickDiff)
                   "Increase the length or reduce lag. tickDiff: %u, "
                   "historyLength: %u",
                   tickDiff, InputHistory::LENGTH);
+    }
+}
+
+void PlayerMovementSystem::movePlayerEntity(Input& input,
+                    Velocity& velocity, Position& position)
+{
+    // Use the current input state to update our velocity for this tick.
+    velocity = MovementHelpers::updateVelocity(velocity, input.inputStates,
+                                               SharedConfig::SIM_TICK_TIMESTEP_S);
+
+    // Calculate our desired position, using the new velocity.
+    Position desiredPosition{position};
+    desiredPosition = MovementHelpers::updatePosition(desiredPosition, velocity,
+                                    SharedConfig::SIM_TICK_TIMESTEP_S);
+
+    // If we're trying to move, resolve the movement.
+    if (desiredPosition != position) {
+        // Calculate a new bounding box to match our desired position.
+        BoundingBox& boundingBox{
+            world.registry.get<BoundingBox>(world.playerEntity)};
+        BoundingBox desiredBounds{MovementHelpers::moveBoundingBox(boundingBox, position,
+            desiredPosition)};
+
+        // Resolve any collisions with the surrounding bounding boxes.
+        BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(boundingBox,
+            desiredBounds, world.tileMap)};
+
+        // Update our bounding box and position.
+        boundingBox = resolvedBounds;
+        position = resolvedBounds.asEntityPosition();
     }
 }
 

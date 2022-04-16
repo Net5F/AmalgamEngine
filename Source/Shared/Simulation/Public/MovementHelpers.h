@@ -79,14 +79,19 @@ public:
     static BoundingBox resolveCollisions(const BoundingBox& currentBounds,
                                   const BoundingBox& desiredBounds, const T& tileMap)
     {
+        // TODO: Replace this logic with real sliding collision.
+
+        // If the desired movement would go outside of the map, don't let
+        // them move.
         TileExtent boxTileExtent{desiredBounds.asTileExtent()};
-        int yMax{boxTileExtent.y + boxTileExtent.yLength};
-        int xMax{boxTileExtent.x + boxTileExtent.xLength};
-//        LOG_INFO("boxTileExtent: %u, %u, %u, %u",
-//                 boxTileExtent.x, boxTileExtent.xLength,
-//                 boxTileExtent.y, boxTileExtent.yLength);
+        TileExtent mapExtent{tileMap.getTileExtent()};
+        if (!mapExtent.containsExtent(boxTileExtent)) {
+            return currentBounds;
+        }
 
         // For each tile that the desired bounds is touching.
+        int yMax{boxTileExtent.y + boxTileExtent.yLength};
+        int xMax{boxTileExtent.x + boxTileExtent.xLength};
         for (int y = boxTileExtent.y; y < yMax; ++y) {
             for (int x = boxTileExtent.x; x < xMax; ++x) {
                 const auto& tile{tileMap.getTile(x, y)};
@@ -98,20 +103,10 @@ public:
                         || !(layer.sprite->hasBoundingBox)) {
                         continue;
                     }
-//                    LOG_INFO("desiredBounds: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f",
-//                             desiredBounds.minX, desiredBounds.maxX,
-//                             desiredBounds.minY, desiredBounds.maxY,
-//                             desiredBounds.minZ, desiredBounds.maxZ);
-//                    LOG_INFO("worldBounds: %.2f, %.2f, %.2f, %.2f, %.2f, %.2f",
-//                             layer.worldBounds.minX, layer.worldBounds.maxX,
-//                             layer.worldBounds.minY, layer.worldBounds.maxY,
-//                             layer.worldBounds.minZ, layer.worldBounds.maxZ);
 
-                    // TODO: Replace this with real sliding collision.
                     // If the desired movement would intersect a box, don't let
                     // them move.
                     if (desiredBounds.intersects(layer.worldBounds)) {
-//                        LOG_INFO("Intersected");
                         return currentBounds;
                     }
                 }

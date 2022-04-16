@@ -25,13 +25,13 @@ void MovementSystem::processMovements()
 {
     SCOPED_CPU_SAMPLE(processMovements);
 
-    // Move all entities that have an input, position, and velocity component.
+    // Move all entities that have the required components.
     auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Velocity, BoundingBox, Sprite>();
+                                      Velocity, BoundingBox>();
     for (entt::entity entity : group) {
-        auto [input, position, previousPosition, velocity, boundingBox, sprite]
+        auto [input, position, previousPosition, velocity, boundingBox]
             = group.get<Input, Position, PreviousPosition, Velocity,
-                        BoundingBox, Sprite>(entity);
+                        BoundingBox>(entity);
 
         // Save their old position.
         previousPosition = position;
@@ -40,20 +40,32 @@ void MovementSystem::processMovements()
         velocity = MovementHelpers::updateVelocity(velocity, input.inputStates,
                                         SharedConfig::SIM_TICK_TIMESTEP_S);
 
-        // Update their position, using the new velocity.
-        position = MovementHelpers::updatePosition(position, velocity,
+        // Calculate their desired position, using the new velocity.
+        Position desiredPosition{position};
+        desiredPosition = MovementHelpers::updatePosition(desiredPosition, velocity,
                                         SharedConfig::SIM_TICK_TIMESTEP_S);
 
-        // If the entity moved.
-        if (position != previousPosition) {
-            // Update their bounding box to match their new position.
-            boundingBox = Transforms::modelToWorldCentered(sprite.modelBounds,
-                                                           position);
+        // If they're trying to move, resolve the movement.
+        if (desiredPosition != position) {
+            // Calculate a new bounding box to match their desired position.
+            BoundingBox desiredBounds{MovementHelpers::moveBoundingBox(boundingBox, position,
+                desiredPosition)};
 
-            // Update the entity's position in the locator.
+            // Resolve any collisions with the surrounding bounding boxes.
+            BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(boundingBox,
+                desiredBounds, world.tileMap)};
+
+            // Update their bounding box and position.
+            boundingBox = resolvedBounds;
+            position = resolvedBounds.asEntityPosition();
+        }
+
+        // If they did actually move.
+        if (position != previousPosition) {
+            // Update their position in the locator.
             world.entityLocator.setEntityLocation(entity, boundingBox);
 
-            // Tag the entity as having moved.
+            // Tag them as having moved.
             world.registry.emplace<PositionHasChanged>(entity);
         }
     }
