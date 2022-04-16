@@ -178,7 +178,8 @@ private:
      *                  non-unique.
      * @param displayName  The display name that the sprite will be set to.
      */
-    bool spriteNameIsUnique(unsigned int spriteID, const std::string& displayName);
+    bool spriteNameIsUnique(unsigned int spriteID,
+                            const std::string& displayName);
 
     /** Used for validating user-selected sprite sheet textures. */
     SDL_Renderer* sdlRenderer;

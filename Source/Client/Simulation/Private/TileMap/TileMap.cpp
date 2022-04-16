@@ -115,9 +115,11 @@ void TileMap::clearTile(unsigned int tileX, unsigned int tileY)
 const Tile& TileMap::getTile(unsigned int x, unsigned int y) const
 {
     unsigned int tileIndex{linearizeTileIndex(x, y)};
-    unsigned int maxTileIndex{static_cast<unsigned int>(tileExtent.xLength * tileExtent.yLength)};
-    AM_ASSERT((tileIndex < maxTileIndex)
-        , "Tried to get an out of bounds tile. tileIndex: %u, max: %u", tileIndex, maxTileIndex);
+    unsigned int maxTileIndex{
+        static_cast<unsigned int>(tileExtent.xLength * tileExtent.yLength)};
+    AM_ASSERT((tileIndex < maxTileIndex),
+              "Tried to get an out of bounds tile. tileIndex: %u, max: %u",
+              tileIndex, maxTileIndex);
 
     return tiles[tileIndex];
 }

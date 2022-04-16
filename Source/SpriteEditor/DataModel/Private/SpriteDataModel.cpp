@@ -522,7 +522,8 @@ std::string SpriteDataModel::deriveStringId(const std::string& displayName)
     return stringID;
 }
 
-bool SpriteDataModel::spriteNameIsUnique(unsigned int spriteID, const std::string& displayName)
+bool SpriteDataModel::spriteNameIsUnique(unsigned int spriteID,
+                                         const std::string& displayName)
 {
     // Dumbly look through all names for a match.
     // Note: Eventually, this should change to a name map that we keep updated.

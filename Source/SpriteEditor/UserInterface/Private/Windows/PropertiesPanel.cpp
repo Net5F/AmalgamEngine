@@ -335,7 +335,8 @@ void PropertiesPanel::saveMaxX()
         const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
 
         BoundingBox newModelBounds{activeSprite.modelBounds};
-        newModelBounds.maxX = std::clamp(newMaxX, newModelBounds.minX,
+        newModelBounds.maxX
+            = std::clamp(newMaxX, newModelBounds.minX,
                          static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
         // Apply the new value.
@@ -357,8 +358,9 @@ void PropertiesPanel::saveMaxY()
         const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
 
         BoundingBox newModelBounds{activeSprite.modelBounds};
-        newModelBounds.maxY = std::clamp(newMaxY, newModelBounds.minY,
-                            static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
+        newModelBounds.maxY
+            = std::clamp(newMaxY, newModelBounds.minY,
+                         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
         // Apply the new value.
         spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);

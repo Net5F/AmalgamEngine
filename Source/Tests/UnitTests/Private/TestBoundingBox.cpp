@@ -60,8 +60,12 @@ TEST_CASE("TestBoundingBox")
     {
         const float TILE_WIDTH{SharedConfig::TILE_WORLD_WIDTH};
 
-        BoundingBox box{(TILE_WIDTH * 1.25), (TILE_WIDTH * 4), (TILE_WIDTH * 0.75)
-            , (TILE_WIDTH * 4), 0, TILE_WIDTH};
+        BoundingBox box{(TILE_WIDTH * 1.25),
+                        (TILE_WIDTH * 4),
+                        (TILE_WIDTH * 0.75),
+                        (TILE_WIDTH * 4),
+                        0,
+                        TILE_WIDTH};
         TileExtent tileExtent{box.asTileExtent()};
 
         REQUIRE(tileExtent.x == 1);

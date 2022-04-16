@@ -35,8 +35,9 @@ public:
      *
      * @return The updated velocity.
      */
-    static Velocity updateVelocity(const Velocity& velocity, const Input::StateArr& inputStates,
-                               double deltaSeconds);
+    static Velocity updateVelocity(const Velocity& velocity,
+                                   const Input::StateArr& inputStates,
+                                   double deltaSeconds);
 
     /**
      * Updates the given position based on the given velocity.
@@ -48,8 +49,9 @@ public:
      *
      * @return The updated position.
      */
-    static Position updatePosition(const Position& position, const Velocity& velocity,
-                               double deltaSeconds);
+    static Position updatePosition(const Position& position,
+                                   const Velocity& velocity,
+                                   double deltaSeconds);
 
     /**
      * Returns a position interpolated between previousPos and position.
@@ -69,7 +71,8 @@ public:
      */
     template<typename T>
     static BoundingBox resolveCollisions(const BoundingBox& currentBounds,
-                                  const BoundingBox& desiredBounds, const T& tileMap)
+                                         const BoundingBox& desiredBounds,
+                                         const T& tileMap)
     {
         // TODO: Replace this logic with real sliding collision.
 

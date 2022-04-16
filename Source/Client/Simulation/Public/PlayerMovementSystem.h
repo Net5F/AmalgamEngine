@@ -69,8 +69,7 @@ private:
     /**
      * Processes the player entity movement for this tick.
      */
-    void movePlayerEntity(Input& input,
-                    Velocity& velocity, Position& position);
+    void movePlayerEntity(Input& input, Velocity& velocity, Position& position);
 
     /** Used to get the current tick. */
     Simulation& sim;

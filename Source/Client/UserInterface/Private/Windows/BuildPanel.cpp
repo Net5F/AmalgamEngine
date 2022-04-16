@@ -104,12 +104,18 @@ void BuildPanel::addEraser()
     thumbnail.setIsActivateable(false);
 
     // Load the eraser's image.
-    thumbnail.thumbnailImage.addResolution({1280, 720},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "BuildPanel/EraserIcon_1280.png"));
-    thumbnail.thumbnailImage.addResolution({1600, 900},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "BuildPanel/EraserIcon_1600.png"));
-    thumbnail.thumbnailImage.addResolution({1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "BuildPanel/EraserIcon_1920.png"));
+    thumbnail.thumbnailImage.addResolution(
+        {1280, 720},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "BuildPanel/EraserIcon_1280.png"));
+    thumbnail.thumbnailImage.addResolution(
+        {1600, 900},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "BuildPanel/EraserIcon_1600.png"));
+    thumbnail.thumbnailImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "BuildPanel/EraserIcon_1920.png"));
 
     // Add a callback to deactivate all other thumbnails when one is activated.
     thumbnail.setOnSelected([this](AUI::Thumbnail* selectedThumb) {

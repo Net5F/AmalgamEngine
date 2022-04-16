@@ -81,8 +81,9 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         checkReceivedTickValidity(receivedTick, currentTick);
 
         // Check that the received tick is ahead of our latest.
-        AM_ASSERT((receivedTick > latestReceivedTick), "Received ticks out of order. latest: %u, new: %u",
-                      latestReceivedTick, receivedTick);
+        AM_ASSERT((receivedTick > latestReceivedTick),
+                  "Received ticks out of order. latest: %u, new: %u",
+                  latestReceivedTick, receivedTick);
 
         // Track our latest received tick.
         latestReceivedTick = receivedTick;
@@ -99,7 +100,9 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
             }
         }
 
-        AM_ASSERT((playerUpdate != nullptr), "Failed to find player entity in a message that should have contained one.");
+        AM_ASSERT((playerUpdate != nullptr),
+                  "Failed to find player entity in a message that should have "
+                  "contained one.");
 
         /* Apply the received velocity and position. */
         velocity = playerUpdate->velocity;
@@ -160,7 +163,9 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
 void PlayerMovementSystem::checkReceivedTickValidity(Uint32 receivedTick,
                                                      Uint32 currentTick)
 {
-    AM_ASSERT((receivedTick <= currentTick), "Received data for tick %u on tick %u. Server is in the future, can't replay inputs.",
+    AM_ASSERT((receivedTick <= currentTick),
+              "Received data for tick %u on tick %u. Server is in the future, "
+              "can't replay inputs.",
               receivedTick, currentTick);
 }
 
@@ -176,35 +181,36 @@ void PlayerMovementSystem::checkTickDiffValidity(Uint32 tickDiff)
     }
 }
 
-void PlayerMovementSystem::movePlayerEntity(Input& input,
-                    Velocity& velocity, Position& position)
+void PlayerMovementSystem::movePlayerEntity(Input& input, Velocity& velocity,
+                                            Position& position)
 {
     // Use the current input state to update our velocity for this tick.
-    velocity = MovementHelpers::updateVelocity(velocity, input.inputStates,
-                                               SharedConfig::SIM_TICK_TIMESTEP_S);
+    velocity = MovementHelpers::updateVelocity(
+        velocity, input.inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
 
     // Calculate our desired position, using the new velocity.
     Position desiredPosition{position};
-    desiredPosition = MovementHelpers::updatePosition(desiredPosition, velocity,
-                                    SharedConfig::SIM_TICK_TIMESTEP_S);
+    desiredPosition = MovementHelpers::updatePosition(
+        desiredPosition, velocity, SharedConfig::SIM_TICK_TIMESTEP_S);
 
     // If we're trying to move, resolve the movement.
     if (desiredPosition != position) {
         // Calculate a new bounding box to match our desired position.
         Sprite& sprite{world.registry.get<Sprite>(world.playerEntity)};
-        BoundingBox desiredBounds{Transforms::modelToWorldCentered(sprite.modelBounds,
-            desiredPosition)};
+        BoundingBox desiredBounds{Transforms::modelToWorldCentered(
+            sprite.modelBounds, desiredPosition)};
 
         // Resolve any collisions with the surrounding bounding boxes.
         BoundingBox& boundingBox{
             world.registry.get<BoundingBox>(world.playerEntity)};
-        BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(boundingBox,
-            desiredBounds, world.tileMap)};
+        BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(
+            boundingBox, desiredBounds, world.tileMap)};
 
         // Update our bounding box and position.
         // Note: Since desiredBounds was properly offset, we can do a simple
         //       diff to get the position.
-        position += (resolvedBounds.getMinPosition() - boundingBox.getMinPosition());
+        position
+            += (resolvedBounds.getMinPosition() - boundingBox.getMinPosition());
         boundingBox = resolvedBounds;
     }
 }

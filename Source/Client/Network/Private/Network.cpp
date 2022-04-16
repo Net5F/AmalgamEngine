@@ -192,7 +192,8 @@ void Network::processBatch()
         // Receive the expected bytes.
         NetworkResult result{
             server->receiveBytesWait(&(batchRecBuffer[0]), batchSize)};
-        AM_ASSERT((result == NetworkResult::Success), "Failed to receive expected bytes.");
+        AM_ASSERT((result == NetworkResult::Success),
+                  "Failed to receive expected bytes.");
 
         // Track the number of bytes we've received.
         bytesReceived += MESSAGE_HEADER_SIZE + batchSize;
@@ -221,12 +222,13 @@ void Network::processBatch()
                 messageSize);
 
             bufferIndex += MESSAGE_HEADER_SIZE + messageSize;
-            AM_ASSERT((bufferIndex <= batchSize), "Buffer index is wrong. %u, %u",
-                bufferIndex, batchSize);
+            AM_ASSERT((bufferIndex <= batchSize),
+                      "Buffer index is wrong. %u, %u", bufferIndex, batchSize);
         }
 
         AM_ASSERT((bufferIndex == batchSize),
-            "Didn't process correct number of bytes. %u, %u", bufferIndex, batchSize);
+                  "Didn't process correct number of bytes. %u, %u", bufferIndex,
+                  batchSize);
     }
 
     // Record the number of received bytes.

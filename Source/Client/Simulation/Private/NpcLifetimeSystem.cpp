@@ -112,7 +112,8 @@ void NpcLifetimeSystem::processEntityInits(Uint32 desiredTick)
 
             // Construct their bounding box (it'll be positioned once they get
             // a position update).
-            registry.emplace<BoundingBox>(entityInit->entity, sprite.modelBounds);
+            registry.emplace<BoundingBox>(entityInit->entity,
+                                          sprite.modelBounds);
 
             LOG_INFO("Entity added: %u. Desired tick: %u, Message tick: %u",
                      entityInit->entity, desiredTick, entityInit->tickNum);

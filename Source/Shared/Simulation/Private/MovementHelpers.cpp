@@ -8,8 +8,8 @@
 namespace AM
 {
 Velocity MovementHelpers::updateVelocity(const Velocity& velocity,
-                                     const Input::StateArr& inputStates,
-                                     double deltaSeconds)
+                                         const Input::StateArr& inputStates,
+                                         double deltaSeconds)
 {
     // TODO: Ignoring while velocity is constant for testing.
     ignore(deltaSeconds);
@@ -53,8 +53,9 @@ Velocity MovementHelpers::updateVelocity(const Velocity& velocity,
     return updatedVelocity;
 }
 
-Position MovementHelpers::updatePosition(const Position& position, const Velocity& velocity,
-                                     double deltaSeconds)
+Position MovementHelpers::updatePosition(const Position& position,
+                                         const Velocity& velocity,
+                                         double deltaSeconds)
 {
     // Update the position.
     Position newPosition{position};
@@ -65,8 +66,9 @@ Position MovementHelpers::updatePosition(const Position& position, const Velocit
     return newPosition;
 }
 
-Position MovementHelpers::interpolatePosition(const PreviousPosition& previousPos,
-                                              const Position& position, double alpha)
+Position
+    MovementHelpers::interpolatePosition(const PreviousPosition& previousPos,
+                                         const Position& position, double alpha)
 {
     double interpX{(position.x * alpha) + (previousPos.x * (1.0 - alpha))};
     double interpY{(position.y * alpha) + (previousPos.y * (1.0 - alpha))};

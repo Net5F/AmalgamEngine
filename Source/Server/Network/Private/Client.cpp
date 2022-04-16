@@ -76,8 +76,9 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
 
     // If the batch + header is too large, error.
     AM_ASSERT((currentIndex <= SharedConfig::MAX_BATCH_SIZE),
-        "Batch too large to fit into buffers. Increase MAX_BATCH_SIZE. Size: %u, Max: %u"
-        , currentIndex, SharedConfig::MAX_BATCH_SIZE);
+              "Batch too large to fit into buffers. Increase MAX_BATCH_SIZE. "
+              "Size: %u, Max: %u",
+              currentIndex, SharedConfig::MAX_BATCH_SIZE);
 
     // If we have a large enough payload, compress it.
     std::size_t batchSize{currentIndex - SERVER_HEADER_SIZE};
@@ -89,7 +90,8 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
             &(compressedBatchBuffer[ServerHeaderIndex::MessageHeaderStart]),
             COMPRESSED_BUFFER_SIZE);
         AM_ASSERT((batchSize <= MAX_BATCH_SIZE),
-            "Batch too large, even after compression. Size: %u", batchSize);
+                  "Batch too large, even after compression. Size: %u",
+                  batchSize);
 
         isCompressed = true;
 
@@ -187,7 +189,8 @@ void Client::fillHeader(Uint8* bufferToFill, Uint16 batchSize,
 Uint8 Client::getWaitingMessageCount() const
 {
     std::size_t size{sendQueue.size_approx()};
-    AM_ASSERT((size <= SDL_MAX_UINT8),
+    AM_ASSERT(
+        (size <= SDL_MAX_UINT8),
         "Client's sendQueue contains too many messages to return as a Uint8.");
 
     return size;
@@ -201,12 +204,14 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
 
     // Receive the header.
     Uint8 headerBuf[CLIENT_HEADER_SIZE];
-    NetworkResult headerResult{peer->receiveBytes(headerBuf, CLIENT_HEADER_SIZE, false)};
+    NetworkResult headerResult{
+        peer->receiveBytes(headerBuf, CLIENT_HEADER_SIZE, false)};
 
     // Receive the following message, or check for timeouts.
     if (headerResult == NetworkResult::Success) {
         // Process the adjustment iteration.
-        Uint8 receivedAdjIteration{headerBuf[ClientHeaderIndex::AdjustmentIteration]};
+        Uint8 receivedAdjIteration{
+            headerBuf[ClientHeaderIndex::AdjustmentIteration]};
         Uint8 expectedNextIteration{static_cast<Uint8>(latestAdjIteration + 1)};
 
         // If we received the next expected iteration, save it.

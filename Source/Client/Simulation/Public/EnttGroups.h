@@ -29,11 +29,12 @@ public:
     static void init(entt::registry& registry)
     {
         // Used for moving an NPC.
-        auto movementGroup = registry.group<Input, Position, PreviousPosition,
-                                            Velocity, BoundingBox, Sprite>(entt::exclude<InputHistory>);
+        auto movementGroup
+            = registry.group<Input, Position, PreviousPosition, Velocity,
+                             BoundingBox, Sprite>(entt::exclude<InputHistory>);
         ignore(movementGroup);
     }
 };
 
-} // End namespace Server
+} // namespace Client
 } // End namespace AM

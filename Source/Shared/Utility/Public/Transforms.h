@@ -98,9 +98,9 @@ public:
         //       add support for other sizes, this will need to be updated.
         Position position{};
         position.x = boundingBox.minX - sprite.modelBounds.minX
-            + (SharedConfig::TILE_WORLD_WIDTH / 2);
+                     + (SharedConfig::TILE_WORLD_WIDTH / 2);
         position.y = boundingBox.minY - sprite.modelBounds.minY
-            + (SharedConfig::TILE_WORLD_WIDTH / 2);
+                     + (SharedConfig::TILE_WORLD_WIDTH / 2);
 
         // The bottom of the stage is flush with the entity's position, so we
         // only need to remove the model offset.

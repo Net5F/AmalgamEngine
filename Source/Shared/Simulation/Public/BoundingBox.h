@@ -37,18 +37,12 @@ public:
     /**
      * Returns a position at the minimum point of this bounding box.
      */
-    Position getMinPosition() const
-    {
-        return {minX, minY, minZ};
-    }
+    Position getMinPosition() const { return {minX, minY, minZ}; }
 
     /**
      * Returns a position at the maximum point of this bounding box.
      */
-    Position getMaxPosition() const
-    {
-        return {maxX, maxY, maxZ};
-    }
+    Position getMaxPosition() const { return {maxX, maxY, maxZ}; }
 
     /**
      * Returns a position at the center of this bounding box.
@@ -72,9 +66,9 @@ public:
      */
     bool intersects(const BoundingBox& other) const
     {
-        return ((minX < other.maxX) && (maxX > other.minX) &&
-            (minY < other.maxY) && (maxY > other.minY) &&
-            (minZ < other.maxZ) && (maxZ > other.minZ));
+        return ((minX < other.maxX) && (maxX > other.minX)
+                && (minY < other.maxY) && (maxY > other.minY)
+                && (minZ < other.maxZ) && (maxZ > other.minZ));
     }
 
     /**
@@ -161,8 +155,10 @@ public:
 
         tileExtent.x = static_cast<int>(std::floor(minX / tileWorldWidth));
         tileExtent.y = static_cast<int>(std::floor(minY / tileWorldWidth));
-        tileExtent.xLength = (static_cast<int>(std::ceil(maxX / tileWorldWidth)) - tileExtent.x);
-        tileExtent.yLength = (static_cast<int>(std::ceil(maxY / tileWorldWidth)) - tileExtent.y);
+        tileExtent.xLength = (static_cast<int>(std::ceil(maxX / tileWorldWidth))
+                              - tileExtent.x);
+        tileExtent.yLength = (static_cast<int>(std::ceil(maxY / tileWorldWidth))
+                              - tileExtent.y);
 
         return tileExtent;
     }
