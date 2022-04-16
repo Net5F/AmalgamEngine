@@ -14,9 +14,6 @@ CameraSystem::CameraSystem(Simulation& inSim, World& inWorld)
 : sim(inSim)
 , world(inWorld)
 {
-    // Init the groups that we'll be using.
-    auto cameraGroup = world.registry.group<Camera>(entt::get<Position>);
-    ignore(cameraGroup);
 }
 
 void CameraSystem::moveCameras()

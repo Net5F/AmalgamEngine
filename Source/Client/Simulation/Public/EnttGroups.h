@@ -5,12 +5,13 @@
 #include "PreviousPosition.h"
 #include "Velocity.h"
 #include "BoundingBox.h"
+#include "InputHistory.h"
 #include "Ignore.h"
 #include "entt/entity/registry.hpp"
 
 namespace AM
 {
-namespace Server
+namespace Client
 {
 class EnttGroups
 {
@@ -27,9 +28,9 @@ public:
      */
     static void init(entt::registry& registry)
     {
-        // Used for moving an entity.
+        // Used for moving an NPC.
         auto movementGroup = registry.group<Input, Position, PreviousPosition,
-                                            Velocity, BoundingBox, Sprite>();
+                                            Velocity, BoundingBox, Sprite>(entt::exclude<InputHistory>);
         ignore(movementGroup);
     }
 };

@@ -1,6 +1,7 @@
 #include "Simulation.h"
 #include "Network.h"
 #include "SpriteData.h"
+#include "EnttGroups.h"
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
@@ -40,6 +41,10 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 , cameraSystem(*this, world)
 , currentTick(0)
 {
+    // Initialize our entt groups.
+    EnttGroups::init(world.registry);
+
+    // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);
 }

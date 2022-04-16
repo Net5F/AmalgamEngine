@@ -75,23 +75,4 @@ Position MovementHelpers::interpolatePosition(const PreviousPosition& previousPo
             static_cast<float>(interpZ)};
 }
 
-BoundingBox MovementHelpers::moveBoundingBox(const BoundingBox& boundingBox,
-                                             const Position& oldPosition,
-                                             const Position& newPosition)
-{
-    // Get the difference between the old position and the new position.
-    Position diff{newPosition - oldPosition};
-
-    // Use the diff to move the given box to the new position.
-    BoundingBox newBox{boundingBox};
-    newBox.minX += diff.x;
-    newBox.maxX += diff.x;
-    newBox.minY += diff.y;
-    newBox.maxY += diff.y;
-    newBox.minZ += diff.z;
-    newBox.maxZ += diff.z;
-
-    return newBox;
-}
-
 } // End namespace AM

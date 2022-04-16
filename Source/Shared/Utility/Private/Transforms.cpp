@@ -104,25 +104,25 @@ BoundingBox Transforms::modelToWorld(const BoundingBox& modelBounds,
 BoundingBox Transforms::modelToWorldCentered(const BoundingBox& modelBounds,
                                              const Position& position)
 {
-    // Place the model-space bounding box at the given position, shifted back
-    // by a half tile to center it.
-    // Note: This assumes that the sprite is 1 tile large. When we add support
-    //       for other sizes, this will need to be updated.
-    BoundingBox movedBox{};
-    movedBox.minX
+    // Place the model-space bounding box at the given position, offset back
+    // by half of the sprite's stage size to center it in the X/Y.
+    // Note: This assumes that the sprite's stage is 1 tile large. When we add
+    //       support for other sizes, this will need to be updated.
+    BoundingBox offsetBounds{};
+    offsetBounds.minX
         = position.x + modelBounds.minX - (SharedConfig::TILE_WORLD_WIDTH / 2);
-    movedBox.minY
+    offsetBounds.minY
         = position.y + modelBounds.minY - (SharedConfig::TILE_WORLD_WIDTH / 2);
-    movedBox.maxX = movedBox.minX + modelBounds.getXLength();
-    movedBox.maxY = movedBox.minY + modelBounds.getYLength();
+    offsetBounds.maxX = offsetBounds.minX + modelBounds.getXLength();
+    offsetBounds.maxY = offsetBounds.minY + modelBounds.getYLength();
 
-    // Place the bottom of the box flush with the given position.
-    // (e.g. if this is a character's position, the bottom of the box is at
+    // Place the bottom of the stage flush with the given position.
+    // (e.g. if this is an entity's position, the bottom of the stage is at
     // their feet).
-    movedBox.minZ = position.z + modelBounds.minZ;
-    movedBox.maxZ = position.z + modelBounds.maxZ;
+    offsetBounds.minZ = position.z + modelBounds.minZ;
+    offsetBounds.maxZ = position.z + modelBounds.maxZ;
 
-    return movedBox;
+    return offsetBounds;
 }
 
 } // End namespace AM

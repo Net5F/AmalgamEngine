@@ -79,14 +79,4 @@ TEST_CASE("TestBoundingBox")
         REQUIRE(center.y == 305);
         REQUIRE(center.z == 5);
     }
-
-    SECTION("As entity position")
-    {
-        BoundingBox box{300, 310, 300, 310, 0, 10};
-        Position center{box.asEntityPosition()};
-
-        REQUIRE(center.x == 305);
-        REQUIRE(center.y == 305);
-        REQUIRE(center.z == 0);
-    }
 }

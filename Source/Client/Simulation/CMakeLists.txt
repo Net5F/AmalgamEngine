@@ -13,6 +13,7 @@ target_sources(Client
 	PUBLIC
 		Public/CameraSystem.h
 		Public/ChunkUpdateSystem.h
+		Public/EnttGroups.h
 		Public/NpcLifetimeSystem.h
 		Public/NpcMovementSystem.h
 		Public/PlayerInputSystem.h

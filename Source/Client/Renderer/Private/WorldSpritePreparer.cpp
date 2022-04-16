@@ -24,9 +24,6 @@ WorldSpritePreparer::WorldSpritePreparer(entt::registry& inRegistry,
 , sortedSprites{}
 , spritesToSort{}
 {
-    // Init the groups that we'll be using.
-    auto group = registry.group<Position, PreviousPosition, Sprite>();
-    ignore(group);
 }
 
 std::vector<SpriteRenderInfo>&

@@ -191,18 +191,21 @@ void PlayerMovementSystem::movePlayerEntity(Input& input,
     // If we're trying to move, resolve the movement.
     if (desiredPosition != position) {
         // Calculate a new bounding box to match our desired position.
-        BoundingBox& boundingBox{
-            world.registry.get<BoundingBox>(world.playerEntity)};
-        BoundingBox desiredBounds{MovementHelpers::moveBoundingBox(boundingBox, position,
+        Sprite& sprite{world.registry.get<Sprite>(world.playerEntity)};
+        BoundingBox desiredBounds{Transforms::modelToWorldCentered(sprite.modelBounds,
             desiredPosition)};
 
         // Resolve any collisions with the surrounding bounding boxes.
+        BoundingBox& boundingBox{
+            world.registry.get<BoundingBox>(world.playerEntity)};
         BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(boundingBox,
             desiredBounds, world.tileMap)};
 
         // Update our bounding box and position.
+        // Note: Since desiredBounds was properly offset, we can do a simple
+        //       diff to get the position.
+        position += (resolvedBounds.getMinPosition() - boundingBox.getMinPosition());
         boundingBox = resolvedBounds;
-        position = resolvedBounds.asEntityPosition();
     }
 }
 

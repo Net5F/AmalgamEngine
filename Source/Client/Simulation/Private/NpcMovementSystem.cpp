@@ -11,7 +11,6 @@
 #include "Velocity.h"
 #include "Input.h"
 #include "BoundingBox.h"
-#include "Sprite.h"
 #include "InputHistory.h"
 #include "ClientNetworkDefs.h"
 #include "Transforms.h"
@@ -39,11 +38,6 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
 , lastProcessedTick(0)
 , tickReplicationOffset(Config::INITIAL_REPLICATION_OFFSET)
 {
-    // Init the groups that we'll be using.
-    auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Velocity, BoundingBox, Sprite>(
-        entt::exclude<InputHistory>);
-    ignore(group);
 }
 
 void NpcMovementSystem::updateNpcs()
@@ -187,7 +181,7 @@ void NpcMovementSystem::handleUpdate(
 
 void NpcMovementSystem::moveAllNpcs()
 {
-    // Move all NPCs that have an input, position, and velocity component.
+    // Move all NPCs that have the required components.
     auto group = world.registry.group<Input, Position, PreviousPosition,
                                       Velocity, BoundingBox, Sprite>(
         entt::exclude<InputHistory>);
@@ -203,13 +197,27 @@ void NpcMovementSystem::moveAllNpcs()
         velocity = MovementHelpers::updateVelocity(velocity, input.inputStates,
                                         SharedConfig::SIM_TICK_TIMESTEP_S);
 
-        // Update their position, using the new velocity.
-        position = MovementHelpers::updatePosition(position, velocity,
+        // Calculate their desired position, using the new velocity.
+        Position desiredPosition{position};
+        desiredPosition = MovementHelpers::updatePosition(desiredPosition, velocity,
                                         SharedConfig::SIM_TICK_TIMESTEP_S);
 
-        // Update their bounding box to match the new position.
-        boundingBox
-            = Transforms::modelToWorldCentered(sprite.modelBounds, position);
+        // If they're trying to move, resolve the movement.
+        if (desiredPosition != position) {
+            // Calculate a new bounding box to match their desired position.
+            BoundingBox desiredBounds{Transforms::modelToWorldCentered(sprite.modelBounds,
+                desiredPosition)};
+
+            // Resolve any collisions with the surrounding bounding boxes.
+            BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(boundingBox,
+                desiredBounds, world.tileMap)};
+
+            // Update their bounding box and position.
+            // Note: Since desiredBounds was properly offset, we can do a
+            //       simple diff to get the position.
+            position += (resolvedBounds.getMinPosition() - boundingBox.getMinPosition());
+            boundingBox = resolvedBounds;
+        }
     }
 }
 
@@ -258,8 +266,7 @@ void NpcMovementSystem::applyUpdateMessage(
         }
 
         // Move their bounding box to their new position.
-        boundingBox
-            = Transforms::modelToWorldCentered(sprite.modelBounds, position);
+        boundingBox = Transforms::modelToWorldCentered(sprite.modelBounds, position);
     }
 }
 

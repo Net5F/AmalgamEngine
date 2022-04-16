@@ -1,18 +1,19 @@
 #pragma once
 
 #include "TilePosition.h"
+#include "Position.h"
+#include "BoundingBox.h"
+#include "SharedConfig.h"
 #include <SDL2/SDL_rect.h>
 
 namespace AM
 {
-class Position;
 class ScreenPoint;
 class Sprite;
 class Camera;
-class BoundingBox;
 
 /**
- * Static functions for transforming between world and screen space.
+ * Static functions for transforming between world, screen, and model space.
  */
 class Transforms
 {
@@ -68,9 +69,45 @@ public:
      * the given position.
      *
      * Mostly used to center a bounding box on an entity's position.
+     *
+     * Note: This function takes care to center the bounds based on the
+     *       sprite's "stage size". If you naively center based on the size of
+     *       the box, you won't get the correct positioning.
      */
     static BoundingBox modelToWorldCentered(const BoundingBox& modelBounds,
                                             const Position& position);
+
+    /**
+     * Returns an entity's position, given that entity's BoundingBox and Sprite
+     * components.
+     *
+     * Note: This function takes care to consider the sprite's "stage size".
+     *       If you naively take the center of the bounds as the entity's
+     *       position, it won't be correct.
+     * Note: This isn't a transform between spaces, but it's related to
+     *       modelToWorldCentered() so it's nice to have in this file.
+     */
+    template<typename T>
+    static Position boundsToEntityPosition(const BoundingBox& boundingBox,
+                                           const T& sprite)
+    {
+        // The box is centered on the entity's position by offsetting it by
+        // half of the sprite's stage size. Remove this stage offset and the
+        // model offset to find the X/Y position.
+        // Note: This assumes that the sprite's stage is 1 tile large. When we
+        //       add support for other sizes, this will need to be updated.
+        Position position{};
+        position.x = boundingBox.minX - sprite.modelBounds.minX
+            + (SharedConfig::TILE_WORLD_WIDTH / 2);
+        position.y = boundingBox.minY - sprite.modelBounds.minY
+            + (SharedConfig::TILE_WORLD_WIDTH / 2);
+
+        // The bottom of the stage is flush with the entity's position, so we
+        // only need to remove the model offset.
+        position.z = boundingBox.minZ - sprite.modelBounds.minZ;
+
+        return position;
+    }
 };
 
 } // End namespace AM

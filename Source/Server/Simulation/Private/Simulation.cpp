@@ -22,11 +22,12 @@ Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher,
 , chunkStreamingSystem(world, inNetworkEventDispatcher, network)
 , currentTick(0)
 {
-    Log::registerCurrentTickPtr(&currentTick);
-    network.registerCurrentTickPtr(&currentTick);
-
     // Initialize our entt groups.
     EnttGroups::init(world.registry);
+
+    // Register our current tick pointer with the classes that care.
+    Log::registerCurrentTickPtr(&currentTick);
+    network.registerCurrentTickPtr(&currentTick);
 }
 
 void Simulation::tick()

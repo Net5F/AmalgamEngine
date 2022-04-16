@@ -27,11 +27,11 @@ void MovementSystem::processMovements()
 
     // Move all entities that have the required components.
     auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Velocity, BoundingBox>();
+                                      Velocity, BoundingBox, Sprite>();
     for (entt::entity entity : group) {
-        auto [input, position, previousPosition, velocity, boundingBox]
+        auto [input, position, previousPosition, velocity, boundingBox, sprite]
             = group.get<Input, Position, PreviousPosition, Velocity,
-                        BoundingBox>(entity);
+                        BoundingBox, Sprite>(entity);
 
         // Save their old position.
         previousPosition = position;
@@ -48,7 +48,7 @@ void MovementSystem::processMovements()
         // If they're trying to move, resolve the movement.
         if (desiredPosition != position) {
             // Calculate a new bounding box to match their desired position.
-            BoundingBox desiredBounds{MovementHelpers::moveBoundingBox(boundingBox, position,
+            BoundingBox desiredBounds{Transforms::modelToWorldCentered(sprite.modelBounds,
                 desiredPosition)};
 
             // Resolve any collisions with the surrounding bounding boxes.
@@ -56,8 +56,10 @@ void MovementSystem::processMovements()
                 desiredBounds, world.tileMap)};
 
             // Update their bounding box and position.
+            // Note: Since desiredBounds was properly offset, we can do a
+            //       simple diff to get the position.
+            position += (resolvedBounds.getMinPosition() - boundingBox.getMinPosition());
             boundingBox = resolvedBounds;
-            position = resolvedBounds.asEntityPosition();
         }
 
         // If they did actually move.

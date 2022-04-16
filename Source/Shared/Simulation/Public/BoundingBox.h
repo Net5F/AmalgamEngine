@@ -35,11 +35,27 @@ public:
     float getZLength() const { return (maxZ - minZ); }
 
     /**
+     * Returns a position at the minimum point of this bounding box.
+     */
+    Position getMinPosition() const
+    {
+        return {minX, minY, minZ};
+    }
+
+    /**
+     * Returns a position at the maximum point of this bounding box.
+     */
+    Position getMaxPosition() const
+    {
+        return {maxX, maxY, maxZ};
+    }
+
+    /**
      * Returns a position at the center of this bounding box.
      *
-     * Note: This center position is different than the one returned by
-     *       asEntityPosition(). This one is centered in all axis, while an
-     *       entity's Position is centered in the X/Y but is at the minimum Z.
+     * Note: This center position is different than an entity's Position
+     *       component. This one is centered in all axis, while an entity's
+     *       Position is centered in the X/Y but is at the minimum Z.
      */
     Position get3dCenter() const
     {
@@ -149,25 +165,6 @@ public:
         tileExtent.yLength = (static_cast<int>(std::ceil(maxY / tileWorldWidth)) - tileExtent.y);
 
         return tileExtent;
-    }
-
-    /**
-     * Returns a position at the bottom center of this bounding box.
-     *
-     * Note: An entity's position is defined as being centered in the X/Y axis
-     *       and at the lowest point in the Z axis (under the entity's feet).
-     */
-    Position asEntityPosition() const
-    {
-        Position centerPosition{};
-        centerPosition.x = minX + ((maxX - minX) / 2);
-        centerPosition.y = minY + ((maxY - minY) / 2);
-
-        // Note: We set z to minZ because an entity's position is defined as
-        //       being under its feet.
-        centerPosition.z = minZ;
-
-        return centerPosition;
     }
 };
 

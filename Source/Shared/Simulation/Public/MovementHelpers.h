@@ -58,14 +58,6 @@ public:
                                         const Position& position, double alpha);
 
     /**
-     * Returns a bounding box of the same size as the given boundingBox,
-     * moved from oldPosition to newPosition.
-     */
-    static BoundingBox moveBoundingBox(const BoundingBox& boundingBox,
-                                       const Position& oldPosition,
-                                       const Position& newPosition);
-
-    /**
      * Resolves collisions between the given desiredBox and other nearby
      * bounding boxes in the world.
      *
