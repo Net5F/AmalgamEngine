@@ -39,11 +39,11 @@ set_target_properties(Client PROPERTIES CXX_EXTENSIONS OFF)
 target_compile_options(Client PUBLIC -Wall -Wextra)
 
 # Copy assets to the build directory.
-file(COPY ${PROJECT_SOURCE_DIR}/../Resources/Client/Assets/
+file(COPY ${PROJECT_SOURCE_DIR}/Resources/Client/Assets/
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Assets/)
 
 # Copy SpriteData.json to the build directory.
-file(COPY ${PROJECT_SOURCE_DIR}/../Resources/Shared/SpriteData.json
+file(COPY ${PROJECT_SOURCE_DIR}/Resources/Shared/SpriteData.json
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 # Build all of the subdirectories

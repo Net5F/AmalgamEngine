@@ -19,7 +19,7 @@ popd
 
 rem Check that the build files exist.
 set "Config=%1"
-set "BuildPath=%BasePath%\Build\Windows\%Config%"
+set "BuildPath=%BasePath%\Build\Windows\%Config%\Source"
 
 set "Result=0"
 if not exist %BuildPath%\Server\Server.exe set "Result=1"

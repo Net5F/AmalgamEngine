@@ -11,7 +11,7 @@ BasePath="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." >/dev/null 2>&1 && pwd 
 
 # Check that the build files exist.
 Config=$1
-BuildPath=$BasePath/Build/Linux/$Config
+BuildPath=$BasePath/Build/Linux/$Config/Source
 if ! [ -f "$BuildPath/Server/Server" ] || ! [ -f "$BuildPath/Client/Client" ] \
    || ! [ -f "$BuildPath/SpriteEditor/SpriteEditor" ] ; then
     echo "Build files for $Config config were not found. Please build before attempting to package."

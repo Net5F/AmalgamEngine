@@ -4,12 +4,12 @@ message(STATUS "Configuring SDL_net")
 
 # Add our static library target
 add_library(SDL2_net-static STATIC
-       ${PROJECT_SOURCE_DIR}/../Libraries/SDL_net/SDLnet.c
-       ${PROJECT_SOURCE_DIR}/../Libraries/SDL_net/SDLnetTCP.c
-       ${PROJECT_SOURCE_DIR}/../Libraries/SDL_net/SDLnetUDP.c
-       ${PROJECT_SOURCE_DIR}/../Libraries/SDL_net/SDLnetselect.c
-       ${PROJECT_SOURCE_DIR}/../Libraries/SDL_net/SDLnetsys.h
-       ${PROJECT_SOURCE_DIR}/../Libraries/SDL_net/SDL_net.h
+       ${PROJECT_SOURCE_DIR}/Libraries/SDL_net/SDLnet.c
+       ${PROJECT_SOURCE_DIR}/Libraries/SDL_net/SDLnetTCP.c
+       ${PROJECT_SOURCE_DIR}/Libraries/SDL_net/SDLnetUDP.c
+       ${PROJECT_SOURCE_DIR}/Libraries/SDL_net/SDLnetselect.c
+       ${PROJECT_SOURCE_DIR}/Libraries/SDL_net/SDLnetsys.h
+       ${PROJECT_SOURCE_DIR}/Libraries/SDL_net/SDL_net.h
 )
 set_target_properties(SDL2_net-static PROPERTIES OUTPUT_NAME "SDL2_net")
 
@@ -17,7 +17,7 @@ target_include_directories(SDL2_net-static
     PRIVATE
         ${SDL2_INCLUDE_DIRS}
     PUBLIC
-        ${PROJECT_SOURCE_DIR}/../Libraries/SDL_net
+        ${PROJECT_SOURCE_DIR}/Libraries/SDL_net
 )
 
 target_link_libraries(SDL2_net-static PRIVATE ${SDL2_LIBRARIES})

@@ -37,7 +37,7 @@ set_target_properties(SpriteEditor PROPERTIES CXX_EXTENSIONS OFF)
 target_compile_options(SpriteEditor PUBLIC -Wall -Wextra)
 
 # Copy assets to the build directory.
-file(COPY ${PROJECT_SOURCE_DIR}/../Resources/SpriteEditor/Assets/
+file(COPY ${PROJECT_SOURCE_DIR}/Resources/SpriteEditor/Assets/
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Assets/)
 
 # Build all of the subdirectories

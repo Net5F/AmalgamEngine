@@ -7,12 +7,12 @@ OPTION(ENABLE_PROFILING "Enable Remotery profiling." OFF)
 
 # Add our static library target
 add_library(Remotery STATIC
-       ${PROJECT_SOURCE_DIR}/../Libraries/Remotery/lib/Remotery.c
+       ${PROJECT_SOURCE_DIR}/Libraries/Remotery/lib/Remotery.c
 )
 
 target_include_directories(Remotery
     PUBLIC
-        ${PROJECT_SOURCE_DIR}/../Libraries/Remotery/lib
+        ${PROJECT_SOURCE_DIR}/Libraries/Remotery/lib
 )
 
 if(MINGW)

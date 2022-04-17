@@ -5,10 +5,10 @@ add_library(readerwriterqueue INTERFACE)
 
 target_include_directories(readerwriterqueue
     INTERFACE
-        ${PROJECT_SOURCE_DIR}/../Libraries/readerwriterqueue/
+        ${PROJECT_SOURCE_DIR}/Libraries/readerwriterqueue/
 )
 
 target_sources(readerwriterqueue INTERFACE
-    ${PROJECT_SOURCE_DIR}/../Libraries/readerwriterqueue/readerwriterqueue.h
-    ${PROJECT_SOURCE_DIR}/../Libraries/readerwriterqueue/atomicops.h
+    ${PROJECT_SOURCE_DIR}/Libraries/readerwriterqueue/readerwriterqueue.h
+    ${PROJECT_SOURCE_DIR}/Libraries/readerwriterqueue/atomicops.h
 )
