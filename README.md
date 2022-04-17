@@ -1,33 +1,30 @@
 ## The Amalgam Engine
-#### An engine for creating virtual worlds.
-This engine aims to make it easy to create sprite-based isometric virtual worlds. It'll be ready when you're able to pull it down, build it, and immediately have a working world that you can start building on top of.
-
-Everything you need will be provided, including:
-* Client
-* Server
-* Minimal editor (most editing happens in-world)
-* Login server
-* Web server (to host the website where users can register accounts)
-* Text chat server
+#### An engine for easily creating virtual worlds.
+Project vision (not all implemented yet, see Status section)
+* Easily create isometric, sprite-based virtual worlds.
+* Start from a template and have a full working world, including client, server, text chat, and account management.
+* All of the networking is provided, and adding new messages for your custom features is extremely easy.
+* Targeted to be used on relatively low-spec hardware (tested on a $30/mo rented server).
+* Load tested with 150 clients in 1 spot or 1000 clients in groups of 10, all sending 4 inputs/second.
+* Live, in-world map editing. Use permissions to let players build things, or to restrict it to your developers.
 
 ## Status
-(Once things are more ready for outside developers, I'll link the trello.)
 ### Current
 - [x] Implement, load test, and optimize the netcode.
 - [x] Implement tile maps, iso rendering, and figure out architecture between the sim/rendering/UI.
-- [x] Build minimal UI library. (MVP working, needs refactoring later)
+- [x] Build minimal UI library.
 - [x] Build sprite editor. (lets you add 3d bounding boxes to sprites for draw order and collision calcs)
 - [x] Import sprite bounds data into engine.
 - [x] Implement world map persistence.
 - [x] Implement chunk and tile update streaming (live, in-world map editing).
-- [x] Implement spatial partitioning grid.
+- [x] Implement spatial partitioning grid for entities.
 - [x] Implement interest management system.
-- [x] Refactor UI library (make it really nice).
+- [x] Refactor UI library (spatial grid, nice event propagation).
 - [x] Implement world editing UI.
-- [ ] Implement collision.
+- [x] Implement collision.
+- [ ] Split single repo into engine and project repos.
 
 ### Future
-- [ ] Split single repo into engine and project repos.
 - [ ] Implement text chat, chat server.
 - [ ] Implement sprite animation.
 - [ ] Implement login server, account db, account validation.
