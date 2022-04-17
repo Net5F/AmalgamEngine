@@ -1,10 +1,10 @@
 ## The Amalgam Engine
-#### An engine for easily creating virtual worlds.
+### An engine for easily creating virtual worlds.
 Project vision (not all implemented yet, see Status section)
 * Easily create isometric, sprite-based virtual worlds.
 * Start from a template and have a full working world, including client, server, text chat, and account management.
-* All of the networking is provided, and adding new messages for your custom features is extremely easy.
-* Targeted to be used on relatively low-spec hardware (tested on a $30/mo rented server).
+* All networking is provided, and adding new messages for your custom features is extremely easy.
+* Targeted for use on relatively low-spec hardware (tested on a $30/mo rented server).
 * Load tested with 150 clients in 1 spot or 1000 clients in groups of 10, all sending 4 inputs/second.
 * Live, in-world map editing. Use permissions to let players build things, or to restrict it to your developers.
 
@@ -29,7 +29,7 @@ Project vision (not all implemented yet, see Status section)
 - [ ] Implement sprite animation.
 - [ ] Implement login server, account db, account validation.
 - [ ] Implement web server, account creation.
-- [ ] Ready for other people to use.
+- [ ] MVP is done.
 
 ## Building
 ### Windows
