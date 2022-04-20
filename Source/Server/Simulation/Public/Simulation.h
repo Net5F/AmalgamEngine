@@ -8,7 +8,7 @@
 #include "MovementSystem.h"
 #include "MovementUpdateSystem.h"
 #include "ChunkStreamingSystem.h"
-#include <SDL2/SDL_stdinc.h>
+#include <SDL_stdinc.h>
 #include <atomic>
 
 namespace AM

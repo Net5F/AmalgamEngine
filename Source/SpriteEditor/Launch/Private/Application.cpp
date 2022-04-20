@@ -4,7 +4,7 @@
 #include "Paths.h"
 #include "Log.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include "nfd.hpp"
 
 #include <memory>

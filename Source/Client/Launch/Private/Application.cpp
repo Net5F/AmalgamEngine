@@ -5,7 +5,7 @@
 #include "Paths.h"
 #include "Log.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <memory>
 #include <functional>

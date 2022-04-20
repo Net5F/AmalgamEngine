@@ -2,7 +2,7 @@
 #include "TcpSocket.h"
 #include "ByteTools.h"
 #include "Log.h"
-#include <SDL2/SDL_stdinc.h>
+#include <SDL_stdinc.h>
 
 namespace AM
 {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MessageType.h"
-#include <SDL2/SDL_stdinc.h>
+#include <SDL_stdinc.h>
 
 namespace AM
 {

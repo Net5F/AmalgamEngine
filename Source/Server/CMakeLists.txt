@@ -36,7 +36,11 @@ target_compile_features(Server PRIVATE cxx_std_20)
 set_target_properties(Server PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable compile warnings.
-target_compile_options(Server PUBLIC -Wall -Wextra)
+if(CMAKE_COMPILER_IS_GNUCXX)
+    target_compile_options(Server PUBLIC -Wall -Wextra)
+elseif()
+    target_compile_options(Server PUBLIC -Wall)
+endif(CMAKE_COMPILER_IS_GNUCXX)
 
 # Copy SpriteData.json to the build directory.
 file(COPY ${PROJECT_SOURCE_DIR}/Resources/Shared/SpriteData.json

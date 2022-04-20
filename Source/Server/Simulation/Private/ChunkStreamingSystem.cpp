@@ -8,7 +8,7 @@
 #include "SharedConfig.h"
 #include "Serialize.h"
 #include "Log.h"
-#include <SDL2/SDL_rect.h>
+#include <SDL_rect.h>
 #include <vector>
 
 namespace AM

@@ -34,6 +34,13 @@ target_link_libraries(UnitTests
 target_compile_features(UnitTests PRIVATE cxx_std_20)
 set_target_properties(UnitTests PROPERTIES CXX_EXTENSIONS OFF)
 
+# Enable compile warnings.
+if(CMAKE_COMPILER_IS_GNUCXX)
+    target_compile_options(UnitTests PUBLIC -Wall -Wextra)
+elseif()
+    target_compile_options(UnitTests PUBLIC -Wall)
+endif(CMAKE_COMPILER_IS_GNUCXX)
+
 # If debug, enable debug printing.
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_options(UnitTests PUBLIC -DENABLE_DEBUG_INFO)

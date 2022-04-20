@@ -4,7 +4,7 @@
 #include "Position.h"
 #include "BoundingBox.h"
 #include "SharedConfig.h"
-#include <SDL2/SDL_rect.h>
+#include <SDL_rect.h>
 
 namespace AM
 {

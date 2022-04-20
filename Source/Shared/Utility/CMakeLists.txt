@@ -13,6 +13,7 @@ target_sources(Shared
         Public/AssetCache.h
         Public/BinaryBuffer.h
         Public/ByteTools.h
+        Public/ConstexprTools.h
         Public/Deserialize.h
         Public/IDPool.h
         Public/OSEventHandler.h

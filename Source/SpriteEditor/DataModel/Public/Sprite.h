@@ -2,8 +2,8 @@
 
 #include "BoundingBox.h"
 #include "entt/core/hashed_string.hpp"
-#include <SDL2/SDL_rect.h>
-#include <SDL2/SDL_stdinc.h>
+#include <SDL_rect.h>
+#include <SDL_stdinc.h>
 
 namespace AM
 {

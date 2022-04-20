@@ -1,5 +1,5 @@
 #include "Paths.h"
-#include <SDL2/SDL_filesystem.h>
+#include <SDL_filesystem.h>
 
 namespace AM
 {

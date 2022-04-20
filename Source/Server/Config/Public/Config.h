@@ -1,9 +1,9 @@
 #pragma once
 
 #include "SharedConfig.h"
-#include <SDL2/SDL_stdinc.h>
+#include "ConstexprTools.h"
+#include <SDL_stdinc.h>
 #include <string>
-#include <cmath>
 
 namespace AM
 {
@@ -46,7 +46,7 @@ public:
     static constexpr double TICKDIFF_HISTORY_S = .5;
     /** The integer number of diffs that we'll remember in the history. */
     static constexpr unsigned int TICKDIFF_HISTORY_LENGTH
-        = std::ceil((TICKDIFF_HISTORY_S / SharedConfig::SIM_TICK_TIMESTEP_S));
+        = ConstexprTools::ceilInt(TICKDIFF_HISTORY_S / SharedConfig::SIM_TICK_TIMESTEP_S);
 
     /** The range of difference (inclusive) between a received message's tickNum
         and our current tickNum that we won't send an adjustment for. */

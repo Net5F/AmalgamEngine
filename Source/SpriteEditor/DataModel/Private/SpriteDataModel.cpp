@@ -4,8 +4,8 @@
 #include "AUI/Core.h"
 #include "nlohmann/json.hpp"
 
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_image.h>
+#include <SDL_render.h>
+#include <SDL_image.h>
 
 #include <filesystem>
 #include <algorithm>

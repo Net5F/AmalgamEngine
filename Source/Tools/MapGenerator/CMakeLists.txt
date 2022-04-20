@@ -26,4 +26,8 @@ target_compile_features(MapGenerator PRIVATE cxx_std_20)
 set_target_properties(MapGenerator PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable compile warnings.
-target_compile_options(MapGenerator PUBLIC -Wall -Wextra)
+if(CMAKE_COMPILER_IS_GNUCXX)
+    target_compile_options(MapGenerator PUBLIC -Wall -Wextra)
+elseif()
+    target_compile_options(MapGenerator PUBLIC -Wall)
+endif(CMAKE_COMPILER_IS_GNUCXX)

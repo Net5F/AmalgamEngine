@@ -7,7 +7,7 @@
 #include <string>
 
 // Libs
-#include <SDL2/SDL_stdinc.h>
+#include <SDL_stdinc.h>
 
 // Ours
 #include "Log.h"

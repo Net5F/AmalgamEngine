@@ -5,7 +5,7 @@
 #include "Heartbeat.h"
 #include "Log.h"
 #include "NetworkStats.h"
-#include <SDL2/SDL_net.h>
+#include <SDL_net.h>
 #include <algorithm>
 #include <atomic>
 

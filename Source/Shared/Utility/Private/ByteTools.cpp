@@ -1,7 +1,7 @@
 #include "ByteTools.h"
 #include "Peer.h"
 #include "Log.h"
-#include <SDL2/SDL_endian.h>
+#include <SDL_endian.h>
 #include "zlib-ng.h"
 
 // If the system has data access alignment restrictions, our casting may fail.

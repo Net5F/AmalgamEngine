@@ -2,7 +2,7 @@
 
 #include "NetworkDefs.h"
 #include "Input.h"
-#include <SDL2/SDL_stdinc.h>
+#include <SDL_stdinc.h>
 
 namespace AM
 {

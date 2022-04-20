@@ -12,8 +12,8 @@
 #include "Log.h"
 #include "Ignore.h"
 
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL2_gfxPrimitives.h>
+#include <SDL_render.h>
+#include <SDL2_gfxPrimitives.h>
 
 namespace AM
 {

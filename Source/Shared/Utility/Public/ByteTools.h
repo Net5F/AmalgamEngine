@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL_stdinc.h>
+#include <SDL_stdinc.h>
 
 /**
  * This file contains helper functions for writing to and reading from byte

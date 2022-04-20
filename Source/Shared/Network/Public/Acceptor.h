@@ -4,7 +4,7 @@
 #include "Peer.h"
 #include "SocketSet.h"
 #include "TcpSocket.h"
-#include <SDL2/SDL_net.h>
+#include <SDL_net.h>
 #include <memory>
 #include <string>
 

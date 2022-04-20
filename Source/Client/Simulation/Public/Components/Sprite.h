@@ -2,7 +2,7 @@
 
 #include "AssetCache.h"
 #include "BoundingBox.h"
-#include <SDL2/SDL_rect.h>
+#include <SDL_rect.h>
 #include <memory>
 
 namespace AM

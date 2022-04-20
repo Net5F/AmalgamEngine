@@ -1,4 +1,4 @@
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include "SDL2pp/SDL.hh"
 #include "SDL2pp/Window.hh"
 #include "SDL2pp/Renderer.hh"

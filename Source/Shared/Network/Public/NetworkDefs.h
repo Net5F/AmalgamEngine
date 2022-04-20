@@ -2,7 +2,7 @@
 
 #include "BinaryBuffer.h"
 #include "MessageType.h"
-#include <SDL2/SDL_stdinc.h>
+#include <SDL_stdinc.h>
 #include <memory>
 #include <vector>
 

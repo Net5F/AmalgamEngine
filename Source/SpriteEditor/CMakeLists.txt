@@ -34,7 +34,11 @@ target_compile_features(SpriteEditor PRIVATE cxx_std_20)
 set_target_properties(SpriteEditor PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable compile warnings.
-target_compile_options(SpriteEditor PUBLIC -Wall -Wextra)
+if(CMAKE_COMPILER_IS_GNUCXX)
+    target_compile_options(SpriteEditor PUBLIC -Wall -Wextra)
+elseif()
+    target_compile_options(SpriteEditor PUBLIC -Wall)
+endif(CMAKE_COMPILER_IS_GNUCXX)
 
 # Copy assets to the build directory.
 file(COPY ${PROJECT_SOURCE_DIR}/Resources/SpriteEditor/Assets/

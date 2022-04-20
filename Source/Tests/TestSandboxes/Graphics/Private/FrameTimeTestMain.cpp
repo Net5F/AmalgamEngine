@@ -42,7 +42,7 @@
 
 #include "Ignore.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #define FRAMETIME_COUNT 200
 

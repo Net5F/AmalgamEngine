@@ -5,7 +5,7 @@
 #include "QueuedEvents.h"
 #include "ConnectionResponse.h"
 #include "entt/entity/registry.hpp"
-#include <SDL2/SDL_stdinc.h>
+#include <SDL_stdinc.h>
 #include <atomic>
 
 namespace AM

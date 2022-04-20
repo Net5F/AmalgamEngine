@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL_stdinc.h>
+#include <SDL_stdinc.h>
 #include "Input.h"
 #include "Position.h"
 #include "Velocity.h"

@@ -1,7 +1,7 @@
 #ifndef SOCKETSET_H_
 #define SOCKETSET_H_
 
-#include <SDL2/SDL_net.h>
+#include <SDL_net.h>
 #include <memory>
 
 namespace AM
