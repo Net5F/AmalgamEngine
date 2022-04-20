@@ -29,11 +29,11 @@ target_compile_features(Shared PRIVATE cxx_std_20)
 set_target_properties(Shared PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable compile warnings.
-if(CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(Shared PUBLIC -Wall -Wextra)
-elseif()
-    target_compile_options(Shared PUBLIC -Wall)
-endif(CMAKE_COMPILER_IS_GNUCXX)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(Shared PUBLIC /W4 /permissive-)
+endif()
 
 # Build all of the subdirectories
 add_subdirectory(Config)
