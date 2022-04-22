@@ -10,7 +10,7 @@ namespace Server
 class Simulation;
 class World;
 class Network;
-class ClientSimData;
+struct ClientSimData;
 
 /**
  * Maintains each client entity's list of peers that are within their area of

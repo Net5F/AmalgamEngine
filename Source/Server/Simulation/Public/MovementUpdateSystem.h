@@ -4,17 +4,17 @@
 
 namespace AM
 {
-class Input;
-class Position;
-class Velocity;
-class EntityUpdate;
+struct Input;
+struct Position;
+struct Velocity;
+struct EntityUpdate;
 
 namespace Server
 {
 class Simulation;
 class World;
 class Network;
-class ClientSimData;
+struct ClientSimData;
 
 /**
  * Sends each client the new movement state of any nearby entities that moved.

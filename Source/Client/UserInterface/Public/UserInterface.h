@@ -19,7 +19,7 @@ namespace AM
 {
 class EventDispatcher;
 class AssetCache;
-class Camera;
+struct Camera;
 
 namespace Client
 {

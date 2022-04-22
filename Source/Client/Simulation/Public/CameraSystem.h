@@ -4,8 +4,8 @@
 
 namespace AM
 {
-class Position;
-class Camera;
+struct Position;
+struct Camera;
 
 namespace Client
 {

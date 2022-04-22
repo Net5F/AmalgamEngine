@@ -41,8 +41,8 @@ void ClientAOISystem::updateAOILists()
 
         // Get the list of entities that are in entityThatMoved's AOI.
         std::vector<entt::entity>& currentAOIEntities{
-            world.entityLocator.getEntitiesFine(position,
-                                                SharedConfig::AOI_RADIUS)};
+            world.entityLocator.getEntitiesFine(
+                position, static_cast<unsigned int>(SharedConfig::AOI_RADIUS))};
 
         // Remove entityThatMoved from the list, if it's in there.
         // (We don't want to add it to its own list.)

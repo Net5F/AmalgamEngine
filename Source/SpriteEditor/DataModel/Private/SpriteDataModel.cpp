@@ -298,6 +298,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
         spriteHeightI = std::stoi(spriteHeight);
         yOffsetI = std::stoi(yOffset);
     } catch (std::exception& e) {
+        ignore(e);
         return "Error: Width, height, or Y offset is not a valid integer.";
     }
 

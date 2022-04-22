@@ -11,7 +11,7 @@ class EventDispatcher;
 namespace Client
 {
 class WorldSinks;
-class Sprite;
+struct Sprite;
 
 /**
  * The build mode overlay on the main screen. Allows the user to place tiles

@@ -60,7 +60,8 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
                   &(batchBuffer[currentIndex]));
 
         // Increment the index.
-        currentIndex += queuedMessage.message->size();
+        currentIndex
+            += static_cast<unsigned int>(queuedMessage.message->size());
 
         // Track the latest tick we've sent.
         if (queuedMessage.tick != 0) {
@@ -81,14 +82,14 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
               currentIndex, SharedConfig::MAX_BATCH_SIZE);
 
     // If we have a large enough payload, compress it.
-    std::size_t batchSize{currentIndex - SERVER_HEADER_SIZE};
+    unsigned int batchSize{currentIndex - SERVER_HEADER_SIZE};
     Uint8* bufferToSend{&(batchBuffer[0])};
     bool isCompressed{false};
     if (batchSize > SharedConfig::BATCH_COMPRESSION_THRESHOLD) {
-        batchSize = ByteTools::compress(
+        batchSize = static_cast<unsigned int>(ByteTools::compress(
             &(batchBuffer[ServerHeaderIndex::MessageHeaderStart]), batchSize,
             &(compressedBatchBuffer[ServerHeaderIndex::MessageHeaderStart]),
-            COMPRESSED_BUFFER_SIZE);
+            COMPRESSED_BUFFER_SIZE));
         AM_ASSERT((batchSize <= MAX_BATCH_SIZE),
                   "Batch too large, even after compression. Size: %u",
                   batchSize);
@@ -103,15 +104,15 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     fillHeader(bufferToSend, static_cast<Uint16>(batchSize), isCompressed);
 
     // Record the number of sent bytes.
-    std::size_t totalSize{SERVER_HEADER_SIZE + batchSize};
+    unsigned int totalSize{SERVER_HEADER_SIZE + batchSize};
     NetworkStats::recordBytesSent(totalSize);
 
     // Send the header and batch.
-    std::size_t sendIndex{0};
+    unsigned int sendIndex{0};
     NetworkResult result{NetworkResult::Success};
     while (sendIndex < totalSize) {
         // Calc how many bytes we have left to send.
-        std::size_t bytesToSend{totalSize - sendIndex};
+        unsigned int bytesToSend{totalSize - sendIndex};
 
         // Only send up to MAX_WIRE_SIZE bytes per send() call.
         if (bytesToSend > Peer::MAX_WIRE_SIZE) {
@@ -155,9 +156,9 @@ void Client::addExplicitConfirmation(unsigned int& currentIndex,
     // Write the explicit confirmation message.
     ExplicitConfirmation explicitConfirmation{
         static_cast<Uint8>(confirmedTickCount)};
-    currentIndex += Serialize::toBuffer(
+    currentIndex += static_cast<unsigned int>(Serialize::toBuffer(
         batchBuffer.data(), (SharedConfig::MAX_BATCH_SIZE - currentIndex),
-        explicitConfirmation, currentIndex);
+        explicitConfirmation, currentIndex));
 
     // Increment the message count.
     messageCount++;
@@ -193,7 +194,7 @@ Uint8 Client::getWaitingMessageCount() const
         (size <= SDL_MAX_UINT8),
         "Client's sendQueue contains too many messages to return as a Uint8.");
 
-    return size;
+    return static_cast<Uint8>(size);
 }
 
 ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
@@ -272,7 +273,7 @@ void Client::recordTickDiff(Sint64 tickDiff)
 
     // Add the new data.
     if ((tickDiff > SDL_MIN_SINT8) && (tickDiff < SDL_MAX_SINT8)) {
-        tickDiffHistory.push(tickDiff);
+        tickDiffHistory.push(static_cast<Uint8>(tickDiff));
     }
     else {
         LOG_FATAL("tickDiff out of Sint8 range. diff: %ll", static_cast<long long>(tickDiff));
@@ -354,7 +355,10 @@ Sint8 Client::calcAdjustment(
                         truncatedAverage);
 
     // Make an adjustment back towards the target.
-    return (Config::TICKDIFF_TARGET - truncatedAverage);
+    Sint64 adjustment{Config::TICKDIFF_TARGET - truncatedAverage};
+    AM_ASSERT((adjustment >= SDL_MIN_SINT8), "Adjustment out of bounds.");
+    AM_ASSERT((adjustment <= SDL_MAX_SINT8), "Adjustment out of bounds.");
+    return static_cast<Sint8>(adjustment);
 }
 
 void Client::printAdjustmentInfo(

@@ -107,7 +107,8 @@ private:
         statistics. */
     static constexpr unsigned int SECONDS_TILL_STATS_DUMP = 5;
     static constexpr unsigned int TICKS_TILL_STATS_DUMP
-        = (1 / SharedConfig::NETWORK_TICK_TIMESTEP_S) * SECONDS_TILL_STATS_DUMP;
+        = static_cast<unsigned int>((1 / SharedConfig::NETWORK_TICK_TIMESTEP_S)
+                                    * SECONDS_TILL_STATS_DUMP);
 
     /** The number of ticks since we last logged our network statistics. */
     unsigned int ticksSinceNetstatsLog;
@@ -138,7 +139,7 @@ void Network::serializeAndSend(NetworkID networkID, const T& messageStruct,
         = static_cast<Uint8>(T::MESSAGE_TYPE);
 
     // Copy the messageSize into the buffer.
-    ByteTools::write16(messageSize,
+    ByteTools::write16(static_cast<Uint16>(messageSize),
                        (messageBuffer->data() + MessageHeaderIndex::Size));
 
     // Send the message.

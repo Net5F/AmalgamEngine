@@ -9,7 +9,7 @@ namespace AM
 {
 namespace SpriteEditor
 {
-class SpriteSheet;
+struct SpriteSheet;
 
 /**
  * Holds the data for a single sprite.

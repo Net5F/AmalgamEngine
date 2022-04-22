@@ -131,7 +131,8 @@ void Network::send(const BinaryBufferSharedPtr& message)
         messagesSentSinceTick++;
 
         // Record the number of sent bytes.
-        NetworkStats::recordBytesSent(message->size());
+        NetworkStats::recordBytesSent(
+            static_cast<unsigned int>(message->size()));
     }
     else {
         LOG_FATAL("Message send failed.");
@@ -201,9 +202,10 @@ void Network::processBatch()
         // If the payload is compressed, uncompress it.
         Uint8* bufferToUse{&(batchRecBuffer[0])};
         if (batchIsCompressed) {
-            batchSize = ByteTools::uncompress(&(batchRecBuffer[0]), batchSize,
-                                              &(uncompressedBatchRecBuffer[0]),
-                                              SharedConfig::MAX_BATCH_SIZE);
+            batchSize = static_cast<Uint16>(
+                ByteTools::uncompress(&(batchRecBuffer[0]), batchSize,
+                                      &(uncompressedBatchRecBuffer[0]),
+                                      SharedConfig::MAX_BATCH_SIZE));
 
             bufferToUse = &(uncompressedBatchRecBuffer[0]);
         }

@@ -13,7 +13,7 @@ class AssetCache;
 namespace Client
 {
 class SpriteData;
-class Sprite;
+struct Sprite;
 class BuildOverlay;
 
 /**

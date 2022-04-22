@@ -8,10 +8,10 @@ struct SDL_Renderer;
 
 namespace AM
 {
-class Sprite;
-class BoundingBox;
-class Camera;
-class ScreenRect;
+struct Sprite;
+struct BoundingBox;
+struct Camera;
+struct ScreenRect;
 namespace Client
 {
 class Simulation;

@@ -50,7 +50,7 @@ public:
 
         // We didn't have the id, add it.
         palette.push_back(numericID);
-        return (palette.size() - 1);
+        return static_cast<unsigned int>(palette.size() - 1);
     }
 };
 

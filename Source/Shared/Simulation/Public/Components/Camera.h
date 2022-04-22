@@ -36,7 +36,7 @@ public:
     float zoomFactor{1.0};
 
     /** How quickly the camera zooms. */
-    float zoomSensitivity{0.1};
+    float zoomSensitivity{0.1f};
 };
 
 } // namespace AM

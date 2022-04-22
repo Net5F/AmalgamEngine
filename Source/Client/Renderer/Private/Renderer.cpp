@@ -136,8 +136,8 @@ void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
     Sint16 xValues[8] = {};
     Sint16 yValues[8] = {};
     for (unsigned int i = 0; i < 8; ++i) {
-        xValues[i] = verts[i].x;
-        yValues[i] = verts[i].y;
+        xValues[i] = static_cast<Sint16>(verts[i].x);
+        yValues[i] = static_cast<Sint16>(verts[i].y);
     }
 
     // Draw the faces.

@@ -39,12 +39,16 @@ void EntityLocator::setEntityLocation(entt::entity entity,
 {
     // Find the cells that the bounding box intersects.
     CellExtent boxCellExtent{};
-    boxCellExtent.x = std::floor(boundingBox.minX / cellWorldWidth);
-    boxCellExtent.y = std::floor(boundingBox.minY / cellWorldWidth);
+    boxCellExtent.x
+        = static_cast<int>(std::floor(boundingBox.minX / cellWorldWidth));
+    boxCellExtent.y
+        = static_cast<int>(std::floor(boundingBox.minY / cellWorldWidth));
     boxCellExtent.xLength
-        = (std::ceil(boundingBox.maxX / cellWorldWidth) - boxCellExtent.x);
+        = (static_cast<int>(std::ceil(boundingBox.maxX / cellWorldWidth))
+           - boxCellExtent.x);
     boxCellExtent.yLength
-        = (std::ceil(boundingBox.maxY / cellWorldWidth) - boxCellExtent.y);
+        = (static_cast<int>(std::ceil(boundingBox.maxY / cellWorldWidth))
+           - boxCellExtent.y);
 
     AM_ASSERT(cellExtent.containsExtent(boxCellExtent),
               "Tried to track entity "
@@ -83,15 +87,17 @@ std::vector<entt::entity>&
 
     // Calc the cell extent that is intersected by the cylinder.
     CellExtent cylinderCellExtent{};
-    cylinderCellExtent.x
-        = std::floor((cylinderCenter.x - radius) / cellWorldWidth);
-    cylinderCellExtent.y
-        = std::floor((cylinderCenter.y - radius) / cellWorldWidth);
+    cylinderCellExtent.x = static_cast<int>(
+        std::floor((cylinderCenter.x - radius) / cellWorldWidth));
+    cylinderCellExtent.y = static_cast<int>(
+        std::floor((cylinderCenter.y - radius) / cellWorldWidth));
     cylinderCellExtent.xLength
-        = (std::ceil((cylinderCenter.x + radius) / cellWorldWidth)
+        = (static_cast<int>(
+               std::ceil((cylinderCenter.x + radius) / cellWorldWidth))
            - cylinderCellExtent.x);
     cylinderCellExtent.yLength
-        = (std::ceil((cylinderCenter.y + radius) / cellWorldWidth)
+        = (static_cast<int>(
+               std::ceil((cylinderCenter.y + radius) / cellWorldWidth))
            - cylinderCellExtent.y);
 
     // Clip the extent to the grid's bounds.

@@ -475,7 +475,8 @@ void BoundingBoxGizmo::renderControls()
     offsetExtent.y += renderExtent.y;
     lastRenderedPosExtent = offsetExtent;
 
-    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 0, 0, alpha);
+    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 0, 0,
+                           static_cast<Uint8>(alpha));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedPosExtent);
 
     // X control
@@ -484,7 +485,8 @@ void BoundingBoxGizmo::renderControls()
     offsetExtent.y += renderExtent.y;
     lastRenderedXExtent = offsetExtent;
 
-    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 148, 0, 0, alpha);
+    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 148, 0, 0,
+                           static_cast<Uint8>(alpha));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedXExtent);
 
     // Y control
@@ -493,7 +495,8 @@ void BoundingBoxGizmo::renderControls()
     offsetExtent.y += renderExtent.y;
     lastRenderedYExtent = offsetExtent;
 
-    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 149, 0, alpha);
+    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 149, 0,
+                           static_cast<Uint8>(alpha));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedYExtent);
 
     // Z control
@@ -502,7 +505,8 @@ void BoundingBoxGizmo::renderControls()
     offsetExtent.y += renderExtent.y;
     lastRenderedZExtent = offsetExtent;
 
-    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 82, 240, alpha);
+    SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 82, 240,
+                           static_cast<Uint8>(alpha));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedZExtent);
 }
 
@@ -524,7 +528,7 @@ void BoundingBoxGizmo::renderLines()
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 148, 0,
-                  0, alpha);
+                  0, static_cast<Uint8>(alpha));
 
     // Y-axis line
     offsetMinPoint = yMinPoint;
@@ -536,7 +540,7 @@ void BoundingBoxGizmo::renderLines()
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 149,
-                  0, alpha);
+                  0, static_cast<Uint8>(alpha));
 
     // Z-axis line
     offsetMinPoint = zMinPoint;
@@ -548,7 +552,7 @@ void BoundingBoxGizmo::renderLines()
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 82,
-                  240, alpha);
+                  240, static_cast<Uint8>(alpha));
 }
 
 void BoundingBoxGizmo::renderPlanes()
@@ -573,15 +577,18 @@ void BoundingBoxGizmo::renderPlanes()
 
     // X-axis plane
     filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[0]),
-                      &(offsetYCoords[0]), 4, 148, 0, 0, alpha);
+                      &(offsetYCoords[0]), 4, 148, 0, 0,
+                      static_cast<Uint8>(alpha));
 
     // Y-axis plane
     filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[4]),
-                      &(offsetYCoords[4]), 4, 0, 149, 0, alpha);
+                      &(offsetYCoords[4]), 4, 0, 149, 0,
+                      static_cast<Uint8>(alpha));
 
     // Z-axis plane
     filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[8]),
-                      &(offsetYCoords[8]), 4, 0, 82, 240, alpha);
+                      &(offsetYCoords[8]), 4, 0, 82, 240,
+                      static_cast<Uint8>(alpha));
 }
 
 } // End namespace SpriteEditor

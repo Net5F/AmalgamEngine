@@ -59,9 +59,9 @@ Position MovementHelpers::updatePosition(const Position& position,
 {
     // Update the position.
     Position newPosition{position};
-    newPosition.x += (deltaSeconds * velocity.x);
-    newPosition.y += (deltaSeconds * velocity.y);
-    newPosition.z += (deltaSeconds * velocity.z);
+    newPosition.x += static_cast<float>((deltaSeconds * velocity.x));
+    newPosition.y += static_cast<float>((deltaSeconds * velocity.y));
+    newPosition.z += static_cast<float>((deltaSeconds * velocity.z));
 
     return newPosition;
 }

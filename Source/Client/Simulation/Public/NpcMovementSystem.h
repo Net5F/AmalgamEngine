@@ -7,7 +7,7 @@
 
 namespace AM
 {
-class EntityUpdate;
+struct EntityUpdate;
 
 namespace Client
 {

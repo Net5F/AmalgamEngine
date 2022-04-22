@@ -18,8 +18,8 @@
 
 namespace AM
 {
-class ConnectionResponse;
-class EntityUpdate;
+struct ConnectionResponse;
+struct EntityUpdate;
 
 namespace Client
 {
@@ -176,7 +176,8 @@ private:
         statistics. */
     static constexpr unsigned int SECONDS_TILL_STATS_DUMP = 5;
     static constexpr unsigned int TICKS_TILL_STATS_DUMP
-        = (1 / SharedConfig::NETWORK_TICK_TIMESTEP_S) * SECONDS_TILL_STATS_DUMP;
+        = static_cast<unsigned int>((1 / SharedConfig::NETWORK_TICK_TIMESTEP_S)
+                                    * SECONDS_TILL_STATS_DUMP);
 
     /** Whether network statistics logging is enabled or not. */
     bool netstatsLoggingEnabled;
@@ -219,8 +220,9 @@ void Network::serializeAndSend(const T& messageStruct)
         = static_cast<Uint8>(T::MESSAGE_TYPE);
 
     // Copy the message size into the message header.
-    ByteTools::write16(messageSize, (messageBuffer->data() + CLIENT_HEADER_SIZE
-                                     + MessageHeaderIndex::Size));
+    ByteTools::write16(static_cast<Uint16>(messageSize),
+                       (messageBuffer->data() + CLIENT_HEADER_SIZE
+                        + MessageHeaderIndex::Size));
 
     // Send the message.
     send(messageBuffer);

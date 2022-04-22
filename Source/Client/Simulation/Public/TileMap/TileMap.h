@@ -9,7 +9,7 @@
 
 namespace AM
 {
-class TileMapSnapshot;
+struct TileMapSnapshot;
 namespace Client
 {
 class SpriteData;

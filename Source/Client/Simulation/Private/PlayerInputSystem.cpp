@@ -36,8 +36,8 @@ void PlayerInputSystem::processMomentaryInput(SDL_Event& event)
 void PlayerInputSystem::processMouseState(SDL_MouseMotionEvent& event)
 {
     // Save the mouse's new position.
-    world.mouseScreenPoint.x = event.x;
-    world.mouseScreenPoint.y = event.y;
+    world.mouseScreenPoint.x = static_cast<float>(event.x);
+    world.mouseScreenPoint.y = static_cast<float>(event.y);
 }
 
 void PlayerInputSystem::processHeldInputs()

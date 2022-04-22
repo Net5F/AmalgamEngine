@@ -50,7 +50,7 @@ public:
 
         // We didn't have the string, add it.
         palette.push_back(stringID);
-        return (palette.size() - 1);
+        return static_cast<unsigned int>(palette.size() - 1);
     }
 };
 

@@ -7,7 +7,7 @@
 #include "entt/entity/registry.hpp"
 #include "entt/signal/sigh.hpp"
 
-class SDL_Rect;
+struct SDL_Rect;
 
 namespace AM
 {

@@ -59,7 +59,7 @@ NetworkResult Peer::send(const BinaryBufferSharedPtr& buffer)
                   messageSize, MAX_WIRE_SIZE);
     }
 
-    int bytesSent = socket->send(buffer->data(), messageSize);
+    int bytesSent{socket->send(buffer->data(), static_cast<int>(messageSize))};
     if (bytesSent < 0) {
         LOG_FATAL("TCP_Send returned < 0. This should never happen, the socket"
                   "was likely misused.");

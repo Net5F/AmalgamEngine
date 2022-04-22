@@ -6,10 +6,10 @@
 
 namespace AM
 {
-class Position;
-class PreviousPosition;
-class Velocity;
-class Input;
+struct Position;
+struct PreviousPosition;
+struct Velocity;
+struct Input;
 
 namespace Client
 {
@@ -17,7 +17,7 @@ class Simulation;
 class World;
 class Network;
 
-class InputHistory;
+struct InputHistory;
 
 /**
  * Processes player entity update messages and moves the entity appropriately.

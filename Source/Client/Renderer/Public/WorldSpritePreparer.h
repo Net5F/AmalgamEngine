@@ -9,6 +9,7 @@ struct SDL_Rect;
 namespace AM
 {
 struct Camera;
+
 namespace Client
 {
 class TileMap;

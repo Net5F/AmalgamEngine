@@ -279,6 +279,7 @@ void PropertiesPanel::saveMinX()
         // Apply the new value.
         spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
     } catch (std::exception& e) {
+        ignore(e);
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinX));
     }
@@ -299,6 +300,7 @@ void PropertiesPanel::saveMinY()
         // Apply the new value.
         spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
     } catch (std::exception& e) {
+        ignore(e);
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinY));
     }
@@ -319,6 +321,7 @@ void PropertiesPanel::saveMinZ()
         // Apply the new value.
         spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
     } catch (std::exception& e) {
+        ignore(e);
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinZ));
     }
@@ -342,6 +345,7 @@ void PropertiesPanel::saveMaxX()
         // Apply the new value.
         spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
     } catch (std::exception& e) {
+        ignore(e);
         // Input was not valid, reset the field to what it was.
         maxXInput.setText(std::to_string(committedMaxX));
     }
@@ -365,6 +369,7 @@ void PropertiesPanel::saveMaxY()
         // Apply the new value.
         spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
     } catch (std::exception& e) {
+        ignore(e);
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));
     }
@@ -392,6 +397,7 @@ void PropertiesPanel::saveMaxZ()
         // Apply the new value.
         spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
     } catch (std::exception& e) {
+        ignore(e);
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));
     }

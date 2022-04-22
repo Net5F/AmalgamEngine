@@ -62,18 +62,19 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 
     // Find the lowest x/y tile indices that the player can see.
     TileExtent tileViewExtent{};
-    tileViewExtent.x
-        = std::floor((centerPosition.x - SharedConfig::VIEW_RADIUS)
-                     / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
-    tileViewExtent.y
-        = std::floor((centerPosition.y - SharedConfig::VIEW_RADIUS)
-                     / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
+    tileViewExtent.x = static_cast<int>(
+        std::floor((centerPosition.x - SharedConfig::VIEW_RADIUS)
+                   / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)));
+    tileViewExtent.y = static_cast<int>(
+        std::floor((centerPosition.y - SharedConfig::VIEW_RADIUS)
+                   / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)));
 
     // Calc how far the player's view extends.
     // Note: We add 1 to the view radius to keep all sides even, since the
     //       player occupies a tile.
-    tileViewExtent.xLength = std::ceil(((SharedConfig::VIEW_RADIUS * 2) + 1)
-                                       / SharedConfig::TILE_WORLD_WIDTH);
+    tileViewExtent.xLength
+        = static_cast<int>(std::ceil(((SharedConfig::VIEW_RADIUS * 2) + 1)
+                                     / SharedConfig::TILE_WORLD_WIDTH));
     tileViewExtent.yLength = tileViewExtent.xLength;
 
     // Clip the view to the world bounds.
