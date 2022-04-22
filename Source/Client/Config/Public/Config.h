@@ -77,7 +77,7 @@ public:
      * "linear" = Linear filtering (supported by OpenGL and Direct3D).
      * "best" = Ansiotropic filtering (supported by Direct3D).
      */
-    static constexpr char SCALING_QUALITY[]{"linear"};
+    static constexpr char SCALING_QUALITY[] = "linear";
 
     /** The rate at which the user interfaces fires off tick() events. */
     static constexpr unsigned int UI_TICKS_PER_SECOND = 30;

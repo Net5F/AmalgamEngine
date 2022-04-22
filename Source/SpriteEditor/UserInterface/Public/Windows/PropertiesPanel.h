@@ -9,12 +9,12 @@
 namespace AM
 {
 class AssetCache;
-class BoundingBox;
+struct BoundingBox;
 
 namespace SpriteEditor
 {
 class SpriteDataModel;
-class Sprite;
+struct Sprite;
 
 /**
  * The right-side panel on the main screen. Allows the user to view and

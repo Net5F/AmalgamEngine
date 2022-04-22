@@ -6,12 +6,12 @@
 
 namespace AM
 {
-class Position;
-class BoundingBox;
+struct Position;
+struct BoundingBox;
 
 namespace SpriteEditor
 {
-class Sprite;
+struct Sprite;
 class SpriteDataModel;
 
 /**

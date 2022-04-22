@@ -1,0 +1,67 @@
+﻿{
+  "configurations": [
+    {
+      "name": "x64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "buildRoot": "${projectDir}\\Build\\Windows",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "variables": [
+        {
+          "name": "SDL2_INCLUDE_DIR",
+          "value": "E:/Libraries/SDL2/SDL2-2.0.20/include",
+          "type": "PATH"
+        },
+        {
+          "name": "SDL2_DIR",
+          "value": "E:/Libraries/SDL2/SDL2-2.0.20",
+          "type": "PATH"
+        },
+        {
+          "name": "SDL2_IMAGE_INCLUDE_DIR",
+          "value": "E:/Libraries/SDL2/SDL2_image-2.0.5/include",
+          "type": "PATH"
+        },
+        {
+          "name": "SDL2_IMAGE_LIBRARY",
+          "value": "E:/Libraries/SDL2/SDL2_image-2.0.5/lib/x64/SDL2_image.lib",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "SDL2_MIXER_INCLUDE_DIR",
+          "value": "E:/Libraries/SDL2/SDL2_mixer-2.0.4/include",
+          "type": "PATH"
+        },
+        {
+          "name": "SDL2_MIXER_LIBRARY",
+          "value": "E:/Libraries/SDL2/SDL2_mixer-2.0.4/lib/x64/SDL2_mixer.lib",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "SDL2_TTF_INCLUDE_DIR",
+          "value": "E:/Libraries/SDL2/SDL2_ttf-2.0.18/include",
+          "type": "PATH"
+        },
+        {
+          "name": "SDL2_TTF_LIBRARY",
+          "value": "E:/Libraries/SDL2/SDL2_ttf-2.0.18/lib/x64/SDL2_ttf.lib",
+          "type": "FILEPATH"
+        },
+        {
+          "name": "SDL2_GFX_INCLUDE_DIR",
+          "value": "E:/Libraries/SDL2/SDL2_gfx-1.0.4/include",
+          "type": "PATH"
+        },
+        {
+          "name": "SDL2_GFX_LIBRARY",
+          "value": "E:/Libraries/SDL2/SDL2_gfx-1.0.4/lib/SDL2_gfx.lib",
+          "type": "FILEPATH"
+        }
+      ]
+    }
+  ]
+}

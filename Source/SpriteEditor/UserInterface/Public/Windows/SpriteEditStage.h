@@ -11,7 +11,7 @@ class AssetCache;
 
 namespace SpriteEditor
 {
-class Sprite;
+struct Sprite;
 class SpriteDataModel;
 
 /**

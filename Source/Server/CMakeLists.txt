@@ -39,7 +39,7 @@ set_target_properties(Server PROPERTIES CXX_EXTENSIONS OFF)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(Server PUBLIC -Wall -Wextra)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(Server PUBLIC /W4 /permissive-)
+    target_compile_options(Server PUBLIC /W3 /permissive-)
 endif()
 
 # Copy SpriteData.json to the build directory.

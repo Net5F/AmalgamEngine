@@ -4,11 +4,11 @@
 #include "entt/entity/registry.hpp"
 #include <vector>
 
-class SDL_Rect;
+struct SDL_Rect;
 
 namespace AM
 {
-class Camera;
+struct Camera;
 namespace Client
 {
 class TileMap;

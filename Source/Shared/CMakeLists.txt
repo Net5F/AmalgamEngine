@@ -32,7 +32,7 @@ set_target_properties(Shared PROPERTIES CXX_EXTENSIONS OFF)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(Shared PUBLIC -Wall -Wextra)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(Shared PUBLIC /W4 /permissive-)
+    target_compile_options(Shared PUBLIC /W3 /permissive-)
 endif()
 
 # Build all of the subdirectories

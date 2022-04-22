@@ -38,7 +38,7 @@ set_target_properties(UnitTests PROPERTIES CXX_EXTENSIONS OFF)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(UnitTests PUBLIC -Wall -Wextra)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(UnitTests PUBLIC /W4 /permissive-)
+    target_compile_options(UnitTests PUBLIC /W3 /permissive-)
 endif()
 
 # If debug, enable debug printing.

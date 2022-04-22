@@ -8,7 +8,7 @@ target_include_directories(SpriteEditor
     PRIVATE
         ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} 
         ${SDL2_MIXER_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS}
-        ${SDL2PP_INCLUDE_DIRS}
+        ${SDL2_GFX_INCLUDE_DIRS} ${SDL2PP_INCLUDE_DIRS}
 )
 
 # Inherit Shared's precompiled header.
@@ -37,7 +37,7 @@ set_target_properties(SpriteEditor PROPERTIES CXX_EXTENSIONS OFF)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(SpriteEditor PUBLIC -Wall -Wextra)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(SpriteEditor PUBLIC /W4 /permissive-)
+    target_compile_options(SpriteEditor PUBLIC /W3 /permissive-)
 endif()
 
 # Copy assets to the build directory.

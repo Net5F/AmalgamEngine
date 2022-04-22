@@ -275,7 +275,7 @@ void Client::recordTickDiff(Sint64 tickDiff)
         tickDiffHistory.push(tickDiff);
     }
     else {
-        LOG_FATAL("tickDiff out of Sint8 range. diff: %" PRId64, tickDiff);
+        LOG_FATAL("tickDiff out of Sint8 range. diff: %ll", static_cast<long long>(tickDiff));
     }
 
     // Note: This is safe, only this thread modifies numFreshDiffs.

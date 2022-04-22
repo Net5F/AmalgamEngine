@@ -8,9 +8,9 @@
 
 namespace AM
 {
-class ScreenPoint;
-class Sprite;
-class Camera;
+struct ScreenPoint;
+struct Sprite;
+struct Camera;
 
 /**
  * Static functions for transforming between world, screen, and model space.

@@ -7,10 +7,10 @@
 
 namespace AM
 {
-class Camera;
+struct Camera;
 namespace Client
 {
-class Sprite;
+struct Sprite;
 
 /**
  * Client-specific static functions for transforming between world and screen

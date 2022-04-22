@@ -9,9 +9,9 @@
 
 namespace AM
 {
-class Position;
-class PreviousPosition;
-class Velocity;
+struct Position;
+struct PreviousPosition;
+struct Velocity;
 
 /**
  * Shared static functions for moving entities.

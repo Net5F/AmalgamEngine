@@ -22,7 +22,7 @@ target_include_directories(SDL2_net-static
 
 target_link_libraries(SDL2_net-static PRIVATE ${SDL2_LIBRARIES})
 
-if(MINGW)
+if(MINGW OR MSVC)
     target_link_libraries(SDL2_net-static PRIVATE ws2_32 iphlpapi)
 endif()
 
