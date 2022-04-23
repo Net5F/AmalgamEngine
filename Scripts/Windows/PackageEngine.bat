@@ -10,6 +10,13 @@ if not "%argC%"=="1" (
     goto End
 )
 
+rem Check that CMake exists.
+WHERE /q cmake
+if %ERRORLEVEL% NEQ 0 (
+    echo "CMake not found. Either install it, or run this script from the Visual Studio command line (Tools -> Command Line -> Developer Command Prompt)."
+    goto End
+)
+
 rem Grab the full path to the base of the repo (assuming this script is in Scripts/Windows).
 set "ScriptPath=%~dp0"
 pushd %ScriptPath%
@@ -64,6 +71,5 @@ rem Detect and copy dependencies.
 cmake -P "%BasePath%\CMake\copy_runtime_deps.cmake" "%BuildPath%\Client\Client.exe" "%PackagePath%\Client"
 cmake -P "%BasePath%\CMake\copy_runtime_deps.cmake" "%BuildPath%\Server\Server.exe" "%PackagePath%\Server"
 cmake -P "%BasePath%\CMake\copy_runtime_deps.cmake" "%BuildPath%\SpriteEditor\SpriteEditor.exe" "%PackagePath%\SpriteEditor"
-
 
 :End

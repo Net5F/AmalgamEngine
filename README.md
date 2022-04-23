@@ -34,9 +34,9 @@ Project vision (not all implemented yet, see Status section)
 ## Building
 ### Windows
 #### Visual Studio (MSVC)
-1. Run `Scripts/Windows/InstallDependencies.bat`, passing it the path you want to download the dependencies to.
+1. Run `Scripts/Windows/InstallDependencies.bat`, passing it the path you want to install the dependencies to.
 1. Open CMakeLists.txt in Visual Studio (`Open` -> `CMake`).
-1. Update CMakeSettings.json (in this repo) to point at your dependency installation path.
+1. Update CMakeSettings.json (in this repo) to point at the various SDL folders in your installation path.
    1. You'll leave this file dirty. Don't try to commit it back upstream with your personal paths.
 1. `Project` -> `Generate CMake cache` (or just let it run if you have auto-config on).
 1. `Build` -> `Build All`

@@ -15,8 +15,8 @@ target_include_directories(MapGenerator
 
 target_link_libraries(MapGenerator
     PRIVATE
-        -static-libgcc
-        -static-libstdc++
+        $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>
+        $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>
         Bitsery::bitsery
         Shared
 )
@@ -29,5 +29,5 @@ set_target_properties(MapGenerator PROPERTIES CXX_EXTENSIONS OFF)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(MapGenerator PUBLIC -Wall -Wextra)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(MapGenerator PUBLIC /W4 /permissive-)
+    target_compile_options(MapGenerator PUBLIC /W3 /permissive-)
 endif()

@@ -16,8 +16,8 @@ target_precompile_headers(SpriteEditor REUSE_FROM Shared)
 
 target_link_libraries(SpriteEditor
     PRIVATE
-        -static-libgcc
-        -static-libstdc++
+        $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>
+        $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>
         ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}
         ${SDL2_MIXER_LIBRARIES} ${SDL2_TTF_LIBRARIES}
         ${SDL2_GFX_LIBRARIES} ${SDL2PP_LIBRARIES}

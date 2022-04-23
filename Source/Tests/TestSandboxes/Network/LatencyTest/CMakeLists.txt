@@ -13,8 +13,8 @@ target_include_directories(LatencyTestClient
 )
 target_link_libraries(LatencyTestClient
     PRIVATE
-        -static-libgcc
-        -static-libstdc++
+        $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>
+        $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>
         ${SDL2_LIBRARIES}
         SDL2_net-static
         Shared
@@ -33,8 +33,8 @@ target_include_directories(LatencyTestServer
 )
 target_link_libraries(LatencyTestServer
     PRIVATE
-        -static-libgcc
-        -static-libstdc++
+        $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>
+        $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>
         ${SDL2_LIBRARIES}
         SDL2_net-static
         Shared
