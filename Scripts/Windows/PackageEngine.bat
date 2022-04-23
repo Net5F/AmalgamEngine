@@ -72,4 +72,6 @@ cmake -P "%BasePath%\CMake\copy_runtime_deps.cmake" "%BuildPath%\Client\Client.e
 cmake -P "%BasePath%\CMake\copy_runtime_deps.cmake" "%BuildPath%\Server\Server.exe" "%PackagePath%\Server"
 cmake -P "%BasePath%\CMake\copy_runtime_deps.cmake" "%BuildPath%\SpriteEditor\SpriteEditor.exe" "%PackagePath%\SpriteEditor"
 
+echo "Packaging complete. Package can be found at %PackagePath%"
+
 :End

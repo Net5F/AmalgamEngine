@@ -52,4 +52,6 @@ cmake -P $BasePath/CMake/copy_runtime_deps.cmake $BuildPath/SpriteEditor/SpriteE
 find $PackagePath/Client/ -maxdepth 1 -type f ! -name '*.json' -exec patchelf --set-rpath '$ORIGIN' {} \;
 find $PackagePath/Server/ -maxdepth 1 -type f ! -name '*.json' ! -name '*.bin' -exec patchelf --set-rpath '$ORIGIN' {} \;
 find $PackagePath/SpriteEditor/ -maxdepth 1 -type f -exec patchelf --set-rpath '$ORIGIN' {} \;
+
+echo "Packaging complete. Package can be found at $PackagePath"
     
