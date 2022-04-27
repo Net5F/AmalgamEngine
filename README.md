@@ -3,10 +3,10 @@
 Project vision (not all implemented yet, see Status section)
 * Easily create isometric, sprite-based virtual worlds.
 * Start from a template and have a full working world, including client, server, text chat, and account management.
-* All networking is provided, and adding new messages for your custom features is extremely easy.
+* All needed networking is built-in, and adding new messages for your custom features is extremely easy.
 * Targeted for use on relatively low-spec hardware (tested on a $30/mo rented server).
 * Load tested with 150 clients in 1 spot or 1000 clients in groups of 10, all sending 4 inputs/second.
-* Live, in-world map editing. Use permissions to let players build things, or to restrict it to your developers.
+* Live, in-world map editing. Use permissions to let players build things, or restrict it to your developers.
 
 ## Status
 ### Current
