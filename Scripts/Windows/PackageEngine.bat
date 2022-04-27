@@ -67,10 +67,14 @@ robocopy "%BasePath%\Resources\SpriteEditor" "%PackagePath%\SpriteEditor" /E >nu
 robocopy "%BasePath%\Resources\Shared" "%PackagePath%\Client" /E >nul 2>&1
 robocopy "%BasePath%\Resources\Shared" "%PackagePath%\Server" /E >nul 2>&1
 
+robocopy "%BasePath%\Resources\Packaging\Windows" "%PackagePath%\Client" /E >nul 2>&1
+robocopy "%BasePath%\Resources\Packaging\Windows" "%PackagePath%\Server" /E >nul 2>&1
+robocopy "%BasePath%\Resources\Packaging\Windows" "%PackagePath%\SpriteEditor" /E >nul 2>&1
+
 rem Detect and copy dependencies.
-cmake -P "%BasePath%\CMake\copy_runtime_deps.cmake" "%BuildPath%\Client\Client.exe" "%PackagePath%\Client"
-cmake -P "%BasePath%\CMake\copy_runtime_deps.cmake" "%BuildPath%\Server\Server.exe" "%PackagePath%\Server"
-cmake -P "%BasePath%\CMake\copy_runtime_deps.cmake" "%BuildPath%\SpriteEditor\SpriteEditor.exe" "%PackagePath%\SpriteEditor"
+cmake -P "%BasePath%\CMake\copy_windows_deps.cmake" "%PackagePath%\Client" false
+cmake -P "%BasePath%\CMake\copy_windows_deps.cmake" "%PackagePath%\Server" true
+cmake -P "%BasePath%\CMake\copy_windows_deps.cmake" "%PackagePath%\SpriteEditor" false
 
 echo "Packaging complete. Package can be found at %PackagePath%"
 
