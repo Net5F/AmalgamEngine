@@ -1,6 +1,11 @@
 Hello! Thanks for downloading. I hope you enjoy. - Net
 
-Please make sure you have the latest Visual C++ Redistributable:
+###################
+## Installation
+###################
+No installation is required, just run the .exe file.
+
+If you have issues, please make sure you have the latest Visual C++ Redistributable:
     Direct link
         https://aka.ms/vs/17/release/vc_redist.x64.exe
     Microsoft support page

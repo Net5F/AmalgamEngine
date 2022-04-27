@@ -43,15 +43,8 @@ cp -r $BasePath/Resources/SpriteEditor/* $PackagePath/SpriteEditor/
 cp -r $BasePath/Resources/Shared/* $PackagePath/Client/
 cp -r $BasePath/Resources/Shared/* $PackagePath/Server/
 
-# Detect and copy dependencies.
-cmake -P $BasePath/CMake/copy_runtime_deps.cmake $BuildPath/Client/Client $PackagePath/Client/
-cmake -P $BasePath/CMake/copy_runtime_deps.cmake $BuildPath/Server/Server $PackagePath/Server/
-cmake -P $BasePath/CMake/copy_runtime_deps.cmake $BuildPath/SpriteEditor/SpriteEditor $PackagePath/SpriteEditor/
-
-# Set the rpath of our executable and dependencies to $ORIGIN (effectively ./)
-find $PackagePath/Client/ -maxdepth 1 -type f ! -name '*.json' -exec patchelf --set-rpath '$ORIGIN' {} \;
-find $PackagePath/Server/ -maxdepth 1 -type f ! -name '*.json' ! -name '*.bin' -exec patchelf --set-rpath '$ORIGIN' {} \;
-find $PackagePath/SpriteEditor/ -maxdepth 1 -type f -exec patchelf --set-rpath '$ORIGIN' {} \;
+cp -r $BasePath/Resources/Packaging/Linux/* $PackagePath/Client/
+cp -r $BasePath/Resources/Packaging/Linux/* $PackagePath/Server/
+cp -r $BasePath/Resources/Packaging/Linux/* $PackagePath/SpriteEditor/
 
 echo "Packaging complete. Package can be found at $PackagePath"
-    
