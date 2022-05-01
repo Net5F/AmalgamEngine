@@ -120,6 +120,7 @@ const Tile& TileMap::getTile(unsigned int x, unsigned int y) const
     AM_ASSERT((tileIndex < maxTileIndex),
               "Tried to get an out of bounds tile. tileIndex: %u, max: %u",
               tileIndex, maxTileIndex);
+    ignore(maxTileIndex);
 
     return tiles[tileIndex];
 }

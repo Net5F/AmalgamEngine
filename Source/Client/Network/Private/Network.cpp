@@ -4,6 +4,7 @@
 #include "Config.h"
 #include "NetworkStats.h"
 #include "AMAssert.h"
+#include "Ignore.h"
 #include <SDL_net.h>
 
 namespace AM
@@ -195,6 +196,7 @@ void Network::processBatch()
             server->receiveBytesWait(&(batchRecBuffer[0]), batchSize)};
         AM_ASSERT((result == NetworkResult::Success),
                   "Failed to receive expected bytes.");
+        ignore(result);
 
         // Track the number of bytes we've received.
         bytesReceived += MESSAGE_HEADER_SIZE + batchSize;

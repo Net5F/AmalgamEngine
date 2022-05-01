@@ -6,6 +6,7 @@
 #include "Serialize.h"
 #include "NetworkStats.h"
 #include "AMAssert.h"
+#include "Ignore.h"
 #include <cmath>
 #include <array>
 
@@ -33,6 +34,7 @@ void Client::queueMessage(const BinaryBufferSharedPtr& message,
 {
     bool emplaceSucceeded{sendQueue.emplace(message, messageTick)};
     AM_ASSERT(emplaceSucceeded, "Queue emplace failed.");
+    ignore(emplaceSucceeded);
 }
 
 NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
@@ -52,8 +54,9 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     for (unsigned int i = 0; i < messageCount; ++i) {
         // Pop the message.
         QueuedMessage queuedMessage;
-        bool dequeueSuceeded{sendQueue.try_dequeue(queuedMessage)};
-        AM_ASSERT(dequeueSuceeded, "Expected element but dequeue failed.");
+        bool dequeueSucceeded{sendQueue.try_dequeue(queuedMessage)};
+        AM_ASSERT(dequeueSucceeded, "Expected element but dequeue failed.");
+        ignore(dequeueSucceeded);
 
         // Copy the message data into the batchBuffer.
         std::copy(queuedMessage.message->begin(), queuedMessage.message->end(),

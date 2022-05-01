@@ -13,6 +13,7 @@
 #include "Config.h"
 #include "Log.h"
 #include "AMAssert.h"
+#include "Ignore.h"
 #include <memory>
 
 namespace AM
@@ -167,6 +168,8 @@ void PlayerMovementSystem::checkReceivedTickValidity(Uint32 receivedTick,
               "Received data for tick %u on tick %u. Server is in the future, "
               "can't replay inputs.",
               receivedTick, currentTick);
+    ignore(receivedTick);
+    ignore(currentTick);
 }
 
 void PlayerMovementSystem::checkTickDiffValidity(Uint32 tickDiff)
