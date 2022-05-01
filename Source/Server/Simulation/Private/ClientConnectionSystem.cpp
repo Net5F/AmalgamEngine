@@ -17,7 +17,7 @@
 #include "EntityDelete.h"
 #include "Transforms.h"
 #include "Log.h"
-#include "Profiler.h"
+#include "Tracy.hpp"
 
 namespace AM
 {
@@ -38,7 +38,7 @@ ClientConnectionSystem::ClientConnectionSystem(
 
 void ClientConnectionSystem::processConnectionEvents()
 {
-    SCOPED_CPU_SAMPLE(processConnectionEvents);
+    ZoneScoped;
 
     processConnectEvents();
 

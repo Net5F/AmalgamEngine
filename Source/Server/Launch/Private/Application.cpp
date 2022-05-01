@@ -1,6 +1,5 @@
 #include "Application.h"
 #include "SharedConfig.h"
-#include "Profiler.h"
 #include "Log.h"
 
 #include <functional>
@@ -38,9 +37,6 @@ Application::~Application()
 
 void Application::start()
 {
-    // Set up profiling.
-    Profiler::init();
-
     LOG_INFO("Starting main loop.");
 
     // Prime the timers so they don't start at 0.
@@ -54,8 +50,8 @@ void Application::start()
         networkCaller.update();
 
         // See if we have enough time left to sleep.
-        double simTimeLeft = simCaller.getTimeTillNextCall();
-        double networkTimeLeft = networkCaller.getTimeTillNextCall();
+        double simTimeLeft{simCaller.getTimeTillNextCall()};
+        double networkTimeLeft{networkCaller.getTimeTillNextCall()};
         if ((simTimeLeft > SLEEP_MINIMUM_TIME_S)
             && (networkTimeLeft > SLEEP_MINIMUM_TIME_S)) {
             // We have enough time to sleep for a few ms.

@@ -10,7 +10,7 @@
 #include "SharedConfig.h"
 #include "Transforms.h"
 #include "Log.h"
-#include "Profiler.h"
+#include "Tracy.hpp"
 
 namespace AM
 {
@@ -23,7 +23,7 @@ MovementSystem::MovementSystem(World& inWorld)
 
 void MovementSystem::processMovements()
 {
-    SCOPED_CPU_SAMPLE(processMovements);
+    ZoneScoped;
 
     // Move all entities that have the required components.
     auto group = world.registry.group<Input, Position, PreviousPosition,

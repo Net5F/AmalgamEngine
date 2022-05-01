@@ -11,8 +11,8 @@ Timer::Timer()
 
 double Timer::getDeltaSeconds(bool updateSavedTime)
 {
-    Uint64 currentTicks = SDL_GetPerformanceCounter();
-    Uint64 deltaTicks = currentTicks - savedTimestamp;
+    Uint64 currentTicks{SDL_GetPerformanceCounter()};
+    Uint64 deltaTicks{currentTicks - savedTimestamp};
 
     if (updateSavedTime) {
         savedTimestamp = currentTicks;

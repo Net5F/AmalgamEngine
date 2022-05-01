@@ -61,7 +61,7 @@ try {
     }
 
     // Set up the SDL constructs.
-    SDL2pp::SDL sdl();
+    SDL2pp::SDL sdl(0);
 
     // Set up file logging.
     // TODO: This currently will do weird stuff if you have 2 instances of this

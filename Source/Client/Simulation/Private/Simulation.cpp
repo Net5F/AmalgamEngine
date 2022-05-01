@@ -16,7 +16,6 @@
 #include "Paths.h"
 #include "Config.h"
 #include "SharedConfig.h"
-#include "Profiler.h"
 #include "Log.h"
 #include "entt/entity/registry.hpp"
 #include <memory>
@@ -174,8 +173,6 @@ void Simulation::fakeConnection()
 
 void Simulation::tick()
 {
-    BEGIN_CPU_SAMPLE(SimTick);
-
     /* Calculate what tick we should be on. */
     // Increment the tick to the next.
     Uint32 targetTick = currentTick + 1;
@@ -227,8 +224,6 @@ void Simulation::tick()
 
         currentTick++;
     }
-
-    END_CPU_SAMPLE();
 }
 
 World& Simulation::getWorld()

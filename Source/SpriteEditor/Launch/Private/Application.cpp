@@ -1,6 +1,5 @@
 #include "Application.h"
 #include "Config.h"
-#include "Profiler.h"
 #include "Paths.h"
 #include "Log.h"
 
@@ -67,9 +66,6 @@ Application::~Application()
 
 void Application::start()
 {
-    // Set up profiling.
-    Profiler::init();
-
     // Prime the timers so they don't start at 0.
     rendererCaller.initTimer();
     uiCaller.initTimer();

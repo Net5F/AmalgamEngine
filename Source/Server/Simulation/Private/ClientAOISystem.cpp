@@ -13,6 +13,7 @@
 #include "SharedConfig.h"
 #include "Log.h"
 #include <algorithm>
+#include "Tracy.hpp"
 
 namespace AM
 {
@@ -28,6 +29,8 @@ ClientAOISystem::ClientAOISystem(Simulation& inSim, World& inWorld,
 
 void ClientAOISystem::updateAOILists()
 {
+    ZoneScoped;
+
     // Process the entities that have recently moved.
     auto view{
         world.registry.view<ClientSimData, PositionHasChanged, Position>()};

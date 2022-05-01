@@ -2,6 +2,7 @@
 
 #include <SDL_stdinc.h>
 #include "bitsery/ext/value_range.h"
+#include <array>
 
 namespace AM
 {

@@ -10,6 +10,7 @@
 #include "Log.h"
 #include <SDL_rect.h>
 #include <vector>
+#include "Tracy.hpp"
 
 namespace AM
 {
@@ -26,6 +27,8 @@ ChunkStreamingSystem::ChunkStreamingSystem(
 
 void ChunkStreamingSystem::sendChunks()
 {
+    ZoneScoped;
+
     // Process all chunk update requests.
     ChunkUpdateRequest chunkUpdateRequest{};
     while (chunkUpdateRequestQueue.pop(chunkUpdateRequest)) {

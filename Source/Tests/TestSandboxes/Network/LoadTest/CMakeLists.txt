@@ -11,12 +11,12 @@ add_executable(LoadTestClient
     Public/WorldSim.h
     
     # Client objects
-    ${PROJECT_SOURCE_DIR}/Client/Config/Private/Config.cpp
-    ${PROJECT_SOURCE_DIR}/Client/Config/Public/Config.h
-    ${PROJECT_SOURCE_DIR}/Client/Network/Private/Network.cpp
-    ${PROJECT_SOURCE_DIR}/Client/Network/Public/Network.h
-    ${PROJECT_SOURCE_DIR}/Client/Network/Private/MessageProcessor.cpp
-    ${PROJECT_SOURCE_DIR}/Client/Network/Public/MessageProcessor.h
+    ${PROJECT_SOURCE_DIR}/Source/Client/Config/Private/Config.cpp
+    ${PROJECT_SOURCE_DIR}/Source/Client/Config/Public/Config.h
+    ${PROJECT_SOURCE_DIR}/Source/Client/Network/Private/Network.cpp
+    ${PROJECT_SOURCE_DIR}/Source/Client/Network/Public/Network.h
+    ${PROJECT_SOURCE_DIR}/Source/Client/Network/Private/MessageProcessor.cpp
+    ${PROJECT_SOURCE_DIR}/Source/Client/Network/Public/MessageProcessor.h
 )
 
 target_include_directories(LoadTestClient
@@ -27,8 +27,8 @@ target_include_directories(LoadTestClient
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 
         # Client objects
-        ${PROJECT_SOURCE_DIR}/Client/Network/Public
-        ${PROJECT_SOURCE_DIR}/Client/Config/Public
+        ${PROJECT_SOURCE_DIR}/Source/Client/Network/Public
+        ${PROJECT_SOURCE_DIR}/Source/Client/Config/Public
 )
 
 target_link_libraries(LoadTestClient
@@ -44,7 +44,7 @@ target_link_libraries(LoadTestClient
         Shared
 )
 
-# Compile with C++17
+# Compile with C++20
 target_compile_features(LoadTestClient PRIVATE cxx_std_20)
 set_target_properties(LoadTestClient PROPERTIES CXX_EXTENSIONS OFF)
 

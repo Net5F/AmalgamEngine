@@ -21,7 +21,6 @@ target_sources(Shared
         Public/Log.h
         Public/Paths.h
         Public/PeriodicCaller.h
-        Public/Profiler.h
         Public/Serialize.h
         Public/SerializeBuffer.h
         Public/Timer.h

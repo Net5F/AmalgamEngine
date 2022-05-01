@@ -38,9 +38,20 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/libSDL2pp/"
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/bitsery/"
                  "${PROJECT_BINARY_DIR}/Libraries/bitsery/")
 
-# Configure Remotery.
-set(ENABLE_PROFILING OFF CACHE BOOL "Enable Remotery profiling." FORCE)
-include("${CMAKE_MODULE_PATH}/Remotery.cmake")
+# Configure Tracy.
+option(TRACY_ENABLE "Enable Tracy profiling." ON)
+option(TRACY_ON_DEMAND "Wait for connection before starting profiling." ON)
+option(TRACY_NO_CALLSTACK "Disable all callstack related functionality" ON)
+option(TRACY_NO_VSYNC_CAPTURE "Disable capture of hardware Vsync events" ON)
+option(TRACY_NO_FRAME_IMAGE  "Disable the frame image support and its thread" ON)
+option(TRACY_NO_CODE_TRANSFER "Disable collection of source code" ON)
+option(TRACY_NO_CONTEXT_SWITCH "Disable capture of context switches" ON)
+option(TRACY_NO_SAMPLING "Disable call stack sampling" ON)
+option(TRACY_NO_VERIFY "Disable zone validation for C API" ON)
+option(TRACY_NO_SYSTEM_TRACING  "Disable systrace sampling" ON)
+option(TRACY_TIMER_FALLBACK "Use lower resolution timers" ON)
+add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/tracy/"
+                 "${PROJECT_BINARY_DIR}/Libraries/tracy/")
 
 # Configure nlohmann json.
 set(JSON_MultipleHeaders ON CACHE INTERNAL "Enable forward declaration.")

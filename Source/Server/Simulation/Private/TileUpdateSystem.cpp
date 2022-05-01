@@ -3,6 +3,7 @@
 #include "Network.h"
 #include "ClientSimData.h"
 #include "TileUpdate.h"
+#include "Tracy.hpp"
 
 namespace AM
 {
@@ -19,6 +20,8 @@ TileUpdateSystem::TileUpdateSystem(World& inWorld,
 
 void TileUpdateSystem::updateTiles()
 {
+    ZoneScoped;
+
     auto clientView = world.registry.view<ClientSimData>();
 
     // Process any waiting update requests.

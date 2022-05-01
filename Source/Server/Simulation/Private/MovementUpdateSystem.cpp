@@ -10,8 +10,8 @@
 #include "ClientSimData.h"
 #include "InputHasChanged.h"
 #include "Log.h"
-#include "Profiler.h"
 #include <algorithm>
+#include "Tracy.hpp"
 
 namespace AM
 {
@@ -27,7 +27,7 @@ MovementUpdateSystem::MovementUpdateSystem(Simulation& inSim, World& inWorld,
 
 void MovementUpdateSystem::sendMovementUpdates()
 {
-    SCOPED_CPU_SAMPLE(sendMovementUpdate);
+    ZoneScoped;
 
     // Send clients the updated movement state of any nearby entities that
     // have moved.

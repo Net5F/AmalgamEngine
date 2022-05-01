@@ -8,7 +8,7 @@
 #include "ClientSimData.h"
 #include "Log.h"
 #include <memory>
-#include "Profiler.h"
+#include "Tracy.hpp"
 
 namespace AM
 {
@@ -26,7 +26,7 @@ InputSystem::InputSystem(Simulation& inSim, World& inWorld,
 
 void InputSystem::processInputMessages()
 {
-    SCOPED_CPU_SAMPLE(processInputMessages);
+    ZoneScoped;
 
     // Sort any waiting client input events.
     while (InputChangeRequest* inputChangeRequest

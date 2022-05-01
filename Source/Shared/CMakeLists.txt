@@ -20,8 +20,8 @@ target_link_libraries(Shared
         SDL2pp
         EnTT::EnTT
         Bitsery::bitsery
-        Remotery
         nlohmann_json::nlohmann_json
+        Tracy::TracyClient
 )
 
 # Compile with C++20

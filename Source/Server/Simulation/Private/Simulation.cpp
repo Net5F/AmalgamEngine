@@ -2,12 +2,16 @@
 #include "Network.h"
 #include "EnttGroups.h"
 #include "Log.h"
-#include "Profiler.h"
+#include "Timer.h"
+#include "Tracy.hpp"
 
 namespace AM
 {
 namespace Server
 {
+
+const char* const FRAME_NAME = "Simulation";
+
 Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher,
                        Network& inNetwork, SpriteData& inSpriteData)
 : network(inNetwork)
@@ -32,8 +36,9 @@ Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher,
 
 void Simulation::tick()
 {
+    FrameMarkStart(FRAME_NAME);
+
     /* Run all systems. */
-    BEGIN_CPU_SAMPLE(SimulationTick);
     // Process client connections and disconnections.
     clientConnectionSystem.processConnectionEvents();
 
@@ -54,9 +59,10 @@ void Simulation::tick()
 
     // Respond to chunk data requests.
     chunkStreamingSystem.sendChunks();
-    END_CPU_SAMPLE();
 
     currentTick++;
+
+    FrameMarkEnd(FRAME_NAME);
 }
 
 Uint32 Simulation::getCurrentTick()
