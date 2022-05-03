@@ -26,8 +26,6 @@ class Application
 public:
     Application();
 
-    ~Application();
-
     /**
      * Begins the application. Assumes control of the thread until the
      * application exits.
@@ -35,11 +33,6 @@ public:
     void start();
 
 private:
-    /**
-     * Thread function that checks for command line input.
-     */
-    void receiveCliInput();
-
     /** We sleep for 1ms when possible to reduce our CPU usage. We can't trust
         the scheduler to come back to us after exactly 1ms though, so we need
         to give it some leeway. Picked .003 = 3ms as a reasonable number. Open
@@ -72,9 +65,6 @@ private:
     //-------------------------------------------------------------------------
     /** Flags when to end the application. */
     std::atomic<bool> exitRequested;
-
-    /** Thread to check for command line input */
-    std::thread inputThreadObj;
 };
 
 } // End namespace Server

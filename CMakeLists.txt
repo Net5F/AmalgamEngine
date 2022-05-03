@@ -41,14 +41,14 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/bitsery/"
 # Configure Tracy.
 option(TRACY_ENABLE "Enable Tracy profiling." ON)
 option(TRACY_ON_DEMAND "Wait for connection before starting profiling." ON)
+# (Disabled because it requires extra dependencies. Can enable if useful.)
 option(TRACY_NO_CALLSTACK "Disable all callstack related functionality" ON)
+# (Below 2 are disabled because they didn't seem useful. Can enable if useful.)
 option(TRACY_NO_VSYNC_CAPTURE "Disable capture of hardware Vsync events" ON)
 option(TRACY_NO_FRAME_IMAGE  "Disable the frame image support and its thread" ON)
-option(TRACY_NO_CODE_TRANSFER "Disable collection of source code" ON)
-option(TRACY_NO_CONTEXT_SWITCH "Disable capture of context switches" ON)
-option(TRACY_NO_SAMPLING "Disable call stack sampling" ON)
-option(TRACY_NO_VERIFY "Disable zone validation for C API" ON)
+# (Disabled because it uses a lot of CPU in the remote server.)
 option(TRACY_NO_SYSTEM_TRACING  "Disable systrace sampling" ON)
+# (Disabled because the remote server doesn't support the default timers.)
 option(TRACY_TIMER_FALLBACK "Use lower resolution timers" ON)
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/tracy/"
                  "${PROJECT_BINARY_DIR}/Libraries/tracy/")

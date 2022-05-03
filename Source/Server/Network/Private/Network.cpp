@@ -15,7 +15,7 @@ namespace AM
 namespace Server
 {
 
-const char* const FRAME_NAME = "Network";
+const char* const FRAME_NAME = "NetworkTick";
 
 Network::Network(EventDispatcher& inNetworkEventDispatcher)
 : messageProcessor(inNetworkEventDispatcher)

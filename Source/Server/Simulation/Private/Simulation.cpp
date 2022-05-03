@@ -10,7 +10,7 @@ namespace AM
 namespace Server
 {
 
-const char* const FRAME_NAME = "Simulation";
+const char* const FRAME_NAME = "SimTick";
 
 Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher,
                        Network& inNetwork, SpriteData& inSpriteData)

@@ -89,9 +89,10 @@ void Application::start()
 bool Application::handleOSEvent(SDL_Event& event)
 {
     switch (event.type) {
-        case SDL_QUIT:
+        case SDL_QUIT: {
             exitRequested = true;
             return true;
+        }
     }
 
     return false;

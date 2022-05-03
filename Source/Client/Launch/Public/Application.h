@@ -44,6 +44,18 @@ public:
     bool handleOSEvent(SDL_Event& event) override;
 
 private:
+    /** Event polling can take up to 5-6ms depending on how much is waiting.
+        We prioritize the PeriodicCallers getting called on time, so we only
+        dispatch events if there's a reasonable gap until the next needs to be
+        called. */
+    static constexpr double DISPATCH_MINIMUM_TIME_S = .003;
+
+    /** We sleep for 1ms when possible to reduce our CPU usage. We can't trust
+        the scheduler to come back to us after exactly 1ms though, so we need
+        to give it some leeway. Picked .003 = 3ms as a reasonable number. Open
+        for tweaking. */
+    static constexpr double SLEEP_MINIMUM_TIME_S = .003;
+
     /**
      * Dispatches waiting events to the eventHandlers.
      * Events are propagated through the vector in order, starting at index 0.
@@ -65,18 +77,6 @@ private:
      * SDL_PollEvent). May run on a different core.
      */
     static int filterEvents(void* userData, SDL_Event* event);
-
-    /** Event polling can take up to 5-6ms depending on how much is waiting.
-        We prioritize the PeriodicCallers getting called on time, so we only
-        dispatch events if there's a reasonable gap until the next needs to be
-        called. */
-    static constexpr double DISPATCH_MINIMUM_TIME_S = .003;
-
-    /** We sleep for 1ms when possible to reduce our CPU usage. We can't trust
-        the scheduler to come back to us after exactly 1ms though, so we need
-        to give it some leeway. Picked .003 = 3ms as a reasonable number. Open
-        for tweaking. */
-    static constexpr double SLEEP_MINIMUM_TIME_S = .003;
 
     //-------------------------------------------------------------------------
     // SDL Objects
