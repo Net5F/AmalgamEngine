@@ -6,7 +6,7 @@ namespace AM
 /**
  * Common helper functions for constexpr use.
  *
- * Note: This shouldn't be necessary since a lot of std algorithms are 
+ * Note: This shouldn't be necessary since a lot of std algorithms are
  *       constexpr in gcc, but they aren't constexpr in msvc yet.
  */
 class ConstexprTools

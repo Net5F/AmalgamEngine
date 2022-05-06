@@ -63,7 +63,7 @@ public:
     bool handleOSEvent(SDL_Event& event) override;
 
 private:
-    /** How long the game should wait for the server to send a connection
+    /** How long the sim should wait for the server to send a connection
         response, in microseconds. */
     static constexpr int CONNECTION_RESPONSE_WAIT_US = 1 * 1000 * 1000;
 
@@ -79,6 +79,15 @@ private:
 
     EventQueue<ConnectionResponse> connectionResponseQueue;
 
+    /**
+     * The tick number that we're currently on.
+     * Initialized based on the number that the server tells us it's on.
+     */
+    std::atomic<Uint32> currentTick;
+
+    //-------------------------------------------------------------------------
+    // Systems
+    //-------------------------------------------------------------------------
     ChunkUpdateSystem chunkUpdateSystem;
     TileUpdateSystem tileUpdateSystem;
     NpcLifetimeSystem npcLifetimeSystem;
@@ -86,12 +95,6 @@ private:
     PlayerMovementSystem playerMovementSystem;
     NpcMovementSystem npcMovementSystem;
     CameraSystem cameraSystem;
-
-    /**
-     * The number of the tick that we're currently on.
-     * Initialized based on the number that the server tells us it's on.
-     */
-    std::atomic<Uint32> currentTick;
 };
 
 } // namespace Client

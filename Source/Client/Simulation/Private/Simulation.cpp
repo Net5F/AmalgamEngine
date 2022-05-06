@@ -30,6 +30,7 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 : network{inNetwork}
 , spriteData{inSpriteData}
 , world(inSpriteData)
+, currentTick(0)
 , connectionResponseQueue(network.getEventDispatcher())
 , chunkUpdateSystem(*this, world, network)
 , tileUpdateSystem(world, inUiEventDispatcher, network)
@@ -38,7 +39,6 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 , playerMovementSystem(*this, world, network.getEventDispatcher())
 , npcMovementSystem(*this, world, network, spriteData)
 , cameraSystem(*this, world)
-, currentTick(0)
 {
     // Initialize our entt groups.
     EnttGroups::init(world.registry);

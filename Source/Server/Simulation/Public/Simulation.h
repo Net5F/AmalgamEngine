@@ -45,6 +45,14 @@ private:
 
     World world;
 
+    /**
+     * The tick number that we're currently on.
+     */
+    std::atomic<Uint32> currentTick;
+
+    //-------------------------------------------------------------------------
+    // Systems
+    //-------------------------------------------------------------------------
     ClientConnectionSystem clientConnectionSystem;
     TileUpdateSystem tileUpdateSystem;
     ClientAOISystem clientAOISystem;
@@ -52,11 +60,6 @@ private:
     MovementSystem movementSystem;
     MovementUpdateSystem movementUpdateSystem;
     ChunkStreamingSystem chunkStreamingSystem;
-
-    /**
-     * The number of the tick that we're currently on.
-     */
-    std::atomic<Uint32> currentTick;
 };
 
 } // namespace Server

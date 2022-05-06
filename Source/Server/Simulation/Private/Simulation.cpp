@@ -16,6 +16,7 @@ Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher,
                        Network& inNetwork, SpriteData& inSpriteData)
 : network(inNetwork)
 , world(inSpriteData)
+, currentTick(0)
 , clientConnectionSystem(*this, world, inNetworkEventDispatcher, network,
                          inSpriteData)
 , tileUpdateSystem(world, inNetworkEventDispatcher, network)
@@ -24,7 +25,6 @@ Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher,
 , movementSystem(world)
 , movementUpdateSystem(*this, world, network)
 , chunkStreamingSystem(world, inNetworkEventDispatcher, network)
-, currentTick(0)
 {
     // Initialize our entt groups.
     EnttGroups::init(world.registry);

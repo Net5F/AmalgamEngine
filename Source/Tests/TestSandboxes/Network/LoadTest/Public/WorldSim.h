@@ -10,7 +10,7 @@
 
 namespace AM
 {
-class InputChangeRequest;
+struct InputChangeRequest;
 
 namespace Client
 {
@@ -49,14 +49,14 @@ private:
      */
     void sendNextInput();
 
-    /** How long the game should wait for the server to send a connection
+    /** How long the sim should wait for the server to send a connection
         response, in microseconds. */
     static constexpr int CONNECTION_RESPONSE_WAIT_US = 1 * 1000 * 1000;
 
     /** How often to send inputs. */
     static constexpr double INPUT_RATE_S = (1 / 4.0);
-    static constexpr unsigned int INPUT_RATE_TICKS
-        = SharedConfig::SIM_TICKS_PER_SECOND * INPUT_RATE_S;
+    static constexpr unsigned int INPUT_RATE_TICKS = static_cast<unsigned int>(
+        SharedConfig::SIM_TICKS_PER_SECOND * INPUT_RATE_S);
 
     Client::Network& network;
 
