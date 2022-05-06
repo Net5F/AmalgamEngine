@@ -87,7 +87,8 @@ void ClientHandler::sendClientUpdates()
 {
     tracy::SetThreadName("ServerSend");
 
-    SharedLockableBase(std::shared_mutex)& clientMapMutex{network.getClientMapMutex()};
+    SharedLockableBase(std::shared_mutex)
+        & clientMapMutex{network.getClientMapMutex()};
     ClientMap& clientMap{network.getClientMap()};
 
     while (!exitRequested) {

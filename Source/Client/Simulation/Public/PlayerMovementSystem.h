@@ -48,7 +48,7 @@ private:
                                 PreviousPosition& previousPosition,
                                 Velocity& velocity, Input& input,
                                 InputHistory& inputHistory, Sprite& sprite,
-								BoundingBox& boundingBox);
+                                BoundingBox& boundingBox);
 
     /**
      * Replay any inputs that are from newer ticks than the latestReceivedTick.

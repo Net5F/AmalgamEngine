@@ -59,7 +59,7 @@ public:
     // to attempt to re-assign the obtained ref (can't re-seat a reference once
     // bound).
     ClientMap& getClientMap();
-    SharedLockableBase(std::shared_mutex)& getClientMapMutex();
+    SharedLockableBase(std::shared_mutex) & getClientMapMutex();
 
     /** Used for passing us a pointer to the Game's currentTick. */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);

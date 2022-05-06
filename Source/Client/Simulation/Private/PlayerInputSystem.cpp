@@ -87,8 +87,10 @@ void PlayerInputSystem::processHeldInputs()
 
 void PlayerInputSystem::addCurrentInputsToHistory()
 {
-    CircularBuffer<Input::StateArr, InputHistory::LENGTH>& playerInputHistory{world.registry.get<InputHistory>(world.playerEntity).inputHistory};
-    Input::StateArr& playerInputs{world.registry.get<Input>(world.playerEntity).inputStates};
+    CircularBuffer<Input::StateArr, InputHistory::LENGTH>& playerInputHistory{
+        world.registry.get<InputHistory>(world.playerEntity).inputHistory};
+    Input::StateArr& playerInputs{
+        world.registry.get<Input>(world.playerEntity).inputStates};
 
     // Push the player's current inputs into the player's input history.
     playerInputHistory.push(playerInputs);

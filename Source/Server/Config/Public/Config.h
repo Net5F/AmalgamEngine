@@ -46,7 +46,8 @@ public:
     static constexpr double TICKDIFF_HISTORY_S = .5;
     /** The integer number of diffs that we'll remember in the history. */
     static constexpr unsigned int TICKDIFF_HISTORY_LENGTH
-        = ConstexprTools::ceilInt(TICKDIFF_HISTORY_S / SharedConfig::SIM_TICK_TIMESTEP_S);
+        = ConstexprTools::ceilInt(TICKDIFF_HISTORY_S
+                                  / SharedConfig::SIM_TICK_TIMESTEP_S);
 
     /** The range of difference (inclusive) between a received message's tickNum
         and our current tickNum that we won't send an adjustment for. */

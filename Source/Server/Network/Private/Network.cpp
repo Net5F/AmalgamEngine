@@ -42,7 +42,7 @@ ClientMap& Network::getClientMap()
     return clientMap;
 }
 
-SharedLockableBase(std::shared_mutex)& Network::getClientMapMutex()
+SharedLockableBase(std::shared_mutex) & Network::getClientMapMutex()
 {
     return clientMapMutex;
 }
