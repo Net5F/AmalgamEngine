@@ -10,12 +10,14 @@ struct Position;
 struct PreviousPosition;
 struct Velocity;
 struct Input;
+struct BoundingBox;
 
 namespace Client
 {
 class Simulation;
 class World;
 class Network;
+struct Sprite;
 
 struct InputHistory;
 
@@ -45,7 +47,8 @@ private:
     Uint32 processPlayerUpdates(Position& position,
                                 PreviousPosition& previousPosition,
                                 Velocity& velocity, Input& input,
-                                InputHistory& inputHistory);
+                                InputHistory& inputHistory, Sprite& sprite,
+								BoundingBox& boundingBox);
 
     /**
      * Replay any inputs that are from newer ticks than the latestReceivedTick.

@@ -15,8 +15,6 @@ namespace AM
 namespace Server
 {
 
-const char* const FRAME_NAME = "NetworkTick";
-
 Network::Network(EventDispatcher& inNetworkEventDispatcher)
 : messageProcessor(inNetworkEventDispatcher)
 , clientHandler(*this, inNetworkEventDispatcher, messageProcessor)
@@ -27,8 +25,6 @@ Network::Network(EventDispatcher& inNetworkEventDispatcher)
 
 void Network::tick()
 {
-    FrameMarkStart(FRAME_NAME);
-
     // Flag the send thread to start sending all messages for this network
     // tick.
     clientHandler.beginSendClientUpdates();
@@ -39,8 +35,6 @@ void Network::tick()
         logNetworkStatistics();
         ticksSinceNetstatsLog = 0;
     }
-
-    FrameMarkEnd(FRAME_NAME);
 }
 
 ClientMap& Network::getClientMap()
@@ -48,7 +42,7 @@ ClientMap& Network::getClientMap()
     return clientMap;
 }
 
-std::shared_mutex& Network::getClientMapMutex()
+SharedLockableBase(std::shared_mutex)& Network::getClientMapMutex()
 {
     return clientMapMutex;
 }

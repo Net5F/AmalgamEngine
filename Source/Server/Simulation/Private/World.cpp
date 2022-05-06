@@ -18,7 +18,9 @@ World::World(SpriteData& spriteData)
 , xDistribution(SharedConfig::TILE_WORLD_WIDTH,
                 (static_cast<unsigned int>(SharedConfig::AOI_RADIUS)
                  - SharedConfig::TILE_WORLD_WIDTH))
-, yDistribution(0, static_cast<unsigned int>(SharedConfig::AOI_RADIUS))
+, yDistribution(SharedConfig::TILE_WORLD_WIDTH,
+                (static_cast<unsigned int>(SharedConfig::AOI_RADIUS)
+                 - SharedConfig::TILE_WORLD_WIDTH))
 , baseX{0}
 , baseY{0}
 , groupOffsetsX{32, 64, 96, 128, 160, 32, 64, 96, 128, 160}

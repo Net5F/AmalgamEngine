@@ -63,9 +63,9 @@ public:
     /**
      * Returns a pointer to the queue holding events for the current tick.
      */
-    std::queue<T>* getCurrentQueue()
+    std::queue<T>& getCurrentQueue()
     {
-        return &(queueBuffer[currentTick % BUFFER_SIZE]);
+        return queueBuffer[currentTick % BUFFER_SIZE];
     }
 
     /**

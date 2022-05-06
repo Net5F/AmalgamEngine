@@ -8,6 +8,8 @@
 #include "Input.h"
 #include "InputHistory.h"
 #include "PreviousPosition.h"
+#include "Sprite.h"
+#include "BoundingBox.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include "Config.h"
@@ -40,12 +42,14 @@ void PlayerMovementSystem::processMovement()
     // If we're online, process any updates from the server.
     Velocity& velocity{world.registry.get<Velocity>(world.playerEntity)};
     Input& input{world.registry.get<Input>(world.playerEntity)};
+	Sprite& sprite{world.registry.get<Sprite>(world.playerEntity)};
+	BoundingBox& boundingBox{world.registry.get<BoundingBox>(world.playerEntity)};
     if (!Config::RUN_OFFLINE) {
         // Apply any player entity updates from the server.
         InputHistory& inputHistory{
             world.registry.get<InputHistory>(world.playerEntity)};
         Uint32 latestReceivedTick{processPlayerUpdates(
-            position, previousPosition, velocity, input, inputHistory)};
+            position, previousPosition, velocity, input, inputHistory, sprite, boundingBox)};
 
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
@@ -69,7 +73,7 @@ void PlayerMovementSystem::processMovement()
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(
     Position& position, PreviousPosition& previousPosition, Velocity& velocity,
-    Input& input, InputHistory& inputHistory)
+    Input& input, InputHistory& inputHistory, Sprite& sprite, BoundingBox& boundingBox)
 {
     /* Process any messages for us from the server. */
     Uint32 latestReceivedTick{0};
@@ -105,9 +109,10 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
                   "Failed to find player entity in a message that should have "
                   "contained one.");
 
-        /* Apply the received velocity and position. */
+        /* Apply the received movement state. */
         velocity = playerUpdate->velocity;
         position = playerUpdate->position;
+        boundingBox = Transforms::modelToWorldCentered(sprite.modelBounds, position);
 
         /* Check if the input is mismatched. */
         // Check that the diff is valid.

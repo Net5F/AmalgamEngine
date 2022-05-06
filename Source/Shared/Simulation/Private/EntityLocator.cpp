@@ -50,9 +50,10 @@ void EntityLocator::setEntityLocation(entt::entity entity,
         = (static_cast<int>(std::ceil(boundingBox.maxY / cellWorldWidth))
            - boxCellExtent.y);
 
-    AM_ASSERT(cellExtent.containsExtent(boxCellExtent),
-              "Tried to track entity "
-              "that is outside of the locator's grid.");
+    if (!(cellExtent.containsExtent(boxCellExtent))) {
+        LOG_FATAL(
+            "Tried to track entity that is outside of the locator's grid.");
+    }
 
     // If we already have a location for the entity, clear it.
     auto entityIt{entityMap.find(entity)};

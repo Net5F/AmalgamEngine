@@ -6,6 +6,7 @@
 #include "CircularBuffer.h"
 #include "Timer.h"
 #include "readerwriterqueue.h"
+#include "Tracy.hpp"
 #include <memory>
 #include <array>
 #include <mutex>
@@ -202,7 +203,7 @@ private:
      * Used to prevent tickDiffHistory and numFreshData changing while a
      * getTickAdjustment() is happening.
      */
-    std::mutex tickDiffMutex;
+    TracyLockable(std::mutex, tickDiffMutex);
 
     /**
      * The number of fresh diffs that we have in the history.

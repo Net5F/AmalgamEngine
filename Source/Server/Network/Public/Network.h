@@ -9,6 +9,7 @@
 #include "Peer.h"
 #include "ByteTools.h"
 #include "QueuedEvents.h"
+#include "Tracy.hpp"
 #include <memory>
 #include <cstddef>
 #include <unordered_map>
@@ -58,7 +59,7 @@ public:
     // to attempt to re-assign the obtained ref (can't re-seat a reference once
     // bound).
     ClientMap& getClientMap();
-    std::shared_mutex& getClientMapMutex();
+    SharedLockableBase(std::shared_mutex)& getClientMapMutex();
 
     /** Used for passing us a pointer to the Game's currentTick. */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
@@ -94,7 +95,7 @@ private:
     ClientMap clientMap;
 
     /** Used to lock access to the clientMap. */
-    std::shared_mutex clientMapMutex;
+    TracySharedLockable(std::shared_mutex, clientMapMutex);
 
     /** Deserializes messages, does any network-layer message handling, and
         passes messages down to the simulation. */

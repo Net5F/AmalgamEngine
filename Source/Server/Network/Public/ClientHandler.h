@@ -5,6 +5,7 @@
 #include "Client.h"
 #include "Acceptor.h"
 #include "IDPool.h"
+#include "Tracy.hpp"
 #include <thread>
 #include <queue>
 #include <unordered_map>
@@ -135,9 +136,9 @@ private:
     /** Calls sendClientUpdates(). */
     std::thread sendThreadObj;
     /** Used for signaling the send thread. */
-    std::mutex sendMutex;
+    TracyLockable(std::mutex, sendMutex);
     /** Used for signaling the send thread. */
-    std::condition_variable sendCondVar;
+    std::condition_variable_any sendCondVar;
     /** Used for signaling the send thread. */
     bool sendRequested;
 };

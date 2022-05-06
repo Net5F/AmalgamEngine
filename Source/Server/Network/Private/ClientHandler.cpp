@@ -13,9 +13,6 @@ namespace AM
 namespace Server
 {
 
-const char* const SEND_FRAME_NAME = "NetworkSend";
-const char* const RECEIVE_FRAME_NAME = "NetworkReceive";
-
 ClientHandler::ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher,
                              MessageProcessor& inMessageProcessor)
 : network{inNetwork}
@@ -40,7 +37,7 @@ ClientHandler::~ClientHandler()
     receiveThreadObj.join();
 
     {
-        std::unique_lock<std::mutex> lock{sendMutex};
+        std::unique_lock lock{sendMutex};
         sendRequested = true;
     }
     sendCondVar.notify_one();
@@ -51,7 +48,7 @@ void ClientHandler::beginSendClientUpdates()
 {
     // Wake the send thread.
     {
-        std::unique_lock<std::mutex> lock{sendMutex};
+        std::unique_lock lock{sendMutex};
         sendRequested = true;
     }
     sendCondVar.notify_one();
@@ -64,8 +61,6 @@ void ClientHandler::serviceClients()
     ClientMap& clientMap{network.getClientMap()};
 
     while (!exitRequested) {
-        FrameMarkStart(RECEIVE_FRAME_NAME);
-
         // Check if there are any new clients to connect.
         acceptNewClients(clientMap);
 
@@ -81,8 +76,6 @@ void ClientHandler::serviceClients()
             numReceived = receiveAndProcessClientMessages(clientMap);
         }
 
-        FrameMarkEnd(RECEIVE_FRAME_NAME);
-
         // There wasn't any activity, delay so we don't waste CPU spinning.
         if (numReceived == 0) {
             SDL_Delay(INACTIVE_DELAY_TIME_MS);
@@ -94,33 +87,35 @@ void ClientHandler::sendClientUpdates()
 {
     tracy::SetThreadName("ServerSend");
 
-    std::shared_mutex& clientMapMutex{network.getClientMapMutex()};
+    SharedLockableBase(std::shared_mutex)& clientMapMutex{network.getClientMapMutex()};
     ClientMap& clientMap{network.getClientMap()};
 
     while (!exitRequested) {
         // Wait until this thread is signaled by beginSendClientUpdates().
-        std::unique_lock<std::mutex> lock{sendMutex};
+        std::unique_lock lock{sendMutex};
         sendCondVar.wait(lock, [this] { return sendRequested; });
 
-        FrameMarkStart(SEND_FRAME_NAME);
+        {
+            ZoneScoped;
 
-        // Acquire a read lock before running through the client map.
-        std::shared_lock readLock{clientMapMutex};
+            // Acquire a read lock before running through the client map.
+            std::shared_lock readLock{clientMapMutex};
 
-        // Run through the clients, sending their waiting messages.
-        Uint32 currentTick{network.getCurrentTick()};
-        for (auto& pair : clientMap) {
-            pair.second->sendWaitingMessages(currentTick);
+            // Run through the clients, sending their waiting messages.
+            Uint32 currentTick{network.getCurrentTick()};
+            for (auto& pair : clientMap) {
+                pair.second->sendWaitingMessages(currentTick);
+            }
+
+            sendRequested = false;
         }
-
-        sendRequested = false;
-
-        FrameMarkEnd(SEND_FRAME_NAME);
     }
 }
 
 void ClientHandler::acceptNewClients(ClientMap& clientMap)
 {
+    ZoneScoped;
+
     // Creates the new peer, which adds itself to the socket set.
     std::unique_ptr<Peer> newPeer{acceptor.accept()};
 
@@ -150,6 +145,8 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
 
 void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
 {
+    ZoneScoped;
+
     /* Erase any disconnected clients. */
     for (auto it = clientMap.begin(); it != clientMap.end();) {
         std::shared_ptr<Client>& client{it->second};
@@ -179,6 +176,8 @@ void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
 
 int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
 {
+    ZoneScoped;
+
     // Update each client's internal socket isReady().
     // Note: We check all clients regardless of whether this returns > 0
     //       because, even if there's no activity, we need to check for
