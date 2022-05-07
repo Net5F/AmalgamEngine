@@ -42,7 +42,7 @@ public:
     /** The "level" value passed to zlib's compression function.
         Can be 0 - 9, with 0 being no compression, 1 being fastest, and 9 being
         most compressed. 6 is the default. */
-    static constexpr int COMPRESSION_LEVEL = 6;
+    static constexpr int COMPRESSION_LEVEL = 9;
 
     /**
      * Compresses data.

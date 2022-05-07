@@ -23,7 +23,7 @@ Network::Network()
 , receiveThreadObj()
 , exitRequested(false)
 , headerRecBuffer(SERVER_HEADER_SIZE)
-, batchRecBuffer(Peer::MAX_WIRE_SIZE)
+, batchRecBuffer(SharedConfig::MAX_BATCH_SIZE)
 , uncompressedBatchRecBuffer(SharedConfig::MAX_BATCH_SIZE)
 , netstatsLoggingEnabled(true)
 , ticksSinceNetstatsLog(0)
@@ -194,9 +194,9 @@ void Network::processBatch()
         // Receive the expected bytes.
         NetworkResult result{
             server->receiveBytesWait(&(batchRecBuffer[0]), batchSize)};
-        AM_ASSERT((result == NetworkResult::Success),
-                  "Failed to receive expected bytes.");
-        ignore(result);
+        if (result != NetworkResult::Success) {
+            LOG_INFO("Failed to receive expected bytes.");
+        }
 
         // Track the number of bytes we've received.
         bytesReceived += MESSAGE_HEADER_SIZE + batchSize;

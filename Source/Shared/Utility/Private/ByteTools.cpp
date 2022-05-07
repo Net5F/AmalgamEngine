@@ -65,7 +65,7 @@ std::size_t ByteTools::uncompress(const Uint8* sourceBuffer,
                                   std::size_t sourceLength, Uint8* destBuffer,
                                   std::size_t destLength)
 {
-    // Compress the data.
+    // Uncompress the data.
     std::size_t destLengthReturn{destLength};
     int32_t result{zng_uncompress(destBuffer, &destLengthReturn, sourceBuffer,
                                   sourceLength)};

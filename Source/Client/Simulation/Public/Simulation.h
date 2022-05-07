@@ -77,13 +77,13 @@ private:
 
     World world;
 
-    EventQueue<ConnectionResponse> connectionResponseQueue;
-
     /**
      * The tick number that we're currently on.
      * Initialized based on the number that the server tells us it's on.
      */
     std::atomic<Uint32> currentTick;
+
+    EventQueue<ConnectionResponse> connectionResponseQueue;
 
     //-------------------------------------------------------------------------
     // Systems
