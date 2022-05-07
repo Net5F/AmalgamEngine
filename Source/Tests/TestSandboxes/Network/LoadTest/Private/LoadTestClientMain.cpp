@@ -29,9 +29,9 @@ void printUsage()
 {
     std::printf(
         "Usage: LoadTestClientMain.exe <NumClients> <ConnectionWaitTime>\n"
-        "NumClients: How many clients to simulate. Defaults to 10.\n"
-        "ConnectionWaitTime: How long, in milliseconds, to wait between"
-        " connecting clients. Defaults to 1ms.");
+        "  NumClients: How many clients to simulate. Default: 10.\n"
+        "  ConnectionWaitTime: How long, in milliseconds, to wait between"
+        " connecting clients. Default: 1.\n");
 }
 
 void connectClients(unsigned int numClients, unsigned int connectionWaitTimeMs,
