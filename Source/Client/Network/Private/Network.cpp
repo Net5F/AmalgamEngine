@@ -41,7 +41,9 @@ Network::~Network()
     exitRequested = true;
 
     if (!Config::RUN_OFFLINE) {
-        receiveThreadObj.join();
+        if (receiveThreadObj.joinable()) {
+            receiveThreadObj.join();
+        }
         SDLNet_Quit();
     }
 }
