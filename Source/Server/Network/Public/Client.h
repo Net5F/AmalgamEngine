@@ -200,7 +200,7 @@ private:
     CircularBuffer<Sint8, Config::TICKDIFF_HISTORY_LENGTH> tickDiffHistory;
 
     /**
-     * Used to prevent tickDiffHistory and numFreshData changing while a
+     * Used to prevent tickDiffHistory and numFreshData from changing while a
      * getTickAdjustment() is happening.
      */
     TracyLockable(std::mutex, tickDiffMutex);
