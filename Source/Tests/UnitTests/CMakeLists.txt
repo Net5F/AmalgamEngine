@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 message(STATUS "Configuring Unit Tests")
 
 # Configure Catch2.
-if(NOT EXISTS Catch2::Catch2)
+if(NOT TARGET Catch2::Catch2)
     SET(CATCH_BUILD_TESTING OFF CACHE BOOL "Build SelfTest project")
     SET(CATCH_INSTALL_DOCS OFF CACHE BOOL "Install documentation alongside library")
     add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/Catch2/"
