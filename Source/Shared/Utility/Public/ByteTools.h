@@ -50,7 +50,7 @@ public:
      * @param sourceBuffer  A buffer containing the data to compress.
      * @param sourceLength  The length of the source data.
      * @param destBuffer  The buffer to write the compressed data to. Must be
-     *                    at least (sourceLength * 1.1 + 12) bytes long.
+     *                    at least LZ4_compressBound(sourceLength) bytes long.
      * @param destLength  The length of the destination buffer.
      * @return The length of the compressed data.
      */
@@ -59,16 +59,16 @@ public:
                                 std::size_t destLength);
 
     /**
-     * Uncompresses data.
+     * Decompresses data.
      *
-     * @param sourceBuffer  A buffer containing the data to uncompress.
+     * @param sourceBuffer  A buffer containing the data to decompress.
      * @param sourceLength  The length of the source data.
-     * @param destBuffer  The buffer to write the uncompressed data to. Must be
+     * @param destBuffer  The buffer to write the decompressed data to. Must be
      *                    long enough to hold the original data.
      * @param destLength  The length of the destination buffer.
-     * @return The length of the uncompressed data.
+     * @return The length of the decompressed data.
      */
-    static std::size_t uncompress(const Uint8* sourceBuffer,
+    static std::size_t decompress(const Uint8* sourceBuffer,
                                   std::size_t sourceLength, Uint8* destBuffer,
                                   std::size_t destLength);
 };

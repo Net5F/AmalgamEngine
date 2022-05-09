@@ -13,7 +13,7 @@ target_include_directories(Shared
 
 target_link_libraries(Shared
     PUBLIC
-        zlibstatic
+        lz4_static
         ${SDL2_LIBRARIES}
         ${SDL2PP_LIBRARIES}
         SDL2_net-static

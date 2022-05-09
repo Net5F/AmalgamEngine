@@ -1,8 +1,9 @@
 #include "ByteTools.h"
 #include "Peer.h"
 #include "Log.h"
+#include "AMAssert.h"
 #include <SDL_endian.h>
-#include "zlib-ng.h"
+#include "lz4.h"
 
 // If the system has data access alignment restrictions, our casting may fail.
 #if defined(sparc) || defined(mips) || defined(__arm__)
@@ -44,45 +45,42 @@ std::size_t ByteTools::compress(const Uint8* sourceBuffer,
                                 std::size_t sourceLength, Uint8* destBuffer,
                                 std::size_t destLength)
 {
+    // Check if destBuffer is large enough for efficient compression.
+    if (static_cast<int>(destLength) < LZ4_compressBound(static_cast<int>(sourceLength))) {
+        LOG_INFO("destLength: %uB. Please increase to at least %uB.",
+                 destLength, LZ4_compressBound(static_cast<int>(sourceLength)));
+    }
+
     // Compress the data.
-    std::size_t destLengthReturn{destLength};
-    int32_t result{zng_compress2(destBuffer, &destLengthReturn, sourceBuffer,
-                                 sourceLength, COMPRESSION_LEVEL)};
+    int compressedLength{LZ4_compress_default(
+        reinterpret_cast<const char*>(sourceBuffer),
+        reinterpret_cast<char*>(destBuffer), static_cast<int>(sourceLength),
+        static_cast<int>(destLength))};
 
     // Check for errors.
-    if (result == Z_MEM_ERROR) {
-        LOG_FATAL("Ran out of memory while compressing.");
-    }
-    else if (result == Z_BUF_ERROR) {
-        LOG_FATAL("Ran out of room in destBuffer while compressing.");
+    if (compressedLength <= 0) {
+        LOG_FATAL("Error during compression.");
     }
 
-    // Return the compressed data length.
-    return destLengthReturn;
+    return compressedLength;
 }
 
-std::size_t ByteTools::uncompress(const Uint8* sourceBuffer,
+std::size_t ByteTools::decompress(const Uint8* sourceBuffer,
                                   std::size_t sourceLength, Uint8* destBuffer,
                                   std::size_t destLength)
 {
-    // Uncompress the data.
-    std::size_t destLengthReturn{destLength};
-    int32_t result{zng_uncompress(destBuffer, &destLengthReturn, sourceBuffer,
-                                  sourceLength)};
+    // Decompress the data.
+    int decompressedLength{LZ4_decompress_safe(
+        reinterpret_cast<const char*>(sourceBuffer),
+        reinterpret_cast<char*>(destBuffer), static_cast<int>(sourceLength),
+        static_cast<int>(destLength))};
 
     // Check for errors.
-    if (result == Z_MEM_ERROR) {
-        LOG_FATAL("Ran out of memory while uncompressing.");
-    }
-    else if (result == Z_BUF_ERROR) {
-        LOG_FATAL("Ran out of room in destBuffer while uncompressing.");
-    }
-    else if (result == Z_DATA_ERROR) {
-        LOG_FATAL("Data corrupted or incomplete while uncompressing.");
+    if (decompressedLength < 0) {
+        LOG_FATAL("Error during decompression.");
     }
 
-    // Return the uncompressed data length.
-    return destLengthReturn;
+    return decompressedLength;
 }
 
 } // End namespace AM

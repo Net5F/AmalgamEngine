@@ -24,7 +24,7 @@ Network::Network()
 , exitRequested(false)
 , headerRecBuffer(SERVER_HEADER_SIZE)
 , batchRecBuffer(SharedConfig::MAX_BATCH_SIZE)
-, uncompressedBatchRecBuffer(SharedConfig::MAX_BATCH_SIZE)
+, decompressedBatchRecBuffer(SharedConfig::MAX_BATCH_SIZE)
 , netstatsLoggingEnabled(true)
 , ticksSinceNetstatsLog(0)
 {
@@ -203,15 +203,15 @@ void Network::processBatch()
         // Track the number of bytes we've received.
         bytesReceived += MESSAGE_HEADER_SIZE + batchSize;
 
-        // If the payload is compressed, uncompress it.
+        // If the payload is compressed, decompress it.
         Uint8* bufferToUse{&(batchRecBuffer[0])};
         if (batchIsCompressed) {
             batchSize = static_cast<Uint16>(
-                ByteTools::uncompress(&(batchRecBuffer[0]), batchSize,
-                                      &(uncompressedBatchRecBuffer[0]),
+                ByteTools::decompress(&(batchRecBuffer[0]), batchSize,
+                                      &(decompressedBatchRecBuffer[0]),
                                       SharedConfig::MAX_BATCH_SIZE));
 
-            bufferToUse = &(uncompressedBatchRecBuffer[0]);
+            bufferToUse = &(decompressedBatchRecBuffer[0]);
         }
 
         // Process the messages.

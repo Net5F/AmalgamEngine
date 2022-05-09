@@ -168,9 +168,9 @@ private:
     /** Holds a received message batch while we pass its messages to
         MessageProcessor. */
     BinaryBuffer batchRecBuffer;
-    /** If a batch is compressed, it's uncompressed into this buffer before
+    /** If a batch is compressed, it's decompressed into this buffer before
         processing. */
-    BinaryBuffer uncompressedBatchRecBuffer;
+    BinaryBuffer decompressedBatchRecBuffer;
 
     /** The number of seconds we'll wait before logging our network
         statistics. */

@@ -31,9 +31,9 @@
 [submodule "Libraries/QueuedEvents"]
 	path = Libraries/QueuedEvents
 	url = git@github.com:Net5F/QueuedEvents.git
-[submodule "Libraries/zlib-ng"]
-	path = Libraries/zlib-ng
-	url = git@github.com:zlib-ng/zlib-ng.git
 [submodule "Libraries/tracy"]
 	path = Libraries/tracy
 	url = git@github.com:wolfpld/tracy.git
+[submodule "Libraries/lz4"]
+	path = Libraries/lz4
+	url = git@github.com:Net5F/lz4.git

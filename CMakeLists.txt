@@ -19,12 +19,11 @@ find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_gfx REQUIRED)
 include("${CMAKE_MODULE_PATH}/SDL2_net.cmake")
 
-# Configure zlib-ng.
-set(ZLIB_ENABLE_TESTS OFF CACHE BOOL "Build test binaries." FORCE)
-set(WITH_SANITIZER "" CACHE STRING "Build with sanitizer (Memory, Address, Thread, Undefined)." FORCE)
-set(WITH_GZFILEOP OFF CACHE BOOL "Compile with support for .gz file saving/reading functions." FORCE)
-add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/zlib-ng/"
-                 "${PROJECT_BINARY_DIR}/Libraries/zlib-ng/")
+# Configure lz4.
+option(LZ4_BUILD_CLI "Build lz4 program" OFF)
+option(LZ4_BUILD_LEGACY_LZ4C "Build lz4c program with legacy argument support" OFF)
+add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/lz4/build/cmake/"
+                 "${PROJECT_BINARY_DIR}/Libraries/lz4/")
 
 # Configure SDL2pp.
 set(SDL2PP_WITH_IMAGE ON)
