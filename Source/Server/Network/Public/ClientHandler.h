@@ -33,9 +33,6 @@ class MessageProcessor;
 class ClientHandler
 {
 public:
-    /** The maximum number of clients that we will accept connections from. */
-    static constexpr unsigned int MAX_CLIENTS = 1000;
-
     ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher,
                   MessageProcessor& inMessageProcessor);
 
@@ -117,6 +114,9 @@ private:
 
     /** Used for generating network IDs. */
     IDPool idPool;
+
+    /** The number of clients that are currently connected. */
+    unsigned int clientCount;
 
     /** The socket set used for all clients. Lets us do select()-like behavior,
         allowing our receive thread to not be constantly spinning. */

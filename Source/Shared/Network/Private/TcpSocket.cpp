@@ -13,12 +13,12 @@ TcpSocket::TcpSocket(Uint16 inPort)
         LOG_FATAL("Tried to use port 0.");
     }
 
-    IPaddress ip;
-    if (SDLNet_ResolveHost(&ip, nullptr, port) == -1) {
+    IPaddress ipObj;
+    if (SDLNet_ResolveHost(&ipObj, nullptr, port) == -1) {
         LOG_FATAL("Could not resolve host: %s", SDLNet_GetError());
     }
 
-    socket = SDLNet_TCP_Open(&ip);
+    socket = SDLNet_TCP_Open(&ipObj);
     if (socket == nullptr) {
         LOG_FATAL("Could not open TCP socket: %s", SDLNet_GetError());
     }
@@ -41,7 +41,6 @@ TcpSocket::TcpSocket(std::string inIp, Uint16 inPort)
     }
 
     IPaddress ipObj;
-
     if (SDLNet_ResolveHost(&ipObj, ip.c_str(), port) == -1) {
         LOG_FATAL("Could not resolve host: %s", SDLNet_GetError());
     }
@@ -74,12 +73,12 @@ bool TcpSocket::isReady()
 
 std::unique_ptr<TcpSocket> TcpSocket::accept()
 {
-    TCPsocket newSocket = SDLNet_TCP_Accept(socket);
-    if (newSocket == nullptr) {
-        return nullptr;
+    TCPsocket newSocket{SDLNet_TCP_Accept(socket)};
+    if (newSocket != nullptr) {
+        return std::make_unique<TcpSocket>(newSocket);
     }
     else {
-        return std::make_unique<TcpSocket>(newSocket);
+        return nullptr;
     }
 }
 
@@ -92,7 +91,7 @@ std::string TcpSocket::getAddress()
     else if (port == 0) {
         // Socket was received through a listener and hasn't yet retrieved its
         // address.
-        IPaddress* remoteIP = SDLNet_TCP_GetPeerAddress(socket);
+        IPaddress* remoteIP{SDLNet_TCP_GetPeerAddress(socket)};
         if (remoteIP == nullptr) {
             LOG_FATAL("Failed to get peer address: %s", SDLNet_GetError());
         }

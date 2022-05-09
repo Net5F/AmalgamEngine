@@ -2,6 +2,7 @@
 #include "Network.h"
 #include "NetworkDefs.h"
 #include "SocketSet.h"
+#include "Config.h"
 #include "Log.h"
 #include <shared_mutex>
 #include <mutex>
@@ -18,13 +19,14 @@ ClientHandler::ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher,
 : network{inNetwork}
 , dispatcher{inDispatcher}
 , messageProcessor{inMessageProcessor}
-, idPool(MAX_CLIENTS)
-, clientSet(std::make_shared<SocketSet>(MAX_CLIENTS))
-, acceptor(Network::SERVER_PORT, clientSet)
+, idPool{Config::MAX_CLIENTS}
+, clientCount{0}
+, clientSet{std::make_shared<SocketSet>(Config::MAX_CLIENTS)}
+, acceptor{Network::SERVER_PORT, clientSet}
 , messageRecBuffer(Peer::MAX_WIRE_SIZE)
-, receiveThreadObj()
-, exitRequested(false)
-, sendRequested(false)
+, receiveThreadObj{}
+, exitRequested{false}
+, sendRequested{false}
 {
     // Start the send and receive threads.
     receiveThreadObj = std::thread(&ClientHandler::serviceClients, this);
@@ -117,9 +119,18 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
 {
     ZoneScoped;
 
-    // Creates the new peer, which adds itself to the socket set.
-    std::unique_ptr<Peer> newPeer{acceptor.accept()};
+    // If we're at max capacity, reject any waiting connections.
+    if (clientCount == Config::MAX_CLIENTS) {
+        while (acceptor.reject()) {
+            LOG_INFO("Rejected connection attempt: Already at maximum "
+                     "connected clients.");
+        }
+        return;
+    }
 
+    // We have room for more peers. Connect to any that are waiting.
+    // Note: newPeer adds itself to the socket set.
+    std::unique_ptr<Peer> newPeer{acceptor.accept()};
     while (newPeer != nullptr) {
         NetworkID newID{idPool.reserveID()};
         LOG_INFO("New client connected. Assigning netID: %u", newID);
@@ -136,6 +147,8 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
                     "Ran out of room in client map or key already existed.");
             }
         }
+
+        clientCount++;
 
         // Notify the sim that a client was connected.
         dispatcher.emplace<ClientConnected>(newID);
@@ -164,6 +177,8 @@ void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
                 idPool.freeID(it->first);
                 it = clientMap.erase(it);
             }
+
+            clientCount--;
 
             // Notify the sim that a client was disconnected.
             LOG_INFO("Erased disconnected client with netID: %u.", clientID);

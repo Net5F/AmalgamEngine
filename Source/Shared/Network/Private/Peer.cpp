@@ -9,8 +9,8 @@ namespace AM
 std::unique_ptr<Peer> Peer::initiate(std::string serverIP,
                                      unsigned int serverPort)
 {
-    std::unique_ptr<TcpSocket> socket
-        = std::make_unique<TcpSocket>(serverIP, serverPort);
+    std::unique_ptr<TcpSocket> socket{
+        std::make_unique<TcpSocket>(serverIP, serverPort)};
 
     return std::make_unique<Peer>(std::move(socket));
 }
@@ -53,7 +53,7 @@ NetworkResult Peer::send(const BinaryBufferSharedPtr& buffer)
         return NetworkResult::Disconnected;
     }
 
-    std::size_t messageSize = buffer->size();
+    std::size_t messageSize{buffer->size()};
     if (messageSize > MAX_WIRE_SIZE) {
         LOG_FATAL("Tried to send too many bytes. Size: %u, MAX_WIRE_SIZE: %u",
                   messageSize, MAX_WIRE_SIZE);
@@ -171,7 +171,7 @@ ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
 
     // Receive the message header.
     Uint8 headerBuf[MESSAGE_HEADER_SIZE];
-    int result = socket->receive(headerBuf, MESSAGE_HEADER_SIZE);
+    int result{socket->receive(headerBuf, MESSAGE_HEADER_SIZE)};
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
@@ -202,8 +202,8 @@ ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
                   "Need to add logic for this scenario.");
     }
 
-    MessageType messageType
-        = static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageType]);
+    MessageType messageType{
+        static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageType])};
     return {NetworkResult::Success, messageType, messageSize};
 }
 
@@ -214,8 +214,8 @@ ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
     }
 
     // Receive the message header.
-    Uint8 headerBuf[MESSAGE_HEADER_SIZE];
-    int result = socket->receive(headerBuf, MESSAGE_HEADER_SIZE);
+    std::array<Uint8, MESSAGE_HEADER_SIZE> headerBuf{};
+    int result{socket->receive(headerBuf.data(), MESSAGE_HEADER_SIZE)};
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
@@ -227,8 +227,8 @@ ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
     }
 
     // The number of bytes in the upcoming message.
-    Uint16 messageSize
-        = ByteTools::read16(&(headerBuf[MessageHeaderIndex::Size]));
+    Uint16 messageSize{
+        ByteTools::read16(&(headerBuf[MessageHeaderIndex::Size]))};
     if (messageSize > MAX_WIRE_SIZE) {
         LOG_FATAL("Tried to receive too large of a message. messageSize: %u, "
                   "MAX_WIRE_SIZE: %u",
@@ -247,8 +247,8 @@ ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
                   "Need to add logic for this scenario.");
     }
 
-    MessageType messageType
-        = static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageType]);
+    MessageType messageType{
+        static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageType])};
     return {NetworkResult::Success, messageType, messageSize};
 }
 

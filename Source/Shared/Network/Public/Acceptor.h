@@ -12,9 +12,10 @@ namespace AM
 {
 /**
  * This class owns a listener socket and can accept new Peers.
- * TODO: Peer/acceptor seem like a redundant layer and should probably be
- * removed. A Client/Server class and the SocketSet/TcpSocket classes should be
- * able to cleanly handle all the responsibilities.
+
+ * TODO: Peer/Acceptor seem like a redundant layer and should probably be
+ *       removed. The Client/Server classes and the SocketSet/TcpSocket
+ *       classes should be able to cleanly handle all the responsibilities.
  */
 class Acceptor
 {
@@ -23,7 +24,23 @@ public:
 
     ~Acceptor();
 
+    /**
+     * If a peer is waiting to connect, opens a connection to the peer and
+     * adds it to the clientSet.
+     *
+     * @return A pointer to a new peer, if one was waiting. Else, nullptr.
+     */
     std::unique_ptr<Peer> accept();
+
+    /**
+     * If a peer is waiting to connect, opens a connection to the peer and
+     * immediately closes it.
+     *
+     * Use this to close connections when you're at maximum capacity.
+     *
+     * @return true if a peer was waiting, else false.
+     */
+    bool reject();
 
 private:
     /** Our listener socket. */

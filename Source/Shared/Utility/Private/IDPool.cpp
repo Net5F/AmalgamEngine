@@ -8,7 +8,7 @@ IDPool::IDPool(unsigned int inPoolSize)
 , containerSize(poolSize + SAFETY_BUFFER)
 , lastAddedIndex(0)
 , reservedIDCount(0)
-, IDs(poolSize)
+, IDs(containerSize)
 {
 }
 
@@ -22,7 +22,7 @@ unsigned int IDPool::reserveID()
     // Find the next empty index.
     for (unsigned int i = 1; i < poolSize; ++i) {
         // If this index is false (ID is unused).
-        unsigned int index = (lastAddedIndex + i) % containerSize;
+        unsigned int index{(lastAddedIndex + i) % containerSize};
         if (!IDs[index]) {
             IDs[index] = true;
             lastAddedIndex = index;

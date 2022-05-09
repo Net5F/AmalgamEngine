@@ -10,8 +10,6 @@ namespace AM
 namespace Server
 {
 
-const char* const FRAME_NAME = "SimTick";
-
 Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher,
                        Network& inNetwork, SpriteData& inSpriteData)
 : network(inNetwork)
@@ -36,7 +34,7 @@ Simulation::Simulation(EventDispatcher& inNetworkEventDispatcher,
 
 void Simulation::tick()
 {
-    FrameMarkStart(FRAME_NAME);
+    ZoneScoped;
 
     /* Run all systems. */
     // Process client connections and disconnections.
@@ -61,8 +59,6 @@ void Simulation::tick()
     chunkStreamingSystem.sendChunks();
 
     currentTick++;
-
-    FrameMarkEnd(FRAME_NAME);
 }
 
 Uint32 Simulation::getCurrentTick()

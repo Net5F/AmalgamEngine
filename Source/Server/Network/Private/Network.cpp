@@ -25,6 +25,8 @@ Network::Network(EventDispatcher& inNetworkEventDispatcher)
 
 void Network::tick()
 {
+    ZoneScoped;
+
     // Flag the send thread to start sending all messages for this network
     // tick.
     clientHandler.beginSendClientUpdates();

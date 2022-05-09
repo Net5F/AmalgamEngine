@@ -295,7 +295,7 @@ Client::AdjustmentData Client::getTickAdjustment()
     std::unique_lock lock(tickDiffMutex);
     CircularBuffer<Sint8, Config::TICKDIFF_HISTORY_LENGTH> tickDiffHistoryCopy(
         tickDiffHistory);
-    unsigned int numFreshDiffsCopy = numFreshDiffs;
+    unsigned int numFreshDiffsCopy{numFreshDiffs};
     lock.unlock();
 
     // Run through all checks and calc any necessary adjustment.

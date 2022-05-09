@@ -51,14 +51,14 @@ void WorldSim::connect()
 
 void WorldSim::tick()
 {
-    Uint32 targetTick = currentTick + 1;
+    Uint32 targetTick{currentTick + 1};
 
     // Apply any adjustments that we receive from the server.
     targetTick += network.transferTickAdjustment();
 
-    /* Process ticks until we match what the server wants.
-       This may cause us to not process any ticks, or to process multiple
-       ticks. */
+    // Process ticks until we match what the server wants.
+    // This may cause us to not process any ticks, or to process multiple
+    // ticks.
     while (currentTick < targetTick) {
         // If it's time to move, send an input message.
         if (ticksTillInput == 0) {

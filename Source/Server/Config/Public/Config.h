@@ -29,12 +29,15 @@ public:
     // 1. If the client is too far ahead or behind, send an adjustment.
     //    (TICKDIFF config entries mostly relate to this.)
     //
-    // 2. If a single tickdiff is lower than LOWEST_VALID_TICKDIFF or higher
-    //    than HIGHEST_VALID_TICKDIFF, disconnect them.
+    // 2. If a single tickdiff is lower than TICKDIFF_ACCEPTABLE_BOUND_LOWER
+    //    or higher than TICKDIFF_ACCEPTABLE_BOUND_UPPER, disconnect them.
     //
     // 3. If we haven't received data from the client within CLIENT_TIMEOUT_S
     //    seconds, disconnect them.
     ////////////////////////////////////////////////////////////////////////////
+
+    /** The maximum number of clients that we will allow. */
+    static constexpr unsigned int MAX_CLIENTS = 1010;
 
     /** How long we should wait before considering the client to be timed out.
         Arbitrarily chosen. If too high, we set ourselves up to take a huge
