@@ -4,8 +4,8 @@ Project vision (not all implemented yet, see Status section)
 * Easily create isometric, sprite-based virtual worlds.
 * Start from a template and have a full working world, including client, server, text chat, and account management.
 * All needed networking is built-in, and adding new messages for your custom features is extremely easy.
-* Targeted for use on relatively low-spec hardware (tested on a $30/mo rented server).
 * Load tested with 150 clients in 1 spot or 1000 clients in groups of 10, all sending 4 inputs/second.
+* Targeted for use on relatively low-spec hardware (tested on a $30/mo rented server).
 * Live, in-world map editing. Use permissions to let players build things, or restrict it to your developers.
 
 ## Status
@@ -22,9 +22,10 @@ Project vision (not all implemented yet, see Status section)
 - [x] Refactor UI library (spatial grid, nice event propagation).
 - [x] Implement world editing UI.
 - [x] Implement collision.
-- [ ] Split single repo into engine and project repos.
+- [ ] Further netcode load testing (get ready for users).
 
 ### Future
+- [ ] Split single repo into engine and project repos.
 - [ ] Implement text chat, chat server.
 - [ ] Implement sprite animation.
 - [ ] Implement login server, account db, account validation.
@@ -57,3 +58,12 @@ I haven't yet locked down an SDL2 or CMake version, we'll see where it ends up.
 1. `cd Build/Linux/Debug`
 1. `cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -G Ninja ../../../Source/`
 1. `ninja all`
+
+## Contributing
+### Bugs
+Bug reports and fixes are always welcome. Feel free to open an issue or submit a PR.
+
+### Features
+**Unsolicited feature PRs will not be reviewed. Please ask about the feature plan before working on a feature.**
+
+Collaboration is very welcome! That being said, there is a fairly solid vision for the near-future of this engine. If you would like to contribute expertise or take ownership over a feature on the roadmap, please open an issue and explain how you would like to help. If there's enough interest, a forum will be created to contain and track our feature discussions.
