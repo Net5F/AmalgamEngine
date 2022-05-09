@@ -10,8 +10,8 @@
 #include "ClientSimData.h"
 #include "InputHasChanged.h"
 #include "Log.h"
-#include <algorithm>
 #include "Tracy.hpp"
+#include <algorithm>
 
 namespace AM
 {

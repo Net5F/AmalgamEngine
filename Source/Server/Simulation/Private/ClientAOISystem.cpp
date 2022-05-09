@@ -12,8 +12,8 @@
 #include "EntityInit.h"
 #include "SharedConfig.h"
 #include "Log.h"
-#include <algorithm>
 #include "Tracy.hpp"
+#include <algorithm>
 
 namespace AM
 {

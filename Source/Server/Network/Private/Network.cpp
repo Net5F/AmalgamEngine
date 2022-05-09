@@ -6,9 +6,9 @@
 #include "Log.h"
 #include "NetworkStats.h"
 #include <SDL_net.h>
+#include "Tracy.hpp"
 #include <algorithm>
 #include <atomic>
-#include "Tracy.hpp"
 
 namespace AM
 {

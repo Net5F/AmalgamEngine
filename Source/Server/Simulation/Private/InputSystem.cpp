@@ -7,8 +7,8 @@
 #include "InputHasChanged.h"
 #include "ClientSimData.h"
 #include "Log.h"
-#include <memory>
 #include "Tracy.hpp"
+#include <memory>
 
 namespace AM
 {

@@ -2,10 +2,10 @@
 #include "SharedConfig.h"
 #include "Log.h"
 
+#include "Tracy.hpp"
 #include <functional>
 #include <string>
 #include <iostream>
-#include "Tracy.hpp"
 
 namespace AM
 {

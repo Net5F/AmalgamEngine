@@ -9,8 +9,8 @@
 #include "Serialize.h"
 #include "Log.h"
 #include <SDL_rect.h>
-#include <vector>
 #include "Tracy.hpp"
+#include <vector>
 
 namespace AM
 {
