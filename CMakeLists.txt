@@ -2,11 +2,19 @@ cmake_minimum_required(VERSION 3.13)
 
 project(Amalgam)
 
-# Tell CMake where the CMake folder is, since our source dir isn't the base dir.
+# Tell CMake where the CMake folder is.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMake/")
 
-# Make ThreadSanitizer available. Will only be used if AM_THREADSANITIZER == ON.
+###############################################################################
+# Sanitizers 
+###############################################################################
+# Make ThreadSanitizer available.
+OPTION(AM_THREADSANITIZER "Enable ThreadSanitizer data race detector." OFF)
 include("${CMAKE_MODULE_PATH}/ThreadSanitizer.cmake")
+
+# Make AddressSanitizer available.
+OPTION(AM_ADDRESSSANITIZER "Enable AddressSanitizer memory error detector." OFF)
+include("${CMAKE_MODULE_PATH}/AddressSanitizer.cmake")
 
 ###############################################################################
 # Dependencies

@@ -51,7 +51,7 @@ std::size_t ByteTools::compress(const Uint8* sourceBuffer,
                                 std::size_t destLength)
 {
     // Check that destBuffer is large enough for efficient compression.
-    AM_ASSERT((static_cast<int>(destLength) < compressBound(sourceLength)),
+    AM_ASSERT((destLength >= compressBound(sourceLength)),
               "Please increase destLength to at least %uB.",
               compressBound(sourceLength));
 

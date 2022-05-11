@@ -1,4 +1,4 @@
-# Support for building with ThreadSanitizer (tsan) -
+# Support for building with ThreadSanitizer (TSan) -
 # https://code.google.com/p/thread-sanitizer/
 #
 # Copied from ForestDB under the Apache-2.0 License.
@@ -8,8 +8,7 @@ INCLUDE(CheckCCompilerFlag)
 INCLUDE(CheckCXXCompilerFlag)
 INCLUDE(CMakePushCheckState)
 
-OPTION(AM_THREADSANITIZER "Enable ThreadSanitizer data race detector."
-       OFF)
+OPTION(AM_THREADSANITIZER "Enable ThreadSanitizer data race detector." OFF)
 
 IF (AM_THREADSANITIZER)
     CMAKE_PUSH_CHECK_STATE(RESET)
@@ -27,7 +26,7 @@ IF (AM_THREADSANITIZER)
 
         ADD_DEFINITIONS(-DTHREAD_SANITIZER)
 
-        MESSAGE(STATUS "ThreadSanitizer enabled.")
+        MESSAGE(STATUS "AM: ThreadSanitizer enabled.")
     ELSE()
         MESSAGE(FATAL_ERROR "AM_THREADSANITIZER enabled but compiler doesn't support ThreadSanitizer - cannot continue.")
     ENDIF()
