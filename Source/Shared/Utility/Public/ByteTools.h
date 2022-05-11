@@ -39,19 +39,23 @@ public:
     //-------------------------------------------------------------------------
     // Compression
     //-------------------------------------------------------------------------
-    /** The "level" value passed to zlib's compression function.
-        Can be 0 - 9, with 0 being no compression, 1 being fastest, and 9 being
-        most compressed. 6 is the default. */
-    static constexpr int COMPRESSION_LEVEL = 9;
+    /**
+     * Returns the size that a destination buffer should be for the efficient 
+     * compression of source data of the given length.
+     * 
+     * Our compression may work if the buffer is smaller than this value, but 
+     * it may fail and will at least run more slowly.
+     */
+    static std::size_t compressBound(std::size_t sourceLength);
 
     /**
      * Compresses data.
      *
      * @param sourceBuffer  A buffer containing the data to compress.
      * @param sourceLength  The length of the source data.
-     * @param destBuffer  The buffer to write the compressed data to. Must be
-     *                    at least LZ4_compressBound(sourceLength) bytes long.
-     * @param destLength  The length of the destination buffer.
+     * @param destBuffer  The buffer to write the compressed data to.
+     * @param destLength  The length of the destination buffer. See 
+     *                    compressBound() for more info.
      * @return The length of the compressed data.
      */
     static std::size_t compress(const Uint8* sourceBuffer,

@@ -51,8 +51,10 @@ void EntityLocator::setEntityLocation(entt::entity entity,
            - boxCellExtent.y);
 
     if (!(cellExtent.containsExtent(boxCellExtent))) {
-        LOG_FATAL(
-            "Tried to track entity that is outside of the locator's grid.");
+        LOG_FATAL("Tried to track entity that is outside of the locator's "
+                  "grid: (%d, %d, %d, %d)",
+                  boxCellExtent.x, boxCellExtent.y, boxCellExtent.xLength,
+                  boxCellExtent.yLength);
     }
 
     // If we already have a location for the entity, clear it.

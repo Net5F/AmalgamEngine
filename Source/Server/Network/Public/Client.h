@@ -99,6 +99,13 @@ private:
                                  Uint8& messageCount);
 
     /**
+     * Compresses the first batchSize bytes in the payload section of 
+     * batchBuffer into compressedBatchBuffer and returns the compressed 
+     * payload size.
+     */
+    unsigned int compressBatch(unsigned int batchSize);
+
+    /**
      * Fills in the header information for the message batch currently being
      * built.
      *
@@ -134,10 +141,6 @@ private:
         from this buffer. */
     static BinaryBuffer batchBuffer;
 
-    /** The size of our compressed batch buffer.
-        Zlib requires at least ((dataSize * 1.1) + 12) bytes of space during
-        compression. We just double the max message size to be safe. */
-    static const unsigned int COMPRESSED_BUFFER_SIZE = Peer::MAX_WIRE_SIZE * 2;
     /** If a batch needs to be compressed, the compressed bytes will be written
         to and sent from this buffer.
         See SharedConfig::BATCH_COMPRESSION_THRESHOLD for more info. */

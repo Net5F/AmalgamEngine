@@ -41,15 +41,19 @@ void ByteTools::write32(Uint32 value, Uint8* buffer)
     *reinterpret_cast<Uint32*>(buffer) = SDL_SwapLE32(value);
 }
 
+std::size_t ByteTools::compressBound(std::size_t sourceLength)
+{
+    return LZ4_compressBound(static_cast<int>(sourceLength));
+}
+
 std::size_t ByteTools::compress(const Uint8* sourceBuffer,
                                 std::size_t sourceLength, Uint8* destBuffer,
                                 std::size_t destLength)
 {
-    // Check if destBuffer is large enough for efficient compression.
-    if (static_cast<int>(destLength) < LZ4_compressBound(static_cast<int>(sourceLength))) {
-        LOG_INFO("destLength: %uB. Please increase to at least %uB.",
-                 destLength, LZ4_compressBound(static_cast<int>(sourceLength)));
-    }
+    // Check that destBuffer is large enough for efficient compression.
+    AM_ASSERT((static_cast<int>(destLength) < compressBound(sourceLength)),
+              "Please increase destLength to at least %uB.",
+              compressBound(sourceLength));
 
     // Compress the data.
     int compressedLength{LZ4_compress_default(

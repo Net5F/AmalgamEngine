@@ -15,7 +15,8 @@ namespace AM
 namespace Server
 {
 BinaryBuffer Client::batchBuffer(SharedConfig::MAX_BATCH_SIZE);
-BinaryBuffer Client::compressedBatchBuffer(Client::COMPRESSED_BUFFER_SIZE);
+// No default size since it's dynamically enlarged if too small.
+BinaryBuffer Client::compressedBatchBuffer;
 
 Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
 : netID(inNetID)
@@ -89,13 +90,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     Uint8* bufferToSend{&(batchBuffer[0])};
     bool isCompressed{false};
     if (batchSize > SharedConfig::BATCH_COMPRESSION_THRESHOLD) {
-        batchSize = static_cast<unsigned int>(ByteTools::compress(
-            &(batchBuffer[ServerHeaderIndex::MessageHeaderStart]), batchSize,
-            &(compressedBatchBuffer[ServerHeaderIndex::MessageHeaderStart]),
-            COMPRESSED_BUFFER_SIZE));
-        AM_ASSERT((batchSize <= MAX_BATCH_SIZE),
-                  "Batch too large, even after compression. Size: %u",
-                  batchSize);
+        batchSize = compressBatch(batchSize);
 
         isCompressed = true;
 
@@ -168,6 +163,27 @@ void Client::addExplicitConfirmation(unsigned int& currentIndex,
 
     // Update our latestSent tracking to account for the confirmed ticks.
     latestSentSimTick += confirmedTickCount;
+}
+
+unsigned int Client::compressBatch(unsigned int batchSize)
+{
+    // If the destination buffer is too small, resize it.
+    std::size_t compressBound{ByteTools::compressBound(batchSize)};
+    if (compressedBatchBuffer.size() < compressBound) {
+        compressedBatchBuffer.resize(compressBound);
+    }
+
+    // Compress the batch.
+    unsigned int compressedBatchSize{
+        static_cast<unsigned int>(ByteTools::compress(
+            &(batchBuffer[ServerHeaderIndex::MessageHeaderStart]), batchSize,
+            &(compressedBatchBuffer[ServerHeaderIndex::MessageHeaderStart]),
+            compressedBatchBuffer.size()))};
+    AM_ASSERT((compressedBatchSize <= MAX_BATCH_SIZE),
+              "Batch too large, even after compression. Size: %u",
+              compressedBatchSize);
+
+    return compressedBatchSize;
 }
 
 void Client::fillHeader(Uint8* bufferToFill, Uint16 batchSize,
