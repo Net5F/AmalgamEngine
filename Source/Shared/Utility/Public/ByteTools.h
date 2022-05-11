@@ -40,10 +40,10 @@ public:
     // Compression
     //-------------------------------------------------------------------------
     /**
-     * Returns the size that a destination buffer should be for the efficient 
+     * Returns the size that a destination buffer should be for the efficient
      * compression of source data of the given length.
-     * 
-     * Our compression may work if the buffer is smaller than this value, but 
+     *
+     * Our compression may work if the buffer is smaller than this value, but
      * it may fail and will at least run more slowly.
      */
     static std::size_t compressBound(std::size_t sourceLength);
@@ -54,7 +54,7 @@ public:
      * @param sourceBuffer  A buffer containing the data to compress.
      * @param sourceLength  The length of the source data.
      * @param destBuffer  The buffer to write the compressed data to.
-     * @param destLength  The length of the destination buffer. See 
+     * @param destLength  The length of the destination buffer. See
      *                    compressBound() for more info.
      * @return The length of the compressed data.
      */

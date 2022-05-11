@@ -99,8 +99,8 @@ private:
                                  Uint8& messageCount);
 
     /**
-     * Compresses the first batchSize bytes in the payload section of 
-     * batchBuffer into compressedBatchBuffer and returns the compressed 
+     * Compresses the first batchSize bytes in the payload section of
+     * batchBuffer into compressedBatchBuffer and returns the compressed
      * payload size.
      */
     unsigned int compressBatch(unsigned int batchSize);
