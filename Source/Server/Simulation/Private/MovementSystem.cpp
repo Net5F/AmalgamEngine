@@ -6,7 +6,6 @@
 #include "PreviousPosition.h"
 #include "Velocity.h"
 #include "BoundingBox.h"
-#include "PositionHasChanged.h"
 #include "SharedConfig.h"
 #include "Transforms.h"
 #include "Log.h"
@@ -67,9 +66,6 @@ void MovementSystem::processMovements()
         if (position != previousPosition) {
             // Update their position in the locator.
             world.entityLocator.setEntityLocation(entity, boundingBox);
-
-            // Tag them as having moved.
-            world.registry.emplace<PositionHasChanged>(entity);
         }
     }
 }

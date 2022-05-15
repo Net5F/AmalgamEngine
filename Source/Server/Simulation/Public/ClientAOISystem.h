@@ -43,18 +43,16 @@ public:
 
 private:
     /**
-     * Processes the entities that left entityThatMoved's AOI.
-     * Updates lists and sends EntityDelete messages appropriately.
+     * Sends an EntityDelete message to the given client for each entity that 
+     * left its AOI.
      */
-    void processEntitiesThatLeft(entt::entity entityThatMoved,
-                                 ClientSimData& clientThatMoved);
+    void processEntitiesThatLeft(ClientSimData& client);
 
     /**
-     * Processes the entities that entered entityThatMoved's AOI.
-     * Updates lists and sends EntityInit messages appropriately.
+     * Sends an EntityInit message to the given client for each entity that 
+     * entered its AOI.
      */
-    void processEntitiesThatEntered(entt::entity entityThatMoved,
-                                    ClientSimData& clientThatMoved);
+    void processEntitiesThatEntered(ClientSimData& client);
 
     /** Used to get the current tick number. */
     Simulation& sim;

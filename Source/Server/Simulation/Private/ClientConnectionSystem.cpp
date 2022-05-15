@@ -13,7 +13,6 @@
 #include "ClientSimData.h"
 #include "BoundingBox.h"
 #include "Name.h"
-#include "PositionHasChanged.h"
 #include "EntityDelete.h"
 #include "Transforms.h"
 #include "Log.h"
@@ -57,7 +56,7 @@ void ClientConnectionSystem::processConnectEvents()
         /* Build their entity. */
         // Find their spawn point.
         entt::registry& registry{world.registry};
-        const Position spawnPoint{world.getRandomSpawnPoint()};
+        const Position spawnPoint{world.getGroupedSpawnPoint()};
 
         // Create the entity and construct its standard components.
         entt::entity newEntity{registry.create()};
@@ -79,9 +78,6 @@ void ClientConnectionSystem::processConnectEvents()
 
         // Start tracking the entity in the locator.
         world.entityLocator.setEntityLocation(newEntity, boundingBox);
-
-        // Tag the entity as having moved, so the AOI system picks it up.
-        registry.emplace<PositionHasChanged>(newEntity);
 
         // Register the entity with the network ID map.
         world.netIdMap[clientConnected.clientID] = newEntity;
@@ -110,7 +106,7 @@ void ClientConnectionSystem::processDisconnectEvents()
         auto disconnectedEntityIt{
             world.netIdMap.find(clientDisconnected.clientID)};
         if (disconnectedEntityIt != world.netIdMap.end()) {
-            // Found the entity, remove it from the entity locator.
+            // Found the entity. Remove it from the entity locator.
             entt::entity disconnectedEntity{disconnectedEntityIt->second};
             world.entityLocator.removeEntity(disconnectedEntity);
 

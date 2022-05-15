@@ -23,7 +23,6 @@ target_sources(Server
 		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/Components/ClientSimData.h
-		Public/Components/PositionHasChanged.h
 		Public/Components/Sprite.h
 		Public/TileMap/Tile.h
 		Public/TileMap/TileMap.h
