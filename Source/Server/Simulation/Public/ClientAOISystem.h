@@ -43,13 +43,13 @@ public:
 
 private:
     /**
-     * Sends an EntityDelete message to the given client for each entity that 
+     * Sends an EntityDelete message to the given client for each entity that
      * left its AOI.
      */
     void processEntitiesThatLeft(ClientSimData& client);
 
     /**
-     * Sends an EntityInit message to the given client for each entity that 
+     * Sends an EntityInit message to the given client for each entity that
      * entered its AOI.
      */
     void processEntitiesThatEntered(ClientSimData& client);

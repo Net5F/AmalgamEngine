@@ -69,10 +69,10 @@ void ClientAOISystem::updateAOILists()
 
         // Fill entitiesThatEntered with the entities that entered this entity's
         // AOI.
-        std::set_difference(
-            currentAOIEntities.begin(), currentAOIEntities.end(),
-            oldAOIEntities.begin(), oldAOIEntities.end(),
-            std::back_inserter(client.entitiesThatEnteredAOI));
+        std::set_difference(currentAOIEntities.begin(),
+                            currentAOIEntities.end(), oldAOIEntities.begin(),
+                            oldAOIEntities.end(),
+                            std::back_inserter(client.entitiesThatEnteredAOI));
 
         // Process the entities that entered this entity's AOI.
         if (client.entitiesThatEnteredAOI.size() > 0) {
@@ -91,8 +91,7 @@ void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
     // Send the client an EntityDelete for each entity that left its AOI.
     for (entt::entity entityThatLeft : entitiesThatLeft) {
         network.serializeAndSend(
-            client.netID,
-            EntityDelete{sim.getCurrentTick(), entityThatLeft});
+            client.netID, EntityDelete{sim.getCurrentTick(), entityThatLeft});
     }
 }
 
