@@ -102,10 +102,8 @@ void ChunkUpdateSystem::requestNewInRangeChunks(
 
     // Bound each range to the map boundaries.
     const ChunkExtent& mapChunkExtent{world.tileMap.getChunkExtent()};
-    ChunkExtent mapBounds{0, 0, static_cast<int>(mapChunkExtent.xLength),
-                          static_cast<int>(mapChunkExtent.yLength)};
-    previousExtent.intersectWith(mapBounds);
-    currentExtent.intersectWith(mapBounds);
+    previousExtent.intersectWith(mapChunkExtent);
+    currentExtent.intersectWith(mapChunkExtent);
 
     // Iterate over the current extent, adding any new chunks to a request.
     ChunkUpdateRequest chunkUpdateRequest;

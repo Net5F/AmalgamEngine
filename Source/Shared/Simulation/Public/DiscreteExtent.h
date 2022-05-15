@@ -175,8 +175,8 @@ public:
      */
     bool containsPosition(const DiscretePosition<T>& position) const
     {
-        return ((position.x >= x) && (position.x <= (x + xLength))
-                && (position.y >= y) && (position.y <= (y + yLength)));
+        return ((position.x >= x) && (position.x < (x + xLength))
+                && (position.y >= y) && (position.y < (y + yLength)));
     }
 
     /**

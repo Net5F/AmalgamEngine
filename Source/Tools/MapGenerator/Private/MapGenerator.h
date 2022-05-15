@@ -10,7 +10,7 @@ namespace AM
 namespace MG
 {
 /**
- * Generates the World.map file based on the given parameters.
+ * Generates the TileMap.bin file based on the given parameters.
  */
 class MapGenerator
 {

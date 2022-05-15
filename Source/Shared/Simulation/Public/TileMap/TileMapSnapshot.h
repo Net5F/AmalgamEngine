@@ -23,6 +23,9 @@ public:
         can see later if we care to make it more complicated. */
     Uint16 version{0};
 
+    // Note: The map's origin is currently always assumed to be (0, 0). Add 
+    //       x/y fields here if we ever support negative origins.
+
     /** The length, in chunks, of the map's X axis. */
     unsigned int xLengthChunks{0};
 

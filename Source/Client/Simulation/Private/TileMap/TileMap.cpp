@@ -58,8 +58,14 @@ void TileMap::setMapSize(unsigned int inMapXLengthChunks,
                          unsigned int inMapYLengthChunks)
 {
     // Set our map size.
+    // Note: We set x/y to 0 since our map origin is always (0, 0). Change 
+    //       this if we ever support negative origins.
+    chunkExtent.x = 0;
+    chunkExtent.y = 0;
     chunkExtent.xLength = inMapXLengthChunks;
     chunkExtent.yLength = inMapYLengthChunks;
+    tileExtent.x = 0;
+    tileExtent.y = 0;
     tileExtent.xLength = (chunkExtent.xLength * SharedConfig::CHUNK_WIDTH);
     tileExtent.yLength = (chunkExtent.yLength * SharedConfig::CHUNK_WIDTH);
 

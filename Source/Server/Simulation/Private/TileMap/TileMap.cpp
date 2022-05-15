@@ -111,8 +111,14 @@ void TileMap::loadMap(TileMapSnapshot& mapSnapshot)
 {
     /* Load the snapshot into this map. */
     // Load the header data.
+    // Note: We set x/y to 0 since our map origin is always (0, 0). Change 
+    //       this if we ever support negative origins.
+    chunkExtent.x = 0;
+    chunkExtent.y = 0;
     chunkExtent.xLength = mapSnapshot.xLengthChunks;
     chunkExtent.yLength = mapSnapshot.yLengthChunks;
+    tileExtent.x = 0;
+    tileExtent.y = 0;
     tileExtent.xLength = (chunkExtent.xLength * SharedConfig::CHUNK_WIDTH);
     tileExtent.yLength = (chunkExtent.yLength * SharedConfig::CHUNK_WIDTH);
 

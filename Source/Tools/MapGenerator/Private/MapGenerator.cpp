@@ -39,7 +39,7 @@ void MapGenerator::generateAndSave(const std::string& fileName)
         chunk.palette.push_back(fillSpriteId);
 
         // Push the palette index of the sprite into each tile.
-        for (unsigned int i = 0; i < 256; ++i) {
+        for (unsigned int i = 0; i < SharedConfig::CHUNK_TILE_COUNT; ++i) {
             chunk.tiles[i].spriteLayers.push_back(0);
         }
     }
