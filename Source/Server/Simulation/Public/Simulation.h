@@ -20,6 +20,11 @@ class SpriteData;
 
 /**
  * Manages the simulation, including world state and system processing.
+ *
+ * The simulation is built on an ECS architecture:
+ *   Entities exist in a registry, owned by the World class.
+ *   Components that hold data are attached to each entity.
+ *   Systems that act on sets of components are owned and ran by this class.
  */
 class Simulation
 {

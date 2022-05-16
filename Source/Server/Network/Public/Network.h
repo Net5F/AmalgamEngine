@@ -22,7 +22,11 @@ class Acceptor;
 namespace Server
 {
 /**
- * Provides network functionality in the format that the Simulation wants.
+ * Provides a convenient interface for sending and receiving messages, and 
+ * other network-related functionality.
+ * 
+ * Internally, manages client connections and orchestrates message sending 
+ * and receiving.
  */
 class Network
 {

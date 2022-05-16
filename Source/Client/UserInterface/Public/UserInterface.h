@@ -27,7 +27,12 @@ class WorldSinks;
 class SpriteData;
 
 /**
- * Uses user input and sim data to manage the state of the user interface.
+ * Owns the UI widget tree (built using AmalgamUI) and manages its state.
+ * 
+ * The UI is given user input through SDL events. The simulation can also 
+ * communicate to the UI, through a signal system (see WorldSinks).
+ * 
+ * Also provides an interface for rendering the UI.
  */
 class UserInterface : public OSEventHandler
 {

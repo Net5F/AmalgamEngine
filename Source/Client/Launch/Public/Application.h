@@ -22,8 +22,11 @@ namespace AM
 namespace Client
 {
 /**
- * Maintains the lifetime of all app modules (sim, network, etc) and manages
- * the main thread's loop.
+ * The start of all client application activity. Owns all of the application's 
+ * modules (Simulation, Network, etc).
+ * 
+ * Also manages the main thread's loop, calling each module's update function 
+ * when appropriate.
  */
 class Application : public OSEventHandler
 {
