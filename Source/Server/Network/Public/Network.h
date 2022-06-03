@@ -22,10 +22,10 @@ class Acceptor;
 namespace Server
 {
 /**
- * Provides a convenient interface for sending and receiving messages, and 
+ * Provides a convenient interface for sending and receiving messages, and
  * other network-related functionality.
- * 
- * Internally, manages client connections and orchestrates message sending 
+ *
+ * Internally, manages client connections and orchestrates message sending
  * and receiving.
  */
 class Network

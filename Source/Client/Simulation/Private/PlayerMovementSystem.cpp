@@ -55,7 +55,8 @@ void PlayerMovementSystem::processMovement()
 
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
-            replayInputs(latestReceivedTick, position, velocity, inputHistory);
+            replayInputs(latestReceivedTick, position, velocity, inputHistory,
+                         sprite, boundingBox);
 
             // Check if there was a mismatch between the position we had and
             // where the server thought we should be.
@@ -70,7 +71,8 @@ void PlayerMovementSystem::processMovement()
     }
 
     // Process the player entity's movement for this tick.
-    movePlayerEntity(input, velocity, position);
+    movePlayerEntity(input.inputStates, velocity, position, sprite,
+                     boundingBox);
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(
@@ -146,27 +148,24 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
 
 void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
                                         Position& position, Velocity& velocity,
-                                        InputHistory& inputHistory)
+                                        InputHistory& inputHistory,
+                                        Sprite& sprite,
+                                        BoundingBox& boundingBox)
 {
     Uint32 currentTick{sim.getCurrentTick()};
     checkReceivedTickValidity(latestReceivedTick, currentTick);
 
-    /* Replay all inputs newer than latestReceivedTick, except the current
-       tick's input. */
+    // Replay all inputs newer than latestReceivedTick, except the current
+    // tick's input.
     for (Uint32 tickToProcess = (latestReceivedTick + 1);
          tickToProcess < currentTick; ++tickToProcess) {
         // Check that the diff is valid.
         Uint32 tickDiff{currentTick - tickToProcess};
         checkTickDiffValidity(tickDiff);
 
-        // Use the appropriate input state to update our velocity.
-        MovementHelpers::updateVelocity(velocity,
-                                        inputHistory.inputHistory[tickDiff],
-                                        SharedConfig::SIM_TICK_TIMESTEP_S);
-
-        // Update our position, using the new velocity.
-        MovementHelpers::updatePosition(position, velocity,
-                                        SharedConfig::SIM_TICK_TIMESTEP_S);
+        // Replay the input state and move the entity.
+        movePlayerEntity(inputHistory.inputHistory[tickDiff], velocity,
+                         position, sprite, boundingBox);
     }
 }
 
@@ -193,12 +192,14 @@ void PlayerMovementSystem::checkTickDiffValidity(Uint32 tickDiff)
     }
 }
 
-void PlayerMovementSystem::movePlayerEntity(Input& input, Velocity& velocity,
-                                            Position& position)
+void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates,
+                                            Velocity& velocity,
+                                            Position& position, Sprite& sprite,
+                                            BoundingBox& boundingBox)
 {
     // Use the current input state to update our velocity for this tick.
     velocity = MovementHelpers::updateVelocity(
-        velocity, input.inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
+        velocity, inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
 
     // Calculate our desired position, using the new velocity.
     Position desiredPosition{position};
@@ -208,13 +209,10 @@ void PlayerMovementSystem::movePlayerEntity(Input& input, Velocity& velocity,
     // If we're trying to move, resolve the movement.
     if (desiredPosition != position) {
         // Calculate a new bounding box to match our desired position.
-        Sprite& sprite{world.registry.get<Sprite>(world.playerEntity)};
         BoundingBox desiredBounds{Transforms::modelToWorldCentered(
             sprite.modelBounds, desiredPosition)};
 
         // Resolve any collisions with the surrounding bounding boxes.
-        BoundingBox& boundingBox{
-            world.registry.get<BoundingBox>(world.playerEntity)};
         BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(
             boundingBox, desiredBounds, world.tileMap)};
 

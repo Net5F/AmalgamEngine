@@ -54,7 +54,8 @@ private:
      * Replay any inputs that are from newer ticks than the latestReceivedTick.
      */
     void replayInputs(Uint32 latestReceivedTick, Position& position,
-                      Velocity& velocity, InputHistory& inputHistory);
+                      Velocity& velocity, InputHistory& inputHistory,
+                      Sprite& sprite, BoundingBox& boundingBox);
 
     /**
      * If receivedTick > currentTick, logs an error.
@@ -70,9 +71,14 @@ private:
     void checkTickDiffValidity(Uint32 tickDiff);
 
     /**
-     * Processes the player entity movement for this tick.
+     * Processes a single tick of player entity movement.
+     *
+     * @post The given velocity, position, and boundingBox now reflect the
+     *       entity's new position.
      */
-    void movePlayerEntity(Input& input, Velocity& velocity, Position& position);
+    void movePlayerEntity(Input::StateArr& inputStates, Velocity& velocity,
+                          Position& position, Sprite& sprite,
+                          BoundingBox& boundingBox);
 
     /** Used to get the current tick. */
     Simulation& sim;

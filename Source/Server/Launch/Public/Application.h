@@ -18,10 +18,10 @@ class EventDispatcher;
 namespace Server
 {
 /**
- * The start of all server application activity. Owns all of the application's 
+ * The start of all server application activity. Owns all of the application's
  * modules (Simulation, Network, etc).
- * 
- * Also manages the main thread's loop, calling each module's update function 
+ *
+ * Also manages the main thread's loop, calling each module's update function
  * when appropriate.
  */
 class Application

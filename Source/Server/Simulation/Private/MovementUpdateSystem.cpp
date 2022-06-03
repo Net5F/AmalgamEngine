@@ -73,6 +73,10 @@ void MovementUpdateSystem::collectEntitiesToSend(ClientSimData& client,
         entitiesToSend.push_back(clientEntity);
         client.inputWasDropped = false;
     }
+    // Else if the client entity has dirty inputs, add it.
+    else if (world.registry.all_of<InputHasChanged>(clientEntity)) {
+        entitiesToSend.push_back(clientEntity);
+    }
 
     // Remove duplicates from the vector.
     std::sort(entitiesToSend.begin(), entitiesToSend.end());

@@ -24,10 +24,10 @@ struct EntityUpdate;
 namespace Client
 {
 /**
- * Provides a convenient interface for connecting to the server, sending 
+ * Provides a convenient interface for connecting to the server, sending
  * and receiving messages, and other network-related functionality.
- * 
- * Internally, manages our connection to the server (if connected) and 
+ *
+ * Internally, manages our connection to the server (if connected) and
  * orchestrates message sending and receiving.
  */
 class Network
