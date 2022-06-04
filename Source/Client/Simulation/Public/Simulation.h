@@ -61,8 +61,8 @@ public:
 
     /**
      * Returns our current tick.
-     * 
-     * Our current tick aims to be some amount ahead of the server, so that 
+     *
+     * Our current tick aims to be some amount ahead of the server, so that
      * our messages will arrive before their intended tick is processed.
      *
      * Note: This is used for predicted state (such as player movement).
@@ -71,11 +71,11 @@ public:
 
     /**
      * Returns the tick that we're replicating non-predicted server state at.
-     * 
-     * Our replication tick aims to be some amount behind the server, so that 
-     * we can smoothly replicate the received server state without network 
+     *
+     * Our replication tick aims to be some amount behind the server, so that
+     * we can smoothly replicate the received server state without network
      * inconsistencies causing choppiness.
-     * 
+     *
      * Note: This is used for non-predicted state (such as NPC movement).
      */
     Uint32 getReplicationTick();

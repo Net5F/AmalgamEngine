@@ -6,9 +6,10 @@ namespace AM
 namespace Client
 {
 
-void ReplicationTickOffset::applyAdjustment(int adjustment) {
+void ReplicationTickOffset::applyAdjustment(int adjustment)
+{
     // We set our client ahead of the server by an amount equal to our latency,
-    // but this means that received messages will appear to be doubly far into 
+    // but this means that received messages will appear to be doubly far into
     // the past.
     // To account for this, we double the adjustment before applying.
     // We also negate it since we're reversing the direction.
