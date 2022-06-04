@@ -50,9 +50,7 @@ private:
 
     World world;
 
-    /**
-     * The tick number that we're currently on.
-     */
+    /** The tick number that we're currently on. */
     std::atomic<Uint32> currentTick;
 
     //-------------------------------------------------------------------------

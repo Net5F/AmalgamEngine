@@ -175,18 +175,17 @@ void Simulation::tick()
 {
     /* Calculate what tick we should be on. */
     // Increment the tick to the next.
-    Uint32 targetTick = currentTick + 1;
+    Uint32 targetTick{currentTick + 1};
 
     // If we're online, apply any adjustments that we receive from the
     // server.
     if (!Config::RUN_OFFLINE) {
-        int adjustment = network.transferTickAdjustment();
+        int adjustment{network.transferTickAdjustment()};
         if (adjustment != 0) {
             targetTick += adjustment;
 
             // Make sure NPC replication takes the adjustment into account.
-            npcLifetimeSystem.applyTickAdjustment(adjustment);
-            npcMovementSystem.applyTickAdjustment(adjustment);
+            replicationTickOffset.applyAdjustment(adjustment);
         }
     }
 
@@ -234,6 +233,11 @@ World& Simulation::getWorld()
 Uint32 Simulation::getCurrentTick()
 {
     return currentTick;
+}
+
+Uint32 Simulation::getReplicationTick()
+{
+    return (currentTick + replicationTickOffset.get());
 }
 
 bool Simulation::handleOSEvent(SDL_Event& event)

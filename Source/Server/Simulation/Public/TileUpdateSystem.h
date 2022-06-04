@@ -27,7 +27,7 @@ public:
     void updateTiles();
 
 private:
-    /** Used to access the player entity and components. */
+    /** Used to access the entity registry, locator, and the tile map. */
     World& world;
     /** Used to send chunk update request messages. */
     Network& network;

@@ -32,12 +32,6 @@ public:
      */
     void updateNpcs();
 
-    /**
-     * Applies the given tick adjustment (received from the server) to
-     * tickReplicationOffset.
-     */
-    void applyTickAdjustment(int adjustment);
-
 private:
     /** Represents what NPC movement changes happened on a single server
         tick. */
@@ -83,6 +77,7 @@ private:
     /** Used to send entity info request messages. */
     Network& network;
 
+    /** NPC state updates, received from the server. */
     EventQueue<NpcUpdate> npcUpdateQueue;
 
     /** Temporarily used for loading NPC sprite data.
@@ -97,13 +92,6 @@ private:
 
     /** The last tick that we processed update data for. */
     Uint32 lastProcessedTick;
-
-    /**
-     * How far into the past to replicate NPCs at.
-     * e.g. If tickReplicationOffset == -5, on tick 15 we'll replicate NPC data
-     *      for tick 10.
-     */
-    int tickReplicationOffset;
 };
 
 } // namespace Client

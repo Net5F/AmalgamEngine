@@ -29,12 +29,6 @@ public:
      */
     void processUpdates();
 
-    /**
-     * Applies the given tick adjustment (received from the server) to
-     * tickReplicationOffset.
-     */
-    void applyTickAdjustment(int adjustment);
-
 private:
     /**
      * Processes waiting EntityDelete messages, up to desiredTick.
@@ -55,13 +49,6 @@ private:
 
     EventQueue<EntityInit> entityInitQueue;
     EventQueue<EntityDelete> entityDeleteQueue;
-
-    /**
-     * How far into the past to replicate NPCs at.
-     * e.g. If tickReplicationOffset == -5, on tick 15 we'll replicate NPC data
-     *      for tick 10.
-     */
-    int tickReplicationOffset;
 };
 
 } // End namespace Client

@@ -6,6 +6,7 @@ target_sources(Client
 		Private/NpcMovementSystem.cpp
 		Private/PlayerInputSystem.cpp
 		Private/PlayerMovementSystem.cpp
+		Private/ReplicationTickOffset.cpp
 		Private/Simulation.cpp
 		Private/TileUpdateSystem.cpp
 		Private/World.cpp
@@ -18,6 +19,7 @@ target_sources(Client
 		Public/NpcMovementSystem.h
 		Public/PlayerInputSystem.h
 		Public/PlayerMovementSystem.h
+		Public/ReplicationTickOffset.h
 		Public/Simulation.h
 		Public/TileUpdateSystem.h
 		Public/World.h

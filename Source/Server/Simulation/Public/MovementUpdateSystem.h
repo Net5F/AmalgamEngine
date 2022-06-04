@@ -46,8 +46,11 @@ private:
      */
     void sendEntityUpdate(ClientSimData& client);
 
+    /** Used to get the current tick. */
     Simulation& sim;
+    /** Used to access entity component data. */
     World& world;
+    /** Used to send movement update messages. */
     Network& network;
 
     /** Holds the entities that a particular client needs to be sent updates

@@ -36,7 +36,6 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
 , spriteData{inSpriteData}
 , lastReceivedTick(0)
 , lastProcessedTick(0)
-, tickReplicationOffset(Config::INITIAL_REPLICATION_OFFSET)
 {
 }
 
@@ -51,8 +50,8 @@ void NpcMovementSystem::updateNpcs()
     receiveMovementUpdates();
 
     // We want to process updates until we've either processed the desired
-    // tick, or run out of data.
-    Uint32 desiredTick{sim.getCurrentTick() + tickReplicationOffset};
+    // tick, or have run out of data.
+    Uint32 desiredTick{sim.getReplicationTick()};
 
     /* While we have authoritative data to use, apply updates for all
        unprocessed ticks including the desired tick. */
@@ -87,25 +86,8 @@ void NpcMovementSystem::updateNpcs()
     if (!updated && (lastReceivedTick != 0)
         && (lastProcessedTick < desiredTick)) {
         LOG_INFO("Tick passed with no npc update. last: %u, desired: %u, "
-                 "queueSize: %u, offset: %d",
-                 lastProcessedTick, desiredTick, movementUpdateQueue.size(),
-                 tickReplicationOffset);
-    }
-}
-
-void NpcMovementSystem::applyTickAdjustment(int adjustment)
-{
-    // We set our client ahead of the server by an amount equal to our latency,
-    // but this means that received messages will appear to be doubly far into
-    // the past.
-    // To account for this, we double the adjustment before applying.
-    // We also negate it since we're reversing the direction.
-    tickReplicationOffset += (-2 * adjustment);
-
-    if (tickReplicationOffset >= 0) {
-        LOG_FATAL("Adjusted tickReplicationOffset too far into the future. "
-                  "offset: %u",
-                  tickReplicationOffset);
+                 "queueSize: %u",
+                 lastProcessedTick, desiredTick, movementUpdateQueue.size());
     }
 }
 
@@ -149,7 +131,7 @@ void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
     // If there's a gap > 1 between the latest received tick and the confirmed
     // tick, we know that no changes happened on the in-between ticks and can
     // push confirmations for them.
-    unsigned int implicitConfirmations = confirmedTick - lastReceivedTick;
+    unsigned int implicitConfirmations{confirmedTick - lastReceivedTick};
     for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
         movementUpdateQueue.push({(lastReceivedTick + i), false, nullptr});
     }
@@ -160,7 +142,7 @@ void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
 void NpcMovementSystem::handleUpdate(
     const std::shared_ptr<const MovementUpdate>& movementUpdate)
 {
-    Uint32 newReceivedTick = movementUpdate->tickNum;
+    Uint32 newReceivedTick{movementUpdate->tickNum};
 
     if (lastReceivedTick != 0) {
         // The update message implicitly confirmed all ticks since our last

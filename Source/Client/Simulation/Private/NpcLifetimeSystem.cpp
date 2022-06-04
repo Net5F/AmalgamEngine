@@ -22,37 +22,20 @@ NpcLifetimeSystem::NpcLifetimeSystem(Simulation& inSim, World& inWorld,
 , spriteData{inSpriteData}
 , entityInitQueue{inNetworkEventDispatcher}
 , entityDeleteQueue{inNetworkEventDispatcher}
-, tickReplicationOffset(Config::INITIAL_REPLICATION_OFFSET)
 {
 }
 
 void NpcLifetimeSystem::processUpdates()
 {
     // We want to process updates until we've either processed the desired
-    // tick, or run out of data.
-    Uint32 desiredTick{sim.getCurrentTick() + tickReplicationOffset};
+    // tick, or have run out of data.
+    Uint32 desiredTick{sim.getReplicationTick()};
 
     // Process any waiting EntityDelete messages, up to desiredTick.
     processEntityDeletes(desiredTick);
 
     // Process any waiting EntityInit messages, up to desiredTick.
     processEntityInits(desiredTick);
-}
-
-void NpcLifetimeSystem::applyTickAdjustment(int adjustment)
-{
-    // We set our client ahead of the server by an amount equal to our latency,
-    // but this means that received messages will appear to be doubly far into
-    // the past.
-    // To account for this, we double the adjustment before applying.
-    // We also negate it since we're reversing the direction.
-    tickReplicationOffset += (-2 * adjustment);
-
-    if (tickReplicationOffset >= 0) {
-        LOG_FATAL("Adjusted tickReplicationOffset too far into the future. "
-                  "offset: %u",
-                  tickReplicationOffset);
-    }
 }
 
 void NpcLifetimeSystem::processEntityDeletes(Uint32 desiredTick)

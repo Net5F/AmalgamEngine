@@ -45,7 +45,7 @@ private:
      */
     void processNetworkUpdates();
 
-    /** Used to access the player entity and components. */
+    /** Used to access the tile map. */
     World& world;
     /** Used to send tile update request messages. */
     Network& network;

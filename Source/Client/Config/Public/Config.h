@@ -34,7 +34,7 @@ public:
         Doesn't matter much since the server will quickly adjust us. */
     static constexpr Sint8 INITIAL_TICK_OFFSET = 5;
 
-    /** How far into the past to begin replicating NPCs at.
+    /** How far into the past to begin replicating non-predicted state at.
         We negate INITIAL_TICK_OFFSET since we want to be in the past instead
         of in the future. Additionally, we double it since the messages we
         receive will appear to be doubly far into the past (since we're in the

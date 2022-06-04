@@ -19,9 +19,9 @@ namespace Server
 {
 MovementUpdateSystem::MovementUpdateSystem(Simulation& inSim, World& inWorld,
                                            Network& inNetwork)
-: sim(inSim)
-, world(inWorld)
-, network(inNetwork)
+: sim{inSim}
+, world{inWorld}
+, network{inNetwork}
 {
 }
 

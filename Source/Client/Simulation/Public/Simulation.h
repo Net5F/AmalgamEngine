@@ -12,6 +12,7 @@
 #include "NpcMovementSystem.h"
 #include "CameraSystem.h"
 #include "Timer.h"
+#include "ReplicationTickOffset.h"
 #include <atomic>
 
 namespace AM
@@ -58,7 +59,26 @@ public:
 
     World& getWorld();
 
+    /**
+     * Returns our current tick.
+     * 
+     * Our current tick aims to be some amount ahead of the server, so that 
+     * our messages will arrive before their intended tick is processed.
+     *
+     * Note: This is used for predicted state (such as player movement).
+     */
     Uint32 getCurrentTick();
+
+    /**
+     * Returns the tick that we're replicating non-predicted server state at.
+     * 
+     * Our replication tick aims to be some amount behind the server, so that 
+     * we can smoothly replicate the received server state without network 
+     * inconsistencies causing choppiness.
+     * 
+     * Note: This is used for non-predicted state (such as NPC movement).
+     */
+    Uint32 getReplicationTick();
 
     /**
      * Handles user input events, specifically mouse and momentary events.
@@ -82,11 +102,12 @@ private:
 
     World world;
 
-    /**
-     * The tick number that we're currently on.
-     * Initialized based on the number that the server tells us it's on.
-     */
+    /** The tick number that we're currently on.
+        Initialized based on the number that the server tells us it's on. */
     std::atomic<Uint32> currentTick;
+
+    /** How far into the past to replicate non-predicted state at. */
+    ReplicationTickOffset replicationTickOffset;
 
     EventQueue<ConnectionResponse> connectionResponseQueue;
 
