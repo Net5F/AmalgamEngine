@@ -32,6 +32,9 @@ Project vision (not all implemented yet, see Status section)
 - [ ] Implement web server, account creation.
 - [ ] MVP is done.
 
+## Playing
+Currently, the client application is hardcoded to connect to a server ran by Net_. You can simply download the latest release and follow the instructions in the README.
+
 ## Building
 ### Windows
 #### Visual Studio (MSVC)
