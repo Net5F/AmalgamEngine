@@ -33,7 +33,7 @@ Project vision (not all implemented yet, see Status section)
 - [ ] MVP is done.
 
 ## Joining the demo world
-To join the demo world and play with other people, you can download the latest release and follow the instructions in the README.
+To join the demo world and play with other people, you can [download the latest release](https://github.com/Net5F/Amalgam/releases/latest) and follow the instructions in the README.
 
 Currently, the client application is hardcoded to connect to a server ran by Net_.
 
