@@ -59,7 +59,7 @@ Had to update to Ubuntu 21.04 for g++ 10.3.0 (older versions didn't have support
 I haven't yet locked down an SDL2 or CMake version, we'll see where it ends up.
 
 1. Run `Scripts/Linux/InstallDependencies.sh`, then build through the Eclipse project, or:
-1. (From the base of the repo) `mkdir Build Build/Linux Build/Linux/Debug`
+1. (From the base of the repo) `mkdir -p Build/Linux/Debug`
 1. `cd Build/Linux/Debug`
 1. `cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -G Ninja ../../../Source/`
 1. `ninja all`
