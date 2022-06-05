@@ -46,7 +46,7 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/bitsery/"
                  "${PROJECT_BINARY_DIR}/Libraries/bitsery/")
 
 # Configure Tracy.
-option(TRACY_ENABLE "Enable Tracy profiling." ON)
+option(TRACY_ENABLE "Enable Tracy profiling." OFF)
 option(TRACY_ON_DEMAND "Wait for connection before starting profiling." ON)
 # (Disabled because it requires extra dependencies. Can enable if useful.)
 option(TRACY_NO_CALLSTACK "Disable all callstack related functionality" ON)

@@ -43,11 +43,11 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 # Copy assets to the build directory.
-file(COPY ${PROJECT_SOURCE_DIR}/Resources/Client/Assets/
+file(COPY ${PROJECT_SOURCE_DIR}/Resources/Client/Common/Assets/
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Assets/)
 
 # Copy SpriteData.json to the build directory.
-file(COPY ${PROJECT_SOURCE_DIR}/Resources/Shared/SpriteData.json
+file(COPY ${PROJECT_SOURCE_DIR}/Resources/Shared/Common/SpriteData.json
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 # Build all of the subdirectories

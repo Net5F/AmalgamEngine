@@ -61,15 +61,14 @@ robocopy "%BuildPath%\Server" "%PackagePath%\Server" "Server.exe" >nul 2>&1
 robocopy "%BuildPath%\SpriteEditor" "%PackagePath%\SpriteEditor" "SpriteEditor.exe" >nul 2>&1
 
 rem Copy the resource files.
-robocopy "%BasePath%\Resources\Client" "%PackagePath%\Client" /E >nul 2>&1
-robocopy "%BasePath%\Resources\Server" "%PackagePath%\Server" /E >nul 2>&1
-robocopy "%BasePath%\Resources\SpriteEditor" "%PackagePath%\SpriteEditor" /E >nul 2>&1
-robocopy "%BasePath%\Resources\Shared" "%PackagePath%\Client" /E >nul 2>&1
-robocopy "%BasePath%\Resources\Shared" "%PackagePath%\Server" /E >nul 2>&1
-
-robocopy "%BasePath%\Resources\Packaging\Windows" "%PackagePath%\Client" /E >nul 2>&1
-robocopy "%BasePath%\Resources\Packaging\Windows" "%PackagePath%\Server" /E >nul 2>&1
-robocopy "%BasePath%\Resources\Packaging\Windows" "%PackagePath%\SpriteEditor" /E >nul 2>&1
+robocopy "%BasePath%\Resources\Client\Common" "%PackagePath%\Client" /E >nul 2>&1
+robocopy "%BasePath%\Resources\Client\Windows" "%PackagePath%\Client" /E >nul 2>&1
+robocopy "%BasePath%\Resources\Server\Common" "%PackagePath%\Server" /E >nul 2>&1
+robocopy "%BasePath%\Resources\Server\Windows" "%PackagePath%\Server" /E >nul 2>&1
+robocopy "%BasePath%\Resources\SpriteEditor\Common" "%PackagePath%\SpriteEditor" /E >nul 2>&1
+robocopy "%BasePath%\Resources\SpriteEditor\Windows" "%PackagePath%\SpriteEditor" /E >nul 2>&1
+robocopy "%BasePath%\Resources\Shared\Common" "%PackagePath%\Client" /E >nul 2>&1
+robocopy "%BasePath%\Resources\Shared\Common" "%PackagePath%\Server" /E >nul 2>&1
 
 rem Detect and copy dependencies.
 cmake -P "%BasePath%\CMake\copy_windows_deps.cmake" "%PackagePath%\Client" false

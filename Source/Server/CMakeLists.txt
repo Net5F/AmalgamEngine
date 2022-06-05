@@ -43,11 +43,11 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 # Copy SpriteData.json to the build directory.
-file(COPY ${PROJECT_SOURCE_DIR}/Resources/Shared/SpriteData.json
+file(COPY ${PROJECT_SOURCE_DIR}/Resources/Shared/Common/SpriteData.json
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 # Copy TileMap.bin to the build directory.
-file(COPY ${PROJECT_SOURCE_DIR}/Resources/Server/TileMap.bin
+file(COPY ${PROJECT_SOURCE_DIR}/Resources/Server/Common/TileMap.bin
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
 
 # Build all of the subdirectories

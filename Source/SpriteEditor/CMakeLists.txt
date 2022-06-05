@@ -41,7 +41,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 # Copy assets to the build directory.
-file(COPY ${PROJECT_SOURCE_DIR}/Resources/SpriteEditor/Assets/
+file(COPY ${PROJECT_SOURCE_DIR}/Resources/SpriteEditor/Common/Assets/
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Assets/)
 
 # Build all of the subdirectories

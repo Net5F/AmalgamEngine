@@ -37,14 +37,13 @@ cp $BuildPath/Server/Server $PackagePath/Server/
 cp $BuildPath/SpriteEditor/SpriteEditor $PackagePath/SpriteEditor/
 
 # Copy the resource files.
-cp -r $BasePath/Resources/Client/* $PackagePath/Client/
-cp -r $BasePath/Resources/Server/* $PackagePath/Server/
-cp -r $BasePath/Resources/SpriteEditor/* $PackagePath/SpriteEditor/
-cp -r $BasePath/Resources/Shared/* $PackagePath/Client/
-cp -r $BasePath/Resources/Shared/* $PackagePath/Server/
-
-cp -r $BasePath/Resources/Packaging/Linux/* $PackagePath/Client/
-cp -r $BasePath/Resources/Packaging/Linux/* $PackagePath/Server/
-cp -r $BasePath/Resources/Packaging/Linux/* $PackagePath/SpriteEditor/
+cp -r $BasePath/Resources/Client/Common/* $PackagePath/Client/
+cp -r $BasePath/Resources/Client/Linux/* $PackagePath/Client/
+cp -r $BasePath/Resources/Server/Common/* $PackagePath/Server/
+cp -r $BasePath/Resources/Server/Linux/* $PackagePath/Server/
+cp -r $BasePath/Resources/SpriteEditor/Common/* $PackagePath/SpriteEditor/
+cp -r $BasePath/Resources/SpriteEditor/Linux/* $PackagePath/SpriteEditor/
+cp -r $BasePath/Resources/Shared/Common/* $PackagePath/Client/
+cp -r $BasePath/Resources/Shared/Common/* $PackagePath/Server/
 
 echo "Packaging complete. Package can be found at $PackagePath"

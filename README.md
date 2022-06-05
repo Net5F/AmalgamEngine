@@ -21,7 +21,7 @@ Project vision (not all implemented yet, see Status section)
 - [x] Implement interest management system.
 - [x] Refactor UI library (spatial grid, nice event propagation).
 - [x] Implement world editing UI.
-- [x] Implement collision.
+- [x] Implement collision (simple placeholder).
 - [ ] Further netcode load testing (get ready for users).
 
 ### Future
