@@ -32,8 +32,10 @@ Project vision (not all implemented yet, see Status section)
 - [ ] Implement web server, account creation.
 - [ ] MVP is done.
 
-## Playing
-Currently, the client application is hardcoded to connect to a server ran by Net_. You can simply download the latest release and follow the instructions in the README.
+## Joining the demo world
+To join the demo world and play with other people, you can download the latest release and follow the instructions in the README.
+
+Currently, the client application is hardcoded to connect to a server ran by Net_.
 
 ## Building
 ### Windows
