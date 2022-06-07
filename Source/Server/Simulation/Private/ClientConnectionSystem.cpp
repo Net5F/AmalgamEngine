@@ -77,6 +77,8 @@ void ClientConnectionSystem::processConnectEvents()
                                                         newPosition))};
 
         // Start tracking the entity in the locator.
+        // Note: Since the entity was added to the locator, its peers 
+        //       will be told by ClientAOISystem to construct it.
         world.entityLocator.setEntityLocation(newEntity, boundingBox);
 
         // Register the entity with the network ID map.
@@ -107,44 +109,15 @@ void ClientConnectionSystem::processDisconnectEvents()
             world.netIdMap.find(clientDisconnected.clientID)};
         if (disconnectedEntityIt != world.netIdMap.end()) {
             // Found the entity. Remove it from the entity locator.
+            // Note: Since the entity was removed from the locator, its peers 
+            //       will be told by ClientAOISystem to delete it.
             entt::entity disconnectedEntity{disconnectedEntityIt->second};
             world.entityLocator.removeEntity(disconnectedEntity);
-
-            // Remove it from the AOI lists of all client entities in its
-            // range and send them EntityDeletes.
-            ClientSimData& disconnectedClient{
-                view.get<ClientSimData>(disconnectedEntity)};
-            for (entt::entity entityInRange :
-                 disconnectedClient.entitiesInAOI) {
-                // If entityInRange isn't a client entity, skip it.
-                if (!(world.registry.all_of<ClientSimData>(entityInRange))) {
-                    continue;
-                }
-
-                // Find disconnectedEntity in entityInRange's list.
-                ClientSimData& clientInRange{
-                    view.get<ClientSimData>(entityInRange)};
-                auto eraseIt{std::find(clientInRange.entitiesInAOI.begin(),
-                                       clientInRange.entitiesInAOI.end(),
-                                       disconnectedEntity)};
-
-                // Remove disconnectedEntity from entityInRange's list.
-                if (eraseIt != clientInRange.entitiesInAOI.end()) {
-                    clientInRange.entitiesInAOI.erase(eraseIt);
-                }
-                else {
-                    LOG_FATAL("Failed to find expected entity when erasing.");
-                }
-
-                // Tell clientInRange that disconnectedEntity has been deleted.
-                network.serializeAndSend(
-                    clientInRange.netID,
-                    EntityDelete{sim.getCurrentTick(), disconnectedEntity});
-            }
 
             // Remove it from the registry and network ID map.
             world.registry.destroy(disconnectedEntity);
             world.netIdMap.erase(disconnectedEntityIt);
+
             LOG_INFO("Removed entity with entityID: %u", disconnectedEntity);
         }
         else {
