@@ -15,8 +15,6 @@ target_include_directories(FrameTimeTest
 
 target_link_libraries(FrameTimeTest
     PRIVATE
-        $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>
-        $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>
         ${SDL2_LIBRARIES}
         Shared
 )

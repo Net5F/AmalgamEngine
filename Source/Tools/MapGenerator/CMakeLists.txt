@@ -15,8 +15,6 @@ target_include_directories(MapGenerator
 
 target_link_libraries(MapGenerator
     PRIVATE
-        $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>
-        $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>
         Bitsery::bitsery
         Shared
 )

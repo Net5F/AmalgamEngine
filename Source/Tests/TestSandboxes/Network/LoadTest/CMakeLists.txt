@@ -33,8 +33,6 @@ target_include_directories(LoadTestClient
 
 target_link_libraries(LoadTestClient
     PRIVATE
-        $<$<CXX_COMPILER_ID:GNU>:-static-libgcc>
-        $<$<CXX_COMPILER_ID:GNU>:-static-libstdc++>
         ${SDL2_LIBRARIES}
         ${SDL2PP_LIBRARIES}
         SDL2_net-static
