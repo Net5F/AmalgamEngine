@@ -38,7 +38,8 @@ TEST_CASE("TestEntityLocator")
         entt::entity entity{registry.create()};
 
         // Intersecting 2 tiles at the edge of the map.
-        Position position{((28 * TILE_WORLD_WIDTH) + (HALF_TILE / 2.f)), HALF_TILE, 0};
+        Position position{((28 * TILE_WORLD_WIDTH) + (HALF_TILE / 2.f)),
+                          HALF_TILE, 0};
         BoundingBox boundingBox{
             Transforms::modelToWorldCentered(modelBounds, position)};
         entityLocator.setEntityLocation(entity, boundingBox);

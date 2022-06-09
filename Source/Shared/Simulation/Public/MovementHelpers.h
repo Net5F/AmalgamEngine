@@ -80,7 +80,8 @@ public:
         // them move.
         TileExtent boxTileExtent{desiredBounds.asTileExtent()};
         TileExtent mapExtent{tileMap.getTileExtent()};
-        if (!mapExtent.containsExtent(boxTileExtent) || (desiredBounds.minZ < 0)) {
+        if (!mapExtent.containsExtent(boxTileExtent)
+            || (desiredBounds.minZ < 0)) {
             return currentBounds;
         }
 
