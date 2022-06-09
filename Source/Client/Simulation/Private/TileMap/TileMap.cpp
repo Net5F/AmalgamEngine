@@ -88,7 +88,7 @@ void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
 
     // If the tile's layers vector isn't big enough, resize it.
     // Note: This sets new layers to the "empty sprite".
-    Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
     if (tile.spriteLayers.size() <= layerIndex) {
         const Sprite& emptySprite{spriteData.get(-1)};
         tile.spriteLayers.resize((layerIndex + 1),
@@ -114,7 +114,7 @@ void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
 
 void TileMap::clearTile(unsigned int tileX, unsigned int tileY)
 {
-    Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
     tile.spriteLayers.clear();
 }
 

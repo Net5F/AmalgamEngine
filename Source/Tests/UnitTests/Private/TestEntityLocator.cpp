@@ -33,6 +33,17 @@ TEST_CASE("TestEntityLocator")
     float HALF_CELL{CELL_WORLD_WIDTH / 2.f};
     unsigned int radius{static_cast<unsigned int>(HALF_CELL)};
 
+    SECTION("Set entity location")
+    {
+        entt::entity entity{registry.create()};
+
+        // Intersecting 2 tiles at the edge of the map.
+        Position position{((28 * TILE_WORLD_WIDTH) + (HALF_TILE / 2.f)), HALF_TILE, 0};
+        BoundingBox boundingBox{
+            Transforms::modelToWorldCentered(modelBounds, position)};
+        entityLocator.setEntityLocation(entity, boundingBox);
+    }
+
     SECTION("Coarse cylinder - Single intersected cell")
     {
         entt::entity entity{registry.create()};

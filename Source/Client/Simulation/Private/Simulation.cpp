@@ -80,7 +80,7 @@ void Simulation::connect()
                              connectionResponse.mapYLengthChunks);
     world.worldSignals.tileMapExtentChanged.publish(
         world.tileMap.getTileExtent());
-    LOG_INFO("Setting map size to: (%u, %u).",
+    LOG_INFO("Setting map size to: (%u, %u)ch.",
              connectionResponse.mapXLengthChunks,
              connectionResponse.mapYLengthChunks);
 

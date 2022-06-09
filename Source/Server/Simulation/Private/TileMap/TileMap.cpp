@@ -34,9 +34,9 @@ TileMap::TileMap(SpriteData& inSpriteData)
     loadMap(mapSnapshot);
 
     // Print the time taken.
-    double timeTaken = timer.getDeltaSeconds(false);
-    LOG_INFO("Map loaded in %.6fs. Size: (%u, %u).", timeTaken,
-             tileExtent.xLength, tileExtent.yLength);
+    double timeTaken{timer.getDeltaSeconds(false)};
+    LOG_INFO("Map loaded in %.6fs. Size: (%u, %u)ch.", timeTaken,
+             chunkExtent.xLength, chunkExtent.yLength);
 }
 
 TileMap::~TileMap()
@@ -60,7 +60,7 @@ void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
 
     // If the tile's layers vector isn't big enough, resize it.
     // Note: This sets new layers to the "empty sprite".
-    Tile& tile = tiles[linearizeTileIndex(tileX, tileY)];
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
     if (tile.spriteLayers.size() <= layerIndex) {
         const Sprite& emptySprite{spriteData.get(-1)};
         tile.spriteLayers.resize((layerIndex + 1),
@@ -226,7 +226,7 @@ void TileMap::save(const std::string& fileName)
     Serialize::toFile((Paths::BASE_PATH + fileName), mapSnapshot);
 
     // Print the time taken.
-    double timeTaken = timer.getDeltaSeconds(false);
+    double timeTaken{timer.getDeltaSeconds(false)};
     LOG_INFO("Map saved in %.6fs.", timeTaken);
 }
 

@@ -52,7 +52,7 @@ void EntityLocator::setEntityLocation(entt::entity entity,
 
     if (!(cellExtent.containsExtent(boxCellExtent))) {
         LOG_FATAL("Tried to track entity that is outside of the locator's "
-                  "grid: (%d, %d, %d, %d)",
+                  "grid: (%d, %d, %d, %d)ce.",
                   boxCellExtent.x, boxCellExtent.y, boxCellExtent.xLength,
                   boxCellExtent.yLength);
     }

@@ -128,7 +128,7 @@ private:
     CellExtent cellExtent;
 
     /** The width of a grid cell in world units. */
-    float cellWorldWidth;
+    const float cellWorldWidth;
 
     /** The outer vector is a 2D grid stored in row-major order, holding the
         grid's cells.
