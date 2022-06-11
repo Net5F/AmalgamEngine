@@ -1,10 +1,15 @@
-## The Amalgam Engine
-### An engine for easily creating virtual worlds.
-Project vision (not all implemented yet, see Status section)
+## The Amalgam Engine - An engine for easily creating virtual worlds
+[![Watch 150 clients in 1 area load test](https://img.youtube.com/vi/N7eCfXj04cE/maxresdefault.jpg)](https://youtu.be/N7eCfXj04cE)
+<p align="center">
+   <i>One of our single-area load tests (150 clients constantly moving). Click to watch.</i>
+</p>
+
+## Vision
+(Not all implemented yet, see Status section)
 * Easily create isometric, sprite-based virtual worlds.
 * Start from a template and have a full working world, including client, server, text chat, and account management.
 * All needed networking is built-in, and adding new messages for your custom features is extremely easy.
-* Load tested with 150 clients in 1 spot or 1000 clients in groups of 10, all sending 4 inputs/second.
+* Load tested with 150 clients in 1 area or 1000 clients in groups of 10, all sending 4 inputs/second.
 * Targeted for use on relatively low-spec hardware (tested on a $30/mo rented server).
 * Live, in-world map editing. Use permissions to let players build things, or restrict it to your developers.
 
@@ -22,10 +27,10 @@ Project vision (not all implemented yet, see Status section)
 - [x] Refactor UI library (spatial grid, nice event propagation).
 - [x] Implement world editing UI.
 - [x] Implement collision (simple placeholder).
-- [ ] Further netcode load testing (get ready for users).
+- [x] Further netcode load testing (get ready for users).
+- [ ] Split single repo into engine and project repos.
 
 ### Future
-- [ ] Split single repo into engine and project repos.
 - [ ] Implement text chat, chat server.
 - [ ] Implement sprite animation.
 - [ ] Implement login server, account db, account validation.
