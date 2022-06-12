@@ -1,7 +1,19 @@
 ## The Amalgam Engine - An engine for easily creating virtual worlds
 [![Watch 150 clients in 1 area load test](https://img.youtube.com/vi/N7eCfXj04cE/maxresdefault.jpg)](https://youtu.be/N7eCfXj04cE)
 <p align="center">
-   <i>One of our single-area load tests (150 clients constantly moving). Click to watch.</i>
+   <i>One of our single-area load tests - 150 clients constantly moving. Click to watch.</i>
+</p>
+&nbsp;
+
+![BuildMode](https://user-images.githubusercontent.com/17211746/173250545-7b5b66fb-b8b6-46ba-a301-69f4c8d818e4.jpg)
+<p align="center">
+   <i>Our in-world "Build Mode".</i>
+</p>
+&nbsp;
+
+![SpriteEditor](https://user-images.githubusercontent.com/17211746/173250552-2cc9db87-f748-4417-83c9-258c8720bf44.jpg)
+<p align="center">
+   <i>Our Sprite Editor, used to draw 3D collision boxes on sprites.</i>
 </p>
 
 ## Vision
