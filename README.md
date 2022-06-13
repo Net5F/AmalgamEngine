@@ -13,7 +13,7 @@
 
 ![SpriteEditor](https://user-images.githubusercontent.com/17211746/173250552-2cc9db87-f748-4417-83c9-258c8720bf44.jpg)
 <p align="center">
-   <i>Our Sprite Editor, used to draw 3D collision boxes on sprites.</i>
+   <i>Our Sprite Editor, used to draw 3D bounding boxes on sprites.</i>
 </p>
 
 ## Vision
