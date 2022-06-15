@@ -1,6 +1,5 @@
 target_sources(Server
     PRIVATE
-		Private/main.cpp
 		Private/Application.cpp
     PUBLIC
 		Public/Application.h

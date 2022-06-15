@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
-message(STATUS "Configuring Server")
+message(STATUS "Configuring Amalgam Server")
 
-add_executable(Server "")
+# Add our static library target.
+add_library(Server STATIC "")
+
+# Provide an alias that can be used whether the target comes from 
+# add_subdirectory() or find_package().
+add_library(Amalgam::Server ALIAS Server)
 
 target_include_directories(Server
     PRIVATE
@@ -29,7 +34,7 @@ target_link_libraries(Server
         Shared
 )
 
-# Compile with C++20
+# Compile with C++20.
 target_compile_features(Server PRIVATE cxx_std_20)
 set_target_properties(Server PROPERTIES CXX_EXTENSIONS OFF)
 

@@ -10,6 +10,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMake/")
 ###############################################################################
 option(AM_BUILD_TESTS "Build Amalgam Engine tests." OFF)
 
+option(AM_BUILD_SPRITE_EDITOR "Build Amalgam Engine Sprite Editor." OFF)
+
 ###############################################################################
 # Sanitizers 
 ###############################################################################

@@ -1,6 +1,5 @@
 target_sources(Client
     PRIVATE
-        Private/main.cpp
         Private/Application.cpp
     PUBLIC
         Public/Application.h

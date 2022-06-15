@@ -1,9 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
-message(STATUS "Configuring Shared")
+message(STATUS "Configuring Amalgam Shared")
 
 # Add our static library target.
 add_library(Shared STATIC "")
+
+# Provide an alias that can be used whether the target comes from 
+# add_subdirectory() or find_package().
+add_library(Amalgam::Shared ALIAS Shared)
 
 target_include_directories(Shared
     PUBLIC

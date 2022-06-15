@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
-message(STATUS "Configuring Client")
+message(STATUS "Configuring Amalgam Client")
 
-add_executable(Client "")
+# Add our static library target.
+add_library(Client STATIC "")
+
+# Provide an alias that can be used whether the target comes from 
+# add_subdirectory() or find_package().
+add_library(Amalgam::Client ALIAS Client)
 
 target_include_directories(Client
     PRIVATE
@@ -29,7 +34,7 @@ target_link_libraries(Client
         Shared
 )
 
-# Compile with C++20
+# Compile with C++20.
 target_compile_features(Client PRIVATE cxx_std_20)
 set_target_properties(Client PROPERTIES CXX_EXTENSIONS OFF)
 

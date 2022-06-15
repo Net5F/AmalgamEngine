@@ -13,7 +13,9 @@ add_subdirectory(Client)
 add_subdirectory(Server)
 
 # Configure sprite editor
-add_subdirectory(SpriteEditor)
+if (AM_BUILD_SPRITE_EDITOR)
+    add_subdirectory(SpriteEditor)
+endif()
 
 # Configure tests.
 if (AM_BUILD_TESTS)
