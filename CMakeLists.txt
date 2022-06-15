@@ -1,27 +1,27 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(Amalgam)
+project(AmalgamEngine)
 
 # Tell CMake where the CMake folder is.
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMake/")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMake")
 
 ###############################################################################
 # Options
 ###############################################################################
-option(AM_BUILD_TESTS "Build Amalgam Engine tests." OFF)
-
 option(AM_BUILD_SPRITE_EDITOR "Build Amalgam Engine Sprite Editor." OFF)
+
+option(AM_BUILD_TESTS "Build Amalgam Engine tests." OFF)
 
 ###############################################################################
 # Sanitizers 
 ###############################################################################
 # Make ThreadSanitizer available.
-OPTION(AM_THREADSANITIZER "Enable ThreadSanitizer data race detector." OFF)
-include("${CMAKE_MODULE_PATH}/ThreadSanitizer.cmake")
+option(AM_THREADSANITIZER "Enable ThreadSanitizer data race detector." OFF)
+include("${PROJECT_SOURCE_DIR}/CMake/ThreadSanitizer.cmake")
 
 # Make AddressSanitizer available.
-OPTION(AM_ADDRESSSANITIZER "Enable AddressSanitizer memory error detector." OFF)
-include("${CMAKE_MODULE_PATH}/AddressSanitizer.cmake")
+option(AM_ADDRESSSANITIZER "Enable AddressSanitizer memory error detector." OFF)
+include("${PROJECT_SOURCE_DIR}/CMake/AddressSanitizer.cmake")
 
 ###############################################################################
 # Dependencies
@@ -32,7 +32,7 @@ find_package(SDL2_image REQUIRED)
 find_package(SDL2_mixer REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(SDL2_gfx REQUIRED)
-include("${CMAKE_MODULE_PATH}/SDL2_net.cmake")
+include("${PROJECT_SOURCE_DIR}/CMake/SDL2_net.cmake")
 
 # Configure lz4.
 option(LZ4_BUILD_CLI "Build lz4 program" OFF)
@@ -77,7 +77,7 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/nativefiledialog-extended/"
                  "${PROJECT_BINARY_DIR}/Libraries/nativefiledialog-extended/")
 
 # Configure header-only readerwriterqueue.
-include("${CMAKE_MODULE_PATH}/readerwriterqueue.cmake")
+include("${PROJECT_SOURCE_DIR}/CMake/readerwriterqueue.cmake")
 
 # Configure header-only CircularBuffer.
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/CircularBuffer/"

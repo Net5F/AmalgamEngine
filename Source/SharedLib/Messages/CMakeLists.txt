@@ -1,0 +1,20 @@
+target_sources(SharedLib
+    PUBLIC
+        Public/ChunkUpdate.h
+        Public/ChunkUpdateRequest.h
+        Public/ChunkWireSnapshot.h
+        Public/ConnectionResponse.h
+        Public/ExplicitConfirmation.h
+        Public/Heartbeat.h
+        Public/InputChangeRequest.h
+        Public/MessageType.h
+        Public/MovementState.h
+        Public/MovementUpdate.h
+        Public/TileUpdate.h
+        Public/TileUpdateRequest.h
+)
+
+target_include_directories(SharedLib
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public
+)

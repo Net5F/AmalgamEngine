@@ -1,0 +1,38 @@
+target_sources(ServerLib
+	PRIVATE
+		Private/ChunkStreamingSystem.cpp
+		Private/ClientAOISystem.cpp
+		Private/ClientConnectionSystem.cpp
+		Private/InputSystem.cpp
+		Private/MovementSystem.cpp
+		Private/MovementUpdateSystem.cpp
+		Private/Simulation.cpp
+		Private/TileUpdateSystem.cpp
+		Private/World.cpp
+		Private/TileMap/TileMap.cpp
+	PUBLIC
+		Public/ChunkStreamingSystem.h
+		Public/ClientAOISystem.h
+		Public/ClientConnectionSystem.h
+		Public/EnttGroups.h
+		Public/EventSorter.h
+		Public/InputSystem.h
+		Public/MovementSystem.h
+		Public/MovementUpdateSystem.h
+		Public/Simulation.h
+		Public/TileUpdateSystem.h
+		Public/World.h
+		Public/Components/ClientSimData.h
+		Public/Components/Sprite.h
+		Public/TileMap/Tile.h
+		Public/TileMap/TileMap.h
+)
+
+target_include_directories(ServerLib
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
+)

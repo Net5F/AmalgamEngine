@@ -28,7 +28,7 @@ target_include_directories(UnitTests
 # Link our dependencies.
 target_link_libraries(UnitTests
     PRIVATE
-        Shared
+        SharedLib
         Catch2::Catch2
 )
 

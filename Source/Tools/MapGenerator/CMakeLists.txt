@@ -16,7 +16,7 @@ target_include_directories(MapGenerator
 target_link_libraries(MapGenerator
     PRIVATE
         Bitsery::bitsery
-        Shared
+        SharedLib
 )
 
 # Compile with C++20

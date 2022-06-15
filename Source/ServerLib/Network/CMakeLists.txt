@@ -1,0 +1,21 @@
+target_sources(ServerLib
+    PRIVATE
+        Private/Client.cpp
+        Private/ClientHandler.cpp
+        Private/MessageProcessor.cpp
+        Private/Network.cpp
+    PUBLIC
+        Public/Client.h
+        Public/ClientHandler.h
+        Public/MessageProcessor.h
+        Public/Network.h
+        Public/SDLNetInitializer.h
+        Public/ServerNetworkDefs.h
+)
+
+target_include_directories(ServerLib
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public
+)

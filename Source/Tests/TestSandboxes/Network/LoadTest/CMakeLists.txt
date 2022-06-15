@@ -11,12 +11,12 @@ add_executable(LoadTestClient
     Public/WorldSim.h
     
     # Client objects
-    ${PROJECT_SOURCE_DIR}/Source/Client/Config/Private/Config.cpp
-    ${PROJECT_SOURCE_DIR}/Source/Client/Config/Public/Config.h
-    ${PROJECT_SOURCE_DIR}/Source/Client/Network/Private/Network.cpp
-    ${PROJECT_SOURCE_DIR}/Source/Client/Network/Public/Network.h
-    ${PROJECT_SOURCE_DIR}/Source/Client/Network/Private/MessageProcessor.cpp
-    ${PROJECT_SOURCE_DIR}/Source/Client/Network/Public/MessageProcessor.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Private/Config.cpp
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Public/Config.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/Network.cpp
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/Network.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/MessageProcessor.cpp
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/MessageProcessor.h
 )
 
 target_include_directories(LoadTestClient
@@ -39,7 +39,7 @@ target_link_libraries(LoadTestClient
         readerwriterqueue
         EnTT::EnTT
         QueuedEvents
-        Shared
+        SharedLib
 )
 
 # Compile with C++20

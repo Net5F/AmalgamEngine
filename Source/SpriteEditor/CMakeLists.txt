@@ -24,7 +24,7 @@ target_link_libraries(SpriteEditor
         EnTT::EnTT
         nfd
         nlohmann_json::nlohmann_json
-        Shared
+        SharedLib
 )
 
 # Compile with C++20.

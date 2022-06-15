@@ -1,0 +1,41 @@
+target_sources(ClientLib
+	PRIVATE
+		Private/CameraSystem.cpp
+		Private/ChunkUpdateSystem.cpp
+		Private/NpcLifetimeSystem.cpp
+		Private/NpcMovementSystem.cpp
+		Private/PlayerInputSystem.cpp
+		Private/PlayerMovementSystem.cpp
+		Private/ReplicationTickOffset.cpp
+		Private/Simulation.cpp
+		Private/TileUpdateSystem.cpp
+		Private/World.cpp
+		Private/TileMap/TileMap.cpp
+	PUBLIC
+		Public/CameraSystem.h
+		Public/ChunkUpdateSystem.h
+		Public/EnttGroups.h
+		Public/NpcLifetimeSystem.h
+		Public/NpcMovementSystem.h
+		Public/PlayerInputSystem.h
+		Public/PlayerMovementSystem.h
+		Public/ReplicationTickOffset.h
+		Public/Simulation.h
+		Public/TileUpdateSystem.h
+		Public/World.h
+		Public/WorldSignals.h
+		Public/Components/InputHistory.h
+		Public/Components/NeedsAdjacentChunks.h
+		Public/Components/Sprite.h
+		Public/TileMap/Tile.h
+		Public/TileMap/TileMap.h
+)
+
+target_include_directories(ClientLib
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
+)

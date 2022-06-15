@@ -15,7 +15,7 @@ target_link_libraries(DriftTestClient
     PRIVATE
         ${SDL2_LIBRARIES}
         SDL2_net-static
-        Shared
+        SharedLib
 )
 target_compile_features(DriftTestClient PRIVATE cxx_std_20)
 set_target_properties(DriftTestClient PROPERTIES CXX_EXTENSIONS OFF)
@@ -33,7 +33,7 @@ target_link_libraries(DriftTestServer
     PRIVATE
         ${SDL2_LIBRARIES}
         SDL2_net-static
-        Shared
+        SharedLib
 )
 target_compile_features(DriftTestServer PRIVATE cxx_std_20)
 set_target_properties(DriftTestServer PROPERTIES CXX_EXTENSIONS OFF)
