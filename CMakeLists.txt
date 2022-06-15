@@ -6,6 +6,11 @@ project(Amalgam)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMake/")
 
 ###############################################################################
+# Options
+###############################################################################
+option(AM_BUILD_TESTS "Build Amalgam Engine tests." OFF)
+
+###############################################################################
 # Sanitizers 
 ###############################################################################
 # Make ThreadSanitizer available.
