@@ -21,6 +21,3 @@ endif()
 if (AM_BUILD_TESTS)
     add_subdirectory(Tests)
 endif()
-
-# Configure tools.
-add_subdirectory(Tools)
