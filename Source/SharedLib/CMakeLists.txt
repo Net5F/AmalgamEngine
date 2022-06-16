@@ -7,7 +7,7 @@ add_library(SharedLib STATIC "")
 
 # Provide an alias that can be used whether the target comes from 
 # add_subdirectory() or find_package().
-add_library(Amalgam::SharedLib ALIAS SharedLib)
+add_library(AmalgamEngine::SharedLib ALIAS SharedLib)
 
 target_include_directories(SharedLib
     PUBLIC

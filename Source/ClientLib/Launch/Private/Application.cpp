@@ -59,7 +59,7 @@ void Application::start()
     networkCaller.initTimer();
     rendererCaller.initTimer();
     while (!exitRequested) {
-        // Let the sim process an iteration if it needs to.
+        // Let the simulation process an iteration if it needs to.
         simCaller.update();
 
         // Let the UI widgets tick if they need to.

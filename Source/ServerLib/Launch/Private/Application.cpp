@@ -38,10 +38,10 @@ void Application::start()
     simCaller.initTimer();
     networkCaller.initTimer();
     while (!exitRequested) {
-        // Let the sim process an iteration if it needs to.
+        // Let the simulation process an iteration if it needs to.
         simCaller.update();
 
-        // Send a heartbeat if necessary.
+        // Send any queued messages, if necessary.
         networkCaller.update();
 
         // See if we have enough time left to sleep.

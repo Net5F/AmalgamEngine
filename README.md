@@ -61,6 +61,7 @@ Currently, the client application is hardcoded to connect to a server ran by Net
 1. Open CMakeLists.txt in Visual Studio (`Open` -> `CMake`).
 1. Update CMakeSettings.json (in this repo) to point at the various SDL folders in your installation path.
    1. You'll leave this file dirty. Don't try to commit it back upstream with your personal paths.
+   1. You can optionally enable `AM_BUILD_SPRITE_EDITOR` to build the sprite editor.
 1. `Project` -> `Generate CMake cache` (or just let it run if you have auto-config on).
 1. `Build` -> `Build All`
 
@@ -76,9 +77,10 @@ Had to update to Ubuntu 21.04 for g++ 10.3.0 (older versions didn't have support
 I haven't yet locked down an SDL2 or CMake version, we'll see where it ends up.
 
 1. Run `Scripts/Linux/InstallDependencies.sh`, then build through the Eclipse project, or:
-1. (From the base of the repo) `mkdir -p Build/Linux/Debug`
-1. `cd Build/Linux/Debug`
-1. `cmake -DCMAKE_BUILD_TYPE:STRING=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON -G Ninja ../../../Source/`
+1. (From the base of the repo) `mkdir -p Build/Linux/Release`
+1. `cd Build/Linux/Release`
+1. `cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../../../Source/`
+   1. You can optionally add `-DAM_BUILD_SPRITE_EDITOR` to build the sprite editor.
 1. `ninja all`
 
 ## Contributing

@@ -7,7 +7,7 @@ add_library(ServerLib STATIC "")
 
 # Provide an alias that can be used whether the target comes from 
 # add_subdirectory() or find_package().
-add_library(Amalgam::ServerLib ALIAS ServerLib)
+add_library(AmalgamEngine::ServerLib ALIAS ServerLib)
 
 target_include_directories(ServerLib
     PUBLIC

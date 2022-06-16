@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-message(STATUS "Configuring Amalgam SpriteEditor")
+message(STATUS "Configuring Amalgam Engine SpriteEditor")
 
 add_executable(SpriteEditor "")
 
@@ -12,7 +12,7 @@ target_include_directories(SpriteEditor
 )
 
 # Inherit Shared's precompiled header.
-target_precompile_headers(SpriteEditor REUSE_FROM Shared)
+target_precompile_headers(SpriteEditor REUSE_FROM SharedLib)
 
 target_link_libraries(SpriteEditor
     PRIVATE

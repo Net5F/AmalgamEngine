@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-message(STATUS "Configuring Load Test")
+message(STATUS "Configuring Amalgam Engine Load Test Client")
 
 # Load test client
 add_executable(LoadTestClient

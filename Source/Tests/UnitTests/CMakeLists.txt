@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-message(STATUS "Configuring Unit Tests")
+message(STATUS "Configuring Amalgam Engine Unit Tests")
 
 # Configure Catch2.
 if(NOT TARGET Catch2::Catch2)

@@ -7,7 +7,7 @@ add_library(ClientLib STATIC "")
 
 # Provide an alias that can be used whether the target comes from 
 # add_subdirectory() or find_package().
-add_library(Amalgam::ClientLib ALIAS ClientLib)
+add_library(AmalgamEngine::ClientLib ALIAS ClientLib)
 
 target_include_directories(ClientLib
     PUBLIC
