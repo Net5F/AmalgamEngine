@@ -10,6 +10,7 @@
 #include "WorldSinks.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
+#include "RendererHooks.h"
 
 #include "SDL2pp/SDL.hh"
 #include "SDL2pp/Window.hh"
@@ -45,6 +46,16 @@ public:
      * Handles application-relevant events, such as exit requests.
      */
     bool handleOSEvent(SDL_Event& event) override;
+
+    //-------------------------------------------------------------------------
+    // Engine Extension Registration
+    //-------------------------------------------------------------------------
+    /**
+     * Registers an extension object to be called by the Renderer.
+     * 
+     * Note: The RendererHooks class members are initialized by this function.
+     */
+    void registerRendererExtension(std::unique_ptr<RendererHooks> rendererHooks);
 
 private:
     /** Event polling can take up to 5-6ms depending on how much is waiting.

@@ -1,10 +1,11 @@
 #include "Renderer.h"
-#include "Simulation.h"
+#include "World.h"
 #include "UserInterface.h"
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Sprite.h"
 #include "Camera.h"
+#include "RendererHooks.h"
 #include "Transforms.h"
 #include "ClientTransforms.h"
 #include "MovementHelpers.h"
@@ -19,14 +20,15 @@ namespace AM
 {
 namespace Client
 {
-Renderer::Renderer(SDL_Renderer* inSdlRenderer, Simulation& sim,
+Renderer::Renderer(SDL_Renderer* inSdlRenderer, World& inWorld,
                    UserInterface& inUI,
                    std::function<double(void)> inGetProgress)
 : sdlRenderer{inSdlRenderer}
-, world{sim.getWorld()}
+, world{world}
 , ui{inUI}
-, getProgress(inGetProgress)
-, worldSpritePreparer(world.registry, world.tileMap)
+, getProgress{inGetProgress}
+, worldSpritePreparer{world.registry, world.tileMap}
+, rendererHooks{nullptr}
 {
 }
 
@@ -67,8 +69,18 @@ void Renderer::render()
     // Clear the screen to prepare for drawing.
     SDL_RenderClear(sdlRenderer);
 
+    // Call the project's pre-world-rendering logic, if present.
+    if (rendererHooks != nullptr) {
+        rendererHooks->beforeWorld(lerpedCamera, alpha);
+    }
+
     // Draw tiles and entities.
     renderWorld(lerpedCamera, alpha);
+
+    // Call the project's post-world-rendering logic, if present.
+    if (rendererHooks != nullptr) {
+        rendererHooks->afterWorld(lerpedCamera, alpha);
+    }
 
     // Draw UI elements.
     ui.render(lerpedCamera);
@@ -79,6 +91,14 @@ void Renderer::render()
 
 bool Renderer::handleOSEvent(SDL_Event& event)
 {
+    // Check if the project wants to handle the event.
+    if (rendererHooks != nullptr) {
+        if (rendererHooks->handleOSEvent(event)) {
+            return true;
+        }
+    }
+
+    // The project didn't handle the event. Handle it ourselves.
     switch (event.type) {
         case SDL_WINDOWEVENT:
             // TODO: Handle this.
@@ -86,6 +106,11 @@ bool Renderer::handleOSEvent(SDL_Event& event)
     }
 
     return false;
+}
+
+void Renderer::setRendererHooks(std::unique_ptr<RendererHooks> inRendererHooks)
+{
+    rendererHooks = std::move(inRendererHooks);
 }
 
 void Renderer::renderWorld(const Camera& camera, double alpha)

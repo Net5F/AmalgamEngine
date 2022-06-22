@@ -34,7 +34,7 @@ Application::Application()
                 spriteData)
 , uiCaller(std::bind_front(&UserInterface::tick, &userInterface),
            Config::UI_TICK_TIMESTEP_S, "UserInterface", true)
-, renderer(sdlRenderer.Get(), sim, userInterface,
+, renderer(sdlRenderer.Get(), sim.getWorld(), userInterface,
            std::bind_front(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind_front(&Renderer::render, &renderer),
                  Renderer::FRAME_TIMESTEP_S, "Renderer", true)
@@ -96,6 +96,15 @@ bool Application::handleOSEvent(SDL_Event& event)
     }
 
     return false;
+}
+
+void Application::registerRendererExtension(std::unique_ptr<RendererHooks> rendererHooks)
+{
+    // Set up the extension's dependencies.
+    rendererHooks->setSdlRenderer(sdlRenderer.Get());
+    rendererHooks->setWorld(&(sim.getWorld()));
+
+    renderer.setRendererHooks(std::move(rendererHooks));
 }
 
 void Application::dispatchOSEvents()

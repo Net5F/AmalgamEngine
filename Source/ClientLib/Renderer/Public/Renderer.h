@@ -14,16 +14,13 @@ struct Camera;
 struct ScreenRect;
 namespace Client
 {
-class Simulation;
 class World;
 class UserInterface;
+class RendererHooks;
 
 /**
  * Uses world information from the Sim to isometrically render the player's
  * view.
- *
- * Also kicks off the UI's rendering, but the UI manages its render logic
- * itself.
  */
 class Renderer : public OSEventHandler
 {
@@ -36,7 +33,7 @@ public:
      * @param getProgress  A function that returns how far between sim ticks we
      *                     are in decimal percent.
      */
-    Renderer(SDL_Renderer* inSdlRenderer, Simulation& sim, UserInterface& inUI,
+    Renderer(SDL_Renderer* inSdlRenderer, World& inWorld, UserInterface& inUI,
              std::function<double(void)> inGetProgress);
 
     /**
@@ -48,6 +45,8 @@ public:
      * Handles window events.
      */
     bool handleOSEvent(SDL_Event& event) override;
+
+    void setRendererHooks(std::unique_ptr<RendererHooks> inRendererHooks);
 
 private:
     /**
@@ -76,6 +75,11 @@ private:
     std::function<double(void)> getProgress;
 
     WorldSpritePreparer worldSpritePreparer;
+
+    /** If non-nullptr, contains the project's rendering extension functions.
+        Allows the project to provide rendering code and have it be called at 
+        the appropriate time. */
+    std::unique_ptr<RendererHooks> rendererHooks;
 };
 
 } // namespace Client
