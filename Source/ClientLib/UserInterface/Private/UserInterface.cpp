@@ -3,16 +3,21 @@
 #include "AssetCache.h"
 #include "SpriteData.h"
 #include "Camera.h"
+#include "IUserInterfaceExtension.h"
 #include "SharedConfig.h"
 #include "Transforms.h"
 #include "ClientTransforms.h"
 #include "Log.h"
-#include "IUserInterfaceExtension.h"
 
 namespace AM
 {
 namespace Client
 {
+
+UserInterface::UserInterface() 
+: extension{nullptr}
+{
+}
 
 void UserInterface::tick(double timestepS)
 {

@@ -12,14 +12,20 @@ namespace Client
 class World;
 
 /**
- * Provides hooks that the project can use to have code called during 
- * rendering.
- * 
- * Also provides any dependencies that the project's rendering logic may need.
+ * Defines an extension for the engine's Renderer class.
+ *
+ * Extensions are implemented by the project, and are given generic functions 
+ * ("hooks") in which they can implement relevant project logic.
+ *
+ * The project can register the extension class with the engine through 
+ * Application::registerRendererExtension().
  */
-class RendererHooks : public OSEventHandler
+class IRendererExtension : public OSEventHandler
 {
 public:
+    // Canonical constructor (derived class must implement):
+    // RendererExtension(RendererExDependencies deps)
+
     /**
      * Called before tiles and entities are rendered.
      */
@@ -37,20 +43,6 @@ public:
      *       not handled, then Renderer will attempt to handle it.
      */
     bool handleOSEvent(SDL_Event& event) override = 0;
-    
-    //-------------------------------------------------------------------------
-    // Setters
-    //-------------------------------------------------------------------------
-    // Note: These are set by Application::registerRendererExtension().
-    void setSdlRenderer(SDL_Renderer* inSdlRenderer);
-    void setWorld(const World* inWorld);
-
-private:
-    /** Used for making SDL2 render calls. */
-    SDL_Renderer* sdlRenderer;
-
-    /** Used for observing world state to render. */
-    const World* world;
 };
 
 } // namespace Client

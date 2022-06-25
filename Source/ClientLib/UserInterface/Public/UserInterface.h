@@ -18,6 +18,8 @@ class IUserInterfaceExtension;
 class UserInterface : public OSEventHandler
 {
 public:
+    UserInterface();
+
     /**
      * Calls the project's UI tick(), if present.
      */

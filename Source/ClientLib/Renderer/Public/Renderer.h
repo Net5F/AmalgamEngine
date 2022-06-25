@@ -16,7 +16,7 @@ namespace Client
 {
 class World;
 class UserInterface;
-class RendererHooks;
+class IRendererExtension;
 
 /**
  * Uses world information from the Sim to isometrically render the player's
@@ -30,11 +30,11 @@ public:
         = 1.0 / static_cast<double>(FRAMES_PER_SECOND);
 
     /**
-     * @param getProgress  A function that returns how far between sim ticks we
-     *                     are in decimal percent.
+     * @param getSimTickProgress  A function that returns how far between sim 
+     *                            ticks we are in decimal percent.
      */
     Renderer(SDL_Renderer* inSdlRenderer, World& inWorld, UserInterface& inUI,
-             std::function<double(void)> inGetProgress);
+             std::function<double(void)> inGetSimTickProgress);
 
     /**
      * First renders all tiles in view, then renders all entities in view.
@@ -47,9 +47,9 @@ public:
     bool handleOSEvent(SDL_Event& event) override;
 
     /**
-     * See rendererHooks member comment.
+     * See extension member comment.
      */
-    void setRendererHooks(std::unique_ptr<RendererHooks> inRendererHooks);
+    void setExtension(std::unique_ptr<IRendererExtension> inExtension);
 
 private:
     /**
@@ -75,14 +75,14 @@ private:
     /** Used to begin the UI rendering. */
     UserInterface& ui;
 
-    std::function<double(void)> getProgress;
+    std::function<double(void)> getSimTickProgress;
 
     WorldSpritePreparer worldSpritePreparer;
 
     /** If non-nullptr, contains the project's rendering extension functions.
         Allows the project to provide rendering code and have it be called at 
         the appropriate time. */
-    std::unique_ptr<RendererHooks> rendererHooks;
+    std::unique_ptr<IRendererExtension> extension;
 };
 
 } // namespace Client

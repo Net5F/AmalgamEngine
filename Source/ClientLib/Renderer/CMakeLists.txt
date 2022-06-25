@@ -1,11 +1,11 @@
 target_sources(ClientLib
     PRIVATE
         Private/Renderer.cpp
-        Private/RendererHooks.cpp
         Private/WorldSpritePreparer.cpp
     PUBLIC
+        Public/IRendererExtension.h
         Public/Renderer.h
-        Public/RendererHooks.h
+        Public/RendererExDependencies.h
         Public/SpriteRenderInfo.h
         Public/WorldSpritePreparer.h
 )

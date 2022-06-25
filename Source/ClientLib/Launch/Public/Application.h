@@ -9,7 +9,7 @@
 #include "QueuedEvents.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
-#include "RendererHooks.h"
+#include "IRendererExtension.h"
 #include "IUserInterfaceExtension.h"
 #include "UserInterfaceExDependencies.h"
 
@@ -18,6 +18,7 @@
 #include "SDL2pp/Renderer.hh"
 
 #include <atomic>
+#include <functional>
 
 namespace AM
 {
@@ -52,11 +53,14 @@ public:
     // Engine Extension Registration
     //-------------------------------------------------------------------------
     /**
-     * Registers an extension object to be called by the Renderer.
+     * Registers an extension class to be called by the Renderer.
      * 
-     * Note: The RendererHooks class members are initialized by this function.
+     * Note: The extension class type T must derive from IRendererExtension 
+     *       and must implement a constructor of the form 
+     *       T(RendererExDependencies).
      */
-    void registerRendererExtension(std::unique_ptr<RendererHooks> rendererHooks);
+    template<typename T>
+    void registerRendererExtension();
 
     /**
      * Registers an extension class to be called by the UserInterface.
@@ -150,6 +154,16 @@ private:
     /** True if there has been a request to exit the program, else false. */
     std::atomic<bool> exitRequested;
 };
+
+template<typename T>
+void Application::registerRendererExtension()
+{
+    UserInterfaceExDependencies rendererDeps{
+        sdlRenderer.Get(), sim.getWorld(), userInterface,
+        std::bind_front(&PeriodicCaller::getProgress, &simCaller)};
+
+    userInterface.setExtension(std::make_unique<T>(rendererDeps));
+}
 
 template<typename T>
 void Application::registerUserInterfaceExtension()

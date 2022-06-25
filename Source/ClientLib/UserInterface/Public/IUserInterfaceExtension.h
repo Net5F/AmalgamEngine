@@ -26,7 +26,7 @@ class IUserInterfaceExtension : public OSEventHandler
 {
 public:
     // Canonical constructor (derived class must implement):
-    // UserInterfaceExtension(UserInterfaceDependencies uiDeps)
+    // UserInterfaceExtension(UserInterfaceExDependencies deps)
 
     /**
      * Called during the UI tick.

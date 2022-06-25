@@ -7,7 +7,6 @@
 #include <SDL.h>
 
 #include <memory>
-#include <functional>
 #include "Ignore.h"
 
 namespace AM
@@ -94,15 +93,6 @@ bool Application::handleOSEvent(SDL_Event& event)
     }
 
     return false;
-}
-
-void Application::registerRendererExtension(std::unique_ptr<RendererHooks> rendererHooks)
-{
-    // Set up the extension's dependencies.
-    rendererHooks->setSdlRenderer(sdlRenderer.Get());
-    rendererHooks->setWorld(&(sim.getWorld()));
-
-    renderer.setRendererHooks(std::move(rendererHooks));
 }
 
 void Application::dispatchOSEvents()

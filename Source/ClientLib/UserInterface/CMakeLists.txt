@@ -4,7 +4,7 @@ target_sources(ClientLib
     PUBLIC
         Public/IUserInterfaceExtension.h
         Public/UserInterface.h
-        Public/UserInterfaceDependencies.h
+        Public/UserInterfaceExDependencies.h
 )
 
 target_include_directories(ClientLib

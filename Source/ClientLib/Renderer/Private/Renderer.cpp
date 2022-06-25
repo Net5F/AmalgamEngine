@@ -5,7 +5,7 @@
 #include "PreviousPosition.h"
 #include "Sprite.h"
 #include "Camera.h"
-#include "RendererHooks.h"
+#include "IRendererExtension.h"
 #include "Transforms.h"
 #include "ClientTransforms.h"
 #include "MovementHelpers.h"
@@ -22,13 +22,13 @@ namespace Client
 {
 Renderer::Renderer(SDL_Renderer* inSdlRenderer, World& inWorld,
                    UserInterface& inUI,
-                   std::function<double(void)> inGetProgress)
+                   std::function<double(void)> inGetSimTickProgress)
 : sdlRenderer{inSdlRenderer}
 , world{inWorld}
 , ui{inUI}
-, getProgress{inGetProgress}
+, getSimTickProgress{inGetSimTickProgress}
 , worldSpritePreparer{world.registry, world.tileMap}
-, rendererHooks{nullptr}
+, extension{nullptr}
 {
 }
 
@@ -36,7 +36,7 @@ void Renderer::render()
 {
     /* Set up the camera for this frame. */
     // Get how far we are between sim ticks in decimal percent.
-    double alpha = getProgress();
+    double alpha = getSimTickProgress();
 
     // Get the lerped camera position based on the alpha.
     auto [playerCamera, playerSprite, playerPosition, playerPreviousPos]
@@ -70,16 +70,16 @@ void Renderer::render()
     SDL_RenderClear(sdlRenderer);
 
     // Call the project's pre-world-rendering logic, if present.
-    if (rendererHooks != nullptr) {
-        rendererHooks->beforeWorld(lerpedCamera, alpha);
+    if (extension != nullptr) {
+        extension->beforeWorld(lerpedCamera, alpha);
     }
 
     // Draw tiles and entities.
     renderWorld(lerpedCamera, alpha);
 
     // Call the project's post-world-rendering logic, if present.
-    if (rendererHooks != nullptr) {
-        rendererHooks->afterWorld(lerpedCamera, alpha);
+    if (extension != nullptr) {
+        extension->afterWorld(lerpedCamera, alpha);
     }
 
     // Draw UI elements.
@@ -92,8 +92,8 @@ void Renderer::render()
 bool Renderer::handleOSEvent(SDL_Event& event)
 {
     // Check if the project wants to handle the event.
-    if (rendererHooks != nullptr) {
-        if (rendererHooks->handleOSEvent(event)) {
+    if (extension != nullptr) {
+        if (extension->handleOSEvent(event)) {
             return true;
         }
     }
@@ -108,9 +108,9 @@ bool Renderer::handleOSEvent(SDL_Event& event)
     return false;
 }
 
-void Renderer::setRendererHooks(std::unique_ptr<RendererHooks> inRendererHooks)
+void Renderer::setExtension(std::unique_ptr<IRendererExtension> inExtension)
 {
-    rendererHooks = std::move(inRendererHooks);
+    extension = std::move(inExtension);
 }
 
 void Renderer::renderWorld(const Camera& camera, double alpha)
