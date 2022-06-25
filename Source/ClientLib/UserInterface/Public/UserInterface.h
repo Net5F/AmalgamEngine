@@ -1,84 +1,48 @@
 #pragma once
 
 #include "OSEventHandler.h"
-#include "MainScreen.h"
-#include "AUI/Initializer.h"
-#include "SDL2pp/Texture.hh"
 #include <memory>
-#include <vector>
-
-// Forward declarations.
-struct SDL_Renderer;
-
-namespace AUI
-{
-class Screen;
-}
 
 namespace AM
 {
-class EventDispatcher;
-class AssetCache;
 struct Camera;
 
 namespace Client
 {
-class WorldSinks;
-class SpriteData;
+
+class IUserInterfaceExtension;
 
 /**
- * Owns the UI widget tree (built using AmalgamUI) and manages its state.
- *
- * The UI is given user input through SDL events. The simulation can also
- * communicate to the UI, through a signal system (see WorldSinks).
- *
- * Also provides an interface for rendering the UI.
+ * Passthrough class for the project's UI.
  */
 class UserInterface : public OSEventHandler
 {
 public:
-    UserInterface(WorldSinks& inWorldSinks,
-                  EventDispatcher& inUiEventDispatcher,
-                  SDL_Renderer* inSDLRenderer, AssetCache& inAssetCache,
-                  SpriteData& inSpriteData);
-
     /**
-     * Handles user input events.
-     */
-    bool handleOSEvent(SDL_Event& event) override;
-
-    /**
-     * Calls AUI::Screen::tick() on the current screen.
-     *
-     * @param timestepS  The amount of time that has passed since the last
-     *                   tick() call, in seconds.
+     * Calls the project's UI tick(), if present.
      */
     void tick(double timestepS);
 
     /**
-     * Renders all UI graphics for the current screen to the current rendering
-     * target.
-     *
-     * @param camera  The camera to calculate screen position with.
+     * Calls the project's UI render(), if present.
      */
     void render(const Camera& camera);
 
-private:
     /**
-     * Cycles the tile under the given mouse position to the next sprite in
-     * terrainSprites.
+     * Passes the given event to the project's UI handler, if present.
      */
-    void cycleTile(int mouseX, int mouseY);
+    bool handleOSEvent(SDL_Event& event) override;
 
-    /** AmalgamUI initializer, used to init/quit the library at the proper
-        times. */
-    AUI::Initializer auiInitializer;
+    /**
+     * See extension member comment.
+     */
+    void setExtension(std::unique_ptr<IUserInterfaceExtension> inExtension);
 
-    /** The main UI that overlays the world. */
-    MainScreen mainScreen;
-
-    /** The current active UI screen. */
-    AUI::Screen* currentScreen;
+private:
+    /** If non-nullptr, contains the project's UI extension functions.
+        Allows the project to provide UI code and have it be called at the 
+        appropriate time. */
+    std::unique_ptr<IUserInterfaceExtension> extension;
 };
 
 } // End namespace Client

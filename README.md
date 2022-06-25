@@ -79,7 +79,7 @@ I haven't yet locked down an SDL2 or CMake version, we'll see where it ends up.
 1. Run `Scripts/Linux/InstallDependencies.sh`, then build through the Eclipse project, or:
 1. (From the base of the repo) `mkdir -p Build/Linux/Release`
 1. `cd Build/Linux/Release`
-1. `cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../../../Source/`
+1. `cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../../../`
    1. You can optionally add `-DAM_BUILD_SPRITE_EDITOR` to build the sprite editor.
 1. `ninja all`
 

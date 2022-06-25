@@ -7,10 +7,11 @@
 #include "AssetCache.h"
 #include "SpriteData.h"
 #include "QueuedEvents.h"
-#include "WorldSinks.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
 #include "RendererHooks.h"
+#include "IUserInterfaceExtension.h"
+#include "UserInterfaceExDependencies.h"
 
 #include "SDL2pp/SDL.hh"
 #include "SDL2pp/Window.hh"
@@ -56,6 +57,16 @@ public:
      * Note: The RendererHooks class members are initialized by this function.
      */
     void registerRendererExtension(std::unique_ptr<RendererHooks> rendererHooks);
+
+    /**
+     * Registers an extension class to be called by the UserInterface.
+     * 
+     * Note: The extension class type T must derive from IUserInterfaceExtension 
+     *       and must implement a constructor of the form 
+     *       T(UserInterfaceExDependencies).
+     */
+    template<typename T>
+    void registerUserInterfaceExtension();
 
 private:
     /** Event polling can take up to 5-6ms depending on how much is waiting.
@@ -122,10 +133,6 @@ private:
     /** Calls sim.tick() at the sim tick rate. */
     PeriodicCaller simCaller;
 
-    /** Used to signal world state changes from the simulation to the UI.
-        Owned by the Application to break the UI's dependency on the sim. */
-    WorldSinks worldSinks;
-
     UserInterface userInterface;
     /** Calls userInterface.tick() at our UI tick rate. */
     PeriodicCaller uiCaller;
@@ -143,6 +150,16 @@ private:
     /** True if there has been a request to exit the program, else false. */
     std::atomic<bool> exitRequested;
 };
+
+template<typename T>
+void Application::registerUserInterfaceExtension()
+{
+    UserInterfaceExDependencies uiDeps{sim.getWorld().worldSignals,
+                                       uiEventDispatcher, sdlRenderer.Get(),
+                                       assetCache, spriteData};
+
+    userInterface.setExtension(std::make_unique<T>(uiDeps));
+}
 
 } // End namespace Client
 } // End namespace AM

@@ -1,20 +1,10 @@
 target_sources(ClientLib
     PRIVATE
-        Private/MainScreen.cpp
         Private/UserInterface.cpp
-        Private/WorldSinks.cpp
-        Private/Widgets/MainButton.cpp
-        Private/Widgets/MainThumbnail.cpp
-        Private/Windows/BuildOverlay.cpp
-        Private/Windows/BuildPanel.cpp
     PUBLIC
-        Public/MainScreen.h
+        Public/IUserInterfaceExtension.h
         Public/UserInterface.h
-        Public/WorldSinks.h
-        Public/Widgets/MainButton.h
-        Public/Widgets/MainThumbnail.h
-        Public/Windows/BuildOverlay.h
-        Public/Windows/BuildPanel.h
+        Public/UserInterfaceDependencies.h
 )
 
 target_include_directories(ClientLib
@@ -22,6 +12,4 @@ target_include_directories(ClientLib
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
-        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Widgets
-        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Windows
 )

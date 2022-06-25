@@ -29,9 +29,7 @@ Application::Application()
 , sim(uiEventDispatcher, network, spriteData)
 , simCaller(std::bind_front(&Simulation::tick, &sim),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
-, worldSinks{sim.getWorld().worldSignals}
-, userInterface(worldSinks, uiEventDispatcher, sdlRenderer.Get(), assetCache,
-                spriteData)
+, userInterface()
 , uiCaller(std::bind_front(&UserInterface::tick, &userInterface),
            Config::UI_TICK_TIMESTEP_S, "UserInterface", true)
 , renderer(sdlRenderer.Get(), sim.getWorld(), userInterface,

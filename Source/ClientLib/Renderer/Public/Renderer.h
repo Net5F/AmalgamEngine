@@ -46,6 +46,9 @@ public:
      */
     bool handleOSEvent(SDL_Event& event) override;
 
+    /**
+     * See rendererHooks member comment.
+     */
     void setRendererHooks(std::unique_ptr<RendererHooks> inRendererHooks);
 
 private:

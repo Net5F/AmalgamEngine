@@ -41,7 +41,7 @@ public:
     //-------------------------------------------------------------------------
     // Setters
     //-------------------------------------------------------------------------
-    // Note: These are called by Application::registerRendererExtension().
+    // Note: These are set by Application::registerRendererExtension().
     void setSdlRenderer(SDL_Renderer* inSdlRenderer);
     void setWorld(const World* inWorld);
 

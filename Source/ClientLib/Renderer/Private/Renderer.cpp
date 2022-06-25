@@ -24,7 +24,7 @@ Renderer::Renderer(SDL_Renderer* inSdlRenderer, World& inWorld,
                    UserInterface& inUI,
                    std::function<double(void)> inGetProgress)
 : sdlRenderer{inSdlRenderer}
-, world{world}
+, world{inWorld}
 , ui{inUI}
 , getProgress{inGetProgress}
 , worldSpritePreparer{world.registry, world.tileMap}

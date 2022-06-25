@@ -1,6 +1,5 @@
 #include "UserInterface.h"
 #include "Config.h"
-#include "WorldSinks.h"
 #include "AssetCache.h"
 #include "SpriteData.h"
 #include "Camera.h"
@@ -8,41 +7,40 @@
 #include "Transforms.h"
 #include "ClientTransforms.h"
 #include "Log.h"
-#include "AUI/Core.h"
-#include "QueuedEvents.h"
+#include "IUserInterfaceExtension.h"
 
 namespace AM
 {
 namespace Client
 {
-UserInterface::UserInterface(WorldSinks& inWorldSinks,
-                             EventDispatcher& inUiEventDispatcher,
-                             SDL_Renderer* inSDLRenderer,
-                             AssetCache& inAssetCache, SpriteData& inSpriteData)
-: auiInitializer{inSDLRenderer,
-                 {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT}}
-, mainScreen{inWorldSinks, inUiEventDispatcher, inAssetCache, inSpriteData}
-, currentScreen{&mainScreen}
-{
-    AUI::Core::setActualScreenSize(
-        {Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT});
-}
-
-bool UserInterface::handleOSEvent(SDL_Event& event)
-{
-    return currentScreen->handleOSEvent(event);
-}
 
 void UserInterface::tick(double timestepS)
 {
-    currentScreen->tick(timestepS);
+    if (extension != nullptr) {
+        extension->tick(timestepS);
+    }
 }
 
 void UserInterface::render(const Camera& camera)
 {
-    mainScreen.setCamera(camera);
+    if (extension != nullptr) {
+        extension->render(camera);
+    }
+}
 
-    currentScreen->render();
+bool UserInterface::handleOSEvent(SDL_Event& event)
+{
+    // Check if the project wants to handle the event.
+    if (extension != nullptr) {
+        return extension->handleOSEvent(event);
+    }
+
+    return false;
+}
+
+void UserInterface::setExtension(std::unique_ptr<IUserInterfaceExtension> inExtension)
+{
+    extension = std::move(inExtension);
 }
 
 } // End namespace Client
