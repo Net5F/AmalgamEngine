@@ -196,7 +196,7 @@ void Simulation::tick()
        ticks. */
     while (currentTick < targetTick) {
         /* Run all systems. */
-        // Call the project's pre-everything logic, if present.
+        // Call the project's pre-everything logic.
         if (extension != nullptr) {
             extension->beforeAll();
         }
@@ -210,7 +210,7 @@ void Simulation::tick()
         // Process entities that need to be constructed or destructed.
         npcLifetimeSystem.processUpdates();
 
-        // Call the project's pre-movement logic, if present.
+        // Call the project's pre-movement logic.
         if (extension != nullptr) {
             extension->afterMapAndLifetimeUpdates();
         }
@@ -233,7 +233,7 @@ void Simulation::tick()
         // Move all cameras to their new positions.
         cameraSystem.moveCameras();
 
-        // Call the project's post-movement logic, if present.
+        // Call the project's post-movement logic.
         if (extension != nullptr) {
             extension->afterMovement();
         }
@@ -272,6 +272,11 @@ bool Simulation::handleOSEvent(SDL_Event& event)
     }
 
     return false;
+}
+
+void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
+{
+    extension = std::move(inExtension);
 }
 
 } // namespace Client

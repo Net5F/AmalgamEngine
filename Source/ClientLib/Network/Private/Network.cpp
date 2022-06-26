@@ -3,6 +3,7 @@
 #include "Heartbeat.h"
 #include "Config.h"
 #include "NetworkStats.h"
+#include "IMessageProcessorExtension.h"
 #include "AMAssert.h"
 #include "Ignore.h"
 #include <SDL_net.h>
@@ -120,6 +121,12 @@ void Network::registerCurrentTickPtr(
 void Network::setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled)
 {
     netstatsLoggingEnabled = inNetstatsLoggingEnabled;
+}
+
+void Network::setMessageProcessorExtension(
+    std::unique_ptr<IMessageProcessorExtension> extension)
+{
+    messageProcessor.setExtension(std::move(extension));
 }
 
 void Network::send(const BinaryBufferSharedPtr& message)

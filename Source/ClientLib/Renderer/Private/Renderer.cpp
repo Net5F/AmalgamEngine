@@ -69,7 +69,7 @@ void Renderer::render()
     // Clear the screen to prepare for drawing.
     SDL_RenderClear(sdlRenderer);
 
-    // Call the project's pre-world-rendering logic, if present.
+    // Call the project's pre-world-rendering logic.
     if (extension != nullptr) {
         extension->beforeWorld(lerpedCamera, alpha);
     }
@@ -77,7 +77,7 @@ void Renderer::render()
     // Draw tiles and entities.
     renderWorld(lerpedCamera, alpha);
 
-    // Call the project's post-world-rendering logic, if present.
+    // Call the project's post-world-rendering logic.
     if (extension != nullptr) {
         extension->afterWorld(lerpedCamera, alpha);
     }

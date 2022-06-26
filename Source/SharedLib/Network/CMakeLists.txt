@@ -7,6 +7,7 @@ target_sources(SharedLib
         Private/NetworkStats.cpp
     PUBLIC
         Public/Acceptor.h
+        Public/DispatchMessage.h
         Public/NetworkDefs.h
         Public/Peer.h
         Public/SocketSet.h

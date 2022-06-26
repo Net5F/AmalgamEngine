@@ -1,6 +1,8 @@
 #include "MessageProcessor.h"
 #include "QueuedEvents.h"
 #include "Deserialize.h"
+#include "DispatchMessage.h"
+#include "IMessageProcessorExtension.h"
 #include "ClientNetworkDefs.h"
 #include "ExplicitConfirmation.h"
 #include "ConnectionResponse.h"
@@ -25,7 +27,7 @@ void MessageProcessor::processReceivedMessage(MessageType messageType,
                                               Uint8* messageBuffer,
                                               unsigned int messageSize)
 {
-    /* Match the enum values to their event types. */
+    // Match the enum values to their event types.
     switch (messageType) {
         case MessageType::ExplicitConfirmation: {
             handleExplicitConfirmation(messageBuffer, messageSize);
@@ -40,48 +42,40 @@ void MessageProcessor::processReceivedMessage(MessageType messageType,
             break;
         }
         case MessageType::ChunkUpdate: {
-            pushEventSharedPtr<ChunkUpdate>(messageBuffer, messageSize);
+            dispatchMessageSharedPtr<ChunkUpdate>(messageBuffer, messageSize,
+                                                  networkEventDispatcher);
             break;
         }
         case MessageType::TileUpdate: {
-            pushEvent<TileUpdate>(messageBuffer, messageSize);
+            dispatchMessage<TileUpdate>(messageBuffer, messageSize,
+                                                  networkEventDispatcher);
             break;
         }
         case MessageType::EntityInit: {
-            pushEvent<EntityInit>(messageBuffer, messageSize);
+            dispatchMessage<EntityInit>(messageBuffer, messageSize,
+                                                  networkEventDispatcher);
+
             break;
         }
         case MessageType::EntityDelete: {
-            pushEvent<EntityDelete>(messageBuffer, messageSize);
+            dispatchMessage<EntityDelete>(messageBuffer, messageSize,
+                                          networkEventDispatcher);
             break;
         }
         default: {
-            LOG_ERROR("Received unexpected message type: %u", messageType);
+            // If we don't have a handler for this message type, pass it to 
+            // the project.
+            if (extension != nullptr) {
+                extension->processReceivedMessage(messageType, messageBuffer,
+                                                  messageSize);
+            }
         }
     }
 }
 
-template<typename T>
-void MessageProcessor::pushEvent(Uint8* messageBuffer, unsigned int messageSize)
+void MessageProcessor::setExtension(std::unique_ptr<IMessageProcessorExtension> inExtension)
 {
-    // Deserialize the message.
-    T message{};
-    Deserialize::fromBuffer(messageBuffer, messageSize, message);
-
-    // Push the message into any subscribed queues.
-    networkEventDispatcher.push<T>(message);
-}
-
-template<typename T>
-void MessageProcessor::pushEventSharedPtr(Uint8* messageBuffer,
-                                          unsigned int messageSize)
-{
-    // Deserialize the message.
-    std::shared_ptr<T> message{std::make_shared<T>()};
-    Deserialize::fromBuffer(messageBuffer, messageSize, *message);
-
-    // Push the message into any subscribed queues.
-    networkEventDispatcher.push<std::shared_ptr<const T>>(message);
+    extension = std::move(inExtension);
 }
 
 void MessageProcessor::handleExplicitConfirmation(Uint8* messageBuffer,

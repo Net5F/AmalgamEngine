@@ -9,6 +9,8 @@
 #include "QueuedEvents.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
+#include "IMessageProcessorExtension.h"
+#include "MessageProcessorExDependencies.h"
 #include "IRendererExtension.h"
 #include "RendererExDependencies.h"
 #include "ISimulationExtension.h"
@@ -55,6 +57,16 @@ public:
     //-------------------------------------------------------------------------
     // Engine Extension Registration
     //-------------------------------------------------------------------------
+    /**
+     * Registers an extension class to be called by the MessageProcessor.
+     * 
+     * Note: The extension class type T must derive from 
+     *       IMessageProcessorExtension and must implement a constructor of 
+     *       the form T(MessageProcessorExDependencies).
+     */
+    template<typename T>
+    void registerMessageProcessorExtension();
+
     /**
      * Registers an extension class to be called by the Renderer.
      * 
@@ -167,6 +179,15 @@ private:
     /** True if there has been a request to exit the program, else false. */
     std::atomic<bool> exitRequested;
 };
+
+template<typename T>
+void Application::registerMessageProcessorExtension()
+{
+    MessageProcessorExDependencies messageProcessorDeps{
+        network.getEventDispatcher()};
+
+    network.setMessageProcessorExtension(std::make_unique<T>(messageProcessorDeps));
+}
 
 template<typename T>
 void Application::registerRendererExtension()

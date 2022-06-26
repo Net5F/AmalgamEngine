@@ -1,9 +1,6 @@
 #pragma once
 
 #include "OSEventHandler.h"
-#include <memory>
-
-struct SDL_Renderer;
 
 namespace AM
 {
@@ -11,10 +8,9 @@ struct Camera;
 
 namespace Client
 {
-class World;
 
 /**
- * Defines an extension for the engine's UserInterface class.
+ * Defines an extension for the engine's Client::UserInterface class.
  *
  * Extensions are implemented by the project, and are given generic functions 
  * ("hooks") in which they can implement relevant project logic.

@@ -21,6 +21,7 @@ UserInterface::UserInterface()
 
 void UserInterface::tick(double timestepS)
 {
+    // Call the project's UI tick logic.
     if (extension != nullptr) {
         extension->tick(timestepS);
     }
@@ -28,6 +29,7 @@ void UserInterface::tick(double timestepS)
 
 void UserInterface::render(const Camera& camera)
 {
+    // Call the project's UI rendering logic.
     if (extension != nullptr) {
         extension->render(camera);
     }

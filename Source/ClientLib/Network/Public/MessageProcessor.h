@@ -11,6 +11,8 @@ class EventDispatcher;
 
 namespace Client
 {
+class IMessageProcessorExtension;
+
 /**
  * Processes received messages.
  *
@@ -38,32 +40,12 @@ public:
     void processReceivedMessage(MessageType messageType, Uint8* messageBuffer,
                                 unsigned int messageSize);
 
+    /**
+     * See extension member comment.
+     */
+    void setExtension(std::unique_ptr<IMessageProcessorExtension> inExtension);
+
 private:
-    /**
-     * Pushes an event straight out to the simulation layer. Used when the
-     * message type doesn't require any network-level processing.
-     *
-     * Deserializes the message to type T and pushes it into the Network's
-     * dispatcher.
-     *
-     * The event can be received in a system using EventQueue<T>.
-     */
-    template<typename T>
-    void pushEvent(Uint8* messageBuffer, unsigned int messageSize);
-
-    /**
-     * Similar to pushEvent(), but allocates the event to the heap through a
-     * std::shared_ptr.
-     *
-     * Used for large events or events with internal allocations, where the
-     * cost of allocating once is lower than copying.
-     *
-     * The event can be received in a system using
-     * EventQueue<std::shared_ptr<const T>>.
-     */
-    template<typename T>
-    void pushEventSharedPtr(Uint8* messageBuffer, unsigned int messageSize);
-
     //-------------------------------------------------------------------------
     // Handlers for messages relevant to the network layer.
     //-------------------------------------------------------------------------
@@ -86,6 +68,12 @@ private:
     /** Local copy of the playerEntity so we can tell if we got a player
         message. */
     entt::entity playerEntity;
+
+    /** If non-nullptr, contains the project's message processing extension 
+        functions.
+        Allows the project to provide message processing code and have it be 
+        called at the appropriate time. */
+    std::unique_ptr<IMessageProcessorExtension> extension;
 };
 
 } // End namespace Client

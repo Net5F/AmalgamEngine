@@ -2,17 +2,14 @@
 
 #include "OSEventHandler.h"
 
-struct SDL_Renderer;
-
 namespace AM
 {
 struct Camera;
 namespace Client
 {
-class World;
 
 /**
- * Defines an extension for the engine's Renderer class.
+ * Defines an extension for the engine's Client::Renderer class.
  *
  * Extensions are implemented by the project, and are given generic functions 
  * ("hooks") in which they can implement relevant project logic.

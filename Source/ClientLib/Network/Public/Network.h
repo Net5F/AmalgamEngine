@@ -23,6 +23,7 @@ struct EntityUpdate;
 
 namespace Client
 {
+class IMessageProcessorExtension;
 /**
  * Provides a convenient interface for connecting to the server, sending
  * and receiving messages, and other network-related functionality.
@@ -91,6 +92,12 @@ public:
      * Enables the periodic printing and logging of network stats.
      */
     void setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled);
+
+    /**
+     * See MessageProcessor::extension member comment.
+     */
+    void setMessageProcessorExtension(
+        std::unique_ptr<IMessageProcessorExtension> extension);
 
 private:
     /**
