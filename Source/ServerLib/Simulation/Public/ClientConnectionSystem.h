@@ -21,7 +21,7 @@ class SpriteData;
 class ClientConnectionSystem
 {
 public:
-    ClientConnectionSystem(Simulation& inSim, World& inWorld,
+    ClientConnectionSystem(Simulation& inSimulation, World& inWorld,
                            EventDispatcher& inNetworkEventDispatcher,
                            Network& inNetwork, SpriteData& inSpriteData);
 
@@ -50,7 +50,7 @@ private:
                                 float spawnX, float spawnY);
 
     /** Used to get the current tick. */
-    Simulation& sim;
+    Simulation& simulation;
     /** Used to access components. */
     World& world;
     /** Used to send connection responses and receive connection events. */

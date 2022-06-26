@@ -9,7 +9,6 @@ struct Camera;
 
 namespace Client
 {
-class Simulation;
 class World;
 
 /**
@@ -18,7 +17,7 @@ class World;
 class CameraSystem
 {
 public:
-    CameraSystem(Simulation& inSim, World& inWorld);
+    CameraSystem(World& inWorld);
 
     /**
      * Moves all cameras to their appropriate next positions.
@@ -34,7 +33,6 @@ private:
      */
     void moveCameraToPosition(Camera& camera, Position& position);
 
-    Simulation& sim;
     World& world;
 };
 

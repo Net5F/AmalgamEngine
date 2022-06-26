@@ -23,9 +23,9 @@ namespace AM
 namespace Client
 {
 PlayerMovementSystem::PlayerMovementSystem(
-    Simulation& inSim, World& inWorld,
+    Simulation& inSimulation, World& inWorld,
     EventDispatcher& inNetworkEventDispatcher)
-: sim{inSim}
+: simulation{inSimulation}
 , world{inWorld}
 , playerUpdateQueue{inNetworkEventDispatcher}
 {
@@ -87,7 +87,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         /* Validate the received tick. */
         // Check that the received tick is in the past.
         Uint32 receivedTick{receivedUpdate->tickNum};
-        Uint32 currentTick{sim.getCurrentTick()};
+        Uint32 currentTick{simulation.getCurrentTick()};
         checkReceivedTickValidity(receivedTick, currentTick);
 
         // Check that the received tick is ahead of our latest.
@@ -122,7 +122,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
 
         /* Check if the input is mismatched. */
         // Check that the diff is valid.
-        Uint32 tickDiff{sim.getCurrentTick() - receivedTick};
+        Uint32 tickDiff{simulation.getCurrentTick() - receivedTick};
         checkTickDiffValidity(tickDiff);
 
         // Check if the received input disagrees with what we predicted.
@@ -152,7 +152,7 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
                                         Sprite& sprite,
                                         BoundingBox& boundingBox)
 {
-    Uint32 currentTick{sim.getCurrentTick()};
+    Uint32 currentTick{simulation.getCurrentTick()};
     checkReceivedTickValidity(latestReceivedTick, currentTick);
 
     // Replay all inputs newer than latestReceivedTick, except the current

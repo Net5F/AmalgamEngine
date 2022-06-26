@@ -1,4 +1,4 @@
-#include "WorldSim.h"
+#include "WorldSimulation.h"
 #include "Network.h"
 #include "Config.h"
 #include "Serialize.h"
@@ -12,7 +12,7 @@ namespace AM
 {
 namespace LTC
 {
-WorldSim::WorldSim(EventDispatcher& inNetworkEventDispatcher,
+WorldSimulation::WorldSimulation(EventDispatcher& inNetworkEventDispatcher,
                    Client::Network& inNetwork)
 : network(inNetwork)
 , connectionResponseQueue(inNetworkEventDispatcher)
@@ -24,7 +24,7 @@ WorldSim::WorldSim(EventDispatcher& inNetworkEventDispatcher,
     network.registerCurrentTickPtr(&currentTick);
 }
 
-void WorldSim::connect()
+void WorldSimulation::connect()
 {
     while (!(network.connect())) {
         LOG_INFO("Network failed to connect. Retrying.");
@@ -49,7 +49,7 @@ void WorldSim::connect()
         = connectionResponse.tickNum + Client::Config::INITIAL_TICK_OFFSET;
 }
 
-void WorldSim::tick()
+void WorldSimulation::tick()
 {
     Uint32 targetTick{currentTick + 1};
 
@@ -71,7 +71,7 @@ void WorldSim::tick()
     }
 }
 
-void WorldSim::sendNextInput()
+void WorldSimulation::sendNextInput()
 {
     // Construct the next input.
     InputChangeRequest inputChangeRequest{};

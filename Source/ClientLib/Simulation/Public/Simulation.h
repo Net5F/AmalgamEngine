@@ -23,6 +23,7 @@ namespace Client
 {
 class Network;
 class SpriteData;
+class ISimulationExtension;
 
 /**
  * Manages the simulation, including world state and system processing.
@@ -87,6 +88,11 @@ public:
      */
     bool handleOSEvent(SDL_Event& event) override;
 
+    /**
+     * See extension member comment.
+     */
+    void setExtension(std::unique_ptr<ISimulationExtension> inExtension);
+
 private:
     /** How long the sim should wait for the server to send a connection
         response, in microseconds. */
@@ -110,6 +116,11 @@ private:
     ReplicationTickOffset replicationTickOffset;
 
     EventQueue<ConnectionResponse> connectionResponseQueue;
+
+    /** If non-nullptr, contains the project's simulation extension functions.
+        Allows the project to provide simulation code and have it be called at 
+        the appropriate time. */
+    std::unique_ptr<ISimulationExtension> extension;
 
     //-------------------------------------------------------------------------
     // Systems

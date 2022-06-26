@@ -23,10 +23,10 @@ namespace AM
 namespace Server
 {
 ClientConnectionSystem::ClientConnectionSystem(
-    Simulation& inSim, World& inWorld,
+    Simulation& inSimulation, World& inWorld,
     EventDispatcher& inNetworkEventDispatcher, Network& inNetwork,
     SpriteData& inSpriteData)
-: sim(inSim)
+: simulation(inSimulation)
 , world(inWorld)
 , network(inNetwork)
 , spriteData{inSpriteData}
@@ -133,7 +133,7 @@ void ClientConnectionSystem::sendConnectionResponse(NetworkID networkID,
 {
     // Fill in the current tick and their entity's ID.
     ConnectionResponse connectionResponse{};
-    Uint32 currentTick{sim.getCurrentTick()};
+    Uint32 currentTick{simulation.getCurrentTick()};
     connectionResponse.entity = newEntity;
     connectionResponse.tickNum = currentTick;
 

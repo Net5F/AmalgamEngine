@@ -21,7 +21,7 @@ class Network;
 class PlayerInputSystem
 {
 public:
-    PlayerInputSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
+    PlayerInputSystem(Simulation& inSimulation, World& inWorld, Network& inNetwork);
 
     /**
      * Updates the player's input state with the given event.
@@ -50,7 +50,7 @@ private:
      */
     void processMouseWheel(SDL_MouseWheelEvent& wheelEvent);
 
-    Simulation& sim;
+    Simulation& simulation;
     World& world;
     Network& network;
 };

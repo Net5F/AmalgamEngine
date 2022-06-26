@@ -20,7 +20,7 @@ class SpriteData;
 class NpcLifetimeSystem
 {
 public:
-    NpcLifetimeSystem(Simulation& inSim, World& inWorld,
+    NpcLifetimeSystem(Simulation& inSimulation, World& inWorld,
                       SpriteData& inSpriteData,
                       EventDispatcher& inNetworkEventDispatcher);
 
@@ -41,7 +41,7 @@ private:
     void processEntityInits(Uint32 desiredTick);
 
     /** Used to get the current tick number. */
-    Simulation& sim;
+    Simulation& simulation;
     /** Used to access components. */
     World& world;
     /** Used to get sprite data when constructing entities. */

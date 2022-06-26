@@ -25,17 +25,17 @@ Application::Application()
 , network()
 , networkCaller(std::bind_front(&Network::tick, &network),
                 SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
-, sim(uiEventDispatcher, network, spriteData)
-, simCaller(std::bind_front(&Simulation::tick, &sim),
+, simulation(uiEventDispatcher, network, spriteData)
+, simCaller(std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
 , userInterface()
 , uiCaller(std::bind_front(&UserInterface::tick, &userInterface),
            Config::UI_TICK_TIMESTEP_S, "UserInterface", true)
-, renderer(sdlRenderer.Get(), sim.getWorld(), userInterface,
+, renderer(sdlRenderer.Get(), simulation.getWorld(), userInterface,
            std::bind_front(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind_front(&Renderer::render, &renderer),
                  Renderer::FRAME_TIMESTEP_S, "Renderer", true)
-, eventHandlers{this, &renderer, &userInterface, &sim}
+, eventHandlers{this, &renderer, &userInterface, &simulation}
 , exitRequested(false)
 {
     // Enable delay reporting.
@@ -48,7 +48,7 @@ Application::Application()
 void Application::start()
 {
     // Connect to the server (waits for connection response).
-    sim.connect();
+    simulation.connect();
 
     // Prime the timers so they don't start at 0.
     simCaller.initTimer();

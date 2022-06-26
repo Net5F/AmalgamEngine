@@ -17,9 +17,9 @@ namespace AM
 {
 namespace Client
 {
-ChunkUpdateSystem::ChunkUpdateSystem(Simulation& inSim, World& inWorld,
+ChunkUpdateSystem::ChunkUpdateSystem(Simulation& inSimulation, World& inWorld,
                                      Network& inNetwork)
-: sim{inSim}
+: simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
 , chunkUpdateQueue{network.getEventDispatcher()}

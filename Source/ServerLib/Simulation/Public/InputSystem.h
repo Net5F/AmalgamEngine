@@ -20,7 +20,7 @@ class Network;
 class InputSystem
 {
 public:
-    InputSystem(Simulation& inSim, World& inWorld,
+    InputSystem(Simulation& inSimulation, World& inWorld,
                 EventDispatcher& inNetworkEventDispatcher, Network& inNetwork);
 
     /**
@@ -41,7 +41,7 @@ private:
     void handleDroppedMessage(NetworkID clientID);
 
     /** Used to get the current tick. */
-    Simulation& sim;
+    Simulation& simulation;
     /** Used to access components. */
     World& world;
     /** Used to access the dispatcher. */

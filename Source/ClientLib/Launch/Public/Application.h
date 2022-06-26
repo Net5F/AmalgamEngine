@@ -10,6 +10,9 @@
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
 #include "IRendererExtension.h"
+#include "RendererExDependencies.h"
+#include "ISimulationExtension.h"
+#include "SimulationExDependencies.h"
 #include "IUserInterfaceExtension.h"
 #include "UserInterfaceExDependencies.h"
 
@@ -61,6 +64,16 @@ public:
      */
     template<typename T>
     void registerRendererExtension();
+
+    /**
+     * Registers an extension class to be called by the Simulation.
+     * 
+     * Note: The extension class type T must derive from ISimulationExtension 
+     *       and must implement a constructor of the form 
+     *       T(SimulationExDependencies).
+     */
+    template<typename T>
+    void registerSimulationExtension();
 
     /**
      * Registers an extension class to be called by the UserInterface.
@@ -133,8 +146,8 @@ private:
     /** Calls network.tick() at the network tick rate. */
     PeriodicCaller networkCaller;
 
-    Simulation sim;
-    /** Calls sim.tick() at the sim tick rate. */
+    Simulation simulation;
+    /** Calls simulation.tick() at the sim tick rate. */
     PeriodicCaller simCaller;
 
     UserInterface userInterface;
@@ -158,17 +171,25 @@ private:
 template<typename T>
 void Application::registerRendererExtension()
 {
-    UserInterfaceExDependencies rendererDeps{
-        sdlRenderer.Get(), sim.getWorld(), userInterface,
+    RendererExDependencies rendererDeps{
+        sdlRenderer.Get(), simulation.getWorld(), userInterface,
         std::bind_front(&PeriodicCaller::getProgress, &simCaller)};
 
-    userInterface.setExtension(std::make_unique<T>(rendererDeps));
+    renderer.setExtension(std::make_unique<T>(rendererDeps));
+}
+
+template<typename T>
+void Application::registerSimulationExtension()
+{
+    SimulationExDependencies simulationDeps{uiEventDispatcher, network, spriteData};
+
+    simulation.setExtension(std::make_unique<T>(simulationDeps));
 }
 
 template<typename T>
 void Application::registerUserInterfaceExtension()
 {
-    UserInterfaceExDependencies uiDeps{sim.getWorld().worldSignals,
+    UserInterfaceExDependencies uiDeps{simulation.getWorld().worldSignals,
                                        uiEventDispatcher, sdlRenderer.Get(),
                                        assetCache, spriteData};
 

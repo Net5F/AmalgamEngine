@@ -10,9 +10,8 @@ namespace AM
 {
 namespace Client
 {
-CameraSystem::CameraSystem(Simulation& inSim, World& inWorld)
-: sim(inSim)
-, world(inWorld)
+CameraSystem::CameraSystem(World& inWorld)
+: world(inWorld)
 {
 }
 

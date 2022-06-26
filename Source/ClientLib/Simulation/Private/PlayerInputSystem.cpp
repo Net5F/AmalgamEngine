@@ -13,9 +13,9 @@ namespace AM
 {
 namespace Client
 {
-PlayerInputSystem::PlayerInputSystem(Simulation& inSim, World& inWorld,
+PlayerInputSystem::PlayerInputSystem(Simulation& inSimulation, World& inWorld,
                                      Network& inNetwork)
-: sim{inSim}
+: simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
 {
@@ -81,7 +81,7 @@ void PlayerInputSystem::processHeldInputs()
     // If our input state has changed, ask the server to apply the new state.
     if (inputHasChanged && !Config::RUN_OFFLINE) {
         network.serializeAndSend<InputChangeRequest>(
-            {sim.getCurrentTick(), playerInput});
+            {simulation.getCurrentTick(), playerInput});
     }
 }
 

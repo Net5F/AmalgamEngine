@@ -14,10 +14,10 @@ namespace AM
 {
 namespace Client
 {
-NpcLifetimeSystem::NpcLifetimeSystem(Simulation& inSim, World& inWorld,
+NpcLifetimeSystem::NpcLifetimeSystem(Simulation& inSimulation, World& inWorld,
                                      SpriteData& inSpriteData,
                                      EventDispatcher& inNetworkEventDispatcher)
-: sim{inSim}
+: simulation{inSimulation}
 , world{inWorld}
 , spriteData{inSpriteData}
 , entityInitQueue{inNetworkEventDispatcher}
@@ -29,7 +29,7 @@ void NpcLifetimeSystem::processUpdates()
 {
     // We want to process updates until we've either processed the desired
     // tick, or have run out of data.
-    Uint32 desiredTick{sim.getReplicationTick()};
+    Uint32 desiredTick{simulation.getReplicationTick()};
 
     // Process any waiting EntityDelete messages, up to desiredTick.
     processEntityDeletes(desiredTick);

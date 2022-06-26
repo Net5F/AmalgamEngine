@@ -26,10 +26,10 @@ namespace AM
 {
 namespace Client
 {
-NpcMovementSystem::NpcMovementSystem(Simulation& inSim, World& inWorld,
+NpcMovementSystem::NpcMovementSystem(Simulation& inSimulation, World& inWorld,
                                      Network& inNetwork,
                                      SpriteData& inSpriteData)
-: sim{inSim}
+: simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
 , npcUpdateQueue{network.getEventDispatcher()}
@@ -51,7 +51,7 @@ void NpcMovementSystem::updateNpcs()
 
     // We want to process updates until we've either processed the desired
     // tick, or have run out of data.
-    Uint32 desiredTick{sim.getReplicationTick()};
+    Uint32 desiredTick{simulation.getReplicationTick()};
 
     /* While we have authoritative data to use, apply updates for all
        unprocessed ticks including the desired tick. */

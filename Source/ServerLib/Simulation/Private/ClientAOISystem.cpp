@@ -18,9 +18,9 @@ namespace AM
 {
 namespace Server
 {
-ClientAOISystem::ClientAOISystem(Simulation& inSim, World& inWorld,
+ClientAOISystem::ClientAOISystem(Simulation& inSimulation, World& inWorld,
                                  Network& inNetwork)
-: sim{inSim}
+: simulation{inSimulation}
 , world(inWorld)
 , network(inNetwork)
 {
@@ -91,7 +91,7 @@ void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
     // Send the client an EntityDelete for each entity that left its AOI.
     for (entt::entity entityThatLeft : entitiesThatLeft) {
         network.serializeAndSend(
-            client.netID, EntityDelete{sim.getCurrentTick(), entityThatLeft});
+            client.netID, EntityDelete{simulation.getCurrentTick(), entityThatLeft});
     }
 }
 
@@ -104,7 +104,7 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
         Name& enteredName{view.get<Name>(entityThatEntered)};
         Sprite& enteredSprite{view.get<Sprite>(entityThatEntered)};
         network.serializeAndSend(client.netID,
-                                 EntityInit{sim.getCurrentTick(),
+                                 EntityInit{simulation.getCurrentTick(),
                                             entityThatEntered, enteredName.name,
                                             enteredSprite.numericID});
     }

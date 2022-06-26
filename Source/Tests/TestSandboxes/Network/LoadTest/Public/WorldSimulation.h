@@ -25,10 +25,10 @@ namespace LTC
  * This is a minimal form of the sim, just maintaining tick timing and sending
  * inputs once in a while.
  */
-class WorldSim
+class WorldSimulation
 {
 public:
-    WorldSim(EventDispatcher& inNetworkEventDispatcher,
+    WorldSimulation(EventDispatcher& inNetworkEventDispatcher,
              Client::Network& inNetwork);
 
     /**

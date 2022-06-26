@@ -27,7 +27,7 @@ struct InputHistory;
 class PlayerMovementSystem
 {
 public:
-    PlayerMovementSystem(Simulation& inSim, World& inWorld,
+    PlayerMovementSystem(Simulation& inSimulation, World& inWorld,
                          EventDispatcher& inNetworkEventDispatcher);
 
     /**
@@ -81,7 +81,7 @@ private:
                           BoundingBox& boundingBox);
 
     /** Used to get the current tick. */
-    Simulation& sim;
+    Simulation& simulation;
     /** Used to access components. */
     World& world;
 

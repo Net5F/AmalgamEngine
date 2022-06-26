@@ -19,8 +19,8 @@ Application::Application()
 , network(networkEventDispatcher)
 , networkCaller(std::bind_front(&Network::tick, &network),
                 SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
-, sim(networkEventDispatcher, network, spriteData)
-, simCaller(std::bind_front(&Simulation::tick, &sim),
+, simulation(networkEventDispatcher, network, spriteData)
+, simCaller(std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
 , exitRequested(false)
 {

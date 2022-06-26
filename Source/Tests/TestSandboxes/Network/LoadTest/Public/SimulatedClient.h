@@ -2,7 +2,7 @@
 
 #include "QueuedEvents.h"
 #include "Network.h"
-#include "WorldSim.h"
+#include "WorldSimulation.h"
 #include "PeriodicCaller.h"
 #include <SDL_stdinc.h>
 #include <atomic>
@@ -37,7 +37,7 @@ private:
     Client::Network network;
     PeriodicCaller networkCaller;
 
-    WorldSim worldSim;
+    WorldSimulation worldSim;
     PeriodicCaller simCaller;
 
     std::atomic<bool> isConnected;

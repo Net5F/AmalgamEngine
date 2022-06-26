@@ -9,6 +9,7 @@
 #include "Sprite.h"
 #include "Camera.h"
 #include "InputHistory.h"
+#include "ISimulationExtension.h"
 #include "NeedsAdjacentChunks.h"
 #include "Name.h"
 #include "ScreenRect.h"
@@ -32,13 +33,14 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 , world(inSpriteData)
 , currentTick(0)
 , connectionResponseQueue(network.getEventDispatcher())
+, extension{nullptr}
 , chunkUpdateSystem(*this, world, network)
 , tileUpdateSystem(world, inUiEventDispatcher, network)
 , npcLifetimeSystem(*this, world, spriteData, network.getEventDispatcher())
 , playerInputSystem(*this, world, network)
 , playerMovementSystem(*this, world, network.getEventDispatcher())
 , npcMovementSystem(*this, world, network, spriteData)
-, cameraSystem(*this, world)
+, cameraSystem(world)
 {
     // Initialize our entt groups.
     EnttGroups::init(world.registry);
@@ -194,6 +196,11 @@ void Simulation::tick()
        ticks. */
     while (currentTick < targetTick) {
         /* Run all systems. */
+        // Call the project's pre-everything logic, if present.
+        if (extension != nullptr) {
+            extension->beforeAll();
+        }
+
         // Process chunk updates from the server.
         chunkUpdateSystem.updateChunks();
 
@@ -202,6 +209,11 @@ void Simulation::tick()
 
         // Process entities that need to be constructed or destructed.
         npcLifetimeSystem.processUpdates();
+
+        // Call the project's pre-movement logic, if present.
+        if (extension != nullptr) {
+            extension->afterMapAndLifetimeUpdates();
+        }
 
         // Process the held user input state and send change requests to the
         // server.
@@ -220,6 +232,11 @@ void Simulation::tick()
 
         // Move all cameras to their new positions.
         cameraSystem.moveCameras();
+
+        // Call the project's post-movement logic, if present.
+        if (extension != nullptr) {
+            extension->afterMovement();
+        }
 
         currentTick++;
     }

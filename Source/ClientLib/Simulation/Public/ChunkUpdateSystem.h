@@ -21,7 +21,7 @@ class TileMap;
 class ChunkUpdateSystem
 {
 public:
-    ChunkUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
+    ChunkUpdateSystem(Simulation& inSimulation, World& inWorld, Network& inNetwork);
 
     /**
      * Requests any needed chunk data and applies received chunk updates.
@@ -64,7 +64,7 @@ private:
     void applyChunkSnapshot(const ChunkWireSnapshot& chunk);
 
     /** Used to get the current tick. */
-    Simulation& sim;
+    Simulation& simulation;
     /** Used to access the player entity and components. */
     World& world;
     /** Used to send chunk update request messages. */

@@ -23,7 +23,7 @@ class SpriteData;
 class NpcMovementSystem
 {
 public:
-    NpcMovementSystem(Simulation& inSim, World& inWorld, Network& inNetwork,
+    NpcMovementSystem(Simulation& inSimulation, World& inWorld, Network& inNetwork,
                       SpriteData& inSpriteData);
 
     /**
@@ -71,7 +71,7 @@ private:
         const std::shared_ptr<const MovementUpdate>& entityUpdate);
 
     /** Used to get the current tick. */
-    Simulation& sim;
+    Simulation& simulation;
     /** Used to access components. */
     World& world;
     /** Used to send entity info request messages. */

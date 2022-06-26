@@ -58,9 +58,11 @@ private:
     EventDispatcher networkEventDispatcher;
 
     Network network;
+    /** Calls network.tick() at the network tick rate. */
     PeriodicCaller networkCaller;
 
-    Simulation sim;
+    Simulation simulation;
+    /** Calls simulation.tick() at the sim tick rate. */
     PeriodicCaller simCaller;
 
     //-------------------------------------------------------------------------

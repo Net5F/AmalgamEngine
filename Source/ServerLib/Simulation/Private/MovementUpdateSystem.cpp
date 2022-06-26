@@ -17,9 +17,9 @@ namespace AM
 {
 namespace Server
 {
-MovementUpdateSystem::MovementUpdateSystem(Simulation& inSim, World& inWorld,
+MovementUpdateSystem::MovementUpdateSystem(Simulation& inSimulation, World& inWorld,
                                            Network& inNetwork)
-: sim{inSim}
+: simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
 {
@@ -102,7 +102,7 @@ void MovementUpdateSystem::sendEntityUpdate(ClientSimData& client)
     }
 
     // Finish filling the other fields.
-    movementUpdate.tickNum = sim.getCurrentTick();
+    movementUpdate.tickNum = simulation.getCurrentTick();
 
     // Send the message.
     network.serializeAndSend(client.netID, movementUpdate,

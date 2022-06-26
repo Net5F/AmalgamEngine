@@ -22,7 +22,7 @@ struct ClientSimData;
 class MovementUpdateSystem
 {
 public:
-    MovementUpdateSystem(Simulation& inSim, World& inWorld, Network& inNetwork);
+    MovementUpdateSystem(Simulation& inSimulation, World& inWorld, Network& inNetwork);
 
     /**
      * Updates all connected clients with relevant entity movement state.
@@ -47,7 +47,7 @@ private:
     void sendEntityUpdate(ClientSimData& client);
 
     /** Used to get the current tick. */
-    Simulation& sim;
+    Simulation& simulation;
     /** Used to access entity component data. */
     World& world;
     /** Used to send movement update messages. */

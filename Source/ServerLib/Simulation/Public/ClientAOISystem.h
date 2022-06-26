@@ -30,7 +30,7 @@ struct ClientSimData;
 class ClientAOISystem
 {
 public:
-    ClientAOISystem(Simulation& inSim, World& inWorld, Network& inNetwork);
+    ClientAOISystem(Simulation& inSimulation, World& inWorld, Network& inNetwork);
 
     /**
      * Updates the peersInAOI list in any client entities that have recently
@@ -55,7 +55,7 @@ private:
     void processEntitiesThatEntered(ClientSimData& client);
 
     /** Used to get the current tick number. */
-    Simulation& sim;
+    Simulation& simulation;
     /** Used to access components. */
     World& world;
     /** Used for sending messages. */

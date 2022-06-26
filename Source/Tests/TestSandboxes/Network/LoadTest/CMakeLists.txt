@@ -7,8 +7,8 @@ add_executable(LoadTestClient
     Private/LoadTestClientMain.cpp
     Private/SimulatedClient.cpp
     Public/SimulatedClient.h
-    Private/WorldSim.cpp
-    Public/WorldSim.h
+    Private/WorldSimulation.cpp
+    Public/WorldSimulation.h
     
     # Client objects
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Private/Config.cpp

@@ -21,10 +21,6 @@ public:
     static constexpr double FRAME_TIMESTEP_S
         = 1.0 / static_cast<double>(FRAMES_PER_SECOND);
 
-    /**
-     * @param getProgress  A function that returns how far between sim ticks we
-     *                     are in decimal percent.
-     */
     Renderer(SDL_Renderer* inSdlRenderer, UserInterface& inUI);
 
     /**

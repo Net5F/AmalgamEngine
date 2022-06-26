@@ -14,10 +14,10 @@ namespace AM
 {
 namespace Server
 {
-InputSystem::InputSystem(Simulation& inSim, World& inWorld,
+InputSystem::InputSystem(Simulation& inSimulation, World& inWorld,
                          EventDispatcher& inNetworkEventDispatcher,
                          Network& inNetwork)
-: sim(inSim)
+: simulation(inSimulation)
 , world(inWorld)
 , network(inNetwork)
 , inputChangeRequestQueue(inNetworkEventDispatcher)
@@ -38,7 +38,7 @@ void InputSystem::processInputMessages()
         // If we had to drop an event, handle it.
         if (result != SorterBase::ValidityResult::Valid) {
             LOG_INFO("Dropped message from %u. Tick: %u, received: %u",
-                     inputChangeRequest->netID, sim.getCurrentTick(),
+                     inputChangeRequest->netID, simulation.getCurrentTick(),
                      inputChangeRequest->tickNum);
             handleDroppedMessage(inputChangeRequest->netID);
         }
@@ -54,16 +54,16 @@ void InputSystem::processInputMessages()
         InputChangeRequest& inputChangeRequest{queue.front()};
 
         // If the input is from an earlier tick, drop it and continue.
-        if (inputChangeRequest.tickNum < sim.getCurrentTick()) {
+        if (inputChangeRequest.tickNum < simulation.getCurrentTick()) {
             LOG_INFO("Dropped message from %u. Tick: %u, received: %u",
-                     inputChangeRequest.netID, sim.getCurrentTick(),
+                     inputChangeRequest.netID, simulation.getCurrentTick(),
                      inputChangeRequest.tickNum);
             handleDroppedMessage(inputChangeRequest.netID);
             inputChangeRequestQueue.pop();
             continue;
         }
         // If the message is from a later tick, we're done.
-        else if (inputChangeRequest.tickNum > sim.getCurrentTick()) {
+        else if (inputChangeRequest.tickNum > simulation.getCurrentTick()) {
             break;
         }
 
