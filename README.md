@@ -40,7 +40,8 @@
 - [x] Implement world editing UI.
 - [x] Implement collision (simple placeholder).
 - [x] Further netcode load testing (get ready for users).
-- [ ] Split single repo into engine and project repos.
+- [x] Split single repo into engine and project repos.
+- [ ] Build simple reference project.
 
 ### Future
 - [ ] Implement text chat, chat server.
