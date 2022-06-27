@@ -2,6 +2,7 @@
 #include "QueuedEvents.h"
 #include "Deserialize.h"
 #include "DispatchMessage.h"
+#include "IMessageProcessorExtension.h"
 #include "ServerNetworkDefs.h"
 #include "Heartbeat.h"
 #include "InputChangeRequest.h"
@@ -54,6 +55,11 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
     }
 
     return messageTick;
+}
+
+void MessageProcessor::setExtension(std::unique_ptr<IMessageProcessorExtension> inExtension)
+{
+    extension = std::move(inExtension);
 }
 
 Uint32 MessageProcessor::handleHeartbeat(Uint8* messageBuffer,

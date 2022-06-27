@@ -7,7 +7,9 @@ target_sources(ServerLib
     PUBLIC
         Public/Client.h
         Public/ClientHandler.h
+        Public/IMessageProcessorExtension.h
         Public/MessageProcessor.h
+        Public/MessageProcessorExDependencies.h
         Public/Network.h
         Public/SDLNetInitializer.h
         Public/ServerNetworkDefs.h

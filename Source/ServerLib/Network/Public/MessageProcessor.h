@@ -10,7 +10,8 @@ class EventDispatcher;
 
 namespace Server
 {
-class Network;
+class IMessageProcessorExtension;
+
 /**
  * Processes received messages.
  *
@@ -43,6 +44,11 @@ public:
                                   Uint8* messageBuffer,
                                   unsigned int messageSize);
 
+    /**
+     * See extension member comment.
+     */
+    void setExtension(std::unique_ptr<IMessageProcessorExtension> inExtension);
+
 private:
     //-------------------------------------------------------------------------
     // Handlers for messages relevant to the network layer.
@@ -68,6 +74,12 @@ private:
     /** The network's event dispatcher. Used to send events to the subscribed
         queues. */
     EventDispatcher& networkEventDispatcher;
+
+    /** If non-nullptr, contains the project's message processing extension 
+        functions.
+        Allows the project to provide message processing code and have it be 
+        called at the appropriate time. */
+    std::unique_ptr<IMessageProcessorExtension> extension;
 };
 
 } // End namespace Server

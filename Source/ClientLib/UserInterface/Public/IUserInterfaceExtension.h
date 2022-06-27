@@ -26,11 +26,15 @@ public:
 
     /**
      * Called during the UI tick.
+     *
+     * @param tick  The time since this function was last called.
      */
     virtual void tick(double timestepS) = 0;
 
     /**
      * Called when the UI should be rendered.
+     *
+     * @param camera  The camera to calculate screen position with.
      */
     virtual void render(const Camera& camera) = 0;
 

@@ -5,6 +5,7 @@
 namespace AM
 {
 struct Camera;
+
 namespace Client
 {
 
@@ -25,11 +26,19 @@ public:
 
     /**
      * Called before tiles and entities are rendered.
+     *
+     * @param lerpedCamera  The camera to calculate screen position with.
+     * @param alpha  How far we are between sim ticks, as a percentage from 
+     *               0.0 to 1.0. Used to interpolate between positions.
      */
     virtual void beforeWorld(const Camera& lerpedCamera, double alpha) = 0;
 
     /**
      * Called after tiles and entities are rendered.
+     *
+     * @param lerpedCamera  The camera to calculate screen position with.
+     * @param alpha  How far we are between sim ticks, as a percentage from 
+     *               0.0 to 1.0. Used to interpolate between positions.
      */
     virtual void afterWorld(const Camera& lerpedCamera, double alpha) = 0;
 

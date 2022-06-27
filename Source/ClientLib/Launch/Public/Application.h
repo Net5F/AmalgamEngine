@@ -150,10 +150,6 @@ private:
 
     SpriteData spriteData;
 
-    /** Used to dispatch events from the UI to the simulation.
-        Owned by the Application to break the sim's dependency on the UI. */
-    EventDispatcher uiEventDispatcher;
-
     Network network;
     /** Calls network.tick() at the network tick rate. */
     PeriodicCaller networkCaller;
@@ -202,7 +198,8 @@ void Application::registerRendererExtension()
 template<typename T>
 void Application::registerSimulationExtension()
 {
-    SimulationExDependencies simulationDeps{uiEventDispatcher, network, spriteData};
+    SimulationExDependencies simulationDeps{userInterface.getEventDispatcher(),
+                                            network, spriteData};
 
     simulation.setExtension(std::make_unique<T>(simulationDeps));
 }
@@ -210,9 +207,9 @@ void Application::registerSimulationExtension()
 template<typename T>
 void Application::registerUserInterfaceExtension()
 {
-    UserInterfaceExDependencies uiDeps{simulation.getWorld().worldSignals,
-                                       uiEventDispatcher, sdlRenderer.Get(),
-                                       assetCache, spriteData};
+    UserInterfaceExDependencies uiDeps{
+        simulation.getWorld().worldSignals, userInterface.getEventDispatcher(),
+        sdlRenderer.Get(), assetCache, spriteData};
 
     userInterface.setExtension(std::make_unique<T>(uiDeps));
 }

@@ -21,11 +21,10 @@ Application::Application()
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , assetCache(sdlRenderer.Get())
 , spriteData(assetCache)
-, uiEventDispatcher()
 , network()
 , networkCaller(std::bind_front(&Network::tick, &network),
                 SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
-, simulation(uiEventDispatcher, network, spriteData)
+, simulation(userInterface.getEventDispatcher(), network, spriteData)
 , simCaller(std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
 , userInterface()

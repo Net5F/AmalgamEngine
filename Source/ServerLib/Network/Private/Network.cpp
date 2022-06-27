@@ -5,6 +5,7 @@
 #include "Heartbeat.h"
 #include "Log.h"
 #include "NetworkStats.h"
+#include "IMessageProcessorExtension.h"
 #include <SDL_net.h>
 #include "Tracy.hpp"
 #include <algorithm>
@@ -15,9 +16,9 @@ namespace AM
 namespace Server
 {
 
-Network::Network(EventDispatcher& inNetworkEventDispatcher)
-: messageProcessor(inNetworkEventDispatcher)
-, clientHandler(*this, inNetworkEventDispatcher, messageProcessor)
+Network::Network()
+: messageProcessor(eventDispatcher)
+, clientHandler(*this, eventDispatcher, messageProcessor)
 , ticksSinceNetstatsLog(0)
 , currentTickPtr(nullptr)
 {
@@ -39,6 +40,11 @@ void Network::tick()
     }
 }
 
+EventDispatcher& Network::getEventDispatcher()
+{
+    return eventDispatcher;
+}
+
 ClientMap& Network::getClientMap()
 {
     return clientMap;
@@ -58,6 +64,12 @@ void Network::registerCurrentTickPtr(
 Uint32 Network::getCurrentTick()
 {
     return *currentTickPtr;
+}
+
+void Network::setMessageProcessorExtension(
+    std::unique_ptr<IMessageProcessorExtension> extension)
+{
+    messageProcessor.setExtension(std::move(extension));
 }
 
 void Network::send(NetworkID networkID, const BinaryBufferSharedPtr& message,

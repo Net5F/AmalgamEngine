@@ -33,7 +33,7 @@ class Network
 public:
     static constexpr unsigned int SERVER_PORT = 41499;
 
-    Network(EventDispatcher& inNetworkEventDispatcher);
+    Network();
 
     /**
      * Sends all queued messages over the network.
@@ -56,6 +56,12 @@ public:
     void serializeAndSend(NetworkID networkID, const T& messageStruct,
                           Uint32 messageTick = 0);
 
+    /**
+     * Returns the Network event dispatcher. All messages that we receive
+     * from the server are pushed into this dispatcher.
+     */
+    EventDispatcher& getEventDispatcher();
+
     /** Initialize the tick timer. */
     void initTimer();
 
@@ -75,6 +81,12 @@ public:
 
     /** Convenience for network-owned objects to get the current tick. */
     Uint32 getCurrentTick();
+
+    /**
+     * See MessageProcessor::extension member comment.
+     */
+    void setMessageProcessorExtension(
+        std::unique_ptr<IMessageProcessorExtension> extension);
 
 private:
     /**
@@ -104,6 +116,9 @@ private:
     /** Deserializes messages, does any network-layer message handling, and
         passes messages down to the simulation. */
     MessageProcessor messageProcessor;
+
+    /** Used to dispatch events from the network to the simulation. */
+    EventDispatcher eventDispatcher;
 
     /** Handles asynchronous client activity. */
     ClientHandler clientHandler;

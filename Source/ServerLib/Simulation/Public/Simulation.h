@@ -17,6 +17,7 @@ namespace Server
 {
 class Network;
 class SpriteData;
+class ISimulationExtension;
 
 /**
  * Manages the simulation, including world state and system processing.
@@ -32,8 +33,7 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S = .001;
 
-    Simulation(EventDispatcher& inNetworkEventDispatcher, Network& inNetwork,
-               SpriteData& inSpriteData);
+    Simulation(Network& inNetwork, SpriteData& inSpriteData);
 
     /**
      * Updates accumulatedTime. If greater than the tick timestep, processes
@@ -42,6 +42,11 @@ public:
     void tick();
 
     Uint32 getCurrentTick();
+
+    /**
+     * See extension member comment.
+     */
+    void setExtension(std::unique_ptr<ISimulationExtension> inExtension);
 
 private:
     /** Used to receive events (through the Network's dispatcher) and to
@@ -52,6 +57,11 @@ private:
 
     /** The tick number that we're currently on. */
     std::atomic<Uint32> currentTick;
+
+    /** If non-nullptr, contains the project's simulation extension functions.
+        Allows the project to provide simulation code and have it be called at 
+        the appropriate time. */
+    std::unique_ptr<ISimulationExtension> extension;
 
     //-------------------------------------------------------------------------
     // Systems

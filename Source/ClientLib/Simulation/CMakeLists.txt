@@ -15,12 +15,14 @@ target_sources(ClientLib
 		Public/CameraSystem.h
 		Public/ChunkUpdateSystem.h
 		Public/EnttGroups.h
+		Public/ISimulationExtension.h
 		Public/NpcLifetimeSystem.h
 		Public/NpcMovementSystem.h
 		Public/PlayerInputSystem.h
 		Public/PlayerMovementSystem.h
 		Public/ReplicationTickOffset.h
 		Public/Simulation.h
+		Public/SimulationExDependencies.h
 		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/WorldSignals.h

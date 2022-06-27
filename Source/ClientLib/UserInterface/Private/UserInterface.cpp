@@ -15,7 +15,8 @@ namespace Client
 {
 
 UserInterface::UserInterface() 
-: extension{nullptr}
+: eventDispatcher{}
+, extension{nullptr}
 {
 }
 
@@ -43,6 +44,11 @@ bool UserInterface::handleOSEvent(SDL_Event& event)
     }
 
     return false;
+}
+
+EventDispatcher& UserInterface::getEventDispatcher() 
+{
+    return eventDispatcher;
 }
 
 void UserInterface::setExtension(std::unique_ptr<IUserInterfaceExtension> inExtension)

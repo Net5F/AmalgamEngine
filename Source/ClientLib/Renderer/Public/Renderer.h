@@ -57,7 +57,8 @@ private:
      * worldSpritePreparer.prepareSprites().
      *
      * @param camera  The camera to calculate screen position with.
-     * @param alpha  For entities, the alpha to lerp between positions with.
+     * @param alpha  How far we are between sim ticks, as a percentage from 
+     *               0.0 to 1.0. Used to interpolate between positions.
      */
     void renderWorld(const Camera& camera, double alpha);
 

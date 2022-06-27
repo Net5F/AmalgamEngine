@@ -17,9 +17,11 @@ target_sources(ServerLib
 		Public/EnttGroups.h
 		Public/EventSorter.h
 		Public/InputSystem.h
+		Public/ISimulationExtension.h
 		Public/MovementSystem.h
 		Public/MovementUpdateSystem.h
 		Public/Simulation.h
+		Public/SimulationExDependencies.h
 		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/Components/ClientSimData.h

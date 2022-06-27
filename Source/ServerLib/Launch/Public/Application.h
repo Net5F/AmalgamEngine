@@ -5,6 +5,10 @@
 #include "SpriteData.h"
 #include "PeriodicCaller.h"
 #include "SDLNetInitializer.h"
+#include "IMessageProcessorExtension.h"
+#include "MessageProcessorExDependencies.h"
+#include "ISimulationExtension.h"
+#include "SimulationExDependencies.h"
 
 #include "SDL2pp/SDL.hh"
 
@@ -35,6 +39,29 @@ public:
      */
     void start();
 
+    //-------------------------------------------------------------------------
+    // Engine Extension Registration
+    //-------------------------------------------------------------------------
+    /**
+     * Registers an extension class to be called by the MessageProcessor.
+     * 
+     * Note: The extension class type T must derive from 
+     *       IMessageProcessorExtension and must implement a constructor of 
+     *       the form T(MessageProcessorExDependencies).
+     */
+    template<typename T>
+    void registerMessageProcessorExtension();
+
+    /**
+     * Registers an extension class to be called by the Simulation.
+     * 
+     * Note: The extension class type T must derive from ISimulationExtension 
+     *       and must implement a constructor of the form 
+     *       T(SimulationExDependencies).
+     */
+    template<typename T>
+    void registerSimulationExtension();
+
 private:
     /** We sleep for 1ms when possible to reduce our CPU usage. We can't trust
         the scheduler to come back to us after exactly 1ms though, so we need
@@ -53,10 +80,6 @@ private:
     //-------------------------------------------------------------------------
     SpriteData spriteData;
 
-    /** This is owned by the Application to follow the pattern of the Client's
-        UI event dispatcher. */
-    EventDispatcher networkEventDispatcher;
-
     Network network;
     /** Calls network.tick() at the network tick rate. */
     PeriodicCaller networkCaller;
@@ -71,6 +94,23 @@ private:
     /** Flags when to end the application. */
     std::atomic<bool> exitRequested;
 };
+
+template<typename T>
+void Application::registerMessageProcessorExtension()
+{
+    MessageProcessorExDependencies messageProcessorDeps{
+        network.getEventDispatcher()};
+
+    network.setMessageProcessorExtension(std::make_unique<T>(messageProcessorDeps));
+}
+
+template<typename T>
+void Application::registerSimulationExtension()
+{
+    SimulationExDependencies simulationDeps{network, spriteData};
+
+    simulation.setExtension(std::make_unique<T>(simulationDeps));
+}
 
 } // End namespace Server
 } // End namespace AM
