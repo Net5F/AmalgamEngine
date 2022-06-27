@@ -12,10 +12,10 @@ namespace Server
 /**
  * Defines an extension for the engine's Server::MessageProcessor class.
  *
- * Extensions are implemented by the project, and are given generic functions 
+ * Extensions are implemented by the project, and are given generic functions
  * ("hooks") in which they can implement relevant project logic.
  *
- * The project can register the extension class with the engine through 
+ * The project can register the extension class with the engine through
  * Application::registerMessageProcessorExtension().
  */
 class IMessageProcessorExtension
@@ -37,9 +37,9 @@ public:
      * @return If the message corresponds to a particular simulation tick,
      *         returns that tick number. If not, returns -1.
      */
-    virtual Sint64 processReceivedMessage(NetworkID netID, MessageType messageType,
-                                        Uint8* messageBuffer,
-                                        unsigned int messageSize)
+    virtual Sint64
+        processReceivedMessage(NetworkID netID, MessageType messageType,
+                               Uint8* messageBuffer, unsigned int messageSize)
         = 0;
 };
 

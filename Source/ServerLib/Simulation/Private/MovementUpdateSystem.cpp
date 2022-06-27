@@ -17,8 +17,8 @@ namespace AM
 {
 namespace Server
 {
-MovementUpdateSystem::MovementUpdateSystem(Simulation& inSimulation, World& inWorld,
-                                           Network& inNetwork)
+MovementUpdateSystem::MovementUpdateSystem(Simulation& inSimulation,
+                                           World& inWorld, Network& inNetwork)
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}

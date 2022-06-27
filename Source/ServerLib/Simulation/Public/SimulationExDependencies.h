@@ -8,11 +8,10 @@ class Network;
 class SpriteData;
 
 /**
- * Defines the dependencies that will be injected into the project's 
+ * Defines the dependencies that will be injected into the project's
  * SimulationExtension class.
  */
-struct SimulationExDependencies
-{
+struct SimulationExDependencies {
 public:
     Network& inNetwork;
 

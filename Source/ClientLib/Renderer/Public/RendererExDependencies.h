@@ -13,11 +13,10 @@ namespace Client
 {
 
 /**
- * Defines the dependencies that will be injected into the project's 
+ * Defines the dependencies that will be injected into the project's
  * RendererExtension class.
  */
-struct RendererExDependencies
-{
+struct RendererExDependencies {
 public:
     SDL_Renderer* sdlRenderer;
 

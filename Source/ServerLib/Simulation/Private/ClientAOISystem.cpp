@@ -91,7 +91,8 @@ void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
     // Send the client an EntityDelete for each entity that left its AOI.
     for (entt::entity entityThatLeft : entitiesThatLeft) {
         network.serializeAndSend(
-            client.netID, EntityDelete{simulation.getCurrentTick(), entityThatLeft});
+            client.netID,
+            EntityDelete{simulation.getCurrentTick(), entityThatLeft});
     }
 }
 

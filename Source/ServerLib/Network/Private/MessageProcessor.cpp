@@ -57,7 +57,8 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
     return messageTick;
 }
 
-void MessageProcessor::setExtension(std::unique_ptr<IMessageProcessorExtension> inExtension)
+void MessageProcessor::setExtension(
+    std::unique_ptr<IMessageProcessorExtension> inExtension)
 {
     extension = std::move(inExtension);
 }

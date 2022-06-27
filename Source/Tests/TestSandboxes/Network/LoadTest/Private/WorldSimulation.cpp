@@ -13,7 +13,7 @@ namespace AM
 namespace LTC
 {
 WorldSimulation::WorldSimulation(EventDispatcher& inNetworkEventDispatcher,
-                   Client::Network& inNetwork)
+                                 Client::Network& inNetwork)
 : network(inNetwork)
 , connectionResponseQueue(inNetworkEventDispatcher)
 , clientEntity(entt::null)

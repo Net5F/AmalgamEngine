@@ -21,7 +21,8 @@ class Network;
 class PlayerInputSystem
 {
 public:
-    PlayerInputSystem(Simulation& inSimulation, World& inWorld, Network& inNetwork);
+    PlayerInputSystem(Simulation& inSimulation, World& inWorld,
+                      Network& inNetwork);
 
     /**
      * Updates the player's input state with the given event.

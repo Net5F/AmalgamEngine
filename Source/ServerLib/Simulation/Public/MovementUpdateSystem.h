@@ -22,7 +22,8 @@ struct ClientSimData;
 class MovementUpdateSystem
 {
 public:
-    MovementUpdateSystem(Simulation& inSimulation, World& inWorld, Network& inNetwork);
+    MovementUpdateSystem(Simulation& inSimulation, World& inWorld,
+                         Network& inNetwork);
 
     /**
      * Updates all connected clients with relevant entity movement state.

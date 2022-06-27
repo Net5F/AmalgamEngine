@@ -48,12 +48,12 @@ void MessageProcessor::processReceivedMessage(MessageType messageType,
         }
         case MessageType::TileUpdate: {
             dispatchMessage<TileUpdate>(messageBuffer, messageSize,
-                                                  networkEventDispatcher);
+                                        networkEventDispatcher);
             break;
         }
         case MessageType::EntityInit: {
             dispatchMessage<EntityInit>(messageBuffer, messageSize,
-                                                  networkEventDispatcher);
+                                        networkEventDispatcher);
 
             break;
         }
@@ -63,7 +63,7 @@ void MessageProcessor::processReceivedMessage(MessageType messageType,
             break;
         }
         default: {
-            // If we don't have a handler for this message type, pass it to 
+            // If we don't have a handler for this message type, pass it to
             // the project.
             if (extension != nullptr) {
                 extension->processReceivedMessage(messageType, messageBuffer,
@@ -73,7 +73,8 @@ void MessageProcessor::processReceivedMessage(MessageType messageType,
     }
 }
 
-void MessageProcessor::setExtension(std::unique_ptr<IMessageProcessorExtension> inExtension)
+void MessageProcessor::setExtension(
+    std::unique_ptr<IMessageProcessorExtension> inExtension)
 {
     extension = std::move(inExtension);
 }

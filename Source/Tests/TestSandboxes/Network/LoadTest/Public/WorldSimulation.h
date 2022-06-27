@@ -29,7 +29,7 @@ class WorldSimulation
 {
 public:
     WorldSimulation(EventDispatcher& inNetworkEventDispatcher,
-             Client::Network& inNetwork);
+                    Client::Network& inNetwork);
 
     /**
      * Requests to connect to the game server, waits for a ConnectionResponse.

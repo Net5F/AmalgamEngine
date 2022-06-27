@@ -10,10 +10,10 @@ namespace Server
 /**
  * Defines an extension for the engine's Server::Simulation class.
  *
- * Extensions are implemented by the project, and are given generic functions 
+ * Extensions are implemented by the project, and are given generic functions
  * ("hooks") in which they can implement relevant project logic.
  *
- * The project can register the extension class with the engine through 
+ * The project can register the extension class with the engine through
  * Application::registerSimulationExtension().
  */
 class ISimulationExtension : public OSEventHandler
@@ -39,8 +39,8 @@ public:
 
     /**
      * See OSEventHandler for details.
-     * 
-     * Note: Simulation will pass events to this class first. If the event is 
+     *
+     * Note: Simulation will pass events to this class first. If the event is
      *       not handled, then Simulation will attempt to handle it.
      */
     bool handleOSEvent(SDL_Event& event) override = 0;

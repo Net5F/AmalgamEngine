@@ -59,7 +59,7 @@ private:
     std::atomic<Uint32> currentTick;
 
     /** If non-nullptr, contains the project's simulation extension functions.
-        Allows the project to provide simulation code and have it be called at 
+        Allows the project to provide simulation code and have it be called at
         the appropriate time. */
     std::unique_ptr<ISimulationExtension> extension;
 

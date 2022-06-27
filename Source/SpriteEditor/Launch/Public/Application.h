@@ -19,7 +19,7 @@ namespace AM
 namespace SpriteEditor
 {
 /**
- * Maintains the lifetime of all app modules and manages the main thread's 
+ * Maintains the lifetime of all app modules and manages the main thread's
  * loop.
  */
 class Application : public OSEventHandler

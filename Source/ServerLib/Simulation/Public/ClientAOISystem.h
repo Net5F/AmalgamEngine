@@ -30,7 +30,8 @@ struct ClientSimData;
 class ClientAOISystem
 {
 public:
-    ClientAOISystem(Simulation& inSimulation, World& inWorld, Network& inNetwork);
+    ClientAOISystem(Simulation& inSimulation, World& inWorld,
+                    Network& inNetwork);
 
     /**
      * Updates the peersInAOI list in any client entities that have recently

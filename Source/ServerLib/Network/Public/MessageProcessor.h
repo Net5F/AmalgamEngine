@@ -75,9 +75,9 @@ private:
         queues. */
     EventDispatcher& networkEventDispatcher;
 
-    /** If non-nullptr, contains the project's message processing extension 
+    /** If non-nullptr, contains the project's message processing extension
         functions.
-        Allows the project to provide message processing code and have it be 
+        Allows the project to provide message processing code and have it be
         called at the appropriate time. */
     std::unique_ptr<IMessageProcessorExtension> extension;
 };

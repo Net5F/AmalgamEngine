@@ -30,7 +30,7 @@ public:
         = 1.0 / static_cast<double>(FRAMES_PER_SECOND);
 
     /**
-     * @param getSimTickProgress  A function that returns how far between sim 
+     * @param getSimTickProgress  A function that returns how far between sim
      *                            ticks we are in decimal percent.
      */
     Renderer(SDL_Renderer* inSdlRenderer, World& inWorld, UserInterface& inUI,
@@ -57,7 +57,7 @@ private:
      * worldSpritePreparer.prepareSprites().
      *
      * @param camera  The camera to calculate screen position with.
-     * @param alpha  How far we are between sim ticks, as a percentage from 
+     * @param alpha  How far we are between sim ticks, as a percentage from
      *               0.0 to 1.0. Used to interpolate between positions.
      */
     void renderWorld(const Camera& camera, double alpha);
@@ -81,7 +81,7 @@ private:
     WorldSpritePreparer worldSpritePreparer;
 
     /** If non-nullptr, contains the project's rendering extension functions.
-        Allows the project to provide rendering code and have it be called at 
+        Allows the project to provide rendering code and have it be called at
         the appropriate time. */
     std::unique_ptr<IRendererExtension> extension;
 };

@@ -9,7 +9,7 @@ namespace AM
 {
 
 /**
- * Deserializes the message in the given buffer and pushes it through the 
+ * Deserializes the message in the given buffer and pushes it through the
  * given event dispatcher.
  * Used when the message type doesn't require any network-level processing.
  *
@@ -17,7 +17,7 @@ namespace AM
  */
 template<typename T>
 static void dispatchMessage(Uint8* messageBuffer, unsigned int messageSize,
-                     EventDispatcher& dispatcher)
+                            EventDispatcher& dispatcher)
 {
     // Deserialize the message.
     T message{};
@@ -38,8 +38,9 @@ static void dispatchMessage(Uint8* messageBuffer, unsigned int messageSize,
  * EventQueue<std::shared_ptr<const T>>.
  */
 template<typename T>
-static void dispatchMessageSharedPtr(Uint8* messageBuffer, unsigned int messageSize,
-                              EventDispatcher& dispatcher)
+static void dispatchMessageSharedPtr(Uint8* messageBuffer,
+                                     unsigned int messageSize,
+                                     EventDispatcher& dispatcher)
 {
     // Deserialize the message.
     std::shared_ptr<T> message{std::make_shared<T>()};

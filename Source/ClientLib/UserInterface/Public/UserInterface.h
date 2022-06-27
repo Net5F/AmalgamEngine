@@ -56,7 +56,7 @@ private:
     EventDispatcher eventDispatcher;
 
     /** If non-nullptr, contains the project's UI extension functions.
-        Allows the project to provide UI code and have it be called at the 
+        Allows the project to provide UI code and have it be called at the
         appropriate time. */
     std::unique_ptr<IUserInterfaceExtension> extension;
 };

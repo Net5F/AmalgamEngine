@@ -13,11 +13,10 @@ class WorldSignals;
 class SpriteData;
 
 /**
- * Defines the dependencies that will be injected into the project's 
+ * Defines the dependencies that will be injected into the project's
  * UserInterfaceExtension class.
  */
-struct UserInterfaceExDependencies
-{
+struct UserInterfaceExDependencies {
 public:
     WorldSignals& worldSignals;
 

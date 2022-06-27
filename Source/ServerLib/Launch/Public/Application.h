@@ -44,9 +44,9 @@ public:
     //-------------------------------------------------------------------------
     /**
      * Registers an extension class to be called by the MessageProcessor.
-     * 
-     * Note: The extension class type T must derive from 
-     *       IMessageProcessorExtension and must implement a constructor of 
+     *
+     * Note: The extension class type T must derive from
+     *       IMessageProcessorExtension and must implement a constructor of
      *       the form T(MessageProcessorExDependencies).
      */
     template<typename T>
@@ -54,9 +54,9 @@ public:
 
     /**
      * Registers an extension class to be called by the Simulation.
-     * 
-     * Note: The extension class type T must derive from ISimulationExtension 
-     *       and must implement a constructor of the form 
+     *
+     * Note: The extension class type T must derive from ISimulationExtension
+     *       and must implement a constructor of the form
      *       T(SimulationExDependencies).
      */
     template<typename T>
@@ -101,7 +101,8 @@ void Application::registerMessageProcessorExtension()
     MessageProcessorExDependencies messageProcessorDeps{
         network.getEventDispatcher()};
 
-    network.setMessageProcessorExtension(std::make_unique<T>(messageProcessorDeps));
+    network.setMessageProcessorExtension(
+        std::make_unique<T>(messageProcessorDeps));
 }
 
 template<typename T>

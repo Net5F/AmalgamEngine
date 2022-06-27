@@ -59,9 +59,9 @@ public:
     //-------------------------------------------------------------------------
     /**
      * Registers an extension class to be called by the MessageProcessor.
-     * 
-     * Note: The extension class type T must derive from 
-     *       IMessageProcessorExtension and must implement a constructor of 
+     *
+     * Note: The extension class type T must derive from
+     *       IMessageProcessorExtension and must implement a constructor of
      *       the form T(MessageProcessorExDependencies).
      */
     template<typename T>
@@ -69,9 +69,9 @@ public:
 
     /**
      * Registers an extension class to be called by the Renderer.
-     * 
-     * Note: The extension class type T must derive from IRendererExtension 
-     *       and must implement a constructor of the form 
+     *
+     * Note: The extension class type T must derive from IRendererExtension
+     *       and must implement a constructor of the form
      *       T(RendererExDependencies).
      */
     template<typename T>
@@ -79,9 +79,9 @@ public:
 
     /**
      * Registers an extension class to be called by the Simulation.
-     * 
-     * Note: The extension class type T must derive from ISimulationExtension 
-     *       and must implement a constructor of the form 
+     *
+     * Note: The extension class type T must derive from ISimulationExtension
+     *       and must implement a constructor of the form
      *       T(SimulationExDependencies).
      */
     template<typename T>
@@ -89,9 +89,9 @@ public:
 
     /**
      * Registers an extension class to be called by the UserInterface.
-     * 
-     * Note: The extension class type T must derive from IUserInterfaceExtension 
-     *       and must implement a constructor of the form 
+     *
+     * Note: The extension class type T must derive from IUserInterfaceExtension
+     *       and must implement a constructor of the form
      *       T(UserInterfaceExDependencies).
      */
     template<typename T>
@@ -182,7 +182,8 @@ void Application::registerMessageProcessorExtension()
     MessageProcessorExDependencies messageProcessorDeps{
         network.getEventDispatcher()};
 
-    network.setMessageProcessorExtension(std::make_unique<T>(messageProcessorDeps));
+    network.setMessageProcessorExtension(
+        std::make_unique<T>(messageProcessorDeps));
 }
 
 template<typename T>

@@ -12,10 +12,10 @@ namespace Client
 /**
  * Defines an extension for the engine's Client::UserInterface class.
  *
- * Extensions are implemented by the project, and are given generic functions 
+ * Extensions are implemented by the project, and are given generic functions
  * ("hooks") in which they can implement relevant project logic.
  *
- * The project can register the extension class with the engine through 
+ * The project can register the extension class with the engine through
  * Application::registerUserInterfaceExtension().
  */
 class IUserInterfaceExtension : public OSEventHandler
