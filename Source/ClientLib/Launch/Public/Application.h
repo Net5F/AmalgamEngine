@@ -150,6 +150,10 @@ private:
 
     SpriteData spriteData;
 
+    UserInterface userInterface;
+    /** Calls userInterface.tick() at our UI tick rate. */
+    PeriodicCaller uiCaller;
+
     Network network;
     /** Calls network.tick() at the network tick rate. */
     PeriodicCaller networkCaller;
@@ -157,10 +161,6 @@ private:
     Simulation simulation;
     /** Calls simulation.tick() at the sim tick rate. */
     PeriodicCaller simCaller;
-
-    UserInterface userInterface;
-    /** Calls userInterface.tick() at our UI tick rate. */
-    PeriodicCaller uiCaller;
 
     Renderer renderer;
     /** Calls renderer.render() at our frame rate. */

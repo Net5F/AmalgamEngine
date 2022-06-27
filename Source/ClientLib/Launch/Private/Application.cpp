@@ -21,15 +21,15 @@ Application::Application()
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , assetCache(sdlRenderer.Get())
 , spriteData(assetCache)
+, userInterface()
+, uiCaller(std::bind_front(&UserInterface::tick, &userInterface),
+           Config::UI_TICK_TIMESTEP_S, "UserInterface", true)
 , network()
 , networkCaller(std::bind_front(&Network::tick, &network),
                 SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
 , simulation(userInterface.getEventDispatcher(), network, spriteData)
 , simCaller(std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
-, userInterface()
-, uiCaller(std::bind_front(&UserInterface::tick, &userInterface),
-           Config::UI_TICK_TIMESTEP_S, "UserInterface", true)
 , renderer(sdlRenderer.Get(), simulation.getWorld(), userInterface,
            std::bind_front(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind_front(&Renderer::render, &renderer),
