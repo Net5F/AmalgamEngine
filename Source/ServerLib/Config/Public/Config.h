@@ -1,5 +1,9 @@
 #pragma once
 
+// Use the project's Server::Config, if one is provided.
+#if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
+#include "Override/ServerConfig.h"
+#else
 #include "SharedConfig.h"
 #include "ConstexprTools.h"
 #include <SDL_stdinc.h>
@@ -10,10 +14,7 @@ namespace AM
 namespace Server
 {
 /**
- * This class contains configuration data for all modules.
- *
- * All data is currently static, but eventually this class will be in charge
- * of loading some of the data dynamically from a config file.
+ * Contains configuration constants relevant to the Server.
  */
 class Config
 {
@@ -37,33 +38,35 @@ public:
     ////////////////////////////////////////////////////////////////////////////
 
     /** The maximum number of clients that we will allow. */
-    static constexpr unsigned int MAX_CLIENTS = 1010;
+    static constexpr unsigned int MAX_CLIENTS{1010};
 
     /** How long we should wait before considering the client to be timed out.
         Arbitrarily chosen. If too high, we set ourselves up to take a huge
        spike of data for a very late client. */
-    static constexpr double CLIENT_TIMEOUT_S = 1.5;
+    static constexpr double CLIENT_TIMEOUT_S{1.5};
 
     /** The minimum amount of time worth of tick differences that we'll
         remember. */
-    static constexpr double TICKDIFF_HISTORY_S = .5;
+    static constexpr double TICKDIFF_HISTORY_S{.5};
     /** The integer number of diffs that we'll remember in the history. */
-    static constexpr unsigned int TICKDIFF_HISTORY_LENGTH
-        = ConstexprTools::ceilInt(TICKDIFF_HISTORY_S
-                                  / SharedConfig::SIM_TICK_TIMESTEP_S);
+    static constexpr unsigned int TICKDIFF_HISTORY_LENGTH{
+        ConstexprTools::ceilInt(TICKDIFF_HISTORY_S
+                                / SharedConfig::SIM_TICK_TIMESTEP_S)};
 
     /** The range of difference (inclusive) between a received message's tickNum
         and our current tickNum that we won't send an adjustment for. */
-    static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_LOWER = 1;
-    static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_UPPER = 3;
+    static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_LOWER{1};
+    static constexpr Sint64 TICKDIFF_ACCEPTABLE_BOUND_UPPER{3};
     /** The value that we'll adjust clients to if they fall outside the bounds.
      */
-    static constexpr Sint64 TICKDIFF_TARGET = 2;
+    static constexpr Sint64 TICKDIFF_TARGET{2};
 
     /** The minimum number of fresh diffs we'll use to calculate an adjustment.
         Aims to prevent thrashing. */
-    static constexpr unsigned int MIN_FRESH_DIFFS = 3;
+    static constexpr unsigned int MIN_FRESH_DIFFS{3};
 };
 
 } // End namespace Server
 } // End namespace AM
+
+#endif // defined(AM_OVERRIDE_CONFIG)
