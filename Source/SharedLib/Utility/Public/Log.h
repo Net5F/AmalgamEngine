@@ -13,16 +13,16 @@
         AM::Log::info(__VA_ARGS__);                                            \
     } while (false)
 
-#ifndef NDEBUG
+#ifdef NDEBUG
 #define LOG_ERROR(...)                                                         \
     do {                                                                       \
         AM::Log::error(__FILE__, __LINE__, __VA_ARGS__);                       \
-        std::abort();                                                          \
     } while (false)
 #else
 #define LOG_ERROR(...)                                                         \
     do {                                                                       \
         AM::Log::error(__FILE__, __LINE__, __VA_ARGS__);                       \
+        std::abort();                                                          \
     } while (false)
 #endif
 
