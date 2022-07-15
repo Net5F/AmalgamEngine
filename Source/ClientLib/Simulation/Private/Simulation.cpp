@@ -17,6 +17,7 @@
 #include "Paths.h"
 #include "Config.h"
 #include "SharedConfig.h"
+#include "UserConfig.h"
 #include "Log.h"
 #include "entt/entity/registry.hpp"
 #include <memory>
@@ -116,12 +117,12 @@ void Simulation::connect()
     // TODO: Since sprite components hold static data, do we want them to
     //       just contain a ref to the actual data? Or is this copy better?
     // TODO: Switch to logical screen size and do scaling in Renderer.
+    UserConfig& userConfig{UserConfig::get()};
     Sprite& playerSprite{
         registry.emplace<Sprite>(newEntity, spriteData.get("roberto_0"))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
-                             ScreenRect{0, 0, Config::ACTUAL_SCREEN_WIDTH,
-                                        Config::ACTUAL_SCREEN_HEIGHT});
+                             userConfig.getWindowSize());
 
     // Set up the player's bounding box, based on their sprite.
     registry.emplace<BoundingBox>(
@@ -156,12 +157,12 @@ void Simulation::fakeConnection()
 
     // Set up the player's visual components.
     // TODO: Switch to logical screen size and do scaling in Renderer.
+    UserConfig& userConfig{UserConfig::get()};
     Sprite& playerSprite{
         registry.emplace<Sprite>(newEntity, spriteData.get("roberto_0"))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{},
-                             ScreenRect{0, 0, Config::ACTUAL_SCREEN_WIDTH,
-                                        Config::ACTUAL_SCREEN_HEIGHT});
+                             userConfig.getWindowSize());
 
     // Set up the player's bounding box, based on their sprite.
     registry.emplace<BoundingBox>(

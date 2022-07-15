@@ -25,10 +25,6 @@ class IRendererExtension;
 class Renderer : public OSEventHandler
 {
 public:
-    static constexpr unsigned int FRAMES_PER_SECOND = 60;
-    static constexpr double FRAME_TIMESTEP_S
-        = 1.0 / static_cast<double>(FRAMES_PER_SECOND);
-
     /**
      * @param getSimTickProgress  A function that returns how far between sim
      *                            ticks we are in decimal percent.

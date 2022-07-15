@@ -1,10 +1,8 @@
 #include "SpriteData.h"
 #include "Paths.h"
 #include "Log.h"
-
-#include <fstream>
-
 #include "nlohmann/json.hpp"
+#include <fstream>
 
 namespace AM
 {
@@ -21,9 +19,12 @@ SpriteData::SpriteData()
     }
 
     // Parse the file into a json structure.
-    nlohmann::json json = nlohmann::json::parse(workingFile, nullptr, false);
-    if (json.is_discarded()) {
-        LOG_FATAL("SpriteData.json is not valid JSON.");
+    nlohmann::json json;
+    try {
+        json = nlohmann::json::parse(workingFile, nullptr, true);
+    }
+    catch (nlohmann::json::exception& e) {
+        LOG_FATAL("Failed to parse SpriteData.json: %s", e.what());
     }
 
     // Parse the json structure to construct our sprites.

@@ -29,7 +29,7 @@ public:
      * Initiates a TCP connection that the other side can then accept.
      * (e.g. the client connecting to the server)
      */
-    static std::unique_ptr<Peer> initiate(std::string serverIP,
+    static std::unique_ptr<Peer> initiate(const std::string& serverIP,
                                           unsigned int serverPort);
 
     /**

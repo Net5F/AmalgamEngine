@@ -19,6 +19,9 @@ namespace Server
  *
  * The data in this class is immutable. To modify it, edit SpriteData.json in
  * the SpriteEditor.
+ * 
+ * TODO: We should replace the hand-parsing approach used in this file with 
+ *       nlohmann json's json-to-struct parsing macro.
  */
 class SpriteData
 {

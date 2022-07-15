@@ -1,0 +1,27 @@
+/**
+ * This is an example UserConfig.json file, these values are not actually used. 
+ * Projects can reference this file to understand what fields they must 
+ * provide in their UserConfig.json.
+ */
+
+{
+  // Sets full screen preference.
+  // 0 = Windowed
+  // 1 = Borderless windowed
+  "fullscreenMode": 0,
+
+  // The size of the application window.
+  // Note: We currently only support 16:9 aspect ratios.
+  // Note: If fullscreenMode is Fullscreen or Fullscreen windowed,
+  //       this setting is ignored and the desktop size is used.
+  "windowSizeWidth": 1600,
+  "windowSizeHeight": 900,
+
+  // The application framerate.
+  "framesPerSecond": 60,
+
+  // The IP address and port of the simulation server.
+  "serverIP": "104.237.139.17",
+  // "serverIP": "127.0.0.1",
+  "serverPort": 41499
+}

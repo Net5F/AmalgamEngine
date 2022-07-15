@@ -4,6 +4,7 @@ target_sources(ServerLib
         Private/ClientHandler.cpp
         Private/MessageProcessor.cpp
         Private/Network.cpp
+        Private/SDLNetInitializer.cpp
     PUBLIC
         Public/Client.h
         Public/ClientHandler.h

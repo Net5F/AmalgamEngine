@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "Config.h"
 #include "SharedConfig.h"
+#include "UserConfig.h"
 #include "Paths.h"
 #include "Log.h"
 
@@ -15,8 +16,10 @@ namespace Client
 {
 Application::Application()
 : sdl(SDL_INIT_VIDEO)
+, userConfigInitializer()
 , sdlWindow("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-            Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT,
+            static_cast<int>(UserConfig::get().getWindowSize().width),
+            static_cast<int>(UserConfig::get().getWindowSize().height),
             SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
 , assetCache(sdlRenderer.Get())
@@ -33,10 +36,30 @@ Application::Application()
 , renderer(sdlRenderer.Get(), simulation.getWorld(), userInterface,
            std::bind_front(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind_front(&Renderer::render, &renderer),
-                 Renderer::FRAME_TIMESTEP_S, "Renderer", true)
+                 UserConfig::get().getFrameTimestepS(), "Renderer", true)
 , eventHandlers{this, &renderer, &userInterface, &simulation}
 , exitRequested(false)
 {
+    // Set fullscreen mode.
+    unsigned int fullscreenMode{UserConfig::get().getFullscreenMode()};
+    switch (fullscreenMode) {
+        case 0: {
+            sdlWindow.SetFullscreen(0);
+            break;
+        }
+        case 1: {
+            sdlWindow.SetFullscreen(SDL_WINDOW_FULLSCREEN_DESKTOP);
+            break;
+        }
+        // Note: We removed real fullscreen because it was behaving weirdly and
+        //       causing network timeouts, and having just windowed and 
+        //       borderless seems fine.
+        default: {
+            LOG_FATAL("Invalid fullscreen value: %d", fullscreenMode);
+            break;
+        }
+    }
+
     // Enable delay reporting.
     simCaller.reportDelays(Simulation::SIM_DELAYED_TIME_S);
 

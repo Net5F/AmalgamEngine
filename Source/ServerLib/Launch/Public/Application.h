@@ -1,5 +1,6 @@
 #pragma once
 
+#include "UserConfigInitializer.h"
 #include "Network.h"
 #include "Simulation.h"
 #include "SpriteData.h"
@@ -73,11 +74,14 @@ private:
     // SDL Objects
     //-------------------------------------------------------------------------
     SDL2pp::SDL sdl;
+
     SDLNetInitializer sdlNetInit;
 
     //-------------------------------------------------------------------------
     // Modules, Dependencies, PeriodicCallers
     //-------------------------------------------------------------------------
+    UserConfigInitializer userConfigInitializer;
+
     SpriteData spriteData;
 
     Network network;

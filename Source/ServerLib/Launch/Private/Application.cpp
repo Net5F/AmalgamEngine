@@ -14,6 +14,7 @@ namespace Server
 Application::Application()
 : sdl(0)
 , sdlNetInit()
+, userConfigInitializer()
 , spriteData()
 , network()
 , networkCaller(std::bind_front(&Network::tick, &network),

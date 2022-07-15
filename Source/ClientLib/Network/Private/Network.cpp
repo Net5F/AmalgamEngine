@@ -2,6 +2,7 @@
 #include "QueuedEvents.h"
 #include "Heartbeat.h"
 #include "Config.h"
+#include "UserConfig.h"
 #include "NetworkStats.h"
 #include "IMessageProcessorExtension.h"
 #include "AMAssert.h"
@@ -52,7 +53,8 @@ Network::~Network()
 bool Network::connect()
 {
     // Try to connect.
-    server = Peer::initiate(Config::SERVER_IP, Config::SERVER_PORT);
+    ServerAddress serverAddress{UserConfig::get().getServerAddress()};
+    server = Peer::initiate(serverAddress.IP, serverAddress.port);
 
     // Spin up the receive thread.
     if (server != nullptr) {

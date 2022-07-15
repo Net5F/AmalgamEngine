@@ -6,7 +6,7 @@
 
 namespace AM
 {
-std::unique_ptr<Peer> Peer::initiate(std::string serverIP,
+std::unique_ptr<Peer> Peer::initiate(const std::string& serverIP,
                                      unsigned int serverPort)
 {
     std::unique_ptr<TcpSocket> socket{

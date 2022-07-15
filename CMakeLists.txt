@@ -72,9 +72,11 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/tracy/"
                  "${PROJECT_BINARY_DIR}/Libraries/tracy/")
 
 # Configure nlohmann json.
+# Note: We use FetchContent because it's a much smaller download (100KB vs 300MB).
 set(JSON_MultipleHeaders ON CACHE INTERNAL "Enable forward declaration.")
-add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/json/"
-                 "${PROJECT_BINARY_DIR}/Libraries/json/")
+include(FetchContent)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz)
+FetchContent_MakeAvailable(json)
                  
 # Configure nativefiledialog-extended.
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/nativefiledialog-extended/"

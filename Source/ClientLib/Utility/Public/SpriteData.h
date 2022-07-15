@@ -2,9 +2,9 @@
 
 #include "Sprite.h"
 #include "EmptySpriteID.h"
+#include "nlohmann/json_fwd.hpp"
 #include <vector>
 #include <unordered_map>
-#include "nlohmann/json_fwd.hpp"
 
 namespace AM
 {
@@ -21,6 +21,9 @@ namespace Client
  *
  * The data in this class is immutable. To modify it, edit SpriteData.json in
  * the SpriteEditor.
+ * 
+ * TODO: We should replace the hand-parsing approach used in this file with 
+ *       nlohmann json's json-to-struct parsing macro.
  */
 class SpriteData
 {

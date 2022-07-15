@@ -1,7 +1,5 @@
 #pragma once
 
-#include "SDL_net.h"
-
 namespace AM
 {
 namespace Server
@@ -16,9 +14,9 @@ namespace Server
 class SDLNetInitializer
 {
 public:
-    SDLNetInitializer() { SDLNet_Init(); }
+    SDLNetInitializer();
 
-    ~SDLNetInitializer() { SDLNet_Quit(); }
+    ~SDLNetInitializer();
 };
 
 } // End namespace Server

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "OSEventHandler.h"
+#include "UserConfigInitializer.h"
 #include "Network.h"
 #include "Simulation.h"
 #include "Renderer.h"
@@ -136,7 +137,13 @@ private:
     // SDL Objects
     //-------------------------------------------------------------------------
     SDL2pp::SDL sdl;
+
+    /** Initializes UserConfig. Must be constructed after SDL is initialized 
+        and before anything else. */
+    UserConfigInitializer userConfigInitializer;
+
     SDL2pp::Window sdlWindow;
+
     /** The SDL renderer that we use to render the UI and world.
         We use SDL2pp::Renderer for convenience of initialization here, but
         all other parts of the engine directly use SDL_Renderer (so that we
