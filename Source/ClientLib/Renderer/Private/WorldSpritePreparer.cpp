@@ -149,7 +149,7 @@ void WorldSpritePreparer::sortSpritesByDepth()
     calcDepthDependencies();
 
     // Calculate depth values.
-    int depthValue = 0;
+    int depthValue{0};
     for (SpriteRenderInfo& spriteInfo : spritesToSort) {
         visitSprite(spriteInfo, depthValue);
     }

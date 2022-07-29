@@ -75,7 +75,7 @@ void SpriteData::parseJson(nlohmann::json& json)
             }
         }
     } catch (nlohmann::json::type_error& e) {
-        LOG_FATAL("Parse failure - %s", e.what());
+        LOG_FATAL("Failed to parse SpriteData.json: %s", e.what());
     }
 
     // Fill the maps with pointers to all the sprites.
@@ -89,10 +89,8 @@ void SpriteData::parseJson(nlohmann::json& json)
 
 void SpriteData::parseSprite(const nlohmann::json& spriteJson)
 {
-    // Add the parent sprite sheet's texture.
-    Sprite sprite{};
-
     // Add the display name.
+    Sprite sprite{};
     sprite.displayName = spriteJson["displayName"].get<std::string>();
 
     // Add the string identifier.
@@ -101,6 +99,17 @@ void SpriteData::parseSprite(const nlohmann::json& spriteJson)
     // Add the numeric identifier.
     sprite.numericID = spriteJson["numericID"];
 
+    // Add the model-space bounds.
+    //for (auto& modelJson : spriteJson["modelBounds"].items()) {
+    //    BoundingBox boundingBox{};
+    //    boundingBox.minX = modelJson.value()["minX"];
+    //    boundingBox.maxX = modelJson.value()["maxX"];
+    //    boundingBox.minY = modelJson.value()["minY"];
+    //    boundingBox.maxY = modelJson.value()["maxY"];
+    //    boundingBox.minZ = modelJson.value()["minZ"];
+    //    boundingBox.maxZ = modelJson.value()["maxZ"];
+    //    sprite.modelBounds.emplace_back(boundingBox);
+    //}
     // Add whether the sprite has a bounding box or not.
     sprite.hasBoundingBox = spriteJson["hasBoundingBox"];
 

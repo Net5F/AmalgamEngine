@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "SpriteDataModel.h"
 #include "Transforms.h"
+#include "PolygonTools.h"
 #include "Position.h"
 #include "Camera.h"
 #include "SharedConfig.h"
@@ -18,13 +19,14 @@ namespace AM
 {
 namespace SpriteEditor
 {
-BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
+BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel, unsigned int inSpriteID, unsigned int inModelBoundsIndex)
 : AUI::Widget({0, 0, 1920, 1080}, "BoundingBoxGizmo")
 , spriteDataModel{inSpriteDataModel}
-, activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
+, spriteID{inSpriteID}
+, modelBoundsIndex{inModelBoundsIndex}
 , scaledRectSize{AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE)}
 , scaledLineWidth{AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH)}
-, hasBoundingBox{false}
+, isSelected{false}
 , positionControlExtent{0, 0, scaledRectSize, scaledRectSize}
 , lastRenderedPosExtent{}
 , xControlExtent{0, 0, scaledRectSize, scaledRectSize}
@@ -41,62 +43,71 @@ BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
 , zMaxPoint{}
 , planeXCoords{}
 , planeYCoords{}
-, currentHeldControl{Control::None}
+, currentHeldControl{HitTarget::None}
 {
-    // When the active sprite is updated, update it in this widget.
-    spriteDataModel.activeSpriteChanged
-        .connect<&BoundingBoxGizmo::onActiveSpriteChanged>(*this);
-    spriteDataModel.spriteHasBoundingBoxChanged
-        .connect<&BoundingBoxGizmo::onSpriteHasBoundingBoxChanged>(*this);
+    // When the bounds of our associated sprite change, update this widget.
     spriteDataModel.spriteModelBoundsChanged
         .connect<&BoundingBoxGizmo::onSpriteModelBoundsChanged>(*this);
+
+    // Refresh our controls to reflect our bounding box.
+    refresh(spriteDataModel.getSprite(spriteID));
+}
+
+void BoundingBoxGizmo::setIsSelected(bool inIsSelected)
+{
+    isSelected = inIsSelected;
+}
+
+bool BoundingBoxGizmo::getIsSelected()
+{
+    return isSelected;
 }
 
 void BoundingBoxGizmo::render()
 {
-    // Render the planes.
+    // Always render the planes.
     renderPlanes();
 
-    // Render the lines.
-    renderLines();
+    if (isSelected) {
+        // Render the lines.
+        renderLines();
 
-    // Render the control rectangles.
-    renderControls();
+        // Render the control rectangles.
+        renderControls();
+    }
 }
 
 AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType,
                                                const SDL_Point& cursorPosition)
 {
+    LOG_INFO("Mouse down in gizmo: %u. %p", modelBoundsIndex, this);
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
         return AUI::EventResult{.wasHandled{false}};
     }
 
-    // Check if the mouse press hit any of our controls.
-    if (AUI::SDLHelpers::pointInRect(cursorPosition, lastRenderedPosExtent)) {
-        currentHeldControl = Control::Position;
-    }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition,
-                                          lastRenderedXExtent)) {
-        currentHeldControl = Control::X;
-    }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition,
-                                          lastRenderedYExtent)) {
-        currentHeldControl = Control::Y;
-    }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition,
-                                          lastRenderedZExtent)) {
-        currentHeldControl = Control::Z;
-    }
+    // Check if the cursor hit anything.
+    HitTarget hitTarget{hitTest(cursorPosition)};
 
-    // If we're holding a control, set mouse capture so we get the associated
-    // MouseUp.
-    if (currentHeldControl != Control::None) {
+    // If the cursor is holding a control, set mouse capture so we get the 
+    // associated MouseUp.
+    if ((hitTarget == HitTarget::PositionControl)
+        || (hitTarget == HitTarget::XControl)
+        || (hitTarget == HitTarget::YControl)
+        || (hitTarget == HitTarget::ZControl)) {
+        LOG_INFO("Hit control");
+        currentHeldControl = hitTarget;
         return AUI::EventResult{.wasHandled{true}, .setMouseCapture{this}};
     }
-    else {
+    else if (hitTarget == HitTarget::Box) {
+        // The box was hit, handle the event to block anything behind us.
+        LOG_INFO("Hit box");
+        spriteDataModel.setActiveSpriteModelBounds(modelBoundsIndex);
         return AUI::EventResult{.wasHandled{true}};
     }
+
+    // The click didn't hit our controls or box, report it as unhandled.
+    return AUI::EventResult{.wasHandled{false}};
 }
 
 AUI::EventResult BoundingBoxGizmo::onMouseUp(AUI::MouseButtonType buttonType,
@@ -110,8 +121,8 @@ AUI::EventResult BoundingBoxGizmo::onMouseUp(AUI::MouseButtonType buttonType,
     }
 
     // If we're holding a control, release it and release mouse capture.
-    if (currentHeldControl != Control::None) {
-        currentHeldControl = Control::None;
+    if (currentHeldControl != HitTarget::None) {
+        currentHeldControl = HitTarget::None;
         return AUI::EventResult{.wasHandled{true}, .releaseMouseCapture{true}};
     }
     else {
@@ -119,16 +130,23 @@ AUI::EventResult BoundingBoxGizmo::onMouseUp(AUI::MouseButtonType buttonType,
     }
 }
 
+AUI::EventResult BoundingBoxGizmo::onMouseDoubleClick(AUI::MouseButtonType buttonType,
+                                       const SDL_Point& cursorPosition)
+{
+    // We treat additional clicks as regular MouseDown events.
+    return onMouseDown(buttonType, cursorPosition);
+}
+
 AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
 {
     // If we aren't being pressed, ignore the event.
-    if (currentHeldControl == Control::None) {
+    if (currentHeldControl == HitTarget::None) {
         return AUI::EventResult{.wasHandled{false}};
     }
 
     /* Translate the mouse position to world space. */
     // Account for the sprite's empty vertical space.
-    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    const Sprite& activeSprite{spriteDataModel.getSprite(spriteID)};
     int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite.yOffset)};
     yOffset += renderExtent.y;
 
@@ -150,19 +168,19 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
 
     // Adjust the currently pressed control appropriately.
     switch (currentHeldControl) {
-        case Control::Position: {
+        case HitTarget::PositionControl: {
             updatePositionBounds(mouseWorldPos);
             break;
         }
-        case Control::X: {
+        case HitTarget::XControl: {
             updateXBounds(mouseWorldPos);
             break;
         }
-        case Control::Y: {
+        case HitTarget::YControl: {
             updateYBounds(mouseWorldPos);
             break;
         }
-        case Control::Z: {
+        case HitTarget::ZControl: {
             updateZBounds(cursorPosition.y);
             break;
         }
@@ -187,7 +205,7 @@ bool BoundingBoxGizmo::refreshScaling()
             = AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH);
 
         // Refresh our controls to reflect the new sizes.
-        refresh(spriteDataModel.getSprite(activeSpriteID));
+        refresh(spriteDataModel.getSprite(spriteID));
 
         return true;
     }
@@ -195,28 +213,12 @@ bool BoundingBoxGizmo::refreshScaling()
     return false;
 }
 
-void BoundingBoxGizmo::onActiveSpriteChanged(unsigned int newActiveSpriteID,
-                                             const Sprite& newActiveSprite)
-{
-    activeSpriteID = newActiveSpriteID;
-    hasBoundingBox = newActiveSprite.hasBoundingBox;
-    refresh(newActiveSprite);
-}
-
-void BoundingBoxGizmo::onSpriteHasBoundingBoxChanged(unsigned int spriteID,
-                                                     bool newHasBoundingBox)
-{
-    if (spriteID == activeSpriteID) {
-        hasBoundingBox = newHasBoundingBox;
-    }
-}
-
 void BoundingBoxGizmo::onSpriteModelBoundsChanged(
-    unsigned int spriteID, const BoundingBox& newModelBounds)
+    unsigned int inSpriteID, unsigned int changedBoundsIndex, const BoundingBox& newModelBounds)
 {
     ignore(newModelBounds);
 
-    if (spriteID == activeSpriteID) {
+    if ((inSpriteID == spriteID) && (changedBoundsIndex == modelBoundsIndex)) {
         refresh(spriteDataModel.getSprite(spriteID));
     }
 }
@@ -228,6 +230,9 @@ void BoundingBoxGizmo::refresh(const Sprite& activeSprite)
     //       for calcOffsetScreenPoints().
     std::vector<SDL_Point> boundsScreenPoints;
     calcOffsetScreenPoints(activeSprite, boundsScreenPoints);
+
+    // Update our enclosing polygon.
+    setLastEnclosingPolygon(boundsScreenPoints);
 
     // Move the controls to the correct positions.
     moveControls(boundsScreenPoints);
@@ -241,10 +246,12 @@ void BoundingBoxGizmo::refresh(const Sprite& activeSprite)
 
 void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 {
+    // TODO: If shift is held, only move along the Z axis
+
     // Note: The expected behavior is to move along the x/y plane and
     //       leave minZ where it was.
-    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
-    BoundingBox modelBounds{activeSprite.modelBounds};
+    const Sprite& activeSprite{spriteDataModel.getSprite(spriteID)};
+    BoundingBox modelBounds{activeSprite.modelBounds.at(modelBoundsIndex)};
     float& minX{modelBounds.minX};
     float& minY{modelBounds.minY};
     float& maxX{modelBounds.maxX};
@@ -284,29 +291,29 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
     }
 
     // Apply the new model bounds.
-    spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
+    spriteDataModel.setSpriteModelBounds(spriteID, modelBoundsIndex, modelBounds);
 }
 
 void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
-    BoundingBox modelBounds{activeSprite.modelBounds};
+    const Sprite& activeSprite{spriteDataModel.getSprite(spriteID)};
+    BoundingBox modelBounds{activeSprite.modelBounds.at(modelBoundsIndex)};
     modelBounds.minX = std::clamp(mouseWorldPos.x, 0.f, modelBounds.maxX);
 
     // Apply the new model bound.
-    spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
+    spriteDataModel.setSpriteModelBounds(spriteID, modelBoundsIndex, modelBounds);
 }
 
 void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
-    BoundingBox modelBounds{activeSprite.modelBounds};
+    const Sprite& activeSprite{spriteDataModel.getSprite(spriteID)};
+    BoundingBox modelBounds{activeSprite.modelBounds.at(modelBoundsIndex)};
     modelBounds.minY = std::clamp(mouseWorldPos.y, 0.f, modelBounds.maxY);
 
     // Apply the new model bound.
-    spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
+    spriteDataModel.setSpriteModelBounds(spriteID, modelBoundsIndex, modelBounds);
 }
 
 void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
@@ -328,13 +335,13 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     mouseZHeight = Transforms::screenYToWorldZ(mouseZHeight, 1.f);
 
     // Set maxZ, making sure it doesn't go below minZ.
-    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
-    BoundingBox modelBounds{activeSprite.modelBounds};
+    const Sprite& activeSprite{spriteDataModel.getSprite(spriteID)};
+    BoundingBox modelBounds{activeSprite.modelBounds.at(modelBoundsIndex)};
     if (mouseZHeight > modelBounds.minZ) {
         modelBounds.maxZ = mouseZHeight;
 
         // Apply the new model bound.
-        spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
+        spriteDataModel.setSpriteModelBounds(spriteID, modelBoundsIndex, modelBounds);
     }
 }
 
@@ -347,7 +354,7 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
     std::array<ScreenPoint, 7> floatPoints{};
 
     // Push the points in the correct order.
-    const BoundingBox& modelBounds{activeSprite.modelBounds};
+    BoundingBox modelBounds{activeSprite.modelBounds.at(modelBoundsIndex)};
     Position position{modelBounds.minX, modelBounds.maxY, modelBounds.minZ};
     floatPoints[0] = Transforms::worldToScreen(position, 1);
 
@@ -391,6 +398,56 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
         boundsScreenPoints.push_back(
             {static_cast<int>(point.x), static_cast<int>(point.y)});
     }
+}
+
+void BoundingBoxGizmo::setLastEnclosingPolygon(std::vector<SDL_Point>& boundsScreenPoints) 
+{
+    // Store the bounds screen points starting at the topmost vertex (in 
+    // screen space), and proceeding clockwise.
+    // (See calcOffsetScreenPoints for ordering.)
+    lastEnclosingPolygon[0] = boundsScreenPoints[6];
+    lastEnclosingPolygon[1] = boundsScreenPoints[5];
+    lastEnclosingPolygon[2] = boundsScreenPoints[2];
+    lastEnclosingPolygon[3] = boundsScreenPoints[1];
+    lastEnclosingPolygon[4] = boundsScreenPoints[0];
+    lastEnclosingPolygon[5] = boundsScreenPoints[3];
+}
+
+BoundingBoxGizmo::HitTarget BoundingBoxGizmo::hitTest(const SDL_Point& cursorPosition)
+{
+    // Get the cursor position, relative to the top left of the widget instead 
+    // of the top left of the screen (to match lastEnclosingPolygon).
+    SDL_Point relativeCursorPos{cursorPosition};
+    relativeCursorPos.x -= renderExtent.x;
+    relativeCursorPos.y -= renderExtent.y;
+
+    // If we're selected, test if the mouse click hit any of our controls.
+    // Note: These are relative to the top left of the screen, unlike above.
+    if (isSelected) {
+        if (AUI::SDLHelpers::pointInRect(cursorPosition, lastRenderedPosExtent)) {
+            return HitTarget::PositionControl;
+        }
+        else if (AUI::SDLHelpers::pointInRect(cursorPosition,
+                                              lastRenderedXExtent)) {
+            return HitTarget::XControl;
+        }
+        else if (AUI::SDLHelpers::pointInRect(cursorPosition,
+                                              lastRenderedYExtent)) {
+            return HitTarget::YControl;
+        }
+        else if (AUI::SDLHelpers::pointInRect(cursorPosition,
+                                              lastRenderedZExtent)) {
+            return HitTarget::ZControl;
+        }
+    }
+
+    // Test if the mouse click hit our bounding box.
+    if (PolygonTools::pointIsInsideConvexPolygon(lastEnclosingPolygon.data()
+        , lastEnclosingPolygon.size(), relativeCursorPos)) {
+        return HitTarget::Box;
+    }
+
+    return HitTarget::None;
 }
 
 void BoundingBoxGizmo::moveControls(std::vector<SDL_Point>& boundsScreenPoints)
@@ -463,10 +520,10 @@ void BoundingBoxGizmo::movePlanes(std::vector<SDL_Point>& boundsScreenPoints)
 
 void BoundingBoxGizmo::renderControls()
 {
-    // If the bounding box is disabled, show it at 1/4 alpha.
-    float alpha{255};
-    if (!hasBoundingBox) {
-        alpha /= 4.f;
+    // If this gizmo isn't selected, make it semi-transparent.
+    float alpha{BASE_ALPHA};
+    if (!isSelected) {
+        alpha *= UNSELECTED_ALPHA_FACTOR;
     }
 
     // Position control
@@ -512,10 +569,10 @@ void BoundingBoxGizmo::renderControls()
 
 void BoundingBoxGizmo::renderLines()
 {
-    // If the bounding box is disabled, show it at 1/4 alpha.
-    float alpha{255};
-    if (!hasBoundingBox) {
-        alpha /= 4.f;
+    // If this gizmo isn't selected, make it semi-transparent.
+    float alpha{BASE_ALPHA};
+    if (!isSelected) {
+        alpha *= UNSELECTED_ALPHA_FACTOR;
     }
 
     // X-axis line
@@ -569,10 +626,10 @@ void BoundingBoxGizmo::renderPlanes()
     }
 
     /* Draw the planes. */
-    // If the bounding box is disabled, show it at 1/4 alpha.
-    float alpha{127};
-    if (!hasBoundingBox) {
-        alpha /= 4.f;
+    // If this gizmo isn't selected, make it semi-transparent.
+    float alpha{BASE_ALPHA * PLANE_ALPHA_FACTOR};
+    if (!isSelected) {
+        alpha *= UNSELECTED_ALPHA_FACTOR;
     }
 
     // X-axis plane

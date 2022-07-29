@@ -23,9 +23,18 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel);
+    BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel,
+                     unsigned int inSpriteID,
+                     unsigned int inModelBoundsIndex);
 
     virtual ~BoundingBoxGizmo() = default;
+
+    /**
+     * Sets whether the gizmo is selected or not.
+     * Deselected gizmos are more transparent and hide their controls.
+     */
+    void setIsSelected(bool inIsSelected);
+    bool getIsSelected();
 
     //-------------------------------------------------------------------------
     // Base class overrides
@@ -38,6 +47,9 @@ public:
     AUI::EventResult onMouseUp(AUI::MouseButtonType buttonType,
                                const SDL_Point& cursorPosition) override;
 
+    AUI::EventResult onMouseDoubleClick(AUI::MouseButtonType buttonType,
+                                   const SDL_Point& cursorPosition) override;
+
     AUI::EventResult onMouseMove(const SDL_Point& cursorPosition) override;
 
 protected:
@@ -47,25 +59,34 @@ protected:
     bool refreshScaling() override;
 
 private:
-    /**
-     * The list of our clickable controls.
-     */
-    enum class Control { None, Position, X, Y, Z };
+    /** The base transparency value for a selected gizmo. */
+    static constexpr float BASE_ALPHA{255};
+
+    /** How opaque the sides of the bounding box will be. */
+    static constexpr float PLANE_ALPHA_FACTOR{0.6f};
+
+    /** How opaque an unselected gizmo will be. */
+    static constexpr float UNSELECTED_ALPHA_FACTOR{0.65f};
 
     /**
-     * Saves the new active sprite's ID.
+     * The list of this gizmo's clickable targets.
      */
-    void onActiveSpriteChanged(unsigned int newSpriteID,
-                               const Sprite& newActiveSprite);
+    enum class HitTarget {
+        None,
+        Box,
+        PositionControl,
+        XControl,
+        YControl,
+        ZControl
+    };
 
     /**
-     * Updates this panel with the active sprite's new properties.
+     * Updates this gizmo with the active sprite's new properties.
      * Note: This gizmo depends on having its logical extent set to match the
      *       sprite image that it will be overlaying.
      */
-    void onSpriteHasBoundingBoxChanged(unsigned int spriteID,
-                                       bool newHasBoundingBox);
-    void onSpriteModelBoundsChanged(unsigned int spriteID,
+    void onSpriteModelBoundsChanged(unsigned int inSpriteID,
+                                    unsigned int changedBoundsIndex,
                                     const BoundingBox& newModelBounds);
 
     /**
@@ -108,6 +129,19 @@ private:
                                 std::vector<SDL_Point>& boundsScreenPoints);
 
     /**
+     * Sets lastEnclosingPolygon using the given points.
+     */
+    void setLastEnclosingPolygon(std::vector<SDL_Point>& boundsScreenPoints);
+
+    /**
+     * Hit tests the given mouse cursor position against the current box and 
+     * control positions.
+     *
+     * @return A target if one was hit, else HitTarget::None.
+     */
+    HitTarget hitTest(const SDL_Point& cursorPosition);
+
+    /**
      * Moves the control extents to their proper screen position.
      */
     void moveControls(std::vector<SDL_Point>& boundsScreenPoints);
@@ -140,23 +174,27 @@ private:
     /** Used while setting user-inputted sprite data. */
     SpriteDataModel& spriteDataModel;
 
-    /** The active sprite's ID. */
-    unsigned int activeSpriteID;
+    /** The ID of the sprite that this gizmo is associated with. */
+    unsigned int spriteID;
+
+    /** The index within the associated sprite's modelBounds vector of the box 
+        that this gizmo is associated with. */
+    unsigned int modelBoundsIndex;
 
     /** A reasonable size for the control rectangles. */
-    static constexpr int LOGICAL_RECT_SIZE = 12;
+    static constexpr int LOGICAL_RECT_SIZE{12};
 
     /** The scaled size of the control rectangles. */
     int scaledRectSize;
 
     /** A reasonable width for the lines. */
-    static constexpr int LOGICAL_LINE_WIDTH = 4;
+    static constexpr int LOGICAL_LINE_WIDTH{4};
 
     /** The scaled width of the lines. */
     int scaledLineWidth;
 
-    /** Tracks whether the active sprite has a bounding box or not. */
-    bool hasBoundingBox;
+    /** Tracks whether this gizmo is selected or not. */
+    bool isSelected;
 
     // Controls (scaled extents, without parent offsets)
     /** The extent of the box position control, (maxX, maxY, minZ). */
@@ -194,7 +232,13 @@ private:
     std::array<Sint16, 12> planeYCoords;
 
     /** Tracks which control, if any, is currently being held. */
-    Control currentHeldControl;
+    HitTarget currentHeldControl;
+
+    /** Holds a screen-space polygon that encloses this gizmo's bounding box.
+        Calc'd during refresh(). Used in hit testing.
+        The points in this array start at the topmost vertex and proceed 
+        clockwise, and are relative to the top left of the screen. */
+    std::array<SDL_Point, 6> lastEnclosingPolygon;
 };
 
 } // End namespace SpriteEditor

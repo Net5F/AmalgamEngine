@@ -3,6 +3,7 @@
 #include "BoundingBox.h"
 #include <SDL_rect.h>
 #include <string>
+#include <vector>
 
 namespace AM
 {
@@ -30,13 +31,10 @@ public:
         modified. */
     int numericID{-1};
 
-    /** True if this sprite has a bounding box, else false.
-        Things like floors and carpets share bounds with their tile, so they
-        don't need a separate bounding box. */
-    bool hasBoundingBox{true};
-
-    /** Model-space bounding box. Defines the sprite's 3D volume. */
-    BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
+    /** Model-space bounding boxes. Defines the sprite's 3D volume. */
+    //std::vector<BoundingBox> modelBounds;
+    bool hasBoundingBox{false};
+    BoundingBox modelBounds{};
 };
 
 } // namespace Server

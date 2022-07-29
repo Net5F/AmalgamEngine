@@ -50,6 +50,9 @@ public:
     /** The maximum number of sprite layers a tile can have. */
     static constexpr unsigned int MAX_TILE_LAYERS{5};
 
+    /** The maximum number of bounding boxes a sprite can have. */
+    static constexpr unsigned int MAX_SPRITE_BOUNDING_BOXES{5};
+
     /** The string ID of our default sprite for character entities. */
     static constexpr char DEFAULT_CHARACTER_SPRITE[] = "roberto_0";
 

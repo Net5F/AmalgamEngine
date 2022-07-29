@@ -24,8 +24,10 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache,
 : AUI::Window({1605, 0, 315, 502}, "PropertiesPanel")
 , nameLabel({36, 24, 65, 28}, "NameLabel")
 , nameInput(assetCache, {36, 56, 255, 38}, "NameInput")
-, hasBoundingBoxLabel({36, 126, 210, 38}, "HasBBLabel")
-, hasBoundingBoxInput({269, 134, 22, 22}, "HasBBInput")
+, boxesLabel({36, 126, 110, 38}, "BoxesLabel")
+, remBoxButton({162, 126, 39, 39}, "RemBoxButton")
+, boxCountLabel({212, 127, 32, 38}, "BoxCountLabel")
+, addBoxButton({252, 126, 39, 39}, "AddBoxButton")
 , minXLabel({36, 176, 110, 38}, "MinXLabel")
 , minXInput(assetCache, {162, 176, 129, 38}, "MinXInput")
 , minYLabel({36, 226, 110, 38}, "MinYLabel")
@@ -40,6 +42,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache,
 , maxZInput(assetCache, {162, 426, 129, 38}, "MaxZInput")
 , spriteDataModel{inSpriteDataModel}
 , activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
+, activeModelBoundsIndex{SpriteDataModel::INVALID_MODEL_BOUNDS_INDEX}
 , committedMinX{0.0}
 , committedMinY{0.0}
 , committedMinZ{0.0}
@@ -52,8 +55,10 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache,
     children.push_back(backgroundImage);
     children.push_back(nameLabel);
     children.push_back(nameInput);
-    children.push_back(hasBoundingBoxLabel);
-    children.push_back(hasBoundingBoxInput);
+    children.push_back(boxesLabel);
+    children.push_back(boxCountLabel);
+    children.push_back(addBoxButton);
+    children.push_back(remBoxButton);
     children.push_back(minXLabel);
     children.push_back(minXInput);
     children.push_back(minYLabel);
@@ -84,21 +89,62 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache,
     nameInput.setMargins({8, 0, 8, 0});
     nameInput.setOnTextCommitted([this]() { saveName(); });
 
-    /* Has bounding box entry. */
-    hasBoundingBoxLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
-    hasBoundingBoxLabel.setColor({255, 255, 255, 255});
-    hasBoundingBoxLabel.setVerticalAlignment(
-        AUI::Text::VerticalAlignment::Center);
-    hasBoundingBoxLabel.setText("Has bounding box");
+    /* Bounding box count entry. */
+    // Boxes label.
+    boxesLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
+    boxesLabel.setColor({255, 255, 255, 255});
+    boxesLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
+    boxesLabel.setText("Boxes");
 
-    hasBoundingBoxInput.uncheckedImage.addResolution(
+    // Remove bounding box button
+    remBoxButton.normalImage.addResolution(
         {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "Checkbox/Unchecked.png"));
-    hasBoundingBoxInput.checkedImage.addResolution(
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "PropertiesPanel/RemoveNormal.png"));
+    remBoxButton.hoveredImage.addResolution(
         {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "Checkbox/Checked.png"));
-    hasBoundingBoxInput.setOnChecked([this]() { saveHasBoundingBox(); });
-    hasBoundingBoxInput.setOnUnchecked([this]() { saveHasBoundingBox(); });
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "PropertiesPanel/RemoveHovered.png"));
+    remBoxButton.pressedImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "PropertiesPanel/RemoveNormal.png"));
+    remBoxButton.disabledImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "PropertiesPanel/RemoveDisabled.png"));
+    remBoxButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
+    remBoxButton.text.setText("");
+    remBoxButton.setOnPressed([this]() { saveRemoveBoundingBox(); });
+
+    // Bounding box count label.
+    boxCountLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
+    boxCountLabel.setColor({255, 255, 255, 255});
+    boxCountLabel.setHorizontalAlignment(
+        AUI::Text::HorizontalAlignment::Center);
+    boxCountLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
+    boxCountLabel.setText("0");
+
+    // Add bounding box button
+    addBoxButton.normalImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "PropertiesPanel/AddNormal.png"));
+    addBoxButton.hoveredImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "PropertiesPanel/AddHovered.png"));
+    addBoxButton.pressedImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "PropertiesPanel/AddNormal.png"));
+    addBoxButton.disabledImage.addResolution(
+        {1920, 1080},
+        assetCache.loadTexture(Paths::TEXTURE_DIR
+                               + "PropertiesPanel/AddDisabled.png"));
+    addBoxButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
+    addBoxButton.text.setText("");
+    addBoxButton.setOnPressed([this]() { saveAddBoundingBox(); });
 
     /* Minimum X-axis bounds entry. */
     minXLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -165,49 +211,47 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache,
         .connect<&PropertiesPanel::onActiveSpriteChanged>(*this);
     spriteDataModel.spriteDisplayNameChanged
         .connect<&PropertiesPanel::onSpriteDisplayNameChanged>(*this);
-    spriteDataModel.spriteHasBoundingBoxChanged
-        .connect<&PropertiesPanel::onSpriteHasBoundingBoxChanged>(*this);
+    spriteDataModel.spriteModelBoundsAdded
+        .connect<&PropertiesPanel::onSpriteModelBoundsAdded>(*this);
+    spriteDataModel.spriteModelBoundsRemoved
+        .connect<&PropertiesPanel::onSpriteModelBoundsRemoved>(*this);
     spriteDataModel.spriteModelBoundsChanged
         .connect<&PropertiesPanel::onSpriteModelBoundsChanged>(*this);
+    spriteDataModel.activeSpriteModelBoundsChanged
+        .connect<&PropertiesPanel::onActiveSpriteModelBoundsChanged>(*this);
     spriteDataModel.spriteRemoved.connect<&PropertiesPanel::onSpriteRemoved>(
         *this);
 }
 
 void PropertiesPanel::onActiveSpriteChanged(unsigned int newActiveSpriteID,
+                                            unsigned int newActiveModelBoundsIndex,
                                             const Sprite& newActiveSprite)
 {
     activeSpriteID = newActiveSpriteID;
+    activeModelBoundsIndex = newActiveModelBoundsIndex;
 
     // Update all of our property fields to match the new active sprite's data.
     nameInput.setText(newActiveSprite.displayName);
 
-    if (newActiveSprite.hasBoundingBox) {
-        hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Checked);
+    // Set the box count label.
+    unsigned int boxCount{0};
+    if (newActiveModelBoundsIndex != SpriteDataModel::INVALID_MODEL_BOUNDS_INDEX) {
+        boxCount = newActiveModelBoundsIndex + 1;
     }
-    else {
-        hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Unchecked);
-    }
+    boxCountLabel.setText(std::to_string(boxCount));
 
-    minXInput.setText(toRoundedString(newActiveSprite.modelBounds.minX));
-    minYInput.setText(toRoundedString(newActiveSprite.modelBounds.minY));
-    minZInput.setText(toRoundedString(newActiveSprite.modelBounds.minZ));
-    maxXInput.setText(toRoundedString(newActiveSprite.modelBounds.maxX));
-    maxYInput.setText(toRoundedString(newActiveSprite.modelBounds.maxY));
-    maxZInput.setText(toRoundedString(newActiveSprite.modelBounds.maxZ));
-}
-
-void PropertiesPanel::onSpriteRemoved(unsigned int spriteID)
-{
-    if (spriteID == activeSpriteID) {
-        activeSpriteID = SpriteDataModel::INVALID_SPRITE_ID;
-        nameInput.setText("");
-        minXInput.setText("");
-        minYInput.setText("");
-        minZInput.setText("");
-        maxXInput.setText("");
-        maxYInput.setText("");
-        maxZInput.setText("");
+    // If the active sprite has a bounding box, fill our fields to match.
+    // Otherwise, default them to 0.
+    BoundingBox modelBounds{};
+    if (activeModelBoundsIndex != SpriteDataModel::INVALID_MODEL_BOUNDS_INDEX) {
+        modelBounds = newActiveSprite.modelBounds.at(activeModelBoundsIndex);
     }
+    minXInput.setText(toRoundedString(modelBounds.minX));
+    minYInput.setText(toRoundedString(modelBounds.minY));
+    minZInput.setText(toRoundedString(modelBounds.minZ));
+    maxXInput.setText(toRoundedString(modelBounds.maxX));
+    maxYInput.setText(toRoundedString(modelBounds.maxY));
+    maxZInput.setText(toRoundedString(modelBounds.maxZ));
 }
 
 void PropertiesPanel::onSpriteDisplayNameChanged(
@@ -218,30 +262,63 @@ void PropertiesPanel::onSpriteDisplayNameChanged(
     }
 }
 
-void PropertiesPanel::onSpriteHasBoundingBoxChanged(unsigned int spriteID,
-                                                    bool newHasBoundingBox)
+void PropertiesPanel::onSpriteModelBoundsAdded(
+    unsigned int spriteID, unsigned int addedBoundsIndex,
+    const BoundingBox& newModelBounds)
 {
-    if (spriteID == activeSpriteID) {
-        if (newHasBoundingBox) {
-            hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Checked);
-        }
-        else {
-            hasBoundingBoxInput.setCurrentState(
-                AUI::Checkbox::State::Unchecked);
-        }
+    unsigned int boxCount{addedBoundsIndex + 1};
+    boxCountLabel.setText(std::to_string(boxCount));
+}
+
+void PropertiesPanel::onSpriteModelBoundsRemoved(
+    unsigned int spriteID, unsigned int removedBoundsIndex)
+{
+    unsigned int boxCount{0};
+    if (removedBoundsIndex != SpriteDataModel::INVALID_MODEL_BOUNDS_INDEX) {
+        boxCount = removedBoundsIndex + 1;
     }
+
+    boxCountLabel.setText(std::to_string(boxCount));
 }
 
 void PropertiesPanel::onSpriteModelBoundsChanged(
-    unsigned int spriteID, const BoundingBox& newModelBounds)
+    unsigned int spriteID, unsigned int changedBoundsIndex, const BoundingBox& newModelBounds)
 {
-    if (spriteID == activeSpriteID) {
+    if ((spriteID == activeSpriteID) && (changedBoundsIndex == activeModelBoundsIndex)) {
         minXInput.setText(toRoundedString(newModelBounds.minX));
         minYInput.setText(toRoundedString(newModelBounds.minY));
         minZInput.setText(toRoundedString(newModelBounds.minZ));
         maxXInput.setText(toRoundedString(newModelBounds.maxX));
         maxYInput.setText(toRoundedString(newModelBounds.maxY));
         maxZInput.setText(toRoundedString(newModelBounds.maxZ));
+    }
+}
+
+void PropertiesPanel::onActiveSpriteModelBoundsChanged(
+    unsigned int newActiveModelBoundsIndex, const BoundingBox& newActiveModelBounds)
+{
+    activeModelBoundsIndex = newActiveModelBoundsIndex;
+
+    minXInput.setText(toRoundedString(newActiveModelBounds.minX));
+    minYInput.setText(toRoundedString(newActiveModelBounds.minY));
+    minZInput.setText(toRoundedString(newActiveModelBounds.minZ));
+    maxXInput.setText(toRoundedString(newActiveModelBounds.maxX));
+    maxYInput.setText(toRoundedString(newActiveModelBounds.maxY));
+    maxZInput.setText(toRoundedString(newActiveModelBounds.maxZ));
+}
+
+void PropertiesPanel::onSpriteRemoved(unsigned int spriteID)
+{
+    if (spriteID == activeSpriteID) {
+        activeSpriteID = SpriteDataModel::INVALID_SPRITE_ID;
+        activeModelBoundsIndex = SpriteDataModel::INVALID_MODEL_BOUNDS_INDEX;
+        nameInput.setText("");
+        minXInput.setText("");
+        minYInput.setText("");
+        minZInput.setText("");
+        maxXInput.setText("");
+        maxYInput.setText("");
+        maxZInput.setText("");
     }
 }
 
@@ -252,32 +329,63 @@ std::string PropertiesPanel::toRoundedString(float value)
     return stream.str();
 }
 
+bool PropertiesPanel::boxIsSelected()
+{
+    bool spriteExists{(activeSpriteID != SpriteDataModel::INVALID_SPRITE_ID)};
+    bool boxExists{(activeModelBoundsIndex
+                    != SpriteDataModel::INVALID_MODEL_BOUNDS_INDEX)};
+    return (spriteExists && boxExists);
+}
+
 void PropertiesPanel::saveName()
 {
+    if (activeSpriteID == SpriteDataModel::INVALID_SPRITE_ID) {
+        return;
+    }
+
     spriteDataModel.setSpriteDisplayName(activeSpriteID, nameInput.getText());
 }
 
-void PropertiesPanel::saveHasBoundingBox()
+void PropertiesPanel::saveRemoveBoundingBox()
 {
-    bool hasBoundingBox{(hasBoundingBoxInput.getCurrentState()
-                         == AUI::Checkbox::State::Checked)};
-    spriteDataModel.setSpriteHasBoundingBox(activeSpriteID, hasBoundingBox);
+    if (!boxIsSelected()) {
+        return;
+    }
+
+    // Remove a bounding box off the end of the vector.
+    spriteDataModel.removeSpriteModelBounds(activeSpriteID);
+}
+
+void PropertiesPanel::saveAddBoundingBox()
+{
+    if (activeSpriteID == SpriteDataModel::INVALID_SPRITE_ID) {
+        return;
+    }
+
+    // Add the new bounding box.
+    spriteDataModel.addSpriteModelBounds(activeSpriteID,
+                                         SpriteDataModel::DEFAULT_BOUNDING_BOX);
 }
 
 void PropertiesPanel::saveMinX()
 {
+    if (!boxIsSelected()) {
+        return;
+    }
+
     // Validate the user input as a valid float.
     try {
         // Convert the input string to a float.
         float newMinX{std::stof(minXInput.getText())};
 
         // Clamp the value to its bounds.
-        BoundingBox newModelBounds{
-            spriteDataModel.getSprite(activeSpriteID).modelBounds};
+        BoundingBox newModelBounds{spriteDataModel.getSprite(activeSpriteID)
+                                       .modelBounds.at(activeModelBoundsIndex)};
         newModelBounds.minX = std::clamp(newMinX, 0.f, newModelBounds.maxX);
 
         // Apply the new value.
-        spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
+        spriteDataModel.setSpriteModelBounds(
+            activeSpriteID, activeModelBoundsIndex, newModelBounds);
     } catch (std::exception& e) {
         ignore(e);
         // Input was not valid, reset the field to what it was.
@@ -287,18 +395,23 @@ void PropertiesPanel::saveMinX()
 
 void PropertiesPanel::saveMinY()
 {
+    if (!boxIsSelected()) {
+        return;
+    }
+
     // Validate the user input as a valid float.
     try {
         // Convert the input string to a float.
         float newMinY{std::stof(minYInput.getText())};
 
         // Clamp the value to its bounds.
-        BoundingBox newModelBounds{
-            spriteDataModel.getSprite(activeSpriteID).modelBounds};
+        BoundingBox newModelBounds{spriteDataModel.getSprite(activeSpriteID)
+                                       .modelBounds.at(activeModelBoundsIndex)};
         newModelBounds.minY = std::clamp(newMinY, 0.f, newModelBounds.maxY);
 
         // Apply the new value.
-        spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
+        spriteDataModel.setSpriteModelBounds(
+            activeSpriteID, activeModelBoundsIndex, newModelBounds);
     } catch (std::exception& e) {
         ignore(e);
         // Input was not valid, reset the field to what it was.
@@ -308,18 +421,23 @@ void PropertiesPanel::saveMinY()
 
 void PropertiesPanel::saveMinZ()
 {
+    if (!boxIsSelected()) {
+        return;
+    }
+
     // Validate the user input as a valid float.
     try {
         // Convert the input string to a float.
         float newMinZ{std::stof(minZInput.getText())};
 
         // Clamp the value to its bounds.
-        BoundingBox newModelBounds{
-            spriteDataModel.getSprite(activeSpriteID).modelBounds};
+        BoundingBox newModelBounds{spriteDataModel.getSprite(activeSpriteID)
+                                       .modelBounds.at(activeModelBoundsIndex)};
         newModelBounds.minY = std::clamp(newMinZ, 0.f, newModelBounds.maxZ);
 
         // Apply the new value.
-        spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
+        spriteDataModel.setSpriteModelBounds(
+            activeSpriteID, activeModelBoundsIndex, newModelBounds);
     } catch (std::exception& e) {
         ignore(e);
         // Input was not valid, reset the field to what it was.
@@ -329,6 +447,10 @@ void PropertiesPanel::saveMinZ()
 
 void PropertiesPanel::saveMaxX()
 {
+    if (!boxIsSelected()) {
+        return;
+    }
+
     // Validate the user input as a valid float.
     try {
         // Convert the input string to a float.
@@ -337,13 +459,15 @@ void PropertiesPanel::saveMaxX()
         // Clamp the value to its bounds.
         const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
 
-        BoundingBox newModelBounds{activeSprite.modelBounds};
+        BoundingBox newModelBounds{
+            activeSprite.modelBounds.at(activeModelBoundsIndex)};
         newModelBounds.maxX
             = std::clamp(newMaxX, newModelBounds.minX,
                          static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
         // Apply the new value.
-        spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
+        spriteDataModel.setSpriteModelBounds(
+            activeSpriteID, activeModelBoundsIndex, newModelBounds);
     } catch (std::exception& e) {
         ignore(e);
         // Input was not valid, reset the field to what it was.
@@ -353,6 +477,10 @@ void PropertiesPanel::saveMaxX()
 
 void PropertiesPanel::saveMaxY()
 {
+    if (!boxIsSelected()) {
+        return;
+    }
+
     // Validate the user input as a valid float.
     try {
         // Convert the input string to a float.
@@ -361,13 +489,15 @@ void PropertiesPanel::saveMaxY()
         // Clamp the value to its bounds.
         const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
 
-        BoundingBox newModelBounds{activeSprite.modelBounds};
+        BoundingBox newModelBounds{
+            activeSprite.modelBounds.at(activeModelBoundsIndex)};
         newModelBounds.maxY
             = std::clamp(newMaxY, newModelBounds.minY,
                          static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
         // Apply the new value.
-        spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
+        spriteDataModel.setSpriteModelBounds(
+            activeSpriteID, activeModelBoundsIndex, newModelBounds);
     } catch (std::exception& e) {
         ignore(e);
         // Input was not valid, reset the field to what it was.
@@ -377,6 +507,10 @@ void PropertiesPanel::saveMaxY()
 
 void PropertiesPanel::saveMaxZ()
 {
+    if (!boxIsSelected()) {
+        return;
+    }
+
     // Validate the user input as a valid float.
     try {
         // Convert the input string to a float.
@@ -386,16 +520,18 @@ void PropertiesPanel::saveMaxZ()
         // Note: We don't clamp to an upper bound cause it's hard to calc
         //       and not very useful. Can add if we ever care to.
         const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
-        float minZ{activeSprite.modelBounds.minZ};
+        float minZ{activeSprite.modelBounds.at(activeModelBoundsIndex).minZ};
         if (newMaxZ < minZ) {
             newMaxZ = minZ;
         }
 
-        BoundingBox newModelBounds{activeSprite.modelBounds};
+        BoundingBox newModelBounds{
+            activeSprite.modelBounds.at(activeModelBoundsIndex)};
         newModelBounds.maxZ = newMaxZ;
 
         // Apply the new value.
-        spriteDataModel.setSpriteModelBounds(activeSpriteID, newModelBounds);
+        spriteDataModel.setSpriteModelBounds(
+            activeSpriteID, activeModelBoundsIndex, newModelBounds);
     } catch (std::exception& e) {
         ignore(e);
         // Input was not valid, reset the field to what it was.

@@ -1,8 +1,10 @@
 #pragma once
 
 #include "SpriteSheet.h"
+#include "BoundingBox.h"
 #include "IDPool.h"
 #include "entt/signal/sigh.hpp"
+#include <climits>
 #include <fstream>
 #include <map>
 #include <string>
@@ -15,12 +17,21 @@ namespace SpriteEditor
 {
 /**
  * A data model that holds our SpriteData.json project file in memory.
+ *
+ * TODO: Find a way to combine the ClientLib/ServerLib/SpriteEditor SpriteData 
+ *       classes to avoid having so much duplicate parsing logic.
  */
 class SpriteDataModel
 {
 public:
     /** Can be used as an invalid ID for initialization purposes and such. */
-    static constexpr unsigned int INVALID_SPRITE_ID = 0;
+    static constexpr unsigned int INVALID_SPRITE_ID{0};
+    /** Used to indicate that a sprite has no bounding boxes. */
+    static constexpr unsigned int INVALID_MODEL_BOUNDS_INDEX{UINT_MAX};
+
+    /** Our default bounding box, for when new boxes are added.
+        Non-0 to make it easier to click. */
+    static constexpr BoundingBox DEFAULT_BOUNDING_BOX{0, 20, 0, 20, 0, 20};
 
     SpriteDataModel(SDL_Renderer* inSdlRenderer);
 
@@ -97,7 +108,6 @@ public:
 
     const Sprite& getSprite(unsigned int spriteID);
 
-    // TODO: Can this be made private?
     const std::string& getWorkingTexturesDir();
 
     //-------------------------------------------------------------------------
@@ -108,10 +118,20 @@ public:
     void setSpriteDisplayName(unsigned int spriteID,
                               const std::string& newDisplayName);
 
-    void setSpriteHasBoundingBox(unsigned int spriteID, bool newHasBoundingBox);
+    /** Adds the given BoundingBox to the end of the modelBounds vector. */
+    void addSpriteModelBounds(unsigned int spriteID,
+                              const BoundingBox& newModelBounds);
+
+    /** Removes the last BoundingBox from the modelBounds vector. */
+    void removeSpriteModelBounds(unsigned int spriteID);
 
     void setSpriteModelBounds(unsigned int spriteID,
+                              unsigned int modelBoundsIndex,
                               const BoundingBox& newModelBounds);
+
+    /** Sets the active sprite's current active model bounds.
+        Changes when the user selects a different gizmo. */
+    void setActiveSpriteModelBounds(unsigned int newActiveModelBoundsIndex);
 
     //-------------------------------------------------------------------------
     // Signal Sinks
@@ -130,6 +150,7 @@ public:
 
     /** The active sprite has changed to a new sprite. */
     entt::sink<void(unsigned int newActiveSpriteID,
+                    unsigned int newActiveModelBoundsIndex,
                     const Sprite& newActiveSprite)>
         activeSpriteChanged;
 
@@ -137,18 +158,28 @@ public:
     entt::sink<void(unsigned int spriteID, const std::string& newDisplayName)>
         spriteDisplayNameChanged;
 
-    /** A sprite's "has bounding box" field has changed. */
-    entt::sink<void(unsigned int spriteID, bool hasBoundingBox)>
-        spriteHasBoundingBoxChanged;
+    /** A bounding box has been added to a sprite. */
+    entt::sink<void(unsigned int spriteID, unsigned int addedBoundsIndex,
+                    const BoundingBox& newModelBounds)>
+        spriteModelBoundsAdded;
+
+    /** A bounding box has been removed from a sprite. */
+    entt::sink<void(unsigned int spriteID, unsigned int removedBoundsIndex)>
+        spriteModelBoundsRemoved;
 
     /** A sprite's bounding box has changed. */
-    entt::sink<void(unsigned int spriteID, const BoundingBox& newModelBounds)>
+    entt::sink<void(unsigned int spriteID, unsigned int changedBoundsIndex,
+                    const BoundingBox& newModelBounds)>
         spriteModelBoundsChanged;
+
+    entt::sink<void(unsigned int newActiveModelBoundsIndex,
+                    const BoundingBox& newActiveModelBounds)>
+        activeSpriteModelBoundsChanged;
 
 private:
     // Note: These were arbitrarily chosen and can be increased if necessary.
-    static constexpr unsigned int MAX_SPRITE_SHEETS = 1000;
-    static constexpr unsigned int MAX_SPRITES = MAX_SPRITE_SHEETS * 100;
+    static constexpr unsigned int MAX_SPRITE_SHEETS{1000};
+    static constexpr unsigned int MAX_SPRITES{MAX_SPRITE_SHEETS * 100};
 
     /**
      * Checks that the given relative path corresponds to a valid sprite
@@ -200,6 +231,10 @@ private:
     /** The ID of the active sprite. */
     unsigned int activeSpriteID;
 
+    /** The index of the active BoundingBox within the sprite's modelBounds 
+        vector. */
+    unsigned int activeModelBoundsIndex;
+
     /** Used for generating temporary sprite sheet IDs that are only used
         internally by this editor. */
     IDPool sheetIDPool;
@@ -222,17 +257,27 @@ private:
     entt::sigh<void(unsigned int spriteID)> spriteRemovedSig;
 
     entt::sigh<void(unsigned int newActiveSpriteID,
+                    unsigned int newActiveModelBoundsIndex,
                     const Sprite& newActiveSprite)>
         activeSpriteChangedSig;
 
     entt::sigh<void(unsigned int spriteID, const std::string& newDisplayName)>
         spriteDisplayNameChangedSig;
 
-    entt::sigh<void(unsigned int spriteID, bool hasBoundingBox)>
-        spriteHasBoundingBoxChangedSig;
+    entt::sigh<void(unsigned int spriteID, unsigned int addedBoundsIndex,
+                    const BoundingBox& newModelBounds)>
+        spriteModelBoundsAddedSig;
 
-    entt::sigh<void(unsigned int spriteID, const BoundingBox& newModelBounds)>
+    entt::sigh<void(unsigned int spriteID, unsigned int removedBoundsIndex)>
+        spriteModelBoundsRemovedSig;
+
+    entt::sigh<void(unsigned int spriteID, unsigned int changedBoundsIndex,
+                    const BoundingBox& newModelBounds)>
         spriteModelBoundsChangedSig;
+
+    entt::sigh<void(unsigned int newActiveModelBoundsIndex,
+                    const BoundingBox& newActiveModelBounds)>
+        activeSpriteModelBoundsChangedSig;
 };
 
 } // namespace SpriteEditor

@@ -23,12 +23,15 @@ SpriteDataModel::SpriteDataModel(SDL_Renderer* inSdlRenderer)
 , spriteRemoved{spriteRemovedSig}
 , activeSpriteChanged{activeSpriteChangedSig}
 , spriteDisplayNameChanged{spriteDisplayNameChangedSig}
-, spriteHasBoundingBoxChanged{spriteHasBoundingBoxChangedSig}
+, spriteModelBoundsAdded{spriteModelBoundsAddedSig}
+, spriteModelBoundsRemoved{spriteModelBoundsRemovedSig}
 , spriteModelBoundsChanged{spriteModelBoundsChangedSig}
+, activeSpriteModelBoundsChanged{activeSpriteModelBoundsChangedSig}
 , sdlRenderer{inSdlRenderer}
 , workingFilePath{""}
 , workingTexturesDir{""}
 , activeSpriteID{INVALID_SPRITE_ID}
+, activeModelBoundsIndex{INVALID_MODEL_BOUNDS_INDEX}
 , sheetIDPool{MAX_SPRITE_SHEETS}
 , spriteIDPool{MAX_SPRITES}
 {
@@ -77,15 +80,11 @@ std::string SpriteDataModel::load(const std::string& fullPath)
         return "File failed to open.";
     }
 
-    // Parse the file into a json structure.
-    nlohmann::json json = nlohmann::json::parse(workingFile, nullptr, false);
-    if (json.is_discarded()) {
-        workingFile.close();
-        return "File is not valid JSON.";
-    }
-
-    // Parse the json structure to fill our data model.
+    // Parse the json file to fill our data model.
     try {
+        // Parse the file into a json structure.
+        nlohmann::json json = nlohmann::json::parse(workingFile, nullptr);
+
         // For every sprite sheet in the json.
         for (auto& sheetJson : json["spriteSheets"].items()) {
             unsigned int sheetID{sheetIDPool.reserveID()};
@@ -95,7 +94,7 @@ std::string SpriteDataModel::load(const std::string& fullPath)
             // Add this sheet's relative path.
             spriteSheet.relPath
                 = sheetJson.value()["relPath"].get<std::string>();
-            std::string resultString = validateRelPath(spriteSheet.relPath);
+            std::string resultString{validateRelPath(spriteSheet.relPath)};
             if (resultString != "") {
                 workingFile.close();
                 spriteSheetMap.clear();
@@ -111,8 +110,8 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 Sprite& sprite{spriteMap[spriteID]};
 
                 // If the display name isn't unique, fail.
-                std::string displayName
-                    = spriteJson.value()["displayName"].get<std::string>();
+                std::string displayName{
+                    spriteJson.value()["displayName"].get<std::string>()};
                 if (!spriteNameIsUnique(spriteID, displayName)) {
                     std::string returnString{
                         "Sprite display name isn't unique: "};
@@ -140,22 +139,16 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 // Add the Y offset.
                 sprite.yOffset = spriteJson.value()["yOffset"];
 
-                // Add hasBoundingBox.
-                sprite.hasBoundingBox = spriteJson.value()["hasBoundingBox"];
-
-                // Add the model-space bounds.
-                sprite.modelBounds.minX
-                    = spriteJson.value()["modelBounds"]["minX"];
-                sprite.modelBounds.maxX
-                    = spriteJson.value()["modelBounds"]["maxX"];
-                sprite.modelBounds.minY
-                    = spriteJson.value()["modelBounds"]["minY"];
-                sprite.modelBounds.maxY
-                    = spriteJson.value()["modelBounds"]["maxY"];
-                sprite.modelBounds.minZ
-                    = spriteJson.value()["modelBounds"]["minZ"];
-                sprite.modelBounds.maxZ
-                    = spriteJson.value()["modelBounds"]["maxZ"];
+                for (auto& modelJson : spriteJson.value()["modelBounds"].items()) {
+                    BoundingBox boundingBox{};
+                    boundingBox.minX = modelJson.value()["minX"];
+                    boundingBox.maxX = modelJson.value()["maxX"];
+                    boundingBox.minY = modelJson.value()["minY"];
+                    boundingBox.maxY = modelJson.value()["maxY"];
+                    boundingBox.minZ = modelJson.value()["minZ"];
+                    boundingBox.maxZ = modelJson.value()["maxZ"];
+                    sprite.modelBounds.emplace_back(boundingBox);
+                }
 
                 // Signal the new sprite to the UI.
                 spriteAddedSig.publish(spriteID, sprite);
@@ -219,23 +212,19 @@ void SpriteDataModel::save()
             // Add the Y offset.
             json["spriteSheets"][i]["sprites"][j]["yOffset"] = sprite.yOffset;
 
-            // Add hasBoundingBox.
-            json["spriteSheets"][i]["sprites"][j]["hasBoundingBox"]
-                = sprite.hasBoundingBox;
-
             // Add the model-space bounds.
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minX"]
-                = sprite.modelBounds.minX;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxX"]
-                = sprite.modelBounds.maxX;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minY"]
-                = sprite.modelBounds.minY;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxY"]
-                = sprite.modelBounds.maxY;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minZ"]
-                = sprite.modelBounds.minZ;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxZ"]
-                = sprite.modelBounds.maxZ;
+            for (unsigned int k = 0; k < sprite.modelBounds.size(); ++k) {
+                BoundingBox& boundingBox{sprite.modelBounds[k]};
+                nlohmann::json& modelBoundsJson{
+                    json["spriteSheets"][i]["sprites"][j]["modelBounds"]};
+
+                modelBoundsJson[i]["minX"] = boundingBox.minX;
+                modelBoundsJson[i]["minY"] = boundingBox.minY;
+                modelBoundsJson[i]["minZ"] = boundingBox.minZ;
+                modelBoundsJson[i]["maxX"] = boundingBox.maxX;
+                modelBoundsJson[i]["maxY"] = boundingBox.maxY;
+                modelBoundsJson[i]["maxZ"] = boundingBox.maxZ;
+            }
         }
 
         i++;
@@ -323,14 +312,13 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
             // Find the sprite's extent within the sheet texture.
             SDL_Rect textureExtent{x, y, spriteWidthI, spriteHeightI};
 
-            // Default to a non-0 bounding box so it's easier to click.
-            static BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
-
             // Add the sprite to the map and sheet.
             unsigned int spriteID{spriteIDPool.reserveID()};
-            spriteMap.emplace(spriteID, Sprite{spriteSheet.relPath, displayName,
-                                               textureExtent, yOffsetI, true,
-                                               defaultBox});
+            spriteMap.emplace(spriteID, Sprite{spriteSheet.relPath,
+                                               displayName,
+                                               textureExtent,
+                                               yOffsetI,
+                                               {}});
             spriteSheet.spriteIDs.push_back(spriteID);
 
             // Signal the new sprite to the UI.
@@ -404,9 +392,20 @@ void SpriteDataModel::setActiveSprite(unsigned int newActiveSpriteID)
         LOG_FATAL("Tried to set active sprite to invalid ID.");
     }
 
+    // If the new active sprite has a bounding box, set the active index to 0.
+    Sprite& activeSprite{spritePair->second};
+    if (activeSprite.modelBounds.size() > 0) {
+        activeModelBoundsIndex = 0;
+    }
+    else {
+        // Else, set the active index to INVALID to show it has no boxes.
+        activeModelBoundsIndex = INVALID_MODEL_BOUNDS_INDEX;
+    }
+
     // Set the active sprite and signal it to the UI.
     activeSpriteID = newActiveSpriteID;
-    activeSpriteChangedSig.publish(activeSpriteID, spritePair->second);
+    activeSpriteChangedSig.publish(activeSpriteID, activeModelBoundsIndex,
+                                   spritePair->second);
 }
 
 void SpriteDataModel::setSpriteDisplayName(unsigned int spriteID,
@@ -414,7 +413,7 @@ void SpriteDataModel::setSpriteDisplayName(unsigned int spriteID,
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
-        LOG_FATAL("Tried to set active sprite to invalid ID.");
+        LOG_FATAL("Tried to set name using invalid sprite ID.");
     }
 
     // Set the new display name and make it unique.
@@ -434,34 +433,106 @@ void SpriteDataModel::setSpriteDisplayName(unsigned int spriteID,
     spriteDisplayNameChangedSig.publish(spriteID, sprite.displayName);
 }
 
-void SpriteDataModel::setSpriteHasBoundingBox(unsigned int spriteID,
-                                              bool newHasBoundingBox)
+void SpriteDataModel::addSpriteModelBounds(unsigned int spriteID,
+                          const BoundingBox& newModelBounds)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
-        LOG_FATAL("Tried to set sprite hasBoundingBox using invalid ID.");
+        LOG_FATAL("Tried to add bounds using invalid sprite ID.");
     }
 
-    // Set the new hasBoundingBox and signal the change.
+    // If the sprite is at the maximum number of bounding boxes, return early.
     Sprite& sprite{spritePair->second};
-    sprite.hasBoundingBox = newHasBoundingBox;
+    if (sprite.modelBounds.size() == SharedConfig::MAX_SPRITE_BOUNDING_BOXES) {
+        return;
+    }
 
-    spriteHasBoundingBoxChangedSig.publish(spriteID, newHasBoundingBox);
+    // Add the given bounds to the end of modelBounds and signal the change.
+    sprite.modelBounds.push_back(newModelBounds);
+    unsigned int modelBoundsIndex{
+        static_cast<unsigned int>(sprite.modelBounds.size() - 1)};
+    spriteModelBoundsAddedSig.publish(spriteID, modelBoundsIndex,
+                                      newModelBounds);
+
+    // Set the new bounds as active and signal the change.
+    activeModelBoundsIndex
+        = static_cast<unsigned int>(sprite.modelBounds.size() - 1);
+    activeSpriteModelBoundsChangedSig.publish(
+        activeModelBoundsIndex, sprite.modelBounds[activeModelBoundsIndex]);
+}
+
+void SpriteDataModel::removeSpriteModelBounds(unsigned int spriteID)
+{
+    auto spritePair{spriteMap.find(spriteID)};
+    if (spritePair == spriteMap.end()) {
+        LOG_FATAL("Tried to remove bounds using invalid sprite ID.");
+    }
+    Sprite& sprite{spritePair->second};
+    if (sprite.modelBounds.size() == 0) {
+        LOG_FATAL("Tried to remove bounding box when vector was empty.");
+    }
+
+    // Check if the bounds that we're going to remove is active.
+    unsigned int indexToRemove{
+        static_cast<unsigned int>(sprite.modelBounds.size()) - 1};
+    bool wasActive{activeModelBoundsIndex == indexToRemove};
+
+    // Remove the last BoundingBox from modelBounds and signal the change.
+    sprite.modelBounds.pop_back();
+    spriteModelBoundsRemovedSig.publish(spriteID, indexToRemove);
+
+    // If the bounds that we removed was active and other bounds exist, 
+    // set the last one as active and signal the change.
+    if (wasActive && sprite.modelBounds.size() > 0) {
+        activeModelBoundsIndex
+            = static_cast<unsigned int>(sprite.modelBounds.size() - 1);
+        activeSpriteModelBoundsChangedSig.publish(
+            activeModelBoundsIndex, sprite.modelBounds[activeModelBoundsIndex]);
+    }
 }
 
 void SpriteDataModel::setSpriteModelBounds(unsigned int spriteID,
+                                           unsigned int modelBoundsIndex,
                                            const BoundingBox& newModelBounds)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
-        LOG_FATAL("Tried to set sprite boundingBox using invalid ID.");
+        LOG_FATAL("Tried to set bounds using invalid sprite ID.");
     }
 
     // Set the new model bounds and signal the change.
     Sprite& sprite{spritePair->second};
-    sprite.modelBounds = newModelBounds;
+    if (modelBoundsIndex >= sprite.modelBounds.size()) {
+        LOG_FATAL("Tried to set sprite bounds using invalid index.");
+    }
+    sprite.modelBounds[modelBoundsIndex] = newModelBounds;
 
-    spriteModelBoundsChangedSig.publish(spriteID, newModelBounds);
+    spriteModelBoundsChangedSig.publish(spriteID, modelBoundsIndex,
+                                        newModelBounds);
+}
+
+void SpriteDataModel::setActiveSpriteModelBounds(unsigned int newActiveModelBoundsIndex)
+{
+    // If the given bounds aren't already active.
+    if (newActiveModelBoundsIndex != activeModelBoundsIndex) {
+        // Find the active sprite.
+        auto spritePair{spriteMap.find(activeSpriteID)};
+        if (spritePair == spriteMap.end()) {
+            LOG_FATAL("Couldn't find active sprite.");
+        }
+        Sprite& sprite{spritePair->second};
+
+        if (newActiveModelBoundsIndex >= sprite.modelBounds.size()) {
+            LOG_FATAL("Tried to set active sprite to out of bounds index.");
+        }
+
+        // Set the new active index.
+        activeModelBoundsIndex = newActiveModelBoundsIndex;
+
+        // Signal the change.
+        activeSpriteModelBoundsChangedSig.publish(
+            activeModelBoundsIndex, sprite.modelBounds[activeModelBoundsIndex]);
+    }
 }
 
 std::string SpriteDataModel::validateRelPath(const std::string& relPath)
@@ -491,13 +562,13 @@ bool SpriteDataModel::setWorkingTexturesDir()
 
     // Check if the textures dir exists.
     if (!std::filesystem::exists(texturesDirPath)) {
-        // Resources dir doesn't exist, create it.
-        std::error_code errorCode;
-        if (!std::filesystem::create_directories(texturesDirPath, errorCode)) {
-            // Failed to create dir, return false.
-            LOG_INFO("Failed to create Textures dir. Path: %s, Error: %s",
+        // Directory doesn't exist, create it.
+        try {
+            std::filesystem::create_directories(texturesDirPath);
+        } catch (std::filesystem::filesystem_error& e) {
+            LOG_INFO("Failed to create Textures directory. Path: %s, Error: %s",
                      texturesDirPath.string().c_str(),
-                     errorCode.message().c_str());
+                     e.what());
             return false;
         }
     }
