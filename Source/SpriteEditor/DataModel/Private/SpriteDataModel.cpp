@@ -218,12 +218,12 @@ void SpriteDataModel::save()
                 nlohmann::json& modelBoundsJson{
                     json["spriteSheets"][i]["sprites"][j]["modelBounds"]};
 
-                modelBoundsJson[i]["minX"] = boundingBox.minX;
-                modelBoundsJson[i]["minY"] = boundingBox.minY;
-                modelBoundsJson[i]["minZ"] = boundingBox.minZ;
-                modelBoundsJson[i]["maxX"] = boundingBox.maxX;
-                modelBoundsJson[i]["maxY"] = boundingBox.maxY;
-                modelBoundsJson[i]["maxZ"] = boundingBox.maxZ;
+                modelBoundsJson[k]["minX"] = boundingBox.minX;
+                modelBoundsJson[k]["minY"] = boundingBox.minY;
+                modelBoundsJson[k]["minZ"] = boundingBox.minZ;
+                modelBoundsJson[k]["maxX"] = boundingBox.maxX;
+                modelBoundsJson[k]["maxY"] = boundingBox.maxY;
+                modelBoundsJson[k]["maxZ"] = boundingBox.maxZ;
             }
         }
 

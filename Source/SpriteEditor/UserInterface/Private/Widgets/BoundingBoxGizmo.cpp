@@ -80,7 +80,6 @@ void BoundingBoxGizmo::render()
 AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType,
                                                const SDL_Point& cursorPosition)
 {
-    LOG_INFO("Mouse down in gizmo: %u. %p", modelBoundsIndex, this);
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
         return AUI::EventResult{.wasHandled{false}};
@@ -95,13 +94,11 @@ AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType,
         || (hitTarget == HitTarget::XControl)
         || (hitTarget == HitTarget::YControl)
         || (hitTarget == HitTarget::ZControl)) {
-        LOG_INFO("Hit control");
         currentHeldControl = hitTarget;
         return AUI::EventResult{.wasHandled{true}, .setMouseCapture{this}};
     }
     else if (hitTarget == HitTarget::Box) {
         // The box was hit, handle the event to block anything behind us.
-        LOG_INFO("Hit box");
         spriteDataModel.setActiveSpriteModelBounds(modelBoundsIndex);
         return AUI::EventResult{.wasHandled{true}};
     }
