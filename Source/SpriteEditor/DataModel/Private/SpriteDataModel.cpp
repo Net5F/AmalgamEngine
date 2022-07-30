@@ -77,15 +77,11 @@ std::string SpriteDataModel::load(const std::string& fullPath)
         return "File failed to open.";
     }
 
-    // Parse the file into a json structure.
-    nlohmann::json json = nlohmann::json::parse(workingFile, nullptr, false);
-    if (json.is_discarded()) {
-        workingFile.close();
-        return "File is not valid JSON.";
-    }
-
-    // Parse the json structure to fill our data model.
+    // Parse the json file to fill our data model.
     try {
+        // Parse the file into a json structure.
+        nlohmann::json json = nlohmann::json::parse(workingFile, nullptr);
+
         // For every sprite sheet in the json.
         for (auto& sheetJson : json["spriteSheets"].items()) {
             unsigned int sheetID{sheetIDPool.reserveID()};
@@ -95,7 +91,7 @@ std::string SpriteDataModel::load(const std::string& fullPath)
             // Add this sheet's relative path.
             spriteSheet.relPath
                 = sheetJson.value()["relPath"].get<std::string>();
-            std::string resultString = validateRelPath(spriteSheet.relPath);
+            std::string resultString{validateRelPath(spriteSheet.relPath)};
             if (resultString != "") {
                 workingFile.close();
                 spriteSheetMap.clear();
@@ -111,8 +107,8 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 Sprite& sprite{spriteMap[spriteID]};
 
                 // If the display name isn't unique, fail.
-                std::string displayName
-                    = spriteJson.value()["displayName"].get<std::string>();
+                std::string displayName{
+                    spriteJson.value()["displayName"].get<std::string>()};
                 if (!spriteNameIsUnique(spriteID, displayName)) {
                     std::string returnString{
                         "Sprite display name isn't unique: "};
@@ -414,7 +410,7 @@ void SpriteDataModel::setSpriteDisplayName(unsigned int spriteID,
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
-        LOG_FATAL("Tried to set active sprite to invalid ID.");
+        LOG_FATAL("Tried to set name using invalid sprite ID.");
     }
 
     // Set the new display name and make it unique.
@@ -439,7 +435,7 @@ void SpriteDataModel::setSpriteHasBoundingBox(unsigned int spriteID,
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
-        LOG_FATAL("Tried to set sprite hasBoundingBox using invalid ID.");
+        LOG_FATAL("Tried to set hasBoundingBox using invalid sprite ID.");
     }
 
     // Set the new hasBoundingBox and signal the change.
@@ -454,7 +450,7 @@ void SpriteDataModel::setSpriteModelBounds(unsigned int spriteID,
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
-        LOG_FATAL("Tried to set sprite boundingBox using invalid ID.");
+        LOG_FATAL("Tried to set boundingBox using invalid sprite ID.");
     }
 
     // Set the new model bounds and signal the change.
@@ -491,13 +487,12 @@ bool SpriteDataModel::setWorkingTexturesDir()
 
     // Check if the textures dir exists.
     if (!std::filesystem::exists(texturesDirPath)) {
-        // Resources dir doesn't exist, create it.
-        std::error_code errorCode;
-        if (!std::filesystem::create_directories(texturesDirPath, errorCode)) {
-            // Failed to create dir, return false.
-            LOG_INFO("Failed to create Textures dir. Path: %s, Error: %s",
-                     texturesDirPath.string().c_str(),
-                     errorCode.message().c_str());
+        // Directory doesn't exist, create it.
+        try {
+            std::filesystem::create_directories(texturesDirPath);
+        } catch (std::filesystem::filesystem_error& e) {
+            LOG_INFO("Failed to create Textures directory. Path: %s, Error: %s",
+                     texturesDirPath.string().c_str(), e.what());
             return false;
         }
     }

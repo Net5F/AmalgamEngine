@@ -149,7 +149,7 @@ void WorldSpritePreparer::sortSpritesByDepth()
     calcDepthDependencies();
 
     // Calculate depth values.
-    int depthValue = 0;
+    int depthValue{0};
     for (SpriteRenderInfo& spriteInfo : spritesToSort) {
         visitSprite(spriteInfo, depthValue);
     }
@@ -168,8 +168,8 @@ void WorldSpritePreparer::calcDepthDependencies()
     for (unsigned int i = 0; i < spritesToSort.size(); ++i) {
         for (unsigned int j = 0; j < spritesToSort.size(); ++j) {
             if (i != j) {
-                SpriteRenderInfo& spriteA = spritesToSort[i];
-                SpriteRenderInfo& spriteB = spritesToSort[j];
+                SpriteRenderInfo& spriteA{spritesToSort[i]};
+                SpriteRenderInfo& spriteB{spritesToSort[j]};
 
                 if ((spriteB.worldBounds.minX < spriteA.worldBounds.maxX)
                     && (spriteB.worldBounds.minY < spriteA.worldBounds.maxY)

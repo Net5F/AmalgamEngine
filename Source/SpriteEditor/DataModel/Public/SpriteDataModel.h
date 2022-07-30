@@ -15,12 +15,15 @@ namespace SpriteEditor
 {
 /**
  * A data model that holds our SpriteData.json project file in memory.
+ * 
+ * TODO: Find a way to combine the ClientLib/ServerLib/SpriteEditor logic for 
+ *       parsing SpriteData.json.
  */
 class SpriteDataModel
 {
 public:
     /** Can be used as an invalid ID for initialization purposes and such. */
-    static constexpr unsigned int INVALID_SPRITE_ID = 0;
+    static constexpr unsigned int INVALID_SPRITE_ID{0};
 
     SpriteDataModel(SDL_Renderer* inSdlRenderer);
 
@@ -147,8 +150,8 @@ public:
 
 private:
     // Note: These were arbitrarily chosen and can be increased if necessary.
-    static constexpr unsigned int MAX_SPRITE_SHEETS = 1000;
-    static constexpr unsigned int MAX_SPRITES = MAX_SPRITE_SHEETS * 100;
+    static constexpr unsigned int MAX_SPRITE_SHEETS{1000};
+    static constexpr unsigned int MAX_SPRITES{MAX_SPRITE_SHEETS * 100};
 
     /**
      * Checks that the given relative path corresponds to a valid sprite

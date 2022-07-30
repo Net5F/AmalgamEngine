@@ -47,6 +47,15 @@ protected:
     bool refreshScaling() override;
 
 private:
+    /** The base transparency value for a selected gizmo. */
+    static constexpr float BASE_ALPHA{255};
+
+    /** How opaque the sides of the bounding box will be. */
+    static constexpr float PLANE_ALPHA_FACTOR{0.5f};
+
+    /** How opaque a disabled gizmo will be. */
+    static constexpr float DISABLED_ALPHA_FACTOR{0.25f};
+
     /**
      * The list of our clickable controls.
      */

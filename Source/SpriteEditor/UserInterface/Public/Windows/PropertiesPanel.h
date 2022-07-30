@@ -31,8 +31,8 @@ public:
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------
-    /** All fields below directly match a data field in Sprite.
-        See its displayName, hasBoundingBox, and modelBounds fields for more
+    /** All fields below directly match a data field in the Sprite class.
+        See displayName, hasBoundingBox, and modelBounds fields for more 
         information. */
     AUI::Text nameLabel;
     MainTextInput nameInput;

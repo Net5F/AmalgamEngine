@@ -19,11 +19,11 @@ namespace Client
  * Note: This class expects a SpriteData.json file to be present in the same
  *       directory as the application executable.
  *
- * The data in this class is immutable. To modify it, edit SpriteData.json in
- * the SpriteEditor.
+ * The data in this class is immutable. To modify it, edit SpriteData.json 
+ * using the SpriteEditor.
  * 
- * TODO: We should replace the hand-parsing approach used in this file with 
- *       nlohmann json's json-to-struct parsing macro.
+ * TODO: Find a way to combine the ClientLib/ServerLib/SpriteEditor logic for 
+ *       parsing SpriteData.json.
  */
 class SpriteData
 {

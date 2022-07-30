@@ -89,8 +89,8 @@ AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType,
         currentHeldControl = Control::Z;
     }
 
-    // If we're holding a control, set mouse capture so we get the associated
-    // MouseUp.
+    // If the cursor is holding a control, set mouse capture so we get the 
+    // associated MouseUp.
     if (currentHeldControl != Control::None) {
         return AUI::EventResult{.wasHandled{true}, .setMouseCapture{this}};
     }
@@ -241,6 +241,8 @@ void BoundingBoxGizmo::refresh(const Sprite& activeSprite)
 
 void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 {
+    // TODO: If shift is held, only move along the Z axis
+     
     // Note: The expected behavior is to move along the x/y plane and
     //       leave minZ where it was.
     const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
@@ -463,10 +465,10 @@ void BoundingBoxGizmo::movePlanes(std::vector<SDL_Point>& boundsScreenPoints)
 
 void BoundingBoxGizmo::renderControls()
 {
-    // If the bounding box is disabled, show it at 1/4 alpha.
-    float alpha{255};
+    // If this bounding box is disabled, make it semi-transparent.
+    float alpha{BASE_ALPHA};
     if (!hasBoundingBox) {
-        alpha /= 4.f;
+        alpha *= DISABLED_ALPHA_FACTOR;
     }
 
     // Position control
@@ -512,10 +514,10 @@ void BoundingBoxGizmo::renderControls()
 
 void BoundingBoxGizmo::renderLines()
 {
-    // If the bounding box is disabled, show it at 1/4 alpha.
-    float alpha{255};
+    // If this bounding box is disabled, make it semi-transparent.
+    float alpha{BASE_ALPHA};
     if (!hasBoundingBox) {
-        alpha /= 4.f;
+        alpha *= DISABLED_ALPHA_FACTOR;
     }
 
     // X-axis line
@@ -569,10 +571,10 @@ void BoundingBoxGizmo::renderPlanes()
     }
 
     /* Draw the planes. */
-    // If the bounding box is disabled, show it at 1/4 alpha.
-    float alpha{127};
+    // If this bounding box is disabled, make it semi-transparent.
+    float alpha{BASE_ALPHA * PLANE_ALPHA_FACTOR};
     if (!hasBoundingBox) {
-        alpha /= 4.f;
+        alpha *= DISABLED_ALPHA_FACTOR;
     }
 
     // X-axis plane

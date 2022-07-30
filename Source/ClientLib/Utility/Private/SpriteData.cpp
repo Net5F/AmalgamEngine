@@ -81,7 +81,7 @@ void SpriteData::parseJson(nlohmann::json& json, AssetCache& assetCache)
             }
         }
     } catch (nlohmann::json::type_error& e) {
-        LOG_FATAL("Parse failure - %s", e.what());
+        LOG_FATAL("Failure to parse SpriteData.json: %s", e.what());
     }
 
     // Fill the maps with pointers to all the sprites.
