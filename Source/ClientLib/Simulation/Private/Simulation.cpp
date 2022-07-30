@@ -128,7 +128,6 @@ void Simulation::connect()
     registry.emplace<BoundingBox>(
         newEntity, Transforms::modelToWorldCentered(playerSprite.modelBounds,
                                                     playerPosition));
-    // TODO: Update our placement in the spatial partition.
 
     // Set up the player's InputHistory component.
     registry.emplace<InputHistory>(newEntity);
