@@ -63,6 +63,9 @@ public:
     static constexpr float SPAWN_POINT_GROUP_OFFSET_X{0};
     static constexpr float SPAWN_POINT_GROUP_OFFSET_Y{400};
 
+    /** How often the world's tile map should be saved, in seconds. */
+    static constexpr float MAP_SAVE_PERIOD_S{60 * 15};
+
     //-------------------------------------------------------------------------
     // Network
     //-------------------------------------------------------------------------

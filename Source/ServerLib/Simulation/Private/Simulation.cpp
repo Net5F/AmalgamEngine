@@ -24,6 +24,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , movementSystem(world)
 , movementUpdateSystem(*this, world, network)
 , chunkStreamingSystem(world, network.getEventDispatcher(), network)
+, mapSaveSystem(world)
 {
     // Initialize our entt groups.
     EnttGroups::init(world.registry);
@@ -73,6 +74,9 @@ void Simulation::tick()
 
     // Respond to chunk data requests.
     chunkStreamingSystem.sendChunks();
+
+    // If enough time has passed, save the world's tile map state.
+    mapSaveSystem.saveMapIfNecessary();
 
     currentTick++;
 }

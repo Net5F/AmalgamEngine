@@ -4,6 +4,7 @@ target_sources(ServerLib
 		Private/ClientAOISystem.cpp
 		Private/ClientConnectionSystem.cpp
 		Private/InputSystem.cpp
+		Private/MapSaveSystem.cpp
 		Private/MovementSystem.cpp
 		Private/MovementUpdateSystem.cpp
 		Private/Simulation.cpp
@@ -18,6 +19,7 @@ target_sources(ServerLib
 		Public/EventSorter.h
 		Public/InputSystem.h
 		Public/ISimulationExtension.h
+		Public/MapSaveSystem.h
 		Public/MovementSystem.h
 		Public/MovementUpdateSystem.h
 		Public/Simulation.h

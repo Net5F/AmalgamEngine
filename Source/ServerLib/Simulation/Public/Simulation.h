@@ -8,6 +8,7 @@
 #include "MovementSystem.h"
 #include "MovementUpdateSystem.h"
 #include "ChunkStreamingSystem.h"
+#include "MapSaveSystem.h"
 #include <SDL_stdinc.h>
 #include <atomic>
 
@@ -73,6 +74,7 @@ private:
     MovementSystem movementSystem;
     MovementUpdateSystem movementUpdateSystem;
     ChunkStreamingSystem chunkStreamingSystem;
+    MapSaveSystem mapSaveSystem;
 };
 
 } // namespace Server
