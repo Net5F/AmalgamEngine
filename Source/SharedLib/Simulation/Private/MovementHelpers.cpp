@@ -3,6 +3,7 @@
 #include "PreviousPosition.h"
 #include "Velocity.h"
 #include "Boundingbox.h"
+#include "SharedConfig.h"
 #include "Ignore.h"
 
 namespace AM
@@ -11,18 +12,18 @@ Velocity MovementHelpers::updateVelocity(const Velocity& velocity,
                                          const Input::StateArr& inputStates,
                                          double deltaSeconds)
 {
-    // TODO: Ignoring while velocity is constant for testing.
+    // Note: Ignoring while velocity is constant for testing.
+    //       If we ever care to support non-constant velocity, we'll need this.
     ignore(deltaSeconds);
 
     Velocity updatedVelocity{velocity};
 
-    static constexpr double VELOCITY{30};
     // Y-axis (favors up).
     if (inputStates[Input::YUp] == Input::Pressed) {
-        updatedVelocity.y = -VELOCITY;
+        updatedVelocity.y = -SharedConfig::MOVEMENT_VELOCITY;
     }
     else if (inputStates[Input::YDown] == Input::Pressed) {
-        updatedVelocity.y = VELOCITY;
+        updatedVelocity.y = SharedConfig::MOVEMENT_VELOCITY;
     }
     else {
         updatedVelocity.y = 0;
@@ -30,10 +31,10 @@ Velocity MovementHelpers::updateVelocity(const Velocity& velocity,
 
     // X-axis (favors up).
     if (inputStates[Input::XUp] == Input::Pressed) {
-        updatedVelocity.x = VELOCITY;
+        updatedVelocity.x = SharedConfig::MOVEMENT_VELOCITY;
     }
     else if (inputStates[Input::XDown] == Input::Pressed) {
-        updatedVelocity.x = -VELOCITY;
+        updatedVelocity.x = -SharedConfig::MOVEMENT_VELOCITY;
     }
     else {
         updatedVelocity.x = 0;
@@ -41,10 +42,10 @@ Velocity MovementHelpers::updateVelocity(const Velocity& velocity,
 
     // Z-axis (favors up).
     if (inputStates[Input::ZUp] == Input::Pressed) {
-        updatedVelocity.z = VELOCITY;
+        updatedVelocity.z = SharedConfig::MOVEMENT_VELOCITY;
     }
     else if (inputStates[Input::ZDown] == Input::Pressed) {
-        updatedVelocity.z = -VELOCITY;
+        updatedVelocity.z = -SharedConfig::MOVEMENT_VELOCITY;
     }
     else {
         updatedVelocity.z = 0;

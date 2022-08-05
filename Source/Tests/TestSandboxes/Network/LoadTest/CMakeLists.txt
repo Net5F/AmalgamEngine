@@ -11,8 +11,9 @@ add_executable(LoadTestClient
     Public/WorldSimulation.h
     
     # Client objects
-    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Private/Config.cpp
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Public/Config.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Private/UserConfig.cpp
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Public/UserConfig.h
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/Network.cpp
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/Network.h
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/MessageProcessor.cpp
@@ -27,8 +28,8 @@ target_include_directories(LoadTestClient
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 
         # Client objects
-        ${PROJECT_SOURCE_DIR}/Source/Client/Network/Public
-        ${PROJECT_SOURCE_DIR}/Source/Client/Config/Public
+        ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public
+        ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Public
 )
 
 target_link_libraries(LoadTestClient
@@ -52,3 +53,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(LoadTestClient PUBLIC /W3 /permissive-)
 endif()
+
+# Copy UserConfig.json to the build directory.
+file(COPY ${CMAKE_SOURCE_DIR}/Resources/Client/Common/UserConfig.json
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)

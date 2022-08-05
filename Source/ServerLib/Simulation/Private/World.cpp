@@ -1,6 +1,7 @@
 #include "World.h"
 #include "ClientSimData.h"
 #include "SharedConfig.h"
+#include "Config.h"
 #include "Log.h"
 #include "Ignore.h"
 
@@ -14,46 +15,60 @@ World::World(SpriteData& spriteData)
 , entityLocator(registry)
 , device()
 , generator(device())
-// Note: We restrict the x-axis positions to keep them in bounds while moving.
-, xDistribution(SharedConfig::TILE_WORLD_WIDTH,
-                (static_cast<unsigned int>(SharedConfig::AOI_RADIUS)
-                 - SharedConfig::TILE_WORLD_WIDTH))
-, yDistribution(SharedConfig::TILE_WORLD_WIDTH,
-                (static_cast<unsigned int>(SharedConfig::AOI_RADIUS)
-                 - SharedConfig::TILE_WORLD_WIDTH))
-, baseX{0}
-, baseY{0}
-, groupOffsetsX{32, 64, 96, 128, 160, 32, 64, 96, 128, 160}
-, groupOffsetsY{32, 32, 32, 32, 32, 64, 64, 64, 64, 64}
-, offsetSelector{0}
+, xDistribution(Config::SPAWN_POINT_RANDOM_MIN_X,
+                Config::SPAWN_POINT_RANDOM_MAX_X)
+, yDistribution(Config::SPAWN_POINT_RANDOM_MIN_Y,
+                Config::SPAWN_POINT_RANDOM_MAX_Y)
+, groupX{Config::SPAWN_POINT_GROUP_MIN_X}
+, groupY{Config::SPAWN_POINT_GROUP_MIN_Y}
+, columnIndex{0}
+, rowIndex{0}
 {
     // Allocate the entity locator's grid.
     entityLocator.setGridSize(tileMap.getTileExtent().xLength,
                               tileMap.getTileExtent().yLength);
 }
 
-Position World::getRandomSpawnPoint()
+Position World::getSpawnPoint()
 {
-    return {xDistribution(generator), yDistribution(generator), 0};
+    switch (Config::SPAWN_STRATEGY) {
+        case SpawnStrategy::Fixed: {
+            return {Config::SPAWN_POINT_FIXED_X, Config::SPAWN_POINT_FIXED_Y};
+        }
+        case SpawnStrategy::Random: {
+            return {xDistribution(generator), yDistribution(generator), 0};
+        }
+        case SpawnStrategy::Grouped: {
+            return getGroupedSpawnPoint();
+        }
+        default: {
+            LOG_FATAL("Invalid spawn strategy.");
+            return {};
+        }
+    }
 }
 
 Position World::getGroupedSpawnPoint()
 {
-    // Find the next position.
-    Position position{};
-    position.x = baseX + groupOffsetsX[offsetSelector];
-    position.y = baseY + groupOffsetsY[offsetSelector];
+    // Calculate the next spawn point.
+    Position spawnPoint{groupX, groupY};
+    spawnPoint.x += (columnIndex * Config::SPAWN_POINT_GROUP_PADDING_X);
+    spawnPoint.y += (rowIndex * Config::SPAWN_POINT_GROUP_PADDING_Y);
 
-    // Advance the offset selector.
-    offsetSelector++;
-    if (offsetSelector == 10) {
-        offsetSelector = 0;
-
-        // Move up to the next position.
-        baseY += 400;
+    // Increment our column. If it wrapped, increment our row.
+    columnIndex = ((columnIndex + 1) % Config::SPAWN_POINT_GROUP_COLUMNS);
+    unsigned int previousRow{rowIndex};
+    if (columnIndex == 0) {
+        rowIndex = ((rowIndex + 1) % Config::SPAWN_POINT_GROUP_ROWS);
     }
 
-    return position;
+    // If the row wrapped, increment our group position.
+    if (previousRow > rowIndex) {
+        groupX += Config::SPAWN_POINT_GROUP_OFFSET_X;
+        groupY += Config::SPAWN_POINT_GROUP_OFFSET_Y;
+    }
+
+    return spawnPoint;
 }
 
 } // namespace Server

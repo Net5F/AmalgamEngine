@@ -10,7 +10,7 @@ SimulatedClient::SimulatedClient()
 , networkCaller(std::bind_front(&Client::Network::tick, &network),
                 SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
 , worldSim(network.getEventDispatcher(), network)
-, simCaller(std::bind_front(&WorldSim::tick, &worldSim),
+, simCaller(std::bind_front(&WorldSimulation::tick, &worldSim),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
 , isConnected(false)
 {

@@ -99,17 +99,12 @@ public:
     void registerUserInterfaceExtension();
 
 private:
-    /** Event polling can take up to 5-6ms depending on how much is waiting.
+    /** The minimum "time to next call" required to trigger an event dispatch.
+        Event polling can take up to 5-6ms depending on how much is waiting.
         We prioritize the PeriodicCallers getting called on time, so we only
         dispatch events if there's a reasonable gap until the next needs to be
         called. */
     static constexpr double DISPATCH_MINIMUM_TIME_S = .003;
-
-    /** We sleep for 1ms when possible to reduce our CPU usage. We can't trust
-        the scheduler to come back to us after exactly 1ms though, so we need
-        to give it some leeway. Picked .003 = 3ms as a reasonable number. Open
-        for tweaking. */
-    static constexpr double SLEEP_MINIMUM_TIME_S = .003;
 
     /**
      * Dispatches waiting events to the eventHandlers.

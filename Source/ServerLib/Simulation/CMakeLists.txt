@@ -22,6 +22,7 @@ target_sources(ServerLib
 		Public/MovementUpdateSystem.h
 		Public/Simulation.h
 		Public/SimulationExDependencies.h
+		Public/SpawnStrategy.h
 		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/Components/ClientSimData.h

@@ -64,10 +64,11 @@ public:
     void registerSimulationExtension();
 
 private:
-    /** We sleep for 1ms when possible to reduce our CPU usage. We can't trust
-        the scheduler to come back to us after exactly 1ms though, so we need
-        to give it some leeway. Picked .003 = 3ms as a reasonable number. Open
-        for tweaking. */
+    /** The minimum "time to next call" required to trigger a main loop sleep.
+        We sleep for 1ms when possible to reduce our CPU usage. We can't trust
+        the scheduler to come back to us after exactly 1ms though, so we busy 
+        wait if something needs to be called soon.
+        Higher value == more CPU usage. */
     static constexpr double SLEEP_MINIMUM_TIME_S = .003;
 
     //-------------------------------------------------------------------------

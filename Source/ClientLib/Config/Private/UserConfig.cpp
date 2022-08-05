@@ -20,10 +20,6 @@ UserConfig::UserConfig()
 , serverIP{}
 , serverPort{}
 {
-    if (!SDL_WasInit(SDL_INIT_VIDEO)) {
-        LOG_FATAL("Must init SDL before user config.");
-    }
-
     // Open the file.
     std::string fullPath{Paths::BASE_PATH};
     fullPath += "UserConfig.json";
@@ -75,19 +71,18 @@ ScreenRect UserConfig::getWindowSize()
 
 void UserConfig::setWindowSize(ScreenRect inWindowSize)
 {
-    // If we're windowed, use the given window size.
-    if (fullscreenMode == 0) {
-        windowSizeWidth = inWindowSize.width;
-        windowSizeHeight = inWindowSize.height;
-    }
-    else {
-        // Else we're fullscreen, use the desktop size.
+    // Default to the given window size.
+    windowSizeWidth = inWindowSize.width;
+    windowSizeHeight = inWindowSize.height;
+
+    // If fullscreen is selected, use the desktop size instead.
+    // Note: SDL_GetDesktopDisplayMode() requires the SDL video subsystem 
+    //       to be initialized, so we have to check for that first.
+    if ((fullscreenMode != 0) && SDL_WasInit(SDL_INIT_VIDEO)) {
         SDL_DisplayMode displayMode;
         SDL_GetDesktopDisplayMode(0, &displayMode);
         windowSizeWidth = static_cast<float>(displayMode.w);
         windowSizeHeight = static_cast<float>(displayMode.h);
-        LOG_INFO("Using desktop size: %f, %f", windowSizeWidth,
-                 windowSizeHeight);
     }
 }
 

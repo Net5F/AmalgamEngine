@@ -20,12 +20,6 @@ class MovementHelpers
 {
 public:
     /**
-     * Constant acceleration.
-     * TODO: Eventually move this to be dynamic based on the player stats.
-     */
-    static constexpr float acceleration = 750;
-
-    /**
      * Updates the given velocity based on the given inputStates.
      *
      * @param velocity  The velocity to update.

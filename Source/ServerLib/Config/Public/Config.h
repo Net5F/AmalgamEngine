@@ -20,6 +20,50 @@ class Config
 {
 public:
     //-------------------------------------------------------------------------
+    // Simulation
+    //-------------------------------------------------------------------------
+    /** The strategy that we'll use when spawning entities. */
+    static constexpr SpawnStrategy SPAWN_STRATEGY{SpawnStrategy::Fixed};
+
+    // SpawnPoint::Fixed Config
+    /** Fixed spawn position. */
+    static constexpr float SPAWN_POINT_FIXED_X{};
+    static constexpr float SPAWN_POINT_FIXED_Y{};
+
+    // SpawnPoint::Random Config
+    // Note: We offset these positions to keep entities in bounds while moving.
+    /** The min and max X positions that entities will be spawned within. */
+    static constexpr float SPAWN_POINT_RANDOM_MIN_X{
+        SharedConfig::TILE_WORLD_WIDTH};
+    static constexpr float SPAWN_POINT_RANDOM_MAX_X{
+        static_cast<unsigned int>(SharedConfig::AOI_RADIUS)
+        - SharedConfig::TILE_WORLD_WIDTH};
+
+    /** The min and max Y positions that entities will be spawned within. */
+    static constexpr float SPAWN_POINT_RANDOM_MIN_Y{
+        SharedConfig::TILE_WORLD_WIDTH};
+    static constexpr float SPAWN_POINT_RANDOM_MAX_Y{
+        static_cast<unsigned int>(SharedConfig::AOI_RADIUS)
+        - SharedConfig::TILE_WORLD_WIDTH};
+
+    // SpawnPoint::Grouped Config
+    /** The starting position of the first group. */
+    static constexpr float SPAWN_POINT_GROUP_MIN_X{SPAWN_POINT_RANDOM_MIN_X};
+    static constexpr float SPAWN_POINT_GROUP_MIN_Y{SPAWN_POINT_RANDOM_MIN_Y};
+
+    /** The number of columns and rows that a group consists of. */
+    static constexpr unsigned int SPAWN_POINT_GROUP_COLUMNS{5};
+    static constexpr unsigned int SPAWN_POINT_GROUP_ROWS{2};
+
+    /** The amount of padding between rows and columns within a group. */
+    static constexpr float SPAWN_POINT_GROUP_PADDING_X{32};
+    static constexpr float SPAWN_POINT_GROUP_PADDING_Y{32};
+
+    /** The offset between groups. */
+    static constexpr float SPAWN_POINT_GROUP_OFFSET_X{0};
+    static constexpr float SPAWN_POINT_GROUP_OFFSET_Y{400};
+
+    //-------------------------------------------------------------------------
     // Network
     //-------------------------------------------------------------------------
     ////////////////////////////////////////////////////////////////////////////

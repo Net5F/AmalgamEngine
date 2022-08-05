@@ -96,7 +96,7 @@ void Application::start()
         }
 
         // If we have enough time, sleep.
-        if (enoughTimeTillNextCall(SLEEP_MINIMUM_TIME_S)) {
+        if (enoughTimeTillNextCall(Config::SLEEP_MINIMUM_TIME_S)) {
             // We have enough time to sleep for a few ms.
             // Note: We try to delay for 1ms because the OS will generally end
             //       up delaying us for 1-3ms.

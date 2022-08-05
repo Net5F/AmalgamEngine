@@ -4,6 +4,7 @@
 #include "NetworkDefs.h"
 #include "Position.h"
 #include "EntityLocator.h"
+#include "SpawnStrategy.h"
 
 #include "entt/entity/registry.hpp"
 
@@ -15,6 +16,7 @@ namespace AM
 namespace Server
 {
 class SpriteData;
+
 /**
  * Owns and manages the persistence of all world state.
  *
@@ -47,17 +49,17 @@ public:
     std::unordered_map<NetworkID, entt::entity> netIdMap;
 
     /**
-     * Returns a random spawn point position, with all points being within a
-     * single AoI.
+     * Returns the spawn point position.
+     * To configure, see Server::Config.
      */
-    Position getRandomSpawnPoint();
+    Position getSpawnPoint();
 
+private:
     /**
      * Returns the next spawn point, trying to build groups of 10.
      */
     Position getGroupedSpawnPoint();
 
-private:
     // For random spawn points.
     std::random_device device;
     std::mt19937 generator;
@@ -65,12 +67,10 @@ private:
     std::uniform_real_distribution<float> yDistribution;
 
     // For grouped spawn points.
-    static constexpr unsigned int GROUP_SIZE = 10;
-    float baseX;
-    float baseY;
-    std::array<float, GROUP_SIZE> groupOffsetsX;
-    std::array<float, GROUP_SIZE> groupOffsetsY;
-    unsigned int offsetSelector;
+    float groupX;
+    float groupY;
+    unsigned int columnIndex;
+    unsigned int rowIndex;
 };
 
 } // namespace Server

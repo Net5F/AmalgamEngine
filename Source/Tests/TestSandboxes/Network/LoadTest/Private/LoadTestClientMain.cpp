@@ -8,6 +8,7 @@
 #include "Log.h"
 
 #include "SimulatedClient.h"
+#include "UserConfig.h"
 
 #include <exception>
 #include <atomic>
@@ -62,6 +63,9 @@ try {
 
     // Set up the SDL constructs.
     SDL2pp::SDL sdl(0);
+
+    // Initialize the user config.
+    Client::UserConfig::get();
 
     // Set up file logging.
     // TODO: This currently will do weird stuff if you have 2 instances of this
