@@ -6,6 +6,7 @@ class EventDispatcher;
 
 namespace Client
 {
+class World;
 class Network;
 class SpriteData;
 
@@ -15,11 +16,13 @@ class SpriteData;
  */
 struct SimulationExDependencies {
 public:
-    EventDispatcher& inUiEventDispatcher;
+    World& world;
 
-    Network& inNetwork;
+    EventDispatcher& uiEventDispatcher;
 
-    SpriteData& inSpriteData;
+    Network& network;
+
+    SpriteData& spriteData;
 };
 
 } // namespace Client

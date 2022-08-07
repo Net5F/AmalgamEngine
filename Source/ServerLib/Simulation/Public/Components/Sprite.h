@@ -13,6 +13,10 @@ namespace Server
  *
  * World position should be read from an associated Position component (if
  * this sprite is attached to an entity), or derived from an associated Tile.
+ *
+ * Note: If needed, a potential optimization would be to remove displayName 
+ *       and stringID and have them available through maps (with numericID 
+ *       keys).
  */
 struct Sprite {
 public:

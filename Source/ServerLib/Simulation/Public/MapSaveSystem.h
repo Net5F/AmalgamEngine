@@ -27,8 +27,8 @@ public:
 private:
     World& world;
 
-    /** Used to track how much time has passed. */
-    Timer timer;
+    /** Used to track how much time has passed since the last save. */
+    Timer saveTimer;
 };
 
 } // namespace Server

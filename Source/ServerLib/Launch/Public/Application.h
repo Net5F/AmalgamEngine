@@ -113,7 +113,8 @@ void Application::registerMessageProcessorExtension()
 template<typename T>
 void Application::registerSimulationExtension()
 {
-    SimulationExDependencies simulationDeps{network, spriteData};
+    SimulationExDependencies simulationDeps{simulation.getWorld(), network,
+                                            spriteData};
 
     simulation.setExtension(std::make_unique<T>(simulationDeps));
 }

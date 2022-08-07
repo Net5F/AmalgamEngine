@@ -24,6 +24,8 @@ public:
      * Represents a sprite, placed on one of a tile's layers.
      */
     struct SpriteLayer {
+        // Note: If needed, a potential optimization could be to copy the 
+        //       sprite here instead of pointing to it.
         /** The sprite that this layer contains. */
         const Sprite* sprite{nullptr};
 

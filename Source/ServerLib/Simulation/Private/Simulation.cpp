@@ -81,6 +81,11 @@ void Simulation::tick()
     currentTick++;
 }
 
+World& Simulation::getWorld()
+{
+    return world;
+}
+
 Uint32 Simulation::getCurrentTick()
 {
     return currentTick;

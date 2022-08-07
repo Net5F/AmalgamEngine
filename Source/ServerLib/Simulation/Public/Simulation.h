@@ -42,6 +42,8 @@ public:
      */
     void tick();
 
+    World& getWorld();
+
     Uint32 getCurrentTick();
 
     /**

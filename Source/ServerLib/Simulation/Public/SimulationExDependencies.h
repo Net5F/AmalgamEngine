@@ -4,6 +4,7 @@ namespace AM
 {
 namespace Server
 {
+class World;
 class Network;
 class SpriteData;
 
@@ -13,9 +14,11 @@ class SpriteData;
  */
 struct SimulationExDependencies {
 public:
-    Network& inNetwork;
+    World& world;
 
-    SpriteData& inSpriteData;
+    Network& network;
+
+    SpriteData& spriteData;
 };
 
 } // namespace Server
