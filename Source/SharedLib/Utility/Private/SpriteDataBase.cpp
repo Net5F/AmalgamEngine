@@ -26,8 +26,7 @@ SpriteDataBase::SpriteDataBase()
     nlohmann::json json;
     try {
         json = nlohmann::json::parse(workingFile, nullptr, true);
-    }
-    catch (nlohmann::json::exception& e) {
+    } catch (nlohmann::json::exception& e) {
         LOG_FATAL("Failed to parse SpriteData.json: %s", e.what());
     }
 
@@ -75,7 +74,8 @@ const std::string& SpriteDataBase::getDisplayName(int numericID) const
     if (numericID == EMPTY_SPRITE_ID) {
         return displayNames[emptySpriteIndex];
     }
-    else if (numericID < 0 || numericID >= static_cast<int>(displayNames.size())) {
+    else if (numericID < 0
+             || numericID >= static_cast<int>(displayNames.size())) {
         LOG_FATAL("Invalid numeric ID while getting sprite display name: %d",
                   numericID);
     }
@@ -108,7 +108,7 @@ void SpriteDataBase::parseJson(nlohmann::json& json)
 
         // Set the empty sprite's index to the end of the vector.
         emptySpriteIndex = (spriteCount - 1);
-        
+
         // For every sprite sheet in the json.
         for (auto& sheetJson : json.at("spriteSheets").items()) {
             // For every sprite in the sheet.

@@ -25,7 +25,8 @@ TileMapBase::TileMapBase(SpriteDataBase& inSpriteData)
 }
 
 void TileMapBase::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
-                                 unsigned int layerIndex, const Sprite& sprite)
+                                     unsigned int layerIndex,
+                                     const Sprite& sprite)
 {
     // If the sprite has a bounding box, calculate its position.
     BoundingBox worldBounds{};
@@ -51,14 +52,14 @@ void TileMapBase::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
 }
 
 void TileMapBase::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
-                                 unsigned int layerIndex,
-                                 const std::string& stringID)
+                                     unsigned int layerIndex,
+                                     const std::string& stringID)
 {
     setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(stringID));
 }
 
 void TileMapBase::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
-                                 unsigned int layerIndex, int numericID)
+                                     unsigned int layerIndex, int numericID)
 {
     setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(numericID));
 }

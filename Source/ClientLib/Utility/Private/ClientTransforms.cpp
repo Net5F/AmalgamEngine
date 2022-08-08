@@ -11,9 +11,10 @@ namespace AM
 {
 namespace Client
 {
-SDL_Rect ClientTransforms::entityToScreenExtent(const Position& position,
-                                                const SpriteRenderData& renderData,
-                                                const Camera& camera)
+SDL_Rect
+    ClientTransforms::entityToScreenExtent(const Position& position,
+                                           const SpriteRenderData& renderData,
+                                           const Camera& camera)
 {
     // Transform the position to a point in screen space.
     // Note: This applies the camera's zoom to the position, so we don't need
@@ -52,9 +53,10 @@ SDL_Rect ClientTransforms::entityToScreenExtent(const Position& position,
     return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 }
 
-SDL_Rect ClientTransforms::tileToScreenExtent(const TilePosition& position,
-                                              const SpriteRenderData& renderData,
-                                              const Camera& camera)
+SDL_Rect
+    ClientTransforms::tileToScreenExtent(const TilePosition& position,
+                                         const SpriteRenderData& renderData,
+                                         const Camera& camera)
 {
     // Convert tile position to isometric screen position.
     float screenX{(position.x - position.y)

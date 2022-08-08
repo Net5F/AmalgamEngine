@@ -25,8 +25,7 @@ SpriteData::SpriteData(AssetCache& assetCache)
     nlohmann::json json;
     try {
         json = nlohmann::json::parse(workingFile, nullptr, true);
-    }
-    catch (nlohmann::json::exception& e) {
+    } catch (nlohmann::json::exception& e) {
         LOG_FATAL("Failed to parse SpriteData.json: %s", e.what());
     }
 
@@ -42,7 +41,8 @@ const SpriteRenderData& SpriteData::getRenderData(int numericID) const
     if (numericID == EMPTY_SPRITE_ID) {
         return renderData[emptySpriteIndex];
     }
-    else if (numericID < 0 || numericID >= static_cast<int>(renderData.size())) {
+    else if (numericID < 0
+             || numericID >= static_cast<int>(renderData.size())) {
         LOG_FATAL("Invalid numeric ID while getting sprite render data: %d",
                   numericID);
     }

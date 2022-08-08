@@ -6,7 +6,7 @@ namespace AM
 namespace Client
 {
 UserConfigInitializer::UserConfigInitializer()
-{ 
+{
     UserConfig::get();
 }
 

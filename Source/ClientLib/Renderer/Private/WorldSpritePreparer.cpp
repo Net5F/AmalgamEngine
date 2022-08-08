@@ -109,8 +109,8 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
 
                 // If this sprite has a bounding box, push it to be sorted.
                 if (layer.sprite.hasBoundingBox) {
-                    spritesToSort.emplace_back(&(layer.sprite), layer.worldBounds,
-                                               screenExtent);
+                    spritesToSort.emplace_back(&(layer.sprite),
+                                               layer.worldBounds, screenExtent);
                 }
                 else {
                     // No bounding box, push it straight into the sorted
@@ -135,8 +135,8 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
         // Get the iso screen extent for the lerped sprite.
         const SpriteRenderData& renderData{
             spriteData.getRenderData(sprite.numericID)};
-        SDL_Rect screenExtent{ClientTransforms::entityToScreenExtent(
-            lerp, renderData, camera)};
+        SDL_Rect screenExtent{
+            ClientTransforms::entityToScreenExtent(lerp, renderData, camera)};
 
         // If the sprite is on screen, push the render info.
         if (isWithinScreenBounds(screenExtent, camera)) {
@@ -162,11 +162,10 @@ void WorldSpritePreparer::sortSpritesByDepth()
     }
 
     // Sort sprites by depth.
-    std::sort(
-        spritesToSort.begin(), spritesToSort.end(),
-        [](const SpriteSortInfo& lhs, const SpriteSortInfo& rhs) -> bool {
-            return lhs.depthValue < rhs.depthValue;
-        });
+    std::sort(spritesToSort.begin(), spritesToSort.end(),
+              [](const SpriteSortInfo& lhs, const SpriteSortInfo& rhs) -> bool {
+                  return lhs.depthValue < rhs.depthValue;
+              });
 }
 
 void WorldSpritePreparer::calcDepthDependencies()

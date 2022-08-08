@@ -125,8 +125,7 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
         const SpriteRenderData& renderData{
             spriteData.getRenderData(spriteInfo.sprite->numericID)};
         SDL_RenderCopy(sdlRenderer, renderData.texture.get(),
-                       &(renderData.textureExtent),
-                       &(spriteInfo.screenExtent));
+                       &(renderData.textureExtent), &(spriteInfo.screenExtent));
         //        drawBoundingBox(spriteInfo.worldBounds, camera);
     }
 }

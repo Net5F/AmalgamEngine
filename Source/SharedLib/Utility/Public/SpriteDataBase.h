@@ -9,7 +9,7 @@ namespace AM
 {
 /**
  * Base class for Client::SpriteData and Server::SpriteData.
- * Loads the shared sprite data from SpriteData.json into memory and provides 
+ * Loads the shared sprite data from SpriteData.json into memory and provides
  * an interface for accessing it.
  *
  * Also adds the "Empty" sprite, for use as a default.
@@ -17,7 +17,7 @@ namespace AM
  * Note: This class expects a SpriteData.json file to be present in the same
  *       directory as the application executable.
  *
- * The data in this class is immutable. To modify it, edit SpriteData.json 
+ * The data in this class is immutable. To modify it, edit SpriteData.json
  * using the SpriteEditor.
  */
 class SpriteDataBase
@@ -52,18 +52,18 @@ public:
 
     /**
      * Get a sprite's string ID, using its numeric ID.
-     * 
-     * Unlike the numeric ID, the string ID will be consistent, and can be 
+     *
+     * Unlike the numeric ID, the string ID will be consistent, and can be
      * used for persistent state.
      */
     const std::string& getStringID(int numericID) const;
 
 protected:
-    /** The index of the empty sprite. Will always be the last sprite in the 
+    /** The index of the empty sprite. Will always be the last sprite in the
         vectors.
-        Note: Don't get confused, the empty sprite's ID is -1, but its index 
-              is at the end of the vectors. We do this instead of putting it 
-              at index 0, because we would have to save it in SpriteData.json 
+        Note: Don't get confused, the empty sprite's ID is -1, but its index
+              is at the end of the vectors. We do this instead of putting it
+              at index 0, because we would have to save it in SpriteData.json
               and add logic to skip it in the editor. */
     unsigned int emptySpriteIndex;
 
@@ -87,7 +87,7 @@ private:
     void parseSprite(const nlohmann::json& spriteJson);
 
     /**
-     * Returns the number of sprites that are in the given SpriteData.json 
+     * Returns the number of sprites that are in the given SpriteData.json
      * + 1 for the empty sprite.
      */
     unsigned int getSpriteCount(const nlohmann::json& json);
@@ -99,7 +99,7 @@ private:
     std::vector<std::string> displayNames;
 
     /** Each sprite's string ID, indexed by their numeric ID.
-        String IDs are derived from displayName by replacing spaces with 
+        String IDs are derived from displayName by replacing spaces with
         underscores and making everything lowercase.
         This ID will be consistent, and can be used for persistent state. */
     std::vector<std::string> stringIDs;

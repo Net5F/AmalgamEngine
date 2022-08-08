@@ -133,7 +133,7 @@ private:
     //-------------------------------------------------------------------------
     SDL2pp::SDL sdl;
 
-    /** Initializes UserConfig. Must be constructed after SDL is initialized 
+    /** Initializes UserConfig. Must be constructed after SDL is initialized
         and before anything else. */
     UserConfigInitializer userConfigInitializer;
 

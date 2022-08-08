@@ -6,7 +6,7 @@ namespace AM
 namespace Server
 {
 UserConfigInitializer::UserConfigInitializer()
-{ 
+{
     UserConfig::get();
 }
 

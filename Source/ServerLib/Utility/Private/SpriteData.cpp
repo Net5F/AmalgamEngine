@@ -8,9 +8,7 @@ namespace AM
 {
 namespace Server
 {
-SpriteData::SpriteData()
-{
-}
+SpriteData::SpriteData() {}
 
 } // End namespace Server
 } // End namespace AM

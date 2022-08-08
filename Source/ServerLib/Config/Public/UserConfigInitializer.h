@@ -5,7 +5,7 @@ namespace AM
 namespace Server
 {
 /**
- * Minimal helper class to facilitate calling UserConfig::get() from an 
+ * Minimal helper class to facilitate calling UserConfig::get() from an
  * initializer list.
  */
 class UserConfigInitializer

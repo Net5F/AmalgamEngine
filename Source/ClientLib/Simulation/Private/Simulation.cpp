@@ -119,8 +119,7 @@ void Simulation::connect()
     Sprite& playerSprite{
         registry.emplace<Sprite>(newEntity, spriteData.get("roberto_0"))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
-                             PreviousPosition{},
-                             userConfig.getWindowSize());
+                             PreviousPosition{}, userConfig.getWindowSize());
 
     // Set up the player's bounding box, based on their sprite.
     registry.emplace<BoundingBox>(
@@ -158,8 +157,7 @@ void Simulation::fakeConnection()
     Sprite& playerSprite{
         registry.emplace<Sprite>(newEntity, spriteData.get("roberto_0"))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
-                             PreviousPosition{},
-                             userConfig.getWindowSize());
+                             PreviousPosition{}, userConfig.getWindowSize());
 
     // Set up the player's bounding box, based on their sprite.
     registry.emplace<BoundingBox>(

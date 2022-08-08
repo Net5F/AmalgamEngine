@@ -16,13 +16,13 @@ namespace AM
 struct Sprite {
 public:
     /**
-     * The sprite's display name and string ID fields are stored in flat 
+     * The sprite's display name and string ID fields are stored in flat
      * vectors in the SpriteDataBase class, since they aren't commonly accessed
-     * alongside the fields in this struct. 
-     * See SpriteDataBase::getDisplayName() and SpriteDataBase::getStringID(), 
+     * alongside the fields in this struct.
+     * See SpriteDataBase::getDisplayName() and SpriteDataBase::getStringID(),
      * accessible through Client::SpriteData, Server::SpriteData.
      *
-     * Additionally, the client stores the sprite's rendering-related data in 
+     * Additionally, the client stores the sprite's rendering-related data in
      * the SpriteRenderData class. See Client::SpriteData::getRenderData().
      */
 

@@ -74,8 +74,7 @@ void TileMap::save(const std::string& fileName)
                  tiles[nextLinearTileIndex].spriteLayers) {
                 const std::string& stringID{
                     spriteData.getStringID(layer.sprite.numericID)};
-                unsigned int paletteID{
-                    chunk.getPaletteIndex(stringID)};
+                unsigned int paletteID{chunk.getPaletteIndex(stringID)};
                 tile.spriteLayers.push_back(paletteID);
             }
 

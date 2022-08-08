@@ -24,8 +24,7 @@ UserConfig::UserConfig()
     nlohmann::json json;
     try {
         json = nlohmann::json::parse(workingFile, nullptr, true, true);
-    }
-    catch (nlohmann::json::exception& e) {
+    } catch (nlohmann::json::exception& e) {
         LOG_FATAL("Failed to parse UserConfig.json: %s", e.what());
     }
 
@@ -43,9 +42,7 @@ UserConfig& UserConfig::get()
     return userConfig;
 }
 
-void UserConfig::init([[maybe_unused]] nlohmann::json& json)
-{
-}
+void UserConfig::init([[maybe_unused]] nlohmann::json& json) {}
 
 } // End namespace Server
 } // End namespace AM

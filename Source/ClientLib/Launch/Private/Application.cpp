@@ -33,8 +33,7 @@ Application::Application()
 , simulation(userInterface.getEventDispatcher(), network, spriteData)
 , simCaller(std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
-, renderer(sdlRenderer.Get(), simulation.getWorld(), userInterface,
-           spriteData, 
+, renderer(sdlRenderer.Get(), simulation.getWorld(), userInterface, spriteData,
            std::bind_front(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind_front(&Renderer::render, &renderer),
                  UserConfig::get().getFrameTimestepS(), "Renderer", true)
@@ -53,7 +52,7 @@ Application::Application()
             break;
         }
         // Note: We removed real fullscreen because it was behaving weirdly and
-        //       causing network timeouts, and having just windowed and 
+        //       causing network timeouts, and having just windowed and
         //       borderless seems fine.
         default: {
             LOG_FATAL("Invalid fullscreen value: %d", fullscreenMode);

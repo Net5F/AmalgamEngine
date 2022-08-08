@@ -89,7 +89,7 @@ AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType,
         currentHeldControl = Control::Z;
     }
 
-    // If the cursor is holding a control, set mouse capture so we get the 
+    // If the cursor is holding a control, set mouse capture so we get the
     // associated MouseUp.
     if (currentHeldControl != Control::None) {
         return AUI::EventResult{.wasHandled{true}, .setMouseCapture{this}};
@@ -242,7 +242,7 @@ void BoundingBoxGizmo::refresh(const Sprite& activeSprite)
 void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 {
     // TODO: If shift is held, only move along the Z axis
-     
+
     // Note: The expected behavior is to move along the x/y plane and
     //       leave minZ where it was.
     const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};

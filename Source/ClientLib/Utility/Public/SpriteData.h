@@ -14,20 +14,20 @@ namespace Client
 /**
  * See SpriteDataBase class comment.
  *
- * Beyond the parsing that SpriteDataBase performs, this class loads the 
+ * Beyond the parsing that SpriteDataBase performs, this class loads the
  * rendering-specific sprite data and provides an interface for accessing it.
  *
  * Note: This class expects a SpriteData.json file to be present in the same
  *       directory as the application executable.
  *
- * The data in this class is immutable. To modify it, edit SpriteData.json 
+ * The data in this class is immutable. To modify it, edit SpriteData.json
  * using the SpriteEditor.
  */
 class SpriteData : public SpriteDataBase
 {
 public:
     /**
-     * Calls SpriteDataBase() constructor, then re-parses SpriteData.json to 
+     * Calls SpriteDataBase() constructor, then re-parses SpriteData.json to
      * load the rendering-specific sprite data.
      *
      * Errors if SpriteData.json doesn't exist or it fails to parse.
@@ -61,7 +61,7 @@ private:
     void parseSprite(const nlohmann::json& spriteJson,
                      const TextureHandle& texture);
 
-    /** The loaded rendering data for each sprite, indexed by their numeric 
+    /** The loaded rendering data for each sprite, indexed by their numeric
         IDs */
     std::vector<SpriteRenderData> renderData;
 };

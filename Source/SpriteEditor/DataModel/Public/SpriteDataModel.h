@@ -15,8 +15,8 @@ namespace SpriteEditor
 {
 /**
  * A data model that holds our SpriteData.json project file in memory.
- * 
- * TODO: Find a way to combine the ClientLib/ServerLib/SpriteEditor logic for 
+ *
+ * TODO: Find a way to combine the ClientLib/ServerLib/SpriteEditor logic for
  *       parsing SpriteData.json.
  */
 class SpriteDataModel

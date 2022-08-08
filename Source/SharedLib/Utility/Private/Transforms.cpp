@@ -127,7 +127,7 @@ BoundingBox Transforms::modelToWorldCentered(const BoundingBox& modelBounds,
 }
 
 Position Transforms::boundsToEntityPosition(const BoundingBox& boundingBox,
-                                       const Sprite& sprite)
+                                            const Sprite& sprite)
 {
     // The box is centered on the entity's position by offsetting it by
     // half of the sprite's stage size. Remove this stage offset and the

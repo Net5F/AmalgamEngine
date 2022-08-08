@@ -53,7 +53,7 @@ public:
     /** The string ID of our default sprite for character entities. */
     static constexpr char DEFAULT_CHARACTER_SPRITE[] = "roberto_0";
 
-    /** The speed that entities will move at. Eventually we'll support 
+    /** The speed that entities will move at. Eventually we'll support
         dynamically setting this based on stats, for now it's a constant. */
     static constexpr double MOVEMENT_VELOCITY{50};
 

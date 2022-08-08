@@ -32,8 +32,7 @@ UserConfig::UserConfig()
     nlohmann::json json;
     try {
         json = nlohmann::json::parse(workingFile, nullptr, true, true);
-    }
-    catch (nlohmann::json::exception& e) {
+    } catch (nlohmann::json::exception& e) {
         LOG_FATAL("Failed to parse UserConfig.json: %s", e.what());
     }
 
@@ -76,7 +75,7 @@ void UserConfig::setWindowSize(ScreenRect inWindowSize)
     windowSizeHeight = inWindowSize.height;
 
     // If fullscreen is selected, use the desktop size instead.
-    // Note: SDL_GetDesktopDisplayMode() requires the SDL video subsystem 
+    // Note: SDL_GetDesktopDisplayMode() requires the SDL video subsystem
     //       to be initialized, so we have to check for that first.
     if ((fullscreenMode != 0) && SDL_WasInit(SDL_INIT_VIDEO)) {
         SDL_DisplayMode displayMode;
