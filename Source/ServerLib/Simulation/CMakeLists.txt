@@ -28,8 +28,6 @@ target_sources(ServerLib
 		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/Components/ClientSimData.h
-		Public/Components/Sprite.h
-		Public/TileMap/Tile.h
 		Public/TileMap/TileMap.h
 )
 

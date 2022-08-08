@@ -75,7 +75,7 @@ void ChunkStreamingSystem::addChunkToMessage(const ChunkPosition& chunkPosition,
                 = world.tileMap.getTile((startX + tileX), (startY + tileY));
             for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
                 unsigned int paletteID{
-                    chunk.getPaletteIndex(layer.sprite->numericID)};
+                    chunk.getPaletteIndex(layer.sprite.numericID)};
                 chunk.tiles[tileIndex].spriteLayers.push_back(paletteID);
             }
 

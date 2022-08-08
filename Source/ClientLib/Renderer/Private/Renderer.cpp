@@ -1,18 +1,17 @@
 #include "Renderer.h"
 #include "World.h"
 #include "UserInterface.h"
+#include "SpriteData.h"
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Sprite.h"
 #include "Camera.h"
 #include "IRendererExtension.h"
 #include "Transforms.h"
-#include "ClientTransforms.h"
 #include "MovementHelpers.h"
 #include "ScreenRect.h"
 #include "Log.h"
 #include "Ignore.h"
-
 #include <SDL_render.h>
 #include <SDL2_gfxPrimitives.h>
 
@@ -21,13 +20,14 @@ namespace AM
 namespace Client
 {
 Renderer::Renderer(SDL_Renderer* inSdlRenderer, World& inWorld,
-                   UserInterface& inUI,
+                   UserInterface& inUI, SpriteData& inSpriteData,
                    std::function<double(void)> inGetSimTickProgress)
 : sdlRenderer{inSdlRenderer}
 , world{inWorld}
 , ui{inUI}
+, spriteData{inSpriteData}
 , getSimTickProgress{inGetSimTickProgress}
-, worldSpritePreparer{world.registry, world.tileMap}
+, worldSpritePreparer{world.registry, world.tileMap, spriteData}
 , extension{nullptr}
 {
 }
@@ -116,14 +116,16 @@ void Renderer::setExtension(std::unique_ptr<IRendererExtension> inExtension)
 void Renderer::renderWorld(const Camera& camera, double alpha)
 {
     // Prepare sprites (bounds updating, screen position calcs, depth sorting).
-    std::vector<SpriteRenderInfo>& sprites{
+    std::vector<SpriteSortInfo>& sprites{
         worldSpritePreparer.prepareSprites(camera, alpha)};
 
     // Draw depth-sorted tiles and sprites.
     // Note: These are already culled during the gather step.
-    for (SpriteRenderInfo& spriteInfo : sprites) {
-        SDL_RenderCopy(sdlRenderer, spriteInfo.sprite->texture.get(),
-                       &(spriteInfo.sprite->textureExtent),
+    for (SpriteSortInfo& spriteInfo : sprites) {
+        const SpriteRenderData& renderData{
+            spriteData.getRenderData(spriteInfo.sprite->numericID)};
+        SDL_RenderCopy(sdlRenderer, renderData.texture.get(),
+                       &(renderData.textureExtent),
                        &(spriteInfo.screenExtent));
         //        drawBoundingBox(spriteInfo.worldBounds, camera);
     }

@@ -5,6 +5,7 @@ target_sources(SharedLib
         Private/TileMap/ChunkExtent.cpp
         Private/TileMap/ChunkPosition.cpp
         Private/TileMap/TileExtent.cpp
+        Private/TileMap/TileMapBase.cpp
         Private/TileMap/TilePosition.cpp
 	PUBLIC
         Public/BoundingBox.h
@@ -19,6 +20,7 @@ target_sources(SharedLib
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
+        Public/Components/Sprite.h
         Public/Components/Velocity.h
         Public/TileMap/CellExtent.h
         Public/TileMap/CellPosition.h
@@ -26,7 +28,9 @@ target_sources(SharedLib
         Public/TileMap/ChunkPosition.h
         Public/TileMap/ChunkSnapshot.h
         Public/TileMap/EmptySpriteID.h
+        Public/TileMap/Tile.h
         Public/TileMap/TileExtent.h
+        Public/TileMap/TileMapBase.h
         Public/TileMap/TileMapSnapshot.h
         Public/TileMap/TilePosition.h
         Public/TileMap/TileSnapshot.h

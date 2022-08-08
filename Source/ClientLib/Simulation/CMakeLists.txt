@@ -28,8 +28,6 @@ target_sources(ClientLib
 		Public/WorldSignals.h
 		Public/Components/InputHistory.h
 		Public/Components/NeedsAdjacentChunks.h
-		Public/Components/Sprite.h
-		Public/TileMap/Tile.h
 		Public/TileMap/TileMap.h
 )
 

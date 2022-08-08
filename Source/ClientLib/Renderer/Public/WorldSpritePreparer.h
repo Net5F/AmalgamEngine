@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SpriteRenderInfo.h"
+#include "SpriteSortInfo.h"
 #include "entt/entity/registry.hpp"
 #include <vector>
 
@@ -13,6 +13,8 @@ struct Camera;
 namespace Client
 {
 class TileMap;
+class SpriteData;
+
 /**
  * This class is responsible for figuring out which sprites from the world are
  * relevant to the current frame and providing them in a sorted, prepared form.
@@ -20,7 +22,8 @@ class TileMap;
 class WorldSpritePreparer
 {
 public:
-    WorldSpritePreparer(entt::registry& inRegistry, const TileMap& inTileMap);
+    WorldSpritePreparer(entt::registry& inRegistry, const TileMap& inTileMap,
+                        const SpriteData& inSpriteData);
 
     /**
      * Clears the stored sprite info and prepares the updated batch of sprites.
@@ -28,8 +31,8 @@ public:
      * @return A reference to a vector of all sprites that should be drawn
      *         on this frame, sorted in their proper draw order.
      */
-    std::vector<SpriteRenderInfo>& prepareSprites(const Camera& camera,
-                                                  double alpha);
+    std::vector<SpriteSortInfo>& prepareSprites(const Camera& camera,
+                                                double alpha);
 
 private:
     /**
@@ -67,7 +70,7 @@ private:
      * @param spriteInfo  The sprite that we're visiting.
      * @param depthValue  The next depth value to assign.
      */
-    void visitSprite(SpriteRenderInfo& spriteInfo, int& depthValue);
+    void visitSprite(SpriteSortInfo& spriteInfo, int& depthValue);
 
     /**
      * Returns true if any part of the given extent is within the given
@@ -78,20 +81,24 @@ private:
      */
     bool isWithinScreenBounds(const SDL_Rect& extent, const Camera& camera);
 
-    /** Registry reference used for gathering sprites. */
+    /** Used for gathering sprites. */
     entt::registry& registry;
-    /** World map reference used for gathering tiles. */
+
+    /** Used for gathering tiles. */
     const TileMap& tileMap;
+
+    /** Used for getting sprite render data. */
+    const SpriteData& spriteData;
 
     /** Stores the sorted sprite info from the last prepareSprites() call.
         Calculations and sorting are done in-place.
         Indices 0 - boxSpriteStartIndex have no bounding boxes (floors,
         carpets, etc). The rest are sprites with bounding boxes. */
-    std::vector<SpriteRenderInfo> sortedSprites;
+    std::vector<SpriteSortInfo> sortedSprites;
 
     /** Holds sprites that need to be sorted. Sprites are pushed during
         gatherSpriteInfo() and sorted during sortSpritesByDepth(). */
-    std::vector<SpriteRenderInfo> spritesToSort;
+    std::vector<SpriteSortInfo> spritesToSort;
 };
 
 } // End namespace Client

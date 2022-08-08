@@ -8,9 +8,10 @@
 namespace AM
 {
 struct Camera;
+struct Sprite;
 namespace Client
 {
-struct Sprite;
+struct SpriteRenderData;
 
 /**
  * Client-specific static functions for transforming between world and screen
@@ -26,7 +27,7 @@ public:
      * and sprite.
      */
     static SDL_Rect entityToScreenExtent(const Position& position,
-                                         const Sprite& sprite,
+                                         const SpriteRenderData& renderData,
                                          const Camera& camera);
 
     /**
@@ -36,7 +37,7 @@ public:
      * and sprite.
      */
     static SDL_Rect tileToScreenExtent(const TilePosition& position,
-                                       const Sprite& sprite,
+                                       const SpriteRenderData& renderData,
                                        const Camera& camera);
 };
 

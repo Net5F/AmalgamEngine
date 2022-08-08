@@ -19,9 +19,7 @@ namespace AM
 namespace Client
 {
 TileMap::TileMap(SpriteData& inSpriteData)
-: chunkExtent{}
-, tileExtent{}
-, spriteData{inSpriteData}
+: TileMapBase{inSpriteData}
 {
     if (Config::RUN_OFFLINE) {
         LOG_INFO("Offline mode. Constructing default tile map.");
@@ -32,7 +30,7 @@ TileMap::TileMap(SpriteData& inSpriteData)
         // Fill every tile with a ground layer.
         const Sprite& ground{spriteData.get("test_6")};
         for (Tile& tile : tiles) {
-            tile.spriteLayers.emplace_back(&ground, BoundingBox{});
+            tile.spriteLayers.emplace_back(ground, BoundingBox{});
         }
 
         // Add some rugs to layer 1.
@@ -71,74 +69,6 @@ void TileMap::setMapSize(unsigned int inMapXLengthChunks,
 
     // Resize the tiles vector to fit the map.
     tiles.resize(tileExtent.xLength * tileExtent.yLength);
-}
-
-void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
-                                 unsigned int layerIndex, const Sprite& sprite)
-{
-    // If the sprite has a bounding box, calculate its position.
-    BoundingBox worldBounds{};
-    if (sprite.hasBoundingBox) {
-        Position tilePosition{
-            static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),
-            static_cast<float>(tileY * SharedConfig::TILE_WORLD_WIDTH), 0};
-        worldBounds
-            = Transforms::modelToWorld(sprite.modelBounds, tilePosition);
-    }
-
-    // If the tile's layers vector isn't big enough, resize it.
-    // Note: This sets new layers to the "empty sprite".
-    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
-    if (tile.spriteLayers.size() <= layerIndex) {
-        const Sprite& emptySprite{spriteData.get(-1)};
-        tile.spriteLayers.resize((layerIndex + 1),
-                                 {&emptySprite, BoundingBox{}});
-    }
-
-    // Replace the sprite.
-    tile.spriteLayers[layerIndex] = {&sprite, worldBounds};
-}
-
-void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
-                                 unsigned int layerIndex,
-                                 const std::string& stringID)
-{
-    setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(stringID));
-}
-
-void TileMap::setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
-                                 unsigned int layerIndex, int numericID)
-{
-    setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(numericID));
-}
-
-void TileMap::clearTile(unsigned int tileX, unsigned int tileY)
-{
-    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
-    tile.spriteLayers.clear();
-}
-
-const Tile& TileMap::getTile(unsigned int x, unsigned int y) const
-{
-    unsigned int tileIndex{linearizeTileIndex(x, y)};
-    unsigned int maxTileIndex{
-        static_cast<unsigned int>(tileExtent.xLength * tileExtent.yLength)};
-    AM_ASSERT((tileIndex < maxTileIndex),
-              "Tried to get an out of bounds tile. tileIndex: %u, max: %u",
-              tileIndex, maxTileIndex);
-    ignore(maxTileIndex);
-
-    return tiles[tileIndex];
-}
-
-const ChunkExtent& TileMap::getChunkExtent() const
-{
-    return chunkExtent;
-}
-
-const TileExtent& TileMap::getTileExtent() const
-{
-    return tileExtent;
 }
 
 } // End namespace Client

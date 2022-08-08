@@ -89,8 +89,8 @@ public:
                 // For each sprite layer in this tile.
                 for (const auto& layer : tile.spriteLayers) {
                     // If this layer doesn't have a bounding box, skip it.
-                    if ((layer.sprite->numericID == EMPTY_SPRITE_ID)
-                        || !(layer.sprite->hasBoundingBox)) {
+                    if ((layer.sprite.numericID == EMPTY_SPRITE_ID)
+                        || !(layer.sprite.hasBoundingBox)) {
                         continue;
                     }
 

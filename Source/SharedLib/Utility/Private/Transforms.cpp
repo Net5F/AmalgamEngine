@@ -3,6 +3,7 @@
 #include "ScreenPoint.h"
 #include "Camera.h"
 #include "BoundingBox.h"
+#include "Sprite.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include <cmath>
@@ -123,6 +124,27 @@ BoundingBox Transforms::modelToWorldCentered(const BoundingBox& modelBounds,
     offsetBounds.maxZ = position.z + modelBounds.maxZ;
 
     return offsetBounds;
+}
+
+Position Transforms::boundsToEntityPosition(const BoundingBox& boundingBox,
+                                       const Sprite& sprite)
+{
+    // The box is centered on the entity's position by offsetting it by
+    // half of the sprite's stage size. Remove this stage offset and the
+    // model offset to find the X/Y position.
+    // Note: This assumes that the sprite's stage is 1 tile large. When we
+    //       add support for other sizes, this will need to be updated.
+    Position position{};
+    position.x = boundingBox.minX - sprite.modelBounds.minX
+                 + (SharedConfig::TILE_WORLD_WIDTH / 2);
+    position.y = boundingBox.minY - sprite.modelBounds.minY
+                 + (SharedConfig::TILE_WORLD_WIDTH / 2);
+
+    // The bottom of the stage is flush with the entity's position, so we
+    // only need to remove the model offset.
+    position.z = boundingBox.minZ - sprite.modelBounds.minZ;
+
+    return position;
 }
 
 } // End namespace AM

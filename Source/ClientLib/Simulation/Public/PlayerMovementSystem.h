@@ -11,13 +11,13 @@ struct PreviousPosition;
 struct Velocity;
 struct Input;
 struct BoundingBox;
+struct Sprite;
 
 namespace Client
 {
 class Simulation;
 class World;
 class Network;
-struct Sprite;
 
 struct InputHistory;
 

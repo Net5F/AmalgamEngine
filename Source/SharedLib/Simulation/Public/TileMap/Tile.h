@@ -2,12 +2,9 @@
 
 #include "Sprite.h"
 #include "BoundingBox.h"
-#include "SharedConfig.h"
 #include <vector>
 
 namespace AM
-{
-namespace Client
 {
 /**
  * A 32x32-unit tile in the tile map.
@@ -25,7 +22,7 @@ public:
      */
     struct SpriteLayer {
         /** The sprite that this layer contains. */
-        const Sprite* sprite{nullptr};
+        Sprite sprite{};
 
         /** If sprite.hasBoundingBox == true, this is the sprite's modelBounds
             moved to match the tile's world position.
@@ -42,5 +39,4 @@ public:
     std::vector<SpriteLayer> spriteLayers;
 };
 
-} // End namespace Client
 } // End namespace AM

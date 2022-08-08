@@ -34,6 +34,7 @@ Application::Application()
 , simCaller(std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
 , renderer(sdlRenderer.Get(), simulation.getWorld(), userInterface,
+           spriteData, 
            std::bind_front(&PeriodicCaller::getProgress, &simCaller))
 , rendererCaller(std::bind_front(&Renderer::render, &renderer),
                  UserConfig::get().getFrameTimestepS(), "Renderer", true)

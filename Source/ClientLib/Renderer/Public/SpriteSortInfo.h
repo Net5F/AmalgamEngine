@@ -11,7 +11,7 @@ namespace Client
  * Used for storing information relevant to sorting and rendering a sprite
  * on a given frame.
  */
-struct SpriteRenderInfo {
+struct SpriteSortInfo {
     /** The sprite that is associated with this render information. */
     const Sprite* sprite;
 
@@ -38,7 +38,7 @@ struct SpriteRenderInfo {
 
     /** The sprites that are behind this sprite in the current frame.
         Necessary for our topological sort. */
-    std::vector<SpriteRenderInfo*> spritesBehind{};
+    std::vector<SpriteSortInfo*> spritesBehind{};
 
     /** True if this sprite has been visited on the current topological
         sort pass. */

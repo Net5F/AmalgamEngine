@@ -6,7 +6,8 @@ target_sources(ClientLib
         Public/IRendererExtension.h
         Public/Renderer.h
         Public/RendererExDependencies.h
-        Public/SpriteRenderInfo.h
+        Public/SpriteRenderData.h
+        Public/SpriteSortInfo.h
         Public/WorldSpritePreparer.h
 )
 

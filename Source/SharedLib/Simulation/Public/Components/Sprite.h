@@ -1,38 +1,36 @@
 #pragma once
 
 #include "BoundingBox.h"
+#include "EmptySpriteID.h"
 #include <SDL_rect.h>
 #include <string>
 
 namespace AM
-{
-namespace Server
 {
 /**
  * Holds the data for a single sprite from SpriteData.json.
  *
  * World position should be read from an associated Position component (if
  * this sprite is attached to an entity), or derived from an associated Tile.
- *
- * Note: If needed, a potential optimization would be to remove displayName 
- *       and stringID and have them available through maps (with numericID 
- *       keys).
  */
 struct Sprite {
 public:
-    /** Unique display name, shown in the UI.  */
-    std::string displayName{"Empty"};
-
-    /** The sprite's unique string ID. Derived from displayName by replacing
-        spaces with underscores and making everything lowercase.
-        This ID will be consistent, and can be used for persistent state. */
-    std::string stringID{"empty"};
+    /**
+     * The sprite's display name and string ID fields are stored in flat 
+     * vectors in the SpriteDataBase class, since they aren't commonly accessed
+     * alongside the fields in this struct. 
+     * See SpriteDataBase::getDisplayName() and SpriteDataBase::getStringID(), 
+     * accessible through Client::SpriteData, Server::SpriteData.
+     *
+     * Additionally, the client stores the sprite's rendering-related data in 
+     * the SpriteRenderData class. See Client::SpriteData::getRenderData().
+     */
 
     /** The sprite's unique numeric identifier.
         This value can be used safely at runtime, but shouldn't be used for
         persistent state since it may change when SpriteData.json is
         modified. */
-    int numericID{-1};
+    int numericID{EMPTY_SPRITE_ID};
 
     /** True if this sprite has a bounding box, else false.
         Things like floors and carpets share bounds with their tile, so they
@@ -43,5 +41,4 @@ public:
     BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
 };
 
-} // namespace Server
 } // namespace AM

@@ -7,6 +7,7 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Velocity.h"
+#include "Sprite.h"
 #include "Config.h"
 #include "entt/entity/registry.hpp"
 

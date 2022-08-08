@@ -2,6 +2,7 @@
 #include "Transforms.h"
 #include "Camera.h"
 #include "Sprite.h"
+#include "SpriteRenderData.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include <cmath>
@@ -11,7 +12,7 @@ namespace AM
 namespace Client
 {
 SDL_Rect ClientTransforms::entityToScreenExtent(const Position& position,
-                                                const Sprite& sprite,
+                                                const SpriteRenderData& renderData,
                                                 const Camera& camera)
 {
     // Transform the position to a point in screen space.
@@ -22,11 +23,11 @@ SDL_Rect ClientTransforms::entityToScreenExtent(const Position& position,
 
     // Offset the sprite horizontally to line up with our tile positioning.
     // Note: We assume the sprite's x = 0 point is in its horizontal center.
-    screenPoint.x -= ((sprite.textureExtent.w / 2.f) * camera.zoomFactor);
+    screenPoint.x -= ((renderData.textureExtent.w / 2.f) * camera.zoomFactor);
 
     // An iso sprite may have extra vertical space to show depth, we subtract
     // that space to align it.
-    screenPoint.y -= (sprite.yOffset * camera.zoomFactor);
+    screenPoint.y -= (renderData.yOffset * camera.zoomFactor);
 
     // screenPoint currently would give us a rect that starts at the given
     // position instead of being centered on it. Pull the point back by a half
@@ -44,15 +45,15 @@ SDL_Rect ClientTransforms::entityToScreenExtent(const Position& position,
 
     // Apply the camera's zoom to the sprite size.
     int zoomedWidth{static_cast<int>(
-        std::round(sprite.textureExtent.w * camera.zoomFactor))};
+        std::round(renderData.textureExtent.w * camera.zoomFactor))};
     int zoomedHeight{static_cast<int>(
-        std::round(sprite.textureExtent.h * camera.zoomFactor))};
+        std::round(renderData.textureExtent.h * camera.zoomFactor))};
 
     return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 }
 
 SDL_Rect ClientTransforms::tileToScreenExtent(const TilePosition& position,
-                                              const Sprite& sprite,
+                                              const SpriteRenderData& renderData,
                                               const Camera& camera)
 {
     // Convert tile position to isometric screen position.
@@ -67,7 +68,7 @@ SDL_Rect ClientTransforms::tileToScreenExtent(const TilePosition& position,
 
     // An iso sprite may have extra vertical space to show depth, we subtract
     // that space to align it.
-    screenY -= sprite.yOffset;
+    screenY -= renderData.yOffset;
 
     // Apply the camera zoom.
     screenX *= camera.zoomFactor;
@@ -79,9 +80,9 @@ SDL_Rect ClientTransforms::tileToScreenExtent(const TilePosition& position,
 
     // Apply the camera's zoom to the tile size.
     int zoomedWidth{static_cast<int>(
-        std::round(sprite.textureExtent.w * camera.zoomFactor))};
+        std::round(renderData.textureExtent.w * camera.zoomFactor))};
     int zoomedHeight{static_cast<int>(
-        std::round(sprite.textureExtent.h * camera.zoomFactor))};
+        std::round(renderData.textureExtent.h * camera.zoomFactor))};
 
     return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 }

@@ -114,8 +114,6 @@ void Simulation::connect()
     registry.emplace<Input>(newEntity);
 
     // Set up the player's visual components.
-    // TODO: Since sprite components hold static data, do we want them to
-    //       just contain a ref to the actual data? Or is this copy better?
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};
     Sprite& playerSprite{

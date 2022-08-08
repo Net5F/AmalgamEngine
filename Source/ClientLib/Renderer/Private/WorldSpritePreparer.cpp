@@ -7,7 +7,8 @@
 #include "ClientTransforms.h"
 #include "TileExtent.h"
 #include "SharedConfig.h"
-#include "EmptySpriteID.h"
+#include "SpriteData.h"
+#include "SpriteRenderData.h"
 #include "Ignore.h"
 #include <SDL_rect.h>
 #include <cmath>
@@ -18,15 +19,17 @@ namespace AM
 namespace Client
 {
 WorldSpritePreparer::WorldSpritePreparer(entt::registry& inRegistry,
-                                         const TileMap& inTileMap)
+                                         const TileMap& inTileMap,
+                                         const SpriteData& inSpriteData)
 : registry(inRegistry)
 , tileMap{inTileMap}
+, spriteData{inSpriteData}
 , sortedSprites{}
 , spritesToSort{}
 {
 }
 
-std::vector<SpriteRenderInfo>&
+std::vector<SpriteSortInfo>&
     WorldSpritePreparer::prepareSprites(const Camera& camera, double alpha)
 {
     // Clear the old data.
@@ -40,7 +43,7 @@ std::vector<SpriteRenderInfo>&
     sortSpritesByDepth();
 
     // Push the now-sorted sprites into the sorted vector.
-    for (SpriteRenderInfo& sprite : spritesToSort) {
+    for (SpriteSortInfo& sprite : spritesToSort) {
         sortedSprites.push_back(sprite);
     }
 
@@ -89,13 +92,15 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
             // Push all of this tile's sprites into the appropriate vector.
             for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
                 // If the layer is empty, skip it.
-                if (layer.sprite->numericID == EMPTY_SPRITE_ID) {
+                if (layer.sprite.numericID == EMPTY_SPRITE_ID) {
                     continue;
                 }
 
                 // Get iso screen extent for this sprite.
+                const SpriteRenderData& renderData{
+                    spriteData.getRenderData(layer.sprite.numericID)};
                 SDL_Rect screenExtent{ClientTransforms::tileToScreenExtent(
-                    {x, y}, *(layer.sprite), camera)};
+                    {x, y}, renderData, camera)};
 
                 // If this sprite isn't on screen, skip it.
                 if (!isWithinScreenBounds(screenExtent, camera)) {
@@ -103,14 +108,14 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
                 }
 
                 // If this sprite has a bounding box, push it to be sorted.
-                if (layer.sprite->hasBoundingBox) {
-                    spritesToSort.emplace_back(layer.sprite, layer.worldBounds,
+                if (layer.sprite.hasBoundingBox) {
+                    spritesToSort.emplace_back(&(layer.sprite), layer.worldBounds,
                                                screenExtent);
                 }
                 else {
                     // No bounding box, push it straight into the sorted
                     // sprites vector.
-                    sortedSprites.emplace_back(layer.sprite, BoundingBox{},
+                    sortedSprites.emplace_back(&(layer.sprite), BoundingBox{},
                                                screenExtent);
                 }
             }
@@ -128,8 +133,10 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
             MovementHelpers::interpolatePosition(previousPos, position, alpha)};
 
         // Get the iso screen extent for the lerped sprite.
-        SDL_Rect screenExtent{
-            ClientTransforms::entityToScreenExtent(lerp, sprite, camera)};
+        const SpriteRenderData& renderData{
+            spriteData.getRenderData(sprite.numericID)};
+        SDL_Rect screenExtent{ClientTransforms::entityToScreenExtent(
+            lerp, renderData, camera)};
 
         // If the sprite is on screen, push the render info.
         if (isWithinScreenBounds(screenExtent, camera)) {
@@ -150,14 +157,14 @@ void WorldSpritePreparer::sortSpritesByDepth()
 
     // Calculate depth values.
     int depthValue{0};
-    for (SpriteRenderInfo& spriteInfo : spritesToSort) {
+    for (SpriteSortInfo& spriteInfo : spritesToSort) {
         visitSprite(spriteInfo, depthValue);
     }
 
     // Sort sprites by depth.
     std::sort(
         spritesToSort.begin(), spritesToSort.end(),
-        [](const SpriteRenderInfo& lhs, const SpriteRenderInfo& rhs) -> bool {
+        [](const SpriteSortInfo& lhs, const SpriteSortInfo& rhs) -> bool {
             return lhs.depthValue < rhs.depthValue;
         });
 }
@@ -168,8 +175,8 @@ void WorldSpritePreparer::calcDepthDependencies()
     for (unsigned int i = 0; i < spritesToSort.size(); ++i) {
         for (unsigned int j = 0; j < spritesToSort.size(); ++j) {
             if (i != j) {
-                SpriteRenderInfo& spriteA{spritesToSort[i]};
-                SpriteRenderInfo& spriteB{spritesToSort[j]};
+                SpriteSortInfo& spriteA{spritesToSort[i]};
+                SpriteSortInfo& spriteB{spritesToSort[j]};
 
                 if ((spriteB.worldBounds.minX < spriteA.worldBounds.maxX)
                     && (spriteB.worldBounds.minY < spriteA.worldBounds.maxY)
@@ -182,7 +189,7 @@ void WorldSpritePreparer::calcDepthDependencies()
     }
 }
 
-void WorldSpritePreparer::visitSprite(SpriteRenderInfo& spriteInfo,
+void WorldSpritePreparer::visitSprite(SpriteSortInfo& spriteInfo,
                                       int& depthValue)
 {
     if (!(spriteInfo.visited)) {
