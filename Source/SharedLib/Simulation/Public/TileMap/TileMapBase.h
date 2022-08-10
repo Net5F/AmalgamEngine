@@ -27,35 +27,38 @@ public:
     TileMapBase(SpriteDataBase& inSpriteData);
 
     /**
-     * Sets the specified sprite layer to the given sprite.
+     * Sets the given sprite layer to the given tile.
      *
-     * If the specified tile's spriteLayers vector isn't big enough, resizes
+     * If the given tile's spriteLayers vector isn't big enough, resizes
      * it. Any tiles added during resizing will be default initialized to
      * the "empty sprite".
      *
      * Note: There's no bounds checking on tileX/tileY. It's on you to make
      *       sure they're valid.
      */
-    void setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
+    void setTileSpriteLayer(int tileX, int tileY,
                             unsigned int layerIndex, const Sprite& sprite);
 
     /**
      * Overload for sprite string IDs.
      */
-    void setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
+    void setTileSpriteLayer(int tileX, int tileY,
                             unsigned int layerIndex,
                             const std::string& stringID);
 
     /**
      * Overload for sprite numeric IDs.
      */
-    void setTileSpriteLayer(unsigned int tileX, unsigned int tileY,
+    void setTileSpriteLayer(int tileX, int tileY,
                             unsigned int layerIndex, int numericID);
 
     /**
-     * Clears all sprite layers out of the tile at the given index.
+     * Clears all sprite layers out of the given tile.
+     *
+     * Note: There's no bounds checking on tileX/tileY. It's on you to make
+     *       sure they're valid.
      */
-    void clearTile(unsigned int tileX, unsigned int tileY);
+    void clearTile(int tileX, int tileY);
 
     /**
      * Gets a const reference to the tile at the given coordinates.

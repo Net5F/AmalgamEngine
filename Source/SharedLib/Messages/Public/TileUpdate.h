@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MessageType.h"
+#include "EmptySpriteID.h"
 #include <SDL_stdinc.h>
 
 namespace AM
@@ -12,7 +13,7 @@ struct TileUpdate {
 public:
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE = MessageType::TileUpdate;
+    static constexpr MessageType MESSAGE_TYPE{MessageType::TileUpdate};
 
     /** The X coordinate of the tile to update. */
     int tileX{0};
@@ -24,7 +25,7 @@ public:
     Uint8 layerIndex{0};
 
     /** The new sprite's numeric ID. */
-    int numericID{-1};
+    int numericID{EMPTY_SPRITE_ID};
 };
 
 template<typename S>

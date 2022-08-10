@@ -154,7 +154,7 @@ void ChunkUpdateSystem::applyChunkSnapshot(const ChunkWireSnapshot& chunk)
             world.tileMap.clearTile(currentTileX, currentTileY);
 
             // Copy all of the snapshot tile's sprite layers to our map tile.
-            const TileSnapshot& tileSnapshot = chunk.tiles[tileIndex];
+            const TileSnapshot& tileSnapshot{chunk.tiles[tileIndex]};
             unsigned int layerIndex{0};
             for (Uint8 paletteID : tileSnapshot.spriteLayers) {
                 // Add the sprite layer to the tile.
