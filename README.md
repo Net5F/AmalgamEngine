@@ -1,4 +1,8 @@
+
 ## The Amalgam Engine - An engine for easily creating virtual worlds
+
+Feel free to join the discord: https://discord.gg/EA2Sg3ar74
+
 [![Watch 150 clients in 1 area load test](https://img.youtube.com/vi/N7eCfXj04cE/maxresdefault.jpg)](https://youtu.be/N7eCfXj04cE)
 <p align="center">
    <i>One of our single-area load tests - 150 clients constantly moving. Click to watch.</i>
