@@ -32,6 +32,12 @@ void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
     std::vector<Tile::SpriteLayer>& spriteLayers{tile.spriteLayers};
 
+    // If the layer is already set to the given sprite, exit early.
+    if ((spriteLayers.size() >= layerIndex)
+        && (spriteLayers[layerIndex].sprite.numericID == sprite.numericID)) {
+        return;
+    }
+
     // If we're being asked to set the highest layer in the tile to the empty 
     // sprite, erase it and any empties below it instead (to reduce space).
     if ((sprite.numericID == EMPTY_SPRITE_ID) 
@@ -87,10 +93,70 @@ void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
     setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(numericID));
 }
 
-void TileMapBase::clearTile(int tileX, int tileY)
+bool TileMapBase::clearTile(int tileX, int tileY)
 {
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+
+    bool layersWereCleared{false};
+    if (tile.spriteLayers.size() > 0) {
+        layersWereCleared = true;
+    }
+
     tile.spriteLayers.clear();
+    return layersWereCleared;
+}
+
+bool TileMapBase::clearTile(int tileX, int tileY,
+    unsigned int startLayerIndex)
+{
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+    std::vector<Tile::SpriteLayer>& spriteLayers{tile.spriteLayers};
+
+    // If the start index is beyond this tile's highest layer, return false.
+    if ((startLayerIndex + 1) > spriteLayers.size()) {
+        return false;
+    }
+
+    // Erase the chosen layers and return true.
+    spriteLayers.erase((spriteLayers.begin() + startLayerIndex),
+                       spriteLayers.end());
+    return true;
+}
+
+bool TileMapBase::clearExtent(TileExtent extent)
+{
+    bool layersWereCleared{false};
+
+    // Clear every tile in the given extent.
+    int xMax{extent.x + extent.xLength};
+    int yMax{extent.y + extent.yLength};
+    for (int x = extent.x; x < xMax; ++x) {
+        for (int y = extent.y; y < yMax; ++y) {
+            if (clearTile(x, y)) {
+                layersWereCleared = true;
+            }
+        }
+    }
+
+    return layersWereCleared;
+}
+
+bool TileMapBase::clearExtent(TileExtent extent, unsigned int startLayerIndex)
+{
+    bool layersWereCleared{false};
+
+    // Clear every layer above startLayerIndex in the given extent.
+    int xMax{extent.x + extent.xLength};
+    int yMax{extent.y + extent.yLength};
+    for (int x = extent.x; x < xMax; ++x) {
+        for (int y = extent.y; y < yMax; ++y) {
+            if (clearTile(x, y, startLayerIndex)) {
+                layersWereCleared = true;
+            }
+        }
+    }
+
+    return layersWereCleared;
 }
 
 const Tile& TileMapBase::getTile(unsigned int x, unsigned int y) const

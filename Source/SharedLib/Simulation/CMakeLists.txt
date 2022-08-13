@@ -10,8 +10,9 @@ target_sources(SharedLib
 	PUBLIC
         Public/BoundingBox.h
         Public/DiscreteExtent.h
-        Public/DiscretePosition.h
         Public/DiscreteImpl.h
+        Public/DiscretePosition.h
+        Public/EmptySpriteID.h
         Public/EntityLocator.h
         Public/MovementHelpers.h
         Public/Components/Camera.h
@@ -27,7 +28,6 @@ target_sources(SharedLib
         Public/TileMap/ChunkExtent.h
         Public/TileMap/ChunkPosition.h
         Public/TileMap/ChunkSnapshot.h
-        Public/TileMap/EmptySpriteID.h
         Public/TileMap/Tile.h
         Public/TileMap/TileExtent.h
         Public/TileMap/TileMapBase.h

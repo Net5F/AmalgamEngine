@@ -4,6 +4,7 @@
 #include "ChunkExtent.h"
 #include "TileExtent.h"
 #include <vector>
+#include <unordered_set>
 
 namespace AM
 {
@@ -57,8 +58,43 @@ public:
      *
      * Note: There's no bounds checking on tileX/tileY. It's on you to make
      *       sure they're valid.
+     *
+     * @return true if any layers were cleared. false if the tile was empty.
      */
-    void clearTile(int tileX, int tileY);
+    bool clearTile(int tileX, int tileY);
+
+    /**
+     * Overload for clearing a chosen layer and all layers above it.
+     *
+     * @param startLayerIndex  The layer index to start clearing at.
+     *                         E.g. If 1, layers 1 - end will be cleared and 
+     *                         layer 0 will remain untouched.
+     * @return true if any layers were cleared. false if startLayerIndex was 
+     *         too high to match any layers in the given tile.
+     */
+    bool clearTile(int tileX, int tileY,
+                   unsigned int startLayerIndex);
+
+    /**
+     * Clears sprite layers out of all tiles within the given extent.
+     *
+     * Note: There's no bounds checking on the given extent. It's on you to make
+     *       sure the indices are valid.
+     *
+     * @return true if any layers were cleared. false if all tiles were empty.
+     */
+    bool clearExtent(TileExtent extent);
+
+    /**
+     * Overload for clearing a chosen layer and all layers above it.
+     *
+     * @param startLayerIndex  The layer index to start clearing at.
+     *                         E.g. If 1, layers 1 - end will be cleared and 
+     *                         layer 0 will remain untouched.
+     * @return true if any layers were cleared. false if startLayerIndex was 
+     *         too high to match any layers in the given tile.
+     */
+    bool clearExtent(TileExtent extent, unsigned int startLayerIndex);
 
     /**
      * Gets a const reference to the tile at the given coordinates.
@@ -74,14 +110,6 @@ public:
      * Returns the map extent, with tiles as the unit.
      */
     const TileExtent& getTileExtent() const;
-
-    /**
-     * Saves the map to a file with the given name, placed in the same
-     * directory as the program binary.
-     *
-     * @param fileName  The file name to save to, with no path prepended.
-     */
-    void save(const std::string& fileName);
 
 protected:
     /**

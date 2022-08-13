@@ -128,24 +128,6 @@ std::vector<entt::entity>&
 }
 
 std::vector<entt::entity>&
-    EntityLocator::getEntitiesFine(const Position& cylinderCenter,
-                                   unsigned int radius)
-{
-    // Run a coarse pass.
-    getEntitiesCoarse(cylinderCenter, radius);
-
-    // Erase any entities that don't actually intersect the cylinder.
-    auto view{registry.view<BoundingBox>()};
-    std::erase_if(returnVector,
-                  [&view, &cylinderCenter, radius](entt::entity entity) {
-                      BoundingBox& boundingBox{view.get<BoundingBox>(entity)};
-                      return !(boundingBox.intersects(cylinderCenter, radius));
-                  });
-
-    return returnVector;
-}
-
-std::vector<entt::entity>&
     EntityLocator::getEntitiesCoarse(const TileExtent& tileExtent)
 {
     // Clear the return vector.
@@ -179,6 +161,33 @@ std::vector<entt::entity>&
 }
 
 std::vector<entt::entity>&
+    EntityLocator::getEntitiesCoarse(const ChunkExtent& chunkExtent)
+{
+    // Convert to TileExtent.
+    TileExtent tileExtent{chunkExtent};
+
+    return getEntitiesCoarse(tileExtent);
+}
+
+std::vector<entt::entity>&
+    EntityLocator::getEntitiesFine(const Position& cylinderCenter,
+                                   unsigned int radius)
+{
+    // Run a coarse pass.
+    getEntitiesCoarse(cylinderCenter, radius);
+
+    // Erase any entities that don't actually intersect the cylinder.
+    auto view{registry.view<BoundingBox>()};
+    std::erase_if(returnVector,
+                  [&view, &cylinderCenter, radius](entt::entity entity) {
+                      BoundingBox& boundingBox{view.get<BoundingBox>(entity)};
+                      return !(boundingBox.intersects(cylinderCenter, radius));
+                  });
+
+    return returnVector;
+}
+
+std::vector<entt::entity>&
     EntityLocator::getEntitiesFine(const TileExtent& tileExtent)
 {
     // Run a coarse pass.
@@ -192,15 +201,6 @@ std::vector<entt::entity>&
     });
 
     return returnVector;
-}
-
-std::vector<entt::entity>&
-    EntityLocator::getEntitiesCoarse(const ChunkExtent& chunkExtent)
-{
-    // Convert to TileExtent.
-    TileExtent tileExtent{chunkExtent};
-
-    return getEntitiesCoarse(tileExtent);
 }
 
 std::vector<entt::entity>&

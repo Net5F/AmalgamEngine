@@ -62,6 +62,17 @@ public:
                                                  unsigned int radius);
 
     /**
+     * Overload for TileExtent.
+     */
+    std::vector<entt::entity>& getEntitiesCoarse(const TileExtent& tileExtent);
+
+    /**
+     * Overload for ChunkExtent.
+     */
+    std::vector<entt::entity>&
+        getEntitiesCoarse(const ChunkExtent& chunkExtent);
+
+    /**
      * Performs a fine pass to return all entities that intersect the given
      * cylinder.
      *
@@ -74,18 +85,7 @@ public:
     /**
      * Overload for TileExtent.
      */
-    std::vector<entt::entity>& getEntitiesCoarse(const TileExtent& tileExtent);
-
-    /**
-     * Overload for TileExtent.
-     */
     std::vector<entt::entity>& getEntitiesFine(const TileExtent& tileExtent);
-
-    /**
-     * Overload for ChunkExtent.
-     */
-    std::vector<entt::entity>&
-        getEntitiesCoarse(const ChunkExtent& chunkExtent);
 
     /**
      * Overload for ChunkExtent.

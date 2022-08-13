@@ -52,7 +52,7 @@ void Simulation::tick()
 
     // Call the project's pre-movement logic.
     if (extension != nullptr) {
-        extension->afterMapAndLifetimeUpdates();
+        extension->afterMapAndConnectionUpdates();
     }
 
     // Receive and process client input messages.

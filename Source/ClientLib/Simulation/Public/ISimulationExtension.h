@@ -28,9 +28,9 @@ public:
     virtual void beforeAll() = 0;
 
     /**
-     * Called after the tile map is updated and NPCs are added/removed.
+     * Called after the tile map is updated and peer entities are added/removed.
      */
-    virtual void afterMapAndLifetimeUpdates() = 0;
+    virtual void afterMapAndConnectionUpdates() = 0;
 
     /**
      * Called after all entity movement has been processed.
