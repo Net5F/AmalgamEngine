@@ -33,7 +33,7 @@ void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
     std::vector<Tile::SpriteLayer>& spriteLayers{tile.spriteLayers};
 
     // If the layer is already set to the given sprite, exit early.
-    if ((spriteLayers.size() >= layerIndex)
+    if ((spriteLayers.size() > layerIndex)
         && (spriteLayers[layerIndex].sprite.numericID == sprite.numericID)) {
         return;
     }

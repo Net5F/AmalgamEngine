@@ -20,19 +20,16 @@
 using namespace AM;
 using namespace AM::LTC;
 
-/** Default number of simulated clients if no argument is given. */
-static constexpr unsigned int DEFAULT_NUM_CLIENTS = 10;
-
-/** Default time to wait, in milliseconds, between connecting clients. */
-static constexpr unsigned int DEFAULT_CONNECTION_WAIT_TIME_MS = 1;
-
 void printUsage()
 {
     std::printf(
-        "Usage: LoadTestClientMain.exe <NumClients> <ConnectionWaitTime>\n"
-        "  NumClients: How many clients to simulate. Default: 10.\n"
+        "Usage: LoadTestClientMain.exe <NumClients> <InputsPerSecond> "
+        "<ConnectionWaitTime>\n"
+        "  NumClients: How many clients to simulate.\n"
+        "  InputsPerSecond: How many times each client should change movement "
+        "direction per second.\n"
         "  ConnectionWaitTime: How long, in milliseconds, to wait between"
-        " connecting clients. Default: 1.\n");
+        " client connections.\n");
 }
 
 void connectClients(unsigned int numClients, unsigned int connectionWaitTimeMs,
@@ -55,7 +52,12 @@ void connectClients(unsigned int numClients, unsigned int connectionWaitTimeMs,
 
 int main(int argc, char** argv)
 try {
-    if (argc > 3) {
+    if (argc > 4) {
+        std::printf("Too many arguments.\n");
+        printUsage();
+        return 1;
+    }
+    else if (argc < 4) {
         std::printf("Too many arguments.\n");
         printUsage();
         return 1;
@@ -73,10 +75,10 @@ try {
     //    Log::enableFileLogging("LoadTestClient.log");
 
     // Check for a NumClients argument.
-    unsigned int numClients{DEFAULT_NUM_CLIENTS};
+    unsigned int numClients{};
     if (argc > 1) {
         char* end;
-        int input = std::strtol(argv[1], &end, 10);
+        int input{std::strtol(argv[1], &end, 10)};
         if ((*end != '\0') || (input < 1)) {
             // Input didn't parse into an integer, or value was less than 1.
             std::printf("Invalid input: %s\n", argv[1]);
@@ -88,14 +90,30 @@ try {
         }
     }
 
-    // Check for a ConnectionWaitTime argument.
-    unsigned int connectionWaitTimeMs{DEFAULT_CONNECTION_WAIT_TIME_MS};
+    // Check for a InputRate argument.
+    unsigned int inputsPerSecond{};
     if (argc > 2) {
         char* end;
-        int input = std::strtol(argv[2], &end, 10);
-        if ((*end != '\0') || (input < 1)) {
-            // Input didn't parse into a float, or value was less than 1.
-            std::printf("Invalid input: %s\n", argv[1]);
+        int input{std::strtol(argv[2], &end, 10)};
+        if ((*end != '\0')) {
+            // Input didn't parse into a valid integer.
+            std::printf("Invalid input: %s\n", argv[2]);
+            printUsage();
+            return 1;
+        }
+        else {
+            inputsPerSecond = static_cast<unsigned int>(input);
+        }
+    }
+
+    // Check for a ConnectionWaitTime argument.
+    unsigned int connectionWaitTimeMs{};
+    if (argc > 3) {
+        char* end;
+        int input{std::strtol(argv[3], &end, 10)};
+        if ((*end != '\0')) {
+            // Input didn't parse into a valid integer.
+            std::printf("Invalid input: %s\n", argv[3]);
             printUsage();
             return 1;
         }
@@ -107,7 +125,7 @@ try {
     // Construct the clients.
     std::vector<std::unique_ptr<SimulatedClient>> clients;
     for (unsigned int i = 0; i < numClients; ++i) {
-        clients.push_back(std::make_unique<SimulatedClient>());
+        clients.push_back(std::make_unique<SimulatedClient>(inputsPerSecond));
         clients[i]->setNetstatsLoggingEnabled(false);
     }
 

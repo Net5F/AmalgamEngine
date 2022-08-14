@@ -29,7 +29,7 @@ class WorldSimulation
 {
 public:
     WorldSimulation(EventDispatcher& inNetworkEventDispatcher,
-                    Client::Network& inNetwork);
+                    Client::Network& inNetwork, unsigned int inInputsPerSecond);
 
     /**
      * Requests to connect to the game server, waits for a ConnectionResponse.
@@ -51,12 +51,7 @@ private:
 
     /** How long the sim should wait for the server to send a connection
         response, in microseconds. */
-    static constexpr int CONNECTION_RESPONSE_WAIT_US = 1 * 1000 * 1000;
-
-    /** How often to send inputs. */
-    static constexpr double INPUT_RATE_S = (1 / 4.0);
-    static constexpr unsigned int INPUT_RATE_TICKS = static_cast<unsigned int>(
-        SharedConfig::SIM_TICKS_PER_SECOND * INPUT_RATE_S);
+    static constexpr int CONNECTION_RESPONSE_WAIT_US{1 * 1000 * 1000};
 
     Client::Network& network;
 
@@ -71,6 +66,9 @@ private:
      * Initialized based on the number that the server tells us it's on.
      */
     std::atomic<Uint32> currentTick;
+
+    /** How many times we should send a new input, per second. */
+    const unsigned int inputsPerSecond;
 
     /** How many ticks are left until we need to send another input message. */
     unsigned int ticksTillInput;

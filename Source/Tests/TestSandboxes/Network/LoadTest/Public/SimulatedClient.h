@@ -19,7 +19,7 @@ namespace LTC
 class SimulatedClient
 {
 public:
-    SimulatedClient();
+    SimulatedClient(unsigned int inInputsPerSecond);
 
     /**
      * Calls worldSim.connect().

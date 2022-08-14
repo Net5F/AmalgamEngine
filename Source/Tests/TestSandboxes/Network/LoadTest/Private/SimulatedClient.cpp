@@ -5,11 +5,11 @@ namespace AM
 {
 namespace LTC
 {
-SimulatedClient::SimulatedClient()
+SimulatedClient::SimulatedClient(unsigned int inInputsPerSecond)
 : network()
 , networkCaller(std::bind_front(&Client::Network::tick, &network),
                 SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
-, worldSim(network.getEventDispatcher(), network)
+, worldSim(network.getEventDispatcher(), network, inInputsPerSecond)
 , simCaller(std::bind_front(&WorldSimulation::tick, &worldSim),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
 , isConnected(false)

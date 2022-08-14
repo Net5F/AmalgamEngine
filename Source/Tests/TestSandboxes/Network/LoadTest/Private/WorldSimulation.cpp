@@ -12,12 +12,14 @@ namespace AM
 {
 namespace LTC
 {
+
 WorldSimulation::WorldSimulation(EventDispatcher& inNetworkEventDispatcher,
-                                 Client::Network& inNetwork)
+                                 Client::Network& inNetwork, unsigned int inInputsPerSecond)
 : network(inNetwork)
 , connectionResponseQueue(inNetworkEventDispatcher)
 , clientEntity(entt::null)
 , currentTick(0)
+, inputsPerSecond{inInputsPerSecond}
 , ticksTillInput(0)
 , isMovingRight(false)
 {
@@ -60,12 +62,15 @@ void WorldSimulation::tick()
     // This may cause us to not process any ticks, or to process multiple
     // ticks.
     while (currentTick < targetTick) {
-        // If it's time to move, send an input message.
-        if (ticksTillInput == 0) {
-            sendNextInput();
-            ticksTillInput = INPUT_RATE_TICKS;
+        if (inputsPerSecond > 0) {
+            // If it's time to move, send an input message.
+            if (ticksTillInput == 0) {
+                sendNextInput();
+                ticksTillInput
+                    = (SharedConfig::SIM_TICKS_PER_SECOND / inputsPerSecond);
+            }
+            ticksTillInput--;
         }
-        ticksTillInput--;
 
         currentTick++;
     }
