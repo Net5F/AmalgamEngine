@@ -20,6 +20,7 @@ public:
     /** The Y coordinate of the tile to update. */
     int tileY{0};
 
+    /** The numeric ID of each sprite layer in this tile. */
     std::vector<int> numericIDs;
 };
 
