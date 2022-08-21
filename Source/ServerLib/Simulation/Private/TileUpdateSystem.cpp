@@ -35,11 +35,8 @@ void TileUpdateSystem::updateTiles()
     }
 }
 
-// TODO: Remove timer
-Timer timer;
 void TileUpdateSystem::sendTileUpdates()
 {
-    timer.updateSavedTime();
     auto clientView = world.registry.view<ClientSimData>();
     std::unordered_set<TilePosition>& dirtyTiles{world.tileMap.getDirtyTiles()};
 
@@ -72,11 +69,8 @@ void TileUpdateSystem::sendTileUpdates()
         }
     }
 
+    // The dirty state is now clean, clear the set.
     dirtyTiles.clear();
-    double timeTaken{timer.getDeltaSeconds(false)};
-    if (sentCount > 0) {
-        LOG_INFO("Sent %u messages in %.6fs", sentCount, timeTaken);
-    }
 }
 
 } // End namespace Server

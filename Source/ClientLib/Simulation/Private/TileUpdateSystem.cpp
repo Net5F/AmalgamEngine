@@ -47,8 +47,6 @@ void TileUpdateSystem::processNetworkUpdates()
         for (unsigned int i = 0; i < tileUpdate.numericIDs.size(); ++i) {
             world.tileMap.setTileSpriteLayer(tileUpdate.tileX, tileUpdate.tileY,
                                              i, tileUpdate.numericIDs[i]);
-            LOG_INFO("Setting (%d, %d) layer %u to %d", tileUpdate.tileX,
-                     tileUpdate.tileY, i, tileUpdate.numericIDs[i]);
         }
     }
 }
