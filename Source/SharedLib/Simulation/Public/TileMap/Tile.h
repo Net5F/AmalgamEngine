@@ -2,7 +2,8 @@
 
 #include "Sprite.h"
 #include "BoundingBox.h"
-#include <vector>
+#include "SharedConfig.h"
+#include <array>
 
 namespace AM
 {
@@ -28,7 +29,7 @@ public:
             moved to match the tile's world position.
             Tiles don't move, so we can calculate this ahead of time and save
             it here. */
-        BoundingBox worldBounds;
+        BoundingBox worldBounds{};
     };
 
     /** The layers of sprites that make up this tile, ordered bottom to top.
@@ -36,7 +37,7 @@ public:
         Sprites with bounding boxes will be rendered in an order corresponding
         to their box extent, but sprites with no box will be rendered by order
         of appearance in this vector, from begin -> end. */
-    std::vector<SpriteLayer> spriteLayers;
+    std::array<SpriteLayer, SharedConfig::MAX_TILE_LAYERS> spriteLayers{};
 };
 
 } // End namespace AM

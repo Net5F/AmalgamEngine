@@ -38,7 +38,7 @@ void TileUpdateSystem::processUiRequests()
 void TileUpdateSystem::processNetworkUpdates()
 {
     // Process any waiting tile updates from the server.
-    TileUpdate tileUpdate;
+    TileUpdate tileUpdate{};
     while (tileUpdateQueue.pop(tileUpdate)) {
         // Clear the tile (the message contains all of the tile's layers).
         world.tileMap.clearTile(tileUpdate.tileX, tileUpdate.tileY);

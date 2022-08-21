@@ -25,14 +25,23 @@ ChunkStreamingSystem::ChunkStreamingSystem(
 {
 }
 
+// TODO: Remove timer
+Timer timer2;
+double totalTime{0};
 void ChunkStreamingSystem::sendChunks()
 {
     ZoneScoped;
 
     // Process all chunk update requests.
     ChunkUpdateRequest chunkUpdateRequest{};
+    totalTime = 0;
     while (chunkUpdateRequestQueue.pop(chunkUpdateRequest)) {
+        timer2.updateSavedTime();
         sendChunkUpdate(chunkUpdateRequest);
+        totalTime += timer2.getDeltaSeconds(false);
+    }
+    if (totalTime > 0) {
+        LOG_INFO("Total time to send nearby chunks: %.6f", totalTime);
     }
 }
 
@@ -71,8 +80,8 @@ void ChunkStreamingSystem::addChunkToMessage(const ChunkPosition& chunkPosition,
         for (unsigned int tileX = 0; tileX < SharedConfig::CHUNK_WIDTH;
              ++tileX) {
             // Copy all of the tile's layers to the snapshot.
-            const Tile& tile
-                = world.tileMap.getTile((startX + tileX), (startY + tileY));
+            const Tile& tile{
+                world.tileMap.getTile((startX + tileX), (startY + tileY))};
             for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
                 unsigned int paletteID{
                     chunk.getPaletteIndex(layer.sprite.numericID)};

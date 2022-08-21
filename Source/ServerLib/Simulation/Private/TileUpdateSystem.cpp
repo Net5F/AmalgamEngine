@@ -52,8 +52,8 @@ void TileUpdateSystem::sendTileUpdates()
         TileUpdate tileUpdate{position.x, position.y};
         for (unsigned int layerIndex = 0; layerIndex < tile.spriteLayers.size();
              ++layerIndex) {
-            tileUpdate.numericIDs.push_back(
-                tile.spriteLayers[layerIndex].sprite.numericID);
+            tileUpdate.numericIDs[layerIndex]
+                = tile.spriteLayers[layerIndex].sprite.numericID;
         }
 
         // Get the list of clients that are in range of this tile.

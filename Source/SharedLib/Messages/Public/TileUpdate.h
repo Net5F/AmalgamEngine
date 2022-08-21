@@ -20,9 +20,8 @@ public:
     /** The Y coordinate of the tile to update. */
     int tileY{0};
 
-    // TODO: Switch to array
     /** The numeric ID of each sprite layer in this tile. */
-    std::vector<int> numericIDs{};
+    std::array<int, SharedConfig::MAX_TILE_LAYERS> numericIDs{};
 };
 
 template<typename S>
@@ -30,9 +29,7 @@ void serialize(S& serializer, TileUpdate& tileUpdate)
 {
     serializer.value4b(tileUpdate.tileX);
     serializer.value4b(tileUpdate.tileY);
-    serializer.container4b(
-        tileUpdate.numericIDs,
-        static_cast<std::size_t>(SharedConfig::MAX_TILE_LAYERS));
+    serializer.container4b(tileUpdate.numericIDs);
 }
 
 } // End namespace AM

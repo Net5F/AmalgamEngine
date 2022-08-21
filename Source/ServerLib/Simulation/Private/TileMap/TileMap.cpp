@@ -145,7 +145,7 @@ void TileMap::load(TileMapSnapshot& mapSnapshot)
         unsigned int relativeX{0};
         unsigned int relativeY{0};
 
-        // Add all of this chunk's tiles to the tiles vector.
+        // Add all of this chunk's tiles to the tiles array.
         for (unsigned int i = 0; i < SharedConfig::CHUNK_TILE_COUNT; ++i) {
             // Push all of the snapshot's sprites into the tile.
             TileSnapshot& tileSnapshot{chunk.tiles[i]};
