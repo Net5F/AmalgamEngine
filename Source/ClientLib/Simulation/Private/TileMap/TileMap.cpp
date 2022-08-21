@@ -19,7 +19,7 @@ namespace AM
 namespace Client
 {
 TileMap::TileMap(SpriteData& inSpriteData)
-: TileMapBase{inSpriteData}
+: TileMapBase{inSpriteData, false}
 {
     if (Config::RUN_OFFLINE) {
         LOG_INFO("Offline mode. Constructing default tile map.");

@@ -16,6 +16,7 @@ target_sources(SharedLib
         Public/ByteTools.h
         Public/ConstexprTools.h
         Public/Deserialize.h
+        Public/HashTools.h
         Public/IDPool.h
         Public/OSEventHandler.h
         Public/Ignore.h

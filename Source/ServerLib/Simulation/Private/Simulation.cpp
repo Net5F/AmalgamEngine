@@ -55,6 +55,9 @@ void Simulation::tick()
         extension->afterMapAndConnectionUpdates();
     }
 
+    // Send updated tile state to nearby clients.
+    tileUpdateSystem.sendTileUpdates();
+
     // Receive and process client input messages.
     inputSystem.processInputMessages();
 

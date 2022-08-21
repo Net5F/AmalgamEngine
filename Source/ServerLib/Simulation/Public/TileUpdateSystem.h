@@ -21,10 +21,14 @@ public:
                      Network& inNetwork);
 
     /**
-     * Processes tile updates, updating the map and sending the new map state
-     * to all relevant clients.
+     * Processes tile updates and updates the world's tile map.
      */
     void updateTiles();
+
+    /**
+     * Sends any dirty tile state to all nearby clients.
+     */
+    void sendTileUpdates();
 
 private:
     /** Used to access the entity registry, locator, and the tile map. */

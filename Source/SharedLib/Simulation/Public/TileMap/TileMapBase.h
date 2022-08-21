@@ -25,7 +25,7 @@ public:
      *
      * Errors if TileMap.bin doesn't exist or it fails to parse.
      */
-    TileMapBase(SpriteDataBase& inSpriteData);
+    TileMapBase(SpriteDataBase& inSpriteData, bool inTrackDirtyState);
 
     /**
      * Sets the given sprite layer to the given tile.
@@ -111,6 +111,14 @@ public:
      */
     const TileExtent& getTileExtent() const;
 
+    /**
+     * Returns the coordinates of all tiles that have been modified.
+     *
+     * Note: This class does not clear elements from this container. You 
+     *       must do it yourself after you've processed them.
+     */
+    std::unordered_set<TilePosition>& getDirtyTiles();
+
 protected:
     /**
      * Returns the index in the tiles vector where the tile with the given
@@ -136,6 +144,14 @@ protected:
 
     /** The tiles that make up this map, stored in row-major order. */
     std::vector<Tile> tiles;
+
+private:
+    /** If true, any updates to a tile's state will cause that tile to be 
+        pushed into dirtyTiles. */
+    bool trackDirtyState;
+
+    /** Holds the coordinates of tiles that currently have dirty state. */
+    std::unordered_set<TilePosition> dirtyTiles;
 };
 
 } // End namespace AM

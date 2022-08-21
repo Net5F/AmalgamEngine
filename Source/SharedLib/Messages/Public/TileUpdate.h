@@ -1,8 +1,7 @@
 #pragma once
 
 #include "MessageType.h"
-#include "EmptySpriteID.h"
-#include <SDL_stdinc.h>
+#include <vector>
 
 namespace AM
 {
@@ -21,11 +20,8 @@ public:
     /** The Y coordinate of the tile to update. */
     int tileY{0};
 
-    /** The index of the sprite layer that should be modified. */
-    Uint8 layerIndex{0};
-
-    /** The new sprite's numeric ID. */
-    int numericID{EMPTY_SPRITE_ID};
+    /** The numeric ID of each sprite layer in this tile. */
+    std::vector<int> numericIDs{};
 };
 
 template<typename S>
@@ -33,8 +29,9 @@ void serialize(S& serializer, TileUpdate& tileUpdate)
 {
     serializer.value4b(tileUpdate.tileX);
     serializer.value4b(tileUpdate.tileY);
-    serializer.value1b(tileUpdate.layerIndex);
-    serializer.value4b(tileUpdate.numericID);
+    serializer.container4b(
+        tileUpdate.numericIDs,
+        static_cast<std::size_t>(SharedConfig::MAX_TILE_LAYERS));
 }
 
 } // End namespace AM

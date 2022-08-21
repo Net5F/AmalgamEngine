@@ -17,7 +17,7 @@ namespace AM
 namespace Server
 {
 TileMap::TileMap(SpriteData& inSpriteData)
-: TileMapBase{inSpriteData}
+: TileMapBase{inSpriteData, true}
 {
     // Prime a timer.
     Timer timer;

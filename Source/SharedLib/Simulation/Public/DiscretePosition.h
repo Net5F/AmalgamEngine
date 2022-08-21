@@ -20,17 +20,17 @@ public:
     /** The Y-axis coordinate of this position. */
     int y{0};
 
-    bool operator==(const DiscretePosition<T>& other)
+    bool operator==(const DiscretePosition<T>& other) const
     {
         return (x == other.x) && (y == other.y);
     }
 
-    bool operator!=(const DiscretePosition<T>& other)
+    bool operator!=(const DiscretePosition<T>& other) const
     {
         return (x != other.x) || (y != other.y);
     }
 
-    DiscretePosition<T> operator+(const DiscretePosition<T>& other)
+    DiscretePosition<T> operator+(const DiscretePosition<T>& other) const
     {
         return {(x + other.x), (y + other.y)};
     }
@@ -45,7 +45,7 @@ public:
     /**
      * If this position is within 1 unit of the given position, returns true.
      */
-    bool isAdjacentTo(const DiscretePosition<T>& other)
+    bool isAdjacentTo(const DiscretePosition<T>& other) const
     {
         // Get the differences between the positions.
         int xDif{other.x - x};

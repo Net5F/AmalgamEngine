@@ -123,6 +123,8 @@ try {
     }
 
     // Construct the clients.
+    LOG_INFO("Client entities will move at %u inputs per second.",
+             inputsPerSecond);
     std::vector<std::unique_ptr<SimulatedClient>> clients;
     for (unsigned int i = 0; i < numClients; ++i) {
         clients.push_back(std::make_unique<SimulatedClient>(inputsPerSecond));

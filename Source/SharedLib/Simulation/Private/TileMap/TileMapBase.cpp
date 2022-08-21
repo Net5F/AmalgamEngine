@@ -17,11 +17,12 @@
 
 namespace AM
 {
-TileMapBase::TileMapBase(SpriteDataBase& inSpriteData)
+TileMapBase::TileMapBase(SpriteDataBase& inSpriteData, bool inTrackDirtyState)
 : spriteData{inSpriteData}
 , chunkExtent{}
 , tileExtent{}
 , tiles{}
+, trackDirtyState{inTrackDirtyState}
 {
 }
 
@@ -78,6 +79,11 @@ void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
         // Replace the sprite.
         spriteLayers[layerIndex] = {sprite, worldBounds};
     }
+
+    // If we're tracking dirty state, add the updated tile's coordinates.
+    if (trackDirtyState) {
+        dirtyTiles.emplace(tileX, tileY);
+    }
 }
 
 void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
@@ -100,6 +106,11 @@ bool TileMapBase::clearTile(int tileX, int tileY)
     bool layersWereCleared{false};
     if (tile.spriteLayers.size() > 0) {
         layersWereCleared = true;
+
+        // If we're tracking dirty state, add the updated tile's coordinates.
+        if (trackDirtyState) {
+            dirtyTiles.emplace(tileX, tileY);
+        }
     }
 
     tile.spriteLayers.clear();
@@ -115,6 +126,11 @@ bool TileMapBase::clearTile(int tileX, int tileY,
     // If the start index is beyond this tile's highest layer, return false.
     if ((startLayerIndex + 1) > spriteLayers.size()) {
         return false;
+    }
+
+    // If we're tracking dirty state, add the updated tile's coordinates.
+    if (trackDirtyState) {
+        dirtyTiles.emplace(tileX, tileY);
     }
 
     // Erase the chosen layers and return true.
@@ -180,6 +196,11 @@ const ChunkExtent& TileMapBase::getChunkExtent() const
 const TileExtent& TileMapBase::getTileExtent() const
 {
     return tileExtent;
+}
+
+std::unordered_set<TilePosition>& TileMapBase::getDirtyTiles()
+{
+    return dirtyTiles;
 }
 
 } // End namespace AM
