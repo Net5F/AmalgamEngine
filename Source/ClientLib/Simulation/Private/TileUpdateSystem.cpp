@@ -40,10 +40,16 @@ void TileUpdateSystem::processNetworkUpdates()
     // Process any waiting tile updates from the server.
     TileUpdate tileUpdate;
     while (tileUpdateQueue.pop(tileUpdate)) {
-        // Update the map.
-        world.tileMap.setTileSpriteLayer(tileUpdate.tileX, tileUpdate.tileY,
-                                         tileUpdate.layerIndex,
-                                         tileUpdate.numericID);
+        // Clear the tile (the message contains all of the tile's layers).
+        world.tileMap.clearTile(tileUpdate.tileX, tileUpdate.tileY);
+
+        // Fill the tile with the layers from the message.
+        for (unsigned int i = 0; i < tileUpdate.numericIDs.size(); ++i) {
+            world.tileMap.setTileSpriteLayer(tileUpdate.tileX, tileUpdate.tileY,
+                                             i, tileUpdate.numericIDs[i]);
+            LOG_INFO("Setting (%d, %d) layer %u to %d", tileUpdate.tileX,
+                     tileUpdate.tileY, i, tileUpdate.numericIDs[i]);
+        }
     }
 }
 
