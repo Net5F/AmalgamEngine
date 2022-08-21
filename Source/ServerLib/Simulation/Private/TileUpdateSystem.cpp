@@ -49,7 +49,7 @@ void TileUpdateSystem::sendTileUpdates()
         const Tile& tile{world.tileMap.getTile(position.x, position.y)};
 
         // Construct an update message with all of this tile's layers.
-        TileUpdate tileUpdate{position.x, position.y, {}};
+        TileUpdate tileUpdate{position.x, position.y};
         for (unsigned int layerIndex = 0; layerIndex < tile.spriteLayers.size();
              ++layerIndex) {
             tileUpdate.numericIDs.push_back(
