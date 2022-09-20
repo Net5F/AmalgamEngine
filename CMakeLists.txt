@@ -17,17 +17,6 @@ option(AM_BUILD_SPRITE_EDITOR "Build Amalgam Engine Sprite Editor." OFF)
 option(AM_BUILD_TESTS "Build Amalgam Engine tests." OFF)
 
 ###############################################################################
-# Sanitizers 
-###############################################################################
-# Make ThreadSanitizer available.
-option(AM_THREADSANITIZER "Enable ThreadSanitizer data race detector." OFF)
-include("${PROJECT_SOURCE_DIR}/CMake/ThreadSanitizer.cmake")
-
-# Make AddressSanitizer available.
-option(AM_ADDRESSSANITIZER "Enable AddressSanitizer memory error detector." OFF)
-include("${PROJECT_SOURCE_DIR}/CMake/AddressSanitizer.cmake")
-
-###############################################################################
 # Dependencies
 ###############################################################################
 # Find SDL2 and associated libs.
