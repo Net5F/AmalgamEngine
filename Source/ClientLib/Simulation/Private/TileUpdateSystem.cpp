@@ -1,6 +1,7 @@
 #include "TileUpdateSystem.h"
 #include "World.h"
 #include "Network.h"
+#include "AMAssert.h"
 
 namespace AM
 {
@@ -40,13 +41,25 @@ void TileUpdateSystem::processNetworkUpdates()
     // Process any waiting tile updates from the server.
     TileUpdate tileUpdate;
     while (tileUpdateQueue.pop(tileUpdate)) {
-        // Clear the tile (the message contains all of the tile's layers).
-        world.tileMap.clearTile(tileUpdate.tileX, tileUpdate.tileY);
+        std::size_t updatedLayersIndex{0};
 
-        // Fill the tile with the layers from the message.
-        for (unsigned int i = 0; i < tileUpdate.numericIDs.size(); ++i) {
-            world.tileMap.setTileSpriteLayer(tileUpdate.tileX, tileUpdate.tileY,
-                                             i, tileUpdate.numericIDs[i]);
+        // For each updated tile.
+        for (TileUpdate::TileInfo& tileInfo : tileUpdate.tileInfo) {
+            // Clear the tile (the message contains all of the tile's layers).
+            world.tileMap.clearTile(tileInfo.tileX, tileInfo.tileY);
+
+            // Fill the tile with the layers from the message.
+            for (unsigned int layerIndex = 0; layerIndex < tileInfo.layerCount;
+                 ++layerIndex) {
+                AM_ASSERT(updatedLayersIndex < tileUpdate.updatedLayers.size(),
+                          "Updated layers index is out of bounds.");
+
+                int numericID{tileUpdate.updatedLayers[updatedLayersIndex]};
+                world.tileMap.setTileSpriteLayer(tileInfo.tileX, tileInfo.tileY,
+                                                 layerIndex, numericID);
+
+                updatedLayersIndex++;
+            }
         }
     }
 }

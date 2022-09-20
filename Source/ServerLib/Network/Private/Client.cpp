@@ -59,13 +59,20 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
         AM_ASSERT(dequeueSucceeded, "Expected element but dequeue failed.");
         ignore(dequeueSucceeded);
 
+        // If the message would make the batch too large, error.
+        std::size_t messageSize{queuedMessage.message->size()};
+        AM_ASSERT(
+            ((currentIndex + messageSize) <= SharedConfig::MAX_BATCH_SIZE),
+            "Batch too large to fit into buffers. Increase MAX_BATCH_SIZE. "
+            "Size: %u, Max: %u",
+            (currentIndex + messageSize), SharedConfig::MAX_BATCH_SIZE);
+
         // Copy the message data into the batchBuffer.
         std::copy(queuedMessage.message->begin(), queuedMessage.message->end(),
                   &(batchBuffer[currentIndex]));
 
         // Increment the index.
-        currentIndex
-            += static_cast<unsigned int>(queuedMessage.message->size());
+        currentIndex += static_cast<unsigned int>(messageSize);
 
         // Track the latest tick we've sent.
         if (queuedMessage.tick != 0) {
@@ -149,14 +156,14 @@ void Client::addExplicitConfirmation(unsigned int& currentIndex,
     // (the tick count increments at the end of a sim tick, so our latest
     //  sent data is from currentTick - 1).
     unsigned int confirmedTickCount{(currentTick - 1) - latestSentSimTick};
-    assert(confirmedTickCount <= UINT8_MAX);
+    AM_ASSERT(confirmedTickCount <= UINT8_MAX, "Count too large for Uint8.");
 
     // Write the explicit confirmation message.
     ExplicitConfirmation explicitConfirmation{
         static_cast<Uint8>(confirmedTickCount)};
-    currentIndex += static_cast<unsigned int>(Serialize::toBuffer(
-        batchBuffer.data(), (SharedConfig::MAX_BATCH_SIZE - currentIndex),
-        explicitConfirmation, currentIndex));
+    currentIndex += static_cast<unsigned int>(
+        Serialize::toBuffer(batchBuffer.data(), batchBuffer.size(),
+                            explicitConfirmation, currentIndex));
 
     // Increment the message count.
     messageCount++;

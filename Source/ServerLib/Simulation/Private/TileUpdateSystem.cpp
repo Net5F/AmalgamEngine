@@ -2,7 +2,6 @@
 #include "World.h"
 #include "Network.h"
 #include "ClientSimData.h"
-#include "TileUpdate.h"
 #include "Tracy.hpp"
 
 namespace AM
@@ -40,18 +39,10 @@ void TileUpdateSystem::sendTileUpdates()
     auto clientView = world.registry.view<ClientSimData>();
     std::unordered_set<TilePosition>& dirtyTiles{world.tileMap.getDirtyTiles()};
 
-    // For every tile with dirty state, send it to all nearby clients.
-    unsigned int sentCount{0};
+    // For every tile with dirty state, push it into the working update of 
+    // each client in range.
     for (const TilePosition& position : dirtyTiles) {
         const Tile& tile{world.tileMap.getTile(position.x, position.y)};
-
-        // Construct an update message with all of this tile's layers.
-        TileUpdate tileUpdate{position.x, position.y};
-        for (unsigned int layerIndex = 0; layerIndex < tile.spriteLayers.size();
-             ++layerIndex) {
-            tileUpdate.numericIDs.push_back(
-                tile.spriteLayers[layerIndex].sprite.numericID);
-        }
 
         // Get the list of clients that are in range of this tile.
         // Note: This is hardcoded to match ChunkUpdateSystem.
@@ -59,17 +50,32 @@ void TileUpdateSystem::sendTileUpdates()
         ChunkExtent chunkExtent{(centerChunk.x - 1), (centerChunk.y - 1), 3, 3};
         chunkExtent.intersectWith(world.tileMap.getChunkExtent());
 
-        // Send the tile update to all clients that are in range.
+        // Add this tile to the working update of all clients that are in range.
         std::vector<entt::entity>& entitiesInRange{
             world.entityLocator.getEntitiesFine(chunkExtent)};
         for (entt::entity entity : entitiesInRange) {
             ClientSimData& client{clientView.get<ClientSimData>(entity)};
-            network.serializeAndSend<TileUpdate>(client.netID, tileUpdate);
-            sentCount++;
+
+            // Push the tile info.
+            workingUpdates[client.netID].tileInfo.emplace_back(
+                position.x, position.y,
+                static_cast<unsigned int>(tile.spriteLayers.size()));
+
+            // Push the numericID of each of the tile's layers.
+            for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
+                workingUpdates[client.netID].updatedLayers.push_back(
+                    layer.sprite.numericID);
+            }
         }
     }
 
-    // The dirty state is now clean, clear the set.
+    // Send all the updates.
+    for (auto& [netID, tileUpdate] : workingUpdates) {
+        network.serializeAndSend<TileUpdate>(netID, tileUpdate);
+    }
+    workingUpdates.clear();
+
+    // The dirty tile map state is now clean, clear the set.
     dirtyTiles.clear();
 }
 

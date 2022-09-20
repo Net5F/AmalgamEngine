@@ -2,6 +2,8 @@
 
 #include "QueuedEvents.h"
 #include "TileUpdateRequest.h"
+#include "TileUpdate.h"
+#include <unordered_map>
 
 namespace AM
 {
@@ -35,6 +37,10 @@ private:
     World& world;
     /** Used to send chunk update request messages. */
     Network& network;
+
+    /** Holds tile updates as we iterate the dirty tiles and figure out what 
+        needs to be sent to each client. */
+    std::unordered_map<NetworkID, TileUpdate> workingUpdates;
 
     EventQueue<TileUpdateRequest> tileUpdateRequestQueue;
 };
