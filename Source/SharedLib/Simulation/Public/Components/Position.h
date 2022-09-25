@@ -28,7 +28,7 @@ public:
     /**
      * Returns the coordinates of the tile that this position is within.
      */
-    TilePosition asTilePosition()
+    TilePosition asTilePosition() const
     {
         return {(static_cast<int>(x / SharedConfig::TILE_WORLD_WIDTH)),
                 (static_cast<int>(y / SharedConfig::TILE_WORLD_WIDTH))};
@@ -37,7 +37,7 @@ public:
     /**
      * Returns the coordinates of the chunk that this position is within.
      */
-    ChunkPosition asChunkPosition()
+    ChunkPosition asChunkPosition() const
     {
         return {(static_cast<int>((x / SharedConfig::TILE_WORLD_WIDTH)
                                   / SharedConfig::CHUNK_WIDTH)),
@@ -71,12 +71,12 @@ public:
         return *this;
     }
 
-    bool operator==(const Position& other)
+    bool operator==(const Position& other) const
     {
         return (x == other.x) && (y == other.y) && (z == other.z);
     }
 
-    bool operator!=(const Position& other)
+    bool operator!=(const Position& other) const
     {
         return (x != other.x) || (y != other.y) || (z != other.z);
     }
