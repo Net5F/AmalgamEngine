@@ -99,7 +99,7 @@ public:
     /**
      * Gets a const reference to the tile at the given coordinates.
      */
-    const Tile& getTile(unsigned int x, unsigned int y) const;
+    const Tile& getTile(int x, int y) const;
 
     /**
      * Returns the map extent, with chunks as the unit.

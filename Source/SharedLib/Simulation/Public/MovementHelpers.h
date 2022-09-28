@@ -53,6 +53,8 @@ public:
     static Position interpolatePosition(const PreviousPosition& previousPos,
                                         const Position& position, double alpha);
 
+    // TODO: TileMap and Tile are no longer split across repos, so turn this 
+    //       into a normal function acting on TileMapBase.
     /**
      * Resolves collisions between the given desiredBox and other nearby
      * bounding boxes in the world.
@@ -72,18 +74,16 @@ public:
 
         // If the desired movement would go outside of the map, don't let
         // them move.
-        TileExtent boxTileExtent{desiredBounds.asTileExtent()};
-        TileExtent mapExtent{tileMap.getTileExtent()};
+        const TileExtent boxTileExtent{desiredBounds.asTileExtent()};
+        const TileExtent mapExtent{tileMap.getTileExtent()};
         if (!mapExtent.containsExtent(boxTileExtent)
             || (desiredBounds.minZ < 0)) {
             return currentBounds;
         }
 
         // For each tile that the desired bounds is touching.
-        int yMax{boxTileExtent.y + boxTileExtent.yLength};
-        int xMax{boxTileExtent.x + boxTileExtent.xLength};
-        for (int y = boxTileExtent.y; y < yMax; ++y) {
-            for (int x = boxTileExtent.x; x < xMax; ++x) {
+        for (int y = boxTileExtent.y; y < boxTileExtent.yMax(); ++y) {
+            for (int x = boxTileExtent.x; x < boxTileExtent.xMax(); ++x) {
                 const auto& tile{tileMap.getTile(x, y)};
 
                 // For each sprite layer in this tile.

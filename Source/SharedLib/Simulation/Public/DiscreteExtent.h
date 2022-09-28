@@ -57,22 +57,18 @@ public:
 
     /**
      * Returns the max X position in this extent.
-     * Kept as a function instead of a variable for brevity of initialization.
      */
-    int xMax() { return (x + xLength); }
+    int xMax() const { return (x + xLength); }
 
     /**
      * Returns the max Y position in this extent.
-     * Kept as a function instead of a variable for brevity of initialization.
      */
-    int yMax() { return (y + yLength); }
+    int yMax() const { return (y + yLength); }
 
     /**
      * Sets this extent to the union between itself and the given extent.
-     *
-     * @return false if the resulting extent is empty (has no area), else true.
      */
-    bool unionWith(const DiscreteExtent<T>& other)
+    void unionWith(const DiscreteExtent<T>& other)
     {
         // Note: We can add some special fast cases for empty extents if we
         //       ever care to, but they likely wouldn't be exercised much.
@@ -115,16 +111,12 @@ public:
 
         y = selfMin;
         yLength = (selfMax - selfMin);
-
-        return isEmpty();
     }
 
     /**
      * Sets this extent to the intersection between itself and the given extent.
-     *
-     * @return false if the resulting extent is empty (has no area), else true.
      */
-    bool intersectWith(const DiscreteExtent<T>& other)
+    void intersectWith(const DiscreteExtent<T>& other)
     {
         // Note: We can add some special fast cases for empty extents if we
         //       ever care to, but they likely wouldn't be exercised much.
@@ -166,8 +158,6 @@ public:
 
         y = selfMin;
         yLength = (selfMax - selfMin);
-
-        return isEmpty();
     }
 
     /**

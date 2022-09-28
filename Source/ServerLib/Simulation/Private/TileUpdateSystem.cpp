@@ -71,6 +71,8 @@ void TileUpdateSystem::sendTileUpdates()
 
     // Send all the updates.
     for (auto& [netID, tileUpdate] : workingUpdates) {
+        LOG_INFO("Sending update with %u tiles, %u layers",
+                 tileUpdate.tileInfo.size(), tileUpdate.updatedLayers.size());
         network.serializeAndSend<TileUpdate>(netID, tileUpdate);
     }
     workingUpdates.clear();

@@ -30,6 +30,11 @@ void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
                                      unsigned int layerIndex,
                                      const Sprite& sprite)
 {
+    AM_ASSERT(tileX >= tileExtent.x, "x out of bounds: %d", tileX);
+    AM_ASSERT(tileX <= tileExtent.xMax(), "x out of bounds: %d", tileX);
+    AM_ASSERT(tileY >= tileExtent.y, "y out of bounds: %d", tileY);
+    AM_ASSERT(tileY <= tileExtent.yMax(), "y out of bounds: %d", tileY);
+
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
     std::vector<Tile::SpriteLayer>& spriteLayers{tile.spriteLayers};
 
@@ -175,8 +180,12 @@ bool TileMapBase::clearExtent(TileExtent extent, unsigned int startLayerIndex)
     return layersWereCleared;
 }
 
-const Tile& TileMapBase::getTile(unsigned int x, unsigned int y) const
+const Tile& TileMapBase::getTile(int x, int y) const
 {
+    // TODO: How do we linearize negative coords?
+    AM_ASSERT(x >= 0, "Negative coords not yet supported");
+    AM_ASSERT(y >= 0, "Negative coords not yet supported");
+
     unsigned int tileIndex{linearizeTileIndex(x, y)};
     unsigned int maxTileIndex{
         static_cast<unsigned int>(tileExtent.xLength * tileExtent.yLength)};
