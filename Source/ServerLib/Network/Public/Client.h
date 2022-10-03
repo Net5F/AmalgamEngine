@@ -88,22 +88,20 @@ private:
     //--------------------------------------------------------------------------
     /**
      * Returns the number of messages waiting in the sendQueue.
-     * The return type is Uint8 because it needs to fit in 1 byte of a message.
      */
-    Uint8 getWaitingMessageCount() const;
+    std::size_t getWaitingMessageCount() const;
 
     /**
      * Adds an explicit confirmation to the current batch.
      */
-    void addExplicitConfirmation(unsigned int& currentIndex, Uint32 currentTick,
-                                 Uint8& messageCount);
+    void addExplicitConfirmation(std::size_t& currentIndex, Uint32 currentTick);
 
     /**
      * Compresses the first batchSize bytes in the payload section of
      * batchBuffer into compressedBatchBuffer and returns the compressed
      * payload size.
      */
-    unsigned int compressBatch(unsigned int batchSize);
+    std::size_t compressBatch(std::size_t batchSize);
 
     /**
      * Fills in the header information for the message batch currently being

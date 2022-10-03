@@ -1,13 +1,14 @@
 #pragma once
 
 #include <atomic>
+#include <cstddef>
 
 namespace AM
 {
 /** Used to pass data out to the consumer. */
 struct NetStatsDump {
-    unsigned int bytesSent = 0;
-    unsigned int bytesReceived = 0;
+    std::size_t bytesSent = 0;
+    std::size_t bytesReceived = 0;
 };
 
 /**
@@ -32,16 +33,16 @@ public:
 
     // Mutators
     /** Adds inBytesSent to bytesSent. */
-    static void recordBytesSent(unsigned int inBytesSent);
+    static void recordBytesSent(std::size_t inBytesSent);
     /** Adds inBytesReceived to bytesReceived. */
-    static void recordBytesReceived(unsigned int inBytesReceived);
+    static void recordBytesReceived(std::size_t inBytesReceived);
 
 private:
     /** The number of bytes that have been sent since the last dump. */
-    static std::atomic<unsigned int> bytesSent;
+    static std::atomic<std::size_t> bytesSent;
 
     /** The number of bytes that have been received since the last dump. */
-    static std::atomic<unsigned int> bytesReceived;
+    static std::atomic<std::size_t> bytesReceived;
 };
 
 } // End namespace AM

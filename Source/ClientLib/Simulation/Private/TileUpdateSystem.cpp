@@ -44,13 +44,17 @@ void TileUpdateSystem::processNetworkUpdates()
         std::size_t updatedLayersIndex{0};
 
         // For each updated tile.
-        for (TileUpdate::TileInfo& tileInfo : tileUpdate.tileInfo) {
-            // Clear the tile (the message contains all of the tile's layers).
-            world.tileMap.clearTile(tileInfo.tileX, tileInfo.tileY);
+        for (const TileUpdate::TileInfo& tileInfo : tileUpdate.tileInfo) {
+            // Clear the start layer and all layers above it (layers below the 
+            // start layer are unchanged).
+            world.tileMap.clearTile(tileInfo.tileX, tileInfo.tileY,
+                                    tileInfo.startLayerIndex);
 
             // Fill the tile with the layers from the message.
-            for (unsigned int layerIndex = 0; layerIndex < tileInfo.layerCount;
-                 ++layerIndex) {
+            std::size_t totalLayerCount{static_cast<std::size_t>(
+                tileInfo.startLayerIndex + tileInfo.layerCount)};
+            for (std::size_t layerIndex = tileInfo.startLayerIndex;
+                 layerIndex < totalLayerCount; ++layerIndex) {
                 AM_ASSERT(updatedLayersIndex < tileUpdate.updatedLayers.size(),
                           "Updated layers index is out of bounds.");
 

@@ -27,7 +27,7 @@ TileMapBase::TileMapBase(SpriteDataBase& inSpriteData, bool inTrackDirtyState)
 }
 
 void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
-                                     unsigned int layerIndex,
+                                     std::size_t layerIndex,
                                      const Sprite& sprite)
 {
     AM_ASSERT(tileX >= tileExtent.x, "x out of bounds: %d", tileX);
@@ -52,7 +52,7 @@ void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
         spriteLayers.erase(spriteLayers.begin() + layerIndex);
 
         // Erase any empty sprites below it.
-        for (unsigned int endIndex = (layerIndex - 1); endIndex-- > 0; ) {
+        for (std::size_t endIndex = (layerIndex - 1); endIndex-- > 0; ) {
             if (spriteLayers[endIndex].sprite.numericID == EMPTY_SPRITE_ID) {
                 spriteLayers.erase(spriteLayers.begin() + endIndex);
             }
@@ -85,21 +85,27 @@ void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
         spriteLayers[layerIndex] = {sprite, worldBounds};
     }
 
-    // If we're tracking dirty state, add the updated tile's coordinates.
+    // If we're tracking dirty tile state, update it.
     if (trackDirtyState) {
-        dirtyTiles.emplace(tileX, tileY);
+        // Set the lowest dirty layer index, unless there's already a lower
+        // one being tracked.
+        auto [iterator, didEmplace]
+            = dirtyTiles.try_emplace({tileX, tileY}, layerIndex);
+        if (!didEmplace && (layerIndex < iterator->second)) {
+            iterator->second = layerIndex;
+        }
     }
 }
 
 void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
-                                     unsigned int layerIndex,
+                                     std::size_t layerIndex,
                                      const std::string& stringID)
 {
     setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(stringID));
 }
 
 void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
-                                     unsigned int layerIndex, int numericID)
+                                     std::size_t layerIndex, int numericID)
 {
     setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(numericID));
 }
@@ -112,9 +118,11 @@ bool TileMapBase::clearTile(int tileX, int tileY)
     if (tile.spriteLayers.size() > 0) {
         layersWereCleared = true;
 
-        // If we're tracking dirty state, add the updated tile's coordinates.
+        // If we're tracking dirty tile state, update it.
         if (trackDirtyState) {
-            dirtyTiles.emplace(tileX, tileY);
+            // Set the lowest dirty layer index.
+            // Note: We don't have to check before setting, since 0 is lowest.
+            dirtyTiles[{tileX, tileY}] = 0;
         }
     }
 
@@ -123,7 +131,7 @@ bool TileMapBase::clearTile(int tileX, int tileY)
 }
 
 bool TileMapBase::clearTile(int tileX, int tileY,
-    unsigned int startLayerIndex)
+    std::size_t startLayerIndex)
 {
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
     std::vector<Tile::SpriteLayer>& spriteLayers{tile.spriteLayers};
@@ -133,9 +141,15 @@ bool TileMapBase::clearTile(int tileX, int tileY,
         return false;
     }
 
-    // If we're tracking dirty state, add the updated tile's coordinates.
+    // If we're tracking dirty tile state, update it.
     if (trackDirtyState) {
-        dirtyTiles.emplace(tileX, tileY);
+        // Set the lowest dirty layer index, unless there's already a lower
+        // one being tracked.
+        auto [iterator, didEmplace]
+            = dirtyTiles.try_emplace({tileX, tileY}, startLayerIndex);
+        if (!didEmplace && (startLayerIndex < iterator->second)) {
+            iterator->second = startLayerIndex;
+        }
     }
 
     // Erase the chosen layers and return true.
@@ -162,7 +176,7 @@ bool TileMapBase::clearExtent(TileExtent extent)
     return layersWereCleared;
 }
 
-bool TileMapBase::clearExtent(TileExtent extent, unsigned int startLayerIndex)
+bool TileMapBase::clearExtent(TileExtent extent, std::size_t startLayerIndex)
 {
     bool layersWereCleared{false};
 
@@ -186,9 +200,9 @@ const Tile& TileMapBase::getTile(int x, int y) const
     AM_ASSERT(x >= 0, "Negative coords not yet supported");
     AM_ASSERT(y >= 0, "Negative coords not yet supported");
 
-    unsigned int tileIndex{linearizeTileIndex(x, y)};
-    unsigned int maxTileIndex{
-        static_cast<unsigned int>(tileExtent.xLength * tileExtent.yLength)};
+    std::size_t tileIndex{linearizeTileIndex(x, y)};
+    std::size_t maxTileIndex{
+        static_cast<std::size_t>(tileExtent.xLength * tileExtent.yLength)};
     AM_ASSERT((tileIndex < maxTileIndex),
               "Tried to get an out of bounds tile. tileIndex: %u, max: %u",
               tileIndex, maxTileIndex);
@@ -207,7 +221,7 @@ const TileExtent& TileMapBase::getTileExtent() const
     return tileExtent;
 }
 
-std::unordered_set<TilePosition>& TileMapBase::getDirtyTiles()
+std::unordered_map<TilePosition, std::size_t>& TileMapBase::getDirtyTiles()
 {
     return dirtyTiles;
 }

@@ -23,7 +23,7 @@ public:
         we need larger.
         BE AWARE: Must be kept below 32768 (2^15) since we store it in a Uint16
                   and use the high bit to indicate compression. */
-    static constexpr unsigned int MAX_WIRE_SIZE = 1450;
+    static constexpr std::size_t MAX_WIRE_SIZE = 1450;
 
     /**
      * Initiates a TCP connection that the other side can then accept.
@@ -76,7 +76,7 @@ public:
      * @return Disconnected if the peer was found to be disconnected, else
      * Success.
      */
-    NetworkResult send(const Uint8* buffer, unsigned int numBytesToSend);
+    NetworkResult send(const Uint8* buffer, std::size_t numBytesToSend);
 
     /**
      * Tries to receive bytes over the network.
@@ -89,7 +89,7 @@ public:
      * @return An appropriate NetworkResult. If return == Success,
      *         buffer contains the received data.
      */
-    NetworkResult receiveBytes(Uint8* buffer, unsigned int numBytes,
+    NetworkResult receiveBytes(Uint8* buffer, std::size_t numBytes,
                                bool checkSockets);
 
     /**
@@ -101,7 +101,7 @@ public:
      * @return An appropriate NetworkResult. If return == Success,
      *         buffer contains the received data.
      */
-    NetworkResult receiveBytesWait(Uint8* buffer, unsigned int numBytes);
+    NetworkResult receiveBytesWait(Uint8* buffer, std::size_t numBytes);
 
     /**
      * Tries to receive a {size, message} pair over the network.

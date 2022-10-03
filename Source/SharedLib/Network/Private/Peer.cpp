@@ -10,7 +10,7 @@ std::unique_ptr<Peer> Peer::initiate(const std::string& serverIP,
                                      unsigned int serverPort)
 {
     std::unique_ptr<TcpSocket> socket{
-        std::make_unique<TcpSocket>(serverIP, serverPort)};
+        std::make_unique<TcpSocket>(serverIP, static_cast<Uint16>(serverPort))};
 
     return std::make_unique<Peer>(std::move(socket));
 }
@@ -65,7 +65,7 @@ NetworkResult Peer::send(const BinaryBufferSharedPtr& buffer)
                   "was likely misused.");
     }
 
-    if (static_cast<unsigned int>(bytesSent) < messageSize) {
+    if (static_cast<std::size_t>(bytesSent) < messageSize) {
         // The peer probably disconnected (could be a different issue).
         bIsConnected = false;
         return NetworkResult::Disconnected;
@@ -75,7 +75,7 @@ NetworkResult Peer::send(const BinaryBufferSharedPtr& buffer)
     }
 }
 
-NetworkResult Peer::send(const Uint8* buffer, unsigned int numBytesToSend)
+NetworkResult Peer::send(const Uint8* buffer, std::size_t numBytesToSend)
 {
     if (!bIsConnected) {
         return NetworkResult::Disconnected;
@@ -86,13 +86,13 @@ NetworkResult Peer::send(const Uint8* buffer, unsigned int numBytesToSend)
                   numBytesToSend, MAX_WIRE_SIZE);
     }
 
-    int bytesSent{socket->send(buffer, numBytesToSend)};
+    int bytesSent{socket->send(buffer, static_cast<int>(numBytesToSend))};
     if (bytesSent < 0) {
         LOG_FATAL("TCP_Send returned < 0. This should never happen, the socket"
                   "was likely misused.");
     }
 
-    if (static_cast<unsigned int>(bytesSent) < numBytesToSend) {
+    if (static_cast<std::size_t>(bytesSent) < numBytesToSend) {
         // The peer probably disconnected (could be a different issue).
         bIsConnected = false;
         return NetworkResult::Disconnected;
@@ -102,7 +102,7 @@ NetworkResult Peer::send(const Uint8* buffer, unsigned int numBytesToSend)
     }
 }
 
-NetworkResult Peer::receiveBytes(Uint8* buffer, unsigned int numBytes,
+NetworkResult Peer::receiveBytes(Uint8* buffer, std::size_t numBytes,
                                  bool checkSockets)
 {
     if (!bIsConnected) {
@@ -121,7 +121,7 @@ NetworkResult Peer::receiveBytes(Uint8* buffer, unsigned int numBytes,
     }
 }
 
-NetworkResult Peer::receiveBytesWait(Uint8* buffer, unsigned int numBytes)
+NetworkResult Peer::receiveBytesWait(Uint8* buffer, std::size_t numBytes)
 {
     if (!bIsConnected) {
         return NetworkResult::Disconnected;
@@ -129,9 +129,10 @@ NetworkResult Peer::receiveBytesWait(Uint8* buffer, unsigned int numBytes)
 
     // Loop until we've received all of the bytes.
     int bytesReceived{0};
-    while (static_cast<unsigned int>(bytesReceived) < numBytes) {
+    while (static_cast<std::size_t>(bytesReceived) < numBytes) {
         // Try to receive bytes.
-        int result{socket->receive((buffer + bytesReceived), numBytes)};
+        int result{socket->receive((buffer + bytesReceived),
+                                   static_cast<int>(numBytes))};
         if (result > 0) {
             bytesReceived += result;
         }

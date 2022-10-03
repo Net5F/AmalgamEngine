@@ -45,14 +45,14 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     }
 
     // If we have no messages to send, return early.
-    Uint8 messageCount{getWaitingMessageCount()};
+    std::size_t messageCount{getWaitingMessageCount()};
     if ((latestSentSimTick == 0) && (messageCount == 0)) {
         return NetworkResult::Success;
     }
 
     // Copy any waiting messages into the buffer.
-    unsigned int currentIndex{ServerHeaderIndex::MessageHeaderStart};
-    for (unsigned int i = 0; i < messageCount; ++i) {
+    std::size_t currentIndex{ServerHeaderIndex::MessageHeaderStart};
+    for (std::size_t i = 0; i < messageCount; ++i) {
         // Pop the message.
         QueuedMessage queuedMessage;
         bool dequeueSucceeded{sendQueue.try_dequeue(queuedMessage)};
@@ -72,7 +72,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
                   &(batchBuffer[currentIndex]));
 
         // Increment the index.
-        currentIndex += static_cast<unsigned int>(messageSize);
+        currentIndex += messageSize;
 
         // Track the latest tick we've sent.
         if (queuedMessage.tick != 0) {
@@ -83,7 +83,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     // If we've started talking to this client and none of this batch's
     // messages confirm the latest tick, add an explicit confirmation message.
     if ((latestSentSimTick != 0) && (latestSentSimTick < (currentTick - 1))) {
-        addExplicitConfirmation(currentIndex, currentTick, messageCount);
+        addExplicitConfirmation(currentIndex, currentTick);
     }
 
     // If the batch + header is too large, error.
@@ -93,7 +93,7 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
               currentIndex, SharedConfig::MAX_BATCH_SIZE);
 
     // If we have a large enough payload, compress it.
-    unsigned int batchSize{currentIndex - SERVER_HEADER_SIZE};
+    std::size_t batchSize{currentIndex - SERVER_HEADER_SIZE};
     Uint8* bufferToSend{&(batchBuffer[0])};
     bool isCompressed{false};
     if (batchSize > SharedConfig::BATCH_COMPRESSION_THRESHOLD) {
@@ -109,15 +109,15 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     fillHeader(bufferToSend, static_cast<Uint16>(batchSize), isCompressed);
 
     // Record the number of sent bytes.
-    unsigned int totalSize{SERVER_HEADER_SIZE + batchSize};
+    std::size_t totalSize{SERVER_HEADER_SIZE + batchSize};
     NetworkStats::recordBytesSent(totalSize);
 
     // Send the header and batch.
-    unsigned int sendIndex{0};
+    std::size_t sendIndex{0};
     NetworkResult result{NetworkResult::Success};
     while (sendIndex < totalSize) {
         // Calc how many bytes we have left to send.
-        unsigned int bytesToSend{totalSize - sendIndex};
+        std::size_t bytesToSend{totalSize - sendIndex};
 
         // Only send up to MAX_WIRE_SIZE bytes per send() call.
         if (bytesToSend > Peer::MAX_WIRE_SIZE) {
@@ -136,8 +136,8 @@ NetworkResult Client::sendWaitingMessages(Uint32 currentTick)
     return result;
 }
 
-void Client::addExplicitConfirmation(unsigned int& currentIndex,
-                                     Uint32 currentTick, Uint8& messageCount)
+void Client::addExplicitConfirmation(std::size_t& currentIndex,
+                                     Uint32 currentTick)
 {
     /* Add the ExplicitConfirmation to the batch.
        Note: We add it by hand instead of using the normal functions because
@@ -145,7 +145,7 @@ void Client::addExplicitConfirmation(unsigned int& currentIndex,
 
     // Write the message type.
     batchBuffer[currentIndex]
-        = static_cast<unsigned int>(MessageType::ExplicitConfirmation);
+        = static_cast<Uint8>(MessageType::ExplicitConfirmation);
     currentIndex++;
 
     // Write the message size.
@@ -155,24 +155,21 @@ void Client::addExplicitConfirmation(unsigned int& currentIndex,
     // Calc the number of ticks we've processed since the last update.
     // (the tick count increments at the end of a sim tick, so our latest
     //  sent data is from currentTick - 1).
-    unsigned int confirmedTickCount{(currentTick - 1) - latestSentSimTick};
+    std::size_t confirmedTickCount{(currentTick - 1) - latestSentSimTick};
     AM_ASSERT(confirmedTickCount <= UINT8_MAX, "Count too large for Uint8.");
 
     // Write the explicit confirmation message.
     ExplicitConfirmation explicitConfirmation{
         static_cast<Uint8>(confirmedTickCount)};
-    currentIndex += static_cast<unsigned int>(
+    currentIndex += static_cast<std::size_t>(
         Serialize::toBuffer(batchBuffer.data(), batchBuffer.size(),
                             explicitConfirmation, currentIndex));
 
-    // Increment the message count.
-    messageCount++;
-
     // Update our latestSent tracking to account for the confirmed ticks.
-    latestSentSimTick += confirmedTickCount;
+    latestSentSimTick += static_cast<Uint32>(confirmedTickCount);
 }
 
-unsigned int Client::compressBatch(unsigned int batchSize)
+std::size_t Client::compressBatch(std::size_t batchSize)
 {
     // If the destination buffer is too small, resize it.
     std::size_t compressBound{ByteTools::compressBound(batchSize)};
@@ -181,8 +178,8 @@ unsigned int Client::compressBatch(unsigned int batchSize)
     }
 
     // Compress the batch.
-    unsigned int compressedBatchSize{
-        static_cast<unsigned int>(ByteTools::compress(
+    std::size_t compressedBatchSize{
+        static_cast<std::size_t>(ByteTools::compress(
             &(batchBuffer[ServerHeaderIndex::MessageHeaderStart]), batchSize,
             &(compressedBatchBuffer[ServerHeaderIndex::MessageHeaderStart]),
             compressedBatchBuffer.size()))};
@@ -213,14 +210,9 @@ void Client::fillHeader(Uint8* bufferToFill, Uint16 batchSize,
                        &(bufferToFill[ServerHeaderIndex::BatchSize]));
 }
 
-Uint8 Client::getWaitingMessageCount() const
+std::size_t Client::getWaitingMessageCount() const
 {
-    std::size_t size{sendQueue.size_approx()};
-    AM_ASSERT(
-        (size <= SDL_MAX_UINT8),
-        "Client's sendQueue contains too many messages to return as a Uint8.");
-
-    return static_cast<Uint8>(size);
+    return sendQueue.size_approx();
 }
 
 ReceiveResult Client::receiveMessage(Uint8* messageBuffer)

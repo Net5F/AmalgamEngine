@@ -31,20 +31,23 @@ public:
         /** The Y coordinate of the tile to update. */
         int tileY{0};
 
-        /** The number of layers that the tile has. 
-            Note: Because the update system only sees the end result of map 
-                  changes, we must send all of the tile's layers so the client
-                  can tell if multiple layers were cleared. */
+        /** The number of layer IDs in updatedLayers for this tile. */
         Uint8 layerCount{0};
+
+        /** The layer index of the first ID in updatedLayers for this tile. 
+            Subsequent tiles will be incrementally ascending.
+            When a layer is updated, we send that layer and all layers above 
+            it (so the client knows if upper layers were cleared). */
+        Uint8 startLayerIndex{0};
     };
 
     /** Holds tile info, in the same order as updatedLayers. */
     std::vector<TileInfo> tileInfo;
 
     /** The numericID that each layer is now set to.
-        Ordered to match tileInfo. E.g. if tileInfo[0] == {2, 2, 5}, the 
-        first 5 elements in this vector correspond to tile (2, 2) and are 
-        ordered by increasing layer number (0, 1, 2, 3, 4).
+        Ordered to match tileInfo. E.g. if tileInfo[0] == {2, 2, 3, 1}, the 
+        first 3 elements in this vector correspond to tile (2, 2) and are 
+        ordered by increasing layer index starting at 1: (1, 2, 3).
         
         To find which tile and layer an ID in this vector corresponds to, 
         iterate tileInfo and increment based on each layerCount. */
@@ -57,6 +60,7 @@ void serialize(S& serializer, TileUpdate::TileInfo& tileInfo)
     serializer.value4b(tileInfo.tileX);
     serializer.value4b(tileInfo.tileY);
     serializer.value1b(tileInfo.layerCount);
+    serializer.value1b(tileInfo.startLayerIndex);
 }
 
 template<typename S>

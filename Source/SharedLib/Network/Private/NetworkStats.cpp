@@ -3,8 +3,8 @@
 namespace AM
 {
 // Initialize data.
-std::atomic<unsigned int> NetworkStats::bytesSent = 0;
-std::atomic<unsigned int> NetworkStats::bytesReceived = 0;
+std::atomic<std::size_t> NetworkStats::bytesSent = 0;
+std::atomic<std::size_t> NetworkStats::bytesReceived = 0;
 
 NetStatsDump NetworkStats::dumpStats()
 {
@@ -17,12 +17,12 @@ NetStatsDump NetworkStats::dumpStats()
     return netStatsDump;
 }
 
-void NetworkStats::recordBytesSent(unsigned int inBytesSent)
+void NetworkStats::recordBytesSent(std::size_t inBytesSent)
 {
     bytesSent += inBytesSent;
 }
 
-void NetworkStats::recordBytesReceived(unsigned int inBytesReceived)
+void NetworkStats::recordBytesReceived(std::size_t inBytesReceived)
 {
     bytesReceived += inBytesReceived;
 }

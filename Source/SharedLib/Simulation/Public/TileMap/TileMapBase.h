@@ -38,20 +38,20 @@ public:
      *       sure they're valid.
      */
     void setTileSpriteLayer(int tileX, int tileY,
-                            unsigned int layerIndex, const Sprite& sprite);
+                            std::size_t layerIndex, const Sprite& sprite);
 
     /**
      * Overload for sprite string IDs.
      */
     void setTileSpriteLayer(int tileX, int tileY,
-                            unsigned int layerIndex,
+                            std::size_t layerIndex,
                             const std::string& stringID);
 
     /**
      * Overload for sprite numeric IDs.
      */
     void setTileSpriteLayer(int tileX, int tileY,
-                            unsigned int layerIndex, int numericID);
+                            std::size_t layerIndex, int numericID);
 
     /**
      * Clears all sprite layers out of the given tile.
@@ -73,7 +73,7 @@ public:
      *         too high to match any layers in the given tile.
      */
     bool clearTile(int tileX, int tileY,
-                   unsigned int startLayerIndex);
+                   std::size_t startLayerIndex);
 
     /**
      * Clears sprite layers out of all tiles within the given extent.
@@ -94,7 +94,7 @@ public:
      * @return true if any layers were cleared. false if startLayerIndex was 
      *         too high to match any layers in the given tile.
      */
-    bool clearExtent(TileExtent extent, unsigned int startLayerIndex);
+    bool clearExtent(TileExtent extent, std::size_t startLayerIndex);
 
     /**
      * Gets a const reference to the tile at the given coordinates.
@@ -112,21 +112,22 @@ public:
     const TileExtent& getTileExtent() const;
 
     /**
-     * Returns the coordinates of all tiles that have been modified.
+     * Returns a map containing all tiles with dirty state, and the lowest 
+     * dirty layer index for each tile.
      *
      * Note: This class does not clear elements from this container. You 
      *       must do it yourself after you've processed them.
      */
-    std::unordered_set<TilePosition>& getDirtyTiles();
+    std::unordered_map<TilePosition, std::size_t>& getDirtyTiles();
 
 protected:
     /**
      * Returns the index in the tiles vector where the tile with the given
      * coordinates can be found.
      */
-    inline unsigned int linearizeTileIndex(int x, int y) const
+    inline std::size_t linearizeTileIndex(int x, int y) const
     {
-        return (y * tileExtent.xLength) + x;
+        return static_cast<std::size_t>((y * tileExtent.xLength) + x);
     }
 
     /** The version of the map format. Kept as just a 16-bit int for now, we
@@ -150,8 +151,10 @@ private:
         pushed into dirtyTiles. */
     bool trackDirtyState;
 
-    /** Holds the coordinates of tiles that currently have dirty state. */
-    std::unordered_set<TilePosition> dirtyTiles;
+    /** Tracks the lowest dirty layer for each dirty tile.
+        If dirtyTiles[{x, y}] == 2, layer 2 is the lowest dirty layer for tile 
+        (x, y). */
+    std::unordered_map<TilePosition, std::size_t> dirtyTiles;
 };
 
 } // End namespace AM
