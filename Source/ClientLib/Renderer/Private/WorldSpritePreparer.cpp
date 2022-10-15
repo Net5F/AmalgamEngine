@@ -84,8 +84,8 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
     tileViewExtent.intersectWith(tileMap.getTileExtent());
 
     // Gather all tiles that are in view.
-    for (int y = tileViewExtent.y; y < tileViewExtent.yMax(); ++y) {
-        for (int x = tileViewExtent.x; x < tileViewExtent.xMax(); ++x) {
+    for (int y = tileViewExtent.y; y <= tileViewExtent.yMax(); ++y) {
+        for (int x = tileViewExtent.x; x <= tileViewExtent.xMax(); ++x) {
             // Get the tile data that we want to process.
             const Tile& tile{tileMap.getTile(x, y)};
 

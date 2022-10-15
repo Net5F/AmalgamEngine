@@ -82,8 +82,8 @@ public:
         }
 
         // For each tile that the desired bounds is touching.
-        for (int y = boxTileExtent.y; y < boxTileExtent.yMax(); ++y) {
-            for (int x = boxTileExtent.x; x < boxTileExtent.xMax(); ++x) {
+        for (int y = boxTileExtent.y; y <= boxTileExtent.yMax(); ++y) {
+            for (int x = boxTileExtent.x; x <= boxTileExtent.xMax(); ++x) {
                 const auto& tile{tileMap.getTile(x, y)};
 
                 // For each sprite layer in this tile.

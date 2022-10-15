@@ -58,12 +58,12 @@ public:
     /**
      * Returns the max X position in this extent.
      */
-    int xMax() const { return (x + xLength); }
+    int xMax() const { return (x + xLength - 1); }
 
     /**
      * Returns the max Y position in this extent.
      */
-    int yMax() const { return (y + yLength); }
+    int yMax() const { return (y + yLength - 1); }
 
     /**
      * Sets this extent to the union between itself and the given extent.
