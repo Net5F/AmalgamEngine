@@ -98,6 +98,11 @@ void PlayerInputSystem::addCurrentInputsToHistory()
 
 void PlayerInputSystem::processMouseWheel(SDL_MouseWheelEvent& wheelEvent)
 {
+    // If zooming is disabled, do nothing.
+    if (!Config::ENABLE_MOUSE_ZOOM) {
+        return;
+    }
+
     // Only process zoom if the player has a camera.
     if (world.registry.all_of<Camera>(world.playerEntity)) {
         /* Zoom the player's camera based on the mouse wheel movement. */

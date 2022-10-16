@@ -40,16 +40,18 @@ Velocity MovementHelpers::updateVelocity(const Velocity& velocity,
         updatedVelocity.x = 0;
     }
 
+    // Note: Disabled Z-axis since it's underdeveloped. Can re-enable for 
+    //       for testing. Eventually, we'll incorporate it fully.
     // Z-axis (favors up).
-    if (inputStates[Input::ZUp] == Input::Pressed) {
-        updatedVelocity.z = SharedConfig::MOVEMENT_VELOCITY;
-    }
-    else if (inputStates[Input::ZDown] == Input::Pressed) {
-        updatedVelocity.z = -SharedConfig::MOVEMENT_VELOCITY;
-    }
-    else {
-        updatedVelocity.z = 0;
-    }
+    //if (inputStates[Input::ZUp] == Input::Pressed) {
+    //    updatedVelocity.z = SharedConfig::MOVEMENT_VELOCITY;
+    //}
+    //else if (inputStates[Input::ZDown] == Input::Pressed) {
+    //    updatedVelocity.z = -SharedConfig::MOVEMENT_VELOCITY;
+    //}
+    //else {
+    //    updatedVelocity.z = 0;
+    //}
 
     return updatedVelocity;
 }
@@ -62,7 +64,7 @@ Position MovementHelpers::updatePosition(const Position& position,
     Position newPosition{position};
     newPosition.x += static_cast<float>((deltaSeconds * velocity.x));
     newPosition.y += static_cast<float>((deltaSeconds * velocity.y));
-    newPosition.z += static_cast<float>((deltaSeconds * velocity.z));
+    //newPosition.z += static_cast<float>((deltaSeconds * velocity.z));
 
     return newPosition;
 }
