@@ -13,8 +13,8 @@ World::World(SpriteData& spriteData)
 : registry()
 , tileMap(spriteData)
 , entityLocator(registry)
-, device()
-, generator(device())
+, randomDevice()
+, generator(randomDevice())
 , xDistribution(Config::SPAWN_POINT_RANDOM_MIN_X,
                 Config::SPAWN_POINT_RANDOM_MAX_X)
 , yDistribution(Config::SPAWN_POINT_RANDOM_MIN_Y,

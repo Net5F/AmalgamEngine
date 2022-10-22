@@ -61,7 +61,7 @@ private:
     Position getGroupedSpawnPoint();
 
     // For random spawn points.
-    std::random_device device;
+    std::random_device randomDevice;
     std::mt19937 generator;
     std::uniform_real_distribution<float> xDistribution;
     std::uniform_real_distribution<float> yDistribution;
