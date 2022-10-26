@@ -1,9 +1,8 @@
 #pragma once
 
 #include "OSEventHandler.h"
-#include "QueuedEvents.h"
 #include "World.h"
-#include "ConnectionResponse.h"
+#include "ServerConnectionSystem.h"
 #include "ChunkUpdateSystem.h"
 #include "TileUpdateSystem.h"
 #include "NpcLifetimeSystem.h"
@@ -41,17 +40,6 @@ public:
 
     Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
                SpriteData& inSpriteData);
-
-    /**
-     * Requests to connect to the game server, waits for an assigned EntityID,
-     * and constructs the player.
-     */
-    void connect();
-
-    /**
-     * Fills in player data as if we connected to the server.
-     */
-    void fakeConnection();
 
     /**
      * Processes the next sim iteration.
@@ -94,17 +82,9 @@ public:
     void setExtension(std::unique_ptr<ISimulationExtension> inExtension);
 
 private:
-    /** How long the sim should wait for the server to send a connection
-        response, in microseconds. */
-    static constexpr int CONNECTION_RESPONSE_WAIT_US = 1 * 1000 * 1000;
-
     /** Used to receive events (through the Network's dispatcher) and to
         send messages. */
     Network& network;
-
-    /** Temporarily used for loading the player's sprite texture.
-        When that logic gets moved, this member can be removed. */
-    SpriteData& spriteData;
 
     World world;
 
@@ -115,8 +95,6 @@ private:
     /** How far into the past to replicate non-predicted state at. */
     ReplicationTickOffset replicationTickOffset;
 
-    EventQueue<ConnectionResponse> connectionResponseQueue;
-
     /** If non-nullptr, contains the project's simulation extension functions.
         Allows the project to provide simulation code and have it be called at
         the appropriate time. */
@@ -125,6 +103,7 @@ private:
     //-------------------------------------------------------------------------
     // Systems
     //-------------------------------------------------------------------------
+    ServerConnectionSystem serverConnectionSystem;
     ChunkUpdateSystem chunkUpdateSystem;
     TileUpdateSystem tileUpdateSystem;
     NpcLifetimeSystem npcLifetimeSystem;

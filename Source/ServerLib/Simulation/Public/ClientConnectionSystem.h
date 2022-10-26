@@ -25,7 +25,10 @@ public:
                            EventDispatcher& inNetworkEventDispatcher,
                            Network& inNetwork, SpriteData& inSpriteData);
 
-    /** Processes the effects of new connections and disconnects on the sim. */
+    /**
+     * Processes new connections and disconnections, updating the sim state 
+     * appropriately.
+     */
     void processConnectionEvents();
 
 private:

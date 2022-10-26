@@ -20,7 +20,7 @@ public:
     };
 
     /** The camera's movement behavior. */
-    MovementBehavior behavior;
+    MovementBehavior behavior{MovementBehavior::CenterOnEntity};
 
     /** Center of the camera's view, in world coordinates. */
     Position position{};

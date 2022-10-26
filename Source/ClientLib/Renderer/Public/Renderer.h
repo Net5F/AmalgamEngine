@@ -51,6 +51,11 @@ public:
 
 private:
     /**
+     * Gets the player entity's current camera, lerped to match the given alpha.
+     */
+    Camera getLerpedCamera(double alpha);
+
+    /**
      * Renders the vector of sprites returned by
      * worldSpritePreparer.prepareSprites().
      *

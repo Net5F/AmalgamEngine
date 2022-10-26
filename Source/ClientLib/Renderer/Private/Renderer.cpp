@@ -36,34 +36,15 @@ void Renderer::render()
 {
     /* Set up the camera for this frame. */
     // Get how far we are between sim ticks in decimal percent.
-    double alpha = getSimTickProgress();
+    double alpha{getSimTickProgress()};
 
-    // Get the lerped camera position based on the alpha.
-    auto [playerCamera, playerSprite, playerPosition, playerPreviousPos]
-        = world.registry.get<Camera, Sprite, Position, PreviousPosition>(
-            world.playerEntity);
-    Position cameraLerp{MovementHelpers::interpolatePosition(
-        playerCamera.prevPosition, playerCamera.position, alpha)};
-
-    // Set the camera at the lerped position.
-    Camera lerpedCamera{playerCamera};
-    lerpedCamera.position.x = cameraLerp.x;
-    lerpedCamera.position.y = cameraLerp.y;
-
-    // Get iso screen coords for the center point of camera.
-    ScreenPoint lerpedCameraCenter{Transforms::worldToScreen(
-        lerpedCamera.position, lerpedCamera.zoomFactor)};
-
-    // Calc where the top left of the lerpedCamera is in screen space.
-    lerpedCamera.extent.x
-        = lerpedCameraCenter.x - (lerpedCamera.extent.width / 2);
-    lerpedCamera.extent.y
-        = lerpedCameraCenter.y - (lerpedCamera.extent.height / 2);
-
-    // Save the last calculated screen position of the camera for use in
-    // screen -> world calcs.
-    playerCamera.extent.x = lerpedCamera.extent.x;
-    playerCamera.extent.y = lerpedCamera.extent.y;
+    // If we have a valid player entity, get the lerped camera.
+    // Note: When we're disconnected from the server, the camera will be 
+    //       default (the UI will be covering it anyway).
+    Camera lerpedCamera{};
+    if (world.playerEntity != entt::null) {
+        lerpedCamera = getLerpedCamera(alpha);
+    }
 
     /* Render. */
     // Clear the screen to prepare for drawing.
@@ -111,6 +92,38 @@ bool Renderer::handleOSEvent(SDL_Event& event)
 void Renderer::setExtension(std::unique_ptr<IRendererExtension> inExtension)
 {
     extension = std::move(inExtension);
+}
+
+Camera Renderer::getLerpedCamera(double alpha)
+{
+    // Get the lerped camera position based on the alpha.
+    auto [playerCamera, playerSprite, playerPosition, playerPreviousPos]
+        = world.registry.get<Camera, Sprite, Position, PreviousPosition>(
+            world.playerEntity);
+    Position cameraLerp{MovementHelpers::interpolatePosition(
+        playerCamera.prevPosition, playerCamera.position, alpha)};
+
+    // Set the camera at the lerped position.
+    Camera lerpedCamera{playerCamera};
+    lerpedCamera.position.x = cameraLerp.x;
+    lerpedCamera.position.y = cameraLerp.y;
+
+    // Get iso screen coords for the center point of camera.
+    ScreenPoint lerpedCameraCenter{Transforms::worldToScreen(
+        lerpedCamera.position, lerpedCamera.zoomFactor)};
+
+    // Calc where the top left of the lerpedCamera is in screen space.
+    lerpedCamera.extent.x
+        = lerpedCameraCenter.x - (lerpedCamera.extent.width / 2);
+    lerpedCamera.extent.y
+        = lerpedCameraCenter.y - (lerpedCamera.extent.height / 2);
+
+    // Save the last calculated screen position of the camera for use in
+    // screen -> world calcs.
+    playerCamera.extent.x = lerpedCamera.extent.x;
+    playerCamera.extent.y = lerpedCamera.extent.y;
+
+    return lerpedCamera;
 }
 
 void Renderer::renderWorld(const Camera& camera, double alpha)

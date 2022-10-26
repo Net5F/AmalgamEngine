@@ -16,8 +16,7 @@ class Network;
  *
  * See updateTiles() comment for more info.
  *
- * Note: There is no sophisticated networking done for tile updates.
- *       If an updated tile collides with an entity, visual desyncs can occur.
+ * Note: If an updated tile collides with an entity, visual desyncs can occur.
  *       This client-side visual desync can occur for NPC entities as well as
  *       the player entity.
  *       This desync is easily fixed, the offending entity just needs to change

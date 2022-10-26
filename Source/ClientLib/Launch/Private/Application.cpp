@@ -69,9 +69,6 @@ Application::Application()
 
 void Application::start()
 {
-    // Connect to the server (waits for connection response).
-    simulation.connect();
-
     // Prime the timers so they don't start at 0.
     simCaller.initTimer();
     uiCaller.initTimer();

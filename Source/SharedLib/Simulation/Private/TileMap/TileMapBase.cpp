@@ -194,6 +194,14 @@ bool TileMapBase::clearExtent(TileExtent extent, std::size_t startLayerIndex)
     return layersWereCleared;
 }
 
+void TileMapBase::clear()
+{
+    chunkExtent = {};
+    tileExtent = {};
+    tiles.clear();
+    dirtyTiles.clear();
+}
+
 const Tile& TileMapBase::getTile(int x, int y) const
 {
     // TODO: How do we linearize negative coords?

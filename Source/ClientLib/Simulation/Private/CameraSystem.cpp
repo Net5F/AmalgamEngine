@@ -11,7 +11,7 @@ namespace AM
 namespace Client
 {
 CameraSystem::CameraSystem(World& inWorld)
-: world(inWorld)
+: world{inWorld}
 {
 }
 

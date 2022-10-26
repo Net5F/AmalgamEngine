@@ -3,6 +3,7 @@ target_sources(SharedLib
         Public/ChunkUpdate.h
         Public/ChunkUpdateRequest.h
         Public/ChunkWireSnapshot.h
+        Public/ConnectionRequest.h
         Public/ConnectionResponse.h
         Public/ExplicitConfirmation.h
         Public/Heartbeat.h

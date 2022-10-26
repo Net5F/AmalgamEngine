@@ -28,8 +28,9 @@ class IMessageProcessorExtension;
  * Provides a convenient interface for connecting to the server, sending
  * and receiving messages, and other network-related functionality.
  *
- * Internally, manages our connection to the server (if connected) and
- * orchestrates message sending and receiving.
+ * Note: ServerConnectionSystem is responsible for calling connect() and 
+ * disconnect(). If a connection error is detected, this class will push a 
+ * ConnectionError event and ServerConnectionSystem will handle it.
  */
 class Network
 {
@@ -39,18 +40,26 @@ public:
     ~Network();
 
     /**
-     * Attempts to establish a connection with the server.
-     * If successful, starts the receiver thread.
+     * Spins up the connectAndReceive thread.
      *
-     * @return true if a connection was successfully established, else false.
+     * Note: ServerConnectionSystem is responsible for calling this. See class 
+     *       comment.
      */
-    bool connect();
+    void connect();
+
+    /**
+     * Cleans up our server connection and spins down the receive thread.
+     *
+     * Note: ServerConnectionSystem is responsible for calling this. See class 
+     *       comment.
+     */
+    void disconnect();
 
     /**
      * Updates accumulatedTime. If greater than the tick timestep and no
      * messages have been sent since the last heartbeat, sends a message.
      *
-     * Also logs network statistics if it's time to do so.
+     * Also logs network statistics periodically.
      */
     void tick();
 
@@ -114,10 +123,12 @@ private:
 
     /**
      * Thread function, started from connect().
-     * Tries to retrieve a message batch from the server.
-     * If successful, calls processBatch().
+     *
+     * First, tries to connect to the server.
+     * If successful, receives messages from the server and passes them to 
+     * processBatch().
      */
-    int pollForMessages();
+    void connectAndReceive();
 
     /**
      * Processes the received header and following batch.
@@ -170,7 +181,7 @@ private:
     Timer receiveTimer;
 
     /** Calls pollForMessages(). */
-    std::thread receiveThreadObj;
+    std::jthread receiveThreadObj;
     /** Turn false to signal that the receive thread should end. */
     std::atomic<bool> exitRequested;
 

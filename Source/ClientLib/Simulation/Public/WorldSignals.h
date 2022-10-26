@@ -3,6 +3,7 @@
 #include "entt/signal/sigh.hpp"
 
 #include "TileExtent.h"
+#include "ConnectionError.h"
 
 namespace AM
 {
@@ -18,6 +19,9 @@ namespace Client
 class WorldSignals
 {
 public:
+    /** Our connection to the server has encountered an error. */
+    entt::sigh<void(ConnectionError)> serverConnectionError;
+
     /** The tile map's extent (size) has changed. */
     entt::sigh<void(TileExtent)> tileMapExtentChanged;
 };

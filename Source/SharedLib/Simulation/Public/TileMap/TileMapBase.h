@@ -97,6 +97,11 @@ public:
     bool clearExtent(TileExtent extent, std::size_t startLayerIndex);
 
     /**
+     * Clears all tile map state, leaving an empty map.
+     */
+    void clear();
+
+    /**
      * Gets a const reference to the tile at the given coordinates.
      */
     const Tile& getTile(int x, int y) const;

@@ -3,9 +3,12 @@ target_sources(ClientLib
 		Private/Network.cpp
 		Private/MessageProcessor.cpp
 	PUBLIC
-		Public/Network.h
-		Public/MessageProcessor.h
 		Public/ClientNetworkDefs.h
+		Public/ConnectionError.h
+		Public/IMessageProcessorExtension.h
+		Public/MessageProcessor.h
+		Public/MessageProcessorExDependencies.h
+		Public/Network.h
 )
 
 target_include_directories(ClientLib

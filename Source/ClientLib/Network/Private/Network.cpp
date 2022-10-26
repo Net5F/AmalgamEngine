@@ -1,6 +1,7 @@
 #include "Network.h"
 #include "QueuedEvents.h"
 #include "Heartbeat.h"
+#include "ConnectionError.h"
 #include "Config.h"
 #include "UserConfig.h"
 #include "NetworkStats.h"
@@ -50,25 +51,35 @@ Network::~Network()
     }
 }
 
-bool Network::connect()
+void Network::connect()
 {
-    // Try to connect.
-    ServerAddress serverAddress{UserConfig::get().getServerAddress()};
-    server = Peer::initiate(serverAddress.IP, serverAddress.port);
-
-    // Spin up the receive thread.
     if (server != nullptr) {
-        receiveThreadObj = std::thread(&Network::pollForMessages, this);
+        LOG_INFO("Attempted to connect while connected.");
+        return;
     }
 
-    return (server != nullptr);
+    // Spin up the receive thread (will start the connection attempt).
+    LOG_INFO("Network: Spinning up receive thread");
+    receiveThreadObj = std::jthread(&Network::connectAndReceive, this);
+}
+
+void Network::disconnect()
+{
+    // Spin down the receive thread.
+    exitRequested = true;
+    if (receiveThreadObj.joinable()) {
+        receiveThreadObj.join();
+    }
+    server = nullptr;
 }
 
 void Network::tick()
 {
-    if (!Config::RUN_OFFLINE) {
-        // Send a heartbeat if we need to.
-        sendHeartbeatIfNecessary();
+    if (!Config::RUN_OFFLINE && (server != nullptr)) {
+        // If the sim is running, send a heartbeat if we need to.
+        if (*currentTickPtr != 0) {
+            sendHeartbeatIfNecessary();
+        }
 
         // If it's time to log our network statistics, do so.
         if (netstatsLoggingEnabled) {
@@ -134,7 +145,9 @@ void Network::setMessageProcessorExtension(
 void Network::send(const BinaryBufferSharedPtr& message)
 {
     if ((server == nullptr) || !(server->isConnected())) {
-        LOG_FATAL("Tried to send while server is disconnected.");
+        // Note: Receive thread is responsible for emitting ConnectionError.
+        LOG_INFO("Tried to send while server is disconnected.");
+        return;
     }
 
     // Send the message.
@@ -147,7 +160,8 @@ void Network::send(const BinaryBufferSharedPtr& message)
             static_cast<unsigned int>(message->size()));
     }
     else {
-        LOG_FATAL("Message send failed.");
+        // Note: Receive thread is responsible for emitting ConnectionError.
+        LOG_INFO("Message send failed.");
     }
 }
 
@@ -162,8 +176,25 @@ void Network::sendHeartbeatIfNecessary()
     messagesSentSinceTick = 0;
 }
 
-int Network::pollForMessages()
+void Network::connectAndReceive()
 {
+    // Try to connect.
+    LOG_INFO("Network: Attempting connection");
+    ServerAddress serverAddress{UserConfig::get().getServerAddress()};
+    server = Peer::initiate(serverAddress.IP, serverAddress.port);
+    if (server != nullptr) {
+        LOG_INFO("Network: Connected");
+        // Note: The server sends us a ConnectionResponse when we connect the 
+        //       socket. Eventually, we'll instead send a ConnectionRequest to 
+        //       the login server here.
+    }
+    else {
+        LOG_INFO("Network: Failed to connect");
+        eventDispatcher.emplace<ConnectionError>(ConnectionError::Type::Failed);
+        return;
+    }
+
+    // Receive message batches from the server.
     while (!exitRequested) {
         // Wait for a server header.
         NetworkResult headerResult{server->receiveBytesWait(
@@ -173,12 +204,13 @@ int Network::pollForMessages()
             processBatch();
         }
         else if (headerResult == NetworkResult::Disconnected) {
-            LOG_FATAL("Found server to be disconnected while trying to "
-                      "receive header.");
+            LOG_INFO("Found server to be disconnected while trying to "
+                     "receive header.");
+            eventDispatcher.emplace<ConnectionError>(
+                ConnectionError::Type::Disconnected);
+            return;
         }
     }
-
-    return 0;
 }
 
 void Network::processBatch()

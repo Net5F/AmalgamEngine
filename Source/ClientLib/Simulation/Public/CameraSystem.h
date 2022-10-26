@@ -1,7 +1,5 @@
 #pragma once
 
-#include "entt/entity/registry.hpp"
-
 namespace AM
 {
 struct Position;

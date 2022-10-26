@@ -7,6 +7,7 @@ target_sources(ClientLib
 		Private/PlayerInputSystem.cpp
 		Private/PlayerMovementSystem.cpp
 		Private/ReplicationTickOffset.cpp
+		Private/ServerConnectionSystem.cpp
 		Private/Simulation.cpp
 		Private/TileUpdateSystem.cpp
 		Private/World.cpp
@@ -21,6 +22,7 @@ target_sources(ClientLib
 		Public/PlayerInputSystem.h
 		Public/PlayerMovementSystem.h
 		Public/ReplicationTickOffset.h
+		Public/ServerConnectionSystem.h
 		Public/Simulation.h
 		Public/SimulationExDependencies.h
 		Public/TileUpdateSystem.h

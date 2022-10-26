@@ -38,7 +38,7 @@ public:
     /**
      * Sends all queued messages over the network.
      *
-     * Also logs network statistics if it's time to do so.
+     * Also logs network statistics periodically.
      */
     void tick();
 

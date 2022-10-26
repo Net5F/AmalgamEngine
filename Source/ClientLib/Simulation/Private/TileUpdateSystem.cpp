@@ -12,8 +12,8 @@ TileUpdateSystem::TileUpdateSystem(World& inWorld,
                                    Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
-, tileUpdateRequestQueue(inUiEventDispatcher)
-, tileUpdateQueue(network.getEventDispatcher())
+, tileUpdateRequestQueue{inUiEventDispatcher}
+, tileUpdateQueue{network.getEventDispatcher()}
 {
 }
 
