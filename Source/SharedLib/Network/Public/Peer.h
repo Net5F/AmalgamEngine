@@ -11,9 +11,10 @@ namespace AM
 {
 /**
  * Represents a network peer for communication.
- * TODO: Peer/acceptor seem like a redundant layer and should probably be
- * removed. A Client/Server class and the SocketSet/TcpSocket classes should be
- * able to cleanly handle all the responsibilities.
+ *
+ * This class helps us interact with sockets in the ways that we usually like 
+ * to. If different behavior is needed, TcpSocket/SocketSet should be used 
+ * directly.
  */
 class Peer
 {
@@ -23,7 +24,7 @@ public:
         we need larger.
         BE AWARE: Must be kept below 32768 (2^15) since we store it in a Uint16
                   and use the high bit to indicate compression. */
-    static constexpr std::size_t MAX_WIRE_SIZE = 1450;
+    static constexpr std::size_t MAX_WIRE_SIZE{1450};
 
     /**
      * Initiates a TCP connection that the other side can then accept.
@@ -35,16 +36,17 @@ public:
     /**
      * Constructor for when you only need 1 peer (client connecting to server,
      * anyone connecting to chat server.)
-     * Constructs a socket set for this peer to use and adds the socket to it.
+     * Takes ownership of the given socket and adds it as the only member of a 
+     * socket set.
      */
-    Peer(std::unique_ptr<TcpSocket> inSocket);
+    Peer(TcpSocket&& inSocket);
 
     /**
      * Constructor for when you need a set of peers (server connecting to
      * clients).
-     * Adds the socket to the given set.
+     * Takes ownership of the given socket and adds it to the given set.
      */
-    Peer(std::unique_ptr<TcpSocket> inSocket,
+    Peer(TcpSocket&& inSocket,
          const std::shared_ptr<SocketSet>& inSet);
 
     /**
@@ -140,7 +142,7 @@ public:
 private:
     /** The socket for this peer. Must be a unique_ptr so we can move without
         copying. */
-    std::unique_ptr<TcpSocket> socket;
+    TcpSocket socket;
 
     /** The set that this peer belongs to.
         Must be a shared_ptr since we may or may not allocate it ourselves

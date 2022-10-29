@@ -11,11 +11,7 @@
 namespace AM
 {
 /**
- * This class owns a listener socket and can accept new Peers.
-
- * TODO: Peer/Acceptor seem like a redundant layer and should probably be
- *       removed. The Client/Server classes and the SocketSet/TcpSocket
- *       classes should be able to cleanly handle all the responsibilities.
+ * Owns a listener socket and provides an interface for accepting new Peers.
  */
 class Acceptor
 {

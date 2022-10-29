@@ -9,37 +9,40 @@ namespace AM
 std::unique_ptr<Peer> Peer::initiate(const std::string& serverIP,
                                      unsigned int serverPort)
 {
-    std::unique_ptr<TcpSocket> socket{
-        std::make_unique<TcpSocket>(serverIP, static_cast<Uint16>(serverPort))};
-
-    return std::make_unique<Peer>(std::move(socket));
+    TcpSocket socket{};
+    if (socket.openConnectionTo(serverIP, static_cast<Uint16>(serverPort))) {
+        return std::make_unique<Peer>(std::move(socket));
+    }
+    else {
+        return nullptr;
+    }
 }
 
-Peer::Peer(std::unique_ptr<TcpSocket> inSocket)
-: socket(std::move(inSocket))
-, set(std::make_shared<SocketSet>(
-      1)) // No set given, create a set of size 1 for this peer.
-, bIsConnected(false)
+Peer::Peer(TcpSocket&& inSocket)
+: socket{std::move(inSocket)}
+// No set given, create a set of size 1 for this peer.
+, set{std::make_shared<SocketSet>(1)} 
+, bIsConnected{false}
 {
-    set->addSocket(*socket);
+    set->addSocket(socket);
 
     bIsConnected = true;
 }
 
-Peer::Peer(std::unique_ptr<TcpSocket> inSocket,
+Peer::Peer(TcpSocket&& inSocket,
            const std::shared_ptr<SocketSet>& inSet)
-: socket(std::move(inSocket))
-, set(inSet)
-, bIsConnected(false)
+: socket{std::move(inSocket)}
+, set{inSet}
+, bIsConnected{false}
 {
-    set->addSocket(*socket);
+    set->addSocket(socket);
 
     bIsConnected = true;
 }
 
 Peer::~Peer()
 {
-    set->remSocket(*socket);
+    set->remSocket(socket);
 }
 
 bool Peer::isConnected() const
@@ -59,7 +62,7 @@ NetworkResult Peer::send(const BinaryBufferSharedPtr& buffer)
                   messageSize, MAX_WIRE_SIZE);
     }
 
-    int bytesSent{socket->send(buffer->data(), static_cast<int>(messageSize))};
+    int bytesSent{socket.send(buffer->data(), static_cast<int>(messageSize))};
     if (bytesSent < 0) {
         LOG_FATAL("TCP_Send returned < 0. This should never happen, the socket"
                   "was likely misused.");
@@ -86,7 +89,7 @@ NetworkResult Peer::send(const Uint8* buffer, std::size_t numBytesToSend)
                   numBytesToSend, MAX_WIRE_SIZE);
     }
 
-    int bytesSent{socket->send(buffer, static_cast<int>(numBytesToSend))};
+    int bytesSent{socket.send(buffer, static_cast<int>(numBytesToSend))};
     if (bytesSent < 0) {
         LOG_FATAL("TCP_Send returned < 0. This should never happen, the socket"
                   "was likely misused.");
@@ -113,7 +116,7 @@ NetworkResult Peer::receiveBytes(Uint8* buffer, std::size_t numBytes,
         set->checkSockets(0);
     }
 
-    if (!(socket->isReady())) {
+    if (!(socket.isReady())) {
         return NetworkResult::NoWaitingData;
     }
     else {
@@ -131,7 +134,7 @@ NetworkResult Peer::receiveBytesWait(Uint8* buffer, std::size_t numBytes)
     int bytesReceived{0};
     while (static_cast<std::size_t>(bytesReceived) < numBytes) {
         // Try to receive bytes.
-        int result{socket->receive((buffer + bytesReceived),
+        int result{socket.receive((buffer + bytesReceived),
                                    static_cast<int>(numBytes))};
         if (result > 0) {
             bytesReceived += result;
@@ -156,7 +159,7 @@ ReceiveResult Peer::receiveMessage(Uint8* messageBuffer, bool checkSockets)
         set->checkSockets(0);
     }
 
-    if (!(socket->isReady())) {
+    if (!(socket.isReady())) {
         return {NetworkResult::NoWaitingData};
     }
     else {
@@ -172,7 +175,7 @@ ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
 
     // Receive the message header.
     Uint8 headerBuf[MESSAGE_HEADER_SIZE];
-    int result{socket->receive(headerBuf, MESSAGE_HEADER_SIZE)};
+    int result{socket.receive(headerBuf, MESSAGE_HEADER_SIZE)};
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
@@ -192,7 +195,7 @@ ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
                   messageSize, MAX_WIRE_SIZE);
     }
 
-    result = socket->receive(messageBuffer, messageSize);
+    result = socket.receive(messageBuffer, messageSize);
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
@@ -216,7 +219,7 @@ ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
 
     // Receive the message header.
     std::array<Uint8, MESSAGE_HEADER_SIZE> headerBuf{};
-    int result{socket->receive(headerBuf.data(), MESSAGE_HEADER_SIZE)};
+    int result{socket.receive(headerBuf.data(), MESSAGE_HEADER_SIZE)};
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;
@@ -237,7 +240,7 @@ ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
     }
 
     messageBuffer = std::make_unique<BinaryBuffer>(messageSize);
-    result = socket->receive(messageBuffer->data(), messageSize);
+    result = socket.receive(messageBuffer->data(), messageSize);
     if (result <= 0) {
         // Disconnected
         bIsConnected = false;

@@ -19,6 +19,10 @@ namespace Client
 class WorldSignals
 {
 public:
+    /** We've established a connection with the server and the simulation has 
+        started running. */
+    entt::sigh<void()> simulationStarted;
+
     /** Our connection to the server has encountered an error. */
     entt::sigh<void(ConnectionError)> serverConnectionError;
 

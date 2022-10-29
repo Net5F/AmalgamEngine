@@ -4,36 +4,58 @@
 
 namespace AM
 {
-TcpSocket::TcpSocket(Uint16 inPort)
-: ip("")
-, port(inPort)
+TcpSocket::TcpSocket()
+: socket{nullptr}
+, ip{""}
+, port{0}
 {
-    // We explicitly guard against this since we use port == 0 as a flag.
-    if (port == 0) {
-        LOG_FATAL("Tried to use port 0.");
-    }
-
-    IPaddress ipObj;
-    if (SDLNet_ResolveHost(&ipObj, nullptr, port) == -1) {
-        LOG_FATAL("Could not resolve host: %s", SDLNet_GetError());
-    }
-
-    socket = SDLNet_TCP_Open(&ipObj);
-    if (socket == nullptr) {
-        LOG_FATAL("Could not open TCP socket: %s", SDLNet_GetError());
-    }
 }
 
 TcpSocket::TcpSocket(TCPsocket inSdlSocket)
 : socket(inSdlSocket)
-, ip("")
-, port(0)
+, ip{""}
+, port{0}
 {
 }
 
-TcpSocket::TcpSocket(std::string inIp, Uint16 inPort)
-: ip(inIp)
-, port(inPort)
+TcpSocket::~TcpSocket()
+{
+    close();
+}
+
+TcpSocket::TcpSocket(TcpSocket&& otherSocket) noexcept
+: socket{otherSocket.socket}
+, ip{otherSocket.ip}
+, port{otherSocket.port}
+{
+    otherSocket.socket = nullptr;
+    otherSocket.ip = "";
+    otherSocket.port = 0;
+}
+
+bool TcpSocket::openAsListener(Uint16 portToListenOn)
+{
+    // We explicitly guard against this since we use port == 0 as a flag.
+    if (portToListenOn == 0) {
+        LOG_FATAL("Tried to listen on port 0.");
+    }
+
+    IPaddress ipObj;
+    if (SDLNet_ResolveHost(&ipObj, nullptr, portToListenOn) == -1) {
+        LOG_INFO("Could not resolve host: %s", SDLNet_GetError());
+        return false;
+    }
+
+    socket = SDLNet_TCP_Open(&ipObj);
+    if (socket == nullptr) {
+        LOG_INFO("Could not open TCP socket: %s", SDLNet_GetError());
+        return false;
+    }
+
+    return true;
+}
+
+bool TcpSocket::openConnectionTo(std::string ip, Uint16 port)
 {
     // We explicitly guard against this since we use port == 0 as a flag.
     if (port == 0) {
@@ -42,18 +64,30 @@ TcpSocket::TcpSocket(std::string inIp, Uint16 inPort)
 
     IPaddress ipObj;
     if (SDLNet_ResolveHost(&ipObj, ip.c_str(), port) == -1) {
-        LOG_FATAL("Could not resolve host: %s", SDLNet_GetError());
+        LOG_INFO("Could not resolve host: %s", SDLNet_GetError());
+        return false;
     }
 
     socket = SDLNet_TCP_Open(&ipObj);
     if (socket == nullptr) {
-        LOG_FATAL("Could not open TCP socket: %s", SDLNet_GetError());
+        LOG_INFO("Could not open TCP socket: %s", SDLNet_GetError());
+        return false;
+    }
+
+    return true;
+}
+
+void TcpSocket::close()
+{
+    if (socket != nullptr) {
+        SDLNet_TCP_Close(socket);
+        socket = nullptr;
     }
 }
 
-TcpSocket::~TcpSocket()
+bool TcpSocket::isOpen()
 {
-    SDLNet_TCP_Close(socket);
+    return (socket != nullptr);
 }
 
 int TcpSocket::send(const void* dataBuffer, int len)
@@ -71,14 +105,14 @@ bool TcpSocket::isReady()
     return SDLNet_SocketReady(socket);
 }
 
-std::unique_ptr<TcpSocket> TcpSocket::accept()
+TcpSocket TcpSocket::accept()
 {
     TCPsocket newSocket{SDLNet_TCP_Accept(socket)};
     if (newSocket != nullptr) {
-        return std::make_unique<TcpSocket>(newSocket);
+        return std::move(TcpSocket{newSocket});
     }
     else {
-        return nullptr;
+        return TcpSocket{};
     }
 }
 

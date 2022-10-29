@@ -39,7 +39,7 @@ int SocketSet::checkSockets(unsigned int timeoutMs)
 {
     int numReady{SDLNet_CheckSockets(set, timeoutMs)};
     if (numReady == -1) {
-        LOG_INFO("Error while checking sockets: %s", SDLNet_GetError());
+        LOG_FATAL("Error while checking sockets: %s", SDLNet_GetError());
         // Most of the time this is a system error, where perror might help.
         perror("SDLNet_CheckSockets");
     }

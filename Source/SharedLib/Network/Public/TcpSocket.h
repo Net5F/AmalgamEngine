@@ -12,42 +12,68 @@ namespace AM
 {
 /**
  * Represents a single TCP socket.
- * Wraps SDLNet's TCPsocket in an RAII object interface.
+ * Wraps SDLNet's TCPsocket in a C++ object interface.
  */
 class TcpSocket
 {
 public:
-    /**
-     * Opens the socket as a listener.
-     *
-     * @param inPort  The port to listen on.
-     */
-    TcpSocket(Uint16 inPort);
+    TcpSocket();
 
     /**
-     * Accepts the given SDLNet socket connection.
+     * Takes ownership over the given SDLNet socket connection.
      *
      * @param inSdlSocket A connected socket.
      */
     TcpSocket(TCPsocket inSdlSocket);
 
-    /**
-     * Opens a socket connection to the given host.
-     *
-     * @param inIp  The IP to connect to.
-     * @param inPort  The port to connect to.
-     */
-    TcpSocket(std::string inIp, Uint16 inPort);
-
-    /**
-     * Closes the socket.
-     * Note: Will not remove the socket from any sets that it might belong to.
-     */
-    ~TcpSocket();
+    // Moveable.
+    TcpSocket(TcpSocket&& otherSocket) noexcept;
 
     // Not copyable.
     TcpSocket(const TcpSocket& otherSocket) = delete;
     TcpSocket& operator=(const TcpSocket& otherSocket) = delete;
+
+    /**
+     * Closes this socket, if it's open.
+     * Note: Will not remove the socket from any sets that it might belong to.
+     */
+    ~TcpSocket();
+
+    /**
+     * Opens this socket as a listener.
+     *
+     * @param portToListenOn  The port to listen on.
+     * @return true if successful, else false.
+     */
+    bool openAsListener(Uint16 portToListenOn);
+
+    /**
+     * Opens a socket connection to the given host.
+     *
+     * @param ip  The IP to connect to.
+     * @param port  The port to connect to.
+     * @return true if successful, else false.
+     */
+    bool openConnectionTo(std::string ip, Uint16 port);
+
+    /**
+     * Closes this socket, if it's open.
+     * Note: Will not remove this socket from any sets that it might belong to.
+     */
+    void close();
+
+    /**
+     * @return true if this socket has an open connection, else false.
+     */
+    bool isOpen();
+
+    /**
+     * @return true if this socket has been marked as active, else false.
+     *
+     * Note: Only call this on a socket in a set, after calling checkSockets()
+     *       on that set.
+     */
+    bool isReady();
 
     /**
      * Sends len bytes from the given dataBuffer over this socket.
@@ -74,27 +100,19 @@ public:
     int receive(void* dataBuffer, int maxLen);
 
     /**
-     * Checks if a socket has been marked as active.
-     *
-     * Note: Only call this on a socket in a set, after calling checkSockets()
-     *       on that set.
-     */
-    bool isReady();
-
-    /**
      * Accepts an incoming connection on this socket.
      *
      * Note: Only call this on a server (listener) socket.
      *
-     * @return A valid TcpSocket unique pointer on success.
-     *         nullptr is returned on errors, such as failure to create a
-     *         socket, failure to finish connecting, or if there is no waiting
-     *         connection.
+     * @return A TcpSocket. If the accept was successful, socket.isOpen() will 
+     *         == true. The socket will be closed if an error occurs, such as 
+     *         failure to create a socket, failure to finish connecting, or if 
+     *         there is no waiting connection.
      */
-    std::unique_ptr<TcpSocket> accept();
+    TcpSocket accept();
 
     /**
-     * Gets the address of the peer at the other side of the socket.
+     * Gets the address of the peer at the other side of this socket.
      *
      * Note: Only call this on a connected socket, not a listener.
      *

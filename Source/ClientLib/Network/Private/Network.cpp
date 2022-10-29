@@ -59,7 +59,7 @@ void Network::connect()
     }
 
     // Spin up the receive thread (will start the connection attempt).
-    LOG_INFO("Network: Spinning up receive thread");
+    exitRequested = false;
     receiveThreadObj = std::jthread(&Network::connectAndReceive, this);
 }
 
@@ -179,36 +179,41 @@ void Network::sendHeartbeatIfNecessary()
 void Network::connectAndReceive()
 {
     // Try to connect.
-    LOG_INFO("Network: Attempting connection");
     ServerAddress serverAddress{UserConfig::get().getServerAddress()};
     server = Peer::initiate(serverAddress.IP, serverAddress.port);
     if (server != nullptr) {
-        LOG_INFO("Network: Connected");
         // Note: The server sends us a ConnectionResponse when we connect the 
         //       socket. Eventually, we'll instead send a ConnectionRequest to 
         //       the login server here.
     }
     else {
-        LOG_INFO("Network: Failed to connect");
         eventDispatcher.emplace<ConnectionError>(ConnectionError::Type::Failed);
         return;
     }
 
     // Receive message batches from the server.
     while (!exitRequested) {
-        // Wait for a server header.
-        NetworkResult headerResult{server->receiveBytesWait(
-            headerRecBuffer.data(), SERVER_HEADER_SIZE)};
+        NetworkResult headerResult{server->receiveBytes(
+            headerRecBuffer.data(), SERVER_HEADER_SIZE, true)};
 
-        if (headerResult == NetworkResult::Success) {
-            processBatch();
-        }
-        else if (headerResult == NetworkResult::Disconnected) {
-            LOG_INFO("Found server to be disconnected while trying to "
-                     "receive header.");
-            eventDispatcher.emplace<ConnectionError>(
-                ConnectionError::Type::Disconnected);
-            return;
+        switch (headerResult) {
+            case NetworkResult::Success: {
+                processBatch();
+                break;
+            }
+            case NetworkResult::Disconnected: {
+                LOG_INFO("Found server to be disconnected while trying to "
+                         "receive header.");
+                eventDispatcher.emplace<ConnectionError>(
+                    ConnectionError::Type::Disconnected);
+                return;
+            }
+            case NetworkResult::NoWaitingData: {
+                // There wasn't any activity, delay so we don't waste CPU 
+                // spinning.
+                SDL_Delay(INACTIVE_DELAY_TIME_MS);
+                break;
+            }
         }
     }
 }

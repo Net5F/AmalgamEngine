@@ -21,21 +21,22 @@ UserInterface::UserInterface(SDL_Renderer* inRenderer, AssetCache& inAssetCache,
         {Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT});
 }
 
-void UserInterface::openTitleScreen()
+void UserInterface::changeScreenTo(ScreenType screenType)
 {
-    // Switch to the title screen.
-    currentScreen = &titleScreen;
-}
-
-void UserInterface::openMainScreen()
-{
-    // Switch to the main screen.
-    currentScreen = &mainScreen;
-}
-
-bool UserInterface::handleOSEvent(SDL_Event& event)
-{
-    return currentScreen->handleOSEvent(event);
+    switch (screenType) {
+        case ScreenType::TitleScreen: {
+            currentScreen = &titleScreen;
+            break;
+        }
+        case ScreenType::MainScreen: {
+            currentScreen = &mainScreen;
+            break;
+        }
+        default: {
+            currentScreen = &titleScreen;
+            break;
+        }
+    }
 }
 
 void UserInterface::tick(double timestepS)
@@ -49,6 +50,11 @@ void UserInterface::render()
     if (currentScreen != nullptr) {
         currentScreen->render();
     }
+}
+
+bool UserInterface::handleOSEvent(SDL_Event& event)
+{
+    return currentScreen->handleOSEvent(event);
 }
 
 } // End namespace SpriteEditor

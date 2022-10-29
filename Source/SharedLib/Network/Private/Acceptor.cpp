@@ -4,10 +4,11 @@
 namespace AM
 {
 Acceptor::Acceptor(Uint16 port, const std::shared_ptr<SocketSet>& inClientSet)
-: socket(port)
-, listenerSet(1)
-, clientSet(inClientSet)
+: socket{}
+, listenerSet{1}
+, clientSet{inClientSet}
 {
+    socket.openAsListener(port);
     listenerSet.addSocket(socket);
 }
 
@@ -18,8 +19,8 @@ std::unique_ptr<Peer> Acceptor::accept()
     listenerSet.checkSockets(0);
 
     if (socket.isReady()) {
-        std::unique_ptr<TcpSocket> newSocket{socket.accept()};
-        if (newSocket != nullptr) {
+        TcpSocket newSocket{socket.accept()};
+        if (newSocket.isOpen()) {
             return std::make_unique<Peer>(std::move(newSocket), clientSet);
         }
         else {
@@ -36,8 +37,9 @@ bool Acceptor::reject()
 
     bool peerWasWaiting{false};
     if (socket.isReady()) {
-        std::unique_ptr<TcpSocket> newSocket{socket.accept()};
-        if (newSocket != nullptr) {
+        TcpSocket newSocket{socket.accept()};
+        if (newSocket.isOpen()) {
+            newSocket.close();
             peerWasWaiting = true;
         }
         else {

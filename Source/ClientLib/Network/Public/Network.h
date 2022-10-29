@@ -110,6 +110,12 @@ public:
 
 private:
     /**
+     * How long the receive loop in connectAndReceive should delay if no 
+     * socket activity was reported on the socket.
+     */
+    static constexpr unsigned int INACTIVE_DELAY_TIME_MS{1};
+
+    /**
      * Sends bytes over the network.
      * Errors if the server is disconnected.
      */

@@ -28,23 +28,18 @@ namespace SpriteEditor
 class UserInterface : public OSEventHandler
 {
 public:
+    enum class ScreenType {
+        TitleScreen,
+        MainScreen
+    };
+
     UserInterface(SDL_Renderer* inRenderer, AssetCache& inAssetCache,
                   SpriteDataModel& inSpriteDataModel);
 
     /**
-     * Changes the currentScreen to titleScreen.
+     * Changes the currentScreen to the given screenType.
      */
-    void openTitleScreen();
-
-    /**
-     * Changes the currentScreen to mainScreen.
-     */
-    void openMainScreen();
-
-    /**
-     * Handles user input events.
-     */
-    bool handleOSEvent(SDL_Event& event) override;
+    void changeScreenTo(ScreenType screenType);
 
     /**
      * Calls AUI::Screen::tick() on the current screen.
@@ -59,6 +54,11 @@ public:
      * target.
      */
     void render();
+
+    /**
+     * Handles user input events.
+     */
+    bool handleOSEvent(SDL_Event& event) override;
 
 private:
     /** AmalgamUI initializer, used to init/quit the library at the proper

@@ -58,7 +58,7 @@ void TitleWindow::onNewButtonPressed()
         // If we successfully created a new file, change to the main screen.
         std::string resultString{spriteDataModel.create(selectedPath)};
         if (resultString == "") {
-            userInterface.openMainScreen();
+            userInterface.changeScreenTo(UserInterface::ScreenType::MainScreen);
         }
         else {
             // Failed to create file or dir, display the error text.
@@ -93,7 +93,8 @@ void TitleWindow::onLoadButtonPressed()
             // If it loads successfully, change to the main screen.
             std::string resultString{spriteDataModel.load(selectedPath)};
             if (resultString == "") {
-                userInterface.openMainScreen();
+                userInterface.changeScreenTo(
+                    UserInterface::ScreenType::MainScreen);
             }
             else {
                 // Failed to parse, display the error text.

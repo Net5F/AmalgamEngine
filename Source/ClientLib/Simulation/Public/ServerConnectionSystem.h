@@ -45,8 +45,8 @@ public:
 
 private:
     /** How long the sim should wait for the server to send a connection
-        response, in microseconds. */
-    static constexpr double CONNECTION_RESPONSE_WAIT_S{1};
+        response, in seconds. */
+    static constexpr double CONNECTION_RESPONSE_WAIT_S{5};
 
     /**
      * Requests to connect to the game server, waits for an assigned EntityID,

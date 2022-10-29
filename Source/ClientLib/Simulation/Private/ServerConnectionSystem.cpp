@@ -35,51 +35,39 @@ ServerConnectionSystem::ServerConnectionSystem(
 void ServerConnectionSystem::processConnectionEvents()
 {
     if (connectionState == ConnectionState::Disconnected) {
-        // TEMP
-        // Kick off the server connection since we don't yet have a UI
-        network.connect();
-        connectionState = ConnectionState::AwaitingResponse;
-        connectionAttemptTimer.updateSavedTime();
-        LOG_INFO("SCS: Kicked off connection");
-        // TEMP
-
         // Wait for a connection request from the UI.
-        //ConnectionRequest connectionRequest;
-        //if (connectionRequestQueue.pop(connectionRequest)) {
-        //    if (Config::RUN_OFFLINE) {
-        //        // No need to connect if we're running offline. Just mock up
-        //        // the player data.
-        //        initMockSimState();
-        //        return;
-        //    }
-        //    else {
-        //        // Kick off a connection attempt with the server.
-        //        // Note: Eventually we'll instead send a ConnectionRequest to 
-        //        //       the login server here with our login info.
-        //        network.connect();
-        //        connectionState = ConnectionState::AwaitingResponse;
-        //        connectionAttemptTimer.updateSavedTime();
-        //    }
-        //}
+        ConnectionRequest connectionRequest;
+        if (connectionRequestQueue.pop(connectionRequest)) {
+            if (Config::RUN_OFFLINE) {
+                // No need to connect if we're running offline. Just mock up
+                // the player data.
+                initMockSimState();
+                return;
+            }
+            else {
+                // Kick off a connection attempt with the server.
+                // Note: Eventually we'll instead send a ConnectionRequest to 
+                //       the login server here with our login info.
+                network.connect();
+                connectionState = ConnectionState::AwaitingResponse;
+                connectionAttemptTimer.updateSavedTime();
+            }
+        }
     }
     else if (connectionState == ConnectionState::AwaitingResponse) {
-        LOG_INFO("SCS: Awaiting response. Time: %.6f",
-                 connectionAttemptTimer.getDeltaSeconds(false));
         // Wait for a connection response from the server.
         ConnectionResponse connectionResponse;
         if (connectionResponseQueue.pop(connectionResponse)) {
             initSimState(connectionResponse);
             connectionState = ConnectionState::Connected;
-            LOG_INFO("SCS: Connected");
+            world.worldSignals.simulationStarted.publish();
         }
 
         // If we've timed out, send a failure signal.
         if (connectionAttemptTimer.getDeltaSeconds(false)
             >= CONNECTION_RESPONSE_WAIT_S) {
-            LOG_INFO("SCS: Calling disconnect 1");
             world.worldSignals.serverConnectionError.publish(
                 {ConnectionError::Type::Failed});
-            network.disconnect();
             connectionState = ConnectionState::Disconnected;
         }
     }
@@ -87,9 +75,7 @@ void ServerConnectionSystem::processConnectionEvents()
     // If the connection is lost, reset all network and sim state.
     ConnectionError connectionError;
     if (connectionErrorQueue.pop(connectionError)) {
-        LOG_INFO("SCS: Calling disconnect 2");
-        world.worldSignals.serverConnectionError.publish(
-            {ConnectionError::Type::Disconnected});
+        world.worldSignals.serverConnectionError.publish(connectionError);
         network.disconnect();
         clearSimState();
         connectionState = ConnectionState::Disconnected;
@@ -200,6 +186,10 @@ void ServerConnectionSystem::clearSimState()
     world.registry.clear();
     world.playerEntity = entt::null;
     world.tileMap.clear();
+
+    // The current tick needs to be set back to 0 so the Network knows not 
+    // to immediately send Heartbeats the next time it spins up.
+    currentTick = 0;
 }
 
 } // namespace Client
