@@ -24,11 +24,11 @@ ServerConnectionSystem::ServerConnectionSystem(
 : world{inWorld}
 , network{inNetwork}
 , spriteData{inSpriteData}
+, currentTick{inCurrentTick}
 , connectionRequestQueue{inUiEventDispatcher}
 , connectionResponseQueue{network.getEventDispatcher()}
 , connectionErrorQueue{network.getEventDispatcher()}
 , connectionState{ConnectionState::Disconnected}
-, currentTick{inCurrentTick}
 {
 }
 

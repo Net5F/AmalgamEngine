@@ -214,6 +214,9 @@ void Network::connectAndReceive()
                 SDL_Delay(INACTIVE_DELAY_TIME_MS);
                 break;
             }
+            default: {
+                break;
+            }
         }
     }
 }
