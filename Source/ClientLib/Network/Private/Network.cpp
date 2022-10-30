@@ -15,28 +15,25 @@ namespace AM
 namespace Client
 {
 Network::Network()
-: server(nullptr)
-, messageProcessor(eventDispatcher)
-, eventDispatcher()
-, tickAdjustment(0)
-, adjustmentIteration(0)
-, isApplyingTickAdjustment(false)
-, messagesSentSinceTick(0)
-, currentTickPtr(nullptr)
-, receiveThreadObj()
-, exitRequested(false)
+: server{nullptr}
+, messageProcessor{eventDispatcher}
+, eventDispatcher{}
+, tickAdjustment{0}
+, adjustmentIteration{0}
+, isApplyingTickAdjustment{false}
+, messagesSentSinceTick{0}
+, currentTickPtr{nullptr}
+, receiveThreadObj{}
+, exitRequested{false}
 , headerRecBuffer(SERVER_HEADER_SIZE)
 , batchRecBuffer(SharedConfig::MAX_BATCH_SIZE)
 , decompressedBatchRecBuffer(SharedConfig::MAX_BATCH_SIZE)
-, netstatsLoggingEnabled(true)
-, ticksSinceNetstatsLog(0)
+, netstatsLoggingEnabled{true}
+, ticksSinceNetstatsLog{0}
 {
     if (!Config::RUN_OFFLINE) {
         SDLNet_Init();
     }
-
-    // Init the timer to the current time.
-    receiveTimer.updateSavedTime();
 }
 
 Network::~Network()
@@ -71,6 +68,10 @@ void Network::disconnect()
         receiveThreadObj.join();
     }
     server = nullptr;
+    adjustmentIteration = 0;
+    isApplyingTickAdjustment = false;
+    messagesSentSinceTick = 0;
+    ticksSinceNetstatsLog = 0;
 }
 
 void Network::tick()

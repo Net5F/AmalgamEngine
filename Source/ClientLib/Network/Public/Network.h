@@ -182,10 +182,6 @@ private:
     /** Pointer to the game's current tick. */
     const std::atomic<Uint32>* currentTickPtr;
 
-    /** Tracks how long it's been since we've received a message from the
-        server. */
-    Timer receiveTimer;
-
     /** Calls pollForMessages(). */
     std::jthread receiveThreadObj;
     /** Turn false to signal that the receive thread should end. */
@@ -202,10 +198,10 @@ private:
 
     /** The number of seconds we'll wait before logging our network
         statistics. */
-    static constexpr unsigned int SECONDS_TILL_STATS_DUMP = 5;
-    static constexpr unsigned int TICKS_TILL_STATS_DUMP
-        = static_cast<unsigned int>((1 / SharedConfig::NETWORK_TICK_TIMESTEP_S)
-                                    * SECONDS_TILL_STATS_DUMP);
+    static constexpr unsigned int SECONDS_TILL_STATS_DUMP{5};
+    static constexpr unsigned int TICKS_TILL_STATS_DUMP{
+        static_cast<unsigned int>((1 / SharedConfig::NETWORK_TICK_TIMESTEP_S)
+                                  * SECONDS_TILL_STATS_DUMP)};
 
     /** Whether network statistics logging is enabled or not. */
     bool netstatsLoggingEnabled;
