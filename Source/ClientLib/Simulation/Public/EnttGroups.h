@@ -4,6 +4,7 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Velocity.h"
+#include "Rotation.h"
 #include "BoundingBox.h"
 #include "InputHistory.h"
 #include "Ignore.h"
@@ -30,7 +31,7 @@ public:
     {
         // Used for moving an NPC.
         auto movementGroup
-            = registry.group<Input, Position, PreviousPosition, Velocity,
+            = registry.group<Input, Position, PreviousPosition, Velocity, Rotation,
                              BoundingBox, Sprite>(entt::exclude<InputHistory>);
         ignore(movementGroup);
     }
