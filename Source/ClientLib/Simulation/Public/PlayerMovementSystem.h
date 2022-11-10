@@ -10,6 +10,7 @@ struct Position;
 struct PreviousPosition;
 struct Velocity;
 struct Input;
+struct Rotation;
 struct BoundingBox;
 struct Sprite;
 
@@ -47,15 +48,16 @@ private:
     Uint32 processPlayerUpdates(Position& position,
                                 PreviousPosition& previousPosition,
                                 Velocity& velocity, Input& input,
-                                InputHistory& inputHistory, Sprite& sprite,
-                                BoundingBox& boundingBox);
+                                InputHistory& inputHistory, Rotation& rotation,
+                                Sprite& sprite, BoundingBox& boundingBox);
 
     /**
      * Replay any inputs that are from newer ticks than the latestReceivedTick.
      */
     void replayInputs(Uint32 latestReceivedTick, Position& position,
-                      Velocity& velocity, InputHistory& inputHistory,
-                      Sprite& sprite, BoundingBox& boundingBox);
+                      Velocity& velocity, Rotation& rotation,
+                      InputHistory& inputHistory, Sprite& sprite,
+                      BoundingBox& boundingBox);
 
     /**
      * If receivedTick > currentTick, logs an error.
@@ -77,8 +79,8 @@ private:
      *       entity's new position.
      */
     void movePlayerEntity(Input::StateArr& inputStates, Velocity& velocity,
-                          Position& position, Sprite& sprite,
-                          BoundingBox& boundingBox);
+                          Position& position, Rotation& rotation,
+                          Sprite& sprite, BoundingBox& boundingBox);
 
     /** Used to get the current tick. */
     Simulation& simulation;

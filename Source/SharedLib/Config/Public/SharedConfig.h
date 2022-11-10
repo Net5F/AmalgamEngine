@@ -55,7 +55,7 @@ public:
 
     /** The speed that entities will move at. Eventually we'll support
         dynamically setting this based on stats, for now it's a constant. */
-    static constexpr double MOVEMENT_VELOCITY{50};
+    static constexpr float MOVEMENT_VELOCITY{50};
 
     //-------------------------------------------------------------------------
     // Network

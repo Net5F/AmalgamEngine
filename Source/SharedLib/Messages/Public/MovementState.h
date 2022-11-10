@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "Position.h"
 #include "Velocity.h"
+#include "Rotation.h"
 #include "entt/entity/registry.hpp"
 
 namespace AM
@@ -20,6 +21,7 @@ struct MovementState {
     Input input;
     Position position;
     Velocity velocity;
+    Rotation rotation;
 };
 
 template<typename S>
@@ -33,6 +35,7 @@ void serialize(S& serializer, MovementState& movementState)
 
     serializer.object(movementState.position);
     serializer.object(movementState.velocity);
+    serializer.object(movementState.rotation);
 }
 
 } // End namespace AM

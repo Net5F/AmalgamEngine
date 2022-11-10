@@ -21,6 +21,7 @@ target_sources(SharedLib
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
+        Public/Components/Rotation.h
         Public/Components/Sprite.h
         Public/Components/Velocity.h
         Public/TileMap/CellExtent.h

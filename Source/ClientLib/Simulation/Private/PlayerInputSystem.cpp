@@ -47,13 +47,13 @@ void PlayerInputSystem::processHeldInputs()
 
     // Get the latest state of all the keys that we care about.
     if (keyStates[SDL_SCANCODE_W]) {
-        newInputStates[Input::YUp] = Input::Pressed;
+        newInputStates[Input::YDown] = Input::Pressed;
     }
     if (keyStates[SDL_SCANCODE_A]) {
         newInputStates[Input::XDown] = Input::Pressed;
     }
     if (keyStates[SDL_SCANCODE_S]) {
-        newInputStates[Input::YDown] = Input::Pressed;
+        newInputStates[Input::YUp] = Input::Pressed;
     }
     if (keyStates[SDL_SCANCODE_D]) {
         newInputStates[Input::XUp] = Input::Pressed;

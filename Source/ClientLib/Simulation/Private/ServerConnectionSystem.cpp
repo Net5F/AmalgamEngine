@@ -6,6 +6,7 @@
 #include "PreviousPosition.h"
 #include "Position.h"
 #include "InputHistory.h"
+#include "Rotation.h"
 #include "NeedsAdjacentChunks.h"
 #include "Camera.h"
 #include "Transforms.h"
@@ -124,6 +125,7 @@ void ServerConnectionSystem::initSimState(ConnectionResponse& connectionResponse
                                        connectionResponse.y, 0.0f);
     registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
     registry.emplace<Input>(newEntity);
+    registry.emplace<Rotation>(newEntity);
 
     // Set up the player's visual components.
     // TODO: Switch to logical screen size and do scaling in Renderer.
@@ -162,6 +164,7 @@ void ServerConnectionSystem::initMockSimState()
     registry.emplace<PreviousPosition>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
     registry.emplace<Input>(newEntity);
+    registry.emplace<Rotation>(newEntity);
 
     // Set up the player's visual components.
     // TODO: Switch to logical screen size and do scaling in Renderer.

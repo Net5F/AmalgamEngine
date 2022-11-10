@@ -8,6 +8,7 @@
 #include "Input.h"
 #include "InputHistory.h"
 #include "PreviousPosition.h"
+#include "Rotation.h"
 #include "Sprite.h"
 #include "BoundingBox.h"
 #include "Transforms.h"
@@ -42,6 +43,7 @@ void PlayerMovementSystem::processMovement()
     // If we're online, process any updates from the server.
     Velocity& velocity{world.registry.get<Velocity>(world.playerEntity)};
     Input& input{world.registry.get<Input>(world.playerEntity)};
+    Rotation& rotation{world.registry.get<Rotation>(world.playerEntity)};
     Sprite& sprite{world.registry.get<Sprite>(world.playerEntity)};
     BoundingBox& boundingBox{
         world.registry.get<BoundingBox>(world.playerEntity)};
@@ -51,12 +53,12 @@ void PlayerMovementSystem::processMovement()
             world.registry.get<InputHistory>(world.playerEntity)};
         Uint32 latestReceivedTick{
             processPlayerUpdates(position, previousPosition, velocity, input,
-                                 inputHistory, sprite, boundingBox)};
+                                 inputHistory, rotation, sprite, boundingBox)};
 
         // If we received messages, replay inputs newer than the latest.
         if (latestReceivedTick != 0) {
-            replayInputs(latestReceivedTick, position, velocity, inputHistory,
-                         sprite, boundingBox);
+            replayInputs(latestReceivedTick, position, velocity, rotation,
+                         inputHistory, sprite, boundingBox);
 
             // Check if there was a mismatch between the position we had and
             // where the server thought we should be.
@@ -71,14 +73,14 @@ void PlayerMovementSystem::processMovement()
     }
 
     // Process the player entity's movement for this tick.
-    movePlayerEntity(input.inputStates, velocity, position, sprite,
+    movePlayerEntity(input.inputStates, velocity, position, rotation, sprite,
                      boundingBox);
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(
     Position& position, PreviousPosition& previousPosition, Velocity& velocity,
-    Input& input, InputHistory& inputHistory, Sprite& sprite,
-    BoundingBox& boundingBox)
+    Input& input, InputHistory& inputHistory, Rotation& rotation,
+    Sprite& sprite, BoundingBox& boundingBox)
 {
     /* Process any messages for us from the server. */
     Uint32 latestReceivedTick{0};
@@ -117,6 +119,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         /* Apply the received movement state. */
         velocity = playerUpdate->velocity;
         position = playerUpdate->position;
+        rotation = playerUpdate->rotation;
         boundingBox
             = Transforms::modelToWorldCentered(sprite.modelBounds, position);
 
@@ -148,6 +151,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
 
 void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
                                         Position& position, Velocity& velocity,
+                                        Rotation& rotation,
                                         InputHistory& inputHistory,
                                         Sprite& sprite,
                                         BoundingBox& boundingBox)
@@ -165,7 +169,7 @@ void PlayerMovementSystem::replayInputs(Uint32 latestReceivedTick,
 
         // Replay the input state and move the entity.
         movePlayerEntity(inputHistory.inputHistory[tickDiff], velocity,
-                         position, sprite, boundingBox);
+                         position, rotation, sprite, boundingBox);
     }
 }
 
@@ -194,10 +198,11 @@ void PlayerMovementSystem::checkTickDiffValidity(Uint32 tickDiff)
 
 void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates,
                                             Velocity& velocity,
-                                            Position& position, Sprite& sprite,
+                                            Position& position,
+                                            Rotation& rotation, Sprite& sprite,
                                             BoundingBox& boundingBox)
 {
-    // Use the current input state to update our velocity for this tick.
+    // Update our velocity for this tick, based on our current inputs.
     velocity = MovementHelpers::updateVelocity(
         velocity, inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
 
@@ -206,7 +211,10 @@ void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates,
     desiredPosition = MovementHelpers::updatePosition(
         desiredPosition, velocity, SharedConfig::SIM_TICK_TIMESTEP_S);
 
-    // If we're trying to move, resolve the movement.
+    // Update the direction we're facing, based on our current inputs.
+    rotation = MovementHelpers::updateRotation(rotation, inputStates);
+
+    // If we're trying to move, resolve collisions.
     if (desiredPosition != position) {
         // Calculate a new bounding box to match our desired position.
         BoundingBox desiredBounds{Transforms::modelToWorldCentered(

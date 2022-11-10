@@ -4,6 +4,7 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Velocity.h"
+#include "Rotation.h"
 #include "BoundingBox.h"
 #include "Ignore.h"
 #include "entt/entity/registry.hpp"
@@ -28,8 +29,9 @@ public:
     static void init(entt::registry& registry)
     {
         // Used for moving an entity.
-        auto movementGroup = registry.group<Input, Position, PreviousPosition,
-                                            Velocity, BoundingBox, Sprite>();
+        auto movementGroup
+            = registry.group<Input, Position, PreviousPosition, Velocity,
+                             Rotation, BoundingBox, Sprite>();
         ignore(movementGroup);
     }
 };

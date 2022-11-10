@@ -7,6 +7,7 @@
 #include "Input.h"
 #include "Position.h"
 #include "Velocity.h"
+#include "Rotation.h"
 #include "ClientSimData.h"
 #include "InputHasChanged.h"
 #include "Log.h"
@@ -90,15 +91,17 @@ void MovementUpdateSystem::collectEntitiesToSend(ClientSimData& client,
 
 void MovementUpdateSystem::sendEntityUpdate(ClientSimData& client)
 {
-    auto movementGroup{world.registry.group<Input, Position, Velocity>()};
+    auto movementGroup{
+        world.registry.group<Input, Position, Velocity, Rotation>()};
     MovementUpdate movementUpdate{};
 
     // Add the entities to the message.
     for (entt::entity entityToSend : entitiesToSend) {
-        auto [input, position, velocity]
-            = movementGroup.get<Input, Position, Velocity>(entityToSend);
+        auto [input, position, velocity, rotation]
+            = movementGroup.get<Input, Position, Velocity, Rotation>(
+                entityToSend);
         movementUpdate.movementStates.push_back(
-            {entityToSend, input, position, velocity});
+            {entityToSend, input, position, velocity, rotation});
     }
 
     // Finish filling the other fields.

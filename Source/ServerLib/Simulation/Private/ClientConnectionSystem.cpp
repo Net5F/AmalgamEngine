@@ -7,6 +7,7 @@
 #include "Serialize.h"
 #include "ConnectionResponse.h"
 #include "Input.h"
+#include "Rotation.h"
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Velocity.h"
@@ -68,6 +69,7 @@ void ClientConnectionSystem::processConnectEvents()
                                            spawnPoint.y, 0.0f);
         registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
         registry.emplace<Input>(newEntity);
+        registry.emplace<Rotation>(newEntity);
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
                                         false, std::vector<entt::entity>());
         Sprite& newSprite{registry.emplace<Sprite>(

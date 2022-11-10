@@ -12,6 +12,7 @@ namespace AM
 struct Position;
 struct PreviousPosition;
 struct Velocity;
+struct Rotation;
 
 /**
  * Shared static functions for moving entities.
@@ -36,7 +37,7 @@ public:
     /**
      * Updates the given position based on the given velocity.
      *
-     * @param[out] position  The position to update.
+     * @param position  The position to update.
      * @param velocity  The current velocity.
      * @param deltaSeconds  The number of seconds that have passed since the
      *                      last update.
@@ -46,6 +47,17 @@ public:
     static Position updatePosition(const Position& position,
                                    const Velocity& velocity,
                                    double deltaSeconds);
+
+    /**
+     * Updates the given rotation based on the given input state.
+     *
+     * @param rotation  The rotation to update.
+     * @param inputStates  The current input state.
+     * 
+     * @return The updated rotation.
+     */
+    static Rotation updateRotation(const Rotation& rotation,
+                                   const Input::StateArr& inputStates);
 
     /**
      * Returns a position interpolated between previousPos and position.

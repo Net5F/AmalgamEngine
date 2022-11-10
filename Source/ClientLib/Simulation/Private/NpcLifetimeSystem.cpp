@@ -7,6 +7,7 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Velocity.h"
+#include "Rotation.h"
 #include "Sprite.h"
 #include "Config.h"
 #include "entt/entity/registry.hpp"
@@ -86,6 +87,7 @@ void NpcLifetimeSystem::processEntityInits(Uint32 desiredTick)
             registry.emplace<Position>(entityInit->entity);
             registry.emplace<PreviousPosition>(entityInit->entity);
             registry.emplace<Velocity>(entityInit->entity);
+            registry.emplace<Rotation>(entityInit->entity);
 
             // Construct their name using the received name.
             registry.emplace<Name>(entityInit->entity, entityInit->name);

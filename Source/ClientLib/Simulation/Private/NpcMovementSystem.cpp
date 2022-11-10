@@ -10,6 +10,7 @@
 #include "PreviousPosition.h"
 #include "Velocity.h"
 #include "Input.h"
+#include "Rotation.h"
 #include "BoundingBox.h"
 #include "InputHistory.h"
 #include "ClientNetworkDefs.h"
@@ -53,8 +54,8 @@ void NpcMovementSystem::updateNpcs()
     // tick, or have run out of data.
     Uint32 desiredTick{simulation.getReplicationTick()};
 
-    /* While we have authoritative data to use, apply updates for all
-       unprocessed ticks including the desired tick. */
+    // While we have authoritative data to use, apply updates for all
+    // unprocessed ticks including the desired tick.
     bool updated{false};
     while ((lastProcessedTick < desiredTick)
            && (movementUpdateQueue.size() > 0)) {
@@ -76,7 +77,6 @@ void NpcMovementSystem::updateNpcs()
             applyUpdateMessage(movementUpdate.movementUpdate);
         }
 
-        /* Prepare for the next iteration. */
         lastProcessedTick++;
         movementUpdateQueue.pop();
     }
@@ -93,7 +93,7 @@ void NpcMovementSystem::updateNpcs()
 
 void NpcMovementSystem::receiveMovementUpdates()
 {
-    /* Process any NPC update messages from the Network. */
+    // Process any NPC update messages from the Network.
     NpcUpdate npcUpdate{};
     while (npcUpdateQueue.pop(npcUpdate)) {
         // Handle the message appropriately.
@@ -165,17 +165,18 @@ void NpcMovementSystem::moveAllNpcs()
 {
     // Move all NPCs that have the required components.
     auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Velocity, BoundingBox, Sprite>(
+                                      Velocity, Rotation, BoundingBox, Sprite>(
         entt::exclude<InputHistory>);
     for (entt::entity entity : group) {
-        auto [input, position, previousPosition, velocity, boundingBox, sprite]
-            = group.get<Input, Position, PreviousPosition, Velocity,
+        auto [input, position, previousPosition, velocity, rotation,
+              boundingBox, sprite]
+            = group.get<Input, Position, PreviousPosition, Velocity, Rotation,
                         BoundingBox, Sprite>(entity);
 
         // Save their old position.
         previousPosition = position;
 
-        // Use the current input state to update their velocity for this tick.
+        // Update their velocity for this tick, based on their current inputs.
         velocity = MovementHelpers::updateVelocity(
             velocity, input.inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
 
@@ -184,7 +185,10 @@ void NpcMovementSystem::moveAllNpcs()
         desiredPosition = MovementHelpers::updatePosition(
             desiredPosition, velocity, SharedConfig::SIM_TICK_TIMESTEP_S);
 
-        // If they're trying to move, resolve the movement.
+        // Update the direction they're facing, based on their current inputs.
+        rotation = MovementHelpers::updateRotation(rotation, input.inputStates);
+
+        // If they're trying to move, resolve collisions.
         if (desiredPosition != position) {
             // Calculate a new bounding box to match their desired position.
             BoundingBox desiredBounds{Transforms::modelToWorldCentered(
@@ -208,7 +212,7 @@ void NpcMovementSystem::applyUpdateMessage(
     const std::shared_ptr<const MovementUpdate>& movementUpdate)
 {
     auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Velocity, BoundingBox, Sprite>(
+                                      Velocity, Rotation, BoundingBox, Sprite>(
         entt::exclude<InputHistory>);
 
     // Use the data in the message to correct any NPCs that changed inputs.
@@ -232,14 +236,16 @@ void NpcMovementSystem::applyUpdateMessage(
         }
 
         // Get the entity's components.
-        auto [input, position, previousPosition, velocity, boundingBox, sprite]
-            = group.get<Input, Position, PreviousPosition, Velocity,
+        auto [input, position, previousPosition, velocity, rotation,
+              boundingBox, sprite]
+            = group.get<Input, Position, PreviousPosition, Velocity, Rotation,
                         BoundingBox, Sprite>(entity);
 
         // Apply the received component updates.
         input = movementState.input;
         velocity = movementState.velocity;
         position = movementState.position;
+        rotation = movementState.rotation;
 
         // If the previous position hasn't been initialized, set it to the
         // current position so they don't lerp in from the origin.
