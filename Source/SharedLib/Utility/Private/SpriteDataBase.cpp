@@ -44,9 +44,9 @@ SpriteDataBase::SpriteDataBase()
 const Sprite& SpriteDataBase::get(const std::string& stringID) const
 {
     // Attempt to find the given string ID.
-    auto it = stringMap.find(stringID);
+    auto it{stringMap.find(stringID)};
     if (it == stringMap.end()) {
-        LOG_FATAL("Failed to find sprite from string ID: %s", stringID.c_str());
+        LOG_FATAL("Failed to find sprite with string ID: %s", stringID.c_str());
     }
 
     return *(it->second);

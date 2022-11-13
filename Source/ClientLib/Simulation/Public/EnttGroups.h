@@ -5,7 +5,7 @@
 #include "PreviousPosition.h"
 #include "Velocity.h"
 #include "Rotation.h"
-#include "BoundingBox.h"
+#include "Collision.h"
 #include "InputHistory.h"
 #include "Ignore.h"
 #include "entt/entity/registry.hpp"
@@ -29,10 +29,10 @@ public:
      */
     static void init(entt::registry& registry)
     {
-        // Used for moving an NPC.
+        // Used for NPC movement and dynamic entity sorting.
         auto movementGroup
             = registry.group<Input, Position, PreviousPosition, Velocity, Rotation,
-                             BoundingBox, Sprite>(entt::exclude<InputHistory>);
+                             Collision>(entt::get<Sprite>, entt::exclude<InputHistory>);
         ignore(movementGroup);
     }
 };

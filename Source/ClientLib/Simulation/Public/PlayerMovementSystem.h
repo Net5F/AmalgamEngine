@@ -11,8 +11,7 @@ struct PreviousPosition;
 struct Velocity;
 struct Input;
 struct Rotation;
-struct BoundingBox;
-struct Sprite;
+struct Collision;
 
 namespace Client
 {
@@ -49,15 +48,14 @@ private:
                                 PreviousPosition& previousPosition,
                                 Velocity& velocity, Input& input,
                                 InputHistory& inputHistory, Rotation& rotation,
-                                Sprite& sprite, BoundingBox& boundingBox);
+                                Collision& collision);
 
     /**
      * Replay any inputs that are from newer ticks than the latestReceivedTick.
      */
     void replayInputs(Uint32 latestReceivedTick, Position& position,
                       Velocity& velocity, Rotation& rotation,
-                      InputHistory& inputHistory, Sprite& sprite,
-                      BoundingBox& boundingBox);
+                      InputHistory& inputHistory, Collision& collision);
 
     /**
      * If receivedTick > currentTick, logs an error.
@@ -80,7 +78,7 @@ private:
      */
     void movePlayerEntity(Input::StateArr& inputStates, Velocity& velocity,
                           Position& position, Rotation& rotation,
-                          Sprite& sprite, BoundingBox& boundingBox);
+                          Collision& collision);
 
     /** Used to get the current tick. */
     Simulation& simulation;

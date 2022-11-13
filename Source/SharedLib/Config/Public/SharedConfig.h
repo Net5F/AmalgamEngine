@@ -22,7 +22,7 @@ public:
         1.0 / static_cast<double>(SIM_TICKS_PER_SECOND)};
 
     /** The max number of entities that we will allow. */
-    static constexpr std::size_t MAX_ENTITIES{1010};
+    static constexpr std::size_t MAX_ENTITIES{200};
 
     /** The x and y axis width, in world units, of our tiles. */
     static constexpr unsigned int TILE_WORLD_WIDTH{32};
@@ -50,8 +50,16 @@ public:
     /** The maximum number of sprite layers a tile can have. */
     static constexpr std::size_t MAX_TILE_LAYERS{5};
 
-    /** The string ID of our default sprite for character entities. */
-    static constexpr char DEFAULT_CHARACTER_SPRITE[] = "roberto_0";
+    /** The string ID of the default sprite for character entities.
+        This is the sprite that players and NPCs get assigned before the 
+        project's animation system gives them their real sprite.
+
+        Note: This sprite's bounding box acts as the "standard collision" for 
+              all characters. Their Collision component will be set to this 
+              sprite's box, and will remain even if their sprite changes.
+              However, your project may choose to set the Collision component 
+              to something else. */
+    static constexpr const char* DEFAULT_CHARACTER_SPRITE{"roberto_0"};
 
     /** The speed that entities will move at. Eventually we'll support
         dynamically setting this based on stats, for now it's a constant. */

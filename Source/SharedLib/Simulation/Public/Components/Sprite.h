@@ -37,7 +37,9 @@ public:
         don't need a separate bounding box. */
     bool hasBoundingBox{true};
 
-    /** Model-space bounding box. Defines the sprite's 3D volume. */
+    /** Model-space bounding box. Defines the sprite's 3D volume.
+        Note: Tiles and static (unmoving) entities use these bounds, but dynamic
+              entities use the bounds defined by their Collision component. */
     BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
 };
 

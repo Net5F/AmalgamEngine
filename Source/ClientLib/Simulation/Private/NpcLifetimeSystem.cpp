@@ -7,6 +7,7 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Velocity.h"
+#include "Collision.h"
 #include "Rotation.h"
 #include "Sprite.h"
 #include "Config.h"
@@ -96,10 +97,10 @@ void NpcLifetimeSystem::processEntityInits(Uint32 desiredTick)
             const Sprite& sprite{spriteData.get(entityInit->numericID)};
             registry.emplace<Sprite>(entityInit->entity, sprite);
 
-            // Construct their bounding box (it'll be positioned once they get
-            // a position update).
-            registry.emplace<BoundingBox>(entityInit->entity,
-                                          sprite.modelBounds);
+            // Construct their collision (it'll be positioned once they get a 
+            // position update).
+            registry.emplace<Collision>(entityInit->entity, sprite.modelBounds,
+                                        BoundingBox{});
 
             LOG_INFO("Entity added: %u. Desired tick: %u, Message tick: %u",
                      entityInit->entity, desiredTick, entityInit->tickNum);

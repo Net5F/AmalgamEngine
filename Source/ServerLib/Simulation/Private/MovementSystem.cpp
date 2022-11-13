@@ -6,7 +6,7 @@
 #include "PreviousPosition.h"
 #include "Velocity.h"
 #include "Rotation.h"
-#include "BoundingBox.h"
+#include "Collision.h"
 #include "SharedConfig.h"
 #include "Transforms.h"
 #include "Log.h"
@@ -27,12 +27,11 @@ void MovementSystem::processMovements()
 
     // Move all entities that have the required components.
     auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Velocity, Rotation, BoundingBox, Sprite>();
+                                      Velocity, Rotation, Collision>();
     for (entt::entity entity : group) {
-        auto [input, position, previousPosition, velocity, rotation,
-              boundingBox, sprite]
+        auto [input, position, previousPosition, velocity, rotation, collision]
             = group.get<Input, Position, PreviousPosition, Velocity, Rotation,
-                        BoundingBox, Sprite>(entity);
+                        Collision>(entity);
 
         // Save their old position.
         previousPosition = position;
@@ -53,24 +52,25 @@ void MovementSystem::processMovements()
         if (desiredPosition != position) {
             // Calculate a new bounding box to match their desired position.
             BoundingBox desiredBounds{Transforms::modelToWorldCentered(
-                sprite.modelBounds, desiredPosition)};
+                collision.modelBounds, desiredPosition)};
 
             // Resolve any collisions with the surrounding bounding boxes.
             BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(
-                boundingBox, desiredBounds, world.tileMap)};
+                collision.worldBounds, desiredBounds, world.tileMap)};
 
             // Update their bounding box and position.
             // Note: Since desiredBounds was properly offset, we can do a
             //       simple diff to get the position.
             position += (resolvedBounds.getMinPosition()
-                         - boundingBox.getMinPosition());
-            boundingBox = resolvedBounds;
+                         - collision.worldBounds.getMinPosition());
+            collision.worldBounds = resolvedBounds;
         }
 
         // If they did actually move.
         if (position != previousPosition) {
             // Update their position in the locator.
-            world.entityLocator.setEntityLocation(entity, boundingBox);
+            world.entityLocator.setEntityLocation(entity,
+                                                  collision.worldBounds);
         }
     }
 }

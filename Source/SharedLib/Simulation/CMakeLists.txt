@@ -16,6 +16,7 @@ target_sources(SharedLib
         Public/EntityLocator.h
         Public/MovementHelpers.h
         Public/Components/Camera.h
+        Public/Components/Collision.h
         Public/Components/Input.h
         Public/Components/InputHasChanged.h
         Public/Components/Name.h

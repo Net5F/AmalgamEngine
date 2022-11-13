@@ -9,6 +9,7 @@
 #include "SharedConfig.h"
 #include "SpriteData.h"
 #include "SpriteRenderData.h"
+#include "Collision.h"
 #include "Ignore.h"
 #include <SDL_rect.h>
 #include <cmath>
@@ -123,10 +124,10 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
     }
 
     // Gather all relevant dynamic sprites.
-    auto group = registry.group<Position, PreviousPosition, Sprite>();
+    auto group = registry.group<Position, PreviousPosition, Collision>(entt::get<Sprite>);
     for (entt::entity entity : group) {
-        auto [sprite, position, previousPos]
-            = group.get<Sprite, Position, PreviousPosition>(entity);
+        auto [position, previousPos, collision, sprite]
+            = group.get<Position, PreviousPosition, Collision, Sprite>(entity);
 
         // Get the entity's lerp'd world position.
         Position lerp{

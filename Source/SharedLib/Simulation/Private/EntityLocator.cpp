@@ -2,6 +2,7 @@
 #include "SharedConfig.h"
 #include "Position.h"
 #include "BoundingBox.h"
+#include "Collision.h"
 #include "CellPosition.h"
 #include "Log.h"
 #include "AMAssert.h"
@@ -177,12 +178,12 @@ std::vector<entt::entity>&
     getEntitiesCoarse(cylinderCenter, radius);
 
     // Erase any entities that don't actually intersect the cylinder.
-    auto view{registry.view<BoundingBox>()};
-    std::erase_if(returnVector,
-                  [&view, &cylinderCenter, radius](entt::entity entity) {
-                      BoundingBox& boundingBox{view.get<BoundingBox>(entity)};
-                      return !(boundingBox.intersects(cylinderCenter, radius));
-                  });
+    auto view{registry.view<Collision>()};
+    std::erase_if(
+        returnVector, [&view, &cylinderCenter, radius](entt::entity entity) {
+            Collision& collision{view.get<Collision>(entity)};
+            return !(collision.worldBounds.intersects(cylinderCenter, radius));
+        });
 
     return returnVector;
 }
@@ -194,10 +195,10 @@ std::vector<entt::entity>&
     getEntitiesCoarse(tileExtent);
 
     // Erase any entities that don't actually intersect the extent.
-    auto view{registry.view<BoundingBox>()};
+    auto view{registry.view<Collision>()};
     std::erase_if(returnVector, [&view, &tileExtent](entt::entity entity) {
-        BoundingBox& boundingBox{view.get<BoundingBox>(entity)};
-        return !(boundingBox.intersects(tileExtent));
+        Collision& collision{view.get<Collision>(entity)};
+        return !(collision.worldBounds.intersects(tileExtent));
     });
 
     return returnVector;

@@ -5,6 +5,7 @@
 #include "Name.h"
 #include "PreviousPosition.h"
 #include "Position.h"
+#include "Collision.h"
 #include "InputHistory.h"
 #include "Rotation.h"
 #include "NeedsAdjacentChunks.h"
@@ -130,15 +131,15 @@ void ServerConnectionSystem::initSimState(ConnectionResponse& connectionResponse
     // Set up the player's visual components.
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};
-    Sprite& playerSprite{
-        registry.emplace<Sprite>(newEntity, spriteData.get("roberto_0"))};
+    Sprite& playerSprite{registry.emplace<Sprite>(
+        newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{}, userConfig.getWindowSize());
 
-    // Set up the player's bounding box, based on their sprite.
-    registry.emplace<BoundingBox>(
-        newEntity, Transforms::modelToWorldCentered(playerSprite.modelBounds,
-                                                    playerPosition));
+    // Set up the player's collision component.
+    registry.emplace<Collision>(newEntity, playerSprite.modelBounds,
+                                Transforms::modelToWorldCentered(
+                                    playerSprite.modelBounds, playerPosition));
 
     // Set up the player's InputHistory component.
     registry.emplace<InputHistory>(newEntity);
@@ -169,16 +170,15 @@ void ServerConnectionSystem::initMockSimState()
     // Set up the player's visual components.
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};
-    Sprite& playerSprite{
-        registry.emplace<Sprite>(newEntity, spriteData.get("roberto_0"))};
+    Sprite& playerSprite{registry.emplace<Sprite>(
+        newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{}, userConfig.getWindowSize());
 
-    // Set up the player's bounding box, based on their sprite.
-    registry.emplace<BoundingBox>(
-        newEntity, Transforms::modelToWorldCentered(playerSprite.modelBounds,
-                                                    playerPosition));
-    // TODO: Update our placement in the spatial partition.
+    // Set up the player's collision component.
+    registry.emplace<Collision>(newEntity, playerSprite.modelBounds,
+                                Transforms::modelToWorldCentered(
+                                    playerSprite.modelBounds, playerPosition));
 
     // Set up the player's InputHistory component.
     registry.emplace<InputHistory>(newEntity);

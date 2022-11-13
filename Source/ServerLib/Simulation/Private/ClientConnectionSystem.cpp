@@ -12,7 +12,7 @@
 #include "PreviousPosition.h"
 #include "Velocity.h"
 #include "ClientSimData.h"
-#include "BoundingBox.h"
+#include "Collision.h"
 #include "Name.h"
 #include "EntityDelete.h"
 #include "Transforms.h"
@@ -74,14 +74,15 @@ void ClientConnectionSystem::processConnectEvents()
                                         false, std::vector<entt::entity>());
         Sprite& newSprite{registry.emplace<Sprite>(
             newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
-        BoundingBox& boundingBox{registry.emplace<BoundingBox>(
-            newEntity, Transforms::modelToWorldCentered(newSprite.modelBounds,
-                                                        newPosition))};
+        Collision& collision{registry.emplace<Collision>(
+            newEntity, newSprite.modelBounds,
+            Transforms::modelToWorldCentered(newSprite.modelBounds,
+                                             newPosition))};
 
         // Start tracking the entity in the locator.
         // Note: Since the entity was added to the locator, its peers
         //       will be told by ClientAOISystem to construct it.
-        world.entityLocator.setEntityLocation(newEntity, boundingBox);
+        world.entityLocator.setEntityLocation(newEntity, collision.worldBounds);
 
         // Register the entity with the network ID map.
         world.netIdMap[clientConnected.clientID] = newEntity;

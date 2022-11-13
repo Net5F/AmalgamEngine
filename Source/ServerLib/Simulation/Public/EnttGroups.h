@@ -5,7 +5,7 @@
 #include "PreviousPosition.h"
 #include "Velocity.h"
 #include "Rotation.h"
-#include "BoundingBox.h"
+#include "Collision.h"
 #include "Ignore.h"
 #include "entt/entity/registry.hpp"
 
@@ -31,7 +31,7 @@ public:
         // Used for moving an entity.
         auto movementGroup
             = registry.group<Input, Position, PreviousPosition, Velocity,
-                             Rotation, BoundingBox, Sprite>();
+                             Rotation, Collision>();
         ignore(movementGroup);
     }
 };

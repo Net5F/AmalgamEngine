@@ -11,7 +11,7 @@
 #include "Velocity.h"
 #include "Input.h"
 #include "Rotation.h"
-#include "BoundingBox.h"
+#include "Collision.h"
 #include "InputHistory.h"
 #include "ClientNetworkDefs.h"
 #include "Transforms.h"
@@ -165,13 +165,12 @@ void NpcMovementSystem::moveAllNpcs()
 {
     // Move all NPCs that have the required components.
     auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Velocity, Rotation, BoundingBox, Sprite>(
+                                      Velocity, Rotation, Collision>(
         entt::exclude<InputHistory>);
     for (entt::entity entity : group) {
-        auto [input, position, previousPosition, velocity, rotation,
-              boundingBox, sprite]
+        auto [input, position, previousPosition, velocity, rotation, collision]
             = group.get<Input, Position, PreviousPosition, Velocity, Rotation,
-                        BoundingBox, Sprite>(entity);
+                        Collision>(entity);
 
         // Save their old position.
         previousPosition = position;
@@ -192,18 +191,18 @@ void NpcMovementSystem::moveAllNpcs()
         if (desiredPosition != position) {
             // Calculate a new bounding box to match their desired position.
             BoundingBox desiredBounds{Transforms::modelToWorldCentered(
-                sprite.modelBounds, desiredPosition)};
+                collision.modelBounds, desiredPosition)};
 
             // Resolve any collisions with the surrounding bounding boxes.
             BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(
-                boundingBox, desiredBounds, world.tileMap)};
+                collision.worldBounds, desiredBounds, world.tileMap)};
 
-            // Update their bounding box and position.
+            // Update their collision box and position.
             // Note: Since desiredBounds was properly offset, we can do a
             //       simple diff to get the position.
             position += (resolvedBounds.getMinPosition()
-                         - boundingBox.getMinPosition());
-            boundingBox = resolvedBounds;
+                         - collision.worldBounds.getMinPosition());
+            collision.worldBounds = resolvedBounds;
         }
     }
 }
@@ -212,7 +211,7 @@ void NpcMovementSystem::applyUpdateMessage(
     const std::shared_ptr<const MovementUpdate>& movementUpdate)
 {
     auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Velocity, Rotation, BoundingBox, Sprite>(
+                                      Velocity, Rotation, Collision>(
         entt::exclude<InputHistory>);
 
     // Use the data in the message to correct any NPCs that changed inputs.
@@ -236,10 +235,9 @@ void NpcMovementSystem::applyUpdateMessage(
         }
 
         // Get the entity's components.
-        auto [input, position, previousPosition, velocity, rotation,
-              boundingBox, sprite]
+        auto [input, position, previousPosition, velocity, rotation, collision]
             = group.get<Input, Position, PreviousPosition, Velocity, Rotation,
-                        BoundingBox, Sprite>(entity);
+                        Collision>(entity);
 
         // Apply the received component updates.
         input = movementState.input;
@@ -254,9 +252,9 @@ void NpcMovementSystem::applyUpdateMessage(
             previousPosition.isInitialized = true;
         }
 
-        // Move their bounding box to their new position.
-        boundingBox
-            = Transforms::modelToWorldCentered(sprite.modelBounds, position);
+        // Move their collision box to their new position.
+        collision.worldBounds
+            = Transforms::modelToWorldCentered(collision.modelBounds, position);
     }
 }
 
