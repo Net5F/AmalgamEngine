@@ -45,7 +45,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(ServerLib PUBLIC /W3 /permissive-)
 endif()
 
-# Build all of the subdirectories
+# Build all of the subdirectories.
 add_subdirectory(Config)
 add_subdirectory(Launch)
 add_subdirectory(Network)

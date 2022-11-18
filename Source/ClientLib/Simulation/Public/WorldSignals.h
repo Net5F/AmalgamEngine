@@ -2,8 +2,9 @@
 
 #include "entt/signal/sigh.hpp"
 
-#include "TileExtent.h"
 #include "ConnectionError.h"
+#include "TileExtent.h"
+#include "Position.h"
 
 namespace AM
 {
@@ -28,6 +29,9 @@ public:
 
     /** The tile map's extent (size) has changed. */
     entt::sigh<void(TileExtent)> tileMapExtentChanged;
+
+    /** The player entity's position has changed. */
+    entt::sigh<void(Position)> playerPositionChanged;
 };
 
 } // namespace Client

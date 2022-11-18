@@ -1,6 +1,7 @@
 #include "TileUpdateSystem.h"
 #include "World.h"
 #include "Network.h"
+#include "ISimulationExtension.h"
 #include "ClientSimData.h"
 #include "AMAssert.h"
 #include "Tracy.hpp"
@@ -11,9 +12,11 @@ namespace Server
 {
 TileUpdateSystem::TileUpdateSystem(World& inWorld,
                                    EventDispatcher& inNetworkEventDispatcher,
-                                   Network& inNetwork)
+                                   Network& inNetwork,
+                                   const std::unique_ptr<ISimulationExtension>& inExtension)
 : world{inWorld}
 , network{inNetwork}
+, extension{inExtension}
 , tileUpdateRequestQueue(inNetworkEventDispatcher)
 {
 }
@@ -25,13 +28,18 @@ void TileUpdateSystem::updateTiles()
     // Process any waiting update requests.
     TileUpdateRequest updateRequest;
     while (tileUpdateRequestQueue.pop(updateRequest)) {
+        // Call the project's "is this update valid" check.
+        bool isValid{true};
+        if (extension != nullptr) {
+            isValid = extension->isTileUpdateValid(updateRequest);
+        }
+
         // Update the map.
-        // Note: This doesn't check if the client entity is within any certain
-        //       range of the tile or anything. We can add that if it's
-        //       useful, I just couldn't immediately think of a use case for it.
-        world.tileMap.setTileSpriteLayer(
-            updateRequest.tileX, updateRequest.tileY, updateRequest.layerIndex,
-            updateRequest.numericID);
+        if (isValid) {
+            world.tileMap.setTileSpriteLayer(
+                updateRequest.tileX, updateRequest.tileY,
+                updateRequest.layerIndex, updateRequest.numericID);
+        }
     }
 }
 

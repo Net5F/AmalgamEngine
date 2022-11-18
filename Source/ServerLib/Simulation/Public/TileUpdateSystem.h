@@ -11,6 +11,7 @@ namespace Server
 {
 class World;
 class Network;
+class ISimulationExtension;
 
 /**
  * Processes tile update requests. If the request is valid, updates the
@@ -20,7 +21,8 @@ class TileUpdateSystem
 {
 public:
     TileUpdateSystem(World& inWorld, EventDispatcher& inNetworkEventDispatcher,
-                     Network& inNetwork);
+                     Network& inNetwork,
+                     const std::unique_ptr<ISimulationExtension>& inExtension);
 
     /**
      * Processes tile updates and updates the world's tile map.
@@ -37,6 +39,10 @@ private:
     World& world;
     /** Used to send chunk update request messages. */
     Network& network;
+
+    /** If non-nullptr, contains the project's simulation extension functions.
+        Used for checking if tile updates are valid. */
+    const std::unique_ptr<ISimulationExtension>& extension;
 
     /** Holds tile updates as we iterate the dirty tiles and figure out what 
         needs to be sent to each client. */

@@ -21,7 +21,7 @@ class InputSystem
 {
 public:
     InputSystem(Simulation& inSimulation, World& inWorld,
-                EventDispatcher& inNetworkEventDispatcher, Network& inNetwork);
+                EventDispatcher& inNetworkEventDispatcher);
 
     /**
      * Processes incoming InputChangeRequest messages.
@@ -44,8 +44,6 @@ private:
     Simulation& simulation;
     /** Used to access components. */
     World& world;
-    /** Used to access the dispatcher. */
-    Network& network;
 
     EventQueue<InputChangeRequest> inputChangeRequestQueue;
     EventSorter<InputChangeRequest> inputChangeRequestSorter;

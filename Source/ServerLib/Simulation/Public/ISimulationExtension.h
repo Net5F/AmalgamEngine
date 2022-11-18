@@ -4,6 +4,8 @@
 
 namespace AM
 {
+struct TileUpdateRequest;
+
 namespace Server
 {
 
@@ -22,6 +24,9 @@ public:
     // Canonical constructor (derived class must implement):
     // SimulationExtension(SimulationExDependencies deps)
 
+    //-------------------------------------------------------------------------
+    // Simulation Tick Hooks (Call your systems in these)
+    //-------------------------------------------------------------------------
     /**
      * Called before any systems are ran.
      */
@@ -45,6 +50,19 @@ public:
      *       not handled, then Simulation will attempt to handle it.
      */
     bool handleOSEvent(SDL_Event& event) override = 0;
+
+    //-------------------------------------------------------------------------
+    // Simulation System Hooks (Hooks into engine systems)
+    //-------------------------------------------------------------------------
+    /**
+     * Called by TileUpdateSystem when a tile update request is received, 
+     * before applying the update.
+     * Allows the project to place constraints on map modifications, such as 
+     * requiring certain permissions, or only allowing updates to certain areas.
+     *
+     * @return true if the update should be performed, else false.
+     */
+    virtual bool isTileUpdateValid(const TileUpdateRequest& updateRequest) = 0;
 };
 
 } // namespace Server

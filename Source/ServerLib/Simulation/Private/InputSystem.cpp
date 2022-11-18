@@ -15,12 +15,10 @@ namespace AM
 namespace Server
 {
 InputSystem::InputSystem(Simulation& inSimulation, World& inWorld,
-                         EventDispatcher& inNetworkEventDispatcher,
-                         Network& inNetwork)
-: simulation(inSimulation)
-, world(inWorld)
-, network(inNetwork)
-, inputChangeRequestQueue(inNetworkEventDispatcher)
+                         EventDispatcher& inNetworkEventDispatcher)
+: simulation{inSimulation}
+, world{inWorld}
+, inputChangeRequestQueue{inNetworkEventDispatcher}
 {
 }
 

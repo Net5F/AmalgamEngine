@@ -74,6 +74,11 @@ void PlayerMovementSystem::processMovement()
     // Process the player entity's movement for this tick.
     movePlayerEntity(input.inputStates, velocity, position, rotation,
                      collision);
+
+    // If the player moved, signal it to the UI.
+    if (position != previousPosition) {
+        world.worldSignals.playerPositionChanged.publish(position);
+    }
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates(
@@ -228,6 +233,10 @@ void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates,
         position += (resolvedBounds.getMinPosition()
                      - collision.worldBounds.getMinPosition());
         collision.worldBounds = resolvedBounds;
+
+        //LOG_INFO("Player position: (%.4f, %.4f) tile: (%d, %d)", position.x,
+        //         position.y, position.asTilePosition().x,
+        //         position.asTilePosition().y);
     }
 }
 

@@ -12,20 +12,20 @@ namespace Server
 {
 
 Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
-: network(inNetwork)
-, world(inSpriteData)
-, currentTick(0)
+: network{inNetwork}
+, world{inSpriteData}
+, currentTick{0}
 , extension{nullptr}
-, clientConnectionSystem(*this, world, network.getEventDispatcher(), network,
-                         inSpriteData)
-, tileUpdateSystem(world, network.getEventDispatcher(), network)
-, clientAOISystem(*this, world, network)
-, inputSystem(*this, world, network.getEventDispatcher(), network)
-, movementSystem(world)
-, movementUpdateSystem(*this, world, network)
-, chunkStreamingSystem(world, network.getEventDispatcher(), network)
-, mapSaveSystem(world)
-{
+, clientConnectionSystem{*this, world, network.getEventDispatcher(), network,
+                         inSpriteData}
+, tileUpdateSystem{world, network.getEventDispatcher(), network, extension}
+, clientAOISystem{*this, world, network}
+, inputSystem{*this, world, network.getEventDispatcher()}
+, movementSystem{world}
+, movementUpdateSystem{*this, world, network}
+, chunkStreamingSystem{world, network.getEventDispatcher(), network}
+, mapSaveSystem{world}
+                {
     // Initialize our entt groups.
     EnttGroups::init(world.registry);
 
