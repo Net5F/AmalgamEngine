@@ -14,8 +14,10 @@ class Network;
 class ISimulationExtension;
 
 /**
- * Processes tile update requests. If the request is valid, updates the
- * map and sends the new map state to all nearby clients.
+ * Processes tile update requests sent by clients. If a request is valid, 
+ * updates the map.
+ * Also, detects changes to the tile map and sends the new map state to all 
+ * nearby clients.
  */
 class TileUpdateSystem
 {

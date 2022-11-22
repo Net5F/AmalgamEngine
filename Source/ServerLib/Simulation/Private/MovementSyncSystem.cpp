@@ -1,4 +1,4 @@
-#include "MovementUpdateSystem.h"
+#include "MovementSyncSystem.h"
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
@@ -9,7 +9,7 @@
 #include "Velocity.h"
 #include "Rotation.h"
 #include "ClientSimData.h"
-#include "InputHasChanged.h"
+#include "MovementStateNeedsSync.h"
 #include "Log.h"
 #include "Tracy.hpp"
 #include <algorithm>
@@ -18,7 +18,7 @@ namespace AM
 {
 namespace Server
 {
-MovementUpdateSystem::MovementUpdateSystem(Simulation& inSimulation,
+MovementSyncSystem::MovementSyncSystem(Simulation& inSimulation,
                                            World& inWorld, Network& inNetwork)
 : simulation{inSimulation}
 , world{inWorld}
@@ -26,12 +26,12 @@ MovementUpdateSystem::MovementUpdateSystem(Simulation& inSimulation,
 {
 }
 
-void MovementUpdateSystem::sendMovementUpdates()
+void MovementSyncSystem::sendMovementUpdates()
 {
     ZoneScoped;
 
-    // Send clients the updated movement state of any nearby entities that
-    // have moved.
+    // Send clients the updated movement state of any nearby entities that have
+    // changed inputs, teleported, etc.
     auto clientView{world.registry.view<ClientSimData>()};
     for (entt::entity clientEntity : clientView) {
         // Collect the entities that have updated state that is relevant to
@@ -45,11 +45,11 @@ void MovementUpdateSystem::sendMovementUpdates()
         }
     }
 
-    // Mark any entities with dirty inputs as clean.
-    world.registry.clear<InputHasChanged>();
+    // Clear the sync flags from every entity, since we just handled them.
+    world.registry.clear<MovementStateNeedsSync>();
 }
 
-void MovementUpdateSystem::collectEntitiesToSend(ClientSimData& client,
+void MovementSyncSystem::collectEntitiesToSend(ClientSimData& client,
                                                  entt::entity clientEntity)
 {
     /* Collect the entities that need to be sent to the client. */
@@ -61,21 +61,15 @@ void MovementUpdateSystem::collectEntitiesToSend(ClientSimData& client,
                           client.entitiesThatEnteredAOI.begin(),
                           client.entitiesThatEnteredAOI.end());
 
-    // Add any entities in this client's AOI that have dirty inputs.
+    // Add any entities in this client's AOI that need to be synced.
     for (entt::entity entityInAOI : client.entitiesInAOI) {
-        if (world.registry.all_of<InputHasChanged>(entityInAOI)) {
+        if (world.registry.all_of<MovementStateNeedsSync>(entityInAOI)) {
             entitiesToSend.push_back(entityInAOI);
         }
     }
 
-    // If the client entity had an input drop, add it.
-    // (It mispredicted, so it needs to know the actual state it's in.)
-    if (client.inputWasDropped) {
-        entitiesToSend.push_back(clientEntity);
-        client.inputWasDropped = false;
-    }
-    // Else if the client entity has dirty inputs, add it.
-    else if (world.registry.all_of<InputHasChanged>(clientEntity)) {
+    // If the client entity itself needs to be synced, add it.
+    if (world.registry.all_of<MovementStateNeedsSync>(clientEntity)) {
         entitiesToSend.push_back(clientEntity);
     }
 
@@ -89,7 +83,7 @@ void MovementUpdateSystem::collectEntitiesToSend(ClientSimData& client,
     client.entitiesThatEnteredAOI.clear();
 }
 
-void MovementUpdateSystem::sendEntityUpdate(ClientSimData& client)
+void MovementSyncSystem::sendEntityUpdate(ClientSimData& client)
 {
     auto movementGroup{
         world.registry.group<Input, Position, Velocity, Rotation>()};

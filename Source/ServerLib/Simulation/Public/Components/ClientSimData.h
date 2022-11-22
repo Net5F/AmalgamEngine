@@ -26,10 +26,6 @@ public:
         disconnects.*/
     NetworkID netID{0};
 
-    /** Tracks if an input from this client was received late and had to be
-        dropped. */
-    bool inputWasDropped{false};
-
     /** Tracks the entities that are in range of this client's entity. */
     std::vector<entt::entity> entitiesInAOI{};
 

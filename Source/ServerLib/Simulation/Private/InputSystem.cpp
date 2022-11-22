@@ -4,7 +4,7 @@
 #include "Network.h"
 #include "Peer.h"
 #include "Input.h"
-#include "InputHasChanged.h"
+#include "MovementStateNeedsSync.h"
 #include "ClientSimData.h"
 #include "Log.h"
 #include "Tracy.hpp"
@@ -75,10 +75,10 @@ void InputSystem::processInputMessages()
             Input& input{world.registry.get<Input>(clientEntity)};
             input = inputChangeRequest.input;
 
-            // Tag the entity as dirty.
-            // It might already be dirty from a drop, so check first.
-            if (!(world.registry.all_of<InputHasChanged>(clientEntity))) {
-                world.registry.emplace<InputHasChanged>(clientEntity);
+            // Flag that the entity's movement state needs to be synced.
+            if (!(world.registry.all_of<MovementStateNeedsSync>(
+                    clientEntity))) {
+                world.registry.emplace<MovementStateNeedsSync>(clientEntity);
             }
         }
         else {
@@ -109,13 +109,13 @@ void InputSystem::handleDroppedMessage(NetworkID clientID)
     Input defaultInput{};
     if (entityInput.inputStates != defaultInput.inputStates) {
         entityInput.inputStates = defaultInput.inputStates;
-
-        // Flag the entity as dirty.
-        registry.emplace<InputHasChanged>(clientEntityIt->second);
     }
 
-    // Flag that a drop occurred for this entity.
-    registry.get<ClientSimData>(clientEntityIt->second).inputWasDropped = true;
+    // Flag that the entity's movement state needs to be synced.
+    if (!(world.registry.all_of<MovementStateNeedsSync>(
+            clientEntityIt->second))) {
+        registry.emplace<MovementStateNeedsSync>(clientEntityIt->second);
+    }
 }
 
 } // namespace Server

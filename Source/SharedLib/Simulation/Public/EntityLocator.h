@@ -62,6 +62,12 @@ public:
                                                  unsigned int radius);
 
     /**
+     * Overload for BoundingBox.
+     */
+    std::vector<entt::entity>&
+        getEntitiesCoarse(const BoundingBox& boundingBox);
+
+    /**
      * Overload for TileExtent.
      */
     std::vector<entt::entity>& getEntitiesCoarse(const TileExtent& tileExtent);
@@ -81,6 +87,11 @@ public:
      */
     std::vector<entt::entity>& getEntitiesFine(const Position& cylinderCenter,
                                                unsigned int radius);
+
+    /**
+     * Overload for BoundingBox.
+     */
+    std::vector<entt::entity>& getEntitiesFine(const BoundingBox& boundingBox);
 
     /**
      * Overload for TileExtent.

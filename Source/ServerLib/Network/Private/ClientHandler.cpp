@@ -203,7 +203,7 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
     /* Iterate through all clients. */
     // Note: Doesn't need a lock because we only mutate the map from this
     //       thread.
-    int numReceived = 0;
+    int numReceived{0};
     for (auto& pair : clientMap) {
         const std::shared_ptr<Client>& clientPtr{pair.second};
 

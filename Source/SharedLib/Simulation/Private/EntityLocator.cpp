@@ -129,6 +129,13 @@ std::vector<entt::entity>&
 }
 
 std::vector<entt::entity>&
+    EntityLocator::getEntitiesCoarse(const BoundingBox& boundingBox)
+{
+    // Convert to TileExtent.
+    return getEntitiesCoarse(boundingBox.asTileExtent());
+}
+
+std::vector<entt::entity>&
     EntityLocator::getEntitiesCoarse(const TileExtent& tileExtent)
 {
     // Clear the return vector.
@@ -184,6 +191,22 @@ std::vector<entt::entity>&
             Collision& collision{view.get<Collision>(entity)};
             return !(collision.worldBounds.intersects(cylinderCenter, radius));
         });
+
+    return returnVector;
+}
+
+std::vector<entt::entity>&
+    EntityLocator::getEntitiesFine(const BoundingBox& boundingBox)
+{
+    // Run a coarse pass.
+    getEntitiesCoarse(boundingBox);
+
+    // Erase any entities that don't actually intersect the extent.
+    auto view{registry.view<Collision>()};
+    std::erase_if(returnVector, [&view, &boundingBox](entt::entity entity) {
+        Collision& collision{view.get<Collision>(entity)};
+        return !(collision.worldBounds.intersects(boundingBox));
+    });
 
     return returnVector;
 }

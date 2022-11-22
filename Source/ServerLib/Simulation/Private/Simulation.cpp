@@ -22,10 +22,10 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , clientAOISystem{*this, world, network}
 , inputSystem{*this, world, network.getEventDispatcher()}
 , movementSystem{world}
-, movementUpdateSystem{*this, world, network}
+, movementSyncSystem{*this, world, network}
 , chunkStreamingSystem{world, network.getEventDispatcher(), network}
 , mapSaveSystem{world}
-                {
+{
     // Initialize our entt groups.
     EnttGroups::init(world.registry);
 
@@ -67,8 +67,8 @@ void Simulation::tick()
     // Update each client entity's "entities in my AOI" list.
     clientAOISystem.updateAOILists();
 
-    // Send any dirty entity movement state to the clients.
-    movementUpdateSystem.sendMovementUpdates();
+    // Synchronize entity movement state with the clients.
+    movementSyncSystem.sendMovementUpdates();
 
     // Call the project's post-movement logic.
     if (extension != nullptr) {

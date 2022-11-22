@@ -63,7 +63,7 @@ void ChunkUpdateSystem::requestNeededUpdates()
 void ChunkUpdateSystem::requestAllInRangeChunks(
     const ChunkPosition& currentChunk)
 {
-    // Determine which chunks are in range of each chunk position.
+    // Determine which chunks are in range of the given position.
     // Note: This is hardcoded to assume the range is all chunks directly
     //       surrounding a given chunk.
     ChunkExtent currentExtent{(currentChunk.x - 1), (currentChunk.y - 1), 3, 3};
@@ -74,14 +74,12 @@ void ChunkUpdateSystem::requestAllInRangeChunks(
                           static_cast<int>(mapChunkExtent.yLength)};
     currentExtent.intersectWith(mapBounds);
 
-    // Iterate over the current range, adding any new chunks to a request.
+    // Iterate over the range, adding all chunks to a request.
     ChunkUpdateRequest chunkUpdateRequest{};
     for (int i = 0; i < currentExtent.yLength; ++i) {
         for (int j = 0; j < currentExtent.xLength; ++j) {
-            // If this chunk isn't in range of the previous chunk, add it.
             int chunkX{currentExtent.x + j};
             int chunkY{currentExtent.y + i};
-
             chunkUpdateRequest.requestedChunks.emplace_back(chunkX, chunkY);
         }
     }

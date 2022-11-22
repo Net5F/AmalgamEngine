@@ -6,7 +6,7 @@ target_sources(ServerLib
 		Private/InputSystem.cpp
 		Private/MapSaveSystem.cpp
 		Private/MovementSystem.cpp
-		Private/MovementUpdateSystem.cpp
+		Private/MovementSyncSystem.cpp
 		Private/Simulation.cpp
 		Private/TileUpdateSystem.cpp
 		Private/World.cpp
@@ -21,13 +21,14 @@ target_sources(ServerLib
 		Public/ISimulationExtension.h
 		Public/MapSaveSystem.h
 		Public/MovementSystem.h
-		Public/MovementUpdateSystem.h
+		Public/MovementSyncSystem.h
 		Public/Simulation.h
 		Public/SimulationExDependencies.h
 		Public/SpawnStrategy.h
 		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/Components/ClientSimData.h
+		Public/Components/MovementStateNeedsSync.h
 		Public/TileMap/TileMap.h
 )
 

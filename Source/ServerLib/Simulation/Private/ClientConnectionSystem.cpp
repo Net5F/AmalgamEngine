@@ -71,7 +71,7 @@ void ClientConnectionSystem::processConnectEvents()
         registry.emplace<Input>(newEntity);
         registry.emplace<Rotation>(newEntity);
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
-                                        false, std::vector<entt::entity>());
+                                        std::vector<entt::entity>());
         Sprite& newSprite{registry.emplace<Sprite>(
             newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
         Collision& collision{registry.emplace<Collision>(

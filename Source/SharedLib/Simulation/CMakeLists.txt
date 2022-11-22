@@ -18,7 +18,6 @@ target_sources(SharedLib
         Public/Components/Camera.h
         Public/Components/Collision.h
         Public/Components/Input.h
-        Public/Components/InputHasChanged.h
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h

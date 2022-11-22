@@ -6,7 +6,7 @@
 #include "ClientAOISystem.h"
 #include "InputSystem.h"
 #include "MovementSystem.h"
-#include "MovementUpdateSystem.h"
+#include "MovementSyncSystem.h"
 #include "ChunkStreamingSystem.h"
 #include "MapSaveSystem.h"
 #include <SDL_stdinc.h>
@@ -74,7 +74,7 @@ private:
     ClientAOISystem clientAOISystem;
     InputSystem inputSystem;
     MovementSystem movementSystem;
-    MovementUpdateSystem movementUpdateSystem;
+    MovementSyncSystem movementSyncSystem;
     ChunkStreamingSystem chunkStreamingSystem;
     MapSaveSystem mapSaveSystem;
 };
