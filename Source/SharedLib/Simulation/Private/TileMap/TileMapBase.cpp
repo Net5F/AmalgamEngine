@@ -46,15 +46,18 @@ void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
 
     // If we're being asked to set the highest layer in the tile to the empty 
     // sprite, erase it and any empties below it instead (to reduce space).
+    std::size_t lowestDirtyLayer{0};
     if ((sprite.numericID == EMPTY_SPRITE_ID) 
         && (layerIndex == (spriteLayers.size() - 1))) {
         // Erase the sprite.
         spriteLayers.erase(spriteLayers.begin() + layerIndex);
+        lowestDirtyLayer = layerIndex;
 
         // Erase any empty sprites below it.
-        for (std::size_t endIndex = (layerIndex - 1); endIndex-- > 0; ) {
+        for (std::size_t endIndex = layerIndex; endIndex-- > 0; ) {
             if (spriteLayers[endIndex].sprite.numericID == EMPTY_SPRITE_ID) {
                 spriteLayers.erase(spriteLayers.begin() + endIndex);
+                lowestDirtyLayer = endIndex;
             }
             else {
                 break;
@@ -83,6 +86,7 @@ void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
 
         // Replace the sprite.
         spriteLayers[layerIndex] = {sprite, worldBounds};
+        lowestDirtyLayer = layerIndex;
     }
 
     // If we're tracking dirty tile state, update it.
@@ -90,9 +94,9 @@ void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
         // Set the lowest dirty layer index, unless there's already a lower
         // one being tracked.
         auto [iterator, didEmplace]
-            = dirtyTiles.try_emplace({tileX, tileY}, layerIndex);
-        if (!didEmplace && (layerIndex < iterator->second)) {
-            iterator->second = layerIndex;
+            = dirtyTiles.try_emplace({tileX, tileY}, lowestDirtyLayer);
+        if (!didEmplace && (lowestDirtyLayer < iterator->second)) {
+            iterator->second = lowestDirtyLayer;
         }
     }
 }

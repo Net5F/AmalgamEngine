@@ -31,13 +31,16 @@ public:
         /** The Y coordinate of the tile to update. */
         int tileY{0};
 
-        /** The number of layer IDs in updatedLayers for this tile. */
+        /** The number of layer IDs in updatedLayers for this tile.
+            Note: If this update only contains erased layers, this will be 0. */
         Uint8 layerCount{0};
 
         /** The layer index of the first ID in updatedLayers for this tile. 
             Subsequent tiles will be incrementally ascending.
             When a layer is updated, we send that layer and all layers above 
-            it (so the client knows if upper layers were cleared). */
+            it (so the client knows if upper layers were cleared).
+            When an update only contains erased layers, this will be the lowest
+            erased layer index. */
         Uint8 startLayerIndex{0};
     };
 
@@ -50,7 +53,9 @@ public:
         ordered by increasing layer index starting at 1: (1, 2, 3).
         
         To find which tile and layer an ID in this vector corresponds to, 
-        iterate tileInfo and increment based on each layerCount. */
+        iterate tileInfo and increment based on each layerCount.
+        
+        Note: Erased layers are not added to this vector. */
     std::vector<int> updatedLayers;
 };
 

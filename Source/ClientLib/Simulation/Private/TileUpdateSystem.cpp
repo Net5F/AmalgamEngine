@@ -51,6 +51,8 @@ void TileUpdateSystem::processNetworkUpdates()
                                     tileInfo.startLayerIndex);
 
             // Fill the tile with the layers from the message.
+            // Note: If the update only contains erased layers, layerCount will
+            //       be 0 and we won't add any new layers here.
             std::size_t totalLayerCount{static_cast<std::size_t>(
                 tileInfo.startLayerIndex + tileInfo.layerCount)};
             for (std::size_t layerIndex = tileInfo.startLayerIndex;
