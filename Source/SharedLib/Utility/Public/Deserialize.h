@@ -57,6 +57,8 @@ public:
      *
      * @param filePath  The file to read from.
      * @param outputObject  The object to store the deserialized data in.
+     * @return false if the file could not be opened or deserialization 
+     *         failed, else true.
      */
     template<typename T>
     static bool fromFile(const std::string& filePath, T& outputObject)
@@ -64,8 +66,8 @@ public:
         // Open the file.
         std::ifstream file(filePath, std::ios::binary);
         if (!(file.is_open())) {
-            LOG_FATAL("Could not open file for deserialization: %s",
-                      filePath.c_str());
+            LOG_ERROR("Failed to open file: %s", filePath.c_str());
+            return false;
         }
 
         // Deserialize the file contents into outputObject.

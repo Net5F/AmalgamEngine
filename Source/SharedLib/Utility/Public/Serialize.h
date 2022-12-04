@@ -58,19 +58,18 @@ public:
      * Serializes the given object, writing the serialized bytes into the
      * given file.
      *
-     * Errors if the file cannot be opened.
-     *
      * @param filePath  The file to write to.
      * @param objectToSerialize  The object to serialize. Must be serializable.
+     * @return false if the file failed to open, else true.
      */
     template<typename T>
-    static void toFile(const std::string& filePath, T& objectToSerialize)
+    static bool toFile(const std::string& filePath, T& objectToSerialize)
     {
         // Open or create the file.
         std::ofstream file(filePath, std::ios::binary);
         if (!(file.is_open())) {
-            LOG_FATAL("Could not open file for serialization: %s",
-                      filePath.c_str());
+            LOG_ERROR("Failed to open file: %s", filePath.c_str());
+            return false;
         }
 
         // Initialize the stream serializer.
@@ -80,6 +79,8 @@ public:
 
         // Serialize the object.
         serializer.adapter().flush();
+
+        return true;
     }
 
     /**
