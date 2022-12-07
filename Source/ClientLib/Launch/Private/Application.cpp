@@ -17,7 +17,7 @@ namespace Client
 Application::Application()
 : sdl(SDL_INIT_VIDEO)
 , userConfigInitializer()
-, sdlWindow("Amalgam", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+, sdlWindow(Config::WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             static_cast<int>(UserConfig::get().getWindowSize().width),
             static_cast<int>(UserConfig::get().getWindowSize().height),
             SDL_WINDOW_SHOWN)

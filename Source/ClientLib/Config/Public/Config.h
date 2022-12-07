@@ -48,6 +48,11 @@ public:
     // Renderer, User Interface
     //-------------------------------------------------------------------------
     /**
+     * The title that will show on the application window.
+     */
+    static constexpr const char* WINDOW_TITLE{"Amalgam"};
+
+    /**
      * The logical screen size that we're targeting.
      *
      * The developer can write layout logic in reference to this logical size,
