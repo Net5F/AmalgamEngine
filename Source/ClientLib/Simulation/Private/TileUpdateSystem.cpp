@@ -47,8 +47,10 @@ void TileUpdateSystem::processNetworkUpdates()
         for (const TileUpdate::TileInfo& tileInfo : tileUpdate.tileInfo) {
             // Clear the start layer and all layers above it (layers below the 
             // start layer are unchanged).
-            world.tileMap.clearTile(tileInfo.tileX, tileInfo.tileY,
-                                    tileInfo.startLayerIndex);
+            std::size_t endLayerIndex{SharedConfig::MAX_TILE_LAYERS - 1};
+            world.tileMap.clearTileSpriteLayers(tileInfo.tileX, tileInfo.tileY,
+                                                tileInfo.startLayerIndex,
+                                                endLayerIndex);
 
             // Fill the tile with the layers from the message.
             // Note: If the update only contains erased layers, layerCount will

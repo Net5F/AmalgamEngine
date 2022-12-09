@@ -28,7 +28,7 @@ public:
     TileMapBase(SpriteDataBase& inSpriteData, bool inTrackDirtyState);
 
     /**
-     * Sets the given sprite layer to the given tile.
+     * Sets the layer at the given index to the given sprite.
      *
      * If the given tile's spriteLayers vector isn't big enough, resizes
      * it. Any tiles added during resizing will be default initialized to
@@ -54,7 +54,26 @@ public:
                             std::size_t layerIndex, int numericID);
 
     /**
-     * Clears all sprite layers out of the given tile.
+     * Clears all layers between the given indices (inclusive) in the 
+     * given tile.
+     *
+     * It's valid to use the same index as the start and end.
+     *
+     * It's safe to use an end index that's past the end of the tile's vector, 
+     * it will be constrained.
+     *
+     * If clearing to the end of the vector, layers will be erased. Otherwise, 
+     * they'll be set to the "empty sprite".
+     *
+     * @param startLayerIndex  The layer index to start clearing at.
+     * @param endLayerIndex  The last layer index to clear. Must be >= start.
+     * @return true if any layers were cleared.
+     */
+    bool clearTileSpriteLayers(int tileX, int tileY,
+                   std::size_t startLayerIndex, std::size_t endLayerIndex);
+
+    /**
+     * Clears all sprite layers in the given tile.
      *
      * Note: There's no bounds checking on tileX/tileY. It's on you to make
      *       sure they're valid.
@@ -64,19 +83,16 @@ public:
     bool clearTile(int tileX, int tileY);
 
     /**
-     * Overload for clearing a chosen layer and all layers above it.
+     * Clears all layers between the given indices (inclusive) in all tiles 
+     * within the given extent.
      *
-     * @param startLayerIndex  The layer index to start clearing at.
-     *                         E.g. If 1, layers 1 - end will be cleared and 
-     *                         layer 0 will remain untouched.
-     * @return true if any layers were cleared. false if startLayerIndex was 
-     *         too high to match any layers in the given tile.
+     * See clearTileSpriteLayers() for behavior.
      */
-    bool clearTile(int tileX, int tileY,
-                   std::size_t startLayerIndex);
+    bool clearExtentSpriteLayers(TileExtent extent, std::size_t startLayerIndex,
+                                 std::size_t endLayerIndex);
 
     /**
-     * Clears sprite layers out of all tiles within the given extent.
+     * Clears all sprite layers in all tiles within the given extent.
      *
      * Note: There's no bounds checking on the given extent. It's on you to make
      *       sure the indices are valid.
@@ -84,17 +100,6 @@ public:
      * @return true if any layers were cleared. false if all tiles were empty.
      */
     bool clearExtent(TileExtent extent);
-
-    /**
-     * Overload for clearing a chosen layer and all layers above it.
-     *
-     * @param startLayerIndex  The layer index to start clearing at.
-     *                         E.g. If 1, layers 1 - end will be cleared and 
-     *                         layer 0 will remain untouched.
-     * @return true if any layers were cleared. false if startLayerIndex was 
-     *         too high to match any layers in the given tile.
-     */
-    bool clearExtent(TileExtent extent, std::size_t startLayerIndex);
 
     /**
      * Clears all tile map state, leaving an empty map.

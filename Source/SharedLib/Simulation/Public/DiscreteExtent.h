@@ -58,14 +58,14 @@ public:
     /**
      * Returns the max X position in this extent.
      * Note: Named differently from BoundingBox's 'maxX' member to avoid 
-     *       confusion (typing extent.maxX and wondering why it fails).
+     *       confusion (variable vs function).
      */
     int xMax() const { return (x + xLength - 1); }
 
     /**
      * Returns the max Y position in this extent.
      * Note: Named differently from BoundingBox's 'maxY' member to avoid 
-     *       confusion (typing extent.maxY and wondering why it fails).
+     *       confusion (variable vs function).
      */
     int yMax() const { return (y + yLength - 1); }
 

@@ -28,6 +28,13 @@ void TileUpdateSystem::updateTiles()
     // Process any waiting update requests.
     TileUpdateRequest updateRequest;
     while (tileUpdateRequestQueue.pop(updateRequest)) {
+        // Check that the requested layer index is valid.
+        if (updateRequest.layerIndex >= SharedConfig::MAX_TILE_LAYERS) {
+            LOG_ERROR(
+                "Received tile update request with too-high layer index: %u",
+                updateRequest.layerIndex);
+        }
+
         // Call the project's "is this update valid" check.
         bool isValid{true};
         if (extension != nullptr) {
