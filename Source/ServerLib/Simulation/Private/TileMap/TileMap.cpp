@@ -47,6 +47,8 @@ TileMap::~TileMap()
 
 void TileMap::save(const std::string& fileName)
 {
+    LOG_INFO("Saving map...");
+
     // Prime a timer.
     Timer timer;
     timer.updateSavedTime();
