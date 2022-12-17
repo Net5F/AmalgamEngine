@@ -64,15 +64,20 @@ void Simulation::tick()
     // Move all of our entities.
     movementSystem.processMovements();
 
+    // Call the project's post-movement logic.
+    if (extension != nullptr) {
+        extension->afterMovement();
+    }
+
     // Update each client entity's "entities in my AOI" list.
     clientAOISystem.updateAOILists();
 
     // Synchronize entity movement state with the clients.
     movementSyncSystem.sendMovementUpdates();
 
-    // Call the project's post-movement logic.
+    // Call the project's post-movement-sync logic.
     if (extension != nullptr) {
-        extension->afterMovement();
+        extension->afterMovementSync();
     }
 
     // Respond to chunk data requests.

@@ -39,9 +39,15 @@ public:
     virtual void afterMapAndConnectionUpdates() = 0;
 
     /**
-     * Called after all entity movement has been processed.
+     * Called after all entity movement has been processed, but before the new 
+     * movement state has been sent to the clients.
      */
     virtual void afterMovement() = 0;
+
+    /**
+     * Called after all entity movement state has been sent to the clients.
+     */
+    virtual void afterMovementSync() = 0;
 
     /**
      * See OSEventHandler for details.

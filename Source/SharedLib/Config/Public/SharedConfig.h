@@ -59,7 +59,7 @@ public:
               sprite's box, and will remain even if their sprite changes.
               However, your project may choose to set the Collision component 
               to something else. */
-    static constexpr const char* DEFAULT_CHARACTER_SPRITE{"roberto_0"};
+    static constexpr const char* DEFAULT_CHARACTER_SPRITE{"roberto"};
 
     /** The speed that entities will move at. Eventually we'll support
         dynamically setting this based on stats, for now it's a constant. */
