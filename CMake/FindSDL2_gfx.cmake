@@ -58,6 +58,12 @@ find_path(SDL2_GFX_INCLUDE_DIR SDL2_gfxPrimitives.h
   ${CMAKE_SOURCE_DIR}/deps
 )
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(VC_LIB_PATH_SUFFIX lib/x64)
+else()
+    set(VC_LIB_PATH_SUFFIX lib/x86)
+endif()
+
 if(NOT SDL2_GFX_LIBRARY AND SDL2GFX_LIBRARY)
   set(SDL2_GFX_LIBRARY ${SDL2GFX_LIBRARY} CACHE FILEPATH "file cache entry
 initialized from old variable name")
@@ -67,7 +73,7 @@ find_library(SDL2_GFX_LIBRARY
   HINTS
     ENV SDL2GFXDIR
     ENV SDL2DIR
-  PATH_SUFFIXES lib
+  PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
   PATHS
   ${CMAKE_SOURCE_DIR}/deps
 )

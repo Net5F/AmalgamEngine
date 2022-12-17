@@ -52,20 +52,23 @@ set "SDLGFXFile=SDL2_gfx-devel-1.0.4.zip"
 set "SDLGFXFolder=SDL2_gfx-1.0.4"
 set "SDLGFXURL=https://github.com/Net5F/SDL_gfx/releases/download/1.0.4/%SDLGFXFile%"
 
-set "argC=0"
-for %%x in (%*) do Set /A argC+=1
+echo "Amalgam Engine Dependency Installer"
+echo "Downloads the engine's dependencies to the specified folder."
+echo "Sets environment variables, so the build system can find the dependencies."
+echo "Adds a system path entry (if one doesn't already exist), so project executables can be ran from the build directory."
+echo:
+echo "Dependencies to be installed: SDL2, SDL2_Image, SDL2_Mixer, SDL2_TTF, SDL2_GFX"
+echo:
+echo "Note: This script doesn't delete existing folders (though it may overwrite)."
+echo "      If you have conflicting files at the given path, you should probably delete them before running this."
+echo:
 
-if not "%argC%"=="1" (
-    echo "Downloads the engine's dependencies to the given folder and adds it to the system path (if it isn't already added)."
-    echo "Usage: InstallDependencies.bat <InstallPath>"
-    echo "Note: This script doesn't delete existing folders (though it may overwrite). If you have conflicting files at the given path, you should probably delete them before running this."
-    goto End
-)
+set /p UserPath=Please enter the path to install to: 
 
 rem ## Download and install the libraries. ##
 rem Make the install folders if they don't already exist.
 echo "Creating install folders (if they don't already exist)..."
-set "InstallPath=%~f1\SDL2"
+set "InstallPath=%UserPath%\SDL2"
 if not exist %InstallPath% mkdir %InstallPath%
 if not exist %InstallPath%\bin mkdir %InstallPath%\bin
 
@@ -95,10 +98,14 @@ del %InstallPath%\%SDLTTFFile%
 del %InstallPath%\%SDLGFXFile%
 
 rem Copy all the dlls into "bin".
+echo "Copying dlls into %BinPath%..."
 set "BinPath=%InstallPath%\bin"
 for /r %InstallPath% %%x in (x64\*.dll) do copy "%%x" %BinPath% >nul
 
 rem ## Add bin to the system PATH (if it isn't already added). ##
+rem Note: We add this so that we don't have to copy the SDL binaries into the 
+rem       build folder in order to run the project binaries.
+
 rem Check if it's already in the user or system PATH.
 echo %PATH% | findstr "%BinPath%" > nul
 
@@ -116,10 +123,24 @@ if ERRORLEVEL 1 (
     )
     echo "Added %BinPath% to the system PATH. Previous PATH has been saved in SystemPATHBackup.txt."
 ) else (
-    echo "Found %BinPath% in user or system path. Proceeding without adding it again."
+    echo "Found %BinPath% in user or system path. Proceeding without re-adding."
 )
 
+rem ## Add the library paths as environment variables. ##
+rem Note: We add these so that the CMake "Find" files can find the libraries.
+rem       We don't check if they already exist or back them up like we do with 
+rem       the system PATH, because they're less scary.
+echo "Setting environment variables..."
+setx SDLDIR %InstallPath%\%SDL2Folder% /M
+setx SDL2IMAGEDIR %InstallPath%\%SDLImageFolder% /M
+setx SDL2MIXERDIR %InstallPath%\%SDLMixerFolder% /M
+setx SDL2TTFDIR %InstallPath%\%SDLTTFFolder% /M
+setx SDL2GFXDIR %InstallPath%\%SDLGFXFolder% /M
+
+echo:
 echo "Successfully installed dependencies to %InstallPath%. You may close this window."
+echo:
+echo "** Please close and re-open any IDEs or terminals to refresh your environment variables. **"
 
 :End
 pause >nul

@@ -29,6 +29,12 @@ Feel free to join the discord: https://discord.gg/EA2Sg3ar74
 * Targeted for use on relatively low-spec hardware (tested on a $30/mo rented server).
 * Live, in-world map editing. Use permissions to let players build things, or restrict it to your developers.
 
+## Projects
+### Repose
+Repose is a reference project, meant to show what the engine can do and inspire developers.
+
+[Check out the project and download the latest playable release here.](https://github.com/Net5F/Repose)
+
 ## Status
 ### Current
 - [x] Implement, load test, and optimize the netcode.
@@ -45,7 +51,7 @@ Feel free to join the discord: https://discord.gg/EA2Sg3ar74
 - [x] Implement collision (simple placeholder).
 - [x] Further netcode load testing (get ready for users).
 - [x] Split single repo into engine and project repos.
-- [ ] Build simple reference project.
+- [x] Build simple reference project.
 
 ### Future
 - [ ] Implement text chat, chat server.
@@ -54,19 +60,12 @@ Feel free to join the discord: https://discord.gg/EA2Sg3ar74
 - [ ] Implement web server, account creation.
 - [ ] MVP is done.
 
-## Joining the demo world
-To join the demo world and play with other people, you can [download the latest release](https://github.com/Net5F/Amalgam/releases/latest) and follow the instructions in the README.
-
-Currently, the client application is hardcoded to connect to a server ran by Net_.
-
 ## Building
 ### Windows
 #### Visual Studio (MSVC)
-1. Run `Scripts/Windows/InstallDependencies.bat`, passing it the path you want to install the dependencies to.
+1. Run `Scripts/Windows/InstallDependencies.bat` to install our dependencies to a folder of your choice.
 1. Open CMakeLists.txt in Visual Studio (`Open` -> `CMake`).
-1. Update CMakeSettings.json (in this repo) to point at the various SDL folders in your installation path.
-   1. You'll leave this file dirty. Don't try to commit it back upstream with your personal paths.
-   1. You can optionally enable `AM_BUILD_SPRITE_EDITOR` to build the sprite editor.
+1. (Optional) Open CMakeSettings.json (in this repo) and enable `AM_BUILD_SPRITE_EDITOR` to build the sprite editor.
 1. `Project` -> `Generate CMake cache` (or just let it run if you have auto-config on).
 1. `Build` -> `Build All`
 
@@ -78,7 +77,7 @@ For MSYS2/MinGW, we don't have a dependency install script. Here's the list:
 Then, build through the Eclipse project or follow the linux instructions for a command line build.
 
 ### Linux
-Had to update to Ubuntu 21.04 for g++ 10.3.0 (older versions didn't have support for some C++20 features I needed.)
+We had to update to Ubuntu 21.04 for g++ 10.3.0 (older versions didn't have support for some C++20 features I needed.)
 I haven't yet locked down an SDL2 or CMake version, we'll see where it ends up.
 
 1. Run `Scripts/Linux/InstallDependencies.sh`, then build through the Eclipse project, or:
