@@ -44,9 +44,9 @@ set "SDLMixerFile=SDL2_mixer-devel-2.0.4-VC.zip"
 set "SDLMixerFolder=SDL2_mixer-2.0.4"
 set "SDLMixerURL=https://www.libsdl.org/projects/SDL_mixer/release/%SDLMixerFile%"
 rem SDL2_ttf
-set "SDLTTFFile=SDL2_ttf-devel-2.0.18-VC.zip"
-set "SDLTTFFolder=SDL2_ttf-2.0.18"
-set "SDLTTFURL=https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.0.18/%SDLTTFFile%"
+set "SDLTTFFile=SDL2_ttf-devel-2.20.1-VC.zip"
+set "SDLTTFFolder=SDL2_ttf-2.20.1"
+set "SDLTTFURL=https://github.com/libsdl-org/SDL_ttf/releases/download/release-2.20.1/%SDLTTFFile%"
 rem SDL2_gfx
 set "SDLGFXFile=SDL2_gfx-devel-1.0.4.zip"
 set "SDLGFXFolder=SDL2_gfx-1.0.4"
