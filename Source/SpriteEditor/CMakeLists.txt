@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.16)
 
 message(STATUS "Configuring Amalgam Engine SpriteEditor")
 
+###############################################################################
+# Configure Step
+###############################################################################
 add_executable(SpriteEditor "")
 
 target_include_directories(SpriteEditor
@@ -42,9 +45,49 @@ endif()
 file(COPY ${PROJECT_SOURCE_DIR}/Resources/SpriteEditor/Common/Assets/
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Assets/)
 
+# On Windows, copy the SDL2 DLLs into the build folder so we can run our executable.
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    list(APPEND SDL2_DLL_PATHS 
+         ${SDL2_DIR}/lib/x64/
+         ${SDL2_IMAGE_INCLUDE_DIR}/../lib/x64
+         ${SDL2_MIXER_INCLUDE_DIR}/../lib/x64
+         ${SDL2_TTF_INCLUDE_DIR}/../lib/x64
+         ${SDL2_GFX_INCLUDE_DIR}/../lib/x64
+    )
+
+    foreach(DLL_PATH ${SDL2_DLL_PATHS})
+        file(GLOB SDL2_DLLS ${DLL_PATH}/*.dll)
+        file(COPY ${SDL2_DLLS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+    endforeach()
+endif()
+
 # Build all of the subdirectories
 add_subdirectory(Config)
 add_subdirectory(DataModel)
 add_subdirectory(Launch)
 add_subdirectory(Renderer)
 add_subdirectory(UserInterface)
+
+###############################################################################
+# Install Step (Packaging the application)
+###############################################################################
+# Define an install step that copies the executable and all resources.
+install(TARGETS SpriteEditor RUNTIME DESTINATION ${CMAKE_PROJECT_NAME}/SpriteEditor)
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/SpriteEditor/Common/
+        DESTINATION ${CMAKE_PROJECT_NAME}/SpriteEditor)
+
+# Add platform-specific files to the install step.
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/SpriteEditor/Windows/
+            DESTINATION ${CMAKE_PROJECT_NAME}/SpriteEditor)
+
+    # On Windows, we provide the SDL2 DLLs.
+    foreach(DLL_PATH ${SDL2_DLL_PATHS})
+        install(DIRECTORY ${DLL_PATH}/
+                DESTINATION ${CMAKE_PROJECT_NAME}/SpriteEditor
+                FILES_MATCHING PATTERN "*.dll")
+    endforeach()
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/Resources/SpriteEditor/Linux/
+            DESTINATION ${CMAKE_PROJECT_NAME}/SpriteEditor)
+endif()
