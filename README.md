@@ -41,9 +41,9 @@ Repose is our first template project. If you'd like to make a world, you can for
 - [ ] MVP features are done, template project is finished.
 
 ### Future
-- [ ] Implement world interactions, decide on whether scripting is in-world or offline
-- [ ] Implement object database, inventory, picking up objects
-- [ ] Implement NPCs, potential in-world AI scripting
+- [ ] Implement world interactions, decide on whether scripting is in-world or offline.
+- [ ] Implement object database, inventory, picking up objects.
+- [ ] Implement NPCs, potential in-world AI scripting.
 - [ ] Implement text chat, chat server.
 - [ ] Implement sprite animation.
 - [ ] Implement login server, account db, account validation.
