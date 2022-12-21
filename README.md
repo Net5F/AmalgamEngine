@@ -12,7 +12,7 @@ If you'd like to get involved, please join the Discord: https://discord.gg/EA2Sg
 * Targeted for use on relatively low-spec hardware (tested on a $30/mo rented server).
 * Live, in-world map editing. Use permissions to let players build things, or restrict it to your developers.
 
-## Projects
+## Worlds
 ### Repose
 TODO: Add title screen and in-world screenshots.
 
