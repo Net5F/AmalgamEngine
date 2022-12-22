@@ -50,7 +50,7 @@ Repose is our first template project. If you'd like to make a world, you can for
 - [ ] Implement web server, account creation.
 
 ## Building
-Note: You rarely need to build the engine by itself, this section just provides canonical instructions. Instead, see the Projects section.
+Note: You rarely need to build the engine by itself, this section just provides canonical instructions. Instead, see the Worlds section.
 
 ### Windows
 #### Visual Studio (MSVC)
@@ -79,7 +79,7 @@ Note: This is only tested on Ubuntu 20.04. If you have experience in multi-distr
 1. `ninja all`
 
 ## Packaging
-Note: You rarely need to package the engine by itself, this section just provides canonical instructions. Instead, see the Projects section.
+Note: You rarely need to package the engine by itself, this section just provides canonical instructions. Instead, see the Worlds section.
 
 To package the applications in a way that can be shared, first run the desired build. Then, run:
 ```
