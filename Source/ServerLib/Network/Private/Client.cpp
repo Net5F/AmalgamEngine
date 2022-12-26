@@ -290,12 +290,17 @@ void Client::recordTickDiff(Sint64 tickDiff)
     std::unique_lock lock(tickDiffMutex);
 
     // Add the new data.
-    if ((tickDiff > SDL_MIN_SINT8) && (tickDiff < SDL_MAX_SINT8)) {
-        tickDiffHistory.push(static_cast<Uint8>(tickDiff));
+    if ((tickDiff >= Config::TICKDIFF_MAX_BOUND_LOWER)
+        && (tickDiff <= Config::TICKDIFF_MAX_BOUND_UPPER)) {
+        tickDiffHistory.push(static_cast<Sint8>(tickDiff));
     }
     else {
-        LOG_FATAL("tickDiff out of Sint8 range. diff: %ll",
-                  static_cast<long long>(tickDiff));
+        // Tickdiff out of max range, drop the connection.
+        peer = nullptr;
+        LOG_INFO("Dropped connection, tickDiff out of range. tickDiff: %d, "
+                 "NetID: %u",
+                 tickDiff, netID);
+        return;
     }
 
     // Note: This is safe, only this thread modifies numFreshDiffs.

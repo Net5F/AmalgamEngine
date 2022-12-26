@@ -57,8 +57,8 @@ struct ServerHeaderIndex {
     };
 };
 /** The size of a server header in bytes. */
-static constexpr unsigned int SERVER_HEADER_SIZE
-    = ServerHeaderIndex::MessageHeaderStart;
+static constexpr unsigned int SERVER_HEADER_SIZE{
+    ServerHeaderIndex::MessageHeaderStart};
 
 /**
  * Used for indexing into the parts of a client header.
@@ -72,8 +72,8 @@ struct ClientHeaderIndex {
     };
 };
 /** The size of a client header in bytes. */
-static constexpr unsigned int CLIENT_HEADER_SIZE
-    = ClientHeaderIndex::MessageHeaderStart;
+static constexpr unsigned int CLIENT_HEADER_SIZE{
+    ClientHeaderIndex::MessageHeaderStart};
 
 /**
  * Used for indexing into the size or payload of a received message.
@@ -88,8 +88,8 @@ struct MessageHeaderIndex {
         MessageStart = 3
     };
 };
-static constexpr unsigned int MESSAGE_HEADER_SIZE
-    = MessageHeaderIndex::MessageStart;
+static constexpr unsigned int MESSAGE_HEADER_SIZE{
+    MessageHeaderIndex::MessageStart};
 
 //--------------------------------------------------------------------------
 // Enums, Structs

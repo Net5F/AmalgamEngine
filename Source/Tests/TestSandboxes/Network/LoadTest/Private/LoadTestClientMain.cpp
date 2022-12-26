@@ -58,7 +58,7 @@ try {
         return 1;
     }
     else if (argc < 4) {
-        std::printf("Too many arguments.\n");
+        std::printf("Too few arguments.\n");
         printUsage();
         return 1;
     }

@@ -4,6 +4,7 @@
 #include "SharedConfig.h"
 #include "QueuedEvents.h"
 #include "ConnectionResponse.h"
+#include "ConnectionError.h"
 #include "entt/entity/registry.hpp"
 #include <SDL_stdinc.h>
 #include <atomic>
@@ -55,8 +56,11 @@ private:
 
     Client::Network& network;
 
-    // Event queues.
+    /** Connection responses, received from the server. */
     EventQueue<ConnectionResponse> connectionResponseQueue;
+
+    /** Connection error events, received from the Network. */
+    EventQueue<Client::ConnectionError> connectionErrorQueue;
 
     /** The entity ID that we were given by the server. */
     entt::entity clientEntity;

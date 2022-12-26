@@ -5,6 +5,7 @@
 #include <array>
 #include <memory>
 #include <string>
+#include <cstddef>
 
 // Libs
 #include <SDL_stdinc.h>

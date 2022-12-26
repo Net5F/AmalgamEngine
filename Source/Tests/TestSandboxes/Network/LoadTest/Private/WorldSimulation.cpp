@@ -15,26 +15,24 @@ namespace LTC
 
 WorldSimulation::WorldSimulation(EventDispatcher& inNetworkEventDispatcher,
                                  Client::Network& inNetwork, unsigned int inInputsPerSecond)
-: network(inNetwork)
-, connectionResponseQueue(inNetworkEventDispatcher)
-, clientEntity(entt::null)
-, currentTick(0)
+: network{inNetwork}
+, connectionResponseQueue{inNetworkEventDispatcher}
+, connectionErrorQueue{inNetworkEventDispatcher}
+, clientEntity{entt::null}
+, currentTick{0}
 , inputsPerSecond{inInputsPerSecond}
-, ticksTillInput(0)
-, isMovingRight(false)
+, ticksTillInput{0}
+, isMovingRight{false}
 {
     network.registerCurrentTickPtr(&currentTick);
 }
 
 void WorldSimulation::connect()
 {
-    while (!(network.connect())) {
-        LOG_INFO("Network failed to connect. Retrying.");
-    }
+    network.connect();
 
     // Wait for the player's ID from the server.
     ConnectionResponse connectionResponse{};
-    ;
     if (!(connectionResponseQueue.waitPop(connectionResponse,
                                           CONNECTION_RESPONSE_WAIT_US))) {
         LOG_FATAL("Server did not respond.");
@@ -65,6 +63,12 @@ void WorldSimulation::tick()
         if (inputsPerSecond > 0) {
             // If it's time to move, send an input message.
             if (ticksTillInput == 0) {
+                // First make sure we still have a connection.
+                Client::ConnectionError connectionError;
+                if (connectionErrorQueue.pop(connectionError)) {
+                    LOG_FATAL("Lost connection to server.");
+                }
+
                 sendNextInput();
                 ticksTillInput
                     = (SharedConfig::SIM_TICKS_PER_SECOND / inputsPerSecond);

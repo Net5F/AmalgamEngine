@@ -14,10 +14,11 @@ add_executable(LoadTestClient
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Public/Config.h
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Private/UserConfig.cpp
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Public/UserConfig.h
-    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/Network.cpp
-    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/Network.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/ConnectionError.h
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/MessageProcessor.cpp
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/MessageProcessor.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/Network.cpp
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/Network.h
 )
 
 target_include_directories(LoadTestClient
@@ -28,9 +29,12 @@ target_include_directories(LoadTestClient
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 
         # Client objects
-        ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public
         ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Public
+        ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public
 )
+
+# Inherit Shared's precompiled header.
+target_precompile_headers(LoadTestClient REUSE_FROM SharedLib)
 
 target_link_libraries(LoadTestClient
     PRIVATE
@@ -57,3 +61,8 @@ endif()
 # Copy UserConfig.json to the build directory.
 file(COPY ${CMAKE_SOURCE_DIR}/Resources/Client/Common/UserConfig.json
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+
+# On Windows, copy the SDL2 DLL into the build folder so we can run our executable.
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    file(COPY ${SDL2_DIR}/lib/x64/SDL2.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/)
+endif()
