@@ -37,7 +37,7 @@ ServerConnectionSystem::ServerConnectionSystem(
 void ServerConnectionSystem::processConnectionEvents()
 {
     if (connectionState == ConnectionState::Disconnected) {
-        // Wait for a connection request from the UI.
+        // Check for a connection request from the UI.
         ConnectionRequest connectionRequest;
         if (connectionRequestQueue.pop(connectionRequest)) {
             if (Config::RUN_OFFLINE) {

@@ -39,6 +39,9 @@ public:
 
     ~Network();
 
+    // TODO: If the IP provided in UserConfig.json is invalid, the receive 
+    //       thread will stall for a long time while waiting for 
+    //       SDLNet_TCP_Open() to return. If we move off SDL_Net, improve this.
     /**
      * Spins up the connectAndReceive thread.
      *
