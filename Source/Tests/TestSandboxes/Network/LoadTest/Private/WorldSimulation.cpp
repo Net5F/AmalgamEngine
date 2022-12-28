@@ -51,9 +51,15 @@ void WorldSimulation::connect()
 
 void WorldSimulation::tick()
 {
+    // First, make sure we still have a connection.
+    Client::ConnectionError connectionError;
+    if (connectionErrorQueue.pop(connectionError)) {
+        LOG_FATAL("Lost connection to server.");
+    }
+
     Uint32 targetTick{currentTick + 1};
 
-    // Apply any adjustments that we receive from the server.
+    // Apply any adjustments that we received from the server.
     targetTick += network.transferTickAdjustment();
 
     // Process ticks until we match what the server wants.
@@ -63,12 +69,6 @@ void WorldSimulation::tick()
         if (inputsPerSecond > 0) {
             // If it's time to move, send an input message.
             if (ticksTillInput == 0) {
-                // First make sure we still have a connection.
-                Client::ConnectionError connectionError;
-                if (connectionErrorQueue.pop(connectionError)) {
-                    LOG_FATAL("Lost connection to server.");
-                }
-
                 sendNextInput();
                 ticksTillInput
                     = (SharedConfig::SIM_TICKS_PER_SECOND / inputsPerSecond);
