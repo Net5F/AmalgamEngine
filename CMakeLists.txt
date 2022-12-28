@@ -144,6 +144,7 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/QueuedEvents/"
                  "${PROJECT_BINARY_DIR}/Libraries/QueuedEvents/")
 
 # Configure header-only EnTT.
+option(ENTT_INCLUDE_HEADERS "Add all EnTT headers to the EnTT target." ON)
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/entt/"
                  "${PROJECT_BINARY_DIR}/Libraries/entt/"
                  EXCLUDE_FROM_ALL)

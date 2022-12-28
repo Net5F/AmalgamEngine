@@ -35,8 +35,8 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSimulation, World& inWorld,
 , network{inNetwork}
 , npcUpdateQueue{network.getEventDispatcher()}
 , spriteData{inSpriteData}
-, lastReceivedTick(0)
-, lastProcessedTick(0)
+, lastReceivedTick{0}
+, lastProcessedTick{0}
 {
 }
 
@@ -131,8 +131,8 @@ void NpcMovementSystem::handleImplicitConfirmation(Uint32 confirmedTick)
     // If there's a gap > 1 between the latest received tick and the confirmed
     // tick, we know that no changes happened on the in-between ticks and can
     // push confirmations for them.
-    unsigned int implicitConfirmations{confirmedTick - lastReceivedTick};
-    for (unsigned int i = 1; i <= implicitConfirmations; ++i) {
+    Uint32 implicitConfirmations{confirmedTick - lastReceivedTick};
+    for (Uint32 i = 1; i <= implicitConfirmations; ++i) {
         movementUpdateQueue.push({(lastReceivedTick + i), false, nullptr});
     }
 
@@ -163,10 +163,9 @@ void NpcMovementSystem::handleUpdate(
 
 void NpcMovementSystem::moveAllNpcs()
 {
-    // Move all NPCs that have the required components.
     auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Velocity, Rotation, Collision>(
-        entt::exclude<InputHistory>);
+                                       Velocity, Rotation, Collision>(
+        {}, entt::exclude<InputHistory>);
     for (entt::entity entity : group) {
         auto [input, position, previousPosition, velocity, rotation, collision]
             = group.get<Input, Position, PreviousPosition, Velocity, Rotation,
@@ -212,7 +211,7 @@ void NpcMovementSystem::applyUpdateMessage(
 {
     auto group = world.registry.group<Input, Position, PreviousPosition,
                                       Velocity, Rotation, Collision>(
-        entt::exclude<InputHistory>);
+        {}, entt::exclude<InputHistory>);
 
     // Use the data in the message to correct any NPCs that changed inputs.
     for (const MovementState& movementState : movementUpdate->movementStates) {

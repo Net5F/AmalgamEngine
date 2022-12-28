@@ -7,6 +7,7 @@
 #include "Rotation.h"
 #include "Collision.h"
 #include "InputHistory.h"
+#include "Sprite.h"
 #include "Ignore.h"
 #include "entt/entity/registry.hpp"
 
