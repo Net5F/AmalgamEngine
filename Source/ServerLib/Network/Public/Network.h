@@ -31,8 +31,6 @@ namespace Server
 class Network
 {
 public:
-    static constexpr unsigned int SERVER_PORT{41499};
-
     Network();
 
     /**

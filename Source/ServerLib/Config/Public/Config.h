@@ -84,6 +84,9 @@ public:
     //    seconds, disconnect them.
     ////////////////////////////////////////////////////////////////////////////
 
+    /** The port that the server listens for incoming client connections on. */
+    static constexpr unsigned int SERVER_PORT{41499};
+
     /** The maximum number of clients that we will allow. */
     static constexpr unsigned int MAX_CLIENTS{1010};
 

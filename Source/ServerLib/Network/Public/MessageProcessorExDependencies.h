@@ -8,7 +8,7 @@ namespace Server
 {
 
 /**
- * Defines the dependencies that will be injected into the project's
+ * Defines the dependencies that will be provided to the project's
  * MessageProcessorExtension class.
  */
 struct MessageProcessorExDependencies {
