@@ -10,7 +10,6 @@
 #include <cmath>
 #include <algorithm>
 
-// qweqoiwjeoiqwjeoijqowiejqiowjeoqiwjeioqjwoeijqwoeijqowiejqoiwjeoijqwoiejqiowjeqoiwjeoqiwe
 namespace AM
 {
 EntityLocator::EntityLocator(entt::registry& inRegistry)
