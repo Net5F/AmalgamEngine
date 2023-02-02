@@ -18,8 +18,8 @@ namespace AM
 {
 namespace Server
 {
-MovementSyncSystem::MovementSyncSystem(Simulation& inSimulation,
-                                           World& inWorld, Network& inNetwork)
+MovementSyncSystem::MovementSyncSystem(Simulation& inSimulation, World& inWorld,
+                                       Network& inNetwork)
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
@@ -50,7 +50,7 @@ void MovementSyncSystem::sendMovementUpdates()
 }
 
 void MovementSyncSystem::collectEntitiesToSend(ClientSimData& client,
-                                                 entt::entity clientEntity)
+                                               entt::entity clientEntity)
 {
     /* Collect the entities that need to be sent to the client. */
     // Clear the vector.

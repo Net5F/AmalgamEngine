@@ -29,9 +29,8 @@ public:
     static void init(entt::registry& registry)
     {
         // Used for moving an entity.
-        auto movementGroup
-            = registry.group<Input, Position, PreviousPosition, Velocity,
-                             Rotation, Collision>();
+        auto movementGroup = registry.group<Input, Position, PreviousPosition,
+                                            Velocity, Rotation, Collision>();
         ignore(movementGroup);
     }
 };

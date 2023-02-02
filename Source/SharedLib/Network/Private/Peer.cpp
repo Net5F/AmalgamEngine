@@ -21,7 +21,7 @@ std::unique_ptr<Peer> Peer::initiate(const std::string& serverIP,
 Peer::Peer(TcpSocket&& inSocket)
 : socket{std::move(inSocket)}
 // No set given, create a set of size 1 for this peer.
-, set{std::make_shared<SocketSet>(1)} 
+, set{std::make_shared<SocketSet>(1)}
 , bIsConnected{false}
 {
     set->addSocket(socket);
@@ -29,8 +29,7 @@ Peer::Peer(TcpSocket&& inSocket)
     bIsConnected = true;
 }
 
-Peer::Peer(TcpSocket&& inSocket,
-           const std::shared_ptr<SocketSet>& inSet)
+Peer::Peer(TcpSocket&& inSocket, const std::shared_ptr<SocketSet>& inSet)
 : socket{std::move(inSocket)}
 , set{inSet}
 , bIsConnected{false}
@@ -135,7 +134,7 @@ NetworkResult Peer::receiveBytesWait(Uint8* buffer, std::size_t numBytes)
     while (static_cast<std::size_t>(bytesReceived) < numBytes) {
         // Try to receive bytes.
         int result{socket.receive((buffer + bytesReceived),
-                                   static_cast<int>(numBytes))};
+                                  static_cast<int>(numBytes))};
         if (result > 0) {
             bytesReceived += result;
         }

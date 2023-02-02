@@ -97,7 +97,7 @@ void NpcLifetimeSystem::processEntityInits(Uint32 desiredTick)
             const Sprite& sprite{spriteData.get(entityInit->numericID)};
             registry.emplace<Sprite>(entityInit->entity, sprite);
 
-            // Construct their collision (it'll be positioned once they get a 
+            // Construct their collision (it'll be positioned once they get a
             // position update).
             registry.emplace<Collision>(entityInit->entity, sprite.modelBounds,
                                         BoundingBox{});

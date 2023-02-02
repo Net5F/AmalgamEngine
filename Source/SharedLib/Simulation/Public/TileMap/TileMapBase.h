@@ -37,32 +37,31 @@ public:
      * Note: There's no bounds checking on tileX/tileY. It's on you to make
      *       sure they're valid.
      */
-    void setTileSpriteLayer(int tileX, int tileY,
-                            std::size_t layerIndex, const Sprite& sprite);
+    void setTileSpriteLayer(int tileX, int tileY, std::size_t layerIndex,
+                            const Sprite& sprite);
 
     /**
      * Overload for sprite string IDs.
      */
-    void setTileSpriteLayer(int tileX, int tileY,
-                            std::size_t layerIndex,
+    void setTileSpriteLayer(int tileX, int tileY, std::size_t layerIndex,
                             const std::string& stringID);
 
     /**
      * Overload for sprite numeric IDs.
      */
-    void setTileSpriteLayer(int tileX, int tileY,
-                            std::size_t layerIndex, int numericID);
+    void setTileSpriteLayer(int tileX, int tileY, std::size_t layerIndex,
+                            int numericID);
 
     /**
-     * Clears all layers between the given indices (inclusive) in the 
+     * Clears all layers between the given indices (inclusive) in the
      * given tile.
      *
      * It's valid to use the same index as the start and end.
      *
-     * It's safe to use an end index that's past the end of the tile's vector, 
+     * It's safe to use an end index that's past the end of the tile's vector,
      * it will be constrained.
      *
-     * If clearing to the end of the vector, layers will be erased. Otherwise, 
+     * If clearing to the end of the vector, layers will be erased. Otherwise,
      * they'll be set to the "empty sprite".
      *
      * @param startLayerIndex  The layer index to start clearing at.
@@ -70,7 +69,8 @@ public:
      * @return true if any layers were cleared.
      */
     bool clearTileSpriteLayers(int tileX, int tileY,
-                   std::size_t startLayerIndex, std::size_t endLayerIndex);
+                               std::size_t startLayerIndex,
+                               std::size_t endLayerIndex);
 
     /**
      * Clears all sprite layers in the given tile.
@@ -83,7 +83,7 @@ public:
     bool clearTile(int tileX, int tileY);
 
     /**
-     * Clears all layers between the given indices (inclusive) in all tiles 
+     * Clears all layers between the given indices (inclusive) in all tiles
      * within the given extent.
      *
      * See clearTileSpriteLayers() for behavior.
@@ -122,10 +122,10 @@ public:
     const TileExtent& getTileExtent() const;
 
     /**
-     * Returns a map containing all tiles with dirty state, and the lowest 
+     * Returns a map containing all tiles with dirty state, and the lowest
      * dirty layer index for each tile.
      *
-     * Note: This class does not clear elements from this container. You 
+     * Note: This class does not clear elements from this container. You
      *       must do it yourself after you've processed them.
      */
     std::unordered_map<TilePosition, std::size_t>& getDirtyTiles();
@@ -157,12 +157,12 @@ protected:
     std::vector<Tile> tiles;
 
 private:
-    /** If true, any updates to a tile's state will cause that tile to be 
+    /** If true, any updates to a tile's state will cause that tile to be
         pushed into dirtyTiles. */
     bool trackDirtyState;
 
     /** Tracks the lowest dirty layer for each dirty tile.
-        If dirtyTiles[{x, y}] == 2, layer 2 is the lowest dirty layer for tile 
+        If dirtyTiles[{x, y}] == 2, layer 2 is the lowest dirty layer for tile
         (x, y). */
     std::unordered_map<TilePosition, std::size_t> dirtyTiles;
 };

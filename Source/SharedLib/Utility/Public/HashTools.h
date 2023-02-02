@@ -5,7 +5,8 @@
 /**
  * This file contains helper functions for hashing custom types.
  *
- * Reference: https://stackoverflow.com/questions/37007307/fast-hash-function-for-stdvector
+ * Reference:
+ * https://stackoverflow.com/questions/37007307/fast-hash-function-for-stdvector
  */
 namespace AM
 {

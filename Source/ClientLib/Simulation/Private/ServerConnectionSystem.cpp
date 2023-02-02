@@ -48,7 +48,7 @@ void ServerConnectionSystem::processConnectionEvents()
             }
             else {
                 // Kick off a connection attempt with the server.
-                // Note: Eventually we'll instead send a ConnectionRequest to 
+                // Note: Eventually we'll instead send a ConnectionRequest to
                 //       the login server here with our login info.
                 network.connect();
                 connectionState = ConnectionState::AwaitingResponse;
@@ -84,7 +84,8 @@ void ServerConnectionSystem::processConnectionEvents()
     }
 }
 
-void ServerConnectionSystem::initSimState(ConnectionResponse& connectionResponse)
+void ServerConnectionSystem::initSimState(
+    ConnectionResponse& connectionResponse)
 {
     LOG_INFO(
         "Received connection response. ID: %u, tick: %u, pos: (%.4f, %.4f)",
@@ -190,7 +191,7 @@ void ServerConnectionSystem::clearSimState()
     world.playerEntity = entt::null;
     world.tileMap.clear();
 
-    // The current tick needs to be set back to 0 so the Network knows not 
+    // The current tick needs to be set back to 0 so the Network knows not
     // to immediately send Heartbeats the next time it spins up.
     currentTick = 0;
 }

@@ -183,8 +183,8 @@ void Network::connectAndReceive()
     ServerAddress serverAddress{UserConfig::get().getServerAddress()};
     server = Peer::initiate(serverAddress.IP, serverAddress.port);
     if (server != nullptr) {
-        // Note: The server sends us a ConnectionResponse when we connect the 
-        //       socket. Eventually, we'll instead send a ConnectionRequest to 
+        // Note: The server sends us a ConnectionResponse when we connect the
+        //       socket. Eventually, we'll instead send a ConnectionRequest to
         //       the login server here.
     }
     else {
@@ -210,7 +210,7 @@ void Network::connectAndReceive()
                 return;
             }
             case NetworkResult::NoWaitingData: {
-                // There wasn't any activity, delay so we don't waste CPU 
+                // There wasn't any activity, delay so we don't waste CPU
                 // spinning.
                 SDL_Delay(INACTIVE_DELAY_TIME_MS);
                 break;

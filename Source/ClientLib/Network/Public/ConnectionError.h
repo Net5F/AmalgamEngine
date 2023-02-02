@@ -10,7 +10,7 @@ namespace Client
  */
 struct ConnectionError {
     enum class Type {
-        Failed,    /*!< We failed to connect. */
+        Failed,      /*!< We failed to connect. */
         Disconnected /*!< We lost our connection to the server. */
     };
 

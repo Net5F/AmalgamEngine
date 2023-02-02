@@ -124,7 +124,8 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
     }
 
     // Gather all relevant dynamic sprites.
-    auto group = registry.group<Position, PreviousPosition, Collision>(entt::get<Sprite>);
+    auto group = registry.group<Position, PreviousPosition, Collision>(
+        entt::get<Sprite>);
     for (entt::entity entity : group) {
         auto [position, previousPos, collision, sprite]
             = group.get<Position, PreviousPosition, Collision, Sprite>(entity);

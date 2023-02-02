@@ -112,8 +112,7 @@ void TileMap::save(const std::string& fileName)
     // Serialize the map snapshot and write it to the file.
     bool saveSuccessful{
         Serialize::toFile((Paths::BASE_PATH + fileName), mapSnapshot)};
-    if (saveSuccessful)
-    {
+    if (saveSuccessful) {
         // Print the time taken.
         double timeTaken{timer.getDeltaSeconds(false)};
         LOG_INFO("Map saved in %.6fs.", timeTaken);

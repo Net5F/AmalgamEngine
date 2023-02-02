@@ -12,8 +12,8 @@ namespace AM
 /**
  * Represents a network peer for communication.
  *
- * This class helps us interact with sockets in the ways that we usually like 
- * to. If different behavior is needed, TcpSocket/SocketSet should be used 
+ * This class helps us interact with sockets in the ways that we usually like
+ * to. If different behavior is needed, TcpSocket/SocketSet should be used
  * directly.
  */
 class Peer
@@ -36,7 +36,7 @@ public:
     /**
      * Constructor for when you only need 1 peer (client connecting to server,
      * anyone connecting to chat server.)
-     * Takes ownership of the given socket and adds it as the only member of a 
+     * Takes ownership of the given socket and adds it as the only member of a
      * socket set.
      */
     Peer(TcpSocket&& inSocket);
@@ -46,8 +46,7 @@ public:
      * clients).
      * Takes ownership of the given socket and adds it to the given set.
      */
-    Peer(TcpSocket&& inSocket,
-         const std::shared_ptr<SocketSet>& inSet);
+    Peer(TcpSocket&& inSocket, const std::shared_ptr<SocketSet>& inSet);
 
     /**
      * Removes the socket from the set.

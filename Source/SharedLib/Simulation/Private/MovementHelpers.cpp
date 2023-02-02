@@ -7,7 +7,7 @@
 #include "SharedConfig.h"
 #include "Ignore.h"
 
-/** The constant to multiply by when normalizing a diagonal direction vector 
+/** The constant to multiply by when normalizing a diagonal direction vector
     to be equal magnitude to movement in cardinal directions.
     sin(45) == cos(45) == 0.70710678118 */
 const float DIAGONAL_NORMALIZATION_CONSTANT{0.70710678118f};
@@ -44,12 +44,12 @@ Velocity MovementHelpers::updateVelocity(const Velocity& velocity,
     updatedVelocity.x = xDirection * SharedConfig::MOVEMENT_VELOCITY;
     updatedVelocity.y = yDirection * SharedConfig::MOVEMENT_VELOCITY;
 
-    // Note: Disabled Z-axis since it's underdeveloped. Can re-enable for 
+    // Note: Disabled Z-axis since it's underdeveloped. Can re-enable for
     //       for testing. Eventually, we'll incorporate it fully.
-    //int zUp{static_cast<int>(inputStates[Input::ZUp])};
-    //int zDown{static_cast<int>(inputStates[Input::ZDown])};
-    //float zDirection{static_cast<float>(zUp - zDown)};
-    //updatedVelocity.z = zDirection * SharedConfig::MOVEMENT_VELOCITY;
+    // int zUp{static_cast<int>(inputStates[Input::ZUp])};
+    // int zDown{static_cast<int>(inputStates[Input::ZDown])};
+    // float zDirection{static_cast<float>(zUp - zDown)};
+    // updatedVelocity.z = zDirection * SharedConfig::MOVEMENT_VELOCITY;
 
     return updatedVelocity;
 }
@@ -63,9 +63,9 @@ Position MovementHelpers::updatePosition(const Position& position,
     newPosition.x += static_cast<float>((deltaSeconds * velocity.x));
     newPosition.y += static_cast<float>((deltaSeconds * velocity.y));
 
-    // Note: Disabled Z-axis since it's underdeveloped. Can re-enable for 
+    // Note: Disabled Z-axis since it's underdeveloped. Can re-enable for
     //       for testing. Eventually, we'll incorporate it fully.
-    //newPosition.z += static_cast<float>((deltaSeconds * velocity.z));
+    // newPosition.z += static_cast<float>((deltaSeconds * velocity.z));
 
     return newPosition;
 }

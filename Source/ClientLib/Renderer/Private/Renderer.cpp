@@ -39,7 +39,7 @@ void Renderer::render()
     double alpha{getSimTickProgress()};
 
     // If we have a valid player entity, get the lerped camera.
-    // Note: When we're disconnected from the server, the camera will be 
+    // Note: When we're disconnected from the server, the camera will be
     //       default (the UI will be covering it anyway).
     Camera lerpedCamera{};
     if (world.playerEntity != entt::null) {

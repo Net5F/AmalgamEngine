@@ -33,13 +33,13 @@ public:
     virtual void beforeAll() = 0;
 
     /**
-     * Called after the tile map is updated and client entities are 
+     * Called after the tile map is updated and client entities are
      * added/removed.
      */
     virtual void afterMapAndConnectionUpdates() = 0;
 
     /**
-     * Called after all entity movement has been processed, but before the new 
+     * Called after all entity movement has been processed, but before the new
      * movement state has been sent to the clients.
      */
     virtual void afterMovement() = 0;
@@ -61,9 +61,9 @@ public:
     // Simulation System Hooks (Hooks into engine systems)
     //-------------------------------------------------------------------------
     /**
-     * Called by TileUpdateSystem when a tile update request is received, 
+     * Called by TileUpdateSystem when a tile update request is received,
      * before applying the update.
-     * Allows the project to place constraints on map modifications, such as 
+     * Allows the project to place constraints on map modifications, such as
      * requiring certain permissions, or only allowing updates to certain areas.
      *
      * @return true if the update should be performed, else false.

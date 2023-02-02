@@ -10,10 +10,10 @@ namespace AM
 {
 namespace Server
 {
-TileUpdateSystem::TileUpdateSystem(World& inWorld,
-                                   EventDispatcher& inNetworkEventDispatcher,
-                                   Network& inNetwork,
-                                   const std::unique_ptr<ISimulationExtension>& inExtension)
+TileUpdateSystem::TileUpdateSystem(
+    World& inWorld, EventDispatcher& inNetworkEventDispatcher,
+    Network& inNetwork,
+    const std::unique_ptr<ISimulationExtension>& inExtension)
 : world{inWorld}
 , network{inNetwork}
 , extension{inExtension}
@@ -56,11 +56,11 @@ void TileUpdateSystem::sendTileUpdates()
     std::unordered_map<TilePosition, std::size_t>& dirtyTiles{
         world.tileMap.getDirtyTiles()};
 
-    // For every tile with dirty state, push it into the working update of 
+    // For every tile with dirty state, push it into the working update of
     // each client in range.
     for (const auto& [tilePos, lowestDirtyLayerIndex] : dirtyTiles) {
-        // Calc how many layers the tile has, starting at the lowest dirty layer.
-        // Note: This tile might be fully cleared (no layers).
+        // Calc how many layers the tile has, starting at the lowest dirty
+        // layer. Note: This tile might be fully cleared (no layers).
         const Tile& tile{world.tileMap.getTile(tilePos.x, tilePos.y)};
         std::size_t layerCount{tile.spriteLayers.size()
                                - lowestDirtyLayerIndex};
@@ -85,7 +85,7 @@ void TileUpdateSystem::sendTileUpdates()
                 tilePos.x, tilePos.y, static_cast<Uint8>(layerCount),
                 static_cast<Uint8>(lowestDirtyLayerIndex));
 
-            // Push the numericID of the lowest updated layer and all layers 
+            // Push the numericID of the lowest updated layer and all layers
             // above it.
             for (std::size_t i = 0; i < layerCount; ++i) {
                 int numericID{tile.spriteLayers[lowestDirtyLayerIndex + i]

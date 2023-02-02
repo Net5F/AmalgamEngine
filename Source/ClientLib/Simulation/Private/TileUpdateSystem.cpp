@@ -45,7 +45,7 @@ void TileUpdateSystem::processNetworkUpdates()
 
         // For each updated tile.
         for (const TileUpdate::TileInfo& tileInfo : tileUpdate.tileInfo) {
-            // Clear the start layer and all layers above it (layers below the 
+            // Clear the start layer and all layers above it (layers below the
             // start layer are unchanged).
             std::size_t endLayerIndex{SharedConfig::MAX_TILE_LAYERS - 1};
             world.tileMap.clearTileSpriteLayers(tileInfo.tileX, tileInfo.tileY,

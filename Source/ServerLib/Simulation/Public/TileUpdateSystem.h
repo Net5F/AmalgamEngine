@@ -14,9 +14,9 @@ class Network;
 class ISimulationExtension;
 
 /**
- * Processes tile update requests sent by clients. If a request is valid, 
+ * Processes tile update requests sent by clients. If a request is valid,
  * updates the map.
- * Also, detects changes to the tile map and sends the new map state to all 
+ * Also, detects changes to the tile map and sends the new map state to all
  * nearby clients.
  */
 class TileUpdateSystem
@@ -46,7 +46,7 @@ private:
         Used for checking if tile updates are valid. */
     const std::unique_ptr<ISimulationExtension>& extension;
 
-    /** Holds tile updates as we iterate the dirty tiles and figure out what 
+    /** Holds tile updates as we iterate the dirty tiles and figure out what
         needs to be sent to each client. */
     std::unordered_map<NetworkID, TileUpdate> workingUpdates;
 

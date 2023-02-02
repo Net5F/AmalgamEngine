@@ -20,7 +20,7 @@ namespace Client
 class WorldSignals
 {
 public:
-    /** We've established a connection with the server and the simulation has 
+    /** We've established a connection with the server and the simulation has
         started running. */
     entt::sigh<void()> simulationStarted;
 

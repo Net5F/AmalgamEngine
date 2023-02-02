@@ -31,9 +31,9 @@ public:
     static void init(entt::registry& registry)
     {
         // Used for NPC movement and dynamic entity sorting.
-        auto movementGroup
-            = registry.group<Input, Position, PreviousPosition, Velocity, Rotation,
-                             Collision>(entt::get<Sprite>, entt::exclude<InputHistory>);
+        auto movementGroup = registry.group<Input, Position, PreviousPosition,
+                                            Velocity, Rotation, Collision>(
+            entt::get<Sprite>, entt::exclude<InputHistory>);
         ignore(movementGroup);
     }
 };

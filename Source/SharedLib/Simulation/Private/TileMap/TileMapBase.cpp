@@ -46,17 +46,17 @@ void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
         return;
     }
 
-    // If we're being asked to set the highest layer in the tile to the empty 
+    // If we're being asked to set the highest layer in the tile to the empty
     // sprite, erase it and any empties below it instead (to reduce space).
     std::size_t lowestDirtyLayer{0};
-    if ((sprite.numericID == EMPTY_SPRITE_ID) 
+    if ((sprite.numericID == EMPTY_SPRITE_ID)
         && (layerIndex == (spriteLayers.size() - 1))) {
         // Erase the sprite.
         spriteLayers.erase(spriteLayers.begin() + layerIndex);
         lowestDirtyLayer = layerIndex;
 
         // Erase any uncovered empty layers at the end of the vector.
-        for (std::size_t endIndex = layerIndex; endIndex-- > 0; ) {
+        for (std::size_t endIndex = layerIndex; endIndex-- > 0;) {
             if (spriteLayers[endIndex].sprite.numericID == EMPTY_SPRITE_ID) {
                 spriteLayers.erase(spriteLayers.begin() + endIndex);
                 lowestDirtyLayer = endIndex;
@@ -117,7 +117,8 @@ void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
 }
 
 bool TileMapBase::clearTileSpriteLayers(int tileX, int tileY,
-    std::size_t startLayerIndex, std::size_t endLayerIndex)
+                                        std::size_t startLayerIndex,
+                                        std::size_t endLayerIndex)
 {
     AM_ASSERT(endLayerIndex < SharedConfig::MAX_TILE_LAYERS,
               "End layer index out of bounds: %u", endLayerIndex);
@@ -132,7 +133,7 @@ bool TileMapBase::clearTileSpriteLayers(int tileX, int tileY,
         return false;
     }
 
-    // If the end index is at the end of the vector (or beyond), erase 
+    // If the end index is at the end of the vector (or beyond), erase
     // the elements.
     std::size_t lowestDirtyLayer{startLayerIndex};
     bool layerWasCleared{false};
@@ -141,7 +142,7 @@ bool TileMapBase::clearTileSpriteLayers(int tileX, int tileY,
                            spriteLayers.end());
 
         // Erase any uncovered empty layers at the end of the vector.
-        for (std::size_t endIndex = startLayerIndex; endIndex-- > 0; ) {
+        for (std::size_t endIndex = startLayerIndex; endIndex-- > 0;) {
             if (spriteLayers[endIndex].sprite.numericID == EMPTY_SPRITE_ID) {
                 spriteLayers.erase(spriteLayers.begin() + endIndex);
                 lowestDirtyLayer = endIndex;
@@ -203,7 +204,7 @@ bool TileMapBase::clearExtentSpriteLayers(TileExtent extent,
 {
     bool layersWereCleared{false};
 
-    // Clear every layer between the given indices (inclusive) in the given 
+    // Clear every layer between the given indices (inclusive) in the given
     // extent.
     for (int x = extent.x; x <= extent.xMax(); ++x) {
         for (int y = extent.y; y <= extent.yMax(); ++y) {

@@ -164,7 +164,7 @@ void NpcMovementSystem::handleUpdate(
 void NpcMovementSystem::moveAllNpcs()
 {
     auto group = world.registry.group<Input, Position, PreviousPosition,
-                                       Velocity, Rotation, Collision>(
+                                      Velocity, Rotation, Collision>(
         {}, entt::exclude<InputHistory>);
     for (entt::entity entity : group) {
         auto [input, position, previousPosition, velocity, rotation, collision]

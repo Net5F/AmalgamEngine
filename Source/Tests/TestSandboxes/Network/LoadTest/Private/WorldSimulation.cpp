@@ -14,7 +14,8 @@ namespace LTC
 {
 
 WorldSimulation::WorldSimulation(EventDispatcher& inNetworkEventDispatcher,
-                                 Client::Network& inNetwork, unsigned int inInputsPerSecond)
+                                 Client::Network& inNetwork,
+                                 unsigned int inInputsPerSecond)
 : network{inNetwork}
 , connectionResponseQueue{inNetworkEventDispatcher}
 , connectionErrorQueue{inNetworkEventDispatcher}

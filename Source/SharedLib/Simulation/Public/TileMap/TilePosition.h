@@ -26,8 +26,7 @@ public:
 namespace std
 {
 template<>
-struct hash<AM::TilePosition>
-{
+struct hash<AM::TilePosition> {
     typedef AM::TilePosition argument_type;
     typedef std::size_t result_type;
     result_type operator()(const argument_type& position) const

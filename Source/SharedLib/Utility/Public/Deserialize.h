@@ -57,7 +57,7 @@ public:
      *
      * @param filePath  The file to read from.
      * @param outputObject  The object to store the deserialized data in.
-     * @return false if the file could not be opened or deserialization 
+     * @return false if the file could not be opened or deserialization
      *         failed, else true.
      */
     template<typename T>

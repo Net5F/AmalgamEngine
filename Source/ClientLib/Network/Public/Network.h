@@ -28,8 +28,8 @@ class IMessageProcessorExtension;
  * Provides a convenient interface for connecting to the server, sending
  * and receiving messages, and other network-related functionality.
  *
- * Note: ServerConnectionSystem is responsible for calling connect() and 
- * disconnect(). If a connection error is detected, this class will push a 
+ * Note: ServerConnectionSystem is responsible for calling connect() and
+ * disconnect(). If a connection error is detected, this class will push a
  * ConnectionError event and ServerConnectionSystem will handle it.
  */
 class Network
@@ -39,13 +39,13 @@ public:
 
     ~Network();
 
-    // TODO: If the IP provided in UserConfig.json is invalid, the receive 
-    //       thread will stall for a long time while waiting for 
+    // TODO: If the IP provided in UserConfig.json is invalid, the receive
+    //       thread will stall for a long time while waiting for
     //       SDLNet_TCP_Open() to return. If we move off SDL_Net, improve this.
     /**
      * Spins up the connectAndReceive thread.
      *
-     * Note: ServerConnectionSystem is responsible for calling this. See class 
+     * Note: ServerConnectionSystem is responsible for calling this. See class
      *       comment.
      */
     void connect();
@@ -53,7 +53,7 @@ public:
     /**
      * Cleans up our server connection and spins down the receive thread.
      *
-     * Note: ServerConnectionSystem is responsible for calling this. See class 
+     * Note: ServerConnectionSystem is responsible for calling this. See class
      *       comment.
      */
     void disconnect();
@@ -113,7 +113,7 @@ public:
 
 private:
     /**
-     * How long the receive loop in connectAndReceive should delay if no 
+     * How long the receive loop in connectAndReceive should delay if no
      * socket activity was reported on the socket.
      */
     static constexpr unsigned int INACTIVE_DELAY_TIME_MS{1};
@@ -134,7 +134,7 @@ private:
      * Thread function, started from connect().
      *
      * First, tries to connect to the server.
-     * If successful, receives messages from the server and passes them to 
+     * If successful, receives messages from the server and passes them to
      * processBatch().
      */
     void connectAndReceive();

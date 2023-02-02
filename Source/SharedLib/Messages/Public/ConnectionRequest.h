@@ -13,7 +13,7 @@ struct ConnectionRequest {
     // Declares this struct as a message that the Network can send and receive.
     static constexpr MessageType MESSAGE_TYPE = MessageType::ConnectionRequest;
 
-    // Note: This will eventually change to login credentials and will be sent 
+    // Note: This will eventually change to login credentials and will be sent
     //       to the login server instead of the simulation server.
     /** The name of this player. */
     std::string playerName{""};

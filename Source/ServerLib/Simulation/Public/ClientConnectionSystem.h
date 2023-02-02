@@ -26,7 +26,7 @@ public:
                            Network& inNetwork, SpriteData& inSpriteData);
 
     /**
-     * Processes new connections and disconnections, updating the sim state 
+     * Processes new connections and disconnections, updating the sim state
      * appropriately.
      */
     void processConnectionEvents();

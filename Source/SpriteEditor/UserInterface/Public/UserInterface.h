@@ -28,10 +28,7 @@ namespace SpriteEditor
 class UserInterface : public OSEventHandler
 {
 public:
-    enum class ScreenType {
-        TitleScreen,
-        MainScreen
-    };
+    enum class ScreenType { TitleScreen, MainScreen };
 
     UserInterface(SDL_Renderer* inRenderer, AssetCache& inAssetCache,
                   SpriteDataModel& inSpriteDataModel);

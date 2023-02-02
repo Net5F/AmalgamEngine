@@ -53,7 +53,7 @@ public:
      *
      * @param rotation  The rotation to update.
      * @param inputStates  The current input state.
-     * 
+     *
      * @return The updated rotation.
      */
     static Rotation updateRotation(const Rotation& rotation,
@@ -65,7 +65,7 @@ public:
     static Position interpolatePosition(const PreviousPosition& previousPos,
                                         const Position& position, double alpha);
 
-    // TODO: TileMap and Tile are no longer split across repos, so turn this 
+    // TODO: TileMap and Tile are no longer split across repos, so turn this
     //       into a normal function acting on TileMapBase.
     /**
      * Resolves collisions between the given desiredBox and other nearby

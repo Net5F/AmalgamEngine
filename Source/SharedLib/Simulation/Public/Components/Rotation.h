@@ -6,7 +6,7 @@ namespace AM
 {
 
 /**
- * Represents an entity's rotation about the z-axis, i.e. yaw, or "the 
+ * Represents an entity's rotation about the z-axis, i.e. yaw, or "the
  * direction the entity is facing".
  *
  * Due to being a sprite-based engine, rotation about other axes is not viable,

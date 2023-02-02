@@ -18,27 +18,22 @@ class Network;
 class SpriteData;
 
 /**
- * This system is in charge of processing server connect/disconnect events and 
+ * This system is in charge of processing server connect/disconnect events and
  * updating the client's entity.
  */
 class ServerConnectionSystem
 {
 public:
-    enum class ConnectionState
-    {
-        Disconnected,
-        AwaitingResponse,
-        Connected
-    };
+    enum class ConnectionState { Disconnected, AwaitingResponse, Connected };
 
     ServerConnectionSystem(World& inWorld, EventDispatcher& inUiEventDispatcher,
                            Network& inNetwork, SpriteData& inSpriteData,
                            std::atomic<Uint32>& inCurrentTick);
 
     /**
-     * Waits for connection events from the UI. When one is received, attempts 
+     * Waits for connection events from the UI. When one is received, attempts
      * to connect to the server.
-     * 
+     *
      * While connected, detects disconnects and sends the disconnect event.
      */
     void processConnectionEvents();

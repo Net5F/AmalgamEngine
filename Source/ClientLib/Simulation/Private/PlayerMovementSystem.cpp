@@ -44,8 +44,7 @@ void PlayerMovementSystem::processMovement()
     Velocity& velocity{world.registry.get<Velocity>(world.playerEntity)};
     Input& input{world.registry.get<Input>(world.playerEntity)};
     Rotation& rotation{world.registry.get<Rotation>(world.playerEntity)};
-    Collision& collision{
-        world.registry.get<Collision>(world.playerEntity)};
+    Collision& collision{world.registry.get<Collision>(world.playerEntity)};
     if (!Config::RUN_OFFLINE) {
         // Apply any player entity updates from the server.
         InputHistory& inputHistory{
@@ -78,9 +77,9 @@ void PlayerMovementSystem::processMovement()
     // If the player moved, signal it to the UI.
     if (position != previousPosition) {
         world.worldSignals.playerPositionChanged.publish(position);
-        //LOG_INFO("Player position: (%.4f, %.4f) tile: (%d, %d)", position.x,
-        //         position.y, position.asTilePosition().x,
-        //         position.asTilePosition().y);
+        // LOG_INFO("Player position: (%.4f, %.4f) tile: (%d, %d)", position.x,
+        //          position.y, position.asTilePosition().x,
+        //          position.asTilePosition().y);
     }
 }
 
@@ -127,7 +126,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates(
         velocity = playerUpdate->velocity;
         position = playerUpdate->position;
         rotation = playerUpdate->rotation;
-        collision.worldBounds 
+        collision.worldBounds
             = Transforms::modelToWorldCentered(collision.modelBounds, position);
 
         /* Check if the input is mismatched. */

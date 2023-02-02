@@ -104,9 +104,9 @@ public:
      *
      * Note: Only call this on a server (listener) socket.
      *
-     * @return A TcpSocket. If the accept was successful, socket.isOpen() will 
-     *         == true. The socket will be closed if an error occurs, such as 
-     *         failure to create a socket, failure to finish connecting, or if 
+     * @return A TcpSocket. If the accept was successful, socket.isOpen() will
+     *         == true. The socket will be closed if an error occurs, such as
+     *         failure to create a socket, failure to finish connecting, or if
      *         there is no waiting connection.
      */
     TcpSocket accept();
