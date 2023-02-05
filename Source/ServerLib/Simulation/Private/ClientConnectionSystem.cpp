@@ -27,12 +27,12 @@ ClientConnectionSystem::ClientConnectionSystem(
     Simulation& inSimulation, World& inWorld,
     EventDispatcher& inNetworkEventDispatcher, Network& inNetwork,
     SpriteData& inSpriteData)
-: simulation(inSimulation)
-, world(inWorld)
-, network(inNetwork)
+: simulation{inSimulation}
+, world{inWorld}
+, network{inNetwork}
 , spriteData{inSpriteData}
-, clientConnectedQueue(inNetworkEventDispatcher)
-, clientDisconnectedQueue(inNetworkEventDispatcher)
+, clientConnectedQueue{inNetworkEventDispatcher}
+, clientDisconnectedQueue{inNetworkEventDispatcher}
 {
 }
 

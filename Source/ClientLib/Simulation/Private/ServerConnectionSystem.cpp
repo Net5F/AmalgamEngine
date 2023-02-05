@@ -31,6 +31,7 @@ ServerConnectionSystem::ServerConnectionSystem(
 , connectionResponseQueue{network.getEventDispatcher()}
 , connectionErrorQueue{network.getEventDispatcher()}
 , connectionState{ConnectionState::Disconnected}
+, connectionAttemptTimer{}
 {
 }
 
@@ -52,7 +53,7 @@ void ServerConnectionSystem::processConnectionEvents()
                 //       the login server here with our login info.
                 network.connect();
                 connectionState = ConnectionState::AwaitingResponse;
-                connectionAttemptTimer.updateSavedTime();
+                connectionAttemptTimer.reset();
             }
         }
     }
@@ -66,8 +67,7 @@ void ServerConnectionSystem::processConnectionEvents()
         }
 
         // If we've timed out, send a failure signal.
-        if (connectionAttemptTimer.getDeltaSeconds(false)
-            >= CONNECTION_RESPONSE_WAIT_S) {
+        if (connectionAttemptTimer.getTime() >= CONNECTION_RESPONSE_WAIT_S) {
             world.worldSignals.serverConnectionError.publish(
                 {ConnectionError::Type::Failed});
             connectionState = ConnectionState::Disconnected;

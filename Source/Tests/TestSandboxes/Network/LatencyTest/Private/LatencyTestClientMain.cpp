@@ -58,9 +58,9 @@ int main(int argc, char* argv[])
 
     std::array<Uint8, NUM_BYTES> messageBuffer = {};
 
+    // Prime a timer.
     std::cout << "Running tests" << std::endl;
     Timer rttTimer;
-    rttTimer.updateSavedTime();
     while (iterationCount < iterationsToRun) {
         // Send
         int bytesSent = SDLNet_TCP_Send(socket, &messageBuffer, NUM_BYTES);
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
         // Receive
         int result = SDLNet_TCP_Recv(socket, &messageBuffer, NUM_BYTES);
         if (result == NUM_BYTES) {
-            float rtt = rttTimer.getDeltaSeconds(true);
+            float rtt = rttTimer.getTimeAndReset();
             resultArray[iterationCount] = rtt;
             iterationCount++;
         }

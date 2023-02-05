@@ -99,12 +99,11 @@ int main(int argc, char* argv[])
         LOG_FATAL("Failed to get server's current tick.");
     }
 
-    // Prime the timer so it doesn't start at 0.
+    // Prime a timer.
     Timer timer;
-    timer.updateSavedTime();
     while (true) {
         // Calc the time delta.
-        double deltaSeconds = timer.getDeltaSeconds(true);
+        double deltaSeconds = timer.getTimeAndReset();
 
         /* Process as many game ticks as have accumulated. */
         accumulatedTime += deltaSeconds;

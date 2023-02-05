@@ -6,40 +6,38 @@ namespace AM
 PeriodicCaller::PeriodicCaller(std::function<void(void)> inGivenFunctNoTimestep,
                                double inTimestepS, std::string_view inDebugName,
                                bool inSkipLateSteps)
-: givenFunctNoTimestep(std::move(inGivenFunctNoTimestep))
-, timestepS(inTimestepS)
-, debugName(inDebugName)
-, skipLateSteps(inSkipLateSteps)
-, accumulatedTime(0.0)
-, delayedTimeS(-1)
+: givenFunctNoTimestep{std::move(inGivenFunctNoTimestep)}
+, timestepS{inTimestepS}
+, debugName{inDebugName}
+, skipLateSteps{inSkipLateSteps}
+, timer{}
+, accumulatedTime{0.0}
+, delayedTimeS{-1}
 {
-    // Prime the timer so we don't get a giant value on the first usage.
-    timer.updateSavedTime();
 }
 
 PeriodicCaller::PeriodicCaller(std::function<void(double)> inGivenFunctTimestep,
                                double inTimestepS, std::string_view inDebugName,
                                bool inSkipLateSteps)
-: givenFunctTimestep(std::move(inGivenFunctTimestep))
-, timestepS(inTimestepS)
-, debugName(inDebugName)
-, skipLateSteps(inSkipLateSteps)
-, accumulatedTime(0.0)
-, delayedTimeS(-1)
+: givenFunctTimestep{std::move(inGivenFunctTimestep)}
+, timestepS{inTimestepS}
+, debugName{inDebugName}
+, skipLateSteps{inSkipLateSteps}
+, timer{}
+, accumulatedTime{0.0}
+, delayedTimeS{-1}
 {
-    // Prime the timer so we don't get a giant value on the first usage.
-    timer.updateSavedTime();
 }
 
 void PeriodicCaller::initTimer()
 {
-    timer.updateSavedTime();
+    timer.reset();
 }
 
 void PeriodicCaller::update()
 {
     // Accumulate the time passed since the last update().
-    accumulatedTime += timer.getDeltaSeconds(true);
+    accumulatedTime += timer.getTimeAndReset();
 
     // Process as many time steps as have accumulated.
     while (accumulatedTime >= timestepS) {
@@ -52,7 +50,7 @@ void PeriodicCaller::update()
         }
 
         // Check our execution time.
-        double executionTime = timer.getDeltaSeconds(false);
+        double executionTime{timer.getTime()};
         if (executionTime > timestepS) {
             LOG_INFO("%s overran its update timestep. executionTime: %.5fs",
                      debugName.c_str(), executionTime);
@@ -85,7 +83,7 @@ void PeriodicCaller::update()
 double PeriodicCaller::getTimeTillNextCall()
 {
     // Get the time since accumulatedTime was last updated.
-    double timeSinceLastCall = timer.getDeltaSeconds(false);
+    double timeSinceLastCall{timer.getTime()};
 
     // Return the amount of time until our next call.
     return (timestepS - (accumulatedTime + timeSinceLastCall));
@@ -94,7 +92,7 @@ double PeriodicCaller::getTimeTillNextCall()
 double PeriodicCaller::getProgress()
 {
     // Get the time since accumulatedTime was last updated.
-    double timeSinceLastCall = timer.getDeltaSeconds(false);
+    double timeSinceLastCall{timer.getTime()};
 
     // Return how far we are into this timestep.
     return ((accumulatedTime + timeSinceLastCall) / timestepS);

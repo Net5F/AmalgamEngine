@@ -19,15 +19,14 @@ BinaryBuffer Client::batchBuffer(SharedConfig::MAX_BATCH_SIZE);
 BinaryBuffer Client::compressedBatchBuffer;
 
 Client::Client(NetworkID inNetID, std::unique_ptr<Peer> inPeer)
-: netID(inNetID)
-, peer(std::move(inPeer))
-, latestSentSimTick(0)
-, tickDiffHistory(Config::TICKDIFF_TARGET)
-, numFreshDiffs(0)
-, latestAdjIteration(0)
+: netID{inNetID}
+, peer{std::move(inPeer)}
+, receiveTimer{}
+, latestSentSimTick{0}
+, tickDiffHistory{Config::TICKDIFF_TARGET}
+, numFreshDiffs{0}
+, latestAdjIteration{0}
 {
-    // Init the timers to the current time.
-    receiveTimer.updateSavedTime();
 }
 
 void Client::queueMessage(const BinaryBufferSharedPtr& message,
@@ -248,7 +247,7 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
         ReceiveResult receiveResult{peer->receiveMessageWait(messageBuffer)};
         if (receiveResult.networkResult == NetworkResult::Success) {
             // Got a message, update the receiveTimer.
-            receiveTimer.updateSavedTime();
+            receiveTimer.reset();
 
             // Record the number of received bytes.
             NetworkStats::recordBytesReceived(CLIENT_HEADER_SIZE
@@ -263,7 +262,7 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
     }
     else if (headerResult == NetworkResult::NoWaitingData) {
         // If we timed out, drop the connection.
-        double delta{receiveTimer.getDeltaSeconds(false)};
+        double delta{receiveTimer.getTime()};
         if (delta > Config::CLIENT_TIMEOUT_S) {
             peer = nullptr;
             LOG_INFO("Dropped connection, peer timed out. Time since last "

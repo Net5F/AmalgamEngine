@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
             }
             else {
                 // Got the start byte, start timing and proceed.
-                timer.updateSavedTime();
+                timer.reset();
                 waitingForStart = false;
                 LOG_INFO("Received start byte.");
             }
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
             }
             else {
                 LOG_INFO("Received end byte. Time passed: %.8f",
-                         timer.getDeltaSeconds(false));
+                         timer.getTime());
                 waitingForEnd = false;
             }
         }

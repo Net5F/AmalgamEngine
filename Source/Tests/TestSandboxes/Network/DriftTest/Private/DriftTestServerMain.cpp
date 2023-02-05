@@ -144,15 +144,14 @@ int main(int argc, char* argv[])
 
     LOG_INFO("Server started.");
 
-    // Prime the timer so it doesn't start at 0.
+    // Prime a timer.
     Timer timer;
-    timer.updateSavedTime();
     while (!exitRequested) {
         // Connect or disconnect the client.
         updateConnection(serverSocket, clientSocket, clientSet, currentTick);
 
         // Calc the time delta.
-        double deltaSeconds = timer.getDeltaSeconds(true);
+        double deltaSeconds = timer.getTimeAndReset();
 
         /* Process as many game ticks as have accumulated. */
         accumulatedTime += deltaSeconds;

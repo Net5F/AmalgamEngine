@@ -21,7 +21,6 @@ TileMap::TileMap(SpriteData& inSpriteData)
 {
     // Prime a timer.
     Timer timer;
-    timer.updateSavedTime();
 
     // Deserialize the file into a snapshot.
     TileMapSnapshot mapSnapshot;
@@ -34,7 +33,7 @@ TileMap::TileMap(SpriteData& inSpriteData)
     load(mapSnapshot);
 
     // Print the time taken.
-    double timeTaken{timer.getDeltaSeconds(false)};
+    double timeTaken{timer.getTime()};
     LOG_INFO("Map loaded in %.6fs. Size: (%u, %u)ch.", timeTaken,
              chunkExtent.xLength, chunkExtent.yLength);
 }
@@ -51,7 +50,6 @@ void TileMap::save(const std::string& fileName)
 
     // Prime a timer.
     Timer timer;
-    timer.updateSavedTime();
 
     /* Save this map's state into a snapshot. */
     // Save the header data.
@@ -114,7 +112,7 @@ void TileMap::save(const std::string& fileName)
         Serialize::toFile((Paths::BASE_PATH + fileName), mapSnapshot)};
     if (saveSuccessful) {
         // Print the time taken.
-        double timeTaken{timer.getDeltaSeconds(false)};
+        double timeTaken{timer.getTime()};
         LOG_INFO("Map saved in %.6fs.", timeTaken);
     }
     else {

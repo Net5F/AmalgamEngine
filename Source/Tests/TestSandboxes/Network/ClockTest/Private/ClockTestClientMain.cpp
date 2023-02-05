@@ -47,8 +47,7 @@ int main(int argc, char* argv[])
 
     /* Wait for 5s to let the connection settle. */
     Timer timer;
-    timer.updateSavedTime();
-    while (timer.getDeltaSeconds(false) < 5) {
+    while (timer.getTime() < 5) {
         SDL_Delay(1);
     }
 
@@ -63,8 +62,8 @@ int main(int argc, char* argv[])
     }
 
     // Wait for the desired time.
-    timer.updateSavedTime();
-    while (timer.getDeltaSeconds(false) < 1200) {
+    timer.reset();
+    while (timer.getTime() < 1200) {
         SDL_Delay(1);
     }
 
@@ -75,7 +74,7 @@ int main(int argc, char* argv[])
         LOG_INFO("Failed to send all bytes.");
         return 5;
     }
-    LOG_INFO("Sent end byte. Time passed: ~%.8f", timer.getDeltaSeconds(true));
+    LOG_INFO("Sent end byte. Time passed: ~%.8f", timer.getTimeAndReset());
 
     return 0;
 }

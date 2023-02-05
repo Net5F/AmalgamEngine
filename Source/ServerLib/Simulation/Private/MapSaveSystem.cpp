@@ -9,17 +9,17 @@ namespace Server
 
 MapSaveSystem::MapSaveSystem(World& inWorld)
 : world{inWorld}
+, saveTimer{}
 {
-    saveTimer.updateSavedTime();
 }
 
 void MapSaveSystem::saveMapIfNecessary()
 {
     // If enough time has passed, save the map state to TileMap.bin.
-    if (saveTimer.getDeltaSeconds(false) >= Config::MAP_SAVE_PERIOD_S) {
+    if (saveTimer.getTime() >= Config::MAP_SAVE_PERIOD_S) {
         world.tileMap.save("TileMap.bin");
 
-        saveTimer.updateSavedTime();
+        saveTimer.reset();
     }
 }
 
