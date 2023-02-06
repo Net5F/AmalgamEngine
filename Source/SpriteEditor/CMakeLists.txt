@@ -5,7 +5,7 @@ message(STATUS "Configuring Amalgam Engine SpriteEditor")
 ###############################################################################
 # Configure Step
 ###############################################################################
-add_executable(SpriteEditor "")
+add_executable(SpriteEditor WIN32 "")
 
 target_include_directories(SpriteEditor
     PRIVATE
