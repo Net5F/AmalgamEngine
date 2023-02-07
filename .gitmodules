@@ -7,9 +7,6 @@
 [submodule "Libraries/CircularBuffer"]
 	path = Libraries/CircularBuffer
 	url = git@github.com:Net5F/CircularBuffer.git
-[submodule "Libraries/Catch2"]
-	path = Libraries/Catch2
-	url = git@github.com:catchorg/Catch2.git
 [submodule "Libraries/SDL_net"]
 	path = Libraries/SDL_net
 	url = git@github.com:SDL-mirror/SDL_net.git
