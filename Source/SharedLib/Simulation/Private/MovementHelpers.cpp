@@ -3,7 +3,7 @@
 #include "PreviousPosition.h"
 #include "Velocity.h"
 #include "Rotation.h"
-#include "Boundingbox.h"
+#include "BoundingBox.h"
 #include "SharedConfig.h"
 #include "Ignore.h"
 
