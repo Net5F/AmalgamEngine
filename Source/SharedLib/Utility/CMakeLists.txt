@@ -25,7 +25,7 @@ target_sources(SharedLib
         Public/PeriodicCaller.h
         Public/Serialize.h
         Public/SerializeBuffer.h
-        Public/SpriteDatabase.h
+        Public/SpriteDataBase.h
         Public/Timer.h
         Public/Transforms.h
 )
