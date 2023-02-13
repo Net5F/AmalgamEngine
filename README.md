@@ -59,7 +59,7 @@ cmake --install Build/Windows/Release --prefix Packages/Windows
 ```
 where 'Build/Windows/Release' is your desired build to package, and 'Packages/Windows' is your desired output directory.
 
-On Windows, you can use Visual Studio's developer terminal (`Tools` -> `Command Line` -> `Developer Command Prompt`) for access to CMake.
+On Windows, you can use Visual Studio's developer terminal (`Tools` -> `Command Line` -> `Developer Command Prompt`) for easy access to CMake.
 
 ## Contributing
 ### Bugs
