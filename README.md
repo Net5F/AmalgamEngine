@@ -1,10 +1,12 @@
 
 ## The Amalgam Engine - An engine for easily creating virtual worlds
 
+For more information, visit [worlds.place](https://worlds.place/).
+
 If you'd like to get involved, please join the Discord: https://discord.gg/EA2Sg3ar74
 
 ## Vision
-(Not all implemented yet, see Status section)
+(Not all implemented yet, see [Roadmap](https://worlds.place/roadmap.html))
 * Easily create your own isometric, sprite-based virtual world.
 * Start from a template and have a full working world, including client, server, text chat, and account management.
 * All needed networking is built-in, and adding new messages for your custom features is extremely easy.
@@ -12,45 +14,14 @@ If you'd like to get involved, please join the Discord: https://discord.gg/EA2Sg
 * Targeted for use on relatively low-spec hardware (tested on a $30/mo rented server).
 * Live, in-world map editing. Use permissions to let players build things, or restrict it to your developers.
 
-## Worlds
+## Template Projects
 ### Repose
-TODO: Add title screen and in-world screenshots.
-
 Repose is our first template project. If you'd like to make a world, you can fork Repose and use it as a fully-functioning starting point.
 
 [Check out the project and download the latest playable release here.](https://github.com/Net5F/Repose)
 
-## Status
-### Current
-- [x] Implement, load test, and optimize the netcode.
-- [x] Implement tile maps, iso rendering, and figure out architecture between the sim/rendering/UI.
-- [x] Build minimal UI library.
-- [x] Build sprite editor. (lets you add 3d bounding boxes to sprites for draw order and collision calcs)
-- [x] Import sprite bounds data into engine.
-- [x] Implement world map persistence.
-- [x] Implement chunk and tile update streaming (live, in-world map editing).
-- [x] Implement spatial partitioning grid for entities.
-- [x] Implement interest management system.
-- [x] Refactor UI library (spatial grid, nice event propagation).
-- [x] Implement world editing UI.
-- [x] Implement collision (simple placeholder).
-- [x] Further netcode load testing (get ready for users).
-- [x] Split single repo into engine and project repos.
-- [x] Build simple template project.
-- [x] Simplify build/packaging process.
-- [ ] MVP features are done, template project is finished.
-
-### Future
-- [ ] Implement world interactions, decide on whether scripting is in-world or offline.
-- [ ] Implement object database, inventory, picking up objects.
-- [ ] Implement NPCs, potential in-world AI scripting.
-- [ ] Implement text chat, chat server.
-- [ ] Implement sprite animation.
-- [ ] Implement login server, account db, account validation.
-- [ ] Implement web server, account creation.
-
 ## Building
-Note: You rarely need to build the engine by itself, this section just provides canonical instructions. Instead, see the Worlds section.
+Note: You rarely need to build the engine by itself, this section just provides canonical instructions. Instead, see the Template Projects section.
 
 ### Windows
 #### Visual Studio (MSVC)
@@ -79,7 +50,7 @@ Note: This is only tested on Ubuntu 20.04. If you have experience in multi-distr
 1. `ninja all`
 
 ## Packaging
-Note: You rarely need to package the engine by itself, this section just provides canonical instructions. Instead, see the Worlds section.
+Note: You rarely need to package the engine by itself, this section just provides canonical instructions. Instead, see the Template Projects section.
 
 To package the applications in a way that can be shared, first run the desired build. Then, run:
 ```
@@ -88,7 +59,7 @@ cmake --install Build/Windows/Release --prefix Packages/Windows
 ```
 where 'Build/Windows/Release' is your desired build to package, and 'Packages/Windows' is your desired output directory.
 
-This is easily done on Windows using Visual Studio's developer terminal (`Tools` -> `Command Line` -> `Developer Command Prompt`).
+On Windows, you can use Visual Studio's developer terminal (`Tools` -> `Command Line` -> `Developer Command Prompt`) for access to CMake.
 
 ## Contributing
 ### Bugs
