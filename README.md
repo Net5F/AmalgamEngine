@@ -66,6 +66,6 @@ On Windows, you can use Visual Studio's developer terminal (`Tools` -> `Command 
 Bug reports and fixes are always welcome. Feel free to open an issue or submit a PR.
 
 ### Features
-**Unsolicited feature PRs will not be reviewed. Please ask about the feature plan before working on a feature.**
+Contributions are very welcome! Feel free to work on features or bugfixes and submit PRs, they'll all be promptly reviewed.
 
-Collaboration is very welcome! That being said, there is a fairly solid vision for the near-future of this engine. If you would like to contribute expertise or take ownership over a feature on [the roadmap](https://worlds.place/roadmap.html), please [join the discord](https://discord.gg/EA2Sg3ar74).
+There's a fairly solid vision for the near-future of this engine. If you would like to work on a larger feature, please make sure it's on [the roadmap](https://worlds.place/roadmap.html), or [join the discord](https://discord.gg/EA2Sg3ar74) and discuss it before getting started.
