@@ -68,4 +68,4 @@ Bug reports and fixes are always welcome. Feel free to open an issue or submit a
 ### Features
 **Unsolicited feature PRs will not be reviewed. Please ask about the feature plan before working on a feature.**
 
-Collaboration is very welcome! That being said, there is a fairly solid vision for the near-future of this engine. If you would like to contribute expertise or take ownership over a feature on the roadmap, please make a post [on the discussion board](https://github.com/Net5F/AmalgamEngine/discussions/categories/feature-development).
+Collaboration is very welcome! That being said, there is a fairly solid vision for the near-future of this engine. If you would like to contribute expertise or take ownership over a feature on the roadmap, please [join the discord](https://discord.gg/EA2Sg3ar74).
