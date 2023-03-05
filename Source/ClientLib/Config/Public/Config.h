@@ -83,6 +83,9 @@ public:
           2. If < ~.010, our low CPU usage might cause Windows to put us into
              energy saving mode, causing visual jitter. */
     static constexpr double SLEEP_MINIMUM_TIME_S = .010;
+
+    /** If true, zooming with the mouse scroll wheel will be enabled. */
+    static constexpr bool ENABLE_MOUSE_ZOOM{false};
 };
 
 } // End namespace Client

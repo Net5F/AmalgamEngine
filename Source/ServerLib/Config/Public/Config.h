@@ -4,6 +4,7 @@
 #if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
 #include "Override/ServerConfig.h"
 #else
+#include "SpawnStrategy.h"
 #include "SharedConfig.h"
 #include "ConstexprTools.h"
 #include <SDL_stdinc.h>
