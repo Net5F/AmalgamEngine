@@ -6,6 +6,7 @@
 #else
 #include "SharedConfig.h"
 #include "ConstexprTools.h"
+#include "SpawnStrategy.h"
 #include <SDL_stdinc.h>
 #include <string>
 
