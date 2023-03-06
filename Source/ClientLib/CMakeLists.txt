@@ -18,8 +18,8 @@ target_include_directories(ClientLib
 
 # Inherit Shared's precompiled header.
 # CMake causes issues when using precompiled headers with GCC on macOS,
-# so precompiled headers as disabled for that target.
-if (NOT APPLE OR CMAKE_C_COMPILER_ID MATCHES "Clang|AppleClang")
+# so precompiled headers are disabled for that target.
+if ((NOT APPLE) OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang"))
     target_precompile_headers(ClientLib REUSE_FROM SharedLib)
 endif()
 
