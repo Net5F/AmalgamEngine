@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MessageType.h"
+#include "SharedConfig.h"
 #include <vector>
 
 namespace AM
