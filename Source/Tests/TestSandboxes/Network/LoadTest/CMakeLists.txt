@@ -34,7 +34,11 @@ target_include_directories(LoadTestClient
 )
 
 # Inherit Shared's precompiled header.
-target_precompile_headers(LoadTestClient REUSE_FROM SharedLib)
+# CMake causes issues when using precompiled headers with GCC on macOS,
+# so precompiled headers are disabled for that target.
+if ((NOT APPLE) OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang"))
+    target_precompile_headers(LoadTestClient REUSE_FROM SharedLib)
+endif()
 
 target_link_libraries(LoadTestClient
     PRIVATE
