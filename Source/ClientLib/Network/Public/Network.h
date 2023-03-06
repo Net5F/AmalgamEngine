@@ -161,12 +161,12 @@ private:
 
     std::shared_ptr<Peer> server;
 
+    /** Used to dispatch events from the network to the simulation. */
+    EventDispatcher eventDispatcher;
+
     /** Deserializes messages, does any network-layer message handling, and
         pushes messages into the eventDispatcher. */
     MessageProcessor messageProcessor;
-
-    /** Used to dispatch events from the network to the simulation. */
-    EventDispatcher eventDispatcher;
 
     /** The adjustment that the server has told us to apply to the tick. */
     std::atomic<int> tickAdjustment;

@@ -16,8 +16,8 @@ namespace Client
 {
 Network::Network()
 : server{nullptr}
-, messageProcessor{eventDispatcher}
 , eventDispatcher{}
+, messageProcessor{eventDispatcher}
 , tickAdjustment{0}
 , adjustmentIteration{0}
 , isApplyingTickAdjustment{false}

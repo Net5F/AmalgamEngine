@@ -111,12 +111,12 @@ private:
     /** Used to lock access to the clientMap. */
     TracySharedLockable(std::shared_mutex, clientMapMutex);
 
+    /** Used to dispatch events from the network to the simulation. */
+    EventDispatcher eventDispatcher;
+
     /** Deserializes messages, does any network-layer message handling, and
         passes messages down to the simulation. */
     MessageProcessor messageProcessor;
-
-    /** Used to dispatch events from the network to the simulation. */
-    EventDispatcher eventDispatcher;
 
     /** Handles asynchronous client activity. */
     ClientHandler clientHandler;

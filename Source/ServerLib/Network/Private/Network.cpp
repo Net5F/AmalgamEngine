@@ -17,10 +17,11 @@ namespace Server
 {
 
 Network::Network()
-: messageProcessor(eventDispatcher)
-, clientHandler(*this, eventDispatcher, messageProcessor)
-, ticksSinceNetstatsLog(0)
-, currentTickPtr(nullptr)
+: eventDispatcher{}
+, messageProcessor{eventDispatcher}
+, clientHandler{*this, eventDispatcher, messageProcessor}
+, ticksSinceNetstatsLog{0}
+, currentTickPtr{nullptr}
 {
 }
 
