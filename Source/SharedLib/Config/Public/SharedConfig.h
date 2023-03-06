@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 // Use the project's SharedConfig, if one is provided.
 #if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
 #include "Override/SharedConfig.h"
