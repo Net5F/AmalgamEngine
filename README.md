@@ -56,7 +56,7 @@ Note: AmalgamEngine requires GCC to build on macOS. Clang / Apple Clang does not
 1. Use the Homebrew package manager to install dependencies: `brew install gcc make cmake ninja sdl2 sdl2_image sdl2_mixer sdl2_ttf sdl2_gfx sdl2_net`
 1. (From the base of the repo) `mkdir -p Build/macOS/Release`
 1. `cd Build/macOS/Release`
-1. `CC=gcc-XX CXX=g++-XX cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../../../`. Replace the `XX` in `gcc-XX` and `g++-XX` with the version of GCC that you installed with Homebrew. This is important, as using `gcc` without a version number will alias to `clang`.
+1. `CC=gcc-NN CXX=g++-NN cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../../../`. Replace the `NN` in `gcc-NN` and `g++-NN` with the version of GCC that you installed with Homebrew. This is important, as using `gcc` without a version number will alias to `clang`.
    1. ~~You can optionally add `-DAM_BUILD_SPRITE_EDITOR` to build the sprite editor.~~ Sprite editor doesn't currently build on macOS due to GCC not being able to build with Apple SDK headers which use certain Objective C extensions.
 1. `ninja all`
 
