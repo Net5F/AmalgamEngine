@@ -17,7 +17,11 @@ target_include_directories(ServerLib
 )
 
 # Inherit Shared's precompiled header.
-target_precompile_headers(ServerLib REUSE_FROM SharedLib)
+# CMake causes issues when using precompiled headers with GCC on MacOS,
+# so precompiled headers as disabled for that target.
+if (NOT APPLE OR CMAKE_C_COMPILER_ID MATCHES "Clang|AppleClang")
+    target_precompile_headers(ServerLib REUSE_FROM SharedLib)
+endif()
 
 target_link_libraries(ServerLib
     PUBLIC

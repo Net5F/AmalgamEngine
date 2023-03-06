@@ -38,4 +38,8 @@ target_include_directories(SharedLib
 )
 
 # Build our precompiled header.
-target_precompile_headers(SharedLib PRIVATE Private/pch.h)
+# CMake causes issues when using precompiled headers with GCC on MacOS,
+# so precompiled headers as disabled for that target.
+if (NOT APPLE OR CMAKE_C_COMPILER_ID MATCHES "Clang|AppleClang")
+    target_precompile_headers(SharedLib PRIVATE Private/pch.h)
+endif()
