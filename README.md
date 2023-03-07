@@ -6,7 +6,7 @@ For more information, visit [worlds.place](https://worlds.place/).
 If you'd like to get involved, please join the Discord: https://discord.gg/EA2Sg3ar74
 
 ## Vision
-(Not all implemented yet, see [Roadmap](https://worlds.place/roadmap.html))
+(Not all implemented yet, see [Roadmap](https://worlds.place/roadmap.html) or more detailed [Task Board](https://trello.com/b/8Z8VoAiX/amalgam-engine-tasks))
 * Easily create your own isometric, sprite-based virtual world.
 * Start from a template and have a full working world, including client, server, text chat, and account management.
 * All needed networking is built-in, and adding new messages for your custom features is extremely easy.
