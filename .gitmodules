@@ -31,3 +31,6 @@
 [submodule "Libraries/lz4"]
 	path = Libraries/lz4
 	url = git@github.com:Net5F/lz4.git
+[submodule "Libraries/jthread"]
+	path = Libraries/jthread
+	url = https://github.com/StirlingLabs/jthread.git

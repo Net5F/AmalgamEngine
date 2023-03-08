@@ -38,6 +38,12 @@ target_link_libraries(ClientLib
         SharedLib
 )
 
+# Some compilers (mainly Clang) may not support jthread yet.
+# When using Clang, this provides an implementation of jthread.
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|AppleClang")
+    target_link_libraries(ClientLib PUBLIC jthread)
+endif()
+
 # Compile with C++20.
 target_compile_features(ClientLib PRIVATE cxx_std_20)
 set_target_properties(ClientLib PROPERTIES CXX_EXTENSIONS OFF)
