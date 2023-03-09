@@ -120,32 +120,36 @@ public:
     // Signal Sinks
     //-------------------------------------------------------------------------
     /** A sprite sheet was added to the model. */
-    entt::sink<void(unsigned int sheetID, const SpriteSheet& sheet)> sheetAdded;
+    entt::sink<entt::sigh<void(unsigned int sheetID, const SpriteSheet& sheet)>>
+        sheetAdded;
 
     /** A sprite sheet was removed from the model. */
-    entt::sink<void(unsigned int sheetID)> sheetRemoved;
+    entt::sink<entt::sigh<void(unsigned int sheetID)>> sheetRemoved;
 
     /** A sprite was added to the model. */
-    entt::sink<void(unsigned int spriteID, const Sprite& sprite)> spriteAdded;
+    entt::sink<entt::sigh<void(unsigned int spriteID, const Sprite& sprite)>>
+        spriteAdded;
 
     /** A sprite was removed from the model. */
-    entt::sink<void(unsigned int spriteID)> spriteRemoved;
+    entt::sink<entt::sigh<void(unsigned int spriteID)>> spriteRemoved;
 
     /** The active sprite has changed to a new sprite. */
-    entt::sink<void(unsigned int newActiveSpriteID,
-                    const Sprite& newActiveSprite)>
+    entt::sink<entt::sigh<void(unsigned int newActiveSpriteID,
+                               const Sprite& newActiveSprite)>>
         activeSpriteChanged;
 
     /** A sprite's display name has changed. */
-    entt::sink<void(unsigned int spriteID, const std::string& newDisplayName)>
+    entt::sink<entt::sigh<void(unsigned int spriteID,
+                               const std::string& newDisplayName)>>
         spriteDisplayNameChanged;
 
     /** A sprite's "has bounding box" field has changed. */
-    entt::sink<void(unsigned int spriteID, bool hasBoundingBox)>
+    entt::sink<entt::sigh<void(unsigned int spriteID, bool hasBoundingBox)>>
         spriteHasBoundingBoxChanged;
 
     /** A sprite's bounding box has changed. */
-    entt::sink<void(unsigned int spriteID, const BoundingBox& newModelBounds)>
+    entt::sink<entt::sigh<void(unsigned int spriteID,
+                               const BoundingBox& newModelBounds)>>
         spriteModelBoundsChanged;
 
 private:
