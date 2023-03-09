@@ -6,7 +6,7 @@ For more information, visit [worlds.place](https://worlds.place/).
 If you'd like to get involved, please join the Discord: https://discord.gg/EA2Sg3ar74
 
 ## Vision
-(Not all implemented yet, see [Roadmap](https://worlds.place/roadmap.html))
+(Not all implemented yet, see [Roadmap](https://worlds.place/roadmap.html) or more detailed [Task Board](https://trello.com/b/8Z8VoAiX/amalgam-engine-tasks))
 * Easily create your own isometric, sprite-based virtual world.
 * Start from a template and have a full working world, including client, server, text chat, and account management.
 * All needed networking is built-in, and adding new messages for your custom features is extremely easy.
@@ -73,6 +73,6 @@ where 'Build/Windows/Release' is your desired build to package, and 'Packages/Wi
 On Windows, you can use Visual Studio's developer terminal (`Tools` -> `Command Line` -> `Developer Command Prompt`) for easy access to CMake.
 
 ## Contributing
-Contributions are very welcome! Feel free to work on features or bugfixes and submit PRs, they'll all be promptly reviewed.
+Contributions are very welcome! Feel free to work on features or bugfixes and submit PRs, they'll all be promptly reviewed. If you're looking for ways to contribute, check the [Task Board](https://trello.com/b/8Z8VoAiX/amalgam-engine-tasks).
 
 There's a fairly solid vision for the near-future of this engine. If you would like to work on a larger feature, please make sure it's on [the roadmap](https://worlds.place/roadmap.html), or [join the discord](https://discord.gg/EA2Sg3ar74) and discuss it before getting started.
