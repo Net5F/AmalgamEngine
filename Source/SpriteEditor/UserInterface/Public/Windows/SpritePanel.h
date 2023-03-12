@@ -9,8 +9,6 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace SpriteEditor
 {
 class SpriteDataModel;
@@ -26,7 +24,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpritePanel(AssetCache& inAssetCache, SpriteDataModel& inSpriteDataModel);
+    SpritePanel(SpriteDataModel& inSpriteDataModel);
 
 private:
     /**
@@ -44,9 +42,6 @@ private:
      */
     void onSpriteDisplayNameChanged(unsigned int spriteID,
                                     const std::string& newDisplayName);
-
-    /** Used to load the active sprite's texture. */
-    AssetCache& assetCache;
 
     /** Used to get the current working dir when displaying the thumbnails. */
     SpriteDataModel& spriteDataModel;

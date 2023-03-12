@@ -1,16 +1,15 @@
 #include "TitleScreen.h"
 #include "UserInterface.h"
-#include "AssetCache.h"
 #include "AUI/Core.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
-TitleScreen::TitleScreen(UserInterface& inUserInterface, AssetCache& assetCache,
+TitleScreen::TitleScreen(UserInterface& inUserInterface,
                          SpriteDataModel& inSpriteDataModel)
 : AUI::Screen("TitleScreen")
-, titleWindow{inUserInterface, assetCache, inSpriteDataModel}
+, titleWindow{inUserInterface, inSpriteDataModel}
 {
     // Add our windows so they're included in rendering, etc.
     windows.push_back(titleWindow);

@@ -2,7 +2,6 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
-#include "AssetCache.h"
 #include "Paths.h"
 #include "Ignore.h"
 
@@ -10,10 +9,8 @@ namespace AM
 {
 namespace SpriteEditor
 {
-SpritePanel::SpritePanel(AssetCache& inAssetCache,
-                         SpriteDataModel& inSpriteDataModel)
+SpritePanel::SpritePanel(SpriteDataModel& inSpriteDataModel)
 : AUI::Window({-8, 732, 1936, 352}, "SpritePanel")
-, assetCache{inAssetCache}
 , spriteDataModel{inSpriteDataModel}
 , backgroundImage({0, 0, 1936, 352}, "SpritePanelBackground")
 , spriteContainer({191, 24, 1737, 324}, "SpriteContainer")
@@ -24,9 +21,7 @@ SpritePanel::SpritePanel(AssetCache& inAssetCache,
 
     /* Background image */
     backgroundImage.addResolution(
-        {1600, 900},
-        assetCache.loadTexture(Paths::TEXTURE_DIR
-                               + "SpritePanel/Background_1600.png"));
+        {1600, 900}, (Paths::TEXTURE_DIR + "SpritePanel/Background_1600.png"));
 
     /* Container */
     spriteContainer.setNumColumns(10);
@@ -46,7 +41,7 @@ void SpritePanel::onSpriteAdded(unsigned int spriteID, const Sprite& sprite)
 {
     // Construct the new sprite thumbnail.
     std::unique_ptr<AUI::Widget> thumbnailPtr{
-        std::make_unique<MainThumbnail>(assetCache, "SpritePanelThumbnail")};
+        std::make_unique<MainThumbnail>("SpritePanelThumbnail")};
     MainThumbnail& thumbnail{static_cast<MainThumbnail&>(*thumbnailPtr)};
     thumbnail.setText(sprite.displayName);
     thumbnail.setIsSelectable(false);
@@ -54,8 +49,8 @@ void SpritePanel::onSpriteAdded(unsigned int spriteID, const Sprite& sprite)
     // Load the sprite's image.
     std::string imagePath{spriteDataModel.getWorkingTexturesDir()};
     imagePath += sprite.parentSpriteSheetPath;
-    thumbnail.thumbnailImage.addResolution(
-        {1280, 720}, assetCache.loadTexture(imagePath), sprite.textureExtent);
+    thumbnail.thumbnailImage.addResolution({1280, 720}, imagePath,
+                                           sprite.textureExtent);
 
     // Add a callback to deactivate all other thumbnails when one is activated.
     thumbnail.setOnActivated([this, spriteID](AUI::Thumbnail* selectedThumb) {

@@ -8,7 +8,6 @@
 
 namespace AM
 {
-class AssetCache;
 struct BoundingBox;
 
 namespace SpriteEditor
@@ -26,7 +25,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    PropertiesPanel(AssetCache& assetCache, SpriteDataModel& inSpriteDataModel);
+    PropertiesPanel(SpriteDataModel& inSpriteDataModel);
 
     //-------------------------------------------------------------------------
     // Public child widgets

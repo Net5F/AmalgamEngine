@@ -3,7 +3,6 @@
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
 #include "Sprite.h"
-#include "AssetCache.h"
 #include "Paths.h"
 #include "Camera.h"
 #include "Transforms.h"
@@ -19,25 +18,24 @@ namespace AM
 {
 namespace SpriteEditor
 {
-PropertiesPanel::PropertiesPanel(AssetCache& assetCache,
-                                 SpriteDataModel& inSpriteDataModel)
+PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
 : AUI::Window({1605, 0, 315, 502}, "PropertiesPanel")
 , nameLabel({36, 24, 65, 28}, "NameLabel")
-, nameInput(assetCache, {36, 56, 255, 38}, "NameInput")
+, nameInput({36, 56, 255, 38}, "NameInput")
 , hasBoundingBoxLabel({36, 126, 210, 38}, "HasBBLabel")
 , hasBoundingBoxInput({269, 134, 22, 22}, "HasBBInput")
 , minXLabel({36, 176, 110, 38}, "MinXLabel")
-, minXInput(assetCache, {162, 176, 129, 38}, "MinXInput")
+, minXInput({162, 176, 129, 38}, "MinXInput")
 , minYLabel({36, 226, 110, 38}, "MinYLabel")
-, minYInput(assetCache, {162, 226, 129, 38}, "MinYInput")
+, minYInput({162, 226, 129, 38}, "MinYInput")
 , minZLabel({36, 276, 110, 38}, "MinZLabel")
-, minZInput(assetCache, {162, 276, 129, 38}, "MinZInput")
+, minZInput({162, 276, 129, 38}, "MinZInput")
 , maxXLabel({36, 326, 110, 38}, "MaxXLabel")
-, maxXInput(assetCache, {162, 326, 129, 38}, "MaxXInput")
+, maxXInput({162, 326, 129, 38}, "MaxXInput")
 , maxYLabel({36, 376, 110, 38}, "MaxYLabel")
-, maxYInput(assetCache, {162, 376, 129, 38}, "MaxYInput")
+, maxYInput({162, 376, 129, 38}, "MaxYInput")
 , maxZLabel({36, 426, 110, 38}, "MaxZLabel")
-, maxZInput(assetCache, {162, 426, 129, 38}, "MaxZInput")
+, maxZInput({162, 426, 129, 38}, "MaxZInput")
 , spriteDataModel{inSpriteDataModel}
 , activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
 , committedMinX{0.0}
@@ -69,9 +67,7 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache,
 
     /* Background image */
     backgroundImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR
-                               + "PropertiesPanel/Background.png"),
+        {1920, 1080}, (Paths::TEXTURE_DIR + "PropertiesPanel/Background.png"),
         {0, 4, 315, 502});
 
     /* Display name entry. */
@@ -92,11 +88,9 @@ PropertiesPanel::PropertiesPanel(AssetCache& assetCache,
     hasBoundingBoxLabel.setText("Has bounding box");
 
     hasBoundingBoxInput.uncheckedImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "Checkbox/Unchecked.png"));
+        {1920, 1080}, (Paths::TEXTURE_DIR + "Checkbox/Unchecked.png"));
     hasBoundingBoxInput.checkedImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "Checkbox/Checked.png"));
+        {1920, 1080}, (Paths::TEXTURE_DIR + "Checkbox/Checked.png"));
     hasBoundingBoxInput.setOnChecked([this]() { saveHasBoundingBox(); });
     hasBoundingBoxInput.setOnUnchecked([this]() { saveHasBoundingBox(); });
 

@@ -8,8 +8,6 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace SpriteEditor
 {
 class SpriteDataModel;
@@ -21,7 +19,7 @@ class SpriteDataModel;
 class AddSheetDialog : public AUI::Window
 {
 public:
-    AddSheetDialog(AssetCache& assetCache, SpriteDataModel& inSpriteDataModel);
+    AddSheetDialog(SpriteDataModel& inSpriteDataModel);
 
     virtual ~AddSheetDialog() = default;
 

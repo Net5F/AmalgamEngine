@@ -5,8 +5,6 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace SpriteEditor
 {
 class UserInterface;
@@ -18,7 +16,7 @@ class SpriteDataModel;
 class TitleScreen : public AUI::Screen
 {
 public:
-    TitleScreen(UserInterface& inUserInterface, AssetCache& assetCache,
+    TitleScreen(UserInterface& inUserInterface,
                 SpriteDataModel& inSpriteDataModel);
 
     void render() override;

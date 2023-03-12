@@ -3,7 +3,7 @@
 #include "AUI/Screen.h"
 #include "AUI/Button.h"
 #include "AUI/ConfirmationDialog.h"
-#include "SpriteSheetPanel.h"
+#include "LibraryWindow.h"
 #include "SpriteEditStage.h"
 #include "SpritePanel.h"
 #include "SaveButtonWindow.h"
@@ -13,8 +13,6 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace SpriteEditor
 {
 class SpriteDataModel;
@@ -25,7 +23,7 @@ class SpriteDataModel;
 class MainScreen : public AUI::Screen
 {
 public:
-    MainScreen(AssetCache& inAssetCache, SpriteDataModel& inSpriteDataModel);
+    MainScreen(SpriteDataModel& inSpriteDataModel);
 
     /**
      * Opens a confirmation dialog.
@@ -59,8 +57,8 @@ private:
     //-------------------------------------------------------------------------
     // Windows
     //-------------------------------------------------------------------------
-    /** The left-side panel for managing sprite texture sheets. */
-    SpriteSheetPanel spriteSheetPanel;
+    /** The left-side window for managing sprite sheets, sprites, etc. */
+    LibraryWindow libraryWindow;
 
     /** The center stage for editing sprite bounding boxes. */
     SpriteEditStage spriteEditStage;

@@ -6,11 +6,11 @@ target_sources(SpriteEditor
         Private/Widgets/MainThumbnail.cpp
         Private/Widgets/TitleButton.cpp
         Private/Windows/AddSheetDialog.cpp
+        Private/Windows/LibraryWindow.cpp
         Private/Windows/PropertiesPanel.cpp
         Private/Windows/SaveButtonWindow.cpp
         Private/Windows/SpriteEditStage.cpp
         Private/Windows/SpritePanel.cpp
-        Private/Windows/SpriteSheetPanel.cpp
         Private/Windows/TitleWindow.cpp
         Private/MainScreen.cpp
         Private/TitleScreen.cpp
@@ -22,11 +22,11 @@ target_sources(SpriteEditor
         Public/Widgets/MainThumbnail.h
         Public/Widgets/TitleButton.h
         Public/Windows/AddSheetDialog.h
+        Public/Windows/LibraryWindow.h
         Public/Windows/PropertiesPanel.h
         Public/Windows/SaveButtonWindow.h
         Public/Windows/SpriteEditStage.h
         Public/Windows/SpritePanel.h
-        Public/Windows/SpriteSheetPanel.h
         Public/Windows/TitleWindow.h
         Public/MainScreen.h
         Public/TitleScreen.h

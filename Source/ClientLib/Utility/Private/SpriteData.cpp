@@ -66,7 +66,7 @@ void SpriteData::parseJson(nlohmann::json& json, AssetCache& assetCache)
 
             // For every sprite in the sheet.
             for (auto& spriteJson : sheetJson.value()["sprites"].items()) {
-                parseSprite(spriteJson.value(), texture);
+                parseSprite(spriteJson.value(), texturePath, texture);
             }
         }
     } catch (nlohmann::json::type_error& e) {
@@ -75,13 +75,15 @@ void SpriteData::parseJson(nlohmann::json& json, AssetCache& assetCache)
 }
 
 void SpriteData::parseSprite(const nlohmann::json& spriteJson,
+                             const std::string& spriteSheetRelPath,
                              const TextureHandle& texture)
 {
     // Get the numeric identifier.
     int numericID{spriteJson.at("numericID")};
 
-    // Add the parent sprite sheet's texture.
+    // Add the parent sprite sheet's path and texture.
     SpriteRenderData& spriteRenderData{renderData[numericID]};
+    spriteRenderData.spriteSheetRelPath = spriteSheetRelPath;
     spriteRenderData.texture = texture;
 
     // Add this sprite's extent within the sprite sheet.

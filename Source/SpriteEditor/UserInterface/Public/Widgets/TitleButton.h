@@ -4,8 +4,6 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace SpriteEditor
 {
 /**
@@ -14,8 +12,7 @@ namespace SpriteEditor
 class TitleButton : public AUI::Button
 {
 public:
-    TitleButton(AssetCache& assetCache, const SDL_Rect& inScreenExtent,
-                const std::string& inText,
+    TitleButton(const SDL_Rect& inScreenExtent, const std::string& inText,
                 const std::string& inDebugName = "TitleButton");
 };
 

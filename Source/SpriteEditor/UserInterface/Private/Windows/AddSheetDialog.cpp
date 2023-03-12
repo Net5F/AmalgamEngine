@@ -2,7 +2,6 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
-#include "AssetCache.h"
 #include "Paths.h"
 #include "Ignore.h"
 
@@ -10,23 +9,22 @@ namespace AM
 {
 namespace SpriteEditor
 {
-AddSheetDialog::AddSheetDialog(AssetCache& assetCache,
-                               SpriteDataModel& inSpriteDataModel)
+AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
 : AUI::Window({0, 0, 1920, 1080}, "AddSheetDialog")
 , backgroundImage({0, 0, logicalExtent.w, logicalExtent.h})
 , headerText({747, 228, 280, 60})
 , pathLabel({747, 300, 151, 38})
-, pathInput(assetCache, {919, 300, 180, 38})
+, pathInput({919, 300, 180, 38})
 , widthLabel({747, 350, 151, 38})
-, widthInput(assetCache, {919, 350, 180, 38})
+, widthInput({919, 350, 180, 38})
 , heightLabel({747, 400, 151, 38})
-, heightInput(assetCache, {919, 400, 180, 38})
+, heightInput({919, 400, 180, 38})
 , offsetLabel({747, 450, 151, 38})
-, offsetInput(assetCache, {919, 450, 180, 38})
+, offsetInput({919, 450, 180, 38})
 , nameLabel({747, 500, 151, 38})
-, nameInput(assetCache, {919, 500, 180, 38})
-, addButton(assetCache, {1099, 640, 123, 56}, "ADD")
-, cancelButton(assetCache, {958, 640, 123, 56}, "CANCEL")
+, nameInput({919, 500, 180, 38})
+, addButton({1099, 640, 123, 56}, "ADD")
+, cancelButton({958, 640, 123, 56}, "CANCEL")
 , spriteDataModel{inSpriteDataModel}
 , errorText({748, 556, 466, 60})
 {
@@ -49,9 +47,7 @@ AddSheetDialog::AddSheetDialog(AssetCache& assetCache,
 
     /* Background image. */
     backgroundImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR
-                               + "Dialogs/AddSheetBackground.png"));
+        {1920, 1080}, (Paths::TEXTURE_DIR + "Dialogs/AddSheetBackground.png"));
 
     /* Header text. */
     headerText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 32);

@@ -7,8 +7,6 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace SpriteEditor
 {
 struct Sprite;
@@ -24,8 +22,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteEditStage(AssetCache& inAssetCache,
-                    SpriteDataModel& inSpriteDataModel);
+    SpriteEditStage(SpriteDataModel& inSpriteDataModel);
 
 private:
     /**
@@ -39,9 +36,6 @@ private:
      * the stage to its default state.
      */
     void onSpriteRemoved(unsigned int spriteID);
-
-    /** Used to load the active sprite's texture. */
-    AssetCache& assetCache;
 
     /** Used to get the current working dir when displaying the sprite. */
     SpriteDataModel& spriteDataModel;

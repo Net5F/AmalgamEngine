@@ -1,7 +1,6 @@
 #include "SpriteEditStage.h"
 #include "MainScreen.h"
 #include "Sprite.h"
-#include "AssetCache.h"
 #include "SpriteDataModel.h"
 #include "Paths.h"
 #include "Ignore.h"
@@ -11,10 +10,8 @@ namespace AM
 {
 namespace SpriteEditor
 {
-SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache,
-                                 SpriteDataModel& inSpriteDataModel)
+SpriteEditStage::SpriteEditStage(SpriteDataModel& inSpriteDataModel)
 : AUI::Window({389, 60, 1142, 684}, "SpriteEditStage")
-, assetCache{inAssetCache}
 , spriteDataModel{inSpriteDataModel}
 , activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
 , checkerboardImage({0, 0, 100, 100})
@@ -29,8 +26,7 @@ SpriteEditStage::SpriteEditStage(AssetCache& inAssetCache,
     /* Active sprite and checkerboard background. */
     checkerboardImage.addResolution(
         {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR
-                               + "SpriteEditStage/Checkerboard.png"));
+        (Paths::TEXTURE_DIR + "SpriteEditStage/Checkerboard.png"));
     checkerboardImage.setIsVisible(false);
     spriteImage.setIsVisible(false);
 
@@ -53,8 +49,7 @@ void SpriteEditStage::onActiveSpriteChanged(unsigned int newActiveSpriteID,
     spriteImage.clearTextures();
     std::string imagePath{spriteDataModel.getWorkingTexturesDir()};
     imagePath += newActiveSprite.parentSpriteSheetPath;
-    spriteImage.addResolution(AUI::Core::getLogicalScreenSize(),
-                              assetCache.loadTexture(imagePath),
+    spriteImage.addResolution(AUI::Core::getLogicalScreenSize(), imagePath,
                               newActiveSprite.textureExtent);
 
     // Calc the centered sprite position.
