@@ -33,8 +33,8 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
     /* Confirmation dialog. */
     // Background shadow image.
     confirmationDialog.shadowImage.setLogicalExtent({0, 0, 1920, 1080});
-    confirmationDialog.shadowImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "Dialogs/Shadow.png");
+    confirmationDialog.shadowImage.setSimpleImage(Paths::TEXTURE_DIR
+                                                  + "Dialogs/Shadow.png");
 
     // Background image.
     confirmationDialog.backgroundImage.setLogicalExtent({721, 358, 474, 248});

@@ -24,8 +24,8 @@ SpriteEditStage::SpriteEditStage(SpriteDataModel& inSpriteDataModel)
     children.push_back(boundingBoxGizmo);
 
     /* Active sprite and checkerboard background. */
-    checkerboardImage.setTiledImage(
-        Paths::TEXTURE_DIR + "SpriteEditStage/Checkerboard.png");
+    checkerboardImage.setTiledImage(Paths::TEXTURE_DIR
+                                    + "SpriteEditStage/Checkerboard.png");
     checkerboardImage.setIsVisible(false);
     spriteImage.setIsVisible(false);
 
@@ -47,8 +47,7 @@ void SpriteEditStage::onActiveSpriteChanged(unsigned int newActiveSpriteID,
     // Load the sprite's image.
     std::string imagePath{spriteDataModel.getWorkingTexturesDir()};
     imagePath += newActiveSprite.parentSpriteSheetPath;
-    spriteImage.setSimpleImage(imagePath,
-                              newActiveSprite.textureExtent);
+    spriteImage.setSimpleImage(imagePath, newActiveSprite.textureExtent);
 
     // Calc the centered sprite position.
     SDL_Rect centeredSpriteExtent{newActiveSprite.textureExtent};

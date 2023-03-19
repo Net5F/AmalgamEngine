@@ -18,12 +18,12 @@ SaveButtonWindow::SaveButtonWindow(MainScreen& inScreen,
     children.push_back(saveButton);
 
     /* Save button. */
-    saveButton.normalImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "SaveButton/Normal.png");
-    saveButton.hoveredImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "SaveButton/Hovered.png");
-    saveButton.pressedImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "SaveButton/Pressed.png");
+    saveButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR
+                                          + "SaveButton/Normal.png");
+    saveButton.hoveredImage.setSimpleImage(Paths::TEXTURE_DIR
+                                           + "SaveButton/Hovered.png");
+    saveButton.pressedImage.setSimpleImage(Paths::TEXTURE_DIR
+                                           + "SaveButton/Pressed.png");
     saveButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     saveButton.text.setText("");
 

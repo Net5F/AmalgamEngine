@@ -46,7 +46,8 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
     children.push_back(errorText);
 
     /* Background image. */
-    backgroundImage.setSimpleImage(Paths::TEXTURE_DIR + "Dialogs/AddSheetBackground.png");
+    backgroundImage.setSimpleImage(Paths::TEXTURE_DIR
+                                   + "Dialogs/AddSheetBackground.png");
 
     /* Header text. */
     headerText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 32);

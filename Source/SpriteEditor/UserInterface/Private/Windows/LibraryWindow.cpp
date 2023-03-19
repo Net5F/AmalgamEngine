@@ -26,7 +26,8 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
 
     /* Background images */
     backgroundImage.setNineSliceImage(
-        (Paths::TEXTURE_DIR + "LibraryWindow/BodyBackground.png"), {1, 1, 1, 1});
+        (Paths::TEXTURE_DIR + "LibraryWindow/BodyBackground.png"),
+        {1, 1, 1, 1});
     headerImage.setNineSliceImage(
         (Paths::TEXTURE_DIR + "LibraryWindow/HeaderBackground.png"),
         {1, 1, 1, 1});
@@ -35,9 +36,12 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
     categoryContainer.setNumColumns(1);
 
     /* New list item button */
-    newButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR + "LibraryWindow/NewIcon.png");
-    newButton.hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "LibraryWindow/NewHoveredIcon.png");
-    newButton.pressedImage.setSimpleImage(Paths::TEXTURE_DIR + "LibraryWindow/NewIcon.png");
+    newButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR
+                                         + "LibraryWindow/NewIcon.png");
+    newButton.hoveredImage.setSimpleImage(Paths::TEXTURE_DIR
+                                          + "LibraryWindow/NewHoveredIcon.png");
+    newButton.pressedImage.setSimpleImage(Paths::TEXTURE_DIR
+                                          + "LibraryWindow/NewIcon.png");
 
     newButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     newButton.text.setText("");

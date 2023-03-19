@@ -20,8 +20,8 @@ SpritePanel::SpritePanel(SpriteDataModel& inSpriteDataModel)
     children.push_back(spriteContainer);
 
     /* Background image */
-    backgroundImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "SpritePanel/Background_1600.png");
+    backgroundImage.setSimpleImage(Paths::TEXTURE_DIR
+                                   + "SpritePanel/Background_1600.png");
 
     /* Container */
     spriteContainer.setNumColumns(10);
@@ -49,8 +49,7 @@ void SpritePanel::onSpriteAdded(unsigned int spriteID, const Sprite& sprite)
     // Load the sprite's image.
     std::string imagePath{spriteDataModel.getWorkingTexturesDir()};
     imagePath += sprite.parentSpriteSheetPath;
-    thumbnail.thumbnailImage.setSimpleImage(imagePath,
-                                           sprite.textureExtent);
+    thumbnail.thumbnailImage.setSimpleImage(imagePath, sprite.textureExtent);
 
     // Add a callback to deactivate all other thumbnails when one is activated.
     thumbnail.setOnActivated([this, spriteID](AUI::Thumbnail* selectedThumb) {

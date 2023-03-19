@@ -66,7 +66,8 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     children.push_back(maxZInput);
 
     /* Background image */
-    backgroundImage.setSimpleImage((Paths::TEXTURE_DIR + "PropertiesPanel/Background.png"),
+    backgroundImage.setSimpleImage(
+        (Paths::TEXTURE_DIR + "PropertiesPanel/Background.png"),
         {0, 4, 315, 502});
 
     /* Display name entry. */
@@ -88,8 +89,8 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
 
     hasBoundingBoxInput.uncheckedImage.setSimpleImage(
         Paths::TEXTURE_DIR + "Checkbox/Unchecked.png");
-    hasBoundingBoxInput.checkedImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "Checkbox/Checked.png");
+    hasBoundingBoxInput.checkedImage.setSimpleImage(Paths::TEXTURE_DIR
+                                                    + "Checkbox/Checked.png");
     hasBoundingBoxInput.setOnChecked([this]() { saveHasBoundingBox(); });
     hasBoundingBoxInput.setOnUnchecked([this]() { saveHasBoundingBox(); });
 
