@@ -11,12 +11,9 @@ ConfirmationButton::ConfirmationButton(const SDL_Rect& inScreenExtent,
 : AUI::Button(inScreenExtent, inDebugName)
 {
     // Add our backgrounds.
-    normalImage.addResolution(
-        {1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Normal.png"));
-    hoveredImage.addResolution(
-        {1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Hovered.png"));
-    pressedImage.addResolution(
-        {1600, 900}, (Paths::TEXTURE_DIR + "ConfirmationButton/Pressed.png"));
+    normalImage.setSimpleImage(Paths::TEXTURE_DIR + "ConfirmationButton/Normal.png");
+    hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "ConfirmationButton/Hovered.png");
+    pressedImage.setSimpleImage(Paths::TEXTURE_DIR + "ConfirmationButton/Pressed.png");
 
     // Set our text properties.
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);

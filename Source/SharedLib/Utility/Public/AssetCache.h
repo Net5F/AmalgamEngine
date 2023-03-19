@@ -33,17 +33,17 @@ public:
      * If the texture is already loaded, returns a handle to it without re-
      * loading.
      *
-     * @param relPath  The image file's full path.
+     * @param imagePath  The image file's full path.
      */
-    TextureHandle loadTexture(const std::string& filePath);
+    TextureHandle loadTexture(const std::string& imagePath);
 
     /**
      * Removes the texture associated with the given path from the cache.
      *
-     * @param relPath  The original image file's full path.
+     * @param imagePath  The original image file's full path.
      * @return true if the texture was found and removed, else false.
      */
-    bool discardTexture(const std::string& filePath);
+    bool discardTexture(const std::string& imagePath);
 
 private:
     SDL_Renderer* sdlRenderer;

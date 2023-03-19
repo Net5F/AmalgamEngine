@@ -66,8 +66,7 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     children.push_back(maxZInput);
 
     /* Background image */
-    backgroundImage.addResolution(
-        {1920, 1080}, (Paths::TEXTURE_DIR + "PropertiesPanel/Background.png"),
+    backgroundImage.setSimpleImage((Paths::TEXTURE_DIR + "PropertiesPanel/Background.png"),
         {0, 4, 315, 502});
 
     /* Display name entry. */
@@ -77,7 +76,7 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     nameLabel.setText("Name");
 
     nameInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    nameInput.setMargins({8, 0, 8, 0});
+    nameInput.setPadding({0, 8, 0, 8});
     nameInput.setOnTextCommitted([this]() { saveName(); });
 
     /* Has bounding box entry. */
@@ -87,10 +86,10 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
         AUI::Text::VerticalAlignment::Center);
     hasBoundingBoxLabel.setText("Has bounding box");
 
-    hasBoundingBoxInput.uncheckedImage.addResolution(
-        {1920, 1080}, (Paths::TEXTURE_DIR + "Checkbox/Unchecked.png"));
-    hasBoundingBoxInput.checkedImage.addResolution(
-        {1920, 1080}, (Paths::TEXTURE_DIR + "Checkbox/Checked.png"));
+    hasBoundingBoxInput.uncheckedImage.setSimpleImage(
+        Paths::TEXTURE_DIR + "Checkbox/Unchecked.png");
+    hasBoundingBoxInput.checkedImage.setSimpleImage(
+        Paths::TEXTURE_DIR + "Checkbox/Checked.png");
     hasBoundingBoxInput.setOnChecked([this]() { saveHasBoundingBox(); });
     hasBoundingBoxInput.setOnUnchecked([this]() { saveHasBoundingBox(); });
 
@@ -101,7 +100,7 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     minXLabel.setText("Min X");
 
     minXInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    minXInput.setMargins({8, 0, 8, 0});
+    minXInput.setPadding({0, 8, 0, 8});
     minXInput.setOnTextCommitted([this]() { saveMinX(); });
 
     /* Minimum Y-axis bounds entry. */
@@ -111,7 +110,7 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     minYLabel.setText("Min Y");
 
     minYInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    minYInput.setMargins({8, 0, 8, 0});
+    minYInput.setPadding({0, 8, 0, 8});
     minYInput.setOnTextCommitted([this]() { saveMinY(); });
 
     /* Minimum Z-axis bounds entry. */
@@ -121,7 +120,7 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     minZLabel.setText("Min Z");
 
     minZInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    minZInput.setMargins({8, 0, 8, 0});
+    minZInput.setPadding({0, 8, 0, 8});
     minZInput.setOnTextCommitted([this]() { saveMinZ(); });
 
     /* Maximum X-axis bounds entry. */
@@ -131,7 +130,7 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     maxXLabel.setText("Max X");
 
     maxXInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    maxXInput.setMargins({8, 0, 8, 0});
+    maxXInput.setPadding({0, 8, 0, 8});
     maxXInput.setOnTextCommitted([this]() { saveMaxX(); });
 
     /* Maximum Y-axis bounds entry. */
@@ -141,7 +140,7 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     maxYLabel.setText("Max Y");
 
     maxYInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    maxYInput.setMargins({8, 0, 8, 0});
+    maxYInput.setPadding({0, 8, 0, 8});
     maxYInput.setOnTextCommitted([this]() { saveMaxY(); });
 
     /* Maximum Z-axis bounds entry. */
@@ -151,7 +150,7 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     maxZLabel.setText("Max Z");
 
     maxZInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    maxZInput.setMargins({8, 0, 8, 0});
+    maxZInput.setPadding({0, 8, 0, 8});
     maxZInput.setOnTextCommitted([this]() { saveMaxZ(); });
 
     // When the active sprite is updated, update it in this widget.

@@ -33,7 +33,7 @@ public:
     AUI::Text headerText;
 
     // Path entry
-    // Note: The path must be relative to Core::resourcePath.
+    // Note: The path must be relative to SpriteDataModel::workingTexturesDir.
     AUI::Text pathLabel;
     MainTextInput pathInput;
 

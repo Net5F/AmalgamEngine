@@ -64,7 +64,7 @@ public:
      *       sizes and no padding.
      *
      * @param relPath  The path to the desired sprite sheet, relative to
-     *                   the application's base directory.
+     *                 the application's base directory.
      * @param spriteWidth  How wide each sprite is.
      * @param spriteHeight  How tall each sprite is.
      * @param yOffset  How much each sprite should be offset in the Y direction

@@ -46,8 +46,7 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
     children.push_back(errorText);
 
     /* Background image. */
-    backgroundImage.addResolution(
-        {1920, 1080}, (Paths::TEXTURE_DIR + "Dialogs/AddSheetBackground.png"));
+    backgroundImage.setSimpleImage(Paths::TEXTURE_DIR + "Dialogs/AddSheetBackground.png");
 
     /* Header text. */
     headerText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 32);
@@ -61,7 +60,7 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
     pathLabel.setText("Relative Path");
 
     pathInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    pathInput.setMargins({8, 0, 8, 0});
+    pathInput.setPadding({0, 8, 0, 8});
 
     /* Width entry. */
     widthLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -70,7 +69,7 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
     widthLabel.setText("Sprite Width");
 
     widthInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    widthInput.setMargins({8, 0, 8, 0});
+    widthInput.setPadding({0, 8, 0, 8});
 
     /* Height entry. */
     heightLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -79,7 +78,7 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
     heightLabel.setText("Sprite Height");
 
     heightInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    heightInput.setMargins({8, 0, 8, 0});
+    heightInput.setPadding({0, 8, 0, 8});
 
     /* Y offset entry. */
     offsetLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -88,7 +87,7 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
     offsetLabel.setText("Y Offset");
 
     offsetInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    offsetInput.setMargins({8, 0, 8, 0});
+    offsetInput.setPadding({0, 8, 0, 8});
 
     /* Name entry. */
     nameLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -97,7 +96,7 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
     nameLabel.setText("Base Name");
 
     nameInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    nameInput.setMargins({8, 0, 8, 0});
+    nameInput.setPadding({0, 8, 0, 8});
 
     /* Confirmation buttons. */
     // Add a callback to validate the input and add the new sprite sheet.

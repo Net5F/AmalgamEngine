@@ -2,7 +2,7 @@
 
 #include "AUI/Window.h"
 #include "AUI/Screen.h"
-#include "AUI/TiledImage.h"
+#include "AUI/Image.h"
 #include "BoundingBoxGizmo.h"
 
 namespace AM
@@ -47,7 +47,7 @@ private:
     // Private child widgets
     //-------------------------------------------------------------------------
     /** Checkerboard image, tiled as the background for the loaded sprite. */
-    AUI::TiledImage checkerboardImage;
+    AUI::Image checkerboardImage;
 
     /** The sprite that is currently loaded onto the stage. */
     AUI::Image spriteImage;

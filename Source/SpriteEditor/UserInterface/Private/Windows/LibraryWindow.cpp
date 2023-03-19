@@ -24,25 +24,21 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
     children.push_back(categoryContainer);
     children.push_back(newButton);
 
-    /* Background image */
-    backgroundImage.addResolution(
-        {1920, 1080},
-        (Paths::TEXTURE_DIR + "LibraryWindow/BodyBackground.png"));
-    headerImage.addResolution(
-        {1920, 1080},
-        (Paths::TEXTURE_DIR + "LibraryWindow/HeaderBackground.png"));
+    /* Background images */
+    backgroundImage.setNineSliceImage(
+        (Paths::TEXTURE_DIR + "LibraryWindow/BodyBackground.png"), {1, 1, 1, 1});
+    headerImage.setNineSliceImage(
+        (Paths::TEXTURE_DIR + "LibraryWindow/HeaderBackground.png"),
+        {1, 1, 1, 1});
 
     /* Container */
     categoryContainer.setNumColumns(1);
 
     /* New list item button */
-    newButton.normalImage.addResolution(
-        {1920, 1080}, (Paths::TEXTURE_DIR + "LibraryWindow/NewIcon.png"));
-    newButton.hoveredImage.addResolution(
-        {1920, 1080},
-        (Paths::TEXTURE_DIR + "LibraryWindow/NewHoveredIcon.png"));
-    newButton.pressedImage.addResolution(
-        {1920, 1080}, (Paths::TEXTURE_DIR + "LibraryWindow/NewIcon.png"));
+    newButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR + "LibraryWindow/NewIcon.png");
+    newButton.hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "LibraryWindow/NewHoveredIcon.png");
+    newButton.pressedImage.setSimpleImage(Paths::TEXTURE_DIR + "LibraryWindow/NewIcon.png");
+
     newButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     newButton.text.setText("");
 }

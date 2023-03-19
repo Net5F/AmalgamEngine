@@ -9,14 +9,10 @@ MainThumbnail::MainThumbnail(const std::string& inDebugName)
 : AUI::Thumbnail({0, 0, 150, 150}, inDebugName)
 {
     // Add our backgrounds.
-    hoveredImage.addResolution({1920, 1080},
-                               (Paths::TEXTURE_DIR + "Thumbnail/Hovered.png"));
-    activeImage.addResolution({1920, 1080},
-                              (Paths::TEXTURE_DIR + "Thumbnail/Active.png"));
-    backdropImage.addResolution(
-        {1920, 1080}, (Paths::TEXTURE_DIR + "Thumbnail/Backdrop.png"));
-    selectedImage.addResolution(
-        {1920, 1080}, (Paths::TEXTURE_DIR + "Thumbnail/Selected.png"));
+    hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "Thumbnail/Hovered.png");
+    activeImage.setSimpleImage(Paths::TEXTURE_DIR + "Thumbnail/Active.png");
+    backdropImage.setSimpleImage(Paths::TEXTURE_DIR + "Thumbnail/Backdrop.png");
+    selectedImage.setSimpleImage(Paths::TEXTURE_DIR + "Thumbnail/Selected.png");
 
     // Move our thumbnail image to the right position.
     thumbnailImage.setLogicalExtent({27, 15, 96, 96});
