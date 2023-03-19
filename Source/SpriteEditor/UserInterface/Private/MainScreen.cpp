@@ -24,7 +24,7 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
     // Add our windows so they're included in rendering, etc.
     windows.push_back(spriteEditStage);
     windows.push_back(libraryWindow);
-    windows.push_back(spritePanel);
+    //windows.push_back(spritePanel);
     windows.push_back(saveButtonWindow);
     windows.push_back(propertiesPanel);
     windows.push_back(confirmationDialog);
@@ -38,8 +38,9 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 
     // Background image.
     confirmationDialog.backgroundImage.setLogicalExtent({721, 358, 474, 248});
-    confirmationDialog.backgroundImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "Dialogs/Background.png");
+    confirmationDialog.backgroundImage.setNineSliceImage(
+        (Paths::TEXTURE_DIR + "WindowBackground.png"),
+        {1, 1, 1, 1});
 
     // Body text.
     confirmationDialog.bodyText.setLogicalExtent({763, 400, 400, 60});
@@ -128,7 +129,7 @@ void MainScreen::render()
 {
     // Fill the background with the background color.
     SDL_Renderer* renderer{AUI::Core::getRenderer()};
-    SDL_SetRenderDrawColor(renderer, 17, 17, 19, 255);
+    SDL_SetRenderDrawColor(renderer, 35, 35, 38, 255);
     SDL_RenderClear(renderer);
 
     // Update our child widget's layouts and render them.

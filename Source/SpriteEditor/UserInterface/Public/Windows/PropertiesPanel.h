@@ -116,6 +116,10 @@ private:
     // Private child widgets
     //-------------------------------------------------------------------------
     AUI::Image backgroundImage;
+
+    AUI::Image headerImage;
+
+    AUI::Text windowLabel;
 };
 
 } // End namespace SpriteEditor

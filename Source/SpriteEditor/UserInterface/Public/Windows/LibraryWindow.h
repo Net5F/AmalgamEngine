@@ -2,6 +2,7 @@
 
 #include "SpriteSheet.h"
 #include "AUI/Window.h"
+#include "AUI/Text.h"
 #include "AUI/Image.h"
 #include "AUI/VerticalGridContainer.h"
 #include "AUI/Button.h"
@@ -40,6 +41,8 @@ private:
     AUI::Image backgroundImage;
 
     AUI::Image headerImage;
+
+    AUI::Text windowLabel;
 
     AUI::VerticalGridContainer categoryContainer;
 

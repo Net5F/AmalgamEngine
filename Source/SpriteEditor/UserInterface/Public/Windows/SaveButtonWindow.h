@@ -30,7 +30,8 @@ private:
     //-------------------------------------------------------------------------
     // Private child widgets
     //-------------------------------------------------------------------------
-    /** The save button at the top of the screen, next to the properties. */
+    AUI::Image backgroundImage;
+
     AUI::Button saveButton;
 };
 

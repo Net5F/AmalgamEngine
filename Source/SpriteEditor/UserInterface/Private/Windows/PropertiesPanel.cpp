@@ -19,23 +19,23 @@ namespace AM
 namespace SpriteEditor
 {
 PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
-: AUI::Window({1605, 0, 315, 502}, "PropertiesPanel")
-, nameLabel({36, 24, 65, 28}, "NameLabel")
-, nameInput({36, 56, 255, 38}, "NameInput")
-, hasBoundingBoxLabel({36, 126, 210, 38}, "HasBBLabel")
-, hasBoundingBoxInput({269, 134, 22, 22}, "HasBBInput")
-, minXLabel({36, 176, 110, 38}, "MinXLabel")
-, minXInput({162, 176, 129, 38}, "MinXInput")
-, minYLabel({36, 226, 110, 38}, "MinYLabel")
-, minYInput({162, 226, 129, 38}, "MinYInput")
-, minZLabel({36, 276, 110, 38}, "MinZLabel")
-, minZInput({162, 276, 129, 38}, "MinZInput")
-, maxXLabel({36, 326, 110, 38}, "MaxXLabel")
-, maxXInput({162, 326, 129, 38}, "MaxXInput")
-, maxYLabel({36, 376, 110, 38}, "MaxYLabel")
-, maxYInput({162, 376, 129, 38}, "MaxYInput")
-, maxZLabel({36, 426, 110, 38}, "MaxZLabel")
-, maxZInput({162, 426, 129, 38}, "MaxZInput")
+: AUI::Window({1617, 0, 303, 518}, "PropertiesPanel")
+, nameLabel({24, 52, 65, 28}, "NameLabel")
+, nameInput({24, 84, 255, 38}, "NameInput")
+, hasBoundingBoxLabel({24, 160, 210, 27}, "HasBBLabel")
+, hasBoundingBoxInput({257, 162, 22, 22}, "HasBBInput")
+, minXLabel({24, 210, 110, 38}, "MinXLabel")
+, minXInput({150, 204, 129, 38}, "MinXInput")
+, minYLabel({24, 260, 110, 38}, "MinYLabel")
+, minYInput({150, 254, 129, 38}, "MinYInput")
+, minZLabel({24, 310, 110, 38}, "MinZLabel")
+, minZInput({150, 304, 129, 38}, "MinZInput")
+, maxXLabel({24, 360, 110, 38}, "MaxXLabel")
+, maxXInput({150, 354, 129, 38}, "MaxXInput")
+, maxYLabel({24, 410, 110, 38}, "MaxYLabel")
+, maxYInput({150, 404, 129, 38}, "MaxYInput")
+, maxZLabel({24, 460, 110, 38}, "MaxZLabel")
+, maxZInput({150, 454, 129, 38}, "MaxZInput")
 , spriteDataModel{inSpriteDataModel}
 , activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
 , committedMinX{0.0}
@@ -44,10 +44,14 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
 , committedMaxX{0.0}
 , committedMaxY{0.0}
 , committedMaxZ{0.0}
-, backgroundImage({0, 0, 315, 502}, "BackgroundImage")
+, backgroundImage({0, 0, 303, 518}, "PropertiesBackground")
+, headerImage({0, 0, 303, 40}, "PropertiesHeader")
+, windowLabel({12, 0, 115, 40}, "PropertiesWindowLabel")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
+    children.push_back(headerImage);
+    children.push_back(windowLabel);
     children.push_back(nameLabel);
     children.push_back(nameInput);
     children.push_back(hasBoundingBoxLabel);
@@ -65,10 +69,17 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     children.push_back(maxZLabel);
     children.push_back(maxZInput);
 
-    /* Background image */
-    backgroundImage.setSimpleImage(
-        (Paths::TEXTURE_DIR + "PropertiesPanel/Background.png"),
-        {0, 4, 315, 502});
+    /* Window setup */
+    backgroundImage.setNineSliceImage(
+        (Paths::TEXTURE_DIR + "WindowBackground.png"),
+        {1, 1, 1, 1});
+    headerImage.setNineSliceImage(
+        (Paths::TEXTURE_DIR + "HeaderBackground.png"),
+        {1, 1, 1, 1});
+    windowLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
+    windowLabel.setColor({255, 255, 255, 255});
+    windowLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
+    windowLabel.setText("Properties");
 
     /* Display name entry. */
     nameLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -83,8 +94,6 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     /* Has bounding box entry. */
     hasBoundingBoxLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     hasBoundingBoxLabel.setColor({255, 255, 255, 255});
-    hasBoundingBoxLabel.setVerticalAlignment(
-        AUI::Text::VerticalAlignment::Center);
     hasBoundingBoxLabel.setText("Has bounding box");
 
     hasBoundingBoxInput.uncheckedImage.setSimpleImage(
@@ -97,7 +106,6 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     /* Minimum X-axis bounds entry. */
     minXLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     minXLabel.setColor({255, 255, 255, 255});
-    minXLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     minXLabel.setText("Min X");
 
     minXInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
@@ -107,7 +115,6 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     /* Minimum Y-axis bounds entry. */
     minYLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     minYLabel.setColor({255, 255, 255, 255});
-    minYLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     minYLabel.setText("Min Y");
 
     minYInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
@@ -117,7 +124,6 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     /* Minimum Z-axis bounds entry. */
     minZLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     minZLabel.setColor({255, 255, 255, 255});
-    minZLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     minZLabel.setText("Min Z");
 
     minZInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
@@ -127,7 +133,6 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     /* Maximum X-axis bounds entry. */
     maxXLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     maxXLabel.setColor({255, 255, 255, 255});
-    maxXLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     maxXLabel.setText("Max X");
 
     maxXInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
@@ -137,7 +142,6 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     /* Maximum Y-axis bounds entry. */
     maxYLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     maxYLabel.setColor({255, 255, 255, 255});
-    maxYLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     maxYLabel.setText("Max Y");
 
     maxYInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
@@ -147,7 +151,6 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     /* Maximum Z-axis bounds entry. */
     maxZLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     maxZLabel.setColor({255, 255, 255, 255});
-    maxZLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
     maxZLabel.setText("Max Z");
 
     maxZInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);

@@ -12,10 +12,17 @@ SaveButtonWindow::SaveButtonWindow(MainScreen& inScreen,
 : AUI::Window({1537, 0, 58, 58}, "SaveButtonWindow")
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
+, backgroundImage{{0, 0, 58, 58}}
 , saveButton({0, 0, 58, 58})
 {
     // Add our children so they're included in rendering, etc.
+    children.push_back(backgroundImage);
     children.push_back(saveButton);
+
+    /* Window setup */
+    backgroundImage.setNineSliceImage(
+        (Paths::TEXTURE_DIR + "WindowBackground.png"),
+        {1, 1, 1, 1});
 
     /* Save button. */
     saveButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR
