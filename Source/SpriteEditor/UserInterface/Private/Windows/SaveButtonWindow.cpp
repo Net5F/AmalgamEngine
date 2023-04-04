@@ -21,8 +21,7 @@ SaveButtonWindow::SaveButtonWindow(MainScreen& inScreen,
 
     /* Window setup */
     backgroundImage.setNineSliceImage(
-        (Paths::TEXTURE_DIR + "WindowBackground.png"),
-        {1, 1, 1, 1});
+        (Paths::TEXTURE_DIR + "WindowBackground.png"), {1, 1, 1, 1});
 
     /* Save button. */
     saveButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR

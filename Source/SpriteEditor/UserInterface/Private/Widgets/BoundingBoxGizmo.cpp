@@ -50,8 +50,8 @@ BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
 }
 
 void BoundingBoxGizmo::updateLayout(const SDL_Point& startPosition,
-                        const SDL_Rect& availableExtent,
-                        AUI::WidgetLocator* widgetLocator)
+                                    const SDL_Rect& availableExtent,
+                                    AUI::WidgetLocator* widgetLocator)
 {
     // Do the normal layout updating.
     Widget::updateLayout(startPosition, availableExtent, widgetLocator);
@@ -87,16 +87,13 @@ AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType,
     if (AUI::SDLHelpers::pointInRect(cursorPosition, positionControlExtent)) {
         currentHeldControl = Control::Position;
     }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition,
-                                          xControlExtent)) {
+    else if (AUI::SDLHelpers::pointInRect(cursorPosition, xControlExtent)) {
         currentHeldControl = Control::X;
     }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition,
-                                          yControlExtent)) {
+    else if (AUI::SDLHelpers::pointInRect(cursorPosition, yControlExtent)) {
         currentHeldControl = Control::Y;
     }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition,
-                                          zControlExtent)) {
+    else if (AUI::SDLHelpers::pointInRect(cursorPosition, zControlExtent)) {
         currentHeldControl = Control::Z;
     }
 
@@ -190,12 +187,10 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
 void BoundingBoxGizmo::refreshScaling()
 {
     // Re-calculate our control rectangle size.
-    scaledRectSize
-        = AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE);
+    scaledRectSize = AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE);
 
     // Re-calculate our line width.
-    scaledLineWidth
-        = AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH);
+    scaledLineWidth = AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH);
 
     // Refresh our controls to reflect the new sizes.
     refresh(spriteDataModel.getSprite(activeSpriteID));

@@ -39,8 +39,7 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
     // Background image.
     confirmationDialog.backgroundImage.setLogicalExtent({721, 358, 474, 248});
     confirmationDialog.backgroundImage.setNineSliceImage(
-        (Paths::TEXTURE_DIR + "WindowBackground.png"),
-        {1, 1, 1, 1});
+        (Paths::TEXTURE_DIR + "WindowBackground.png"), {1, 1, 1, 1});
 
     // Body text.
     confirmationDialog.bodyText.setLogicalExtent({763, 400, 400, 60});

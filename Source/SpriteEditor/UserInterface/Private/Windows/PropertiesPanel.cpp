@@ -71,11 +71,9 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
 
     /* Window setup */
     backgroundImage.setNineSliceImage(
-        (Paths::TEXTURE_DIR + "WindowBackground.png"),
-        {1, 1, 1, 1});
-    headerImage.setNineSliceImage(
-        (Paths::TEXTURE_DIR + "HeaderBackground.png"),
-        {1, 1, 1, 1});
+        (Paths::TEXTURE_DIR + "WindowBackground.png"), {1, 1, 1, 1});
+    headerImage.setNineSliceImage((Paths::TEXTURE_DIR + "HeaderBackground.png"),
+                                  {1, 1, 1, 1});
     windowLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     windowLabel.setColor({255, 255, 255, 255});
     windowLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);

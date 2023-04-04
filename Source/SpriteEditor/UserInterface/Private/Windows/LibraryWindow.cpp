@@ -28,11 +28,9 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
 
     /* Window setup */
     backgroundImage.setNineSliceImage(
-        (Paths::TEXTURE_DIR + "WindowBackground.png"),
-        {1, 1, 1, 1});
-    headerImage.setNineSliceImage(
-        (Paths::TEXTURE_DIR + "HeaderBackground.png"),
-        {1, 1, 1, 1});
+        (Paths::TEXTURE_DIR + "WindowBackground.png"), {1, 1, 1, 1});
+    headerImage.setNineSliceImage((Paths::TEXTURE_DIR + "HeaderBackground.png"),
+                                  {1, 1, 1, 1});
     windowLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     windowLabel.setColor({255, 255, 255, 255});
     windowLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
@@ -41,11 +39,10 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
     /* Container */
     categoryContainer.setGapSize(10);
     for (std::size_t i = 0; i < 30; ++i) {
-        //auto image{std::make_unique<AUI::Image>(SDL_Rect{0, 0, 318, 50})};
+        // auto image{std::make_unique<AUI::Image>(SDL_Rect{0, 0, 318, 50})};
         auto image{std::make_unique<AUI::Image>(SDL_Rect{0, 0, 400, 50})};
-        image->setNineSliceImage(
-            (Paths::TEXTURE_DIR + "HeaderBackground.png"),
-            {1, 1, 1, 1});
+        image->setNineSliceImage((Paths::TEXTURE_DIR + "HeaderBackground.png"),
+                                 {1, 1, 1, 1});
         categoryContainer.push_back(std::move(image));
     }
 

@@ -152,8 +152,8 @@ private:
     /** Used while setting user-inputted sprite data. */
     SpriteDataModel& spriteDataModel;
 
-    /** The value of AUI::Core::actualScreenSize that was used the last time 
-        this widget updated its layout. Used to detect when the UI scale 
+    /** The value of AUI::Core::actualScreenSize that was used the last time
+        this widget updated its layout. Used to detect when the UI scale
         changes, so we can resize our controls. */
     AUI::ScreenResolution lastUsedScreenSize;
 
