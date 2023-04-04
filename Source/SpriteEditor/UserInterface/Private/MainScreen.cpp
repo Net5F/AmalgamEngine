@@ -24,7 +24,7 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
     // Add our windows so they're included in rendering, etc.
     windows.push_back(spriteEditStage);
     windows.push_back(libraryWindow);
-    //windows.push_back(spritePanel);
+    windows.push_back(spritePanel);
     windows.push_back(saveButtonWindow);
     windows.push_back(propertiesPanel);
     windows.push_back(confirmationDialog);

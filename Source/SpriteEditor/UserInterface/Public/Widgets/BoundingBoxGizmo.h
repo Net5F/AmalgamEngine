@@ -30,7 +30,14 @@ public:
     //-------------------------------------------------------------------------
     // Base class overrides
     //-------------------------------------------------------------------------
-    void render() override;
+    /**
+     * Calls Widget::updateLayout() and refreshes our controls.
+     */
+    void updateLayout(const SDL_Point& startPosition,
+                      const SDL_Rect& availableExtent,
+                      AUI::WidgetLocator* widgetLocator) override;
+
+    void render(const SDL_Point& windowTopLeft) override;
 
     AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
                                  const SDL_Point& cursorPosition) override;
@@ -40,13 +47,9 @@ public:
 
     AUI::EventResult onMouseMove(const SDL_Point& cursorPosition) override;
 
-protected:
-    /**
-     * Overridden to choose the proper resolution of texture to use.
-     */
-    bool refreshScaling() override;
-
 private:
+    void refreshScaling();
+
     /** The base transparency value for a selected gizmo. */
     static constexpr float BASE_ALPHA{255};
 
@@ -134,20 +137,25 @@ private:
     /**
      * Renders the control rectangles.
      */
-    void renderControls();
+    void renderControls(const SDL_Point& windowTopLeft);
 
     /**
      * Renders the line polygons.
      */
-    void renderLines();
+    void renderLines(const SDL_Point& windowTopLeft);
 
     /**
      * Renders the plane polygons.
      */
-    void renderPlanes();
+    void renderPlanes(const SDL_Point& windowTopLeft);
 
     /** Used while setting user-inputted sprite data. */
     SpriteDataModel& spriteDataModel;
+
+    /** The value of AUI::Core::actualScreenSize that was used the last time 
+        this widget updated its layout. Used to detect when the UI scale 
+        changes, so we can resize our controls. */
+    AUI::ScreenResolution lastUsedScreenSize;
 
     /** The active sprite's ID. */
     unsigned int activeSpriteID;
@@ -170,23 +178,15 @@ private:
     // Controls (scaled extents, without parent offsets)
     /** The extent of the box position control, (maxX, maxY, minZ). */
     SDL_Rect positionControlExtent;
-    /** positionControlExtent + offsets from the most recent render(). */
-    SDL_Rect lastRenderedPosExtent;
 
     /** The extent of the x-axis box length control, (minX, maxY, minZ). */
     SDL_Rect xControlExtent;
-    /** xControlExtent + offsets from the most recent render(). */
-    SDL_Rect lastRenderedXExtent;
 
     /** The extent of the y-axis box length control, (maxX, minY, minZ). */
     SDL_Rect yControlExtent;
-    /** yControlExtent + offsets from the most recent render(). */
-    SDL_Rect lastRenderedYExtent;
 
     /** The extent of the z-axis box length control, (maxX, maxY, maxZ). */
     SDL_Rect zControlExtent;
-    /** zControlExtent + offsets from the most recent render(). */
-    SDL_Rect lastRenderedZExtent;
 
     // Lines
     SDL_Point xMinPoint;

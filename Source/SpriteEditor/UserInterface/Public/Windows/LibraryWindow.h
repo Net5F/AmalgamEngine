@@ -4,7 +4,7 @@
 #include "AUI/Window.h"
 #include "AUI/Text.h"
 #include "AUI/Image.h"
-#include "AUI/VerticalGridContainer.h"
+#include "AUI/FlowContainer.h"
 #include "AUI/Button.h"
 
 namespace AM
@@ -44,7 +44,7 @@ private:
 
     AUI::Text windowLabel;
 
-    AUI::VerticalGridContainer categoryContainer;
+    AUI::FlowContainer categoryContainer;
 
     AUI::Button newButton;
 };
