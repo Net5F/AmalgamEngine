@@ -2,6 +2,8 @@ target_sources(SpriteEditor
     PRIVATE
         Private/Widgets/BoundingBoxGizmo.cpp
         Private/Widgets/ConfirmationButton.cpp
+        Private/Widgets/LibraryListItem.cpp
+        Private/Widgets/MainCollapsibleContainer.cpp
         Private/Widgets/MainTextInput.cpp
         Private/Widgets/MainThumbnail.cpp
         Private/Widgets/TitleButton.cpp
@@ -18,6 +20,8 @@ target_sources(SpriteEditor
     PUBLIC
         Public/Widgets/BoundingBoxGizmo.h
         Public/Widgets/ConfirmationButton.h
+        Public/Widgets/LibraryListItem.h
+        Public/Widgets/MainCollapsibleContainer.h
         Public/Widgets/MainTextInput.h
         Public/Widgets/MainThumbnail.h
         Public/Widgets/TitleButton.h

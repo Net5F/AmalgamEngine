@@ -3,6 +3,8 @@
 #include "SpriteDataModel.h"
 #include "Paths.h"
 #include "Ignore.h"
+#include "MainCollapsibleContainer.h"
+#include "LibraryListItem.h"
 
 namespace AM
 {
@@ -21,8 +23,8 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
-    children.push_back(categoryContainer);
     children.push_back(headerImage);
+    children.push_back(categoryContainer);
     children.push_back(windowLabel);
     children.push_back(newButton);
 
@@ -37,13 +39,18 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
     windowLabel.setText("Library");
 
     /* Container */
-    categoryContainer.setGapSize(10);
     for (std::size_t i = 0; i < 30; ++i) {
-        // auto image{std::make_unique<AUI::Image>(SDL_Rect{0, 0, 318, 50})};
-        auto image{std::make_unique<AUI::Image>(SDL_Rect{0, 0, 400, 50})};
-        image->setNineSliceImage((Paths::TEXTURE_DIR + "HeaderBackground.png"),
-                                 {1, 1, 1, 1});
-        categoryContainer.push_back(std::move(image));
+        std::string temp{"hi: "};
+        temp += std::to_string(i);
+        auto collapsible{std::make_unique<MainCollapsibleContainer>(temp)};
+        collapsible->setLeftPadding(8);
+        auto collapsible2{std::make_unique<MainCollapsibleContainer>(temp)};
+        collapsible2->setLeftPadding(32);
+        auto listItem{std::make_unique<LibraryListItem>("SpriteName")};
+        listItem->setLeftPadding(57);
+        collapsible2->push_back(std::move(listItem));
+        collapsible->push_back(std::move(collapsible2));
+        categoryContainer.push_back(std::move(collapsible));
     }
 
     /* New list item button */

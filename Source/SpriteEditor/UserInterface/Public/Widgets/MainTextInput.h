@@ -13,7 +13,7 @@ namespace SpriteEditor
 class MainTextInput : public AUI::TextInput
 {
 public:
-    MainTextInput(const SDL_Rect& inScreenExtent,
+    MainTextInput(const SDL_Rect& inLogicalExtent,
                   const std::string& inDebugName = "MainTextInput");
 };
 

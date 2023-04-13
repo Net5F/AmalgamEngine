@@ -56,6 +56,11 @@ void BoundingBoxGizmo::updateLayout(const SDL_Point& startPosition,
     // Do the normal layout updating.
     Widget::updateLayout(startPosition, availableExtent, widgetLocator);
 
+    // If this widget is fully clipped, return early.
+    if (SDL_RectEmpty(&clippedExtent)) {
+        return;
+    }
+
     // If the UI scaling has changed, refresh everything.
     if (lastUsedScreenSize != AUI::Core::getActualScreenSize()) {
         refreshScaling();
@@ -65,6 +70,11 @@ void BoundingBoxGizmo::updateLayout(const SDL_Point& startPosition,
 
 void BoundingBoxGizmo::render(const SDL_Point& windowTopLeft)
 {
+    // If this widget is fully clipped, don't render it.
+    if (SDL_RectEmpty(&clippedExtent)) {
+        return;
+    }
+
     // Render the planes.
     renderPlanes(windowTopLeft);
 
@@ -381,8 +391,8 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
         static_cast<int>(activeSprite.textureExtent.w / 2.f))};
 
     // Account for this widget's position.
-    xOffset += clippedExtent.x;
-    yOffset += clippedExtent.y;
+    xOffset += fullExtent.x;
+    yOffset += fullExtent.y;
 
     // Scale and offset each point, then push it into the return vector.
     for (ScreenPoint& point : floatPoints) {

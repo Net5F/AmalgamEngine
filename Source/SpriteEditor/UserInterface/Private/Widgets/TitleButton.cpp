@@ -5,10 +5,10 @@ namespace AM
 {
 namespace SpriteEditor
 {
-TitleButton::TitleButton(const SDL_Rect& inScreenExtent,
+TitleButton::TitleButton(const SDL_Rect& inLogicalExtent,
                          const std::string& inText,
                          const std::string& inDebugName)
-: AUI::Button(inScreenExtent, inDebugName)
+: AUI::Button(inLogicalExtent, inDebugName)
 {
     // Add our backgrounds.
     normalImage.setSimpleImage(Paths::TEXTURE_DIR + "Button/Normal.png");

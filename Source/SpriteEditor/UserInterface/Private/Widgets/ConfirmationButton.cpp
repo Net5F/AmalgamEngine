@@ -5,10 +5,10 @@ namespace AM
 {
 namespace SpriteEditor
 {
-ConfirmationButton::ConfirmationButton(const SDL_Rect& inScreenExtent,
+ConfirmationButton::ConfirmationButton(const SDL_Rect& inLogicalExtent,
                                        const std::string& inText,
                                        const std::string& inDebugName)
-: AUI::Button(inScreenExtent, inDebugName)
+: AUI::Button(inLogicalExtent, inDebugName)
 {
     // Add our backgrounds.
     normalImage.setSimpleImage(Paths::TEXTURE_DIR
