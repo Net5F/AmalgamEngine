@@ -5,7 +5,6 @@
 #include "AUI/ConfirmationDialog.h"
 #include "LibraryWindow.h"
 #include "SpriteEditStage.h"
-#include "SpritePanel.h"
 #include "SaveButtonWindow.h"
 #include "PropertiesPanel.h"
 #include "TitleButton.h"
@@ -62,9 +61,6 @@ private:
 
     /** The center stage for editing sprite bounding boxes. */
     SpriteEditStage spriteEditStage;
-
-    /** The bottom panel for selecting sprites. */
-    SpritePanel spritePanel;
 
     /** The save button at the top of the screen, next to the properties. */
     SaveButtonWindow saveButtonWindow;

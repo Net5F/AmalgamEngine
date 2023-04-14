@@ -39,19 +39,12 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
     windowLabel.setText("Library");
 
     /* Container */
-    for (std::size_t i = 0; i < 30; ++i) {
-        std::string temp{"hi: "};
-        temp += std::to_string(i);
-        auto collapsible{std::make_unique<MainCollapsibleContainer>(temp)};
-        collapsible->setLeftPadding(8);
-        auto collapsible2{std::make_unique<MainCollapsibleContainer>(temp)};
-        collapsible2->setLeftPadding(32);
-        auto listItem{std::make_unique<LibraryListItem>("SpriteName")};
-        listItem->setLeftPadding(57);
-        collapsible2->push_back(std::move(listItem));
-        collapsible->push_back(std::move(collapsible2));
-        categoryContainer.push_back(std::move(collapsible));
-    }
+    // Add the collapsible categories.
+    categoryContainer.resize(Category::Count);
+
+    auto category{std::make_unique<MainCollapsibleContainer>("Sprite Sheets")};
+    category->setLeftPadding(8);
+    categoryContainer[Category::SpriteSheets] = std::move(category);
 
     /* New list item button */
     newButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR
@@ -63,6 +56,99 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
 
     newButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     newButton.text.setText("");
+
+    newButton.setOnPressed([this]() {
+        // Bring up the add dialog.
+        mainScreen.openAddSheetDialog();
+    });
+
+    // When a sprite sheet is added or removed from the model, update this
+    // widget.
+    spriteDataModel.sheetAdded.connect<&LibraryWindow::onSheetAdded>(*this);
+    spriteDataModel.sheetRemoved.connect<&LibraryWindow::onSheetRemoved>(
+        *this);
+}
+
+void LibraryWindow::onSheetAdded(unsigned int sheetID,
+                                 const SpriteSheet& sheet)
+{
+    // Create a widget for the new sheet.
+    std::unique_ptr<AUI::Widget> sheetWidgetPtr{
+        std::make_unique<MainCollapsibleContainer>(sheet.relPath)};
+    MainCollapsibleContainer& sheetWidget{
+        static_cast<MainCollapsibleContainer&>(*sheetWidgetPtr)};
+    sheetWidget.setLeftPadding(32);
+
+    // Add each of the new sheet's sprites to the sheet widget.
+    for (unsigned int spriteID : sheet.spriteIDs) {
+        addSpriteToSheetWidget(sheetWidget, sheet, spriteID);
+    }
+
+    // Add the sheet widget to the sheet widget container.
+    auto& sheetContainer{static_cast<MainCollapsibleContainer&>(
+        *categoryContainer[Category::SpriteSheets])};
+    sheetContainer.push_back(std::move(sheetWidgetPtr));
+}
+
+void LibraryWindow::onSheetRemoved(unsigned int sheetID)
+{
+    //auto sheetIt{thumbnailMap.find(sheetID)};
+    //if (sheetIt == thumbnailMap.end()) {
+    //    LOG_FATAL("Failed to find sprite sheet during removal.");
+    //}
+
+    //// Remove the thumbnail from the container.
+    //spriteSheetContainer.erase(sheetIt->second);
+
+    //// Remove the thumbnail from the map.
+    //thumbnailMap.erase(sheetIt);
+}
+
+void LibraryWindow::addSpriteToSheetWidget(
+    MainCollapsibleContainer& sheetWidget,
+    const SpriteSheet& sheet, unsigned int spriteID)
+{
+    // Construct a new list item for this sprite.
+    const Sprite& sprite{spriteDataModel.getSprite(spriteID)};
+    auto spriteListItem{std::make_unique<LibraryListItem>(sprite.displayName)};
+
+    spriteListItem->setLeftPadding(57);
+
+    spriteListItem->setOnActivated([this, spriteID](LibraryListItem* activatedItem) {
+        // Deactivate any active list items.
+        deactivateListItems(activatedItem);
+
+        // Set this item's associated sprite as the active sprite.
+        spriteDataModel.setActiveSprite(spriteID);
+    });
+
+    // Add the sprite to the sheet widget.
+    sheetWidget.push_back(std::move(spriteListItem));
+}
+
+void LibraryWindow::deactivateListItems(const LibraryListItem* activatedItem)
+{
+    // Deactivate all list items in the sprite sheet category.
+    // Note: We handle the sprite sheet category separately, since it's the 
+    //       only one with 2 levels.
+    auto& sheetContainer{static_cast<MainCollapsibleContainer&>(
+        *categoryContainer[Category::SpriteSheets])};
+    for (auto& sheetWidgetPtr : sheetContainer) {
+        MainCollapsibleContainer& sheetWidget{
+            static_cast<MainCollapsibleContainer&>(*sheetWidgetPtr)};
+
+        for (auto& spriteWidgetPtr : sheetWidget) {
+            LibraryListItem& otherListItem{
+                static_cast<LibraryListItem&>(*spriteWidgetPtr)};
+            if (otherListItem.getIsActive()
+                && (&otherListItem != activatedItem)) {
+                otherListItem.deactivate();
+            }
+        }
+    }
+
+    // Deactivate all list items in the other categories.
+    // TODO
 }
 
 } // End namespace SpriteEditor

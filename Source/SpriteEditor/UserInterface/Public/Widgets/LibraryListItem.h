@@ -70,9 +70,9 @@ public:
      */
     void deactivate();
 
-    bool getIsHovered();
-    bool getIsSelected();
-    bool getIsActive();
+    bool getIsHovered() const;
+    bool getIsSelected() const;
+    bool getIsActive() const;
 
     /**
      * Sets the left padding. Used to define the visual hierarchy in the list.

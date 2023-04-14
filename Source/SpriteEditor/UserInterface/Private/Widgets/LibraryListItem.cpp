@@ -108,17 +108,17 @@ void LibraryListItem::deactivate()
     }
 }
 
-bool LibraryListItem::getIsHovered()
+bool LibraryListItem::getIsHovered() const
 {
     return isHovered;
 }
 
-bool LibraryListItem::getIsSelected()
+bool LibraryListItem::getIsSelected() const
 {
     return isSelected;
 }
 
-bool LibraryListItem::getIsActive()
+bool LibraryListItem::getIsActive() const
 {
     return isActive;
 }

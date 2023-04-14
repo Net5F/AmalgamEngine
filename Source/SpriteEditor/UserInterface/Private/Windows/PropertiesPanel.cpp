@@ -164,8 +164,9 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
         .connect<&PropertiesPanel::onSpriteHasBoundingBoxChanged>(*this);
     spriteDataModel.spriteModelBoundsChanged
         .connect<&PropertiesPanel::onSpriteModelBoundsChanged>(*this);
-    spriteDataModel.spriteRemoved.connect<&PropertiesPanel::onSpriteRemoved>(
-        *this);
+    // TODO: Switch this to sheet removed
+    //spriteDataModel.spriteRemoved.connect<&PropertiesPanel::onSpriteRemoved>(
+    //    *this);
 }
 
 void PropertiesPanel::onActiveSpriteChanged(unsigned int newActiveSpriteID,

@@ -126,13 +126,6 @@ public:
     /** A sprite sheet was removed from the model. */
     entt::sink<entt::sigh<void(unsigned int sheetID)>> sheetRemoved;
 
-    /** A sprite was added to the model. */
-    entt::sink<entt::sigh<void(unsigned int spriteID, const Sprite& sprite)>>
-        spriteAdded;
-
-    /** A sprite was removed from the model. */
-    entt::sink<entt::sigh<void(unsigned int spriteID)>> spriteRemoved;
-
     /** The active sprite has changed to a new sprite. */
     entt::sink<entt::sigh<void(unsigned int newActiveSpriteID,
                                const Sprite& newActiveSprite)>>
@@ -219,27 +212,24 @@ private:
     // Signals
     //-------------------------------------------------------------------------
     entt::sigh<void(unsigned int sheetID, const SpriteSheet& sheet)>
-        sheetAddedSig;
+        sheetAddedSig{};
 
-    entt::sigh<void(unsigned int sheetID)> sheetRemovedSig;
+    entt::sigh<void(unsigned int sheetID)> sheetRemovedSig{};
 
-    entt::sigh<void(unsigned int spriteID, const Sprite& sprite)>
-        spriteAddedSig;
-
-    entt::sigh<void(unsigned int spriteID)> spriteRemovedSig;
+    entt::sigh<void(unsigned int spriteID)> spriteRemovedSig{};
 
     entt::sigh<void(unsigned int newActiveSpriteID,
                     const Sprite& newActiveSprite)>
-        activeSpriteChangedSig;
+        activeSpriteChangedSig{};
 
     entt::sigh<void(unsigned int spriteID, const std::string& newDisplayName)>
-        spriteDisplayNameChangedSig;
+        spriteDisplayNameChangedSig{};
 
     entt::sigh<void(unsigned int spriteID, bool hasBoundingBox)>
-        spriteHasBoundingBoxChangedSig;
+        spriteHasBoundingBoxChangedSig{};
 
     entt::sigh<void(unsigned int spriteID, const BoundingBox& newModelBounds)>
-        spriteModelBoundsChangedSig;
+        spriteModelBoundsChangedSig{};
 };
 
 } // namespace SpriteEditor

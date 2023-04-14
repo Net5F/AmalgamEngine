@@ -12,7 +12,6 @@ target_sources(SpriteEditor
         Private/Windows/PropertiesPanel.cpp
         Private/Windows/SaveButtonWindow.cpp
         Private/Windows/SpriteEditStage.cpp
-        Private/Windows/SpritePanel.cpp
         Private/Windows/TitleWindow.cpp
         Private/MainScreen.cpp
         Private/TitleScreen.cpp
@@ -30,7 +29,6 @@ target_sources(SpriteEditor
         Public/Windows/PropertiesPanel.h
         Public/Windows/SaveButtonWindow.h
         Public/Windows/SpriteEditStage.h
-        Public/Windows/SpritePanel.h
         Public/Windows/TitleWindow.h
         Public/MainScreen.h
         Public/TitleScreen.h

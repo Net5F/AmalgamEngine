@@ -35,8 +35,9 @@ SpriteEditStage::SpriteEditStage(SpriteDataModel& inSpriteDataModel)
     // When the active sprite is updated, update it in this widget.
     spriteDataModel.activeSpriteChanged
         .connect<&SpriteEditStage::onActiveSpriteChanged>(*this);
-    spriteDataModel.spriteRemoved.connect<&SpriteEditStage::onSpriteRemoved>(
-        *this);
+    // TODO: Switch this to sheet removed
+    //spriteDataModel.spriteRemoved.connect<&SpriteEditStage::onSpriteRemoved>(
+    //    *this);
 }
 
 void SpriteEditStage::onActiveSpriteChanged(unsigned int newActiveSpriteID,
