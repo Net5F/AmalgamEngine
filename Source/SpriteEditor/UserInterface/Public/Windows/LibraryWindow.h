@@ -13,7 +13,7 @@ namespace SpriteEditor
 {
 class MainScreen;
 class SpriteDataModel;
-class SpriteSheetContainer;
+class SpriteSheetListItem;
 class LibraryListItem;
 
 /**
@@ -54,18 +54,11 @@ private:
     void onSheetRemoved(unsigned int sheetID);
 
     /**
-     * Adds the given sprite to the given sprite sheet container.
+     * Adds the given sprite to the given sprite sheet list item.
      */
-    void addSpriteToSheetWidget(
-        SpriteSheetContainer& sheetContainer,
+    void addSpriteToSheetListItem(
+        SpriteSheetListItem& sheetListItem,
         const SpriteSheet& sheet, unsigned int spriteID);
-
-    /**
-     * Iterates all sprite sheet containers in the library, applying the given 
-     * transform.
-     */
-    template<class UnaryOperation>
-    void transformSpriteSheetContainers(UnaryOperation unaryOp);
 
     /**
      * Iterates all list items in the library, applying the given transform.

@@ -1,11 +1,11 @@
-#include "CategoryContainer.h"
+#include "LibraryCollapsibleContainer.h"
 #include "Paths.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
-CategoryContainer::CategoryContainer(const std::string& inHeaderText,
+LibraryCollapsibleContainer::LibraryCollapsibleContainer(const std::string& inHeaderText,
                          const std::string& inDebugName)
 : AUI::CollapsibleContainer({0, 0, 318, 30}, inDebugName)
 {
@@ -35,7 +35,7 @@ CategoryContainer::CategoryContainer(const std::string& inHeaderText,
     setLeftPadding(8);
 }
 
-void CategoryContainer::setLeftPadding(int inLeftPadding)
+void LibraryCollapsibleContainer::setLeftPadding(int inLeftPadding)
 {
     int imageX{0 + inLeftPadding};
     int textX{25 + inLeftPadding};

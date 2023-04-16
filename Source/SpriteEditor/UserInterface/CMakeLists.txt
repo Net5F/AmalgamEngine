@@ -1,12 +1,12 @@
 target_sources(SpriteEditor
     PRIVATE
         Private/Widgets/BoundingBoxGizmo.cpp
-        Private/Widgets/CategoryContainer.cpp
         Private/Widgets/ConfirmationButton.cpp
+        Private/Widgets/LibraryCollapsibleContainer.cpp
         Private/Widgets/LibraryListItem.cpp
         Private/Widgets/MainTextInput.cpp
         Private/Widgets/MainThumbnail.cpp
-        Private/Widgets/SpriteSheetContainer.cpp
+        Private/Widgets/SpriteSheetListItem.cpp
         Private/Widgets/TitleButton.cpp
         Private/Windows/AddSheetDialog.cpp
         Private/Windows/LibraryWindow.cpp
@@ -19,12 +19,12 @@ target_sources(SpriteEditor
         Private/UserInterface.cpp
     PUBLIC
         Public/Widgets/BoundingBoxGizmo.h
-        Public/Widgets/CategoryContainer.h
         Public/Widgets/ConfirmationButton.h
+        Public/Widgets/LibraryCollapsibleContainer.h
         Public/Widgets/LibraryListItem.h
         Public/Widgets/MainTextInput.h
         Public/Widgets/MainThumbnail.h
-        Public/Widgets/SpriteSheetContainer.h
+        Public/Widgets/SpriteSheetListItem.h
         Public/Widgets/TitleButton.h
         Public/Windows/AddSheetDialog.h
         Public/Windows/LibraryWindow.h

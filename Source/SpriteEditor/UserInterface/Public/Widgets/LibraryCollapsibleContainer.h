@@ -10,12 +10,12 @@ namespace SpriteEditor
  * A collapsible container used for the top-level categories in the library 
  * window on the main screen.
  */
-class CategoryContainer : public AUI::CollapsibleContainer
+class LibraryCollapsibleContainer : public AUI::CollapsibleContainer
 {
 public:
-    CategoryContainer(const std::string& inHeaderText,
+    LibraryCollapsibleContainer(const std::string& inHeaderText,
                       const std::string& inDebugName
-                         = "CategoryContainer");
+                         = "LibraryCollapsibleContainer");
 
     /**
      * Sets the left padding. Used to define the visual hierarchy in the list.

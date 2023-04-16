@@ -68,6 +68,7 @@ public:
     /** Background image, selected state. */
     AUI::Image selectedImage;
 
+    /** List item text. */
     AUI::Text text;
 
     //-------------------------------------------------------------------------
@@ -104,7 +105,7 @@ public:
 
     void onMouseLeave() override;
 
-private:
+protected:
     /** Sets isHovered and updates the visibility of hoveredImage. */
     void setIsHovered(bool inIsHovered);
     /** Sets isSelected and updates the visibility of selectedImage. */

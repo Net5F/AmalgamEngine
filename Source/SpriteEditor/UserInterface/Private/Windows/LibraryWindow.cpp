@@ -3,8 +3,8 @@
 #include "SpriteDataModel.h"
 #include "Paths.h"
 #include "Ignore.h"
-#include "CategoryContainer.h"
-#include "SpriteSheetContainer.h"
+#include "LibraryCollapsibleContainer.h"
+#include "SpriteSheetListItem.h"
 #include "LibraryListItem.h"
 
 namespace AM
@@ -44,7 +44,7 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
     libraryContainer.resize(Category::Count);
 
     auto categoryContainer{
-        std::make_unique<CategoryContainer>("Sprite Sheets")};
+        std::make_unique<LibraryCollapsibleContainer>("Sprite Sheets")};
     libraryContainer[Category::SpriteSheets] = std::move(categoryContainer);
 
     /* New list item button */
@@ -74,30 +74,30 @@ void LibraryWindow::onSheetAdded(unsigned int sheetID,
                                  const SpriteSheet& sheet)
 {
     // Create a container for the new sheet.
-    std::unique_ptr<AUI::Widget> sheetContainerPtr{
-        std::make_unique<SpriteSheetContainer>(sheet.relPath)};
-    SpriteSheetContainer& sheetContainer{
-        static_cast<SpriteSheetContainer&>(*sheetContainerPtr)};
+    std::unique_ptr<AUI::Widget> sheetListItemPtr{
+        std::make_unique<SpriteSheetListItem>(sheet.relPath)};
+    SpriteSheetListItem& sheetListItem{
+        static_cast<SpriteSheetListItem&>(*sheetListItemPtr)};
 
-    sheetContainer.setOnSelected([this](SpriteSheetContainer* selectedSheetContainer) {
-        // Deselect any selected sprite sheets.
-        transformSpriteSheetContainers([selectedSheetContainer](SpriteSheetContainer& otherSheetContainer) {
-            if (otherSheetContainer.getIsSelected()
-                && (&otherSheetContainer != selectedSheetContainer)) {
-                otherSheetContainer.deselect();
+    sheetListItem.setOnSelected([this](LibraryListItem* selectedListItem) {
+        // Deselect any selected list items.
+        transformListItems([selectedListItem](LibraryListItem& otherListItem) {
+            if (otherListItem.getIsSelected()
+                && (&otherListItem != selectedListItem)) {
+                otherListItem.deselect();
             }
         });
     });
 
     // Add each of the new sheet's sprites to the sheet container.
     for (unsigned int spriteID : sheet.spriteIDs) {
-        addSpriteToSheetWidget(sheetContainer, sheet, spriteID);
+        addSpriteToSheetListItem(sheetListItem, sheet, spriteID);
     }
 
     // Add the sheet container to the sheet category container.
-    auto& categoryContainer{static_cast<CategoryContainer&>(
+    auto& categoryContainer{static_cast<LibraryCollapsibleContainer&>(
         *libraryContainer[Category::SpriteSheets])};
-    categoryContainer.push_back(std::move(sheetContainerPtr));
+    categoryContainer.push_back(std::move(sheetListItemPtr));
 }
 
 void LibraryWindow::onSheetRemoved(unsigned int sheetID)
@@ -114,8 +114,8 @@ void LibraryWindow::onSheetRemoved(unsigned int sheetID)
     //thumbnailMap.erase(sheetIt);
 }
 
-void LibraryWindow::addSpriteToSheetWidget(
-    SpriteSheetContainer& sheetContainer,
+void LibraryWindow::addSpriteToSheetListItem(
+    SpriteSheetListItem& sheetListItem,
     const SpriteSheet& sheet, unsigned int spriteID)
 {
     // Construct a new list item for this sprite.
@@ -138,21 +138,8 @@ void LibraryWindow::addSpriteToSheetWidget(
         spriteDataModel.setActiveSprite(spriteID);
     });
 
-    // Add the sprite to the sheet container.
-    sheetContainer.push_back(std::move(spriteListItem));
-}
-
-template<class UnaryOperation>
-void LibraryWindow::transformSpriteSheetContainers(UnaryOperation unaryOp) 
-{
-    // Transform all containers in the sprite sheet category.
-    auto& categoryContainer{static_cast<CategoryContainer&>(
-        *libraryContainer[Category::SpriteSheets])};
-    for (auto& sheetContainerPtr : categoryContainer) {
-        SpriteSheetContainer& sheetContainer{
-            static_cast<SpriteSheetContainer&>(*sheetContainerPtr)};
-        unaryOp(sheetContainer);
-    }
+    // Add the sprite to the sheet list item.
+    sheetListItem.spriteListItemContainer.push_back(std::move(spriteListItem));
 }
 
 template<class UnaryOperation>
@@ -161,16 +148,17 @@ void LibraryWindow::transformListItems(UnaryOperation unaryOp)
     // Transform all list items in the sprite sheet category.
     // Note: We handle the sprite sheet category separately, since it's the 
     //       only one with 2 levels.
-    auto& categoryContainer{static_cast<CategoryContainer&>(
+    auto& categoryContainer{static_cast<LibraryCollapsibleContainer&>(
         *libraryContainer[Category::SpriteSheets])};
-    for (auto& sheetContainerPtr : categoryContainer) {
-        SpriteSheetContainer& sheetContainer{
-            static_cast<SpriteSheetContainer&>(*sheetContainerPtr)};
+    for (auto& sheetListItemPtr : categoryContainer) {
+        SpriteSheetListItem& sheetListItem{
+            static_cast<SpriteSheetListItem&>(*sheetListItemPtr)};
+        unaryOp(sheetListItem);
 
-        for (auto& spriteListItemPtr : sheetContainer) {
-            LibraryListItem& otherListItem{
+        for (auto& spriteListItemPtr : sheetListItem.spriteListItemContainer) {
+            LibraryListItem& spriteListItem{
                 static_cast<LibraryListItem&>(*spriteListItemPtr)};
-            unaryOp(otherListItem);
+            unaryOp(spriteListItem);
         }
     }
 
