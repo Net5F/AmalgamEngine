@@ -12,22 +12,18 @@ LibraryListItem::LibraryListItem(const std::string& inText,
 : AUI::Widget({0, 0, 318, 30}, inDebugName)
 , hoveredImage({0, 0, logicalExtent.w, logicalExtent.h})
 , selectedImage({0, 0, logicalExtent.w, logicalExtent.h})
-, activeImage({0, 0, logicalExtent.w, logicalExtent.h})
 , text({0, 0, logicalExtent.w, logicalExtent.h})
 , isHovered{false}
 , isSelected{false}
-, isActive{false}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(hoveredImage);
     children.push_back(selectedImage);
-    children.push_back(activeImage);
     children.push_back(text);
 
     // Add our backgrounds.
     hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "LibraryWindow/ListItemHovered.png");
     selectedImage.setSimpleImage(Paths::TEXTURE_DIR + "LibraryWindow/ListItemSelected.png");
-    activeImage.setSimpleImage(Paths::TEXTURE_DIR + "LibraryWindow/ListItemActive.png");
 
     // Set our text properties.
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
@@ -38,7 +34,6 @@ LibraryListItem::LibraryListItem(const std::string& inText,
     // Make the images we aren't using invisible.
     hoveredImage.setIsVisible(false);
     selectedImage.setIsVisible(false);
-    activeImage.setIsVisible(false);
 }
 
 void LibraryListItem::select()
@@ -73,41 +68,6 @@ void LibraryListItem::deselect()
     }
 }
 
-void LibraryListItem::activate()
-{
-    // If we are already active, do nothing.
-    if (isActive) {
-        return;
-    }
-
-    // Flag that we're now active.
-    setIsActive(true);
-
-    // Flag that we aren't hovered (can't be hovered while active.)
-    setIsHovered(false);
-
-    // If the user set a callback for this event, call it.
-    if (onActivated != nullptr) {
-        onActivated(this);
-    }
-}
-
-void LibraryListItem::deactivate()
-{
-    // If we aren't active, do nothing.
-    if (!isActive) {
-        return;
-    }
-
-    // Flag that we're inactive.
-    setIsActive(false);
-
-    // If the user set a callback for this event, call it.
-    if (onDeactivated != nullptr) {
-        onDeactivated(this);
-    }
-}
-
 bool LibraryListItem::getIsHovered() const
 {
     return isHovered;
@@ -116,11 +76,6 @@ bool LibraryListItem::getIsHovered() const
 bool LibraryListItem::getIsSelected() const
 {
     return isSelected;
-}
-
-bool LibraryListItem::getIsActive() const
-{
-    return isActive;
 }
 
 void LibraryListItem::setLeftPadding(int inLeftPadding)
@@ -144,12 +99,6 @@ void LibraryListItem::setOnActivated(std::function<void(LibraryListItem*)> inOnA
     onActivated = std::move(inOnActivated);
 }
 
-void LibraryListItem::setOnDeactivated(
-    std::function<void(LibraryListItem*)> inOnDeactivated)
-{
-    onDeactivated = std::move(inOnDeactivated);
-}
-
 AUI::EventResult LibraryListItem::onMouseDown(AUI::MouseButtonType buttonType,
                                    const SDL_Point& cursorPosition)
 {
@@ -159,13 +108,13 @@ AUI::EventResult LibraryListItem::onMouseDown(AUI::MouseButtonType buttonType,
     if (buttonType != AUI::MouseButtonType::Left) {
         return AUI::EventResult{.wasHandled{false}};
     }
-    // If we're already selected and active, do nothing.
-    else if (isSelected && isActive) {
+    // If we're already selected, do nothing.
+    else if (isSelected) {
         return AUI::EventResult{.wasHandled{false}};
     }
 
     if (!isSelected) {
-        // This was a single click, if we aren't already selected, select
+        // This was a single click. If we aren't already selected, select
         // this widget.
         select();
 
@@ -192,27 +141,18 @@ AUI::EventResult LibraryListItem::onMouseDoubleClick(AUI::MouseButtonType button
         return AUI::EventResult{.wasHandled{false}};
     }
 
-    // If we aren't already active, activate.
-    if (!isActive) {
-        activate();
-
-        // If we were selected, clear the selection.
-        // Note: We don't call the deselected callback since this wasn't
-        //       a normal deselect event.
-        if (isSelected) {
-            setIsSelected(false);
-        }
-
-        return AUI::EventResult{.wasHandled{true}};
+    // If the user set a callback for this event, call it.
+    if (onActivated != nullptr) {
+        onActivated(this);
     }
 
-    return AUI::EventResult{.wasHandled{false}};
+    return AUI::EventResult{.wasHandled{true}};
 }
 
 void LibraryListItem::onMouseEnter()
 {
-    // If we're active, don't change to hovered.
-    if (isActive) {
+    // If we're selected, ignore hovers.
+    if (isSelected) {
         return;
     }
 
@@ -244,12 +184,6 @@ void LibraryListItem::setIsSelected(bool inIsSelected)
 {
     isSelected = inIsSelected;
     selectedImage.setIsVisible(isSelected);
-}
-
-void LibraryListItem::setIsActive(bool inIsActive)
-{
-    isActive = inIsActive;
-    activeImage.setIsVisible(isActive);
 }
 
 } // End namespace SpriteEditor

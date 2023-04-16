@@ -1,11 +1,11 @@
-#include "MainCollapsibleContainer.h"
+#include "CategoryContainer.h"
 #include "Paths.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
-MainCollapsibleContainer::MainCollapsibleContainer(const std::string& inHeaderText,
+CategoryContainer::CategoryContainer(const std::string& inHeaderText,
                          const std::string& inDebugName)
 : AUI::CollapsibleContainer({0, 0, 318, 30}, inDebugName)
 {
@@ -30,9 +30,12 @@ MainCollapsibleContainer::MainCollapsibleContainer(const std::string& inHeaderTe
     headerText.setText(inHeaderText);
     headerText.setLogicalExtent(
         {25, 0, (logicalExtent.w - 25), logicalExtent.h});
+
+    // Set our padding.
+    setLeftPadding(8);
 }
 
-void MainCollapsibleContainer::setLeftPadding(int inLeftPadding)
+void CategoryContainer::setLeftPadding(int inLeftPadding)
 {
     int imageX{0 + inLeftPadding};
     int textX{25 + inLeftPadding};

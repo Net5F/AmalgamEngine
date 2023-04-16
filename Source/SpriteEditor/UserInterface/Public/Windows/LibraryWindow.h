@@ -13,7 +13,7 @@ namespace SpriteEditor
 {
 class MainScreen;
 class SpriteDataModel;
-class MainCollapsibleContainer;
+class SpriteSheetContainer;
 class LibraryListItem;
 
 /**
@@ -28,7 +28,7 @@ struct Category {
     };
 };
 
-// TODO: Make this obtain focus and deselect all selected thumbnails when
+// TODO: Make this obtain focus and deselect all selected things when
 //       focus is lost.
 /**
  * The left-side panel on the main screen. Allows the user to manage the
@@ -54,17 +54,24 @@ private:
     void onSheetRemoved(unsigned int sheetID);
 
     /**
-     * Adds the given sprite to the given sprite sheet widget.
+     * Adds the given sprite to the given sprite sheet container.
      */
     void addSpriteToSheetWidget(
-        MainCollapsibleContainer& sheetWidget,
+        SpriteSheetContainer& sheetContainer,
         const SpriteSheet& sheet, unsigned int spriteID);
 
     /**
-     * Deactivates any activated list items in any library category, except 
-     * for the given list item.
+     * Iterates all sprite sheet containers in the library, applying the given 
+     * transform.
      */
-    void deactivateListItems(const LibraryListItem* newActiveListItem);
+    template<class UnaryOperation>
+    void transformSpriteSheetContainers(UnaryOperation unaryOp);
+
+    /**
+     * Iterates all list items in the library, applying the given transform.
+     */
+    template<class UnaryOperation>
+    void transformListItems(UnaryOperation unaryOp);
 
     /** Used to open the confirmation dialog when removing a sheet. */
     MainScreen& mainScreen;
@@ -81,7 +88,7 @@ private:
 
     AUI::Text windowLabel;
 
-    AUI::VerticalListContainer categoryContainer;
+    AUI::VerticalListContainer libraryContainer;
 
     AUI::Button newButton;
 };

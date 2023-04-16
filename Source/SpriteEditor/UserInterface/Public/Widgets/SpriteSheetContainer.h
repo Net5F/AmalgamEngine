@@ -1,34 +1,25 @@
 #pragma once
 
-#include "AUI/Widget.h"
-#include "AUI/Image.h"
-#include "AUI/Text.h"
+#include "CategoryContainer.h"
+#include <SDL_rect.h>
 
 namespace AM
 {
 namespace SpriteEditor
 {
 /**
- * A selectable list item, used in the library window.
+ * A collapsible container used for the sprite sheets in the library window on 
+ * the main screen.
  *
- * Interactions:
- *   Mouse-over to hover.
- *   Click once to "select", putting this widget into a "selected" state.
- *   Double-click to "activate". Does not change internal state.
- *
- * The rendering order for this widget's children is:
- *   Background: hoveredImage, selectedImage
- *   Foreground: text
+ * Derives from CategoryContainer, adds "selectable" functionality so we can 
+ * select the sprite sheets to e.g. delete them.
  */
-class LibraryListItem : public AUI::Widget
+class SpriteSheetContainer : public CategoryContainer
 {
 public:
-    //-------------------------------------------------------------------------
-    // Public interface
-    //-------------------------------------------------------------------------
-    LibraryListItem(const std::string& inText,
-                    const std::string& inDebugName
-                             = "LibraryListItem");
+    SpriteSheetContainer(const std::string& inHeaderText,
+                         const std::string& inDebugName
+                             = "SpriteSheetContainer");
 
     /**
      * Selects this widget and calls onSelected.
@@ -52,13 +43,7 @@ public:
      */
     void deselect();
 
-    bool getIsHovered() const;
     bool getIsSelected() const;
-
-    /**
-     * Sets the left padding. Used to define the visual hierarchy in the list.
-     */
-    void setLeftPadding(int inLeftPadding);
 
     //-------------------------------------------------------------------------
     // Public child widgets
@@ -68,8 +53,6 @@ public:
     /** Background image, selected state. */
     AUI::Image selectedImage;
 
-    AUI::Text text;
-
     //-------------------------------------------------------------------------
     // Callback registration
     //-------------------------------------------------------------------------
@@ -77,19 +60,14 @@ public:
      * @param inOnSelected  A callback that expects a pointer to the widget
      *                      that was selected.
      */
-    void setOnSelected(std::function<void(LibraryListItem*)> inOnSelected);
+    void setOnSelected(std::function<void(SpriteSheetContainer*)> inOnSelected);
 
     /**
      * @param inOnDeselected  A callback that expects a pointer to the
      *                        widget that was deselected.
      */
-    void setOnDeselected(std::function<void(LibraryListItem*)> inOnDeselected);
+    void setOnDeselected(std::function<void(SpriteSheetContainer*)> inOnDeselected);
 
-    /**
-     * @param inOnActivated  A callback that expects a pointer to the widget
-     *                       that was activated.
-     */
-    void setOnActivated(std::function<void(LibraryListItem*)> inOnActivated);
 
     //-------------------------------------------------------------------------
     // Base class overrides
@@ -100,7 +78,7 @@ public:
     AUI::EventResult onMouseDoubleClick(AUI::MouseButtonType buttonType,
                                    const SDL_Point& cursorPosition) override;
 
-    void onMouseEnter() override;
+    AUI::EventResult onMouseMove(const SDL_Point& cursorPosition) override;
 
     void onMouseLeave() override;
 
@@ -110,15 +88,18 @@ private:
     /** Sets isSelected and updates the visibility of selectedImage. */
     void setIsSelected(bool inIsSelected);
 
-    std::function<void(LibraryListItem*)> onSelected;
-    std::function<void(LibraryListItem*)> onDeselected;
-    std::function<void(LibraryListItem*)> onActivated;
+    std::function<void(SpriteSheetContainer*)> onSelected;
+    std::function<void(SpriteSheetContainer*)> onDeselected;
 
     /** Tracks whether the mouse is currently hovering over this widget. */
     bool isHovered;
 
     /** Tracks whether this widget is currently selected. */
     bool isSelected;
+
+    /** The extent around the expand/collapse arrow that is clickable.
+        Clicking outside of this extent will cause it to be selected instead. */
+    SDL_Rect clickableExtent;
 };
 
 } // End namespace SpriteEditor
