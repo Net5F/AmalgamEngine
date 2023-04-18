@@ -29,6 +29,9 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
     children.push_back(windowLabel);
     children.push_back(newButton);
 
+    // Flag ourselves as keyboard focusable, so we can receive keyboard events.
+    isFocusable = true;
+
     /* Window setup */
     backgroundImage.setNineSliceImage(
         (Paths::TEXTURE_DIR + "WindowBackground.png"), {1, 1, 1, 1});
@@ -70,6 +73,30 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
         *this);
 }
 
+void LibraryWindow::onFocusLost(AUI::FocusLostType focusLostType) 
+{
+    // Deselect all of our selected list items.
+    for (LibraryListItem* listItem : selectedListItems) {
+        listItem->deselect();
+    }
+    selectedListItems.clear();
+}
+
+AUI::EventResult LibraryWindow::onKeyDown(SDL_Keycode keyCode)
+{
+    // If the delete key was pressed, delete all of the selected list items.
+    if (keyCode == SDLK_DELETE) {
+        for (LibraryListItem* listItem : selectedListItems) {
+            // TODO
+            LOG_INFO("Delete %s", listItem->getDebugName().c_str());
+        }
+
+        return AUI::EventResult{.wasHandled{true}};
+    }
+
+    return AUI::EventResult{.wasHandled{false}};
+}
+
 void LibraryWindow::onSheetAdded(unsigned int sheetID,
                                  const SpriteSheet& sheet)
 {
@@ -80,13 +107,7 @@ void LibraryWindow::onSheetAdded(unsigned int sheetID,
         static_cast<SpriteSheetListItem&>(*sheetListItemPtr)};
 
     sheetListItem.setOnSelected([this](LibraryListItem* selectedListItem) {
-        // Deselect any selected list items.
-        transformListItems([selectedListItem](LibraryListItem& otherListItem) {
-            if (otherListItem.getIsSelected()
-                && (&otherListItem != selectedListItem)) {
-                otherListItem.deselect();
-            }
-        });
+        processSelectedListItem(selectedListItem);
     });
 
     // Add each of the new sheet's sprites to the sheet container.
@@ -114,6 +135,22 @@ void LibraryWindow::onSheetRemoved(unsigned int sheetID)
     //thumbnailMap.erase(sheetIt);
 }
 
+void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
+{
+    // TODO: Currently we only support one selection at a time. When we add 
+    //       multi-select, this logic will need to check if the newly selected 
+    //       item is compatible with the existing ones.
+
+    // Deselect all of our selected list items.
+    for (LibraryListItem* listItem : selectedListItems) {
+        listItem->deselect();
+    }
+    selectedListItems.clear();
+
+    // Add the new item.
+    selectedListItems.push_back(selectedListItem);
+}
+
 void LibraryWindow::addSpriteToSheetListItem(
     SpriteSheetListItem& sheetListItem,
     const SpriteSheet& sheet, unsigned int spriteID)
@@ -124,46 +161,17 @@ void LibraryWindow::addSpriteToSheetListItem(
 
     spriteListItem->setLeftPadding(57);
 
-    spriteListItem->setOnSelected([this, spriteID](LibraryListItem* selectedItem) {
-        // Deselect any selected list items.
-        transformListItems([selectedItem](LibraryListItem& otherItem) {
-            if (otherItem.getIsSelected()
-                && (&otherItem != selectedItem)) {
-                otherItem.deselect();
-            }
-        });
+    spriteListItem->setOnSelected([this, spriteID](LibraryListItem* selectedListItem) {
+        processSelectedListItem(selectedListItem);
     });
-    spriteListItem->setOnActivated([this, spriteID](LibraryListItem* activatedItem) {
+    spriteListItem->setOnActivated([this, spriteID](LibraryListItem* activatedListItem) {
+        AM::ignore(activatedListItem);
         // Set this item's associated sprite as the active sprite.
         spriteDataModel.setActiveSprite(spriteID);
     });
 
     // Add the sprite to the sheet list item.
     sheetListItem.spriteListItemContainer.push_back(std::move(spriteListItem));
-}
-
-template<class UnaryOperation>
-void LibraryWindow::transformListItems(UnaryOperation unaryOp) 
-{
-    // Transform all list items in the sprite sheet category.
-    // Note: We handle the sprite sheet category separately, since it's the 
-    //       only one with 2 levels.
-    auto& categoryContainer{static_cast<LibraryCollapsibleContainer&>(
-        *libraryContainer[Category::SpriteSheets])};
-    for (auto& sheetListItemPtr : categoryContainer) {
-        SpriteSheetListItem& sheetListItem{
-            static_cast<SpriteSheetListItem&>(*sheetListItemPtr)};
-        unaryOp(sheetListItem);
-
-        for (auto& spriteListItemPtr : sheetListItem.spriteListItemContainer) {
-            LibraryListItem& spriteListItem{
-                static_cast<LibraryListItem&>(*spriteListItemPtr)};
-            unaryOp(spriteListItem);
-        }
-    }
-
-    // Transform all list items in the other categories.
-    // TODO
 }
 
 } // End namespace SpriteEditor

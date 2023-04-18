@@ -118,13 +118,6 @@ AUI::EventResult LibraryListItem::onMouseDown(AUI::MouseButtonType buttonType,
         // this widget.
         select();
 
-        // Note: It would make sense to request focus and deselect when we
-        //       lose focus, but it seems like every use case for "select a
-        //       thumbnail" prefers leaving the thumbnail selected and
-        //       controlling it from the outside.
-        //       E.g. for build mode, we want the thumbnail to stay selected
-        //       until the parent tells it to deselect.
-
         return AUI::EventResult{.wasHandled{true}};
     }
 
