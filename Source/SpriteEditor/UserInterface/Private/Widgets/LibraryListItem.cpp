@@ -108,20 +108,13 @@ AUI::EventResult LibraryListItem::onMouseDown(AUI::MouseButtonType buttonType,
     if (buttonType != AUI::MouseButtonType::Left) {
         return AUI::EventResult{.wasHandled{false}};
     }
-    // If we're already selected, do nothing.
-    else if (isSelected) {
-        return AUI::EventResult{.wasHandled{false}};
-    }
 
+    // If we aren't already selected, select this widget.
     if (!isSelected) {
-        // This was a single click. If we aren't already selected, select
-        // this widget.
         select();
-
-        return AUI::EventResult{.wasHandled{true}};
     }
 
-    return AUI::EventResult{.wasHandled{false}};
+    return AUI::EventResult{.wasHandled{true}};
 }
 
 AUI::EventResult LibraryListItem::onMouseDoubleClick(AUI::MouseButtonType buttonType,
@@ -152,10 +145,6 @@ void LibraryListItem::onMouseEnter()
     // If we're not hovered, become hovered.
     if (!isHovered) {
         setIsHovered(true);
-    }
-    else {
-        // We're hovered, unhover.
-        setIsHovered(false);
     }
 }
 

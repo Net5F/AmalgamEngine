@@ -1,11 +1,13 @@
 #pragma once
 
 #include "SpriteSheet.h"
+#include "LibraryListItem.h"
 #include "AUI/Window.h"
 #include "AUI/Text.h"
 #include "AUI/Image.h"
 #include "AUI/VerticalListContainer.h"
 #include "AUI/Button.h"
+#include <unordered_map>
 
 namespace AM
 {
@@ -14,22 +16,7 @@ namespace SpriteEditor
 class MainScreen;
 class SpriteDataModel;
 class SpriteSheetListItem;
-class LibraryListItem;
 
-/**
- * The top-level categories that we have in the library.
- * These values are used to index into the categoryContainer.
- */
-struct Category {
-    enum Value
-    {
-        SpriteSheets,
-        Count
-    };
-};
-
-// TODO: Make this obtain focus and deselect all selected things when
-//       focus is lost.
 /**
  * The left-side panel on the main screen. Allows the user to manage the
  * project's sprite sheets.
@@ -51,6 +38,18 @@ public:
 
 private:
     /**
+     * The top-level categories that we have in the library.
+     * These values are used to index into libraryContainer.
+     */
+    struct Category {
+        enum Value
+        {
+            SpriteSheets,
+            Count
+        };
+    };
+
+    /**
      * Adds the given sheet to the library.
      */
     void onSheetAdded(unsigned int sheetID, const SpriteSheet& sheet);
@@ -59,6 +58,12 @@ private:
      * Removes the given sheet from the library.
      */
     void onSheetRemoved(unsigned int sheetID);
+
+    /**
+     * Updates the display name on the list item for the given sprite.
+     */
+    void onSpriteDisplayNameChanged(unsigned int spriteID,
+                                    const std::string& newDisplayName);
 
     /**
      * If there are other currently selected list items, checks if the given 
@@ -73,11 +78,28 @@ private:
         SpriteSheetListItem& sheetListItem,
         const SpriteSheet& sheet, unsigned int spriteID);
 
+    /**
+     * @return true if the given type is removable.
+     */
+    bool isRemovable(LibraryListItem::Type listItemType);
+
+    /**
+     * Removes the given list item widget from the library and all secondary 
+     * data structures.
+     */
+    void removeListItem(LibraryListItem* listItem);
+
     /** Used to open the confirmation dialog when removing a sheet. */
     MainScreen& mainScreen;
 
     /** Used to update the model when a sheet is removed. */
     SpriteDataModel& spriteDataModel;
+
+    /** Maps sprite sheet IDs to their associated thumbnails. */
+    std::unordered_map<unsigned int, LibraryListItem*> sheetListItemMap;
+
+    /** Maps sprite IDs to their associated thumbnails. */
+    std::unordered_map<unsigned int, LibraryListItem*> spriteListItemMap;
 
     /** Holds the currently selected list items. */
     std::vector<LibraryListItem*> selectedListItems;

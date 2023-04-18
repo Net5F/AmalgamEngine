@@ -44,11 +44,10 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
 
     /* Container */
     // Add the collapsible categories.
-    libraryContainer.resize(Category::Count);
-
-    auto categoryContainer{
+    // Note: These must be ordered to match the Category enum.
+    auto sheetContainer{
         std::make_unique<LibraryCollapsibleContainer>("Sprite Sheets")};
-    libraryContainer[Category::SpriteSheets] = std::move(categoryContainer);
+    libraryContainer.push_back(std::move(sheetContainer));
 
     /* New list item button */
     newButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR
@@ -71,6 +70,10 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
     spriteDataModel.sheetAdded.connect<&LibraryWindow::onSheetAdded>(*this);
     spriteDataModel.sheetRemoved.connect<&LibraryWindow::onSheetRemoved>(
         *this);
+
+    // When a sprite's display name is updated, update the matching thumbnail.
+    spriteDataModel.spriteDisplayNameChanged
+        .connect<&LibraryWindow::onSpriteDisplayNameChanged>(*this);
 }
 
 void LibraryWindow::onFocusLost(AUI::FocusLostType focusLostType) 
@@ -84,12 +87,37 @@ void LibraryWindow::onFocusLost(AUI::FocusLostType focusLostType)
 
 AUI::EventResult LibraryWindow::onKeyDown(SDL_Keycode keyCode)
 {
-    // If the delete key was pressed, delete all of the selected list items.
+    // If the delete key was pressed, open the confirmation dialog.
     if (keyCode == SDLK_DELETE) {
-        for (LibraryListItem* listItem : selectedListItems) {
-            // TODO
-            LOG_INFO("Delete %s", listItem->getDebugName().c_str());
+        // If there aren't any selected list items, return early.
+        if (selectedListItems.size() == 0) {
+            return AUI::EventResult{.wasHandled{false}};
         }
+
+        // If any of the selected items aren't removable, return early.
+        for (LibraryListItem* listItem : selectedListItems) {
+            if (!isRemovable(listItem->type)) {
+                return AUI::EventResult{.wasHandled{false}};
+            }
+        }
+
+        // Set up our data for the confirmation dialog.
+        std::string endText{(selectedListItems.size() > 1) ? " items?"
+                                                           : " item?"};
+        std::string bodyText{};
+        bodyText += "Delete " + std::to_string(selectedListItems.size())
+                    + endText;
+
+        std::function<void(void)> onConfirmation = [&]() {
+            for (LibraryListItem* listItem : selectedListItems) {
+                removeListItem(listItem);
+            }
+            selectedListItems.clear();
+        };
+
+        // Bring up the confirmation dialog.
+        mainScreen.openConfirmationDialog(bodyText, "DELETE",
+                                          std::move(onConfirmation));
 
         return AUI::EventResult{.wasHandled{true}};
     }
@@ -101,38 +129,59 @@ void LibraryWindow::onSheetAdded(unsigned int sheetID,
                                  const SpriteSheet& sheet)
 {
     // Create a container for the new sheet.
-    std::unique_ptr<AUI::Widget> sheetListItemPtr{
-        std::make_unique<SpriteSheetListItem>(sheet.relPath)};
-    SpriteSheetListItem& sheetListItem{
-        static_cast<SpriteSheetListItem&>(*sheetListItemPtr)};
+    auto sheetListItem{std::make_unique<SpriteSheetListItem>(sheet.relPath)};
+    sheetListItem->type = LibraryListItem::Type::SpriteSheet;
+    sheetListItem->ID = sheetID;
+    sheetListItemMap.emplace(sheetID, sheetListItem.get());
 
-    sheetListItem.setOnSelected([this](LibraryListItem* selectedListItem) {
+    sheetListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
         processSelectedListItem(selectedListItem);
     });
 
     // Add each of the new sheet's sprites to the sheet container.
     for (unsigned int spriteID : sheet.spriteIDs) {
-        addSpriteToSheetListItem(sheetListItem, sheet, spriteID);
+        addSpriteToSheetListItem(*sheetListItem, sheet, spriteID);
     }
 
-    // Add the sheet container to the sheet category container.
-    auto& categoryContainer{static_cast<LibraryCollapsibleContainer&>(
+    // Add the sheet list item to the sheet container.
+    auto& sheetContainer{static_cast<LibraryCollapsibleContainer&>(
         *libraryContainer[Category::SpriteSheets])};
-    categoryContainer.push_back(std::move(sheetListItemPtr));
+    sheetContainer.push_back(std::move(sheetListItem));
 }
 
 void LibraryWindow::onSheetRemoved(unsigned int sheetID)
 {
-    //auto sheetIt{thumbnailMap.find(sheetID)};
-    //if (sheetIt == thumbnailMap.end()) {
-    //    LOG_FATAL("Failed to find sprite sheet during removal.");
-    //}
+    auto sheetIt{sheetListItemMap.find(sheetID)};
+    if (sheetIt == sheetListItemMap.end()) {
+        LOG_FATAL("Failed to find sprite sheet during removal.");
+    }
 
-    //// Remove the thumbnail from the container.
-    //spriteSheetContainer.erase(sheetIt->second);
+    // Clear any list item selections.
+    for (LibraryListItem* listItem : selectedListItems) {
+        listItem->deselect();
+    }
+    selectedListItems.clear();
 
-    //// Remove the thumbnail from the map.
-    //thumbnailMap.erase(sheetIt);
+    // Remove the list item from the container.
+    auto& sheetContainer{static_cast<LibraryCollapsibleContainer&>(
+        *libraryContainer[Category::SpriteSheets])};
+    sheetContainer.erase(sheetIt->second);
+
+    // Remove the list item from the map.
+    sheetListItemMap.erase(sheetIt);
+}
+
+void LibraryWindow::onSpriteDisplayNameChanged(unsigned int spriteID,
+                                const std::string& newDisplayName)
+{
+    auto spriteListItemIt{spriteListItemMap.find(spriteID)};
+    if (spriteListItemIt == spriteListItemMap.end()) {
+        LOG_FATAL("Failed to find a list item for the given sprite.");
+    }
+
+    // Update the list item to use the sprite's new display name.
+    LibraryListItem& spriteListItem{*(spriteListItemIt->second)};
+    spriteListItem.text.setText(newDisplayName);
 }
 
 void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
@@ -158,6 +207,9 @@ void LibraryWindow::addSpriteToSheetListItem(
     // Construct a new list item for this sprite.
     const Sprite& sprite{spriteDataModel.getSprite(spriteID)};
     auto spriteListItem{std::make_unique<LibraryListItem>(sprite.displayName)};
+    spriteListItem->type = LibraryListItem::Type::Sprite;
+    spriteListItem->ID = spriteID;
+    spriteListItemMap.emplace(spriteID, spriteListItem.get());
 
     spriteListItem->setLeftPadding(57);
 
@@ -170,8 +222,33 @@ void LibraryWindow::addSpriteToSheetListItem(
         spriteDataModel.setActiveSprite(spriteID);
     });
 
-    // Add the sprite to the sheet list item.
+    // Add the sprite list item to the sheet list item.
     sheetListItem.spriteListItemContainer.push_back(std::move(spriteListItem));
+}
+
+bool LibraryWindow::isRemovable(LibraryListItem::Type listItemType)
+{
+    if (listItemType == LibraryListItem::Type::Sprite) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+
+void LibraryWindow::removeListItem(LibraryListItem* listItem)
+{
+    // Sprites can't be individually removed, return early.
+    if (listItem->type == LibraryListItem::Type::Sprite) {
+        return;
+    }
+
+    switch (listItem->type) {
+        case LibraryListItem::Type::SpriteSheet: {
+            spriteDataModel.remSpriteSheet(listItem->ID);
+            break;
+        }
+    }
 }
 
 } // End namespace SpriteEditor

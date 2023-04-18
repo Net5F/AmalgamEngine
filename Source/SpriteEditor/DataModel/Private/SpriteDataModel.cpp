@@ -19,6 +19,7 @@ namespace SpriteEditor
 SpriteDataModel::SpriteDataModel(SDL_Renderer* inSdlRenderer)
 : sheetAdded{sheetAddedSig}
 , sheetRemoved{sheetRemovedSig}
+, spriteRemoved{spriteRemovedSig}
 , activeSpriteChanged{activeSpriteChangedSig}
 , spriteDisplayNameChanged{spriteDisplayNameChangedSig}
 , spriteHasBoundingBoxChanged{spriteHasBoundingBoxChangedSig}

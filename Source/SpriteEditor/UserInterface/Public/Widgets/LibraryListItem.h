@@ -60,6 +60,22 @@ public:
      */
     void setLeftPadding(int inLeftPadding);
 
+    /**
+     * The types of list items that we hold in the library.
+     */
+    enum class Type
+    {
+        SpriteSheet,
+        Sprite,
+        Floor,
+        Wall
+    };
+    Type type{};
+
+    /** Alongside type, associates this list item with the model data that it 
+        represents. */
+    unsigned int ID{0};
+
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------

@@ -126,6 +126,9 @@ public:
     /** A sprite sheet was removed from the model. */
     entt::sink<entt::sigh<void(unsigned int sheetID)>> sheetRemoved;
 
+    /** A sprite was removed from the model. */
+    entt::sink<entt::sigh<void(unsigned int spriteID)>> spriteRemoved;
+
     /** The active sprite has changed to a new sprite. */
     entt::sink<entt::sigh<void(unsigned int newActiveSpriteID,
                                const Sprite& newActiveSprite)>>
@@ -216,7 +219,7 @@ private:
 
     entt::sigh<void(unsigned int sheetID)> sheetRemovedSig{};
 
-    entt::sigh<void(unsigned int spriteID)> spriteRemovedSig{};
+    entt::sigh<void(unsigned int spriteID)> spriteRemovedSig;
 
     entt::sigh<void(unsigned int newActiveSpriteID,
                     const Sprite& newActiveSprite)>

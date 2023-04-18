@@ -42,11 +42,13 @@ AUI::EventResult
         return AUI::EventResult{.wasHandled{false}};
     }
 
-    // If we aren't selected and our text was clicked, select this widget.
-    if (!isSelected
-        && AUI::SDLHelpers::pointInRect(cursorPosition,
+    // If our text was clicked, select this widget.
+    if (AUI::SDLHelpers::pointInRect(cursorPosition,
                                         text.getClippedExtent())) {
-        select();
+        // If we're already selected, do nothing.
+        if (!isSelected) {
+            select();
+        }
 
         return AUI::EventResult{.wasHandled{true}};
     }
@@ -65,23 +67,18 @@ AUI::EventResult SpriteSheetListItem::onMouseDoubleClick(AUI::MouseButtonType bu
 
 AUI::EventResult SpriteSheetListItem::onMouseMove(const SDL_Point& cursorPosition)
 {
-    // If we're selected, don't change to hovered.
-    if (isSelected) {
-        return AUI::EventResult{.wasHandled{false}};
-    }
-
     // If the mouse is within the header extent.
     SDL_Rect headerExtent{spriteListItemContainer.getHeaderExtent()};
     if (AUI::SDLHelpers::pointInRect(cursorPosition, headerExtent)) {
-        // If we're not hovered, become hovered.
-        if (!isHovered) {
+        // If we're not selected or hovered, become hovered.
+        if (!isSelected && !isHovered) {
             setIsHovered(true);
         }
 
         return AUI::EventResult{.wasHandled{true}};
     }
     else if (isHovered) {
-        // We're hovered, unhover.
+        // We're hovered and the mouse is outside the header, unhover.
         setIsHovered(false);
     }
 
