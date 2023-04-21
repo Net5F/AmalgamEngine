@@ -22,8 +22,8 @@ LibraryListItem::LibraryListItem(const std::string& inText,
     children.push_back(text);
 
     // Add our backgrounds.
-    hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "LibraryWindow/ListItemHovered.png");
-    selectedImage.setSimpleImage(Paths::TEXTURE_DIR + "LibraryWindow/ListItemSelected.png");
+    hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "Highlights/Hovered.png");
+    selectedImage.setSimpleImage(Paths::TEXTURE_DIR + "Highlights/Selected.png");
 
     // Set our text properties.
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);

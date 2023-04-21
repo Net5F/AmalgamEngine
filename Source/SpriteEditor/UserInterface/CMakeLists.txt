@@ -9,6 +9,7 @@ target_sources(SpriteEditor
         Private/Widgets/SpriteSheetListItem.cpp
         Private/Widgets/TitleButton.cpp
         Private/Windows/AddSheetDialog.cpp
+        Private/Windows/LibraryAddMenu.cpp
         Private/Windows/LibraryWindow.cpp
         Private/Windows/PropertiesPanel.cpp
         Private/Windows/SaveButtonWindow.cpp
@@ -27,6 +28,7 @@ target_sources(SpriteEditor
         Public/Widgets/SpriteSheetListItem.h
         Public/Widgets/TitleButton.h
         Public/Windows/AddSheetDialog.h
+        Public/Windows/LibraryAddMenu.h
         Public/Windows/LibraryWindow.h
         Public/Windows/PropertiesPanel.h
         Public/Windows/SaveButtonWindow.h

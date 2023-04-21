@@ -104,6 +104,9 @@ private:
     /** Holds the currently selected list items. */
     std::vector<LibraryListItem*> selectedListItems;
 
+    /** Holds items that are staged to be removed. */
+    std::vector<LibraryListItem*> itemsToRemove;
+
     //-------------------------------------------------------------------------
     // Private child widgets
     //-------------------------------------------------------------------------
@@ -115,7 +118,7 @@ private:
 
     AUI::VerticalListContainer libraryContainer;
 
-    AUI::Button newButton;
+    AUI::Button addButton;
 };
 
 } // End namespace SpriteEditor

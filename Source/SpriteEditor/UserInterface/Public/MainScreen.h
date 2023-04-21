@@ -8,6 +8,7 @@
 #include "SaveButtonWindow.h"
 #include "PropertiesPanel.h"
 #include "TitleButton.h"
+#include "LibraryAddMenu.h"
 #include "AddSheetDialog.h"
 
 namespace AM
@@ -36,9 +37,9 @@ public:
                                 std::function<void(void)> onConfirmation);
 
     /**
-     * Opens the "Add Sheet" dialog.
+     * Opens the Library's "add list item" menu.
      */
-    void openAddSheetDialog();
+    void openLibraryAddMenu();
 
     void render() override;
 
@@ -58,6 +59,9 @@ private:
     //-------------------------------------------------------------------------
     /** The left-side window for managing sprite sheets, sprites, etc. */
     LibraryWindow libraryWindow;
+
+    /** The menu for adding new items that opens when you press the "+". */
+    LibraryAddMenu libraryAddMenu;
 
     /** The center stage for editing sprite bounding boxes. */
     SpriteEditStage spriteEditStage;

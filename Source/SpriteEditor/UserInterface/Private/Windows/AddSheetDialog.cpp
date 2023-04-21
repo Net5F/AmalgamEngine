@@ -11,7 +11,8 @@ namespace SpriteEditor
 {
 AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
 : AUI::Window({0, 0, 1920, 1080}, "AddSheetDialog")
-, backgroundImage({0, 0, logicalExtent.w, logicalExtent.h})
+, shadowImage({0, 0, logicalExtent.w, logicalExtent.h})
+, backgroundImage({719, 208, 523, 506})
 , headerText({747, 228, 280, 60})
 , pathLabel({747, 300, 151, 38})
 , pathInput({919, 300, 180, 38})
@@ -29,6 +30,7 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
 , errorText({748, 556, 466, 60})
 {
     // Add our children so they're included in rendering, etc.
+    children.push_back(shadowImage);
     children.push_back(backgroundImage);
     children.push_back(headerText);
     children.push_back(pathLabel);
@@ -45,9 +47,12 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
     children.push_back(cancelButton);
     children.push_back(errorText);
 
+    /* Background shadow image. */
+    shadowImage.setSimpleImage(Paths::TEXTURE_DIR + "Dialogs/Shadow.png");
+
     /* Background image. */
-    backgroundImage.setSimpleImage(Paths::TEXTURE_DIR
-                                   + "Dialogs/AddSheetBackground.png");
+    backgroundImage.setNineSliceImage(
+        (Paths::TEXTURE_DIR + "WindowBackground.png"), {1, 1, 1, 1});
 
     /* Header text. */
     headerText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 32);

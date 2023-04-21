@@ -26,7 +26,11 @@ public:
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------
-    /** The dialog's background */
+    /** Semi-transparent shadow image to obscure things that are behind the
+        dialog. */
+    AUI::Image shadowImage;
+
+    /** The dialog's background image. */
     AUI::Image backgroundImage;
 
     /** The header text at the top of the dialog. */

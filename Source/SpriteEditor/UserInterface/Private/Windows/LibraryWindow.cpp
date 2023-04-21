@@ -20,16 +20,16 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
 , headerImage({0, 0, 320, 40}, "LibraryHeader")
 , windowLabel({12, 0, 80, 40}, "LibraryWindowLabel")
 , libraryContainer({1, 40, 318, (1080 - 40 - 1)}, "LibraryContainer")
-, newButton({286, 9, 22, 22}, "NewButton")
+, addButton({286, 9, 22, 22}, "AddButton")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
     children.push_back(headerImage);
     children.push_back(libraryContainer);
     children.push_back(windowLabel);
-    children.push_back(newButton);
+    children.push_back(addButton);
 
-    // Flag ourselves as keyboard focusable, so we can receive keyboard events.
+    // Flag ourselves as focusable, so we can receive keyboard events.
     isFocusable = true;
 
     /* Window setup */
@@ -49,20 +49,20 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
         std::make_unique<LibraryCollapsibleContainer>("Sprite Sheets")};
     libraryContainer.push_back(std::move(sheetContainer));
 
-    /* New list item button */
-    newButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR
+    /* Add list item button */
+    addButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR
                                          + "LibraryWindow/NewIcon.png");
-    newButton.hoveredImage.setSimpleImage(Paths::TEXTURE_DIR
+    addButton.hoveredImage.setSimpleImage(Paths::TEXTURE_DIR
                                           + "LibraryWindow/NewHoveredIcon.png");
-    newButton.pressedImage.setSimpleImage(Paths::TEXTURE_DIR
+    addButton.pressedImage.setSimpleImage(Paths::TEXTURE_DIR
                                           + "LibraryWindow/NewIcon.png");
 
-    newButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
-    newButton.text.setText("");
+    addButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
+    addButton.text.setText("");
 
-    newButton.setOnPressed([this]() {
-        // Bring up the add dialog.
-        mainScreen.openAddSheetDialog();
+    addButton.setOnPressed([this]() {
+        // Bring up the add menu.
+        mainScreen.openLibraryAddMenu();
     });
 
     // When a sprite sheet is added or removed from the model, update this
@@ -94,10 +94,16 @@ AUI::EventResult LibraryWindow::onKeyDown(SDL_Keycode keyCode)
             return AUI::EventResult{.wasHandled{false}};
         }
 
+        // Add the selected items to a vector so any accidental selection 
+        // changes don't affect the operation.
         // If any of the selected items aren't removable, return early.
+        itemsToRemove.clear();
         for (LibraryListItem* listItem : selectedListItems) {
             if (!isRemovable(listItem->type)) {
                 return AUI::EventResult{.wasHandled{false}};
+            }
+            else {
+                itemsToRemove.push_back(listItem);
             }
         }
 
@@ -109,7 +115,7 @@ AUI::EventResult LibraryWindow::onKeyDown(SDL_Keycode keyCode)
                     + endText;
 
         std::function<void(void)> onConfirmation = [&]() {
-            for (LibraryListItem* listItem : selectedListItems) {
+            for (LibraryListItem* listItem : itemsToRemove) {
                 removeListItem(listItem);
             }
             selectedListItems.clear();

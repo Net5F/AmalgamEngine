@@ -14,6 +14,7 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 : AUI::Screen("MainScreen")
 , spriteDataModel{inSpriteDataModel}
 , libraryWindow(*this, spriteDataModel)
+, libraryAddMenu()
 , spriteEditStage(spriteDataModel)
 , saveButtonWindow(*this, spriteDataModel)
 , propertiesPanel(spriteDataModel)
@@ -23,6 +24,7 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
     // Add our windows so they're included in rendering, etc.
     windows.push_back(spriteEditStage);
     windows.push_back(libraryWindow);
+    windows.push_back(libraryAddMenu);
     windows.push_back(saveButtonWindow);
     windows.push_back(propertiesPanel);
     windows.push_back(confirmationDialog);
@@ -89,9 +91,16 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
         confirmationDialog.setIsVisible(false);
     });
 
+    /* Library add menu. */
+    libraryAddMenu.addSpriteSheetButton.setOnPressed([this]() {
+        addSheetDialog.setIsVisible(true);
+        libraryAddMenu.setIsVisible(false);
+    });
+
     // Make the modal dialogs invisible.
     confirmationDialog.setIsVisible(false);
     addSheetDialog.setIsVisible(false);
+    libraryAddMenu.setIsVisible(false);
 }
 
 void MainScreen::openConfirmationDialog(
@@ -116,10 +125,14 @@ void MainScreen::openConfirmationDialog(
     confirmationDialog.setIsVisible(true);
 }
 
-void MainScreen::openAddSheetDialog()
+void MainScreen::openLibraryAddMenu()
 {
-    // Open the dialog.
-    addSheetDialog.setIsVisible(true);
+    // If the menu isn't already open.
+    if (!libraryAddMenu.getIsVisible()) {
+        // Open the menu and focus it, so it can close itself if necessary.
+        libraryAddMenu.setIsVisible(true);
+        setFocusAfterNextLayout(&libraryAddMenu);
+    }
 }
 
 void MainScreen::render()
