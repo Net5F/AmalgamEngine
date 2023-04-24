@@ -1,29 +1,20 @@
 #include "TitleButton.h"
-#include "AssetCache.h"
 #include "Paths.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
-TitleButton::TitleButton(AssetCache& assetCache, const SDL_Rect& inScreenExtent,
+TitleButton::TitleButton(const SDL_Rect& inLogicalExtent,
                          const std::string& inText,
                          const std::string& inDebugName)
-: AUI::Button(inScreenExtent, inDebugName)
+: AUI::Button(inLogicalExtent, inDebugName)
 {
     // Add our backgrounds.
-    normalImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "Button/Normal.png"));
-    hoveredImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "Button/Hovered.png"));
-    pressedImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "Button/Pressed.png"));
-    disabledImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "Button/Disabled.png"));
+    normalImage.setSimpleImage(Paths::TEXTURE_DIR + "Button/Normal.png");
+    hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "Button/Hovered.png");
+    pressedImage.setSimpleImage(Paths::TEXTURE_DIR + "Button/Pressed.png");
+    disabledImage.setSimpleImage(Paths::TEXTURE_DIR + "Button/Disabled.png");
 
     // Set our text properties.
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);

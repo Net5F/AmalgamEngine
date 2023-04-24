@@ -2,7 +2,6 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
-#include "AssetCache.h"
 #include "Paths.h"
 #include "Ignore.h"
 
@@ -10,27 +9,28 @@ namespace AM
 {
 namespace SpriteEditor
 {
-AddSheetDialog::AddSheetDialog(AssetCache& assetCache,
-                               SpriteDataModel& inSpriteDataModel)
+AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
 : AUI::Window({0, 0, 1920, 1080}, "AddSheetDialog")
-, backgroundImage({0, 0, logicalExtent.w, logicalExtent.h})
+, shadowImage({0, 0, logicalExtent.w, logicalExtent.h})
+, backgroundImage({719, 208, 523, 506})
 , headerText({747, 228, 280, 60})
 , pathLabel({747, 300, 151, 38})
-, pathInput(assetCache, {919, 300, 180, 38})
+, pathInput({919, 300, 180, 38})
 , widthLabel({747, 350, 151, 38})
-, widthInput(assetCache, {919, 350, 180, 38})
+, widthInput({919, 350, 180, 38})
 , heightLabel({747, 400, 151, 38})
-, heightInput(assetCache, {919, 400, 180, 38})
+, heightInput({919, 400, 180, 38})
 , offsetLabel({747, 450, 151, 38})
-, offsetInput(assetCache, {919, 450, 180, 38})
+, offsetInput({919, 450, 180, 38})
 , nameLabel({747, 500, 151, 38})
-, nameInput(assetCache, {919, 500, 180, 38})
-, addButton(assetCache, {1099, 640, 123, 56}, "ADD")
-, cancelButton(assetCache, {958, 640, 123, 56}, "CANCEL")
+, nameInput({919, 500, 180, 38})
+, addButton({1099, 640, 123, 56}, "ADD")
+, cancelButton({958, 640, 123, 56}, "CANCEL")
 , spriteDataModel{inSpriteDataModel}
 , errorText({748, 556, 466, 60})
 {
     // Add our children so they're included in rendering, etc.
+    children.push_back(shadowImage);
     children.push_back(backgroundImage);
     children.push_back(headerText);
     children.push_back(pathLabel);
@@ -47,11 +47,12 @@ AddSheetDialog::AddSheetDialog(AssetCache& assetCache,
     children.push_back(cancelButton);
     children.push_back(errorText);
 
+    /* Background shadow image. */
+    shadowImage.setSimpleImage(Paths::TEXTURE_DIR + "Dialogs/Shadow.png");
+
     /* Background image. */
-    backgroundImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR
-                               + "Dialogs/AddSheetBackground.png"));
+    backgroundImage.setNineSliceImage(
+        (Paths::TEXTURE_DIR + "WindowBackground.png"), {1, 1, 1, 1});
 
     /* Header text. */
     headerText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 32);
@@ -65,7 +66,7 @@ AddSheetDialog::AddSheetDialog(AssetCache& assetCache,
     pathLabel.setText("Relative Path");
 
     pathInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    pathInput.setMargins({8, 0, 8, 0});
+    pathInput.setPadding({0, 8, 0, 8});
 
     /* Width entry. */
     widthLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -74,7 +75,7 @@ AddSheetDialog::AddSheetDialog(AssetCache& assetCache,
     widthLabel.setText("Sprite Width");
 
     widthInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    widthInput.setMargins({8, 0, 8, 0});
+    widthInput.setPadding({0, 8, 0, 8});
 
     /* Height entry. */
     heightLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -83,7 +84,7 @@ AddSheetDialog::AddSheetDialog(AssetCache& assetCache,
     heightLabel.setText("Sprite Height");
 
     heightInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    heightInput.setMargins({8, 0, 8, 0});
+    heightInput.setPadding({0, 8, 0, 8});
 
     /* Y offset entry. */
     offsetLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -92,7 +93,7 @@ AddSheetDialog::AddSheetDialog(AssetCache& assetCache,
     offsetLabel.setText("Y Offset");
 
     offsetInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    offsetInput.setMargins({8, 0, 8, 0});
+    offsetInput.setPadding({0, 8, 0, 8});
 
     /* Name entry. */
     nameLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -101,7 +102,7 @@ AddSheetDialog::AddSheetDialog(AssetCache& assetCache,
     nameLabel.setText("Base Name");
 
     nameInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    nameInput.setMargins({8, 0, 8, 0});
+    nameInput.setPadding({0, 8, 0, 8});
 
     /* Confirmation buttons. */
     // Add a callback to validate the input and add the new sprite sheet.

@@ -2,15 +2,18 @@ target_sources(SpriteEditor
     PRIVATE
         Private/Widgets/BoundingBoxGizmo.cpp
         Private/Widgets/ConfirmationButton.cpp
+        Private/Widgets/LibraryCollapsibleContainer.cpp
+        Private/Widgets/LibraryListItem.cpp
         Private/Widgets/MainTextInput.cpp
         Private/Widgets/MainThumbnail.cpp
+        Private/Widgets/SpriteSheetListItem.cpp
         Private/Widgets/TitleButton.cpp
         Private/Windows/AddSheetDialog.cpp
+        Private/Windows/LibraryAddMenu.cpp
+        Private/Windows/LibraryWindow.cpp
         Private/Windows/PropertiesPanel.cpp
         Private/Windows/SaveButtonWindow.cpp
         Private/Windows/SpriteEditStage.cpp
-        Private/Windows/SpritePanel.cpp
-        Private/Windows/SpriteSheetPanel.cpp
         Private/Windows/TitleWindow.cpp
         Private/MainScreen.cpp
         Private/TitleScreen.cpp
@@ -18,15 +21,18 @@ target_sources(SpriteEditor
     PUBLIC
         Public/Widgets/BoundingBoxGizmo.h
         Public/Widgets/ConfirmationButton.h
+        Public/Widgets/LibraryCollapsibleContainer.h
+        Public/Widgets/LibraryListItem.h
         Public/Widgets/MainTextInput.h
         Public/Widgets/MainThumbnail.h
+        Public/Widgets/SpriteSheetListItem.h
         Public/Widgets/TitleButton.h
         Public/Windows/AddSheetDialog.h
+        Public/Windows/LibraryAddMenu.h
+        Public/Windows/LibraryWindow.h
         Public/Windows/PropertiesPanel.h
         Public/Windows/SaveButtonWindow.h
         Public/Windows/SpriteEditStage.h
-        Public/Windows/SpritePanel.h
-        Public/Windows/SpriteSheetPanel.h
         Public/Windows/TitleWindow.h
         Public/MainScreen.h
         Public/TitleScreen.h

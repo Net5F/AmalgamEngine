@@ -2,13 +2,11 @@
 
 #include "AUI/Window.h"
 #include "AUI/Screen.h"
-#include "AUI/TiledImage.h"
+#include "AUI/Image.h"
 #include "BoundingBoxGizmo.h"
 
 namespace AM
 {
-class AssetCache;
-
 namespace SpriteEditor
 {
 struct Sprite;
@@ -24,8 +22,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteEditStage(AssetCache& inAssetCache,
-                    SpriteDataModel& inSpriteDataModel);
+    SpriteEditStage(SpriteDataModel& inSpriteDataModel);
 
 private:
     /**
@@ -40,9 +37,6 @@ private:
      */
     void onSpriteRemoved(unsigned int spriteID);
 
-    /** Used to load the active sprite's texture. */
-    AssetCache& assetCache;
-
     /** Used to get the current working dir when displaying the sprite. */
     SpriteDataModel& spriteDataModel;
 
@@ -53,7 +47,7 @@ private:
     // Private child widgets
     //-------------------------------------------------------------------------
     /** Checkerboard image, tiled as the background for the loaded sprite. */
-    AUI::TiledImage checkerboardImage;
+    AUI::Image checkerboardImage;
 
     /** The sprite that is currently loaded onto the stage. */
     AUI::Image spriteImage;

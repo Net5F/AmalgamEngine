@@ -21,18 +21,15 @@ namespace SpriteEditor
 BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
 : AUI::Widget({0, 0, 1920, 1080}, "BoundingBoxGizmo")
 , spriteDataModel{inSpriteDataModel}
+, lastUsedScreenSize{0, 0}
 , activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
 , scaledRectSize{AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE)}
 , scaledLineWidth{AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH)}
 , hasBoundingBox{false}
 , positionControlExtent{0, 0, scaledRectSize, scaledRectSize}
-, lastRenderedPosExtent{}
 , xControlExtent{0, 0, scaledRectSize, scaledRectSize}
-, lastRenderedXExtent{}
 , yControlExtent{0, 0, scaledRectSize, scaledRectSize}
-, lastRenderedYExtent{}
 , zControlExtent{0, 0, scaledRectSize, scaledRectSize}
-, lastRenderedZExtent{}
 , xMinPoint{}
 , xMaxPoint{}
 , yMinPoint{}
@@ -52,16 +49,40 @@ BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
         .connect<&BoundingBoxGizmo::onSpriteModelBoundsChanged>(*this);
 }
 
-void BoundingBoxGizmo::render()
+void BoundingBoxGizmo::updateLayout(const SDL_Point& startPosition,
+                                    const SDL_Rect& availableExtent,
+                                    AUI::WidgetLocator* widgetLocator)
 {
+    // Do the normal layout updating.
+    Widget::updateLayout(startPosition, availableExtent, widgetLocator);
+
+    // If this widget is fully clipped, return early.
+    if (SDL_RectEmpty(&clippedExtent)) {
+        return;
+    }
+
+    // If the UI scaling has changed, refresh everything.
+    if (lastUsedScreenSize != AUI::Core::getActualScreenSize()) {
+        refreshScaling();
+        lastUsedScreenSize = AUI::Core::getActualScreenSize();
+    }
+}
+
+void BoundingBoxGizmo::render(const SDL_Point& windowTopLeft)
+{
+    // If this widget is fully clipped, don't render it.
+    if (SDL_RectEmpty(&clippedExtent)) {
+        return;
+    }
+
     // Render the planes.
-    renderPlanes();
+    renderPlanes(windowTopLeft);
 
     // Render the lines.
-    renderLines();
+    renderLines(windowTopLeft);
 
     // Render the control rectangles.
-    renderControls();
+    renderControls(windowTopLeft);
 }
 
 AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType,
@@ -73,19 +94,16 @@ AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType,
     }
 
     // Check if the mouse press hit any of our controls.
-    if (AUI::SDLHelpers::pointInRect(cursorPosition, lastRenderedPosExtent)) {
+    if (AUI::SDLHelpers::pointInRect(cursorPosition, positionControlExtent)) {
         currentHeldControl = Control::Position;
     }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition,
-                                          lastRenderedXExtent)) {
+    else if (AUI::SDLHelpers::pointInRect(cursorPosition, xControlExtent)) {
         currentHeldControl = Control::X;
     }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition,
-                                          lastRenderedYExtent)) {
+    else if (AUI::SDLHelpers::pointInRect(cursorPosition, yControlExtent)) {
         currentHeldControl = Control::Y;
     }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition,
-                                          lastRenderedZExtent)) {
+    else if (AUI::SDLHelpers::pointInRect(cursorPosition, zControlExtent)) {
         currentHeldControl = Control::Z;
     }
 
@@ -121,7 +139,7 @@ AUI::EventResult BoundingBoxGizmo::onMouseUp(AUI::MouseButtonType buttonType,
 
 AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
 {
-    // If we aren't being pressed, ignore the event.
+    // If a control isn't currently being held, ignore the event.
     if (currentHeldControl == Control::None) {
         return AUI::EventResult{.wasHandled{false}};
     }
@@ -130,12 +148,14 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
     // Account for the sprite's empty vertical space.
     const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
     int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite.yOffset)};
-    yOffset += renderExtent.y;
 
     // Account for the sprite's half-tile offset.
     int xOffset{AUI::ScalingHelpers::logicalToActual(
         static_cast<int>(SharedConfig::TILE_SCREEN_WIDTH / 2.f))};
-    xOffset += renderExtent.x;
+
+    // Account for the widget's offset.
+    xOffset += clippedExtent.x;
+    yOffset += clippedExtent.y;
 
     // Apply the offset to the mouse position and convert to logical space.
     SDL_Point offsetMousePoint{cursorPosition.x - xOffset,
@@ -174,25 +194,16 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
     return AUI::EventResult{.wasHandled{true}};
 }
 
-bool BoundingBoxGizmo::refreshScaling()
+void BoundingBoxGizmo::refreshScaling()
 {
-    // If scaledExtent was refreshed, do our specialized refreshing.
-    if (Widget::refreshScaling()) {
-        // Re-calculate our control rectangle size.
-        scaledRectSize
-            = AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE);
+    // Re-calculate our control rectangle size.
+    scaledRectSize = AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE);
 
-        // Re-calculate our line width.
-        scaledLineWidth
-            = AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH);
+    // Re-calculate our line width.
+    scaledLineWidth = AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH);
 
-        // Refresh our controls to reflect the new sizes.
-        refresh(spriteDataModel.getSprite(activeSpriteID));
-
-        return true;
-    }
-
-    return false;
+    // Refresh our controls to reflect the new sizes.
+    refresh(spriteDataModel.getSprite(activeSpriteID));
 }
 
 void BoundingBoxGizmo::onActiveSpriteChanged(unsigned int newActiveSpriteID,
@@ -320,7 +331,7 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     // Set maxZ relative to the distance between the mouse and the
     // position control (the position control is always our reference
     // for where z == 0 is.)
-    float mouseZHeight{lastRenderedPosExtent.y + (scaledRectSize / 2.f)
+    float mouseZHeight{positionControlExtent.y + (scaledRectSize / 2.f)
                        - mouseScreenYPos};
 
     // Convert to logical space.
@@ -379,7 +390,11 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
     int xOffset{AUI::ScalingHelpers::logicalToActual(
         static_cast<int>(activeSprite.textureExtent.w / 2.f))};
 
-    /* Scale and offset each point, then push it into the return vector. */
+    // Account for this widget's position.
+    xOffset += fullExtent.x;
+    yOffset += fullExtent.y;
+
+    // Scale and offset each point, then push it into the return vector.
     for (ScreenPoint& point : floatPoints) {
         // Scale and round the point.
         point.x = std::round(AUI::ScalingHelpers::logicalToActual(point.x));
@@ -463,7 +478,7 @@ void BoundingBoxGizmo::movePlanes(std::vector<SDL_Point>& boundsScreenPoints)
     planeYCoords[11] = boundsScreenPoints[3].y;
 }
 
-void BoundingBoxGizmo::renderControls()
+void BoundingBoxGizmo::renderControls(const SDL_Point& windowTopLeft)
 {
     // If this bounding box is disabled, make it semi-transparent.
     float alpha{BASE_ALPHA};
@@ -473,46 +488,42 @@ void BoundingBoxGizmo::renderControls()
 
     // Position control
     SDL_Rect offsetExtent{positionControlExtent};
-    offsetExtent.x += renderExtent.x;
-    offsetExtent.y += renderExtent.y;
-    lastRenderedPosExtent = offsetExtent;
+    offsetExtent.x += windowTopLeft.x;
+    offsetExtent.y += windowTopLeft.y;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 0, 0,
                            static_cast<Uint8>(alpha));
-    SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedPosExtent);
+    SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
 
     // X control
     offsetExtent = xControlExtent;
-    offsetExtent.x += renderExtent.x;
-    offsetExtent.y += renderExtent.y;
-    lastRenderedXExtent = offsetExtent;
+    offsetExtent.x += windowTopLeft.x;
+    offsetExtent.y += windowTopLeft.y;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 148, 0, 0,
                            static_cast<Uint8>(alpha));
-    SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedXExtent);
+    SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
 
     // Y control
     offsetExtent = yControlExtent;
-    offsetExtent.x += renderExtent.x;
-    offsetExtent.y += renderExtent.y;
-    lastRenderedYExtent = offsetExtent;
+    offsetExtent.x += windowTopLeft.x;
+    offsetExtent.y += windowTopLeft.y;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 149, 0,
                            static_cast<Uint8>(alpha));
-    SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedYExtent);
+    SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
 
     // Z control
     offsetExtent = zControlExtent;
-    offsetExtent.x += renderExtent.x;
-    offsetExtent.y += renderExtent.y;
-    lastRenderedZExtent = offsetExtent;
+    offsetExtent.x += windowTopLeft.x;
+    offsetExtent.y += windowTopLeft.y;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 82, 240,
                            static_cast<Uint8>(alpha));
-    SDL_RenderFillRect(AUI::Core::getRenderer(), &lastRenderedZExtent);
+    SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
 }
 
-void BoundingBoxGizmo::renderLines()
+void BoundingBoxGizmo::renderLines(const SDL_Point& windowTopLeft)
 {
     // If this bounding box is disabled, make it semi-transparent.
     float alpha{BASE_ALPHA};
@@ -523,10 +534,10 @@ void BoundingBoxGizmo::renderLines()
     // X-axis line
     SDL_Point offsetMinPoint{xMinPoint};
     SDL_Point offsetMaxPoint{xMaxPoint};
-    offsetMinPoint.x += renderExtent.x;
-    offsetMinPoint.y += renderExtent.y;
-    offsetMaxPoint.x += renderExtent.x;
-    offsetMaxPoint.y += renderExtent.y;
+    offsetMinPoint.x += windowTopLeft.x;
+    offsetMinPoint.y += windowTopLeft.y;
+    offsetMaxPoint.x += windowTopLeft.x;
+    offsetMaxPoint.y += windowTopLeft.y;
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 148, 0,
@@ -535,10 +546,10 @@ void BoundingBoxGizmo::renderLines()
     // Y-axis line
     offsetMinPoint = yMinPoint;
     offsetMaxPoint = yMaxPoint;
-    offsetMinPoint.x += renderExtent.x;
-    offsetMinPoint.y += renderExtent.y;
-    offsetMaxPoint.x += renderExtent.x;
-    offsetMaxPoint.y += renderExtent.y;
+    offsetMinPoint.x += windowTopLeft.x;
+    offsetMinPoint.y += windowTopLeft.y;
+    offsetMaxPoint.x += windowTopLeft.x;
+    offsetMaxPoint.y += windowTopLeft.y;
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 149,
@@ -547,27 +558,27 @@ void BoundingBoxGizmo::renderLines()
     // Z-axis line
     offsetMinPoint = zMinPoint;
     offsetMaxPoint = zMaxPoint;
-    offsetMinPoint.x += renderExtent.x;
-    offsetMinPoint.y += renderExtent.y;
-    offsetMaxPoint.x += renderExtent.x;
-    offsetMaxPoint.y += renderExtent.y;
+    offsetMinPoint.x += windowTopLeft.x;
+    offsetMinPoint.y += windowTopLeft.y;
+    offsetMaxPoint.x += windowTopLeft.x;
+    offsetMaxPoint.y += windowTopLeft.y;
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 82,
                   240, static_cast<Uint8>(alpha));
 }
 
-void BoundingBoxGizmo::renderPlanes()
+void BoundingBoxGizmo::renderPlanes(const SDL_Point& windowTopLeft)
 {
     /* Offset all the points. */
     std::array<Sint16, 12> offsetXCoords{};
     for (unsigned int i = 0; i < offsetXCoords.size(); ++i) {
-        offsetXCoords[i] = planeXCoords[i] + renderExtent.x;
+        offsetXCoords[i] = planeXCoords[i] + windowTopLeft.x;
     }
 
     std::array<Sint16, 12> offsetYCoords{};
     for (unsigned int i = 0; i < offsetYCoords.size(); ++i) {
-        offsetYCoords[i] = planeYCoords[i] + renderExtent.y;
+        offsetYCoords[i] = planeYCoords[i] + windowTopLeft.y;
     }
 
     /* Draw the planes. */

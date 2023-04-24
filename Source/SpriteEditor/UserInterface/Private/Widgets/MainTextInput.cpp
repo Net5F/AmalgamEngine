@@ -1,29 +1,19 @@
 #include "MainTextInput.h"
-#include "AssetCache.h"
 #include "Paths.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
-MainTextInput::MainTextInput(AssetCache& assetCache,
-                             const SDL_Rect& inScreenExtent,
+MainTextInput::MainTextInput(const SDL_Rect& inLogicalExtent,
                              const std::string& inDebugName)
-: AUI::TextInput(inScreenExtent, inDebugName)
+: AUI::TextInput(inLogicalExtent, inDebugName)
 {
     // Add our backgrounds.
-    normalImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "TextInput/Normal.png"));
-    hoveredImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "TextInput/Hovered.png"));
-    focusedImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "TextInput/Selected.png"));
-    disabledImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "TextInput/Disabled.png"));
+    normalImage.setSimpleImage(Paths::TEXTURE_DIR + "TextInput/Normal.png");
+    hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "TextInput/Hovered.png");
+    focusedImage.setSimpleImage(Paths::TEXTURE_DIR + "TextInput/Selected.png");
+    disabledImage.setSimpleImage(Paths::TEXTURE_DIR + "TextInput/Disabled.png");
 
     // Set our text properties.
     setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 25);

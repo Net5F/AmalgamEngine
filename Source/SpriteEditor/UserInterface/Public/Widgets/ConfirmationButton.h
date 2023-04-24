@@ -6,8 +6,6 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace SpriteEditor
 {
 /**
@@ -17,7 +15,7 @@ namespace SpriteEditor
 class ConfirmationButton : public AUI::Button
 {
 public:
-    ConfirmationButton(AssetCache& assetCache, const SDL_Rect& inScreenExtent,
+    ConfirmationButton(const SDL_Rect& inLogicalExtent,
                        const std::string& inText,
                        const std::string& inDebugName = "ConfirmationButton");
 };

@@ -7,8 +7,6 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace SpriteEditor
 {
 class MainScreen;
@@ -20,13 +18,9 @@ class SpriteDataModel;
 class SaveButtonWindow : public AUI::Window
 {
 public:
-    SaveButtonWindow(AssetCache& inAssetCache, MainScreen& inScreen,
-                     SpriteDataModel& inSpriteDataModel);
+    SaveButtonWindow(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
 
 private:
-    /** Used to load the button's textures. */
-    AssetCache& assetCache;
-
     /** Used to open the confirmation dialog. */
     MainScreen& mainScreen;
 
@@ -36,7 +30,8 @@ private:
     //-------------------------------------------------------------------------
     // Private child widgets
     //-------------------------------------------------------------------------
-    /** The save button at the top of the screen, next to the properties. */
+    AUI::Image backgroundImage;
+
     AUI::Button saveButton;
 };
 

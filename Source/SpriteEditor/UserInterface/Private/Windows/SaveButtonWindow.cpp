@@ -1,5 +1,4 @@
 #include "SaveButtonWindow.h"
-#include "AssetCache.h"
 #include "MainScreen.h"
 #include "SpriteDataModel.h"
 #include "Paths.h"
@@ -8,28 +7,29 @@ namespace AM
 {
 namespace SpriteEditor
 {
-SaveButtonWindow::SaveButtonWindow(AssetCache& inAssetCache,
-                                   MainScreen& inScreen,
+SaveButtonWindow::SaveButtonWindow(MainScreen& inScreen,
                                    SpriteDataModel& inSpriteDataModel)
 : AUI::Window({1537, 0, 58, 58}, "SaveButtonWindow")
-, assetCache{inAssetCache}
 , mainScreen{inScreen}
 , spriteDataModel{inSpriteDataModel}
+, backgroundImage{{0, 0, 58, 58}}
 , saveButton({0, 0, 58, 58})
 {
     // Add our children so they're included in rendering, etc.
+    children.push_back(backgroundImage);
     children.push_back(saveButton);
 
+    /* Window setup */
+    backgroundImage.setNineSliceImage(
+        (Paths::TEXTURE_DIR + "WindowBackground.png"), {1, 1, 1, 1});
+
     /* Save button. */
-    saveButton.normalImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "SaveButton/Normal.png"));
-    saveButton.hoveredImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "SaveButton/Hovered.png"));
-    saveButton.pressedImage.addResolution(
-        {1920, 1080},
-        assetCache.loadTexture(Paths::TEXTURE_DIR + "SaveButton/Pressed.png"));
+    saveButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR
+                                          + "SaveButton/Normal.png");
+    saveButton.hoveredImage.setSimpleImage(Paths::TEXTURE_DIR
+                                           + "SaveButton/Hovered.png");
+    saveButton.pressedImage.setSimpleImage(Paths::TEXTURE_DIR
+                                           + "SaveButton/Pressed.png");
     saveButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     saveButton.text.setText("");
 

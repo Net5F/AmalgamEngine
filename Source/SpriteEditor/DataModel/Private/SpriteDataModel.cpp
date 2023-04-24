@@ -19,7 +19,6 @@ namespace SpriteEditor
 SpriteDataModel::SpriteDataModel(SDL_Renderer* inSdlRenderer)
 : sheetAdded{sheetAddedSig}
 , sheetRemoved{sheetRemovedSig}
-, spriteAdded{spriteAddedSig}
 , spriteRemoved{spriteRemovedSig}
 , activeSpriteChanged{activeSpriteChangedSig}
 , spriteDisplayNameChanged{spriteDisplayNameChangedSig}
@@ -152,9 +151,6 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                     = spriteJson.value()["modelBounds"]["minZ"];
                 sprite.modelBounds.maxZ
                     = spriteJson.value()["modelBounds"]["maxZ"];
-
-                // Signal the new sprite to the UI.
-                spriteAddedSig.publish(spriteID, sprite);
             }
 
             // Signal the new sheet to the UI.
@@ -328,9 +324,6 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
                                                textureExtent, yOffsetI, true,
                                                defaultBox});
             spriteSheet.spriteIDs.push_back(spriteID);
-
-            // Signal the new sprite to the UI.
-            spriteAddedSig.publish(spriteID, spriteMap[spriteID]);
 
             // Increment the count (used for the display name).
             spriteCount++;

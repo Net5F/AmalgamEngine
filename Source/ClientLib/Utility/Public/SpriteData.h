@@ -56,9 +56,12 @@ private:
      *
      * @param spriteJson  The json to parse. Must be a valid sprite section
      *                    from SpriteData.json.
+     * @param spriteSheetRelPath  The relative path to the sprite sheet image
+     *                            file that holds this sprite.
      * @param texture  The texture of the spritesheet that contains the sprite.
      */
     void parseSprite(const nlohmann::json& spriteJson,
+                     const std::string& spriteSheetRelPath,
                      const TextureHandle& texture);
 
     /** The loaded rendering data for each sprite, indexed by their numeric

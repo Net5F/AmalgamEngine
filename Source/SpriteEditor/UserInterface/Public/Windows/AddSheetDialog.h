@@ -8,8 +8,6 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace SpriteEditor
 {
 class SpriteDataModel;
@@ -21,21 +19,25 @@ class SpriteDataModel;
 class AddSheetDialog : public AUI::Window
 {
 public:
-    AddSheetDialog(AssetCache& assetCache, SpriteDataModel& inSpriteDataModel);
+    AddSheetDialog(SpriteDataModel& inSpriteDataModel);
 
     virtual ~AddSheetDialog() = default;
 
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------
-    /** The dialog's background */
+    /** Semi-transparent shadow image to obscure things that are behind the
+        dialog. */
+    AUI::Image shadowImage;
+
+    /** The dialog's background image. */
     AUI::Image backgroundImage;
 
     /** The header text at the top of the dialog. */
     AUI::Text headerText;
 
     // Path entry
-    // Note: The path must be relative to Core::resourcePath.
+    // Note: The path must be relative to SpriteDataModel::workingTexturesDir.
     AUI::Text pathLabel;
     MainTextInput pathInput;
 

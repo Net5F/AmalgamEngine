@@ -5,7 +5,6 @@ struct SDL_Renderer;
 namespace AM
 {
 class EventDispatcher;
-class AssetCache;
 
 namespace Client
 {
@@ -23,8 +22,6 @@ public:
     EventDispatcher& uiEventDispatcher;
 
     SDL_Renderer* sdlRenderer;
-
-    AssetCache& assetCache;
 
     SpriteData& spriteData;
 };

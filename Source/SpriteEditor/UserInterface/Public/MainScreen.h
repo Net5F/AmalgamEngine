@@ -3,18 +3,16 @@
 #include "AUI/Screen.h"
 #include "AUI/Button.h"
 #include "AUI/ConfirmationDialog.h"
-#include "SpriteSheetPanel.h"
+#include "LibraryWindow.h"
 #include "SpriteEditStage.h"
-#include "SpritePanel.h"
 #include "SaveButtonWindow.h"
 #include "PropertiesPanel.h"
 #include "TitleButton.h"
+#include "LibraryAddMenu.h"
 #include "AddSheetDialog.h"
 
 namespace AM
 {
-class AssetCache;
-
 namespace SpriteEditor
 {
 class SpriteDataModel;
@@ -25,7 +23,7 @@ class SpriteDataModel;
 class MainScreen : public AUI::Screen
 {
 public:
-    MainScreen(AssetCache& inAssetCache, SpriteDataModel& inSpriteDataModel);
+    MainScreen(SpriteDataModel& inSpriteDataModel);
 
     /**
      * Opens a confirmation dialog.
@@ -39,9 +37,9 @@ public:
                                 std::function<void(void)> onConfirmation);
 
     /**
-     * Opens the "Add Sheet" dialog.
+     * Opens the Library's "add list item" menu.
      */
-    void openAddSheetDialog();
+    void openLibraryAddMenu();
 
     void render() override;
 
@@ -59,14 +57,14 @@ private:
     //-------------------------------------------------------------------------
     // Windows
     //-------------------------------------------------------------------------
-    /** The left-side panel for managing sprite texture sheets. */
-    SpriteSheetPanel spriteSheetPanel;
+    /** The left-side window for managing sprite sheets, sprites, etc. */
+    LibraryWindow libraryWindow;
+
+    /** The menu for adding new items that opens when you press the "+". */
+    LibraryAddMenu libraryAddMenu;
 
     /** The center stage for editing sprite bounding boxes. */
     SpriteEditStage spriteEditStage;
-
-    /** The bottom panel for selecting sprites. */
-    SpritePanel spritePanel;
 
     /** The save button at the top of the screen, next to the properties. */
     SaveButtonWindow saveButtonWindow;

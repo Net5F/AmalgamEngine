@@ -16,7 +16,7 @@ namespace SpriteEditor
 {
 Application::Application()
 : sdl(SDL_INIT_VIDEO)
-, sdlWindow("Amalgam Sprite Editor", SDL_WINDOWPOS_UNDEFINED,
+, sdlWindow("Amalgam Engine Sprite Editor", SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED, Config::ACTUAL_SCREEN_WIDTH,
             Config::ACTUAL_SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
 , sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)

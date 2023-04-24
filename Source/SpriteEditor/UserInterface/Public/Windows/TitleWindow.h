@@ -6,8 +6,6 @@
 
 namespace AM
 {
-class AssetCache;
-
 namespace SpriteEditor
 {
 class UserInterface;
@@ -20,7 +18,7 @@ class SpriteDataModel;
 class TitleWindow : public AUI::Window
 {
 public:
-    TitleWindow(UserInterface& inUserInterface, AssetCache& inAssetCache,
+    TitleWindow(UserInterface& inUserInterface,
                 SpriteDataModel& inSpriteDataModel);
 
 private:
@@ -30,9 +28,6 @@ private:
 
     /** The user interface manager. Used for switching to the main screen. */
     UserInterface& userInterface;
-
-    /** Used to load textures. */
-    AssetCache& assetCache;
 
     /** The sprite data for this project. Used for loading the user-selected
         file. */

@@ -13,8 +13,8 @@ UserInterface::UserInterface(SDL_Renderer* inRenderer, AssetCache& inAssetCache,
                              SpriteDataModel& inSpriteDataModel)
 : auiInitializer{inRenderer,
                  {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT}}
-, titleScreen{*this, inAssetCache, inSpriteDataModel}
-, mainScreen{inAssetCache, inSpriteDataModel}
+, titleScreen{*this, inSpriteDataModel}
+, mainScreen{inSpriteDataModel}
 , currentScreen{&titleScreen}
 {
     AUI::Core::setActualScreenSize(
