@@ -1,11 +1,15 @@
 #include "TileMap.h"
 #include "SpriteData.h"
+#include "Sprite.h"
 #include "Paths.h"
 #include "Position.h"
 #include "Serialize.h"
 #include "Deserialize.h"
 #include "ByteTools.h"
 #include "TileMapSnapshot.h"
+#include "Tile.h"
+#include "TileSnapshot.h"
+#include "ChunkSnapshot.h"
 #include "SharedConfig.h"
 #include "Timer.h"
 #include "Log.h"
@@ -62,24 +66,18 @@ void TileMap::save(const std::string& fileName)
     mapSnapshot.chunks.resize(chunkExtent.getCount());
 
     // Save our tiles into the snapshot as chunks.
-    unsigned int startLinearTileIndex{0};
+    std::size_t startLinearTileIndex{0};
     int chunksProcessed{0};
-    for (unsigned int i = 0; i < chunkExtent.getCount(); ++i) {
-        ChunkSnapshot& chunk{mapSnapshot.chunks[i]};
+    for (std::size_t i = 0; i < chunkExtent.getCount(); ++i) {
+        ChunkSnapshot& chunkSnapshot{mapSnapshot.chunks[i]};
 
         // Process each tile in this chunk.
-        unsigned int nextLinearTileIndex{startLinearTileIndex};
-        unsigned int tilesProcessed{0};
-        for (unsigned int j = 0; j < SharedConfig::CHUNK_TILE_COUNT; ++j) {
-            // Copy all of the tile's layers into the snapshot.
-            TileSnapshot& tile{chunk.tiles[j]};
-            for (Tile::SpriteLayer& layer :
-                 tiles[nextLinearTileIndex].spriteLayers) {
-                const std::string& stringID{
-                    spriteData.getStringID(layer.sprite.numericID)};
-                unsigned int paletteID{chunk.getPaletteIndex(stringID)};
-                tile.spriteLayers.push_back(paletteID);
-            }
+        std::size_t nextLinearTileIndex{startLinearTileIndex};
+        std::size_t tilesProcessed{0};
+        for (std::size_t j = 0; j < SharedConfig::CHUNK_TILE_COUNT; ++j) {
+            // Copy all of this tile's layers into the snapshot.
+            addTileLayersToSnapshot(tiles[nextLinearTileIndex],
+                                    chunkSnapshot.tiles[j], chunkSnapshot);
 
             // Increment to the next tile.
             nextLinearTileIndex++;
@@ -139,30 +137,26 @@ void TileMap::load(TileMapSnapshot& mapSnapshot)
     tiles.resize(tileExtent.xLength * tileExtent.yLength);
 
     // Load the chunks into the tiles vector.
-    for (unsigned int chunkIndex = 0; chunkIndex < mapSnapshot.chunks.size();
+    for (std::size_t chunkIndex = 0; chunkIndex < mapSnapshot.chunks.size();
          ++chunkIndex) {
         // Calc the coordinates of this chunk's first tile.
-        unsigned int startX{(chunkIndex % chunkExtent.xLength)
-                            * SharedConfig::CHUNK_WIDTH};
-        unsigned int startY{(chunkIndex / chunkExtent.xLength)
-                            * SharedConfig::CHUNK_WIDTH};
-        ChunkSnapshot& chunk{mapSnapshot.chunks[chunkIndex]};
+        int startX{static_cast<int>((chunkIndex % chunkExtent.xLength)
+                                    * SharedConfig::CHUNK_WIDTH)};
+        int startY{static_cast<int>((chunkIndex / chunkExtent.xLength)
+                                    * SharedConfig::CHUNK_WIDTH)};
+        ChunkSnapshot& chunkSnapshot{mapSnapshot.chunks[chunkIndex]};
 
         // These vars track which tile we're looking at, with respect to the
         // top left of the chunk.
-        unsigned int relativeX{0};
-        unsigned int relativeY{0};
+        int relativeX{0};
+        int relativeY{0};
 
         // Add all of this chunk's tiles to the tiles vector.
-        for (unsigned int i = 0; i < SharedConfig::CHUNK_TILE_COUNT; ++i) {
+        for (std::size_t i = 0; i < SharedConfig::CHUNK_TILE_COUNT; ++i) {
             // Push all of the snapshot's sprites into the tile.
-            TileSnapshot& tileSnapshot{chunk.tiles[i]};
-            unsigned int layerIndex{0};
-            for (unsigned int paletteID : tileSnapshot.spriteLayers) {
-                const Sprite& sprite{spriteData.get(chunk.palette[paletteID])};
-                setTileSpriteLayer((startX + relativeX), (startY + relativeY),
-                                   layerIndex++, sprite);
-            }
+            TileSnapshot& tileSnapshot{chunkSnapshot.tiles[i]};
+            addSnapshotLayersToTile(tileSnapshot, chunkSnapshot,
+                                    (startX + relativeX), (startY + relativeY));
 
             // Increment the relative indices, wrapping at the chunk width.
             relativeX++;
@@ -171,6 +165,43 @@ void TileMap::load(TileMapSnapshot& mapSnapshot)
                 relativeX = 0;
             }
         }
+    }
+}
+
+void TileMap::addTileLayersToSnapshot(const Tile& tile,
+                                      TileSnapshot& tileSnapshot,
+                                      ChunkSnapshot& chunkSnapshot)
+{
+    // Add the floor.
+    std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
+        TileLayer::Type::Floor, tile.getFloor().getSprite()->stringID, 0)};
+    tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
+
+    // Add the floor coverings.
+    const auto& floorCoverings{tile.getFloorCoverings()};
+    for (const FloorCoveringTileLayer& floorCovering : floorCoverings) {
+        std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
+            TileLayer::Type::FloorCovering, floorCovering.getSprite()->stringID,
+            floorCovering.direction)};
+        tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
+    }
+
+    // Add the walls.
+    const auto& walls{tile.getWalls()};
+    for (const WallTileLayer& wall : walls) {
+        std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
+            TileLayer::Type::Wall, wall.getSprite()->stringID,
+            wall.wallType)};
+        tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
+    }
+
+    // Add the objects.
+    const auto& objects{tile.getObjects()};
+    for (const ObjectTileLayer& object : objects) {
+        std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
+            TileLayer::Type::Object, object.getSprite()->stringID,
+            object.direction)};
+        tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
     }
 }
 

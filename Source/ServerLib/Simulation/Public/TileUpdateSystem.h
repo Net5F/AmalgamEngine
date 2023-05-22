@@ -1,8 +1,10 @@
 #pragma once
 
 #include "QueuedEvents.h"
-#include "TileUpdateRequest.h"
-#include "TileUpdate.h"
+#include "TileAddLayer.h"
+#include "TileRemoveLayer.h"
+#include "TileClearLayers.h"
+#include "TileExtentClearLayers.h"
 #include <unordered_map>
 
 namespace AM
@@ -37,6 +39,27 @@ public:
     void sendTileUpdates();
 
 private:
+    /**
+     * If the given request is valid, adds the tile layer to the map.
+     */
+    void addTileLayer(const TileAddLayer& addLayerRequest);
+
+    /**
+     * If the given request is valid, removes the tile layer from the map.
+     */
+    void remTileLayer(const TileRemoveLayer& remLayerRequest);
+
+    /**
+     * If the given request is valid, clears the tile layers from the map.
+     */
+    void clearTileLayers(const TileClearLayers& clearLayersRequest);
+
+    /**
+     * If the given request is valid, clears the tile layers from the map.
+     */
+    void clearExtentLayers(
+        const TileExtentClearLayers& clearExtentLayersRequest);
+
     /** Used to access the entity registry, locator, and the tile map. */
     World& world;
     /** Used to send chunk update request messages. */
@@ -46,11 +69,10 @@ private:
         Used for checking if tile updates are valid. */
     const std::unique_ptr<ISimulationExtension>& extension;
 
-    /** Holds tile updates as we iterate the dirty tiles and figure out what
-        needs to be sent to each client. */
-    std::unordered_map<NetworkID, TileUpdate> workingUpdates;
-
-    EventQueue<TileUpdateRequest> tileUpdateRequestQueue;
+    EventQueue<TileAddLayer> addLayerRequestQueue;
+    EventQueue<TileRemoveLayer> removeLayerRequestQueue;
+    EventQueue<TileClearLayers> clearLayersRequestQueue;
+    EventQueue<TileExtentClearLayers> extentClearLayersRequestQueue;
 };
 
 } // namespace Server

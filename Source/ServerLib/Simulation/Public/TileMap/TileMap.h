@@ -1,13 +1,17 @@
 #pragma once
 
 #include "TileMapBase.h"
+#include "SpriteData.h"
 
 namespace AM
 {
 struct TileMapSnapshot;
+struct Tile;
+struct TileSnapshot;
+struct ChunkSnapshot;
+
 namespace Server
 {
-class SpriteData;
 
 /**
  * Owns and manages the world's tile map state.
@@ -46,6 +50,13 @@ private:
      * Loads the given snapshot's data into this map.
      */
     void load(TileMapSnapshot& mapSnapshot);
+
+    /**
+     * Adds the sprite layers from the given tile to the given tile snapshot 
+     * and the given chunk snapshot's palette.
+     */
+    void addTileLayersToSnapshot(const Tile& tile, TileSnapshot& tileSnapshot,
+                                 ChunkSnapshot& chunkSnapshot);
 };
 
 } // End namespace Server

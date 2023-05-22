@@ -14,7 +14,6 @@ namespace AM
  * see ChunkSnapshot and TileSnapshot for more obvious differences.
  */
 struct TileMapSnapshot {
-public:
     /** Used as a "we should never hit this" cap on the number of chunks in a
         map. Only checked in debug builds. */
     static constexpr unsigned int MAX_CHUNKS = 10000;

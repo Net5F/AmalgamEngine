@@ -1,8 +1,10 @@
 #pragma once
 
 #include "QueuedEvents.h"
-#include "TileUpdate.h"
-#include "TileUpdateRequest.h"
+#include "TileAddLayer.h"
+#include "TileRemoveLayer.h"
+#include "TileClearLayers.h"
+#include "TileExtentClearLayers.h"
 
 namespace AM
 {
@@ -52,15 +54,43 @@ private:
      */
     void processNetworkUpdates();
 
+    /**
+     * Adds the tile layer to the map.
+     */
+    void addTileLayer(const TileAddLayer& addLayer);
+
+    /**
+     * Removes the tile layer from the map.
+     */
+    void remTileLayer(const TileRemoveLayer& remLayer);
+
+    /**
+     * Clears the tile layers from the map.
+     */
+    void clearTileLayers(const TileClearLayers& clearLayers);
+
+    /**
+     * Clears the tile layers from the map.
+     */
+    void clearExtentLayers(
+        const TileExtentClearLayers& clearExtentLayers);
+
     /** Used to access the tile map. */
     World& world;
     /** Used to send tile update request messages. */
     Network& network;
 
     /** Tile update requests, received from the UI. */
-    EventQueue<TileUpdateRequest> tileUpdateRequestQueue;
+    EventQueue<TileAddLayer> addLayerRequestQueue;
+    EventQueue<TileRemoveLayer> removeLayerRequestQueue;
+    EventQueue<TileClearLayers> clearLayersRequestQueue;
+    EventQueue<TileExtentClearLayers> extentClearLayersRequestQueue;
+
     /** Tile updates, received from the network. */
-    EventQueue<TileUpdate> tileUpdateQueue;
+    EventQueue<TileAddLayer> addLayerQueue;
+    EventQueue<TileRemoveLayer> removeLayerQueue;
+    EventQueue<TileClearLayers> clearLayersQueue;
+    EventQueue<TileExtentClearLayers> extentClearLayersQueue;
 };
 
 } // namespace Client

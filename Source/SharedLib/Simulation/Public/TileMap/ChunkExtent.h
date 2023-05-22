@@ -4,14 +4,13 @@
 
 namespace AM
 {
-class TileExtent;
+struct TileExtent;
 
 /**
  * A strong type alias, describing an extent of map chunks.
  */
-class ChunkExtent : public DiscreteExtent<DiscreteImpl::ChunkTag>
+struct ChunkExtent : public DiscreteExtent<DiscreteImpl::ChunkTag>
 {
-public:
     ChunkExtent();
 
     ChunkExtent(int inX, int inY, int inXLength, int inYLength);

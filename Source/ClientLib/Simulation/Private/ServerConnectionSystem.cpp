@@ -133,7 +133,7 @@ void ServerConnectionSystem::initSimState(
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};
     Sprite& playerSprite{registry.emplace<Sprite>(
-        newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
+        newEntity, spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{}, userConfig.getWindowSize());
 
@@ -172,7 +172,7 @@ void ServerConnectionSystem::initMockSimState()
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};
     Sprite& playerSprite{registry.emplace<Sprite>(
-        newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
+        newEntity, spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
     registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
                              PreviousPosition{}, userConfig.getWindowSize());
 

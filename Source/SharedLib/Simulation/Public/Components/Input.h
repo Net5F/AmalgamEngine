@@ -11,7 +11,7 @@ namespace AM
  */
 struct Input {
 public:
-    enum Type : Uint8 { XUp, XDown, YUp, YDown, ZUp, ZDown, NumTypes, None };
+    enum Type : Uint8 { XUp, XDown, YUp, YDown, ZUp, ZDown, Count, None };
 
     enum State : Uint8 { Released, Pressed };
 
@@ -19,7 +19,7 @@ public:
     // Replicated data
     //--------------------------------------------------------------------------
     /** Holds the current state of the inputs, indexed by Input::Type. */
-    typedef std::array<State, Type::NumTypes> StateArr;
+    typedef std::array<State, Type::Count> StateArr;
     StateArr inputStates{};
 };
 

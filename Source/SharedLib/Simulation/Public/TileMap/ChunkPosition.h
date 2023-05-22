@@ -4,14 +4,13 @@
 
 namespace AM
 {
-class TilePosition;
+struct TilePosition;
 
 /**
  * A strong type alias, describing the position of a particular map chunk.
  */
-class ChunkPosition : public DiscretePosition<DiscreteImpl::ChunkTag>
+struct ChunkPosition : public DiscretePosition<DiscreteImpl::ChunkTag>
 {
-public:
     ChunkPosition();
 
     ChunkPosition(int inX, int inY);

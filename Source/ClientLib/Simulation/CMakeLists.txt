@@ -11,6 +11,7 @@ target_sources(ClientLib
 		Private/Simulation.cpp
 		Private/TileUpdateSystem.cpp
 		Private/World.cpp
+        Private/SpriteData/SpriteData.cpp
 		Private/TileMap/TileMap.cpp
 	PUBLIC
 		Public/CameraSystem.h
@@ -30,14 +31,17 @@ target_sources(ClientLib
 		Public/WorldSignals.h
 		Public/Components/InputHistory.h
 		Public/Components/NeedsAdjacentChunks.h
+        Public/SpriteData/SpriteData.h
 		Public/TileMap/TileMap.h
 )
 
 target_include_directories(ClientLib
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/SpriteData
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/SpriteData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
 )

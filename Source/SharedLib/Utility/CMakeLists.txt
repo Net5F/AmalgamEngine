@@ -6,7 +6,6 @@ target_sources(SharedLib
         Private/Log.cpp
         Private/Paths.cpp
         Private/PeriodicCaller.cpp
-        Private/SpriteDataBase.cpp
         Private/Timer.cpp
         Private/Transforms.cpp
     PUBLIC
@@ -25,7 +24,6 @@ target_sources(SharedLib
         Public/PeriodicCaller.h
         Public/Serialize.h
         Public/SerializeBuffer.h
-        Public/SpriteDataBase.h
         Public/Timer.h
         Public/Transforms.h
 )

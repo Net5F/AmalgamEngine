@@ -4,7 +4,7 @@
 
 namespace AM
 {
-class TilePosition;
+struct TilePosition;
 
 /**
  * A strong type alias, describing the position of a particular spatial

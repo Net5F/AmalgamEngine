@@ -1,16 +1,34 @@
 #pragma once
 
+#include "SpriteDataBase.h"
 #include "Tile.h"
+#include "SpriteSets.h"
+#include "Rotation.h"
+#include "Wall.h"
 #include "ChunkExtent.h"
 #include "TileExtent.h"
+#include "TileAddLayer.h"
+#include "TileRemoveLayer.h"
+#include "TileClearLayers.h"
+#include "TileExtentClearLayers.h"
+#include "TileSnapshot.h"
+#include "TileLayers.h"
+#include "AMAssert.h"
 #include <vector>
-#include <unordered_set>
-#include <unordered_map>
+#include <variant>
+#include <type_traits>
+
+/** Constraint to match ChunkSnapshot and ChunkWireSnapshot. */
+template<typename T>
+concept IsChunkSnapshotType = requires(T a)
+{
+    a.palette;
+    a.tiles;
+};
 
 namespace AM
 {
 struct TileMapSnapshot;
-class SpriteDataBase;
 
 /**
  * Owns and manages the world's tile map state.
@@ -25,82 +43,133 @@ public:
      * Attempts to parse TileMap.bin and construct the tile map.
      *
      * Errors if TileMap.bin doesn't exist or it fails to parse.
+     *
+     * @param inTrackTileUpdates  If true, tile updates will be pushed into 
+     *                            tileUpdateHistory.
      */
-    TileMapBase(SpriteDataBase& inSpriteData, bool inTrackDirtyState);
+    TileMapBase(SpriteDataBase& inSpriteData, bool inTrackTileUpdates);
 
     /**
-     * Sets the layer at the given index to the given sprite.
-     *
-     * If the given tile's spriteLayers vector isn't big enough, resizes
-     * it. Any tiles added during resizing will be default initialized to
-     * the "empty sprite".
-     *
-     * Note: There's no bounds checking on tileX/tileY. It's on you to make
-     *       sure they're valid.
+     * Sets the given tile's floor to the given floor.
+     * Note: Floor sprite sets only have 1 sprite, so you don't need to specify 
+     *       which sprite from the set to use.
      */
-    void setTileSpriteLayer(int tileX, int tileY, std::size_t layerIndex,
-                            const Sprite& sprite);
+    void setFloor(int tileX, int tileY, const FloorSpriteSet& spriteSet);
+    void setFloor(int tileX, int tileY, const std::string& spriteSetID);
+    void setFloor(int tileX, int tileY, Uint16 spriteSetID);
 
     /**
-     * Overload for sprite string IDs.
+     * Adds the given floor covering to the given tile.
      */
-    void setTileSpriteLayer(int tileX, int tileY, std::size_t layerIndex,
-                            const std::string& stringID);
+    void addFloorCovering(int tileX, int tileY, const FloorCoveringSpriteSet& spriteSet,
+                          Rotation::Direction rotation);
+    void addFloorCovering(int tileX, int tileY, const std::string& spriteSetID,
+                          Rotation::Direction rotation);
+    void addFloorCovering(int tileX, int tileY, Uint16 spriteSetID,
+                          Rotation::Direction rotation);
 
     /**
-     * Overload for sprite numeric IDs.
+     * Removes the given floor covering from the given tile.
+     * @return true if the tile had a floor covering to remove, else false.
      */
-    void setTileSpriteLayer(int tileX, int tileY, std::size_t layerIndex,
-                            int numericID);
+    bool remFloorCovering(int tileX, int tileY, const FloorCoveringSpriteSet& spriteSet,
+                          Rotation::Direction rotation);
+    bool remFloorCovering(int tileX, int tileY, const std::string& spriteSetID,
+                          Rotation::Direction rotation);
+    bool remFloorCovering(int tileX, int tileY, Uint16 spriteSetID,
+                          Rotation::Direction rotation);
 
     /**
-     * Clears all layers between the given indices (inclusive) in the
-     * given tile.
-     *
-     * It's valid to use the same index as the start and end.
-     *
-     * It's safe to use an end index that's past the end of the tile's vector,
-     * it will be constrained.
-     *
-     * If clearing to the end of the vector, layers will be erased. Otherwise,
-     * they'll be set to the "empty sprite".
-     *
-     * @param startLayerIndex  The layer index to start clearing at.
-     * @param endLayerIndex  The last layer index to clear. Must be >= start.
-     * @return true if any layers were cleared.
+     * Adds the given wall to the given tile.
+     * Note: wallType must be North or West. Gap fills will be added 
+     *       automatically.
      */
-    bool clearTileSpriteLayers(int tileX, int tileY,
-                               std::size_t startLayerIndex,
-                               std::size_t endLayerIndex);
+    void addWall(int tileX, int tileY, const WallSpriteSet& spriteSet,
+                          Wall::Type wallType);
+    void addWall(int tileX, int tileY, const std::string& spriteSetID,
+                          Wall::Type wallType);
+    void addWall(int tileX, int tileY, Uint16 spriteSetID, Wall::Type wallType);
 
     /**
-     * Clears all sprite layers in the given tile.
+     * Removes the given wall from the given tile.
+     * Note: wallType must be North or West. Gap fills will be removed 
+     *       automatically.
+     * @return true if the tile had a wall to remove, else false.
+     */
+    bool remWall(int tileX, int tileY, Wall::Type wallType);
+
+    /**
+     * Adds the given object to the given tile.
+     */
+    void addObject(int tileX, int tileY, const ObjectSpriteSet& spriteSet,
+                          Rotation::Direction rotation);
+    void addObject(int tileX, int tileY, const std::string& spriteSetID,
+                          Rotation::Direction rotation);
+    void addObject(int tileX, int tileY, Uint16 spriteSetID,
+                          Rotation::Direction rotation);
+
+    /**
+     * Removes the given object from the given tile.
+     * @return true if the tile had an object to remove, else false.
+     */
+    bool remObject(int tileX, int tileY, const ObjectSpriteSet& spriteSet,
+                          Rotation::Direction rotation);
+    bool remObject(int tileX, int tileY, const std::string& spriteSetID,
+                          Rotation::Direction rotation);
+    bool remObject(int tileX, int tileY, Uint16 spriteSetID,
+                          Rotation::Direction rotation);
+
+    /**
+     * Clears the given layer types from the given tile.
      *
-     * Note: There's no bounds checking on tileX/tileY. It's on you to make
-     *       sure they're valid.
-     *
+     * @tparam LayersToClear  The layer types to clear. Must be:
+     *                        FloorTileLayer, FloorCoveringTileLayer, 
+     *                        WallTileLayer, or ObjectTileLayer.
+     * @return true if any layers were cleared. false if the tile was empty.
+     */
+    template<typename... LayersToClear>
+    bool clearTileLayers(int tileX, int tileY);
+
+    /**
+     * Override for clearing based on an array of bools. If a given index 
+     * is true, the associated TileLayer::Type will be cleared.
+     * You probably don't want to use this, it's mostly useful for messaging.
+     */
+    bool clearTileLayers(
+        int tileX, int tileY,
+        const std::array<bool, TileLayer::Type::Count>& layerTypesToClear);
+
+    /**
+     * Clears all layers from the given tile.
      * @return true if any layers were cleared. false if the tile was empty.
      */
     bool clearTile(int tileX, int tileY);
 
     /**
-     * Clears all layers between the given indices (inclusive) in all tiles
-     * within the given extent.
+     * Clears the given layer types from all tiles within the given extent.
      *
-     * See clearTileSpriteLayers() for behavior.
-     */
-    bool clearExtentSpriteLayers(TileExtent extent, std::size_t startLayerIndex,
-                                 std::size_t endLayerIndex);
-
-    /**
-     * Clears all sprite layers in all tiles within the given extent.
-     *
-     * Note: There's no bounds checking on the given extent. It's on you to make
-     *       sure the indices are valid.
-     *
+     * @tparam LayersToClear  The layer types to clear in each tile. Must be:
+     *                        FloorTileLayer, FloorCoveringTileLayer, 
+     *                        WallTileLayer, or ObjectTileLayer.
      * @return true if any layers were cleared. false if all tiles were empty.
      */
-    bool clearExtent(TileExtent extent);
+    template<typename... LayersToClear>
+    bool clearExtentLayers(const TileExtent& extent);
+
+    /**
+     * Override for clearing based on an array of bools. If a given index 
+     * is true, the associated TileLayer::Type will be cleared.
+     * You probably don't want to use this, it's mostly useful for messaging.
+     */
+    bool clearExtentLayers(
+        const TileExtent& extent,
+        const std::array<bool, TileLayer::Type::Count>& layerTypesToClear);
+
+    /**
+     * Clears all layers from all tiles within the given extent.
+     * @return true if any layers were cleared. false if all tiles were empty.
+     */
+    bool clearExtent(const TileExtent& extent);
 
     /**
      * Clears all tile map state, leaving an empty map.
@@ -110,7 +179,7 @@ public:
     /**
      * Gets a const reference to the tile at the given coordinates.
      */
-    const Tile& getTile(int x, int y) const;
+    const Tile& getTile(int tileX, int tileY) const;
 
     /**
      * Returns the map extent, with chunks as the unit.
@@ -122,14 +191,27 @@ public:
      */
     const TileExtent& getTileExtent() const;
 
+    using TileUpdateVariant
+        = std::variant<TileAddLayer, TileRemoveLayer, TileClearLayers,
+                       TileExtentClearLayers>;
     /**
-     * Returns a map containing all tiles with dirty state, and the lowest
-     * dirty layer index for each tile.
-     *
-     * Note: This class does not clear elements from this container. You
-     *       must do it yourself after you've processed them.
+     * Returns a vector containing all operations that have been performed on 
+     * this tile map since the last time the vector was cleared.
      */
-    std::unordered_map<TilePosition, std::size_t>& getDirtyTiles();
+    const std::vector<TileUpdateVariant>& getTileUpdateHistory();
+
+    /**
+     * Clears the tile update history vector.
+     */
+    void clearTileUpdateHistory();
+
+    /**
+     * Adds the sprite layers from the given snapshot to the given tile.
+     */
+    template<IsChunkSnapshotType T>
+    void addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
+                                 const T& chunkSnapshot,
+                                 int tileX, int tileY);
 
 protected:
     /**
@@ -141,9 +223,45 @@ protected:
         return static_cast<std::size_t>((y * tileExtent.xLength) + x);
     }
 
+    /**
+     * Adds a North wall to the given tile and adds gap fills if necessary.
+     */
+    void addNorthWall(int tileX, int tileY, const WallSpriteSet& spriteSet);
+
+    /**
+     * Adds a West wall to the given tile and adds gap fills if necessary.
+     */
+    void addWestWall(int tileX, int tileY, const WallSpriteSet& spriteSet);
+
+    /**
+     * Removes the North wall from the given tile. If a corner was broken, 
+     * modifies the other wall pieces appropriately.
+     */
+    bool remNorthWall(int tileX, int tileY);
+
+    /**
+     * Removes the West wall from the given tile. If a corner was broken, 
+     * modifies the other wall pieces appropriately.
+     */
+    bool remWestWall(int tileX, int tileY);
+
+    /**
+     * Clears the given layer types from the given tile.
+     */
+    bool clearTileLayersInternal(
+        int tileX, int tileY,
+        std::array<bool, TileLayer::Type::Count> layerTypesToClear);
+
+    /**
+     * Returns an array of layer types to clear, based on the given 
+     * LayersToClear.
+     */
+    template<typename... LayersToClear>
+    std::array<bool, TileLayer::Type::Count> getLayerTypesToClear();
+
     /** The version of the map format. Kept as just a 16-bit int for now, we
         can see later if we care to make it more complicated. */
-    static constexpr uint16_t MAP_FORMAT_VERSION = 0;
+    static constexpr Uint16 MAP_FORMAT_VERSION{0};
 
     /** Used to get sprites while constructing tiles. */
     SpriteDataBase& spriteData;
@@ -158,14 +276,100 @@ protected:
     std::vector<Tile> tiles;
 
 private:
-    /** If true, any updates to a tile's state will cause that tile to be
-        pushed into dirtyTiles. */
-    bool trackDirtyState;
+    /** If true, all tile updates will be pushed into tileUpdateHistory. */
+    bool trackTileUpdates;
 
-    /** Tracks the lowest dirty layer for each dirty tile.
-        If dirtyTiles[{x, y}] == 2, layer 2 is the lowest dirty layer for tile
-        (x, y). */
-    std::unordered_map<TilePosition, std::size_t> dirtyTiles;
+    /** Holds a history of tile operations that have been performed on this map.
+        TileUpdateSystem uses this history to send updates to clients, then 
+        clears it. */
+    std::vector<TileUpdateVariant> tileUpdateHistory;
 };
+
+template<typename... LayersToClear>
+bool TileMapBase::clearTileLayers(int tileX, int tileY)
+{
+    return clearTileLayers(tileX, tileY,
+                           getLayerTypesToClear<LayersToClear...>());
+}
+
+template<typename... LayersToClear>
+bool TileMapBase::clearExtentLayers(const TileExtent& extent)
+{
+    return clearExtentLayers(extent, getLayerTypesToClear<LayersToClear...>());
+}
+
+template<IsChunkSnapshotType T>
+void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
+                             const T& chunkSnapshot,
+                             int tileX, int tileY)
+{
+    for (Uint8 paletteIndex : tileSnapshot.layers) {
+        const T::PaletteEntry& paletteEntry{
+            chunkSnapshot.palette[paletteIndex]};
+
+        switch (paletteEntry.layerType) {
+            case TileLayer::Type::Floor: {
+                setFloor(tileX, tileY, paletteEntry.spriteSetID);
+                break;
+            }
+            case TileLayer::Type::FloorCovering: {
+                addFloorCovering(
+                    tileX, tileY, paletteEntry.spriteSetID,
+                    static_cast<Rotation::Direction>(paletteEntry.spriteIndex));
+                break;
+            }
+            case TileLayer::Type::Wall: {
+                // Note: We can't use addWall() because it automatically adds 
+                //       walls to fill in gaps. We just need a straight copy.
+                Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+                std::array<WallTileLayer, 2>& walls{tile.getWalls()};
+                const WallSpriteSet& spriteSet{
+                    spriteData.getWallSpriteSet(paletteEntry.spriteSetID)};
+
+                Wall::Type newWallType{
+                    static_cast<Wall::Type>(paletteEntry.spriteIndex)};
+                if (newWallType == Wall::Type::West) {
+                    walls[0].spriteSet = &spriteSet;
+                    walls[0].wallType = newWallType;
+                }
+                else {
+                    walls[1].spriteSet = &spriteSet;
+                    walls[1].wallType = newWallType;
+                }
+                break;
+            }
+            case TileLayer::Type::Object: {
+                addObject(
+                    tileX, tileY, paletteEntry.spriteSetID,
+                    static_cast<Rotation::Direction>(paletteEntry.spriteIndex));
+                break;
+            }
+        }
+    }
+}
+
+template<typename... LayersToClear>
+std::array<bool, TileLayer::Type::Count> TileMapBase::getLayerTypesToClear()
+{
+    std::array<bool, TileLayer::Type::Count> layerTypesToClear{};
+    if constexpr ((std::is_same_v<FloorTileLayer, LayersToClear> || ...)) {
+        layerTypesToClear[TileLayer::Type::Floor] = true;
+    }
+
+    if constexpr ((std::is_same_v<FloorCoveringTileLayer,
+                                 LayersToClear> || ...)) {
+        layerTypesToClear[TileLayer::Type::FloorCovering] = true;
+    }
+
+    if constexpr ((std::is_same_v<WallTileLayer, LayersToClear> || ...)) {
+        layerTypesToClear[TileLayer::Type::Wall] = true;
+    }
+
+    if constexpr ((std::is_same_v<ObjectTileLayer, LayersToClear> || ...)) {
+        layerTypesToClear[TileLayer::Type::Object] = true;
+    }
+
+    return layerTypesToClear;
+}
 
 } // End namespace AM

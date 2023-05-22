@@ -8,6 +8,9 @@
 namespace AM
 {
 struct ChunkUpdate;
+struct Tile;
+struct TileSnapshot;
+struct ChunkWireSnapshot;
 
 namespace Server
 {
@@ -21,9 +24,7 @@ class Network;
  * chunk, or teleports.
  *
  * Note: We have no validation to see if client entities are in range of the
- *       requested chunks, but the worlds are all open source so it doesn't
- *       matter anyway. If someone wants to see the map, they can already get
- *       it from github.
+ *       requested chunks. Maybe add that once we get a permissions system.
  */
 class ChunkStreamingSystem
 {
@@ -52,6 +53,13 @@ private:
      */
     void addChunkToMessage(const ChunkPosition& chunkPosition,
                            ChunkUpdate& chunkUpdate);
+
+    /**
+     * Adds the sprite layers from the given tile to the given tile snapshot 
+     * and the given chunk snapshot's palette.
+     */
+    void addTileLayersToSnapshot(const Tile& tile, TileSnapshot& tileSnapshot,
+                                 ChunkWireSnapshot& chunkSnapshot);
 
     /** Used for fetching entity, component, and map data. */
     World& world;

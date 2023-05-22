@@ -49,9 +49,6 @@ public:
         of an entity without doing a square root. */
     static constexpr float AOI_RADIUS_SQUARED{AOI_RADIUS * AOI_RADIUS};
 
-    /** The maximum number of sprite layers a tile can have. */
-    static constexpr std::size_t MAX_TILE_LAYERS{5};
-
     /** The string ID of the default sprite for character entities.
         This is the sprite that players and NPCs get assigned before the
         project's animation system gives them their real sprite.

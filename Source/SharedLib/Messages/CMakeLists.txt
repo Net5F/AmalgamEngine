@@ -11,8 +11,10 @@ target_sources(SharedLib
         Public/MessageType.h
         Public/MovementState.h
         Public/MovementUpdate.h
-        Public/TileUpdate.h
-        Public/TileUpdateRequest.h
+        Public/TileAddLayer.h
+        Public/TileClearLayers.h
+        Public/TileExtentClearLayers.h
+        Public/TileRemoveLayer.h
 )
 
 target_include_directories(SharedLib

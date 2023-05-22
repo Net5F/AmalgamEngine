@@ -8,6 +8,7 @@
 #include "NeedsAdjacentChunks.h"
 #include "ChunkExtent.h"
 #include "ChunkUpdateRequest.h"
+#include "ChunkWireSnapshot.h"
 #include "SharedConfig.h"
 #include "Config.h"
 #include "Log.h"
@@ -134,32 +135,26 @@ void ChunkUpdateSystem::receiveAndApplyUpdates()
     }
 }
 
-void ChunkUpdateSystem::applyChunkSnapshot(const ChunkWireSnapshot& chunk)
+void ChunkUpdateSystem::applyChunkSnapshot(const ChunkWireSnapshot& chunkSnapshot)
 {
+    const int CHUNK_WIDTH{static_cast<int>(SharedConfig::CHUNK_WIDTH)};
+
     // Iterate through the chunk snapshot's linear tile array, adding the tiles
     // to our map.
     int tileIndex{0};
-    for (unsigned int tileY = 0; tileY < SharedConfig::CHUNK_WIDTH; ++tileY) {
-        for (unsigned int tileX = 0; tileX < SharedConfig::CHUNK_WIDTH;
-             ++tileX) {
+    for (int tileY = 0; tileY < CHUNK_WIDTH; ++tileY) {
+        for (int tileX = 0; tileX < CHUNK_WIDTH; ++tileX) {
             // Calculate where this tile is.
-            unsigned int currentTileX{
-                ((chunk.x * SharedConfig::CHUNK_WIDTH) + tileX)};
-            unsigned int currentTileY{
-                ((chunk.y * SharedConfig::CHUNK_WIDTH) + tileY)};
+            int currentTileX{((chunkSnapshot.x * CHUNK_WIDTH) + tileX)};
+            int currentTileY{((chunkSnapshot.y * CHUNK_WIDTH) + tileY)};
 
             // Clear the tile.
             world.tileMap.clearTile(currentTileX, currentTileY);
 
             // Copy all of the snapshot tile's sprite layers to our map tile.
-            const TileSnapshot& tileSnapshot{chunk.tiles[tileIndex]};
-            unsigned int layerIndex{0};
-            for (Uint8 paletteID : tileSnapshot.spriteLayers) {
-                // Add the sprite layer to the tile.
-                world.tileMap.setTileSpriteLayer(currentTileX, currentTileY,
-                                                 layerIndex++,
-                                                 chunk.palette[paletteID]);
-            }
+            const TileSnapshot& tileSnapshot{chunkSnapshot.tiles[tileIndex]};
+            world.tileMap.addSnapshotLayersToTile(
+                tileSnapshot, chunkSnapshot, currentTileX, currentTileY);
 
             // Increment to the next linear index.
             tileIndex++;

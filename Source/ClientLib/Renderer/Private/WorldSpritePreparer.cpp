@@ -91,35 +91,35 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
             const Tile& tile{tileMap.getTile(x, y)};
 
             // Push all of this tile's sprites into the appropriate vector.
-            for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
-                // If the layer is empty, skip it.
-                if (layer.sprite.numericID == EMPTY_SPRITE_ID) {
-                    continue;
-                }
+            //for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
+            //    // If the layer is empty, skip it.
+            //    if (layer.sprite.numericID == EMPTY_SPRITE_ID) {
+            //        continue;
+            //    }
 
-                // Get iso screen extent for this sprite.
-                const SpriteRenderData& renderData{
-                    spriteData.getRenderData(layer.sprite.numericID)};
-                SDL_Rect screenExtent{ClientTransforms::tileToScreenExtent(
-                    {x, y}, renderData, camera)};
+            //    // Get iso screen extent for this sprite.
+            //    const SpriteRenderData& renderData{
+            //        spriteData.getRenderData(layer.sprite.numericID)};
+            //    SDL_Rect screenExtent{ClientTransforms::tileToScreenExtent(
+            //        {x, y}, renderData, camera)};
 
-                // If this sprite isn't on screen, skip it.
-                if (!isWithinScreenBounds(screenExtent, camera)) {
-                    continue;
-                }
+            //    // If this sprite isn't on screen, skip it.
+            //    if (!isWithinScreenBounds(screenExtent, camera)) {
+            //        continue;
+            //    }
 
-                // If this sprite has a bounding box, push it to be sorted.
-                if (layer.sprite.hasBoundingBox) {
-                    spritesToSort.emplace_back(&(layer.sprite),
-                                               layer.worldBounds, screenExtent);
-                }
-                else {
-                    // No bounding box, push it straight into the sorted
-                    // sprites vector.
-                    sortedSprites.emplace_back(&(layer.sprite), BoundingBox{},
-                                               screenExtent);
-                }
-            }
+            //    // If this sprite has a bounding box, push it to be sorted.
+            //    if (layer.sprite.hasBoundingBox) {
+            //        spritesToSort.emplace_back(&(layer.sprite),
+            //                                   layer.worldBounds, screenExtent);
+            //    }
+            //    else {
+            //        // No bounding box, push it straight into the sorted
+            //        // sprites vector.
+            //        sortedSprites.emplace_back(&(layer.sprite), BoundingBox{},
+            //                                   screenExtent);
+            //    }
+            //}
         }
     }
 

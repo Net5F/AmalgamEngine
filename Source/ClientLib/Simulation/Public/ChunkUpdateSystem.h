@@ -7,6 +7,8 @@
 
 namespace AM
 {
+struct ChunkWireSnapshot;
+
 namespace Client
 {
 class Simulation;
@@ -62,7 +64,7 @@ private:
     /**
      * Applies the given chunk snapshot's state to our tile map.
      */
-    void applyChunkSnapshot(const ChunkWireSnapshot& chunk);
+    void applyChunkSnapshot(const ChunkWireSnapshot& chunkSnapshot);
 
     /** Used to get the current tick. */
     Simulation& simulation;

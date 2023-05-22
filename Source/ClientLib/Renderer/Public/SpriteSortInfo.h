@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Sprite.h"
+#include <SDL_rect.h>
 #include <vector>
 
 namespace AM

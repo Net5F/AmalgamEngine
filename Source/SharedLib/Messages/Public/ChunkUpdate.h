@@ -13,11 +13,11 @@ struct ChunkUpdate {
 public:
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE = MessageType::ChunkUpdate;
+    static constexpr MessageType MESSAGE_TYPE{MessageType::ChunkUpdate};
 
     /** Used as a "we should never hit this" cap on the number of chunks that
         we send at once. Only checked in debug builds. */
-    static constexpr unsigned int MAX_CHUNKS = 50;
+    static constexpr std::size_t MAX_CHUNKS{50};
 
     /** The chunks that the client should load. */
     std::vector<ChunkWireSnapshot> chunks;
@@ -26,8 +26,7 @@ public:
 template<typename S>
 void serialize(S& serializer, ChunkUpdate& chunkUpdate)
 {
-    serializer.container(chunkUpdate.chunks,
-                         static_cast<std::size_t>(ChunkUpdate::MAX_CHUNKS));
+    serializer.container(chunkUpdate.chunks, ChunkUpdate::MAX_CHUNKS);
 }
 
 } // End namespace AM

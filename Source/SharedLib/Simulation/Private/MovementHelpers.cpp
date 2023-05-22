@@ -82,8 +82,7 @@ Rotation MovementHelpers::updateRotation(const Rotation& rotation,
     // Calculate which direction the entity is facing, based on its inputs.
     // Note: Opposite inputs cancel eachother out.
     int directionInt{3 * (yDown - yUp) + xUp - xDown};
-    Rotation::Direction direction{
-        static_cast<Rotation::Direction>(directionInt)};
+    Rotation::Direction direction{directionIntToDirection(directionInt)};
 
     switch (direction) {
         case Rotation::Direction::None: {
@@ -105,6 +104,43 @@ Position
     double interpZ{(position.z * alpha) + (previousPos.z * (1.0 - alpha))};
     return {static_cast<float>(interpX), static_cast<float>(interpY),
             static_cast<float>(interpZ)};
+}
+
+Rotation::Direction MovementHelpers::directionIntToDirection(int directionInt)
+{
+    switch (directionInt) {
+        case -4: {
+            return Rotation::Direction::SouthWest;
+        }
+        case -3: {
+            return Rotation::Direction::South;
+        }
+        case -2: {
+            return Rotation::Direction::SouthEast;
+        }
+        case -1: {
+            return Rotation::Direction::West;
+        }
+        case 0: {
+            return Rotation::Direction::None;
+        }
+        case 1: {
+            return Rotation::Direction::East;
+        }
+        case 2: {
+            return Rotation::Direction::NorthWest;
+        }
+        case 3: {
+            return Rotation::Direction::North;
+        }
+        case 4: {
+            return Rotation::Direction::NorthEast;
+        }
+        default: {
+            LOG_FATAL("Invalid direction int.");
+            return Rotation::Direction::None;
+        }
+    }
 }
 
 } // End namespace AM

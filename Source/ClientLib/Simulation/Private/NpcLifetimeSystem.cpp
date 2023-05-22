@@ -94,7 +94,7 @@ void NpcLifetimeSystem::processEntityInits(Uint32 desiredTick)
             registry.emplace<Name>(entityInit->entity, entityInit->name);
 
             // Construct their sprite using the received numericID.
-            const Sprite& sprite{spriteData.get(entityInit->numericID)};
+            const Sprite& sprite{spriteData.getSprite(entityInit->numericID)};
             registry.emplace<Sprite>(entityInit->entity, sprite);
 
             // Construct their collision (it'll be positioned once they get a

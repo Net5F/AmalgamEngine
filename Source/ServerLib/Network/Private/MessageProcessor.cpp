@@ -7,7 +7,10 @@
 #include "Heartbeat.h"
 #include "InputChangeRequest.h"
 #include "ChunkUpdateRequest.h"
-#include "TileUpdateRequest.h"
+#include "TileAddLayer.h"
+#include "TileRemoveLayer.h"
+#include "TileClearLayers.h"
+#include "TileExtentClearLayers.h"
 #include "Log.h"
 
 namespace AM
@@ -44,9 +47,24 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             handleChunkUpdateRequest(netID, messageBuffer, messageSize);
             break;
         }
-        case MessageType::TileUpdateRequest: {
-            dispatchMessage<TileUpdateRequest>(messageBuffer, messageSize,
-                                               networkEventDispatcher);
+        case MessageType::TileAddLayer: {
+            dispatchMessage<TileAddLayer>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
+        case MessageType::TileRemoveLayer: {
+            dispatchMessage<TileRemoveLayer>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
+        case MessageType::TileClearLayers: {
+            dispatchMessage<TileClearLayers>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
+        case MessageType::TileExtentClearLayers: {
+            dispatchMessage<TileExtentClearLayers>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
             break;
         }
         default: {

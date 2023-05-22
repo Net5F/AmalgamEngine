@@ -2,8 +2,6 @@
 
 #include "BoundingBox.h"
 #include "EmptySpriteID.h"
-#include <SDL_rect.h>
-#include <string>
 
 namespace AM
 {
@@ -15,31 +13,28 @@ namespace AM
  */
 struct Sprite {
 public:
-    /**
-     * The sprite's display name and string ID fields are stored in flat
-     * vectors in the SpriteDataBase class, since they aren't commonly accessed
-     * alongside the fields in this struct.
-     * See SpriteDataBase::getDisplayName() and SpriteDataBase::getStringID(),
-     * accessible through Client::SpriteData, Server::SpriteData.
-     *
-     * Additionally, the client stores the sprite's rendering-related data in
-     * the SpriteRenderData class. See Client::SpriteData::getRenderData().
-     */
+    /** Unique display name, shown in the UI.  */
+    std::string displayName{"Empty"};
 
-    /** The sprite's unique numeric identifier.
+    /** The sprite's unique string ID. Derived from displayName by replacing
+        spaces with underscores and making everything lowercase.
+        This ID will be consistent, and can be used for persistent state. */
+    std::string stringID{"empty"};
+
+    /** This sprite's unique numeric identifier.
         This value can be used safely at runtime, but shouldn't be used for
         persistent state since it may change when SpriteData.json is
         modified. */
     int numericID{EMPTY_SPRITE_ID};
 
     /** True if this sprite has a bounding box, else false.
-        Things like floors and carpets share bounds with their tile, so they
-        don't need a separate bounding box. */
+        Things like floors and carpets don't have a bounding box, they're just 
+        treated as part of the tile. */
     bool hasBoundingBox{true};
 
     /** Model-space bounding box. Defines the sprite's 3D volume.
-        Note: Tiles and static (unmoving) entities use these bounds, but dynamic
-              entities use the bounds defined by their Collision component. */
+        Note: Tiles use these bounds, but dynamic entities use the bounds 
+              defined by their Collision component. */
     BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
 };
 

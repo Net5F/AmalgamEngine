@@ -73,7 +73,8 @@ void ClientConnectionSystem::processConnectEvents()
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
                                         std::vector<entt::entity>());
         Sprite& newSprite{registry.emplace<Sprite>(
-            newEntity, spriteData.get(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
+            newEntity,
+            spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
         Collision& collision{registry.emplace<Collision>(
             newEntity, newSprite.modelBounds,
             Transforms::modelToWorldCentered(newSprite.modelBounds,

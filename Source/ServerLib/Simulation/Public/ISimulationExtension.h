@@ -5,6 +5,7 @@
 namespace AM
 {
 struct TileUpdateRequest;
+struct TileExtent;
 
 namespace Server
 {
@@ -66,9 +67,9 @@ public:
      * Allows the project to place constraints on map modifications, such as
      * requiring certain permissions, or only allowing updates to certain areas.
      *
-     * @return true if the update should be performed, else false.
+     * @return true if the given extent is editable, else false.
      */
-    virtual bool isTileUpdateValid(const TileUpdateRequest& updateRequest) = 0;
+    virtual bool isExtentEditable(const TileExtent& tileExtent) = 0;
 };
 
 } // namespace Server

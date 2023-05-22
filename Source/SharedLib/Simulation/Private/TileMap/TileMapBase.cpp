@@ -17,162 +17,308 @@
 
 namespace AM
 {
-TileMapBase::TileMapBase(SpriteDataBase& inSpriteData, bool inTrackDirtyState)
+TileMapBase::TileMapBase(SpriteDataBase& inSpriteData, bool inTrackTileUpdates)
 : spriteData{inSpriteData}
 , chunkExtent{}
 , tileExtent{}
 , tiles{}
-, trackDirtyState{inTrackDirtyState}
+, trackTileUpdates{inTrackTileUpdates}
 {
 }
 
-void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
-                                     std::size_t layerIndex,
-                                     const Sprite& sprite)
+void TileMapBase::setFloor(int tileX, int tileY, const FloorSpriteSet& spriteSet)
 {
-    AM_ASSERT(tileX >= tileExtent.x, "x out of bounds: %d", tileX);
-    AM_ASSERT(tileX <= tileExtent.xMax(), "x out of bounds: %d", tileX);
-    AM_ASSERT(tileY >= tileExtent.y, "y out of bounds: %d", tileY);
-    AM_ASSERT(tileY <= tileExtent.yMax(), "y out of bounds: %d", tileY);
-    AM_ASSERT(layerIndex < SharedConfig::MAX_TILE_LAYERS,
-              "Layer index out of bounds: %u", layerIndex);
+    AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
+              "Tile coords out of bounds: %d, %d.", tileX, tileY);
 
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
-    std::vector<Tile::SpriteLayer>& spriteLayers{tile.spriteLayers};
+    tile.getFloor().spriteSet = &spriteSet;
 
-    // If the layer is already set to the given sprite, exit early.
-    if ((spriteLayers.size() > layerIndex)
-        && (spriteLayers[layerIndex].sprite.numericID == sprite.numericID)) {
-        return;
-    }
-
-    // If we're being asked to set the highest layer in the tile to the empty
-    // sprite, erase it and any empties below it instead (to reduce space).
-    std::size_t lowestDirtyLayer{0};
-    if ((sprite.numericID == EMPTY_SPRITE_ID)
-        && (layerIndex == (spriteLayers.size() - 1))) {
-        // Erase the sprite.
-        spriteLayers.erase(spriteLayers.begin() + layerIndex);
-        lowestDirtyLayer = layerIndex;
-
-        // Erase any uncovered empty layers at the end of the vector.
-        for (std::size_t endIndex = layerIndex; endIndex-- > 0;) {
-            if (spriteLayers[endIndex].sprite.numericID == EMPTY_SPRITE_ID) {
-                spriteLayers.erase(spriteLayers.begin() + endIndex);
-                lowestDirtyLayer = endIndex;
-            }
-            else {
-                break;
-            }
-        }
-    }
-    // Else, set the sprite layer.
-    else {
-        // If the sprite has a bounding box, calculate its position.
-        BoundingBox worldBounds{};
-        if (sprite.hasBoundingBox) {
-            Position tilePosition{
-                static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),
-                static_cast<float>(tileY * SharedConfig::TILE_WORLD_WIDTH), 0};
-            worldBounds
-                = Transforms::modelToWorld(sprite.modelBounds, tilePosition);
-        }
-
-        // If the tile's layers vector isn't big enough, resize it.
-        // Note: This sets intermediate layers to the empty sprite.
-        if (spriteLayers.size() <= layerIndex) {
-            spriteLayers.resize(
-                (layerIndex + 1),
-                {spriteData.get(EMPTY_SPRITE_ID), BoundingBox{}});
-        }
-
-        // Replace the sprite.
-        spriteLayers[layerIndex] = {sprite, worldBounds};
-        lowestDirtyLayer = layerIndex;
-    }
-
-    // If we're tracking dirty tile state, update it.
-    if (trackDirtyState) {
-        // Set the lowest dirty layer index, unless there's already a lower
-        // one being tracked.
-        auto [iterator, didEmplace]
-            = dirtyTiles.try_emplace({tileX, tileY}, lowestDirtyLayer);
-        if (!didEmplace && (lowestDirtyLayer < iterator->second)) {
-            iterator->second = lowestDirtyLayer;
-        }
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates) {
+        tileUpdateHistory.emplace_back(TileAddLayer{
+            tileX, tileY, TileLayer::Type::Floor, spriteSet.numericID, 0});
     }
 }
 
-void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
-                                     std::size_t layerIndex,
-                                     const std::string& stringID)
+void TileMapBase::setFloor(int tileX, int tileY, const std::string& spriteSetID)
 {
-    setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(stringID));
+    setFloor(tileX, tileY, spriteData.getFloorSpriteSet(spriteSetID));
 }
 
-void TileMapBase::setTileSpriteLayer(int tileX, int tileY,
-                                     std::size_t layerIndex, int numericID)
+void TileMapBase::setFloor(int tileX, int tileY, Uint16 spriteSetID)
 {
-    setTileSpriteLayer(tileX, tileY, layerIndex, spriteData.get(numericID));
+    setFloor(tileX, tileY, spriteData.getFloorSpriteSet(spriteSetID));
 }
 
-bool TileMapBase::clearTileSpriteLayers(int tileX, int tileY,
-                                        std::size_t startLayerIndex,
-                                        std::size_t endLayerIndex)
+void TileMapBase::addFloorCovering(int tileX, int tileY, const FloorCoveringSpriteSet& spriteSet,
+                      Rotation::Direction rotation)
 {
-    AM_ASSERT(endLayerIndex < SharedConfig::MAX_TILE_LAYERS,
-              "End layer index out of bounds: %u", endLayerIndex);
-    AM_ASSERT(startLayerIndex <= endLayerIndex,
-              "End layer index must be greater than start");
+    AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
+              "Tile coords out of bounds: %d, %d.", tileX, tileY);
 
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
-    std::vector<Tile::SpriteLayer>& spriteLayers{tile.spriteLayers};
+    tile.getFloorCoverings().emplace_back(&spriteSet, rotation);
 
-    // If the start index is beyond this tile's highest layer, return false.
-    if (startLayerIndex >= spriteLayers.size()) {
-        return false;
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates) {
+        tileUpdateHistory.emplace_back(
+            TileAddLayer{tileX, tileY, TileLayer::Type::FloorCovering,
+                         spriteSet.numericID, static_cast<Uint8>(rotation)});
+    }
+}
+
+void TileMapBase::addFloorCovering(int tileX, int tileY,
+                                   const std::string& spriteSetID,
+                                   Rotation::Direction rotation)
+{
+    addFloorCovering(tileX, tileY,
+                     spriteData.getFloorCoveringSpriteSet(spriteSetID), rotation);
+}
+
+void TileMapBase::addFloorCovering(int tileX, int tileY, Uint16 spriteSetID,
+                                   Rotation::Direction rotation)
+{
+    addFloorCovering(tileX, tileY,
+                     spriteData.getFloorCoveringSpriteSet(spriteSetID), rotation);
+}
+
+bool TileMapBase::remFloorCovering(int tileX, int tileY,
+                                   const FloorCoveringSpriteSet& spriteSet,
+                                   Rotation::Direction direction)
+{
+    AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
+              "Tile coords out of bounds: %d, %d.", tileX, tileY);
+
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+
+    // Erase any layers with the same sprite set and rotation.
+    std::size_t erasedCount{std::erase_if(
+        tile.getFloorCoverings(),
+        [spriteSet, direction](const FloorCoveringTileLayer& layer) {
+            if ((layer.spriteSet == &spriteSet)
+                && (layer.direction == direction)) {
+                return true;
+            }
+            return false;
+        })};
+
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates && (erasedCount > 0)) {
+        tileUpdateHistory.emplace_back(
+            TileRemoveLayer{tileX, tileY, TileLayer::Type::FloorCovering,
+                            spriteSet.numericID, direction});
     }
 
-    // If the end index is at the end of the vector (or beyond), erase
-    // the elements.
-    std::size_t lowestDirtyLayer{startLayerIndex};
+    return (erasedCount > 0);
+}
+
+bool TileMapBase::remFloorCovering(int tileX, int tileY,
+                                   const std::string& spriteSetID,
+                                   Rotation::Direction rotation)
+{
+    return remFloorCovering(tileX, tileY,
+                     spriteData.getFloorCoveringSpriteSet(spriteSetID), rotation);
+}
+
+bool TileMapBase::remFloorCovering(int tileX, int tileY, Uint16 spriteSetID,
+                                   Rotation::Direction rotation)
+{
+    return remFloorCovering(tileX, tileY,
+                     spriteData.getFloorCoveringSpriteSet(spriteSetID), rotation);
+}
+
+void TileMapBase::addWall(int tileX, int tileY, const WallSpriteSet& spriteSet,
+                      Wall::Type wallType)
+{
+    AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
+              "Tile coords out of bounds: %d, %d.", tileX, tileY);
+
+    switch (wallType) {
+        case Wall::Type::North: {
+            addNorthWall(tileX, tileY, spriteSet);
+        }
+        case Wall::Type::West:
+            {
+            addWestWall(tileX, tileY, spriteSet);
+            break;
+        }
+        default: {
+            LOG_FATAL("Wall type must be North or West.");
+            break;
+        }
+    }
+
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates) {
+        tileUpdateHistory.emplace_back(
+            TileAddLayer{tileX, tileY, TileLayer::Type::Wall,
+                         spriteSet.numericID, static_cast<Uint8>(wallType)});
+    }
+}
+
+void TileMapBase::addWall(int tileX, int tileY, const std::string& spriteSetID,
+                          Wall::Type wallType)
+{
+    addWall(tileX, tileY, spriteData.getWallSpriteSet(spriteSetID), wallType);
+}
+
+void TileMapBase::addWall(int tileX, int tileY, Uint16 spriteSetID,
+                          Wall::Type wallType)
+{
+    addWall(tileX, tileY, spriteData.getWallSpriteSet(spriteSetID), wallType);
+}
+
+bool TileMapBase::remWall(int tileX, int tileY, Wall::Type wallType)
+{
+    AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
+              "Tile coords out of bounds: %d, %d.", tileX, tileY);
+
+    bool wallWasRemoved{false};
+    switch (wallType) {
+        case Wall::Type::North:
+        {
+            wallWasRemoved = remNorthWall(tileX, tileY);
+        }
+        case Wall::Type::West:
+        {
+            wallWasRemoved = remWestWall(tileX, tileY);
+            break;
+        }
+        default: {
+            LOG_FATAL("Wall type must be North or West.");
+            break;
+        }
+    }
+
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates && wallWasRemoved) {
+        // Note: We don't care about sprite set ID when removing walls.
+        tileUpdateHistory.emplace_back(
+            TileRemoveLayer{tileX, tileY, TileLayer::Type::Wall,
+                            0, static_cast<Uint8>(wallType)});
+    }
+
+    return wallWasRemoved;
+}
+
+void TileMapBase::addObject(int tileX, int tileY, const ObjectSpriteSet& spriteSet,
+                      Rotation::Direction rotation)
+{
+    AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
+              "Tile coords out of bounds: %d, %d.", tileX, tileY);
+
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+    tile.getObjects().emplace_back(&spriteSet, rotation);
+
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates) {
+        tileUpdateHistory.emplace_back(
+            TileAddLayer{tileX, tileY, TileLayer::Type::Object,
+                         spriteSet.numericID, static_cast<Uint8>(rotation)});
+    }
+}
+
+void TileMapBase::addObject(int tileX, int tileY, const std::string& spriteSetID,
+                            Rotation::Direction rotation)
+{
+    addObject(tileX, tileY, spriteData.getObjectSpriteSet(spriteSetID), rotation);
+}
+
+void TileMapBase::addObject(int tileX, int tileY, Uint16 spriteSetID,
+                            Rotation::Direction rotation)
+{
+    addObject(tileX, tileY, spriteData.getObjectSpriteSet(spriteSetID), rotation);
+}
+
+bool TileMapBase::remObject(int tileX, int tileY,
+                                   const ObjectSpriteSet& spriteSet,
+                                   Rotation::Direction rotation)
+{
+    AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
+              "Tile coords out of bounds: %d, %d.", tileX, tileY);
+
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+
+    // Erase any layers with the same sprite set and rotation.
+    std::size_t erasedCount{std::erase_if(
+        tile.getObjects(),
+        [spriteSet, rotation](const ObjectTileLayer& layer) {
+            if ((layer.spriteSet == &spriteSet)
+                && (layer.direction == rotation)) {
+                return true;
+            }
+            return false;
+        })};
+
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates && (erasedCount > 0)) {
+        tileUpdateHistory.emplace_back(
+            TileRemoveLayer{tileX, tileY, TileLayer::Type::Object,
+                            spriteSet.numericID, static_cast<Uint8>(rotation)});
+    }
+
+    return (erasedCount > 0);
+}
+
+bool TileMapBase::remObject(int tileX, int tileY, const std::string& spriteSetID,
+                            Rotation::Direction rotation)
+{
+    return remObject(tileX, tileY, spriteData.getObjectSpriteSet(spriteSetID), rotation);
+}
+
+bool TileMapBase::remObject(int tileX, int tileY, Uint16 spriteSetID,
+                            Rotation::Direction rotation)
+{
+    return remObject(tileX, tileY, spriteData.getObjectSpriteSet(spriteSetID), rotation);
+}
+
+bool TileMapBase::clearTileLayers(
+    int tileX, int tileY,
+    const std::array<bool, TileLayer::Type::Count>& layerTypesToClear)
+{
+    AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
+              "Tile coords out of bounds: %d, %d.", tileX, tileY);
+
     bool layerWasCleared{false};
-    if (endLayerIndex >= (spriteLayers.size() - 1)) {
-        spriteLayers.erase((spriteLayers.begin() + startLayerIndex),
-                           spriteLayers.end());
-
-        // Erase any uncovered empty layers at the end of the vector.
-        for (std::size_t endIndex = startLayerIndex; endIndex-- > 0;) {
-            if (spriteLayers[endIndex].sprite.numericID == EMPTY_SPRITE_ID) {
-                spriteLayers.erase(spriteLayers.begin() + endIndex);
-                lowestDirtyLayer = endIndex;
-            }
-            else {
-                break;
-            }
-        }
-
-        layerWasCleared = true;
-    }
-    else {
-        // Else, set the elements to the empty sprite.
-        for (std::size_t i = startLayerIndex; i <= endLayerIndex; ++i) {
-            if (spriteLayers[i].sprite.numericID != EMPTY_SPRITE_ID) {
-                setTileSpriteLayer(tileX, tileY, i, EMPTY_SPRITE_ID);
-                layerWasCleared = true;
-            }
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+    if (layerTypesToClear[TileLayer::Type::Floor]) {
+        if (tile.getFloor().spriteSet != nullptr) {
+            tile.getFloor().spriteSet = nullptr;
+            layerWasCleared = true;
         }
     }
 
-    // If we're tracking dirty tile state, update it.
-    if (trackDirtyState) {
-        // Set the lowest dirty layer index, unless there's already a lower
-        // one being tracked.
-        auto [iterator, didEmplace]
-            = dirtyTiles.try_emplace({tileX, tileY}, lowestDirtyLayer);
-        if (!didEmplace && (lowestDirtyLayer < iterator->second)) {
-            iterator->second = lowestDirtyLayer;
+    if (layerTypesToClear[TileLayer::Type::FloorCovering]) {
+        if (tile.getFloorCoverings().size() != 0) {
+            tile.getFloorCoverings().clear();
+            layerWasCleared = true;
         }
+    }
+
+    if (layerTypesToClear[TileLayer::Type::Wall]) {
+        std::array<WallTileLayer, 2>& walls{tile.getWalls()};
+        if ((walls[0].wallType != Wall::Type::None)
+            || (walls[1].wallType != Wall::Type::None)) {
+            walls[0].spriteSet = nullptr;
+            walls[0].wallType = Wall::Type::None;
+            walls[1].spriteSet = nullptr;
+            walls[1].wallType = Wall::Type::None;
+            layerWasCleared = true;
+        }
+    }
+
+    if (layerTypesToClear[TileLayer::Type::Object]) {
+        if (tile.getObjects().size() != 0) {
+            tile.getObjects().clear();
+            layerWasCleared = true;
+        }
+    }
+
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates) {
+        tileUpdateHistory.emplace_back(TileClearLayers{
+            tileX, tileY, layerTypesToClear});
     }
 
     return layerWasCleared;
@@ -180,57 +326,41 @@ bool TileMapBase::clearTileSpriteLayers(int tileX, int tileY,
 
 bool TileMapBase::clearTile(int tileX, int tileY)
 {
-    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
-
-    bool layersWereCleared{false};
-    if (tile.spriteLayers.size() > 0) {
-        layersWereCleared = true;
-
-        // If we're tracking dirty tile state, update it.
-        if (trackDirtyState) {
-            // Set the lowest dirty layer index.
-            // Note: We don't have to check before setting, since 0 is lowest.
-            dirtyTiles[{tileX, tileY}] = 0;
-        }
-    }
-
-    tile.spriteLayers.clear();
-    return layersWereCleared;
+    return clearTileLayers<FloorTileLayer, FloorCoveringTileLayer, WallTileLayer,
+                    ObjectTileLayer>(tileX, tileY);
 }
 
-bool TileMapBase::clearExtentSpriteLayers(TileExtent extent,
-                                          std::size_t startLayerIndex,
-                                          std::size_t endLayerIndex)
+bool TileMapBase::clearExtentLayers(
+    const TileExtent& extent,
+    const std::array<bool, TileLayer::Type::Count>& layerTypesToClear)
 {
-    bool layersWereCleared{false};
+    AM_ASSERT(tileExtent.containsExtent(extent),
+              "Tile extent out of bounds: %d, %d, %d, %d.", extent.x, extent.y,
+              extent.xLength, extent.yLength);
 
-    // Clear every layer between the given indices (inclusive) in the given
-    // extent.
+    // Clear the given layers from each tile in the given extent.
+    bool layerWasCleared{false};
     for (int x = extent.x; x <= extent.xMax(); ++x) {
         for (int y = extent.y; y <= extent.yMax(); ++y) {
-            if (clearTileSpriteLayers(x, y, startLayerIndex, endLayerIndex)) {
-                layersWereCleared = true;
+            if (clearTileLayersInternal(x, y, layerTypesToClear)) {
+                layerWasCleared = true;
             }
         }
     }
 
-    return layersWereCleared;
-}
-
-bool TileMapBase::clearExtent(TileExtent extent)
-{
-    bool layersWereCleared{false};
-
-    // Clear every tile in the given extent.
-    for (int x = extent.x; x <= extent.xMax(); ++x) {
-        for (int y = extent.y; y <= extent.yMax(); ++y) {
-            if (clearTile(x, y)) {
-                layersWereCleared = true;
-            }
-        }
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates) {
+        tileUpdateHistory.emplace_back(TileExtentClearLayers{
+            extent, layerTypesToClear});
     }
 
-    return layersWereCleared;
+    return layerWasCleared;
+}
+
+bool TileMapBase::clearExtent(const TileExtent& extent)
+{
+    return clearExtentLayers<FloorTileLayer, FloorCoveringTileLayer, WallTileLayer,
+                      ObjectTileLayer>(extent);
 }
 
 void TileMapBase::clear()
@@ -238,24 +368,19 @@ void TileMapBase::clear()
     chunkExtent = {};
     tileExtent = {};
     tiles.clear();
-    dirtyTiles.clear();
+    tileUpdateHistory.clear();
 }
 
-const Tile& TileMapBase::getTile(int x, int y) const
+const Tile& TileMapBase::getTile(int tileX, int tileY) const
 {
     // TODO: How do we linearize negative coords?
-    AM_ASSERT(x >= 0, "Negative coords not yet supported");
-    AM_ASSERT(y >= 0, "Negative coords not yet supported");
+    AM_ASSERT(tileX >= 0, "Negative coords not yet supported");
+    AM_ASSERT(tileY >= 0, "Negative coords not yet supported");
 
-    std::size_t tileIndex{linearizeTileIndex(x, y)};
-    std::size_t maxTileIndex{
-        static_cast<std::size_t>(tileExtent.xLength * tileExtent.yLength)};
-    AM_ASSERT((tileIndex < maxTileIndex),
-              "Tried to get an out of bounds tile. tileIndex: %u, max: %u",
-              tileIndex, maxTileIndex);
-    ignore(maxTileIndex);
+    AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
+              "Tile coords out of bounds: %d, %d.", tileX, tileY);
 
-    return tiles[tileIndex];
+    return tiles[linearizeTileIndex(tileX, tileY)];
 }
 
 const ChunkExtent& TileMapBase::getChunkExtent() const
@@ -268,9 +393,191 @@ const TileExtent& TileMapBase::getTileExtent() const
     return tileExtent;
 }
 
-std::unordered_map<TilePosition, std::size_t>& TileMapBase::getDirtyTiles()
+const std::vector<TileMapBase::TileUpdateVariant>&
+    TileMapBase::getTileUpdateHistory()
 {
-    return dirtyTiles;
+    return tileUpdateHistory;
+}
+
+void TileMapBase::clearTileUpdateHistory()
+{
+    tileUpdateHistory.clear();
+}
+
+void TileMapBase::addNorthWall(int tileX, int tileY, const WallSpriteSet& spriteSet)
+{
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+    std::array<WallTileLayer, 2>& walls{tile.getWalls()};
+
+    // If the tile has a West wall, add a NE gap fill.
+    if (walls[0].wallType == Wall::Type::West) {
+        walls[1].spriteSet = &spriteSet;
+        walls[1].wallType = Wall::Type::NorthEastGapFill;
+    }
+    else {
+        // No West wall, add the North wall.
+        // Note: If there's a NorthWestGapFill, this will replace it.
+        walls[1].spriteSet = &spriteSet;
+        walls[1].wallType = Wall::Type::North;
+    }
+
+    // If there's a tile to the NE that we might've formed a corner with.
+    if (tileExtent.containsPosition({tileX + 1, tileY - 1})) {
+        Tile& northeastTile{tiles[linearizeTileIndex(tileX + 1, tileY - 1)]};
+        std::array<WallTileLayer, 2>& northeastWalls{northeastTile.getWalls()};
+
+        // If the NorthEast tile has a West wall.
+        if (northeastWalls[0].wallType == Wall::Type::West) {
+            // We formed a corner. Check if the tile to the east has a wall.
+            // Note: We know this tile is valid cause there's a NorthEast tile.
+            Tile& eastTile{tiles[linearizeTileIndex(tileX + 1, tileY)]};
+            std::array<WallTileLayer, 2>& eastWalls{eastTile.getWalls()};
+            if ((eastWalls[0].wallType == Wall::Type::None)
+                && (eastWalls[1].wallType == Wall::Type::None)) {
+                // The tile has no walls. Add a NorthWestGapFill.
+                eastWalls[1].spriteSet = &spriteSet;
+                eastWalls[1].wallType = Wall::Type::NorthWestGapFill;
+            }
+        }
+    }
+}
+
+void TileMapBase::addWestWall(int tileX, int tileY, const WallSpriteSet& spriteSet)
+{
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+    std::array<WallTileLayer, 2>& walls{tile.getWalls()};
+
+    // Add the West wall.
+    // Note: If this tile already has a West wall, this will replace it.
+    walls[0].spriteSet = &spriteSet;
+    walls[0].wallType = Wall::Type::West;
+
+    // If the tile has a North wall, switch it to a NorthEast gap fill.
+    if (walls[1].wallType == Wall::Type::North) {
+        walls[1].spriteSet = &spriteSet;
+        walls[1].wallType = Wall::Type::NorthEastGapFill;
+    }
+    // Else if the tile has a NorthWest gap fill, remove it.
+    else if (walls[1].wallType == Wall::Type::NorthWestGapFill) {
+        walls[1].wallType = Wall::Type::None;
+    }
+
+    // If there's a tile to the SW that we might've formed a corner with.
+    if (tileExtent.containsPosition({tileX - 1, tileY + 1})) {
+        Tile& southwestTile{tiles[linearizeTileIndex(tileX - 1, tileY + 1)]};
+        std::array<WallTileLayer, 2>& southwestWalls{southwestTile.getWalls()};
+
+        // If the SouthWest tile has a North wall.
+        if (southwestWalls[0].wallType == Wall::Type::North) {
+            // We formed a corner. Check if the tile to the south has a wall.
+            // Note: We know this tile is valid cause there's a SouthWest tile.
+            Tile& southTile{tiles[linearizeTileIndex(tileX, tileY + 1)]};
+            std::array<WallTileLayer, 2>& southWalls{southTile.getWalls()};
+            if ((southWalls[0].wallType == Wall::Type::None)
+                && (southWalls[1].wallType == Wall::Type::None)) {
+                // The tile has no walls. Add a NorthWestGapFill.
+                southWalls[1].spriteSet = &spriteSet;
+                southWalls[1].wallType = Wall::Type::NorthWestGapFill;
+            }
+        }
+    }
+}
+
+bool TileMapBase::remNorthWall(int tileX, int tileY)
+{
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+    std::array<WallTileLayer, 2>& walls{tile.getWalls()};
+
+    bool wallWasRemoved{false};
+
+    // If the tile has a North wall or NE gap fill, remove it.
+    if ((walls[1].wallType == Wall::Type::North)
+        || (walls[1].wallType == Wall::Type::NorthEastGapFill)) {
+        walls[1].wallType = Wall::Type::None;
+        wallWasRemoved = true;
+    }
+
+    // If a wall was removed, check if there's a NW gap fill to the East.
+    if (wallWasRemoved && (tileExtent.containsPosition({tileX + 1, tileY}))) {
+        Tile& eastTile{tiles[linearizeTileIndex(tileX + 1, tileY)]};
+        std::array<WallTileLayer, 2>& eastWalls{eastTile.getWalls()};
+        if (eastWalls[1].wallType == Wall::Type::NorthWestGapFill) {
+            // The East tile has a gap fill for a corner that we just broke.
+            // Remove the gap fill.
+            eastWalls[1].wallType = Wall::Type::None;
+        }
+    }
+
+    return wallWasRemoved;
+}
+
+bool TileMapBase::remWestWall(int tileX, int tileY)
+{
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+    std::array<WallTileLayer, 2>& walls{tile.getWalls()};
+
+    bool wallWasRemoved{false};
+
+    // If the tile has a West wall, remove it.
+    if (walls[0].wallType == Wall::Type::West) {
+        walls[0].wallType = Wall::Type::None;
+        wallWasRemoved = true;
+    }
+
+    // If a wall was removed, check if there's a NW gap fill to the South
+    if (wallWasRemoved && (tileExtent.containsPosition({tileX, tileY + 1}))) {
+        Tile& southTile{tiles[linearizeTileIndex(tileX, tileY + 1)]};
+        std::array<WallTileLayer, 2>& southWalls{southTile.getWalls()};
+        if (southWalls[1].wallType == Wall::Type::NorthWestGapFill) {
+            // The South tile has a gap fill for a corner that we just broke.
+            // Remove the gap fill.
+            southWalls[1].wallType = Wall::Type::None;
+        }
+    }
+
+    return wallWasRemoved;
+}
+
+bool TileMapBase::clearTileLayersInternal(
+    int tileX, int tileY,
+    std::array<bool, TileLayer::Type::Count> layerTypesToClear)
+{
+    bool layerWasCleared{false};
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+    if (layerTypesToClear[TileLayer::Type::Floor]) {
+        if (tile.getFloor().spriteSet != nullptr) {
+            tile.getFloor().spriteSet = nullptr;
+            layerWasCleared = true;
+        }
+    }
+
+    if (layerTypesToClear[TileLayer::Type::FloorCovering]) {
+        if (tile.getFloorCoverings().size() != 0) {
+            tile.getFloorCoverings().clear();
+            layerWasCleared = true;
+        }
+    }
+
+    if (layerTypesToClear[TileLayer::Type::Wall]) {
+        std::array<WallTileLayer, 2>& walls{tile.getWalls()};
+        if ((walls[0].wallType != Wall::Type::None)
+            || (walls[1].wallType != Wall::Type::None)) {
+            walls[0].spriteSet = nullptr;
+            walls[0].wallType = Wall::Type::None;
+            walls[1].spriteSet = nullptr;
+            walls[1].wallType = Wall::Type::None;
+            layerWasCleared = true;
+        }
+    }
+
+    if (layerTypesToClear[TileLayer::Type::Object]) {
+        if (tile.getObjects().size() != 0) {
+            tile.getObjects().clear();
+            layerWasCleared = true;
+        }
+    }
+
+    return layerWasCleared;
 }
 
 } // End namespace AM

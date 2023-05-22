@@ -2,6 +2,7 @@
 
 #include "Input.h"
 #include "BoundingBox.h"
+#include "Tile.h"
 #include "TileExtent.h"
 #include "EmptySpriteID.h"
 #include "Log.h"
@@ -96,19 +97,14 @@ public:
         // For each tile that the desired bounds is touching.
         for (int y = boxTileExtent.y; y <= boxTileExtent.yMax(); ++y) {
             for (int x = boxTileExtent.x; x <= boxTileExtent.xMax(); ++x) {
-                const auto& tile{tileMap.getTile(x, y)};
+                const Tile& tile{tileMap.getTile(x, y)};
 
-                // For each sprite layer in this tile.
-                for (const auto& layer : tile.spriteLayers) {
-                    // If this layer doesn't have a bounding box, skip it.
-                    if ((layer.sprite.numericID == EMPTY_SPRITE_ID)
-                        || !(layer.sprite.hasBoundingBox)) {
-                        continue;
-                    }
-
-                    // If the desired movement would intersect a box, don't let
-                    // them move.
-                    if (desiredBounds.intersects(layer.worldBounds)) {
+                // For each collision box in this tile.
+                for (const BoundingBox& collisionBox :
+                     tile.getCollisionBoxes()) {
+                    // If the desired movement would intersect this box, don't 
+                    // let them move.
+                    if (desiredBounds.intersects(collisionBox)) {
                         return currentBounds;
                     }
                 }
@@ -117,6 +113,14 @@ public:
 
         return desiredBounds;
     }
+
+private:
+    /**
+     * Returns the appropriate direction for the given direction int.
+     * @param directionInt An integer representation of a direction, derived 
+     *                     from the formula (3 * (yDown - yUp) + xUp - xDown).
+     */
+    static Rotation::Direction directionIntToDirection(int directionInt);
 };
 
 } // End namespace AM

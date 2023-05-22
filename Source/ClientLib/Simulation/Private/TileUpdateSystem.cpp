@@ -2,6 +2,7 @@
 #include "World.h"
 #include "Network.h"
 #include "AMAssert.h"
+#include <variant>
 
 namespace AM
 {
@@ -12,8 +13,14 @@ TileUpdateSystem::TileUpdateSystem(World& inWorld,
                                    Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
-, tileUpdateRequestQueue{inUiEventDispatcher}
-, tileUpdateQueue{network.getEventDispatcher()}
+, addLayerRequestQueue{inUiEventDispatcher}
+, removeLayerRequestQueue{inUiEventDispatcher}
+, clearLayersRequestQueue{inUiEventDispatcher}
+, extentClearLayersRequestQueue{inUiEventDispatcher}
+, addLayerQueue{network.getEventDispatcher()}
+, removeLayerQueue{network.getEventDispatcher()}
+, clearLayersQueue{network.getEventDispatcher()}
+, extentClearLayersQueue{network.getEventDispatcher()}
 {
 }
 
@@ -29,47 +36,115 @@ void TileUpdateSystem::updateTiles()
 void TileUpdateSystem::processUiRequests()
 {
     // Process any waiting update requests from the UI.
-    TileUpdateRequest uiRequest;
-    while (tileUpdateRequestQueue.pop(uiRequest)) {
-        // Send the request to the server.
-        network.serializeAndSend<TileUpdateRequest>(uiRequest);
+    TileAddLayer addLayerRequest{};
+    while (addLayerRequestQueue.pop(addLayerRequest)) {
+        network.serializeAndSend<TileAddLayer>(addLayerRequest);
+    }
+
+    TileRemoveLayer removeLayerRequest{};
+    while (removeLayerRequestQueue.pop(removeLayerRequest)) {
+        network.serializeAndSend<TileRemoveLayer>(removeLayerRequest);
+    }
+
+    TileClearLayers clearLayersRequest{};
+    while (clearLayersRequestQueue.pop(clearLayersRequest)) {
+        network.serializeAndSend<TileClearLayers>(clearLayersRequest);
+    }
+
+    TileExtentClearLayers clearExtentLayersRequest{};
+    while (extentClearLayersRequestQueue.pop(clearExtentLayersRequest)) {
+        network.serializeAndSend<TileExtentClearLayers>(
+            clearExtentLayersRequest);
     }
 }
 
 void TileUpdateSystem::processNetworkUpdates()
 {
     // Process any waiting tile updates from the server.
-    TileUpdate tileUpdate;
-    while (tileUpdateQueue.pop(tileUpdate)) {
-        std::size_t updatedLayersIndex{0};
-
-        // For each updated tile.
-        for (const TileUpdate::TileInfo& tileInfo : tileUpdate.tileInfo) {
-            // Clear the start layer and all layers above it (layers below the
-            // start layer are unchanged).
-            std::size_t endLayerIndex{SharedConfig::MAX_TILE_LAYERS - 1};
-            world.tileMap.clearTileSpriteLayers(tileInfo.tileX, tileInfo.tileY,
-                                                tileInfo.startLayerIndex,
-                                                endLayerIndex);
-
-            // Fill the tile with the layers from the message.
-            // Note: If the update only contains erased layers, layerCount will
-            //       be 0 and we won't add any new layers here.
-            std::size_t totalLayerCount{static_cast<std::size_t>(
-                tileInfo.startLayerIndex + tileInfo.layerCount)};
-            for (std::size_t layerIndex = tileInfo.startLayerIndex;
-                 layerIndex < totalLayerCount; ++layerIndex) {
-                AM_ASSERT(updatedLayersIndex < tileUpdate.updatedLayers.size(),
-                          "Updated layers index is out of bounds.");
-
-                int numericID{tileUpdate.updatedLayers[updatedLayersIndex]};
-                world.tileMap.setTileSpriteLayer(tileInfo.tileX, tileInfo.tileY,
-                                                 layerIndex, numericID);
-
-                updatedLayersIndex++;
-            }
-        }
+    TileAddLayer tileAddLayer{};
+    while (addLayerQueue.pop(tileAddLayer)) {
+        addTileLayer(tileAddLayer);
     }
+
+    TileRemoveLayer tileRemoveLayer{};
+    while (removeLayerQueue.pop(tileRemoveLayer)) {
+        remTileLayer(tileRemoveLayer);
+    }
+
+    TileClearLayers tileClearLayers{};
+    while (clearLayersQueue.pop(tileClearLayers)) {
+        clearTileLayers(tileClearLayers);
+    }
+
+    TileExtentClearLayers tileExtentClearLayers{};
+    while (extentClearLayersQueue.pop(tileExtentClearLayers)) {
+        clearExtentLayers(tileExtentClearLayers);
+    }
+}
+
+void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
+{
+    if (addLayerRequest.layerType == TileLayer::Type::Floor) {
+        world.tileMap.setFloor(addLayerRequest.tileX, addLayerRequest.tileY,
+                               addLayerRequest.spriteSetID);
+    }
+    else if (addLayerRequest.layerType == TileLayer::Type::FloorCovering) {
+        world.tileMap.addFloorCovering(
+            addLayerRequest.tileX, addLayerRequest.tileY,
+            addLayerRequest.spriteSetID,
+            static_cast<Rotation::Direction>(addLayerRequest.spriteIndex));
+    }
+    else if (addLayerRequest.layerType == TileLayer::Type::Wall) {
+        world.tileMap.addWall(
+            addLayerRequest.tileX, addLayerRequest.tileY,
+            addLayerRequest.spriteSetID,
+            static_cast<Wall::Type>(addLayerRequest.spriteIndex));
+    }
+    else if (addLayerRequest.layerType == TileLayer::Type::Object) {
+        world.tileMap.addObject(
+            addLayerRequest.tileX, addLayerRequest.tileY,
+            addLayerRequest.spriteSetID,
+            static_cast<Rotation::Direction>(addLayerRequest.spriteIndex));
+    }
+}
+
+void TileUpdateSystem::remTileLayer(const TileRemoveLayer& remLayerRequest)
+{
+    if (remLayerRequest.layerType == TileLayer::Type::Floor) {
+        world.tileMap.clearTileLayers<FloorTileLayer>(remLayerRequest.tileX,
+                                                      remLayerRequest.tileY);
+    }
+    else if (remLayerRequest.layerType == TileLayer::Type::FloorCovering) {
+        world.tileMap.remFloorCovering(
+            remLayerRequest.tileX, remLayerRequest.tileY,
+            remLayerRequest.spriteSetID,
+            static_cast<Rotation::Direction>(remLayerRequest.spriteIndex));
+    }
+    else if (remLayerRequest.layerType == TileLayer::Type::Wall) {
+        world.tileMap.remWall(
+            remLayerRequest.tileX, remLayerRequest.tileY,
+            static_cast<Wall::Type>(remLayerRequest.spriteIndex));
+    }
+    else if (remLayerRequest.layerType == TileLayer::Type::Object) {
+        world.tileMap.remObject(
+            remLayerRequest.tileX, remLayerRequest.tileY,
+            remLayerRequest.spriteSetID,
+            static_cast<Rotation::Direction>(remLayerRequest.spriteIndex));
+    }
+}
+
+void TileUpdateSystem::clearTileLayers(const TileClearLayers& clearLayersRequest)
+{
+    world.tileMap.clearTileLayers(clearLayersRequest.tileX,
+                                  clearLayersRequest.tileY,
+                                  clearLayersRequest.layerTypesToClear);
+}
+
+void TileUpdateSystem::clearExtentLayers(
+    const TileExtentClearLayers& clearExtentLayersRequest)
+{
+    world.tileMap.clearExtentLayers(clearExtentLayersRequest.tileExtent,
+                                    clearExtentLayersRequest.layerTypesToClear);
 }
 
 } // End namespace Client

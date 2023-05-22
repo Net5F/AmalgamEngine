@@ -11,7 +11,11 @@ namespace AM
 struct ConnectionRequest {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE = MessageType::ConnectionRequest;
+    static constexpr MessageType MESSAGE_TYPE{MessageType::ConnectionRequest};
+
+    /** Used as a "we should never hit this" cap on the size of each name 
+        string. Only checked in debug builds. */
+    static constexpr std::size_t MAX_NAME_LENGTH{50};
 
     // Note: This will eventually change to login credentials and will be sent
     //       to the login server instead of the simulation server.
@@ -22,7 +26,8 @@ struct ConnectionRequest {
 template<typename S>
 void serialize(S& serializer, ConnectionRequest& connectionResponse)
 {
-    serializer.value(connectionResponse.playerName);
+    serializer.text1b(connectionResponse.playerName,
+                      ConnectionRequest::MAX_NAME_LENGTH);
 }
 
 } // End namespace AM

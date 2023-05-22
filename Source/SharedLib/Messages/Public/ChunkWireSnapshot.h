@@ -13,46 +13,80 @@ namespace AM
  * in the palette instead of their string ID.
  *
  * Since the integer ID isn't persistable, this struct is only suitable for
- * sending chunk data to clients.
+ * sending chunk data to clients over the wire.
  */
 struct ChunkWireSnapshot {
 public:
-    /** The chunk's X-axis coordinate. */
+    struct PaletteEntry
+    {
+        /** The type of tile layer that this entry represents. */
+        TileLayer::Type layerType{TileLayer::Type::None};
+
+        /** The numeric ID of the sprite set that this entry refers to. */
+        Uint16 spriteSetID{0};
+
+        /** The index within spriteSet.sprites that this entry refers to.
+            For Walls, cast this to Wall::Type. For Floor Coverings and Objects,
+            cast this to Rotation::Direction. For Floors, this will always be 0
+            (floor sprite sets only have 1 sprite). */
+        Uint8 spriteIndex{0};
+    };
+
+    /** This chunk's X-axis coordinate. */
     Uint16 x{0};
 
-    /** The chunk's Y-axis coordinate. */
+    /** This chunk's Y-axis coordinate. */
     Uint16 y{0};
 
-    /** Holds the numeric IDs of all the sprites used in this chunk's tiles.
-        Tile layers hold indices into this palette. */
-    std::vector<int> palette;
+    /** Holds an entry for each sprite used in this chunk's tiles. Part of a 
+        space-saving approach that lets TileSnapshot hold indices into this 
+        palette instead of directly holding the data. */
+    std::vector<PaletteEntry> palette;
 
     /** The tiles that make up this chunk, stored in row-major order. */
     std::array<TileSnapshot, SharedConfig::CHUNK_TILE_COUNT> tiles;
 
     /**
-     * Returns the palette index for the given ID.
-     * If the ID is not in the palette, it will be added.
+     * Returns the palette index for the given palette entry info.
+     * If the palette doesn't have a matching entry, it will be added.
      */
-    unsigned int getPaletteIndex(int numericID)
+    std::size_t getPaletteIndex(TileLayer::Type tileLayerType,
+                                Uint16 spriteSetID,
+                                Uint8 spriteIndex)
     {
         // TODO: If this gets to be a performance issue, we can look into
         //       switching palette to a map. Serialization will be more
         //       complicated, though.
-
-        // Check if we already have this id.
-        for (unsigned int i = 0; i < palette.size(); ++i) {
-            if (palette[i] == numericID) {
-                // We already have the string, return its index.
+        // Check if we already have this ID.
+        for (std::size_t i = 0; i < palette.size(); ++i) {
+            if ((palette[i].layerType == tileLayerType)
+                && (palette[i].spriteSetID == spriteSetID)
+                && (palette[i].spriteIndex == spriteIndex)) {
+                // We already have the string, returns its index.
                 return i;
             }
         }
 
-        // We didn't have the id, add it.
-        palette.push_back(numericID);
-        return static_cast<unsigned int>(palette.size() - 1);
+        // We didn't have a matching entry, add it.
+        if (palette.size() < UINT8_MAX) {
+            palette.emplace_back(tileLayerType, spriteSetID, spriteIndex);
+        }
+        else {
+            // TODO: If this becomes an issue, either switch to Uint16 or 
+            //       find some more efficient way to grow the space.
+            LOG_FATAL("Ran out of palette slots.");
+        }
+        return (palette.size() - 1);
     }
 };
+
+template<typename S>
+void serialize(S& serializer, ChunkWireSnapshot::PaletteEntry& paletteEntry)
+{
+    serializer.value1b(paletteEntry.layerType);
+    serializer.value2b(paletteEntry.spriteSetID);
+    serializer.value1b(paletteEntry.spriteIndex);
+}
 
 template<typename S>
 void serialize(S& serializer, ChunkWireSnapshot& testChunk)
@@ -61,7 +95,7 @@ void serialize(S& serializer, ChunkWireSnapshot& testChunk)
 
     serializer.value2b(testChunk.y);
 
-    serializer.container4b(testChunk.palette, ChunkSnapshot::MAX_IDS);
+    serializer.container(testChunk.palette, ChunkSnapshot::MAX_PALETTE_ENTRIES);
 
     serializer.container(testChunk.tiles);
 }

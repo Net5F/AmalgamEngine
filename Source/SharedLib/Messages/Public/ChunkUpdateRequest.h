@@ -18,7 +18,7 @@ public:
 
     /** Used as a "we should never hit this" cap on the number of chunks that
         we request at once. Only checked in debug builds. */
-    static constexpr unsigned int MAX_CHUNKS = 10;
+    static constexpr std::size_t MAX_CHUNKS = 10;
 
     //--------------------------------------------------------------------------
     // Replicated data
@@ -41,9 +41,8 @@ public:
 template<typename S>
 void serialize(S& serializer, ChunkUpdateRequest& chunkUpdateRequest)
 {
-    serializer.container(
-        chunkUpdateRequest.requestedChunks,
-        static_cast<std::size_t>(ChunkUpdateRequest::MAX_CHUNKS));
+    serializer.container(chunkUpdateRequest.requestedChunks,
+                         ChunkUpdateRequest::MAX_CHUNKS);
 }
 
 } // End namespace AM

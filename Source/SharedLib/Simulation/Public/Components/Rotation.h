@@ -13,18 +13,20 @@ namespace AM
  * and rotation is locked to 8 directions.
  */
 struct Rotation {
-public:
-    /** The 8 directions that rotation is locked to. */
-    enum Direction : Sint8 {
-        SouthWest = -4,
-        South = -3,
-        SouthEast = -2,
-        West = -1,
-        None = 0, /*!< No inputs, or inputs are canceling eachother out. */
-        East = 1,
-        NorthWest = 2,
-        North = 3,
-        NorthEast = 4
+    /**
+     * The 8 directions that rotation is locked to.
+     */
+    enum Direction : Uint8 {
+        South,
+        SouthWest,
+        West,
+        NorthWest,
+        North,
+        NorthEast,
+        East,
+        SouthEast,
+        Count,
+        None, /*!< No inputs, or inputs are canceling eachother out. */
     };
 
     //--------------------------------------------------------------------------

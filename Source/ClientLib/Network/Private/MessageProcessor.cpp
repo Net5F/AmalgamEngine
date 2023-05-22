@@ -8,7 +8,10 @@
 #include "ConnectionResponse.h"
 #include "MovementUpdate.h"
 #include "ChunkUpdate.h"
-#include "TileUpdate.h"
+#include "TileAddLayer.h"
+#include "TileRemoveLayer.h"
+#include "TileClearLayers.h"
+#include "TileExtentClearLayers.h"
 #include "EntityInit.h"
 #include "EntityDelete.h"
 #include "Log.h"
@@ -46,8 +49,23 @@ void MessageProcessor::processReceivedMessage(MessageType messageType,
                                                   networkEventDispatcher);
             break;
         }
-        case MessageType::TileUpdate: {
-            dispatchMessage<TileUpdate>(messageBuffer, messageSize,
+        case MessageType::TileAddLayer: {
+            dispatchMessage<TileAddLayer>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
+        case MessageType::TileRemoveLayer: {
+            dispatchMessage<TileRemoveLayer>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
+        case MessageType::TileClearLayers: {
+            dispatchMessage<TileClearLayers>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
+        case MessageType::TileExtentClearLayers: {
+            dispatchMessage<TileExtentClearLayers>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }
