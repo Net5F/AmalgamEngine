@@ -250,7 +250,7 @@ protected:
      */
     bool clearTileLayersInternal(
         int tileX, int tileY,
-        std::array<bool, TileLayer::Type::Count> layerTypesToClear);
+        const std::array<bool, TileLayer::Type::Count>& layerTypesToClear);
 
     /**
      * Returns an array of layer types to clear, based on the given 

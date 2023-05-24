@@ -138,8 +138,7 @@ void TileMapBase::addWall(int tileX, int tileY, const WallSpriteSet& spriteSet,
         case Wall::Type::North: {
             addNorthWall(tileX, tileY, spriteSet);
         }
-        case Wall::Type::West:
-            {
+        case Wall::Type::West: {
             addWestWall(tileX, tileY, spriteSet);
             break;
         }
@@ -148,6 +147,10 @@ void TileMapBase::addWall(int tileX, int tileY, const WallSpriteSet& spriteSet,
             break;
         }
     }
+
+    // Rebuild the affected tile's collision.
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+    tile.rebuildCollision(tileX, tileY);
 
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates) {
@@ -191,6 +194,12 @@ bool TileMapBase::remWall(int tileX, int tileY, Wall::Type wallType)
         }
     }
 
+    // If the wall was removed, rebuild the affected tile's collision.
+    if (wallWasRemoved) {
+        Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+        tile.rebuildCollision(tileX, tileY);
+    }
+
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates && wallWasRemoved) {
         // Note: We don't care about sprite set ID when removing walls.
@@ -210,6 +219,9 @@ void TileMapBase::addObject(int tileX, int tileY, const ObjectSpriteSet& spriteS
 
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
     tile.getObjects().emplace_back(&spriteSet, rotation);
+
+    // Rebuild the affected tile's collision.
+    tile.rebuildCollision(tileX, tileY);
 
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates) {
@@ -251,6 +263,11 @@ bool TileMapBase::remObject(int tileX, int tileY,
             return false;
         })};
 
+    // If an object was removed, rebuild the affected tile's collision.
+    if (erasedCount > 0) {
+        tile.rebuildCollision(tileX, tileY);
+    }
+
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates && (erasedCount > 0)) {
         tileUpdateHistory.emplace_back(
@@ -280,39 +297,13 @@ bool TileMapBase::clearTileLayers(
     AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
               "Tile coords out of bounds: %d, %d.", tileX, tileY);
 
-    bool layerWasCleared{false};
-    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
-    if (layerTypesToClear[TileLayer::Type::Floor]) {
-        if (tile.getFloor().spriteSet != nullptr) {
-            tile.getFloor().spriteSet = nullptr;
-            layerWasCleared = true;
-        }
-    }
+    bool layerWasCleared{
+        clearTileLayersInternal(tileX, tileY, layerTypesToClear)};
 
-    if (layerTypesToClear[TileLayer::Type::FloorCovering]) {
-        if (tile.getFloorCoverings().size() != 0) {
-            tile.getFloorCoverings().clear();
-            layerWasCleared = true;
-        }
-    }
-
-    if (layerTypesToClear[TileLayer::Type::Wall]) {
-        std::array<WallTileLayer, 2>& walls{tile.getWalls()};
-        if ((walls[0].wallType != Wall::Type::None)
-            || (walls[1].wallType != Wall::Type::None)) {
-            walls[0].spriteSet = nullptr;
-            walls[0].wallType = Wall::Type::None;
-            walls[1].spriteSet = nullptr;
-            walls[1].wallType = Wall::Type::None;
-            layerWasCleared = true;
-        }
-    }
-
-    if (layerTypesToClear[TileLayer::Type::Object]) {
-        if (tile.getObjects().size() != 0) {
-            tile.getObjects().clear();
-            layerWasCleared = true;
-        }
+    // If a layer was cleared, rebuild the affected tile's collision.
+    if (layerWasCleared) {
+        Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+        tile.rebuildCollision(tileX, tileY);
     }
 
     // If we're tracking tile updates, add this one to the history.
@@ -344,6 +335,10 @@ bool TileMapBase::clearExtentLayers(
         for (int y = extent.y; y <= extent.yMax(); ++y) {
             if (clearTileLayersInternal(x, y, layerTypesToClear)) {
                 layerWasCleared = true;
+
+                // A layer was cleared. Rebuild the affected tile's collision.
+                Tile& tile{tiles[linearizeTileIndex(x, y)]};
+                tile.rebuildCollision(x, y);
             }
         }
     }
@@ -459,6 +454,7 @@ void TileMapBase::addWestWall(int tileX, int tileY, const WallSpriteSet& spriteS
     }
     // Else if the tile has a NorthWest gap fill, remove it.
     else if (walls[1].wallType == Wall::Type::NorthWestGapFill) {
+        walls[1].spriteSet = nullptr;
         walls[1].wallType = Wall::Type::None;
     }
 
@@ -467,8 +463,9 @@ void TileMapBase::addWestWall(int tileX, int tileY, const WallSpriteSet& spriteS
         Tile& southwestTile{tiles[linearizeTileIndex(tileX - 1, tileY + 1)]};
         std::array<WallTileLayer, 2>& southwestWalls{southwestTile.getWalls()};
 
-        // If the SouthWest tile has a North wall.
-        if (southwestWalls[0].wallType == Wall::Type::North) {
+        // If the SouthWest tile has a North wall or a NE gap fill.
+        if ((southwestWalls[0].wallType == Wall::Type::North) ||
+            (southwestWalls[0].wallType == Wall::Type::NorthEastGapFill)) {
             // We formed a corner. Check if the tile to the south has a wall.
             // Note: We know this tile is valid cause there's a SouthWest tile.
             Tile& southTile{tiles[linearizeTileIndex(tileX, tileY + 1)]};
@@ -493,6 +490,7 @@ bool TileMapBase::remNorthWall(int tileX, int tileY)
     // If the tile has a North wall or NE gap fill, remove it.
     if ((walls[1].wallType == Wall::Type::North)
         || (walls[1].wallType == Wall::Type::NorthEastGapFill)) {
+        walls[1].spriteSet = nullptr;
         walls[1].wallType = Wall::Type::None;
         wallWasRemoved = true;
     }
@@ -504,6 +502,7 @@ bool TileMapBase::remNorthWall(int tileX, int tileY)
         if (eastWalls[1].wallType == Wall::Type::NorthWestGapFill) {
             // The East tile has a gap fill for a corner that we just broke.
             // Remove the gap fill.
+            eastWalls[1].spriteSet = nullptr;
             eastWalls[1].wallType = Wall::Type::None;
         }
     }
@@ -520,6 +519,7 @@ bool TileMapBase::remWestWall(int tileX, int tileY)
 
     // If the tile has a West wall, remove it.
     if (walls[0].wallType == Wall::Type::West) {
+        walls[0].spriteSet = nullptr;
         walls[0].wallType = Wall::Type::None;
         wallWasRemoved = true;
     }
@@ -531,6 +531,7 @@ bool TileMapBase::remWestWall(int tileX, int tileY)
         if (southWalls[1].wallType == Wall::Type::NorthWestGapFill) {
             // The South tile has a gap fill for a corner that we just broke.
             // Remove the gap fill.
+            southWalls[1].spriteSet = nullptr;
             southWalls[1].wallType = Wall::Type::None;
         }
     }
@@ -540,7 +541,7 @@ bool TileMapBase::remWestWall(int tileX, int tileY)
 
 bool TileMapBase::clearTileLayersInternal(
     int tileX, int tileY,
-    std::array<bool, TileLayer::Type::Count> layerTypesToClear)
+    const std::array<bool, TileLayer::Type::Count>& layerTypesToClear)
 {
     bool layerWasCleared{false};
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};

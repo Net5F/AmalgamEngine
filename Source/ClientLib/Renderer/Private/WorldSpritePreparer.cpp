@@ -87,39 +87,30 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
     // Gather all tiles that are in view.
     for (int y = tileViewExtent.y; y <= tileViewExtent.yMax(); ++y) {
         for (int x = tileViewExtent.x; x <= tileViewExtent.xMax(); ++x) {
-            // Get the tile data that we want to process.
+            // Push all of this tile's sprites into the appropriate vector.
             const Tile& tile{tileMap.getTile(x, y)};
 
-            // Push all of this tile's sprites into the appropriate vector.
-            //for (const Tile::SpriteLayer& layer : tile.spriteLayers) {
-            //    // If the layer is empty, skip it.
-            //    if (layer.sprite.numericID == EMPTY_SPRITE_ID) {
-            //        continue;
-            //    }
+            const Sprite* floorSprite{tile.getFloor().getSprite()};
+            if (floorSprite != nullptr) { 
+                pushTileSprite(*floorSprite, camera, x, y);
+            }
 
-            //    // Get iso screen extent for this sprite.
-            //    const SpriteRenderData& renderData{
-            //        spriteData.getRenderData(layer.sprite.numericID)};
-            //    SDL_Rect screenExtent{ClientTransforms::tileToScreenExtent(
-            //        {x, y}, renderData, camera)};
+            const auto& floorCoverings{tile.getFloorCoverings()};
+            for (const FloorCoveringTileLayer& floorCovering : floorCoverings) {
+                pushTileSprite(*(floorCovering.getSprite()), camera, x, y);
+            }
 
-            //    // If this sprite isn't on screen, skip it.
-            //    if (!isWithinScreenBounds(screenExtent, camera)) {
-            //        continue;
-            //    }
+            const std::array<WallTileLayer, 2>& walls{tile.getWalls()};
+            for (const WallTileLayer& wall : walls) {
+                if (wall.getSprite() != nullptr) {
+                    pushTileSprite(*(wall.getSprite()), camera, x, y);
+                }
+            }
 
-            //    // If this sprite has a bounding box, push it to be sorted.
-            //    if (layer.sprite.hasBoundingBox) {
-            //        spritesToSort.emplace_back(&(layer.sprite),
-            //                                   layer.worldBounds, screenExtent);
-            //    }
-            //    else {
-            //        // No bounding box, push it straight into the sorted
-            //        // sprites vector.
-            //        sortedSprites.emplace_back(&(layer.sprite), BoundingBox{},
-            //                                   screenExtent);
-            //    }
-            //}
+            const std::vector<ObjectTileLayer>& objects{tile.getObjects()};
+            for (const ObjectTileLayer& object : objects) {
+                pushTileSprite(*(object.getSprite()), camera, x, y);
+            }
         }
     }
 
@@ -149,6 +140,36 @@ void WorldSpritePreparer::gatherSpriteInfo(const Camera& camera, double alpha)
             // Push the entity's render info for this frame.
             spritesToSort.emplace_back(&sprite, worldBox, screenExtent);
         }
+    }
+}
+
+void WorldSpritePreparer::pushTileSprite(const Sprite& sprite,
+                                         const Camera& camera, int x, int y)
+{
+    // Get iso screen extent for this sprite.
+    const SpriteRenderData& renderData{
+        spriteData.getRenderData(sprite.numericID)};
+    SDL_Rect screenExtent{
+        ClientTransforms::tileToScreenExtent({x, y}, renderData, camera)};
+
+    // If this sprite isn't on screen, skip it.
+    if (!isWithinScreenBounds(screenExtent, camera)) {
+        return;
+    }
+
+    // If this sprite has a bounding box, push it to be sorted.
+    if (sprite.hasBoundingBox) {
+        Position tilePosition{
+            static_cast<float>(x * SharedConfig::TILE_WORLD_WIDTH),
+            static_cast<float>(y * SharedConfig::TILE_WORLD_WIDTH), 0};
+        BoundingBox worldBounds{
+            Transforms::modelToWorld(sprite.modelBounds, tilePosition)};
+        spritesToSort.emplace_back(&sprite, worldBounds, screenExtent);
+    }
+    else {
+        // No bounding box, push it straight into the sorted
+        // sprites vector.
+        sortedSprites.emplace_back(&sprite, BoundingBox{}, screenExtent);
     }
 }
 

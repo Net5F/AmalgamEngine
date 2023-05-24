@@ -51,6 +51,13 @@ private:
     void gatherSpriteInfo(const Camera& camera, double alpha);
 
     /**
+     * Pushes the given tile sprite into the appropriate vector, based on 
+     * whether it needs to be sorted or not.
+     */
+    void pushTileSprite(const Sprite& sprite, const Camera& camera,
+                        int x, int y);
+
+    /**
      * Sorts the sprites into their draw order (farthest sprite first).
      */
     void sortSpritesByDepth();

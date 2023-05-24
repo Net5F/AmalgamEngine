@@ -54,12 +54,21 @@ public:
     /**
      * @return true if this tile has a West wall.
      */
-    bool hasWestWall();
+    bool hasWestWall() const;
 
     /**
      * @return true if this tile has a North wall.
      */
-    bool hasNorthWall();
+    bool hasNorthWall() const;
+
+    /**
+     * Clears the collisionBoxes vector, then refills it with all of this 
+     * tile's walls and objects.
+     * 
+     * @param tileX  This tile's X-axis coordinate.
+     * @param tileY  This tile's Y-axis coordinate.
+     */
+    void rebuildCollision(int tileX, int tileY);
 
 private:
     // TODO: Maybe eventually switch to an alternative vector type that 
@@ -91,15 +100,6 @@ private:
 
     /** The sprite layers that are on this tile.  */
     std::unique_ptr<Layers> layers;
-
-    /**
-     * Clears the collisionBoxes vector, then refills it with all of this 
-     * tile's walls and objects.
-     * 
-     * @param tileX  This tile's X-axis coordinate.
-     * @param tileY  This tile's Y-axis coordinate.
-     */
-    void rebuildCollision(int tileX, int tileY);
 
     /**
      * Returns the given sprite's modelBounds, translated to world space and 

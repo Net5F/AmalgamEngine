@@ -51,12 +51,12 @@ std::vector<ObjectTileLayer>& Tile::getObjects()
     return layers->objects;
 }
 
-bool Tile::hasWestWall()
+bool Tile::hasWestWall() const
 {
     return layers->walls[0].wallType == Wall::Type::West;
 }
 
-bool Tile::hasNorthWall()
+bool Tile::hasNorthWall() const
 {
     return (layers->walls[1].wallType == Wall::Type::North)
            || (layers->walls[1].wallType == Wall::Type::NorthEastGapFill);
@@ -64,10 +64,14 @@ bool Tile::hasNorthWall()
 
 void Tile::rebuildCollision(int tileX, int tileY)
 {
+    // Clear out the old collision boxes.
+    collisionBoxes.clear();
+
     // Add all of this tile's walls.
     for (const WallTileLayer& wallLayer : getWalls()) {
+        // Note: Walls may be empty, in which case sprite == nullptr.
         const Sprite* sprite{wallLayer.getSprite()};
-        if (sprite->hasBoundingBox) {
+        if ((sprite != nullptr) && sprite->hasBoundingBox) {
             collisionBoxes.push_back(
                 calcWorldBoundsForSprite(tileX, tileY, sprite));
         }
