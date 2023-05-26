@@ -8,7 +8,7 @@
 namespace AM
 {
 struct ChunkUpdate;
-struct Tile;
+class Tile;
 struct TileSnapshot;
 struct ChunkWireSnapshot;
 

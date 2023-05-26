@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 
+# Temp: Set to new behavior to avoid warning.
+cmake_policy(SET CMP0135 NEW)
+
 project(AmalgamEngine)
 
 # Tell CMake where the CMake folder is.

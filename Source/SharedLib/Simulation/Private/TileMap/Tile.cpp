@@ -6,6 +6,12 @@
 namespace AM
 {
 
+Tile::Tile()
+: collisionBoxes{}
+, layers{std::make_unique<Layers>()}
+{
+}
+
 const std::vector<BoundingBox>& Tile::getCollisionBoxes() const
 {
     return collisionBoxes;

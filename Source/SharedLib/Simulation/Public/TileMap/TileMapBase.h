@@ -303,25 +303,30 @@ void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
                              const T& chunkSnapshot,
                              int tileX, int tileY)
 {
+    // Note: We can't use the set/add functions because they'll push updates 
+    //       into the history, and addWall() adds extra walls.
+    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
     for (Uint8 paletteIndex : tileSnapshot.layers) {
         const T::PaletteEntry& paletteEntry{
             chunkSnapshot.palette[paletteIndex]};
 
         switch (paletteEntry.layerType) {
             case TileLayer::Type::Floor: {
-                setFloor(tileX, tileY, paletteEntry.spriteSetID);
+                const FloorSpriteSet& spriteSet{
+                    spriteData.getFloorSpriteSet(paletteEntry.spriteSetID)};
+                tile.getFloor().spriteSet = &spriteSet;
                 break;
             }
             case TileLayer::Type::FloorCovering: {
-                addFloorCovering(
-                    tileX, tileY, paletteEntry.spriteSetID,
+                const auto& floorCoverings{tile.getFloorCoverings()};
+                const auto& spriteSet{spriteData.getFloorCoveringSpriteSet(
+                    paletteEntry.spriteSetID)};
+                tile.getFloorCoverings().emplace_back(
+                    &spriteSet,
                     static_cast<Rotation::Direction>(paletteEntry.spriteIndex));
                 break;
             }
             case TileLayer::Type::Wall: {
-                // Note: We can't use addWall() because it automatically adds 
-                //       walls to fill in gaps. We just need a straight copy.
-                Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
                 std::array<WallTileLayer, 2>& walls{tile.getWalls()};
                 const WallSpriteSet& spriteSet{
                     spriteData.getWallSpriteSet(paletteEntry.spriteSetID)};
@@ -339,8 +344,11 @@ void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
                 break;
             }
             case TileLayer::Type::Object: {
-                addObject(
-                    tileX, tileY, paletteEntry.spriteSetID,
+                const std::vector<ObjectTileLayer>& objects{tile.getObjects()};
+                const auto& spriteSet{
+                    spriteData.getObjectSpriteSet(paletteEntry.spriteSetID)};
+                tile.getObjects().emplace_back(
+                    &spriteSet,
                     static_cast<Rotation::Direction>(paletteEntry.spriteIndex));
                 break;
             }

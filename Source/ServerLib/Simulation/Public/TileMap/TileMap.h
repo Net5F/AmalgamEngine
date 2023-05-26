@@ -6,7 +6,7 @@
 namespace AM
 {
 struct TileMapSnapshot;
-struct Tile;
+class Tile;
 struct TileSnapshot;
 struct ChunkSnapshot;
 

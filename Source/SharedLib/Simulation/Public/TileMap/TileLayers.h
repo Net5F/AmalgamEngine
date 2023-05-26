@@ -28,7 +28,14 @@ struct FloorTileLayer {
     // Floors currently only support a single sprite, so no enum is needed.
     // Eventually, we may add support for "variations" of a floor, so we could
     // support a randomized floor placement tool in build mode.
-    const Sprite* getSprite() const { return spriteSet->sprite; }
+    const Sprite* getSprite() const { 
+        if (spriteSet == nullptr) {
+            return nullptr;
+        }
+        else {
+            return spriteSet->sprite;
+        }
+    }
 };
 
 struct FloorCoveringTileLayer {
@@ -56,7 +63,12 @@ struct WallTileLayer {
 
     const Sprite* getSprite() const
     {
-        return spriteSet->sprites[wallType];
+        if (spriteSet == nullptr) {
+            return nullptr;
+        }
+        else {
+            return spriteSet->sprites[wallType];
+        }
     };
 };
 

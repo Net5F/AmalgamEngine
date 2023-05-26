@@ -186,13 +186,15 @@ void TileMap::addTileLayersToSnapshot(const Tile& tile,
         tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
     }
 
-    // Add the walls.
+    // Add the walls (skipping any empty elements).
     const auto& walls{tile.getWalls()};
     for (const WallTileLayer& wall : walls) {
-        std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            TileLayer::Type::Wall, wall.getSprite()->stringID,
-            wall.wallType)};
-        tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
+        if (wall.wallType != Wall::Type::None) {
+            std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
+                TileLayer::Type::Wall, wall.getSprite()->stringID,
+                wall.wallType)};
+            tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
+        }
     }
 
     // Add the objects.

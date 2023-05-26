@@ -18,8 +18,10 @@ struct Sprite;
  * Tiles contain no logic. If something on a tile requires logic, e.g. a tree
  * growing over time, it must have a system act upon it.
  */
-struct Tile {
+class Tile {
 public:
+    Tile();
+
     /**
      * Returns the collision boxes of each of this tile's layers.
      * Note: The returned vector may be empty, if this tile has no walls or 
@@ -76,7 +78,7 @@ private:
     /** Holds this tile's collision boxes.
         We pre-calculate these and store them contiguously to speed up collision
         checking. */
-    std::vector<BoundingBox> collisionBoxes{};
+    std::vector<BoundingBox> collisionBoxes;
 
     struct Layers
     {
