@@ -26,7 +26,7 @@ public:
     /** The type of tile layer that should be added. */
     TileLayer::Type layerType{TileLayer::Type::None};
 
-    /** The ID of the sprite set that the new layer should use.
+    /** The numeric ID of the sprite set that the new layer should use.
         If the type is Floor, the existing floor will be overwritten. */
     Uint16 spriteSetID{0};
 

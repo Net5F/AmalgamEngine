@@ -174,8 +174,7 @@ void WorldSpritePreparer::pushFloorSprite(const Tile& tile,
             phantomTileSprites.begin(), phantomTileSprites.end(),
             [&](const PhantomTileSpriteInfo& info) {
                 return ((info.layerType == TileLayer::Type::Floor)
-                        && (info.tileX == x) && (info.tileY == y)
-                        && (info.sprite == floorSprite));
+                        && (info.tileX == x) && (info.tileY == y));
             });
         if (phantomSpriteInfo != phantomTileSprites.end()) {
             floorSprite = phantomSpriteInfo->sprite;
@@ -209,7 +208,7 @@ void WorldSpritePreparer::pushWallSprites(const Tile& tile,
                 [&](const PhantomTileSpriteInfo& info) {
                     return ((info.layerType == TileLayer::Type::Wall)
                             && (info.tileX == x) && (info.tileY == y)
-                            && (info.sprite == wallSprite));
+                            && (info.wallType == wall.wallType));
                 });
             if (phantomSpriteInfo != phantomTileSprites.end()) {
                 wallSprite = phantomSpriteInfo->sprite;
