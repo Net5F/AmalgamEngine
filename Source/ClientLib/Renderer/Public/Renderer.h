@@ -20,8 +20,10 @@ class SpriteData;
 class IRendererExtension;
 
 /**
- * Uses world information from the Sim to isometrically render the player's
- * view.
+ * Pulls information from the Simulation and other sources to isometrically 
+ * render the player's view of the world.
+ * 
+ * Also kicks off the UI rendering.
  */
 class Renderer : public OSEventHandler
 {
@@ -35,7 +37,7 @@ public:
              std::function<double(void)> inGetSimTickProgress);
 
     /**
-     * First renders all tiles in view, then renders all entities in view.
+     * Renders the player's view of the world, then kicks off the UI rendering.
      */
     void render();
 

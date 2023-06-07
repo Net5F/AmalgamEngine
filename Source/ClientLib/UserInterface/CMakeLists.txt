@@ -3,6 +3,8 @@ target_sources(ClientLib
         Private/UserInterface.cpp
     PUBLIC
         Public/IUserInterfaceExtension.h
+        Public/PhantomTileSpriteInfo.h
+        Public/TileSpriteColorModInfo.h
         Public/UserInterface.h
         Public/UserInterfaceExDependencies.h
 )

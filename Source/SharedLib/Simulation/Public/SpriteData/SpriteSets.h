@@ -51,7 +51,7 @@ struct SpriteSet {
 struct FloorSpriteSet : public SpriteSet
 {
     /** This floor's single sprite. */
-    const Sprite* sprite{};
+    const Sprite& sprite;
 };
 
 struct FloorCoveringSpriteSet : public SpriteSet
@@ -66,7 +66,8 @@ struct FloorCoveringSpriteSet : public SpriteSet
 struct WallSpriteSet : public SpriteSet
 {
     /** The 4 types of wall sprite that we use for our modular wall system. */
-    std::array<const Sprite*, Wall::Type::Count> sprites{};
+    std::array<std::reference_wrapper<const Sprite>, Wall::Type::Count>
+        sprites;
 };
 
 struct ObjectSpriteSet : public SpriteSet

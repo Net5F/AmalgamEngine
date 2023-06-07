@@ -18,7 +18,7 @@
 #include <variant>
 #include <type_traits>
 
-/** Constraint to match ChunkSnapshot and ChunkWireSnapshot. */
+/** Concept to match ChunkSnapshot and ChunkWireSnapshot. */
 template<typename T>
 concept IsChunkSnapshotType = requires(T a)
 {
@@ -122,12 +122,10 @@ public:
     /**
      * Clears the given layer types from the given tile.
      *
-     * @tparam LayersToClear  The layer types to clear. Must be:
-     *                        FloorTileLayer, FloorCoveringTileLayer, 
-     *                        WallTileLayer, or ObjectTileLayer.
+     * @tparam LayersToClear  The layer types to clear.
      * @return true if any layers were cleared. false if the tile was empty.
      */
-    template<typename... LayersToClear>
+    template<IsTileLayerType... LayersToClear>
     bool clearTileLayers(int tileX, int tileY);
 
     /**
@@ -148,12 +146,10 @@ public:
     /**
      * Clears the given layer types from all tiles within the given extent.
      *
-     * @tparam LayersToClear  The layer types to clear in each tile. Must be:
-     *                        FloorTileLayer, FloorCoveringTileLayer, 
-     *                        WallTileLayer, or ObjectTileLayer.
+     * @tparam LayersToClear  The layer types to clear in each tile.
      * @return true if any layers were cleared. false if all tiles were empty.
      */
-    template<typename... LayersToClear>
+    template<IsTileLayerType... LayersToClear>
     bool clearExtentLayers(const TileExtent& extent);
 
     /**
@@ -256,7 +252,7 @@ protected:
      * Returns an array of layer types to clear, based on the given 
      * LayersToClear.
      */
-    template<typename... LayersToClear>
+    template<IsTileLayerType... LayersToClear>
     std::array<bool, TileLayer::Type::Count> getLayerTypesToClear();
 
     /** The version of the map format. Kept as just a 16-bit int for now, we
@@ -285,14 +281,14 @@ private:
     std::vector<TileUpdateVariant> tileUpdateHistory;
 };
 
-template<typename... LayersToClear>
+template<IsTileLayerType... LayersToClear>
 bool TileMapBase::clearTileLayers(int tileX, int tileY)
 {
     return clearTileLayers(tileX, tileY,
                            getLayerTypesToClear<LayersToClear...>());
 }
 
-template<typename... LayersToClear>
+template<IsTileLayerType... LayersToClear>
 bool TileMapBase::clearExtentLayers(const TileExtent& extent)
 {
     return clearExtentLayers(extent, getLayerTypesToClear<LayersToClear...>());
@@ -356,7 +352,7 @@ void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
     }
 }
 
-template<typename... LayersToClear>
+template<IsTileLayerType... LayersToClear>
 std::array<bool, TileLayer::Type::Count> TileMapBase::getLayerTypesToClear()
 {
     std::array<bool, TileLayer::Type::Count> layerTypesToClear{};

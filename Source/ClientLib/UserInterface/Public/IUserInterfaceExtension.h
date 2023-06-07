@@ -1,6 +1,9 @@
 #pragma once
 
 #include "OSEventHandler.h"
+#include "PhantomTileSpriteInfo.h"
+#include "TileSpriteColorModInfo.h"
+#include <vector>
 
 namespace AM
 {
@@ -23,6 +26,22 @@ class IUserInterfaceExtension : public OSEventHandler
 public:
     // Canonical constructor (derived class must implement):
     // UserInterfaceExtension(UserInterfaceExDependencies deps)
+
+    /**
+     * Returns all of the UI's phantom tile sprites.
+     * Phantom tile sprites are used when you want to visually add or replace a
+     * tile layer in the sim's tile map without actually modifying the map.
+     */
+    virtual std::vector<PhantomTileSpriteInfo> getPhantomTileSprites() const
+        = 0;
+
+    /**
+     * Returns all of the UI's tile sprite color modifications.
+     * Color mods are used when you want to modify the color or transparency 
+     * of a tile layer in the sim's tile map.
+     */
+    virtual std::vector<TileSpriteColorModInfo> getTileSpriteColorMods() const
+        = 0;
 
     /**
      * Called during the UI tick.

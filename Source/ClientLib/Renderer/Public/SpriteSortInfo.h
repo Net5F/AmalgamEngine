@@ -17,7 +17,7 @@ struct SpriteSortInfo {
     const Sprite* sprite;
 
     //-------------------------------------------------------------------------
-    // Render data
+    // Sprite data
     //-------------------------------------------------------------------------
     /** The world-space bounding box that has been calculated for this sprite
         in the current frame, based on the associated entity's lerped
@@ -29,6 +29,10 @@ struct SpriteSortInfo {
         current frame, based on the associated entity's lerped position.
         Used during rendering. */
     SDL_Rect screenExtent{};
+
+    /** If non-default, the UI wants us to multiply this sprite's color and 
+        transparency by these values. */
+    SDL_Color colorMod{255, 255, 255, 255};
 
     //-------------------------------------------------------------------------
     // Topological sort data

@@ -17,7 +17,33 @@ namespace Client
 UserInterface::UserInterface()
 : eventDispatcher{}
 , extension{nullptr}
+, phantomTileSprites{}
+, tileSpriteColorMods{}
 {
+}
+
+std::vector<PhantomTileSpriteInfo>
+    UserInterface::getPhantomTileSprites() const
+{
+    // Get the project's phantom tiles.
+    if (extension != nullptr) {
+        return extension->getPhantomTileSprites();
+    }
+    else {
+        return {};
+    }
+}
+
+std::vector<TileSpriteColorModInfo>
+    UserInterface::getTileSpriteColorMods() const
+{
+    // Get the project's tile color mods.
+    if (extension != nullptr) {
+        return extension->getTileSpriteColorMods();
+    }
+    else {
+        return {};
+    }
 }
 
 void UserInterface::tick(double timestepS)

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "SpriteSortInfo.h"
+#include "TileLayers.h"
+#include "PhantomTileSpriteInfo.h"
+#include "TileSpriteColorModInfo.h"
 #include "entt/entity/registry.hpp"
 #include <vector>
 
@@ -9,11 +12,13 @@ struct SDL_Rect;
 namespace AM
 {
 struct Camera;
+class Tile;
 
 namespace Client
 {
 class TileMap;
 class SpriteData;
+class UserInterface;
 
 /**
  * This class is responsible for figuring out which sprites from the world are
@@ -23,7 +28,8 @@ class WorldSpritePreparer
 {
 public:
     WorldSpritePreparer(entt::registry& inRegistry, const TileMap& inTileMap,
-                        const SpriteData& inSpriteData);
+                        const SpriteData& inSpriteData,
+                        const UserInterface& inUI);
 
     /**
      * Clears the stored sprite info and prepares the updated batch of sprites.
@@ -51,11 +57,26 @@ private:
     void gatherSpriteInfo(const Camera& camera, double alpha);
 
     /**
+     * Performs the tile portion of the gather step.
+     */
+    void gatherTileSpriteInfo(const Camera& camera, double alpha);
+
+    // All of these just call pushTileSprite(), but Floor and Wall also check 
+    // if the UI wants to swap any of their sprites with a phantom.
+    void pushFloorSprite(const Tile& tile, const Camera& camera, int x, int y);
+    void pushFloorCoveringSprites(const Tile& tile, const Camera& camera, int x,
+                                 int y);
+    void pushWallSprites(const Tile& tile, const Camera& camera, int x,
+                         int y);
+    void pushObjectSprites(const Tile& tile, const Camera& camera, int x,
+                           int y);
+
+    /**
      * Pushes the given tile sprite into the appropriate vector, based on 
      * whether it needs to be sorted or not.
      */
     void pushTileSprite(const Sprite& sprite, const Camera& camera,
-                        int x, int y);
+                        int x, int y, TileLayer::Type layerType);
 
     /**
      * Sorts the sprites into their draw order (farthest sprite first).
@@ -96,6 +117,25 @@ private:
 
     /** Used for getting sprite render data. */
     const SpriteData& spriteData;
+
+    /** Used for getting sprite color mods and phantom sprites. */
+    const UserInterface& ui;
+
+    /** Stores a temporary copy of the UI's desired phantom tile sprites. 
+        We make a copy so that we can remove them as they get used. */
+    std::vector<PhantomTileSpriteInfo> phantomTileSprites;
+
+    /** Stores a temporary copy of the UI's desired tile sprite color mods.
+        We make a copy so that we can remove them as they get used. */
+    std::vector<TileSpriteColorModInfo> tileSpriteColorMods;
+
+    /** Holds floor sprites during the gather step before they get pushed into 
+        sortedSprites. */
+    std::vector<SpriteSortInfo> floorSprites;
+
+    /** Holds floor covering sprites during the gather step before they get 
+        pushed into sortedSprites. */
+    std::vector<SpriteSortInfo> floorCoveringSprites;
 
     /** Stores the sorted sprite info from the last prepareSprites() call.
         Calculations and sorting are done in-place.

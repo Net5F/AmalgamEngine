@@ -117,19 +117,6 @@ private:
     void parseWallSpriteSet(const nlohmann::json& spriteSetJson);
     void parseObjectSpriteSet(const nlohmann::json& spriteSetJson);
 
-    /**
-     * Returns the number of sprites that are in the given SpriteData.json
-     * + 1 for the empty sprite.
-     */
-    std::size_t getSpriteCount(const nlohmann::json& json);
-
-    /**
-     * Returns the number of sprite sets of the given type that are in the 
-     * given SpriteData.json
-     */
-    std::size_t getSpriteSetCount(SpriteSet::Type spriteSetType,
-                                  const nlohmann::json& json);
-
     /** The loaded sprites, indexed by their numeric IDs. */
     std::vector<Sprite> sprites;
 

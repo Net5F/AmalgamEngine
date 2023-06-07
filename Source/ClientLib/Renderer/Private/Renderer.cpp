@@ -27,7 +27,7 @@ Renderer::Renderer(SDL_Renderer* inSdlRenderer, World& inWorld,
 , ui{inUI}
 , spriteData{inSpriteData}
 , getSimTickProgress{inGetSimTickProgress}
-, worldSpritePreparer{world.registry, world.tileMap, spriteData}
+, worldSpritePreparer{world.registry, world.tileMap, spriteData, ui}
 , extension{nullptr}
 {
 }
@@ -137,8 +137,21 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
     for (SpriteSortInfo& spriteInfo : sprites) {
         const SpriteRenderData& renderData{
             spriteData.getRenderData(spriteInfo.sprite->numericID)};
+        const SDL_Color& colorMod{spriteInfo.colorMod};
+
+        // Apply the color/alpha mod that the UI gave us.
+        SDL_SetTextureColorMod(renderData.texture.get(), colorMod.r, colorMod.g,
+                               colorMod.b);
+        SDL_SetTextureAlphaMod(renderData.texture.get(), colorMod.a);
+
+        // Render the sprite.
         SDL_RenderCopy(sdlRenderer, renderData.texture.get(),
                        &(renderData.textureExtent), &(spriteInfo.screenExtent));
+
+        // Reset the texture's color/alpha.
+        SDL_SetTextureColorMod(renderData.texture.get(), 255, 255, 255);
+        SDL_SetTextureAlphaMod(renderData.texture.get(), 255);
+
         //        drawBoundingBox(spriteInfo.worldBounds, camera);
     }
 }

@@ -5,6 +5,7 @@
 #include <vector>
 #include <span>
 #include <array>
+#include <memory>
 
 namespace AM
 {
@@ -84,20 +85,20 @@ private:
     {
         /** Tiles can only have 1 floor.
             If the floor is cleared, its sprite set will be nullptr. */
-        FloorTileLayer floor;
+        FloorTileLayer floor{};
 
         /** Tiles can have any number of floor coverings. */
-        std::vector<FloorCoveringTileLayer> floorCoverings;
+        std::vector<FloorCoveringTileLayer> floorCoverings{};
 
         /** Tiles can have up to 2 walls.
             If a wall doesn't exist, its sprite set will be nullptr and its
             WallType will be None.
             Possible states: [None, None], [West, None], [None, North],
                              [West, NEGapFill], [None, NWGapFill] */
-        std::array<WallTileLayer, 2> walls;
+        std::array<WallTileLayer, 2> walls{};
 
         /** Tiles can have any number of objects. */
-        std::vector<ObjectTileLayer> objects;
+        std::vector<ObjectTileLayer> objects{};
     };
 
     /** The sprite layers that are on this tile.  */
