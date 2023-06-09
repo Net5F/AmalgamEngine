@@ -30,8 +30,12 @@ public:
      */
     TilePosition asTilePosition() const
     {
-        return {(static_cast<int>(x / SharedConfig::TILE_WORLD_WIDTH)),
-                (static_cast<int>(y / SharedConfig::TILE_WORLD_WIDTH))};
+        float tileX{x / (static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))};
+        tileX = std::floor(tileX);
+        float tileY{y / (static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))};
+        tileY = std::floor(tileY);
+
+        return {static_cast<int>(tileX), static_cast<int>(tileY)};
     }
 
     /**
@@ -39,10 +43,14 @@ public:
      */
     ChunkPosition asChunkPosition() const
     {
-        return {(static_cast<int>((x / SharedConfig::TILE_WORLD_WIDTH)
-                                  / SharedConfig::CHUNK_WIDTH)),
-                (static_cast<int>((y / SharedConfig::TILE_WORLD_WIDTH)
-                                  / SharedConfig::CHUNK_WIDTH))};
+        float chunkX{(x / (static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))
+                      / static_cast<float>(SharedConfig::CHUNK_WIDTH))};
+        chunkX = std::floor(chunkX);
+        float chunkY{(y / (static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))
+                      / static_cast<float>(SharedConfig::CHUNK_WIDTH))};
+        chunkY = std::floor(chunkY);
+
+        return {static_cast<int>(chunkX), static_cast<int>(chunkY)};
     }
 
     Position operator+(const Position& other) const

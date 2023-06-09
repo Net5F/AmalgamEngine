@@ -14,12 +14,12 @@ ScreenPoint Transforms::worldToScreen(const Position& position,
                                       float zoomFactor)
 {
     // Calc the scaling factor going from world tiles to screen tiles.
-    static const float TILE_WIDTH_SCALE
-        = static_cast<float>(SharedConfig::TILE_SCREEN_WIDTH)
-          / SharedConfig::TILE_WORLD_WIDTH;
-    static const float TILE_HEIGHT_SCALE
-        = static_cast<float>(SharedConfig::TILE_SCREEN_HEIGHT)
-          / SharedConfig::TILE_WORLD_WIDTH;
+    static const float TILE_WIDTH_SCALE{
+        static_cast<float>(SharedConfig::TILE_SCREEN_WIDTH)
+        / SharedConfig::TILE_WORLD_WIDTH};
+    static const float TILE_HEIGHT_SCALE{
+        static_cast<float>(SharedConfig::TILE_SCREEN_HEIGHT)
+        / SharedConfig::TILE_WORLD_WIDTH};
 
     // Convert cartesian world point to isometric screen point.
     float screenX{(position.x - position.y) * (TILE_WIDTH_SCALE / 2.f)};
@@ -54,12 +54,12 @@ Position Transforms::screenToWorld(const ScreenPoint& screenPoint,
     float y{absolutePoint.y / camera.zoomFactor};
 
     // Calc the scaling factor going from screen tiles to world tiles.
-    static const float TILE_WIDTH_SCALE
-        = static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
-          / SharedConfig::TILE_SCREEN_WIDTH;
-    static const float TILE_HEIGHT_SCALE
-        = static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
-          / SharedConfig::TILE_SCREEN_HEIGHT;
+    static const float TILE_WIDTH_SCALE{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
+        / SharedConfig::TILE_SCREEN_WIDTH};
+    static const float TILE_HEIGHT_SCALE{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
+        / SharedConfig::TILE_SCREEN_HEIGHT};
 
     // Calc the world position.
     float worldX{((2.f * y) + x) * TILE_WIDTH_SCALE};
@@ -72,7 +72,7 @@ Position Transforms::screenToWorld(const ScreenPoint& screenPoint,
 float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)
 {
     // Calc the scaling factor going from screen Y units to world Z units.
-    static const float Z_WORLD_SCALE = 1 / SharedConfig::Z_SCREEN_SCALE;
+    static const float Z_WORLD_SCALE{1 / SharedConfig::Z_SCREEN_SCALE};
 
     return yCoord * zoomFactor * Z_WORLD_SCALE;
 }
@@ -81,7 +81,7 @@ TilePosition Transforms::screenToTile(const ScreenPoint& screenPoint,
                                       const Camera& camera)
 {
     // Convert to world space.
-    Position worldPos = screenToWorld(screenPoint, camera);
+    Position worldPos{screenToWorld(screenPoint, camera)};
 
     // Convert to tile index.
     return worldPos.asTilePosition();

@@ -275,8 +275,13 @@ void SpriteDataBase::parseFloorCoveringSpriteSet(const nlohmann::json& spriteSet
     // Add the sprite set's sprites.
     std::size_t index{0};
     for (auto& spriteIDJson : spriteSetJson.at("spriteIDs").items()) {
-        const Sprite* sprite{&getSprite(spriteIDJson.value().get<int>())};
-        spriteSet.sprites[index] = sprite;
+        int spriteID{spriteIDJson.value().get<int>()};
+        if (spriteID == EMPTY_SPRITE_ID) {
+            spriteSet.sprites[index] = nullptr;
+        }
+        else {
+            spriteSet.sprites[index] = &getSprite(spriteID);
+        }
         index++;
     }
 }
@@ -312,8 +317,13 @@ void SpriteDataBase::parseObjectSpriteSet(const nlohmann::json& spriteSetJson)
     // Add the sprite set's sprites.
     std::size_t index{0};
     for (auto& spriteIDJson : spriteSetJson.at("spriteIDs").items()) {
-        const Sprite* sprite{&getSprite(spriteIDJson.value().get<int>())};
-        spriteSet.sprites[index] = sprite;
+        int spriteID{spriteIDJson.value().get<int>()};
+        if (spriteID == EMPTY_SPRITE_ID) {
+            spriteSet.sprites[index] = nullptr;
+        }
+        else {
+            spriteSet.sprites[index] = &getSprite(spriteID);
+        }
         index++;
     }
 }
