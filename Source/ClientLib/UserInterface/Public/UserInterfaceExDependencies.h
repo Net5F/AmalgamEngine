@@ -8,6 +8,7 @@ class EventDispatcher;
 
 namespace Client
 {
+class World;
 class WorldSignals;
 class SpriteData;
 
@@ -17,6 +18,10 @@ class SpriteData;
  */
 struct UserInterfaceExDependencies {
 public:
+    /** Const, only allows us to view world data. */
+    const World& world;
+
+    /** Non-const, allows us to subscribe to world data updates. */
     WorldSignals& worldSignals;
 
     EventDispatcher& uiEventDispatcher;

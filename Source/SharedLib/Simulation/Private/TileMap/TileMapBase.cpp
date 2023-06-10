@@ -137,6 +137,7 @@ void TileMapBase::addWall(int tileX, int tileY, const WallSpriteSet& spriteSet,
     switch (wallType) {
         case Wall::Type::North: {
             addNorthWall(tileX, tileY, spriteSet);
+            break;
         }
         case Wall::Type::West: {
             addWestWall(tileX, tileY, spriteSet);
@@ -464,8 +465,8 @@ void TileMapBase::addWestWall(int tileX, int tileY, const WallSpriteSet& spriteS
         std::array<WallTileLayer, 2>& southwestWalls{southwestTile.getWalls()};
 
         // If the SouthWest tile has a North wall or a NE gap fill.
-        if ((southwestWalls[0].wallType == Wall::Type::North) ||
-            (southwestWalls[0].wallType == Wall::Type::NorthEastGapFill)) {
+        if ((southwestWalls[1].wallType == Wall::Type::North) ||
+            (southwestWalls[1].wallType == Wall::Type::NorthEastGapFill)) {
             // We formed a corner. Check if the tile to the south has a wall.
             // Note: We know this tile is valid cause there's a SouthWest tile.
             Tile& southTile{tiles[linearizeTileIndex(tileX, tileY + 1)]};

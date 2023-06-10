@@ -337,6 +337,7 @@ void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
                     walls[1].spriteSet = &spriteSet;
                     walls[1].wallType = newWallType;
                 }
+                tile.rebuildCollision(tileX, tileY);
                 break;
             }
             case TileLayer::Type::Object: {
@@ -346,6 +347,7 @@ void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
                 tile.getObjects().emplace_back(
                     &spriteSet,
                     static_cast<Rotation::Direction>(paletteEntry.spriteIndex));
+                tile.rebuildCollision(tileX, tileY);
                 break;
             }
         }

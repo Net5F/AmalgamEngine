@@ -206,9 +206,26 @@ void WorldSpritePreparer::pushWallSprites(const Tile& tile,
             auto phantomSpriteInfo = std::find_if(
                 phantomTileSprites.begin(), phantomTileSprites.end(),
                 [&](const PhantomTileSpriteInfo& info) {
-                    return ((info.layerType == TileLayer::Type::Wall)
-                            && (info.tileX == x) && (info.tileY == y)
-                            && (info.wallType == wall.wallType));
+                    if ((info.layerType == TileLayer::Type::Wall)
+                        && (info.tileX == x) && (info.tileY == y)) {
+                        // Check if we need to replace a N with a NE fill.
+                        if ((wall.wallType == Wall::Type::North)
+                            && (info.wallType
+                                == Wall::Type::NorthEastGapFill)) {
+                            return true;
+                        }
+                        // Check if we need to replace a NW fill with a W or N.
+                        else if ((wall.wallType == Wall::Type::NorthWestGapFill)
+                                 && ((info.wallType == Wall::Type::West)
+                                     || (info.wallType == Wall::Type::North))) {
+                            return true;
+                        }
+                        else if (info.wallType == wall.wallType) {
+                            // Otherwise, check if the type matches.
+                            return true;
+                        }
+                    }
+                    return false;
                 });
             if (phantomSpriteInfo != phantomTileSprites.end()) {
                 wallSprite = phantomSpriteInfo->sprite;
