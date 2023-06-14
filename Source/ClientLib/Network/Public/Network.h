@@ -16,6 +16,10 @@
 #include <atomic>
 #include <thread>
 
+#if defined(__clang__) && !defined(__cpp_lib_jthread)
+#include <jthread>
+#endif
+
 namespace AM
 {
 struct ConnectionResponse;

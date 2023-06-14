@@ -51,13 +51,13 @@ Note: This is only tested on Ubuntu 20.04. If you have experience in multi-distr
 
 ### macOS
 
-Note: AmalgamEngine requires GCC to build on macOS. Clang / Apple Clang does not yet support C++ features required by this project (as of Apple Clang 14 / Clang 15).
+Note: AmalgamEngine requires Clang 16 or higher to build on macOS. GCC may also work, but some optional programs will fail to build.
 
-1. Use the Homebrew package manager to install dependencies: `brew install gcc make cmake ninja sdl2 sdl2_image sdl2_mixer sdl2_ttf sdl2_gfx sdl2_net`
+1. Use the Homebrew package manager to install dependencies: `brew install llvm make cmake ninja sdl2 sdl2_image sdl2_mixer sdl2_ttf sdl2_gfx sdl2_net`
 1. (From the base of the repo) `mkdir -p Build/macOS/Release`
 1. `cd Build/macOS/Release`
-1. `CC=gcc-NN CXX=g++-NN cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../../../`. Replace the `NN` in `gcc-NN` and `g++-NN` with the version of GCC that you installed with Homebrew. This is important, as using `gcc` without a version number will alias to `clang`.
-   1. ~~You can optionally add `-DAM_BUILD_SPRITE_EDITOR` to build the sprite editor.~~ Sprite editor doesn't currently build on macOS due to GCC not being able to build with Apple SDK headers which use certain Objective C extensions.
+1. `CC=/path/to/llvm/bin/clang CXX=/path/to/llvm/bin/clang++ cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../../../`. Replace `/path/to/llvm/` in `/path/to/llvm/bin/clang` and `/path/to/llvm/bin/clang++` with the path to the version of LLVM that you installed with Homebrew (likely `/opt/homebrew/opt/llvm/`).
+   1. You can optionally add `-DAM_BUILD_SPRITE_EDITOR` to build the sprite editor.
 1. `ninja all`
 
 ## Packaging
