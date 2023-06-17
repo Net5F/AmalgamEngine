@@ -9,7 +9,6 @@
 #include "IRendererExtension.h"
 #include "Transforms.h"
 #include "MovementHelpers.h"
-#include "ScreenRect.h"
 #include "Log.h"
 #include "Ignore.h"
 #include <SDL_render.h>
@@ -27,7 +26,7 @@ Renderer::Renderer(SDL_Renderer* inSdlRenderer, World& inWorld,
 , ui{inUI}
 , spriteData{inSpriteData}
 , getSimTickProgress{inGetSimTickProgress}
-, worldSpritePreparer{world.registry, world.tileMap, spriteData, ui}
+, worldSpriteSorter{world.registry, world.tileMap, spriteData, ui}
 , extension{nullptr}
 {
 }
@@ -56,6 +55,7 @@ void Renderer::render()
     }
 
     // Draw tiles and entities.
+    // Note: As part of this, the sorter's sorted sprites vector is updated.
     renderWorld(lerpedCamera, alpha);
 
     // Call the project's post-world-rendering logic.
@@ -64,7 +64,8 @@ void Renderer::render()
     }
 
     // Draw UI elements.
-    ui.render(lerpedCamera);
+    // Note: We pass the sorted sprites list so the UI can update its locator.
+    ui.render(lerpedCamera, worldSpriteSorter.getSortedSprites());
 
     // Render the finished buffer to the screen.
     SDL_RenderPresent(sdlRenderer);
@@ -109,14 +110,12 @@ Camera Renderer::getLerpedCamera(double alpha)
     lerpedCamera.position.y = cameraLerp.y;
 
     // Get iso screen coords for the center point of camera.
-    ScreenPoint lerpedCameraCenter{Transforms::worldToScreen(
+    SDL_FPoint lerpedCameraCenter{Transforms::worldToScreen(
         lerpedCamera.position, lerpedCamera.zoomFactor)};
 
     // Calc where the top left of the lerpedCamera is in screen space.
-    lerpedCamera.extent.x
-        = lerpedCameraCenter.x - (lerpedCamera.extent.width / 2);
-    lerpedCamera.extent.y
-        = lerpedCameraCenter.y - (lerpedCamera.extent.height / 2);
+    lerpedCamera.extent.x = lerpedCameraCenter.x - (lerpedCamera.extent.w / 2);
+    lerpedCamera.extent.y = lerpedCameraCenter.y - (lerpedCamera.extent.h / 2);
 
     // Save the last calculated screen position of the camera for use in
     // screen -> world calcs.
@@ -129,12 +128,13 @@ Camera Renderer::getLerpedCamera(double alpha)
 void Renderer::renderWorld(const Camera& camera, double alpha)
 {
     // Prepare sprites (bounds updating, screen position calcs, depth sorting).
-    std::vector<SpriteSortInfo>& sprites{
-        worldSpritePreparer.prepareSprites(camera, alpha)};
+    worldSpriteSorter.sortSprites(camera, alpha);
+    const std::vector<SpriteSortInfo>& sortedSprites{
+        worldSpriteSorter.getSortedSprites()};
 
     // Draw depth-sorted tiles and sprites.
     // Note: These are already culled during the gather step.
-    for (SpriteSortInfo& spriteInfo : sprites) {
+    for (const SpriteSortInfo& spriteInfo : sortedSprites) {
         const SpriteRenderData& renderData{
             spriteData.getRenderData(spriteInfo.sprite->numericID)};
         const SDL_Color& colorMod{spriteInfo.colorMod};
@@ -159,7 +159,7 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
 void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
 {
     // Transform all the vertices to screen space.
-    std::vector<ScreenPoint> verts;
+    std::vector<SDL_FPoint> verts;
     Position position{box.minX, box.minY, box.minZ};
     verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
     position = {box.maxX, box.minY, box.minZ};
@@ -179,7 +179,7 @@ void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
     verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
 
     // Adjust all verts for the camera.
-    for (ScreenPoint& vert : verts) {
+    for (SDL_FPoint& vert : verts) {
         vert.x = std::round(vert.x - camera.extent.x);
         vert.y = std::round(vert.y - camera.extent.y);
     }

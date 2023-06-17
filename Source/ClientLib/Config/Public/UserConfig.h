@@ -1,8 +1,8 @@
 #pragma once
 
 #include "UserConfigStructs.h"
-#include "ScreenRect.h"
 #include "nlohmann/json_fwd.hpp"
+#include <SDL_rect.h>
 
 namespace AM
 {
@@ -43,8 +43,8 @@ public:
     unsigned int getFullscreenMode();
     void setFullscreenMode(unsigned int inFullscreenMode);
 
-    ScreenRect getWindowSize();
-    void setWindowSize(ScreenRect inWindowSize);
+    SDL_Rect getWindowSize();
+    void setWindowSize(const SDL_Rect& inWindowSize);
 
     unsigned int getFramesPerSecond();
     double getFrameTimestepS();
@@ -62,8 +62,8 @@ private:
 
     unsigned int fullscreenMode;
 
-    float windowSizeWidth;
-    float windowSizeHeight;
+    int windowSizeWidth;
+    int windowSizeHeight;
 
     unsigned int framesPerSecond;
     double frameTimestepS;

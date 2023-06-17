@@ -1,8 +1,8 @@
 #pragma once
 
 #include "OSEventHandler.h"
-#include "PhantomTileSpriteInfo.h"
-#include "TileSpriteColorModInfo.h"
+#include "PhantomSpriteInfo.h"
+#include "SpriteColorModInfo.h"
 #include <vector>
 
 namespace AM
@@ -28,20 +28,18 @@ public:
     // UserInterfaceExtension(UserInterfaceExDependencies deps)
 
     /**
-     * Returns all of the UI's phantom tile sprites.
-     * Phantom tile sprites are used when you want to visually add or replace a
-     * tile layer in the sim's tile map without actually modifying the map.
+     * Returns all of the project UI's phantom sprites.
+     * Phantom sprites are used when you want to visually add or replace a tile 
+     * layer or entity without actually modifying the sim.
      */
-    virtual std::vector<PhantomTileSpriteInfo> getPhantomTileSprites() const
-        = 0;
+    virtual std::vector<PhantomSpriteInfo> getPhantomSprites() const = 0;
 
     /**
-     * Returns all of the UI's tile sprite color modifications.
+     * Returns all of the project UI's sprite color modifications.
      * Color mods are used when you want to modify the color or transparency 
-     * of a tile layer in the sim's tile map.
+     * of a tile layer or entity.
      */
-    virtual std::vector<TileSpriteColorModInfo> getTileSpriteColorMods() const
-        = 0;
+    virtual std::vector<SpriteColorModInfo> getSpriteColorMods() const = 0;
 
     /**
      * Called during the UI tick.

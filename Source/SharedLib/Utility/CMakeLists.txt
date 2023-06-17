@@ -6,6 +6,7 @@ target_sources(SharedLib
         Private/Log.cpp
         Private/Paths.cpp
         Private/PeriodicCaller.cpp
+        Private/SDLHelpers.cpp
         Private/Timer.cpp
         Private/Transforms.cpp
     PUBLIC
@@ -22,6 +23,7 @@ target_sources(SharedLib
         Public/Log.h
         Public/Paths.h
         Public/PeriodicCaller.h
+        Public/SDLHelpers.h
         Public/Serialize.h
         Public/SerializeBuffer.h
         Public/Timer.h

@@ -11,7 +11,6 @@ World::World(SpriteData& spriteData)
 : registry{}
 , playerEntity{entt::null}
 , tileMap{spriteData}
-, mouseScreenPoint{}
 {
 }
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AUI/Widget.h"
-#include "ScreenPoint.h"
 #include <array>
 
 namespace AM
@@ -161,13 +160,13 @@ private:
     unsigned int activeSpriteID;
 
     /** A reasonable size for the control rectangles. */
-    static constexpr int LOGICAL_RECT_SIZE = 12;
+    static constexpr int LOGICAL_RECT_SIZE{12};
 
     /** The scaled size of the control rectangles. */
     int scaledRectSize;
 
     /** A reasonable width for the lines. */
-    static constexpr int LOGICAL_LINE_WIDTH = 4;
+    static constexpr int LOGICAL_LINE_WIDTH{4};
 
     /** The scaled width of the lines. */
     int scaledLineWidth;

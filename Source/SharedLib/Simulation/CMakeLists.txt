@@ -35,6 +35,7 @@ target_sources(SharedLib
         Public/TileMap/ChunkPosition.h
         Public/TileMap/ChunkSnapshot.h
         Public/TileMap/Tile.h
+        Public/TileMap/TileLayerID.h
         Public/TileMap/TileLayers.h
         Public/TileMap/TileExtent.h
         Public/TileMap/TileMapBase.h

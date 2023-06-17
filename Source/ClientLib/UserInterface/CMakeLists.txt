@@ -1,12 +1,14 @@
 target_sources(ClientLib
     PRIVATE
         Private/UserInterface.cpp
+        Private/WorldObjectLocator.cpp
     PUBLIC
         Public/IUserInterfaceExtension.h
-        Public/PhantomTileSpriteInfo.h
-        Public/TileSpriteColorModInfo.h
+        Public/PhantomSpriteInfo.h
+        Public/SpriteColorModInfo.h
         Public/UserInterface.h
         Public/UserInterfaceExDependencies.h
+        Public/WorldObjectLocator.h
 )
 
 target_include_directories(ClientLib

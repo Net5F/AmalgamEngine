@@ -13,6 +13,7 @@
 #include "Transforms.h"
 #include "Config.h"
 #include "UserConfig.h"
+#include "SDLHelpers.h"
 #include "Ignore.h"
 #include "Log.h"
 
@@ -134,8 +135,9 @@ void ServerConnectionSystem::initSimState(
     UserConfig& userConfig{UserConfig::get()};
     Sprite& playerSprite{registry.emplace<Sprite>(
         newEntity, spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
-    registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
-                             PreviousPosition{}, userConfig.getWindowSize());
+    registry.emplace<Camera>(
+        newEntity, Camera::CenterOnEntity, Position{}, PreviousPosition{},
+        SDLHelpers::rectToFRect(userConfig.getWindowSize()));
 
     // Set up the player's collision component.
     registry.emplace<Collision>(newEntity, playerSprite.modelBounds,
@@ -173,8 +175,9 @@ void ServerConnectionSystem::initMockSimState()
     UserConfig& userConfig{UserConfig::get()};
     Sprite& playerSprite{registry.emplace<Sprite>(
         newEntity, spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
-    registry.emplace<Camera>(newEntity, Camera::CenterOnEntity, Position{},
-                             PreviousPosition{}, userConfig.getWindowSize());
+    registry.emplace<Camera>(
+        newEntity, Camera::CenterOnEntity, Position{}, PreviousPosition{},
+        SDLHelpers::rectToFRect(userConfig.getWindowSize()));
 
     // Set up the player's collision component.
     registry.emplace<Collision>(newEntity, playerSprite.modelBounds,

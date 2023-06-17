@@ -2,8 +2,8 @@
 
 #include "SpriteSortInfo.h"
 #include "TileLayers.h"
-#include "PhantomTileSpriteInfo.h"
-#include "TileSpriteColorModInfo.h"
+#include "PhantomSpriteInfo.h"
+#include "SpriteColorModInfo.h"
 #include "entt/entity/registry.hpp"
 #include <vector>
 
@@ -21,24 +21,30 @@ class SpriteData;
 class UserInterface;
 
 /**
- * This class is responsible for figuring out which sprites from the world are
- * relevant to the current frame and providing them in a sorted, prepared form.
+ * Gathers all of the World's entity and tile layer sprites and sorts them 
+ * into their proper draw order.
  */
-class WorldSpritePreparer
+class WorldSpriteSorter
 {
 public:
-    WorldSpritePreparer(entt::registry& inRegistry, const TileMap& inTileMap,
+    WorldSpriteSorter(entt::registry& inRegistry, const TileMap& inTileMap,
                         const SpriteData& inSpriteData,
                         const UserInterface& inUI);
 
     /**
-     * Clears the stored sprite info and prepares the updated batch of sprites.
-     *
-     * @return A reference to a vector of all sprites that should be drawn
-     *         on this frame, sorted in their proper draw order.
+     * Clears the stored sprite info, gathers the updated batch of sprites, 
+     * and sorts them into their proper draw order.
      */
-    std::vector<SpriteSortInfo>& prepareSprites(const Camera& camera,
-                                                double alpha);
+    void sortSprites(const Camera& camera, double alpha);
+
+    /**
+     * @return A reference to the vector of sprites that was built during the 
+     *         last sortSprites() call.
+     *
+     * Note: Some of the returned vector's elements may be pure phantoms.
+     *       Phantoms will have an empty spriteOwnerID field.
+     */
+    const std::vector<SpriteSortInfo>& getSortedSprites();
 
 private:
     /**
@@ -49,9 +55,7 @@ private:
      * @param camera  The camera to calculate screen position with.
      * @param alpha  For entities, the alpha to lerp between positions with.
      *
-     * @post sprites is filled with the sprites that are relevant to this
-     *       frame.
-     * @post sortedSprites is filled with the ground sprites, and spritesToSort
+     * @post sortedSprites is filled with the floor sprites, and spritesToSort
      *       is filled with the sprites that need to be sorted.
      */
     void gatherSpriteInfo(const Camera& camera, double alpha);
@@ -76,7 +80,7 @@ private:
      * whether it needs to be sorted or not.
      */
     void pushTileSprite(const Sprite& sprite, const Camera& camera,
-                        int x, int y, TileLayer::Type layerType);
+                        const TileLayerID& layerID, bool isFullPhantom);
 
     /**
      * Sorts the sprites into their draw order (farthest sprite first).
@@ -109,6 +113,14 @@ private:
      */
     bool isWithinScreenBounds(const SDL_Rect& extent, const Camera& camera);
 
+    /**
+     * Returns a color mod from spriteColorMods for the given world object ID 
+     * if one exists, else returns {255, 255, 255, 255}.
+     * If a color mod is returned, it will be removed from spriteColorMods.
+     */
+    template<typename T>
+    SDL_Color getColorMod(const T& objectID);
+
     /** Used for gathering sprites. */
     entt::registry& registry;
 
@@ -121,13 +133,13 @@ private:
     /** Used for getting sprite color mods and phantom sprites. */
     const UserInterface& ui;
 
-    /** Stores a temporary copy of the UI's desired phantom tile sprites. 
+    /** Stores a temporary copy of the UI's desired phantom sprites. 
         We make a copy so that we can remove them as they get used. */
-    std::vector<PhantomTileSpriteInfo> phantomTileSprites;
+    std::vector<PhantomSpriteInfo> phantomSprites;
 
-    /** Stores a temporary copy of the UI's desired tile sprite color mods.
+    /** Stores a temporary copy of the UI's desired sprite color mods.
         We make a copy so that we can remove them as they get used. */
-    std::vector<TileSpriteColorModInfo> tileSpriteColorMods;
+    std::vector<SpriteColorModInfo> spriteColorMods;
 
     /** Holds floor sprites during the gather step before they get pushed into 
         sortedSprites. */
@@ -138,15 +150,42 @@ private:
     std::vector<SpriteSortInfo> floorCoveringSprites;
 
     /** Stores the sorted sprite info from the last prepareSprites() call.
-        Calculations and sorting are done in-place.
-        Indices 0 - boxSpriteStartIndex have no bounding boxes (floors,
-        carpets, etc). The rest are sprites with bounding boxes. */
+        Calculations and sorting are done in-place. */
     std::vector<SpriteSortInfo> sortedSprites;
 
     /** Holds sprites that need to be sorted. Sprites are pushed during
         gatherSpriteInfo() and sorted during sortSpritesByDepth(). */
     std::vector<SpriteSortInfo> spritesToSort;
 };
+
+template<typename T>
+SDL_Color WorldSpriteSorter::getColorMod(const T& objectID)
+{
+    auto objectIDsMatch = [&](const SpriteColorModInfo& info) {
+        // If this color mod is for the same type of object.
+        if (const T* colorModLayerID
+            = std::get_if<T>(&(info.objectToModify))) {
+            // If the IDs match, return true.
+            if (*colorModLayerID == objectID) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    // If the UI wants a color mod on this sprite, use it.
+    auto colorModInfo = std::find_if(spriteColorMods.begin(),
+                                     spriteColorMods.end(), objectIDsMatch);
+    if (colorModInfo != spriteColorMods.end()) {
+        // Remove this color mod from our temp vector, since it's been used.
+        spriteColorMods.erase(colorModInfo);
+        return colorModInfo->colorMod;
+    }
+    else {
+        return {255, 255, 255, 255};
+    }
+}
 
 } // End namespace Client
 } // End namespace AM

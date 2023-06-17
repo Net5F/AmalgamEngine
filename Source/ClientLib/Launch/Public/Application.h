@@ -211,9 +211,12 @@ void Application::registerSimulationExtension()
 template<typename T>
 void Application::registerUserInterfaceExtension()
 {
-    UserInterfaceExDependencies uiDeps{
-        simulation.getWorld(), simulation.getWorld().worldSignals,
-        userInterface.getEventDispatcher(), sdlRenderer.Get(), spriteData};
+    UserInterfaceExDependencies uiDeps{simulation.getWorld(),
+                                       simulation.getWorld().worldSignals,
+                                       userInterface.getWorldObjectLocator(),
+                                       userInterface.getEventDispatcher(),
+                                       sdlRenderer.Get(),
+                                       spriteData};
 
     userInterface.setExtension(std::make_unique<T>(uiDeps));
 }

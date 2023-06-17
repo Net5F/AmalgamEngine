@@ -163,8 +163,8 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
     offsetMousePoint = AUI::ScalingHelpers::actualToLogical(offsetMousePoint);
 
     // Convert the screen-space mouse point to world space.
-    ScreenPoint offsetMouseScreenPoint{static_cast<float>(offsetMousePoint.x),
-                                       static_cast<float>(offsetMousePoint.y)};
+    SDL_FPoint offsetMouseScreenPoint{static_cast<float>(offsetMousePoint.x),
+                                      static_cast<float>(offsetMousePoint.y)};
     Position mouseWorldPos{
         Transforms::screenToWorld(offsetMouseScreenPoint, {})};
 
@@ -357,7 +357,7 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
     /* Transform the world positions to screen points. */
     // Set up a vector of float points so we can maintain precision until
     // the end.
-    std::array<ScreenPoint, 7> floatPoints{};
+    std::array<SDL_FPoint, 7> floatPoints{};
 
     // Push the points in the correct order.
     const BoundingBox& modelBounds{activeSprite.modelBounds};
@@ -395,7 +395,7 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
     yOffset += fullExtent.y;
 
     // Scale and offset each point, then push it into the return vector.
-    for (ScreenPoint& point : floatPoints) {
+    for (SDL_FPoint& point : floatPoints) {
         // Scale and round the point.
         point.x = std::round(AUI::ScalingHelpers::logicalToActual(point.x));
         point.y = std::round(AUI::ScalingHelpers::logicalToActual(point.y));

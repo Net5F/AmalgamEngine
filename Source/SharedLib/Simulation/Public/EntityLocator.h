@@ -33,8 +33,8 @@ public:
      * @param inMapXLengthTiles  The X length of the tile map, in tiles.
      * @param inMapYLengthTiles  The Y length of the tile map, in tiles.
      */
-    void setGridSize(unsigned int inMapXLengthTiles,
-                     unsigned int inMapYLengthTiles);
+    void setGridSize(std::size_t inMapXLengthTiles,
+                     std::size_t inMapYLengthTiles);
 
     /**
      * Sets the given entity's location to the location of the given bounding
@@ -122,7 +122,7 @@ private:
      * Returns the index in the entityGrid vector where the cell with the given
      * coordinates can be found.
      */
-    inline unsigned int linearizeCellIndex(int x, int y) const
+    inline std::size_t linearizeCellIndex(int x, int y) const
     {
         return (y * cellExtent.xLength) + x;
     }

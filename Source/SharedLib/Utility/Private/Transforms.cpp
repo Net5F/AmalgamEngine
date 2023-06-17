@@ -1,6 +1,5 @@
 #include "Transforms.h"
 #include "Position.h"
-#include "ScreenPoint.h"
 #include "Camera.h"
 #include "BoundingBox.h"
 #include "Sprite.h"
@@ -10,7 +9,7 @@
 
 namespace AM
 {
-ScreenPoint Transforms::worldToScreen(const Position& position,
+SDL_FPoint Transforms::worldToScreen(const Position& position,
                                       float zoomFactor)
 {
     // Calc the scaling factor going from world tiles to screen tiles.
@@ -25,7 +24,7 @@ ScreenPoint Transforms::worldToScreen(const Position& position,
     float screenX{(position.x - position.y) * (TILE_WIDTH_SCALE / 2.f)};
     float screenY{(position.x + position.y) * (TILE_HEIGHT_SCALE / 2.f)};
 
-    // The Z coordinate scaling is independent of X/Y and only affects the
+    // The Z coordinate contribution is independent of X/Y and only affects the
     // screen's Y axis. Scale and apply it.
     screenY -= (position.z * SharedConfig::Z_SCREEN_SCALE);
 
@@ -41,11 +40,11 @@ float Transforms::worldZToScreenY(float zCoord, float zoomFactor)
     return zCoord * zoomFactor * SharedConfig::Z_SCREEN_SCALE;
 }
 
-Position Transforms::screenToWorld(const ScreenPoint& screenPoint,
+Position Transforms::screenToWorld(const SDL_FPoint& screenPoint,
                                    const Camera& camera)
 {
-    // Remove the camera adjustment.
-    ScreenPoint absolutePoint;
+    // Offset the screen point to include the camera position.
+    SDL_FPoint absolutePoint;
     absolutePoint.x = screenPoint.x + camera.extent.x;
     absolutePoint.y = screenPoint.y + camera.extent.y;
 
@@ -77,7 +76,7 @@ float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)
     return yCoord * zoomFactor * Z_WORLD_SCALE;
 }
 
-TilePosition Transforms::screenToTile(const ScreenPoint& screenPoint,
+TilePosition Transforms::screenToTile(const SDL_FPoint& screenPoint,
                                       const Camera& camera)
 {
     // Convert to world space.

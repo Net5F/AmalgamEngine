@@ -2,8 +2,10 @@
 
 #include "OSEventHandler.h"
 #include "TileLayers.h"
-#include "PhantomTileSpriteInfo.h"
-#include "TileSpriteColorModInfo.h"
+#include "PhantomSpriteInfo.h"
+#include "SpriteColorModInfo.h"
+#include "SpriteSortInfo.h"
+#include "WorldObjectLocator.h"
 #include "QueuedEvents.h"
 #include <memory>
 
@@ -29,18 +31,18 @@ public:
     UserInterface();
 
     /**
-     * Returns all of the project UI's phantom tile sprites.
-     * Phantom tile sprites are used when you want to visually add or replace a
-     * tile layer in the sim's tile map without actually modifying the map.
+     * Returns all of the project UI's phantom sprites.
+     * Phantom sprites are used when you want to visually add or replace a tile 
+     * layer or entity without actually modifying the sim.
      */
-    std::vector<PhantomTileSpriteInfo> getPhantomTileSprites() const;
+    std::vector<PhantomSpriteInfo> getPhantomSprites() const;
 
     /**
-     * Returns all of the project UI's tile sprite color modifications.
+     * Returns all of the project UI's sprite color modifications.
      * Color mods are used when you want to modify the color or transparency 
-     * of a tile layer in the sim's tile map.
+     * of a tile layer or entity.
      */
-    std::vector<TileSpriteColorModInfo> getTileSpriteColorMods() const;
+    std::vector<SpriteColorModInfo> getSpriteColorMods() const;
 
     /**
      * Calls the project's UI tick(), if present.
@@ -53,13 +55,18 @@ public:
      * Calls the project's UI render(), if present.
      *
      * @param camera  The camera to calculate screen position with.
+     * @param sortedSprites  The sorted list of world sprites that were drawn on 
+     *                       this frame. Used to update worldObjectLocator.
      */
-    void render(const Camera& camera);
+    void render(const Camera& camera,
+                const std::vector<SpriteSortInfo>& sortedSprites);
 
     /**
      * Passes the given event to the project's UI handler, if present.
      */
     bool handleOSEvent(SDL_Event& event) override;
+
+    const WorldObjectLocator& getWorldObjectLocator();
 
     /**
      * Returns the UI event dispatcher. Used to send events to the simulation.
@@ -80,11 +87,8 @@ private:
         appropriate time. */
     std::unique_ptr<IUserInterfaceExtension> extension;
 
-    /** Holds any phantom tile sprites that the UI wants rendered. */
-    std::vector<PhantomTileSpriteInfo> phantomTileSprites;
-
-    /** Holds any color mods that the UI wants applied when rendering. */
-    std::vector<TileSpriteColorModInfo> tileSpriteColorMods;
+    /** Used in hit testing for mouse events. */
+    WorldObjectLocator worldObjectLocator;
 };
 
 } // End namespace Client

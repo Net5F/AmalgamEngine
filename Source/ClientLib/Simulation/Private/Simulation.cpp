@@ -134,8 +134,7 @@ bool Simulation::handleOSEvent(SDL_Event& event)
 {
     switch (event.type) {
         case SDL_MOUSEMOTION: {
-            playerInputSystem.processMouseState(event.motion);
-            return true;
+            return false;
         }
         default: {
             // Default to assuming it's a momentary input.

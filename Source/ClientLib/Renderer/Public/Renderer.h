@@ -2,7 +2,7 @@
 
 #include "OSEventHandler.h"
 #include "PeriodicCaller.h"
-#include "WorldSpritePreparer.h"
+#include "WorldSpriteSorter.h"
 
 struct SDL_Renderer;
 
@@ -11,7 +11,6 @@ namespace AM
 struct Sprite;
 struct BoundingBox;
 struct Camera;
-struct ScreenRect;
 namespace Client
 {
 class World;
@@ -86,7 +85,7 @@ private:
 
     std::function<double(void)> getSimTickProgress;
 
-    WorldSpritePreparer worldSpritePreparer;
+    WorldSpriteSorter worldSpriteSorter;
 
     /** If non-nullptr, contains the project's rendering extension functions.
         Allows the project to provide rendering code and have it be called at

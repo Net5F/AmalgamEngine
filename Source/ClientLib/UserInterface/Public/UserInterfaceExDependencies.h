@@ -11,6 +11,7 @@ namespace Client
 class World;
 class WorldSignals;
 class SpriteData;
+class WorldObjectLocator;
 
 /**
  * Defines the dependencies that will be provided to the project's
@@ -21,13 +22,19 @@ public:
     /** Const, only allows us to view world data. */
     const World& world;
 
-    /** Non-const, allows us to subscribe to world data updates. */
+    /** Non-const, used for subscribing to world data updates. */
     WorldSignals& worldSignals;
 
+    /** Used for finding entities or tile layers that a mouse event hit. */
+    const WorldObjectLocator& worldObjectLocator;
+
+    /** Used to send events to the sim. */
     EventDispatcher& uiEventDispatcher;
 
+    /** Used for rendering. */
     SDL_Renderer* sdlRenderer;
 
+    /** Used for getting sprite and sprite set data. */
     SpriteData& spriteData;
 };
 

@@ -2,7 +2,7 @@
 
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "ScreenRect.h"
+#include <SDL_rect.h>
 
 namespace AM
 {
@@ -30,7 +30,7 @@ public:
 
     /** The camera's extent in screen space, calculated during the last render
         tick. */
-    ScreenRect extent{0, 0, 0, 0};
+    SDL_FRect extent{0, 0, 0, 0};
 
     /** The amount that this camera is zoomed in or out. 1.0 is no zoom. */
     float zoomFactor{1.0};

@@ -19,8 +19,8 @@ EntityLocator::EntityLocator(entt::registry& inRegistry)
 {
 }
 
-void EntityLocator::setGridSize(unsigned int inMapXLengthTiles,
-                                unsigned int inMapYLengthTiles)
+void EntityLocator::setGridSize(std::size_t inMapXLengthTiles,
+                                std::size_t inMapYLengthTiles)
 {
     if (((inMapXLengthTiles % SharedConfig::CELL_WIDTH) != 0)
         || ((inMapYLengthTiles % SharedConfig::CELL_WIDTH) != 0)) {
@@ -28,8 +28,10 @@ void EntityLocator::setGridSize(unsigned int inMapXLengthTiles,
     }
 
     // Set our grid size to match the tile map.
-    cellExtent.xLength = (inMapXLengthTiles / SharedConfig::CELL_WIDTH);
-    cellExtent.yLength = (inMapYLengthTiles / SharedConfig::CELL_WIDTH);
+    cellExtent.xLength
+        = static_cast<int>(inMapXLengthTiles / SharedConfig::CELL_WIDTH);
+    cellExtent.yLength
+        = static_cast<int>(inMapYLengthTiles / SharedConfig::CELL_WIDTH);
 
     // Resize the grid to fit the map.
     entityGrid.resize(cellExtent.xLength * cellExtent.yLength);
@@ -69,12 +71,10 @@ void EntityLocator::setEntityLocation(entt::entity entity,
     entityMap.insert_or_assign(entity, boxCellExtent);
 
     // Add the entity to all the cells that it occupies.
-    int xMax{boxCellExtent.x + boxCellExtent.xLength};
-    int yMax{boxCellExtent.y + boxCellExtent.yLength};
-    for (int x = boxCellExtent.x; x < xMax; ++x) {
-        for (int y = boxCellExtent.y; y < yMax; ++y) {
+    for (int x = boxCellExtent.x; x <= boxCellExtent.xMax(); ++x) {
+        for (int y = boxCellExtent.y; y <= boxCellExtent.yMax(); ++y) {
             // Add the entity to this cell's entity vector.
-            unsigned int linearizedIndex{linearizeCellIndex(x, y)};
+            std::size_t linearizedIndex{linearizeCellIndex(x, y)};
             std::vector<entt::entity>& entityVec{entityGrid[linearizedIndex]};
 
             entityVec.push_back(entity);
@@ -108,12 +108,11 @@ std::vector<entt::entity>&
     cylinderCellExtent.intersectWith(cellExtent);
 
     // Add the entities in every intersected cell to the return vector.
-    int xMax{cylinderCellExtent.x + cylinderCellExtent.xLength};
-    int yMax{cylinderCellExtent.y + cylinderCellExtent.yLength};
-    for (int x = cylinderCellExtent.x; x < xMax; ++x) {
-        for (int y = cylinderCellExtent.y; y < yMax; ++y) {
+    for (int x = cylinderCellExtent.x; x <= cylinderCellExtent.xMax(); ++x) {
+        for (int y = cylinderCellExtent.y; y <= cylinderCellExtent.yMax();
+             ++y) {
             // Add the entities in this cell to the return vector.
-            unsigned int linearizedIndex{linearizeCellIndex(x, y)};
+            std::size_t linearizedIndex{linearizeCellIndex(x, y)};
             std::vector<entt::entity>& entityVec{entityGrid[linearizedIndex]};
             returnVector.insert(returnVector.end(), entityVec.begin(),
                                 entityVec.end());
@@ -148,12 +147,10 @@ std::vector<entt::entity>&
     tileCellExtent.intersectWith(cellExtent);
 
     // Add the entities in every intersected cell to the return vector.
-    int xMax{tileCellExtent.x + tileCellExtent.xLength};
-    int yMax{tileCellExtent.y + tileCellExtent.yLength};
-    for (int x = tileCellExtent.x; x < xMax; ++x) {
-        for (int y = tileCellExtent.y; y < yMax; ++y) {
+    for (int x = tileCellExtent.x; x <= tileCellExtent.xMax(); ++x) {
+        for (int y = tileCellExtent.y; y <= tileCellExtent.yMax(); ++y) {
             // Add the entities in this cell to the return vector.
-            unsigned int linearizedIndex{linearizeCellIndex(x, y)};
+            std::size_t linearizedIndex{linearizeCellIndex(x, y)};
             std::vector<entt::entity>& entityVec{entityGrid[linearizedIndex]};
             returnVector.insert(returnVector.end(), entityVec.begin(),
                                 entityVec.end());
@@ -252,12 +249,10 @@ void EntityLocator::clearEntityLocation(entt::entity entity,
                                         CellExtent& clearExtent)
 {
     // Iterate through all the cells that the entity occupies.
-    int xMax{clearExtent.x + clearExtent.xLength};
-    int yMax{clearExtent.y + clearExtent.yLength};
-    for (int x = clearExtent.x; x < xMax; ++x) {
-        for (int y = clearExtent.y; y < yMax; ++y) {
+    for (int x = clearExtent.x; x <= clearExtent.xMax(); ++x) {
+        for (int y = clearExtent.y; y <= clearExtent.yMax(); ++y) {
             // Find the entity in this cell's entity vector.
-            unsigned int linearizedIndex{linearizeCellIndex(x, y)};
+            std::size_t linearizedIndex{linearizeCellIndex(x, y)};
             std::vector<entt::entity>& entityVec{entityGrid[linearizedIndex]};
             auto entityIt{
                 std::find(entityVec.begin(), entityVec.end(), entity)};

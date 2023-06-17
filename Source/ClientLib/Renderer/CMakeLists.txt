@@ -1,14 +1,14 @@
 target_sources(ClientLib
     PRIVATE
         Private/Renderer.cpp
-        Private/WorldSpritePreparer.cpp
+        Private/WorldSpriteSorter.cpp
     PUBLIC
         Public/IRendererExtension.h
         Public/Renderer.h
         Public/RendererExDependencies.h
         Public/SpriteRenderData.h
         Public/SpriteSortInfo.h
-        Public/WorldSpritePreparer.h
+        Public/WorldSpriteSorter.h
 )
 
 target_include_directories(ClientLib

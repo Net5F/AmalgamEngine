@@ -63,16 +63,16 @@ void UserConfig::setFullscreenMode(unsigned int inFullscreenMode)
     fullscreenMode = inFullscreenMode;
 }
 
-ScreenRect UserConfig::getWindowSize()
+SDL_Rect UserConfig::getWindowSize()
 {
     return {0, 0, windowSizeWidth, windowSizeHeight};
 }
 
-void UserConfig::setWindowSize(ScreenRect inWindowSize)
+void UserConfig::setWindowSize(const SDL_Rect& inWindowSize)
 {
     // Default to the given window size.
-    windowSizeWidth = inWindowSize.width;
-    windowSizeHeight = inWindowSize.height;
+    windowSizeWidth = inWindowSize.w;
+    windowSizeHeight = inWindowSize.h;
 
     // If fullscreen is selected, use the desktop size instead.
     // Note: SDL_GetDesktopDisplayMode() requires the SDL video subsystem

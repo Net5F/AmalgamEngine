@@ -8,7 +8,6 @@
 
 namespace AM
 {
-struct ScreenPoint;
 struct Sprite;
 struct Camera;
 
@@ -23,8 +22,8 @@ public:
      *
      * @param zoomFactor  The camera's zoom factor.
      */
-    static ScreenPoint worldToScreen(const Position& position,
-                                     float zoomFactor);
+    static SDL_FPoint worldToScreen(const Position& position,
+                                    float zoomFactor);
 
     /**
      * Converts a Z coordinate in world space to a Y coordinate in screen space.
@@ -36,7 +35,7 @@ public:
     /**
      * Converts a point in screen space to a position in world space.
      */
-    static Position screenToWorld(const ScreenPoint& screenPoint,
+    static Position screenToWorld(const SDL_FPoint& screenPoint,
                                   const Camera& camera);
 
     /**
@@ -52,7 +51,7 @@ public:
      *
      * Mostly used for getting the tile that the mouse is over.
      */
-    static TilePosition screenToTile(const ScreenPoint& screenPoint,
+    static TilePosition screenToTile(const SDL_FPoint& screenPoint,
                                      const Camera& camera);
 
     /**

@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "IUserInterfaceExtension.h"
 #include "SharedConfig.h"
+#include "UserConfig.h"
 #include "Transforms.h"
 #include "ClientTransforms.h"
 #include "Log.h"
@@ -17,29 +18,28 @@ namespace Client
 UserInterface::UserInterface()
 : eventDispatcher{}
 , extension{nullptr}
-, phantomTileSprites{}
-, tileSpriteColorMods{}
+, worldObjectLocator{}
 {
 }
 
-std::vector<PhantomTileSpriteInfo>
-    UserInterface::getPhantomTileSprites() const
+std::vector<PhantomSpriteInfo>
+    UserInterface::getPhantomSprites() const
 {
     // Get the project's phantom tiles.
     if (extension != nullptr) {
-        return extension->getPhantomTileSprites();
+        return extension->getPhantomSprites();
     }
     else {
         return {};
     }
 }
 
-std::vector<TileSpriteColorModInfo>
-    UserInterface::getTileSpriteColorMods() const
+std::vector<SpriteColorModInfo>
+    UserInterface::getSpriteColorMods() const
 {
     // Get the project's tile color mods.
     if (extension != nullptr) {
-        return extension->getTileSpriteColorMods();
+        return extension->getSpriteColorMods();
     }
     else {
         return {};
@@ -54,11 +54,22 @@ void UserInterface::tick(double timestepS)
     }
 }
 
-void UserInterface::render(const Camera& camera)
+void UserInterface::render(const Camera& camera,
+                const std::vector<SpriteSortInfo>& sortedSprites)
 {
     // Call the project's UI rendering logic.
     if (extension != nullptr) {
         extension->render(camera);
+    }
+
+    // Update our locator with the latest sprites.
+    worldObjectLocator.clear();
+    for (const SpriteSortInfo& spriteInfo : sortedSprites) {
+        // If this sprite isn't a full phantom, add it.
+        if (!std::get_if<std::monostate>(&(spriteInfo.spriteOwnerID))) {
+            worldObjectLocator.addWorldObject(spriteInfo.spriteOwnerID,
+                                              spriteInfo.worldBounds);
+        }
     }
 }
 
@@ -70,6 +81,11 @@ bool UserInterface::handleOSEvent(SDL_Event& event)
     }
 
     return false;
+}
+
+const WorldObjectLocator& UserInterface::getWorldObjectLocator()
+{
+    return worldObjectLocator;
 }
 
 EventDispatcher& UserInterface::getEventDispatcher()

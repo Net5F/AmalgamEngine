@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ScreenPoint.h"
 #include "Position.h"
 #include "TilePosition.h"
 #include <SDL_rect.h>

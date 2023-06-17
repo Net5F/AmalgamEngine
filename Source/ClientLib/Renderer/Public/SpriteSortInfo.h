@@ -1,24 +1,31 @@
 #pragma once
 
 #include "Sprite.h"
+#include "TileLayers.h"
+#include "WorldObjectIDVariant.h"
 #include <SDL_rect.h>
 #include <vector>
+#include <variant>
 
 namespace AM
 {
 namespace Client
 {
 /**
- * Used for storing information relevant to sorting and rendering a sprite
- * on a given frame.
+ * Used for storing information relevant to sorting a sprite.
  */
 struct SpriteSortInfo {
-    /** The sprite that is associated with this render information. */
-    const Sprite* sprite;
-
     //-------------------------------------------------------------------------
     // Sprite data
     //-------------------------------------------------------------------------
+    /** The sprite that is associated with this render information. */
+    const Sprite* sprite;
+
+    /** The tile layer or entity that the sprite comes from, or std::monostate 
+        if this is a full phantom (not replacing an existing layer).
+        Used when we pass the sorted sprites to the UI's locator. */
+    WorldObjectIDVariant spriteOwnerID;
+
     /** The world-space bounding box that has been calculated for this sprite
         in the current frame, based on the associated entity's lerped
         position.
@@ -27,7 +34,7 @@ struct SpriteSortInfo {
 
     /** The screen extent that has been calculated for this sprite in the
         current frame, based on the associated entity's lerped position.
-        Used during rendering. */
+        Used during rendering and passed to the UI's locator. */
     SDL_Rect screenExtent{};
 
     /** If non-default, the UI wants us to multiply this sprite's color and 

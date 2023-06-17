@@ -17,11 +17,11 @@ namespace AM
 struct EntityInit {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE = MessageType::EntityInit;
+    static constexpr MessageType MESSAGE_TYPE{MessageType::EntityInit};
 
     /** Used as a "we should never hit this" cap on the length of the name
         string. Only checked in debug builds. */
-    static constexpr unsigned int NAME_LENGTH = 50;
+    static constexpr std::size_t NAME_LENGTH{50};
 
     /** The tick that this update corresponds to. */
     Uint32 tickNum{0};

@@ -19,7 +19,7 @@ SDL_Rect
     // Transform the position to a point in screen space.
     // Note: This applies the camera's zoom to the position, so we don't need
     //       to do it again.
-    ScreenPoint screenPoint{
+    SDL_FPoint screenPoint{
         Transforms::worldToScreen(position, camera.zoomFactor)};
 
     // Offset the sprite horizontally to line up with our tile positioning.

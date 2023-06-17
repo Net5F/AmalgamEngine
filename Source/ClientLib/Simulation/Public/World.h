@@ -2,7 +2,6 @@
 
 #include "WorldSignals.h"
 #include "TileMap.h"
-#include "ScreenPoint.h"
 
 #include "entt/entity/registry.hpp"
 #include "entt/signal/sigh.hpp"
@@ -44,10 +43,6 @@ public:
 
     /** The tile map that makes up the world. */
     TileMap tileMap;
-
-    /** The mouse's current position in screen space.
-        Temporarily here, should be removed eventually. */
-    ScreenPoint mouseScreenPoint;
 };
 
 } // namespace Client
