@@ -31,13 +31,13 @@ public:
     // Public child widgets
     //-------------------------------------------------------------------------
     /** All fields below directly match a data field in the Sprite class.
-        See displayName, hasBoundingBox, and modelBounds fields for more
+        See displayName, collisionEnabled, and modelBounds fields for more
         information. */
     AUI::Text nameLabel;
     MainTextInput nameInput;
 
-    AUI::Text hasBoundingBoxLabel;
-    AUI::Checkbox hasBoundingBoxInput;
+    AUI::Text collisionEnabledLabel;
+    AUI::Checkbox collisionEnabledInput;
 
     AUI::Text minXLabel;
     MainTextInput minXInput;
@@ -76,8 +76,8 @@ private:
      */
     void onSpriteDisplayNameChanged(unsigned int spriteID,
                                     const std::string& newDisplayName);
-    void onSpriteHasBoundingBoxChanged(unsigned int spriteID,
-                                       bool newHasBoundingBox);
+    void onSpriteCollisionEnabledChanged(unsigned int spriteID,
+                                       bool newCollisionEnabled);
     void onSpriteModelBoundsChanged(unsigned int spriteID,
                                     const BoundingBox& newModelBounds);
 
@@ -95,7 +95,7 @@ private:
     /** The below functions are all for validating and saving the user's data
         when the text is committed. */
     void saveName();
-    void saveHasBoundingBox();
+    void saveCollisionEnabled();
     void saveMinX();
     void saveMinY();
     void saveMinZ();

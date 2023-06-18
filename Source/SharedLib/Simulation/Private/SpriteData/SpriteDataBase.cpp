@@ -233,7 +233,7 @@ void SpriteDataBase::parseSprite(const nlohmann::json& spriteJson)
     sprite.stringID = spriteJson.at("stringID").get<std::string>();
 
     // Add whether the sprite has a bounding box or not.
-    sprite.hasBoundingBox = spriteJson.at("hasBoundingBox");
+    sprite.collisionEnabled = spriteJson.at("collisionEnabled");
 
     // Add the model-space bounds.
     sprite.modelBounds.minX = spriteJson.at("modelBounds").at("minX");

@@ -22,7 +22,7 @@ SpriteDataModel::SpriteDataModel(SDL_Renderer* inSdlRenderer)
 , spriteRemoved{spriteRemovedSig}
 , activeSpriteChanged{activeSpriteChangedSig}
 , spriteDisplayNameChanged{spriteDisplayNameChangedSig}
-, spriteHasBoundingBoxChanged{spriteHasBoundingBoxChangedSig}
+, spriteCollisionEnabledChanged{spriteCollisionEnabledChangedSig}
 , spriteModelBoundsChanged{spriteModelBoundsChangedSig}
 , sdlRenderer{inSdlRenderer}
 , workingFilePath{""}
@@ -135,8 +135,8 @@ std::string SpriteDataModel::load(const std::string& fullPath)
                 // Add the Y offset.
                 sprite.yOffset = spriteJson.value()["yOffset"];
 
-                // Add hasBoundingBox.
-                sprite.hasBoundingBox = spriteJson.value()["hasBoundingBox"];
+                // Add collisionEnabled.
+                sprite.collisionEnabled = spriteJson.value()["collisionEnabled"];
 
                 // Add the model-space bounds.
                 sprite.modelBounds.minX
@@ -211,9 +211,9 @@ void SpriteDataModel::save()
             // Add the Y offset.
             json["spriteSheets"][i]["sprites"][j]["yOffset"] = sprite.yOffset;
 
-            // Add hasBoundingBox.
-            json["spriteSheets"][i]["sprites"][j]["hasBoundingBox"]
-                = sprite.hasBoundingBox;
+            // Add collisionEnabled.
+            json["spriteSheets"][i]["sprites"][j]["collisionEnabled"]
+                = sprite.collisionEnabled;
 
             // Add the model-space bounds.
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minX"]
@@ -423,19 +423,19 @@ void SpriteDataModel::setSpriteDisplayName(unsigned int spriteID,
     spriteDisplayNameChangedSig.publish(spriteID, sprite.displayName);
 }
 
-void SpriteDataModel::setSpriteHasBoundingBox(unsigned int spriteID,
-                                              bool newHasBoundingBox)
+void SpriteDataModel::setSpriteCollisionEnabled(unsigned int spriteID,
+                                              bool newCollisionEnabled)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
-        LOG_FATAL("Tried to set hasBoundingBox using invalid sprite ID.");
+        LOG_FATAL("Tried to set collisionEnabled using invalid sprite ID.");
     }
 
-    // Set the new hasBoundingBox and signal the change.
+    // Set the new collisionEnabled and signal the change.
     Sprite& sprite{spritePair->second};
-    sprite.hasBoundingBox = newHasBoundingBox;
+    sprite.collisionEnabled = newCollisionEnabled;
 
-    spriteHasBoundingBoxChangedSig.publish(spriteID, newHasBoundingBox);
+    spriteCollisionEnabledChangedSig.publish(spriteID, newCollisionEnabled);
 }
 
 void SpriteDataModel::setSpriteModelBounds(unsigned int spriteID,

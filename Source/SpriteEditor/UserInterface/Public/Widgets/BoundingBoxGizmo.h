@@ -55,9 +55,6 @@ private:
     /** How opaque the sides of the bounding box will be. */
     static constexpr float PLANE_ALPHA_FACTOR{0.5f};
 
-    /** How opaque a disabled gizmo will be. */
-    static constexpr float DISABLED_ALPHA_FACTOR{0.25f};
-
     /**
      * The list of our clickable controls.
      */
@@ -74,8 +71,6 @@ private:
      * Note: This gizmo depends on having its logical extent set to match the
      *       sprite image that it will be overlaying.
      */
-    void onSpriteHasBoundingBoxChanged(unsigned int spriteID,
-                                       bool newHasBoundingBox);
     void onSpriteModelBoundsChanged(unsigned int spriteID,
                                     const BoundingBox& newModelBounds);
 
@@ -170,9 +165,6 @@ private:
 
     /** The scaled width of the lines. */
     int scaledLineWidth;
-
-    /** Tracks whether the active sprite has a bounding box or not. */
-    bool hasBoundingBox;
 
     // Controls (scaled extents, without parent offsets)
     /** The extent of the box position control, (maxX, maxY, minZ). */

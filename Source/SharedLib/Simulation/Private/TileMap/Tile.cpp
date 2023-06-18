@@ -77,7 +77,7 @@ void Tile::rebuildCollision(int tileX, int tileY)
     for (const WallTileLayer& wallLayer : getWalls()) {
         // Note: Walls may be empty, in which case sprite == nullptr.
         const Sprite* sprite{wallLayer.getSprite()};
-        if ((sprite != nullptr) && sprite->hasBoundingBox) {
+        if ((sprite != nullptr) && sprite->collisionEnabled) {
             collisionBoxes.push_back(
                 calcWorldBoundsForSprite(tileX, tileY, sprite));
         }
@@ -86,7 +86,7 @@ void Tile::rebuildCollision(int tileX, int tileY)
     // Add all of this tile's objects.
     for (const ObjectTileLayer& objectLayer : getObjects()) {
         const Sprite* sprite{objectLayer.getSprite()};
-        if (sprite->hasBoundingBox) {
+        if (sprite->collisionEnabled) {
             collisionBoxes.push_back(
                 calcWorldBoundsForSprite(tileX, tileY, sprite));
         }

@@ -27,10 +27,10 @@ public:
         modified. */
     int numericID{EMPTY_SPRITE_ID};
 
-    /** True if this sprite has a bounding box, else false.
-        Things like floors and carpets don't have a bounding box, they're just 
-        treated as part of the tile. */
-    bool hasBoundingBox{true};
+    /** If true, this sprite's modelBounds will be used in collision checks.
+        Most sprites will want collision enabled, but things like floors and 
+        carpets usually don't need collision. */
+    bool collisionEnabled{false};
 
     /** Model-space bounding box. Defines the sprite's 3D volume.
         Note: Tiles use these bounds, but dynamic entities use the bounds 

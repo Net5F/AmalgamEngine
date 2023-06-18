@@ -22,8 +22,8 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
 : AUI::Window({1617, 0, 303, 518}, "PropertiesPanel")
 , nameLabel({24, 52, 65, 28}, "NameLabel")
 , nameInput({24, 84, 255, 38}, "NameInput")
-, hasBoundingBoxLabel({24, 160, 210, 27}, "HasBBLabel")
-, hasBoundingBoxInput({257, 162, 22, 22}, "HasBBInput")
+, collisionEnabledLabel({24, 160, 210, 27}, "CollisionLabel")
+, collisionEnabledInput({257, 162, 22, 22}, "CollisionInput")
 , minXLabel({24, 210, 110, 38}, "MinXLabel")
 , minXInput({150, 204, 129, 38}, "MinXInput")
 , minYLabel({24, 260, 110, 38}, "MinYLabel")
@@ -54,8 +54,8 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     children.push_back(windowLabel);
     children.push_back(nameLabel);
     children.push_back(nameInput);
-    children.push_back(hasBoundingBoxLabel);
-    children.push_back(hasBoundingBoxInput);
+    children.push_back(collisionEnabledLabel);
+    children.push_back(collisionEnabledInput);
     children.push_back(minXLabel);
     children.push_back(minXInput);
     children.push_back(minYLabel);
@@ -90,16 +90,16 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     nameInput.setOnTextCommitted([this]() { saveName(); });
 
     /* Has bounding box entry. */
-    hasBoundingBoxLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
-    hasBoundingBoxLabel.setColor({255, 255, 255, 255});
-    hasBoundingBoxLabel.setText("Has bounding box");
+    collisionEnabledLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
+    collisionEnabledLabel.setColor({255, 255, 255, 255});
+    collisionEnabledLabel.setText("Collision enabled");
 
-    hasBoundingBoxInput.uncheckedImage.setSimpleImage(
+    collisionEnabledInput.uncheckedImage.setSimpleImage(
         Paths::TEXTURE_DIR + "Checkbox/Unchecked.png");
-    hasBoundingBoxInput.checkedImage.setSimpleImage(Paths::TEXTURE_DIR
+    collisionEnabledInput.checkedImage.setSimpleImage(Paths::TEXTURE_DIR
                                                     + "Checkbox/Checked.png");
-    hasBoundingBoxInput.setOnChecked([this]() { saveHasBoundingBox(); });
-    hasBoundingBoxInput.setOnUnchecked([this]() { saveHasBoundingBox(); });
+    collisionEnabledInput.setOnChecked([this]() { saveCollisionEnabled(); });
+    collisionEnabledInput.setOnUnchecked([this]() { saveCollisionEnabled(); });
 
     /* Minimum X-axis bounds entry. */
     minXLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -160,8 +160,8 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
         .connect<&PropertiesPanel::onActiveSpriteChanged>(*this);
     spriteDataModel.spriteDisplayNameChanged
         .connect<&PropertiesPanel::onSpriteDisplayNameChanged>(*this);
-    spriteDataModel.spriteHasBoundingBoxChanged
-        .connect<&PropertiesPanel::onSpriteHasBoundingBoxChanged>(*this);
+    spriteDataModel.spriteCollisionEnabledChanged
+        .connect<&PropertiesPanel::onSpriteCollisionEnabledChanged>(*this);
     spriteDataModel.spriteModelBoundsChanged
         .connect<&PropertiesPanel::onSpriteModelBoundsChanged>(*this);
     spriteDataModel.spriteRemoved.connect<&PropertiesPanel::onSpriteRemoved>(
@@ -176,11 +176,11 @@ void PropertiesPanel::onActiveSpriteChanged(unsigned int newActiveSpriteID,
     // Update all of our property fields to match the new active sprite's data.
     nameInput.setText(newActiveSprite.displayName);
 
-    if (newActiveSprite.hasBoundingBox) {
-        hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Checked);
+    if (newActiveSprite.collisionEnabled) {
+        collisionEnabledInput.setCurrentState(AUI::Checkbox::State::Checked);
     }
     else {
-        hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Unchecked);
+        collisionEnabledInput.setCurrentState(AUI::Checkbox::State::Unchecked);
     }
 
     minXInput.setText(toRoundedString(newActiveSprite.modelBounds.minX));
@@ -213,15 +213,16 @@ void PropertiesPanel::onSpriteDisplayNameChanged(
     }
 }
 
-void PropertiesPanel::onSpriteHasBoundingBoxChanged(unsigned int spriteID,
-                                                    bool newHasBoundingBox)
+void PropertiesPanel::onSpriteCollisionEnabledChanged(unsigned int spriteID,
+                                                      bool newCollisionEnabled)
 {
     if (spriteID == activeSpriteID) {
-        if (newHasBoundingBox) {
-            hasBoundingBoxInput.setCurrentState(AUI::Checkbox::State::Checked);
+        if (newCollisionEnabled) {
+            collisionEnabledInput.setCurrentState(
+                AUI::Checkbox::State::Checked);
         }
         else {
-            hasBoundingBoxInput.setCurrentState(
+            collisionEnabledInput.setCurrentState(
                 AUI::Checkbox::State::Unchecked);
         }
     }
@@ -252,11 +253,11 @@ void PropertiesPanel::saveName()
     spriteDataModel.setSpriteDisplayName(activeSpriteID, nameInput.getText());
 }
 
-void PropertiesPanel::saveHasBoundingBox()
+void PropertiesPanel::saveCollisionEnabled()
 {
-    bool hasBoundingBox{(hasBoundingBoxInput.getCurrentState()
-                         == AUI::Checkbox::State::Checked)};
-    spriteDataModel.setSpriteHasBoundingBox(activeSpriteID, hasBoundingBox);
+    bool collisionEnabled{(collisionEnabledInput.getCurrentState()
+                           == AUI::Checkbox::State::Checked)};
+    spriteDataModel.setSpriteCollisionEnabled(activeSpriteID, collisionEnabled);
 }
 
 void PropertiesPanel::saveMinX()

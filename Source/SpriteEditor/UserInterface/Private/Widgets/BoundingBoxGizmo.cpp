@@ -25,7 +25,6 @@ BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
 , activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
 , scaledRectSize{AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE)}
 , scaledLineWidth{AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH)}
-, hasBoundingBox{false}
 , positionControlExtent{0, 0, scaledRectSize, scaledRectSize}
 , xControlExtent{0, 0, scaledRectSize, scaledRectSize}
 , yControlExtent{0, 0, scaledRectSize, scaledRectSize}
@@ -43,8 +42,6 @@ BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
     // When the active sprite is updated, update it in this widget.
     spriteDataModel.activeSpriteChanged
         .connect<&BoundingBoxGizmo::onActiveSpriteChanged>(*this);
-    spriteDataModel.spriteHasBoundingBoxChanged
-        .connect<&BoundingBoxGizmo::onSpriteHasBoundingBoxChanged>(*this);
     spriteDataModel.spriteModelBoundsChanged
         .connect<&BoundingBoxGizmo::onSpriteModelBoundsChanged>(*this);
 }
@@ -210,16 +207,7 @@ void BoundingBoxGizmo::onActiveSpriteChanged(unsigned int newActiveSpriteID,
                                              const Sprite& newActiveSprite)
 {
     activeSpriteID = newActiveSpriteID;
-    hasBoundingBox = newActiveSprite.hasBoundingBox;
     refresh(newActiveSprite);
-}
-
-void BoundingBoxGizmo::onSpriteHasBoundingBoxChanged(unsigned int spriteID,
-                                                     bool newHasBoundingBox)
-{
-    if (spriteID == activeSpriteID) {
-        hasBoundingBox = newHasBoundingBox;
-    }
 }
 
 void BoundingBoxGizmo::onSpriteModelBoundsChanged(
@@ -480,19 +468,13 @@ void BoundingBoxGizmo::movePlanes(std::vector<SDL_Point>& boundsScreenPoints)
 
 void BoundingBoxGizmo::renderControls(const SDL_Point& windowTopLeft)
 {
-    // If this bounding box is disabled, make it semi-transparent.
-    float alpha{BASE_ALPHA};
-    if (!hasBoundingBox) {
-        alpha *= DISABLED_ALPHA_FACTOR;
-    }
-
     // Position control
     SDL_Rect offsetExtent{positionControlExtent};
     offsetExtent.x += windowTopLeft.x;
     offsetExtent.y += windowTopLeft.y;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 0, 0,
-                           static_cast<Uint8>(alpha));
+                           static_cast<Uint8>(BASE_ALPHA));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
 
     // X control
@@ -501,7 +483,7 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& windowTopLeft)
     offsetExtent.y += windowTopLeft.y;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 148, 0, 0,
-                           static_cast<Uint8>(alpha));
+                           static_cast<Uint8>(BASE_ALPHA));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
 
     // Y control
@@ -510,7 +492,7 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& windowTopLeft)
     offsetExtent.y += windowTopLeft.y;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 149, 0,
-                           static_cast<Uint8>(alpha));
+                           static_cast<Uint8>(BASE_ALPHA));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
 
     // Z control
@@ -519,18 +501,12 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& windowTopLeft)
     offsetExtent.y += windowTopLeft.y;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 82, 240,
-                           static_cast<Uint8>(alpha));
+                           static_cast<Uint8>(BASE_ALPHA));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
 }
 
 void BoundingBoxGizmo::renderLines(const SDL_Point& windowTopLeft)
 {
-    // If this bounding box is disabled, make it semi-transparent.
-    float alpha{BASE_ALPHA};
-    if (!hasBoundingBox) {
-        alpha *= DISABLED_ALPHA_FACTOR;
-    }
-
     // X-axis line
     SDL_Point offsetMinPoint{xMinPoint};
     SDL_Point offsetMaxPoint{xMaxPoint};
@@ -541,7 +517,7 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& windowTopLeft)
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 148, 0,
-                  0, static_cast<Uint8>(alpha));
+                  0, static_cast<Uint8>(BASE_ALPHA));
 
     // Y-axis line
     offsetMinPoint = yMinPoint;
@@ -553,7 +529,7 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& windowTopLeft)
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 149,
-                  0, static_cast<Uint8>(alpha));
+                  0, static_cast<Uint8>(BASE_ALPHA));
 
     // Z-axis line
     offsetMinPoint = zMinPoint;
@@ -565,7 +541,7 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& windowTopLeft)
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 82,
-                  240, static_cast<Uint8>(alpha));
+                  240, static_cast<Uint8>(BASE_ALPHA));
 }
 
 void BoundingBoxGizmo::renderPlanes(const SDL_Point& windowTopLeft)
@@ -582,11 +558,7 @@ void BoundingBoxGizmo::renderPlanes(const SDL_Point& windowTopLeft)
     }
 
     /* Draw the planes. */
-    // If this bounding box is disabled, make it semi-transparent.
-    float alpha{BASE_ALPHA * PLANE_ALPHA_FACTOR};
-    if (!hasBoundingBox) {
-        alpha *= DISABLED_ALPHA_FACTOR;
-    }
+    static constexpr float alpha{BASE_ALPHA * PLANE_ALPHA_FACTOR};
 
     // X-axis plane
     filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[0]),

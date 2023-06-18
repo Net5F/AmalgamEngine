@@ -111,7 +111,8 @@ public:
     void setSpriteDisplayName(unsigned int spriteID,
                               const std::string& newDisplayName);
 
-    void setSpriteHasBoundingBox(unsigned int spriteID, bool newHasBoundingBox);
+    void setSpriteCollisionEnabled(unsigned int spriteID,
+                                   bool newCollisionEnabled);
 
     void setSpriteModelBounds(unsigned int spriteID,
                               const BoundingBox& newModelBounds);
@@ -140,8 +141,8 @@ public:
         spriteDisplayNameChanged;
 
     /** A sprite's "has bounding box" field has changed. */
-    entt::sink<entt::sigh<void(unsigned int spriteID, bool hasBoundingBox)>>
-        spriteHasBoundingBoxChanged;
+    entt::sink<entt::sigh<void(unsigned int spriteID, bool collisionEnabled)>>
+        spriteCollisionEnabledChanged;
 
     /** A sprite's bounding box has changed. */
     entt::sink<entt::sigh<void(unsigned int spriteID,
@@ -150,8 +151,8 @@ public:
 
 private:
     // Note: These were arbitrarily chosen and can be increased if necessary.
-    static constexpr unsigned int MAX_SPRITE_SHEETS{1000};
-    static constexpr unsigned int MAX_SPRITES{MAX_SPRITE_SHEETS * 100};
+    static constexpr std::size_t MAX_SPRITE_SHEETS{1000};
+    static constexpr std::size_t MAX_SPRITES{MAX_SPRITE_SHEETS * 100};
 
     /**
      * Checks that the given relative path corresponds to a valid sprite
@@ -228,8 +229,8 @@ private:
     entt::sigh<void(unsigned int spriteID, const std::string& newDisplayName)>
         spriteDisplayNameChangedSig{};
 
-    entt::sigh<void(unsigned int spriteID, bool hasBoundingBox)>
-        spriteHasBoundingBoxChangedSig{};
+    entt::sigh<void(unsigned int spriteID, bool collisionEnabled)>
+        spriteCollisionEnabledChangedSig{};
 
     entt::sigh<void(unsigned int spriteID, const BoundingBox& newModelBounds)>
         spriteModelBoundsChangedSig{};

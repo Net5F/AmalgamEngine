@@ -30,12 +30,14 @@ public:
         with its tile. Used to support tall tiles for the iso depth effect. */
     int yOffset{0};
 
-    /** True if this sprite has a bounding box, else false.
-        Things like floors and carpets share bounds with their tile, so they
-        don't need a separate bounding box. */
-    bool hasBoundingBox{true};
+    /** If true, this sprite's modelBounds will be used in collision checks.
+        Most sprites will want collision enabled, but things like floors and 
+        carpets usually don't need collision. */
+    bool collisionEnabled{false};
 
-    /** Model-space bounding box. Defines the sprite's 3D volume. */
+    /** Model-space bounding box. Defines the sprite's 3D volume.
+        Used in hit testing for user mouse events, and for collision checks (
+        if collisionEnabled). */
     BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
 };
 
