@@ -2,6 +2,7 @@
 #include "AssetCache.h"
 #include "SpriteDataModel.h"
 #include "Paths.h"
+#include "Ignore.h"
 #include "AUI/Core.h"
 #include "nfd.h"
 #include "Log.h"
@@ -109,8 +110,8 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 
     // When the user selects a new item in the library, make the proper windows
     // visible.
-    spriteDataModel.activeSpriteChanged
-        .connect<&MainScreen::onActiveSpriteChanged>(*this);
+    spriteDataModel.activeLibraryItemChanged
+        .connect<&MainScreen::onActiveLibraryItemChanged>(*this);
 }
 
 void MainScreen::openConfirmationDialog(
@@ -156,9 +157,11 @@ void MainScreen::render()
     Screen::render();
 }
 
-void MainScreen::onActiveSpriteChanged(unsigned int newSpriteID,
-    const Sprite& newActiveSprite)
+void MainScreen::onActiveLibraryItemChanged(
+    const LibraryItemData& newActiveItem)
 {
+    ignore(newActiveItem);
+
     spriteEditStage.setIsVisible(true);
     spritePropertiesWindow.setIsVisible(true);
 }

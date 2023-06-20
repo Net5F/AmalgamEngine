@@ -1,6 +1,7 @@
 #include "BoundingBoxGizmo.h"
 #include "MainScreen.h"
 #include "SpriteDataModel.h"
+#include "EmptySpriteID.h"
 #include "Transforms.h"
 #include "Position.h"
 #include "Camera.h"
@@ -22,7 +23,7 @@ BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
 : AUI::Widget({0, 0, 1920, 1080}, "BoundingBoxGizmo")
 , spriteDataModel{inSpriteDataModel}
 , lastUsedScreenSize{0, 0}
-, activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
+, activeSpriteID{EMPTY_SPRITE_ID}
 , scaledRectSize{AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE)}
 , scaledLineWidth{AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH)}
 , positionControlExtent{0, 0, scaledRectSize, scaledRectSize}
@@ -40,8 +41,8 @@ BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
 , currentHeldControl{Control::None}
 {
     // When the active sprite is updated, update it in this widget.
-    spriteDataModel.activeSpriteChanged
-        .connect<&BoundingBoxGizmo::onActiveSpriteChanged>(*this);
+    spriteDataModel.activeLibraryItemChanged
+        .connect<&BoundingBoxGizmo::onActiveLibraryItemChanged>(*this);
     spriteDataModel.spriteModelBoundsChanged
         .connect<&BoundingBoxGizmo::onSpriteModelBoundsChanged>(*this);
 }
@@ -143,7 +144,7 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
 
     /* Translate the mouse position to world space. */
     // Account for the sprite's empty vertical space.
-    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
     int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite.yOffset)};
 
     // Account for the sprite's half-tile offset.
@@ -203,15 +204,23 @@ void BoundingBoxGizmo::refreshScaling()
     refresh(spriteDataModel.getSprite(activeSpriteID));
 }
 
-void BoundingBoxGizmo::onActiveSpriteChanged(unsigned int newActiveSpriteID,
-                                             const Sprite& newActiveSprite)
+void BoundingBoxGizmo::onActiveLibraryItemChanged(
+    const LibraryItemData& newActiveItem)
 {
-    activeSpriteID = newActiveSpriteID;
-    refresh(newActiveSprite);
+    // Check if the new active item is a sprite and return early if not.
+    const EditorSprite* newActiveSprite{
+        std::get_if<EditorSprite>(&newActiveItem)};
+    if (newActiveSprite == nullptr) {
+        activeSpriteID = EMPTY_SPRITE_ID;
+        return;
+    }
+
+    activeSpriteID = newActiveSprite->numericID;
+    refresh(*newActiveSprite);
 }
 
 void BoundingBoxGizmo::onSpriteModelBoundsChanged(
-    unsigned int spriteID, const BoundingBox& newModelBounds)
+    int spriteID, const BoundingBox& newModelBounds)
 {
     ignore(newModelBounds);
 
@@ -220,7 +229,7 @@ void BoundingBoxGizmo::onSpriteModelBoundsChanged(
     }
 }
 
-void BoundingBoxGizmo::refresh(const Sprite& activeSprite)
+void BoundingBoxGizmo::refresh(const EditorSprite& activeSprite)
 {
     // Calculate where the sprite's model bounds are on the screen.
     // Note: The ordering of the points in this vector is listed in the comment
@@ -244,7 +253,7 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 
     // Note: The expected behavior is to move along the x/y plane and
     //       leave minZ where it was.
-    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
     BoundingBox modelBounds{activeSprite.modelBounds};
     float& minX{modelBounds.minX};
     float& minY{modelBounds.minY};
@@ -291,7 +300,7 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
     BoundingBox modelBounds{activeSprite.modelBounds};
     modelBounds.minX = std::clamp(mouseWorldPos.x, 0.f, modelBounds.maxX);
 
@@ -302,7 +311,7 @@ void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
 void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
     BoundingBox modelBounds{activeSprite.modelBounds};
     modelBounds.minY = std::clamp(mouseWorldPos.y, 0.f, modelBounds.maxY);
 
@@ -329,7 +338,7 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     mouseZHeight = Transforms::screenYToWorldZ(mouseZHeight, 1.f);
 
     // Set maxZ, making sure it doesn't go below minZ.
-    const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
     BoundingBox modelBounds{activeSprite.modelBounds};
     if (mouseZHeight > modelBounds.minZ) {
         modelBounds.maxZ = mouseZHeight;
@@ -340,7 +349,7 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
 }
 
 void BoundingBoxGizmo::calcOffsetScreenPoints(
-    const Sprite& activeSprite, std::vector<SDL_Point>& boundsScreenPoints)
+    const EditorSprite& activeSprite, std::vector<SDL_Point>& boundsScreenPoints)
 {
     /* Transform the world positions to screen points. */
     // Set up a vector of float points so we can maintain precision until
@@ -548,12 +557,12 @@ void BoundingBoxGizmo::renderPlanes(const SDL_Point& windowTopLeft)
 {
     /* Offset all the points. */
     std::array<Sint16, 12> offsetXCoords{};
-    for (unsigned int i = 0; i < offsetXCoords.size(); ++i) {
+    for (std::size_t i = 0; i < offsetXCoords.size(); ++i) {
         offsetXCoords[i] = planeXCoords[i] + windowTopLeft.x;
     }
 
     std::array<Sint16, 12> offsetYCoords{};
-    for (unsigned int i = 0; i < offsetYCoords.size(); ++i) {
+    for (std::size_t i = 0; i < offsetYCoords.size(); ++i) {
         offsetYCoords[i] = planeYCoords[i] + windowTopLeft.y;
     }
 

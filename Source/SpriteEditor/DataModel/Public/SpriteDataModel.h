@@ -1,6 +1,10 @@
 #pragma once
 
-#include "SpriteSheet.h"
+#include "EditorSpriteSheet.h"
+#include "EditorSprite.h"
+#include "SpriteSets.h"
+#include "BoundingBox.h"
+#include "LibraryItemData.h"
 #include "IDPool.h"
 #include "entt/signal/sigh.hpp"
 #include <fstream>
@@ -16,15 +20,15 @@ namespace SpriteEditor
 /**
  * A data model that holds our SpriteData.json project file in memory.
  *
- * TODO: Find a way to combine the ClientLib/ServerLib/SpriteEditor logic for
- *       parsing SpriteData.json.
+ * Note: All ID spaces are separate (i.e. sprites, sprite sheets, floors, etc 
+ *       all have unique ID spaces.
+ *       Additionally, the IDs used at runtime are temporary. We generate fresh
+ *       IDs while saving the json, to make sure we don't accumulate any gaps 
+ *       in the ID sequence.
  */
 class SpriteDataModel
 {
 public:
-    /** Can be used as an invalid ID for initialization purposes and such. */
-    static constexpr unsigned int INVALID_SPRITE_ID{0};
-
     SpriteDataModel(SDL_Renderer* inSdlRenderer);
 
     /**
@@ -87,7 +91,7 @@ public:
      *
      * @param sheetID  The editor ID of the sheet to be removed.
      */
-    void remSpriteSheet(unsigned int sheetID);
+    void remSpriteSheet(int sheetID);
 
     /**
      * Removes the sprite with the given ID from the sprite map.
@@ -96,58 +100,56 @@ public:
      *
      * @param spriteID  The editor ID of the sprite to be removed.
      */
-    void remSprite(unsigned int spriteID);
+    void remSprite(int spriteID);
 
-    const Sprite& getSprite(unsigned int spriteID);
+    const EditorSprite& getSprite(int spriteID);
 
-    // TODO: Can this be made private?
     const std::string& getWorkingTexturesDir();
 
     //-------------------------------------------------------------------------
     // Active Sprite
     //-------------------------------------------------------------------------
-    void setActiveSprite(unsigned int newActiveSpriteID);
+    void setActiveSprite(int newActiveSpriteID);
 
-    void setSpriteDisplayName(unsigned int spriteID,
+    void setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveSpriteSetID);
+
+    void setSpriteDisplayName(int spriteID,
                               const std::string& newDisplayName);
 
-    void setSpriteCollisionEnabled(unsigned int spriteID,
+    void setSpriteCollisionEnabled(int spriteID,
                                    bool newCollisionEnabled);
 
-    void setSpriteModelBounds(unsigned int spriteID,
+    void setSpriteModelBounds(int spriteID,
                               const BoundingBox& newModelBounds);
 
     //-------------------------------------------------------------------------
     // Signal Sinks
     //-------------------------------------------------------------------------
     /** A sprite sheet was added to the model. */
-    entt::sink<entt::sigh<void(unsigned int sheetID, const SpriteSheet& sheet)>>
+    entt::sink<entt::sigh<void(int sheetID, const EditorSpriteSheet& sheet)>>
         sheetAdded;
 
     /** A sprite sheet was removed from the model. */
-    entt::sink<entt::sigh<void(unsigned int sheetID)>> sheetRemoved;
+    entt::sink<entt::sigh<void(int sheetID)>> sheetRemoved;
 
     /** A sprite was removed from the model. */
-    entt::sink<entt::sigh<void(unsigned int spriteID)>> spriteRemoved;
+    entt::sink<entt::sigh<void(int spriteID)>> spriteRemoved;
 
-    // TODO: How do we want to handle this?
-    //       Separate signals for each type? Single signal with variant?
-    /** The active sprite has changed to a new sprite. */
-    entt::sink<entt::sigh<void(unsigned int newActiveSpriteID,
-                               const Sprite& newActiveSprite)>>
-        activeSpriteChanged;
+    /** The active library item has changed. */
+    entt::sink<entt::sigh<void(const LibraryItemData& newActiveItem)>>
+        activeLibraryItemChanged;
 
     /** A sprite's display name has changed. */
-    entt::sink<entt::sigh<void(unsigned int spriteID,
+    entt::sink<entt::sigh<void(int spriteID,
                                const std::string& newDisplayName)>>
         spriteDisplayNameChanged;
 
     /** A sprite's "has bounding box" field has changed. */
-    entt::sink<entt::sigh<void(unsigned int spriteID, bool collisionEnabled)>>
+    entt::sink<entt::sigh<void(int spriteID, bool collisionEnabled)>>
         spriteCollisionEnabledChanged;
 
     /** A sprite's bounding box has changed. */
-    entt::sink<entt::sigh<void(unsigned int spriteID,
+    entt::sink<entt::sigh<void(int spriteID,
                                const BoundingBox& newModelBounds)>>
         spriteModelBoundsChanged;
 
@@ -184,7 +186,7 @@ private:
      *                  non-unique.
      * @param displayName  The display name that the sprite will be set to.
      */
-    bool spriteNameIsUnique(unsigned int spriteID,
+    bool spriteNameIsUnique(int spriteID,
                             const std::string& displayName);
 
     /** Used for validating user-selected sprite sheet textures. */
@@ -197,14 +199,24 @@ private:
     /** The parent directory of currentWorkingFilePath + "/Assets/Textures". */
     std::string workingTexturesDir;
 
-    /** The sprite sheets that we currently have loaded. */
-    std::map<unsigned int, SpriteSheet> spriteSheetMap;
+    /** Maps sheet IDs -> the sprite sheets that we currently have loaded. */
+    std::map<int, EditorSpriteSheet> spriteSheetMap;
 
-    /** The sprites that we currently have loaded. */
-    std::map<unsigned int, Sprite> spriteMap;
+    /** Maps sprite IDs -> the sprites that we currently have loaded. */
+    std::map<int, EditorSprite> spriteMap;
 
-    /** The ID of the active sprite. */
-    unsigned int activeSpriteID;
+    /** Maps floor IDs -> the floor sprite sets that we currently have loaded. */
+    std::map<Uint16, EditorFloorSpriteSet> floorMap;
+
+    /** Maps floor covering IDs -> the floor sprite sets that we currently have 
+        loaded. */
+    std::map<Uint16, EditorFloorCoveringSpriteSet> floorCoveringMap;
+
+    /** Maps wall IDs -> the wall sprite sets that we currently have loaded. */
+    std::map<Uint16, EditorWallSpriteSet> wallMap;
+
+    /** Maps object IDs -> the object sprite sets that we currently have loaded. */
+    std::map<Uint16, EditorObjectSpriteSet> objectMap;
 
     /** Used for generating temporary sprite sheet IDs that are only used
         internally by this editor. */
@@ -217,25 +229,24 @@ private:
     //-------------------------------------------------------------------------
     // Signals
     //-------------------------------------------------------------------------
-    entt::sigh<void(unsigned int sheetID, const SpriteSheet& sheet)>
-        sheetAddedSig{};
+    entt::sigh<void(int sheetID, const EditorSpriteSheet& sheet)>
+        sheetAddedSig;
 
-    entt::sigh<void(unsigned int sheetID)> sheetRemovedSig{};
+    entt::sigh<void(int sheetID)> sheetRemovedSig;
 
-    entt::sigh<void(unsigned int spriteID)> spriteRemovedSig;
+    entt::sigh<void(int spriteID)> spriteRemovedSig;
 
-    entt::sigh<void(unsigned int newActiveSpriteID,
-                    const Sprite& newActiveSprite)>
-        activeSpriteChangedSig{};
+    entt::sigh<void(const LibraryItemData& newActiveItem)>
+        activeLibraryItemChangedSig;
 
-    entt::sigh<void(unsigned int spriteID, const std::string& newDisplayName)>
-        spriteDisplayNameChangedSig{};
+    entt::sigh<void(int spriteID, const std::string& newDisplayName)>
+        spriteDisplayNameChangedSig;
 
-    entt::sigh<void(unsigned int spriteID, bool collisionEnabled)>
-        spriteCollisionEnabledChangedSig{};
+    entt::sigh<void(int spriteID, bool collisionEnabled)>
+        spriteCollisionEnabledChangedSig;
 
-    entt::sigh<void(unsigned int spriteID, const BoundingBox& newModelBounds)>
-        spriteModelBoundsChangedSig{};
+    entt::sigh<void(int spriteID, const BoundingBox& newModelBounds)>
+        spriteModelBoundsChangedSig;
 };
 
 } // namespace SpriteEditor

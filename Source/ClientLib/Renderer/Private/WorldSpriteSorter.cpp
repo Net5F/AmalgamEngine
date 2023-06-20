@@ -286,7 +286,7 @@ void WorldSpriteSorter::pushTileSprite(const Sprite& sprite,
     // If this sprite comes from an existing tile layer or is a phantom that 
     // replaces an existing sprite, set the layer's ID. Otherwise, leave it 
     // as std::monostate to show that this is a full phantom.
-    WorldObjectIDVariant worldObjectID{};
+    WorldObjectID worldObjectID{};
     if (!isFullPhantom) {
         worldObjectID = layerID;
     }

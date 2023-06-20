@@ -3,7 +3,7 @@
 
 namespace AM
 {
-IDPool::IDPool(unsigned int inPoolSize)
+IDPool::IDPool(std::size_t inPoolSize)
 : poolSize(inPoolSize)
 , containerSize(poolSize + SAFETY_BUFFER)
 , lastAddedIndex(0)
@@ -20,15 +20,15 @@ unsigned int IDPool::reserveID()
     }
 
     // Find the next empty index.
-    for (unsigned int i = 1; i < poolSize; ++i) {
+    for (std::size_t i = 1; i < poolSize; ++i) {
         // If this index is false (ID is unused).
-        unsigned int index{(lastAddedIndex + i) % containerSize};
+        std::size_t index{(lastAddedIndex + i) % containerSize};
         if (!IDs[index]) {
             IDs[index] = true;
             lastAddedIndex = index;
             reservedIDCount++;
 
-            return index;
+            return static_cast<unsigned int>(index);
         }
     }
 

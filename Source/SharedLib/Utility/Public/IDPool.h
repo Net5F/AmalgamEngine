@@ -20,7 +20,7 @@ namespace AM
 class IDPool
 {
 public:
-    IDPool(unsigned int inPoolSize);
+    IDPool(std::size_t inPoolSize);
 
     /**
      * Reserves and returns the next empty ID.
@@ -43,19 +43,19 @@ private:
         are reserved.
         Note: If this isn't sufficient, you can just make your pool much
               larger than the number of IDs you plan on using. */
-    static constexpr unsigned int SAFETY_BUFFER = 100;
+    static constexpr std::size_t SAFETY_BUFFER{100};
 
     /** The maximum number of IDs that we can give out. */
-    unsigned int poolSize;
+    std::size_t poolSize;
 
     /** The size of our container. Equal to poolSize + SAFETY_BUFFER. */
-    unsigned int containerSize;
+    std::size_t containerSize;
 
     /** The last index that we added an ID to. */
-    unsigned int lastAddedIndex;
+    std::size_t lastAddedIndex;
 
     /** The number of currently reserved IDs. */
-    unsigned int reservedIDCount;
+    std::size_t reservedIDCount;
 
     /**
      * If ID 'x' is available, IDs[x] will be true. Else, it will be false.

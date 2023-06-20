@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Sprite.h"
 #include <string>
 #include <vector>
 
@@ -9,17 +8,16 @@ namespace AM
 namespace SpriteEditor
 {
 /**
- * Holds the path to a sprite sheet and all associated sprite data.
+ * Holds the data necessary for editing and saving a sprite sheet.
+ * Part of SpriteDataModel. 
  */
-struct SpriteSheet {
-public:
+struct EditorSpriteSheet {
     /** The path to the sprite sheet image file, relative to the application's
         base directory. */
     std::string relPath;
 
-    /** The editor IDs for each sprite in this sheet.
-        Refers to SpriteDataModel::spriteMap. */
-    std::vector<unsigned int> spriteIDs;
+    /** The runtime IDs for each sprite in this sheet. */
+    std::vector<int> spriteIDs;
 };
 
 } // namespace SpriteEditor

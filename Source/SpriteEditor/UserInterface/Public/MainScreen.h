@@ -3,6 +3,7 @@
 #include "AUI/Screen.h"
 #include "AUI/Button.h"
 #include "AUI/ConfirmationDialog.h"
+#include "LibraryItemData.h"
 #include "LibraryWindow.h"
 #include "SpriteEditStage.h"
 #include "SaveButtonWindow.h"
@@ -16,6 +17,7 @@ namespace AM
 namespace SpriteEditor
 {
 class SpriteDataModel;
+struct EditorSprite;
 
 /**
  * The main screen for doing work.
@@ -44,9 +46,10 @@ public:
     void render() override;
 
 private:
-    // These all just make the appropriate windows visible.
-    void onActiveSpriteChanged(unsigned int newSpriteID,
-                               const Sprite& newActiveSprite);
+    /**
+     * Makes the appropriate windows visible based on the new item's type.
+     */
+    void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /** The sprite data for this project. Used by this screen's UI. */
     SpriteDataModel& spriteDataModel;

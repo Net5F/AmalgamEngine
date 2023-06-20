@@ -1,22 +1,24 @@
 #pragma once
 
 #include "BoundingBox.h"
-#include "entt/core/hashed_string.hpp"
+#include "EmptySpriteID.h"
 #include <SDL_rect.h>
-#include <SDL_stdinc.h>
+#include <string>
 
 namespace AM
 {
 namespace SpriteEditor
 {
-struct SpriteSheet;
 
 /**
- * Holds the data for a single sprite.
- * Used as part of SpriteEditor's data model.
+ * Holds the data necessary for editing and saving a sprite.
+ * Part of SpriteDataModel. 
  */
-struct Sprite {
-public:
+struct EditorSprite {
+    /** This sprite's unique numeric identifier.
+        Note: This ID may change when this sprite is saved to the json. */
+    int numericID{EMPTY_SPRITE_ID};
+
     /** The unique relPath of the sprite sheet that this sprite is from. */
     std::string parentSpriteSheetPath{""};
 

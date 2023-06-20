@@ -1,6 +1,5 @@
 #pragma once
 
-#include "SpriteSheet.h"
 #include "LibraryListItem.h"
 #include "AUI/Window.h"
 #include "AUI/Text.h"
@@ -15,6 +14,7 @@ namespace SpriteEditor
 {
 class MainScreen;
 class SpriteDataModel;
+struct EditorSpriteSheet;
 class SpriteSheetListItem;
 
 /**
@@ -52,17 +52,17 @@ private:
     /**
      * Adds the given sheet to the library.
      */
-    void onSheetAdded(unsigned int sheetID, const SpriteSheet& sheet);
+    void onSheetAdded(int sheetID, const EditorSpriteSheet& sheet);
 
     /**
      * Removes the given sheet from the library.
      */
-    void onSheetRemoved(unsigned int sheetID);
+    void onSheetRemoved(int sheetID);
 
     /**
      * Updates the display name on the list item for the given sprite.
      */
-    void onSpriteDisplayNameChanged(unsigned int spriteID,
+    void onSpriteDisplayNameChanged(int spriteID,
                                     const std::string& newDisplayName);
 
     /**
@@ -76,7 +76,7 @@ private:
      */
     void addSpriteToSheetListItem(
         SpriteSheetListItem& sheetListItem,
-        const SpriteSheet& sheet, unsigned int spriteID);
+        const EditorSpriteSheet& sheet, int spriteID);
 
     /**
      * @return true if the given type is removable.
@@ -96,10 +96,10 @@ private:
     SpriteDataModel& spriteDataModel;
 
     /** Maps sprite sheet IDs to their associated thumbnails. */
-    std::unordered_map<unsigned int, LibraryListItem*> sheetListItemMap;
+    std::unordered_map<int, LibraryListItem*> sheetListItemMap;
 
     /** Maps sprite IDs to their associated thumbnails. */
-    std::unordered_map<unsigned int, LibraryListItem*> spriteListItemMap;
+    std::unordered_map<int, LibraryListItem*> spriteListItemMap;
 
     /** Holds the currently selected list items. */
     std::vector<LibraryListItem*> selectedListItems;

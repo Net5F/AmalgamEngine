@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AUI/Widget.h"
+#include "LibraryItemData.h"
 #include <array>
 
 namespace AM
@@ -10,8 +11,8 @@ struct BoundingBox;
 
 namespace SpriteEditor
 {
-struct Sprite;
 class SpriteDataModel;
+struct EditorSprite;
 
 /**
  * A gizmo that allows the user to draw 3D bounding boxes for their 2D sprites.
@@ -61,23 +62,22 @@ private:
     enum class Control { None, Position, X, Y, Z };
 
     /**
-     * Saves the new active sprite's ID.
+     * If the new active item is a sprite, loads it's data into this gizmo.
      */
-    void onActiveSpriteChanged(unsigned int newSpriteID,
-                               const Sprite& newActiveSprite);
+    void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
      * Updates this panel with the active sprite's new properties.
      * Note: This gizmo depends on having its logical extent set to match the
      *       sprite image that it will be overlaying.
      */
-    void onSpriteModelBoundsChanged(unsigned int spriteID,
+    void onSpriteModelBoundsChanged(int spriteID,
                                     const BoundingBox& newModelBounds);
 
     /**
      * Refreshes this widget's UI with the given active sprite's data.
      */
-    void refresh(const Sprite& activeSprite);
+    void refresh(const EditorSprite& activeSprite);
 
     /**
      * Updates the active sprite's maxX and maxY bounds to match the given
@@ -110,7 +110,7 @@ private:
      *     (minX, maxY, maxZ), (maxX, maxY, maxZ), (maxX, minY, maxZ),
      *     (minX, minY, maxZ)
      */
-    void calcOffsetScreenPoints(const Sprite& activeSprite,
+    void calcOffsetScreenPoints(const EditorSprite& activeSprite,
                                 std::vector<SDL_Point>& boundsScreenPoints);
 
     /**
@@ -152,7 +152,7 @@ private:
     AUI::ScreenResolution lastUsedScreenSize;
 
     /** The active sprite's ID. */
-    unsigned int activeSpriteID;
+    int activeSpriteID;
 
     /** A reasonable size for the control rectangles. */
     static constexpr int LOGICAL_RECT_SIZE{12};

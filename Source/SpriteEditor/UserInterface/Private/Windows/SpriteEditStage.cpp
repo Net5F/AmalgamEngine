@@ -1,7 +1,8 @@
 #include "SpriteEditStage.h"
 #include "MainScreen.h"
-#include "Sprite.h"
+#include "EditorSprite.h"
 #include "SpriteDataModel.h"
+#include "EmptySpriteID.h"
 #include "Paths.h"
 #include "Ignore.h"
 #include "AUI/Core.h"
@@ -13,7 +14,7 @@ namespace SpriteEditor
 SpriteEditStage::SpriteEditStage(SpriteDataModel& inSpriteDataModel)
 : AUI::Window({389, 60, 1142, 684}, "SpriteEditStage")
 , spriteDataModel{inSpriteDataModel}
-, activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
+, activeSpriteID{EMPTY_SPRITE_ID}
 , checkerboardImage({0, 0, 100, 100})
 , spriteImage({0, 0, 100, 100})
 , boundingBoxGizmo(inSpriteDataModel)
@@ -33,24 +34,32 @@ SpriteEditStage::SpriteEditStage(SpriteDataModel& inSpriteDataModel)
     boundingBoxGizmo.setIsVisible(false);
 
     // When the active sprite is updated, update it in this widget.
-    spriteDataModel.activeSpriteChanged
-        .connect<&SpriteEditStage::onActiveSpriteChanged>(*this);
+    spriteDataModel.activeLibraryItemChanged
+        .connect<&SpriteEditStage::onActiveLibraryItemChanged>(*this);
     spriteDataModel.spriteRemoved.connect<&SpriteEditStage::onSpriteRemoved>(
         *this);
 }
 
-void SpriteEditStage::onActiveSpriteChanged(unsigned int newActiveSpriteID,
-                                            const Sprite& newActiveSprite)
+void SpriteEditStage::onActiveLibraryItemChanged(
+    const LibraryItemData& newActiveItem)
 {
-    activeSpriteID = newActiveSpriteID;
+    // Check if the new active item is a sprite and return early if not.
+    const EditorSprite* newActiveSprite{
+        std::get_if<EditorSprite>(&newActiveItem)};
+    if (newActiveSprite == nullptr) {
+        activeSpriteID = EMPTY_SPRITE_ID;
+        return;
+    }
+
+    activeSpriteID = newActiveSprite->numericID;
 
     // Load the sprite's image.
     std::string imagePath{spriteDataModel.getWorkingTexturesDir()};
-    imagePath += newActiveSprite.parentSpriteSheetPath;
-    spriteImage.setSimpleImage(imagePath, newActiveSprite.textureExtent);
+    imagePath += newActiveSprite->parentSpriteSheetPath;
+    spriteImage.setSimpleImage(imagePath, newActiveSprite->textureExtent);
 
     // Calc the centered sprite position.
-    SDL_Rect centeredSpriteExtent{newActiveSprite.textureExtent};
+    SDL_Rect centeredSpriteExtent{newActiveSprite->textureExtent};
     centeredSpriteExtent.x = logicalExtent.w / 2;
     centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
     centeredSpriteExtent.y = logicalExtent.h / 2;
@@ -71,10 +80,10 @@ void SpriteEditStage::onActiveSpriteChanged(unsigned int newActiveSpriteID,
     boundingBoxGizmo.setIsVisible(true);
 }
 
-void SpriteEditStage::onSpriteRemoved(unsigned int spriteID)
+void SpriteEditStage::onSpriteRemoved(int spriteID)
 {
     if (spriteID == activeSpriteID) {
-        activeSpriteID = SpriteDataModel::INVALID_SPRITE_ID;
+        activeSpriteID = EMPTY_SPRITE_ID;
 
         // Set everything back to being invisible.
         checkerboardImage.setIsVisible(false);

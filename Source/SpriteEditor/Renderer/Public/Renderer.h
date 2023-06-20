@@ -17,9 +17,9 @@ class UserInterface;
 class Renderer : public OSEventHandler
 {
 public:
-    static constexpr unsigned int FRAMES_PER_SECOND = 60;
-    static constexpr double FRAME_TIMESTEP_S
-        = 1.0 / static_cast<double>(FRAMES_PER_SECOND);
+    static constexpr unsigned int FRAMES_PER_SECOND{60};
+    static constexpr double FRAME_TIMESTEP_S{
+        1.0 / static_cast<double>(FRAMES_PER_SECOND)};
 
     Renderer(SDL_Renderer* inSdlRenderer, UserInterface& inUI);
 

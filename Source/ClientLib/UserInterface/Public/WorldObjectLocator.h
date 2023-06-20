@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Camera.h"
-#include "WorldObjectIDVariant.h"
+#include "WorldObjectID.h"
 #include "CellExtent.h"
 #include "CellPosition.h"
 #include <SDL_rect.h>
@@ -56,10 +56,10 @@ public:
      * @param objectID  The object to add.
      * @param objectWorldBounds  The object's world-space bounding box.
      */
-    void addWorldObject(const WorldObjectIDVariant& objectID,
+    void addWorldObject(const WorldObjectID& objectID,
                         const BoundingBox& objectWorldBounds);
 
-    WorldObjectIDVariant getObjectUnderPoint(const SDL_Point& screenPoint) const;
+    WorldObjectID getObjectUnderPoint(const SDL_Point& screenPoint) const;
 
     /**
      * Returns the tile layer underneath the given actual-space point.
@@ -103,7 +103,7 @@ private:
     /** A simple structure for holding tracked objects. */
     struct WorldObject
     {
-        WorldObjectIDVariant objectID{};
+        WorldObjectID objectID{};
         BoundingBox worldBounds{};
     };
 

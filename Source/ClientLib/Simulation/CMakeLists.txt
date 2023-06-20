@@ -28,7 +28,7 @@ target_sources(ClientLib
 		Public/SimulationExDependencies.h
 		Public/TileUpdateSystem.h
 		Public/World.h
-		Public/WorldObjectIDVariant.h
+		Public/WorldObjectID.h
 		Public/WorldSignals.h
 		Public/Components/InputHistory.h
 		Public/Components/NeedsAdjacentChunks.h

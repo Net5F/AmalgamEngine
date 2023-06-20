@@ -1,7 +1,5 @@
 #pragma once
 
-#include "SpriteSheet.h"
-#include "Sprite.h"
 #include "AUI/Window.h"
 #include "AUI/Button.h"
 

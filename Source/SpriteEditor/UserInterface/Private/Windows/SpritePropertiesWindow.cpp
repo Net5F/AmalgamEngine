@@ -2,7 +2,8 @@
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
-#include "Sprite.h"
+#include "EditorSprite.h"
+#include "EmptySpriteID.h"
 #include "Paths.h"
 #include "Camera.h"
 #include "Transforms.h"
@@ -37,7 +38,7 @@ SpritePropertiesWindow::SpritePropertiesWindow(SpriteDataModel& inSpriteDataMode
 , maxZLabel({24, 460, 110, 38}, "MaxZLabel")
 , maxZInput({150, 454, 129, 38}, "MaxZInput")
 , spriteDataModel{inSpriteDataModel}
-, activeSpriteID{SpriteDataModel::INVALID_SPRITE_ID}
+, activeSpriteID{EMPTY_SPRITE_ID}
 , committedMinX{0.0}
 , committedMinY{0.0}
 , committedMinZ{0.0}
@@ -156,8 +157,8 @@ SpritePropertiesWindow::SpritePropertiesWindow(SpriteDataModel& inSpriteDataMode
     maxZInput.setOnTextCommitted([this]() { saveMaxZ(); });
 
     // When the active sprite is updated, update it in this widget.
-    spriteDataModel.activeSpriteChanged
-        .connect<&SpritePropertiesWindow::onActiveSpriteChanged>(*this);
+    spriteDataModel.activeLibraryItemChanged
+        .connect<&SpritePropertiesWindow::onActiveLibraryItemChanged>(*this);
     spriteDataModel.spriteDisplayNameChanged
         .connect<&SpritePropertiesWindow::onSpriteDisplayNameChanged>(*this);
     spriteDataModel.spriteCollisionEnabledChanged
@@ -168,33 +169,41 @@ SpritePropertiesWindow::SpritePropertiesWindow(SpriteDataModel& inSpriteDataMode
         *this);
 }
 
-void SpritePropertiesWindow::onActiveSpriteChanged(unsigned int newActiveSpriteID,
-                                            const Sprite& newActiveSprite)
+void SpritePropertiesWindow::onActiveLibraryItemChanged(
+    const LibraryItemData& newActiveItem)
 {
-    activeSpriteID = newActiveSpriteID;
+    // Check if the new active item is a sprite and return early if not.
+    const EditorSprite* newActiveSprite{
+        std::get_if<EditorSprite>(&newActiveItem)};
+    if (newActiveSprite == nullptr) {
+        activeSpriteID = EMPTY_SPRITE_ID;
+        return;
+    }
+
+    activeSpriteID = newActiveSprite->numericID;
 
     // Update all of our property fields to match the new active sprite's data.
-    nameInput.setText(newActiveSprite.displayName);
+    nameInput.setText(newActiveSprite->displayName);
 
-    if (newActiveSprite.collisionEnabled) {
+    if (newActiveSprite->collisionEnabled) {
         collisionEnabledInput.setCurrentState(AUI::Checkbox::State::Checked);
     }
     else {
         collisionEnabledInput.setCurrentState(AUI::Checkbox::State::Unchecked);
     }
 
-    minXInput.setText(toRoundedString(newActiveSprite.modelBounds.minX));
-    minYInput.setText(toRoundedString(newActiveSprite.modelBounds.minY));
-    minZInput.setText(toRoundedString(newActiveSprite.modelBounds.minZ));
-    maxXInput.setText(toRoundedString(newActiveSprite.modelBounds.maxX));
-    maxYInput.setText(toRoundedString(newActiveSprite.modelBounds.maxY));
-    maxZInput.setText(toRoundedString(newActiveSprite.modelBounds.maxZ));
+    minXInput.setText(toRoundedString(newActiveSprite->modelBounds.minX));
+    minYInput.setText(toRoundedString(newActiveSprite->modelBounds.minY));
+    minZInput.setText(toRoundedString(newActiveSprite->modelBounds.minZ));
+    maxXInput.setText(toRoundedString(newActiveSprite->modelBounds.maxX));
+    maxYInput.setText(toRoundedString(newActiveSprite->modelBounds.maxY));
+    maxZInput.setText(toRoundedString(newActiveSprite->modelBounds.maxZ));
 }
 
-void SpritePropertiesWindow::onSpriteRemoved(unsigned int spriteID)
+void SpritePropertiesWindow::onSpriteRemoved(int spriteID)
 {
     if (spriteID == activeSpriteID) {
-        activeSpriteID = SpriteDataModel::INVALID_SPRITE_ID;
+        activeSpriteID = EMPTY_SPRITE_ID;
         nameInput.setText("");
         minXInput.setText("");
         minYInput.setText("");
@@ -206,14 +215,14 @@ void SpritePropertiesWindow::onSpriteRemoved(unsigned int spriteID)
 }
 
 void SpritePropertiesWindow::onSpriteDisplayNameChanged(
-    unsigned int spriteID, const std::string& newDisplayName)
+    int spriteID, const std::string& newDisplayName)
 {
     if (spriteID == activeSpriteID) {
         nameInput.setText(newDisplayName);
     }
 }
 
-void SpritePropertiesWindow::onSpriteCollisionEnabledChanged(unsigned int spriteID,
+void SpritePropertiesWindow::onSpriteCollisionEnabledChanged(int spriteID,
                                                       bool newCollisionEnabled)
 {
     if (spriteID == activeSpriteID) {
@@ -229,7 +238,7 @@ void SpritePropertiesWindow::onSpriteCollisionEnabledChanged(unsigned int sprite
 }
 
 void SpritePropertiesWindow::onSpriteModelBoundsChanged(
-    unsigned int spriteID, const BoundingBox& newModelBounds)
+    int spriteID, const BoundingBox& newModelBounds)
 {
     if (spriteID == activeSpriteID) {
         minXInput.setText(toRoundedString(newModelBounds.minX));
@@ -331,7 +340,7 @@ void SpritePropertiesWindow::saveMaxX()
         float newMaxX{std::stof(maxXInput.getText())};
 
         // Clamp the value to its bounds.
-        const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+        const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
 
         BoundingBox newModelBounds{activeSprite.modelBounds};
         newModelBounds.maxX
@@ -355,7 +364,7 @@ void SpritePropertiesWindow::saveMaxY()
         float newMaxY{std::stof(maxYInput.getText())};
 
         // Clamp the value to its bounds.
-        const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+        const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
 
         BoundingBox newModelBounds{activeSprite.modelBounds};
         newModelBounds.maxY
@@ -381,7 +390,7 @@ void SpritePropertiesWindow::saveMaxZ()
         // Clamp the value to its lower bound.
         // Note: We don't clamp to an upper bound cause it's hard to calc
         //       and not very useful. Can add if we ever care to.
-        const Sprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+        const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
         float minZ{activeSprite.modelBounds.minZ};
         if (newMaxZ < minZ) {
             newMaxZ = minZ;

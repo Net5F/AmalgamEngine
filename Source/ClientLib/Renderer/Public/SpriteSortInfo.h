@@ -2,7 +2,7 @@
 
 #include "Sprite.h"
 #include "TileLayers.h"
-#include "WorldObjectIDVariant.h"
+#include "WorldObjectID.h"
 #include <SDL_rect.h>
 #include <vector>
 #include <variant>
@@ -24,7 +24,7 @@ struct SpriteSortInfo {
     /** The tile layer or entity that the sprite comes from, or std::monostate 
         if this is a full phantom (not replacing an existing layer).
         Used when we pass the sorted sprites to the UI's locator. */
-    WorldObjectIDVariant spriteOwnerID;
+    WorldObjectID spriteOwnerID;
 
     /** The world-space bounding box that has been calculated for this sprite
         in the current frame, based on the associated entity's lerped

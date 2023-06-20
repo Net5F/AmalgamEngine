@@ -3,14 +3,15 @@
 #include "AUI/Window.h"
 #include "AUI/Screen.h"
 #include "AUI/Image.h"
+#include "LibraryItemData.h"
 #include "BoundingBoxGizmo.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
-struct Sprite;
 class SpriteDataModel;
+struct EditorSprite;
 
 /**
  * The center stage shown when the user loads a sprite from the Library.
@@ -26,22 +27,21 @@ public:
 
 private:
     /**
-     * Loads the new active sprite's data onto the stage.
+     * If the new active item is a sprite, loads it's data onto this stage.
      */
-    void onActiveSpriteChanged(unsigned int newSpriteID,
-                               const Sprite& newSprite);
+    void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
      * (If active sprite was removed) Sets activeSprite to invalid and returns
      * the stage to its default state.
      */
-    void onSpriteRemoved(unsigned int spriteID);
+    void onSpriteRemoved(int spriteID);
 
     /** Used to get the current working dir when displaying the sprite. */
     SpriteDataModel& spriteDataModel;
 
     /** The active sprite's ID. */
-    unsigned int activeSpriteID;
+    int activeSpriteID;
 
     //-------------------------------------------------------------------------
     // Private child widgets

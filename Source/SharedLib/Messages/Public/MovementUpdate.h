@@ -21,7 +21,7 @@ namespace AM
 struct MovementUpdate {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE = MessageType::MovementUpdate;
+    static constexpr MessageType MESSAGE_TYPE{MessageType::MovementUpdate};
 
     /** The tick that this update corresponds to. */
     Uint32 tickNum{0};

@@ -5,6 +5,7 @@
 #include "AUI/Text.h"
 #include "AUI/Checkbox.h"
 #include "MainTextInput.h"
+#include "LibraryItemData.h"
 
 namespace AM
 {
@@ -13,7 +14,7 @@ struct BoundingBox;
 namespace SpriteEditor
 {
 class SpriteDataModel;
-struct Sprite;
+struct EditorSprite;
 
 /**
  * The properties window shown when the user loads a sprite from the Library.
@@ -59,33 +60,32 @@ public:
 
 private:
     /**
-     * Loads the new active sprite's data into this panel.
+     * If the new active item is a sprite, loads it's data into this panel.
      */
-    void onActiveSpriteChanged(unsigned int newSpriteID,
-                               const Sprite& newActiveSprite);
+    void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
      * (If active sprite was removed) Sets activeSprite to invalid and clears
      * all of the text inputs, putting this panel back to its default state.
      */
-    void onSpriteRemoved(unsigned int spriteID);
+    void onSpriteRemoved(int spriteID);
 
     /**
      * (If active sprite changed) Updates this panel with the active sprite's
      * new properties.
      */
-    void onSpriteDisplayNameChanged(unsigned int spriteID,
+    void onSpriteDisplayNameChanged(int spriteID,
                                     const std::string& newDisplayName);
-    void onSpriteCollisionEnabledChanged(unsigned int spriteID,
-                                       bool newCollisionEnabled);
-    void onSpriteModelBoundsChanged(unsigned int spriteID,
+    void onSpriteCollisionEnabledChanged(int spriteID,
+                                         bool newCollisionEnabled);
+    void onSpriteModelBoundsChanged(int spriteID,
                                     const BoundingBox& newModelBounds);
 
     /** Used while setting user-inputted sprite data. */
     SpriteDataModel& spriteDataModel;
 
     /** The active sprite's ID. */
-    unsigned int activeSpriteID;
+    int activeSpriteID;
 
     /**
      * Converts the given float to a string with 3 decimals of precision.

@@ -131,8 +131,8 @@ AUI::EventResult LibraryWindow::onKeyDown(SDL_Keycode keyCode)
     return AUI::EventResult{.wasHandled{false}};
 }
 
-void LibraryWindow::onSheetAdded(unsigned int sheetID,
-                                 const SpriteSheet& sheet)
+void LibraryWindow::onSheetAdded(int sheetID,
+                                 const EditorSpriteSheet& sheet)
 {
     // Create a container for the new sheet.
     auto sheetListItem{std::make_unique<SpriteSheetListItem>(sheet.relPath)};
@@ -145,7 +145,7 @@ void LibraryWindow::onSheetAdded(unsigned int sheetID,
     });
 
     // Add each of the new sheet's sprites to the sheet container.
-    for (unsigned int spriteID : sheet.spriteIDs) {
+    for (int spriteID : sheet.spriteIDs) {
         addSpriteToSheetListItem(*sheetListItem, sheet, spriteID);
     }
 
@@ -155,7 +155,7 @@ void LibraryWindow::onSheetAdded(unsigned int sheetID,
     sheetContainer.push_back(std::move(sheetListItem));
 }
 
-void LibraryWindow::onSheetRemoved(unsigned int sheetID)
+void LibraryWindow::onSheetRemoved(int sheetID)
 {
     auto sheetIt{sheetListItemMap.find(sheetID)};
     if (sheetIt == sheetListItemMap.end()) {
@@ -177,7 +177,7 @@ void LibraryWindow::onSheetRemoved(unsigned int sheetID)
     sheetListItemMap.erase(sheetIt);
 }
 
-void LibraryWindow::onSpriteDisplayNameChanged(unsigned int spriteID,
+void LibraryWindow::onSpriteDisplayNameChanged(int spriteID,
                                 const std::string& newDisplayName)
 {
     auto spriteListItemIt{spriteListItemMap.find(spriteID)};
@@ -208,10 +208,10 @@ void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
 
 void LibraryWindow::addSpriteToSheetListItem(
     SpriteSheetListItem& sheetListItem,
-    const SpriteSheet& sheet, unsigned int spriteID)
+    const EditorSpriteSheet& sheet, int spriteID)
 {
     // Construct a new list item for this sprite.
-    const Sprite& sprite{spriteDataModel.getSprite(spriteID)};
+    const EditorSprite& sprite{spriteDataModel.getSprite(spriteID)};
     auto spriteListItem{std::make_unique<LibraryListItem>(sprite.displayName)};
     spriteListItem->type = LibraryListItem::Type::Sprite;
     spriteListItem->ID = spriteID;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <SDL_stdinc.h>
 #include "Input.h"
 #include "Position.h"
 #include "Velocity.h"
@@ -18,10 +17,10 @@ struct MovementState {
     /** The entity that this state belongs to. */
     entt::entity entity{entt::null};
 
-    Input input;
-    Position position;
-    Velocity velocity;
-    Rotation rotation;
+    Input input{};
+    Position position{};
+    Velocity velocity{};
+    Rotation rotation{};
 };
 
 template<typename S>

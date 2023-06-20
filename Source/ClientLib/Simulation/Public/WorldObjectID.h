@@ -15,7 +15,7 @@ namespace Client
  * 
  * Useful, e.g., when returning the object that the user clicked on.
  */
-using WorldObjectIDVariant = std::variant<std::monostate, TileLayerID, entt::entity>;
+using WorldObjectID = std::variant<std::monostate, TileLayerID, entt::entity>;
 
 } // namespace Client
 } // namespace AM

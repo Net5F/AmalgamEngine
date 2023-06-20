@@ -14,7 +14,7 @@ WorldObjectLocator::WorldObjectLocator()
 {
 }
 
-void WorldObjectLocator::addWorldObject(const WorldObjectIDVariant& objectID,
+void WorldObjectLocator::addWorldObject(const WorldObjectID& objectID,
                                         const BoundingBox& objectWorldBounds)
 {
     // If objectID is empty, fail.
@@ -44,7 +44,7 @@ void WorldObjectLocator::addWorldObject(const WorldObjectIDVariant& objectID,
     }
 }
 
-WorldObjectIDVariant
+WorldObjectID
     WorldObjectLocator::getObjectUnderPoint(const SDL_Point& screenPoint) const
 {
     // Cast a world-space ray from the given point on the screen.
