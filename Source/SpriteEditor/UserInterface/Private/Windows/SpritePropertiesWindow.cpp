@@ -1,4 +1,4 @@
-#include "PropertiesPanel.h"
+#include "SpritePropertiesWindow.h"
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "SpriteDataModel.h"
@@ -18,8 +18,8 @@ namespace AM
 {
 namespace SpriteEditor
 {
-PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
-: AUI::Window({1617, 0, 303, 518}, "PropertiesPanel")
+SpritePropertiesWindow::SpritePropertiesWindow(SpriteDataModel& inSpriteDataModel)
+: AUI::Window({1617, 0, 303, 518}, "SpritePropertiesWindow")
 , nameLabel({24, 52, 65, 28}, "NameLabel")
 , nameInput({24, 84, 255, 38}, "NameInput")
 , collisionEnabledLabel({24, 160, 210, 27}, "CollisionLabel")
@@ -89,7 +89,7 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
     nameInput.setPadding({0, 8, 0, 8});
     nameInput.setOnTextCommitted([this]() { saveName(); });
 
-    /* Has bounding box entry. */
+    /* Collision enabled entry. */
     collisionEnabledLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     collisionEnabledLabel.setColor({255, 255, 255, 255});
     collisionEnabledLabel.setText("Collision enabled");
@@ -157,18 +157,18 @@ PropertiesPanel::PropertiesPanel(SpriteDataModel& inSpriteDataModel)
 
     // When the active sprite is updated, update it in this widget.
     spriteDataModel.activeSpriteChanged
-        .connect<&PropertiesPanel::onActiveSpriteChanged>(*this);
+        .connect<&SpritePropertiesWindow::onActiveSpriteChanged>(*this);
     spriteDataModel.spriteDisplayNameChanged
-        .connect<&PropertiesPanel::onSpriteDisplayNameChanged>(*this);
+        .connect<&SpritePropertiesWindow::onSpriteDisplayNameChanged>(*this);
     spriteDataModel.spriteCollisionEnabledChanged
-        .connect<&PropertiesPanel::onSpriteCollisionEnabledChanged>(*this);
+        .connect<&SpritePropertiesWindow::onSpriteCollisionEnabledChanged>(*this);
     spriteDataModel.spriteModelBoundsChanged
-        .connect<&PropertiesPanel::onSpriteModelBoundsChanged>(*this);
-    spriteDataModel.spriteRemoved.connect<&PropertiesPanel::onSpriteRemoved>(
+        .connect<&SpritePropertiesWindow::onSpriteModelBoundsChanged>(*this);
+    spriteDataModel.spriteRemoved.connect<&SpritePropertiesWindow::onSpriteRemoved>(
         *this);
 }
 
-void PropertiesPanel::onActiveSpriteChanged(unsigned int newActiveSpriteID,
+void SpritePropertiesWindow::onActiveSpriteChanged(unsigned int newActiveSpriteID,
                                             const Sprite& newActiveSprite)
 {
     activeSpriteID = newActiveSpriteID;
@@ -191,7 +191,7 @@ void PropertiesPanel::onActiveSpriteChanged(unsigned int newActiveSpriteID,
     maxZInput.setText(toRoundedString(newActiveSprite.modelBounds.maxZ));
 }
 
-void PropertiesPanel::onSpriteRemoved(unsigned int spriteID)
+void SpritePropertiesWindow::onSpriteRemoved(unsigned int spriteID)
 {
     if (spriteID == activeSpriteID) {
         activeSpriteID = SpriteDataModel::INVALID_SPRITE_ID;
@@ -205,7 +205,7 @@ void PropertiesPanel::onSpriteRemoved(unsigned int spriteID)
     }
 }
 
-void PropertiesPanel::onSpriteDisplayNameChanged(
+void SpritePropertiesWindow::onSpriteDisplayNameChanged(
     unsigned int spriteID, const std::string& newDisplayName)
 {
     if (spriteID == activeSpriteID) {
@@ -213,7 +213,7 @@ void PropertiesPanel::onSpriteDisplayNameChanged(
     }
 }
 
-void PropertiesPanel::onSpriteCollisionEnabledChanged(unsigned int spriteID,
+void SpritePropertiesWindow::onSpriteCollisionEnabledChanged(unsigned int spriteID,
                                                       bool newCollisionEnabled)
 {
     if (spriteID == activeSpriteID) {
@@ -228,7 +228,7 @@ void PropertiesPanel::onSpriteCollisionEnabledChanged(unsigned int spriteID,
     }
 }
 
-void PropertiesPanel::onSpriteModelBoundsChanged(
+void SpritePropertiesWindow::onSpriteModelBoundsChanged(
     unsigned int spriteID, const BoundingBox& newModelBounds)
 {
     if (spriteID == activeSpriteID) {
@@ -241,26 +241,26 @@ void PropertiesPanel::onSpriteModelBoundsChanged(
     }
 }
 
-std::string PropertiesPanel::toRoundedString(float value)
+std::string SpritePropertiesWindow::toRoundedString(float value)
 {
     std::stringstream stream;
     stream << std::fixed << std::setprecision(3) << value;
     return stream.str();
 }
 
-void PropertiesPanel::saveName()
+void SpritePropertiesWindow::saveName()
 {
     spriteDataModel.setSpriteDisplayName(activeSpriteID, nameInput.getText());
 }
 
-void PropertiesPanel::saveCollisionEnabled()
+void SpritePropertiesWindow::saveCollisionEnabled()
 {
     bool collisionEnabled{(collisionEnabledInput.getCurrentState()
                            == AUI::Checkbox::State::Checked)};
     spriteDataModel.setSpriteCollisionEnabled(activeSpriteID, collisionEnabled);
 }
 
-void PropertiesPanel::saveMinX()
+void SpritePropertiesWindow::saveMinX()
 {
     // Validate the user input as a valid float.
     try {
@@ -281,7 +281,7 @@ void PropertiesPanel::saveMinX()
     }
 }
 
-void PropertiesPanel::saveMinY()
+void SpritePropertiesWindow::saveMinY()
 {
     // Validate the user input as a valid float.
     try {
@@ -302,7 +302,7 @@ void PropertiesPanel::saveMinY()
     }
 }
 
-void PropertiesPanel::saveMinZ()
+void SpritePropertiesWindow::saveMinZ()
 {
     // Validate the user input as a valid float.
     try {
@@ -323,7 +323,7 @@ void PropertiesPanel::saveMinZ()
     }
 }
 
-void PropertiesPanel::saveMaxX()
+void SpritePropertiesWindow::saveMaxX()
 {
     // Validate the user input as a valid float.
     try {
@@ -347,7 +347,7 @@ void PropertiesPanel::saveMaxX()
     }
 }
 
-void PropertiesPanel::saveMaxY()
+void SpritePropertiesWindow::saveMaxY()
 {
     // Validate the user input as a valid float.
     try {
@@ -371,7 +371,7 @@ void PropertiesPanel::saveMaxY()
     }
 }
 
-void PropertiesPanel::saveMaxZ()
+void SpritePropertiesWindow::saveMaxZ()
 {
     // Validate the user input as a valid float.
     try {

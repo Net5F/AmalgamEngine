@@ -130,6 +130,8 @@ public:
     /** A sprite was removed from the model. */
     entt::sink<entt::sigh<void(unsigned int spriteID)>> spriteRemoved;
 
+    // TODO: How do we want to handle this?
+    //       Separate signals for each type? Single signal with variant?
     /** The active sprite has changed to a new sprite. */
     entt::sink<entt::sigh<void(unsigned int newActiveSpriteID,
                                const Sprite& newActiveSprite)>>

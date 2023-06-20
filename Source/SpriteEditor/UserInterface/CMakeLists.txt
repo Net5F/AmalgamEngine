@@ -11,7 +11,7 @@ target_sources(SpriteEditor
         Private/Windows/AddSheetDialog.cpp
         Private/Windows/LibraryAddMenu.cpp
         Private/Windows/LibraryWindow.cpp
-        Private/Windows/PropertiesPanel.cpp
+        Private/Windows/SpritePropertiesWindow.cpp
         Private/Windows/SaveButtonWindow.cpp
         Private/Windows/SpriteEditStage.cpp
         Private/Windows/TitleWindow.cpp
@@ -30,7 +30,7 @@ target_sources(SpriteEditor
         Public/Windows/AddSheetDialog.h
         Public/Windows/LibraryAddMenu.h
         Public/Windows/LibraryWindow.h
-        Public/Windows/PropertiesPanel.h
+        Public/Windows/SpritePropertiesWindow.h
         Public/Windows/SaveButtonWindow.h
         Public/Windows/SpriteEditStage.h
         Public/Windows/TitleWindow.h

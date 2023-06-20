@@ -6,7 +6,7 @@
 #include "LibraryWindow.h"
 #include "SpriteEditStage.h"
 #include "SaveButtonWindow.h"
-#include "PropertiesPanel.h"
+#include "SpritePropertiesWindow.h"
 #include "TitleButton.h"
 #include "LibraryAddMenu.h"
 #include "AddSheetDialog.h"
@@ -44,9 +44,9 @@ public:
     void render() override;
 
 private:
-    void onNewButtonPressed();
-
-    void onLoadButtonPressed();
+    // These all just make the appropriate windows visible.
+    void onActiveSpriteChanged(unsigned int newSpriteID,
+                               const Sprite& newActiveSprite);
 
     /** The sprite data for this project. Used by this screen's UI. */
     SpriteDataModel& spriteDataModel;
@@ -63,14 +63,16 @@ private:
     /** The menu for adding new items that opens when you press the "+". */
     LibraryAddMenu libraryAddMenu;
 
-    /** The center stage for editing sprite bounding boxes. */
-    SpriteEditStage spriteEditStage;
-
     /** The save button at the top of the screen, next to the properties. */
     SaveButtonWindow saveButtonWindow;
 
+    // Edit stages
+    /** The center stage for editing sprite bounding boxes. */
+    SpriteEditStage spriteEditStage;
+
+    // Properties windows
     /** The right-side panel for viewing and editing the active sprite data. */
-    PropertiesPanel propertiesPanel;
+    SpritePropertiesWindow spritePropertiesWindow;
 
     /** Confirmation dialog. Child widgets can call openConfirmationDialog()
         to use it. */

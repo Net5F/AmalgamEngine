@@ -17,7 +17,7 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 , libraryAddMenu()
 , spriteEditStage(spriteDataModel)
 , saveButtonWindow(*this, spriteDataModel)
-, propertiesPanel(spriteDataModel)
+, spritePropertiesWindow(spriteDataModel)
 , confirmationDialog({0, 0, 1920, 1080}, "ConfirmationDialog")
 , addSheetDialog(spriteDataModel)
 {
@@ -26,7 +26,7 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
     windows.push_back(libraryWindow);
     windows.push_back(libraryAddMenu);
     windows.push_back(saveButtonWindow);
-    windows.push_back(propertiesPanel);
+    windows.push_back(spritePropertiesWindow);
     windows.push_back(confirmationDialog);
     windows.push_back(addSheetDialog);
 
@@ -101,6 +101,16 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
     confirmationDialog.setIsVisible(false);
     addSheetDialog.setIsVisible(false);
     libraryAddMenu.setIsVisible(false);
+
+    /* Edit Stages and Properties Windows. */
+    // Make the edit stages and properties windows invisible
+    spriteEditStage.setIsVisible(false);
+    spritePropertiesWindow.setIsVisible(false);
+
+    // When the user selects a new item in the library, make the proper windows
+    // visible.
+    spriteDataModel.activeSpriteChanged
+        .connect<&MainScreen::onActiveSpriteChanged>(*this);
 }
 
 void MainScreen::openConfirmationDialog(
@@ -144,6 +154,13 @@ void MainScreen::render()
 
     // Update our child widget's layouts and render them.
     Screen::render();
+}
+
+void MainScreen::onActiveSpriteChanged(unsigned int newSpriteID,
+    const Sprite& newActiveSprite)
+{
+    spriteEditStage.setIsVisible(true);
+    spritePropertiesWindow.setIsVisible(true);
 }
 
 } // End namespace SpriteEditor

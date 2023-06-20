@@ -13,8 +13,8 @@ struct Sprite;
 class SpriteDataModel;
 
 /**
- * The center stage on the main screen. Allows the user to edit a sprite's
- * bounding box.
+ * The center stage shown when the user loads a sprite from the Library.
+ * Allows the user to edit the active sprite's bounding box.
  */
 class SpriteEditStage : public AUI::Window
 {

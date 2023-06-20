@@ -16,16 +16,16 @@ class SpriteDataModel;
 struct Sprite;
 
 /**
- * The right-side panel on the main screen. Allows the user to view and
- * modify the active sprite's properties.
+ * The properties window shown when the user loads a sprite from the Library.
+ * Allows the user to edit the active sprite's properties.
  */
-class PropertiesPanel : public AUI::Window
+class SpritePropertiesWindow : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    PropertiesPanel(SpriteDataModel& inSpriteDataModel);
+    SpritePropertiesWindow(SpriteDataModel& inSpriteDataModel);
 
     //-------------------------------------------------------------------------
     // Public child widgets
