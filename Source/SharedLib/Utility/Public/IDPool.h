@@ -38,6 +38,11 @@ public:
      */
     void freeID(unsigned int ID);
 
+    /**
+     * Frees all IDs for reuse.
+     */
+    void freeAllIDs();
+
 private:
     /** Extra room so that we don't run into reuse issues when almost all IDs
         are reserved.

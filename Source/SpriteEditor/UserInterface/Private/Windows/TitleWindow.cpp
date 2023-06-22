@@ -88,15 +88,13 @@ void TitleWindow::onLoadButtonPressed()
         if (std::strstr(selectedPath, "SpriteData.json") != 0) {
             // Valid file name.
             // If it loads successfully, change to the main screen.
-            std::string resultString{spriteDataModel.load(selectedPath)};
-            if (resultString == "") {
+            if (spriteDataModel.load(selectedPath)) {
                 userInterface.changeScreenTo(
                     UserInterface::ScreenType::MainScreen);
             }
             else {
                 // Failed to parse, display the error text.
-                resultString = "Error: " + resultString;
-                errorText.setText(resultString);
+                errorText.setText("Error: " + spriteDataModel.getErrorString());
                 errorText.setIsVisible(true);
             }
         }

@@ -1,13 +1,14 @@
 #include "IDPool.h"
 #include "Log.h"
+#include <algorithm>
 
 namespace AM
 {
 IDPool::IDPool(std::size_t inPoolSize)
-: poolSize(inPoolSize)
-, containerSize(poolSize + SAFETY_BUFFER)
-, lastAddedIndex(0)
-, reservedIDCount(0)
+: poolSize{inPoolSize}
+, containerSize{poolSize + SAFETY_BUFFER}
+, lastAddedIndex{0}
+, reservedIDCount{0}
 , IDs(containerSize)
 {
 }
@@ -45,6 +46,11 @@ void IDPool::freeID(unsigned int ID)
     else {
         LOG_FATAL("Tried to free an unused ID.");
     }
+}
+
+void IDPool::freeAllIDs()
+{
+    std::fill(IDs.begin(), IDs.end(), false);
 }
 
 } // namespace AM

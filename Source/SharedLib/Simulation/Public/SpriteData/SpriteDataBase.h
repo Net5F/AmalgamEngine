@@ -109,8 +109,9 @@ private:
      * Parses the given sprite set json and adds the resulting sprite set to 
      * the appropriate vector.
      *
-     * @param spriteJson  The json to parse. Must be a valid sprite set section
-     *                    from SpriteData.json, for the appropriate set type.
+     * @param spriteSetJson  The json to parse. Must be a valid sprite set 
+     *                       section from SpriteData.json, for the appropriate 
+     *                       set type.
      */
     void parseFloorSpriteSet(const nlohmann::json& spriteSetJson);
     void parseFloorCoveringSpriteSet(const nlohmann::json& spriteSetJson);

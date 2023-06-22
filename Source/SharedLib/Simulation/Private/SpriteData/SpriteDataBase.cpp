@@ -169,7 +169,7 @@ void SpriteDataBase::parseJson(nlohmann::json& json)
 {
     // Parse the json and catch any parsing errors.
     try {
-        // Iterate every sprite sheet and add all their sprites.
+        // Iterate every sprite sheet and add all of their sprites.
         for (auto& sheetJson : json.at("spriteSheets").items()) {
             for (auto& spriteJson : sheetJson.value().at("sprites").items()) {
                 // Parse the sprite's data and add it to our containers.
@@ -229,7 +229,7 @@ void SpriteDataBase::parseSprite(const nlohmann::json& spriteJson)
     // Add the display name and IDs.
     Sprite sprite{};
     sprite.numericID = spriteJson.at("numericID");
-    sprite.displayName = spriteJson["displayName"].get<std::string>();
+    sprite.displayName = spriteJson.at("displayName").get<std::string>();
     sprite.stringID = spriteJson.at("stringID").get<std::string>();
 
     // Add whether the sprite has a bounding box or not.
@@ -250,7 +250,7 @@ void SpriteDataBase::parseSprite(const nlohmann::json& spriteJson)
 void SpriteDataBase::parseFloorSpriteSet(const nlohmann::json& spriteSetJson)
 {
     Uint16 numericID{spriteSetJson.at("numericID")};
-    std::string displayName{spriteSetJson["displayName"].get<std::string>()};
+    std::string displayName{spriteSetJson.at("displayName").get<std::string>()};
     std::string stringID{spriteSetJson.at("stringID").get<std::string>()};
 
     // Add the sprite set's sprites.
@@ -269,7 +269,7 @@ void SpriteDataBase::parseFloorCoveringSpriteSet(const nlohmann::json& spriteSet
     // Add a sprite set to the appropriate vector.
     FloorCoveringSpriteSet& spriteSet{floorCoveringSpriteSets.emplace_back()};
     spriteSet.numericID = spriteSetJson.at("numericID");
-    spriteSet.displayName = spriteSetJson["displayName"].get<std::string>();
+    spriteSet.displayName = spriteSetJson.at("displayName").get<std::string>();
     spriteSet.stringID = spriteSetJson.at("stringID").get<std::string>();
 
     // Add the sprite set's sprites.
@@ -289,7 +289,7 @@ void SpriteDataBase::parseFloorCoveringSpriteSet(const nlohmann::json& spriteSet
 void SpriteDataBase::parseWallSpriteSet(const nlohmann::json& spriteSetJson)
 {
     Uint16 numericID{spriteSetJson.at("numericID")};
-    std::string displayName{spriteSetJson["displayName"].get<std::string>()};
+    std::string displayName{spriteSetJson.at("displayName").get<std::string>()};
     std::string stringID{spriteSetJson.at("stringID").get<std::string>()};
 
     // Add the sprite set's sprites.
@@ -311,7 +311,7 @@ void SpriteDataBase::parseObjectSpriteSet(const nlohmann::json& spriteSetJson)
     // Add a sprite set to the appropriate vector.
     ObjectSpriteSet& spriteSet{objectSpriteSets.emplace_back()};
     spriteSet.numericID = spriteSetJson.at("numericID");
-    spriteSet.displayName = spriteSetJson["displayName"].get<std::string>();
+    spriteSet.displayName = spriteSetJson.at("displayName").get<std::string>();
     spriteSet.stringID = spriteSetJson.at("stringID").get<std::string>();
 
     // Add the sprite set's sprites.

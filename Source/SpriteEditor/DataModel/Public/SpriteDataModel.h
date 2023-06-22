@@ -7,6 +7,7 @@
 #include "LibraryItemData.h"
 #include "IDPool.h"
 #include "entt/signal/sigh.hpp"
+#include "nlohmann/json_fwd.hpp"
 #include <fstream>
 #include <map>
 #include <string>
@@ -38,24 +39,24 @@ public:
      *                  should be created.
      * @return An empty string if the file at the given path parses
      *         successfully, else a string containing the failure message.
+     * @return true if successful. If false, getErrorString() will return more 
+     *         information.
      */
-    std::string create(const std::string& fullPath);
+    bool create(const std::string& fullPath);
 
     /**
      * Attempts to open the SpriteData.json at the given path, parse it,
      * and load the data into this model.
      *
      * @param fullPath  The full path to the SpriteData.json file.
-     * @return An empty string if the file at the given path parses
-     *         successfully, else a string containing the failure message.
+     * @return true if successful. If false, getErrorString() will return more 
+     *         information.
      */
-    std::string load(const std::string& fullPath);
+    bool load(const std::string& fullPath);
 
     /**
      * Saves the current state of this data model into the SpriteData.json
      * file at the previously loaded path.
-     *
-     * @pre parse() must have been called to load a SpriteData.json.
      */
     void save();
 
@@ -76,13 +77,14 @@ public:
      * @param baseName  The name to prepend to each sprite's number. (e.g.
      *                  "mob_" results in "mob_0", "mob_1", etc.)
      *
-     * @return "" if the given data is valid, else an appropriate error string.
+     * @return true if successful. If false, getErrorString() will return more 
+     *         information.
      */
-    std::string addSpriteSheet(const std::string& relPath,
-                               const std::string& spriteWidth,
-                               const std::string& spriteHeight,
-                               const std::string& yOffset,
-                               const std::string& baseName);
+    bool addSpriteSheet(const std::string& relPath,
+                        const std::string& spriteWidth,
+                        const std::string& spriteHeight,
+                        const std::string& yOffset,
+                        const std::string& baseName);
 
     /**
      * Removes the sprite sheet with the given ID from the sprite sheet map.
@@ -104,23 +106,33 @@ public:
 
     const EditorSprite& getSprite(int spriteID);
 
-    const std::string& getWorkingTexturesDir();
+    /**
+     * Adds a blank sprite set of the appropriate type and loads it.
+     */
+    bool addFloor();
+    bool addFloorCovering();
+    bool addWall();
+    bool addObject();
 
-    //-------------------------------------------------------------------------
-    // Active Sprite
-    //-------------------------------------------------------------------------
+    /** Sets the current active library item to the given sprite. */
     void setActiveSprite(int newActiveSpriteID);
 
+    /** Sets the current active library item to the given sprite set. */
     void setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveSpriteSetID);
 
+    // Sprite property mutators.
     void setSpriteDisplayName(int spriteID,
                               const std::string& newDisplayName);
-
     void setSpriteCollisionEnabled(int spriteID,
                                    bool newCollisionEnabled);
-
     void setSpriteModelBounds(int spriteID,
                               const BoundingBox& newModelBounds);
+
+    // Sprite set property mutators.
+
+    const std::string& getWorkingTexturesDir();
+
+    const std::string& getErrorString();
 
     //-------------------------------------------------------------------------
     // Signal Sinks
@@ -128,10 +140,8 @@ public:
     /** A sprite sheet was added to the model. */
     entt::sink<entt::sigh<void(int sheetID, const EditorSpriteSheet& sheet)>>
         sheetAdded;
-
     /** A sprite sheet was removed from the model. */
     entt::sink<entt::sigh<void(int sheetID)>> sheetRemoved;
-
     /** A sprite was removed from the model. */
     entt::sink<entt::sigh<void(int spriteID)>> spriteRemoved;
 
@@ -143,15 +153,38 @@ public:
     entt::sink<entt::sigh<void(int spriteID,
                                const std::string& newDisplayName)>>
         spriteDisplayNameChanged;
-
-    /** A sprite's "has bounding box" field has changed. */
+    /** A sprite's "collision enabled" field has changed. */
     entt::sink<entt::sigh<void(int spriteID, bool collisionEnabled)>>
         spriteCollisionEnabledChanged;
-
     /** A sprite's bounding box has changed. */
     entt::sink<entt::sigh<void(int spriteID,
                                const BoundingBox& newModelBounds)>>
         spriteModelBoundsChanged;
+
+    /** A floor sprite set was added to the model. */
+    entt::sink<entt::sigh<void(Uint16 floorID, const EditorFloorSpriteSet& floor)>>
+        floorAdded;
+    /** A floor covering sprite set was added to the model. */
+    entt::sink<entt::sigh<void(Uint16 floorCoveringID,
+                               const EditorFloorCoveringSpriteSet& floorCovering)>>
+        floorCoveringAdded;
+    /** A wall sprite set was added to the model. */
+    entt::sink<
+        entt::sigh<void(Uint16 wallID, const EditorWallSpriteSet& wall)>>
+        wallAdded;
+    /** An object sprite set was added to the model. */
+    entt::sink<
+        entt::sigh<void(Uint16 objectID, const EditorObjectSpriteSet& floor)>>
+        objectAdded;
+
+    /** An sprite set was removed from the model. */
+    entt::sink<entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID)>>
+        spriteSetRemoved;
+
+    /** A sprite set's display name has changed. */
+    entt::sink<entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
+                               const std::string& newDisplayName)>>
+        spriteSetDisplayNameChanged;
 
 private:
     // Note: These were arbitrarily chosen and can be increased if necessary.
@@ -162,9 +195,10 @@ private:
      * Checks that the given relative path corresponds to a valid sprite
      * sheet image in the working Resources directory.
      *
-     * @return "" if the given path is valid, else an appropriate error string.
+     * @return true if successful. If false, getErrorString() will return more 
+     *         information.
      */
-    std::string validateRelPath(const std::string& relPath);
+    bool validateRelPath(const std::string& relPath);
 
     /**
      * Sets currentWorkingDir to the parent directory of
@@ -176,7 +210,34 @@ private:
      * Derives a string ID from a display name by making it all lowercase and
      * replacing spaces with underscores.
      */
-    std::string deriveStringId(const std::string& displayName);
+    std::string deriveStringID(const std::string& displayName);
+
+    // Parsing functions.
+    /**
+     * @param sheetJson  The json to parse. Must be a valid sprite sheet section
+     *                    from SpriteData.json.
+     * @return true if successful. If false, getErrorString() will return more 
+     *         information.
+     */
+    bool parseSpriteSheet(const nlohmann::json& sheetJson);
+    /**
+     * @param spriteJson  The json to parse. Must be a valid sprite section
+     *                    from SpriteData.json.
+     * @param spriteSheet  The sheet that this sprite is from.
+     * @return true if successful. If false, getErrorString() will return more 
+     *         information.
+     */
+    bool parseSprite(const nlohmann::json& spriteJson,
+                     EditorSpriteSheet& spriteSheet);
+    /**
+     * @param spriteSetJson  The json to parse. Must be a valid sprite set 
+     *                       section from SpriteData.json, for the appropriate 
+     *                       set type.
+     */
+    bool parseFloorSpriteSet(const nlohmann::json& spriteSetJson);
+    bool parseFloorCoveringSpriteSet(const nlohmann::json& spriteSetJson);
+    bool parseWallSpriteSet(const nlohmann::json& spriteSetJson);
+    bool parseObjectSpriteSet(const nlohmann::json& spriteSetJson);
 
     /**
      * Checks if the given name is unique among all sprites in the model.
@@ -188,6 +249,21 @@ private:
      */
     bool spriteNameIsUnique(int spriteID,
                             const std::string& displayName);
+    bool floorNameIsUnique(Uint16 spriteSetID, const std::string& displayName);
+    bool floorCoveringNameIsUnique(Uint16 spriteSetID,
+                                   const std::string& displayName);
+    bool wallNameIsUnique(Uint16 spriteSetID, const std::string& displayName);
+    bool objectNameIsUnique(Uint16 spriteSetID, const std::string& displayName);
+
+    // Save functions.
+    void saveSpriteSheets(nlohmann::json& json);
+    void saveFloors(nlohmann::json& json);
+    void saveFloorCoverings(nlohmann::json& json);
+    void saveWalls(nlohmann::json& json);
+    void saveObjects(nlohmann::json& json);
+
+    /** Resets the model state, setting it back to default. */
+    void resetModelState();
 
     /** Used for validating user-selected sprite sheet textures. */
     SDL_Renderer* sdlRenderer;
@@ -221,19 +297,22 @@ private:
     /** Used for generating temporary sprite sheet IDs that are only used
         internally by this editor. */
     IDPool sheetIDPool;
-
-    /** Used for generating temporary sprite sheet IDs that are only used
-        internally by this editor. */
     IDPool spriteIDPool;
+    IDPool floorIDPool;
+    IDPool floorCoveringIDPool;
+    IDPool wallIDPool;
+    IDPool objectIDPool;
+
+    /** If one of our parsing functions returns false, this holds a string 
+        describing the error that occurred. */
+    std::string errorString;
 
     //-------------------------------------------------------------------------
     // Signals
     //-------------------------------------------------------------------------
     entt::sigh<void(int sheetID, const EditorSpriteSheet& sheet)>
         sheetAddedSig;
-
     entt::sigh<void(int sheetID)> sheetRemovedSig;
-
     entt::sigh<void(int spriteID)> spriteRemovedSig;
 
     entt::sigh<void(const LibraryItemData& newActiveItem)>
@@ -241,12 +320,26 @@ private:
 
     entt::sigh<void(int spriteID, const std::string& newDisplayName)>
         spriteDisplayNameChangedSig;
-
     entt::sigh<void(int spriteID, bool collisionEnabled)>
         spriteCollisionEnabledChangedSig;
-
     entt::sigh<void(int spriteID, const BoundingBox& newModelBounds)>
         spriteModelBoundsChangedSig;
+
+    entt::sigh<void(Uint16 floorID, const EditorFloorSpriteSet& floor)>
+        floorAddedSig;
+    entt::sigh<void(Uint16 floorCoveringID,
+                    const EditorFloorCoveringSpriteSet& floorCovering)>
+        floorCoveringAddedSig;
+    entt::sigh<void(Uint16 wallID, const EditorWallSpriteSet& wall)>
+        wallAddedSig;
+    entt::sigh<void(Uint16 objectID, const EditorObjectSpriteSet& object)>
+        objectAddedSig;
+
+    entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID)>
+        spriteSetRemovedSig;
+    entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
+                               const std::string& newDisplayName)>
+        spriteSetDisplayNameChangedSig;
 };
 
 } // namespace SpriteEditor

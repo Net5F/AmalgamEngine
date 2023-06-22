@@ -26,22 +26,33 @@ SpriteDataModel::SpriteDataModel(SDL_Renderer* inSdlRenderer)
 , spriteDisplayNameChanged{spriteDisplayNameChangedSig}
 , spriteCollisionEnabledChanged{spriteCollisionEnabledChangedSig}
 , spriteModelBoundsChanged{spriteModelBoundsChangedSig}
+, floorAdded{floorAddedSig}
+, floorCoveringAdded{floorCoveringAddedSig}
+, wallAdded{wallAddedSig}
+, objectAdded{objectAddedSig}
+, spriteSetRemoved{spriteSetRemovedSig}
+, spriteSetDisplayNameChanged{spriteSetDisplayNameChangedSig}
 , sdlRenderer{inSdlRenderer}
 , workingFilePath{""}
 , workingTexturesDir{""}
 , sheetIDPool{MAX_SPRITE_SHEETS}
 , spriteIDPool{MAX_SPRITES}
+, floorIDPool{SDL_MAX_UINT16}
+, floorCoveringIDPool{SDL_MAX_UINT16}
+, wallIDPool{SDL_MAX_UINT16}
+, objectIDPool{SDL_MAX_UINT16}
 {
 }
 
-std::string SpriteDataModel::create(const std::string& fullPath)
+bool SpriteDataModel::create(const std::string& fullPath)
 {
     // If a SpriteData.json already exists at the given path, return false.
     workingFilePath = fullPath;
     workingFilePath += "/SpriteData.json";
     if (std::filesystem::exists(workingFilePath)) {
         workingFilePath = "";
-        return "SpriteData.json file already exists at the selected path.";
+        errorString = "SpriteData.json file already exists at the selected path.";
+        return false;
     }
 
     // Create the file.
@@ -50,16 +61,17 @@ std::string SpriteDataModel::create(const std::string& fullPath)
 
     // Set the working directory.
     if (!setWorkingTexturesDir()) {
-        return "Failed to create Resources directory.";
+        errorString = "Failed to create Resources directory.";
+        return false;
     }
 
     // Save our empty model structure.
     save();
 
-    return "";
+    return true;
 }
 
-std::string SpriteDataModel::load(const std::string& fullPath)
+bool SpriteDataModel::load(const std::string& fullPath)
 {
     // Open the file.
     std::ifstream workingFile(fullPath);
@@ -68,11 +80,13 @@ std::string SpriteDataModel::load(const std::string& fullPath)
 
         // Set the working directory.
         if (!setWorkingTexturesDir()) {
-            return "Failed to create Resources directory.";
+            errorString = "Failed to create Resources directory.";
+            return false;
         }
     }
     else {
-        return "File failed to open.";
+        errorString = "File failed to open.";
+        return false;
     }
 
     // Parse the json file to fill our data model.
@@ -80,158 +94,226 @@ std::string SpriteDataModel::load(const std::string& fullPath)
         // Parse the file into a json structure.
         nlohmann::json json = nlohmann::json::parse(workingFile, nullptr);
 
-        // For every sprite sheet in the json.
-        for (auto& sheetJson : json["spriteSheets"].items()) {
-            int sheetID{static_cast<int>(sheetIDPool.reserveID())};
-            spriteSheetMap.emplace(sheetID, EditorSpriteSheet{});
-            EditorSpriteSheet& spriteSheet{spriteSheetMap[sheetID]};
-
-            // Add this sheet's relative path.
-            spriteSheet.relPath
-                = sheetJson.value()["relPath"].get<std::string>();
-            std::string resultString{validateRelPath(spriteSheet.relPath)};
-            if (resultString != "") {
-                workingFile.close();
-                spriteSheetMap.clear();
-                spriteMap.clear();
-                return resultString;
+        // Iterate every sprite sheet and add all their sprites.
+        for (auto& sheetJson : json.at("spriteSheets").items()) {
+            if (!parseSpriteSheet(sheetJson.value())) {
+                resetModelState();
+                return false;
             }
+        }
 
-            // For every sprite in the sheet.
-            for (auto& spriteJson : sheetJson.value()["sprites"].items()) {
-                int spriteID{static_cast<int>(spriteIDPool.reserveID())};
-                spriteMap.emplace(spriteID,
-                                  EditorSprite{spriteID, spriteSheet.relPath});
-                spriteSheet.spriteIDs.push_back(spriteID);
-                EditorSprite& sprite{spriteMap[spriteID]};
-
-                // If the display name isn't unique, fail.
-                std::string displayName{
-                    spriteJson.value()["displayName"].get<std::string>()};
-                if (!spriteNameIsUnique(spriteID, displayName)) {
-                    std::string returnString{
-                        "Sprite display name isn't unique: "};
-                    returnString += sprite.displayName.c_str();
-
-                    workingFile.close();
-                    spriteSheetMap.clear();
-                    spriteMap.clear();
-                    return returnString;
-                }
-
-                // Add the display name.
-                sprite.displayName = displayName;
-
-                // Add this sprite's extent within the sprite sheet.
-                sprite.textureExtent.x
-                    = spriteJson.value()["textureExtent"]["x"];
-                sprite.textureExtent.y
-                    = spriteJson.value()["textureExtent"]["y"];
-                sprite.textureExtent.w
-                    = spriteJson.value()["textureExtent"]["w"];
-                sprite.textureExtent.h
-                    = spriteJson.value()["textureExtent"]["h"];
-
-                // Add the Y offset.
-                sprite.yOffset = spriteJson.value()["yOffset"];
-
-                // Add collisionEnabled.
-                sprite.collisionEnabled = spriteJson.value()["collisionEnabled"];
-
-                // Add the model-space bounds.
-                sprite.modelBounds.minX
-                    = spriteJson.value()["modelBounds"]["minX"];
-                sprite.modelBounds.maxX
-                    = spriteJson.value()["modelBounds"]["maxX"];
-                sprite.modelBounds.minY
-                    = spriteJson.value()["modelBounds"]["minY"];
-                sprite.modelBounds.maxY
-                    = spriteJson.value()["modelBounds"]["maxY"];
-                sprite.modelBounds.minZ
-                    = spriteJson.value()["modelBounds"]["minZ"];
-                sprite.modelBounds.maxZ
-                    = spriteJson.value()["modelBounds"]["maxZ"];
+        // Add each type of sprite set.
+        for (auto& floorJson : json.at("floors").items()) {
+            if (!parseFloorSpriteSet(floorJson.value())) {
+                resetModelState();
+                return false;
             }
-
-            // Signal the new sheet to the UI.
-            sheetAddedSig.publish(sheetID, spriteSheet);
+        }
+        for (auto& floorCoveringJson : json.at("floorCoverings").items()) {
+            if (!parseFloorCoveringSpriteSet(floorCoveringJson.value())) {
+                resetModelState();
+                return false;
+            }
+        }
+        for (auto& wallJson : json.at("walls").items()) {
+            std::string resultString{};
+            if (!parseWallSpriteSet(wallJson.value())) {
+                resetModelState();
+                return false;
+            }
+        }
+        for (auto& objectJson : json.at("objects").items()) {
+            if (!parseObjectSpriteSet(objectJson.value())) {
+                resetModelState();
+                return false;
+            }
         }
     } catch (nlohmann::json::type_error& e) {
-        workingFile.close();
-        spriteSheetMap.clear();
-        spriteMap.clear();
-        std::string failureString{"Parse failure - "};
-        failureString += e.what();
-        return failureString;
+        resetModelState();
+        errorString = "Parse failure - ";
+        errorString += e.what();
+        return false;
     }
 
     return "";
 }
 
+bool SpriteDataModel::parseSpriteSheet(const nlohmann::json& sheetJson)
+{
+    int sheetID{static_cast<int>(sheetIDPool.reserveID())};
+    spriteSheetMap.emplace(sheetID, EditorSpriteSheet{});
+    EditorSpriteSheet& spriteSheet{spriteSheetMap[sheetID]};
+
+    // Add this sheet's relative path.
+    spriteSheet.relPath
+        = sheetJson.at("relPath").get<std::string>();
+    if (!validateRelPath(spriteSheet.relPath)) {
+        return false;
+    }
+
+    // For every sprite in the sheet.
+    for (auto& spriteJson : sheetJson.at("sprites").items()) {
+        if (!parseSprite(spriteJson.value(), spriteSheet)) {
+            return false;
+        }
+    }
+
+    // Signal the new sheet to the UI.
+    sheetAddedSig.publish(sheetID, spriteSheet);
+
+    return true;
+}
+
+bool SpriteDataModel::parseSprite(const nlohmann::json& spriteJson,
+                     EditorSpriteSheet& spriteSheet)
+{
+    int spriteID{static_cast<int>(spriteIDPool.reserveID())};
+    spriteMap.emplace(spriteID,
+                      EditorSprite{spriteID, spriteSheet.relPath});
+    spriteSheet.spriteIDs.push_back(spriteID);
+    EditorSprite& sprite{spriteMap[spriteID]};
+
+    // If the display name isn't unique, fail.
+    std::string displayName{
+        spriteJson.at("displayName").get<std::string>()};
+    if (!spriteNameIsUnique(spriteID, displayName)) {
+        errorString = "Sprite display name isn't unique: ";
+        errorString += sprite.displayName.c_str();
+        return false;
+    }
+
+    // Add the display name.
+    sprite.displayName = displayName;
+
+    // Add this sprite's extent within the sprite sheet.
+    sprite.textureExtent.x = spriteJson.at("textureExtent").at("x");
+    sprite.textureExtent.y = spriteJson.at("textureExtent").at("y");
+    sprite.textureExtent.w = spriteJson.at("textureExtent").at("w");
+    sprite.textureExtent.h = spriteJson.at("textureExtent").at("h");
+
+    // Add the Y offset.
+    sprite.yOffset = spriteJson.at("yOffset");
+
+    // Add collisionEnabled.
+    sprite.collisionEnabled = spriteJson.at("collisionEnabled");
+
+    // Add the model-space bounds.
+    sprite.modelBounds.minX = spriteJson.at("modelBounds").at("minX");
+    sprite.modelBounds.maxX = spriteJson.at("modelBounds").at("maxX");
+    sprite.modelBounds.minY = spriteJson.at("modelBounds").at("minY");
+    sprite.modelBounds.maxY = spriteJson.at("modelBounds").at("maxY");
+    sprite.modelBounds.minZ = spriteJson.at("modelBounds").at("minZ");
+    sprite.modelBounds.maxZ = spriteJson.at("modelBounds").at("maxZ");
+
+    return true;
+}
+
+bool SpriteDataModel::parseFloorSpriteSet(const nlohmann::json& spriteSetJson)
+{
+    Uint16 numericID{static_cast<Uint16>(floorIDPool.reserveID())};
+    std::string displayName{spriteSetJson.at("displayName").get<std::string>()};
+
+    // Add the sprite set's sprites.
+    // Note: Floors just have 1 sprite, but the json uses an array in case we
+    //       want to add variations in the future.
+    const nlohmann::json& spriteIDJson{spriteSetJson.at("spriteIDs")};
+    std::array<int, 1> spriteIDs{spriteIDJson[0].get<int>()};
+    for (int spriteID : spriteIDs) {
+        if (!floorNameIsUnique(spriteID, displayName)) {
+            errorString = "Floor display name isn't unique: ";
+            errorString += displayName.c_str();
+            return false;
+        }
+    }
+
+    // Save the sprite set in the appropriate map.
+    floorMap.emplace(numericID,
+                     EditorFloorSpriteSet{numericID, displayName, spriteIDs});
+
+    return true;
+}
+
+bool SpriteDataModel::parseFloorCoveringSpriteSet(const nlohmann::json& spriteSetJson)
+{
+    Uint16 numericID{static_cast<Uint16>(floorCoveringIDPool.reserveID())};
+    std::string displayName{spriteSetJson.at("displayName").get<std::string>()};
+
+    // Add the sprite set's sprites.
+    const nlohmann::json& spriteIDJson{spriteSetJson.at("spriteIDs")};
+    std::array<int, Rotation::Direction::Count> spriteIDs{};
+    for (std::size_t i = 0; i < Rotation::Direction::Count; ++i) {
+        spriteIDs[i] = spriteIDJson[i].get<int>();
+        if (!floorCoveringNameIsUnique(spriteIDs[i], displayName)) {
+            errorString = "Floor covering display name isn't unique: ";
+            errorString += displayName.c_str();
+            return false;
+        }
+    }
+
+    // Save the sprite set in the appropriate map.
+    floorCoveringMap.emplace(numericID, EditorFloorCoveringSpriteSet{
+                                            numericID, displayName, spriteIDs});
+
+    return true;
+}
+
+bool SpriteDataModel::parseWallSpriteSet(const nlohmann::json& spriteSetJson)
+{
+    Uint16 numericID{static_cast<Uint16>(wallIDPool.reserveID())};
+    std::string displayName{spriteSetJson.at("displayName").get<std::string>()};
+
+    // Add the sprite set's sprites.
+    const nlohmann::json& spriteIDJson{spriteSetJson.at("spriteIDs")};
+    std::array<int, Wall::Type::Count> spriteIDs{};
+    for (std::size_t i = 0; i < Wall::Type::Count; ++i) {
+        spriteIDs[i] = spriteIDJson[i].get<int>();
+        if (!wallNameIsUnique(spriteIDs[i], displayName)) {
+            errorString = "Wall display name isn't unique: ";
+            errorString += displayName.c_str();
+            return false;
+        }
+    }
+
+    // Save the sprite set in the appropriate map.
+    wallMap.emplace(numericID,
+                    EditorWallSpriteSet{numericID, displayName, spriteIDs});
+
+    return true;
+}
+
+bool SpriteDataModel::parseObjectSpriteSet(const nlohmann::json& spriteSetJson)
+{
+    Uint16 numericID{static_cast<Uint16>(objectIDPool.reserveID())};
+    std::string displayName{spriteSetJson.at("displayName").get<std::string>()};
+
+    // Add the sprite set's sprites.
+    const nlohmann::json& spriteIDJson{spriteSetJson.at("spriteIDs")};
+    std::array<int, Rotation::Direction::Count> spriteIDs{};
+    for (std::size_t i = 0; i < Rotation::Direction::Count; ++i) {
+        spriteIDs[i] = spriteIDJson[i].get<int>();
+        if (!objectNameIsUnique(spriteIDs[i], displayName)) {
+            errorString = "Object display name isn't unique: ";
+            errorString += displayName.c_str();
+            return false;
+        }
+    }
+
+    // Save the sprite set in the appropriate map.
+    objectMap.emplace(numericID,
+                      EditorObjectSpriteSet{numericID, displayName, spriteIDs});
+
+    return true;
+}
+
 void SpriteDataModel::save()
 {
-    // Create a new json structure to fill.
+    // Save each part of the model to a json object.
     nlohmann::json json;
-    json["spriteSheets"] = nlohmann::json::array();
-
-    // Fill the json with our current model data.
-    // For each sprite sheet.
-    int nextNumericId{0};
-    int i{0};
-    for (auto& sheetPair : spriteSheetMap) {
-        // Add this sheet's relative path.
-        EditorSpriteSheet& spriteSheet{sheetPair.second};
-        json["spriteSheets"][i]["relPath"] = spriteSheet.relPath;
-
-        // For each sprite in this sheet.
-        for (std::size_t j = 0; j < spriteSheet.spriteIDs.size(); ++j) {
-            // Add the display name.
-            EditorSprite& sprite{spriteMap[spriteSheet.spriteIDs[j]]};
-            json["spriteSheets"][i]["sprites"][j]["displayName"]
-                = sprite.displayName;
-
-            // Derive the string ID from the display name and add it.
-            json["spriteSheets"][i]["sprites"][j]["stringID"]
-                = deriveStringId(sprite.displayName);
-
-            // Add the numeric ID.
-            json["spriteSheets"][i]["sprites"][j]["numericID"] = nextNumericId;
-            nextNumericId++;
-
-            // Add the sprite sheet texture extent.
-            json["spriteSheets"][i]["sprites"][j]["textureExtent"]["x"]
-                = sprite.textureExtent.x;
-            json["spriteSheets"][i]["sprites"][j]["textureExtent"]["y"]
-                = sprite.textureExtent.y;
-            json["spriteSheets"][i]["sprites"][j]["textureExtent"]["w"]
-                = sprite.textureExtent.w;
-            json["spriteSheets"][i]["sprites"][j]["textureExtent"]["h"]
-                = sprite.textureExtent.h;
-
-            // Add the Y offset.
-            json["spriteSheets"][i]["sprites"][j]["yOffset"] = sprite.yOffset;
-
-            // Add collisionEnabled.
-            json["spriteSheets"][i]["sprites"][j]["collisionEnabled"]
-                = sprite.collisionEnabled;
-
-            // Add the model-space bounds.
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minX"]
-                = sprite.modelBounds.minX;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxX"]
-                = sprite.modelBounds.maxX;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minY"]
-                = sprite.modelBounds.minY;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxY"]
-                = sprite.modelBounds.maxY;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minZ"]
-                = sprite.modelBounds.minZ;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxZ"]
-                = sprite.modelBounds.maxZ;
-        }
-
-        i++;
-    }
+    saveSpriteSheets(json);
+    saveFloors(json);
+    saveFloorCoverings(json);
+    saveWalls(json);
+    saveObjects(json);
 
     // Write the json to our working file.
     std::ofstream workingFile(workingFilePath, std::ios::trunc);
@@ -243,7 +325,7 @@ void SpriteDataModel::save()
     workingFile << jsonDump;
 }
 
-std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
+bool SpriteDataModel::addSpriteSheet(const std::string& relPath,
                                             const std::string& spriteWidth,
                                             const std::string& spriteHeight,
                                             const std::string& yOffset,
@@ -253,7 +335,8 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
     // Check if we already have the given sheet.
     for (const auto& sheetPair : spriteSheetMap) {
         if (sheetPair.second.relPath == relPath) {
-            return "Error: Path conflicts with existing sprite sheet.";
+            errorString = "Error: Path conflicts with existing sprite sheet.";
+            return false;
         }
     }
 
@@ -266,11 +349,10 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
     int sheetHeight{0};
     SDL_Texture* sheetTexture{IMG_LoadTexture(sdlRenderer, fullPath.c_str())};
     if (sheetTexture == nullptr) {
-        std::string errorString{
-            "Error: File at given path is not a valid image. Path: "};
+        errorString = "Error: File at given path is not a valid image. Path: ";
         errorString += workingTexturesDir;
         errorString += relPath;
-        return errorString;
+        return false;
     }
     else {
         // Save the texture size for later.
@@ -291,12 +373,15 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
         yOffsetI = std::stoi(yOffset);
     } catch (std::exception& e) {
         ignore(e);
-        return "Error: Width, height, or Y offset is not a valid integer.";
+        errorString
+            = "Error: Width, height, or Y offset is not a valid integer.";
+        return false;
     }
 
     // Validate the size of the texture.
     if ((spriteWidthI > sheetWidth) || (spriteHeightI > sheetHeight)) {
-        return "Error: Sheet must be larger than sprite size.";
+        errorString = "Error: Sheet must be larger than sprite size.";
+        return false;
     }
 
     /* Add the sprite sheet and sprites. */
@@ -333,7 +418,7 @@ std::string SpriteDataModel::addSpriteSheet(const std::string& relPath,
     // Signal the new sheet to the UI.
     sheetAddedSig.publish(sheetID, spriteSheet);
 
-    return "";
+    return true;
 }
 
 void SpriteDataModel::remSpriteSheet(int sheetID)
@@ -381,9 +466,110 @@ const EditorSprite& SpriteDataModel::getSprite(int spriteID)
     return spriteIt->second;
 }
 
-const std::string& SpriteDataModel::getWorkingTexturesDir()
+bool SpriteDataModel::addFloor()
 {
-    return workingTexturesDir;
+    Uint16 numericID{static_cast<Uint16>(floorIDPool.reserveID())};
+
+    // Generate a unique name.
+    int nameCount{0};
+    std::string displayName{"NewFloor"};
+    while (!floorNameIsUnique(numericID, displayName)) {
+        displayName = "NewFloor" + std::to_string(nameCount);
+    }
+
+    // Add the new, empty sprite set to the map.
+    std::array<int, 1> spriteIDs{-1};
+    floorMap.emplace(numericID,
+                     EditorFloorSpriteSet{numericID, displayName, spriteIDs});
+
+    // Signal the new sprite set to the UI.
+    EditorFloorSpriteSet& spriteSet{floorMap[numericID]};
+    floorAddedSig.publish(numericID, spriteSet);
+
+    // Set the new sprite as the active library item.
+    setActiveSpriteSet(SpriteSet::Type::Floor, numericID);
+
+    return true;
+}
+
+bool SpriteDataModel::addFloorCovering()
+{
+    Uint16 numericID{static_cast<Uint16>(floorCoveringIDPool.reserveID())};
+
+    // Generate a unique name.
+    int nameCount{0};
+    std::string displayName{"NewFloorCovering"};
+    while (!floorCoveringNameIsUnique(numericID, displayName)) {
+        displayName = "NewFloorCovering" + std::to_string(nameCount);
+    }
+
+    // Add the new, empty sprite set to the map.
+    std::array<int, Rotation::Direction::Count> spriteIDs{-1, -1, -1, -1,
+                                                          -1, -1, -1, -1};
+    floorCoveringMap.emplace(numericID, EditorFloorCoveringSpriteSet{
+                                            numericID, displayName, spriteIDs});
+
+    // Signal the new sprite set to the UI.
+    EditorFloorCoveringSpriteSet& spriteSet{floorCoveringMap[numericID]};
+    floorCoveringAddedSig.publish(numericID, spriteSet);
+
+    // Set the new sprite as the active library item.
+    setActiveSpriteSet(SpriteSet::Type::FloorCovering, numericID);
+
+    return true;
+}
+
+bool SpriteDataModel::addWall()
+{
+    Uint16 numericID{static_cast<Uint16>(wallIDPool.reserveID())};
+
+    // Generate a unique name.
+    int nameCount{0};
+    std::string displayName{"NewWall"};
+    while (!wallNameIsUnique(numericID, displayName)) {
+        displayName = "NewWall" + std::to_string(nameCount);
+    }
+
+    // Add the new, empty sprite set to the map.
+    std::array<int, Wall::Type::Count> spriteIDs{-1, -1, -1, -1};
+    wallMap.emplace(numericID,
+                     EditorWallSpriteSet{numericID, displayName, spriteIDs});
+
+    // Signal the new sprite set to the UI.
+    EditorWallSpriteSet& spriteSet{wallMap[numericID]};
+    wallAddedSig.publish(numericID, spriteSet);
+
+    // Set the new sprite as the active library item.
+    setActiveSpriteSet(SpriteSet::Type::Wall, numericID);
+
+    return true;
+}
+
+bool SpriteDataModel::addObject()
+{
+    Uint16 numericID{static_cast<Uint16>(objectIDPool.reserveID())};
+
+    // Generate a unique name.
+    int nameCount{0};
+    std::string displayName{"NewObject"};
+    while (!objectNameIsUnique(numericID, displayName)) {
+        displayName = "NewObject" + std::to_string(nameCount);
+    }
+
+    // Add the new, empty sprite set to the map.
+    std::array<int, Rotation::Direction::Count> spriteIDs{-1, -1, -1, -1,
+                                                          -1, -1, -1, -1};
+    objectMap.emplace(numericID,
+                      EditorObjectSpriteSet{numericID, displayName, spriteIDs});
+
+    // Signal the new sprite set to the UI.
+    EditorObjectSpriteSet& spriteSet{objectMap[numericID]};
+    objectAddedSig.publish(numericID, spriteSet);
+
+    // Set the new sprite as the active library item.
+    setActiveSpriteSet(SpriteSet::Type::Object, numericID);
+
+    return true;
 }
 
 void SpriteDataModel::setActiveSprite(int newActiveSpriteID)
@@ -496,7 +682,17 @@ void SpriteDataModel::setSpriteModelBounds(int spriteID,
     spriteModelBoundsChangedSig.publish(spriteID, newModelBounds);
 }
 
-std::string SpriteDataModel::validateRelPath(const std::string& relPath)
+const std::string& SpriteDataModel::getWorkingTexturesDir()
+{
+    return workingTexturesDir;
+}
+
+const std::string& SpriteDataModel::getErrorString()
+{
+    return errorString;
+}
+
+bool SpriteDataModel::validateRelPath(const std::string& relPath)
 {
     // Construct the file path.
     std::filesystem::path filePath{workingTexturesDir};
@@ -504,13 +700,12 @@ std::string SpriteDataModel::validateRelPath(const std::string& relPath)
 
     // Check if the file exists.
     if (std::filesystem::exists(filePath)) {
-        return "";
+        return true;
     }
     else {
-        // File doesn't exist, return an error string.
-        std::string returnString{"File not found at Assets/Textures/"};
-        returnString += relPath;
-        return returnString;
+        errorString = "File not found at Assets/Textures/";
+        errorString += relPath;
+        return false;
     }
 }
 
@@ -541,7 +736,7 @@ bool SpriteDataModel::setWorkingTexturesDir()
     return true;
 }
 
-std::string SpriteDataModel::deriveStringId(const std::string& displayName)
+std::string SpriteDataModel::deriveStringID(const std::string& displayName)
 {
     // Make the string all lowercase.
     std::string stringID{displayName};
@@ -570,6 +765,244 @@ bool SpriteDataModel::spriteNameIsUnique(int spriteID,
     }
 
     return isUnique;
+}
+
+bool SpriteDataModel::floorNameIsUnique(Uint16 spriteSetID,
+                                        const std::string& displayName)
+{
+    // Dumbly look through all names for a match.
+    // Note: Eventually, this should change to a name map that we keep updated.
+    bool isUnique{true};
+    for (const auto& spriteSetPair : floorMap) {
+        int idToCheck{spriteSetPair.first};
+        const EditorFloorSpriteSet& spriteSet{spriteSetPair.second};
+
+        if ((idToCheck != spriteSetID) && (displayName == spriteSet.displayName)) {
+            isUnique = false;
+        }
+    }
+
+    return isUnique;
+}
+
+bool SpriteDataModel::floorCoveringNameIsUnique(Uint16 spriteSetID,
+                                        const std::string& displayName)
+{
+    // Dumbly look through all names for a match.
+    // Note: Eventually, this should change to a name map that we keep updated.
+    bool isUnique{true};
+    for (const auto& spriteSetPair : floorCoveringMap) {
+        int idToCheck{spriteSetPair.first};
+        const EditorFloorCoveringSpriteSet& spriteSet{spriteSetPair.second};
+
+        if ((idToCheck != spriteSetID) && (displayName == spriteSet.displayName)) {
+            isUnique = false;
+        }
+    }
+
+    return isUnique;
+}
+
+bool SpriteDataModel::wallNameIsUnique(Uint16 spriteSetID,
+                                        const std::string& displayName)
+{
+    // Dumbly look through all names for a match.
+    // Note: Eventually, this should change to a name map that we keep updated.
+    bool isUnique{true};
+    for (const auto& spriteSetPair : wallMap) {
+        int idToCheck{spriteSetPair.first};
+        const EditorWallSpriteSet& spriteSet{spriteSetPair.second};
+
+        if ((idToCheck != spriteSetID) && (displayName == spriteSet.displayName)) {
+            isUnique = false;
+        }
+    }
+
+    return isUnique;
+}
+
+bool SpriteDataModel::objectNameIsUnique(Uint16 spriteSetID,
+                                        const std::string& displayName)
+{
+    // Dumbly look through all names for a match.
+    // Note: Eventually, this should change to a name map that we keep updated.
+    bool isUnique{true};
+    for (const auto& spriteSetPair : objectMap) {
+        int idToCheck{spriteSetPair.first};
+        const EditorObjectSpriteSet& spriteSet{spriteSetPair.second};
+
+        if ((idToCheck != spriteSetID) && (displayName == spriteSet.displayName)) {
+            isUnique = false;
+        }
+    }
+
+    return isUnique;
+}
+
+void SpriteDataModel::saveSpriteSheets(nlohmann::json& json)
+{
+    json["spriteSheets"] = nlohmann::json::array();
+
+    // Fill the json with our current model data.
+    // For each sprite sheet.
+    int nextNumericID{0};
+    int i{0};
+    for (auto& sheetPair : spriteSheetMap) {
+        // Add this sheet's relative path.
+        EditorSpriteSheet& spriteSheet{sheetPair.second};
+        json["spriteSheets"][i]["relPath"] = spriteSheet.relPath;
+
+        // For each sprite in this sheet.
+        for (std::size_t j = 0; j < spriteSheet.spriteIDs.size(); ++j) {
+            // Add the display name.
+            EditorSprite& sprite{spriteMap[spriteSheet.spriteIDs[j]]};
+            json["spriteSheets"][i]["sprites"][j]["displayName"]
+                = sprite.displayName;
+
+            // Derive the string ID from the display name and add it.
+            json["spriteSheets"][i]["sprites"][j]["stringID"]
+                = deriveStringID(sprite.displayName);
+
+            // Add the numeric ID.
+            json["spriteSheets"][i]["sprites"][j]["numericID"] = nextNumericID;
+            nextNumericID++;
+
+            // Add the sprite sheet texture extent.
+            json["spriteSheets"][i]["sprites"][j]["textureExtent"]["x"]
+                = sprite.textureExtent.x;
+            json["spriteSheets"][i]["sprites"][j]["textureExtent"]["y"]
+                = sprite.textureExtent.y;
+            json["spriteSheets"][i]["sprites"][j]["textureExtent"]["w"]
+                = sprite.textureExtent.w;
+            json["spriteSheets"][i]["sprites"][j]["textureExtent"]["h"]
+                = sprite.textureExtent.h;
+
+            // Add the Y offset.
+            json["spriteSheets"][i]["sprites"][j]["yOffset"] = sprite.yOffset;
+
+            // Add collisionEnabled.
+            json["spriteSheets"][i]["sprites"][j]["collisionEnabled"]
+                = sprite.collisionEnabled;
+
+            // Add the model-space bounds.
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minX"]
+                = sprite.modelBounds.minX;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxX"]
+                = sprite.modelBounds.maxX;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minY"]
+                = sprite.modelBounds.minY;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxY"]
+                = sprite.modelBounds.maxY;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minZ"]
+                = sprite.modelBounds.minZ;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxZ"]
+                = sprite.modelBounds.maxZ;
+        }
+
+        i++;
+    }
+}
+
+void SpriteDataModel::saveFloors(nlohmann::json& json)
+{
+    json["floors"] = nlohmann::json::array();
+
+    // Fill the json with our current model data.
+    // For each sprite sheet.
+    int i{0};
+    for (auto& spriteSetPair : floorMap) {
+        // Add this sheet's relative path.
+        EditorFloorSpriteSet& spriteSet{spriteSetPair.second};
+        json["floors"][i]["displayName"] = spriteSet.displayName;
+        json["floors"][i]["stringID"] = deriveStringID(spriteSet.displayName);
+        json["floors"][i]["numericID"] = i;
+        for (std::size_t j = 0; j < spriteSet.spriteIDs.size(); ++j) {
+            json["floors"][i]["spriteIDs"][j] = spriteSet.spriteIDs[j];
+        }
+
+        i++;
+    }
+}
+
+void SpriteDataModel::saveFloorCoverings(nlohmann::json& json)
+{
+    json["floorCoverings"] = nlohmann::json::array();
+
+    // Fill the json with our current model data.
+    // For each sprite sheet.
+    int i{0};
+    for (auto& spriteSetPair : floorCoveringMap) {
+        // Add this sheet's relative path.
+        EditorFloorCoveringSpriteSet& spriteSet{spriteSetPair.second};
+        json["floorCoverings"][i]["displayName"] = spriteSet.displayName;
+        json["floorCoverings"][i]["stringID"] = deriveStringID(spriteSet.displayName);
+        json["floorCoverings"][i]["numericID"] = i;
+        for (std::size_t j = 0; j < spriteSet.spriteIDs.size(); ++j) {
+            json["floorCoverings"][i]["spriteIDs"][j] = spriteSet.spriteIDs[j];
+        }
+
+        i++;
+    }
+}
+
+void SpriteDataModel::saveWalls(nlohmann::json& json)
+{
+    json["walls"] = nlohmann::json::array();
+
+    // Fill the json with our current model data.
+    // For each sprite sheet.
+    int i{0};
+    for (auto& spriteSetPair : wallMap) {
+        // Add this sheet's relative path.
+        EditorWallSpriteSet& spriteSet{spriteSetPair.second};
+        json["walls"][i]["displayName"] = spriteSet.displayName;
+        json["walls"][i]["stringID"] = deriveStringID(spriteSet.displayName);
+        json["walls"][i]["numericID"] = i;
+        for (std::size_t j = 0; j < spriteSet.spriteIDs.size(); ++j) {
+            json["walls"][i]["spriteIDs"][j] = spriteSet.spriteIDs[j];
+        }
+
+        i++;
+    }
+}
+
+void SpriteDataModel::saveObjects(nlohmann::json& json)
+{
+    json["objects"] = nlohmann::json::array();
+
+    // Fill the json with our current model data.
+    // For each sprite sheet.
+    int i{0};
+    for (auto& spriteSetPair : objectMap) {
+        // Add this sheet's relative path.
+        EditorObjectSpriteSet& spriteSet{spriteSetPair.second};
+        json["objects"][i]["displayName"] = spriteSet.displayName;
+        json["objects"][i]["stringID"] = deriveStringID(spriteSet.displayName);
+        json["objects"][i]["numericID"] = i;
+        for (std::size_t j = 0; j < spriteSet.spriteIDs.size(); ++j) {
+            json["objects"][i]["spriteIDs"][j] = spriteSet.spriteIDs[j];
+        }
+
+        i++;
+    }
+}
+
+void SpriteDataModel::resetModelState()
+{
+    workingFilePath = "";
+    workingTexturesDir = "";
+    spriteSheetMap.clear();
+    spriteMap.clear();
+    floorMap.clear();
+    floorCoveringMap.clear();
+    wallMap.clear();
+    objectMap.clear();
+    sheetIDPool.freeAllIDs();
+    spriteIDPool.freeAllIDs();
+    floorIDPool.freeAllIDs();
+    floorCoveringIDPool.freeAllIDs();
+    wallIDPool.freeAllIDs();
+    objectIDPool.freeAllIDs();
 }
 
 } // End namespace SpriteEditor

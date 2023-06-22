@@ -108,12 +108,12 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
     // Add a callback to validate the input and add the new sprite sheet.
     addButton.setOnPressed([this]() {
         // Pass the user-inputted data to the model.
-        std::string result{spriteDataModel.addSpriteSheet(
+        bool result{spriteDataModel.addSpriteSheet(
             pathInput.getText(), widthInput.getText(), heightInput.getText(),
             offsetInput.getText(), nameInput.getText())};
 
         // If the data was valid.
-        if (result == "") {
+        if (result) {
             // Clear this dialog's text to prepare for the next usage.
             clear();
 
@@ -123,7 +123,7 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
         }
         else {
             // Data wasn't valid, display an error string.
-            errorText.setText(result);
+            errorText.setText(spriteDataModel.getErrorString());
             errorText.setIsVisible(true);
         }
     });

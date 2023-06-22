@@ -101,6 +101,9 @@ private:
     /** Maps sprite IDs to their associated thumbnails. */
     std::unordered_map<int, LibraryListItem*> spriteListItemMap;
 
+    /** Maps floor IDs to their associated thumbnails. */
+    std::unordered_map<Uint16, LibraryListItem*> floorListItemMap;
+
     /** Holds the currently selected list items. */
     std::vector<LibraryListItem*> selectedListItems;
 

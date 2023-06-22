@@ -48,6 +48,18 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
     auto sheetContainer{
         std::make_unique<LibraryCollapsibleContainer>("Sprite Sheets")};
     libraryContainer.push_back(std::move(sheetContainer));
+    auto floorContainer{
+        std::make_unique<LibraryCollapsibleContainer>("Floors")};
+    libraryContainer.push_back(std::move(floorContainer));
+    auto floorCoveringContainer{
+        std::make_unique<LibraryCollapsibleContainer>("Floor Coverings")};
+    libraryContainer.push_back(std::move(floorCoveringContainer));
+    auto wallContainer{
+        std::make_unique<LibraryCollapsibleContainer>("Walls")};
+    libraryContainer.push_back(std::move(wallContainer));
+    auto objectContainer{
+        std::make_unique<LibraryCollapsibleContainer>("Objects")};
+    libraryContainer.push_back(std::move(objectContainer));
 
     /* Add list item button */
     addButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR
