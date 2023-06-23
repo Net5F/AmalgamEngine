@@ -230,6 +230,10 @@ bool SpriteDataModel::parseFloorSpriteSet(const nlohmann::json& spriteSetJson)
     floorMap.emplace(numericID,
                      EditorFloorSpriteSet{numericID, displayName, spriteIDs});
 
+    // Signal the new sprite set to the UI.
+    EditorFloorSpriteSet& spriteSet{floorMap[numericID]};
+    floorAddedSig.publish(numericID, spriteSet);
+
     return true;
 }
 
@@ -253,6 +257,10 @@ bool SpriteDataModel::parseFloorCoveringSpriteSet(const nlohmann::json& spriteSe
     // Save the sprite set in the appropriate map.
     floorCoveringMap.emplace(numericID, EditorFloorCoveringSpriteSet{
                                             numericID, displayName, spriteIDs});
+
+    // Signal the new sprite set to the UI.
+    EditorFloorCoveringSpriteSet& spriteSet{floorCoveringMap[numericID]};
+    floorCoveringAddedSig.publish(numericID, spriteSet);
 
     return true;
 }
@@ -278,6 +286,10 @@ bool SpriteDataModel::parseWallSpriteSet(const nlohmann::json& spriteSetJson)
     wallMap.emplace(numericID,
                     EditorWallSpriteSet{numericID, displayName, spriteIDs});
 
+    // Signal the new sprite set to the UI.
+    EditorWallSpriteSet& spriteSet{wallMap[numericID]};
+    wallAddedSig.publish(numericID, spriteSet);
+
     return true;
 }
 
@@ -301,6 +313,10 @@ bool SpriteDataModel::parseObjectSpriteSet(const nlohmann::json& spriteSetJson)
     // Save the sprite set in the appropriate map.
     objectMap.emplace(numericID,
                       EditorObjectSpriteSet{numericID, displayName, spriteIDs});
+
+    // Signal the new sprite set to the UI.
+    EditorObjectSpriteSet& spriteSet{objectMap[numericID]};
+    objectAddedSig.publish(numericID, spriteSet);
 
     return true;
 }
@@ -486,7 +502,7 @@ bool SpriteDataModel::addFloor()
     EditorFloorSpriteSet& spriteSet{floorMap[numericID]};
     floorAddedSig.publish(numericID, spriteSet);
 
-    // Set the new sprite as the active library item.
+    // Set the new sprite set as the active library item.
     setActiveSpriteSet(SpriteSet::Type::Floor, numericID);
 
     return true;
@@ -570,6 +586,67 @@ bool SpriteDataModel::addObject()
     setActiveSpriteSet(SpriteSet::Type::Object, numericID);
 
     return true;
+}
+
+void SpriteDataModel::remFloor(Uint16 floorID)
+{
+    // Find the floor in the map.
+    auto floorIt{floorMap.find(floorID)};
+    if (floorIt == floorMap.end()) {
+        LOG_FATAL("Invalid ID while removing floor.");
+    }
+
+    // Erase the floor.
+    floorMap.erase(floorIt);
+
+    // Signal that the sprite was erased.
+    spriteSetRemovedSig.publish(SpriteSet::Type::Floor, floorID);
+}
+
+void SpriteDataModel::remFloorCovering(Uint16 floorCoveringID)
+{
+    // Find the floor covering in the map.
+    auto floorCoveringIt{floorCoveringMap.find(floorCoveringID)};
+    if (floorCoveringIt == floorCoveringMap.end()) {
+        LOG_FATAL("Invalid ID while removing floor covering.");
+    }
+
+    // Erase the floor covering.
+    floorCoveringMap.erase(floorCoveringIt);
+
+    // Signal that the sprite was erased.
+    spriteSetRemovedSig.publish(SpriteSet::Type::FloorCovering,
+                                floorCoveringID);
+}
+
+void SpriteDataModel::remWall(Uint16 wallID)
+{
+    // Find the wall in the map.
+    auto wallIt{wallMap.find(wallID)};
+    if (wallIt == wallMap.end()) {
+        LOG_FATAL("Invalid ID while removing wall.");
+    }
+
+    // Erase the sprite.
+    wallMap.erase(wallIt);
+
+    // Signal that the sprite was erased.
+    spriteSetRemovedSig.publish(SpriteSet::Type::Wall, wallID);
+}
+
+void SpriteDataModel::remObject(Uint16 objectID)
+{
+    // Find the floor in the map.
+    auto objectIt{objectMap.find(objectID)};
+    if (objectIt == objectMap.end()) {
+        LOG_FATAL("Invalid ID while removing object.");
+    }
+
+    // Erase the sprite.
+    objectMap.erase(objectIt);
+
+    // Signal that the sprite was erased.
+    spriteSetRemovedSig.publish(SpriteSet::Type::Object, objectID);
 }
 
 void SpriteDataModel::setActiveSprite(int newActiveSpriteID)

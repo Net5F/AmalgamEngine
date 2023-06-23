@@ -91,7 +91,7 @@ public:
      *
      * Errors if the given ID isn't present in spriteSheetMap.
      *
-     * @param sheetID  The editor ID of the sheet to be removed.
+     * @param sheetID  The editor ID of the sheet to remove.
      */
     void remSpriteSheet(int sheetID);
 
@@ -100,7 +100,7 @@ public:
      *
      * Errors if the given ID isn't present in spriteMap.
      *
-     * @param spriteID  The editor ID of the sprite to be removed.
+     * @param spriteID  The editor ID of the sprite to remove.
      */
     void remSprite(int spriteID);
 
@@ -113,6 +113,19 @@ public:
     bool addFloorCovering();
     bool addWall();
     bool addObject();
+
+    /**
+     * Removes the sprite set of the appropriate type with the given ID from 
+     * the associated map.
+     * 
+     * Error if the given ID isn't preset in the map.
+     *
+     * @param spriteSetID  The editor ID of the sprite set to remove.
+     */
+    void remFloor(Uint16 floorID);
+    void remFloorCovering(Uint16 floorCoveringID);
+    void remWall(Uint16 wallID);
+    void remObject(Uint16 objectID);
 
     /** Sets the current active library item to the given sprite. */
     void setActiveSprite(int newActiveSpriteID);

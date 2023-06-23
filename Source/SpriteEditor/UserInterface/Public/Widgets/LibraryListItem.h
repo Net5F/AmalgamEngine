@@ -63,18 +63,23 @@ public:
     /**
      * The types of list items that we hold in the library.
      */
-    enum class Type
+    enum Type
     {
         SpriteSheet,
         Sprite,
         Floor,
-        Wall
+        FloorCovering,
+        Wall,
+        Object,
+        Count,
+        None
     };
     Type type{};
 
     /** Alongside type, associates this list item with the model data that it 
-        represents. */
-    unsigned int ID{0};
+        represents.
+        Note: For sprite sets, this can be cast to Uint16. */
+    int ID{0};
 
     //-------------------------------------------------------------------------
     // Public child widgets

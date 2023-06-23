@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LibraryListItem.h"
+#include "SpriteSets.h"
 #include "AUI/Window.h"
 #include "AUI/Text.h"
 #include "AUI/Image.h"
@@ -16,6 +17,10 @@ class MainScreen;
 class SpriteDataModel;
 struct EditorSpriteSheet;
 class SpriteSheetListItem;
+struct EditorFloorSpriteSet;
+struct EditorFloorCoveringSpriteSet;
+struct EditorWallSpriteSet;
+struct EditorObjectSpriteSet;
 
 /**
  * The left-side panel on the main screen. Allows the user to manage the
@@ -41,23 +46,33 @@ private:
      * The top-level categories that we have in the library.
      * These values are used to index into libraryContainer.
      */
-    struct Category {
-        enum Value
-        {
-            SpriteSheets,
-            Count
-        };
+    enum Category {
+        SpriteSheets,
+        Floors,
+        FloorCoverings,
+        Walls,
+        Objects,
+        Count
     };
 
     /**
-     * Adds the given sheet to the library.
+     * Adds the given item to the library.
      */
     void onSheetAdded(int sheetID, const EditorSpriteSheet& sheet);
+    void onFloorAdded(Uint16 floorID, const EditorFloorSpriteSet& floor);
+    void
+        onFloorCoveringAdded(Uint16 floorCoveringID,
+                             const EditorFloorCoveringSpriteSet& floorCovering);
+    void onWallAdded(Uint16 wallID, const EditorWallSpriteSet& wall);
+    void onObjectAdded(Uint16 objectID, const EditorObjectSpriteSet& object);
+    template<typename T>
+    void onSpriteSetAdded(Uint16 spriteSetID, const T& spriteSet);
 
     /**
-     * Removes the given sheet from the library.
+     * Removes the given item from the library.
      */
     void onSheetRemoved(int sheetID);
+    void onSpriteSetRemoved(SpriteSet::Type type, Uint16 spriteSetID);
 
     /**
      * Updates the display name on the list item for the given sprite.
@@ -89,20 +104,20 @@ private:
      */
     void removeListItem(LibraryListItem* listItem);
 
+    LibraryListItem::Type toListItemType(SpriteSet::Type spriteSetType);
+    Category toCategory(SpriteSet::Type spriteSetType);
+
     /** Used to open the confirmation dialog when removing a sheet. */
     MainScreen& mainScreen;
 
     /** Used to update the model when a sheet is removed. */
     SpriteDataModel& spriteDataModel;
 
-    /** Maps sprite sheet IDs to their associated thumbnails. */
-    std::unordered_map<int, LibraryListItem*> sheetListItemMap;
-
-    /** Maps sprite IDs to their associated thumbnails. */
-    std::unordered_map<int, LibraryListItem*> spriteListItemMap;
-
-    /** Maps floor IDs to their associated thumbnails. */
-    std::unordered_map<Uint16, LibraryListItem*> floorListItemMap;
+    /** An array of maps, indexed by list item types. Each map holds the 
+        list items for the associated type. */
+    std::array<std::unordered_map<int, LibraryListItem*>,
+               LibraryListItem::Type::Count>
+        listItemMaps;
 
     /** Holds the currently selected list items. */
     std::vector<LibraryListItem*> selectedListItems;
