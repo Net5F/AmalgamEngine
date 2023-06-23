@@ -368,6 +368,25 @@ void LibraryWindow::removeListItem(LibraryListItem* listItem)
             spriteDataModel.remSpriteSheet(listItem->ID);
             break;
         }
+        case LibraryListItem::Type::Floor: {
+            spriteDataModel.remFloor(static_cast<Uint16>(listItem->ID));
+            break;
+        }
+        case LibraryListItem::Type::FloorCovering: {
+            spriteDataModel.remFloorCovering(static_cast<Uint16>(listItem->ID));
+            break;
+        }
+        case LibraryListItem::Type::Wall: {
+            spriteDataModel.remWall(static_cast<Uint16>(listItem->ID));
+            break;
+        }
+        case LibraryListItem::Type::Object: {
+            spriteDataModel.remObject(static_cast<Uint16>(listItem->ID));
+            break;
+        }
+        default: {
+            LOG_FATAL("Unsupported list item type.");
+        }
     }
 }
 
