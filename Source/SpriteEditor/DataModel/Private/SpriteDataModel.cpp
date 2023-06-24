@@ -491,6 +491,7 @@ bool SpriteDataModel::addFloor()
     std::string displayName{"NewFloor"};
     while (!floorNameIsUnique(numericID, displayName)) {
         displayName = "NewFloor" + std::to_string(nameCount);
+        nameCount++;
     }
 
     // Add the new, empty sprite set to the map.
@@ -670,6 +671,7 @@ void SpriteDataModel::setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveS
             auto pair{floorMap.find(newActiveSpriteSetID)};
             if (pair != floorMap.end()) {
                 activeLibraryItemChangedSig.publish(pair->second);
+                return;
             }
             break;
         }
@@ -677,6 +679,7 @@ void SpriteDataModel::setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveS
             auto pair{floorCoveringMap.find(newActiveSpriteSetID)};
             if (pair != floorCoveringMap.end()) {
                 activeLibraryItemChangedSig.publish(pair->second);
+                return;
             }
             break;
         }
@@ -684,6 +687,7 @@ void SpriteDataModel::setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveS
             auto pair{wallMap.find(newActiveSpriteSetID)};
             if (pair != wallMap.end()) {
                 activeLibraryItemChangedSig.publish(pair->second);
+                return;
             }
             break;
         }
@@ -691,6 +695,7 @@ void SpriteDataModel::setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveS
             auto pair{objectMap.find(newActiveSpriteSetID)};
             if (pair != objectMap.end()) {
                 activeLibraryItemChangedSig.publish(pair->second);
+                return;
             }
             break;
         }

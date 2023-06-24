@@ -26,17 +26,21 @@ public:
     AUI::Image backgroundImage;
 
     AUI::Button addSpriteSheetButton;
+    AUI::Button addFloorButton;
+    AUI::Button addFloorCoveringButton;
+    AUI::Button addWallButton;
+    AUI::Button addObjectButton;
 
     //-------------------------------------------------------------------------
     // Base class overrides
     //-------------------------------------------------------------------------
-    AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
-                            const SDL_Point& cursorPosition) override;
-
-    AUI::EventResult onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                   const SDL_Point& cursorPosition) override;
-
     void onFocusLost(AUI::FocusLostType focusLostType) override;
+
+private:
+    /**
+     * Styles the given button and sets its text to the given text.
+     */
+    void styleButton(AUI::Button& button, const std::string& text);
 };
 
 } // End namespace SpriteEditor

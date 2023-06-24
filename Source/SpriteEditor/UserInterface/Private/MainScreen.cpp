@@ -95,7 +95,24 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
     /* Library add menu. */
     libraryAddMenu.addSpriteSheetButton.setOnPressed([this]() {
         addSheetDialog.setIsVisible(true);
-        libraryAddMenu.setIsVisible(false);
+        // When we drop focus, the menu will close itself.
+        dropFocus();
+    });
+    libraryAddMenu.addFloorButton.setOnPressed([this]() {
+        spriteDataModel.addFloor();
+        dropFocus();
+    });
+    libraryAddMenu.addFloorCoveringButton.setOnPressed([this]() {
+        spriteDataModel.addFloorCovering();
+        dropFocus();
+    });
+    libraryAddMenu.addWallButton.setOnPressed([this]() {
+        spriteDataModel.addWall();
+        dropFocus();
+    });
+    libraryAddMenu.addObjectButton.setOnPressed([this]() {
+        spriteDataModel.addObject();
+        dropFocus();
     });
 
     // Make the modal dialogs invisible.
