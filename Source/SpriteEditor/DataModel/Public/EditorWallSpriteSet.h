@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Wall.h"
+#include "EmptySpriteID.h"
 #include <SDL_stdinc.h>
 #include <string>
 #include <array>
@@ -21,10 +22,11 @@ struct EditorWallSpriteSet {
     /** Unique display name, shown in the UI.  */
     std::string displayName{""};
 
-    /** The runtime IDs for each sprite in this set.
+    /** The numeric IDs for each sprite in this set.
         Walls require the 4 types of wall sprites that our modular wall 
         system uses. */
-    std::array<int, Wall::Type::Count> spriteIDs;
+    std::array<int, Wall::Type::Count> spriteIDs{
+        EMPTY_SPRITE_ID, EMPTY_SPRITE_ID, EMPTY_SPRITE_ID, EMPTY_SPRITE_ID};
 };
 
 } // namespace SpriteEditor

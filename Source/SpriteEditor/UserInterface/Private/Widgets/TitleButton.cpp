@@ -11,10 +11,10 @@ TitleButton::TitleButton(const SDL_Rect& inLogicalExtent,
 : AUI::Button(inLogicalExtent, inDebugName)
 {
     // Add our backgrounds.
-    normalImage.setSimpleImage(Paths::TEXTURE_DIR + "Button/Normal.png");
-    hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "Button/Hovered.png");
-    pressedImage.setSimpleImage(Paths::TEXTURE_DIR + "Button/Pressed.png");
-    disabledImage.setSimpleImage(Paths::TEXTURE_DIR + "Button/Disabled.png");
+    normalImage.setSimpleImage(Paths::TEXTURE_DIR + "TitleButton/Normal.png");
+    hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "TitleButton/Hovered.png");
+    pressedImage.setSimpleImage(Paths::TEXTURE_DIR + "TitleButton/Pressed.png");
+    disabledImage.setSimpleImage(Paths::TEXTURE_DIR + "TitleButton/Disabled.png");
 
     // Set our text properties.
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);

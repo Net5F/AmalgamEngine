@@ -3,7 +3,7 @@
 #include "AUI/Window.h"
 #include "AUI/Image.h"
 #include "AUI/Text.h"
-#include "ConfirmationButton.h"
+#include "MainButton.h"
 #include "MainTextInput.h"
 
 namespace AM
@@ -58,11 +58,11 @@ public:
     MainTextInput nameInput;
 
     /** Right-side confirmation button. Adds the sheet. */
-    ConfirmationButton addButton;
+    MainButton addButton;
 
     /** Left-side cancel button. Closes the dialog without performing any
         action. */
-    ConfirmationButton cancelButton;
+    MainButton cancelButton;
 
 private:
     /**

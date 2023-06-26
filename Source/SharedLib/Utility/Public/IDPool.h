@@ -34,6 +34,11 @@ public:
     unsigned int reserveID();
 
     /**
+     * Marks the given ID as reserved.
+     */
+    void markIDAsReserved(unsigned int ID);
+
+    /**
      * Frees an ID for reuse.
      */
     void freeID(unsigned int ID);
@@ -57,7 +62,7 @@ private:
     std::size_t containerSize;
 
     /** The last index that we added an ID to. */
-    std::size_t lastAddedIndex;
+    int lastAddedIndex;
 
     /** The number of currently reserved IDs. */
     std::size_t reservedIDCount;

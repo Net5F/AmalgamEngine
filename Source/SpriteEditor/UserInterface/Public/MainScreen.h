@@ -5,9 +5,11 @@
 #include "AUI/ConfirmationDialog.h"
 #include "LibraryItemData.h"
 #include "LibraryWindow.h"
-#include "SpriteEditStage.h"
 #include "SaveButtonWindow.h"
+#include "SpriteEditStage.h"
 #include "SpritePropertiesWindow.h"
+#include "FloorEditStage.h"
+#include "FloorPropertiesWindow.h"
 #include "TitleButton.h"
 #include "LibraryAddMenu.h"
 #include "AddSheetDialog.h"
@@ -72,10 +74,12 @@ private:
     // Edit stages
     /** The center stage for editing sprite bounding boxes. */
     SpriteEditStage spriteEditStage;
+    FloorEditStage floorEditStage;
 
     // Properties windows
     /** The right-side panel for viewing and editing the active sprite data. */
     SpritePropertiesWindow spritePropertiesWindow;
+    FloorPropertiesWindow floorPropertiesWindow;
 
     /** Confirmation dialog. Child widgets can call openConfirmationDialog()
         to use it. */

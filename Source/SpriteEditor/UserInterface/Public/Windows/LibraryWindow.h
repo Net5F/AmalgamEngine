@@ -34,6 +34,11 @@ public:
     //-------------------------------------------------------------------------
     LibraryWindow(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
 
+    /**
+     * Returns the currently selected list items.
+     */
+    const std::vector<LibraryListItem*>& getSelectedListItems() const;
+
     //-------------------------------------------------------------------------
     // Base class overrides
     //-------------------------------------------------------------------------
@@ -75,10 +80,12 @@ private:
     void onSpriteSetRemoved(SpriteSet::Type type, Uint16 spriteSetID);
 
     /**
-     * Updates the display name on the list item for the given sprite.
+     * Updates the display name on the associated list item.
      */
     void onSpriteDisplayNameChanged(int spriteID,
                                     const std::string& newDisplayName);
+    void onSpriteSetDisplayNameChanged(SpriteSet::Type type, Uint16 spriteSetID,
+                                       const std::string& newDisplayName);
 
     /**
      * If there are other currently selected list items, checks if the given 

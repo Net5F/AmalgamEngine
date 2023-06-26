@@ -21,22 +21,22 @@ namespace SpriteEditor
 {
 SpritePropertiesWindow::SpritePropertiesWindow(SpriteDataModel& inSpriteDataModel)
 : AUI::Window({1617, 0, 303, 518}, "SpritePropertiesWindow")
-, nameLabel({24, 52, 65, 28}, "NameLabel")
-, nameInput({24, 84, 255, 38}, "NameInput")
-, collisionEnabledLabel({24, 160, 210, 27}, "CollisionLabel")
-, collisionEnabledInput({257, 162, 22, 22}, "CollisionInput")
-, minXLabel({24, 210, 110, 38}, "MinXLabel")
-, minXInput({150, 204, 129, 38}, "MinXInput")
-, minYLabel({24, 260, 110, 38}, "MinYLabel")
-, minYInput({150, 254, 129, 38}, "MinYInput")
-, minZLabel({24, 310, 110, 38}, "MinZLabel")
-, minZInput({150, 304, 129, 38}, "MinZInput")
-, maxXLabel({24, 360, 110, 38}, "MaxXLabel")
-, maxXInput({150, 354, 129, 38}, "MaxXInput")
-, maxYLabel({24, 410, 110, 38}, "MaxYLabel")
-, maxYInput({150, 404, 129, 38}, "MaxYInput")
-, maxZLabel({24, 460, 110, 38}, "MaxZLabel")
-, maxZInput({150, 454, 129, 38}, "MaxZInput")
+, nameLabel{{24, 52, 65, 28}, "NameLabel"}
+, nameInput{{24, 84, 255, 38}, "NameInput"}
+, collisionEnabledLabel{{24, 160, 210, 27}, "CollisionLabel"}
+, collisionEnabledInput{{257, 162, 22, 22}, "CollisionInput"}
+, minXLabel{{24, 210, 110, 38}, "MinXLabel"}
+, minXInput{{150, 204, 129, 38}, "MinXInput"}
+, minYLabel{{24, 260, 110, 38}, "MinYLabel"}
+, minYInput{{150, 254, 129, 38}, "MinYInput"}
+, minZLabel{{24, 310, 110, 38}, "MinZLabel"}
+, minZInput{{150, 304, 129, 38}, "MinZInput"}
+, maxXLabel{{24, 360, 110, 38}, "MaxXLabel"}
+, maxXInput{{150, 354, 129, 38}, "MaxXInput"}
+, maxYLabel{{24, 410, 110, 38}, "MaxYLabel"}
+, maxYInput{{150, 404, 129, 38}, "MaxYInput"}
+, maxZLabel{{24, 460, 110, 38}, "MaxZLabel"}
+, maxZInput{{150, 454, 129, 38}, "MaxZInput"}
 , spriteDataModel{inSpriteDataModel}
 , activeSpriteID{EMPTY_SPRITE_ID}
 , committedMinX{0.0}
@@ -45,9 +45,9 @@ SpritePropertiesWindow::SpritePropertiesWindow(SpriteDataModel& inSpriteDataMode
 , committedMaxX{0.0}
 , committedMaxY{0.0}
 , committedMaxZ{0.0}
-, backgroundImage({0, 0, 303, 518}, "PropertiesBackground")
-, headerImage({0, 0, 303, 40}, "PropertiesHeader")
-, windowLabel({12, 0, 115, 40}, "PropertiesWindowLabel")
+, backgroundImage{{0, 0, 303, 518}, "PropertiesBackground"}
+, headerImage{{0, 0, 303, 40}, "PropertiesHeader"}
+, windowLabel{{12, 0, 282, 40}, "PropertiesWindowLabel"}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
@@ -78,7 +78,7 @@ SpritePropertiesWindow::SpritePropertiesWindow(SpriteDataModel& inSpriteDataMode
     windowLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
     windowLabel.setColor({255, 255, 255, 255});
     windowLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
-    windowLabel.setText("Properties");
+    windowLabel.setText("Sprite Properties");
 
     /* Display name entry. */
     nameLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);

@@ -22,7 +22,7 @@ struct EditorObjectSpriteSet {
     /** Unique display name, shown in the UI.  */
     std::string displayName{""};
 
-    /** The runtime IDs for each sprite in this set.
+    /** The numeric IDs for each sprite in this set.
         Objects support 8 directions of rotation. At least 1 sprite must be 
         set. If a direction isn't provided, it should be set to 
         EMPTY_SPRITE_ID. */

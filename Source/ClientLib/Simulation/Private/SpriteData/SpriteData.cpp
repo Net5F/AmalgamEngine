@@ -13,6 +13,9 @@ namespace Client
 SpriteData::SpriteData(AssetCache& assetCache)
 : SpriteDataBase()
 {
+    // Note: SpriteDataBase has already parsed the file and its data structures,
+    //       but it didn't parse any rendering-related data.
+
     // Open the file.
     std::string fullPath{Paths::BASE_PATH};
     fullPath += "SpriteData.json";
@@ -29,7 +32,7 @@ SpriteData::SpriteData(AssetCache& assetCache)
         LOG_FATAL("Failed to parse SpriteData.json: %s", e.what());
     }
 
-    // Parse the json structure to construct our sprites.
+    // Parse the json structure to construct our sprite render data.
     parseJson(json, assetCache);
 
     // Add the empty sprite.

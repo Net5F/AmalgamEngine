@@ -7,7 +7,9 @@ namespace AM
 IDPool::IDPool(std::size_t inPoolSize)
 : poolSize{inPoolSize}
 , containerSize{poolSize + SAFETY_BUFFER}
-, lastAddedIndex{0}
+// Note: We initialize this to -1 since reserveID() always checks for the 
+//       next index. If we started at 0, our first ID would be 1.
+, lastAddedIndex{-1}
 , reservedIDCount{0}
 , IDs(containerSize)
 {
@@ -26,7 +28,7 @@ unsigned int IDPool::reserveID()
         std::size_t index{(lastAddedIndex + i) % containerSize};
         if (!IDs[index]) {
             IDs[index] = true;
-            lastAddedIndex = index;
+            lastAddedIndex = static_cast<int>(index);
             reservedIDCount++;
 
             return static_cast<unsigned int>(index);
@@ -37,8 +39,29 @@ unsigned int IDPool::reserveID()
     return 0;
 }
 
+void IDPool::markIDAsReserved(unsigned int ID)
+{
+    if (ID > containerSize) {
+        LOG_FATAL("ID out of bounds.");
+    }
+
+    if (!IDs[ID]) {
+        reservedIDCount++;
+    }
+
+    IDs[ID] = true;
+
+    if (static_cast<int>(ID) > lastAddedIndex) {
+        lastAddedIndex = ID;
+    }
+}
+
 void IDPool::freeID(unsigned int ID)
 {
+    if (ID > containerSize) {
+        LOG_FATAL("ID out of bounds.");
+    }
+
     if (IDs[ID]) {
         IDs[ID] = false;
         reservedIDCount--;

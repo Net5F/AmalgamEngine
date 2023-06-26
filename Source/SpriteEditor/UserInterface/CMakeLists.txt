@@ -1,38 +1,44 @@
 target_sources(SpriteEditor
     PRIVATE
         Private/Widgets/BoundingBoxGizmo.cpp
-        Private/Widgets/ConfirmationButton.cpp
         Private/Widgets/LibraryCollapsibleContainer.cpp
         Private/Widgets/LibraryListItem.cpp
+        Private/Widgets/MainButton.cpp
         Private/Widgets/MainTextInput.cpp
         Private/Widgets/MainThumbnail.cpp
+        Private/Widgets/SpriteSetSlot.cpp
         Private/Widgets/SpriteSheetListItem.cpp
         Private/Widgets/TitleButton.cpp
         Private/Windows/AddSheetDialog.cpp
+        Private/Windows/FloorEditStage.cpp
+        Private/Windows/FloorPropertiesWindow.cpp
         Private/Windows/LibraryAddMenu.cpp
         Private/Windows/LibraryWindow.cpp
-        Private/Windows/SpritePropertiesWindow.cpp
         Private/Windows/SaveButtonWindow.cpp
         Private/Windows/SpriteEditStage.cpp
+        Private/Windows/SpritePropertiesWindow.cpp
         Private/Windows/TitleWindow.cpp
         Private/MainScreen.cpp
         Private/TitleScreen.cpp
         Private/UserInterface.cpp
     PUBLIC
         Public/Widgets/BoundingBoxGizmo.h
-        Public/Widgets/ConfirmationButton.h
         Public/Widgets/LibraryCollapsibleContainer.h
         Public/Widgets/LibraryListItem.h
+        Public/Widgets/MainButton.h
         Public/Widgets/MainTextInput.h
         Public/Widgets/MainThumbnail.h
+        Public/Widgets/SpriteSetSlot.h
         Public/Widgets/SpriteSheetListItem.h
         Public/Widgets/TitleButton.h
         Public/Windows/AddSheetDialog.h
+        Public/Windows/FloorEditStage.h
+        Public/Windows/FloorPropertiesWindow.h
         Public/Windows/LibraryAddMenu.h
         Public/Windows/LibraryWindow.h
-        Public/Windows/SpritePropertiesWindow.h
         Public/Windows/SaveButtonWindow.h
         Public/Windows/SpriteEditStage.h
+        Public/Windows/SpritePropertiesWindow.h
         Public/Windows/TitleWindow.h
         Public/MainScreen.h
         Public/TitleScreen.h

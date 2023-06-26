@@ -23,9 +23,9 @@ namespace SpriteEditor
  *
  * Note: All ID spaces are separate (i.e. sprites, sprite sheets, floors, etc 
  *       all have unique ID spaces.
- *       Additionally, the IDs used at runtime are temporary. We generate fresh
- *       IDs while saving the json, to make sure we don't accumulate any gaps 
- *       in the ID sequence.
+ * Note: The sprite numeric ID space might accrue gaps as sprite are deleted.
+ *       The is known and expected. Sprites are ordered in the UI by their 
+ *       sheet's ID, so it shouldn't inconvenience users.
  */
 class SpriteDataModel
 {
@@ -133,7 +133,7 @@ public:
     /** Sets the current active library item to the given sprite set. */
     void setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveSpriteSetID);
 
-    // Sprite property mutators.
+    // Sprite properties.
     void setSpriteDisplayName(int spriteID,
                               const std::string& newDisplayName);
     void setSpriteCollisionEnabled(int spriteID,
@@ -141,7 +141,9 @@ public:
     void setSpriteModelBounds(int spriteID,
                               const BoundingBox& newModelBounds);
 
-    // Sprite set property mutators.
+    // Sprite set properties.
+    void setSpriteSetDisplayName(SpriteSet::Type type, Uint16 spriteSetID,
+                                 const std::string& newDisplayName);
 
     const std::string& getWorkingTexturesDir();
 
@@ -190,9 +192,14 @@ public:
         entt::sigh<void(Uint16 objectID, const EditorObjectSpriteSet& floor)>>
         objectAdded;
 
-    /** An sprite set was removed from the model. */
+    /** A sprite set was removed from the model. */
     entt::sink<entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID)>>
         spriteSetRemoved;
+
+    /** A sprite set's sprite at the given index was changed. */
+    entt::sink<entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
+                               std::size_t index, int newSpriteID)>>
+        spriteSetSlotChanged;
 
     /** A sprite set's display name has changed. */
     entt::sink<entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
@@ -253,6 +260,12 @@ private:
     bool parseObjectSpriteSet(const nlohmann::json& spriteSetJson);
 
     /**
+     * Returns the appropriate map for the given sprite set type.
+     */
+    template<typename T>
+    std::map<Uint16, T>& getMapForSpriteSetType();
+
+    /**
      * Checks if the given name is unique among all sprites in the model.
      *
      * @param spriteID  The ID of the sprite that might get displayName. If it
@@ -262,11 +275,16 @@ private:
      */
     bool spriteNameIsUnique(int spriteID,
                             const std::string& displayName);
-    bool floorNameIsUnique(Uint16 spriteSetID, const std::string& displayName);
-    bool floorCoveringNameIsUnique(Uint16 spriteSetID,
-                                   const std::string& displayName);
-    bool wallNameIsUnique(Uint16 spriteSetID, const std::string& displayName);
-    bool objectNameIsUnique(Uint16 spriteSetID, const std::string& displayName);
+    template<typename T>
+    bool spriteSetNameIsUnique(Uint16 spriteSetID,
+                               const std::string& displayName);
+
+    /**
+     * Implementation for setSpriteSetDisplayName().
+     */
+    template<typename T>
+    void setSpriteSetDisplayName(SpriteSet::Type type, Uint16 spriteSetID,
+                                 const std::string& newDisplayName);
 
     // Save functions.
     void saveSpriteSheets(nlohmann::json& json);
@@ -274,6 +292,12 @@ private:
     void saveFloorCoverings(nlohmann::json& json);
     void saveWalls(nlohmann::json& json);
     void saveObjects(nlohmann::json& json);
+
+    /**
+     * Iterates all the sprite sets and replaces any instances of spriteID 
+     * with EMPTY_SPRITE_ID.
+     */
+    void removeSpriteIDFromSets(int spriteID);
 
     /** Resets the model state, setting it back to default. */
     void resetModelState();
@@ -350,6 +374,9 @@ private:
 
     entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID)>
         spriteSetRemovedSig;
+    entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID, std::size_t index,
+                    int newSpriteID)>
+        spriteSetSlotChangedSig;
     entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
                                const std::string& newDisplayName)>
         spriteSetDisplayNameChangedSig;

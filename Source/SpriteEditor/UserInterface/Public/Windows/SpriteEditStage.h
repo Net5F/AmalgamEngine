@@ -2,6 +2,7 @@
 
 #include "AUI/Window.h"
 #include "AUI/Screen.h"
+#include "AUI/Text.h"
 #include "AUI/Image.h"
 #include "LibraryItemData.h"
 #include "BoundingBoxGizmo.h"
@@ -37,6 +38,11 @@ private:
      */
     void onSpriteRemoved(int spriteID);
 
+    /**
+     * Styles the given text.
+     */
+    void styleText(AUI::Text& text);
+
     /** Used to get the current working dir when displaying the sprite. */
     SpriteDataModel& spriteDataModel;
 
@@ -46,6 +52,8 @@ private:
     //-------------------------------------------------------------------------
     // Private child widgets
     //-------------------------------------------------------------------------
+    AUI::Text topText;
+
     /** Checkerboard image, tiled as the background for the loaded sprite. */
     AUI::Image checkerboardImage;
 
@@ -54,6 +62,11 @@ private:
 
     /** The gizmo for editing the sprite's bounding box. */
     BoundingBoxGizmo boundingBoxGizmo;
+
+    AUI::Text descText1;
+    AUI::Text descText2;
+    AUI::Text descText3;
+    AUI::Text descText4;
 };
 
 } // End namespace SpriteEditor

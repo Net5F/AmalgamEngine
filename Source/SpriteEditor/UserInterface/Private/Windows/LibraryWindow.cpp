@@ -89,9 +89,16 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
     spriteDataModel.spriteSetRemoved
         .connect<&LibraryWindow::onSpriteSetRemoved>(*this);
 
-    // When a sprite's display name is updated, update the matching thumbnail.
+    // When a display name is updated, update the matching thumbnail.
     spriteDataModel.spriteDisplayNameChanged
         .connect<&LibraryWindow::onSpriteDisplayNameChanged>(*this);
+    spriteDataModel.spriteSetDisplayNameChanged
+        .connect<&LibraryWindow::onSpriteSetDisplayNameChanged>(*this);
+}
+
+const std::vector<LibraryListItem*>& LibraryWindow::getSelectedListItems() const
+{
+    return selectedListItems;
 }
 
 void LibraryWindow::onFocusLost(AUI::FocusLostType focusLostType) 
@@ -301,6 +308,21 @@ void LibraryWindow::onSpriteDisplayNameChanged(int spriteID,
     // Update the list item to use the sprite's new display name.
     LibraryListItem& spriteListItem{*(spriteListItemIt->second)};
     spriteListItem.text.setText(newDisplayName);
+}
+
+void LibraryWindow::onSpriteSetDisplayNameChanged(SpriteSet::Type type, Uint16 spriteSetID,
+    const std::string& newDisplayName)
+{
+    LibraryListItem::Type spriteSetListItemType{toListItemType(type)};
+    auto spriteSetListItemMap{listItemMaps[spriteSetListItemType]};
+    auto spriteSetListItemIt{spriteSetListItemMap.find(spriteSetID)};
+    if (spriteSetListItemIt == spriteSetListItemMap.end()) {
+        LOG_FATAL("Failed to find a list item for the given sprite set.");
+    }
+
+    // Update the list item to use the sprite set's new display name.
+    LibraryListItem& spriteSetListItem{*(spriteSetListItemIt->second)};
+    spriteSetListItem.text.setText(newDisplayName);
 }
 
 void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)

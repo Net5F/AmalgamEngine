@@ -15,8 +15,7 @@ namespace SpriteEditor
  * Part of SpriteDataModel. 
  */
 struct EditorSprite {
-    /** This sprite's unique numeric identifier.
-        Note: This ID may change when this sprite is saved to the json. */
+    /** This sprite's unique numeric identifier. */
     int numericID{EMPTY_SPRITE_ID};
 
     /** The unique relPath of the sprite sheet that this sprite is from. */

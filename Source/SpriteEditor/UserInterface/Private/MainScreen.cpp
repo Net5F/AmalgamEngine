@@ -16,18 +16,22 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 , spriteDataModel{inSpriteDataModel}
 , libraryWindow(*this, spriteDataModel)
 , libraryAddMenu()
-, spriteEditStage(spriteDataModel)
 , saveButtonWindow(*this, spriteDataModel)
+, spriteEditStage(spriteDataModel)
+, floorEditStage(spriteDataModel, libraryWindow)
 , spritePropertiesWindow(spriteDataModel)
+, floorPropertiesWindow(spriteDataModel)
 , confirmationDialog({0, 0, 1920, 1080}, "ConfirmationDialog")
 , addSheetDialog(spriteDataModel)
 {
     // Add our windows so they're included in rendering, etc.
-    windows.push_back(spriteEditStage);
     windows.push_back(libraryWindow);
     windows.push_back(libraryAddMenu);
     windows.push_back(saveButtonWindow);
+    windows.push_back(spriteEditStage);
+    windows.push_back(floorEditStage);
     windows.push_back(spritePropertiesWindow);
+    windows.push_back(floorPropertiesWindow);
     windows.push_back(confirmationDialog);
     windows.push_back(addSheetDialog);
 
@@ -124,6 +128,8 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
     // Make the edit stages and properties windows invisible
     spriteEditStage.setIsVisible(false);
     spritePropertiesWindow.setIsVisible(false);
+    floorEditStage.setIsVisible(false);
+    floorPropertiesWindow.setIsVisible(false);
 
     // When the user selects a new item in the library, make the proper windows
     // visible.
@@ -179,8 +185,27 @@ void MainScreen::onActiveLibraryItemChanged(
 {
     ignore(newActiveItem);
 
-    spriteEditStage.setIsVisible(true);
-    spritePropertiesWindow.setIsVisible(true);
+    // Make everything invisible.
+    spriteEditStage.setIsVisible(false);
+    spritePropertiesWindow.setIsVisible(false);
+    floorEditStage.setIsVisible(false);
+    floorPropertiesWindow.setIsVisible(false);
+
+    // Make the appropriate windows visible, based on the new item's type.
+    if (std::get_if<EditorSprite>(&newActiveItem)) {
+        spriteEditStage.setIsVisible(true);
+        spritePropertiesWindow.setIsVisible(true);
+    }
+    else if (std::get_if<EditorFloorSpriteSet>(&newActiveItem)) {
+        floorEditStage.setIsVisible(true);
+        floorPropertiesWindow.setIsVisible(true);
+    }
+    else if (std::get_if<EditorFloorCoveringSpriteSet>(&newActiveItem)) {
+    }
+    else if (std::get_if<EditorWallSpriteSet>(&newActiveItem)) {
+    }
+    else if (std::get_if<EditorObjectSpriteSet>(&newActiveItem)) {
+    }
 }
 
 } // End namespace SpriteEditor

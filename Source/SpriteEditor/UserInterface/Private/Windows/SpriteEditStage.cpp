@@ -6,23 +6,54 @@
 #include "Paths.h"
 #include "Ignore.h"
 #include "AUI/Core.h"
+#include "AUI/ScalingHelpers.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
 SpriteEditStage::SpriteEditStage(SpriteDataModel& inSpriteDataModel)
-: AUI::Window({389, 60, 1142, 684}, "SpriteEditStage")
+: AUI::Window({320, 58, 1297, 1022}, "SpriteEditStage")
 , spriteDataModel{inSpriteDataModel}
 , activeSpriteID{EMPTY_SPRITE_ID}
-, checkerboardImage({0, 0, 100, 100})
-, spriteImage({0, 0, 100, 100})
-, boundingBoxGizmo(inSpriteDataModel)
+, topText{{0, 0, logicalExtent.w, 34}, "TopText"}
+, checkerboardImage{{0, 0, 100, 100}, "BackgroundImage"}
+, spriteImage{{0, 0, 100, 100}, "SpriteImage"}
+, boundingBoxGizmo{inSpriteDataModel}
+, descText1{{24, 806, 1240, 24}, "DescText1"}
+, descText2{{24, 846, 1240, 24}, "DescText2"}
+, descText3{{24, 886, 1240, 24}, "DescText3"}
+, descText4{{24, 926, 1240, 24}, "DescText4"}
 {
     // Add our children so they're included in rendering, etc.
+    children.push_back(topText);
     children.push_back(checkerboardImage);
     children.push_back(spriteImage);
     children.push_back(boundingBoxGizmo);
+    children.push_back(descText1);
+    children.push_back(descText2);
+    children.push_back(descText3);
+    children.push_back(descText4);
+
+    /* Text */
+    topText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 26);
+    topText.setColor({255, 255, 255, 255});
+    topText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
+    topText.setText("Sprite");
+
+    styleText(descText1);
+    descText1.setText("Sprites are the basic building block for graphics in "
+                      "The Amalgam Engine.");
+    styleText(descText2);
+    descText2.setText(
+        "The bounding box that you set for this sprite will be used for render "
+        "sorting, mouse hit detection, and (if enabled) collision.");
+    styleText(descText3);
+    descText3.setText(
+        "Sprites must be added to a Sprite Set to be used in the engine.");
+    styleText(descText4);
+    descText4.setText("Sprite Sets come in various types: Floor, Floor "
+                      "Covering, Wall, and Object.");
 
     /* Active sprite and checkerboard background. */
     checkerboardImage.setTiledImage(Paths::TEXTURE_DIR
@@ -58,12 +89,11 @@ void SpriteEditStage::onActiveLibraryItemChanged(
     imagePath += newActiveSprite->parentSpriteSheetPath;
     spriteImage.setSimpleImage(imagePath, newActiveSprite->textureExtent);
 
-    // Calc the centered sprite position.
+    // Center the sprite to the stage's X, but use a fixed Y.
     SDL_Rect centeredSpriteExtent{newActiveSprite->textureExtent};
     centeredSpriteExtent.x = logicalExtent.w / 2;
     centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
-    centeredSpriteExtent.y = logicalExtent.h / 2;
-    centeredSpriteExtent.y -= (centeredSpriteExtent.h / 2);
+    centeredSpriteExtent.y = AUI::ScalingHelpers::logicalToActual(212);
 
     // Size the sprite image to the sprite extent size.
     spriteImage.setLogicalExtent(centeredSpriteExtent);
@@ -90,6 +120,12 @@ void SpriteEditStage::onSpriteRemoved(int spriteID)
         spriteImage.setIsVisible(false);
         boundingBoxGizmo.setIsVisible(false);
     }
+}
+
+void SpriteEditStage::styleText(AUI::Text& text)
+{
+    text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
+    text.setColor({255, 255, 255, 255});
 }
 
 } // End namespace SpriteEditor

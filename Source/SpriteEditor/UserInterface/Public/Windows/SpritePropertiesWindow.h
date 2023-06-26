@@ -14,7 +14,6 @@ struct BoundingBox;
 namespace SpriteEditor
 {
 class SpriteDataModel;
-struct EditorSprite;
 
 /**
  * The properties window shown when the user loads a sprite from the Library.
@@ -31,7 +30,7 @@ public:
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------
-    /** All fields below directly match a data field in the Sprite class.
+    /** All fields below directly match a data field in the EditorSprite class.
         See displayName, collisionEnabled, and modelBounds fields for more
         information. */
     AUI::Text nameLabel;
@@ -65,13 +64,12 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If active sprite was removed) Sets activeSprite to invalid and clears
-     * all of the text inputs, putting this panel back to its default state.
+     * (If active sprite was removed) Sets this panel back to its default state.
      */
     void onSpriteRemoved(int spriteID);
 
     /**
-     * (If active sprite changed) Updates this panel with the active sprite's
+     * (If ID matches active sprite) Updates this panel with the active sprite's
      * new properties.
      */
     void onSpriteDisplayNameChanged(int spriteID,

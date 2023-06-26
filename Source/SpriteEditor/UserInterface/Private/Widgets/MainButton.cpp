@@ -1,22 +1,22 @@
-#include "ConfirmationButton.h"
+#include "MainButton.h"
 #include "Paths.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
-ConfirmationButton::ConfirmationButton(const SDL_Rect& inLogicalExtent,
+MainButton::MainButton(const SDL_Rect& inLogicalExtent,
                                        const std::string& inText,
                                        const std::string& inDebugName)
 : AUI::Button(inLogicalExtent, inDebugName)
 {
     // Add our backgrounds.
     normalImage.setSimpleImage(Paths::TEXTURE_DIR
-                               + "ConfirmationButton/Normal.png");
+                               + "MainButton/Normal.png");
     hoveredImage.setSimpleImage(Paths::TEXTURE_DIR
-                                + "ConfirmationButton/Hovered.png");
+                                + "MainButton/Hovered.png");
     pressedImage.setSimpleImage(Paths::TEXTURE_DIR
-                                + "ConfirmationButton/Pressed.png");
+                                + "MainButton/Pressed.png");
 
     // Set our text properties.
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
