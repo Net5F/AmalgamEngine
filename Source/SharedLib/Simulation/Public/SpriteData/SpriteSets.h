@@ -29,7 +29,8 @@ struct SpriteSet {
         Wall,
         Object,
         // Character,
-        Count
+        Count,
+        None
     };
 
     /** Unique display name, shown in the UI.  */

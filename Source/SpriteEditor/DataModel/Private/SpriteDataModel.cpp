@@ -623,6 +623,37 @@ void SpriteDataModel::setSpriteSetDisplayName(SpriteSet::Type type, Uint16 sprit
     }
 }
 
+void SpriteDataModel::setSpriteSetSlot(SpriteSet::Type type, Uint16 spriteSetID,
+    std::size_t index, int newSpriteID)
+{
+    switch (type) {
+        case SpriteSet::Type::Floor: {
+            setSpriteSetSlot<EditorFloorSpriteSet>(type, spriteSetID, index,
+                                                   newSpriteID);
+            break;
+        }
+        case SpriteSet::Type::FloorCovering: {
+            setSpriteSetSlot<EditorFloorCoveringSpriteSet>(type, spriteSetID,
+                                                           index, newSpriteID);
+            break;
+        }
+        case SpriteSet::Type::Wall: {
+            setSpriteSetSlot<EditorWallSpriteSet>(type, spriteSetID, index,
+                                                  newSpriteID);
+            break;
+        }
+        case SpriteSet::Type::Object: {
+            setSpriteSetSlot<EditorObjectSpriteSet>(type, spriteSetID, index,
+                                                    newSpriteID);
+            break;
+        }
+        default: {
+            LOG_FATAL("Invalid sprite set type.");
+            break;
+        }
+    }
+}
+
 const std::string& SpriteDataModel::getWorkingTexturesDir()
 {
     return workingTexturesDir;
@@ -925,7 +956,7 @@ template<typename T>
 bool SpriteDataModel::spriteSetNameIsUnique(Uint16 spriteSetID,
                                             const std::string& displayName)
 {
-    auto spriteSetMap{getMapForSpriteSetType<T>()};
+    auto& spriteSetMap{getMapForSpriteSetType<T>()};
 
     // Dumbly look through all names for a match.
     // Note: Eventually, this should change to a name map that we keep updated.
@@ -947,7 +978,7 @@ void SpriteDataModel::setSpriteSetDisplayName(SpriteSet::Type type,
                                               Uint16 spriteSetID,
                                               const std::string& newDisplayName)
 {
-    auto spriteSetMap{getMapForSpriteSetType<T>()};
+    auto& spriteSetMap{getMapForSpriteSetType<T>()};
 
     auto spriteSetPair{spriteSetMap.find(spriteSetID)};
     if (spriteSetPair == spriteSetMap.end()) {
@@ -970,6 +1001,29 @@ void SpriteDataModel::setSpriteSetDisplayName(SpriteSet::Type type,
     // Signal the change.
     spriteSetDisplayNameChangedSig.publish(type, spriteSetID,
                                            spriteSet.displayName);
+}
+
+template<typename T>
+void SpriteDataModel::setSpriteSetSlot(SpriteSet::Type type, Uint16 spriteSetID,
+                                       std::size_t index, int newSpriteID)
+{
+    auto& spriteSetMap{getMapForSpriteSetType<T>()};
+
+    auto spriteSetPair{spriteSetMap.find(spriteSetID)};
+    if (spriteSetPair == spriteSetMap.end()) {
+        LOG_FATAL("Tried to set slot using invalid sprite set ID.");
+    }
+
+    // Check that the specified set can hold the given index.
+    T& spriteSet{spriteSetPair->second};
+    if (index >= spriteSet.spriteIDs.size()) {
+        LOG_FATAL("Tried to set slot using out of bounds index.");
+    }
+
+    spriteSet.spriteIDs[index] = newSpriteID;
+
+    // Signal the change.
+    spriteSetSlotChangedSig.publish(type, spriteSetID, index, newSpriteID);
 }
 
 void SpriteDataModel::saveSpriteSheets(nlohmann::json& json)

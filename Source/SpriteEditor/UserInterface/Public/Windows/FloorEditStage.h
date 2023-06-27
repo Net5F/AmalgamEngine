@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LibraryItemData.h"
+#include "LibraryListItem.h"
 #include "SpriteSets.h"
 #include "SpriteSetSlot.h"
 #include "AUI/Window.h"
@@ -55,6 +56,9 @@ private:
      */
     std::string getTopText(std::size_t spriteSetIndex);
 
+    /**
+     * Fills the given slot widget with the given sprite's image and name.
+     */
     void fillSlotSpriteData(SpriteSetSlot& slot, int spriteID);
 
     /** Used to get the current working dir when displaying the sprite. */

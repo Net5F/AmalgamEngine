@@ -57,7 +57,8 @@ private:
         FloorCoverings,
         Walls,
         Objects,
-        Count
+        Count,
+        None
     };
 
     /**

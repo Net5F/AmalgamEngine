@@ -432,6 +432,8 @@ LibraryListItem::Type LibraryWindow::toListItemType(SpriteSet::Type spriteSetTyp
             break;
         }
     }
+
+    return LibraryListItem::Type::None;
 }
 
 LibraryWindow::Category LibraryWindow::toCategory(SpriteSet::Type spriteSetType)
@@ -454,6 +456,8 @@ LibraryWindow::Category LibraryWindow::toCategory(SpriteSet::Type spriteSetType)
             break;
         }
     }
+
+    return LibraryWindow::Category::None;
 }
 
 } // End namespace SpriteEditor

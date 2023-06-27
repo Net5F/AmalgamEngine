@@ -100,6 +100,27 @@ void FloorEditStage::onActiveLibraryItemChanged(
         // Fill in the sprite's data.
         fillSlotSpriteData(slot, spriteID);
 
+        // Set the assignment button callback.
+        slot.assignButton.setOnPressed([this, &slot, i]() {
+            // If a sprite is selected, set this slot to it.
+            const auto& selectedListItems{libraryWindow.getSelectedListItems()};
+            if (selectedListItems.size() > 0) {
+                for (const LibraryListItem* selectedItem : selectedListItems) {
+                    // If this is a sprite, update this slot in the model.
+                    if (selectedItem->type == LibraryListItem::Type::Sprite) {
+                        spriteDataModel.setSpriteSetSlot(
+                            SpriteSet::Type::Floor, activeFloorID, i,
+                            static_cast<Uint16>(selectedItem->ID));
+                    }
+                }
+            }
+            else {
+                // No selection. Empty the slot.
+                spriteDataModel.setSpriteSetSlot(
+                    SpriteSet::Type::Floor, activeFloorID, i, EMPTY_SPRITE_ID);
+            }
+        });
+
         spriteContainer.push_back(std::move(slotPtr));
     }
 
@@ -172,17 +193,6 @@ void FloorEditStage::fillSlotSpriteData(SpriteSetSlot& slot, int spriteID)
         slot.spriteImage.setIsVisible(false);
         slot.spriteNameText.setText("Empty");
     }
-
-    // Set the callback.
-    slot.assignButton.setOnPressed([this, &slot]() {
-        const auto& selectedListItems{libraryWindow.getSelectedListItems()};
-        for (const LibraryListItem* selectedItem : selectedListItems) {
-            // If this is a sprite, fill this slot with its data.
-            if (selectedItem->type == LibraryListItem::Type::Sprite) {
-                fillSlotSpriteData(slot, selectedItem->ID);
-            }
-        }
-    });
 }
 
 } // End namespace SpriteEditor

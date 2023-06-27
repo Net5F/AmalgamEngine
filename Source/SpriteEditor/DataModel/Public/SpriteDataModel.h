@@ -144,6 +144,8 @@ public:
     // Sprite set properties.
     void setSpriteSetDisplayName(SpriteSet::Type type, Uint16 spriteSetID,
                                  const std::string& newDisplayName);
+    void setSpriteSetSlot(SpriteSet::Type type, Uint16 spriteSetID,
+                          std::size_t index, int newSpriteID);
 
     const std::string& getWorkingTexturesDir();
 
@@ -285,6 +287,13 @@ private:
     template<typename T>
     void setSpriteSetDisplayName(SpriteSet::Type type, Uint16 spriteSetID,
                                  const std::string& newDisplayName);
+
+    /**
+     * Implementation for setSpriteSetSlot().
+     */
+    template<typename T>
+    void setSpriteSetSlot(SpriteSet::Type type, Uint16 spriteSetID,
+                          std::size_t index, int newSpriteID);
 
     // Save functions.
     void saveSpriteSheets(nlohmann::json& json);
