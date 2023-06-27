@@ -18,8 +18,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteSetSlot(const std::string& inText,
-                  const std::string& inDebugName = "SpriteSetSlot");
+    SpriteSetSlot();
 
     //-------------------------------------------------------------------------
     // Public child widgets

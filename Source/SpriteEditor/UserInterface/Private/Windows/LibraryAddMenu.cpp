@@ -10,11 +10,11 @@ namespace SpriteEditor
 LibraryAddMenu::LibraryAddMenu()
 : AUI::Window({310, 5, 169, 187}, "LibraryAddMenu")
 , backgroundImage({0, 0, logicalExtent.w, logicalExtent.h})
-, addSpriteSheetButton({1, 1, 167, 31})
-, addFloorButton({1, 32, 167, 31})
-, addFloorCoveringButton({1, 63, 167, 31})
-, addWallButton({1, 94, 167, 31})
-, addObjectButton({1, 125, 167, 31})
+, addSpriteSheetButton({1, 1, 167, 32}, "AddSpriteSheetButton")
+, addFloorButton({1, 32, 167, 32}, "AddFloorButton")
+, addFloorCoveringButton({1, 64, 167, 32}, "AddFloorCoveringButton")
+, addWallButton({1, 96, 167, 32}, "AddWallButton")
+, addObjectButton({1, 128, 167, 32}, "AddObjectButton")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);

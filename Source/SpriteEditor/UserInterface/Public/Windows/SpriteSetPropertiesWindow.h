@@ -16,22 +16,22 @@ namespace SpriteEditor
 class SpriteDataModel;
 
 /**
- * The properties window shown when the user loads a floor from the Library.
- * Allows the user to edit the active floor's properties.
+ * The properties window shown when the user loads a sprite set from the Library.
+ * Allows the user to edit the active sprite set's properties.
  */
-class FloorPropertiesWindow : public AUI::Window
+class SpriteSetPropertiesWindow : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    FloorPropertiesWindow(SpriteDataModel& inSpriteDataModel);
+    SpriteSetPropertiesWindow(SpriteDataModel& inSpriteDataModel);
 
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------
-    /** All fields below directly match a data field in the 
-        EditorFloorSpriteSet class. */
+    /** All fields below directly match a data field in an
+        Editor<type>SpriteSet class. */
     AUI::Text nameLabel;
     MainTextInput nameInput;
 
@@ -53,11 +53,21 @@ private:
     void onSpriteSetDisplayNameChanged(SpriteSet::Type type, Uint16 spriteSetID,
                                const std::string& newDisplayName);
 
+    /**
+     * Loads the given sprite set's data into this panel.
+     */
+    template<typename T>
+    void loadActiveSpriteSet(SpriteSet::Type spriteSetType,
+                             const T& newActiveSpriteSet);
+
     /** Used while setting user-inputted sprite set data. */
     SpriteDataModel& spriteDataModel;
 
-    /** The active floor's ID. */
-    Uint16 activeFloorID;
+    /** The active sprite set's type. */
+    SpriteSet::Type activeSpriteSetType;
+
+    /** The active sprite set's ID. */
+    Uint16 activeSpriteSetID;
 
     /** The below functions are all for validating and saving the user's data
         when the text is committed. */

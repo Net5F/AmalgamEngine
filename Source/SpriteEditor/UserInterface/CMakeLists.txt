@@ -10,13 +10,13 @@ target_sources(SpriteEditor
         Private/Widgets/SpriteSheetListItem.cpp
         Private/Widgets/TitleButton.cpp
         Private/Windows/AddSheetDialog.cpp
-        Private/Windows/FloorEditStage.cpp
-        Private/Windows/FloorPropertiesWindow.cpp
         Private/Windows/LibraryAddMenu.cpp
         Private/Windows/LibraryWindow.cpp
         Private/Windows/SaveButtonWindow.cpp
         Private/Windows/SpriteEditStage.cpp
         Private/Windows/SpritePropertiesWindow.cpp
+        Private/Windows/SpriteSetEditStage.cpp
+        Private/Windows/SpriteSetPropertiesWindow.cpp
         Private/Windows/TitleWindow.cpp
         Private/MainScreen.cpp
         Private/TitleScreen.cpp
@@ -32,13 +32,13 @@ target_sources(SpriteEditor
         Public/Widgets/SpriteSheetListItem.h
         Public/Widgets/TitleButton.h
         Public/Windows/AddSheetDialog.h
-        Public/Windows/FloorEditStage.h
-        Public/Windows/FloorPropertiesWindow.h
         Public/Windows/LibraryAddMenu.h
         Public/Windows/LibraryWindow.h
         Public/Windows/SaveButtonWindow.h
         Public/Windows/SpriteEditStage.h
         Public/Windows/SpritePropertiesWindow.h
+        Public/Windows/SpriteSetEditStage.h
+        Public/Windows/SpriteSetPropertiesWindow.h
         Public/Windows/TitleWindow.h
         Public/MainScreen.h
         Public/TitleScreen.h

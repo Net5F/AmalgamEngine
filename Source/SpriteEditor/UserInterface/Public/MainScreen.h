@@ -8,8 +8,8 @@
 #include "SaveButtonWindow.h"
 #include "SpriteEditStage.h"
 #include "SpritePropertiesWindow.h"
-#include "FloorEditStage.h"
-#include "FloorPropertiesWindow.h"
+#include "SpriteSetEditStage.h"
+#include "SpriteSetPropertiesWindow.h"
 #include "TitleButton.h"
 #include "LibraryAddMenu.h"
 #include "AddSheetDialog.h"
@@ -74,12 +74,12 @@ private:
     // Edit stages
     /** The center stage for editing sprite bounding boxes. */
     SpriteEditStage spriteEditStage;
-    FloorEditStage floorEditStage;
+    SpriteSetEditStage spriteSetEditStage;
 
     // Properties windows
     /** The right-side panel for viewing and editing the active sprite data. */
     SpritePropertiesWindow spritePropertiesWindow;
-    FloorPropertiesWindow floorPropertiesWindow;
+    SpriteSetPropertiesWindow spriteSetPropertiesWindow;
 
     /** Confirmation dialog. Child widgets can call openConfirmationDialog()
         to use it. */

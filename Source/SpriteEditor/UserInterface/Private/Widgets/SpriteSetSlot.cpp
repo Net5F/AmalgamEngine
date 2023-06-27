@@ -5,9 +5,8 @@ namespace AM
 {
 namespace SpriteEditor
 {
-SpriteSetSlot::SpriteSetSlot(const std::string& inText,
-                         const std::string& inDebugName)
-: AUI::Widget({0, 0, 180, 255}, inDebugName)
+SpriteSetSlot::SpriteSetSlot()
+: AUI::Widget({0, 0, 180, 255}, "SpriteSetSlot")
 , topText{{0, 0, logicalExtent.w, 27}}
 , checkerboardImage{{30, 45, 120, 120}}
 , spriteImage{{30, 45, 120, 120}}
@@ -24,12 +23,10 @@ SpriteSetSlot::SpriteSetSlot(const std::string& inText,
     // Set our text properties.
     topText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 24);
     topText.setColor({255, 255, 255, 255});
-    topText.setText(inText);
     topText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
 
     spriteNameText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     spriteNameText.setColor({255, 255, 255, 255});
-    spriteNameText.setText(inText);
     spriteNameText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
 
     // Set our background image.

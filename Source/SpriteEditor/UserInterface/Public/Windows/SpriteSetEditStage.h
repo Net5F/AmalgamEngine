@@ -17,21 +17,21 @@ class SpriteDataModel;
 class LibraryWindow;
 
 /**
- * The center stage shown when the user loads a floor from the Library.
- * Allows the user to edit the active floor's sprites.
+ * The center stage shown when the user loads a sprite set from the Library.
+ * Allows the user to edit the active sprite set's sprite slots.
  */
-class FloorEditStage : public AUI::Window
+class SpriteSetEditStage : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    FloorEditStage(SpriteDataModel& inSpriteDataModel,
+    SpriteSetEditStage(SpriteDataModel& inSpriteDataModel,
                    const LibraryWindow& inLibraryWindow);
 
 private:
     /**
-     * If the new active item is a floor, loads it's data onto this stage.
+     * If the new active item is a sprite set, loads it's data onto this stage.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
@@ -47,6 +47,13 @@ private:
                                     std::size_t index, int newSpriteID);
 
     /**
+     * Loads the given sprite set's data onto this stage.
+     */
+    template<typename T>
+    void loadActiveSpriteSet(SpriteSet::Type spriteSetType,
+                             const T& newActiveSpriteSet);
+
+    /**
      * Styles the given text.
      */
     void styleText(AUI::Text& text);
@@ -54,12 +61,18 @@ private:
     /**
      * Returns the appropriate top text for the given index.
      */
-    std::string getTopText(std::size_t spriteSetIndex);
+    std::string getSlotTopText(std::size_t spriteSetIndex);
 
     /**
      * Fills the given slot widget with the given sprite's image and name.
      */
     void fillSlotSpriteData(SpriteSetSlot& slot, int spriteID);
+
+    /**
+     * Fills the description text widgets with the appropriate strings, based 
+     * on the current activeSpriteSetType.
+     */
+    void fillDescriptionTexts();
 
     /** Used to get the current working dir when displaying the sprite. */
     SpriteDataModel& spriteDataModel;
@@ -67,8 +80,11 @@ private:
     /** Used to get the currently selected list item. */
     const LibraryWindow& libraryWindow;
 
-    /** The active floor's ID. */
-    Uint16 activeFloorID;
+    /** The active sprite set's type. */
+    SpriteSet::Type activeSpriteSetType;
+
+    /** The active sprite set's ID. */
+    Uint16 activeSpriteSetID;
 
     //-------------------------------------------------------------------------
     // Private child widgets
@@ -83,6 +99,7 @@ private:
     AUI::Text descText1;
     AUI::Text descText2;
     AUI::Text descText3;
+    AUI::Text descText4;
 };
 
 } // End namespace SpriteEditor

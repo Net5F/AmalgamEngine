@@ -341,6 +341,7 @@ bool SpriteDataModel::addFloorCovering()
     while (!spriteSetNameIsUnique<EditorFloorCoveringSpriteSet>(numericID,
                                                                 displayName)) {
         displayName = "NewFloorCovering" + std::to_string(nameCount);
+        nameCount++;
     }
 
     // Add the new, empty sprite set to the map.
@@ -370,6 +371,7 @@ bool SpriteDataModel::addWall()
     while (
         !spriteSetNameIsUnique<EditorWallSpriteSet>(numericID, displayName)) {
         displayName = "NewWall" + std::to_string(nameCount);
+        nameCount++;
     }
 
     // Add the new, empty sprite set to the map.
@@ -398,6 +400,7 @@ bool SpriteDataModel::addObject()
     while (
         !spriteSetNameIsUnique<EditorObjectSpriteSet>(numericID, displayName)) {
         displayName = "NewObject" + std::to_string(nameCount);
+        nameCount++;
     }
 
     // Add the new, empty sprite set to the map.
