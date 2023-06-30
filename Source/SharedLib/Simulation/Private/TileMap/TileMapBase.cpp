@@ -424,15 +424,25 @@ void TileMapBase::addNorthWall(int tileX, int tileY, const WallSpriteSet& sprite
 
         // If the NorthEast tile has a West wall.
         if (northeastWalls[0].wallType == Wall::Type::West) {
-            // We formed a corner. Check if the tile to the east has a wall.
+            // We formed a corner. Check if the tile to the East has a wall.
             // Note: We know this tile is valid cause there's a NorthEast tile.
             Tile& eastTile{tiles[linearizeTileIndex(tileX + 1, tileY)]};
             std::array<WallTileLayer, 2>& eastWalls{eastTile.getWalls()};
             if ((eastWalls[0].wallType == Wall::Type::None)
                 && (eastWalls[1].wallType == Wall::Type::None)) {
-                // The tile has no walls. Add a NorthWestGapFill.
+                // The East tile has no walls. Add a NorthWestGapFill.
                 eastWalls[1].spriteSet = &spriteSet;
                 eastWalls[1].wallType = Wall::Type::NorthWestGapFill;
+            }
+            else if (eastWalls[1].wallType == Wall::Type::NorthWestGapFill) {
+                // The East tile has a NW gap fill. If its sprite set no longer 
+                // matches either surrounding wall, make it match the new wall.
+                int gapFillID{eastWalls[1].spriteSet->numericID};
+                int newNorthID{spriteSet.numericID};
+                int westID{northeastWalls[0].spriteSet->numericID};
+                if ((gapFillID != newNorthID) && (gapFillID != westID)) {
+                    eastWalls[1].spriteSet = &spriteSet;
+                }
             }
         }
     }
@@ -450,7 +460,7 @@ void TileMapBase::addWestWall(int tileX, int tileY, const WallSpriteSet& spriteS
 
     // If the tile has a North wall, switch it to a NorthEast gap fill.
     if (walls[1].wallType == Wall::Type::North) {
-        walls[1].spriteSet = &spriteSet;
+        // Note: We don't change the sprite set. Only the type changes.
         walls[1].wallType = Wall::Type::NorthEastGapFill;
     }
     // Else if the tile has a NorthWest gap fill, remove it.
@@ -467,15 +477,25 @@ void TileMapBase::addWestWall(int tileX, int tileY, const WallSpriteSet& spriteS
         // If the SouthWest tile has a North wall or a NE gap fill.
         if ((southwestWalls[1].wallType == Wall::Type::North) ||
             (southwestWalls[1].wallType == Wall::Type::NorthEastGapFill)) {
-            // We formed a corner. Check if the tile to the south has a wall.
+            // We formed a corner. Check if the tile to the South has a wall.
             // Note: We know this tile is valid cause there's a SouthWest tile.
             Tile& southTile{tiles[linearizeTileIndex(tileX, tileY + 1)]};
             std::array<WallTileLayer, 2>& southWalls{southTile.getWalls()};
             if ((southWalls[0].wallType == Wall::Type::None)
                 && (southWalls[1].wallType == Wall::Type::None)) {
-                // The tile has no walls. Add a NorthWestGapFill.
+                // The South tile has no walls. Add a NorthWestGapFill.
                 southWalls[1].spriteSet = &spriteSet;
                 southWalls[1].wallType = Wall::Type::NorthWestGapFill;
+            }
+            else if (southWalls[1].wallType == Wall::Type::NorthWestGapFill) {
+                // The South tile has a NW gap fill. If its sprite set no longer 
+                // matches either surrounding wall, make it match the new wall.
+                int gapFillID{southWalls[1].spriteSet->numericID};
+                int newWestID{spriteSet.numericID};
+                int northID{southwestWalls[1].spriteSet->numericID};
+                if ((gapFillID != newWestID) && (gapFillID != northID)) {
+                    southWalls[1].spriteSet = &spriteSet;
+                }
             }
         }
     }

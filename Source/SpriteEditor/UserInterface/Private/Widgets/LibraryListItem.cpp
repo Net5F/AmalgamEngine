@@ -127,6 +127,11 @@ AUI::EventResult LibraryListItem::onMouseDoubleClick(AUI::MouseButtonType button
         return AUI::EventResult{.wasHandled{false}};
     }
 
+    // If we aren't already selected, select this widget.
+    if (!isSelected) {
+        select();
+    }
+
     // If the user set a callback for this event, call it.
     if (onActivated != nullptr) {
         onActivated(this);

@@ -41,16 +41,16 @@ TileMap::TileMap(SpriteData& inSpriteData)
     }
 }
 
-void TileMap::setMapSize(unsigned int inMapXLengthChunks,
-                         unsigned int inMapYLengthChunks)
+void TileMap::setMapSize(std::size_t inMapXLengthChunks,
+                         std::size_t inMapYLengthChunks)
 {
     // Set our map size.
     // Note: We set x/y to 0 since our map origin is always (0, 0). Change
     //       this if we ever support negative origins.
     chunkExtent.x = 0;
     chunkExtent.y = 0;
-    chunkExtent.xLength = inMapXLengthChunks;
-    chunkExtent.yLength = inMapYLengthChunks;
+    chunkExtent.xLength = static_cast<int>(inMapXLengthChunks);
+    chunkExtent.yLength = static_cast<int>(inMapYLengthChunks);
     tileExtent.x = 0;
     tileExtent.y = 0;
     tileExtent.xLength = (chunkExtent.xLength * SharedConfig::CHUNK_WIDTH);

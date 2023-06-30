@@ -208,7 +208,7 @@ void WorldSpriteSorter::pushFloorCoveringSprites(const Tile& tile,
 }
 
 void WorldSpriteSorter::pushWallSprites(const Tile& tile,
-                                          const Camera& camera, int x, int y)
+                                        const Camera& camera, int x, int y)
 {
     const std::array<WallTileLayer, 2>& walls{tile.getWalls()};
     for (const WallTileLayer& wall : walls) {

@@ -27,8 +27,8 @@ public:
     /**
      * Sets the size of the map and resizes the tiles vector.
      */
-    void setMapSize(unsigned int inMapXLengthChunks,
-                    unsigned int inMapYLengthChunks);
+    void setMapSize(std::size_t inMapXLengthChunks,
+                    std::size_t inMapYLengthChunks);
 };
 
 } // End namespace Client
