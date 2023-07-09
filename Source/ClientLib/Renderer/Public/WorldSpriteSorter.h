@@ -179,11 +179,12 @@ SDL_Color WorldSpriteSorter::getColorMod(const T& objectID)
                                      spriteColorMods.end(), objectIDsMatch);
     if (colorModInfo != spriteColorMods.end()) {
         // Remove this color mod from our temp vector, since it's been used.
+        SDL_Color colorMod{colorModInfo->colorMod};
         spriteColorMods.erase(colorModInfo);
-        return colorModInfo->colorMod;
+        return colorMod;
     }
     else {
-        return {255, 255, 255, 255};
+        return {0, 0, 0, 255};
     }
 }
 

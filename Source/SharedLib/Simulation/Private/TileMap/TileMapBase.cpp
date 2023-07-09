@@ -51,6 +51,11 @@ void TileMapBase::setFloor(int tileX, int tileY, Uint16 spriteSetID)
     setFloor(tileX, tileY, spriteData.getFloorSpriteSet(spriteSetID));
 }
 
+bool TileMapBase::remFloor(int tileX, int tileY)
+{
+    return clearTileLayers<FloorTileLayer>(tileX, tileY);
+}
+
 void TileMapBase::addFloorCovering(int tileX, int tileY, const FloorCoveringSpriteSet& spriteSet,
                       Rotation::Direction rotation)
 {
@@ -95,7 +100,7 @@ bool TileMapBase::remFloorCovering(int tileX, int tileY,
     // Erase any layers with the same sprite set and rotation.
     std::size_t erasedCount{std::erase_if(
         tile.getFloorCoverings(),
-        [spriteSet, direction](const FloorCoveringTileLayer& layer) {
+        [&spriteSet, direction](const FloorCoveringTileLayer& layer) {
             if ((layer.spriteSet == &spriteSet)
                 && (layer.direction == direction)) {
                 return true;
@@ -183,6 +188,7 @@ bool TileMapBase::remWall(int tileX, int tileY, Wall::Type wallType)
         case Wall::Type::North:
         {
             wallWasRemoved = remNorthWall(tileX, tileY);
+            break;
         }
         case Wall::Type::West:
         {
@@ -193,12 +199,6 @@ bool TileMapBase::remWall(int tileX, int tileY, Wall::Type wallType)
             LOG_FATAL("Wall type must be North or West.");
             break;
         }
-    }
-
-    // If the wall was removed, rebuild the affected tile's collision.
-    if (wallWasRemoved) {
-        Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
-        tile.rebuildCollision(tileX, tileY);
     }
 
     // If we're tracking tile updates, add this one to the history.
@@ -256,7 +256,7 @@ bool TileMapBase::remObject(int tileX, int tileY,
     // Erase any layers with the same sprite set and rotation.
     std::size_t erasedCount{std::erase_if(
         tile.getObjects(),
-        [spriteSet, rotation](const ObjectTileLayer& layer) {
+        [&spriteSet, rotation](const ObjectTileLayer& layer) {
             if ((layer.spriteSet == &spriteSet)
                 && (layer.direction == rotation)) {
                 return true;
@@ -513,6 +513,7 @@ bool TileMapBase::remNorthWall(int tileX, int tileY)
         || (walls[1].wallType == Wall::Type::NorthEastGapFill)) {
         walls[1].spriteSet = nullptr;
         walls[1].wallType = Wall::Type::None;
+        tile.rebuildCollision(tileX, tileY);
         wallWasRemoved = true;
     }
 
@@ -525,6 +526,7 @@ bool TileMapBase::remNorthWall(int tileX, int tileY)
             // Remove the gap fill.
             eastWalls[1].spriteSet = nullptr;
             eastWalls[1].wallType = Wall::Type::None;
+            eastTile.rebuildCollision(tileX + 1, tileY);
         }
     }
 
@@ -542,6 +544,13 @@ bool TileMapBase::remWestWall(int tileX, int tileY)
     if (walls[0].wallType == Wall::Type::West) {
         walls[0].spriteSet = nullptr;
         walls[0].wallType = Wall::Type::None;
+
+        // If the tile has a NE gap fill, change it to a North.
+        if (walls[1].wallType == Wall::Type::NorthEastGapFill) {
+            walls[1].wallType = Wall::Type::North;
+        }
+
+        tile.rebuildCollision(tileX, tileY);
         wallWasRemoved = true;
     }
 
@@ -554,6 +563,7 @@ bool TileMapBase::remWestWall(int tileX, int tileY)
             // Remove the gap fill.
             southWalls[1].spriteSet = nullptr;
             southWalls[1].wallType = Wall::Type::None;
+            southTile.rebuildCollision(tileX, tileY + 1);
         }
     }
 

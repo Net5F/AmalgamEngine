@@ -1,4 +1,5 @@
 #include "UserInterface.h"
+#include "World.h"
 #include "Config.h"
 #include "AssetCache.h"
 #include "SpriteData.h"
@@ -62,7 +63,11 @@ void UserInterface::render(const Camera& camera,
         extension->render(camera);
     }
 
-    // Update our locator with the latest sprites.
+    // Update our locator's data and fill it with the latest sprites.
+    worldObjectLocator.setCamera(camera);
+    worldObjectLocator.setExtent(
+        camera.getTileViewExtent(world->tileMap.getTileExtent()));
+
     worldObjectLocator.clear();
     for (const SpriteSortInfo& spriteInfo : sortedSprites) {
         // If this sprite isn't a full phantom, add it.
@@ -97,6 +102,11 @@ void UserInterface::setExtension(
     std::unique_ptr<IUserInterfaceExtension> inExtension)
 {
     extension = std::move(inExtension);
+}
+
+void UserInterface::setWorld(const World& inWorld)
+{
+    world = &inWorld;
 }
 
 } // End namespace Client

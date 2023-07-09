@@ -16,8 +16,12 @@ struct SpriteColorModInfo {
     /** The world object that we want to modify the color of. */
     WorldObjectID objectToModify;
 
-    /** The color and transparency to multiply the sprite by. */
-    SDL_Color colorMod{255, 255, 255, 255};
+    /** The color and transparency to multiply the sprite by.
+        Note: Instead of directly multiplying the sprite by this color (which 
+              would make it darker), we render an additional sprite with an 
+              additive blend mode and multiply that one by this color.
+              Alpha is applied to both sprites. */
+    SDL_Color colorMod{0, 0, 0, 255};
 };
 
 } // End namespace Client

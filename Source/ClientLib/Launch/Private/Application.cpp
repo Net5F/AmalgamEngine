@@ -15,32 +15,37 @@ namespace AM
 namespace Client
 {
 Application::Application()
-: sdl(SDL_INIT_VIDEO)
-, userConfigInitializer()
-, sdlWindow(Config::WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED,
+: sdl{SDL_INIT_VIDEO}
+, userConfigInitializer{}
+, sdlWindow{Config::WINDOW_TITLE,
+            SDL_WINDOWPOS_UNDEFINED,
             SDL_WINDOWPOS_UNDEFINED,
             UserConfig::get().getWindowSize().w,
             UserConfig::get().getWindowSize().h,
-            SDL_WINDOW_SHOWN)
-, sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
-, assetCache(sdlRenderer.Get())
-, spriteData(assetCache)
-, userInterface()
-, uiCaller(std::bind_front(&UserInterface::tick, &userInterface),
-           Config::UI_TICK_TIMESTEP_S, "UserInterface", true)
-, network()
-, networkCaller(std::bind_front(&Network::tick, &network),
-                SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
-, simulation(userInterface.getEventDispatcher(), network, spriteData)
-, simCaller(std::bind_front(&Simulation::tick, &simulation),
-            SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
-, renderer(sdlRenderer.Get(), simulation.getWorld(), userInterface, spriteData,
-           std::bind_front(&PeriodicCaller::getProgress, &simCaller))
-, rendererCaller(std::bind_front(&Renderer::render, &renderer),
-                 UserConfig::get().getFrameTimestepS(), "Renderer", true)
+            SDL_WINDOW_SHOWN}
+, sdlRenderer{sdlWindow, -1, SDL_RENDERER_ACCELERATED}
+, assetCache{sdlRenderer.Get()}
+, spriteData{assetCache}
+, userInterface{}
+, uiCaller{std::bind_front(&UserInterface::tick, &userInterface),
+           Config::UI_TICK_TIMESTEP_S, "UserInterface", true}
+, network{}
+, networkCaller{std::bind_front(&Network::tick, &network),
+                SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true}
+, simulation{userInterface.getEventDispatcher(), network, spriteData}
+, simCaller{std::bind_front(&Simulation::tick, &simulation),
+            SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
+, renderer{sdlRenderer.Get(), simulation.getWorld(), userInterface, spriteData,
+           std::bind_front(&PeriodicCaller::getProgress, &simCaller)}
+, rendererCaller{std::bind_front(&Renderer::render, &renderer),
+                 UserConfig::get().getFrameTimestepS(), "Renderer", true}
 , eventHandlers{this, &renderer, &userInterface, &simulation}
-, exitRequested(false)
+, exitRequested{false}
 {
+    // Note: We pass this separately from the above initialization to avoid a 
+    //       circular dependency between Simulation and UserInterface.
+    userInterface.setWorld(simulation.getWorld());
+
     // Set fullscreen mode.
     unsigned int fullscreenMode{UserConfig::get().getFullscreenMode()};
     switch (fullscreenMode) {

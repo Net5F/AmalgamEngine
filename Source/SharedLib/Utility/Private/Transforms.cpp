@@ -68,6 +68,29 @@ Position Transforms::screenToWorld(const SDL_FPoint& screenPoint,
     return {worldX, worldY, 0};
 }
 
+Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
+                                 const Camera& camera)
+{
+    // Ref: https://gamedev.stackexchange.com/a/206067/124282
+
+    // Find where the screen point intersects the world at Z == 0.
+    Position floorPos{screenToWorld(screenPoint, camera)};
+
+    // Calc the scaling factor going from world tiles to screen tiles.
+    static const float TILE_HEIGHT_SCALE{
+        static_cast<float>(SharedConfig::TILE_SCREEN_HEIGHT)
+        / SharedConfig::TILE_WORLD_WIDTH};
+
+    // Return a ray that starts at the calculated position and points towards 
+    // the camera.
+    return {floorPos.x,
+            floorPos.y,
+            floorPos.z,
+            SharedConfig::Z_SCREEN_SCALE,
+            SharedConfig::Z_SCREEN_SCALE,
+            TILE_HEIGHT_SCALE};
+}
+
 float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)
 {
     // Calc the scaling factor going from screen Y units to world Z units.

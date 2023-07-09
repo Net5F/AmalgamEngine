@@ -14,7 +14,7 @@ namespace AM
 {
 EntityLocator::EntityLocator(entt::registry& inRegistry)
 : registry{inRegistry}
-, cellExtent{}
+, gridCellExtent{}
 , cellWorldWidth{SharedConfig::CELL_WIDTH * SharedConfig::TILE_WORLD_WIDTH}
 {
 }
@@ -28,13 +28,13 @@ void EntityLocator::setGridSize(std::size_t inMapXLengthTiles,
     }
 
     // Set our grid size to match the tile map.
-    cellExtent.xLength
+    gridCellExtent.xLength
         = static_cast<int>(inMapXLengthTiles / SharedConfig::CELL_WIDTH);
-    cellExtent.yLength
+    gridCellExtent.yLength
         = static_cast<int>(inMapYLengthTiles / SharedConfig::CELL_WIDTH);
 
     // Resize the grid to fit the map.
-    entityGrid.resize(cellExtent.xLength * cellExtent.yLength);
+    entityGrid.resize(gridCellExtent.xLength * gridCellExtent.yLength);
 }
 
 void EntityLocator::setEntityLocation(entt::entity entity,
@@ -53,7 +53,7 @@ void EntityLocator::setEntityLocation(entt::entity entity,
         = (static_cast<int>(std::ceil(boundingBox.maxY / cellWorldWidth))
            - boxCellExtent.y);
 
-    if (!(cellExtent.containsExtent(boxCellExtent))) {
+    if (!(gridCellExtent.containsExtent(boxCellExtent))) {
         LOG_FATAL("Tried to track entity that is outside of the locator's "
                   "grid: (%d, %d, %d, %d)ce.",
                   boxCellExtent.x, boxCellExtent.y, boxCellExtent.xLength,
@@ -105,7 +105,7 @@ std::vector<entt::entity>&
            - cylinderCellExtent.y);
 
     // Clip the extent to the grid's bounds.
-    cylinderCellExtent.intersectWith(cellExtent);
+    cylinderCellExtent.intersectWith(gridCellExtent);
 
     // Add the entities in every intersected cell to the return vector.
     for (int x = cylinderCellExtent.x; x <= cylinderCellExtent.xMax(); ++x) {
@@ -144,7 +144,7 @@ std::vector<entt::entity>&
     CellExtent tileCellExtent{tileToCellExtent(tileExtent)};
 
     // Clip the extent to the grid's bounds.
-    tileCellExtent.intersectWith(cellExtent);
+    tileCellExtent.intersectWith(gridCellExtent);
 
     // Add the entities in every intersected cell to the return vector.
     for (int x = tileCellExtent.x; x <= tileCellExtent.xMax(); ++x) {

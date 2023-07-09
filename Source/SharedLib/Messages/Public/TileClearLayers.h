@@ -25,7 +25,7 @@ public:
     int tileY{0};
 
     /** The layer types that should be cleared from the specified tile. */
-    std::array<bool, TileLayer::Type::Count> layerTypesToClear;
+    std::array<bool, TileLayer::Type::Count> layerTypesToClear{};
 
     //--------------------------------------------------------------------------
     // Non-replicated data
@@ -47,19 +47,13 @@ void serialize(S& serializer, TileClearLayers& tileClearLayers)
 
     // Bit pack the input array.
     // It's an array of bools, so we can make it pretty small.
-    // Note: We expect the outer context (such as EntityUpdate) to
-    //       enable bit packing.
     serializer.enableBitPacking([&tileClearLayers](
                                     typename S::BPEnabledType& sbp) {
         sbp.container(tileClearLayers.layerTypesToClear,
-                      [](typename S::BPEnabledType& sbp, bool clearLayerType) {
+                      [](typename S::BPEnabledType& sbp, bool& clearLayerType) {
                           sbp.boolValue(clearLayerType);
                       });
     });
-
-    // Align after bit-packing to make sure the following bytes can be easily
-    // processed.
-    serializer.adapter().align();
 }
 
 } // End namespace AM

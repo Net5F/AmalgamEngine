@@ -2,6 +2,7 @@
 
 #include "Position.h"
 #include "PreviousPosition.h"
+#include "TileExtent.h"
 #include <SDL_rect.h>
 
 namespace AM
@@ -11,7 +12,6 @@ namespace AM
  * currently viewing.
  */
 struct Camera {
-public:
     enum MovementBehavior {
         // Camera will not move.
         Fixed,
@@ -37,6 +37,13 @@ public:
 
     /** How quickly the camera zooms. */
     float zoomSensitivity{0.1f};
+
+    /**
+     * Returns the tile extent that is in view of this camera.
+     *
+     * @param tileMapExtent  The tile map's bounds.
+     */
+    TileExtent getTileViewExtent(const TileExtent& tileMapExtent) const;
 };
 
 } // namespace AM

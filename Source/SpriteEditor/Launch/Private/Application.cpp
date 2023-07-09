@@ -15,21 +15,21 @@ namespace AM
 namespace SpriteEditor
 {
 Application::Application()
-: sdl(SDL_INIT_VIDEO)
-, sdlWindow("Amalgam Engine Sprite Editor", SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED, Config::ACTUAL_SCREEN_WIDTH,
-            Config::ACTUAL_SCREEN_HEIGHT, SDL_WINDOW_SHOWN)
-, sdlRenderer(sdlWindow, -1, SDL_RENDERER_ACCELERATED)
-, assetCache(sdlRenderer.Get())
-, spriteDataModel(sdlRenderer.Get())
-, userInterface(sdlRenderer.Get(), assetCache, spriteDataModel)
-, uiCaller(std::bind_front(&UserInterface::tick, &userInterface),
-           Config::UI_TICK_TIMESTEP_S, "UserInterface", true)
-, renderer(sdlRenderer.Get(), userInterface)
-, rendererCaller(std::bind_front(&Renderer::render, &renderer),
-                 Renderer::FRAME_TIMESTEP_S, "Renderer", true)
+: sdl{SDL_INIT_VIDEO}
+, sdlWindow{"Amalgam Engine Sprite Editor", SDL_WINDOWPOS_UNDEFINED,
+            SDL_WINDOWPOS_UNDEFINED,        Config::ACTUAL_SCREEN_WIDTH,
+            Config::ACTUAL_SCREEN_HEIGHT,   SDL_WINDOW_SHOWN}
+, sdlRenderer{sdlWindow, -1, SDL_RENDERER_ACCELERATED}
+, assetCache{sdlRenderer.Get()}
+, spriteDataModel{sdlRenderer.Get()}
+, userInterface{sdlRenderer.Get(), assetCache, spriteDataModel}
+, uiCaller{std::bind_front(&UserInterface::tick, &userInterface),
+           Config::UI_TICK_TIMESTEP_S, "UserInterface", true}
+, renderer{sdlRenderer.Get(), userInterface}
+, rendererCaller{std::bind_front(&Renderer::render, &renderer),
+                 Renderer::FRAME_TIMESTEP_S, "Renderer", true}
 , eventHandlers{this, &userInterface, &renderer}
-, exitRequested(false)
+, exitRequested{false}
 {
     // Initialize nativefiledialog.
     if (NFD_Init() != NFD_OKAY) {

@@ -10,7 +10,6 @@ namespace AM
  * Represents the states of a particular entity's inputs at a point in time.
  */
 struct Input {
-public:
     enum Type : Uint8 { XUp, XDown, YUp, YDown, ZUp, ZDown, Count, None };
 
     enum State : Uint8 { Released, Pressed };

@@ -15,7 +15,7 @@ struct Camera;
 
 namespace Client
 {
-
+class World;
 class IUserInterfaceExtension;
 
 /**
@@ -78,7 +78,16 @@ public:
      */
     void setExtension(std::unique_ptr<IUserInterfaceExtension> inExtension);
 
+    /**
+     * Separate setter to avoid a circular dependency during construction 
+     * (Simulation needs our eventDispatcher, we need Simulation's World).
+     */
+    void setWorld(const World& inWorld);
+
 private:
+    /** Used to get tile map info for the locator. */
+    const World* world;
+
     /** Used to dispatch events from the UI to the simulation. */
     EventDispatcher eventDispatcher;
 

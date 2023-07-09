@@ -124,7 +124,7 @@ private:
      */
     inline std::size_t linearizeCellIndex(int x, int y) const
     {
-        return (y * cellExtent.xLength) + x;
+        return (y * gridCellExtent.xLength) + x;
     }
 
     /**
@@ -136,7 +136,7 @@ private:
     entt::registry& registry;
 
     /** The grid's extent, with cells as the unit. */
-    CellExtent cellExtent;
+    CellExtent gridCellExtent;
 
     /** The width of a grid cell in world units. */
     const float cellWorldWidth;

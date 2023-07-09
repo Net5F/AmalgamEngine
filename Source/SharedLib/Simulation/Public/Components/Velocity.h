@@ -6,8 +6,7 @@ namespace AM
  * Represents the current velocity of an entity.
  */
 struct Velocity {
-public:
-    static constexpr float DEFAULT_MAX_VELOCITY = 5;
+    static constexpr float DEFAULT_MAX_VELOCITY{5};
 
     //--------------------------------------------------------------------------
     // Replicated data

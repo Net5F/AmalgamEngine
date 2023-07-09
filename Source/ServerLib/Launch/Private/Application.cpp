@@ -12,17 +12,17 @@ namespace AM
 namespace Server
 {
 Application::Application()
-: sdl(0)
-, sdlNetInit()
-, userConfigInitializer()
-, spriteData()
-, network()
-, networkCaller(std::bind_front(&Network::tick, &network),
-                SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true)
-, simulation(network, spriteData)
-, simCaller(std::bind_front(&Simulation::tick, &simulation),
-            SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
-, exitRequested(false)
+: sdl{0}
+, sdlNetInit{}
+, userConfigInitializer{}
+, spriteData{}
+, network{}
+, networkCaller{std::bind_front(&Network::tick, &network),
+                SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true}
+, simulation{network, spriteData}
+, simCaller{std::bind_front(&Simulation::tick, &simulation),
+            SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
+, exitRequested{false}
 {
     // Enable delay reporting.
     simCaller.reportDelays(Simulation::SIM_DELAYED_TIME_S);

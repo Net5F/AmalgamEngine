@@ -3,6 +3,7 @@
 #include "TilePosition.h"
 #include "Position.h"
 #include "BoundingBox.h"
+#include "Ray.h"
 #include "SharedConfig.h"
 #include <SDL_rect.h>
 
@@ -37,6 +38,15 @@ public:
      */
     static Position screenToWorld(const SDL_FPoint& screenPoint,
                                   const Camera& camera);
+
+    /**
+     * Converts a point in screen space to a ray in world space.
+     * Note: The resulting ray starts at the ground (Z == 0) and points 
+     *       towards the camera. It does not point from the camera to the 
+     *       ground, as may be expected.
+     */
+    static Ray screenToWorldRay(const SDL_FPoint& screenPoint,
+                                const Camera& camera);
 
     /**
      * Converts a Y coordinate in screen space to a Z coordinate in world space.

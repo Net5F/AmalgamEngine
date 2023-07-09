@@ -80,8 +80,8 @@ void UserConfig::setWindowSize(const SDL_Rect& inWindowSize)
     if ((fullscreenMode != 0) && SDL_WasInit(SDL_INIT_VIDEO)) {
         SDL_DisplayMode displayMode;
         SDL_GetDesktopDisplayMode(0, &displayMode);
-        windowSizeWidth = static_cast<float>(displayMode.w);
-        windowSizeHeight = static_cast<float>(displayMode.h);
+        windowSizeWidth = displayMode.w;
+        windowSizeHeight = displayMode.h;
     }
 }
 

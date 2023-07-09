@@ -36,7 +36,7 @@ class Simulation : public OSEventHandler
 {
 public:
     /** An unreasonable amount of time for the sim tick to be late by. */
-    static constexpr double SIM_DELAYED_TIME_S = .001;
+    static constexpr double SIM_DELAYED_TIME_S{.001};
 
     Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
                SpriteData& inSpriteData);

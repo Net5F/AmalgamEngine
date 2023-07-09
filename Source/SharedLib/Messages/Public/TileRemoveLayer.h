@@ -27,6 +27,7 @@ public:
     TileLayer::Type layerType{TileLayer::Type::None};
 
     /** The numeric ID of the layer's sprite set.
+        For Floors, this will always be 0.
         For Walls, this won't be used (we only need the Wall::Type). */
     Uint16 spriteSetID{0};
 

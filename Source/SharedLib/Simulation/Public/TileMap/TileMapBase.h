@@ -59,6 +59,12 @@ public:
     void setFloor(int tileX, int tileY, Uint16 spriteSetID);
 
     /**
+     * Removes the given tile's floor. Since tiles only have 1 floor, this is 
+     * equivalent to clearTileLayers<FloorTileLayer>().
+     */
+    bool remFloor(int tileX, int tileY);
+
+    /**
      * Adds the given floor covering to the given tile.
      */
     void addFloorCovering(int tileX, int tileY, const FloorCoveringSpriteSet& spriteSet,

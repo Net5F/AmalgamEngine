@@ -9,14 +9,15 @@ namespace AM
 /**
  * Represents a position in the world.
  *
- * Generally, this will be a component attached to an entity, and will
- * correspond to a centered point under the entity's feet.
+ * If used as a component attached to an entity, this will correspond to a 
+ * a centered point under the entity's feet.
  * This means that an entity's sprite and bounding box will be centered on this
  * position in the X and Y axis, and will sit on top of this position in the Z
  * axis.
+ *
+ * We also commonly use this for 3D math.
  */
 struct Position {
-public:
     //--------------------------------------------------------------------------
     // Replicated data
     //--------------------------------------------------------------------------

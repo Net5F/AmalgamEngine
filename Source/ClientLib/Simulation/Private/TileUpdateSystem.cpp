@@ -111,8 +111,9 @@ void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
 void TileUpdateSystem::remTileLayer(const TileRemoveLayer& remLayerRequest)
 {
     if (remLayerRequest.layerType == TileLayer::Type::Floor) {
-        world.tileMap.clearTileLayers<FloorTileLayer>(remLayerRequest.tileX,
-                                                      remLayerRequest.tileY);
+        // Note: We normally won't receive this, since the server uses the 
+        //       clearTileLayers path for removing floors.
+        world.tileMap.remFloor(remLayerRequest.tileX, remLayerRequest.tileY);
     }
     else if (remLayerRequest.layerType == TileLayer::Type::FloorCovering) {
         world.tileMap.remFloorCovering(

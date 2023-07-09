@@ -59,37 +59,36 @@ public:
     void addWorldObject(const WorldObjectID& objectID,
                         const BoundingBox& objectWorldBounds);
 
+    /**
+     * Returns the top-most world object under the given screen-space point.
+     * If multiple objects are intersected, the one drawn on top will be 
+     * returned.
+     *
+     * @param screenPoint  The point on the screen to hit test with.
+     * @return The ID of the intersected object. If no layer is hit, the variant
+     *         type will == std::monostate.
+     */
     WorldObjectID getObjectUnderPoint(const SDL_Point& screenPoint) const;
-
-    /**
-     * Returns the tile layer underneath the given actual-space point.
-     * If multiple tile layers are intersected, the one drawn on top will be 
-     * returned.
-     *
-     * @param screenPoint  The point in isometric screen space to hit test with.
-     *                     Note: This should include the camera offset.
-     * @return The ID of the intersected layer. If no layer is hit, type will 
-     *         == TileLayer::Type::None.
-     */
-    TileLayerID getTileLayerUnderPoint(const SDL_Point& screenPoint) const;
-
-    /**
-     * Returns the entity underneath the given actual-space point.
-     * If multiple entities are intersected, the one drawn on top will be 
-     * returned.
-     *
-     * @param screenPoint  The point in isometric screen space to hit test with.
-     *                     Note: This should include the camera offset.
-     * @return The ID of the intersected entity. If no entity is hit, entt::null
-     *         will be returned.
-     */
-    entt::entity getEntityUnderPoint(const SDL_Point& screenPoint) const;
 
     /**
      * Clears all of our internal data structures, getting rid of any tracked
      * objects.
      */
     void clear();
+
+    /**
+     * Sets the camera that will be used for screen/world conversions.
+     */
+    void setCamera(const Camera& inCamera);
+
+    /**
+     * Sets the part of the world map that this locator covers.
+     * 
+     * Typically, this will match the view extent of the player's camera.
+     *
+     * All tracked widgets must be fully within these bounds.
+     */
+    void setExtent(const TileExtent& inTileExtent);
 
     /**
      * Sets the width of the cells in the spatial partitioning hash map and 
@@ -109,15 +108,32 @@ private:
 
     /** The default width of the cells in the spatial partitioning hash map,
         in world units. */
-    static constexpr float DEFAULT_CELL_WIDTH{128};
+    static constexpr float DEFAULT_CELL_WIDTH{SharedConfig::TILE_WORLD_WIDTH
+                                              * 4};
 
     /**
-     * Converts the given isometric screen-space extent to a cell extent.
+     * Converts the given tile position to a cell position.
      */
-    SDL_Rect screenToCellExtent(const SDL_Rect& screenExtent);
+    CellPosition tileToCellPosition(const TilePosition& tilePosition) const;
+
+    /**
+     * Converts the given tile extent to a cell extent.
+     */
+    CellExtent tileToCellExtent(const TileExtent& tileExtent);
 
     /** The width of a grid cell in world units. */
     float cellWorldWidth;
+
+    /** The part of the world map that this locator currently covers, in 
+        world units. */
+    BoundingBox locatorBounds;
+
+    /** The part of the world map that this locator currently covers, with 
+        cells as the unit. */
+    CellExtent locatorCellExtent;
+
+    /** The camera to use for screen/world conversions. */
+    Camera camera;
 
     /** A spatial partitioning hash map, mapping cell positions -> vectors 
         containing the world objects that currently intersect with that cell. */

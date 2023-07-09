@@ -139,17 +139,30 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
             spriteData.getRenderData(spriteInfo.sprite->numericID)};
         const SDL_Color& colorMod{spriteInfo.colorMod};
 
-        // Apply the color/alpha mod that the UI gave us.
-        SDL_SetTextureColorMod(renderData.texture.get(), colorMod.r, colorMod.g,
-                               colorMod.b);
+        // Apply the alpha mod that the UI gave us.
         SDL_SetTextureAlphaMod(renderData.texture.get(), colorMod.a);
 
         // Render the sprite.
         SDL_RenderCopy(sdlRenderer, renderData.texture.get(),
                        &(renderData.textureExtent), &(spriteInfo.screenExtent));
 
-        // Reset the texture's color/alpha.
-        SDL_SetTextureColorMod(renderData.texture.get(), 255, 255, 255);
+        // If the UI gave us a color mod to apply, render an additional sprite 
+        // with an additive blend mode and apply the color to that.
+        if (colorMod.r > 0 || colorMod.g > 0 || colorMod.b > 0) {
+            SDL_SetTextureColorMod(renderData.texture.get(), colorMod.r, colorMod.g,
+                                   colorMod.b);
+            SDL_SetTextureBlendMode(renderData.texture.get(),
+                                    SDL_BLENDMODE_ADD);
+
+            SDL_RenderCopy(sdlRenderer, renderData.texture.get(),
+                           &(renderData.textureExtent), &(spriteInfo.screenExtent));
+
+            SDL_SetTextureBlendMode(renderData.texture.get(),
+                                    SDL_BLENDMODE_BLEND);
+            SDL_SetTextureColorMod(renderData.texture.get(), 255, 255, 255);
+        }
+
+        // Reset the texture's alpha.
         SDL_SetTextureAlphaMod(renderData.texture.get(), 255);
 
         //        drawBoundingBox(spriteInfo.worldBounds, camera);

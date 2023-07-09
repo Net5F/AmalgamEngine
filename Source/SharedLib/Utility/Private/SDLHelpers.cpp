@@ -1,4 +1,5 @@
 #include "SDLHelpers.h"
+#include "Ray.h"
 #include "Log.h"
 #include <cmath>
 
@@ -22,6 +23,22 @@ bool SDLHelpers::rectInRect(const SDL_Rect& rectA, const SDL_Rect& rectB)
     SDL_Point topLeft{rectA.x, rectA.y};
     SDL_Point bottomRight{(rectA.x + rectA.w), (rectA.y + rectA.h)};
     return (pointInRect(topLeft, rectB) && pointInRect(bottomRight, rectB));
+}
+
+SDL_FPoint SDLHelpers::pointToFPoint(const SDL_Point& point)
+{
+    return {static_cast<float>(point.x), static_cast<float>(point.y)};
+}
+
+SDL_Point SDLHelpers::truncateFPoint(const SDL_FPoint& point)
+{
+    return {static_cast<int>(point.x), static_cast<int>(point.y)};
+}
+
+SDL_Point SDLHelpers::roundFPoint(const SDL_FPoint& point)
+{
+    return {static_cast<int>(std::round(point.x)),
+            static_cast<int>(std::round(point.y))};
 }
 
 SDL_FRect SDLHelpers::rectToFRect(const SDL_Rect& rect)

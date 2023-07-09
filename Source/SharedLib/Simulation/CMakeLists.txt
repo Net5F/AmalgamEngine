@@ -1,7 +1,9 @@
 target_sources(SharedLib
     PRIVATE
+        Private/BoundingBox.cpp
         Private/EntityLocator.cpp
         Private/MovementHelpers.cpp
+        Private/Components/Camera.cpp
         Private/SpriteData/SpriteDataBase.cpp
         Private/TileMap/ChunkExtent.cpp
         Private/TileMap/ChunkPosition.cpp
@@ -16,6 +18,7 @@ target_sources(SharedLib
         Public/DiscretePosition.h
         Public/EntityLocator.h
         Public/MovementHelpers.h
+        Public/Ray.h
         Public/Wall.h
         Public/Components/Camera.h
         Public/Components/Collision.h
@@ -47,6 +50,7 @@ target_sources(SharedLib
 target_include_directories(SharedLib
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/Components
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/SpriteData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/TileMap
     PUBLIC

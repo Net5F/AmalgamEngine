@@ -23,7 +23,7 @@ public:
     TileExtent tileExtent{};
 
     /** The layer types that should be cleared from the specified tiles. */
-    std::array<bool, TileLayer::Type::Count> layerTypesToClear;
+    std::array<bool, TileLayer::Type::Count> layerTypesToClear{};
 
     //--------------------------------------------------------------------------
     // Non-replicated data

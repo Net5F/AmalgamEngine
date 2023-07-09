@@ -12,7 +12,6 @@ namespace AM
  * this sprite is attached to an entity), or derived from an associated Tile.
  */
 struct Sprite {
-public:
     /** Unique display name, shown in the UI.  */
     std::string displayName{"Empty"};
 

@@ -39,7 +39,7 @@ struct SpriteSortInfo {
 
     /** If non-default, the UI wants us to multiply this sprite's color and 
         transparency by these values. */
-    SDL_Color colorMod{255, 255, 255, 255};
+    SDL_Color colorMod{0, 0, 0, 255};
 
     //-------------------------------------------------------------------------
     // Topological sort data

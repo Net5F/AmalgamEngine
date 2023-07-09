@@ -7,9 +7,8 @@ namespace AM
 /**
  * Represents an entity's name.
  */
-class Name
+struct Name
 {
-public:
     std::string name{""};
 };
 

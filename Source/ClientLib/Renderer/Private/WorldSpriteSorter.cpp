@@ -107,36 +107,9 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera, double alpha)
     phantomSprites = ui.getPhantomSprites();
     spriteColorMods = ui.getSpriteColorMods();
 
-    // Find the world position that the camera is centered on.
-    SDL_FPoint centerPoint{(camera.extent.w / 2), (camera.extent.h / 2)};
-    Position centerPosition{Transforms::screenToWorld(centerPoint, camera)};
-
-    // Issues with float precision can cause flickering tiles. Round to the
-    // nearest whole number to avoid this.
-    centerPosition.x = std::round(centerPosition.x);
-    centerPosition.y = std::round(centerPosition.y);
-
-    // Find the lowest x/y tile indices that the player can see.
-    TileExtent tileViewExtent{};
-    tileViewExtent.x = static_cast<int>(
-        std::floor((centerPosition.x - SharedConfig::VIEW_RADIUS)
-                   / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)));
-    tileViewExtent.y = static_cast<int>(
-        std::floor((centerPosition.y - SharedConfig::VIEW_RADIUS)
-                   / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)));
-
-    // Calc how far the player's view extends.
-    // Note: We add 1 to the view radius to keep all sides even, since the
-    //       player occupies a tile.
-    tileViewExtent.xLength
-        = static_cast<int>(std::ceil(((SharedConfig::VIEW_RADIUS * 2) + 1)
-                                     / SharedConfig::TILE_WORLD_WIDTH));
-    tileViewExtent.yLength = tileViewExtent.xLength;
-
-    // Clip the view to the world bounds.
-    tileViewExtent.intersectWith(tileMap.getTileExtent());
-
     // Gather all tiles that are in view.
+    TileExtent tileViewExtent{
+        camera.getTileViewExtent(tileMap.getTileExtent())};
     for (int y = tileViewExtent.y; y <= tileViewExtent.yMax(); ++y) {
         for (int x = tileViewExtent.x; x <= tileViewExtent.xMax(); ++x) {
             // Push all of this tile's sprites into the appropriate vectors.
@@ -309,7 +282,12 @@ void WorldSpriteSorter::pushTileSprite(const Sprite& sprite,
     }
     else if (layerID.type == TileLayer::Type::FloorCovering) {
         // Push floor coverings into their intermediate vector.
-        floorCoveringSprites.emplace_back(&sprite, worldObjectID, BoundingBox{},
+        Position tilePosition{
+            static_cast<float>(layerID.x * SharedConfig::TILE_WORLD_WIDTH),
+            static_cast<float>(layerID.y * SharedConfig::TILE_WORLD_WIDTH), 0};
+        BoundingBox worldBounds{
+            Transforms::modelToWorld(sprite.modelBounds, tilePosition)};
+        floorCoveringSprites.emplace_back(&sprite, worldObjectID, worldBounds,
                                           screenExtent, colorMod);
     }
     else {
