@@ -24,9 +24,9 @@ struct TileSnapshot {
 };
 
 template<typename S>
-void serialize(S& serializer, TileSnapshot& testTile)
+void serialize(S& serializer, TileSnapshot& tileSnapshot)
 {
-    serializer.container1b(testTile.layers,
+    serializer.container1b(tileSnapshot.layers,
                            TileSnapshot::MAX_SPRITE_LAYERS);
 }
 

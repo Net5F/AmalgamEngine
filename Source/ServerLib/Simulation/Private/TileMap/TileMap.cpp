@@ -173,9 +173,12 @@ void TileMap::addTileLayersToSnapshot(const Tile& tile,
                                       ChunkSnapshot& chunkSnapshot)
 {
     // Add the floor.
-    std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-        TileLayer::Type::Floor, tile.getFloor().spriteSet->stringID, 0)};
-    tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
+    const FloorTileLayer& floor{tile.getFloor()};
+    if (floor.spriteSet != nullptr) {
+        std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
+            TileLayer::Type::Floor, floor.spriteSet->stringID, 0)};
+        tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
+    }
 
     // Add the floor coverings.
     const auto& floorCoverings{tile.getFloorCoverings()};

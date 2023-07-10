@@ -138,11 +138,11 @@ void WorldObjectLocator::setExtent(const TileExtent& inTileExtent)
 {
     locatorBounds.minX
         = inTileExtent.x * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
-    locatorBounds.maxX = inTileExtent.xLength
+    locatorBounds.maxX = (inTileExtent.x + inTileExtent.xLength)
                     * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
     locatorBounds.minY
         = inTileExtent.y * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
-    locatorBounds.maxY = inTileExtent.yLength
+    locatorBounds.maxY = (inTileExtent.y + inTileExtent.yLength)
                     * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
     // Note: We don't want our rays to immediately intersect with these bounds, 
     //       so we drop the Z bound below the ground.

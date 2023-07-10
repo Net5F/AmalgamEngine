@@ -36,12 +36,12 @@ struct TileMapSnapshot {
 };
 
 template<typename S>
-void serialize(S& serializer, TileMapSnapshot& testTileMap)
+void serialize(S& serializer, TileMapSnapshot& tileMapSnapshot)
 {
-    serializer.value2b(testTileMap.version);
-    serializer.value4b(testTileMap.xLengthChunks);
-    serializer.value4b(testTileMap.yLengthChunks);
-    serializer.container(testTileMap.chunks, TileMapSnapshot::MAX_CHUNKS);
+    serializer.value2b(tileMapSnapshot.version);
+    serializer.value4b(tileMapSnapshot.xLengthChunks);
+    serializer.value4b(tileMapSnapshot.yLengthChunks);
+    serializer.container(tileMapSnapshot.chunks, TileMapSnapshot::MAX_CHUNKS);
 }
 
 } // End namespace AM

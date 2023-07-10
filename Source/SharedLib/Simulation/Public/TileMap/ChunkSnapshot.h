@@ -90,10 +90,10 @@ void serialize(S& serializer, ChunkSnapshot::PaletteEntry& paletteEntry)
 }
 
 template<typename S>
-void serialize(S& serializer, ChunkSnapshot& testChunk)
+void serialize(S& serializer, ChunkSnapshot& chunkSnapshot)
 {
-    serializer.container(testChunk.palette, ChunkSnapshot::MAX_PALETTE_ENTRIES);
-    serializer.container(testChunk.tiles);
+    serializer.container(chunkSnapshot.palette, ChunkSnapshot::MAX_PALETTE_ENTRIES);
+    serializer.container(chunkSnapshot.tiles);
 }
 
 } // End namespace AM

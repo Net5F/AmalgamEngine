@@ -263,7 +263,7 @@ protected:
 
     /** The version of the map format. Kept as just a 16-bit int for now, we
         can see later if we care to make it more complicated. */
-    static constexpr Uint16 MAP_FORMAT_VERSION{0};
+    static constexpr Uint16 MAP_FORMAT_VERSION{1};
 
     /** Used to get sprites while constructing tiles. */
     SpriteDataBase& spriteData;
