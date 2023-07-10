@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.24)
 
 # Temp: Set to new behavior to avoid warning.
 cmake_policy(SET CMP0135 NEW)
