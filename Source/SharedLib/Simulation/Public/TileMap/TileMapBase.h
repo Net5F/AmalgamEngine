@@ -309,8 +309,7 @@ void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
     //       into the history, and addWall() adds extra walls.
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
     for (Uint8 paletteIndex : tileSnapshot.layers) {
-        const T::PaletteEntry& paletteEntry{
-            chunkSnapshot.palette[paletteIndex]};
+        const auto& paletteEntry{chunkSnapshot.palette[paletteIndex]};
 
         switch (paletteEntry.layerType) {
             case TileLayer::Type::Floor: {
