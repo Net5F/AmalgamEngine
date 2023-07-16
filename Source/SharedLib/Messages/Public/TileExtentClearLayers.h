@@ -49,7 +49,7 @@ void serialize(S& serializer, TileExtentClearLayers& tileExtentClearLayers)
     serializer.enableBitPacking([&tileExtentClearLayers](
                                     typename S::BPEnabledType& sbp) {
         sbp.container(tileExtentClearLayers.layerTypesToClear,
-                      [](typename S::BPEnabledType& sbp, bool clearLayerType) {
+                      [](typename S::BPEnabledType& sbp, bool& clearLayerType) {
                           sbp.boolValue(clearLayerType);
                       });
     });

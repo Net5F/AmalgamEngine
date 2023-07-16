@@ -61,16 +61,6 @@ void TileUpdateSystem::processUiRequests()
 void TileUpdateSystem::processNetworkUpdates()
 {
     // Process any waiting tile updates from the server.
-    TileAddLayer tileAddLayer{};
-    while (addLayerQueue.pop(tileAddLayer)) {
-        addTileLayer(tileAddLayer);
-    }
-
-    TileRemoveLayer tileRemoveLayer{};
-    while (removeLayerQueue.pop(tileRemoveLayer)) {
-        remTileLayer(tileRemoveLayer);
-    }
-
     TileClearLayers tileClearLayers{};
     while (clearLayersQueue.pop(tileClearLayers)) {
         clearTileLayers(tileClearLayers);
@@ -79,6 +69,16 @@ void TileUpdateSystem::processNetworkUpdates()
     TileExtentClearLayers tileExtentClearLayers{};
     while (extentClearLayersQueue.pop(tileExtentClearLayers)) {
         clearExtentLayers(tileExtentClearLayers);
+    }
+
+    TileAddLayer tileAddLayer{};
+    while (addLayerQueue.pop(tileAddLayer)) {
+        addTileLayer(tileAddLayer);
+    }
+
+    TileRemoveLayer tileRemoveLayer{};
+    while (removeLayerQueue.pop(tileRemoveLayer)) {
+        remTileLayer(tileRemoveLayer);
     }
 }
 

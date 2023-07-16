@@ -37,7 +37,7 @@ void serialize(S& serializer, MovementUpdate& movementUpdate)
     serializer.enableBitPacking(
         [&movementUpdate](typename S::BPEnabledType& sbp) {
             sbp.container(movementUpdate.movementStates,
-                          static_cast<std::size_t>(SharedConfig::MAX_ENTITIES));
+                          SharedConfig::MAX_ENTITIES);
         });
 }
 
