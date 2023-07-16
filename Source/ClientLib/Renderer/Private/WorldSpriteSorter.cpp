@@ -41,7 +41,6 @@ void WorldSpriteSorter::sortSprites(const Camera& camera, double alpha)
 {
     // Clear the old data.
     sortedSprites.clear();
-    spritesToSort.clear();
 
     // Gather sprites relevant to this frame and calc their screen extents.
     gatherSpriteInfo(camera, alpha);
@@ -50,9 +49,10 @@ void WorldSpriteSorter::sortSprites(const Camera& camera, double alpha)
     sortSpritesByDepth();
 
     // Push the now-sorted sprites into the sorted vector.
-    for (SpriteSortInfo& sprite : spritesToSort) {
-        sortedSprites.push_back(sprite);
-    }
+    sortedSprites.insert(sortedSprites.end(),
+                         std::make_move_iterator(spritesToSort.begin()),
+                         std::make_move_iterator(spritesToSort.end()));
+    spritesToSort.clear();
 }
 
 const std::vector<SpriteSortInfo>& WorldSpriteSorter::getSortedSprites()
@@ -116,8 +116,13 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera, double alpha)
             const Tile& tile{tileMap.getTile(x, y)};
             pushFloorSprite(tile, camera, x, y);
             pushFloorCoveringSprites(tile, camera, x, y);
-            pushWallSprites(tile, camera, x, y);
+
+            // TODO: We temporarily are pushing objects before walls to fix 
+            //       NW gap fills rendering in front of overlapping objects. 
+            //       We should instead find a way to make objects and phantoms 
+            //       consistently render in front of walls.
             pushObjectSprites(tile, camera, x, y);
+            pushWallSprites(tile, camera, x, y);
         }
     }
 
@@ -129,6 +134,7 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera, double alpha)
 
     // Add all of the floors, then all of the floor coverings to the sorted 
     // sprites vector so they're in the correct rendering order.
+    // Note: The other sprites haven't been sorted yet, so the vector is empty.
     sortedSprites.insert(sortedSprites.end(),
                          std::make_move_iterator(floorSprites.begin()),
                          std::make_move_iterator(floorSprites.end()));
@@ -246,8 +252,6 @@ void WorldSpriteSorter::pushTileSprite(const Sprite& sprite,
     SDL_Rect screenExtent{ClientTransforms::tileToScreenExtent(
         {layerID.x, layerID.y}, renderData, camera)};
 
-    // TODO: Can we get rid of this, since we're already only gathering tiles 
-    //       that are in view?
     // If this sprite isn't on screen, skip it.
     if (!isWithinScreenBounds(screenExtent, camera)) {
         return;
