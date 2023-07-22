@@ -154,10 +154,6 @@ void TileMapBase::addWall(int tileX, int tileY, const WallSpriteSet& spriteSet,
         }
     }
 
-    // Rebuild the affected tile's collision.
-    Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
-    tile.rebuildCollision(tileX, tileY);
-
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates) {
         tileUpdateHistory.emplace_back(
@@ -417,6 +413,9 @@ void TileMapBase::addNorthWall(int tileX, int tileY, const WallSpriteSet& sprite
         walls[1].wallType = Wall::Type::North;
     }
 
+    // Rebuild the affected tile's collision.
+    tile.rebuildCollision(tileX, tileY);
+
     // If there's a tile to the NE that we might've formed a corner with.
     if (tileExtent.containsPosition({tileX + 1, tileY - 1})) {
         Tile& northeastTile{tiles[linearizeTileIndex(tileX + 1, tileY - 1)]};
@@ -433,6 +432,7 @@ void TileMapBase::addNorthWall(int tileX, int tileY, const WallSpriteSet& sprite
                 // The East tile has no walls. Add a NorthWestGapFill.
                 eastWalls[1].spriteSet = &spriteSet;
                 eastWalls[1].wallType = Wall::Type::NorthWestGapFill;
+                eastTile.rebuildCollision(tileX + 1, tileY);
             }
             else if (eastWalls[1].wallType == Wall::Type::NorthWestGapFill) {
                 // The East tile has a NW gap fill. If its sprite set no longer 
@@ -469,6 +469,9 @@ void TileMapBase::addWestWall(int tileX, int tileY, const WallSpriteSet& spriteS
         walls[1].wallType = Wall::Type::None;
     }
 
+    // Rebuild the affected tile's collision.
+    tile.rebuildCollision(tileX, tileY);
+
     // If there's a tile to the SW that we might've formed a corner with.
     if (tileExtent.containsPosition({tileX - 1, tileY + 1})) {
         Tile& southwestTile{tiles[linearizeTileIndex(tileX - 1, tileY + 1)]};
@@ -486,6 +489,7 @@ void TileMapBase::addWestWall(int tileX, int tileY, const WallSpriteSet& spriteS
                 // The South tile has no walls. Add a NorthWestGapFill.
                 southWalls[1].spriteSet = &spriteSet;
                 southWalls[1].wallType = Wall::Type::NorthWestGapFill;
+                southTile.rebuildCollision(tileX, tileY + 1);
             }
             else if (southWalls[1].wallType == Wall::Type::NorthWestGapFill) {
                 // The South tile has a NW gap fill. If its sprite set no longer 

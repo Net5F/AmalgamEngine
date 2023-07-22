@@ -176,8 +176,10 @@ std::vector<entt::entity>&
 
 std::vector<entt::entity>&
     EntityLocator::getEntitiesFine(const Position& cylinderCenter,
-                                   unsigned int radius)
+                                   float radius)
 {
+    AM_ASSERT(radius >= 0, "Cylinder can't have negative radius.");
+
     // Run a coarse pass.
     getEntitiesCoarse(cylinderCenter, radius);
 

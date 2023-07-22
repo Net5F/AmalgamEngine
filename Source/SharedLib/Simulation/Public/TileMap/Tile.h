@@ -68,8 +68,8 @@ public:
      * Clears the collisionBoxes vector, then refills it with all of this 
      * tile's walls and objects.
      * 
-     * @param tileX  This tile's X-axis coordinate.
-     * @param tileY  This tile's Y-axis coordinate.
+     * @param tileX  This tile's X-axis tile coordinate.
+     * @param tileY  This tile's Y-axis tile coordinate.
      */
     void rebuildCollision(int tileX, int tileY);
 

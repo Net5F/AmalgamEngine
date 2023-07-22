@@ -41,8 +41,8 @@ void ClientAOISystem::updateAOILists()
 
         // Get the list of entities that are in this entity's AOI.
         std::vector<entt::entity>& currentAOIEntities{
-            world.entityLocator.getEntitiesFine(
-                position, static_cast<unsigned int>(SharedConfig::AOI_RADIUS))};
+            world.entityLocator.getEntitiesFine(position,
+                                                SharedConfig::AOI_RADIUS)};
 
         // Remove this entity from the list, if it's in there.
         // (We don't want to add it to its own list.)
@@ -86,8 +86,6 @@ void ClientAOISystem::updateAOILists()
 
 void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
 {
-    auto view{world.registry.view<ClientSimData>()};
-
     // Send the client an EntityDelete for each entity that left its AOI.
     for (entt::entity entityThatLeft : entitiesThatLeft) {
         network.serializeAndSend(
@@ -98,7 +96,7 @@ void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
 
 void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
 {
-    auto view{world.registry.view<ClientSimData, Name, Sprite>()};
+    auto view{world.registry.view<Name, Sprite>()};
 
     // Send the client an EntityInit for each entity that entered its AOI.
     for (entt::entity entityThatEntered : client.entitiesThatEnteredAOI) {

@@ -53,8 +53,10 @@ bool BoundingBox::intersects(const BoundingBox& other) const
 }
 
 bool BoundingBox::intersects(const Position& cylinderCenter,
-                             unsigned int radius) const
+                             float radius) const
 {
+    // Reference: https://stackoverflow.com/a/402010/4258629
+
     Position boxCenter{get3dCenter()};
     float xLength{getXLength()};
     float yLength{getYLength()};

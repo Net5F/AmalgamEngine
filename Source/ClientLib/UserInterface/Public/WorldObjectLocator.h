@@ -24,7 +24,7 @@ namespace Client
  * In constract to the similar EntityLocator, this class is UI-centric (for 
  * hit testing mouse events), whereas EntityLocator is sim-centric (for getting 
  * all entities at a particular location in the world, with no regard for 
- * draw order).
+ * draw order). 
  *
  * Internally, world objects are organized into "cells", each of which has a 
  * size corresponding to a configurable cell width. This value can be tweaked 

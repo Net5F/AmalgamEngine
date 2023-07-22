@@ -61,10 +61,8 @@ public:
      *       along the Z axis. If we want to treat it as a sphere, we can
      *       change it.
      * Note: Shared edges are considered to be intersecting.
-     *
-     * Reference: https://stackoverflow.com/a/402010/4258629
      */
-    bool intersects(const Position& cylinderCenter, unsigned int radius) const;
+    bool intersects(const Position& cylinderCenter, float radius) const;
 
     /**
      * Returns the t at which this box intersects the given ray.
