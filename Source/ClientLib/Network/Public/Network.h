@@ -11,6 +11,7 @@
 #include "ByteTools.h"
 #include "Timer.h"
 #include "Log.h"
+#include <SDL_stdinc.h>
 #include <string>
 #include <memory>
 #include <atomic>

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "QueuedEvents.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
+#include "QueuedEvents.h"
 #include <unordered_map>
 
 namespace AM

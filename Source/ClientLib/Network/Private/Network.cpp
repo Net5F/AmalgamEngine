@@ -267,8 +267,8 @@ void Network::processBatch()
         // Process the messages.
         std::size_t bufferIndex{0};
         while (bufferIndex < batchSize) {
-            MessageType messageType{static_cast<MessageType>(
-                bufferToUse[bufferIndex + MessageHeaderIndex::MessageType])};
+            Uint8 messageType{
+                bufferToUse[bufferIndex + MessageHeaderIndex::MessageType]};
             Uint16 messageSize{ByteTools::read16(
                 &(bufferToUse[bufferIndex + MessageHeaderIndex::Size]))};
 

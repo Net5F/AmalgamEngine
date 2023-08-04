@@ -28,10 +28,12 @@ namespace Client
  * wall will be placed when they click.
  */
 struct PhantomSpriteInfo {
-    /** The X coordinate of the tile to add the phantom to. */
+    /** If this is a tile phantom, this is the X coordinate of the phantom's
+        tile. */
     int tileX{0};
 
-    /** The Y coordinate of the tile to add the phantom to. */
+    /** If this is a tile phantom, this is the Y coordinate of the phantom's
+        tile. */
     int tileY{0};
 
     /** The phantom's tile layer type. If this != None, this is a tile phantom.

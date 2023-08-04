@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MessageType.h"
+#include "EngineMessageType.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
 #include <string>
@@ -15,9 +15,9 @@ namespace AM
  * often (such as the entity's name).
  */
 struct EntityInit {
-    // The MessageType enum value that this message corresponds to.
+    // The EngineMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE{MessageType::EntityInit};
+    static constexpr EngineMessageType MESSAGE_TYPE{EngineMessageType::EntityInit};
 
     /** Used as a "we should never hit this" cap on the length of the name
         string. Only checked in debug builds. */

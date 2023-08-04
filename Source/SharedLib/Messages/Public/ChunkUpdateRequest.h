@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MessageType.h"
+#include "EngineMessageType.h"
 #include "ChunkPosition.h"
 #include "NetworkDefs.h"
 #include <vector>
@@ -12,13 +12,14 @@ namespace AM
  */
 struct ChunkUpdateRequest {
 public:
-    // The MessageType enum value that this message corresponds to.
+    // The EngineMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE = MessageType::ChunkUpdateRequest;
+    static constexpr EngineMessageType MESSAGE_TYPE{
+        EngineMessageType::ChunkUpdateRequest};
 
     /** Used as a "we should never hit this" cap on the number of chunks that
         we request at once. Only checked in debug builds. */
-    static constexpr std::size_t MAX_CHUNKS = 10;
+    static constexpr std::size_t MAX_CHUNKS{10};
 
     //--------------------------------------------------------------------------
     // Replicated data

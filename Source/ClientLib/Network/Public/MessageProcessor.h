@@ -1,8 +1,7 @@
 #pragma once
 
-#include "BinaryBuffer.h"
-#include "MessageType.h"
 #include "entt/fwd.hpp"
+#include <SDL_stdinc.h>
 #include <memory>
 
 namespace AM
@@ -21,6 +20,9 @@ class IMessageProcessorExtension;
  *
  * If the message isn't relevant to the network layer, it's passed to a generic
  * function that pushes it straight down to the simulation layer.
+ *
+ * If the message isn't relevant to the engine at all, it's passed to the 
+ * project.
  */
 class MessageProcessor
 {
@@ -37,7 +39,7 @@ public:
      *                      at index 0.
      * @param messageSize  The length in bytes of the message in messageBuffer.
      */
-    void processReceivedMessage(MessageType messageType, Uint8* messageBuffer,
+    void processReceivedMessage(Uint8 messageType, Uint8* messageBuffer,
                                 unsigned int messageSize);
 
     /**

@@ -84,7 +84,7 @@ void EntityLocator::setEntityLocation(entt::entity entity,
 
 std::vector<entt::entity>&
     EntityLocator::getEntitiesCoarse(const Position& cylinderCenter,
-                                     unsigned int radius)
+                                     float radius)
 {
     // Clear the return vector.
     returnVector.clear();

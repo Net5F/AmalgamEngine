@@ -1,6 +1,5 @@
 #pragma once
 
-#include "MessageType.h"
 #include "NetworkDefs.h"
 #include <SDL_stdinc.h>
 
@@ -33,12 +32,9 @@ public:
      * @param messageBuffer A buffer containing a serialized message, starting
      *                      at index 0.
      * @param messageSize  The length in bytes of the message in messageBuffer.
-     *
-     * @return If the message corresponds to a particular simulation tick,
-     *         returns that tick number. If not, returns -1.
      */
-    virtual Sint64
-        processReceivedMessage(NetworkID netID, MessageType messageType,
+    virtual void 
+        processReceivedMessage(NetworkID netID, Uint8 messageType,
                                Uint8* messageBuffer, unsigned int messageSize)
         = 0;
 };

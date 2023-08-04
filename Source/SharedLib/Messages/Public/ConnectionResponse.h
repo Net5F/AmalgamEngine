@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MessageType.h"
+#include "EngineMessageType.h"
 #include <SDL_stdinc.h>
 #include "entt/entity/registry.hpp"
 
@@ -10,9 +10,10 @@ namespace AM
  * Contains a connection response, sent from the server to the client.
  */
 struct ConnectionResponse {
-    // The MessageType enum value that this message corresponds to.
+    // The EngineMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE = MessageType::ConnectionResponse;
+    static constexpr EngineMessageType MESSAGE_TYPE{
+        EngineMessageType::ConnectionResponse};
 
     /** The tick that the server is telling the client to assume. */
     Uint32 tickNum{0};

@@ -26,56 +26,58 @@ MessageProcessor::MessageProcessor(EventDispatcher& inNetworkEventDispatcher)
 {
 }
 
-void MessageProcessor::processReceivedMessage(MessageType messageType,
+void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                               Uint8* messageBuffer,
                                               unsigned int messageSize)
 {
     // Match the enum values to their event types.
-    switch (messageType) {
-        case MessageType::ExplicitConfirmation: {
+    EngineMessageType engineMessageType{
+        static_cast<EngineMessageType>(messageType)};
+    switch (engineMessageType) {
+        case EngineMessageType::ExplicitConfirmation: {
             handleExplicitConfirmation(messageBuffer, messageSize);
             break;
         }
-        case MessageType::ConnectionResponse: {
+        case EngineMessageType::ConnectionResponse: {
             handleConnectionResponse(messageBuffer, messageSize);
             break;
         }
-        case MessageType::MovementUpdate: {
+        case EngineMessageType::MovementUpdate: {
             handleMovementUpdate(messageBuffer, messageSize);
             break;
         }
-        case MessageType::ChunkUpdate: {
+        case EngineMessageType::ChunkUpdate: {
             dispatchMessageSharedPtr<ChunkUpdate>(messageBuffer, messageSize,
                                                   networkEventDispatcher);
             break;
         }
-        case MessageType::TileAddLayer: {
+        case EngineMessageType::TileAddLayer: {
             dispatchMessage<TileAddLayer>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }
-        case MessageType::TileRemoveLayer: {
+        case EngineMessageType::TileRemoveLayer: {
             dispatchMessage<TileRemoveLayer>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }
-        case MessageType::TileClearLayers: {
+        case EngineMessageType::TileClearLayers: {
             dispatchMessage<TileClearLayers>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }
-        case MessageType::TileExtentClearLayers: {
+        case EngineMessageType::TileExtentClearLayers: {
             dispatchMessage<TileExtentClearLayers>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }
-        case MessageType::EntityInit: {
+        case EngineMessageType::EntityInit: {
             dispatchMessage<EntityInit>(messageBuffer, messageSize,
                                         networkEventDispatcher);
 
             break;
         }
-        case MessageType::EntityDelete: {
+        case EngineMessageType::EntityDelete: {
             dispatchMessage<EntityDelete>(messageBuffer, messageSize,
                                           networkEventDispatcher);
             break;

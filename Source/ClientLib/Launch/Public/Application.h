@@ -215,6 +215,7 @@ void Application::registerUserInterfaceExtension()
                                        simulation.getWorld().worldSignals,
                                        userInterface.getWorldObjectLocator(),
                                        userInterface.getEventDispatcher(),
+                                       network,
                                        sdlRenderer.Get(),
                                        spriteData};
 

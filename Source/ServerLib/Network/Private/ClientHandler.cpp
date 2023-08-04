@@ -227,8 +227,8 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
 }
 
 void ClientHandler::processReceivedMessage(Client& client,
-                                           MessageType messageType,
-                                           unsigned int messageSize)
+                                           Uint8 messageType,
+                                           std::size_t messageSize)
 {
     // Process the message.
     // Note: messageTick will be > -1 if the message contained a tick number.

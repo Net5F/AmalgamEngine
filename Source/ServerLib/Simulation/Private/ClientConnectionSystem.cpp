@@ -48,7 +48,7 @@ void ClientConnectionSystem::processConnectionEvents()
 void ClientConnectionSystem::processConnectEvents()
 {
     // Add all newly connected client's entities to the sim.
-    for (unsigned int i = 0; i < clientConnectedQueue.size(); ++i) {
+    for (std::size_t i = 0; i < clientConnectedQueue.size(); ++i) {
         ClientConnected clientConnected{};
         if (!(clientConnectedQueue.pop(clientConnected))) {
             LOG_FATAL("Expected element but pop failed.");
@@ -102,7 +102,7 @@ void ClientConnectionSystem::processDisconnectEvents()
     auto view{world.registry.view<ClientSimData>()};
 
     // Remove all newly disconnected client's entities from the sim.
-    for (unsigned int i = 0; i < clientDisconnectedQueue.size(); ++i) {
+    for (std::size_t i = 0; i < clientDisconnectedQueue.size(); ++i) {
         ClientDisconnected clientDisconnected{};
         if (!(clientDisconnectedQueue.pop(clientDisconnected))) {
             LOG_FATAL("Expected element but pop failed.");

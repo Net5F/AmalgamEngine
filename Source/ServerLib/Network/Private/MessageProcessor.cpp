@@ -23,7 +23,7 @@ MessageProcessor::MessageProcessor(EventDispatcher& inNetworkEventDispatcher)
 }
 
 Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
-                                                MessageType messageType,
+                                                Uint8 messageType,
                                                 Uint8* messageBuffer,
                                                 unsigned int messageSize)
 {
@@ -32,43 +32,50 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
     Sint64 messageTick{-1};
 
     // Match the enum values to their event types.
-    switch (messageType) {
-        case MessageType::Heartbeat: {
+    EngineMessageType engineMessageType{
+        static_cast<EngineMessageType>(messageType)};
+    switch (engineMessageType) {
+        case EngineMessageType::Heartbeat: {
             messageTick = static_cast<Sint64>(
                 handleHeartbeat(messageBuffer, messageSize));
             break;
         }
-        case MessageType::InputChangeRequest: {
+        case EngineMessageType::InputChangeRequest: {
             messageTick = static_cast<Sint64>(
                 handleInputChangeRequest(netID, messageBuffer, messageSize));
             break;
         }
-        case MessageType::ChunkUpdateRequest: {
+        case EngineMessageType::ChunkUpdateRequest: {
             handleChunkUpdateRequest(netID, messageBuffer, messageSize);
             break;
         }
-        case MessageType::TileAddLayer: {
+        case EngineMessageType::TileAddLayer: {
             dispatchMessage<TileAddLayer>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }
-        case MessageType::TileRemoveLayer: {
+        case EngineMessageType::TileRemoveLayer: {
             dispatchMessage<TileRemoveLayer>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }
-        case MessageType::TileClearLayers: {
+        case EngineMessageType::TileClearLayers: {
             dispatchMessage<TileClearLayers>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }
-        case MessageType::TileExtentClearLayers: {
+        case EngineMessageType::TileExtentClearLayers: {
             dispatchMessage<TileExtentClearLayers>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }
         default: {
-            LOG_FATAL("Received unexpected message type: %u", messageType);
+            // If we don't have a handler for this message type, pass it to
+            // the project.
+            if (extension != nullptr) {
+                extension->processReceivedMessage(netID, messageType,
+                                                  messageBuffer, messageSize);
+            }
         }
     }
 

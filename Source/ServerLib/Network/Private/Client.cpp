@@ -144,7 +144,7 @@ void Client::addExplicitConfirmation(std::size_t& currentIndex,
 
     // Write the message type.
     batchBuffer[currentIndex]
-        = static_cast<Uint8>(MessageType::ExplicitConfirmation);
+        = static_cast<Uint8>(EngineMessageType::ExplicitConfirmation);
     currentIndex++;
 
     // Write the message size.

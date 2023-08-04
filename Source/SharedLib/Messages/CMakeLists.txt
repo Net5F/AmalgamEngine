@@ -8,7 +8,7 @@ target_sources(SharedLib
         Public/ExplicitConfirmation.h
         Public/Heartbeat.h
         Public/InputChangeRequest.h
-        Public/MessageType.h
+        Public/EngineMessageType.h
         Public/MovementState.h
         Public/MovementUpdate.h
         Public/TileAddLayer.h

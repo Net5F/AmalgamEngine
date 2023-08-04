@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BinaryBuffer.h"
-#include "MessageType.h"
+#include "EngineMessageType.h"
 #include <SDL_stdinc.h>
 #include <memory>
 #include <vector>
@@ -21,14 +21,14 @@ namespace AM
 /** The max size that a message batch can be.
     2^15 because the BatchSize field is 16 bits long, and the high bit is
     reserved. */
-static constexpr unsigned int MAX_BATCH_SIZE{2 << 14};
+static constexpr std::size_t MAX_BATCH_SIZE{2 << 14};
 
 //--------------------------------------------------------------------------
 // Typedefs
 //--------------------------------------------------------------------------
 /** Represents a single network client. Will be reused if the client
     disconnects. */
-typedef Uint32 NetworkID;
+using NetworkID = Uint32;
 
 //--------------------------------------------------------------------------
 // Headers
@@ -116,9 +116,10 @@ struct ReceiveResult {
     /** The result of the receive attempt. */
     NetworkResult networkResult{NetworkResult::NotSet};
 
-    /** The type of the received message. Will be Invalid if networkResult
-        != Success. */
-    MessageType messageType{MessageType::NotSet};
+    /** The type of the received message. Will be NotSet if networkResult
+        != Success.
+        Note: This gets cast to EngineMessageType or ProjectMessageType. */
+    Uint8 messageType{static_cast<Uint8>(EngineMessageType::NotSet)};
 
     /** If networkResult == Success, contains the size of the received message.
      */

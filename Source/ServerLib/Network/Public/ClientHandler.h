@@ -1,6 +1,5 @@
 #pragma once
 
-#include "MessageType.h"
 #include "ServerNetworkDefs.h"
 #include "Client.h"
 #include "Acceptor.h"
@@ -100,8 +99,8 @@ private:
      * @param messageType  The type of the received message.
      * @param messageSize  The length in bytes of the message in messageBuffer.
      */
-    void processReceivedMessage(Client& client, MessageType messageType,
-                                unsigned int messageSize);
+    void processReceivedMessage(Client& client, Uint8 messageType,
+                                std::size_t messageSize);
 
     /** Used to get the client map and current tick. */
     Network& network;

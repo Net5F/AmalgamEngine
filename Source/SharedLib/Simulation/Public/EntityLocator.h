@@ -59,7 +59,7 @@ public:
      * @param radius  The length of the radius to cast.
      */
     std::vector<entt::entity>& getEntitiesCoarse(const Position& cylinderCenter,
-                                                 unsigned int radius);
+                                                 float radius);
 
     /**
      * Overload for BoundingBox.

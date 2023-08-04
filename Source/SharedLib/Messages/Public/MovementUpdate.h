@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MovementState.h"
-#include "MessageType.h"
+#include "EngineMessageType.h"
 #include "SharedConfig.h"
 #include <SDL_stdinc.h>
 #include <vector>
@@ -19,9 +19,9 @@ namespace AM
  * interest.
  */
 struct MovementUpdate {
-    // The MessageType enum value that this message corresponds to.
+    // The EngineMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE{MessageType::MovementUpdate};
+    static constexpr EngineMessageType MESSAGE_TYPE{EngineMessageType::MovementUpdate};
 
     /** The tick that this update corresponds to. */
     Uint32 tickNum{0};

@@ -14,7 +14,6 @@ namespace AM
  * Tiles just use their Sprite's model bounds to define their collision.
  */
 struct Collision {
-public:
     /** Model-space bounding box. Defines the entity's 3D volume.
         Note: When an entity is constructed, we set this to match the default 
               sprite's model bounds. This makes it easy for project devs to 

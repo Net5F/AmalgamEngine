@@ -205,8 +205,7 @@ ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
                   "Need to add logic for this scenario.");
     }
 
-    MessageType messageType{
-        static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageType])};
+    Uint8 messageType{headerBuf[MessageHeaderIndex::MessageType]};
     return {NetworkResult::Success, messageType, messageSize};
 }
 
@@ -250,8 +249,7 @@ ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
                   "Need to add logic for this scenario.");
     }
 
-    MessageType messageType{
-        static_cast<MessageType>(headerBuf[MessageHeaderIndex::MessageType])};
+    Uint8 messageType{headerBuf[MessageHeaderIndex::MessageType]};
     return {NetworkResult::Success, messageType, messageSize};
 }
 

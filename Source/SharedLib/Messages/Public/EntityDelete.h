@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MessageType.h"
+#include "EngineMessageType.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
 
@@ -11,9 +11,10 @@ namespace AM
  * interest and must be deleted.
  */
 struct EntityDelete {
-    // The MessageType enum value that this message corresponds to.
+    // The EngineMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE = MessageType::EntityDelete;
+    static constexpr EngineMessageType MESSAGE_TYPE{
+        EngineMessageType::EntityDelete};
 
     /** The tick that this update corresponds to. */
     Uint32 tickNum{0};

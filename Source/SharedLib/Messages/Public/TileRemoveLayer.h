@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MessageType.h"
+#include "EngineMessageType.h"
 #include "TileLayers.h"
 #include "NetworkDefs.h"
 #include <SDL_stdinc.h>
@@ -13,9 +13,9 @@ namespace AM
  */
 struct TileRemoveLayer {
 public:
-    // The MessageType enum value that this message corresponds to.
+    // The EngineMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr MessageType MESSAGE_TYPE{MessageType::TileRemoveLayer};
+    static constexpr EngineMessageType MESSAGE_TYPE{EngineMessageType::TileRemoveLayer};
 
     /** The X coordinate of the tile to update. */
     int tileX{0};

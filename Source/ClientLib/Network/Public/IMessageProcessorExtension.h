@@ -1,6 +1,5 @@
 #pragma once
 
-#include "MessageType.h"
 #include <SDL_stdinc.h>
 
 namespace AM
@@ -27,7 +26,7 @@ public:
      * Called when a message is received that the engine doesn't have a handler
      * for.
      */
-    virtual void processReceivedMessage(MessageType messageType,
+    virtual void processReceivedMessage(Uint8 messageType,
                                         Uint8* messageBuffer,
                                         unsigned int messageSize)
         = 0;

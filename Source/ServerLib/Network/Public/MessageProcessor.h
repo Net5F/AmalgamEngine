@@ -20,6 +20,9 @@ class IMessageProcessorExtension;
  *
  * If the message isn't relevant to the network layer, it's passed to a generic
  * function that pushes it straight down to the simulation layer.
+ *
+ * If the message isn't relevant to the engine at all, it's passed to the 
+ * project.
  */
 class MessageProcessor
 {
@@ -40,7 +43,7 @@ public:
      * @return If the message corresponds to a particular simulation tick,
      *         returns that tick number. If not, returns -1.
      */
-    Sint64 processReceivedMessage(NetworkID netID, MessageType messageType,
+    Sint64 processReceivedMessage(NetworkID netID, Uint8 messageType,
                                   Uint8* messageBuffer,
                                   unsigned int messageSize);
 
