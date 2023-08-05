@@ -2,6 +2,7 @@
 
 #include "NetworkDefs.h"
 #include <SDL_stdinc.h>
+#include <cstddef>
 
 namespace AM
 {
@@ -35,7 +36,7 @@ public:
      */
     virtual void 
         processReceivedMessage(NetworkID netID, Uint8 messageType,
-                               Uint8* messageBuffer, unsigned int messageSize)
+                               Uint8* messageBuffer, std::size_t messageSize)
         = 0;
 };
 

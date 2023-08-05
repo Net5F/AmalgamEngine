@@ -28,7 +28,7 @@ MessageProcessor::MessageProcessor(EventDispatcher& inNetworkEventDispatcher)
 
 void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                               Uint8* messageBuffer,
-                                              unsigned int messageSize)
+                                              std::size_t messageSize)
 {
     // Match the enum values to their event types.
     EngineMessageType engineMessageType{
@@ -100,21 +100,21 @@ void MessageProcessor::setExtension(
 }
 
 void MessageProcessor::handleExplicitConfirmation(Uint8* messageBuffer,
-                                                  unsigned int messageSize)
+                                                  std::size_t messageSize)
 {
     // Deserialize the message.
     ExplicitConfirmation explicitConfirmation{};
     Deserialize::fromBuffer(messageBuffer, messageSize, explicitConfirmation);
 
     // Push confirmations into the NPC update system's queue.
-    for (unsigned int i = 0; i < explicitConfirmation.confirmedTickCount; ++i) {
+    for (std::size_t i = 0; i < explicitConfirmation.confirmedTickCount; ++i) {
         networkEventDispatcher.emplace<NpcUpdate>(
             NpcUpdateType::ExplicitConfirmation);
     }
 }
 
 void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer,
-                                            unsigned int messageSize)
+                                            std::size_t messageSize)
 {
     // Deserialize the message.
     std::shared_ptr<MovementUpdate> movementUpdate{
@@ -160,7 +160,7 @@ void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer,
 }
 
 void MessageProcessor::handleConnectionResponse(Uint8* messageBuffer,
-                                                unsigned int messageSize)
+                                                std::size_t messageSize)
 {
     // Deserialize the message.
     ConnectionResponse connectionResponse{};

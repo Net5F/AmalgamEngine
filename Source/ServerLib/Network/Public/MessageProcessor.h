@@ -45,7 +45,7 @@ public:
      */
     Sint64 processReceivedMessage(NetworkID netID, Uint8 messageType,
                                   Uint8* messageBuffer,
-                                  unsigned int messageSize);
+                                  std::size_t messageSize);
 
     /**
      * See extension member comment.
@@ -60,18 +60,18 @@ private:
      * Pushes nothing - Handled in network layer.
      * @return The tick number that the message contained.
      */
-    Uint32 handleHeartbeat(Uint8* messageBuffer, unsigned int messageSize);
+    Uint32 handleHeartbeat(Uint8* messageBuffer, std::size_t messageSize);
 
     /**
      * Pushes InputChangeRequest event.
      * @return The tick number that the message contained.
      */
     Uint32 handleInputChangeRequest(NetworkID netID, Uint8* messageBuffer,
-                                    unsigned int messageSize);
+                                    std::size_t messageSize);
 
     /** Pushes ChunkUpdateRequest event. */
     void handleChunkUpdateRequest(NetworkID netID, Uint8* messageBuffer,
-                                  unsigned int messageSize);
+                                  std::size_t messageSize);
     //-------------------------------------------------------------------------
 
     /** The network's event dispatcher. Used to send events to the subscribed

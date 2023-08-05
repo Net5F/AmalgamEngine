@@ -16,7 +16,7 @@ namespace AM
  * The event can be received in a system using EventQueue<T>.
  */
 template<typename T>
-static void dispatchMessage(Uint8* messageBuffer, unsigned int messageSize,
+static void dispatchMessage(Uint8* messageBuffer, std::size_t messageSize,
                             EventDispatcher& dispatcher)
 {
     // Deserialize the message.
@@ -39,7 +39,7 @@ static void dispatchMessage(Uint8* messageBuffer, unsigned int messageSize,
  */
 template<typename T>
 static void dispatchMessageSharedPtr(Uint8* messageBuffer,
-                                     unsigned int messageSize,
+                                     std::size_t messageSize,
                                      EventDispatcher& dispatcher)
 {
     // Deserialize the message.

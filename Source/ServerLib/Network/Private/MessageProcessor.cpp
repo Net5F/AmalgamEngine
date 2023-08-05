@@ -25,7 +25,7 @@ MessageProcessor::MessageProcessor(EventDispatcher& inNetworkEventDispatcher)
 Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                                                 Uint8 messageType,
                                                 Uint8* messageBuffer,
-                                                unsigned int messageSize)
+                                                std::size_t messageSize)
 {
     // The tick that the received message corresponds to.
     // Will be -1 if the message doesn't correspond to any tick.
@@ -89,7 +89,7 @@ void MessageProcessor::setExtension(
 }
 
 Uint32 MessageProcessor::handleHeartbeat(Uint8* messageBuffer,
-                                         unsigned int messageSize)
+                                         std::size_t messageSize)
 {
     // Deserialize the message.
     Heartbeat heartbeat{};
@@ -101,7 +101,7 @@ Uint32 MessageProcessor::handleHeartbeat(Uint8* messageBuffer,
 
 Uint32 MessageProcessor::handleInputChangeRequest(NetworkID netID,
                                                   Uint8* messageBuffer,
-                                                  unsigned int messageSize)
+                                                  std::size_t messageSize)
 {
     // Deserialize the message.
     InputChangeRequest inputChangeRequest{};
@@ -119,7 +119,7 @@ Uint32 MessageProcessor::handleInputChangeRequest(NetworkID netID,
 
 void MessageProcessor::handleChunkUpdateRequest(NetworkID netID,
                                                 Uint8* messageBuffer,
-                                                unsigned int messageSize)
+                                                std::size_t messageSize)
 {
     // Deserialize the message.
     ChunkUpdateRequest chunkUpdateRequest{};

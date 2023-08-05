@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL_stdinc.h>
+#include <cstddef>
 
 namespace AM
 {
@@ -28,7 +29,7 @@ public:
      */
     virtual void processReceivedMessage(Uint8 messageType,
                                         Uint8* messageBuffer,
-                                        unsigned int messageSize)
+                                        std::size_t messageSize)
         = 0;
 };
 

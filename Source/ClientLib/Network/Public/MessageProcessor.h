@@ -40,7 +40,7 @@ public:
      * @param messageSize  The length in bytes of the message in messageBuffer.
      */
     void processReceivedMessage(Uint8 messageType, Uint8* messageBuffer,
-                                unsigned int messageSize);
+                                std::size_t messageSize);
 
     /**
      * See extension member comment.
@@ -53,14 +53,14 @@ private:
     //-------------------------------------------------------------------------
     /** Pushes ExplicitConfirmation event. */
     void handleExplicitConfirmation(Uint8* messageBuffer,
-                                    unsigned int messageSize);
+                                    std::size_t messageSize);
 
     /** Pushes ConnectionResponse event. */
     void handleConnectionResponse(Uint8* messageBuffer,
-                                  unsigned int messageSize);
+                                  std::size_t messageSize);
 
     /** Pushes std::shared_ptr<const MovementUpdate> event. **/
-    void handleMovementUpdate(Uint8* messageBuffer, unsigned int messageSize);
+    void handleMovementUpdate(Uint8* messageBuffer, std::size_t messageSize);
     //-------------------------------------------------------------------------
 
     /** The dispatcher for network events. Used to send events to the
