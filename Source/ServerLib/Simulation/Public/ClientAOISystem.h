@@ -64,6 +64,9 @@ private:
 
     /** Holds entities that left the AOI. Used during updateAOILists(). */
     std::vector<entt::entity> entitiesThatLeft;
+
+    /** Holds entities that entered the AOI. Used during updateAOILists(). */
+    std::vector<entt::entity> entitiesThatEntered;
 };
 
 } // End namespace Server

@@ -8,6 +8,7 @@
 #include "Collision.h"
 #include "InputHistory.h"
 #include "Rotation.h"
+#include "IsClientEntity.h"
 #include "NeedsAdjacentChunks.h"
 #include "Camera.h"
 #include "Transforms.h"
@@ -129,6 +130,7 @@ void ServerConnectionSystem::initSimState(
     registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
     registry.emplace<Input>(newEntity);
     registry.emplace<Rotation>(newEntity);
+    registry.emplace<IsClientEntity>(newEntity);
 
     // Set up the player's visual components.
     // TODO: Switch to logical screen size and do scaling in Renderer.
@@ -169,6 +171,7 @@ void ServerConnectionSystem::initMockSimState()
     registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
     registry.emplace<Input>(newEntity);
     registry.emplace<Rotation>(newEntity);
+    registry.emplace<IsClientEntity>(newEntity);
 
     // Set up the player's visual components.
     // TODO: Switch to logical screen size and do scaling in Renderer.

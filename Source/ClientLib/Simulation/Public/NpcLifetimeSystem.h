@@ -1,7 +1,8 @@
 #pragma once
 
 #include "QueuedEvents.h"
-#include "EntityInit.h"
+#include "ClientEntityInit.h"
+#include "NonClientEntityInit.h"
 #include "EntityDelete.h"
 #include <queue>
 
@@ -16,6 +17,9 @@ class SpriteData;
 /**
  * Maintains the entity registry, constructing and deleting entities based
  * on messages from the server.
+ *
+ * From this Client's perspective, NPCs are any entity that isn't controlled by 
+ * this client's player. See IsClientEntity.h for more info.
  */
 class NpcLifetimeSystem
 {
@@ -36,9 +40,14 @@ private:
     void processEntityDeletes(Uint32 desiredTick);
 
     /**
-     * Processes waiting EntityInit messages, up to desiredTick.
+     * Processes waiting ClientEntityInit messages, up to desiredTick.
      */
-    void processEntityInits(Uint32 desiredTick);
+    void processClientEntityInits(Uint32 desiredTick);
+
+    /**
+     * Processes waiting NonClientEntityInit messages, up to desiredTick.
+     */
+    void processNonClientEntityInits(Uint32 desiredTick);
 
     /** Used to get the current tick number. */
     Simulation& simulation;
@@ -47,7 +56,8 @@ private:
     /** Used to get sprite data when constructing entities. */
     SpriteData& spriteData;
 
-    EventQueue<EntityInit> entityInitQueue;
+    EventQueue<ClientEntityInit> clientEntityInitQueue;
+    EventQueue<NonClientEntityInit> nonClientEntityInitQueue;
     EventQueue<EntityDelete> entityDeleteQueue;
 };
 

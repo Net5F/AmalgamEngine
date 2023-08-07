@@ -56,11 +56,6 @@ void MovementSyncSystem::collectEntitiesToSend(ClientSimData& client,
     // Clear the vector.
     entitiesToSend.clear();
 
-    // Add all of the entities that just entered this client's AOI.
-    entitiesToSend.insert(entitiesToSend.end(),
-                          client.entitiesThatEnteredAOI.begin(),
-                          client.entitiesThatEnteredAOI.end());
-
     // Add any entities in this client's AOI that need to be synced.
     for (entt::entity entityInAOI : client.entitiesInAOI) {
         if (world.registry.all_of<MovementStateNeedsSync>(entityInAOI)) {
@@ -78,9 +73,6 @@ void MovementSyncSystem::collectEntitiesToSend(ClientSimData& client,
     entitiesToSend.erase(
         std::unique(entitiesToSend.begin(), entitiesToSend.end()),
         entitiesToSend.end());
-
-    // Clear entitiesThatEnteredAOI so they don't get added again next tick.
-    client.entitiesThatEnteredAOI.clear();
 }
 
 void MovementSyncSystem::sendEntityUpdate(ClientSimData& client)

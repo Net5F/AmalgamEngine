@@ -188,12 +188,18 @@ ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
     // The number of bytes in the upcoming message.
     Uint16 messageSize{
         ByteTools::read16(&(headerBuf[MessageHeaderIndex::Size]))};
+    Uint8 messageType{headerBuf[MessageHeaderIndex::MessageType]};
     if (messageSize > MAX_WIRE_SIZE) {
         LOG_FATAL("Tried to receive too large of a message. messageSize: %u, "
                   "MAX_WIRE_SIZE: %u",
                   messageSize, MAX_WIRE_SIZE);
     }
+    else if (messageSize == 0) {
+        // We're receiving a "tag message" (0 bytes, type only).
+        return {NetworkResult::Success, messageType, messageSize};
+    }
 
+    // Receive the message.
     result = socket.receive(messageBuffer, messageSize);
     if (result <= 0) {
         // Disconnected
@@ -205,7 +211,6 @@ ReceiveResult Peer::receiveMessageWait(Uint8* messageBuffer)
                   "Need to add logic for this scenario.");
     }
 
-    Uint8 messageType{headerBuf[MessageHeaderIndex::MessageType]};
     return {NetworkResult::Success, messageType, messageSize};
 }
 
@@ -231,12 +236,18 @@ ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
     // The number of bytes in the upcoming message.
     Uint16 messageSize{
         ByteTools::read16(&(headerBuf[MessageHeaderIndex::Size]))};
+    Uint8 messageType{headerBuf[MessageHeaderIndex::MessageType]};
     if (messageSize > MAX_WIRE_SIZE) {
         LOG_FATAL("Tried to receive too large of a message. messageSize: %u, "
                   "MAX_WIRE_SIZE: %u",
                   messageSize, MAX_WIRE_SIZE);
     }
+    else if (messageSize == 0) {
+        // We're receiving a "tag message" (0 bytes, type only).
+        return {NetworkResult::Success, messageType, messageSize};
+    }
 
+    // Receive the message.
     messageBuffer = std::make_unique<BinaryBuffer>(messageSize);
     result = socket.receive(messageBuffer->data(), messageSize);
     if (result <= 0) {
@@ -249,7 +260,6 @@ ReceiveResult Peer::receiveMessageWait(BinaryBufferPtr& messageBuffer)
                   "Need to add logic for this scenario.");
     }
 
-    Uint8 messageType{headerBuf[MessageHeaderIndex::MessageType]};
     return {NetworkResult::Success, messageType, messageSize};
 }
 

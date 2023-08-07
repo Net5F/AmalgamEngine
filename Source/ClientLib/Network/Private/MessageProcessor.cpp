@@ -8,11 +8,12 @@
 #include "ConnectionResponse.h"
 #include "MovementUpdate.h"
 #include "ChunkUpdate.h"
+#include "ClientEntityInit.h"
+#include "NonClientEntityInit.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
-#include "EntityInit.h"
 #include "EntityDelete.h"
 #include "Log.h"
 
@@ -51,6 +52,21 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                                   networkEventDispatcher);
             break;
         }
+        case EngineMessageType::ClientEntityInit: {
+            dispatchMessage<ClientEntityInit>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::NonClientEntityInit: {
+            dispatchMessage<NonClientEntityInit>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::EntityDelete: {
+            dispatchMessage<EntityDelete>(messageBuffer, messageSize,
+                                          networkEventDispatcher);
+            break;
+        }
         case EngineMessageType::TileAddLayer: {
             dispatchMessage<TileAddLayer>(messageBuffer, messageSize,
                                         networkEventDispatcher);
@@ -69,17 +85,6 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         case EngineMessageType::TileExtentClearLayers: {
             dispatchMessage<TileExtentClearLayers>(messageBuffer, messageSize,
                                         networkEventDispatcher);
-            break;
-        }
-        case EngineMessageType::EntityInit: {
-            dispatchMessage<EntityInit>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
-
-            break;
-        }
-        case EngineMessageType::EntityDelete: {
-            dispatchMessage<EntityDelete>(messageBuffer, messageSize,
-                                          networkEventDispatcher);
             break;
         }
         default: {

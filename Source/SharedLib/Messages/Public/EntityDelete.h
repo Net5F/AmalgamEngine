@@ -7,8 +7,8 @@
 namespace AM
 {
 /**
- * Sent by the server to tell a client that an entity has left its area of
- * interest and must be deleted.
+ * Used to request that an entity be deleted, or to inform a client that an 
+ * entity was deleted.
  */
 struct EntityDelete {
     // The EngineMessageType enum value that this message corresponds to.

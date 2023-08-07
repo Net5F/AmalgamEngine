@@ -4,6 +4,7 @@
 #include "Velocity.h"
 #include "Rotation.h"
 #include "BoundingBox.h"
+#include "TileMapBase.h"
 #include "SharedConfig.h"
 #include "Ignore.h"
 
@@ -104,6 +105,44 @@ Position
     double interpZ{(position.z * alpha) + (previousPos.z * (1.0 - alpha))};
     return {static_cast<float>(interpX), static_cast<float>(interpY),
             static_cast<float>(interpZ)};
+}
+
+BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
+                                               const BoundingBox& desiredBounds,
+                                               const TileMapBase& tileMap)
+{
+    // TODO: Replace this logic with real sliding collision.
+
+    // If the desired movement would go outside of the map, don't let
+    // them move.
+    const TileExtent boxTileExtent{desiredBounds.asTileExtent()};
+    const TileExtent mapExtent{tileMap.getTileExtent()};
+    if (!mapExtent.containsExtent(boxTileExtent)
+        || (desiredBounds.minZ < 0)) {
+        return currentBounds;
+    }
+
+    // For each tile that the desired bounds is touching.
+    for (int y = boxTileExtent.y; y <= boxTileExtent.yMax(); ++y) {
+        for (int x = boxTileExtent.x; x <= boxTileExtent.xMax(); ++x) {
+            const Tile& tile{tileMap.getTile(x, y)};
+
+            // For each collision box in this tile.
+            for (const BoundingBox& collisionBox :
+                 tile.getCollisionBoxes()) {
+                // If the desired movement would intersect this box, don't 
+                // let them move.
+                if (desiredBounds.intersects(collisionBox)) {
+                    return currentBounds;
+                }
+            }
+        }
+    }
+
+    // TODO: If we want to collide with non-client entities, Client will need 
+    //       to maintain an EntityLocator.
+
+    return desiredBounds;
 }
 
 Rotation::Direction MovementHelpers::directionIntToDirection(int directionInt)

@@ -8,15 +8,9 @@ namespace AM
 {
 namespace Client
 {
-TileUpdateSystem::TileUpdateSystem(World& inWorld,
-                                   EventDispatcher& inUiEventDispatcher,
-                                   Network& inNetwork)
+TileUpdateSystem::TileUpdateSystem(World& inWorld, Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
-, addLayerRequestQueue{inUiEventDispatcher}
-, removeLayerRequestQueue{inUiEventDispatcher}
-, clearLayersRequestQueue{inUiEventDispatcher}
-, extentClearLayersRequestQueue{inUiEventDispatcher}
 , addLayerQueue{network.getEventDispatcher()}
 , removeLayerQueue{network.getEventDispatcher()}
 , clearLayersQueue{network.getEventDispatcher()}
@@ -26,36 +20,8 @@ TileUpdateSystem::TileUpdateSystem(World& inWorld,
 
 void TileUpdateSystem::updateTiles()
 {
-    // Process tile update requests from the UI.
-    processUiRequests();
-
     // Process tile updates from the server.
     processNetworkUpdates();
-}
-
-void TileUpdateSystem::processUiRequests()
-{
-    // Process any waiting update requests from the UI.
-    TileAddLayer addLayerRequest{};
-    while (addLayerRequestQueue.pop(addLayerRequest)) {
-        network.serializeAndSend<TileAddLayer>(addLayerRequest);
-    }
-
-    TileRemoveLayer removeLayerRequest{};
-    while (removeLayerRequestQueue.pop(removeLayerRequest)) {
-        network.serializeAndSend<TileRemoveLayer>(removeLayerRequest);
-    }
-
-    TileClearLayers clearLayersRequest{};
-    while (clearLayersRequestQueue.pop(clearLayersRequest)) {
-        network.serializeAndSend<TileClearLayers>(clearLayersRequest);
-    }
-
-    TileExtentClearLayers clearExtentLayersRequest{};
-    while (extentClearLayersRequestQueue.pop(clearExtentLayersRequest)) {
-        network.serializeAndSend<TileExtentClearLayers>(
-            clearExtentLayersRequest);
-    }
 }
 
 void TileUpdateSystem::processNetworkUpdates()

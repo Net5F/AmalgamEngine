@@ -22,7 +22,8 @@ class Network;
 struct InputHistory;
 
 /**
- * Processes player entity update messages and moves the entity appropriately.
+ * Processes movement update messages for the player's entity and moves the 
+ * entity appropriately.
  */
 class PlayerMovementSystem
 {

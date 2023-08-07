@@ -26,12 +26,14 @@ Application::Application()
 , sdlRenderer{sdlWindow, -1, SDL_RENDERER_ACCELERATED}
 , assetCache{sdlRenderer.Get()}
 , spriteData{assetCache}
-, userInterface{}
-, uiCaller{std::bind_front(&UserInterface::tick, &userInterface),
-           Config::UI_TICK_TIMESTEP_S, "UserInterface", true}
 , network{}
 , networkCaller{std::bind_front(&Network::tick, &network),
                 SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true}
+// Note: Since the UI and sim subscribe to the network's event queues, they 
+//       need to be destructed before it.
+, userInterface{}
+, uiCaller{std::bind_front(&UserInterface::tick, &userInterface),
+           Config::UI_TICK_TIMESTEP_S, "UserInterface", true}
 , simulation{userInterface.getEventDispatcher(), network, spriteData}
 , simCaller{std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}

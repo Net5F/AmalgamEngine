@@ -17,8 +17,11 @@ class Network;
 class SpriteData;
 
 /**
- * Processes NPC (networked player and AI) entity update messages and moves
- * their entities appropriately.
+ * Processes NPC (non-player-controlled) entity update messages and moves their 
+ * entities appropriately.
+ *
+ * From this Client's perspective, NPCs are any entity that isn't controlled by 
+ * this client's player. See IsClientEntity.h for more info.
  */
 class NpcMovementSystem
 {

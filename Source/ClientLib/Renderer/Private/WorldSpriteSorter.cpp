@@ -63,50 +63,23 @@ const std::vector<SpriteSortInfo>& WorldSpriteSorter::getSortedSprites()
 
 void WorldSpriteSorter::gatherSpriteInfo(const Camera& camera, double alpha)
 {
-    // Gather all relevant tiles.
-    gatherTileSpriteInfo(camera, alpha);
-
-    // Gather all relevant dynamic sprites.
-    auto group = registry.group<Position, PreviousPosition, Collision>(
-        entt::get<Sprite>);
-    for (entt::entity entity : group) {
-        auto [position, previousPos, collision, sprite]
-            = group.get<Position, PreviousPosition, Collision, Sprite>(entity);
-
-        // Get the entity's lerp'd world position.
-        Position lerp{
-            MovementHelpers::interpolatePosition(previousPos, position, alpha)};
-
-        // Get the iso screen extent for the lerped sprite.
-        const SpriteRenderData& renderData{
-            spriteData.getRenderData(sprite.numericID)};
-        SDL_Rect screenExtent{
-            ClientTransforms::entityToScreenExtent(lerp, renderData, camera)};
-
-        // If the sprite is on screen, push the render info.
-        if (isWithinScreenBounds(screenExtent, camera)) {
-            // Get an updated bounding box for this entity.
-            BoundingBox worldBox{
-                Transforms::modelToWorldCentered(sprite.modelBounds, lerp)};
-
-            // If the UI wants a color mod on this sprite, use it.
-            SDL_Color colorMod{getColorMod<entt::entity>(entity)};
-
-            // TODO: Check for phantoms
-
-            // Push the entity's render info for this frame.
-            spritesToSort.emplace_back(&sprite, entity, worldBox, screenExtent,
-                                       colorMod);
-        }
-    }
-}
-
-void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera, double alpha)
-{
     // Save a temporary copy of the UI's current phantoms and color mods.
     phantomSprites = ui.getPhantomSprites();
     spriteColorMods = ui.getSpriteColorMods();
 
+    // Gather all relevant tiles.
+    gatherTileSpriteInfo(camera, alpha);
+
+    // Gather all relevant entities.
+    gatherEntitySpriteInfo(camera, alpha);
+
+    // Clear our temporary vectors.
+    phantomSprites.clear();
+    spriteColorMods.clear();
+}
+
+void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera, double alpha)
+{
     // Gather all tiles that are in view.
     TileExtent tileViewExtent{
         camera.getTileViewExtent(tileMap.getTileExtent())};
@@ -126,10 +99,13 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera, double alpha)
         }
     }
 
-    // Gather all of the UI's phantom sprites that weren't already used.
+    // Gather all of the UI's phantom tile sprites that weren't already used.
     for (const PhantomSpriteInfo& info : phantomSprites) {
-        pushTileSprite(*(info.sprite), camera,
-                       {info.tileX, info.tileY, info.layerType, 0, 0}, true);
+        if (info.layerType != TileLayer::Type::None) {
+            pushTileSprite(*(info.sprite), camera,
+                           {info.tileX, info.tileY, info.layerType, 0, 0},
+                           true);
+        }
     }
 
     // Add all of the floors, then all of the floor coverings to the sorted 
@@ -143,10 +119,33 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera, double alpha)
                          std::make_move_iterator(floorCoveringSprites.begin()),
                          std::make_move_iterator(floorCoveringSprites.end()));
     floorCoveringSprites.clear();
+}
 
-    // Clear our temporary vectors.
-    phantomSprites.clear();
-    spriteColorMods.clear();
+void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera, double alpha)
+{
+    // Gather all entities that have a position and sprite.
+    auto view = registry.view<Position, Sprite>();
+    for (entt::entity entity : view) {
+        auto [position, sprite] = view.get<Position, Sprite>(entity);
+
+        // If this entity has a previous position, calc a lerp'd position.
+        Position renderPosition{position};
+        if (registry.all_of<PreviousPosition>(entity)) {
+            const auto& previousPos{registry.get<PreviousPosition>(entity)};
+            renderPosition = MovementHelpers::interpolatePosition(
+                previousPos, position, alpha);
+        }
+
+        pushEntitySprite(entity, renderPosition, sprite, camera);
+    }
+
+    // Gather all of the UI's phantom entity sprites.
+    for (const PhantomSpriteInfo& info : phantomSprites) {
+        if (info.layerType == TileLayer::Type::None) {
+            pushEntitySprite(entt::null, info.position, *(info.sprite),
+                             camera);
+        }
+    }
 }
 
 void WorldSpriteSorter::pushFloorSprite(const Tile& tile,
@@ -296,6 +295,32 @@ void WorldSpriteSorter::pushTileSprite(const Sprite& sprite,
     }
     else {
         LOG_ERROR("Invalid layer type.");
+    }
+}
+
+void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
+                                         const Position& position,
+                                         const Sprite& sprite,
+                                         const Camera& camera)
+{
+    // Get the iso screen extent for the lerped sprite.
+    const SpriteRenderData& renderData{
+        spriteData.getRenderData(sprite.numericID)};
+    SDL_Rect screenExtent{
+        ClientTransforms::entityToScreenExtent(position, renderData, camera)};
+
+    // If the sprite is on screen, push the render info.
+    if (isWithinScreenBounds(screenExtent, camera)) {
+        // Get an updated bounding box for this entity.
+        BoundingBox worldBox{
+            Transforms::modelToWorldCentered(sprite.modelBounds, position)};
+
+        // If the UI wants a color mod on this sprite, use it.
+        SDL_Color colorMod{getColorMod<entt::entity>(entity)};
+
+        // Push the entity's render info for this frame.
+        spritesToSort.emplace_back(&sprite, entity, worldBox, screenExtent,
+                                   colorMod);
     }
 }
 

@@ -13,7 +13,9 @@ namespace Client
  * modified.
  */
 struct SpriteColorModInfo {
-    /** The world object that we want to modify the color of. */
+    /** The world object that we want to modify the color of.
+        Note: Since phantom entities don't have an entity ID, you can use 
+              entt::null to target them. */
     WorldObjectID objectToModify;
 
     /** The color and transparency to multiply the sprite by.

@@ -36,9 +36,7 @@ public:
     /** Entity data registry. */
     entt::registry registry;
 
-    /** We save the player entity ID since it's more convenient than searching
-        for the PlayerState component and getting the entity from that every
-        time we need it. */
+    /** The entity that this client is controlling. */
     entt::entity playerEntity;
 
     /** The tile map that makes up the world. */

@@ -14,6 +14,7 @@ struct Position;
 struct PreviousPosition;
 struct Velocity;
 struct Rotation;
+class TileMapBase;
 
 /**
  * Shared static functions for moving entities.
@@ -66,8 +67,6 @@ public:
     static Position interpolatePosition(const PreviousPosition& previousPos,
                                         const Position& position, double alpha);
 
-    // TODO: TileMap and Tile are no longer split across repos, so turn this
-    //       into a normal function acting on TileMapBase.
     /**
      * Resolves collisions between the given desiredBox and other nearby
      * bounding boxes in the world.
@@ -78,41 +77,9 @@ public:
      *
      * @return The desired bounding box, moved to resolve collisions.
      */
-    template<typename T>
     static BoundingBox resolveCollisions(const BoundingBox& currentBounds,
                                          const BoundingBox& desiredBounds,
-                                         const T& tileMap)
-    {
-        // TODO: Replace this logic with real sliding collision.
-
-        // If the desired movement would go outside of the map, don't let
-        // them move.
-        const TileExtent boxTileExtent{desiredBounds.asTileExtent()};
-        const TileExtent mapExtent{tileMap.getTileExtent()};
-        if (!mapExtent.containsExtent(boxTileExtent)
-            || (desiredBounds.minZ < 0)) {
-            return currentBounds;
-        }
-
-        // For each tile that the desired bounds is touching.
-        for (int y = boxTileExtent.y; y <= boxTileExtent.yMax(); ++y) {
-            for (int x = boxTileExtent.x; x <= boxTileExtent.xMax(); ++x) {
-                const Tile& tile{tileMap.getTile(x, y)};
-
-                // For each collision box in this tile.
-                for (const BoundingBox& collisionBox :
-                     tile.getCollisionBoxes()) {
-                    // If the desired movement would intersect this box, don't 
-                    // let them move.
-                    if (desiredBounds.intersects(collisionBox)) {
-                        return currentBounds;
-                    }
-                }
-            }
-        }
-
-        return desiredBounds;
-    }
+                                         const TileMapBase& tileMap);
 
 private:
     /**

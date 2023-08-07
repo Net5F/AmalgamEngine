@@ -65,6 +65,11 @@ private:
      */
     void gatherTileSpriteInfo(const Camera& camera, double alpha);
 
+    /**
+     * Performs the entity portion of the gather step.
+     */
+    void gatherEntitySpriteInfo(const Camera& camera, double alpha);
+
     // All of these just call pushTileSprite(), but Floor and Wall also check 
     // if the UI wants to swap any of their sprites with a phantom.
     void pushFloorSprite(const Tile& tile, const Camera& camera, int x, int y);
@@ -81,6 +86,12 @@ private:
      */
     void pushTileSprite(const Sprite& sprite, const Camera& camera,
                         const TileLayerID& layerID, bool isFullPhantom);
+
+    /**
+     * Pushes the given entity sprite into the sorting vector.
+     */
+    void pushEntitySprite(entt::entity entity, const Position& position,
+                          const Sprite& sprite, const Camera& camera);
 
     /**
      * Sorts the sprites into their draw order (farthest sprite first).

@@ -9,6 +9,7 @@
 #include "Velocity.h"
 #include "Collision.h"
 #include "Rotation.h"
+#include "IsClientEntity.h"
 #include "Sprite.h"
 #include "Config.h"
 #include "entt/entity/registry.hpp"
@@ -23,7 +24,8 @@ NpcLifetimeSystem::NpcLifetimeSystem(Simulation& inSimulation, World& inWorld,
 : simulation{inSimulation}
 , world{inWorld}
 , spriteData{inSpriteData}
-, entityInitQueue{inNetworkEventDispatcher}
+, clientEntityInitQueue{inNetworkEventDispatcher}
+, nonClientEntityInitQueue{inNetworkEventDispatcher}
 , entityDeleteQueue{inNetworkEventDispatcher}
 {
 }
@@ -37,8 +39,11 @@ void NpcLifetimeSystem::processUpdates()
     // Process any waiting EntityDelete messages, up to desiredTick.
     processEntityDeletes(desiredTick);
 
-    // Process any waiting EntityInit messages, up to desiredTick.
-    processEntityInits(desiredTick);
+    // Process any waiting ClientEntityInit messages, up to desiredTick.
+    processClientEntityInits(desiredTick);
+
+    // Process any waiting NonClientEntityInit messages, up to desiredTick.
+    processNonClientEntityInits(desiredTick);
 }
 
 void NpcLifetimeSystem::processEntityDeletes(Uint32 desiredTick)
@@ -65,13 +70,13 @@ void NpcLifetimeSystem::processEntityDeletes(Uint32 desiredTick)
     }
 }
 
-void NpcLifetimeSystem::processEntityInits(Uint32 desiredTick)
+void NpcLifetimeSystem::processClientEntityInits(Uint32 desiredTick)
 {
     entt::registry& registry{world.registry};
 
-    // Construct the entities that entered our AOI on this tick (or previous
-    // ticks).
-    EntityInit* entityInit{entityInitQueue.peek()};
+    // Construct the client entities that entered our AOI on this tick (or 
+    // previous ticks).
+    ClientEntityInit* entityInit{clientEntityInitQueue.peek()};
     while ((entityInit != nullptr) && (entityInit->tickNum <= desiredTick)) {
         if (!(registry.valid(entityInit->entity))) {
             // Create the entity.
@@ -85,10 +90,13 @@ void NpcLifetimeSystem::processEntityInits(Uint32 desiredTick)
             // Construct their movement-related components (to be set for real
             // when we get an EntityUpdate).
             registry.emplace<Input>(entityInit->entity);
-            registry.emplace<Position>(entityInit->entity);
-            registry.emplace<PreviousPosition>(entityInit->entity);
+            registry.emplace<Position>(entityInit->entity,
+                                       entityInit->position);
+            registry.emplace<PreviousPosition>(entityInit->entity,
+                                               entityInit->position);
             registry.emplace<Velocity>(entityInit->entity);
             registry.emplace<Rotation>(entityInit->entity);
+            registry.emplace<IsClientEntity>(newEntity);
 
             // Construct their name using the received name.
             registry.emplace<Name>(entityInit->entity, entityInit->name);
@@ -97,8 +105,8 @@ void NpcLifetimeSystem::processEntityInits(Uint32 desiredTick)
             const Sprite& sprite{spriteData.getSprite(entityInit->numericID)};
             registry.emplace<Sprite>(entityInit->entity, sprite);
 
-            // Construct their collision (it'll be positioned once they get a
-            // position update).
+            // Construct their collision (we don't need to position it until 
+            // they move, since the player entity doesn't collide with them).
             registry.emplace<Collision>(entityInit->entity, sprite.modelBounds,
                                         BoundingBox{});
 
@@ -110,8 +118,48 @@ void NpcLifetimeSystem::processEntityInits(Uint32 desiredTick)
                       entityInit->entity);
         }
 
-        entityInitQueue.pop();
-        entityInit = entityInitQueue.peek();
+        clientEntityInitQueue.pop();
+        entityInit = clientEntityInitQueue.peek();
+    }
+}
+
+void NpcLifetimeSystem::processNonClientEntityInits(Uint32 desiredTick)
+{
+    entt::registry& registry{world.registry};
+
+    // Construct the non-client entities that entered our AOI on this tick (or 
+    // previous ticks).
+    NonClientEntityInit* entityInit{nonClientEntityInitQueue.peek()};
+    while ((entityInit != nullptr) && (entityInit->tickNum <= desiredTick)) {
+        if (!(registry.valid(entityInit->entity))) {
+            // Create the entity.
+            entt::entity newEntity{registry.create(entityInit->entity)};
+            if (entityInit->entity != newEntity) {
+                LOG_FATAL("Created entity doesn't match received entity. "
+                          "Created: %u, received: %u",
+                          newEntity, entityInit->entity);
+            }
+
+            // Construct their Position.
+            registry.emplace<Position>(entityInit->entity,
+                                       entityInit->position);
+
+            // Construct their sprite using the received numericID.
+            const Sprite& sprite{spriteData.getSprite(entityInit->numericID)};
+            registry.emplace<Sprite>(entityInit->entity, sprite);
+
+            // TODO: Construct components from vector.
+
+            LOG_INFO("Entity added: %u. Desired tick: %u, Message tick: %u",
+                     entityInit->entity, desiredTick, entityInit->tickNum);
+        }
+        else {
+            LOG_FATAL("Asked to construct entity that already exists: %u",
+                      entityInit->entity);
+        }
+
+        nonClientEntityInitQueue.pop();
+        entityInit = nonClientEntityInitQueue.peek();
     }
 }
 

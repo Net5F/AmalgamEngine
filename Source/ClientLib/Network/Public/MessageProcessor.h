@@ -67,8 +67,9 @@ private:
         subscribed queues. */
     EventDispatcher& networkEventDispatcher;
 
-    /** Local copy of the playerEntity so we can tell if we got a player
-        message. */
+    /** The entity that this client is controlling. Used when we receive client 
+        entity updates, to tell if they contain data relevant to the player 
+        entity. */
     entt::entity playerEntity;
 
     /** If non-nullptr, contains the project's message processing extension

@@ -28,8 +28,7 @@ class Network;
 class TileUpdateSystem
 {
 public:
-    TileUpdateSystem(World& inWorld, EventDispatcher& inUiEventDispatcher,
-                     Network& inNetwork);
+    TileUpdateSystem(World& inWorld, Network& inNetwork);
 
     /**
      * Processes tile updates.
@@ -44,11 +43,6 @@ public:
     void updateTiles();
 
 private:
-    /**
-     * Processes tile update requests from the UI.
-     */
-    void processUiRequests();
-
     /**
      * Processes tile updates from the server.
      */
@@ -79,12 +73,6 @@ private:
     World& world;
     /** Used to send tile update request messages. */
     Network& network;
-
-    /** Tile update requests, received from the UI. */
-    EventQueue<TileAddLayer> addLayerRequestQueue;
-    EventQueue<TileRemoveLayer> removeLayerRequestQueue;
-    EventQueue<TileClearLayers> clearLayersRequestQueue;
-    EventQueue<TileExtentClearLayers> extentClearLayersRequestQueue;
 
     /** Tile updates, received from the network. */
     EventQueue<TileAddLayer> addLayerQueue;

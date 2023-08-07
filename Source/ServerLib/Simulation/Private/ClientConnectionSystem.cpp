@@ -63,7 +63,7 @@ void ClientConnectionSystem::processConnectEvents()
         entt::entity newEntity{registry.create()};
         registry.emplace<Name>(newEntity,
                                std::to_string(static_cast<Uint32>(newEntity)));
-        Position& newPosition{registry.emplace<Position>(
+        const Position& newPosition{registry.emplace<Position>(
             newEntity, spawnPoint.x, spawnPoint.y, 0.0f)};
         registry.emplace<PreviousPosition>(newEntity, spawnPoint.x,
                                            spawnPoint.y, 0.0f);
@@ -72,18 +72,19 @@ void ClientConnectionSystem::processConnectEvents()
         registry.emplace<Rotation>(newEntity);
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
                                         std::vector<entt::entity>());
-        Sprite& newSprite{registry.emplace<Sprite>(
+        const Sprite& newSprite{registry.emplace<Sprite>(
             newEntity,
             spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
-        Collision& collision{registry.emplace<Collision>(
+        const Collision& newCollision{registry.emplace<Collision>(
             newEntity, newSprite.modelBounds,
             Transforms::modelToWorldCentered(newSprite.modelBounds,
                                              newPosition))};
 
         // Start tracking the entity in the locator.
-        // Note: Since the entity was added to the locator, its peers
+        // Note: Since the entity was added to the locator, clients 
         //       will be told by ClientAOISystem to construct it.
-        world.entityLocator.setEntityLocation(newEntity, collision.worldBounds);
+        world.entityLocator.setEntityLocation(newEntity,
+                                              newCollision.worldBounds);
 
         // Register the entity with the network ID map.
         world.netIdMap[clientConnected.clientID] = newEntity;

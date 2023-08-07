@@ -22,7 +22,7 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 , serverConnectionSystem{world, inUiEventDispatcher, network, inSpriteData,
                          currentTick}
 , chunkUpdateSystem{*this, world, network}
-, tileUpdateSystem{world, inUiEventDispatcher, network}
+, tileUpdateSystem{world, network}
 , npcLifetimeSystem{*this, world, inSpriteData, network.getEventDispatcher()}
 , playerInputSystem{*this, world, network}
 , playerMovementSystem{*this, world, network.getEventDispatcher()}

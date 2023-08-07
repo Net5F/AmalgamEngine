@@ -20,6 +20,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
                          inSpriteData}
 , tileUpdateSystem{world, network.getEventDispatcher(), network, extension}
 , clientAOISystem{*this, world, network}
+, nceLifetimeSystem{world, network.getEventDispatcher(), network, inSpriteData}
 , inputSystem{*this, world, network.getEventDispatcher()}
 , movementSystem{world}
 , movementSyncSystem{*this, world, network}
@@ -57,6 +58,9 @@ void Simulation::tick()
 
     // Send updated tile state to nearby clients.
     tileUpdateSystem.sendTileUpdates();
+
+    // Create and destroy non-client-controlled entities.
+    nceLifetimeSystem.processUpdates();
 
     // Receive and process client input messages.
     inputSystem.processInputMessages();

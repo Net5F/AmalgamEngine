@@ -28,11 +28,6 @@ public:
 
     /** Tracks the entities that are in range of this client's entity. */
     std::vector<entt::entity> entitiesInAOI{};
-
-    /** Tracks the entities that have just entered this client's AOI on this
-        tick.
-        Only valid after ClientAOISystem has ran. */
-    std::vector<entt::entity> entitiesThatEnteredAOI{};
 };
 
 } // namespace Server

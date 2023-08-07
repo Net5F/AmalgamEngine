@@ -8,7 +8,8 @@
 #include "Name.h"
 #include "Sprite.h"
 #include "EntityDelete.h"
-#include "EntityInit.h"
+#include "ClientEntityInit.h"
+#include "NonClientEntityInit.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include "Tracy.hpp"
@@ -21,8 +22,10 @@ namespace Server
 ClientAOISystem::ClientAOISystem(Simulation& inSimulation, World& inWorld,
                                  Network& inNetwork)
 : simulation{inSimulation}
-, world(inWorld)
-, network(inNetwork)
+, world{inWorld}
+, network{inNetwork}
+, entitiesThatLeft{}
+, entitiesThatEntered{}
 {
 }
 
@@ -37,7 +40,7 @@ void ClientAOISystem::updateAOILists()
 
         // Clear our lists.
         entitiesThatLeft.clear();
-        client.entitiesThatEnteredAOI.clear();
+        entitiesThatEntered.clear();
 
         // Get the list of entities that are in this entity's AOI.
         std::vector<entt::entity>& currentAOIEntities{
@@ -72,10 +75,10 @@ void ClientAOISystem::updateAOILists()
         std::set_difference(currentAOIEntities.begin(),
                             currentAOIEntities.end(), oldAOIEntities.begin(),
                             oldAOIEntities.end(),
-                            std::back_inserter(client.entitiesThatEnteredAOI));
+                            std::back_inserter(entitiesThatEntered));
 
         // Process the entities that entered this entity's AOI.
-        if (client.entitiesThatEnteredAOI.size() > 0) {
+        if (entitiesThatEntered.size() > 0) {
             processEntitiesThatEntered(client);
         }
 
@@ -96,16 +99,27 @@ void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
 
 void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
 {
-    auto view{world.registry.view<Name, Sprite>()};
+    auto view{world.registry.view<Position, Sprite, Name>()};
 
     // Send the client an EntityInit for each entity that entered its AOI.
-    for (entt::entity entityThatEntered : client.entitiesThatEnteredAOI) {
-        Name& enteredName{view.get<Name>(entityThatEntered)};
-        Sprite& enteredSprite{view.get<Sprite>(entityThatEntered)};
-        network.serializeAndSend(client.netID,
-                                 EntityInit{simulation.getCurrentTick(),
-                                            entityThatEntered, enteredName.name,
-                                            enteredSprite.numericID});
+    for (entt::entity entityThatEntered : entitiesThatEntered) {
+        auto [position, sprite] = view.get<Position, Sprite>(entityThatEntered);
+
+        // If it's a client entity, send a ClientEntityInit.
+        if (world.registry.all_of<ClientSimData>(entityThatEntered)) {
+            Name& name{view.get<Name>(entityThatEntered)};
+            network.serializeAndSend(
+                client.netID,
+                ClientEntityInit{simulation.getCurrentTick(), entityThatEntered,
+                                 name.name, position, sprite.numericID});
+        }
+        else {
+            // Non-client entity, send a NonClientEntityInit.
+            network.serializeAndSend(
+                client.netID, NonClientEntityInit{simulation.getCurrentTick(),
+                                                  entityThatEntered, position,
+                                                  sprite.numericID});
+        }
     }
 }
 

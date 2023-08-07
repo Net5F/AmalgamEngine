@@ -5,8 +5,9 @@ target_sources(ServerLib
 		Private/ClientConnectionSystem.cpp
 		Private/InputSystem.cpp
 		Private/MapSaveSystem.cpp
-		Private/MovementSystem.cpp
 		Private/MovementSyncSystem.cpp
+		Private/MovementSystem.cpp
+		Private/NceLifetimeSystem.cpp
 		Private/Simulation.cpp
 		Private/TileUpdateSystem.cpp
 		Private/World.cpp
@@ -21,8 +22,9 @@ target_sources(ServerLib
 		Public/InputSystem.h
 		Public/ISimulationExtension.h
 		Public/MapSaveSystem.h
-		Public/MovementSystem.h
 		Public/MovementSyncSystem.h
+		Public/MovementSystem.h
+		Public/NceLifetimeSystem.h
 		Public/Simulation.h
 		Public/SimulationExDependencies.h
 		Public/SpawnStrategy.h

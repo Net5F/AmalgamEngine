@@ -4,6 +4,7 @@
 #include "ClientConnectionSystem.h"
 #include "TileUpdateSystem.h"
 #include "ClientAOISystem.h"
+#include "NceLifetimeSystem.h"
 #include "InputSystem.h"
 #include "MovementSystem.h"
 #include "MovementSyncSystem.h"
@@ -72,6 +73,7 @@ private:
     ClientConnectionSystem clientConnectionSystem;
     TileUpdateSystem tileUpdateSystem;
     ClientAOISystem clientAOISystem;
+    NceLifetimeSystem nceLifetimeSystem;
     InputSystem inputSystem;
     MovementSystem movementSystem;
     MovementSyncSystem movementSyncSystem;

@@ -109,11 +109,13 @@ void TileUpdateSystem::sendTileUpdates()
         std::vector<entt::entity>& entitiesInRange{
             world.entityLocator.getEntitiesFine(inRangeExtent)};
 
-        // Send the update to all of the in-range entities.
+        // Send the update to all of the in-range clients.
         for (entt::entity entity : entitiesInRange) {
-            ClientSimData& client{clientView.get<ClientSimData>(entity)};
-            updateSender.netID = client.netID;
-            std::visit(updateSender, updateVariant);
+            if (world.registry.all_of<ClientSimData>(entity)) {
+                ClientSimData& client{clientView.get<ClientSimData>(entity)};
+                updateSender.netID = client.netID;
+                std::visit(updateSender, updateVariant);
+            }
         }
     }
 
