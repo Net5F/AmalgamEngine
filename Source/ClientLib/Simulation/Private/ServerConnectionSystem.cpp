@@ -8,7 +8,7 @@
 #include "Collision.h"
 #include "InputHistory.h"
 #include "Rotation.h"
-#include "IsClientEntity.h"
+#include "EntityType.h"
 #include "NeedsAdjacentChunks.h"
 #include "Camera.h"
 #include "Transforms.h"
@@ -121,32 +121,29 @@ void ServerConnectionSystem::initSimState(
     world.playerEntity = newEntity;
 
     // Set up the player's sim components.
+    registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
     registry.emplace<Name>(newEntity,
                            std::to_string(static_cast<Uint32>(newEntity)));
-    Position& playerPosition{registry.emplace<Position>(
+
+    registry.emplace<Input>(newEntity);
+    Position& position{registry.emplace<Position>(
         newEntity, connectionResponse.x, connectionResponse.y, 0.0f)};
     registry.emplace<PreviousPosition>(newEntity, connectionResponse.x,
                                        connectionResponse.y, 0.0f);
     registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
-    registry.emplace<Input>(newEntity);
     registry.emplace<Rotation>(newEntity);
-    registry.emplace<IsClientEntity>(newEntity);
 
-    // Set up the player's visual components.
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};
-    Sprite& playerSprite{registry.emplace<Sprite>(
+    Sprite& sprite{registry.emplace<Sprite>(
         newEntity, spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
     registry.emplace<Camera>(
         newEntity, Camera::CenterOnEntity, Position{}, PreviousPosition{},
         SDLHelpers::rectToFRect(userConfig.getWindowSize()));
 
-    // Set up the player's collision component.
-    registry.emplace<Collision>(newEntity, playerSprite.modelBounds,
-                                Transforms::modelToWorldCentered(
-                                    playerSprite.modelBounds, playerPosition));
-
-    // Set up the player's InputHistory component.
+    registry.emplace<Collision>(
+        newEntity, sprite.modelBounds,
+        Transforms::modelToWorldCentered(sprite.modelBounds, position));
     registry.emplace<InputHistory>(newEntity);
 
     // Flag that we just moved and need to request all map data.
@@ -163,17 +160,17 @@ void ServerConnectionSystem::initMockSimState()
     world.playerEntity = newEntity;
 
     // Set up the player's sim components.
+    registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
     registry.emplace<Name>(newEntity,
                            std::to_string(static_cast<Uint32>(newEntity)));
-    Position& playerPosition{
+
+    registry.emplace<Input>(newEntity);
+    Position& position{
         registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f)};
     registry.emplace<PreviousPosition>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
-    registry.emplace<Input>(newEntity);
     registry.emplace<Rotation>(newEntity);
-    registry.emplace<IsClientEntity>(newEntity);
 
-    // Set up the player's visual components.
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};
     Sprite& playerSprite{registry.emplace<Sprite>(
@@ -182,12 +179,9 @@ void ServerConnectionSystem::initMockSimState()
         newEntity, Camera::CenterOnEntity, Position{}, PreviousPosition{},
         SDLHelpers::rectToFRect(userConfig.getWindowSize()));
 
-    // Set up the player's collision component.
-    registry.emplace<Collision>(newEntity, playerSprite.modelBounds,
-                                Transforms::modelToWorldCentered(
-                                    playerSprite.modelBounds, playerPosition));
-
-    // Set up the player's InputHistory component.
+    registry.emplace<Collision>(
+        newEntity, playerSprite.modelBounds,
+        Transforms::modelToWorldCentered(playerSprite.modelBounds, position));
     registry.emplace<InputHistory>(newEntity);
 }
 

@@ -7,7 +7,7 @@
 #include "Heartbeat.h"
 #include "InputChangeRequest.h"
 #include "ChunkUpdateRequest.h"
-#include "EntityCreateRequest.h"
+#include "DynamicObjectCreateRequest.h"
 #include "EntityDelete.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
@@ -51,9 +51,9 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             handleChunkUpdateRequest(netID, messageBuffer, messageSize);
             break;
         }
-        case EngineMessageType::EntityCreateRequest: {
-            dispatchMessage<EntityCreateRequest>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+        case EngineMessageType::DynamicObjectCreateRequest: {
+            dispatchMessage<DynamicObjectCreateRequest>(
+                messageBuffer, messageSize, networkEventDispatcher);
             break;
         }
         case EngineMessageType::EntityDelete: {

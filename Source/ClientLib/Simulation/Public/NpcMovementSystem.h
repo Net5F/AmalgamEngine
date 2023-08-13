@@ -20,8 +20,8 @@ class SpriteData;
  * Processes NPC (non-player-controlled) entity update messages and moves their 
  * entities appropriately.
  *
- * From this Client's perspective, NPCs are any entity that isn't controlled by 
- * this client's player. See IsClientEntity.h for more info.
+ * Note: By "NPC", we mean any entity that isn't controlled by this client's 
+ *       player. This is different from what EntityType::NPC means.
  */
 class NpcMovementSystem
 {

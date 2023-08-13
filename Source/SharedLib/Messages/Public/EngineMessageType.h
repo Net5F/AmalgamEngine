@@ -26,8 +26,8 @@ enum class EngineMessageType : Uint8 {
     MovementUpdate,
     ChunkUpdate,
     ClientEntityInit,
-    NonClientEntityInit,
-    EntityCreateRequest,
+    DynamicObjectInit,
+    DynamicObjectCreateRequest,
     EntityDelete,
 
     // Bidirectional Messages

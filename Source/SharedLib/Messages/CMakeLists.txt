@@ -6,16 +6,15 @@ target_sources(SharedLib
         Public/ClientEntityInit.h
         Public/ConnectionRequest.h
         Public/ConnectionResponse.h
+        Public/DynamicObjectCreateRequest.h
+        Public/DynamicObjectInit.h
         Public/EngineMessageType.h
-        Public/EntityCreateRequest.h
         Public/EntityDelete.h
-        Public/EntityReconstructRequest.h
         Public/ExplicitConfirmation.h
         Public/Heartbeat.h
         Public/InputChangeRequest.h
         Public/MovementState.h
         Public/MovementUpdate.h
-        Public/NonClientEntityInit.h
         Public/TileAddLayer.h
         Public/TileClearLayers.h
         Public/TileExtentClearLayers.h

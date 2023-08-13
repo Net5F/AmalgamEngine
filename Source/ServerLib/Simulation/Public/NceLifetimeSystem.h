@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EntityCreateRequest.h"
+#include "DynamicObjectCreateRequest.h"
 #include "EntityDelete.h"
 #include "QueuedEvents.h"
 
@@ -14,8 +14,10 @@ class Network;
 class SpriteData;
 
 /**
- * Manages creation and destruction of non-client entities (see IsClientEntity.h
- * for more info).
+ * Manages creation and destruction of non-client entities.
+ *
+ * Non-client entities are any entity not controlled by a client (dynamic 
+ * objects, NPCs, etc).
  */
 class NceLifetimeSystem
 {
@@ -39,7 +41,7 @@ private:
     /** Used to get sprite data when adding an entity. */
     SpriteData& spriteData;
 
-    EventQueue<EntityCreateRequest> createRequestQueue;
+    EventQueue<DynamicObjectCreateRequest> objectCreateRequestQueue;
     EventQueue<EntityDelete> deleteQueue;
 };
 

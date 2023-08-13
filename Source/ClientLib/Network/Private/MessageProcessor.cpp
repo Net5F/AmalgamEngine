@@ -9,7 +9,7 @@
 #include "MovementUpdate.h"
 #include "ChunkUpdate.h"
 #include "ClientEntityInit.h"
-#include "NonClientEntityInit.h"
+#include "DynamicObjectInit.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
@@ -57,8 +57,8 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                         networkEventDispatcher);
             break;
         }
-        case EngineMessageType::NonClientEntityInit: {
-            dispatchMessage<NonClientEntityInit>(messageBuffer, messageSize,
+        case EngineMessageType::DynamicObjectInit: {
+            dispatchMessage<DynamicObjectInit>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }

@@ -17,6 +17,7 @@ target_sources(SharedLib
         Public/DiscreteImpl.h
         Public/DiscretePosition.h
         Public/EntityLocator.h
+        Public/EntityType.h
         Public/MovementHelpers.h
         Public/Ray.h
         Public/Wall.h

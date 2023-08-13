@@ -12,6 +12,7 @@
 #include "PreviousPosition.h"
 #include "Velocity.h"
 #include "ClientSimData.h"
+#include "EntityType.h"
 #include "Collision.h"
 #include "Name.h"
 #include "EntityDelete.h"
@@ -61,24 +62,27 @@ void ClientConnectionSystem::processConnectEvents()
 
         // Create the entity and construct its standard components.
         entt::entity newEntity{registry.create()};
+        registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
         registry.emplace<Name>(newEntity,
                                std::to_string(static_cast<Uint32>(newEntity)));
-        const Position& newPosition{registry.emplace<Position>(
+
+        registry.emplace<Input>(newEntity);
+        const Position& position{registry.emplace<Position>(
             newEntity, spawnPoint.x, spawnPoint.y, 0.0f)};
         registry.emplace<PreviousPosition>(newEntity, spawnPoint.x,
                                            spawnPoint.y, 0.0f);
         registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
-        registry.emplace<Input>(newEntity);
         registry.emplace<Rotation>(newEntity);
+
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
                                         std::vector<entt::entity>());
-        const Sprite& newSprite{registry.emplace<Sprite>(
+        const Sprite& sprite{registry.emplace<Sprite>(
             newEntity,
             spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
         const Collision& newCollision{registry.emplace<Collision>(
-            newEntity, newSprite.modelBounds,
-            Transforms::modelToWorldCentered(newSprite.modelBounds,
-                                             newPosition))};
+            newEntity, sprite.modelBounds,
+            Transforms::modelToWorldCentered(sprite.modelBounds,
+                                             position))};
 
         // Start tracking the entity in the locator.
         // Note: Since the entity was added to the locator, clients 

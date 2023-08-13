@@ -5,11 +5,13 @@
 #include "Serialize.h"
 #include "ClientSimData.h"
 #include "BoundingBox.h"
+#include "EntityType.h"
 #include "Name.h"
 #include "Sprite.h"
 #include "EntityDelete.h"
 #include "ClientEntityInit.h"
-#include "NonClientEntityInit.h"
+#include "DynamicObjectInit.h"
+#include "SpriteSets.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include "Tracy.hpp"
@@ -99,26 +101,34 @@ void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
 
 void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
 {
-    auto view{world.registry.view<Position, Sprite, Name>()};
+    auto view{world.registry.view<EntityType, Position>()};
 
     // Send the client an EntityInit for each entity that entered its AOI.
     for (entt::entity entityThatEntered : entitiesThatEntered) {
-        auto [position, sprite] = view.get<Position, Sprite>(entityThatEntered);
+        auto [entityType, position]
+            = view.get<EntityType, Position>(entityThatEntered);
 
-        // If it's a client entity, send a ClientEntityInit.
-        if (world.registry.all_of<ClientSimData>(entityThatEntered)) {
-            Name& name{view.get<Name>(entityThatEntered)};
+        // Send the appropriate init message for the entity.
+        if (entityType == EntityType::ClientEntity) {
+            const auto& name{world.registry.get<Name>(entityThatEntered)};
+            const auto& sprite{world.registry.get<Sprite>(entityThatEntered)};
+            const auto& rotation{world.registry.get<Rotation>(entityThatEntered)};
             network.serializeAndSend(
                 client.netID,
                 ClientEntityInit{simulation.getCurrentTick(), entityThatEntered,
-                                 name.name, position, sprite.numericID});
+                                 name.name, position, rotation,
+                                 static_cast<Uint8>(sprite.numericID)});
         }
-        else {
-            // Non-client entity, send a NonClientEntityInit.
+        else if (entityType == EntityType::DynamicObject) {
+            const auto& name{world.registry.get<Name>(entityThatEntered)};
+            const auto& spriteSet{
+                world.registry.get<ObjectSpriteSet>(entityThatEntered)};
+            const auto& rotation{world.registry.get<Rotation>(entityThatEntered)};
             network.serializeAndSend(
-                client.netID, NonClientEntityInit{simulation.getCurrentTick(),
-                                                  entityThatEntered, position,
-                                                  sprite.numericID});
+                client.netID,
+                DynamicObjectInit{simulation.getCurrentTick(),
+                                  entityThatEntered, name.name, position,
+                                  rotation, spriteSet.numericID});
         }
     }
 }
