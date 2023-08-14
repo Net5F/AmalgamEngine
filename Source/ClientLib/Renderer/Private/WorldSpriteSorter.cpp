@@ -318,8 +318,15 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
         // If the UI wants a color mod on this sprite, use it.
         SDL_Color colorMod{getColorMod<entt::entity>(entity)};
 
+        // If this sprite comes from a phantom, leave the owner ID as 
+        // std::monostate.
+        WorldObjectID ownerID{};
+        if (entity != entt::null) {
+            ownerID = entity;
+        }
+
         // Push the entity's render info for this frame.
-        spritesToSort.emplace_back(&sprite, entity, worldBox, screenExtent,
+        spritesToSort.emplace_back(&sprite, ownerID, worldBox, screenExtent,
                                    colorMod);
     }
 }
