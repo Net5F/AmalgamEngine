@@ -26,7 +26,7 @@ class TileUpdateSystem
 public:
     TileUpdateSystem(World& inWorld, EventDispatcher& inNetworkEventDispatcher,
                      Network& inNetwork,
-                     const std::unique_ptr<ISimulationExtension>& inExtension);
+                     const ISimulationExtension* inExtension);
 
     /**
      * Processes tile updates and updates the world's tile map.
@@ -67,7 +67,7 @@ private:
 
     /** If non-nullptr, contains the project's simulation extension functions.
         Used for checking if tile updates are valid. */
-    const std::unique_ptr<ISimulationExtension>& extension;
+    const ISimulationExtension* extension;
 
     EventQueue<TileAddLayer> addLayerRequestQueue;
     EventQueue<TileRemoveLayer> removeLayerRequestQueue;

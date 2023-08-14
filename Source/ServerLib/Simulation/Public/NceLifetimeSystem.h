@@ -6,12 +6,15 @@
 
 namespace AM
 {
+struct DynamicObjectCreateRequest;
+
 namespace Server
 {
 
 class World;
 class Network;
 class SpriteData;
+class ISimulationExtension;
 
 /**
  * Manages creation and destruction of non-client entities.
@@ -22,9 +25,9 @@ class SpriteData;
 class NceLifetimeSystem
 {
 public:
-    NceLifetimeSystem(World& inWorld,
-                      EventDispatcher& inNetworkEventDispatcher,
-                      Network& inNetwork, SpriteData& inSpriteData);
+    NceLifetimeSystem(World& inWorld, EventDispatcher& inNetworkEventDispatcher,
+                      Network& inNetwork, SpriteData& inSpriteData,
+                      const ISimulationExtension* inExtension);
 
     /**
      * Processes any waiting EntityCreateRequest or EntityDelete messages.
@@ -32,6 +35,9 @@ public:
     void processUpdates();
 
 private:
+    void createDynamicObject(
+        const DynamicObjectCreateRequest& objectCreateRequest);
+
     /** Used to add/remove entities. */
     World& world;
 
@@ -40,6 +46,10 @@ private:
 
     /** Used to get sprite data when adding an entity. */
     SpriteData& spriteData;
+
+    /** If non-nullptr, contains the project's simulation extension functions.
+        Used for checking if entity creation requests are valid. */
+    const ISimulationExtension* extension;
 
     EventQueue<DynamicObjectCreateRequest> objectCreateRequestQueue;
     EventQueue<EntityDelete> deleteQueue;

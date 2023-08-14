@@ -69,7 +69,7 @@ public:
      *
      * @return true if the given extent is editable, else false.
      */
-    virtual bool isExtentEditable(const TileExtent& tileExtent) = 0;
+    virtual bool isExtentEditable(const TileExtent& tileExtent) const = 0;
 };
 
 } // namespace Server

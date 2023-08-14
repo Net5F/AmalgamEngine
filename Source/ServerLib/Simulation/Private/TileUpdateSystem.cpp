@@ -57,7 +57,7 @@ struct UpdateSender
 TileUpdateSystem::TileUpdateSystem(
     World& inWorld, EventDispatcher& inNetworkEventDispatcher,
     Network& inNetwork,
-    const std::unique_ptr<ISimulationExtension>& inExtension)
+    const ISimulationExtension* inExtension)
 : world{inWorld}
 , network{inNetwork}
 , extension{inExtension}

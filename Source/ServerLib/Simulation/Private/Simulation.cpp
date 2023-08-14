@@ -18,9 +18,11 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , extension{nullptr}
 , clientConnectionSystem{*this, world, network.getEventDispatcher(), network,
                          inSpriteData}
-, tileUpdateSystem{world, network.getEventDispatcher(), network, extension}
+, tileUpdateSystem{world, network.getEventDispatcher(), network,
+                   extension.get()}
 , clientAOISystem{*this, world, network}
-, nceLifetimeSystem{world, network.getEventDispatcher(), network, inSpriteData}
+, nceLifetimeSystem{world, network.getEventDispatcher(), network, inSpriteData,
+                    extension.get()}
 , inputSystem{*this, world, network.getEventDispatcher()}
 , movementSystem{world}
 , movementSyncSystem{*this, world, network}
