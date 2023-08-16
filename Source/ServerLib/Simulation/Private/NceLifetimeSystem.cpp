@@ -49,26 +49,29 @@ void NceLifetimeSystem::createDynamicObject(
         return;
     }
 
+    // Create the object and construct its standard components.
+    entt::registry& registry{world.registry};
     entt::entity newEntity{world.registry.create()};
 
-    world.registry.emplace<EntityType>(newEntity, EntityType::DynamicObject);
-    world.registry.emplace<Name>(newEntity, Name{objectCreateRequest.name});
+    // Note: Be careful with holding onto references here. If components 
+    //       are added to the same group, the ref will be invalidated.
+    registry.emplace<EntityType>(newEntity, EntityType::DynamicObject);
+    registry.emplace<Name>(newEntity, Name{objectCreateRequest.name});
 
-    const Position& position{world.registry.emplace<Position>(
-        newEntity, objectCreateRequest.position)};
-    const Rotation& rotation{world.registry.emplace<Rotation>(
-        newEntity, objectCreateRequest.rotation)};
+    registry.emplace<Position>(newEntity, objectCreateRequest.position);
+    registry.emplace<Rotation>(newEntity, objectCreateRequest.rotation);
 
     const ObjectSpriteSet& spriteSet{
         spriteData.getObjectSpriteSet(objectCreateRequest.spriteSetID)};
-    world.registry.emplace<ObjectSpriteSet>(newEntity, spriteSet);
-    const Sprite& sprite{*(spriteSet.sprites[rotation.direction])};
+    registry.emplace<ObjectSpriteSet>(newEntity, spriteSet);
 
     // Note: Every entity needs a Collision for the EntityLocator to use.
-    const Collision& collision{world.registry.emplace<Collision>(
+    const Sprite& sprite{
+        *(spriteSet.sprites[registry.get<Rotation>(newEntity).direction])};
+    const Collision& collision{registry.emplace<Collision>(
         newEntity, sprite.modelBounds,
         Transforms::modelToWorldCentered(sprite.modelBounds,
-                                         position))};
+                                         registry.get<Position>(newEntity)))};
 
     // Start tracking the entity in the locator.
     // Note: Since the entity was added to the locator, clients 

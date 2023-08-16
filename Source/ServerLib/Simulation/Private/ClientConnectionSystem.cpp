@@ -61,14 +61,15 @@ void ClientConnectionSystem::processConnectEvents()
         const Position spawnPoint{world.getSpawnPoint()};
 
         // Create the entity and construct its standard components.
+        // Note: Be careful with holding onto references here. If components 
+        //       are added to the same group, the ref will be invalidated.
         entt::entity newEntity{registry.create()};
         registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
         registry.emplace<Name>(newEntity,
                                std::to_string(static_cast<Uint32>(newEntity)));
 
         registry.emplace<Input>(newEntity);
-        const Position& position{registry.emplace<Position>(
-            newEntity, spawnPoint.x, spawnPoint.y, 0.0f)};
+        registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0.0f);
         registry.emplace<PreviousPosition>(newEntity, spawnPoint.x,
                                            spawnPoint.y, 0.0f);
         registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
@@ -81,7 +82,8 @@ void ClientConnectionSystem::processConnectEvents()
             spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
         const Collision& collision{registry.emplace<Collision>(
             newEntity, sprite.modelBounds,
-            Transforms::modelToWorldCentered(sprite.modelBounds, position))};
+            Transforms::modelToWorldCentered(
+                sprite.modelBounds, registry.get<Position>(newEntity)))};
 
         // Start tracking the entity in the locator.
         // Note: Since the entity was added to the locator, clients 
@@ -89,7 +91,7 @@ void ClientConnectionSystem::processConnectEvents()
         world.entityLocator.setEntityLocation(newEntity,
                                               collision.worldBounds);
 
-        // Register the entity with the network ID map.
+        // Add the new client entity to the network ID map.
         world.netIdMap[clientConnected.clientID] = newEntity;
 
         LOG_INFO("Constructed client entity with netID: %u, entityID: %u",

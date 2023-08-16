@@ -163,13 +163,13 @@ void NpcMovementSystem::handleUpdate(
 
 void NpcMovementSystem::moveAllNpcs()
 {
-    auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Velocity, Rotation, Collision>(
-        {}, entt::exclude<InputHistory>);
-    for (entt::entity entity : group) {
+    auto movementGroup = world.registry.group<Input, Position, PreviousPosition,
+                                              Velocity, Rotation, Collision>(
+        entt::get<Sprite>, entt::exclude<InputHistory>);
+    for (entt::entity entity : movementGroup) {
         auto [input, position, previousPosition, velocity, rotation, collision]
-            = group.get<Input, Position, PreviousPosition, Velocity, Rotation,
-                        Collision>(entity);
+            = movementGroup.get<Input, Position, PreviousPosition, Velocity,
+                                Rotation, Collision>(entity);
 
         // Save their old position.
         previousPosition = position;
@@ -209,9 +209,9 @@ void NpcMovementSystem::moveAllNpcs()
 void NpcMovementSystem::applyUpdateMessage(
     const std::shared_ptr<const MovementUpdate>& movementUpdate)
 {
-    auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Velocity, Rotation, Collision>(
-        {}, entt::exclude<InputHistory>);
+    auto movementGroup = world.registry.group<Input, Position, PreviousPosition,
+                                              Velocity, Rotation, Collision>(
+        entt::get<Sprite>, entt::exclude<InputHistory>);
 
     // Use the data in the message to correct any NPCs that changed inputs.
     for (const MovementState& movementState : movementUpdate->movementStates) {
@@ -235,8 +235,8 @@ void NpcMovementSystem::applyUpdateMessage(
 
         // Get the entity's components.
         auto [input, position, previousPosition, velocity, rotation, collision]
-            = group.get<Input, Position, PreviousPosition, Velocity, Rotation,
-                        Collision>(entity);
+            = movementGroup.get<Input, Position, PreviousPosition, Velocity,
+                                Rotation, Collision>(entity);
 
         // Apply the received component updates.
         input = movementState.input;

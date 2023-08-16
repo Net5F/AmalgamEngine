@@ -76,44 +76,37 @@ void NpcLifetimeSystem::processClientEntityInits(Uint32 desiredTick)
     // previous ticks).
     ClientEntityInit* entityInit{clientEntityInitQueue.peek()};
     while ((entityInit != nullptr) && (entityInit->tickNum <= desiredTick)) {
-        if (!(registry.valid(entityInit->entity))) {
-            // Create the entity and construct its standard components.
-            entt::entity newEntity{registry.create(entityInit->entity)};
-            if (entityInit->entity != newEntity) {
-                LOG_FATAL("Created entity doesn't match received entity. "
-                          "Created: %u, received: %u",
-                          newEntity, entityInit->entity);
-            }
-
-            registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
-            registry.emplace<Name>(entityInit->entity, entityInit->name);
-
-            // Note: These will be set for real when we get their first movement 
-            //       update.
-            registry.emplace<Input>(entityInit->entity);
-            registry.emplace<Position>(entityInit->entity,
-                                       entityInit->position);
-            registry.emplace<PreviousPosition>(entityInit->entity,
-                                               entityInit->position);
-            registry.emplace<Velocity>(entityInit->entity);
-            registry.emplace<Rotation>(entityInit->entity,
-                                       entityInit->rotation);
-
-            const Sprite& sprite{spriteData.getSprite(entityInit->numericID)};
-            registry.emplace<Sprite>(entityInit->entity, sprite);
-
-            // Note: We don't need to position their collision until they move,
-            //       since the player entity doesn't collide with them.
-            registry.emplace<Collision>(entityInit->entity, sprite.modelBounds,
-                                        BoundingBox{});
-
-            LOG_INFO("Entity added: %u. Desired tick: %u, Message tick: %u",
-                     entityInit->entity, desiredTick, entityInit->tickNum);
+        // Create the entity and construct its standard components.
+        entt::entity newEntity{registry.create(entityInit->entity)};
+        if (newEntity != entityInit->entity) {
+            LOG_FATAL("Created entity doesn't match received entity. "
+                      "Created: %u, received: %u",
+                      newEntity, entityInit->entity);
         }
-        else {
-            LOG_FATAL("Asked to construct entity that already exists: %u",
-                      entityInit->entity);
-        }
+
+        // Note: Be careful with holding onto references here. If components 
+        //       are added to the same group, the ref will be invalidated.
+        registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
+        registry.emplace<Name>(newEntity, entityInit->name);
+
+        // Note: These will be set for real when we get their first movement
+        //       update.
+        registry.emplace<Input>(newEntity);
+        registry.emplace<Position>(newEntity, entityInit->position);
+        registry.emplace<PreviousPosition>(newEntity, entityInit->position);
+        registry.emplace<Velocity>(newEntity);
+        registry.emplace<Rotation>(newEntity, entityInit->rotation);
+
+        const Sprite& sprite{spriteData.getSprite(entityInit->numericID)};
+        registry.emplace<Sprite>(newEntity, sprite);
+
+        // Note: We don't need to position their collision until they move,
+        //       since the player entity doesn't collide with them.
+        registry.emplace<Collision>(newEntity, sprite.modelBounds,
+                                    BoundingBox{});
+
+        LOG_INFO("Peer entity added: %u. Desired tick: %u, Message tick: %u",
+                 newEntity, desiredTick, entityInit->tickNum);
 
         clientEntityInitQueue.pop();
         entityInit = clientEntityInitQueue.peek();
@@ -128,42 +121,37 @@ void NpcLifetimeSystem::processDynamicObjectInits(Uint32 desiredTick)
     // previous ticks).
     DynamicObjectInit* objectInit{dynamicObjectInitQueue.peek()};
     while ((objectInit != nullptr) && (objectInit->tickNum <= desiredTick)) {
-        if (!(registry.valid(objectInit->entity))) {
-            // Create the entity and construct its standard components.
-            entt::entity newEntity{registry.create(objectInit->entity)};
-            if (objectInit->entity != newEntity) {
-                LOG_FATAL("Created entity doesn't match received entity. "
-                          "Created: %u, received: %u",
-                          newEntity, objectInit->entity);
-            }
-
-            registry.emplace<EntityType>(newEntity, EntityType::DynamicObject);
-            registry.emplace<Name>(objectInit->entity, objectInit->name);
-
-            const Position& position{
-                registry.emplace<Position>(newEntity, objectInit->position)};
-            registry.emplace<Rotation>(objectInit->entity,
-                                       objectInit->rotation);
-
-            const ObjectSpriteSet& spriteSet{
-                spriteData.getObjectSpriteSet(objectInit->spriteSetID)};
-            registry.emplace<ObjectSpriteSet>(newEntity, spriteSet);
-            const Sprite& sprite{
-                *(spriteSet.sprites[objectInit->rotation.direction])};
-            const Sprite& spriteCopy = registry.emplace<Sprite>(newEntity, sprite);
-
-            registry.emplace<Collision>(
-                newEntity, sprite.modelBounds,
-                Transforms::modelToWorldCentered(sprite.modelBounds,
-                                                 position));
-
-            LOG_INFO("Constructed dynamic object with entityID: %u", newEntity);
+        // Create the entity and construct its standard components.
+        entt::entity newEntity{registry.create(objectInit->entity)};
+        if (newEntity != objectInit->entity) {
+            LOG_FATAL("Created entity doesn't match received entity. "
+                      "Created: %u, received: %u",
+                      newEntity, objectInit->entity);
         }
-        else {
-            LOG_FATAL(
-                "Asked to construct dynamic object that already exists: %u",
-                objectInit->entity);
-        }
+
+        // Note: Be careful with holding onto references here. If components 
+        //       are added to the same group, the ref will be invalidated.
+        registry.emplace<EntityType>(newEntity, EntityType::DynamicObject);
+        registry.emplace<Name>(newEntity, objectInit->name);
+
+        registry.emplace<Position>(newEntity, objectInit->position);
+        registry.emplace<Rotation>(newEntity, objectInit->rotation);
+
+        const ObjectSpriteSet& spriteSet{
+            spriteData.getObjectSpriteSet(objectInit->spriteSetID)};
+        registry.emplace<ObjectSpriteSet>(newEntity, spriteSet);
+        const Sprite& sprite{
+            *(spriteSet.sprites[objectInit->rotation.direction])};
+        registry.emplace<Sprite>(newEntity, sprite);
+
+        registry.emplace<Collision>(
+            newEntity, sprite.modelBounds,
+            Transforms::modelToWorldCentered(
+                sprite.modelBounds, registry.get<Position>(newEntity)));
+
+        LOG_INFO("Dynamic object entity added: %u. Desired tick: %u, Message "
+                 "tick: %u",
+                 newEntity, desiredTick, objectInit->tickNum);
 
         dynamicObjectInitQueue.pop();
         objectInit = dynamicObjectInitQueue.peek();

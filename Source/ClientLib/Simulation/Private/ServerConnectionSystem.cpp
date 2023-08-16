@@ -121,13 +121,15 @@ void ServerConnectionSystem::initSimState(
     world.playerEntity = newEntity;
 
     // Set up the player's sim components.
+    // Note: Be careful with holding onto references here. If components 
+    //       are added to the same group, the ref will be invalidated.
     registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
     registry.emplace<Name>(newEntity,
                            std::to_string(static_cast<Uint32>(newEntity)));
 
     registry.emplace<Input>(newEntity);
-    Position& position{registry.emplace<Position>(
-        newEntity, connectionResponse.x, connectionResponse.y, 0.0f)};
+    registry.emplace<Position>(newEntity, connectionResponse.x,
+                               connectionResponse.y, 0.0f);
     registry.emplace<PreviousPosition>(newEntity, connectionResponse.x,
                                        connectionResponse.y, 0.0f);
     registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
@@ -143,7 +145,8 @@ void ServerConnectionSystem::initSimState(
 
     registry.emplace<Collision>(
         newEntity, sprite.modelBounds,
-        Transforms::modelToWorldCentered(sprite.modelBounds, position));
+        Transforms::modelToWorldCentered(sprite.modelBounds,
+                                         registry.get<Position>(newEntity)));
     registry.emplace<InputHistory>(newEntity);
 
     // Flag that we just moved and need to request all map data.
@@ -160,29 +163,32 @@ void ServerConnectionSystem::initMockSimState()
     world.playerEntity = newEntity;
 
     // Set up the player's sim components.
+    // Note: Be careful with holding onto references here. If components 
+    //       are added to the same group, the ref will be invalidated.
     registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
     registry.emplace<Name>(newEntity,
                            std::to_string(static_cast<Uint32>(newEntity)));
 
     registry.emplace<Input>(newEntity);
-    Position& position{
-        registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f)};
+    registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<PreviousPosition>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
     registry.emplace<Rotation>(newEntity);
+    registry.emplace<InputHistory>(newEntity);
 
-    // TODO: Switch to logical screen size and do scaling in Renderer.
-    UserConfig& userConfig{UserConfig::get()};
     Sprite& playerSprite{registry.emplace<Sprite>(
         newEntity, spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
-    registry.emplace<Camera>(
-        newEntity, Camera::CenterOnEntity, Position{}, PreviousPosition{},
-        SDLHelpers::rectToFRect(userConfig.getWindowSize()));
 
     registry.emplace<Collision>(
         newEntity, playerSprite.modelBounds,
-        Transforms::modelToWorldCentered(playerSprite.modelBounds, position));
-    registry.emplace<InputHistory>(newEntity);
+        Transforms::modelToWorldCentered(playerSprite.modelBounds,
+                                         registry.get<Position>(newEntity)));
+
+    // TODO: Switch to logical screen size and do scaling in Renderer.
+    UserConfig& userConfig{UserConfig::get()};
+    registry.emplace<Camera>(
+        newEntity, Camera::CenterOnEntity, Position{}, PreviousPosition{},
+        SDLHelpers::rectToFRect(userConfig.getWindowSize()));
 }
 
 void ServerConnectionSystem::clearSimState()

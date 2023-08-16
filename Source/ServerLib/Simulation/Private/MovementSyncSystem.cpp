@@ -8,6 +8,7 @@
 #include "Position.h"
 #include "Velocity.h"
 #include "Rotation.h"
+#include "Collision.h"
 #include "ClientSimData.h"
 #include "MovementStateNeedsSync.h"
 #include "Log.h"
@@ -77,8 +78,8 @@ void MovementSyncSystem::collectEntitiesToSend(ClientSimData& client,
 
 void MovementSyncSystem::sendEntityUpdate(ClientSimData& client)
 {
-    auto movementGroup{
-        world.registry.group<Input, Position, Velocity, Rotation>()};
+    auto movementGroup = world.registry.group<Input, Position, PreviousPosition,
+                                              Velocity, Rotation, Collision>();
     MovementUpdate movementUpdate{};
 
     // Add the entities to the message.
