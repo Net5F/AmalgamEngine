@@ -156,6 +156,8 @@ void NpcLifetimeSystem::processDynamicObjectInits(Uint32 desiredTick)
                 newEntity, sprite.modelBounds,
                 Transforms::modelToWorldCentered(sprite.modelBounds,
                                                  position));
+
+            LOG_INFO("Constructed dynamic object with entityID: %u", newEntity);
         }
         else {
             LOG_FATAL(

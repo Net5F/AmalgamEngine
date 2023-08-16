@@ -20,7 +20,7 @@ class Network;
  */
 struct UserInterfaceExDependencies {
 public:
-    /** Const, only allows us to view world data. */
+    /** Const, only allows the UI to view world data. */
     const World& world;
 
     /** Non-const, used for subscribing to world data updates. */

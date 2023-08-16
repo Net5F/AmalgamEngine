@@ -79,21 +79,20 @@ void ClientConnectionSystem::processConnectEvents()
         const Sprite& sprite{registry.emplace<Sprite>(
             newEntity,
             spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
-        const Collision& newCollision{registry.emplace<Collision>(
+        const Collision& collision{registry.emplace<Collision>(
             newEntity, sprite.modelBounds,
-            Transforms::modelToWorldCentered(sprite.modelBounds,
-                                             position))};
+            Transforms::modelToWorldCentered(sprite.modelBounds, position))};
 
         // Start tracking the entity in the locator.
         // Note: Since the entity was added to the locator, clients 
         //       will be told by ClientAOISystem to construct it.
         world.entityLocator.setEntityLocation(newEntity,
-                                              newCollision.worldBounds);
+                                              collision.worldBounds);
 
         // Register the entity with the network ID map.
         world.netIdMap[clientConnected.clientID] = newEntity;
 
-        LOG_INFO("Constructed entity with netID: %u, entityID: %u",
+        LOG_INFO("Constructed client entity with netID: %u, entityID: %u",
                  clientConnected.clientID, newEntity);
 
         // Build and send the response.

@@ -41,7 +41,7 @@ void NceLifetimeSystem::processUpdates()
 void NceLifetimeSystem::createDynamicObject(
     const DynamicObjectCreateRequest& objectCreateRequest)
 {
-    // If the project says the entity isn't editable, skip this request.
+    // If the project says the area isn't editable, skip this request.
     TilePosition entityTilePos{objectCreateRequest.position.asTilePosition()};
     if ((extension != nullptr)
         && !(extension->isExtentEditable(
@@ -75,6 +75,8 @@ void NceLifetimeSystem::createDynamicObject(
     //       will be told by ClientAOISystem to construct it.
     world.entityLocator.setEntityLocation(newEntity,
                                           collision.worldBounds);
+
+    LOG_INFO("Constructed dynamic object with entityID: %u", newEntity);
 }
 
 } // End namespace Server

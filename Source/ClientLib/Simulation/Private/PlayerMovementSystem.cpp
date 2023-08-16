@@ -214,7 +214,7 @@ void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates,
     // Calculate our desired position, using the new velocity.
     Position desiredPosition{position};
     desiredPosition = MovementHelpers::updatePosition(
-        desiredPosition, velocity, SharedConfig::SIM_TICK_TIMESTEP_S);
+        position, velocity, SharedConfig::SIM_TICK_TIMESTEP_S);
 
     // Update the direction we're facing, based on our current inputs.
     rotation = MovementHelpers::updateRotation(rotation, inputStates);

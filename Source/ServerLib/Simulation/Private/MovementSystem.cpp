@@ -43,7 +43,7 @@ void MovementSystem::processMovements()
         // Calculate their desired position, using the new velocity.
         Position desiredPosition{position};
         desiredPosition = MovementHelpers::updatePosition(
-            desiredPosition, velocity, SharedConfig::SIM_TICK_TIMESTEP_S);
+            position, velocity, SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update the direction they're facing, based on their current inputs.
         rotation = MovementHelpers::updateRotation(rotation, input.inputStates);

@@ -7,6 +7,7 @@
 #include "InputChangeRequest.h"
 #include "Camera.h"
 #include "Config.h"
+#include "AUI/Core.h"
 #include "Log.h"
 
 namespace AM
@@ -35,7 +36,12 @@ void PlayerInputSystem::processMomentaryInput(SDL_Event& event)
 
 void PlayerInputSystem::processHeldInputs()
 {
-    const Uint8* keyStates = SDL_GetKeyboardState(nullptr);
+    // If a text input UI widget is capturing keyboard input, do nothing.
+    if (AUI::Core::getIsTextInputFocused()) {
+        return;
+    }
+
+    const Uint8* keyStates{SDL_GetKeyboardState(nullptr)};
     Input::StateArr newInputStates{};
 
     // Get the latest state of all the keys that we care about.
