@@ -18,7 +18,7 @@ class World;
 class Network;
 
 /**
- * This system handles streaming chunk data to clients.
+ * Handles streaming chunk data to clients.
  *
  * A client may require chunks to be sent when it logs in, moves into a new
  * chunk, or teleports.
@@ -29,9 +29,7 @@ class Network;
 class ChunkStreamingSystem
 {
 public:
-    ChunkStreamingSystem(World& inWorld,
-                         EventDispatcher& inNetworkEventDispatcher,
-                         Network& inNetwork);
+    ChunkStreamingSystem(World& inWorld, Network& inNetwork);
 
     /**
      * Processes chunk update requests, sending chunk data if the request is
@@ -63,7 +61,7 @@ private:
 
     /** Used for fetching entity, component, and map data. */
     World& world;
-    /** Used for sending chunks to clients. */
+    /** Used for receiving chunk requests and sending chunks to clients. */
     Network& network;
 
     EventQueue<ChunkUpdateRequest> chunkUpdateRequestQueue;

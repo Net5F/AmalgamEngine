@@ -9,8 +9,9 @@
 namespace AM
 {
 /**
- * Used to request that layers be cleared from all tiles in an extent, 
- * or to inform a client that an extent of tiles was cleared.
+ * Sent by a client to request that layers be cleared from all tiles in an 
+ * extent, or by the server to tell a client that an extent of tiles was 
+ * cleared.
  */
 struct TileExtentClearLayers {
 public:

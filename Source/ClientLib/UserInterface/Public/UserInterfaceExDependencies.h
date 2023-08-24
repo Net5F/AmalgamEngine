@@ -20,10 +20,11 @@ class Network;
  */
 struct UserInterfaceExDependencies {
 public:
-    /** Const, only allows the UI to view world data. */
-    const World& world;
+    /** Used for viewing world data and subscribing to entity registry
+        updates. */
+    World& world;
 
-    /** Non-const, used for subscribing to world data updates. */
+    /** Used for subscribing to non-registry world state updates. */
     WorldSignals& worldSignals;
 
     /** Used for finding entities or tile layers that a mouse event hit. */

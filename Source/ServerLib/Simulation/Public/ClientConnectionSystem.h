@@ -22,7 +22,6 @@ class ClientConnectionSystem
 {
 public:
     ClientConnectionSystem(Simulation& inSimulation, World& inWorld,
-                           EventDispatcher& inNetworkEventDispatcher,
                            Network& inNetwork, SpriteData& inSpriteData);
 
     /**

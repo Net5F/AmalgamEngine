@@ -41,6 +41,19 @@ void Network::tick()
     }
 }
 
+void Network::send(NetworkID networkID, const BinaryBufferSharedPtr& message,
+                   Uint32 messageTick)
+{
+    // Acquire a read lock before running through the client map.
+    std::shared_lock readLock(clientMapMutex);
+
+    // Check that the client still exists, queue the message if so.
+    auto clientPair = clientMap.find(networkID);
+    if (clientPair != clientMap.end()) {
+        clientPair->second->queueMessage(message, messageTick);
+    }
+}
+
 EventDispatcher& Network::getEventDispatcher()
 {
     return eventDispatcher;
@@ -71,19 +84,6 @@ void Network::setMessageProcessorExtension(
     std::unique_ptr<IMessageProcessorExtension> extension)
 {
     messageProcessor.setExtension(std::move(extension));
-}
-
-void Network::send(NetworkID networkID, const BinaryBufferSharedPtr& message,
-                   Uint32 messageTick)
-{
-    // Acquire a read lock before running through the client map.
-    std::shared_lock readLock(clientMapMutex);
-
-    // Check that the client still exists, queue the message if so.
-    auto clientPair = clientMap.find(networkID);
-    if (clientPair != clientMap.end()) {
-        clientPair->second->queueMessage(message, messageTick);
-    }
 }
 
 void Network::logNetworkStatistics()

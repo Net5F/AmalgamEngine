@@ -8,7 +8,7 @@
 namespace AM
 {
 /**
- * Used by the client to request chunk updates.
+ * Used by the client to request chunk data.
  */
 struct ChunkUpdateRequest {
 public:

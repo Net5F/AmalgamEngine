@@ -9,8 +9,8 @@ namespace AM
 {
 
 /**
- * Used to request that layers be cleared from a tile, or to inform a 
- * client that layers were cleared.
+ * Sent by a client to request that layers be cleared from a tile, or by the 
+ * server to tell a client that layers were cleared.
  */
 struct TileClearLayers {
 public:

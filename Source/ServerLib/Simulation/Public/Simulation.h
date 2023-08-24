@@ -2,13 +2,15 @@
 
 #include "World.h"
 #include "ClientConnectionSystem.h"
-#include "TileUpdateSystem.h"
-#include "ClientAOISystem.h"
 #include "NceLifetimeSystem.h"
+#include "TileUpdateSystem.h"
+#include "SpriteUpdateSystem.h"
 #include "InputSystem.h"
 #include "MovementSystem.h"
+#include "ClientAOISystem.h"
 #include "MovementSyncSystem.h"
 #include "ChunkStreamingSystem.h"
+#include "ScriptDataSystem.h"
 #include "MapSaveSystem.h"
 #include <SDL_stdinc.h>
 #include <atomic>
@@ -71,13 +73,15 @@ private:
     // Systems
     //-------------------------------------------------------------------------
     ClientConnectionSystem clientConnectionSystem;
-    TileUpdateSystem tileUpdateSystem;
-    ClientAOISystem clientAOISystem;
     NceLifetimeSystem nceLifetimeSystem;
+    TileUpdateSystem tileUpdateSystem;
+    SpriteUpdateSystem spriteUpdateSystem;
     InputSystem inputSystem;
     MovementSystem movementSystem;
+    ClientAOISystem clientAOISystem;
     MovementSyncSystem movementSyncSystem;
     ChunkStreamingSystem chunkStreamingSystem;
+    ScriptDataSystem scriptDataSystem;
     MapSaveSystem mapSaveSystem;
 };
 

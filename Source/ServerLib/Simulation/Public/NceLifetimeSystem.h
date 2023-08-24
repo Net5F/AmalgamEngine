@@ -1,13 +1,12 @@
 #pragma once
 
-#include "DynamicObjectCreateRequest.h"
+#include "DynamicObjectInitRequest.h"
 #include "EntityDelete.h"
 #include "QueuedEvents.h"
+#include <queue>
 
 namespace AM
 {
-struct DynamicObjectCreateRequest;
-
 namespace Server
 {
 
@@ -25,8 +24,8 @@ class ISimulationExtension;
 class NceLifetimeSystem
 {
 public:
-    NceLifetimeSystem(World& inWorld, EventDispatcher& inNetworkEventDispatcher,
-                      Network& inNetwork, SpriteData& inSpriteData,
+    NceLifetimeSystem(World& inWorld, Network& inNetwork,
+                      SpriteData& inSpriteData,
                       const ISimulationExtension* inExtension);
 
     /**
@@ -35,14 +34,21 @@ public:
     void processUpdates();
 
 private:
+    /**
+     * Either creates the given object and initializes it, or re-creates it 
+     * and queues an init for next tick.
+     */
     void createDynamicObject(
-        const DynamicObjectCreateRequest& objectCreateRequest);
+        const DynamicObjectInitRequest& objectInitRequest);
+
+    /**
+     * Creates and sets the given object's components and adds it to the locator.
+     */
+    void initDynamicObject(entt::entity newEntity,
+        const DynamicObjectInitRequest& objectInitRequest);
 
     /** Used to add/remove entities. */
     World& world;
-
-    /** Used to send entity-related messages. */
-    Network& network;
 
     /** Used to get sprite data when adding an entity. */
     SpriteData& spriteData;
@@ -51,7 +57,10 @@ private:
         Used for checking if entity creation requests are valid. */
     const ISimulationExtension* extension;
 
-    EventQueue<DynamicObjectCreateRequest> objectCreateRequestQueue;
+    /** Holds objects that need to be re-initialized on the next tick. */
+    std::queue<DynamicObjectInitRequest> objectReInitQueue;
+
+    EventQueue<DynamicObjectInitRequest> objectInitRequestQueue;
     EventQueue<EntityDelete> deleteQueue;
 };
 

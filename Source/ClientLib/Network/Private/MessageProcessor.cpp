@@ -10,11 +10,13 @@
 #include "ChunkUpdate.h"
 #include "ClientEntityInit.h"
 #include "DynamicObjectInit.h"
+#include "InitScriptResponse.h"
+#include "EntityDelete.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
-#include "EntityDelete.h"
+#include "SpriteChange.h"
 #include "Log.h"
 
 namespace AM
@@ -62,6 +64,11 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                         networkEventDispatcher);
             break;
         }
+        case EngineMessageType::InitScriptResponse: {
+            dispatchMessage<InitScriptResponse>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
         case EngineMessageType::EntityDelete: {
             dispatchMessage<EntityDelete>(messageBuffer, messageSize,
                                           networkEventDispatcher);
@@ -84,6 +91,11 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         }
         case EngineMessageType::TileExtentClearLayers: {
             dispatchMessage<TileExtentClearLayers>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::SpriteChange: {
+            dispatchMessage<SpriteChange>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }

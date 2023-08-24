@@ -44,7 +44,8 @@ void serialize(S& serializer, DynamicObjectInit& dynamicObjectInit)
 {
     serializer.value4b(dynamicObjectInit.tickNum);
     serializer.value4b(dynamicObjectInit.entity);
-    serializer.text1b(dynamicObjectInit.name, ClientEntityInit::NAME_LENGTH);
+    serializer.text1b(dynamicObjectInit.name,
+                      ClientEntityInit::MAX_NAME_LENGTH);
     serializer.object(dynamicObjectInit.position);
     serializer.object(dynamicObjectInit.rotation);
     serializer.value2b(dynamicObjectInit.spriteSetID);

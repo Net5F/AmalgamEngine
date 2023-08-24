@@ -8,7 +8,9 @@ target_sources(ServerLib
 		Private/MovementSyncSystem.cpp
 		Private/MovementSystem.cpp
 		Private/NceLifetimeSystem.cpp
+		Private/ScriptDataSystem.cpp
 		Private/Simulation.cpp
+		Private/SpriteUpdateSystem.cpp
 		Private/TileUpdateSystem.cpp
 		Private/World.cpp
 		Private/SpriteData/SpriteData.cpp
@@ -25,13 +27,17 @@ target_sources(ServerLib
 		Public/MovementSyncSystem.h
 		Public/MovementSystem.h
 		Public/NceLifetimeSystem.h
+		Public/ScriptDataSystem.h
 		Public/Simulation.h
 		Public/SimulationExDependencies.h
 		Public/SpawnStrategy.h
+		Public/SpriteUpdateSystem.h
 		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/Components/ClientSimData.h
+		Public/Components/InitScript.h
 		Public/Components/MovementStateNeedsSync.h
+		Public/Components/SpriteStateNeedsSync.h
 		Public/SpriteData/SpriteData.h
 		Public/TileMap/TileMap.h
 )

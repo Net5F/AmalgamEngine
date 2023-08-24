@@ -8,8 +8,8 @@
 namespace AM
 {
 /**
- * Used to request that a layer be added to a tile, or to inform a client 
- * that a layer was added.
+ * Sent by a client to request that a layer be added to a tile, or by the server
+ * to tell a client that a layer was added.
  */
 struct TileAddLayer {
 public:

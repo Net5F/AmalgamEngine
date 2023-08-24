@@ -12,6 +12,7 @@ namespace Client
 {
 class Simulation;
 class World;
+class Network;
 class SpriteData;
 
 /**
@@ -25,8 +26,7 @@ class NpcLifetimeSystem
 {
 public:
     NpcLifetimeSystem(Simulation& inSimulation, World& inWorld,
-                      SpriteData& inSpriteData,
-                      EventDispatcher& inNetworkEventDispatcher);
+                      SpriteData& inSpriteData, Network& inNetwork);
 
     /**
      * Processes any waiting EntityInit or EntityDelete messages.

@@ -42,7 +42,7 @@ public:
 
     /**
      * Sends bytes over the network.
-     * Errors if the server is disconnected.
+     * Equivalent to calling serialize() and send().
      *
      * @param networkID  The client to send the message to.
      * @param messageStruct  A structure that defines MESSAGE_TYPE and has an
@@ -53,6 +53,28 @@ public:
     template<typename T>
     void serializeAndSend(NetworkID networkID, const T& messageStruct,
                           Uint32 messageTick = 0);
+
+    /**
+     * Serializes and frames the given message.
+     *
+     * @param messageStruct  A structure that defines MESSAGE_TYPE and has an
+     *                       associated serialize() function.
+     * @return A message that's ready to be passed to send().
+     */
+    template<typename T>
+    BinaryBufferSharedPtr serialize(const T& messageStruct);
+
+    /**
+     * Queues a message to be sent the next time sendWaitingMessages is called.
+     * @throws std::out_of_range if id is not in the clients map.
+     *
+     * @param networkID  The client to send the message to.
+     * @param message  The message to send.
+     * @param messageTick  Optional, used when sending entity movement updates
+     *                     to update the Client's latestSentSimTick.
+     */
+    void send(NetworkID networkID, const BinaryBufferSharedPtr& message,
+              Uint32 messageTick = 0);
 
     /**
      * Returns the Network event dispatcher. All messages that we receive
@@ -87,18 +109,6 @@ public:
         std::unique_ptr<IMessageProcessorExtension> extension);
 
 private:
-    /**
-     * Queues a message to be sent the next time sendWaitingMessages is called.
-     * @throws std::out_of_range if id is not in the clients map.
-     *
-     * @param networkID  The client to send the message to.
-     * @param message  The message to send.
-     * @param messageTick  Optional, used when sending entity movement updates
-     *                     to update the Client's latestSentSimTick.
-     */
-    void send(NetworkID networkID, const BinaryBufferSharedPtr& message,
-              Uint32 messageTick = 0);
-
     /**
      * Logs the network stats such as bytes sent/received per second.
      */
@@ -139,6 +149,16 @@ template<typename T>
 void Network::serializeAndSend(NetworkID networkID, const T& messageStruct,
                                Uint32 messageTick)
 {
+    // Serialize and frame the message.
+    BinaryBufferSharedPtr messageBuffer{serialize(messageStruct)};
+
+    // Send the message.
+    send(networkID, messageBuffer, messageTick);
+}
+
+template<typename T>
+BinaryBufferSharedPtr Network::serialize(const T& messageStruct)
+{
     // Allocate the buffer.
     std::size_t totalMessageSize{MESSAGE_HEADER_SIZE
                                  + Serialize::measureSize(messageStruct)};
@@ -160,8 +180,7 @@ void Network::serializeAndSend(NetworkID networkID, const T& messageStruct,
     ByteTools::write16(static_cast<Uint16>(messageSize),
                        (messageBuffer->data() + MessageHeaderIndex::Size));
 
-    // Send the message.
-    send(networkID, messageBuffer, messageTick);
+    return messageBuffer;
 }
 
 } // namespace Server

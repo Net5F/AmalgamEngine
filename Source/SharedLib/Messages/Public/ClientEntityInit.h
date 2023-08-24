@@ -28,7 +28,7 @@ struct ClientEntityInit {
 
     /** Used as a "we should never hit this" cap on the length of the name
         string. Only checked in debug builds. */
-    static constexpr std::size_t NAME_LENGTH{50};
+    static constexpr std::size_t MAX_NAME_LENGTH{50};
 
     /** The tick that this update corresponds to. */
     Uint32 tickNum{0};
@@ -55,7 +55,7 @@ void serialize(S& serializer, ClientEntityInit& clientEntityInit)
 {
     serializer.value4b(clientEntityInit.tickNum);
     serializer.value4b(clientEntityInit.entity);
-    serializer.text1b(clientEntityInit.name, ClientEntityInit::NAME_LENGTH);
+    serializer.text1b(clientEntityInit.name, ClientEntityInit::MAX_NAME_LENGTH);
     serializer.object(clientEntityInit.position);
     serializer.object(clientEntityInit.rotation);
     serializer.value4b(clientEntityInit.numericID);

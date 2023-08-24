@@ -21,11 +21,12 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 , extension{nullptr}
 , serverConnectionSystem{world, inUiEventDispatcher, network, inSpriteData,
                          currentTick}
-, chunkUpdateSystem{*this, world, network}
+, chunkUpdateSystem{world, network}
 , tileUpdateSystem{world, network}
-, npcLifetimeSystem{*this, world, inSpriteData, network.getEventDispatcher()}
+, spriteUpdateSystem{*this, world, network, inSpriteData}
+, npcLifetimeSystem{*this, world, inSpriteData, network}
 , playerInputSystem{*this, world, network}
-, playerMovementSystem{*this, world, network.getEventDispatcher()}
+, playerMovementSystem{*this, world, network}
 , npcMovementSystem{*this, world, network, inSpriteData}
 , cameraSystem{world}
 {
@@ -74,14 +75,17 @@ void Simulation::tick()
             extension->beforeAll();
         }
 
+        // Process entities that need to be constructed or destructed.
+        npcLifetimeSystem.processUpdates();
+
         // Process chunk updates from the server.
         chunkUpdateSystem.updateChunks();
 
-        // Process tile updates from the UI and server.
+        // Process tile updates from the server.
         tileUpdateSystem.updateTiles();
 
-        // Process entities that need to be constructed or destructed.
-        npcLifetimeSystem.processUpdates();
+        // Process sprite updates from the server.
+        spriteUpdateSystem.updateSprites();
 
         // Call the project's pre-movement logic.
         if (extension != nullptr) {

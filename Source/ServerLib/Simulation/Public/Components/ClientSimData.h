@@ -18,7 +18,6 @@ namespace Server
  *       "ClientNetID" and split the sim data out into other components.
  */
 struct ClientSimData {
-public:
     /** The network ID associated with this client.
         We track this here so the sim knows where to send messages related to
         the entity.

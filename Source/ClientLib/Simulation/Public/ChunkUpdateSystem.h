@@ -11,7 +11,6 @@ struct ChunkWireSnapshot;
 
 namespace Client
 {
-class Simulation;
 class World;
 class Network;
 class SpriteData;
@@ -23,8 +22,7 @@ class TileMap;
 class ChunkUpdateSystem
 {
 public:
-    ChunkUpdateSystem(Simulation& inSimulation, World& inWorld,
-                      Network& inNetwork);
+    ChunkUpdateSystem(World& inWorld, Network& inNetwork);
 
     /**
      * Requests any needed chunk data and applies received chunk updates.
@@ -66,11 +64,9 @@ private:
      */
     void applyChunkSnapshot(const ChunkWireSnapshot& chunkSnapshot);
 
-    /** Used to get the current tick. */
-    Simulation& simulation;
     /** Used to access the player entity and components. */
     World& world;
-    /** Used to send chunk update request messages. */
+    /** Used to send chunk update request messages and receive chunk updates. */
     Network& network;
 
     EventQueue<std::shared_ptr<const ChunkUpdate>> chunkUpdateQueue;

@@ -10,7 +10,6 @@
 #include "TileSnapshot.h"
 #include "ChunkWireSnapshot.h"
 #include "SharedConfig.h"
-#include "Serialize.h"
 #include "Log.h"
 #include <SDL_rect.h>
 #include "Tracy.hpp"
@@ -20,12 +19,10 @@ namespace AM
 {
 namespace Server
 {
-ChunkStreamingSystem::ChunkStreamingSystem(
-    World& inWorld, EventDispatcher& inNetworkEventDispatcher,
-    Network& inNetwork)
+ChunkStreamingSystem::ChunkStreamingSystem(World& inWorld, Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
-, chunkUpdateRequestQueue(inNetworkEventDispatcher)
+, chunkUpdateRequestQueue{inNetwork.getEventDispatcher()}
 {
 }
 

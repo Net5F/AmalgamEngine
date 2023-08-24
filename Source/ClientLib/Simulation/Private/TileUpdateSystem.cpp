@@ -20,12 +20,6 @@ TileUpdateSystem::TileUpdateSystem(World& inWorld, Network& inNetwork)
 
 void TileUpdateSystem::updateTiles()
 {
-    // Process tile updates from the server.
-    processNetworkUpdates();
-}
-
-void TileUpdateSystem::processNetworkUpdates()
-{
     // Process any waiting tile updates from the server.
     TileClearLayers tileClearLayers{};
     while (clearLayersQueue.pop(tileClearLayers)) {

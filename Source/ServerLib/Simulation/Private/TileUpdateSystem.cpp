@@ -54,17 +54,15 @@ struct UpdateSender
     }
 };
 
-TileUpdateSystem::TileUpdateSystem(
-    World& inWorld, EventDispatcher& inNetworkEventDispatcher,
-    Network& inNetwork,
+TileUpdateSystem::TileUpdateSystem(World& inWorld, Network& inNetwork,
     const ISimulationExtension* inExtension)
 : world{inWorld}
 , network{inNetwork}
 , extension{inExtension}
-, addLayerRequestQueue{inNetworkEventDispatcher}
-, removeLayerRequestQueue{inNetworkEventDispatcher}
-, clearLayersRequestQueue{inNetworkEventDispatcher}
-, extentClearLayersRequestQueue{inNetworkEventDispatcher}
+, addLayerRequestQueue{network.getEventDispatcher()}
+, removeLayerRequestQueue{network.getEventDispatcher()}
+, clearLayersRequestQueue{network.getEventDispatcher()}
+, extentClearLayersRequestQueue{network.getEventDispatcher()}
 {
 }
 

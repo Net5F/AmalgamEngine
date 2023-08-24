@@ -5,6 +5,7 @@
 #include "ServerConnectionSystem.h"
 #include "ChunkUpdateSystem.h"
 #include "TileUpdateSystem.h"
+#include "SpriteUpdateSystem.h"
 #include "NpcLifetimeSystem.h"
 #include "PlayerInputSystem.h"
 #include "PlayerMovementSystem.h"
@@ -106,6 +107,7 @@ private:
     ServerConnectionSystem serverConnectionSystem;
     ChunkUpdateSystem chunkUpdateSystem;
     TileUpdateSystem tileUpdateSystem;
+    SpriteUpdateSystem spriteUpdateSystem;
     NpcLifetimeSystem npcLifetimeSystem;
     PlayerInputSystem playerInputSystem;
     PlayerMovementSystem playerMovementSystem;

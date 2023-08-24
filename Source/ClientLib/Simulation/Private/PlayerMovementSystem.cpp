@@ -23,12 +23,11 @@ namespace AM
 {
 namespace Client
 {
-PlayerMovementSystem::PlayerMovementSystem(
-    Simulation& inSimulation, World& inWorld,
-    EventDispatcher& inNetworkEventDispatcher)
+PlayerMovementSystem::PlayerMovementSystem(Simulation& inSimulation,
+                                           World& inWorld, Network& inNetwork)
 : simulation{inSimulation}
 , world{inWorld}
-, playerUpdateQueue{inNetworkEventDispatcher}
+, playerUpdateQueue{inNetwork.getEventDispatcher()}
 {
 }
 

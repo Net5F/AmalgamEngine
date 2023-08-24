@@ -26,14 +26,14 @@ namespace Server
 {
 ClientConnectionSystem::ClientConnectionSystem(
     Simulation& inSimulation, World& inWorld,
-    EventDispatcher& inNetworkEventDispatcher, Network& inNetwork,
+    Network& inNetwork,
     SpriteData& inSpriteData)
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
 , spriteData{inSpriteData}
-, clientConnectedQueue{inNetworkEventDispatcher}
-, clientDisconnectedQueue{inNetworkEventDispatcher}
+, clientConnectedQueue{network.getEventDispatcher()}
+, clientDisconnectedQueue{network.getEventDispatcher()}
 {
 }
 
@@ -105,8 +105,6 @@ void ClientConnectionSystem::processConnectEvents()
 
 void ClientConnectionSystem::processDisconnectEvents()
 {
-    auto view{world.registry.view<ClientSimData>()};
-
     // Remove all newly disconnected client's entities from the sim.
     for (std::size_t i = 0; i < clientDisconnectedQueue.size(); ++i) {
         ClientDisconnected clientDisconnected{};

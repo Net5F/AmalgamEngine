@@ -1,6 +1,7 @@
 #include "NpcLifetimeSystem.h"
 #include "Simulation.h"
 #include "World.h"
+#include "Network.h"
 #include "SpriteData.h"
 #include "Name.h"
 #include "Input.h"
@@ -20,13 +21,13 @@ namespace Client
 {
 NpcLifetimeSystem::NpcLifetimeSystem(Simulation& inSimulation, World& inWorld,
                                      SpriteData& inSpriteData,
-                                     EventDispatcher& inNetworkEventDispatcher)
+                                     Network& inNetwork)
 : simulation{inSimulation}
 , world{inWorld}
 , spriteData{inSpriteData}
-, clientEntityInitQueue{inNetworkEventDispatcher}
-, dynamicObjectInitQueue{inNetworkEventDispatcher}
-, entityDeleteQueue{inNetworkEventDispatcher}
+, clientEntityInitQueue{inNetwork.getEventDispatcher()}
+, dynamicObjectInitQueue{inNetwork.getEventDispatcher()}
+, entityDeleteQueue{inNetwork.getEventDispatcher()}
 {
 }
 
@@ -140,6 +141,9 @@ void NpcLifetimeSystem::processDynamicObjectInits(Uint32 desiredTick)
         const ObjectSpriteSet& spriteSet{
             spriteData.getObjectSpriteSet(objectInit->spriteSetID)};
         registry.emplace<ObjectSpriteSet>(newEntity, spriteSet);
+
+        // Note: Unlike the server, we add a Sprite component to dynamic 
+        //       entities. This lets the rendering system pick them up.
         const Sprite& sprite{
             *(spriteSet.sprites[objectInit->rotation.direction])};
         registry.emplace<Sprite>(newEntity, sprite);

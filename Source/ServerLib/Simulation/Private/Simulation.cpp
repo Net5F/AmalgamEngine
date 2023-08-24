@@ -10,23 +10,21 @@ namespace AM
 {
 namespace Server
 {
-
 Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 : network{inNetwork}
 , world{inSpriteData}
 , currentTick{0}
 , extension{nullptr}
-, clientConnectionSystem{*this, world, network.getEventDispatcher(), network,
-                         inSpriteData}
-, tileUpdateSystem{world, network.getEventDispatcher(), network,
-                   extension.get()}
-, clientAOISystem{*this, world, network}
-, nceLifetimeSystem{world, network.getEventDispatcher(), network, inSpriteData,
-                    extension.get()}
-, inputSystem{*this, world, network.getEventDispatcher()}
+, clientConnectionSystem{*this, world, network, inSpriteData}
+, nceLifetimeSystem{world, network, inSpriteData, extension.get()}
+, tileUpdateSystem{world, network, extension.get()}
+, spriteUpdateSystem{*this, world, network, inSpriteData}
+, inputSystem{*this, world, network}
 , movementSystem{world}
+, clientAOISystem{*this, world, network}
 , movementSyncSystem{*this, world, network}
-, chunkStreamingSystem{world, network.getEventDispatcher(), network}
+, chunkStreamingSystem{world, network}
+, scriptDataSystem{world, network}
 , mapSaveSystem{world}
 {
     // Initialize our entt groups.
@@ -50,8 +48,14 @@ void Simulation::tick()
     // Process client connections and disconnections.
     clientConnectionSystem.processConnectionEvents();
 
+    // Create and destroy non-client-controlled entities.
+    nceLifetimeSystem.processUpdates();
+
     // Receive and process tile update requests.
     tileUpdateSystem.updateTiles();
+
+    // Receive and process sprite update requests.
+    spriteUpdateSystem.updateSprites();
 
     // Call the project's pre-movement logic.
     if (extension != nullptr) {
@@ -61,8 +65,8 @@ void Simulation::tick()
     // Send updated tile state to nearby clients.
     tileUpdateSystem.sendTileUpdates();
 
-    // Create and destroy non-client-controlled entities.
-    nceLifetimeSystem.processUpdates();
+    // Send updated sprite state to nearby clients.
+    spriteUpdateSystem.sendSpriteUpdates();
 
     // Receive and process client input messages.
     inputSystem.processInputMessages();
@@ -88,6 +92,9 @@ void Simulation::tick()
 
     // Respond to chunk data requests.
     chunkStreamingSystem.sendChunks();
+
+    // Respond to script data requests.
+    scriptDataSystem.sendScripts();
 
     // If enough time has passed, save the world's tile map state.
     mapSaveSystem.saveMapIfNecessary();

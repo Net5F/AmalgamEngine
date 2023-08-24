@@ -2,7 +2,6 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
-#include "Serialize.h"
 #include "MovementUpdate.h"
 #include "Input.h"
 #include "Position.h"
@@ -31,13 +30,16 @@ void MovementSyncSystem::sendMovementUpdates()
 {
     ZoneScoped;
 
+    // TODO: We should measure this function and see if it's more performant to
+    //       instead loop over all entities that moved on this frame and add 
+    //       their AOI entities to a map of update messages to be sent.
+
     // Send clients the updated movement state of any nearby entities that have
     // changed inputs, teleported, etc.
     auto clientView{world.registry.view<ClientSimData>()};
-    for (entt::entity clientEntity : clientView) {
+    for (auto [clientEntity, client] : clientView.each()) {
         // Collect the entities that have updated state that is relevant to
         // this client.
-        ClientSimData& client{clientView.get<ClientSimData>(clientEntity)};
         collectEntitiesToSend(client, clientEntity);
 
         // If there is updated state to send, send an update message.

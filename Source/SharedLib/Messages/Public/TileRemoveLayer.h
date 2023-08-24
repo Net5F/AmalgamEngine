@@ -8,8 +8,8 @@
 namespace AM
 {
 /**
- * Used to request that a layer be removed from a tile, or to inform a 
- * client that a layer was removed.
+ * Sent by a client to request that a layer be removed from a tile, or by the 
+ * server to tell a client that a layer was removed.
  */
 struct TileRemoveLayer {
 public:

@@ -5,7 +5,6 @@
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
 #include "QueuedEvents.h"
-#include <unordered_map>
 
 namespace AM
 {
@@ -24,8 +23,7 @@ class ISimulationExtension;
 class TileUpdateSystem
 {
 public:
-    TileUpdateSystem(World& inWorld, EventDispatcher& inNetworkEventDispatcher,
-                     Network& inNetwork,
+    TileUpdateSystem(World& inWorld, Network& inNetwork,
                      const ISimulationExtension* inExtension);
 
     /**
@@ -62,7 +60,7 @@ private:
 
     /** Used to access the entity registry, locator, and the tile map. */
     World& world;
-    /** Used to send chunk update request messages. */
+    /** Used to send tile update requests and receive tile updates. */
     Network& network;
 
     /** If non-nullptr, contains the project's simulation extension functions.

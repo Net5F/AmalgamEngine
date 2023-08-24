@@ -29,7 +29,7 @@ class PlayerMovementSystem
 {
 public:
     PlayerMovementSystem(Simulation& inSimulation, World& inWorld,
-                         EventDispatcher& inNetworkEventDispatcher);
+                         Network& inNetwork);
 
     /**
      * Processes the player entity's movement for this tick.

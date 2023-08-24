@@ -16,8 +16,6 @@ class Network;
 /**
  * Processes tile updates.
  *
- * See updateTiles() comment for more info.
- *
  * Note: If an updated tile collides with an entity, visual desyncs can occur.
  *       This client-side visual desync can occur for NPC entities as well as
  *       the player entity.
@@ -31,23 +29,11 @@ public:
     TileUpdateSystem(World& inWorld, Network& inNetwork);
 
     /**
-     * Processes tile updates.
-     *
-     * On the client -> server side, processes tile update requests received
-     * from the UI, updates the tile map, and sends the requests to the
-     * server.
-     *
-     * On the server -> client side, applies received tile updates to the
-     * tile map.
+     * Processes received tile updates, applying them to the tile map.
      */
     void updateTiles();
 
 private:
-    /**
-     * Processes tile updates from the server.
-     */
-    void processNetworkUpdates();
-
     /**
      * Adds the tile layer to the map.
      */
@@ -71,7 +57,7 @@ private:
 
     /** Used to access the tile map. */
     World& world;
-    /** Used to send tile update request messages. */
+    /** Used to receive tile updates. */
     Network& network;
 
     /** Tile updates, received from the network. */

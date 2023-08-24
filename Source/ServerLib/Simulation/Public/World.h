@@ -49,6 +49,12 @@ public:
     std::unordered_map<NetworkID, entt::entity> netIdMap;
 
     /**
+     * Returns true if the given ID is valid and in use.
+     * Note: If entt adds a storage.in_use(entity), we can replace this.
+     */
+    bool entityIDIsInUse(entt::entity entityID);
+
+    /**
      * Returns the spawn point position.
      * To configure, see Server::Config.
      */
