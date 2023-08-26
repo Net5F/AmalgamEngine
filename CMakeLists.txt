@@ -135,6 +135,15 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/nativefiledialog-extended/"
                  "${PROJECT_BINARY_DIR}/Libraries/nativefiledialog-extended/"
                  EXCLUDE_FROM_ALL)
 
+# Configure Lua.
+include("${PROJECT_SOURCE_DIR}/CMake/lua.cmake")
+
+# Configure Sol2.
+option(SOL2_SYSTEM_INCLUDE "Sol2 as system include" OFF)
+option(SOL2_ENABLE_INSTALL "Enable installation of Sol2" OFF)
+add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/sol2/"
+                 "${PROJECT_BINARY_DIR}/Libraries/sol2/")
+
 # Configure header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/CMake/readerwriterqueue.cmake")
 

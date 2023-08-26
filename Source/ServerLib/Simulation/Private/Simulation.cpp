@@ -13,10 +13,11 @@ namespace Server
 Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 : network{inNetwork}
 , world{inSpriteData}
+, lua{}
 , currentTick{0}
 , extension{nullptr}
 , clientConnectionSystem{*this, world, network, inSpriteData}
-, nceLifetimeSystem{world, network, inSpriteData, extension.get()}
+, nceLifetimeSystem{world, network, inSpriteData, lua, extension.get()}
 , tileUpdateSystem{world, network, extension.get()}
 , spriteUpdateSystem{*this, world, network, inSpriteData}
 , inputSystem{*this, world, network}
@@ -29,6 +30,9 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 {
     // Initialize our entt groups.
     EnttGroups::init(world.registry);
+
+    // Initialize the lua engine.
+    lua.open_libraries(sol::lib::base);
 
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);

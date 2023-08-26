@@ -5,6 +5,11 @@
 #include "QueuedEvents.h"
 #include <queue>
 
+namespace sol
+{
+class state;
+}
+
 namespace AM
 {
 namespace Server
@@ -25,7 +30,7 @@ class NceLifetimeSystem
 {
 public:
     NceLifetimeSystem(World& inWorld, Network& inNetwork,
-                      SpriteData& inSpriteData,
+                      SpriteData& inSpriteData, sol::state& inLua,
                       const ISimulationExtension* inExtension);
 
     /**
@@ -52,6 +57,9 @@ private:
 
     /** Used to get sprite data when adding an entity. */
     SpriteData& spriteData;
+
+    /** Used to run entity init scripts. */
+    sol::state& lua;
 
     /** If non-nullptr, contains the project's simulation extension functions.
         Used for checking if entity creation requests are valid. */

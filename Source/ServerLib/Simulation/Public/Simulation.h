@@ -15,6 +15,9 @@
 #include <SDL_stdinc.h>
 #include <atomic>
 
+#define SOL_ALL_SAFETIES_ON 1
+#include "sol/sol.hpp"
+
 namespace AM
 {
 namespace Server
@@ -60,6 +63,9 @@ private:
     Network& network;
 
     World world;
+
+    /** The Lua engine. */
+    sol::state lua;
 
     /** The tick number that we're currently on. */
     std::atomic<Uint32> currentTick;

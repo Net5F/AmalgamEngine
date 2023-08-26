@@ -10,18 +10,20 @@
 #include "InitScript.h"
 #include "Transforms.h"
 #include "Log.h"
+#include "sol/sol.hpp"
 
 namespace AM
 {
 namespace Server
 {
 
-NceLifetimeSystem::NceLifetimeSystem(World& inWorld,
-                                     Network& inNetwork,
+NceLifetimeSystem::NceLifetimeSystem(World& inWorld, Network& inNetwork,
                                      SpriteData& inSpriteData,
+                                     sol::state& inLua,
                                      const ISimulationExtension* inExtension)
 : world{inWorld}
 , spriteData{inSpriteData}
+, lua{inLua}
 , extension{inExtension}
 , objectReInitQueue{}
 , objectInitRequestQueue{inNetwork.getEventDispatcher()}
@@ -120,8 +122,9 @@ void NceLifetimeSystem::initDynamicObject(entt::entity newEntity,
 
     registry.emplace<InitScript>(newEntity, objectInitRequest.initScript);
 
-    // TODO: Run the given init script.
-    LOG_INFO("%s", objectInitRequest.initScript.c_str());
+    // Run the given init script.
+    lua["selfEntityID"] = newEntity;
+    lua.script(objectInitRequest.initScript, &sol::script_default_on_error);
 
     // Start tracking the entity in the locator.
     // Note: Since the entity was added to the locator, clients 

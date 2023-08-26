@@ -16,8 +16,8 @@ namespace Client
 Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
                        SpriteData& inSpriteData)
 : network{inNetwork}
-, world(inSpriteData)
-, currentTick(0)
+, world{inSpriteData}
+, currentTick{0}
 , extension{nullptr}
 , serverConnectionSystem{world, inUiEventDispatcher, network, inSpriteData,
                          currentTick}

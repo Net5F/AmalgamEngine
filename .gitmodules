@@ -31,3 +31,9 @@
 [submodule "Libraries/lz4"]
 	path = Libraries/lz4
 	url = git@github.com:Net5F/lz4.git
+[submodule "Libraries/lua"]
+	path = Libraries/lua
+	url = git@github.com:lua/lua.git
+[submodule "Libraries/sol2"]
+	path = Libraries/sol2
+	url = git@github.com:ThePhD/sol2.git

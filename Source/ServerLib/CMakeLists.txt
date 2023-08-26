@@ -34,6 +34,8 @@ target_link_libraries(ServerLib
         readerwriterqueue
         CircularBuffer
         EnTT::EnTT
+        Lua
+        sol2::sol2
         QueuedEvents
         SharedLib
 )
