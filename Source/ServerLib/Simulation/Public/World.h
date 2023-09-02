@@ -11,11 +11,22 @@
 #include <unordered_map>
 #include <random>
 
+namespace sol
+{
+class state;
+}
+
 namespace AM
 {
+struct Name;
+struct Position;
+struct Rotation;
+struct ObjectSpriteSet;
+
 namespace Server
 {
 class SpriteData;
+struct InitScript;
 
 /**
  * Owns and manages the persistence of all world state.
@@ -32,7 +43,7 @@ class SpriteData;
 class World
 {
 public:
-    World(SpriteData& spriteData);
+    World(SpriteData& spriteData, sol::state& inLua);
 
     /** Entity data registry. */
     entt::registry registry;
@@ -47,6 +58,17 @@ public:
     /** Maps network IDs to entity IDs.
         Used for interfacing with the Network. */
     std::unordered_map<NetworkID, entt::entity> netIdMap;
+
+    /**
+     * Constructs a dynamic object with the given components, and runs 
+     * initScript on it.
+     */
+    entt::entity constructDynamicObject(const Name& name,
+                                        const Position& position,
+                                        const Rotation& rotation,
+                                        const ObjectSpriteSet& spriteSet,
+                                        const InitScript& initScript,
+                                        entt::entity entityHint = entt::null);
 
     /**
      * Returns true if the given ID is valid and in use.
@@ -65,6 +87,14 @@ private:
      * Returns the next spawn point, trying to build groups of 10.
      */
     Position getGroupedSpawnPoint();
+
+    /**
+     * Does any necessary cleanup to the given entity.
+     */
+    void onEntityDestroyed(entt::entity entity);
+
+    /** Used to run entity init scripts. */
+    sol::state& lua;
 
     // For random spawn points.
     std::random_device randomDevice;

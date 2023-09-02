@@ -1,6 +1,7 @@
 #include "EntityLocator.h"
 #include "SharedConfig.h"
 #include "Position.h"
+#include "Cylinder.h"
 #include "BoundingBox.h"
 #include "Collision.h"
 #include "CellPosition.h"
@@ -83,8 +84,118 @@ void EntityLocator::setEntityLocation(entt::entity entity,
 }
 
 std::vector<entt::entity>&
-    EntityLocator::getEntitiesCoarse(const Position& cylinderCenter,
-                                     float radius)
+    EntityLocator::getEntities(const Cylinder& cylinder)
+{
+    AM_ASSERT(cylinder.radius >= 0, "Cylinder can't have negative radius.");
+
+    // Run a coarse pass.
+    getEntitiesCoarse(cylinder);
+
+    // Erase any entities whose position isn't within the cylinder.
+    std::erase_if(
+        returnVector, [this, &cylinder](entt::entity entity) {
+            const Position& position{registry.get<Position>(entity)};
+            return !(cylinder.intersects(position));
+        });
+
+    return returnVector;
+}
+
+std::vector<entt::entity>&
+    EntityLocator::getEntities(const TileExtent& tileExtent)
+{
+    // Run a coarse pass.
+    getEntitiesCoarse(tileExtent);
+
+    // Erase any entities that don't actually intersect the extent.
+    std::erase_if(returnVector, [this, &tileExtent](entt::entity entity) {
+        const Position& position{registry.get<Position>(entity)};
+        return !(tileExtent.containsPosition(position.asTilePosition()));
+    });
+
+    return returnVector;
+}
+
+std::vector<entt::entity>&
+    EntityLocator::getEntities(const ChunkExtent& chunkExtent)
+{
+    // Convert to TileExtent.
+    TileExtent tileExtent{chunkExtent};
+
+    return getCollisions(tileExtent);
+}
+
+std::vector<entt::entity>&
+    EntityLocator::getCollisions(const Cylinder& cylinder)
+{
+    AM_ASSERT(cylinder.radius >= 0, "Cylinder can't have negative radius.");
+
+    // Run a coarse pass.
+    getEntitiesCoarse(cylinder);
+
+    // Erase any entities that don't actually intersect the cylinder.
+    std::erase_if(
+        returnVector, [this, &cylinder](entt::entity entity) {
+            const Collision& collision{registry.get<Collision>(entity)};
+            return !(collision.worldBounds.intersects(cylinder));
+        });
+
+    return returnVector;
+}
+
+std::vector<entt::entity>&
+    EntityLocator::getCollisions(const BoundingBox& boundingBox)
+{
+    // Run a coarse pass.
+    getEntitiesCoarse(boundingBox);
+
+    // Erase any entities that don't actually intersect the extent.
+    std::erase_if(returnVector, [this, &boundingBox](entt::entity entity) {
+        const Collision& collision{registry.get<Collision>(entity)};
+        return !(collision.worldBounds.intersects(boundingBox));
+    });
+
+    return returnVector;
+}
+
+std::vector<entt::entity>&
+    EntityLocator::getCollisions(const TileExtent& tileExtent)
+{
+    // Run a coarse pass.
+    getEntitiesCoarse(tileExtent);
+
+    // Erase any entities that don't actually intersect the extent.
+    std::erase_if(returnVector, [this, &tileExtent](entt::entity entity) {
+        const Collision& collision{registry.get<Collision>(entity)};
+        return !(collision.worldBounds.intersects(tileExtent));
+    });
+
+    return returnVector;
+}
+
+std::vector<entt::entity>&
+    EntityLocator::getCollisions(const ChunkExtent& chunkExtent)
+{
+    // Convert to TileExtent.
+    TileExtent tileExtent{chunkExtent};
+
+    return getCollisions(tileExtent);
+}
+
+void EntityLocator::removeEntity(entt::entity entity)
+{
+    auto entityIt{entityMap.find(entity)};
+    if (entityIt != entityMap.end()) {
+        // Remove the entity from each cell that it's located in.
+        clearEntityLocation(entity, entityIt->second);
+
+        // Remove the entity from the map.
+        entityMap.erase(entityIt);
+    }
+}
+
+std::vector<entt::entity>&
+    EntityLocator::getEntitiesCoarse(const Cylinder& cylinder)
 {
     // Clear the return vector.
     returnVector.clear();
@@ -92,16 +203,16 @@ std::vector<entt::entity>&
     // Calc the cell extent that is intersected by the cylinder.
     CellExtent cylinderCellExtent{};
     cylinderCellExtent.x = static_cast<int>(
-        std::floor((cylinderCenter.x - radius) / cellWorldWidth));
+        std::floor((cylinder.center.x - cylinder.radius) / cellWorldWidth));
     cylinderCellExtent.y = static_cast<int>(
-        std::floor((cylinderCenter.y - radius) / cellWorldWidth));
+        std::floor((cylinder.center.y - cylinder.radius) / cellWorldWidth));
     cylinderCellExtent.xLength
-        = (static_cast<int>(
-               std::ceil((cylinderCenter.x + radius) / cellWorldWidth))
+        = (static_cast<int>(std::ceil((cylinder.center.x + cylinder.radius)
+                                      / cellWorldWidth))
            - cylinderCellExtent.x);
     cylinderCellExtent.yLength
-        = (static_cast<int>(
-               std::ceil((cylinderCenter.y + radius) / cellWorldWidth))
+        = (static_cast<int>(std::ceil((cylinder.center.y + cylinder.radius)
+                                      / cellWorldWidth))
            - cylinderCellExtent.y);
 
     // Clip the extent to the grid's bounds.
@@ -172,79 +283,6 @@ std::vector<entt::entity>&
     TileExtent tileExtent{chunkExtent};
 
     return getEntitiesCoarse(tileExtent);
-}
-
-std::vector<entt::entity>&
-    EntityLocator::getEntitiesFine(const Position& cylinderCenter,
-                                   float radius)
-{
-    AM_ASSERT(radius >= 0, "Cylinder can't have negative radius.");
-
-    // Run a coarse pass.
-    getEntitiesCoarse(cylinderCenter, radius);
-
-    // Erase any entities that don't actually intersect the cylinder.
-    auto view{registry.view<Collision>()};
-    std::erase_if(
-        returnVector, [&view, &cylinderCenter, radius](entt::entity entity) {
-            Collision& collision{view.get<Collision>(entity)};
-            return !(collision.worldBounds.intersects(cylinderCenter, radius));
-        });
-
-    return returnVector;
-}
-
-std::vector<entt::entity>&
-    EntityLocator::getEntitiesFine(const BoundingBox& boundingBox)
-{
-    // Run a coarse pass.
-    getEntitiesCoarse(boundingBox);
-
-    // Erase any entities that don't actually intersect the extent.
-    auto view{registry.view<Collision>()};
-    std::erase_if(returnVector, [&view, &boundingBox](entt::entity entity) {
-        Collision& collision{view.get<Collision>(entity)};
-        return !(collision.worldBounds.intersects(boundingBox));
-    });
-
-    return returnVector;
-}
-
-std::vector<entt::entity>&
-    EntityLocator::getEntitiesFine(const TileExtent& tileExtent)
-{
-    // Run a coarse pass.
-    getEntitiesCoarse(tileExtent);
-
-    // Erase any entities that don't actually intersect the extent.
-    auto view{registry.view<Collision>()};
-    std::erase_if(returnVector, [&view, &tileExtent](entt::entity entity) {
-        Collision& collision{view.get<Collision>(entity)};
-        return !(collision.worldBounds.intersects(tileExtent));
-    });
-
-    return returnVector;
-}
-
-std::vector<entt::entity>&
-    EntityLocator::getEntitiesFine(const ChunkExtent& chunkExtent)
-{
-    // Convert to TileExtent.
-    TileExtent tileExtent{chunkExtent};
-
-    return getEntitiesFine(tileExtent);
-}
-
-void EntityLocator::removeEntity(entt::entity entity)
-{
-    auto entityIt{entityMap.find(entity)};
-    if (entityIt != entityMap.end()) {
-        // Remove the entity from each cell that it's located in.
-        clearEntityLocation(entity, entityIt->second);
-
-        // Remove the entity from the map.
-        entityMap.erase(entityIt);
-    }
 }
 
 void EntityLocator::clearEntityLocation(entt::entity entity,

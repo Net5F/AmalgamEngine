@@ -82,16 +82,16 @@ WorldObjectID
     // These hold the value (relative to stepX/stepY) where the next intersection
     // occurs in each direction.
     float nextIntersectionX{
-        (std::fmod(ray.originX, cellWorldWidth) / cellWorldWidth) * stepX};
+        (std::fmod(ray.origin.x, cellWorldWidth) / cellWorldWidth) * stepX};
     float nextIntersectionY{
-        (std::fmod(ray.originY, cellWorldWidth) / cellWorldWidth) * stepY};
+        (std::fmod(ray.origin.y, cellWorldWidth) / cellWorldWidth) * stepY};
 
     // Walk along the ray, checking each cell for a hit world object.
     CellPosition currentCellPosition{
         tileToCellPosition(rayOrigin.asTilePosition())};
-    CellPosition endCellPosition{tileToCellPosition(
-        Position{rayToCamera.originX, rayToCamera.originY, rayToCamera.originZ}
-            .asTilePosition())};
+    CellPosition endCellPosition{tileToCellPosition(Position{
+        rayToCamera.origin.x, rayToCamera.origin.y, rayToCamera.origin.z}
+                                                        .asTilePosition())};
     while ((currentCellPosition.x >= endCellPosition.x)
            && (currentCellPosition.y >= endCellPosition.y)) {
         // If an object in this cell intersects the ray, return it.

@@ -2,6 +2,7 @@
 #include "Network.h"
 #include "EnttGroups.h"
 #include "ISimulationExtension.h"
+#include "InteractionRequest.h"
 #include "Log.h"
 #include "Timer.h"
 #include "Tracy.hpp"
@@ -12,13 +13,15 @@ namespace Server
 {
 Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 : network{inNetwork}
-, world{inSpriteData}
 , lua{}
+, world{inSpriteData, lua}
 , currentTick{0}
 , extension{nullptr}
+, interactionRequestQueue{inNetwork.getEventDispatcher()}
+, interactionQueueMap{}
 , clientConnectionSystem{*this, world, network, inSpriteData}
-, nceLifetimeSystem{world, network, inSpriteData, lua, extension.get()}
-, tileUpdateSystem{world, network, extension.get()}
+, nceLifetimeSystem{world, network, inSpriteData}
+, tileUpdateSystem{world, network}
 , spriteUpdateSystem{*this, world, network, inSpriteData}
 , inputSystem{*this, world, network}
 , movementSystem{world}
@@ -37,6 +40,26 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);
+}
+
+void Simulation::registerInteractionQueue(Uint8 interactionType,
+                                          std::queue<InteractionRequest>& queue)
+{
+    if (interactionQueueMap[interactionType] != nullptr) {
+        LOG_FATAL("Only one queue can be registered for each interaction type.");
+    }
+
+    interactionQueueMap[interactionType] = &queue;
+}
+
+World& Simulation::getWorld()
+{
+    return world;
+}
+
+Uint32 Simulation::getCurrentTick()
+{
+    return currentTick;
 }
 
 void Simulation::tick()
@@ -65,6 +88,9 @@ void Simulation::tick()
     if (extension != nullptr) {
         extension->afterMapAndConnectionUpdates();
     }
+
+    // Push any waiting interaction messages into the system queues.
+    dispatchInteractionMessages();
 
     // Send updated tile state to nearby clients.
     tileUpdateSystem.sendTileUpdates();
@@ -106,19 +132,23 @@ void Simulation::tick()
     currentTick++;
 }
 
-World& Simulation::getWorld()
-{
-    return world;
-}
-
-Uint32 Simulation::getCurrentTick()
-{
-    return currentTick;
-}
-
 void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
 {
     extension = std::move(inExtension);
+    nceLifetimeSystem.setExtension(extension.get());
+    tileUpdateSystem.setExtension(extension.get());
+}
+
+void Simulation::dispatchInteractionMessages()
+{
+    // Dispatch any waiting interaction requests.
+    InteractionRequest interactionRequest{};
+    while (interactionRequestQueue.pop(interactionRequest)) {
+        Uint8 interactionType{interactionRequest.interactionType};
+        if (interactionQueueMap[interactionType] != nullptr) {
+            interactionQueueMap[interactionType]->push(interactionRequest);
+        }
+    }
 }
 
 } // namespace Server

@@ -15,6 +15,7 @@ target_sources(SharedLib
         Public/InitScriptRequest.h
         Public/InitScriptResponse.h
         Public/InputChangeRequest.h
+        Public/InteractionRequest.h
         Public/MovementState.h
         Public/MovementUpdate.h
         Public/SpriteChange.h

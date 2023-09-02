@@ -43,10 +43,8 @@ public:
                SpriteData& inSpriteData);
 
     /**
-     * Processes the next sim iteration.
+     * Returns a reference to the simulation's world state.
      */
-    void tick();
-
     World& getWorld();
 
     /**
@@ -69,6 +67,11 @@ public:
      * Note: This is used for non-predicted state (such as NPC movement).
      */
     Uint32 getReplicationTick();
+
+    /**
+     * Processes the next sim iteration.
+     */
+    void tick();
 
     /**
      * Handles user input events, specifically mouse and momentary events.

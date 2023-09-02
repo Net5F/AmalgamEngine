@@ -5,11 +5,6 @@
 #include "QueuedEvents.h"
 #include <queue>
 
-namespace sol
-{
-class state;
-}
-
 namespace AM
 {
 namespace Server
@@ -30,13 +25,14 @@ class NceLifetimeSystem
 {
 public:
     NceLifetimeSystem(World& inWorld, Network& inNetwork,
-                      SpriteData& inSpriteData, sol::state& inLua,
-                      const ISimulationExtension* inExtension);
+                      SpriteData& inSpriteData);
 
     /**
      * Processes any waiting EntityCreateRequest or EntityDelete messages.
      */
     void processUpdates();
+
+    void setExtension(ISimulationExtension* inExtension);
 
 private:
     /**
@@ -47,23 +43,18 @@ private:
         const DynamicObjectInitRequest& objectInitRequest);
 
     /**
-     * Creates and sets the given object's components and adds it to the locator.
+     * Tells the World to create the given dynamic object.
      */
     void initDynamicObject(entt::entity newEntity,
         const DynamicObjectInitRequest& objectInitRequest);
 
     /** Used to add/remove entities. */
     World& world;
-
     /** Used to get sprite data when adding an entity. */
     SpriteData& spriteData;
-
-    /** Used to run entity init scripts. */
-    sol::state& lua;
-
     /** If non-nullptr, contains the project's simulation extension functions.
         Used for checking if entity creation requests are valid. */
-    const ISimulationExtension* extension;
+    ISimulationExtension* extension;
 
     /** Holds objects that need to be re-initialized on the next tick. */
     std::queue<DynamicObjectInitRequest> objectReInitQueue;

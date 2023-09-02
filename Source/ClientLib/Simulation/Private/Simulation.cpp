@@ -38,6 +38,21 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
     network.registerCurrentTickPtr(&currentTick);
 }
 
+World& Simulation::getWorld()
+{
+    return world;
+}
+
+Uint32 Simulation::getCurrentTick()
+{
+    return currentTick;
+}
+
+Uint32 Simulation::getReplicationTick()
+{
+    return (currentTick + replicationTickOffset.get());
+}
+
 void Simulation::tick()
 {
     /* Calculate what tick we should be on. */
@@ -117,21 +132,6 @@ void Simulation::tick()
 
         currentTick++;
     }
-}
-
-World& Simulation::getWorld()
-{
-    return world;
-}
-
-Uint32 Simulation::getCurrentTick()
-{
-    return currentTick;
-}
-
-Uint32 Simulation::getReplicationTick()
-{
-    return (currentTick + replicationTickOffset.get());
 }
 
 bool Simulation::handleOSEvent(SDL_Event& event)

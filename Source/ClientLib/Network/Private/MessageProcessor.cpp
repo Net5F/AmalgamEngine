@@ -106,6 +106,7 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                 extension->processReceivedMessage(messageType, messageBuffer,
                                                   messageSize);
             }
+            break;
         }
     }
 }

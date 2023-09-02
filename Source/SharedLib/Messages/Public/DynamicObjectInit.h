@@ -3,6 +3,7 @@
 #include "EngineMessageType.h"
 #include "Position.h"
 #include "Rotation.h"
+#include "Interactions.h"
 #include "ClientEntityInit.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
@@ -37,6 +38,9 @@ struct DynamicObjectInit {
 
     /** The object's sprite set. */
     Uint16 spriteSetID{0};
+
+    /** The object's supported interactions. */
+    Interactions interactions{};
 };
 
 template<typename S>
@@ -49,6 +53,7 @@ void serialize(S& serializer, DynamicObjectInit& dynamicObjectInit)
     serializer.object(dynamicObjectInit.position);
     serializer.object(dynamicObjectInit.rotation);
     serializer.value2b(dynamicObjectInit.spriteSetID);
+    serializer.object(dynamicObjectInit.interactions);
 }
 
 } // End namespace AM

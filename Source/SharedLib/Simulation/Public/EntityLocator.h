@@ -10,6 +10,7 @@
 namespace AM
 {
 struct Position;
+struct Cylinder;
 struct BoundingBox;
 
 /**
@@ -49,17 +50,64 @@ public:
     void setEntityLocation(entt::entity entity, const BoundingBox& boundingBox);
 
     /**
+     * Returns all entities whose positions intersect the given cylinder.
+     * 
+     * Note: Because this uses position, it exhibits the commutative property 
+     *       (if a cylinder centered on entityA returns entityB, the reverse 
+     *       will also be true).
+     */
+    std::vector<entt::entity>& getEntities(const Cylinder& cylinder);
+
+    /**
+     * Overload for TileExtent.
+     */
+    std::vector<entt::entity>& getEntities(const TileExtent& tileExtent);
+
+    /**
+     * Overload for ChunkExtent.
+     */
+    std::vector<entt::entity>& getEntities(const ChunkExtent& chunkExtent);
+
+    /**
+     * Returns all entities whose collision boxes intersect the given cylinder.
+     *
+     * Note: Because this uses collision and collision boxes vary in size and 
+     *       position, it does not exhibit the commutative property (if a 
+     *       cylinder centered on entityA returns entityB, the reverse may not 
+     *       be true).
+     */
+    std::vector<entt::entity>& getCollisions(const Cylinder& cylinder);
+
+    /**
+     * Overload for BoundingBox.
+     */
+    std::vector<entt::entity>& getCollisions(const BoundingBox& boundingBox);
+
+    /**
+     * Overload for TileExtent.
+     */
+    std::vector<entt::entity>& getCollisions(const TileExtent& tileExtent);
+
+    /**
+     * Overload for ChunkExtent.
+     */
+    std::vector<entt::entity>& getCollisions(const ChunkExtent& chunkExtent);
+
+    /**
+     * If we're tracking the given entity, removes it from the entityGrid and
+     * entityMap.
+     */
+    void removeEntity(entt::entity entity);
+
+private:
+    /**
      * Performs a coarse pass to get all entities in cells intersected by
      * the given cylinder.
      *
      * Note: All entities in the intersected cells are returned, which may
      *       include entities that aren't actually within the radius.
-     *
-     * @param cylinderCenter  The position to cast the radius from.
-     * @param radius  The length of the radius to cast.
      */
-    std::vector<entt::entity>& getEntitiesCoarse(const Position& cylinderCenter,
-                                                 float radius);
+    std::vector<entt::entity>& getEntitiesCoarse(const Cylinder& cylinder);
 
     /**
      * Overload for BoundingBox.
@@ -78,38 +126,6 @@ public:
     std::vector<entt::entity>&
         getEntitiesCoarse(const ChunkExtent& chunkExtent);
 
-    /**
-     * Performs a fine pass to return all entities that intersect the given
-     * cylinder.
-     *
-     * @param cylinderCenter  The position to cast the radius from.
-     * @param radius  The length of the radius to cast.
-     */
-    std::vector<entt::entity>& getEntitiesFine(const Position& cylinderCenter,
-                                               float radius);
-
-    /**
-     * Overload for BoundingBox.
-     */
-    std::vector<entt::entity>& getEntitiesFine(const BoundingBox& boundingBox);
-
-    /**
-     * Overload for TileExtent.
-     */
-    std::vector<entt::entity>& getEntitiesFine(const TileExtent& tileExtent);
-
-    /**
-     * Overload for ChunkExtent.
-     */
-    std::vector<entt::entity>& getEntitiesFine(const ChunkExtent& chunkExtent);
-
-    /**
-     * If we're tracking the given entity, removes it from the entityGrid and
-     * entityMap.
-     */
-    void removeEntity(entt::entity entity);
-
-private:
     /**
      * Removes the given entity from the cells within the given extent.
      *

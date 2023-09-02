@@ -2,6 +2,7 @@
 
 #include "BoundingBox.h"
 #include "EmptySpriteID.h"
+#include <string>
 
 namespace AM
 {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "World.h"
+#include "InteractionRequest.h"
 #include "ClientConnectionSystem.h"
 #include "NceLifetimeSystem.h"
 #include "TileUpdateSystem.h"
@@ -12,8 +13,10 @@
 #include "ChunkStreamingSystem.h"
 #include "ScriptDataSystem.h"
 #include "MapSaveSystem.h"
+#include "QueuedEvents.h"
 #include <SDL_stdinc.h>
 #include <atomic>
+#include <queue>
 
 #define SOL_ALL_SAFETIES_ON 1
 #include "sol/sol.hpp"
@@ -38,9 +41,35 @@ class Simulation
 {
 public:
     /** An unreasonable amount of time for the sim tick to be late by. */
-    static constexpr double SIM_DELAYED_TIME_S = .001;
+    static constexpr double SIM_DELAYED_TIME_S{.001};
 
     Simulation(Network& inNetwork, SpriteData& inSpriteData);
+
+    /** 
+     * Registers the given queue to receive interaction events of a 
+     * particular type.
+     *
+     * Interaction events occur when the user left-clicks an entity, or right-
+     * clicks and selects an interaction from the menu.
+     *
+     * @param interactionType The type of interaction. Should be cast from 
+     *                        EngineInteractionType or ProjectInteractionType.
+     * @param queue The queue to register.
+     *
+     * Note: Only 1 queue can be subscribed to each type of interaction.
+     */
+    void registerInteractionQueue(Uint8 interactionType,
+                                  std::queue<InteractionRequest>& queue);
+
+    /**
+     * Returns a reference to the simulation's world state.
+     */
+    World& getWorld();
+
+    /**
+     * Returns the simulation's current tick number.
+     */
+    Uint32 getCurrentTick();
 
     /**
      * Updates accumulatedTime. If greater than the tick timestep, processes
@@ -48,24 +77,23 @@ public:
      */
     void tick();
 
-    World& getWorld();
-
-    Uint32 getCurrentTick();
-
     /**
      * See extension member comment.
      */
     void setExtension(std::unique_ptr<ISimulationExtension> inExtension);
 
 private:
+    void dispatchInteractionMessages();
+
     /** Used to receive events (through the Network's dispatcher) and to
         send messages. */
     Network& network;
 
-    World world;
-
     /** The Lua engine. */
     sol::state lua;
+
+    /** The world's state. */
+    World world;
 
     /** The tick number that we're currently on. */
     std::atomic<Uint32> currentTick;
@@ -74,6 +102,13 @@ private:
         Allows the project to provide simulation code and have it be called at
         the appropriate time. */
     std::unique_ptr<ISimulationExtension> extension;
+
+    EventQueue<InteractionRequest> interactionRequestQueue;
+
+    /** Holds the subscribed interaction queues.
+        See subscribeInteractionQueue() comment. */
+    std::unordered_map<Uint8, std::queue<InteractionRequest>*>
+        interactionQueueMap;
 
     //-------------------------------------------------------------------------
     // Systems

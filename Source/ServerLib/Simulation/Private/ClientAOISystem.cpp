@@ -8,10 +8,12 @@
 #include "EntityType.h"
 #include "Name.h"
 #include "Sprite.h"
+#include "SpriteSets.h"
+#include "Interactions.h"
 #include "EntityDelete.h"
 #include "ClientEntityInit.h"
 #include "DynamicObjectInit.h"
-#include "SpriteSets.h"
+#include "Cylinder.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include "Tracy.hpp"
@@ -37,17 +39,15 @@ void ClientAOISystem::updateAOILists()
 
     // Update every client entity's AOI list.
     auto view{world.registry.view<ClientSimData, Position>()};
-    for (entt::entity entity : view) {
-        auto [client, position] = view.get<ClientSimData, Position>(entity);
-
+    for (auto [entity, client, position] : view.each()) {
         // Clear our lists.
         entitiesThatLeft.clear();
         entitiesThatEntered.clear();
 
         // Get the list of entities that are in this entity's AOI.
         std::vector<entt::entity>& currentAOIEntities{
-            world.entityLocator.getEntitiesFine(position,
-                                                SharedConfig::AOI_RADIUS)};
+            world.entityLocator.getEntities(
+                {position, SharedConfig::AOI_RADIUS})};
 
         // Remove this entity from the list, if it's in there.
         // (We don't want to add it to its own list.)
@@ -124,11 +124,13 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
             const auto& spriteSet{
                 world.registry.get<ObjectSpriteSet>(entityThatEntered)};
             const auto& rotation{world.registry.get<Rotation>(entityThatEntered)};
+            const auto& interactions{
+                world.registry.get<Interactions>(entityThatEntered)};
             network.serializeAndSend(
                 client.netID,
                 DynamicObjectInit{simulation.getCurrentTick(),
                                   entityThatEntered, name.name, position,
-                                  rotation, spriteSet.numericID});
+                                  rotation, spriteSet.numericID, interactions});
         }
     }
 }

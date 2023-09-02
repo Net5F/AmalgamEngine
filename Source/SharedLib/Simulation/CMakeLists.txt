@@ -1,6 +1,7 @@
 target_sources(SharedLib
     PRIVATE
         Private/BoundingBox.cpp
+        Private/Cylinder.cpp
         Private/EntityLocator.cpp
         Private/MovementHelpers.cpp
         Private/Components/Camera.cpp
@@ -13,9 +14,11 @@ target_sources(SharedLib
         Private/TileMap/TilePosition.cpp
 	PUBLIC
         Public/BoundingBox.h
+        Public/Cylinder.h
         Public/DiscreteExtent.h
         Public/DiscreteImpl.h
         Public/DiscretePosition.h
+        Public/EngineInteractionType.h
         Public/EntityLocator.h
         Public/EntityType.h
         Public/MovementHelpers.h
@@ -24,6 +27,7 @@ target_sources(SharedLib
         Public/Components/Camera.h
         Public/Components/Collision.h
         Public/Components/Input.h
+        Public/Components/Interactions.h
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h

@@ -11,6 +11,7 @@
 #include "SpriteSets.h"
 #include "SpriteChange.h"
 #include "ClientSimData.h"
+#include "Cylinder.h"
 #include "SpriteStateNeedsSync.h"
 #include "Transforms.h"
 #include "Log.h"
@@ -105,16 +106,16 @@ void SpriteUpdateSystem::sendSpriteUpdates()
         }
         else if (entityType == EntityType::NPC) {
             const Position& position{registry.get<Position>(updatedEntity)};
-            entitiesInRange = &(world.entityLocator.getEntitiesFine(
-                position, SharedConfig::AOI_RADIUS));
+            entitiesInRange = &(world.entityLocator.getEntities(
+                {position, SharedConfig::AOI_RADIUS}));
 
             const Sprite& sprite{registry.get<Sprite>(updatedEntity)};
             spriteChange.spriteNumericID = sprite.numericID;
         }
         else if (entityType == EntityType::DynamicObject) {
             const Position& position{registry.get<Position>(updatedEntity)};
-            entitiesInRange = &(world.entityLocator.getEntitiesFine(
-                position, SharedConfig::AOI_RADIUS));
+            entitiesInRange = &(world.entityLocator.getEntities(
+                {position, SharedConfig::AOI_RADIUS}));
 
             const ObjectSpriteSet& spriteSet{
                 registry.get<ObjectSpriteSet>(updatedEntity)};

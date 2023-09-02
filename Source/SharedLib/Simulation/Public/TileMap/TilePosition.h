@@ -6,6 +6,7 @@
 namespace AM
 {
 struct ChunkPosition;
+struct Position;
 
 /**
  * A strong type alias, describing the position of a particular map tile.
@@ -17,6 +18,9 @@ struct TilePosition : public DiscretePosition<DiscreteImpl::TileTag>
     TilePosition(int inX, int inY);
 
     explicit TilePosition(const ChunkPosition& chunkPosition);
+
+    /** Returns the world position at the center of this tile. */
+    Position getCenterPosition();
 };
 
 } // namespace AM

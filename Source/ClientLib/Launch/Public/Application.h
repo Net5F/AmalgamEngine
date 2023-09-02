@@ -201,9 +201,8 @@ void Application::registerRendererExtension()
 template<typename T>
 void Application::registerSimulationExtension()
 {
-    SimulationExDependencies simulationDeps{simulation.getWorld(),
-                                            userInterface.getEventDispatcher(),
-                                            network, spriteData};
+    SimulationExDependencies simulationDeps{
+        simulation, userInterface.getEventDispatcher(), network, spriteData};
 
     simulation.setExtension(std::make_unique<T>(simulationDeps));
 }

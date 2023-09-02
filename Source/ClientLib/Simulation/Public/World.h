@@ -41,6 +41,12 @@ public:
 
     /** The tile map that makes up the world. */
     TileMap tileMap;
+
+    /**
+     * Returns true if the given ID is valid and in use.
+     * Note: If entt adds a storage.in_use(entity), we can replace this.
+     */
+    bool entityIDIsInUse(entt::entity entityID);
 };
 
 } // namespace Client

@@ -15,12 +15,10 @@ namespace AM
  * directions).
  */
 struct Ray {
-    /** This ray's origin point. */
-    float originX{0};
-    float originY{0};
-    float originZ{0};
+    /** Origin point. */
+    Position origin{};
 
-    /** This ray's direction vector. */
+    /** Direction vector. */
     float directionX{0};
     float directionY{0};
     float directionZ{0};
@@ -43,8 +41,8 @@ struct Ray {
      */
     Position getPositionAtT(float t)
     {
-        return {(originX + (directionX * t)), (originY + (directionY * t)),
-                (originZ + (directionZ * t))};
+        return {(origin.x + (directionX * t)), (origin.y + (directionY * t)),
+                (origin.z + (directionZ * t))};
     }
 };
 

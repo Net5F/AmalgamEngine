@@ -1,24 +1,34 @@
 #include "World.h"
 #include "ClientSimData.h"
+#include "EntityType.h"
+#include "Name.h"
+#include "Position.h"
+#include "Collision.h"
+#include "InitScript.h"
+#include "Interactions.h"
+#include "Transforms.h"
 #include "SharedConfig.h"
 #include "Config.h"
 #include "Log.h"
 #include "Ignore.h"
+#include "sol/sol.hpp"
 
 namespace AM
 {
 namespace Server
 {
-World::World(SpriteData& spriteData)
-: registry()
-, tileMap(spriteData)
-, entityLocator(registry)
-, randomDevice()
-, generator(randomDevice())
-, xDistribution(Config::SPAWN_POINT_RANDOM_MIN_X,
-                Config::SPAWN_POINT_RANDOM_MAX_X)
-, yDistribution(Config::SPAWN_POINT_RANDOM_MIN_Y,
-                Config::SPAWN_POINT_RANDOM_MAX_Y)
+World::World(SpriteData& spriteData, sol::state& inLua)
+: registry{}
+, tileMap{spriteData}
+, entityLocator{registry}
+, netIdMap{}
+, lua{inLua}
+, randomDevice{}
+, generator{randomDevice()}
+, xDistribution{Config::SPAWN_POINT_RANDOM_MIN_X,
+                Config::SPAWN_POINT_RANDOM_MAX_X}
+, yDistribution{Config::SPAWN_POINT_RANDOM_MIN_Y,
+                Config::SPAWN_POINT_RANDOM_MAX_Y}
 , groupX{Config::SPAWN_POINT_GROUP_MIN_X}
 , groupY{Config::SPAWN_POINT_GROUP_MIN_Y}
 , columnIndex{0}
@@ -27,6 +37,63 @@ World::World(SpriteData& spriteData)
     // Allocate the entity locator's grid.
     entityLocator.setGridSize(tileMap.getTileExtent().xLength,
                               tileMap.getTileExtent().yLength);
+
+    // When an entity is destroyed, do any necessary cleanup.
+    registry.on_destroy<entt::entity>().connect<&World::onEntityDestroyed>(
+        this);
+}
+
+entt::entity World::constructDynamicObject(const Name& name,
+                                           const Position& position,
+                                           const Rotation& rotation,
+                                           const ObjectSpriteSet& spriteSet,
+                                           const InitScript& initScript,
+                                           entt::entity entityHint)
+{
+    // Create the new entity and initialize it.
+    entt::entity newEntity{entt::null};
+    if (entityHint != entt::null) {
+        newEntity = registry.create(entityHint);
+    }
+    else {
+        newEntity = registry.create();
+    }
+
+    // Construct the standard components.
+    // Note: Be careful with holding onto references here. If components 
+    //       are added to the same group, the ref will be invalidated.
+    registry.emplace<EntityType>(newEntity, EntityType::DynamicObject);
+    registry.emplace<Name>(newEntity, name);
+
+    registry.emplace<Position>(newEntity, position);
+    registry.emplace<Rotation>(newEntity, rotation);
+
+    registry.emplace<ObjectSpriteSet>(newEntity, spriteSet);
+
+    // Note: The server doesn't have any need for a Sprite component on dynamic
+    //       entities, we just get it from the sprite set + rotation.
+    const Sprite& sprite{
+        *(spriteSet.sprites[registry.get<Rotation>(newEntity).direction])};
+
+    // Note: Every entity needs a Collision for the EntityLocator to use.
+    const Collision& collision{registry.emplace<Collision>(
+        newEntity, sprite.modelBounds,
+        Transforms::modelToWorldCentered(sprite.modelBounds,
+                                         registry.get<Position>(newEntity)))};
+
+    // Start tracking the entity in the locator.
+    // Note: Since the entity was added to the locator, clients 
+    //       will be told by ClientAOISystem to construct it.
+    entityLocator.setEntityLocation(newEntity, collision.worldBounds);
+
+    registry.emplace<InitScript>(newEntity, initScript);
+    registry.emplace<Interactions>(newEntity);
+
+    // Run the given init script.
+    lua["selfEntityID"] = newEntity;
+    lua.script(initScript.script, &sol::script_default_on_error);
+
+    return newEntity;
 }
 
 bool World::entityIDIsInUse(entt::entity entityID)
@@ -83,6 +150,12 @@ Position World::getGroupedSpawnPoint()
     }
 
     return spawnPoint;
+}
+
+void World::onEntityDestroyed(entt::entity entity)
+{
+    // Remove it from the locator.
+    entityLocator.removeEntity(entity);
 }
 
 } // namespace Server

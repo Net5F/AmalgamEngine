@@ -8,7 +8,7 @@ namespace AM
 /**
  * The types of messages that we send across the network.
  *
- * For descriptions, see their definitions in Shared/Messages/Public.
+ * For message descriptions, see their definitions in Shared/Messages/Public.
  */
 enum class EngineMessageType : Uint8 {
     /** Indicates the value hasn't been set. Used for initialization. */
@@ -21,6 +21,7 @@ enum class EngineMessageType : Uint8 {
     ChunkUpdateRequest,
     DynamicObjectInitRequest,
     InitScriptRequest,
+    InteractionRequest,
 
     // Server -> Client Messages
     ExplicitConfirmation,
@@ -30,13 +31,13 @@ enum class EngineMessageType : Uint8 {
     ClientEntityInit,
     DynamicObjectInit,
     InitScriptResponse,
-    EntityDelete,
 
     // Bidirectional Messages
     TileAddLayer,
     TileRemoveLayer,
     TileClearLayers,
     TileExtentClearLayers,
+    EntityDelete,
     SpriteChange,
 
     // We reserve values 0 - 124. The project can start at 125.

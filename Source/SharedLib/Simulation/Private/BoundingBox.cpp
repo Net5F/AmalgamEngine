@@ -1,4 +1,9 @@
 #include "BoundingBox.h"
+#include "Position.h"
+#include "Cylinder.h"
+#include "Ray.h"
+#include "TileExtent.h"
+#include <cmath>
 
 namespace AM
 {
@@ -52,8 +57,7 @@ bool BoundingBox::intersects(const BoundingBox& other) const
             && (maxZ > other.minZ));
 }
 
-bool BoundingBox::intersects(const Position& cylinderCenter,
-                             float radius) const
+bool BoundingBox::intersects(const Cylinder& cylinder) const
 {
     // Reference: https://stackoverflow.com/a/402010/4258629
 
@@ -62,15 +66,15 @@ bool BoundingBox::intersects(const Position& cylinderCenter,
     float yLength{getYLength()};
 
     // Get the X and Y distances between the centers.
-    float circleDistanceX{std::abs(cylinderCenter.x - boxCenter.x)};
-    float circleDistanceY{std::abs(cylinderCenter.y - boxCenter.y)};
+    float circleDistanceX{std::abs(cylinder.center.x - boxCenter.x)};
+    float circleDistanceY{std::abs(cylinder.center.y - boxCenter.y)};
 
     // If the circle is far enough away that no intersection is possible,
     // return false.
-    if (circleDistanceX > ((xLength / 2) + radius)) {
+    if (circleDistanceX > ((xLength / 2) + cylinder.radius)) {
         return false;
     }
-    if (circleDistanceY > ((yLength / 2) + radius)) {
+    if (circleDistanceY > ((yLength / 2) + cylinder.radius)) {
         return false;
     }
 
@@ -90,18 +94,18 @@ bool BoundingBox::intersects(const Position& cylinderCenter,
     float cornerDistanceSquared{(xDif * xDif) + (yDif * yDif)};
 
     // If the distance is less than the radius, return true.
-    return (cornerDistanceSquared <= (radius * radius));
+    return (cornerDistanceSquared <= (cylinder.radius * cylinder.radius));
 }
 
 float BoundingBox::intersects(const Ray& ray) const
 {
     // Find the constant t where intersection occurs for each direction.
-    float tX1{(minX - ray.originX) / ray.directionX};
-    float tX2{(maxX - ray.originX) / ray.directionX};
-    float tY1{(minY - ray.originY) / ray.directionY};
-    float tY2{(maxY - ray.originY) / ray.directionY};
-    float tZ1{(minZ - ray.originZ) / ray.directionZ};
-    float tZ2{(maxZ - ray.originZ) / ray.directionZ};
+    float tX1{(minX - ray.origin.x) / ray.directionX};
+    float tX2{(maxX - ray.origin.x) / ray.directionX};
+    float tY1{(minY - ray.origin.y) / ray.directionY};
+    float tY2{(maxY - ray.origin.y) / ray.directionY};
+    float tZ1{(minZ - ray.origin.z) / ray.directionZ};
+    float tZ2{(maxZ - ray.origin.z) / ray.directionZ};
 
     // Find the min t in each direction, then find the max of those.
     // This gives us the t where the ray first intersects the rect.

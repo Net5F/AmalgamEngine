@@ -23,8 +23,7 @@ class ISimulationExtension;
 class TileUpdateSystem
 {
 public:
-    TileUpdateSystem(World& inWorld, Network& inNetwork,
-                     const ISimulationExtension* inExtension);
+    TileUpdateSystem(World& inWorld, Network& inNetwork);
 
     /**
      * Processes tile updates and updates the world's tile map.
@@ -35,6 +34,8 @@ public:
      * Sends any dirty tile state to all nearby clients.
      */
     void sendTileUpdates();
+
+    void setExtension(ISimulationExtension* inExtension);
 
 private:
     /**
@@ -65,7 +66,7 @@ private:
 
     /** If non-nullptr, contains the project's simulation extension functions.
         Used for checking if tile updates are valid. */
-    const ISimulationExtension* extension;
+    ISimulationExtension* extension;
 
     EventQueue<TileAddLayer> addLayerRequestQueue;
     EventQueue<TileRemoveLayer> removeLayerRequestQueue;

@@ -9,6 +9,7 @@
 #include "InputHistory.h"
 #include "Rotation.h"
 #include "EntityType.h"
+#include "Interactions.h"
 #include "NeedsAdjacentChunks.h"
 #include "Camera.h"
 #include "Transforms.h"
@@ -148,6 +149,9 @@ void ServerConnectionSystem::initSimState(
         Transforms::modelToWorldCentered(sprite.modelBounds,
                                          registry.get<Position>(newEntity)));
     registry.emplace<InputHistory>(newEntity);
+
+    // TODO: Figure out what interactions clients have.
+    registry.emplace<Interactions>(newEntity);
 
     // Flag that we just moved and need to request all map data.
     registry.emplace<NeedsAdjacentChunks>(newEntity);

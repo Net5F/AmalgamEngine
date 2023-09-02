@@ -18,7 +18,7 @@ struct Input {
     // Replicated data
     //--------------------------------------------------------------------------
     /** Holds the current state of the inputs, indexed by Input::Type. */
-    typedef std::array<State, Type::Count> StateArr;
+    using StateArr = std::array<State, Type::Count>;
     StateArr inputStates{};
 };
 

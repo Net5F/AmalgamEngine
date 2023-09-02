@@ -1,13 +1,12 @@
 #pragma once
 
-#include "TileExtent.h"
-#include "Position.h"
-#include "Ray.h"
-#include "Log.h"
-#include <cmath>
-
 namespace AM
 {
+struct Position;
+struct Cylinder;
+struct Ray;
+struct TileExtent;
+
 /**
  * Represents a set of axis-aligned 3D bounds, forming a box.
  */
@@ -57,12 +56,9 @@ public:
     /**
      * Returns true if this box intersects the given cylinder.
      *
-     * Note: This treats the given data as a cylinder with infinite length
-     *       along the Z axis. If we want to treat it as a sphere, we can
-     *       change it.
      * Note: Shared edges are considered to be intersecting.
      */
-    bool intersects(const Position& cylinderCenter, float radius) const;
+    bool intersects(const Cylinder& cylinder) const;
 
     /**
      * Returns the t at which this box intersects the given ray.

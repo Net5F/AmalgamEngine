@@ -54,11 +54,10 @@ struct UpdateSender
     }
 };
 
-TileUpdateSystem::TileUpdateSystem(World& inWorld, Network& inNetwork,
-    const ISimulationExtension* inExtension)
+TileUpdateSystem::TileUpdateSystem(World& inWorld, Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
-, extension{inExtension}
+, extension{nullptr}
 , addLayerRequestQueue{network.getEventDispatcher()}
 , removeLayerRequestQueue{network.getEventDispatcher()}
 , clearLayersRequestQueue{network.getEventDispatcher()}
@@ -105,7 +104,7 @@ void TileUpdateSystem::sendTileUpdates()
         // Find the entities that are in range of this update.
         ChunkExtent inRangeExtent{std::visit(extentGetter, updateVariant)};
         std::vector<entt::entity>& entitiesInRange{
-            world.entityLocator.getEntitiesFine(inRangeExtent)};
+            world.entityLocator.getEntities(inRangeExtent)};
 
         // Send the update to all of the in-range clients.
         for (entt::entity entity : entitiesInRange) {
@@ -118,6 +117,11 @@ void TileUpdateSystem::sendTileUpdates()
     }
 
     world.tileMap.clearTileUpdateHistory();
+}
+
+void TileUpdateSystem::setExtension(ISimulationExtension* inExtension)
+{
+    extension = std::move(inExtension);
 }
 
 void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)

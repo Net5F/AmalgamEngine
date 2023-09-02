@@ -9,11 +9,12 @@
 #include "ChunkUpdateRequest.h"
 #include "DynamicObjectInitRequest.h"
 #include "InitScriptRequest.h"
-#include "EntityDelete.h"
+#include "InteractionRequest.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
+#include "EntityDelete.h"
 #include "SpriteChange.h"
 #include "Log.h"
 
@@ -62,9 +63,8 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             handleInitScriptRequest(netID, messageBuffer, messageSize);
             break;
         }
-        case EngineMessageType::EntityDelete: {
-            dispatchMessage<EntityDelete>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+        case EngineMessageType::InteractionRequest: {
+            handleInteractionRequest(netID, messageBuffer, messageSize);
             break;
         }
         case EngineMessageType::TileAddLayer: {
@@ -87,6 +87,11 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                                         networkEventDispatcher);
             break;
         }
+        case EngineMessageType::EntityDelete: {
+            dispatchMessage<EntityDelete>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
         case EngineMessageType::SpriteChange: {
             dispatchMessage<SpriteChange>(messageBuffer, messageSize,
                                           networkEventDispatcher);
@@ -99,6 +104,7 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 extension->processReceivedMessage(netID, messageType,
                                                   messageBuffer, messageSize);
             }
+            break;
         }
     }
 
@@ -168,6 +174,21 @@ void MessageProcessor::handleInitScriptRequest(NetworkID netID,
 
     // Push the message into any subscribed queues.
     networkEventDispatcher.push<InitScriptRequest>(initScriptRequest);
+}
+
+void MessageProcessor::handleInteractionRequest(NetworkID netID,
+                                               Uint8* messageBuffer,
+                                               std::size_t messageSize)
+{
+    // Deserialize the message.
+    InteractionRequest interactionRequest{};
+    Deserialize::fromBuffer(messageBuffer, messageSize, interactionRequest);
+
+    // Fill in the network ID that we assigned to this client.
+    interactionRequest.netID = netID;
+
+    // Push the message into any subscribed queues.
+    networkEventDispatcher.push<InteractionRequest>(interactionRequest);
 }
 
 } // End namespace Server
