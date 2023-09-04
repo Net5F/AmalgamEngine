@@ -45,9 +45,11 @@ public:
         Used in the simulation to tell if data is relevant to a client. */
     static constexpr float AOI_RADIUS{TILE_WORLD_WIDTH * 8};
 
-    /** The squared AOI radius. Useful for checking if things are in range
-        of an entity without doing a square root. */
-    static constexpr float AOI_RADIUS_SQUARED{AOI_RADIUS * AOI_RADIUS};
+    /** How close you need to be to an entity, in world units, to interact 
+        with it. */
+    static constexpr float INTERACTION_DISTANCE{TILE_WORLD_WIDTH * 1};
+    static constexpr float SQUARED_INTERACTION_DISTANCE{INTERACTION_DISTANCE
+                                                        * INTERACTION_DISTANCE};
 
     /** The string ID of the default sprite for character entities.
         This is the sprite that players and NPCs get assigned before the

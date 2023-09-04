@@ -11,7 +11,6 @@
 #include "Collision.h"
 #include "Rotation.h"
 #include "EntityType.h"
-#include "Interactions.h"
 #include "Transforms.h"
 #include "Config.h"
 #include "entt/entity/registry.hpp"
@@ -107,9 +106,6 @@ void NpcLifetimeSystem::processClientEntityInits(Uint32 desiredTick)
         registry.emplace<Collision>(newEntity, sprite.modelBounds,
                                     BoundingBox{});
 
-        // TODO: Figure out what interactions clients have.
-        registry.emplace<Interactions>(newEntity);
-
         LOG_INFO("Peer entity added: %u. Desired tick: %u, Message tick: %u",
                  newEntity, desiredTick, entityInit->tickNum);
 
@@ -157,7 +153,7 @@ void NpcLifetimeSystem::processDynamicObjectInits(Uint32 desiredTick)
             Transforms::modelToWorldCentered(
                 sprite.modelBounds, registry.get<Position>(newEntity)));
 
-        registry.emplace<Interactions>(newEntity, objectInit->interactions);
+        registry.emplace<Interaction>(newEntity, objectInit->interaction);
 
         LOG_INFO("Dynamic object entity added: %u. Desired tick: %u, Message "
                  "tick: %u",

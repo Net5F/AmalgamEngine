@@ -5,7 +5,6 @@
 #include "Position.h"
 #include "Collision.h"
 #include "InitScript.h"
-#include "Interactions.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include "Config.h"
@@ -87,7 +86,6 @@ entt::entity World::constructDynamicObject(const Name& name,
     entityLocator.setEntityLocation(newEntity, collision.worldBounds);
 
     registry.emplace<InitScript>(newEntity, initScript);
-    registry.emplace<Interactions>(newEntity);
 
     // Run the given init script.
     lua["selfEntityID"] = newEntity;

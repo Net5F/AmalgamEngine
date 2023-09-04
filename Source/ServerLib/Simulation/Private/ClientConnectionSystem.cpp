@@ -15,7 +15,6 @@
 #include "EntityType.h"
 #include "Collision.h"
 #include "Name.h"
-#include "Interactions.h"
 #include "EntityDelete.h"
 #include "Transforms.h"
 #include "Log.h"
@@ -91,9 +90,6 @@ void ClientConnectionSystem::processConnectEvents()
         //       will be told by ClientAOISystem to construct it.
         world.entityLocator.setEntityLocation(newEntity,
                                               collision.worldBounds);
-
-        // TODO: Figure out what interactions clients have.
-        registry.emplace<Interactions>(newEntity);
 
         // Add the new client entity to the network ID map.
         world.netIdMap[clientConnected.clientID] = newEntity;

@@ -26,6 +26,7 @@ enum class EngineMessageType : Uint8 {
     // Server -> Client Messages
     ExplicitConfirmation,
     ConnectionResponse,
+    UserErrorString,
     MovementUpdate,
     ChunkUpdate,
     ClientEntityInit,

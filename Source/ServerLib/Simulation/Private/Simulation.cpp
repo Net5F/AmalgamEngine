@@ -3,6 +3,8 @@
 #include "EnttGroups.h"
 #include "ISimulationExtension.h"
 #include "InteractionRequest.h"
+#include "Interaction.h"
+#include "UserErrorString.h"
 #include "Log.h"
 #include "Timer.h"
 #include "Tracy.hpp"
@@ -141,9 +143,39 @@ void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
 
 void Simulation::dispatchInteractionMessages()
 {
+    entt::registry& registry{world.registry};
+
     // Dispatch any waiting interaction requests.
     InteractionRequest interactionRequest{};
     while (interactionRequestQueue.pop(interactionRequest)) {
+        entt::entity clientEntity{interactionRequest.clientEntity};
+        entt::entity targetEntity{interactionRequest.targetEntity};
+
+        // Check that the client and target both exist.
+        if (!(world.entityIDIsInUse(clientEntity))
+            || !(world.entityIDIsInUse(targetEntity))) {
+            continue;
+        }
+
+        // Check that the client is in range of the target. 
+        const Position& clientPosition{registry.get<Position>(clientEntity)};
+        const Position& targetPosition{registry.get<Position>(targetEntity)};
+        if (clientPosition.squaredDistanceTo(targetPosition)
+            > (SharedConfig::SQUARED_INTERACTION_DISTANCE)) {
+            network.serializeAndSend(
+                interactionRequest.netID,
+                UserErrorString{"You must move closer to interact with that."});
+            continue;
+        }
+
+        // Check that the target actually has this interaction type.
+        if (auto interactionPtr = registry.try_get<Interaction>(targetEntity);
+            (interactionPtr == nullptr)
+            || !interactionPtr->contains(interactionRequest.interactionType)) {
+            continue;
+        }
+
+        // Dispatch the interaction.
         Uint8 interactionType{interactionRequest.interactionType};
         if (interactionQueueMap[interactionType] != nullptr) {
             interactionQueueMap[interactionType]->push(interactionRequest);

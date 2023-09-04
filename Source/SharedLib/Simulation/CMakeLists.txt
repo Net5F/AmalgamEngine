@@ -27,7 +27,7 @@ target_sources(SharedLib
         Public/Components/Camera.h
         Public/Components/Collision.h
         Public/Components/Input.h
-        Public/Components/Interactions.h
+        Public/Components/Interaction.h
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h

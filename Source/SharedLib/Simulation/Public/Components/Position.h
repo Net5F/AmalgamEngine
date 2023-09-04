@@ -54,6 +54,22 @@ struct Position {
         return {static_cast<int>(chunkX), static_cast<int>(chunkY)};
     }
 
+    /**
+     * Returns the squared distance between this position and the given 
+     * position.
+     * We keep it squared to avoid an expensive sqrt. You can use this by 
+     * squaring the distance you're comparing it to.
+     */
+    float squaredDistanceTo(const Position& other) const
+    {
+        float distanceX{std::abs(x - other.x)};
+        float distanceY{std::abs(y - other.y)};
+        float distanceZ{std::abs(z - other.z)};
+
+        return {(distanceX * distanceX) + (distanceY * distanceY)
+                + (distanceZ * distanceZ)};
+    }
+
     Position operator+(const Position& other) const
     {
         return {(x + other.x), (y + other.y), (z + other.z)};

@@ -23,6 +23,7 @@ target_sources(SharedLib
         Public/TileClearLayers.h
         Public/TileExtentClearLayers.h
         Public/TileRemoveLayer.h
+        Public/UserErrorString.h
 )
 
 target_include_directories(SharedLib

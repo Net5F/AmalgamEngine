@@ -6,6 +6,7 @@
 #include "ClientNetworkDefs.h"
 #include "ExplicitConfirmation.h"
 #include "ConnectionResponse.h"
+#include "UserErrorString.h"
 #include "MovementUpdate.h"
 #include "ChunkUpdate.h"
 #include "ClientEntityInit.h"
@@ -43,6 +44,11 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         }
         case EngineMessageType::ConnectionResponse: {
             handleConnectionResponse(messageBuffer, messageSize);
+            break;
+        }
+        case EngineMessageType::UserErrorString: {
+            dispatchMessage<UserErrorString>(messageBuffer, messageSize,
+                                             networkEventDispatcher);
             break;
         }
         case EngineMessageType::MovementUpdate: {

@@ -9,7 +9,7 @@
 #include "Name.h"
 #include "Sprite.h"
 #include "SpriteSets.h"
-#include "Interactions.h"
+#include "Interaction.h"
 #include "EntityDelete.h"
 #include "ClientEntityInit.h"
 #include "DynamicObjectInit.h"
@@ -101,7 +101,8 @@ void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
 
 void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
 {
-    auto view{world.registry.view<EntityType, Position>()};
+    entt::registry& registry{world.registry};
+    auto view{registry.view<EntityType, Position>()};
 
     // Send the client an EntityInit for each entity that entered its AOI.
     for (entt::entity entityThatEntered : entitiesThatEntered) {
@@ -110,9 +111,9 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
 
         // Send the appropriate init message for the entity.
         if (entityType == EntityType::ClientEntity) {
-            const auto& name{world.registry.get<Name>(entityThatEntered)};
-            const auto& sprite{world.registry.get<Sprite>(entityThatEntered)};
-            const auto& rotation{world.registry.get<Rotation>(entityThatEntered)};
+            const auto& name{registry.get<Name>(entityThatEntered)};
+            const auto& sprite{registry.get<Sprite>(entityThatEntered)};
+            const auto& rotation{registry.get<Rotation>(entityThatEntered)};
             network.serializeAndSend(
                 client.netID,
                 ClientEntityInit{simulation.getCurrentTick(), entityThatEntered,
@@ -120,17 +121,20 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
                                  static_cast<Uint8>(sprite.numericID)});
         }
         else if (entityType == EntityType::DynamicObject) {
-            const auto& name{world.registry.get<Name>(entityThatEntered)};
+            const auto& name{registry.get<Name>(entityThatEntered)};
             const auto& spriteSet{
-                world.registry.get<ObjectSpriteSet>(entityThatEntered)};
-            const auto& rotation{world.registry.get<Rotation>(entityThatEntered)};
-            const auto& interactions{
-                world.registry.get<Interactions>(entityThatEntered)};
+                registry.get<ObjectSpriteSet>(entityThatEntered)};
+            const auto& rotation{registry.get<Rotation>(entityThatEntered)};
+            Interaction interaction{};
+            if (auto interactionPtr
+                = registry.try_get<Interaction>(entityThatEntered)) {
+                interaction = *interactionPtr;
+            }
             network.serializeAndSend(
                 client.netID,
                 DynamicObjectInit{simulation.getCurrentTick(),
                                   entityThatEntered, name.name, position,
-                                  rotation, spriteSet.numericID, interactions});
+                                  rotation, spriteSet.numericID, interaction});
         }
     }
 }

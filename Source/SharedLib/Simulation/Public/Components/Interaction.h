@@ -12,15 +12,15 @@ namespace AM
  * Represents the interactions that an entity supports, i.e. the options that 
  * show up when you right click them.
  */
-struct Interactions {
+struct Interaction {
     /** The maximum number of interactions that an entity can support. */
     static constexpr std::size_t MAX_INTERACTIONS{4};
 
-    /** The interactions that this entity supports. These show up in the 
-        right-click list.
-        The first interaction in this list will be used as the default 
-        interaction.
-        Note: This defaults to EngineInteractionType::NotSet. */
+    /** The interactions that this entity supports.
+        Elements are filled contiguously starting at index 0. Empty elements 
+        will be at the end.
+        The first interaction in this list is the default interaction.
+        Note: This defaults values to EngineInteractionType::NotSet. */
     std::array<Uint8, MAX_INTERACTIONS> supportedInteractions{};
 
     /**
@@ -28,7 +28,7 @@ struct Interactions {
      * interaction.
      * If supportedInteractions is full, prints a warning and does nothing.
      */
-    void addInteraction(Uint8 newInteraction)
+    void add(Uint8 newInteraction)
     {
         for (Uint8& interaction : supportedInteractions) {
             if (interaction == EngineInteractionType::NotSet) {
@@ -39,10 +39,24 @@ struct Interactions {
 
         LOG_ERROR("Tried to add interaction to full array.");
     }
+
+    /**
+     * Returns true if this component contains the given interaction.
+     */
+    bool contains(Uint8 desiredInteraction)
+    {
+        for (Uint8 interaction : supportedInteractions) {
+            if (interaction == desiredInteraction) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 };
 
 template<typename S>
-void serialize(S& serializer, Interactions& interaction)
+void serialize(S& serializer, Interaction& interaction)
 {
     serializer.container1b(interaction.supportedInteractions);
 }
