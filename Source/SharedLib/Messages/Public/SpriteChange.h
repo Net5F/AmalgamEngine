@@ -22,8 +22,9 @@ struct SpriteChange {
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::SpriteChange};
 
-    // Note: We don't use this for client -> server because the client only 
-    //       sends this from build mode, where we don't care about perfect sync.
+    // Note: We don't use this for client -> server because we don't care about
+    //       syncing to the predicted client entity state. This is only sent 
+    //       by the client in build mode, so it's better to do it ASAP.
     /** If this is a server -> client message, this is the server tick that 
         the change occurred on. Not used for client -> server. */
     Uint32 tickNum{0};
