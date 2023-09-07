@@ -2,7 +2,7 @@ target_sources(ClientLib
 	PRIVATE
 		Private/CameraSystem.cpp
 		Private/ChunkUpdateSystem.cpp
-		Private/NpcLifetimeSystem.cpp
+		Private/EntityLifetimeSystem.cpp
 		Private/NpcMovementSystem.cpp
 		Private/PlayerInputSystem.cpp
 		Private/PlayerMovementSystem.cpp
@@ -17,9 +17,9 @@ target_sources(ClientLib
 	PUBLIC
 		Public/CameraSystem.h
 		Public/ChunkUpdateSystem.h
+		Public/EntityLifetimeSystem.h
 		Public/EnttGroups.h
 		Public/ISimulationExtension.h
-		Public/NpcLifetimeSystem.h
 		Public/NpcMovementSystem.h
 		Public/PlayerInputSystem.h
 		Public/PlayerMovementSystem.h

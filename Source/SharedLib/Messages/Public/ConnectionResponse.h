@@ -1,8 +1,8 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include <SDL_stdinc.h>
 #include "entt/entity/registry.hpp"
+#include <SDL_stdinc.h>
 
 namespace AM
 {
@@ -23,14 +23,10 @@ struct ConnectionResponse {
     entt::entity entity{entt::null};
 
     /** The length, in tiles, of the tile map's X axis. */
-    unsigned int mapXLengthChunks{0};
+    Uint32 mapXLengthChunks{0};
 
     /** The length, in tiles, of the tile map's Y axis. */
-    unsigned int mapYLengthChunks{0};
-
-    /** Position (spawn point or last logout). */
-    float x{0};
-    float y{0};
+    Uint32 mapYLengthChunks{0};
 };
 
 template<typename S>
@@ -40,8 +36,6 @@ void serialize(S& serializer, ConnectionResponse& connectionResponse)
     serializer.value4b(connectionResponse.entity);
     serializer.value4b(connectionResponse.mapXLengthChunks);
     serializer.value4b(connectionResponse.mapYLengthChunks);
-    serializer.value4b(connectionResponse.x);
-    serializer.value4b(connectionResponse.y);
 }
 
 } // End namespace AM

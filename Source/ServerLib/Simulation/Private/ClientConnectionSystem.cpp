@@ -13,6 +13,7 @@
 #include "Velocity.h"
 #include "ClientSimData.h"
 #include "EntityType.h"
+#include "AnimationState.h"
 #include "Collision.h"
 #include "Name.h"
 #include "EntityDelete.h"
@@ -77,13 +78,22 @@ void ClientConnectionSystem::processConnectEvents()
 
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
                                         std::vector<entt::entity>());
-        const Sprite& sprite{registry.emplace<Sprite>(
-            newEntity,
-            spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
+
+        // TODO: When we add character sprite sets, update this.
+        Uint16 spriteSetID{spriteData
+                .getObjectSpriteSet(SharedConfig::DEFAULT_CHARACTER_SPRITE_SET)
+                .numericID};
+        const auto& animationState{registry.emplace<AnimationState>(
+            newEntity, SpriteSet::Type::Object, spriteSetID,
+            SharedConfig::DEFAULT_CHARACTER_SPRITE_INDEX)};
+        const Sprite* sprite{
+            spriteData.getObjectSpriteSet(animationState.spriteSetID)
+                .sprites[animationState.spriteIndex]};
+
         const Collision& collision{registry.emplace<Collision>(
-            newEntity, sprite.modelBounds,
+            newEntity, sprite->modelBounds,
             Transforms::modelToWorldCentered(
-                sprite.modelBounds, registry.get<Position>(newEntity)))};
+                sprite->modelBounds, registry.get<Position>(newEntity)))};
 
         // Start tracking the entity in the locator.
         // Note: Since the entity was added to the locator, clients 
@@ -98,8 +108,7 @@ void ClientConnectionSystem::processConnectEvents()
                  clientConnected.clientID, newEntity);
 
         // Build and send the response.
-        sendConnectionResponse(clientConnected.clientID, newEntity,
-                               spawnPoint.x, spawnPoint.y);
+        sendConnectionResponse(clientConnected.clientID, newEntity);
     }
 }
 
@@ -136,18 +145,13 @@ void ClientConnectionSystem::processDisconnectEvents()
 }
 
 void ClientConnectionSystem::sendConnectionResponse(NetworkID networkID,
-                                                    entt::entity newEntity,
-                                                    float spawnX, float spawnY)
+                                                    entt::entity newEntity)
 {
     // Fill in the current tick and their entity's ID.
     ConnectionResponse connectionResponse{};
     Uint32 currentTick{simulation.getCurrentTick()};
     connectionResponse.entity = newEntity;
     connectionResponse.tickNum = currentTick;
-
-    // Fill in their spawn point.
-    connectionResponse.x = spawnX;
-    connectionResponse.y = spawnY;
 
     // Fill in the map's size.
     const ChunkExtent& mapChunkExtent{world.tileMap.getChunkExtent()};

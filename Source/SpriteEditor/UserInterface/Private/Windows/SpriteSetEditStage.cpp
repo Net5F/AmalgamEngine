@@ -26,6 +26,7 @@ SpriteSetEditStage::SpriteSetEditStage(SpriteDataModel& inSpriteDataModel,
 , descText2{{24, 846, 1240, 24}, "DescText2"}
 , descText3{{24, 886, 1240, 24}, "DescText3"}
 , descText4{{24, 926, 1240, 24}, "DescText4"}
+, descText5{{24, 966, 1240, 24}, "DescText5"}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(topText);
@@ -36,6 +37,7 @@ SpriteSetEditStage::SpriteSetEditStage(SpriteDataModel& inSpriteDataModel,
     children.push_back(descText2);
     children.push_back(descText3);
     children.push_back(descText4);
+    children.push_back(descText5);
 
     /* Text */
     topText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 26);
@@ -52,6 +54,7 @@ SpriteSetEditStage::SpriteSetEditStage(SpriteDataModel& inSpriteDataModel,
     styleText(descText2);
     styleText(descText3);
     styleText(descText4);
+    styleText(descText5);
 
     /* Container */
     spriteContainer.setNumColumns(4);
@@ -200,28 +203,28 @@ std::string SpriteSetEditStage::getSlotTopText(std::size_t spriteSetIndex)
         case SpriteSet::Type::Object: {
             switch (spriteSetIndex) {
                 case Rotation::Direction::South: {
-                    return "South";
+                    return "0 (S)";
                 }
                 case Rotation::Direction::SouthWest: {
-                    return "SouthWest";
+                    return "1 (SW)";
                 }
                 case Rotation::Direction::West: {
-                    return "West";
+                    return "2 (W)";
                 }
                 case Rotation::Direction::NorthWest: {
-                    return "NorthWest";
+                    return "3 (NW)";
                 }
                 case Rotation::Direction::North: {
-                    return "North";
+                    return "4 (N)";
                 }
                 case Rotation::Direction::NorthEast: {
-                    return "NorthEast";
+                    return "5 (NE)";
                 }
                 case Rotation::Direction::East: {
-                    return "East";
+                    return "6 (E)";
                 }
                 case Rotation::Direction::SouthEast: {
-                    return "SouthEast";
+                    return "7 (SE)";
                 }
                 default: {
                     return "";
@@ -300,6 +303,7 @@ void SpriteSetEditStage::fillDescriptionTexts()
                               "sprites. Their tile "
                               "will be used for mouse hit detection.");
             descText4.setText("");
+            descText5.setText("");
             break;
         }
         case SpriteSet::Type::FloorCovering: {
@@ -307,14 +311,17 @@ void SpriteSetEditStage::fillDescriptionTexts()
             descText1.setText(
                 "Floor coverings are things like rugs and puddles. They're "
                 "rendered above floors, and below everything else.");
-            descText2.setText("Floor coverings have no collision, regardless "
+            descText2.setText("Each index is associated with a direction (in "
+                              "parenthesis). You can ignore it if it isn't "
+                              "applicable to your set of sprites.");
+            descText3.setText("Floor coverings have no collision, regardless "
                               "of each sprite's collisionEnabled.");
-            descText3.setText("Make sure to draw appropriate bounding boxes on "
+            descText4.setText("Make sure to draw appropriate bounding boxes on "
                               "each sprite, as they will be used when clicking "
                               "the floor covering in build mode.");
-            descText4.setText("At least 1 sprite must be set, but you don't "
-                              "need to set sprites for every direction. "
-                              "Missing directions will be skipped.");
+            descText5.setText("At least 1 sprite must be set, but you don't "
+                              "need to set sprites for every index. "
+                              "Missing indices will be skipped.");
             break;
         }
         case SpriteSet::Type::Wall: {
@@ -328,6 +335,7 @@ void SpriteSetEditStage::fillDescriptionTexts()
                 "Make sure to draw appropriate bounding boxes on each sprite, "
                 "as they will be used when clicking the object in build mode.");
             descText4.setText("All 4 sprites must be set.");
+            descText5.setText("");
             break;
         }
         case SpriteSet::Type::Object: {
@@ -335,14 +343,17 @@ void SpriteSetEditStage::fillDescriptionTexts()
             descText1.setText("Objects are anything that doesn't fit into the "
                               "other categories. Their render order is based "
                               "on their bounding box.");
-            descText2.setText("Objects may have collision. You can control "
+            descText2.setText("Each index is associated with a direction (in "
+                              "parenthesis). You can ignore it if it isn't "
+                              "applicable to your set of sprites.");
+            descText3.setText("Objects may have collision. You can control "
                               "this using each sprite's collisionEnabled.");
-            descText3.setText(
+            descText4.setText(
                 "Make sure to draw appropriate bounding boxes on each sprite, "
                 "as they will be used when clicking the object in build mode.");
-            descText4.setText("At least 1 sprite must be set, but you don't "
-                              "need to set sprites for every direction. "
-                              "Missing directions will be skipped.");
+            descText5.setText("At least 1 sprite must be set, but you don't "
+                              "need to set sprites for every index. "
+                              "Missing indices will be skipped.");
             break;
         }
         default: {

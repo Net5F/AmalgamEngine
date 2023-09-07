@@ -12,7 +12,7 @@
 #include "SpriteChange.h"
 #include "ClientSimData.h"
 #include "Cylinder.h"
-#include "SpriteStateNeedsSync.h"
+#include "AnimationStateNeedsSync.h"
 #include "Transforms.h"
 #include "Log.h"
 
@@ -44,42 +44,39 @@ void SpriteUpdateSystem::updateSprites()
             continue;
         }
 
-        auto [entityType, position, collision]
-            = registry.get<EntityType, Position, Collision>(updatedEntity);
+        auto [entityType, position, collision, animationState]
+            = registry.get<EntityType, Position, Collision, AnimationState>(
+                updatedEntity);
         if ((entityType == EntityType::ClientEntity) ||
             (entityType == EntityType::NPC)) {
-            //// Client entity and NPC Rotation components control which sprite
-            //// index they use, so we ignore the given index.
-            // TODO: Switch this to use character sprite sets.
-            // TEMP
-            Sprite& sprite{registry.get<Sprite>(updatedEntity)};
-            const Sprite& newSprite{
-                spriteData.getSprite(spriteChange.spriteNumericID)};
-            sprite = newSprite;
-            collision.modelBounds = newSprite.modelBounds;
-            collision.worldBounds = Transforms::modelToWorldCentered(
-                newSprite.modelBounds, position);
-            // TEMP
-        }
-        else if (entityType == EntityType::DynamicObject) {
-            // Dynamic objects don't move, so we change their rotation to match 
-            // the sprite index they're set to.
-            auto [spriteSet, rotation]
-                = registry.get<ObjectSpriteSet, Rotation>(updatedEntity);
-
+            // Client entity and NPC Rotation components control which sprite
+            // index they use, so we ignore the given index.
+            // TODO: When character sprite sets are added, update this.
             const ObjectSpriteSet& newSpriteSet{
                 spriteData.getObjectSpriteSet(spriteChange.spriteSetID)};
-            spriteSet = newSpriteSet;
+            animationState.spriteSetID = newSpriteSet.numericID;
+            animationState.spriteIndex = spriteChange.spriteIndex;
+
             const Sprite& newSprite{
                 *(newSpriteSet.sprites[spriteChange.spriteIndex])};
-            rotation.direction
-                = static_cast<Rotation::Direction>(spriteChange.spriteIndex);
+            collision.modelBounds = newSprite.modelBounds;
+            collision.worldBounds = Transforms::modelToWorldCentered(
+                newSprite.modelBounds, position);
+        }
+        else if (entityType == EntityType::DynamicObject) {
+            const ObjectSpriteSet& newSpriteSet{
+                spriteData.getObjectSpriteSet(spriteChange.spriteSetID)};
+            animationState.spriteSetID = newSpriteSet.numericID;
+            animationState.spriteIndex = spriteChange.spriteIndex;
+
+            const Sprite& newSprite{
+                *(newSpriteSet.sprites[spriteChange.spriteIndex])};
             collision.modelBounds = newSprite.modelBounds;
             collision.worldBounds = Transforms::modelToWorldCentered(
                 newSprite.modelBounds, position);
         }
 
-        registry.emplace<SpriteStateNeedsSync>(updatedEntity);
+        registry.emplace<AnimationStateNeedsSync>(updatedEntity);
     }
 }
 
@@ -89,8 +86,9 @@ void SpriteUpdateSystem::sendSpriteUpdates()
 
     // Note: We make an assumption that every entity with a sprite also has 
     //       a position and entity type. This should always be true.
-    auto view{registry.view<EntityType, SpriteStateNeedsSync>()};
-    for (auto [updatedEntity, entityType] : view.each()) {
+    auto view{
+        registry.view<EntityType, AnimationState, AnimationStateNeedsSync>()};
+    for (auto [updatedEntity, entityType, animationState] : view.each()) {
         // Get the list of entities that are in range of the updated entity 
         // and fill the update message struct.
         const std::vector<entt::entity>* entitiesInRange{nullptr};
@@ -101,27 +99,19 @@ void SpriteUpdateSystem::sendSpriteUpdates()
                 registry.get<ClientSimData>(updatedEntity)};
             entitiesInRange = &(client.entitiesInAOI);
 
-            const Sprite& sprite{registry.get<Sprite>(updatedEntity)};
-            spriteChange.spriteNumericID = sprite.numericID;
+            spriteChange.spriteSetID = animationState.spriteSetID;
+            spriteChange.spriteIndex = animationState.spriteIndex;
         }
-        else if (entityType == EntityType::NPC) {
+        else if ((entityType == EntityType::NPC) || 
+                 (entityType == EntityType::DynamicObject)) {
             const Position& position{registry.get<Position>(updatedEntity)};
             entitiesInRange = &(world.entityLocator.getEntities(
                 {position, SharedConfig::AOI_RADIUS}));
 
-            const Sprite& sprite{registry.get<Sprite>(updatedEntity)};
-            spriteChange.spriteNumericID = sprite.numericID;
-        }
-        else if (entityType == EntityType::DynamicObject) {
-            const Position& position{registry.get<Position>(updatedEntity)};
-            entitiesInRange = &(world.entityLocator.getEntities(
-                {position, SharedConfig::AOI_RADIUS}));
-
-            const ObjectSpriteSet& spriteSet{
-                registry.get<ObjectSpriteSet>(updatedEntity)};
-            const Rotation& rotation{registry.get<Rotation>(updatedEntity)};
-            spriteChange.spriteSetID = spriteSet.numericID;
-            spriteChange.spriteIndex = rotation.direction;
+            // Note: NPCs and DynamicObjects have different sprite set types, 
+            //       but it doesn't matter here.
+            spriteChange.spriteSetID = animationState.spriteSetID;
+            spriteChange.spriteIndex = animationState.spriteIndex;
         }
         else {
             LOG_FATAL("Unsupported entity type.");
@@ -140,7 +130,7 @@ void SpriteUpdateSystem::sendSpriteUpdates()
         }
     }
 
-    registry.clear<SpriteStateNeedsSync>();
+    registry.clear<AnimationStateNeedsSync>();
 }
 
 } // namespace Server

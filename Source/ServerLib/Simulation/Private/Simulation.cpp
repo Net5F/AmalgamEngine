@@ -22,7 +22,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , interactionRequestQueue{inNetwork.getEventDispatcher()}
 , interactionQueueMap{}
 , clientConnectionSystem{*this, world, network, inSpriteData}
-, nceLifetimeSystem{world, network, inSpriteData}
+, nceLifetimeSystem{world, network}
 , tileUpdateSystem{world, network}
 , spriteUpdateSystem{*this, world, network, inSpriteData}
 , inputSystem{*this, world, network}

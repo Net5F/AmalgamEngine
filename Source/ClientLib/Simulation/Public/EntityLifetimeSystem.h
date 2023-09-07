@@ -18,14 +18,11 @@ class SpriteData;
 /**
  * Maintains the entity registry, constructing and deleting entities based
  * on messages from the server.
- *
- * Note: By "NPC", we mean any entity that isn't controlled by this client's 
- *       player. This is different from what EntityType::NPC means.
  */
-class NpcLifetimeSystem
+class EntityLifetimeSystem
 {
 public:
-    NpcLifetimeSystem(Simulation& inSimulation, World& inWorld,
+    EntityLifetimeSystem(Simulation& inSimulation, World& inWorld,
                       SpriteData& inSpriteData, Network& inNetwork);
 
     /**
@@ -44,6 +41,13 @@ private:
      */
     void processClientEntityInits(Uint32 desiredTick);
 
+    void processClientEntityInit(const ClientEntityInit& entityInit);
+
+    /**
+     * Handles any processing that's specific to the player entity.
+     */
+    void finishPlayerEntity();
+
     /**
      * Processes waiting DynamicObjectInit messages, up to desiredTick.
      */
@@ -55,6 +59,11 @@ private:
     World& world;
     /** Used to get sprite data when constructing entities. */
     SpriteData& spriteData;
+
+    /** We pop messages off clientEntityInitQueue and push them into here, so 
+        we can find and immediately process any messages for the player 
+        entity. */
+    std::queue<ClientEntityInit> clientEntityInitSecondaryQueue;
 
     EventQueue<ClientEntityInit> clientEntityInitQueue;
     EventQueue<DynamicObjectInit> dynamicObjectInitQueue;

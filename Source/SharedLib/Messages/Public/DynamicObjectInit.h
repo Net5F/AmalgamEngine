@@ -2,7 +2,7 @@
 
 #include "EngineMessageType.h"
 #include "Position.h"
-#include "Rotation.h"
+#include "AnimationState.h"
 #include "Interaction.h"
 #include "ClientEntityInit.h"
 #include "entt/fwd.hpp"
@@ -33,11 +33,8 @@ struct DynamicObjectInit {
     /** The object's world position. */
     Position position{};
 
-    /** The object's rotation. */
-    Rotation rotation{};
-
-    /** The object's sprite set. */
-    Uint16 spriteSetID{0};
+    /** The object's animation state. */
+    AnimationState animationState{};
 
     // TODO: We should dynamically send this based on whether they have one 
     //       or not
@@ -53,8 +50,7 @@ void serialize(S& serializer, DynamicObjectInit& dynamicObjectInit)
     serializer.text1b(dynamicObjectInit.name,
                       ClientEntityInit::MAX_NAME_LENGTH);
     serializer.object(dynamicObjectInit.position);
-    serializer.object(dynamicObjectInit.rotation);
-    serializer.value2b(dynamicObjectInit.spriteSetID);
+    serializer.object(dynamicObjectInit.animationState);
     serializer.object(dynamicObjectInit.interaction);
 }
 

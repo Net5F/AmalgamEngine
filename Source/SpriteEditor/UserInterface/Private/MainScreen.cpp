@@ -62,11 +62,11 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
         {0, 0, 123, 56});
     confirmationDialog.confirmButton.text.setLogicalExtent({-1, -1, 123, 56});
     confirmationDialog.confirmButton.normalImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "ConfirmationButton/Normal.png");
+        Paths::TEXTURE_DIR + "MainButton/Normal.png");
     confirmationDialog.confirmButton.hoveredImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "ConfirmationButton/Hovered.png");
+        Paths::TEXTURE_DIR + "MainButton/Hovered.png");
     confirmationDialog.confirmButton.pressedImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "ConfirmationButton/Pressed.png");
+        Paths::TEXTURE_DIR + "MainButton/Pressed.png");
     confirmationDialog.confirmButton.text.setFont(
         (Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     confirmationDialog.confirmButton.text.setColor({255, 255, 255, 255});
@@ -80,11 +80,11 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
         {0, 0, 123, 56});
     confirmationDialog.cancelButton.text.setLogicalExtent({-1, -1, 123, 56});
     confirmationDialog.cancelButton.normalImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "ConfirmationButton/Normal.png");
+        Paths::TEXTURE_DIR + "MainButton/Normal.png");
     confirmationDialog.cancelButton.hoveredImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "ConfirmationButton/Hovered.png");
+        Paths::TEXTURE_DIR + "MainButton/Hovered.png");
     confirmationDialog.cancelButton.pressedImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "ConfirmationButton/Pressed.png");
+        Paths::TEXTURE_DIR + "MainButton/Pressed.png");
     confirmationDialog.cancelButton.text.setFont(
         (Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     confirmationDialog.cancelButton.text.setColor({255, 255, 255, 255});

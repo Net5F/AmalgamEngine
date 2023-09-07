@@ -6,7 +6,7 @@
 #include "ChunkUpdateSystem.h"
 #include "TileUpdateSystem.h"
 #include "SpriteUpdateSystem.h"
-#include "NpcLifetimeSystem.h"
+#include "EntityLifetimeSystem.h"
 #include "PlayerInputSystem.h"
 #include "PlayerMovementSystem.h"
 #include "NpcMovementSystem.h"
@@ -111,7 +111,7 @@ private:
     ChunkUpdateSystem chunkUpdateSystem;
     TileUpdateSystem tileUpdateSystem;
     SpriteUpdateSystem spriteUpdateSystem;
-    NpcLifetimeSystem npcLifetimeSystem;
+    EntityLifetimeSystem entityLifetimeSystem;
     PlayerInputSystem playerInputSystem;
     PlayerMovementSystem playerMovementSystem;
     NpcMovementSystem npcMovementSystem;

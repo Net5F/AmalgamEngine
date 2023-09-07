@@ -48,8 +48,7 @@ private:
      *                   to.
      * @param newEntity  The entity that was created for this client.
      */
-    void sendConnectionResponse(NetworkID networkID, entt::entity newEntity,
-                                float spawnX, float spawnY);
+    void sendConnectionResponse(NetworkID networkID, entt::entity newEntity);
 
     /** Used to get the current tick. */
     Simulation& simulation;

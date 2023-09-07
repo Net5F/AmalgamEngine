@@ -24,7 +24,7 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 , chunkUpdateSystem{world, network}
 , tileUpdateSystem{world, network}
 , spriteUpdateSystem{*this, world, network, inSpriteData}
-, npcLifetimeSystem{*this, world, inSpriteData, network}
+, entityLifetimeSystem{*this, world, inSpriteData, network}
 , playerInputSystem{*this, world, network}
 , playerMovementSystem{*this, world, network}
 , npcMovementSystem{*this, world, network, inSpriteData}
@@ -91,7 +91,7 @@ void Simulation::tick()
         }
 
         // Process entities that need to be constructed or destructed.
-        npcLifetimeSystem.processUpdates();
+        entityLifetimeSystem.processUpdates();
 
         // Process chunk updates from the server.
         chunkUpdateSystem.updateChunks();

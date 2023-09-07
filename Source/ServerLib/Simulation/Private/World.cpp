@@ -3,6 +3,7 @@
 #include "EntityType.h"
 #include "Name.h"
 #include "Position.h"
+#include "AnimationState.h"
 #include "Collision.h"
 #include "InitScript.h"
 #include "Transforms.h"
@@ -16,11 +17,12 @@ namespace AM
 {
 namespace Server
 {
-World::World(SpriteData& spriteData, sol::state& inLua)
+World::World(SpriteData& inSpriteData, sol::state& inLua)
 : registry{}
-, tileMap{spriteData}
+, tileMap{inSpriteData}
 , entityLocator{registry}
 , netIdMap{}
+, spriteData{inSpriteData}
 , lua{inLua}
 , randomDevice{}
 , generator{randomDevice()}
@@ -44,8 +46,7 @@ World::World(SpriteData& spriteData, sol::state& inLua)
 
 entt::entity World::constructDynamicObject(const Name& name,
                                            const Position& position,
-                                           const Rotation& rotation,
-                                           const ObjectSpriteSet& spriteSet,
+                                           const AnimationState& animationState,
                                            const InitScript& initScript,
                                            entt::entity entityHint)
 {
@@ -65,16 +66,18 @@ entt::entity World::constructDynamicObject(const Name& name,
     registry.emplace<Name>(newEntity, name);
 
     registry.emplace<Position>(newEntity, position);
-    registry.emplace<Rotation>(newEntity, rotation);
 
-    registry.emplace<ObjectSpriteSet>(newEntity, spriteSet);
+    registry.emplace<AnimationState>(newEntity, animationState);
 
-    // Note: The server doesn't have any need for a Sprite component on dynamic
-    //       entities, we just get it from the sprite set + rotation.
-    const Sprite& sprite{
-        *(spriteSet.sprites[registry.get<Rotation>(newEntity).direction])};
+    // Note: The server doesn't have any need for a Sprite component on
+    //       entities, we just derive it from AnimationState.
+    const ObjectSpriteSet& spriteSet{
+        spriteData.getObjectSpriteSet(animationState.spriteSetID)};
+    const Sprite& sprite{*(spriteSet.sprites[animationState.spriteIndex])};
 
-    // Note: Every entity needs a Collision for the EntityLocator to use.
+    // Note: Every entity needs a Collision because there may be cases where 
+    //       they collide with something, but the collision logic doesn't let 
+    //       e.g. players collide with other players.
     const Collision& collision{registry.emplace<Collision>(
         newEntity, sprite.modelBounds,
         Transforms::modelToWorldCentered(sprite.modelBounds,

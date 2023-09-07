@@ -8,13 +8,14 @@
 #include "Collision.h"
 #include "InputHistory.h"
 #include "Rotation.h"
+#include "AnimationState.h"
 #include "EntityType.h"
-#include "NeedsAdjacentChunks.h"
+#include "UserConfig.h"
 #include "Camera.h"
+#include "SDLHelpers.h"
+#include "NeedsAdjacentChunks.h"
 #include "Transforms.h"
 #include "Config.h"
-#include "UserConfig.h"
-#include "SDLHelpers.h"
 #include "Ignore.h"
 #include "Log.h"
 
@@ -89,10 +90,8 @@ void ServerConnectionSystem::processConnectionEvents()
 void ServerConnectionSystem::initSimState(
     ConnectionResponse& connectionResponse)
 {
-    LOG_INFO(
-        "Received connection response. ID: %u, tick: %u, pos: (%.4f, %.4f)",
-        connectionResponse.entity, connectionResponse.tickNum,
-        connectionResponse.x, connectionResponse.y);
+    LOG_INFO("Received connection response. ID: %u, tick: %u",
+             connectionResponse.entity, connectionResponse.tickNum);
 
     // Resize the world's tile map.
     world.tileMap.setMapSize(connectionResponse.mapXLengthChunks,
@@ -107,50 +106,8 @@ void ServerConnectionSystem::initSimState(
     // The server will adjust us after the first message anyway.
     currentTick = connectionResponse.tickNum + Config::INITIAL_TICK_OFFSET;
 
-    // Create the player entity using the ID we received.
-    entt::entity playerEntity{connectionResponse.entity};
-    entt::registry& registry{world.registry};
-    entt::entity newEntity{registry.create(playerEntity)};
-    if (newEntity != playerEntity) {
-        LOG_FATAL("Created entity doesn't match received entity. Created: %u, "
-                  "received: %u",
-                  newEntity, playerEntity);
-    }
-
-    // Save the player entity ID for convenience.
-    world.playerEntity = newEntity;
-
-    // Set up the player's sim components.
-    // Note: Be careful with holding onto references here. If components 
-    //       are added to the same group, the ref will be invalidated.
-    registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
-    registry.emplace<Name>(newEntity,
-                           std::to_string(static_cast<Uint32>(newEntity)));
-
-    registry.emplace<Input>(newEntity);
-    registry.emplace<Position>(newEntity, connectionResponse.x,
-                               connectionResponse.y, 0.0f);
-    registry.emplace<PreviousPosition>(newEntity, connectionResponse.x,
-                                       connectionResponse.y, 0.0f);
-    registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
-    registry.emplace<Rotation>(newEntity);
-
-    // TODO: Switch to logical screen size and do scaling in Renderer.
-    UserConfig& userConfig{UserConfig::get()};
-    Sprite& sprite{registry.emplace<Sprite>(
-        newEntity, spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
-    registry.emplace<Camera>(
-        newEntity, Camera::CenterOnEntity, Position{}, PreviousPosition{},
-        SDLHelpers::rectToFRect(userConfig.getWindowSize()));
-
-    registry.emplace<Collision>(
-        newEntity, sprite.modelBounds,
-        Transforms::modelToWorldCentered(sprite.modelBounds,
-                                         registry.get<Position>(newEntity)));
-    registry.emplace<InputHistory>(newEntity);
-
-    // Flag that we just moved and need to request all map data.
-    registry.emplace<NeedsAdjacentChunks>(newEntity);
+    // Save the player entity ID so we can treat it differently.
+    world.playerEntity = connectionResponse.entity;
 }
 
 void ServerConnectionSystem::initMockSimState()
@@ -176,13 +133,22 @@ void ServerConnectionSystem::initMockSimState()
     registry.emplace<Rotation>(newEntity);
     registry.emplace<InputHistory>(newEntity);
 
-    Sprite& playerSprite{registry.emplace<Sprite>(
-        newEntity, spriteData.getSprite(SharedConfig::DEFAULT_CHARACTER_SPRITE))};
+    // TODO: When we add character sprite sets, update this.
+    Uint16 spriteSetID{spriteData
+            .getObjectSpriteSet(SharedConfig::DEFAULT_CHARACTER_SPRITE_SET)
+            .numericID};
+    const auto& animationState{registry.emplace<AnimationState>(
+        newEntity, SpriteSet::Type::Object, spriteSetID,
+        SharedConfig::DEFAULT_CHARACTER_SPRITE_INDEX)};
+    const Sprite* sprite{
+        spriteData.getObjectSpriteSet(animationState.spriteSetID)
+            .sprites[animationState.spriteIndex]};
+    registry.emplace<Sprite>(newEntity, *sprite);
 
-    registry.emplace<Collision>(
-        newEntity, playerSprite.modelBounds,
-        Transforms::modelToWorldCentered(playerSprite.modelBounds,
-                                         registry.get<Position>(newEntity)));
+    const Collision& collision{registry.emplace<Collision>(
+        newEntity, sprite->modelBounds,
+        Transforms::modelToWorldCentered(
+            sprite->modelBounds, registry.get<Position>(newEntity)))};
 
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};

@@ -37,13 +37,6 @@ struct SpriteChange {
 
     /** The index within spriteSet.sprites of the entity's new sprite. */
     Uint8 spriteIndex{0};
-
-    // TODO: Switch this to use character sprite sets.
-    // TEMP
-    /** If the entity is a client entity or NPC, this will be used instead of 
-        spriteSetID/spriteIndex. */
-    int spriteNumericID{EMPTY_SPRITE_ID};
-    // TEMP
 };
 
 template<typename S>
@@ -53,7 +46,6 @@ void serialize(S& serializer, SpriteChange& spriteChange)
     serializer.value4b(spriteChange.entity);
     serializer.value2b(spriteChange.spriteSetID);
     serializer.value1b(spriteChange.spriteIndex);
-    serializer.value4b(spriteChange.spriteNumericID);
 }
 
 } // End namespace AM

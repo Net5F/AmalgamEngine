@@ -49,14 +49,6 @@ void ClientAOISystem::updateAOILists()
             world.entityLocator.getEntities(
                 {position, SharedConfig::AOI_RADIUS})};
 
-        // Remove this entity from the list, if it's in there.
-        // (We don't want to add it to its own list.)
-        auto entityIt{std::find(currentAOIEntities.begin(),
-                                currentAOIEntities.end(), entity)};
-        if (entityIt != currentAOIEntities.end()) {
-            currentAOIEntities.erase(entityIt);
-        }
-
         // Sort the list.
         std::sort(currentAOIEntities.begin(), currentAOIEntities.end());
 
@@ -112,19 +104,20 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
         // Send the appropriate init message for the entity.
         if (entityType == EntityType::ClientEntity) {
             const auto& name{registry.get<Name>(entityThatEntered)};
-            const auto& sprite{registry.get<Sprite>(entityThatEntered)};
+            const auto& animationState{
+                registry.get<AnimationState>(entityThatEntered)};
             const auto& rotation{registry.get<Rotation>(entityThatEntered)};
             network.serializeAndSend(
                 client.netID,
                 ClientEntityInit{simulation.getCurrentTick(), entityThatEntered,
                                  name.name, position, rotation,
-                                 static_cast<Uint8>(sprite.numericID)});
+                                 animationState});
         }
         else if (entityType == EntityType::DynamicObject) {
             const auto& name{registry.get<Name>(entityThatEntered)};
-            const auto& spriteSet{
-                registry.get<ObjectSpriteSet>(entityThatEntered)};
-            const auto& rotation{registry.get<Rotation>(entityThatEntered)};
+            const auto& animationState{
+                registry.get<AnimationState>(entityThatEntered)};
+
             Interaction interaction{};
             if (auto interactionPtr
                 = registry.try_get<Interaction>(entityThatEntered)) {
@@ -134,7 +127,7 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
                 client.netID,
                 DynamicObjectInit{simulation.getCurrentTick(),
                                   entityThatEntered, name.name, position,
-                                  rotation, spriteSet.numericID, interaction});
+                                  animationState, interaction});
         }
     }
 }

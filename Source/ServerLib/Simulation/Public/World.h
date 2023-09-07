@@ -20,8 +20,7 @@ namespace AM
 {
 struct Name;
 struct Position;
-struct Rotation;
-struct ObjectSpriteSet;
+struct AnimationState;
 
 namespace Server
 {
@@ -43,7 +42,7 @@ struct InitScript;
 class World
 {
 public:
-    World(SpriteData& spriteData, sol::state& inLua);
+    World(SpriteData& inSpriteData, sol::state& inLua);
 
     /** Entity data registry. */
     entt::registry registry;
@@ -65,8 +64,7 @@ public:
      */
     entt::entity constructDynamicObject(const Name& name,
                                         const Position& position,
-                                        const Rotation& rotation,
-                                        const ObjectSpriteSet& spriteSet,
+                                        const AnimationState& animationState,
                                         const InitScript& initScript,
                                         entt::entity entityHint = entt::null);
 
@@ -92,6 +90,9 @@ private:
      * Does any necessary cleanup to the given entity.
      */
     void onEntityDestroyed(entt::entity entity);
+
+    /** Used to get sprite info. */
+    const SpriteData& spriteData;
 
     /** Used to run entity init scripts. */
     sol::state& lua;

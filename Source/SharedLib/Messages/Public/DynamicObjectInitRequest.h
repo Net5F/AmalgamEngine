@@ -2,6 +2,7 @@
 
 #include "EngineMessageType.h"
 #include "Position.h"
+#include "AnimationState.h"
 #include "ClientEntityInit.h"
 #include "InitScriptResponse.h"
 #include "entt/fwd.hpp"
@@ -30,11 +31,8 @@ struct DynamicObjectInitRequest {
     /** The position to place the object at. */
     Position position{};
 
-    /** The object's rotation. */
-    Rotation rotation{};
-
-    /** The object's sprite set. */
-    Uint16 spriteSetID{0};
+    /** The object's animation info. */
+    AnimationState animationState{};
 
     /** The script to run on this object after creation. */
     std::string initScript{};
@@ -48,8 +46,7 @@ void serialize(S& serializer,
     serializer.text1b(dynamicObjectInitRequest.name,
                       ClientEntityInit::MAX_NAME_LENGTH);
     serializer.object(dynamicObjectInitRequest.position);
-    serializer.object(dynamicObjectInitRequest.rotation);
-    serializer.value2b(dynamicObjectInitRequest.spriteSetID);
+    serializer.object(dynamicObjectInitRequest.animationState);
     serializer.text1b(dynamicObjectInitRequest.initScript,
                       InitScriptResponse::MAX_SCRIPT_LENGTH);
 }

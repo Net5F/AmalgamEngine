@@ -100,6 +100,7 @@ private:
     AUI::Text descText2;
     AUI::Text descText3;
     AUI::Text descText4;
+    AUI::Text descText5;
 };
 
 } // End namespace SpriteEditor

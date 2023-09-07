@@ -5,6 +5,7 @@
 #include "PreviousPosition.h"
 #include "Velocity.h"
 #include "Rotation.h"
+#include "AnimationState.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
 #include <string>
@@ -45,9 +46,8 @@ struct ClientEntityInit {
     /** The entity's rotation. */
     Rotation rotation{};
 
-    // TODO: Figure out what we're doing with sprite sets.
-    /** The numeric identifier for the entity's sprite. */
-    int numericID{-1};
+    /** The entity's animation state. */
+    AnimationState animationState{};
 };
 
 template<typename S>
@@ -58,7 +58,7 @@ void serialize(S& serializer, ClientEntityInit& clientEntityInit)
     serializer.text1b(clientEntityInit.name, ClientEntityInit::MAX_NAME_LENGTH);
     serializer.object(clientEntityInit.position);
     serializer.object(clientEntityInit.rotation);
-    serializer.value4b(clientEntityInit.numericID);
+    serializer.object(clientEntityInit.animationState);
 }
 
 } // End namespace AM

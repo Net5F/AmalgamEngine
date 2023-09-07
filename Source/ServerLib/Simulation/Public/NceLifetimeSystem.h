@@ -12,7 +12,6 @@ namespace Server
 
 class World;
 class Network;
-class SpriteData;
 class ISimulationExtension;
 
 /**
@@ -24,8 +23,7 @@ class ISimulationExtension;
 class NceLifetimeSystem
 {
 public:
-    NceLifetimeSystem(World& inWorld, Network& inNetwork,
-                      SpriteData& inSpriteData);
+    NceLifetimeSystem(World& inWorld, Network& inNetwork);
 
     /**
      * Processes any waiting EntityCreateRequest or EntityDelete messages.
@@ -50,8 +48,6 @@ private:
 
     /** Used to add/remove entities. */
     World& world;
-    /** Used to get sprite data when adding an entity. */
-    SpriteData& spriteData;
     /** If non-nullptr, contains the project's simulation extension functions.
         Used for checking if entity creation requests are valid. */
     ISimulationExtension* extension;

@@ -5,7 +5,7 @@
 #include "SpriteData.h"
 #include "EntityType.h"
 #include "Collision.h"
-#include "SpriteSets.h"
+#include "AnimationState.h"
 #include "Sprite.h"
 #include "Transforms.h"
 #include "Log.h"
@@ -31,7 +31,7 @@ void SpriteUpdateSystem::updateSprites()
 
     // Note: We process sprite updates based on the replication tick instead of 
     //       the current tick. This means that, if the server observes our 
-    //       player entity colliding with the new sprite, it'll take longer 
+    //       player entity colliding with the new sprite, it'll be a while
     //       before we replicate it (and rubberband the player).
     //       This approach was chosen because there's always going to be some 
     //       rubberbanding for the player in that scenario, and this approach 
@@ -44,37 +44,35 @@ void SpriteUpdateSystem::updateSprites()
            && (spriteChange->tickNum <= desiredTick)) {
         entt::entity updatedEntity{spriteChange->entity};
 
-        auto [entityType, position, sprite, collision]
-            = registry.get<EntityType, Position, Sprite, Collision>(
+        auto [entityType, position, sprite, collision, animationState]
+            = registry.get<EntityType, Position, Sprite, Collision, AnimationState>(
                 updatedEntity);
         if ((entityType == EntityType::ClientEntity)
             || (entityType == EntityType::NPC)) {
-            //// Client entity and NPC Rotation components control which sprite
-            //// index they use, so we ignore the given index.
-            // TODO: Switch this to use character sprite sets.
-            // TEMP
+            // Client entity and NPC Rotation components control which sprite
+            // index they use, so we ignore the given index.
+            // TODO: When character sprite sets are added, update this.
+            const ObjectSpriteSet& newSpriteSet{
+                spriteData.getObjectSpriteSet(spriteChange->spriteSetID)};
+            animationState.spriteSetID = newSpriteSet.numericID;
+            animationState.spriteIndex = spriteChange->spriteIndex;
+
             const Sprite& newSprite{
-                spriteData.getSprite(spriteChange->spriteNumericID)};
+                *(newSpriteSet.sprites[spriteChange->spriteIndex])};
             sprite = newSprite;
             collision.modelBounds = newSprite.modelBounds;
             collision.worldBounds = Transforms::modelToWorldCentered(
                 newSprite.modelBounds, position);
-            // TEMP
         }
         else if (entityType == EntityType::DynamicObject) {
-            // Dynamic objects don't move, so we change their rotation to match 
-            // the sprite index they're set to.
-            auto [spriteSet, rotation]
-                = registry.get<ObjectSpriteSet, Rotation>(updatedEntity);
-
             const ObjectSpriteSet& newSpriteSet{
                 spriteData.getObjectSpriteSet(spriteChange->spriteSetID)};
-            spriteSet = newSpriteSet;
+            animationState.spriteSetID = newSpriteSet.numericID;
+            animationState.spriteIndex = spriteChange->spriteIndex;
+
             const Sprite& newSprite{
                 *(newSpriteSet.sprites[spriteChange->spriteIndex])};
             sprite = newSprite;
-            rotation.direction
-                = static_cast<Rotation::Direction>(spriteChange->spriteIndex);
             collision.modelBounds = newSprite.modelBounds;
             collision.worldBounds = Transforms::modelToWorldCentered(
                 newSprite.modelBounds, position);

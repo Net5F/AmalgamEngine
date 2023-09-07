@@ -13,6 +13,8 @@ class World;
 class Network;
 class SpriteData;
 
+// TODO: When we add animation support, maybe call this something like 
+//       AnimationSetUpdateSystem.
 /**
  * Processes sprite change requests sent by clients. If a request is valid, 
  * updates the entity's sprite state.

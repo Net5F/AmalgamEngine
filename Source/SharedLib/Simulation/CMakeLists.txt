@@ -24,6 +24,7 @@ target_sources(SharedLib
         Public/MovementHelpers.h
         Public/Ray.h
         Public/Wall.h
+        Public/Components/AnimationState.h
         Public/Components/Camera.h
         Public/Components/Collision.h
         Public/Components/Input.h

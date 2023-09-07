@@ -1,10 +1,8 @@
 #include "NceLifetimeSystem.h"
 #include "World.h"
 #include "Network.h"
-#include "SpriteData.h"
 #include "Name.h"
 #include "Position.h"
-#include "Rotation.h"
 #include "InitScript.h"
 #include "ISimulationExtension.h"
 #include "Log.h"
@@ -14,10 +12,8 @@ namespace AM
 namespace Server
 {
 
-NceLifetimeSystem::NceLifetimeSystem(World& inWorld, Network& inNetwork,
-                                     SpriteData& inSpriteData)
+NceLifetimeSystem::NceLifetimeSystem(World& inWorld, Network& inNetwork)
 : world{inWorld}
-, spriteData{inSpriteData}
 , extension{nullptr}
 , objectReInitQueue{}
 , objectInitRequestQueue{inNetwork.getEventDispatcher()}
@@ -90,11 +86,9 @@ void NceLifetimeSystem::createDynamicObject(
 void NceLifetimeSystem::initDynamicObject(entt::entity newEntity,
     const DynamicObjectInitRequest& objectInitRequest)
 {
-    const ObjectSpriteSet& spriteSet{
-        spriteData.getObjectSpriteSet(objectInitRequest.spriteSetID)};
     world.constructDynamicObject(Name{objectInitRequest.name},
                                  objectInitRequest.position,
-                                 objectInitRequest.rotation, spriteSet,
+                                 objectInitRequest.animationState,
                                  InitScript{objectInitRequest.initScript});
 }
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Sprite.h"
-#include "Rotation.h"
 #include "Wall.h"
 #include <SDL_stdinc.h>
 #include <string>
@@ -57,11 +56,16 @@ struct FloorSpriteSet : public SpriteSet
 
 struct FloorCoveringSpriteSet : public SpriteSet
 {
-    /** The 8 directions that this floor covering can face.
-        If any directions weren't assigned a sprite, they will be nullptr in 
+    /** The number of variations that this sprite set can hold. */
+    static constexpr std::size_t VARIATION_COUNT{8};
+
+    /** The 8 variations of this floor covering.
+        If any slots weren't assigned a sprite, they will be nullptr in 
         this array.
-        Note: Remember to use Rotation::directionToIndex(). */
-    std::array<const Sprite*, Rotation::Direction::Count> sprites{};
+        When useful, the sprites in this array can represent the same floor 
+        covering, facing different directions. In such a case, you can use 
+        Rotation::directionToIndex() to match an index to a direction. */
+    std::array<const Sprite*, VARIATION_COUNT> sprites{};
 };
 
 struct WallSpriteSet : public SpriteSet
@@ -73,11 +77,16 @@ struct WallSpriteSet : public SpriteSet
 
 struct ObjectSpriteSet : public SpriteSet
 {
-    /** The 8 directions that this object can face.
-        If any directions weren't assigned a sprite, they will be nullptr in 
+    /** The number of variations that this sprite set can hold. */
+    static constexpr std::size_t VARIATION_COUNT{8};
+
+    /** The 8 variations of this floor covering.
+        If any slots weren't assigned a sprite, they will be nullptr in 
         this array.
-        Note: Remember to use Rotation::directionToIndex(). */
-    std::array<const Sprite*, Rotation::Direction::Count> sprites{};
+        When useful, the sprites in this array can represent the same floor 
+        covering, facing different directions. In such a case, you can use 
+        Rotation::directionToIndex() to match an index to a direction. */
+    std::array<const Sprite*, VARIATION_COUNT> sprites{};
 };
 
 } // namespace AM

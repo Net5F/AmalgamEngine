@@ -34,10 +34,10 @@ target_sources(ServerLib
 		Public/SpriteUpdateSystem.h
 		Public/TileUpdateSystem.h
 		Public/World.h
+		Public/Components/AnimationStateNeedsSync.h
 		Public/Components/ClientSimData.h
 		Public/Components/InitScript.h
 		Public/Components/MovementStateNeedsSync.h
-		Public/Components/SpriteStateNeedsSync.h
 		Public/SpriteData/SpriteData.h
 		Public/TileMap/TileMap.h
 )
