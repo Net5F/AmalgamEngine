@@ -3,6 +3,7 @@ target_sources(ServerLib
 		Private/ChunkStreamingSystem.cpp
 		Private/ClientAOISystem.cpp
 		Private/ClientConnectionSystem.cpp
+		Private/ComponentSyncSystem.cpp
 		Private/InputSystem.cpp
 		Private/MapSaveSystem.cpp
 		Private/MovementSyncSystem.cpp
@@ -19,6 +20,7 @@ target_sources(ServerLib
 		Public/ChunkStreamingSystem.h
 		Public/ClientAOISystem.h
 		Public/ClientConnectionSystem.h
+		Public/ComponentSyncSystem.h
 		Public/EnttGroups.h
 		Public/EventSorter.h
 		Public/InputSystem.h
@@ -38,6 +40,7 @@ target_sources(ServerLib
 		Public/Components/ClientSimData.h
 		Public/Components/InitScript.h
 		Public/Components/MovementStateNeedsSync.h
+		Public/Components/ReplicatedComponentList.h
 		Public/SpriteData/SpriteData.h
 		Public/TileMap/TileMap.h
 )

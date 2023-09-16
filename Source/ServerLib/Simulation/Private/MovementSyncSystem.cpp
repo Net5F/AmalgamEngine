@@ -5,6 +5,7 @@
 #include "MovementUpdate.h"
 #include "Input.h"
 #include "Position.h"
+#include "PreviousPosition.h"
 #include "Velocity.h"
 #include "Rotation.h"
 #include "Collision.h"

@@ -11,18 +11,42 @@
 #include "SpriteSets.h"
 #include "Interaction.h"
 #include "EntityDelete.h"
-#include "ClientEntityInit.h"
-#include "DynamicObjectInit.h"
+#include "ReplicatedComponent.h"
+#include "EntityInit.h"
+#include "ReplicatedComponentList.h"
 #include "Cylinder.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include "Tracy.hpp"
+#include "boost/mp11/list.hpp"
+#include "boost/mp11/algorithm.hpp"
 #include <algorithm>
 
 namespace AM
 {
 namespace Server
 {
+
+/**
+ * Retrieves the types in componentIndices for the given entity and pushes 
+ * them into componentVec.
+ *
+ * Note: This is a free function to reduce includes in the header.
+ */
+void addComponentsToVector(entt::registry& registry, entt::entity entity,
+                           const std::vector<Uint8>& componentIndices,
+                           std::vector<ReplicatedComponent>& componentVec)
+{
+    for (Uint8 componentIndex : componentIndices) {
+        boost::mp11::mp_with_index<
+            boost::mp11::mp_size<ReplicatedComponentTypes>>(
+            componentIndex, [&](auto I) {
+                using T = boost::mp11::mp_at_c<ReplicatedComponentTypes, I>;
+                componentVec.emplace_back(registry.get<T>(entity));
+            });
+    }
+}
+
 ClientAOISystem::ClientAOISystem(Simulation& inSimulation, World& inWorld,
                                  Network& inNetwork)
 : simulation{inSimulation}
@@ -30,6 +54,7 @@ ClientAOISystem::ClientAOISystem(Simulation& inSimulation, World& inWorld,
 , network{inNetwork}
 , entitiesThatLeft{}
 , entitiesThatEntered{}
+, entityInitMap{}
 {
 }
 
@@ -79,6 +104,11 @@ void ClientAOISystem::updateAOILists()
         // Save the new list.
         client.entitiesInAOI = currentAOIEntities;
     }
+
+    // Note: If it's ever worthwhile, we could wait until the entity actually 
+    //       changes to clear its message from the map.
+    // Clear the message map, since they won't be valid next tick.
+    entityInitMap.clear();
 }
 
 void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
@@ -94,41 +124,34 @@ void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
 void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
 {
     entt::registry& registry{world.registry};
-    auto view{registry.view<EntityType, Position>()};
 
     // Send the client an EntityInit for each entity that entered its AOI.
     for (entt::entity entityThatEntered : entitiesThatEntered) {
-        auto [entityType, position]
-            = view.get<EntityType, Position>(entityThatEntered);
-
-        // Send the appropriate init message for the entity.
-        if (entityType == EntityType::ClientEntity) {
-            const auto& name{registry.get<Name>(entityThatEntered)};
-            const auto& animationState{
-                registry.get<AnimationState>(entityThatEntered)};
-            const auto& rotation{registry.get<Rotation>(entityThatEntered)};
-            network.serializeAndSend(
-                client.netID,
-                ClientEntityInit{simulation.getCurrentTick(), entityThatEntered,
-                                 name.name, position, rotation,
-                                 animationState});
+        // If we already built a message for this entity, send it.
+        if (auto pair = entityInitMap.find(entityThatEntered);
+            pair != entityInitMap.end()) {
+            network.send(client.netID, pair->second);
+            continue;
         }
-        else if (entityType == EntityType::DynamicObject) {
-            const auto& name{registry.get<Name>(entityThatEntered)};
-            const auto& animationState{
-                registry.get<AnimationState>(entityThatEntered)};
 
-            Interaction interaction{};
-            if (auto interactionPtr
-                = registry.try_get<Interaction>(entityThatEntered)) {
-                interaction = *interactionPtr;
-            }
-            network.serializeAndSend(
-                client.netID,
-                DynamicObjectInit{simulation.getCurrentTick(),
-                                  entityThatEntered, name.name, position,
-                                  animationState, interaction});
-        }
+        const auto& replicatedComponentList{
+            registry.get<ReplicatedComponentList>(entityThatEntered)};
+
+        // Build a message with all of the entity's client-relevant components.
+        // Note: We send the entity, even if it has no client-relevant component,
+        //       because there may be a build mode that cares about it.
+        EntityInit entityInit{simulation.getCurrentTick(), entityThatEntered};
+        addComponentsToVector(registry, entityThatEntered,
+                              replicatedComponentList.typeIndices,
+                              entityInit.components);
+
+        // Serialize the message and save it in the map, in case any other 
+        // clients need to be sent the same data.
+        BinaryBufferSharedPtr message{network.serialize(entityInit)};
+        entityInitMap[entityThatEntered] = message;
+
+        // Send the message.
+        network.send(client.netID, message);
     }
 }
 

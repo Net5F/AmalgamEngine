@@ -1,5 +1,6 @@
 target_sources(SharedLib
     PUBLIC
+        Public/ProjectComponentLists.h
         Public/SharedConfig.h
 )
 

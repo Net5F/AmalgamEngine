@@ -1,9 +1,9 @@
 #pragma once
 
 #include "EngineMessageType.h"
+#include "Name.h"
 #include "Position.h"
 #include "AnimationState.h"
-#include "ClientEntityInit.h"
 #include "InitScriptResponse.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
@@ -11,6 +11,7 @@
 
 namespace AM
 {
+// TODO: Replace with EntityInitRequest with a dynamic list of components
 /**
  * Sent by the client to request that a dynamic object be created, or to 
  * request that an existing dynamic object be re-initialized.
@@ -44,7 +45,7 @@ void serialize(S& serializer,
 {
     serializer.value4b(dynamicObjectInitRequest.entity);
     serializer.text1b(dynamicObjectInitRequest.name,
-                      ClientEntityInit::MAX_NAME_LENGTH);
+                      Name::MAX_NAME_LENGTH);
     serializer.object(dynamicObjectInitRequest.position);
     serializer.object(dynamicObjectInitRequest.animationState);
     serializer.text1b(dynamicObjectInitRequest.initScript,

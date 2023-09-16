@@ -1,8 +1,7 @@
 #pragma once
 
 #include "QueuedEvents.h"
-#include "ClientEntityInit.h"
-#include "DynamicObjectInit.h"
+#include "EntityInit.h"
 #include "EntityDelete.h"
 #include <queue>
 
@@ -37,21 +36,15 @@ private:
     void processEntityDeletes(Uint32 desiredTick);
 
     /**
-     * Processes waiting ClientEntityInit messages, up to desiredTick.
+     * Processes waiting EntityInit messages, up to desiredTick.
      */
-    void processClientEntityInits(Uint32 desiredTick);
-
-    void processClientEntityInit(const ClientEntityInit& entityInit);
+    void processEntityInits(Uint32 desiredTick);
+    void processEntityInit(const EntityInit& entityInit);
 
     /**
      * Handles any processing that's specific to the player entity.
      */
     void finishPlayerEntity();
-
-    /**
-     * Processes waiting DynamicObjectInit messages, up to desiredTick.
-     */
-    void processDynamicObjectInits(Uint32 desiredTick);
 
     /** Used to get the current tick number. */
     Simulation& simulation;
@@ -60,13 +53,12 @@ private:
     /** Used to get sprite data when constructing entities. */
     SpriteData& spriteData;
 
-    /** We pop messages off clientEntityInitQueue and push them into here, so 
+    /** We pop messages off entityInitQueue and push them into here, so 
         we can find and immediately process any messages for the player 
         entity. */
-    std::queue<ClientEntityInit> clientEntityInitSecondaryQueue;
+    std::queue<EntityInit> entityInitSecondaryQueue;
 
-    EventQueue<ClientEntityInit> clientEntityInitQueue;
-    EventQueue<DynamicObjectInit> dynamicObjectInitQueue;
+    EventQueue<EntityInit> entityInitQueue;
     EventQueue<EntityDelete> entityDeleteQueue;
 };
 

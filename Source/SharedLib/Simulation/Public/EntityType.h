@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SDL_stdinc.h>
+
 namespace AM
 {
 /**
@@ -15,7 +17,7 @@ namespace AM
  *       it might lead to degenerate behavior (e.g. systems acting on "all 
  *       NPCs", instead of "all entities with an AIScript component").
  */
-enum class EntityType
+enum class EntityType : Uint8
 {
     /* Controlled by a client. From the Client's perspective, this may be either
        the "player entity" (the entity controlled by this client's player), or 
@@ -29,5 +31,11 @@ enum class EntityType
        it. */
     TriggerVolume
 };
+
+template<typename S>
+void serialize(S& serializer, EntityType& entityType)
+{
+    serializer.value1b(entityType);
+}
 
 } // namespace AM

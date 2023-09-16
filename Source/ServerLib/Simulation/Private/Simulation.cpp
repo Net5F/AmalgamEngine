@@ -29,6 +29,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , movementSystem{world}
 , clientAOISystem{*this, world, network}
 , movementSyncSystem{*this, world, network}
+, componentSyncSystem{*this, world, network}
 , chunkStreamingSystem{world, network}
 , scriptDataSystem{world, network}
 , mapSaveSystem{world}
@@ -117,6 +118,10 @@ void Simulation::tick()
     // Synchronize entity movement state with the clients.
     movementSyncSystem.sendMovementUpdates();
 
+    // Synchronize entity component state with the clients.
+    componentSyncSystem.sendUpdates();
+
+    // TODO: Rename to afterComponentSync();
     // Call the project's post-movement-sync logic.
     if (extension != nullptr) {
         extension->afterMovementSync();

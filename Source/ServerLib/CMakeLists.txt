@@ -30,6 +30,7 @@ target_link_libraries(ServerLib
         ${SDL2PP_LIBRARIES}
         SDL2_net-static
         SDL2pp
+        boost_mp11
         Bitsery::bitsery
         readerwriterqueue
         CircularBuffer

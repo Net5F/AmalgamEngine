@@ -37,3 +37,6 @@
 [submodule "Libraries/sol2"]
 	path = Libraries/sol2
 	url = git@github.com:ThePhD/sol2.git
+[submodule "Libraries/mp11"]
+	path = Libraries/mp11
+	url = git@github.com:boostorg/mp11.git

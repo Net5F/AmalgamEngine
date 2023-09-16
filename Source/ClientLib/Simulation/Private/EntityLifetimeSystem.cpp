@@ -4,35 +4,35 @@
 #include "Network.h"
 #include "SpriteData.h"
 #include "Name.h"
-#include "Input.h"
-#include "InputHistory.h"
-#include "Position.h"
 #include "PreviousPosition.h"
-#include "Velocity.h"
 #include "Collision.h"
-#include "Rotation.h"
-#include "EntityType.h"
 #include "UserConfig.h"
 #include "Camera.h"
+#include "InputHistory.h"
 #include "NeedsAdjacentChunks.h"
 #include "SDLHelpers.h"
 #include "Transforms.h"
 #include "Config.h"
 #include "entt/entity/registry.hpp"
+#include <variant>
+#include <string_view>
 
 namespace AM
 {
 namespace Client
 {
+template<class T>
+using remove_cv_ref =
+    typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+
 EntityLifetimeSystem::EntityLifetimeSystem(Simulation& inSimulation, World& inWorld,
                                      SpriteData& inSpriteData,
                                      Network& inNetwork)
 : simulation{inSimulation}
 , world{inWorld}
 , spriteData{inSpriteData}
-, clientEntityInitSecondaryQueue{}
-, clientEntityInitQueue{inNetwork.getEventDispatcher()}
-, dynamicObjectInitQueue{inNetwork.getEventDispatcher()}
+, entityInitSecondaryQueue{}
+, entityInitQueue{inNetwork.getEventDispatcher()}
 , entityDeleteQueue{inNetwork.getEventDispatcher()}
 {
 }
@@ -47,8 +47,7 @@ void EntityLifetimeSystem::processUpdates()
     processEntityDeletes(desiredTick);
 
     // Process any waiting init messages, up to desiredTick.
-    processClientEntityInits(desiredTick);
-    processDynamicObjectInits(desiredTick);
+    processEntityInits(desiredTick);
 }
 
 void EntityLifetimeSystem::processEntityDeletes(Uint32 desiredTick)
@@ -75,25 +74,25 @@ void EntityLifetimeSystem::processEntityDeletes(Uint32 desiredTick)
     }
 }
 
-void EntityLifetimeSystem::processClientEntityInits(Uint32 desiredTick)
+void EntityLifetimeSystem::processEntityInits(Uint32 desiredTick)
 {
     // Immediately process any player entity messages, push the rest into a 
     // secondary queue.
     {
-        ClientEntityInit entityInit{};
-        while (clientEntityInitQueue.pop(entityInit)) {
+        EntityInit entityInit{};
+        while (entityInitQueue.pop(entityInit)) {
             if (entityInit.entity == world.playerEntity) {
-                processClientEntityInit(entityInit);
+                processEntityInit(entityInit);
             }
             else {
-                clientEntityInitSecondaryQueue.push(entityInit);
+                entityInitSecondaryQueue.push(entityInit);
             }
         }
     }
 
     // Process all messages in the secondary queue.
-    while (!(clientEntityInitSecondaryQueue.empty())) {
-        ClientEntityInit& entityInit{clientEntityInitSecondaryQueue.front()};
+    while (!(entityInitSecondaryQueue.empty())) {
+        EntityInit& entityInit{entityInitSecondaryQueue.front()};
 
         // If we've reached the desired tick, save the rest of the messages for 
         // later.
@@ -102,17 +101,17 @@ void EntityLifetimeSystem::processClientEntityInits(Uint32 desiredTick)
         }
 
         // Process the message.
-        processClientEntityInit(entityInit);
+        processEntityInit(entityInit);
 
-        clientEntityInitSecondaryQueue.pop();
+        entityInitSecondaryQueue.pop();
     }
 }
 
-void EntityLifetimeSystem::processClientEntityInit(const ClientEntityInit& entityInit)
+void EntityLifetimeSystem::processEntityInit(const EntityInit& entityInit)
 {
     entt::registry& registry{world.registry};
 
-    // Create the entity and construct its standard components.
+    // Create the entity.
     entt::entity newEntity{registry.create(entityInit.entity)};
     if (newEntity != entityInit.entity) {
         LOG_FATAL("Created entity doesn't match received entity. "
@@ -120,40 +119,33 @@ void EntityLifetimeSystem::processClientEntityInit(const ClientEntityInit& entit
                   newEntity, entityInit.entity);
     }
 
+    // Add any replicated components that the server sent.
+    for (const auto& componentVariant : entityInit.components) {
+        std::visit([&](const auto& component) {
+            using T = remove_cv_ref<decltype(component)>;
+            registry.emplace<T>(newEntity, component);
+        }, componentVariant);
+    }
+    
+    // Add any client-only or non-replicated components.
     // Note: Be careful with holding onto references here. If components 
     //       are added to the same group, the ref will be invalidated.
-    registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
-    registry.emplace<Name>(newEntity, entityInit.name);
+    if (auto position = registry.try_get<Position>(newEntity)) {
+        registry.emplace<PreviousPosition>(newEntity, *position);
+    }
+    if (auto animationState = registry.try_get<AnimationState>(newEntity)) {
+        const Sprite* sprite{
+            spriteData.getObjectSpriteSet(animationState->spriteSetID)
+                .sprites[animationState->spriteIndex]};
+        registry.emplace<Sprite>(newEntity, *sprite);
 
-    // Note: These will be set for real when we get their first movement
-    //       update.
-    registry.emplace<Input>(newEntity);
-    registry.emplace<Position>(newEntity, entityInit.position);
-    registry.emplace<PreviousPosition>(newEntity, entityInit.position);
-    registry.emplace<Velocity>(newEntity);
-    registry.emplace<Rotation>(newEntity, entityInit.rotation);
+        registry.emplace<Collision>(
+            newEntity, sprite->modelBounds,
+            Transforms::modelToWorldCentered(
+                sprite->modelBounds, registry.get<Position>(newEntity)));
+    }
 
-    // TODO: When we add character sprite sets, update this.
-    Uint16 spriteSetID{spriteData
-            .getObjectSpriteSet(SharedConfig::DEFAULT_CHARACTER_SPRITE_SET)
-            .numericID};
-    const auto& animationState{registry.emplace<AnimationState>(
-        newEntity, SpriteSet::Type::Object, spriteSetID,
-        SharedConfig::DEFAULT_CHARACTER_SPRITE_INDEX)};
-    const Sprite* sprite{
-        spriteData.getObjectSpriteSet(animationState.spriteSetID)
-            .sprites[animationState.spriteIndex]};
-    registry.emplace<Sprite>(newEntity, *sprite);
-
-    // Note: Every entity needs a Collision because there may be cases where 
-    //       they collide with something, but the collision logic doesn't 
-    //       let e.g. players collide with other players.
-    registry.emplace<Collision>(
-        newEntity, sprite->modelBounds,
-        Transforms::modelToWorldCentered(
-            sprite->modelBounds, registry.get<Position>(newEntity)));
-
-    // If we just added the player entity, we need to do some extra steps.
+    // If this is the player entity, add any client components specific to it.
     if (newEntity == world.playerEntity) {
         finishPlayerEntity();
         LOG_INFO("Player entity added: %u. Message tick: %u", newEntity,
@@ -180,55 +172,6 @@ void EntityLifetimeSystem::finishPlayerEntity()
 
     // Flag that we need to request all map data.
     registry.emplace<NeedsAdjacentChunks>(playerEntity);
-}
-
-void EntityLifetimeSystem::processDynamicObjectInits(Uint32 desiredTick)
-{
-    entt::registry& registry{world.registry};
-
-    // Construct the dynamic objects that entered our AOI on this tick (or 
-    // previous ticks).
-    DynamicObjectInit* objectInit{dynamicObjectInitQueue.peek()};
-    while ((objectInit != nullptr) && (objectInit->tickNum <= desiredTick)) {
-        // Create the entity and construct its standard components.
-        entt::entity newEntity{registry.create(objectInit->entity)};
-        if (newEntity != objectInit->entity) {
-            LOG_FATAL("Created entity doesn't match received entity. "
-                      "Created: %u, received: %u",
-                      newEntity, objectInit->entity);
-        }
-
-        // Note: Be careful with holding onto references here. If components 
-        //       are added to the same group, the ref will be invalidated.
-        registry.emplace<EntityType>(newEntity, EntityType::DynamicObject);
-        registry.emplace<Name>(newEntity, objectInit->name);
-
-        registry.emplace<Position>(newEntity, objectInit->position);
-
-        const AnimationState& animationState{objectInit->animationState};
-        registry.emplace<AnimationState>(newEntity, animationState);
-
-        // Note: Unlike the server, we add a Sprite component to dynamic 
-        //       entities. This lets the rendering system pick them up.
-        const Sprite* sprite{
-            spriteData.getObjectSpriteSet(animationState.spriteSetID)
-                .sprites[animationState.spriteIndex]};
-        registry.emplace<Sprite>(newEntity, *sprite);
-
-        registry.emplace<Collision>(
-            newEntity, sprite->modelBounds,
-            Transforms::modelToWorldCentered(
-                sprite->modelBounds, registry.get<Position>(newEntity)));
-
-        registry.emplace<Interaction>(newEntity, objectInit->interaction);
-
-        LOG_INFO("Dynamic object entity added: %u. Desired tick: %u, Message "
-                 "tick: %u",
-                 newEntity, desiredTick, objectInit->tickNum);
-
-        dynamicObjectInitQueue.pop();
-        objectInit = dynamicObjectInitQueue.peek();
-    }
 }
 
 } // End namespace Client

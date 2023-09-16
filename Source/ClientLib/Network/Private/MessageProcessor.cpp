@@ -9,8 +9,7 @@
 #include "UserErrorString.h"
 #include "MovementUpdate.h"
 #include "ChunkUpdate.h"
-#include "ClientEntityInit.h"
-#include "DynamicObjectInit.h"
+#include "EntityInit.h"
 #include "InitScriptResponse.h"
 #include "EntityDelete.h"
 #include "TileAddLayer.h"
@@ -60,13 +59,8 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                                   networkEventDispatcher);
             break;
         }
-        case EngineMessageType::ClientEntityInit: {
-            dispatchMessage<ClientEntityInit>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
-            break;
-        }
-        case EngineMessageType::DynamicObjectInit: {
-            dispatchMessage<DynamicObjectInit>(messageBuffer, messageSize,
+        case EngineMessageType::EntityInit: {
+            dispatchMessage<EntityInit>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }

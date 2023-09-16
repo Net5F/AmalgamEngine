@@ -11,6 +11,8 @@ namespace AM
 /**
  * Represents the interactions that an entity supports, i.e. the options that 
  * show up when you right click them.
+ *
+ * Note: This component won't be present on an entity if it has no interactions.
  */
 struct Interaction {
     /** The maximum number of interactions that an entity can support. */

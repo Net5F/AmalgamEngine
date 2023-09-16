@@ -3,13 +3,13 @@ target_sources(SharedLib
         Public/ChunkUpdate.h
         Public/ChunkUpdateRequest.h
         Public/ChunkWireSnapshot.h
-        Public/ClientEntityInit.h
+        Public/ComponentUpdate.h
         Public/ConnectionRequest.h
         Public/ConnectionResponse.h
-        Public/DynamicObjectInit.h
         Public/DynamicObjectInitRequest.h
         Public/EngineMessageType.h
         Public/EntityDelete.h
+        Public/EntityInit.h
         Public/ExplicitConfirmation.h
         Public/Heartbeat.h
         Public/InitScriptRequest.h

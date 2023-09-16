@@ -8,6 +8,7 @@
 #include "bitsery/traits/vector.h"
 #include "bitsery/traits/array.h"
 #include "bitsery/traits/string.h"
+#include "bitsery/ext/std_variant.h"
 #include <fstream>
 
 namespace AM

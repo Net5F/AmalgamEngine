@@ -99,6 +99,10 @@ set(SDL2PP_WITH_NET ON)
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/libSDL2pp/"
                  "${PROJECT_BINARY_DIR}/Libraries/libSDL2pp/")
 
+# Configure Boost MP11.
+add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/mp11/"
+                 "${PROJECT_BINARY_DIR}/Libraries/mp11/")
+
 # Configure bitsery.
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/bitsery/"
                  "${PROJECT_BINARY_DIR}/Libraries/bitsery/"

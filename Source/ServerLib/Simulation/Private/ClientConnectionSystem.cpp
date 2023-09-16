@@ -6,6 +6,7 @@
 #include "SharedConfig.h"
 #include "Serialize.h"
 #include "ConnectionResponse.h"
+#include "ReplicatedComponentList.h"
 #include "Input.h"
 #include "Rotation.h"
 #include "Position.h"
@@ -65,6 +66,10 @@ void ClientConnectionSystem::processConnectEvents()
         // Note: Be careful with holding onto references here. If components 
         //       are added to the same group, the ref will be invalidated.
         entt::entity newEntity{registry.create()};
+
+        // Add RelicatedComponentList first so it gets updated as we add others.
+        registry.emplace<ReplicatedComponentList>(newEntity);
+
         registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
         registry.emplace<Name>(newEntity,
                                std::to_string(static_cast<Uint32>(newEntity)));

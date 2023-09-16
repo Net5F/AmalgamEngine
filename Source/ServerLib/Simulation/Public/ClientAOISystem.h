@@ -1,7 +1,9 @@
 #pragma once
 
+#include "BinaryBuffer.h"
 #include "entt/fwd.hpp"
 #include <vector>
+#include <unordered_map>
 
 namespace AM
 {
@@ -73,6 +75,13 @@ private:
 
     /** Holds entities that entered the AOI. Used during updateAOILists(). */
     std::vector<entt::entity> entitiesThatEntered;
+
+    /** Maps entityID -> a serialized EntityInit message containing that 
+        entity's data. We use this map to save the cost of building the same 
+        message multiple times (once for each client that got in range).
+        We clear this out each tick, since it would be invalidated by any 
+        system changing any of the included components. */
+    std::unordered_map<entt::entity, BinaryBufferSharedPtr> entityInitMap;
 };
 
 } // End namespace Server

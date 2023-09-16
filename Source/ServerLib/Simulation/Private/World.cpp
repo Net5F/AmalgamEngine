@@ -1,5 +1,7 @@
 #include "World.h"
 #include "ClientSimData.h"
+#include "ReplicatedComponentList.h"
+#include "ReplicatedComponent.h"
 #include "EntityType.h"
 #include "Name.h"
 #include "Position.h"
@@ -11,12 +13,42 @@
 #include "Config.h"
 #include "Log.h"
 #include "Ignore.h"
+#include "AMAssert.h"
 #include "sol/sol.hpp"
+#include "boost/mp11/algorithm.hpp"
 
 namespace AM
 {
 namespace Server
 {
+
+template<typename T>
+void onComponentConstructed(entt::registry& registry, entt::entity entity)
+{
+    // Find the component's index within the type list.
+    constexpr std::size_t index{
+        boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
+
+    // Add the component to the entity's tracking vector.
+    auto& replicatedComponents{
+        registry.get_or_emplace<ReplicatedComponentList>(entity)};
+    replicatedComponents.typeIndices.push_back(static_cast<Uint8>(index));
+}
+
+template<typename T>
+void onComponentDestroyed(entt::registry& registry, entt::entity entity)
+{
+    // Find the component's index within the type list.
+    constexpr std::size_t index{
+        boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
+
+    // If the component is in the entity's tracking vector, remove it.
+    if (auto replicatedComponents
+        = registry.try_get<ReplicatedComponentList>(entity)) {
+        std::erase(replicatedComponents->typeIndices, index);
+    }
+}
+
 World::World(SpriteData& inSpriteData, sol::state& inLua)
 : registry{}
 , tileMap{inSpriteData}
@@ -38,6 +70,15 @@ World::World(SpriteData& inSpriteData, sol::state& inLua)
     // Allocate the entity locator's grid.
     entityLocator.setGridSize(tileMap.getTileExtent().xLength,
                               tileMap.getTileExtent().yLength);
+
+    // Add listeners for each client-relevant component. When the component is 
+    // constructed or destroyed, the associated entity's ReplicatedComponentList
+    // will be updated.
+    boost::mp11::mp_for_each<ReplicatedComponentTypes>([&](auto I) {
+        using T = decltype(I);
+        registry.on_construct<T>().connect<&onComponentConstructed<T>>();
+        registry.on_destroy<T>().connect<&onComponentDestroyed<T>>();
+    });
 
     // When an entity is destroyed, do any necessary cleanup.
     registry.on_destroy<entt::entity>().connect<&World::onEntityDestroyed>(
@@ -62,6 +103,11 @@ entt::entity World::constructDynamicObject(const Name& name,
     // Construct the standard components.
     // Note: Be careful with holding onto references here. If components 
     //       are added to the same group, the ref will be invalidated.
+
+    // TODO: When we add triggers, conditionally add this.
+    // Add RelicatedComponentList first so it gets updated as we add others.
+    registry.emplace<ReplicatedComponentList>(newEntity);
+
     registry.emplace<EntityType>(newEntity, EntityType::DynamicObject);
     registry.emplace<Name>(newEntity, name);
 
