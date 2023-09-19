@@ -18,9 +18,6 @@ namespace AM
  * We also commonly use this for 3D math.
  */
 struct Position {
-    //--------------------------------------------------------------------------
-    // Replicated data
-    //--------------------------------------------------------------------------
     /** Current position. */
     float x{0};
     float y{0};

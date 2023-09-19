@@ -21,7 +21,7 @@ class SpriteData;
  * entities appropriately.
  *
  * Note: By "NPC", we mean any entity that isn't controlled by this client's 
- *       player. This is different from what EntityType::NPC means.
+ *       player. See IsClientEntity.h for more info.
  */
 class NpcMovementSystem
 {

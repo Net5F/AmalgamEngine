@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DynamicObjectInitRequest.h"
+#include "EntityInitRequest.h"
 #include "EntityDelete.h"
 #include "QueuedEvents.h"
 #include <queue>
@@ -26,9 +26,9 @@ public:
     NceLifetimeSystem(World& inWorld, Network& inNetwork);
 
     /**
-     * Processes any waiting EntityCreateRequest or EntityDelete messages.
+     * Processes any waiting EntityInitRequest or EntityDelete messages.
      */
-    void processUpdates();
+    void processUpdateRequests();
 
     void setExtension(ISimulationExtension* inExtension);
 
@@ -37,14 +37,13 @@ private:
      * Either creates the given object and initializes it, or re-creates it 
      * and queues an init for next tick.
      */
-    void createDynamicObject(
-        const DynamicObjectInitRequest& objectInitRequest);
+    void createEntity(const EntityInitRequest& entityInitRequest);
 
     /**
-     * Tells the World to create the given dynamic object.
+     * Tells the World to create the given entity.
      */
-    void initDynamicObject(entt::entity newEntity,
-        const DynamicObjectInitRequest& objectInitRequest);
+    void initEntity(entt::entity newEntity,
+        const EntityInitRequest& entityInitRequest);
 
     /** Used to add/remove entities. */
     World& world;
@@ -52,10 +51,10 @@ private:
         Used for checking if entity creation requests are valid. */
     ISimulationExtension* extension;
 
-    /** Holds objects that need to be re-initialized on the next tick. */
-    std::queue<DynamicObjectInitRequest> objectReInitQueue;
+    /** Holds entity that need to be re-initialized on the next tick. */
+    std::queue<EntityInitRequest> entityReInitQueue;
 
-    EventQueue<DynamicObjectInitRequest> objectInitRequestQueue;
+    EventQueue<EntityInitRequest> entityInitRequestQueue;
     EventQueue<EntityDelete> deleteQueue;
 };
 

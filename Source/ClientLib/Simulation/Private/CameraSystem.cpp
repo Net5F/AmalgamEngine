@@ -18,9 +18,8 @@ CameraSystem::CameraSystem(World& inWorld)
 void CameraSystem::moveCameras()
 {
     auto cameraGroup = world.registry.group<Camera>(entt::get<Position>);
-    for (entt::entity entity : cameraGroup) {
+    for (auto [entity, camera, position] : cameraGroup.each()) {
         // Save the camera's previous position.
-        auto [camera, position] = cameraGroup.get<Camera, Position>(entity);
         camera.prevPosition.x = camera.position.x;
         camera.prevPosition.y = camera.position.y;
 

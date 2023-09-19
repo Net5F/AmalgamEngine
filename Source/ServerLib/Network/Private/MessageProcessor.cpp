@@ -7,7 +7,8 @@
 #include "Heartbeat.h"
 #include "InputChangeRequest.h"
 #include "ChunkUpdateRequest.h"
-#include "DynamicObjectInitRequest.h"
+#include "EntityInitRequest.h"
+#include "ComponentUpdateRequest.h"
 #include "InitScriptRequest.h"
 #include "InteractionRequest.h"
 #include "TileAddLayer.h"
@@ -15,7 +16,6 @@
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
 #include "EntityDelete.h"
-#include "SpriteChange.h"
 #include "Log.h"
 
 namespace AM
@@ -54,8 +54,13 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             handleChunkUpdateRequest(netID, messageBuffer, messageSize);
             break;
         }
-        case EngineMessageType::DynamicObjectInitRequest: {
-            dispatchMessage<DynamicObjectInitRequest>(
+        case EngineMessageType::EntityInitRequest: {
+            dispatchMessage<EntityInitRequest>(
+                messageBuffer, messageSize, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::ComponentUpdateRequest: {
+            dispatchMessage<ComponentUpdateRequest>(
                 messageBuffer, messageSize, networkEventDispatcher);
             break;
         }
@@ -90,11 +95,6 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
         case EngineMessageType::EntityDelete: {
             dispatchMessage<EntityDelete>(messageBuffer, messageSize,
                                         networkEventDispatcher);
-            break;
-        }
-        case EngineMessageType::SpriteChange: {
-            dispatchMessage<SpriteChange>(messageBuffer, messageSize,
-                                          networkEventDispatcher);
             break;
         }
         default: {

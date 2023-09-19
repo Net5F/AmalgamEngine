@@ -10,13 +10,13 @@
 #include "MovementUpdate.h"
 #include "ChunkUpdate.h"
 #include "EntityInit.h"
+#include "ComponentUpdate.h"
 #include "InitScriptResponse.h"
 #include "EntityDelete.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
-#include "SpriteChange.h"
 #include "Log.h"
 
 namespace AM
@@ -64,6 +64,11 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                         networkEventDispatcher);
             break;
         }
+        case EngineMessageType::ComponentUpdate: {
+            dispatchMessage<ComponentUpdate>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
         case EngineMessageType::InitScriptResponse: {
             dispatchMessage<InitScriptResponse>(messageBuffer, messageSize,
                                         networkEventDispatcher);
@@ -94,11 +99,6 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                         networkEventDispatcher);
             break;
         }
-        case EngineMessageType::SpriteChange: {
-            dispatchMessage<SpriteChange>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
-            break;
-        }
         default: {
             // If we don't have a handler for this message type, pass it to
             // the project.
@@ -117,6 +117,9 @@ void MessageProcessor::setExtension(
     extension = std::move(inExtension);
 }
 
+// TODO: Handle ComponentUpdate and ExplicitConfirmation by updating a 
+//       local latestConfirmedTick. Add a network.getLatestConfirmedTick() 
+//       that gets it from here
 void MessageProcessor::handleExplicitConfirmation(Uint8* messageBuffer,
                                                   std::size_t messageSize)
 {

@@ -4,12 +4,13 @@ target_sources(SharedLib
         Public/ChunkUpdateRequest.h
         Public/ChunkWireSnapshot.h
         Public/ComponentUpdate.h
+        Public/ComponentUpdateRequest.h
         Public/ConnectionRequest.h
         Public/ConnectionResponse.h
-        Public/DynamicObjectInitRequest.h
         Public/EngineMessageType.h
         Public/EntityDelete.h
         Public/EntityInit.h
+        Public/EntityInitRequest.h
         Public/ExplicitConfirmation.h
         Public/Heartbeat.h
         Public/InitScriptRequest.h
@@ -18,7 +19,6 @@ target_sources(SharedLib
         Public/InteractionRequest.h
         Public/MovementState.h
         Public/MovementUpdate.h
-        Public/SpriteChange.h
         Public/TileAddLayer.h
         Public/TileClearLayers.h
         Public/TileExtentClearLayers.h

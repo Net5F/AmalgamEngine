@@ -21,6 +21,9 @@ struct InteractionRequest {
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::InteractionRequest};
   
+    //--------------------------------------------------------------------------
+    // Networked data
+    //--------------------------------------------------------------------------
     // Note: We don't include a tick number in our interaction requests, because 
     //       there isn't anything that a client would want to sync the 
     //       interaction with. NPC state is in the past, and the client entity's 
@@ -38,7 +41,7 @@ struct InteractionRequest {
     Uint8 interactionType{};
 
     //--------------------------------------------------------------------------
-    // Non-replicated data
+    // Local data
     //--------------------------------------------------------------------------
     /**
      * The network ID of the client that sent this message.

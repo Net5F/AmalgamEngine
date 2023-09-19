@@ -23,13 +23,12 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , interactionQueueMap{}
 , clientConnectionSystem{*this, world, network, inSpriteData}
 , nceLifetimeSystem{world, network}
+, componentUpdateSystem{*this, world, network, inSpriteData}
 , tileUpdateSystem{world, network}
-, spriteUpdateSystem{*this, world, network, inSpriteData}
 , inputSystem{*this, world, network}
 , movementSystem{world}
 , clientAOISystem{*this, world, network}
 , movementSyncSystem{*this, world, network}
-, componentSyncSystem{*this, world, network}
 , chunkStreamingSystem{world, network}
 , scriptDataSystem{world, network}
 , mapSaveSystem{world}
@@ -78,14 +77,14 @@ void Simulation::tick()
     // Process client connections and disconnections.
     clientConnectionSystem.processConnectionEvents();
 
-    // Create and destroy non-client-controlled entities.
-    nceLifetimeSystem.processUpdates();
+    // Process requests to create or destroy non-client-controlled entities.
+    nceLifetimeSystem.processUpdateRequests();
+
+    // Process requests to update components.
+    componentUpdateSystem.processUpdateRequests();
 
     // Receive and process tile update requests.
     tileUpdateSystem.updateTiles();
-
-    // Receive and process sprite update requests.
-    spriteUpdateSystem.updateSprites();
 
     // Call the project's pre-movement logic.
     if (extension != nullptr) {
@@ -98,9 +97,6 @@ void Simulation::tick()
     // Send updated tile state to nearby clients.
     tileUpdateSystem.sendTileUpdates();
 
-    // Send updated sprite state to nearby clients.
-    spriteUpdateSystem.sendSpriteUpdates();
-
     // Receive and process client input messages.
     inputSystem.processInputMessages();
 
@@ -112,19 +108,19 @@ void Simulation::tick()
         extension->afterMovement();
     }
 
-    // Update each client entity's "entities in my AOI" list.
+    // Update each client entity's "entities in my AOI" list and send Init/
+    // Delete messages.
     clientAOISystem.updateAOILists();
 
     // Synchronize entity movement state with the clients.
     movementSyncSystem.sendMovementUpdates();
 
-    // Synchronize entity component state with the clients.
-    componentSyncSystem.sendUpdates();
+    // Send any updated entity component state to nearby clients.
+    componentUpdateSystem.sendUpdates();
 
-    // TODO: Rename to afterComponentSync();
     // Call the project's post-movement-sync logic.
     if (extension != nullptr) {
-        extension->afterMovementSync();
+        extension->afterClientSync();
     }
 
     // Respond to chunk data requests.
@@ -136,6 +132,11 @@ void Simulation::tick()
     // If enough time has passed, save the world's tile map state.
     mapSaveSystem.saveMapIfNecessary();
 
+    // Call the project's post-everything logic.
+    if (extension != nullptr) {
+        extension->afterAll();
+    }
+
     currentTick++;
 }
 
@@ -143,6 +144,7 @@ void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
 {
     extension = std::move(inExtension);
     nceLifetimeSystem.setExtension(extension.get());
+    componentUpdateSystem.setExtension(extension.get());
     tileUpdateSystem.setExtension(extension.get());
 }
 

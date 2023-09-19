@@ -2,6 +2,7 @@ target_sources(ClientLib
 	PRIVATE
 		Private/CameraSystem.cpp
 		Private/ChunkUpdateSystem.cpp
+		Private/ComponentUpdateSystem.cpp
 		Private/EntityLifetimeSystem.cpp
 		Private/NpcMovementSystem.cpp
 		Private/PlayerInputSystem.cpp
@@ -9,7 +10,6 @@ target_sources(ClientLib
 		Private/ReplicationTickOffset.cpp
 		Private/ServerConnectionSystem.cpp
 		Private/Simulation.cpp
-		Private/SpriteUpdateSystem.cpp
 		Private/TileUpdateSystem.cpp
 		Private/World.cpp
         Private/SpriteData/SpriteData.cpp
@@ -17,6 +17,7 @@ target_sources(ClientLib
 	PUBLIC
 		Public/CameraSystem.h
 		Public/ChunkUpdateSystem.h
+		Public/ComponentUpdateSystem.h
 		Public/EntityLifetimeSystem.h
 		Public/EnttGroups.h
 		Public/ISimulationExtension.h
@@ -27,7 +28,6 @@ target_sources(ClientLib
 		Public/ServerConnectionSystem.h
 		Public/Simulation.h
 		Public/SimulationExDependencies.h
-		Public/SpriteUpdateSystem.h
 		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/WorldObjectID.h

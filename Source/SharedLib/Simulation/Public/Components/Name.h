@@ -13,13 +13,13 @@ struct Name
         string. Only checked in debug builds. */
     static constexpr std::size_t MAX_NAME_LENGTH{50};
 
-    std::string name{""};
+    std::string value{""};
 };
 
 template<typename S>
 void serialize(S& serializer, Name& name)
 {
-    serializer.text1b(name.name, Name::MAX_NAME_LENGTH);
+    serializer.text1b(name.value, Name::MAX_NAME_LENGTH);
 }
 
 } // End namespace AM

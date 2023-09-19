@@ -13,7 +13,7 @@
 #include "PreviousPosition.h"
 #include "Velocity.h"
 #include "ClientSimData.h"
-#include "EntityType.h"
+#include "IsClientEntity.h"
 #include "AnimationState.h"
 #include "Collision.h"
 #include "Name.h"
@@ -70,7 +70,7 @@ void ClientConnectionSystem::processConnectEvents()
         // Add RelicatedComponentList first so it gets updated as we add others.
         registry.emplace<ReplicatedComponentList>(newEntity);
 
-        registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
+        registry.emplace<IsClientEntity>(newEntity);
         registry.emplace<Name>(newEntity,
                                std::to_string(static_cast<Uint32>(newEntity)));
 

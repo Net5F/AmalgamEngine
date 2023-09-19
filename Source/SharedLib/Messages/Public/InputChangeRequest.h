@@ -1,8 +1,8 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "NetworkDefs.h"
 #include "Input.h"
+#include "NetworkDefs.h"
 #include <SDL_stdinc.h>
 
 namespace AM
@@ -18,7 +18,7 @@ struct InputChangeRequest {
     static constexpr EngineMessageType MESSAGE_TYPE{EngineMessageType::InputChangeRequest};
 
     //--------------------------------------------------------------------------
-    // Replicated data
+    // Networked data
     //--------------------------------------------------------------------------
     /** The tick that these client input states correspond to. */
     Uint32 tickNum{0};
@@ -27,7 +27,7 @@ struct InputChangeRequest {
     Input input;
 
     //--------------------------------------------------------------------------
-    // Non-replicated data
+    // Local data
     //--------------------------------------------------------------------------
     /**
      * The network ID of the client that sent this message.

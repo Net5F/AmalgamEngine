@@ -14,9 +14,6 @@ struct Input {
 
     enum State : Uint8 { Released, Pressed };
 
-    //--------------------------------------------------------------------------
-    // Replicated data
-    //--------------------------------------------------------------------------
     /** Holds the current state of the inputs, indexed by Input::Type. */
     using StateArr = std::array<State, Type::Count>;
     StateArr inputStates{};

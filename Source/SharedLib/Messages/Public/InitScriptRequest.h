@@ -20,11 +20,14 @@ struct InitScriptRequest {
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::InitScriptRequest};
 
+    //--------------------------------------------------------------------------
+    // Networked data
+    //--------------------------------------------------------------------------
     /** The ID of the entity to get the init script for. */
     entt::entity entity{entt::null};
 
     //--------------------------------------------------------------------------
-    // Non-replicated data
+    // Local data
     //--------------------------------------------------------------------------
     /**
      * The network ID of the client that sent this message.

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EntityType.h"
+#include "IsClientEntity.h"
 #include "Name.h"
 #include "Input.h"
 #include "Position.h"
@@ -27,23 +27,27 @@ namespace EngineComponentLists
  * add it to ObservedComponentMap below.
  */
 using ReplicatedComponentTypes
-    = boost::mp11::mp_list<EntityType, Name, Input, Position, Velocity,
+    = boost::mp11::mp_list<IsClientEntity, Name, Input, Position, Velocity,
                            Rotation, AnimationState, Interaction>;
 
 /**
  * A map of "ObservedComponent" -> "SendComponents".
- * The first type in each list is the key, the rest are the values.
+ * The first type in each list is the ObservedComponent, the rest are the 
+ * SendComponents.
  *
  * When an ObservedComponent is updated (using e.g. patch()), an Update message
- * will be sent by the server to all nearby clients, containing the 
- * SendComponents.
+ * containing the SendComponents will be sent by the server to all nearby 
+ * clients.
  *
  * Note: All of the SendComponents must be in ReplicatedComponentTypes.
  *       The ObservedComponents don't need to be in ReplicatedComponentTypes.
  */
 using ObservedComponentMap = boost::mp11::mp_list<
-    boost::mp11::mp_list<Input, Input, Position, Velocity, Rotation>,
-    boost::mp11::mp_list<AnimationState, AnimationState>>;
+    boost::mp11::mp_list<IsClientEntity, IsClientEntity>,
+    //boost::mp11::mp_list<Input, Input, Position, Velocity, Rotation>,
+    boost::mp11::mp_list<Name, Name>,
+    boost::mp11::mp_list<AnimationState, AnimationState>,
+    boost::mp11::mp_list<Interaction, Interaction>>;
 
 } // End namespace EngineComponentLists
 } // End namespace AM

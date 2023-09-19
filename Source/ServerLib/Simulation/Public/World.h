@@ -3,13 +3,13 @@
 #include "TileMap.h"
 #include "NetworkDefs.h"
 #include "Position.h"
+#include "ReplicatedComponent.h"
 #include "EntityLocator.h"
 #include "SpawnStrategy.h"
-
 #include "entt/entity/registry.hpp"
-
 #include <unordered_map>
 #include <random>
+#include <span>
 
 namespace sol
 {
@@ -59,14 +59,15 @@ public:
     std::unordered_map<NetworkID, entt::entity> netIdMap;
 
     /**
-     * Constructs a dynamic object with the given components, and runs 
-     * initScript on it.
+     * Constructs an entity with the given components, then runs initScript 
+     * on it.
+     * 
+     * Note: We restrict the component types to those in ReplicatedComponent
+     *       only because it has all that we currently need and it's convenient.
      */
-    entt::entity constructDynamicObject(const Name& name,
-                                        const Position& position,
-                                        const AnimationState& animationState,
-                                        const InitScript& initScript,
-                                        entt::entity entityHint = entt::null);
+    entt::entity constructEntity(std::span<const ReplicatedComponent> components,
+                                 const InitScript& initScript,
+                                 entt::entity entityHint = entt::null);
 
     /**
      * Returns true if the given ID is valid and in use.

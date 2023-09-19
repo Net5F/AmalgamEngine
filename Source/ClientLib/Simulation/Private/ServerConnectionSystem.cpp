@@ -9,7 +9,7 @@
 #include "InputHistory.h"
 #include "Rotation.h"
 #include "AnimationState.h"
-#include "EntityType.h"
+#include "IsClientEntity.h"
 #include "UserConfig.h"
 #include "Camera.h"
 #include "SDLHelpers.h"
@@ -122,7 +122,7 @@ void ServerConnectionSystem::initMockSimState()
     // Set up the player's sim components.
     // Note: Be careful with holding onto references here. If components 
     //       are added to the same group, the ref will be invalidated.
-    registry.emplace<EntityType>(newEntity, EntityType::ClientEntity);
+    registry.emplace<IsClientEntity>(newEntity);
     registry.emplace<Name>(newEntity,
                            std::to_string(static_cast<Uint32>(newEntity)));
 

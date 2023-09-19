@@ -32,9 +32,6 @@ struct Rotation {
         None, /*!< No inputs, or inputs are canceling eachother out. */
     };
 
-    //--------------------------------------------------------------------------
-    // Replicated data
-    //--------------------------------------------------------------------------
     /** The current direction that the entity is facing. */
     Direction direction{Direction::South};
 };

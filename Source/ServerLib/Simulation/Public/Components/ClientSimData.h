@@ -9,13 +9,11 @@ namespace AM
 namespace Server
 {
 /**
- * Acts as a tag to say "this entity belongs to a client". Entities without
- * this component are dummies or are AI-controlled.
+ * Holds all client-related sim data.
  *
- * Also holds all client-related sim data.
- *
- * Note: If this ever gets too big, we can change it to "IsClient" or
- *       "ClientNetID" and split the sim data out into other components.
+ * If you need to tell if an entity is a client entity or not, favor checking 
+ * for IsClientEntity over this. IsClientEntity gets replicated to the clients,
+ * so it's more expected to see.
  */
 struct ClientSimData {
     /** The network ID associated with this client.

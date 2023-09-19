@@ -2,8 +2,6 @@
 #include "ClientSimData.h"
 #include "ReplicatedComponentList.h"
 #include "ReplicatedComponent.h"
-#include "EntityType.h"
-#include "Name.h"
 #include "Position.h"
 #include "AnimationState.h"
 #include "Collision.h"
@@ -11,6 +9,7 @@
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include "Config.h"
+#include "RemoveCvRef.h"
 #include "Log.h"
 #include "Ignore.h"
 #include "AMAssert.h"
@@ -85,13 +84,11 @@ World::World(SpriteData& inSpriteData, sol::state& inLua)
         this);
 }
 
-entt::entity World::constructDynamicObject(const Name& name,
-                                           const Position& position,
-                                           const AnimationState& animationState,
-                                           const InitScript& initScript,
-                                           entt::entity entityHint)
+entt::entity World::constructEntity(std::span<const ReplicatedComponent> components,
+                                    const InitScript& initScript,
+                                    entt::entity entityHint)
 {
-    // Create the new entity and initialize it.
+    // Create the new entity.
     entt::entity newEntity{entt::null};
     if (entityHint != entt::null) {
         newEntity = registry.create(entityHint);
@@ -100,39 +97,41 @@ entt::entity World::constructDynamicObject(const Name& name,
         newEntity = registry.create();
     }
 
-    // Construct the standard components.
-    // Note: Be careful with holding onto references here. If components 
-    //       are added to the same group, the ref will be invalidated.
-
-    // TODO: When we add triggers, conditionally add this.
     // Add RelicatedComponentList first so it gets updated as we add others.
     registry.emplace<ReplicatedComponentList>(newEntity);
 
-    registry.emplace<EntityType>(newEntity, EntityType::DynamicObject);
-    registry.emplace<Name>(newEntity, name);
+    // Add the given components.
+    for (const auto& componentVariant : components) {
+        std::visit([&](const auto& component) {
+            using T = remove_cv_ref<decltype(component)>;
+            registry.emplace<T>(newEntity, component);
+        }, componentVariant);
+    }
 
-    registry.emplace<Position>(newEntity, position);
+    // Add any additional components based on those that were added.
+    // Note: Be careful with holding onto references here. If components 
+    //       are added to the same group, the ref will be invalidated.
 
-    registry.emplace<AnimationState>(newEntity, animationState);
+    // Note: We only add entities to the locator (and replicate them to clients)
+    //       if they have both Position and AnimationState. If we ever need 
+    //       to replicate entities that don't have AnimationState, revisit this.
+    // If the entity has a position and animation state, add collision and 
+    // add the entity to the locator.
+    const auto [position, animationState]
+        = registry.try_get<Position, AnimationState>(newEntity);
+    if (position && animationState) {
+        const ObjectSpriteSet& spriteSet{
+            spriteData.getObjectSpriteSet(animationState->spriteSetID)};
+        const Sprite* sprite{spriteSet.sprites[animationState->spriteIndex]};
 
-    // Note: The server doesn't have any need for a Sprite component on
-    //       entities, we just derive it from AnimationState.
-    const ObjectSpriteSet& spriteSet{
-        spriteData.getObjectSpriteSet(animationState.spriteSetID)};
-    const Sprite& sprite{*(spriteSet.sprites[animationState.spriteIndex])};
+        const Collision& collision{registry.emplace<Collision>(
+            newEntity, sprite->modelBounds,
+            Transforms::modelToWorldCentered(sprite->modelBounds, *position))};
 
-    // Note: Every entity needs a Collision because there may be cases where 
-    //       they collide with something, but the collision logic doesn't let 
-    //       e.g. players collide with other players.
-    const Collision& collision{registry.emplace<Collision>(
-        newEntity, sprite.modelBounds,
-        Transforms::modelToWorldCentered(sprite.modelBounds,
-                                         registry.get<Position>(newEntity)))};
-
-    // Start tracking the entity in the locator.
-    // Note: Since the entity was added to the locator, clients 
-    //       will be told by ClientAOISystem to construct it.
-    entityLocator.setEntityLocation(newEntity, collision.worldBounds);
+        // Note: Since the entity was added to the locator, clients 
+        //       will be told by ClientAOISystem to replicate it.
+        entityLocator.setEntityLocation(newEntity, collision.worldBounds);
+    }
 
     registry.emplace<InitScript>(newEntity, initScript);
 

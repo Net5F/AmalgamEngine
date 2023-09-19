@@ -23,6 +23,7 @@ target_sources(SharedLib
         Public/Log.h
         Public/Paths.h
         Public/PeriodicCaller.h
+        Public/RemoveCvRef.h
         Public/SDLHelpers.h
         Public/Serialize.h
         Public/SerializeBuffer.h

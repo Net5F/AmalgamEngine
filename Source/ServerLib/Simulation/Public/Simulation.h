@@ -4,13 +4,12 @@
 #include "InteractionRequest.h"
 #include "ClientConnectionSystem.h"
 #include "NceLifetimeSystem.h"
+#include "ComponentUpdateSystem.h"
 #include "TileUpdateSystem.h"
-#include "SpriteUpdateSystem.h"
 #include "InputSystem.h"
 #include "MovementSystem.h"
 #include "ClientAOISystem.h"
 #include "MovementSyncSystem.h"
-#include "ComponentSyncSystem.h"
 #include "ChunkStreamingSystem.h"
 #include "ScriptDataSystem.h"
 #include "MapSaveSystem.h"
@@ -116,13 +115,12 @@ private:
     //-------------------------------------------------------------------------
     ClientConnectionSystem clientConnectionSystem;
     NceLifetimeSystem nceLifetimeSystem;
+    ComponentUpdateSystem componentUpdateSystem;
     TileUpdateSystem tileUpdateSystem;
-    SpriteUpdateSystem spriteUpdateSystem;
     InputSystem inputSystem;
     MovementSystem movementSystem;
     ClientAOISystem clientAOISystem;
     MovementSyncSystem movementSyncSystem;
-    ComponentSyncSystem componentSyncSystem;
     ChunkStreamingSystem chunkStreamingSystem;
     ScriptDataSystem scriptDataSystem;
     MapSaveSystem mapSaveSystem;

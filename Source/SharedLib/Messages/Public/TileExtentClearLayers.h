@@ -20,6 +20,9 @@ public:
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::TileExtentClearLayers};
 
+    //--------------------------------------------------------------------------
+    // Networked data
+    //--------------------------------------------------------------------------
     /** The tiles to update. */
     TileExtent tileExtent{};
 
@@ -27,7 +30,7 @@ public:
     std::array<bool, TileLayer::Type::Count> layerTypesToClear{};
 
     //--------------------------------------------------------------------------
-    // Non-replicated data
+    // Local data
     //--------------------------------------------------------------------------
     /**
      * The network ID of the client that sent this message.

@@ -1,11 +1,14 @@
 #pragma once
 
 #include "OSEventHandler.h"
+#include "NetworkDefs.h"
 
 namespace AM
 {
 struct TileUpdateRequest;
 struct TileExtent;
+struct EntityInitRequest;
+struct ComponentUpdateRequest;
 
 namespace Server
 {
@@ -46,9 +49,14 @@ public:
     virtual void afterMovement() = 0;
 
     /**
-     * Called after all entity movement state has been sent to the clients.
+     * Called after all relevant state has been sent to the clients.
      */
-    virtual void afterMovementSync() = 0;
+    virtual void afterClientSync() = 0;
+
+    /**
+     * Called after all other systems.
+     */
+    virtual void afterAll() = 0;
 
     /**
      * See OSEventHandler for details.
@@ -61,15 +69,20 @@ public:
     //-------------------------------------------------------------------------
     // Simulation System Hooks (Hooks into engine systems)
     //-------------------------------------------------------------------------
-    /**
-     * Called by TileUpdateSystem when a tile update request is received,
-     * before applying the update.
-     * Allows the project to place constraints on map modifications, such as
-     * requiring certain permissions, or only allowing updates to certain areas.
-     *
-     * @return true if the given extent is editable, else false.
-     */
-    virtual bool isExtentEditable(const TileExtent& tileExtent) const = 0;
+    // These functions allow the project to place constraints on various 
+    // World state modifications.
+    /** @return true if the given extent is editable, else false. */
+    virtual bool isTileExtentEditable(NetworkID netID,
+                                      const TileExtent& tileExtent) const
+        = 0;
+    /** @return true if the given request is valid, else false. */
+    virtual bool isEntityInitRequestValid(
+        const EntityInitRequest& entityInitRequest) const
+        = 0;
+    /** @return true if the given request is valid, else false. */
+    virtual bool isComponentUpdateRequestValid(
+        const ComponentUpdateRequest& componentUpdateRequest) const
+        = 0;
 };
 
 } // namespace Server

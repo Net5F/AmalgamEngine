@@ -17,6 +17,9 @@ public:
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{EngineMessageType::TileRemoveLayer};
 
+    //--------------------------------------------------------------------------
+    // Networked data
+    //--------------------------------------------------------------------------
     /** The X coordinate of the tile to update. */
     int tileX{0};
 
@@ -38,7 +41,7 @@ public:
     Uint8 spriteIndex{0};
 
     //--------------------------------------------------------------------------
-    // Non-replicated data
+    // Local data
     //--------------------------------------------------------------------------
     /**
      * The network ID of the client that sent this message.

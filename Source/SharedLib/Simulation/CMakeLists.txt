@@ -18,18 +18,18 @@ target_sources(SharedLib
         Public/DiscreteExtent.h
         Public/DiscreteImpl.h
         Public/DiscretePosition.h
+        Public/EngineComponentLists.h
         Public/EngineInteractionType.h
         Public/EntityLocator.h
-        Public/EntityType.h
         Public/MovementHelpers.h
         Public/Ray.h
         Public/Wall.h
         Public/Components/AnimationState.h
         Public/Components/Camera.h
         Public/Components/Collision.h
-        Public/Components/EngineComponentLists.h
         Public/Components/Input.h
         Public/Components/Interaction.h
+        Public/Components/IsClientEntity.h
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h

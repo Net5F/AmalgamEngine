@@ -16,7 +16,7 @@ struct ComponentUpdate {
     // The EngineMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::EntityUpdate};
+        EngineMessageType::ComponentUpdate};
 
     /** The tick that this update corresponds to. */
     Uint32 tickNum{0};

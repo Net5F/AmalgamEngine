@@ -128,7 +128,7 @@ void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
 {
     // If the project says the tile isn't editable, skip this request.
     if ((extension != nullptr)
-        && !(extension->isExtentEditable(
+        && !(extension->isTileExtentEditable(addLayerRequest.netID,
             {addLayerRequest.tileX, addLayerRequest.tileY, 1, 1}))) {
         return;
     }
@@ -161,7 +161,7 @@ void TileUpdateSystem::remTileLayer(const TileRemoveLayer& remLayerRequest)
 {
     // If the project says the tile isn't editable, skip this request.
     if ((extension != nullptr)
-        && !(extension->isExtentEditable(
+        && !(extension->isTileExtentEditable(remLayerRequest.netID,
             {remLayerRequest.tileX, remLayerRequest.tileY, 1, 1}))) {
         return;
     }
@@ -192,7 +192,7 @@ void TileUpdateSystem::clearTileLayers(const TileClearLayers& clearLayersRequest
 {
     // If the project says the tile isn't editable, skip this request.
     if ((extension != nullptr)
-        && !(extension->isExtentEditable(
+        && !(extension->isTileExtentEditable(clearLayersRequest.netID,
             {clearLayersRequest.tileX, clearLayersRequest.tileY, 1, 1}))) {
         return;
     }
@@ -207,7 +207,9 @@ void TileUpdateSystem::clearExtentLayers(
 {
     // If the project says the extent isn't editable, skip this request.
     if ((extension != nullptr)
-        && !(extension->isExtentEditable(clearExtentLayersRequest.tileExtent))) {
+        && !(extension->isTileExtentEditable(
+            clearExtentLayersRequest.netID,
+            clearExtentLayersRequest.tileExtent))) {
         return;
     }
 

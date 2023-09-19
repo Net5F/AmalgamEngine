@@ -19,7 +19,8 @@ enum class EngineMessageType : Uint8 {
     ConnectionRequest,
     InputChangeRequest,
     ChunkUpdateRequest,
-    DynamicObjectInitRequest,
+    EntityInitRequest,
+    ComponentUpdateRequest,
     InitScriptRequest,
     InteractionRequest,
 
@@ -30,7 +31,7 @@ enum class EngineMessageType : Uint8 {
     MovementUpdate,
     ChunkUpdate,
     EntityInit,
-    EntityUpdate,
+    ComponentUpdate,
     InitScriptResponse,
 
     // Bidirectional Messages
@@ -39,7 +40,6 @@ enum class EngineMessageType : Uint8 {
     TileClearLayers,
     TileExtentClearLayers,
     EntityDelete,
-    SpriteChange,
 
     // We reserve values 0 - 124. The project can start at 125.
     PROJECT_START = 125

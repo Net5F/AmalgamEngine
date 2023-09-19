@@ -38,6 +38,11 @@ public:
     virtual void afterMovement() = 0;
 
     /**
+     * Called after all other systems.
+     */
+    virtual void afterAll() = 0;
+
+    /**
      * See OSEventHandler for details.
      *
      * Note: Simulation will pass events to this class first. If the event is

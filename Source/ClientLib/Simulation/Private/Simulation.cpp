@@ -23,11 +23,11 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
                          currentTick}
 , chunkUpdateSystem{world, network}
 , tileUpdateSystem{world, network}
-, spriteUpdateSystem{*this, world, network, inSpriteData}
 , entityLifetimeSystem{*this, world, inSpriteData, network}
 , playerInputSystem{*this, world, network}
 , playerMovementSystem{*this, world, network}
 , npcMovementSystem{*this, world, network, inSpriteData}
+, componentUpdateSystem{*this, world, network, inSpriteData}
 , cameraSystem{world}
 {
     // Initialize our entt groups.
@@ -99,9 +99,6 @@ void Simulation::tick()
         // Process tile updates from the server.
         tileUpdateSystem.updateTiles();
 
-        // Process sprite updates from the server.
-        spriteUpdateSystem.updateSprites();
-
         // Call the project's pre-movement logic.
         if (extension != nullptr) {
             extension->afterMapAndConnectionUpdates();
@@ -122,12 +119,22 @@ void Simulation::tick()
         // Process NPC movement.
         npcMovementSystem.updateNpcs();
 
-        // Move all cameras to their new positions.
-        cameraSystem.moveCameras();
-
         // Call the project's post-movement logic.
         if (extension != nullptr) {
             extension->afterMovement();
+        }
+
+        // Process component updates from the server.
+        // Note: We do this last because the state that we receive is the 
+        //       final state for this tick.
+        componentUpdateSystem.processUpdates();
+
+        // Move all cameras to their new positions.
+        cameraSystem.moveCameras();
+
+        // Call the project's post-everything logic.
+        if (extension != nullptr) {
+            extension->afterAll();
         }
 
         currentTick++;

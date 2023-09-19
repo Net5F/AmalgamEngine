@@ -3,7 +3,7 @@ target_sources(ServerLib
 		Private/ChunkStreamingSystem.cpp
 		Private/ClientAOISystem.cpp
 		Private/ClientConnectionSystem.cpp
-		Private/ComponentSyncSystem.cpp
+		Private/ComponentUpdateSystem.cpp
 		Private/InputSystem.cpp
 		Private/MapSaveSystem.cpp
 		Private/MovementSyncSystem.cpp
@@ -11,7 +11,6 @@ target_sources(ServerLib
 		Private/NceLifetimeSystem.cpp
 		Private/ScriptDataSystem.cpp
 		Private/Simulation.cpp
-		Private/SpriteUpdateSystem.cpp
 		Private/TileUpdateSystem.cpp
 		Private/World.cpp
 		Private/SpriteData/SpriteData.cpp
@@ -20,7 +19,7 @@ target_sources(ServerLib
 		Public/ChunkStreamingSystem.h
 		Public/ClientAOISystem.h
 		Public/ClientConnectionSystem.h
-		Public/ComponentSyncSystem.h
+		Public/ComponentUpdateSystem.h
 		Public/EnttGroups.h
 		Public/EventSorter.h
 		Public/InputSystem.h
@@ -33,10 +32,8 @@ target_sources(ServerLib
 		Public/Simulation.h
 		Public/SimulationExDependencies.h
 		Public/SpawnStrategy.h
-		Public/SpriteUpdateSystem.h
 		Public/TileUpdateSystem.h
 		Public/World.h
-		Public/Components/AnimationStateNeedsSync.h
 		Public/Components/ClientSimData.h
 		Public/Components/InitScript.h
 		Public/Components/MovementStateNeedsSync.h

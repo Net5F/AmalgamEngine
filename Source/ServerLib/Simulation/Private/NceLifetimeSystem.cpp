@@ -15,8 +15,8 @@ namespace Server
 NceLifetimeSystem::NceLifetimeSystem(World& inWorld, Network& inNetwork)
 : world{inWorld}
 , extension{nullptr}
-, objectReInitQueue{}
-, objectInitRequestQueue{inNetwork.getEventDispatcher()}
+, entityReInitQueue{}
+, entityInitRequestQueue{inNetwork.getEventDispatcher()}
 , deleteQueue{inNetwork.getEventDispatcher()}
 {
 }
@@ -26,70 +26,67 @@ void NceLifetimeSystem::setExtension(ISimulationExtension* inExtension)
     extension = std::move(inExtension);
 }
 
-void NceLifetimeSystem::processUpdates()
+void NceLifetimeSystem::processUpdateRequests()
 {
     // Process any entities that are waiting for re-initialization.
-    while (!(objectReInitQueue.empty())) {
-        DynamicObjectInitRequest& queuedObjectInit{objectReInitQueue.front()};
-        initDynamicObject(queuedObjectInit.entity, queuedObjectInit);
-        objectReInitQueue.pop();
+    while (!(entityReInitQueue.empty())) {
+        EntityInitRequest& queuedEntityInit{entityReInitQueue.front()};
+        initEntity(queuedEntityInit.entity, queuedEntityInit);
+        entityReInitQueue.pop();
     }
 
     // If we've been requested to create an entity, create it.
-    DynamicObjectInitRequest objectCreateRequest{};
-    while (objectInitRequestQueue.pop(objectCreateRequest)) {
-        createDynamicObject(objectCreateRequest);
+    EntityInitRequest entityCreateRequest{};
+    while (entityInitRequestQueue.pop(entityCreateRequest)) {
+        createEntity(entityCreateRequest);
     }
 
     // TODO: Handle EntityDelete
 }
 
-void NceLifetimeSystem::createDynamicObject(
-    const DynamicObjectInitRequest& objectInitRequest)
+void NceLifetimeSystem::createEntity(
+    const EntityInitRequest& entityInitRequest)
 {
-    // If the project says the area isn't editable, skip this request.
-    TilePosition entityTilePos{objectInitRequest.position.asTilePosition()};
+    // If the project says the request isn't valid, skip it.
     if ((extension != nullptr)
-        && !(extension->isExtentEditable(
-            {entityTilePos.x, entityTilePos.x, 1, 1}))) {
+        && !(extension->isEntityInitRequestValid(entityInitRequest))) {
         return;
     }
 
     // If the message contains an entity ID, re-initialize the given entity.
-    if (objectInitRequest.entity != entt::null) {
+    if (entityInitRequest.entity != entt::null) {
         // Double-check that the ID is actually in use.
-        if (world.entityIDIsInUse(objectInitRequest.entity)) {
+        if (world.entityIDIsInUse(entityInitRequest.entity)) {
             // This is an existing entity. Remove all of its components. 
             for (auto [id, storage] : world.registry.storage()) {
-                storage.remove(objectInitRequest.entity);
+                storage.remove(entityInitRequest.entity);
             }
 
             // Remove it from the entity locator.
-            world.entityLocator.removeEntity(objectInitRequest.entity);
+            world.entityLocator.removeEntity(entityInitRequest.entity);
 
             // Queue an init for next tick.
             // Note: Since the entity was removed from the locator, AOISystem
             //       will tell nearby clients to delete it. Then, when we re-
             //       init it, AOISystem will send them the new data.
-            objectReInitQueue.push(objectInitRequest);
+            entityReInitQueue.push(entityInitRequest);
 
-            LOG_INFO("Re-initialized dynamic object with entityID: %u",
-                     objectInitRequest.entity);
+            LOG_INFO("Re-initialized entity with entityID: %u",
+                     entityInitRequest.entity);
         }
     }
     else {
         // No ID, create a new entity and initialize it.
-        initDynamicObject(entt::null, objectInitRequest);
+        initEntity(entt::null, entityInitRequest);
     }
 }
 
-void NceLifetimeSystem::initDynamicObject(entt::entity newEntity,
-    const DynamicObjectInitRequest& objectInitRequest)
+void NceLifetimeSystem::initEntity(entt::entity newEntity,
+    const EntityInitRequest& entityInitRequest)
 {
-    world.constructDynamicObject(Name{objectInitRequest.name},
-                                 objectInitRequest.position,
-                                 objectInitRequest.animationState,
-                                 InitScript{objectInitRequest.initScript});
+    world.constructEntity(entityInitRequest.components,
+                          InitScript{entityInitRequest.initScript},
+                          entityInitRequest.entity);
 }
 
 } // End namespace Server

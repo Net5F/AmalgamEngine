@@ -9,14 +9,14 @@ struct Velocity {
     static constexpr float DEFAULT_MAX_VELOCITY{5};
 
     //--------------------------------------------------------------------------
-    // Replicated data
+    // Networked data
     //--------------------------------------------------------------------------
     float x{0};
     float y{0};
     float z{0};
 
     //--------------------------------------------------------------------------
-    // Non-replicated data
+    // Local data
     //--------------------------------------------------------------------------
     float maxX{DEFAULT_MAX_VELOCITY};
     float maxY{DEFAULT_MAX_VELOCITY};

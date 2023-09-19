@@ -3,9 +3,9 @@
 #include "boost/mp11/list.hpp"
 
 // Use the project's ProjectComponentLists, if one is provided.
-//#if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
-//#include "Override/ProjectComponentLists.h"
-//#else
+#if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
+#include "Override/ProjectComponentLists.h"
+#else
 namespace AM
 {
 namespace ProjectComponentLists
@@ -39,4 +39,4 @@ using ObservedComponentMap = boost::mp11::mp_list<>;
 } // End namespace ProjectComponentLists
 } // End namespace AM
 
-//#endif // defined(AM_OVERRIDE_CONFIG)
+#endif // defined(AM_OVERRIDE_CONFIG)

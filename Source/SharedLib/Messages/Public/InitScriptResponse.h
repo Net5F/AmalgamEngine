@@ -28,6 +28,9 @@ struct InitScriptResponse {
         string. Only checked in debug builds. */
     static constexpr std::size_t MAX_SCRIPT_LENGTH{10000};
 
+    //--------------------------------------------------------------------------
+    // Networked data
+    //--------------------------------------------------------------------------
     /** The ID of the entity that this init script is for. */
     entt::entity entity{entt::null};
 
@@ -35,7 +38,7 @@ struct InitScriptResponse {
     std::string initScript{};
 
     //--------------------------------------------------------------------------
-    // Non-replicated data
+    // Local data
     //--------------------------------------------------------------------------
     /**
      * The network ID of the client that sent this message.

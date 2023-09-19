@@ -13,6 +13,7 @@
 #include "SDLHelpers.h"
 #include "Transforms.h"
 #include "Config.h"
+#include "RemoveCvRef.h"
 #include "entt/entity/registry.hpp"
 #include <variant>
 #include <string_view>
@@ -21,9 +22,6 @@ namespace AM
 {
 namespace Client
 {
-template<class T>
-using remove_cv_ref =
-    typename std::remove_cv<typename std::remove_reference<T>::type>::type;
 
 EntityLifetimeSystem::EntityLifetimeSystem(Simulation& inSimulation, World& inWorld,
                                      SpriteData& inSpriteData,
@@ -124,25 +122,31 @@ void EntityLifetimeSystem::processEntityInit(const EntityInit& entityInit)
         std::visit([&](const auto& component) {
             using T = remove_cv_ref<decltype(component)>;
             registry.emplace<T>(newEntity, component);
+            std::size_t compIndex{
+                boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
         }, componentVariant);
     }
     
     // Add any client-only or non-replicated components.
     // Note: Be careful with holding onto references here. If components 
     //       are added to the same group, the ref will be invalidated.
-    if (auto position = registry.try_get<Position>(newEntity)) {
+    if (const auto* position = registry.try_get<Position>(newEntity)) {
         registry.emplace<PreviousPosition>(newEntity, *position);
     }
-    if (auto animationState = registry.try_get<AnimationState>(newEntity)) {
+
+    const auto* position{registry.try_get<Position>(newEntity)};
+    const auto* animationState{registry.try_get<AnimationState>(newEntity)};
+    if ((position != nullptr) && (animationState != nullptr)) {
         const Sprite* sprite{
             spriteData.getObjectSpriteSet(animationState->spriteSetID)
                 .sprites[animationState->spriteIndex]};
         registry.emplace<Sprite>(newEntity, *sprite);
 
+        // When entities have a Position and AnimationState, the server gives 
+        // them a Collision. It isn't sent, so add it manually.
         registry.emplace<Collision>(
             newEntity, sprite->modelBounds,
-            Transforms::modelToWorldCentered(
-                sprite->modelBounds, registry.get<Position>(newEntity)));
+            Transforms::modelToWorldCentered(sprite->modelBounds, *position));
     }
 
     // If this is the player entity, add any client components specific to it.

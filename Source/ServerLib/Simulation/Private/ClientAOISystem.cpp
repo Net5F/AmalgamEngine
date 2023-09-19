@@ -5,16 +5,11 @@
 #include "Serialize.h"
 #include "ClientSimData.h"
 #include "BoundingBox.h"
-#include "EntityType.h"
-#include "Name.h"
-#include "Sprite.h"
-#include "SpriteSets.h"
-#include "Interaction.h"
-#include "EntityDelete.h"
+#include "Cylinder.h"
 #include "ReplicatedComponent.h"
 #include "EntityInit.h"
+#include "EntityDelete.h"
 #include "ReplicatedComponentList.h"
-#include "Cylinder.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include "Tracy.hpp"
@@ -42,7 +37,13 @@ void addComponentsToVector(entt::registry& registry, entt::entity entity,
             boost::mp11::mp_size<ReplicatedComponentTypes>>(
             componentIndex, [&](auto I) {
                 using T = boost::mp11::mp_at_c<ReplicatedComponentTypes, I>;
-                componentVec.emplace_back(registry.get<T>(entity));
+                if constexpr (std::is_empty_v<T>) {
+                    // Note: Can't registry.get() empty types.
+                    componentVec.push_back(T{});
+                }
+                else {
+                    componentVec.push_back(registry.get<T>(entity));
+                }
             });
     }
 }
@@ -72,7 +73,7 @@ void ClientAOISystem::updateAOILists()
         // Get the list of entities that are in this entity's AOI.
         std::vector<entt::entity>& currentAOIEntities{
             world.entityLocator.getEntities(
-                {position, SharedConfig::AOI_RADIUS})};
+                Cylinder{position, SharedConfig::AOI_RADIUS})};
 
         // Sort the list.
         std::sort(currentAOIEntities.begin(), currentAOIEntities.end());

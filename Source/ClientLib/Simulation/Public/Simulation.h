@@ -5,11 +5,11 @@
 #include "ServerConnectionSystem.h"
 #include "ChunkUpdateSystem.h"
 #include "TileUpdateSystem.h"
-#include "SpriteUpdateSystem.h"
 #include "EntityLifetimeSystem.h"
 #include "PlayerInputSystem.h"
 #include "PlayerMovementSystem.h"
 #include "NpcMovementSystem.h"
+#include "ComponentUpdateSystem.h"
 #include "CameraSystem.h"
 #include "Timer.h"
 #include "ReplicationTickOffset.h"
@@ -110,11 +110,11 @@ private:
     ServerConnectionSystem serverConnectionSystem;
     ChunkUpdateSystem chunkUpdateSystem;
     TileUpdateSystem tileUpdateSystem;
-    SpriteUpdateSystem spriteUpdateSystem;
     EntityLifetimeSystem entityLifetimeSystem;
     PlayerInputSystem playerInputSystem;
     PlayerMovementSystem playerMovementSystem;
     NpcMovementSystem npcMovementSystem;
+    ComponentUpdateSystem componentUpdateSystem;
     CameraSystem cameraSystem;
 };
 

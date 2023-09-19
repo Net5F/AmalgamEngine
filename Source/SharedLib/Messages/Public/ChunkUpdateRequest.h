@@ -22,13 +22,13 @@ public:
     static constexpr std::size_t MAX_CHUNKS{10};
 
     //--------------------------------------------------------------------------
-    // Replicated data
+    // Networked data
     //--------------------------------------------------------------------------
     /** The chunks that the client is requesting. */
     std::vector<ChunkPosition> requestedChunks;
 
     //--------------------------------------------------------------------------
-    // Non-replicated data
+    // Local data
     //--------------------------------------------------------------------------
     /**
      * The network ID of the client that sent this message.
