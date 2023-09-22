@@ -6,7 +6,7 @@
 #include "Input.h"
 #include "ClientSimData.h"
 #include "Log.h"
-#include "Tracy.hpp"
+#include "tracy/Tracy.hpp"
 #include <memory>
 
 namespace AM

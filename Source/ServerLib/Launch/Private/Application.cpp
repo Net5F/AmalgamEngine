@@ -2,7 +2,7 @@
 #include "SharedConfig.h"
 #include "Log.h"
 
-#include "Tracy.hpp"
+#include "tracy/Tracy.hpp"
 #include <functional>
 #include <string>
 #include <iostream>

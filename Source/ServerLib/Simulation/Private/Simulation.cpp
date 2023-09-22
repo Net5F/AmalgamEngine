@@ -7,7 +7,7 @@
 #include "UserErrorString.h"
 #include "Log.h"
 #include "Timer.h"
-#include "Tracy.hpp"
+#include "tracy/Tracy.hpp"
 
 namespace AM
 {
@@ -134,6 +134,8 @@ void Simulation::tick()
     }
 
     currentTick++;
+
+    FrameMark;
 }
 
 void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)

@@ -4,7 +4,7 @@
 #include "ISimulationExtension.h"
 #include "ClientSimData.h"
 #include "AMAssert.h"
-#include "Tracy.hpp"
+#include "tracy/Tracy.hpp"
 #include <variant>
 
 namespace AM

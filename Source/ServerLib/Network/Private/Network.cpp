@@ -7,7 +7,6 @@
 #include "NetworkStats.h"
 #include "IMessageProcessorExtension.h"
 #include <SDL_net.h>
-#include "Tracy.hpp"
 #include <algorithm>
 #include <atomic>
 

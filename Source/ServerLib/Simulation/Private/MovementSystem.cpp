@@ -10,7 +10,7 @@
 #include "SharedConfig.h"
 #include "Transforms.h"
 #include "Log.h"
-#include "Tracy.hpp"
+#include "tracy/Tracy.hpp"
 
 namespace AM
 {

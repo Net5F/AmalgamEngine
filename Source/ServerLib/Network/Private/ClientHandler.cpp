@@ -4,7 +4,6 @@
 #include "SocketSet.h"
 #include "Config.h"
 #include "Log.h"
-#include "Tracy.hpp"
 #include <shared_mutex>
 #include <mutex>
 #include <memory>

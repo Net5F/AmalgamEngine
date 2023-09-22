@@ -12,7 +12,7 @@
 #include "SharedConfig.h"
 #include "Log.h"
 #include <SDL_rect.h>
-#include "Tracy.hpp"
+#include "tracy/Tracy.hpp"
 #include <vector>
 
 namespace AM

@@ -6,7 +6,7 @@
 #include "CircularBuffer.h"
 #include "Timer.h"
 #include "readerwriterqueue.h"
-#include "Tracy.hpp"
+#include "tracy/Tracy.hpp"
 #include <memory>
 #include <array>
 #include <mutex>

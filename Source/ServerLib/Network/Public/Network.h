@@ -9,7 +9,7 @@
 #include "Peer.h"
 #include "ByteTools.h"
 #include "QueuedEvents.h"
-#include "Tracy.hpp"
+#include "tracy/Tracy.hpp"
 #include <memory>
 #include <cstddef>
 #include <unordered_map>

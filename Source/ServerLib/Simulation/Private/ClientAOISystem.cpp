@@ -12,7 +12,7 @@
 #include "ReplicatedComponentList.h"
 #include "SharedConfig.h"
 #include "Log.h"
-#include "Tracy.hpp"
+#include "tracy/Tracy.hpp"
 #include "boost/mp11/list.hpp"
 #include "boost/mp11/algorithm.hpp"
 #include <algorithm>

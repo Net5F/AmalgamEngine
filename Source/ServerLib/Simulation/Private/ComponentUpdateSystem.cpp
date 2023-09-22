@@ -16,6 +16,7 @@
 #include "boost/mp11/algorithm.hpp"
 #include "boost/mp11/map.hpp"
 #include "boost/mp11/bind.hpp"
+#include "tracy/Tracy.hpp"
 
 namespace AM
 {
@@ -78,6 +79,8 @@ ComponentUpdateSystem::ComponentUpdateSystem(Simulation& inSimulation,
 
 void ComponentUpdateSystem::processUpdateRequests()
 {
+    ZoneScoped;
+
     entt::registry& registry{world.registry};
 
     // Process any waiting update requests.
@@ -104,6 +107,8 @@ void ComponentUpdateSystem::processUpdateRequests()
 
 void ComponentUpdateSystem::sendUpdates()
 {
+    ZoneScoped;
+
     entt::registry& registry{world.registry};
 
     // Note: We build a message for each updated entity, even if there aren't 

@@ -120,6 +120,8 @@ option(TRACY_NO_FRAME_IMAGE  "Disable the frame image support and its thread" ON
 option(TRACY_NO_SYSTEM_TRACING  "Disable systrace sampling" ON)
 # (Disabled because the remote server doesn't support the default timers.)
 option(TRACY_TIMER_FALLBACK "Use lower resolution timers" ON)
+# (Disabled because it was failing to compile.)
+option(TRACY_NO_CRASH_HANDLER "Disable crash handling" ON)
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/tracy/"
                  "${PROJECT_BINARY_DIR}/Libraries/tracy/"
                  EXCLUDE_FROM_ALL)
