@@ -81,12 +81,6 @@ public:
         before sending. */
     static constexpr std::size_t BATCH_COMPRESSION_THRESHOLD{50};
 
-    /** The "level" value passed to zlib's compression function when
-        compressing message batches.
-        Can be 0 - 9, with 0 being no compression, 1 being fastest, and 9 being
-        most compressed. 6 is the default. */
-    static constexpr int BATCH_COMPRESSION_LEVEL{9};
-
     /** The max size that an uncompressed message batch can be.
         Used to allocate our message buffers.
 

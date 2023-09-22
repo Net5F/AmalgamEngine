@@ -44,7 +44,7 @@ using ReplicatedComponentTypes
  */
 using ObservedComponentMap = boost::mp11::mp_list<
     boost::mp11::mp_list<IsClientEntity, IsClientEntity>,
-    //boost::mp11::mp_list<Input, Input, Position, Velocity, Rotation>,
+    boost::mp11::mp_list<Input, Input, Position, Velocity, Rotation>,
     boost::mp11::mp_list<Name, Name>,
     boost::mp11::mp_list<AnimationState, AnimationState>,
     boost::mp11::mp_list<Interaction, Interaction>>;

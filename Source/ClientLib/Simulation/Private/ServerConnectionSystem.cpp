@@ -145,10 +145,10 @@ void ServerConnectionSystem::initMockSimState()
             .sprites[animationState.spriteIndex]};
     registry.emplace<Sprite>(newEntity, *sprite);
 
-    const Collision& collision{registry.emplace<Collision>(
+    registry.emplace<Collision>(
         newEntity, sprite->modelBounds,
-        Transforms::modelToWorldCentered(
-            sprite->modelBounds, registry.get<Position>(newEntity)))};
+        Transforms::modelToWorldCentered(sprite->modelBounds,
+                                         registry.get<Position>(newEntity)));
 
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};

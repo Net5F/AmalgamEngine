@@ -23,6 +23,8 @@ target_sources(SharedLib
         Public/EntityLocator.h
         Public/MovementHelpers.h
         Public/Ray.h
+        Public/ReplicatedComponent.h
+        Public/ReplicatedComponentTools.h
         Public/Wall.h
         Public/Components/AnimationState.h
         Public/Components/Camera.h

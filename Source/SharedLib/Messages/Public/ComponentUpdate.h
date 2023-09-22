@@ -25,7 +25,7 @@ struct ComponentUpdate {
     entt::entity entity{entt::null};
 
     /** The entity's updated components. */
-    std::vector<ReplicatedComponent> components;
+    std::vector<ReplicatedComponent> components{};
 };
 
 template<typename S>

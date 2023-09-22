@@ -319,7 +319,6 @@ void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
                 break;
             }
             case TileLayer::Type::FloorCovering: {
-                const auto& floorCoverings{tile.getFloorCoverings()};
                 const auto& spriteSet{spriteData.getFloorCoveringSpriteSet(
                     paletteEntry.spriteSetID)};
                 tile.getFloorCoverings().emplace_back(
@@ -346,13 +345,15 @@ void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
                 break;
             }
             case TileLayer::Type::Object: {
-                const std::vector<ObjectTileLayer>& objects{tile.getObjects()};
                 const auto& spriteSet{
                     spriteData.getObjectSpriteSet(paletteEntry.spriteSetID)};
                 tile.getObjects().emplace_back(
                     &spriteSet,
                     static_cast<Rotation::Direction>(paletteEntry.spriteIndex));
                 tile.rebuildCollision(tileX, tileY);
+                break;
+            }
+            default: {
                 break;
             }
         }

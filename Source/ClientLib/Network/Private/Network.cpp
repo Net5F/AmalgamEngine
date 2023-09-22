@@ -98,6 +98,11 @@ EventDispatcher& Network::getEventDispatcher()
     return eventDispatcher;
 }
 
+Uint32 Network::getLastReceivedTick()
+{
+    return messageProcessor.getLastReceivedTick();
+}
+
 int Network::transferTickAdjustment()
 {
     if (isApplyingTickAdjustment) {

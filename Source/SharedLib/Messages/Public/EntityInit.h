@@ -25,7 +25,7 @@ struct EntityInit {
     entt::entity entity{entt::null};
 
     /** This entity's client-relevant components. */
-    std::vector<ReplicatedComponent> components;
+    std::vector<ReplicatedComponent> components{};
 };
 
 template<typename S>

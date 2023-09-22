@@ -17,7 +17,7 @@ struct IsClientEntity {
 };
 
 template<typename S>
-void serialize(S& serializer, IsClientEntity& isClientEntity)
+void serialize(S&, IsClientEntity&)
 {
     // Note: No data to serialize.
 }

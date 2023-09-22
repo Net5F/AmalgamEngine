@@ -300,10 +300,10 @@ void SpriteDataBase::parseWallSpriteSet(const nlohmann::json& spriteSetJson)
     const Sprite& northeastSprite{getSprite(spriteIDJson[3].get<int>())};
 
     // Save the sprite set in the appropriate vector.
-    WallSpriteSet& spriteSet{wallSpriteSets.emplace_back(
+    wallSpriteSets.emplace_back(
         SpriteSet{displayName, stringID, numericID},
         std::array<std::reference_wrapper<const Sprite>, Wall::Type::Count>{
-            westSprite, northSprite, northwestSprite, northeastSprite})};
+            westSprite, northSprite, northwestSprite, northeastSprite});
 }
 
 void SpriteDataBase::parseObjectSpriteSet(const nlohmann::json& spriteSetJson)

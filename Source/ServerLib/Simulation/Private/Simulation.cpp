@@ -28,7 +28,6 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , inputSystem{*this, world, network}
 , movementSystem{world}
 , clientAOISystem{*this, world, network}
-, movementSyncSystem{*this, world, network}
 , chunkStreamingSystem{world, network}
 , scriptDataSystem{world, network}
 , mapSaveSystem{world}
@@ -111,9 +110,6 @@ void Simulation::tick()
     // Update each client entity's "entities in my AOI" list and send Init/
     // Delete messages.
     clientAOISystem.updateAOILists();
-
-    // Synchronize entity movement state with the clients.
-    movementSyncSystem.sendMovementUpdates();
 
     // Send any updated entity component state to nearby clients.
     componentUpdateSystem.sendUpdates();

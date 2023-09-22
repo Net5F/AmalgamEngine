@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.5)
 
 message(STATUS "Configuring Amalgam Engine Unit Tests")
 
+# Temp: Set to new behavior to avoid warning.
+cmake_policy(SET CMP0135 NEW)
+
 # Configure Catch2.
 if(NOT TARGET Catch2::Catch2)
     message(STATUS "Downloading dependency if not present: Catch2")

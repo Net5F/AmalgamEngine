@@ -9,7 +9,6 @@
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include "Config.h"
-#include "RemoveCvRef.h"
 #include "Log.h"
 #include "Ignore.h"
 #include "AMAssert.h"
@@ -75,8 +74,9 @@ World::World(SpriteData& inSpriteData, sol::state& inLua)
     // will be updated.
     boost::mp11::mp_for_each<ReplicatedComponentTypes>([&](auto I) {
         using T = decltype(I);
-        registry.on_construct<T>().connect<&onComponentConstructed<T>>();
-        registry.on_destroy<T>().connect<&onComponentDestroyed<T>>();
+        registry.on_construct<T>()
+            .template connect<&onComponentConstructed<T>>();
+        registry.on_destroy<T>().template connect<&onComponentDestroyed<T>>();
     });
 
     // When an entity is destroyed, do any necessary cleanup.
@@ -103,7 +103,7 @@ entt::entity World::constructEntity(std::span<const ReplicatedComponent> compone
     // Add the given components.
     for (const auto& componentVariant : components) {
         std::visit([&](const auto& component) {
-            using T = remove_cv_ref<decltype(component)>;
+            using T = std::decay_t<decltype(component)>;
             registry.emplace<T>(newEntity, component);
         }, componentVariant);
     }

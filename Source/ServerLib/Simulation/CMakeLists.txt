@@ -6,7 +6,6 @@ target_sources(ServerLib
 		Private/ComponentUpdateSystem.cpp
 		Private/InputSystem.cpp
 		Private/MapSaveSystem.cpp
-		Private/MovementSyncSystem.cpp
 		Private/MovementSystem.cpp
 		Private/NceLifetimeSystem.cpp
 		Private/ScriptDataSystem.cpp
@@ -25,7 +24,6 @@ target_sources(ServerLib
 		Public/InputSystem.h
 		Public/ISimulationExtension.h
 		Public/MapSaveSystem.h
-		Public/MovementSyncSystem.h
 		Public/MovementSystem.h
 		Public/NceLifetimeSystem.h
 		Public/ScriptDataSystem.h
@@ -36,7 +34,6 @@ target_sources(ServerLib
 		Public/World.h
 		Public/Components/ClientSimData.h
 		Public/Components/InitScript.h
-		Public/Components/MovementStateNeedsSync.h
 		Public/Components/ReplicatedComponentList.h
 		Public/SpriteData/SpriteData.h
 		Public/TileMap/TileMap.h

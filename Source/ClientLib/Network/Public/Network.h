@@ -2,7 +2,6 @@
 
 #include "SharedConfig.h"
 #include "NetworkDefs.h"
-#include "ClientNetworkDefs.h"
 #include "MessageProcessor.h"
 #include "QueuedEvents.h"
 #include "Serialize.h"
@@ -83,6 +82,11 @@ public:
      */
     EventDispatcher& getEventDispatcher();
 
+    /**
+     * Returns the latest tick that we've received an update message for.
+     */
+    Uint32 getLastReceivedTick();
+
     // TODO: Just return the total adjustment and let the sim figure it out.
     /**
      * Returns the amount that the sim tick should be adjusted by.
@@ -97,7 +101,7 @@ public:
     int transferTickAdjustment();
 
     /**
-     * Used for passing us a pointer to the Game's currentTick.
+     * Used for passing us a pointer to the Simulation's currentTick.
      */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 

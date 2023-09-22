@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ClientNetworkDefs.h"
 #include "SharedConfig.h"
 #include "QueuedEvents.h"
 #include "ConnectionResponse.h"

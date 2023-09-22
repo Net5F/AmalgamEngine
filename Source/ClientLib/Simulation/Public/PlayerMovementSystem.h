@@ -1,25 +1,16 @@
 #pragma once
 
-#include <SDL_stdinc.h>
+#include "PlayerMovementUpdate.h"
 #include "QueuedEvents.h"
-#include "MovementUpdate.h"
+#include <SDL_stdinc.h>
 
 namespace AM
 {
-struct Position;
-struct PreviousPosition;
-struct Velocity;
-struct Input;
-struct Rotation;
-struct Collision;
-
 namespace Client
 {
 class Simulation;
 class World;
 class Network;
-
-struct InputHistory;
 
 /**
  * Processes movement update messages for the player's entity and moves the 
@@ -45,48 +36,43 @@ private:
      *
      * @return The tick number of the newest message that we received.
      */
-    Uint32 processPlayerUpdates(Position& position,
-                                PreviousPosition& previousPosition,
-                                Velocity& velocity, Input& input,
-                                InputHistory& inputHistory, Rotation& rotation,
-                                Collision& collision);
+    Uint32 processPlayerUpdates();
 
     /**
-     * Replay any inputs that are from newer ticks than the latestReceivedTick.
+     * Replay any inputs that are from newer ticks than lastUpdateTick.
      */
-    void replayInputs(Uint32 latestReceivedTick, Position& position,
-                      Velocity& velocity, Rotation& rotation,
-                      InputHistory& inputHistory, Collision& collision);
-
-    /**
-     * If receivedTick > currentTick, logs an error.
-     * Used to move a large error print out of a long function.
-     */
-    void checkReceivedTickValidity(Uint32 receivedTick, Uint32 currentTick);
-
-    /**
-     * If tickDiff is larger than the number of elements we have in the
-     * player's input history, logs an error.
-     * Used to move a large error print out of a long function.
-     */
-    void checkTickDiffValidity(Uint32 tickDiff);
+    void replayInputs(Uint32 lastUpdateTick);
 
     /**
      * Processes a single tick of player entity movement.
      *
+     * @param inputStates The input states to use to move the entity.
      * @post The given velocity, position, and boundingBox now reflect the
      *       entity's new position.
      */
-    void movePlayerEntity(Input::StateArr& inputStates, Velocity& velocity,
-                          Position& position, Rotation& rotation,
-                          Collision& collision);
+    void movePlayerEntity(Input::StateArr& inputStates);
+
+    /**
+     * Calls registry.patch() on each movement-related component to trigger 
+     * any on_update callbacks that are connected to them.
+     * We don't patch until the end, because we may update the components 
+     * multiple times before we're done.
+     */
+    void triggerUpdateSignals();
+
+    /** Debug printing, asserting. */
+    void printMismatchInfo(Uint32 lastUpdateTick);
+    void checkReceivedTickValidity(Uint32 updateTick, Uint32 currentTick);
+    void checkTickDiffValidity(Uint32 tickDiff);
 
     /** Used to get the current tick. */
     Simulation& simulation;
     /** Used to access components. */
     World& world;
+    /** Used to get the latest received tick. */
+    Network& network;
 
-    EventQueue<std::shared_ptr<const MovementUpdate>> playerUpdateQueue;
+    EventQueue<PlayerMovementUpdate> playerMovementUpdateQueue;
 };
 
 } // namespace Client

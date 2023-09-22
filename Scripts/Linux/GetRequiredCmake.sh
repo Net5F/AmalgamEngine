@@ -3,7 +3,7 @@
 # This script builds a new enough cmake from source to use for this project.
 # If your OS version is new enough, you won't need to use this.
 
-version=3.17.3
+version=3.24.3
 
 sudo apt install build-essential libssl-dev
 sudo apt purge --auto-remove cmake

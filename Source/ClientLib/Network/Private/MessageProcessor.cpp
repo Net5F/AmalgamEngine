@@ -3,11 +3,9 @@
 #include "Deserialize.h"
 #include "DispatchMessage.h"
 #include "IMessageProcessorExtension.h"
-#include "ClientNetworkDefs.h"
 #include "ExplicitConfirmation.h"
 #include "ConnectionResponse.h"
 #include "UserErrorString.h"
-#include "MovementUpdate.h"
 #include "ChunkUpdate.h"
 #include "EntityInit.h"
 #include "ComponentUpdate.h"
@@ -17,7 +15,11 @@
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
+#include "PlayerMovementUpdate.h"
+#include "NpcMovementUpdate.h"
+#include "ReplicatedComponentTools.h"
 #include "Log.h"
+#include "AMAssert.h"
 
 namespace AM
 {
@@ -26,6 +28,7 @@ namespace Client
 MessageProcessor::MessageProcessor(EventDispatcher& inNetworkEventDispatcher)
 : networkEventDispatcher{inNetworkEventDispatcher}
 , playerEntity{entt::null}
+, lastReceivedTick{0}
 {
 }
 
@@ -50,10 +53,6 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                              networkEventDispatcher);
             break;
         }
-        case EngineMessageType::MovementUpdate: {
-            handleMovementUpdate(messageBuffer, messageSize);
-            break;
-        }
         case EngineMessageType::ChunkUpdate: {
             dispatchMessageSharedPtr<ChunkUpdate>(messageBuffer, messageSize,
                                                   networkEventDispatcher);
@@ -65,18 +64,12 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
             break;
         }
         case EngineMessageType::ComponentUpdate: {
-            dispatchMessage<ComponentUpdate>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+            handleComponentUpdate(messageBuffer, messageSize);
             break;
         }
         case EngineMessageType::InitScriptResponse: {
             dispatchMessage<InitScriptResponse>(messageBuffer, messageSize,
                                         networkEventDispatcher);
-            break;
-        }
-        case EngineMessageType::EntityDelete: {
-            dispatchMessage<EntityDelete>(messageBuffer, messageSize,
-                                          networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {
@@ -99,6 +92,11 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                         networkEventDispatcher);
             break;
         }
+        case EngineMessageType::EntityDelete: {
+            dispatchMessage<EntityDelete>(messageBuffer, messageSize,
+                                          networkEventDispatcher);
+            break;
+        }
         default: {
             // If we don't have a handler for this message type, pass it to
             // the project.
@@ -111,15 +109,17 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
     }
 }
 
+Uint32 MessageProcessor::getLastReceivedTick()
+{
+    return lastReceivedTick;
+}
+
 void MessageProcessor::setExtension(
     std::unique_ptr<IMessageProcessorExtension> inExtension)
 {
     extension = std::move(inExtension);
 }
 
-// TODO: Handle ComponentUpdate and ExplicitConfirmation by updating a 
-//       local latestConfirmedTick. Add a network.getLatestConfirmedTick() 
-//       that gets it from here
 void MessageProcessor::handleExplicitConfirmation(Uint8* messageBuffer,
                                                   std::size_t messageSize)
 {
@@ -127,57 +127,8 @@ void MessageProcessor::handleExplicitConfirmation(Uint8* messageBuffer,
     ExplicitConfirmation explicitConfirmation{};
     Deserialize::fromBuffer(messageBuffer, messageSize, explicitConfirmation);
 
-    // Push confirmations into the NPC update system's queue.
-    for (std::size_t i = 0; i < explicitConfirmation.confirmedTickCount; ++i) {
-        networkEventDispatcher.emplace<NpcUpdate>(
-            NpcUpdateType::ExplicitConfirmation);
-    }
-}
-
-void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer,
-                                            std::size_t messageSize)
-{
-    // Deserialize the message.
-    std::shared_ptr<MovementUpdate> movementUpdate{
-        std::make_shared<MovementUpdate>()};
-    Deserialize::fromBuffer(messageBuffer, messageSize, *movementUpdate);
-
-    // Pull out the vector of entities.
-    const std::vector<MovementState>& entities{movementUpdate->movementStates};
-
-    // Iterate through the entities, checking if there's player or npc data.
-    bool playerFound{false};
-    bool npcFound{false};
-    for (auto entityIt = entities.begin(); entityIt != entities.end();
-         ++entityIt) {
-        entt::entity entity{entityIt->entity};
-
-        if (entity == playerEntity) {
-            // Found the player.
-            networkEventDispatcher.push<std::shared_ptr<const MovementUpdate>>(
-                movementUpdate);
-            playerFound = true;
-        }
-        else if (!npcFound) {
-            // Found a non-player (npc).
-            networkEventDispatcher.emplace<NpcUpdate>(NpcUpdateType::Update,
-                                                      movementUpdate);
-            npcFound = true;
-        }
-
-        // If we found the player and an npc, we can stop looking.
-        if (playerFound && npcFound) {
-            break;
-        }
-    }
-
-    // If we didn't find an NPC and queue an update message, push an
-    // implicit confirmation to show that we've confirmed up to this tick.
-    if (!npcFound) {
-        networkEventDispatcher.emplace<NpcUpdate>(
-            NpcUpdateType::ImplicitConfirmation, nullptr,
-            movementUpdate->tickNum);
-    }
+    // Move lastReceivedTick forward.
+    lastReceivedTick += explicitConfirmation.confirmedTickCount;
 }
 
 void MessageProcessor::handleConnectionResponse(Uint8* messageBuffer,
@@ -191,8 +142,65 @@ void MessageProcessor::handleConnectionResponse(Uint8* messageBuffer,
     // the player.
     playerEntity = connectionResponse.entity;
 
+    // Initialize lastReceivedTick.
+    lastReceivedTick = connectionResponse.tickNum;
+
     // Push the message into any subscribed queues.
     networkEventDispatcher.push<ConnectionResponse>(connectionResponse);
+}
+
+void MessageProcessor::handleComponentUpdate(Uint8* messageBuffer, std::size_t messageSize)
+{
+    // Deserialize the message.
+    ComponentUpdate componentUpdate{};
+    Deserialize::fromBuffer(messageBuffer, messageSize, componentUpdate);
+
+    // If the message's tick is newer than our saved tick, update it.
+    if (componentUpdate.tickNum > lastReceivedTick) {
+        lastReceivedTick = componentUpdate.tickNum;
+    }
+    AM_ASSERT((componentUpdate.tickNum >= lastReceivedTick),
+              "Received ticks out of order. last: %u, new: %u",
+              lastReceivedTick.load(), componentUpdate.tickNum);
+
+    // Give the interceptors a chance to grab components.
+    interceptMovementUpdates(componentUpdate);
+
+    // Push the message into any subscribed queues.
+    networkEventDispatcher.push<ComponentUpdate>(componentUpdate);
+}
+
+void MessageProcessor::interceptMovementUpdates(
+    ComponentUpdate& componentUpdate)
+{
+    // If the update contains our desired components.
+    if (ReplicatedComponentTools::containsTypes<Input, Position, Velocity,
+                                                Rotation>(
+            componentUpdate.components)) {
+        // Find all of the desired components, push them into a new struct, 
+        // and erase them from componentUpdate.
+        PlayerMovementUpdate movementUpdate{componentUpdate.tickNum,
+                                            componentUpdate.entity};
+        auto& components{componentUpdate.components};
+        for (auto it = components.begin(); it != components.end();) {
+            if (std::visit(movementUpdate, *it)) {
+                it = components.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+
+        // If this update is for the player, push a PlayerMovementUpdate.
+        if (componentUpdate.entity == playerEntity) {
+            networkEventDispatcher.push(movementUpdate);
+        }
+        else {
+            // Not for the player, push an NpcMovementUpdate.
+            networkEventDispatcher.push<NpcMovementUpdate>(
+                static_cast<NpcMovementUpdate>(movementUpdate));
+        }
+    }
 }
 
 } // End namespace Client

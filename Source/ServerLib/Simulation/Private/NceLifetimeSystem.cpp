@@ -31,7 +31,7 @@ void NceLifetimeSystem::processUpdateRequests()
     // Process any entities that are waiting for re-initialization.
     while (!(entityReInitQueue.empty())) {
         EntityInitRequest& queuedEntityInit{entityReInitQueue.front()};
-        initEntity(queuedEntityInit.entity, queuedEntityInit);
+        initEntity(queuedEntityInit);
         entityReInitQueue.pop();
     }
 
@@ -77,12 +77,11 @@ void NceLifetimeSystem::createEntity(
     }
     else {
         // No ID, create a new entity and initialize it.
-        initEntity(entt::null, entityInitRequest);
+        initEntity(entityInitRequest);
     }
 }
 
-void NceLifetimeSystem::initEntity(entt::entity newEntity,
-    const EntityInitRequest& entityInitRequest)
+void NceLifetimeSystem::initEntity(const EntityInitRequest& entityInitRequest)
 {
     world.constructEntity(entityInitRequest.components,
                           InitScript{entityInitRequest.initScript},

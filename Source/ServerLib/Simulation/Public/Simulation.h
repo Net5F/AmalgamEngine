@@ -9,7 +9,6 @@
 #include "InputSystem.h"
 #include "MovementSystem.h"
 #include "ClientAOISystem.h"
-#include "MovementSyncSystem.h"
 #include "ChunkStreamingSystem.h"
 #include "ScriptDataSystem.h"
 #include "MapSaveSystem.h"
@@ -120,7 +119,6 @@ private:
     InputSystem inputSystem;
     MovementSystem movementSystem;
     ClientAOISystem clientAOISystem;
-    MovementSyncSystem movementSyncSystem;
     ChunkStreamingSystem chunkStreamingSystem;
     ScriptDataSystem scriptDataSystem;
     MapSaveSystem mapSaveSystem;

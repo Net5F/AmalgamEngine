@@ -40,15 +40,15 @@ endif()
 # Compile with C++20.
 target_compile_features(SharedLib PRIVATE cxx_std_20)
 set_target_properties(SharedLib PROPERTIES CXX_EXTENSIONS OFF)
-# Temp: MSVC needs this to properly set __cplusplus, and we need it to 
-#       be > 2017 for the bitsery extension headers.
-target_compile_options(SharedLib PUBLIC "/Zc:__cplusplus")
 
 # Enable compile warnings.
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(SharedLib PUBLIC -Wall -Wextra)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(SharedLib PUBLIC /W3 /permissive-)
+    # Temp: MSVC needs this to properly set __cplusplus, and we need it to 
+    #       be > 2017 for the bitsery extension headers.
+    target_compile_options(SharedLib PUBLIC "/Zc:__cplusplus")
 endif()
 
 # Build all of the subdirectories.

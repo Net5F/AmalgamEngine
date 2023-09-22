@@ -4,7 +4,6 @@
 #include "Network.h"
 #include "SpriteData.h"
 #include "Collision.h"
-#include "RemoveCvRef.h"
 #include "Transforms.h"
 #include "Log.h"
 
@@ -72,11 +71,9 @@ void ComponentUpdateSystem::processComponentUpdate(
 
     for (const auto& componentVariant : componentUpdate.components) {
         std::visit([&](const auto& component) {
-            using T = remove_cv_ref<decltype(component)>;
+            using T = std::decay_t<decltype(component)>;
             registry.emplace_or_replace<T>(componentUpdate.entity,
                                            component);
-            std::size_t compIndex{
-                boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
         }, componentVariant);
     }
 }

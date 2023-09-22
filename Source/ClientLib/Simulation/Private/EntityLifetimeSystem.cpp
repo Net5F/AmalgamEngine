@@ -13,7 +13,6 @@
 #include "SDLHelpers.h"
 #include "Transforms.h"
 #include "Config.h"
-#include "RemoveCvRef.h"
 #include "entt/entity/registry.hpp"
 #include <variant>
 #include <string_view>
@@ -120,10 +119,8 @@ void EntityLifetimeSystem::processEntityInit(const EntityInit& entityInit)
     // Add any replicated components that the server sent.
     for (const auto& componentVariant : entityInit.components) {
         std::visit([&](const auto& component) {
-            using T = remove_cv_ref<decltype(component)>;
+            using T = std::decay_t<decltype(component)>;
             registry.emplace<T>(newEntity, component);
-            std::size_t compIndex{
-                boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
         }, componentVariant);
     }
     

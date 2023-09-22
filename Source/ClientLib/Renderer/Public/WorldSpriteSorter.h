@@ -63,7 +63,7 @@ private:
     /**
      * Performs the tile portion of the gather step.
      */
-    void gatherTileSpriteInfo(const Camera& camera, double alpha);
+    void gatherTileSpriteInfo(const Camera& camera);
 
     /**
      * Performs the entity portion of the gather step.

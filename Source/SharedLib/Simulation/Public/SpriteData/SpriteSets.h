@@ -5,6 +5,7 @@
 #include <SDL_stdinc.h>
 #include <string>
 #include <array>
+#include <functional>
 
 namespace AM
 {

@@ -68,7 +68,7 @@ void WorldSpriteSorter::gatherSpriteInfo(const Camera& camera, double alpha)
     spriteColorMods = ui.getSpriteColorMods();
 
     // Gather all relevant tiles.
-    gatherTileSpriteInfo(camera, alpha);
+    gatherTileSpriteInfo(camera);
 
     // Gather all relevant entities.
     gatherEntitySpriteInfo(camera, alpha);
@@ -78,7 +78,7 @@ void WorldSpriteSorter::gatherSpriteInfo(const Camera& camera, double alpha)
     spriteColorMods.clear();
 }
 
-void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera, double alpha)
+void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
 {
     // Gather all tiles that are in view.
     TileExtent tileViewExtent{

@@ -26,7 +26,7 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 , entityLifetimeSystem{*this, world, inSpriteData, network}
 , playerInputSystem{*this, world, network}
 , playerMovementSystem{*this, world, network}
-, npcMovementSystem{*this, world, network, inSpriteData}
+, npcMovementSystem{*this, world, network}
 , componentUpdateSystem{*this, world, network, inSpriteData}
 , cameraSystem{world}
 {

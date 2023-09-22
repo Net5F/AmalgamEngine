@@ -31,7 +31,7 @@ struct EntityInitRequest {
 
     /** This entity's client-relevant components.
         We use this for components that build mode will want to set directly. */
-    std::vector<ReplicatedComponent> components;
+    std::vector<ReplicatedComponent> components{};
 
     /** The script to run on this entity after creation. */
     std::string initScript{};

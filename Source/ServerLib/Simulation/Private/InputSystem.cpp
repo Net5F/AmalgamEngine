@@ -4,7 +4,6 @@
 #include "Network.h"
 #include "Peer.h"
 #include "Input.h"
-#include "MovementStateNeedsSync.h"
 #include "ClientSimData.h"
 #include "Log.h"
 #include "Tracy.hpp"
@@ -72,14 +71,8 @@ void InputSystem::processInputMessages()
         if (clientEntityIt != world.netIdMap.end()) {
             // Update the entity's Input component.
             entt::entity clientEntity{clientEntityIt->second};
-            Input& input{world.registry.get<Input>(clientEntity)};
-            input = inputChangeRequest.input;
-
-            // Flag that the entity's movement state needs to be synced.
-            if (!(world.registry.all_of<MovementStateNeedsSync>(
-                    clientEntity))) {
-                world.registry.emplace<MovementStateNeedsSync>(clientEntity);
-            }
+            world.registry.replace<Input>(clientEntity,
+                                          inputChangeRequest.input);
         }
         else {
             // The entity was probably disconnected. Do nothing with the
@@ -108,13 +101,7 @@ void InputSystem::handleDroppedMessage(NetworkID clientID)
     // Default the entity's inputs so they don't run off a cliff.
     Input defaultInput{};
     if (entityInput.inputStates != defaultInput.inputStates) {
-        entityInput.inputStates = defaultInput.inputStates;
-    }
-
-    // Flag that the entity's movement state needs to be synced.
-    if (!(world.registry.all_of<MovementStateNeedsSync>(
-            clientEntityIt->second))) {
-        registry.emplace<MovementStateNeedsSync>(clientEntityIt->second);
+        registry.replace<Input>(clientEntityIt->second, defaultInput);
     }
 }
 

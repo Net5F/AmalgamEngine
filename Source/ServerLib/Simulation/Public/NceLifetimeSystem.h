@@ -42,8 +42,7 @@ private:
     /**
      * Tells the World to create the given entity.
      */
-    void initEntity(entt::entity newEntity,
-        const EntityInitRequest& entityInitRequest);
+    void initEntity(const EntityInitRequest& entityInitRequest);
 
     /** Used to add/remove entities. */
     World& world;

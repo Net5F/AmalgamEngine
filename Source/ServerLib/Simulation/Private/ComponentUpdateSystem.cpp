@@ -2,6 +2,7 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
+#include "SpriteData.h"
 #include "EngineComponentLists.h"
 #include "ProjectComponentLists.h"
 #include "ReplicatedComponent.h"
@@ -9,7 +10,6 @@
 #include "Cylinder.h"
 #include "Collision.h"
 #include "ISimulationExtension.h"
-#include "RemoveCvRef.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include "Log.h"
@@ -48,8 +48,9 @@ std::array<entt::observer, boost::mp11::mp_size<ObservedComponents>::value>
 //-----------------------------------------------------------------------------
 // ComponentUpdateSystem members
 //-----------------------------------------------------------------------------
-ComponentUpdateSystem::ComponentUpdateSystem(Simulation& inSimulation, World& inWorld,
-                                       Network& inNetwork, SpriteData& inSpriteData)
+ComponentUpdateSystem::ComponentUpdateSystem(Simulation& inSimulation,
+                                             World& inWorld, Network& inNetwork,
+                                             SpriteData& inSpriteData)
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
@@ -68,7 +69,7 @@ ComponentUpdateSystem::ComponentUpdateSystem(Simulation& inSimulation, World& in
         //       but until then it isn't a huge cost.
         observers[index].connect(world.registry,
                                  entt::collector.group<ObservedComponent>()
-                                     .update<ObservedComponent>());
+                                     .template update<ObservedComponent>());
     });
 
     world.registry.on_update<AnimationState>()
@@ -83,7 +84,6 @@ void ComponentUpdateSystem::processUpdateRequests()
     ComponentUpdateRequest componentUpdateRequest{};
     while (componentUpdateRequestQueue.pop(componentUpdateRequest)) {
         // If the project says the request isn't valid, skip it.
-        entt::entity updatedEntity{componentUpdateRequest.entity};
         if ((extension != nullptr)
             && !(extension->isComponentUpdateRequestValid(componentUpdateRequest))) {
             continue;
@@ -93,7 +93,7 @@ void ComponentUpdateSystem::processUpdateRequests()
         for (const auto& componentVariant : componentUpdateRequest.components) {
             std::visit(
                 [&](const auto& component) {
-                    using T = remove_cv_ref<decltype(component)>;
+                    using T = std::decay_t<decltype(component)>;
                     registry.emplace_or_replace<T>(
                         componentUpdateRequest.entity, component);
                 },
@@ -129,8 +129,6 @@ void ComponentUpdateSystem::sendUpdates()
                     const auto& component{registry.get<T>(entity)};
                     componentUpdateMap[entity].components.push_back(component);
                 }
-                std::size_t compIndex{
-                    boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
             });
         }
 

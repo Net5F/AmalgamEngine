@@ -17,8 +17,6 @@ target_sources(SharedLib
         Public/InitScriptResponse.h
         Public/InputChangeRequest.h
         Public/InteractionRequest.h
-        Public/MovementState.h
-        Public/MovementUpdate.h
         Public/TileAddLayer.h
         Public/TileClearLayers.h
         Public/TileExtentClearLayers.h
