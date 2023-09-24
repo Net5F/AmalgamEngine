@@ -18,6 +18,8 @@ enum class EngineMessageType : Uint8 {
     Heartbeat,
     ConnectionRequest,
     InputChangeRequest,
+    NameChangeRequest,
+    AnimationStateChangeRequest,
     ChunkUpdateRequest,
     EntityInitRequest,
     ComponentUpdateRequest,
@@ -28,10 +30,10 @@ enum class EngineMessageType : Uint8 {
     ExplicitConfirmation,
     ConnectionResponse,
     UserErrorString,
-    MovementUpdate,
-    ChunkUpdate,
     EntityInit,
+    MovementUpdate,
     ComponentUpdate,
+    ChunkUpdate,
     InitScriptResponse,
 
     // Bidirectional Messages

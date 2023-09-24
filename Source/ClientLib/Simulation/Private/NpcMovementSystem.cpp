@@ -63,13 +63,6 @@ void NpcMovementSystem::updateNpcs()
             npcMovementUpdate = npcMovementUpdateQueue.peek();
         }
 
-        // TEMP
-        if ((npcMovementUpdate != nullptr)
-            && (npcMovementUpdate->tickNum < (lastProcessedTick + 1))) {
-            LOG_INFO("Old tick: %u", npcMovementUpdate->tickNum);
-        }
-        // TEMP
-
         lastProcessedTick++;
     }
 

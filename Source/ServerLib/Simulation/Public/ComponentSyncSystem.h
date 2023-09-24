@@ -18,39 +18,26 @@ class Simulation;
 class World;
 class Network;
 class SpriteData;
-class ISimulationExtension;
 
 /**
  * Observes component updates based on the ObservedComponentTypes lists in 
  * EngineComponentLists.h and ProjectComponentLists.h.
- * When a component is updated, an update message will be sent to all nearby 
+ *
+ * When an observed component is updated, sends an update message to all nearby 
  * clients.
  */
-class ComponentUpdateSystem
+class ComponentSyncSystem
 {
 public:
-    ComponentUpdateSystem(Simulation& inSimulation, World& inWorld,
-                          Network& inNetwork, SpriteData& inSpriteData);
-
-    /**
-     * Processes any waiting ComponentUpdateRequest messages.
-     */
-    void processUpdateRequests();
+    ComponentSyncSystem(Simulation& inSimulation, World& inWorld,
+                        Network& inNetwork, SpriteData& inSpriteData);
 
     /**
      * Sends updates for any observed components that were modified.
      */
     void sendUpdates();
 
-    void setExtension(ISimulationExtension* inExtension);
-
 private:
-    /**
-     * Updates Sprite and Collision components when an AnimationState is updated.
-     * Neither component is replicated, so we need to maintain them ourselves.
-     */
-    void onAnimationStateUpdated(entt::registry& registry, entt::entity entity);
-
     /** Used to get the current tick number. */
     Simulation& simulation;
     /** Used for fetching component data. */
@@ -59,9 +46,6 @@ private:
     Network& network;
     /** Used to update Collision components when AnimationState is updated. */
     SpriteData& spriteData;
-    /** If non-nullptr, contains the project's simulation extension functions.
-        Used for checking if component update requests are valid. */
-    ISimulationExtension* extension;
 
     // Note: Check the top of the cpp file for file-local types and variables.
     //       We keep some templated code there to reduce compile times.

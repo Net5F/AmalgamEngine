@@ -1,32 +1,31 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "Input.h"
+#include "AnimationState.h"
 #include "NetworkDefs.h"
+#include "entt/fwd.hpp"
+#include "entt/entity/entity.hpp"
 #include <SDL_stdinc.h>
 
 namespace AM
 {
 /**
- * Contains a client's input state on a given tick.
- *
- * Used by clients to request input changes on the server.
+ * Used by clients to request animation state changes on the server.
  */
-struct InputChangeRequest {
+struct AnimationStateChangeRequest {
     // The enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr EngineMessageType MESSAGE_TYPE{EngineMessageType::InputChangeRequest};
+    static constexpr EngineMessageType MESSAGE_TYPE{
+        EngineMessageType::AnimationStateChangeRequest};
 
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** The tick that these client input states correspond to. */
-    Uint32 tickNum{0};
+    /** The entity to change the animation state of. */
+    entt::entity entity{entt::null};
 
-    // Note: No entity ID, because clients can only change their own inputs.
-
-    /** The client's input state for the given tickNum. */
-    Input input;
+    /** The new animation state. */
+    AnimationState animationState;
 
     //--------------------------------------------------------------------------
     // Local data
@@ -41,14 +40,11 @@ struct InputChangeRequest {
 };
 
 template<typename S>
-void serialize(S& serializer, InputChangeRequest& inputChangeRequest)
+void serialize(S& serializer,
+               AnimationStateChangeRequest& animationStateChangeRequest)
 {
-    serializer.value4b(inputChangeRequest.tickNum);
-
-    serializer.enableBitPacking(
-        [&inputChangeRequest](typename S::BPEnabledType& sbp) {
-            sbp.object(inputChangeRequest.input);
-        });
+    serializer.value4b(animationStateChangeRequest.entity);
+    serializer.object(animationStateChangeRequest.animationState);
 }
 
 } // End namespace AM

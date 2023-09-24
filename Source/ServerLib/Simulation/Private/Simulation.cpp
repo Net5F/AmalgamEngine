@@ -23,11 +23,13 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , interactionQueueMap{}
 , clientConnectionSystem{*this, world, network, inSpriteData}
 , nceLifetimeSystem{world, network}
-, componentUpdateSystem{*this, world, network, inSpriteData}
+, componentChangeSystem{world, network, inSpriteData}
 , tileUpdateSystem{world, network}
 , inputSystem{*this, world, network}
 , movementSystem{world}
 , clientAOISystem{*this, world, network}
+, movementSyncSystem{*this, world, network}
+, componentSyncSystem{*this, world, network, inSpriteData}
 , chunkStreamingSystem{world, network}
 , scriptDataSystem{world, network}
 , mapSaveSystem{world}
@@ -79,8 +81,8 @@ void Simulation::tick()
     // Process requests to create or destroy non-client-controlled entities.
     nceLifetimeSystem.processUpdateRequests();
 
-    // Process requests to update components.
-    componentUpdateSystem.processUpdateRequests();
+    // Process requests to change components.
+    componentChangeSystem.processChangeRequests();
 
     // Receive and process tile update requests.
     tileUpdateSystem.updateTiles();
@@ -111,8 +113,11 @@ void Simulation::tick()
     // Delete messages.
     clientAOISystem.updateAOILists();
 
-    // Send any updated entity component state to nearby clients.
-    componentUpdateSystem.sendUpdates();
+    // Send any updated entity movement state to nearby clients.
+    movementSyncSystem.sendMovementUpdates();
+
+    // Send any remaining updated entity component state to nearby clients.
+    //componentSyncSystem.sendUpdates();
 
     // Call the project's post-movement-sync logic.
     if (extension != nullptr) {
@@ -142,7 +147,6 @@ void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
 {
     extension = std::move(inExtension);
     nceLifetimeSystem.setExtension(extension.get());
-    componentUpdateSystem.setExtension(extension.get());
     tileUpdateSystem.setExtension(extension.get());
 }
 

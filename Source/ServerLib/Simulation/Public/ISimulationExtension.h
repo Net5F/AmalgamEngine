@@ -8,7 +8,8 @@ namespace AM
 struct TileUpdateRequest;
 struct TileExtent;
 struct EntityInitRequest;
-struct ComponentUpdateRequest;
+struct NameChangeRequest;
+struct AnimationStateChangeRequest;
 
 namespace Server
 {
@@ -79,9 +80,11 @@ public:
     virtual bool isEntityInitRequestValid(
         const EntityInitRequest& entityInitRequest) const
         = 0;
-    /** @return true if the given request is valid, else false. */
-    virtual bool isComponentUpdateRequestValid(
-        const ComponentUpdateRequest& componentUpdateRequest) const
+    virtual bool isNameChangeRequestValid(
+        const NameChangeRequest& nameChangeRequest) const
+        = 0;
+    virtual bool isAnimationStateChangeRequestValid(
+        const AnimationStateChangeRequest& nameChangeRequest) const
         = 0;
 };
 

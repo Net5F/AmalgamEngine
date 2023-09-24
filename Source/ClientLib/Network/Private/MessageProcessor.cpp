@@ -9,6 +9,7 @@
 #include "ChunkUpdate.h"
 #include "EntityInit.h"
 #include "ComponentUpdate.h"
+#include "MovementUpdate.h"
 #include "InitScriptResponse.h"
 #include "EntityDelete.h"
 #include "TileAddLayer.h"
@@ -61,6 +62,10 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         case EngineMessageType::EntityInit: {
             dispatchMessage<EntityInit>(messageBuffer, messageSize,
                                         networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::MovementUpdate: {
+            handleMovementUpdate(messageBuffer, messageSize);
             break;
         }
         case EngineMessageType::ComponentUpdate: {
@@ -149,7 +154,42 @@ void MessageProcessor::handleConnectionResponse(Uint8* messageBuffer,
     networkEventDispatcher.push<ConnectionResponse>(connectionResponse);
 }
 
-void MessageProcessor::handleComponentUpdate(Uint8* messageBuffer, std::size_t messageSize)
+void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer, std::size_t messageSize)
+{
+    // Deserialize the message.
+    MovementUpdate movementUpdate{};
+    Deserialize::fromBuffer(messageBuffer, messageSize, movementUpdate);
+
+    // If the message's tick is newer than our saved tick, update it.
+    if (movementUpdate.tickNum > lastReceivedTick) {
+        lastReceivedTick = movementUpdate.tickNum;
+    }
+    AM_ASSERT((movementUpdate.tickNum >= lastReceivedTick),
+              "Received ticks out of order. last: %u, new: %u",
+              lastReceivedTick.load(), movementUpdate.tickNum);
+
+    // TEMP: Push updates as player or npc. Eventually, split player and send 
+    //       the rest as npc.
+    for (const MovementState& movementState : movementUpdate.movementStates) {
+        PlayerMovementUpdate playerMovementUpdate{
+            movementState.entity,   movementState.input,
+            movementState.position, movementState.velocity,
+            movementState.rotation, movementUpdate.tickNum};
+
+        // If this update is for the player, push a PlayerMovementUpdate.
+        if (movementState.entity == playerEntity) {
+            networkEventDispatcher.push(playerMovementUpdate);
+        }
+        else {
+            // Not for the player, push an NpcMovementUpdate.
+            networkEventDispatcher.push<NpcMovementUpdate>(
+                static_cast<NpcMovementUpdate>(playerMovementUpdate));
+        }
+    }
+}
+
+void MessageProcessor::handleComponentUpdate(Uint8* messageBuffer,
+                                            std::size_t messageSize)
 {
     // Deserialize the message.
     ComponentUpdate componentUpdate{};
@@ -163,44 +203,7 @@ void MessageProcessor::handleComponentUpdate(Uint8* messageBuffer, std::size_t m
               "Received ticks out of order. last: %u, new: %u",
               lastReceivedTick.load(), componentUpdate.tickNum);
 
-    // Give the interceptors a chance to grab components.
-    interceptMovementUpdates(componentUpdate);
-
-    // Push the message into any subscribed queues.
-    networkEventDispatcher.push<ComponentUpdate>(componentUpdate);
-}
-
-void MessageProcessor::interceptMovementUpdates(
-    ComponentUpdate& componentUpdate)
-{
-    // If the update contains our desired components.
-    if (ReplicatedComponentTools::containsTypes<Input, Position, Velocity,
-                                                Rotation>(
-            componentUpdate.components)) {
-        // Find all of the desired components, push them into a new struct, 
-        // and erase them from componentUpdate.
-        PlayerMovementUpdate movementUpdate{componentUpdate.tickNum,
-                                            componentUpdate.entity};
-        auto& components{componentUpdate.components};
-        for (auto it = components.begin(); it != components.end();) {
-            if (std::visit(movementUpdate, *it)) {
-                it = components.erase(it);
-            }
-            else {
-                ++it;
-            }
-        }
-
-        // If this update is for the player, push a PlayerMovementUpdate.
-        if (componentUpdate.entity == playerEntity) {
-            networkEventDispatcher.push(movementUpdate);
-        }
-        else {
-            // Not for the player, push an NpcMovementUpdate.
-            networkEventDispatcher.push<NpcMovementUpdate>(
-                static_cast<NpcMovementUpdate>(movementUpdate));
-        }
-    }
+    networkEventDispatcher.push(componentUpdate);
 }
 
 } // End namespace Client

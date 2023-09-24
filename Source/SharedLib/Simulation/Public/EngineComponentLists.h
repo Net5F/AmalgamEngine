@@ -9,7 +9,6 @@
 #include "AnimationState.h"
 #include "Interaction.h"
 #include "boost/mp11/list.hpp"
-#include "boost/mp11/map.hpp"
 
 namespace AM
 {
@@ -17,37 +16,32 @@ namespace EngineComponentLists
 {
 
 /**
- * All of the project's component types that are relevant to the client.
+ * All of the engine's component types that are relevant to the client.
  *
  * When a client comes in range of an entity, an Init message that includes these
  * components will be sent (if the entity possesses any of them).
  *
  * In other words, adding components to this list will cause them to be sent 
  * once. If you want a component to additionally be sent whenever it's updated, 
- * add it to ObservedComponentMap below.
+ * add it to ObservedComponentTypes below.
  */
 using ReplicatedComponentTypes
     = boost::mp11::mp_list<IsClientEntity, Name, Input, Position, Velocity,
                            Rotation, AnimationState, Interaction>;
 
 /**
- * A map of "ObservedComponent" -> "SendComponents".
- * The first type in each list is the ObservedComponent, the rest are the 
- * SendComponents.
+ * All of the engine's component types that should be observed and auto-
+ * replicated. When an observed component is updated (using patch() or 
+ * replace()), an Update message containing the component will be sent by the 
+ * server to all nearby clients.
  *
- * When an ObservedComponent is updated (using e.g. patch()), an Update message
- * containing the SendComponents will be sent by the server to all nearby 
- * clients.
- *
- * Note: All of the SendComponents must be in ReplicatedComponentTypes.
- *       The ObservedComponents don't need to be in ReplicatedComponentTypes.
+ * Note: Every type in this list must also be in ReplicatedComponentTypes.
+ * Note: For performance reasons, if something is going to be updated very 
+ *       frequently (e.g. movement), consider manually handling it in a system 
+ *       instead of adding it here.
  */
-using ObservedComponentMap = boost::mp11::mp_list<
-    boost::mp11::mp_list<IsClientEntity, IsClientEntity>,
-    boost::mp11::mp_list<Input, Input, Position, Velocity, Rotation>,
-    boost::mp11::mp_list<Name, Name>,
-    boost::mp11::mp_list<AnimationState, AnimationState>,
-    boost::mp11::mp_list<Interaction, Interaction>>;
+using ObservedComponentTypes
+    = boost::mp11::mp_list<Name, AnimationState, Interaction>;
 
 } // End namespace EngineComponentLists
 } // End namespace AM

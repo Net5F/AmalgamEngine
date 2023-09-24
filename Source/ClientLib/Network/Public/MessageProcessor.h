@@ -11,7 +11,7 @@
 namespace AM
 {
 class EventDispatcher;
-struct ComponentUpdate;
+struct MovementUpdate;
 
 namespace Client
 {
@@ -69,20 +69,12 @@ private:
     void handleConnectionResponse(Uint8* messageBuffer,
                                   std::size_t messageSize);
 
-    /**
-     * If the message contains components that have an interceptor registered, 
-     * splits them off and sends them to the interceptor's queue.
-     * Otherwise, pushes std::shared_ptr<const ComponentUpdate> event.
-     */
+    /** Pushes PlayerMovementUpdate and MovementUpdate events. */
+    void handleMovementUpdate(Uint8* messageBuffer, std::size_t messageSize);
+
+    /** Pushes ComponentUpdate event. */
     void handleComponentUpdate(Uint8* messageBuffer, std::size_t messageSize);
     //-------------------------------------------------------------------------
-
-    /**
-     * If the given ComponentUpdate contains all of the movement components, 
-     * erases them from componentUpdate and pushes them as either 
-     * PlayerMovementUpdate or NpcMovementUpdate.
-     */
-    void interceptMovementUpdates(ComponentUpdate& componentUpdate);
 
     /** The dispatcher for network events. Used to send events to the
         subscribed queues. */

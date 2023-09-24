@@ -12,7 +12,7 @@ namespace Client
  * This isn't an actual message that gets sent by the server, instead it gets
  * split out when we receive a ComponentUpdate with the relevant data.
  */
-struct NpcMovementUpdate : PlayerMovementUpdate {};
+struct NpcMovementUpdate : public PlayerMovementUpdate {};
 
 } // End namespace Client
 } // End namespace AM
