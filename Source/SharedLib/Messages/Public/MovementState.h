@@ -5,6 +5,7 @@
 #include "Velocity.h"
 #include "Rotation.h"
 #include "entt/entity/registry.hpp"
+#include "bitsery/bitsery.h"
 
 namespace AM
 {
@@ -27,11 +28,10 @@ template<typename S>
 void serialize(S& serializer, MovementState& movementState)
 {
     serializer.value4b(movementState.entity);
-
-    // Note: Input needs bit packing enabled, but we expect EntityUpdate to
-    //       enable it.
-    serializer.object(movementState.input);
-
+    serializer.enableBitPacking(
+        [&movementState](typename S::BPEnabledType& sbp) {
+            sbp.object(movementState.input);
+        });
     serializer.object(movementState.position);
     serializer.object(movementState.velocity);
     serializer.object(movementState.rotation);

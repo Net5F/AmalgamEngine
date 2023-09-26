@@ -8,7 +8,6 @@ target_sources(ClientLib
 		Public/MessageProcessor.h
 		Public/MessageProcessorExDependencies.h
 		Public/Network.h
-		Public/NpcMovementUpdate.h
 		Public/PlayerMovementUpdate.h
 )
 

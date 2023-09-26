@@ -5,7 +5,6 @@
 #include "SharedConfig.h"
 #include <SDL_stdinc.h>
 #include <vector>
-#include "bitsery/bitsery.h"
 
 namespace AM
 {
@@ -35,12 +34,8 @@ template<typename S>
 void serialize(S& serializer, MovementUpdate& movementUpdate)
 {
     serializer.value4b(movementUpdate.tickNum);
-    // TODO: Test if putting this in MovementState is better
-    serializer.enableBitPacking(
-        [&movementUpdate](typename S::BPEnabledType& sbp) {
-            sbp.container(movementUpdate.movementStates,
-                          SharedConfig::MAX_ENTITIES);
-        });
+    serializer.container(movementUpdate.movementStates,
+                  SharedConfig::MAX_ENTITIES);
 }
 
 } // End namespace AM

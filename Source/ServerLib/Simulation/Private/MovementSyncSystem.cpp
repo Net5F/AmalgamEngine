@@ -10,7 +10,6 @@
 #include "Rotation.h"
 #include "Collision.h"
 #include "ClientSimData.h"
-#include "MovementStateNeedsSync.h"
 #include "Log.h"
 #include "tracy/Tracy.hpp"
 #include <algorithm>
@@ -24,6 +23,9 @@ MovementSyncSystem::MovementSyncSystem(Simulation& inSimulation, World& inWorld,
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
+, updatedEntities{}
+, entitiesToSend{}
+, inputObserver{world.registry, entt::collector.update<Input>()}
 {
 }
 
@@ -35,49 +37,41 @@ void MovementSyncSystem::sendMovementUpdates()
     //       instead loop over all entities that moved on this frame and add
     //       their AOI entities to a map of update messages to be sent.
 
+    // Push all the updated entities into a vector and sort them.
+    updatedEntities.clear();
+    for (entt::entity entity : inputObserver) {
+        updatedEntities.push_back(entity);
+    }
+    std::sort(updatedEntities.begin(), updatedEntities.end());
+    inputObserver.clear();
+
     // Send clients the updated movement state of any nearby entities that have
     // changed inputs, teleported, etc.
     auto clientView{world.registry.view<ClientSimData>()};
     for (auto [clientEntity, client] : clientView.each()) {
         // Collect the entities that have updated state that is relevant to
         // this client.
-        collectEntitiesToSend(client, clientEntity);
+        collectEntitiesToSend(client);
 
         // If there is updated state to send, send an update message.
         if (entitiesToSend.size() > 0) {
             sendEntityUpdate(client);
         }
     }
-
-    // TODO: Benchmark this vs observer
-    // Clear the sync flags from every entity, since we just handled them.
-    world.registry.clear<MovementStateNeedsSync>();
 }
 
-void MovementSyncSystem::collectEntitiesToSend(ClientSimData& client,
-                                               entt::entity clientEntity)
+void MovementSyncSystem::collectEntitiesToSend(ClientSimData& client)
 {
     /* Collect the entities that need to be sent to the client. */
     // Clear the vector.
     entitiesToSend.clear();
 
-    // Add any entities in this client's AOI that need to be synced.
-    for (entt::entity entityInAOI : client.entitiesInAOI) {
-        if (world.registry.all_of<MovementStateNeedsSync>(entityInAOI)) {
-            entitiesToSend.push_back(entityInAOI);
-        }
-    }
-
-    // If the client entity itself needs to be synced, add it.
-    if (world.registry.all_of<MovementStateNeedsSync>(clientEntity)) {
-        entitiesToSend.push_back(clientEntity);
-    }
-
-    // Remove duplicates from the vector.
-    std::sort(entitiesToSend.begin(), entitiesToSend.end());
-    entitiesToSend.erase(
-        std::unique(entitiesToSend.begin(), entitiesToSend.end()),
-        entitiesToSend.end());
+    // Fill entitiesToSend with all of the entities that are both updated and 
+    // in this client's AOI.
+    std::set_intersection(updatedEntities.begin(), updatedEntities.end(),
+                          client.entitiesInAOI.begin(),
+                          client.entitiesInAOI.end(),
+                          std::back_inserter(entitiesToSend));
 }
 
 void MovementSyncSystem::sendEntityUpdate(ClientSimData& client)

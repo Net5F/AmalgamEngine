@@ -1,12 +1,11 @@
 #pragma once
 
-#include "NpcMovementUpdate.h"
 #include "QueuedEvents.h"
 #include <SDL_stdinc.h>
 
 namespace AM
 {
-struct EntityUpdate;
+struct MovementUpdate;
 
 namespace Client
 {
@@ -42,7 +41,7 @@ private:
     /**
      * Applies the given update message to the entity world state.
      */
-    void applyUpdateMessage(const NpcMovementUpdate& npcMovementUpdate);
+    void applyUpdateMessage(const MovementUpdate& npcMovementUpdate);
 
     /** Used to get the current tick. */
     Simulation& simulation;
@@ -51,7 +50,7 @@ private:
     /** Used to send entity info request messages. */
     Network& network;
 
-    EventQueue<NpcMovementUpdate> npcMovementUpdateQueue;
+    EventQueue<std::shared_ptr<const MovementUpdate>> npcMovementUpdateQueue;
 
     /** The last tick that we processed update data for. */
     Uint32 lastProcessedTick;

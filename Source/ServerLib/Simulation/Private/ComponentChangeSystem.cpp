@@ -42,7 +42,8 @@ void ComponentChangeSystem::processChangeRequests()
             continue;
         }
 
-        // TODO: Patch or normal update?
+        registry.replace<Name>(nameChangeRequest.entity,
+                               nameChangeRequest.name);
     }
 
     AnimationStateChangeRequest animationStateChangeRequest{};
@@ -54,7 +55,9 @@ void ComponentChangeSystem::processChangeRequests()
             continue;
         }
 
-        // TODO: Patch or normal update?
+        registry.replace<AnimationState>(
+            animationStateChangeRequest.entity,
+            animationStateChangeRequest.animationState);
     }
 }
 

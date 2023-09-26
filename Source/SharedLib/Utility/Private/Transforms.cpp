@@ -64,7 +64,6 @@ Position Transforms::screenToWorld(const SDL_FPoint& screenPoint,
     float worldX{((2.f * y) + x) * TILE_WIDTH_SCALE};
     float worldY{((2.f * y) - x) * TILE_HEIGHT_SCALE / 2.f};
 
-    // TODO: Figure out how to handle Z.
     return {worldX, worldY, 0};
 }
 

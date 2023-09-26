@@ -17,7 +17,6 @@
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
 #include "PlayerMovementUpdate.h"
-#include "NpcMovementUpdate.h"
 #include "ReplicatedComponentTools.h"
 #include "Log.h"
 #include "AMAssert.h"
@@ -157,35 +156,39 @@ void MessageProcessor::handleConnectionResponse(Uint8* messageBuffer,
 void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer, std::size_t messageSize)
 {
     // Deserialize the message.
-    MovementUpdate movementUpdate{};
-    Deserialize::fromBuffer(messageBuffer, messageSize, movementUpdate);
+    std::shared_ptr<MovementUpdate> movementUpdate{
+        std::make_shared<MovementUpdate>()};
+    Deserialize::fromBuffer(messageBuffer, messageSize, *movementUpdate);
 
     // If the message's tick is newer than our saved tick, update it.
-    if (movementUpdate.tickNum > lastReceivedTick) {
-        lastReceivedTick = movementUpdate.tickNum;
+    if (movementUpdate->tickNum > lastReceivedTick) {
+        lastReceivedTick = movementUpdate->tickNum;
     }
-    AM_ASSERT((movementUpdate.tickNum >= lastReceivedTick),
+    AM_ASSERT((movementUpdate->tickNum >= lastReceivedTick),
               "Received ticks out of order. last: %u, new: %u",
-              lastReceivedTick.load(), movementUpdate.tickNum);
+              lastReceivedTick.load(), movementUpdate->tickNum);
 
-    // TEMP: Push updates as player or npc. Eventually, split player and send 
-    //       the rest as npc.
-    for (const MovementState& movementState : movementUpdate.movementStates) {
-        PlayerMovementUpdate playerMovementUpdate{
-            movementState.entity,   movementState.input,
-            movementState.position, movementState.velocity,
-            movementState.rotation, movementUpdate.tickNum};
+    // Iterate through the updated entities, checking if there's player data.
+    std::vector<MovementState>& movementStates{movementUpdate->movementStates};
+    for (auto it = movementStates.begin(); it != movementStates.end(); ++it) {
+        MovementState& movementState{*it};
 
-        // If this update is for the player, push a PlayerMovementUpdate.
+        // If this update is for the player, push it as a PlayerMovementUpdate.
         if (movementState.entity == playerEntity) {
+            PlayerMovementUpdate playerMovementUpdate{
+                movementState.entity,   movementState.input,
+                movementState.position, movementState.velocity,
+                movementState.rotation, movementUpdate->tickNum};
             networkEventDispatcher.push(playerMovementUpdate);
-        }
-        else {
-            // Not for the player, push an NpcMovementUpdate.
-            networkEventDispatcher.push<NpcMovementUpdate>(
-                static_cast<NpcMovementUpdate>(playerMovementUpdate));
+
+            movementStates.erase(it);
+            break;
         }
     }
+
+    // Push the remaining NPC updates.
+    networkEventDispatcher.push<std::shared_ptr<const MovementUpdate>>(
+        movementUpdate);
 }
 
 void MessageProcessor::handleComponentUpdate(Uint8* messageBuffer,

@@ -39,6 +39,7 @@ target_link_libraries(ServerLib
         sol2::sol2
         QueuedEvents
         SharedLib
+        Tracy::TracyClient
 )
 
 # Compile with C++20.

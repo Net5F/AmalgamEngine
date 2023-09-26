@@ -35,6 +35,8 @@ public:
 
     /**
      * Converts a point in screen space to a position in world space.
+     * Note: The resulting position will be a point on the ground (Z == 0).
+     *       For anything else, see screenToWorldRay().
      */
     static Position screenToWorld(const SDL_FPoint& screenPoint,
                                   const Camera& camera);

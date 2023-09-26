@@ -117,7 +117,7 @@ void Simulation::tick()
     movementSyncSystem.sendMovementUpdates();
 
     // Send any remaining updated entity component state to nearby clients.
-    //componentSyncSystem.sendUpdates();
+    componentSyncSystem.sendUpdates();
 
     // Call the project's post-movement-sync logic.
     if (extension != nullptr) {

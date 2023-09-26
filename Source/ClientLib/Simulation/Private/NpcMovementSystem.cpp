@@ -3,7 +3,7 @@
 #include "World.h"
 #include "Network.h"
 #include "MovementHelpers.h"
-#include "NpcMovementUpdate.h"
+#include "MovementUpdate.h"
 #include "Name.h"
 #include "Position.h"
 #include "PreviousPosition.h"
@@ -33,7 +33,6 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSimulation, World& inWorld,
 {
 }
 
-// TODO: Where do we want to patch/replace to trigger signals?
 void NpcMovementSystem::updateNpcs()
 {
     if (Config::RUN_OFFLINE) {
@@ -53,11 +52,11 @@ void NpcMovementSystem::updateNpcs()
         moveAllNpcs();
 
         // If we've received updates for this tick, process them.
-        const NpcMovementUpdate* npcMovementUpdate{
+        std::shared_ptr<const MovementUpdate>* npcMovementUpdate{
             npcMovementUpdateQueue.peek()};
         while ((npcMovementUpdate != nullptr)
-               && (npcMovementUpdate->tickNum == (lastProcessedTick + 1))) {
-            applyUpdateMessage(*npcMovementUpdate);
+               && ((*npcMovementUpdate)->tickNum == (lastProcessedTick + 1))) {
+            applyUpdateMessage(*(npcMovementUpdate->get()));
 
             npcMovementUpdateQueue.pop();
             npcMovementUpdate = npcMovementUpdateQueue.peek();
@@ -118,46 +117,48 @@ void NpcMovementSystem::moveAllNpcs()
 }
 
 void NpcMovementSystem::applyUpdateMessage(
-    const NpcMovementUpdate& npcMovementUpdate)
+    const MovementUpdate& npcMovementUpdate)
 {
     entt::registry& registry{world.registry};
     auto movementGroup = registry.group<Input, Position, PreviousPosition,
                                         Velocity, Rotation, Collision>(
         entt::get<Sprite>, entt::exclude<InputHistory>);
 
-    // Check that the entity exists.
-    // TODO: There's possibly an issue here if we receive a MovementUpdate
-    //       while the sim happens to be at this system, and the update's
-    //       tick is up for processing. We might end up here before
-    //       EntityLifetimeSystem was able to construct the entity.
-    entt::entity entity{npcMovementUpdate.entity};
-    if (!(world.entityIDIsInUse(entity))) {
-        LOG_FATAL(
-            "Received update for invalid entity: %u. Message tick: %u",
-            entity, npcMovementUpdate.tickNum);
+    // Apply each updated entity's new state.
+    for (const MovementState& movementState :
+         npcMovementUpdate.movementStates) {
+        // Check that the entity exists.
+        // TODO: There's possibly an issue here if we receive a MovementUpdate
+        //       while the sim happens to be at this system, and the update's
+        //       tick is up for processing. We might end up here before
+        //       EntityLifetimeSystem was able to construct the entity.
+        entt::entity entity{movementState.entity};
+        if (!(world.entityIDIsInUse(entity))) {
+            LOG_FATAL(
+                "Received update for invalid entity: %u. Message tick: %u",
+                entity, npcMovementUpdate.tickNum);
+        }
+
+        // Apply the received component updates.
+        registry.replace<Input>(entity, movementState.input);
+        auto& position{
+            registry.replace<Position>(entity, movementState.position)};
+        registry.replace<Velocity>(entity, movementState.velocity);
+        registry.replace<Rotation>(entity, movementState.rotation);
+
+        // If the previous position hasn't been initialized, set it to the
+        // current position so they don't lerp in from the origin.
+        auto& previousPosition{movementGroup.get<PreviousPosition>(entity)};
+        if (!(previousPosition.isInitialized)) {
+            previousPosition = position;
+            previousPosition.isInitialized = true;
+        }
+
+        // Move their collision box to their new position.
+        auto& collision{movementGroup.get<Collision>(entity)};
+        collision.worldBounds
+            = Transforms::modelToWorldCentered(collision.modelBounds, position);
     }
-
-    // Get the entity's components.
-    auto [input, position, previousPosition, velocity, rotation, collision]
-        = movementGroup.get<Input, Position, PreviousPosition, Velocity,
-                            Rotation, Collision>(entity);
-
-    // Apply the received component updates.
-    input = npcMovementUpdate.input;
-    position = npcMovementUpdate.position;
-    velocity = npcMovementUpdate.velocity;
-    rotation = npcMovementUpdate.rotation;
-
-    // If the previous position hasn't been initialized, set it to the
-    // current position so they don't lerp in from the origin.
-    if (!(previousPosition.isInitialized)) {
-        previousPosition = position;
-        previousPosition.isInitialized = true;
-    }
-
-    // Move their collision box to their new position.
-    collision.worldBounds
-        = Transforms::modelToWorldCentered(collision.modelBounds, position);
 }
 
 } // namespace Client
