@@ -29,9 +29,9 @@ struct ClientSimData;
  *       ClientConnectionSystem maintains the lifetime of client entities, it's
  *       handled there.
  * Note: We split "init" logic (handled here) from "update" logic (handled in 
- *       systems). This is because updates sometimes require more context, e.g.
- *       movement updates are triggered when an Input is updated, but must send 
- *       Input, Position, Velocity, and Rotation components.
+ *       other systems). This is because updates sometimes require more context,
+ *       e.g. movement updates are triggered when an Input is updated, but must 
+ *       send Input and Position components.
  *       Also, inits are built by testing each client's AOI, whereas updates are
  *       built by testing the updated entity's AOI.
  */

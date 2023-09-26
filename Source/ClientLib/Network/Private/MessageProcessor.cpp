@@ -176,9 +176,8 @@ void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer, std::size_t me
         // If this update is for the player, push it as a PlayerMovementUpdate.
         if (movementState.entity == playerEntity) {
             PlayerMovementUpdate playerMovementUpdate{
-                movementState.entity,   movementState.input,
-                movementState.position, movementState.velocity,
-                movementState.rotation, movementUpdate->tickNum};
+                movementState.entity, movementState.input,
+                movementState.position, movementUpdate->tickNum};
             networkEventDispatcher.push(playerMovementUpdate);
 
             movementStates.erase(it);

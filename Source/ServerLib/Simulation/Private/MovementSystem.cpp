@@ -4,7 +4,6 @@
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Velocity.h"
 #include "Rotation.h"
 #include "Collision.h"
 #include "SharedConfig.h"
@@ -26,27 +25,19 @@ void MovementSystem::processMovements()
     ZoneScoped;
 
     // Move all entities that have the required components.
-    auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Velocity, Rotation, Collision>();
-    for (entt::entity entity : group) {
-        auto [input, position, previousPosition, velocity, rotation, collision]
-            = group.get<Input, Position, PreviousPosition, Velocity, Rotation,
-                        Collision>(entity);
-
+    auto group = world.registry.group<Input, Position, PreviousPosition, Rotation, Collision>();
+    for (auto [entity, input, position, previousPosition, rotation, collision] :
+         group.each()) {
         // Save their old position.
         previousPosition = position;
 
-        // Update their velocity for this tick, based on their current inputs.
-        velocity = MovementHelpers::updateVelocity(
-            velocity, input.inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
-
-        // Calculate their desired position, using the new velocity.
+        // Calculate their desired next position.
         Position desiredPosition{position};
-        desiredPosition = MovementHelpers::updatePosition(
-            position, velocity, SharedConfig::SIM_TICK_TIMESTEP_S);
+        desiredPosition = MovementHelpers::calcPosition(
+            position, input.inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update the direction they're facing, based on their current inputs.
-        rotation = MovementHelpers::updateRotation(rotation, input.inputStates);
+        rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
 
         // If they're trying to move, resolve collisions.
         if (desiredPosition != position) {

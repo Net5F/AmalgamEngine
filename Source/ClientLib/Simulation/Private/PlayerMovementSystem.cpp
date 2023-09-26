@@ -4,7 +4,6 @@
 #include "World.h"
 #include "Network.h"
 #include "Position.h"
-#include "Velocity.h"
 #include "Input.h"
 #include "InputHistory.h"
 #include "PreviousPosition.h"
@@ -59,17 +58,16 @@ void PlayerMovementSystem::processMovement()
     Input& input{world.registry.get<Input>(world.playerEntity)};
     movePlayerEntity(input.inputStates);
 
-    // Trigger any on_update callbacks for the movement-related components.
-    triggerUpdateSignals();
+    // Signal the updated components to any observers.
+    emitUpdateSignals();
 }
 
 Uint32 PlayerMovementSystem::processPlayerUpdates()
 {
     entt::registry& registry{world.registry};
-    auto [input, position, previousPosition, velocity, rotation, collision,
-          inputHistory]
-        = registry.get<Input, Position, PreviousPosition, Velocity, Rotation,
-                       Collision, InputHistory>(world.playerEntity);
+    auto [input, position, previousPosition, rotation, collision, inputHistory]
+        = registry.get<Input, Position, PreviousPosition, Rotation, Collision,
+                       InputHistory>(world.playerEntity);
 
     /* Process any messages for us from the server. */
     PlayerMovementUpdate movementUpdate{};
@@ -84,8 +82,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
 
         // Apply the received movement state.
         position = movementUpdate.position;
-        velocity = movementUpdate.velocity;
-        rotation = movementUpdate.rotation;
+        rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
         collision.worldBounds
             = Transforms::modelToWorldCentered(collision.modelBounds, position);
 
@@ -116,14 +113,10 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
 
 void PlayerMovementSystem::replayInputs(Uint32 lastUpdateTick)
 {
-    auto [input, position, velocity, rotation, collision, inputHistory]
-        = world.registry.get<Input, Position, Velocity, Rotation, Collision,
-                             InputHistory>(world.playerEntity);
-
-    Uint32 currentTick{simulation.getCurrentTick()};
-
     // Replay all inputs newer than lastUpdateTick, except the current
     // tick's input.
+    Uint32 currentTick{simulation.getCurrentTick()};
+    auto& inputHistory{world.registry.get<InputHistory>(world.playerEntity)};
     for (Uint32 tickToProcess = (lastUpdateTick + 1);
          tickToProcess < currentTick; ++tickToProcess) {
         // Check that the diff is valid.
@@ -137,21 +130,16 @@ void PlayerMovementSystem::replayInputs(Uint32 lastUpdateTick)
 
 void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates)
 {
-    auto [position, velocity, rotation, collision]
-        = world.registry.get<Position, Velocity, Rotation, Collision>(
-            world.playerEntity);
+    auto [position, rotation, collision]
+        = world.registry.get<Position, Rotation, Collision>(world.playerEntity);
 
-    // Update our velocity for this tick, based on our current inputs.
-    velocity = MovementHelpers::updateVelocity(
-        velocity, inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
-
-    // Calculate our desired position, using the new velocity.
+    // Calculate their desired next position.
     Position desiredPosition{position};
-    desiredPosition = MovementHelpers::updatePosition(
-        position, velocity, SharedConfig::SIM_TICK_TIMESTEP_S);
+    desiredPosition = MovementHelpers::calcPosition(
+        position, inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
 
     // Update the direction we're facing, based on our current inputs.
-    rotation = MovementHelpers::updateRotation(rotation, inputStates);
+    rotation = MovementHelpers::calcRotation(rotation, inputStates);
 
     // If we're trying to move, resolve collisions.
     if (desiredPosition != position) {
@@ -172,12 +160,10 @@ void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates)
     }
 }
 
-void PlayerMovementSystem::triggerUpdateSignals()
+void PlayerMovementSystem::emitUpdateSignals()
 {
+    // Emit update signals to any observers.
     world.registry.patch<Position>(world.playerEntity, [](auto&) {});
-    world.registry.patch<Velocity>(world.playerEntity, [](auto&) {});
-    world.registry.patch<Rotation>(world.playerEntity, [](auto&) {});
-    world.registry.patch<Collision>(world.playerEntity, [](auto&) {});
 }
 
 void PlayerMovementSystem::printMismatchInfo(Uint32 lastUpdateTick)

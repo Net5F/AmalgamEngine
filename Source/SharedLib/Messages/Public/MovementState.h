@@ -2,8 +2,6 @@
 
 #include "Input.h"
 #include "Position.h"
-#include "Velocity.h"
-#include "Rotation.h"
 #include "entt/entity/registry.hpp"
 #include "bitsery/bitsery.h"
 
@@ -20,8 +18,7 @@ struct MovementState {
 
     Input input{};
     Position position{};
-    Velocity velocity{};
-    Rotation rotation{};
+    // Note: Rotation is calculated client-side.
 };
 
 template<typename S>
@@ -33,8 +30,6 @@ void serialize(S& serializer, MovementState& movementState)
             sbp.object(movementState.input);
         });
     serializer.object(movementState.position);
-    serializer.object(movementState.velocity);
-    serializer.object(movementState.rotation);
 }
 
 } // End namespace AM

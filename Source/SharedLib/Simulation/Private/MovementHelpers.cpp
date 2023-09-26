@@ -1,7 +1,6 @@
 #include "MovementHelpers.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Velocity.h"
 #include "Rotation.h"
 #include "BoundingBox.h"
 #include "TileMapBase.h"
@@ -15,14 +14,10 @@ const float DIAGONAL_NORMALIZATION_CONSTANT{0.70710678118f};
 
 namespace AM
 {
-Velocity MovementHelpers::updateVelocity(const Velocity& velocity,
-                                         const Input::StateArr& inputStates,
-                                         double deltaSeconds)
+Position MovementHelpers::calcPosition(const Position& position,
+                                       const Input::StateArr& inputStates,
+                                       double deltaSeconds)
 {
-    // Note: Ignoring while velocity is constant for testing.
-    //       If we ever care to support non-constant velocity, we'll need this.
-    ignore(deltaSeconds);
-
     // Direction values. 0 == no movement, 1 == movement.
     int xUp{static_cast<int>(inputStates[Input::XUp])};
     int xDown{static_cast<int>(inputStates[Input::XDown])};
@@ -40,29 +35,14 @@ Velocity MovementHelpers::updateVelocity(const Velocity& velocity,
         yDirection *= DIAGONAL_NORMALIZATION_CONSTANT;
     }
 
-    // Apply the velocity.
-    Velocity updatedVelocity{velocity};
-    updatedVelocity.x = xDirection * SharedConfig::MOVEMENT_VELOCITY;
-    updatedVelocity.y = yDirection * SharedConfig::MOVEMENT_VELOCITY;
+    // Calc the velocity.
+    float velocityX{xDirection * SharedConfig::MOVEMENT_VELOCITY};
+    float velocityY{yDirection * SharedConfig::MOVEMENT_VELOCITY};
 
-    // Note: Disabled Z-axis since it's underdeveloped. Can re-enable for
-    //       for testing. Eventually, we'll incorporate it fully.
-    // int zUp{static_cast<int>(inputStates[Input::ZUp])};
-    // int zDown{static_cast<int>(inputStates[Input::ZDown])};
-    // float zDirection{static_cast<float>(zUp - zDown)};
-    // updatedVelocity.z = zDirection * SharedConfig::MOVEMENT_VELOCITY;
-
-    return updatedVelocity;
-}
-
-Position MovementHelpers::updatePosition(const Position& position,
-                                         const Velocity& velocity,
-                                         double deltaSeconds)
-{
     // Update the position.
     Position newPosition{position};
-    newPosition.x += static_cast<float>((deltaSeconds * velocity.x));
-    newPosition.y += static_cast<float>((deltaSeconds * velocity.y));
+    newPosition.x += static_cast<float>((deltaSeconds * velocityX));
+    newPosition.y += static_cast<float>((deltaSeconds * velocityY));
 
     // Note: Disabled Z-axis since it's underdeveloped. Can re-enable for
     //       for testing. Eventually, we'll incorporate it fully.
@@ -71,8 +51,8 @@ Position MovementHelpers::updatePosition(const Position& position,
     return newPosition;
 }
 
-Rotation MovementHelpers::updateRotation(const Rotation& rotation,
-                                         const Input::StateArr& inputStates)
+Rotation MovementHelpers::calcRotation(const Rotation& rotation,
+                                       const Input::StateArr& inputStates)
 {
     // Direction values. 0 == no movement, 1 == movement.
     int xUp{static_cast<int>(inputStates[Input::XUp])};

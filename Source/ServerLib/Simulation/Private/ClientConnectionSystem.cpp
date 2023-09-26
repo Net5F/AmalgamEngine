@@ -11,7 +11,6 @@
 #include "Rotation.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Velocity.h"
 #include "ClientSimData.h"
 #include "IsClientEntity.h"
 #include "AnimationState.h"
@@ -78,7 +77,6 @@ void ClientConnectionSystem::processConnectEvents()
         registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0.0f);
         registry.emplace<PreviousPosition>(newEntity, spawnPoint.x,
                                            spawnPoint.y, 0.0f);
-        registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 250.0f, 250.0f);
         registry.emplace<Rotation>(newEntity);
 
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,

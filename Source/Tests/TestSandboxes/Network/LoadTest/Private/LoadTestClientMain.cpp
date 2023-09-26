@@ -78,7 +78,7 @@ try {
     unsigned int numClients{};
     if (argc > 1) {
         char* end;
-        int input{std::strtol(argv[1], &end, 10)};
+        int input{static_cast<int>(std::strtol(argv[1], &end, 10))};
         if ((*end != '\0') || (input < 1)) {
             // Input didn't parse into an integer, or value was less than 1.
             std::printf("Invalid input: %s\n", argv[1]);
@@ -94,7 +94,7 @@ try {
     unsigned int inputsPerSecond{};
     if (argc > 2) {
         char* end;
-        int input{std::strtol(argv[2], &end, 10)};
+        int input{static_cast<int>(std::strtol(argv[2], &end, 10))};
         if ((*end != '\0')) {
             // Input didn't parse into a valid integer.
             std::printf("Invalid input: %s\n", argv[2]);
@@ -110,7 +110,7 @@ try {
     unsigned int connectionWaitTimeMs{};
     if (argc > 3) {
         char* end;
-        int input{std::strtol(argv[3], &end, 10)};
+        int input{static_cast<int>(std::strtol(argv[3], &end, 10))};
         if ((*end != '\0')) {
             // Input didn't parse into a valid integer.
             std::printf("Invalid input: %s\n", argv[3]);

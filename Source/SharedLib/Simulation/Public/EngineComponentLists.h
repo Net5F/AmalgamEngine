@@ -4,7 +4,6 @@
 #include "Name.h"
 #include "Input.h"
 #include "Position.h"
-#include "Velocity.h"
 #include "Rotation.h"
 #include "AnimationState.h"
 #include "Interaction.h"
@@ -26,8 +25,8 @@ namespace EngineComponentLists
  * add it to ObservedComponentTypes below.
  */
 using ReplicatedComponentTypes
-    = boost::mp11::mp_list<IsClientEntity, Name, Input, Position, Velocity,
-                           Rotation, AnimationState, Interaction>;
+    = boost::mp11::mp_list<IsClientEntity, Name, Input, Position,
+                           AnimationState, Interaction>;
 
 /**
  * All of the engine's component types that should be observed and auto-

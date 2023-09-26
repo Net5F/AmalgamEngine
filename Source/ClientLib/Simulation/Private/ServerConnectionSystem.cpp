@@ -129,7 +129,6 @@ void ServerConnectionSystem::initMockSimState()
     registry.emplace<Input>(newEntity);
     registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<PreviousPosition>(newEntity, 0.0f, 0.0f, 0.0f);
-    registry.emplace<Velocity>(newEntity, 0.0f, 0.0f, 20.0f, 20.0f);
     registry.emplace<Rotation>(newEntity);
     registry.emplace<InputHistory>(newEntity);
 

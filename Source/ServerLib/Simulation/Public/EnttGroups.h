@@ -3,7 +3,6 @@
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Velocity.h"
 #include "Rotation.h"
 #include "Collision.h"
 #include "Ignore.h"
@@ -30,7 +29,7 @@ public:
     {
         // Used for moving an entity.
         auto movementGroup = registry.group<Input, Position, PreviousPosition,
-                                            Velocity, Rotation, Collision>();
+                                            Rotation, Collision>();
         ignore(movementGroup);
     }
 };

@@ -12,7 +12,6 @@ namespace AM
 {
 struct Position;
 struct PreviousPosition;
-struct Velocity;
 struct Rotation;
 class TileMapBase;
 
@@ -23,43 +22,30 @@ class MovementHelpers
 {
 public:
     /**
-     * Updates the given velocity based on the given inputStates.
+     * Calculates an updated position based on the current position, input state, 
+     * and a time delta.
      *
-     * @param velocity  The velocity to update.
+     * @param position  The current position.
      * @param inputStates  The current input state.
-     * @param deltaSeconds  The number of seconds that have passed since the
-     *                      last update.
-     *
-     * @return The updated velocity.
-     */
-    static Velocity updateVelocity(const Velocity& velocity,
-                                   const Input::StateArr& inputStates,
-                                   double deltaSeconds);
-
-    /**
-     * Updates the given position based on the given velocity.
-     *
-     * @param position  The position to update.
-     * @param velocity  The current velocity.
      * @param deltaSeconds  The number of seconds that have passed since the
      *                      last update.
      *
      * @return The updated position.
      */
-    static Position updatePosition(const Position& position,
-                                   const Velocity& velocity,
-                                   double deltaSeconds);
+    static Position calcPosition(const Position& position,
+                                 const Input::StateArr& inputStates,
+                                 double deltaSeconds);
 
     /**
-     * Updates the given rotation based on the given input state.
+     * Calculates a rotation based on the given input state.
+     * If there are no inputs or they cancel out, the given rotation will be 
+     * returned.
      *
-     * @param rotation  The rotation to update.
+     * @param rotation  The current rotation.
      * @param inputStates  The current input state.
-     *
-     * @return The updated rotation.
      */
-    static Rotation updateRotation(const Rotation& rotation,
-                                   const Input::StateArr& inputStates);
+    static Rotation calcRotation(const Rotation& rotation,
+                                 const Input::StateArr& inputStates);
 
     /**
      * Returns a position interpolated between previousPos and position.

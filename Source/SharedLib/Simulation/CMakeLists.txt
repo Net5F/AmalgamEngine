@@ -37,7 +37,6 @@ target_sources(SharedLib
         Public/Components/PreviousPosition.h
         Public/Components/Rotation.h
         Public/Components/Sprite.h
-        Public/Components/Velocity.h
         Public/SpriteData/EmptySpriteID.h
         Public/SpriteData/SpriteDataBase.h
         Public/SpriteData/SpriteSets.h

@@ -12,6 +12,7 @@
 #include "NeedsAdjacentChunks.h"
 #include "SDLHelpers.h"
 #include "Transforms.h"
+#include "MovementHelpers.h"
 #include "Config.h"
 #include "entt/entity/registry.hpp"
 #include <variant>
@@ -127,20 +128,27 @@ void EntityLifetimeSystem::processEntityInit(const EntityInit& entityInit)
     // Add any client-only or non-replicated components.
     // Note: Be careful with holding onto references here. If components 
     //       are added to the same group, the ref will be invalidated.
-    if (const auto* position = registry.try_get<Position>(newEntity)) {
+
+    // Entities with an Input are capable of movement, so we add a Rotation 
+    // and PreviousPosition based on their input state.
+    auto [input, position] = registry.try_get<Input, Position>(newEntity);
+    if (input && position) {
         registry.emplace<PreviousPosition>(newEntity, *position);
+        registry.emplace<Rotation>(
+            newEntity, MovementHelpers::calcRotation({}, input->inputStates));
     }
 
-    const auto* position{registry.try_get<Position>(newEntity)};
+    // For entities with an AnimationState, we locally add a Sprite so the 
+    // Renderer can use it.
     const auto* animationState{registry.try_get<AnimationState>(newEntity)};
-    if ((position != nullptr) && (animationState != nullptr)) {
+    if (position && animationState) {
         const Sprite* sprite{
             spriteData.getObjectSpriteSet(animationState->spriteSetID)
                 .sprites[animationState->spriteIndex]};
         registry.emplace<Sprite>(newEntity, *sprite);
 
         // When entities have a Position and AnimationState, the server gives 
-        // them a Collision. It isn't sent, so add it manually.
+        // them a Collision. It isn't replicated, so add it manually.
         registry.emplace<Collision>(
             newEntity, sprite->modelBounds,
             Transforms::modelToWorldCentered(sprite->modelBounds, *position));

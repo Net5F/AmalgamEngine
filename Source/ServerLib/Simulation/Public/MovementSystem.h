@@ -16,9 +16,6 @@ public:
 
     /**
      * Processes 1 tick of entity movement.
-     *
-     * Updates velocity components based on input state, moves position
-     * components based on velocity, updates sprites based on position.
      */
     void processMovements();
 

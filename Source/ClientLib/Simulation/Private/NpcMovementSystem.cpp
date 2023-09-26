@@ -7,7 +7,6 @@
 #include "Name.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Velocity.h"
 #include "Input.h"
 #include "Rotation.h"
 #include "Collision.h"
@@ -65,6 +64,9 @@ void NpcMovementSystem::updateNpcs()
         lastProcessedTick++;
     }
 
+    // Signal the updated components to any observers.
+    emitUpdateSignals();
+
     if (!updated) {
         LOG_INFO(
             "Tick passed with no npc update. lastProcessed: %u, desired: %u, "
@@ -77,24 +79,20 @@ void NpcMovementSystem::updateNpcs()
 void NpcMovementSystem::moveAllNpcs()
 {
     auto movementGroup = world.registry.group<Input, Position, PreviousPosition,
-                                              Velocity, Rotation, Collision>(
+                                              Rotation, Collision>(
         entt::get<Sprite>, entt::exclude<InputHistory>);
-    for (auto [entity, input, position, previousPosition, velocity, rotation,
+    for (auto [entity, input, position, previousPosition, rotation,
                collision, sprite] : movementGroup.each()) {
         // Save their old position.
         previousPosition = position;
 
-        // Update their velocity for this tick, based on their current inputs.
-        velocity = MovementHelpers::updateVelocity(
-            velocity, input.inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
-
-        // Calculate their desired position, using the new velocity.
+        // Calculate their desired next position.
         Position desiredPosition{position};
-        desiredPosition = MovementHelpers::updatePosition(
-            position, velocity, SharedConfig::SIM_TICK_TIMESTEP_S);
+        desiredPosition = MovementHelpers::calcPosition(
+            position, input.inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update the direction they're facing, based on their current inputs.
-        rotation = MovementHelpers::updateRotation(rotation, input.inputStates);
+        rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
 
         // If they're trying to move, resolve collisions.
         if (desiredPosition != position) {
@@ -121,7 +119,7 @@ void NpcMovementSystem::applyUpdateMessage(
 {
     entt::registry& registry{world.registry};
     auto movementGroup = registry.group<Input, Position, PreviousPosition,
-                                        Velocity, Rotation, Collision>(
+                                        Rotation, Collision>(
         entt::get<Sprite>, entt::exclude<InputHistory>);
 
     // Apply each updated entity's new state.
@@ -139,25 +137,36 @@ void NpcMovementSystem::applyUpdateMessage(
                 entity, npcMovementUpdate.tickNum);
         }
 
+        // Get the entity's components.
+        auto [input, position, previousPosition, rotation, collision]
+            = movementGroup
+                  .get<Input, Position, PreviousPosition, Rotation, Collision>(
+                      entity);
+
         // Apply the received component updates.
-        registry.replace<Input>(entity, movementState.input);
-        auto& position{
-            registry.replace<Position>(entity, movementState.position)};
-        registry.replace<Velocity>(entity, movementState.velocity);
-        registry.replace<Rotation>(entity, movementState.rotation);
+        input = movementState.input;
+        position = movementState.position;
+        rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
 
         // If the previous position hasn't been initialized, set it to the
         // current position so they don't lerp in from the origin.
-        auto& previousPosition{movementGroup.get<PreviousPosition>(entity)};
         if (!(previousPosition.isInitialized)) {
             previousPosition = position;
             previousPosition.isInitialized = true;
         }
 
         // Move their collision box to their new position.
-        auto& collision{movementGroup.get<Collision>(entity)};
         collision.worldBounds
             = Transforms::modelToWorldCentered(collision.modelBounds, position);
+    }
+}
+
+void NpcMovementSystem::emitUpdateSignals()
+{
+    // Emit update signals to any observers.
+    auto view{world.registry.view<Position, PreviousPosition>()};
+    for (entt::entity entity : view) {
+        world.registry.patch<Position>(entity, [](auto&) {});
     }
 }
 

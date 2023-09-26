@@ -7,7 +7,6 @@ namespace AM
 {
 struct Input;
 struct Position;
-struct Velocity;
 struct EntityUpdate;
 
 namespace Server

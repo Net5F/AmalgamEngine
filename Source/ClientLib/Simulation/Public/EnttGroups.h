@@ -3,7 +3,6 @@
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Velocity.h"
 #include "Rotation.h"
 #include "Collision.h"
 #include "InputHistory.h"
@@ -32,7 +31,7 @@ public:
     {
         // Used for NPC movement and dynamic entity sorting.
         auto movementGroup = registry.group<Input, Position, PreviousPosition,
-                                            Velocity, Rotation, Collision>(
+                                            Rotation, Collision>(
             entt::get<Sprite>, entt::exclude<InputHistory>);
         ignore(movementGroup);
     }
