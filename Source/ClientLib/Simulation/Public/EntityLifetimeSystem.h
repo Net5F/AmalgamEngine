@@ -39,7 +39,8 @@ private:
      * Processes waiting EntityInit messages, up to desiredTick.
      */
     void processEntityInits(Uint32 desiredTick);
-    void processEntityInit(const EntityInit& entityInit);
+    void processEntityData(Uint32 tickNum,
+                           const EntityInit::EntityData& entityData);
 
     /**
      * Handles any processing that's specific to the player entity.

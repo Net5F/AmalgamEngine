@@ -79,10 +79,21 @@ void EntityLifetimeSystem::processEntityInits(Uint32 desiredTick)
     {
         EntityInit entityInit{};
         while (entityInitQueue.pop(entityInit)) {
-            if (entityInit.entity == world.playerEntity) {
-                processEntityInit(entityInit);
+            // If the player entity is present, process it and erase it from 
+            // the message.
+            for (auto it = entityInit.entityData.begin();
+                 it != entityInit.entityData.end();) {
+                if (it->entity == world.playerEntity) {
+                    processEntityData(entityInit.tickNum, *it);
+                    it = entityInit.entityData.erase(it);
+                }
+                else {
+                    ++it;
+                }
             }
-            else {
+
+            // If there are entities remaining in the message, push it.
+            if (entityInit.entityData.size() > 0) {
                 entityInitSecondaryQueue.push(entityInit);
             }
         }
@@ -99,26 +110,29 @@ void EntityLifetimeSystem::processEntityInits(Uint32 desiredTick)
         }
 
         // Process the message.
-        processEntityInit(entityInit);
+        for (const auto& entityData : entityInit.entityData) {
+            processEntityData(entityInit.tickNum, entityData);
+        }
 
         entityInitSecondaryQueue.pop();
     }
 }
 
-void EntityLifetimeSystem::processEntityInit(const EntityInit& entityInit)
+void EntityLifetimeSystem::processEntityData(
+    Uint32 tickNum, const EntityInit::EntityData& entityData)
 {
     entt::registry& registry{world.registry};
 
     // Create the entity.
-    entt::entity newEntity{registry.create(entityInit.entity)};
-    if (newEntity != entityInit.entity) {
+    entt::entity newEntity{registry.create(entityData.entity)};
+    if (newEntity != entityData.entity) {
         LOG_FATAL("Created entity doesn't match received entity. "
                   "Created: %u, received: %u",
-                  newEntity, entityInit.entity);
+                  newEntity, entityData.entity);
     }
 
     // Add any replicated components that the server sent.
-    for (const auto& componentVariant : entityInit.components) {
+    for (const auto& componentVariant : entityData.components) {
         std::visit([&](const auto& component) {
             using T = std::decay_t<decltype(component)>;
             registry.emplace<T>(newEntity, component);
@@ -158,11 +172,11 @@ void EntityLifetimeSystem::processEntityInit(const EntityInit& entityInit)
     if (newEntity == world.playerEntity) {
         finishPlayerEntity();
         LOG_INFO("Player entity added: %u. Message tick: %u", newEntity,
-                 entityInit.tickNum);
+                 tickNum);
     }
     else {
         LOG_INFO("Peer entity added: %u. Message tick: %u", newEntity,
-                 entityInit.tickNum);
+                 tickNum);
     }
 }
 

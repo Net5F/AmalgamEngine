@@ -55,7 +55,6 @@ ClientAOISystem::ClientAOISystem(Simulation& inSimulation, World& inWorld,
 , network{inNetwork}
 , entitiesThatLeft{}
 , entitiesThatEntered{}
-, entityInitMap{}
 {
 }
 
@@ -105,11 +104,6 @@ void ClientAOISystem::updateAOILists()
         // Save the new list.
         client.entitiesInAOI = currentAOIEntities;
     }
-
-    // Note: If it's ever worthwhile, we could wait until the entity actually 
-    //       changes to clear its message from the map.
-    // Clear the message map, since they won't be valid next tick.
-    entityInitMap.clear();
 }
 
 void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
@@ -126,34 +120,25 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
 {
     entt::registry& registry{world.registry};
 
-    // Send the client an EntityInit for each entity that entered its AOI.
+    // Send the client an EntityInit containing each entity that entered its AOI.
+    EntityInit entityInit{simulation.getCurrentTick()};
     for (entt::entity entityThatEntered : entitiesThatEntered) {
-        // If we already built a message for this entity, send it.
-        if (auto pair = entityInitMap.find(entityThatEntered);
-            pair != entityInitMap.end()) {
-            network.send(client.netID, pair->second);
-            continue;
-        }
-
         const auto& replicatedComponentList{
             registry.get<ReplicatedComponentList>(entityThatEntered)};
 
-        // Build a message with all of the entity's client-relevant components.
+        // Add the entity and all of its client-relevant components to the 
+        // message.
         // Note: We send the entity, even if it has no client-relevant component,
         //       because there may be a build mode that cares about it.
-        EntityInit entityInit{simulation.getCurrentTick(), entityThatEntered};
+        EntityInit::EntityData& entityData{
+            entityInit.entityData.emplace_back(entityThatEntered)};
         addComponentsToVector(registry, entityThatEntered,
                               replicatedComponentList.typeIndices,
-                              entityInit.components);
-
-        // Serialize the message and save it in the map, in case any other 
-        // clients need to be sent the same data.
-        BinaryBufferSharedPtr message{network.serialize(entityInit)};
-        entityInitMap[entityThatEntered] = message;
-
-        // Send the message.
-        network.send(client.netID, message);
+                              entityData.components);
     }
+
+    // Send the message.
+    network.serializeAndSend(client.netID, entityInit);
 }
 
 } // namespace Server

@@ -9,10 +9,9 @@
 namespace AM
 {
 /**
- * Sent by the server to tell a client that an entity has moved and must have
- * its state updated.
+ * Sent by the server when an entity moves and must have its state updated.
  *
- * Contains new entity movement state for a single sim tick.
+ * Contains all updated entity movement state for a single sim tick.
  *
  * Each client is only sent the state of entities that are in their area of
  * interest.
@@ -27,7 +26,7 @@ struct MovementUpdate {
     Uint32 tickNum{0};
 
     /** The new state of all relevant entities that updated on this tick. */
-    std::vector<MovementState> movementStates;
+    std::vector<MovementState> movementStates{};
 };
 
 template<typename S>
