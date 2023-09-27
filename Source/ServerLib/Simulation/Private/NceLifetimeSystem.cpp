@@ -83,9 +83,9 @@ void NceLifetimeSystem::createEntity(
 
 void NceLifetimeSystem::initEntity(const EntityInitRequest& entityInitRequest)
 {
-    world.constructEntity(entityInitRequest.components,
-                          InitScript{entityInitRequest.initScript},
-                          entityInitRequest.entity);
+    world.constructEntity(
+        entityInitRequest.position, entityInitRequest.components,
+        InitScript{entityInitRequest.initScript}, entityInitRequest.entity);
 }
 
 } // End namespace Server

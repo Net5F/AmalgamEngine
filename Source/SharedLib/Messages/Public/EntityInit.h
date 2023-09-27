@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineMessageType.h"
+#include "Position.h"
 #include "ReplicatedComponent.h"
 #include "SharedConfig.h"
 #include "entt/fwd.hpp"
@@ -34,7 +35,10 @@ struct EntityInit {
         /** The entity's ID. */
         entt::entity entity{entt::null};
 
-        /** This entity's client-relevant components. */
+        /** The entity's Position. */
+        Position position{};
+
+        /** This entity's optional client-relevant components. */
         std::vector<ReplicatedComponent> components{};
     };
 
@@ -47,6 +51,7 @@ template<typename S>
 void serialize(S& serializer, EntityInit::EntityData& entityData)
 {
     serializer.value4b(entityData.entity);
+    serializer.object(entityData.position);
     serializer.enableBitPacking([&](typename S::BPEnabledType& sbp) {
         sbp.container(entityData.components,
                       boost::mp11::mp_size<ReplicatedComponentTypes>::value,

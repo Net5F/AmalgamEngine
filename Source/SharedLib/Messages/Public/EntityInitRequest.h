@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineMessageType.h"
+#include "Position.h"
 #include "ReplicatedComponent.h"
 #include "InitScriptResponse.h"
 #include "NetworkDefs.h"
@@ -29,7 +30,10 @@ struct EntityInitRequest {
         this message is a request to create a new entity. */
     entt::entity entity{entt::null};
 
-    /** This entity's client-relevant components.
+    /** The entity's Position. */
+    Position position{};
+
+    /** The entity's optional client-relevant components.
         We use this for components that build mode will want to set directly. */
     std::vector<ReplicatedComponent> components{};
 

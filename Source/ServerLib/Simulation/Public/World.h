@@ -65,9 +65,11 @@ public:
      * Note: We restrict the component types to those in ReplicatedComponent
      *       only because it has all that we currently need and it's convenient.
      */
-    entt::entity constructEntity(std::span<const ReplicatedComponent> components,
-                                 const InitScript& initScript,
-                                 entt::entity entityHint = entt::null);
+    entt::entity
+        constructEntity(const Position& position,
+                        std::span<const ReplicatedComponent> components,
+                        const InitScript& initScript,
+                        entt::entity entityHint = entt::null);
 
     /**
      * Returns true if the given ID is valid and in use.

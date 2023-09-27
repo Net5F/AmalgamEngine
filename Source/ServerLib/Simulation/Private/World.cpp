@@ -84,9 +84,9 @@ World::World(SpriteData& inSpriteData, sol::state& inLua)
         this);
 }
 
-entt::entity World::constructEntity(std::span<const ReplicatedComponent> components,
-                                    const InitScript& initScript,
-                                    entt::entity entityHint)
+entt::entity World::constructEntity(
+    const Position& position, std::span<const ReplicatedComponent> components,
+    const InitScript& initScript, entt::entity entityHint)
 {
     // Create the new entity.
     entt::entity newEntity{entt::null};
@@ -113,20 +113,19 @@ entt::entity World::constructEntity(std::span<const ReplicatedComponent> compone
     //       are added to the same group, the ref will be invalidated.
 
     // Note: We only add entities to the locator (and replicate them to clients)
-    //       if they have both Position and AnimationState. If we ever need 
-    //       to replicate entities that don't have AnimationState, revisit this.
+    //       if they have an AnimationState. If we ever need to replicate 
+    //       entities that don't have AnimationState, revisit this.
     // If the entity has a position and animation state, add collision and 
     // add the entity to the locator.
-    const auto [position, animationState]
-        = registry.try_get<Position, AnimationState>(newEntity);
-    if (position && animationState) {
+    if (const auto* animationState{
+            registry.try_get<AnimationState>(newEntity)}) {
         const ObjectSpriteSet& spriteSet{
             spriteData.getObjectSpriteSet(animationState->spriteSetID)};
         const Sprite* sprite{spriteSet.sprites[animationState->spriteIndex]};
 
         const Collision& collision{registry.emplace<Collision>(
             newEntity, sprite->modelBounds,
-            Transforms::modelToWorldCentered(sprite->modelBounds, *position))};
+            Transforms::modelToWorldCentered(sprite->modelBounds, position))};
 
         // Note: Since the entity was added to the locator, clients 
         //       will be told by ClientAOISystem to replicate it.

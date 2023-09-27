@@ -3,8 +3,6 @@
 #include "IsClientEntity.h"
 #include "Name.h"
 #include "Input.h"
-#include "Position.h"
-#include "Rotation.h"
 #include "AnimationState.h"
 #include "Interaction.h"
 #include "boost/mp11/list.hpp"
@@ -23,10 +21,13 @@ namespace EngineComponentLists
  * In other words, adding components to this list will cause them to be sent 
  * once. If you want a component to additionally be sent whenever it's updated, 
  * add it to ObservedComponentTypes below.
+ *
+ * Note: We handle Position separately because every entity is guaranteed to 
+ *       have one and it's more efficient to do so.
  */
 using ReplicatedComponentTypes
-    = boost::mp11::mp_list<IsClientEntity, Name, Input, Position,
-                           AnimationState, Interaction>;
+    = boost::mp11::mp_list<IsClientEntity, Name, Input, AnimationState,
+                           Interaction>;
 
 /**
  * All of the engine's component types that should be observed and auto-

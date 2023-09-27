@@ -131,6 +131,9 @@ void EntityLifetimeSystem::processEntityData(
                   newEntity, entityData.entity);
     }
 
+    // Note: All entities have a position.
+    registry.emplace<Position>(newEntity, entityData.position);
+
     // Add any replicated components that the server sent.
     for (const auto& componentVariant : entityData.components) {
         std::visit([&](const auto& component) {
@@ -145,17 +148,17 @@ void EntityLifetimeSystem::processEntityData(
 
     // Entities with an Input are capable of movement, so we add a Rotation 
     // and PreviousPosition based on their input state.
-    auto [input, position] = registry.try_get<Input, Position>(newEntity);
-    if (input && position) {
-        registry.emplace<PreviousPosition>(newEntity, *position);
+    if (const auto* input{registry.try_get<Input>(newEntity)}) {
+        const Position& position{registry.get<Position>(newEntity)};
+        registry.emplace<PreviousPosition>(newEntity, position);
         registry.emplace<Rotation>(
             newEntity, MovementHelpers::calcRotation({}, input->inputStates));
     }
 
     // For entities with an AnimationState, we locally add a Sprite so the 
     // Renderer can use it.
-    const auto* animationState{registry.try_get<AnimationState>(newEntity)};
-    if (position && animationState) {
+    if (const auto* animationState{
+            registry.try_get<AnimationState>(newEntity)}) {
         const Sprite* sprite{
             spriteData.getObjectSpriteSet(animationState->spriteSetID)
                 .sprites[animationState->spriteIndex]};
@@ -163,9 +166,10 @@ void EntityLifetimeSystem::processEntityData(
 
         // When entities have a Position and AnimationState, the server gives 
         // them a Collision. It isn't replicated, so add it manually.
+        const Position& position{registry.get<Position>(newEntity)};
         registry.emplace<Collision>(
             newEntity, sprite->modelBounds,
-            Transforms::modelToWorldCentered(sprite->modelBounds, *position));
+            Transforms::modelToWorldCentered(sprite->modelBounds, position));
     }
 
     // If this is the player entity, add any client components specific to it.

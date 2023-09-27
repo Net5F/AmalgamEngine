@@ -14,6 +14,7 @@ namespace AM
  * This means that an entity's sprite and bounding box will be centered on this
  * position in the X and Y axis, and will sit on top of this position in the Z
  * axis.
+ * All entities possess a Position component.
  *
  * We also commonly use this for 3D math.
  */

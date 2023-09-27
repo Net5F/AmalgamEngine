@@ -130,8 +130,8 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
         // message.
         // Note: We send the entity, even if it has no client-relevant component,
         //       because there may be a build mode that cares about it.
-        EntityInit::EntityData& entityData{
-            entityInit.entityData.emplace_back(entityThatEntered)};
+        EntityInit::EntityData& entityData{entityInit.entityData.emplace_back(
+            entityThatEntered, registry.get<Position>(entityThatEntered))};
         addComponentsToVector(registry, entityThatEntered,
                               replicatedComponentList.typeIndices,
                               entityData.components);
