@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EntityInitRequest.h"
-#include "EntityDelete.h"
+#include "EntityDeleteRequest.h"
 #include "QueuedEvents.h"
 #include <queue>
 
@@ -39,6 +39,8 @@ private:
      */
     void createEntity(const EntityInitRequest& entityInitRequest);
 
+    void deleteEntity(const EntityDeleteRequest& entityDeleteRequest);
+
     /** Used to add/remove entities. */
     World& world;
     /** If non-nullptr, contains the project's simulation extension functions.
@@ -49,7 +51,7 @@ private:
     std::queue<EntityInitRequest> entityReInitQueue;
 
     EventQueue<EntityInitRequest> entityInitRequestQueue;
-    EventQueue<EntityDelete> deleteQueue;
+    EventQueue<EntityDeleteRequest> entityDeleteRequestQueue;
 };
 
 } // End namespace Server

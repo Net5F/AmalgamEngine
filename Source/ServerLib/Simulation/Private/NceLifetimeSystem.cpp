@@ -17,7 +17,7 @@ NceLifetimeSystem::NceLifetimeSystem(World& inWorld, Network& inNetwork)
 , extension{nullptr}
 , entityReInitQueue{}
 , entityInitRequestQueue{inNetwork.getEventDispatcher()}
-, deleteQueue{inNetwork.getEventDispatcher()}
+, entityDeleteRequestQueue{inNetwork.getEventDispatcher()}
 {
 }
 
@@ -43,7 +43,11 @@ void NceLifetimeSystem::processUpdateRequests()
         createEntity(entityCreateRequest);
     }
 
-    // TODO: Handle EntityDelete
+    // If we've been requested to delete an entity, delete it.
+    EntityDeleteRequest entityDeleteRequest{};
+    while (entityDeleteRequestQueue.pop(entityDeleteRequest)) {
+        deleteEntity(entityDeleteRequest);
+    }
 }
 
 void NceLifetimeSystem::createEntity(
@@ -80,6 +84,24 @@ void NceLifetimeSystem::createEntity(
             entityInitRequest.position, entityInitRequest.components,
             InitScript{entityInitRequest.initScript}, entityInitRequest.entity);
     }
+}
+
+void NceLifetimeSystem::deleteEntity(
+    const EntityDeleteRequest& entityDeleteRequest)
+{
+    // If the entity isn't valid or is a client, skip it.
+    entt::entity entity{entityDeleteRequest.entity};
+    if (!(world.entityIDIsInUse(entity))
+        || world.registry.all_of<IsClientEntity>(entity)) {
+        return;
+    }
+    // If the project says the request isn't valid, skip it.
+    else if ((extension != nullptr)
+             && !(extension->isEntityDeleteRequestValid(entityDeleteRequest))) {
+        return;
+    }
+
+    world.registry.destroy(entity);
 }
 
 } // End namespace Server

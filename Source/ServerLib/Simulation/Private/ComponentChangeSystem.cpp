@@ -35,10 +35,13 @@ void ComponentChangeSystem::processChangeRequests()
     // Process any waiting update requests.
     NameChangeRequest nameChangeRequest{};
     while (nameChangeRequestQueue.pop(nameChangeRequest)) {
+        // If the entity isn't valid, skip it.
+        if (!(world.entityIDIsInUse(nameChangeRequest.entity))) {
+            continue;
+        }
         // If the project says the request isn't valid, skip it.
-        if ((extension != nullptr)
-            && !(extension->isNameChangeRequestValid(
-                nameChangeRequest))) {
+        else if ((extension != nullptr)
+                 && !(extension->isNameChangeRequestValid(nameChangeRequest))) {
             continue;
         }
 
@@ -48,10 +51,14 @@ void ComponentChangeSystem::processChangeRequests()
 
     AnimationStateChangeRequest animationStateChangeRequest{};
     while (animationStateChangeRequestQueue.pop(animationStateChangeRequest)) {
+        // If the entity isn't valid, skip it.
+        if (!(world.entityIDIsInUse(nameChangeRequest.entity))) {
+            continue;
+        }
         // If the project says the request isn't valid, skip it.
-        if ((extension != nullptr)
-            && !(extension->isAnimationStateChangeRequestValid(
-                animationStateChangeRequest))) {
+        else if ((extension != nullptr)
+                 && !(extension->isAnimationStateChangeRequestValid(
+                     animationStateChangeRequest))) {
             continue;
         }
 

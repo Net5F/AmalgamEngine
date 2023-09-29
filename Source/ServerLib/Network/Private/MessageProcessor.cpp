@@ -8,6 +8,7 @@
 #include "InputChangeRequest.h"
 #include "ChunkUpdateRequest.h"
 #include "EntityInitRequest.h"
+#include "EntityDeleteRequest.h"
 #include "NameChangeRequest.h"
 #include "AnimationStateChangeRequest.h"
 #include "InitScriptRequest.h"
@@ -57,6 +58,11 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
         }
         case EngineMessageType::EntityInitRequest: {
             dispatchMessage<EntityInitRequest>(
+                messageBuffer, messageSize, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::EntityDeleteRequest: {
+            dispatchMessage<EntityDeleteRequest>(
                 messageBuffer, messageSize, networkEventDispatcher);
             break;
         }

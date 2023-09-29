@@ -4,11 +4,11 @@ target_sources(SharedLib
         Public/ChunkUpdateRequest.h
         Public/ChunkWireSnapshot.h
         Public/ComponentUpdate.h
-        Public/ComponentUpdateRequest.h
         Public/ConnectionRequest.h
         Public/ConnectionResponse.h
         Public/EngineMessageType.h
         Public/EntityDelete.h
+        Public/EntityDeleteRequest.h
         Public/EntityInit.h
         Public/EntityInitRequest.h
         Public/ExplicitConfirmation.h
