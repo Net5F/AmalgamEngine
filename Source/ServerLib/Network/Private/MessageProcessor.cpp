@@ -8,7 +8,8 @@
 #include "InputChangeRequest.h"
 #include "ChunkUpdateRequest.h"
 #include "EntityInitRequest.h"
-#include "ComponentUpdateRequest.h"
+#include "NameChangeRequest.h"
+#include "AnimationStateChangeRequest.h"
 #include "InitScriptRequest.h"
 #include "InteractionRequest.h"
 #include "TileAddLayer.h"
@@ -59,8 +60,13 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 messageBuffer, messageSize, networkEventDispatcher);
             break;
         }
-        case EngineMessageType::ComponentUpdateRequest: {
-            dispatchMessage<ComponentUpdateRequest>(
+        case EngineMessageType::NameChangeRequest: {
+            dispatchMessage<NameChangeRequest>(messageBuffer, messageSize,
+                                               networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::AnimationStateChangeRequest: {
+            dispatchMessage<AnimationStateChangeRequest>(
                 messageBuffer, messageSize, networkEventDispatcher);
             break;
         }

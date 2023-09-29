@@ -100,6 +100,9 @@ entt::entity World::constructEntity(
     // Add RelicatedComponentList first so it gets updated as we add others.
     registry.emplace<ReplicatedComponentList>(newEntity);
 
+    // All entities have a position.
+    registry.emplace<Position>(newEntity, position);
+
     // Add the given components.
     for (const auto& componentVariant : components) {
         std::visit([&](const auto& component) {

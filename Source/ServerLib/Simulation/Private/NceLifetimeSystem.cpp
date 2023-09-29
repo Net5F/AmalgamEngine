@@ -31,7 +31,9 @@ void NceLifetimeSystem::processUpdateRequests()
     // Process any entities that are waiting for re-initialization.
     while (!(entityReInitQueue.empty())) {
         EntityInitRequest& queuedEntityInit{entityReInitQueue.front()};
-        initEntity(queuedEntityInit);
+        world.constructEntity(
+            queuedEntityInit.position, queuedEntityInit.components,
+            InitScript{queuedEntityInit.initScript}, queuedEntityInit.entity);
         entityReInitQueue.pop();
     }
 
@@ -70,22 +72,14 @@ void NceLifetimeSystem::createEntity(
             //       will tell nearby clients to delete it. Then, when we re-
             //       init it, AOISystem will send them the new data.
             entityReInitQueue.push(entityInitRequest);
-
-            LOG_INFO("Re-initialized entity with entityID: %u",
-                     entityInitRequest.entity);
         }
     }
     else {
         // No ID, create a new entity and initialize it.
-        initEntity(entityInitRequest);
+        world.constructEntity(
+            entityInitRequest.position, entityInitRequest.components,
+            InitScript{entityInitRequest.initScript}, entityInitRequest.entity);
     }
-}
-
-void NceLifetimeSystem::initEntity(const EntityInitRequest& entityInitRequest)
-{
-    world.constructEntity(
-        entityInitRequest.position, entityInitRequest.components,
-        InitScript{entityInitRequest.initScript}, entityInitRequest.entity);
 }
 
 } // End namespace Server

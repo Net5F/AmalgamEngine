@@ -22,7 +22,6 @@ enum class EngineMessageType : Uint8 {
     AnimationStateChangeRequest,
     ChunkUpdateRequest,
     EntityInitRequest,
-    ComponentUpdateRequest,
     InitScriptRequest,
     InteractionRequest,
 

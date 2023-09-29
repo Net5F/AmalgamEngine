@@ -11,6 +11,7 @@
 #include "Collision.h"
 #include "SharedConfig.h"
 #include "Log.h"
+#include "entt/entity/observer.hpp"
 #include "boost/mp11/algorithm.hpp"
 #include "boost/mp11/map.hpp"
 #include "boost/mp11/bind.hpp"
@@ -45,7 +46,6 @@ ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,
 , world{inWorld}
 , network{inNetwork}
 , spriteData{inSpriteData}
-, componentUpdateRequestQueue{inNetwork.getEventDispatcher()}
 {
     boost::mp11::mp_for_each<ObservedComponentTypes>([&](auto I) {
         using ObservedComponent = decltype(I);
@@ -53,7 +53,7 @@ ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,
             boost::mp11::mp_find<ObservedComponentTypes,
                                  ObservedComponent>::value};
 
-        // Note: If a client is near an entity when it's constructed, it'll 
+        // TODO: If a client is near an entity when it's constructed, it'll 
         //       receive both an EntityInit and an EntityUpdate (from the group
         //       observer). It'd be nice if we could find a way to just send one,
         //       but until then it isn't a huge cost.
@@ -69,8 +69,9 @@ void ComponentSyncSystem::sendUpdates()
 
     entt::registry& registry{world.registry};
 
-    // Note: We build a message for each updated entity, even if there aren't 
-    //       any clients nearby to send it to. There may be ways to optimize.
+    // TODO: We build a message for each updated entity, even if there aren't 
+    //       any clients nearby to send it to. There may be ways to optimize by
+    //       making it client-by-client like MovementSyncSystem.
     // Build an EntityUpdate for each entity that has an updated component.
     boost::mp11::mp_for_each<ObservedComponentTypes>([&](auto I) {
         using ObservedComponent = decltype(I);

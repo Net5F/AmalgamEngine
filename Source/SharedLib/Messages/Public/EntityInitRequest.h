@@ -57,6 +57,7 @@ void serialize(S& serializer,
                EntityInitRequest& entityInitRequest)
 {
     serializer.value4b(entityInitRequest.entity);
+    serializer.object(entityInitRequest.position);
     serializer.enableBitPacking([&](typename S::BPEnabledType& sbp) {
         sbp.container(entityInitRequest.components,
                       boost::mp11::mp_size<ReplicatedComponentTypes>::value,

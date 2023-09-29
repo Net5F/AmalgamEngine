@@ -39,11 +39,6 @@ private:
      */
     void createEntity(const EntityInitRequest& entityInitRequest);
 
-    /**
-     * Tells the World to create the given entity.
-     */
-    void initEntity(const EntityInitRequest& entityInitRequest);
-
     /** Used to add/remove entities. */
     World& world;
     /** If non-nullptr, contains the project's simulation extension functions.

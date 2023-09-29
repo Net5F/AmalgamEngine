@@ -2,12 +2,8 @@
 
 #include "ReplicatedComponent.h"
 #include "ComponentUpdate.h"
-#include "ComponentUpdateRequest.h"
-#include "QueuedEvents.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/registry.hpp"
-#include "entt/entity/observer.hpp"
-#include <array>
 #include <unordered_map>
 
 namespace AM
@@ -56,8 +52,6 @@ private:
         We iterate the observers to detect changes, so this map lets us 
         iteratively build the update messages component-by-component. */
     std::unordered_map<entt::entity, ComponentUpdate> componentUpdateMap;
-
-    EventQueue<ComponentUpdateRequest> componentUpdateRequestQueue;
 };
 
 } // namespace Server

@@ -131,7 +131,7 @@ void EntityLifetimeSystem::processEntityData(
                   newEntity, entityData.entity);
     }
 
-    // Note: All entities have a position.
+    // All entities have a position.
     registry.emplace<Position>(newEntity, entityData.position);
 
     // Add any replicated components that the server sent.
@@ -164,8 +164,8 @@ void EntityLifetimeSystem::processEntityData(
                 .sprites[animationState->spriteIndex]};
         registry.emplace<Sprite>(newEntity, *sprite);
 
-        // When entities have a Position and AnimationState, the server gives 
-        // them a Collision. It isn't replicated, so add it manually.
+        // When entities have an AnimationState, the server gives them a 
+        // Collision. It isn't replicated, so add it manually.
         const Position& position{registry.get<Position>(newEntity)};
         registry.emplace<Collision>(
             newEntity, sprite->modelBounds,
