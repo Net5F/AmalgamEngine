@@ -9,14 +9,17 @@
 #include "Timer.h"
 #include "tracy/Tracy.hpp"
 
+#define SOL_ALL_SAFETIES_ON 1
+#include "sol/sol.hpp"
+
 namespace AM
 {
 namespace Server
 {
 Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 : network{inNetwork}
-, lua{}
-, world{inSpriteData, lua}
+, lua{std::make_unique<sol::state>()}
+, world{inSpriteData, *lua}
 , currentTick{0}
 , extension{nullptr}
 , interactionRequestQueue{inNetwork.getEventDispatcher()}
@@ -38,12 +41,14 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
     EnttGroups::init(world.registry);
 
     // Initialize the lua engine.
-    lua.open_libraries(sol::lib::base);
+    lua->open_libraries(sol::lib::base);
 
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);
 }
+
+Simulation::~Simulation() = default;
 
 void Simulation::registerInteractionQueue(Uint8 interactionType,
                                           std::queue<InteractionRequest>& queue)

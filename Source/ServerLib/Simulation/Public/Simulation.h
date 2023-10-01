@@ -18,9 +18,12 @@
 #include <SDL_stdinc.h>
 #include <atomic>
 #include <queue>
+#include <memory>
 
-#define SOL_ALL_SAFETIES_ON 1
-#include "sol/sol.hpp"
+namespace sol
+{
+class state;
+}
 
 namespace AM
 {
@@ -45,6 +48,8 @@ public:
     static constexpr double SIM_DELAYED_TIME_S{.001};
 
     Simulation(Network& inNetwork, SpriteData& inSpriteData);
+
+    ~Simulation();
 
     /** 
      * Registers the given queue to receive interaction events of a 
@@ -90,8 +95,8 @@ private:
         send messages. */
     Network& network;
 
-    /** The Lua engine. */
-    sol::state lua;
+    /** The Lua engine (kept as a pointer to speed up compilation). */
+    std::unique_ptr<sol::state> lua;
 
     /** The world's state. */
     World world;
