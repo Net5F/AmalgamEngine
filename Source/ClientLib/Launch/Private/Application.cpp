@@ -28,7 +28,7 @@ Application::Application()
 , spriteData{assetCache}
 , network{}
 , networkCaller{std::bind_front(&Network::tick, &network),
-                SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true}
+                SharedConfig::CLIENT_NETWORK_TICK_TIMESTEP_S, "Network", true}
 // Note: Since the UI and sim subscribe to the network's event queues, they 
 //       need to be destructed before it.
 , userInterface{}

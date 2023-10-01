@@ -71,11 +71,15 @@ public:
     //-------------------------------------------------------------------------
     // Network
     //-------------------------------------------------------------------------
-    /** The rate at which the network will send queued messages, or a heartbeat
-        if no messages are queued. */
-    static constexpr unsigned int NETWORK_TICKS_PER_SECOND{20};
-    static constexpr double NETWORK_TICK_TIMESTEP_S{
-        1.0 / static_cast<double>(NETWORK_TICKS_PER_SECOND)};
+    /** The rate at which the server will batch and send queued messages. */
+    static constexpr unsigned int SERVER_NETWORK_TICKS_PER_SECOND{20};
+    static constexpr double SERVER_NETWORK_TICK_TIMESTEP_S{
+        1.0 / static_cast<double>(SERVER_NETWORK_TICKS_PER_SECOND)};
+
+    /** The rate at which the client will heartbeat (if necessary). */
+    static constexpr unsigned int CLIENT_NETWORK_TICKS_PER_SECOND{5};
+    static constexpr double CLIENT_NETWORK_TICK_TIMESTEP_S{
+        1.0 / static_cast<double>(CLIENT_NETWORK_TICKS_PER_SECOND)};
 
     /** Message batches larger than this size (in bytes) will be compressed
         before sending. */

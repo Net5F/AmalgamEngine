@@ -24,6 +24,12 @@ ComponentUpdateSystem::ComponentUpdateSystem(Simulation& inSimulation, World& in
         .connect<&ComponentUpdateSystem::onAnimationStateUpdated>(this);
 }
 
+ComponentUpdateSystem::~ComponentUpdateSystem()
+{
+    world.registry.on_update<AnimationState>()
+        .disconnect<&ComponentUpdateSystem::onAnimationStateUpdated>(this);
+}
+
 void ComponentUpdateSystem::processUpdates()
 {
     // We want to process updates until we've either processed the desired

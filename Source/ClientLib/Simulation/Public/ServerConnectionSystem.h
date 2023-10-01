@@ -6,6 +6,7 @@
 #include "ConnectionError.h"
 #include "Timer.h"
 #include "entt/fwd.hpp"
+#include "entt/signal/sigh.hpp"
 #include "SDL_stdinc.h"
 #include <atomic>
 
@@ -18,8 +19,8 @@ class Network;
 class SpriteData;
 
 /**
- * This system is in charge of processing server connect/disconnect events and
- * updating the client's entity.
+ * Processes server connect/disconnect events and initializes the sim state 
+ * when we connect.
  */
 class ServerConnectionSystem
 {
@@ -37,6 +38,13 @@ public:
      * While connected, detects disconnects and sends the disconnect event.
      */
     void processConnectionEvents();
+
+    /** Returns the current state of our connection to the server. */
+    ConnectionState getConnectionState();
+
+    // Signals (see "Signal Sinks" section in Simulation.h).
+    entt::sigh<void()> simulationStartedSig;
+    entt::sigh<void(ConnectionError)> serverConnectionErrorSig;
 
 private:
     /** How long the sim should wait for the server to send a connection

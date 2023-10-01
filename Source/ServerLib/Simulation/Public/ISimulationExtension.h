@@ -28,7 +28,7 @@ class ISimulationExtension : public OSEventHandler
 {
 public:
     // Canonical constructor (derived class must implement):
-    // SimulationExtension(SimulationExDependencies deps)
+    // SimulationExtension(const SimulationExDependencies& deps)
 
     //-------------------------------------------------------------------------
     // Simulation Tick Hooks (Call your systems in these)

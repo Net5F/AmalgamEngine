@@ -22,7 +22,7 @@ class IMessageProcessorExtension
 {
 public:
     // Canonical constructor (derived class must implement):
-    // MessageProcessorExtension(MessageProcessorExDependencies deps)
+    // MessageProcessorExtension(const MessageProcessorExDependencies& deps)
 
     /**
      * Called when a message is received that the engine doesn't have a handler

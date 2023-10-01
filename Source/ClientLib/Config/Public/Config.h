@@ -42,7 +42,7 @@ public:
     /** How long we should wait before considering the server to be timed out.
      */
     static constexpr double SERVER_TIMEOUT_S{
-        SharedConfig::NETWORK_TICK_TIMESTEP_S * 2};
+        SharedConfig::SERVER_NETWORK_TICK_TIMESTEP_S * 2};
 
     //-------------------------------------------------------------------------
     // Renderer, User Interface

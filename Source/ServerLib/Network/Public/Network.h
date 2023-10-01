@@ -135,8 +135,9 @@ private:
         statistics. */
     static constexpr unsigned int SECONDS_TILL_STATS_DUMP{5};
     static constexpr unsigned int TICKS_TILL_STATS_DUMP{
-        static_cast<unsigned int>((1 / SharedConfig::NETWORK_TICK_TIMESTEP_S)
-                                  * SECONDS_TILL_STATS_DUMP)};
+        static_cast<unsigned int>(
+            (1 / SharedConfig::SERVER_NETWORK_TICK_TIMESTEP_S)
+            * SECONDS_TILL_STATS_DUMP)};
 
     /** The number of ticks since we last logged our network statistics. */
     unsigned int ticksSinceNetstatsLog;

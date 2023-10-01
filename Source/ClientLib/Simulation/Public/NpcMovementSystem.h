@@ -34,6 +34,11 @@ public:
 
 private:
     /**
+     * Initializes lastProcessedTick based on the sim's currentTick.
+     */
+    void initLastProcessedTick();
+
+    /**
      * Moves all NPCs using their current inputs.
      */
     void moveAllNpcs();

@@ -39,26 +39,32 @@ void NpcMovementSystem::updateNpcs()
         return;
     }
 
+    // If this is our first run, initialize our lastProcessedTick.
+    if (lastProcessedTick == 0) {
+        initLastProcessedTick();
+    }
+
     // While we haven't reached the desired tick and have more data to process.
     Uint32 desiredTick{simulation.getReplicationTick()};
     Uint32 lastReceivedTick{network.getLastReceivedTick()};
-    bool updated{false};
     while ((lastProcessedTick < desiredTick)
            && (lastProcessedTick < lastReceivedTick)) {
-        updated = true;
-
         // Move all NPCs as if their inputs didn't change.
         moveAllNpcs();
 
-        // If we've received updates for this tick, process them.
+        // If there's an update message waiting.
         std::shared_ptr<const MovementUpdate>* npcMovementUpdate{
             npcMovementUpdateQueue.peek()};
-        while ((npcMovementUpdate != nullptr)
-               && ((*npcMovementUpdate)->tickNum == (lastProcessedTick + 1))) {
-            applyUpdateMessage(*(npcMovementUpdate->get()));
+        if ((npcMovementUpdate != nullptr)) {
+            Uint32 messageTick{(*npcMovementUpdate)->tickNum};
+            AM_ASSERT((messageTick >= (lastProcessedTick + 1)),
+                      "Processed NPC movement out of order.");
 
-            npcMovementUpdateQueue.pop();
-            npcMovementUpdate = npcMovementUpdateQueue.peek();
+            // If the update is for this tick, apply it.
+            if (messageTick == (lastProcessedTick + 1)) {
+                applyUpdateMessage(*(npcMovementUpdate->get()));
+                npcMovementUpdateQueue.pop();
+            }
         }
 
         lastProcessedTick++;
@@ -67,13 +73,22 @@ void NpcMovementSystem::updateNpcs()
     // Signal the updated components to any observers.
     emitUpdateSignals();
 
-    if (!updated) {
-        LOG_INFO(
-            "Tick passed with no npc update. lastProcessed: %u, desired: %u, "
-            "lastReceived: %u, queueSize: %u",
-            lastProcessedTick, desiredTick, lastReceivedTick,
-            npcMovementUpdateQueue.size());
+    // If we wanted to process more ticks but ran out of data, log it.
+    if (lastProcessedTick < desiredTick) {
+        LOG_INFO("Ran out of NPC data. lastProcessed: %u, desired: %u, "
+                 "lastReceived: %u, queueSize: %u",
+                 lastProcessedTick, desiredTick, lastReceivedTick,
+                 npcMovementUpdateQueue.size());
     }
+}
+
+void NpcMovementSystem::initLastProcessedTick()
+{
+    // Since we aren't ran until a server connection is established, the sim's 
+    // currentTick is set to what the server gave us in ConnectionResponse.
+    // Our first received updates will be for that tick, so we init to 
+    // currentTick - 1 to prepare for processing them.
+    lastProcessedTick = simulation.getReplicationTick() - 1;
 }
 
 void NpcMovementSystem::moveAllNpcs()

@@ -8,8 +8,7 @@ class EventDispatcher;
 
 namespace Client
 {
-class World;
-class WorldSignals;
+class Simulation;
 class SpriteData;
 class WorldObjectLocator;
 class Network;
@@ -20,12 +19,8 @@ class Network;
  */
 struct UserInterfaceExDependencies {
 public:
-    /** Used for viewing world data and subscribing to entity registry
-        updates. */
-    World& world;
-
-    /** Used for subscribing to non-registry world state updates. */
-    WorldSignals& worldSignals;
+    /** Used for viewing world data and subscribing to signals. */
+    Simulation& simulation;
 
     /** Used for finding entities or tile layers that a mouse event hit. */
     const WorldObjectLocator& worldObjectLocator;

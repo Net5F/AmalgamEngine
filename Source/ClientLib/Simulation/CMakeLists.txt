@@ -31,7 +31,6 @@ target_sources(ClientLib
 		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/WorldObjectID.h
-		Public/WorldSignals.h
 		Public/Components/InputHistory.h
 		Public/Components/NeedsAdjacentChunks.h
         Public/SpriteData/SpriteData.h

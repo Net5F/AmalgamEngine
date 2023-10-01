@@ -210,8 +210,7 @@ void Application::registerSimulationExtension()
 template<typename T>
 void Application::registerUserInterfaceExtension()
 {
-    UserInterfaceExDependencies uiDeps{simulation.getWorld(),
-                                       simulation.getWorld().worldSignals,
+    UserInterfaceExDependencies uiDeps{simulation,
                                        userInterface.getWorldObjectLocator(),
                                        userInterface.getEventDispatcher(),
                                        network,

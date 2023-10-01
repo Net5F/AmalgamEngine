@@ -168,12 +168,10 @@ void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer, std::size_t me
               "Received ticks out of order. last: %u, new: %u",
               lastReceivedTick.load(), movementUpdate->tickNum);
 
-    // Iterate through the updated entities, checking if there's player data.
+    // If the player entity is present, process it and erase it from the message.
     std::vector<MovementState>& movementStates{movementUpdate->movementStates};
     for (auto it = movementStates.begin(); it != movementStates.end(); ++it) {
         MovementState& movementState{*it};
-
-        // If this update is for the player, push it as a PlayerMovementUpdate.
         if (movementState.entity == playerEntity) {
             PlayerMovementUpdate playerMovementUpdate{
                 movementState.entity, movementState.input,
@@ -185,9 +183,11 @@ void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer, std::size_t me
         }
     }
 
-    // Push the remaining NPC updates.
-    networkEventDispatcher.push<std::shared_ptr<const MovementUpdate>>(
-        movementUpdate);
+    // If there are NPC entities remaining in the message, push it.
+    if (movementStates.size() > 0) {
+        networkEventDispatcher.push<std::shared_ptr<const MovementUpdate>>(
+            movementUpdate);
+    }
 }
 
 void MessageProcessor::handleComponentUpdate(Uint8* messageBuffer,

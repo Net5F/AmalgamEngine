@@ -1,6 +1,5 @@
 #include "World.h"
 #include "SharedConfig.h"
-
 #include <SDL_rect.h>
 
 namespace AM

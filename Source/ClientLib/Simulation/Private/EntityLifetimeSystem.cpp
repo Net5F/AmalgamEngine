@@ -92,7 +92,7 @@ void EntityLifetimeSystem::processEntityInits(Uint32 desiredTick)
                 }
             }
 
-            // If there are entities remaining in the message, push it.
+            // If there are NPC entities remaining in the message, push it.
             if (entityInit.entityData.size() > 0) {
                 entityInitSecondaryQueue.push(entityInit);
             }

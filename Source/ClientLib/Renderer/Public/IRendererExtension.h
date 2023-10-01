@@ -22,7 +22,7 @@ class IRendererExtension : public OSEventHandler
 {
 public:
     // Canonical constructor (derived class must implement):
-    // RendererExtension(RendererExDependencies deps)
+    // RendererExtension(const RendererExDependencies& deps)
 
     /**
      * Called before tiles and entities are rendered.

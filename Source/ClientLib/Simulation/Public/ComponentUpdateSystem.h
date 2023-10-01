@@ -22,6 +22,8 @@ public:
     ComponentUpdateSystem(Simulation& inSimulation, World& inWorld,
                        Network& inNetwork, SpriteData& inSpriteData);
 
+    ~ComponentUpdateSystem();
+
     /**
      * Processes any received component updates.
      */

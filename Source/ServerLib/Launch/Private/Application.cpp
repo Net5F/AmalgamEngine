@@ -18,7 +18,7 @@ Application::Application()
 , spriteData{}
 , network{}
 , networkCaller{std::bind_front(&Network::tick, &network),
-                SharedConfig::NETWORK_TICK_TIMESTEP_S, "Network", true}
+                SharedConfig::SERVER_NETWORK_TICK_TIMESTEP_S, "Network", true}
 , simulation{network, spriteData}
 , simCaller{std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}

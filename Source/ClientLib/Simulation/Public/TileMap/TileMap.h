@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TileMapBase.h"
+#include "entt/signal/sigh.hpp"
 
 namespace AM
 {
@@ -29,6 +30,12 @@ public:
      */
     void setMapSize(std::size_t inMapXLengthChunks,
                     std::size_t inMapYLengthChunks);
+
+    /** The tile map's size (extent) has changed. */
+    entt::sink<entt::sigh<void(TileExtent)>> sizeChanged;
+
+private:
+    entt::sigh<void(TileExtent)> sizeChangedSig;
 };
 
 } // End namespace Client

@@ -20,6 +20,7 @@ namespace Client
 {
 TileMap::TileMap(SpriteData& inSpriteData)
 : TileMapBase{inSpriteData, false}
+, sizeChanged{sizeChangedSig}
 {
     if (Config::RUN_OFFLINE) {
         LOG_INFO("Offline mode. Constructing default tile map.");
@@ -58,6 +59,9 @@ void TileMap::setMapSize(std::size_t inMapXLengthChunks,
 
     // Resize the tiles vector to fit the map.
     tiles.resize(tileExtent.xLength * tileExtent.yLength);
+
+    // Signal that the size changed.
+    sizeChangedSig.publish(tileExtent);
 }
 
 } // End namespace Client

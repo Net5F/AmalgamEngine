@@ -1,10 +1,7 @@
 #pragma once
 
-#include "WorldSignals.h"
 #include "TileMap.h"
-
 #include "entt/entity/registry.hpp"
-#include "entt/signal/sigh.hpp"
 
 struct SDL_Rect;
 
@@ -29,9 +26,6 @@ class World
 {
 public:
     World(SpriteData& spriteData);
-
-    /** Signals for informing the UI of changes to the world state. */
-    WorldSignals worldSignals;
 
     /** Entity data registry. */
     entt::registry registry;

@@ -3,15 +3,9 @@
 #include "OSEventHandler.h"
 #include "World.h"
 #include "ServerConnectionSystem.h"
-#include "ChunkUpdateSystem.h"
-#include "TileUpdateSystem.h"
-#include "EntityLifetimeSystem.h"
-#include "PlayerInputSystem.h"
-#include "PlayerMovementSystem.h"
-#include "NpcMovementSystem.h"
-#include "ComponentUpdateSystem.h"
-#include "CameraSystem.h"
 #include "ReplicationTickOffset.h"
+#include "ConnectionError.h"
+#include "entt/signal/sigh.hpp"
 #include <atomic>
 
 namespace AM
@@ -23,6 +17,14 @@ namespace Client
 class Network;
 class SpriteData;
 class ISimulationExtension;
+class ChunkUpdateSystem;
+class TileUpdateSystem;
+class EntityLifetimeSystem;
+class PlayerInputSystem;
+class PlayerMovementSystem;
+class NpcMovementSystem;
+class ComponentUpdateSystem;
+class CameraSystem;
 
 /**
  * Manages the simulation, including world state and system processing.
@@ -40,6 +42,8 @@ public:
 
     Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
                SpriteData& inSpriteData);
+
+    ~Simulation();
 
     /**
      * Returns a reference to the simulation's world state.
@@ -85,9 +89,18 @@ public:
     void setExtension(std::unique_ptr<ISimulationExtension> inExtension);
 
 private:
+    /**
+     * Initializes or re-initializes our simulation systems.
+     *
+     * Used to put the systems in a consistent state, so they don't need to 
+     * account for disconnects/reconnects.
+     */
+    void initializeSystems();
+
     /** Used to receive events (through the Network's dispatcher) and to
         send messages. */
     Network& network;
+    SpriteData& spriteData;
 
     World world;
 
@@ -106,15 +119,31 @@ private:
     //-------------------------------------------------------------------------
     // Systems
     //-------------------------------------------------------------------------
+    // Note: This system is always alive, so it can process connection events.
     ServerConnectionSystem serverConnectionSystem;
-    ChunkUpdateSystem chunkUpdateSystem;
-    TileUpdateSystem tileUpdateSystem;
-    EntityLifetimeSystem entityLifetimeSystem;
-    PlayerInputSystem playerInputSystem;
-    PlayerMovementSystem playerMovementSystem;
-    NpcMovementSystem npcMovementSystem;
-    ComponentUpdateSystem componentUpdateSystem;
-    CameraSystem cameraSystem;
+
+    // Note: These are pointers so that we can delete/reconstruct them when we 
+    //       connect to the server. This gives them a consistent starting state.
+    std::unique_ptr<ChunkUpdateSystem> chunkUpdateSystem;
+    std::unique_ptr<TileUpdateSystem> tileUpdateSystem;
+    std::unique_ptr<EntityLifetimeSystem> entityLifetimeSystem;
+    std::unique_ptr<PlayerInputSystem> playerInputSystem;
+    std::unique_ptr<PlayerMovementSystem> playerMovementSystem;
+    std::unique_ptr<NpcMovementSystem> npcMovementSystem;
+    std::unique_ptr<ComponentUpdateSystem> componentUpdateSystem;
+    std::unique_ptr<CameraSystem> cameraSystem;
+
+public:
+    //-------------------------------------------------------------------------
+    // Signal Sinks
+    //-------------------------------------------------------------------------
+    /** We've established a connection with the server and the simulation has
+        started running. */
+    entt::sink<entt::sigh<void()>> simulationStarted;
+
+    /** Our connection to the server has encountered an error and the 
+        simulation has stopped running. */
+    entt::sink<entt::sigh<void(ConnectionError)>> serverConnectionError;
 };
 
 } // namespace Client

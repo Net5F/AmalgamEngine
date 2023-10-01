@@ -66,12 +66,12 @@ void ServerConnectionSystem::processConnectionEvents()
         if (connectionResponseQueue.pop(connectionResponse)) {
             initSimState(connectionResponse);
             connectionState = ConnectionState::Connected;
-            world.worldSignals.simulationStarted.publish();
+            simulationStartedSig.publish();
         }
 
         // If we've timed out, send a failure signal.
         if (connectionAttemptTimer.getTime() >= CONNECTION_RESPONSE_WAIT_S) {
-            world.worldSignals.serverConnectionError.publish(
+            serverConnectionErrorSig.publish(
                 {ConnectionError::Type::Failed});
             connectionState = ConnectionState::Disconnected;
         }
@@ -80,11 +80,17 @@ void ServerConnectionSystem::processConnectionEvents()
     // If the connection is lost, reset all network and sim state.
     ConnectionError connectionError;
     if (connectionErrorQueue.pop(connectionError)) {
-        world.worldSignals.serverConnectionError.publish(connectionError);
+        serverConnectionErrorSig.publish(connectionError);
         network.disconnect();
         clearSimState();
         connectionState = ConnectionState::Disconnected;
     }
+}
+
+ServerConnectionSystem::ConnectionState
+    ServerConnectionSystem::getConnectionState()
+{
+    return connectionState;
 }
 
 void ServerConnectionSystem::initSimState(
@@ -96,8 +102,6 @@ void ServerConnectionSystem::initSimState(
     // Resize the world's tile map.
     world.tileMap.setMapSize(connectionResponse.mapXLengthChunks,
                              connectionResponse.mapYLengthChunks);
-    world.worldSignals.tileMapExtentChanged.publish(
-        world.tileMap.getTileExtent());
     LOG_INFO("Setting map size to: (%u, %u)ch.",
              connectionResponse.mapXLengthChunks,
              connectionResponse.mapYLengthChunks);
@@ -162,8 +166,8 @@ void ServerConnectionSystem::clearSimState()
     world.playerEntity = entt::null;
     world.tileMap.clear();
 
-    // The current tick needs to be set back to 0 so the Network knows not
-    // to immediately send Heartbeats the next time it spins up.
+    // The current tick needs to be set back to 0 so the Network knows to stop 
+    // sending heartbeats.
     currentTick = 0;
 }
 
