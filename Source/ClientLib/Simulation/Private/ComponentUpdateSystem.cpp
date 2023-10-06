@@ -87,22 +87,21 @@ void ComponentUpdateSystem::processComponentUpdate(
 void ComponentUpdateSystem::onAnimationStateUpdated(entt::registry& registry,
                                                     entt::entity entity)
 {
-    const auto& animationState{registry.get<AnimationState>(entity)};
-    auto [position, sprite] = registry.try_get<Position, Sprite>(entity);
-    if (position && sprite) {
-        const Sprite* newSprite{
-            spriteData.getObjectSpriteSet(animationState.spriteSetID)
-                .sprites[animationState.spriteIndex]};
-        registry.replace<Sprite>(entity, *newSprite);
+    // Since the animation state was updated, we need to update the entity's 
+    // sprite and collision.
+    auto [position, animationState]
+        = registry.get<Position, AnimationState>(entity);
+    const Sprite* newSprite{
+        spriteData.getObjectSpriteSet(animationState.spriteSetID)
+            .sprites[animationState.spriteIndex]};
+    registry.emplace_or_replace<Sprite>(entity, *newSprite);
 
-        // Note: We assume that an entity with Position and AnimationState 
-        //       always has a Collision.
-        registry.patch<Collision>(entity, [&](Collision& collision) {
-            collision.modelBounds = newSprite->modelBounds;
-            collision.worldBounds = Transforms::modelToWorldCentered(
-                newSprite->modelBounds, *position);
-        });
-    }
+    // Note: We assume that an entity with AnimationState always has a Collision.
+    registry.patch<Collision>(entity, [&](Collision& collision) {
+        collision.modelBounds = newSprite->modelBounds;
+        collision.worldBounds = Transforms::modelToWorldCentered(
+            newSprite->modelBounds, position);
+    });
 }
 
 } // namespace Client

@@ -76,24 +76,23 @@ void ComponentChangeSystem::setExtension(ISimulationExtension* inExtension)
 void ComponentChangeSystem::onAnimationStateUpdated(entt::registry& registry,
                                                     entt::entity entity)
 {
-    const auto& animationState{registry.get<AnimationState>(entity)};
-    auto [position, sprite] = registry.try_get<Position, Sprite>(entity);
-    if (position && sprite) {
-        const Sprite* newSprite{
-            spriteData.getObjectSpriteSet(animationState.spriteSetID)
-                .sprites[animationState.spriteIndex]};
+    // Since the animation state was updated, we need to update the entity's 
+    // collision.
+    auto [position, animationState]
+        = registry.get<Position, AnimationState>(entity);
+    const Sprite* newSprite{
+        spriteData.getObjectSpriteSet(animationState.spriteSetID)
+            .sprites[animationState.spriteIndex]};
 
-        // Note: We assume that an entity with Position and AnimationState
-        //       always has a Collision.
-        Collision& collision{
-            registry.patch<Collision>(entity, [&](Collision& collision) {
-                collision.modelBounds = newSprite->modelBounds;
-                collision.worldBounds = Transforms::modelToWorldCentered(
-                    newSprite->modelBounds, *position);
-            })};
+    // Note: We assume that an entity with AnimationState always has a Collision.
+    Collision& collision{
+        registry.patch<Collision>(entity, [&](Collision& collision) {
+            collision.modelBounds = newSprite->modelBounds;
+            collision.worldBounds = Transforms::modelToWorldCentered(
+                newSprite->modelBounds, position);
+        })};
 
-        world.entityLocator.setEntityLocation(entity, collision.worldBounds);
-    }
+    world.entityLocator.setEntityLocation(entity, collision.worldBounds);
 }
 
 } // namespace Server

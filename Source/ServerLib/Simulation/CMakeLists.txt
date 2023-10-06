@@ -1,10 +1,13 @@
 target_sources(ServerLib
 	PRIVATE
+		Private/AILogic.cpp
+		Private/AISystem.cpp
 		Private/ChunkStreamingSystem.cpp
 		Private/ClientAOISystem.cpp
 		Private/ClientConnectionSystem.cpp
 		Private/ComponentChangeSystem.cpp
 		Private/ComponentSyncSystem.cpp
+		Private/EngineLuaBindings.cpp
 		Private/InputSystem.cpp
 		Private/MapSaveSystem.cpp
 		Private/MovementSyncSystem.cpp
@@ -17,11 +20,14 @@ target_sources(ServerLib
 		Private/SpriteData/SpriteData.cpp
 		Private/TileMap/TileMap.cpp
 	PUBLIC
+		Public/AILogic.h
+		Public/AISystem.h
 		Public/ChunkStreamingSystem.h
 		Public/ClientAOISystem.h
 		Public/ClientConnectionSystem.h
 		Public/ComponentChangeSystem.h
 		Public/ComponentSyncSystem.h
+		Public/EngineLuaBindings.h
 		Public/EnttGroups.h
 		Public/EventSorter.h
 		Public/InputSystem.h
@@ -36,6 +42,7 @@ target_sources(ServerLib
 		Public/SpawnStrategy.h
 		Public/TileUpdateSystem.h
 		Public/World.h
+		Public/Components/AIBehavior.h
 		Public/Components/ClientSimData.h
 		Public/Components/InitScript.h
 		Public/Components/ReplicatedComponentList.h

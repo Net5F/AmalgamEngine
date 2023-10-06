@@ -19,11 +19,27 @@
 #include "TileExtentClearLayers.h"
 #include "EntityDelete.h"
 #include "Log.h"
+#include <span>
 
 namespace AM
 {
 namespace Server
 {
+template<typename T>
+void dispatchWithNetID(NetworkID netID, std::span<Uint8> messageBuffer,
+                       EventDispatcher& dispatcher)
+{
+    // Deserialize the message.
+    T message{};
+    Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(), message);
+
+    // Fill in the network ID that we assigned to this client.
+    message.netID = netID;
+
+    // Push the message into any subscribed queues.
+    dispatcher.push<T>(message);
+}
+
 MessageProcessor::MessageProcessor(EventDispatcher& inNetworkEventDispatcher)
 : networkEventDispatcher{inNetworkEventDispatcher}
 {
@@ -53,12 +69,13 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             break;
         }
         case EngineMessageType::ChunkUpdateRequest: {
-            handleChunkUpdateRequest(netID, messageBuffer, messageSize);
+            dispatchWithNetID<ChunkUpdateRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
         case EngineMessageType::EntityInitRequest: {
-            dispatchMessage<EntityInitRequest>(
-                messageBuffer, messageSize, networkEventDispatcher);
+            dispatchWithNetID<EntityInitRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
         case EngineMessageType::EntityDeleteRequest: {
@@ -77,11 +94,13 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             break;
         }
         case EngineMessageType::InitScriptRequest: {
-            handleInitScriptRequest(netID, messageBuffer, messageSize);
+            dispatchWithNetID<InitScriptRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
         case EngineMessageType::InteractionRequest: {
-            handleInteractionRequest(netID, messageBuffer, messageSize);
+            dispatchWithNetID<InteractionRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {
@@ -156,51 +175,6 @@ Uint32 MessageProcessor::handleInputChangeRequest(NetworkID netID,
 
     // Return the tick number associated with this message.
     return inputChangeRequest.tickNum;
-}
-
-void MessageProcessor::handleChunkUpdateRequest(NetworkID netID,
-                                                Uint8* messageBuffer,
-                                                std::size_t messageSize)
-{
-    // Deserialize the message.
-    ChunkUpdateRequest chunkUpdateRequest{};
-    Deserialize::fromBuffer(messageBuffer, messageSize, chunkUpdateRequest);
-
-    // Fill in the network ID that we assigned to this client.
-    chunkUpdateRequest.netID = netID;
-
-    // Push the message into any subscribed queues.
-    networkEventDispatcher.push<ChunkUpdateRequest>(chunkUpdateRequest);
-}
-
-void MessageProcessor::handleInitScriptRequest(NetworkID netID,
-                                               Uint8* messageBuffer,
-                                               std::size_t messageSize)
-{
-    // Deserialize the message.
-    InitScriptRequest initScriptRequest{};
-    Deserialize::fromBuffer(messageBuffer, messageSize, initScriptRequest);
-
-    // Fill in the network ID that we assigned to this client.
-    initScriptRequest.netID = netID;
-
-    // Push the message into any subscribed queues.
-    networkEventDispatcher.push<InitScriptRequest>(initScriptRequest);
-}
-
-void MessageProcessor::handleInteractionRequest(NetworkID netID,
-                                               Uint8* messageBuffer,
-                                               std::size_t messageSize)
-{
-    // Deserialize the message.
-    InteractionRequest interactionRequest{};
-    Deserialize::fromBuffer(messageBuffer, messageSize, interactionRequest);
-
-    // Fill in the network ID that we assigned to this client.
-    interactionRequest.netID = netID;
-
-    // Push the message into any subscribed queues.
-    networkEventDispatcher.push<InteractionRequest>(interactionRequest);
 }
 
 } // End namespace Server

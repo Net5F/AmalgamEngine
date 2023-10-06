@@ -68,18 +68,6 @@ private:
      */
     Uint32 handleInputChangeRequest(NetworkID netID, Uint8* messageBuffer,
                                     std::size_t messageSize);
-
-    /** Pushes ChunkUpdateRequest event. */
-    void handleChunkUpdateRequest(NetworkID netID, Uint8* messageBuffer,
-                                  std::size_t messageSize);
-
-    /** Pushes InitScriptRequest event. */
-    void handleInitScriptRequest(NetworkID netID, Uint8* messageBuffer,
-                                 std::size_t messageSize);
-
-    /** Pushes InteractionRequest event. */
-    void handleInteractionRequest(NetworkID netID, Uint8* messageBuffer,
-                                  std::size_t messageSize);
     //-------------------------------------------------------------------------
 
     /** The network's event dispatcher. Used to send events to the subscribed

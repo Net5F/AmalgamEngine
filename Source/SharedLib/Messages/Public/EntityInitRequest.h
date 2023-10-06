@@ -1,8 +1,9 @@
 #pragma once
 
 #include "EngineMessageType.h"
+#include "Name.h"
 #include "Position.h"
-#include "ReplicatedComponent.h"
+#include "AnimationState.h"
 #include "InitScriptResponse.h"
 #include "NetworkDefs.h"
 #include "entt/fwd.hpp"
@@ -30,12 +31,10 @@ struct EntityInitRequest {
         this message is a request to create a new entity. */
     entt::entity entity{entt::null};
 
-    /** The entity's Position. */
+    /** The entity's components. */
+    Name name{};
     Position position{};
-
-    /** The entity's optional client-relevant components.
-        We use this for components that build mode will want to set directly. */
-    std::vector<ReplicatedComponent> components{};
+    AnimationState animationState{};
 
     /** The script to run on this entity after creation. */
     std::string initScript{};
@@ -57,15 +56,9 @@ void serialize(S& serializer,
                EntityInitRequest& entityInitRequest)
 {
     serializer.value4b(entityInitRequest.entity);
+    serializer.object(entityInitRequest.name);
     serializer.object(entityInitRequest.position);
-    serializer.enableBitPacking([&](typename S::BPEnabledType& sbp) {
-        sbp.container(entityInitRequest.components,
-                      boost::mp11::mp_size<ReplicatedComponentTypes>::value,
-                      [](typename S::BPEnabledType& serializer,
-                         ReplicatedComponent& component) {
-                          serializer.ext(component, bitsery::ext::StdVariant{});
-                      });
-    });
+    serializer.object(entityInitRequest.animationState);
     serializer.text1b(entityInitRequest.initScript,
                       InitScriptResponse::MAX_SCRIPT_LENGTH);
 }

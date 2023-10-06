@@ -4,6 +4,7 @@
 #include "Name.h"
 #include "Position.h"
 #include "InitScript.h"
+#include "SystemMessage.h"
 #include "ISimulationExtension.h"
 #include "Log.h"
 
@@ -14,6 +15,7 @@ namespace Server
 
 NceLifetimeSystem::NceLifetimeSystem(World& inWorld, Network& inNetwork)
 : world{inWorld}
+, network{inNetwork}
 , extension{nullptr}
 , entityReInitQueue{}
 , entityInitRequestQueue{inNetwork.getEventDispatcher()}
@@ -31,26 +33,24 @@ void NceLifetimeSystem::processUpdateRequests()
     // Process any entities that are waiting for re-initialization.
     while (!(entityReInitQueue.empty())) {
         EntityInitRequest& queuedEntityInit{entityReInitQueue.front()};
-        world.constructEntity(
-            queuedEntityInit.position, queuedEntityInit.components,
-            InitScript{queuedEntityInit.initScript}, queuedEntityInit.entity);
+        createEntity(queuedEntityInit);
         entityReInitQueue.pop();
     }
 
     // If we've been requested to create an entity, create it.
     EntityInitRequest entityCreateRequest{};
     while (entityInitRequestQueue.pop(entityCreateRequest)) {
-        createEntity(entityCreateRequest);
+        handleInitRequest(entityCreateRequest);
     }
 
     // If we've been requested to delete an entity, delete it.
     EntityDeleteRequest entityDeleteRequest{};
     while (entityDeleteRequestQueue.pop(entityDeleteRequest)) {
-        deleteEntity(entityDeleteRequest);
+        handleDeleteRequest(entityDeleteRequest);
     }
 }
 
-void NceLifetimeSystem::createEntity(
+void NceLifetimeSystem::handleInitRequest(
     const EntityInitRequest& entityInitRequest)
 {
     // If the project says the request isn't valid, skip it.
@@ -80,13 +80,11 @@ void NceLifetimeSystem::createEntity(
     }
     else {
         // No ID, create a new entity and initialize it.
-        world.constructEntity(
-            entityInitRequest.position, entityInitRequest.components,
-            InitScript{entityInitRequest.initScript}, entityInitRequest.entity);
+        createEntity(entityInitRequest);
     }
 }
 
-void NceLifetimeSystem::deleteEntity(
+void NceLifetimeSystem::handleDeleteRequest(
     const EntityDeleteRequest& entityDeleteRequest)
 {
     // If the entity isn't valid or is a client, skip it.
@@ -102,6 +100,25 @@ void NceLifetimeSystem::deleteEntity(
     }
 
     world.registry.destroy(entity);
+}
+
+void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
+{
+    // Create the entity.
+    entt::entity newEntity{world.createEntity(entityInitRequest.position,
+                                              entityInitRequest.entity)};
+    world.registry.emplace<Name>(newEntity, entityInitRequest.name);
+
+    // Add the animation state and collision components.
+    world.addGraphicsComponents(newEntity, entityInitRequest.animationState);
+
+    // Run the init script. If there was an error, tell the user.
+    std::string resultString{
+        world.runInitScript(newEntity, entityInitRequest.initScript)};
+    if (!(resultString.empty())) {
+        network.serializeAndSend(entityInitRequest.netID,
+                                 SystemMessage{resultString});
+    }
 }
 
 } // End namespace Server

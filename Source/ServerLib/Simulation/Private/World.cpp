@@ -3,6 +3,7 @@
 #include "ReplicatedComponentList.h"
 #include "ReplicatedComponent.h"
 #include "Position.h"
+#include "PreviousPosition.h"
 #include "AnimationState.h"
 #include "Collision.h"
 #include "InitScript.h"
@@ -84,9 +85,8 @@ World::World(SpriteData& inSpriteData, sol::state& inLua)
         this);
 }
 
-entt::entity World::constructEntity(
-    const Position& position, std::span<const ReplicatedComponent> components,
-    const InitScript& initScript, entt::entity entityHint)
+entt::entity World::createEntity(const Position& position,
+                                 entt::entity entityHint)
 {
     // Create the new entity.
     entt::entity newEntity{entt::null};
@@ -97,65 +97,102 @@ entt::entity World::constructEntity(
         newEntity = registry.create();
     }
 
-    // Add RelicatedComponentList first so it gets updated as we add others.
+    // Add RelicatedComponentList so it gets updated as we add others.
     registry.emplace<ReplicatedComponentList>(newEntity);
 
     // All entities have a position.
     registry.emplace<Position>(newEntity, position);
 
-    // Add the given components.
-    for (const auto& componentVariant : components) {
-        std::visit([&](const auto& component) {
-            using T = std::decay_t<decltype(component)>;
-            registry.emplace<T>(newEntity, component);
-        }, componentVariant);
-    }
-
-    // Add any additional components based on those that were added.
-    // Note: Be careful with holding onto references here. If components 
-    //       are added to the same group, the ref will be invalidated.
-
-    // Note: We only add entities to the locator (and replicate them to clients)
-    //       if they have an AnimationState. If we ever need to replicate 
-    //       entities that don't have AnimationState, revisit this.
-    // If the entity has a position and animation state, add collision and 
-    // add the entity to the locator.
-    if (const auto* animationState{
-            registry.try_get<AnimationState>(newEntity)}) {
-        const ObjectSpriteSet& spriteSet{
-            spriteData.getObjectSpriteSet(animationState->spriteSetID)};
-        const Sprite* sprite{spriteSet.sprites[animationState->spriteIndex]};
-
-        const Collision& collision{registry.emplace<Collision>(
-            newEntity, sprite->modelBounds,
-            Transforms::modelToWorldCentered(sprite->modelBounds, position))};
-
-        // Note: Since the entity was added to the locator, clients 
-        //       will be told by ClientAOISystem to replicate it.
-        entityLocator.setEntityLocation(newEntity, collision.worldBounds);
-    }
-
-    registry.emplace<InitScript>(newEntity, initScript);
-
-    // Run the given init script.
-    lua["selfEntityID"] = newEntity;
-    lua.script(initScript.script, &sol::script_default_on_error);
-
     return newEntity;
 }
 
-bool World::entityIDIsInUse(entt::entity entityID)
+void World::addGraphicsComponents(entt::entity entity,
+                                  const AnimationState& animationState)
+{
+    // Note: We only add entities to the locator (and replicate them to clients)
+    //       if they have an AnimationState. If we ever need to replicate 
+    //       entities that don't have AnimationState, revisit this.
+    //       Similarly, if we ever need to add AnimationState without Collision,
+    //       we need to revisit this.
+
+    // Add the AnimationState.
+    registry.emplace<AnimationState>(entity, animationState);
+
+    // TODO: When we add character sprite sets, update this.
+    // Use the current sprite as the entity's collision bounds.
+    const ObjectSpriteSet& spriteSet{
+        spriteData.getObjectSpriteSet(animationState.spriteSetID)};
+    const Sprite* sprite{spriteSet.sprites[animationState.spriteIndex]};
+
+    const Position& position{registry.get<Position>(entity)};
+    const Collision& collision{registry.emplace<Collision>(
+        entity, sprite->modelBounds,
+        Transforms::modelToWorldCentered(sprite->modelBounds, position))};
+
+    // Add the entity to the locator.
+    // Note: Since we're adding the entity to the locator, clients 
+    //       will be told by ClientAOISystem to replicate it.
+    entityLocator.setEntityLocation(entity, collision.worldBounds);
+}
+
+void World::addMovementComponents(entt::entity entity)
+{
+    registry.emplace<Input>(entity);
+    // Note: All entities have a Position component.
+    registry.emplace<PreviousPosition>(entity, registry.get<Position>(entity));
+    // Note: We normally derive rotation from inputs, but we know the inputs 
+    //       are default here.
+    registry.emplace<Rotation>(entity);
+}
+
+std::string World::runInitScript(entt::entity entity,
+                                 const std::string& initScript)
+{
+    // If there's an init script, run it.
+    // Note: We use "selfEntityID" to hold the ID of the entity that the init 
+    //       script is being ran on.
+    lua["selfEntityID"] = entity;
+    auto result{lua.script(initScript, &sol::script_default_on_error)};
+
+    // If there was an error while running the init script, keep the entity 
+    // alive (so the user can try again) and return the error.
+    std::string returnString{""};
+    std::string errorString{lua.get<std::string>("errorString")};
+    if (!(result.valid())) {
+        sol::error err = result;
+        returnString = err.what();
+    }
+    else if (!(errorString.empty())) {
+        returnString = errorString;
+        lua["errorString"] = "";
+    }
+    else {
+        // No errors, save the init script.
+        registry.emplace<InitScript>(entity, initScript);
+    }
+
+    return returnString;
+}
+
+bool World::entityIDIsInUse(entt::entity entity)
 {
     // Note: We can't just check valid(), since calling create(N) will cause 
     //       valid() to return true for all X < N. We account for this by 
     //       checking if the index is actually in use.
     const auto& storage{registry.storage<entt::entity>()};
-    if (registry.valid(entityID)
-        && (storage.index(entityID) < storage.in_use())) {
+    if (registry.valid(entity)
+        && (storage.index(entity) < storage.in_use())) {
         return true;
     }
 
     return false;
+}
+
+bool World::hasMovementComponents(entt::entity entity)
+{
+    // Note: Entities also need Rotation and Collision for the movement systems
+    //       to pick them up, but we assume those are present.
+    return registry.all_of<Input, PreviousPosition>(entity);
 }
 
 Position World::getSpawnPoint()

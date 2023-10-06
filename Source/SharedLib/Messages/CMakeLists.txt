@@ -19,11 +19,11 @@ target_sources(SharedLib
         Public/InteractionRequest.h
         Public/MovementState.h
         Public/MovementUpdate.h
+        Public/SystemMessage.h
         Public/TileAddLayer.h
         Public/TileClearLayers.h
         Public/TileExtentClearLayers.h
         Public/TileRemoveLayer.h
-        Public/UserErrorString.h
 )
 
 target_include_directories(SharedLib

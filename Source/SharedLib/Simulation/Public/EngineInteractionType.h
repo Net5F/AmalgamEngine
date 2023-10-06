@@ -4,6 +4,8 @@
 
 namespace AM
 {
+namespace InteractionType
+{
 
 /**
  * The types of interactions that a user may be able to perform on an entity.
@@ -13,15 +15,15 @@ namespace AM
  *       end up being useful and all the interactions are handled by the project,
  *       we could make things a lot simpler by getting rid of this.
  */
-struct EngineInteractionType {
-    enum Value : Uint8 {
-        /** Indicates the value hasn't been set. Used for initialization. */
-        NotSet,
-        Temp,
+enum Engine : Uint8
+{
+    /** Indicates the value hasn't been set. Used for initialization. */
+    NotSet,
+    Temp,
 
-        // We reserve values 0 - 124. The project can start at 125.
-        PROJECT_START = 125
-    };
+    // We reserve values 0 - 124. The project can start at 125.
+    PROJECT_START = 125
 };
 
+} // End namespace InteractionType
 } // End namespace AM

@@ -146,13 +146,11 @@ void EntityLifetimeSystem::processEntityData(
     // Note: Be careful with holding onto references here. If components 
     //       are added to the same group, the ref will be invalidated.
 
-    // Entities with an Input are capable of movement, so we add a Rotation 
-    // and PreviousPosition based on their input state.
+    // Entities with an Input are capable of movement, so we add a 
+    // PreviousPosition. They'll also already have a replicated Rotation.
     if (const auto* input{registry.try_get<Input>(newEntity)}) {
         const Position& position{registry.get<Position>(newEntity)};
         registry.emplace<PreviousPosition>(newEntity, position);
-        registry.emplace<Rotation>(
-            newEntity, MovementHelpers::calcRotation({}, input->inputStates));
     }
 
     // For entities with an AnimationState, we locally add a Sprite so the 

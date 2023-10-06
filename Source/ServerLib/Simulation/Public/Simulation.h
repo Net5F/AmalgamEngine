@@ -1,6 +1,7 @@
 #pragma once
 
 #include "World.h"
+#include "EngineLuaBindings.h"
 #include "InteractionRequest.h"
 #include "ClientConnectionSystem.h"
 #include "NceLifetimeSystem.h"
@@ -8,6 +9,7 @@
 #include "TileUpdateSystem.h"
 #include "InputSystem.h"
 #include "MovementSystem.h"
+#include "AISystem.h"
 #include "ClientAOISystem.h"
 #include "MovementSyncSystem.h"
 #include "ComponentSyncSystem.h"
@@ -58,8 +60,8 @@ public:
      * Interaction events occur when the user left-clicks an entity, or right-
      * clicks and selects an interaction from the menu.
      *
-     * @param interactionType The type of interaction. Should be cast from 
-     *                        EngineInteractionType or ProjectInteractionType.
+     * @param interactionType The type of interaction. Should be cast from an 
+     *                        InteractionType.
      * @param queue The queue to register.
      *
      * Note: Only 1 queue can be subscribed to each type of interaction.
@@ -71,6 +73,11 @@ public:
      * Returns a reference to the simulation's world state.
      */
     World& getWorld();
+
+    /**
+     * Returns a reference to the simulation's Lua engine.
+     */
+    sol::state& getLua();
 
     /**
      * Returns the simulation's current tick number.
@@ -89,6 +96,9 @@ public:
     void setExtension(std::unique_ptr<ISimulationExtension> inExtension);
 
 private:
+    /**
+     * Dispatches any received interaction messages to the appropriate queue.
+     */
     void dispatchInteractionMessages();
 
     /** Used to receive events (through the Network's dispatcher) and to
@@ -103,6 +113,9 @@ private:
 
     /** The tick number that we're currently on. */
     std::atomic<Uint32> currentTick;
+
+    /** The engine's Lua bindings. */
+    EngineLuaBindings engineLuaBindings;
 
     /** If non-nullptr, contains the project's simulation extension functions.
         Allows the project to provide simulation code and have it be called at
@@ -125,6 +138,7 @@ private:
     TileUpdateSystem tileUpdateSystem;
     InputSystem inputSystem;
     MovementSystem movementSystem;
+    AISystem aiSystem;
     ClientAOISystem clientAOISystem;
     MovementSyncSystem movementSyncSystem;
     ComponentSyncSystem componentSyncSystem;

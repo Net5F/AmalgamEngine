@@ -4,7 +4,7 @@
 #include "ISimulationExtension.h"
 #include "InteractionRequest.h"
 #include "Interaction.h"
-#include "UserErrorString.h"
+#include "SystemMessage.h"
 #include "Log.h"
 #include "Timer.h"
 #include "tracy/Tracy.hpp"
@@ -21,6 +21,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , lua{std::make_unique<sol::state>()}
 , world{inSpriteData, *lua}
 , currentTick{0}
+, engineLuaBindings{*lua, world}
 , extension{nullptr}
 , interactionRequestQueue{inNetwork.getEventDispatcher()}
 , interactionQueueMap{}
@@ -30,6 +31,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , tileUpdateSystem{world, network}
 , inputSystem{*this, world, network}
 , movementSystem{world}
+, aiSystem{world}
 , clientAOISystem{*this, world, network}
 , movementSyncSystem{*this, world, network}
 , componentSyncSystem{*this, world, network, inSpriteData}
@@ -40,8 +42,13 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
     // Initialize our entt groups.
     EnttGroups::init(world.registry);
 
-    // Initialize the lua engine.
+    // Initialize the Lua engine and add our bindings.
     lua->open_libraries(sol::lib::base);
+    engineLuaBindings.addBindings();
+
+    // We use "errorString" to hold strings to send back to the user if one 
+    // of our bound functions encountered an error.
+    (*lua)["errorString"] = "";
 
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
@@ -63,6 +70,11 @@ void Simulation::registerInteractionQueue(Uint8 interactionType,
 World& Simulation::getWorld()
 {
     return world;
+}
+
+sol::state& Simulation::getLua()
+{
+    return *lua;
 }
 
 Uint32 Simulation::getCurrentTick()
@@ -108,6 +120,9 @@ void Simulation::tick()
 
     // Move all of our entities.
     movementSystem.processMovements();
+    
+    // Run all of our AI.
+    aiSystem.processAITick();
 
     // Call the project's post-movement logic.
     if (extension != nullptr) {
@@ -178,7 +193,7 @@ void Simulation::dispatchInteractionMessages()
             > (SharedConfig::SQUARED_INTERACTION_DISTANCE)) {
             network.serializeAndSend(
                 interactionRequest.netID,
-                UserErrorString{"You must move closer to interact with that."});
+                SystemMessage{"You must move closer to interact with that."});
             continue;
         }
 

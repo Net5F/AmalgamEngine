@@ -33,7 +33,7 @@ struct Interaction {
     void add(Uint8 newInteraction)
     {
         for (Uint8& interaction : supportedInteractions) {
-            if (interaction == EngineInteractionType::NotSet) {
+            if (interaction == InteractionType::NotSet) {
                 interaction = newInteraction;
                 return;
             }
@@ -45,7 +45,7 @@ struct Interaction {
     /**
      * Returns true if this component contains the given interaction.
      */
-    bool contains(Uint8 desiredInteraction)
+    bool contains(Uint8 desiredInteraction) const
     {
         for (Uint8 interaction : supportedInteractions) {
             if (interaction == desiredInteraction) {
@@ -54,6 +54,14 @@ struct Interaction {
         }
 
         return false;
+    }
+
+    /**
+     * Returns true if this component doesn't contain any interactions.
+     */
+    bool isEmpty() const
+    {
+        return (supportedInteractions[0] == InteractionType::NotSet);
     }
 };
 

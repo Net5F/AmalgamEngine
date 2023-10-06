@@ -3,6 +3,7 @@
 #include "IsClientEntity.h"
 #include "Name.h"
 #include "Input.h"
+#include "Rotation.h"
 #include "AnimationState.h"
 #include "Interaction.h"
 #include "boost/mp11/list.hpp"
@@ -24,10 +25,11 @@ namespace EngineComponentLists
  *
  * Note: We handle Position separately because every entity is guaranteed to 
  *       have one and it's more efficient to do so.
+ * Note: We need Rotation, otherwise entities will face the wrong way on init.
  */
 using ReplicatedComponentTypes
-    = boost::mp11::mp_list<IsClientEntity, Name, Input, AnimationState,
-                           Interaction>;
+    = boost::mp11::mp_list<IsClientEntity, Name, Input, Rotation,
+                           AnimationState, Interaction>;
 
 /**
  * All of the engine's component types that should be observed and auto-

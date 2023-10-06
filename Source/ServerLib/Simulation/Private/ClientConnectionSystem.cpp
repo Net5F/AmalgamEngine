@@ -49,6 +49,8 @@ void ClientConnectionSystem::processConnectionEvents()
 
 void ClientConnectionSystem::processConnectEvents()
 {
+    entt::registry& registry{world.registry};
+
     // Add all newly connected client's entities to the sim.
     for (std::size_t i = 0; i < clientConnectedQueue.size(); ++i) {
         ClientConnected clientConnected{};
@@ -56,53 +58,28 @@ void ClientConnectionSystem::processConnectEvents()
             LOG_FATAL("Expected element but pop failed.");
         }
 
-        /* Build their entity. */
-        // Find their spawn point.
-        entt::registry& registry{world.registry};
-        const Position spawnPoint{world.getSpawnPoint()};
-
         // Create the entity and construct its standard components.
         // Note: Be careful with holding onto references here. If components 
         //       are added to the same group, the ref will be invalidated.
-        entt::entity newEntity{registry.create()};
-
-        // Add RelicatedComponentList first so it gets updated as we add others.
-        registry.emplace<ReplicatedComponentList>(newEntity);
+        entt::entity newEntity{world.createEntity(world.getSpawnPoint())};
 
         registry.emplace<IsClientEntity>(newEntity);
         registry.emplace<Name>(newEntity,
                                std::to_string(static_cast<Uint32>(newEntity)));
 
-        registry.emplace<Input>(newEntity);
-        registry.emplace<Position>(newEntity, spawnPoint.x, spawnPoint.y, 0.0f);
-        registry.emplace<PreviousPosition>(newEntity, spawnPoint.x,
-                                           spawnPoint.y, 0.0f);
-        registry.emplace<Rotation>(newEntity);
-
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
                                         std::vector<entt::entity>());
+
+        world.addMovementComponents(newEntity);
 
         // TODO: When we add character sprite sets, update this.
         Uint16 spriteSetID{spriteData
                 .getObjectSpriteSet(SharedConfig::DEFAULT_CHARACTER_SPRITE_SET)
                 .numericID};
-        const auto& animationState{registry.emplace<AnimationState>(
-            newEntity, SpriteSet::Type::Object, spriteSetID,
-            SharedConfig::DEFAULT_CHARACTER_SPRITE_INDEX)};
-        const Sprite* sprite{
-            spriteData.getObjectSpriteSet(animationState.spriteSetID)
-                .sprites[animationState.spriteIndex]};
-
-        const Collision& collision{registry.emplace<Collision>(
-            newEntity, sprite->modelBounds,
-            Transforms::modelToWorldCentered(
-                sprite->modelBounds, registry.get<Position>(newEntity)))};
-
-        // Start tracking the entity in the locator.
-        // Note: Since the entity was added to the locator, clients 
-        //       will be told by ClientAOISystem to construct it.
-        world.entityLocator.setEntityLocation(newEntity,
-                                              collision.worldBounds);
+        AnimationState animationState{
+            SpriteSet::Type::Object, spriteSetID,
+            SharedConfig::DEFAULT_CHARACTER_SPRITE_INDEX};
+        world.addGraphicsComponents(newEntity, animationState);
 
         // Add the new client entity to the network ID map.
         world.netIdMap[clientConnected.clientID] = newEntity;

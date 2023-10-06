@@ -44,6 +44,9 @@ class World
 public:
     World(SpriteData& inSpriteData, sol::state& inLua);
 
+    //-------------------------------------------------------------------------
+    // World State
+    //-------------------------------------------------------------------------
     /** Entity data registry. */
     entt::registry registry;
 
@@ -58,24 +61,53 @@ public:
         Used for interfacing with the Network. */
     std::unordered_map<NetworkID, entt::entity> netIdMap;
 
+    //-------------------------------------------------------------------------
+    // Helper Functions
+    //-------------------------------------------------------------------------
     /**
-     * Constructs an entity with the given components, then runs initScript 
-     * on it.
-     * 
-     * Note: We restrict the component types to those in ReplicatedComponent
-     *       only because it has all that we currently need and it's convenient.
+     * Creates an entity with the given position.
+     *
+     * @param entityHint (Optional) The entityID to use, if it's available.
+     * @return The new entity's ID.
      */
-    entt::entity
-        constructEntity(const Position& position,
-                        std::span<const ReplicatedComponent> components,
-                        const InitScript& initScript,
-                        entt::entity entityHint = entt::null);
+    entt::entity createEntity(const Position& position,
+                              entt::entity entityHint = entt::null);
+
+    /**
+     * Adds the given graphical component to the entity.
+     *
+     * Since an entity's collision is based on its graphics, this also adds 
+     * the Collision component and adds the entity to the locator.
+     */
+    void addGraphicsComponents(entt::entity entity,
+                               const AnimationState& animationState);
+
+    /**
+     * Adds the components needed for movement to the given entity.
+     */
+    void addMovementComponents(entt::entity entity);
+
+    /**
+     * Runs the given init script on the given entity. If successful, adds it 
+     * as a component.
+     *
+     * @return If the init script failed to run, returns a string 
+     *         describing the issue. Else, returns an empty string.
+     */
+    std::string runInitScript(entt::entity entity,
+                              const std::string& initScript);
 
     /**
      * Returns true if the given ID is valid and in use.
      * Note: If entt adds a storage.in_use(entity), we can replace this.
      */
-    bool entityIDIsInUse(entt::entity entityID);
+    bool entityIDIsInUse(entt::entity entity);
+
+    /**
+     * Returns true if the given entity has all the components necessary for 
+     * movement.
+     */
+    bool hasMovementComponents(entt::entity entity);
 
     /**
      * Returns the spawn point position.

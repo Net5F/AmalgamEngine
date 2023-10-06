@@ -5,7 +5,7 @@
 #include "IMessageProcessorExtension.h"
 #include "ExplicitConfirmation.h"
 #include "ConnectionResponse.h"
-#include "UserErrorString.h"
+#include "SystemMessage.h"
 #include "ChunkUpdate.h"
 #include "EntityInit.h"
 #include "ComponentUpdate.h"
@@ -48,9 +48,9 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
             handleConnectionResponse(messageBuffer, messageSize);
             break;
         }
-        case EngineMessageType::UserErrorString: {
-            dispatchMessage<UserErrorString>(messageBuffer, messageSize,
-                                             networkEventDispatcher);
+        case EngineMessageType::SystemMessage: {
+            dispatchMessage<SystemMessage>(messageBuffer, messageSize,
+                                           networkEventDispatcher);
             break;
         }
         case EngineMessageType::ChunkUpdate: {
