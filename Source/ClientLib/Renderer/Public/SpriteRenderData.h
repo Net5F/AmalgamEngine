@@ -14,7 +14,6 @@ namespace Client
  * See Sprite.h for more info.
  */
 struct SpriteRenderData {
-public:
     /** The relative path to the sprite sheet image file that holds this
         sprite. Used for passing the sprite to our UI library, which has its
         own texture cache. */
