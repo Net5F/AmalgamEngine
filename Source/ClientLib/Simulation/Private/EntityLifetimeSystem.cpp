@@ -57,6 +57,7 @@ void EntityLifetimeSystem::processEntityDeletes(Uint32 desiredTick)
     while ((entityDelete != nullptr)
            && (entityDelete->tickNum <= desiredTick)) {
         if (registry.valid(entityDelete->entity)) {
+            world.entityLocator.removeEntity(entityDelete->entity);
             registry.destroy(entityDelete->entity);
 
             LOG_INFO("Entity removed: %u. Desired tick: %u, Message tick: %u",
@@ -165,9 +166,12 @@ void EntityLifetimeSystem::processEntityData(
         // When entities have an AnimationState, the server gives them a 
         // Collision. It isn't replicated, so add it manually.
         const Position& position{registry.get<Position>(newEntity)};
-        registry.emplace<Collision>(
+        const Collision& collision{registry.emplace<Collision>(
             newEntity, sprite->modelBounds,
-            Transforms::modelToWorldCentered(sprite->modelBounds, position));
+            Transforms::modelToWorldCentered(sprite->modelBounds, position))};
+
+        // Entities with Collision get added to the locator.
+        world.entityLocator.setEntityLocation(newEntity, collision.worldBounds);
     }
 
     // If this is the player entity, add any client components specific to it.

@@ -6,6 +6,7 @@
 #include "TileExtent.h"
 #include "EmptySpriteID.h"
 #include "Log.h"
+#include "entt/fwd.hpp"
 #include <array>
 
 namespace AM
@@ -14,6 +15,7 @@ struct Position;
 struct PreviousPosition;
 struct Rotation;
 class TileMapBase;
+class EntityLocator;
 
 /**
  * Shared static functions for moving entities.
@@ -25,10 +27,10 @@ public:
      * Calculates an updated position based on the current position, input state, 
      * and a time delta.
      *
-     * @param position  The current position.
-     * @param inputStates  The current input state.
-     * @param deltaSeconds  The number of seconds that have passed since the
-     *                      last update.
+     * @param position The current position.
+     * @param inputStates The current input state.
+     * @param deltaSeconds The number of seconds that have passed since the
+     *                     last update.
      *
      * @return The updated position.
      */
@@ -41,8 +43,8 @@ public:
      * If there are no inputs or they cancel out, the given rotation will be 
      * returned.
      *
-     * @param rotation  The current rotation.
-     * @param inputStates  The current input state.
+     * @param rotation The current rotation.
+     * @param inputStates The current input state.
      */
     static Rotation calcRotation(const Rotation& rotation,
                                  const Input::StateArr& inputStates);
@@ -57,15 +59,19 @@ public:
      * Resolves collisions between the given desiredBox and other nearby
      * bounding boxes in the world.
      *
-     * @param currentBounds  The bounding box, at its current position.
-     * @param desiredBounds  The bounding box, at its desired position.
-     * @param tileMap  The world's tile map.
+     * @param currentBounds The bounding box, at its current position.
+     * @param desiredBounds The bounding box, at its desired position.
+     * @param registry The world's entity registry.
+     * @param tileMap The world's tile map.
+     * @param entityLocator The world's entity locator.
      *
      * @return The desired bounding box, moved to resolve collisions.
      */
     static BoundingBox resolveCollisions(const BoundingBox& currentBounds,
                                          const BoundingBox& desiredBounds,
-                                         const TileMapBase& tileMap);
+                                         const entt::registry& registry,
+                                         const TileMapBase& tileMap,
+                                         EntityLocator& entityLocator);
 
 private:
     /**

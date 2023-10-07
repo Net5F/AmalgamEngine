@@ -4,8 +4,11 @@
 #include "Rotation.h"
 #include "BoundingBox.h"
 #include "TileMapBase.h"
+#include "EntityLocator.h"
+#include "IsClientEntity.h"
 #include "SharedConfig.h"
 #include "Ignore.h"
+#include "entt/entity/registry.hpp"
 
 /** The constant to multiply by when normalizing a diagonal direction vector
     to be equal magnitude to movement in cardinal directions.
@@ -89,12 +92,13 @@ Position
 
 BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
                                                const BoundingBox& desiredBounds,
-                                               const TileMapBase& tileMap)
+                                               const entt::registry& registry,
+                                               const TileMapBase& tileMap,
+                                               EntityLocator& entityLocator)
 {
     // TODO: Replace this logic with real sliding collision.
 
-    // If the desired movement would go outside of the map, don't let
-    // them move.
+    // If the desired movement would go outside of the map, reject the move.
     const TileExtent boxTileExtent{desiredBounds.asTileExtent()};
     const TileExtent mapExtent{tileMap.getTileExtent()};
     if (!mapExtent.containsExtent(boxTileExtent)
@@ -110,8 +114,8 @@ BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
             // For each collision box in this tile.
             for (const BoundingBox& collisionBox :
                  tile.getCollisionBoxes()) {
-                // If the desired movement would intersect this box, don't 
-                // let them move.
+                // If the desired movement would intersect this box, reject 
+                // the move.
                 if (desiredBounds.intersects(collisionBox)) {
                     return currentBounds;
                 }
@@ -119,8 +123,14 @@ BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
         }
     }
 
-    // TODO: If we want to collide with non-client entities, Client will need 
-    //       to maintain an EntityLocator.
+    // If any non-client entity intersects the desired bounds, reject the move.
+    std::vector<entt::entity>& collidedEntities{
+        entityLocator.getCollisions(desiredBounds)};
+    for (entt::entity entity : collidedEntities) {
+        if (!(registry.all_of<IsClientEntity>(entity))) {
+            return currentBounds;
+        }
+    }
 
     return desiredBounds;
 }

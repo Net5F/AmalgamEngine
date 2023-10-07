@@ -85,7 +85,7 @@ void ComponentChangeSystem::onAnimationStateUpdated(entt::registry& registry,
             .sprites[animationState.spriteIndex]};
 
     // Note: We assume that an entity with AnimationState always has a Collision.
-    Collision& collision{
+    const Collision& collision{
         registry.patch<Collision>(entity, [&](Collision& collision) {
             collision.modelBounds = newSprite->modelBounds;
             collision.worldBounds = Transforms::modelToWorldCentered(

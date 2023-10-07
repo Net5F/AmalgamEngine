@@ -47,7 +47,8 @@ void MovementSystem::processMovements()
 
             // Resolve any collisions with the surrounding bounding boxes.
             BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(
-                collision.worldBounds, desiredBounds, world.tileMap)};
+                collision.worldBounds, desiredBounds, world.registry,
+                world.tileMap, world.entityLocator)};
 
             // Update their bounding box and position.
             // Note: Since desiredBounds was properly offset, we can do a
@@ -57,9 +58,8 @@ void MovementSystem::processMovements()
             collision.worldBounds = resolvedBounds;
         }
 
-        // If they did actually move.
+        // If they did actually move, update their position in the locator.
         if (position != previousPosition) {
-            // Update their position in the locator.
             world.entityLocator.setEntityLocation(entity,
                                                   collision.worldBounds);
         }

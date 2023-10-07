@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TileMap.h"
+#include "EntityLocator.h"
 #include "entt/entity/registry.hpp"
 
 struct SDL_Rect;
@@ -35,6 +36,10 @@ public:
 
     /** The tile map that makes up the world. */
     TileMap tileMap;
+
+    /** Spatial partitioning grid for efficiently locating entities by
+        position. */
+    EntityLocator entityLocator;
 
     /**
      * Returns true if the given ID is valid and in use.

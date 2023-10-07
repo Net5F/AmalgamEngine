@@ -117,7 +117,8 @@ void NpcMovementSystem::moveAllNpcs()
 
             // Resolve any collisions with the surrounding bounding boxes.
             BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(
-                collision.worldBounds, desiredBounds, world.tileMap)};
+                collision.worldBounds, desiredBounds, world.registry,
+                world.tileMap, world.entityLocator)};
 
             // Update their collision box and position.
             // Note: Since desiredBounds was properly offset, we can do a
@@ -125,6 +126,12 @@ void NpcMovementSystem::moveAllNpcs()
             position += (resolvedBounds.getMinPosition()
                          - collision.worldBounds.getMinPosition());
             collision.worldBounds = resolvedBounds;
+        }
+
+        // If they did actually move, update their position in the locator.
+        if (position != previousPosition) {
+            world.entityLocator.setEntityLocation(entity,
+                                                  collision.worldBounds);
         }
     }
 }

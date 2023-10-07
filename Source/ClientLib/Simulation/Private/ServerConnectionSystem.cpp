@@ -106,6 +106,10 @@ void ServerConnectionSystem::initSimState(
              connectionResponse.mapXLengthChunks,
              connectionResponse.mapYLengthChunks);
 
+    // Allocate the entity locator's grid.
+    world.entityLocator.setGridSize(world.tileMap.getTileExtent().xLength,
+                                    world.tileMap.getTileExtent().yLength);
+
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.
     currentTick = connectionResponse.tickNum + Config::INITIAL_TICK_OFFSET;
@@ -148,10 +152,11 @@ void ServerConnectionSystem::initMockSimState()
             .sprites[animationState.spriteIndex]};
     registry.emplace<Sprite>(newEntity, *sprite);
 
-    registry.emplace<Collision>(
+    const Collision& collision{registry.emplace<Collision>(
         newEntity, sprite->modelBounds,
         Transforms::modelToWorldCentered(sprite->modelBounds,
-                                         registry.get<Position>(newEntity)));
+                                         registry.get<Position>(newEntity)))};
+    world.entityLocator.setEntityLocation(newEntity, collision.worldBounds);
 
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};

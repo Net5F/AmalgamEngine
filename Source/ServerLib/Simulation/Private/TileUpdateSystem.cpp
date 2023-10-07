@@ -3,6 +3,8 @@
 #include "Network.h"
 #include "ISimulationExtension.h"
 #include "ClientSimData.h"
+#include "ChunkPosition.h"
+#include "TilePosition.h"
 #include "AMAssert.h"
 #include "tracy/Tracy.hpp"
 #include <variant>

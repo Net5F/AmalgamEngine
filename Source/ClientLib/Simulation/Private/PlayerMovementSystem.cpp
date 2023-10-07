@@ -130,8 +130,9 @@ void PlayerMovementSystem::replayInputs(Uint32 lastUpdateTick)
 
 void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates)
 {
-    auto [position, rotation, collision]
-        = world.registry.get<Position, Rotation, Collision>(world.playerEntity);
+    auto [position, previousPosition, rotation, collision]
+        = world.registry.get<Position, PreviousPosition, Rotation, Collision>(
+            world.playerEntity);
 
     // Calculate their desired next position.
     Position desiredPosition{position};
@@ -149,7 +150,8 @@ void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates)
 
         // Resolve any collisions with the surrounding bounding boxes.
         BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(
-            collision.worldBounds, desiredBounds, world.tileMap)};
+            collision.worldBounds, desiredBounds, world.registry, world.tileMap,
+            world.entityLocator)};
 
         // Update our collision box and position.
         // Note: Since desiredBounds was properly offset, we can do a simple
@@ -157,6 +159,12 @@ void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates)
         position += (resolvedBounds.getMinPosition()
                      - collision.worldBounds.getMinPosition());
         collision.worldBounds = resolvedBounds;
+    }
+
+    // If they did actually move, update their position in the locator.
+    if (position != previousPosition) {
+        world.entityLocator.setEntityLocation(world.playerEntity,
+                                              collision.worldBounds);
     }
 }
 

@@ -4,6 +4,7 @@
 #include "Name.h"
 #include "Position.h"
 #include "InitScript.h"
+#include "IsClientEntity.h"
 #include "SystemMessage.h"
 #include "ISimulationExtension.h"
 #include "Log.h"

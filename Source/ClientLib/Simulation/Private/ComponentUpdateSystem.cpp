@@ -97,11 +97,14 @@ void ComponentUpdateSystem::onAnimationStateUpdated(entt::registry& registry,
     registry.emplace_or_replace<Sprite>(entity, *newSprite);
 
     // Note: We assume that an entity with AnimationState always has a Collision.
-    registry.patch<Collision>(entity, [&](Collision& collision) {
-        collision.modelBounds = newSprite->modelBounds;
-        collision.worldBounds = Transforms::modelToWorldCentered(
-            newSprite->modelBounds, position);
-    });
+    const Collision& collision{
+        registry.patch<Collision>(entity, [&](Collision& collision) {
+            collision.modelBounds = newSprite->modelBounds;
+            collision.worldBounds = Transforms::modelToWorldCentered(
+                newSprite->modelBounds, position);
+        })};
+
+    world.entityLocator.setEntityLocation(entity, collision.worldBounds);
 }
 
 } // namespace Client
