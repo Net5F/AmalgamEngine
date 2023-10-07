@@ -21,11 +21,11 @@ namespace AM
 struct Name;
 struct Position;
 struct AnimationState;
+struct InitScript;
 
 namespace Server
 {
 class SpriteData;
-struct InitScript;
 
 /**
  * Owns and manages the persistence of all world state.
@@ -95,7 +95,7 @@ public:
      *         describing the issue. Else, returns an empty string.
      */
     std::string runInitScript(entt::entity entity,
-                              const std::string& initScript);
+                              const InitScript& initScript);
 
     /**
      * Returns true if the given ID is valid and in use.

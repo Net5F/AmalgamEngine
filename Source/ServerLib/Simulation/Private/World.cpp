@@ -146,13 +146,13 @@ void World::addMovementComponents(entt::entity entity)
 }
 
 std::string World::runInitScript(entt::entity entity,
-                                 const std::string& initScript)
+                                 const InitScript& initScript)
 {
     // If there's an init script, run it.
     // Note: We use "selfEntityID" to hold the ID of the entity that the init 
     //       script is being ran on.
     lua["selfEntityID"] = entity;
-    auto result{lua.script(initScript, &sol::script_default_on_error)};
+    auto result{lua.script(initScript.script, &sol::script_default_on_error)};
 
     // If there was an error while running the init script, keep the entity 
     // alive (so the user can try again) and return the error.

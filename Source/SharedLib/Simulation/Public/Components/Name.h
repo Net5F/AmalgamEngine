@@ -11,7 +11,7 @@ struct Name
 {
     /** Used as a "we should never hit this" cap on the length of the name
         string. Only checked in debug builds. */
-    static constexpr std::size_t MAX_NAME_LENGTH{50};
+    static constexpr std::size_t MAX_LENGTH{50};
 
     std::string value{""};
 };
@@ -19,7 +19,7 @@ struct Name
 template<typename S>
 void serialize(S& serializer, Name& name)
 {
-    serializer.text1b(name.value, Name::MAX_NAME_LENGTH);
+    serializer.text1b(name.value, Name::MAX_LENGTH);
 }
 
 } // End namespace AM

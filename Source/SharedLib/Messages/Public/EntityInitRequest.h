@@ -4,7 +4,7 @@
 #include "Name.h"
 #include "Position.h"
 #include "AnimationState.h"
-#include "InitScriptResponse.h"
+#include "InitScript.h"
 #include "NetworkDefs.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
@@ -37,7 +37,7 @@ struct EntityInitRequest {
     AnimationState animationState{};
 
     /** The script to run on this entity after creation. */
-    std::string initScript{};
+    InitScript initScript{};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -59,8 +59,7 @@ void serialize(S& serializer,
     serializer.object(entityInitRequest.name);
     serializer.object(entityInitRequest.position);
     serializer.object(entityInitRequest.animationState);
-    serializer.text1b(entityInitRequest.initScript,
-                      InitScriptResponse::MAX_SCRIPT_LENGTH);
+    serializer.object(entityInitRequest.initScript);
 }
 
 } // End namespace AM

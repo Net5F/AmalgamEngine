@@ -4,8 +4,6 @@
 
 namespace AM
 {
-namespace Server
-{
 /**
  * An entity's initialization script. Init scripts allow builders to customize 
  * an entity, by adding components and logic to it. 
@@ -21,9 +19,18 @@ namespace Server
  * Init scripts aren't used by client entities.
  */
 struct InitScript {
+    /** Used as a "we should never hit this" cap on the length of the script
+        string. Only checked in debug builds. */
+    static constexpr std::size_t MAX_LENGTH{10000};
+
     /** The initialization script. */
     std::string script{};
 };
 
-} // namespace Server
+template<typename S>
+void serialize(S& serializer, InitScript& initScript)
+{
+    serializer.text1b(initScript.script, InitScript::MAX_LENGTH);
+}
+
 } // namespace AM

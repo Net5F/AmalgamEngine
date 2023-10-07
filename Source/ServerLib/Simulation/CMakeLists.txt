@@ -44,7 +44,6 @@ target_sources(ServerLib
 		Public/World.h
 		Public/Components/AIBehavior.h
 		Public/Components/ClientSimData.h
-		Public/Components/InitScript.h
 		Public/Components/ReplicatedComponentList.h
 		Public/SpriteData/SpriteData.h
 		Public/TileMap/TileMap.h

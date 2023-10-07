@@ -2,6 +2,7 @@
 
 #include "EngineMessageType.h"
 #include "NetworkDefs.h"
+#include "InitScript.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
 #include <string>
@@ -23,10 +24,6 @@ struct InitScriptResponse {
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::InitScriptResponse};
-
-    /** Used as a "we should never hit this" cap on the length of the script
-        string. Only checked in debug builds. */
-    static constexpr std::size_t MAX_SCRIPT_LENGTH{10000};
 
     //--------------------------------------------------------------------------
     // Networked data
@@ -53,8 +50,7 @@ template<typename S>
 void serialize(S& serializer, InitScriptResponse& initScriptResponse)
 {
     serializer.value4b(initScriptResponse.entity);
-    serializer.text1b(initScriptResponse.initScript,
-                     InitScriptResponse::MAX_SCRIPT_LENGTH);
+    serializer.text1b(initScriptResponse.initScript, InitScript::MAX_LENGTH);
 }
 
 } // End namespace AM
