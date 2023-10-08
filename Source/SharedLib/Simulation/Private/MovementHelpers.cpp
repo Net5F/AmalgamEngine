@@ -92,6 +92,7 @@ Position
 
 BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
                                                const BoundingBox& desiredBounds,
+                                               entt::entity movingEntity,
                                                const entt::registry& registry,
                                                const TileMapBase& tileMap,
                                                EntityLocator& entityLocator)
@@ -123,11 +124,13 @@ BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
         }
     }
 
-    // If any non-client entity intersects the desired bounds, reject the move.
+    // If any non-client entity (besides the entity trying to move) intersects 
+    // the desired bounds, reject the move.
     std::vector<entt::entity>& collidedEntities{
         entityLocator.getCollisions(desiredBounds)};
-    for (entt::entity entity : collidedEntities) {
-        if (!(registry.all_of<IsClientEntity>(entity))) {
+    for (entt::entity collidedEntity : collidedEntities) {
+        if ((collidedEntity != movingEntity)
+            && !(registry.all_of<IsClientEntity>(collidedEntity))) {
             return currentBounds;
         }
     }

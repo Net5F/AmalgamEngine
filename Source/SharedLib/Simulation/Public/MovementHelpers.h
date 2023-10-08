@@ -61,6 +61,7 @@ public:
      *
      * @param currentBounds The bounding box, at its current position.
      * @param desiredBounds The bounding box, at its desired position.
+     * @param movingEntity The entity that's trying to move.
      * @param registry The world's entity registry.
      * @param tileMap The world's tile map.
      * @param entityLocator The world's entity locator.
@@ -69,6 +70,7 @@ public:
      */
     static BoundingBox resolveCollisions(const BoundingBox& currentBounds,
                                          const BoundingBox& desiredBounds,
+                                         entt::entity movingEntity,
                                          const entt::registry& registry,
                                          const TileMapBase& tileMap,
                                          EntityLocator& entityLocator);

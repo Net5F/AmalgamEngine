@@ -117,7 +117,7 @@ void NpcMovementSystem::moveAllNpcs()
 
             // Resolve any collisions with the surrounding bounding boxes.
             BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(
-                collision.worldBounds, desiredBounds, world.registry,
+                collision.worldBounds, desiredBounds, entity, world.registry,
                 world.tileMap, world.entityLocator)};
 
             // Update their collision box and position.

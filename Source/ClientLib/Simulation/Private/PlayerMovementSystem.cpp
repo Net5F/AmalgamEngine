@@ -150,8 +150,8 @@ void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates)
 
         // Resolve any collisions with the surrounding bounding boxes.
         BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(
-            collision.worldBounds, desiredBounds, world.registry, world.tileMap,
-            world.entityLocator)};
+            collision.worldBounds, desiredBounds, world.playerEntity,
+            world.registry, world.tileMap, world.entityLocator)};
 
         // Update our collision box and position.
         // Note: Since desiredBounds was properly offset, we can do a simple
