@@ -149,7 +149,7 @@ void EntityLifetimeSystem::processEntityData(
 
     // Entities with an Input are capable of movement, so we add a 
     // PreviousPosition. They'll also already have a replicated Rotation.
-    if (const auto* input{registry.try_get<Input>(newEntity)}) {
+    if (registry.all_of<Input>(newEntity)) {
         const Position& position{registry.get<Position>(newEntity)};
         registry.emplace<PreviousPosition>(newEntity, position);
     }
