@@ -23,8 +23,8 @@ TextureHandle AssetCache::loadTexture(const std::string& imagePath)
     }
 
     // Wrap the texture in a shared_ptr.
-    TextureHandle handle{
-        TextureHandle(texture, [](SDL_Texture* p) { SDL_DestroyTexture(p); })};
+    TextureHandle handle{texture,
+                         [](SDL_Texture* p) { SDL_DestroyTexture(p); }};
 
     // Save the texture in the cache.
     textureCache[imagePath] = handle;
