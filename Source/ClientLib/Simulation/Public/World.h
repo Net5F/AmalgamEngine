@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ItemData.h"
 #include "TileMap.h"
 #include "EntityLocator.h"
 #include "entt/entity/registry.hpp"
@@ -30,6 +31,9 @@ public:
 
     /** Entity data registry. */
     entt::registry registry;
+
+    /** Item data templates. */
+    ItemData itemData;
 
     /** The entity that this client is controlling. */
     entt::entity playerEntity;

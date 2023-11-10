@@ -8,6 +8,7 @@ namespace Client
 {
 World::World(SpriteData& spriteData)
 : registry{}
+, itemData{}
 , playerEntity{entt::null}
 , tileMap{spriteData}
 , entityLocator{registry}

@@ -4,7 +4,6 @@
 #include "SpriteSets.h"
 #include <vector>
 #include <unordered_map>
-#include "SDL_stdinc.h"
 #include "nlohmann/json_fwd.hpp"
 
 namespace AM
@@ -15,7 +14,7 @@ namespace AM
  * Loads the shared sprite data from SpriteData.json into memory and provides
  * an interface for accessing it.
  *
- * Also adds the "Empty" sprite, for use as a default.
+ * Also adds the "Null" sprite, for use as a default.
  *
  * Note: This class expects a SpriteData.json file to be present in the same
  *       directory as the application executable.
@@ -34,17 +33,20 @@ public:
     SpriteDataBase();
 
     /**
-     * Get a sprite, using its string ID.
+     * Returns the sprite with the given string ID.
+     * Errors if the given ID doesn't exist.
      */
     const Sprite& getSprite(const std::string& stringID) const;
 
     /**
-     * Get a sprite, using its numeric ID.
+     * Returns the sprite with the given numeric ID.
+     * Errors if the given ID doesn't exist.
      */
     const Sprite& getSprite(int numericID) const;
 
     /**
-     * Get a sprite set, using its string ID.
+     * Returns the sprite set with the given string ID.
+     * Errors if the given ID doesn't exist.
      */
     const FloorSpriteSet& getFloorSpriteSet(const std::string& stringID) const;
     const FloorCoveringSpriteSet&
@@ -54,7 +56,8 @@ public:
         getObjectSpriteSet(const std::string& stringID) const;
 
     /**
-     * Get a sprite set, using its numeric ID.
+     * Returns the sprite set with the given numeric ID.
+     * Errors if the given ID doesn't exist.
      */
     const FloorSpriteSet& getFloorSpriteSet(Uint16 numericID) const;
     const FloorCoveringSpriteSet&
@@ -78,13 +81,13 @@ public:
     const std::vector<ObjectSpriteSet>& getAllObjectSpriteSets() const;
 
 protected:
-    /** The index of the empty sprite. Will always be the last sprite in the
+    /** The index of the null sprite. Will always be the last sprite in the
         vector.
-        Note: Don't get confused, the empty sprite's ID is -1, but its index 
+        Note: Don't get confused, the null sprite's ID is -1, but its index 
               is at the end of the vector. We do this instead of putting it at
               index 0, because we would have to save it in SpriteData.json and 
               add logic to skip it in the editor. */
-    int emptySpriteIndex;
+    int nullSpriteIndex;
 
 private:
     /**

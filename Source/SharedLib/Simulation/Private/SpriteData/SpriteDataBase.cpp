@@ -1,5 +1,5 @@
 #include "SpriteDataBase.h"
-#include "EmptySpriteID.h"
+#include "NullSpriteID.h"
 #include "Paths.h"
 #include "Log.h"
 #include "nlohmann/json.hpp"
@@ -8,7 +8,7 @@
 namespace AM
 {
 SpriteDataBase::SpriteDataBase()
-: emptySpriteIndex{0}
+: nullSpriteIndex{0}
 , sprites{}
 , floorSpriteSets{}
 , floorCoveringSpriteSets{}
@@ -53,8 +53,8 @@ const Sprite& SpriteDataBase::getSprite(const std::string& stringID) const
 
 const Sprite& SpriteDataBase::getSprite(int numericID) const
 {
-    if (numericID == EMPTY_SPRITE_ID) {
-        return sprites[emptySpriteIndex];
+    if (numericID == NULL_SPRITE_ID) {
+        return sprites[nullSpriteIndex];
     }
     else if (numericID < 0 || numericID >= static_cast<int>(sprites.size())) {
         LOG_FATAL("Invalid numeric ID while getting sprite: %d", numericID);
@@ -194,15 +194,15 @@ void SpriteDataBase::parseJson(nlohmann::json& json)
         LOG_FATAL("Failure to parse SpriteDataBase.json: %s", e.what());
     }
 
-    // Add the empty sprite and set the empty sprite index.
-    sprites.push_back({"Empty", "empty", EMPTY_SPRITE_ID});
-    emptySpriteIndex = static_cast<int>(sprites.size() - 1);
+    // Add the null sprite and set the null sprite index.
+    sprites.push_back({"Null", "null", NULL_SPRITE_ID});
+    nullSpriteIndex = static_cast<int>(sprites.size() - 1);
 
     // Add everything to the associated maps.
     for (const Sprite& sprite : sprites) {
         int numericID{sprite.numericID};
-        if (numericID == EMPTY_SPRITE_ID) {
-            numericID = emptySpriteIndex;
+        if (numericID == NULL_SPRITE_ID) {
+            numericID = nullSpriteIndex;
         }
         spriteStringMap.emplace(sprite.stringID, &sprites[numericID]);
     }
@@ -276,7 +276,7 @@ void SpriteDataBase::parseFloorCoveringSpriteSet(const nlohmann::json& spriteSet
     std::size_t index{0};
     for (auto& spriteIDJson : spriteSetJson.at("spriteIDs").items()) {
         int spriteID{spriteIDJson.value().get<int>()};
-        if (spriteID == EMPTY_SPRITE_ID) {
+        if (spriteID == NULL_SPRITE_ID) {
             spriteSet.sprites[index] = nullptr;
         }
         else {
@@ -318,7 +318,7 @@ void SpriteDataBase::parseObjectSpriteSet(const nlohmann::json& spriteSetJson)
     std::size_t index{0};
     for (auto& spriteIDJson : spriteSetJson.at("spriteIDs").items()) {
         int spriteID{spriteIDJson.value().get<int>()};
-        if (spriteID == EMPTY_SPRITE_ID) {
+        if (spriteID == NULL_SPRITE_ID) {
             spriteSet.sprites[index] = nullptr;
         }
         else {

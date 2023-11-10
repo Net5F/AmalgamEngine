@@ -11,6 +11,8 @@ struct EntityInitRequest;
 struct EntityDeleteRequest;
 struct NameChangeRequest;
 struct AnimationStateChangeRequest;
+struct ItemChangeRequest;
+struct InventoryAddItem;
 
 namespace Server
 {
@@ -45,10 +47,10 @@ public:
     virtual void afterMapAndConnectionUpdates() = 0;
 
     /**
-     * Called after all entity movement has been processed, but before the new
-     * movement state has been sent to the clients.
+     * Called after the general simulation update logic (movement, interactions,
+     * etc.)
      */
-    virtual void afterMovement() = 0;
+    virtual void afterSimUpdate() = 0;
 
     /**
      * Called after all relevant state has been sent to the clients.
@@ -88,7 +90,13 @@ public:
         const NameChangeRequest& nameChangeRequest) const
         = 0;
     virtual bool isAnimationStateChangeRequestValid(
-        const AnimationStateChangeRequest& nameChangeRequest) const
+        const AnimationStateChangeRequest& animationStateChangeRequest) const
+        = 0;
+    virtual bool isItemChangeRequestValid(
+        const ItemChangeRequest& itemChangeRequest) const
+        = 0;
+    virtual bool isInventoryAddItemValid(
+        const InventoryAddItem& inventoryAddItem) const
         = 0;
 };
 

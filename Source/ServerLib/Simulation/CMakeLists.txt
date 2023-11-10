@@ -9,6 +9,8 @@ target_sources(ServerLib
 		Private/ComponentSyncSystem.cpp
 		Private/EngineLuaBindings.cpp
 		Private/InputSystem.cpp
+		Private/InventorySystem.cpp
+		Private/ItemSystem.cpp
 		Private/MapSaveSystem.cpp
 		Private/MovementSyncSystem.cpp
 		Private/MovementSystem.cpp
@@ -17,6 +19,7 @@ target_sources(ServerLib
 		Private/Simulation.cpp
 		Private/TileUpdateSystem.cpp
 		Private/World.cpp
+		Private/ItemData/ItemData.cpp
 		Private/SpriteData/SpriteData.cpp
 		Private/TileMap/TileMap.cpp
 	PUBLIC
@@ -31,7 +34,9 @@ target_sources(ServerLib
 		Public/EnttGroups.h
 		Public/EventSorter.h
 		Public/InputSystem.h
+		Public/InventorySystem.h
 		Public/ISimulationExtension.h
+		Public/ItemSystem.h
 		Public/MapSaveSystem.h
 		Public/MovementSyncSystem.h
 		Public/MovementSystem.h
@@ -45,6 +50,7 @@ target_sources(ServerLib
 		Public/Components/AIBehavior.h
 		Public/Components/ClientSimData.h
 		Public/Components/ReplicatedComponentList.h
+		Public/ItemData/ItemData.h
 		Public/SpriteData/SpriteData.h
 		Public/TileMap/TileMap.h
 )
@@ -52,10 +58,12 @@ target_sources(ServerLib
 target_include_directories(ServerLib
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/ItemData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/SpriteData
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/SpriteData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
 )

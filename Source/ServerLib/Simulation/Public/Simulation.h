@@ -1,8 +1,12 @@
 #pragma once
 
+#include "EntityInteractionType.h"
+#include "ItemInteractionType.h"
 #include "World.h"
 #include "EngineLuaBindings.h"
-#include "InteractionRequest.h"
+#include "EntityInteractionRequest.h"
+#include "ItemInteractionRequest.h"
+#include "UseItemOnRequest.h"
 #include "ClientConnectionSystem.h"
 #include "NceLifetimeSystem.h"
 #include "ComponentChangeSystem.h"
@@ -10,6 +14,8 @@
 #include "InputSystem.h"
 #include "MovementSystem.h"
 #include "AISystem.h"
+#include "ItemSystem.h"
+#include "InventorySystem.h"
 #include "ClientAOISystem.h"
 #include "MovementSyncSystem.h"
 #include "ComponentSyncSystem.h"
@@ -66,8 +72,10 @@ public:
      *
      * Note: Only 1 queue can be subscribed to each type of interaction.
      */
-    void registerInteractionQueue(Uint8 interactionType,
-                                  std::queue<InteractionRequest>& queue);
+    void registerInteractionQueue(EntityInteractionType interactionType,
+                                  std::queue<EntityInteractionRequest>& queue);
+    void registerInteractionQueue(ItemInteractionType interactionType,
+                                  std::queue<ItemInteractionRequest>& queue);
 
     /**
      * Returns a reference to the simulation's world state.
@@ -122,12 +130,18 @@ private:
         the appropriate time. */
     std::unique_ptr<ISimulationExtension> extension;
 
-    EventQueue<InteractionRequest> interactionRequestQueue;
+    // Note: We receive the generic interaction request messages here and 
+    //       dispatch each specific interaction to the appropriate system.
+    EventQueue<EntityInteractionRequest> entityInteractionRequestQueue;
+    EventQueue<ItemInteractionRequest> itemInteractionRequestQueue;
 
-    /** Holds the subscribed interaction queues.
-        See subscribeInteractionQueue() comment. */
-    std::unordered_map<Uint8, std::queue<InteractionRequest>*>
-        interactionQueueMap;
+    /** Holds the subscribed entity interaction queues. */
+    std::unordered_map<EntityInteractionType,
+                       std::queue<EntityInteractionRequest>*>
+        entityInteractionQueueMap;
+    /** Holds the subscribed item interaction queues. */
+    std::unordered_map<ItemInteractionType, std::queue<ItemInteractionRequest>*>
+        itemInteractionQueueMap;
 
     //-------------------------------------------------------------------------
     // Systems
@@ -139,6 +153,8 @@ private:
     InputSystem inputSystem;
     MovementSystem movementSystem;
     AISystem aiSystem;
+    ItemSystem itemSystem;
+    InventorySystem inventorySystem;
     ClientAOISystem clientAOISystem;
     MovementSyncSystem movementSyncSystem;
     ComponentSyncSystem componentSyncSystem;

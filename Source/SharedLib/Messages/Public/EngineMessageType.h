@@ -24,24 +24,34 @@ enum class EngineMessageType : Uint8 {
     EntityInitRequest,
     EntityDeleteRequest,
     InitScriptRequest,
-    InteractionRequest,
+    EntityInteractionRequest,
+    ItemRequest,
+    ItemChangeRequest,
+    ItemInteractionRequest,
+    UseItemOnEntityRequest,
 
     // Server -> Client Messages
     ExplicitConfirmation,
     ConnectionResponse,
     SystemMessage,
     EntityInit,
+    EntityDelete,
     MovementUpdate,
     ComponentUpdate,
     ChunkUpdate,
     InitScriptResponse,
+    InventoryInit,
+    Item,
 
     // Bidirectional Messages
     TileAddLayer,
     TileRemoveLayer,
     TileClearLayers,
     TileExtentClearLayers,
-    EntityDelete,
+    InventoryAddItem,
+    InventoryDeleteItem,
+    InventoryMoveItem,
+    CombineItems,
 
     // We reserve values 0 - 124. The project can start at 125.
     PROJECT_START = 125

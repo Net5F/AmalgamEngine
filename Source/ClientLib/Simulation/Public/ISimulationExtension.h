@@ -41,9 +41,10 @@ public:
     virtual void afterMapAndConnectionUpdates() = 0;
 
     /**
-     * Called after all entity movement has been processed.
+     * Called after the general simulation update logic (movement, interactions,
+     * etc.)
      */
-    virtual void afterMovement() = 0;
+    virtual void afterSimUpdate() = 0;
 
     /**
      * Called after all other systems.

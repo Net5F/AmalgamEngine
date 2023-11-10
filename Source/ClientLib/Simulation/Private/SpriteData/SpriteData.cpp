@@ -1,6 +1,6 @@
 #include "SpriteData.h"
 #include "AssetCache.h"
-#include "EmptySpriteID.h"
+#include "NullSpriteID.h"
 #include "Paths.h"
 #include "Log.h"
 #include "nlohmann/json.hpp"
@@ -35,14 +35,14 @@ SpriteData::SpriteData(AssetCache& assetCache)
     // Parse the json structure to construct our sprite render data.
     parseJson(json, assetCache);
 
-    // Add the empty sprite.
-    renderData[emptySpriteIndex] = SpriteRenderData{};
+    // Add the null sprite.
+    renderData[nullSpriteIndex] = SpriteRenderData{};
 }
 
 const SpriteRenderData& SpriteData::getRenderData(int numericID) const
 {
-    if (numericID == EMPTY_SPRITE_ID) {
-        return renderData[emptySpriteIndex];
+    if (numericID == NULL_SPRITE_ID) {
+        return renderData[nullSpriteIndex];
     }
     else if (numericID < 0
              || numericID >= static_cast<int>(renderData.size())) {
@@ -58,7 +58,7 @@ void SpriteData::parseJson(nlohmann::json& json, AssetCache& assetCache)
     // Parse the json and catch any parsing errors.
     try {
         // Resize our vector.
-        renderData.resize(emptySpriteIndex + 1);
+        renderData.resize(nullSpriteIndex + 1);
 
         // For every sprite sheet in the json.
         for (auto& sheetJson : json["spriteSheets"].items()) {

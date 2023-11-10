@@ -2,7 +2,7 @@
 #include "Network.h"
 #include "EnttGroups.h"
 #include "ISimulationExtension.h"
-#include "InteractionRequest.h"
+#include "EntityInteractionRequest.h"
 #include "Interaction.h"
 #include "SystemMessage.h"
 #include "Log.h"
@@ -23,8 +23,10 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , currentTick{0}
 , engineLuaBindings{*lua, world}
 , extension{nullptr}
-, interactionRequestQueue{inNetwork.getEventDispatcher()}
-, interactionQueueMap{}
+, entityInteractionRequestQueue{inNetwork.getEventDispatcher()}
+, itemInteractionRequestQueue{inNetwork.getEventDispatcher()}
+, entityInteractionQueueMap{}
+, itemInteractionQueueMap{}
 , clientConnectionSystem{*this, world, network, inSpriteData}
 , nceLifetimeSystem{world, network}
 , componentChangeSystem{world, network, inSpriteData}
@@ -32,6 +34,8 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , inputSystem{*this, world, network}
 , movementSystem{world}
 , aiSystem{world}
+, itemSystem{world, network}
+, inventorySystem{world, network}
 , clientAOISystem{*this, world, network}
 , movementSyncSystem{*this, world, network}
 , componentSyncSystem{*this, world, network, inSpriteData}
@@ -57,14 +61,24 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 
 Simulation::~Simulation() = default;
 
-void Simulation::registerInteractionQueue(Uint8 interactionType,
-                                          std::queue<InteractionRequest>& queue)
+void Simulation::registerInteractionQueue(EntityInteractionType interactionType,
+                                          std::queue<EntityInteractionRequest>& queue)
 {
-    if (interactionQueueMap[interactionType] != nullptr) {
+    if (entityInteractionQueueMap[interactionType] != nullptr) {
         LOG_FATAL("Only one queue can be registered for each interaction type.");
     }
 
-    interactionQueueMap[interactionType] = &queue;
+    entityInteractionQueueMap[interactionType] = &queue;
+}
+
+void Simulation::registerInteractionQueue(ItemInteractionType interactionType,
+                                          std::queue<ItemInteractionRequest>& queue)
+{
+    if (itemInteractionQueueMap[interactionType] != nullptr) {
+        LOG_FATAL("Only one queue can be registered for each interaction type.");
+    }
+
+    itemInteractionQueueMap[interactionType] = &queue;
 }
 
 World& Simulation::getWorld()
@@ -124,9 +138,18 @@ void Simulation::tick()
     // Run all of our AI.
     aiSystem.processAITick();
 
-    // Call the project's post-movement logic.
+    // Process any waiting item interaction messages.
+    itemSystem.processItemInteractions();
+
+    // Process and send item definition updates.
+    itemSystem.processItemUpdates();
+
+    // Process inventory updates.
+    inventorySystem.processInventoryUpdates();
+
+    // Call the project's post-sim-update logic.
     if (extension != nullptr) {
-        extension->afterMovement();
+        extension->afterSimUpdate();
     }
 
     // Update each client entity's "entities in my AOI" list and send Init/
@@ -135,6 +158,9 @@ void Simulation::tick()
 
     // Send any updated entity movement state to nearby clients.
     movementSyncSystem.sendMovementUpdates();
+
+    // Send initial Inventory state.
+    inventorySystem.sendInventoryInits();
 
     // Send any remaining updated entity component state to nearby clients.
     componentSyncSystem.sendUpdates();
@@ -175,8 +201,8 @@ void Simulation::dispatchInteractionMessages()
     entt::registry& registry{world.registry};
 
     // Dispatch any waiting interaction requests.
-    InteractionRequest interactionRequest{};
-    while (interactionRequestQueue.pop(interactionRequest)) {
+    EntityInteractionRequest interactionRequest{};
+    while (entityInteractionRequestQueue.pop(interactionRequest)) {
         entt::entity clientEntity{interactionRequest.clientEntity};
         entt::entity targetEntity{interactionRequest.targetEntity};
 
@@ -205,9 +231,11 @@ void Simulation::dispatchInteractionMessages()
         }
 
         // Dispatch the interaction.
-        Uint8 interactionType{interactionRequest.interactionType};
-        if (interactionQueueMap[interactionType] != nullptr) {
-            interactionQueueMap[interactionType]->push(interactionRequest);
+        EntityInteractionType interactionType{
+            interactionRequest.interactionType};
+        if (entityInteractionQueueMap[interactionType] != nullptr) {
+            entityInteractionQueueMap[interactionType]->push(
+                interactionRequest);
         }
     }
 }

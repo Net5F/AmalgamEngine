@@ -144,9 +144,9 @@ void Simulation::tick()
         // Process NPC movement.
         npcMovementSystem->updateNpcs();
 
-        // Call the project's post-movement logic.
+        // Call the project's post-sim-update logic.
         if (extension != nullptr) {
-            extension->afterMovement();
+            extension->afterSimUpdate();
         }
 
         // Process component updates from the server.

@@ -1,15 +1,19 @@
 #pragma once
 
-#include "boost/mp11/list.hpp"
-
 // Use the project's ProjectComponentLists, if one is provided.
 #if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
 #include "Override/ProjectComponentLists.h"
 #else
+#include "boost/mp11/list.hpp"
+
 namespace AM
 {
 namespace ProjectComponentLists
 {
+/**
+ * Add component types to these lists to have them be automatically replicated 
+ * (sent to nearby clients) by the engine.
+ */
 
 /**
  * All of the project's component types that are relevant to the client.

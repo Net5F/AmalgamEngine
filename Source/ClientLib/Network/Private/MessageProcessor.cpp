@@ -11,11 +11,16 @@
 #include "ComponentUpdate.h"
 #include "MovementUpdate.h"
 #include "InitScriptResponse.h"
+#include "InventoryInit.h"
 #include "EntityDelete.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
+#include "InventoryAddItem.h"
+#include "InventoryDeleteItem.h"
+#include "InventoryMoveItem.h"
+#include "CombineItems.h"
 #include "PlayerMovementUpdate.h"
 #include "ReplicatedComponentTools.h"
 #include "Log.h"
@@ -63,6 +68,11 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                         networkEventDispatcher);
             break;
         }
+        case EngineMessageType::EntityDelete: {
+            dispatchMessage<EntityDelete>(messageBuffer, messageSize,
+                                          networkEventDispatcher);
+            break;
+        }
         case EngineMessageType::MovementUpdate: {
             handleMovementUpdate(messageBuffer, messageSize);
             break;
@@ -73,6 +83,11 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         }
         case EngineMessageType::InitScriptResponse: {
             dispatchMessage<InitScriptResponse>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::InventoryInit: {
+            dispatchMessage<InventoryInit>(messageBuffer, messageSize,
                                         networkEventDispatcher);
             break;
         }
@@ -96,8 +111,23 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                         networkEventDispatcher);
             break;
         }
-        case EngineMessageType::EntityDelete: {
-            dispatchMessage<EntityDelete>(messageBuffer, messageSize,
+        case EngineMessageType::InventoryAddItem: {
+            dispatchMessage<InventoryAddItem>(messageBuffer, messageSize,
+                                              networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::InventoryDeleteItem: {
+            dispatchMessage<InventoryDeleteItem>(messageBuffer, messageSize,
+                                                 networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::InventoryMoveItem: {
+            dispatchMessage<InventoryMoveItem>(messageBuffer, messageSize,
+                                               networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::CombineItems: {
+            dispatchMessage<CombineItems>(messageBuffer, messageSize,
                                           networkEventDispatcher);
             break;
         }

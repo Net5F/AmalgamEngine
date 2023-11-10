@@ -1,5 +1,8 @@
 target_sources(SharedLib
     PUBLIC
+        Public/EntityInteractionType.h
+        Public/ItemInteractionType.h
+        Public/ItemProperties.h
         Public/ProjectComponentLists.h
         Public/SharedConfig.h
 )

@@ -4,6 +4,7 @@ target_sources(ClientLib
 		Private/ChunkUpdateSystem.cpp
 		Private/ComponentUpdateSystem.cpp
 		Private/EntityLifetimeSystem.cpp
+		Private/ItemSystem.cpp
 		Private/NpcMovementSystem.cpp
 		Private/PlayerInputSystem.cpp
 		Private/PlayerMovementSystem.cpp
@@ -12,6 +13,7 @@ target_sources(ClientLib
 		Private/Simulation.cpp
 		Private/TileUpdateSystem.cpp
 		Private/World.cpp
+        Private/ItemData/ItemData.cpp
         Private/SpriteData/SpriteData.cpp
 		Private/TileMap/TileMap.cpp
 	PUBLIC
@@ -21,6 +23,7 @@ target_sources(ClientLib
 		Public/EntityLifetimeSystem.h
 		Public/EnttGroups.h
 		Public/ISimulationExtension.h
+		Public/ItemSystem.h
 		Public/NpcMovementSystem.h
 		Public/PlayerInputSystem.h
 		Public/PlayerMovementSystem.h
@@ -33,6 +36,7 @@ target_sources(ClientLib
 		Public/WorldObjectID.h
 		Public/Components/InputHistory.h
 		Public/Components/NeedsAdjacentChunks.h
+        Public/ItemData/ItemData.h
         Public/SpriteData/SpriteData.h
 		Public/TileMap/TileMap.h
 )
@@ -44,6 +48,7 @@ target_include_directories(ClientLib
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/SpriteData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
 )

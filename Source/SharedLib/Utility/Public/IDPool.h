@@ -8,14 +8,16 @@ namespace AM
 /**
  * Provides unique identifiers.
  *
- * TODO: Re-use of IDs is an issue (e.g. if client 0 disconnects and another
+ * Note: Re-use of IDs is an issue (e.g. if client 0 disconnects and another
  *       client connects and is given ID 0, there may be old messages in the
  *       queues that refer to ID 0 that will be incorrectly applied to the new
  *       client).
- *       The current soft solution is to reserve more IDs than we need, so
- *       that we don't immediately re-use the same ID. The real solution is to
- *       copy EnTT by making the top ~n bytes of our ID an "iteration", which
- *       gets incremented when the ID is freed.
+ *       The current solution is to reserve more IDs than we need and always 
+ *       march forward, so that we don't immediately re-use the same ID. 
+ *       An alternative solution is to make the top ~n bits of our ID a 
+ *       "version", which gets incremented when the ID is freed. This is 
+ *       effectively the same as having extra IDs, though. The only reason to 
+ *       switch would be if we didn't want a static, pre-allocated pool size.
  */
 class IDPool
 {
@@ -67,9 +69,7 @@ private:
     /** The number of currently reserved IDs. */
     std::size_t reservedIDCount;
 
-    /**
-     * If ID 'x' is available, IDs[x] will be true. Else, it will be false.
-     */
+    /** If ID 'x' is available, IDs[x] will be true. Else, it will be false. */
     std::vector<bool> IDs;
 };
 

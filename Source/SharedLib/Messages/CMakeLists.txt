@@ -3,6 +3,7 @@ target_sources(SharedLib
         Public/ChunkUpdate.h
         Public/ChunkUpdateRequest.h
         Public/ChunkWireSnapshot.h
+        Public/CombineItems.h
         Public/ComponentUpdate.h
         Public/ConnectionRequest.h
         Public/ConnectionResponse.h
@@ -11,12 +12,19 @@ target_sources(SharedLib
         Public/EntityDeleteRequest.h
         Public/EntityInit.h
         Public/EntityInitRequest.h
+        Public/EntityInteractionRequest.h
         Public/ExplicitConfirmation.h
         Public/Heartbeat.h
         Public/InitScriptRequest.h
         Public/InitScriptResponse.h
         Public/InputChangeRequest.h
-        Public/InteractionRequest.h
+        Public/InventoryAddItem.h
+        Public/InventoryDeleteItem.h
+        Public/InventoryInit.h
+        Public/InventoryMoveItem.h
+        Public/ItemChangeRequest.h
+        Public/ItemInteractionRequest.h
+        Public/ItemRequest.h
         Public/MovementState.h
         Public/MovementUpdate.h
         Public/SystemMessage.h
@@ -24,6 +32,7 @@ target_sources(SharedLib
         Public/TileClearLayers.h
         Public/TileExtentClearLayers.h
         Public/TileRemoveLayer.h
+        Public/UseItemOnEntityRequest.h
 )
 
 target_include_directories(SharedLib

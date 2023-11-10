@@ -7,7 +7,7 @@
 namespace AM
 {
 /**
- * Represents a particular entity's current input states.
+ * Represents an entity's current input states.
  *
  * In the server, when this component is updated, MovementSyncSystem auto-sends
  * movement state updates to all nearby clients.

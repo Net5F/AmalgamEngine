@@ -2,6 +2,8 @@
 
 #include "EngineMessageType.h"
 #include "NetworkDefs.h"
+#include "ItemInteractionType.h"
+#include "ItemID.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
 #include <SDL_stdinc.h>
@@ -9,17 +11,14 @@
 namespace AM
 {
 
-// Note: When we add item interactions, we may want to rename this to 
-//       EntityInteractionRequest and do a separate ItemInteractionRequest.
-
 /**
  * Used to request that an interaction be performed.
  */
-struct InteractionRequest {
+struct ItemInteractionRequest {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::InteractionRequest};
+        EngineMessageType::ItemInteractionRequest};
   
     //--------------------------------------------------------------------------
     // Networked data
@@ -29,16 +28,11 @@ struct InteractionRequest {
     //       interaction with. NPC state is in the past, and the client entity's 
     //       predicted state (e.g. position) wouldn't be useful to sync to.
 
-    /** The ID of the client entity performing the interaction. */
-    entt::entity clientEntity{entt::null};
+    /** The ID of the item that the interaction is being performed on. */
+    ItemID targetItemID{NULL_ITEM_ID};
 
-    /** The ID of the entity that the interaction is being performed on. */
-    entt::entity targetEntity{entt::null};
-
-    /** The type of interaction to perform.
-        Note: This should either be cast to EngineInteractionType or 
-              ProjectInteractionType, depending on its value. */
-    Uint8 interactionType{};
+    /** The type of interaction to perform. */
+    ItemInteractionType interactionType{};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -53,10 +47,9 @@ struct InteractionRequest {
 };
 
 template<typename S>
-void serialize(S& serializer, InteractionRequest& interactionRequest)
+void serialize(S& serializer, ItemInteractionRequest& interactionRequest)
 {
-    serializer.value4b(interactionRequest.clientEntity);
-    serializer.value4b(interactionRequest.targetEntity);
+    serializer.value2b(interactionRequest.targetItemID);
     serializer.value1b(interactionRequest.interactionType);
 }
 

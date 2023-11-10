@@ -50,6 +50,7 @@ void onComponentDestroyed(entt::registry& registry, entt::entity entity)
 
 World::World(SpriteData& inSpriteData, sol::state& inLua)
 : registry{}
+, itemData{}
 , tileMap{inSpriteData}
 , entityLocator{registry}
 , netIdMap{}

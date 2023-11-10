@@ -5,6 +5,9 @@ target_sources(SharedLib
         Private/EntityLocator.cpp
         Private/MovementHelpers.cpp
         Private/Components/Camera.cpp
+        Private/Components/Inventory.cpp
+        Private/ItemData/Item.cpp
+        Private/ItemData/ItemDataBase.cpp
         Private/SpriteData/SpriteDataBase.cpp
         Private/TileMap/ChunkExtent.cpp
         Private/TileMap/ChunkPosition.cpp
@@ -19,7 +22,8 @@ target_sources(SharedLib
         Public/DiscreteImpl.h
         Public/DiscretePosition.h
         Public/EngineComponentLists.h
-        Public/EngineInteractionType.h
+        Public/EngineEntityInteractionType.h
+        Public/EngineItemInteractionType.h
         Public/EntityLocator.h
         Public/MovementHelpers.h
         Public/Ray.h
@@ -32,13 +36,17 @@ target_sources(SharedLib
         Public/Components/InitScript.h
         Public/Components/Input.h
         Public/Components/Interaction.h
+        Public/Components/Inventory.h
         Public/Components/IsClientEntity.h
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
         Public/Components/Rotation.h
-        Public/Components/Sprite.h
-        Public/SpriteData/EmptySpriteID.h
+        Public/ItemData/Item.h
+        Public/ItemData/ItemDataBase.h
+        Public/ItemData/ItemID.h
+        Public/SpriteData/NullSpriteID.h
+        Public/SpriteData/Sprite.h
         Public/SpriteData/SpriteDataBase.h
         Public/SpriteData/SpriteSets.h
         Public/TileMap/CellExtent.h
@@ -65,6 +73,7 @@ target_include_directories(SharedLib
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+		${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/SpriteData
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
 )

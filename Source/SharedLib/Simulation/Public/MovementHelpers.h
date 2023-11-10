@@ -4,7 +4,6 @@
 #include "BoundingBox.h"
 #include "Tile.h"
 #include "TileExtent.h"
-#include "EmptySpriteID.h"
 #include "Log.h"
 #include "entt/fwd.hpp"
 #include <array>

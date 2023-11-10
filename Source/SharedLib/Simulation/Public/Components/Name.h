@@ -9,8 +9,7 @@ namespace AM
  */
 struct Name
 {
-    /** Used as a "we should never hit this" cap on the length of the name
-        string. Only checked in debug builds. */
+    /** The max length of a name. */
     static constexpr std::size_t MAX_LENGTH{50};
 
     std::string value{""};

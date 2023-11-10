@@ -48,7 +48,7 @@ private:
     /** Used to update Collision components when AnimationState is updated. */
     SpriteData& spriteData;
     /** If non-nullptr, contains the project's simulation extension functions.
-        Used for checking if component update requests are valid. */
+        Used for checking if component change requests are valid. */
     ISimulationExtension* extension;
 
     EventQueue<NameChangeRequest> nameChangeRequestQueue;

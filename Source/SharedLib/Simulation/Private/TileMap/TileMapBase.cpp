@@ -8,7 +8,6 @@
 #include "ByteTools.h"
 #include "TileMapSnapshot.h"
 #include "SharedConfig.h"
-#include "EmptySpriteID.h"
 #include "Timer.h"
 #include "Log.h"
 #include "AMAssert.h"

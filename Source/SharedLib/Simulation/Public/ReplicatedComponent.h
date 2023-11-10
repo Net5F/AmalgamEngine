@@ -5,7 +5,6 @@
 #include "boost/mp11/list.hpp"
 #include "boost/mp11/algorithm.hpp"
 #include <variant>
-#include "bitsery/bitsery.h"
 
 namespace AM
 {
@@ -28,12 +27,5 @@ static_assert(boost::mp11::mp_size<ReplicatedComponentTypes>::value
  */
 using ReplicatedComponent
     = boost::mp11::mp_rename<ReplicatedComponentTypes, std::variant>;
-
-template<typename S>
-void serialize(S& serializer, ReplicatedComponent& replicatedComponent)
-{
-    std::visit([&](auto& component) { serializer.object(component); },
-               replicatedComponent);
-}
 
 } // End namespace AM

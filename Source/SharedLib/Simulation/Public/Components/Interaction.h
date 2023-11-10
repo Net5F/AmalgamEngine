@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EngineInteractionType.h"
+#include "EntityInteractionType.h"
 #include "Log.h"
 #include <SDL_stdinc.h>
 #include <array>
@@ -22,18 +22,22 @@ struct Interaction {
         Elements are filled contiguously starting at index 0. Empty elements 
         will be at the end.
         The first interaction in this list is the default interaction.
-        Note: This defaults values to EngineInteractionType::NotSet. */
-    std::array<Uint8, MAX_INTERACTIONS> supportedInteractions{};
+        Note: This defaults values to EntityInteractionType::NotSet. */
+    std::array<EntityInteractionType, MAX_INTERACTIONS> supportedInteractions{};
 
     /**
      * Finds the first empty index in supportedInteractions and adds the given 
      * interaction.
      * If supportedInteractions is full, prints a warning and does nothing.
      */
-    void add(Uint8 newInteraction)
+    void add(EntityInteractionType newInteraction)
     {
-        for (Uint8& interaction : supportedInteractions) {
-            if (interaction == InteractionType::NotSet) {
+        for (EntityInteractionType& interaction : supportedInteractions) {
+            if (interaction == newInteraction) {
+                LOG_ERROR("Tried to add already-present interaction: %u",
+                          newInteraction);
+            }
+            else if (interaction == EntityInteractionType::NotSet) {
                 interaction = newInteraction;
                 return;
             }
@@ -45,9 +49,9 @@ struct Interaction {
     /**
      * Returns true if this component contains the given interaction.
      */
-    bool contains(Uint8 desiredInteraction) const
+    bool contains(EntityInteractionType desiredInteraction) const
     {
-        for (Uint8 interaction : supportedInteractions) {
+        for (EntityInteractionType interaction : supportedInteractions) {
             if (interaction == desiredInteraction) {
                 return true;
             }
@@ -61,7 +65,7 @@ struct Interaction {
      */
     bool isEmpty() const
     {
-        return (supportedInteractions[0] == InteractionType::NotSet);
+        return (supportedInteractions[0] == EntityInteractionType::NotSet);
     }
 };
 

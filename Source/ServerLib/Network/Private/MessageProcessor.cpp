@@ -12,12 +12,20 @@
 #include "NameChangeRequest.h"
 #include "AnimationStateChangeRequest.h"
 #include "InitScriptRequest.h"
-#include "InteractionRequest.h"
+#include "EntityInteractionRequest.h"
+#include "ItemRequest.h"
+#include "ItemChangeRequest.h"
+#include "ItemInteractionRequest.h"
+#include "UseItemOnEntityRequest.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
+#include "InventoryAddItem.h"
+#include "InventoryDeleteItem.h"
+#include "InventoryMoveItem.h"
 #include "EntityDelete.h"
+#include "CombineItems.h"
 #include "Log.h"
 #include <span>
 
@@ -98,34 +106,69 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
-        case EngineMessageType::InteractionRequest: {
-            dispatchWithNetID<InteractionRequest>(
+        case EngineMessageType::EntityInteractionRequest: {
+            dispatchWithNetID<EntityInteractionRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::ItemRequest: {
+            dispatchWithNetID<ItemRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::ItemChangeRequest: {
+            dispatchWithNetID<ItemChangeRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::ItemInteractionRequest: {
+            dispatchWithNetID<ItemInteractionRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::UseItemOnEntityRequest: {
+            dispatchWithNetID<UseItemOnEntityRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {
-            dispatchMessage<TileAddLayer>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+            dispatchWithNetID<TileAddLayer>(netID, {messageBuffer, messageSize},
+                                            networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileRemoveLayer: {
-            dispatchMessage<TileRemoveLayer>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+            dispatchWithNetID<TileRemoveLayer>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileClearLayers: {
-            dispatchMessage<TileClearLayers>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+            dispatchWithNetID<TileClearLayers>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileExtentClearLayers: {
-            dispatchMessage<TileExtentClearLayers>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+            dispatchWithNetID<TileExtentClearLayers>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
-        case EngineMessageType::EntityDelete: {
-            dispatchMessage<EntityDelete>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+        case EngineMessageType::InventoryAddItem: {
+            dispatchWithNetID<InventoryAddItem>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::InventoryDeleteItem: {
+            dispatchWithNetID<InventoryDeleteItem>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::InventoryMoveItem: {
+            dispatchWithNetID<InventoryMoveItem>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::CombineItems: {
+            dispatchWithNetID<CombineItems>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
         default: {

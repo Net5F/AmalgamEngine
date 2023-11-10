@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ItemData.h"
 #include "TileMap.h"
 #include "NetworkDefs.h"
 #include "EntityLocator.h"
@@ -33,6 +34,9 @@ class SpriteData;
  *   Entity data
  *     Maintained at runtime in an ECS registry.
  *     Eventually will be persisted in a database.
+ *   Item data
+ *     Stored as "item templates", modifiable at runtime.
+ *     Eventually will be persisted in a database.
  *
  * Also provides helpers for common uses of world state.
  */
@@ -46,6 +50,9 @@ public:
     //-------------------------------------------------------------------------
     /** Entity data registry. */
     entt::registry registry;
+
+    /** Item data templates. */
+    ItemData itemData;
 
     /** The tile map that makes up the world. */
     TileMap tileMap;
