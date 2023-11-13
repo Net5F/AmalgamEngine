@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EngineMessageType.h"
 #include "ItemID.h"
 #include "ItemInteractionType.h"
 #include "ItemProperties.h"
@@ -17,6 +18,10 @@ namespace AM
  * Holds the data for a single item.
  */
 struct Item {
+    // The EngineMessageType enum value that this message corresponds to.
+    // Declares this struct as a message that the Network can send and receive.
+    static constexpr EngineMessageType MESSAGE_TYPE{EngineMessageType::Item};
+
     /** The max length of a display name. Also the max for string IDs, since 
         they're derived from display name. */
     static constexpr std::size_t MAX_DISPLAY_NAME_LENGTH{50};
@@ -31,6 +36,8 @@ struct Item {
 
     /** The maximum number of combinations that an item can support. */
     static constexpr std::size_t MAX_COMBINATIONS{50};
+
+    // TODO: Icon ID 
 
     /** Unique display name, shown in the UI.  */
     std::string displayName{"Null"};
@@ -113,7 +120,7 @@ struct Item {
      * Else, returns nullptr.
      */
     template<typename T>
-    ItemProperty* getProperty() const
+    const ItemProperty* getProperty() const
     {
         // Note: We use a vector and iterate through it every time because 
         //       it reduces wire size (vs a map) and we expect each item to 

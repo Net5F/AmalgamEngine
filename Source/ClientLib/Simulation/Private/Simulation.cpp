@@ -9,6 +9,8 @@
 #include "PlayerInputSystem.h"
 #include "PlayerMovementSystem.h"
 #include "NpcMovementSystem.h"
+#include "ItemSystem.h"
+#include "InventorySystem.h"
 #include "ComponentUpdateSystem.h"
 #include "CameraSystem.h"
 #include "Config.h"
@@ -144,6 +146,12 @@ void Simulation::tick()
         // Process NPC movement.
         npcMovementSystem->updateNpcs();
 
+        // Process any waiting item definition updates.
+        itemSystem->processItemUpdates();
+
+        // Process any waiting inventory updates.
+        inventorySystem->processInventoryUpdates();
+
         // Call the project's post-sim-update logic.
         if (extension != nullptr) {
             extension->afterSimUpdate();
@@ -205,6 +213,8 @@ void Simulation::initializeSystems()
         = std::make_unique<PlayerMovementSystem>(*this, world, network);
     npcMovementSystem
         = std::make_unique<NpcMovementSystem>(*this, world, network);
+    itemSystem = std::make_unique<ItemSystem>(world, network);
+    inventorySystem = std::make_unique<InventorySystem>(world, network);
     componentUpdateSystem = std::make_unique<ComponentUpdateSystem>(
         *this, world, network, spriteData);
     cameraSystem = std::make_unique<CameraSystem>(world);

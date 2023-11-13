@@ -49,6 +49,7 @@ target_sources(ServerLib
 		Public/World.h
 		Public/Components/AIBehavior.h
 		Public/Components/ClientSimData.h
+		Public/Components/ItemHandlers.h
 		Public/Components/ReplicatedComponentList.h
 		Public/ItemData/ItemData.h
 		Public/SpriteData/SpriteData.h

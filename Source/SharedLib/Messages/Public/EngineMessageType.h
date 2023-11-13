@@ -25,9 +25,9 @@ enum class EngineMessageType : Uint8 {
     EntityDeleteRequest,
     InitScriptRequest,
     EntityInteractionRequest,
+    ItemInteractionRequest,
     ItemRequest,
     ItemChangeRequest,
-    ItemInteractionRequest,
     UseItemOnEntityRequest,
 
     // Server -> Client Messages

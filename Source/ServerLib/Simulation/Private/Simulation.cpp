@@ -34,7 +34,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , inputSystem{*this, world, network}
 , movementSystem{world}
 , aiSystem{world}
-, itemSystem{world, network}
+, itemSystem{*this, network}
 , inventorySystem{world, network}
 , clientAOISystem{*this, world, network}
 , movementSyncSystem{*this, world, network}
@@ -203,7 +203,13 @@ void Simulation::dispatchInteractionMessages()
     // Dispatch any waiting interaction requests.
     EntityInteractionRequest interactionRequest{};
     while (entityInteractionRequestQueue.pop(interactionRequest)) {
-        entt::entity clientEntity{interactionRequest.clientEntity};
+        // Find the client's entity ID.
+        auto it{world.netIdMap.find(interactionRequest.netID)};
+        if (it == world.netIdMap.end()) {
+            // Client doesn't exist (may have disconnected), do nothing.
+            continue;
+        }
+        entt::entity clientEntity{it->second};
         entt::entity targetEntity{interactionRequest.targetEntity};
 
         // Check that the client and target both exist.

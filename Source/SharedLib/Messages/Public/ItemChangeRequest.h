@@ -8,7 +8,8 @@ namespace AM
 {
 
 /**
- * Used to request an item definition be changed. 
+ * Used to request either a new item be created, or an existing item definiton 
+ * be updated.
  */
 struct ItemChangeRequest {
     // The MessageType enum value that this message corresponds to.
@@ -21,7 +22,8 @@ struct ItemChangeRequest {
     //--------------------------------------------------------------------------
     /** The new item definition.
         The numericID of this item determines which item should be updated. 
-        Note: The updated item's stringID will be derived from this item's 
+        If numericID == NULL_ITEM_ID, a new item will be created.
+        Note: The item's stringID will be derived from this item's 
               displayName, regardless of what this item's stringID is. */
     Item item{};
 

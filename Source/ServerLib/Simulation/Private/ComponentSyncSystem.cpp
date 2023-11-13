@@ -34,7 +34,7 @@ using ObservedComponentTypes
 
 /** A group and update observer for each observed component type. */
 std::array<entt::observer, boost::mp11::mp_size<ObservedComponentTypes>::value>
-    observers;
+    observers{};
 
 //-----------------------------------------------------------------------------
 // ComponentSyncSystem members

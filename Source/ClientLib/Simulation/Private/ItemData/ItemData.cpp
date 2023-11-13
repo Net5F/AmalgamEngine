@@ -6,10 +6,8 @@ namespace AM
 namespace Client
 {
 ItemData::ItemData()
-: ItemDataBase()
+: ItemDataBase(false)
 {
-    // Add the null item.
-    items.push_back(Item{"Null", "null", 0});
 }
 
 } // End namespace Client

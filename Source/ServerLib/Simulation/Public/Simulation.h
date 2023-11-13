@@ -6,7 +6,6 @@
 #include "EngineLuaBindings.h"
 #include "EntityInteractionRequest.h"
 #include "ItemInteractionRequest.h"
-#include "UseItemOnRequest.h"
 #include "ClientConnectionSystem.h"
 #include "NceLifetimeSystem.h"
 #include "ComponentChangeSystem.h"

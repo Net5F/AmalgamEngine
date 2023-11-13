@@ -5,6 +5,7 @@
 #include "InventoryMoveItem.h"
 #include "QueuedEvents.h"
 #include "entt/entity/observer.hpp"
+#include "entt/entity/registry.hpp"
 
 namespace AM
 {

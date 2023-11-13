@@ -22,7 +22,9 @@ struct InventoryAddItem {
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** The entity to add the item to. */
+    /** The entity to add the item to.
+        When sent by the server, this can be ignored and assumed to be the 
+        client entity (clients are only sent updates for their own inventory). */
     entt::entity entity{entt::null};
 
     /** The item to add. */
@@ -45,7 +47,7 @@ struct InventoryAddItem {
 
 template<typename S>
 void serialize(S& serializer, InventoryAddItem& inventoryAddItem) {
-    serializer.value4b(inventoryAddItem.entityToAddTo);
+    serializer.value4b(inventoryAddItem.entity);
     serializer.value2b(inventoryAddItem.itemID);
     serializer.value2b(inventoryAddItem.count);
 }

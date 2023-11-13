@@ -23,6 +23,8 @@ class EntityLifetimeSystem;
 class PlayerInputSystem;
 class PlayerMovementSystem;
 class NpcMovementSystem;
+class ItemSystem;
+class InventorySystem;
 class ComponentUpdateSystem;
 class CameraSystem;
 
@@ -130,6 +132,8 @@ private:
     std::unique_ptr<PlayerInputSystem> playerInputSystem;
     std::unique_ptr<PlayerMovementSystem> playerMovementSystem;
     std::unique_ptr<NpcMovementSystem> npcMovementSystem;
+    std::unique_ptr<ItemSystem> itemSystem;
+    std::unique_ptr<InventorySystem> inventorySystem;
     std::unique_ptr<ComponentUpdateSystem> componentUpdateSystem;
     std::unique_ptr<CameraSystem> cameraSystem;
 

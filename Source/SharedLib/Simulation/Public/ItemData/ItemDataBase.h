@@ -18,7 +18,8 @@ namespace AM
  * them in the world, you must copy one of these templates into something like 
  * an entity's Inventory.
  *
- * Also adds the "Null" item, for use as a default.
+ * Also adds the "Null" item. The null item can't be overwritten or edited, but
+ * it can be accessed through getItem() to get a default icon to use.
  *
  * Note: Once created, items can't be deleted. You can, however, repurpose an 
  *       ID by updating that item's definition.
@@ -35,22 +36,27 @@ public:
     ItemDataBase(bool inTrackItemUpdates);
 
     /**
-     * Creates a new item, giving it the next sequential numeric ID.
+     * Creates a new item with the given ID.
+     * If newItem.numericID == NULL_ITEM_ID, uses the next sequential ID.
      * 
-     * @return If an item with the given displayName exists, does nothing and 
-     *         returns nullptr. Else, returns the new item.
+     * Note: The new item's stringID will be derived from newItem's displayName,
+     *       regardless of what newItem's stringID is.
+     * 
+     * @return If an item with the given ID or displayName exists, does nothing 
+     *         and returns nullptr. Else, returns the new item.
      */
-    const Item* createItem(const std::string& displayName);
+    const Item* createItem(const Item& newItem);
 
     /**
      * Updates the item at newItem.numericID to match the given item, then 
      * increments its version number.
      *
-     * @return If no item with the given ID exists or newItem's displayName is 
-     *         already taken, returns nullptr. Else, returns the updated item.
-     *
      * Note: The updated item's stringID will be derived from newItem's 
      *       displayName, regardless of what newItem's stringID is.
+     *
+     * @return If no item with the given ID exists or newItem's displayName is 
+     *         changed but already taken, returns nullptr. Else, returns the 
+     *         updated item.
      */
     const Item* updateItem(const Item& newItem);
 
@@ -83,9 +89,9 @@ public:
     ItemVersion getItemVersion(ItemID numericID);
 
     /**
-     * Get a reference to the vector containing all the items.
+     * Get a reference to the map containing all the items.
      */
-    const std::vector<Item>& getAllItems() const;
+    const std::unordered_map<ItemID, Item>& getAllItems() const;
 
     /**
      * Returns a vector containing all items that have had their definitions 
@@ -105,15 +111,20 @@ protected:
      */
     std::string deriveStringID(const std::string& displayName);
 
+    // Note: We use unordered_map instead of vector for items/itemVersions 
+    //       so that we don't have to allocate/copy the whole vector when 
+    //       a new item is added.
     /** The loaded items, indexed by their numeric IDs. */
-    std::vector<Item> items;
-
-    /** Each item's version number, indexed by their numeric IDs. Each time an
-        item's definition is changed, its version gets incremented. */
-    std::vector<ItemVersion> itemVersions;
+    std::unordered_map<ItemID, Item> itemMap;
 
     /** A map for easily looking up items by their string ID. */
     std::unordered_map<std::string, Item*> itemStringMap;
+
+    /** Each item's version number, indexed by their numeric IDs. Each time an
+        item's definition is changed, its version gets incremented.
+        Note: We split this from the Item class because it's often used 
+              separately (e.g. sending ID + version for Inventory). */
+    std::unordered_map<ItemID, ItemVersion> itemVersionMap;
 
     /** If true, all item updates will be pushed into itemUpdateHistory. */
     bool trackItemUpdates;
@@ -122,6 +133,9 @@ protected:
         ItemSystem uses this history to send updates to clients, then
         clears it. */
     std::vector<ItemID> itemUpdateHistory;
+
+    /** Tracks the highest numeric item ID that we have in our maps. */
+    ItemID highestItemID{};
 };
 
 } // End namespace AM

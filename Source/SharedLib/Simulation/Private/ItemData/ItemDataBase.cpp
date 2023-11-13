@@ -7,61 +7,91 @@
 namespace AM
 {
 ItemDataBase::ItemDataBase(bool inTrackItemUpdates)
-: items{}
-, itemVersions{}
+: itemMap{}
 , itemStringMap{}
+, itemVersionMap{}
 , trackItemUpdates{inTrackItemUpdates}
 , itemUpdateHistory{}
+, highestItemID{0}
 {
     // Add the null item.
-    createItem("Null");
+    createItem(Item{"Null", "", NULL_ITEM_ID});
 }
 
-const Item* ItemDataBase::createItem(const std::string& displayName)
+const Item* ItemDataBase::createItem(const Item& item)
 {
-    // Derive the string ID and check that it's unique.
-    std::string stringID{deriveStringID(displayName)};
-    auto it{itemStringMap.find(stringID)};
-    if (it != itemStringMap.end()) {
-        // String ID already exists. Do nothing.
+    // If the numeric ID is taken, do nothing.
+    if ((item.numericID != NULL_ITEM_ID)
+        && itemMap.find(item.numericID) != itemMap.end()) {
         return nullptr;
     }
 
-    // Add the item to the end of each of our vectors.
-    ItemID numericID{static_cast<Uint16>(items.size())};
-    Item& newItem{items.emplace_back(displayName, stringID, numericID)};
-    itemVersions.emplace_back(0);
+    // Derive the string ID. If it's taken, do nothing.
+    std::string stringID{deriveStringID(item.displayName)};
+    if (itemStringMap.find(stringID) != itemStringMap.end()) {
+        return nullptr;
+    }
+
+    // If the new item doesn't have a desired ID, use the next sequential ID.
+    ItemID newItemID{item.numericID};
+    if (newItemID == NULL_ITEM_ID) {
+        newItemID = highestItemID + 1;
+    }
+
+    // Add the item to our maps.
+    // Note: When we insert into an unordered_map, references to the map's 
+    //       elements are guaranteed to remain valid.
+    itemMap[newItemID] = Item{item.displayName, stringID, newItemID};
+    itemVersionMap[newItemID] = 0;
+    Item& newItem{itemMap[newItemID]};
+    itemStringMap[stringID] = &newItem;
+
+    // Track our highest item ID.
+    if (newItemID > highestItemID) {
+        highestItemID = newItemID;
+    }
 
     return &newItem;
 }
 
 const Item* ItemDataBase::updateItem(const Item& newItem)
 {
-    if (newItem.numericID >= items.size()) {
-        LOG_ERROR("Tried to update invalid item. ID: %u", newItem.numericID);
+    // If the item doesn't exist, do nothing.
+    auto itemIt{itemMap.find(newItem.numericID)};
+    if (itemIt == itemMap.end()) {
         return nullptr;
     }
 
-    // Derive the string ID and check that it's unique.
+    // If the new derived string ID doesn't match the old one.
     std::string stringID{deriveStringID(newItem.displayName)};
-    auto it{itemStringMap.find(stringID)};
-    if (it != itemStringMap.end()) {
-        // String ID already exists. Do nothing.
-        return nullptr;
+    Item& item{itemIt->second};
+    if (stringID != item.stringID) {
+        // If the new ID is taken, do nothing.
+        auto stringIt{itemStringMap.find(stringID)};
+        if (stringIt != itemStringMap.end()) {
+            return nullptr;
+        }
+        else {
+            // New ID isn't taken. Add it to the string ID map.
+            itemStringMap[stringID] = &item;
+        }
     }
+
+    // TODO: Need to update the string ID in the map
 
     // Update the item.
-    Item& item{items[newItem.numericID]};
     item = newItem;
     item.stringID = stringID;
 
     // Increment the version.
-    itemVersions[newItem.numericID]++;
+    itemVersionMap[newItem.numericID]++;
 
     // If we're tracking item updates, add this one to the history.
     if (trackItemUpdates) {
         itemUpdateHistory.emplace_back(newItem.numericID);
     }
+
+    return &item;
 }
 
 const Item* ItemDataBase::getItem(const std::string& stringID) const
@@ -77,32 +107,35 @@ const Item* ItemDataBase::getItem(const std::string& stringID) const
 
 const Item* ItemDataBase::getItem(ItemID numericID) const
 {
-    if (numericID >= items.size()) {
-        LOG_ERROR("Tried to get invalid item. ID: %u", numericID);
+    // Attempt to find the given numeric ID.
+    auto it{itemMap.find(numericID)};
+    if (it == itemMap.end()) {
         return nullptr;
     }
 
-    return &(items[numericID]);
+    return &(it->second);
 }
 
 bool ItemDataBase::itemExists(ItemID numericID) const
 {
-    return (numericID < items.size());
+    return (itemMap.find(numericID) != itemMap.end());
 }
 
 ItemVersion ItemDataBase::getItemVersion(ItemID numericID)
 {
-    if (numericID >= itemVersions.size()) {
-        LOG_ERROR("Tried to get invalid item. ID: %u", numericID);
+    // Attempt to find the given numeric ID.
+    auto it{itemVersionMap.find(numericID)};
+    if (it == itemVersionMap.end()) {
+        LOG_ERROR("Tried to get invalid item's version. ID: %u", numericID);
         return 0;
     }
 
-    return itemVersions[numericID];
+    return it->second;
 }
 
-const std::vector<Item>& ItemDataBase::getAllItems() const
+const std::unordered_map<ItemID, Item>& ItemDataBase::getAllItems() const
 {
-    return items;
+    return itemMap;
 }
 
 const std::vector<ItemID>& ItemDataBase::getItemUpdateHistory()

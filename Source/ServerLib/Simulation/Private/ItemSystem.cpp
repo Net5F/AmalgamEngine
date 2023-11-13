@@ -5,6 +5,7 @@
 #include "ISimulationExtension.h"
 #include "ClientSimData.h"
 #include "Inventory.h"
+#include "ItemHandlers.h"
 #include "SystemMessage.h"
 #include "Log.h"
 
@@ -56,7 +57,10 @@ void ItemSystem::processItemInteractions()
 
 void ItemSystem::processItemUpdates()
 {
-    // Process any waiting requests to change item definitions.
+    ItemData& itemData{world.itemData};
+
+    // Process any waiting requests to create or change items.
+    // TODO: If request fails, send a response
     ItemChangeRequest itemChangeRequest{};
     while (itemChangeRequestQueue.pop(itemChangeRequest)) {
         // If the project says the request isn't valid, skip it.
@@ -65,12 +69,18 @@ void ItemSystem::processItemUpdates()
             continue;
         }
 
-        world.itemData.updateItem(itemChangeRequest.item);
+        // If the item exists, update it. Else, create it.
+        if (itemData.itemExists(itemChangeRequest.item.numericID)) {
+            itemData.updateItem(itemChangeRequest.item);
+        }
+        else {
+            itemData.createItem(itemChangeRequest.item);
+        }
     }
 
     // If any items definitions were changed, send the new definitions to all 
     // players that own that item.
-    const auto& updatedItems{world.itemData.getItemUpdateHistory()};
+    const auto& updatedItems{itemData.getItemUpdateHistory()};
     if (updatedItems.size() > 0) {
         // If any player's inventory contains an updated item, send the new 
         // definition.
@@ -81,18 +91,18 @@ void ItemSystem::processItemUpdates()
                                   itemSlot.ID)};
                 if (it != updatedItems.end()) {
                     network.serializeAndSend(
-                        client.netID, *(world.itemData.getItem(itemSlot.ID)));
+                        client.netID, *(itemData.getItem(itemSlot.ID)));
                 }
             }
         }
 
-        world.itemData.clearItemUpdateHistory();
+        itemData.clearItemUpdateHistory();
     }
 
     // Send item definitions to any requestors.
     ItemRequest itemRequest{};
     while (itemRequestQueue.pop(itemRequest)) {
-        if (const Item* item{world.itemData.getItem(itemRequest.itemID)}) {
+        if (const Item* item{itemData.getItem(itemRequest.itemID)}) {
             network.serializeAndSend(itemRequest.netID, *item);
         }
     }
@@ -124,7 +134,7 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
 
         // If the combination is successful, tell the client.
         // Note: All clients have inventories so we don't need to check for it.
-        auto& inventory{world.registry.get<Inventory>(it->second)};
+        auto& inventory{world.registry.get<Inventory>(clientEntity)};
         if (inventory.combineItems(sourceSlotIndex, targetSlotIndex,
                                    world.itemData)) {
             network.serializeAndSend(clientID, CombineItems{});
@@ -135,6 +145,33 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
 void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
                                  entt::entity targetEntity, NetworkID clientID)
 {
+    // Find the client's entity ID.
+    auto it{world.netIdMap.find(clientID)};
+    if (it != world.netIdMap.end()) {
+        entt::entity clientEntity{it->second};
+
+        // If the slot is invalid or empty, do nothing.
+        // Note: All clients have inventories so we don't need to check for it.
+        Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
+        if (!(inventory.slotIndexIsValid(sourceSlotIndex))
+            || (inventory.items[sourceSlotIndex].count == 0)) {
+            return;
+        }
+
+        // Get the item ID in the given slot.
+        ItemID sourceItemID{inventory.items[sourceSlotIndex].ID};
+
+        // If the target entity has a handler for the item, run it.
+        if (const ItemHandlers* itemHandlers{
+                world.registry.try_get<ItemHandlers>(targetEntity)}) {
+            for (const ItemHandlers::HandlerPair& handlerPair :
+                 itemHandlers->handlerPairs) {
+                if (handlerPair.itemToHandleID == sourceItemID) {
+                    handlerPair.handler();
+                }
+            }
+        }
+    }
 }
 
 } // namespace Server

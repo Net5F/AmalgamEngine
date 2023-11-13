@@ -12,6 +12,7 @@
 #include "MovementUpdate.h"
 #include "InitScriptResponse.h"
 #include "InventoryInit.h"
+#include "Item.h"
 #include "EntityDelete.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
@@ -89,6 +90,11 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         case EngineMessageType::InventoryInit: {
             dispatchMessage<InventoryInit>(messageBuffer, messageSize,
                                         networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::Item: {
+            dispatchMessage<Item>(messageBuffer, messageSize,
+                                  networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {

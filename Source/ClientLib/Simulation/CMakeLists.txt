@@ -4,6 +4,7 @@ target_sources(ClientLib
 		Private/ChunkUpdateSystem.cpp
 		Private/ComponentUpdateSystem.cpp
 		Private/EntityLifetimeSystem.cpp
+		Private/InventorySystem.cpp
 		Private/ItemSystem.cpp
 		Private/NpcMovementSystem.cpp
 		Private/PlayerInputSystem.cpp
@@ -22,6 +23,7 @@ target_sources(ClientLib
 		Public/ComponentUpdateSystem.h
 		Public/EntityLifetimeSystem.h
 		Public/EnttGroups.h
+		Public/InventorySystem.h
 		Public/ISimulationExtension.h
 		Public/ItemSystem.h
 		Public/NpcMovementSystem.h

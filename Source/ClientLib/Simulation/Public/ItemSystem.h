@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Item.h"
 #include "QueuedEvents.h"
 
 namespace AM
@@ -10,7 +11,7 @@ class World;
 class Network;
 
 /**
- * Processes inventory updates and requests needed item definitions.
+ * Processes item definition updates.
  */
 class ItemSystem
 {
@@ -23,10 +24,12 @@ public:
     void processItemUpdates();
 
 private:
-    /** Used for accessing item and inventory data. */
+    /** Used for accessing item data. */
     World& world;
-    /** Used for sending requests and receiving item and inventory data. */
+    /** Used for sending requests and receiving item data. */
     Network& network;
+
+    EventQueue<Item> itemQueue;
 };
 
 } // namespace Client

@@ -6,6 +6,7 @@ namespace AM
 
 bool Inventory::addItem(ItemID itemID, Uint16 count)
 {
+    // Try to find an empty slot.
     bool emptySlotFound{false};
     for (ItemSlot& item : items) {
         if (item.ID == NULL_ITEM_ID) {
@@ -15,6 +16,7 @@ bool Inventory::addItem(ItemID itemID, Uint16 count)
         }
     }
 
+    // If an empty slot was found, add the item.
     if (!emptySlotFound && (items.size() < MAX_ITEMS)) {
         items.emplace_back(itemID, count);
         return true;
@@ -67,7 +69,7 @@ bool Inventory::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
         return false;
     }
 
-    // Get the items.
+    // Get the items in the given slots.
     // Note: We don't need to check if they exist since we do so before adding 
     //       them to the inventory.
     ItemID sourceItemID{items[sourceSlotIndex].ID};
@@ -75,7 +77,6 @@ bool Inventory::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
     const Item* sourceItem{itemData.getItem(sourceItemID)};
     const Item* targetItem{itemData.getItem(targetItemID)};
 
-    // TODO: can we quickly think of any cleaner way to do this?
     // If either item has this combination listed, find the resulting item.
     ItemID resultItemID{NULL_ITEM_ID};
     for (const Item::ItemCombination& combination :

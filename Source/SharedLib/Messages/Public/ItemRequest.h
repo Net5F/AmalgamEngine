@@ -8,7 +8,7 @@ namespace AM
 {
 
 /**
- * Used to request an item's latest definition from the server.
+ * Used to request an item's definition data from the server.
  */
 struct ItemRequest {
     // The MessageType enum value that this message corresponds to.

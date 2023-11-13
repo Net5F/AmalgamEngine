@@ -3,6 +3,7 @@
 #include "Network.h"
 #include "SpriteData.h"
 #include "Name.h"
+#include "Inventory.h"
 #include "PreviousPosition.h"
 #include "Position.h"
 #include "Collision.h"
@@ -133,6 +134,7 @@ void ServerConnectionSystem::initMockSimState()
     registry.emplace<IsClientEntity>(newEntity);
     registry.emplace<Name>(newEntity,
                            std::to_string(static_cast<Uint32>(newEntity)));
+    registry.emplace<Inventory>(newEntity);
 
     registry.emplace<Input>(newEntity);
     registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f);

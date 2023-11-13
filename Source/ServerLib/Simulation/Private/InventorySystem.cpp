@@ -17,6 +17,7 @@ InventorySystem::InventorySystem(World& inWorld, Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
 , extension{nullptr}
+, playerInventoryObserver{}
 , inventoryAddItemQueue{inNetwork.getEventDispatcher()}
 , inventoryDeleteItemQueue{inNetwork.getEventDispatcher()}
 , inventoryMoveItemQueue{inNetwork.getEventDispatcher()}
@@ -36,13 +37,17 @@ void InventorySystem::sendInventoryInits()
 
         InventoryInit inventoryInit{};
         for (const Inventory::ItemSlot& itemSlot : inventory.items) {
-            Uint16 version{world.itemData.getItemVersion(itemSlot.ID)};
+            ItemVersion version{world.itemData.getItemVersion(itemSlot.ID)};
             inventoryInit.items.emplace_back(itemSlot.ID, itemSlot.count,
                                              version);
         }
 
-        network.serializeAndSend(client.netID, inventoryInit);
+        if (inventoryInit.items.size() > 0) {
+            network.serializeAndSend(client.netID, inventoryInit);
+        }
     }
+
+    playerInventoryObserver.clear();
 }
 
 void InventorySystem::processInventoryUpdates()
@@ -83,9 +88,11 @@ void InventorySystem::addItem(const InventoryAddItem& inventoryAddItem)
     }
 
     // Try to add the item.
+    // Note: We need to check for Inventory since entityToAddTo may not be a 
+    //       client entity.
     bool itemExists{world.itemData.itemExists(inventoryAddItem.itemID)};
     auto* inventory{world.registry.try_get<Inventory>(entityToAddTo)};
-    if (itemExists
+    if (itemExists && inventory 
         && inventory->addItem(inventoryAddItem.itemID,
                               inventoryAddItem.count)) {
         // Success. If this is a client entity, tell it about the new item.
@@ -114,10 +121,10 @@ void InventorySystem::deleteItem(const InventoryDeleteItem& inventoryDeleteItem)
         entt::entity clientEntity{it->second};
 
         // If the deletion is successful, tell the client.
-        auto* inventory{world.registry.try_get<Inventory>(clientEntity)};
-        if (inventory
-            && inventory->deleteItem(inventoryDeleteItem.slotIndex,
-                                     inventoryDeleteItem.count)) {
+        // Note: All clients have inventories so we don't need to check for it.
+        Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
+        if (inventory.deleteItem(inventoryDeleteItem.slotIndex,
+                                 inventoryDeleteItem.count)) {
             network.serializeAndSend(inventoryDeleteItem.netID,
                                      inventoryDeleteItem);
         }
@@ -136,10 +143,10 @@ void InventorySystem::moveItem(const InventoryMoveItem& inventoryMoveItem)
         entt::entity clientEntity{it->second};
 
         // If the move is successful, tell the client.
-        auto* inventory{world.registry.try_get<Inventory>(clientEntity)};
-        if (inventory
-            && inventory->moveItem(inventoryMoveItem.sourceSlotIndex,
-                                   inventoryMoveItem.destSlotIndex)) {
+        // Note: All clients have inventories so we don't need to check for it.
+        Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
+        if (inventory.moveItem(inventoryMoveItem.sourceSlotIndex,
+                               inventoryMoveItem.destSlotIndex)) {
             network.serializeAndSend(inventoryMoveItem.netID,
                                      inventoryMoveItem);
         }

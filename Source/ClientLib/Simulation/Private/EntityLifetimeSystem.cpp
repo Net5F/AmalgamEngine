@@ -8,6 +8,7 @@
 #include "Collision.h"
 #include "UserConfig.h"
 #include "Camera.h"
+#include "Inventory.h"
 #include "InputHistory.h"
 #include "NeedsAdjacentChunks.h"
 #include "SDLHelpers.h"
@@ -111,7 +112,7 @@ void EntityLifetimeSystem::processEntityInits(Uint32 desiredTick)
         }
 
         // Process the message.
-        for (const auto& entityData : entityInit.entityData) {
+        for (const EntityInit::EntityData& entityData : entityInit.entityData) {
             processEntityData(entityInit.tickNum, entityData);
         }
 
@@ -136,7 +137,7 @@ void EntityLifetimeSystem::processEntityData(
     registry.emplace<Position>(newEntity, entityData.position);
 
     // Add any replicated components that the server sent.
-    for (const auto& componentVariant : entityData.components) {
+    for (const ReplicatedComponent& componentVariant : entityData.components) {
         std::visit([&](const auto& component) {
             using T = std::decay_t<decltype(component)>;
             registry.emplace<T>(newEntity, component);
@@ -197,6 +198,7 @@ void EntityLifetimeSystem::finishPlayerEntity()
         playerEntity, Camera::CenterOnEntity, Position{}, PreviousPosition{},
         SDLHelpers::rectToFRect(userConfig.getWindowSize()));
 
+    registry.emplace<Inventory>(playerEntity);
     registry.emplace<InputHistory>(playerEntity);
 
     // Flag that we need to request all map data.

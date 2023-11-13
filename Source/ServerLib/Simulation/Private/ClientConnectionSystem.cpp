@@ -11,11 +11,12 @@
 #include "Rotation.h"
 #include "Position.h"
 #include "PreviousPosition.h"
+#include "Name.h"
+#include "Inventory.h"
 #include "ClientSimData.h"
 #include "IsClientEntity.h"
 #include "AnimationState.h"
 #include "Collision.h"
-#include "Name.h"
 #include "EntityDelete.h"
 #include "Transforms.h"
 #include "Log.h"
@@ -66,6 +67,11 @@ void ClientConnectionSystem::processConnectEvents()
         registry.emplace<IsClientEntity>(newEntity);
         registry.emplace<Name>(newEntity,
                                std::to_string(static_cast<Uint32>(newEntity)));
+        registry.emplace<Inventory>(newEntity);
+        // TEMP
+        ItemID test1ID{world.itemData.getItem("test1")->numericID};
+        world.registry.get<Inventory>(newEntity).addItem(test1ID, 1);
+        // TEMP
 
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
                                         std::vector<entt::entity>());
