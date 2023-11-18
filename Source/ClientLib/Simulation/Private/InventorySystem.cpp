@@ -46,48 +46,55 @@ void InventorySystem::processInventoryUpdates()
 
 void InventorySystem::initInventory(const InventoryInit& inventoryInit)
 {
-    // Note: All clients have inventories so we don't need to check for it.
-    Inventory& inventory{world.registry.get<Inventory>(world.playerEntity)};
-    AM_ASSERT(inventory.items.size() == 0,
-              "Inventory should be empty when we receive init.");
+    // Initialize the players inventory with the given items.
+    world.registry.patch<Inventory>(
+        world.playerEntity, [&](Inventory& inventory) {
+            AM_ASSERT(inventory.items.size() == 0,
+                      "Inventory should be empty when we receive init.");
 
-    // Add all the given items to the player's inventory.
-    for (const InventoryInit::ItemSlot& itemSlot : inventoryInit.items) {
-        inventory.items.emplace_back(itemSlot.ID, itemSlot.count);
+            // Add all the given items to the player's inventory.
+            for (const InventoryInit::ItemSlot& itemSlot :
+                 inventoryInit.items) {
+                inventory.items.emplace_back(itemSlot.ID, itemSlot.count);
 
-        // If we don't have the latest definition for an item, request it.
-        if (!(world.itemData.itemExists(itemSlot.ID))
-            || (world.itemData.getItemVersion(itemSlot.ID)
-                < itemSlot.version)) {
-            network.serializeAndSend(ItemRequest{itemSlot.ID});
-        }
-    }
+                // If we don't have the latest definition for an item, request
+                // it.
+                if (!(world.itemData.itemExists(itemSlot.ID))
+                    || (world.itemData.getItemVersion(itemSlot.ID)
+                        < itemSlot.version)) {
+                    network.serializeAndSend(ItemRequest{itemSlot.ID});
+                }
+            }
+        });
 }
 
 void InventorySystem::addItem(const InventoryAddItem& inventoryAddItem)
 {
     // Try to add the item.
-    // Note: All clients have inventories so we don't need to check for it.
-    Inventory& inventory{world.registry.get<Inventory>(world.playerEntity)};
-    inventory.addItem(inventoryAddItem.itemID, inventoryAddItem.count);
+    world.registry.patch<Inventory>(
+        world.playerEntity, [&](Inventory& inventory) {
+            inventory.addItem(inventoryAddItem.itemID, inventoryAddItem.count);
+        });
 }
 
 void InventorySystem::deleteItem(const InventoryDeleteItem& inventoryDeleteItem)
 {
     // Try to delete the item.
-    // Note: All clients have inventories so we don't need to check for it.
-    Inventory& inventory{world.registry.get<Inventory>(world.playerEntity)};
-    inventory.deleteItem(inventoryDeleteItem.slotIndex,
-                         inventoryDeleteItem.count);
+    world.registry.patch<Inventory>(
+        world.playerEntity, [&](Inventory& inventory) {
+            inventory.deleteItem(inventoryDeleteItem.slotIndex,
+                                 inventoryDeleteItem.count);
+        });
 }
 
 void InventorySystem::moveItem(const InventoryMoveItem& inventoryMoveItem)
 {
     // Try to move the item(s).
-    // Note: All clients have inventories so we don't need to check for it.
-    Inventory& inventory{world.registry.get<Inventory>(world.playerEntity)};
-    inventory.moveItem(inventoryMoveItem.sourceSlotIndex,
-                       inventoryMoveItem.destSlotIndex);
+    world.registry.patch<Inventory>(
+        world.playerEntity, [&](Inventory& inventory) {
+            inventory.moveItem(inventoryMoveItem.sourceSlotIndex,
+                               inventoryMoveItem.destSlotIndex);
+        });
 }
 
 } // namespace Client

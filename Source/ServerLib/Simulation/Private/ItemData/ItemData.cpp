@@ -10,7 +10,9 @@ ItemData::ItemData()
 {
     // TODO: Load these from the database.
     // TEMP: Add some placeholder items.
-    createItem(Item{"Test1", "", NULL_ITEM_ID});
+    Item testItem{"Test1"};
+    testItem.addProperty(Description{"A test item."});
+    createItem(testItem);
 }
 
 } // End namespace Server

@@ -67,6 +67,29 @@ struct Interaction {
     {
         return (supportedInteractions[0] == EntityInteractionType::NotSet);
     }
+
+    /**
+     * Returns this component's default interaction.
+     */
+    EntityInteractionType getDefault() const
+    {
+        return supportedInteractions[0];
+    }
+
+    /**
+     * Returns the number of interactions that this component supports.
+     */
+    std::size_t getCount() const
+    {
+        std::size_t interactionCount{0};
+        for (EntityInteractionType interactionType : supportedInteractions) {
+            if (interactionType != EntityInteractionType::NotSet) {
+                interactionCount++;
+            }
+        }
+
+        return interactionCount;
+    }
 };
 
 template<typename S>

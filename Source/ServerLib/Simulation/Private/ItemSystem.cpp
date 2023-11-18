@@ -35,7 +35,7 @@ void ItemSystem::processItemInteractions()
     while (!(examineInteractionQueue.empty())) {
         const ItemInteractionRequest examineRequest{
             examineInteractionQueue.front()};
-        examineItem(examineRequest.targetItemID, examineRequest.netID);
+        examineItem(examineRequest.slotIndex, examineRequest.netID);
 
         examineInteractionQueue.pop();
     }
@@ -113,10 +113,21 @@ void ItemSystem::setExtension(ISimulationExtension* inExtension)
     extension = inExtension;
 }
 
-void ItemSystem::examineItem(ItemID targetItemID, NetworkID clientID)
+void ItemSystem::examineItem(Uint8 targetSlotIndex, NetworkID clientID)
 {
-    // If the given item has a description, send it.
-    if (const Item* item{world.itemData.getItem(targetItemID)}) {
+    // Find the client's entity ID.
+    auto it{world.netIdMap.find(clientID)};
+    if (it != world.netIdMap.end()) {
+        entt::entity clientEntity{it->second};
+
+        // If the given slot doesn't contain an item, do nothing.
+        auto& inventory{world.registry.get<Inventory>(clientEntity)};
+        const Item* item{inventory.getItem(targetSlotIndex, world.itemData)};
+        if (!item) {
+            return;
+        }
+
+        // If the item in the given slot has a description, send it.
         if (const ItemProperty* property{item->getProperty<Description>()}) {
             const Description& description{std::get<Description>(*property)};
             network.serializeAndSend(clientID, SystemMessage{description.text});
@@ -133,7 +144,6 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
         entt::entity clientEntity{it->second};
 
         // If the combination is successful, tell the client.
-        // Note: All clients have inventories so we don't need to check for it.
         auto& inventory{world.registry.get<Inventory>(clientEntity)};
         if (inventory.combineItems(sourceSlotIndex, targetSlotIndex,
                                    world.itemData)) {
@@ -151,15 +161,11 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
         entt::entity clientEntity{it->second};
 
         // If the slot is invalid or empty, do nothing.
-        // Note: All clients have inventories so we don't need to check for it.
         Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
-        if (!(inventory.slotIndexIsValid(sourceSlotIndex))
-            || (inventory.items[sourceSlotIndex].count == 0)) {
+        ItemID sourceItemID{inventory.items[sourceSlotIndex].ID};
+        if (!sourceItemID) {
             return;
         }
-
-        // Get the item ID in the given slot.
-        ItemID sourceItemID{inventory.items[sourceSlotIndex].ID};
 
         // If the target entity has a handler for the item, run it.
         if (const ItemHandlers* itemHandlers{

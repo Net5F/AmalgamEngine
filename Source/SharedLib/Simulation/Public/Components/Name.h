@@ -6,6 +6,8 @@ namespace AM
 {
 /**
  * Represents an entity's name.
+ *
+ * All entities have a name.
  */
 struct Name
 {

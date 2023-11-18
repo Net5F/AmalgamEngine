@@ -11,6 +11,7 @@
 namespace AM
 {
 class EventDispatcher;
+struct Item;
 
 namespace Client
 {
@@ -90,6 +91,21 @@ public:
      */
     void setExtension(std::unique_ptr<ISimulationExtension> inExtension);
 
+    //-------------------------------------------------------------------------
+    // System Signals
+    //-------------------------------------------------------------------------
+    /** We've established a connection with the server and the simulation has
+        started running. */
+    entt::sink<entt::sigh<void()>>& getSimulationStartedSink();
+
+    /** Our connection to the server has encountered an error and the
+        simulation has stopped running. */
+    entt::sink<entt::sigh<void(ConnectionError)>>
+        getServerConnectionErrorSink();
+
+    /** An item's definition has been updated. */
+    entt::sink<entt::sigh<void(const Item&)>>& getItemUpdatedSink();
+
 private:
     /**
      * Initializes or re-initializes our simulation systems.
@@ -136,18 +152,6 @@ private:
     std::unique_ptr<InventorySystem> inventorySystem;
     std::unique_ptr<ComponentUpdateSystem> componentUpdateSystem;
     std::unique_ptr<CameraSystem> cameraSystem;
-
-public:
-    //-------------------------------------------------------------------------
-    // Signal Sinks
-    //-------------------------------------------------------------------------
-    /** We've established a connection with the server and the simulation has
-        started running. */
-    entt::sink<entt::sigh<void()>> simulationStarted;
-
-    /** Our connection to the server has encountered an error and the 
-        simulation has stopped running. */
-    entt::sink<entt::sigh<void(ConnectionError)>> serverConnectionError;
 };
 
 } // namespace Client

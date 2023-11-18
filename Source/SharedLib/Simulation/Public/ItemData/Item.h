@@ -26,10 +26,18 @@ struct Item {
         they're derived from display name. */
     static constexpr std::size_t MAX_DISPLAY_NAME_LENGTH{50};
 
-    /** The maximum number of interactions that an item can support.
-        Note: This is in addition to the Use, Destroy, and Examine interactions
-              that all items support. */
-    static constexpr std::size_t MAX_INTERACTIONS{4};
+    /** The maximum number of non-built-in interactions that an item can 
+        support. */
+    static constexpr std::size_t MAX_CUSTOM_INTERACTIONS{4};
+
+    /** The number of built-in interactions that every item supports: UseOn, 
+        Destroy, and Examine. */
+    static constexpr std::size_t BUILTIN_INTERACTION_COUNT{3};
+
+    /** The total number of interactions that an item can support, including 
+        the built-ins. */
+    static constexpr std::size_t MAX_INTERACTIONS{MAX_CUSTOM_INTERACTIONS
+                                                  + BUILTIN_INTERACTION_COUNT};
 
     /** The maximum number of interactions that an item can support. */
     static constexpr std::size_t MAX_PROPERTIES{50};
@@ -56,7 +64,8 @@ struct Item {
         will be at the end.
         The first interaction in this list is the default interaction.
         Note: This defaults values to ItemInteractionType::NotSet. */
-    std::array<ItemInteractionType, MAX_INTERACTIONS> supportedInteractions{};
+    std::array<ItemInteractionType, MAX_CUSTOM_INTERACTIONS>
+        supportedInteractions{};
 
     /** The properties that are attached to this item.
         Properties hold data that gets used when handling interactions. */
@@ -78,14 +87,30 @@ struct Item {
     /**
      * Finds the first empty index in supportedInteractions and adds the given 
      * interaction.
-     * If supportedInteractions is full, prints a warning and does nothing.
+     * If supportedInteractions is full or the interaction is already present, 
+     * prints a warning and does nothing.
      */
     void addInteraction(ItemInteractionType newInteraction);
 
     /**
-     * Returns true if this item supports the given interaction.
+     * Returns the list of interactions that this item supports, in the order 
+     * that they should appear in the UI.
+     * The list will start with any interactions from supportedInteractions, 
+     * followed by UseOn, Destroy, and Examine. Any empty slots will be at the 
+     * end and equal to NotSet.
      */
-    bool containsInteraction(ItemInteractionType desiredInteraction) const;
+    std::array<ItemInteractionType, MAX_INTERACTIONS>
+        getInteractionList() const;
+
+    /**
+     * Returns this item's default interaction.
+     */
+    ItemInteractionType getDefaultInteraction() const;
+
+    /**
+     * Returns the number of interactions that this item supports.
+     */
+    std::size_t getInteractionCount() const;
 
     /**
      * Adds the given property to this item.

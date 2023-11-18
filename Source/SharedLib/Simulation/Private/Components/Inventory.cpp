@@ -39,6 +39,29 @@ bool Inventory::deleteItem(Uint8 slotIndex, Uint16 count)
     return true;
 }
 
+ItemID Inventory::getItemID(Uint8 slotIndex) const
+{
+    // If the slot index is invalid or empty, return false.
+    if (!slotIndexIsValid(slotIndex)
+        || (items[slotIndex].count == 0)) {
+        return NULL_ITEM_ID;
+    }
+
+    return items[slotIndex].ID;
+}
+
+const Item* Inventory::getItem(Uint8 slotIndex,
+                               const ItemDataBase& itemData) const
+{
+    // If the slot index is invalid or empty, return nullptr.
+    if (ItemID itemID{getItemID(slotIndex)}) {
+        return itemData.getItem(itemID);
+    }
+    else {
+        return nullptr;
+    }
+}
+
 bool Inventory::moveItem(Uint8 sourceSlotIndex, Uint8 destSlotIndex)
 {
     // If either slot is invalid, return false.
@@ -109,7 +132,7 @@ bool Inventory::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
     return true;
 }
 
-bool Inventory::slotIndexIsValid(Uint8 slotIndex)
+bool Inventory::slotIndexIsValid(Uint8 slotIndex) const
 { 
     return (slotIndex < MAX_ITEMS) && (slotIndex < items.size());
 }

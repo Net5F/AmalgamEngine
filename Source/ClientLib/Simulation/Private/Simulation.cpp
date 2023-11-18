@@ -13,6 +13,7 @@
 #include "InventorySystem.h"
 #include "ComponentUpdateSystem.h"
 #include "CameraSystem.h"
+#include "Item.h"
 #include "Config.h"
 #include "Log.h"
 #include "entt/entity/registry.hpp"
@@ -32,8 +33,6 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 , extension{nullptr}
 , serverConnectionSystem{world, inUiEventDispatcher, network, inSpriteData,
                          currentTick}
-, simulationStarted{serverConnectionSystem.simulationStartedSig}
-, serverConnectionError{serverConnectionSystem.serverConnectionErrorSig}
 {
     // Initialize our entt groups.
     EnttGroups::init(world.registry);
@@ -198,6 +197,26 @@ void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
     if (extension != nullptr) {
         extension->initializeSystems();
     }
+}
+
+entt::sink<entt::sigh<void()>>&
+    Simulation::getSimulationStartedSink()
+{
+    return serverConnectionSystem.simulationStarted;
+}
+
+entt::sink<entt::sigh<void(ConnectionError)>>
+    Simulation::getServerConnectionErrorSink()
+{
+    return serverConnectionSystem.serverConnectionError;
+}
+
+entt::sink<entt::sigh<void(const Item&)>>& Simulation::getItemUpdatedSink()
+{
+    if (!itemSystem) {
+        LOG_FATAL("Tried to call uninitialized system.");
+    }
+    return itemSystem->itemUpdated;
 }
 
 void Simulation::initializeSystems()

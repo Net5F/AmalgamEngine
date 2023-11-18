@@ -18,6 +18,8 @@ using ItemID = Uint16;
  * not present.
  *
  * Placed in a separate file to avoid unnecessarily including heavy headers.
+ *
+ * Note: Since the null ID is 0, you can do null checks like "if (itemID)".
  */
 static constexpr ItemID NULL_ITEM_ID{0};
 

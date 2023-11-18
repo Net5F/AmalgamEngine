@@ -3,7 +3,6 @@
 #include "EngineMessageType.h"
 #include "NetworkDefs.h"
 #include "ItemInteractionType.h"
-#include "ItemID.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
 #include <SDL_stdinc.h>
@@ -28,10 +27,14 @@ struct ItemInteractionRequest {
     //       interaction with. NPC state is in the past, and the client entity's 
     //       predicted state (e.g. position) wouldn't be useful to sync to.
 
-    /** The ID of the item that the interaction is being performed on. */
-    ItemID targetItemID{NULL_ITEM_ID};
+    /** The inventory slot of the item that the interaction is being performed 
+        on. */
+    Uint8 slotIndex{0};
 
-    /** The type of interaction to perform. */
+    /** The type of interaction to perform.
+        Note: UseOn and Destroy are handled by other messages (see 
+              ItemInteractionType). If you send them using this message, they'll
+              be ignored. */
     ItemInteractionType interactionType{};
 
     //--------------------------------------------------------------------------
@@ -49,7 +52,7 @@ struct ItemInteractionRequest {
 template<typename S>
 void serialize(S& serializer, ItemInteractionRequest& interactionRequest)
 {
-    serializer.value2b(interactionRequest.targetItemID);
+    serializer.value1b(interactionRequest.slotIndex);
     serializer.value1b(interactionRequest.interactionType);
 }
 

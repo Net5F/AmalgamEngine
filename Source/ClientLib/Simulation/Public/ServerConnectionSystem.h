@@ -42,10 +42,6 @@ public:
     /** Returns the current state of our connection to the server. */
     ConnectionState getConnectionState();
 
-    // Signals (see "Signal Sinks" section in Simulation.h).
-    entt::sigh<void()> simulationStartedSig;
-    entt::sigh<void(ConnectionError)> serverConnectionErrorSig;
-
 private:
     /** How long the sim should wait for the server to send a connection
         response, in seconds. */
@@ -91,6 +87,18 @@ private:
 
     /** Times our connection attempt, so we can time out if necessary. */
     Timer connectionAttemptTimer;
+
+    entt::sigh<void()> simulationStartedSig;
+    entt::sigh<void(ConnectionError)> serverConnectionErrorSig;
+
+public:
+    /** We've established a connection with the server and the simulation has
+        started running. */
+    entt::sink<entt::sigh<void()>> simulationStarted;
+
+    /** Our connection to the server has encountered an error and the 
+        simulation has stopped running. */
+    entt::sink<entt::sigh<void(ConnectionError)>> serverConnectionError;
 };
 
 } // namespace Client

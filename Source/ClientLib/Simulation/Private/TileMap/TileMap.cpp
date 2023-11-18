@@ -20,6 +20,7 @@ namespace Client
 {
 TileMap::TileMap(SpriteData& inSpriteData)
 : TileMapBase{inSpriteData, false}
+, sizeChangedSig{}
 , sizeChanged{sizeChangedSig}
 {
     if (Config::RUN_OFFLINE) {

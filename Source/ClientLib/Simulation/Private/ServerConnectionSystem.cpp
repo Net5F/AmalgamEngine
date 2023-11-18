@@ -36,6 +36,10 @@ ServerConnectionSystem::ServerConnectionSystem(
 , connectionErrorQueue{network.getEventDispatcher()}
 , connectionState{ConnectionState::Disconnected}
 , connectionAttemptTimer{}
+, simulationStartedSig{}
+, serverConnectionErrorSig{}
+, simulationStarted{simulationStartedSig}
+, serverConnectionError{serverConnectionErrorSig}
 {
 }
 

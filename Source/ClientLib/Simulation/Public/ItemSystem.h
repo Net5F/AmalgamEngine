@@ -2,6 +2,7 @@
 
 #include "Item.h"
 #include "QueuedEvents.h"
+#include "entt/signal/sigh.hpp"
 
 namespace AM
 {
@@ -30,6 +31,12 @@ private:
     Network& network;
 
     EventQueue<Item> itemQueue;
+
+    entt::sigh<void(const Item&)> itemUpdatedSig;
+
+public:
+    /** An item's definition has been updated. */
+    entt::sink<entt::sigh<void(const Item&)>> itemUpdated;
 };
 
 } // namespace Client

@@ -44,7 +44,7 @@ private:
     /**
      * Sends the given item's examine text to the given client.
      */
-    void examineItem(ItemID targetItemID, NetworkID clientID);
+    void examineItem(Uint8 targetSlotIndex, NetworkID clientID);
 
     /**
      * Tries to combine the given items in the given player's inventory. If the 

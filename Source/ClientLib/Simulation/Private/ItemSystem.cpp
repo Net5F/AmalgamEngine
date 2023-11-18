@@ -11,6 +11,8 @@ ItemSystem::ItemSystem(World& inWorld, Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
 , itemQueue{network.getEventDispatcher()}
+, itemUpdatedSig{}
+, itemUpdated{itemUpdatedSig}
 {
 }
 

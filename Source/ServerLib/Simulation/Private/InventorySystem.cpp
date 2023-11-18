@@ -121,7 +121,6 @@ void InventorySystem::deleteItem(const InventoryDeleteItem& inventoryDeleteItem)
         entt::entity clientEntity{it->second};
 
         // If the deletion is successful, tell the client.
-        // Note: All clients have inventories so we don't need to check for it.
         Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
         if (inventory.deleteItem(inventoryDeleteItem.slotIndex,
                                  inventoryDeleteItem.count)) {
@@ -143,7 +142,6 @@ void InventorySystem::moveItem(const InventoryMoveItem& inventoryMoveItem)
         entt::entity clientEntity{it->second};
 
         // If the move is successful, tell the client.
-        // Note: All clients have inventories so we don't need to check for it.
         Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
         if (inventory.moveItem(inventoryMoveItem.sourceSlotIndex,
                                inventoryMoveItem.destSlotIndex)) {

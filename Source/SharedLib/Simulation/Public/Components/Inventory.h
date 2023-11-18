@@ -7,9 +7,13 @@
 namespace AM
 {
 class ItemDataBase;
+struct Item;
 
 /**
  * Represents an entity's inventory of items.
+ *
+ * All client entities have an inventory. Non-client entities may or may not 
+ * have one.
  */
 struct Inventory {
     /** The maximum number of items we can have in an inventory. 
@@ -47,6 +51,20 @@ struct Inventory {
     bool deleteItem(Uint8 slotIndex, Uint16 count);
 
     /**
+     * Returns the ID of the item at the given inventory slot.
+     * If the given index is invalid or there's no item in the slot, returns 
+     * NULL_ITEM_ID.
+     */
+    ItemID getItemID(Uint8 slotIndex) const;
+
+    /**
+     * Returns the item at the given inventory slot.
+     * If the given index is invalid or there's no item in the slot, returns 
+     * nullptr.
+     */
+    const Item* getItem(Uint8 slotIndex, const ItemDataBase& itemData) const;
+
+    /**
      * Moves the item in sourceSlot into destSlot (or swaps, if there's an 
      * item already in destSlot).
      *
@@ -67,7 +85,7 @@ struct Inventory {
 
     /** Returns true if the given inventory slot index is valid, else returns 
         false. */
-    bool slotIndexIsValid(Uint8 slotIndex);
+    bool slotIndexIsValid(Uint8 slotIndex) const;
 
 private:
     /**

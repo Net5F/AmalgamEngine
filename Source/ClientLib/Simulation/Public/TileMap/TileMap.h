@@ -31,11 +31,12 @@ public:
     void setMapSize(std::size_t inMapXLengthChunks,
                     std::size_t inMapYLengthChunks);
 
-    /** The tile map's size (extent) has changed. */
-    entt::sink<entt::sigh<void(TileExtent)>> sizeChanged;
-
 private:
     entt::sigh<void(TileExtent)> sizeChangedSig;
+
+public:
+    /** The tile map's size (extent) has changed. */
+    entt::sink<entt::sigh<void(TileExtent)>> sizeChanged;
 };
 
 } // End namespace Client
