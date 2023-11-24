@@ -2,7 +2,7 @@
 #include "World.h"
 #include "Network.h"
 #include "Inventory.h"
-#include "ItemRequest.h"
+#include "ItemUpdateRequest.h"
 #include "AMAssert.h"
 #include "Log.h"
 
@@ -62,7 +62,7 @@ void InventorySystem::initInventory(const InventoryInit& inventoryInit)
                 if (!(world.itemData.itemExists(itemSlot.ID))
                     || (world.itemData.getItemVersion(itemSlot.ID)
                         < itemSlot.version)) {
-                    network.serializeAndSend(ItemRequest{itemSlot.ID});
+                    network.serializeAndSend(ItemUpdateRequest{itemSlot.ID});
                 }
             }
         });
@@ -73,7 +73,16 @@ void InventorySystem::addItem(const InventoryAddItem& inventoryAddItem)
     // Try to add the item.
     world.registry.patch<Inventory>(
         world.playerEntity, [&](Inventory& inventory) {
-            inventory.addItem(inventoryAddItem.itemID, inventoryAddItem.count);
+            ItemID itemID{inventoryAddItem.itemID};
+            if (inventory.addItem(itemID, inventoryAddItem.count)) {
+                // Successfully added. If we don't have the latest definition 
+                // for the item, request it.
+                ItemVersion itemVersion{inventoryAddItem.version};
+                if (!(world.itemData.itemExists(itemID))
+                    || world.itemData.getItemVersion(itemID) < itemVersion) {
+                    network.serializeAndSend(ItemUpdateRequest{itemID});
+                }
+            }
         });
 }
 

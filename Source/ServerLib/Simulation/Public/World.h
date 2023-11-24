@@ -105,13 +105,13 @@ public:
      * Returns true if the given ID is valid and in use.
      * Note: If entt adds a storage.in_use(entity), we can replace this.
      */
-    bool entityIDIsInUse(entt::entity entity);
+    bool entityIDIsInUse(entt::entity entity) const;
 
     /**
      * Returns true if the given entity has all the components necessary for 
      * movement.
      */
-    bool hasMovementComponents(entt::entity entity);
+    bool hasMovementComponents(entt::entity entity) const;
 
     /**
      * Returns the spawn point position.

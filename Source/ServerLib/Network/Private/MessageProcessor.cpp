@@ -13,7 +13,7 @@
 #include "AnimationStateChangeRequest.h"
 #include "InitScriptRequest.h"
 #include "EntityInteractionRequest.h"
-#include "ItemRequest.h"
+#include "ItemUpdateRequest.h"
 #include "ItemChangeRequest.h"
 #include "ItemInteractionRequest.h"
 #include "UseItemOnEntityRequest.h"
@@ -25,7 +25,7 @@
 #include "InventoryDeleteItem.h"
 #include "InventoryMoveItem.h"
 #include "EntityDelete.h"
-#include "CombineItems.h"
+#include "CombineItemsRequest.h"
 #include "Log.h"
 #include <span>
 
@@ -111,8 +111,8 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
-        case EngineMessageType::ItemRequest: {
-            dispatchWithNetID<ItemRequest>(
+        case EngineMessageType::ItemUpdateRequest: {
+            dispatchWithNetID<ItemUpdateRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
@@ -166,8 +166,8 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
-        case EngineMessageType::CombineItems: {
-            dispatchWithNetID<CombineItems>(
+        case EngineMessageType::CombineItemsRequest: {
+            dispatchWithNetID<CombineItemsRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }

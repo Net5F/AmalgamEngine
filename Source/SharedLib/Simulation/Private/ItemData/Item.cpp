@@ -27,6 +27,24 @@ void Item::addInteraction(ItemInteractionType newInteraction)
     LOG_INFO("Tried to add interaction to full array.");
 }
 
+bool Item::supportsInteraction(ItemInteractionType desiredInteraction) const
+{
+    // All items support UseOn, Destroy, and Examine.
+    if ((desiredInteraction == ItemInteractionType::UseOn)
+        || (desiredInteraction == ItemInteractionType::Destroy)
+        || (desiredInteraction == ItemInteractionType::Examine)) {
+        return true;
+    }
+
+    for (ItemInteractionType interaction : supportedInteractions) {
+        if (interaction == desiredInteraction) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 std::array<ItemInteractionType, Item::MAX_INTERACTIONS>
     Item::getInteractionList() const
 {

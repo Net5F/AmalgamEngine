@@ -6,6 +6,8 @@
 #include "ClientSimData.h"
 #include "Inventory.h"
 #include "ItemHandlers.h"
+#include "ItemUpdate.h"
+#include "CombineItems.h"
 #include "SystemMessage.h"
 #include "Log.h"
 
@@ -14,37 +16,31 @@ namespace AM
 namespace Server
 {
 ItemSystem::ItemSystem(Simulation& inSimulation, Network& inNetwork)
-: world{inSimulation.getWorld()}
+: simulation{inSimulation}
+, world{inSimulation.getWorld()}
 , network{inNetwork}
 , extension{nullptr}
-, destroyInteractionQueue{}
-, examineInteractionQueue{}
-, combineItemsQueue{inNetwork.getEventDispatcher()}
+, combineItemsRequestQueue{inNetwork.getEventDispatcher()}
 , useItemOnEntityRequestQueue{inNetwork.getEventDispatcher()}
-, itemRequestQueue{inNetwork.getEventDispatcher()}
+, itemUpdateRequestQueue{inNetwork.getEventDispatcher()}
 , itemChangeRequestQueue{inNetwork.getEventDispatcher()}
 {
-    // Subscribe to receive any Examine interactions.
-    inSimulation.registerInteractionQueue(ItemInteractionType::Examine,
-                                          examineInteractionQueue);
 }
 
 void ItemSystem::processItemInteractions()
 {
     // Process any waiting interactions.
-    while (!(examineInteractionQueue.empty())) {
-        const ItemInteractionRequest examineRequest{
-            examineInteractionQueue.front()};
-        examineItem(examineRequest.slotIndex, examineRequest.netID);
-
-        examineInteractionQueue.pop();
+    Simulation::ItemInteractionData examineRequest{};
+    while (simulation.popItemInteractionRequest(ItemInteractionType::Examine,
+                                                examineRequest)) {
+        examineItem(examineRequest.item, examineRequest.clientID);
     }
 
-    CombineItems combineItemsMessage{};
-    while (combineItemsQueue.pop(combineItemsMessage)) {
-        combineItems(combineItemsMessage.sourceSlotIndex,
-                     combineItemsMessage.targetSlotIndex,
-                     combineItemsMessage.netID);
+    CombineItemsRequest combineItemsRequest{};
+    while (combineItemsRequestQueue.pop(combineItemsRequest)) {
+        combineItems(combineItemsRequest.sourceSlotIndex,
+                     combineItemsRequest.targetSlotIndex,
+                     combineItemsRequest.netID);
     }
 
     UseItemOnEntityRequest useItemOnEntityRequest{};
@@ -90,8 +86,11 @@ void ItemSystem::processItemUpdates()
                 auto it{std::find(updatedItems.begin(), updatedItems.end(),
                                   itemSlot.ID)};
                 if (it != updatedItems.end()) {
+                    const Item& item{*(itemData.getItem(itemSlot.ID))};
                     network.serializeAndSend(
-                        client.netID, *(itemData.getItem(itemSlot.ID)));
+                        client.netID,
+                        ItemUpdate{item.displayName, item.stringID,
+                                   item.numericID, item.supportedInteractions});
                 }
             }
         }
@@ -100,10 +99,13 @@ void ItemSystem::processItemUpdates()
     }
 
     // Send item definitions to any requestors.
-    ItemRequest itemRequest{};
-    while (itemRequestQueue.pop(itemRequest)) {
-        if (const Item* item{itemData.getItem(itemRequest.itemID)}) {
-            network.serializeAndSend(itemRequest.netID, *item);
+    ItemUpdateRequest itemUpdateRequest{};
+    while (itemUpdateRequestQueue.pop(itemUpdateRequest)) {
+        if (const Item* item{itemData.getItem(itemUpdateRequest.itemID)}) {
+            network.serializeAndSend(itemUpdateRequest.netID,
+                                     ItemUpdate{item->displayName,
+                                                item->stringID, item->numericID,
+                                                item->supportedInteractions});
         }
     }
 }
@@ -113,25 +115,13 @@ void ItemSystem::setExtension(ISimulationExtension* inExtension)
     extension = inExtension;
 }
 
-void ItemSystem::examineItem(Uint8 targetSlotIndex, NetworkID clientID)
+void ItemSystem::examineItem(const Item* item, NetworkID clientID)
 {
-    // Find the client's entity ID.
-    auto it{world.netIdMap.find(clientID)};
-    if (it != world.netIdMap.end()) {
-        entt::entity clientEntity{it->second};
-
-        // If the given slot doesn't contain an item, do nothing.
-        auto& inventory{world.registry.get<Inventory>(clientEntity)};
-        const Item* item{inventory.getItem(targetSlotIndex, world.itemData)};
-        if (!item) {
-            return;
-        }
-
-        // If the item in the given slot has a description, send it.
-        if (const ItemProperty* property{item->getProperty<Description>()}) {
-            const Description& description{std::get<Description>(*property)};
-            network.serializeAndSend(clientID, SystemMessage{description.text});
-        }
+    // If the item in the given slot has a description, send it.
+    if (const ItemDescription* 
+            itemDescription{item->getProperty<ItemDescription>()}) {
+        network.serializeAndSend(clientID,
+                                 SystemMessage{itemDescription->text});
     }
 }
 
@@ -145,9 +135,17 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
 
         // If the combination is successful, tell the client.
         auto& inventory{world.registry.get<Inventory>(clientEntity)};
-        if (inventory.combineItems(sourceSlotIndex, targetSlotIndex,
-                                   world.itemData)) {
-            network.serializeAndSend(clientID, CombineItems{});
+        const ItemCombination* combination{inventory.combineItems(
+            sourceSlotIndex, targetSlotIndex, world.itemData)};
+        if (combination) {
+            ItemID resultItemID{combination->resultItemID};
+            ItemVersion resultItemVersion{
+                world.itemData.getItemVersion(resultItemID)};
+            network.serializeAndSend(
+                clientID, CombineItems{sourceSlotIndex, targetSlotIndex,
+                                       resultItemID, resultItemVersion});
+            network.serializeAndSend(clientID,
+                                     SystemMessage{combination->description});
         }
     }
 }

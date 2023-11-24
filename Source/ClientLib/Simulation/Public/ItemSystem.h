@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Item.h"
+#include "ItemUpdate.h"
+#include "CombineItems.h"
 #include "QueuedEvents.h"
 #include "entt/signal/sigh.hpp"
 
@@ -12,7 +13,7 @@ class World;
 class Network;
 
 /**
- * Processes item definition updates.
+ * Processes item definition updates and item combination updates.
  */
 class ItemSystem
 {
@@ -30,7 +31,8 @@ private:
     /** Used for sending requests and receiving item data. */
     Network& network;
 
-    EventQueue<Item> itemQueue;
+    EventQueue<ItemUpdate> itemUpdateQueue;
+    EventQueue<CombineItems> combineItemsQueue;
 
     entt::sigh<void(const Item&)> itemUpdatedSig;
 

@@ -3,7 +3,7 @@ target_sources(SharedLib
         Public/ChunkUpdate.h
         Public/ChunkUpdateRequest.h
         Public/ChunkWireSnapshot.h
-        Public/CombineItems.h
+        Public/CombineItemsRequest.h
         Public/ComponentUpdate.h
         Public/ConnectionRequest.h
         Public/ConnectionResponse.h
@@ -24,7 +24,8 @@ target_sources(SharedLib
         Public/InventoryMoveItem.h
         Public/ItemChangeRequest.h
         Public/ItemInteractionRequest.h
-        Public/ItemRequest.h
+        Public/ItemUpdate.h
+        Public/ItemUpdateRequest.h
         Public/MovementState.h
         Public/MovementUpdate.h
         Public/SystemMessage.h

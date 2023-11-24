@@ -70,7 +70,9 @@ void ClientConnectionSystem::processConnectEvents()
         registry.emplace<Inventory>(newEntity);
         // TEMP
         ItemID test1ID{world.itemData.getItem("test1")->numericID};
+        ItemID test2ID{world.itemData.getItem("test2")->numericID};
         world.registry.get<Inventory>(newEntity).addItem(test1ID, 1);
+        world.registry.get<Inventory>(newEntity).addItem(test2ID, 1);
         // TEMP
 
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,

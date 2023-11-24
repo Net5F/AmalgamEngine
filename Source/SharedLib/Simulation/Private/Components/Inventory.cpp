@@ -6,17 +6,18 @@ namespace AM
 
 bool Inventory::addItem(ItemID itemID, Uint16 count)
 {
-    // Try to find an empty slot.
+    // If there's an existing empty slot, fill it with the given item.
     bool emptySlotFound{false};
     for (ItemSlot& item : items) {
         if (item.ID == NULL_ITEM_ID) {
             item.ID = itemID;
             item.count = count;
             emptySlotFound = true;
+            break;
         }
     }
 
-    // If an empty slot was found, add the item.
+    // If an empty slot wasn't found, push a new slot into the vector.
     if (!emptySlotFound && (items.size() < MAX_ITEMS)) {
         items.emplace_back(itemID, count);
         return true;
@@ -81,15 +82,16 @@ bool Inventory::moveItem(Uint8 sourceSlotIndex, Uint8 destSlotIndex)
     return true;
 }
 
-bool Inventory::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
-                             const ItemDataBase& itemData)
+const ItemCombination* Inventory::combineItems(Uint8 sourceSlotIndex,
+                                               Uint8 targetSlotIndex,
+                                               const ItemDataBase& itemData)
 {
     // If either slot is invalid or empty, return false.
     if (!slotIndexIsValid(sourceSlotIndex)
         || !slotIndexIsValid(targetSlotIndex)
         || (items[sourceSlotIndex].count == 0)
         || (items[targetSlotIndex].count == 0)) {
-        return false;
+        return nullptr;
     }
 
     // Get the items in the given slots.
@@ -100,36 +102,68 @@ bool Inventory::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
     const Item* sourceItem{itemData.getItem(sourceItemID)};
     const Item* targetItem{itemData.getItem(targetItemID)};
 
-    // If either item has this combination listed, find the resulting item.
-    ItemID resultItemID{NULL_ITEM_ID};
-    for (const Item::ItemCombination& combination :
+    // Try to find a matching combination in either item's list.
+    const ItemCombination* matchingCombination{nullptr};
+    for (const ItemCombination& combination :
          sourceItem->itemCombinations) {
         if (combination.otherItemID == targetItemID) {
-            resultItemID = combination.resultItemID;
+            matchingCombination = &combination;
             break;
         }
     }
-    if (resultItemID == NULL_ITEM_ID) {
-        for (const Item::ItemCombination& combination :
+    if (!matchingCombination) {
+        for (const ItemCombination& combination :
              targetItem->itemCombinations) {
             if (combination.otherItemID == sourceItemID) {
-                resultItemID = combination.resultItemID;
+                matchingCombination = &combination;
                 break;
             }
         }
     }
 
     // If we found a resulting item, combine the items.
-    if (resultItemID != NULL_ITEM_ID) {
+    if (matchingCombination) {
         // Decrement each item's count, erasing them if appropriate.
         reduceItemCount(sourceSlotIndex, 1);
         reduceItemCount(targetSlotIndex, 1);
 
         // Add the new item.
-        addItem(resultItemID, 1);
+        addItem(matchingCombination->resultItemID, 1);
     }
 
-    return true;
+    return matchingCombination;
+}
+
+void Inventory::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
+    ItemID resultItemID)
+{
+    // If either slot is invalid or empty, return false.
+    if (!slotIndexIsValid(sourceSlotIndex)
+        || !slotIndexIsValid(targetSlotIndex)
+        || (items[sourceSlotIndex].count == 0)
+        || (items[targetSlotIndex].count == 0)) {
+        return;
+    }
+
+    // Combine the items:
+    // Decrement each item's count, erasing them if appropriate.
+    reduceItemCount(sourceSlotIndex, 1);
+    reduceItemCount(targetSlotIndex, 1);
+
+    // Add the new item.
+    addItem(resultItemID, 1);
+}
+
+Uint8 Inventory::getFilledSlotCount()
+{
+    Uint8 count{0};
+    for (ItemSlot& item : items) {
+        if (item.ID != NULL_ITEM_ID) {
+            count++;
+        }
+    }
+
+    return count;
 }
 
 bool Inventory::slotIndexIsValid(Uint8 slotIndex) const
@@ -144,7 +178,7 @@ void Inventory::reduceItemCount(Uint8 slotIndex, Uint16 count)
     itemSlot.count -= count;
 
     // If the slot is out of items, set it to empty.
-    if (itemSlot.count <= 0) {
+    if (itemSlot.count == 0) {
         itemSlot.ID = NULL_ITEM_ID;
         itemSlot.count = 0;
     }

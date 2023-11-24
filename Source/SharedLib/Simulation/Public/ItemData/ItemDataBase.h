@@ -134,8 +134,9 @@ protected:
         clears it. */
     std::vector<ItemID> itemUpdateHistory;
 
-    /** Tracks the highest numeric item ID that we have in our maps. */
-    ItemID highestItemID{};
+    /** Tracks the next numeric item ID to use (typically 1 greater than the 
+        highest ID in our maps). */
+    ItemID nextItemID{};
 };
 
 } // End namespace AM

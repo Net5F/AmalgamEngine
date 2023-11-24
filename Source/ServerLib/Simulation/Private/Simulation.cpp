@@ -4,6 +4,7 @@
 #include "ISimulationExtension.h"
 #include "EntityInteractionRequest.h"
 #include "Interaction.h"
+#include "Inventory.h"
 #include "SystemMessage.h"
 #include "Log.h"
 #include "Timer.h"
@@ -61,24 +62,96 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 
 Simulation::~Simulation() = default;
 
-void Simulation::registerInteractionQueue(EntityInteractionType interactionType,
-                                          std::queue<EntityInteractionRequest>& queue)
+bool Simulation::popEntityInteractionRequest(
+    EntityInteractionType interactionType, EntityInteractionData& data)
 {
-    if (entityInteractionQueueMap[interactionType] != nullptr) {
-        LOG_FATAL("Only one queue can be registered for each interaction type.");
+    // If there's a waiting message of the given type, validate it.
+    std::queue<EntityInteractionRequest>& queue{
+        entityInteractionQueueMap[interactionType]};
+    if (!(queue.empty())) {
+        EntityInteractionRequest interactionRequest{queue.front()};
+        queue.pop();
+        entt::registry& registry{world.registry};
+
+        // Find the client's entity ID.
+        auto it{world.netIdMap.find(interactionRequest.netID)};
+        if (it == world.netIdMap.end()) {
+            // Client doesn't exist (may have disconnected), do nothing.
+            return false;
+        }
+        entt::entity clientEntity{it->second};
+        entt::entity targetEntity{interactionRequest.targetEntity};
+
+        // Check that the target exists.
+        if (!(world.entityIDIsInUse(targetEntity))) {
+            return false;
+        }
+
+        // Check that the client is in range of the target. 
+        const Position& clientPosition{registry.get<Position>(clientEntity)};
+        const Position& targetPosition{registry.get<Position>(targetEntity)};
+        if (clientPosition.squaredDistanceTo(targetPosition)
+            > (SharedConfig::SQUARED_INTERACTION_DISTANCE)) {
+            network.serializeAndSend(
+                interactionRequest.netID,
+                SystemMessage{"You must move closer to interact with that."});
+            return false;
+        }
+
+        // Check that the target actually has this interaction type.
+        if (auto* interaction{registry.try_get<Interaction>(targetEntity)};
+            !interaction
+            || !interaction->supports(interactionRequest.interactionType)) {
+            return false;
+        }
+
+        // Request is valid. Return it.
+        data.clientEntity = clientEntity;
+        data.targetEntity = targetEntity;
+        data.clientID = interactionRequest.netID;
+        return true;
     }
 
-    entityInteractionQueueMap[interactionType] = &queue;
+    return false;
 }
 
-void Simulation::registerInteractionQueue(ItemInteractionType interactionType,
-                                          std::queue<ItemInteractionRequest>& queue)
+bool Simulation::popItemInteractionRequest(ItemInteractionType interactionType,
+                                           ItemInteractionData& data)
 {
-    if (itemInteractionQueueMap[interactionType] != nullptr) {
-        LOG_FATAL("Only one queue can be registered for each interaction type.");
+    // If there's a waiting message of the given type, validate it.
+    std::queue<ItemInteractionRequest>& queue{
+        itemInteractionQueueMap[interactionType]};
+    if (!(queue.empty())) {
+        ItemInteractionRequest interactionRequest{queue.front()};
+        queue.pop();
+
+        // Find the client's entity ID.
+        auto it{world.netIdMap.find(interactionRequest.netID)};
+        if (it == world.netIdMap.end()) {
+            // Client doesn't exist (may have disconnected), do nothing.
+            return false;
+        }
+        entt::entity clientEntity{it->second};
+
+        // Check that the item exists and actually has this interaction type.
+        const auto& inventory{world.registry.get<Inventory>(clientEntity)};
+        const Item* item{
+            inventory.getItem(interactionRequest.slotIndex, world.itemData)};
+        if (!item
+            || !(item->supportsInteraction(
+                interactionRequest.interactionType))) {
+            return false;
+        }
+
+        // Request is valid. Return it.
+        data.clientEntity = clientEntity;
+        data.slotIndex = interactionRequest.slotIndex;
+        data.clientID = interactionRequest.netID;
+        data.item = item;
+        return true;
     }
 
-    itemInteractionQueueMap[interactionType] = &queue;
+    return false;
 }
 
 World& Simulation::getWorld()
@@ -118,13 +191,13 @@ void Simulation::tick()
     // Receive and process tile update requests.
     tileUpdateSystem.updateTiles();
 
+    // Sort any waiting interaction messages into their type-based queues.
+    sortInteractionMessages();
+
     // Call the project's pre-movement logic.
     if (extension != nullptr) {
         extension->afterMapAndConnectionUpdates();
     }
-
-    // Push any waiting interaction messages into the system queues.
-    dispatchInteractionMessages();
 
     // Send updated tile state to nearby clients.
     tileUpdateSystem.sendTileUpdates();
@@ -196,53 +269,19 @@ void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
     tileUpdateSystem.setExtension(extension.get());
 }
 
-void Simulation::dispatchInteractionMessages()
+void Simulation::sortInteractionMessages()
 {
-    entt::registry& registry{world.registry};
+    // Push each message into the associated queue, based on its type enum.
+    EntityInteractionRequest entityInteractionRequest{};
+    while (entityInteractionRequestQueue.pop(entityInteractionRequest)) {
+        entityInteractionQueueMap[entityInteractionRequest.interactionType]
+            .push(entityInteractionRequest);
+    }
 
-    // Dispatch any waiting interaction requests.
-    EntityInteractionRequest interactionRequest{};
-    while (entityInteractionRequestQueue.pop(interactionRequest)) {
-        // Find the client's entity ID.
-        auto it{world.netIdMap.find(interactionRequest.netID)};
-        if (it == world.netIdMap.end()) {
-            // Client doesn't exist (may have disconnected), do nothing.
-            continue;
-        }
-        entt::entity clientEntity{it->second};
-        entt::entity targetEntity{interactionRequest.targetEntity};
-
-        // Check that the client and target both exist.
-        if (!(world.entityIDIsInUse(clientEntity))
-            || !(world.entityIDIsInUse(targetEntity))) {
-            continue;
-        }
-
-        // Check that the client is in range of the target. 
-        const Position& clientPosition{registry.get<Position>(clientEntity)};
-        const Position& targetPosition{registry.get<Position>(targetEntity)};
-        if (clientPosition.squaredDistanceTo(targetPosition)
-            > (SharedConfig::SQUARED_INTERACTION_DISTANCE)) {
-            network.serializeAndSend(
-                interactionRequest.netID,
-                SystemMessage{"You must move closer to interact with that."});
-            continue;
-        }
-
-        // Check that the target actually has this interaction type.
-        if (auto interactionPtr = registry.try_get<Interaction>(targetEntity);
-            (interactionPtr == nullptr)
-            || !interactionPtr->contains(interactionRequest.interactionType)) {
-            continue;
-        }
-
-        // Dispatch the interaction.
-        EntityInteractionType interactionType{
-            interactionRequest.interactionType};
-        if (entityInteractionQueueMap[interactionType] != nullptr) {
-            entityInteractionQueueMap[interactionType]->push(
-                interactionRequest);
-        }
+    ItemInteractionRequest itemInteractionRequest{};
+    while (itemInteractionRequestQueue.pop(itemInteractionRequest)) {
+        itemInteractionQueueMap[itemInteractionRequest.interactionType].push(
+            itemInteractionRequest);
     }
 }
 

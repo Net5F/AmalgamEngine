@@ -47,9 +47,9 @@ struct Interaction {
     }
 
     /**
-     * Returns true if this component contains the given interaction.
+     * Returns true if this component supports the given interaction.
      */
-    bool contains(EntityInteractionType desiredInteraction) const
+    bool supports(EntityInteractionType desiredInteraction) const
     {
         for (EntityInteractionType interaction : supportedInteractions) {
             if (interaction == desiredInteraction) {

@@ -2,21 +2,20 @@
 
 #include "EngineMessageType.h"
 #include "NetworkDefs.h"
-#include "ItemInteractionType.h"
-#include "entt/fwd.hpp"
-#include "entt/entity/entity.hpp"
 #include <SDL_stdinc.h>
 
 namespace AM
 {
+
 /**
- * Used to request that an interaction be performed.
+ * Sent by a client to request that two items in a player's inventory be 
+ * combined.
  */
-struct ItemInteractionRequest {
+struct CombineItemsRequest {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::ItemInteractionRequest};
+        EngineMessageType::CombineItemsRequest};
   
     //--------------------------------------------------------------------------
     // Networked data
@@ -26,15 +25,11 @@ struct ItemInteractionRequest {
     //       interaction with. NPC state is in the past, and the client entity's 
     //       predicted state (e.g. position) wouldn't be useful to sync to.
 
-    /** The inventory slot of the item that the interaction is being performed 
-        on. */
-    Uint8 slotIndex{0};
+    /** The inventory slot of the item that is being used. */
+    Uint8 sourceSlotIndex{0};
 
-    /** The type of interaction to perform.
-        Note: UseOn and Destroy are handled by other messages (see 
-              ItemInteractionType). If you send them using this message, they'll
-              be ignored. */
-    ItemInteractionType interactionType{};
+    /** The inventory slot of the target item. */
+    Uint8 targetSlotIndex{0};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -49,10 +44,10 @@ struct ItemInteractionRequest {
 };
 
 template<typename S>
-void serialize(S& serializer, ItemInteractionRequest& interactionRequest)
+void serialize(S& serializer, CombineItemsRequest& combineItemsRequest)
 {
-    serializer.value1b(interactionRequest.slotIndex);
-    serializer.value1b(interactionRequest.interactionType);
+    serializer.value1b(combineItemsRequest.sourceSlotIndex);
+    serializer.value1b(combineItemsRequest.targetSlotIndex);
 }
 
 } // End namespace AM

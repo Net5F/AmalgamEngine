@@ -33,6 +33,12 @@ struct InventoryAddItem {
     /** How many of the item to add. */
     Uint16 count{0};
 
+    /** The item's version number. Used by the client to tell if it 
+        already has the latest definition for this item, or if it needs 
+        to request it.
+        When sent by the client, this field is ignored. */
+    ItemVersion version{0};
+
     //--------------------------------------------------------------------------
     // Local data
     //--------------------------------------------------------------------------
@@ -50,6 +56,7 @@ void serialize(S& serializer, InventoryAddItem& inventoryAddItem) {
     serializer.value4b(inventoryAddItem.entity);
     serializer.value2b(inventoryAddItem.itemID);
     serializer.value2b(inventoryAddItem.count);
+    serializer.value2b(inventoryAddItem.version);
 }
 
 } // namespace AM

@@ -12,7 +12,7 @@
 #include "MovementUpdate.h"
 #include "InitScriptResponse.h"
 #include "InventoryInit.h"
-#include "Item.h"
+#include "ItemUpdate.h"
 #include "EntityDelete.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
@@ -92,9 +92,9 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                         networkEventDispatcher);
             break;
         }
-        case EngineMessageType::Item: {
-            dispatchMessage<Item>(messageBuffer, messageSize,
-                                  networkEventDispatcher);
+        case EngineMessageType::ItemUpdate: {
+            dispatchMessage<ItemUpdate>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {

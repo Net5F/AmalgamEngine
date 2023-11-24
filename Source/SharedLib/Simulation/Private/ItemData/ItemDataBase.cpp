@@ -12,7 +12,7 @@ ItemDataBase::ItemDataBase(bool inTrackItemUpdates)
 , itemVersionMap{}
 , trackItemUpdates{inTrackItemUpdates}
 , itemUpdateHistory{}
-, highestItemID{0}
+, nextItemID{0}
 {
     // Add the null item.
     createItem(Item{"Null", "", NULL_ITEM_ID});
@@ -35,20 +35,22 @@ const Item* ItemDataBase::createItem(const Item& item)
     // If the new item doesn't have a desired ID, use the next sequential ID.
     ItemID newItemID{item.numericID};
     if (newItemID == NULL_ITEM_ID) {
-        newItemID = highestItemID + 1;
+        newItemID = nextItemID;
     }
 
     // Add the item to our maps.
     // Note: When we insert into an unordered_map, references to the map's 
-    //       elements are guaranteed to remain valid.
-    itemMap[newItemID] = Item{item.displayName, stringID, newItemID};
-    itemVersionMap[newItemID] = 0;
+    //       elements are guaranteed to remain valid (for itemStringMap).
+    itemMap[newItemID] = item;
     Item& newItem{itemMap[newItemID]};
+    newItem.stringID = stringID;
+    newItem.numericID = newItemID;
+    itemVersionMap[newItemID] = 0;
     itemStringMap[stringID] = &newItem;
 
-    // Track our highest item ID.
-    if (newItemID > highestItemID) {
-        highestItemID = newItemID;
+    // Always update nextItemID to be 1 greater than the highest ID.
+    if (newItemID >= nextItemID) {
+        nextItemID = (newItemID + 1);
     }
 
     return &newItem;

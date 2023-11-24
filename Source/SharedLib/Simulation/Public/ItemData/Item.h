@@ -4,6 +4,7 @@
 #include "ItemID.h"
 #include "ItemInteractionType.h"
 #include "ItemProperties.h"
+#include "ItemCombination.h"
 #include "Log.h"
 #include "bitsery/ext/std_variant.h"
 #include <SDL_stdinc.h>
@@ -18,10 +19,6 @@ namespace AM
  * Holds the data for a single item.
  */
 struct Item {
-    // The EngineMessageType enum value that this message corresponds to.
-    // Declares this struct as a message that the Network can send and receive.
-    static constexpr EngineMessageType MESSAGE_TYPE{EngineMessageType::Item};
-
     /** The max length of a display name. Also the max for string IDs, since 
         they're derived from display name. */
     static constexpr std::size_t MAX_DISPLAY_NAME_LENGTH{50};
@@ -71,13 +68,6 @@ struct Item {
         Properties hold data that gets used when handling interactions. */
     std::vector<ItemProperty> properties{};
 
-    struct ItemCombination
-    {
-        /** The item to combine with. */
-        ItemID otherItemID{};
-        /** The resulting item. */
-        ItemID resultItemID{};
-    };
     /** A list of the items that this item may be combined with, and the 
         resulting items.
         Note: If you want to put skill requirements on your item combinations, 
@@ -91,6 +81,11 @@ struct Item {
      * prints a warning and does nothing.
      */
     void addInteraction(ItemInteractionType newInteraction);
+
+    /**
+     * Returns true if this item supports the given interaction.
+     */
+    bool supportsInteraction(ItemInteractionType desiredInteraction) const;
 
     /**
      * Returns the list of interactions that this item supports, in the order 
@@ -145,7 +140,7 @@ struct Item {
      * Else, returns nullptr.
      */
     template<typename T>
-    const ItemProperty* getProperty() const
+    const T* getProperty() const
     {
         // Note: We use a vector and iterate through it every time because 
         //       it reduces wire size (vs a map) and we expect each item to 
@@ -153,21 +148,14 @@ struct Item {
 
         // If this item contains the given property type, return it.
         for (const ItemProperty& property : properties) {
-            if (std::holds_alternative<T>(property)) {
-                return &property;
+            if (const T* ptr{std::get_if<T>(&property)}) {
+                return ptr;
             }
         }
 
         return nullptr;
     }
 };
-
-template<typename S>
-void serialize(S& serializer, Item::ItemCombination& itemCombination)
-{
-    serializer.value2b(itemCombination.otherItemID);
-    serializer.value2b(itemCombination.resultItemID);
-}
 
 template<typename S>
 void serialize(S& serializer, Item& item)

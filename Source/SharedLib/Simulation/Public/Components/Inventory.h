@@ -8,6 +8,7 @@ namespace AM
 {
 class ItemDataBase;
 struct Item;
+struct ItemCombination;
 
 /**
  * Represents an entity's inventory of items.
@@ -29,7 +30,9 @@ struct Inventory {
     };
 
     /** Holds this inventory's items.
-        Empty slots will have ID == NULL_ITEM_ID. */
+        Empty slots will have ID == NULL_ITEM_ID.
+        Note: Slots may be allocated, but still be empty. If you're iterating 
+              this vector, be sure to check for NULL_ITEM_ID. */
     std::vector<ItemSlot> items{};
 
     /**
@@ -75,13 +78,31 @@ struct Inventory {
     /**
      * Combines the items in the given slots and decrements their count 
      * (emptying the slot if count == 0).
+     *
+     * Looks up the item's combinations to determine what the resulting item is.
+     * Only for use by the server.
      * 
-     * @return true if the items were combined, else false (slot index isn't 
-     *         valid, either slot was empty, neither item contained the 
-     *         combination).
+     * @return The used combination if the items were combined, else nullptr 
+     *         (slot index isn't valid, either slot was empty, neither item 
+     *         contained the combination).
      */
-    bool combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
-                      const ItemDataBase& itemData);
+    const ItemCombination* combineItems(Uint8 sourceSlotIndex,
+                                        Uint8 targetSlotIndex,
+                                        const ItemDataBase& itemData);
+
+    /**
+     * Overload for the client version of this operation.
+     * 
+     * Clients don't have the combination data for any items, so this overload 
+     * instead takes in the resulting item's ID.
+     */
+    void combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
+                      ItemID resultItemID);
+
+    /**
+     * Returns the number of slots that have an item in them.
+     */
+    Uint8 getFilledSlotCount();
 
     /** Returns true if the given inventory slot index is valid, else returns 
         false. */

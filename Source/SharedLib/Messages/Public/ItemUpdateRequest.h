@@ -10,11 +10,11 @@ namespace AM
 /**
  * Used to request an item's definition data from the server.
  */
-struct ItemRequest {
+struct ItemUpdateRequest {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::ItemRequest};
+        EngineMessageType::ItemUpdateRequest};
 
     //--------------------------------------------------------------------------
     // Networked data
@@ -35,9 +35,9 @@ struct ItemRequest {
 };
 
 template<typename S>
-void serialize(S& serializer, ItemRequest& itemRequest)
+void serialize(S& serializer, ItemUpdateRequest& itemUpdateRequest)
 {
-    serializer.value2b(itemRequest.itemID);
+    serializer.value2b(itemUpdateRequest.itemID);
 }
 
 } // End namespace AM

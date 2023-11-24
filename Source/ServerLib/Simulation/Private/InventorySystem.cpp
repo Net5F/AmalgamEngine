@@ -98,7 +98,10 @@ void InventorySystem::addItem(const InventoryAddItem& inventoryAddItem)
         // Success. If this is a client entity, tell it about the new item.
         if (auto* client{
                 world.registry.try_get<ClientSimData>(entityToAddTo)}) {
-            network.serializeAndSend(client->netID, inventoryAddItem);
+            InventoryAddItem response{inventoryAddItem};
+            response.version
+                = world.itemData.getItemVersion(inventoryAddItem.itemID);
+            network.serializeAndSend(client->netID, response);
         }
     }
     else {

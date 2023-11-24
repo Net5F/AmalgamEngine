@@ -180,11 +180,8 @@ void MainScreen::render()
     Screen::render();
 }
 
-void MainScreen::onActiveLibraryItemChanged(
-    const LibraryItemData& newActiveItem)
+void MainScreen::onActiveLibraryItemChanged(const LibraryItemData&)
 {
-    ignore(newActiveItem);
-
     // Make everything invisible.
     spriteEditStage.setIsVisible(false);
     spritePropertiesWindow.setIsVisible(false);

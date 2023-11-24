@@ -2,13 +2,12 @@
 
 #include "ItemID.h"
 #include "ItemInteractionRequest.h"
-#include "CombineItems.h"
+#include "CombineItemsRequest.h"
 #include "UseItemOnEntityRequest.h"
-#include "ItemRequest.h"
+#include "ItemUpdateRequest.h"
 #include "ItemChangeRequest.h"
 #include "NetworkDefs.h"
 #include "QueuedEvents.h"
-#include <queue>
 
 namespace AM
 {
@@ -44,7 +43,7 @@ private:
     /**
      * Sends the given item's examine text to the given client.
      */
-    void examineItem(Uint8 targetSlotIndex, NetworkID clientID);
+    void examineItem(const Item* item, NetworkID clientID);
 
     /**
      * Tries to combine the given items in the given player's inventory. If the 
@@ -62,6 +61,8 @@ private:
     void useItemOnEntity(Uint8 sourceSlotIndex, entt::entity targetEntity,
                          NetworkID clientID);
 
+    /** Used for getting Examine interaction requests. */
+    Simulation& simulation;
     /** Used for accessing item and inventory data. */
     World& world;
     /** Used for receiving requests and sending item and inventory data. */
@@ -70,12 +71,9 @@ private:
         Used for checking if item change requests are valid. */
     ISimulationExtension* extension;
 
-    std::queue<ItemInteractionRequest> destroyInteractionQueue;
-    std::queue<ItemInteractionRequest> examineInteractionQueue;
-
-    EventQueue<CombineItems> combineItemsQueue;
+    EventQueue<CombineItemsRequest> combineItemsRequestQueue;
     EventQueue<UseItemOnEntityRequest> useItemOnEntityRequestQueue;
-    EventQueue<ItemRequest> itemRequestQueue;
+    EventQueue<ItemUpdateRequest> itemUpdateRequestQueue;
     EventQueue<ItemChangeRequest> itemChangeRequestQueue;
 };
 

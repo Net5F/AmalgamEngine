@@ -58,23 +58,57 @@ public:
 
     ~Simulation();
 
-    /** 
-     * Registers the given queue to receive interaction events of a 
-     * particular type.
+    // Note: Since the <Entity|Item>InteractionRequest messages are consumed by 
+    //       different systems depending on their type, we receive and queue 
+    //       the messages here. Systems can use these functions to pop them.
+    struct EntityInteractionData
+    {
+        /** The ID of the entity performing the interaction. */
+        entt::entity clientEntity{entt::null};
+        /** The ID of the entity that the interaction is being performed on. */
+        entt::entity targetEntity{entt::null};
+        /** The network ID of the client performing the interaction. */
+        NetworkID clientID{0};
+    };
+    /**
+     * Pops the next entity interaction request of the given type off the queue, 
+     * checks it for validity, and returns its data.
      *
-     * Interaction events occur when the user left-clicks an entity, or right-
+     * Entity interactions occur when the user left-clicks an entity, or right-
      * clicks and selects an interaction from the menu.
      *
-     * @param interactionType The type of interaction. Should be cast from an 
-     *                        InteractionType.
-     * @param queue The queue to register.
-     *
-     * Note: Only 1 queue can be subscribed to each type of interaction.
+     * @param interactionType The type of interaction request to return.
+     * @param[out] data If return==true, holds the interaction data.
+     * @return true if a valid request was waiting, else false.
      */
-    void registerInteractionQueue(EntityInteractionType interactionType,
-                                  std::queue<EntityInteractionRequest>& queue);
-    void registerInteractionQueue(ItemInteractionType interactionType,
-                                  std::queue<ItemInteractionRequest>& queue);
+    bool popEntityInteractionRequest(EntityInteractionType interactionType,
+                                     EntityInteractionData& data);
+
+    struct ItemInteractionData
+    {
+        /** The ID of the entity performing the interaction. */
+        entt::entity clientEntity{entt::null};
+        /** The inventory slot of the item that the interaction is being 
+            performed on. */
+        Uint8 slotIndex{0};
+        /** The item that the interaction is being performed on. */
+        const Item* item{nullptr};
+        /** The network ID of the client performing the interaction. */
+        NetworkID clientID{0};
+    };
+    /**
+     * Pops the next item interaction request of the given type off the queue, 
+     * checks it for validity, and returns its data.
+     *
+     * Item interactions occur when the user left-clicks an item, or right-
+     * clicks and selects an interaction from the menu.
+     *
+     * @param interactionType The type of interaction request to return.
+     * @param[out] data If return==true, holds the interaction data.
+     * @return true if a valid request was waiting, else false.
+     */
+    bool popItemInteractionRequest(ItemInteractionType interactionType,
+                                   ItemInteractionData& data);
 
     /**
      * Returns a reference to the simulation's world state.
@@ -104,9 +138,9 @@ public:
 
 private:
     /**
-     * Dispatches any received interaction messages to the appropriate queue.
+     * Sorts any received interaction messages to the appropriate queue.
      */
-    void dispatchInteractionMessages();
+    void sortInteractionMessages();
 
     /** Used to receive events (through the Network's dispatcher) and to
         send messages. */
@@ -134,12 +168,12 @@ private:
     EventQueue<EntityInteractionRequest> entityInteractionRequestQueue;
     EventQueue<ItemInteractionRequest> itemInteractionRequestQueue;
 
-    /** Holds the subscribed entity interaction queues. */
+    /** Holds the received entity interaction requests of each type. */
     std::unordered_map<EntityInteractionType,
-                       std::queue<EntityInteractionRequest>*>
+                       std::queue<EntityInteractionRequest>>
         entityInteractionQueueMap;
-    /** Holds the subscribed item interaction queues. */
-    std::unordered_map<ItemInteractionType, std::queue<ItemInteractionRequest>*>
+    /** Holds the received item interaction requests of each type. */
+    std::unordered_map<ItemInteractionType, std::queue<ItemInteractionRequest>>
         itemInteractionQueueMap;
 
     //-------------------------------------------------------------------------
