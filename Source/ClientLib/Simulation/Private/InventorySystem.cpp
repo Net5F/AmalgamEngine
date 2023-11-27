@@ -46,13 +46,14 @@ void InventorySystem::processInventoryUpdates()
 
 void InventorySystem::initInventory(const InventoryInit& inventoryInit)
 {
-    // Initialize the players inventory with the given items.
+    // Initialize the player's inventory with the given items.
     world.registry.patch<Inventory>(
         world.playerEntity, [&](Inventory& inventory) {
             AM_ASSERT(inventory.items.size() == 0,
                       "Inventory should be empty when we receive init.");
 
             // Add all the given items to the player's inventory.
+            std::vector<ItemID> itemsToRequest{};
             for (const InventoryInit::ItemSlot& itemSlot :
                  inventoryInit.items) {
                 inventory.items.emplace_back(itemSlot.ID, itemSlot.count);
@@ -62,8 +63,17 @@ void InventorySystem::initInventory(const InventoryInit& inventoryInit)
                 if (!(world.itemData.itemExists(itemSlot.ID))
                     || (world.itemData.getItemVersion(itemSlot.ID)
                         < itemSlot.version)) {
-                    network.serializeAndSend(ItemUpdateRequest{itemSlot.ID});
+                    // Only request each ID once.
+                    if (std::find(itemsToRequest.begin(), itemsToRequest.end(),
+                                  itemSlot.ID)
+                        == itemsToRequest.end()) {
+                        itemsToRequest.push_back(itemSlot.ID);
+                    }
                 }
+            }
+
+            for (ItemID itemID : itemsToRequest) {
+                network.serializeAndSend(ItemUpdateRequest{itemID});
             }
         });
 }

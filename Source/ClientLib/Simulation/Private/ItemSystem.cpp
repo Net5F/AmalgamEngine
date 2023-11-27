@@ -36,6 +36,9 @@ void ItemSystem::processItemUpdates()
             // Item doesn't exist, create it.
             itemData.createItem(item);
         }
+
+        // Signal that an item definition was updated.
+        itemUpdatedSig.publish(item);
     }
 
     // Process any waiting item combinations.
