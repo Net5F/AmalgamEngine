@@ -10,7 +10,7 @@ namespace AM
 {
 namespace SpriteEditor
 {
-class SpriteDataModel;
+class DataModel;
 
 /**
  * A confirmation dialog with header text, body text, and confirm/cancel
@@ -19,7 +19,7 @@ class SpriteDataModel;
 class AddSheetDialog : public AUI::Window
 {
 public:
-    AddSheetDialog(SpriteDataModel& inSpriteDataModel);
+    AddSheetDialog(DataModel& ineDataModel);
 
     virtual ~AddSheetDialog() = default;
 
@@ -71,7 +71,7 @@ private:
     void clear();
 
     /** Used to update the model when a sheet is added. */
-    SpriteDataModel& spriteDataModel;
+    DataModel& dataModel;
 
     //-------------------------------------------------------------------------
     // Private child widgets

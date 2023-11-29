@@ -11,7 +11,7 @@ namespace AM
 {
 namespace SpriteEditor
 {
-class SpriteDataModel;
+class DataModel;
 struct EditorSprite;
 
 /**
@@ -24,7 +24,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteEditStage(SpriteDataModel& inSpriteDataModel);
+    SpriteEditStage(DataModel& inDataModel);
 
 private:
     /**
@@ -44,7 +44,7 @@ private:
     void styleText(AUI::Text& text);
 
     /** Used to get the current working dir when displaying the sprite. */
-    SpriteDataModel& spriteDataModel;
+    DataModel& dataModel;
 
     /** The active sprite's ID. */
     int activeSpriteID;

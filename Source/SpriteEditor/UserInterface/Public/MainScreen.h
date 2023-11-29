@@ -18,7 +18,7 @@ namespace AM
 {
 namespace SpriteEditor
 {
-class SpriteDataModel;
+class DataModel;
 struct EditorSprite;
 
 /**
@@ -27,7 +27,7 @@ struct EditorSprite;
 class MainScreen : public AUI::Screen
 {
 public:
-    MainScreen(SpriteDataModel& inSpriteDataModel);
+    MainScreen(DataModel& inDataModel);
 
     /**
      * Opens a confirmation dialog.
@@ -53,8 +53,8 @@ private:
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
-    /** The sprite data for this project. Used by this screen's UI. */
-    SpriteDataModel& spriteDataModel;
+    /** Used by this screen's UI. */
+    DataModel& dataModel;
 
     /** The confirmationDialog user's callback. Set while opening the dialog. */
     std::function<void(void)> userOnConfirmation;

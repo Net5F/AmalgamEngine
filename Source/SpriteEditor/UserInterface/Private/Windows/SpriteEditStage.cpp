@@ -1,8 +1,8 @@
 #include "SpriteEditStage.h"
 #include "MainScreen.h"
 #include "EditorSprite.h"
-#include "SpriteDataModel.h"
-#include "EmptySpriteID.h"
+#include "DataModel.h"
+#include "NullSpriteID.h"
 #include "Paths.h"
 #include "Ignore.h"
 #include "AUI/Core.h"
@@ -12,14 +12,14 @@ namespace AM
 {
 namespace SpriteEditor
 {
-SpriteEditStage::SpriteEditStage(SpriteDataModel& inSpriteDataModel)
+SpriteEditStage::SpriteEditStage(DataModel& inDataModel)
 : AUI::Window({320, 58, 1297, 1022}, "SpriteEditStage")
-, spriteDataModel{inSpriteDataModel}
-, activeSpriteID{EMPTY_SPRITE_ID}
+, dataModel{inDataModel}
+, activeSpriteID{NULL_SPRITE_ID}
 , topText{{0, 0, logicalExtent.w, 34}, "TopText"}
 , checkerboardImage{{0, 0, 100, 100}, "BackgroundImage"}
 , spriteImage{{0, 0, 100, 100}, "SpriteImage"}
-, boundingBoxGizmo{inSpriteDataModel}
+, boundingBoxGizmo{inDataModel}
 , descText1{{24, 806, 1240, 24}, "DescText1"}
 , descText2{{24, 846, 1240, 24}, "DescText2"}
 , descText3{{24, 886, 1240, 24}, "DescText3"}
@@ -65,10 +65,10 @@ SpriteEditStage::SpriteEditStage(SpriteDataModel& inSpriteDataModel)
     boundingBoxGizmo.setIsVisible(false);
 
     // When the active sprite is updated, update it in this widget.
-    spriteDataModel.activeLibraryItemChanged
+    dataModel.activeLibraryItemChanged
         .connect<&SpriteEditStage::onActiveLibraryItemChanged>(*this);
-    spriteDataModel.spriteRemoved.connect<&SpriteEditStage::onSpriteRemoved>(
-        *this);
+    dataModel.spriteModel.spriteRemoved
+        .connect<&SpriteEditStage::onSpriteRemoved>(*this);
 }
 
 void SpriteEditStage::onActiveLibraryItemChanged(
@@ -78,14 +78,14 @@ void SpriteEditStage::onActiveLibraryItemChanged(
     const EditorSprite* newActiveSprite{
         std::get_if<EditorSprite>(&newActiveItem)};
     if (newActiveSprite == nullptr) {
-        activeSpriteID = EMPTY_SPRITE_ID;
+        activeSpriteID = NULL_SPRITE_ID;
         return;
     }
 
     activeSpriteID = newActiveSprite->numericID;
 
     // Load the sprite's image.
-    std::string imagePath{spriteDataModel.getWorkingTexturesDir()};
+    std::string imagePath{dataModel.getWorkingTexturesDir()};
     imagePath += newActiveSprite->parentSpriteSheetPath;
     spriteImage.setSimpleImage(imagePath, newActiveSprite->textureExtent);
 
@@ -113,7 +113,7 @@ void SpriteEditStage::onActiveLibraryItemChanged(
 void SpriteEditStage::onSpriteRemoved(int spriteID)
 {
     if (spriteID == activeSpriteID) {
-        activeSpriteID = EMPTY_SPRITE_ID;
+        activeSpriteID = NULL_SPRITE_ID;
 
         // Set everything back to being invisible.
         checkerboardImage.setIsVisible(false);

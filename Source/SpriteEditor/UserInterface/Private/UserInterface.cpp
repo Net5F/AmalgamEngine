@@ -3,18 +3,17 @@
 #include "Config.h"
 #include "AUI/Core.h"
 #include "Log.h"
-#include "Ignore.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
 UserInterface::UserInterface(SDL_Renderer* inRenderer, AssetCache& inAssetCache,
-                             SpriteDataModel& inSpriteDataModel)
+                             DataModel& inDataModel)
 : auiInitializer{inRenderer,
                  {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT}}
-, titleScreen{*this, inSpriteDataModel}
-, mainScreen{inSpriteDataModel}
+, titleScreen{*this, inDataModel}
+, mainScreen{inDataModel}
 , currentScreen{&titleScreen}
 {
     AUI::Core::setActualScreenSize(

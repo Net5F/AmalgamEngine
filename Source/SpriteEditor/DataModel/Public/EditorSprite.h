@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BoundingBox.h"
-#include "EmptySpriteID.h"
+#include "NullSpriteID.h"
 #include <SDL_rect.h>
 #include <string>
 
@@ -16,7 +16,7 @@ namespace SpriteEditor
  */
 struct EditorSprite {
     /** This sprite's unique numeric identifier. */
-    int numericID{EMPTY_SPRITE_ID};
+    int numericID{NULL_SPRITE_ID};
 
     /** The unique relPath of the sprite sheet that this sprite is from. */
     std::string parentSpriteSheetPath{""};

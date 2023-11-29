@@ -8,7 +8,7 @@ namespace AM
 namespace SpriteEditor
 {
 class MainScreen;
-class SpriteDataModel;
+class DataModel;
 
 /**
  * The save button at the top of the screen, next to the properties.
@@ -16,14 +16,14 @@ class SpriteDataModel;
 class SaveButtonWindow : public AUI::Window
 {
 public:
-    SaveButtonWindow(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
+    SaveButtonWindow(MainScreen& inScreen, DataModel& inDataModel);
 
 private:
     /** Used to open the confirmation dialog. */
     MainScreen& mainScreen;
 
     /** Used to save the model state. */
-    SpriteDataModel& spriteDataModel;
+    DataModel& dataModel;
 
     //-------------------------------------------------------------------------
     // Private child widgets

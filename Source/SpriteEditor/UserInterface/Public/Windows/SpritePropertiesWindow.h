@@ -13,7 +13,7 @@ struct BoundingBox;
 
 namespace SpriteEditor
 {
-class SpriteDataModel;
+class DataModel;
 
 /**
  * The properties window shown when the user loads a sprite from the Library.
@@ -25,7 +25,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpritePropertiesWindow(SpriteDataModel& inSpriteDataModel);
+    SpritePropertiesWindow(DataModel& ineDataModel);
 
     //-------------------------------------------------------------------------
     // Public child widgets
@@ -80,7 +80,7 @@ private:
                                     const BoundingBox& newModelBounds);
 
     /** Used while setting user-inputted sprite data. */
-    SpriteDataModel& spriteDataModel;
+    DataModel& dataModel;
 
     /** The active sprite's ID. */
     int activeSpriteID;

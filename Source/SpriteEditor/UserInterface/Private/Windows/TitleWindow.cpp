@@ -1,7 +1,7 @@
 #include "TitleWindow.h"
 #include "UserInterface.h"
 #include "TitleScreen.h"
-#include "SpriteDataModel.h"
+#include "DataModel.h"
 #include "Paths.h"
 #include "Log.h"
 #include "nfd.hpp"
@@ -12,10 +12,10 @@ namespace AM
 namespace SpriteEditor
 {
 TitleWindow::TitleWindow(UserInterface& inUserInterface,
-                         SpriteDataModel& inSpriteDataModel)
+                         DataModel& inDataModel)
 : AUI::Window({0, 0, 1920, 1080}, "TitleWindow")
 , userInterface{inUserInterface}
-, spriteDataModel{inSpriteDataModel}
+, dataModel{inDataModel}
 , titleText({0, 193, 1920, 75}, "TitleText")
 , newButton({724, 432, 472, 96}, "New", "NewButton")
 , loadButton({724, 589, 472, 96}, "Load", "LoadButton")
@@ -53,7 +53,7 @@ void TitleWindow::onNewButtonPressed()
 
     if (result == NFD_OKAY) {
         // If we successfully created a new file, change to the main screen.
-        std::string resultString{spriteDataModel.create(selectedPath)};
+        std::string resultString{dataModel.create(selectedPath)};
         if (resultString == "") {
             userInterface.changeScreenTo(UserInterface::ScreenType::MainScreen);
         }
@@ -88,13 +88,13 @@ void TitleWindow::onLoadButtonPressed()
         if (std::strstr(selectedPath, "SpriteData.json") != 0) {
             // Valid file name.
             // If it loads successfully, change to the main screen.
-            if (spriteDataModel.load(selectedPath)) {
+            if (dataModel.load(selectedPath)) {
                 userInterface.changeScreenTo(
                     UserInterface::ScreenType::MainScreen);
             }
             else {
                 // Failed to parse, display the error text.
-                errorText.setText("Error: " + spriteDataModel.getErrorString());
+                errorText.setText("Error: " + dataModel.getErrorString());
                 errorText.setIsVisible(true);
             }
         }

@@ -3,7 +3,7 @@
 #include "OSEventHandler.h"
 #include "TitleScreen.h"
 #include "MainScreen.h"
-#include "SpriteDataModel.h"
+#include "DataModel.h"
 
 #include "AUI/Initializer.h"
 
@@ -31,7 +31,7 @@ public:
     enum class ScreenType { TitleScreen, MainScreen };
 
     UserInterface(SDL_Renderer* inRenderer, AssetCache& inAssetCache,
-                  SpriteDataModel& inSpriteDataModel);
+                  DataModel& inDataModel);
 
     /**
      * Changes the currentScreen to the given screenType.

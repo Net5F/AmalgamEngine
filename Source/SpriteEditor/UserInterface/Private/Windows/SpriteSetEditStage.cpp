@@ -1,20 +1,19 @@
 #include "SpriteSetEditStage.h"
 #include "MainScreen.h"
-#include "EmptySpriteID.h"
-#include "SpriteDataModel.h"
+#include "DataModel.h"
+#include "NullSpriteID.h"
 #include "LibraryItemData.h"
 #include "Paths.h"
-#include "Ignore.h"
 #include "AUI/Core.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
-SpriteSetEditStage::SpriteSetEditStage(SpriteDataModel& inSpriteDataModel,
+SpriteSetEditStage::SpriteSetEditStage(DataModel& inDataModel,
                                const LibraryWindow& inLibraryWindow)
 : AUI::Window({320, 58, 1297, 1022}, "SpriteSetEditStage")
-, spriteDataModel{inSpriteDataModel}
+, dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
 , activeSpriteSetType{SpriteSet::Type::None}
 , activeSpriteSetID{SDL_MAX_UINT16}
@@ -62,11 +61,11 @@ SpriteSetEditStage::SpriteSetEditStage(SpriteDataModel& inSpriteDataModel,
     spriteContainer.setCellHeight(255 + 14);
 
     // When the active sprite set is updated, update it in this widget.
-    spriteDataModel.activeLibraryItemChanged
+    dataModel.activeLibraryItemChanged
         .connect<&SpriteSetEditStage::onActiveLibraryItemChanged>(*this);
-    spriteDataModel.spriteSetRemoved.connect<&SpriteSetEditStage::onSpriteSetRemoved>(
-        *this);
-    spriteDataModel.spriteSetSlotChanged
+    dataModel.spriteSetModel.spriteSetRemoved
+        .connect<&SpriteSetEditStage::onSpriteSetRemoved>(*this);
+    dataModel.spriteSetModel.spriteSetSlotChanged
         .connect<&SpriteSetEditStage::onSpriteSetSlotChanged>(*this);
 }
 
@@ -155,7 +154,7 @@ void SpriteSetEditStage::loadActiveSpriteSet(SpriteSet::Type spriteSetType,
                 for (const LibraryListItem* selectedItem : selectedListItems) {
                     // If this is a sprite, update this slot in the model.
                     if (selectedItem->type == LibraryListItem::Type::Sprite) {
-                        spriteDataModel.setSpriteSetSlot(
+                        dataModel.spriteSetModel.setSpriteSetSlot(
                             activeSpriteSetType, activeSpriteSetID, i,
                             static_cast<Uint16>(selectedItem->ID));
                     }
@@ -163,8 +162,8 @@ void SpriteSetEditStage::loadActiveSpriteSet(SpriteSet::Type spriteSetType,
             }
             else {
                 // No selection. Empty the slot.
-                spriteDataModel.setSpriteSetSlot(
-                    activeSpriteSetType, activeSpriteSetID, i, EMPTY_SPRITE_ID);
+                dataModel.spriteSetModel.setSpriteSetSlot(
+                    activeSpriteSetType, activeSpriteSetID, i, NULL_SPRITE_ID);
             }
         });
 
@@ -261,10 +260,10 @@ std::string SpriteSetEditStage::getSlotTopText(std::size_t spriteSetIndex)
 void SpriteSetEditStage::fillSlotSpriteData(SpriteSetSlot& slot, int spriteID)
 {
     // If this slot isn't empty, set the widget's data.
-    if (spriteID != EMPTY_SPRITE_ID) {
+    if (spriteID != NULL_SPRITE_ID) {
         // Calc a square texture extent that shows the bottom of the sprite
         // (so we don't have to squash it).
-        const EditorSprite& sprite{spriteDataModel.getSprite(spriteID)};
+        const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
         SDL_Rect textureExtent{sprite.textureExtent};
         if (textureExtent.h > textureExtent.w) {
             int diff{textureExtent.h - textureExtent.w};
@@ -273,7 +272,7 @@ void SpriteSetEditStage::fillSlotSpriteData(SpriteSetSlot& slot, int spriteID)
         }
 
         // Load the sprite's image into the slot.
-        std::string imagePath{spriteDataModel.getWorkingTexturesDir()};
+        std::string imagePath{dataModel.getWorkingTexturesDir()};
         imagePath += sprite.parentSpriteSheetPath;
         slot.spriteImage.setSimpleImage(imagePath, textureExtent);
         slot.spriteImage.setIsVisible(true);

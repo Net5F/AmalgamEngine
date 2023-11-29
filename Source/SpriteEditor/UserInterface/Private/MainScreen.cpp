@@ -1,8 +1,7 @@
 #include "MainScreen.h"
 #include "AssetCache.h"
-#include "SpriteDataModel.h"
+#include "DataModel.h"
 #include "Paths.h"
-#include "Ignore.h"
 #include "AUI/Core.h"
 #include "nfd.h"
 #include "Log.h"
@@ -11,18 +10,18 @@ namespace AM
 {
 namespace SpriteEditor
 {
-MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
+MainScreen::MainScreen(DataModel& inDataModel)
 : AUI::Screen("MainScreen")
-, spriteDataModel{inSpriteDataModel}
-, libraryWindow{*this, spriteDataModel}
+, dataModel{inDataModel}
+, libraryWindow{*this, dataModel}
 , libraryAddMenu{}
-, saveButtonWindow{*this, spriteDataModel}
-, spriteEditStage{spriteDataModel}
-, spriteSetEditStage{spriteDataModel, libraryWindow}
-, spritePropertiesWindow{spriteDataModel}
-, spriteSetPropertiesWindow{spriteDataModel}
+, saveButtonWindow{*this, dataModel}
+, spriteEditStage{dataModel}
+, spriteSetEditStage{dataModel, libraryWindow}
+, spritePropertiesWindow{dataModel}
+, spriteSetPropertiesWindow{dataModel}
 , confirmationDialog{{0, 0, 1920, 1080}, "ConfirmationDialog"}
-, addSheetDialog{spriteDataModel}
+, addSheetDialog{dataModel}
 {
     // Add our windows so they're included in rendering, etc.
     windows.push_back(libraryWindow);
@@ -103,19 +102,19 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
         dropFocus();
     });
     libraryAddMenu.addFloorButton.setOnPressed([this]() {
-        spriteDataModel.addFloor();
+        dataModel.spriteSetModel.addFloor();
         dropFocus();
     });
     libraryAddMenu.addFloorCoveringButton.setOnPressed([this]() {
-        spriteDataModel.addFloorCovering();
+        dataModel.spriteSetModel.addFloorCovering();
         dropFocus();
     });
     libraryAddMenu.addWallButton.setOnPressed([this]() {
-        spriteDataModel.addWall();
+        dataModel.spriteSetModel.addWall();
         dropFocus();
     });
     libraryAddMenu.addObjectButton.setOnPressed([this]() {
-        spriteDataModel.addObject();
+        dataModel.spriteSetModel.addObject();
         dropFocus();
     });
 
@@ -133,7 +132,7 @@ MainScreen::MainScreen(SpriteDataModel& inSpriteDataModel)
 
     // When the user selects a new item in the library, make the proper windows
     // visible.
-    spriteDataModel.activeLibraryItemChanged
+    dataModel.activeLibraryItemChanged
         .connect<&MainScreen::onActiveLibraryItemChanged>(*this);
 }
 
@@ -180,7 +179,8 @@ void MainScreen::render()
     Screen::render();
 }
 
-void MainScreen::onActiveLibraryItemChanged(const LibraryItemData&)
+void MainScreen::onActiveLibraryItemChanged(
+    const LibraryItemData& newActiveItem)
 {
     // Make everything invisible.
     spriteEditStage.setIsVisible(false);

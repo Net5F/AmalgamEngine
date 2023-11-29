@@ -14,7 +14,7 @@ namespace AM
 namespace SpriteEditor
 {
 class MainScreen;
-class SpriteDataModel;
+class DataModel;
 struct EditorSpriteSheet;
 class SpriteSheetListItem;
 struct EditorFloorSpriteSet;
@@ -32,7 +32,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    LibraryWindow(MainScreen& inScreen, SpriteDataModel& inSpriteDataModel);
+    LibraryWindow(MainScreen& inScreen, DataModel& inDataModel);
 
     /**
      * Returns the currently selected list items.
@@ -119,7 +119,7 @@ private:
     MainScreen& mainScreen;
 
     /** Used to update the model when a sheet is removed. */
-    SpriteDataModel& spriteDataModel;
+    DataModel& dataModel;
 
     /** An array of maps, indexed by list item types. Each map holds the 
         list items for the associated type. */

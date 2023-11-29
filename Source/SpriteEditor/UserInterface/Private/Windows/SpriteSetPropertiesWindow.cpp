@@ -1,25 +1,24 @@
 #include "SpriteSetPropertiesWindow.h"
 #include "MainScreen.h"
 #include "MainThumbnail.h"
-#include "SpriteDataModel.h"
+#include "DataModel.h"
 #include "EditorFloorSpriteSet.h"
-#include "EmptySpriteID.h"
+#include "NullSpriteID.h"
 #include "Paths.h"
 #include "Camera.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
-#include "Ignore.h"
 #include <string>
 
 namespace AM
 {
 namespace SpriteEditor
 {
-SpriteSetPropertiesWindow::SpriteSetPropertiesWindow(SpriteDataModel& inSpriteDataModel)
+SpriteSetPropertiesWindow::SpriteSetPropertiesWindow(DataModel& inDataModel)
 : AUI::Window({1617, 0, 303, 518}, "SpriteSetPropertiesWindow")
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
 , nameInput{{24, 84, 255, 38}, "NameInput"}
-, spriteDataModel{inSpriteDataModel}
+, dataModel{inDataModel}
 , activeSpriteSetType{SpriteSet::Type::None}
 , activeSpriteSetID{SDL_MAX_UINT16}
 , backgroundImage{{0, 0, 303, 518}, "PropertiesBackground"}
@@ -54,11 +53,11 @@ SpriteSetPropertiesWindow::SpriteSetPropertiesWindow(SpriteDataModel& inSpriteDa
     nameInput.setOnTextCommitted([this]() { saveName(); });
 
     // When the active sprite set is updated, update it in this widget.
-    spriteDataModel.activeLibraryItemChanged
+    dataModel.activeLibraryItemChanged
         .connect<&SpriteSetPropertiesWindow::onActiveLibraryItemChanged>(*this);
-    spriteDataModel.spriteSetRemoved
+    dataModel.spriteSetModel.spriteSetRemoved
         .connect<&SpriteSetPropertiesWindow::onSpriteSetRemoved>(*this);
-    spriteDataModel.spriteSetDisplayNameChanged
+    dataModel.spriteSetModel.spriteSetDisplayNameChanged
         .connect<&SpriteSetPropertiesWindow::onSpriteSetDisplayNameChanged>(*this);
 }
 
@@ -142,7 +141,7 @@ void SpriteSetPropertiesWindow::loadActiveSpriteSet(
 
 void SpriteSetPropertiesWindow::saveName()
 {
-    spriteDataModel.setSpriteSetDisplayName(
+    dataModel.spriteSetModel.setSpriteSetDisplayName(
         activeSpriteSetType, activeSpriteSetID, nameInput.getText());
 }
 

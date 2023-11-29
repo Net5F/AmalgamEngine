@@ -1,15 +1,14 @@
 #include "AddSheetDialog.h"
 #include "MainScreen.h"
 #include "MainThumbnail.h"
-#include "SpriteDataModel.h"
+#include "DataModel.h"
 #include "Paths.h"
-#include "Ignore.h"
 
 namespace AM
 {
 namespace SpriteEditor
 {
-AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
+AddSheetDialog::AddSheetDialog(DataModel& inDataModel)
 : AUI::Window({0, 0, 1920, 1080}, "AddSheetDialog")
 , shadowImage({0, 0, logicalExtent.w, logicalExtent.h})
 , backgroundImage({719, 208, 523, 506})
@@ -26,7 +25,7 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
 , nameInput({919, 500, 180, 38})
 , addButton({1099, 640, 123, 56}, "ADD")
 , cancelButton({958, 640, 123, 56}, "CANCEL")
-, spriteDataModel{inSpriteDataModel}
+, dataModel{inDataModel}
 , errorText({748, 556, 466, 60})
 {
     // Add our children so they're included in rendering, etc.
@@ -108,7 +107,7 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
     // Add a callback to validate the input and add the new sprite sheet.
     addButton.setOnPressed([this]() {
         // Pass the user-inputted data to the model.
-        bool result{spriteDataModel.addSpriteSheet(
+        bool result{dataModel.spriteModel.addSpriteSheet(
             pathInput.getText(), widthInput.getText(), heightInput.getText(),
             offsetInput.getText(), nameInput.getText())};
 
@@ -123,7 +122,7 @@ AddSheetDialog::AddSheetDialog(SpriteDataModel& inSpriteDataModel)
         }
         else {
             // Data wasn't valid, display an error string.
-            errorText.setText(spriteDataModel.getErrorString());
+            errorText.setText(dataModel.spriteModel.getErrorString());
             errorText.setIsVisible(true);
         }
     });

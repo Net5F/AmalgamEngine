@@ -4,7 +4,7 @@
 #include "UserInterface.h"
 #include "Renderer.h"
 #include "PeriodicCaller.h"
-#include "SpriteDataModel.h"
+#include "DataModel.h"
 #include "AssetCache.h"
 
 #include "SDL2pp/SDL.hh"
@@ -87,8 +87,8 @@ private:
     /** The application's asset cache. Used for caching textures. */
     AssetCache assetCache;
 
-    /** The data model that defines the user's project. */
-    SpriteDataModel spriteDataModel;
+    /** The data model that holds the user's project data. */
+    DataModel dataModel;
 
     UserInterface userInterface;
     /** Calls userInterface.tick() at our UI tick rate. */

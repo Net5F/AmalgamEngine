@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EmptySpriteID.h"
+#include "NullSpriteID.h"
 #include <SDL_stdinc.h>
 #include <string>
 #include <array>
@@ -24,7 +24,7 @@ struct EditorFloorSpriteSet {
     /** The numeric IDs for each sprite in this set.
         Floors currently only support 1 sprite, but support for "variations" 
         may be added in the future. */
-    std::array<int, 1> spriteIDs{EMPTY_SPRITE_ID};
+    std::array<int, 1> spriteIDs{NULL_SPRITE_ID};
 };
 
 } // namespace SpriteEditor

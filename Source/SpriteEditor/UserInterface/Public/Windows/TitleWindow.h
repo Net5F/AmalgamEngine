@@ -10,7 +10,7 @@ namespace SpriteEditor
 {
 class UserInterface;
 class TitleScreen;
-class SpriteDataModel;
+class DataModel;
 
 /**
  * The single window for the title screen.
@@ -18,20 +18,17 @@ class SpriteDataModel;
 class TitleWindow : public AUI::Window
 {
 public:
-    TitleWindow(UserInterface& inUserInterface,
-                SpriteDataModel& inSpriteDataModel);
+    TitleWindow(UserInterface& inUserInterface, DataModel& inDataModel);
 
 private:
     void onNewButtonPressed();
 
     void onLoadButtonPressed();
 
-    /** The user interface manager. Used for switching to the main screen. */
+    /** Used for switching to the main screen. */
     UserInterface& userInterface;
-
-    /** The sprite data for this project. Used for loading the user-selected
-        file. */
-    SpriteDataModel& spriteDataModel;
+    /** Used for loading the user-selected file. */
+    DataModel& dataModel;
 
     //-------------------------------------------------------------------------
     // Private child widgets

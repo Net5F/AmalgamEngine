@@ -8,7 +8,7 @@ namespace AM
 namespace SpriteEditor
 {
 class UserInterface;
-class SpriteDataModel;
+class DataModel;
 
 /**
  * The opening title screen that you see on app launch.
@@ -16,8 +16,7 @@ class SpriteDataModel;
 class TitleScreen : public AUI::Screen
 {
 public:
-    TitleScreen(UserInterface& inUserInterface,
-                SpriteDataModel& inSpriteDataModel);
+    TitleScreen(UserInterface& inUserInterface, DataModel& inDataModel);
 
     void render() override;
 

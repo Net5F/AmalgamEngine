@@ -1,7 +1,10 @@
 target_sources(SpriteEditor
     PRIVATE
-        Private/SpriteDataModel.cpp
+        Private/DataModel.cpp
+        Private/SpriteModel.cpp
+        Private/SpriteSetModel.cpp
     PUBLIC
+        Public/DataModel.h
         Public/EditorFloorCoveringSpriteSet.h
         Public/EditorFloorSpriteSet.h
         Public/EditorObjectSpriteSet.h
@@ -9,7 +12,8 @@ target_sources(SpriteEditor
         Public/EditorSpriteSheet.h
         Public/EditorWallSpriteSet.h
         Public/LibraryItemData.h
-        Public/SpriteDataModel.h
+        Public/SpriteModel.h
+        Public/SpriteSetModel.h
 )
 
 target_include_directories(SpriteEditor

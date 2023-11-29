@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Wall.h"
-#include "EmptySpriteID.h"
+#include "NullSpriteID.h"
 #include <SDL_stdinc.h>
 #include <string>
 #include <array>
@@ -26,7 +26,7 @@ struct EditorWallSpriteSet {
         Walls require the 4 types of wall sprites that our modular wall 
         system uses. */
     std::array<int, Wall::Type::Count> spriteIDs{
-        EMPTY_SPRITE_ID, EMPTY_SPRITE_ID, EMPTY_SPRITE_ID, EMPTY_SPRITE_ID};
+        NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID};
 };
 
 } // namespace SpriteEditor

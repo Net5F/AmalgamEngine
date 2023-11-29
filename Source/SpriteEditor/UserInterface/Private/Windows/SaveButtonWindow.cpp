@@ -1,6 +1,6 @@
 #include "SaveButtonWindow.h"
 #include "MainScreen.h"
-#include "SpriteDataModel.h"
+#include "DataModel.h"
 #include "Paths.h"
 
 namespace AM
@@ -8,10 +8,10 @@ namespace AM
 namespace SpriteEditor
 {
 SaveButtonWindow::SaveButtonWindow(MainScreen& inScreen,
-                                   SpriteDataModel& inSpriteDataModel)
+                                   DataModel& inDataModel)
 : AUI::Window({1537, 0, 58, 58}, "SaveButtonWindow")
 , mainScreen{inScreen}
-, spriteDataModel{inSpriteDataModel}
+, dataModel{inDataModel}
 , backgroundImage{{0, 0, 58, 58}}
 , saveButton({0, 0, 58, 58})
 {
@@ -38,7 +38,7 @@ SaveButtonWindow::SaveButtonWindow(MainScreen& inScreen,
         // Create our callback.
         std::function<void(void)> onConfirmation = [&]() {
             // Save the data.
-            spriteDataModel.save();
+            dataModel.save();
         };
 
         // Open the confirmation dialog.

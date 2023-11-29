@@ -1,7 +1,7 @@
 #include "BoundingBoxGizmo.h"
 #include "MainScreen.h"
-#include "SpriteDataModel.h"
-#include "EmptySpriteID.h"
+#include "DataModel.h"
+#include "NullSpriteID.h"
 #include "Transforms.h"
 #include "Position.h"
 #include "Camera.h"
@@ -19,11 +19,11 @@ namespace AM
 {
 namespace SpriteEditor
 {
-BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
+BoundingBoxGizmo::BoundingBoxGizmo(DataModel& inDataModel)
 : AUI::Widget({0, 0, 1920, 1080}, "BoundingBoxGizmo")
-, spriteDataModel{inSpriteDataModel}
+, dataModel{inDataModel}
 , lastUsedScreenSize{0, 0}
-, activeSpriteID{EMPTY_SPRITE_ID}
+, activeSpriteID{NULL_SPRITE_ID}
 , scaledRectSize{AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE)}
 , scaledLineWidth{AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH)}
 , positionControlExtent{0, 0, scaledRectSize, scaledRectSize}
@@ -41,9 +41,9 @@ BoundingBoxGizmo::BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel)
 , currentHeldControl{Control::None}
 {
     // When the active sprite is updated, update it in this widget.
-    spriteDataModel.activeLibraryItemChanged
+    dataModel.activeLibraryItemChanged
         .connect<&BoundingBoxGizmo::onActiveLibraryItemChanged>(*this);
-    spriteDataModel.spriteModelBoundsChanged
+    dataModel.spriteModel.spriteModelBoundsChanged
         .connect<&BoundingBoxGizmo::onSpriteModelBoundsChanged>(*this);
 }
 
@@ -144,7 +144,8 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
 
     /* Translate the mouse position to world space. */
     // Account for the sprite's empty vertical space.
-    const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    const EditorSprite& activeSprite{
+        dataModel.spriteModel.getSprite(activeSpriteID)};
     int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite.yOffset)};
 
     // Account for the sprite's half-tile offset.
@@ -201,7 +202,7 @@ void BoundingBoxGizmo::refreshScaling()
     scaledLineWidth = AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH);
 
     // Refresh our controls to reflect the new sizes.
-    refresh(spriteDataModel.getSprite(activeSpriteID));
+    refresh(dataModel.spriteModel.getSprite(activeSpriteID));
 }
 
 void BoundingBoxGizmo::onActiveLibraryItemChanged(
@@ -211,7 +212,7 @@ void BoundingBoxGizmo::onActiveLibraryItemChanged(
     const EditorSprite* newActiveSprite{
         std::get_if<EditorSprite>(&newActiveItem)};
     if (newActiveSprite == nullptr) {
-        activeSpriteID = EMPTY_SPRITE_ID;
+        activeSpriteID = NULL_SPRITE_ID;
         return;
     }
 
@@ -225,7 +226,7 @@ void BoundingBoxGizmo::onSpriteModelBoundsChanged(
     ignore(newModelBounds);
 
     if (spriteID == activeSpriteID) {
-        refresh(spriteDataModel.getSprite(spriteID));
+        refresh(dataModel.spriteModel.getSprite(spriteID));
     }
 }
 
@@ -253,7 +254,8 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 
     // Note: The expected behavior is to move along the x/y plane and
     //       leave minZ where it was.
-    const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    const EditorSprite& activeSprite{
+        dataModel.spriteModel.getSprite(activeSpriteID)};
     BoundingBox modelBounds{activeSprite.modelBounds};
     float& minX{modelBounds.minX};
     float& minY{modelBounds.minY};
@@ -294,29 +296,31 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
     }
 
     // Apply the new model bounds.
-    spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
+    dataModel.spriteModel.setSpriteModelBounds(activeSpriteID, modelBounds);
 }
 
 void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    const EditorSprite& activeSprite{
+        dataModel.spriteModel.getSprite(activeSpriteID)};
     BoundingBox modelBounds{activeSprite.modelBounds};
     modelBounds.minX = std::clamp(mouseWorldPos.x, 0.f, modelBounds.maxX);
 
     // Apply the new model bound.
-    spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
+    dataModel.spriteModel.setSpriteModelBounds(activeSpriteID, modelBounds);
 }
 
 void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    const EditorSprite& activeSprite{
+        dataModel.spriteModel.getSprite(activeSpriteID)};
     BoundingBox modelBounds{activeSprite.modelBounds};
     modelBounds.minY = std::clamp(mouseWorldPos.y, 0.f, modelBounds.maxY);
 
     // Apply the new model bound.
-    spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
+    dataModel.spriteModel.setSpriteModelBounds(activeSpriteID, modelBounds);
 }
 
 void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
@@ -338,13 +342,14 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     mouseZHeight = Transforms::screenYToWorldZ(mouseZHeight, 1.f);
 
     // Set maxZ, making sure it doesn't go below minZ.
-    const EditorSprite& activeSprite{spriteDataModel.getSprite(activeSpriteID)};
+    const EditorSprite& activeSprite{
+        dataModel.spriteModel.getSprite(activeSpriteID)};
     BoundingBox modelBounds{activeSprite.modelBounds};
     if (mouseZHeight > modelBounds.minZ) {
         modelBounds.maxZ = mouseZHeight;
 
         // Apply the new model bound.
-        spriteDataModel.setSpriteModelBounds(activeSpriteID, modelBounds);
+        dataModel.spriteModel.setSpriteModelBounds(activeSpriteID, modelBounds);
     }
 }
 

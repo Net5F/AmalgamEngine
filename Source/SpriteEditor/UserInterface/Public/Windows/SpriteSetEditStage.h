@@ -13,7 +13,7 @@ namespace AM
 {
 namespace SpriteEditor
 {
-class SpriteDataModel;
+class DataModel;
 class LibraryWindow;
 
 /**
@@ -26,8 +26,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteSetEditStage(SpriteDataModel& inSpriteDataModel,
-                   const LibraryWindow& inLibraryWindow);
+    SpriteSetEditStage(DataModel& inDataModel, const LibraryWindow& inLibraryWindow);
 
 private:
     /**
@@ -75,7 +74,7 @@ private:
     void fillDescriptionTexts();
 
     /** Used to get the current working dir when displaying the sprite. */
-    SpriteDataModel& spriteDataModel;
+    DataModel& dataModel;
 
     /** Used to get the currently selected list item. */
     const LibraryWindow& libraryWindow;

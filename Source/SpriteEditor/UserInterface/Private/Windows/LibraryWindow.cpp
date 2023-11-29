@@ -1,8 +1,7 @@
 #include "LibraryWindow.h"
 #include "MainScreen.h"
-#include "SpriteDataModel.h"
+#include "DataModel.h"
 #include "Paths.h"
-#include "Ignore.h"
 #include "LibraryCollapsibleContainer.h"
 #include "SpriteSheetListItem.h"
 #include "LibraryListItem.h"
@@ -12,10 +11,10 @@ namespace AM
 namespace SpriteEditor
 {
 LibraryWindow::LibraryWindow(MainScreen& inScreen,
-                             SpriteDataModel& inSpriteDataModel)
+                             DataModel& inDataModel)
 : AUI::Window({0, 0, 320, 1080}, "LibraryWindow")
 , mainScreen{inScreen}
-, spriteDataModel{inSpriteDataModel}
+, dataModel{inDataModel}
 , backgroundImage({0, 0, 320, 1080}, "LibraryBackground")
 , headerImage({0, 0, 320, 40}, "LibraryHeader")
 , windowLabel({12, 0, 80, 40}, "LibraryWindowLabel")
@@ -78,21 +77,23 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen,
     });
 
     // When an item is added or removed from the model, update this widget.
-    spriteDataModel.sheetAdded.connect<&LibraryWindow::onSheetAdded>(*this);
-    spriteDataModel.sheetRemoved.connect<&LibraryWindow::onSheetRemoved>(
+    SpriteModel& spriteModel{dataModel.spriteModel};
+    spriteModel.sheetAdded.connect<&LibraryWindow::onSheetAdded>(*this);
+    spriteModel.sheetRemoved.connect<&LibraryWindow::onSheetRemoved>(
         *this);
-    spriteDataModel.floorAdded.connect<&LibraryWindow::onFloorAdded>(*this);
-    spriteDataModel.floorCoveringAdded
+    SpriteSetModel& spriteSetModel{dataModel.spriteSetModel};
+    spriteSetModel.floorAdded.connect<&LibraryWindow::onFloorAdded>(*this);
+    spriteSetModel.floorCoveringAdded
         .connect<&LibraryWindow::onFloorCoveringAdded>(*this);
-    spriteDataModel.wallAdded.connect<&LibraryWindow::onWallAdded>(*this);
-    spriteDataModel.objectAdded.connect<&LibraryWindow::onObjectAdded>(*this);
-    spriteDataModel.spriteSetRemoved
+    spriteSetModel.wallAdded.connect<&LibraryWindow::onWallAdded>(*this);
+    spriteSetModel.objectAdded.connect<&LibraryWindow::onObjectAdded>(*this);
+    spriteSetModel.spriteSetRemoved
         .connect<&LibraryWindow::onSpriteSetRemoved>(*this);
 
     // When a display name is updated, update the matching thumbnail.
-    spriteDataModel.spriteDisplayNameChanged
+    spriteModel.spriteDisplayNameChanged
         .connect<&LibraryWindow::onSpriteDisplayNameChanged>(*this);
-    spriteDataModel.spriteSetDisplayNameChanged
+    spriteSetModel.spriteSetDisplayNameChanged
         .connect<&LibraryWindow::onSpriteSetDisplayNameChanged>(*this);
 }
 
@@ -238,10 +239,9 @@ void LibraryWindow::onSpriteSetAdded(Uint16 spriteSetID, const T& spriteSet)
         processSelectedListItem(selectedListItem);
     });
     spriteSetListItem->setOnActivated(
-        [this, spriteSetType, spriteSetID](LibraryListItem* activatedListItem) {
-            AM::ignore(activatedListItem);
+        [this, spriteSetType, spriteSetID](LibraryListItem*) {
             // Set this item's associated sprite set as the active item.
-            spriteDataModel.setActiveSpriteSet(spriteSetType, spriteSetID);
+            dataModel.setActiveSpriteSet(spriteSetType, spriteSetID);
         });
 
     // Add the new list item to the appropriate container.
@@ -346,7 +346,7 @@ void LibraryWindow::addSpriteToSheetListItem(
     const EditorSpriteSheet& sheet, int spriteID)
 {
     // Construct a new list item for this sprite.
-    const EditorSprite& sprite{spriteDataModel.getSprite(spriteID)};
+    const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
     auto spriteListItem{std::make_unique<LibraryListItem>(sprite.displayName)};
     spriteListItem->type = LibraryListItem::Type::Sprite;
     spriteListItem->ID = spriteID;
@@ -359,9 +359,8 @@ void LibraryWindow::addSpriteToSheetListItem(
         processSelectedListItem(selectedListItem);
     });
     spriteListItem->setOnActivated([this, spriteID](LibraryListItem* activatedListItem) {
-        AM::ignore(activatedListItem);
         // Set this item's associated sprite as the active item.
-        spriteDataModel.setActiveSprite(spriteID);
+        dataModel.setActiveSprite(spriteID);
     });
 
     // Add the sprite list item to the sheet list item.
@@ -385,25 +384,26 @@ void LibraryWindow::removeListItem(LibraryListItem* listItem)
         return;
     }
 
+    SpriteSetModel& spriteSetModel{dataModel.spriteSetModel};
     switch (listItem->type) {
         case LibraryListItem::Type::SpriteSheet: {
-            spriteDataModel.remSpriteSheet(listItem->ID);
+            dataModel.spriteModel.remSpriteSheet(listItem->ID);
             break;
         }
         case LibraryListItem::Type::Floor: {
-            spriteDataModel.remFloor(static_cast<Uint16>(listItem->ID));
+            spriteSetModel.remFloor(static_cast<Uint16>(listItem->ID));
             break;
         }
         case LibraryListItem::Type::FloorCovering: {
-            spriteDataModel.remFloorCovering(static_cast<Uint16>(listItem->ID));
+            spriteSetModel.remFloorCovering(static_cast<Uint16>(listItem->ID));
             break;
         }
         case LibraryListItem::Type::Wall: {
-            spriteDataModel.remWall(static_cast<Uint16>(listItem->ID));
+            spriteSetModel.remWall(static_cast<Uint16>(listItem->ID));
             break;
         }
         case LibraryListItem::Type::Object: {
-            spriteDataModel.remObject(static_cast<Uint16>(listItem->ID));
+            spriteSetModel.remObject(static_cast<Uint16>(listItem->ID));
             break;
         }
         default: {

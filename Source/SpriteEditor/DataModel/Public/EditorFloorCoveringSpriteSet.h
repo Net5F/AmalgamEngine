@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Rotation.h"
-#include "EmptySpriteID.h"
+#include "NullSpriteID.h"
 #include <SDL_stdinc.h>
 #include <string>
 #include <array>
@@ -27,8 +27,8 @@ struct EditorFloorCoveringSpriteSet {
         must be set. If a direction isn't provided, it should be set to 
         EMPTY_SPRITE_ID. */
     std::array<int, Rotation::Direction::Count> spriteIDs{
-        EMPTY_SPRITE_ID, EMPTY_SPRITE_ID, EMPTY_SPRITE_ID, EMPTY_SPRITE_ID,
-        EMPTY_SPRITE_ID, EMPTY_SPRITE_ID, EMPTY_SPRITE_ID, EMPTY_SPRITE_ID};
+        NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID,
+        NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID};
 };
 
 } // namespace SpriteEditor

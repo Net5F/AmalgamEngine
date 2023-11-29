@@ -11,7 +11,7 @@ struct BoundingBox;
 
 namespace SpriteEditor
 {
-class SpriteDataModel;
+class DataModel;
 struct EditorSprite;
 
 /**
@@ -23,7 +23,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BoundingBoxGizmo(SpriteDataModel& inSpriteDataModel);
+    BoundingBoxGizmo(DataModel& inDataModel);
 
     virtual ~BoundingBoxGizmo() = default;
 
@@ -144,7 +144,7 @@ private:
     void renderPlanes(const SDL_Point& windowTopLeft);
 
     /** Used while setting user-inputted sprite data. */
-    SpriteDataModel& spriteDataModel;
+    DataModel& dataModel;
 
     /** The value of AUI::Core::actualScreenSize that was used the last time
         this widget updated its layout. Used to detect when the UI scale
