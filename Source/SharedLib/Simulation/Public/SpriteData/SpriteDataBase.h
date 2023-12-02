@@ -16,9 +16,6 @@ namespace AM
  *
  * Also adds the "Null" sprite, for use as a default.
  *
- * Note: This class expects a ResourceData.json file to be present in the same
- *       directory as the application executable.
- *
  * The data in this class is immutable. To modify it, edit ResourceData.json
  * using the ResourceImporter.
  */
@@ -28,9 +25,9 @@ public:
     /**
      * Attempts to parse ResourceData.json and load all of the sprite data.
      *
-     * Errors if ResourceData.json doesn't exist or it fails to parse.
+     * Errors if resourceDataJson doesn't contain a spriteSheets section.
      */
-    SpriteDataBase();
+    SpriteDataBase(const nlohmann::json& resourceDataJson);
 
     /**
      * Returns the sprite with the given string ID.
@@ -97,7 +94,7 @@ private:
      * @param json  The json to parse. Must be loaded from a valid
      *              ResourceData.json.
      */
-    void parseJson(nlohmann::json& json);
+    void parseJson(const nlohmann::json& json);
 
     /**
      * Parses the given sprite json and adds the resulting sprite to the

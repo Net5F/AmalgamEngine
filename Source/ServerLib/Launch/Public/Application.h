@@ -3,7 +3,9 @@
 #include "UserConfigInitializer.h"
 #include "Network.h"
 #include "Simulation.h"
+#include "ResourceData.h"
 #include "SpriteData.h"
+#include "IconData.h"
 #include "PeriodicCaller.h"
 #include "SDLNetInitializer.h"
 #include "IMessageProcessorExtension.h"
@@ -83,7 +85,11 @@ private:
     //-------------------------------------------------------------------------
     UserConfigInitializer userConfigInitializer;
 
+    ResourceData resourceData;
+
     SpriteData spriteData;
+
+    IconData iconData;
 
     Network network;
     /** Calls network.tick() at the network tick rate. */

@@ -19,7 +19,7 @@ public:
     /**
      * Calls SpriteDataBase() constructor.
      */
-    SpriteData();
+    SpriteData(const nlohmann::json& resourceDataJson);
 };
 
 } // End namespace Server

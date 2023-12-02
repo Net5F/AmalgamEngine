@@ -28,7 +28,7 @@ void ItemSystem::processItemUpdates()
     while (itemUpdateQueue.pop(itemUpdate)) {
         // If the item exists, update it.
         Item item{itemUpdate.displayName, "", itemUpdate.numericID,
-                  itemUpdate.supportedInteractions};
+                  itemUpdate.iconID, itemUpdate.supportedInteractions};
         if (itemData.itemExists(itemUpdate.numericID)) {
             itemData.updateItem(item);
         }

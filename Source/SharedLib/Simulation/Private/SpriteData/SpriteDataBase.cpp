@@ -3,11 +3,10 @@
 #include "Paths.h"
 #include "Log.h"
 #include "nlohmann/json.hpp"
-#include <fstream>
 
 namespace AM
 {
-SpriteDataBase::SpriteDataBase()
+SpriteDataBase::SpriteDataBase(const nlohmann::json& resourceDataJson)
 : nullSpriteIndex{0}
 , sprites{}
 , floorSpriteSets{}
@@ -20,24 +19,8 @@ SpriteDataBase::SpriteDataBase()
 , wallSpriteSetStringMap{}
 , objectSpriteSetStringMap{}
 {
-    // Open the file.
-    std::string fullPath{Paths::BASE_PATH};
-    fullPath += "ResourceData.json";
-    std::ifstream workingFile(fullPath);
-    if (!(workingFile.is_open())) {
-        LOG_FATAL("Failed to open ResourceData.json");
-    }
-
-    // Parse the file into a json structure.
-    nlohmann::json json;
-    try {
-        json = nlohmann::json::parse(workingFile, nullptr, true);
-    } catch (nlohmann::json::exception& e) {
-        LOG_FATAL("Failed to parse ResourceData.json: %s", e.what());
-    }
-
     // Parse the json structure to construct our sprites.
-    parseJson(json);
+    parseJson(resourceDataJson);
 }
 
 const Sprite& SpriteDataBase::getSprite(const std::string& stringID) const
@@ -165,7 +148,7 @@ const std::vector<ObjectSpriteSet>& SpriteDataBase::getAllObjectSpriteSets() con
     return objectSpriteSets;
 }
 
-void SpriteDataBase::parseJson(nlohmann::json& json)
+void SpriteDataBase::parseJson(const nlohmann::json& json)
 {
     // Parse the json and catch any parsing errors.
     try {
@@ -191,7 +174,9 @@ void SpriteDataBase::parseJson(nlohmann::json& json)
             parseObjectSpriteSet(objectJson.value());
         }
     } catch (nlohmann::json::type_error& e) {
-        LOG_FATAL("Failure to parse SpriteDataBase.json: %s", e.what());
+        LOG_FATAL(
+            "Failed to parse sprites and sprite sets in ResourceData.json: %s",
+            e.what());
     }
 
     // Add the null sprite and set the null sprite index.
@@ -226,8 +211,10 @@ void SpriteDataBase::parseJson(nlohmann::json& json)
 
 void SpriteDataBase::parseSprite(const nlohmann::json& spriteJson)
 {
+    // Add the sprite to the sprites vector.
+    Sprite& sprite{sprites.emplace_back()};
+
     // Add the display name and IDs.
-    Sprite sprite{};
     sprite.numericID = spriteJson.at("numericID");
     sprite.displayName = spriteJson.at("displayName").get<std::string>();
     sprite.stringID = spriteJson.at("stringID").get<std::string>();
@@ -242,9 +229,6 @@ void SpriteDataBase::parseSprite(const nlohmann::json& spriteJson)
     sprite.modelBounds.maxY = spriteJson.at("modelBounds").at("maxY");
     sprite.modelBounds.minZ = spriteJson.at("modelBounds").at("minZ");
     sprite.modelBounds.maxZ = spriteJson.at("modelBounds").at("maxZ");
-
-    // Save the sprite in the sprites vector.
-    sprites.push_back(sprite);
 }
 
 void SpriteDataBase::parseFloorSpriteSet(const nlohmann::json& spriteSetJson)

@@ -4,39 +4,17 @@
 #include "Paths.h"
 #include "Log.h"
 #include "nlohmann/json.hpp"
-#include <fstream>
 
 namespace AM
 {
 namespace Client
 {
-SpriteData::SpriteData(AssetCache& assetCache)
-: SpriteDataBase()
+SpriteData::SpriteData(const nlohmann::json& resourceDataJson,
+                       AssetCache& assetCache)
+: SpriteDataBase(resourceDataJson)
 {
-    // Note: SpriteDataBase has already parsed the file and its data structures,
-    //       but it didn't parse any rendering-related data.
-
-    // Open the file.
-    std::string fullPath{Paths::BASE_PATH};
-    fullPath += "ResourceData.json";
-    std::ifstream workingFile(fullPath);
-    if (!(workingFile.is_open())) {
-        LOG_FATAL("Failed to open ResourceData.json");
-    }
-
-    // Parse the file into a json structure.
-    nlohmann::json json;
-    try {
-        json = nlohmann::json::parse(workingFile, nullptr, true);
-    } catch (nlohmann::json::exception& e) {
-        LOG_FATAL("Failed to parse ResourceData.json: %s", e.what());
-    }
-
     // Parse the json structure to construct our sprite render data.
-    parseJson(json, assetCache);
-
-    // Add the null sprite.
-    renderData[nullSpriteIndex] = SpriteRenderData{};
+    parseJson(resourceDataJson, assetCache);
 }
 
 const SpriteRenderData& SpriteData::getRenderData(int numericID) const
@@ -53,27 +31,32 @@ const SpriteRenderData& SpriteData::getRenderData(int numericID) const
     return renderData[numericID];
 }
 
-void SpriteData::parseJson(nlohmann::json& json, AssetCache& assetCache)
+void SpriteData::parseJson(const nlohmann::json& json, AssetCache& assetCache)
 {
     // Parse the json and catch any parsing errors.
     try {
         // Resize our vector.
         renderData.resize(nullSpriteIndex + 1);
 
-        // For every sprite sheet in the json.
+        // Parse every sprite sheet in the json.
         for (auto& sheetJson : json["spriteSheets"].items()) {
             // Get this sheet's texture.
             std::string texturePath{Paths::TEXTURE_DIR};
             texturePath += sheetJson.value()["relPath"].get<std::string>();
             TextureHandle texture{assetCache.loadTexture(texturePath)};
 
-            // For every sprite in the sheet.
+            // Parse every sprite in this sheet.
             for (auto& spriteJson : sheetJson.value()["sprites"].items()) {
                 parseSprite(spriteJson.value(), texturePath, texture);
             }
         }
+
+        // Add the null sprite.
+        renderData[nullSpriteIndex] = SpriteRenderData{};
     } catch (nlohmann::json::type_error& e) {
-        LOG_FATAL("Failure to parse ResourceData.json: %s", e.what());
+        LOG_FATAL(
+            "Failed to parse sprites and sprite sets in ResourceData.json: %s",
+            e.what());
     }
 }
 

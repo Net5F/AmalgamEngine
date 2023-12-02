@@ -4,8 +4,10 @@ target_sources(SharedLib
         Private/Cylinder.cpp
         Private/EntityLocator.cpp
         Private/MovementHelpers.cpp
+        Private/ResourceData.cpp
         Private/Components/Camera.cpp
         Private/Components/Inventory.cpp
+        Private/IconData/IconDataBase.cpp
         Private/ItemData/Item.cpp
         Private/ItemData/ItemDataBase.cpp
         Private/SpriteData/SpriteDataBase.cpp
@@ -29,6 +31,7 @@ target_sources(SharedLib
         Public/Ray.h
         Public/ReplicatedComponent.h
         Public/ReplicatedComponentTools.h
+        Public/ResourceData.h
         Public/Wall.h
         Public/Components/AnimationState.h
         Public/Components/Camera.h
@@ -71,6 +74,7 @@ target_include_directories(SharedLib
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/IconData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/SpriteData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/TileMap
     PUBLIC

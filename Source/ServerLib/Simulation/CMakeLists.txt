@@ -19,8 +19,9 @@ target_sources(ServerLib
 		Private/Simulation.cpp
 		Private/TileUpdateSystem.cpp
 		Private/World.cpp
+        Private/IconData/IconData.cpp
 		Private/ItemData/ItemData.cpp
-		Private/SpriteData/SpriteData.cpp
+        Private/SpriteData/SpriteData.cpp
 		Private/TileMap/TileMap.cpp
 	PUBLIC
 		Public/AILogic.h
@@ -51,6 +52,7 @@ target_sources(ServerLib
 		Public/Components/ClientSimData.h
 		Public/Components/ItemHandlers.h
 		Public/Components/ReplicatedComponentList.h
+		Public/IconData/IconData.h
 		Public/ItemData/ItemData.h
 		Public/SpriteData/SpriteData.h
 		Public/TileMap/TileMap.h
@@ -60,10 +62,10 @@ target_include_directories(ServerLib
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/ItemData
-        ${CMAKE_CURRENT_SOURCE_DIR}/Private/SpriteData
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/IconData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/SpriteData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap

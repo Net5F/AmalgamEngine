@@ -1,55 +1,62 @@
 target_sources(ClientLib
-	PRIVATE
-		Private/CameraSystem.cpp
-		Private/ChunkUpdateSystem.cpp
-		Private/ComponentUpdateSystem.cpp
-		Private/EntityLifetimeSystem.cpp
-		Private/InventorySystem.cpp
-		Private/ItemSystem.cpp
-		Private/NpcMovementSystem.cpp
-		Private/PlayerInputSystem.cpp
-		Private/PlayerMovementSystem.cpp
-		Private/ReplicationTickOffset.cpp
-		Private/ServerConnectionSystem.cpp
-		Private/Simulation.cpp
-		Private/TileUpdateSystem.cpp
-		Private/World.cpp
+    PRIVATE
+        Private/CameraSystem.cpp
+        Private/ChunkUpdateSystem.cpp
+        Private/ComponentUpdateSystem.cpp
+        Private/EntityLifetimeSystem.cpp
+        Private/InventorySystem.cpp
+        Private/ItemSystem.cpp
+        Private/NpcMovementSystem.cpp
+        Private/PlayerInputSystem.cpp
+        Private/PlayerMovementSystem.cpp
+        Private/ReplicationTickOffset.cpp
+        Private/ServerConnectionSystem.cpp
+        Private/Simulation.cpp
+        Private/TileUpdateSystem.cpp
+        Private/World.cpp
+        Private/IconData/IconData.cpp
         Private/ItemData/ItemData.cpp
         Private/SpriteData/SpriteData.cpp
-		Private/TileMap/TileMap.cpp
-	PUBLIC
-		Public/CameraSystem.h
-		Public/ChunkUpdateSystem.h
-		Public/ComponentUpdateSystem.h
-		Public/EntityLifetimeSystem.h
-		Public/EnttGroups.h
-		Public/InventorySystem.h
-		Public/ISimulationExtension.h
-		Public/ItemSystem.h
-		Public/NpcMovementSystem.h
-		Public/PlayerInputSystem.h
-		Public/PlayerMovementSystem.h
-		Public/ReplicationTickOffset.h
-		Public/ServerConnectionSystem.h
-		Public/Simulation.h
-		Public/SimulationExDependencies.h
-		Public/TileUpdateSystem.h
-		Public/World.h
-		Public/WorldObjectID.h
-		Public/Components/InputHistory.h
-		Public/Components/NeedsAdjacentChunks.h
+        Private/TileMap/TileMap.cpp
+    PUBLIC
+        Public/CameraSystem.h
+        Public/ChunkUpdateSystem.h
+        Public/ComponentUpdateSystem.h
+        Public/EntityLifetimeSystem.h
+        Public/EnttGroups.h
+        Public/InventorySystem.h
+        Public/ISimulationExtension.h
+        Public/ItemSystem.h
+        Public/NpcMovementSystem.h
+        Public/PlayerInputSystem.h
+        Public/PlayerMovementSystem.h
+        Public/ReplicationTickOffset.h
+        Public/ServerConnectionSystem.h
+        Public/Simulation.h
+        Public/SimulationExDependencies.h
+        Public/TileUpdateSystem.h
+        Public/World.h
+        Public/WorldObjectID.h
+        Public/Components/InputHistory.h
+        Public/Components/NeedsAdjacentChunks.h
+        Public/IconData/IconData.h
+        Public/IconData/IconRenderData.h
         Public/ItemData/ItemData.h
         Public/SpriteData/SpriteData.h
-		Public/TileMap/TileMap.h
+        Public/SpriteData/SpriteRenderData.h
+        Public/TileMap/TileMap.h
 )
 
 target_include_directories(ClientLib
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/IconData
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/ItemData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/SpriteData
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/IconData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/SpriteData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap

@@ -1,8 +1,6 @@
 #include "UserInterface.h"
 #include "World.h"
 #include "Config.h"
-#include "AssetCache.h"
-#include "SpriteData.h"
 #include "Camera.h"
 #include "IUserInterfaceExtension.h"
 #include "SharedConfig.h"

@@ -90,7 +90,8 @@ void ItemSystem::processItemUpdates()
                     network.serializeAndSend(
                         client.netID,
                         ItemUpdate{item.displayName, item.stringID,
-                                   item.numericID, item.supportedInteractions});
+                                   item.numericID, item.iconID,
+                                   item.supportedInteractions});
                 }
             }
         }
@@ -103,9 +104,8 @@ void ItemSystem::processItemUpdates()
     while (itemUpdateRequestQueue.pop(itemUpdateRequest)) {
         if (const Item* item{itemData.getItem(itemUpdateRequest.itemID)}) {
             network.serializeAndSend(itemUpdateRequest.netID,
-                                     ItemUpdate{item->displayName,
-                                                item->stringID, item->numericID,
-                                                item->supportedInteractions});
+                ItemUpdate{item->displayName, item->stringID, item->numericID,
+                           item->iconID, item->supportedInteractions});
         }
     }
 }

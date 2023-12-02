@@ -1,143 +1,74 @@
 #pragma once
 
-#include "Item.h"
-#include "IDPool.h"
-#include <SDL_stdinc.h>
+#include "Icon.h"
 #include <vector>
 #include <unordered_map>
-#include <string>
+#include "nlohmann/json_fwd.hpp"
 
 namespace AM
 {
 
-    // TODO: Implement this for icons
 /**
- * Base class for Client::ItemData and Server::ItemData.
- * Holds item data.
- * 
- * You can think of the items in this class as "templates". To actually place 
- * them in the world, you must copy one of these templates into something like 
- * an entity's Inventory.
+ * Base class for Client::IconData and Server::IconData.
+ * Loads the shared icon data from ResourceData.json into memory and provides
+ * an interface for accessing it.
  *
- * Also adds the "Null" item. The null item can't be overwritten or edited, but
- * it can be accessed through getItem() to get a default icon to use.
+ * Also adds the "Null" icon, for use as a default.
  *
- * Note: Once created, items can't be deleted. You can, however, repurpose an 
- *       ID by updating that item's definition.
+ * The data in this class is immutable. To modify it, edit ResourceData.json
+ * using the ResourceImporter.
  */
-class ItemDataBase
+class IconDataBase
 {
 public:
     /**
-     * Requests the item data from the database.
+     * Attempts to parse ResourceData.json and load all of the icon data.
      *
-     * @param inTrackItemUpdates  If true, item updates will be pushed into 
-     *                            itemUpdateHistory.
+     * Errors if resourceDataJson doesn't contain an iconSheets section.
      */
-    ItemDataBase(bool inTrackItemUpdates);
+    IconDataBase(const nlohmann::json& resourceDataJson);
 
     /**
-     * Creates a new item with the given ID.
-     * If newItem.numericID == NULL_ITEM_ID, uses the next sequential ID.
-     * 
-     * Note: The new item's stringID will be derived from newItem's displayName,
-     *       regardless of what newItem's stringID is.
-     * 
-     * @return If an item with the given ID or displayName exists, does nothing 
-     *         and returns nullptr. Else, returns the new item.
+     * Returns the icon with the given string ID.
+     * Errors if the given ID doesn't exist.
      */
-    const Item* createItem(const Item& newItem);
+    const Icon& getIcon(const std::string& stringID) const;
 
     /**
-     * Updates the item at newItem.numericID to match the given item, then 
-     * increments its version number.
+     * Returns the icon with the given numeric ID.
+     * Errors if the given ID doesn't exist.
+     */
+    const Icon& getIcon(IconID numericID) const;
+
+    /**
+     * Get a reference to a vector containing all the icons.
+     */
+    const std::vector<Icon>& getAllIcons() const;
+
+private:
+    /**
+     * Parses the given json, constructing icons and pushing them into the
+     * icons vector.
      *
-     * Note: The updated item's stringID will be derived from newItem's 
-     *       displayName, regardless of what newItem's stringID is.
-     *
-     * @return If no item with the given ID exists or newItem's displayName is 
-     *         changed but already taken, returns nullptr. Else, returns the 
-     *         updated item.
+     * @param json  The json to parse. Must be loaded from a valid
+     *              ResourceData.json.
      */
-    const Item* updateItem(const Item& newItem);
+    void parseJson(const nlohmann::json& json);
 
     /**
-     * @return If no item with the given ID exists, returns nullptr. Else, 
-     *         returns the requested item.
+     * Parses the given icon json and adds the resulting icon to the
+     * icons vector.
+
+     * @param iconJson  The json to parse. Must be a valid icon section
+     *                    from ResourceData.json.
      */
-    const Item* getItem(const std::string& stringID) const;
+    void parseIcon(const nlohmann::json& iconJson);
 
-    /**
-     * @return If no item with the given ID exists, returns nullptr. Else, 
-     *         returns the requested item.
-     */
-    const Item* getItem(ItemID numericID) const;
+    /** The loaded icons, indexed by their numeric IDs. */
+    std::vector<Icon> icons;
 
-    /**
-     * @return If no item with the given ID exists, returns false. Else, 
-     *         returns true.
-     */
-    bool itemExists(ItemID numericID) const;
-
-    /**
-     * Get an item's version number.
-     * Version numbers increase incrementally each time an item's definition 
-     * is changed.
-     * 
-     * @return If no item with the given ID exists, returns 0. Else, returns 
-     *         the item's version number.
-     */
-    ItemVersion getItemVersion(ItemID numericID);
-
-    /**
-     * Get a reference to the map containing all the items.
-     */
-    const std::unordered_map<ItemID, Item>& getAllItems() const;
-
-    /**
-     * Returns a vector containing all items that have had their definitions 
-     * updated since the last time the vector was cleared.
-     */
-    const std::vector<ItemID>& getItemUpdateHistory();
-
-    /**
-     * Clears the item update history vector.
-     */
-    void clearItemUpdateHistory();
-
-protected:
-    /**
-     * Derives a string ID from a display name by making it all lowercase and
-     * replacing spaces with underscores.
-     */
-    std::string deriveStringID(const std::string& displayName);
-
-    // Note: We use unordered_map instead of vector for items/itemVersions 
-    //       so that we don't have to allocate/copy the whole vector when 
-    //       a new item is added.
-    /** The loaded items, indexed by their numeric IDs. */
-    std::unordered_map<ItemID, Item> itemMap;
-
-    /** A map for easily looking up items by their string ID. */
-    std::unordered_map<std::string, Item*> itemStringMap;
-
-    /** Each item's version number, indexed by their numeric IDs. Each time an
-        item's definition is changed, its version gets incremented.
-        Note: We split this from the Item class because it's often used 
-              separately (e.g. sending ID + version for Inventory). */
-    std::unordered_map<ItemID, ItemVersion> itemVersionMap;
-
-    /** If true, all item updates will be pushed into itemUpdateHistory. */
-    bool trackItemUpdates;
-
-    /** Holds a history of items that have been updated.
-        ItemSystem uses this history to send updates to clients, then
-        clears it. */
-    std::vector<ItemID> itemUpdateHistory;
-
-    /** Tracks the next numeric item ID to use (typically 1 greater than the 
-        highest ID in our maps). */
-    ItemID nextItemID{};
+    /** A map for easily looking up icons by their string ID. */
+    std::unordered_map<std::string, const Icon*> iconStringMap;
 };
 
 } // End namespace AM

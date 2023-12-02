@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineMessageType.h"
 #include "ItemID.h"
+#include "IconID.h"
 #include "ItemInteractionType.h"
 #include "ItemProperties.h"
 #include "ItemCombination.h"
@@ -9,7 +9,6 @@
 #include "bitsery/ext/std_variant.h"
 #include <SDL_stdinc.h>
 #include <string>
-#include <unordered_map>
 #include <array>
 #include <vector>
 
@@ -42,8 +41,6 @@ struct Item {
     /** The maximum number of combinations that an item can support. */
     static constexpr std::size_t MAX_COMBINATIONS{50};
 
-    // TODO: Icon ID 
-
     /** Unique display name, shown in the UI.  */
     std::string displayName{"Null"};
 
@@ -55,6 +52,9 @@ struct Item {
     /** This item's unique numeric identifier.
         This ID will be consistent, and can be used for persistent state. */
     ItemID numericID{NULL_ITEM_ID};
+
+    /** The ID of this item's icon. */
+    IconID iconID{NULL_ICON_ID};
 
     /** The interactions that this item supports.
         Elements are filled contiguously starting at index 0. Empty elements 
@@ -163,6 +163,7 @@ void serialize(S& serializer, Item& item)
     serializer.text1b(item.displayName, Item::MAX_DISPLAY_NAME_LENGTH);
     serializer.text1b(item.stringID, Item::MAX_DISPLAY_NAME_LENGTH);
     serializer.value2b(item.numericID);
+    serializer.value2b(item.iconID);
     serializer.container1b(item.supportedInteractions);
     serializer.container(item.properties, Item::MAX_PROPERTIES,
                          [](S& serializer, ItemProperty& property) {

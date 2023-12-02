@@ -15,7 +15,9 @@ Application::Application()
 : sdl{0}
 , sdlNetInit{}
 , userConfigInitializer{}
-, spriteData{}
+, resourceData{}
+, spriteData{resourceData.get()}
+, iconData{resourceData.get()}
 , network{}
 , networkCaller{std::bind_front(&Network::tick, &network),
                 SharedConfig::SERVER_NETWORK_TICK_TIMESTEP_S, "Network", true}

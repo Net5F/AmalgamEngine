@@ -6,7 +6,9 @@
 #include "Simulation.h"
 #include "Renderer.h"
 #include "AssetCache.h"
+#include "ResourceData.h"
 #include "SpriteData.h"
+#include "IconData.h"
 #include "QueuedEvents.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
@@ -150,7 +152,11 @@ private:
     //-------------------------------------------------------------------------
     AssetCache assetCache;
 
+    ResourceData resourceData;
+
     SpriteData spriteData;
+
+    IconData iconData;
 
     Network network;
     /** Calls network.tick() at the network tick rate. */
@@ -215,7 +221,7 @@ void Application::registerUserInterfaceExtension()
                                        userInterface.getEventDispatcher(),
                                        network,
                                        sdlRenderer.Get(),
-                                       spriteData};
+                                       spriteData, iconData};
 
     userInterface.setExtension(std::make_unique<T>(uiDeps));
 }

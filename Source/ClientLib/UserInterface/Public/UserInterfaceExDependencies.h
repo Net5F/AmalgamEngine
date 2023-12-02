@@ -9,9 +9,10 @@ class EventDispatcher;
 namespace Client
 {
 class Simulation;
-class SpriteData;
 class WorldObjectLocator;
 class Network;
+class SpriteData;
+class IconData;
 
 /**
  * Defines the dependencies that will be provided to the project's
@@ -36,6 +37,9 @@ public:
 
     /** Used for getting sprite and sprite set data. */
     SpriteData& spriteData;
+
+    /** Used for getting icon data. */
+    IconData& iconData;
 };
 
 } // namespace Client

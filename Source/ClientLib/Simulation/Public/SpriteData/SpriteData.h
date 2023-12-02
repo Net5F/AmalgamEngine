@@ -2,7 +2,6 @@
 
 #include "SpriteDataBase.h"
 #include "SpriteRenderData.h"
-#include "nlohmann/json_fwd.hpp"
 #include <vector>
 
 namespace AM
@@ -17,9 +16,6 @@ namespace Client
  * Beyond the parsing that SpriteDataBase performs, this class loads the
  * rendering-specific sprite data and provides an interface for accessing it.
  *
- * Note: This class expects a ResourceData.json file to be present in the same
- *       directory as the application executable.
- *
  * The data in this class is immutable. To modify it, edit ResourceData.json
  * using the ResourceImporter.
  */
@@ -27,12 +23,12 @@ class SpriteData : public SpriteDataBase
 {
 public:
     /**
-     * Calls SpriteDataBase() constructor, then re-parses ResourceData.json to
-     * load the rendering-specific sprite data.
+     * Calls SpriteDataBase() constructor, then load the rendering-specific 
+     * sprite data from the given json.
      *
-     * Errors if ResourceData.json doesn't exist or it fails to parse.
+     * Errors if resourceDataJson doesn't contain a spriteSheets section.
      */
-    SpriteData(AssetCache& assetCache);
+    SpriteData(const nlohmann::json& resourceDataJson, AssetCache& assetCache);
 
     /**
      * Get a sprite's render data, using its numeric ID.
@@ -42,17 +38,17 @@ public:
 private:
     /**
      * Parses the given json, constructing sprites and pushing them into the
-     * sprites vector.
+     * renderData vector.
      *
      * @param json  The json to parse. Must be loaded from a valid
      *              ResourceData.json.
      * @param assetCache  The asset cache to load sprite sheet textures into.
      */
-    void parseJson(nlohmann::json& json, AssetCache& assetCache);
+    void parseJson(const nlohmann::json& json, AssetCache& assetCache);
 
     /**
      * Parses the given sprite json and adds the resulting sprite to the
-     * sprites vector.
+     * renderData vector.
      *
      * @param spriteJson  The json to parse. Must be a valid sprite section
      *                    from ResourceData.json.

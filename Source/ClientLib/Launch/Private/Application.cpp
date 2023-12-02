@@ -25,7 +25,9 @@ Application::Application()
             SDL_WINDOW_SHOWN}
 , sdlRenderer{sdlWindow, -1, SDL_RENDERER_ACCELERATED}
 , assetCache{sdlRenderer.Get()}
-, spriteData{assetCache}
+, resourceData{}
+, spriteData{resourceData.get(), assetCache}
+, iconData{resourceData.get()}
 , network{}
 , networkCaller{std::bind_front(&Network::tick, &network),
                 SharedConfig::CLIENT_NETWORK_TICK_TIMESTEP_S, "Network", true}
