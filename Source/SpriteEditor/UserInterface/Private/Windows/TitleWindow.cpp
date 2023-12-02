@@ -19,7 +19,7 @@ TitleWindow::TitleWindow(UserInterface& inUserInterface,
 , titleText({0, 193, 1920, 75}, "TitleText")
 , newButton({724, 432, 472, 96}, "New", "NewButton")
 , loadButton({724, 589, 472, 96}, "Load", "LoadButton")
-, errorText({0, 721, 1920, 48}, "ErrorText")
+, errorText({20, 721, 1880, 300}, "ErrorText")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(titleText);

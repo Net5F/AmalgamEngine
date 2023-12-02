@@ -1,6 +1,5 @@
 #include "SpritePropertiesWindow.h"
 #include "MainScreen.h"
-#include "MainThumbnail.h"
 #include "DataModel.h"
 #include "EditorSprite.h"
 #include "NullSpriteID.h"

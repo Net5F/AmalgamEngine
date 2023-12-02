@@ -2,6 +2,7 @@
 
 #include "LibraryListItem.h"
 #include "SpriteSets.h"
+#include "IconID.h"
 #include "AUI/Window.h"
 #include "AUI/Text.h"
 #include "AUI/Image.h"
@@ -16,11 +17,12 @@ namespace SpriteEditor
 class MainScreen;
 class DataModel;
 struct EditorSpriteSheet;
-class SpriteSheetListItem;
+class ParentListItem;
 struct EditorFloorSpriteSet;
 struct EditorFloorCoveringSpriteSet;
 struct EditorWallSpriteSet;
 struct EditorObjectSpriteSet;
+struct EditorIconSheet;
 
 /**
  * The left-side panel on the main screen. Allows the user to manage the
@@ -57,6 +59,7 @@ private:
         FloorCoverings,
         Walls,
         Objects,
+        IconSheets,
         Count,
         None
     };
@@ -64,7 +67,7 @@ private:
     /**
      * Adds the given item to the library.
      */
-    void onSheetAdded(int sheetID, const EditorSpriteSheet& sheet);
+    void onSpriteSheetAdded(int sheetID, const EditorSpriteSheet& sheet);
     void onFloorAdded(Uint16 floorID, const EditorFloorSpriteSet& floor);
     void
         onFloorCoveringAdded(Uint16 floorCoveringID,
@@ -73,12 +76,14 @@ private:
     void onObjectAdded(Uint16 objectID, const EditorObjectSpriteSet& object);
     template<typename T>
     void onSpriteSetAdded(Uint16 spriteSetID, const T& spriteSet);
+    void onIconSheetAdded(int sheetID, const EditorIconSheet& sheet);
 
     /**
      * Removes the given item from the library.
      */
-    void onSheetRemoved(int sheetID);
+    void onSpriteSheetRemoved(int sheetID);
     void onSpriteSetRemoved(SpriteSet::Type type, Uint16 spriteSetID);
+    void onIconSheetRemoved(int sheetID);
 
     /**
      * Updates the display name on the associated list item.
@@ -87,6 +92,8 @@ private:
                                     const std::string& newDisplayName);
     void onSpriteSetDisplayNameChanged(SpriteSet::Type type, Uint16 spriteSetID,
                                        const std::string& newDisplayName);
+    void onIconDisplayNameChanged(IconID iconID,
+                                  const std::string& newDisplayName);
 
     /**
      * If there are other currently selected list items, checks if the given 
@@ -98,8 +105,15 @@ private:
      * Adds the given sprite to the given sprite sheet list item.
      */
     void addSpriteToSheetListItem(
-        SpriteSheetListItem& sheetListItem,
+        ParentListItem& sheetListItem,
         const EditorSpriteSheet& sheet, int spriteID);
+
+    /**
+     * Adds the given icon to the given icon sheet list item.
+     */
+    void addIconToSheetListItem(
+        ParentListItem& sheetListItem,
+        const EditorIconSheet& sheet, IconID iconID);
 
     /**
      * @return true if the given type is removable.

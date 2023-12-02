@@ -1,4 +1,4 @@
-#include "AddSheetDialog.h"
+#include "AddSpriteSheetDialog.h"
 #include "MainScreen.h"
 #include "MainThumbnail.h"
 #include "DataModel.h"
@@ -8,8 +8,8 @@ namespace AM
 {
 namespace SpriteEditor
 {
-AddSheetDialog::AddSheetDialog(DataModel& inDataModel)
-: AUI::Window({0, 0, 1920, 1080}, "AddSheetDialog")
+AddSpriteSheetDialog::AddSpriteSheetDialog(DataModel& inDataModel)
+: AUI::Window({0, 0, 1920, 1080}, "AddSpriteSheetDialog")
 , shadowImage({0, 0, logicalExtent.w, logicalExtent.h})
 , backgroundImage({719, 208, 523, 506})
 , headerText({747, 228, 280, 60})
@@ -143,7 +143,7 @@ AddSheetDialog::AddSheetDialog(DataModel& inDataModel)
     errorText.setIsVisible(false);
 }
 
-void AddSheetDialog::clear()
+void AddSpriteSheetDialog::clear()
 {
     pathInput.setText("");
     widthInput.setText("");

@@ -12,7 +12,7 @@ namespace SpriteEditor
 
 /**
  * Holds the data necessary for editing and saving a sprite.
- * Part of SpriteDataModel. 
+ * Part of SpriteModel. 
  */
 struct EditorSprite {
     /** This sprite's unique numeric identifier. */

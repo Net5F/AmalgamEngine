@@ -71,6 +71,8 @@ public:
         FloorCovering,
         Wall,
         Object,
+        IconSheet,
+        Icon,
         Count,
         None
     };

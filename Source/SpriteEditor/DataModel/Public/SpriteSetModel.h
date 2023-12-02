@@ -19,6 +19,8 @@ namespace SpriteEditor
 class DataModel;
 
 /**
+ * Holds data for each type of sprite set (floor, floor covering, wall, and 
+ * object).
  */
 class SpriteSetModel
 {
@@ -82,39 +84,6 @@ public:
     void removeSpriteIDFromSets(int spriteID);
 
     const std::string& getErrorString();
-
-    //-------------------------------------------------------------------------
-    // Signal Sinks
-    //-------------------------------------------------------------------------
-    /** A floor sprite set was added to the model. */
-    entt::sink<entt::sigh<void(Uint16 floorID, const EditorFloorSpriteSet& floor)>>
-        floorAdded;
-    /** A floor covering sprite set was added to the model. */
-    entt::sink<entt::sigh<void(Uint16 floorCoveringID,
-                               const EditorFloorCoveringSpriteSet& floorCovering)>>
-        floorCoveringAdded;
-    /** A wall sprite set was added to the model. */
-    entt::sink<
-        entt::sigh<void(Uint16 wallID, const EditorWallSpriteSet& wall)>>
-        wallAdded;
-    /** An object sprite set was added to the model. */
-    entt::sink<
-        entt::sigh<void(Uint16 objectID, const EditorObjectSpriteSet& floor)>>
-        objectAdded;
-
-    /** A sprite set was removed from the model. */
-    entt::sink<entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID)>>
-        spriteSetRemoved;
-
-    /** A sprite set's sprite at the given index was changed. */
-    entt::sink<entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
-                               std::size_t index, int newSpriteID)>>
-        spriteSetSlotChanged;
-
-    /** A sprite set's display name has changed. */
-    entt::sink<entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
-                               const std::string& newDisplayName)>>
-        spriteSetDisplayNameChanged;
 
 private:
     // Parsing functions.
@@ -213,6 +182,40 @@ private:
     entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
                                const std::string& newDisplayName)>
         spriteSetDisplayNameChangedSig;
+
+public:
+    //-------------------------------------------------------------------------
+    // Signal Sinks
+    //-------------------------------------------------------------------------
+    /** A floor sprite set was added to the model. */
+    entt::sink<entt::sigh<void(Uint16 floorID, const EditorFloorSpriteSet& floor)>>
+        floorAdded;
+    /** A floor covering sprite set was added to the model. */
+    entt::sink<entt::sigh<void(Uint16 floorCoveringID,
+                               const EditorFloorCoveringSpriteSet& floorCovering)>>
+        floorCoveringAdded;
+    /** A wall sprite set was added to the model. */
+    entt::sink<
+        entt::sigh<void(Uint16 wallID, const EditorWallSpriteSet& wall)>>
+        wallAdded;
+    /** An object sprite set was added to the model. */
+    entt::sink<
+        entt::sigh<void(Uint16 objectID, const EditorObjectSpriteSet& floor)>>
+        objectAdded;
+
+    /** A sprite set was removed from the model. */
+    entt::sink<entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID)>>
+        spriteSetRemoved;
+
+    /** A sprite set's sprite at the given index was changed. */
+    entt::sink<entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
+                               std::size_t index, int newSpriteID)>>
+        spriteSetSlotChanged;
+
+    /** A sprite set's display name has changed. */
+    entt::sink<entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
+                               const std::string& newDisplayName)>>
+        spriteSetDisplayNameChanged;
 };
 
 } // namespace SpriteEditor

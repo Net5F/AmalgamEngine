@@ -6,10 +6,13 @@ target_sources(SpriteEditor
         Private/Widgets/MainButton.cpp
         Private/Widgets/MainTextInput.cpp
         Private/Widgets/MainThumbnail.cpp
+        Private/Widgets/ParentListItem.cpp
         Private/Widgets/SpriteSetSlot.cpp
-        Private/Widgets/SpriteSheetListItem.cpp
         Private/Widgets/TitleButton.cpp
-        Private/Windows/AddSheetDialog.cpp
+        Private/Windows/AddIconSheetDialog.cpp
+        Private/Windows/AddSpriteSheetDialog.cpp
+        Private/Windows/IconEditStage.cpp
+        Private/Windows/IconPropertiesWindow.cpp
         Private/Windows/LibraryAddMenu.cpp
         Private/Windows/LibraryWindow.cpp
         Private/Windows/SaveButtonWindow.cpp
@@ -28,10 +31,13 @@ target_sources(SpriteEditor
         Public/Widgets/MainButton.h
         Public/Widgets/MainTextInput.h
         Public/Widgets/MainThumbnail.h
+        Public/Widgets/ParentListItem.h
         Public/Widgets/SpriteSetSlot.h
-        Public/Widgets/SpriteSheetListItem.h
         Public/Widgets/TitleButton.h
-        Public/Windows/AddSheetDialog.h
+        Public/Windows/AddIconSheetDialog.h
+        Public/Windows/AddSpriteSheetDialog.h
+        Public/Windows/IconEditStage.h
+        Public/Windows/IconPropertiesWindow.h
         Public/Windows/LibraryAddMenu.h
         Public/Windows/LibraryWindow.h
         Public/Windows/SaveButtonWindow.h

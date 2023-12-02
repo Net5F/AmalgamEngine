@@ -42,6 +42,9 @@ target_sources(SharedLib
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
         Public/Components/Rotation.h
+        Public/IconData/Icon.h
+        Public/IconData/IconDataBase.h
+        Public/IconData/IconID.h
         Public/ItemData/Item.h
         Public/ItemData/ItemDataBase.h
         Public/ItemData/ItemID.h
@@ -73,6 +76,7 @@ target_include_directories(SharedLib
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+		${CMAKE_CURRENT_SOURCE_DIR}/Public/IconData
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/SpriteData
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap

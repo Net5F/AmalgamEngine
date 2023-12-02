@@ -17,22 +17,28 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , libraryAddMenu{}
 , saveButtonWindow{*this, dataModel}
 , spriteEditStage{dataModel}
+, iconEditStage{dataModel}
 , spriteSetEditStage{dataModel, libraryWindow}
 , spritePropertiesWindow{dataModel}
 , spriteSetPropertiesWindow{dataModel}
+, iconPropertiesWindow{dataModel}
 , confirmationDialog{{0, 0, 1920, 1080}, "ConfirmationDialog"}
-, addSheetDialog{dataModel}
+, addSpriteSheetDialog{dataModel}
+, addIconSheetDialog{dataModel}
 {
     // Add our windows so they're included in rendering, etc.
     windows.push_back(libraryWindow);
     windows.push_back(saveButtonWindow);
     windows.push_back(spriteEditStage);
     windows.push_back(spriteSetEditStage);
+    windows.push_back(iconEditStage);
     windows.push_back(spritePropertiesWindow);
     windows.push_back(spriteSetPropertiesWindow);
+    windows.push_back(iconPropertiesWindow);
     windows.push_back(libraryAddMenu);
     windows.push_back(confirmationDialog);
-    windows.push_back(addSheetDialog);
+    windows.push_back(addSpriteSheetDialog);
+    windows.push_back(addIconSheetDialog);
 
     /* Confirmation dialog. */
     // Background shadow image.
@@ -97,7 +103,7 @@ MainScreen::MainScreen(DataModel& inDataModel)
 
     /* Library add menu. */
     libraryAddMenu.addSpriteSheetButton.setOnPressed([this]() {
-        addSheetDialog.setIsVisible(true);
+        addSpriteSheetDialog.setIsVisible(true);
         // When we drop focus, the menu will close itself.
         dropFocus();
     });
@@ -117,10 +123,15 @@ MainScreen::MainScreen(DataModel& inDataModel)
         dataModel.spriteSetModel.addObject();
         dropFocus();
     });
+    libraryAddMenu.addIconButton.setOnPressed([this]() {
+        addIconSheetDialog.setIsVisible(true);
+        dropFocus();
+    });
 
     // Make the modal dialogs invisible.
     confirmationDialog.setIsVisible(false);
-    addSheetDialog.setIsVisible(false);
+    addSpriteSheetDialog.setIsVisible(false);
+    addIconSheetDialog.setIsVisible(false);
     libraryAddMenu.setIsVisible(false);
 
     /* Edit Stages and Properties Windows. */
@@ -129,6 +140,8 @@ MainScreen::MainScreen(DataModel& inDataModel)
     spritePropertiesWindow.setIsVisible(false);
     spriteSetEditStage.setIsVisible(false);
     spriteSetPropertiesWindow.setIsVisible(false);
+    iconEditStage.setIsVisible(false);
+    iconPropertiesWindow.setIsVisible(false);
 
     // When the user selects a new item in the library, make the proper windows
     // visible.
@@ -187,11 +200,17 @@ void MainScreen::onActiveLibraryItemChanged(
     spritePropertiesWindow.setIsVisible(false);
     spriteSetEditStage.setIsVisible(false);
     spriteSetPropertiesWindow.setIsVisible(false);
+    iconEditStage.setIsVisible(false);
+    iconPropertiesWindow.setIsVisible(false);
 
     // Make the appropriate windows visible, based on the new item's type.
     if (std::holds_alternative<EditorSprite>(newActiveItem)) {
         spriteEditStage.setIsVisible(true);
         spritePropertiesWindow.setIsVisible(true);
+    }
+    else if (std::holds_alternative<EditorIcon>(newActiveItem)) {
+        iconEditStage.setIsVisible(true);
+        iconPropertiesWindow.setIsVisible(true);
     }
     else {
         // The new active item is a sprite set.

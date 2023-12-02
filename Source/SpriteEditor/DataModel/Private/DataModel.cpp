@@ -17,9 +17,11 @@ namespace SpriteEditor
 DataModel::DataModel(SDL_Renderer* inSdlRenderer)
 : spriteSetModel{*this}
 , spriteModel{*this, spriteSetModel, inSdlRenderer}
-, activeLibraryItemChanged{activeLibraryItemChangedSig}
+, iconModel{*this, inSdlRenderer}
 , workingFilePath{""}
 , workingTexturesDir{""}
+, activeLibraryItemChangedSig{}
+, activeLibraryItemChanged{activeLibraryItemChangedSig}
 {
 }
 
@@ -70,20 +72,30 @@ bool DataModel::load(const std::string& fullPath)
     }
 
     // Parse the file into a json structure.
-    nlohmann::json json = nlohmann::json::parse(workingFile, nullptr);
+    nlohmann::json json;
+    std::string parseError{""};
+    try {
+        json = nlohmann::json::parse(workingFile, nullptr);
+    } catch (nlohmann::json::exception& e) {
+        parseError = e.what();
+    }
 
     // Load the data into each model.
-    std::string modelError{""};
-    if (!spriteModel.load(json)) {
-        modelError = spriteModel.getErrorString();
-    }
-    else if (!spriteSetModel.load(json)) {
-        modelError = spriteModel.getErrorString();
+    if (parseError == "") {
+        if (!spriteModel.load(json)) {
+            parseError = spriteModel.getErrorString();
+        }
+        else if (!spriteSetModel.load(json)) {
+            parseError = spriteSetModel.getErrorString();
+        }
+        else if (!iconModel.load(json)) {
+            parseError = iconModel.getErrorString();
+        }
     }
 
-    if (modelError != "") {
+    if (parseError != "") {
         resetModelState();
-        errorString = "Parse failure - " + modelError;
+        errorString = "Parse failure - " + parseError;
         return false;
     }
 
@@ -96,6 +108,7 @@ void DataModel::save()
     nlohmann::json json;
     spriteModel.save(json);
     spriteSetModel.save(json);
+    iconModel.save(json);
 
     // Write the json to our working file.
     std::ofstream workingFile(workingFilePath, std::ios::trunc);
@@ -149,6 +162,16 @@ void DataModel::setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveSpriteS
     }
 }
 
+void DataModel::setActiveIcon(IconID newActiveIconID)
+{
+    // Note: This will error if the sprite ID is invalid. This is good, since 
+    //       we don't expect any invalid IDs to be floating around.
+    const EditorIcon& icon{iconModel.getIcon(newActiveIconID)};
+
+    // Signal the active sprite to the UI.
+    activeLibraryItemChangedSig.publish(icon);
+}
+
 const std::string& DataModel::getWorkingTexturesDir()
 {
     return workingTexturesDir;
@@ -170,6 +193,23 @@ std::string DataModel::deriveStringID(const std::string& displayName)
     std::replace(stringID.begin(), stringID.end(), ' ', '_');
 
     return stringID;
+}
+
+bool DataModel::validateRelPath(const std::string& relPath)
+{
+    // Construct the file path.
+    std::filesystem::path filePath{getWorkingTexturesDir()};
+    filePath /= relPath;
+
+    // Check if the file exists.
+    if (std::filesystem::exists(filePath)) {
+        return true;
+    }
+    else {
+        errorString = "File not found at Assets/Textures/";
+        errorString += relPath;
+        return false;
+    }
 }
 
 bool DataModel::setWorkingTexturesDir()
@@ -206,6 +246,7 @@ void DataModel::resetModelState()
 
     spriteModel.resetModelState();
     spriteSetModel.resetModelState();
+    iconModel.resetModelState();
 }
 
 } // End namespace SpriteEditor

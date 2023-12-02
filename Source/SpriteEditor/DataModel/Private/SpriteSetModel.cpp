@@ -8,6 +8,18 @@ namespace SpriteEditor
 {
 SpriteSetModel::SpriteSetModel(DataModel& inDataModel)
 : dataModel{inDataModel}
+, floorIDPool{SDL_MAX_UINT16}
+, floorCoveringIDPool{SDL_MAX_UINT16}
+, wallIDPool{SDL_MAX_UINT16}
+, objectIDPool{SDL_MAX_UINT16}
+, errorString{}
+, floorAddedSig{}
+, floorCoveringAddedSig{}
+, wallAddedSig{}
+, objectAddedSig{}
+, spriteSetRemovedSig{}
+, spriteSetSlotChangedSig{}
+, spriteSetDisplayNameChangedSig{}
 , floorAdded{floorAddedSig}
 , floorCoveringAdded{floorCoveringAddedSig}
 , wallAdded{wallAddedSig}
@@ -15,10 +27,6 @@ SpriteSetModel::SpriteSetModel(DataModel& inDataModel)
 , spriteSetRemoved{spriteSetRemovedSig}
 , spriteSetSlotChanged{spriteSetSlotChangedSig}
 , spriteSetDisplayNameChanged{spriteSetDisplayNameChangedSig}
-, floorIDPool{SDL_MAX_UINT16}
-, floorCoveringIDPool{SDL_MAX_UINT16}
-, wallIDPool{SDL_MAX_UINT16}
-, objectIDPool{SDL_MAX_UINT16}
 {
 }
 
@@ -51,7 +59,7 @@ bool SpriteSetModel::load(const nlohmann::json& json)
                 return false;
             }
         }
-    } catch (nlohmann::json::type_error& e) {
+    } catch (nlohmann::json::exception& e) {
         resetModelState();
         errorString = "Parse failure - ";
         errorString += e.what();

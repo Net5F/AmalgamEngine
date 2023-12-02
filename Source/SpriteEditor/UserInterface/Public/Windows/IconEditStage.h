@@ -1,7 +1,6 @@
 #pragma once
 
 #include "LibraryItemData.h"
-#include "BoundingBoxGizmo.h"
 #include "AUI/Window.h"
 #include "AUI/Screen.h"
 #include "AUI/Text.h"
@@ -14,58 +13,51 @@ namespace SpriteEditor
 class DataModel;
 
 /**
- * The center stage shown when the user loads a sprite from the Library.
- * Allows the user to edit the active sprite's bounding box.
+ * The center stage shown when the user loads an icon from the Library.
  */
-class SpriteEditStage : public AUI::Window
+class IconEditStage : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteEditStage(DataModel& inDataModel);
+    IconEditStage(DataModel& inDataModel);
 
 private:
     /**
-     * If the new active item is a sprite, loads it's data onto this stage.
+     * If the new active item is a icon, loads it's data onto this stage.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If active sprite was removed) Sets activeSprite to invalid and returns
+     * (If active icon was removed) Sets activeIcon to invalid and returns
      * the stage to its default state.
      */
-    void onSpriteRemoved(int spriteID);
+    void onIconRemoved(IconID iconID);
 
     /**
      * Styles the given text.
      */
     void styleText(AUI::Text& text);
 
-    /** Used to get the current working dir when displaying the sprite. */
+    /** Used to get the current working dir when displaying the icon. */
     DataModel& dataModel;
 
-    /** The active sprite's ID. */
-    int activeSpriteID;
+    /** The active icon's ID. */
+    IconID activeIconID;
 
     //-------------------------------------------------------------------------
     // Private child widgets
     //-------------------------------------------------------------------------
     AUI::Text topText;
 
-    /** Checkerboard image, tiled as the background for the loaded sprite. */
+    /** Checkerboard image, tiled as the background for the loaded icon. */
     AUI::Image checkerboardImage;
 
-    /** The sprite that is currently loaded onto the stage. */
-    AUI::Image spriteImage;
+    /** The icon that is currently loaded onto the stage. */
+    AUI::Image iconImage;
 
-    /** The gizmo for editing the sprite's bounding box. */
-    BoundingBoxGizmo boundingBoxGizmo;
-
-    AUI::Text descText1;
-    AUI::Text descText2;
-    AUI::Text descText3;
-    AUI::Text descText4;
+    AUI::Text descText;
 };
 
 } // End namespace SpriteEditor

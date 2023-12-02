@@ -1,16 +1,20 @@
 target_sources(SpriteEditor
     PRIVATE
         Private/DataModel.cpp
+        Private/IconModel.cpp
         Private/SpriteModel.cpp
         Private/SpriteSetModel.cpp
     PUBLIC
         Public/DataModel.h
         Public/EditorFloorCoveringSpriteSet.h
         Public/EditorFloorSpriteSet.h
+        Public/EditorIcon.h
+        Public/EditorIconSheet.h
         Public/EditorObjectSpriteSet.h
         Public/EditorSprite.h
         Public/EditorSpriteSheet.h
         Public/EditorWallSpriteSet.h
+        Public/IconModel.h
         Public/LibraryItemData.h
         Public/SpriteModel.h
         Public/SpriteSetModel.h

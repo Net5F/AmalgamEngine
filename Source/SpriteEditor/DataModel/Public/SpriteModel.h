@@ -20,7 +20,7 @@ class DataModel;
 class SpriteSetModel;
 
 /**
- * 
+ * Holds data for sprites and their parent sprite sheets.
  */
 class SpriteModel
 {
@@ -50,14 +50,14 @@ public:
      * Note: We currently only support sprite sheets with consistent sprite
      *       sizes and no padding.
      *
-     * @param relPath  The path to the desired sprite sheet, relative to
-     *                 the application's base directory.
-     * @param spriteWidth  How wide each sprite is.
-     * @param spriteHeight  How tall each sprite is.
-     * @param yOffset  How much each sprite should be offset in the Y direction
-     *                 to line up with their tile.
-     * @param baseName  The name to prepend to each sprite's number. (e.g.
-     *                  "mob_" results in "mob_0", "mob_1", etc.)
+     * @param relPath The path to the desired sprite sheet, relative to
+     *                the application's base directory.
+     * @param spriteWidth How wide each sprite is.
+     * @param spriteHeight How tall each sprite is.
+     * @param yOffset How much each sprite should be offset in the Y direction
+     *                to line up with their tile.
+     * @param baseName The name to prepend to each sprite's number. (e.g.
+     *                 "mob_" results in "mob_0", "mob_1", etc.)
      *
      * @return true if successful. If false, getErrorString() will return more 
      *         information.
@@ -73,7 +73,7 @@ public:
      *
      * Errors if the given ID isn't present in spriteSheetMap.
      *
-     * @param sheetID  The editor ID of the sheet to remove.
+     * @param sheetID The editor ID of the sheet to remove.
      */
     void remSpriteSheet(int sheetID);
 
@@ -82,7 +82,7 @@ public:
      *
      * Errors if the given ID isn't present in spriteMap.
      *
-     * @param spriteID  The editor ID of the sprite to remove.
+     * @param spriteID The editor ID of the sprite to remove.
      */
     void remSprite(int spriteID);
 
@@ -101,55 +101,23 @@ public:
 
     const std::string& getErrorString();
 
-    //-------------------------------------------------------------------------
-    // Signal Sinks
-    //-------------------------------------------------------------------------
-    /** A sprite sheet was added to the model. */
-    entt::sink<entt::sigh<void(int sheetID, const EditorSpriteSheet& sheet)>>
-        sheetAdded;
-    /** A sprite sheet was removed from the model. */
-    entt::sink<entt::sigh<void(int sheetID)>> sheetRemoved;
-    /** A sprite was removed from the model. */
-    entt::sink<entt::sigh<void(int spriteID)>> spriteRemoved;
-
-    /** A sprite's display name has changed. */
-    entt::sink<entt::sigh<void(int spriteID,
-                               const std::string& newDisplayName)>>
-        spriteDisplayNameChanged;
-    /** A sprite's "collision enabled" field has changed. */
-    entt::sink<entt::sigh<void(int spriteID, bool collisionEnabled)>>
-        spriteCollisionEnabledChanged;
-    /** A sprite's bounding box has changed. */
-    entt::sink<entt::sigh<void(int spriteID,
-                               const BoundingBox& newModelBounds)>>
-        spriteModelBoundsChanged;
-
 private:
     // Note: These were arbitrarily chosen and can be increased if necessary.
     static constexpr std::size_t MAX_SPRITE_SHEETS{1000};
     static constexpr std::size_t MAX_SPRITES{MAX_SPRITE_SHEETS * 100};
 
-    /**
-     * Checks that the given relative path corresponds to a valid sprite
-     * sheet image in the working Resources directory.
-     *
-     * @return true if successful. If false, getErrorString() will return more 
-     *         information.
-     */
-    bool validateRelPath(const std::string& relPath);
-
     // Parsing functions.
     /**
-     * @param sheetJson  The json to parse. Must be a valid sprite sheet section
-     *                    from ResourceData.json.
+     * @param sheetJson The json to parse. Must be a valid sprite sheet section
+     *                  from ResourceData.json.
      * @return true if successful. If false, getErrorString() will return more 
      *         information.
      */
     bool parseSpriteSheet(const nlohmann::json& sheetJson);
     /**
-     * @param spriteJson  The json to parse. Must be a valid sprite section
-     *                    from ResourceData.json.
-     * @param spriteSheet  The sheet that this sprite is from.
+     * @param spriteJson The json to parse. Must be a valid sprite section
+     *                   from ResourceData.json.
+     * @param spriteSheet The sheet that this sprite is from.
      * @return true if successful. If false, getErrorString() will return more 
      *         information.
      */
@@ -159,10 +127,10 @@ private:
     /**
      * Checks if the given name is unique among all sprites in the model.
      *
-     * @param spriteID  The ID of the sprite that might get displayName. If it
-     *                  already is set to displayName, it won't be counted as
-     *                  non-unique.
-     * @param displayName  The display name that the sprite will be set to.
+     * @param spriteID The ID of the sprite that might get displayName. If it
+     *                 already is set to displayName, it won't be counted as
+     *                 non-unique.
+     * @param displayName The display name that the sprite will be set to.
      */
     bool spriteNameIsUnique(int spriteID,
                             const std::string& displayName);
@@ -203,6 +171,30 @@ private:
         spriteCollisionEnabledChangedSig;
     entt::sigh<void(int spriteID, const BoundingBox& newModelBounds)>
         spriteModelBoundsChangedSig;
+
+public:
+    //-------------------------------------------------------------------------
+    // Signal Sinks
+    //-------------------------------------------------------------------------
+    /** A sprite sheet was added to the model. */
+    entt::sink<entt::sigh<void(int sheetID, const EditorSpriteSheet& sheet)>>
+        sheetAdded;
+    /** A sprite sheet was removed from the model. */
+    entt::sink<entt::sigh<void(int sheetID)>> sheetRemoved;
+    /** A sprite was removed from the model. */
+    entt::sink<entt::sigh<void(int spriteID)>> spriteRemoved;
+
+    /** A sprite's display name has changed. */
+    entt::sink<entt::sigh<void(int spriteID,
+                               const std::string& newDisplayName)>>
+        spriteDisplayNameChanged;
+    /** A sprite's "collision enabled" field has changed. */
+    entt::sink<entt::sigh<void(int spriteID, bool collisionEnabled)>>
+        spriteCollisionEnabledChanged;
+    /** A sprite's bounding box has changed. */
+    entt::sink<entt::sigh<void(int spriteID,
+                               const BoundingBox& newModelBounds)>>
+        spriteModelBoundsChanged;
 };
 
 } // namespace SpriteEditor

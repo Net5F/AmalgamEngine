@@ -30,6 +30,7 @@ public:
     AUI::Button addFloorCoveringButton;
     AUI::Button addWallButton;
     AUI::Button addObjectButton;
+    AUI::Button addIconButton;
 
     //-------------------------------------------------------------------------
     // Base class overrides

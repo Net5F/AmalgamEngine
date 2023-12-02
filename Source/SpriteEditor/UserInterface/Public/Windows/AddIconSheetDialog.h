@@ -13,15 +13,14 @@ namespace SpriteEditor
 class DataModel;
 
 /**
- * A confirmation dialog with header text, body text, and confirm/cancel
- * buttons.
+ * A confirmation dialog for adding sprite sheets.
  */
-class AddSheetDialog : public AUI::Window
+class AddIconSheetDialog : public AUI::Window
 {
 public:
-    AddSheetDialog(DataModel& ineDataModel);
+    AddIconSheetDialog(DataModel& inDataModel);
 
-    virtual ~AddSheetDialog() = default;
+    virtual ~AddIconSheetDialog() = default;
 
     //-------------------------------------------------------------------------
     // Public child widgets
@@ -37,21 +36,17 @@ public:
     AUI::Text headerText;
 
     // Path entry
-    // Note: The path must be relative to SpriteDataModel::workingTexturesDir.
+    // Note: The path must be relative to IconDataModel::workingTexturesDir.
     AUI::Text pathLabel;
     MainTextInput pathInput;
 
-    // Sprite width entry
+    // Icon width entry
     AUI::Text widthLabel;
     MainTextInput widthInput;
 
-    // Sprite height entry
+    // Icon height entry
     AUI::Text heightLabel;
     MainTextInput heightInput;
-
-    // Sprite Y offset entry
-    AUI::Text offsetLabel;
-    MainTextInput offsetInput;
 
     // Base name entry
     AUI::Text nameLabel;
@@ -80,5 +75,5 @@ private:
     AUI::Text errorText;
 };
 
-} // End namespace SpriteEditor
+} // End namespace IconEditor
 } // End namespace AM

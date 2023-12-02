@@ -9,19 +9,18 @@ namespace AM
 namespace SpriteEditor
 {
 /**
- * A collapsible container used for the sprite sheets in the library window on 
- * the main screen.
+ * A collapsible container used for the top-level list items in the library 
+ * window on the main screen, such as sprite and icon sheets which contain a 
+ * list of sprites or items.
  *
  * Derives from LibraryListItem for hover/select functionality and library 
- * list info. Has a child CategoryContainer to hold the sprites that belong 
- * to this sheet.
+ * list info.
  */
-class SpriteSheetListItem : public LibraryListItem 
+class ParentListItem : public LibraryListItem 
 {
 public:
-    SpriteSheetListItem(const std::string& inHeaderText,
-                         const std::string& inDebugName
-                             = "SpriteSheetListItem");
+    ParentListItem(const std::string& inHeaderText,
+                   const std::string& inDebugName = "ParentListItem");
 
     //-------------------------------------------------------------------------
     // Base class overrides
@@ -41,8 +40,8 @@ public:
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------
-    /** Holds list item children for the sprites in this sheet. */
-    LibraryCollapsibleContainer spriteListItemContainer;
+    /** Holds list item children. */
+    LibraryCollapsibleContainer childListItemContainer;
 };
 
 } // End namespace SpriteEditor

@@ -4,6 +4,7 @@
 #include "LibraryItemData.h"
 #include "SpriteModel.h"
 #include "SpriteSetModel.h"
+#include "IconModel.h"
 #include "entt/signal/sigh.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include <fstream>
@@ -31,12 +32,15 @@ class DataModel
 public:
     DataModel(SDL_Renderer* inSdlRenderer);
 
-    // Note: We put SpriteSetModel first because SpriteModel is dependent.
+    // Note: We put SpriteSetModel first because SpriteModel is dependent on it.
     /** Holds Floor, FloorCovering, Wall, and Object SpriteSet data. */
     SpriteSetModel spriteSetModel;
 
     /** Holds Sprite and SpriteSheet data. */
     SpriteModel spriteModel;
+
+    /** Holds Icon and IconSheet data. */
+    IconModel iconModel;
 
     /**
      * Creates a new ResourceData.json file at the given path and saves to it.
@@ -72,6 +76,9 @@ public:
     /** Sets the current active library item to the given sprite set. */
     void setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveSpriteSetID);
 
+    /** Sets the current active library item to the given sprite. */
+    void setActiveIcon(IconID newActiveIconID);
+
     const std::string& getWorkingTexturesDir();
 
     const std::string& getErrorString();
@@ -82,12 +89,14 @@ public:
      */
     static std::string deriveStringID(const std::string& displayName);
 
-    //-------------------------------------------------------------------------
-    // Signal Sinks
-    //-------------------------------------------------------------------------
-    /** The active library item has changed. */
-    entt::sink<entt::sigh<void(const LibraryItemData& newActiveItem)>>
-        activeLibraryItemChanged;
+    /**
+     * Checks that the given relative path corresponds to a valid sprite
+     * sheet image in the working Resources directory.
+     *
+     * @return true if successful. If false, getErrorString() will return more 
+     *         information.
+     */
+    bool validateRelPath(const std::string& relPath);
 
 private:
     /**
@@ -115,6 +124,14 @@ private:
     //-------------------------------------------------------------------------
     entt::sigh<void(const LibraryItemData& newActiveItem)>
         activeLibraryItemChangedSig;
+
+public:
+    //-------------------------------------------------------------------------
+    // Signal Sinks
+    //-------------------------------------------------------------------------
+    /** The active library item has changed. */
+    entt::sink<entt::sigh<void(const LibraryItemData& newActiveItem)>>
+        activeLibraryItemChanged;
 };
 
 } // namespace SpriteEditor

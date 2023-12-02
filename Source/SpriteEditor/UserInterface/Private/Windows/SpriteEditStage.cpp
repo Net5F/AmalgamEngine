@@ -4,7 +4,6 @@
 #include "DataModel.h"
 #include "NullSpriteID.h"
 #include "Paths.h"
-#include "Ignore.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
 

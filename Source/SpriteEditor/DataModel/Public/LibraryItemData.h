@@ -5,6 +5,7 @@
 #include "EditorFloorCoveringSpriteSet.h"
 #include "EditorWallSpriteSet.h"
 #include "EditorObjectSpriteSet.h"
+#include "EditorIcon.h"
 #include <variant>
 
 namespace AM
@@ -21,7 +22,7 @@ namespace SpriteEditor
 using LibraryItemData
     = std::variant<std::monostate, EditorSprite, EditorFloorSpriteSet,
                    EditorFloorCoveringSpriteSet, EditorWallSpriteSet,
-                   EditorObjectSpriteSet>;
+                   EditorObjectSpriteSet, EditorIcon>;
 
 } // End namespace SpriteEditor
 } // End namespace AM

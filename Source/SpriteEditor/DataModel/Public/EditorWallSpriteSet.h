@@ -12,7 +12,7 @@ namespace SpriteEditor
 {
 /**
  * Holds the data necessary for editing and saving a floor sprite set.
- * Part of SpriteDataModel. 
+ * Part of SpriteSetModel. 
  */
 struct EditorWallSpriteSet {
     /** This sprite set's unique numeric identifier.

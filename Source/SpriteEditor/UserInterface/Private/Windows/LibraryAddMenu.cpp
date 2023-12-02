@@ -8,13 +8,14 @@ namespace AM
 namespace SpriteEditor
 {
 LibraryAddMenu::LibraryAddMenu()
-: AUI::Window({310, 5, 169, 187}, "LibraryAddMenu")
+: AUI::Window({310, 5, 169, 219}, "LibraryAddMenu")
 , backgroundImage({0, 0, logicalExtent.w, logicalExtent.h})
 , addSpriteSheetButton({1, 1, 167, 32}, "AddSpriteSheetButton")
 , addFloorButton({1, 32, 167, 32}, "AddFloorButton")
 , addFloorCoveringButton({1, 64, 167, 32}, "AddFloorCoveringButton")
 , addWallButton({1, 96, 167, 32}, "AddWallButton")
 , addObjectButton({1, 128, 167, 32}, "AddObjectButton")
+, addIconButton({1, 160, 167, 32}, "AddIconButton")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
@@ -23,6 +24,7 @@ LibraryAddMenu::LibraryAddMenu()
     children.push_back(addFloorCoveringButton);
     children.push_back(addWallButton);
     children.push_back(addObjectButton);
+    children.push_back(addIconButton);
 
     // Flag ourselves as focusable, so we can close when focus is lost.
     isFocusable = true;
@@ -37,6 +39,7 @@ LibraryAddMenu::LibraryAddMenu()
     styleButton(addFloorCoveringButton, "Floor Covering");
     styleButton(addWallButton, "Wall");
     styleButton(addObjectButton, "Object");
+    styleButton(addIconButton, "Icon");
 }
 
 void LibraryAddMenu::onFocusLost(AUI::FocusLostType focusLostType)

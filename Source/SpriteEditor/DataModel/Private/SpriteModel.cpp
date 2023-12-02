@@ -6,6 +6,7 @@
 #include <SDL_render.h>
 #include <SDL_image.h>
 #include <filesystem>
+#include "Log.h"
 
 namespace AM
 {
@@ -14,17 +15,26 @@ namespace SpriteEditor
 SpriteModel::SpriteModel(DataModel& inDataModel,
                          SpriteSetModel& inSpriteSetModel,
                          SDL_Renderer* inSdlRenderer)
-: dataModel{inDataModel}
-, spriteSetModel{inSpriteSetModel}
+: spriteSetModel{inSpriteSetModel}
+, dataModel{inDataModel}
+, sdlRenderer{inSdlRenderer}
+, spriteSheetMap{}
+, spriteMap{}
+, sheetIDPool{MAX_SPRITE_SHEETS}
+, spriteIDPool{MAX_SPRITES}
+, errorString{}
+, sheetAddedSig{}
+, sheetRemovedSig{}
+, spriteRemovedSig{}
+, spriteDisplayNameChangedSig{}
+, spriteCollisionEnabledChangedSig{}
+, spriteModelBoundsChangedSig{}
 , sheetAdded{sheetAddedSig}
 , sheetRemoved{sheetRemovedSig}
 , spriteRemoved{spriteRemovedSig}
 , spriteDisplayNameChanged{spriteDisplayNameChangedSig}
 , spriteCollisionEnabledChanged{spriteCollisionEnabledChangedSig}
 , spriteModelBoundsChanged{spriteModelBoundsChangedSig}
-, sdlRenderer{inSdlRenderer}
-, sheetIDPool{MAX_SPRITE_SHEETS}
-, spriteIDPool{MAX_SPRITES}
 {
 }
 
@@ -37,7 +47,7 @@ bool SpriteModel::load(const nlohmann::json& json)
                 return false;
             }
         }
-    } catch (nlohmann::json::type_error& e) {
+    } catch (nlohmann::json::exception& e) {
         resetModelState();
         errorString = "Parse failure - ";
         errorString += e.what();
@@ -125,7 +135,7 @@ bool SpriteModel::addSpriteSheet(const std::string& relPath,
         }
     }
 
-    // Append the texture directory to the given relative path.
+    // Prepend the texture directory to the given relative path.
     std::string fullPath{dataModel.getWorkingTexturesDir()};
     fullPath += relPath;
 
@@ -133,19 +143,19 @@ bool SpriteModel::addSpriteSheet(const std::string& relPath,
     int sheetWidth{0};
     int sheetHeight{0};
     SDL_Texture* sheetTexture{IMG_LoadTexture(sdlRenderer, fullPath.c_str())};
-    if (sheetTexture == nullptr) {
-        errorString = "Error: File at given path is not a valid image. Path: ";
-        errorString += dataModel.getWorkingTexturesDir();
-        errorString += relPath;
-        return false;
-    }
-    else {
+    if (sheetTexture != nullptr) {
         // Save the texture size for later.
         SDL_QueryTexture(sheetTexture, nullptr, nullptr, &sheetWidth,
                          &sheetHeight);
 
         // We don't need the actual texture right now, destroy it.
         SDL_DestroyTexture(sheetTexture);
+    }
+    else {
+        errorString = "Error: File at given path is not a valid image. Path: ";
+        errorString += dataModel.getWorkingTexturesDir();
+        errorString += relPath;
+        return false;
     }
 
     // Validate the width/height/yOffset.
@@ -185,7 +195,7 @@ bool SpriteModel::addSpriteSheet(const std::string& relPath,
             SDL_Rect textureExtent{x, y, spriteWidthI, spriteHeightI};
 
             // Default to a non-0 bounding box so it's easier to click.
-            static BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
+            static constexpr BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
 
             // Add the sprite to the map and sheet.
             int spriteID{static_cast<int>(spriteIDPool.reserveID())};
@@ -321,23 +331,6 @@ const std::string& SpriteModel::getErrorString()
     return errorString;
 }
 
-bool SpriteModel::validateRelPath(const std::string& relPath)
-{
-    // Construct the file path.
-    std::filesystem::path filePath{dataModel.getWorkingTexturesDir()};
-    filePath /= relPath;
-
-    // Check if the file exists.
-    if (std::filesystem::exists(filePath)) {
-        return true;
-    }
-    else {
-        errorString = "File not found at Assets/Textures/";
-        errorString += relPath;
-        return false;
-    }
-}
-
 bool SpriteModel::parseSpriteSheet(const nlohmann::json& sheetJson)
 {
     int sheetID{static_cast<int>(sheetIDPool.reserveID())};
@@ -347,7 +340,7 @@ bool SpriteModel::parseSpriteSheet(const nlohmann::json& sheetJson)
     // Add this sheet's relative path.
     spriteSheet.relPath
         = sheetJson.at("relPath").get<std::string>();
-    if (!validateRelPath(spriteSheet.relPath)) {
+    if (!(dataModel.validateRelPath(spriteSheet.relPath))) {
         return false;
     }
 

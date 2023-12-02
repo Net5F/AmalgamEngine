@@ -1,4 +1,4 @@
-#include "SpriteSheetListItem.h"
+#include "ParentListItem.h"
 #include "Paths.h"
 #include "Ignore.h"
 #include "AUI/ScalingHelpers.h"
@@ -8,33 +8,33 @@ namespace AM
 {
 namespace SpriteEditor
 {
-SpriteSheetListItem::SpriteSheetListItem(const std::string& inHeaderText,
+ParentListItem::ParentListItem(const std::string& inHeaderText,
                          const std::string& inDebugName)
 : LibraryListItem("", inDebugName)
 // Note: We use our child's text and leave our parent ListItem's blank, so 
 //       that all of the text and arrows are above our highlight images.
-, spriteListItemContainer(inHeaderText)
+, childListItemContainer(inHeaderText)
 {
     // Add our children so they're included in rendering, etc.
-    children.push_back(spriteListItemContainer);
+    children.push_back(childListItemContainer);
 
     // Set our padding.
-    spriteListItemContainer.setLeftPadding(32);
+    childListItemContainer.setLeftPadding(32);
 
     // Set our child container's click region to cover from the far left, to 
     // the start of our text.
-    SDL_Rect textLogicalExtent{spriteListItemContainer.headerText.getLogicalExtent()};
-    spriteListItemContainer.setClickRegionLogicalExtent(
+    SDL_Rect textLogicalExtent{childListItemContainer.headerText.getLogicalExtent()};
+    childListItemContainer.setClickRegionLogicalExtent(
         {0, 0, textLogicalExtent.x, textLogicalExtent.h});
 
     // If our child container expands or collapses, adjust our height to match.
-    spriteListItemContainer.setOnHeightChanged([this]() {
-        logicalExtent.h = spriteListItemContainer.getLogicalExtent().h;
+    childListItemContainer.setOnHeightChanged([this]() {
+        logicalExtent.h = childListItemContainer.getLogicalExtent().h;
     });
 }
 
 AUI::EventResult
-    SpriteSheetListItem::onMouseDown(AUI::MouseButtonType buttonType,
+    ParentListItem::onMouseDown(AUI::MouseButtonType buttonType,
                                       const SDL_Point& cursorPosition)
 {
     // Only respond to the left mouse button.
@@ -43,8 +43,7 @@ AUI::EventResult
     }
 
     // If our text was clicked, select this widget.
-    if (AUI::SDLHelpers::pointInRect(cursorPosition,
-                                        text.getClippedExtent())) {
+    if (AUI::SDLHelpers::pointInRect(cursorPosition, text.getClippedExtent())) {
         // If we're already selected, do nothing.
         if (!isSelected) {
             select();
@@ -58,17 +57,17 @@ AUI::EventResult
     return AUI::EventResult{.wasHandled{false}};
 }
 
-AUI::EventResult SpriteSheetListItem::onMouseDoubleClick(AUI::MouseButtonType buttonType,
+AUI::EventResult ParentListItem::onMouseDoubleClick(AUI::MouseButtonType buttonType,
                                           const SDL_Point& cursorPosition)
 {
     // We treat additional clicks as regular MouseDown events.
     return onMouseDown(buttonType, cursorPosition);
 }
 
-AUI::EventResult SpriteSheetListItem::onMouseMove(const SDL_Point& cursorPosition)
+AUI::EventResult ParentListItem::onMouseMove(const SDL_Point& cursorPosition)
 {
     // If the mouse is within the header extent.
-    SDL_Rect headerExtent{spriteListItemContainer.getHeaderExtent()};
+    SDL_Rect headerExtent{childListItemContainer.getHeaderExtent()};
     if (AUI::SDLHelpers::pointInRect(cursorPosition, headerExtent)) {
         // If we're not selected or hovered, become hovered.
         if (!isSelected && !isHovered) {
@@ -85,13 +84,13 @@ AUI::EventResult SpriteSheetListItem::onMouseMove(const SDL_Point& cursorPositio
     return AUI::EventResult{.wasHandled{false}};
 }
 
-void SpriteSheetListItem::onMouseEnter()
+void ParentListItem::onMouseEnter()
 {
     // We handle this in onMouseMove(), but we override this to stop 
     // LibraryListItem's behavior.
 }
 
-void SpriteSheetListItem::onMouseLeave()
+void ParentListItem::onMouseLeave()
 {
     // If we're hovered, unhover.
     if (isHovered) {

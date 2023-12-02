@@ -10,9 +10,12 @@
 #include "SpritePropertiesWindow.h"
 #include "SpriteSetEditStage.h"
 #include "SpriteSetPropertiesWindow.h"
+#include "IconEditStage.h"
+#include "IconPropertiesWindow.h"
 #include "TitleButton.h"
 #include "LibraryAddMenu.h"
-#include "AddSheetDialog.h"
+#include "AddSpriteSheetDialog.h"
+#include "AddIconSheetDialog.h"
 
 namespace AM
 {
@@ -75,19 +78,23 @@ private:
     /** The center stage for editing sprite bounding boxes. */
     SpriteEditStage spriteEditStage;
     SpriteSetEditStage spriteSetEditStage;
+    IconEditStage iconEditStage;
 
     // Properties windows
     /** The right-side panel for viewing and editing the active sprite data. */
     SpritePropertiesWindow spritePropertiesWindow;
     SpriteSetPropertiesWindow spriteSetPropertiesWindow;
+    IconPropertiesWindow iconPropertiesWindow;
 
     /** Confirmation dialog. Child widgets can call openConfirmationDialog()
         to use it. */
     AUI::ConfirmationDialog confirmationDialog;
 
-    /** Dialog for adding a sprite sheet to the SpriteSheetPanel. Child widgets
-        can call openAddSheetDialog() to use it. */
-    AddSheetDialog addSheetDialog;
+    /** Dialog for adding a sprite sheet to the SpriteSheetPanel. */
+    AddSpriteSheetDialog addSpriteSheetDialog;
+
+    /** Dialog for adding an icon sheet to the IconSheetPanel. */
+    AddIconSheetDialog addIconSheetDialog;
 };
 
 } // End namespace SpriteEditor
