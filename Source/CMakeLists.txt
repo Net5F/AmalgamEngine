@@ -12,9 +12,9 @@ add_subdirectory(ClientLib)
 # Configure server library.
 add_subdirectory(ServerLib)
 
-# Configure sprite editor.
-if (AM_BUILD_SPRITE_EDITOR)
-    add_subdirectory(SpriteEditor)
+# Configure resource importer.
+if (AM_BUILD_RESOURCE_IMPORTER)
+    add_subdirectory(ResourceImporter)
 endif()
 
 # Configure tests.

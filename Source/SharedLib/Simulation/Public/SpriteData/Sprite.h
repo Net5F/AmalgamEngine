@@ -7,7 +7,7 @@
 namespace AM
 {
 /**
- * Holds the data for a single sprite from SpriteData.json.
+ * Holds the data for a single sprite from ResourceData.json.
  *
  * World position should be read from an associated Position component (if
  * this sprite is attached to an entity), or derived from an associated Tile.
@@ -23,7 +23,7 @@ struct Sprite {
 
     /** This sprite's unique numeric identifier.
         This value can be used safely at runtime, but shouldn't be used for
-        persistent state since it may change when SpriteData.json is
+        persistent state since it may change when ResourceData.json is
         modified. */
     int numericID{NULL_SPRITE_ID};
 

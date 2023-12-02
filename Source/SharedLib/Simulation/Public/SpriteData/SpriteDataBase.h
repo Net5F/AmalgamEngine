@@ -11,24 +11,24 @@ namespace AM
 
 /**
  * Base class for Client::SpriteData and Server::SpriteData.
- * Loads the shared sprite data from SpriteData.json into memory and provides
+ * Loads the shared sprite data from ResourceData.json into memory and provides
  * an interface for accessing it.
  *
  * Also adds the "Null" sprite, for use as a default.
  *
- * Note: This class expects a SpriteData.json file to be present in the same
+ * Note: This class expects a ResourceData.json file to be present in the same
  *       directory as the application executable.
  *
- * The data in this class is immutable. To modify it, edit SpriteData.json
- * using the SpriteEditor.
+ * The data in this class is immutable. To modify it, edit ResourceData.json
+ * using the ResourceImporter.
  */
 class SpriteDataBase
 {
 public:
     /**
-     * Attempts to parse SpriteData.json and load all of the sprite data.
+     * Attempts to parse ResourceData.json and load all of the sprite data.
      *
-     * Errors if SpriteData.json doesn't exist or it fails to parse.
+     * Errors if ResourceData.json doesn't exist or it fails to parse.
      */
     SpriteDataBase();
 
@@ -85,7 +85,7 @@ protected:
         vector.
         Note: Don't get confused, the null sprite's ID is -1, but its index 
               is at the end of the vector. We do this instead of putting it at
-              index 0, because we would have to save it in SpriteData.json and 
+              index 0, because we would have to save it in ResourceData.json and 
               add logic to skip it in the editor. */
     int nullSpriteIndex;
 
@@ -95,7 +95,7 @@ private:
      * sprites vector.
      *
      * @param json  The json to parse. Must be loaded from a valid
-     *              SpriteData.json.
+     *              ResourceData.json.
      */
     void parseJson(nlohmann::json& json);
 
@@ -104,7 +104,7 @@ private:
      * sprites vector.
 
      * @param spriteJson  The json to parse. Must be a valid sprite section
-     *                    from SpriteData.json.
+     *                    from ResourceData.json.
      */
     void parseSprite(const nlohmann::json& spriteJson);
 
@@ -113,7 +113,7 @@ private:
      * the appropriate vector.
      *
      * @param spriteSetJson  The json to parse. Must be a valid sprite set 
-     *                       section from SpriteData.json, for the appropriate 
+     *                       section from ResourceData.json, for the appropriate 
      *                       set type.
      */
     void parseFloorSpriteSet(const nlohmann::json& spriteSetJson);

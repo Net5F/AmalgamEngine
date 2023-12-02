@@ -11,7 +11,7 @@ namespace AM
 {
 
 /**
- * Base class for a single sprite set from SpriteData.json.
+ * Base class for a single sprite set from ResourceData.json.
  *
  * Sprite sets are used for grouping sprites into a higher-level concept. A
  * FloorCoveringSpriteSet, for example, holds all of the available rotations 
@@ -44,7 +44,7 @@ struct SpriteSet {
     /** This sprite set's unique numeric identifier.
         Each sprite set type has its own ID space.
         This value can be used safely at runtime, but shouldn't be used for
-        persistent state since it may change when SpriteData.json is
+        persistent state since it may change when ResourceData.json is
         modified. */
     Uint16 numericID{0};
 };

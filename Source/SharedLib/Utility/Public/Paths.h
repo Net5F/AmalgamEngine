@@ -7,7 +7,7 @@ namespace AM
 /**
  * Used for accessing files in expected directories.
  *
- * The Client and SpriteEditor expect a particular asset directory
+ * The Client and ResourceImporter expect a particular asset directory
  * structure, starting at the binary's location:
  * .
  * └── Assets

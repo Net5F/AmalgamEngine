@@ -10,7 +10,7 @@ namespace AM
 {
 /**
  * Contains shared configuration constants that must be consistent between the
- * client, server, and sprite editor.
+ * client, server, and resource importer.
  */
 class SharedConfig
 {

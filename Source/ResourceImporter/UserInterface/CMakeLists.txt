@@ -1,0 +1,61 @@
+target_sources(ResourceImporter
+    PRIVATE
+        Private/Widgets/BoundingBoxGizmo.cpp
+        Private/Widgets/LibraryCollapsibleContainer.cpp
+        Private/Widgets/LibraryListItem.cpp
+        Private/Widgets/MainButton.cpp
+        Private/Widgets/MainTextInput.cpp
+        Private/Widgets/MainThumbnail.cpp
+        Private/Widgets/ParentListItem.cpp
+        Private/Widgets/SpriteSetSlot.cpp
+        Private/Widgets/TitleButton.cpp
+        Private/Windows/AddIconSheetDialog.cpp
+        Private/Windows/AddSpriteSheetDialog.cpp
+        Private/Windows/IconEditStage.cpp
+        Private/Windows/IconPropertiesWindow.cpp
+        Private/Windows/LibraryAddMenu.cpp
+        Private/Windows/LibraryWindow.cpp
+        Private/Windows/SaveButtonWindow.cpp
+        Private/Windows/SpriteEditStage.cpp
+        Private/Windows/SpritePropertiesWindow.cpp
+        Private/Windows/SpriteSetEditStage.cpp
+        Private/Windows/SpriteSetPropertiesWindow.cpp
+        Private/Windows/TitleWindow.cpp
+        Private/MainScreen.cpp
+        Private/TitleScreen.cpp
+        Private/UserInterface.cpp
+    PUBLIC
+        Public/Widgets/BoundingBoxGizmo.h
+        Public/Widgets/LibraryCollapsibleContainer.h
+        Public/Widgets/LibraryListItem.h
+        Public/Widgets/MainButton.h
+        Public/Widgets/MainTextInput.h
+        Public/Widgets/MainThumbnail.h
+        Public/Widgets/ParentListItem.h
+        Public/Widgets/SpriteSetSlot.h
+        Public/Widgets/TitleButton.h
+        Public/Windows/AddIconSheetDialog.h
+        Public/Windows/AddSpriteSheetDialog.h
+        Public/Windows/IconEditStage.h
+        Public/Windows/IconPropertiesWindow.h
+        Public/Windows/LibraryAddMenu.h
+        Public/Windows/LibraryWindow.h
+        Public/Windows/SaveButtonWindow.h
+        Public/Windows/SpriteEditStage.h
+        Public/Windows/SpritePropertiesWindow.h
+        Public/Windows/SpriteSetEditStage.h
+        Public/Windows/SpriteSetPropertiesWindow.h
+        Public/Windows/TitleWindow.h
+        Public/MainScreen.h
+        Public/TitleScreen.h
+        Public/UserInterface.h
+)
+
+target_include_directories(ResourceImporter
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Widgets
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Windows
+)

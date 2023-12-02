@@ -22,10 +22,10 @@ SpriteDataBase::SpriteDataBase()
 {
     // Open the file.
     std::string fullPath{Paths::BASE_PATH};
-    fullPath += "SpriteData.json";
+    fullPath += "ResourceData.json";
     std::ifstream workingFile(fullPath);
     if (!(workingFile.is_open())) {
-        LOG_FATAL("Failed to open SpriteData.json");
+        LOG_FATAL("Failed to open ResourceData.json");
     }
 
     // Parse the file into a json structure.
@@ -33,7 +33,7 @@ SpriteDataBase::SpriteDataBase()
     try {
         json = nlohmann::json::parse(workingFile, nullptr, true);
     } catch (nlohmann::json::exception& e) {
-        LOG_FATAL("Failed to parse SpriteData.json: %s", e.what());
+        LOG_FATAL("Failed to parse ResourceData.json: %s", e.what());
     }
 
     // Parse the json structure to construct our sprites.

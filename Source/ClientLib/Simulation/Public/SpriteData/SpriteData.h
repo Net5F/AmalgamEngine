@@ -17,20 +17,20 @@ namespace Client
  * Beyond the parsing that SpriteDataBase performs, this class loads the
  * rendering-specific sprite data and provides an interface for accessing it.
  *
- * Note: This class expects a SpriteData.json file to be present in the same
+ * Note: This class expects a ResourceData.json file to be present in the same
  *       directory as the application executable.
  *
- * The data in this class is immutable. To modify it, edit SpriteData.json
- * using the SpriteEditor.
+ * The data in this class is immutable. To modify it, edit ResourceData.json
+ * using the ResourceImporter.
  */
 class SpriteData : public SpriteDataBase
 {
 public:
     /**
-     * Calls SpriteDataBase() constructor, then re-parses SpriteData.json to
+     * Calls SpriteDataBase() constructor, then re-parses ResourceData.json to
      * load the rendering-specific sprite data.
      *
-     * Errors if SpriteData.json doesn't exist or it fails to parse.
+     * Errors if ResourceData.json doesn't exist or it fails to parse.
      */
     SpriteData(AssetCache& assetCache);
 
@@ -45,7 +45,7 @@ private:
      * sprites vector.
      *
      * @param json  The json to parse. Must be loaded from a valid
-     *              SpriteData.json.
+     *              ResourceData.json.
      * @param assetCache  The asset cache to load sprite sheet textures into.
      */
     void parseJson(nlohmann::json& json, AssetCache& assetCache);
@@ -55,7 +55,7 @@ private:
      * sprites vector.
      *
      * @param spriteJson  The json to parse. Must be a valid sprite section
-     *                    from SpriteData.json.
+     *                    from ResourceData.json.
      * @param spriteSheetRelPath  The relative path to the sprite sheet image
      *                            file that holds this sprite.
      * @param texture  The texture of the spritesheet that contains the sprite.
