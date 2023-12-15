@@ -1,31 +1,30 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "Item.h"
 #include "NetworkDefs.h"
+#include "entt/fwd.hpp"
+#include "entt/entity/entity.hpp"
 
 namespace AM
 {
 
 /**
- * Used to request either a new item be created, or an existing item definiton 
- * be updated.
+ * Used to request an entity's init script from the server.
+ *
+ * Init scripts are only requested by clients for use in build mode. Only the
+ * server actually runs the scripts.
  */
-struct ItemChangeRequest {
+struct EntityInitScriptRequest {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::ItemChangeRequest};
+        EngineMessageType::EntityInitScriptRequest};
 
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** The new item definition.
-        The numericID of this item determines which item should be updated. 
-        If numericID == NULL_ITEM_ID, a new item will be created.
-        Note: The item's stringID will be derived from this item's 
-              displayName, regardless of what this item's stringID is. */
-    Item item{};
+    /** The ID of the entity to get the init script for. */
+    entt::entity entity{entt::null};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -40,9 +39,9 @@ struct ItemChangeRequest {
 };
 
 template<typename S>
-void serialize(S& serializer, ItemChangeRequest& itemChangeRequest)
+void serialize(S& serializer, EntityInitScriptRequest& initScriptRequest)
 {
-    serializer.object(itemChangeRequest.item);
+    serializer.value4b(initScriptRequest.entity);
 }
 
 } // End namespace AM

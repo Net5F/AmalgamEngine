@@ -19,7 +19,8 @@ namespace AM
 struct Name;
 struct Position;
 struct AnimationState;
-struct InitScript;
+struct EntityInitScript;
+struct ItemInitScript;
 
 namespace Server
 {
@@ -43,7 +44,8 @@ class SpriteData;
 class World
 {
 public:
-    World(SpriteData& inSpriteData, sol::state& inLua);
+    World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
+          sol::state& inItemInitLua);
 
     //-------------------------------------------------------------------------
     // World State
@@ -93,13 +95,13 @@ public:
 
     /**
      * Runs the given init script on the given entity. If successful, adds it 
-     * as a component.
+     * as an EntityInitScript component.
      *
      * @return If the init script failed to run, returns a string 
      *         describing the issue. Else, returns an empty string.
      */
-    std::string runInitScript(entt::entity entity,
-                              const InitScript& initScript);
+    std::string runEntityInitScript(entt::entity entity,
+                                    const EntityInitScript& initScript);
 
     /**
      * Returns true if the given ID is valid and in use.
@@ -112,6 +114,16 @@ public:
      * movement.
      */
     bool hasMovementComponents(entt::entity entity) const;
+
+    /**
+     * Runs the given init script on the given item. If successful, saves it  
+     * in item.initScript.
+     *
+     * @return If the init script failed to run, returns a string 
+     *         describing the issue. Else, returns an empty string.
+     */
+    std::string runItemInitScript(Item& item,
+                                  const ItemInitScript& initScript);
 
     /**
      * Returns the spawn point position.
@@ -134,7 +146,10 @@ private:
     const SpriteData& spriteData;
 
     /** Used to run entity init scripts. */
-    sol::state& lua;
+    sol::state& entityInitLua;
+
+    /** Used to run item init scripts. */
+    sol::state& itemInitLua;
 
     // For random spawn points.
     std::random_device randomDevice;

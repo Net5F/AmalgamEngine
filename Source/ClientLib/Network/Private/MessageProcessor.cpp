@@ -6,14 +6,17 @@
 #include "ExplicitConfirmation.h"
 #include "ConnectionResponse.h"
 #include "SystemMessage.h"
-#include "ChunkUpdate.h"
 #include "EntityInit.h"
-#include "ComponentUpdate.h"
-#include "MovementUpdate.h"
-#include "InitScriptResponse.h"
-#include "InventoryInit.h"
-#include "ItemUpdate.h"
 #include "EntityDelete.h"
+#include "EntityInitScriptResponse.h"
+#include "MovementUpdate.h"
+#include "ComponentUpdate.h"
+#include "ChunkUpdate.h"
+#include "InventoryInit.h"
+#include "ItemError.h"
+#include "ItemUpdate.h"
+#include "ItemInitScriptResponse.h"
+#include "CombineItems.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
@@ -21,7 +24,6 @@
 #include "InventoryAddItem.h"
 #include "InventoryDeleteItem.h"
 #include "InventoryMoveItem.h"
-#include "CombineItems.h"
 #include "PlayerMovementUpdate.h"
 #include "ReplicatedComponentTools.h"
 #include "Log.h"
@@ -59,11 +61,6 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                            networkEventDispatcher);
             break;
         }
-        case EngineMessageType::ChunkUpdate: {
-            dispatchMessageSharedPtr<ChunkUpdate>(messageBuffer, messageSize,
-                                                  networkEventDispatcher);
-            break;
-        }
         case EngineMessageType::EntityInit: {
             dispatchMessage<EntityInit>(messageBuffer, messageSize,
                                         networkEventDispatcher);
@@ -74,6 +71,11 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                           networkEventDispatcher);
             break;
         }
+        case EngineMessageType::EntityInitScriptResponse: {
+            dispatchMessage<EntityInitScriptResponse>(
+                messageBuffer, messageSize, networkEventDispatcher);
+            break;
+        }
         case EngineMessageType::MovementUpdate: {
             handleMovementUpdate(messageBuffer, messageSize);
             break;
@@ -82,9 +84,9 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
             handleComponentUpdate(messageBuffer, messageSize);
             break;
         }
-        case EngineMessageType::InitScriptResponse: {
-            dispatchMessage<InitScriptResponse>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+        case EngineMessageType::ChunkUpdate: {
+            dispatchMessageSharedPtr<ChunkUpdate>(messageBuffer, messageSize,
+                                                  networkEventDispatcher);
             break;
         }
         case EngineMessageType::InventoryInit: {
@@ -92,9 +94,24 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                         networkEventDispatcher);
             break;
         }
+        case EngineMessageType::ItemError: {
+            dispatchMessage<ItemError>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
         case EngineMessageType::ItemUpdate: {
             dispatchMessage<ItemUpdate>(messageBuffer, messageSize,
                                         networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::ItemInitScriptResponse: {
+            dispatchMessage<ItemInitScriptResponse>(
+                messageBuffer, messageSize, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::CombineItems: {
+            dispatchMessage<CombineItems>(messageBuffer, messageSize,
+                                          networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {
@@ -130,11 +147,6 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         case EngineMessageType::InventoryMoveItem: {
             dispatchMessage<InventoryMoveItem>(messageBuffer, messageSize,
                                                networkEventDispatcher);
-            break;
-        }
-        case EngineMessageType::CombineItems: {
-            dispatchMessage<CombineItems>(messageBuffer, messageSize,
-                                          networkEventDispatcher);
             break;
         }
         default: {

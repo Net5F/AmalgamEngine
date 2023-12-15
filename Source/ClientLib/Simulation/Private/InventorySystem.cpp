@@ -58,8 +58,8 @@ void InventorySystem::initInventory(const InventoryInit& inventoryInit)
                  inventoryInit.items) {
                 inventory.items.emplace_back(itemSlot.ID, itemSlot.count);
 
-                // If we don't have the latest definition for an item, request
-                // it.
+                // If we don't have the latest definition for an item, add it
+                // to the vector.
                 if (!(world.itemData.itemExists(itemSlot.ID))
                     || (world.itemData.getItemVersion(itemSlot.ID)
                         < itemSlot.version)) {
@@ -72,6 +72,7 @@ void InventorySystem::initInventory(const InventoryInit& inventoryInit)
                 }
             }
 
+            // Request definitions for any out-of-date items.
             for (ItemID itemID : itemsToRequest) {
                 network.serializeAndSend(ItemUpdateRequest{itemID});
             }

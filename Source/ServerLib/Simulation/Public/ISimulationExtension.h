@@ -9,9 +9,9 @@ struct TileUpdateRequest;
 struct TileExtent;
 struct EntityInitRequest;
 struct EntityDeleteRequest;
-struct NameChangeRequest;
+struct EntityNameChangeRequest;
 struct AnimationStateChangeRequest;
-struct ItemChangeRequest;
+struct ItemInitRequest;
 struct InventoryAddItem;
 
 namespace Server
@@ -86,14 +86,14 @@ public:
     virtual bool isEntityDeleteRequestValid(
         const EntityDeleteRequest& entityDeleteRequest) const
         = 0;
-    virtual bool isNameChangeRequestValid(
-        const NameChangeRequest& nameChangeRequest) const
+    virtual bool isEntityNameChangeRequestValid(
+        const EntityNameChangeRequest& nameChangeRequest) const
         = 0;
     virtual bool isAnimationStateChangeRequestValid(
         const AnimationStateChangeRequest& animationStateChangeRequest) const
         = 0;
-    virtual bool isItemChangeRequestValid(
-        const ItemChangeRequest& itemChangeRequest) const
+    virtual bool isItemInitRequestValid(
+        const ItemInitRequest& itemInitRequest) const
         = 0;
     virtual bool isInventoryAddItemValid(
         const InventoryAddItem& inventoryAddItem) const

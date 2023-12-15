@@ -12,11 +12,11 @@ namespace AM
 /**
  * Used by clients to request name changes on the server.
  */
-struct NameChangeRequest {
+struct EntityNameChangeRequest {
     // The enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::NameChangeRequest};
+        EngineMessageType::EntityNameChangeRequest};
 
     //--------------------------------------------------------------------------
     // Networked data
@@ -25,7 +25,7 @@ struct NameChangeRequest {
     entt::entity entity{entt::null};
 
     /** The new name. */
-    Name name;
+    Name name{};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -40,10 +40,10 @@ struct NameChangeRequest {
 };
 
 template<typename S>
-void serialize(S& serializer, NameChangeRequest& nameChangeRequest)
+void serialize(S& serializer, EntityNameChangeRequest& entityNameChangeRequest)
 {
-    serializer.value4b(nameChangeRequest.entity);
-    serializer.object(nameChangeRequest.name);
+    serializer.value4b(entityNameChangeRequest.entity);
+    serializer.object(entityNameChangeRequest.name);
 }
 
 } // End namespace AM

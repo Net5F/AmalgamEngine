@@ -103,8 +103,10 @@ public:
     entt::sink<entt::sigh<void(ConnectionError)>>
         getServerConnectionErrorSink();
 
-    /** An item's definition has been updated. */
-    entt::sink<entt::sigh<void(const Item&)>>& getItemUpdatedSink();
+    /** We've received the latest definition for an item.
+        This may mean that an item was actually updated, or we may have just 
+        requested the latest data to see if it was updated. */
+    entt::sink<entt::sigh<void(const Item&)>>& getItemUpdateSink();
 
 private:
     /**

@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <string_view>
 
 namespace AM
 {
@@ -104,13 +105,13 @@ public:
      */
     void clearItemUpdateHistory();
 
-protected:
     /**
      * Derives a string ID from a display name by making it all lowercase and
      * replacing spaces with underscores.
      */
-    std::string deriveStringID(const std::string& displayName);
+    static std::string deriveStringID(std::string_view displayName);
 
+protected:
     // Note: We use unordered_map instead of vector for items/itemVersions 
     //       so that we don't have to allocate/copy the whole vector when 
     //       a new item is added.

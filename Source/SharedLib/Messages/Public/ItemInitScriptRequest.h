@@ -2,37 +2,28 @@
 
 #include "EngineMessageType.h"
 #include "NetworkDefs.h"
-#include "InitScript.h"
-#include "entt/fwd.hpp"
-#include "entt/entity/entity.hpp"
-#include <string>
+#include "ItemID.h"
 
 namespace AM
 {
 
 /**
- * Used to send an entity's init script to a client.
+ * Used to request an item's init script from the server.
  *
  * Init scripts are only requested by clients for use in build mode. Only the
  * server actually runs the scripts.
- *
- * Note: This is named "Response" to differentiate it from the InitScript 
- *       component. Normally we don't append "Response" to response messages.
  */
-struct InitScriptResponse {
+struct ItemInitScriptRequest {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::InitScriptResponse};
+        EngineMessageType::ItemInitScriptRequest};
 
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** The ID of the entity that this init script is for. */
-    entt::entity entity{entt::null};
-
-    /** This entity's init script. */
-    std::string initScript{};
+    /** The ID of the item to get the init script for. */
+    ItemID itemID{NULL_ITEM_ID};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -47,10 +38,9 @@ struct InitScriptResponse {
 };
 
 template<typename S>
-void serialize(S& serializer, InitScriptResponse& initScriptResponse)
+void serialize(S& serializer, ItemInitScriptRequest& initScriptRequest)
 {
-    serializer.value4b(initScriptResponse.entity);
-    serializer.text1b(initScriptResponse.initScript, InitScript::MAX_LENGTH);
+    serializer.value2b(initScriptRequest.itemID);
 }
 
 } // End namespace AM

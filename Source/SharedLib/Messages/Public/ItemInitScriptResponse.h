@@ -1,31 +1,37 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "ItemID.h"
-#include "Item.h"
 #include "NetworkDefs.h"
-#include <variant>
+#include "ItemInitScript.h"
+#include "ItemID.h"
 #include <string>
-#include "bitsery/ext/std_variant.h"
 
 namespace AM
 {
 
 /**
- * Used to request an item's current state from the server.
+ * Used to send an entity's init script to a client.
+ *
+ * Init scripts are only requested by clients for use in build mode. Only the
+ * server actually runs the scripts.
+ *
+ * Note: This is named "Response" to differentiate it from the ItemInitScript 
+ *       class. Normally we don't append "Response" to message names.
  */
-struct ItemUpdateRequest {
+struct ItemInitScriptResponse {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::ItemUpdateRequest};
+        EngineMessageType::ItemInitScriptResponse};
 
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** The stringID or numericID of the item definition that this client is 
-        requesting. */
-    std::variant<std::string, ItemID> itemID{};
+    /** The ID of the item that this init script is for. */
+    ItemID itemID{NULL_ITEM_ID};
+
+    /** This item's init script. */
+    ItemInitScript initScript{};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -40,19 +46,10 @@ struct ItemUpdateRequest {
 };
 
 template<typename S>
-void serialize(S& serializer, ItemUpdateRequest& itemUpdateRequest)
+void serialize(S& serializer, ItemInitScriptResponse& initScriptResponse)
 {
-    serializer.ext(
-        itemUpdateRequest.itemID,
-        bitsery::ext::StdVariant{
-            [](S& serializer, std::string& stringID) {
-               serializer.text1b(stringID,
-                                 Item::MAX_DISPLAY_NAME_LENGTH);
-            },
-            [](S& serializer, ItemID& numericID) {
-                serializer.value2b(numericID);
-            }
-    });
+    serializer.value2b(initScriptResponse.itemID);
+    serializer.object(initScriptResponse.initScript);
 }
 
 } // End namespace AM

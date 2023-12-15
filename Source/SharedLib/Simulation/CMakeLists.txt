@@ -36,7 +36,7 @@ target_sources(SharedLib
         Public/Components/AnimationState.h
         Public/Components/Camera.h
         Public/Components/Collision.h
-        Public/Components/InitScript.h
+        Public/Components/EntityInitScript.h
         Public/Components/Input.h
         Public/Components/Interaction.h
         Public/Components/Inventory.h
@@ -51,6 +51,7 @@ target_sources(SharedLib
         Public/ItemData/Item.h
         Public/ItemData/ItemDataBase.h
         Public/ItemData/ItemID.h
+        Public/ItemData/ItemInitScript.h
         Public/SpriteData/NullSpriteID.h
         Public/SpriteData/Sprite.h
         Public/SpriteData/SpriteDataBase.h

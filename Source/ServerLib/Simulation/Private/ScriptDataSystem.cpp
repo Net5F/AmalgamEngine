@@ -1,8 +1,8 @@
 #include "ScriptDataSystem.h"
 #include "World.h"
 #include "Network.h"
-#include "InitScript.h"
-#include "InitScriptResponse.h"
+#include "EntityInitScriptResponse.h"
+#include "ItemInitScriptResponse.h"
 #include "Log.h"
 #include <SDL_rect.h>
 #include <vector>
@@ -14,28 +14,45 @@ namespace Server
 ScriptDataSystem::ScriptDataSystem(World& inWorld, Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
-, initScriptRequestQueue{inNetwork.getEventDispatcher()}
+, entityInitScriptRequestQueue{inNetwork.getEventDispatcher()}
+, itemInitScriptRequestQueue{inNetwork.getEventDispatcher()}
 {
 }
 
 void ScriptDataSystem::sendScripts()
 {
     // Process all script data requests.
-    InitScriptRequest initScriptRequest{};
-    while (initScriptRequestQueue.pop(initScriptRequest)) {
-        sendInitScript(initScriptRequest);
+    EntityInitScriptRequest entityInitScriptRequest{};
+    while (entityInitScriptRequestQueue.pop(entityInitScriptRequest)) {
+        sendEntityInitScript(entityInitScriptRequest);
+    }
+
+    ItemInitScriptRequest itemInitScriptRequest{};
+    while (itemInitScriptRequestQueue.pop(itemInitScriptRequest)) {
+        sendItemInitScript(itemInitScriptRequest);
     }
 }
 
-void ScriptDataSystem::sendInitScript(
-    const InitScriptRequest& initScriptRequest)
+void ScriptDataSystem::sendEntityInitScript(
+    const EntityInitScriptRequest& initScriptRequest)
 {
     // If the given entity has an init script, send it.
     entt::entity entity{initScriptRequest.entity};
-    if (world.registry.all_of<InitScript>(entity)) {
-        const auto& initScript{world.registry.get<InitScript>(entity)};
+    if (const auto* initScript{
+            world.registry.try_get<EntityInitScript>(entity)}) {
         network.serializeAndSend(initScriptRequest.netID,
-                                 InitScriptResponse{entity, initScript.script});
+                                 EntityInitScriptResponse{entity, *initScript});
+    }
+}
+
+void ScriptDataSystem::sendItemInitScript(
+    const ItemInitScriptRequest& initScriptRequest)
+{
+    // If the given item is valid, send its init script.
+    if (const Item* item{world.itemData.getItem(initScriptRequest.itemID)}) {
+        network.serializeAndSend(
+            initScriptRequest.netID,
+            ItemInitScriptResponse{item->numericID, {item->initScript}});
     }
 }
 

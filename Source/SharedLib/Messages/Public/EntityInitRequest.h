@@ -4,19 +4,16 @@
 #include "Name.h"
 #include "Position.h"
 #include "AnimationState.h"
-#include "InitScript.h"
+#include "EntityInitScript.h"
 #include "NetworkDefs.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
-#include "bitsery/ext/std_variant.h"
-#include "boost/mp11/algorithm.hpp"
-#include <SDL_stdinc.h>
 
 namespace AM
 {
 /**
- * Sent by the client to request that an entity be created, or to 
- * request that an existing entity be re-initialized.
+ * Sent by the client to request that a new entity be created, or to 
+ * request that an existing entity be re-initialized with new data.
  */
 struct EntityInitRequest {
     // The EngineMessageType enum value that this message corresponds to.
@@ -37,7 +34,7 @@ struct EntityInitRequest {
     AnimationState animationState{};
 
     /** The script to run on this entity after creation. */
-    InitScript initScript{};
+    EntityInitScript initScript{};
 
     //--------------------------------------------------------------------------
     // Local data

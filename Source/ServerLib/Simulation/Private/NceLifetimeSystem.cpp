@@ -3,7 +3,7 @@
 #include "Network.h"
 #include "Name.h"
 #include "Position.h"
-#include "InitScript.h"
+#include "EntityInitScript.h"
 #include "IsClientEntity.h"
 #include "SystemMessage.h"
 #include "ISimulationExtension.h"
@@ -116,7 +116,7 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
 
     // Run the init script. If there was an error, tell the user.
     std::string resultString{
-        world.runInitScript(newEntity, entityInitRequest.initScript)};
+        world.runEntityInitScript(newEntity, entityInitRequest.initScript)};
     if (!(resultString.empty())) {
         network.serializeAndSend(entityInitRequest.netID,
                                  SystemMessage{resultString});

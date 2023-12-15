@@ -1,6 +1,7 @@
 #pragma once
 
-#include "InitScriptRequest.h"
+#include "EntityInitScriptRequest.h"
+#include "ItemInitScriptRequest.h"
 #include "QueuedEvents.h"
 
 namespace AM
@@ -37,11 +38,11 @@ private:
     /**
      * Sends the requested init script.
      */
-    void sendInitScript(const InitScriptRequest& initScriptRequest);
+    void sendEntityInitScript(const EntityInitScriptRequest& initScriptRequest);
+    void sendItemInitScript(const ItemInitScriptRequest& initScriptRequest);
 
-    // TODO: AI scripts, any other scripts
-
-    EventQueue<InitScriptRequest> initScriptRequestQueue;
+    EventQueue<EntityInitScriptRequest> entityInitScriptRequestQueue;
+    EventQueue<ItemInitScriptRequest> itemInitScriptRequestQueue;
 };
 
 } // namespace Server

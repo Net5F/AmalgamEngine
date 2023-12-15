@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NameChangeRequest.h"
+#include "EntityNameChangeRequest.h"
 #include "AnimationStateChangeRequest.h"
 #include "QueuedEvents.h"
 
@@ -51,7 +51,7 @@ private:
         Used for checking if component change requests are valid. */
     ISimulationExtension* extension;
 
-    EventQueue<NameChangeRequest> nameChangeRequestQueue;
+    EventQueue<EntityNameChangeRequest> entityNameChangeRequestQueue;
     EventQueue<AnimationStateChangeRequest> animationStateChangeRequestQueue;
 };
 

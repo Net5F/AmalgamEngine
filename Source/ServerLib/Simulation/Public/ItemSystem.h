@@ -4,8 +4,8 @@
 #include "ItemInteractionRequest.h"
 #include "CombineItemsRequest.h"
 #include "UseItemOnEntityRequest.h"
+#include "ItemInitRequest.h"
 #include "ItemUpdateRequest.h"
-#include "ItemChangeRequest.h"
 #include "NetworkDefs.h"
 #include "QueuedEvents.h"
 
@@ -61,6 +61,18 @@ private:
     void useItemOnEntity(Uint8 sourceSlotIndex, entt::entity targetEntity,
                          NetworkID clientID);
 
+    /**
+     * Builds a new item with the given data. If an existing item has the same 
+     * ID, overwrites it. If not, creates a new item.
+     */
+    void handleInitRequest(const ItemInitRequest& itemInitRequest);
+
+    /**
+     * If the requested item exists, sends an update to the requester.
+     * If not, sends an ItemError.
+     */
+    void handleUpdateRequest(const ItemUpdateRequest& itemUpdateRequest);
+
     /** Used for getting Examine interaction requests. */
     Simulation& simulation;
     /** Used for accessing item and inventory data. */
@@ -68,13 +80,13 @@ private:
     /** Used for receiving requests and sending item and inventory data. */
     Network& network;
     /** If non-nullptr, contains the project's simulation extension functions.
-        Used for checking if item change requests are valid. */
+        Used for checking if item item requests are valid. */
     ISimulationExtension* extension;
 
+    EventQueue<ItemInitRequest> itemInitRequestQueue;
     EventQueue<CombineItemsRequest> combineItemsRequestQueue;
     EventQueue<UseItemOnEntityRequest> useItemOnEntityRequestQueue;
     EventQueue<ItemUpdateRequest> itemUpdateRequestQueue;
-    EventQueue<ItemChangeRequest> itemChangeRequestQueue;
 };
 
 } // namespace Server

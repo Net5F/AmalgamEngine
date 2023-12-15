@@ -7,7 +7,9 @@ namespace AM
 {
 
 /**
- * Used by the server to send item definitions to the client.
+ * Used by the server to send up-to-date item definitions to the client.
+ *
+ * Contains only the fields from the Item class that are relevant to clients.
  */
 struct ItemUpdate {
     // The MessageType enum value that this message corresponds to.
@@ -24,7 +26,7 @@ struct ItemUpdate {
     std::string stringID{"null"};
 
     /** This item's unique numeric identifier. */
-    ItemID numericID{NULL_ITEM_ID};
+    ItemID itemID{NULL_ITEM_ID};
 
     /** The ID of this item's icon. */
     IconID iconID{NULL_ICON_ID};
@@ -39,7 +41,7 @@ void serialize(S& serializer, ItemUpdate& itemUpdate)
 {
     serializer.text1b(itemUpdate.displayName, Item::MAX_DISPLAY_NAME_LENGTH);
     serializer.text1b(itemUpdate.stringID, Item::MAX_DISPLAY_NAME_LENGTH);
-    serializer.value2b(itemUpdate.numericID);
+    serializer.value2b(itemUpdate.itemID);
     serializer.value2b(itemUpdate.iconID);
     serializer.container1b(itemUpdate.supportedInteractions);
 }

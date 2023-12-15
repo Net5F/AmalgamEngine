@@ -28,6 +28,9 @@ IconModel::IconModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer)
 , iconRemoved{iconRemovedSig}
 , iconDisplayNameChanged{iconDisplayNameChangedSig}
 {
+    // Reserve the null icon's ID (the engine provides it in code, so we don't 
+    // need it in the json).
+    iconIDPool.reserveID(NULL_ICON_ID);
 }
 
 bool IconModel::load(const nlohmann::json& json)

@@ -12,17 +12,20 @@ target_sources(SharedLib
         Public/EntityDeleteRequest.h
         Public/EntityInit.h
         Public/EntityInitRequest.h
+        Public/EntityInitScriptRequest.h
+        Public/EntityInitScriptResponse.h
         Public/EntityInteractionRequest.h
         Public/ExplicitConfirmation.h
         Public/Heartbeat.h
-        Public/InitScriptRequest.h
-        Public/InitScriptResponse.h
         Public/InputChangeRequest.h
         Public/InventoryAddItem.h
         Public/InventoryDeleteItem.h
         Public/InventoryInit.h
         Public/InventoryMoveItem.h
-        Public/ItemChangeRequest.h
+        Public/ItemError.h
+        Public/ItemInitRequest.h
+        Public/ItemInitScriptRequest.h
+        Public/ItemInitScriptResponse.h
         Public/ItemInteractionRequest.h
         Public/ItemUpdate.h
         Public/ItemUpdateRequest.h

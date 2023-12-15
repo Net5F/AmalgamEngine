@@ -7,8 +7,10 @@ namespace AM
 namespace Server
 {
 
-EngineLuaBindings::EngineLuaBindings(sol::state& inLua, World& inWorld)
-: lua{inLua}
+EngineLuaBindings::EngineLuaBindings(sol::state& inEntityInitLua,
+                                     sol::state& inItemInitLua, World& inWorld)
+: entityInitLua{inEntityInitLua}
+, itemInitLua{inItemInitLua}
 , world{inWorld}
 {
 }

@@ -7,18 +7,16 @@ namespace AM
 bool Inventory::addItem(ItemID itemID, Uint16 count)
 {
     // If there's an existing empty slot, fill it with the given item.
-    bool emptySlotFound{false};
     for (ItemSlot& item : items) {
         if (item.ID == NULL_ITEM_ID) {
             item.ID = itemID;
             item.count = count;
-            emptySlotFound = true;
-            break;
+            return true;
         }
     }
 
     // If an empty slot wasn't found, push a new slot into the vector.
-    if (!emptySlotFound && (items.size() < MAX_ITEMS)) {
+    if (items.size() < MAX_ITEMS) {
         items.emplace_back(itemID, count);
         return true;
     }

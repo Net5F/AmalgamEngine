@@ -14,8 +14,8 @@ ItemSystem::ItemSystem(World& inWorld, Network& inNetwork)
 , network{inNetwork}
 , itemUpdateQueue{network.getEventDispatcher()}
 , combineItemsQueue{network.getEventDispatcher()}
-, itemUpdatedSig{}
-, itemUpdated{itemUpdatedSig}
+, itemUpdateSig{}
+, itemUpdate{itemUpdateSig}
 {
 }
 
@@ -26,19 +26,21 @@ void ItemSystem::processItemUpdates()
     // Process any waiting item definition updates.
     ItemUpdate itemUpdate{};
     while (itemUpdateQueue.pop(itemUpdate)) {
-        // If the item exists, update it.
-        Item item{itemUpdate.displayName, "", itemUpdate.numericID,
+        // If the item exists, update it (even if there are no changes, it 
+        // doesn't hurt to update it).
+        Item item{itemUpdate.displayName, "", itemUpdate.itemID,
                   itemUpdate.iconID, itemUpdate.supportedInteractions};
-        if (itemData.itemExists(itemUpdate.numericID)) {
-            itemData.updateItem(item);
+        const Item* newItem{nullptr};
+        if (itemData.itemExists(itemUpdate.itemID)) {
+            newItem = itemData.updateItem(item);
         }
         else {
             // Item doesn't exist, create it.
-            itemData.createItem(item);
+            newItem = itemData.createItem(item);
         }
 
-        // Signal that an item definition was updated.
-        itemUpdatedSig.publish(item);
+        // Signal that we received an item update.
+        itemUpdateSig.publish(*newItem);
     }
 
     // Process any waiting item combinations.

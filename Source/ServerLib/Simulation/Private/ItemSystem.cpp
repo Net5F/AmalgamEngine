@@ -7,6 +7,7 @@
 #include "Inventory.h"
 #include "ItemHandlers.h"
 #include "ItemUpdate.h"
+#include "ItemError.h"
 #include "CombineItems.h"
 #include "SystemMessage.h"
 #include "Log.h"
@@ -20,10 +21,10 @@ ItemSystem::ItemSystem(Simulation& inSimulation, Network& inNetwork)
 , world{inSimulation.getWorld()}
 , network{inNetwork}
 , extension{nullptr}
+, itemInitRequestQueue{inNetwork.getEventDispatcher()}
+, itemUpdateRequestQueue{inNetwork.getEventDispatcher()}
 , combineItemsRequestQueue{inNetwork.getEventDispatcher()}
 , useItemOnEntityRequestQueue{inNetwork.getEventDispatcher()}
-, itemUpdateRequestQueue{inNetwork.getEventDispatcher()}
-, itemChangeRequestQueue{inNetwork.getEventDispatcher()}
 {
 }
 
@@ -53,30 +54,15 @@ void ItemSystem::processItemInteractions()
 
 void ItemSystem::processItemUpdates()
 {
-    ItemData& itemData{world.itemData};
-
     // Process any waiting requests to create or change items.
-    // TODO: If request fails, send a response
-    ItemChangeRequest itemChangeRequest{};
-    while (itemChangeRequestQueue.pop(itemChangeRequest)) {
-        // If the project says the request isn't valid, skip it.
-        if (extension
-            && !(extension->isItemChangeRequestValid(itemChangeRequest))) {
-            continue;
-        }
-
-        // If the item exists, update it. Else, create it.
-        if (itemData.itemExists(itemChangeRequest.item.numericID)) {
-            itemData.updateItem(itemChangeRequest.item);
-        }
-        else {
-            itemData.createItem(itemChangeRequest.item);
-        }
+    ItemInitRequest itemInitRequest{};
+    while (itemInitRequestQueue.pop(itemInitRequest)) {
+        handleInitRequest(itemInitRequest);
     }
 
     // If any items definitions were changed, send the new definitions to all 
     // players that own that item.
-    const auto& updatedItems{itemData.getItemUpdateHistory()};
+    const auto& updatedItems{world.itemData.getItemUpdateHistory()};
     if (updatedItems.size() > 0) {
         // If any player's inventory contains an updated item, send the new 
         // definition.
@@ -86,7 +72,7 @@ void ItemSystem::processItemUpdates()
                 auto it{std::find(updatedItems.begin(), updatedItems.end(),
                                   itemSlot.ID)};
                 if (it != updatedItems.end()) {
-                    const Item& item{*(itemData.getItem(itemSlot.ID))};
+                    const Item& item{*(world.itemData.getItem(itemSlot.ID))};
                     network.serializeAndSend(
                         client.netID,
                         ItemUpdate{item.displayName, item.stringID,
@@ -96,17 +82,13 @@ void ItemSystem::processItemUpdates()
             }
         }
 
-        itemData.clearItemUpdateHistory();
+        world.itemData.clearItemUpdateHistory();
     }
 
     // Send item definitions to any requestors.
     ItemUpdateRequest itemUpdateRequest{};
     while (itemUpdateRequestQueue.pop(itemUpdateRequest)) {
-        if (const Item* item{itemData.getItem(itemUpdateRequest.itemID)}) {
-            network.serializeAndSend(itemUpdateRequest.netID,
-                ItemUpdate{item->displayName, item->stringID, item->numericID,
-                           item->iconID, item->supportedInteractions});
-        }
+        handleUpdateRequest(itemUpdateRequest);
     }
 }
 
@@ -175,6 +157,98 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
                 }
             }
         }
+    }
+}
+
+void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
+{
+    ItemData& itemData{world.itemData};
+
+    // If the project says the request isn't valid, skip it.
+    if (extension
+        && !(extension->isItemInitRequestValid(itemInitRequest))) {
+        network.serializeAndSend(itemInitRequest.netID,
+                                 ItemError{itemInitRequest.displayName, "",
+                                           itemInitRequest.itemID,
+                                           ItemError::Type::PermissionFailure});
+        return;
+    }
+
+    // Build the new or updated item.
+    Item item{};
+    item.displayName = itemInitRequest.displayName;
+    item.numericID = itemInitRequest.itemID;
+    item.iconID = itemInitRequest.iconID;
+    item.initScript = itemInitRequest.initScript;
+
+    // Run the init script. If there was an error, tell the user.
+    std::string resultString{
+        world.runItemInitScript(item, itemInitRequest.initScript)};
+    if (!(resultString.empty())) {
+        network.serializeAndSend(itemInitRequest.netID,
+                                 ItemError{item.displayName, "", item.numericID,
+                                           ItemError::Type::InitScriptFailure});
+        network.serializeAndSend(itemInitRequest.netID,
+                                 SystemMessage{resultString});
+        return;
+    }
+
+    // If an item with the given ID exists, update it. Else, create it.
+    const Item* newItem{nullptr};
+    if (itemData.itemExists(item.numericID)) {
+        newItem = itemData.updateItem(item);
+    }
+    else {
+        newItem = itemData.createItem(item);
+    }
+
+    // Send the requester the new or updated item's definition.
+    // Note: If it's an updated item and the requester owns the item, we'll 
+    //       end up double-sending them this update, which isn't a big deal.
+    if (newItem) {
+        network.serializeAndSend(itemInitRequest.netID,
+                                 ItemUpdate{newItem->displayName,
+                                            newItem->stringID,
+                                            newItem->numericID, newItem->iconID,
+                                            newItem->supportedInteractions});
+    }
+}
+
+void ItemSystem::handleUpdateRequest(const ItemUpdateRequest& itemUpdateRequest)
+{
+    // If the item exists, send an update.
+    bool itemWasFound{false};
+    std::visit(
+        [&](auto& itemID) {
+            if (const Item* item{world.itemData.getItem(itemID)}) {
+                itemWasFound = true;
+                network.serializeAndSend(
+                    itemUpdateRequest.netID,
+                    ItemUpdate{item->displayName, item->stringID,
+                               item->numericID, item->iconID,
+                               item->supportedInteractions});
+            }
+        },
+        itemUpdateRequest.itemID);
+
+    // If the requested item doesn't exist, send an error to the client.
+    if (!itemWasFound) {
+        ItemID numericID{};
+        std::string stringID{};
+        std::visit(
+            [&](auto& itemID) {
+                using T = std::decay_t<decltype(itemID)>;
+                if constexpr (std::is_same_v<T, ItemID>) {
+                    numericID = itemID;
+                }
+                else if constexpr (std::is_same_v<T, std::string>) {
+                    stringID = itemID;
+                }
+            },
+            itemUpdateRequest.itemID);
+        network.serializeAndSend(itemUpdateRequest.netID,
+                                 ItemError{"", stringID, numericID,
+                                           ItemError::Type::NotFound});
     }
 }
 

@@ -6,16 +6,18 @@
 #include "ServerNetworkDefs.h"
 #include "Heartbeat.h"
 #include "InputChangeRequest.h"
+#include "EntityNameChangeRequest.h"
+#include "AnimationStateChangeRequest.h"
 #include "ChunkUpdateRequest.h"
 #include "EntityInitRequest.h"
 #include "EntityDeleteRequest.h"
-#include "NameChangeRequest.h"
-#include "AnimationStateChangeRequest.h"
-#include "InitScriptRequest.h"
+#include "EntityInitScriptRequest.h"
 #include "EntityInteractionRequest.h"
 #include "ItemUpdateRequest.h"
-#include "ItemChangeRequest.h"
+#include "ItemInitRequest.h"
+#include "ItemInitScriptRequest.h"
 #include "ItemInteractionRequest.h"
+#include "CombineItemsRequest.h"
 #include "UseItemOnEntityRequest.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
@@ -24,8 +26,6 @@
 #include "InventoryAddItem.h"
 #include "InventoryDeleteItem.h"
 #include "InventoryMoveItem.h"
-#include "EntityDelete.h"
-#include "CombineItemsRequest.h"
 #include "Log.h"
 #include <span>
 
@@ -76,6 +76,16 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 handleInputChangeRequest(netID, messageBuffer, messageSize));
             break;
         }
+        case EngineMessageType::EntityNameChangeRequest: {
+            dispatchMessage<EntityNameChangeRequest>(messageBuffer, messageSize,
+                                               networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::AnimationStateChangeRequest: {
+            dispatchMessage<AnimationStateChangeRequest>(
+                messageBuffer, messageSize, networkEventDispatcher);
+            break;
+        }
         case EngineMessageType::ChunkUpdateRequest: {
             dispatchWithNetID<ChunkUpdateRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
@@ -91,18 +101,8 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 messageBuffer, messageSize, networkEventDispatcher);
             break;
         }
-        case EngineMessageType::NameChangeRequest: {
-            dispatchMessage<NameChangeRequest>(messageBuffer, messageSize,
-                                               networkEventDispatcher);
-            break;
-        }
-        case EngineMessageType::AnimationStateChangeRequest: {
-            dispatchMessage<AnimationStateChangeRequest>(
-                messageBuffer, messageSize, networkEventDispatcher);
-            break;
-        }
-        case EngineMessageType::InitScriptRequest: {
-            dispatchWithNetID<InitScriptRequest>(
+        case EngineMessageType::EntityInitScriptRequest: {
+            dispatchWithNetID<EntityInitScriptRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
@@ -116,13 +116,23 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
-        case EngineMessageType::ItemChangeRequest: {
-            dispatchWithNetID<ItemChangeRequest>(
+        case EngineMessageType::ItemInitRequest: {
+            dispatchWithNetID<ItemInitRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::ItemInitScriptRequest: {
+            dispatchWithNetID<ItemInitScriptRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
         case EngineMessageType::ItemInteractionRequest: {
             dispatchWithNetID<ItemInteractionRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::CombineItemsRequest: {
+            dispatchWithNetID<CombineItemsRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
@@ -163,11 +173,6 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
         }
         case EngineMessageType::InventoryMoveItem: {
             dispatchWithNetID<InventoryMoveItem>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
-            break;
-        }
-        case EngineMessageType::CombineItemsRequest: {
-            dispatchWithNetID<CombineItemsRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }

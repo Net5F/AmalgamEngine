@@ -6,7 +6,7 @@ namespace AM
 {
 /**
  * An entity's initialization script. Init scripts allow builders to customize 
- * an entity, by adding components and logic to it. 
+ * an entity by adding components and interactions to it. 
  *
  * Init scripts are stored on the server in this component. When a client 
  * wants to edit an entity, we send them that entity's script so they don't 
@@ -18,7 +18,7 @@ namespace AM
  * 
  * Init scripts aren't used by client entities.
  */
-struct InitScript {
+struct EntityInitScript {
     /** Used as a "we should never hit this" cap on the length of the script
         string. Only checked in debug builds. */
     static constexpr std::size_t MAX_LENGTH{10000};
@@ -28,9 +28,9 @@ struct InitScript {
 };
 
 template<typename S>
-void serialize(S& serializer, InitScript& initScript)
+void serialize(S& serializer, EntityInitScript& initScript)
 {
-    serializer.text1b(initScript.script, InitScript::MAX_LENGTH);
+    serializer.text1b(initScript.script, EntityInitScript::MAX_LENGTH);
 }
 
 } // namespace AM

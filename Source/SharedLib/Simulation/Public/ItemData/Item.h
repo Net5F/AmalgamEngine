@@ -5,6 +5,7 @@
 #include "ItemInteractionType.h"
 #include "ItemProperties.h"
 #include "ItemCombination.h"
+#include "ItemInitScript.h"
 #include "Log.h"
 #include "bitsery/ext/std_variant.h"
 #include <SDL_stdinc.h>
@@ -73,6 +74,9 @@ struct Item {
         Note: If you want to put skill requirements on your item combinations, 
               you'll need to build a separate UI/workflow. */
     std::vector<ItemCombination> itemCombinations{};
+
+    /** This item's init script. */
+    ItemInitScript initScript{};
 
     /**
      * Finds the first empty index in supportedInteractions and adds the given 
@@ -172,6 +176,7 @@ void serialize(S& serializer, Item& item)
                                             bitsery::ext::StdVariant{});
                          });
     serializer.container(item.itemCombinations, Item::MAX_COMBINATIONS);
+    serializer.object(item.initScript);
 }
 
 } // namespace AM

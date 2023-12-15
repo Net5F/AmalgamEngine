@@ -23,6 +23,10 @@ ItemData::ItemData()
     Item testItem3{.displayName{"Combined Item"}, .iconID{3}};
     testItem3.addProperty(ItemDescription{"A combined item."});
     createItem(testItem3);
+
+    Item testItem4{.displayName{"Hidden Item"}, .iconID{3}};
+    testItem4.addProperty(ItemDescription{"A hidden item."});
+    createItem(testItem4);
 }
 
 } // End namespace Server

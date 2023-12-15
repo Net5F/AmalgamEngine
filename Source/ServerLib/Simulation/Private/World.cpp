@@ -6,7 +6,7 @@
 #include "PreviousPosition.h"
 #include "AnimationState.h"
 #include "Collision.h"
-#include "InitScript.h"
+#include "EntityInitScript.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include "Config.h"
@@ -48,14 +48,16 @@ void onComponentDestroyed(entt::registry& registry, entt::entity entity)
     }
 }
 
-World::World(SpriteData& inSpriteData, sol::state& inLua)
+World::World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
+             sol::state& inItemInitLua)
 : registry{}
 , itemData{}
 , tileMap{inSpriteData}
 , entityLocator{registry}
 , netIdMap{}
 , spriteData{inSpriteData}
-, lua{inLua}
+, entityInitLua{inEntityInitLua}
+, itemInitLua{inItemInitLua}
 , randomDevice{}
 , generator{randomDevice()}
 , xDistribution{Config::SPAWN_POINT_RANDOM_MIN_X,
@@ -146,30 +148,31 @@ void World::addMovementComponents(entt::entity entity)
     registry.emplace<Rotation>(entity);
 }
 
-std::string World::runInitScript(entt::entity entity,
-                                 const InitScript& initScript)
+std::string World::runEntityInitScript(entt::entity entity,
+                                       const EntityInitScript& initScript)
 {
     // If there's an init script, run it.
     // Note: We use "selfEntityID" to hold the ID of the entity that the init 
     //       script is being ran on.
-    lua["selfEntityID"] = entity;
-    auto result{lua.script(initScript.script, &sol::script_pass_on_error)};
+    entityInitLua["selfEntityID"] = entity;
+    auto result{
+        entityInitLua.script(initScript.script, &sol::script_pass_on_error)};
 
-    // If there was an error while running the init script, keep the entity 
+    // If there was an error while running the init script, keep the entity
     // alive (so the user can try again) and return the error.
     std::string returnString{""};
-    std::string errorString{lua.get<std::string>("errorString")};
+    std::string errorString{entityInitLua.get<std::string>("errorString")};
     if (!(result.valid())) {
         sol::error err = result;
         returnString = err.what();
     }
     else if (!(errorString.empty())) {
         returnString = errorString;
-        lua["errorString"] = "";
+        entityInitLua["errorString"] = "";
     }
     else {
         // No errors, save the init script.
-        registry.emplace<InitScript>(entity, initScript);
+        registry.emplace<EntityInitScript>(entity, initScript);
     }
 
     return returnString;
@@ -213,6 +216,35 @@ Position World::getSpawnPoint()
             return {};
         }
     }
+}
+
+std::string World::runItemInitScript(Item& item,
+                                     const ItemInitScript& initScript)
+{
+    // If there's an init script, run it.
+    // Note: We use "selfItemID" to hold the ID of the item that the init 
+    //       script is being ran on.
+    entityInitLua["selfItemID"] = item.numericID;
+    auto result{
+        entityInitLua.script(initScript.script, &sol::script_pass_on_error)};
+
+    // If there was an error while running the init script, return the error.
+    std::string returnString{""};
+    std::string errorString{entityInitLua.get<std::string>("errorString")};
+    if (!(result.valid())) {
+        sol::error err = result;
+        returnString = err.what();
+    }
+    else if (!(errorString.empty())) {
+        returnString = errorString;
+        entityInitLua["errorString"] = "";
+    }
+    else {
+        // No errors, save the init script.
+        item.initScript = initScript;
+    }
+
+    return returnString;
 }
 
 Position World::getGroupedSpawnPoint()

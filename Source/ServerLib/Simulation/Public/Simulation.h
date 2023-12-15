@@ -116,9 +116,16 @@ public:
     World& getWorld();
 
     /**
-     * Returns a reference to the simulation's Lua engine.
+     * Returns a reference to the simulation's Lua bindings for entity init 
+     * processing.
      */
-    sol::state& getLua();
+    sol::state& getEntityInitLua();
+
+    /**
+     * Returns a reference to the simulation's Lua bindings for item init 
+     * processing.
+     */
+    sol::state& getItemInitLua();
 
     /**
      * Returns the simulation's current tick number.
@@ -146,8 +153,12 @@ private:
         send messages. */
     Network& network;
 
-    /** The Lua engine (kept as a pointer to speed up compilation). */
-    std::unique_ptr<sol::state> lua;
+    /** Lua bindings for entity init processing.
+        Kept as a pointer to speed up compilation. */
+    std::unique_ptr<sol::state> entityInitLua;
+
+    /** Lua bindings for item init processing. */
+    std::unique_ptr<sol::state> itemInitLua;
 
     /** The world's state. */
     World world;

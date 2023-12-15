@@ -19,7 +19,7 @@ ComponentChangeSystem::ComponentChangeSystem(World& inWorld, Network& inNetwork,
 , network{inNetwork}
 , spriteData{inSpriteData}
 , extension{nullptr}
-, nameChangeRequestQueue{inNetwork.getEventDispatcher()}
+, entityNameChangeRequestQueue{inNetwork.getEventDispatcher()}
 , animationStateChangeRequestQueue{inNetwork.getEventDispatcher()}
 {
     world.registry.on_update<AnimationState>()
@@ -33,15 +33,16 @@ void ComponentChangeSystem::processChangeRequests()
     entt::registry& registry{world.registry};
 
     // Process any waiting update requests.
-    NameChangeRequest nameChangeRequest{};
-    while (nameChangeRequestQueue.pop(nameChangeRequest)) {
+    EntityNameChangeRequest nameChangeRequest{};
+    while (entityNameChangeRequestQueue.pop(nameChangeRequest)) {
         // If the entity isn't valid, skip it.
         if (!(world.entityIDIsInUse(nameChangeRequest.entity))) {
             continue;
         }
         // If the project says the request isn't valid, skip it.
         else if ((extension != nullptr)
-                 && !(extension->isNameChangeRequestValid(nameChangeRequest))) {
+                 && !(extension->isEntityNameChangeRequestValid(
+                     nameChangeRequest))) {
             continue;
         }
 

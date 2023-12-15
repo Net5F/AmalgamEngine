@@ -19,10 +19,11 @@ namespace Server
 {
 Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 : network{inNetwork}
-, lua{std::make_unique<sol::state>()}
-, world{inSpriteData, *lua}
+, entityInitLua{std::make_unique<sol::state>()}
+, itemInitLua{std::make_unique<sol::state>()}
+, world{inSpriteData, *entityInitLua, *itemInitLua}
 , currentTick{0}
-, engineLuaBindings{*lua, world}
+, engineLuaBindings{*entityInitLua, *itemInitLua, world}
 , extension{nullptr}
 , entityInteractionRequestQueue{inNetwork.getEventDispatcher()}
 , itemInteractionRequestQueue{inNetwork.getEventDispatcher()}
@@ -47,13 +48,15 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
     // Initialize our entt groups.
     EnttGroups::init(world.registry);
 
-    // Initialize the Lua engine and add our bindings.
-    lua->open_libraries(sol::lib::base);
+    // Initialize the Lua engines and add our bindings.
+    entityInitLua->open_libraries(sol::lib::base);
+    itemInitLua->open_libraries(sol::lib::base);
     engineLuaBindings.addBindings();
 
     // We use "errorString" to hold strings to send back to the user if one 
     // of our bound functions encountered an error.
-    (*lua)["errorString"] = "";
+    (*entityInitLua)["errorString"] = "";
+    (*itemInitLua)["errorString"] = "";
 
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
@@ -159,9 +162,14 @@ World& Simulation::getWorld()
     return world;
 }
 
-sol::state& Simulation::getLua()
+sol::state& Simulation::getEntityInitLua()
 {
-    return *lua;
+    return *entityInitLua;
+}
+
+sol::state& Simulation::getItemInitLua()
+{
+    return *itemInitLua;
 }
 
 Uint32 Simulation::getCurrentTick()
