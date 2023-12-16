@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <string_view>
+
 namespace sol
 {
 class state;
@@ -32,6 +35,24 @@ private:
     sol::state& entityInitLua;
     sol::state& itemInitLua;
     World& world;
+
+    // Entity init
+
+    // Item init
+    /**
+     * Adds the description text for when an item is examined.
+     */
+    void addDescription(const std::string& description);
+
+    /**
+     * Adds a combination with the given item, which will result in a new item 
+     * (both inputs will be consumed).
+     * @param otherItemID The item to combine with.
+     * @param resultitemID The resulting item.
+     */
+    void addCombination(const std::string& otherItemID,
+                        const std::string& resultItemID,
+                        const std::string& description);
 };
 
 } // namespace Server

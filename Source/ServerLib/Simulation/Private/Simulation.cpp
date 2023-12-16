@@ -53,11 +53,6 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
     itemInitLua->open_libraries(sol::lib::base);
     engineLuaBindings.addBindings();
 
-    // We use "errorString" to hold strings to send back to the user if one 
-    // of our bound functions encountered an error.
-    (*entityInitLua)["errorString"] = "";
-    (*itemInitLua)["errorString"] = "";
-
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);

@@ -158,21 +158,16 @@ std::string World::runEntityInitScript(entt::entity entity,
     auto result{
         entityInitLua.script(initScript.script, &sol::script_pass_on_error)};
 
-    // If there was an error while running the init script, keep the entity
-    // alive (so the user can try again) and return the error.
+    // If the init script ran successfully, save it.
     std::string returnString{""};
-    std::string errorString{entityInitLua.get<std::string>("errorString")};
-    if (!(result.valid())) {
-        sol::error err = result;
-        returnString = err.what();
-    }
-    else if (!(errorString.empty())) {
-        returnString = errorString;
-        entityInitLua["errorString"] = "";
+    if (result.valid()) {
+        registry.emplace<EntityInitScript>(entity, initScript);
     }
     else {
-        // No errors, save the init script.
-        registry.emplace<EntityInitScript>(entity, initScript);
+        // Error while running the init script. Keep the entity alive (so the 
+        // user can try again) and return the error.
+        sol::error err = result;
+        returnString = err.what();
     }
 
     return returnString;
@@ -222,26 +217,19 @@ std::string World::runItemInitScript(Item& item,
                                      const ItemInitScript& initScript)
 {
     // If there's an init script, run it.
-    // Note: We use "selfItemID" to hold the ID of the item that the init 
-    //       script is being ran on.
-    entityInitLua["selfItemID"] = item.numericID;
+    itemInitLua["selfItemPtr"] = &item;
     auto result{
-        entityInitLua.script(initScript.script, &sol::script_pass_on_error)};
+        itemInitLua.script(initScript.script, &sol::script_pass_on_error)};
 
-    // If there was an error while running the init script, return the error.
+    // If the init script ran successfully, save it.
     std::string returnString{""};
-    std::string errorString{entityInitLua.get<std::string>("errorString")};
-    if (!(result.valid())) {
-        sol::error err = result;
-        returnString = err.what();
-    }
-    else if (!(errorString.empty())) {
-        returnString = errorString;
-        entityInitLua["errorString"] = "";
+    if (result.valid()) {
+        item.initScript = initScript;
     }
     else {
-        // No errors, save the init script.
-        item.initScript = initScript;
+        // Error while running the init script. Return the error.
+        sol::error err = result;
+        returnString = err.what();
     }
 
     return returnString;
