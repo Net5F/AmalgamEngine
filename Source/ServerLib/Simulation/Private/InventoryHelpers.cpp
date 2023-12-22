@@ -33,8 +33,7 @@ bool InventoryHelpers::addItem(ItemID itemID, Uint8 count,
         return true;
     }
     else if (requesterID) {
-        // Failure. If this operation was requested by a client, send it an 
-        // error message.
+        // Failure. We were provided a client ID, send it an error message.
         if (itemExists && inventory) {
             SystemMessage response{"Failed to add item: inventory is full."};
             network.serializeAndSend(requesterID.value(), response);

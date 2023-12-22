@@ -13,10 +13,10 @@ Inventory::Inventory(Uint8 inSize)
 bool Inventory::addItem(ItemID itemID, Uint8 count)
 {
     // If there's an existing empty slot, fill it with the given item.
-    for (ItemSlot& item : slots) {
-        if (item.ID == NULL_ITEM_ID) {
-            item.ID = itemID;
-            item.count = count;
+    for (ItemSlot& slot : slots) {
+        if (slot.ID == NULL_ITEM_ID) {
+            slot.ID = itemID;
+            slot.count = count;
             return true;
         }
     }
@@ -26,7 +26,7 @@ bool Inventory::addItem(ItemID itemID, Uint8 count)
 
 bool Inventory::removeItem(Uint8 slotIndex, Uint8 count)
 {
-    // If the slot index is invalid or empty, return false.
+    // If the slot is invalid or empty, return false.
     if (!slotIndexIsValid(slotIndex)
         || (slots[slotIndex].count == 0)) {
         return false;
@@ -70,7 +70,7 @@ bool Inventory::contains(ItemID itemID) const
 
 ItemID Inventory::getItemID(Uint8 slotIndex) const
 {
-    // If the slot index is invalid or empty, return false.
+    // If the slot is invalid or empty, return null.
     if (!slotIndexIsValid(slotIndex)
         || (slots[slotIndex].count == 0)) {
         return NULL_ITEM_ID;
@@ -94,7 +94,7 @@ std::size_t Inventory::getItemCount(ItemID itemID) const
 const Item* Inventory::getItem(Uint8 slotIndex,
                                const ItemDataBase& itemData) const
 {
-    // If the slot index is invalid or empty, return nullptr.
+    // If the slot is invalid or empty, return nullptr.
     if (ItemID itemID{getItemID(slotIndex)}) {
         return itemData.getItem(itemID);
     }
