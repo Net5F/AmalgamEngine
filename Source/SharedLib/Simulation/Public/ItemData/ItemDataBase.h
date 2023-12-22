@@ -64,14 +64,24 @@ public:
     /**
      * @return If no item with the given ID exists, returns nullptr. Else, 
      *         returns the requested item.
+     * Note: The null item doesn't technically exist, but we return a useful 
+     *       default for it.
      */
     const Item* getItem(const std::string& stringID) const;
 
     /**
      * @return If no item with the given ID exists, returns nullptr. Else, 
      *         returns the requested item.
+     * Note: The null item doesn't technically exist, but we return a useful 
+     *       default for it.
      */
     const Item* getItem(ItemID numericID) const;
+
+    /**
+     * @return If no item with the given ID exists, returns false. Else, 
+     *         returns true.
+     */
+    bool itemExists(const std::string& stringID) const;
 
     /**
      * @return If no item with the given ID exists, returns false. Else, 

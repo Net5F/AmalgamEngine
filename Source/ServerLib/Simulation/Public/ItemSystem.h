@@ -5,9 +5,15 @@
 #include "CombineItemsRequest.h"
 #include "UseItemOnEntityRequest.h"
 #include "ItemInitRequest.h"
-#include "ItemUpdateRequest.h"
+#include "ItemChangeRequest.h"
+#include "ItemDataRequest.h"
 #include "NetworkDefs.h"
 #include "QueuedEvents.h"
+
+namespace sol
+{
+class state;
+}
 
 namespace AM
 {
@@ -17,6 +23,7 @@ class Simulation;
 class World;
 class Network;
 class ISimulationExtension;
+struct EntityItemHandlerScript;
 
 /**
  * Manages item definitions, handling change requests and requests for data.
@@ -24,7 +31,8 @@ class ISimulationExtension;
 class ItemSystem
 {
 public:
-    ItemSystem(Simulation& inSimulation, Network& inNetwork);
+    ItemSystem(Simulation& inSimulation, Network& inNetwork,
+               sol::state& inEntityItemHandlerLua);
 
     /**
      * Processes the interactions that every item supports (UseOn, Destroy, 
@@ -62,16 +70,45 @@ private:
                          NetworkID clientID);
 
     /**
-     * Builds a new item with the given data. If an existing item has the same 
-     * ID, overwrites it. If not, creates a new item.
+     * Creates a new item with the given data. If the ID is already taken, 
+     * sends an ItemError.
      */
     void handleInitRequest(const ItemInitRequest& itemInitRequest);
+
+    /**
+     * Overwrites an existing item with the given data. If no existing item 
+     * matches the given ID, sends an ItemError.
+     */
+    void handleChangeRequest(const ItemChangeRequest& itemChangeRequest);
 
     /**
      * If the requested item exists, sends an update to the requester.
      * If not, sends an ItemError.
      */
-    void handleUpdateRequest(const ItemUpdateRequest& itemUpdateRequest);
+    void handleDataRequest(const ItemDataRequest& itemDataRequest);
+
+    /**
+     * Runs the given init script on the given item.
+     *
+     * @return true if the script ran successfully, else false.
+     *         If false, an appropriate error message will be sent.
+     */
+    bool runItemInitScript(NetworkID clientID, const ItemInitScript& initScript,
+                           Item& item);
+
+    /**
+     * Runs the given item handler script on the given target entity.
+     *
+     * If the script fails, an appropriate error message will be sent.
+     *
+     * @param clientID The client that initiated this interaction.
+     * @param clientEntity The client's entity.
+     * @param targetEntity The entity that the item is being used on.
+     */
+    void runEntityItemHandlerScript(
+        NetworkID clientID, entt::entity clientEntity,
+        entt::entity targetEntity,
+        const EntityItemHandlerScript& itemHandlerScript);
 
     /** Used for getting Examine interaction requests. */
     Simulation& simulation;
@@ -79,14 +116,17 @@ private:
     World& world;
     /** Used for receiving requests and sending item and inventory data. */
     Network& network;
+    /** Used to run entity item handler scripts. */
+    sol::state& entityItemHandlerLua;
     /** If non-nullptr, contains the project's simulation extension functions.
         Used for checking if item item requests are valid. */
     ISimulationExtension* extension;
 
     EventQueue<ItemInitRequest> itemInitRequestQueue;
+    EventQueue<ItemChangeRequest> itemChangeRequestQueue;
     EventQueue<CombineItemsRequest> combineItemsRequestQueue;
     EventQueue<UseItemOnEntityRequest> useItemOnEntityRequestQueue;
-    EventQueue<ItemUpdateRequest> itemUpdateRequestQueue;
+    EventQueue<ItemDataRequest> itemDataRequestQueue;
 };
 
 } // namespace Server

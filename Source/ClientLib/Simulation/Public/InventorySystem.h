@@ -1,9 +1,7 @@
 #pragma once
 
 #include "InventoryInit.h"
-#include "InventoryAddItem.h"
-#include "InventoryDeleteItem.h"
-#include "InventoryMoveItem.h"
+#include "InventoryOperation.h"
 #include "QueuedEvents.h"
 
 namespace AM
@@ -35,18 +33,18 @@ private:
     /**
      * Adds the item to the player's inventory.
      */
-    void addItem(const InventoryAddItem& inventoryAddItem);
+    void processOperation(const InventoryAddItem& inventoryAddItem);
 
     /**
-     * Deletes the specified item from the player's inventory.
+     * Removes the specified item from the player's inventory.
      */
-    void deleteItem(const InventoryDeleteItem& inventoryDeleteItem);
+    void processOperation(const InventoryRemoveItem& inventoryRemoveItem);
 
     /**
      * Moves the specified item to the specified slot in the player's 
      * inventory.
      */
-    void moveItem(const InventoryMoveItem& inventoryMoveItem);
+    void processOperation(const InventoryMoveItem& inventoryMoveItem);
 
     /** Used for accessing item and inventory data. */
     World& world;
@@ -54,9 +52,7 @@ private:
     Network& network;
 
     EventQueue<InventoryInit> inventoryInitQueue;
-    EventQueue<InventoryAddItem> inventoryAddItemQueue;
-    EventQueue<InventoryDeleteItem> inventoryDeleteItemQueue;
-    EventQueue<InventoryMoveItem> inventoryMoveItemQueue;
+    EventQueue<InventoryOperation> inventoryOperationQueue;
 };
 
 } // namespace Client

@@ -5,7 +5,7 @@
 #include "ClientSimData.h"
 #include "Inventory.h"
 #include "InventoryInit.h"
-#include "SystemMessage.h"
+#include "InventoryHelpers.h"
 #include "Log.h"
 #include <algorithm>
 
@@ -18,9 +18,7 @@ InventorySystem::InventorySystem(World& inWorld, Network& inNetwork)
 , network{inNetwork}
 , extension{nullptr}
 , playerInventoryObserver{}
-, inventoryAddItemQueue{inNetwork.getEventDispatcher()}
-, inventoryDeleteItemQueue{inNetwork.getEventDispatcher()}
-, inventoryMoveItemQueue{inNetwork.getEventDispatcher()}
+, inventoryOperationQueue{inNetwork.getEventDispatcher()}
 {
     // Observe player Inventory construction events.
     playerInventoryObserver.connect(
@@ -35,14 +33,14 @@ void InventorySystem::sendInventoryInits()
         auto [client, inventory]
             = world.registry.get<ClientSimData, Inventory>(entity);
 
-        InventoryInit inventoryInit{};
-        for (const Inventory::ItemSlot& itemSlot : inventory.items) {
+        InventoryInit inventoryInit{inventory.size};
+        for (const Inventory::ItemSlot& itemSlot : inventory.slots) {
             ItemVersion version{world.itemData.getItemVersion(itemSlot.ID)};
-            inventoryInit.items.emplace_back(itemSlot.ID, itemSlot.count,
+            inventoryInit.slots.emplace_back(itemSlot.ID, itemSlot.count,
                                              version);
         }
 
-        if (inventoryInit.items.size() > 0) {
+        if (inventoryInit.slots.size() > 0) {
             network.serializeAndSend(client.netID, inventoryInit);
         }
     }
@@ -53,19 +51,13 @@ void InventorySystem::sendInventoryInits()
 void InventorySystem::processInventoryUpdates()
 {
     // Process any waiting inventory operations.
-    InventoryAddItem inventoryAddItem{};
-    while (inventoryAddItemQueue.pop(inventoryAddItem)) {
-        addItem(inventoryAddItem);
-    }
-
-    InventoryDeleteItem inventoryDeleteItem{};
-    while (inventoryDeleteItemQueue.pop(inventoryDeleteItem)) {
-        deleteItem(inventoryDeleteItem);
-    }
-
-    InventoryMoveItem inventoryMoveItem{};
-    while (inventoryMoveItemQueue.pop(inventoryMoveItem)) {
-        moveItem(inventoryMoveItem);
+    InventoryOperation inventoryOperation{};
+    while (inventoryOperationQueue.pop(inventoryOperation)) {
+        std::visit(
+            [&](const auto& operation) {
+                processOperation(inventoryOperation.netID, operation);
+            },
+            inventoryOperation.operation);
     }
 }
 
@@ -74,73 +66,44 @@ void InventorySystem::setExtension(ISimulationExtension* inExtension)
     extension = inExtension;
 }
 
-void InventorySystem::addItem(const InventoryAddItem& inventoryAddItem)
+void InventorySystem::processOperation(NetworkID clientID,
+                                       const InventoryAddItem& inventoryAddItem)
 {
     // If the entity isn't valid, skip it.
     entt::entity entityToAddTo{inventoryAddItem.entity};
     if (!(world.entityIDIsInUse(entityToAddTo))) {
         return;
     }
-    // If the project says the request isn't valid, skip it.
-    else if ((extension != nullptr)
-             && !(extension->isInventoryAddItemValid(inventoryAddItem))) {
-        return;
-    }
 
-    // Try to add the item.
-    // Note: We need to check for Inventory since entityToAddTo may not be a 
-    //       client entity.
-    bool itemExists{world.itemData.itemExists(inventoryAddItem.itemID)};
-    auto* inventory{world.registry.try_get<Inventory>(entityToAddTo)};
-    if (itemExists && inventory 
-        && inventory->addItem(inventoryAddItem.itemID,
-                              inventoryAddItem.count)) {
-        // Success. If this is a client entity, tell it about the new item.
-        if (auto* client{
-                world.registry.try_get<ClientSimData>(entityToAddTo)}) {
-            InventoryAddItem response{inventoryAddItem};
-            response.version
-                = world.itemData.getItemVersion(inventoryAddItem.itemID);
-            network.serializeAndSend(client->netID, response);
-        }
-    }
-    else {
-        network.serializeAndSend(
-            inventoryAddItem.netID,
-            SystemMessage{"Failed to add item (invalid item ID or "
-                          "inventory is full)."});
-    }
+    // Try to add the item, sending messages appropriately.
+    InventoryHelpers::addItem(inventoryAddItem.itemID, inventoryAddItem.count,
+                              entityToAddTo, world, network, clientID);
 }
 
-void InventorySystem::deleteItem(const InventoryDeleteItem& inventoryDeleteItem)
+void InventorySystem::processOperation(
+    NetworkID clientID, const InventoryRemoveItem& inventoryRemoveItem)
 {
-    // Note: "Delete item" always applies to the client's own inventory 
-    //       and they're always allowed to do it, so we don't need a 
-    //       project validity check.
+    // Note: "Remove item" always applies to the client's own inventory.
 
     // Find the client's entity ID.
-    auto it{world.netIdMap.find(inventoryDeleteItem.netID)};
+    auto it{world.netIdMap.find(clientID)};
     if (it != world.netIdMap.end()) {
         entt::entity clientEntity{it->second};
 
-        // If the deletion is successful, tell the client.
-        Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
-        if (inventory.deleteItem(inventoryDeleteItem.slotIndex,
-                                 inventoryDeleteItem.count)) {
-            network.serializeAndSend(inventoryDeleteItem.netID,
-                                     inventoryDeleteItem);
-        }
+        // Try to remove the item, sending messages appropriately.
+        InventoryHelpers::removeItem(inventoryRemoveItem.slotIndex,
+                                     inventoryRemoveItem.count, clientEntity,
+                                     world, network);
     }
 }
 
-void InventorySystem::moveItem(const InventoryMoveItem& inventoryMoveItem)
+void InventorySystem::processOperation(
+    NetworkID clientID, const InventoryMoveItem& inventoryMoveItem)
 {
-    // Note: "Move item" always applies to the client's own inventory 
-    //       and they're always allowed to do it, so we don't need a 
-    //       project validity check.
+    // Note: "Move item" always applies to the client's own inventory.
 
     // Find the client's entity ID.
-    auto it{world.netIdMap.find(inventoryMoveItem.netID)};
+    auto it{world.netIdMap.find(clientID)};
     if (it != world.netIdMap.end()) {
         entt::entity clientEntity{it->second};
 
@@ -148,8 +111,8 @@ void InventorySystem::moveItem(const InventoryMoveItem& inventoryMoveItem)
         Inventory& inventory{world.registry.get<Inventory>(clientEntity)};
         if (inventory.moveItem(inventoryMoveItem.sourceSlotIndex,
                                inventoryMoveItem.destSlotIndex)) {
-            network.serializeAndSend(inventoryMoveItem.netID,
-                                     inventoryMoveItem);
+            network.serializeAndSend(clientID,
+                                     InventoryOperation{inventoryMoveItem});
         }
     }
 }

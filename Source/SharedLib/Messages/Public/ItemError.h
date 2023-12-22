@@ -19,8 +19,13 @@ struct ItemError {
         EngineMessageType::ItemError};
 
     enum Type : Uint8 {
+        NotSet,
+        /** The requested item numeric ID was not found. */
+        NumericIDNotFound,
         /** The requested item string ID was not found. */
-        NotFound,
+        StringIDNotFound,
+        /** Init request failed because given string ID is already in use. */
+        StringIDInUse,
         /** The requester lacks permissions to make the requested change. */
         PermissionFailure,
         /** The given init script failed to execute. */

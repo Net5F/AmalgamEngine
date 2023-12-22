@@ -1,31 +1,40 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "ChunkPosition.h"
+#include "ItemID.h"
+#include "IconID.h"
+#include "ItemInitScript.h"
+#include "Item.h"
 #include "NetworkDefs.h"
-#include <vector>
+#include <string>
 
 namespace AM
 {
 /**
- * Used by the client to request chunk data.
+ * Sent by the client to request that an existing item be re-initialized with 
+ * new data.
  */
-struct ChunkUpdateRequest {
-public:
+struct ItemChangeRequest {
     // The EngineMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::ChunkUpdateRequest};
-
-    /** Used as a "we should never hit this" cap on the number of chunks that
-        we request at once. Only checked in debug builds. */
-    static constexpr std::size_t MAX_CHUNKS{10};
+        EngineMessageType::ItemChangeRequest};
 
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** The chunks that the client is requesting. */
-    std::vector<ChunkPosition> requestedChunks;
+    /** The ID of the item to change. */
+    ItemID itemID{NULL_ITEM_ID};
+
+    /** The item's display name.
+        The item's stringID will be derived from this. */
+    std::string displayName{""};
+
+    /** The ID of this item's icon. */
+    IconID iconID{NULL_ICON_ID};
+
+    /** The script to run on this item after creation. */
+    ItemInitScript initScript{};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -40,10 +49,13 @@ public:
 };
 
 template<typename S>
-void serialize(S& serializer, ChunkUpdateRequest& chunkUpdateRequest)
+void serialize(S& serializer, ItemChangeRequest& itemChangeRequest)
 {
-    serializer.container(chunkUpdateRequest.requestedChunks,
-                         ChunkUpdateRequest::MAX_CHUNKS);
+    serializer.value2b(itemChangeRequest.itemID);
+    serializer.text1b(itemChangeRequest.displayName,
+                      Item::MAX_DISPLAY_NAME_LENGTH);
+    serializer.value2b(itemChangeRequest.iconID);
+    serializer.object(itemChangeRequest.initScript);
 }
 
 } // End namespace AM

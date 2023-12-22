@@ -20,10 +20,12 @@ namespace Server
 Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 : network{inNetwork}
 , entityInitLua{std::make_unique<sol::state>()}
+, entityItemHandlerLua{std::make_unique<sol::state>()}
 , itemInitLua{std::make_unique<sol::state>()}
 , world{inSpriteData, *entityInitLua, *itemInitLua}
 , currentTick{0}
-, engineLuaBindings{*entityInitLua, *itemInitLua, world}
+, engineLuaBindings{*entityInitLua, *entityItemHandlerLua, *itemInitLua, world,
+                    network}
 , extension{nullptr}
 , entityInteractionRequestQueue{inNetwork.getEventDispatcher()}
 , itemInteractionRequestQueue{inNetwork.getEventDispatcher()}
@@ -36,7 +38,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , inputSystem{*this, world, network}
 , movementSystem{world}
 , aiSystem{world}
-, itemSystem{*this, network}
+, itemSystem{*this, network, *entityItemHandlerLua}
 , inventorySystem{world, network}
 , clientAOISystem{*this, world, network}
 , movementSyncSystem{*this, world, network}
@@ -48,8 +50,9 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
     // Initialize our entt groups.
     EnttGroups::init(world.registry);
 
-    // Initialize the Lua engines and add our bindings.
+    // Initialize the Lua environments and add our bindings.
     entityInitLua->open_libraries(sol::lib::base);
+    entityItemHandlerLua->open_libraries(sol::lib::base);
     itemInitLua->open_libraries(sol::lib::base);
     engineLuaBindings.addBindings();
 
@@ -160,6 +163,11 @@ World& Simulation::getWorld()
 sol::state& Simulation::getEntityInitLua()
 {
     return *entityInitLua;
+}
+
+sol::state& Simulation::getEntityItemHandlerLua()
+{
+    return *entityItemHandlerLua;
 }
 
 sol::state& Simulation::getItemInitLua()

@@ -54,7 +54,7 @@ ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,
                                  ObservedComponent>::value};
 
         // TODO: If a client is near an entity when it's constructed, it'll 
-        //       receive both an EntityInit and an EntityUpdate (from the group
+        //       receive both an EntityInit and a ComponentUpdate (from the group
         //       observer). It'd be nice if we could find a way to just send one,
         //       but until then it isn't a huge cost.
         observers[index].connect(world.registry,

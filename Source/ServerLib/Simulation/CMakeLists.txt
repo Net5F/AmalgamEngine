@@ -9,6 +9,7 @@ target_sources(ServerLib
 		Private/ComponentSyncSystem.cpp
 		Private/EngineLuaBindings.cpp
 		Private/InputSystem.cpp
+		Private/InventoryHelpers.cpp
 		Private/InventorySystem.cpp
 		Private/ItemSystem.cpp
 		Private/MapSaveSystem.cpp
@@ -32,9 +33,11 @@ target_sources(ServerLib
 		Public/ComponentChangeSystem.h
 		Public/ComponentSyncSystem.h
 		Public/EngineLuaBindings.h
+		Public/EntityItemHandlerScript.h
 		Public/EnttGroups.h
 		Public/EventSorter.h
 		Public/InputSystem.h
+		Public/InventoryHelpers.h
 		Public/InventorySystem.h
 		Public/ISimulationExtension.h
 		Public/ItemSystem.h

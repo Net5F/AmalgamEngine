@@ -1,8 +1,6 @@
 #pragma once
 
-#include "InventoryAddItem.h"
-#include "InventoryDeleteItem.h"
-#include "InventoryMoveItem.h"
+#include "InventoryOperation.h"
 #include "QueuedEvents.h"
 #include "entt/entity/observer.hpp"
 #include "entt/entity/registry.hpp"
@@ -39,18 +37,21 @@ private:
     /**
      * If the request is valid, adds the item to the specified inventory.
      */
-    void addItem(const InventoryAddItem& inventoryAddItem);
+    void processOperation(NetworkID clientID,
+                          const InventoryAddItem& inventoryAddItem);
 
     /**
-     * Deletes the specified item from the requestor's inventory.
+     * Removes the specified item from the requester's inventory.
      */
-    void deleteItem(const InventoryDeleteItem& inventoryDeleteItem);
+    void processOperation(NetworkID clientID,
+                          const InventoryRemoveItem& inventoryRemoveItem);
 
     /**
      * Moves the specified item to the specified slot in the requestor's 
      * inventory.
      */
-    void moveItem(const InventoryMoveItem& inventoryMoveItem);
+    void processOperation(NetworkID clientID,
+                          const InventoryMoveItem& inventoryMoveItem);
 
     /** Used for accessing item and inventory data. */
     World& world;
@@ -64,9 +65,7 @@ private:
         inventory state to a newly-logged-on player. */
     entt::observer playerInventoryObserver;
 
-    EventQueue<InventoryAddItem> inventoryAddItemQueue;
-    EventQueue<InventoryDeleteItem> inventoryDeleteItemQueue;
-    EventQueue<InventoryMoveItem> inventoryMoveItemQueue;
+    EventQueue<InventoryOperation> inventoryOperationQueue;
 };
 
 } // namespace Server

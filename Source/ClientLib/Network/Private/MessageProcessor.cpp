@@ -21,9 +21,7 @@
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
-#include "InventoryAddItem.h"
-#include "InventoryDeleteItem.h"
-#include "InventoryMoveItem.h"
+#include "InventoryOperation.h"
 #include "PlayerMovementUpdate.h"
 #include "ReplicatedComponentTools.h"
 #include "Log.h"
@@ -134,19 +132,9 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                         networkEventDispatcher);
             break;
         }
-        case EngineMessageType::InventoryAddItem: {
-            dispatchMessage<InventoryAddItem>(messageBuffer, messageSize,
-                                              networkEventDispatcher);
-            break;
-        }
-        case EngineMessageType::InventoryDeleteItem: {
-            dispatchMessage<InventoryDeleteItem>(messageBuffer, messageSize,
-                                                 networkEventDispatcher);
-            break;
-        }
-        case EngineMessageType::InventoryMoveItem: {
-            dispatchMessage<InventoryMoveItem>(messageBuffer, messageSize,
-                                               networkEventDispatcher);
+        case EngineMessageType::InventoryOperation: {
+            dispatchMessage<InventoryOperation>(messageBuffer, messageSize,
+                                                networkEventDispatcher);
             break;
         }
         default: {

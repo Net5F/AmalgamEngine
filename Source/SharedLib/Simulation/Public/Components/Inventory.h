@@ -16,25 +16,36 @@ struct ItemCombination;
  * All client entities have an inventory. Non-client entities may or may not 
  * have one.
  */
-struct Inventory {
-    /** The maximum number of items we can have in an inventory. 
+class Inventory {
+public:
+    /** The absolute maximum number of items we can have in an inventory.
         We use Uint8 to hold slot indices, so 256 is our max. */
     static constexpr std::size_t MAX_ITEMS{256};
+
+    /** The default maximum number of items we can have in an inventory. */
+    static constexpr Uint8 DEFAULT_INVENTORY_SIZE{20};
+
+    /** The number of slots in this inventory. */
+    Uint8 size;
 
     struct ItemSlot {
         /** The item in this inventory slot. */
         ItemID ID{NULL_ITEM_ID};
 
         /** How many of the item is in this inventory slot. */
-        Uint16 count{0};
+        Uint8 count{0};
     };
 
-    /** Holds this inventory's items.
+    /** This inventory's item slots.
         Empty slots will have ID == NULL_ITEM_ID.
         Note: Slots may be allocated, but still be empty. If you're iterating 
               this vector, be sure to check for NULL_ITEM_ID. */
-    std::vector<ItemSlot> items{};
+    std::vector<ItemSlot> slots;
 
+    Inventory(Uint8 inSize = DEFAULT_INVENTORY_SIZE);
+
+    // Note: You likely don't want to call these directly. 
+    //       See InventoryHelpers.h
     /**
      * Adds the given item to the first available slot.
      *
@@ -44,14 +55,28 @@ struct Inventory {
      *
      * Note: This doesn't check if itemID is a valid item.
      */
-    bool addItem(ItemID itemID, Uint16 count);
+    bool addItem(ItemID itemID, Uint8 count);
 
     /**
-     * Deletes the given count of items from the given inventory slot.
+     * Removes the given count of items from the given inventory slot.
      *
-     * @return true if the item was deleted, else false (slot index isn't valid).
+     * @return true if the item was removed, else false (slot index isn't valid,
+     *         count is 0).
      */
-    bool deleteItem(Uint8 slotIndex, Uint16 count);
+    bool removeItem(Uint8 slotIndex, Uint8 count);
+
+    /**
+     * Moves the item in sourceSlot into destSlot (or swaps, if there's an 
+     * item already in destSlot).
+     *
+     * @return true if the items were moved, else false (slot index isn't valid).
+     */
+    bool moveItem(Uint8 sourceSlotIndex, Uint8 destSlotIndex);
+
+    /**
+     * Returns true if this inventory contains at least 1 of the given item.
+     */
+    bool contains(ItemID itemID) const;
 
     /**
      * Returns the ID of the item at the given inventory slot.
@@ -61,19 +86,16 @@ struct Inventory {
     ItemID getItemID(Uint8 slotIndex) const;
 
     /**
+     * Returns the count for the given item across all inventory slots.
+     */
+    std::size_t getItemCount(ItemID itemID) const;
+
+    /**
      * Returns the item at the given inventory slot.
      * If the given index is invalid or there's no item in the slot, returns 
      * nullptr.
      */
     const Item* getItem(Uint8 slotIndex, const ItemDataBase& itemData) const;
-
-    /**
-     * Moves the item in sourceSlot into destSlot (or swaps, if there's an 
-     * item already in destSlot).
-     *
-     * @return true if the items were moved, else false (slot index isn't valid).
-     */
-    bool moveItem(Uint8 sourceSlotIndex, Uint8 destSlotIndex);
 
     /**
      * Combines the items in the given slots and decrements their count 
@@ -100,6 +122,11 @@ struct Inventory {
                       ItemID resultItemID);
 
     /**
+     * Resizes this inventory to match the given new size.
+     */
+    void resize(Uint8 newSize);
+
+    /**
      * Returns the number of slots that have an item in them.
      */
     Uint8 getFilledSlotCount();
@@ -108,12 +135,11 @@ struct Inventory {
         false. */
     bool slotIndexIsValid(Uint8 slotIndex) const;
 
-private:
     /**
      * Reduces the item count in the given slot by the given count.
      * If the resulting count <= 0, empties the slot.
      */
-    void reduceItemCount(Uint8 slotIndex, Uint16 count);
+    void reduceItemCount(Uint8 slotIndex, Uint8 count);
 };
 
 } // namespace AM

@@ -1,7 +1,7 @@
 target_sources(SharedLib
     PUBLIC
+        Public/ChunkDataRequest.h
         Public/ChunkUpdate.h
-        Public/ChunkUpdateRequest.h
         Public/ChunkWireSnapshot.h
         Public/CombineItemsRequest.h
         Public/ComponentUpdate.h
@@ -19,16 +19,19 @@ target_sources(SharedLib
         Public/Heartbeat.h
         Public/InputChangeRequest.h
         Public/InventoryAddItem.h
-        Public/InventoryDeleteItem.h
         Public/InventoryInit.h
         Public/InventoryMoveItem.h
+        Public/InventoryOperation.h
+        Public/InventoryRemoveItem.h
+        Public/ItemError.h
+        Public/ItemChangeRequest.h
+        Public/ItemDataRequest.h
         Public/ItemError.h
         Public/ItemInitRequest.h
         Public/ItemInitScriptRequest.h
         Public/ItemInitScriptResponse.h
         Public/ItemInteractionRequest.h
         Public/ItemUpdate.h
-        Public/ItemUpdateRequest.h
         Public/MovementState.h
         Public/MovementUpdate.h
         Public/SystemMessage.h

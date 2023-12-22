@@ -122,6 +122,12 @@ public:
     sol::state& getEntityInitLua();
 
     /**
+     * Returns a reference to the simulation's Lua bindings for entity item  
+     * handler processing.
+     */
+    sol::state& getEntityItemHandlerLua();
+
+    /**
      * Returns a reference to the simulation's Lua bindings for item init 
      * processing.
      */
@@ -153,11 +159,14 @@ private:
         send messages. */
     Network& network;
 
-    /** Lua bindings for entity init processing.
+    /** Lua environment for entity init script processing.
         Kept as a pointer to speed up compilation. */
     std::unique_ptr<sol::state> entityInitLua;
 
-    /** Lua bindings for item init processing. */
+    /** Lua environment for entity item handler script processing. */
+    std::unique_ptr<sol::state> entityItemHandlerLua;
+
+    /** Lua environment for item init script processing. */
     std::unique_ptr<sol::state> itemInitLua;
 
     /** The world's state. */

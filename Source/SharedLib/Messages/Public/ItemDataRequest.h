@@ -4,9 +4,9 @@
 #include "ItemID.h"
 #include "Item.h"
 #include "NetworkDefs.h"
+#include "bitsery/ext/std_variant.h"
 #include <variant>
 #include <string>
-#include "bitsery/ext/std_variant.h"
 
 namespace AM
 {
@@ -14,11 +14,11 @@ namespace AM
 /**
  * Used to request an item's current state from the server.
  */
-struct ItemUpdateRequest {
+struct ItemDataRequest {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::ItemUpdateRequest};
+        EngineMessageType::ItemDataRequest};
 
     //--------------------------------------------------------------------------
     // Networked data
@@ -40,10 +40,10 @@ struct ItemUpdateRequest {
 };
 
 template<typename S>
-void serialize(S& serializer, ItemUpdateRequest& itemUpdateRequest)
+void serialize(S& serializer, ItemDataRequest& itemDataRequest)
 {
     serializer.ext(
-        itemUpdateRequest.itemID,
+        itemDataRequest.itemID,
         bitsery::ext::StdVariant{
             [](S& serializer, std::string& stringID) {
                serializer.text1b(stringID,

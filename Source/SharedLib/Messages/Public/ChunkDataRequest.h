@@ -1,33 +1,31 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "ItemID.h"
+#include "ChunkPosition.h"
 #include "NetworkDefs.h"
-#include <SDL_stdinc.h>
+#include <vector>
 
 namespace AM
 {
 /**
- * Sent by a client to request that an item be deleted from an inventory, or by 
- * the server to tell a client that an item was deleted.
- *
- * Note: This is currently only used for player inventories. If we reuse it for 
- *       NPC inventories, we can add an entity ID field.
+ * Used by the client to request chunk data.
  */
-struct InventoryDeleteItem {
-    // The MessageType enum value that this message corresponds to.
+struct ChunkDataRequest {
+public:
+    // The EngineMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::InventoryDeleteItem};
+        EngineMessageType::ChunkDataRequest};
+
+    /** Used as a "we should never hit this" cap on the number of chunks that
+        we request at once. Only checked in debug builds. */
+    static constexpr std::size_t MAX_CHUNKS{10};
 
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** The inventory slot to delete the item from. */
-    Uint8 slotIndex{0};
-
-    /** How many of the item to delete. */
-    Uint16 count{0};
+    /** The chunks that the client is requesting. */
+    std::vector<ChunkPosition> requestedChunks;
 
     //--------------------------------------------------------------------------
     // Local data
@@ -42,9 +40,10 @@ struct InventoryDeleteItem {
 };
 
 template<typename S>
-void serialize(S& serializer, InventoryDeleteItem& inventoryDeleteItem) {
-    serializer.value1b(inventoryDeleteItem.slotIndex);
-    serializer.value2b(inventoryDeleteItem.count);
+void serialize(S& serializer, ChunkDataRequest& chunkDataRequest)
+{
+    serializer.container(chunkDataRequest.requestedChunks,
+                         ChunkDataRequest::MAX_CHUNKS);
 }
 
-} // namespace AM
+} // End namespace AM

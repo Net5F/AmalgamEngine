@@ -2,7 +2,7 @@
 #include "World.h"
 #include "Network.h"
 #include "Inventory.h"
-#include "ItemUpdateRequest.h"
+#include "ItemDataRequest.h"
 #include "Log.h"
 
 namespace AM
@@ -59,7 +59,7 @@ void ItemSystem::processItemUpdates()
         if (!(world.itemData.itemExists(resultItemID))
             || (world.itemData.getItemVersion(resultItemID)
                 < combineItems.resultItemVersion)) {
-            network.serializeAndSend(ItemUpdateRequest{resultItemID});
+            network.serializeAndSend(ItemDataRequest{resultItemID});
         }
     }
 }

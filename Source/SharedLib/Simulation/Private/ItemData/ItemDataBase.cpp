@@ -118,6 +118,17 @@ const Item* ItemDataBase::getItem(ItemID numericID) const
     return &(it->second);
 }
 
+bool ItemDataBase::itemExists(const std::string& stringID) const
+{
+    // The null item exists for use as a safe default, but is otherwise 
+    // considered to not exist.
+    if (stringID == "null") {
+        return false;
+    }
+
+    return (itemStringMap.find(stringID) != itemStringMap.end());
+}
+
 bool ItemDataBase::itemExists(ItemID numericID) const
 {
     // The null item exists for use as a safe default, but is otherwise 

@@ -2,7 +2,7 @@
 
 #include "NetworkDefs.h"
 #include "QueuedEvents.h"
-#include "ChunkUpdateRequest.h"
+#include "ChunkDataRequest.h"
 #include "ChunkPosition.h"
 
 namespace AM
@@ -41,7 +41,7 @@ private:
     /**
      * Send a chunk update, containing the chunks from the given request.
      */
-    void sendChunkUpdate(const ChunkUpdateRequest& chunkUpdateRequest);
+    void sendChunkUpdate(const ChunkDataRequest& chunkDataRequest);
 
     /**
      * Adds the given chunk to the given UpdateChunks message.
@@ -64,7 +64,7 @@ private:
     /** Used for receiving chunk requests and sending chunks to clients. */
     Network& network;
 
-    EventQueue<ChunkUpdateRequest> chunkUpdateRequestQueue;
+    EventQueue<ChunkDataRequest> chunkDataRequestQueue;
 };
 
 } // End namespace Server

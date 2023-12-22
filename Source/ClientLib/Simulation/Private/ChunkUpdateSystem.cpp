@@ -6,7 +6,7 @@
 #include "PreviousPosition.h"
 #include "NeedsAdjacentChunks.h"
 #include "ChunkExtent.h"
-#include "ChunkUpdateRequest.h"
+#include "ChunkDataRequest.h"
 #include "ChunkWireSnapshot.h"
 #include "SharedConfig.h"
 #include "Config.h"
@@ -73,17 +73,17 @@ void ChunkUpdateSystem::requestAllInRangeChunks(
     currentExtent.intersectWith(mapBounds);
 
     // Iterate over the range, adding all chunks to a request.
-    ChunkUpdateRequest chunkUpdateRequest{};
+    ChunkDataRequest chunkDataRequest{};
     for (int i = 0; i < currentExtent.yLength; ++i) {
         for (int j = 0; j < currentExtent.xLength; ++j) {
             int chunkX{currentExtent.x + j};
             int chunkY{currentExtent.y + i};
-            chunkUpdateRequest.requestedChunks.emplace_back(chunkX, chunkY);
+            chunkDataRequest.requestedChunks.emplace_back(chunkX, chunkY);
         }
     }
 
     // Send the request.
-    network.serializeAndSend(chunkUpdateRequest);
+    network.serializeAndSend(chunkDataRequest);
 }
 
 void ChunkUpdateSystem::requestNewInRangeChunks(
@@ -102,7 +102,7 @@ void ChunkUpdateSystem::requestNewInRangeChunks(
     currentExtent.intersectWith(mapChunkExtent);
 
     // Iterate over the current extent, adding any new chunks to a request.
-    ChunkUpdateRequest chunkUpdateRequest;
+    ChunkDataRequest chunkDataRequest;
     for (int i = 0; i < currentExtent.yLength; ++i) {
         for (int j = 0; j < currentExtent.xLength; ++j) {
             // If this chunk isn't in range of the previous chunk, add it.
@@ -111,13 +111,13 @@ void ChunkUpdateSystem::requestNewInRangeChunks(
             ChunkPosition chunkPosition{chunkX, chunkY};
 
             if (!(previousExtent.containsPosition(chunkPosition))) {
-                chunkUpdateRequest.requestedChunks.emplace_back(chunkX, chunkY);
+                chunkDataRequest.requestedChunks.emplace_back(chunkX, chunkY);
             }
         }
     }
 
     // Send the request.
-    network.serializeAndSend(chunkUpdateRequest);
+    network.serializeAndSend(chunkDataRequest);
 }
 
 void ChunkUpdateSystem::receiveAndApplyUpdates()

@@ -11,8 +11,6 @@ struct EntityInitRequest;
 struct EntityDeleteRequest;
 struct EntityNameChangeRequest;
 struct AnimationStateChangeRequest;
-struct ItemInitRequest;
-struct InventoryAddItem;
 
 namespace Server
 {
@@ -91,12 +89,6 @@ public:
         = 0;
     virtual bool isAnimationStateChangeRequestValid(
         const AnimationStateChangeRequest& animationStateChangeRequest) const
-        = 0;
-    virtual bool isItemInitRequestValid(
-        const ItemInitRequest& itemInitRequest) const
-        = 0;
-    virtual bool isInventoryAddItemValid(
-        const InventoryAddItem& inventoryAddItem) const
         = 0;
 };
 

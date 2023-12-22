@@ -151,7 +151,7 @@ void World::addMovementComponents(entt::entity entity)
 std::string World::runEntityInitScript(entt::entity entity,
                                        const EntityInitScript& initScript)
 {
-    // If there's an init script, run it.
+    // Run the given script on the given entity.
     // Note: We use "selfEntityID" to hold the ID of the entity that the init 
     //       script is being ran on.
     entityInitLua["selfEntityID"] = entity;
@@ -216,7 +216,8 @@ Position World::getSpawnPoint()
 std::string World::runItemInitScript(Item& item,
                                      const ItemInitScript& initScript)
 {
-    // If there's an init script, run it.
+    // Run the given script on the given item.
+    // Note: We use "selfItemPtr" to hold the item that is being initialized.
     itemInitLua["selfItemPtr"] = &item;
     auto result{
         itemInitLua.script(initScript.script, &sol::script_pass_on_error)};

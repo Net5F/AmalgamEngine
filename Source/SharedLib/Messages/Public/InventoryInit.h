@@ -25,7 +25,7 @@ struct InventoryInit {
         ItemID ID{NULL_ITEM_ID};
 
         /** How many of the item is in this inventory slot. */
-        Uint16 count{0};
+        Uint8 count{0};
 
         /** The item's version number. Used by the client to tell if it 
             already has the latest definition for this item, or if it needs 
@@ -33,19 +33,24 @@ struct InventoryInit {
         ItemVersion version{0};
     };
 
-    std::vector<ItemSlot> items{};
+    /** The number of slots in the inventory. */
+    Uint8 size{Inventory::DEFAULT_INVENTORY_SIZE};
+
+    /** The inventory's item slots. */
+    std::vector<ItemSlot> slots{};
 };
 
 template<typename S>
 void serialize(S& serializer, InventoryInit::ItemSlot& itemSlot) {
     serializer.value2b(itemSlot.ID);
-    serializer.value2b(itemSlot.count);
+    serializer.value1b(itemSlot.count);
     serializer.value2b(itemSlot.version);
 }
 
 template<typename S>
 void serialize(S& serializer, InventoryInit& inventoryInit) {
-    serializer.container(inventoryInit.items, Inventory::MAX_ITEMS);
+    serializer.value1b(inventoryInit.size);
+    serializer.container(inventoryInit.slots, Inventory::MAX_ITEMS);
 }
 
 } // namespace AM

@@ -22,7 +22,7 @@ namespace Server
 ChunkStreamingSystem::ChunkStreamingSystem(World& inWorld, Network& inNetwork)
 : world{inWorld}
 , network{inNetwork}
-, chunkUpdateRequestQueue{inNetwork.getEventDispatcher()}
+, chunkDataRequestQueue{inNetwork.getEventDispatcher()}
 {
 }
 
@@ -30,25 +30,25 @@ void ChunkStreamingSystem::sendChunks()
 {
     ZoneScoped;
 
-    // Process all chunk update requests.
-    ChunkUpdateRequest chunkUpdateRequest{};
-    while (chunkUpdateRequestQueue.pop(chunkUpdateRequest)) {
-        sendChunkUpdate(chunkUpdateRequest);
+    // Process all chunk data requests.
+    ChunkDataRequest chunkDataRequest{};
+    while (chunkDataRequestQueue.pop(chunkDataRequest)) {
+        sendChunkUpdate(chunkDataRequest);
     }
 }
 
 void ChunkStreamingSystem::sendChunkUpdate(
-    const ChunkUpdateRequest& chunkUpdateRequest)
+    const ChunkDataRequest& chunkDataRequest)
 {
     // Add the requested chunks to the message.
     ChunkUpdate chunkUpdate{};
     for (const ChunkPosition& requestedChunk :
-         chunkUpdateRequest.requestedChunks) {
+         chunkDataRequest.requestedChunks) {
         addChunkToMessage(requestedChunk, chunkUpdate);
     }
 
     // Send the message.
-    network.serializeAndSend(chunkUpdateRequest.netID, chunkUpdate);
+    network.serializeAndSend(chunkDataRequest.netID, chunkUpdate);
 }
 
 void ChunkStreamingSystem::addChunkToMessage(const ChunkPosition& chunkPosition,

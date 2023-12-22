@@ -11,8 +11,7 @@
 namespace AM
 {
 /**
- * Sent by the client to request that a new item be created, or to 
- * request that an existing item be re-initialized with new data.
+ * Sent by the client to request that a new item be created.
  */
 struct ItemInitRequest {
     // The EngineMessageType enum value that this message corresponds to.
@@ -23,10 +22,6 @@ struct ItemInitRequest {
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** If non-null, this message is a request to re-init this item. If null,
-        this message is a request to create a new item. */
-    ItemID itemID{NULL_ITEM_ID};
-
     /** The item's display name.
         The item's stringID will be derived from this. */
     std::string displayName{""};
@@ -53,7 +48,6 @@ template<typename S>
 void serialize(S& serializer,
                ItemInitRequest& itemInitRequest)
 {
-    serializer.value2b(itemInitRequest.itemID);
     serializer.text1b(itemInitRequest.displayName,
                       Item::MAX_DISPLAY_NAME_LENGTH);
     serializer.value2b(itemInitRequest.iconID);

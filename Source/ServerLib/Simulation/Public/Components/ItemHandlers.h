@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ItemID.h"
-#include <functional>
+#include "EntityItemHandlerScript.h"
 #include <vector>
 
 namespace AM
@@ -22,8 +22,8 @@ struct ItemHandlers {
         /** The item that this handler is for. */
         ItemID itemToHandleID{NULL_ITEM_ID};
 
-        /** The handling logic. */
-        std::function<void()> handler{};
+        /** The handler script to run. */
+        EntityItemHandlerScript handlerScript{};
     };
 
     /** The handlers for each item that this entity supports. */
@@ -34,8 +34,10 @@ struct ItemHandlers {
      *
      * Note: Multiple handlers for the same item may exist.
      */
-    void add(ItemID itemToHandleID, std::function<void()> handler) {
-        handlerPairs.emplace_back(itemToHandleID, handler);
+    void add(ItemID itemToHandleID, const std::string& handlerScript)
+    {
+        handlerPairs.emplace_back(itemToHandleID,
+                                  EntityItemHandlerScript{handlerScript});
     }
 };
 

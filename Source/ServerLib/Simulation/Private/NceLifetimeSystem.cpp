@@ -121,13 +121,6 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
         network.serializeAndSend(entityInitRequest.netID,
                                  SystemMessage{resultString});
     }
-
-    // TEMP
-    auto& itemHandlers{world.registry.emplace<ItemHandlers>(newEntity)};
-    itemHandlers.add(1, []() { LOG_INFO("Handling item 1"); });
-    itemHandlers.add(2, []() { LOG_INFO("Handling item 2"); });
-    itemHandlers.add(3, []() { LOG_INFO("Handling item 3"); });
-    // TEMP
 }
 
 } // End namespace Server

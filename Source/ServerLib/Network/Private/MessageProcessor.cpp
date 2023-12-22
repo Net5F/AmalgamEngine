@@ -8,13 +8,14 @@
 #include "InputChangeRequest.h"
 #include "EntityNameChangeRequest.h"
 #include "AnimationStateChangeRequest.h"
-#include "ChunkUpdateRequest.h"
+#include "ChunkDataRequest.h"
 #include "EntityInitRequest.h"
 #include "EntityDeleteRequest.h"
 #include "EntityInitScriptRequest.h"
 #include "EntityInteractionRequest.h"
-#include "ItemUpdateRequest.h"
+#include "ItemDataRequest.h"
 #include "ItemInitRequest.h"
+#include "ItemChangeRequest.h"
 #include "ItemInitScriptRequest.h"
 #include "ItemInteractionRequest.h"
 #include "CombineItemsRequest.h"
@@ -23,9 +24,7 @@
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
-#include "InventoryAddItem.h"
-#include "InventoryDeleteItem.h"
-#include "InventoryMoveItem.h"
+#include "InventoryOperation.h"
 #include "Log.h"
 #include <span>
 
@@ -86,8 +85,8 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 messageBuffer, messageSize, networkEventDispatcher);
             break;
         }
-        case EngineMessageType::ChunkUpdateRequest: {
-            dispatchWithNetID<ChunkUpdateRequest>(
+        case EngineMessageType::ChunkDataRequest: {
+            dispatchWithNetID<ChunkDataRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
@@ -111,13 +110,18 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
-        case EngineMessageType::ItemUpdateRequest: {
-            dispatchWithNetID<ItemUpdateRequest>(
+        case EngineMessageType::ItemDataRequest: {
+            dispatchWithNetID<ItemDataRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
         case EngineMessageType::ItemInitRequest: {
             dispatchWithNetID<ItemInitRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::ItemChangeRequest: {
+            dispatchWithNetID<ItemChangeRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
@@ -161,19 +165,9 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
-        case EngineMessageType::InventoryAddItem: {
-            dispatchWithNetID<InventoryAddItem>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
-            break;
-        }
-        case EngineMessageType::InventoryDeleteItem: {
-            dispatchWithNetID<InventoryDeleteItem>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
-            break;
-        }
-        case EngineMessageType::InventoryMoveItem: {
-            dispatchWithNetID<InventoryMoveItem>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+        case EngineMessageType::InventoryOperation: {
+            dispatchMessage<InventoryOperation>(messageBuffer, messageSize,
+                                                networkEventDispatcher);
             break;
         }
         default: {

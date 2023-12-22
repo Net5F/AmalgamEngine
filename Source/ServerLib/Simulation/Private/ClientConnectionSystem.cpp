@@ -68,15 +68,6 @@ void ClientConnectionSystem::processConnectEvents()
         registry.emplace<Name>(newEntity,
                                std::to_string(static_cast<Uint32>(newEntity)));
         registry.emplace<Inventory>(newEntity);
-        // TEMP
-        ItemID test1ID{world.itemData.getItem("test1")->numericID};
-        ItemID test2ID{world.itemData.getItem("test2")->numericID};
-        world.registry.get<Inventory>(newEntity).addItem(test1ID, 1);
-        world.registry.get<Inventory>(newEntity).addItem(test2ID, 1);
-        for (auto i = 0; i < 40; ++i) {
-            world.registry.get<Inventory>(newEntity).addItem(test1ID, 1);
-        }
-        // TEMP
 
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
                                         std::vector<entt::entity>());
