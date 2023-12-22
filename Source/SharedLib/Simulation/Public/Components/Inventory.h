@@ -16,7 +16,7 @@ struct ItemCombination;
  * All client entities have an inventory. Non-client entities may or may not 
  * have one.
  */
-class Inventory {
+struct Inventory {
 public:
     /** The absolute maximum number of items we can have in an inventory.
         We use Uint8 to hold slot indices, so 256 is our max. */
