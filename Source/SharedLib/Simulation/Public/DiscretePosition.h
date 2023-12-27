@@ -55,7 +55,7 @@ public:
         xDif *= xDif;
         yDif *= yDif;
 
-        // Return the absolute squared distance.
+        // If the absolute squared distance is within 1 unit, return true.
         return (std::abs(xDif + yDif) <= 1);
     }
 };
