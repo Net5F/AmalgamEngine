@@ -44,9 +44,10 @@ void InventorySystem::initInventory(const InventoryInit& inventoryInit)
 
             // Add all the given items to the player's inventory.
             std::vector<ItemID> itemsToRequest{};
-            for (const InventoryInit::ItemSlot& itemSlot :
-                 inventoryInit.slots) {
-                inventory.slots.emplace_back(itemSlot.ID, itemSlot.count);
+            for (std::size_t i{0}; i < inventoryInit.slots.size(); ++i) {
+                const InventoryInit::ItemSlot& itemSlot{inventoryInit.slots[i]};
+                inventory.slots[i].ID = itemSlot.ID;
+                inventory.slots[i].count = itemSlot.count;
 
                 // If we don't have the latest definition for an item, add it
                 // to the vector.
