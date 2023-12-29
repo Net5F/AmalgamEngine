@@ -220,17 +220,20 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 
 void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
 {
-    // If the numeric ID isn't found or the string ID is in use, send an error.
+    // Check that the numeric ID exists.
     std::string stringID{
         ItemDataBase::deriveStringID(itemChangeRequest.displayName)};
     ItemError::Type errorType{ItemError::NotSet};
     if (!(world.itemData.itemExists(itemChangeRequest.itemID))) {
         errorType = ItemError::NumericIDNotFound;
     }
-    else if (world.itemData.getItem(stringID)) {
+    // Check that the string ID isn't taken by another item.
+    else if (const Item* item{world.itemData.getItem(stringID)};
+             item && (item->numericID != itemChangeRequest.itemID)) {
         errorType = ItemError::StringIDInUse;
     }
 
+    // If we found an error, send it to the requesting client.
     if (errorType != ItemError::NotSet) {
         network.serializeAndSend(itemChangeRequest.netID,
                                  ItemError{itemChangeRequest.displayName,
