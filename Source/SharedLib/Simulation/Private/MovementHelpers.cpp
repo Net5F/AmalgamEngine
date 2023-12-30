@@ -7,7 +7,6 @@
 #include "EntityLocator.h"
 #include "IsClientEntity.h"
 #include "SharedConfig.h"
-#include "Ignore.h"
 #include "entt/entity/registry.hpp"
 
 /** The constant to multiply by when normalizing a diagonal direction vector

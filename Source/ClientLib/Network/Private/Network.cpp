@@ -7,7 +7,6 @@
 #include "NetworkStats.h"
 #include "IMessageProcessorExtension.h"
 #include "AMAssert.h"
-#include "Ignore.h"
 #include <SDL_net.h>
 
 namespace AM

@@ -3,7 +3,6 @@
 #include "World.h"
 #include "Camera.h"
 #include "Position.h"
-#include "Ignore.h"
 #include "Log.h"
 
 namespace AM

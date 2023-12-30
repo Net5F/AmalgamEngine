@@ -5,7 +5,6 @@
 #include "PreviousPosition.h"
 #include "Rotation.h"
 #include "Collision.h"
-#include "Ignore.h"
 #include "entt/entity/registry.hpp"
 
 namespace AM
@@ -27,10 +26,9 @@ public:
      */
     static void init(entt::registry& registry)
     {
-        // Used for moving an entity.
-        auto movementGroup = registry.group<Input, Position, PreviousPosition,
-                                            Rotation, Collision>();
-        ignore(movementGroup);
+        // movementGroup: Used for moving an entity.
+        registry
+            .group<Input, Position, PreviousPosition, Rotation, Collision>();
     }
 };
 

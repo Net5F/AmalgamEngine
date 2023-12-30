@@ -19,7 +19,6 @@ target_sources(SharedLib
         Public/HashTools.h
         Public/IDPool.h
         Public/OSEventHandler.h
-        Public/Ignore.h
         Public/Log.h
         Public/Paths.h
         Public/PeriodicCaller.h

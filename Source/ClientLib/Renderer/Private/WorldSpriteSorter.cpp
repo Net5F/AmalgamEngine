@@ -11,7 +11,6 @@
 #include "SharedConfig.h"
 #include "SpriteRenderData.h"
 #include "Collision.h"
-#include "Ignore.h"
 #include <SDL_rect.h>
 #include <cmath>
 #include <algorithm>

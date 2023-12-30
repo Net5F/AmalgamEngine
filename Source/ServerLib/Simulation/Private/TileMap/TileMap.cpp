@@ -14,7 +14,6 @@
 #include "Timer.h"
 #include "Log.h"
 #include "AMAssert.h"
-#include "Ignore.h"
 
 namespace AM
 {

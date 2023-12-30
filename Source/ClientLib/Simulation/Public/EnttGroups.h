@@ -7,7 +7,6 @@
 #include "Collision.h"
 #include "InputHistory.h"
 #include "Sprite.h"
-#include "Ignore.h"
 #include "entt/entity/registry.hpp"
 
 namespace AM
@@ -29,11 +28,9 @@ public:
      */
     static void init(entt::registry& registry)
     {
-        // Used for NPC movement and dynamic entity sorting.
-        auto movementGroup = registry.group<Input, Position, PreviousPosition,
-                                            Rotation, Collision>(
+        // movementGroup: Used for NPC movement and dynamic entity sorting.
+        registry.group<Input, Position, PreviousPosition, Rotation, Collision>(
             entt::get<Sprite>, entt::exclude<InputHistory>);
-        ignore(movementGroup);
     }
 };
 

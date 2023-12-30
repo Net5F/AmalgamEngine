@@ -11,7 +11,6 @@
 #include "SharedConfig.h"
 #include "Config.h"
 #include "Log.h"
-#include "Ignore.h"
 #include "AMAssert.h"
 #include "sol/sol.hpp"
 #include "boost/mp11/algorithm.hpp"

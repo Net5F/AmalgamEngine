@@ -17,7 +17,6 @@
 #include "NeedsAdjacentChunks.h"
 #include "Transforms.h"
 #include "Config.h"
-#include "Ignore.h"
 #include "Log.h"
 
 namespace AM
