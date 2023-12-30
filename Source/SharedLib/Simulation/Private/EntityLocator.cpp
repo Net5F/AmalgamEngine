@@ -122,7 +122,7 @@ std::vector<entt::entity>&
     // Convert to TileExtent.
     TileExtent tileExtent{chunkExtent};
 
-    return getCollisions(tileExtent);
+    return getEntities(tileExtent);
 }
 
 std::vector<entt::entity>&
