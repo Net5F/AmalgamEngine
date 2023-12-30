@@ -26,9 +26,9 @@ ItemSystem::ItemSystem(Simulation& inSimulation, Network& inNetwork,
 , extension{nullptr}
 , itemInitRequestQueue{inNetwork.getEventDispatcher()}
 , itemChangeRequestQueue{inNetwork.getEventDispatcher()}
-, itemDataRequestQueue{inNetwork.getEventDispatcher()}
 , combineItemsRequestQueue{inNetwork.getEventDispatcher()}
 , useItemOnEntityRequestQueue{inNetwork.getEventDispatcher()}
+, itemDataRequestQueue{inNetwork.getEventDispatcher()}
 {
 }
 

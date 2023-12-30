@@ -148,7 +148,7 @@ bool Application::enoughTimeTillNextCall(double minimumTime)
     }
 }
 
-int Application::filterEvents(void* userData, SDL_Event*)
+int Application::filterEvents(void*, SDL_Event*)
 {
     // Application* app{static_cast<Application*>(userData)};
 
