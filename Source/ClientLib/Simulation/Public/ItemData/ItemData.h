@@ -4,7 +4,7 @@
 
 namespace AM
 {
-namespace Client 
+namespace Client
 {
 /**
  * See ItemDataBase class comment.

@@ -6,8 +6,7 @@ namespace AM
 {
 namespace ResourceImporter
 {
-TitleScreen::TitleScreen(UserInterface& inUserInterface,
-                         DataModel& inDataModel)
+TitleScreen::TitleScreen(UserInterface& inUserInterface, DataModel& inDataModel)
 : AUI::Screen("TitleScreen")
 , titleWindow{inUserInterface, inDataModel}
 {

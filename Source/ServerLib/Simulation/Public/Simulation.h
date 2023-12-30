@@ -58,11 +58,10 @@ public:
 
     ~Simulation();
 
-    // Note: Since the <Entity|Item>InteractionRequest messages are consumed by 
-    //       different systems depending on their type, we receive and queue 
+    // Note: Since the <Entity|Item>InteractionRequest messages are consumed by
+    //       different systems depending on their type, we receive and queue
     //       the messages here. Systems can use these functions to pop them.
-    struct EntityInteractionData
-    {
+    struct EntityInteractionData {
         /** The ID of the entity performing the interaction. */
         entt::entity clientEntity{entt::null};
         /** The ID of the entity that the interaction is being performed on. */
@@ -71,7 +70,7 @@ public:
         NetworkID clientID{0};
     };
     /**
-     * Pops the next entity interaction request of the given type off the queue, 
+     * Pops the next entity interaction request of the given type off the queue,
      * checks it for validity, and returns its data.
      *
      * Entity interactions occur when the user left-clicks an entity, or right-
@@ -84,11 +83,10 @@ public:
     bool popEntityInteractionRequest(EntityInteractionType interactionType,
                                      EntityInteractionData& data);
 
-    struct ItemInteractionData
-    {
+    struct ItemInteractionData {
         /** The ID of the entity performing the interaction. */
         entt::entity clientEntity{entt::null};
-        /** The inventory slot of the item that the interaction is being 
+        /** The inventory slot of the item that the interaction is being
             performed on. */
         Uint8 slotIndex{0};
         /** The item that the interaction is being performed on. */
@@ -97,7 +95,7 @@ public:
         NetworkID clientID{0};
     };
     /**
-     * Pops the next item interaction request of the given type off the queue, 
+     * Pops the next item interaction request of the given type off the queue,
      * checks it for validity, and returns its data.
      *
      * Item interactions occur when the user left-clicks an item, or right-
@@ -116,19 +114,19 @@ public:
     World& getWorld();
 
     /**
-     * Returns a reference to the simulation's Lua bindings for entity init 
+     * Returns a reference to the simulation's Lua bindings for entity init
      * processing.
      */
     sol::state& getEntityInitLua();
 
     /**
-     * Returns a reference to the simulation's Lua bindings for entity item  
+     * Returns a reference to the simulation's Lua bindings for entity item
      * handler processing.
      */
     sol::state& getEntityItemHandlerLua();
 
     /**
-     * Returns a reference to the simulation's Lua bindings for item init 
+     * Returns a reference to the simulation's Lua bindings for item init
      * processing.
      */
     sol::state& getItemInitLua();
@@ -183,7 +181,7 @@ private:
         the appropriate time. */
     std::unique_ptr<ISimulationExtension> extension;
 
-    // Note: We receive the generic interaction request messages here and 
+    // Note: We receive the generic interaction request messages here and
     //       dispatch each specific interaction to the appropriate system.
     EventQueue<EntityInteractionRequest> entityInteractionRequestQueue;
     EventQueue<ItemInteractionRequest> itemInteractionRequestQueue;

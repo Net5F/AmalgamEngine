@@ -9,8 +9,7 @@
 
 namespace AM
 {
-SDL_FPoint Transforms::worldToScreen(const Position& position,
-                                      float zoomFactor)
+SDL_FPoint Transforms::worldToScreen(const Position& position, float zoomFactor)
 {
     // Calc the scaling factor going from world tiles to screen tiles.
     static const float TILE_WIDTH_SCALE{
@@ -80,7 +79,7 @@ Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
         static_cast<float>(SharedConfig::TILE_SCREEN_HEIGHT)
         / SharedConfig::TILE_WORLD_WIDTH};
 
-    // Return a ray that starts at the calculated position and points towards 
+    // Return a ray that starts at the calculated position and points towards
     // the camera.
     return {floorPos.x,
             floorPos.y,

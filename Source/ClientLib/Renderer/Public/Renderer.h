@@ -19,9 +19,9 @@ class SpriteData;
 class IRendererExtension;
 
 /**
- * Pulls information from the Simulation and other sources to isometrically 
+ * Pulls information from the Simulation and other sources to isometrically
  * render the player's view of the world.
- * 
+ *
  * Also kicks off the UI rendering.
  */
 class Renderer : public OSEventHandler

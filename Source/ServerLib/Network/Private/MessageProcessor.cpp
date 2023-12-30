@@ -38,7 +38,8 @@ void dispatchWithNetID(NetworkID netID, std::span<Uint8> messageBuffer,
 {
     // Deserialize the message.
     T message{};
-    Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(), message);
+    Deserialize::fromBuffer(messageBuffer.data(), messageBuffer.size(),
+                            message);
 
     // Fill in the network ID that we assigned to this client.
     message.netID = netID;
@@ -77,7 +78,7 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
         }
         case EngineMessageType::EntityNameChangeRequest: {
             dispatchMessage<EntityNameChangeRequest>(messageBuffer, messageSize,
-                                               networkEventDispatcher);
+                                                     networkEventDispatcher);
             break;
         }
         case EngineMessageType::AnimationStateChangeRequest: {
@@ -96,8 +97,8 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
             break;
         }
         case EngineMessageType::EntityDeleteRequest: {
-            dispatchMessage<EntityDeleteRequest>(
-                messageBuffer, messageSize, networkEventDispatcher);
+            dispatchMessage<EntityDeleteRequest>(messageBuffer, messageSize,
+                                                 networkEventDispatcher);
             break;
         }
         case EngineMessageType::EntityInitScriptRequest: {

@@ -23,7 +23,7 @@ struct ItemDataRequest {
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** The stringID or numericID of the item definition that this client is 
+    /** The stringID or numericID of the item definition that this client is
         requesting. */
     std::variant<std::string, ItemID> itemID{};
 
@@ -42,17 +42,15 @@ struct ItemDataRequest {
 template<typename S>
 void serialize(S& serializer, ItemDataRequest& itemDataRequest)
 {
-    serializer.ext(
-        itemDataRequest.itemID,
-        bitsery::ext::StdVariant{
-            [](S& serializer, std::string& stringID) {
-               serializer.text1b(stringID,
-                                 Item::MAX_DISPLAY_NAME_LENGTH);
-            },
-            [](S& serializer, ItemID& numericID) {
-                serializer.value2b(numericID);
-            }
-    });
+    serializer.ext(itemDataRequest.itemID,
+                   bitsery::ext::StdVariant{
+                       [](S& serializer, std::string& stringID) {
+                           serializer.text1b(stringID,
+                                             Item::MAX_DISPLAY_NAME_LENGTH);
+                       },
+                       [](S& serializer, ItemID& numericID) {
+                           serializer.value2b(numericID);
+                       }});
 }
 
 } // End namespace AM

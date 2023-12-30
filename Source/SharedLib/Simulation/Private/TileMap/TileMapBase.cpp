@@ -24,7 +24,8 @@ TileMapBase::TileMapBase(SpriteDataBase& inSpriteData, bool inTrackTileUpdates)
 {
 }
 
-void TileMapBase::setFloor(int tileX, int tileY, const FloorSpriteSet& spriteSet)
+void TileMapBase::setFloor(int tileX, int tileY,
+                           const FloorSpriteSet& spriteSet)
 {
     AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
               "Tile coords out of bounds: %d, %d.", tileX, tileY);
@@ -54,8 +55,9 @@ bool TileMapBase::remFloor(int tileX, int tileY)
     return clearTileLayers<FloorTileLayer>(tileX, tileY);
 }
 
-void TileMapBase::addFloorCovering(int tileX, int tileY, const FloorCoveringSpriteSet& spriteSet,
-                      Rotation::Direction rotation)
+void TileMapBase::addFloorCovering(int tileX, int tileY,
+                                   const FloorCoveringSpriteSet& spriteSet,
+                                   Rotation::Direction rotation)
 {
     AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
               "Tile coords out of bounds: %d, %d.", tileX, tileY);
@@ -76,14 +78,16 @@ void TileMapBase::addFloorCovering(int tileX, int tileY,
                                    Rotation::Direction rotation)
 {
     addFloorCovering(tileX, tileY,
-                     spriteData.getFloorCoveringSpriteSet(spriteSetID), rotation);
+                     spriteData.getFloorCoveringSpriteSet(spriteSetID),
+                     rotation);
 }
 
 void TileMapBase::addFloorCovering(int tileX, int tileY, Uint16 spriteSetID,
                                    Rotation::Direction rotation)
 {
     addFloorCovering(tileX, tileY,
-                     spriteData.getFloorCoveringSpriteSet(spriteSetID), rotation);
+                     spriteData.getFloorCoveringSpriteSet(spriteSetID),
+                     rotation);
 }
 
 bool TileMapBase::remFloorCovering(int tileX, int tileY,
@@ -121,18 +125,20 @@ bool TileMapBase::remFloorCovering(int tileX, int tileY,
                                    Rotation::Direction rotation)
 {
     return remFloorCovering(tileX, tileY,
-                     spriteData.getFloorCoveringSpriteSet(spriteSetID), rotation);
+                            spriteData.getFloorCoveringSpriteSet(spriteSetID),
+                            rotation);
 }
 
 bool TileMapBase::remFloorCovering(int tileX, int tileY, Uint16 spriteSetID,
                                    Rotation::Direction rotation)
 {
     return remFloorCovering(tileX, tileY,
-                     spriteData.getFloorCoveringSpriteSet(spriteSetID), rotation);
+                            spriteData.getFloorCoveringSpriteSet(spriteSetID),
+                            rotation);
 }
 
 void TileMapBase::addWall(int tileX, int tileY, const WallSpriteSet& spriteSet,
-                      Wall::Type wallType)
+                          Wall::Type wallType)
 {
     AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
               "Tile coords out of bounds: %d, %d.", tileX, tileY);
@@ -179,13 +185,11 @@ bool TileMapBase::remWall(int tileX, int tileY, Wall::Type wallType)
 
     bool wallWasRemoved{false};
     switch (wallType) {
-        case Wall::Type::North:
-        {
+        case Wall::Type::North: {
             wallWasRemoved = remNorthWall(tileX, tileY);
             break;
         }
-        case Wall::Type::West:
-        {
+        case Wall::Type::West: {
             wallWasRemoved = remWestWall(tileX, tileY);
             break;
         }
@@ -199,15 +203,16 @@ bool TileMapBase::remWall(int tileX, int tileY, Wall::Type wallType)
     if (trackTileUpdates && wallWasRemoved) {
         // Note: We don't care about sprite set ID when removing walls.
         tileUpdateHistory.emplace_back(
-            TileRemoveLayer{tileX, tileY, TileLayer::Type::Wall,
-                            0, static_cast<Uint8>(wallType)});
+            TileRemoveLayer{tileX, tileY, TileLayer::Type::Wall, 0,
+                            static_cast<Uint8>(wallType)});
     }
 
     return wallWasRemoved;
 }
 
-void TileMapBase::addObject(int tileX, int tileY, const ObjectSpriteSet& spriteSet,
-                      Rotation::Direction rotation)
+void TileMapBase::addObject(int tileX, int tileY,
+                            const ObjectSpriteSet& spriteSet,
+                            Rotation::Direction rotation)
 {
     AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
               "Tile coords out of bounds: %d, %d.", tileX, tileY);
@@ -226,21 +231,24 @@ void TileMapBase::addObject(int tileX, int tileY, const ObjectSpriteSet& spriteS
     }
 }
 
-void TileMapBase::addObject(int tileX, int tileY, const std::string& spriteSetID,
+void TileMapBase::addObject(int tileX, int tileY,
+                            const std::string& spriteSetID,
                             Rotation::Direction rotation)
 {
-    addObject(tileX, tileY, spriteData.getObjectSpriteSet(spriteSetID), rotation);
+    addObject(tileX, tileY, spriteData.getObjectSpriteSet(spriteSetID),
+              rotation);
 }
 
 void TileMapBase::addObject(int tileX, int tileY, Uint16 spriteSetID,
                             Rotation::Direction rotation)
 {
-    addObject(tileX, tileY, spriteData.getObjectSpriteSet(spriteSetID), rotation);
+    addObject(tileX, tileY, spriteData.getObjectSpriteSet(spriteSetID),
+              rotation);
 }
 
 bool TileMapBase::remObject(int tileX, int tileY,
-                                   const ObjectSpriteSet& spriteSet,
-                                   Rotation::Direction rotation)
+                            const ObjectSpriteSet& spriteSet,
+                            Rotation::Direction rotation)
 {
     AM_ASSERT(tileExtent.containsPosition({tileX, tileY}),
               "Tile coords out of bounds: %d, %d.", tileX, tileY);
@@ -248,15 +256,15 @@ bool TileMapBase::remObject(int tileX, int tileY,
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
 
     // Erase any layers with the same sprite set and rotation.
-    std::size_t erasedCount{std::erase_if(
-        tile.getObjects(),
-        [&spriteSet, rotation](const ObjectTileLayer& layer) {
-            if ((layer.spriteSet == &spriteSet)
-                && (layer.direction == rotation)) {
-                return true;
-            }
-            return false;
-        })};
+    std::size_t erasedCount{
+        std::erase_if(tile.getObjects(),
+                      [&spriteSet, rotation](const ObjectTileLayer& layer) {
+                          if ((layer.spriteSet == &spriteSet)
+                              && (layer.direction == rotation)) {
+                              return true;
+                          }
+                          return false;
+                      })};
 
     // If an object was removed, rebuild the affected tile's collision.
     if (erasedCount > 0) {
@@ -273,16 +281,19 @@ bool TileMapBase::remObject(int tileX, int tileY,
     return (erasedCount > 0);
 }
 
-bool TileMapBase::remObject(int tileX, int tileY, const std::string& spriteSetID,
+bool TileMapBase::remObject(int tileX, int tileY,
+                            const std::string& spriteSetID,
                             Rotation::Direction rotation)
 {
-    return remObject(tileX, tileY, spriteData.getObjectSpriteSet(spriteSetID), rotation);
+    return remObject(tileX, tileY, spriteData.getObjectSpriteSet(spriteSetID),
+                     rotation);
 }
 
 bool TileMapBase::remObject(int tileX, int tileY, Uint16 spriteSetID,
                             Rotation::Direction rotation)
 {
-    return remObject(tileX, tileY, spriteData.getObjectSpriteSet(spriteSetID), rotation);
+    return remObject(tileX, tileY, spriteData.getObjectSpriteSet(spriteSetID),
+                     rotation);
 }
 
 bool TileMapBase::clearTileLayers(
@@ -303,8 +314,8 @@ bool TileMapBase::clearTileLayers(
 
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates) {
-        tileUpdateHistory.emplace_back(TileClearLayers{
-            tileX, tileY, layerTypesToClear});
+        tileUpdateHistory.emplace_back(
+            TileClearLayers{tileX, tileY, layerTypesToClear});
     }
 
     return layerWasCleared;
@@ -312,8 +323,8 @@ bool TileMapBase::clearTileLayers(
 
 bool TileMapBase::clearTile(int tileX, int tileY)
 {
-    return clearTileLayers<FloorTileLayer, FloorCoveringTileLayer, WallTileLayer,
-                    ObjectTileLayer>(tileX, tileY);
+    return clearTileLayers<FloorTileLayer, FloorCoveringTileLayer,
+                           WallTileLayer, ObjectTileLayer>(tileX, tileY);
 }
 
 bool TileMapBase::clearExtentLayers(
@@ -340,8 +351,8 @@ bool TileMapBase::clearExtentLayers(
 
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates) {
-        tileUpdateHistory.emplace_back(TileExtentClearLayers{
-            extent, layerTypesToClear});
+        tileUpdateHistory.emplace_back(
+            TileExtentClearLayers{extent, layerTypesToClear});
     }
 
     return layerWasCleared;
@@ -349,8 +360,8 @@ bool TileMapBase::clearExtentLayers(
 
 bool TileMapBase::clearExtent(const TileExtent& extent)
 {
-    return clearExtentLayers<FloorTileLayer, FloorCoveringTileLayer, WallTileLayer,
-                      ObjectTileLayer>(extent);
+    return clearExtentLayers<FloorTileLayer, FloorCoveringTileLayer,
+                             WallTileLayer, ObjectTileLayer>(extent);
 }
 
 void TileMapBase::clear()
@@ -394,7 +405,8 @@ void TileMapBase::clearTileUpdateHistory()
     tileUpdateHistory.clear();
 }
 
-void TileMapBase::addNorthWall(int tileX, int tileY, const WallSpriteSet& spriteSet)
+void TileMapBase::addNorthWall(int tileX, int tileY,
+                               const WallSpriteSet& spriteSet)
 {
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
     std::array<WallTileLayer, 2>& walls{tile.getWalls()};
@@ -433,7 +445,7 @@ void TileMapBase::addNorthWall(int tileX, int tileY, const WallSpriteSet& sprite
                 eastTile.rebuildCollision(tileX + 1, tileY);
             }
             else if (eastWalls[1].wallType == Wall::Type::NorthWestGapFill) {
-                // The East tile has a NW gap fill. If its sprite set no longer 
+                // The East tile has a NW gap fill. If its sprite set no longer
                 // matches either surrounding wall, make it match the new wall.
                 int gapFillID{eastWalls[1].spriteSet->numericID};
                 int newNorthID{spriteSet.numericID};
@@ -446,7 +458,8 @@ void TileMapBase::addNorthWall(int tileX, int tileY, const WallSpriteSet& sprite
     }
 }
 
-void TileMapBase::addWestWall(int tileX, int tileY, const WallSpriteSet& spriteSet)
+void TileMapBase::addWestWall(int tileX, int tileY,
+                              const WallSpriteSet& spriteSet)
 {
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
     std::array<WallTileLayer, 2>& walls{tile.getWalls()};
@@ -476,8 +489,8 @@ void TileMapBase::addWestWall(int tileX, int tileY, const WallSpriteSet& spriteS
         std::array<WallTileLayer, 2>& southwestWalls{southwestTile.getWalls()};
 
         // If the SouthWest tile has a North wall or a NE gap fill.
-        if ((southwestWalls[1].wallType == Wall::Type::North) ||
-            (southwestWalls[1].wallType == Wall::Type::NorthEastGapFill)) {
+        if ((southwestWalls[1].wallType == Wall::Type::North)
+            || (southwestWalls[1].wallType == Wall::Type::NorthEastGapFill)) {
             // We formed a corner. Check if the tile to the South has a wall.
             // Note: We know this tile is valid cause there's a SouthWest tile.
             Tile& southTile{tiles[linearizeTileIndex(tileX, tileY + 1)]};
@@ -490,7 +503,7 @@ void TileMapBase::addWestWall(int tileX, int tileY, const WallSpriteSet& spriteS
                 southTile.rebuildCollision(tileX, tileY + 1);
             }
             else if (southWalls[1].wallType == Wall::Type::NorthWestGapFill) {
-                // The South tile has a NW gap fill. If its sprite set no longer 
+                // The South tile has a NW gap fill. If its sprite set no longer
                 // matches either surrounding wall, make it match the new wall.
                 int gapFillID{southWalls[1].spriteSet->numericID};
                 int newWestID{spriteSet.numericID};

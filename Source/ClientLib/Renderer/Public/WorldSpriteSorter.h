@@ -21,24 +21,24 @@ class SpriteData;
 class UserInterface;
 
 /**
- * Gathers all of the World's entity and tile layer sprites and sorts them 
+ * Gathers all of the World's entity and tile layer sprites and sorts them
  * into their proper draw order.
  */
 class WorldSpriteSorter
 {
 public:
     WorldSpriteSorter(entt::registry& inRegistry, const TileMap& inTileMap,
-                        const SpriteData& inSpriteData,
-                        const UserInterface& inUI);
+                      const SpriteData& inSpriteData,
+                      const UserInterface& inUI);
 
     /**
-     * Clears the stored sprite info, gathers the updated batch of sprites, 
+     * Clears the stored sprite info, gathers the updated batch of sprites,
      * and sorts them into their proper draw order.
      */
     void sortSprites(const Camera& camera, double alpha);
 
     /**
-     * @return A reference to the vector of sprites that was built during the 
+     * @return A reference to the vector of sprites that was built during the
      *         last sortSprites() call.
      *
      * Note: Some of the returned vector's elements may be pure phantoms.
@@ -70,18 +70,17 @@ private:
      */
     void gatherEntitySpriteInfo(const Camera& camera, double alpha);
 
-    // All of these just call pushTileSprite(), but Floor and Wall also check 
+    // All of these just call pushTileSprite(), but Floor and Wall also check
     // if the UI wants to swap any of their sprites with a phantom.
     void pushFloorSprite(const Tile& tile, const Camera& camera, int x, int y);
     void pushFloorCoveringSprites(const Tile& tile, const Camera& camera, int x,
-                                 int y);
-    void pushWallSprites(const Tile& tile, const Camera& camera, int x,
-                         int y);
+                                  int y);
+    void pushWallSprites(const Tile& tile, const Camera& camera, int x, int y);
     void pushObjectSprites(const Tile& tile, const Camera& camera, int x,
                            int y);
 
     /**
-     * Pushes the given tile sprite into the appropriate vector, based on 
+     * Pushes the given tile sprite into the appropriate vector, based on
      * whether it needs to be sorted or not.
      */
     void pushTileSprite(const Sprite& sprite, const Camera& camera,
@@ -125,7 +124,7 @@ private:
     bool isWithinScreenBounds(const SDL_Rect& extent, const Camera& camera);
 
     /**
-     * Returns a color mod from spriteColorMods for the given world object ID 
+     * Returns a color mod from spriteColorMods for the given world object ID
      * if one exists, else returns {255, 255, 255, 255}.
      * If a color mod is returned, it will be removed from spriteColorMods.
      */
@@ -144,7 +143,7 @@ private:
     /** Used for getting sprite color mods and phantom sprites. */
     const UserInterface& ui;
 
-    /** Stores a temporary copy of the UI's desired phantom sprites. 
+    /** Stores a temporary copy of the UI's desired phantom sprites.
         We make a copy so that we can remove them as they get used. */
     std::vector<PhantomSpriteInfo> phantomSprites;
 
@@ -152,11 +151,11 @@ private:
         We make a copy so that we can remove them as they get used. */
     std::vector<SpriteColorModInfo> spriteColorMods;
 
-    /** Holds floor sprites during the gather step before they get pushed into 
+    /** Holds floor sprites during the gather step before they get pushed into
         sortedSprites. */
     std::vector<SpriteSortInfo> floorSprites;
 
-    /** Holds floor covering sprites during the gather step before they get 
+    /** Holds floor covering sprites during the gather step before they get
         pushed into sortedSprites. */
     std::vector<SpriteSortInfo> floorCoveringSprites;
 
@@ -174,8 +173,7 @@ SDL_Color WorldSpriteSorter::getColorMod(const T& objectID)
 {
     auto objectIDsMatch = [&](const SpriteColorModInfo& info) {
         // If this color mod is for the same type of object.
-        if (const T* colorModLayerID
-            = std::get_if<T>(&(info.objectToModify))) {
+        if (const T* colorModLayerID = std::get_if<T>(&(info.objectToModify))) {
             // If the IDs match, return true.
             if (*colorModLayerID == objectID) {
                 return true;

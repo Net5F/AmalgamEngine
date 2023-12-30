@@ -12,7 +12,7 @@ namespace ResourceImporter
 
 /**
  * Holds the data necessary for editing and saving a sprite.
- * Part of SpriteModel. 
+ * Part of SpriteModel.
  */
 struct EditorSprite {
     /** This sprite's unique numeric identifier. */
@@ -32,7 +32,7 @@ struct EditorSprite {
     int yOffset{0};
 
     /** If true, this sprite's modelBounds will be used in collision checks.
-        Most sprites will want collision enabled, but things like floors and 
+        Most sprites will want collision enabled, but things like floors and
         carpets usually don't need collision. */
     bool collisionEnabled{false};
 

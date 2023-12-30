@@ -44,8 +44,8 @@ IconEditStage::IconEditStage(DataModel& inDataModel)
     // When the active sprite is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
         .connect<&IconEditStage::onActiveLibraryItemChanged>(*this);
-    dataModel.iconModel.iconRemoved
-        .connect<&IconEditStage::onIconRemoved>(*this);
+    dataModel.iconModel.iconRemoved.connect<&IconEditStage::onIconRemoved>(
+        *this);
 }
 
 void IconEditStage::onActiveLibraryItemChanged(

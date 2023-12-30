@@ -12,8 +12,9 @@ namespace AM
 namespace Client
 {
 
-ComponentUpdateSystem::ComponentUpdateSystem(Simulation& inSimulation, World& inWorld,
-                                       Network& inNetwork, SpriteData& inSpriteData)
+ComponentUpdateSystem::ComponentUpdateSystem(Simulation& inSimulation,
+                                             World& inWorld, Network& inNetwork,
+                                             SpriteData& inSpriteData)
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
@@ -39,7 +40,7 @@ void ComponentUpdateSystem::processUpdates()
     //       here. Otherwise, it will be auto-applied over your predicted state.
     Uint32 desiredTick{simulation.getReplicationTick()};
 
-    // Immediately process any player entity messages, push the rest into a 
+    // Immediately process any player entity messages, push the rest into a
     // secondary queue.
     {
         ComponentUpdate componentUpdate{};
@@ -57,7 +58,7 @@ void ComponentUpdateSystem::processUpdates()
     while (!(componentUpdateSecondaryQueue.empty())) {
         ComponentUpdate& componentUpdate{componentUpdateSecondaryQueue.front()};
 
-        // If we've reached the desired tick, save the rest of the messages for 
+        // If we've reached the desired tick, save the rest of the messages for
         // later.
         if (componentUpdate.tickNum > desiredTick) {
             break;
@@ -76,18 +77,20 @@ void ComponentUpdateSystem::processComponentUpdate(
     entt::registry& registry{world.registry};
 
     for (const auto& componentVariant : componentUpdate.components) {
-        std::visit([&](const auto& component) {
-            using T = std::decay_t<decltype(component)>;
-            registry.emplace_or_replace<T>(componentUpdate.entity,
-                                           component);
-        }, componentVariant);
+        std::visit(
+            [&](const auto& component) {
+                using T = std::decay_t<decltype(component)>;
+                registry.emplace_or_replace<T>(componentUpdate.entity,
+                                               component);
+            },
+            componentVariant);
     }
 }
 
 void ComponentUpdateSystem::onAnimationStateUpdated(entt::registry& registry,
                                                     entt::entity entity)
 {
-    // Since the animation state was updated, we need to update the entity's 
+    // Since the animation state was updated, we need to update the entity's
     // sprite and collision.
     auto [position, animationState]
         = registry.get<Position, AnimationState>(entity);
@@ -96,7 +99,8 @@ void ComponentUpdateSystem::onAnimationStateUpdated(entt::registry& registry,
             .sprites[animationState.spriteIndex]};
     registry.emplace_or_replace<Sprite>(entity, *newSprite);
 
-    // Note: We assume that an entity with AnimationState always has a Collision.
+    // Note: We assume that an entity with AnimationState always has a
+    //       Collision.
     const Collision& collision{
         registry.patch<Collision>(entity, [&](Collision& collision) {
             collision.modelBounds = newSprite->modelBounds;

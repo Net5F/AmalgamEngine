@@ -13,7 +13,7 @@ class World;
 class Network;
 
 /**
- * Processes movement update messages for the player's entity and moves the 
+ * Processes movement update messages for the player's entity and moves the
  * entity appropriately.
  */
 class PlayerMovementSystem
@@ -47,18 +47,18 @@ private:
      * Processes a single tick of player entity movement.
      *
      * @param inputStates The input states to use to move the entity.
-     * @post The player's position, rotation, and collision now reflect 
+     * @post The player's position, rotation, and collision now reflect
      *       their current position and the given input state.
      */
     void movePlayerEntity(Input::StateArr& inputStates);
 
     /**
-     * Calls registry.patch() on the player's Position component to trigger 
+     * Calls registry.patch() on the player's Position component to trigger
      * any on_update callbacks that are connected to them.
-     * We don't patch until the end, because we may update the components 
+     * We don't patch until the end, because we may update the components
      * multiple times before we're done.
      *
-     * Note: We only update Position because it's all we need right now. If 
+     * Note: We only update Position because it's all we need right now. If
      *       the others are needed, they can be added.
      */
     void emitUpdateSignals();

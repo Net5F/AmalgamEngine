@@ -34,9 +34,9 @@ public:
      *                      at index 0.
      * @param messageSize  The length in bytes of the message in messageBuffer.
      */
-    virtual void 
-        processReceivedMessage(NetworkID netID, Uint8 messageType,
-                               Uint8* messageBuffer, std::size_t messageSize)
+    virtual void processReceivedMessage(NetworkID netID, Uint8 messageType,
+                                        Uint8* messageBuffer,
+                                        std::size_t messageSize)
         = 0;
 };
 

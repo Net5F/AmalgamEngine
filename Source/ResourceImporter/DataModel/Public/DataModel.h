@@ -18,13 +18,13 @@ namespace AM
 namespace ResourceImporter
 {
 /**
- * A data model that holds our resource data in memory and supports saving it 
+ * A data model that holds our resource data in memory and supports saving it
  * into a ResourceData.json file.
  *
- * Note: All ID spaces are separate (i.e. sprites, sprite sheets, floors, etc 
+ * Note: All ID spaces are separate (i.e. sprites, sprite sheets, floors, etc
  *       all have unique ID spaces).
  * Note: The sprite numeric ID space might accrue gaps as sprite are deleted.
- *       This is known and expected. Sprites are ordered in the UI by their 
+ *       This is known and expected. Sprites are ordered in the UI by their
  *       sheet's ID, so it shouldn't inconvenience users.
  */
 class DataModel
@@ -49,7 +49,7 @@ public:
      *                  should be created.
      * @return An empty string if the file at the given path parses
      *         successfully, else a string containing the failure message.
-     * @return true if successful. If false, getErrorString() will return more 
+     * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
     bool create(const std::string& fullPath);
@@ -59,7 +59,7 @@ public:
      * and load the data into this model.
      *
      * @param fullPath  The full path to the ResourceData.json file.
-     * @return true if successful. If false, getErrorString() will return more 
+     * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
     bool load(const std::string& fullPath);
@@ -93,7 +93,7 @@ public:
      * Checks that the given relative path corresponds to a valid sprite
      * sheet image in the working Resources directory.
      *
-     * @return true if successful. If false, getErrorString() will return more 
+     * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
     bool validateRelPath(const std::string& relPath);
@@ -115,7 +115,7 @@ private:
     /** The parent directory of currentWorkingFilePath + "/Assets/Textures". */
     std::string workingTexturesDir;
 
-    /** If one of our member model's load functions returns false, this holds a 
+    /** If one of our member model's load functions returns false, this holds a
         string describing the error that occurred. */
     std::string errorString;
 

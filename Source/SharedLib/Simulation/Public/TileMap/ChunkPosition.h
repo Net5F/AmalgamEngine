@@ -9,8 +9,7 @@ struct TilePosition;
 /**
  * A strong type alias, describing the position of a particular map chunk.
  */
-struct ChunkPosition : public DiscretePosition<DiscreteImpl::ChunkTag>
-{
+struct ChunkPosition : public DiscretePosition<DiscreteImpl::ChunkTag> {
     ChunkPosition();
 
     ChunkPosition(int inX, int inY);

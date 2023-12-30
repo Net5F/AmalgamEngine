@@ -39,7 +39,7 @@ const Item* ItemDataBase::createItem(const Item& item)
     }
 
     // Add the item to our maps.
-    // Note: When we insert into an unordered_map, references to the map's 
+    // Note: When we insert into an unordered_map, references to the map's
     //       elements are guaranteed to remain valid (for itemStringMap).
     itemMap[newItemID] = item;
     Item& newItem{itemMap[newItemID]};
@@ -74,7 +74,7 @@ const Item* ItemDataBase::updateItem(const Item& newItem)
             return nullptr;
         }
         else {
-            // New ID isn't taken. Add it to the string ID map and remove the 
+            // New ID isn't taken. Add it to the string ID map and remove the
             // old one.
             itemStringMap[stringID] = &item;
             itemStringMap.erase(item.stringID);
@@ -120,7 +120,7 @@ const Item* ItemDataBase::getItem(ItemID numericID) const
 
 bool ItemDataBase::itemExists(const std::string& stringID) const
 {
-    // The null item exists for use as a safe default, but is otherwise 
+    // The null item exists for use as a safe default, but is otherwise
     // considered to not exist.
     if (stringID == "null") {
         return false;
@@ -131,7 +131,7 @@ bool ItemDataBase::itemExists(const std::string& stringID) const
 
 bool ItemDataBase::itemExists(ItemID numericID) const
 {
-    // The null item exists for use as a safe default, but is otherwise 
+    // The null item exists for use as a safe default, but is otherwise
     // considered to not exist.
     if (numericID == NULL_ITEM_ID) {
         return false;

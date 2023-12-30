@@ -27,8 +27,7 @@ public:
     // Public interface
     //-------------------------------------------------------------------------
     LibraryListItem(const std::string& inText,
-                    const std::string& inDebugName
-                             = "LibraryListItem");
+                    const std::string& inDebugName = "LibraryListItem");
 
     /**
      * Selects this widget and calls onSelected.
@@ -63,8 +62,7 @@ public:
     /**
      * The types of list items that we hold in the library.
      */
-    enum Type
-    {
+    enum Type {
         SpriteSheet,
         Sprite,
         Floor,
@@ -78,7 +76,7 @@ public:
     };
     Type type{};
 
-    /** Alongside type, associates this list item with the model data that it 
+    /** Alongside type, associates this list item with the model data that it
         represents.
         Note: For sprite sets, this can be cast to Uint16. */
     int ID{0};
@@ -119,10 +117,11 @@ public:
     // Base class overrides
     //-------------------------------------------------------------------------
     AUI::EventResult onMouseDown(AUI::MouseButtonType buttonType,
-                            const SDL_Point& cursorPosition) override;
+                                 const SDL_Point& cursorPosition) override;
 
-    AUI::EventResult onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                   const SDL_Point& cursorPosition) override;
+    AUI::EventResult
+        onMouseDoubleClick(AUI::MouseButtonType buttonType,
+                           const SDL_Point& cursorPosition) override;
 
     void onMouseEnter() override;
 

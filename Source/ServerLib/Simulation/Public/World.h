@@ -82,7 +82,7 @@ public:
     /**
      * Adds the given graphical component to the entity.
      *
-     * Since an entity's collision is based on its graphics, this also adds 
+     * Since an entity's collision is based on its graphics, this also adds
      * the Collision component and adds the entity to the locator.
      */
     void addGraphicsComponents(entt::entity entity,
@@ -94,10 +94,10 @@ public:
     void addMovementComponents(entt::entity entity);
 
     /**
-     * Runs the given init script on the given entity. If successful, adds it 
+     * Runs the given init script on the given entity. If successful, adds it
      * as an EntityInitScript component.
      *
-     * @return If the init script failed to run, returns a string 
+     * @return If the init script failed to run, returns a string
      *         describing the issue. Else, returns an empty string.
      */
     std::string runEntityInitScript(entt::entity entity,
@@ -110,20 +110,19 @@ public:
     bool entityIDIsInUse(entt::entity entity) const;
 
     /**
-     * Returns true if the given entity has all the components necessary for 
+     * Returns true if the given entity has all the components necessary for
      * movement.
      */
     bool hasMovementComponents(entt::entity entity) const;
 
     /**
-     * Runs the given init script on the given item. If successful, saves it  
+     * Runs the given init script on the given item. If successful, saves it
      * in item.initScript.
      *
-     * @return If the init script failed to run, returns a string 
+     * @return If the init script failed to run, returns a string
      *         describing the issue. Else, returns an empty string.
      */
-    std::string runItemInitScript(Item& item,
-                                  const ItemInitScript& initScript);
+    std::string runItemInitScript(Item& item, const ItemInitScript& initScript);
 
     /**
      * Returns the spawn point position.

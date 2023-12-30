@@ -23,8 +23,7 @@ public:
      *
      * @param zoomFactor  The camera's zoom factor.
      */
-    static SDL_FPoint worldToScreen(const Position& position,
-                                    float zoomFactor);
+    static SDL_FPoint worldToScreen(const Position& position, float zoomFactor);
 
     /**
      * Converts a Z coordinate in world space to a Y coordinate in screen space.
@@ -43,8 +42,8 @@ public:
 
     /**
      * Converts a point in screen space to a ray in world space.
-     * Note: The resulting ray starts at the ground (Z == 0) and points 
-     *       towards the camera. It does not point from the camera to the 
+     * Note: The resulting ray starts at the ground (Z == 0) and points
+     *       towards the camera. It does not point from the camera to the
      *       ground, as may be expected.
      */
     static Ray screenToWorldRay(const SDL_FPoint& screenPoint,

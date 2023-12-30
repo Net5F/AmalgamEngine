@@ -22,7 +22,7 @@ class IUserInterfaceExtension;
  * Drives the project's UI through the extension interface.
  *
  * Provides a way for the Renderer to know how the UI wants to affect the world
- * rendering (which sprites to highlight, phantom sprites to insert for build 
+ * rendering (which sprites to highlight, phantom sprites to insert for build
  * mode, etc).
  */
 class UserInterface : public OSEventHandler
@@ -32,14 +32,14 @@ public:
 
     /**
      * Returns all of the project UI's phantom sprites.
-     * Phantom sprites are used when you want to visually add or replace a tile 
+     * Phantom sprites are used when you want to visually add or replace a tile
      * layer or entity without actually modifying the sim.
      */
     std::vector<PhantomSpriteInfo> getPhantomSprites() const;
 
     /**
      * Returns all of the project UI's sprite color modifications.
-     * Color mods are used when you want to modify the color or transparency 
+     * Color mods are used when you want to modify the color or transparency
      * of a tile layer or entity.
      */
     std::vector<SpriteColorModInfo> getSpriteColorMods() const;
@@ -55,7 +55,7 @@ public:
      * Calls the project's UI render(), if present.
      *
      * @param camera  The camera to calculate screen position with.
-     * @param sortedSprites  The sorted list of world sprites that were drawn on 
+     * @param sortedSprites  The sorted list of world sprites that were drawn on
      *                       this frame. Used to update worldObjectLocator.
      */
     void render(const Camera& camera,
@@ -79,7 +79,7 @@ public:
     void setExtension(std::unique_ptr<IUserInterfaceExtension> inExtension);
 
     /**
-     * Separate setter to avoid a circular dependency during construction 
+     * Separate setter to avoid a circular dependency during construction
      * (Simulation needs our eventDispatcher, we need Simulation's World).
      */
     void setWorld(const World& inWorld);

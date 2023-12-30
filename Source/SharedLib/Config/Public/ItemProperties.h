@@ -12,8 +12,7 @@ namespace AM
 {
 
 /** The item's description. */
-struct ItemDescription
-{
+struct ItemDescription {
     /** The max length of an item's description text. */
     static constexpr std::size_t MAX_TEXT_LENGTH{500};
 

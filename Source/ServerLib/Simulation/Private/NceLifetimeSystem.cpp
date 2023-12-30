@@ -65,7 +65,7 @@ void NceLifetimeSystem::handleInitRequest(
     if (entityInitRequest.entity != entt::null) {
         // Double-check that the ID is actually in use.
         if (world.entityIDIsInUse(entityInitRequest.entity)) {
-            // This is an existing entity. Remove all of its components. 
+            // This is an existing entity. Remove all of its components.
             for (auto [id, storage] : world.registry.storage()) {
                 storage.remove(entityInitRequest.entity);
             }

@@ -132,7 +132,8 @@ void ChunkUpdateSystem::receiveAndApplyUpdates()
     }
 }
 
-void ChunkUpdateSystem::applyChunkSnapshot(const ChunkWireSnapshot& chunkSnapshot)
+void ChunkUpdateSystem::applyChunkSnapshot(
+    const ChunkWireSnapshot& chunkSnapshot)
 {
     const int CHUNK_WIDTH{static_cast<int>(SharedConfig::CHUNK_WIDTH)};
 
@@ -150,8 +151,8 @@ void ChunkUpdateSystem::applyChunkSnapshot(const ChunkWireSnapshot& chunkSnapsho
 
             // Copy all of the snapshot tile's sprite layers to our map tile.
             const TileSnapshot& tileSnapshot{chunkSnapshot.tiles[tileIndex]};
-            world.tileMap.addSnapshotLayersToTile(
-                tileSnapshot, chunkSnapshot, currentTileX, currentTileY);
+            world.tileMap.addSnapshotLayersToTile(tileSnapshot, chunkSnapshot,
+                                                  currentTileX, currentTileY);
 
             // Increment to the next linear index.
             tileIndex++;

@@ -7,7 +7,7 @@
 namespace AM
 {
 /**
- * Sent by a client to request that an item be moved to a different slot in 
+ * Sent by a client to request that an item be moved to a different slot in
  * their inventory, or by the server to tell a client that an item was moved.
  *
  * Moving an item into an occupied slot swaps its position with the other item.
@@ -21,7 +21,8 @@ struct InventoryMoveItem {
 };
 
 template<typename S>
-void serialize(S& serializer, InventoryMoveItem& inventoryMoveItem) {
+void serialize(S& serializer, InventoryMoveItem& inventoryMoveItem)
+{
     serializer.value1b(inventoryMoveItem.sourceSlotIndex);
     serializer.value1b(inventoryMoveItem.destSlotIndex);
 }

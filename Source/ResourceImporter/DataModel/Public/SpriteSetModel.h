@@ -19,7 +19,7 @@ namespace ResourceImporter
 class DataModel;
 
 /**
- * Holds data for each type of sprite set (floor, floor covering, wall, and 
+ * Holds data for each type of sprite set (floor, floor covering, wall, and
  * object).
  */
 class SpriteSetModel
@@ -28,16 +28,16 @@ public:
     SpriteSetModel(DataModel& inDataModel);
 
     /**
-     * Attempts to load the "floors", "floorCoverings", "walls", and "objects" 
+     * Attempts to load the "floors", "floorCoverings", "walls", and "objects"
      * sections of the given json into this model.
      *
-     * @return true if successful. If false, getErrorString() will return more 
+     * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
     bool load(const nlohmann::json& json);
 
     /**
-     * Saves the current state of this data model into the given json's 
+     * Saves the current state of this data model into the given json's
      * "floors", "floorCoverings", "walls", and "objects" sections.
      */
     void save(nlohmann::json& json);
@@ -51,9 +51,9 @@ public:
     bool addObject();
 
     /**
-     * Removes the sprite set of the appropriate type with the given ID from 
+     * Removes the sprite set of the appropriate type with the given ID from
      * the associated map.
-     * 
+     *
      * Error if the given ID isn't preset in the map.
      *
      * @param spriteSetID  The editor ID of the sprite set to remove.
@@ -64,7 +64,8 @@ public:
     void remObject(Uint16 objectID);
 
     const EditorFloorSpriteSet& getFloor(Uint16 floorID);
-    const EditorFloorCoveringSpriteSet& getFloorCovering(Uint16 floorCoveringID);
+    const EditorFloorCoveringSpriteSet&
+        getFloorCovering(Uint16 floorCoveringID);
     const EditorWallSpriteSet& getWall(Uint16 wallID);
     const EditorObjectSpriteSet& getObject(Uint16 objectID);
 
@@ -78,7 +79,7 @@ public:
     void resetModelState();
 
     /**
-     * Iterates all the sprite sets and replaces any instances of spriteID 
+     * Iterates all the sprite sets and replaces any instances of spriteID
      * with NULL_SPRITE_ID.
      */
     void removeSpriteIDFromSets(int spriteID);
@@ -88,8 +89,8 @@ public:
 private:
     // Parsing functions.
     /**
-     * @param spriteSetJson  The json to parse. Must be a valid sprite set 
-     *                       section from ResourceData.json, for the appropriate 
+     * @param spriteSetJson  The json to parse. Must be a valid sprite set
+     *                       section from ResourceData.json, for the appropriate
      *                       set type.
      */
     bool parseFloorSpriteSet(const nlohmann::json& spriteSetJson);
@@ -137,17 +138,19 @@ private:
 
     DataModel& dataModel;
 
-    /** Maps floor IDs -> the floor sprite sets that we currently have loaded. */
+    /** Maps floor IDs -> the floor sprite sets that we currently have loaded.
+     */
     std::map<Uint16, EditorFloorSpriteSet> floorMap;
 
-    /** Maps floor covering IDs -> the floor sprite sets that we currently have 
+    /** Maps floor covering IDs -> the floor sprite sets that we currently have
         loaded. */
     std::map<Uint16, EditorFloorCoveringSpriteSet> floorCoveringMap;
 
     /** Maps wall IDs -> the wall sprite sets that we currently have loaded. */
     std::map<Uint16, EditorWallSpriteSet> wallMap;
 
-    /** Maps object IDs -> the object sprite sets that we currently have loaded. */
+    /** Maps object IDs -> the object sprite sets that we currently have loaded.
+     */
     std::map<Uint16, EditorObjectSpriteSet> objectMap;
 
     /** Used for generating temporary sprite sheet IDs that are only used
@@ -157,7 +160,7 @@ private:
     IDPool wallIDPool;
     IDPool objectIDPool;
 
-    /** If one of our parsing functions returns false, this holds a string 
+    /** If one of our parsing functions returns false, this holds a string
         describing the error that occurred. */
     std::string errorString;
 
@@ -180,7 +183,7 @@ private:
                     int newSpriteID)>
         spriteSetSlotChangedSig;
     entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
-                               const std::string& newDisplayName)>
+                    const std::string& newDisplayName)>
         spriteSetDisplayNameChangedSig;
 
 public:
@@ -188,15 +191,16 @@ public:
     // Signal Sinks
     //-------------------------------------------------------------------------
     /** A floor sprite set was added to the model. */
-    entt::sink<entt::sigh<void(Uint16 floorID, const EditorFloorSpriteSet& floor)>>
+    entt::sink<
+        entt::sigh<void(Uint16 floorID, const EditorFloorSpriteSet& floor)>>
         floorAdded;
     /** A floor covering sprite set was added to the model. */
-    entt::sink<entt::sigh<void(Uint16 floorCoveringID,
-                               const EditorFloorCoveringSpriteSet& floorCovering)>>
+    entt::sink<
+        entt::sigh<void(Uint16 floorCoveringID,
+                        const EditorFloorCoveringSpriteSet& floorCovering)>>
         floorCoveringAdded;
     /** A wall sprite set was added to the model. */
-    entt::sink<
-        entt::sigh<void(Uint16 wallID, const EditorWallSpriteSet& wall)>>
+    entt::sink<entt::sigh<void(Uint16 wallID, const EditorWallSpriteSet& wall)>>
         wallAdded;
     /** An object sprite set was added to the model. */
     entt::sink<

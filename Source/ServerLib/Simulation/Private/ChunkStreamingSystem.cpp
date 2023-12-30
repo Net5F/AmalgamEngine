@@ -75,8 +75,8 @@ void ChunkStreamingSystem::addChunkToMessage(const ChunkPosition& chunkPosition,
             // Copy all of this tile's layers to the snapshot.
             const Tile& tile{
                 world.tileMap.getTile((startX + tileX), (startY + tileY))};
-            addTileLayersToSnapshot(
-                tile, chunkSnapshot.tiles[tileIndex], chunkSnapshot);
+            addTileLayersToSnapshot(tile, chunkSnapshot.tiles[tileIndex],
+                                    chunkSnapshot);
 
             // Increment to the next linear index.
             tileIndex++;
@@ -84,9 +84,9 @@ void ChunkStreamingSystem::addChunkToMessage(const ChunkPosition& chunkPosition,
     }
 }
 
-void ChunkStreamingSystem::addTileLayersToSnapshot(const Tile& tile,
-                                      TileSnapshot& tileSnapshot,
-                                      ChunkWireSnapshot& chunkSnapshot)
+void ChunkStreamingSystem::addTileLayersToSnapshot(
+    const Tile& tile, TileSnapshot& tileSnapshot,
+    ChunkWireSnapshot& chunkSnapshot)
 {
     // Add the floor (if one is present).
     if (tile.getFloor().getSprite() != nullptr) {

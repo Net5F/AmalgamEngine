@@ -90,7 +90,7 @@ bool InventoryHelpers::removeItem(const std::string& itemID, Uint8 count,
                                   entt::entity entityToRemoveFrom, World& world,
                                   Network& network)
 {
-    // If the entity's inventory has enough copies of the item to satisfy the 
+    // If the entity's inventory has enough copies of the item to satisfy the
     // requested count, remove them.
     const Item* item{world.itemData.getItem(itemID)};
     auto* inventory{world.registry.try_get<Inventory>(entityToRemoveFrom)};

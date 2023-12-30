@@ -23,8 +23,8 @@ class MovementHelpers
 {
 public:
     /**
-     * Calculates an updated position based on the current position, input state, 
-     * and a time delta.
+     * Calculates an updated position based on the current position, input
+     * state, and a time delta.
      *
      * @param position The current position.
      * @param inputStates The current input state.
@@ -39,7 +39,7 @@ public:
 
     /**
      * Calculates a rotation based on the given input state.
-     * If there are no inputs or they cancel out, the given rotation will be 
+     * If there are no inputs or they cancel out, the given rotation will be
      * returned.
      *
      * @param rotation The current rotation.
@@ -77,7 +77,7 @@ public:
 private:
     /**
      * Returns the appropriate direction for the given direction int.
-     * @param directionInt An integer representation of a direction, derived 
+     * @param directionInt An integer representation of a direction, derived
      *                     from the formula (3 * (yDown - yUp) + xUp - xDown).
      */
     static Rotation::Direction directionIntToDirection(int directionInt);

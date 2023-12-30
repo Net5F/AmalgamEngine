@@ -16,9 +16,12 @@ namespace ResourceImporter
 {
 Application::Application()
 : sdl{SDL_INIT_VIDEO}
-, sdlWindow{"Amalgam Engine Resource Importer", SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,        Config::ACTUAL_SCREEN_WIDTH,
-            Config::ACTUAL_SCREEN_HEIGHT,   SDL_WINDOW_SHOWN}
+, sdlWindow{"Amalgam Engine Resource Importer",
+            SDL_WINDOWPOS_UNDEFINED,
+            SDL_WINDOWPOS_UNDEFINED,
+            Config::ACTUAL_SCREEN_WIDTH,
+            Config::ACTUAL_SCREEN_HEIGHT,
+            SDL_WINDOW_SHOWN}
 , sdlRenderer{sdlWindow, -1, SDL_RENDERER_ACCELERATED}
 , assetCache{sdlRenderer.Get()}
 , dataModel{sdlRenderer.Get()}

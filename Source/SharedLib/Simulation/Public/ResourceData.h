@@ -7,13 +7,14 @@ namespace AM
 {
 
 /**
- * Parses ResourceData.json into an in-memory object so we can pass it to 
+ * Parses ResourceData.json into an in-memory object so we can pass it to
  * SpriteData, IconData, etc.
  *
  * Note: This class expects a ResourceData.json file to be present in the same
  *       directory as the application executable.
  */
-class ResourceData {
+class ResourceData
+{
 public:
     /**
      * Parses ResourceData.json. Errors if it fails to parse.

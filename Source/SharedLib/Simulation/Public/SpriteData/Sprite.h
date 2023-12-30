@@ -28,12 +28,12 @@ struct Sprite {
     int numericID{NULL_SPRITE_ID};
 
     /** If true, this sprite's modelBounds will be used in collision checks.
-        Most sprites will want collision enabled, but things like floors and 
+        Most sprites will want collision enabled, but things like floors and
         carpets usually don't need collision. */
     bool collisionEnabled{false};
 
     /** Model-space bounding box. Defines the sprite's 3D volume.
-        Note: Tiles use these bounds, but dynamic entities use the bounds 
+        Note: Tiles use these bounds, but dynamic entities use the bounds
               defined by their Collision component. */
     BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
 };

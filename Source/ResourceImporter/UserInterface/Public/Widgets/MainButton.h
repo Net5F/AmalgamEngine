@@ -14,8 +14,7 @@ namespace ResourceImporter
 class MainButton : public AUI::Button
 {
 public:
-    MainButton(const SDL_Rect& inLogicalExtent,
-               const std::string& inText,
+    MainButton(const SDL_Rect& inLogicalExtent, const std::string& inText,
                const std::string& inDebugName = "MainButton");
 };
 

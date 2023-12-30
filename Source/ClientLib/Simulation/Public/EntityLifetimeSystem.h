@@ -22,7 +22,7 @@ class EntityLifetimeSystem
 {
 public:
     EntityLifetimeSystem(Simulation& inSimulation, World& inWorld,
-                      SpriteData& inSpriteData, Network& inNetwork);
+                         SpriteData& inSpriteData, Network& inNetwork);
 
     /**
      * Processes any waiting EntityInit or EntityDelete messages.
@@ -54,8 +54,8 @@ private:
     /** Used to get sprite data when constructing entities. */
     SpriteData& spriteData;
 
-    /** We pop messages off entityInitQueue and push them into here, so 
-        we can find and immediately process any messages for the player 
+    /** We pop messages off entityInitQueue and push them into here, so
+        we can find and immediately process any messages for the player
         entity. */
     std::queue<EntityInit> entityInitSecondaryQueue;
 

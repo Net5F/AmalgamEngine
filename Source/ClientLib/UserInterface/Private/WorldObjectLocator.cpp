@@ -56,8 +56,8 @@ WorldObjectID
     //                    https://www.youtube.com/watch?v=NbSee-XM7WA
 
     // Cast a world-space ray from the ground to the given point on the screen.
-    Ray rayToCamera{Transforms::screenToWorldRay(SDLHelpers::pointToFPoint(screenPoint),
-                                         camera)};
+    Ray rayToCamera{Transforms::screenToWorldRay(
+        SDLHelpers::pointToFPoint(screenPoint), camera)};
     rayToCamera.normalize();
 
     // Find where the ray intersects this locator's extent.
@@ -69,18 +69,21 @@ WorldObjectID
 
     // Calc the ray we'll be tracing, from locator bounds -> the ground.
     Position rayOrigin{rayToCamera.getPositionAtT(intersectT)};
-    Ray ray{rayOrigin.x, rayOrigin.y, rayOrigin.z,
-            -rayToCamera.directionX, -rayToCamera.directionY,
+    Ray ray{rayOrigin.x,
+            rayOrigin.y,
+            rayOrigin.z,
+            -rayToCamera.directionX,
+            -rayToCamera.directionY,
             -rayToCamera.directionZ};
 
-    // Calc the ratio of how long we have to travel along the ray to 
+    // Calc the ratio of how long we have to travel along the ray to
     // fully move through 1 cell in each direction.
     // Note: Since our ray is from our iso camera, these will always be equal.
     const float stepX{std::abs(1 / ray.directionX)};
     const float stepY{std::abs(1 / ray.directionY)};
 
-    // These hold the value (relative to stepX/stepY) where the next intersection
-    // occurs in each direction.
+    // These hold the value (relative to stepX/stepY) where the next
+    // intersection occurs in each direction.
     float nextIntersectionX{
         (std::fmod(ray.origin.x, cellWorldWidth) / cellWorldWidth) * stepX};
     float nextIntersectionY{
@@ -139,12 +142,12 @@ void WorldObjectLocator::setExtent(const TileExtent& inTileExtent)
     locatorBounds.minX
         = inTileExtent.x * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
     locatorBounds.maxX = (inTileExtent.x + inTileExtent.xLength)
-                    * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
+                         * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
     locatorBounds.minY
         = inTileExtent.y * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
     locatorBounds.maxY = (inTileExtent.y + inTileExtent.yLength)
-                    * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
-    // Note: We don't want our rays to immediately intersect with these bounds, 
+                         * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
+    // Note: We don't want our rays to immediately intersect with these bounds,
     //       so we drop the Z bound below the ground.
     locatorBounds.minZ = -0.1f;
     // Note: Our world doesn't have a max Z, so we just make it really large.
@@ -159,7 +162,8 @@ void WorldObjectLocator::setCellWidth(float inCellWidth)
     clear();
 }
 
-CellPosition WorldObjectLocator::tileToCellPosition(const TilePosition& tilePosition) const
+CellPosition WorldObjectLocator::tileToCellPosition(
+    const TilePosition& tilePosition) const
 {
     // Cast CELL_WIDTH to a float so we get float division below.
     float cellWidth{SharedConfig::CELL_WIDTH};

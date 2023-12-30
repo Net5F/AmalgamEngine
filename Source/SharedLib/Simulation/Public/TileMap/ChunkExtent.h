@@ -9,8 +9,7 @@ struct TileExtent;
 /**
  * A strong type alias, describing an extent of map chunks.
  */
-struct ChunkExtent : public DiscreteExtent<DiscreteImpl::ChunkTag>
-{
+struct ChunkExtent : public DiscreteExtent<DiscreteImpl::ChunkTag> {
     ChunkExtent();
 
     ChunkExtent(int inX, int inY, int inXLength, int inYLength);

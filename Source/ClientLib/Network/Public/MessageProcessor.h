@@ -26,7 +26,7 @@ class IMessageProcessorExtension;
  * If the message isn't relevant to the network layer, it's passed to a generic
  * function that pushes it straight down to the simulation layer.
  *
- * If the message isn't relevant to the engine at all, it's passed to the 
+ * If the message isn't relevant to the engine at all, it's passed to the
  * project.
  */
 class MessageProcessor
@@ -80,8 +80,8 @@ private:
         subscribed queues. */
     EventDispatcher& networkEventDispatcher;
 
-    /** The entity that this client is controlling. Used when we receive client 
-        entity updates, to tell if they contain data relevant to the player 
+    /** The entity that this client is controlling. Used when we receive client
+        entity updates, to tell if they contain data relevant to the player
         entity. */
     entt::entity playerEntity;
 

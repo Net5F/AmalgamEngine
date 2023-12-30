@@ -26,10 +26,10 @@ namespace AM
 {
 namespace Server
 {
-ClientConnectionSystem::ClientConnectionSystem(
-    Simulation& inSimulation, World& inWorld,
-    Network& inNetwork,
-    SpriteData& inSpriteData)
+ClientConnectionSystem::ClientConnectionSystem(Simulation& inSimulation,
+                                               World& inWorld,
+                                               Network& inNetwork,
+                                               SpriteData& inSpriteData)
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
@@ -60,7 +60,7 @@ void ClientConnectionSystem::processConnectEvents()
         }
 
         // Create the entity and construct its standard components.
-        // Note: Be careful with holding onto references here. If components 
+        // Note: Be careful with holding onto references here. If components
         //       are added to the same group, the ref will be invalidated.
         entt::entity newEntity{world.createEntity(world.getSpawnPoint())};
 
@@ -75,7 +75,8 @@ void ClientConnectionSystem::processConnectEvents()
         world.addMovementComponents(newEntity);
 
         // TODO: When we add character sprite sets, update this.
-        Uint16 spriteSetID{spriteData
+        Uint16 spriteSetID{
+            spriteData
                 .getObjectSpriteSet(SharedConfig::DEFAULT_CHARACTER_SPRITE_SET)
                 .numericID};
         AnimationState animationState{

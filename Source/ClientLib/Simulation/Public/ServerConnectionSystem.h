@@ -19,7 +19,7 @@ class Network;
 class SpriteData;
 
 /**
- * Processes server connect/disconnect events and initializes the sim state 
+ * Processes server connect/disconnect events and initializes the sim state
  * when we connect.
  */
 class ServerConnectionSystem
@@ -96,7 +96,7 @@ public:
         started running. */
     entt::sink<entt::sigh<void()>> simulationStarted;
 
-    /** Our connection to the server has encountered an error and the 
+    /** Our connection to the server has encountered an error and the
         simulation has stopped running. */
     entt::sink<entt::sigh<void(ConnectionError)>> serverConnectionError;
 };

@@ -11,7 +11,7 @@ namespace Server
 /**
  * Holds all client-related sim data.
  *
- * If you need to tell if an entity is a client entity or not, favor checking 
+ * If you need to tell if an entity is a client entity or not, favor checking
  * for IsClientEntity over this. IsClientEntity gets replicated to the clients,
  * so it's more expected to see.
  */

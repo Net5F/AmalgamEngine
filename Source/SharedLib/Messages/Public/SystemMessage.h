@@ -7,8 +7,8 @@ namespace AM
 {
 /**
  * A message sent by the server, intended to show up in a client's chat window.
- * 
- * Used for various things, such as to tell a player "You must be closer to do 
+ *
+ * Used for various things, such as to tell a player "You must be closer to do
  * that." when they try to interact with something.
  */
 struct SystemMessage {
@@ -17,7 +17,7 @@ struct SystemMessage {
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::SystemMessage};
 
-    /** Used as a "we should never hit this" cap on the length of the error 
+    /** Used as a "we should never hit this" cap on the length of the error
         string. Only checked in debug builds. */
     static constexpr std::size_t MAX_LENGTH{500};
 
@@ -28,8 +28,7 @@ struct SystemMessage {
 template<typename S>
 void serialize(S& serializer, SystemMessage& systemMessage)
 {
-    serializer.text1b(systemMessage.messageString,
-                      SystemMessage::MAX_LENGTH);
+    serializer.text1b(systemMessage.messageString, SystemMessage::MAX_LENGTH);
 }
 
 } // End namespace AM

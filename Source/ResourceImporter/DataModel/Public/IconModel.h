@@ -27,16 +27,16 @@ public:
     IconModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer);
 
     /**
-     * Attempts to load the "iconSheets" section of the given json into this 
+     * Attempts to load the "iconSheets" section of the given json into this
      * model.
      *
-     * @return true if successful. If false, getErrorString() will return more 
+     * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
     bool load(const nlohmann::json& json);
 
     /**
-     * Saves the current state of this data model into the given json's 
+     * Saves the current state of this data model into the given json's
      * "iconSheets" section.
      */
     void save(nlohmann::json& json);
@@ -56,11 +56,10 @@ public:
      * @param baseName The name to prepend to each icon's number. (e.g.
      *                 "mob_" results in "mob_0", "mob_1", etc.)
      *
-     * @return true if successful. If false, getErrorString() will return more 
+     * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
-    bool addIconSheet(const std::string& relPath,
-                      const std::string& iconWidth,
+    bool addIconSheet(const std::string& relPath, const std::string& iconWidth,
                       const std::string& iconHeight,
                       const std::string& baseName);
 
@@ -101,7 +100,7 @@ private:
     /**
      * @param sheetJson The json to parse. Must be a valid icon sheet section
      *                  from ResourceData.json.
-     * @return true if successful. If false, getErrorString() will return more 
+     * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
     bool parseIconSheet(const nlohmann::json& sheetJson);
@@ -109,7 +108,7 @@ private:
      * @param iconJson The json to parse. Must be a valid icon section
      *                 from ResourceData.json.
      * @param iconSheet The sheet that this icon is from.
-     * @return true if successful. If false, getErrorString() will return more 
+     * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
     bool parseIcon(const nlohmann::json& iconJson, EditorIconSheet& iconSheet);
@@ -135,20 +134,19 @@ private:
     /** Maps icon IDs -> the icons that we currently have loaded. */
     std::map<IconID, EditorIcon> iconMap;
 
-    /** Used for generating temporary icon IDs that are only used internally 
+    /** Used for generating temporary icon IDs that are only used internally
         by this editor. */
     IDPool sheetIDPool;
     IDPool iconIDPool;
 
-    /** If one of our parsing functions returns false, this holds a string 
+    /** If one of our parsing functions returns false, this holds a string
         describing the error that occurred. */
     std::string errorString;
 
     //-------------------------------------------------------------------------
     // Signals
     //-------------------------------------------------------------------------
-    entt::sigh<void(int sheetID, const EditorIconSheet& sheet)>
-        sheetAddedSig;
+    entt::sigh<void(int sheetID, const EditorIconSheet& sheet)> sheetAddedSig;
     entt::sigh<void(int sheetID)> sheetRemovedSig;
     entt::sigh<void(IconID iconID)> iconRemovedSig;
 

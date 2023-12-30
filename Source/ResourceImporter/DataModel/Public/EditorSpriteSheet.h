@@ -9,7 +9,7 @@ namespace ResourceImporter
 {
 /**
  * Holds the data necessary for editing and saving a sprite sheet.
- * Part of SpriteModel. 
+ * Part of SpriteModel.
  */
 struct EditorSpriteSheet {
     /** The path to the sprite sheet image file, relative to the application's

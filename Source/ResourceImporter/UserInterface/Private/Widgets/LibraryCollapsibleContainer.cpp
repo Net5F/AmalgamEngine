@@ -5,8 +5,8 @@ namespace AM
 {
 namespace ResourceImporter
 {
-LibraryCollapsibleContainer::LibraryCollapsibleContainer(const std::string& inHeaderText,
-                         const std::string& inDebugName)
+LibraryCollapsibleContainer::LibraryCollapsibleContainer(
+    const std::string& inHeaderText, const std::string& inDebugName)
 : AUI::CollapsibleContainer({0, 0, 318, 30}, inDebugName)
 {
     // Add our arrow images.

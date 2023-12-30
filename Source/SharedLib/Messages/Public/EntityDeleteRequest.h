@@ -36,8 +36,7 @@ struct EntityDeleteRequest {
 };
 
 template<typename S>
-void serialize(S& serializer,
-               EntityDeleteRequest& entityDeleteRequest)
+void serialize(S& serializer, EntityDeleteRequest& entityDeleteRequest)
 {
     serializer.value4b(entityDeleteRequest.entity);
 }

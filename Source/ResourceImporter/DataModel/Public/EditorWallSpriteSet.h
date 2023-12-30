@@ -12,7 +12,7 @@ namespace ResourceImporter
 {
 /**
  * Holds the data necessary for editing and saving a floor sprite set.
- * Part of SpriteSetModel. 
+ * Part of SpriteSetModel.
  */
 struct EditorWallSpriteSet {
     /** This sprite set's unique numeric identifier.
@@ -23,7 +23,7 @@ struct EditorWallSpriteSet {
     std::string displayName{""};
 
     /** The numeric IDs for each sprite in this set.
-        Walls require the 4 types of wall sprites that our modular wall 
+        Walls require the 4 types of wall sprites that our modular wall
         system uses. */
     std::array<int, Wall::Type::Count> spriteIDs{
         NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID};

@@ -10,7 +10,7 @@
 namespace AM
 {
 /**
- * Sent by the server when a nearby entity's components are updated. 
+ * Sent by the server when a nearby entity's components are updated.
  */
 struct ComponentUpdate {
     // The EngineMessageType enum value that this message corresponds to.

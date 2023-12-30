@@ -11,13 +11,13 @@
 namespace AM
 {
 /**
- * Sent by a client to request that an inventory operation be performed, or by 
+ * Sent by a client to request that an inventory operation be performed, or by
  * the server to tell a client that an operation was performed.
  *
- * Note: We combine all of these into a single message so that they get 
- *       sequenced correctly (since we use per-message queues, relative 
+ * Note: We combine all of these into a single message so that they get
+ *       sequenced correctly (since we use per-message queues, relative
  *       ordering may be lost).
- *       If this continues to be a problem, we may want to consider switching 
+ *       If this continues to be a problem, we may want to consider switching
  *       to a messaging architecture that preserves ordering.
  */
 struct InventoryOperation {
@@ -46,7 +46,8 @@ struct InventoryOperation {
 };
 
 template<typename S>
-void serialize(S& serializer, InventoryOperation& inventoryOperation) {
+void serialize(S& serializer, InventoryOperation& inventoryOperation)
+{
     // Note: This calls serialize() for each type.
     serializer.ext(inventoryOperation.operation, bitsery::ext::StdVariant{});
 }

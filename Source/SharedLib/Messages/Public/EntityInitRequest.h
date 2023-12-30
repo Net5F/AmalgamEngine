@@ -12,7 +12,7 @@
 namespace AM
 {
 /**
- * Sent by the client to request that a new entity be created, or to 
+ * Sent by the client to request that a new entity be created, or to
  * request that an existing entity be re-initialized with new data.
  */
 struct EntityInitRequest {
@@ -49,8 +49,7 @@ struct EntityInitRequest {
 };
 
 template<typename S>
-void serialize(S& serializer,
-               EntityInitRequest& entityInitRequest)
+void serialize(S& serializer, EntityInitRequest& entityInitRequest)
 {
     serializer.value4b(entityInitRequest.entity);
     serializer.object(entityInitRequest.name);

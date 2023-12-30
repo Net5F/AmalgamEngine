@@ -52,8 +52,7 @@ private:
     /**
      * Clears the tile layers from the map.
      */
-    void clearExtentLayers(
-        const TileExtentClearLayers& clearExtentLayers);
+    void clearExtentLayers(const TileExtentClearLayers& clearExtentLayers);
 
     /** Used to access the tile map. */
     World& world;

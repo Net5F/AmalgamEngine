@@ -29,15 +29,16 @@ public:
                 SDL_Renderer* inSdlRenderer);
 
     /**
-     * Attempts to load the "spriteSheets" section of the given json into this model.
+     * Attempts to load the "spriteSheets" section of the given json into this
+     * model.
      *
-     * @return true if successful. If false, getErrorString() will return more 
+     * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
     bool load(const nlohmann::json& json);
 
     /**
-     * Saves the current state of this data model into the given json's 
+     * Saves the current state of this data model into the given json's
      * "spriteSheets" section.
      */
     void save(nlohmann::json& json);
@@ -59,7 +60,7 @@ public:
      * @param baseName The name to prepend to each sprite's number. (e.g.
      *                 "mob_" results in "mob_0", "mob_1", etc.)
      *
-     * @return true if successful. If false, getErrorString() will return more 
+     * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
     bool addSpriteSheet(const std::string& relPath,
@@ -89,12 +90,9 @@ public:
     const EditorSprite& getSprite(int spriteID);
 
     // Sprite properties.
-    void setSpriteDisplayName(int spriteID,
-                              const std::string& newDisplayName);
-    void setSpriteCollisionEnabled(int spriteID,
-                                   bool newCollisionEnabled);
-    void setSpriteModelBounds(int spriteID,
-                              const BoundingBox& newModelBounds);
+    void setSpriteDisplayName(int spriteID, const std::string& newDisplayName);
+    void setSpriteCollisionEnabled(int spriteID, bool newCollisionEnabled);
+    void setSpriteModelBounds(int spriteID, const BoundingBox& newModelBounds);
 
     /** Resets the model state, setting it back to default. */
     void resetModelState();
@@ -110,7 +108,7 @@ private:
     /**
      * @param sheetJson The json to parse. Must be a valid sprite sheet section
      *                  from ResourceData.json.
-     * @return true if successful. If false, getErrorString() will return more 
+     * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
     bool parseSpriteSheet(const nlohmann::json& sheetJson);
@@ -118,7 +116,7 @@ private:
      * @param spriteJson The json to parse. Must be a valid sprite section
      *                   from ResourceData.json.
      * @param spriteSheet The sheet that this sprite is from.
-     * @return true if successful. If false, getErrorString() will return more 
+     * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
     bool parseSprite(const nlohmann::json& spriteJson,
@@ -132,8 +130,7 @@ private:
      *                 non-unique.
      * @param displayName The display name that the sprite will be set to.
      */
-    bool spriteNameIsUnique(int spriteID,
-                            const std::string& displayName);
+    bool spriteNameIsUnique(int spriteID, const std::string& displayName);
 
     DataModel& dataModel;
     /** Used to remove sprites from sprite sets when a sprite is deleted. */
@@ -153,15 +150,14 @@ private:
     IDPool sheetIDPool;
     IDPool spriteIDPool;
 
-    /** If one of our parsing functions returns false, this holds a string 
+    /** If one of our parsing functions returns false, this holds a string
         describing the error that occurred. */
     std::string errorString;
 
     //-------------------------------------------------------------------------
     // Signals
     //-------------------------------------------------------------------------
-    entt::sigh<void(int sheetID, const EditorSpriteSheet& sheet)>
-        sheetAddedSig;
+    entt::sigh<void(int sheetID, const EditorSpriteSheet& sheet)> sheetAddedSig;
     entt::sigh<void(int sheetID)> sheetRemovedSig;
     entt::sigh<void(int spriteID)> spriteRemovedSig;
 
@@ -185,15 +181,15 @@ public:
     entt::sink<entt::sigh<void(int spriteID)>> spriteRemoved;
 
     /** A sprite's display name has changed. */
-    entt::sink<entt::sigh<void(int spriteID,
-                               const std::string& newDisplayName)>>
+    entt::sink<
+        entt::sigh<void(int spriteID, const std::string& newDisplayName)>>
         spriteDisplayNameChanged;
     /** A sprite's "collision enabled" field has changed. */
     entt::sink<entt::sigh<void(int spriteID, bool collisionEnabled)>>
         spriteCollisionEnabledChanged;
     /** A sprite's bounding box has changed. */
-    entt::sink<entt::sigh<void(int spriteID,
-                               const BoundingBox& newModelBounds)>>
+    entt::sink<
+        entt::sigh<void(int spriteID, const BoundingBox& newModelBounds)>>
         spriteModelBoundsChanged;
 };
 

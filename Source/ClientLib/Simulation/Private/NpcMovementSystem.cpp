@@ -84,20 +84,21 @@ void NpcMovementSystem::updateNpcs()
 
 void NpcMovementSystem::initLastProcessedTick()
 {
-    // Since we aren't ran until a server connection is established, the sim's 
+    // Since we aren't ran until a server connection is established, the sim's
     // currentTick is set to what the server gave us in ConnectionResponse.
-    // Our first received updates will be for that tick, so we init to 
+    // Our first received updates will be for that tick, so we init to
     // currentTick - 1 to prepare for processing them.
     lastProcessedTick = simulation.getReplicationTick() - 1;
 }
 
 void NpcMovementSystem::moveAllNpcs()
 {
-    auto movementGroup = world.registry.group<Input, Position, PreviousPosition,
-                                              Rotation, Collision>(
-        entt::get<Sprite>, entt::exclude<InputHistory>);
-    for (auto [entity, input, position, previousPosition, rotation,
-               collision, sprite] : movementGroup.each()) {
+    auto movementGroup
+        = world.registry
+              .group<Input, Position, PreviousPosition, Rotation, Collision>(
+                  entt::get<Sprite>, entt::exclude<InputHistory>);
+    for (auto [entity, input, position, previousPosition, rotation, collision,
+               sprite] : movementGroup.each()) {
         // Save their old position.
         previousPosition = position;
 
@@ -140,9 +141,10 @@ void NpcMovementSystem::applyUpdateMessage(
     const MovementUpdate& npcMovementUpdate)
 {
     entt::registry& registry{world.registry};
-    auto movementGroup = registry.group<Input, Position, PreviousPosition,
-                                        Rotation, Collision>(
-        entt::get<Sprite>, entt::exclude<InputHistory>);
+    auto movementGroup
+        = registry
+              .group<Input, Position, PreviousPosition, Rotation, Collision>(
+                  entt::get<Sprite>, entt::exclude<InputHistory>);
 
     // Apply each updated entity's new state.
     for (const MovementState& movementState :

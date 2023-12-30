@@ -21,10 +21,10 @@ class IconData : public IconDataBase
 {
 public:
     /**
-     * Calls IconDataBase() constructor, then load the rendering-specific 
+     * Calls IconDataBase() constructor, then load the rendering-specific
      * icon data from the given json.
      *
-     * Note: We don't need to actually load any textures, since icons are 
+     * Note: We don't need to actually load any textures, since icons are
      *       only used by the UI (which manages its own textures).
      *
      * Errors if resourceDataJson doesn't contain a iconSheets section.

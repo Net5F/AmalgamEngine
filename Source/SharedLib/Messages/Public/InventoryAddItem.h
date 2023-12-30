@@ -10,13 +10,14 @@
 namespace AM
 {
 /**
- * Sent by a client to request that an item be added to an inventory, or by the 
+ * Sent by a client to request that an item be added to an inventory, or by the
  * server to tell a client that an item was added.
  */
 struct InventoryAddItem {
     /** The entity to add the item to.
-        When sent by the server, this can be ignored and assumed to be the 
-        client entity (clients are only sent updates for their own inventory). */
+        When sent by the server, this can be ignored and assumed to be the
+        client entity (clients are only sent updates for their own inventory).
+     */
     entt::entity entity{entt::null};
 
     /** The item to add. */
@@ -25,15 +26,16 @@ struct InventoryAddItem {
     /** How many of the item to add. */
     Uint8 count{0};
 
-    /** The item's version number. Used by the client to tell if it 
-        already has the latest definition for this item, or if it needs 
+    /** The item's version number. Used by the client to tell if it
+        already has the latest definition for this item, or if it needs
         to request it.
         When sent by the client, this field is ignored. */
     ItemVersion version{0};
 };
 
 template<typename S>
-void serialize(S& serializer, InventoryAddItem& inventoryAddItem) {
+void serialize(S& serializer, InventoryAddItem& inventoryAddItem)
+{
     serializer.value4b(inventoryAddItem.entity);
     serializer.value2b(inventoryAddItem.itemID);
     serializer.value1b(inventoryAddItem.count);

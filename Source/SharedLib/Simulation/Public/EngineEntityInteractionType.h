@@ -8,11 +8,10 @@ namespace AM
 /**
  * The types of entity interactions that the engine provides.
  *
- * Note: Don't use this enum directly, use EntityInteractionType (it combines the 
- *       engine's and the project's interactions).
+ * Note: Don't use this enum directly, use EntityInteractionType (it combines
+ * the engine's and the project's interactions).
  */
-enum class EngineEntityInteractionType : Uint8
-{
+enum class EngineEntityInteractionType : Uint8 {
     NotSet,
 
     // We reserve values 0 - 49. The project can start at 50.

@@ -27,8 +27,7 @@ public:
      * Called when a message is received that the engine doesn't have a handler
      * for.
      */
-    virtual void processReceivedMessage(Uint8 messageType,
-                                        Uint8* messageBuffer,
+    virtual void processReceivedMessage(Uint8 messageType, Uint8* messageBuffer,
                                         std::size_t messageSize)
         = 0;
 };

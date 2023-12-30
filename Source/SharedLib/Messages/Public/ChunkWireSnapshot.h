@@ -17,8 +17,7 @@ namespace AM
  */
 struct ChunkWireSnapshot {
 public:
-    struct PaletteEntry
-    {
+    struct PaletteEntry {
         /** The type of tile layer that this entry represents. */
         TileLayer::Type layerType{TileLayer::Type::None};
 
@@ -38,8 +37,8 @@ public:
     /** This chunk's Y-axis coordinate. */
     Uint16 y{0};
 
-    /** Holds an entry for each sprite used in this chunk's tiles. Part of a 
-        space-saving approach that lets TileSnapshot hold indices into this 
+    /** Holds an entry for each sprite used in this chunk's tiles. Part of a
+        space-saving approach that lets TileSnapshot hold indices into this
         palette instead of directly holding the data. */
     std::vector<PaletteEntry> palette;
 
@@ -51,8 +50,7 @@ public:
      * If the palette doesn't have a matching entry, it will be added.
      */
     std::size_t getPaletteIndex(TileLayer::Type tileLayerType,
-                                Uint16 spriteSetID,
-                                Uint8 spriteIndex)
+                                Uint16 spriteSetID, Uint8 spriteIndex)
     {
         // TODO: If this gets to be a performance issue, we can look into
         //       switching palette to a map. Serialization will be more
@@ -72,7 +70,7 @@ public:
             palette.emplace_back(tileLayerType, spriteSetID, spriteIndex);
         }
         else {
-            // TODO: If this becomes an issue, either switch to Uint16 or 
+            // TODO: If this becomes an issue, either switch to Uint16 or
             //       find some more efficient way to grow the space.
             LOG_FATAL("Ran out of palette slots.");
         }

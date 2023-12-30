@@ -19,19 +19,19 @@ namespace AM
  * Holds the data for a single item.
  */
 struct Item {
-    /** The max length of a display name. Also the max for string IDs, since 
+    /** The max length of a display name. Also the max for string IDs, since
         they're derived from display name. */
     static constexpr std::size_t MAX_DISPLAY_NAME_LENGTH{50};
 
-    /** The maximum number of non-built-in interactions that an item can 
+    /** The maximum number of non-built-in interactions that an item can
         support. */
     static constexpr std::size_t MAX_CUSTOM_INTERACTIONS{4};
 
-    /** The number of built-in interactions that every item supports: UseOn, 
+    /** The number of built-in interactions that every item supports: UseOn,
         Destroy, and Examine. */
     static constexpr std::size_t BUILTIN_INTERACTION_COUNT{3};
 
-    /** The total number of interactions that an item can support, including 
+    /** The total number of interactions that an item can support, including
         the built-ins. */
     static constexpr std::size_t MAX_INTERACTIONS{MAX_CUSTOM_INTERACTIONS
                                                   + BUILTIN_INTERACTION_COUNT};
@@ -58,7 +58,7 @@ struct Item {
     IconID iconID{NULL_ICON_ID};
 
     /** The interactions that this item supports.
-        Elements are filled contiguously starting at index 0. Empty elements 
+        Elements are filled contiguously starting at index 0. Empty elements
         will be at the end.
         The first interaction in this list is the default interaction.
         Note: This defaults values to ItemInteractionType::NotSet. */
@@ -69,9 +69,9 @@ struct Item {
         Properties hold data that gets used when handling interactions. */
     std::vector<ItemProperty> properties{};
 
-    /** A list of the items that this item may be combined with, and the 
+    /** A list of the items that this item may be combined with, and the
         resulting items.
-        Note: If you want to put skill requirements on your item combinations, 
+        Note: If you want to put skill requirements on your item combinations,
               you'll need to build a separate UI/workflow. */
     std::vector<ItemCombination> itemCombinations{};
 
@@ -79,9 +79,9 @@ struct Item {
     ItemInitScript initScript{};
 
     /**
-     * Finds the first empty index in supportedInteractions and adds the given 
+     * Finds the first empty index in supportedInteractions and adds the given
      * interaction.
-     * If supportedInteractions is full or the interaction is already present, 
+     * If supportedInteractions is full or the interaction is already present,
      * prints a warning and does nothing.
      */
     void addInteraction(ItemInteractionType newInteraction);
@@ -92,10 +92,10 @@ struct Item {
     bool supportsInteraction(ItemInteractionType desiredInteraction) const;
 
     /**
-     * Returns the list of interactions that this item supports, in the order 
+     * Returns the list of interactions that this item supports, in the order
      * that they should appear in the UI.
-     * The list will start with any interactions from supportedInteractions, 
-     * followed by UseOn, Destroy, and Examine. Any empty slots will be at the 
+     * The list will start with any interactions from supportedInteractions,
+     * followed by UseOn, Destroy, and Examine. Any empty slots will be at the
      * end and equal to NotSet.
      */
     std::array<ItemInteractionType, MAX_INTERACTIONS>
@@ -114,7 +114,7 @@ struct Item {
     /**
      * Adds the given property to this item.
      * If the property already exists, updates the value.
-     * 
+     *
      * @return false if this item's properties vector is full, else true.
      */
     template<typename T>
@@ -146,13 +146,13 @@ struct Item {
     template<typename T>
     const T* getProperty() const
     {
-        // Note: We use a vector and iterate through it every time because 
-        //       it reduces wire size (vs a map) and we expect each item to 
+        // Note: We use a vector and iterate through it every time because
+        //       it reduces wire size (vs a map) and we expect each item to
         //       only have a few properties.
 
         // If this item contains the given property type, return it.
         for (const ItemProperty& property : properties) {
-            if (const T* ptr{std::get_if<T>(&property)}) {
+            if (const T * ptr{std::get_if<T>(&property)}) {
                 return ptr;
             }
         }

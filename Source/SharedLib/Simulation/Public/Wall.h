@@ -13,11 +13,11 @@ struct Wall {
         West,
         /** A North wall. */
         North,
-        /** A column used to fill SouthEast-pointing corners. Gets placed on the 
+        /** A column used to fill SouthEast-pointing corners. Gets placed on the
             tile southeast of the north and west walls that form the corner. */
         NorthWestGapFill,
-        /** A 3/4 North wall used to fill NorthWest-pointing corners. Gets placed on
-            the same tile as a west wall to form the corner. */
+        /** A 3/4 North wall used to fill NorthWest-pointing corners. Gets
+           placed on the same tile as a west wall to form the corner. */
         NorthEastGapFill,
         /** The number of different wall types that we have. */
         Count,

@@ -8,9 +8,9 @@ namespace AM
 
 /**
  * The minimum information needed to uniquely identify a tile layer.
- * 
- * Technically, multiple layers may be the same type and use the same 
- * set ID and sprite index, but they'll be exactly the same so differentiation 
+ *
+ * Technically, multiple layers may be the same type and use the same
+ * set ID and sprite index, but they'll be exactly the same so differentiation
  * isn't useful.
  */
 struct TileLayerID {
@@ -39,6 +39,5 @@ struct TileLayerID {
                && (spriteIndex == other.spriteIndex);
     }
 };
-
 
 } // End namespace AM

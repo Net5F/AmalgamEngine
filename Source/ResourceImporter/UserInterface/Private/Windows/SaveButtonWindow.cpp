@@ -7,8 +7,7 @@ namespace AM
 {
 namespace ResourceImporter
 {
-SaveButtonWindow::SaveButtonWindow(MainScreen& inScreen,
-                                   DataModel& inDataModel)
+SaveButtonWindow::SaveButtonWindow(MainScreen& inScreen, DataModel& inDataModel)
 : AUI::Window({1537, 0, 58, 58}, "SaveButtonWindow")
 , mainScreen{inScreen}
 , dataModel{inDataModel}

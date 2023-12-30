@@ -14,7 +14,8 @@ TitleButton::TitleButton(const SDL_Rect& inLogicalExtent,
     normalImage.setSimpleImage(Paths::TEXTURE_DIR + "TitleButton/Normal.png");
     hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "TitleButton/Hovered.png");
     pressedImage.setSimpleImage(Paths::TEXTURE_DIR + "TitleButton/Pressed.png");
-    disabledImage.setSimpleImage(Paths::TEXTURE_DIR + "TitleButton/Disabled.png");
+    disabledImage.setSimpleImage(Paths::TEXTURE_DIR
+                                 + "TitleButton/Disabled.png");
 
     // Set our text properties.
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);

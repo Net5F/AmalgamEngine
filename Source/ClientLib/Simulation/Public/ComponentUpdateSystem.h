@@ -20,7 +20,7 @@ class ComponentUpdateSystem
 {
 public:
     ComponentUpdateSystem(Simulation& inSimulation, World& inWorld,
-                       Network& inNetwork, SpriteData& inSpriteData);
+                          Network& inNetwork, SpriteData& inSpriteData);
 
     ~ComponentUpdateSystem();
 
@@ -33,8 +33,9 @@ private:
     void processComponentUpdate(const ComponentUpdate& componentUpdate);
 
     /**
-     * Updates Sprite and Collision components when an AnimationState is updated.
-     * Neither component is replicated, so we need to maintain them ourselves.
+     * Updates Sprite and Collision components when an AnimationState is
+     * updated. Neither component is replicated, so we need to maintain them
+     * ourselves.
      */
     void onAnimationStateUpdated(entt::registry& registry, entt::entity entity);
 
@@ -47,8 +48,8 @@ private:
     /** Used to update Sprite components when AnimationState is updated. */
     SpriteData& spriteData;
 
-    /** We pop messages off componentUpdateQueue and push them into here, so 
-        we can find and immediately process any messages for the player 
+    /** We pop messages off componentUpdateQueue and push them into here, so
+        we can find and immediately process any messages for the player
         entity. */
     std::queue<ComponentUpdate> componentUpdateSecondaryQueue;
 

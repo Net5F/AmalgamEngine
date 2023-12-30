@@ -45,8 +45,7 @@ struct ItemInitRequest {
 };
 
 template<typename S>
-void serialize(S& serializer,
-               ItemInitRequest& itemInitRequest)
+void serialize(S& serializer, ItemInitRequest& itemInitRequest)
 {
     serializer.text1b(itemInitRequest.displayName,
                       Item::MAX_DISPLAY_NAME_LENGTH);

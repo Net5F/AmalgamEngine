@@ -17,7 +17,7 @@ class ISimulationExtension;
 /**
  * Manages creation and destruction of non-client entities.
  *
- * Non-client entities are any entity not controlled by a client (dynamic 
+ * Non-client entities are any entity not controlled by a client (dynamic
  * objects, NPCs, etc).
  */
 class NceLifetimeSystem
@@ -34,13 +34,13 @@ public:
 
 private:
     /**
-     * Either creates the given entity and initializes it, or re-creates it 
+     * Either creates the given entity and initializes it, or re-creates it
      * and queues an init for next tick.
      */
     void handleInitRequest(const EntityInitRequest& entityInitRequest);
 
     /**
-     * Creates the given entity. If there was an error while running the init 
+     * Creates the given entity. If there was an error while running the init
      * script, sends the error to the requesting client.
      */
     void createEntity(const EntityInitRequest& entityInitRequest);

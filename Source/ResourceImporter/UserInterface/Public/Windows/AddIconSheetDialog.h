@@ -75,5 +75,5 @@ private:
     AUI::Text errorText;
 };
 
-} // End namespace IconEditor
+} // namespace ResourceImporter
 } // End namespace AM

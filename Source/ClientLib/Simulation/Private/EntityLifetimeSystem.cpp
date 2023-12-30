@@ -24,9 +24,10 @@ namespace AM
 namespace Client
 {
 
-EntityLifetimeSystem::EntityLifetimeSystem(Simulation& inSimulation, World& inWorld,
-                                     SpriteData& inSpriteData,
-                                     Network& inNetwork)
+EntityLifetimeSystem::EntityLifetimeSystem(Simulation& inSimulation,
+                                           World& inWorld,
+                                           SpriteData& inSpriteData,
+                                           Network& inNetwork)
 : simulation{inSimulation}
 , world{inWorld}
 , spriteData{inSpriteData}
@@ -76,12 +77,12 @@ void EntityLifetimeSystem::processEntityDeletes(Uint32 desiredTick)
 
 void EntityLifetimeSystem::processEntityInits(Uint32 desiredTick)
 {
-    // Immediately process any player entity messages, push the rest into a 
+    // Immediately process any player entity messages, push the rest into a
     // secondary queue.
     {
         EntityInit entityInit{};
         while (entityInitQueue.pop(entityInit)) {
-            // If the player entity is present, process it and erase it from 
+            // If the player entity is present, process it and erase it from
             // the message.
             for (auto it = entityInit.entityData.begin();
                  it != entityInit.entityData.end();) {
@@ -105,7 +106,7 @@ void EntityLifetimeSystem::processEntityInits(Uint32 desiredTick)
     while (!(entityInitSecondaryQueue.empty())) {
         EntityInit& entityInit{entityInitSecondaryQueue.front()};
 
-        // If we've reached the desired tick, save the rest of the messages for 
+        // If we've reached the desired tick, save the rest of the messages for
         // later.
         if (entityInit.tickNum > desiredTick) {
             break;
@@ -138,24 +139,26 @@ void EntityLifetimeSystem::processEntityData(
 
     // Add any replicated components that the server sent.
     for (const ReplicatedComponent& componentVariant : entityData.components) {
-        std::visit([&](const auto& component) {
-            using T = std::decay_t<decltype(component)>;
-            registry.emplace<T>(newEntity, component);
-        }, componentVariant);
+        std::visit(
+            [&](const auto& component) {
+                using T = std::decay_t<decltype(component)>;
+                registry.emplace<T>(newEntity, component);
+            },
+            componentVariant);
     }
-    
+
     // Add any client-only or non-replicated components.
-    // Note: Be careful with holding onto references here. If components 
+    // Note: Be careful with holding onto references here. If components
     //       are added to the same group, the ref will be invalidated.
 
-    // Entities with an Input are capable of movement, so we add a 
+    // Entities with an Input are capable of movement, so we add a
     // PreviousPosition. They'll also already have a replicated Rotation.
     if (registry.all_of<Input>(newEntity)) {
         const Position& position{registry.get<Position>(newEntity)};
         registry.emplace<PreviousPosition>(newEntity, position);
     }
 
-    // For entities with an AnimationState, we locally add a Sprite so the 
+    // For entities with an AnimationState, we locally add a Sprite so the
     // Renderer can use it.
     if (const auto* animationState{
             registry.try_get<AnimationState>(newEntity)}) {
@@ -164,7 +167,7 @@ void EntityLifetimeSystem::processEntityData(
                 .sprites[animationState->spriteIndex]};
         registry.emplace<Sprite>(newEntity, *sprite);
 
-        // When entities have an AnimationState, the server gives them a 
+        // When entities have an AnimationState, the server gives them a
         // Collision. It isn't replicated, so add it manually.
         const Position& position{registry.get<Position>(newEntity)};
         const Collision& collision{registry.emplace<Collision>(
@@ -182,8 +185,7 @@ void EntityLifetimeSystem::processEntityData(
                  tickNum);
     }
     else {
-        LOG_INFO("Peer entity added: %u. Message tick: %u", newEntity,
-                 tickNum);
+        LOG_INFO("Peer entity added: %u. Message tick: %u", newEntity, tickNum);
     }
 }
 

@@ -77,7 +77,7 @@ void InventorySystem::processOperation(const InventoryAddItem& inventoryAddItem)
         world.playerEntity, [&](Inventory& inventory) {
             ItemID itemID{inventoryAddItem.itemID};
             if (inventory.addItem(itemID, inventoryAddItem.count)) {
-                // Successfully added. If we don't have the latest definition 
+                // Successfully added. If we don't have the latest definition
                 // for the item, request it.
                 ItemVersion itemVersion{inventoryAddItem.version};
                 if (!(world.itemData.itemExists(itemID))

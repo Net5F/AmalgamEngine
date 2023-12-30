@@ -16,7 +16,7 @@ void Item::addInteraction(ItemInteractionType newInteraction)
     for (ItemInteractionType& interaction : supportedInteractions) {
         if (interaction == newInteraction) {
             LOG_INFO("Tried to add already-present interaction: %u",
-                      newInteraction);
+                     newInteraction);
         }
         else if (interaction == ItemInteractionType::NotSet) {
             interaction = newInteraction;
@@ -72,7 +72,7 @@ std::array<ItemInteractionType, Item::MAX_INTERACTIONS>
 
 ItemInteractionType Item::getDefaultInteraction() const
 {
-    // If this item doesn't have any custom interactions, return UseOn (the 
+    // If this item doesn't have any custom interactions, return UseOn (the
     // first built-in interaction).
     if (supportedInteractions[0] == ItemInteractionType::NotSet) {
         return ItemInteractionType::UseOn;

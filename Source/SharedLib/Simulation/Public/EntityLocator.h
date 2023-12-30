@@ -51,9 +51,9 @@ public:
 
     /**
      * Returns all entities whose positions intersect the given cylinder.
-     * 
-     * Note: Because this uses position, it exhibits the commutative property 
-     *       (if a cylinder centered on entityA returns entityB, the reverse 
+     *
+     * Note: Because this uses position, it exhibits the commutative property
+     *       (if a cylinder centered on entityA returns entityB, the reverse
      *       will also be true).
      */
     std::vector<entt::entity>& getEntities(const Cylinder& cylinder);
@@ -71,9 +71,9 @@ public:
     /**
      * Returns all entities whose collision boxes intersect the given cylinder.
      *
-     * Note: Because this uses collision and collision boxes vary in size and 
-     *       position, it does not exhibit the commutative property (if a 
-     *       cylinder centered on entityA returns entityB, the reverse may not 
+     * Note: Because this uses collision and collision boxes vary in size and
+     *       position, it does not exhibit the commutative property (if a
+     *       cylinder centered on entityA returns entityB, the reverse may not
      *       be true).
      */
     std::vector<entt::entity>& getCollisions(const Cylinder& cylinder);

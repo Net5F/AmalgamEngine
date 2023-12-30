@@ -101,8 +101,7 @@ BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
     // If the desired movement would go outside of the map, reject the move.
     const TileExtent boxTileExtent{desiredBounds.asTileExtent()};
     const TileExtent mapExtent{tileMap.getTileExtent()};
-    if (!mapExtent.containsExtent(boxTileExtent)
-        || (desiredBounds.minZ < 0)) {
+    if (!mapExtent.containsExtent(boxTileExtent) || (desiredBounds.minZ < 0)) {
         return currentBounds;
     }
 
@@ -112,9 +111,8 @@ BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
             const Tile& tile{tileMap.getTile(x, y)};
 
             // For each collision box in this tile.
-            for (const BoundingBox& collisionBox :
-                 tile.getCollisionBoxes()) {
-                // If the desired movement would intersect this box, reject 
+            for (const BoundingBox& collisionBox : tile.getCollisionBoxes()) {
+                // If the desired movement would intersect this box, reject
                 // the move.
                 if (desiredBounds.intersects(collisionBox)) {
                     return currentBounds;
@@ -123,7 +121,7 @@ BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
         }
     }
 
-    // If any non-client entity (besides the entity trying to move) intersects 
+    // If any non-client entity (besides the entity trying to move) intersects
     // the desired bounds, reject the move.
     std::vector<entt::entity>& collidedEntities{
         entityLocator.getCollisions(desiredBounds)};

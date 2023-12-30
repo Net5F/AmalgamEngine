@@ -16,10 +16,10 @@ class Network;
 class SpriteData;
 
 /**
- * Observes component updates based on the ObservedComponentTypes lists in 
+ * Observes component updates based on the ObservedComponentTypes lists in
  * EngineComponentLists.h and ProjectComponentLists.h.
  *
- * When an observed component is updated, sends an update message to all nearby 
+ * When an observed component is updated, sends an update message to all nearby
  * clients.
  */
 class ComponentSyncSystem
@@ -48,8 +48,8 @@ private:
 
     // Note: To optimize, we could store indices into a vector<ComponentUpdate>.
     //       Then we could re-use the vectors instead of re-allocating.
-    /** Maps entityID -> a ComponentUpdate message containing that entity's data.
-        We iterate the observers to detect changes, so this map lets us 
+    /** Maps entityID -> a ComponentUpdate message containing that entity's
+       data. We iterate the observers to detect changes, so this map lets us
         iteratively build the update messages component-by-component. */
     std::unordered_map<entt::entity, ComponentUpdate> componentUpdateMap;
 };

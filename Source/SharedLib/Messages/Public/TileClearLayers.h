@@ -9,14 +9,15 @@ namespace AM
 {
 
 /**
- * Sent by a client to request that layers be cleared from a tile, or by the 
+ * Sent by a client to request that layers be cleared from a tile, or by the
  * server to tell a client that layers were cleared.
  */
 struct TileClearLayers {
 public:
     // The EngineMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr EngineMessageType MESSAGE_TYPE{EngineMessageType::TileClearLayers};
+    static constexpr EngineMessageType MESSAGE_TYPE{
+        EngineMessageType::TileClearLayers};
 
     //--------------------------------------------------------------------------
     // Networked data

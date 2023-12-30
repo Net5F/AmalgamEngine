@@ -11,7 +11,7 @@ namespace ResourceImporter
 {
 /**
  * Holds the data necessary for editing and saving an icon.
- * Part of IconModel. 
+ * Part of IconModel.
  */
 struct EditorIcon {
     /** This icon's unique numeric identifier.

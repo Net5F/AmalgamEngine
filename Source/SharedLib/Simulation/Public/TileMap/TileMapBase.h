@@ -44,14 +44,14 @@ public:
      *
      * Errors if TileMap.bin doesn't exist or it fails to parse.
      *
-     * @param inTrackTileUpdates  If true, tile updates will be pushed into 
+     * @param inTrackTileUpdates  If true, tile updates will be pushed into
      *                            tileUpdateHistory.
      */
     TileMapBase(SpriteDataBase& inSpriteData, bool inTrackTileUpdates);
 
     /**
      * Sets the given tile's floor to the given floor.
-     * Note: Floor sprite sets only have 1 sprite, so you don't need to specify 
+     * Note: Floor sprite sets only have 1 sprite, so you don't need to specify
      *       which sprite from the set to use.
      */
     void setFloor(int tileX, int tileY, const FloorSpriteSet& spriteSet);
@@ -59,7 +59,7 @@ public:
     void setFloor(int tileX, int tileY, Uint16 spriteSetID);
 
     /**
-     * Removes the given tile's floor. Since tiles only have 1 floor, this is 
+     * Removes the given tile's floor. Since tiles only have 1 floor, this is
      * equivalent to clearTileLayers<FloorTileLayer>().
      */
     bool remFloor(int tileX, int tileY);
@@ -67,7 +67,8 @@ public:
     /**
      * Adds the given floor covering to the given tile.
      */
-    void addFloorCovering(int tileX, int tileY, const FloorCoveringSpriteSet& spriteSet,
+    void addFloorCovering(int tileX, int tileY,
+                          const FloorCoveringSpriteSet& spriteSet,
                           Rotation::Direction rotation);
     void addFloorCovering(int tileX, int tileY, const std::string& spriteSetID,
                           Rotation::Direction rotation);
@@ -78,7 +79,8 @@ public:
      * Removes the given floor covering from the given tile.
      * @return true if the tile had a floor covering to remove, else false.
      */
-    bool remFloorCovering(int tileX, int tileY, const FloorCoveringSpriteSet& spriteSet,
+    bool remFloorCovering(int tileX, int tileY,
+                          const FloorCoveringSpriteSet& spriteSet,
                           Rotation::Direction rotation);
     bool remFloorCovering(int tileX, int tileY, const std::string& spriteSetID,
                           Rotation::Direction rotation);
@@ -87,18 +89,18 @@ public:
 
     /**
      * Adds the given wall to the given tile.
-     * Note: wallType must be North or West. Gap fills will be added 
+     * Note: wallType must be North or West. Gap fills will be added
      *       automatically.
      */
     void addWall(int tileX, int tileY, const WallSpriteSet& spriteSet,
-                          Wall::Type wallType);
+                 Wall::Type wallType);
     void addWall(int tileX, int tileY, const std::string& spriteSetID,
-                          Wall::Type wallType);
+                 Wall::Type wallType);
     void addWall(int tileX, int tileY, Uint16 spriteSetID, Wall::Type wallType);
 
     /**
      * Removes the given wall from the given tile.
-     * Note: wallType must be North or West. Gap fills will be removed 
+     * Note: wallType must be North or West. Gap fills will be removed
      *       automatically.
      * @return true if the tile had a wall to remove, else false.
      */
@@ -108,22 +110,22 @@ public:
      * Adds the given object to the given tile.
      */
     void addObject(int tileX, int tileY, const ObjectSpriteSet& spriteSet,
-                          Rotation::Direction rotation);
+                   Rotation::Direction rotation);
     void addObject(int tileX, int tileY, const std::string& spriteSetID,
-                          Rotation::Direction rotation);
+                   Rotation::Direction rotation);
     void addObject(int tileX, int tileY, Uint16 spriteSetID,
-                          Rotation::Direction rotation);
+                   Rotation::Direction rotation);
 
     /**
      * Removes the given object from the given tile.
      * @return true if the tile had an object to remove, else false.
      */
     bool remObject(int tileX, int tileY, const ObjectSpriteSet& spriteSet,
-                          Rotation::Direction rotation);
+                   Rotation::Direction rotation);
     bool remObject(int tileX, int tileY, const std::string& spriteSetID,
-                          Rotation::Direction rotation);
+                   Rotation::Direction rotation);
     bool remObject(int tileX, int tileY, Uint16 spriteSetID,
-                          Rotation::Direction rotation);
+                   Rotation::Direction rotation);
 
     /**
      * Clears the given layer types from the given tile.
@@ -135,7 +137,7 @@ public:
     bool clearTileLayers(int tileX, int tileY);
 
     /**
-     * Override for clearing based on an array of bools. If a given index 
+     * Override for clearing based on an array of bools. If a given index
      * is true, the associated TileLayer::Type will be cleared.
      * You probably don't want to use this, it's mostly useful for messaging.
      */
@@ -159,7 +161,7 @@ public:
     bool clearExtentLayers(const TileExtent& extent);
 
     /**
-     * Override for clearing based on an array of bools. If a given index 
+     * Override for clearing based on an array of bools. If a given index
      * is true, the associated TileLayer::Type will be cleared.
      * You probably don't want to use this, it's mostly useful for messaging.
      */
@@ -197,7 +199,7 @@ public:
         = std::variant<TileAddLayer, TileRemoveLayer, TileClearLayers,
                        TileExtentClearLayers>;
     /**
-     * Returns a vector containing all operations that have been performed on 
+     * Returns a vector containing all operations that have been performed on
      * this tile map since the last time the vector was cleared.
      */
     const std::vector<TileUpdateVariant>& getTileUpdateHistory();
@@ -212,8 +214,7 @@ public:
      */
     template<IsChunkSnapshotType T>
     void addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
-                                 const T& chunkSnapshot,
-                                 int tileX, int tileY);
+                                 const T& chunkSnapshot, int tileX, int tileY);
 
 protected:
     /**
@@ -236,13 +237,13 @@ protected:
     void addWestWall(int tileX, int tileY, const WallSpriteSet& spriteSet);
 
     /**
-     * Removes the North wall from the given tile. If a corner was broken, 
+     * Removes the North wall from the given tile. If a corner was broken,
      * modifies the other wall pieces appropriately.
      */
     bool remNorthWall(int tileX, int tileY);
 
     /**
-     * Removes the West wall from the given tile. If a corner was broken, 
+     * Removes the West wall from the given tile. If a corner was broken,
      * modifies the other wall pieces appropriately.
      */
     bool remWestWall(int tileX, int tileY);
@@ -255,7 +256,7 @@ protected:
         const std::array<bool, TileLayer::Type::Count>& layerTypesToClear);
 
     /**
-     * Returns an array of layer types to clear, based on the given 
+     * Returns an array of layer types to clear, based on the given
      * LayersToClear.
      */
     template<IsTileLayerType... LayersToClear>
@@ -282,7 +283,7 @@ private:
     bool trackTileUpdates;
 
     /** Holds a history of tile operations that have been performed on this map.
-        TileUpdateSystem uses this history to send updates to clients, then 
+        TileUpdateSystem uses this history to send updates to clients, then
         clears it. */
     std::vector<TileUpdateVariant> tileUpdateHistory;
 };
@@ -302,10 +303,10 @@ bool TileMapBase::clearExtentLayers(const TileExtent& extent)
 
 template<IsChunkSnapshotType T>
 void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
-                             const T& chunkSnapshot,
-                             int tileX, int tileY)
+                                          const T& chunkSnapshot, int tileX,
+                                          int tileY)
 {
-    // Note: We can't use the set/add functions because they'll push updates 
+    // Note: We can't use the set/add functions because they'll push updates
     //       into the history, and addWall() adds extra walls.
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
     for (Uint8 paletteIndex : tileSnapshot.layers) {
@@ -369,7 +370,7 @@ std::array<bool, TileLayer::Type::Count> TileMapBase::getLayerTypesToClear()
     }
 
     if constexpr ((std::is_same_v<FloorCoveringTileLayer,
-                                 LayersToClear> || ...)) {
+                                  LayersToClear> || ...)) {
         layerTypesToClear[TileLayer::Type::FloorCovering] = true;
     }
 

@@ -11,8 +11,7 @@ namespace AM
 {
 namespace ResourceImporter
 {
-TitleWindow::TitleWindow(UserInterface& inUserInterface,
-                         DataModel& inDataModel)
+TitleWindow::TitleWindow(UserInterface& inUserInterface, DataModel& inDataModel)
 : AUI::Window({0, 0, 1920, 1080}, "TitleWindow")
 , userInterface{inUserInterface}
 , dataModel{inDataModel}

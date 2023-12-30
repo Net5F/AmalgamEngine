@@ -8,11 +8,10 @@ namespace AM
 
 /**
  * Defines a combination between two items.
- * 
+ *
  * Occurs when a user "Use"s an item, then selects a target item.
  */
-struct ItemCombination
-{
+struct ItemCombination {
     /** The max length of the description text. */
     static constexpr std::size_t MAX_DESCRIPTION_LENGTH{500};
 
@@ -22,7 +21,7 @@ struct ItemCombination
     /** The resulting item. */
     ItemID resultItemID{NULL_ITEM_ID};
 
-    /** The descriptive text to send to the client when this combination 
+    /** The descriptive text to send to the client when this combination
         succeeds. */
     std::string description{};
 };

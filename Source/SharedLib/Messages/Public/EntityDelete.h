@@ -7,7 +7,7 @@
 namespace AM
 {
 /**
- * Used to request that an entity be deleted, or to inform a client that an 
+ * Used to request that an entity be deleted, or to inform a client that an
  * entity was deleted.
  */
 struct EntityDelete {

@@ -19,13 +19,14 @@ struct Sprite;
  * Tiles contain no logic. If something on a tile requires logic, e.g. a tree
  * growing over time, it must have a system act upon it.
  */
-class Tile {
+class Tile
+{
 public:
     Tile();
 
     /**
      * Returns the collision boxes of each of this tile's layers.
-     * Note: The returned vector may be empty, if this tile has no walls or 
+     * Note: The returned vector may be empty, if this tile has no walls or
      *       objects.
      */
     const std::vector<BoundingBox>& getCollisionBoxes() const;
@@ -65,24 +66,23 @@ public:
     bool hasNorthWall() const;
 
     /**
-     * Clears the collisionBoxes vector, then refills it with all of this 
+     * Clears the collisionBoxes vector, then refills it with all of this
      * tile's walls and objects.
-     * 
+     *
      * @param tileX  This tile's X-axis tile coordinate.
      * @param tileY  This tile's Y-axis tile coordinate.
      */
     void rebuildCollision(int tileX, int tileY);
 
 private:
-    // TODO: Maybe eventually switch to an alternative vector type that 
+    // TODO: Maybe eventually switch to an alternative vector type that
     //       has a smaller footprint but only supports forward iterators.
     /** Holds this tile's collision boxes.
         We pre-calculate these and store them contiguously to speed up collision
         checking. */
     std::vector<BoundingBox> collisionBoxes;
 
-    struct Layers
-    {
+    struct Layers {
         /** Tiles can only have 1 floor.
             If the floor is cleared, its sprite set will be nullptr. */
         FloorTileLayer floor{};
@@ -105,7 +105,7 @@ private:
     std::unique_ptr<Layers> layers;
 
     /**
-     * Returns the given sprite's modelBounds, translated to world space and 
+     * Returns the given sprite's modelBounds, translated to world space and
      * offset to the given tile coords.
      */
     BoundingBox calcWorldBoundsForSprite(int tileX, int tileY,

@@ -14,17 +14,17 @@ namespace Client
 /**
  * Used by the UI when it wants a "phantom" sprite to be shown to the user.
  *
- * This can either be a tile phantom, or an entity phantom (see layerType's 
+ * This can either be a tile phantom, or an entity phantom (see layerType's
  * comment).
- * 
- * Phantoms are visual-only, so they're purely a UI/Renderer concern and don't 
+ *
+ * Phantoms are visual-only, so they're purely a UI/Renderer concern and don't
  * get added to the simulation.
  *
- * Floor and Wall tile layer phantoms will replace any sprites in the same spot. 
+ * Floor and Wall tile layer phantoms will replace any sprites in the same spot.
  * Entities and other tile layer types get added on top instead of replacing.
  *
- * An example usage is when a user is in build mode and is trying to place a 
- * wall. A phantom wall sprite will follow the user's mouse to show where the 
+ * An example usage is when a user is in build mode and is trying to place a
+ * wall. A phantom wall sprite will follow the user's mouse to show where the
  * wall will be placed when they click.
  */
 struct PhantomSpriteInfo {

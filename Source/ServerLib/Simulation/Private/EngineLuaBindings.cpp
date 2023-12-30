@@ -43,18 +43,16 @@ void EngineLuaBindings::addBindings()
 
     // Item init
     itemInitLua.set_function("addDescription",
-                             &EngineLuaBindings::addDescription,
-                             this);
+                             &EngineLuaBindings::addDescription, this);
     itemInitLua.set_function("addCombination",
-                             &EngineLuaBindings::addCombination,
-                             this);
+                             &EngineLuaBindings::addCombination, this);
 }
 
 void EngineLuaBindings::addItemHandler(const std::string& itemID,
                                        const std::string& handlerScript)
 {
     // If the given item exists, add the given handler.
-    if (const Item* item{world.itemData.getItem(itemID)}) {
+    if (const Item * item{world.itemData.getItem(itemID)}) {
         entt::entity entity{entityInitLua["selfEntityID"]};
         ItemHandlers& itemHandlers{
             world.registry.get_or_emplace<ItemHandlers>(entity)};
@@ -66,7 +64,7 @@ void EngineLuaBindings::addItemHandler(const std::string& itemID,
 bool EngineLuaBindings::addItem(const std::string& itemID, Uint8 count)
 {
     // Try to add the item, sending messages appropriately.
-    // Note: We send errors to the user. It may confuse them, but at least 
+    // Note: We send errors to the user. It may confuse them, but at least
     //       they'll get some feedback.
     entt::entity clientEntity{entityItemHandlerLua["clientEntityID"]};
     NetworkID clientID{entityItemHandlerLua["clientID"]};
@@ -77,7 +75,7 @@ bool EngineLuaBindings::addItem(const std::string& itemID, Uint8 count)
 bool EngineLuaBindings::removeItem(const std::string& itemID, Uint8 count)
 {
     // Try to remove the item, sending messages appropriately.
-    // Note: This will walk the whole inventory, looking for enough copies of 
+    // Note: This will walk the whole inventory, looking for enough copies of
     //       the item to satisfy the given count.
     entt::entity clientEntity{entityItemHandlerLua["clientEntityID"]};
     return InventoryHelpers::removeItem(itemID, count, clientEntity, world,
@@ -103,7 +101,7 @@ void EngineLuaBindings::sendSystemMessage(const std::string& message)
 
 void EngineLuaBindings::addDescription(const std::string& description)
 {
-    // All items support the Examine interaction, so we only need to add the 
+    // All items support the Examine interaction, so we only need to add the
     // description property.
     Item* item{itemInitLua.get<Item*>("selfItemPtr")};
     item->properties.push_back(ItemDescription{description});

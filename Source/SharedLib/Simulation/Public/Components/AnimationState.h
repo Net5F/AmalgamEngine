@@ -12,7 +12,7 @@ struct AnimationState {
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    // Note: These will all change to "animationSetType", "animationSetID", etc 
+    // Note: These will all change to "animationSetType", "animationSetID", etc
     //       when we implement animations.
     /** The type of sprite set that this entity uses. */
     SpriteSet::Type spriteSetType{SpriteSet::Type::None};
@@ -26,7 +26,7 @@ struct AnimationState {
     //--------------------------------------------------------------------------
     // Local data
     //--------------------------------------------------------------------------
-    // TODO: When we implement animations, we should add frameRate, frameIndex, 
+    // TODO: When we implement animations, we should add frameRate, frameIndex,
     //       etc (current animation state).
 };
 

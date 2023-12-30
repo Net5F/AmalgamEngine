@@ -11,7 +11,7 @@ namespace AM
  *
  * In the server, when this component is updated, MovementSyncSystem auto-sends
  * movement state updates to all nearby clients.
- * If you want to sync an entity's movement state (e.g. Position) without 
+ * If you want to sync an entity's movement state (e.g. Position) without
  * changing its inputs, you can just registry.patch() with no changes.
  */
 struct Input {

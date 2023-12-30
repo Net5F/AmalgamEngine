@@ -9,8 +9,8 @@ struct BoundingBox;
 /**
  * Represents a cylinder.
  *
- * Note: We currently ignore the Z-axis, so this actually is effectively a 
- *       circle. If it's ever useful to incorporate a Z-axis length, we can do 
+ * Note: We currently ignore the Z-axis, so this actually is effectively a
+ *       circle. If it's ever useful to incorporate a Z-axis length, we can do
  *       so.
  */
 struct Cylinder {

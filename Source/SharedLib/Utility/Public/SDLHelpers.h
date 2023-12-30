@@ -37,13 +37,13 @@ public:
     static SDL_FPoint pointToFPoint(const SDL_Point& point);
 
     /**
-     * Converts the given SDL_FPoint to an SDL_Point, rounding each value 
+     * Converts the given SDL_FPoint to an SDL_Point, rounding each value
      * towards zero.
      */
     static SDL_Point truncateFPoint(const SDL_FPoint& point);
 
     /**
-     * Converts the given SDL_FPoint to an SDL_Point, rounding each value to 
+     * Converts the given SDL_FPoint to an SDL_Point, rounding each value to
      * the nearest whole number.
      */
     static SDL_Point roundFPoint(const SDL_FPoint& point);
@@ -54,13 +54,13 @@ public:
     static SDL_FRect rectToFRect(const SDL_Rect& rect);
 
     /**
-     * Converts the given SDL_FRect to an SDL_Rect, rounding each value towards 
+     * Converts the given SDL_FRect to an SDL_Rect, rounding each value towards
      * zero.
      */
     static SDL_Rect truncateFRect(const SDL_FRect& rect);
 
     /**
-     * Converts the given SDL_FRect to an SDL_Rect, rounding each value to 
+     * Converts the given SDL_FRect to an SDL_Rect, rounding each value to
      * the nearest whole number.
      */
     static SDL_Rect roundFRect(const SDL_FRect& rect);

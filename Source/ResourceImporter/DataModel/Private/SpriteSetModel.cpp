@@ -152,7 +152,7 @@ bool SpriteSetModel::addWall()
     std::array<int, Wall::Type::Count> spriteIDs{
         NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID};
     wallMap.emplace(numericID,
-                     EditorWallSpriteSet{numericID, displayName, spriteIDs});
+                    EditorWallSpriteSet{numericID, displayName, spriteIDs});
 
     // Signal the new sprite set to the UI.
     EditorWallSpriteSet& spriteSet{wallMap[numericID]};
@@ -270,7 +270,8 @@ const EditorFloorCoveringSpriteSet&
 {
     auto floorCoveringIt{floorCoveringMap.find(floorCoveringID)};
     if (floorCoveringIt == floorCoveringMap.end()) {
-        LOG_FATAL("Tried to get floorCovering with invalid ID: %d", floorCoveringID);
+        LOG_FATAL("Tried to get floorCovering with invalid ID: %d",
+                  floorCoveringID);
     }
 
     return floorCoveringIt->second;
@@ -296,8 +297,9 @@ const EditorObjectSpriteSet& SpriteSetModel::getObject(Uint16 objectID)
     return objectIt->second;
 }
 
-void SpriteSetModel::setSpriteSetDisplayName(SpriteSet::Type type, Uint16 spriteSetID,
-    const std::string& newDisplayName)
+void SpriteSetModel::setSpriteSetDisplayName(SpriteSet::Type type,
+                                             Uint16 spriteSetID,
+                                             const std::string& newDisplayName)
 {
     switch (type) {
         case SpriteSet::Type::Floor: {
@@ -328,7 +330,7 @@ void SpriteSetModel::setSpriteSetDisplayName(SpriteSet::Type type, Uint16 sprite
 }
 
 void SpriteSetModel::setSpriteSetSlot(SpriteSet::Type type, Uint16 spriteSetID,
-    std::size_t index, int newSpriteID)
+                                      std::size_t index, int newSpriteID)
 {
     switch (type) {
         case SpriteSet::Type::Floor: {
@@ -372,11 +374,11 @@ void SpriteSetModel::resetModelState()
 
 void SpriteSetModel::removeSpriteIDFromSets(int spriteID)
 {
-    // Given one of the sprite set maps, this will replace all instances of 
+    // Given one of the sprite set maps, this will replace all instances of
     // oldSpriteID with newSpriteID and emit a spriteSetSpriteIDChanged.
-    auto replaceIDInSets
-        = [this]<typename T>(std::map<Uint16, T>& spriteSetMap,
-                             SpriteSet::Type type, int spriteID) { 
+    auto replaceIDInSets = [this]<typename T>(std::map<Uint16, T>& spriteSetMap,
+                                              SpriteSet::Type type,
+                                              int spriteID) {
         // For each sprite set in the map.
         for (auto& pair : spriteSetMap) {
             T& spriteSet{pair.second};
@@ -387,9 +389,9 @@ void SpriteSetModel::removeSpriteIDFromSets(int spriteID)
                 int& slotSpriteID{spriteSet.spriteIDs[i]};
                 if (slotSpriteID == spriteID) {
                     slotSpriteID = NULL_SPRITE_ID;
-                    spriteSetSlotChangedSig.publish(
-                        type, spriteSet.numericID, static_cast<Uint16>(i),
-                        NULL_SPRITE_ID);
+                    spriteSetSlotChangedSig.publish(type, spriteSet.numericID,
+                                                    static_cast<Uint16>(i),
+                                                    NULL_SPRITE_ID);
                 }
             }
         }
@@ -398,8 +400,7 @@ void SpriteSetModel::removeSpriteIDFromSets(int spriteID)
     replaceIDInSets(floorMap, SpriteSet::Type::Floor, spriteID);
     replaceIDInSets(floorCoveringMap, SpriteSet::Type::FloorCovering, spriteID);
     replaceIDInSets(wallMap, SpriteSet::Type::Wall, spriteID);
-    replaceIDInSets(objectMap, SpriteSet::Type::Object,
-                    spriteID);
+    replaceIDInSets(objectMap, SpriteSet::Type::Object, spriteID);
 }
 
 const std::string& SpriteSetModel::getErrorString()
@@ -438,7 +439,8 @@ bool SpriteSetModel::parseFloorSpriteSet(const nlohmann::json& spriteSetJson)
     return true;
 }
 
-bool SpriteSetModel::parseFloorCoveringSpriteSet(const nlohmann::json& spriteSetJson)
+bool SpriteSetModel::parseFloorCoveringSpriteSet(
+    const nlohmann::json& spriteSetJson)
 {
     Uint16 numericID{static_cast<Uint16>(floorCoveringIDPool.reserveID())};
     std::string displayName{spriteSetJson.at("displayName").get<std::string>()};
@@ -549,7 +551,7 @@ std::map<Uint16, T>& SpriteSetModel::getMapForSpriteSetType()
 
 template<typename T>
 bool SpriteSetModel::spriteSetNameIsUnique(Uint16 spriteSetID,
-                                            const std::string& displayName)
+                                           const std::string& displayName)
 {
     auto& spriteSetMap{getMapForSpriteSetType<T>()};
 
@@ -560,7 +562,8 @@ bool SpriteSetModel::spriteSetNameIsUnique(Uint16 spriteSetID,
         int idToCheck{spriteSetPair.first};
         const T& spriteSet{spriteSetPair.second};
 
-        if ((idToCheck != spriteSetID) && (displayName == spriteSet.displayName)) {
+        if ((idToCheck != spriteSetID)
+            && (displayName == spriteSet.displayName)) {
             isUnique = false;
         }
     }
@@ -570,8 +573,8 @@ bool SpriteSetModel::spriteSetNameIsUnique(Uint16 spriteSetID,
 
 template<typename T>
 void SpriteSetModel::setSpriteSetDisplayName(SpriteSet::Type type,
-                                              Uint16 spriteSetID,
-                                              const std::string& newDisplayName)
+                                             Uint16 spriteSetID,
+                                             const std::string& newDisplayName)
 {
     auto& spriteSetMap{getMapForSpriteSetType<T>()};
 
@@ -600,7 +603,7 @@ void SpriteSetModel::setSpriteSetDisplayName(SpriteSet::Type type,
 
 template<typename T>
 void SpriteSetModel::setSpriteSetSlot(SpriteSet::Type type, Uint16 spriteSetID,
-                                       std::size_t index, int newSpriteID)
+                                      std::size_t index, int newSpriteID)
 {
     auto& spriteSetMap{getMapForSpriteSetType<T>()};
 

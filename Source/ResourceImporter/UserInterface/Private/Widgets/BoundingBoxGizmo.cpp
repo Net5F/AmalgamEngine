@@ -354,7 +354,8 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
 }
 
 void BoundingBoxGizmo::calcOffsetScreenPoints(
-    const EditorSprite& activeSprite, std::vector<SDL_Point>& boundsScreenPoints)
+    const EditorSprite& activeSprite,
+    std::vector<SDL_Point>& boundsScreenPoints)
 {
     /* Transform the world positions to screen points. */
     // Set up a vector of float points so we can maintain precision until

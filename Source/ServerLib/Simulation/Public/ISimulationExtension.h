@@ -71,25 +71,21 @@ public:
     //-------------------------------------------------------------------------
     // Simulation System Hooks (Hooks into engine systems)
     //-------------------------------------------------------------------------
-    // These functions allow the project to place constraints on various 
+    // These functions allow the project to place constraints on various
     // World state modifications.
     /** @return true if the given extent is editable, else false. */
     virtual bool isTileExtentEditable(NetworkID netID,
-                                      const TileExtent& tileExtent) const
-        = 0;
+                                      const TileExtent& tileExtent) const = 0;
     /** @return true if the given request is valid, else false. */
     virtual bool isEntityInitRequestValid(
-        const EntityInitRequest& entityInitRequest) const
-        = 0;
+        const EntityInitRequest& entityInitRequest) const = 0;
     virtual bool isEntityDeleteRequestValid(
-        const EntityDeleteRequest& entityDeleteRequest) const
-        = 0;
+        const EntityDeleteRequest& entityDeleteRequest) const = 0;
     virtual bool isEntityNameChangeRequestValid(
-        const EntityNameChangeRequest& nameChangeRequest) const
-        = 0;
+        const EntityNameChangeRequest& nameChangeRequest) const = 0;
     virtual bool isAnimationStateChangeRequestValid(
-        const AnimationStateChangeRequest& animationStateChangeRequest) const
-        = 0;
+        const AnimationStateChangeRequest& animationStateChangeRequest)
+        const = 0;
 };
 
 } // namespace Server

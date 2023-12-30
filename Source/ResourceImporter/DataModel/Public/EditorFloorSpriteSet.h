@@ -11,7 +11,7 @@ namespace ResourceImporter
 {
 /**
  * Holds the data necessary for editing and saving a floor sprite set.
- * Part of SpriteSetModel. 
+ * Part of SpriteSetModel.
  */
 struct EditorFloorSpriteSet {
     /** This sprite set's unique numeric identifier.
@@ -22,7 +22,7 @@ struct EditorFloorSpriteSet {
     std::string displayName{""};
 
     /** The numeric IDs for each sprite in this set.
-        Floors currently only support 1 sprite, but support for "variations" 
+        Floors currently only support 1 sprite, but support for "variations"
         may be added in the future. */
     std::array<int, 1> spriteIDs{NULL_SPRITE_ID};
 };

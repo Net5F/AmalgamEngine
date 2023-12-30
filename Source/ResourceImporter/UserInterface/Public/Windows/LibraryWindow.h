@@ -96,7 +96,7 @@ private:
                                   const std::string& newDisplayName);
 
     /**
-     * If there are other currently selected list items, checks if the given 
+     * If there are other currently selected list items, checks if the given
      * list item is compatible with them. If so, adds it to the vector.
      */
     void processSelectedListItem(LibraryListItem* selectedListItem);
@@ -104,16 +104,14 @@ private:
     /**
      * Adds the given sprite to the given sprite sheet list item.
      */
-    void addSpriteToSheetListItem(
-        ParentListItem& sheetListItem,
-        const EditorSpriteSheet& sheet, int spriteID);
+    void addSpriteToSheetListItem(ParentListItem& sheetListItem,
+                                  const EditorSpriteSheet& sheet, int spriteID);
 
     /**
      * Adds the given icon to the given icon sheet list item.
      */
-    void addIconToSheetListItem(
-        ParentListItem& sheetListItem,
-        const EditorIconSheet& sheet, IconID iconID);
+    void addIconToSheetListItem(ParentListItem& sheetListItem,
+                                const EditorIconSheet& sheet, IconID iconID);
 
     /**
      * @return true if the given type is removable.
@@ -121,7 +119,7 @@ private:
     bool isRemovable(LibraryListItem::Type listItemType);
 
     /**
-     * Removes the given list item widget from the library and all secondary 
+     * Removes the given list item widget from the library and all secondary
      * data structures.
      */
     void removeListItem(LibraryListItem* listItem);
@@ -135,7 +133,7 @@ private:
     /** Used to update the model when a sheet is removed. */
     DataModel& dataModel;
 
-    /** An array of maps, indexed by list item types. Each map holds the 
+    /** An array of maps, indexed by list item types. Each map holds the
         list items for the associated type. */
     std::array<std::unordered_map<int, LibraryListItem*>,
                LibraryListItem::Type::Count>

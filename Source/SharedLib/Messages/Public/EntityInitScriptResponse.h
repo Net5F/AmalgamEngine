@@ -16,7 +16,7 @@ namespace AM
  * Init scripts are only requested by clients for use in build mode. Only the
  * server actually runs the scripts.
  *
- * Note: This is named "Response" to differentiate it from the EntityInitScript 
+ * Note: This is named "Response" to differentiate it from the EntityInitScript
  *       component. Normally we don't append "Response" to response messages.
  */
 struct EntityInitScriptResponse {

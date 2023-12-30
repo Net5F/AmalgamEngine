@@ -11,7 +11,7 @@ namespace AM
  * Represents a world-space ray.
  *
  * A ray is a single point in space with a direction. It extends infinitely far
- * in that single direction (as opposed to a line, which extends in both 
+ * in that single direction (as opposed to a line, which extends in both
  * directions).
  */
 struct Ray {

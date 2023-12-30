@@ -23,7 +23,7 @@ class SpriteData : public SpriteDataBase
 {
 public:
     /**
-     * Calls SpriteDataBase() constructor, then load the rendering-specific 
+     * Calls SpriteDataBase() constructor, then load the rendering-specific
      * sprite data from the given json.
      *
      * Errors if resourceDataJson doesn't contain a spriteSheets section.

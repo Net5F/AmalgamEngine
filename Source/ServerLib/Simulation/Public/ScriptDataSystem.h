@@ -13,9 +13,9 @@ class Network;
 
 /**
  * Handles sending Lua scripts to clients.
- * 
- * Scripts are stored on the server in various components. When a client wants 
- * to edit an entity, we send them that entity's scripts so they don't have to 
+ *
+ * Scripts are stored on the server in various components. When a client wants
+ * to edit an entity, we send them that entity's scripts so they don't have to
  * start from scratch.
  */
 class ScriptDataSystem
@@ -24,7 +24,7 @@ public:
     ScriptDataSystem(World& inWorld, Network& inNetwork);
 
     /**
-     * Processes script data requests, sending script data if the request is 
+     * Processes script data requests, sending script data if the request is
      * valid.
      */
     void sendScripts();

@@ -11,7 +11,7 @@ namespace Server
 /**
  * An entity's handling logic for when an item is used on it.
  *
- * There's no default handler. You must add a handler for a particular item 
+ * There's no default handler. You must add a handler for a particular item
  * in order for anything to happen when that item is used on this entity.
  */
 struct ItemHandlers {

@@ -9,7 +9,7 @@ namespace Client
 {
 /**
  * Holds updated movement state for the player entity.
- * 
+ *
  * This isn't an actual message that gets sent by the server, instead it gets
  * split out when we receive a ComponentUpdate with the relevant data.
  */

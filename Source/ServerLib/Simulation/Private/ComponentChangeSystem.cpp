@@ -77,7 +77,7 @@ void ComponentChangeSystem::setExtension(ISimulationExtension* inExtension)
 void ComponentChangeSystem::onAnimationStateUpdated(entt::registry& registry,
                                                     entt::entity entity)
 {
-    // Since the animation state was updated, we need to update the entity's 
+    // Since the animation state was updated, we need to update the entity's
     // collision.
     auto [position, animationState]
         = registry.get<Position, AnimationState>(entity);
@@ -85,7 +85,8 @@ void ComponentChangeSystem::onAnimationStateUpdated(entt::registry& registry,
         spriteData.getObjectSpriteSet(animationState.spriteSetID)
             .sprites[animationState.spriteIndex]};
 
-    // Note: We assume that an entity with AnimationState always has a Collision.
+    // Note: We assume that an entity with AnimationState always has a
+    //       Collision.
     const Collision& collision{
         registry.patch<Collision>(entity, [&](Collision& collision) {
             collision.modelBounds = newSprite->modelBounds;

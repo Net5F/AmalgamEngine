@@ -28,7 +28,7 @@ Application::Application()
 , network{}
 , networkCaller{std::bind_front(&Network::tick, &network),
                 SharedConfig::CLIENT_NETWORK_TICK_TIMESTEP_S, "Network", true}
-// Note: Since the UI and sim subscribe to the network's event queues, they 
+// Note: Since the UI and sim subscribe to the network's event queues, they
 //       need to be destructed before it.
 , userInterface{}
 , uiCaller{std::bind_front(&UserInterface::tick, &userInterface),
@@ -43,7 +43,7 @@ Application::Application()
 , eventHandlers{this, &renderer, &userInterface, &simulation}
 , exitRequested{false}
 {
-    // Note: We pass this separately from the above initialization to avoid a 
+    // Note: We pass this separately from the above initialization to avoid a
     //       circular dependency between Simulation and UserInterface.
     userInterface.setWorld(simulation.getWorld());
 
@@ -150,7 +150,7 @@ bool Application::enoughTimeTillNextCall(double minimumTime)
 
 int Application::filterEvents(void* userData, SDL_Event*)
 {
-    //Application* app{static_cast<Application*>(userData)};
+    // Application* app{static_cast<Application*>(userData)};
 
     // Currently no events that we care to filter.
     //

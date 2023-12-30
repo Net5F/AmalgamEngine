@@ -16,7 +16,7 @@ namespace ResourceImporter
 /**
  * A generic way to reference the data associated with a LibraryListItem.
  *
- * This only includes the types that the user is able to double click to load 
+ * This only includes the types that the user is able to double click to load
  * into the edit stage.
  */
 using LibraryItemData

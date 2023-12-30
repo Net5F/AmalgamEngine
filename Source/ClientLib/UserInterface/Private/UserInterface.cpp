@@ -21,8 +21,7 @@ UserInterface::UserInterface()
 {
 }
 
-std::vector<PhantomSpriteInfo>
-    UserInterface::getPhantomSprites() const
+std::vector<PhantomSpriteInfo> UserInterface::getPhantomSprites() const
 {
     // Get the project's phantom tiles.
     if (extension != nullptr) {
@@ -33,8 +32,7 @@ std::vector<PhantomSpriteInfo>
     }
 }
 
-std::vector<SpriteColorModInfo>
-    UserInterface::getSpriteColorMods() const
+std::vector<SpriteColorModInfo> UserInterface::getSpriteColorMods() const
 {
     // Get the project's tile color mods.
     if (extension != nullptr) {
@@ -54,7 +52,7 @@ void UserInterface::tick(double timestepS)
 }
 
 void UserInterface::render(const Camera& camera,
-                const std::vector<SpriteSortInfo>& sortedSprites)
+                           const std::vector<SpriteSortInfo>& sortedSprites)
 {
     // Call the project's UI rendering logic.
     if (extension != nullptr) {

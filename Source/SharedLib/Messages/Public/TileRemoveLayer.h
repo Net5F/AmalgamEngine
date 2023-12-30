@@ -8,14 +8,15 @@
 namespace AM
 {
 /**
- * Sent by a client to request that a layer be removed from a tile, or by the 
+ * Sent by a client to request that a layer be removed from a tile, or by the
  * server to tell a client that a layer was removed.
  */
 struct TileRemoveLayer {
 public:
     // The EngineMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr EngineMessageType MESSAGE_TYPE{EngineMessageType::TileRemoveLayer};
+    static constexpr EngineMessageType MESSAGE_TYPE{
+        EngineMessageType::TileRemoveLayer};
 
     //--------------------------------------------------------------------------
     // Networked data

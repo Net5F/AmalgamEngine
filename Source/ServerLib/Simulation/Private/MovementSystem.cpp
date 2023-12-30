@@ -25,7 +25,9 @@ void MovementSystem::processMovements()
     ZoneScoped;
 
     // Move all entities that have the required components.
-    auto group = world.registry.group<Input, Position, PreviousPosition, Rotation, Collision>();
+    auto group
+        = world.registry
+              .group<Input, Position, PreviousPosition, Rotation, Collision>();
     for (auto [entity, input, position, previousPosition, rotation, collision] :
          group.each()) {
         // Save their old position.

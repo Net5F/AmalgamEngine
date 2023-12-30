@@ -122,7 +122,7 @@ void DataModel::save()
 
 void DataModel::setActiveSprite(int newActiveSpriteID)
 {
-    // Note: This will error if the sprite ID is invalid. This is good, since 
+    // Note: This will error if the sprite ID is invalid. This is good, since
     //       we don't expect any invalid IDs to be floating around.
     const EditorSprite& sprite{spriteModel.getSprite(newActiveSpriteID)};
 
@@ -130,7 +130,8 @@ void DataModel::setActiveSprite(int newActiveSpriteID)
     activeLibraryItemChangedSig.publish(sprite);
 }
 
-void DataModel::setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveSpriteSetID)
+void DataModel::setActiveSpriteSet(SpriteSet::Type type,
+                                   Uint16 newActiveSpriteSetID)
 {
     // Match the sprite set type, then:
     //   1. Get the set with the given ID (error if it doesn't exist).
@@ -164,7 +165,7 @@ void DataModel::setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveSpriteS
 
 void DataModel::setActiveIcon(IconID newActiveIconID)
 {
-    // Note: This will error if the sprite ID is invalid. This is good, since 
+    // Note: This will error if the sprite ID is invalid. This is good, since
     //       we don't expect any invalid IDs to be floating around.
     const EditorIcon& icon{iconModel.getIcon(newActiveIconID)};
 

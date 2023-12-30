@@ -9,7 +9,7 @@ namespace AM
 /**
  * Represents a position in the world.
  *
- * If used as a component attached to an entity, this will correspond to a 
+ * If used as a component attached to an entity, this will correspond to a
  * a centered point under the entity's feet.
  * This means that an entity's sprite and bounding box will be centered on this
  * position in the X and Y axis, and will sit on top of this position in the Z
@@ -53,9 +53,9 @@ struct Position {
     }
 
     /**
-     * Returns the squared distance between this position and the given 
+     * Returns the squared distance between this position and the given
      * position.
-     * We keep it squared to avoid an expensive sqrt. You can use this by 
+     * We keep it squared to avoid an expensive sqrt. You can use this by
      * squaring the distance you're comparing it to.
      */
     float squaredDistanceTo(const Position& other) const

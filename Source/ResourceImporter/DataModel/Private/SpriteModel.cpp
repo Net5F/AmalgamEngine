@@ -199,9 +199,10 @@ bool SpriteModel::addSpriteSheet(const std::string& relPath,
 
             // Add the sprite to the map and sheet.
             int spriteID{static_cast<int>(spriteIDPool.reserveID())};
-            spriteMap.emplace(spriteID, EditorSprite{spriteID, spriteSheet.relPath,
-                                               displayName, textureExtent,
-                                               yOffsetI, true, defaultBox});
+            spriteMap.emplace(spriteID,
+                              EditorSprite{spriteID, spriteSheet.relPath,
+                                           displayName, textureExtent, yOffsetI,
+                                           true, defaultBox});
             spriteSheet.spriteIDs.push_back(spriteID);
 
             // Increment the count (used for the display name).
@@ -264,7 +265,7 @@ const EditorSprite& SpriteModel::getSprite(int spriteID)
 }
 
 void SpriteModel::setSpriteDisplayName(int spriteID,
-                                           const std::string& newDisplayName)
+                                       const std::string& newDisplayName)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
@@ -289,7 +290,7 @@ void SpriteModel::setSpriteDisplayName(int spriteID,
 }
 
 void SpriteModel::setSpriteCollisionEnabled(int spriteID,
-                                              bool newCollisionEnabled)
+                                            bool newCollisionEnabled)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
@@ -304,7 +305,7 @@ void SpriteModel::setSpriteCollisionEnabled(int spriteID,
 }
 
 void SpriteModel::setSpriteModelBounds(int spriteID,
-                                           const BoundingBox& newModelBounds)
+                                       const BoundingBox& newModelBounds)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
@@ -338,8 +339,7 @@ bool SpriteModel::parseSpriteSheet(const nlohmann::json& sheetJson)
     EditorSpriteSheet& spriteSheet{spriteSheetMap[sheetID]};
 
     // Add this sheet's relative path.
-    spriteSheet.relPath
-        = sheetJson.at("relPath").get<std::string>();
+    spriteSheet.relPath = sheetJson.at("relPath").get<std::string>();
     if (!(dataModel.validateRelPath(spriteSheet.relPath))) {
         return false;
     }
@@ -358,20 +358,18 @@ bool SpriteModel::parseSpriteSheet(const nlohmann::json& sheetJson)
 }
 
 bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
-                     EditorSpriteSheet& spriteSheet)
+                              EditorSpriteSheet& spriteSheet)
 {
     // Mark the sprite's ID as reserved so it doesn't get reused.
     int spriteID{spriteJson.at("numericID").get<int>()};
     spriteIDPool.markIDAsReserved(spriteID);
 
-    spriteMap.emplace(spriteID,
-                      EditorSprite{spriteID, spriteSheet.relPath});
+    spriteMap.emplace(spriteID, EditorSprite{spriteID, spriteSheet.relPath});
     spriteSheet.spriteIDs.push_back(spriteID);
     EditorSprite& sprite{spriteMap[spriteID]};
 
     // If the display name isn't unique, fail.
-    std::string displayName{
-        spriteJson.at("displayName").get<std::string>()};
+    std::string displayName{spriteJson.at("displayName").get<std::string>()};
     if (!spriteNameIsUnique(spriteID, displayName)) {
         errorString = "Sprite display name isn't unique: ";
         errorString += sprite.displayName.c_str();
@@ -405,7 +403,7 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
 }
 
 bool SpriteModel::spriteNameIsUnique(int spriteID,
-                                         const std::string& displayName)
+                                     const std::string& displayName)
 {
     // Dumbly look through all names for a match.
     // Note: Eventually, this should change to a name map that we keep updated.

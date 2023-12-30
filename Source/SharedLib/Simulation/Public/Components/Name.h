@@ -9,8 +9,7 @@ namespace AM
  *
  * All entities have a name.
  */
-struct Name
-{
+struct Name {
     /** The max length of a name. */
     static constexpr std::size_t MAX_LENGTH{50};
 

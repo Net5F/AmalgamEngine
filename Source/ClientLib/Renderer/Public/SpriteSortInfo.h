@@ -21,7 +21,7 @@ struct SpriteSortInfo {
     /** The sprite that is associated with this render information. */
     const Sprite* sprite;
 
-    /** The tile layer or entity that the sprite comes from, or std::monostate 
+    /** The tile layer or entity that the sprite comes from, or std::monostate
         if this is a full phantom (not replacing an existing layer).
         Used when we pass the sorted sprites to the UI's locator. */
     WorldObjectID spriteOwnerID;
@@ -37,7 +37,7 @@ struct SpriteSortInfo {
         Used during rendering and passed to the UI's locator. */
     SDL_Rect screenExtent{};
 
-    /** If non-default, the UI wants us to multiply this sprite's color and 
+    /** If non-default, the UI wants us to multiply this sprite's color and
         transparency by these values. */
     SDL_Color colorMod{0, 0, 0, 255};
 

@@ -13,7 +13,7 @@ struct ItemCombination;
 /**
  * Represents an entity's inventory of items.
  *
- * All client entities have an inventory. Non-client entities may or may not 
+ * All client entities have an inventory. Non-client entities may or may not
  * have one.
  */
 struct Inventory {
@@ -38,13 +38,13 @@ public:
 
     /** This inventory's item slots.
         Empty slots will have ID == NULL_ITEM_ID.
-        Note: Slots may be allocated, but still be empty. If you're iterating 
+        Note: Slots may be allocated, but still be empty. If you're iterating
               this vector, be sure to check for NULL_ITEM_ID. */
     std::vector<ItemSlot> slots;
 
     Inventory(Uint8 inSize = DEFAULT_INVENTORY_SIZE);
 
-    // Note: You likely don't want to call these directly. 
+    // Note: You likely don't want to call these directly.
     //       See InventoryHelpers.h
     /**
      * Adds the given item to the first available slot.
@@ -66,10 +66,11 @@ public:
     bool removeItem(Uint8 slotIndex, Uint8 count);
 
     /**
-     * Moves the item in sourceSlot into destSlot (or swaps, if there's an 
+     * Moves the item in sourceSlot into destSlot (or swaps, if there's an
      * item already in destSlot).
      *
-     * @return true if the items were moved, else false (slot index isn't valid).
+     * @return true if the items were moved, else false (slot index isn't
+     * valid).
      */
     bool moveItem(Uint8 sourceSlotIndex, Uint8 destSlotIndex);
 
@@ -80,7 +81,7 @@ public:
 
     /**
      * Returns the ID of the item at the given inventory slot.
-     * If the given index is invalid or there's no item in the slot, returns 
+     * If the given index is invalid or there's no item in the slot, returns
      * NULL_ITEM_ID.
      */
     ItemID getItemID(Uint8 slotIndex) const;
@@ -92,20 +93,20 @@ public:
 
     /**
      * Returns the item at the given inventory slot.
-     * If the given index is invalid or there's no item in the slot, returns 
+     * If the given index is invalid or there's no item in the slot, returns
      * nullptr.
      */
     const Item* getItem(Uint8 slotIndex, const ItemDataBase& itemData) const;
 
     /**
-     * Combines the items in the given slots and decrements their count 
+     * Combines the items in the given slots and decrements their count
      * (emptying the slot if count == 0).
      *
      * Looks up the item's combinations to determine what the resulting item is.
      * Only for use by the server.
-     * 
-     * @return The used combination if the items were combined, else nullptr 
-     *         (slot index isn't valid, either slot was empty, neither item 
+     *
+     * @return The used combination if the items were combined, else nullptr
+     *         (slot index isn't valid, either slot was empty, neither item
      *         contained the combination).
      */
     const ItemCombination* combineItems(Uint8 sourceSlotIndex,
@@ -114,8 +115,8 @@ public:
 
     /**
      * Overload for the client version of this operation.
-     * 
-     * Clients don't have the combination data for any items, so this overload 
+     *
+     * Clients don't have the combination data for any items, so this overload
      * instead takes in the resulting item's ID.
      */
     void combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
@@ -131,7 +132,7 @@ public:
      */
     Uint8 getFilledSlotCount();
 
-    /** Returns true if the given inventory slot index is valid, else returns 
+    /** Returns true if the given inventory slot index is valid, else returns
         false. */
     bool slotIndexIsValid(Uint8 slotIndex) const;
 

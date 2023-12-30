@@ -7,7 +7,7 @@ namespace AM
 IDPool::IDPool(std::size_t inPoolSize)
 : poolSize{inPoolSize}
 , containerSize{poolSize + SAFETY_BUFFER}
-// Note: We initialize this to -1 since reserveID() always checks for the 
+// Note: We initialize this to -1 since reserveID() always checks for the
 //       next index. If we started at 0, our first ID would be 1.
 , lastAddedIndex{-1}
 , reservedIDCount{0}

@@ -83,8 +83,7 @@ void EntityLocator::setEntityLocation(entt::entity entity,
     }
 }
 
-std::vector<entt::entity>&
-    EntityLocator::getEntities(const Cylinder& cylinder)
+std::vector<entt::entity>& EntityLocator::getEntities(const Cylinder& cylinder)
 {
     AM_ASSERT(cylinder.radius >= 0, "Cylinder can't have negative radius.");
 
@@ -92,11 +91,10 @@ std::vector<entt::entity>&
     getEntitiesCoarse(cylinder);
 
     // Erase any entities whose position isn't within the cylinder.
-    std::erase_if(
-        returnVector, [this, &cylinder](entt::entity entity) {
-            const Position& position{registry.get<Position>(entity)};
-            return !(cylinder.intersects(position));
-        });
+    std::erase_if(returnVector, [this, &cylinder](entt::entity entity) {
+        const Position& position{registry.get<Position>(entity)};
+        return !(cylinder.intersects(position));
+    });
 
     return returnVector;
 }
@@ -134,11 +132,10 @@ std::vector<entt::entity>&
     getEntitiesCoarse(cylinder);
 
     // Erase any entities that don't actually intersect the cylinder.
-    std::erase_if(
-        returnVector, [this, &cylinder](entt::entity entity) {
-            const Collision& collision{registry.get<Collision>(entity)};
-            return !(collision.worldBounds.intersects(cylinder));
-        });
+    std::erase_if(returnVector, [this, &cylinder](entt::entity entity) {
+        const Collision& collision{registry.get<Collision>(entity)};
+        return !(collision.worldBounds.intersects(cylinder));
+    });
 
     return returnVector;
 }

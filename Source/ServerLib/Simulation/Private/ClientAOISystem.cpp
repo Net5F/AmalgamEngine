@@ -23,7 +23,7 @@ namespace Server
 {
 
 /**
- * Retrieves the types in componentIndices for the given entity and pushes 
+ * Retrieves the types in componentIndices for the given entity and pushes
  * them into componentVec.
  *
  * Note: This is a free function to reduce includes in the header.
@@ -120,15 +120,17 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
 {
     entt::registry& registry{world.registry};
 
-    // Send the client an EntityInit containing each entity that entered its AOI.
+    // Send the client an EntityInit containing each entity that entered its
+    // AOI.
     EntityInit entityInit{simulation.getCurrentTick()};
     for (entt::entity entityThatEntered : entitiesThatEntered) {
         const auto& replicatedComponentList{
             registry.get<ReplicatedComponentList>(entityThatEntered)};
 
-        // Add the entity and all of its client-relevant components to the 
+        // Add the entity and all of its client-relevant components to the
         // message.
-        // Note: We send the entity, even if it has no client-relevant component,
+        // Note: We send the entity, even if it has no client-relevant
+        // component,
         //       because there may be a build mode that cares about it.
         EntityInit::EntityData& entityData{entityInit.entityData.emplace_back(
             entityThatEntered, registry.get<Position>(entityThatEntered))};

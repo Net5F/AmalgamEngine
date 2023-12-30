@@ -11,7 +11,7 @@ namespace ResourceImporter
 {
 /**
  * Holds the data necessary for editing and saving an icon sheet.
- * Part of IconModel. 
+ * Part of IconModel.
  */
 struct EditorIconSheet {
     /** The path to the icon sheet image file, relative to the application's

@@ -11,8 +11,7 @@ struct Position;
 /**
  * A strong type alias, describing the position of a particular map tile.
  */
-struct TilePosition : public DiscretePosition<DiscreteImpl::TileTag>
-{
+struct TilePosition : public DiscretePosition<DiscreteImpl::TileTag> {
     TilePosition();
 
     TilePosition(int inX, int inY);

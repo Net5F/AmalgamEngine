@@ -10,7 +10,7 @@ class World;
 /**
  * Handles AI processing.
  */
-class AISystem 
+class AISystem
 {
 public:
     AISystem(World& inWorld);

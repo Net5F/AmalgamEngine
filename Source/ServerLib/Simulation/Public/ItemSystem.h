@@ -35,7 +35,7 @@ public:
                sol::state& inEntityItemHandlerLua);
 
     /**
-     * Processes the interactions that every item supports (UseOn, Destroy, 
+     * Processes the interactions that every item supports (UseOn, Destroy,
      * and Examine).
      */
     void processItemInteractions();
@@ -54,29 +54,29 @@ private:
     void examineItem(const Item* item, NetworkID clientID);
 
     /**
-     * Tries to combine the given items in the given player's inventory. If the 
-     * combination is invalid (either slot is empty, or neither items supports 
+     * Tries to combine the given items in the given player's inventory. If the
+     * combination is invalid (either slot is empty, or neither items supports
      * the combination), sends an appropriate response.
      */
     void combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
                       NetworkID clientID);
 
     /**
-     * Tries to use the item in the given player's inventory slot on the given 
-     * entity. If the entity doesn't support the interaction, sends an 
+     * Tries to use the item in the given player's inventory slot on the given
+     * entity. If the entity doesn't support the interaction, sends an
      * appropriate response.
      */
     void useItemOnEntity(Uint8 sourceSlotIndex, entt::entity targetEntity,
                          NetworkID clientID);
 
     /**
-     * Creates a new item with the given data. If the ID is already taken, 
+     * Creates a new item with the given data. If the ID is already taken,
      * sends an ItemError.
      */
     void handleInitRequest(const ItemInitRequest& itemInitRequest);
 
     /**
-     * Overwrites an existing item with the given data. If no existing item 
+     * Overwrites an existing item with the given data. If no existing item
      * matches the given ID, sends an ItemError.
      */
     void handleChangeRequest(const ItemChangeRequest& itemChangeRequest);

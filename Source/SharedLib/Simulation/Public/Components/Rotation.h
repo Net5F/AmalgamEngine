@@ -12,7 +12,7 @@ namespace AM
  * Due to being a sprite-based engine, rotation about other axes is not viable,
  * and rotation is locked to 8 directions.
  *
- * Note: This is specifically a rotation component that will be attached to an 
+ * Note: This is specifically a rotation component that will be attached to an
  *       entity. When doing 3D math, we use other structs (Position, Ray, etc).
  */
 struct Rotation {

@@ -46,41 +46,49 @@ const Sprite& SpriteDataBase::getSprite(int numericID) const
     return sprites[numericID];
 }
 
-const FloorSpriteSet& SpriteDataBase::getFloorSpriteSet(const std::string& stringID) const
+const FloorSpriteSet&
+    SpriteDataBase::getFloorSpriteSet(const std::string& stringID) const
 {
     auto it{floorSpriteSetStringMap.find(stringID)};
     if (it == floorSpriteSetStringMap.end()) {
-        LOG_FATAL("Failed to find sprite set with string ID: %s", stringID.c_str());
+        LOG_FATAL("Failed to find sprite set with string ID: %s",
+                  stringID.c_str());
     }
 
     return *(it->second);
 }
 
-const FloorCoveringSpriteSet& SpriteDataBase::getFloorCoveringSpriteSet(const std::string& stringID) const
+const FloorCoveringSpriteSet&
+    SpriteDataBase::getFloorCoveringSpriteSet(const std::string& stringID) const
 {
     auto it{floorCoveringSpriteSetStringMap.find(stringID)};
     if (it == floorCoveringSpriteSetStringMap.end()) {
-        LOG_FATAL("Failed to find sprite set with string ID: %s", stringID.c_str());
+        LOG_FATAL("Failed to find sprite set with string ID: %s",
+                  stringID.c_str());
     }
 
     return *(it->second);
 }
 
-const WallSpriteSet& SpriteDataBase::getWallSpriteSet(const std::string& stringID) const
+const WallSpriteSet&
+    SpriteDataBase::getWallSpriteSet(const std::string& stringID) const
 {
     auto it{wallSpriteSetStringMap.find(stringID)};
     if (it == wallSpriteSetStringMap.end()) {
-        LOG_FATAL("Failed to find sprite set with string ID: %s", stringID.c_str());
+        LOG_FATAL("Failed to find sprite set with string ID: %s",
+                  stringID.c_str());
     }
 
     return *(it->second);
 }
 
-const ObjectSpriteSet& SpriteDataBase::getObjectSpriteSet(const std::string& stringID) const
+const ObjectSpriteSet&
+    SpriteDataBase::getObjectSpriteSet(const std::string& stringID) const
 {
     auto it{objectSpriteSetStringMap.find(stringID)};
     if (it == objectSpriteSetStringMap.end()) {
-        LOG_FATAL("Failed to find sprite set with string ID: %s", stringID.c_str());
+        LOG_FATAL("Failed to find sprite set with string ID: %s",
+                  stringID.c_str());
     }
 
     return *(it->second);
@@ -114,7 +122,8 @@ const WallSpriteSet& SpriteDataBase::getWallSpriteSet(Uint16 numericID) const
     return wallSpriteSets[numericID];
 }
 
-const ObjectSpriteSet& SpriteDataBase::getObjectSpriteSet(Uint16 numericID) const
+const ObjectSpriteSet&
+    SpriteDataBase::getObjectSpriteSet(Uint16 numericID) const
 {
     if (numericID >= objectSpriteSets.size()) {
         LOG_FATAL("Invalid numeric ID while getting sprite set: %d", numericID);
@@ -133,7 +142,8 @@ const std::vector<FloorSpriteSet>& SpriteDataBase::getAllFloorSpriteSets() const
     return floorSpriteSets;
 }
 
-const std::vector<FloorCoveringSpriteSet>& SpriteDataBase::getAllFloorCoveringSpriteSets() const
+const std::vector<FloorCoveringSpriteSet>&
+    SpriteDataBase::getAllFloorCoveringSpriteSets() const
 {
     return floorCoveringSpriteSets;
 }
@@ -143,7 +153,8 @@ const std::vector<WallSpriteSet>& SpriteDataBase::getAllWallSpriteSets() const
     return wallSpriteSets;
 }
 
-const std::vector<ObjectSpriteSet>& SpriteDataBase::getAllObjectSpriteSets() const
+const std::vector<ObjectSpriteSet>&
+    SpriteDataBase::getAllObjectSpriteSets() const
 {
     return objectSpriteSets;
 }
@@ -248,7 +259,8 @@ void SpriteDataBase::parseFloorSpriteSet(const nlohmann::json& spriteSetJson)
                                  sprite);
 }
 
-void SpriteDataBase::parseFloorCoveringSpriteSet(const nlohmann::json& spriteSetJson)
+void SpriteDataBase::parseFloorCoveringSpriteSet(
+    const nlohmann::json& spriteSetJson)
 {
     // Add a sprite set to the appropriate vector.
     FloorCoveringSpriteSet& spriteSet{floorCoveringSpriteSets.emplace_back()};

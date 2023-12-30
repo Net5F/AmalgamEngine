@@ -9,9 +9,9 @@ namespace AM
 namespace ResourceImporter
 {
 ParentListItem::ParentListItem(const std::string& inHeaderText,
-                         const std::string& inDebugName)
+                               const std::string& inDebugName)
 : LibraryListItem("", inDebugName)
-// Note: We use our child's text and leave our parent ListItem's blank, so 
+// Note: We use our child's text and leave our parent ListItem's blank, so
 //       that all of the text and arrows are above our highlight images.
 , childListItemContainer(inHeaderText)
 {
@@ -21,9 +21,10 @@ ParentListItem::ParentListItem(const std::string& inHeaderText,
     // Set our padding.
     childListItemContainer.setLeftPadding(32);
 
-    // Set our child container's click region to cover from the far left, to 
+    // Set our child container's click region to cover from the far left, to
     // the start of our text.
-    SDL_Rect textLogicalExtent{childListItemContainer.headerText.getLogicalExtent()};
+    SDL_Rect textLogicalExtent{
+        childListItemContainer.headerText.getLogicalExtent()};
     childListItemContainer.setClickRegionLogicalExtent(
         {0, 0, textLogicalExtent.x, textLogicalExtent.h});
 
@@ -33,9 +34,8 @@ ParentListItem::ParentListItem(const std::string& inHeaderText,
     });
 }
 
-AUI::EventResult
-    ParentListItem::onMouseDown(AUI::MouseButtonType buttonType,
-                                      const SDL_Point& cursorPosition)
+AUI::EventResult ParentListItem::onMouseDown(AUI::MouseButtonType buttonType,
+                                             const SDL_Point& cursorPosition)
 {
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
@@ -52,13 +52,14 @@ AUI::EventResult
         return AUI::EventResult{.wasHandled{true}};
     }
 
-    // Note: If our arrow was clicked, it'll be handled when this propagates 
+    // Note: If our arrow was clicked, it'll be handled when this propagates
     //       to our child collapsible container.
     return AUI::EventResult{.wasHandled{false}};
 }
 
-AUI::EventResult ParentListItem::onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                          const SDL_Point& cursorPosition)
+AUI::EventResult
+    ParentListItem::onMouseDoubleClick(AUI::MouseButtonType buttonType,
+                                       const SDL_Point& cursorPosition)
 {
     // We treat additional clicks as regular MouseDown events.
     return onMouseDown(buttonType, cursorPosition);
@@ -86,7 +87,7 @@ AUI::EventResult ParentListItem::onMouseMove(const SDL_Point& cursorPosition)
 
 void ParentListItem::onMouseEnter()
 {
-    // We handle this in onMouseMove(), but we override this to stop 
+    // We handle this in onMouseMove(), but we override this to stop
     // LibraryListItem's behavior.
 }
 

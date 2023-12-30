@@ -117,7 +117,7 @@ float BoundingBox::intersects(const Ray& ray) const
     float tMax{std::min(std::min(std::max(tX1, tX2), std::max(tY1, tY2)),
                         std::max(tZ1, tZ2))};
 
-    // If tMax is negative, the ray would have to go in the negative direction 
+    // If tMax is negative, the ray would have to go in the negative direction
     // to intersect the rect.
     // If tMin > tMax, no intersection.
     if ((tMax < 0) || (tMin > tMax)) {

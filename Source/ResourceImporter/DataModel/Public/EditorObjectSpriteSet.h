@@ -12,7 +12,7 @@ namespace ResourceImporter
 {
 /**
  * Holds the data necessary for editing and saving an object sprite set.
- * Part of SpriteSetModel. 
+ * Part of SpriteSetModel.
  */
 struct EditorObjectSpriteSet {
     /** This sprite set's unique numeric identifier.
@@ -23,8 +23,8 @@ struct EditorObjectSpriteSet {
     std::string displayName{""};
 
     /** The numeric IDs for each sprite in this set.
-        Objects support 8 directions of rotation. At least 1 sprite must be 
-        set. If a direction isn't provided, it should be set to 
+        Objects support 8 directions of rotation. At least 1 sprite must be
+        set. If a direction isn't provided, it should be set to
         EMPTY_SPRITE_ID. */
     std::array<int, Rotation::Direction::Count> spriteIDs{
         NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID,

@@ -68,7 +68,7 @@ public:
     const std::vector<Sprite>& getAllSprites() const;
 
     /**
-     * Get a reference to a vector containing all the sprite sets of a 
+     * Get a reference to a vector containing all the sprite sets of a
      * particular type.
      */
     const std::vector<FloorSpriteSet>& getAllFloorSpriteSets() const;
@@ -80,9 +80,9 @@ public:
 protected:
     /** The index of the null sprite. Will always be the last sprite in the
         vector.
-        Note: Don't get confused, the null sprite's ID is -1, but its index 
+        Note: Don't get confused, the null sprite's ID is -1, but its index
               is at the end of the vector. We do this instead of putting it at
-              index 0, because we would have to save it in ResourceData.json and 
+              index 0, because we would have to save it in ResourceData.json and
               add logic to skip it in the editor. */
     int nullSpriteIndex;
 
@@ -106,11 +106,11 @@ private:
     void parseSprite(const nlohmann::json& spriteJson);
 
     /**
-     * Parses the given sprite set json and adds the resulting sprite set to 
+     * Parses the given sprite set json and adds the resulting sprite set to
      * the appropriate vector.
      *
-     * @param spriteSetJson  The json to parse. Must be a valid sprite set 
-     *                       section from ResourceData.json, for the appropriate 
+     * @param spriteSetJson  The json to parse. Must be a valid sprite set
+     *                       section from ResourceData.json, for the appropriate
      *                       set type.
      */
     void parseFloorSpriteSet(const nlohmann::json& spriteSetJson);
@@ -121,7 +121,7 @@ private:
     /** The loaded sprites, indexed by their numeric IDs. */
     std::vector<Sprite> sprites;
 
-    /** The loaded sprite sets of each type. These are indexed by the set 
+    /** The loaded sprite sets of each type. These are indexed by the set
         type's numeric IDs. (Each sprite set type has a unique ID space.) */
     std::vector<FloorSpriteSet> floorSpriteSets;
     std::vector<FloorCoveringSpriteSet> floorCoveringSpriteSets;

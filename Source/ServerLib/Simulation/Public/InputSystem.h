@@ -20,8 +20,7 @@ class Network;
 class InputSystem
 {
 public:
-    InputSystem(Simulation& inSimulation, World& inWorld,
-                Network& inNetwork);
+    InputSystem(Simulation& inSimulation, World& inWorld, Network& inNetwork);
 
     /**
      * Processes incoming InputChangeRequest messages.

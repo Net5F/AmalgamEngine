@@ -76,7 +76,7 @@ void Simulation::tick()
         auto currentConnectionState{
             serverConnectionSystem.getConnectionState()};
 
-        // If we just lost connection, re-initialize our systems to prepare 
+        // If we just lost connection, re-initialize our systems to prepare
         // them for the next run.
         if ((previousConnectionState == ConnectionState::Connected)
             && (currentConnectionState == ConnectionState::Disconnected)) {
@@ -157,7 +157,7 @@ void Simulation::tick()
         }
 
         // Process component updates from the server.
-        // Note: We do this last because the state that we receive is the 
+        // Note: We do this last because the state that we receive is the
         //       final state for this tick.
         componentUpdateSystem->processUpdates();
 
@@ -199,8 +199,7 @@ void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
     }
 }
 
-entt::sink<entt::sigh<void()>>&
-    Simulation::getSimulationStartedSink()
+entt::sink<entt::sigh<void()>>& Simulation::getSimulationStartedSink()
 {
     return serverConnectionSystem.simulationStarted;
 }

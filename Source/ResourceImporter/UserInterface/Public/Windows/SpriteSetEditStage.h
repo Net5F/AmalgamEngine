@@ -26,7 +26,8 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteSetEditStage(DataModel& inDataModel, const LibraryWindow& inLibraryWindow);
+    SpriteSetEditStage(DataModel& inDataModel,
+                       const LibraryWindow& inLibraryWindow);
 
 private:
     /**
@@ -35,7 +36,8 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If type/ID matches active set) Sets this stage back to its default state.
+     * (If type/ID matches active set) Sets this stage back to its default
+     * state.
      */
     void onSpriteSetRemoved(SpriteSet::Type type, Uint16 spriteSetID);
 
@@ -43,7 +45,7 @@ private:
      * (If type/ID matches active set) Sets the given index to the given sprite.
      */
     void onSpriteSetSlotChanged(SpriteSet::Type type, Uint16 spriteSetID,
-                                    std::size_t index, int newSpriteID);
+                                std::size_t index, int newSpriteID);
 
     /**
      * Loads the given sprite set's data onto this stage.
@@ -68,7 +70,7 @@ private:
     void fillSlotSpriteData(SpriteSetSlot& slot, int spriteID);
 
     /**
-     * Fills the description text widgets with the appropriate strings, based 
+     * Fills the description text widgets with the appropriate strings, based
      * on the current activeSpriteSetType.
      */
     void fillDescriptionTexts();

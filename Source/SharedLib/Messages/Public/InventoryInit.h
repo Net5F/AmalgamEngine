@@ -11,7 +11,7 @@ namespace AM
 /**
  * Sent by the server when a player connects and needs their full inventory.
  *
- * Note: This is currently only used for player inventories. If we reuse it for 
+ * Note: This is currently only used for player inventories. If we reuse it for
  *       NPC inventories, we can add an entity ID field.
  */
 struct InventoryInit {
@@ -27,8 +27,8 @@ struct InventoryInit {
         /** How many of the item is in this inventory slot. */
         Uint8 count{0};
 
-        /** The item's version number. Used by the client to tell if it 
-            already has the latest definition for this item, or if it needs 
+        /** The item's version number. Used by the client to tell if it
+            already has the latest definition for this item, or if it needs
             to request it. */
         ItemVersion version{0};
     };
@@ -41,14 +41,16 @@ struct InventoryInit {
 };
 
 template<typename S>
-void serialize(S& serializer, InventoryInit::ItemSlot& itemSlot) {
+void serialize(S& serializer, InventoryInit::ItemSlot& itemSlot)
+{
     serializer.value2b(itemSlot.ID);
     serializer.value1b(itemSlot.count);
     serializer.value2b(itemSlot.version);
 }
 
 template<typename S>
-void serialize(S& serializer, InventoryInit& inventoryInit) {
+void serialize(S& serializer, InventoryInit& inventoryInit)
+{
     serializer.value1b(inventoryInit.size);
     serializer.container(inventoryInit.slots, Inventory::MAX_ITEMS);
 }

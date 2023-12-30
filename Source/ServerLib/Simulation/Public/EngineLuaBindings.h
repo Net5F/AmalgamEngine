@@ -20,8 +20,8 @@ class Network;
 
 /**
  * Holds any functionality that the engine wants to expose to Lua.
- * 
- * Note: This is a class instead of a set of free functions, because it's more 
+ *
+ * Note: This is a class instead of a set of free functions, because it's more
  *       convenient for the bound functions to have access to some state.
  */
 class EngineLuaBindings
@@ -46,7 +46,7 @@ private:
 
     // Entity init
     /**
-     * Sets the given handler to be called when the given item is used on the 
+     * Sets the given handler to be called when the given item is used on the
      * entity.
      */
     void addItemHandler(const std::string& itemID,
@@ -54,16 +54,16 @@ private:
 
     // Entity item handler
     /**
-     * Attempts to add the given item to the first available slot in the client 
+     * Attempts to add the given item to the first available slot in the client
      * entity's inventory.
-     * @return true if the item was successfully added, else false (inventory 
+     * @return true if the item was successfully added, else false (inventory
      *         was full).
      */
     bool addItem(const std::string& itemID, Uint8 count);
 
     /**
      * Attempts to remove the given item from the client entity's inventory.
-     * @return true if the item was successfully removed, else false (inventory 
+     * @return true if the item was successfully removed, else false (inventory
      *         didn't contain the item).
      */
     bool removeItem(const std::string& itemID, Uint8 count);
@@ -85,7 +85,7 @@ private:
     void addDescription(const std::string& description);
 
     /**
-     * Adds a combination with the given item, which will result in a new item 
+     * Adds a combination with the given item, which will result in a new item
      * (both inputs will be consumed).
      * @param otherItemID The item to combine with.
      * @param resultitemID The resulting item.

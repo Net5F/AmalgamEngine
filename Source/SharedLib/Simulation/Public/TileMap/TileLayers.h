@@ -10,7 +10,7 @@ namespace AM
 
 struct TileLayer {
     /** The types of layers that our tiles support. */
-    enum Type : Uint8 { 
+    enum Type : Uint8 {
         Floor,
         /** Floor coverings are things like rugs, flowers, puddles, etc. */
         FloorCovering,
@@ -22,7 +22,7 @@ struct TileLayer {
 };
 
 struct FloorTileLayer {
-    /** This floor's sprite set. Since each tile always has a stack-allocated 
+    /** This floor's sprite set. Since each tile always has a stack-allocated
         floor layer, this will be set to nullptr if this layer has no floor. */
     const FloorSpriteSet* spriteSet{nullptr};
 
@@ -31,7 +31,8 @@ struct FloorTileLayer {
     // support a randomized floor placement tool in build mode.
 
     /** Note: May be nullptr if this layer has no floor. */
-    const Sprite* getSprite() const { 
+    const Sprite* getSprite() const
+    {
         if (spriteSet == nullptr) {
             return nullptr;
         }
@@ -49,20 +50,17 @@ struct FloorCoveringTileLayer {
     Rotation::Direction direction{Rotation::Direction::None};
 
     /** Note: May be nullptr if there's no sprite for the current direction,
-              but generally you should avoid setting directions that have 
+              but generally you should avoid setting directions that have
               no sprite. */
-    const Sprite* getSprite() const
-    {
-        return spriteSet->sprites[direction];
-    }
+    const Sprite* getSprite() const { return spriteSet->sprites[direction]; }
 };
 
 struct WallTileLayer {
-    /** This wall's sprite set. Since each tile always has 2 stack-allocated 
+    /** This wall's sprite set. Since each tile always has 2 stack-allocated
         wall layers, this will be set to nullptr if this layer has no wall. */
     const WallSpriteSet* spriteSet{nullptr};
 
-    /** The type of wall that this is. This will be set to None if the tile 
+    /** The type of wall that this is. This will be set to None if the tile
         has no wall. */
     Wall::Type wallType{Wall::Type::None};
 
@@ -86,19 +84,17 @@ struct ObjectTileLayer {
     Rotation::Direction direction{Rotation::Direction::None};
 
     /** Note: May be nullptr if there's no sprite for the current direction,
-              but generally you should avoid setting directions that have 
+              but generally you should avoid setting directions that have
               no sprite. */
-    const Sprite* getSprite() const
-    {
-        return spriteSet->sprites[direction];
-    };
+    const Sprite* getSprite() const { return spriteSet->sprites[direction]; };
 };
 
 /** Concept to match the tile layer types. */
 template<typename... T>
-concept IsTileLayerType = ((std::same_as<T, FloorTileLayer>
-        || std::same_as<T, FloorCoveringTileLayer>
-        || std::same_as<T, WallTileLayer> || std::same_as<T, ObjectTileLayer>)
-        || ...);
+concept IsTileLayerType
+    = ((std::same_as<
+            T,
+            FloorTileLayer> || std::same_as<T, FloorCoveringTileLayer> || std::same_as<T, WallTileLayer> || std::same_as<T, ObjectTileLayer>)
+       || ...);
 
 } // End namespace AM

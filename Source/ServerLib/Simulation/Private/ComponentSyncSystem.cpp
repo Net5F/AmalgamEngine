@@ -53,10 +53,10 @@ ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,
             boost::mp11::mp_find<ObservedComponentTypes,
                                  ObservedComponent>::value};
 
-        // TODO: If a client is near an entity when it's constructed, it'll 
-        //       receive both an EntityInit and a ComponentUpdate (from the group
-        //       observer). It'd be nice if we could find a way to just send one,
-        //       but until then it isn't a huge cost.
+        // TODO: If a client is near an entity when it's constructed, it'll
+        //       receive both an EntityInit and a ComponentUpdate (from the
+        //       group observer). It'd be nice if we could find a way to just
+        //       send one, but until then it isn't a huge cost.
         observers[index].connect(world.registry,
                                  entt::collector.group<ObservedComponent>()
                                      .template update<ObservedComponent>());
@@ -69,7 +69,7 @@ void ComponentSyncSystem::sendUpdates()
 
     entt::registry& registry{world.registry};
 
-    // TODO: We build a message for each updated entity, even if there aren't 
+    // TODO: We build a message for each updated entity, even if there aren't
     //       any clients nearby to send it to. There may be ways to optimize by
     //       making it client-by-client like MovementSyncSystem.
     // Build an EntityUpdate for each entity that has an updated component.
@@ -79,7 +79,7 @@ void ComponentSyncSystem::sendUpdates()
             boost::mp11::mp_find<ObservedComponentTypes,
                                  ObservedComponent>::value};
 
-        // For each entity that was updated, push its components into its 
+        // For each entity that was updated, push its components into its
         // message.
         for (entt::entity entity : observers[index]) {
             if constexpr (std::is_empty_v<ObservedComponent>) {
@@ -112,7 +112,8 @@ void ComponentSyncSystem::sendUpdates()
             entitiesInRange = &(client->entitiesInAOI);
         }
         else {
-            const auto& updatedEntityPosition{view.get<Position>(updatedEntity)};
+            const auto& updatedEntityPosition{
+                view.get<Position>(updatedEntity)};
             entitiesInRange = &(world.entityLocator.getEntities(
                 {updatedEntityPosition, SharedConfig::AOI_RADIUS}));
         }

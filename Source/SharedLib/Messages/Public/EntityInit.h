@@ -15,7 +15,7 @@ namespace AM
 {
 
 /**
- * Sent by the server when an entity enters a client's area of interest. 
+ * Sent by the server when an entity enters a client's area of interest.
  *
  * Contains all entities that entered the client's AOI on a single sim tick.
  *
@@ -42,7 +42,7 @@ struct EntityInit {
         std::vector<ReplicatedComponent> components{};
     };
 
-    /** The component state of all entities that entered this client's AOI on 
+    /** The component state of all entities that entered this client's AOI on
         this tick. */
     std::vector<EntityData> entityData{};
 };

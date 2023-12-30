@@ -9,7 +9,7 @@ namespace AM
 {
 
 /**
- * Represents the interactions that an entity supports, i.e. the options that 
+ * Represents the interactions that an entity supports, i.e. the options that
  * show up when you right click them.
  *
  * Note: This component won't be present on an entity if it has no interactions.
@@ -19,14 +19,14 @@ struct Interaction {
     static constexpr std::size_t MAX_INTERACTIONS{4};
 
     /** The interactions that this entity supports.
-        Elements are filled contiguously starting at index 0. Empty elements 
+        Elements are filled contiguously starting at index 0. Empty elements
         will be at the end.
         The first interaction in this list is the default interaction.
         Note: This defaults values to EntityInteractionType::NotSet. */
     std::array<EntityInteractionType, MAX_INTERACTIONS> supportedInteractions{};
 
     /**
-     * Finds the first empty index in supportedInteractions and adds the given 
+     * Finds the first empty index in supportedInteractions and adds the given
      * interaction.
      * If supportedInteractions is full, prints a warning and does nothing.
      */

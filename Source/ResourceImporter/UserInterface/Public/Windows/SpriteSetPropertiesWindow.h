@@ -16,8 +16,8 @@ namespace ResourceImporter
 class DataModel;
 
 /**
- * The properties window shown when the user loads a sprite set from the Library.
- * Allows the user to edit the active sprite set's properties.
+ * The properties window shown when the user loads a sprite set from the
+ * Library. Allows the user to edit the active sprite set's properties.
  */
 class SpriteSetPropertiesWindow : public AUI::Window
 {
@@ -42,16 +42,17 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If type/ID matches active set) Sets this panel back to its default state.
+     * (If type/ID matches active set) Sets this panel back to its default
+     * state.
      */
     void onSpriteSetRemoved(SpriteSet::Type type, Uint16 spriteSetID);
 
     /**
-     * (If type/ID matches active set) Updates this panel with the active 
+     * (If type/ID matches active set) Updates this panel with the active
      * sprite set's new properties.
      */
     void onSpriteSetDisplayNameChanged(SpriteSet::Type type, Uint16 spriteSetID,
-                               const std::string& newDisplayName);
+                                       const std::string& newDisplayName);
 
     /**
      * Loads the given sprite set's data into this panel.

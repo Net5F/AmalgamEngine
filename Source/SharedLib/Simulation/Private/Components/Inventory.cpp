@@ -27,8 +27,7 @@ bool Inventory::addItem(ItemID itemID, Uint8 count)
 bool Inventory::removeItem(Uint8 slotIndex, Uint8 count)
 {
     // If the slot is invalid or empty, return false.
-    if (!slotIndexIsValid(slotIndex)
-        || (slots[slotIndex].count == 0)) {
+    if (!slotIndexIsValid(slotIndex) || (slots[slotIndex].count == 0)) {
         return false;
     }
 
@@ -71,8 +70,7 @@ bool Inventory::contains(ItemID itemID) const
 ItemID Inventory::getItemID(Uint8 slotIndex) const
 {
     // If the slot is invalid or empty, return null.
-    if (!slotIndexIsValid(slotIndex)
-        || (slots[slotIndex].count == 0)) {
+    if (!slotIndexIsValid(slotIndex) || (slots[slotIndex].count == 0)) {
         return NULL_ITEM_ID;
     }
 
@@ -108,15 +106,14 @@ const ItemCombination* Inventory::combineItems(Uint8 sourceSlotIndex,
                                                const ItemDataBase& itemData)
 {
     // If either slot is invalid or empty, return false.
-    if (!slotIndexIsValid(sourceSlotIndex)
-        || !slotIndexIsValid(targetSlotIndex)
+    if (!slotIndexIsValid(sourceSlotIndex) || !slotIndexIsValid(targetSlotIndex)
         || (slots[sourceSlotIndex].count == 0)
         || (slots[targetSlotIndex].count == 0)) {
         return nullptr;
     }
 
     // Get the items in the given slots.
-    // Note: We don't need to check if they exist since we do so before adding 
+    // Note: We don't need to check if they exist since we do so before adding
     //       them to the inventory.
     ItemID sourceItemID{slots[sourceSlotIndex].ID};
     ItemID targetItemID{slots[targetSlotIndex].ID};
@@ -125,8 +122,7 @@ const ItemCombination* Inventory::combineItems(Uint8 sourceSlotIndex,
 
     // Try to find a matching combination in either item's list.
     const ItemCombination* matchingCombination{nullptr};
-    for (const ItemCombination& combination :
-         sourceItem->itemCombinations) {
+    for (const ItemCombination& combination : sourceItem->itemCombinations) {
         if (combination.otherItemID == targetItemID) {
             matchingCombination = &combination;
             break;
@@ -156,11 +152,10 @@ const ItemCombination* Inventory::combineItems(Uint8 sourceSlotIndex,
 }
 
 void Inventory::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
-    ItemID resultItemID)
+                             ItemID resultItemID)
 {
     // If either slot is invalid or empty, return false.
-    if (!slotIndexIsValid(sourceSlotIndex)
-        || !slotIndexIsValid(targetSlotIndex)
+    if (!slotIndexIsValid(sourceSlotIndex) || !slotIndexIsValid(targetSlotIndex)
         || (slots[sourceSlotIndex].count == 0)
         || (slots[targetSlotIndex].count == 0)) {
         return;
@@ -194,7 +189,7 @@ Uint8 Inventory::getFilledSlotCount()
 }
 
 bool Inventory::slotIndexIsValid(Uint8 slotIndex) const
-{ 
+{
     return (slotIndex < size) && (slotIndex < slots.size());
 }
 

@@ -225,8 +225,7 @@ int ClientHandler::receiveAndProcessClientMessages(ClientMap& clientMap)
     return numReceived;
 }
 
-void ClientHandler::processReceivedMessage(Client& client,
-                                           Uint8 messageType,
+void ClientHandler::processReceivedMessage(Client& client, Uint8 messageType,
                                            std::size_t messageSize)
 {
     // Process the message.

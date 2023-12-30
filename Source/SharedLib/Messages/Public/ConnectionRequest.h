@@ -11,9 +11,10 @@ namespace AM
 struct ConnectionRequest {
     // The EngineMessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr EngineMessageType MESSAGE_TYPE{EngineMessageType::ConnectionRequest};
+    static constexpr EngineMessageType MESSAGE_TYPE{
+        EngineMessageType::ConnectionRequest};
 
-    /** Used as a "we should never hit this" cap on the size of each name 
+    /** Used as a "we should never hit this" cap on the size of each name
         string. Only checked in debug builds. */
     static constexpr std::size_t MAX_NAME_LENGTH{50};
 

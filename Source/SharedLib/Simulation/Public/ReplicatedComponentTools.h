@@ -4,9 +4,9 @@
 
 /**
  * This file contains helper functions for working with ReplicatedComponents.
- * 
- * We split these out to a separate file because ReplicatedComponents.h is 
- * often included in headers, but these are only needed in source files. 
+ *
+ * We split these out to a separate file because ReplicatedComponents.h is
+ * often included in headers, but these are only needed in source files.
  * Keeping them out of headers leads to faster compilation times.
  */
 namespace AM
@@ -19,7 +19,7 @@ public:
      */
     template<typename T>
     static Uint8 asTypeIndex()
-    { 
+    {
         constexpr std::size_t typeIndex{
             boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
         static_assert(
@@ -34,7 +34,7 @@ public:
      */
     template<typename... Ts>
     static std::vector<Uint8> asTypeIndices()
-    { 
+    {
         std::vector<Uint8> typeIndices;
 
         using Types = boost::mp11::mp_list<Ts...>;
@@ -52,7 +52,8 @@ public:
      * If at least 1 component type in Ts is not found, returns false.
      */
     template<typename... Ts>
-    static bool containsTypes(const std::vector<ReplicatedComponent>& components)
+    static bool
+        containsTypes(const std::vector<ReplicatedComponent>& components)
     {
         // Build a list of type indices for each component in the vector.
         std::vector<Uint8> receivedTypes(components.size());

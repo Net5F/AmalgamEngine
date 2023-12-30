@@ -181,8 +181,7 @@ void PlayerMovementSystem::printMismatchInfo(Uint32 lastUpdateTick)
 
     LOG_INFO("Predicted position mismatched after replay: (%.6f, "
              "%.6f) -> (%.6f, %.6f)",
-             previousPosition.x, previousPosition.y, position.x,
-             position.y);
+             previousPosition.x, previousPosition.y, position.x, position.y);
     LOG_INFO("lastUpdateTick: %u", lastUpdateTick);
 }
 

@@ -14,10 +14,10 @@ class World;
 class Network;
 
 /**
- * Processes NPC (non-player-controlled) entity update messages and moves their 
+ * Processes NPC (non-player-controlled) entity update messages and moves their
  * entities appropriately.
  *
- * Note: By "NPC", we mean any entity that isn't controlled by this client's 
+ * Note: By "NPC", we mean any entity that isn't controlled by this client's
  *       player. See IsClientEntity.h for more info.
  */
 class NpcMovementSystem
@@ -49,12 +49,12 @@ private:
     void applyUpdateMessage(const MovementUpdate& npcMovementUpdate);
 
     /**
-     * Calls registry.patch() on each updated NPC's Position component to trigger
-     * any on_update callbacks that are connected to them.
-     * We don't patch until the end, because we may update the components 
-     * multiple times before we're done.
+     * Calls registry.patch() on each updated NPC's Position component to
+     * trigger any on_update callbacks that are connected to them. We don't
+     * patch until the end, because we may update the components multiple times
+     * before we're done.
      *
-     * Note: We only update Position because it's all we need right now. If 
+     * Note: We only update Position because it's all we need right now. If
      *       the others are needed, they can be added.
      */
     void emitUpdateSignals();

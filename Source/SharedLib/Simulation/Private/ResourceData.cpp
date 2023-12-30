@@ -24,7 +24,6 @@ ResourceData::ResourceData()
     } catch (nlohmann::json::exception& e) {
         LOG_FATAL("Failed to parse ResourceData.json: %s", e.what());
     }
-
 }
 
 ResourceData::~ResourceData() = default;

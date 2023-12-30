@@ -27,7 +27,8 @@ SpriteSetSlot::SpriteSetSlot()
 
     spriteNameText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     spriteNameText.setColor({255, 255, 255, 255});
-    spriteNameText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
+    spriteNameText.setHorizontalAlignment(
+        AUI::Text::HorizontalAlignment::Center);
 
     // Set our background image.
     checkerboardImage.setTiledImage(Paths::TEXTURE_DIR

@@ -14,10 +14,10 @@ class SpriteData;
 class ISimulationExtension;
 
 /**
- * Handles change requests for any random engine components that aren't already 
+ * Handles change requests for any random engine components that aren't already
  * handled by another system.
  *
- * We do this so that the project can just send a change message, instead of 
+ * We do this so that the project can just send a change message, instead of
  * needing to roll its own system.
  */
 class ComponentChangeSystem

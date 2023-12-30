@@ -8,7 +8,7 @@ namespace AM
 {
 
 /**
- * Sent by the server to tell a client that items in their inventory were 
+ * Sent by the server to tell a client that items in their inventory were
  * combined.
  */
 struct CombineItems {
@@ -16,7 +16,7 @@ struct CombineItems {
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::CombineItems};
-  
+
     /** The inventory slot of the item that is being used. */
     Uint8 sourceSlotIndex{0};
 
@@ -26,8 +26,8 @@ struct CombineItems {
     /** The resulting item. */
     ItemID resultItemID{NULL_ITEM_ID};
 
-    /** The resulting item's version number. Used by the client to tell if it 
-        already has the latest definition for this item, or if it needs 
+    /** The resulting item's version number. Used by the client to tell if it
+        already has the latest definition for this item, or if it needs
         to request it. */
     ItemVersion resultItemVersion{0};
 };

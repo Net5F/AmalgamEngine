@@ -47,7 +47,7 @@ private:
                           const InventoryRemoveItem& inventoryRemoveItem);
 
     /**
-     * Moves the specified item to the specified slot in the requestor's 
+     * Moves the specified item to the specified slot in the requestor's
      * inventory.
      */
     void processOperation(NetworkID clientID,
@@ -61,7 +61,7 @@ private:
         Used for checking if item change requests are valid. */
     ISimulationExtension* extension;
 
-    /** Observes player Inventory component creation so we can send the initial 
+    /** Observes player Inventory component creation so we can send the initial
         inventory state to a newly-logged-on player. */
     entt::observer playerInventoryObserver;
 

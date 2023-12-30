@@ -5,10 +5,10 @@
 namespace AM
 {
 /**
- * An item's initialization script. Init scripts allow builders to customize 
- * an item by adding properties and interactions to it. 
+ * An item's initialization script. Init scripts allow builders to customize
+ * an item by adding properties and interactions to it.
  *
- * Init scripts are stored on the server. When a client wants to edit an item, 
+ * Init scripts are stored on the server. When a client wants to edit an item,
  * we send them that item's script so they don't have to start from scratch.
  * When a client sends an updated init script for an item, we:
  *   1. Reset the item to a default state.

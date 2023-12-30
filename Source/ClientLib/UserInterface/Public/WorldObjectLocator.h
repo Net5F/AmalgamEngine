@@ -14,20 +14,20 @@ namespace Client
 {
 
 /**
- * A spatial partitioning hash map that tracks where world objects (tile 
- * layers, entities) are located and the order in which they were drawn to the 
+ * A spatial partitioning hash map that tracks where world objects (tile
+ * layers, entities) are located and the order in which they were drawn to the
  * screen.
  *
- * Used by the UI to quickly find which tile layer or entity the mouse is 
+ * Used by the UI to quickly find which tile layer or entity the mouse is
  * hovering over.
  *
- * In constract to the similar EntityLocator, this class is UI-centric (for 
- * hit testing mouse events), whereas EntityLocator is sim-centric (for getting 
- * all entities at a particular location in the world, with no regard for 
- * draw order). 
+ * In constract to the similar EntityLocator, this class is UI-centric (for
+ * hit testing mouse events), whereas EntityLocator is sim-centric (for getting
+ * all entities at a particular location in the world, with no regard for
+ * draw order).
  *
- * Internally, world objects are organized into "cells", each of which has a 
- * size corresponding to a configurable cell width. This value can be tweaked 
+ * Internally, world objects are organized into "cells", each of which has a
+ * size corresponding to a configurable cell width. This value can be tweaked
  * to affect performance.
  */
 class WorldObjectLocator
@@ -43,7 +43,7 @@ public:
     /**
      * Adds the given world object to the locator.
      *
-     * The given extent will be stored. To update the object's extent in 
+     * The given extent will be stored. To update the object's extent in
      * this locator, call clear() and re-add the object.
      *
      * Note: Objects are layered according to the order that they're added
@@ -61,7 +61,7 @@ public:
 
     /**
      * Returns the top-most world object under the given screen-space point.
-     * If multiple objects are intersected, the one drawn on top will be 
+     * If multiple objects are intersected, the one drawn on top will be
      * returned.
      *
      * @param screenPoint  The point on the screen to hit test with.
@@ -83,7 +83,7 @@ public:
 
     /**
      * Sets the part of the world map that this locator covers.
-     * 
+     *
      * Typically, this will match the view extent of the player's camera.
      *
      * All tracked widgets must be fully within these bounds.
@@ -91,7 +91,7 @@ public:
     void setExtent(const TileExtent& inTileExtent);
 
     /**
-     * Sets the width of the cells in the spatial partitioning hash map and 
+     * Sets the width of the cells in the spatial partitioning hash map and
      * clears the locator's state (since it's now invalid).
      * Note: This isn't typically necessary, the default value should be fine
      *       in most cases.
@@ -100,8 +100,7 @@ public:
 
 private:
     /** A simple structure for holding tracked objects. */
-    struct WorldObject
-    {
+    struct WorldObject {
         WorldObjectID objectID{};
         BoundingBox worldBounds{};
     };
@@ -124,18 +123,18 @@ private:
     /** The width of a grid cell in world units. */
     float cellWorldWidth;
 
-    /** The part of the world map that this locator currently covers, in 
+    /** The part of the world map that this locator currently covers, in
         world units. */
     BoundingBox locatorBounds;
 
-    /** The part of the world map that this locator currently covers, with 
+    /** The part of the world map that this locator currently covers, with
         cells as the unit. */
     CellExtent locatorCellExtent;
 
     /** The camera to use for screen/world conversions. */
     Camera camera;
 
-    /** A spatial partitioning hash map, mapping cell positions -> vectors 
+    /** A spatial partitioning hash map, mapping cell positions -> vectors
         containing the world objects that currently intersect with that cell. */
     std::unordered_map<CellPosition, std::vector<WorldObject>> objectMap;
 };

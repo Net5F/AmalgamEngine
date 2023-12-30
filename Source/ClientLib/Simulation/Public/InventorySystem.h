@@ -41,7 +41,7 @@ private:
     void processOperation(const InventoryRemoveItem& inventoryRemoveItem);
 
     /**
-     * Moves the specified item to the specified slot in the player's 
+     * Moves the specified item to the specified slot in the player's
      * inventory.
      */
     void processOperation(const InventoryMoveItem& inventoryMoveItem);

@@ -221,7 +221,8 @@ void Application::registerUserInterfaceExtension()
                                        userInterface.getEventDispatcher(),
                                        network,
                                        sdlRenderer.Get(),
-                                       spriteData, iconData};
+                                       spriteData,
+                                       iconData};
 
     userInterface.setExtension(std::make_unique<T>(uiDeps));
 }

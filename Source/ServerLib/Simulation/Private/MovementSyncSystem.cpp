@@ -65,7 +65,7 @@ void MovementSyncSystem::collectEntitiesToSend(ClientSimData& client)
     // Clear the vector.
     entitiesToSend.clear();
 
-    // Fill entitiesToSend with all of the entities that are both updated and 
+    // Fill entitiesToSend with all of the entities that are both updated and
     // in this client's AOI.
     std::set_intersection(updatedEntities.begin(), updatedEntities.end(),
                           client.entitiesInAOI.begin(),

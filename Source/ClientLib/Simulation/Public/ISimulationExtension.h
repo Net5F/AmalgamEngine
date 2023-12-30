@@ -25,7 +25,7 @@ public:
     /**
      * Initializes or re-initializes our simulation systems.
      *
-     * Used to put the systems in a consistent state, so they don't need to 
+     * Used to put the systems in a consistent state, so they don't need to
      * account for disconnects/reconnects.
      */
     virtual void initializeSystems() = 0;

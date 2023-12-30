@@ -93,7 +93,8 @@ void Tile::rebuildCollision(int tileX, int tileY)
     }
 }
 
-BoundingBox Tile::calcWorldBoundsForSprite(int tileX, int tileY, const Sprite* sprite)
+BoundingBox Tile::calcWorldBoundsForSprite(int tileX, int tileY,
+                                           const Sprite* sprite)
 {
     Position tilePosition{
         static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),

@@ -45,13 +45,13 @@ public:
         Used in the simulation to tell if data is relevant to a client. */
     static constexpr float AOI_RADIUS{TILE_WORLD_WIDTH * 8};
 
-    /** How close you need to be to an entity, in world units, to interact 
+    /** How close you need to be to an entity, in world units, to interact
         with it. */
     static constexpr float INTERACTION_DISTANCE{TILE_WORLD_WIDTH * 1};
     static constexpr float SQUARED_INTERACTION_DISTANCE{INTERACTION_DISTANCE
                                                         * INTERACTION_DISTANCE};
 
-    // TODO: We currently use an object sprite set for characters. When we 
+    // TODO: We currently use an object sprite set for characters. When we
     //       add character sprite sets, update this.
     /** The string ID of the default sprite set for character entities.
         This is the sprite set that players and NPCs get assigned before the

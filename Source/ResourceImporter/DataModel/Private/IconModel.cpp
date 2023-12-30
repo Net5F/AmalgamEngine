@@ -28,7 +28,7 @@ IconModel::IconModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer)
 , iconRemoved{iconRemovedSig}
 , iconDisplayNameChanged{iconDisplayNameChangedSig}
 {
-    // Reserve the null icon's ID (the engine provides it in code, so we don't 
+    // Reserve the null icon's ID (the engine provides it in code, so we don't
     // need it in the json).
     iconIDPool.reserveID(NULL_ICON_ID);
 }
@@ -68,16 +68,14 @@ void IconModel::save(nlohmann::json& json)
         for (std::size_t j = 0; j < iconSheet.iconIDs.size(); ++j) {
             // Add the display name.
             EditorIcon& icon{iconMap[iconSheet.iconIDs[j]]};
-            json["iconSheets"][i]["icons"][j]["displayName"]
-                = icon.displayName;
+            json["iconSheets"][i]["icons"][j]["displayName"] = icon.displayName;
 
             // Derive the string ID from the display name and add it.
             json["iconSheets"][i]["icons"][j]["stringID"]
                 = DataModel::deriveStringID(icon.displayName);
 
             // Add the numeric ID.
-            json["iconSheets"][i]["icons"][j]["numericID"]
-                = icon.numericID;
+            json["iconSheets"][i]["icons"][j]["numericID"] = icon.numericID;
 
             // Add the icon sheet texture extent.
             json["iconSheets"][i]["icons"][j]["textureExtent"]["x"]
@@ -138,8 +136,7 @@ bool IconModel::addIconSheet(const std::string& relPath,
         iconWidthI = std::stoi(iconWidth);
         iconHeightI = std::stoi(iconHeight);
     } catch (std::exception&) {
-        errorString
-            = "Error: Width or height is not a valid integer.";
+        errorString = "Error: Width or height is not a valid integer.";
         return false;
     }
 
@@ -272,8 +269,7 @@ bool IconModel::parseIconSheet(const nlohmann::json& sheetJson)
     EditorIconSheet& iconSheet{iconSheetMap[sheetID]};
 
     // Add this sheet's relative path.
-    iconSheet.relPath
-        = sheetJson.at("relPath").get<std::string>();
+    iconSheet.relPath = sheetJson.at("relPath").get<std::string>();
     if (!(dataModel.validateRelPath(iconSheet.relPath))) {
         return false;
     }
@@ -292,20 +288,18 @@ bool IconModel::parseIconSheet(const nlohmann::json& sheetJson)
 }
 
 bool IconModel::parseIcon(const nlohmann::json& iconJson,
-                     EditorIconSheet& iconSheet)
+                          EditorIconSheet& iconSheet)
 {
     // Mark the icon's ID as reserved so it doesn't get reused.
     IconID iconID{iconJson.at("numericID").get<IconID>()};
     iconIDPool.markIDAsReserved(iconID);
 
-    iconMap.emplace(iconID,
-                      EditorIcon{iconID, iconSheet.relPath});
+    iconMap.emplace(iconID, EditorIcon{iconID, iconSheet.relPath});
     iconSheet.iconIDs.push_back(iconID);
     EditorIcon& icon{iconMap[iconID]};
 
     // If the display name isn't unique, fail.
-    std::string displayName{
-        iconJson.at("displayName").get<std::string>()};
+    std::string displayName{iconJson.at("displayName").get<std::string>()};
     if (!iconNameIsUnique(iconID, displayName)) {
         errorString = "Icon display name isn't unique: ";
         errorString += icon.displayName.c_str();

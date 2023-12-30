@@ -15,7 +15,8 @@ namespace AM
 struct InputChangeRequest {
     // The enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
-    static constexpr EngineMessageType MESSAGE_TYPE{EngineMessageType::InputChangeRequest};
+    static constexpr EngineMessageType MESSAGE_TYPE{
+        EngineMessageType::InputChangeRequest};
 
     //--------------------------------------------------------------------------
     // Networked data

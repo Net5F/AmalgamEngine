@@ -58,7 +58,8 @@ SpriteSetPropertiesWindow::SpriteSetPropertiesWindow(DataModel& inDataModel)
     dataModel.spriteSetModel.spriteSetRemoved
         .connect<&SpriteSetPropertiesWindow::onSpriteSetRemoved>(*this);
     dataModel.spriteSetModel.spriteSetDisplayNameChanged
-        .connect<&SpriteSetPropertiesWindow::onSpriteSetDisplayNameChanged>(*this);
+        .connect<&SpriteSetPropertiesWindow::onSpriteSetDisplayNameChanged>(
+            *this);
 }
 
 void SpriteSetPropertiesWindow::onActiveLibraryItemChanged(
@@ -91,7 +92,7 @@ void SpriteSetPropertiesWindow::onActiveLibraryItemChanged(
 }
 
 void SpriteSetPropertiesWindow::onSpriteSetRemoved(SpriteSet::Type type,
-                                               Uint16 spriteSetID)
+                                                   Uint16 spriteSetID)
 {
     if ((type == activeSpriteSetType) && (spriteSetID == activeSpriteSetID)) {
         activeSpriteSetType = SpriteSet::Type::None;
@@ -134,7 +135,7 @@ void SpriteSetPropertiesWindow::loadActiveSpriteSet(
         }
     }
 
-    // Update all of our property fields to match the new active sprite set's 
+    // Update all of our property fields to match the new active sprite set's
     // data.
     nameInput.setText(newActiveSpriteSet.displayName);
 }

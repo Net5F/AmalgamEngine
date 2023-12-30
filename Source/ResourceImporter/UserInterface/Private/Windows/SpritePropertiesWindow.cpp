@@ -96,7 +96,7 @@ SpritePropertiesWindow::SpritePropertiesWindow(DataModel& inDataModel)
     collisionEnabledInput.uncheckedImage.setSimpleImage(
         Paths::TEXTURE_DIR + "Checkbox/Unchecked.png");
     collisionEnabledInput.checkedImage.setSimpleImage(Paths::TEXTURE_DIR
-                                                    + "Checkbox/Checked.png");
+                                                      + "Checkbox/Checked.png");
     collisionEnabledInput.setOnChecked([this]() { saveCollisionEnabled(); });
     collisionEnabledInput.setOnUnchecked([this]() { saveCollisionEnabled(); });
 
@@ -161,7 +161,8 @@ SpritePropertiesWindow::SpritePropertiesWindow(DataModel& inDataModel)
     spriteModel.spriteDisplayNameChanged
         .connect<&SpritePropertiesWindow::onSpriteDisplayNameChanged>(*this);
     spriteModel.spriteCollisionEnabledChanged
-        .connect<&SpritePropertiesWindow::onSpriteCollisionEnabledChanged>(*this);
+        .connect<&SpritePropertiesWindow::onSpriteCollisionEnabledChanged>(
+            *this);
     spriteModel.spriteModelBoundsChanged
         .connect<&SpritePropertiesWindow::onSpriteModelBoundsChanged>(*this);
     spriteModel.spriteRemoved.connect<&SpritePropertiesWindow::onSpriteRemoved>(
@@ -221,8 +222,8 @@ void SpritePropertiesWindow::onSpriteDisplayNameChanged(
     }
 }
 
-void SpritePropertiesWindow::onSpriteCollisionEnabledChanged(int spriteID,
-                                                      bool newCollisionEnabled)
+void SpritePropertiesWindow::onSpriteCollisionEnabledChanged(
+    int spriteID, bool newCollisionEnabled)
 {
     if (spriteID == activeSpriteID) {
         if (newCollisionEnabled) {

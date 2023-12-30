@@ -16,21 +16,22 @@ class Network;
 
 /**
  * Static functions for manipulating inventories.
- * 
- * When inventories are manipulated, the clients that own them need to be 
- * updated. Normally we would observe inventory changes and auto-replicate the 
+ *
+ * When inventories are manipulated, the clients that own them need to be
+ * updated. Normally we would observe inventory changes and auto-replicate the
  * whole component, but doing so with a large inventory would be inefficient.
- * Instead, we use these functions to both update the inventory and send the 
+ * Instead, we use these functions to both update the inventory and send the
  * necessary client updates.
  */
-class InventoryHelpers {
+class InventoryHelpers
+{
 public:
     /**
-     * Adds the given item to the first available slot in the given entity's 
+     * Adds the given item to the first available slot in the given entity's
      * inventory.
      *
-     * @param requesterID The client that requested an item be added, if there 
-     *                    was one. If non-null, error messages will be sent on 
+     * @param requesterID The client that requested an item be added, if there
+     *                    was one. If non-null, error messages will be sent on
      *                    failure.
      * @return true if successful, else false.
      */
@@ -41,8 +42,9 @@ public:
     /**
      * Overload for string IDs.
      */
-    static bool addItem(const std::string& itemID, Uint8 count, entt::entity entityToAddTo,
-                        World& world, Network& network,
+    static bool addItem(const std::string& itemID, Uint8 count,
+                        entt::entity entityToAddTo, World& world,
+                        Network& network,
                         std::optional<NetworkID> requesterID = std::nullopt);
 
     /**

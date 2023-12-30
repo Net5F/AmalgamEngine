@@ -15,7 +15,7 @@ namespace AM
  * Init scripts are only requested by clients for use in build mode. Only the
  * server actually runs the scripts.
  *
- * Note: This is named "Response" to differentiate it from the ItemInitScript 
+ * Note: This is named "Response" to differentiate it from the ItemInitScript
  *       class. Normally we don't append "Response" to message names.
  */
 struct ItemInitScriptResponse {

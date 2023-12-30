@@ -52,7 +52,7 @@ private:
     void load(TileMapSnapshot& mapSnapshot);
 
     /**
-     * Adds the sprite layers from the given tile to the given tile snapshot 
+     * Adds the sprite layers from the given tile to the given tile snapshot
      * and the given chunk snapshot's palette.
      */
     void addTileLayersToSnapshot(const Tile& tile, TileSnapshot& tileSnapshot,

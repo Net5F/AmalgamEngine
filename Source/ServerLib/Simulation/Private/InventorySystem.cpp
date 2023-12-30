@@ -27,7 +27,7 @@ InventorySystem::InventorySystem(World& inWorld, Network& inNetwork)
 
 void InventorySystem::sendInventoryInits()
 {
-    // If a player Inventory was constructed, send the initial state to that 
+    // If a player Inventory was constructed, send the initial state to that
     // player.
     for (entt::entity entity : playerInventoryObserver) {
         auto [client, inventory]

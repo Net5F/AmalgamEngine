@@ -20,9 +20,9 @@ namespace AM
 namespace Client
 {
 WorldSpriteSorter::WorldSpriteSorter(entt::registry& inRegistry,
-                                         const TileMap& inTileMap,
-                                         const SpriteData& inSpriteData,
-                                         const UserInterface& inUI)
+                                     const TileMap& inTileMap,
+                                     const SpriteData& inSpriteData,
+                                     const UserInterface& inUI)
 : registry(inRegistry)
 , tileMap{inTileMap}
 , spriteData{inSpriteData}
@@ -89,9 +89,9 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
             pushFloorSprite(tile, camera, x, y);
             pushFloorCoveringSprites(tile, camera, x, y);
 
-            // TODO: We temporarily are pushing objects before walls to fix 
-            //       NW gap fills rendering in front of overlapping objects. 
-            //       We should instead find a way to make objects and phantoms 
+            // TODO: We temporarily are pushing objects before walls to fix
+            //       NW gap fills rendering in front of overlapping objects.
+            //       We should instead find a way to make objects and phantoms
             //       consistently render in front of walls.
             pushObjectSprites(tile, camera, x, y);
             pushWallSprites(tile, camera, x, y);
@@ -107,7 +107,7 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
         }
     }
 
-    // Add all of the floors, then all of the floor coverings to the sorted 
+    // Add all of the floors, then all of the floor coverings to the sorted
     // sprites vector so they're in the correct rendering order.
     // Note: The other sprites haven't been sorted yet, so the vector is empty.
     sortedSprites.insert(sortedSprites.end(),
@@ -120,7 +120,8 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
     floorCoveringSprites.clear();
 }
 
-void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera, double alpha)
+void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
+                                               double alpha)
 {
     // Gather all entities that have a position and sprite.
     auto view = registry.view<Position, Sprite>();
@@ -141,18 +142,17 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera, double alph
     // Gather all of the UI's phantom entity sprites.
     for (const PhantomSpriteInfo& info : phantomSprites) {
         if (info.layerType == TileLayer::Type::None) {
-            pushEntitySprite(entt::null, info.position, *(info.sprite),
-                             camera);
+            pushEntitySprite(entt::null, info.position, *(info.sprite), camera);
         }
     }
 }
 
-void WorldSpriteSorter::pushFloorSprite(const Tile& tile,
-                                         const Camera& camera, int x, int y)
+void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
+                                        int x, int y)
 {
     const FloorTileLayer& floor{tile.getFloor()};
     const Sprite* floorSprite{floor.getSprite()};
-    if (floorSprite != nullptr) { 
+    if (floorSprite != nullptr) {
         // If the UI wants this sprite replaced with a phantom, replace it.
         auto phantomSpriteInfo = std::find_if(
             phantomSprites.begin(), phantomSprites.end(),
@@ -173,19 +173,21 @@ void WorldSpriteSorter::pushFloorSprite(const Tile& tile,
 }
 
 void WorldSpriteSorter::pushFloorCoveringSprites(const Tile& tile,
-                                          const Camera& camera, int x, int y)
+                                                 const Camera& camera, int x,
+                                                 int y)
 {
     const auto& floorCoverings{tile.getFloorCoverings()};
     for (const FloorCoveringTileLayer& floorCovering : floorCoverings) {
         pushTileSprite(*(floorCovering.getSprite()), camera,
                        {x, y, TileLayer::Type::FloorCovering,
                         floorCovering.spriteSet->numericID,
-                        floorCovering.direction}, false);
+                        floorCovering.direction},
+                       false);
     }
 }
 
-void WorldSpriteSorter::pushWallSprites(const Tile& tile,
-                                        const Camera& camera, int x, int y)
+void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
+                                        int x, int y)
 {
     const std::array<WallTileLayer, 2>& walls{tile.getWalls()};
     for (const WallTileLayer& wall : walls) {
@@ -223,7 +225,8 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile,
 
             pushTileSprite(*wallSprite, camera,
                            {x, y, TileLayer::Type::Wall,
-                            wall.spriteSet->numericID, wall.wallType}, false);
+                            wall.spriteSet->numericID, wall.wallType},
+                           false);
         }
     }
 }
@@ -235,7 +238,8 @@ void WorldSpriteSorter::pushObjectSprites(const Tile& tile,
     for (const ObjectTileLayer& object : objects) {
         pushTileSprite(*(object.getSprite()), camera,
                        {x, y, TileLayer::Type::Object,
-                        object.spriteSet->numericID, object.direction}, false);
+                        object.spriteSet->numericID, object.direction},
+                       false);
     }
 }
 
@@ -258,8 +262,8 @@ void WorldSpriteSorter::pushTileSprite(const Sprite& sprite,
     // If the UI wants a color mod on this sprite, use it.
     SDL_Color colorMod{getColorMod<TileLayerID>(layerID)};
 
-    // If this sprite comes from an existing tile layer or is a phantom that 
-    // replaces an existing sprite, set the layer's ID. Otherwise, leave it 
+    // If this sprite comes from an existing tile layer or is a phantom that
+    // replaces an existing sprite, set the layer's ID. Otherwise, leave it
     // as std::monostate to show that this is a full phantom.
     WorldObjectID worldObjectID{};
     if (!isFullPhantom) {
@@ -317,7 +321,7 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
         // If the UI wants a color mod on this sprite, use it.
         SDL_Color colorMod{getColorMod<entt::entity>(entity)};
 
-        // If this sprite comes from a phantom, leave the owner ID as 
+        // If this sprite comes from a phantom, leave the owner ID as
         // std::monostate.
         WorldObjectID ownerID{};
         if (entity != entt::null) {
@@ -368,8 +372,7 @@ void WorldSpriteSorter::calcDepthDependencies()
     }
 }
 
-void WorldSpriteSorter::visitSprite(SpriteSortInfo& spriteInfo,
-                                      int& depthValue)
+void WorldSpriteSorter::visitSprite(SpriteSortInfo& spriteInfo, int& depthValue)
 {
     if (!(spriteInfo.visited)) {
         spriteInfo.visited = true;

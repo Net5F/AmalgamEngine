@@ -75,8 +75,7 @@ void ServerConnectionSystem::processConnectionEvents()
 
         // If we've timed out, send a failure signal.
         if (connectionAttemptTimer.getTime() >= CONNECTION_RESPONSE_WAIT_S) {
-            serverConnectionErrorSig.publish(
-                {ConnectionError::Type::Failed});
+            serverConnectionErrorSig.publish({ConnectionError::Type::Failed});
             connectionState = ConnectionState::Disconnected;
         }
     }
@@ -132,7 +131,7 @@ void ServerConnectionSystem::initMockSimState()
     world.playerEntity = newEntity;
 
     // Set up the player's sim components.
-    // Note: Be careful with holding onto references here. If components 
+    // Note: Be careful with holding onto references here. If components
     //       are added to the same group, the ref will be invalidated.
     registry.emplace<IsClientEntity>(newEntity);
     registry.emplace<Name>(newEntity,
@@ -146,7 +145,8 @@ void ServerConnectionSystem::initMockSimState()
     registry.emplace<InputHistory>(newEntity);
 
     // TODO: When we add character sprite sets, update this.
-    Uint16 spriteSetID{spriteData
+    Uint16 spriteSetID{
+        spriteData
             .getObjectSpriteSet(SharedConfig::DEFAULT_CHARACTER_SPRITE_SET)
             .numericID};
     const auto& animationState{registry.emplace<AnimationState>(
@@ -176,7 +176,7 @@ void ServerConnectionSystem::clearSimState()
     world.playerEntity = entt::null;
     world.tileMap.clear();
 
-    // The current tick needs to be set back to 0 so the Network knows to stop 
+    // The current tick needs to be set back to 0 so the Network knows to stop
     // sending heartbeats.
     currentTick = 0;
 }

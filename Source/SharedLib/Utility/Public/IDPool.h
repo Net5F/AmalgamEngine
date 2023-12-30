@@ -12,11 +12,11 @@ namespace AM
  *       client connects and is given ID 0, there may be old messages in the
  *       queues that refer to ID 0 that will be incorrectly applied to the new
  *       client).
- *       The current solution is to reserve more IDs than we need and always 
- *       march forward, so that we don't immediately re-use the same ID. 
- *       An alternative solution is to make the top ~n bits of our ID a 
- *       "version", which gets incremented when the ID is freed. This is 
- *       effectively the same as having extra IDs, though. The only reason to 
+ *       The current solution is to reserve more IDs than we need and always
+ *       march forward, so that we don't immediately re-use the same ID.
+ *       An alternative solution is to make the top ~n bits of our ID a
+ *       "version", which gets incremented when the ID is freed. This is
+ *       effectively the same as having extra IDs, though. The only reason to
  *       switch would be if we didn't want a static, pre-allocated pool size.
  */
 class IDPool

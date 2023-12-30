@@ -11,7 +11,7 @@ namespace AM
 namespace ResourceImporter
 {
 SpriteSetEditStage::SpriteSetEditStage(DataModel& inDataModel,
-                               const LibraryWindow& inLibraryWindow)
+                                       const LibraryWindow& inLibraryWindow)
 : AUI::Window({320, 58, 1297, 1022}, "SpriteSetEditStage")
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
@@ -98,7 +98,8 @@ void SpriteSetEditStage::onActiveLibraryItemChanged(
     }
 }
 
-void SpriteSetEditStage::onSpriteSetRemoved(SpriteSet::Type type, Uint16 spriteSetID)
+void SpriteSetEditStage::onSpriteSetRemoved(SpriteSet::Type type,
+                                            Uint16 spriteSetID)
 {
     if ((type == activeSpriteSetType) && (spriteSetID == activeSpriteSetID)) {
         activeSpriteSetType = SpriteSet::Type::None;
@@ -108,8 +109,9 @@ void SpriteSetEditStage::onSpriteSetRemoved(SpriteSet::Type type, Uint16 spriteS
 }
 
 void SpriteSetEditStage::onSpriteSetSlotChanged(SpriteSet::Type type,
-                                            Uint16 spriteSetID,
-                                            std::size_t index, int newSpriteID)
+                                                Uint16 spriteSetID,
+                                                std::size_t index,
+                                                int newSpriteID)
 {
     // If the changed data doesn't affect us, return early.
     if ((type != activeSpriteSetType) || (spriteSetID != activeSpriteSetID)) {
@@ -126,7 +128,7 @@ void SpriteSetEditStage::onSpriteSetSlotChanged(SpriteSet::Type type,
 
 template<typename T>
 void SpriteSetEditStage::loadActiveSpriteSet(SpriteSet::Type spriteSetType,
-                                         const T& newActiveSpriteSet)
+                                             const T& newActiveSpriteSet)
 {
     activeSpriteSetType = spriteSetType;
     activeSpriteSetID = newActiveSpriteSet.numericID;
@@ -169,7 +171,7 @@ void SpriteSetEditStage::loadActiveSpriteSet(SpriteSet::Type spriteSetType,
 
         spriteContainer.push_back(std::move(slotPtr));
     }
-    
+
     // Move and resize the container for the new type.
     if (activeSpriteSetType == SpriteSet::Type::Floor) {
         spriteContainer.setLogicalExtent({559, 180, 180, 255});

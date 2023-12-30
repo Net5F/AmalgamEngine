@@ -89,12 +89,12 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         }
         case EngineMessageType::InventoryInit: {
             dispatchMessage<InventoryInit>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+                                           networkEventDispatcher);
             break;
         }
         case EngineMessageType::ItemError: {
             dispatchMessage<ItemError>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+                                       networkEventDispatcher);
             break;
         }
         case EngineMessageType::ItemUpdate: {
@@ -103,8 +103,8 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
             break;
         }
         case EngineMessageType::ItemInitScriptResponse: {
-            dispatchMessage<ItemInitScriptResponse>(
-                messageBuffer, messageSize, networkEventDispatcher);
+            dispatchMessage<ItemInitScriptResponse>(messageBuffer, messageSize,
+                                                    networkEventDispatcher);
             break;
         }
         case EngineMessageType::CombineItems: {
@@ -114,22 +114,22 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         }
         case EngineMessageType::TileAddLayer: {
             dispatchMessage<TileAddLayer>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+                                          networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileRemoveLayer: {
             dispatchMessage<TileRemoveLayer>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+                                             networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileClearLayers: {
             dispatchMessage<TileClearLayers>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+                                             networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileExtentClearLayers: {
             dispatchMessage<TileExtentClearLayers>(messageBuffer, messageSize,
-                                        networkEventDispatcher);
+                                                   networkEventDispatcher);
             break;
         }
         case EngineMessageType::InventoryOperation: {
@@ -189,7 +189,8 @@ void MessageProcessor::handleConnectionResponse(Uint8* messageBuffer,
     networkEventDispatcher.push<ConnectionResponse>(connectionResponse);
 }
 
-void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer, std::size_t messageSize)
+void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer,
+                                            std::size_t messageSize)
 {
     // Deserialize the message.
     std::shared_ptr<MovementUpdate> movementUpdate{
@@ -204,7 +205,8 @@ void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer, std::size_t me
               "Received ticks out of order. last: %u, new: %u",
               lastReceivedTick.load(), movementUpdate->tickNum);
 
-    // If the player entity is present, process it and erase it from the message.
+    // If the player entity is present, process it and erase it from the
+    // message.
     std::vector<MovementState>& movementStates{movementUpdate->movementStates};
     for (auto it = movementStates.begin(); it != movementStates.end(); ++it) {
         MovementState& movementState{*it};
@@ -227,7 +229,7 @@ void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer, std::size_t me
 }
 
 void MessageProcessor::handleComponentUpdate(Uint8* messageBuffer,
-                                            std::size_t messageSize)
+                                             std::size_t messageSize)
 {
     // Deserialize the message.
     ComponentUpdate componentUpdate{};

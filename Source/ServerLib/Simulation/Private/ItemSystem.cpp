@@ -68,11 +68,11 @@ void ItemSystem::processItemUpdates()
         handleChangeRequest(itemChangeRequest);
     }
 
-    // If any items definitions were changed, send the new definitions to all 
+    // If any items definitions were changed, send the new definitions to all
     // players that own that item.
     const auto& updatedItems{world.itemData.getItemUpdateHistory()};
     if (updatedItems.size() > 0) {
-        // If any player's inventory contains an updated item, send the new 
+        // If any player's inventory contains an updated item, send the new
         // definition.
         auto view{world.registry.view<ClientSimData, Inventory>()};
         for (auto [entity, client, inventory] : view.each()) {
@@ -108,8 +108,8 @@ void ItemSystem::setExtension(ISimulationExtension* inExtension)
 void ItemSystem::examineItem(const Item* item, NetworkID clientID)
 {
     // If the item in the given slot has a description, send it.
-    if (const ItemDescription* 
-            itemDescription{item->getProperty<ItemDescription>()}) {
+    if (const ItemDescription*
+          itemDescription{item->getProperty<ItemDescription>()}) {
         network.serializeAndSend(clientID,
                                  SystemMessage{itemDescription->text});
     }
@@ -212,8 +212,7 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 
     // Send the requester the new item's definition.
     network.serializeAndSend(itemInitRequest.netID,
-                             ItemUpdate{newItem->displayName,
-                                        newItem->stringID,
+                             ItemUpdate{newItem->displayName, newItem->stringID,
                                         newItem->numericID, newItem->iconID,
                                         newItem->supportedInteractions});
 }
@@ -228,7 +227,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
         errorType = ItemError::NumericIDNotFound;
     }
     // Check that the string ID isn't taken by another item.
-    else if (const Item* item{world.itemData.getItem(stringID)};
+    else if (const Item * item{world.itemData.getItem(stringID)};
              item && (item->numericID != itemChangeRequest.itemID)) {
         errorType = ItemError::StringIDInUse;
     }
@@ -260,8 +259,8 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
     AM_ASSERT(updatedItem != nullptr, "Failed to update item.");
 
     // Send the requester the updated item's definition.
-    if (const Item* updatedItem{world.itemData.updateItem(item)}) {
-        // Note: If the requester owns the item, we'll end up double-sending 
+    if (updatedItem) {
+        // Note: If the requester owns the item, we'll end up double-sending
         //       them this update, which isn't a big deal.
         network.serializeAndSend(
             itemChangeRequest.netID,
@@ -277,7 +276,7 @@ void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
     bool itemWasFound{false};
     std::visit(
         [&](auto& itemID) {
-            if (const Item* item{world.itemData.getItem(itemID)}) {
+            if (const Item * item{world.itemData.getItem(itemID)}) {
                 itemWasFound = true;
                 network.serializeAndSend(
                     itemDataRequest.netID,
@@ -303,9 +302,9 @@ void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
                 }
             },
             itemDataRequest.itemID);
-        network.serializeAndSend(itemDataRequest.netID,
-                                 ItemError{"", stringID, numericID,
-                                           ItemError::StringIDNotFound});
+        network.serializeAndSend(
+            itemDataRequest.netID,
+            ItemError{"", stringID, numericID, ItemError::StringIDNotFound});
     }
 }
 
@@ -315,7 +314,7 @@ bool ItemSystem::runItemInitScript(NetworkID clientID,
     // Run the given init script.
     std::string resultString{world.runItemInitScript(item, initScript)};
 
-    // If there was an error while running the script, tell the user and return 
+    // If there was an error while running the script, tell the user and return
     // false.
     if (!(resultString.empty())) {
         network.serializeAndSend(clientID,
@@ -339,7 +338,7 @@ void ItemSystem::runEntityItemHandlerScript(
     auto result{entityItemHandlerLua.script(itemHandlerScript.script,
                                             &sol::script_pass_on_error)};
 
-    // If there was an error while running the handler script, tell the 
+    // If there was an error while running the handler script, tell the
     // user.
     if (!(result.valid())) {
         sol::error err = result;

@@ -11,7 +11,8 @@ class World;
 /**
  * Base class for entity AI logic.
  */
-class AILogic {
+class AILogic
+{
 public:
     /**
      * @param inEntity The entity that this AI is controlling.
@@ -21,7 +22,7 @@ public:
     /**
      * Processes one iteration of AI logic.
      *
-     * If the given entity doesn't possess any of the necessary components, 
+     * If the given entity doesn't possess any of the necessary components,
      * prints a warning and returns early.
      */
     virtual void tick() = 0;

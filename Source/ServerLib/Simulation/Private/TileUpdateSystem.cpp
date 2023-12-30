@@ -14,10 +14,9 @@ namespace AM
 namespace Server
 {
 /** Returns the extent that's in range of a given tile update.
-    Note: This matches ChunkUpdateSystem's behavior, which includes all 
+    Note: This matches ChunkUpdateSystem's behavior, which includes all
           directly surrounding chunks. */
-struct InRangeExtentGetter
-{
+struct InRangeExtentGetter {
     TileMap& tileMap;
 
     ChunkExtent operator()(const TileExtentClearLayers& tileUpdate)
@@ -44,8 +43,7 @@ struct InRangeExtentGetter
 };
 
 /** Sends the given tile update to the currently set client netID. */
-struct UpdateSender
-{
+struct UpdateSender {
     Network& network;
     NetworkID netID{};
 
@@ -130,7 +128,8 @@ void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
 {
     // If the project says the tile isn't editable, skip this request.
     if ((extension != nullptr)
-        && !(extension->isTileExtentEditable(addLayerRequest.netID,
+        && !(extension->isTileExtentEditable(
+            addLayerRequest.netID,
             {addLayerRequest.tileX, addLayerRequest.tileY, 1, 1}))) {
         return;
     }
@@ -163,7 +162,8 @@ void TileUpdateSystem::remTileLayer(const TileRemoveLayer& remLayerRequest)
 {
     // If the project says the tile isn't editable, skip this request.
     if ((extension != nullptr)
-        && !(extension->isTileExtentEditable(remLayerRequest.netID,
+        && !(extension->isTileExtentEditable(
+            remLayerRequest.netID,
             {remLayerRequest.tileX, remLayerRequest.tileY, 1, 1}))) {
         return;
     }
@@ -190,11 +190,13 @@ void TileUpdateSystem::remTileLayer(const TileRemoveLayer& remLayerRequest)
     }
 }
 
-void TileUpdateSystem::clearTileLayers(const TileClearLayers& clearLayersRequest)
+void TileUpdateSystem::clearTileLayers(
+    const TileClearLayers& clearLayersRequest)
 {
     // If the project says the tile isn't editable, skip this request.
     if ((extension != nullptr)
-        && !(extension->isTileExtentEditable(clearLayersRequest.netID,
+        && !(extension->isTileExtentEditable(
+            clearLayersRequest.netID,
             {clearLayersRequest.tileX, clearLayersRequest.tileY, 1, 1}))) {
         return;
     }

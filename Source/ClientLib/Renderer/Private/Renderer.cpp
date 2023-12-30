@@ -145,16 +145,17 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
         SDL_RenderCopy(sdlRenderer, renderData.texture.get(),
                        &(renderData.textureExtent), &(spriteInfo.screenExtent));
 
-        // If the UI gave us a color mod to apply, render an additional sprite 
+        // If the UI gave us a color mod to apply, render an additional sprite
         // with an additive blend mode and apply the color to that.
         if (colorMod.r > 0 || colorMod.g > 0 || colorMod.b > 0) {
-            SDL_SetTextureColorMod(renderData.texture.get(), colorMod.r, colorMod.g,
-                                   colorMod.b);
+            SDL_SetTextureColorMod(renderData.texture.get(), colorMod.r,
+                                   colorMod.g, colorMod.b);
             SDL_SetTextureBlendMode(renderData.texture.get(),
                                     SDL_BLENDMODE_ADD);
 
             SDL_RenderCopy(sdlRenderer, renderData.texture.get(),
-                           &(renderData.textureExtent), &(spriteInfo.screenExtent));
+                           &(renderData.textureExtent),
+                           &(spriteInfo.screenExtent));
 
             SDL_SetTextureBlendMode(renderData.texture.get(),
                                     SDL_BLENDMODE_BLEND);

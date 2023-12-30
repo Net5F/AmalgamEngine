@@ -29,14 +29,14 @@ public:
 
     /**
      * Returns all of the project UI's phantom sprites.
-     * Phantom sprites are used when you want to visually add or replace a tile 
+     * Phantom sprites are used when you want to visually add or replace a tile
      * layer or entity without actually modifying the sim.
      */
     virtual std::vector<PhantomSpriteInfo> getPhantomSprites() const = 0;
 
     /**
      * Returns all of the project UI's sprite color modifications.
-     * Color mods are used when you want to modify the color or transparency 
+     * Color mods are used when you want to modify the color or transparency
      * of a tile layer or entity.
      */
     virtual std::vector<SpriteColorModInfo> getSpriteColorMods() const = 0;

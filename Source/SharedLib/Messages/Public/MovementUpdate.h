@@ -34,7 +34,7 @@ void serialize(S& serializer, MovementUpdate& movementUpdate)
 {
     serializer.value4b(movementUpdate.tickNum);
     serializer.container(movementUpdate.movementStates,
-                  SharedConfig::MAX_ENTITIES);
+                         SharedConfig::MAX_ENTITIES);
 }
 
 } // End namespace AM

@@ -88,7 +88,7 @@ bool Simulation::popEntityInteractionRequest(
             return false;
         }
 
-        // Check that the client is in range of the target. 
+        // Check that the client is in range of the target.
         const Position& clientPosition{registry.get<Position>(clientEntity)};
         const Position& targetPosition{registry.get<Position>(targetEntity)};
         if (clientPosition.squaredDistanceTo(targetPosition)
@@ -218,7 +218,7 @@ void Simulation::tick()
 
     // Move all of our entities.
     movementSystem.processMovements();
-    
+
     // Run all of our AI.
     aiSystem.processAITick();
 

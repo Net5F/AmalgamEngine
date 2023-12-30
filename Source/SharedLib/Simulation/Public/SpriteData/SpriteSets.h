@@ -14,7 +14,7 @@ namespace AM
  * Base class for a single sprite set from ResourceData.json.
  *
  * Sprite sets are used for grouping sprites into a higher-level concept. A
- * FloorCoveringSpriteSet, for example, holds all of the available rotations 
+ * FloorCoveringSpriteSet, for example, holds all of the available rotations
  * of a single floor covering, such as a rug.
  *
  * Floor, FloorCovering, and Wall are only used for tiles.
@@ -49,43 +49,38 @@ struct SpriteSet {
     Uint16 numericID{0};
 };
 
-struct FloorSpriteSet : public SpriteSet
-{
+struct FloorSpriteSet : public SpriteSet {
     /** This floor's single sprite. */
     const Sprite& sprite;
 };
 
-struct FloorCoveringSpriteSet : public SpriteSet
-{
+struct FloorCoveringSpriteSet : public SpriteSet {
     /** The number of variations that this sprite set can hold. */
     static constexpr std::size_t VARIATION_COUNT{8};
 
     /** The 8 variations of this floor covering.
-        If any slots weren't assigned a sprite, they will be nullptr in 
+        If any slots weren't assigned a sprite, they will be nullptr in
         this array.
-        When useful, the sprites in this array can represent the same floor 
-        covering, facing different directions. In such a case, you can use 
+        When useful, the sprites in this array can represent the same floor
+        covering, facing different directions. In such a case, you can use
         Rotation::directionToIndex() to match an index to a direction. */
     std::array<const Sprite*, VARIATION_COUNT> sprites{};
 };
 
-struct WallSpriteSet : public SpriteSet
-{
+struct WallSpriteSet : public SpriteSet {
     /** The 4 types of wall sprite that we use for our modular wall system. */
-    std::array<std::reference_wrapper<const Sprite>, Wall::Type::Count>
-        sprites;
+    std::array<std::reference_wrapper<const Sprite>, Wall::Type::Count> sprites;
 };
 
-struct ObjectSpriteSet : public SpriteSet
-{
+struct ObjectSpriteSet : public SpriteSet {
     /** The number of variations that this sprite set can hold. */
     static constexpr std::size_t VARIATION_COUNT{8};
 
     /** The 8 variations of this floor covering.
-        If any slots weren't assigned a sprite, they will be nullptr in 
+        If any slots weren't assigned a sprite, they will be nullptr in
         this array.
-        When useful, the sprites in this array can represent the same floor 
-        covering, facing different directions. In such a case, you can use 
+        When useful, the sprites in this array can represent the same floor
+        covering, facing different directions. In such a case, you can use
         Rotation::directionToIndex() to match an index to a direction. */
     std::array<const Sprite*, VARIATION_COUNT> sprites{};
 };

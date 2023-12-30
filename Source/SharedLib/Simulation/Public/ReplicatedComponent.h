@@ -22,7 +22,7 @@ static_assert(boost::mp11::mp_size<ReplicatedComponentTypes>::value
 /**
  * A variant that holds a client-relevant component.
  *
- * Used by the server to send components to the client (so it can replicate 
+ * Used by the server to send components to the client (so it can replicate
  * them).
  */
 using ReplicatedComponent

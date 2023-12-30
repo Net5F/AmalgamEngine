@@ -8,7 +8,7 @@ namespace AM
 namespace ResourceImporter
 {
 LibraryListItem::LibraryListItem(const std::string& inText,
-                         const std::string& inDebugName)
+                                 const std::string& inDebugName)
 : AUI::Widget({0, 0, 318, 30}, inDebugName)
 , hoveredImage({0, 0, logicalExtent.w, logicalExtent.h})
 , selectedImage({0, 0, logicalExtent.w, logicalExtent.h})
@@ -23,7 +23,8 @@ LibraryListItem::LibraryListItem(const std::string& inText,
 
     // Add our backgrounds.
     hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "Highlights/Hovered.png");
-    selectedImage.setSimpleImage(Paths::TEXTURE_DIR + "Highlights/Selected.png");
+    selectedImage.setSimpleImage(Paths::TEXTURE_DIR
+                                 + "Highlights/Selected.png");
 
     // Set our text properties.
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
@@ -84,23 +85,26 @@ void LibraryListItem::setLeftPadding(int inLeftPadding)
         {inLeftPadding, 0, (logicalExtent.w - inLeftPadding), logicalExtent.h});
 }
 
-void LibraryListItem::setOnSelected(std::function<void(LibraryListItem*)> inOnSelected)
+void LibraryListItem::setOnSelected(
+    std::function<void(LibraryListItem*)> inOnSelected)
 {
     onSelected = std::move(inOnSelected);
 }
 
-void LibraryListItem::setOnDeselected(std::function<void(LibraryListItem*)> inOnDeselected)
+void LibraryListItem::setOnDeselected(
+    std::function<void(LibraryListItem*)> inOnDeselected)
 {
     onDeselected = std::move(inOnDeselected);
 }
 
-void LibraryListItem::setOnActivated(std::function<void(LibraryListItem*)> inOnActivated)
+void LibraryListItem::setOnActivated(
+    std::function<void(LibraryListItem*)> inOnActivated)
 {
     onActivated = std::move(inOnActivated);
 }
 
 AUI::EventResult LibraryListItem::onMouseDown(AUI::MouseButtonType buttonType,
-                                   const SDL_Point& cursorPosition)
+                                              const SDL_Point& cursorPosition)
 {
     ignore(cursorPosition);
 
@@ -117,8 +121,9 @@ AUI::EventResult LibraryListItem::onMouseDown(AUI::MouseButtonType buttonType,
     return AUI::EventResult{.wasHandled{true}};
 }
 
-AUI::EventResult LibraryListItem::onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                          const SDL_Point& cursorPosition)
+AUI::EventResult
+    LibraryListItem::onMouseDoubleClick(AUI::MouseButtonType buttonType,
+                                        const SDL_Point& cursorPosition)
 {
     ignore(cursorPosition);
 

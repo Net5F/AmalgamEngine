@@ -104,7 +104,7 @@ public:
         getServerConnectionErrorSink();
 
     /** We've received the latest definition for an item.
-        This may mean that an item was actually updated, or we may have just 
+        This may mean that an item was actually updated, or we may have just
         requested the latest data to see if it was updated. */
     entt::sink<entt::sigh<void(const Item&)>>& getItemUpdateSink();
 
@@ -112,7 +112,7 @@ private:
     /**
      * Initializes or re-initializes our simulation systems.
      *
-     * Used to put the systems in a consistent state, so they don't need to 
+     * Used to put the systems in a consistent state, so they don't need to
      * account for disconnects/reconnects.
      */
     void initializeSystems();
@@ -142,7 +142,7 @@ private:
     // Note: This system is always alive, so it can process connection events.
     ServerConnectionSystem serverConnectionSystem;
 
-    // Note: These are pointers so that we can delete/reconstruct them when we 
+    // Note: These are pointers so that we can delete/reconstruct them when we
     //       connect to the server. This gives them a consistent starting state.
     std::unique_ptr<ChunkUpdateSystem> chunkUpdateSystem;
     std::unique_ptr<TileUpdateSystem> tileUpdateSystem;

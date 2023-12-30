@@ -72,7 +72,7 @@ World::World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
     entityLocator.setGridSize(tileMap.getTileExtent().xLength,
                               tileMap.getTileExtent().yLength);
 
-    // Add listeners for each client-relevant component. When the component is 
+    // Add listeners for each client-relevant component. When the component is
     // constructed or destroyed, the associated entity's ReplicatedComponentList
     // will be updated.
     boost::mp11::mp_for_each<ReplicatedComponentTypes>([&](auto I) {
@@ -112,7 +112,7 @@ void World::addGraphicsComponents(entt::entity entity,
                                   const AnimationState& animationState)
 {
     // Note: We only add entities to the locator (and replicate them to clients)
-    //       if they have an AnimationState. If we ever need to replicate 
+    //       if they have an AnimationState. If we ever need to replicate
     //       entities that don't have AnimationState, revisit this.
     //       Similarly, if we ever need to add AnimationState without Collision,
     //       we need to revisit this.
@@ -132,7 +132,7 @@ void World::addGraphicsComponents(entt::entity entity,
         Transforms::modelToWorldCentered(sprite->modelBounds, position))};
 
     // Add the entity to the locator.
-    // Note: Since we're adding the entity to the locator, clients 
+    // Note: Since we're adding the entity to the locator, clients
     //       will be told by ClientAOISystem to replicate it.
     entityLocator.setEntityLocation(entity, collision.worldBounds);
 }
@@ -142,7 +142,7 @@ void World::addMovementComponents(entt::entity entity)
     registry.emplace<Input>(entity);
     // Note: All entities have a Position component.
     registry.emplace<PreviousPosition>(entity, registry.get<Position>(entity));
-    // Note: We normally derive rotation from inputs, but we know the inputs 
+    // Note: We normally derive rotation from inputs, but we know the inputs
     //       are default here.
     registry.emplace<Rotation>(entity);
 }
@@ -151,7 +151,7 @@ std::string World::runEntityInitScript(entt::entity entity,
                                        const EntityInitScript& initScript)
 {
     // Run the given script on the given entity.
-    // Note: We use "selfEntityID" to hold the ID of the entity that the init 
+    // Note: We use "selfEntityID" to hold the ID of the entity that the init
     //       script is being ran on.
     entityInitLua["selfEntityID"] = entity;
     auto result{
@@ -163,7 +163,7 @@ std::string World::runEntityInitScript(entt::entity entity,
         registry.emplace<EntityInitScript>(entity, initScript);
     }
     else {
-        // Error while running the init script. Keep the entity alive (so the 
+        // Error while running the init script. Keep the entity alive (so the
         // user can try again) and return the error.
         sol::error err = result;
         returnString = err.what();
@@ -174,8 +174,8 @@ std::string World::runEntityInitScript(entt::entity entity,
 
 bool World::entityIDIsInUse(entt::entity entity) const
 {
-    // Note: We can't just check valid(), since calling create(N) will cause 
-    //       valid() to return true for all X < N. We account for this by 
+    // Note: We can't just check valid(), since calling create(N) will cause
+    //       valid() to return true for all X < N. We account for this by
     //       checking if the index is actually in use.
     const auto* storage{registry.storage<entt::entity>()};
     if (registry.valid(entity)

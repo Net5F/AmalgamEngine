@@ -11,7 +11,7 @@
 namespace AM
 {
 /**
- * Sent by the client to request that an existing item be re-initialized with 
+ * Sent by the client to request that an existing item be re-initialized with
  * new data.
  */
 struct ItemChangeRequest {

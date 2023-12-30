@@ -8,14 +8,14 @@ namespace AM
 /**
  * The types of item interactions that the engine provides.
  *
- * Note: Don't use this enum directly, use ItemInteractionType (it combines the 
+ * Note: Don't use this enum directly, use ItemInteractionType (it combines the
  *       engine's and the project's interactions).
  */
-enum class EngineItemInteractionType : Uint8
-{
+enum class EngineItemInteractionType : Uint8 {
     NotSet,
 
-    // Note: All items support Examine, Destroy (handled by InventoryDeleteItem),
+    // Note: All items support Examine, Destroy (handled by
+    // InventoryDeleteItem),
     //       and UseOn (handled by CombineItems and UseItemOnEntityRequest).
     UseOn,
     Destroy,

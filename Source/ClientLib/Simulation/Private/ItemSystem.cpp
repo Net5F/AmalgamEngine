@@ -26,7 +26,7 @@ void ItemSystem::processItemUpdates()
     // Process any waiting item definition updates.
     ItemUpdate itemUpdate{};
     while (itemUpdateQueue.pop(itemUpdate)) {
-        // If the item exists, update it (even if there are no changes, it 
+        // If the item exists, update it (even if there are no changes, it
         // doesn't hurt to update it).
         Item item{itemUpdate.displayName, "", itemUpdate.itemID,
                   itemUpdate.iconID, itemUpdate.supportedInteractions};

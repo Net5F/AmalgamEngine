@@ -26,9 +26,9 @@ struct ClientSimData;
  *      (in such a case, we zero-out their input state so they don't run off
  *      a cliff).
  *   3. The entity was teleported.
- * 
+ *
  * We detect a need for movement state sync by observing the Input component.
- * If you want to sync an entity's movement state (e.g. Position) without 
+ * If you want to sync an entity's movement state (e.g. Position) without
  * changing its inputs, you can just registry.patch() with no changes.
  */
 class MovementSyncSystem
