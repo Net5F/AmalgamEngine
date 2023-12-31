@@ -155,7 +155,7 @@ void NpcMovementSystem::applyUpdateMessage(
         //       tick is up for processing. We might end up here before
         //       EntityLifetimeSystem was able to construct the entity.
         entt::entity entity{movementState.entity};
-        if (!(world.entityIDIsInUse(entity))) {
+        if (!(registry.valid(entity))) {
             LOG_FATAL(
                 "Received update for invalid entity: %u. Message tick: %u",
                 entity, npcMovementUpdate.tickNum);

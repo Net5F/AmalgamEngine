@@ -64,7 +64,7 @@ void NceLifetimeSystem::handleInitRequest(
     // If the message contains an entity ID, re-initialize the given entity.
     if (entityInitRequest.entity != entt::null) {
         // Double-check that the ID is actually in use.
-        if (world.entityIDIsInUse(entityInitRequest.entity)) {
+        if (world.registry.valid(entityInitRequest.entity)) {
             // This is an existing entity. Remove all of its components.
             for (auto [id, storage] : world.registry.storage()) {
                 storage.remove(entityInitRequest.entity);
@@ -91,7 +91,7 @@ void NceLifetimeSystem::handleDeleteRequest(
 {
     // If the entity isn't valid or is a client, skip it.
     entt::entity entity{entityDeleteRequest.entity};
-    if (!(world.entityIDIsInUse(entity))
+    if (!(world.registry.valid(entity))
         || world.registry.all_of<IsClientEntity>(entity)) {
         return;
     }

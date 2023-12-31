@@ -84,7 +84,7 @@ bool Simulation::popEntityInteractionRequest(
         entt::entity targetEntity{interactionRequest.targetEntity};
 
         // Check that the target exists.
-        if (!(world.entityIDIsInUse(targetEntity))) {
+        if (!(registry.valid(targetEntity))) {
             return false;
         }
 

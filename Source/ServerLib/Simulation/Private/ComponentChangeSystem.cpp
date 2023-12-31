@@ -36,7 +36,7 @@ void ComponentChangeSystem::processChangeRequests()
     EntityNameChangeRequest nameChangeRequest{};
     while (entityNameChangeRequestQueue.pop(nameChangeRequest)) {
         // If the entity isn't valid, skip it.
-        if (!(world.entityIDIsInUse(nameChangeRequest.entity))) {
+        if (!(registry.valid(nameChangeRequest.entity))) {
             continue;
         }
         // If the project says the request isn't valid, skip it.
@@ -53,7 +53,7 @@ void ComponentChangeSystem::processChangeRequests()
     AnimationStateChangeRequest animationStateChangeRequest{};
     while (animationStateChangeRequestQueue.pop(animationStateChangeRequest)) {
         // If the entity isn't valid, skip it.
-        if (!(world.entityIDIsInUse(animationStateChangeRequest.entity))) {
+        if (!(registry.valid(animationStateChangeRequest.entity))) {
             continue;
         }
         // If the project says the request isn't valid, skip it.

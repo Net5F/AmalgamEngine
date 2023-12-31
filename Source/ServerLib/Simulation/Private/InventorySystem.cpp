@@ -71,7 +71,7 @@ void InventorySystem::processOperation(NetworkID clientID,
 {
     // If the entity isn't valid, skip it.
     entt::entity entityToAddTo{inventoryAddItem.entity};
-    if (!(world.entityIDIsInUse(entityToAddTo))) {
+    if (!(world.registry.valid(entityToAddTo))) {
         return;
     }
 

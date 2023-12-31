@@ -44,12 +44,6 @@ public:
     /** Spatial partitioning grid for efficiently locating entities by
         position. */
     EntityLocator entityLocator;
-
-    /**
-     * Returns true if the given ID is valid and in use.
-     * Note: If entt adds a storage.in_use(entity), we can replace this.
-     */
-    bool entityIDIsInUse(entt::entity entityID);
 };
 
 } // namespace Client

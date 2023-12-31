@@ -172,20 +172,6 @@ std::string World::runEntityInitScript(entt::entity entity,
     return returnString;
 }
 
-bool World::entityIDIsInUse(entt::entity entity) const
-{
-    // Note: We can't just check valid(), since calling create(N) will cause
-    //       valid() to return true for all X < N. We account for this by
-    //       checking if the index is actually in use.
-    const auto* storage{registry.storage<entt::entity>()};
-    if (registry.valid(entity)
-        && (storage->index(entity) < storage->in_use())) {
-        return true;
-    }
-
-    return false;
-}
-
 bool World::hasMovementComponents(entt::entity entity) const
 {
     // Note: Entities also need Rotation and Collision for the movement systems
