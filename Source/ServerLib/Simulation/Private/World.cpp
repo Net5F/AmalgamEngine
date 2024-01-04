@@ -1,4 +1,5 @@
 #include "World.h"
+#include "Database.h"
 #include "ClientSimData.h"
 #include "ReplicatedComponentList.h"
 #include "ReplicatedComponent.h"
@@ -53,6 +54,7 @@ World::World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
 , itemData{}
 , tileMap{inSpriteData}
 , entityLocator{registry}
+, database{std::make_unique<Database>()}
 , netIdMap{}
 , spriteData{inSpriteData}
 , entityInitLua{inEntityInitLua}
@@ -85,6 +87,12 @@ World::World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
     // When an entity is destroyed, do any necessary cleanup.
     registry.on_destroy<entt::entity>().connect<&World::onEntityDestroyed>(
         this);
+
+    // Load our saved non-client entities.
+    loadNonClientEntities();
+
+    // Load our saved item definitions.
+    loadItems();
 }
 
 entt::entity World::createEntity(const Position& position,
@@ -248,6 +256,19 @@ void World::onEntityDestroyed(entt::entity entity)
 {
     // Remove it from the locator.
     entityLocator.removeEntity(entity);
+}
+
+void World::loadNonClientEntities()
+{
+    auto loadEntity
+        = [&](entt::entity entity, std::string_view serializedComponents) {
+    };
+
+    database->iterateEntityData(loadEntity);
+}
+
+void World::loadItems()
+{
 }
 
 } // namespace Server

@@ -20,7 +20,7 @@
 #include "ComponentSyncSystem.h"
 #include "ChunkStreamingSystem.h"
 #include "ScriptDataSystem.h"
-#include "MapSaveSystem.h"
+#include "SaveSystem.h"
 #include "QueuedEvents.h"
 #include <SDL_stdinc.h>
 #include <atomic>
@@ -211,7 +211,7 @@ private:
     ComponentSyncSystem componentSyncSystem;
     ChunkStreamingSystem chunkStreamingSystem;
     ScriptDataSystem scriptDataSystem;
-    MapSaveSystem mapSaveSystem;
+    SaveSystem saveSystem;
 };
 
 } // namespace Server

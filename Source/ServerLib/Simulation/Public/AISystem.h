@@ -16,12 +16,12 @@ public:
     AISystem(World& inWorld);
 
     /**
-     * Calls tick() on all AIBehavior components.
+     * Calls tick() on all AI components.
      */
     void processAITick();
 
 private:
-    /** Used to get AIBehavior components to process. */
+    /** Used to get AI components to process. */
     World& world;
 };
 

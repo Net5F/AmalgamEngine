@@ -150,6 +150,13 @@ option(SOL2_ENABLE_INSTALL "Enable installation of Sol2" OFF)
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/sol2/"
                  "${PROJECT_BINARY_DIR}/Libraries/sol2/")
 
+# Configure SQLiteCpp.
+option(SQLITECPP_INCLUDE_SCRIPT "Include config & script files." OFF)
+option(SQLITECPP_RUN_CPPLINT "Run cpplint.py tool for Google C++ StyleGuide." OFF)
+option(SQLITECPP_RUN_CPPCHECK "Run cppcheck C++ static analysis tool." OFF)
+add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/SQLiteCpp/"
+                 "${PROJECT_BINARY_DIR}/Libraries/SQLiteCpp/")
+
 # Configure header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/CMake/readerwriterqueue.cmake")
 

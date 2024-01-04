@@ -26,7 +26,7 @@ public:
     static constexpr Uint8 DEFAULT_INVENTORY_SIZE{20};
 
     /** The number of slots in this inventory. */
-    Uint8 size;
+    Uint8 size{0};
 
     struct ItemSlot {
         /** The item in this inventory slot. */

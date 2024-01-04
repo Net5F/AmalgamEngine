@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EngineComponentLists.h"
-#include "ProjectComponentLists.h"
+#include "EngineReplicatedComponentTypes.h"
+#include "ProjectReplicatedComponentTypes.h"
 #include "boost/mp11/list.hpp"
 #include "boost/mp11/algorithm.hpp"
 #include <variant>
@@ -10,11 +10,11 @@ namespace AM
 {
 
 /**
- * See comment in EngineComponentLists.h
+ * See comment in EngineReplicatedComponents.h
  */
 using ReplicatedComponentTypes
-    = boost::mp11::mp_append<EngineComponentLists::ReplicatedComponentTypes,
-                             ProjectComponentLists::ReplicatedComponentTypes>;
+    = boost::mp11::mp_append<EngineReplicatedComponentTypes,
+                             ProjectReplicatedComponentTypes>;
 static_assert(boost::mp11::mp_size<ReplicatedComponentTypes>::value
                   <= (SDL_MAX_UINT8 + 1),
               "Too many types in ReplicatedComponentTypes. Max is 256");

@@ -3,8 +3,8 @@
 #include "World.h"
 #include "Network.h"
 #include "SpriteData.h"
-#include "EngineComponentLists.h"
-#include "ProjectComponentLists.h"
+#include "EngineObservedComponentTypes.h"
+#include "ProjectObservedComponentTypes.h"
 #include "ReplicatedComponent.h"
 #include "ClientSimData.h"
 #include "Cylinder.h"
@@ -26,11 +26,11 @@ namespace Server
 // Templated type setup
 //-----------------------------------------------------------------------------
 /**
- * See comment in EngineComponentLists.h
+ * See comment in EngineObservedComponents.h
  */
 using ObservedComponentTypes
-    = boost::mp11::mp_append<EngineComponentLists::ObservedComponentTypes,
-                             ProjectComponentLists::ObservedComponentTypes>;
+    = boost::mp11::mp_append<EngineObservedComponentTypes,
+                             ProjectObservedComponentTypes>;
 
 /** A group and update observer for each observed component type. */
 std::array<entt::observer, boost::mp11::mp_size<ObservedComponentTypes>::value>

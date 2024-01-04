@@ -23,7 +23,6 @@ target_sources(SharedLib
         Public/DiscreteExtent.h
         Public/DiscreteImpl.h
         Public/DiscretePosition.h
-        Public/EngineComponentLists.h
         Public/EngineEntityInteractionType.h
         Public/EngineItemInteractionType.h
         Public/EntityLocator.h
@@ -69,6 +68,8 @@ target_sources(SharedLib
         Public/TileMap/TileMapSnapshot.h
         Public/TileMap/TilePosition.h
         Public/TileMap/TileSnapshot.h
+        Public/TypeLists/EngineObservedComponentTypes.h
+        Public/TypeLists/EngineReplicatedComponentTypes.h
 )
 
 target_include_directories(SharedLib
@@ -85,4 +86,5 @@ target_include_directories(SharedLib
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/SpriteData
 		${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
+		${CMAKE_CURRENT_SOURCE_DIR}/Public/TypeLists
 )

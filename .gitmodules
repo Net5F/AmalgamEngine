@@ -40,3 +40,6 @@
 [submodule "Libraries/mp11"]
 	path = Libraries/mp11
 	url = git@github.com:boostorg/mp11.git
+[submodule "Libraries/SQLiteCpp"]
+	path = Libraries/SQLiteCpp
+	url = git@github.com:SRombauts/SQLiteCpp.git

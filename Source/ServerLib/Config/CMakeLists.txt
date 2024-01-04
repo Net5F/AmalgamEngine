@@ -6,6 +6,8 @@ target_sources(ServerLib
         Public/Config.h
         Public/UserConfig.h
         Public/UserConfigInitializer.h
+        Public/TypeLists/ProjectAITypes.h
+        Public/TypeLists/ProjectPersistedComponentTypes.h
 )
 
 target_include_directories(ServerLib
@@ -13,4 +15,5 @@ target_include_directories(ServerLib
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/TypeLists
 )

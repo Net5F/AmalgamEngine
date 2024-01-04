@@ -17,7 +17,7 @@ class SpriteData;
 
 /**
  * Observes component updates based on the ObservedComponentTypes lists in
- * EngineComponentLists.h and ProjectComponentLists.h.
+ * EngineObservedComponents.h and ProjectObservedComponents.h.
  *
  * When an observed component is updated, sends an update message to all nearby
  * clients.

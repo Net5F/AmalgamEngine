@@ -45,7 +45,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , componentSyncSystem{*this, world, network, inSpriteData}
 , chunkStreamingSystem{world, network}
 , scriptDataSystem{world, network}
-, mapSaveSystem{world}
+, saveSystem{world}
 {
     // Initialize our entt groups.
     EnttGroups::init(world.registry);
@@ -260,8 +260,8 @@ void Simulation::tick()
     // Respond to script data requests.
     scriptDataSystem.sendScripts();
 
-    // If enough time has passed, save the world's tile map state.
-    mapSaveSystem.saveMapIfNecessary();
+    // If any category of data is due for saving, save it.
+    saveSystem.saveIfNecessary();
 
     // Call the project's post-everything logic.
     if (extension != nullptr) {

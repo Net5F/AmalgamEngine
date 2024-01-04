@@ -17,7 +17,7 @@ namespace Server
  * Note: This component will be present on an entity regardless of whether it
  *       has any replicated components or not. This is because the on_destroy()
  *       listener isn't allowed to remove components, so we just always leave
- * it.
+ *       it.
  */
 struct ReplicatedComponentList {
     /** Holds all currently attached component types that are relevant to

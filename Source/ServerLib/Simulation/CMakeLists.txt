@@ -1,21 +1,21 @@
 target_sources(ServerLib
 	PRIVATE
-		Private/AILogic.cpp
 		Private/AISystem.cpp
 		Private/ChunkStreamingSystem.cpp
 		Private/ClientAOISystem.cpp
 		Private/ClientConnectionSystem.cpp
 		Private/ComponentChangeSystem.cpp
 		Private/ComponentSyncSystem.cpp
+		Private/Database.cpp
 		Private/EngineLuaBindings.cpp
 		Private/InputSystem.cpp
 		Private/InventoryHelpers.cpp
 		Private/InventorySystem.cpp
 		Private/ItemSystem.cpp
-		Private/MapSaveSystem.cpp
 		Private/MovementSyncSystem.cpp
 		Private/MovementSystem.cpp
 		Private/NceLifetimeSystem.cpp
+		Private/SaveSystem.cpp
 		Private/ScriptDataSystem.cpp
 		Private/Simulation.cpp
 		Private/TileUpdateSystem.cpp
@@ -32,6 +32,7 @@ target_sources(ServerLib
 		Public/ClientConnectionSystem.h
 		Public/ComponentChangeSystem.h
 		Public/ComponentSyncSystem.h
+		Public/Database.h
 		Public/EngineLuaBindings.h
 		Public/EntityItemHandlerScript.h
 		Public/EnttGroups.h
@@ -41,17 +42,16 @@ target_sources(ServerLib
 		Public/InventorySystem.h
 		Public/ISimulationExtension.h
 		Public/ItemSystem.h
-		Public/MapSaveSystem.h
 		Public/MovementSyncSystem.h
 		Public/MovementSystem.h
 		Public/NceLifetimeSystem.h
+		Public/SaveSystem.h
 		Public/ScriptDataSystem.h
 		Public/Simulation.h
 		Public/SimulationExDependencies.h
 		Public/SpawnStrategy.h
 		Public/TileUpdateSystem.h
 		Public/World.h
-		Public/Components/AIBehavior.h
 		Public/Components/ClientSimData.h
 		Public/Components/ItemHandlers.h
 		Public/Components/ReplicatedComponentList.h
@@ -59,6 +59,7 @@ target_sources(ServerLib
 		Public/ItemData/ItemData.h
 		Public/SpriteData/SpriteData.h
 		Public/TileMap/TileMap.h
+		Public/TypeLists/EnginePersistedComponentTypes.h
 )
 
 target_include_directories(ServerLib
@@ -72,4 +73,5 @@ target_include_directories(ServerLib
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/SpriteData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/TypeLists
 )

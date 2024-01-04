@@ -16,7 +16,7 @@ class state;
 
 namespace AM
 {
-struct Name;
+class Database;
 struct Position;
 struct AnimationState;
 struct EntityInitScript;
@@ -62,6 +62,10 @@ public:
     /** Spatial partitioning grid for efficiently locating entities by
         position. */
     EntityLocator entityLocator;
+
+    /** The database for saving and loading world data.
+        Kept as a pointer to speed up compilation. */
+    std::unique_ptr<Database> database;
 
     /** Maps network IDs to entity IDs.
         Used for interfacing with the Network. */
@@ -134,6 +138,16 @@ private:
      * Does any necessary cleanup to the given entity.
      */
     void onEntityDestroyed(entt::entity entity);
+
+    /**
+     * Loads our saved non-client entities and adds them to the registry.
+     */
+    void loadNonClientEntities();
+
+    /**
+     * Loads our saved items and adds them to itemData.
+     */
+    void loadItems();
 
     /** Used to get sprite info. */
     const SpriteData& spriteData;
