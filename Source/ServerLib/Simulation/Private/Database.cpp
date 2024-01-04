@@ -9,7 +9,7 @@ Database::Database()
 : database{(Paths::BASE_PATH + "/Database.db3"),
            SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE}
 {
-    initTables();
+    //initTables();
 }
 
 void Database::initTables()

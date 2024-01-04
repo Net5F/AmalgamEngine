@@ -17,6 +17,8 @@
 #include "boost/mp11/algorithm.hpp"
 #include <algorithm>
 
+#include "Timer.h"
+
 namespace AM
 {
 namespace Server
@@ -58,10 +60,13 @@ ClientAOISystem::ClientAOISystem(Simulation& inSimulation, World& inWorld,
 {
 }
 
+Timer timer{};
+std::size_t bytesSent{};
 void ClientAOISystem::updateAOILists()
 {
     ZoneScoped;
 
+    timer.reset();
     // Update every client entity's AOI list.
     auto view{world.registry.view<ClientSimData, Position>()};
     for (auto [entity, client, position] : view.each()) {
@@ -104,6 +109,10 @@ void ClientAOISystem::updateAOILists()
         // Save the new list.
         client.entitiesInAOI = currentAOIEntities;
     }
+    if (bytesSent > 0) {
+        LOG_INFO("Sent %u bytes. Took: %.9fs", bytesSent, timer.getTime());
+    }
+    bytesSent = 0;
 }
 
 void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
@@ -140,7 +149,10 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
     }
 
     // Send the message.
-    network.serializeAndSend(client.netID, entityInit);
+    //network.serializeAndSend(client.netID, entityInit);
+    auto message{network.serialize(entityInit)};
+    bytesSent += message->size();
+    network.send(client.netID, std::move(message));
 }
 
 } // namespace Server

@@ -16,7 +16,6 @@ class state;
 
 namespace AM
 {
-class Database;
 struct Position;
 struct AnimationState;
 struct EntityInitScript;
@@ -25,6 +24,7 @@ struct ItemInitScript;
 namespace Server
 {
 class SpriteData;
+class Database;
 
 /**
  * Owns and manages the persistence of all world state.
@@ -46,6 +46,8 @@ class World
 public:
     World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
           sol::state& inItemInitLua);
+
+    ~World();
 
     //-------------------------------------------------------------------------
     // World State

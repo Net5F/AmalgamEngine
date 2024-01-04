@@ -33,14 +33,14 @@ public:
      *                 that expects the entity's ID, and a serialized
      *                 std::vector<ReplicatedComponent>.
      */
-    template<typename Func>
-    void iterateEntityData(Func callback)
-    {
-        SQLite::Statement query{database, "SELECT * FROM entities"};
-        while (query.executeStep()) {
-            func(query.getColumn(0), query.getColumn(1));
-        }
-    }
+    //template<typename Func>
+    //void iterateEntityData(Func callback)
+    //{
+    //    SQLite::Statement query{database, "SELECT * FROM entities"};
+    //    while (query.executeStep()) {
+    //        callback(query.getColumn(0), query.getColumn(1));
+    //    }
+    //}
 
 protected:
     /**

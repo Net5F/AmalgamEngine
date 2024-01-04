@@ -95,6 +95,8 @@ World::World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
     loadItems();
 }
 
+World::~World() = default;
+
 entt::entity World::createEntity(const Position& position,
                                  entt::entity entityHint)
 {
@@ -260,11 +262,11 @@ void World::onEntityDestroyed(entt::entity entity)
 
 void World::loadNonClientEntities()
 {
-    auto loadEntity
-        = [&](entt::entity entity, std::string_view serializedComponents) {
-    };
+    //auto loadEntity
+    //    = [&](entt::entity entity, std::string_view serializedComponents) {
+    //};
 
-    database->iterateEntityData(loadEntity);
+    //database->iterateEntityData(loadEntity);
 }
 
 void World::loadItems()
