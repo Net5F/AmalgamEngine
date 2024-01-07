@@ -7,6 +7,7 @@ target_sources(ServerLib
         Public/UserConfig.h
         Public/UserConfigInitializer.h
         Public/TypeLists/ProjectAITypes.h
+        Public/TypeLists/ProjectObservedComponentTypes.h
         Public/TypeLists/ProjectPersistedComponentTypes.h
 )
 

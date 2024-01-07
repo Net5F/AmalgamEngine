@@ -7,8 +7,8 @@
 namespace AM
 {
 /** Dynamically allocated, portable buffers for bytes. */
-typedef std::vector<Uint8> BinaryBuffer;
-typedef std::unique_ptr<BinaryBuffer> BinaryBufferPtr;
-typedef std::shared_ptr<BinaryBuffer> BinaryBufferSharedPtr;
+using BinaryBuffer = std::vector<Uint8>;
+using BinaryBufferPtr = std::unique_ptr<BinaryBuffer>;
+using BinaryBufferSharedPtr = std::shared_ptr<BinaryBuffer>;
 
 } // End namespace AM

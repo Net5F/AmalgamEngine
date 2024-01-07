@@ -12,9 +12,6 @@ namespace Client
 class ItemData : public ItemDataBase
 {
 public:
-    /**
-     * Calls ItemDataBase() constructor.
-     */
     ItemData();
 };
 

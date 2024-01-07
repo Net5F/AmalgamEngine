@@ -4,7 +4,6 @@ target_sources(SharedLib
         Public/ItemInteractionType.h
         Public/ItemProperties.h
         Public/SharedConfig.h
-        Public/TypeLists/ProjectObservedComponentTypes.h
         Public/TypeLists/ProjectReplicatedComponentTypes.h
 )
 

@@ -8,6 +8,9 @@
 
 namespace AM
 {
+// Note: Observed components are server-only.
+namespace Server
+{
 /**
  * All of the engine's component types that should be observed and auto-
  * replicated. When an observed component is updated (using patch() or
@@ -21,6 +24,7 @@ namespace AM
  */
 using ProjectObservedComponentTypes = boost::mp11::mp_list<>;
 
+} // End namespace Server
 } // End namespace AM
 
 #endif // defined(AM_OVERRIDE_CONFIG)

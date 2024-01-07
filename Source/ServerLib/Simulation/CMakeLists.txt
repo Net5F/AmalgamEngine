@@ -59,6 +59,7 @@ target_sources(ServerLib
 		Public/ItemData/ItemData.h
 		Public/SpriteData/SpriteData.h
 		Public/TileMap/TileMap.h
+        Public/TypeLists/EngineObservedComponentTypes.h
 		Public/TypeLists/EnginePersistedComponentTypes.h
 )
 

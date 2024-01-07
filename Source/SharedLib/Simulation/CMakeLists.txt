@@ -29,7 +29,6 @@ target_sources(SharedLib
         Public/MovementHelpers.h
         Public/Ray.h
         Public/ReplicatedComponent.h
-        Public/ReplicatedComponentTools.h
         Public/ResourceData.h
         Public/Wall.h
         Public/Components/AnimationState.h
@@ -68,7 +67,6 @@ target_sources(SharedLib
         Public/TileMap/TileMapSnapshot.h
         Public/TileMap/TilePosition.h
         Public/TileMap/TileSnapshot.h
-        Public/TypeLists/EngineObservedComponentTypes.h
         Public/TypeLists/EngineReplicatedComponentTypes.h
 )
 
