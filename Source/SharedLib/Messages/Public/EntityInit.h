@@ -2,12 +2,10 @@
 
 #include "EngineMessageType.h"
 #include "Position.h"
-#include "ReplicatedComponent.h"
+#include "SerializedComponent.h"
 #include "SharedConfig.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
-#include "bitsery/ext/std_variant.h"
-#include "boost/mp11/algorithm.hpp"
 #include <SDL_stdinc.h>
 #include <vector>
 
@@ -32,6 +30,10 @@ struct EntityInit {
     Uint32 tickNum{0};
 
     struct EntityData {
+        /** Used as a "we should never hit this" cap on the number of replicated
+            components for this entity. Only checked in debug builds. */
+        static constexpr std::size_t MAX_COMPONENTS{100};
+
         /** The entity's ID. */
         entt::entity entity{entt::null};
 
@@ -39,7 +41,7 @@ struct EntityInit {
         Position position{};
 
         /** This entity's optional client-relevant components. */
-        std::vector<ReplicatedComponent> components{};
+        std::vector<SerializedComponent> components{};
     };
 
     /** The component state of all entities that entered this client's AOI on
@@ -52,14 +54,8 @@ void serialize(S& serializer, EntityInit::EntityData& entityData)
 {
     serializer.value4b(entityData.entity);
     serializer.object(entityData.position);
-    serializer.enableBitPacking([&](typename S::BPEnabledType& sbp) {
-        sbp.container(entityData.components,
-                      boost::mp11::mp_size<ReplicatedComponentTypes>::value,
-                      [](typename S::BPEnabledType& serializer,
-                         ReplicatedComponent& component) {
-                          serializer.ext(component, bitsery::ext::StdVariant{});
-                      });
-    });
+    serializer.container(entityData.components,
+                         EntityInit::EntityData::MAX_COMPONENTS);
 }
 
 template<typename S>

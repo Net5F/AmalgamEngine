@@ -14,7 +14,6 @@ struct BoundingBox;
  *       so.
  */
 struct Cylinder {
-public:
     /** Center point. */
     Position center{};
 

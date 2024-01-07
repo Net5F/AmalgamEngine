@@ -1,6 +1,7 @@
 #include "Simulation.h"
 #include "Network.h"
 #include "SpriteData.h"
+#include "ComponentTypeRegistry.h"
 #include "EnttGroups.h"
 #include "ISimulationExtension.h"
 #include "ChunkUpdateSystem.h"
@@ -29,6 +30,7 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 : network{inNetwork}
 , spriteData{inSpriteData}
 , world{inSpriteData}
+, componentTypeRegistry{std::make_unique<ComponentTypeRegistry>(world.registry)}
 , currentTick{0}
 , extension{nullptr}
 , serverConnectionSystem{world, inUiEventDispatcher, network, inSpriteData,
@@ -50,6 +52,11 @@ Simulation::~Simulation() = default;
 World& Simulation::getWorld()
 {
     return world;
+}
+
+ComponentTypeRegistry& Simulation::getComponentTypeRegistry()
+{
+    return *componentTypeRegistry;
 }
 
 Uint32 Simulation::getCurrentTick()
@@ -224,7 +231,7 @@ void Simulation::initializeSystems()
     chunkUpdateSystem = std::make_unique<ChunkUpdateSystem>(world, network);
     tileUpdateSystem = std::make_unique<TileUpdateSystem>(world, network);
     entityLifetimeSystem = std::make_unique<EntityLifetimeSystem>(
-        *this, world, spriteData, network);
+        *this, world, *componentTypeRegistry, network, spriteData);
     playerInputSystem
         = std::make_unique<PlayerInputSystem>(*this, world, network);
     playerMovementSystem
@@ -234,7 +241,7 @@ void Simulation::initializeSystems()
     itemSystem = std::make_unique<ItemSystem>(world, network);
     inventorySystem = std::make_unique<InventorySystem>(world, network);
     componentUpdateSystem = std::make_unique<ComponentUpdateSystem>(
-        *this, world, network, spriteData);
+        *this, world, *componentTypeRegistry, network, spriteData);
     cameraSystem = std::make_unique<CameraSystem>(world);
 
     // Tell the project to initialize its systems.

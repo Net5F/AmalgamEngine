@@ -1,6 +1,7 @@
 target_sources(SharedLib
     PRIVATE
         Private/BoundingBox.cpp
+        Private/ComponentTypeRegistryBase.cpp
         Private/Cylinder.cpp
         Private/EntityLocator.cpp
         Private/MovementHelpers.cpp
@@ -19,6 +20,7 @@ target_sources(SharedLib
         Private/TileMap/TilePosition.cpp
 	PUBLIC
         Public/BoundingBox.h
+        Public/ComponentTypeRegistryBase.h
         Public/Cylinder.h
         Public/DiscreteExtent.h
         Public/DiscreteImpl.h
@@ -28,9 +30,8 @@ target_sources(SharedLib
         Public/EntityLocator.h
         Public/MovementHelpers.h
         Public/Ray.h
-        Public/ReplicatedComponent.h
-        Public/ReplicatedComponentTools.h
         Public/ResourceData.h
+        Public/SerializedComponent.h
         Public/Wall.h
         Public/Components/AnimationState.h
         Public/Components/Camera.h

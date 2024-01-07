@@ -10,6 +10,7 @@ namespace Server
 {
 class Simulation;
 class World;
+class ComponentTypeRegistry;
 class Network;
 struct ClientSimData;
 
@@ -38,6 +39,7 @@ class ClientAOISystem
 {
 public:
     ClientAOISystem(Simulation& inSimulation, World& inWorld,
+                    ComponentTypeRegistry& inComponentTypeRegistry,
                     Network& inNetwork);
 
     /**
@@ -66,6 +68,8 @@ private:
     Simulation& simulation;
     /** Used to access components. */
     World& world;
+    /** Used for handling registered components when sending inits. */
+    ComponentTypeRegistry& componentTypeRegistry;
     /** Used for sending messages. */
     Network& network;
 

@@ -1,5 +1,6 @@
 #include "Simulation.h"
 #include "Network.h"
+#include "ComponentTypeRegistry.h"
 #include "EnttGroups.h"
 #include "ISimulationExtension.h"
 #include "EntityInteractionRequest.h"
@@ -23,6 +24,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , entityItemHandlerLua{std::make_unique<sol::state>()}
 , itemInitLua{std::make_unique<sol::state>()}
 , world{inSpriteData, *entityInitLua, *itemInitLua}
+, componentTypeRegistry{std::make_unique<ComponentTypeRegistry>(world.registry)}
 , currentTick{0}
 , engineLuaBindings{*entityInitLua, *entityItemHandlerLua, *itemInitLua, world,
                     network}
@@ -40,9 +42,9 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , aiSystem{world}
 , itemSystem{*this, network, *entityItemHandlerLua}
 , inventorySystem{world, network}
-, clientAOISystem{*this, world, network}
+, clientAOISystem{*this, world, *componentTypeRegistry, network}
 , movementSyncSystem{*this, world, network}
-, componentSyncSystem{*this, world, network, inSpriteData}
+, componentSyncSystem{*this, world, *componentTypeRegistry, network, inSpriteData}
 , chunkStreamingSystem{world, network}
 , scriptDataSystem{world, network}
 , saveSystem{world}
@@ -155,11 +157,6 @@ bool Simulation::popItemInteractionRequest(ItemInteractionType interactionType,
     return false;
 }
 
-World& Simulation::getWorld()
-{
-    return world;
-}
-
 sol::state& Simulation::getEntityInitLua()
 {
     return *entityInitLua;
@@ -173,6 +170,16 @@ sol::state& Simulation::getEntityItemHandlerLua()
 sol::state& Simulation::getItemInitLua()
 {
     return *itemInitLua;
+}
+
+World& Simulation::getWorld()
+{
+    return world;
+}
+
+ComponentTypeRegistry& Simulation::getComponentTypeRegistry()
+{
+    return *componentTypeRegistry;
 }
 
 Uint32 Simulation::getCurrentTick()

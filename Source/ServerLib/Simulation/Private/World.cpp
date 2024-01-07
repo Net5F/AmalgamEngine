@@ -2,7 +2,7 @@
 #include "Database.h"
 #include "ClientSimData.h"
 #include "ReplicatedComponentList.h"
-#include "ReplicatedComponent.h"
+#include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "AnimationState.h"
@@ -20,33 +20,6 @@ namespace AM
 {
 namespace Server
 {
-
-template<typename T>
-void onComponentConstructed(entt::registry& registry, entt::entity entity)
-{
-    // Find the component's index within the type list.
-    constexpr std::size_t index{
-        boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
-
-    // Add the component to the entity's tracking vector.
-    auto& replicatedComponents{
-        registry.get_or_emplace<ReplicatedComponentList>(entity)};
-    replicatedComponents.typeIndices.push_back(static_cast<Uint8>(index));
-}
-
-template<typename T>
-void onComponentDestroyed(entt::registry& registry, entt::entity entity)
-{
-    // Find the component's index within the type list.
-    constexpr std::size_t index{
-        boost::mp11::mp_find<ReplicatedComponentTypes, T>::value};
-
-    // If the component is in the entity's tracking vector, remove it.
-    if (auto replicatedComponents
-        = registry.try_get<ReplicatedComponentList>(entity)) {
-        std::erase(replicatedComponents->typeIndices, index);
-    }
-}
 
 World::World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
              sol::state& inItemInitLua)
@@ -73,16 +46,6 @@ World::World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
     // Allocate the entity locator's grid.
     entityLocator.setGridSize(tileMap.getTileExtent().xLength,
                               tileMap.getTileExtent().yLength);
-
-    // Add listeners for each client-relevant component. When the component is
-    // constructed or destroyed, the associated entity's ReplicatedComponentList
-    // will be updated.
-    boost::mp11::mp_for_each<ReplicatedComponentTypes>([&](auto I) {
-        using T = decltype(I);
-        registry.on_construct<T>()
-            .template connect<&onComponentConstructed<T>>();
-        registry.on_destroy<T>().template connect<&onComponentDestroyed<T>>();
-    });
 
     // When an entity is destroyed, do any necessary cleanup.
     registry.on_destroy<entt::entity>().connect<&World::onEntityDestroyed>(

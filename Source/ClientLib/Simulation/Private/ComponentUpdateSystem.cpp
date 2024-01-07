@@ -1,8 +1,10 @@
 #include "ComponentUpdateSystem.h"
 #include "Simulation.h"
 #include "World.h"
+#include "ComponentTypeRegistry.h"
 #include "Network.h"
 #include "SpriteData.h"
+#include "AnimationState.h"
 #include "Collision.h"
 #include "Transforms.h"
 #include "Log.h"
@@ -12,11 +14,13 @@ namespace AM
 namespace Client
 {
 
-ComponentUpdateSystem::ComponentUpdateSystem(Simulation& inSimulation,
-                                             World& inWorld, Network& inNetwork,
-                                             SpriteData& inSpriteData)
+ComponentUpdateSystem::ComponentUpdateSystem(
+    Simulation& inSimulation, World& inWorld,
+    ComponentTypeRegistry& inComponentTypeRegistry, Network& inNetwork,
+    SpriteData& inSpriteData)
 : simulation{inSimulation}
 , world{inWorld}
+, componentTypeRegistry{inComponentTypeRegistry}
 , network{inNetwork}
 , spriteData{inSpriteData}
 , componentUpdateQueue{network.getEventDispatcher()}
@@ -74,16 +78,8 @@ void ComponentUpdateSystem::processUpdates()
 void ComponentUpdateSystem::processComponentUpdate(
     const ComponentUpdate& componentUpdate)
 {
-    entt::registry& registry{world.registry};
-
-    for (const auto& componentVariant : componentUpdate.components) {
-        std::visit(
-            [&](const auto& component) {
-                using T = std::decay_t<decltype(component)>;
-                registry.emplace_or_replace<T>(componentUpdate.entity,
-                                               component);
-            },
-            componentVariant);
+    for (const SerializedComponent& component : componentUpdate.components) {
+        componentTypeRegistry.loadComponent(component, componentUpdate.entity);
     }
 }
 

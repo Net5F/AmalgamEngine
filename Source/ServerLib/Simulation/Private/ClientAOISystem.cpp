@@ -1,20 +1,18 @@
 #include "ClientAOISystem.h"
 #include "Simulation.h"
 #include "World.h"
+#include "ComponentTypeRegistry.h"
 #include "Network.h"
 #include "Serialize.h"
 #include "ClientSimData.h"
 #include "BoundingBox.h"
 #include "Cylinder.h"
-#include "ReplicatedComponent.h"
 #include "EntityInit.h"
 #include "EntityDelete.h"
 #include "ReplicatedComponentList.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include "tracy/Tracy.hpp"
-#include "boost/mp11/list.hpp"
-#include "boost/mp11/algorithm.hpp"
 #include <algorithm>
 
 #include "Timer.h"
@@ -24,36 +22,12 @@ namespace AM
 namespace Server
 {
 
-/**
- * Retrieves the types in componentIndices for the given entity and pushes
- * them into componentVec.
- *
- * Note: This is a free function to reduce includes in the header.
- */
-void addComponentsToVector(entt::registry& registry, entt::entity entity,
-                           const std::vector<Uint8>& componentIndices,
-                           std::vector<ReplicatedComponent>& componentVec)
-{
-    for (Uint8 componentIndex : componentIndices) {
-        boost::mp11::mp_with_index<
-            boost::mp11::mp_size<ReplicatedComponentTypes>>(
-            componentIndex, [&](auto I) {
-                using T = boost::mp11::mp_at_c<ReplicatedComponentTypes, I>;
-                if constexpr (std::is_empty_v<T>) {
-                    // Note: Can't registry.get() empty types.
-                    componentVec.push_back(T{});
-                }
-                else {
-                    componentVec.push_back(registry.get<T>(entity));
-                }
-            });
-    }
-}
-
 ClientAOISystem::ClientAOISystem(Simulation& inSimulation, World& inWorld,
+                                 ComponentTypeRegistry& inComponentTypeRegistry,
                                  Network& inNetwork)
 : simulation{inSimulation}
 , world{inWorld}
+, componentTypeRegistry{inComponentTypeRegistry}
 , network{inNetwork}
 , entitiesThatLeft{}
 , entitiesThatEntered{}
@@ -139,13 +113,14 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
         // Add the entity and all of its client-relevant components to the
         // message.
         // Note: We send the entity, even if it has no client-relevant
-        // component,
-        //       because there may be a build mode that cares about it.
+        //       component, because there may be a build mode that cares about
+        //       it.
         EntityInit::EntityData& entityData{entityInit.entityData.emplace_back(
             entityThatEntered, registry.get<Position>(entityThatEntered))};
-        addComponentsToVector(registry, entityThatEntered,
-                              replicatedComponentList.typeIndices,
-                              entityData.components);
+        for (Uint8 typeIndex : replicatedComponentList.typeIndices) {
+            componentTypeRegistry.storeComponent(entityThatEntered, typeIndex,
+                                                 entityData.components);
+        }
     }
 
     // Send the message.

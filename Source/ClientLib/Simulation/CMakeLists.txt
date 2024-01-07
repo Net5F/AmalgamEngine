@@ -2,6 +2,7 @@ target_sources(ClientLib
     PRIVATE
         Private/CameraSystem.cpp
         Private/ChunkUpdateSystem.cpp
+        Private/ComponentTypeRegistry.cpp
         Private/ComponentUpdateSystem.cpp
         Private/EntityLifetimeSystem.cpp
         Private/InventorySystem.cpp
@@ -21,6 +22,7 @@ target_sources(ClientLib
     PUBLIC
         Public/CameraSystem.h
         Public/ChunkUpdateSystem.h
+        Public/ComponentTypeRegistry.h
         Public/ComponentUpdateSystem.h
         Public/EntityLifetimeSystem.h
         Public/EnttGroups.h

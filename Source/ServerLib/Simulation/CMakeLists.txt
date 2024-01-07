@@ -6,6 +6,7 @@ target_sources(ServerLib
 		Private/ClientConnectionSystem.cpp
 		Private/ComponentChangeSystem.cpp
 		Private/ComponentSyncSystem.cpp
+		Private/ComponentTypeRegistry.cpp
 		Private/Database.cpp
 		Private/EngineLuaBindings.cpp
 		Private/InputSystem.cpp
@@ -32,6 +33,7 @@ target_sources(ServerLib
 		Public/ClientConnectionSystem.h
 		Public/ComponentChangeSystem.h
 		Public/ComponentSyncSystem.h
+		Public/ComponentTypeRegistry.h
 		Public/Database.h
 		Public/EngineLuaBindings.h
 		Public/EntityItemHandlerScript.h

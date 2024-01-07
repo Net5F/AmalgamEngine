@@ -27,6 +27,9 @@
 #include <queue>
 #include <memory>
 
+#include "Serialize.h"
+#include "Deserialize.h"
+
 namespace sol
 {
 class state;
@@ -34,6 +37,8 @@ class state;
 
 namespace AM
 {
+class ComponentTypeRegistry;
+
 namespace Server
 {
 class Network;
@@ -109,11 +114,6 @@ public:
                                    ItemInteractionData& data);
 
     /**
-     * Returns a reference to the simulation's world state.
-     */
-    World& getWorld();
-
-    /**
      * Returns a reference to the simulation's Lua bindings for entity init
      * processing.
      */
@@ -130,6 +130,16 @@ public:
      * processing.
      */
     sol::state& getItemInitLua();
+
+    /**
+     * Returns a reference to the simulation's world state.
+     */
+    World& getWorld();
+
+    /**
+     * Returns a reference to the entity component type registry.
+     */
+    ComponentTypeRegistry& getComponentTypeRegistry();
 
     /**
      * Returns the simulation's current tick number.
@@ -169,6 +179,9 @@ private:
 
     /** The world's state. */
     World world;
+
+    /** A registry for type-erased management of entity components. */
+    std::unique_ptr<ComponentTypeRegistry> componentTypeRegistry;
 
     /** The tick number that we're currently on. */
     std::atomic<Uint32> currentTick;

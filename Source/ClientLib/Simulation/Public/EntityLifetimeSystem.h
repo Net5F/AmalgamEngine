@@ -11,6 +11,7 @@ namespace Client
 {
 class Simulation;
 class World;
+class ComponentTypeRegistry;
 class Network;
 class SpriteData;
 
@@ -22,7 +23,8 @@ class EntityLifetimeSystem
 {
 public:
     EntityLifetimeSystem(Simulation& inSimulation, World& inWorld,
-                         SpriteData& inSpriteData, Network& inNetwork);
+                         ComponentTypeRegistry& inComponentTypeRegistry,
+                         Network& inNetwork, SpriteData& inSpriteData);
 
     /**
      * Processes any waiting EntityInit or EntityDelete messages.
@@ -51,6 +53,8 @@ private:
     Simulation& simulation;
     /** Used to access components. */
     World& world;
+    /** Used for handling registered components when processing inits. */
+    ComponentTypeRegistry& componentTypeRegistry;
     /** Used to get sprite data when constructing entities. */
     SpriteData& spriteData;
 

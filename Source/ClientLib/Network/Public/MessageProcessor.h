@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ReplicatedComponent.h"
 #include "entt/fwd.hpp"
 #include <SDL_stdinc.h>
 #include <memory>

@@ -10,7 +10,6 @@ namespace AM
  */
 template<typename T>
 struct DiscreteExtent {
-public:
     // Note: Screens and maps start at (0, 0) so we could make these unsigned,
     //       but these are signed to facilitate using this struct for things
     //       like negative offsets.

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ReplicatedComponent.h"
 #include "ComponentUpdate.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/registry.hpp"
@@ -12,6 +11,7 @@ namespace Server
 {
 class Simulation;
 class World;
+class ComponentTypeRegistry;
 class Network;
 class SpriteData;
 
@@ -26,6 +26,7 @@ class ComponentSyncSystem
 {
 public:
     ComponentSyncSystem(Simulation& inSimulation, World& inWorld,
+                        ComponentTypeRegistry& inComponentTypeRegistry,
                         Network& inNetwork, SpriteData& inSpriteData);
 
     /**
@@ -38,6 +39,8 @@ private:
     Simulation& simulation;
     /** Used for fetching component data. */
     World& world;
+    /** Used for handling observed components when sending updates. */
+    ComponentTypeRegistry& componentTypeRegistry;
     /** Used for sending updates to clients. */
     Network& network;
     /** Used to update Collision components when AnimationState is updated. */

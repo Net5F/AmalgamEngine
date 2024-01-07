@@ -10,9 +10,9 @@ namespace AM
 
 /**
  * All of the engine's component types that should be observed and auto-
- * replicated. When an observed component is updated (using patch() or
- * replace()), an Update message containing the component will be sent by the
- * server to all nearby clients.
+ * replicated.
+ *
+ * See ComponentTypeRegistry.h for more info.
  *
  * Note: Every type in this list must also be in EngineReplicatedComponentTypes.
  * Note: For performance reasons, if something is going to be updated very

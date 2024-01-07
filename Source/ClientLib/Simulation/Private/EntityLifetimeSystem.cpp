@@ -1,10 +1,12 @@
 #include "EntityLifetimeSystem.h"
 #include "Simulation.h"
 #include "World.h"
+#include "ComponentTypeRegistry.h"
 #include "Network.h"
 #include "SpriteData.h"
 #include "Name.h"
 #include "PreviousPosition.h"
+#include "AnimationState.h"
 #include "Collision.h"
 #include "UserConfig.h"
 #include "Camera.h"
@@ -24,12 +26,13 @@ namespace AM
 namespace Client
 {
 
-EntityLifetimeSystem::EntityLifetimeSystem(Simulation& inSimulation,
-                                           World& inWorld,
-                                           SpriteData& inSpriteData,
-                                           Network& inNetwork)
+EntityLifetimeSystem::EntityLifetimeSystem(
+    Simulation& inSimulation, World& inWorld,
+    ComponentTypeRegistry& inComponentTypeRegistry, Network& inNetwork,
+    SpriteData& inSpriteData)
 : simulation{inSimulation}
 , world{inWorld}
+, componentTypeRegistry{inComponentTypeRegistry}
 , spriteData{inSpriteData}
 , entityInitSecondaryQueue{}
 , entityInitQueue{inNetwork.getEventDispatcher()}
@@ -138,13 +141,8 @@ void EntityLifetimeSystem::processEntityData(
     registry.emplace<Position>(newEntity, entityData.position);
 
     // Add any replicated components that the server sent.
-    for (const ReplicatedComponent& componentVariant : entityData.components) {
-        std::visit(
-            [&](const auto& component) {
-                using T = std::decay_t<decltype(component)>;
-                registry.emplace<T>(newEntity, component);
-            },
-            componentVariant);
+    for (const SerializedComponent& component : entityData.components) {
+        componentTypeRegistry.loadComponent(component, newEntity);
     }
 
     // Add any client-only or non-replicated components.

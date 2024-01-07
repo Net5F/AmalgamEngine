@@ -17,6 +17,7 @@ namespace Client
 {
 class Network;
 class SpriteData;
+class ComponentTypeRegistry;
 class ISimulationExtension;
 class ChunkUpdateSystem;
 class TileUpdateSystem;
@@ -52,6 +53,11 @@ public:
      * Returns a reference to the simulation's world state.
      */
     World& getWorld();
+
+    /**
+     * Returns a reference to the entity component type registry.
+     */
+    ComponentTypeRegistry& getComponentTypeRegistry();
 
     /**
      * Returns our current tick.
@@ -122,7 +128,11 @@ private:
     Network& network;
     SpriteData& spriteData;
 
+    /** The local world's state. */
     World world;
+
+    /** A registry for type-erased management of entity components. */
+    std::unique_ptr<ComponentTypeRegistry> componentTypeRegistry;
 
     /** The tick number that we're currently on.
         Initialized based on the number that the server tells us it's on. */

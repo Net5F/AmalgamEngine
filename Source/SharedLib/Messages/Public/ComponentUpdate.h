@@ -1,11 +1,10 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "ReplicatedComponent.h"
+#include "SerializedComponent.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
-#include "bitsery/ext/std_variant.h"
-#include "boost/mp11/algorithm.hpp"
+#include <SDL_stdinc.h>
 
 namespace AM
 {
@@ -18,6 +17,10 @@ struct ComponentUpdate {
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::ComponentUpdate};
 
+    /** Used as a "we should never hit this" cap on the number of replicated
+        components for this entity. Only checked in debug builds. */
+    static constexpr std::size_t MAX_COMPONENTS{100};
+
     /** The tick that this update corresponds to. */
     Uint32 tickNum{0};
 
@@ -25,7 +28,7 @@ struct ComponentUpdate {
     entt::entity entity{entt::null};
 
     /** The entity's updated components. */
-    std::vector<ReplicatedComponent> components{};
+    std::vector<SerializedComponent> components{};
 };
 
 template<typename S>
@@ -33,15 +36,8 @@ void serialize(S& serializer, ComponentUpdate& componentUpdate)
 {
     serializer.value4b(componentUpdate.tickNum);
     serializer.value4b(componentUpdate.entity);
-    serializer.enableBitPacking([&](typename S::BPEnabledType& sbp) {
-        sbp.container(componentUpdate.components,
-                      boost::mp11::mp_size<ReplicatedComponentTypes>::value,
-                      [](typename S::BPEnabledType& serializer,
-                         ReplicatedComponent& component) {
-                          // Note: This calls serialize() for each type.
-                          serializer.ext(component, bitsery::ext::StdVariant{});
-                      });
-    });
+    serializer.container(componentUpdate.components,
+                         ComponentUpdate::MAX_COMPONENTS);
 }
 
 } // End namespace AM

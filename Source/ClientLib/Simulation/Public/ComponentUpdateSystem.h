@@ -10,6 +10,7 @@ namespace Client
 {
 class Simulation;
 class World;
+class ComponentTypeRegistry;
 class Network;
 class SpriteData;
 
@@ -20,6 +21,7 @@ class ComponentUpdateSystem
 {
 public:
     ComponentUpdateSystem(Simulation& inSimulation, World& inWorld,
+                          ComponentTypeRegistry& inComponentTypeRegistry,
                           Network& inNetwork, SpriteData& inSpriteData);
 
     ~ComponentUpdateSystem();
@@ -43,6 +45,8 @@ private:
     Simulation& simulation;
     /** Used to access the components we need to update. */
     World& world;
+    /** Used for handling registered components when processing updates. */
+    ComponentTypeRegistry& componentTypeRegistry;
     /** Used to receive component update messages. */
     Network& network;
     /** Used to update Sprite components when AnimationState is updated. */

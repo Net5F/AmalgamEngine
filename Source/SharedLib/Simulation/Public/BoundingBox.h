@@ -11,7 +11,6 @@ struct TileExtent;
  * Represents a set of axis-aligned 3D bounds, forming a box.
  */
 struct BoundingBox {
-public:
     float minX{0};
     float maxX{0};
 

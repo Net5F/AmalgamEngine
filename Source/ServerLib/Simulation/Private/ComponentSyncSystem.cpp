@@ -1,11 +1,9 @@
 #include "ComponentSyncSystem.h"
 #include "Simulation.h"
 #include "World.h"
+#include "ComponentTypeRegistry.h"
 #include "Network.h"
 #include "SpriteData.h"
-#include "EngineObservedComponentTypes.h"
-#include "ProjectObservedComponentTypes.h"
-#include "ReplicatedComponent.h"
 #include "ClientSimData.h"
 #include "Cylinder.h"
 #include "Collision.h"
@@ -13,7 +11,6 @@
 #include "Log.h"
 #include "entt/entity/observer.hpp"
 #include "boost/mp11/algorithm.hpp"
-#include "boost/mp11/map.hpp"
 #include "boost/mp11/bind.hpp"
 #include "tracy/Tracy.hpp"
 
@@ -22,45 +19,16 @@ namespace AM
 namespace Server
 {
 
-//-----------------------------------------------------------------------------
-// Templated type setup
-//-----------------------------------------------------------------------------
-/**
- * See comment in EngineObservedComponents.h
- */
-using ObservedComponentTypes
-    = boost::mp11::mp_append<EngineObservedComponentTypes,
-                             ProjectObservedComponentTypes>;
-
-/** A group and update observer for each observed component type. */
-std::array<entt::observer, boost::mp11::mp_size<ObservedComponentTypes>::value>
-    observers{};
-
-//-----------------------------------------------------------------------------
-// ComponentSyncSystem members
-//-----------------------------------------------------------------------------
-ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,
-                                         World& inWorld, Network& inNetwork,
-                                         SpriteData& inSpriteData)
+ComponentSyncSystem::ComponentSyncSystem(
+    Simulation& inSimulation, World& inWorld,
+    ComponentTypeRegistry& inComponentTypeRegistry, Network& inNetwork,
+    SpriteData& inSpriteData)
 : simulation{inSimulation}
 , world{inWorld}
+, componentTypeRegistry{inComponentTypeRegistry}
 , network{inNetwork}
 , spriteData{inSpriteData}
 {
-    boost::mp11::mp_for_each<ObservedComponentTypes>([&](auto I) {
-        using ObservedComponent = decltype(I);
-        constexpr std::size_t index{
-            boost::mp11::mp_find<ObservedComponentTypes,
-                                 ObservedComponent>::value};
-
-        // TODO: If a client is near an entity when it's constructed, it'll
-        //       receive both an EntityInit and a ComponentUpdate (from the
-        //       group observer). It'd be nice if we could find a way to just
-        //       send one, but until then it isn't a huge cost.
-        observers[index].connect(world.registry,
-                                 entt::collector.group<ObservedComponent>()
-                                     .template update<ObservedComponent>());
-    });
 }
 
 void ComponentSyncSystem::sendUpdates()
@@ -73,28 +41,20 @@ void ComponentSyncSystem::sendUpdates()
     //       any clients nearby to send it to. There may be ways to optimize by
     //       making it client-by-client like MovementSyncSystem.
     // Build an EntityUpdate for each entity that has an updated component.
-    boost::mp11::mp_for_each<ObservedComponentTypes>([&](auto I) {
-        using ObservedComponent = decltype(I);
-        constexpr std::size_t index{
-            boost::mp11::mp_find<ObservedComponentTypes,
-                                 ObservedComponent>::value};
+    auto& observedComponents{componentTypeRegistry.observedComponents};
+    for (std::size_t i = 0; i < observedComponents.size(); ++i) {
+        entt::observer& observer{observedComponents[i].observer};
+        Uint8 typeIndex{observedComponents[i].typeIndex};
 
         // For each entity that was updated, push its components into its
         // message.
-        for (entt::entity entity : observers[index]) {
-            if constexpr (std::is_empty_v<ObservedComponent>) {
-                // Note: Can't registry.get() empty types.
-                componentUpdateMap[entity].components.push_back(
-                    ObservedComponent{});
-            }
-            else {
-                const auto& component{registry.get<ObservedComponent>(entity)};
-                componentUpdateMap[entity].components.push_back(component);
-            }
+        for (entt::entity entity : observer) {
+            componentTypeRegistry.storeComponent(
+                entity, typeIndex, componentUpdateMap[entity].components);
         }
 
-        observers[index].clear();
-    });
+        observer.clear();
+    }
 
     // Send each update to all nearby clients.
     auto view{registry.view<Position, ClientSimData>()};
