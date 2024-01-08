@@ -1,9 +1,5 @@
 #pragma once
 
-// Use the project's Client::Config, if one is provided.
-#if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
-#include "Override/ClientConfig.h"
-#else
 #include "SharedConfig.h"
 #include <SDL_stdinc.h>
 #include <string>
@@ -90,5 +86,3 @@ public:
 
 } // End namespace Client
 } // End namespace AM
-
-#endif // defined(AM_OVERRIDE_CONFIG)

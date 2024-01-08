@@ -1,11 +1,20 @@
 #include "SaveSystem.h"
 #include "World.h"
 #include "Config.h"
+#include "EnginePersistedComponentTypes.h"
+#include "ProjectPersistedComponentTypes.h"
 
 namespace AM
 {
 namespace Server
 {
+
+/**
+ * See comment in EnginePersistedComponents.h
+ */
+using PersistedComponentTypes
+    = boost::mp11::mp_append<EnginePersistedComponentTypes,
+                             ProjectPersistedComponentTypes>;
 
 SaveSystem::SaveSystem(World& inWorld)
 : world{inWorld}

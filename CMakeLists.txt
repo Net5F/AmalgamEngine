@@ -11,10 +11,6 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMake")
 ###############################################################################
 # Options
 ###############################################################################
-set(AM_CONFIG_OVERRIDE_PATH
-    "" CACHE PATH
-    "Override the engine's default config files with the file at the provided path.")
-
 option(AM_BUILD_RESOURCE_IMPORTER "Build Amalgam Engine Resource Importer." OFF)
 
 option(AM_BUILD_TESTS "Build Amalgam Engine tests." OFF)

@@ -1,9 +1,5 @@
 #pragma once
 
-// Use the project's list, if one is provided.
-#if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
-#include "Override/TypeLists/ProjectAITypes.h"
-#else
 #include "boost/mp11/list.hpp"
 
 namespace AM
@@ -20,5 +16,3 @@ using ProjectAITypes = boost::mp11::mp_list<>;
 
 } // End namespace Server
 } // End namespace AM
-
-#endif // defined(AM_OVERRIDE_CONFIG)

@@ -1,9 +1,5 @@
 #pragma once
 
-// Use the project's list, if one is provided.
-#if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
-#include "Override/TypeLists/ProjectPersistedComponentTypes.h"
-#else
 #include "boost/mp11/list.hpp"
 
 namespace AM

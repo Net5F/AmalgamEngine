@@ -22,9 +22,6 @@ namespace AM
 namespace Server
 {
 
-//-----------------------------------------------------------------------------
-// Templated type setup
-//-----------------------------------------------------------------------------
 /**
  * See comment in EngineObservedComponents.h
  */
@@ -36,9 +33,6 @@ using ObservedComponentTypes
 std::array<entt::observer, boost::mp11::mp_size<ObservedComponentTypes>::value>
     observers{};
 
-//-----------------------------------------------------------------------------
-// ComponentSyncSystem members
-//-----------------------------------------------------------------------------
 ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,
                                          World& inWorld, Network& inNetwork,
                                          SpriteData& inSpriteData)

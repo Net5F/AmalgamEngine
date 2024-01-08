@@ -1,9 +1,5 @@
 #pragma once
 
-// Use the project's ItemInteractionType, if one is provided.
-#if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
-#include "Override/ItemInteractionType.h"
-#else
 #include "EngineItemInteractionType.h"
 #include <SDL_stdinc.h>
 
@@ -30,5 +26,3 @@ enum class ItemInteractionType : Uint8 {
 };
 
 } // End namespace AM
-
-#endif // defined(AM_OVERRIDE_CONFIG)

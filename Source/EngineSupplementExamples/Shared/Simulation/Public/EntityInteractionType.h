@@ -1,9 +1,5 @@
 #pragma once
 
-// Use the project's EntityInteractionType, if one is provided.
-#if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
-#include "Override/EntityInteractionType.h"
-#else
 #include "EngineEntityInteractionType.h"
 #include <SDL_stdinc.h>
 
@@ -19,5 +15,3 @@ enum class EntityInteractionType : Uint8 {
 };
 
 } // End namespace AM
-
-#endif // defined(AM_OVERRIDE_CONFIG)
