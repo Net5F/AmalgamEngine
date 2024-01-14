@@ -91,7 +91,7 @@ public:
     ClientMap& getClientMap();
     SharedLockableBase(std::shared_mutex) & getClientMapMutex();
 
-    /** Used for passing us a pointer to the Game's currentTick. */
+    /** Used for passing us a pointer to the sim's currentTick. */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
     /**
@@ -142,7 +142,7 @@ private:
     /** The number of ticks since we last logged our network statistics. */
     unsigned int ticksSinceNetstatsLog;
 
-    /** Pointer to the game's current tick. */
+    /** Pointer to the sim's current tick. */
     const std::atomic<Uint32>* currentTickPtr;
 };
 

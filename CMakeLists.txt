@@ -148,6 +148,7 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/sol2/"
 
 # Configure SQLiteCpp.
 option(SQLITECPP_INCLUDE_SCRIPT "Include config & script files." OFF)
+option(SQLITE_ENABLE_ASSERT_HANDLER "Enable the user definition of a assertion_failed() handler." ON)
 option(SQLITECPP_RUN_CPPLINT "Run cpplint.py tool for Google C++ StyleGuide." OFF)
 option(SQLITECPP_RUN_CPPCHECK "Run cppcheck C++ static analysis tool." OFF)
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/SQLiteCpp/"

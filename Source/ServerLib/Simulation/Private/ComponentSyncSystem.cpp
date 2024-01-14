@@ -42,18 +42,18 @@ ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,
 , spriteData{inSpriteData}
 {
     boost::mp11::mp_for_each<ObservedComponentTypes>([&](auto I) {
-        using ObservedComponent = decltype(I);
-        constexpr std::size_t index{
+        using ComponentType = decltype(I);
+        constexpr std::size_t typeIndex{
             boost::mp11::mp_find<ObservedComponentTypes,
-                                 ObservedComponent>::value};
+                                 ComponentType>::value};
 
         // TODO: If a client is near an entity when it's constructed, it'll
         //       receive both an EntityInit and a ComponentUpdate (from the
         //       group observer). It'd be nice if we could find a way to just
         //       send one, but until then it isn't a huge cost.
-        observers[index].connect(world.registry,
-                                 entt::collector.group<ObservedComponent>()
-                                     .template update<ObservedComponent>());
+        observers[typeIndex].connect(world.registry,
+                                     entt::collector.group<ComponentType>()
+                                         .template update<ComponentType>());
     });
 }
 
@@ -68,26 +68,26 @@ void ComponentSyncSystem::sendUpdates()
     //       making it client-by-client like MovementSyncSystem.
     // Build an EntityUpdate for each entity that has an updated component.
     boost::mp11::mp_for_each<ObservedComponentTypes>([&](auto I) {
-        using ObservedComponent = decltype(I);
-        constexpr std::size_t index{
+        using ComponentType = decltype(I);
+        constexpr std::size_t typeIndex{
             boost::mp11::mp_find<ObservedComponentTypes,
-                                 ObservedComponent>::value};
+                                 ComponentType>::value};
 
         // For each entity that was updated, push its components into its
         // message.
-        for (entt::entity entity : observers[index]) {
-            if constexpr (std::is_empty_v<ObservedComponent>) {
+        for (entt::entity entity : observers[typeIndex]) {
+            if constexpr (std::is_empty_v<ComponentType>) {
                 // Note: Can't registry.get() empty types.
                 componentUpdateMap[entity].components.push_back(
-                    ObservedComponent{});
+                    ComponentType{});
             }
             else {
-                const auto& component{registry.get<ObservedComponent>(entity)};
+                const auto& component{registry.get<ComponentType>(entity)};
                 componentUpdateMap[entity].components.push_back(component);
             }
         }
 
-        observers[index].clear();
+        observers[typeIndex].clear();
     });
 
     // Send each update to all nearby clients.

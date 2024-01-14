@@ -8,6 +8,8 @@
 #include "AnimationState.h"
 #include "Collision.h"
 #include "EntityInitScript.h"
+#include "PersistedEntityData.h"
+#include "Deserialize.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include "Config.h"
@@ -15,6 +17,7 @@
 #include "AMAssert.h"
 #include "sol/sol.hpp"
 #include "boost/mp11/algorithm.hpp"
+#include <type_traits>
 
 namespace AM
 {
@@ -78,10 +81,11 @@ World::World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
     // constructed or destroyed, the associated entity's ReplicatedComponentList
     // will be updated.
     boost::mp11::mp_for_each<ReplicatedComponentTypes>([&](auto I) {
-        using T = decltype(I);
-        registry.on_construct<T>()
-            .template connect<&onComponentConstructed<T>>();
-        registry.on_destroy<T>().template connect<&onComponentDestroyed<T>>();
+        using ComponentType = decltype(I);
+        registry.on_construct<ComponentType>()
+            .template connect<&onComponentConstructed<ComponentType>>();
+        registry.on_destroy<ComponentType>()
+            .template connect<&onComponentDestroyed<ComponentType>>();
     });
 
     // When an entity is destroyed, do any necessary cleanup.
@@ -147,14 +151,28 @@ void World::addGraphicsComponents(entt::entity entity,
     entityLocator.setEntityLocation(entity, collision.worldBounds);
 }
 
-void World::addMovementComponents(entt::entity entity)
+void World::addMovementComponents(entt::entity entity, const Rotation& rotation)
 {
-    registry.emplace<Input>(entity);
-    // Note: All entities have a Position component.
-    registry.emplace<PreviousPosition>(entity, registry.get<Position>(entity));
-    // Note: We normally derive rotation from inputs, but we know the inputs
-    //       are default here.
-    registry.emplace<Rotation>(entity);
+    if (!(registry.all_of<Input>(entity))) {
+        registry.emplace<Input>(entity);
+    }
+
+    if (!(registry.all_of<PreviousPosition>(entity))) {
+        // Note: All entities have a Position component.
+        registry.emplace<PreviousPosition>(entity,
+                                           registry.get<Position>(entity));
+    }
+
+    if (!(registry.all_of<Rotation>(entity))) {
+        // Note: We normally derive rotation from inputs, but we know the inputs
+        //       are default here, and we may be constructing a persisted entity 
+        //       that's facing a non-default direction.
+        registry.emplace<Rotation>(entity, rotation);
+    }
+
+    // Note: Entities also need Collision for the movement systems to pick 
+    //       them up, but that's considered a "graphics" component because it's 
+    //       dependent on AnimationState.
 }
 
 std::string World::runEntityInitScript(entt::entity entity,
@@ -182,32 +200,6 @@ std::string World::runEntityInitScript(entt::entity entity,
     return returnString;
 }
 
-bool World::hasMovementComponents(entt::entity entity) const
-{
-    // Note: Entities also need Rotation and Collision for the movement systems
-    //       to pick them up, but we assume those are present.
-    return registry.all_of<Input, PreviousPosition>(entity);
-}
-
-Position World::getSpawnPoint()
-{
-    switch (Config::SPAWN_STRATEGY) {
-        case SpawnStrategy::Fixed: {
-            return {Config::SPAWN_POINT_FIXED_X, Config::SPAWN_POINT_FIXED_Y};
-        }
-        case SpawnStrategy::Random: {
-            return {xDistribution(generator), yDistribution(generator), 0};
-        }
-        case SpawnStrategy::Grouped: {
-            return getGroupedSpawnPoint();
-        }
-        default: {
-            LOG_FATAL("Invalid spawn strategy.");
-            return {};
-        }
-    }
-}
-
 std::string World::runItemInitScript(Item& item,
                                      const ItemInitScript& initScript)
 {
@@ -229,6 +221,25 @@ std::string World::runItemInitScript(Item& item,
     }
 
     return returnString;
+}
+
+Position World::getSpawnPoint()
+{
+    switch (Config::SPAWN_STRATEGY) {
+        case SpawnStrategy::Fixed: {
+            return {Config::SPAWN_POINT_FIXED_X, Config::SPAWN_POINT_FIXED_Y};
+        }
+        case SpawnStrategy::Random: {
+            return {xDistribution(generator), yDistribution(generator), 0};
+        }
+        case SpawnStrategy::Grouped: {
+            return getGroupedSpawnPoint();
+        }
+        default: {
+            LOG_FATAL("Invalid spawn strategy.");
+            return {};
+        }
+    }
 }
 
 Position World::getGroupedSpawnPoint()
@@ -258,15 +269,57 @@ void World::onEntityDestroyed(entt::entity entity)
 {
     // Remove it from the locator.
     entityLocator.removeEntity(entity);
+
+    // If the entity is in the database, delete it (does nothing if it isn't).
+    database->deleteEntityData(entity);
 }
 
 void World::loadNonClientEntities()
 {
-    //auto loadEntity
-    //    = [&](entt::entity entity, std::string_view serializedComponents) {
-    //};
+    auto loadEntity
+        = [&](entt::entity entity, const Uint8* entityDataBuffer,
+              std::size_t dataSize) {
+        // Deserialize the entity's data.
+        PersistedEntityData persistedEntityData{};
+        Deserialize::fromBuffer(entityDataBuffer, dataSize,
+                                persistedEntityData);
 
-    //database->iterateEntityData(loadEntity);
+        // Add the entity to the registry.
+        entt::entity newEntity{registry.create(persistedEntityData.entity)};
+        if (newEntity != persistedEntityData.entity) {
+            LOG_FATAL("Created entity ID doesn't match saved entity ID. "
+                      "Created: %u, saved: %u",
+                      newEntity, persistedEntityData.entity);
+        }
+
+        // Add RelicatedComponentList so it gets updated as we add others.
+        registry.emplace<ReplicatedComponentList>(newEntity);
+
+        // Load the entity's persisted components into the registry.
+        for (const PersistedComponent& componentVariant :
+             persistedEntityData.components) {
+            std::visit(
+                [&](const auto& component) {
+                    using T = std::decay_t<decltype(component)>;
+                    if constexpr (std::is_same_v<T, Rotation>) {
+                        // Note: We only persist Rotation, but it implies the 
+                        //       rest of the movement components.
+                        addMovementComponents(newEntity, component);
+                    }
+                    else if constexpr (std::is_same_v<T, AnimationState>) {
+                        // Note: We only persist AnimationState, but it implies 
+                        //       the rest of the graphics components.
+                        addGraphicsComponents(newEntity, component);
+                    }
+                    else {
+                        registry.emplace<T>(newEntity, component);
+                    }
+                },
+                componentVariant);
+        }
+    };
+
+    database->iterateEntities(std::move(loadEntity));
 }
 
 void World::loadItems()

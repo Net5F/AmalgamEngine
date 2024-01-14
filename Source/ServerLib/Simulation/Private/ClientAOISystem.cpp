@@ -38,13 +38,14 @@ void addComponentsToVector(entt::registry& registry, entt::entity entity,
         boost::mp11::mp_with_index<
             boost::mp11::mp_size<ReplicatedComponentTypes>>(
             componentIndex, [&](auto I) {
-                using T = boost::mp11::mp_at_c<ReplicatedComponentTypes, I>;
-                if constexpr (std::is_empty_v<T>) {
+                using ComponentType
+                    = boost::mp11::mp_at_c<ReplicatedComponentTypes, I>;
+                if constexpr (std::is_empty_v<ComponentType>) {
                     // Note: Can't registry.get() empty types.
-                    componentVec.push_back(T{});
+                    componentVec.push_back(ComponentType{});
                 }
                 else {
-                    componentVec.push_back(registry.get<T>(entity));
+                    componentVec.push_back(registry.get<ComponentType>(entity));
                 }
             });
     }
@@ -60,13 +61,10 @@ ClientAOISystem::ClientAOISystem(Simulation& inSimulation, World& inWorld,
 {
 }
 
-Timer timer{};
-std::size_t bytesSent{};
 void ClientAOISystem::updateAOILists()
 {
     ZoneScoped;
 
-    timer.reset();
     // Update every client entity's AOI list.
     auto view{world.registry.view<ClientSimData, Position>()};
     for (auto [entity, client, position] : view.each()) {
@@ -109,10 +107,6 @@ void ClientAOISystem::updateAOILists()
         // Save the new list.
         client.entitiesInAOI = currentAOIEntities;
     }
-    if (bytesSent > 0) {
-        LOG_INFO("Sent %u bytes. Took: %.9fs", bytesSent, timer.getTime());
-    }
-    bytesSent = 0;
 }
 
 void ClientAOISystem::processEntitiesThatLeft(ClientSimData& client)
@@ -149,10 +143,7 @@ void ClientAOISystem::processEntitiesThatEntered(ClientSimData& client)
     }
 
     // Send the message.
-    //network.serializeAndSend(client.netID, entityInit);
-    auto message{network.serialize(entityInit)};
-    bytesSent += message->size();
-    network.send(client.netID, std::move(message));
+    network.serializeAndSend(client.netID, entityInit);
 }
 
 } // namespace Server

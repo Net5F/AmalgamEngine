@@ -1,5 +1,6 @@
 #include "NceLifetimeSystem.h"
 #include "World.h"
+#include "Database.h"
 #include "Network.h"
 #include "Name.h"
 #include "Position.h"

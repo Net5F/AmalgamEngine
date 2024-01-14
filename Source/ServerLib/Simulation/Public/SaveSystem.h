@@ -28,6 +28,8 @@ public:
     void saveIfNecessary();
 
 private:
+    void saveNonClientEntities();
+
     World& world;
 
     /** Used to track how much time has passed since the last save. */

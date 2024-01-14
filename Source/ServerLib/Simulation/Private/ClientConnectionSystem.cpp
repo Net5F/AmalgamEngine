@@ -72,7 +72,7 @@ void ClientConnectionSystem::processConnectEvents()
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,
                                         std::vector<entt::entity>());
 
-        world.addMovementComponents(newEntity);
+        world.addMovementComponents(newEntity, Rotation{});
 
         // TODO: When we add character sprite sets, update this.
         Uint16 spriteSetID{

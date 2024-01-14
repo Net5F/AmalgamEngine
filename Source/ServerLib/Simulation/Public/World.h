@@ -96,8 +96,10 @@ public:
 
     /**
      * Adds the components needed for movement to the given entity.
+     * @param rotation The rotation to apply. Only used if the entity doesn't 
+     *                 already have a Rotation component.
      */
-    void addMovementComponents(entt::entity entity);
+    void addMovementComponents(entt::entity entity, const Rotation& rotation);
 
     /**
      * Runs the given init script on the given entity. If successful, adds it
@@ -108,12 +110,6 @@ public:
      */
     std::string runEntityInitScript(entt::entity entity,
                                     const EntityInitScript& initScript);
-
-    /**
-     * Returns true if the given entity has all the components necessary for
-     * movement.
-     */
-    bool hasMovementComponents(entt::entity entity) const;
 
     /**
      * Runs the given init script on the given item. If successful, saves it

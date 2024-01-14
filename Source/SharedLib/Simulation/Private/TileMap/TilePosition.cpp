@@ -28,7 +28,7 @@ Position TilePosition::getCenterPosition()
         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
     static constexpr float HALF_TILE{TILE_WIDTH / 2};
 
-    return {((x * TILE_WIDTH) - HALF_TILE), ((y * TILE_WIDTH) - HALF_TILE), 0};
+    return {((x * TILE_WIDTH) + HALF_TILE), ((y * TILE_WIDTH) + HALF_TILE), 0};
 }
 
 } // End namespace AM

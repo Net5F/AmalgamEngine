@@ -129,7 +129,7 @@ void EntityLifetimeSystem::processEntityData(
     // Create the entity.
     entt::entity newEntity{registry.create(entityData.entity)};
     if (newEntity != entityData.entity) {
-        LOG_FATAL("Created entity doesn't match received entity. "
+        LOG_FATAL("Created entity ID doesn't match received entity ID. "
                   "Created: %u, received: %u",
                   newEntity, entityData.entity);
     }
