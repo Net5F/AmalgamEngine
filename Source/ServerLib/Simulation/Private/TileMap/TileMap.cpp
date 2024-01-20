@@ -110,7 +110,8 @@ void TileMap::save(const std::string& fileName)
     if (saveSuccessful) {
         // Print the time taken.
         double timeTaken{timer.getTime()};
-        LOG_INFO("Saved %u chunks in %.6fs.", chunksProcessed, timeTaken);
+        LOG_INFO("Saved %u chunks in %.6fs.", chunkExtent.getCount(),
+                 timeTaken);
     }
     else {
         LOG_FATAL("Failed to serialize and save the map.");

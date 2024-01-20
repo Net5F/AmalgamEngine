@@ -40,52 +40,48 @@ void addComponentsToVector(entt::registry& registry, entt::entity entity,
 SaveSystem::SaveSystem(World& inWorld)
 : world{inWorld}
 , saveTimer{}
-, mapHasBeenSaved{}
-, nceHaveBeenSaved{}
+, updatedItems{}
 {
+    // When an item is created or updated, add it to updatedItems.
+    world.itemData.itemCreated.connect<&SaveSystem::itemUpdated>(this);
+    world.itemData.itemUpdated.connect<&SaveSystem::itemUpdated>(this);
 }
 
 void SaveSystem::saveIfNecessary()
 {
-    // We stagger the save times so that they don't cause a performance spike.
-    static constexpr float MAP_SAVE_TIME_S{Config::SAVE_PERIOD_S * (1.0/3.0)};
-    static constexpr float NCE_SAVE_TIME_S{Config::SAVE_PERIOD_S * (2.0/3.0)};
-    static constexpr float ITEM_SAVE_TIME_S{Config::SAVE_PERIOD_S * (3.0/3.0)};
+    // If enough time has passed and a backup isn't still underway, save 
+    // everything to the database.
+    if ((saveTimer.getTime() >= Config::SAVE_PERIOD_S)
+        && !(world.database->backupIsInProgress())) {
+        LOG_INFO("Saving entities, items, and map...");
 
-    // If enough time has passed, save the map state to TileMap.bin.
-    //if (!mapHasBeenSaved && (saveTimer.getTime() >= MAP_SAVE_TIME_S)) {
-    //    world.tileMap.save("TileMap.bin");
+        // Save all of our data to the in-memory database.
+        world.database->startTransaction();
 
-    //    mapHasBeenSaved = true;
-    //}
-
-    // If enough time has passed, save the non-client entity state to the 
-    // database.
-    //if (!nceHaveBeenSaved && (saveTimer.getTime() >= NCE_SAVE_TIME_S)) {
-    if (!nceHaveBeenSaved && (saveTimer.getTime() >= 20)) {
         saveNonClientEntities();
+        saveItems();
+        // TODO: Track changed tiles and save to the database.
+        world.tileMap.save("TileMap.bin");
+
+        world.database->commitTransaction();
+
+        // Backup the in-memory database to the file database.
+        world.database->backupToFile();
+
         saveTimer.reset();
-
-        //nceHaveBeenSaved = true;
     }
+}
 
-    // If enough time has passed, save the item definitions to the database.
-    //if (saveTimer.getTime() >= ITEM_SAVE_TIME_S) {
-
-    //    saveTimer.reset();
-    //}
+void SaveSystem::itemUpdated(ItemID itemID)
+{
+    updatedItems.emplace_back(itemID);
 }
 
 void SaveSystem::saveNonClientEntities()
 {
-    LOG_INFO("Saving non-client entities...");
-
-    // Track some stats.
-    Timer timer;
-    std::size_t entityCount{0};
-
-    // Start the transaction.
-    world.database->startTransaction();
+    // Note: If doing a full save ever starts taking too long, we can add 
+    //       an observer that tracks changes to non-client entities and only 
+    //       save those.
 
     // Queue all of our entity save queries.
     auto view{
@@ -100,16 +96,30 @@ void SaveSystem::saveNonClientEntities()
         Serialize::toBuffer(buffer.data(), buffer.size(), persistedEntityData);
 
         world.database->saveEntityData(entity, buffer.data(), buffer.size());
+    }
+}
 
-        entityCount++;
+void SaveSystem::saveItems()
+{
+    // Remove duplicates from the vector.
+    std::sort(updatedItems.begin(), updatedItems.end());
+    updatedItems.erase(
+        std::unique(updatedItems.begin(), updatedItems.end()),
+        updatedItems.end());
+
+    // Queue all of our item save queries.
+    BinaryBuffer buffer{};
+    for (ItemID itemID : updatedItems) {
+        const Item* updatedItem{world.itemData.getItem(itemID)};
+
+        buffer.resize(Serialize::measureSize(*updatedItem));
+        Serialize::toBuffer(buffer.data(), buffer.size(), *updatedItem);
+
+        world.database->saveItemData(updatedItem->numericID, buffer.data(),
+                                     buffer.size());
     }
 
-    // Commit the transaction.
-    world.database->commitTransaction();
-
-    // Print the time taken.
-    double timeTaken{timer.getTime()};
-    LOG_INFO("Saved %u non-client entities in %.6fs.", entityCount, timeTaken);
+    updatedItems.clear();
 }
 
 } // namespace Server

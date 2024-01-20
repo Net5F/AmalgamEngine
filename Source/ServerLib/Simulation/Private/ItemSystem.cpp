@@ -1,6 +1,7 @@
 #include "ItemSystem.h"
 #include "Simulation.h"
 #include "World.h"
+#include "Database.h"
 #include "Network.h"
 #include "ISimulationExtension.h"
 #include "ClientSimData.h"
@@ -12,6 +13,7 @@
 #include "SystemMessage.h"
 #include "Log.h"
 #include "sol/sol.hpp"
+#include <algorithm>
 
 namespace AM
 {
@@ -24,12 +26,15 @@ ItemSystem::ItemSystem(Simulation& inSimulation, Network& inNetwork,
 , network{inNetwork}
 , entityItemHandlerLua{inEntityItemHandlerLua}
 , extension{nullptr}
+, updatedItems{}
 , itemInitRequestQueue{inNetwork.getEventDispatcher()}
 , itemChangeRequestQueue{inNetwork.getEventDispatcher()}
 , combineItemsRequestQueue{inNetwork.getEventDispatcher()}
 , useItemOnEntityRequestQueue{inNetwork.getEventDispatcher()}
 , itemDataRequestQueue{inNetwork.getEventDispatcher()}
 {
+    // When an item is updated, add it to updatedItems.
+    world.itemData.itemUpdated.connect<&ItemSystem::itemUpdated>(this);
 }
 
 void ItemSystem::processItemInteractions()
@@ -70,8 +75,15 @@ void ItemSystem::processItemUpdates()
 
     // If any items definitions were changed, send the new definitions to all
     // players that own that item.
-    const auto& updatedItems{world.itemData.getItemUpdateHistory()};
     if (updatedItems.size() > 0) {
+        // Remove duplicates from the vector.
+        std::sort(updatedItems.begin(), updatedItems.end());
+        updatedItems.erase(
+            std::unique(updatedItems.begin(), updatedItems.end()),
+            updatedItems.end());
+
+        // TODO: Instead of iterating each inventory slot, find a way to 
+        //       sort and efficiently search for matches.
         // If any player's inventory contains an updated item, send the new
         // definition.
         auto view{world.registry.view<ClientSimData, Inventory>()};
@@ -90,7 +102,7 @@ void ItemSystem::processItemUpdates()
             }
         }
 
-        world.itemData.clearItemUpdateHistory();
+        updatedItems.clear();
     }
 
     // Send item definitions to any requestors.
@@ -103,6 +115,11 @@ void ItemSystem::processItemUpdates()
 void ItemSystem::setExtension(ISimulationExtension* inExtension)
 {
     extension = inExtension;
+}
+
+void ItemSystem::itemUpdated(ItemID itemID)
+{
+    updatedItems.emplace_back(itemID);
 }
 
 void ItemSystem::examineItem(const Item* item, NetworkID clientID)
@@ -212,7 +229,8 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 
     // Send the requester the new item's definition.
     network.serializeAndSend(itemInitRequest.netID,
-                             ItemUpdate{newItem->displayName, newItem->stringID,
+                             ItemUpdate{newItem->displayName,
+                                        newItem->stringID,
                                         newItem->numericID, newItem->iconID,
                                         newItem->supportedInteractions});
 }
@@ -227,7 +245,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
         errorType = ItemError::NumericIDNotFound;
     }
     // Check that the string ID isn't taken by another item.
-    else if (const Item * item{world.itemData.getItem(stringID)};
+    else if (const Item* item{world.itemData.getItem(stringID)};
              item && (item->numericID != itemChangeRequest.itemID)) {
         errorType = ItemError::StringIDInUse;
     }
@@ -241,7 +259,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
         return;
     }
 
-    // Build the new or updated item.
+    // Build the updated item.
     Item item{};
     item.displayName = itemChangeRequest.displayName;
     item.numericID = itemChangeRequest.itemID;
@@ -258,16 +276,14 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
     const Item* updatedItem{world.itemData.updateItem(item)};
     AM_ASSERT(updatedItem != nullptr, "Failed to update item.");
 
-    // Send the requester the updated item's definition.
-    if (updatedItem) {
-        // Note: If the requester owns the item, we'll end up double-sending
-        //       them this update, which isn't a big deal.
-        network.serializeAndSend(
-            itemChangeRequest.netID,
-            ItemUpdate{updatedItem->displayName, updatedItem->stringID,
-                       updatedItem->numericID, updatedItem->iconID,
-                       updatedItem->supportedInteractions});
-    }
+    // Send the requester the new item's definition.
+    // Note: If the requester owns the item, we'll end up double-sending
+    //       them this update, which isn't a big deal.
+    network.serializeAndSend(
+        itemChangeRequest.netID,
+        ItemUpdate{updatedItem->displayName, updatedItem->stringID,
+                   updatedItem->numericID, updatedItem->iconID,
+                   updatedItem->supportedInteractions});
 }
 
 void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)

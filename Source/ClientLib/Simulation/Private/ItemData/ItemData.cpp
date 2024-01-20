@@ -6,7 +6,7 @@ namespace AM
 namespace Client
 {
 ItemData::ItemData()
-: ItemDataBase(false)
+: ItemDataBase()
 {
 }
 

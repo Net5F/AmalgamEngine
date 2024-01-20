@@ -324,6 +324,17 @@ void World::loadNonClientEntities()
 
 void World::loadItems()
 {
+    auto loadItem = [&](ItemID itemID, const Uint8* itemDataBuffer,
+                        std::size_t dataSize) {
+        // Deserialize the item's data.
+        Item item{};
+        Deserialize::fromBuffer(itemDataBuffer, dataSize, item);
+
+        // Add the item to ItemData.
+        itemData.createItem(item);
+    };
+
+    database->iterateItems(std::move(loadItem));
 }
 
 } // namespace Server

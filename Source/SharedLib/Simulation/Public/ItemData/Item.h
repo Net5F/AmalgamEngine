@@ -152,7 +152,7 @@ struct Item {
 
         // If this item contains the given property type, return it.
         for (const ItemProperty& property : properties) {
-            if (const T * ptr{std::get_if<T>(&property)}) {
+            if (const T* ptr{std::get_if<T>(&property)}) {
                 return ptr;
             }
         }

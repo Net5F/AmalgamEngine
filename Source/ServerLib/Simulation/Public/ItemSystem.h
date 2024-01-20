@@ -49,6 +49,11 @@ public:
 
 private:
     /**
+     * Adds the given item to updatedItems.
+     */
+    void itemUpdated(ItemID itemID);
+
+    /**
      * Sends the given item's examine text to the given client.
      */
     void examineItem(const Item* item, NetworkID clientID);
@@ -121,6 +126,10 @@ private:
     /** If non-nullptr, contains the project's simulation extension functions.
         Used for checking if item item requests are valid. */
     ISimulationExtension* extension;
+
+    /** Holds a history of items that have been updated.
+        Used to know which items need to be sent to clients. */
+    std::vector<ItemID> updatedItems;
 
     EventQueue<ItemInitRequest> itemInitRequestQueue;
     EventQueue<ItemChangeRequest> itemChangeRequestQueue;

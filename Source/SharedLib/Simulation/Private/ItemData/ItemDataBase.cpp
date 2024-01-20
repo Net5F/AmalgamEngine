@@ -6,13 +6,15 @@
 
 namespace AM
 {
-ItemDataBase::ItemDataBase(bool inTrackItemUpdates)
+ItemDataBase::ItemDataBase()
 : itemMap{}
 , itemStringMap{}
 , itemVersionMap{}
-, trackItemUpdates{inTrackItemUpdates}
-, itemUpdateHistory{}
 , nextItemID{0}
+, itemCreatedSig{}
+, itemUpdatedSig{}
+, itemCreated{itemCreatedSig}
+, itemUpdated{itemUpdatedSig}
 {
     // Add the null item.
     createItem(Item{"Null", "", NULL_ITEM_ID});
@@ -53,6 +55,9 @@ const Item* ItemDataBase::createItem(const Item& item)
         nextItemID = (newItemID + 1);
     }
 
+    // Signal that an item has been created.
+    itemCreatedSig.publish(newItemID);
+
     return &newItem;
 }
 
@@ -88,10 +93,8 @@ const Item* ItemDataBase::updateItem(const Item& newItem)
     // Increment the version.
     itemVersionMap[newItem.numericID]++;
 
-    // If we're tracking item updates, add this one to the history.
-    if (trackItemUpdates) {
-        itemUpdateHistory.emplace_back(newItem.numericID);
-    }
+    // Signal that an item has been updated.
+    itemUpdatedSig.publish(newItem.numericID);
 
     return &item;
 }
@@ -155,16 +158,6 @@ ItemVersion ItemDataBase::getItemVersion(ItemID numericID)
 const std::unordered_map<ItemID, Item>& ItemDataBase::getAllItems() const
 {
     return itemMap;
-}
-
-const std::vector<ItemID>& ItemDataBase::getItemUpdateHistory()
-{
-    return itemUpdateHistory;
-}
-
-void ItemDataBase::clearItemUpdateHistory()
-{
-    itemUpdateHistory.clear();
 }
 
 std::string ItemDataBase::deriveStringID(std::string_view displayName)
