@@ -28,7 +28,8 @@ TileMap::TileMap(SpriteData& inSpriteData)
     // Deserialize the file into a snapshot.
     TileMapSnapshot mapSnapshot;
     std::string mapPath{Paths::BASE_PATH + "TileMap.bin"};
-    if (!Deserialize::fromFile(mapPath, mapSnapshot)) {
+    bool loadSuccessful{Deserialize::fromFile(mapPath, mapSnapshot)};
+    if (!loadSuccessful) {
         LOG_FATAL("Failed to deserialize map at path: %s", mapPath.c_str());
     }
 
@@ -110,7 +111,8 @@ void TileMap::save(const std::string& fileName)
     if (saveSuccessful) {
         // Print the time taken.
         double timeTaken{timer.getTime()};
-        LOG_INFO("Map saved in %.6fs.", timeTaken);
+        LOG_INFO("Saved %u chunks in %.6fs.", chunkExtent.getCount(),
+                 timeTaken);
     }
     else {
         LOG_FATAL("Failed to serialize and save the map.");

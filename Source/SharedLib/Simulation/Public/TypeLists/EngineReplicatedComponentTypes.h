@@ -10,8 +10,6 @@
 
 namespace AM
 {
-namespace EngineComponentLists
-{
 
 /**
  * All of the engine's component types that are relevant to the client.
@@ -21,29 +19,14 @@ namespace EngineComponentLists
  *
  * In other words, adding components to this list will cause them to be sent
  * once. If you want a component to additionally be sent whenever it's updated,
- * add it to ObservedComponentTypes below.
+ * add it to EngineObservedComponentTypes.
  *
  * Note: We handle Position separately because every entity is guaranteed to
  *       have one and it's more efficient to do so.
  * Note: We need Rotation, otherwise entities will face the wrong way on init.
  */
-using ReplicatedComponentTypes
+using EngineReplicatedComponentTypes
     = boost::mp11::mp_list<IsClientEntity, Name, Input, Rotation,
                            AnimationState, Interaction>;
 
-/**
- * All of the engine's component types that should be observed and auto-
- * replicated. When an observed component is updated (using patch() or
- * replace()), an Update message containing the component will be sent by the
- * server to all nearby clients.
- *
- * Note: Every type in this list must also be in ReplicatedComponentTypes.
- * Note: For performance reasons, if something is going to be updated very
- *       frequently (e.g. movement), consider manually handling it in a system
- *       instead of adding it here.
- */
-using ObservedComponentTypes
-    = boost::mp11::mp_list<Name, AnimationState, Interaction>;
-
-} // End namespace EngineComponentLists
 } // End namespace AM

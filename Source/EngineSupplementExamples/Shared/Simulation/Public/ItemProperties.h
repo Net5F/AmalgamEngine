@@ -1,9 +1,5 @@
 #pragma once
 
-// Use the project's ItemProperties, if one is provided.
-#if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
-#include "Override/ItemProperties.h"
-#else
 #include <SDL_stdinc.h>
 #include <string>
 #include <variant>
@@ -28,5 +24,3 @@ void serialize(S& serializer, ItemDescription& itemDescription)
 using ItemProperty = std::variant<ItemDescription>;
 
 } // End namespace AM
-
-#endif // defined(AM_OVERRIDE_CONFIG)

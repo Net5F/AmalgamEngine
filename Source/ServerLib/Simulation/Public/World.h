@@ -16,7 +16,6 @@ class state;
 
 namespace AM
 {
-struct Name;
 struct Position;
 struct AnimationState;
 struct EntityInitScript;
@@ -25,6 +24,7 @@ struct ItemInitScript;
 namespace Server
 {
 class SpriteData;
+class Database;
 
 /**
  * Owns and manages the persistence of all world state.
@@ -47,6 +47,8 @@ public:
     World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
           sol::state& inItemInitLua);
 
+    ~World();
+
     //-------------------------------------------------------------------------
     // World State
     //-------------------------------------------------------------------------
@@ -62,6 +64,10 @@ public:
     /** Spatial partitioning grid for efficiently locating entities by
         position. */
     EntityLocator entityLocator;
+
+    /** The database for saving and loading world data.
+        Kept as a pointer to speed up compilation. */
+    std::unique_ptr<Database> database;
 
     /** Maps network IDs to entity IDs.
         Used for interfacing with the Network. */
@@ -90,8 +96,10 @@ public:
 
     /**
      * Adds the components needed for movement to the given entity.
+     * @param rotation The rotation to apply. Only used if the entity doesn't 
+     *                 already have a Rotation component.
      */
-    void addMovementComponents(entt::entity entity);
+    void addMovementComponents(entt::entity entity, const Rotation& rotation);
 
     /**
      * Runs the given init script on the given entity. If successful, adds it
@@ -102,12 +110,6 @@ public:
      */
     std::string runEntityInitScript(entt::entity entity,
                                     const EntityInitScript& initScript);
-
-    /**
-     * Returns true if the given entity has all the components necessary for
-     * movement.
-     */
-    bool hasMovementComponents(entt::entity entity) const;
 
     /**
      * Runs the given init script on the given item. If successful, saves it
@@ -134,6 +136,16 @@ private:
      * Does any necessary cleanup to the given entity.
      */
     void onEntityDestroyed(entt::entity entity);
+
+    /**
+     * Loads our saved non-client entities and adds them to the registry.
+     */
+    void loadNonClientEntities();
+
+    /**
+     * Loads our saved items and adds them to itemData.
+     */
+    void loadItems();
 
     /** Used to get sprite info. */
     const SpriteData& spriteData;

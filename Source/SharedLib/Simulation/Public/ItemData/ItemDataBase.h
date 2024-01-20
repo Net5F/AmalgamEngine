@@ -2,6 +2,7 @@
 
 #include "Item.h"
 #include "IDPool.h"
+#include "entt/signal/sigh.hpp"
 #include <SDL_stdinc.h>
 #include <vector>
 #include <unordered_map>
@@ -30,11 +31,10 @@ class ItemDataBase
 public:
     /**
      * Requests the item data from the database.
-     *
-     * @param inTrackItemUpdates  If true, item updates will be pushed into
-     *                            itemUpdateHistory.
      */
-    ItemDataBase(bool inTrackItemUpdates);
+    ItemDataBase();
+
+    virtual ~ItemDataBase() = default;
 
     /**
      * Creates a new item with the given ID.
@@ -46,7 +46,7 @@ public:
      * @return If an item with the given ID or displayName exists, does nothing
      *         and returns nullptr. Else, returns the new item.
      */
-    const Item* createItem(const Item& newItem);
+    virtual const Item* createItem(const Item& newItem);
 
     /**
      * Updates the item at newItem.numericID to match the given item, then
@@ -59,7 +59,7 @@ public:
      *         changed but already taken, returns nullptr. Else, returns the
      *         updated item.
      */
-    const Item* updateItem(const Item& newItem);
+    virtual const Item* updateItem(const Item& newItem);
 
     /**
      * @return If no item with the given ID exists, returns nullptr. Else,
@@ -137,17 +137,20 @@ protected:
               separately (e.g. sending ID + version for Inventory). */
     std::unordered_map<ItemID, ItemVersion> itemVersionMap;
 
-    /** If true, all item updates will be pushed into itemUpdateHistory. */
-    bool trackItemUpdates;
-
-    /** Holds a history of items that have been updated.
-        ItemSystem uses this history to send updates to clients, then
-        clears it. */
-    std::vector<ItemID> itemUpdateHistory;
-
     /** Tracks the next numeric item ID to use (typically 1 greater than the
         highest ID in our maps). */
     ItemID nextItemID{};
+
+private:
+    entt::sigh<void(ItemID)> itemCreatedSig;
+    entt::sigh<void(ItemID)> itemUpdatedSig;
+
+public:
+    /** An item has been created. */
+    entt::sink<entt::sigh<void(ItemID)>> itemCreated;
+
+    /** An item has been updated. */
+    entt::sink<entt::sigh<void(ItemID)>> itemUpdated;
 };
 
 } // End namespace AM

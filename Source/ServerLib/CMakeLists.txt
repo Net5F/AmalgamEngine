@@ -37,6 +37,8 @@ target_link_libraries(ServerLib
         EnTT::EnTT
         Lua
         sol2::sol2
+        SQLiteCpp
+        sqlite3
         QueuedEvents
         SharedLib
         Tracy::TracyClient

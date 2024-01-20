@@ -3,16 +3,16 @@ cmake_minimum_required(VERSION 3.13)
 ###############################################################################
 # Modules
 ###############################################################################
-# Configure shared library.
+# Configure Shared library.
 add_subdirectory(SharedLib)
 
-# Configure client library.
+# Configure Client library.
 add_subdirectory(ClientLib)
 
-# Configure server library.
+# Configure Server library.
 add_subdirectory(ServerLib)
 
-# Configure resource importer.
+# Configure Resource Importer.
 if (AM_BUILD_RESOURCE_IMPORTER)
     add_subdirectory(ResourceImporter)
 endif()

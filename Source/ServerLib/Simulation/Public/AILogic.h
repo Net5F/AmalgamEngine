@@ -9,29 +9,22 @@ namespace Server
 class World;
 
 /**
- * Base class for entity AI logic.
+ * Interface class for entity AI logic.
  */
 class AILogic
 {
 public:
-    /**
-     * @param inEntity The entity that this AI is controlling.
-     */
-    AILogic(World& inWorld, entt::entity inEntity);
-
+    // Note: We pass world and entity as parameters so that we don't have to 
+    //       deal with a World& member during serialization.
     /**
      * Processes one iteration of AI logic.
      *
      * If the given entity doesn't possess any of the necessary components,
      * prints a warning and returns early.
+     *
+     * @param entity The entity that this AI is controlling.
      */
-    virtual void tick() = 0;
-
-protected:
-    World& world;
-
-    /** The entity that this AI is controlling. */
-    entt::entity entity;
+    virtual void tick(World& world, entt::entity entity) = 0;
 };
 
 } // namespace Server

@@ -1,9 +1,5 @@
 #pragma once
 
-// Use the project's Server::Config, if one is provided.
-#if defined(AM_OVERRIDE_DEFAULT_CONFIGS)
-#include "Override/ServerConfig.h"
-#else
 #include "SpawnStrategy.h"
 #include "SharedConfig.h"
 #include "ConstexprTools.h"
@@ -64,8 +60,9 @@ public:
     static constexpr float SPAWN_POINT_GROUP_OFFSET_X{0};
     static constexpr float SPAWN_POINT_GROUP_OFFSET_Y{400};
 
-    /** How often the world's tile map should be saved, in seconds. */
-    static constexpr float MAP_SAVE_PERIOD_S{60 * 15};
+    /** How often the world's data (tile map, entities, etc) should be saved, 
+        in seconds. */
+    static constexpr float SAVE_PERIOD_S{60 * 15};
 
     //-------------------------------------------------------------------------
     // Network
@@ -127,5 +124,3 @@ public:
 
 } // End namespace Server
 } // End namespace AM
-
-#endif // defined(AM_OVERRIDE_CONFIG)

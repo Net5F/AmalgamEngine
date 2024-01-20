@@ -32,13 +32,11 @@ public:
     double getTimeAndReset();
 
 private:
-    /**
-     * How fast the processor is running.
-     * SDL sets this once on init and never changes it.
-     */
-    const double period;
+    /** How fast the processor is running. SDL sets this once on init and 
+        never changes it.  */
+    double period;
 
-    // The saved time in integer ticks from SDL_GetPerformanceCounter().
+    /** The saved time in integer ticks from SDL_GetPerformanceCounter(). */
     Uint64 savedTimestamp;
 };
 

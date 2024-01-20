@@ -32,10 +32,10 @@ struct EntityInit {
     Uint32 tickNum{0};
 
     struct EntityData {
-        /** The entity's ID. */
+        /** This entity's ID. */
         entt::entity entity{entt::null};
 
-        /** The entity's Position. */
+        /** This entity's Position. */
         Position position{};
 
         /** This entity's optional client-relevant components. */

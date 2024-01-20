@@ -3,7 +3,6 @@ target_sources(ClientLib
         Private/UserConfig.cpp
         Private/UserConfigInitializer.cpp
     PUBLIC
-        Public/Config.h
         Public/UserConfig.h
         Public/UserConfigInitializer.h
         Public/UserConfigStructs.h

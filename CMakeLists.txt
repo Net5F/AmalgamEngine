@@ -11,10 +11,6 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMake")
 ###############################################################################
 # Options
 ###############################################################################
-set(AM_CONFIG_OVERRIDE_PATH
-    "" CACHE PATH
-    "Override the engine's default config files with the file at the provided path.")
-
 option(AM_BUILD_RESOURCE_IMPORTER "Build Amalgam Engine Resource Importer." OFF)
 
 option(AM_BUILD_TESTS "Build Amalgam Engine tests." OFF)
@@ -149,6 +145,14 @@ option(SOL2_SYSTEM_INCLUDE "Sol2 as system include" OFF)
 option(SOL2_ENABLE_INSTALL "Enable installation of Sol2" OFF)
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/sol2/"
                  "${PROJECT_BINARY_DIR}/Libraries/sol2/")
+
+# Configure SQLiteCpp.
+option(SQLITECPP_INCLUDE_SCRIPT "Include config & script files." OFF)
+option(SQLITE_ENABLE_ASSERT_HANDLER "Enable the user definition of a assertion_failed() handler." ON)
+option(SQLITECPP_RUN_CPPLINT "Run cpplint.py tool for Google C++ StyleGuide." OFF)
+option(SQLITECPP_RUN_CPPCHECK "Run cppcheck C++ static analysis tool." OFF)
+add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/SQLiteCpp/"
+                 "${PROJECT_BINARY_DIR}/Libraries/SQLiteCpp/")
 
 # Configure header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/CMake/readerwriterqueue.cmake")

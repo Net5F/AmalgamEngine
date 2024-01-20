@@ -122,6 +122,7 @@ private:
     Network& network;
     SpriteData& spriteData;
 
+    /** The local world's state. */
     World world;
 
     /** The tick number that we're currently on.

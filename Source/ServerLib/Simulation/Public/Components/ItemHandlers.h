@@ -15,6 +15,11 @@ namespace Server
  * in order for anything to happen when that item is used on this entity.
  */
 struct ItemHandlers {
+    /** Used as a "we should never hit this" cap on the number of item 
+        handlers that a component can have assigned.
+        Only checked in debug builds. */
+    static constexpr std::size_t MAX_HANDLERS{500};
+
     /**
      * A single item + handler pair.
      */
@@ -40,6 +45,19 @@ struct ItemHandlers {
                                   EntityItemHandlerScript{handlerScript});
     }
 };
+
+template<typename S>
+void serialize(S& serializer, ItemHandlers::HandlerPair& handlerPair)
+{
+    serializer.value2b(handlerPair.itemToHandleID);
+    serializer.object(handlerPair.handlerScript);
+}
+
+template<typename S>
+void serialize(S& serializer, ItemHandlers& itemHandlers)
+{
+    serializer.container(itemHandlers.handlerPairs, ItemHandlers::MAX_HANDLERS);
+}
 
 } // namespace Server
 } // namespace AM

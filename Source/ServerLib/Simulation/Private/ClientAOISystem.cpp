@@ -17,6 +17,8 @@
 #include "boost/mp11/algorithm.hpp"
 #include <algorithm>
 
+#include "Timer.h"
+
 namespace AM
 {
 namespace Server
@@ -36,13 +38,14 @@ void addComponentsToVector(entt::registry& registry, entt::entity entity,
         boost::mp11::mp_with_index<
             boost::mp11::mp_size<ReplicatedComponentTypes>>(
             componentIndex, [&](auto I) {
-                using T = boost::mp11::mp_at_c<ReplicatedComponentTypes, I>;
-                if constexpr (std::is_empty_v<T>) {
+                using ComponentType
+                    = boost::mp11::mp_at_c<ReplicatedComponentTypes, I>;
+                if constexpr (std::is_empty_v<ComponentType>) {
                     // Note: Can't registry.get() empty types.
-                    componentVec.push_back(T{});
+                    componentVec.push_back(ComponentType{});
                 }
                 else {
-                    componentVec.push_back(registry.get<T>(entity));
+                    componentVec.push_back(registry.get<ComponentType>(entity));
                 }
             });
     }

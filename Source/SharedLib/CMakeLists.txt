@@ -29,14 +29,6 @@ target_link_libraries(SharedLib
         Tracy::TracyClient
 )
 
-# Use the config override path, if one was provided.
-# Note: This propagates to ClientLib, ServerLib, etc (since they include 
-#       SharedLib and the compile option is public).
-if (NOT AM_CONFIG_OVERRIDE_PATH STREQUAL "")
-    target_include_directories(SharedLib PUBLIC ${AM_CONFIG_OVERRIDE_PATH})
-    target_compile_options(SharedLib PUBLIC -DAM_OVERRIDE_DEFAULT_CONFIGS)
-endif()
-
 # Compile with C++20.
 target_compile_features(SharedLib PRIVATE cxx_std_20)
 set_target_properties(SharedLib PROPERTIES CXX_EXTENSIONS OFF)
@@ -52,7 +44,6 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 # Build all of the subdirectories.
-add_subdirectory(Config)
 add_subdirectory(Messages)
 add_subdirectory(Network)
 add_subdirectory(Simulation)
