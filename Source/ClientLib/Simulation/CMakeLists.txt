@@ -41,6 +41,7 @@ target_sources(ClientLib
         Public/Components/NeedsAdjacentChunks.h
         Public/IconData/IconData.h
         Public/IconData/IconRenderData.h
+        Public/ItemData/ItemCache.h
         Public/ItemData/ItemData.h
         Public/SpriteData/SpriteData.h
         Public/SpriteData/SpriteRenderData.h

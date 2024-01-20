@@ -26,6 +26,16 @@ public:
     void processItemUpdates();
 
 private:
+    /**
+     * Loads all items from ItemCache.bin into ItemData.
+     */
+    void loadItemCache();
+
+    /**
+     * Saves all items from ItemData into ItemCache.bin.
+     */
+    void saveItemCache();
+
     /** Used for accessing item data. */
     World& world;
     /** Used for sending requests and receiving item data. */

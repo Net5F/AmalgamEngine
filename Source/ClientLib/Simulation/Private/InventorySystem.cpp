@@ -5,6 +5,7 @@
 #include "ItemDataRequest.h"
 #include "AMAssert.h"
 #include "Log.h"
+#include <algorithm>
 
 namespace AM
 {
@@ -54,14 +55,15 @@ void InventorySystem::initInventory(const InventoryInit& inventoryInit)
                 if ((itemSlot.ID && !(world.itemData.itemExists(itemSlot.ID)))
                     || (world.itemData.getItemVersion(itemSlot.ID)
                         < itemSlot.version)) {
-                    // Only request each ID once.
-                    if (std::find(itemsToRequest.begin(), itemsToRequest.end(),
-                                  itemSlot.ID)
-                        == itemsToRequest.end()) {
-                        itemsToRequest.push_back(itemSlot.ID);
-                    }
+                    itemsToRequest.push_back(itemSlot.ID);
                 }
             }
+
+            // Remove duplicates from the vector.
+            std::sort(itemsToRequest.begin(), itemsToRequest.end());
+            itemsToRequest.erase(
+                std::unique(itemsToRequest.begin(), itemsToRequest.end()),
+                itemsToRequest.end());
 
             // Request definitions for any out-of-date items.
             for (ItemID itemID : itemsToRequest) {
