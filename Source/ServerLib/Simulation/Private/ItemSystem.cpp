@@ -154,6 +154,11 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
             network.serializeAndSend(clientID,
                                      SystemMessage{combination->description});
         }
+        else {
+            // No combination for the item. Give the user feedback.
+            network.serializeAndSend(clientID,
+                                     SystemMessage{"Nothing happens."});
+        }
     }
 }
 
