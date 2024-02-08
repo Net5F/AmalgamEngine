@@ -8,7 +8,6 @@
 
 #include <memory>
 #include <functional>
-#include "Ignore.h"
 
 namespace AM
 {
@@ -131,11 +130,9 @@ bool Application::enoughTimeTillNextCall(double minimumTime)
     }
 }
 
-int Application::filterEvents(void* userData, SDL_Event* event)
+int Application::filterEvents(void*, SDL_Event*)
 {
-    Application* app{static_cast<Application*>(userData)};
-    ignore(event);
-    ignore(app);
+    //Application* app{static_cast<Application*>(userData)};
 
     // Currently no events that we care to filter.
     //

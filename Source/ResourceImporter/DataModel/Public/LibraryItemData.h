@@ -6,6 +6,7 @@
 #include "EditorWallSpriteSet.h"
 #include "EditorObjectSpriteSet.h"
 #include "EditorIcon.h"
+#include "EditorBoundingBox.h"
 #include <variant>
 
 namespace AM
@@ -22,7 +23,7 @@ namespace ResourceImporter
 using LibraryItemData
     = std::variant<std::monostate, EditorSprite, EditorFloorSpriteSet,
                    EditorFloorCoveringSpriteSet, EditorWallSpriteSet,
-                   EditorObjectSpriteSet, EditorIcon>;
+                   EditorObjectSpriteSet, EditorIcon, EditorBoundingBox>;
 
 } // End namespace ResourceImporter
 } // End namespace AM

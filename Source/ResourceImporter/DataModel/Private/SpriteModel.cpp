@@ -28,13 +28,15 @@ SpriteModel::SpriteModel(DataModel& inDataModel,
 , spriteRemovedSig{}
 , spriteDisplayNameChangedSig{}
 , spriteCollisionEnabledChangedSig{}
-, spriteModelBoundsChangedSig{}
+, spriteModelBoundsIDChangedSig{}
+, spriteCustomModelBoundsChangedSig{}
 , sheetAdded{sheetAddedSig}
 , sheetRemoved{sheetRemovedSig}
 , spriteRemoved{spriteRemovedSig}
 , spriteDisplayNameChanged{spriteDisplayNameChangedSig}
 , spriteCollisionEnabledChanged{spriteCollisionEnabledChangedSig}
-, spriteModelBoundsChanged{spriteModelBoundsChangedSig}
+, spriteModelBoundsIDChanged{spriteModelBoundsIDChangedSig}
+, spriteCustomModelBoundsChanged{spriteCustomModelBoundsChangedSig}
 {
 }
 
@@ -61,7 +63,7 @@ void SpriteModel::save(nlohmann::json& json)
 {
     json["spriteSheets"] = nlohmann::json::array();
 
-    // Fill the json with our current model data.
+    /* Fill the json with our current model data. */
     // For each sprite sheet.
     int i{0};
     for (auto& sheetPair : spriteSheetMap) {
@@ -101,19 +103,28 @@ void SpriteModel::save(nlohmann::json& json)
             json["spriteSheets"][i]["sprites"][j]["collisionEnabled"]
                 = sprite.collisionEnabled;
 
+            // Add modelBoundsID.
+            json["spriteSheets"][i]["sprites"][j]["modelBoundsID"]
+                = sprite.modelBoundsID;
+
             // Add the model-space bounds.
+            // Note: This will either be a shared bounding box or a custom one 
+            //       depending on modelBoundsID. The engine doesn't care either 
+            //       way, it just needs to know what the bounds are. 
+            const BoundingBox& spriteModelBounds{
+                sprite.getModelBounds(dataModel.boundingBoxModel)}; 
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minX"]
-                = sprite.modelBounds.minX;
+                = spriteModelBounds.minX;
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxX"]
-                = sprite.modelBounds.maxX;
+                = spriteModelBounds.maxX;
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minY"]
-                = sprite.modelBounds.minY;
+                = spriteModelBounds.minY;
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxY"]
-                = sprite.modelBounds.maxY;
+                = spriteModelBounds.maxY;
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minZ"]
-                = sprite.modelBounds.minZ;
+                = spriteModelBounds.minZ;
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxZ"]
-                = sprite.modelBounds.maxZ;
+                = spriteModelBounds.maxZ;
         }
 
         i++;
@@ -199,10 +210,10 @@ bool SpriteModel::addSpriteSheet(const std::string& relPath,
 
             // Add the sprite to the map and sheet.
             int spriteID{static_cast<int>(spriteIDPool.reserveID())};
-            spriteMap.emplace(spriteID,
-                              EditorSprite{spriteID, spriteSheet.relPath,
-                                           displayName, textureExtent, yOffsetI,
-                                           true, defaultBox});
+            spriteMap.emplace(
+                spriteID, EditorSprite{spriteID, spriteSheet.relPath,
+                                       displayName, textureExtent, yOffsetI,
+                                       true, NULL_BOUNDING_BOX_ID, defaultBox});
             spriteSheet.spriteIDs.push_back(spriteID);
 
             // Increment the count (used for the display name).
@@ -304,19 +315,34 @@ void SpriteModel::setSpriteCollisionEnabled(int spriteID,
     spriteCollisionEnabledChangedSig.publish(spriteID, newCollisionEnabled);
 }
 
-void SpriteModel::setSpriteModelBounds(int spriteID,
+void SpriteModel::setSpriteModelBoundsID(int spriteID,
+                                         BoundingBoxID newModelBoundsID)
+{
+    auto spritePair{spriteMap.find(spriteID)};
+    if (spritePair == spriteMap.end()) {
+        LOG_FATAL("Tried to set modelBoundsID using invalid sprite ID.");
+    }
+
+    // Set the new ID and signal the change.
+    EditorSprite& sprite{spritePair->second};
+    sprite.modelBoundsID = newModelBoundsID;
+
+    spriteModelBoundsIDChangedSig.publish(spriteID, newModelBoundsID);
+}
+
+void SpriteModel::setSpriteCustomModelBounds(int spriteID,
                                        const BoundingBox& newModelBounds)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
-        LOG_FATAL("Tried to set boundingBox using invalid sprite ID.");
+        LOG_FATAL("Tried to set customModelBounds using invalid sprite ID.");
     }
 
     // Set the new model bounds and signal the change.
     EditorSprite& sprite{spritePair->second};
-    sprite.modelBounds = newModelBounds;
+    sprite.customModelBounds = newModelBounds;
 
-    spriteModelBoundsChangedSig.publish(spriteID, newModelBounds);
+    spriteCustomModelBoundsChangedSig.publish(spriteID, newModelBounds);
 }
 
 void SpriteModel::resetModelState()
@@ -391,13 +417,19 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     // Add collisionEnabled.
     sprite.collisionEnabled = spriteJson.at("collisionEnabled");
 
-    // Add the model-space bounds.
-    sprite.modelBounds.minX = spriteJson.at("modelBounds").at("minX");
-    sprite.modelBounds.maxX = spriteJson.at("modelBounds").at("maxX");
-    sprite.modelBounds.minY = spriteJson.at("modelBounds").at("minY");
-    sprite.modelBounds.maxY = spriteJson.at("modelBounds").at("maxY");
-    sprite.modelBounds.minZ = spriteJson.at("modelBounds").at("minZ");
-    sprite.modelBounds.maxZ = spriteJson.at("modelBounds").at("maxZ");
+    // Add modelBoundsID.
+    sprite.modelBoundsID = spriteJson.at("modelBoundsID");
+
+    // Add the custom model-space bounds.
+    // Note: Even if this sprite uses a shared bounding box (modelBoundsID != 
+    //       NULL_BOUNDING_BOX_ID), we want to save customModelBounds to give 
+    //       the user a starting point if they switch to it.
+    sprite.customModelBounds.minX = spriteJson.at("modelBounds").at("minX");
+    sprite.customModelBounds.maxX = spriteJson.at("modelBounds").at("maxX");
+    sprite.customModelBounds.minY = spriteJson.at("modelBounds").at("minY");
+    sprite.customModelBounds.maxY = spriteJson.at("modelBounds").at("maxY");
+    sprite.customModelBounds.minZ = spriteJson.at("modelBounds").at("minZ");
+    sprite.customModelBounds.maxZ = spriteJson.at("modelBounds").at("maxZ");
 
     return true;
 }

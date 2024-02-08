@@ -17,25 +17,30 @@ namespace AM
 {
 namespace ResourceImporter
 {
-SpritePropertiesWindow::SpritePropertiesWindow(DataModel& inDataModel)
-: AUI::Window({1617, 0, 303, 518}, "SpritePropertiesWindow")
+SpritePropertiesWindow::SpritePropertiesWindow(
+    DataModel& inDataModel, const LibraryWindow& inLibraryWindow)
+: AUI::Window({1617, 0, 303, 579}, "SpritePropertiesWindow")
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
 , nameInput{{24, 84, 255, 38}, "NameInput"}
 , collisionEnabledLabel{{24, 160, 210, 27}, "CollisionLabel"}
 , collisionEnabledInput{{257, 162, 22, 22}, "CollisionInput"}
-, minXLabel{{24, 210, 110, 38}, "MinXLabel"}
-, minXInput{{150, 204, 129, 38}, "MinXInput"}
-, minYLabel{{24, 260, 110, 38}, "MinYLabel"}
-, minYInput{{150, 254, 129, 38}, "MinYInput"}
-, minZLabel{{24, 310, 110, 38}, "MinZLabel"}
-, minZInput{{150, 304, 129, 38}, "MinZInput"}
-, maxXLabel{{24, 360, 110, 38}, "MaxXLabel"}
-, maxXInput{{150, 354, 129, 38}, "MaxXInput"}
-, maxYLabel{{24, 410, 110, 38}, "MaxYLabel"}
-, maxYInput{{150, 404, 129, 38}, "MaxYInput"}
-, maxZLabel{{24, 460, 110, 38}, "MaxZLabel"}
-, maxZInput{{150, 454, 129, 38}, "MaxZInput"}
+, boundingBoxLabel{{24, 199, 210, 27}, "BoundingBoxLabel"}
+, boundingBoxNameLabel{{24, 232, 178, 21}, "BoundingBoxNameLabel"}
+, boundingBoxButton{{207, 225, 72, 26}, "Assign", "BoundingBoxButton"}
+, minXLabel{{24, 271, 110, 38}, "MinXLabel"}
+, minXInput{{150, 265, 129, 38}, "MinXInput"}
+, minYLabel{{24, 321, 110, 38}, "MinYLabel"}
+, minYInput{{150, 315, 129, 38}, "MinYInput"}
+, minZLabel{{24, 371, 110, 38}, "MinZLabel"}
+, minZInput{{150, 365, 129, 38}, "MinZInput"}
+, maxXLabel{{24, 421, 110, 38}, "MaxXLabel"}
+, maxXInput{{150, 415, 129, 38}, "MaxXInput"}
+, maxYLabel{{24, 471, 110, 38}, "MaxYLabel"}
+, maxYInput{{150, 465, 129, 38}, "MaxYInput"}
+, maxZLabel{{24, 521, 110, 38}, "MaxZLabel"}
+, maxZInput{{150, 515, 129, 38}, "MaxZInput"}
 , dataModel{inDataModel}
+, libraryWindow{inLibraryWindow}
 , activeSpriteID{NULL_SPRITE_ID}
 , committedMinX{0.0}
 , committedMinY{0.0}
@@ -43,7 +48,7 @@ SpritePropertiesWindow::SpritePropertiesWindow(DataModel& inDataModel)
 , committedMaxX{0.0}
 , committedMaxY{0.0}
 , committedMaxZ{0.0}
-, backgroundImage{{0, 0, 303, 518}, "PropertiesBackground"}
+, backgroundImage{{0, 0, 303, 579}, "PropertiesBackground"}
 , headerImage{{0, 0, 303, 40}, "PropertiesHeader"}
 , windowLabel{{12, 0, 282, 40}, "PropertiesWindowLabel"}
 {
@@ -55,6 +60,9 @@ SpritePropertiesWindow::SpritePropertiesWindow(DataModel& inDataModel)
     children.push_back(nameInput);
     children.push_back(collisionEnabledLabel);
     children.push_back(collisionEnabledInput);
+    children.push_back(boundingBoxLabel);
+    children.push_back(boundingBoxNameLabel);
+    children.push_back(boundingBoxButton);
     children.push_back(minXLabel);
     children.push_back(minXInput);
     children.push_back(minYLabel);
@@ -99,6 +107,18 @@ SpritePropertiesWindow::SpritePropertiesWindow(DataModel& inDataModel)
                                                       + "Checkbox/Checked.png");
     collisionEnabledInput.setOnChecked([this]() { saveCollisionEnabled(); });
     collisionEnabledInput.setOnUnchecked([this]() { saveCollisionEnabled(); });
+
+    /* Bounding box selection. */
+    boundingBoxLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
+    boundingBoxLabel.setColor({255, 255, 255, 255});
+    boundingBoxLabel.setText("Bounding Box");
+
+    boundingBoxNameLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 16);
+    boundingBoxNameLabel.setColor({255, 255, 255, 255});
+    boundingBoxNameLabel.setText("");
+
+    boundingBoxButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 14);
+    boundingBoxButton.setOnPressed([&]() { saveModelBoundsID(); });
 
     /* Minimum X-axis bounds entry. */
     minXLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
@@ -163,8 +183,10 @@ SpritePropertiesWindow::SpritePropertiesWindow(DataModel& inDataModel)
     spriteModel.spriteCollisionEnabledChanged
         .connect<&SpritePropertiesWindow::onSpriteCollisionEnabledChanged>(
             *this);
-    spriteModel.spriteModelBoundsChanged
-        .connect<&SpritePropertiesWindow::onSpriteModelBoundsChanged>(*this);
+    spriteModel.spriteModelBoundsIDChanged
+        .connect<&SpritePropertiesWindow::onSpriteModelBoundsIDChanged>(*this);
+    spriteModel.spriteCustomModelBoundsChanged
+        .connect<&SpritePropertiesWindow::onSpriteCustomModelBoundsChanged>(*this);
     spriteModel.spriteRemoved.connect<&SpritePropertiesWindow::onSpriteRemoved>(
         *this);
 }
@@ -192,12 +214,26 @@ void SpritePropertiesWindow::onActiveLibraryItemChanged(
         collisionEnabledInput.setCurrentState(AUI::Checkbox::State::Unchecked);
     }
 
-    minXInput.setText(toRoundedString(newActiveSprite->modelBounds.minX));
-    minYInput.setText(toRoundedString(newActiveSprite->modelBounds.minY));
-    minZInput.setText(toRoundedString(newActiveSprite->modelBounds.minZ));
-    maxXInput.setText(toRoundedString(newActiveSprite->modelBounds.maxX));
-    maxYInput.setText(toRoundedString(newActiveSprite->modelBounds.maxY));
-    maxZInput.setText(toRoundedString(newActiveSprite->modelBounds.maxZ));
+    if (newActiveSprite->modelBoundsID) {
+        const EditorBoundingBox& boundingBox{
+            dataModel.boundingBoxModel.getBoundingBox(
+                newActiveSprite->modelBoundsID)};
+        boundingBoxNameLabel.setText(boundingBox.displayName);
+        setBoundsFieldsEnabled(false);
+    }
+    else {
+        boundingBoxNameLabel.setText("<Custom>");
+        setBoundsFieldsEnabled(true);
+    }
+
+    const BoundingBox& spriteModelBounds{
+        newActiveSprite->getModelBounds(dataModel.boundingBoxModel)};
+    minXInput.setText(toRoundedString(spriteModelBounds.minX));
+    minYInput.setText(toRoundedString(spriteModelBounds.minY));
+    minZInput.setText(toRoundedString(spriteModelBounds.minZ));
+    maxXInput.setText(toRoundedString(spriteModelBounds.maxX));
+    maxYInput.setText(toRoundedString(spriteModelBounds.maxY));
+    maxZInput.setText(toRoundedString(spriteModelBounds.maxZ));
 }
 
 void SpritePropertiesWindow::onSpriteRemoved(int spriteID)
@@ -205,6 +241,7 @@ void SpritePropertiesWindow::onSpriteRemoved(int spriteID)
     if (spriteID == activeSpriteID) {
         activeSpriteID = NULL_SPRITE_ID;
         nameInput.setText("");
+        boundingBoxNameLabel.setText("");
         minXInput.setText("");
         minYInput.setText("");
         minZInput.setText("");
@@ -237,16 +274,68 @@ void SpritePropertiesWindow::onSpriteCollisionEnabledChanged(
     }
 }
 
-void SpritePropertiesWindow::onSpriteModelBoundsChanged(
-    int spriteID, const BoundingBox& newModelBounds)
+void SpritePropertiesWindow::onSpriteModelBoundsIDChanged(
+    int spriteID, BoundingBoxID newModelBoundsID)
+{
+    // If the sprite isn't active, do nothing.
+    if (spriteID != activeSpriteID) {
+        return;
+    }
+
+    // Whether they're enabled or not, the fields should show the correct bounds.
+    const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
+    const BoundingBox& newModelBounds{
+        sprite.getModelBounds(dataModel.boundingBoxModel)};
+
+    if (newModelBoundsID) {
+        const EditorBoundingBox& boundingBox{
+            dataModel.boundingBoxModel.getBoundingBox(newModelBoundsID)};
+        boundingBoxNameLabel.setText(boundingBox.displayName);
+        setBoundsFieldsEnabled(false);
+    }
+    else {
+        boundingBoxNameLabel.setText("<Custom>");
+        setBoundsFieldsEnabled(true);
+    }
+
+    minXInput.setText(toRoundedString(newModelBounds.minX));
+    minYInput.setText(toRoundedString(newModelBounds.minY));
+    minZInput.setText(toRoundedString(newModelBounds.minZ));
+    maxXInput.setText(toRoundedString(newModelBounds.maxX));
+    maxYInput.setText(toRoundedString(newModelBounds.maxY));
+    maxZInput.setText(toRoundedString(newModelBounds.maxZ));
+}
+
+void SpritePropertiesWindow::onSpriteCustomModelBoundsChanged(
+    int spriteID, const BoundingBox& newCustomModelBounds)
 {
     if (spriteID == activeSpriteID) {
-        minXInput.setText(toRoundedString(newModelBounds.minX));
-        minYInput.setText(toRoundedString(newModelBounds.minY));
-        minZInput.setText(toRoundedString(newModelBounds.minZ));
-        maxXInput.setText(toRoundedString(newModelBounds.maxX));
-        maxYInput.setText(toRoundedString(newModelBounds.maxY));
-        maxZInput.setText(toRoundedString(newModelBounds.maxZ));
+        minXInput.setText(toRoundedString(newCustomModelBounds.minX));
+        minYInput.setText(toRoundedString(newCustomModelBounds.minY));
+        minZInput.setText(toRoundedString(newCustomModelBounds.minZ));
+        maxXInput.setText(toRoundedString(newCustomModelBounds.maxX));
+        maxYInput.setText(toRoundedString(newCustomModelBounds.maxY));
+        maxZInput.setText(toRoundedString(newCustomModelBounds.maxZ));
+    }
+}
+
+void SpritePropertiesWindow::setBoundsFieldsEnabled(bool isEnabled)
+{
+    if (isEnabled) {
+        minXInput.enable();
+        minYInput.enable();
+        minZInput.enable();
+        maxXInput.enable();
+        maxYInput.enable();
+        maxZInput.enable();
+    }
+    else {
+        minXInput.disable();
+        minYInput.disable();
+        minZInput.disable();
+        maxXInput.disable();
+        maxYInput.disable();
+        maxZInput.disable();
     }
 }
 
@@ -271,6 +360,32 @@ void SpritePropertiesWindow::saveCollisionEnabled()
                                                     collisionEnabled);
 }
 
+void SpritePropertiesWindow::saveModelBoundsID()
+{
+    SpriteModel& spriteModel{dataModel.spriteModel};
+
+    // If a bounding box is selected, assign it to the active sprite.
+    const auto& selectedListItems{libraryWindow.getSelectedListItems()};
+    bool boundingBoxIsSelected{false};
+    for (const LibraryListItem* selectedItem : selectedListItems) {
+        // If this is a sprite, update this slot in the model.
+        if (selectedItem->type == LibraryListItem::Type::BoundingBox) {
+            boundingBoxIsSelected = true;
+            spriteModel.setSpriteModelBoundsID(
+                activeSpriteID, static_cast<BoundingBoxID>(selectedItem->ID));
+        }
+    }
+
+    // If a bounding box isn't selected and the sprite isn't already set to a 
+    // custom bounding box, set it.
+    if (!boundingBoxIsSelected
+        && (spriteModel.getSprite(activeSpriteID).modelBoundsID
+            != NULL_BOUNDING_BOX_ID)) {
+        spriteModel.setSpriteModelBoundsID(activeSpriteID,
+                                           NULL_BOUNDING_BOX_ID);
+    }
+}
+
 void SpritePropertiesWindow::saveMinX()
 {
     // Validate the user input as a valid float.
@@ -279,13 +394,15 @@ void SpritePropertiesWindow::saveMinX()
         float newMinX{std::stof(minXInput.getText())};
 
         // Clamp the value to its bounds.
+        const EditorSprite& activeSprite{
+            dataModel.spriteModel.getSprite(activeSpriteID)};
         BoundingBox newModelBounds{
-            dataModel.spriteModel.getSprite(activeSpriteID).modelBounds};
+            activeSprite.getModelBounds(dataModel.boundingBoxModel)};
         newModelBounds.minX = std::clamp(newMinX, 0.f, newModelBounds.maxX);
 
         // Apply the new value.
-        dataModel.spriteModel.setSpriteModelBounds(activeSpriteID,
-                                                   newModelBounds);
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinX));
@@ -300,13 +417,15 @@ void SpritePropertiesWindow::saveMinY()
         float newMinY{std::stof(minYInput.getText())};
 
         // Clamp the value to its bounds.
+        const EditorSprite& activeSprite{
+            dataModel.spriteModel.getSprite(activeSpriteID)};
         BoundingBox newModelBounds{
-            dataModel.spriteModel.getSprite(activeSpriteID).modelBounds};
+            activeSprite.getModelBounds(dataModel.boundingBoxModel)};
         newModelBounds.minY = std::clamp(newMinY, 0.f, newModelBounds.maxY);
 
         // Apply the new value.
-        dataModel.spriteModel.setSpriteModelBounds(activeSpriteID,
-                                                   newModelBounds);
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinY));
@@ -321,13 +440,15 @@ void SpritePropertiesWindow::saveMinZ()
         float newMinZ{std::stof(minZInput.getText())};
 
         // Clamp the value to its bounds.
+        const EditorSprite& activeSprite{
+            dataModel.spriteModel.getSprite(activeSpriteID)};
         BoundingBox newModelBounds{
-            dataModel.spriteModel.getSprite(activeSpriteID).modelBounds};
+            activeSprite.getModelBounds(dataModel.boundingBoxModel)};
         newModelBounds.minY = std::clamp(newMinZ, 0.f, newModelBounds.maxZ);
 
         // Apply the new value.
-        dataModel.spriteModel.setSpriteModelBounds(activeSpriteID,
-                                                   newModelBounds);
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinZ));
@@ -344,15 +465,15 @@ void SpritePropertiesWindow::saveMaxX()
         // Clamp the value to its bounds.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
-
-        BoundingBox newModelBounds{activeSprite.modelBounds};
+        BoundingBox newModelBounds{
+            activeSprite.getModelBounds(dataModel.boundingBoxModel)};
         newModelBounds.maxX
             = std::clamp(newMaxX, newModelBounds.minX,
                          static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
         // Apply the new value.
-        dataModel.spriteModel.setSpriteModelBounds(activeSpriteID,
-                                                   newModelBounds);
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxXInput.setText(std::to_string(committedMaxX));
@@ -369,15 +490,15 @@ void SpritePropertiesWindow::saveMaxY()
         // Clamp the value to its bounds.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
-
-        BoundingBox newModelBounds{activeSprite.modelBounds};
+        BoundingBox newModelBounds{
+            activeSprite.getModelBounds(dataModel.boundingBoxModel)};
         newModelBounds.maxY
             = std::clamp(newMaxY, newModelBounds.minY,
                          static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
         // Apply the new value.
-        dataModel.spriteModel.setSpriteModelBounds(activeSpriteID,
-                                                   newModelBounds);
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));
@@ -396,17 +517,18 @@ void SpritePropertiesWindow::saveMaxZ()
         //       and not very useful. Can add if we ever care to.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
-        float minZ{activeSprite.modelBounds.minZ};
+        BoundingBox newModelBounds{
+            activeSprite.getModelBounds(dataModel.boundingBoxModel)};
+        float minZ{newModelBounds.minZ};
         if (newMaxZ < minZ) {
             newMaxZ = minZ;
         }
 
-        BoundingBox newModelBounds{activeSprite.modelBounds};
         newModelBounds.maxZ = newMaxZ;
 
         // Apply the new value.
-        dataModel.spriteModel.setSpriteModelBounds(activeSpriteID,
-                                                   newModelBounds);
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));

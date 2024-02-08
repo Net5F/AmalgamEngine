@@ -19,6 +19,7 @@ target_sources(SharedLib
         Private/TileMap/TilePosition.cpp
 	PUBLIC
         Public/BoundingBox.h
+        Public/BoundingBoxID.h
         Public/Cylinder.h
         Public/DiscreteExtent.h
         Public/DiscreteImpl.h

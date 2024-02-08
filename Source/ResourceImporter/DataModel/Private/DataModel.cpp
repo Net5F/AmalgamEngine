@@ -15,7 +15,8 @@ namespace AM
 namespace ResourceImporter
 {
 DataModel::DataModel(SDL_Renderer* inSdlRenderer)
-: spriteSetModel{*this}
+: boundingBoxModel{*this}
+, spriteSetModel{*this}
 , spriteModel{*this, spriteSetModel, inSdlRenderer}
 , iconModel{*this, inSdlRenderer}
 , workingFilePath{""}
@@ -82,7 +83,10 @@ bool DataModel::load(const std::string& fullPath)
 
     // Load the data into each model.
     if (parseError == "") {
-        if (!spriteModel.load(json)) {
+        if (!boundingBoxModel.load(json)) {
+            parseError = boundingBoxModel.getErrorString();
+        }
+        else if (!spriteModel.load(json)) {
             parseError = spriteModel.getErrorString();
         }
         else if (!spriteSetModel.load(json)) {
@@ -106,6 +110,7 @@ void DataModel::save()
 {
     // Save each part of the model to a json object.
     nlohmann::json json;
+    boundingBoxModel.save(json);
     spriteModel.save(json);
     spriteSetModel.save(json);
     iconModel.save(json);
@@ -118,6 +123,17 @@ void DataModel::save()
 
     std::string jsonDump{json.dump(4)};
     workingFile << jsonDump;
+}
+
+void DataModel::setActiveBoundingBox(BoundingBoxID newActiveBoundingBoxID)
+{
+    // Note: This will error if the ID is invalid. This is good, since we don't
+    //       expect any invalid IDs to be floating around.
+    const EditorBoundingBox& boundingBox{
+        boundingBoxModel.getBoundingBox(newActiveBoundingBoxID)};
+
+    // Signal the active bounding box to the UI.
+    activeLibraryItemChangedSig.publish(boundingBox);
 }
 
 void DataModel::setActiveSprite(int newActiveSpriteID)
@@ -165,11 +181,11 @@ void DataModel::setActiveSpriteSet(SpriteSet::Type type,
 
 void DataModel::setActiveIcon(IconID newActiveIconID)
 {
-    // Note: This will error if the sprite ID is invalid. This is good, since
-    //       we don't expect any invalid IDs to be floating around.
+    // Note: This will error if the ID is invalid. This is good, since we don't
+    //       expect any invalid IDs to be floating around.
     const EditorIcon& icon{iconModel.getIcon(newActiveIconID)};
 
-    // Signal the active sprite to the UI.
+    // Signal the active icon to the UI.
     activeLibraryItemChangedSig.publish(icon);
 }
 

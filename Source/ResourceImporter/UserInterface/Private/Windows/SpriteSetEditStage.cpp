@@ -45,10 +45,10 @@ SpriteSetEditStage::SpriteSetEditStage(DataModel& inDataModel,
 
     styleText(modifyText);
     modifyText.setText("To modify: select a sprite in the Library window, then "
-                       "press one of the ASSIGN buttons.");
+                       "press one of the Assign buttons.");
     styleText(clearText);
     clearText.setText("To clear: click an empty area to clear your selection, "
-                      "then press one of the ASSIGN buttons.");
+                      "then press one of the Assign buttons.");
     styleText(descText1);
     styleText(descText2);
     styleText(descText3);

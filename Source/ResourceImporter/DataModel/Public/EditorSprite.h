@@ -1,7 +1,8 @@
 #pragma once
 
-#include "BoundingBox.h"
 #include "NullSpriteID.h"
+#include "BoundingBoxID.h"
+#include "BoundingBox.h"
 #include <SDL_rect.h>
 #include <string>
 
@@ -9,6 +10,8 @@ namespace AM
 {
 namespace ResourceImporter
 {
+
+class BoundingBoxModel;
 
 /**
  * Holds the data necessary for editing and saving a sprite.
@@ -36,10 +39,24 @@ struct EditorSprite {
         carpets usually don't need collision. */
     bool collisionEnabled{false};
 
-    /** Model-space bounding box. Defines the sprite's 3D volume.
+    /** If non-null, this is the ID of this sprite's model-space bounding box.
+        Defines the sprite's 3D volume.
         Used in hit testing for user mouse events, and for collision checks (
         if collisionEnabled). */
-    BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
+    BoundingBoxID modelBoundsID{NULL_BOUNDING_BOX_ID};
+
+    /** If modelBoundsID is null, this is the sprite's custom model-space 
+        bounding box. */
+    BoundingBox customModelBounds{};
+
+    /**
+     * Returns this sprite's model-space bounding box.
+     *
+     * If modelBoundsID is non-null, returns the associated bounding box. Else, 
+     * returns customModelBounds.
+     */
+    const BoundingBox&
+        getModelBounds(const BoundingBoxModel& boundingBoxModel) const;
 };
 
 } // namespace ResourceImporter

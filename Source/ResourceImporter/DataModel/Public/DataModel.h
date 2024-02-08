@@ -2,8 +2,9 @@
 
 #include "SpriteSets.h"
 #include "LibraryItemData.h"
-#include "SpriteModel.h"
+#include "BoundingBoxModel.h"
 #include "SpriteSetModel.h"
+#include "SpriteModel.h"
 #include "IconModel.h"
 #include "entt/signal/sigh.hpp"
 #include "nlohmann/json_fwd.hpp"
@@ -32,7 +33,9 @@ class DataModel
 public:
     DataModel(SDL_Renderer* inSdlRenderer);
 
-    // Note: We put SpriteSetModel first because SpriteModel is dependent on it.
+    /** Holds bounding box data. */
+    BoundingBoxModel boundingBoxModel;
+
     /** Holds Floor, FloorCovering, Wall, and Object SpriteSet data. */
     SpriteSetModel spriteSetModel;
 
@@ -70,13 +73,19 @@ public:
      */
     void save();
 
+    // Note: Each of these "setActive" functions affect the current active 
+    //       library item. There's only 1 active library item at a time, these 
+    //       are only set up like this because they aren't easily templated.
+    /** Sets the current active library item to the given bounding box. */
+    void setActiveBoundingBox(BoundingBoxID newActiveBoundingBoxID);
+
     /** Sets the current active library item to the given sprite. */
     void setActiveSprite(int newActiveSpriteID);
 
     /** Sets the current active library item to the given sprite set. */
     void setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveSpriteSetID);
 
-    /** Sets the current active library item to the given sprite. */
+    /** Sets the current active library item to the given icon. */
     void setActiveIcon(IconID newActiveIconID);
 
     const std::string& getWorkingTexturesDir();

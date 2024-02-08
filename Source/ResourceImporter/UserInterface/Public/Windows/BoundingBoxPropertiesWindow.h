@@ -18,16 +18,17 @@ class DataModel;
 class LibraryWindow;
 
 /**
- * The properties window shown when the user loads a sprite from the Library.
- * Allows the user to edit the active sprite's properties.
+ * The properties window shown when the user loads a bounding box from the 
+ * Library.
+ * Allows the user to edit the active bounding box's properties.
  */
-class SpritePropertiesWindow : public AUI::Window
+class BoundingBoxPropertiesWindow : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpritePropertiesWindow(DataModel& ineDataModel,
+    BoundingBoxPropertiesWindow(DataModel& ineDataModel,
                            const LibraryWindow& inLibraryWindow);
 
     //-------------------------------------------------------------------------
@@ -38,13 +39,6 @@ public:
         information. */
     AUI::Text nameLabel;
     MainTextInput nameInput;
-
-    AUI::Text collisionEnabledLabel;
-    AUI::Checkbox collisionEnabledInput;
-
-    AUI::Text boundingBoxLabel;
-    AUI::Text boundingBoxNameLabel;
-    MainButton boundingBoxButton;
 
     AUI::Text minXLabel;
     MainTextInput minXInput;
@@ -66,32 +60,24 @@ public:
 
 private:
     /**
-     * If the new active item is a sprite, loads it's data into this panel.
+     * If the new active item is a bounding box, loads it's data into this panel.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If active sprite was removed) Sets this panel back to its default state.
+     * (If active bounding box was removed) Sets this panel back to its default 
+     * state.
      */
-    void onSpriteRemoved(int spriteID);
+    void onBoundingBoxRemoved(BoundingBoxID boundingBoxID);
 
     /**
-     * (If ID matches active sprite) Updates this panel with the active sprite's
-     * new properties.
+     * (If ID matches active bounding box) Updates this panel with the active 
+     * bounding box's new properties.
      */
-    void onSpriteDisplayNameChanged(int spriteID,
-                                    const std::string& newDisplayName);
-    void onSpriteCollisionEnabledChanged(int spriteID,
-                                         bool newCollisionEnabled);
-    void onSpriteModelBoundsIDChanged(int spriteID,
-                                      BoundingBoxID newModelBoundsID);
-    void onSpriteCustomModelBoundsChanged(
-        int spriteID, const BoundingBox& newCustomModelBounds);
-
-    /**
-     * Enables or disables the min/max bounds fields.
-     */
-    void setBoundsFieldsEnabled(bool isEnabled);
+    void onBoundingBoxDisplayNameChanged(BoundingBoxID boundingBoxID,
+                                         const std::string& newDisplayName);
+    void onBoundingBoxBoundsChanged(BoundingBoxID boundingBoxID,
+                                    const BoundingBox& newBounds);
 
     /** Used while setting user-inputted sprite data. */
     DataModel& dataModel;
@@ -99,8 +85,8 @@ private:
     /** Used to get the currently selected list item. */
     const LibraryWindow& libraryWindow;
 
-    /** The active sprite's ID. */
-    int activeSpriteID;
+    /** The active bounding box's ID. */
+    BoundingBoxID activeBoundingBoxID;
 
     /**
      * Converts the given float to a string with 3 decimals of precision.
@@ -110,8 +96,6 @@ private:
     /** The below functions are all for validating and saving the user's data
         when the text is committed. */
     void saveName();
-    void saveCollisionEnabled();
-    void saveModelBoundsID();
     void saveMinX();
     void saveMinY();
     void saveMinZ();

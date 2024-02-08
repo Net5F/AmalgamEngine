@@ -3,6 +3,7 @@
 #include "AUI/Widget.h"
 #include "AUI/Image.h"
 #include "AUI/Text.h"
+#include <functional>
 
 namespace AM
 {
@@ -63,12 +64,14 @@ public:
      * The types of list items that we hold in the library.
      */
     enum Type {
+        BoundingBox,
         SpriteSheet,
         Sprite,
         Floor,
         FloorCovering,
         Wall,
         Object,
+        /*Entity,*/
         IconSheet,
         Icon,
         Count,
@@ -78,7 +81,7 @@ public:
 
     /** Alongside type, associates this list item with the model data that it
         represents.
-        Note: For sprite sets, this can be cast to Uint16. */
+        Note: For unsigned IDs, this can be cast to Uint16. */
     int ID{0};
 
     //-------------------------------------------------------------------------

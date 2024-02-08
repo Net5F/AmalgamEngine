@@ -54,7 +54,7 @@ public:
      * Removes the sprite set of the appropriate type with the given ID from
      * the associated map.
      *
-     * Error if the given ID isn't preset in the map.
+     * Error if the given ID isn't present in the map.
      *
      * @param spriteSetID  The editor ID of the sprite set to remove.
      */

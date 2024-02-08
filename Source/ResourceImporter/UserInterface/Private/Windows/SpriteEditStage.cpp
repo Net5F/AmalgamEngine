@@ -66,8 +66,16 @@ SpriteEditStage::SpriteEditStage(DataModel& inDataModel)
     // When the active sprite is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
         .connect<&SpriteEditStage::onActiveLibraryItemChanged>(*this);
+    dataModel.spriteModel.spriteModelBoundsIDChanged
+        .connect<&SpriteEditStage::onSpriteModelBoundsIDChanged>(*this);
+    dataModel.spriteModel.spriteCustomModelBoundsChanged
+        .connect<&SpriteEditStage::onSpriteCustomModelBoundsChanged>(*this);
     dataModel.spriteModel.spriteRemoved
         .connect<&SpriteEditStage::onSpriteRemoved>(*this);
+
+    // When the gizmo updates the active sprite's bounds, push it to the model.
+    boundingBoxGizmo.boundingBoxUpdated
+        .connect<&SpriteEditStage::onGizmoBoundingBoxUpdated>(*this);
 }
 
 void SpriteEditStage::onActiveLibraryItemChanged(
@@ -92,9 +100,7 @@ void SpriteEditStage::onActiveLibraryItemChanged(
     SDL_Rect centeredSpriteExtent{newActiveSprite->textureExtent};
     centeredSpriteExtent.x = logicalExtent.w / 2;
     centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
-    centeredSpriteExtent.y = AUI::ScalingHelpers::logicalToActual(212);
-
-    // Size the sprite image to the sprite extent size.
+    centeredSpriteExtent.y = 212 - logicalExtent.y;
     spriteImage.setLogicalExtent(centeredSpriteExtent);
 
     // Set the background and gizmo to the size of the sprite.
@@ -105,8 +111,53 @@ void SpriteEditStage::onActiveLibraryItemChanged(
     checkerboardImage.setIsVisible(true);
     spriteImage.setIsVisible(true);
 
+    // Set up the gizmo with the new sprite's data.
+    boundingBoxGizmo.setXOffset(
+        static_cast<int>(newActiveSprite->textureExtent.w / 2.f));
+    boundingBoxGizmo.setYOffset(newActiveSprite->yOffset);
+    boundingBoxGizmo.setBoundingBox(
+        newActiveSprite->getModelBounds(dataModel.boundingBoxModel));
+
     // If the gizmo isn't visible, make it visible.
     boundingBoxGizmo.setIsVisible(true);
+}
+
+void SpriteEditStage::onSpriteModelBoundsIDChanged(int spriteID,
+    BoundingBoxID newModelBoundsID)
+{
+    // If the sprite isn't active, do nothing.
+    if (spriteID != activeSpriteID) {
+        return;
+    }
+
+    // If the sprite is using a shared bounding box, disable the gizmo.
+    if (newModelBoundsID) {
+        boundingBoxGizmo.disable();
+    }
+    else {
+        // The sprite is using custom bounds, enable the gizmo.
+        boundingBoxGizmo.enable();
+    }
+
+    // Whether it's enabled or not, the gizmo should show the correct bounds.
+    const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
+    const BoundingBox& newModelBounds{
+        sprite.getModelBounds(dataModel.boundingBoxModel)};
+
+    boundingBoxGizmo.setBoundingBox(newModelBounds);
+}
+
+void SpriteEditStage::onSpriteCustomModelBoundsChanged(
+    int spriteID, const BoundingBox& newCustomModelBounds)
+{
+    // If the sprite isn't active or isn't set to custom bounds, do nothing.
+    const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
+    if ((spriteID != activeSpriteID) || sprite.modelBoundsID) {
+        return;
+    }
+
+    // Update the gizmo.
+    boundingBoxGizmo.setBoundingBox(newCustomModelBounds);
 }
 
 void SpriteEditStage::onSpriteRemoved(int spriteID)
@@ -118,6 +169,23 @@ void SpriteEditStage::onSpriteRemoved(int spriteID)
         checkerboardImage.setIsVisible(false);
         spriteImage.setIsVisible(false);
         boundingBoxGizmo.setIsVisible(false);
+    }
+}
+
+void SpriteEditStage::onGizmoBoundingBoxUpdated(const BoundingBox& boundingBox)
+{
+    if (activeSpriteID != NULL_SPRITE_ID) {
+        // If the sprite isn't set to use a custom model, do nothing (should 
+        // never happen since the gizmo should be disabled).
+        const EditorSprite& sprite{
+            dataModel.spriteModel.getSprite(activeSpriteID)};
+        if (sprite.modelBoundsID) {
+            return;
+        }
+
+        // Update the model with the gizmo's new state.
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         boundingBox);
     }
 }
 

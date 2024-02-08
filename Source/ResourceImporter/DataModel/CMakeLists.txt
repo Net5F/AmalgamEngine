@@ -1,11 +1,15 @@
 target_sources(ResourceImporter
     PRIVATE
+        Private/BoundingBoxModel.cpp
         Private/DataModel.cpp
+        Private/EditorSprite.cpp
         Private/IconModel.cpp
         Private/SpriteModel.cpp
         Private/SpriteSetModel.cpp
     PUBLIC
+        Public/BoundingBoxModel.h
         Public/DataModel.h
+        Public/EditorBoundingBox.h
         Public/EditorFloorCoveringSpriteSet.h
         Public/EditorFloorSpriteSet.h
         Public/EditorIcon.h

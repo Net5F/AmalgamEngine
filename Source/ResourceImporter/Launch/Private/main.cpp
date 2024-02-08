@@ -1,6 +1,5 @@
 #include "Log.h"
 #include "Application.h"
-#include "Ignore.h"
 
 #include "SDL2pp/Exception.hh"
 
@@ -9,12 +8,9 @@
 using namespace AM;
 using namespace AM::ResourceImporter;
 
-int main(int argc, char** argv)
+// SDL2 needs this signature for main, but we don't use the parameters.
+int main(int, char**)
 try {
-    // SDL2 needs this signature for main, but we don't use the parameters.
-    ignore(argc);
-    ignore(argv);
-
     // Set up file logging.
     Log::enableFileLogging("ResourceImporter.log");
 

@@ -16,10 +16,12 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , libraryWindow{*this, dataModel}
 , libraryAddMenu{}
 , saveButtonWindow{*this, dataModel}
+, boundingBoxEditStage{dataModel, libraryWindow}
+, boundingBoxPropertiesWindow{dataModel, libraryWindow}
 , spriteEditStage{dataModel}
 , iconEditStage{dataModel}
 , spriteSetEditStage{dataModel, libraryWindow}
-, spritePropertiesWindow{dataModel}
+, spritePropertiesWindow{dataModel, libraryWindow}
 , spriteSetPropertiesWindow{dataModel}
 , iconPropertiesWindow{dataModel}
 , confirmationDialog{{0, 0, 1920, 1080}, "ConfirmationDialog"}
@@ -29,6 +31,8 @@ MainScreen::MainScreen(DataModel& inDataModel)
     // Add our windows so they're included in rendering, etc.
     windows.push_back(libraryWindow);
     windows.push_back(saveButtonWindow);
+    windows.push_back(boundingBoxEditStage);
+    windows.push_back(boundingBoxPropertiesWindow);
     windows.push_back(spriteEditStage);
     windows.push_back(spriteSetEditStage);
     windows.push_back(iconEditStage);
@@ -58,42 +62,25 @@ MainScreen::MainScreen(DataModel& inDataModel)
     confirmationDialog.bodyText.setColor({255, 255, 255, 255});
 
     // Buttons.
-    confirmationDialog.confirmButton.setLogicalExtent({1045, 520, 123, 56});
-    confirmationDialog.confirmButton.normalImage.setLogicalExtent(
-        {0, 0, 123, 56});
-    confirmationDialog.confirmButton.hoveredImage.setLogicalExtent(
-        {0, 0, 123, 56});
-    confirmationDialog.confirmButton.pressedImage.setLogicalExtent(
-        {0, 0, 123, 56});
-    confirmationDialog.confirmButton.text.setLogicalExtent({-1, -1, 123, 56});
-    confirmationDialog.confirmButton.normalImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "MainButton/Normal.png");
-    confirmationDialog.confirmButton.hoveredImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "MainButton/Hovered.png");
-    confirmationDialog.confirmButton.pressedImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "MainButton/Pressed.png");
-    confirmationDialog.confirmButton.text.setFont(
-        (Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    confirmationDialog.confirmButton.text.setColor({255, 255, 255, 255});
-
-    confirmationDialog.cancelButton.setLogicalExtent({903, 520, 123, 56});
-    confirmationDialog.cancelButton.normalImage.setLogicalExtent(
-        {0, 0, 123, 56});
-    confirmationDialog.cancelButton.hoveredImage.setLogicalExtent(
-        {0, 0, 123, 56});
-    confirmationDialog.cancelButton.pressedImage.setLogicalExtent(
-        {0, 0, 123, 56});
-    confirmationDialog.cancelButton.text.setLogicalExtent({-1, -1, 123, 56});
-    confirmationDialog.cancelButton.normalImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "MainButton/Normal.png");
-    confirmationDialog.cancelButton.hoveredImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "MainButton/Hovered.png");
-    confirmationDialog.cancelButton.pressedImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "MainButton/Pressed.png");
-    confirmationDialog.cancelButton.text.setFont(
-        (Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    confirmationDialog.cancelButton.text.setColor({255, 255, 255, 255});
-    confirmationDialog.cancelButton.text.setText("CANCEL");
+    auto styleDialogButton = [&](AUI::Button& button, const SDL_Rect& logicalExtent) {
+        button.setLogicalExtent(logicalExtent);
+        SDL_Rect imageExtent{0, 0, logicalExtent.w, logicalExtent.h};
+        button.normalImage.setLogicalExtent(imageExtent);
+        button.hoveredImage.setLogicalExtent(imageExtent);
+        button.pressedImage.setLogicalExtent(imageExtent);
+        button.text.setLogicalExtent({-1, -1, logicalExtent.w, logicalExtent.h});
+        button.normalImage.setNineSliceImage(
+            Paths::TEXTURE_DIR + "MainButton/Normal.png", {4, 4, 4, 4});
+        button.hoveredImage.setNineSliceImage(
+            Paths::TEXTURE_DIR + "MainButton/Hovered.png", {4, 4, 4, 4});
+        button.pressedImage.setNineSliceImage(
+            Paths::TEXTURE_DIR + "MainButton/Pressed.png", {4, 4, 4, 4});
+        button.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
+        button.text.setColor({255, 255, 255, 255});
+    };
+    styleDialogButton(confirmationDialog.confirmButton, {1045, 520, 123, 56});
+    styleDialogButton(confirmationDialog.cancelButton, {903, 520, 123, 56});
+    confirmationDialog.cancelButton.text.setText("Cancel");
 
     // Set up the dialog's cancel button callback.
     confirmationDialog.cancelButton.setOnPressed([this]() {
@@ -102,9 +89,13 @@ MainScreen::MainScreen(DataModel& inDataModel)
     });
 
     /* Library add menu. */
+    libraryAddMenu.addBoundingBoxButton.setOnPressed([this]() {
+        dataModel.boundingBoxModel.addBoundingBox();
+        // When we drop focus, the menu will close itself.
+        dropFocus();
+    });
     libraryAddMenu.addSpriteSheetButton.setOnPressed([this]() {
         addSpriteSheetDialog.setIsVisible(true);
-        // When we drop focus, the menu will close itself.
         dropFocus();
     });
     libraryAddMenu.addFloorButton.setOnPressed([this]() {
@@ -136,6 +127,8 @@ MainScreen::MainScreen(DataModel& inDataModel)
 
     /* Edit Stages and Properties Windows. */
     // Make the edit stages and properties windows invisible
+    boundingBoxEditStage.setIsVisible(false);
+    boundingBoxPropertiesWindow.setIsVisible(false);
     spriteEditStage.setIsVisible(false);
     spritePropertiesWindow.setIsVisible(false);
     spriteSetEditStage.setIsVisible(false);
@@ -196,6 +189,8 @@ void MainScreen::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
     // Make everything invisible.
+    boundingBoxEditStage.setIsVisible(false);
+    boundingBoxPropertiesWindow.setIsVisible(false);
     spriteEditStage.setIsVisible(false);
     spritePropertiesWindow.setIsVisible(false);
     spriteSetEditStage.setIsVisible(false);
@@ -204,7 +199,11 @@ void MainScreen::onActiveLibraryItemChanged(
     iconPropertiesWindow.setIsVisible(false);
 
     // Make the appropriate windows visible, based on the new item's type.
-    if (std::holds_alternative<EditorSprite>(newActiveItem)) {
+    if (std::holds_alternative<EditorBoundingBox>(newActiveItem)) {
+        boundingBoxEditStage.setIsVisible(true);
+        boundingBoxPropertiesWindow.setIsVisible(true);
+    }
+    else if (std::holds_alternative<EditorSprite>(newActiveItem)) {
         spriteEditStage.setIsVisible(true);
         spritePropertiesWindow.setIsVisible(true);
     }

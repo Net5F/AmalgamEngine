@@ -11,9 +11,12 @@ MainButton::MainButton(const SDL_Rect& inLogicalExtent,
 : AUI::Button(inLogicalExtent, inDebugName)
 {
     // Add our backgrounds.
-    normalImage.setSimpleImage(Paths::TEXTURE_DIR + "MainButton/Normal.png");
-    hoveredImage.setSimpleImage(Paths::TEXTURE_DIR + "MainButton/Hovered.png");
-    pressedImage.setSimpleImage(Paths::TEXTURE_DIR + "MainButton/Pressed.png");
+    normalImage.setNineSliceImage(Paths::TEXTURE_DIR + "MainButton/Normal.png",
+                                  {2, 2, 2, 2});
+    hoveredImage.setNineSliceImage(
+        Paths::TEXTURE_DIR + "MainButton/Hovered.png", {2, 2, 2, 2});
+    pressedImage.setNineSliceImage(
+        Paths::TEXTURE_DIR + "MainButton/Pressed.png", {2, 2, 2, 2});
 
     // Set our text properties.
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);

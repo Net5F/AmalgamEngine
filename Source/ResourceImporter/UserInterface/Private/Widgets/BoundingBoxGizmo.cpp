@@ -6,13 +6,12 @@
 #include "Position.h"
 #include "Camera.h"
 #include "SharedConfig.h"
-#include "Ignore.h"
 #include "Log.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
 #include "AUI/SDLHelpers.h"
 #include <algorithm>
-
+#include <SDL_rect.h>
 #include <SDL2_gfxPrimitives.h>
 
 namespace AM
@@ -23,9 +22,12 @@ BoundingBoxGizmo::BoundingBoxGizmo(DataModel& inDataModel)
 : AUI::Widget({0, 0, 1920, 1080}, "BoundingBoxGizmo")
 , dataModel{inDataModel}
 , lastUsedScreenSize{0, 0}
-, activeSpriteID{NULL_SPRITE_ID}
+, boundingBox{}
+, isEnabled{true}
 , scaledRectSize{AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE)}
 , scaledLineWidth{AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH)}
+, xOffset{0}
+, yOffset{0}
 , positionControlExtent{0, 0, scaledRectSize, scaledRectSize}
 , xControlExtent{0, 0, scaledRectSize, scaledRectSize}
 , yControlExtent{0, 0, scaledRectSize, scaledRectSize}
@@ -39,12 +41,39 @@ BoundingBoxGizmo::BoundingBoxGizmo(DataModel& inDataModel)
 , planeXCoords{}
 , planeYCoords{}
 , currentHeldControl{Control::None}
+, boundingBoxUpdatedSig{}
+, boundingBoxUpdated{boundingBoxUpdatedSig}
 {
-    // When the active sprite is updated, update it in this widget.
-    dataModel.activeLibraryItemChanged
-        .connect<&BoundingBoxGizmo::onActiveLibraryItemChanged>(*this);
-    dataModel.spriteModel.spriteModelBoundsChanged
-        .connect<&BoundingBoxGizmo::onSpriteModelBoundsChanged>(*this);
+}
+
+void BoundingBoxGizmo::enable()
+{
+    isEnabled = true;
+    refresh();
+}
+
+void BoundingBoxGizmo::disable()
+{
+    isEnabled = false;
+    refresh();
+}
+
+void BoundingBoxGizmo::setXOffset(int inLogicalXOffset)
+{
+    xOffset = AUI::ScalingHelpers::logicalToActual(inLogicalXOffset);
+    refresh();
+}
+
+void BoundingBoxGizmo::setYOffset(int inLogicalYOffset)
+{
+    yOffset = AUI::ScalingHelpers::logicalToActual(inLogicalYOffset);
+    refresh();
+}
+
+void BoundingBoxGizmo::setBoundingBox(const BoundingBox& newBoundingBox)
+{
+    boundingBox = newBoundingBox;
+    refresh();
 }
 
 void BoundingBoxGizmo::updateLayout(const SDL_Point& startPosition,
@@ -92,16 +121,16 @@ AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType,
     }
 
     // Check if the mouse press hit any of our controls.
-    if (AUI::SDLHelpers::pointInRect(cursorPosition, positionControlExtent)) {
+    if (SDL_PointInRect(&cursorPosition, &positionControlExtent)) {
         currentHeldControl = Control::Position;
     }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition, xControlExtent)) {
+    else if (SDL_PointInRect(&cursorPosition, &xControlExtent)) {
         currentHeldControl = Control::X;
     }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition, yControlExtent)) {
+    else if (SDL_PointInRect(&cursorPosition, &yControlExtent)) {
         currentHeldControl = Control::Y;
     }
-    else if (AUI::SDLHelpers::pointInRect(cursorPosition, zControlExtent)) {
+    else if (SDL_PointInRect(&cursorPosition, &zControlExtent)) {
         currentHeldControl = Control::Z;
     }
 
@@ -116,10 +145,8 @@ AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType,
 }
 
 AUI::EventResult BoundingBoxGizmo::onMouseUp(AUI::MouseButtonType buttonType,
-                                             const SDL_Point& cursorPosition)
+                                             const SDL_Point&)
 {
-    ignore(cursorPosition);
-
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
         return AUI::EventResult{.wasHandled{false}};
@@ -143,22 +170,13 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
     }
 
     /* Translate the mouse position to world space. */
-    // Account for the sprite's empty vertical space.
-    const EditorSprite& activeSprite{
-        dataModel.spriteModel.getSprite(activeSpriteID)};
-    int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite.yOffset)};
-
-    // Account for the sprite's half-tile offset.
-    int xOffset{AUI::ScalingHelpers::logicalToActual(
-        static_cast<int>(SharedConfig::TILE_SCREEN_WIDTH / 2.f))};
-
-    // Account for the widget's offset.
-    xOffset += clippedExtent.x;
-    yOffset += clippedExtent.y;
+    // Account for this widget's position.
+    int finalXOffset{xOffset + clippedExtent.x};
+    int finalYOffset{yOffset + clippedExtent.y};
 
     // Apply the offset to the mouse position and convert to logical space.
-    SDL_Point offsetMousePoint{cursorPosition.x - xOffset,
-                               cursorPosition.y - yOffset};
+    SDL_Point offsetMousePoint{cursorPosition.x - finalXOffset,
+                               cursorPosition.y - finalYOffset};
     offsetMousePoint = AUI::ScalingHelpers::actualToLogical(offsetMousePoint);
 
     // Convert the screen-space mouse point to world space.
@@ -202,41 +220,16 @@ void BoundingBoxGizmo::refreshScaling()
     scaledLineWidth = AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH);
 
     // Refresh our controls to reflect the new sizes.
-    refresh(dataModel.spriteModel.getSprite(activeSpriteID));
+    refresh();
 }
 
-void BoundingBoxGizmo::onActiveLibraryItemChanged(
-    const LibraryItemData& newActiveItem)
-{
-    // Check if the new active item is a sprite and return early if not.
-    const EditorSprite* newActiveSprite{
-        std::get_if<EditorSprite>(&newActiveItem)};
-    if (newActiveSprite == nullptr) {
-        activeSpriteID = NULL_SPRITE_ID;
-        return;
-    }
-
-    activeSpriteID = newActiveSprite->numericID;
-    refresh(*newActiveSprite);
-}
-
-void BoundingBoxGizmo::onSpriteModelBoundsChanged(
-    int spriteID, const BoundingBox& newModelBounds)
-{
-    ignore(newModelBounds);
-
-    if (spriteID == activeSpriteID) {
-        refresh(dataModel.spriteModel.getSprite(spriteID));
-    }
-}
-
-void BoundingBoxGizmo::refresh(const EditorSprite& activeSprite)
+void BoundingBoxGizmo::refresh()
 {
     // Calculate where the sprite's model bounds are on the screen.
     // Note: The ordering of the points in this vector is listed in the comment
     //       for calcOffsetScreenPoints().
     std::vector<SDL_Point> boundsScreenPoints;
-    calcOffsetScreenPoints(activeSprite, boundsScreenPoints);
+    calcOffsetScreenPoints(boundsScreenPoints);
 
     // Move the controls to the correct positions.
     moveControls(boundsScreenPoints);
@@ -254,13 +247,10 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 
     // Note: The expected behavior is to move along the x/y plane and
     //       leave minZ where it was.
-    const EditorSprite& activeSprite{
-        dataModel.spriteModel.getSprite(activeSpriteID)};
-    BoundingBox modelBounds{activeSprite.modelBounds};
-    float& minX{modelBounds.minX};
-    float& minY{modelBounds.minY};
-    float& maxX{modelBounds.maxX};
-    float& maxY{modelBounds.maxY};
+    float& minX{boundingBox.minX};
+    float& minY{boundingBox.minY};
+    float& maxX{boundingBox.maxX};
+    float& maxY{boundingBox.maxY};
 
     // Move the min bounds to follow the max bounds.
     float diffX{mouseWorldPos.x - maxX};
@@ -295,32 +285,34 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
         maxY -= diff;
     }
 
-    // Apply the new model bounds.
-    dataModel.spriteModel.setSpriteModelBounds(activeSpriteID, modelBounds);
+    // Signal the updated bounding box.
+    // Note: We don't update our internal bounding box until our owner 
+    //       saves the update in the model and calls setBoundingBox().
+    BoundingBox updatedBounds{
+        minX, maxX, minY, maxY, boundingBox.minZ, boundingBox.maxZ};
+    boundingBoxUpdatedSig.publish(updatedBounds);
 }
 
 void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    const EditorSprite& activeSprite{
-        dataModel.spriteModel.getSprite(activeSpriteID)};
-    BoundingBox modelBounds{activeSprite.modelBounds};
-    modelBounds.minX = std::clamp(mouseWorldPos.x, 0.f, modelBounds.maxX);
+    BoundingBox updatedBounds{boundingBox};
+    updatedBounds.minX = std::clamp(mouseWorldPos.x, 0.f, updatedBounds.maxX);
 
-    // Apply the new model bound.
-    dataModel.spriteModel.setSpriteModelBounds(activeSpriteID, modelBounds);
+    // Signal the updated bounding box.
+    // Note: We don't update our internal bounding box until our owner 
+    //       saves the update in the model and calls setBoundingBox().
+    boundingBoxUpdatedSig.publish(updatedBounds);
 }
 
 void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    const EditorSprite& activeSprite{
-        dataModel.spriteModel.getSprite(activeSpriteID)};
-    BoundingBox modelBounds{activeSprite.modelBounds};
-    modelBounds.minY = std::clamp(mouseWorldPos.y, 0.f, modelBounds.maxY);
+    BoundingBox updatedBounds{boundingBox};
+    updatedBounds.minY = std::clamp(mouseWorldPos.y, 0.f, updatedBounds.maxY);
 
-    // Apply the new model bound.
-    dataModel.spriteModel.setSpriteModelBounds(activeSpriteID, modelBounds);
+    // Signal the updated bounding box.
+    boundingBoxUpdatedSig.publish(updatedBounds);
 }
 
 void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
@@ -342,19 +334,16 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     mouseZHeight = Transforms::screenYToWorldZ(mouseZHeight, 1.f);
 
     // Set maxZ, making sure it doesn't go below minZ.
-    const EditorSprite& activeSprite{
-        dataModel.spriteModel.getSprite(activeSpriteID)};
-    BoundingBox modelBounds{activeSprite.modelBounds};
-    if (mouseZHeight > modelBounds.minZ) {
-        modelBounds.maxZ = mouseZHeight;
+    if (mouseZHeight > boundingBox.minZ) {
+        BoundingBox updatedBounds{boundingBox};
+        updatedBounds.maxZ = mouseZHeight;
 
-        // Apply the new model bound.
-        dataModel.spriteModel.setSpriteModelBounds(activeSpriteID, modelBounds);
+        // Signal the updated bounding box.
+        boundingBoxUpdatedSig.publish(updatedBounds);
     }
 }
 
 void BoundingBoxGizmo::calcOffsetScreenPoints(
-    const EditorSprite& activeSprite,
     std::vector<SDL_Point>& boundsScreenPoints)
 {
     /* Transform the world positions to screen points. */
@@ -363,39 +352,30 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
     std::array<SDL_FPoint, 7> floatPoints{};
 
     // Push the points in the correct order.
-    const BoundingBox& modelBounds{activeSprite.modelBounds};
-    Position position{modelBounds.minX, modelBounds.maxY, modelBounds.minZ};
+    Position position{boundingBox.minX, boundingBox.maxY, boundingBox.minZ};
     floatPoints[0] = Transforms::worldToScreen(position, 1);
 
-    position = {modelBounds.maxX, modelBounds.maxY, modelBounds.minZ};
+    position = {boundingBox.maxX, boundingBox.maxY, boundingBox.minZ};
     floatPoints[1] = Transforms::worldToScreen(position, 1);
 
-    position = {modelBounds.maxX, modelBounds.minY, modelBounds.minZ};
+    position = {boundingBox.maxX, boundingBox.minY, boundingBox.minZ};
     floatPoints[2] = Transforms::worldToScreen(position, 1);
 
-    position = {modelBounds.minX, modelBounds.maxY, modelBounds.maxZ};
+    position = {boundingBox.minX, boundingBox.maxY, boundingBox.maxZ};
     floatPoints[3] = Transforms::worldToScreen(position, 1);
 
-    position = {modelBounds.maxX, modelBounds.maxY, modelBounds.maxZ};
+    position = {boundingBox.maxX, boundingBox.maxY, boundingBox.maxZ};
     floatPoints[4] = Transforms::worldToScreen(position, 1);
 
-    position = {modelBounds.maxX, modelBounds.minY, modelBounds.maxZ};
+    position = {boundingBox.maxX, boundingBox.minY, boundingBox.maxZ};
     floatPoints[5] = Transforms::worldToScreen(position, 1);
 
-    position = {modelBounds.minX, modelBounds.minY, modelBounds.maxZ};
+    position = {boundingBox.minX, boundingBox.minY, boundingBox.maxZ};
     floatPoints[6] = Transforms::worldToScreen(position, 1);
 
-    /* Build the offsets. */
-    // Account for the sprite's empty vertical space.
-    int yOffset{AUI::ScalingHelpers::logicalToActual(activeSprite.yOffset)};
-
-    // Account for the sprite's half-tile offset.
-    int xOffset{AUI::ScalingHelpers::logicalToActual(
-        static_cast<int>(activeSprite.textureExtent.w / 2.f))};
-
     // Account for this widget's position.
-    xOffset += fullExtent.x;
-    yOffset += fullExtent.y;
+    int finalXOffset{xOffset + clippedExtent.x};
+    int finalYOffset{yOffset + clippedExtent.y};
 
     // Scale and offset each point, then push it into the return vector.
     for (SDL_FPoint& point : floatPoints) {
@@ -404,8 +384,8 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
         point.y = std::round(AUI::ScalingHelpers::logicalToActual(point.y));
 
         // Offset the point.
-        point.x += xOffset;
-        point.y += yOffset;
+        point.x += finalXOffset;
+        point.y += finalYOffset;
 
         // Cast to int and push into the return vector.
         boundsScreenPoints.push_back(
@@ -483,13 +463,19 @@ void BoundingBoxGizmo::movePlanes(std::vector<SDL_Point>& boundsScreenPoints)
 
 void BoundingBoxGizmo::renderControls(const SDL_Point& windowTopLeft)
 {
+    // If this gizmo is disabled, make it semi-transparent.
+    float alpha{BASE_ALPHA};
+    if (!isEnabled) {
+        alpha *= DISABLED_ALPHA_FACTOR;
+    }
+
     // Position control
     SDL_Rect offsetExtent{positionControlExtent};
     offsetExtent.x += windowTopLeft.x;
     offsetExtent.y += windowTopLeft.y;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 0, 0,
-                           static_cast<Uint8>(BASE_ALPHA));
+                           static_cast<Uint8>(alpha));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
 
     // X control
@@ -498,7 +484,7 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& windowTopLeft)
     offsetExtent.y += windowTopLeft.y;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 148, 0, 0,
-                           static_cast<Uint8>(BASE_ALPHA));
+                           static_cast<Uint8>(alpha));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
 
     // Y control
@@ -507,7 +493,7 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& windowTopLeft)
     offsetExtent.y += windowTopLeft.y;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 149, 0,
-                           static_cast<Uint8>(BASE_ALPHA));
+                           static_cast<Uint8>(alpha));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
 
     // Z control
@@ -516,12 +502,18 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& windowTopLeft)
     offsetExtent.y += windowTopLeft.y;
 
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 82, 240,
-                           static_cast<Uint8>(BASE_ALPHA));
+                           static_cast<Uint8>(alpha));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
 }
 
 void BoundingBoxGizmo::renderLines(const SDL_Point& windowTopLeft)
 {
+    // If this gizmo is disabled, make it semi-transparent.
+    float alpha{BASE_ALPHA};
+    if (!isEnabled) {
+        alpha *= DISABLED_ALPHA_FACTOR;
+    }
+
     // X-axis line
     SDL_Point offsetMinPoint{xMinPoint};
     SDL_Point offsetMaxPoint{xMaxPoint};
@@ -532,7 +524,7 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& windowTopLeft)
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 148, 0,
-                  0, static_cast<Uint8>(BASE_ALPHA));
+                  0, static_cast<Uint8>(alpha));
 
     // Y-axis line
     offsetMinPoint = yMinPoint;
@@ -544,7 +536,7 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& windowTopLeft)
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 149,
-                  0, static_cast<Uint8>(BASE_ALPHA));
+                  0, static_cast<Uint8>(alpha));
 
     // Z-axis line
     offsetMinPoint = zMinPoint;
@@ -556,7 +548,7 @@ void BoundingBoxGizmo::renderLines(const SDL_Point& windowTopLeft)
 
     thickLineRGBA(AUI::Core::getRenderer(), offsetMinPoint.x, offsetMinPoint.y,
                   offsetMaxPoint.x, offsetMaxPoint.y, scaledLineWidth, 0, 82,
-                  240, static_cast<Uint8>(BASE_ALPHA));
+                  240, static_cast<Uint8>(alpha));
 }
 
 void BoundingBoxGizmo::renderPlanes(const SDL_Point& windowTopLeft)
@@ -573,7 +565,11 @@ void BoundingBoxGizmo::renderPlanes(const SDL_Point& windowTopLeft)
     }
 
     /* Draw the planes. */
-    static constexpr float alpha{BASE_ALPHA * PLANE_ALPHA_FACTOR};
+    // If this gizmo is disabled, make it semi-transparent.
+    float alpha{BASE_ALPHA * PLANE_ALPHA_FACTOR};
+    if (!isEnabled) {
+        alpha *= DISABLED_ALPHA_FACTOR;
+    }
 
     // X-axis plane
     filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[0]),

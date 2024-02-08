@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LibraryListItem.h"
+#include "BoundingBoxID.h"
 #include "SpriteSets.h"
 #include "IconID.h"
 #include "AUI/Window.h"
@@ -16,6 +17,7 @@ namespace ResourceImporter
 {
 class MainScreen;
 class DataModel;
+struct EditorBoundingBox;
 struct EditorSpriteSheet;
 class ParentListItem;
 struct EditorFloorSpriteSet;
@@ -54,11 +56,13 @@ private:
      * These values are used to index into libraryContainer.
      */
     enum Category {
+        BoundingBoxes,
         SpriteSheets,
         Floors,
         FloorCoverings,
         Walls,
         Objects,
+        /*Entities,*/
         IconSheets,
         Count,
         None
@@ -67,6 +71,8 @@ private:
     /**
      * Adds the given item to the library.
      */
+    void onBoundingBoxAdded(BoundingBoxID boundingBoxID,
+                            const EditorBoundingBox& bounds);
     void onSpriteSheetAdded(int sheetID, const EditorSpriteSheet& sheet);
     void onFloorAdded(Uint16 floorID, const EditorFloorSpriteSet& floor);
     void
@@ -81,6 +87,7 @@ private:
     /**
      * Removes the given item from the library.
      */
+    void onBoundingBoxRemoved(BoundingBoxID boundingBoxID);
     void onSpriteSheetRemoved(int sheetID);
     void onSpriteSetRemoved(SpriteSet::Type type, Uint16 spriteSetID);
     void onIconSheetRemoved(int sheetID);
@@ -88,6 +95,8 @@ private:
     /**
      * Updates the display name on the associated list item.
      */
+    void onBoundingBoxDisplayNameChanged(BoundingBoxID boundingBoxID,
+                                         const std::string& newDisplayName);
     void onSpriteDisplayNameChanged(int spriteID,
                                     const std::string& newDisplayName);
     void onSpriteSetDisplayNameChanged(SpriteSet::Type type, Uint16 spriteSetID,

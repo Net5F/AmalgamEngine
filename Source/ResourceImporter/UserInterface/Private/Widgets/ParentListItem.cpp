@@ -1,8 +1,7 @@
 #include "ParentListItem.h"
 #include "Paths.h"
-#include "Ignore.h"
 #include "AUI/ScalingHelpers.h"
-#include "AUI/SDLHelpers.h"
+#include <SDL_rect.h>
 
 namespace AM
 {
@@ -43,7 +42,7 @@ AUI::EventResult ParentListItem::onMouseDown(AUI::MouseButtonType buttonType,
     }
 
     // If our text was clicked, select this widget.
-    if (AUI::SDLHelpers::pointInRect(cursorPosition, text.getClippedExtent())) {
+    if (SDL_PointInRect(&cursorPosition, &(text.getClippedExtent()))) {
         // If we're already selected, do nothing.
         if (!isSelected) {
             select();
@@ -69,7 +68,7 @@ AUI::EventResult ParentListItem::onMouseMove(const SDL_Point& cursorPosition)
 {
     // If the mouse is within the header extent.
     SDL_Rect headerExtent{childListItemContainer.getHeaderExtent()};
-    if (AUI::SDLHelpers::pointInRect(cursorPosition, headerExtent)) {
+    if (SDL_PointInRect(&cursorPosition, &headerExtent)) {
         // If we're not selected or hovered, become hovered.
         if (!isSelected && !isHovered) {
             setIsHovered(true);

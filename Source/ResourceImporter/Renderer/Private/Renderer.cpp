@@ -1,8 +1,6 @@
 #include "Renderer.h"
 #include "UserInterface.h"
 #include "Log.h"
-#include "Ignore.h"
-
 #include <SDL_render.h>
 #include <SDL2_gfxPrimitives.h>
 

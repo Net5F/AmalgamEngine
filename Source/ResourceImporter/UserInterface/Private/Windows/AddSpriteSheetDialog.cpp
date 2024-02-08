@@ -23,8 +23,8 @@ AddSpriteSheetDialog::AddSpriteSheetDialog(DataModel& inDataModel)
 , offsetInput({919, 450, 180, 38})
 , nameLabel({747, 500, 151, 38})
 , nameInput({919, 500, 180, 38})
-, addButton({1099, 640, 123, 56}, "ADD")
-, cancelButton({958, 640, 123, 56}, "CANCEL")
+, addButton({1099, 640, 123, 56}, "Add")
+, cancelButton({958, 640, 123, 56}, "Cancel")
 , dataModel{inDataModel}
 , errorText({748, 556, 466, 60})
 {

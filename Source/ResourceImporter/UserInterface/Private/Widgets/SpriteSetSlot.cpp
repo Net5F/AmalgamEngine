@@ -11,7 +11,7 @@ SpriteSetSlot::SpriteSetSlot()
 , checkerboardImage{{30, 45, 120, 120}}
 , spriteImage{{30, 45, 120, 120}}
 , spriteNameText{{0, 175, logicalExtent.w, 27}}
-, assignButton{{34, 208, 112, 38}, "ASSIGN"}
+, assignButton{{34, 208, 112, 38}, "Assign"}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(topText);

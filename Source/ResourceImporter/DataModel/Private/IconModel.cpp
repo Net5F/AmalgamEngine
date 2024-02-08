@@ -3,7 +3,6 @@
 #include "nlohmann/json.hpp"
 #include <SDL_render.h>
 #include <SDL_image.h>
-#include <filesystem>
 #include "Log.h"
 
 namespace AM
@@ -30,7 +29,7 @@ IconModel::IconModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer)
 {
     // Reserve the null icon's ID (the engine provides it in code, so we don't
     // need it in the json).
-    iconIDPool.reserveID(NULL_ICON_ID);
+    iconIDPool.reserveID();
 }
 
 bool IconModel::load(const nlohmann::json& json)
@@ -56,7 +55,7 @@ void IconModel::save(nlohmann::json& json)
 {
     json["iconSheets"] = nlohmann::json::array();
 
-    // Fill the json with our current model data.
+    /* Fill the json with our current model data. */
     // For each icon sheet.
     int i{0};
     for (auto& sheetPair : iconSheetMap) {

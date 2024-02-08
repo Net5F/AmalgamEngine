@@ -1,7 +1,6 @@
 #include "LibraryListItem.h"
 #include "Paths.h"
 #include "AUI/Text.h"
-#include "Ignore.h"
 
 namespace AM
 {
@@ -104,10 +103,8 @@ void LibraryListItem::setOnActivated(
 }
 
 AUI::EventResult LibraryListItem::onMouseDown(AUI::MouseButtonType buttonType,
-                                              const SDL_Point& cursorPosition)
+                                              const SDL_Point&)
 {
-    ignore(cursorPosition);
-
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
         return AUI::EventResult{.wasHandled{false}};
@@ -123,10 +120,8 @@ AUI::EventResult LibraryListItem::onMouseDown(AUI::MouseButtonType buttonType,
 
 AUI::EventResult
     LibraryListItem::onMouseDoubleClick(AUI::MouseButtonType buttonType,
-                                        const SDL_Point& cursorPosition)
+                                        const SDL_Point&)
 {
-    ignore(cursorPosition);
-
     // Only respond to the left mouse button.
     if (buttonType != AUI::MouseButtonType::Left) {
         return AUI::EventResult{.wasHandled{false}};

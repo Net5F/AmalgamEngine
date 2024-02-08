@@ -25,6 +25,7 @@ public:
     /** The menu's background */
     AUI::Image backgroundImage;
 
+    AUI::Button addBoundingBoxButton;
     AUI::Button addSpriteSheetButton;
     AUI::Button addFloorButton;
     AUI::Button addFloorCoveringButton;

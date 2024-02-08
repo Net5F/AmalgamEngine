@@ -6,6 +6,8 @@
 #include "LibraryItemData.h"
 #include "LibraryWindow.h"
 #include "SaveButtonWindow.h"
+#include "BoundingBoxEditStage.h"
+#include "BoundingBoxPropertiesWindow.h"
 #include "SpriteEditStage.h"
 #include "SpritePropertiesWindow.h"
 #include "SpriteSetEditStage.h"
@@ -75,13 +77,15 @@ private:
     SaveButtonWindow saveButtonWindow;
 
     // Edit stages
-    /** The center stage for editing sprite bounding boxes. */
+    /** The center stage for editing the active item. */
+    BoundingBoxEditStage boundingBoxEditStage;
     SpriteEditStage spriteEditStage;
     SpriteSetEditStage spriteSetEditStage;
     IconEditStage iconEditStage;
 
     // Properties windows
-    /** The right-side panel for viewing and editing the active sprite data. */
+    /** The right-side panel for viewing and editing the active item's data. */
+    BoundingBoxPropertiesWindow boundingBoxPropertiesWindow;
     SpritePropertiesWindow spritePropertiesWindow;
     SpriteSetPropertiesWindow spriteSetPropertiesWindow;
     IconPropertiesWindow iconPropertiesWindow;

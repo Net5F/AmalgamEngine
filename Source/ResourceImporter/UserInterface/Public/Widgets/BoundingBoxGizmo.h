@@ -1,13 +1,15 @@
 #pragma once
 
-#include "AUI/Widget.h"
+#include "BoundingBox.h"
 #include "LibraryItemData.h"
+#include "AUI/Widget.h"
+#include "AUI/ScreenResolution.h"
+#include "entt/signal/sigh.hpp"
 #include <array>
 
 namespace AM
 {
 struct Position;
-struct BoundingBox;
 
 namespace ResourceImporter
 {
@@ -26,6 +28,40 @@ public:
     BoundingBoxGizmo(DataModel& inDataModel);
 
     virtual ~BoundingBoxGizmo() = default;
+
+    /**
+     * Enabled this gizmo, allowing it to respond to user input.
+     */
+    void enable();
+
+    /**
+     * Disables this gizmo, causing it to ignore user input and render as 
+     * semi-transparent.
+     */
+    void disable();
+
+    /**
+     * Sets the X-axis offset used when translating cursor position to 
+     * world position.
+     *
+     * This will often be half of the screen-space width of the sprite's 
+     * stage, to make the cursor relative to (0, 0).
+     */
+    void setXOffset(int inLogicalXOffset);
+
+    /**
+     * Sets the Y-axis offset used when translating cursor position to 
+     * world position.
+     *
+     * This will often be the sprite's yOffset field, to make the cursor 
+     * relative to (0, 0).
+     */
+    void setYOffset(int inLogicalYOffset);
+
+    /**
+     * Sets this gizmo to match newBoundingBox.
+     */
+    void setBoundingBox(const BoundingBox& newBoundingBox);
 
     //-------------------------------------------------------------------------
     // Base class overrides
@@ -53,6 +89,9 @@ private:
     /** The base transparency value for a selected gizmo. */
     static constexpr float BASE_ALPHA{255};
 
+    /** How opaque a disabled gizmo will be. */
+    static constexpr float DISABLED_ALPHA_FACTOR{0.25f};
+
     /** How opaque the sides of the bounding box will be. */
     static constexpr float PLANE_ALPHA_FACTOR{0.5f};
 
@@ -62,22 +101,9 @@ private:
     enum class Control { None, Position, X, Y, Z };
 
     /**
-     * If the new active item is a sprite, loads it's data into this gizmo.
+     * Refreshes this widget's UI to match its internal state.
      */
-    void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
-
-    /**
-     * Updates this panel with the active sprite's new properties.
-     * Note: This gizmo depends on having its logical extent set to match the
-     *       sprite image that it will be overlaying.
-     */
-    void onSpriteModelBoundsChanged(int spriteID,
-                                    const BoundingBox& newModelBounds);
-
-    /**
-     * Refreshes this widget's UI with the given active sprite's data.
-     */
-    void refresh(const EditorSprite& activeSprite);
+    void refresh();
 
     /**
      * Updates the active sprite's maxX and maxY bounds to match the given
@@ -101,17 +127,16 @@ private:
     void updateZBounds(int mouseScreenYPos);
 
     /**
-     * Transforms the positions in the given sprite's bounding box from world
-     * space to screen space, scales them to the current UI scaling, and
-     * offsets them to overlay the given sprite.
+     * Transforms the positions in the current boundingBox from world space 
+     * to screen space, scales them to the current UI scaling, and offsets 
+     * them using the current offsets.
      *
      * The finished points are pushed into the given vector in the order:
      *     (minX, maxY, minZ), (maxX, maxY, minZ), (maxX, minY, minZ),
      *     (minX, maxY, maxZ), (maxX, maxY, maxZ), (maxX, minY, maxZ),
      *     (minX, minY, maxZ)
      */
-    void calcOffsetScreenPoints(const EditorSprite& activeSprite,
-                                std::vector<SDL_Point>& boundsScreenPoints);
+    void calcOffsetScreenPoints(std::vector<SDL_Point>& boundsScreenPoints);
 
     /**
      * Moves the control extents to their proper screen position.
@@ -151,8 +176,12 @@ private:
         changes, so we can resize our controls. */
     AUI::ScreenResolution lastUsedScreenSize;
 
-    /** The active sprite's ID. */
-    int activeSpriteID;
+    /** The bounding box that this gizmo is representing. */
+    BoundingBox boundingBox;
+
+    /** If false, this widget should ignore all interactions and render as 
+        semi-transparent. */
+    bool isEnabled;
 
     /** A reasonable size for the control rectangles. */
     static constexpr int LOGICAL_RECT_SIZE{12};
@@ -165,6 +194,14 @@ private:
 
     /** The scaled width of the lines. */
     int scaledLineWidth;
+
+    /** Sets the X-axis offset used when translating cursor position to world 
+        position. */
+    int xOffset;
+
+    /** Sets the Y-axis offset used when translating cursor position to world 
+        position. */
+    int yOffset;
 
     // Controls (scaled extents, without parent offsets)
     /** The extent of the box position control, (maxX, maxY, minZ). */
@@ -195,6 +232,18 @@ private:
 
     /** Tracks which control, if any, is currently being held. */
     Control currentHeldControl;
+
+    //-------------------------------------------------------------------------
+    // Signals
+    //-------------------------------------------------------------------------
+    entt::sigh<void(const BoundingBox& boundingBox)> boundingBoxUpdatedSig;
+
+public:
+    //-------------------------------------------------------------------------
+    // Signal Sinks
+    //-------------------------------------------------------------------------
+    entt::sink<entt::sigh<void(const BoundingBox& boundingBox)>>
+        boundingBoxUpdated;
 };
 
 } // End namespace ResourceImporter

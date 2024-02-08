@@ -628,11 +628,9 @@ void SpriteSetModel::saveFloors(nlohmann::json& json)
 {
     json["floors"] = nlohmann::json::array();
 
-    // Fill the json with our current model data.
-    // For each sprite sheet.
+    // Fill the json with each floor sprite set in the model.
     int i{0};
     for (auto& spriteSetPair : floorMap) {
-        // Add this sheet's relative path.
         EditorFloorSpriteSet& spriteSet{spriteSetPair.second};
         json["floors"][i]["displayName"] = spriteSet.displayName;
         json["floors"][i]["stringID"]
@@ -650,11 +648,9 @@ void SpriteSetModel::saveFloorCoverings(nlohmann::json& json)
 {
     json["floorCoverings"] = nlohmann::json::array();
 
-    // Fill the json with our current model data.
-    // For each sprite sheet.
+    // Fill the json with each floor covering sprite set in the model.
     int i{0};
     for (auto& spriteSetPair : floorCoveringMap) {
-        // Add this sheet's relative path.
         EditorFloorCoveringSpriteSet& spriteSet{spriteSetPair.second};
         json["floorCoverings"][i]["displayName"] = spriteSet.displayName;
         json["floorCoverings"][i]["stringID"]
@@ -672,11 +668,9 @@ void SpriteSetModel::saveWalls(nlohmann::json& json)
 {
     json["walls"] = nlohmann::json::array();
 
-    // Fill the json with our current model data.
-    // For each sprite sheet.
+    // Fill the json with each wall sprite set in the model.
     int i{0};
     for (auto& spriteSetPair : wallMap) {
-        // Add this sheet's relative path.
         EditorWallSpriteSet& spriteSet{spriteSetPair.second};
         json["walls"][i]["displayName"] = spriteSet.displayName;
         json["walls"][i]["stringID"]
@@ -694,11 +688,9 @@ void SpriteSetModel::saveObjects(nlohmann::json& json)
 {
     json["objects"] = nlohmann::json::array();
 
-    // Fill the json with our current model data.
-    // For each sprite sheet.
+    // Fill the json with each object sprite set in the model.
     int i{0};
     for (auto& spriteSetPair : objectMap) {
-        // Add this sheet's relative path.
         EditorObjectSpriteSet& spriteSet{spriteSetPair.second};
         json["objects"][i]["displayName"] = spriteSet.displayName;
         json["objects"][i]["stringID"]

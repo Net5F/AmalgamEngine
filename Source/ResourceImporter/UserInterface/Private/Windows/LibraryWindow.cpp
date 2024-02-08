@@ -43,6 +43,9 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     /* Container */
     // Add the collapsible categories.
     // Note: These must be ordered to match the Category enum.
+    auto boundingBoxContainer{
+        std::make_unique<LibraryCollapsibleContainer>("Bounding Boxes")};
+    libraryContainer.push_back(std::move(boundingBoxContainer));
     auto spriteSheetContainer{
         std::make_unique<LibraryCollapsibleContainer>("Sprite Sheets")};
     libraryContainer.push_back(std::move(spriteSheetContainer));
@@ -57,6 +60,9 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     auto objectContainer{
         std::make_unique<LibraryCollapsibleContainer>("Objects")};
     libraryContainer.push_back(std::move(objectContainer));
+    auto entityContainer{
+        std::make_unique<LibraryCollapsibleContainer>("Entities")};
+    libraryContainer.push_back(std::move(entityContainer));
     auto iconSheetContainer{
         std::make_unique<LibraryCollapsibleContainer>("Icon Sheets")};
     libraryContainer.push_back(std::move(iconSheetContainer));
@@ -78,6 +84,11 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     });
 
     // When an item is added or removed from the model, update this widget.
+    BoundingBoxModel& boundingBoxModel{dataModel.boundingBoxModel};
+    boundingBoxModel.boundingBoxAdded
+        .connect<&LibraryWindow::onBoundingBoxAdded>(*this);
+    boundingBoxModel.boundingBoxRemoved
+        .connect<&LibraryWindow::onBoundingBoxRemoved>(*this);
     SpriteModel& spriteModel{dataModel.spriteModel};
     spriteModel.sheetAdded.connect<&LibraryWindow::onSpriteSheetAdded>(*this);
     spriteModel.sheetRemoved.connect<&LibraryWindow::onSpriteSheetRemoved>(
@@ -95,6 +106,8 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     iconModel.sheetRemoved.connect<&LibraryWindow::onIconSheetRemoved>(*this);
 
     // When a display name is updated, update the matching thumbnail.
+    boundingBoxModel.boundingBoxDisplayNameChanged
+        .connect<&LibraryWindow::onBoundingBoxDisplayNameChanged>(*this);
     spriteModel.spriteDisplayNameChanged
         .connect<&LibraryWindow::onSpriteDisplayNameChanged>(*this);
     spriteSetModel.spriteSetDisplayNameChanged
@@ -154,13 +167,41 @@ AUI::EventResult LibraryWindow::onKeyDown(SDL_Keycode keyCode)
         };
 
         // Bring up the confirmation dialog.
-        mainScreen.openConfirmationDialog(bodyText, "DELETE",
+        mainScreen.openConfirmationDialog(bodyText, "Delete",
                                           std::move(onConfirmation));
 
         return AUI::EventResult{.wasHandled{true}};
     }
 
     return AUI::EventResult{.wasHandled{false}};
+}
+
+void LibraryWindow::onBoundingBoxAdded(BoundingBoxID boundingBoxID,
+                                       const EditorBoundingBox& bounds)
+{
+    // Construct a new list item for this bounding box.
+    auto boundingBoxListItem{
+        std::make_unique<LibraryListItem>(bounds.displayName)};
+    boundingBoxListItem->type = LibraryListItem::Type::BoundingBox;
+    boundingBoxListItem->ID = static_cast<int>(boundingBoxID);
+    listItemMaps[LibraryListItem::Type::BoundingBox].emplace(
+        boundingBoxID, boundingBoxListItem.get());
+
+    boundingBoxListItem->setLeftPadding(32);
+
+    boundingBoxListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
+        processSelectedListItem(selectedListItem);
+    });
+    boundingBoxListItem->setOnActivated(
+        [this, boundingBoxID](LibraryListItem*) {
+            // Set this list item's associated bounding box as the active item.
+            dataModel.setActiveBoundingBox(boundingBoxID);
+        });
+
+    // Add the new list item to the appropriate container.
+    auto& listItemContainer{static_cast<LibraryCollapsibleContainer&>(
+        *libraryContainer[Category::BoundingBoxes])};
+    listItemContainer.push_back(std::move(boundingBoxListItem));
 }
 
 void LibraryWindow::onSpriteSheetAdded(int sheetID,
@@ -246,7 +287,7 @@ void LibraryWindow::onSpriteSetAdded(Uint16 spriteSetID, const T& spriteSet)
     });
     spriteSetListItem->setOnActivated(
         [this, spriteSetType, spriteSetID](LibraryListItem*) {
-            // Set this item's associated sprite set as the active item.
+            // Set this list item's associated sprite set as the active item.
             dataModel.setActiveSpriteSet(spriteSetType, spriteSetID);
         });
 
@@ -278,6 +319,29 @@ void LibraryWindow::onIconSheetAdded(int sheetID, const EditorIconSheet& sheet)
     auto& sheetContainer{static_cast<LibraryCollapsibleContainer&>(
         *libraryContainer[Category::IconSheets])};
     sheetContainer.push_back(std::move(sheetListItem));
+}
+
+void LibraryWindow::onBoundingBoxRemoved(BoundingBoxID boundingBoxID)
+{
+    auto boundsListItemMap{listItemMaps[LibraryListItem::Type::BoundingBox]};
+    auto boundsIt{boundsListItemMap.find(boundingBoxID)};
+    if (boundsIt == boundsListItemMap.end()) {
+        LOG_FATAL("Failed to find bounding box during removal.");
+    }
+
+    // Clear any list item selections.
+    for (LibraryListItem* listItem : selectedListItems) {
+        listItem->deselect();
+    }
+    selectedListItems.clear();
+
+    // Remove the list item from the container.
+    auto& boundsContainer{static_cast<LibraryCollapsibleContainer&>(
+        *libraryContainer[Category::BoundingBoxes])};
+    boundsContainer.erase(boundsIt->second);
+
+    // Remove the list item from the map.
+    boundsListItemMap.erase(boundsIt);
 }
 
 void LibraryWindow::onSpriteSheetRemoved(int sheetID)
@@ -347,6 +411,20 @@ void LibraryWindow::onIconSheetRemoved(int sheetID)
 
     // Remove the list item from the map.
     sheetListItemMap.erase(sheetIt);
+}
+
+void LibraryWindow::onBoundingBoxDisplayNameChanged(
+    BoundingBoxID boundingBoxID, const std::string& newDisplayName)
+{
+    auto boundsListItemMap{listItemMaps[LibraryListItem::Type::BoundingBox]};
+    auto boundsListItemIt{boundsListItemMap.find(boundingBoxID)};
+    if (boundsListItemIt == boundsListItemMap.end()) {
+        LOG_FATAL("Failed to find a list item for the given bounding box.");
+    }
+
+    // Update the list item to use the bounding box's new display name.
+    LibraryListItem& boundsListItem{*(boundsListItemIt->second)};
+    boundsListItem.text.setText(newDisplayName);
 }
 
 void LibraryWindow::onSpriteDisplayNameChanged(

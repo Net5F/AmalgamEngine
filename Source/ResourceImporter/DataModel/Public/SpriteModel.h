@@ -92,7 +92,8 @@ public:
     // Sprite properties.
     void setSpriteDisplayName(int spriteID, const std::string& newDisplayName);
     void setSpriteCollisionEnabled(int spriteID, bool newCollisionEnabled);
-    void setSpriteModelBounds(int spriteID, const BoundingBox& newModelBounds);
+    void setSpriteModelBoundsID(int spriteID, BoundingBoxID newModelBoundsID);
+    void setSpriteCustomModelBounds(int spriteID, const BoundingBox& newModelBounds);
 
     /** Resets the model state, setting it back to default. */
     void resetModelState();
@@ -165,8 +166,10 @@ private:
         spriteDisplayNameChangedSig;
     entt::sigh<void(int spriteID, bool collisionEnabled)>
         spriteCollisionEnabledChangedSig;
-    entt::sigh<void(int spriteID, const BoundingBox& newModelBounds)>
-        spriteModelBoundsChangedSig;
+    entt::sigh<void(int spriteID, BoundingBoxID newModelBoundsID)>
+        spriteModelBoundsIDChangedSig;
+    entt::sigh<void(int spriteID, const BoundingBox& newCustomModelBounds)>
+        spriteCustomModelBoundsChangedSig;
 
 public:
     //-------------------------------------------------------------------------
@@ -187,10 +190,14 @@ public:
     /** A sprite's "collision enabled" field has changed. */
     entt::sink<entt::sigh<void(int spriteID, bool collisionEnabled)>>
         spriteCollisionEnabledChanged;
-    /** A sprite's bounding box has changed. */
+    /** A sprite's bounding box ID has changed. */
     entt::sink<
-        entt::sigh<void(int spriteID, const BoundingBox& newModelBounds)>>
-        spriteModelBoundsChanged;
+        entt::sigh<void(int spriteID, BoundingBoxID newModelBoundsID)>>
+        spriteModelBoundsIDChanged;
+    /** A sprite's custom bounding box has changed. */
+    entt::sink<
+        entt::sigh<void(int spriteID, const BoundingBox& newCustomModelBounds)>>
+        spriteCustomModelBoundsChanged;
 };
 
 } // namespace ResourceImporter

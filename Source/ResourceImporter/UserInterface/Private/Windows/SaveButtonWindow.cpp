@@ -12,7 +12,7 @@ SaveButtonWindow::SaveButtonWindow(MainScreen& inScreen, DataModel& inDataModel)
 , mainScreen{inScreen}
 , dataModel{inDataModel}
 , backgroundImage{{0, 0, 58, 58}}
-, saveButton({0, 0, 58, 58})
+, saveButton({0, 0, 58, 58}, "")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
@@ -42,7 +42,7 @@ SaveButtonWindow::SaveButtonWindow(MainScreen& inScreen, DataModel& inDataModel)
 
         // Open the confirmation dialog.
         mainScreen.openConfirmationDialog(
-            "Save over existing ResourceData.json?", "SAVE",
+            "Save over existing ResourceData.json?", "Save",
             std::move(onConfirmation));
     });
 }

@@ -32,10 +32,24 @@ private:
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
+     * If the changed sprite is currently active, updates this stage to reflect 
+     * the new data.
+     */
+    void onSpriteModelBoundsIDChanged(int spriteID,
+                                      BoundingBoxID newModelBoundsID);
+    void onSpriteCustomModelBoundsChanged(
+        int spriteID, const BoundingBox& newCustomModelBounds);
+
+    /**
      * (If active sprite was removed) Sets activeSprite to invalid and returns
      * the stage to its default state.
      */
     void onSpriteRemoved(int spriteID);
+
+    /**
+     * Pushes the gizmo's updated bounding box to the model.
+     */
+    void onGizmoBoundingBoxUpdated(const BoundingBox& boundingBox);
 
     /**
      * Styles the given text.
