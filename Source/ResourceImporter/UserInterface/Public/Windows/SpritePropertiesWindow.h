@@ -16,6 +16,7 @@ namespace ResourceImporter
 {
 class DataModel;
 class LibraryWindow;
+class LibraryListItem;
 
 /**
  * The properties window shown when the user loads a sprite from the Library.
@@ -28,7 +29,7 @@ public:
     // Public interface
     //-------------------------------------------------------------------------
     SpritePropertiesWindow(DataModel& ineDataModel,
-                           const LibraryWindow& inLibraryWindow);
+                           LibraryWindow& inLibraryWindow);
 
     //-------------------------------------------------------------------------
     // Public child widgets
@@ -89,6 +90,12 @@ private:
         int spriteID, const BoundingBox& newCustomModelBounds);
 
     /**
+     * Updates boundingBoxButton to show whether the list item is assignable.
+     */
+    void onLibraryListItemSelected(const LibraryListItem& selectedItem);
+    void onLibraryListItemDeselected(const LibraryListItem& deselectedItem);
+
+    /**
      * Enables or disables the min/max bounds fields.
      */
     void setBoundsFieldsEnabled(bool isEnabled);
@@ -97,7 +104,7 @@ private:
     DataModel& dataModel;
 
     /** Used to get the currently selected list item. */
-    const LibraryWindow& libraryWindow;
+    LibraryWindow& libraryWindow;
 
     /** The active sprite's ID. */
     int activeSpriteID;

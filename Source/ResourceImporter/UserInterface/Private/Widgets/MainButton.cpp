@@ -17,6 +17,8 @@ MainButton::MainButton(const SDL_Rect& inLogicalExtent,
         Paths::TEXTURE_DIR + "MainButton/Hovered.png", {2, 2, 2, 2});
     pressedImage.setNineSliceImage(
         Paths::TEXTURE_DIR + "MainButton/Pressed.png", {2, 2, 2, 2});
+    disabledImage.setNineSliceImage(
+        Paths::TEXTURE_DIR + "MainButton/Disabled.png", {2, 2, 2, 2});
 
     // Set our text properties.
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);

@@ -17,6 +17,8 @@ TitleButton::TitleButton(const SDL_Rect& inLogicalExtent,
         Paths::TEXTURE_DIR + "MainButton/HoveredThick.png", {4, 4, 4, 4});
     pressedImage.setNineSliceImage(
         Paths::TEXTURE_DIR + "MainButton/PressedThick.png", {4, 4, 4, 4});
+    disabledImage.setNineSliceImage(
+        Paths::TEXTURE_DIR + "MainButton/DisabledThick.png", {4, 4, 4, 4});
 
     // Set our text properties.
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);

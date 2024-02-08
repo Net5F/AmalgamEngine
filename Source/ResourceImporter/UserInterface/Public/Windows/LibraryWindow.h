@@ -9,6 +9,7 @@
 #include "AUI/Image.h"
 #include "AUI/VerticalListContainer.h"
 #include "AUI/Button.h"
+#include "entt/signal/sigh.hpp"
 #include <unordered_map>
 
 namespace AM
@@ -166,6 +167,22 @@ private:
     AUI::VerticalListContainer libraryContainer;
 
     AUI::Button addButton;
+
+    //-------------------------------------------------------------------------
+    // Signals
+    //-------------------------------------------------------------------------
+    entt::sigh<void(const LibraryListItem& selectedItem)> listItemSelectedSig;
+    entt::sigh<void(const LibraryListItem& deselectedItem)>
+        listItemDeselectedSig;
+
+public:
+    //-------------------------------------------------------------------------
+    // Signal Sinks
+    //-------------------------------------------------------------------------
+    entt::sink<entt::sigh<void(const LibraryListItem& selectedItem)>>
+        listItemSelected;
+    entt::sink<entt::sigh<void(const LibraryListItem& deselectedItem)>>
+        listItemDeselected;
 };
 
 } // End namespace ResourceImporter

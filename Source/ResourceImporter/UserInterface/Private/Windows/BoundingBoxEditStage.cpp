@@ -12,7 +12,7 @@ namespace AM
 namespace ResourceImporter
 {
 BoundingBoxEditStage::BoundingBoxEditStage(DataModel& inDataModel,
-                                           const LibraryWindow& inLibraryWindow)
+                                           LibraryWindow& inLibraryWindow)
 : AUI::Window({320, 58, 1297, 1022}, "BoundingBoxEditStage")
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
@@ -64,6 +64,10 @@ BoundingBoxEditStage::BoundingBoxEditStage(DataModel& inDataModel,
     /* Bounding box gizmo. */
     boundingBoxGizmo.setIsVisible(false);
 
+    /* Preview sprite button. */
+    previewSpriteButton.setOnPressed([&]() { onPreviewSpriteButtonPressed(); });
+    previewSpriteButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 16);
+
     // When the active bounding box is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
         .connect<&BoundingBoxEditStage::onActiveLibraryItemChanged>(*this);
@@ -76,8 +80,46 @@ BoundingBoxEditStage::BoundingBoxEditStage(DataModel& inDataModel,
     boundingBoxGizmo.boundingBoxUpdated
         .connect<&BoundingBoxEditStage::onGizmoBoundingBoxUpdated>(*this);
 
-    /* Preview sprite button. */
-    previewSpriteButton.setOnPressed([&]() { onPreviewSpriteButtonPressed(); });
+    // When a library item is selected, update the preview button.
+    libraryWindow.listItemSelected
+        .connect<&BoundingBoxEditStage::onLibraryListItemSelected>(*this);
+    libraryWindow.listItemDeselected
+        .connect<&BoundingBoxEditStage::onLibraryListItemDeselected>(*this);
+}
+
+void BoundingBoxEditStage::onPreviewSpriteButtonPressed()
+{
+    const auto& selectedListItems{libraryWindow.getSelectedListItems()};
+    bool imageSelected{false};
+    for (const LibraryListItem* selectedItem : selectedListItems) {
+        // If a sprite is selected, set it as the preview image.
+        if (selectedItem->type == LibraryListItem::Type::Sprite) {
+            const EditorSprite& sprite{
+                dataModel.spriteModel.getSprite(selectedItem->ID)};
+
+            // Load the sprite's image.
+            std::string imagePath{dataModel.getWorkingTexturesDir()};
+            imagePath += sprite.parentSpriteSheetPath;
+            spriteImage.setSimpleImage(imagePath, sprite.textureExtent);
+
+            // Center the sprite to the stage's X, but use a fixed Y.
+            SDL_Rect centeredSpriteExtent{sprite.textureExtent};
+            centeredSpriteExtent.x = logicalExtent.w / 2;
+            centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
+            centeredSpriteExtent.y = 212 - logicalExtent.y;
+            spriteImage.setLogicalExtent(centeredSpriteExtent);
+
+            spriteImage.setIsVisible(true);
+            imageSelected = true;
+        }
+    }
+
+    // If a valid image type wasn't selected, reset the preview.
+    if (!imageSelected) {
+        spriteImage.setIsVisible(false);
+        previewSpriteButton.text.setText("Preview Sprite");
+        previewSpriteButton.disable();
+    }
 }
 
 void BoundingBoxEditStage::onActiveLibraryItemChanged(
@@ -155,36 +197,41 @@ void BoundingBoxEditStage::onGizmoBoundingBoxUpdated(
     }
 }
 
-void BoundingBoxEditStage::onPreviewSpriteButtonPressed()
+void BoundingBoxEditStage::onLibraryListItemSelected(
+    const LibraryListItem& selectedItem)
 {
-    const auto& selectedListItems{libraryWindow.getSelectedListItems()};
-    bool imageSelected{false};
-    for (const LibraryListItem* selectedItem : selectedListItems) {
-        // If a sprite is selected, set it as the preview image.
-        if (selectedItem->type == LibraryListItem::Type::Sprite) {
-            const EditorSprite& sprite{
-                dataModel.spriteModel.getSprite(selectedItem->ID)};
-
-            // Load the sprite's image.
-            std::string imagePath{dataModel.getWorkingTexturesDir()};
-            imagePath += sprite.parentSpriteSheetPath;
-            spriteImage.setSimpleImage(imagePath, sprite.textureExtent);
-
-            // Center the sprite to the stage's X, but use a fixed Y.
-            SDL_Rect centeredSpriteExtent{sprite.textureExtent};
-            centeredSpriteExtent.x = logicalExtent.w / 2;
-            centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
-            centeredSpriteExtent.y = 212 - logicalExtent.y;
-            spriteImage.setLogicalExtent(centeredSpriteExtent);
-
-            spriteImage.setIsVisible(true);
-            imageSelected = true;
-        }
+    // TODO: When we add multi-select, this will need to be updated.
+    // If a sprite is selected, allow the user to preview it.
+    if (selectedItem.type == LibraryListItem::Type::Sprite) {
+        previewSpriteButton.text.setText("Preview Sprite");
+        previewSpriteButton.enable();
     }
+    // If a sprite isn't selected but we're displaying an image, allow the 
+    // user to clear it.
+    else if (spriteImage.getIsVisible()) {
+        previewSpriteButton.text.setText("Clear Preview");
+        previewSpriteButton.enable();
+    }
+    else {
+        // No selection and no image. Disable the button.
+        previewSpriteButton.text.setText("Preview Sprite");
+        previewSpriteButton.disable();
+    }
+}
 
-    // If a valid image type wasn't selected, reset the preview.
-    if (!imageSelected) {
-        spriteImage.setIsVisible(false);
+void BoundingBoxEditStage::onLibraryListItemDeselected(
+    const LibraryListItem& deselectedItem)
+{
+    // TODO: When we add multi-select, this will need to be updated.
+    // If an image is being previewed, allow the user to clear it.
+    if (spriteImage.getIsVisible()) {
+        previewSpriteButton.text.setText("Clear Preview");
+        previewSpriteButton.enable();
+    }
+    else {
+        // No image. Disable the button.
+        previewSpriteButton.text.setText("Preview Sprite");
+        previewSpriteButton.disable();
     }
 }
 

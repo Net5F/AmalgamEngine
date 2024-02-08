@@ -14,6 +14,7 @@ namespace ResourceImporter
 {
 class DataModel;
 class LibraryWindow;
+class LibraryListItem;
 
 /**
  * The center stage shown when the user loads a bounding box from the Library.
@@ -26,9 +27,14 @@ public:
     // Public interface
     //-------------------------------------------------------------------------
     BoundingBoxEditStage(DataModel& inDataModel,
-                           const LibraryWindow& inLibraryWindow);
+                         LibraryWindow& inLibraryWindow);
 
 private:
+    /**
+     * If a sprite is selected in the library, adds it to the stage.
+     */
+    void onPreviewSpriteButtonPressed();
+
     /**
      * If the new active item is a bounding box, loads it's data onto this stage.
      */
@@ -53,9 +59,10 @@ private:
     void onGizmoBoundingBoxUpdated(const BoundingBox& boundingBox);
 
     /**
-     * If a sprite is selected in the library, adds it to the stage.
+     * Updates previewSpriteButton to show whether the list item is preview-able.
      */
-    void onPreviewSpriteButtonPressed();
+    void onLibraryListItemSelected(const LibraryListItem& selectedItem);
+    void onLibraryListItemDeselected(const LibraryListItem& deselectedItem);
 
     /**
      * Styles the given text.
@@ -66,7 +73,7 @@ private:
     DataModel& dataModel;
 
     /** Used to get the currently selected list item. */
-    const LibraryWindow& libraryWindow;
+    LibraryWindow& libraryWindow;
 
     /** The active bounding box's ID. */
     BoundingBoxID activeBoundingBoxID;

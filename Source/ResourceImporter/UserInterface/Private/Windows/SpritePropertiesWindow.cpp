@@ -18,7 +18,7 @@ namespace AM
 namespace ResourceImporter
 {
 SpritePropertiesWindow::SpritePropertiesWindow(
-    DataModel& inDataModel, const LibraryWindow& inLibraryWindow)
+    DataModel& inDataModel, LibraryWindow& inLibraryWindow)
 : AUI::Window({1617, 0, 303, 579}, "SpritePropertiesWindow")
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
 , nameInput{{24, 84, 255, 38}, "NameInput"}
@@ -189,6 +189,12 @@ SpritePropertiesWindow::SpritePropertiesWindow(
         .connect<&SpritePropertiesWindow::onSpriteCustomModelBoundsChanged>(*this);
     spriteModel.spriteRemoved.connect<&SpritePropertiesWindow::onSpriteRemoved>(
         *this);
+
+    // When a library item is selected, update the preview button.
+    libraryWindow.listItemSelected
+        .connect<&SpritePropertiesWindow::onLibraryListItemSelected>(*this);
+    libraryWindow.listItemDeselected
+        .connect<&SpritePropertiesWindow::onLibraryListItemDeselected>(*this);
 }
 
 void SpritePropertiesWindow::onActiveLibraryItemChanged(
@@ -219,10 +225,14 @@ void SpritePropertiesWindow::onActiveLibraryItemChanged(
             dataModel.boundingBoxModel.getBoundingBox(
                 newActiveSprite->modelBoundsID)};
         boundingBoxNameLabel.setText(boundingBox.displayName);
+        boundingBoxButton.text.setText("Custom");
+        boundingBoxButton.enable();
         setBoundsFieldsEnabled(false);
     }
     else {
         boundingBoxNameLabel.setText("<Custom>");
+        boundingBoxButton.text.setText("Assign");
+        boundingBoxButton.disable();
         setBoundsFieldsEnabled(true);
     }
 
@@ -319,6 +329,56 @@ void SpritePropertiesWindow::onSpriteCustomModelBoundsChanged(
     }
 }
 
+void SpritePropertiesWindow::onLibraryListItemSelected(
+    const LibraryListItem& selectedItem)
+{
+    // If there's no active sprite, do nothing.
+    if (activeSpriteID == NULL_SPRITE_ID) {
+        return;
+    }
+
+    // TODO: When we add multi-select, this will need to be updated.
+    // If a bounding box is selected, allow the user to assign it.
+    if (selectedItem.type == LibraryListItem::Type::BoundingBox) {
+        boundingBoxButton.text.setText("Assign");
+        boundingBoxButton.enable();
+    }
+    // If we have a shared bounding box assigned, allow the user to switch 
+    // to a custom bounding box.
+    else if (dataModel.spriteModel.getSprite(activeSpriteID).modelBoundsID
+             != NULL_BOUNDING_BOX_ID) {
+        boundingBoxButton.text.setText("Custom");
+        boundingBoxButton.enable();
+    }
+    else {
+        // Custom bounding box and no selection. Disable the button.
+        boundingBoxButton.text.setText("Assign");
+        boundingBoxButton.disable();
+    }
+}
+
+void SpritePropertiesWindow::onLibraryListItemDeselected(
+    const LibraryListItem& deselectedItem)
+{
+    // If there's no active sprite, do nothing.
+    if (activeSpriteID == NULL_SPRITE_ID) {
+        return;
+    }
+
+    // If we have a shared bounding box assigned, allow the user to switch 
+    // to a custom bounding box.
+    if (dataModel.spriteModel.getSprite(activeSpriteID).modelBoundsID
+             != NULL_BOUNDING_BOX_ID) {
+        boundingBoxButton.text.setText("Custom");
+        boundingBoxButton.enable();
+    }
+    else {
+        // Custom bounding box. Disable the button.
+        boundingBoxButton.text.setText("Assign");
+        boundingBoxButton.disable();
+    }
+}
+
 void SpritePropertiesWindow::setBoundsFieldsEnabled(bool isEnabled)
 {
     if (isEnabled) {
@@ -383,6 +443,8 @@ void SpritePropertiesWindow::saveModelBoundsID()
             != NULL_BOUNDING_BOX_ID)) {
         spriteModel.setSpriteModelBoundsID(activeSpriteID,
                                            NULL_BOUNDING_BOX_ID);
+        boundingBoxButton.text.setText("Assign");
+        boundingBoxButton.disable();
     }
 }
 

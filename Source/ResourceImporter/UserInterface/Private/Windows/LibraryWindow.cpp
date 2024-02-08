@@ -19,6 +19,8 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
 , windowLabel({12, 0, 80, 40}, "LibraryWindowLabel")
 , libraryContainer({1, 40, 318, (1080 - 40 - 1)}, "LibraryContainer")
 , addButton({286, 9, 22, 22}, "AddButton")
+, listItemSelected{listItemSelectedSig}
+, listItemDeselected{listItemDeselectedSig}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
@@ -192,6 +194,11 @@ void LibraryWindow::onBoundingBoxAdded(BoundingBoxID boundingBoxID,
     boundingBoxListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
         processSelectedListItem(selectedListItem);
     });
+    boundingBoxListItem->setOnDeselected(
+        [this](LibraryListItem* deselectedListItem) {
+        // Note: Deselect is handled in OnSelected and FocusLost.
+        listItemDeselectedSig.publish(*deselectedListItem);
+    });
     boundingBoxListItem->setOnActivated(
         [this, boundingBoxID](LibraryListItem*) {
             // Set this list item's associated bounding box as the active item.
@@ -216,6 +223,10 @@ void LibraryWindow::onSpriteSheetAdded(int sheetID,
 
     sheetListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
         processSelectedListItem(selectedListItem);
+    });
+    sheetListItem->setOnDeselected([this](LibraryListItem* deselectedListItem) {
+        // Note: Deselect is handled in OnSelected and FocusLost.
+        listItemDeselectedSig.publish(*deselectedListItem);
     });
 
     // Add each of the new sheet's sprites to its child container.
@@ -308,6 +319,10 @@ void LibraryWindow::onIconSheetAdded(int sheetID, const EditorIconSheet& sheet)
 
     sheetListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
         processSelectedListItem(selectedListItem);
+    });
+    sheetListItem->setOnDeselected([this](LibraryListItem* deselectedListItem) {
+        // Note: Deselect is handled in OnSelected and FocusLost.
+        listItemDeselectedSig.publish(*deselectedListItem);
     });
 
     // Add each of the new sheet's icons to its child container.
@@ -484,6 +499,9 @@ void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
 
     // Add the new item.
     selectedListItems.push_back(selectedListItem);
+
+    // Signal that an item was selected.
+    listItemSelectedSig.publish(*selectedListItem);
 }
 
 void LibraryWindow::addSpriteToSheetListItem(ParentListItem& sheetListItem,
@@ -502,6 +520,10 @@ void LibraryWindow::addSpriteToSheetListItem(ParentListItem& sheetListItem,
 
     spriteListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
         processSelectedListItem(selectedListItem);
+    });
+    spriteListItem->setOnDeselected([this](LibraryListItem* deselectedListItem) {
+        // Note: Deselect is handled in OnSelected and FocusLost.
+        listItemDeselectedSig.publish(*deselectedListItem);
     });
     spriteListItem->setOnActivated(
         [this, spriteID](LibraryListItem* activatedListItem) {
