@@ -420,7 +420,8 @@ const std::string& SpriteSetModel::getErrorString()
 
 bool SpriteSetModel::parseFloorSpriteSet(const nlohmann::json& spriteSetJson)
 {
-    Uint16 numericID{static_cast<Uint16>(floorIDPool.reserveID())};
+    FloorSpriteSetID numericID{
+        static_cast<FloorSpriteSetID>(floorIDPool.reserveID())};
     std::string displayName{spriteSetJson.at("displayName").get<std::string>()};
 
     // Add the sprite set's sprites.
@@ -452,7 +453,8 @@ bool SpriteSetModel::parseFloorSpriteSet(const nlohmann::json& spriteSetJson)
 bool SpriteSetModel::parseFloorCoveringSpriteSet(
     const nlohmann::json& spriteSetJson)
 {
-    Uint16 numericID{static_cast<Uint16>(floorCoveringIDPool.reserveID())};
+    FloorCoveringSpriteSetID numericID{
+        static_cast<FloorCoveringSpriteSetID>(floorCoveringIDPool.reserveID())};
     std::string displayName{spriteSetJson.at("displayName").get<std::string>()};
 
     // Add the sprite set's sprites.
@@ -481,7 +483,8 @@ bool SpriteSetModel::parseFloorCoveringSpriteSet(
 
 bool SpriteSetModel::parseWallSpriteSet(const nlohmann::json& spriteSetJson)
 {
-    Uint16 numericID{static_cast<Uint16>(wallIDPool.reserveID())};
+    WallSpriteSetID numericID{
+        static_cast<WallSpriteSetID>(wallIDPool.reserveID())};
     std::string displayName{spriteSetJson.at("displayName").get<std::string>()};
 
     // Add the sprite set's sprites.
@@ -510,7 +513,8 @@ bool SpriteSetModel::parseWallSpriteSet(const nlohmann::json& spriteSetJson)
 
 bool SpriteSetModel::parseObjectSpriteSet(const nlohmann::json& spriteSetJson)
 {
-    Uint16 numericID{static_cast<Uint16>(objectIDPool.reserveID())};
+    ObjectSpriteSetID numericID{
+        static_cast<ObjectSpriteSetID>(objectIDPool.reserveID())};
     std::string displayName{spriteSetJson.at("displayName").get<std::string>()};
 
     // Add the sprite set's sprites.
@@ -640,12 +644,13 @@ void SpriteSetModel::saveFloors(nlohmann::json& json)
 
     // Fill the json with each floor sprite set in the model.
     int i{0};
+    FloorSpriteSetID spriteSetID{1};
     for (auto& spriteSetPair : floorMap) {
         EditorFloorSpriteSet& spriteSet{spriteSetPair.second};
         json["floors"][i]["displayName"] = spriteSet.displayName;
         json["floors"][i]["stringID"]
             = DataModel::deriveStringID(spriteSet.displayName);
-        json["floors"][i]["numericID"] = i;
+        json["floors"][i]["numericID"] = spriteSetID++;
         for (std::size_t j = 0; j < spriteSet.spriteIDs.size(); ++j) {
             json["floors"][i]["spriteIDs"][j] = spriteSet.spriteIDs[j];
         }
@@ -660,12 +665,13 @@ void SpriteSetModel::saveFloorCoverings(nlohmann::json& json)
 
     // Fill the json with each floor covering sprite set in the model.
     int i{0};
+    FloorCoveringSpriteSetID spriteSetID{1};
     for (auto& spriteSetPair : floorCoveringMap) {
         EditorFloorCoveringSpriteSet& spriteSet{spriteSetPair.second};
         json["floorCoverings"][i]["displayName"] = spriteSet.displayName;
         json["floorCoverings"][i]["stringID"]
             = DataModel::deriveStringID(spriteSet.displayName);
-        json["floorCoverings"][i]["numericID"] = i;
+        json["floorCoverings"][i]["numericID"] = spriteSetID++;
         for (std::size_t j = 0; j < spriteSet.spriteIDs.size(); ++j) {
             json["floorCoverings"][i]["spriteIDs"][j] = spriteSet.spriteIDs[j];
         }
@@ -680,12 +686,13 @@ void SpriteSetModel::saveWalls(nlohmann::json& json)
 
     // Fill the json with each wall sprite set in the model.
     int i{0};
+    WallSpriteSetID spriteSetID{1};
     for (auto& spriteSetPair : wallMap) {
         EditorWallSpriteSet& spriteSet{spriteSetPair.second};
         json["walls"][i]["displayName"] = spriteSet.displayName;
         json["walls"][i]["stringID"]
             = DataModel::deriveStringID(spriteSet.displayName);
-        json["walls"][i]["numericID"] = i;
+        json["walls"][i]["numericID"] = spriteSetID++;
         for (std::size_t j = 0; j < spriteSet.spriteIDs.size(); ++j) {
             json["walls"][i]["spriteIDs"][j] = spriteSet.spriteIDs[j];
         }
@@ -700,12 +707,13 @@ void SpriteSetModel::saveObjects(nlohmann::json& json)
 
     // Fill the json with each object sprite set in the model.
     int i{0};
+    ObjectSpriteSetID spriteSetID{1};
     for (auto& spriteSetPair : objectMap) {
         EditorObjectSpriteSet& spriteSet{spriteSetPair.second};
         json["objects"][i]["displayName"] = spriteSet.displayName;
         json["objects"][i]["stringID"]
             = DataModel::deriveStringID(spriteSet.displayName);
-        json["objects"][i]["numericID"] = i;
+        json["objects"][i]["numericID"] = spriteSetID++;
         for (std::size_t j = 0; j < spriteSet.spriteIDs.size(); ++j) {
             json["objects"][i]["spriteIDs"][j] = spriteSet.spriteIDs[j];
         }

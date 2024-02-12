@@ -58,6 +58,7 @@ void IconModel::save(nlohmann::json& json)
     /* Fill the json with our current model data. */
     // For each icon sheet.
     int i{0};
+    IconID iconID{1};
     for (auto& sheetPair : iconSheetMap) {
         // Add this sheet's relative path.
         EditorIconSheet& iconSheet{sheetPair.second};
@@ -74,7 +75,7 @@ void IconModel::save(nlohmann::json& json)
                 = DataModel::deriveStringID(icon.displayName);
 
             // Add the numeric ID.
-            json["iconSheets"][i]["icons"][j]["numericID"] = icon.numericID;
+            json["iconSheets"][i]["icons"][j]["numericID"] = iconID++;
 
             // Add the icon sheet texture extent.
             json["iconSheets"][i]["icons"][j]["textureExtent"]["x"]

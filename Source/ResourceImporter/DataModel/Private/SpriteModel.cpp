@@ -69,6 +69,7 @@ void SpriteModel::save(nlohmann::json& json)
     /* Fill the json with our current model data. */
     // For each sprite sheet.
     int i{0};
+    SpriteID spriteID{1};
     for (auto& sheetPair : spriteSheetMap) {
         // Add this sheet's relative path.
         EditorSpriteSheet& spriteSheet{sheetPair.second};
@@ -87,7 +88,7 @@ void SpriteModel::save(nlohmann::json& json)
 
             // Add the numeric ID.
             json["spriteSheets"][i]["sprites"][j]["numericID"]
-                = sprite.numericID;
+                = spriteID++;
 
             // Add the sprite sheet texture extent.
             json["spriteSheets"][i]["sprites"][j]["textureExtent"]["x"]

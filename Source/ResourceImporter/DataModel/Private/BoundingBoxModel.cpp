@@ -52,6 +52,7 @@ void BoundingBoxModel::save(nlohmann::json& json)
 
     // Fill the json with each bounding box in the model.
     int i{0};
+    BoundingBoxID boundingBoxID{1};
     for (auto& boundsPair : boundingBoxMap) {
         // Add the display name.
         EditorBoundingBox& bounds{boundsPair.second};
@@ -61,7 +62,7 @@ void BoundingBoxModel::save(nlohmann::json& json)
         //       directly refers to these bounding boxes.
 
         // Add the numeric ID.
-        json["boundingBoxes"][i]["numericID"] = bounds.numericID;
+        json["boundingBoxes"][i]["numericID"] = boundingBoxID++;
 
         // Add the model-space bounds.
         json["boundingBoxes"][i]["modelBounds"]["minX"]
