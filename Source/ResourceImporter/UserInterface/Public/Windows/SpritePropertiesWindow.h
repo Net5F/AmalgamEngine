@@ -74,20 +74,20 @@ private:
     /**
      * (If active sprite was removed) Sets this panel back to its default state.
      */
-    void onSpriteRemoved(int spriteID);
+    void onSpriteRemoved(SpriteID spriteID);
 
     /**
      * (If ID matches active sprite) Updates this panel with the active sprite's
      * new properties.
      */
-    void onSpriteDisplayNameChanged(int spriteID,
+    void onSpriteDisplayNameChanged(SpriteID spriteID,
                                     const std::string& newDisplayName);
-    void onSpriteCollisionEnabledChanged(int spriteID,
+    void onSpriteCollisionEnabledChanged(SpriteID spriteID,
                                          bool newCollisionEnabled);
-    void onSpriteModelBoundsIDChanged(int spriteID,
+    void onSpriteModelBoundsIDChanged(SpriteID spriteID,
                                       BoundingBoxID newModelBoundsID);
     void onSpriteCustomModelBoundsChanged(
-        int spriteID, const BoundingBox& newCustomModelBounds);
+        SpriteID spriteID, const BoundingBox& newCustomModelBounds);
 
     /**
      * Updates boundingBoxButton to show whether the list item is assignable.
@@ -107,7 +107,7 @@ private:
     LibraryWindow& libraryWindow;
 
     /** The active sprite's ID. */
-    int activeSpriteID;
+    SpriteID activeSpriteID;
 
     /**
      * Converts the given float to a string with 3 decimals of precision.

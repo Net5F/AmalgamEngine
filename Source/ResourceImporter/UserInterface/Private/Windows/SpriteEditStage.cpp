@@ -2,7 +2,7 @@
 #include "MainScreen.h"
 #include "EditorSprite.h"
 #include "DataModel.h"
-#include "NullSpriteID.h"
+#include "SpriteID.h"
 #include "Paths.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
@@ -122,7 +122,7 @@ void SpriteEditStage::onActiveLibraryItemChanged(
     boundingBoxGizmo.setIsVisible(true);
 }
 
-void SpriteEditStage::onSpriteModelBoundsIDChanged(int spriteID,
+void SpriteEditStage::onSpriteModelBoundsIDChanged(SpriteID spriteID,
     BoundingBoxID newModelBoundsID)
 {
     // If the sprite isn't active, do nothing.
@@ -148,7 +148,7 @@ void SpriteEditStage::onSpriteModelBoundsIDChanged(int spriteID,
 }
 
 void SpriteEditStage::onSpriteCustomModelBoundsChanged(
-    int spriteID, const BoundingBox& newCustomModelBounds)
+    SpriteID spriteID, const BoundingBox& newCustomModelBounds)
 {
     // If the sprite isn't active or isn't set to custom bounds, do nothing.
     const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
@@ -160,7 +160,7 @@ void SpriteEditStage::onSpriteCustomModelBoundsChanged(
     boundingBoxGizmo.setBoundingBox(newCustomModelBounds);
 }
 
-void SpriteEditStage::onSpriteRemoved(int spriteID)
+void SpriteEditStage::onSpriteRemoved(SpriteID spriteID)
 {
     if (spriteID == activeSpriteID) {
         activeSpriteID = NULL_SPRITE_ID;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SpriteSetIDs.h"
 #include "Sprite.h"
 #include "Wall.h"
 #include <SDL_stdinc.h>
@@ -28,7 +29,7 @@ struct SpriteSet {
         FloorCovering,
         Wall,
         Object,
-        // Character,
+        // Entity,
         Count,
         None
     };
@@ -40,16 +41,16 @@ struct SpriteSet {
         spaces with underscores and making everything lowercase.
         This ID will be consistent, and can be used for persistent state. */
     std::string stringID{"empty"};
+};
 
+struct FloorSpriteSet : public SpriteSet {
     /** This sprite set's unique numeric identifier.
         Each sprite set type has its own ID space.
         This value can be used safely at runtime, but shouldn't be used for
         persistent state since it may change when ResourceData.json is
         modified. */
-    Uint16 numericID{0};
-};
+    FloorSpriteSetID numericID{0};
 
-struct FloorSpriteSet : public SpriteSet {
     /** This floor's single sprite. */
     const Sprite& sprite;
 };
@@ -57,6 +58,13 @@ struct FloorSpriteSet : public SpriteSet {
 struct FloorCoveringSpriteSet : public SpriteSet {
     /** The number of variations that this sprite set can hold. */
     static constexpr std::size_t VARIATION_COUNT{8};
+
+    /** This sprite set's unique numeric identifier.
+        Each sprite set type has its own ID space.
+        This value can be used safely at runtime, but shouldn't be used for
+        persistent state since it may change when ResourceData.json is
+        modified. */
+    FloorCoveringSpriteSetID numericID{0};
 
     /** The 8 variations of this floor covering.
         If any slots weren't assigned a sprite, they will be nullptr in
@@ -68,6 +76,13 @@ struct FloorCoveringSpriteSet : public SpriteSet {
 };
 
 struct WallSpriteSet : public SpriteSet {
+    /** This sprite set's unique numeric identifier.
+        Each sprite set type has its own ID space.
+        This value can be used safely at runtime, but shouldn't be used for
+        persistent state since it may change when ResourceData.json is
+        modified. */
+    WallSpriteSetID numericID{0};
+
     /** The 4 types of wall sprite that we use for our modular wall system. */
     std::array<std::reference_wrapper<const Sprite>, Wall::Type::Count> sprites;
 };
@@ -75,6 +90,13 @@ struct WallSpriteSet : public SpriteSet {
 struct ObjectSpriteSet : public SpriteSet {
     /** The number of variations that this sprite set can hold. */
     static constexpr std::size_t VARIATION_COUNT{8};
+
+    /** This sprite set's unique numeric identifier.
+        Each sprite set type has its own ID space.
+        This value can be used safely at runtime, but shouldn't be used for
+        persistent state since it may change when ResourceData.json is
+        modified. */
+    ObjectSpriteSetID numericID{0};
 
     /** The 8 variations of this floor covering.
         If any slots weren't assigned a sprite, they will be nullptr in

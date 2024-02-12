@@ -1,6 +1,6 @@
 #include "SpriteData.h"
 #include "AssetCache.h"
-#include "NullSpriteID.h"
+#include "SpriteID.h"
 #include "Paths.h"
 #include "Log.h"
 #include "nlohmann/json.hpp"
@@ -17,15 +17,12 @@ SpriteData::SpriteData(const nlohmann::json& resourceDataJson,
     parseJson(resourceDataJson, assetCache);
 }
 
-const SpriteRenderData& SpriteData::getRenderData(int numericID) const
+const SpriteRenderData& SpriteData::getRenderData(SpriteID numericID) const
 {
-    if (numericID == NULL_SPRITE_ID) {
-        return renderData[nullSpriteIndex];
-    }
-    else if (numericID < 0
-             || numericID >= static_cast<int>(renderData.size())) {
-        LOG_FATAL("Invalid numeric ID while getting sprite render data: %d",
+    if (numericID >= renderData.size()) {
+        LOG_ERROR("Invalid numeric ID while getting sprite render data: %d",
                   numericID);
+        return renderData[0];
     }
 
     return renderData[numericID];
@@ -33,10 +30,13 @@ const SpriteRenderData& SpriteData::getRenderData(int numericID) const
 
 void SpriteData::parseJson(const nlohmann::json& json, AssetCache& assetCache)
 {
+    // Add the null sprite.
+    renderData.emplace_back();
+
     // Parse the json and catch any parsing errors.
     try {
         // Resize our vector.
-        renderData.resize(nullSpriteIndex + 1);
+        renderData.resize(sprites.size());
 
         // Parse every sprite sheet in the json.
         for (auto& sheetJson : json["spriteSheets"].items()) {
@@ -50,9 +50,6 @@ void SpriteData::parseJson(const nlohmann::json& json, AssetCache& assetCache)
                 parseSprite(spriteJson.value(), texturePath, texture);
             }
         }
-
-        // Add the null sprite.
-        renderData[nullSpriteIndex] = SpriteRenderData{};
     } catch (nlohmann::json::type_error& e) {
         LOG_FATAL(
             "Failed to parse sprites and sprite sets in ResourceData.json: %s",
@@ -65,7 +62,7 @@ void SpriteData::parseSprite(const nlohmann::json& spriteJson,
                              const TextureHandle& texture)
 {
     // Get the numeric identifier.
-    int numericID{spriteJson.at("numericID")};
+    SpriteID numericID{spriteJson.at("numericID")};
 
     // Add the parent sprite sheet's path and texture.
     SpriteRenderData& spriteRenderData{renderData[numericID]};

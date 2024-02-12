@@ -18,7 +18,8 @@ const Icon& IconDataBase::getIcon(const std::string& stringID) const
     // Attempt to find the given string ID.
     auto it{iconStringMap.find(stringID)};
     if (it == iconStringMap.end()) {
-        LOG_FATAL("Failed to find icon with string ID: %s", stringID.c_str());
+        LOG_ERROR("Failed to find icon with string ID: %s", stringID.c_str());
+        return icons[0];
     }
 
     return *(it->second);
@@ -27,7 +28,8 @@ const Icon& IconDataBase::getIcon(const std::string& stringID) const
 const Icon& IconDataBase::getIcon(IconID numericID) const
 {
     if (numericID >= icons.size()) {
-        LOG_FATAL("Invalid numeric ID while getting icon: %d", numericID);
+        LOG_ERROR("Invalid numeric ID while getting icon: %d", numericID);
+        return icons[0];
     }
 
     return icons[numericID];
@@ -40,7 +42,7 @@ const std::vector<Icon>& IconDataBase::getAllIcons() const
 
 void IconDataBase::parseJson(const nlohmann::json& json)
 {
-    // Add the null icon and set the null icon index.
+    // Add the null icon.
     icons.emplace_back("Null", "null", NULL_ICON_ID);
 
     // Parse the json and catch any parsing errors.

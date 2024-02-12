@@ -1,7 +1,7 @@
 #include "SpriteModel.h"
 #include "DataModel.h"
 #include "SpriteSetModel.h"
-#include "NullSpriteID.h"
+#include "SpriteID.h"
 #include "nlohmann/json.hpp"
 #include <SDL_render.h>
 #include <SDL_image.h>
@@ -38,6 +38,9 @@ SpriteModel::SpriteModel(DataModel& inDataModel,
 , spriteModelBoundsIDChanged{spriteModelBoundsIDChangedSig}
 , spriteCustomModelBoundsChanged{spriteCustomModelBoundsChangedSig}
 {
+    // Reserve the null sprite's ID (the engine provides it in code, so we don't
+    // need it in the json).
+    spriteIDPool.reserveID();
 }
 
 bool SpriteModel::load(const nlohmann::json& json)
@@ -209,7 +212,7 @@ bool SpriteModel::addSpriteSheet(const std::string& relPath,
             static constexpr BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
 
             // Add the sprite to the map and sheet.
-            int spriteID{static_cast<int>(spriteIDPool.reserveID())};
+            SpriteID spriteID{static_cast<SpriteID>(spriteIDPool.reserveID())};
             spriteMap.emplace(
                 spriteID, EditorSprite{spriteID, spriteSheet.relPath,
                                        displayName, textureExtent, yOffsetI,
@@ -236,7 +239,7 @@ void SpriteModel::remSpriteSheet(int sheetID)
     }
 
     // Erase all of the sheet's sprites.
-    for (int spriteID : sheetIt->second.spriteIDs) {
+    for (SpriteID spriteID : sheetIt->second.spriteIDs) {
         remSprite(spriteID);
     }
 
@@ -247,7 +250,7 @@ void SpriteModel::remSpriteSheet(int sheetID)
     sheetRemovedSig.publish(sheetID);
 }
 
-void SpriteModel::remSprite(int spriteID)
+void SpriteModel::remSprite(SpriteID spriteID)
 {
     // Find the sprite in the map.
     auto spriteIt{spriteMap.find(spriteID)};
@@ -265,7 +268,7 @@ void SpriteModel::remSprite(int spriteID)
     spriteSetModel.removeSpriteIDFromSets(spriteID);
 }
 
-const EditorSprite& SpriteModel::getSprite(int spriteID)
+const EditorSprite& SpriteModel::getSprite(SpriteID spriteID)
 {
     auto spriteIt{spriteMap.find(spriteID)};
     if (spriteIt == spriteMap.end()) {
@@ -275,7 +278,7 @@ const EditorSprite& SpriteModel::getSprite(int spriteID)
     return spriteIt->second;
 }
 
-void SpriteModel::setSpriteDisplayName(int spriteID,
+void SpriteModel::setSpriteDisplayName(SpriteID spriteID,
                                        const std::string& newDisplayName)
 {
     auto spritePair{spriteMap.find(spriteID)};
@@ -300,7 +303,7 @@ void SpriteModel::setSpriteDisplayName(int spriteID,
     spriteDisplayNameChangedSig.publish(spriteID, sprite.displayName);
 }
 
-void SpriteModel::setSpriteCollisionEnabled(int spriteID,
+void SpriteModel::setSpriteCollisionEnabled(SpriteID spriteID,
                                             bool newCollisionEnabled)
 {
     auto spritePair{spriteMap.find(spriteID)};
@@ -315,7 +318,7 @@ void SpriteModel::setSpriteCollisionEnabled(int spriteID,
     spriteCollisionEnabledChangedSig.publish(spriteID, newCollisionEnabled);
 }
 
-void SpriteModel::setSpriteModelBoundsID(int spriteID,
+void SpriteModel::setSpriteModelBoundsID(SpriteID spriteID,
                                          BoundingBoxID newModelBoundsID)
 {
     auto spritePair{spriteMap.find(spriteID)};
@@ -330,7 +333,7 @@ void SpriteModel::setSpriteModelBoundsID(int spriteID,
     spriteModelBoundsIDChangedSig.publish(spriteID, newModelBoundsID);
 }
 
-void SpriteModel::setSpriteCustomModelBounds(int spriteID,
+void SpriteModel::setSpriteCustomModelBounds(SpriteID spriteID,
                                        const BoundingBox& newModelBounds)
 {
     auto spritePair{spriteMap.find(spriteID)};
@@ -387,7 +390,7 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
                               EditorSpriteSheet& spriteSheet)
 {
     // Mark the sprite's ID as reserved so it doesn't get reused.
-    int spriteID{spriteJson.at("numericID").get<int>()};
+    SpriteID spriteID{spriteJson.at("numericID").get<SpriteID>()};
     spriteIDPool.markIDAsReserved(spriteID);
 
     spriteMap.emplace(spriteID, EditorSprite{spriteID, spriteSheet.relPath});
@@ -434,14 +437,14 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     return true;
 }
 
-bool SpriteModel::spriteNameIsUnique(int spriteID,
+bool SpriteModel::spriteNameIsUnique(SpriteID spriteID,
                                      const std::string& displayName)
 {
     // Dumbly look through all names for a match.
     // Note: Eventually, this should change to a name map that we keep updated.
     bool isUnique{true};
     for (const auto& spritePair : spriteMap) {
-        int idToCheck{spritePair.first};
+        SpriteID idToCheck{spritePair.first};
         const EditorSprite& sprite{spritePair.second};
 
         if ((idToCheck != spriteID) && (displayName == sprite.displayName)) {

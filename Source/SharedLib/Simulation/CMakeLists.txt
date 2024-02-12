@@ -51,9 +51,10 @@ target_sources(SharedLib
         Public/ItemData/ItemDataBase.h
         Public/ItemData/ItemID.h
         Public/ItemData/ItemInitScript.h
-        Public/SpriteData/NullSpriteID.h
         Public/SpriteData/Sprite.h
         Public/SpriteData/SpriteDataBase.h
+        Public/SpriteData/SpriteID.h
+        Public/SpriteData/SpriteSetIDs.h
         Public/SpriteData/SpriteSets.h
         Public/TileMap/CellExtent.h
         Public/TileMap/CellPosition.h

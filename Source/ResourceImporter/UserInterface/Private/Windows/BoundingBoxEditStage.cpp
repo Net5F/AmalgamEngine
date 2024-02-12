@@ -1,8 +1,6 @@
 #include "BoundingBoxEditStage.h"
 #include "MainScreen.h"
-#include "EditorSprite.h"
 #include "DataModel.h"
-#include "NullSpriteID.h"
 #include "Paths.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"

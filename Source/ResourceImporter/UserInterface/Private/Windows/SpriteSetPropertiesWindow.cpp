@@ -3,7 +3,7 @@
 #include "MainThumbnail.h"
 #include "DataModel.h"
 #include "EditorFloorSpriteSet.h"
-#include "NullSpriteID.h"
+#include "SpriteID.h"
 #include "Paths.h"
 #include "Camera.h"
 #include "Transforms.h"

@@ -80,7 +80,7 @@ public:
     void setActiveBoundingBox(BoundingBoxID newActiveBoundingBoxID);
 
     /** Sets the current active library item to the given sprite. */
-    void setActiveSprite(int newActiveSpriteID);
+    void setActiveSprite(SpriteID newActiveSpriteID);
 
     /** Sets the current active library item to the given sprite set. */
     void setActiveSpriteSet(SpriteSet::Type type, Uint16 newActiveSpriteSetID);

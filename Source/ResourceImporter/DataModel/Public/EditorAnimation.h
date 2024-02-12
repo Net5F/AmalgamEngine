@@ -14,10 +14,10 @@ namespace ResourceImporter
 class BoundingBoxModel;
 
 /**
- * Holds the data necessary for editing and saving a sprite.
- * Part of SpriteModel.
+ * Holds the data necessary for editing and saving an animation.
+ * Part of AnimationModel.
  */
-struct EditorSprite {
+struct EditorAnimation {
     /** This sprite's unique numeric identifier. */
     SpriteID numericID{NULL_SPRITE_ID};
 

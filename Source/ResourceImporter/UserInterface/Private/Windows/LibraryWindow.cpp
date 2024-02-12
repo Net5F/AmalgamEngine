@@ -230,7 +230,7 @@ void LibraryWindow::onSpriteSheetAdded(int sheetID,
     });
 
     // Add each of the new sheet's sprites to its child container.
-    for (int spriteID : sheet.spriteIDs) {
+    for (SpriteID spriteID : sheet.spriteIDs) {
         addSpriteToSheetListItem(*sheetListItem, sheet, spriteID);
     }
 
@@ -240,25 +240,27 @@ void LibraryWindow::onSpriteSheetAdded(int sheetID,
     sheetContainer.push_back(std::move(sheetListItem));
 }
 
-void LibraryWindow::onFloorAdded(Uint16 floorID,
+void LibraryWindow::onFloorAdded(FloorSpriteSetID floorID,
                                  const EditorFloorSpriteSet& floor)
 {
     onSpriteSetAdded<EditorFloorSpriteSet>(floorID, floor);
 }
 
 void LibraryWindow::onFloorCoveringAdded(
-    Uint16 floorCoveringID, const EditorFloorCoveringSpriteSet& floorCovering)
+    FloorCoveringSpriteSetID floorCoveringID,
+    const EditorFloorCoveringSpriteSet& floorCovering)
 {
     onSpriteSetAdded<EditorFloorCoveringSpriteSet>(floorCoveringID,
                                                    floorCovering);
 }
 
-void LibraryWindow::onWallAdded(Uint16 wallID, const EditorWallSpriteSet& wall)
+void LibraryWindow::onWallAdded(WallSpriteSetID wallID,
+                                const EditorWallSpriteSet& wall)
 {
     onSpriteSetAdded<EditorWallSpriteSet>(wallID, wall);
 }
 
-void LibraryWindow::onObjectAdded(Uint16 objectID,
+void LibraryWindow::onObjectAdded(ObjectSpriteSetID objectID,
                                   const EditorObjectSpriteSet& object)
 {
     onSpriteSetAdded<EditorObjectSpriteSet>(objectID, object);
@@ -443,7 +445,7 @@ void LibraryWindow::onBoundingBoxDisplayNameChanged(
 }
 
 void LibraryWindow::onSpriteDisplayNameChanged(
-    int spriteID, const std::string& newDisplayName)
+    SpriteID spriteID, const std::string& newDisplayName)
 {
     auto spriteListItemMap{listItemMaps[LibraryListItem::Type::Sprite]};
     auto spriteListItemIt{spriteListItemMap.find(spriteID)};
@@ -506,7 +508,7 @@ void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
 
 void LibraryWindow::addSpriteToSheetListItem(ParentListItem& sheetListItem,
                                              const EditorSpriteSheet& sheet,
-                                             int spriteID)
+                                             SpriteID spriteID)
 {
     // Construct a new list item for this sprite.
     const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
@@ -586,19 +588,22 @@ void LibraryWindow::removeListItem(LibraryListItem* listItem)
             break;
         }
         case LibraryListItem::Type::Floor: {
-            spriteSetModel.remFloor(static_cast<Uint16>(listItem->ID));
+            spriteSetModel.remFloor(
+                static_cast<FloorSpriteSetID>(listItem->ID));
             break;
         }
         case LibraryListItem::Type::FloorCovering: {
-            spriteSetModel.remFloorCovering(static_cast<Uint16>(listItem->ID));
+            spriteSetModel.remFloorCovering(
+                static_cast<FloorCoveringSpriteSetID>(listItem->ID));
             break;
         }
         case LibraryListItem::Type::Wall: {
-            spriteSetModel.remWall(static_cast<Uint16>(listItem->ID));
+            spriteSetModel.remWall(static_cast<WallSpriteSetID>(listItem->ID));
             break;
         }
         case LibraryListItem::Type::Object: {
-            spriteSetModel.remObject(static_cast<Uint16>(listItem->ID));
+            spriteSetModel.remObject(
+                static_cast<ObjectSpriteSetID>(listItem->ID));
             break;
         }
         default: {

@@ -1,5 +1,5 @@
 #include "SpriteDataBase.h"
-#include "NullSpriteID.h"
+#include "SpriteID.h"
 #include "Paths.h"
 #include "Log.h"
 #include "nlohmann/json.hpp"
@@ -7,8 +7,7 @@
 namespace AM
 {
 SpriteDataBase::SpriteDataBase(const nlohmann::json& resourceDataJson)
-: nullSpriteIndex{0}
-, sprites{}
+: sprites{}
 , floorSpriteSets{}
 , floorCoveringSpriteSets{}
 , wallSpriteSets{}
@@ -28,19 +27,18 @@ const Sprite& SpriteDataBase::getSprite(const std::string& stringID) const
     // Attempt to find the given string ID.
     auto it{spriteStringMap.find(stringID)};
     if (it == spriteStringMap.end()) {
-        LOG_FATAL("Failed to find sprite with string ID: %s", stringID.c_str());
+        LOG_ERROR("Failed to find sprite with string ID: %s", stringID.c_str());
+        return sprites[0];
     }
 
     return *(it->second);
 }
 
-const Sprite& SpriteDataBase::getSprite(int numericID) const
+const Sprite& SpriteDataBase::getSprite(SpriteID numericID) const
 {
-    if (numericID == NULL_SPRITE_ID) {
-        return sprites[nullSpriteIndex];
-    }
-    else if (numericID < 0 || numericID >= static_cast<int>(sprites.size())) {
-        LOG_FATAL("Invalid numeric ID while getting sprite: %d", numericID);
+    if (numericID >= sprites.size()) {
+        LOG_ERROR("Invalid numeric ID while getting sprite: %d", numericID);
+        return sprites[0];
     }
 
     return sprites[numericID];
@@ -51,8 +49,9 @@ const FloorSpriteSet&
 {
     auto it{floorSpriteSetStringMap.find(stringID)};
     if (it == floorSpriteSetStringMap.end()) {
-        LOG_FATAL("Failed to find sprite set with string ID: %s",
+        LOG_ERROR("Failed to find sprite set with string ID: %s",
                   stringID.c_str());
+        return floorSpriteSets[0];
     }
 
     return *(it->second);
@@ -63,8 +62,9 @@ const FloorCoveringSpriteSet&
 {
     auto it{floorCoveringSpriteSetStringMap.find(stringID)};
     if (it == floorCoveringSpriteSetStringMap.end()) {
-        LOG_FATAL("Failed to find sprite set with string ID: %s",
+        LOG_ERROR("Failed to find sprite set with string ID: %s",
                   stringID.c_str());
+        return floorCoveringSpriteSets[0];
     }
 
     return *(it->second);
@@ -75,8 +75,9 @@ const WallSpriteSet&
 {
     auto it{wallSpriteSetStringMap.find(stringID)};
     if (it == wallSpriteSetStringMap.end()) {
-        LOG_FATAL("Failed to find sprite set with string ID: %s",
+        LOG_ERROR("Failed to find sprite set with string ID: %s",
                   stringID.c_str());
+        return wallSpriteSets[0];
     }
 
     return *(it->second);
@@ -87,46 +88,53 @@ const ObjectSpriteSet&
 {
     auto it{objectSpriteSetStringMap.find(stringID)};
     if (it == objectSpriteSetStringMap.end()) {
-        LOG_FATAL("Failed to find sprite set with string ID: %s",
+        LOG_ERROR("Failed to find sprite set with string ID: %s",
                   stringID.c_str());
+        return objectSpriteSets[0];
     }
 
     return *(it->second);
 }
 
-const FloorSpriteSet& SpriteDataBase::getFloorSpriteSet(Uint16 numericID) const
+const FloorSpriteSet&
+    SpriteDataBase::getFloorSpriteSet(FloorSpriteSetID numericID) const
 {
     if (numericID >= floorSpriteSets.size()) {
-        LOG_FATAL("Invalid numeric ID while getting sprite set: %d", numericID);
+        LOG_ERROR("Invalid numeric ID while getting sprite set: %d", numericID);
+        return floorSpriteSets[0];
     }
 
     return floorSpriteSets[numericID];
 }
 
-const FloorCoveringSpriteSet&
-    SpriteDataBase::getFloorCoveringSpriteSet(Uint16 numericID) const
+const FloorCoveringSpriteSet& SpriteDataBase::getFloorCoveringSpriteSet(
+    FloorCoveringSpriteSetID numericID) const
 {
     if (numericID >= floorCoveringSpriteSets.size()) {
-        LOG_FATAL("Invalid numeric ID while getting sprite set: %d", numericID);
+        LOG_ERROR("Invalid numeric ID while getting sprite set: %d", numericID);
+        return floorCoveringSpriteSets[0];
     }
 
     return floorCoveringSpriteSets[numericID];
 }
 
-const WallSpriteSet& SpriteDataBase::getWallSpriteSet(Uint16 numericID) const
+const WallSpriteSet&
+    SpriteDataBase::getWallSpriteSet(WallSpriteSetID numericID) const
 {
     if (numericID >= wallSpriteSets.size()) {
-        LOG_FATAL("Invalid numeric ID while getting sprite set: %d", numericID);
+        LOG_ERROR("Invalid numeric ID while getting sprite set: %d", numericID);
+        return wallSpriteSets[0];
     }
 
     return wallSpriteSets[numericID];
 }
 
 const ObjectSpriteSet&
-    SpriteDataBase::getObjectSpriteSet(Uint16 numericID) const
+    SpriteDataBase::getObjectSpriteSet(ObjectSpriteSetID numericID) const
 {
     if (numericID >= objectSpriteSets.size()) {
-        LOG_FATAL("Invalid numeric ID while getting sprite set: %d", numericID);
+        LOG_ERROR("Invalid numeric ID while getting sprite set: %d", numericID);
+        return objectSpriteSets[0];
     }
 
     return objectSpriteSets[numericID];
@@ -161,6 +169,20 @@ const std::vector<ObjectSpriteSet>&
 
 void SpriteDataBase::parseJson(const nlohmann::json& json)
 {
+    // Add the null sprite and sprite sets.
+    const Sprite& nullSprite{
+        sprites.emplace_back("Null", "null", NULL_SPRITE_ID)};
+    floorSpriteSets.emplace_back(SpriteSet{"Null", "null"},
+                                 NULL_FLOOR_SPRITE_SET_ID, nullSprite);
+    floorCoveringSpriteSets.emplace_back(SpriteSet{"Null", "null"},
+                                         NULL_FLOOR_COVERING_SPRITE_SET_ID);
+    wallSpriteSets.emplace_back(
+        SpriteSet{"Null", "null"}, NULL_WALL_SPRITE_SET_ID,
+        std::array<std::reference_wrapper<const Sprite>, Wall::Type::Count>{
+            nullSprite, nullSprite, nullSprite, nullSprite});
+    objectSpriteSets.emplace_back(SpriteSet{"Null", "null"},
+                                  NULL_OBJECT_SPRITE_SET_ID);
+
     // Parse the json and catch any parsing errors.
     try {
         // Iterate every sprite sheet and add all of their sprites.
@@ -190,17 +212,9 @@ void SpriteDataBase::parseJson(const nlohmann::json& json)
             e.what());
     }
 
-    // Add the null sprite and set the null sprite index.
-    sprites.push_back({"Null", "null", NULL_SPRITE_ID});
-    nullSpriteIndex = static_cast<int>(sprites.size() - 1);
-
     // Add everything to the associated maps.
     for (const Sprite& sprite : sprites) {
-        int numericID{sprite.numericID};
-        if (numericID == NULL_SPRITE_ID) {
-            numericID = nullSpriteIndex;
-        }
-        spriteStringMap.emplace(sprite.stringID, &sprites[numericID]);
+        spriteStringMap.emplace(sprite.stringID, &sprites[sprite.numericID]);
     }
     for (const FloorSpriteSet& set : floorSpriteSets) {
         floorSpriteSetStringMap.emplace(set.stringID,
@@ -244,7 +258,7 @@ void SpriteDataBase::parseSprite(const nlohmann::json& spriteJson)
 
 void SpriteDataBase::parseFloorSpriteSet(const nlohmann::json& spriteSetJson)
 {
-    Uint16 numericID{spriteSetJson.at("numericID")};
+    FloorSpriteSetID numericID{spriteSetJson.at("numericID")};
     std::string displayName{spriteSetJson.at("displayName").get<std::string>()};
     std::string stringID{spriteSetJson.at("stringID").get<std::string>()};
 
@@ -252,10 +266,10 @@ void SpriteDataBase::parseFloorSpriteSet(const nlohmann::json& spriteSetJson)
     // Note: Floors just have 1 sprite, but the json uses an array in case we
     //       want to add variations in the future.
     const nlohmann::json& spriteIDJson{spriteSetJson.at("spriteIDs")};
-    const Sprite& sprite{getSprite(spriteIDJson[0].get<int>())};
+    const Sprite& sprite{getSprite(spriteIDJson[0].get<SpriteID>())};
 
     // Save the sprite set in the appropriate vector.
-    floorSpriteSets.emplace_back(SpriteSet{displayName, stringID, numericID},
+    floorSpriteSets.emplace_back(SpriteSet{displayName, stringID}, numericID,
                                  sprite);
 }
 
@@ -271,7 +285,7 @@ void SpriteDataBase::parseFloorCoveringSpriteSet(
     // Add the sprite set's sprites.
     std::size_t index{0};
     for (auto& spriteIDJson : spriteSetJson.at("spriteIDs").items()) {
-        int spriteID{spriteIDJson.value().get<int>()};
+        SpriteID spriteID{spriteIDJson.value().get<SpriteID>()};
         if (spriteID == NULL_SPRITE_ID) {
             spriteSet.sprites[index] = nullptr;
         }
@@ -290,14 +304,14 @@ void SpriteDataBase::parseWallSpriteSet(const nlohmann::json& spriteSetJson)
 
     // Add the sprite set's sprites.
     const nlohmann::json& spriteIDJson{spriteSetJson.at("spriteIDs")};
-    const Sprite& westSprite{getSprite(spriteIDJson[0].get<int>())};
-    const Sprite& northSprite{getSprite(spriteIDJson[1].get<int>())};
-    const Sprite& northwestSprite{getSprite(spriteIDJson[2].get<int>())};
-    const Sprite& northeastSprite{getSprite(spriteIDJson[3].get<int>())};
+    const Sprite& westSprite{getSprite(spriteIDJson[0].get<SpriteID>())};
+    const Sprite& northSprite{getSprite(spriteIDJson[1].get<SpriteID>())};
+    const Sprite& northwestSprite{getSprite(spriteIDJson[2].get<SpriteID>())};
+    const Sprite& northeastSprite{getSprite(spriteIDJson[3].get<SpriteID>())};
 
     // Save the sprite set in the appropriate vector.
     wallSpriteSets.emplace_back(
-        SpriteSet{displayName, stringID, numericID},
+        SpriteSet{displayName, stringID}, numericID,
         std::array<std::reference_wrapper<const Sprite>, Wall::Type::Count>{
             westSprite, northSprite, northwestSprite, northeastSprite});
 }
@@ -313,7 +327,7 @@ void SpriteDataBase::parseObjectSpriteSet(const nlohmann::json& spriteSetJson)
     // Add the sprite set's sprites.
     std::size_t index{0};
     for (auto& spriteIDJson : spriteSetJson.at("spriteIDs").items()) {
-        int spriteID{spriteIDJson.value().get<int>()};
+        SpriteID spriteID{spriteIDJson.value().get<SpriteID>()};
         if (spriteID == NULL_SPRITE_ID) {
             spriteSet.sprites[index] = nullptr;
         }

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Wall.h"
-#include "NullSpriteID.h"
+#include "SpriteID.h"
+#include "SpriteSetIDs.h"
 #include <SDL_stdinc.h>
 #include <string>
 #include <array>
@@ -17,7 +18,7 @@ namespace ResourceImporter
 struct EditorWallSpriteSet {
     /** This sprite set's unique numeric identifier.
         Note: This ID may change when this sprite set is saved to the json. */
-    Uint16 numericID{0};
+    WallSpriteSetID numericID{0};
 
     /** Unique display name, shown in the UI.  */
     std::string displayName{""};
@@ -25,7 +26,7 @@ struct EditorWallSpriteSet {
     /** The numeric IDs for each sprite in this set.
         Walls require the 4 types of wall sprites that our modular wall
         system uses. */
-    std::array<int, Wall::Type::Count> spriteIDs{
+    std::array<SpriteID, Wall::Type::Count> spriteIDs{
         NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID};
 };
 

@@ -1,7 +1,6 @@
 #include "BoundingBoxGizmo.h"
 #include "MainScreen.h"
 #include "DataModel.h"
-#include "NullSpriteID.h"
 #include "Transforms.h"
 #include "Position.h"
 #include "Camera.h"

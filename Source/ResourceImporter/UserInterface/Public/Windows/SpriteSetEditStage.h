@@ -45,7 +45,7 @@ private:
      * (If type/ID matches active set) Sets the given index to the given sprite.
      */
     void onSpriteSetSlotChanged(SpriteSet::Type type, Uint16 spriteSetID,
-                                std::size_t index, int newSpriteID);
+                                std::size_t index, SpriteID newSpriteID);
 
     /**
      * Loads the given sprite set's data onto this stage.
@@ -67,7 +67,7 @@ private:
     /**
      * Fills the given slot widget with the given sprite's image and name.
      */
-    void fillSlotSpriteData(SpriteSetSlot& slot, int spriteID);
+    void fillSlotSpriteData(SpriteSetSlot& slot, SpriteID spriteID);
 
     /**
      * Fills the description text widgets with the appropriate strings, based

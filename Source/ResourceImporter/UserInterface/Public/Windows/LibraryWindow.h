@@ -75,12 +75,14 @@ private:
     void onBoundingBoxAdded(BoundingBoxID boundingBoxID,
                             const EditorBoundingBox& bounds);
     void onSpriteSheetAdded(int sheetID, const EditorSpriteSheet& sheet);
-    void onFloorAdded(Uint16 floorID, const EditorFloorSpriteSet& floor);
+    void onFloorAdded(FloorSpriteSetID floorID,
+                      const EditorFloorSpriteSet& floor);
     void
-        onFloorCoveringAdded(Uint16 floorCoveringID,
+        onFloorCoveringAdded(FloorCoveringSpriteSetID floorCoveringID,
                              const EditorFloorCoveringSpriteSet& floorCovering);
-    void onWallAdded(Uint16 wallID, const EditorWallSpriteSet& wall);
-    void onObjectAdded(Uint16 objectID, const EditorObjectSpriteSet& object);
+    void onWallAdded(WallSpriteSetID wallID, const EditorWallSpriteSet& wall);
+    void onObjectAdded(ObjectSpriteSetID objectID,
+                       const EditorObjectSpriteSet& object);
     template<typename T>
     void onSpriteSetAdded(Uint16 spriteSetID, const T& spriteSet);
     void onIconSheetAdded(int sheetID, const EditorIconSheet& sheet);
@@ -98,7 +100,7 @@ private:
      */
     void onBoundingBoxDisplayNameChanged(BoundingBoxID boundingBoxID,
                                          const std::string& newDisplayName);
-    void onSpriteDisplayNameChanged(int spriteID,
+    void onSpriteDisplayNameChanged(SpriteID spriteID,
                                     const std::string& newDisplayName);
     void onSpriteSetDisplayNameChanged(SpriteSet::Type type, Uint16 spriteSetID,
                                        const std::string& newDisplayName);
@@ -115,7 +117,8 @@ private:
      * Adds the given sprite to the given sprite sheet list item.
      */
     void addSpriteToSheetListItem(ParentListItem& sheetListItem,
-                                  const EditorSpriteSheet& sheet, int spriteID);
+                                  const EditorSpriteSheet& sheet,
+                                  SpriteID spriteID);
 
     /**
      * Adds the given icon to the given icon sheet list item.

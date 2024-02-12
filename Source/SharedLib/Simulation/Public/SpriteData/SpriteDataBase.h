@@ -39,7 +39,7 @@ public:
      * Returns the sprite with the given numeric ID.
      * Errors if the given ID doesn't exist.
      */
-    const Sprite& getSprite(int numericID) const;
+    const Sprite& getSprite(SpriteID numericID) const;
 
     /**
      * Returns the sprite set with the given string ID.
@@ -56,11 +56,12 @@ public:
      * Returns the sprite set with the given numeric ID.
      * Errors if the given ID doesn't exist.
      */
-    const FloorSpriteSet& getFloorSpriteSet(Uint16 numericID) const;
+    const FloorSpriteSet& getFloorSpriteSet(FloorSpriteSetID numericID) const;
     const FloorCoveringSpriteSet&
-        getFloorCoveringSpriteSet(Uint16 numericID) const;
-    const WallSpriteSet& getWallSpriteSet(Uint16 numericID) const;
-    const ObjectSpriteSet& getObjectSpriteSet(Uint16 numericID) const;
+        getFloorCoveringSpriteSet(FloorCoveringSpriteSetID numericID) const;
+    const WallSpriteSet& getWallSpriteSet(WallSpriteSetID numericID) const;
+    const ObjectSpriteSet&
+        getObjectSpriteSet(ObjectSpriteSetID numericID) const;
 
     /**
      * Get a reference to a vector containing all the sprites.
@@ -78,15 +79,6 @@ public:
     const std::vector<ObjectSpriteSet>& getAllObjectSpriteSets() const;
 
 protected:
-    /** The index of the null sprite. Will always be the last sprite in the
-        vector.
-        Note: Don't get confused, the null sprite's ID is -1, but its index
-              is at the end of the vector. We do this instead of putting it at
-              index 0, because we would have to save it in ResourceData.json and
-              add logic to skip it in the editor. */
-    int nullSpriteIndex;
-
-private:
     /**
      * Parses the given json, constructing sprites and pushing them into the
      * sprites vector.

@@ -35,16 +35,16 @@ private:
      * If the changed sprite is currently active, updates this stage to reflect 
      * the new data.
      */
-    void onSpriteModelBoundsIDChanged(int spriteID,
+    void onSpriteModelBoundsIDChanged(SpriteID spriteID,
                                       BoundingBoxID newModelBoundsID);
     void onSpriteCustomModelBoundsChanged(
-        int spriteID, const BoundingBox& newCustomModelBounds);
+        SpriteID spriteID, const BoundingBox& newCustomModelBounds);
 
     /**
      * (If active sprite was removed) Sets activeSprite to invalid and returns
      * the stage to its default state.
      */
-    void onSpriteRemoved(int spriteID);
+    void onSpriteRemoved(SpriteID spriteID);
 
     /**
      * Pushes the gizmo's updated bounding box to the model.
@@ -60,7 +60,7 @@ private:
     DataModel& dataModel;
 
     /** The active sprite's ID. */
-    int activeSpriteID;
+    SpriteID activeSpriteID;
 
     //-------------------------------------------------------------------------
     // Private child widgets

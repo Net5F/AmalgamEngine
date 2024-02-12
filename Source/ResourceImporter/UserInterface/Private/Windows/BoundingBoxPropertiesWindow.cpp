@@ -1,8 +1,6 @@
 #include "BoundingBoxPropertiesWindow.h"
 #include "MainScreen.h"
 #include "DataModel.h"
-#include "EditorSprite.h"
-#include "NullSpriteID.h"
 #include "Paths.h"
 #include "Camera.h"
 #include "Transforms.h"

@@ -136,7 +136,7 @@ void DataModel::setActiveBoundingBox(BoundingBoxID newActiveBoundingBoxID)
     activeLibraryItemChangedSig.publish(boundingBox);
 }
 
-void DataModel::setActiveSprite(int newActiveSpriteID)
+void DataModel::setActiveSprite(SpriteID newActiveSpriteID)
 {
     // Note: This will error if the sprite ID is invalid. This is good, since
     //       we don't expect any invalid IDs to be floating around.

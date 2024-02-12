@@ -2,7 +2,7 @@
 #include "MainScreen.h"
 #include "DataModel.h"
 #include "EditorSprite.h"
-#include "NullSpriteID.h"
+#include "SpriteID.h"
 #include "Paths.h"
 #include "Camera.h"
 #include "Transforms.h"
@@ -246,7 +246,7 @@ void SpritePropertiesWindow::onActiveLibraryItemChanged(
     maxZInput.setText(toRoundedString(spriteModelBounds.maxZ));
 }
 
-void SpritePropertiesWindow::onSpriteRemoved(int spriteID)
+void SpritePropertiesWindow::onSpriteRemoved(SpriteID spriteID)
 {
     if (spriteID == activeSpriteID) {
         activeSpriteID = NULL_SPRITE_ID;
@@ -262,7 +262,7 @@ void SpritePropertiesWindow::onSpriteRemoved(int spriteID)
 }
 
 void SpritePropertiesWindow::onSpriteDisplayNameChanged(
-    int spriteID, const std::string& newDisplayName)
+    SpriteID spriteID, const std::string& newDisplayName)
 {
     if (spriteID == activeSpriteID) {
         nameInput.setText(newDisplayName);
@@ -270,7 +270,7 @@ void SpritePropertiesWindow::onSpriteDisplayNameChanged(
 }
 
 void SpritePropertiesWindow::onSpriteCollisionEnabledChanged(
-    int spriteID, bool newCollisionEnabled)
+    SpriteID spriteID, bool newCollisionEnabled)
 {
     if (spriteID == activeSpriteID) {
         if (newCollisionEnabled) {
@@ -285,7 +285,7 @@ void SpritePropertiesWindow::onSpriteCollisionEnabledChanged(
 }
 
 void SpritePropertiesWindow::onSpriteModelBoundsIDChanged(
-    int spriteID, BoundingBoxID newModelBoundsID)
+    SpriteID spriteID, BoundingBoxID newModelBoundsID)
 {
     // If the sprite isn't active, do nothing.
     if (spriteID != activeSpriteID) {
@@ -317,7 +317,7 @@ void SpritePropertiesWindow::onSpriteModelBoundsIDChanged(
 }
 
 void SpritePropertiesWindow::onSpriteCustomModelBoundsChanged(
-    int spriteID, const BoundingBox& newCustomModelBounds)
+    SpriteID spriteID, const BoundingBox& newCustomModelBounds)
 {
     if (spriteID == activeSpriteID) {
         minXInput.setText(toRoundedString(newCustomModelBounds.minX));

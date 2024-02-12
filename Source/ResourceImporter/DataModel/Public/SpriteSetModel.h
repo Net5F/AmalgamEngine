@@ -58,22 +58,22 @@ public:
      *
      * @param spriteSetID  The editor ID of the sprite set to remove.
      */
-    void remFloor(Uint16 floorID);
-    void remFloorCovering(Uint16 floorCoveringID);
-    void remWall(Uint16 wallID);
-    void remObject(Uint16 objectID);
+    void remFloor(FloorSpriteSetID floorID);
+    void remFloorCovering(FloorCoveringSpriteSetID floorCoveringID);
+    void remWall(WallSpriteSetID wallID);
+    void remObject(ObjectSpriteSetID objectID);
 
-    const EditorFloorSpriteSet& getFloor(Uint16 floorID);
+    const EditorFloorSpriteSet& getFloor(FloorSpriteSetID floorID);
     const EditorFloorCoveringSpriteSet&
-        getFloorCovering(Uint16 floorCoveringID);
-    const EditorWallSpriteSet& getWall(Uint16 wallID);
-    const EditorObjectSpriteSet& getObject(Uint16 objectID);
+        getFloorCovering(FloorCoveringSpriteSetID floorCoveringID);
+    const EditorWallSpriteSet& getWall(WallSpriteSetID wallID);
+    const EditorObjectSpriteSet& getObject(ObjectSpriteSetID objectID);
 
     // Sprite set properties.
     void setSpriteSetDisplayName(SpriteSet::Type type, Uint16 spriteSetID,
                                  const std::string& newDisplayName);
     void setSpriteSetSlot(SpriteSet::Type type, Uint16 spriteSetID,
-                          std::size_t index, int newSpriteID);
+                          std::size_t index, SpriteID newSpriteID);
 
     /** Resets the model state, setting it back to default. */
     void resetModelState();
@@ -82,7 +82,7 @@ public:
      * Iterates all the sprite sets and replaces any instances of spriteID
      * with NULL_SPRITE_ID.
      */
-    void removeSpriteIDFromSets(int spriteID);
+    void removeSpriteIDFromSets(SpriteID spriteID);
 
     const std::string& getErrorString();
 
@@ -128,7 +128,7 @@ private:
      */
     template<typename T>
     void setSpriteSetSlot(SpriteSet::Type type, Uint16 spriteSetID,
-                          std::size_t index, int newSpriteID);
+                          std::size_t index, SpriteID newSpriteID);
 
     // Save functions.
     void saveFloors(nlohmann::json& json);
@@ -138,6 +138,8 @@ private:
 
     DataModel& dataModel;
 
+    // Note: These all use Uint16 instead of the specific ID type, so we can 
+    //       interact with them generically.
     /** Maps floor IDs -> the floor sprite sets that we currently have loaded.
      */
     std::map<Uint16, EditorFloorSpriteSet> floorMap;
@@ -167,20 +169,22 @@ private:
     //-------------------------------------------------------------------------
     // Signals
     //-------------------------------------------------------------------------
-    entt::sigh<void(Uint16 floorID, const EditorFloorSpriteSet& floor)>
+    entt::sigh<void(FloorSpriteSetID floorID,
+                    const EditorFloorSpriteSet& floor)>
         floorAddedSig;
-    entt::sigh<void(Uint16 floorCoveringID,
+    entt::sigh<void(FloorCoveringSpriteSetID floorCoveringID,
                     const EditorFloorCoveringSpriteSet& floorCovering)>
         floorCoveringAddedSig;
-    entt::sigh<void(Uint16 wallID, const EditorWallSpriteSet& wall)>
+    entt::sigh<void(WallSpriteSetID wallID, const EditorWallSpriteSet& wall)>
         wallAddedSig;
-    entt::sigh<void(Uint16 objectID, const EditorObjectSpriteSet& object)>
+    entt::sigh<void(ObjectSpriteSetID objectID,
+                    const EditorObjectSpriteSet& object)>
         objectAddedSig;
 
     entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID)>
         spriteSetRemovedSig;
     entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID, std::size_t index,
-                    int newSpriteID)>
+                    SpriteID newSpriteID)>
         spriteSetSlotChangedSig;
     entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
                     const std::string& newDisplayName)>
@@ -191,20 +195,21 @@ public:
     // Signal Sinks
     //-------------------------------------------------------------------------
     /** A floor sprite set was added to the model. */
-    entt::sink<
-        entt::sigh<void(Uint16 floorID, const EditorFloorSpriteSet& floor)>>
+    entt::sink<entt::sigh<void(FloorSpriteSetID floorID,
+                               const EditorFloorSpriteSet& floor)>>
         floorAdded;
     /** A floor covering sprite set was added to the model. */
     entt::sink<
-        entt::sigh<void(Uint16 floorCoveringID,
+        entt::sigh<void(FloorCoveringSpriteSetID floorCoveringID,
                         const EditorFloorCoveringSpriteSet& floorCovering)>>
         floorCoveringAdded;
     /** A wall sprite set was added to the model. */
-    entt::sink<entt::sigh<void(Uint16 wallID, const EditorWallSpriteSet& wall)>>
+    entt::sink<entt::sigh<void(WallSpriteSetID wallID,
+                               const EditorWallSpriteSet& wall)>>
         wallAdded;
     /** An object sprite set was added to the model. */
-    entt::sink<
-        entt::sigh<void(Uint16 objectID, const EditorObjectSpriteSet& floor)>>
+    entt::sink<entt::sigh<void(ObjectSpriteSetID objectID,
+                               const EditorObjectSpriteSet& floor)>>
         objectAdded;
 
     /** A sprite set was removed from the model. */
@@ -213,7 +218,7 @@ public:
 
     /** A sprite set's sprite at the given index was changed. */
     entt::sink<entt::sigh<void(SpriteSet::Type type, Uint16 spriteSetID,
-                               std::size_t index, int newSpriteID)>>
+                               std::size_t index, SpriteID newSpriteID)>>
         spriteSetSlotChanged;
 
     /** A sprite set's display name has changed. */

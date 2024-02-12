@@ -85,15 +85,18 @@ public:
      *
      * @param spriteID The editor ID of the sprite to remove.
      */
-    void remSprite(int spriteID);
+    void remSprite(SpriteID spriteID);
 
-    const EditorSprite& getSprite(int spriteID);
+    const EditorSprite& getSprite(SpriteID spriteID);
 
     // Sprite properties.
-    void setSpriteDisplayName(int spriteID, const std::string& newDisplayName);
-    void setSpriteCollisionEnabled(int spriteID, bool newCollisionEnabled);
-    void setSpriteModelBoundsID(int spriteID, BoundingBoxID newModelBoundsID);
-    void setSpriteCustomModelBounds(int spriteID, const BoundingBox& newModelBounds);
+    void setSpriteDisplayName(SpriteID spriteID,
+                              const std::string& newDisplayName);
+    void setSpriteCollisionEnabled(SpriteID spriteID, bool newCollisionEnabled);
+    void setSpriteModelBoundsID(SpriteID spriteID,
+                                BoundingBoxID newModelBoundsID);
+    void setSpriteCustomModelBounds(SpriteID spriteID,
+                                    const BoundingBox& newModelBounds);
 
     /** Resets the model state, setting it back to default. */
     void resetModelState();
@@ -131,7 +134,7 @@ private:
      *                 non-unique.
      * @param displayName The display name that the sprite will be set to.
      */
-    bool spriteNameIsUnique(int spriteID, const std::string& displayName);
+    bool spriteNameIsUnique(SpriteID spriteID, const std::string& displayName);
 
     DataModel& dataModel;
     /** Used to remove sprites from sprite sets when a sprite is deleted. */
@@ -144,7 +147,7 @@ private:
     std::map<int, EditorSpriteSheet> spriteSheetMap;
 
     /** Maps sprite IDs -> the sprites that we currently have loaded. */
-    std::map<int, EditorSprite> spriteMap;
+    std::map<SpriteID, EditorSprite> spriteMap;
 
     /** Used for generating temporary sprite sheet IDs that are only used
         internally by this editor. */
@@ -160,15 +163,15 @@ private:
     //-------------------------------------------------------------------------
     entt::sigh<void(int sheetID, const EditorSpriteSheet& sheet)> sheetAddedSig;
     entt::sigh<void(int sheetID)> sheetRemovedSig;
-    entt::sigh<void(int spriteID)> spriteRemovedSig;
+    entt::sigh<void(SpriteID spriteID)> spriteRemovedSig;
 
-    entt::sigh<void(int spriteID, const std::string& newDisplayName)>
+    entt::sigh<void(SpriteID spriteID, const std::string& newDisplayName)>
         spriteDisplayNameChangedSig;
-    entt::sigh<void(int spriteID, bool collisionEnabled)>
+    entt::sigh<void(SpriteID spriteID, bool collisionEnabled)>
         spriteCollisionEnabledChangedSig;
-    entt::sigh<void(int spriteID, BoundingBoxID newModelBoundsID)>
+    entt::sigh<void(SpriteID spriteID, BoundingBoxID newModelBoundsID)>
         spriteModelBoundsIDChangedSig;
-    entt::sigh<void(int spriteID, const BoundingBox& newCustomModelBounds)>
+    entt::sigh<void(SpriteID spriteID, const BoundingBox& newCustomModelBounds)>
         spriteCustomModelBoundsChangedSig;
 
 public:
@@ -181,22 +184,22 @@ public:
     /** A sprite sheet was removed from the model. */
     entt::sink<entt::sigh<void(int sheetID)>> sheetRemoved;
     /** A sprite was removed from the model. */
-    entt::sink<entt::sigh<void(int spriteID)>> spriteRemoved;
+    entt::sink<entt::sigh<void(SpriteID spriteID)>> spriteRemoved;
 
     /** A sprite's display name has changed. */
     entt::sink<
-        entt::sigh<void(int spriteID, const std::string& newDisplayName)>>
+        entt::sigh<void(SpriteID spriteID, const std::string& newDisplayName)>>
         spriteDisplayNameChanged;
     /** A sprite's "collision enabled" field has changed. */
-    entt::sink<entt::sigh<void(int spriteID, bool collisionEnabled)>>
+    entt::sink<entt::sigh<void(SpriteID spriteID, bool collisionEnabled)>>
         spriteCollisionEnabledChanged;
     /** A sprite's bounding box ID has changed. */
     entt::sink<
-        entt::sigh<void(int spriteID, BoundingBoxID newModelBoundsID)>>
+        entt::sigh<void(SpriteID spriteID, BoundingBoxID newModelBoundsID)>>
         spriteModelBoundsIDChanged;
     /** A sprite's custom bounding box has changed. */
-    entt::sink<
-        entt::sigh<void(int spriteID, const BoundingBox& newCustomModelBounds)>>
+    entt::sink<entt::sigh<void(SpriteID spriteID,
+                               const BoundingBox& newCustomModelBounds)>>
         spriteCustomModelBoundsChanged;
 };
 

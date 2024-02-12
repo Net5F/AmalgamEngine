@@ -33,7 +33,7 @@ public:
     /**
      * Get a sprite's render data, using its numeric ID.
      */
-    const SpriteRenderData& getRenderData(int numericID) const;
+    const SpriteRenderData& getRenderData(SpriteID numericID) const;
 
 private:
     /**

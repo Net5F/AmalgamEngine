@@ -1,7 +1,7 @@
 #pragma once
 
 #include "BoundingBox.h"
-#include "NullSpriteID.h"
+#include "SpriteID.h"
 #include <string>
 
 namespace AM
@@ -25,7 +25,7 @@ struct Sprite {
         This value can be used safely at runtime, but shouldn't be used for
         persistent state since it may change when ResourceData.json is
         modified. */
-    int numericID{NULL_SPRITE_ID};
+    SpriteID numericID{NULL_SPRITE_ID};
 
     /** If true, this sprite's modelBounds will be used in collision checks.
         Most sprites will want collision enabled, but things like floors and

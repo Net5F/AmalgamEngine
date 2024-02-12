@@ -35,8 +35,9 @@ void TileMapBase::setFloor(int tileX, int tileY,
 
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates) {
-        tileUpdateHistory.emplace_back(TileAddLayer{
-            tileX, tileY, TileLayer::Type::Floor, spriteSet.numericID, 0});
+        tileUpdateHistory.emplace_back(
+            TileAddLayer{tileX, tileY, TileLayer::Type::Floor,
+                         static_cast<Uint16>(spriteSet.numericID), 0});
     }
 }
 
@@ -69,7 +70,8 @@ void TileMapBase::addFloorCovering(int tileX, int tileY,
     if (trackTileUpdates) {
         tileUpdateHistory.emplace_back(
             TileAddLayer{tileX, tileY, TileLayer::Type::FloorCovering,
-                         spriteSet.numericID, static_cast<Uint8>(rotation)});
+                         static_cast<Uint16>(spriteSet.numericID),
+                         static_cast<Uint8>(rotation)});
     }
 }
 
@@ -112,9 +114,9 @@ bool TileMapBase::remFloorCovering(int tileX, int tileY,
 
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates && (erasedCount > 0)) {
-        tileUpdateHistory.emplace_back(
-            TileRemoveLayer{tileX, tileY, TileLayer::Type::FloorCovering,
-                            spriteSet.numericID, direction});
+        tileUpdateHistory.emplace_back(TileRemoveLayer{
+            tileX, tileY, TileLayer::Type::FloorCovering,
+            static_cast<Uint16>(spriteSet.numericID), direction});
     }
 
     return (erasedCount > 0);
@@ -162,7 +164,8 @@ void TileMapBase::addWall(int tileX, int tileY, const WallSpriteSet& spriteSet,
     if (trackTileUpdates) {
         tileUpdateHistory.emplace_back(
             TileAddLayer{tileX, tileY, TileLayer::Type::Wall,
-                         spriteSet.numericID, static_cast<Uint8>(wallType)});
+                         static_cast<Uint16>(spriteSet.numericID),
+                         static_cast<Uint8>(wallType)});
     }
 }
 
@@ -227,7 +230,8 @@ void TileMapBase::addObject(int tileX, int tileY,
     if (trackTileUpdates) {
         tileUpdateHistory.emplace_back(
             TileAddLayer{tileX, tileY, TileLayer::Type::Object,
-                         spriteSet.numericID, static_cast<Uint8>(rotation)});
+                         static_cast<Uint16>(spriteSet.numericID),
+                         static_cast<Uint8>(rotation)});
     }
 }
 
@@ -275,7 +279,8 @@ bool TileMapBase::remObject(int tileX, int tileY,
     if (trackTileUpdates && (erasedCount > 0)) {
         tileUpdateHistory.emplace_back(
             TileRemoveLayer{tileX, tileY, TileLayer::Type::Object,
-                            spriteSet.numericID, static_cast<Uint8>(rotation)});
+                            static_cast<Uint16>(spriteSet.numericID),
+                            static_cast<Uint8>(rotation)});
     }
 
     return (erasedCount > 0);

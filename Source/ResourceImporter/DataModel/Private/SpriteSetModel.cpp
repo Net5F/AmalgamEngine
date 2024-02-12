@@ -28,6 +28,12 @@ SpriteSetModel::SpriteSetModel(DataModel& inDataModel)
 , spriteSetSlotChanged{spriteSetSlotChangedSig}
 , spriteSetDisplayNameChanged{spriteSetDisplayNameChangedSig}
 {
+    // Reserve the null ID for each sprite set type (the engine provides it in 
+    // code, so we don't need it in the json).
+    floorIDPool.reserveID();
+    floorCoveringIDPool.reserveID();
+    wallIDPool.reserveID();
+    objectIDPool.reserveID();
 }
 
 bool SpriteSetModel::load(const nlohmann::json& json)
@@ -91,7 +97,7 @@ bool SpriteSetModel::addFloor()
     }
 
     // Add the new, empty sprite set to the map.
-    std::array<int, 1> spriteIDs{NULL_SPRITE_ID};
+    std::array<SpriteID, 1> spriteIDs{NULL_SPRITE_ID};
     floorMap.emplace(numericID,
                      EditorFloorSpriteSet{numericID, displayName, spriteIDs});
 
@@ -107,7 +113,8 @@ bool SpriteSetModel::addFloor()
 
 bool SpriteSetModel::addFloorCovering()
 {
-    Uint16 numericID{static_cast<Uint16>(floorCoveringIDPool.reserveID())};
+    FloorCoveringSpriteSetID numericID{
+        static_cast<FloorCoveringSpriteSetID>(floorCoveringIDPool.reserveID())};
 
     // Generate a unique name.
     int nameCount{0};
@@ -119,7 +126,7 @@ bool SpriteSetModel::addFloorCovering()
     }
 
     // Add the new, empty sprite set to the map.
-    std::array<int, Rotation::Direction::Count> spriteIDs{
+    std::array<SpriteID, Rotation::Direction::Count> spriteIDs{
         NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID,
         NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID};
     floorCoveringMap.emplace(numericID, EditorFloorCoveringSpriteSet{
@@ -137,7 +144,8 @@ bool SpriteSetModel::addFloorCovering()
 
 bool SpriteSetModel::addWall()
 {
-    Uint16 numericID{static_cast<Uint16>(wallIDPool.reserveID())};
+    WallSpriteSetID numericID{
+        static_cast<WallSpriteSetID>(wallIDPool.reserveID())};
 
     // Generate a unique name.
     int nameCount{0};
@@ -149,7 +157,7 @@ bool SpriteSetModel::addWall()
     }
 
     // Add the new, empty sprite set to the map.
-    std::array<int, Wall::Type::Count> spriteIDs{
+    std::array<SpriteID, Wall::Type::Count> spriteIDs{
         NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID};
     wallMap.emplace(numericID,
                     EditorWallSpriteSet{numericID, displayName, spriteIDs});
@@ -166,7 +174,8 @@ bool SpriteSetModel::addWall()
 
 bool SpriteSetModel::addObject()
 {
-    Uint16 numericID{static_cast<Uint16>(objectIDPool.reserveID())};
+    ObjectSpriteSetID numericID{
+        static_cast<ObjectSpriteSetID>(objectIDPool.reserveID())};
 
     // Generate a unique name.
     int nameCount{0};
@@ -178,7 +187,7 @@ bool SpriteSetModel::addObject()
     }
 
     // Add the new, empty sprite set to the map.
-    std::array<int, Rotation::Direction::Count> spriteIDs{
+    std::array<SpriteID, Rotation::Direction::Count> spriteIDs{
         NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID,
         NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID, NULL_SPRITE_ID};
     objectMap.emplace(numericID,
@@ -194,7 +203,7 @@ bool SpriteSetModel::addObject()
     return true;
 }
 
-void SpriteSetModel::remFloor(Uint16 floorID)
+void SpriteSetModel::remFloor(FloorSpriteSetID floorID)
 {
     // Find the floor in the map.
     auto floorIt{floorMap.find(floorID)};
@@ -209,7 +218,7 @@ void SpriteSetModel::remFloor(Uint16 floorID)
     spriteSetRemovedSig.publish(SpriteSet::Type::Floor, floorID);
 }
 
-void SpriteSetModel::remFloorCovering(Uint16 floorCoveringID)
+void SpriteSetModel::remFloorCovering(FloorCoveringSpriteSetID floorCoveringID)
 {
     // Find the floor covering in the map.
     auto floorCoveringIt{floorCoveringMap.find(floorCoveringID)};
@@ -225,7 +234,7 @@ void SpriteSetModel::remFloorCovering(Uint16 floorCoveringID)
                                 floorCoveringID);
 }
 
-void SpriteSetModel::remWall(Uint16 wallID)
+void SpriteSetModel::remWall(WallSpriteSetID wallID)
 {
     // Find the wall in the map.
     auto wallIt{wallMap.find(wallID)};
@@ -240,7 +249,7 @@ void SpriteSetModel::remWall(Uint16 wallID)
     spriteSetRemovedSig.publish(SpriteSet::Type::Wall, wallID);
 }
 
-void SpriteSetModel::remObject(Uint16 objectID)
+void SpriteSetModel::remObject(ObjectSpriteSetID objectID)
 {
     // Find the floor in the map.
     auto objectIt{objectMap.find(objectID)};
@@ -255,7 +264,7 @@ void SpriteSetModel::remObject(Uint16 objectID)
     spriteSetRemovedSig.publish(SpriteSet::Type::Object, objectID);
 }
 
-const EditorFloorSpriteSet& SpriteSetModel::getFloor(Uint16 floorID)
+const EditorFloorSpriteSet& SpriteSetModel::getFloor(FloorSpriteSetID floorID)
 {
     auto floorIt{floorMap.find(floorID)};
     if (floorIt == floorMap.end()) {
@@ -266,7 +275,7 @@ const EditorFloorSpriteSet& SpriteSetModel::getFloor(Uint16 floorID)
 }
 
 const EditorFloorCoveringSpriteSet&
-    SpriteSetModel::getFloorCovering(Uint16 floorCoveringID)
+    SpriteSetModel::getFloorCovering(FloorCoveringSpriteSetID floorCoveringID)
 {
     auto floorCoveringIt{floorCoveringMap.find(floorCoveringID)};
     if (floorCoveringIt == floorCoveringMap.end()) {
@@ -277,7 +286,7 @@ const EditorFloorCoveringSpriteSet&
     return floorCoveringIt->second;
 }
 
-const EditorWallSpriteSet& SpriteSetModel::getWall(Uint16 wallID)
+const EditorWallSpriteSet& SpriteSetModel::getWall(WallSpriteSetID wallID)
 {
     auto wallIt{wallMap.find(wallID)};
     if (wallIt == wallMap.end()) {
@@ -287,7 +296,8 @@ const EditorWallSpriteSet& SpriteSetModel::getWall(Uint16 wallID)
     return wallIt->second;
 }
 
-const EditorObjectSpriteSet& SpriteSetModel::getObject(Uint16 objectID)
+const EditorObjectSpriteSet&
+    SpriteSetModel::getObject(ObjectSpriteSetID objectID)
 {
     auto objectIt{objectMap.find(objectID)};
     if (objectIt == objectMap.end()) {
@@ -330,7 +340,7 @@ void SpriteSetModel::setSpriteSetDisplayName(SpriteSet::Type type,
 }
 
 void SpriteSetModel::setSpriteSetSlot(SpriteSet::Type type, Uint16 spriteSetID,
-                                      std::size_t index, int newSpriteID)
+                                      std::size_t index, SpriteID newSpriteID)
 {
     switch (type) {
         case SpriteSet::Type::Floor: {
@@ -372,13 +382,13 @@ void SpriteSetModel::resetModelState()
     objectIDPool.freeAllIDs();
 }
 
-void SpriteSetModel::removeSpriteIDFromSets(int spriteID)
+void SpriteSetModel::removeSpriteIDFromSets(SpriteID spriteID)
 {
     // Given one of the sprite set maps, this will replace all instances of
     // oldSpriteID with newSpriteID and emit a spriteSetSpriteIDChanged.
     auto replaceIDInSets = [this]<typename T>(std::map<Uint16, T>& spriteSetMap,
                                               SpriteSet::Type type,
-                                              int spriteID) {
+                                              SpriteID spriteID) {
         // For each sprite set in the map.
         for (auto& pair : spriteSetMap) {
             T& spriteSet{pair.second};
@@ -386,7 +396,7 @@ void SpriteSetModel::removeSpriteIDFromSets(int spriteID)
             // For each slot in the set.
             for (std::size_t i = 0; i < spriteSet.spriteIDs.size(); ++i) {
                 // If the ID matches oldSpriteID, replace it and signal.
-                int& slotSpriteID{spriteSet.spriteIDs[i]};
+                SpriteID& slotSpriteID{spriteSet.spriteIDs[i]};
                 if (slotSpriteID == spriteID) {
                     slotSpriteID = NULL_SPRITE_ID;
                     spriteSetSlotChangedSig.publish(type, spriteSet.numericID,
@@ -417,9 +427,9 @@ bool SpriteSetModel::parseFloorSpriteSet(const nlohmann::json& spriteSetJson)
     // Note: Floors just have 1 sprite, but the json uses an array in case we
     //       want to add variations in the future.
     const nlohmann::json& spriteIDJson{spriteSetJson.at("spriteIDs")};
-    std::array<int, 1> spriteIDs{};
+    std::array<SpriteID, 1> spriteIDs{};
     for (std::size_t i = 0; i < spriteIDs.size(); ++i) {
-        spriteIDs[i] = spriteIDJson[i].get<int>();
+        spriteIDs[i] = spriteIDJson[i].get<SpriteID>();
         if (!spriteSetNameIsUnique<EditorFloorSpriteSet>(spriteIDs[i],
                                                          displayName)) {
             errorString = "Floor display name isn't unique: ";
@@ -447,9 +457,9 @@ bool SpriteSetModel::parseFloorCoveringSpriteSet(
 
     // Add the sprite set's sprites.
     const nlohmann::json& spriteIDJson{spriteSetJson.at("spriteIDs")};
-    std::array<int, Rotation::Direction::Count> spriteIDs{};
+    std::array<SpriteID, Rotation::Direction::Count> spriteIDs{};
     for (std::size_t i = 0; i < spriteIDs.size(); ++i) {
-        spriteIDs[i] = spriteIDJson[i].get<int>();
+        spriteIDs[i] = spriteIDJson[i].get<SpriteID>();
         if (!spriteSetNameIsUnique<EditorFloorCoveringSpriteSet>(spriteIDs[i],
                                                                  displayName)) {
             errorString = "Floor covering display name isn't unique: ";
@@ -476,9 +486,9 @@ bool SpriteSetModel::parseWallSpriteSet(const nlohmann::json& spriteSetJson)
 
     // Add the sprite set's sprites.
     const nlohmann::json& spriteIDJson{spriteSetJson.at("spriteIDs")};
-    std::array<int, Wall::Type::Count> spriteIDs{};
+    std::array<SpriteID, Wall::Type::Count> spriteIDs{};
     for (std::size_t i = 0; i < spriteIDs.size(); ++i) {
-        spriteIDs[i] = spriteIDJson[i].get<int>();
+        spriteIDs[i] = spriteIDJson[i].get<SpriteID>();
         if (!spriteSetNameIsUnique<EditorWallSpriteSet>(spriteIDs[i],
                                                         displayName)) {
             errorString = "Wall display name isn't unique: ";
@@ -505,9 +515,9 @@ bool SpriteSetModel::parseObjectSpriteSet(const nlohmann::json& spriteSetJson)
 
     // Add the sprite set's sprites.
     const nlohmann::json& spriteIDJson{spriteSetJson.at("spriteIDs")};
-    std::array<int, Rotation::Direction::Count> spriteIDs{};
+    std::array<SpriteID, Rotation::Direction::Count> spriteIDs{};
     for (std::size_t i = 0; i < spriteIDs.size(); ++i) {
-        spriteIDs[i] = spriteIDJson[i].get<int>();
+        spriteIDs[i] = spriteIDJson[i].get<SpriteID>();
         if (!spriteSetNameIsUnique<EditorObjectSpriteSet>(spriteIDs[i],
                                                           displayName)) {
             errorString = "Object display name isn't unique: ";
@@ -603,7 +613,7 @@ void SpriteSetModel::setSpriteSetDisplayName(SpriteSet::Type type,
 
 template<typename T>
 void SpriteSetModel::setSpriteSetSlot(SpriteSet::Type type, Uint16 spriteSetID,
-                                      std::size_t index, int newSpriteID)
+                                      std::size_t index, SpriteID newSpriteID)
 {
     auto& spriteSetMap{getMapForSpriteSetType<T>()};
 

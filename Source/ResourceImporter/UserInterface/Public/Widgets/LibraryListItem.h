@@ -81,7 +81,7 @@ public:
 
     /** Alongside type, associates this list item with the model data that it
         represents.
-        Note: For unsigned IDs, this can be cast to Uint16. */
+        Note: For unsigned IDs, this can be cast to Uint16 or Uint32. */
     int ID{0};
 
     //-------------------------------------------------------------------------

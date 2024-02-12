@@ -1,7 +1,7 @@
 #include "SpriteSetEditStage.h"
 #include "MainScreen.h"
 #include "DataModel.h"
-#include "NullSpriteID.h"
+#include "SpriteID.h"
 #include "LibraryItemData.h"
 #include "Paths.h"
 #include "AUI/Core.h"
@@ -111,7 +111,7 @@ void SpriteSetEditStage::onSpriteSetRemoved(SpriteSet::Type type,
 void SpriteSetEditStage::onSpriteSetSlotChanged(SpriteSet::Type type,
                                                 Uint16 spriteSetID,
                                                 std::size_t index,
-                                                int newSpriteID)
+                                                SpriteID newSpriteID)
 {
     // If the changed data doesn't affect us, return early.
     if ((type != activeSpriteSetType) || (spriteSetID != activeSpriteSetID)) {
@@ -136,7 +136,7 @@ void SpriteSetEditStage::loadActiveSpriteSet(SpriteSet::Type spriteSetType,
     // Fill the container with the sprite set's sprites.
     spriteContainer.clear();
     for (std::size_t i = 0; i < newActiveSpriteSet.spriteIDs.size(); ++i) {
-        int spriteID{newActiveSpriteSet.spriteIDs[i]};
+        SpriteID spriteID{newActiveSpriteSet.spriteIDs[i]};
 
         // Construct the new slot widget.
         std::unique_ptr<AUI::Widget> slotPtr{std::make_unique<SpriteSetSlot>()};
@@ -158,7 +158,7 @@ void SpriteSetEditStage::loadActiveSpriteSet(SpriteSet::Type spriteSetType,
                     if (selectedItem->type == LibraryListItem::Type::Sprite) {
                         dataModel.spriteSetModel.setSpriteSetSlot(
                             activeSpriteSetType, activeSpriteSetID, i,
-                            static_cast<Uint16>(selectedItem->ID));
+                            static_cast<SpriteID>(selectedItem->ID));
                     }
                 }
             }
@@ -259,7 +259,8 @@ std::string SpriteSetEditStage::getSlotTopText(std::size_t spriteSetIndex)
     return "";
 }
 
-void SpriteSetEditStage::fillSlotSpriteData(SpriteSetSlot& slot, int spriteID)
+void SpriteSetEditStage::fillSlotSpriteData(SpriteSetSlot& slot,
+                                            SpriteID spriteID)
 {
     // If this slot isn't empty, set the widget's data.
     if (spriteID != NULL_SPRITE_ID) {
