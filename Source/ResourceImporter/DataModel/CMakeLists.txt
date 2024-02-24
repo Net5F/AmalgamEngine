@@ -2,26 +2,30 @@ target_sources(ResourceImporter
     PRIVATE
         Private/BoundingBoxModel.cpp
         Private/DataModel.cpp
+        Private/EditorAnimation.cpp
+        Private/EditorGraphicRef.cpp
         Private/EditorSprite.cpp
+        Private/GraphicSetModel.cpp
         Private/IconModel.cpp
         Private/SpriteModel.cpp
-        Private/SpriteSetModel.cpp
     PUBLIC
         Public/BoundingBoxModel.h
         Public/DataModel.h
+        Public/EditorAnimation.h
         Public/EditorBoundingBox.h
-        Public/EditorFloorCoveringSpriteSet.h
-        Public/EditorFloorSpriteSet.h
+        Public/EditorFloorCoveringGraphicSet.h
+        Public/EditorFloorGraphicSet.h
+        Public/EditorGraphicRef.h
         Public/EditorIcon.h
         Public/EditorIconSheet.h
-        Public/EditorObjectSpriteSet.h
+        Public/EditorObjectGraphicSet.h
         Public/EditorSprite.h
         Public/EditorSpriteSheet.h
-        Public/EditorWallSpriteSet.h
+        Public/EditorWallGraphicSet.h
+        Public/GraphicSetModel.h
         Public/IconModel.h
         Public/LibraryItemData.h
         Public/SpriteModel.h
-        Public/SpriteSetModel.h
 )
 
 target_include_directories(ResourceImporter

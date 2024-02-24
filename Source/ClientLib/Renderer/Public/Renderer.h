@@ -15,7 +15,7 @@ namespace Client
 {
 class World;
 class UserInterface;
-class SpriteData;
+class GraphicData;
 class IRendererExtension;
 
 /**
@@ -32,7 +32,7 @@ public:
      *                            ticks we are in decimal percent.
      */
     Renderer(SDL_Renderer* inSdlRenderer, World& inWorld, UserInterface& inUI,
-             SpriteData& inSpriteData,
+             GraphicData& inGraphicData,
              std::function<double(void)> inGetSimTickProgress);
 
     /**
@@ -80,8 +80,8 @@ private:
     /** Used to begin the UI rendering. */
     UserInterface& ui;
 
-    /** Used for getting sprite render data. */
-    SpriteData& spriteData;
+    /** Used for getting graphics render data. */
+    GraphicData& graphicData;
 
     std::function<double(void)> getSimTickProgress;
 

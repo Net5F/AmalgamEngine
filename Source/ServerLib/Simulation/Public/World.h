@@ -17,13 +17,13 @@ class state;
 namespace AM
 {
 struct Position;
-struct AnimationState;
+struct GraphicState;
 struct EntityInitScript;
 struct ItemInitScript;
 
 namespace Server
 {
-class SpriteData;
+class GraphicData;
 class Database;
 
 /**
@@ -44,7 +44,7 @@ class Database;
 class World
 {
 public:
-    World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
+    World(GraphicData& inGraphicData, sol::state& inEntityInitLua,
           sol::state& inItemInitLua);
 
     ~World();
@@ -92,7 +92,7 @@ public:
      * the Collision component and adds the entity to the locator.
      */
     void addGraphicsComponents(entt::entity entity,
-                               const AnimationState& animationState);
+                               const GraphicState& graphicState);
 
     /**
      * Adds the components needed for movement to the given entity.
@@ -147,8 +147,8 @@ private:
      */
     void loadItems();
 
-    /** Used to get sprite info. */
-    const SpriteData& spriteData;
+    /** Used to get graphics info. */
+    const GraphicData& graphicData;
 
     /** Used to run entity init scripts. */
     sol::state& entityInitLua;

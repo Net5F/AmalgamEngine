@@ -10,7 +10,7 @@ struct TileExtent;
 struct EntityInitRequest;
 struct EntityDeleteRequest;
 struct EntityNameChangeRequest;
-struct AnimationStateChangeRequest;
+struct GraphicStateChangeRequest;
 
 namespace Server
 {
@@ -83,8 +83,8 @@ public:
         const EntityDeleteRequest& entityDeleteRequest) const = 0;
     virtual bool isEntityNameChangeRequestValid(
         const EntityNameChangeRequest& nameChangeRequest) const = 0;
-    virtual bool isAnimationStateChangeRequestValid(
-        const AnimationStateChangeRequest& animationStateChangeRequest)
+    virtual bool isGraphicStateChangeRequestValid(
+        const GraphicStateChangeRequest& graphicStateChangeRequest)
         const = 0;
 };
 

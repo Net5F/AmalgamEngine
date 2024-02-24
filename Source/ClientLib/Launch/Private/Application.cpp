@@ -23,7 +23,7 @@ Application::Application()
 , sdlRenderer{sdlWindow, -1, SDL_RENDERER_ACCELERATED}
 , assetCache{sdlRenderer.Get()}
 , resourceData{}
-, spriteData{resourceData.get(), assetCache}
+, graphicData{resourceData.get(), assetCache}
 , iconData{resourceData.get()}
 , network{}
 , networkCaller{std::bind_front(&Network::tick, &network),
@@ -33,10 +33,10 @@ Application::Application()
 , userInterface{}
 , uiCaller{std::bind_front(&UserInterface::tick, &userInterface),
            Config::UI_TICK_TIMESTEP_S, "UserInterface", true}
-, simulation{userInterface.getEventDispatcher(), network, spriteData}
+, simulation{userInterface.getEventDispatcher(), network, graphicData}
 , simCaller{std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
-, renderer{sdlRenderer.Get(), simulation.getWorld(), userInterface, spriteData,
+, renderer{sdlRenderer.Get(), simulation.getWorld(), userInterface, graphicData,
            std::bind_front(&PeriodicCaller::getProgress, &simCaller)}
 , rendererCaller{std::bind_front(&Renderer::render, &renderer),
                  UserConfig::get().getFrameTimestepS(), "Renderer", true}

@@ -14,9 +14,9 @@ target_sources(ClientLib
         Private/Simulation.cpp
         Private/TileUpdateSystem.cpp
         Private/World.cpp
+        Private/GraphicData/GraphicData.cpp
         Private/IconData/IconData.cpp
         Private/ItemData/ItemData.cpp
-        Private/SpriteData/SpriteData.cpp
         Private/TileMap/TileMap.cpp
     PUBLIC
         Public/CameraSystem.h
@@ -37,28 +37,30 @@ target_sources(ClientLib
         Public/TileUpdateSystem.h
         Public/World.h
         Public/WorldObjectID.h
+        Public/Components/AnimationState.h
         Public/Components/InputHistory.h
         Public/Components/NeedsAdjacentChunks.h
+        Public/GraphicData/GraphicData.h
+        Public/GraphicData/SpriteRenderData.h
         Public/IconData/IconData.h
         Public/IconData/IconRenderData.h
         Public/ItemData/ItemCache.h
         Public/ItemData/ItemData.h
-        Public/SpriteData/SpriteData.h
-        Public/SpriteData/SpriteRenderData.h
         Public/TileMap/TileMap.h
 )
 
 target_include_directories(ClientLib
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/GraphicData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/IconData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/ItemData
-        ${CMAKE_CURRENT_SOURCE_DIR}/Private/SpriteData
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/TileMap
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/GraphicData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/IconData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
-        ${CMAKE_CURRENT_SOURCE_DIR}/Public/SpriteData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
 )

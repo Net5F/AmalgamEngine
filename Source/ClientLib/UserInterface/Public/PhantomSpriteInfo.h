@@ -26,6 +26,10 @@ namespace Client
  * An example usage is when a user is in build mode and is trying to place a
  * wall. A phantom wall sprite will follow the user's mouse to show where the
  * wall will be placed when they click.
+ *
+ * Note: Currently we only support phantom sprites. If we ever want to support 
+ *       phantom animations, this should be renamed to PhantomGraphicInfo and 
+ *       replace Sprite with GraphicRef.
  */
 struct PhantomSpriteInfo {
     /** If this is a tile phantom, this is the X coordinate of the phantom's

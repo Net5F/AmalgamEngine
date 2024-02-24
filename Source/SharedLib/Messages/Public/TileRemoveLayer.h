@@ -30,16 +30,16 @@ public:
     /** The type of tile layer that should be removed. */
     TileLayer::Type layerType{TileLayer::Type::None};
 
-    /** The numeric ID of the layer's sprite set.
+    /** The numeric ID of the layer's graphic set.
         For Floors, this will always be 0.
         For Walls, this won't be used (we only need the Wall::Type). */
-    Uint16 spriteSetID{0};
+    Uint16 graphicSetID{0};
 
-    /** The index of the layer's sprite, within the layer's sprite set.
+    /** The index of the layer's graphic, within the layer's graphic set.
         For Floors, this will always be 0.
         For FloorCoverings and Objects, this should be cast to Rotation.
         For Walls, this should be cast to Wall::Type. */
-    Uint8 spriteIndex{0};
+    Uint8 graphicIndex{0};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -59,8 +59,8 @@ void serialize(S& serializer, TileRemoveLayer& tileRemoveLayer)
     serializer.value4b(tileRemoveLayer.tileX);
     serializer.value4b(tileRemoveLayer.tileY);
     serializer.value1b(tileRemoveLayer.layerType);
-    serializer.value2b(tileRemoveLayer.spriteSetID);
-    serializer.value1b(tileRemoveLayer.spriteIndex);
+    serializer.value2b(tileRemoveLayer.graphicSetID);
+    serializer.value1b(tileRemoveLayer.graphicIndex);
 }
 
 } // End namespace AM

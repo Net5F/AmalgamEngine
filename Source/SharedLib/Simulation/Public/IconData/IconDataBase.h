@@ -22,7 +22,7 @@ class IconDataBase
 {
 public:
     /**
-     * Attempts to parse ResourceData.json and load all of the icon data.
+     * Attempts to parse resourceDataJson and load all of the icon data.
      *
      * Errors if resourceDataJson doesn't contain an iconSheets section.
      */

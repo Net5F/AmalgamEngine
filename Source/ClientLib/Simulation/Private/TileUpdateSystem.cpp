@@ -46,25 +46,25 @@ void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
 {
     if (addLayerRequest.layerType == TileLayer::Type::Floor) {
         world.tileMap.setFloor(addLayerRequest.tileX, addLayerRequest.tileY,
-                               addLayerRequest.spriteSetID);
+                               addLayerRequest.graphicSetID);
     }
     else if (addLayerRequest.layerType == TileLayer::Type::FloorCovering) {
         world.tileMap.addFloorCovering(
             addLayerRequest.tileX, addLayerRequest.tileY,
-            addLayerRequest.spriteSetID,
-            static_cast<Rotation::Direction>(addLayerRequest.spriteIndex));
+            addLayerRequest.graphicSetID,
+            static_cast<Rotation::Direction>(addLayerRequest.graphicIndex));
     }
     else if (addLayerRequest.layerType == TileLayer::Type::Wall) {
         world.tileMap.addWall(
             addLayerRequest.tileX, addLayerRequest.tileY,
-            addLayerRequest.spriteSetID,
-            static_cast<Wall::Type>(addLayerRequest.spriteIndex));
+            addLayerRequest.graphicSetID,
+            static_cast<Wall::Type>(addLayerRequest.graphicIndex));
     }
     else if (addLayerRequest.layerType == TileLayer::Type::Object) {
         world.tileMap.addObject(
             addLayerRequest.tileX, addLayerRequest.tileY,
-            addLayerRequest.spriteSetID,
-            static_cast<Rotation::Direction>(addLayerRequest.spriteIndex));
+            addLayerRequest.graphicSetID,
+            static_cast<Rotation::Direction>(addLayerRequest.graphicIndex));
     }
 }
 
@@ -78,19 +78,19 @@ void TileUpdateSystem::remTileLayer(const TileRemoveLayer& remLayerRequest)
     else if (remLayerRequest.layerType == TileLayer::Type::FloorCovering) {
         world.tileMap.remFloorCovering(
             remLayerRequest.tileX, remLayerRequest.tileY,
-            remLayerRequest.spriteSetID,
-            static_cast<Rotation::Direction>(remLayerRequest.spriteIndex));
+            remLayerRequest.graphicSetID,
+            static_cast<Rotation::Direction>(remLayerRequest.graphicIndex));
     }
     else if (remLayerRequest.layerType == TileLayer::Type::Wall) {
         world.tileMap.remWall(
             remLayerRequest.tileX, remLayerRequest.tileY,
-            static_cast<Wall::Type>(remLayerRequest.spriteIndex));
+            static_cast<Wall::Type>(remLayerRequest.graphicIndex));
     }
     else if (remLayerRequest.layerType == TileLayer::Type::Object) {
         world.tileMap.remObject(
             remLayerRequest.tileX, remLayerRequest.tileY,
-            remLayerRequest.spriteSetID,
-            static_cast<Rotation::Direction>(remLayerRequest.spriteIndex));
+            remLayerRequest.graphicSetID,
+            static_cast<Rotation::Direction>(remLayerRequest.graphicIndex));
     }
 }
 

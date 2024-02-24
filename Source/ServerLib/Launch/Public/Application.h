@@ -4,7 +4,7 @@
 #include "Network.h"
 #include "Simulation.h"
 #include "ResourceData.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 #include "IconData.h"
 #include "PeriodicCaller.h"
 #include "SDLNetInitializer.h"
@@ -87,7 +87,7 @@ private:
 
     ResourceData resourceData;
 
-    SpriteData spriteData;
+    GraphicData graphicData;
 
     IconData iconData;
 
@@ -119,7 +119,7 @@ void Application::registerMessageProcessorExtension()
 template<typename T>
 void Application::registerSimulationExtension()
 {
-    SimulationExDependencies simulationDeps{simulation, network, spriteData};
+    SimulationExDependencies simulationDeps{simulation, network, graphicData};
 
     simulation.setExtension(std::make_unique<T>(simulationDeps));
 }

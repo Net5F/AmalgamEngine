@@ -6,7 +6,7 @@
 #include "Rotation.h"
 #include "Collision.h"
 #include "InputHistory.h"
-#include "Sprite.h"
+#include "GraphicState.h"
 #include "entt/entity/registry.hpp"
 
 namespace AM
@@ -30,7 +30,7 @@ public:
     {
         // movementGroup: Used for NPC movement and dynamic entity sorting.
         registry.group<Input, Position, PreviousPosition, Rotation, Collision>(
-            entt::get<Sprite>, entt::exclude<InputHistory>);
+            entt::get<GraphicState>, entt::exclude<InputHistory>);
     }
 };
 

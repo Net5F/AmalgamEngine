@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TileMapBase.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 
 namespace AM
 {
@@ -30,7 +30,7 @@ public:
      *
      * Errors if TileMap.bin doesn't exist or it fails to parse.
      */
-    TileMap(SpriteData& inSpriteData);
+    TileMap(GraphicData& inGraphicData);
 
     /**
      * Attempts to save the current tile map state to TileMap.bin.

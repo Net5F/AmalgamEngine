@@ -17,12 +17,12 @@ namespace AM
 {
 namespace Server
 {
-Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
+Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData)
 : network{inNetwork}
 , entityInitLua{std::make_unique<sol::state>()}
 , entityItemHandlerLua{std::make_unique<sol::state>()}
 , itemInitLua{std::make_unique<sol::state>()}
-, world{inSpriteData, *entityInitLua, *itemInitLua}
+, world{inGraphicData, *entityInitLua, *itemInitLua}
 , currentTick{0}
 , engineLuaBindings{*entityInitLua, *entityItemHandlerLua, *itemInitLua, world,
                     network}
@@ -31,9 +31,9 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , itemInteractionRequestQueue{inNetwork.getEventDispatcher()}
 , entityInteractionQueueMap{}
 , itemInteractionQueueMap{}
-, clientConnectionSystem{*this, world, network, inSpriteData}
+, clientConnectionSystem{*this, world, network, inGraphicData}
 , nceLifetimeSystem{world, network}
-, componentChangeSystem{world, network, inSpriteData}
+, componentChangeSystem{world, network, inGraphicData}
 , tileUpdateSystem{world, network}
 , inputSystem{*this, world, network}
 , movementSystem{world}
@@ -42,7 +42,7 @@ Simulation::Simulation(Network& inNetwork, SpriteData& inSpriteData)
 , inventorySystem{world, network}
 , clientAOISystem{*this, world, network}
 , movementSyncSystem{*this, world, network}
-, componentSyncSystem{*this, world, network, inSpriteData}
+, componentSyncSystem{*this, world, network, inGraphicData}
 , chunkStreamingSystem{world, network}
 , scriptDataSystem{world, network}
 , saveSystem{world}

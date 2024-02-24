@@ -11,7 +11,7 @@ namespace Client
 class Simulation;
 class World;
 class Network;
-class SpriteData;
+class GraphicData;
 
 /**
  * Applies received entity component updates.
@@ -20,7 +20,7 @@ class ComponentUpdateSystem
 {
 public:
     ComponentUpdateSystem(Simulation& inSimulation, World& inWorld,
-                          Network& inNetwork, SpriteData& inSpriteData);
+                          Network& inNetwork, GraphicData& inGraphicData);
 
     ~ComponentUpdateSystem();
 
@@ -33,11 +33,10 @@ private:
     void processComponentUpdate(const ComponentUpdate& componentUpdate);
 
     /**
-     * Updates Sprite and Collision components when an AnimationState is
-     * updated. Neither component is replicated, so we need to maintain them
-     * ourselves.
+     * Updates Collision state when a GraphicState is updated.
+     * Neither component is replicated, so we need to maintain them ourselves.
      */
-    void onAnimationStateUpdated(entt::registry& registry, entt::entity entity);
+    void onGraphicStateUpdated(entt::registry& registry, entt::entity entity);
 
     /** Used to get the current replication tick. */
     Simulation& simulation;
@@ -45,8 +44,8 @@ private:
     World& world;
     /** Used to receive component update messages. */
     Network& network;
-    /** Used to update Sprite components when AnimationState is updated. */
-    SpriteData& spriteData;
+    /** Used to update components when GraphicState is updated. */
+    GraphicData& graphicData;
 
     /** We pop messages off componentUpdateQueue and push them into here, so
         we can find and immediately process any messages for the player

@@ -91,7 +91,7 @@ private:
         std::vector<FloorCoveringTileLayer> floorCoverings{};
 
         /** Tiles can have up to 2 walls.
-            If a wall doesn't exist, its sprite set will be nullptr and its
+            If a wall doesn't exist, its graphic set will be nullptr and its
             WallType will be None.
             Possible states: [None, None], [West, None], [None, North],
                              [West, NEGapFill], [None, NWGapFill] */
@@ -105,11 +105,11 @@ private:
     std::unique_ptr<Layers> layers;
 
     /**
-     * Returns the given sprite's modelBounds, translated to world space and
+     * Returns the given graphic's modelBounds, translated to world space and
      * offset to the given tile coords.
      */
-    BoundingBox calcWorldBoundsForSprite(int tileX, int tileY,
-                                         const Sprite* sprite);
+    BoundingBox calcWorldBoundsForGraphic(int tileX, int tileY,
+                                          const GraphicRef& graphic);
 };
 
 } // End namespace AM

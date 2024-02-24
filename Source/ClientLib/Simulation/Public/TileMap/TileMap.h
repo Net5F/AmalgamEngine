@@ -7,7 +7,7 @@ namespace AM
 {
 namespace Client
 {
-class SpriteData;
+class GraphicData;
 
 /**
  * Owns and manages the world's tile map state.
@@ -23,7 +23,7 @@ public:
      *
      * Errors if TileMap.bin doesn't exist or it fails to parse.
      */
-    TileMap(SpriteData& inSpriteData);
+    TileMap(GraphicData& inGraphicData);
 
     /**
      * Sets the size of the map and resizes the tiles vector.

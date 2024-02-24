@@ -1,5 +1,5 @@
 #include "TileMap.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 #include "Paths.h"
 #include "Position.h"
 #include "Transforms.h"
@@ -17,8 +17,8 @@ namespace AM
 {
 namespace Client
 {
-TileMap::TileMap(SpriteData& inSpriteData)
-: TileMapBase{inSpriteData, false}
+TileMap::TileMap(GraphicData& inGraphicData)
+: TileMapBase{inGraphicData, false}
 , sizeChangedSig{}
 , sizeChanged{sizeChangedSig}
 {
@@ -28,14 +28,14 @@ TileMap::TileMap(SpriteData& inSpriteData)
         // Set our map size.
         setMapSize(1, 1);
 
-        // If we have any floor sprite sets, fill the map with the first one.
-        const std::vector<FloorSpriteSet>& floorSpriteSets{
-            spriteData.getAllFloorSpriteSets()};
-        if (floorSpriteSets.size() > 0) {
-            const FloorSpriteSet& floorSpriteSet{floorSpriteSets[0]};
+        // If we have any floor graphic sets, fill the map with the first one.
+        const std::vector<FloorGraphicSet>& floorGraphicSets{
+            graphicData.getAllFloorGraphicSets()};
+        if (floorGraphicSets.size() > 0) {
+            const FloorGraphicSet& floorGraphicSet{floorGraphicSets[0]};
             for (int x = tileExtent.x; x <= tileExtent.xMax(); ++x) {
                 for (int y = tileExtent.y; y <= tileExtent.yMax(); ++y) {
-                    setFloor(x, y, floorSpriteSet);
+                    setFloor(x, y, floorGraphicSet);
                 }
             }
         }

@@ -7,7 +7,7 @@
 #include "Renderer.h"
 #include "AssetCache.h"
 #include "ResourceData.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 #include "IconData.h"
 #include "QueuedEvents.h"
 #include "UserInterface.h"
@@ -154,7 +154,7 @@ private:
 
     ResourceData resourceData;
 
-    SpriteData spriteData;
+    GraphicData graphicData;
 
     IconData iconData;
 
@@ -208,7 +208,7 @@ template<typename T>
 void Application::registerSimulationExtension()
 {
     SimulationExDependencies simulationDeps{
-        simulation, userInterface.getEventDispatcher(), network, spriteData};
+        simulation, userInterface.getEventDispatcher(), network, graphicData};
 
     simulation.setExtension(std::make_unique<T>(simulationDeps));
 }
@@ -221,7 +221,7 @@ void Application::registerUserInterfaceExtension()
                                        userInterface.getEventDispatcher(),
                                        network,
                                        sdlRenderer.Get(),
-                                       spriteData,
+                                       graphicData,
                                        iconData};
 
     userInterface.setExtension(std::make_unique<T>(uiDeps));

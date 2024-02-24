@@ -96,9 +96,9 @@ void NpcMovementSystem::moveAllNpcs()
     auto movementGroup
         = world.registry
               .group<Input, Position, PreviousPosition, Rotation, Collision>(
-                  entt::get<Sprite>, entt::exclude<InputHistory>);
+                  entt::get<GraphicState>, entt::exclude<InputHistory>);
     for (auto [entity, input, position, previousPosition, rotation, collision,
-               sprite] : movementGroup.each()) {
+               graphicState] : movementGroup.each()) {
         // Save their old position.
         previousPosition = position;
 
@@ -144,7 +144,7 @@ void NpcMovementSystem::applyUpdateMessage(
     auto movementGroup
         = registry
               .group<Input, Position, PreviousPosition, Rotation, Collision>(
-                  entt::get<Sprite>, entt::exclude<InputHistory>);
+                  entt::get<GraphicState>, entt::exclude<InputHistory>);
 
     // Apply each updated entity's new state.
     for (const MovementState& movementState :

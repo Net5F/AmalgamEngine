@@ -11,7 +11,7 @@ namespace Client
 class Simulation;
 class WorldObjectLocator;
 class Network;
-class SpriteData;
+class GraphicData;
 class IconData;
 
 /**
@@ -35,8 +35,8 @@ public:
     /** Used for rendering. */
     SDL_Renderer* sdlRenderer;
 
-    /** Used for getting sprite and sprite set data. */
-    SpriteData& spriteData;
+    /** Used for getting sprite and animation data. */
+    GraphicData& graphicData;
 
     /** Used for getting icon data. */
     IconData& iconData;

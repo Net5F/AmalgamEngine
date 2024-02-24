@@ -11,7 +11,7 @@ namespace AM
 {
 namespace Client
 {
-class SpriteData;
+class GraphicData;
 
 /**
  * Owns and manages the persistence of all world state.
@@ -27,7 +27,7 @@ class SpriteData;
 class World
 {
 public:
-    World(SpriteData& spriteData);
+    World(GraphicData& graphicData);
 
     /** Entity data registry. */
     entt::registry registry;

@@ -16,7 +16,7 @@ namespace Client
 {
 class World;
 class Network;
-class SpriteData;
+class GraphicData;
 
 /**
  * Processes server connect/disconnect events and initializes the sim state
@@ -28,7 +28,7 @@ public:
     enum class ConnectionState { Disconnected, AwaitingResponse, Connected };
 
     ServerConnectionSystem(World& inWorld, EventDispatcher& inUiEventDispatcher,
-                           Network& inNetwork, SpriteData& inSpriteData,
+                           Network& inNetwork, GraphicData& inGraphicData,
                            std::atomic<Uint32>& inCurrentTick);
 
     /**
@@ -64,10 +64,8 @@ private:
     void clearSimState();
 
     World& world;
-
     Network& network;
-
-    SpriteData& spriteData;
+    GraphicData& graphicData;
 
     /** The sim's current tick. Set when we receive a connection response.
         Note: This is the only system that should have a mutable reference. */

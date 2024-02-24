@@ -2,7 +2,7 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 #include "SharedConfig.h"
 #include "Serialize.h"
 #include "ConnectionResponse.h"
@@ -15,7 +15,7 @@
 #include "Inventory.h"
 #include "ClientSimData.h"
 #include "IsClientEntity.h"
-#include "AnimationState.h"
+#include "GraphicState.h"
 #include "Collision.h"
 #include "EntityDelete.h"
 #include "Transforms.h"
@@ -29,11 +29,11 @@ namespace Server
 ClientConnectionSystem::ClientConnectionSystem(Simulation& inSimulation,
                                                World& inWorld,
                                                Network& inNetwork,
-                                               SpriteData& inSpriteData)
+                                               GraphicData& inGraphicData)
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
-, spriteData{inSpriteData}
+, graphicData{inGraphicData}
 , clientConnectedQueue{network.getEventDispatcher()}
 , clientDisconnectedQueue{network.getEventDispatcher()}
 {
@@ -75,14 +75,14 @@ void ClientConnectionSystem::processConnectEvents()
         world.addMovementComponents(newEntity, Rotation{});
 
         // TODO: When we add character sprite sets, update this.
-        Uint16 spriteSetID{
-            spriteData
-                .getObjectSpriteSet(SharedConfig::DEFAULT_CHARACTER_SPRITE_SET)
+        Uint16 graphicSetID{
+            graphicData
+                .getObjectGraphicSet(SharedConfig::DEFAULT_CHARACTER_SPRITE_SET)
                 .numericID};
-        AnimationState animationState{
-            SpriteSet::Type::Object, spriteSetID,
+        GraphicState graphicState{
+            GraphicSet::Type::Object, graphicSetID,
             SharedConfig::DEFAULT_CHARACTER_SPRITE_INDEX};
-        world.addGraphicsComponents(newEntity, animationState);
+        world.addGraphicsComponents(newEntity, graphicState);
 
         // Add the new client entity to the network ID map.
         world.netIdMap[clientConnected.clientID] = newEntity;

@@ -7,10 +7,11 @@ target_sources(SharedLib
         Private/ResourceData.cpp
         Private/Components/Camera.cpp
         Private/Components/Inventory.cpp
+        Private/GraphicData/GraphicDataBase.cpp
+        Private/GraphicData/GraphicRef.cpp
         Private/IconData/IconDataBase.cpp
         Private/ItemData/Item.cpp
         Private/ItemData/ItemDataBase.cpp
-        Private/SpriteData/SpriteDataBase.cpp
         Private/TileMap/ChunkExtent.cpp
         Private/TileMap/ChunkPosition.cpp
         Private/TileMap/Tile.cpp
@@ -32,10 +33,10 @@ target_sources(SharedLib
         Public/ReplicatedComponent.h
         Public/ResourceData.h
         Public/Wall.h
-        Public/Components/AnimationState.h
         Public/Components/Camera.h
         Public/Components/Collision.h
         Public/Components/EntityInitScript.h
+        Public/Components/GraphicState.h
         Public/Components/Input.h
         Public/Components/Interaction.h
         Public/Components/Inventory.h
@@ -44,6 +45,15 @@ target_sources(SharedLib
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
         Public/Components/Rotation.h
+        Public/GraphicData/Animation.h
+        Public/GraphicData/AnimationID.h
+        Public/GraphicData/GraphicDataBase.h
+        Public/GraphicData/GraphicID.h
+        Public/GraphicData/GraphicRef.h
+        Public/GraphicData/GraphicSetIDs.h
+        Public/GraphicData/GraphicSets.h
+        Public/GraphicData/Sprite.h
+        Public/GraphicData/SpriteID.h
         Public/IconData/Icon.h
         Public/IconData/IconDataBase.h
         Public/IconData/IconID.h
@@ -51,11 +61,6 @@ target_sources(SharedLib
         Public/ItemData/ItemDataBase.h
         Public/ItemData/ItemID.h
         Public/ItemData/ItemInitScript.h
-        Public/SpriteData/Sprite.h
-        Public/SpriteData/SpriteDataBase.h
-        Public/SpriteData/SpriteID.h
-        Public/SpriteData/SpriteSetIDs.h
-        Public/SpriteData/SpriteSets.h
         Public/TileMap/CellExtent.h
         Public/TileMap/CellPosition.h
         Public/TileMap/ChunkExtent.h
@@ -76,15 +81,16 @@ target_include_directories(SharedLib
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/GraphicData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/IconData
-        ${CMAKE_CURRENT_SOURCE_DIR}/Private/SpriteData
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/ItemData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/TileMap
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
-		${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
-		${CMAKE_CURRENT_SOURCE_DIR}/Public/IconData
-		${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
-		${CMAKE_CURRENT_SOURCE_DIR}/Public/SpriteData
-		${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
-		${CMAKE_CURRENT_SOURCE_DIR}/Public/TypeLists
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/GraphicData
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/IconData
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/TypeLists
 )

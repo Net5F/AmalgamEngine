@@ -2,7 +2,7 @@
 
 #include "LibraryListItem.h"
 #include "BoundingBoxID.h"
-#include "SpriteSets.h"
+#include "GraphicSets.h"
 #include "IconID.h"
 #include "AUI/Window.h"
 #include "AUI/Text.h"
@@ -21,15 +21,15 @@ class DataModel;
 struct EditorBoundingBox;
 struct EditorSpriteSheet;
 class ParentListItem;
-struct EditorFloorSpriteSet;
-struct EditorFloorCoveringSpriteSet;
-struct EditorWallSpriteSet;
-struct EditorObjectSpriteSet;
+struct EditorFloorGraphicSet;
+struct EditorFloorCoveringGraphicSet;
+struct EditorWallGraphicSet;
+struct EditorObjectGraphicSet;
 struct EditorIconSheet;
 
 /**
  * The left-side panel on the main screen. Allows the user to manage the
- * project's sprite sheets.
+ * project's sprite sheets, sprite sets, etc.
  */
 class LibraryWindow : public AUI::Window
 {
@@ -75,16 +75,16 @@ private:
     void onBoundingBoxAdded(BoundingBoxID boundingBoxID,
                             const EditorBoundingBox& bounds);
     void onSpriteSheetAdded(int sheetID, const EditorSpriteSheet& sheet);
-    void onFloorAdded(FloorSpriteSetID floorID,
-                      const EditorFloorSpriteSet& floor);
+    void onFloorAdded(FloorGraphicSetID floorID,
+                      const EditorFloorGraphicSet& floor);
     void
-        onFloorCoveringAdded(FloorCoveringSpriteSetID floorCoveringID,
-                             const EditorFloorCoveringSpriteSet& floorCovering);
-    void onWallAdded(WallSpriteSetID wallID, const EditorWallSpriteSet& wall);
-    void onObjectAdded(ObjectSpriteSetID objectID,
-                       const EditorObjectSpriteSet& object);
+        onFloorCoveringAdded(FloorCoveringGraphicSetID floorCoveringID,
+                             const EditorFloorCoveringGraphicSet& floorCovering);
+    void onWallAdded(WallGraphicSetID wallID, const EditorWallGraphicSet& wall);
+    void onObjectAdded(ObjectGraphicSetID objectID,
+                       const EditorObjectGraphicSet& object);
     template<typename T>
-    void onSpriteSetAdded(Uint16 spriteSetID, const T& spriteSet);
+    void onGraphicSetAdded(Uint16 graphicSetID, const T& graphicSet);
     void onIconSheetAdded(int sheetID, const EditorIconSheet& sheet);
 
     /**
@@ -92,7 +92,7 @@ private:
      */
     void onBoundingBoxRemoved(BoundingBoxID boundingBoxID);
     void onSpriteSheetRemoved(int sheetID);
-    void onSpriteSetRemoved(SpriteSet::Type type, Uint16 spriteSetID);
+    void onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID);
     void onIconSheetRemoved(int sheetID);
 
     /**
@@ -102,7 +102,7 @@ private:
                                          const std::string& newDisplayName);
     void onSpriteDisplayNameChanged(SpriteID spriteID,
                                     const std::string& newDisplayName);
-    void onSpriteSetDisplayNameChanged(SpriteSet::Type type, Uint16 spriteSetID,
+    void onGraphicSetDisplayNameChanged(GraphicSet::Type type, Uint16 graphicSetID,
                                        const std::string& newDisplayName);
     void onIconDisplayNameChanged(IconID iconID,
                                   const std::string& newDisplayName);
@@ -137,8 +137,8 @@ private:
      */
     void removeListItem(LibraryListItem* listItem);
 
-    LibraryListItem::Type toListItemType(SpriteSet::Type spriteSetType);
-    Category toCategory(SpriteSet::Type spriteSetType);
+    LibraryListItem::Type toListItemType(GraphicSet::Type graphicSetType);
+    Category toCategory(GraphicSet::Type graphicSetType);
 
     /** Used to open the confirmation dialog when removing a sheet. */
     MainScreen& mainScreen;

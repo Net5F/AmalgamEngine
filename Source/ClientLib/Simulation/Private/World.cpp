@@ -6,11 +6,11 @@ namespace AM
 {
 namespace Client
 {
-World::World(SpriteData& spriteData)
+World::World(GraphicData& graphicData)
 : registry{}
 , itemData{}
 , playerEntity{entt::null}
-, tileMap{spriteData}
+, tileMap{graphicData}
 , entityLocator{registry}
 {
 }

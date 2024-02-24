@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TileLayers.h"
+#include "GraphicSetIDs.h"
 #include <SDL_stdinc.h>
 
 namespace AM
@@ -23,20 +24,20 @@ struct TileLayerID {
     /** The tile layer's type. */
     TileLayer::Type type{TileLayer::Type::None};
 
-    /** The numeric ID of the layer's sprite set. */
-    Uint16 spriteSetID{0};
+    /** The numeric ID of the layer's graphic set. */
+    Uint16 graphicSetID{0};
 
-    /** The index of the layer's sprite, within the layer's sprite set.
+    /** The index of the layer's graphic, within the layer's graphic set.
         For Floors, this will always be 0.
         For FloorCoverings and Objects, this should be cast to Rotation.
         For Walls, this should be cast to Wall::Type. */
-    Uint8 spriteIndex{0};
+    Uint8 graphicIndex{0};
 
     bool operator==(const TileLayerID& other) const
     {
         return (x == other.x) && (y == other.y) && (type == other.type)
-               && (spriteSetID == other.spriteSetID)
-               && (spriteIndex == other.spriteIndex);
+               && (graphicSetID == other.graphicSetID)
+               && (graphicIndex == other.graphicIndex);
     }
 };
 

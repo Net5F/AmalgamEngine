@@ -75,31 +75,30 @@ void Tile::rebuildCollision(int tileX, int tileY)
 
     // Add all of this tile's walls.
     for (const WallTileLayer& wallLayer : getWalls()) {
-        // Note: Walls may be empty, in which case sprite == nullptr.
-        const Sprite* sprite{wallLayer.getSprite()};
-        if ((sprite != nullptr) && sprite->collisionEnabled) {
+        std::optional<GraphicRef> graphic{wallLayer.getGraphic()};
+        if (graphic && graphic->getCollisionEnabled()) {
             collisionBoxes.push_back(
-                calcWorldBoundsForSprite(tileX, tileY, sprite));
+                calcWorldBoundsForGraphic(tileX, tileY, *graphic));
         }
     }
 
     // Add all of this tile's objects.
     for (const ObjectTileLayer& objectLayer : getObjects()) {
-        const Sprite* sprite{objectLayer.getSprite()};
-        if (sprite->collisionEnabled) {
+        std::optional<GraphicRef> graphic{objectLayer.getGraphic()};
+        if (graphic && graphic->getCollisionEnabled()) {
             collisionBoxes.push_back(
-                calcWorldBoundsForSprite(tileX, tileY, sprite));
+                calcWorldBoundsForGraphic(tileX, tileY, *graphic));
         }
     }
 }
 
-BoundingBox Tile::calcWorldBoundsForSprite(int tileX, int tileY,
-                                           const Sprite* sprite)
+BoundingBox Tile::calcWorldBoundsForGraphic(int tileX, int tileY,
+                                            const GraphicRef& graphic)
 {
     Position tilePosition{
         static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),
         static_cast<float>(tileY * SharedConfig::TILE_WORLD_WIDTH), 0};
-    return Transforms::modelToWorld(sprite->modelBounds, tilePosition);
+    return Transforms::modelToWorld(graphic.getModelBounds(), tilePosition);
 }
 
 } // End namespace AM

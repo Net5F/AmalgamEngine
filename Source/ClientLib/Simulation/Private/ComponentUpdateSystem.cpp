@@ -2,7 +2,7 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 #include "Collision.h"
 #include "Transforms.h"
 #include "Log.h"
@@ -14,21 +14,21 @@ namespace Client
 
 ComponentUpdateSystem::ComponentUpdateSystem(Simulation& inSimulation,
                                              World& inWorld, Network& inNetwork,
-                                             SpriteData& inSpriteData)
+                                             GraphicData& inGraphicData)
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
-, spriteData{inSpriteData}
+, graphicData{inGraphicData}
 , componentUpdateQueue{network.getEventDispatcher()}
 {
-    world.registry.on_update<AnimationState>()
-        .connect<&ComponentUpdateSystem::onAnimationStateUpdated>(this);
+    world.registry.on_update<GraphicState>()
+        .connect<&ComponentUpdateSystem::onGraphicStateUpdated>(this);
 }
 
 ComponentUpdateSystem::~ComponentUpdateSystem()
 {
-    world.registry.on_update<AnimationState>()
-        .disconnect<&ComponentUpdateSystem::onAnimationStateUpdated>(this);
+    world.registry.on_update<GraphicState>()
+        .disconnect<&ComponentUpdateSystem::onGraphicStateUpdated>(this);
 }
 
 void ComponentUpdateSystem::processUpdates()
@@ -87,25 +87,25 @@ void ComponentUpdateSystem::processComponentUpdate(
     }
 }
 
-void ComponentUpdateSystem::onAnimationStateUpdated(entt::registry& registry,
+void ComponentUpdateSystem::onGraphicStateUpdated(entt::registry& registry,
                                                     entt::entity entity)
 {
-    // Since the animation state was updated, we need to update the entity's
-    // sprite and collision.
-    auto [position, animationState]
-        = registry.get<Position, AnimationState>(entity);
-    const Sprite* newSprite{
-        spriteData.getObjectSpriteSet(animationState.spriteSetID)
-            .sprites[animationState.spriteIndex]};
-    registry.emplace_or_replace<Sprite>(entity, *newSprite);
+    // Since the graphic state was updated, we need to update the entity's
+    // collision.
+    auto [position, graphicState]
+        = registry.get<Position, GraphicState>(entity);
+    GraphicRef newGraphic{
+        graphicData.getObjectGraphicSet(graphicState.graphicSetID)
+            .graphics[graphicState.graphicIndex]};
 
-    // Note: We assume that an entity with AnimationState always has a
+    // Note: We assume that an entity with GraphicState always has a
     //       Collision.
+    const BoundingBox& modelBounds{newGraphic.getModelBounds()};
     const Collision& collision{
         registry.patch<Collision>(entity, [&](Collision& collision) {
-            collision.modelBounds = newSprite->modelBounds;
-            collision.worldBounds = Transforms::modelToWorldCentered(
-                newSprite->modelBounds, position);
+            collision.modelBounds = modelBounds;
+            collision.worldBounds
+                = Transforms::modelToWorldCentered(modelBounds, position);
         })};
 
     world.entityLocator.setEntityLocation(entity, collision.worldBounds);

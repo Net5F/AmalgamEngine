@@ -1,7 +1,7 @@
 #include "ComponentChangeSystem.h"
 #include "World.h"
 #include "Network.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 #include "Collision.h"
 #include "ClientSimData.h"
 #include "ISimulationExtension.h"
@@ -14,16 +14,16 @@ namespace AM
 namespace Server
 {
 ComponentChangeSystem::ComponentChangeSystem(World& inWorld, Network& inNetwork,
-                                             SpriteData& inSpriteData)
+                                             GraphicData& inGraphicData)
 : world{inWorld}
 , network{inNetwork}
-, spriteData{inSpriteData}
+, graphicData{inGraphicData}
 , extension{nullptr}
 , entityNameChangeRequestQueue{inNetwork.getEventDispatcher()}
-, animationStateChangeRequestQueue{inNetwork.getEventDispatcher()}
+, graphicStateChangeRequestQueue{inNetwork.getEventDispatcher()}
 {
-    world.registry.on_update<AnimationState>()
-        .connect<&ComponentChangeSystem::onAnimationStateUpdated>(this);
+    world.registry.on_update<GraphicState>()
+        .connect<&ComponentChangeSystem::onGraphicStateUpdated>(this);
 }
 
 void ComponentChangeSystem::processChangeRequests()
@@ -50,22 +50,22 @@ void ComponentChangeSystem::processChangeRequests()
                                nameChangeRequest.name);
     }
 
-    AnimationStateChangeRequest animationStateChangeRequest{};
-    while (animationStateChangeRequestQueue.pop(animationStateChangeRequest)) {
+    GraphicStateChangeRequest graphicStateChangeRequest{};
+    while (graphicStateChangeRequestQueue.pop(graphicStateChangeRequest)) {
         // If the entity isn't valid, skip it.
-        if (!(registry.valid(animationStateChangeRequest.entity))) {
+        if (!(registry.valid(graphicStateChangeRequest.entity))) {
             continue;
         }
         // If the project says the request isn't valid, skip it.
         else if ((extension != nullptr)
-                 && !(extension->isAnimationStateChangeRequestValid(
-                     animationStateChangeRequest))) {
+                 && !(extension->isGraphicStateChangeRequestValid(
+                     graphicStateChangeRequest))) {
             continue;
         }
 
-        registry.replace<AnimationState>(
-            animationStateChangeRequest.entity,
-            animationStateChangeRequest.animationState);
+        registry.replace<GraphicState>(
+            graphicStateChangeRequest.entity,
+            graphicStateChangeRequest.graphicState);
     }
 }
 
@@ -74,24 +74,25 @@ void ComponentChangeSystem::setExtension(ISimulationExtension* inExtension)
     extension = inExtension;
 }
 
-void ComponentChangeSystem::onAnimationStateUpdated(entt::registry& registry,
-                                                    entt::entity entity)
+void ComponentChangeSystem::onGraphicStateUpdated(entt::registry& registry,
+                                                  entt::entity entity)
 {
-    // Since the animation state was updated, we need to update the entity's
+    // Since the graphic state was updated, we need to update the entity's
     // collision.
-    auto [position, animationState]
-        = registry.get<Position, AnimationState>(entity);
-    const Sprite* newSprite{
-        spriteData.getObjectSpriteSet(animationState.spriteSetID)
-            .sprites[animationState.spriteIndex]};
+    auto [position, graphicState]
+        = registry.get<Position, GraphicState>(entity);
+    GraphicRef newGraphic{
+        graphicData.getObjectGraphicSet(graphicState.graphicSetID)
+            .graphics[graphicState.graphicIndex]};
 
-    // Note: We assume that an entity with AnimationState always has a
+    // Note: We assume that an entity with GraphicState always has a
     //       Collision.
+    const BoundingBox& modelBounds{newGraphic.getModelBounds()};
     const Collision& collision{
         registry.patch<Collision>(entity, [&](Collision& collision) {
-            collision.modelBounds = newSprite->modelBounds;
+            collision.modelBounds = modelBounds;
             collision.worldBounds = Transforms::modelToWorldCentered(
-                newSprite->modelBounds, position);
+                modelBounds, position);
         })};
 
     world.entityLocator.setEntityLocation(entity, collision.worldBounds);

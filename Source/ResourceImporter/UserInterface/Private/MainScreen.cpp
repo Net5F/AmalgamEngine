@@ -20,9 +20,9 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , boundingBoxPropertiesWindow{dataModel, libraryWindow}
 , spriteEditStage{dataModel}
 , iconEditStage{dataModel}
-, spriteSetEditStage{dataModel, libraryWindow}
+, graphicSetEditStage{dataModel, libraryWindow}
 , spritePropertiesWindow{dataModel, libraryWindow}
-, spriteSetPropertiesWindow{dataModel}
+, graphicSetPropertiesWindow{dataModel}
 , iconPropertiesWindow{dataModel}
 , confirmationDialog{{0, 0, 1920, 1080}, "ConfirmationDialog"}
 , addSpriteSheetDialog{dataModel}
@@ -34,10 +34,10 @@ MainScreen::MainScreen(DataModel& inDataModel)
     windows.push_back(boundingBoxEditStage);
     windows.push_back(boundingBoxPropertiesWindow);
     windows.push_back(spriteEditStage);
-    windows.push_back(spriteSetEditStage);
+    windows.push_back(graphicSetEditStage);
     windows.push_back(iconEditStage);
     windows.push_back(spritePropertiesWindow);
-    windows.push_back(spriteSetPropertiesWindow);
+    windows.push_back(graphicSetPropertiesWindow);
     windows.push_back(iconPropertiesWindow);
     windows.push_back(libraryAddMenu);
     windows.push_back(confirmationDialog);
@@ -99,19 +99,19 @@ MainScreen::MainScreen(DataModel& inDataModel)
         dropFocus();
     });
     libraryAddMenu.addFloorButton.setOnPressed([this]() {
-        dataModel.spriteSetModel.addFloor();
+        dataModel.graphicSetModel.addFloor();
         dropFocus();
     });
     libraryAddMenu.addFloorCoveringButton.setOnPressed([this]() {
-        dataModel.spriteSetModel.addFloorCovering();
+        dataModel.graphicSetModel.addFloorCovering();
         dropFocus();
     });
     libraryAddMenu.addWallButton.setOnPressed([this]() {
-        dataModel.spriteSetModel.addWall();
+        dataModel.graphicSetModel.addWall();
         dropFocus();
     });
     libraryAddMenu.addObjectButton.setOnPressed([this]() {
-        dataModel.spriteSetModel.addObject();
+        dataModel.graphicSetModel.addObject();
         dropFocus();
     });
     libraryAddMenu.addIconButton.setOnPressed([this]() {
@@ -131,8 +131,8 @@ MainScreen::MainScreen(DataModel& inDataModel)
     boundingBoxPropertiesWindow.setIsVisible(false);
     spriteEditStage.setIsVisible(false);
     spritePropertiesWindow.setIsVisible(false);
-    spriteSetEditStage.setIsVisible(false);
-    spriteSetPropertiesWindow.setIsVisible(false);
+    graphicSetEditStage.setIsVisible(false);
+    graphicSetPropertiesWindow.setIsVisible(false);
     iconEditStage.setIsVisible(false);
     iconPropertiesWindow.setIsVisible(false);
 
@@ -193,8 +193,8 @@ void MainScreen::onActiveLibraryItemChanged(
     boundingBoxPropertiesWindow.setIsVisible(false);
     spriteEditStage.setIsVisible(false);
     spritePropertiesWindow.setIsVisible(false);
-    spriteSetEditStage.setIsVisible(false);
-    spriteSetPropertiesWindow.setIsVisible(false);
+    graphicSetEditStage.setIsVisible(false);
+    graphicSetPropertiesWindow.setIsVisible(false);
     iconEditStage.setIsVisible(false);
     iconPropertiesWindow.setIsVisible(false);
 
@@ -212,9 +212,9 @@ void MainScreen::onActiveLibraryItemChanged(
         iconPropertiesWindow.setIsVisible(true);
     }
     else {
-        // The new active item is a sprite set.
-        spriteSetEditStage.setIsVisible(true);
-        spriteSetPropertiesWindow.setIsVisible(true);
+        // The new active item is a graphic set.
+        graphicSetEditStage.setIsVisible(true);
+        graphicSetPropertiesWindow.setIsVisible(true);
     }
 }
 

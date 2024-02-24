@@ -2,7 +2,7 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 #include "EngineObservedComponentTypes.h"
 #include "ProjectObservedComponentTypes.h"
 #include "ReplicatedComponent.h"
@@ -35,11 +35,11 @@ std::array<entt::observer, boost::mp11::mp_size<ObservedComponentTypes>::value>
 
 ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,
                                          World& inWorld, Network& inNetwork,
-                                         SpriteData& inSpriteData)
+                                         GraphicData& inGraphicData)
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
-, spriteData{inSpriteData}
+, graphicData{inGraphicData}
 {
     boost::mp11::mp_for_each<ObservedComponentTypes>([&](auto I) {
         using ComponentType = decltype(I);

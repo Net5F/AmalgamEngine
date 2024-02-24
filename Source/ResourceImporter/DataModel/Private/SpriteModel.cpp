@@ -1,6 +1,6 @@
 #include "SpriteModel.h"
 #include "DataModel.h"
-#include "SpriteSetModel.h"
+#include "GraphicSetModel.h"
 #include "SpriteID.h"
 #include "nlohmann/json.hpp"
 #include <SDL_render.h>
@@ -13,9 +13,9 @@ namespace AM
 namespace ResourceImporter
 {
 SpriteModel::SpriteModel(DataModel& inDataModel,
-                         SpriteSetModel& inSpriteSetModel,
+                         GraphicSetModel& inGraphicSetModel,
                          SDL_Renderer* inSdlRenderer)
-: spriteSetModel{inSpriteSetModel}
+: graphicSetModel{inGraphicSetModel}
 , dataModel{inDataModel}
 , sdlRenderer{inSdlRenderer}
 , spriteSheetMap{}
@@ -266,7 +266,7 @@ void SpriteModel::remSprite(SpriteID spriteID)
     spriteRemovedSig.publish(spriteID);
 
     // Clear this sprite from any sets that reference it.
-    spriteSetModel.removeSpriteIDFromSets(spriteID);
+    graphicSetModel.removeGraphicIDFromSets(toGraphicID(spriteID));
 }
 
 const EditorSprite& SpriteModel::getSprite(SpriteID spriteID)

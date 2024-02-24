@@ -16,6 +16,7 @@ target_sources(SharedLib
         Public/EntityInitScriptResponse.h
         Public/EntityInteractionRequest.h
         Public/ExplicitConfirmation.h
+        Public/GraphicStateChangeRequest.h
         Public/Heartbeat.h
         Public/InputChangeRequest.h
         Public/InventoryAddItem.h

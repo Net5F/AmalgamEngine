@@ -7,7 +7,7 @@
 #include "Heartbeat.h"
 #include "InputChangeRequest.h"
 #include "EntityNameChangeRequest.h"
-#include "AnimationStateChangeRequest.h"
+#include "GraphicStateChangeRequest.h"
 #include "ChunkDataRequest.h"
 #include "EntityInitRequest.h"
 #include "EntityDeleteRequest.h"
@@ -81,8 +81,8 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                                                      networkEventDispatcher);
             break;
         }
-        case EngineMessageType::AnimationStateChangeRequest: {
-            dispatchMessage<AnimationStateChangeRequest>(
+        case EngineMessageType::GraphicStateChangeRequest: {
+            dispatchMessage<GraphicStateChangeRequest>(
                 messageBuffer, messageSize, networkEventDispatcher);
             break;
         }

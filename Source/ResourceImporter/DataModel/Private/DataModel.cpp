@@ -16,8 +16,8 @@ namespace ResourceImporter
 {
 DataModel::DataModel(SDL_Renderer* inSdlRenderer)
 : boundingBoxModel{*this}
-, spriteSetModel{*this}
-, spriteModel{*this, spriteSetModel, inSdlRenderer}
+, graphicSetModel{*this}
+, spriteModel{*this, graphicSetModel, inSdlRenderer}
 , iconModel{*this, inSdlRenderer}
 , workingFilePath{""}
 , workingTexturesDir{""}
@@ -89,8 +89,8 @@ bool DataModel::load(const std::string& fullPath)
         else if (!spriteModel.load(json)) {
             parseError = spriteModel.getErrorString();
         }
-        else if (!spriteSetModel.load(json)) {
-            parseError = spriteSetModel.getErrorString();
+        else if (!graphicSetModel.load(json)) {
+            parseError = graphicSetModel.getErrorString();
         }
         else if (!iconModel.load(json)) {
             parseError = iconModel.getErrorString();
@@ -112,7 +112,7 @@ void DataModel::save()
     nlohmann::json json;
     boundingBoxModel.save(json);
     spriteModel.save(json);
-    spriteSetModel.save(json);
+    graphicSetModel.save(json);
     iconModel.save(json);
 
     // Write the json to our working file.
@@ -123,6 +123,17 @@ void DataModel::save()
 
     std::string jsonDump{json.dump(4)};
     workingFile << jsonDump;
+}
+
+EditorGraphicRef DataModel::getGraphic(GraphicID graphicID)
+{
+    if (isSpriteID(graphicID)) {
+        return EditorGraphicRef{spriteModel.getSprite(toSpriteID(graphicID))};
+    }
+    else {
+        // TODO: Implement this once AnimationModel is built.
+        // Animation ID.
+    }
 }
 
 void DataModel::setActiveBoundingBox(BoundingBoxID newActiveBoundingBoxID)
@@ -146,35 +157,35 @@ void DataModel::setActiveSprite(SpriteID newActiveSpriteID)
     activeLibraryItemChangedSig.publish(sprite);
 }
 
-void DataModel::setActiveSpriteSet(SpriteSet::Type type,
-                                   Uint16 newActiveSpriteSetID)
+void DataModel::setActiveGraphicSet(GraphicSet::Type type,
+                                    Uint16 newActiveGraphicSetID)
 {
     // Match the sprite set type, then:
     //   1. Get the set with the given ID (error if it doesn't exist).
     //   2. Signal it out.
     switch (type) {
-        case SpriteSet::Type::Floor: {
+        case GraphicSet::Type::Floor: {
             activeLibraryItemChangedSig.publish(
-                spriteSetModel.getFloor(newActiveSpriteSetID));
+                graphicSetModel.getFloor(newActiveGraphicSetID));
             return;
         }
-        case SpriteSet::Type::FloorCovering: {
+        case GraphicSet::Type::FloorCovering: {
             activeLibraryItemChangedSig.publish(
-                spriteSetModel.getFloorCovering(newActiveSpriteSetID));
+                graphicSetModel.getFloorCovering(newActiveGraphicSetID));
             return;
         }
-        case SpriteSet::Type::Wall: {
+        case GraphicSet::Type::Wall: {
             activeLibraryItemChangedSig.publish(
-                spriteSetModel.getWall(newActiveSpriteSetID));
+                graphicSetModel.getWall(newActiveGraphicSetID));
             return;
         }
-        case SpriteSet::Type::Object: {
+        case GraphicSet::Type::Object: {
             activeLibraryItemChangedSig.publish(
-                spriteSetModel.getObject(newActiveSpriteSetID));
+                graphicSetModel.getObject(newActiveGraphicSetID));
             return;
         }
         default: {
-            LOG_FATAL("Unsupported sprite set type: %u", type);
+            LOG_FATAL("Unsupported graphic set type: %u", type);
         }
     }
 }
@@ -262,7 +273,7 @@ void DataModel::resetModelState()
     workingTexturesDir = "";
 
     spriteModel.resetModelState();
-    spriteSetModel.resetModelState();
+    graphicSetModel.resetModelState();
     iconModel.resetModelState();
 }
 

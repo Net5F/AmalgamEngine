@@ -1,7 +1,7 @@
 #include "ServerConnectionSystem.h"
 #include "World.h"
 #include "Network.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 #include "Name.h"
 #include "Inventory.h"
 #include "PreviousPosition.h"
@@ -10,6 +10,7 @@
 #include "InputHistory.h"
 #include "Rotation.h"
 #include "AnimationState.h"
+#include "GraphicState.h"
 #include "IsClientEntity.h"
 #include "UserConfig.h"
 #include "Camera.h"
@@ -25,10 +26,10 @@ namespace Client
 {
 ServerConnectionSystem::ServerConnectionSystem(
     World& inWorld, EventDispatcher& inUiEventDispatcher, Network& inNetwork,
-    SpriteData& inSpriteData, std::atomic<Uint32>& inCurrentTick)
+    GraphicData& inGraphicData, std::atomic<Uint32>& inCurrentTick)
 : world{inWorld}
 , network{inNetwork}
-, spriteData{inSpriteData}
+, graphicData{inGraphicData}
 , currentTick{inCurrentTick}
 , connectionRequestQueue{inUiEventDispatcher}
 , connectionResponseQueue{network.getEventDispatcher()}
@@ -145,23 +146,22 @@ void ServerConnectionSystem::initMockSimState()
     registry.emplace<InputHistory>(newEntity);
 
     // TODO: When we add character sprite sets, update this.
-    Uint16 spriteSetID{
-        spriteData
-            .getObjectSpriteSet(SharedConfig::DEFAULT_CHARACTER_SPRITE_SET)
-            .numericID};
-    const auto& animationState{registry.emplace<AnimationState>(
-        newEntity, SpriteSet::Type::Object, spriteSetID,
+    const ObjectGraphicSet& graphicSet{graphicData.getObjectGraphicSet(
+        SharedConfig::DEFAULT_CHARACTER_SPRITE_SET)};
+    const auto& graphicState{registry.emplace<GraphicState>(
+        newEntity, GraphicSet::Type::Object, graphicSet.numericID,
         SharedConfig::DEFAULT_CHARACTER_SPRITE_INDEX)};
-    const Sprite* sprite{
-        spriteData.getObjectSpriteSet(animationState.spriteSetID)
-            .sprites[animationState.spriteIndex]};
-    registry.emplace<Sprite>(newEntity, *sprite);
+    const GraphicRef& graphic{
+        graphicSet.graphics[graphicState.graphicIndex]};
 
+    const BoundingBox& modelBounds{graphic.getModelBounds()};
     const Collision& collision{registry.emplace<Collision>(
-        newEntity, sprite->modelBounds,
-        Transforms::modelToWorldCentered(sprite->modelBounds,
+        newEntity, modelBounds,
+        Transforms::modelToWorldCentered(modelBounds,
                                          registry.get<Position>(newEntity)))};
     world.entityLocator.setEntityLocation(newEntity, collision.worldBounds);
+
+    registry.emplace<AnimationState>(newEntity);
 
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};

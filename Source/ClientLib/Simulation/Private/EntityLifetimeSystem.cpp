@@ -2,7 +2,7 @@
 #include "Simulation.h"
 #include "World.h"
 #include "Network.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 #include "Name.h"
 #include "PreviousPosition.h"
 #include "Collision.h"
@@ -11,6 +11,8 @@
 #include "Inventory.h"
 #include "InputHistory.h"
 #include "NeedsAdjacentChunks.h"
+#include "AnimationState.h"
+#include "GraphicState.h"
 #include "SDLHelpers.h"
 #include "Transforms.h"
 #include "MovementHelpers.h"
@@ -26,11 +28,11 @@ namespace Client
 
 EntityLifetimeSystem::EntityLifetimeSystem(Simulation& inSimulation,
                                            World& inWorld,
-                                           SpriteData& inSpriteData,
+                                           GraphicData& inGraphicData,
                                            Network& inNetwork)
 : simulation{inSimulation}
 , world{inWorld}
-, spriteData{inSpriteData}
+, graphicData{inGraphicData}
 , entityInitSecondaryQueue{}
 , entityInitQueue{inNetwork.getEventDispatcher()}
 , entityDeleteQueue{inNetwork.getEventDispatcher()}
@@ -158,24 +160,26 @@ void EntityLifetimeSystem::processEntityData(
         registry.emplace<PreviousPosition>(newEntity, position);
     }
 
-    // For entities with an AnimationState, we locally add a Sprite so the
-    // Renderer can use it.
-    if (const auto* animationState{
-            registry.try_get<AnimationState>(newEntity)}) {
-        const Sprite* sprite{
-            spriteData.getObjectSpriteSet(animationState->spriteSetID)
-                .sprites[animationState->spriteIndex]};
-        registry.emplace<Sprite>(newEntity, *sprite);
+    // When entities have a GraphicState, the server gives them a Collision.
+    // It isn't replicated, so add it manually.
+    if (const auto* graphicState{registry.try_get<GraphicState>(newEntity)}) {
+        const ObjectGraphicSet& graphicSet{
+            graphicData.getObjectGraphicSet(graphicState->graphicSetID)};
+        const GraphicRef& graphic{
+            graphicSet.graphics[graphicState->graphicIndex]};
 
-        // When entities have an AnimationState, the server gives them a
-        // Collision. It isn't replicated, so add it manually.
+        const BoundingBox& modelBounds{graphic.getModelBounds()};
         const Position& position{registry.get<Position>(newEntity)};
         const Collision& collision{registry.emplace<Collision>(
-            newEntity, sprite->modelBounds,
-            Transforms::modelToWorldCentered(sprite->modelBounds, position))};
+            newEntity, modelBounds,
+            Transforms::modelToWorldCentered(modelBounds, position))};
 
         // Entities with Collision get added to the locator.
-        world.entityLocator.setEntityLocation(newEntity, collision.worldBounds);
+        world.entityLocator.setEntityLocation(newEntity,
+                                              collision.worldBounds);
+
+        // On the Client, entities with GraphicState also require AnimationState.
+        registry.emplace<AnimationState>(newEntity);
     }
 
     // If this is the player entity, add any client components specific to it.

@@ -17,7 +17,7 @@ namespace ResourceImporter
 {
 
 class DataModel;
-class SpriteSetModel;
+class GraphicSetModel;
 
 /**
  * Holds data for sprites and their parent sprite sheets.
@@ -25,7 +25,7 @@ class SpriteSetModel;
 class SpriteModel
 {
 public:
-    SpriteModel(DataModel& inDataModel, SpriteSetModel& inSpriteSetModel,
+    SpriteModel(DataModel& inDataModel, GraphicSetModel& inGraphicSetModel,
                 SDL_Renderer* inSdlRenderer);
 
     /**
@@ -137,8 +137,8 @@ private:
     bool spriteNameIsUnique(SpriteID spriteID, const std::string& displayName);
 
     DataModel& dataModel;
-    /** Used to remove sprites from sprite sets when a sprite is deleted. */
-    SpriteSetModel& spriteSetModel;
+    /** Used to remove graphics from graphic sets when a graphic is deleted. */
+    GraphicSetModel& graphicSetModel;
 
     /** Used for validating user-selected sprite sheet textures. */
     SDL_Renderer* sdlRenderer;

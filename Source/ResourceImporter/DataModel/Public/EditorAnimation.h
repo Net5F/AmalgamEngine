@@ -1,10 +1,13 @@
 #pragma once
 
-#include "SpriteID.h"
+#include "AnimationID.h"
+#include "EditorSprite.h"
 #include "BoundingBoxID.h"
 #include "BoundingBox.h"
 #include <SDL_rect.h>
 #include <string>
+#include <vector>
+#include <functional>
 
 namespace AM
 {
@@ -18,45 +21,54 @@ class BoundingBoxModel;
  * Part of AnimationModel.
  */
 struct EditorAnimation {
-    /** This sprite's unique numeric identifier. */
-    SpriteID numericID{NULL_SPRITE_ID};
-
-    /** The unique relPath of the sprite sheet that this sprite is from. */
-    std::string parentSpriteSheetPath{""};
+    /** This animation's unique numeric identifier. */
+    AnimationID numericID{NULL_ANIMATION_ID};
 
     /** Unique display name, shown in the UI.  */
     std::string displayName{""};
 
-    /** UV position and size in texture. */
-    SDL_Rect textureExtent{0, 0, 0, 0};
+    /** How long this animation is, in frames. */
+    Uint8 frameCount{0};
 
-    /** How much this sprite should be offset in the Y direction to line up
-        with its tile. Used to support tall tiles for the iso depth effect. */
-    int yOffset{0};
+    /** This animation's framerate (frames per second). */
+    Uint8 fps{0};
 
-    /** If true, this sprite's modelBounds will be used in collision checks.
-        Most sprites will want collision enabled, but things like floors and
+    struct Frame
+    {
+        Uint8 frameNumber{0};
+        std::reference_wrapper<EditorSprite> sprite;
+    };
+    /** The frames of this animation, ordered by ascending frameNumber. */
+    std::vector<Frame> frames;
+
+    /** If true, this animation's modelBounds will be used in collision checks.
+        Most animations will want collision enabled, but things like floors and
         carpets usually don't need collision. */
     bool collisionEnabled{false};
 
-    /** If non-null, this is the ID of this sprite's model-space bounding box.
-        Defines the sprite's 3D volume.
+    /** If non-null, this is the ID of this animation's model-space bounding box.
+        Defines the animation's 3D volume.
         Used in hit testing for user mouse events, and for collision checks (
         if collisionEnabled). */
     BoundingBoxID modelBoundsID{NULL_BOUNDING_BOX_ID};
 
-    /** If modelBoundsID is null, this is the sprite's custom model-space 
+    /** If modelBoundsID is null, this is the animation's custom model-space 
         bounding box. */
     BoundingBox customModelBounds{};
 
     /**
-     * Returns this sprite's model-space bounding box.
+     * Returns this animation's model-space bounding box.
      *
      * If modelBoundsID is non-null, returns the associated bounding box. Else, 
      * returns customModelBounds.
      */
     const BoundingBox&
         getModelBounds(const BoundingBoxModel& boundingBoxModel) const;
+
+    /**
+     * Returns the sprite that should be displayed at the given animation time.
+     */
+    const EditorSprite& getSpriteAtTime(double animationTime) const;
 };
 
 } // namespace ResourceImporter

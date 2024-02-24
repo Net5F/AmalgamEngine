@@ -1,5 +1,5 @@
 #include "TileMap.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 #include "Sprite.h"
 #include "Paths.h"
 #include "Position.h"
@@ -19,8 +19,8 @@ namespace AM
 {
 namespace Server
 {
-TileMap::TileMap(SpriteData& inSpriteData)
-: TileMapBase{inSpriteData, true}
+TileMap::TileMap(GraphicData& inGraphicData)
+: TileMapBase{inGraphicData, true}
 {
     // Prime a timer.
     Timer timer;
@@ -175,9 +175,9 @@ void TileMap::addTileLayersToSnapshot(const Tile& tile,
 {
     // Add the floor.
     const FloorTileLayer& floor{tile.getFloor()};
-    if (floor.spriteSet != nullptr) {
+    if (floor.graphicSet != nullptr) {
         std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            TileLayer::Type::Floor, floor.spriteSet->stringID, 0)};
+            TileLayer::Type::Floor, floor.graphicSet->stringID, 0)};
         tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
     }
 
@@ -185,7 +185,7 @@ void TileMap::addTileLayersToSnapshot(const Tile& tile,
     const auto& floorCoverings{tile.getFloorCoverings()};
     for (const FloorCoveringTileLayer& floorCovering : floorCoverings) {
         std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            TileLayer::Type::FloorCovering, floorCovering.spriteSet->stringID,
+            TileLayer::Type::FloorCovering, floorCovering.graphicSet->stringID,
             floorCovering.direction)};
         tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
     }
@@ -195,7 +195,7 @@ void TileMap::addTileLayersToSnapshot(const Tile& tile,
     for (const WallTileLayer& wall : walls) {
         if (wall.wallType != Wall::Type::None) {
             std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-                TileLayer::Type::Wall, wall.spriteSet->stringID,
+                TileLayer::Type::Wall, wall.graphicSet->stringID,
                 wall.wallType)};
             tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
         }
@@ -205,7 +205,7 @@ void TileMap::addTileLayersToSnapshot(const Tile& tile,
     const auto& objects{tile.getObjects()};
     for (const ObjectTileLayer& object : objects) {
         std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            TileLayer::Type::Object, object.spriteSet->stringID,
+            TileLayer::Type::Object, object.graphicSet->stringID,
             object.direction)};
         tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
     }

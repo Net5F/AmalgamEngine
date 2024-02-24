@@ -12,7 +12,7 @@ namespace Client
 class Simulation;
 class World;
 class Network;
-class SpriteData;
+class GraphicData;
 
 /**
  * Maintains the entity registry, constructing and deleting entities based
@@ -22,7 +22,7 @@ class EntityLifetimeSystem
 {
 public:
     EntityLifetimeSystem(Simulation& inSimulation, World& inWorld,
-                         SpriteData& inSpriteData, Network& inNetwork);
+                         GraphicData& inGraphicData, Network& inNetwork);
 
     /**
      * Processes any waiting EntityInit or EntityDelete messages.
@@ -51,8 +51,8 @@ private:
     Simulation& simulation;
     /** Used to access components. */
     World& world;
-    /** Used to get sprite data when constructing entities. */
-    SpriteData& spriteData;
+    /** Used to get graphics data when constructing entities. */
+    GraphicData& graphicData;
 
     /** We pop messages off entityInitQueue and push them into here, so
         we can find and immediately process any messages for the player

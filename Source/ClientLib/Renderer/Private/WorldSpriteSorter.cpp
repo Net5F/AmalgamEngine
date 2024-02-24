@@ -1,6 +1,6 @@
 #include "WorldSpriteSorter.h"
 #include "TileMap.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 #include "UserInterface.h"
 #include "Camera.h"
 #include "SharedConfig.h"
@@ -11,6 +11,9 @@
 #include "SharedConfig.h"
 #include "SpriteRenderData.h"
 #include "Collision.h"
+#include "GraphicState.h"
+#include "AnimationState.h"
+#include "VariantTools.h"
 #include <SDL_rect.h>
 #include <cmath>
 #include <algorithm>
@@ -21,11 +24,11 @@ namespace Client
 {
 WorldSpriteSorter::WorldSpriteSorter(entt::registry& inRegistry,
                                      const TileMap& inTileMap,
-                                     const SpriteData& inSpriteData,
+                                     const GraphicData& inGraphicData,
                                      const UserInterface& inUI)
 : registry(inRegistry)
 , tileMap{inTileMap}
-, spriteData{inSpriteData}
+, graphicData{inGraphicData}
 , ui{inUI}
 , phantomSprites{}
 , spriteColorMods{}
@@ -33,11 +36,18 @@ WorldSpriteSorter::WorldSpriteSorter(entt::registry& inRegistry,
 , floorCoveringSprites{}
 , sortedSprites{}
 , spritesToSort{}
+, animationTimer{}
+, lastAnimationTimestamp{}
+, currentAnimationTimestamp{}
 {
 }
 
 void WorldSpriteSorter::sortSprites(const Camera& camera, double alpha)
 {
+    // Get our new timestamp.
+    lastAnimationTimestamp = currentAnimationTimestamp;
+    currentAnimationTimestamp = animationTimer.getTime();
+
     // Clear the old data.
     sortedSprites.clear();
 
@@ -101,7 +111,8 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
     // Gather all of the UI's phantom tile sprites that weren't already used.
     for (const PhantomSpriteInfo& info : phantomSprites) {
         if (info.layerType != TileLayer::Type::None) {
-            pushTileSprite(*(info.sprite), camera,
+            GraphicRef graphic{*(info.sprite)};
+            pushTileSprite(graphic, camera,
                            {info.tileX, info.tileY, info.layerType, 0, 0},
                            true);
         }
@@ -123,10 +134,11 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
 void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
                                                double alpha)
 {
-    // Gather all entities that have a position and sprite.
-    auto view = registry.view<Position, Sprite>();
+    // Gather all entities that have a Position and GraphicState.
+    auto view = registry.view<Position, GraphicState, AnimationState>();
     for (entt::entity entity : view) {
-        auto [position, sprite] = view.get<Position, Sprite>(entity);
+        auto [position, graphicState, animationState]
+            = view.get<Position, GraphicState, AnimationState>(entity);
 
         // If this entity has a previous position, calc a lerp'd position.
         Position renderPosition{position};
@@ -136,6 +148,7 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
                 previousPos, position, alpha);
         }
 
+        const Sprite& sprite{getEntitySprite(graphicState, animationState)};
         pushEntitySprite(entity, renderPosition, sprite, camera);
     }
 
@@ -151,8 +164,8 @@ void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
                                         int x, int y)
 {
     const FloorTileLayer& floor{tile.getFloor()};
-    const Sprite* floorSprite{floor.getSprite()};
-    if (floorSprite != nullptr) {
+    std::optional<GraphicRef> floorGraphic{floor.getGraphic()};
+    if (floorGraphic) {
         // If the UI wants this sprite replaced with a phantom, replace it.
         auto phantomSpriteInfo = std::find_if(
             phantomSprites.begin(), phantomSprites.end(),
@@ -161,13 +174,13 @@ void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
                         && (info.tileX == x) && (info.tileY == y));
             });
         if (phantomSpriteInfo != phantomSprites.end()) {
-            floorSprite = phantomSpriteInfo->sprite;
+            floorGraphic.emplace(*(phantomSpriteInfo->sprite));
             phantomSprites.erase(phantomSpriteInfo);
         }
 
         pushTileSprite(
-            *floorSprite, camera,
-            {x, y, TileLayer::Type::Floor, floor.spriteSet->numericID, 0},
+            *floorGraphic, camera,
+            {x, y, TileLayer::Type::Floor, floor.graphicSet->numericID, 0},
             false);
     }
 }
@@ -178,11 +191,15 @@ void WorldSpriteSorter::pushFloorCoveringSprites(const Tile& tile,
 {
     const auto& floorCoverings{tile.getFloorCoverings()};
     for (const FloorCoveringTileLayer& floorCovering : floorCoverings) {
-        pushTileSprite(*(floorCovering.getSprite()), camera,
-                       {x, y, TileLayer::Type::FloorCovering,
-                        floorCovering.spriteSet->numericID,
-                        floorCovering.direction},
-                       false);
+        std::optional<GraphicRef> floorCoveringGraphic{
+            floorCovering.getGraphic()};
+        if (floorCoveringGraphic) {
+            pushTileSprite(*floorCoveringGraphic, camera,
+                           {x, y, TileLayer::Type::FloorCovering,
+                            floorCovering.graphicSet->numericID,
+                            floorCovering.direction},
+                           false);
+        }
     }
 }
 
@@ -191,8 +208,8 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
 {
     const std::array<WallTileLayer, 2>& walls{tile.getWalls()};
     for (const WallTileLayer& wall : walls) {
-        const Sprite* wallSprite{wall.getSprite()};
-        if (wallSprite != nullptr) {
+        std::optional<GraphicRef> wallGraphic{wall.getGraphic()};
+        if (wallGraphic) {
             // If the UI wants this sprite replaced with a phantom, replace it.
             auto phantomSpriteInfo = std::find_if(
                 phantomSprites.begin(), phantomSprites.end(),
@@ -219,13 +236,13 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
                     return false;
                 });
             if (phantomSpriteInfo != phantomSprites.end()) {
-                wallSprite = phantomSpriteInfo->sprite;
+                wallGraphic.emplace(*(phantomSpriteInfo->sprite));
                 phantomSprites.erase(phantomSpriteInfo);
             }
 
-            pushTileSprite(*wallSprite, camera,
+            pushTileSprite(*wallGraphic, camera,
                            {x, y, TileLayer::Type::Wall,
-                            wall.spriteSet->numericID, wall.wallType},
+                            wall.graphicSet->numericID, wall.wallType},
                            false);
         }
     }
@@ -236,21 +253,27 @@ void WorldSpriteSorter::pushObjectSprites(const Tile& tile,
 {
     const std::vector<ObjectTileLayer>& objects{tile.getObjects()};
     for (const ObjectTileLayer& object : objects) {
-        pushTileSprite(*(object.getSprite()), camera,
-                       {x, y, TileLayer::Type::Object,
-                        object.spriteSet->numericID, object.direction},
-                       false);
+        std::optional<GraphicRef> objectGraphic{object.getGraphic()};
+        if (objectGraphic) {
+            pushTileSprite(*objectGraphic, camera,
+                           {x, y, TileLayer::Type::Object,
+                            object.graphicSet->numericID, object.direction},
+                           false);
+        }
     }
 }
 
-void WorldSpriteSorter::pushTileSprite(const Sprite& sprite,
+void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
                                        const Camera& camera,
                                        const TileLayerID& layerID,
                                        bool isFullPhantom)
 {
+    // Get the current sprite for this graphic.
+    const Sprite& sprite{graphic.getSpriteAtTime(animationTimer.getTime())};
+
     // Get iso screen extent for this sprite.
     const SpriteRenderData& renderData{
-        spriteData.getRenderData(sprite.numericID)};
+        graphicData.getRenderData(sprite.numericID)};
     SDL_Rect screenExtent{ClientTransforms::tileToScreenExtent(
         {layerID.x, layerID.y}, renderData, camera)};
 
@@ -301,14 +324,45 @@ void WorldSpriteSorter::pushTileSprite(const Sprite& sprite,
     }
 }
 
+const Sprite&
+    WorldSpriteSorter::getEntitySprite(const GraphicState& graphicState,
+                                       AnimationState& animationState)
+{
+    // Get the current sprite for this graphic.
+    const ObjectGraphicSet& graphicSet{
+        graphicData.getObjectGraphicSet(graphicState.graphicSetID)};
+    const GraphicRef& graphic{graphicSet.graphics[graphicState.graphicIndex]};
+    const Sprite* sprite{nullptr};
+    std::visit(VariantTools::Overload{
+        [&](std::reference_wrapper<const Sprite> spriteRef) {
+            sprite = &(spriteRef.get());
+        },
+        [&](std::reference_wrapper<const Animation> animation) {
+            // Calc how far we are into this animation and get the appropriate
+            // sprite.
+            double animationTime{currentAnimationTimestamp
+                                 - animationState.animationStartTime};
+            sprite = &(animation.get().getSpriteAtTime(animationTime));
+
+            // If this animation just began, set its start time.
+            if (animationState.setStartTime) {
+                animationState.animationStartTime = animationTimer.getTime();
+                animationState.setStartTime = false;
+            }
+        }
+    }, graphic);
+
+    return *sprite;
+}
+
 void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
                                          const Position& position,
                                          const Sprite& sprite,
                                          const Camera& camera)
 {
-    // Get the iso screen extent for the lerped sprite.
+    // Get the iso screen extent for the sprite.
     const SpriteRenderData& renderData{
-        spriteData.getRenderData(sprite.numericID)};
+        graphicData.getRenderData(sprite.numericID)};
     SDL_Rect screenExtent{
         ClientTransforms::entityToScreenExtent(position, renderData, camera)};
 
@@ -321,9 +375,8 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
         // If the UI wants a color mod on this sprite, use it.
         SDL_Color colorMod{getColorMod<entt::entity>(entity)};
 
-        // If this sprite comes from a phantom, leave the owner ID as
-        // std::monostate.
-        WorldObjectID ownerID{};
+        // If this sprite doesn't come from a phantom, set the owner ID.
+        WorldObjectID ownerID{std::monostate{}};
         if (entity != entt::null) {
             ownerID = entity;
         }

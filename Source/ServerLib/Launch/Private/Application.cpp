@@ -16,12 +16,12 @@ Application::Application()
 , sdlNetInit{}
 , userConfigInitializer{}
 , resourceData{}
-, spriteData{resourceData.get()}
+, graphicData{resourceData.get()}
 , iconData{resourceData.get()}
 , network{}
 , networkCaller{std::bind_front(&Network::tick, &network),
                 SharedConfig::SERVER_NETWORK_TICK_TIMESTEP_S, "Network", true}
-, simulation{network, spriteData}
+, simulation{network, graphicData}
 , simCaller{std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
 , exitRequested{false}

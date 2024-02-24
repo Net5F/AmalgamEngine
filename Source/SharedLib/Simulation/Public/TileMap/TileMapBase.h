@@ -1,8 +1,8 @@
 #pragma once
 
-#include "SpriteDataBase.h"
+#include "GraphicDataBase.h"
 #include "Tile.h"
-#include "SpriteSets.h"
+#include "GraphicSets.h"
 #include "Rotation.h"
 #include "Wall.h"
 #include "ChunkExtent.h"
@@ -47,16 +47,16 @@ public:
      * @param inTrackTileUpdates  If true, tile updates will be pushed into
      *                            tileUpdateHistory.
      */
-    TileMapBase(SpriteDataBase& inSpriteData, bool inTrackTileUpdates);
+    TileMapBase(GraphicDataBase& inGraphicData, bool inTrackTileUpdates);
 
     /**
      * Sets the given tile's floor to the given floor.
-     * Note: Floor sprite sets only have 1 sprite, so you don't need to specify
-     *       which sprite from the set to use.
+     * Note: Floor graphic sets only have 1 graphic, so you don't need to 
+     *       specify which graphic from the set to use.
      */
-    void setFloor(int tileX, int tileY, const FloorSpriteSet& spriteSet);
-    void setFloor(int tileX, int tileY, const std::string& spriteSetID);
-    void setFloor(int tileX, int tileY, Uint16 spriteSetID);
+    void setFloor(int tileX, int tileY, const FloorGraphicSet& graphicSet);
+    void setFloor(int tileX, int tileY, const std::string& graphicSetID);
+    void setFloor(int tileX, int tileY, Uint16 graphicSetID);
 
     /**
      * Removes the given tile's floor. Since tiles only have 1 floor, this is
@@ -68,11 +68,11 @@ public:
      * Adds the given floor covering to the given tile.
      */
     void addFloorCovering(int tileX, int tileY,
-                          const FloorCoveringSpriteSet& spriteSet,
+                          const FloorCoveringGraphicSet& graphicSet,
                           Rotation::Direction rotation);
-    void addFloorCovering(int tileX, int tileY, const std::string& spriteSetID,
+    void addFloorCovering(int tileX, int tileY, const std::string& graphicSetID,
                           Rotation::Direction rotation);
-    void addFloorCovering(int tileX, int tileY, Uint16 spriteSetID,
+    void addFloorCovering(int tileX, int tileY, Uint16 graphicSetID,
                           Rotation::Direction rotation);
 
     /**
@@ -80,11 +80,11 @@ public:
      * @return true if the tile had a floor covering to remove, else false.
      */
     bool remFloorCovering(int tileX, int tileY,
-                          const FloorCoveringSpriteSet& spriteSet,
+                          const FloorCoveringGraphicSet& graphicSet,
                           Rotation::Direction rotation);
-    bool remFloorCovering(int tileX, int tileY, const std::string& spriteSetID,
+    bool remFloorCovering(int tileX, int tileY, const std::string& graphicSetID,
                           Rotation::Direction rotation);
-    bool remFloorCovering(int tileX, int tileY, Uint16 spriteSetID,
+    bool remFloorCovering(int tileX, int tileY, Uint16 graphicSetID,
                           Rotation::Direction rotation);
 
     /**
@@ -92,11 +92,11 @@ public:
      * Note: wallType must be North or West. Gap fills will be added
      *       automatically.
      */
-    void addWall(int tileX, int tileY, const WallSpriteSet& spriteSet,
+    void addWall(int tileX, int tileY, const WallGraphicSet& graphicSet,
                  Wall::Type wallType);
-    void addWall(int tileX, int tileY, const std::string& spriteSetID,
+    void addWall(int tileX, int tileY, const std::string& graphicSetID,
                  Wall::Type wallType);
-    void addWall(int tileX, int tileY, Uint16 spriteSetID, Wall::Type wallType);
+    void addWall(int tileX, int tileY, Uint16 graphicSetID, Wall::Type wallType);
 
     /**
      * Removes the given wall from the given tile.
@@ -109,22 +109,22 @@ public:
     /**
      * Adds the given object to the given tile.
      */
-    void addObject(int tileX, int tileY, const ObjectSpriteSet& spriteSet,
+    void addObject(int tileX, int tileY, const ObjectGraphicSet& graphicSet,
                    Rotation::Direction rotation);
-    void addObject(int tileX, int tileY, const std::string& spriteSetID,
+    void addObject(int tileX, int tileY, const std::string& graphicSetID,
                    Rotation::Direction rotation);
-    void addObject(int tileX, int tileY, Uint16 spriteSetID,
+    void addObject(int tileX, int tileY, Uint16 graphicSetID,
                    Rotation::Direction rotation);
 
     /**
      * Removes the given object from the given tile.
      * @return true if the tile had an object to remove, else false.
      */
-    bool remObject(int tileX, int tileY, const ObjectSpriteSet& spriteSet,
+    bool remObject(int tileX, int tileY, const ObjectGraphicSet& graphicSet,
                    Rotation::Direction rotation);
-    bool remObject(int tileX, int tileY, const std::string& spriteSetID,
+    bool remObject(int tileX, int tileY, const std::string& graphicSetID,
                    Rotation::Direction rotation);
-    bool remObject(int tileX, int tileY, Uint16 spriteSetID,
+    bool remObject(int tileX, int tileY, Uint16 graphicSetID,
                    Rotation::Direction rotation);
 
     /**
@@ -210,7 +210,7 @@ public:
     void clearTileUpdateHistory();
 
     /**
-     * Adds the sprite layers from the given snapshot to the given tile.
+     * Adds the graphic layers from the given snapshot to the given tile.
      */
     template<IsChunkSnapshotType T>
     void addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
@@ -229,12 +229,12 @@ protected:
     /**
      * Adds a North wall to the given tile and adds gap fills if necessary.
      */
-    void addNorthWall(int tileX, int tileY, const WallSpriteSet& spriteSet);
+    void addNorthWall(int tileX, int tileY, const WallGraphicSet& graphicSet);
 
     /**
      * Adds a West wall to the given tile and adds gap fills if necessary.
      */
-    void addWestWall(int tileX, int tileY, const WallSpriteSet& spriteSet);
+    void addWestWall(int tileX, int tileY, const WallGraphicSet& graphicSet);
 
     /**
      * Removes the North wall from the given tile. If a corner was broken,
@@ -266,8 +266,8 @@ protected:
         can see later if we care to make it more complicated. */
     static constexpr Uint16 MAP_FORMAT_VERSION{1};
 
-    /** Used to get sprites while constructing tiles. */
-    SpriteDataBase& spriteData;
+    /** Used to get graphics while constructing tiles. */
+    GraphicDataBase& graphicData;
 
     /** The map's extent, with chunks as the unit. */
     ChunkExtent chunkExtent;
@@ -314,43 +314,43 @@ void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
 
         switch (paletteEntry.layerType) {
             case TileLayer::Type::Floor: {
-                const FloorSpriteSet& spriteSet{
-                    spriteData.getFloorSpriteSet(paletteEntry.spriteSetID)};
-                tile.getFloor().spriteSet = &spriteSet;
+                const FloorGraphicSet& graphicSet{
+                    graphicData.getFloorGraphicSet(paletteEntry.graphicSetID)};
+                tile.getFloor().graphicSet = &graphicSet;
                 break;
             }
             case TileLayer::Type::FloorCovering: {
-                const auto& spriteSet{spriteData.getFloorCoveringSpriteSet(
-                    paletteEntry.spriteSetID)};
+                const auto& graphicSet{graphicData.getFloorCoveringGraphicSet(
+                    paletteEntry.graphicSetID)};
                 tile.getFloorCoverings().emplace_back(
-                    &spriteSet,
-                    static_cast<Rotation::Direction>(paletteEntry.spriteIndex));
+                    &graphicSet,
+                    static_cast<Rotation::Direction>(paletteEntry.graphicIndex));
                 break;
             }
             case TileLayer::Type::Wall: {
                 std::array<WallTileLayer, 2>& walls{tile.getWalls()};
-                const WallSpriteSet& spriteSet{
-                    spriteData.getWallSpriteSet(paletteEntry.spriteSetID)};
+                const WallGraphicSet& graphicSet{
+                    graphicData.getWallGraphicSet(paletteEntry.graphicSetID)};
 
                 Wall::Type newWallType{
-                    static_cast<Wall::Type>(paletteEntry.spriteIndex)};
+                    static_cast<Wall::Type>(paletteEntry.graphicIndex)};
                 if (newWallType == Wall::Type::West) {
-                    walls[0].spriteSet = &spriteSet;
+                    walls[0].graphicSet = &graphicSet;
                     walls[0].wallType = newWallType;
                 }
                 else {
-                    walls[1].spriteSet = &spriteSet;
+                    walls[1].graphicSet = &graphicSet;
                     walls[1].wallType = newWallType;
                 }
                 tile.rebuildCollision(tileX, tileY);
                 break;
             }
             case TileLayer::Type::Object: {
-                const auto& spriteSet{
-                    spriteData.getObjectSpriteSet(paletteEntry.spriteSetID)};
+                const auto& graphicSet{
+                    graphicData.getObjectGraphicSet(paletteEntry.graphicSetID)};
                 tile.getObjects().emplace_back(
-                    &spriteSet,
-                    static_cast<Rotation::Direction>(paletteEntry.spriteIndex));
+                    &graphicSet,
+                    static_cast<Rotation::Direction>(paletteEntry.graphicIndex));
                 tile.rebuildCollision(tileX, tileY);
                 break;
             }

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "EditorSprite.h"
-#include "EditorFloorSpriteSet.h"
-#include "EditorFloorCoveringSpriteSet.h"
-#include "EditorWallSpriteSet.h"
-#include "EditorObjectSpriteSet.h"
+#include "EditorFloorGraphicSet.h"
+#include "EditorFloorCoveringGraphicSet.h"
+#include "EditorWallGraphicSet.h"
+#include "EditorObjectGraphicSet.h"
 #include "EditorIcon.h"
 #include "EditorBoundingBox.h"
 #include <variant>
@@ -21,9 +21,9 @@ namespace ResourceImporter
  * into the edit stage.
  */
 using LibraryItemData
-    = std::variant<std::monostate, EditorSprite, EditorFloorSpriteSet,
-                   EditorFloorCoveringSpriteSet, EditorWallSpriteSet,
-                   EditorObjectSpriteSet, EditorIcon, EditorBoundingBox>;
+    = std::variant<std::monostate, EditorSprite, EditorFloorGraphicSet,
+                   EditorFloorCoveringGraphicSet, EditorWallGraphicSet,
+                   EditorObjectGraphicSet, EditorIcon, EditorBoundingBox>;
 
 } // End namespace ResourceImporter
 } // End namespace AM

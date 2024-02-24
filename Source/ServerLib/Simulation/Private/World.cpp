@@ -5,7 +5,7 @@
 #include "ReplicatedComponent.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "AnimationState.h"
+#include "GraphicState.h"
 #include "Collision.h"
 #include "EntityInitScript.h"
 #include "PersistedEntityData.h"
@@ -13,6 +13,7 @@
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include "Config.h"
+#include "VariantTools.h"
 #include "Log.h"
 #include "AMAssert.h"
 #include "sol/sol.hpp"
@@ -51,15 +52,15 @@ void onComponentDestroyed(entt::registry& registry, entt::entity entity)
     }
 }
 
-World::World(SpriteData& inSpriteData, sol::state& inEntityInitLua,
+World::World(GraphicData& inGraphicData, sol::state& inEntityInitLua,
              sol::state& inItemInitLua)
 : registry{}
 , itemData{}
-, tileMap{inSpriteData}
+, tileMap{inGraphicData}
 , entityLocator{registry}
 , database{std::make_unique<Database>()}
 , netIdMap{}
-, spriteData{inSpriteData}
+, graphicData{inGraphicData}
 , entityInitLua{inEntityInitLua}
 , itemInitLua{inItemInitLua}
 , randomDevice{}
@@ -123,27 +124,28 @@ entt::entity World::createEntity(const Position& position,
 }
 
 void World::addGraphicsComponents(entt::entity entity,
-                                  const AnimationState& animationState)
+                                  const GraphicState& graphicState)
 {
     // Note: We only add entities to the locator (and replicate them to clients)
-    //       if they have an AnimationState. If we ever need to replicate
-    //       entities that don't have AnimationState, revisit this.
-    //       Similarly, if we ever need to add AnimationState without Collision,
-    //       we need to revisit this.
+    //       if they have a GraphicState. If we ever need to replicate
+    //       entities that don't have GraphicState, revisit this.
+    //       Similarly, if we ever need to add GraphicState without Collision,
+    //       we'll need to revisit this.
 
-    // Add the AnimationState.
-    registry.emplace<AnimationState>(entity, animationState);
+    // Add the GraphicState.
+    registry.emplace<GraphicState>(entity, graphicState);
 
     // TODO: When we add character sprite sets, update this.
-    // Use the current sprite as the entity's collision bounds.
-    const ObjectSpriteSet& spriteSet{
-        spriteData.getObjectSpriteSet(animationState.spriteSetID)};
-    const Sprite* sprite{spriteSet.sprites[animationState.spriteIndex]};
+    // Use the current graphic as the entity's collision bounds.
+    const ObjectGraphicSet& graphicSet{
+        graphicData.getObjectGraphicSet(graphicState.graphicSetID)};
+    const GraphicRef& graphic{graphicSet.graphics[graphicState.graphicIndex]};
 
+    const BoundingBox modelBounds{graphic.getModelBounds()};
     const Position& position{registry.get<Position>(entity)};
     const Collision& collision{registry.emplace<Collision>(
-        entity, sprite->modelBounds,
-        Transforms::modelToWorldCentered(sprite->modelBounds, position))};
+        entity, modelBounds,
+        Transforms::modelToWorldCentered(modelBounds, position))};
 
     // Add the entity to the locator.
     // Note: Since we're adding the entity to the locator, clients
@@ -172,7 +174,7 @@ void World::addMovementComponents(entt::entity entity, const Rotation& rotation)
 
     // Note: Entities also need Collision for the movement systems to pick 
     //       them up, but that's considered a "graphics" component because it's 
-    //       dependent on AnimationState.
+    //       dependent on GraphicState.
 }
 
 std::string World::runEntityInitScript(entt::entity entity,
@@ -298,23 +300,21 @@ void World::loadNonClientEntities()
         // Load the entity's persisted components into the registry.
         for (const PersistedComponent& componentVariant :
              persistedEntityData.components) {
-            std::visit(
+            std::visit(VariantTools::Overload(
+                [&](const Rotation& rotation) {
+                    // Note: We only persist Rotation, but it implies the 
+                    //       rest of the movement components.
+                    addMovementComponents(newEntity, rotation);
+                },
+                [&](const GraphicState& graphicState) {
+                    // Note: We only persist GraphicState, but it implies 
+                    //       the rest of the graphics components.
+                    addGraphicsComponents(newEntity, graphicState);
+                },
                 [&](const auto& component) {
                     using T = std::decay_t<decltype(component)>;
-                    if constexpr (std::is_same_v<T, Rotation>) {
-                        // Note: We only persist Rotation, but it implies the 
-                        //       rest of the movement components.
-                        addMovementComponents(newEntity, component);
-                    }
-                    else if constexpr (std::is_same_v<T, AnimationState>) {
-                        // Note: We only persist AnimationState, but it implies 
-                        //       the rest of the graphics components.
-                        addGraphicsComponents(newEntity, component);
-                    }
-                    else {
-                        registry.emplace<T>(newEntity, component);
-                    }
-                },
+                    registry.emplace<T>(newEntity, component);
+                }),
                 componentVariant);
         }
     };

@@ -13,7 +13,7 @@ namespace Server
 class Simulation;
 class World;
 class Network;
-class SpriteData;
+class GraphicData;
 
 /**
  * Observes component updates based on the ObservedComponentTypes lists in
@@ -26,7 +26,7 @@ class ComponentSyncSystem
 {
 public:
     ComponentSyncSystem(Simulation& inSimulation, World& inWorld,
-                        Network& inNetwork, SpriteData& inSpriteData);
+                        Network& inNetwork, GraphicData& inGraphicData);
 
     /**
      * Sends updates for any observed components that were modified.
@@ -40,8 +40,8 @@ private:
     World& world;
     /** Used for sending updates to clients. */
     Network& network;
-    /** Used to update Collision components when AnimationState is updated. */
-    SpriteData& spriteData;
+    /** Used to update Collision components when GraphicState is updated. */
+    GraphicData& graphicData;
 
     // Note: Check the top of the cpp file for file-local types and variables.
     //       We keep some templated code there to reduce compile times.

@@ -4,6 +4,7 @@
 #include "TileLayers.h"
 #include "PhantomSpriteInfo.h"
 #include "SpriteColorModInfo.h"
+#include "Timer.h"
 #include "entt/entity/registry.hpp"
 #include <vector>
 
@@ -13,12 +14,14 @@ namespace AM
 {
 struct Camera;
 class Tile;
+struct GraphicState;
 
 namespace Client
 {
 class TileMap;
-class SpriteData;
+class GraphicData;
 class UserInterface;
+struct AnimationState;
 
 /**
  * Gathers all of the World's entity and tile layer sprites and sorts them
@@ -28,7 +31,7 @@ class WorldSpriteSorter
 {
 public:
     WorldSpriteSorter(entt::registry& inRegistry, const TileMap& inTileMap,
-                      const SpriteData& inSpriteData,
+                      const GraphicData& inGraphicData,
                       const UserInterface& inUI);
 
     /**
@@ -80,11 +83,18 @@ private:
                            int y);
 
     /**
-     * Pushes the given tile sprite into the appropriate vector, based on
+     * Pushes the given tile graphic into the appropriate vector, based on
      * whether it needs to be sorted or not.
      */
-    void pushTileSprite(const Sprite& sprite, const Camera& camera,
+    void pushTileSprite(const GraphicRef& graphic, const Camera& camera,
                         const TileLayerID& layerID, bool isFullPhantom);
+
+    /**
+     * Returns the current sprite for the given entity data.
+     * Updates animationState's data if necessary.
+     */
+    const Sprite& getEntitySprite(const GraphicState& graphicState,
+                                  AnimationState& animationState);
 
     /**
      * Pushes the given entity sprite into the sorting vector.
@@ -137,8 +147,8 @@ private:
     /** Used for gathering tiles. */
     const TileMap& tileMap;
 
-    /** Used for getting sprite render data. */
-    const SpriteData& spriteData;
+    /** Used for getting graphic render data. */
+    const GraphicData& graphicData;
 
     /** Used for getting sprite color mods and phantom sprites. */
     const UserInterface& ui;
@@ -166,6 +176,19 @@ private:
     /** Holds sprites that need to be sorted. Sprites are pushed during
         gatherSpriteInfo() and sorted during sortSpritesByDepth(). */
     std::vector<SpriteSortInfo> spritesToSort;
+
+    /** The timer used for animations. Having a single timer allows us to 
+        keep animations in sync if we care to (which we do for tiles), or to 
+        just use timestamps to know which frame of an animation to display. */
+    Timer animationTimer;
+
+    /** The timestamp from animationTimer that we're using during the current 
+        render frame. */
+    double lastAnimationTimestamp;
+
+    /** The timestamp from animationTimer that we used during the last render 
+        frame. Allows us to calculate time deltas. */
+    double currentAnimationTimestamp;
 };
 
 template<typename T>

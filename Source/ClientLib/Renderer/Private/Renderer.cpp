@@ -1,7 +1,7 @@
 #include "Renderer.h"
 #include "World.h"
 #include "UserInterface.h"
-#include "SpriteData.h"
+#include "GraphicData.h"
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Sprite.h"
@@ -18,14 +18,14 @@ namespace AM
 namespace Client
 {
 Renderer::Renderer(SDL_Renderer* inSdlRenderer, World& inWorld,
-                   UserInterface& inUI, SpriteData& inSpriteData,
+                   UserInterface& inUI, GraphicData& inGraphicData,
                    std::function<double(void)> inGetSimTickProgress)
 : sdlRenderer{inSdlRenderer}
 , world{inWorld}
 , ui{inUI}
-, spriteData{inSpriteData}
+, graphicData{inGraphicData}
 , getSimTickProgress{inGetSimTickProgress}
-, worldSpriteSorter{world.registry, world.tileMap, spriteData, ui}
+, worldSpriteSorter{world.registry, world.tileMap, graphicData, ui}
 , extension{nullptr}
 {
 }
@@ -97,8 +97,8 @@ void Renderer::setExtension(std::unique_ptr<IRendererExtension> inExtension)
 Camera Renderer::getLerpedCamera(double alpha)
 {
     // Get the lerped camera position based on the alpha.
-    auto [playerCamera, playerSprite, playerPosition, playerPreviousPos]
-        = world.registry.get<Camera, Sprite, Position, PreviousPosition>(
+    auto [playerCamera, playerPosition, playerPreviousPos]
+        = world.registry.get<Camera, Position, PreviousPosition>(
             world.playerEntity);
     Position cameraLerp{MovementHelpers::interpolatePosition(
         playerCamera.prevPosition, playerCamera.position, alpha)};
@@ -135,7 +135,7 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
     // Note: These are already culled during the gather step.
     for (const SpriteSortInfo& spriteInfo : sortedSprites) {
         const SpriteRenderData& renderData{
-            spriteData.getRenderData(spriteInfo.sprite->numericID)};
+            graphicData.getRenderData(spriteInfo.sprite->numericID)};
         const SDL_Color& colorMod{spriteInfo.colorMod};
 
         // Apply the alpha mod that the UI gave us.

@@ -6,7 +6,7 @@ namespace Server
 {
 class Simulation;
 class Network;
-class SpriteData;
+class GraphicData;
 
 /**
  * Defines the dependencies that will be provided to the project's
@@ -18,7 +18,7 @@ public:
 
     Network& network;
 
-    SpriteData& spriteData;
+    GraphicData& graphicData;
 };
 
 } // namespace Server

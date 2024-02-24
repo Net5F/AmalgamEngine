@@ -112,8 +112,8 @@ void NceLifetimeSystem::createEntity(const EntityInitRequest& entityInitRequest)
                                               entityInitRequest.entity)};
     world.registry.emplace<Name>(newEntity, entityInitRequest.name);
 
-    // Add the animation state and collision components.
-    world.addGraphicsComponents(newEntity, entityInitRequest.animationState);
+    // Add the graphic state and collision components.
+    world.addGraphicsComponents(newEntity, entityInitRequest.graphicState);
 
     // Run the init script. If there was an error, tell the user.
     std::string resultString{

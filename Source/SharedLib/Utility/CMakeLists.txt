@@ -27,6 +27,7 @@ target_sources(SharedLib
         Public/SerializeBuffer.h
         Public/Timer.h
         Public/Transforms.h
+        Public/VariantTools.h
 )
 
 target_include_directories(SharedLib

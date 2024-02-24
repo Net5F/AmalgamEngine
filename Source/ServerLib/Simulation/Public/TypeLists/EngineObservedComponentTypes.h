@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Name.h"
-#include "AnimationState.h"
+#include "GraphicState.h"
 #include "Interaction.h"
 #include "boost/mp11/list.hpp"
 
@@ -20,6 +20,6 @@ namespace AM
  *       instead of adding it here.
  */
 using EngineObservedComponentTypes
-    = boost::mp11::mp_list<Name, AnimationState, Interaction>;
+    = boost::mp11::mp_list<Name, GraphicState, Interaction>;
 
 } // End namespace AM

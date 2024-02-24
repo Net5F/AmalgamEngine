@@ -12,7 +12,7 @@ namespace Server
 class Simulation;
 class World;
 class Network;
-class SpriteData;
+class GraphicData;
 
 /**
  * This system is in charge of processing client connect/disconnect events and
@@ -22,7 +22,7 @@ class ClientConnectionSystem
 {
 public:
     ClientConnectionSystem(Simulation& inSimulation, World& inWorld,
-                           Network& inNetwork, SpriteData& inSpriteData);
+                           Network& inNetwork, GraphicData& inGraphicData);
 
     /**
      * Processes new connections and disconnections, updating the sim state
@@ -57,9 +57,9 @@ private:
     /** Used to send connection responses and receive connection events. */
     Network& network;
 
-    /** Used for getting the default sprite's data when constructing client
+    /** Used for getting the default graphic's data when constructing client
         entities. */
-    SpriteData& spriteData;
+    GraphicData& graphicData;
 
     EventQueue<ClientConnected> clientConnectedQueue;
     EventQueue<ClientDisconnected> clientDisconnectedQueue;

@@ -16,7 +16,7 @@ struct Item;
 namespace Client
 {
 class Network;
-class SpriteData;
+class GraphicData;
 class ISimulationExtension;
 class ChunkUpdateSystem;
 class TileUpdateSystem;
@@ -44,7 +44,7 @@ public:
     static constexpr double SIM_DELAYED_TIME_S{.001};
 
     Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
-               SpriteData& inSpriteData);
+               GraphicData& inGraphicData);
 
     ~Simulation();
 
@@ -120,7 +120,7 @@ private:
     /** Used to receive events (through the Network's dispatcher) and to
         send messages. */
     Network& network;
-    SpriteData& spriteData;
+    GraphicData& graphicData;
 
     /** The local world's state. */
     World world;

@@ -89,9 +89,10 @@ void ChunkStreamingSystem::addTileLayersToSnapshot(
     ChunkWireSnapshot& chunkSnapshot)
 {
     // Add the floor (if one is present).
-    if (tile.getFloor().getSprite() != nullptr) {
+    const FloorGraphicSet* graphicSet{tile.getFloor().graphicSet};
+    if (graphicSet) {
         std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            TileLayer::Type::Floor, tile.getFloor().spriteSet->numericID, 0)};
+            TileLayer::Type::Floor, graphicSet->numericID, 0)};
         tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
     }
 
@@ -99,7 +100,7 @@ void ChunkStreamingSystem::addTileLayersToSnapshot(
     const auto& floorCoverings{tile.getFloorCoverings()};
     for (const FloorCoveringTileLayer& floorCovering : floorCoverings) {
         std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            TileLayer::Type::FloorCovering, floorCovering.spriteSet->numericID,
+            TileLayer::Type::FloorCovering, floorCovering.graphicSet->numericID,
             floorCovering.direction)};
         tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
     }
@@ -109,7 +110,7 @@ void ChunkStreamingSystem::addTileLayersToSnapshot(
     for (const WallTileLayer& wall : walls) {
         if (wall.wallType != Wall::Type::None) {
             std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-                TileLayer::Type::Wall, wall.spriteSet->numericID,
+                TileLayer::Type::Wall, wall.graphicSet->numericID,
                 wall.wallType)};
             tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
         }
@@ -119,7 +120,7 @@ void ChunkStreamingSystem::addTileLayersToSnapshot(
     const auto& objects{tile.getObjects()};
     for (const ObjectTileLayer& object : objects) {
         std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            TileLayer::Type::Object, object.spriteSet->numericID,
+            TileLayer::Type::Object, object.graphicSet->numericID,
             object.direction)};
         tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
     }

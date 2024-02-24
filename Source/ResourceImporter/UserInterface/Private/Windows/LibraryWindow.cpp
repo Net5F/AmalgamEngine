@@ -62,9 +62,9 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     auto objectContainer{
         std::make_unique<LibraryCollapsibleContainer>("Objects")};
     libraryContainer.push_back(std::move(objectContainer));
-    auto entityContainer{
-        std::make_unique<LibraryCollapsibleContainer>("Entities")};
-    libraryContainer.push_back(std::move(entityContainer));
+    //auto entityContainer{
+    //    std::make_unique<LibraryCollapsibleContainer>("Entities")};
+    //libraryContainer.push_back(std::move(entityContainer));
     auto iconSheetContainer{
         std::make_unique<LibraryCollapsibleContainer>("Icon Sheets")};
     libraryContainer.push_back(std::move(iconSheetContainer));
@@ -95,13 +95,13 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     spriteModel.sheetAdded.connect<&LibraryWindow::onSpriteSheetAdded>(*this);
     spriteModel.sheetRemoved.connect<&LibraryWindow::onSpriteSheetRemoved>(
         *this);
-    SpriteSetModel& spriteSetModel{dataModel.spriteSetModel};
-    spriteSetModel.floorAdded.connect<&LibraryWindow::onFloorAdded>(*this);
-    spriteSetModel.floorCoveringAdded
+    GraphicSetModel& graphicSetModel{dataModel.graphicSetModel};
+    graphicSetModel.floorAdded.connect<&LibraryWindow::onFloorAdded>(*this);
+    graphicSetModel.floorCoveringAdded
         .connect<&LibraryWindow::onFloorCoveringAdded>(*this);
-    spriteSetModel.wallAdded.connect<&LibraryWindow::onWallAdded>(*this);
-    spriteSetModel.objectAdded.connect<&LibraryWindow::onObjectAdded>(*this);
-    spriteSetModel.spriteSetRemoved.connect<&LibraryWindow::onSpriteSetRemoved>(
+    graphicSetModel.wallAdded.connect<&LibraryWindow::onWallAdded>(*this);
+    graphicSetModel.objectAdded.connect<&LibraryWindow::onObjectAdded>(*this);
+    graphicSetModel.graphicSetRemoved.connect<&LibraryWindow::onGraphicSetRemoved>(
         *this);
     IconModel& iconModel{dataModel.iconModel};
     iconModel.sheetAdded.connect<&LibraryWindow::onIconSheetAdded>(*this);
@@ -112,8 +112,8 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
         .connect<&LibraryWindow::onBoundingBoxDisplayNameChanged>(*this);
     spriteModel.spriteDisplayNameChanged
         .connect<&LibraryWindow::onSpriteDisplayNameChanged>(*this);
-    spriteSetModel.spriteSetDisplayNameChanged
-        .connect<&LibraryWindow::onSpriteSetDisplayNameChanged>(*this);
+    graphicSetModel.graphicSetDisplayNameChanged
+        .connect<&LibraryWindow::onGraphicSetDisplayNameChanged>(*this);
     iconModel.iconDisplayNameChanged
         .connect<&LibraryWindow::onIconDisplayNameChanged>(*this);
 }
@@ -240,74 +240,74 @@ void LibraryWindow::onSpriteSheetAdded(int sheetID,
     sheetContainer.push_back(std::move(sheetListItem));
 }
 
-void LibraryWindow::onFloorAdded(FloorSpriteSetID floorID,
-                                 const EditorFloorSpriteSet& floor)
+void LibraryWindow::onFloorAdded(FloorGraphicSetID floorID,
+                                 const EditorFloorGraphicSet& floor)
 {
-    onSpriteSetAdded<EditorFloorSpriteSet>(floorID, floor);
+    onGraphicSetAdded<EditorFloorGraphicSet>(floorID, floor);
 }
 
 void LibraryWindow::onFloorCoveringAdded(
-    FloorCoveringSpriteSetID floorCoveringID,
-    const EditorFloorCoveringSpriteSet& floorCovering)
+    FloorCoveringGraphicSetID floorCoveringID,
+    const EditorFloorCoveringGraphicSet& floorCovering)
 {
-    onSpriteSetAdded<EditorFloorCoveringSpriteSet>(floorCoveringID,
+    onGraphicSetAdded<EditorFloorCoveringGraphicSet>(floorCoveringID,
                                                    floorCovering);
 }
 
-void LibraryWindow::onWallAdded(WallSpriteSetID wallID,
-                                const EditorWallSpriteSet& wall)
+void LibraryWindow::onWallAdded(WallGraphicSetID wallID,
+                                const EditorWallGraphicSet& wall)
 {
-    onSpriteSetAdded<EditorWallSpriteSet>(wallID, wall);
+    onGraphicSetAdded<EditorWallGraphicSet>(wallID, wall);
 }
 
-void LibraryWindow::onObjectAdded(ObjectSpriteSetID objectID,
-                                  const EditorObjectSpriteSet& object)
+void LibraryWindow::onObjectAdded(ObjectGraphicSetID objectID,
+                                  const EditorObjectGraphicSet& object)
 {
-    onSpriteSetAdded<EditorObjectSpriteSet>(objectID, object);
+    onGraphicSetAdded<EditorObjectGraphicSet>(objectID, object);
 }
 
 template<typename T>
-void LibraryWindow::onSpriteSetAdded(Uint16 spriteSetID, const T& spriteSet)
+void LibraryWindow::onGraphicSetAdded(Uint16 graphicSetID, const T& graphicSet)
 {
-    // Get the appropriate enum values for the given sprite set type.
-    SpriteSet::Type spriteSetType{};
-    if constexpr (std::is_same_v<T, EditorFloorSpriteSet>) {
-        spriteSetType = SpriteSet::Type::Floor;
+    // Get the appropriate enum values for the given graphic set type.
+    GraphicSet::Type graphicSetType{};
+    if constexpr (std::is_same_v<T, EditorFloorGraphicSet>) {
+        graphicSetType = GraphicSet::Type::Floor;
     }
-    else if constexpr (std::is_same_v<T, EditorFloorCoveringSpriteSet>) {
-        spriteSetType = SpriteSet::Type::FloorCovering;
+    else if constexpr (std::is_same_v<T, EditorFloorCoveringGraphicSet>) {
+        graphicSetType = GraphicSet::Type::FloorCovering;
     }
-    else if constexpr (std::is_same_v<T, EditorWallSpriteSet>) {
-        spriteSetType = SpriteSet::Type::Wall;
+    else if constexpr (std::is_same_v<T, EditorWallGraphicSet>) {
+        graphicSetType = GraphicSet::Type::Wall;
     }
-    else if constexpr (std::is_same_v<T, EditorObjectSpriteSet>) {
-        spriteSetType = SpriteSet::Type::Object;
+    else if constexpr (std::is_same_v<T, EditorObjectGraphicSet>) {
+        graphicSetType = GraphicSet::Type::Object;
     }
-    LibraryListItem::Type listItemType{toListItemType(spriteSetType)};
-    Category category{toCategory(spriteSetType)};
+    LibraryListItem::Type listItemType{toListItemType(graphicSetType)};
+    Category category{toCategory(graphicSetType)};
 
-    // Construct a new list item for this sprite set.
-    auto spriteSetListItem{
-        std::make_unique<LibraryListItem>(spriteSet.displayName)};
-    spriteSetListItem->type = listItemType;
-    spriteSetListItem->ID = spriteSetID;
-    listItemMaps[listItemType].emplace(spriteSetID, spriteSetListItem.get());
+    // Construct a new list item for this graphic set.
+    auto graphicSetListItem{
+        std::make_unique<LibraryListItem>(graphicSet.displayName)};
+    graphicSetListItem->type = listItemType;
+    graphicSetListItem->ID = graphicSetID;
+    listItemMaps[listItemType].emplace(graphicSetID, graphicSetListItem.get());
 
-    spriteSetListItem->setLeftPadding(32);
+    graphicSetListItem->setLeftPadding(32);
 
-    spriteSetListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
+    graphicSetListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
         processSelectedListItem(selectedListItem);
     });
-    spriteSetListItem->setOnActivated(
-        [this, spriteSetType, spriteSetID](LibraryListItem*) {
-            // Set this list item's associated sprite set as the active item.
-            dataModel.setActiveSpriteSet(spriteSetType, spriteSetID);
+    graphicSetListItem->setOnActivated(
+        [this, graphicSetType, graphicSetID](LibraryListItem*) {
+            // Set this list item's associated graphic set as the active item.
+            dataModel.setActiveGraphicSet(graphicSetType, graphicSetID);
         });
 
     // Add the new list item to the appropriate container.
     auto& listItemContainer{
         static_cast<LibraryCollapsibleContainer&>(*libraryContainer[category])};
-    listItemContainer.push_back(std::move(spriteSetListItem));
+    listItemContainer.push_back(std::move(graphicSetListItem));
 }
 
 void LibraryWindow::onIconSheetAdded(int sheetID, const EditorIconSheet& sheet)
@@ -384,12 +384,12 @@ void LibraryWindow::onSpriteSheetRemoved(int sheetID)
     sheetListItemMap.erase(sheetIt);
 }
 
-void LibraryWindow::onSpriteSetRemoved(SpriteSet::Type type, Uint16 spriteSetID)
+void LibraryWindow::onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID)
 {
     auto listItemMap{listItemMaps[toListItemType(type)]};
-    auto spriteSetIt{listItemMap.find(spriteSetID)};
-    if (spriteSetIt == listItemMap.end()) {
-        LOG_FATAL("Failed to find sprite set during removal.");
+    auto graphicSetIt{listItemMap.find(graphicSetID)};
+    if (graphicSetIt == listItemMap.end()) {
+        LOG_FATAL("Failed to find graphic set during removal.");
     }
 
     // Clear any list item selections.
@@ -399,12 +399,12 @@ void LibraryWindow::onSpriteSetRemoved(SpriteSet::Type type, Uint16 spriteSetID)
     selectedListItems.clear();
 
     // Remove the list item from the container.
-    auto& spriteSetContainer{static_cast<LibraryCollapsibleContainer&>(
+    auto& graphicSetContainer{static_cast<LibraryCollapsibleContainer&>(
         *libraryContainer[toCategory(type)])};
-    spriteSetContainer.erase(spriteSetIt->second);
+    graphicSetContainer.erase(graphicSetIt->second);
 
     // Remove the list item from the map.
-    listItemMaps[toListItemType(type)].erase(spriteSetIt);
+    listItemMaps[toListItemType(type)].erase(graphicSetIt);
 }
 
 void LibraryWindow::onIconSheetRemoved(int sheetID)
@@ -458,19 +458,19 @@ void LibraryWindow::onSpriteDisplayNameChanged(
     spriteListItem.text.setText(newDisplayName);
 }
 
-void LibraryWindow::onSpriteSetDisplayNameChanged(
-    SpriteSet::Type type, Uint16 spriteSetID, const std::string& newDisplayName)
+void LibraryWindow::onGraphicSetDisplayNameChanged(
+    GraphicSet::Type type, Uint16 graphicSetID, const std::string& newDisplayName)
 {
-    LibraryListItem::Type spriteSetListItemType{toListItemType(type)};
-    auto spriteSetListItemMap{listItemMaps[spriteSetListItemType]};
-    auto spriteSetListItemIt{spriteSetListItemMap.find(spriteSetID)};
-    if (spriteSetListItemIt == spriteSetListItemMap.end()) {
-        LOG_FATAL("Failed to find a list item for the given sprite set.");
+    LibraryListItem::Type graphicSetListItemType{toListItemType(type)};
+    auto graphicSetListItemMap{listItemMaps[graphicSetListItemType]};
+    auto graphicSetListItemIt{graphicSetListItemMap.find(graphicSetID)};
+    if (graphicSetListItemIt == graphicSetListItemMap.end()) {
+        LOG_FATAL("Failed to find a list item for the given graphic set.");
     }
 
-    // Update the list item to use the sprite set's new display name.
-    LibraryListItem& spriteSetListItem{*(spriteSetListItemIt->second)};
-    spriteSetListItem.text.setText(newDisplayName);
+    // Update the list item to use the graphic set's new display name.
+    LibraryListItem& graphicSetListItem{*(graphicSetListItemIt->second)};
+    graphicSetListItem.text.setText(newDisplayName);
 }
 
 void LibraryWindow::onIconDisplayNameChanged(IconID iconID,
@@ -581,29 +581,29 @@ void LibraryWindow::removeListItem(LibraryListItem* listItem)
         return;
     }
 
-    SpriteSetModel& spriteSetModel{dataModel.spriteSetModel};
+    GraphicSetModel& graphicSetModel{dataModel.graphicSetModel};
     switch (listItem->type) {
         case LibraryListItem::Type::SpriteSheet: {
             dataModel.spriteModel.remSpriteSheet(listItem->ID);
             break;
         }
         case LibraryListItem::Type::Floor: {
-            spriteSetModel.remFloor(
-                static_cast<FloorSpriteSetID>(listItem->ID));
+            graphicSetModel.remFloor(
+                static_cast<FloorGraphicSetID>(listItem->ID));
             break;
         }
         case LibraryListItem::Type::FloorCovering: {
-            spriteSetModel.remFloorCovering(
-                static_cast<FloorCoveringSpriteSetID>(listItem->ID));
+            graphicSetModel.remFloorCovering(
+                static_cast<FloorCoveringGraphicSetID>(listItem->ID));
             break;
         }
         case LibraryListItem::Type::Wall: {
-            spriteSetModel.remWall(static_cast<WallSpriteSetID>(listItem->ID));
+            graphicSetModel.remWall(static_cast<WallGraphicSetID>(listItem->ID));
             break;
         }
         case LibraryListItem::Type::Object: {
-            spriteSetModel.remObject(
-                static_cast<ObjectSpriteSetID>(listItem->ID));
+            graphicSetModel.remObject(
+                static_cast<ObjectGraphicSetID>(listItem->ID));
             break;
         }
         default: {
@@ -613,23 +613,23 @@ void LibraryWindow::removeListItem(LibraryListItem* listItem)
 }
 
 LibraryListItem::Type
-    LibraryWindow::toListItemType(SpriteSet::Type spriteSetType)
+    LibraryWindow::toListItemType(GraphicSet::Type graphicSetType)
 {
-    switch (spriteSetType) {
-        case SpriteSet::Type::Floor: {
+    switch (graphicSetType) {
+        case GraphicSet::Type::Floor: {
             return LibraryListItem::Type::Floor;
         }
-        case SpriteSet::Type::FloorCovering: {
+        case GraphicSet::Type::FloorCovering: {
             return LibraryListItem::Type::FloorCovering;
         }
-        case SpriteSet::Type::Wall: {
+        case GraphicSet::Type::Wall: {
             return LibraryListItem::Type::Wall;
         }
-        case SpriteSet::Type::Object: {
+        case GraphicSet::Type::Object: {
             return LibraryListItem::Type::Object;
         }
         default: {
-            LOG_FATAL("Invalid sprite set type.");
+            LOG_FATAL("Invalid graphic set type.");
             break;
         }
     }
@@ -637,23 +637,23 @@ LibraryListItem::Type
     return LibraryListItem::Type::None;
 }
 
-LibraryWindow::Category LibraryWindow::toCategory(SpriteSet::Type spriteSetType)
+LibraryWindow::Category LibraryWindow::toCategory(GraphicSet::Type graphicSetType)
 {
-    switch (spriteSetType) {
-        case SpriteSet::Type::Floor: {
+    switch (graphicSetType) {
+        case GraphicSet::Type::Floor: {
             return Category::Floors;
         }
-        case SpriteSet::Type::FloorCovering: {
+        case GraphicSet::Type::FloorCovering: {
             return Category::FloorCoverings;
         }
-        case SpriteSet::Type::Wall: {
+        case GraphicSet::Type::Wall: {
             return Category::Walls;
         }
-        case SpriteSet::Type::Object: {
+        case GraphicSet::Type::Object: {
             return Category::Objects;
         }
         default: {
-            LOG_FATAL("Invalid sprite set type.");
+            LOG_FATAL("Invalid graphic set type.");
             break;
         }
     }

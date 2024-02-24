@@ -30,15 +30,15 @@ public:
     /** The type of tile layer that should be added. */
     TileLayer::Type layerType{TileLayer::Type::None};
 
-    /** The numeric ID of the sprite set that the new layer should use.
+    /** The numeric ID of the graphic set that the new layer should use.
         If the type is Floor, the existing floor will be overwritten. */
-    Uint16 spriteSetID{0};
+    Uint16 graphicSetID{0};
 
-    /** The index within spriteSet.sprites that the new layer should use.
+    /** The index within graphicSet.graphics that the new layer should use.
         For Floors, this will always be 0.
         For FloorCoverings and Objects, this should be cast to Rotation.
         For Walls, this should be cast to Wall::Type. */
-    Uint8 spriteIndex{0};
+    Uint8 graphicIndex{0};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -58,8 +58,8 @@ void serialize(S& serializer, TileAddLayer& tileAddLayer)
     serializer.value4b(tileAddLayer.tileX);
     serializer.value4b(tileAddLayer.tileY);
     serializer.value1b(tileAddLayer.layerType);
-    serializer.value2b(tileAddLayer.spriteSetID);
-    serializer.value1b(tileAddLayer.spriteIndex);
+    serializer.value2b(tileAddLayer.graphicSetID);
+    serializer.value1b(tileAddLayer.graphicIndex);
 }
 
 } // End namespace AM
