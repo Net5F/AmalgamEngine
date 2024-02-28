@@ -5,6 +5,7 @@
 #include "BoundingBoxModel.h"
 #include "GraphicSetModel.h"
 #include "SpriteModel.h"
+#include "AnimationModel.h"
 #include "IconModel.h"
 #include "EditorGraphicRef.h"
 #include "entt/signal/sigh.hpp"
@@ -34,16 +35,10 @@ class DataModel
 public:
     DataModel(SDL_Renderer* inSdlRenderer);
 
-    /** Holds bounding box data. */
     BoundingBoxModel boundingBoxModel;
-
-    /** Holds Floor, FloorCovering, Wall, Object, and Entity GraphicSet data. */
     GraphicSetModel graphicSetModel;
-
-    /** Holds Sprite and SpriteSheet data. */
     SpriteModel spriteModel;
-
-    /** Holds Icon and IconSheet data. */
+    AnimationModel animationModel;
     IconModel iconModel;
 
     /**
@@ -89,6 +84,9 @@ public:
 
     /** Sets the current active library item to the given sprite. */
     void setActiveSprite(SpriteID newActiveSpriteID);
+
+    /** Sets the current active library item to the given animation. */
+    void setActiveAnimation(AnimationID newActiveAnimationID);
 
     /** Sets the current active library item to the given graphic set. */
     void setActiveGraphicSet(GraphicSet::Type type,

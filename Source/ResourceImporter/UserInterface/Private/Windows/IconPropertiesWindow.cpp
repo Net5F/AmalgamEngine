@@ -50,10 +50,10 @@ IconPropertiesWindow::IconPropertiesWindow(DataModel& inDataModel)
     // When the active icon is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
         .connect<&IconPropertiesWindow::onActiveLibraryItemChanged>(*this);
-    IconModel& iconModel{dataModel.iconModel};
-    iconModel.iconDisplayNameChanged
+    dataModel.iconModel.iconDisplayNameChanged
         .connect<&IconPropertiesWindow::onIconDisplayNameChanged>(*this);
-    iconModel.iconRemoved.connect<&IconPropertiesWindow::onIconRemoved>(*this);
+    dataModel.iconModel.iconRemoved
+        .connect<&IconPropertiesWindow::onIconRemoved>(*this);
 }
 
 void IconPropertiesWindow::onActiveLibraryItemChanged(

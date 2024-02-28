@@ -6,6 +6,38 @@ namespace AM
 namespace ResourceImporter
 {
 
+void EditorAnimation::setFrame(Uint8 frameNumber, const EditorSprite& sprite)
+{
+    // If a frame matches the given number, overwrite it.
+    auto insertIt{frames.end()};
+    for (auto it = frames.begin(); it != frames.end(); ++it) {
+        if (it->frameNumber == frameNumber) {
+            it->sprite = sprite;
+            break;
+        }
+        else if (it->frameNumber > frameNumber) {
+            // Number is higher than desired, insert the new frame in front of 
+            // this one.
+            insertIt = it;
+            break;
+        }
+    }
+
+    // No match, insert a new frame.
+    frames.insert(insertIt, {frameNumber, sprite});
+}
+
+void EditorAnimation::clearFrame(Uint8 frameNumber)
+{
+    // If a frame matches the given number, erase it.
+    for (auto it = frames.begin(); it != frames.end(); ++it) {
+        if (it->frameNumber == frameNumber) {
+            frames.erase(it);
+            break;
+        }
+    }
+}
+
 const BoundingBox&
     EditorAnimation::getModelBounds(const BoundingBoxModel& boundingBoxModel) const
 {

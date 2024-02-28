@@ -29,7 +29,7 @@ public:
     BoundingBoxModel(DataModel& inDataModel);
 
     /**
-     * Attempts to load the "boundingBox" section of the given json into this 
+     * Attempts to load the "boundingBoxes" section of the given json into this 
      * model.
      *
      * @return true if successful. If false, getErrorString() will return more
@@ -39,7 +39,7 @@ public:
 
     /**
      * Saves the current state of this data model into the given json's
-     * "boundingBox" section.
+     * "boundingBoxes" section.
      */
     void save(nlohmann::json& json);
 
@@ -73,13 +73,13 @@ private:
     static constexpr std::size_t MAX_BOUNDING_BOXES{1000};
 
     /**
-     * @param boundingBoxJson  The json to parse. Must be a valid bounding box
-     *                         section from ResourceData.json.
+     * @param boundsJson  The json to parse. Must be a valid bounding box
+     *                    section from ResourceData.json.
      */
     bool parseBoundingBox(const nlohmann::json& boundsJson);
 
     /**
-     * Checks if the given name is unique among all sprites in the model.
+     * Checks if the given name is unique among all bounding boxes in the model.
      *
      * @param boundingBoxID  The ID of the bounds that might get displayName. 
      *                       If it already is set to displayName, it won't be 

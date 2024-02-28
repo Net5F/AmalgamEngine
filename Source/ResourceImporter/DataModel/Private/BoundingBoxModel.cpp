@@ -169,7 +169,7 @@ void BoundingBoxModel::setBoundingBoxBounds(
 {
     auto boundingBoxPair{boundingBoxMap.find(boundingBoxID)};
     if (boundingBoxPair == boundingBoxMap.end()) {
-        LOG_FATAL("Tried to set name using invalid bounding box ID.");
+        LOG_FATAL("Tried to set bounds using invalid bounding box ID.");
     }
 
     EditorBoundingBox& boundingBox{boundingBoxPair->second};

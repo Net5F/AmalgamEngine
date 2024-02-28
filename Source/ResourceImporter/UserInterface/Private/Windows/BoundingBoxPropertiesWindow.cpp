@@ -69,73 +69,47 @@ BoundingBoxPropertiesWindow::BoundingBoxPropertiesWindow(
         (Paths::TEXTURE_DIR + "WindowBackground.png"), {1, 1, 1, 1});
     headerImage.setNineSliceImage((Paths::TEXTURE_DIR + "HeaderBackground.png"),
                                   {1, 1, 1, 1});
-    windowLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
-    windowLabel.setColor({255, 255, 255, 255});
+
+    auto styleLabel
+        = [&](AUI::Text& label, const std::string& text, int fontSize) {
+        label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
+        label.setColor({255, 255, 255, 255});
+        label.setText(text);
+    };
+    styleLabel(windowLabel, "Bounding Box Properties", 21);
     windowLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
-    windowLabel.setText("Sprite Properties");
 
     /* Display name entry. */
-    nameLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
-    nameLabel.setColor({255, 255, 255, 255});
+    styleLabel(nameLabel, "Name", 21);
     nameLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
-    nameLabel.setText("Name");
 
-    nameInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    nameInput.setPadding({0, 8, 0, 8});
+    auto styleTextInput = [&](AUI::TextInput& textInput) {
+        textInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
+        textInput.setPadding({0, 8, 0, 8});
+    };
+    styleTextInput(nameInput);
     nameInput.setOnTextCommitted([this]() { saveName(); });
 
-    /* Minimum X-axis bounds entry. */
-    minXLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
-    minXLabel.setColor({255, 255, 255, 255});
-    minXLabel.setText("Min X");
+    // Bounds entry labels.
+    styleLabel(minXLabel, "Min X", 21);
+    styleLabel(minYLabel, "Min Y", 21);
+    styleLabel(minZLabel, "Min Z", 21);
+    styleLabel(maxXLabel, "Max X", 21);
+    styleLabel(maxYLabel, "Max Y", 21);
+    styleLabel(maxZLabel, "Max Z", 21);
 
-    minXInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    minXInput.setPadding({0, 8, 0, 8});
+    // Bounds entry text inputs.
+    styleTextInput(minXInput);
+    styleTextInput(minYInput);
+    styleTextInput(minZInput);
+    styleTextInput(maxXInput);
+    styleTextInput(maxYInput);
+    styleTextInput(maxZInput);
     minXInput.setOnTextCommitted([this]() { saveMinX(); });
-
-    /* Minimum Y-axis bounds entry. */
-    minYLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
-    minYLabel.setColor({255, 255, 255, 255});
-    minYLabel.setText("Min Y");
-
-    minYInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    minYInput.setPadding({0, 8, 0, 8});
     minYInput.setOnTextCommitted([this]() { saveMinY(); });
-
-    /* Minimum Z-axis bounds entry. */
-    minZLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
-    minZLabel.setColor({255, 255, 255, 255});
-    minZLabel.setText("Min Z");
-
-    minZInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    minZInput.setPadding({0, 8, 0, 8});
     minZInput.setOnTextCommitted([this]() { saveMinZ(); });
-
-    /* Maximum X-axis bounds entry. */
-    maxXLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
-    maxXLabel.setColor({255, 255, 255, 255});
-    maxXLabel.setText("Max X");
-
-    maxXInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    maxXInput.setPadding({0, 8, 0, 8});
     maxXInput.setOnTextCommitted([this]() { saveMaxX(); });
-
-    /* Maximum Y-axis bounds entry. */
-    maxYLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
-    maxYLabel.setColor({255, 255, 255, 255});
-    maxYLabel.setText("Max Y");
-
-    maxYInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    maxYInput.setPadding({0, 8, 0, 8});
     maxYInput.setOnTextCommitted([this]() { saveMaxY(); });
-
-    /* Maximum Z-axis bounds entry. */
-    maxZLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
-    maxZLabel.setColor({255, 255, 255, 255});
-    maxZLabel.setText("Max Z");
-
-    maxZInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    maxZInput.setPadding({0, 8, 0, 8});
     maxZInput.setOnTextCommitted([this]() { saveMaxZ(); });
 
     // When the active sprite is updated, update it in this widget.

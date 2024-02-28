@@ -27,16 +27,16 @@ SpriteModel::SpriteModel(DataModel& inDataModel,
 , sheetRemovedSig{}
 , spriteRemovedSig{}
 , spriteDisplayNameChangedSig{}
-, spriteCollisionEnabledChangedSig{}
 , spriteModelBoundsIDChangedSig{}
 , spriteCustomModelBoundsChangedSig{}
+, spriteCollisionEnabledChangedSig{}
 , sheetAdded{sheetAddedSig}
 , sheetRemoved{sheetRemovedSig}
 , spriteRemoved{spriteRemovedSig}
 , spriteDisplayNameChanged{spriteDisplayNameChangedSig}
-, spriteCollisionEnabledChanged{spriteCollisionEnabledChangedSig}
 , spriteModelBoundsIDChanged{spriteModelBoundsIDChangedSig}
 , spriteCustomModelBoundsChanged{spriteCustomModelBoundsChangedSig}
+, spriteCollisionEnabledChanged{spriteCollisionEnabledChangedSig}
 {
     // Reserve the null sprite's ID (the engine provides it in code, so we don't
     // need it in the json).
@@ -108,6 +108,7 @@ void SpriteModel::save(nlohmann::json& json)
                 = sprite.collisionEnabled;
 
             // Add modelBoundsID.
+            // Note: The engine doesn't use this, but this editor needs it.
             json["spriteSheets"][i]["sprites"][j]["modelBoundsID"]
                 = sprite.modelBoundsID;
 
@@ -304,21 +305,6 @@ void SpriteModel::setSpriteDisplayName(SpriteID spriteID,
     spriteDisplayNameChangedSig.publish(spriteID, sprite.displayName);
 }
 
-void SpriteModel::setSpriteCollisionEnabled(SpriteID spriteID,
-                                            bool newCollisionEnabled)
-{
-    auto spritePair{spriteMap.find(spriteID)};
-    if (spritePair == spriteMap.end()) {
-        LOG_FATAL("Tried to set collisionEnabled using invalid sprite ID.");
-    }
-
-    // Set the new collisionEnabled and signal the change.
-    EditorSprite& sprite{spritePair->second};
-    sprite.collisionEnabled = newCollisionEnabled;
-
-    spriteCollisionEnabledChangedSig.publish(spriteID, newCollisionEnabled);
-}
-
 void SpriteModel::setSpriteModelBoundsID(SpriteID spriteID,
                                          BoundingBoxID newModelBoundsID)
 {
@@ -347,6 +333,21 @@ void SpriteModel::setSpriteCustomModelBounds(SpriteID spriteID,
     sprite.customModelBounds = newModelBounds;
 
     spriteCustomModelBoundsChangedSig.publish(spriteID, newModelBounds);
+}
+
+void SpriteModel::setSpriteCollisionEnabled(SpriteID spriteID,
+                                            bool newCollisionEnabled)
+{
+    auto spritePair{spriteMap.find(spriteID)};
+    if (spritePair == spriteMap.end()) {
+        LOG_FATAL("Tried to set collisionEnabled using invalid sprite ID.");
+    }
+
+    // Set the new collisionEnabled and signal the change.
+    EditorSprite& sprite{spritePair->second};
+    sprite.collisionEnabled = newCollisionEnabled;
+
+    spriteCollisionEnabledChangedSig.publish(spriteID, newCollisionEnabled);
 }
 
 void SpriteModel::resetModelState()

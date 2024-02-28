@@ -92,11 +92,11 @@ public:
     // Sprite properties.
     void setSpriteDisplayName(SpriteID spriteID,
                               const std::string& newDisplayName);
-    void setSpriteCollisionEnabled(SpriteID spriteID, bool newCollisionEnabled);
     void setSpriteModelBoundsID(SpriteID spriteID,
                                 BoundingBoxID newModelBoundsID);
     void setSpriteCustomModelBounds(SpriteID spriteID,
                                     const BoundingBox& newModelBounds);
+    void setSpriteCollisionEnabled(SpriteID spriteID, bool newCollisionEnabled);
 
     /** Resets the model state, setting it back to default. */
     void resetModelState();
@@ -167,12 +167,12 @@ private:
 
     entt::sigh<void(SpriteID spriteID, const std::string& newDisplayName)>
         spriteDisplayNameChangedSig;
-    entt::sigh<void(SpriteID spriteID, bool collisionEnabled)>
-        spriteCollisionEnabledChangedSig;
     entt::sigh<void(SpriteID spriteID, BoundingBoxID newModelBoundsID)>
         spriteModelBoundsIDChangedSig;
     entt::sigh<void(SpriteID spriteID, const BoundingBox& newCustomModelBounds)>
         spriteCustomModelBoundsChangedSig;
+    entt::sigh<void(SpriteID spriteID, bool newCollisionEnabled)>
+        spriteCollisionEnabledChangedSig;
 
 public:
     //-------------------------------------------------------------------------
@@ -190,9 +190,6 @@ public:
     entt::sink<
         entt::sigh<void(SpriteID spriteID, const std::string& newDisplayName)>>
         spriteDisplayNameChanged;
-    /** A sprite's "collision enabled" field has changed. */
-    entt::sink<entt::sigh<void(SpriteID spriteID, bool collisionEnabled)>>
-        spriteCollisionEnabledChanged;
     /** A sprite's bounding box ID has changed. */
     entt::sink<
         entt::sigh<void(SpriteID spriteID, BoundingBoxID newModelBoundsID)>>
@@ -201,6 +198,9 @@ public:
     entt::sink<entt::sigh<void(SpriteID spriteID,
                                const BoundingBox& newCustomModelBounds)>>
         spriteCustomModelBoundsChanged;
+    /** A sprite's "collision enabled" field has changed. */
+    entt::sink<entt::sigh<void(SpriteID spriteID, bool newCollisionEnabled)>>
+        spriteCollisionEnabledChanged;
 };
 
 } // namespace ResourceImporter

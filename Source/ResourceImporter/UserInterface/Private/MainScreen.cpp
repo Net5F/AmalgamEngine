@@ -19,9 +19,11 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , boundingBoxEditStage{dataModel, libraryWindow}
 , boundingBoxPropertiesWindow{dataModel, libraryWindow}
 , spriteEditStage{dataModel}
+, animationEditStage{dataModel}
 , iconEditStage{dataModel}
 , graphicSetEditStage{dataModel, libraryWindow}
 , spritePropertiesWindow{dataModel, libraryWindow}
+, animationPropertiesWindow{dataModel, libraryWindow}
 , graphicSetPropertiesWindow{dataModel}
 , iconPropertiesWindow{dataModel}
 , confirmationDialog{{0, 0, 1920, 1080}, "ConfirmationDialog"}
@@ -34,9 +36,11 @@ MainScreen::MainScreen(DataModel& inDataModel)
     windows.push_back(boundingBoxEditStage);
     windows.push_back(boundingBoxPropertiesWindow);
     windows.push_back(spriteEditStage);
+    windows.push_back(animationEditStage);
     windows.push_back(graphicSetEditStage);
     windows.push_back(iconEditStage);
     windows.push_back(spritePropertiesWindow);
+    windows.push_back(animationPropertiesWindow);
     windows.push_back(graphicSetPropertiesWindow);
     windows.push_back(iconPropertiesWindow);
     windows.push_back(libraryAddMenu);
@@ -98,6 +102,10 @@ MainScreen::MainScreen(DataModel& inDataModel)
         addSpriteSheetDialog.setIsVisible(true);
         dropFocus();
     });
+    libraryAddMenu.addAnimationButton.setOnPressed([this]() {
+        dataModel.animationModel.addAnimation();
+        dropFocus();
+    });
     libraryAddMenu.addFloorButton.setOnPressed([this]() {
         dataModel.graphicSetModel.addFloor();
         dropFocus();
@@ -131,6 +139,8 @@ MainScreen::MainScreen(DataModel& inDataModel)
     boundingBoxPropertiesWindow.setIsVisible(false);
     spriteEditStage.setIsVisible(false);
     spritePropertiesWindow.setIsVisible(false);
+    animationEditStage.setIsVisible(false);
+    animationPropertiesWindow.setIsVisible(false);
     graphicSetEditStage.setIsVisible(false);
     graphicSetPropertiesWindow.setIsVisible(false);
     iconEditStage.setIsVisible(false);
@@ -193,6 +203,8 @@ void MainScreen::onActiveLibraryItemChanged(
     boundingBoxPropertiesWindow.setIsVisible(false);
     spriteEditStage.setIsVisible(false);
     spritePropertiesWindow.setIsVisible(false);
+    animationEditStage.setIsVisible(false);
+    animationPropertiesWindow.setIsVisible(false);
     graphicSetEditStage.setIsVisible(false);
     graphicSetPropertiesWindow.setIsVisible(false);
     iconEditStage.setIsVisible(false);
@@ -206,6 +218,10 @@ void MainScreen::onActiveLibraryItemChanged(
     else if (std::holds_alternative<EditorSprite>(newActiveItem)) {
         spriteEditStage.setIsVisible(true);
         spritePropertiesWindow.setIsVisible(true);
+    }
+    else if (std::holds_alternative<EditorAnimation>(newActiveItem)) {
+        animationEditStage.setIsVisible(true);
+        animationPropertiesWindow.setIsVisible(true);
     }
     else if (std::holds_alternative<EditorIcon>(newActiveItem)) {
         iconEditStage.setIsVisible(true);

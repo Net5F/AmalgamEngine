@@ -1,5 +1,6 @@
 target_sources(ResourceImporter
     PRIVATE
+        Private/AnimationModel.cpp
         Private/BoundingBoxModel.cpp
         Private/DataModel.cpp
         Private/EditorAnimation.cpp
@@ -9,6 +10,7 @@ target_sources(ResourceImporter
         Private/IconModel.cpp
         Private/SpriteModel.cpp
     PUBLIC
+        Public/AnimationModel.h
         Public/BoundingBoxModel.h
         Public/DataModel.h
         Public/EditorAnimation.h

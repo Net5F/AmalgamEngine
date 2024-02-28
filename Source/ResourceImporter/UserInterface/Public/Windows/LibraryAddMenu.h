@@ -27,6 +27,7 @@ public:
 
     AUI::Button addBoundingBoxButton;
     AUI::Button addSpriteSheetButton;
+    AUI::Button addAnimationButton;
     AUI::Button addFloorButton;
     AUI::Button addFloorCoveringButton;
     AUI::Button addWallButton;

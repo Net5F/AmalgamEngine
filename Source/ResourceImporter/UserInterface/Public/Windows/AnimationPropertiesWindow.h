@@ -19,26 +19,31 @@ class LibraryWindow;
 class LibraryListItem;
 
 /**
- * The properties window shown when the user loads a sprite from the Library.
- * Allows the user to edit the active sprite's properties.
+ * The properties window shown when the user loads an animation from the Library.
+ * Allows the user to edit the active animation's properties.
  */
-class SpritePropertiesWindow : public AUI::Window
+class AnimationPropertiesWindow : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpritePropertiesWindow(DataModel& ineDataModel,
+    AnimationPropertiesWindow(DataModel& ineDataModel,
                            LibraryWindow& inLibraryWindow);
 
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------
-    /** All fields below directly match a data field in the EditorSprite class.
-        See displayName, collisionEnabled, and modelBounds fields for more
-        information. */
+    /** All fields below directly match a data field in the EditorAnimation 
+        class. See fields below for more info. */
     AUI::Text nameLabel;
     MainTextInput nameInput;
+
+    AUI::Text frameCountLabel;
+    MainTextInput frameCountInput;
+
+    AUI::Text fpsLabel;
+    MainTextInput fpsInput;
 
     AUI::Text boundingBoxLabel;
     AUI::Text boundingBoxNameLabel;
@@ -67,27 +72,32 @@ public:
 
 private:
     /**
-     * If the new active item is a sprite, loads it's data into this panel.
+     * If the new active item is a animation, loads it's data into this panel.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If active sprite was removed) Sets this panel back to its default state.
+     * (If active animation was removed) Sets this panel back to its default 
+     * state.
      */
-    void onSpriteRemoved(SpriteID spriteID);
+    void onAnimationRemoved(AnimationID animationID);
 
     /**
-     * (If ID matches active sprite) Updates this panel with the active sprite's
-     * new properties.
+     * (If ID matches active animation) Updates this panel with the active 
+     * animation's new properties.
      */
-    void onSpriteDisplayNameChanged(SpriteID spriteID,
-                                    const std::string& newDisplayName);
-    void onSpriteModelBoundsIDChanged(SpriteID spriteID,
-                                      BoundingBoxID newModelBoundsID);
-    void onSpriteCustomModelBoundsChanged(
-        SpriteID spriteID, const BoundingBox& newCustomModelBounds);
-    void onSpriteCollisionEnabledChanged(SpriteID spriteID,
-                                         bool newCollisionEnabled);
+    void onAnimationDisplayNameChanged(AnimationID animationID,
+                                       const std::string& newDisplayName);
+    void onAnimationFrameCountChanged(AnimationID animationID,
+                                      Uint8 newFrameCount);
+    void onAnimationFpsChanged(AnimationID animationID,
+                               Uint8 newFps);
+    void onAnimationModelBoundsIDChanged(AnimationID animationID,
+                                         BoundingBoxID newModelBoundsID);
+    void onAnimationCustomModelBoundsChanged(
+        AnimationID animationID, const BoundingBox& newCustomModelBounds);
+    void onAnimationCollisionEnabledChanged(AnimationID animationID,
+                                            bool newCollisionEnabled);
 
     /**
      * Updates boundingBoxButton to show whether the list item is assignable.
@@ -100,14 +110,14 @@ private:
      */
     void setBoundsFieldsEnabled(bool isEnabled);
 
-    /** Used while setting user-inputted sprite data. */
+    /** Used while setting user-inputted animation data. */
     DataModel& dataModel;
 
     /** Used to get the currently selected list item. */
     LibraryWindow& libraryWindow;
 
-    /** The active sprite's ID. */
-    SpriteID activeSpriteID;
+    /** The active animation's ID. */
+    AnimationID activeAnimationID;
 
     /**
      * Converts the given float to a string with 3 decimals of precision.
@@ -117,7 +127,6 @@ private:
     /** The below functions are all for validating and saving the user's data
         when the text is committed. */
     void saveName();
-    void saveCollisionEnabled();
     void saveModelBoundsID();
     void saveMinX();
     void saveMinY();
@@ -125,6 +134,7 @@ private:
     void saveMaxX();
     void saveMaxY();
     void saveMaxZ();
+    void saveCollisionEnabled();
 
     /** The below floats save the committed values, so we can revert to them
         if the user inputs invalid characters. */

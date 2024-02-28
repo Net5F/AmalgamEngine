@@ -67,6 +67,7 @@ public:
         BoundingBox,
         SpriteSheet,
         Sprite,
+        Animation,
         Floor,
         FloorCovering,
         Wall,

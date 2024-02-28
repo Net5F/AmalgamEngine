@@ -18,6 +18,7 @@ DataModel::DataModel(SDL_Renderer* inSdlRenderer)
 : boundingBoxModel{*this}
 , graphicSetModel{*this}
 , spriteModel{*this, graphicSetModel, inSdlRenderer}
+, animationModel{*this}
 , iconModel{*this, inSdlRenderer}
 , workingFilePath{""}
 , workingTexturesDir{""}
@@ -89,6 +90,9 @@ bool DataModel::load(const std::string& fullPath)
         else if (!spriteModel.load(json)) {
             parseError = spriteModel.getErrorString();
         }
+        else if (!animationModel.load(json)) {
+            parseError = animationModel.getErrorString();
+        }
         else if (!graphicSetModel.load(json)) {
             parseError = graphicSetModel.getErrorString();
         }
@@ -112,6 +116,7 @@ void DataModel::save()
     nlohmann::json json;
     boundingBoxModel.save(json);
     spriteModel.save(json);
+    animationModel.save(json);
     graphicSetModel.save(json);
     iconModel.save(json);
 
@@ -131,8 +136,8 @@ EditorGraphicRef DataModel::getGraphic(GraphicID graphicID)
         return EditorGraphicRef{spriteModel.getSprite(toSpriteID(graphicID))};
     }
     else {
-        // TODO: Implement this once AnimationModel is built.
-        // Animation ID.
+        return EditorGraphicRef{
+            animationModel.getAnimation(toAnimationID(graphicID))};
     }
 }
 
@@ -155,6 +160,17 @@ void DataModel::setActiveSprite(SpriteID newActiveSpriteID)
 
     // Signal the active sprite to the UI.
     activeLibraryItemChangedSig.publish(sprite);
+}
+
+void DataModel::setActiveAnimation(AnimationID newActiveAnimationID)
+{
+    // Note: This will error if the animation ID is invalid. This is good, since
+    //       we don't expect any invalid IDs to be floating around.
+    const EditorAnimation& animation{
+        animationModel.getAnimation(newActiveAnimationID)};
+
+    // Signal the active animation to the UI.
+    activeLibraryItemChangedSig.publish(animation);
 }
 
 void DataModel::setActiveGraphicSet(GraphicSet::Type type,

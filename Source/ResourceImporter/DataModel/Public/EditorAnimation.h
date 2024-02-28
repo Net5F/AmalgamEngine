@@ -36,7 +36,8 @@ struct EditorAnimation {
     struct Frame
     {
         Uint8 frameNumber{0};
-        std::reference_wrapper<EditorSprite> sprite;
+        // Note: This gets serialized in ResourceData.json as "spriteID".
+        std::reference_wrapper<const EditorSprite> sprite;
     };
     /** The frames of this animation, ordered by ascending frameNumber. */
     std::vector<Frame> frames;
@@ -55,6 +56,18 @@ struct EditorAnimation {
     /** If modelBoundsID is null, this is the animation's custom model-space 
         bounding box. */
     BoundingBox customModelBounds{};
+
+    /**
+     * Sets the given frame to the given sprite.
+     * If the frame already exists, it will be overwritten.
+     */
+    void setFrame(Uint8 frameNumber, const EditorSprite& sprite);
+
+    /**
+     * Clears the given frame, removing it from the frames vector.
+     * If the frame doesn't exist, does nothing.
+     */
+    void clearFrame(Uint8 frameNumber);
 
     /**
      * Returns this animation's model-space bounding box.

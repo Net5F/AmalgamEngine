@@ -10,6 +10,8 @@
 #include "BoundingBoxPropertiesWindow.h"
 #include "SpriteEditStage.h"
 #include "SpritePropertiesWindow.h"
+#include "AnimationEditStage.h"
+#include "AnimationPropertiesWindow.h"
 #include "GraphicSetEditStage.h"
 #include "GraphicSetPropertiesWindow.h"
 #include "IconEditStage.h"
@@ -24,7 +26,6 @@ namespace AM
 namespace ResourceImporter
 {
 class DataModel;
-struct EditorSprite;
 
 /**
  * The main screen for doing work.
@@ -80,6 +81,7 @@ private:
     /** The center stage for editing the active item. */
     BoundingBoxEditStage boundingBoxEditStage;
     SpriteEditStage spriteEditStage;
+    AnimationEditStage animationEditStage;
     GraphicSetEditStage graphicSetEditStage;
     IconEditStage iconEditStage;
 
@@ -87,6 +89,7 @@ private:
     /** The right-side panel for viewing and editing the active item's data. */
     BoundingBoxPropertiesWindow boundingBoxPropertiesWindow;
     SpritePropertiesWindow spritePropertiesWindow;
+    AnimationPropertiesWindow animationPropertiesWindow;
     GraphicSetPropertiesWindow graphicSetPropertiesWindow;
     IconPropertiesWindow iconPropertiesWindow;
 

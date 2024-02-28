@@ -2,6 +2,7 @@
 
 #include "LibraryListItem.h"
 #include "BoundingBoxID.h"
+#include "AnimationID.h"
 #include "GraphicSets.h"
 #include "IconID.h"
 #include "AUI/Window.h"
@@ -20,6 +21,7 @@ class MainScreen;
 class DataModel;
 struct EditorBoundingBox;
 struct EditorSpriteSheet;
+struct EditorAnimation;
 class ParentListItem;
 struct EditorFloorGraphicSet;
 struct EditorFloorCoveringGraphicSet;
@@ -59,6 +61,7 @@ private:
     enum Category {
         BoundingBoxes,
         SpriteSheets,
+        Animations,
         Floors,
         FloorCoverings,
         Walls,
@@ -75,6 +78,8 @@ private:
     void onBoundingBoxAdded(BoundingBoxID boundingBoxID,
                             const EditorBoundingBox& bounds);
     void onSpriteSheetAdded(int sheetID, const EditorSpriteSheet& sheet);
+    void onAnimationAdded(AnimationID animationID,
+                          const EditorAnimation& animation);
     void onFloorAdded(FloorGraphicSetID floorID,
                       const EditorFloorGraphicSet& floor);
     void
@@ -92,6 +97,7 @@ private:
      */
     void onBoundingBoxRemoved(BoundingBoxID boundingBoxID);
     void onSpriteSheetRemoved(int sheetID);
+    void onAnimationRemoved(AnimationID animationID);
     void onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID);
     void onIconSheetRemoved(int sheetID);
 
@@ -102,6 +108,8 @@ private:
                                          const std::string& newDisplayName);
     void onSpriteDisplayNameChanged(SpriteID spriteID,
                                     const std::string& newDisplayName);
+    void onAnimationDisplayNameChanged(AnimationID animationID,
+                                       const std::string& newDisplayName);
     void onGraphicSetDisplayNameChanged(GraphicSet::Type type, Uint16 graphicSetID,
                                        const std::string& newDisplayName);
     void onIconDisplayNameChanged(IconID iconID,

@@ -11,6 +11,8 @@ target_sources(ResourceImporter
         Private/Widgets/TitleButton.cpp
         Private/Windows/AddIconSheetDialog.cpp
         Private/Windows/AddSpriteSheetDialog.cpp
+        Private/Windows/AnimationEditStage.cpp
+        Private/Windows/AnimationPropertiesWindow.cpp
         Private/Windows/BoundingBoxEditStage.cpp
         Private/Windows/BoundingBoxPropertiesWindow.cpp
         Private/Windows/GraphicSetEditStage.cpp
@@ -38,6 +40,8 @@ target_sources(ResourceImporter
         Public/Widgets/TitleButton.h
         Public/Windows/AddIconSheetDialog.h
         Public/Windows/AddSpriteSheetDialog.h
+        Public/Windows/AnimationEditStage.h
+        Public/Windows/AnimationPropertiesWindow.h
         Public/Windows/BoundingBoxEditStage.h
         Public/Windows/BoundingBoxPropertiesWindow.h
         Public/Windows/GraphicSetEditStage.h

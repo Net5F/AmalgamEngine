@@ -240,6 +240,39 @@ void LibraryWindow::onSpriteSheetAdded(int sheetID,
     sheetContainer.push_back(std::move(sheetListItem));
 }
 
+void LibraryWindow::onAnimationAdded(AnimationID animationID,
+    const EditorAnimation& animation)
+{
+    // Construct a new list item for this animation.
+    auto animationListItem{
+        std::make_unique<LibraryListItem>(animation.displayName)};
+    animationListItem->type = LibraryListItem::Type::BoundingBox;
+    animationListItem->ID = static_cast<int>(animationID);
+    listItemMaps[LibraryListItem::Type::Animation].emplace(
+        animationID, animationListItem.get());
+
+    animationListItem->setLeftPadding(32);
+
+    animationListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
+        processSelectedListItem(selectedListItem);
+    });
+    animationListItem->setOnDeselected(
+        [this](LibraryListItem* deselectedListItem) {
+        // Note: Deselect is handled in OnSelected and FocusLost.
+        listItemDeselectedSig.publish(*deselectedListItem);
+    });
+    animationListItem->setOnActivated(
+        [this, animationID](LibraryListItem*) {
+            // Set this list item's associated animation as the active item.
+            dataModel.setActiveBoundingBox(animationID);
+        });
+
+    // Add the new list item to the appropriate container.
+    auto& listItemContainer{static_cast<LibraryCollapsibleContainer&>(
+        *libraryContainer[Category::Animations])};
+    listItemContainer.push_back(std::move(animationListItem));
+}
+
 void LibraryWindow::onFloorAdded(FloorGraphicSetID floorID,
                                  const EditorFloorGraphicSet& floor)
 {
@@ -384,6 +417,29 @@ void LibraryWindow::onSpriteSheetRemoved(int sheetID)
     sheetListItemMap.erase(sheetIt);
 }
 
+void LibraryWindow::onAnimationRemoved(AnimationID animationID)
+{
+    auto animationListItemMap{listItemMaps[LibraryListItem::Type::Animation]};
+    auto animationIt{animationListItemMap.find(animationID)};
+    if (animationIt == animationListItemMap.end()) {
+        LOG_FATAL("Failed to find animation during removal.");
+    }
+
+    // Clear any list item selections.
+    for (LibraryListItem* listItem : selectedListItems) {
+        listItem->deselect();
+    }
+    selectedListItems.clear();
+
+    // Remove the list item from the container.
+    auto& animationContainer{static_cast<LibraryCollapsibleContainer&>(
+        *libraryContainer[Category::Animations])};
+    animationContainer.erase(animationIt->second);
+
+    // Remove the list item from the map.
+    animationListItemMap.erase(animationIt);
+}
+
 void LibraryWindow::onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID)
 {
     auto listItemMap{listItemMaps[toListItemType(type)]};
@@ -456,6 +512,20 @@ void LibraryWindow::onSpriteDisplayNameChanged(
     // Update the list item to use the sprite's new display name.
     LibraryListItem& spriteListItem{*(spriteListItemIt->second)};
     spriteListItem.text.setText(newDisplayName);
+}
+
+void LibraryWindow::onAnimationDisplayNameChanged(AnimationID animationID,
+    const std::string& newDisplayName)
+{
+    auto animationListItemMap{listItemMaps[LibraryListItem::Type::Animation]};
+    auto animationListItemIt{animationListItemMap.find(animationID)};
+    if (animationListItemIt == animationListItemMap.end()) {
+        LOG_FATAL("Failed to find a list item for the given animation.");
+    }
+
+    // Update the list item to use the animation's new display name.
+    LibraryListItem& animationListItem{*(animationListItemIt->second)};
+    animationListItem.text.setText(newDisplayName);
 }
 
 void LibraryWindow::onGraphicSetDisplayNameChanged(
