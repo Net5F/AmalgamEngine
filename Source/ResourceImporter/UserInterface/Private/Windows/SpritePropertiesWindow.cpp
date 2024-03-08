@@ -168,9 +168,8 @@ void SpritePropertiesWindow::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
     // Check if the new active item is a sprite and return early if not.
-    const EditorSprite* newActiveSprite{
-        std::get_if<EditorSprite>(&newActiveItem)};
-    if (newActiveSprite == nullptr) {
+    const EditorSprite* newActiveSprite{get_if<EditorSprite>(&newActiveItem)};
+    if (!newActiveSprite) {
         activeSpriteID = NULL_SPRITE_ID;
         return;
     }

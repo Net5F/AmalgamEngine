@@ -19,6 +19,7 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel)
 , checkerboardImage{{0, 0, 100, 100}, "BackgroundImage"}
 , animationImage{{0, 0, 100, 100}, "AnimationImage"}
 , boundingBoxGizmo{inDataModel}
+, timeline({109, 706, 1080, 48}, "AnimationTimeline")
 , descText1{{24, 806, 1240, 24}, "DescText1"}
 {
     // Add our children so they're included in rendering, etc.
@@ -26,13 +27,14 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel)
     children.push_back(checkerboardImage);
     children.push_back(animationImage);
     children.push_back(boundingBoxGizmo);
+    children.push_back(timeline);
     children.push_back(descText1);
 
     /* Text */
     topText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 26);
     topText.setColor({255, 255, 255, 255});
     topText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
-    topText.setText("Sprite");
+    topText.setText("Animation");
 
     styleText(descText1);
     descText1.setText("Sprites are the basic building block for graphics in "
@@ -40,7 +42,7 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel)
 
     /* Active animation and checkerboard background. */
     checkerboardImage.setTiledImage(Paths::TEXTURE_DIR
-                                    + "AnimationEditStage/Checkerboard.png");
+                                    + "SpriteEditStage/Checkerboard.png");
     checkerboardImage.setIsVisible(false);
     animationImage.setIsVisible(false);
 
@@ -53,8 +55,6 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel)
     AnimationModel& animationModel{dataModel.animationModel};
     animationModel.animationFrameCountChanged
         .connect<&AnimationEditStage::onAnimationFrameCountChanged>(*this);
-    animationModel.animationFpsChanged
-        .connect<&AnimationEditStage::onAnimationFpsChanged>(*this);
     animationModel.animationFrameChanged
         .connect<&AnimationEditStage::onAnimationFrameChanged>(*this);
     animationModel.animationModelBoundsIDChanged
@@ -65,8 +65,16 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel)
         .connect<&AnimationEditStage::onAnimationRemoved>(*this);
 
     // When the gizmo updates the active animation's bounds, push it to the model.
-    boundingBoxGizmo.boundingBoxUpdated
-        .connect<&AnimationEditStage::onGizmoBoundingBoxUpdated>(*this);
+    boundingBoxGizmo.setOnBoundingBoxUpdated(
+        [&](const BoundingBox& updatedBounds) {
+            onGizmoBoundingBoxUpdated(updatedBounds);
+        });
+
+    timeline.setOnSelectionChanged([&](const EditorSprite* sprite) {
+        onTimelineSelectionChanged(sprite);
+    });
+
+    // TODO: Implement "Assign" and "Play" buttons
 }
 
 void AnimationEditStage::onActiveLibraryItemChanged(
@@ -74,7 +82,7 @@ void AnimationEditStage::onActiveLibraryItemChanged(
 {
     // Check if the new active item is an animation and return early if not.
     const EditorAnimation* newActiveAnimation{
-        std::get_if<EditorAnimation>(&newActiveItem)};
+        get_if<EditorAnimation>(&newActiveItem)};
     if (!newActiveAnimation) {
         activeAnimationID = NULL_ANIMATION_ID;
         return;
@@ -82,63 +90,26 @@ void AnimationEditStage::onActiveLibraryItemChanged(
 
     activeAnimationID = newActiveAnimation->numericID;
 
-    // TODO: Tell the timeline to load this animation
-    //       Set the play head to 0
-    //       If there's a sprite at frame 0, load it.
-
-    // TODO: How do we size the gizmo? Base is on the first sprite in the 
-    //       animation? Do we check sizes when adding sprites and error if 
-    //       size doesn't match?
-
-    /*
-    // Load the animation's first sprite image.
-    std::string imagePath{dataModel.getWorkingTexturesDir()};
-    imagePath += newActiveSprite->parentSpriteSheetPath;
-    spriteImage.setSimpleImage(imagePath, newActiveSprite->textureExtent);
-
-    // Center the sprite to the stage's X, but use a fixed Y.
-    SDL_Rect centeredSpriteExtent{newActiveSprite->textureExtent};
-    centeredSpriteExtent.x = logicalExtent.w / 2;
-    centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
-    centeredSpriteExtent.y = 212 - logicalExtent.y;
-    spriteImage.setLogicalExtent(centeredSpriteExtent);
-
-    // Set the background and gizmo to the size of the sprite.
-    checkerboardImage.setLogicalExtent(spriteImage.getLogicalExtent());
-    boundingBoxGizmo.setLogicalExtent(spriteImage.getLogicalExtent());
-
-    // Set the sprite and background to be visible.
-    checkerboardImage.setIsVisible(true);
-    spriteImage.setIsVisible(true);
-
-    // Set up the gizmo with the new sprite's data.
-    boundingBoxGizmo.setXOffset(
-        static_cast<int>(newActiveSprite->textureExtent.w / 2.f));
-    boundingBoxGizmo.setYOffset(newActiveSprite->yOffset);
-    boundingBoxGizmo.setBoundingBox(
-        newActiveSprite->getModelBounds(dataModel.boundingBoxModel));
-
-    // If the gizmo isn't visible, make it visible.
-    boundingBoxGizmo.setIsVisible(true);
-    */
+    // Load this animation into the timeline.
+    timeline.setActiveAnimation(*newActiveAnimation);
 }
 
-// TODO: Figure out what this class is going to do, and what's going to 
-//       go in the widget.
 void AnimationEditStage::onAnimationFrameCountChanged(AnimationID animationID,
                                                       Uint8 newFrameCount)
 {
-}
-
-void AnimationEditStage::onAnimationFpsChanged(AnimationID animationID,
-                                               Uint8 newFps)
-{
+    if (animationID == activeAnimationID) {
+        timeline.setFrameCount(newFrameCount);
+    }
 }
 
 void AnimationEditStage::onAnimationFrameChanged(AnimationID animationID,
-                                                 Uint8 newFrameNumber,
+                                                 Uint8 frameNumber,
                                                  const EditorSprite* newSprite)
 {
+    if (animationID == activeAnimationID) {
+        bool hasSprite{newSprite != nullptr};
+        timeline.setFrame(frameNumber, hasSprite);
+    }
 }
 
 void AnimationEditStage::onAnimationModelBoundsIDChanged(
@@ -186,13 +157,13 @@ void AnimationEditStage::onAnimationRemoved(AnimationID animationID)
         activeAnimationID = NULL_ANIMATION_ID;
 
         // Set everything back to being invisible.
-        checkerboardImage.setIsVisible(false);
         animationImage.setIsVisible(false);
         boundingBoxGizmo.setIsVisible(false);
     }
 }
 
-void AnimationEditStage::onGizmoBoundingBoxUpdated(const BoundingBox& boundingBox)
+void AnimationEditStage::onGizmoBoundingBoxUpdated(
+    const BoundingBox& updatedBounds)
 {
     if (activeAnimationID != NULL_ANIMATION_ID) {
         // If the animation isn't set to use a custom model, do nothing (should 
@@ -205,8 +176,51 @@ void AnimationEditStage::onGizmoBoundingBoxUpdated(const BoundingBox& boundingBo
 
         // Update the model with the gizmo's new state.
         dataModel.animationModel.setAnimationCustomModelBounds(
-            activeAnimationID, boundingBox);
+            activeAnimationID, updatedBounds);
     }
+}
+
+void AnimationEditStage::onTimelineSelectionChanged(
+    const EditorSprite* selectedSprite)
+{
+    // If the selected cell doesn't have a sprite, clear the stage and return.
+    if (!selectedSprite) {
+        boundingBoxGizmo.setIsVisible(false);
+        return;
+    }
+
+    // Load the selected sprite image.
+    std::string imagePath{dataModel.getWorkingTexturesDir()};
+    imagePath += selectedSprite->parentSpriteSheetPath;
+    animationImage.setSimpleImage(imagePath, selectedSprite->textureExtent);
+
+    // TODO: When we add support for stages larger than 1x1, update this to 
+    //       account for them (maybe just make the Assign button not allow 
+    //       mixing stage sizes).
+    // Center the sprite to the stage's X, but use a fixed Y.
+    SDL_Rect centeredSpriteExtent{selectedSprite->textureExtent};
+    centeredSpriteExtent.x = logicalExtent.w / 2;
+    centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
+    centeredSpriteExtent.y = 212 - logicalExtent.y;
+    animationImage.setLogicalExtent(centeredSpriteExtent);
+
+    // Set the background and gizmo to the size of the sprite.
+    checkerboardImage.setLogicalExtent(animationImage.getLogicalExtent());
+    boundingBoxGizmo.setLogicalExtent(animationImage.getLogicalExtent());
+
+    // Set the sprite and background to be visible.
+    animationImage.setIsVisible(true);
+    checkerboardImage.setIsVisible(true);
+
+    // Set up the gizmo with the new sprite's data.
+    boundingBoxGizmo.setXOffset(
+        static_cast<int>(selectedSprite->textureExtent.w / 2.f));
+    boundingBoxGizmo.setYOffset(selectedSprite->yOffset);
+    boundingBoxGizmo.setBoundingBox(
+        selectedSprite->getModelBounds(dataModel.boundingBoxModel));
+
+    // If the gizmo isn't visible, make it visible.
+    boundingBoxGizmo.setIsVisible(true);
 }
 
 void AnimationEditStage::styleText(AUI::Text& text)

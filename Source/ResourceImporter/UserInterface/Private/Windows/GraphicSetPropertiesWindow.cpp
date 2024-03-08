@@ -65,23 +65,21 @@ GraphicSetPropertiesWindow::GraphicSetPropertiesWindow(DataModel& inDataModel)
 void GraphicSetPropertiesWindow::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
-    if (std::holds_alternative<EditorFloorGraphicSet>(newActiveItem)) {
+    if (holds_alternative<EditorFloorGraphicSet>(newActiveItem)) {
         loadActiveGraphicSet(GraphicSet::Type::Floor,
-                            std::get<EditorFloorGraphicSet>(newActiveItem));
+                             get<EditorFloorGraphicSet>(newActiveItem));
     }
-    else if (std::holds_alternative<EditorFloorCoveringGraphicSet>(
-                 newActiveItem)) {
-        loadActiveGraphicSet(
-            GraphicSet::Type::FloorCovering,
-            std::get<EditorFloorCoveringGraphicSet>(newActiveItem));
+    else if (holds_alternative<EditorFloorCoveringGraphicSet>(newActiveItem)) {
+        loadActiveGraphicSet(GraphicSet::Type::FloorCovering,
+                             get<EditorFloorCoveringGraphicSet>(newActiveItem));
     }
-    else if (std::holds_alternative<EditorWallGraphicSet>(newActiveItem)) {
+    else if (holds_alternative<EditorWallGraphicSet>(newActiveItem)) {
         loadActiveGraphicSet(GraphicSet::Type::Wall,
-                            std::get<EditorWallGraphicSet>(newActiveItem));
+                             get<EditorWallGraphicSet>(newActiveItem));
     }
-    else if (std::holds_alternative<EditorObjectGraphicSet>(newActiveItem)) {
+    else if (holds_alternative<EditorObjectGraphicSet>(newActiveItem)) {
         loadActiveGraphicSet(GraphicSet::Type::Object,
-                            std::get<EditorObjectGraphicSet>(newActiveItem));
+                             get<EditorObjectGraphicSet>(newActiveItem));
     }
     else {
         // New active item is not a graphic set. Clear this panel.

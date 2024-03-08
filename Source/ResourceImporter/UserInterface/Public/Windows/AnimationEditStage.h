@@ -2,6 +2,7 @@
 
 #include "LibraryItemData.h"
 #include "BoundingBoxGizmo.h"
+#include "AnimationTimeline.h"
 #include "AUI/Window.h"
 #include "AUI/Screen.h"
 #include "AUI/Text.h"
@@ -38,8 +39,7 @@ private:
      */
     void onAnimationFrameCountChanged(AnimationID animationID,
                                       Uint8 newFrameCount);
-    void onAnimationFpsChanged(AnimationID animationID, Uint8 newFps);
-    void onAnimationFrameChanged(AnimationID animationID, Uint8 newFrameNumber,
+    void onAnimationFrameChanged(AnimationID animationID, Uint8 frameNumber,
                                  const EditorSprite* newSprite);
     void onAnimationModelBoundsIDChanged(AnimationID animationID,
                                          BoundingBoxID newModelBoundsID);
@@ -55,7 +55,12 @@ private:
     /**
      * Pushes the gizmo's updated bounding box to the model.
      */
-    void onGizmoBoundingBoxUpdated(const BoundingBox& boundingBox);
+    void onGizmoBoundingBoxUpdated(const BoundingBox& updatedBounds);
+
+    /**
+     * Displays the timeline's new selected sprite.
+     */
+    void onTimelineSelectionChanged(const EditorSprite* selectedSprite);
 
     /**
      * Styles the given text.
@@ -81,6 +86,9 @@ private:
 
     /** The gizmo for editing the animation's bounding box. */
     BoundingBoxGizmo boundingBoxGizmo;
+
+    /** The timeline for editing the sprites in the animation. */
+    AnimationTimeline timeline;
 
     AUI::Text descText1;
 };

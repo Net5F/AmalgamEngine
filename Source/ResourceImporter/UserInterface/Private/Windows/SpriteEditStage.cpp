@@ -74,16 +74,17 @@ SpriteEditStage::SpriteEditStage(DataModel& inDataModel)
         .connect<&SpriteEditStage::onSpriteRemoved>(*this);
 
     // When the gizmo updates the active sprite's bounds, push it to the model.
-    boundingBoxGizmo.boundingBoxUpdated
-        .connect<&SpriteEditStage::onGizmoBoundingBoxUpdated>(*this);
+    boundingBoxGizmo.setOnBoundingBoxUpdated(
+        [&](const BoundingBox& updatedBounds) {
+            onGizmoBoundingBoxUpdated(updatedBounds);
+        });
 }
 
 void SpriteEditStage::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
     // Check if the new active item is a sprite and return early if not.
-    const EditorSprite* newActiveSprite{
-        std::get_if<EditorSprite>(&newActiveItem)};
+    const EditorSprite* newActiveSprite{get_if<EditorSprite>(&newActiveItem)};
     if (!newActiveSprite) {
         activeSpriteID = NULL_SPRITE_ID;
         return;
@@ -172,7 +173,7 @@ void SpriteEditStage::onSpriteRemoved(SpriteID spriteID)
     }
 }
 
-void SpriteEditStage::onGizmoBoundingBoxUpdated(const BoundingBox& boundingBox)
+void SpriteEditStage::onGizmoBoundingBoxUpdated(const BoundingBox& updatedBounds)
 {
     if (activeSpriteID != NULL_SPRITE_ID) {
         // If the sprite isn't set to use a custom model, do nothing (should 
@@ -185,7 +186,7 @@ void SpriteEditStage::onGizmoBoundingBoxUpdated(const BoundingBox& boundingBox)
 
         // Update the model with the gizmo's new state.
         dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
-                                                         boundingBox);
+                                                         updatedBounds);
     }
 }
 

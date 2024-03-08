@@ -49,7 +49,7 @@ private:
     /**
      * Pushes the gizmo's updated bounding box to the model.
      */
-    void onGizmoBoundingBoxUpdated(const BoundingBox& boundingBox);
+    void onGizmoBoundingBoxUpdated(const BoundingBox& updatedBounds);
 
     /**
      * Styles the given text.

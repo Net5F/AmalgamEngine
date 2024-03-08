@@ -1,5 +1,6 @@
 target_sources(ResourceImporter
     PRIVATE
+        Private/Widgets/AnimationTimeline.cpp
         Private/Widgets/BoundingBoxGizmo.cpp
         Private/Widgets/GraphicSetSlot.cpp
         Private/Widgets/LibraryCollapsibleContainer.cpp
@@ -8,6 +9,8 @@ target_sources(ResourceImporter
         Private/Widgets/MainTextInput.cpp
         Private/Widgets/MainThumbnail.cpp
         Private/Widgets/ParentListItem.cpp
+        Private/Widgets/TimelineCell.cpp
+        Private/Widgets/TimelineScrubber.cpp
         Private/Widgets/TitleButton.cpp
         Private/Windows/AddIconSheetDialog.cpp
         Private/Windows/AddSpriteSheetDialog.cpp
@@ -29,6 +32,7 @@ target_sources(ResourceImporter
         Private/TitleScreen.cpp
         Private/UserInterface.cpp
     PUBLIC
+        Public/Widgets/AnimationTimeline.h
         Public/Widgets/BoundingBoxGizmo.h
         Public/Widgets/GraphicSetSlot.h
         Public/Widgets/LibraryCollapsibleContainer.h
@@ -37,6 +41,8 @@ target_sources(ResourceImporter
         Public/Widgets/MainTextInput.h
         Public/Widgets/MainThumbnail.h
         Public/Widgets/ParentListItem.h
+        Public/Widgets/TimelineCell.h
+        Public/Widgets/TimelineScrubber.h
         Public/Widgets/TitleButton.h
         Public/Windows/AddIconSheetDialog.h
         Public/Windows/AddSpriteSheetDialog.h

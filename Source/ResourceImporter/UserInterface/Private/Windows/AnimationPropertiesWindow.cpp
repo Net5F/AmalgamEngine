@@ -19,13 +19,13 @@ namespace ResourceImporter
 {
 AnimationPropertiesWindow::AnimationPropertiesWindow(
     DataModel& inDataModel, LibraryWindow& inLibraryWindow)
-: AUI::Window({1617, 0, 303, 579}, "AnimationPropertiesWindow")
+: AUI::Window({1617, 0, 303, 705}, "AnimationPropertiesWindow")
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
 , nameInput{{24, 84, 255, 38}, "NameInput"}
-, frameCountLabel{{24, 166, 65, 28}, "FrameCountLabel"}
-, frameCountInput{{24, 160, 255, 38}, "FrameCountInput"}
-, fpsLabel{{24, 216, 65, 28}, "FpsLabel"}
-, fpsInput{{24, 210, 255, 38}, "FpsInput"}
+, frameCountLabel{{24, 166, 110, 28}, "FrameCountLabel"}
+, frameCountInput{{150, 160, 129, 38}, "FrameCountInput"}
+, fpsLabel{{24, 216, 110, 28}, "FpsLabel"}
+, fpsInput{{150, 210, 129, 38}, "FpsInput"}
 , boundingBoxLabel{{24, 286, 210, 27}, "BoundingBoxLabel"}
 , boundingBoxNameLabel{{24, 319, 178, 21}, "BoundingBoxNameLabel"}
 , boundingBoxButton{{207, 312, 72, 26}, "Assign", "BoundingBoxButton"}
@@ -46,13 +46,16 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
 , activeAnimationID{NULL_ANIMATION_ID}
+, committedFrameCount{0}
+, committedFps{0}
 , committedMinX{0.0}
 , committedMinY{0.0}
 , committedMinZ{0.0}
 , committedMaxX{0.0}
 , committedMaxY{0.0}
 , committedMaxZ{0.0}
-, backgroundImage{{0, 0, 303, 579}, "PropertiesBackground"}
+, backgroundImage{{0, 0, logicalExtent.w, logicalExtent.h},
+                  "PropertiesBackground"}
 , headerImage{{0, 0, 303, 40}, "PropertiesHeader"}
 , windowLabel{{12, 0, 282, 40}, "PropertiesWindowLabel"}
 {
@@ -109,6 +112,20 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(
     };
     styleTextInput(nameInput);
     nameInput.setOnTextCommitted([this]() { saveName(); });
+
+    /* Frame count entry. */
+    styleLabel(frameCountLabel, "Frames", 21);
+    frameCountLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
+
+    styleTextInput(frameCountInput);
+    frameCountInput.setOnTextCommitted([this]() { saveFrameCount(); });
+
+    /* FPS entry. */
+    styleLabel(fpsLabel, "Fps", 21);
+    fpsLabel.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
+
+    styleTextInput(fpsInput);
+    fpsInput.setOnTextCommitted([this]() { saveFps(); });
 
     /* Bounding box selection. */
     styleLabel(boundingBoxLabel, "Bounding Box", 21);
@@ -181,7 +198,7 @@ void AnimationPropertiesWindow::onActiveLibraryItemChanged(
 {
     // Check if the new active item is an animation and return early if not.
     const EditorAnimation* newActiveAnimation{
-        std::get_if<EditorAnimation>(&newActiveItem)};
+        get_if<EditorAnimation>(&newActiveItem)};
     if (!newActiveAnimation) {
         activeAnimationID = NULL_ANIMATION_ID;
         return;
@@ -192,6 +209,8 @@ void AnimationPropertiesWindow::onActiveLibraryItemChanged(
     // Update all of our property fields to match the new active animation's 
     // data.
     nameInput.setText(newActiveAnimation->displayName);
+    frameCountInput.setText(std::to_string(newActiveAnimation->frameCount));
+    fpsInput.setText(std::to_string(newActiveAnimation->fps));
 
     if (newActiveAnimation->modelBoundsID) {
         const EditorBoundingBox& boundingBox{
@@ -408,6 +427,47 @@ void AnimationPropertiesWindow::saveName()
 {
     dataModel.animationModel.setAnimationDisplayName(activeAnimationID,
                                                nameInput.getText());
+}
+
+void AnimationPropertiesWindow::saveFrameCount()
+{
+    // Validate the user input as a valid value.
+    try {
+        // Convert the input string to an int.
+        int newFrameCount{std::stoi(frameCountInput.getText())};
+
+        // Clamp the value to its bounds.
+        // Note: There must be at least 1 frame in every animation.
+        // Note: 1000 was chosen randomly. Adjust it if it's a problem.
+        newFrameCount = std::clamp(newFrameCount, 1, 1000);
+
+        // Apply the new value.
+        dataModel.animationModel.setAnimationFrameCount(activeAnimationID,
+                                                        newFrameCount);
+    } catch (std::exception&) {
+        // Input was not valid, reset the field to what it was.
+        frameCountInput.setText(std::to_string(committedFrameCount));
+    }
+}
+
+void AnimationPropertiesWindow::saveFps()
+{
+    // Validate the user input as a valid value.
+    try {
+        // Convert the input string to an int.
+        int newFps{std::stoi(fpsInput.getText())};
+
+        // Clamp the value to its bounds.
+        // Note: FPS must be at least 1.
+        // Note: 1000 was chosen randomly. Adjust it if it's a problem.
+        newFps = std::clamp(newFps, 1, 1000);
+
+        // Apply the new value.
+        dataModel.animationModel.setAnimationFps(activeAnimationID, newFps);
+    } catch (std::exception&) {
+        // Input was not valid, reset the field to what it was.
+        fpsInput.setText(std::to_string(committedFps));
+    }
 }
 
 void AnimationPropertiesWindow::saveModelBoundsID()

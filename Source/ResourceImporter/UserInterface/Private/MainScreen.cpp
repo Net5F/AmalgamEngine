@@ -211,19 +211,19 @@ void MainScreen::onActiveLibraryItemChanged(
     iconPropertiesWindow.setIsVisible(false);
 
     // Make the appropriate windows visible, based on the new item's type.
-    if (std::holds_alternative<EditorBoundingBox>(newActiveItem)) {
+    if (holds_alternative<EditorBoundingBox>(newActiveItem)) {
         boundingBoxEditStage.setIsVisible(true);
         boundingBoxPropertiesWindow.setIsVisible(true);
     }
-    else if (std::holds_alternative<EditorSprite>(newActiveItem)) {
+    else if (holds_alternative<EditorSprite>(newActiveItem)) {
         spriteEditStage.setIsVisible(true);
         spritePropertiesWindow.setIsVisible(true);
     }
-    else if (std::holds_alternative<EditorAnimation>(newActiveItem)) {
+    else if (holds_alternative<EditorAnimation>(newActiveItem)) {
         animationEditStage.setIsVisible(true);
         animationPropertiesWindow.setIsVisible(true);
     }
-    else if (std::holds_alternative<EditorIcon>(newActiveItem)) {
+    else if (holds_alternative<EditorIcon>(newActiveItem)) {
         iconEditStage.setIsVisible(true);
         iconPropertiesWindow.setIsVisible(true);
     }

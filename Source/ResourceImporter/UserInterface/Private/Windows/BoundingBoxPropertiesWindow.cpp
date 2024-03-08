@@ -131,7 +131,7 @@ void BoundingBoxPropertiesWindow::onActiveLibraryItemChanged(
 {
     // Check if the new active item is a bounding box and return early if not.
     const EditorBoundingBox* newActiveBoundingBox{
-        std::get_if<EditorBoundingBox>(&newActiveItem)};
+        get_if<EditorBoundingBox>(&newActiveItem)};
     if (!newActiveBoundingBox) {
         activeBoundingBoxID = NULL_BOUNDING_BOX_ID;
         return;

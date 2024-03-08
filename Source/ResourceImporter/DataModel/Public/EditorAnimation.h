@@ -28,10 +28,10 @@ struct EditorAnimation {
     std::string displayName{""};
 
     /** How long this animation is, in frames. */
-    Uint8 frameCount{0};
+    Uint8 frameCount{10};
 
     /** This animation's framerate (frames per second). */
-    Uint8 fps{0};
+    Uint8 fps{10};
 
     struct Frame
     {

@@ -52,7 +52,7 @@ void IconEditStage::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
     // Check if the new active item is a icon and return early if not.
-    const EditorIcon* newActiveIcon{std::get_if<EditorIcon>(&newActiveItem)};
+    const EditorIcon* newActiveIcon{get_if<EditorIcon>(&newActiveItem)};
     if (!newActiveIcon) {
         activeIconID = NULL_ICON_ID;
         return;

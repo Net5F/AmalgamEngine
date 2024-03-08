@@ -51,6 +51,9 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     auto spriteSheetContainer{
         std::make_unique<LibraryCollapsibleContainer>("Sprite Sheets")};
     libraryContainer.push_back(std::move(spriteSheetContainer));
+    auto animationContainer{
+        std::make_unique<LibraryCollapsibleContainer>("Animations")};
+    libraryContainer.push_back(std::move(animationContainer));
     auto floorContainer{
         std::make_unique<LibraryCollapsibleContainer>("Floors")};
     libraryContainer.push_back(std::move(floorContainer));
@@ -95,6 +98,11 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     spriteModel.sheetAdded.connect<&LibraryWindow::onSpriteSheetAdded>(*this);
     spriteModel.sheetRemoved.connect<&LibraryWindow::onSpriteSheetRemoved>(
         *this);
+    AnimationModel& animationModel{dataModel.animationModel};
+    animationModel.animationAdded.connect<&LibraryWindow::onAnimationAdded>(
+        *this);
+    animationModel.animationRemoved.connect<&LibraryWindow::onAnimationRemoved>(
+        *this);
     GraphicSetModel& graphicSetModel{dataModel.graphicSetModel};
     graphicSetModel.floorAdded.connect<&LibraryWindow::onFloorAdded>(*this);
     graphicSetModel.floorCoveringAdded
@@ -112,6 +120,8 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
         .connect<&LibraryWindow::onBoundingBoxDisplayNameChanged>(*this);
     spriteModel.spriteDisplayNameChanged
         .connect<&LibraryWindow::onSpriteDisplayNameChanged>(*this);
+    animationModel.animationDisplayNameChanged
+        .connect<&LibraryWindow::onAnimationDisplayNameChanged>(*this);
     graphicSetModel.graphicSetDisplayNameChanged
         .connect<&LibraryWindow::onGraphicSetDisplayNameChanged>(*this);
     iconModel.iconDisplayNameChanged

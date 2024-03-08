@@ -127,6 +127,8 @@ private:
     /** The below functions are all for validating and saving the user's data
         when the text is committed. */
     void saveName();
+    void saveFrameCount();
+    void saveFps();
     void saveModelBoundsID();
     void saveMinX();
     void saveMinY();
@@ -138,6 +140,8 @@ private:
 
     /** The below floats save the committed values, so we can revert to them
         if the user inputs invalid characters. */
+    int committedFrameCount;
+    int committedFps;
     float committedMinX;
     float committedMinY;
     float committedMinZ;

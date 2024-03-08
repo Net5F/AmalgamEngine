@@ -40,8 +40,6 @@ BoundingBoxGizmo::BoundingBoxGizmo(DataModel& inDataModel)
 , planeXCoords{}
 , planeYCoords{}
 , currentHeldControl{Control::None}
-, boundingBoxUpdatedSig{}
-, boundingBoxUpdated{boundingBoxUpdatedSig}
 {
 }
 
@@ -73,6 +71,12 @@ void BoundingBoxGizmo::setBoundingBox(const BoundingBox& newBoundingBox)
 {
     boundingBox = newBoundingBox;
     refresh();
+}
+
+void BoundingBoxGizmo::setOnBoundingBoxUpdated(
+    std::function<void(const BoundingBox&)> inOnBoundingBoxUpdated)
+{
+    onBoundingBoxUpdated = std::move(inOnBoundingBoxUpdated);
 }
 
 void BoundingBoxGizmo::updateLayout(const SDL_Point& startPosition,
@@ -287,9 +291,11 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
     // Signal the updated bounding box.
     // Note: We don't update our internal bounding box until our owner 
     //       saves the update in the model and calls setBoundingBox().
-    BoundingBox updatedBounds{
-        minX, maxX, minY, maxY, boundingBox.minZ, boundingBox.maxZ};
-    boundingBoxUpdatedSig.publish(updatedBounds);
+    if (onBoundingBoxUpdated) {
+        BoundingBox updatedBounds{
+            minX, maxX, minY, maxY, boundingBox.minZ, boundingBox.maxZ};
+        onBoundingBoxUpdated(updatedBounds);
+    }
 }
 
 void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
@@ -301,7 +307,9 @@ void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
     // Signal the updated bounding box.
     // Note: We don't update our internal bounding box until our owner 
     //       saves the update in the model and calls setBoundingBox().
-    boundingBoxUpdatedSig.publish(updatedBounds);
+    if (onBoundingBoxUpdated) {
+        onBoundingBoxUpdated(updatedBounds);
+    }
 }
 
 void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
@@ -311,7 +319,9 @@ void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
     updatedBounds.minY = std::clamp(mouseWorldPos.y, 0.f, updatedBounds.maxY);
 
     // Signal the updated bounding box.
-    boundingBoxUpdatedSig.publish(updatedBounds);
+    if (onBoundingBoxUpdated) {
+        onBoundingBoxUpdated(updatedBounds);
+    }
 }
 
 void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
@@ -338,7 +348,9 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
         updatedBounds.maxZ = mouseZHeight;
 
         // Signal the updated bounding box.
-        boundingBoxUpdatedSig.publish(updatedBounds);
+        if (onBoundingBoxUpdated) {
+            onBoundingBoxUpdated(updatedBounds);
+        }
     }
 }
 

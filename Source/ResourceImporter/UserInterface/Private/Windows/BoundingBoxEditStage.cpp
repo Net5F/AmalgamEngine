@@ -75,8 +75,10 @@ BoundingBoxEditStage::BoundingBoxEditStage(DataModel& inDataModel,
         .connect<&BoundingBoxEditStage::onBoundingBoxRemoved>(*this);
 
     // When the gizmo updates the active sprite's bounds, push it to the model.
-    boundingBoxGizmo.boundingBoxUpdated
-        .connect<&BoundingBoxEditStage::onGizmoBoundingBoxUpdated>(*this);
+    boundingBoxGizmo.setOnBoundingBoxUpdated(
+        [&](const BoundingBox& updatedBounds) {
+            onGizmoBoundingBoxUpdated(updatedBounds);
+        });
 
     // When a library item is selected, update the preview button.
     libraryWindow.listItemSelected
@@ -125,7 +127,7 @@ void BoundingBoxEditStage::onActiveLibraryItemChanged(
 {
     // Check if the new active item is a bounding box and return early if not.
     const EditorBoundingBox* newActiveBoundingBox{
-        std::get_if<EditorBoundingBox>(&newActiveItem)};
+        get_if<EditorBoundingBox>(&newActiveItem)};
     if (!newActiveBoundingBox) {
         activeBoundingBoxID = NULL_BOUNDING_BOX_ID;
         return;
@@ -186,12 +188,12 @@ void BoundingBoxEditStage::onBoundingBoxRemoved(BoundingBoxID boundingBoxID)
 }
 
 void BoundingBoxEditStage::onGizmoBoundingBoxUpdated(
-    const BoundingBox& boundingBox)
+    const BoundingBox& updatedBounds)
 {
     if (activeBoundingBoxID) {
         // Update the model with the gizmo's new state.
         dataModel.boundingBoxModel.setBoundingBoxBounds(activeBoundingBoxID,
-                                                        boundingBox);
+                                                        updatedBounds);
     }
 }
 

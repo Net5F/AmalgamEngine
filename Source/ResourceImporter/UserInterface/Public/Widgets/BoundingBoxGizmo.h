@@ -4,8 +4,8 @@
 #include "LibraryItemData.h"
 #include "AUI/Widget.h"
 #include "AUI/ScreenResolution.h"
-#include "entt/signal/sigh.hpp"
 #include <array>
+#include <functional>
 
 namespace AM
 {
@@ -62,6 +62,16 @@ public:
      * Sets this gizmo to match newBoundingBox.
      */
     void setBoundingBox(const BoundingBox& newBoundingBox);
+
+    //-------------------------------------------------------------------------
+    // Callback registration
+    //-------------------------------------------------------------------------
+    /**
+     * @param inOnBoundingBoxUpdated A callback that expects the updated 
+     *                               bounding box.
+     */
+    void setOnBoundingBoxUpdated(
+        std::function<void(const BoundingBox& updatedBounds)> inOnBoundingBoxUpdated);
 
     //-------------------------------------------------------------------------
     // Base class overrides
@@ -233,17 +243,7 @@ private:
     /** Tracks which control, if any, is currently being held. */
     Control currentHeldControl;
 
-    //-------------------------------------------------------------------------
-    // Signals
-    //-------------------------------------------------------------------------
-    entt::sigh<void(const BoundingBox& boundingBox)> boundingBoxUpdatedSig;
-
-public:
-    //-------------------------------------------------------------------------
-    // Signal Sinks
-    //-------------------------------------------------------------------------
-    entt::sink<entt::sigh<void(const BoundingBox& boundingBox)>>
-        boundingBoxUpdated;
+    std::function<void(const BoundingBox&)> onBoundingBoxUpdated;
 };
 
 } // End namespace ResourceImporter
