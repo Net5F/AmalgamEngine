@@ -116,12 +116,6 @@ private:
                                   const std::string& newDisplayName);
 
     /**
-     * If there are other currently selected list items, checks if the given
-     * list item is compatible with them. If so, adds it to the vector.
-     */
-    void processSelectedListItem(LibraryListItem* selectedListItem);
-
-    /**
      * Adds the given sprite to the given sprite sheet list item.
      */
     void addSpriteToSheetListItem(ParentListItem& sheetListItem,
@@ -133,6 +127,12 @@ private:
      */
     void addIconToSheetListItem(ParentListItem& sheetListItem,
                                 const EditorIconSheet& sheet, IconID iconID);
+
+    /**
+     * If there are other currently selected list items, checks if the given
+     * list item is compatible with them. If so, adds it to the vector.
+     */
+    void processSelectedListItem(LibraryListItem* selectedListItem);
 
     /**
      * @return true if the given type is removable.
@@ -155,7 +155,7 @@ private:
     DataModel& dataModel;
 
     /** An array of maps, indexed by list item types. Each map holds the
-        list items for the associated type. */
+        list items for the associated type, with the associated IDs as keys. */
     std::array<std::unordered_map<int, LibraryListItem*>,
                LibraryListItem::Type::Count>
         listItemMaps;
@@ -182,18 +182,17 @@ private:
     //-------------------------------------------------------------------------
     // Signals
     //-------------------------------------------------------------------------
-    entt::sigh<void(const LibraryListItem& selectedItem)> listItemSelectedSig;
-    entt::sigh<void(const LibraryListItem& deselectedItem)>
-        listItemDeselectedSig;
+    entt::sigh<void(const std::vector<LibraryListItem*>& selectedItems)>
+        selectedItemsChangedSig;
 
 public:
     //-------------------------------------------------------------------------
     // Signal Sinks
     //-------------------------------------------------------------------------
-    entt::sink<entt::sigh<void(const LibraryListItem& selectedItem)>>
-        listItemSelected;
-    entt::sink<entt::sigh<void(const LibraryListItem& deselectedItem)>>
-        listItemDeselected;
+    /** The list of selected library items has changed. */
+    entt::sink<
+        entt::sigh<void(const std::vector<LibraryListItem*>& selectedItems)>>
+        selectedItemsChanged;
 };
 
 } // End namespace ResourceImporter

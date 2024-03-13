@@ -90,10 +90,10 @@ private:
                                          bool newCollisionEnabled);
 
     /**
-     * Updates boundingBoxButton to show whether the list item is assignable.
+     * Updates boundingBoxButton to show whether the selection is assignable.
      */
-    void onLibraryListItemSelected(const LibraryListItem& selectedItem);
-    void onLibraryListItemDeselected(const LibraryListItem& deselectedItem);
+    void onLibrarySelectedItemsChanged(
+        const std::vector<LibraryListItem*>& selectedItems);
 
     /**
      * Enables or disables the min/max bounds fields.

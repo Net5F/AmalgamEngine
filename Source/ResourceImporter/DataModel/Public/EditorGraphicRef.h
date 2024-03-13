@@ -29,6 +29,8 @@ struct EditorGraphicRef
      */
     GraphicID getGraphicID() const;
 
+    const std::string& getDisplayName() const;
+
     bool getCollisionEnabled() const;
 
     const BoundingBox&
@@ -37,16 +39,17 @@ struct EditorGraphicRef
     /**
      * If this ref points to a Sprite, returns it.
      * If this ref points to an Animation, returns the first sprite in the 
-     * animation.
+     * animation or nullptr if the animation has no frames.
      */
-    const EditorSprite& getFirstSprite() const;
+    const EditorSprite* getFirstSprite() const;
 
     /**
      * If this ref points to a Sprite, returns it.
      * If this ref points to an Animation, returns the sprite that should be 
-     * displayed at the given animation time.
+     * displayed at the given animation time or nullptr if the animation has 
+     * no frames.
      */
-    const EditorSprite& getSpriteAtTime(double animationTime) const;
+    const EditorSprite* getSpriteAtTime(double animationTime) const;
 };
 
 } // End namespace ResourceImporter

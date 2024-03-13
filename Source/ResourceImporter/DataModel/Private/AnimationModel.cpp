@@ -79,14 +79,22 @@ void AnimationModel::save(nlohmann::json& json)
         json["animations"][i]["frameCount"] = animation.frameCount;
         json["animations"][i]["fps"] = animation.fps;
 
-        // Add the frames.
-        int j{0};
-        for (auto& [frameNumber, sprite] : animation.frames) {
-            json["animations"][i]["frames"][j]["frameNumber"] = frameNumber;
-            json["animations"][i]["frames"][j]["spriteID"]
-                = sprite.get().numericID;
+        // If the animation has any filled frames, add them.
+        if ((animation.frames.size() > 0)
+            && (animation.frames[0].sprite.get().numericID != NULL_SPRITE_ID)) {
+            int j{0};
+            for (auto& [frameNumber, sprite] : animation.frames) {
+                json["animations"][i]["frames"][j]["frameNumber"] = frameNumber;
+                json["animations"][i]["frames"][j]["spriteID"]
+                    = sprite.get().numericID;
 
-            j++;
+                j++;
+            }
+        }
+        else {
+            // No filled frames, add a null sprite.
+            json["animations"][i]["frames"][0]["frameNumber"] = 0;
+            json["animations"][i]["frames"][0]["spriteID"] = NULL_SPRITE_ID;
         }
 
         // Add collisionEnabled.
@@ -135,8 +143,12 @@ bool AnimationModel::addAnimation()
     // Add the new animation to the map.
     animationMap.emplace(numericID, EditorAnimation{numericID, displayName});
 
-    // Signal the new animation to the UI.
+    // Default to a non-0 bounding box so it's easier to click.
     EditorAnimation& animation{animationMap[numericID]};
+    static constexpr BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
+    animation.customModelBounds = defaultBox;
+
+    // Signal the new animation to the UI.
     animationAddedSig.publish(numericID, animation);
 
     // Set the new animation as the active library item.
@@ -335,9 +347,13 @@ bool AnimationModel::parseAnimation(const nlohmann::json& animationJson)
 
     // Add the frames.
     for (auto& [key, frameJson] : animationJson.at("frames").items()) {
-        const EditorSprite& sprite{
-            dataModel.spriteModel.getSprite(frameJson.at("spriteID"))};
-        animation.frames.emplace_back(frameJson.at("frameNumber"), sprite);
+        // Note: We skip frames that contain the null sprite.
+        SpriteID spriteID{frameJson.at("spriteID")};
+        if (spriteID) {
+            const EditorSprite& sprite{
+                dataModel.spriteModel.getSprite(spriteID)};
+            animation.frames.emplace_back(frameJson.at("frameNumber"), sprite);
+        }
     }
 
     // Add collisionEnabled.

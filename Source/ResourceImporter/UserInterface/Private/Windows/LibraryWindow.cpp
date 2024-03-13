@@ -19,8 +19,7 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
 , windowLabel({12, 0, 80, 40}, "LibraryWindowLabel")
 , libraryContainer({1, 40, 318, (1080 - 40 - 1)}, "LibraryContainer")
 , addButton({286, 9, 22, 22}, "AddButton")
-, listItemSelected{listItemSelectedSig}
-, listItemDeselected{listItemDeselectedSig}
+, selectedItemsChanged{selectedItemsChangedSig}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
@@ -136,10 +135,13 @@ const std::vector<LibraryListItem*>& LibraryWindow::getSelectedListItems() const
 void LibraryWindow::onFocusLost(AUI::FocusLostType focusLostType)
 {
     // Deselect all of our selected list items.
-    for (LibraryListItem* listItem : selectedListItems) {
+    // Note: We need to save a copy of the vector and clear it so that the 
+    //       librarySelectedItemsChanged signal is accurate.
+    std::vector<LibraryListItem*> tempSelectedListItems(selectedListItems);
+    selectedListItems.clear();
+    for (LibraryListItem* listItem : tempSelectedListItems) {
         listItem->deselect();
     }
-    selectedListItems.clear();
 }
 
 AUI::EventResult LibraryWindow::onKeyDown(SDL_Keycode keyCode)
@@ -207,7 +209,7 @@ void LibraryWindow::onBoundingBoxAdded(BoundingBoxID boundingBoxID,
     boundingBoxListItem->setOnDeselected(
         [this](LibraryListItem* deselectedListItem) {
         // Note: Deselect is handled in OnSelected and FocusLost.
-        listItemDeselectedSig.publish(*deselectedListItem);
+        selectedItemsChangedSig.publish(selectedListItems);
     });
     boundingBoxListItem->setOnActivated(
         [this, boundingBoxID](LibraryListItem*) {
@@ -236,7 +238,7 @@ void LibraryWindow::onSpriteSheetAdded(int sheetID,
     });
     sheetListItem->setOnDeselected([this](LibraryListItem* deselectedListItem) {
         // Note: Deselect is handled in OnSelected and FocusLost.
-        listItemDeselectedSig.publish(*deselectedListItem);
+        selectedItemsChangedSig.publish(selectedListItems);
     });
 
     // Add each of the new sheet's sprites to its child container.
@@ -269,7 +271,7 @@ void LibraryWindow::onAnimationAdded(AnimationID animationID,
     animationListItem->setOnDeselected(
         [this](LibraryListItem* deselectedListItem) {
         // Note: Deselect is handled in OnSelected and FocusLost.
-        listItemDeselectedSig.publish(*deselectedListItem);
+        selectedItemsChangedSig.publish(selectedListItems);
     });
     animationListItem->setOnActivated(
         [this, animationID](LibraryListItem*) {
@@ -367,7 +369,7 @@ void LibraryWindow::onIconSheetAdded(int sheetID, const EditorIconSheet& sheet)
     });
     sheetListItem->setOnDeselected([this](LibraryListItem* deselectedListItem) {
         // Note: Deselect is handled in OnSelected and FocusLost.
-        listItemDeselectedSig.publish(*deselectedListItem);
+        selectedItemsChangedSig.publish(selectedListItems);
     });
 
     // Add each of the new sheet's icons to its child container.
@@ -567,25 +569,6 @@ void LibraryWindow::onIconDisplayNameChanged(IconID iconID,
     iconListItem.text.setText(newDisplayName);
 }
 
-void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
-{
-    // TODO: Currently we only support one selection at a time. When we add
-    //       multi-select, this logic will need to check if the newly selected
-    //       item is compatible with the existing ones.
-
-    // Deselect all of our selected list items.
-    for (LibraryListItem* listItem : selectedListItems) {
-        listItem->deselect();
-    }
-    selectedListItems.clear();
-
-    // Add the new item.
-    selectedListItems.push_back(selectedListItem);
-
-    // Signal that an item was selected.
-    listItemSelectedSig.publish(*selectedListItem);
-}
-
 void LibraryWindow::addSpriteToSheetListItem(ParentListItem& sheetListItem,
                                              const EditorSpriteSheet& sheet,
                                              SpriteID spriteID)
@@ -605,7 +588,7 @@ void LibraryWindow::addSpriteToSheetListItem(ParentListItem& sheetListItem,
     });
     spriteListItem->setOnDeselected([this](LibraryListItem* deselectedListItem) {
         // Note: Deselect is handled in OnSelected and FocusLost.
-        listItemDeselectedSig.publish(*deselectedListItem);
+        selectedItemsChangedSig.publish(selectedListItems);
     });
     spriteListItem->setOnActivated(
         [this, spriteID](LibraryListItem* activatedListItem) {
@@ -634,6 +617,10 @@ void LibraryWindow::addIconToSheetListItem(ParentListItem& sheetListItem,
     iconListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
         processSelectedListItem(selectedListItem);
     });
+    iconListItem->setOnDeselected([this](LibraryListItem* deselectedListItem) {
+        // Note: Deselect is handled in OnSelected and FocusLost.
+        selectedItemsChangedSig.publish(selectedListItems);
+    });
     iconListItem->setOnActivated(
         [this, iconID](LibraryListItem* activatedListItem) {
             // Set this item's associated icon as the active item.
@@ -642,6 +629,49 @@ void LibraryWindow::addIconToSheetListItem(ParentListItem& sheetListItem,
 
     // Add the icon list item to the sheet list item.
     sheetListItem.childListItemContainer.push_back(std::move(iconListItem));
+}
+
+void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
+{
+    // Find out if the shift or ctrl keys are held.
+    const Uint8* keyStates{SDL_GetKeyboardState(nullptr)};
+    bool shiftIsHeld{keyStates[SDL_SCANCODE_LSHIFT]
+                     || keyStates[SDL_SCANCODE_RSHIFT]};
+    bool ctrlIsHeld{keyStates[SDL_SCANCODE_LCTRL]
+                    || keyStates[SDL_SCANCODE_RCTRL]};
+
+    // If we're shift or ctrl+clicking and have existing selections, check if 
+    // the new selection is the same type.
+    if ((shiftIsHeld || ctrlIsHeld) && (selectedListItems.size() > 0)
+        && (selectedListItems[0]->type != selectedListItem->type)) {
+        // Not the same type. Ignore this selection.
+        selectedListItem->deselect();
+        return;
+    }
+
+    // If this is a shift+click, select all items between the current selection 
+    // and the new one.
+    if (shiftIsHeld) {
+        // TODO: Implement.
+        return;
+    }
+    else if (ctrlIsHeld) {
+        // Add the new selection to the list.
+        selectedListItems.push_back(selectedListItem);
+    }
+    else {
+        // Normal click. Deselect all of our selected list items.
+        for (LibraryListItem* listItem : selectedListItems) {
+            listItem->deselect();
+        }
+        selectedListItems.clear();
+
+        // Add the new item.
+        selectedListItems.push_back(selectedListItem);
+    }
+
+    // Signal that the selections were updated.
+    selectedItemsChangedSig.publish(selectedListItems);
 }
 
 bool LibraryWindow::isRemovable(LibraryListItem::Type listItemType)

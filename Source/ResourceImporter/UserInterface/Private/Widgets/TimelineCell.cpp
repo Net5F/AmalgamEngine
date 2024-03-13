@@ -8,7 +8,7 @@ namespace AM
 namespace ResourceImporter
 {
 TimelineCell::TimelineCell()
-: AUI::Widget({0, 0, 24, 26}, "TimelineCell")
+: AUI::Widget({0, 0, LOGICAL_WIDTH, 26}, "TimelineCell")
 , hasSprite{false}
 , drawDarkBackground{false}
 {
@@ -44,8 +44,8 @@ void TimelineCell::render(const SDL_Point& windowTopLeft)
         SDL_Point cellCenter{(finalExtent.x + (finalExtent.w / 2)),
                              (finalExtent.y + (finalExtent.h / 2))};
         int radius{AUI::ScalingHelpers::logicalToActual(7)};
-        circleRGBA(AUI::Core::getRenderer(), cellCenter.x, cellCenter.y, radius,
-                   64, 64, 64, 255);
+        filledCircleRGBA(AUI::Core::getRenderer(), cellCenter.x, cellCenter.y,
+                         radius, 64, 64, 64, 255);
     }
 }
 

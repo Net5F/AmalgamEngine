@@ -79,9 +79,10 @@ struct EditorAnimation {
         getModelBounds(const BoundingBoxModel& boundingBoxModel) const;
 
     /**
-     * Returns the sprite that should be displayed at the given animation time.
+     * Returns the sprite that should be displayed at the given animation time, 
+     * or nullptr if this animation has no frames.
      */
-    const EditorSprite& getSpriteAtTime(double animationTime) const;
+    const EditorSprite* getSpriteAtTime(double animationTime) const;
 };
 
 } // namespace ResourceImporter

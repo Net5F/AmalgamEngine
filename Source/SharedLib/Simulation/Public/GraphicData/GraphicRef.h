@@ -25,6 +25,8 @@ struct GraphicRef : public std::variant<std::reference_wrapper<const Sprite>,
      */
     GraphicID getGraphicID() const;
 
+    const std::string& getDisplayName() const;
+
     bool getCollisionEnabled() const;
 
     const BoundingBox& getModelBounds() const;

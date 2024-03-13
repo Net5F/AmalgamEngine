@@ -31,6 +31,12 @@ public:
 
     void setFrame(Uint8 frameNumber, bool hasSprite);
 
+    /**
+     * @return The currently selected frame (the one that the scrubber is 
+     *         hovering over).
+     */
+    Uint8 getSelectedFrameNumber();
+
     //-------------------------------------------------------------------------
     // Callback registration
     //-------------------------------------------------------------------------
@@ -44,6 +50,11 @@ public:
 
 private:
     /**
+     * If the scrubber has been dragged far enough, selects a new cell.
+     */
+    void onScrubberDragged(const SDL_Point& cursorPosition);
+
+    /**
      * Refreshes cellContainer to match the current active animation.
      */
     void refreshCells();
@@ -51,7 +62,7 @@ private:
     /**
      * Moves the scrubber to the given frame cell.
      */
-    void moveScrubberToCell(Uint8 cellIndex);
+    void setSelectedFrame(Uint8 frameNumber);
 
     void styleNumberText(AUI::Text& textObject, const std::string& text);
 

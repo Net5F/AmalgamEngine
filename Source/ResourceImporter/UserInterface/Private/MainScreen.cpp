@@ -19,7 +19,7 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , boundingBoxEditStage{dataModel, libraryWindow}
 , boundingBoxPropertiesWindow{dataModel, libraryWindow}
 , spriteEditStage{dataModel}
-, animationEditStage{dataModel}
+, animationEditStage{dataModel, libraryWindow}
 , iconEditStage{dataModel}
 , graphicSetEditStage{dataModel, libraryWindow}
 , spritePropertiesWindow{dataModel, libraryWindow}

@@ -59,10 +59,10 @@ private:
     void onGizmoBoundingBoxUpdated(const BoundingBox& updatedBounds);
 
     /**
-     * Updates previewSpriteButton to show whether the list item is preview-able.
+     * Updates previewSpriteButton to show whether the selection is preview-able.
      */
-    void onLibraryListItemSelected(const LibraryListItem& selectedItem);
-    void onLibraryListItemDeselected(const LibraryListItem& deselectedItem);
+    void onLibrarySelectedItemsChanged(
+        const std::vector<LibraryListItem*>& selectedItems);
 
     /**
      * Styles the given text.

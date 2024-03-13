@@ -14,6 +14,9 @@ namespace ResourceImporter
 class TimelineCell : public AUI::Widget
 {
 public:
+    /** This widget's width. */
+    static constexpr int LOGICAL_WIDTH{24};
+
     TimelineCell();
 
     /** If true, the "this cell has a sprite" circle should be drawn. */

@@ -7,13 +7,12 @@ namespace AM
 {
 namespace ResourceImporter
 {
-TimelineScrubber::TimelineScrubber(const SDL_Point& inLogicalOrigin)
-: AUI::Widget({inLogicalOrigin.x, inLogicalOrigin.y, 18, 48},
-              "TimelineScrubber")
+TimelineScrubber::TimelineScrubber()
+: AUI::Widget({0, 0, 18, 48}, "TimelineScrubber")
 , isDragging{false}
-, rectLogicalExtent{0, 0, 18, 22}
+, rectLogicalExtent{0, 0, 24, 24}
 , rectClippedExtent{0, 0, 0, 0}
-, lineLogicalExtent{7, 18, 4, 26}
+, lineLogicalExtent{9, 24, 6, 24}
 , lineClippedExtent{0, 0, 0, 0}
 {
 }
@@ -26,29 +25,51 @@ void TimelineScrubber::setOnDragged(
 
 void TimelineScrubber::updateLayout(const SDL_Point& startPosition,
                                     const SDL_Rect& availableExtent,
-                                    WidgetLocator* widgetLocator)
+                                    AUI::WidgetLocator* widgetLocator)
 {
+    // Do the normal layout updating.
+    Widget::updateLayout(startPosition, availableExtent, widgetLocator);
+
+    // If this widget is fully clipped, return early.
+    if (SDL_RectEmpty(&clippedExtent)) {
+        return;
+    }
+
     // Note: You could imagine creating widgets to wrap these graphics so 
     //       they could be automatically managed by the layout system.
     //       It seems very heavyweight to add them to the widget tree just 
     //       for layout/rendering though, so we handle this manually.
+    SDL_Rect rectOffsetExtent{rectLogicalExtent};
+    rectOffsetExtent.x += logicalExtent.x;
+    rectOffsetExtent.y += logicalExtent.y;
     rectClippedExtent = AUI::ScalingHelpers::logicalToClipped(
-        rectLogicalExtent, startPosition, availableExtent);
+        rectOffsetExtent, startPosition, availableExtent);
+
+    SDL_Rect lineOffsetExtent{lineLogicalExtent};
+    lineOffsetExtent.x += logicalExtent.x;
+    lineOffsetExtent.y += logicalExtent.y;
     lineClippedExtent = AUI::ScalingHelpers::logicalToClipped(
-        lineLogicalExtent, startPosition, availableExtent);
+        lineOffsetExtent, startPosition, availableExtent);
 }
 
 void TimelineScrubber::render(const SDL_Point& windowTopLeft)
 {
     // Render the rect.
+    SDL_SetRenderDrawBlendMode(AUI::Core::getRenderer(), SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 24, 155, 243, 191);
     if (!SDL_RectEmpty(&rectClippedExtent)) {
-        SDL_RenderFillRect(AUI::Core::getRenderer(), &rectClippedExtent);
+        SDL_Rect finalExtent{rectClippedExtent};
+        finalExtent.x += windowTopLeft.x;
+        finalExtent.y += windowTopLeft.y;
+        SDL_RenderFillRect(AUI::Core::getRenderer(), &finalExtent);
     }
 
     // Render the line.
     if (!SDL_RectEmpty(&lineClippedExtent)) {
-        SDL_RenderFillRect(AUI::Core::getRenderer(), &lineClippedExtent);
+        SDL_Rect finalExtent{lineClippedExtent};
+        finalExtent.x += windowTopLeft.x;
+        finalExtent.y += windowTopLeft.y;
+        SDL_RenderFillRect(AUI::Core::getRenderer(), &finalExtent);
     }
 }
 
@@ -62,7 +83,7 @@ AUI::EventResult TimelineScrubber::onMouseDown(AUI::MouseButtonType buttonType,
 
     isDragging = true;
 
-    return AUI::EventResult{.wasHandled{true}};
+    return AUI::EventResult{.wasHandled{true}, .setMouseCapture{this}};
 }
 
 AUI::EventResult
@@ -81,7 +102,7 @@ AUI::EventResult TimelineScrubber::onMouseUp(AUI::MouseButtonType buttonType,
         return AUI::EventResult{.wasHandled{true}};
     }
 
-    return AUI::EventResult{.wasHandled{false}};
+    return AUI::EventResult{.wasHandled{false}, .releaseMouseCapture{true}};
 }
 
 AUI::EventResult TimelineScrubber::onMouseMove(const SDL_Point& cursorPosition)

@@ -57,7 +57,8 @@ struct Animation {
     BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
 
     /**
-     * Returns the sprite that should be displayed at the given animation time.
+     * Returns the sprite that should be displayed at the given animation time, 
+     * or nullptr if this animation has no frames.
      */
     const Sprite& getSpriteAtTime(double animationTime) const
     { 

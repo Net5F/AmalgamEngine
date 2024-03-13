@@ -49,8 +49,12 @@ const BoundingBox&
     }
 }
 
-const EditorSprite& EditorAnimation::getSpriteAtTime(double animationTime) const
+const EditorSprite* EditorAnimation::getSpriteAtTime(double animationTime) const
 { 
+    if (frames.size() == 0) {
+        return nullptr;
+    }
+
     // Calculate which frame should be displayed at the given time.
     double frameDuration{1.0 / static_cast<double>(fps)};
     std::size_t desiredFrame{
@@ -69,7 +73,7 @@ const EditorSprite& EditorAnimation::getSpriteAtTime(double animationTime) const
         }
     }
 
-    return *sprite;
+    return sprite;
 }
 
 } // End namespace ResourceImporter

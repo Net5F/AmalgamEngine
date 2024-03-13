@@ -20,6 +20,18 @@ GraphicID GraphicRef::getGraphicID() const
     return graphicID;
 }
 
+const std::string& GraphicRef::getDisplayName() const
+{
+    const std::string* displayName{};
+    std::visit(
+        [&](const auto& underlying) {
+            displayName = &(underlying.get().displayName);
+        },
+        *this);
+
+    return *displayName;
+}
+
 bool GraphicRef::getCollisionEnabled() const
 {
     bool collisionEnabled{false};
@@ -52,7 +64,9 @@ const Sprite& GraphicRef::getFirstSprite() const
             spritePtr = &(sprite.get());
         },
         [&](std::reference_wrapper<const Animation> animation) {
-            spritePtr = &(animation.get().frames[0].sprite.get());
+            if (animation.get().frames.size() > 0) {
+                spritePtr = &(animation.get().frames[0].sprite.get());
+            }
         }
     }, *this);
 

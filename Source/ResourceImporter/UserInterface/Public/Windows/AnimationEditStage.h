@@ -2,17 +2,21 @@
 
 #include "LibraryItemData.h"
 #include "BoundingBoxGizmo.h"
-#include "AnimationTimeline.h"
+#include "MainButton.h"
 #include "AUI/Window.h"
 #include "AUI/Screen.h"
 #include "AUI/Text.h"
 #include "AUI/Image.h"
+#include "AUI/ScrollArea.h"
 
 namespace AM
 {
 namespace ResourceImporter
 {
 class DataModel;
+class LibraryWindow;
+class AnimationTimeline;
+class LibraryListItem;
 
 /**
  * The center stage shown when the user loads an animation from the Library.
@@ -25,9 +29,15 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    AnimationEditStage(DataModel& inDataModel);
+    AnimationEditStage(DataModel& inDataModel, LibraryWindow& inLibraryWindow);
 
 private:
+    /**
+     * Adds or removes sprites from the currently selected frame, depending 
+     * on whether a sprite is selected in the library.
+     */
+    void onAssignSpriteButtonPressed();
+
     /**
      * If the new active item is an animation, loads it's data onto this stage.
      */
@@ -63,12 +73,21 @@ private:
     void onTimelineSelectionChanged(const EditorSprite* selectedSprite);
 
     /**
+     * Updates assignButton to show whether the selection is assign-able.
+     */
+    void onLibrarySelectedItemsChanged(
+        const std::vector<LibraryListItem*>& selectedItems);
+
+    /**
      * Styles the given text.
      */
     void styleText(AUI::Text& text);
 
     /** Used to get the current working dir when displaying the animation. */
     DataModel& dataModel;
+
+    /** Used to get the currently selected list item. */
+    LibraryWindow& libraryWindow;
 
     /** The active animation's ID. */
     AnimationID activeAnimationID;
@@ -78,17 +97,27 @@ private:
     //-------------------------------------------------------------------------
     AUI::Text topText;
 
-    /** Checkerboard image, tiled as the background for the loaded animation. */
+    /** Checkerboard image, tiled as the background for the current frame's 
+        sprite. */
     AUI::Image checkerboardImage;
 
-    /** The animation that is currently loaded onto the stage. */
-    AUI::Image animationImage;
+    /** The sprite for the currently selected frame. */
+    AUI::Image spriteImage;
 
     /** The gizmo for editing the animation's bounding box. */
     BoundingBoxGizmo boundingBoxGizmo;
 
+    /** The button for assigning sprites to the curretn selected frame. */
+    MainButton assignButton;
+
+    /** The button for playing the animation. */
+    MainButton playButton;
+
+    /** Holds the AnimationTimeline so it can be scrolled horizontally. */
+    AUI::ScrollArea timelineScrollArea;
+
     /** The timeline for editing the sprites in the animation. */
-    AnimationTimeline timeline;
+    AnimationTimeline* timeline;
 
     AUI::Text descText1;
 };

@@ -3,11 +3,15 @@
 #include "AUI/Widget.h"
 #include <functional>
 
+namespace AUI
+{
+class WidgetLocator;
+}
+
 namespace AM
 {
 namespace ResourceImporter
 {
-class WidgetLocator;
 
 /**
  * A scrubber used to move between frames in a timeline.
@@ -15,7 +19,7 @@ class WidgetLocator;
 class TimelineScrubber : public AUI::Widget
 {
 public:
-    TimelineScrubber(const SDL_Point& inLogicalOrigin);
+    TimelineScrubber();
 
     //-------------------------------------------------------------------------
     // Callback registration
@@ -30,7 +34,7 @@ public:
     //-------------------------------------------------------------------------
     void updateLayout(const SDL_Point& startPosition,
                       const SDL_Rect& availableExtent,
-                      WidgetLocator* widgetLocator);
+                      AUI::WidgetLocator* widgetLocator) override;
 
     void render(const SDL_Point& windowTopLeft) override;
 

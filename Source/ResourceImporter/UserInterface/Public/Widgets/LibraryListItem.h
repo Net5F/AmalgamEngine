@@ -100,20 +100,20 @@ public:
     // Callback registration
     //-------------------------------------------------------------------------
     /**
-     * @param inOnSelected  A callback that expects a pointer to the widget
-     *                      that was selected.
+     * @param inOnSelected A callback that expects a pointer to the widget
+     *                     that was selected.
      */
     void setOnSelected(std::function<void(LibraryListItem*)> inOnSelected);
 
     /**
-     * @param inOnDeselected  A callback that expects a pointer to the
-     *                        widget that was deselected.
+     * @param inOnDeselected A callback that expects a pointer to the
+     *                       widget that was deselected.
      */
     void setOnDeselected(std::function<void(LibraryListItem*)> inOnDeselected);
 
     /**
-     * @param inOnActivated  A callback that expects a pointer to the widget
-     *                       that was activated.
+     * @param inOnActivated A callback that expects a pointer to the widget
+     *                      that was activated.
      */
     void setOnActivated(std::function<void(LibraryListItem*)> inOnActivated);
 
@@ -136,6 +136,9 @@ protected:
     void setIsHovered(bool inIsHovered);
     /** Sets isSelected and updates the visibility of selectedImage. */
     void setIsSelected(bool inIsSelected);
+
+    /** Returns true if shift or ctrl are currently held. */
+    bool modifierKeyIsHeld();
 
     std::function<void(LibraryListItem*)> onSelected;
     std::function<void(LibraryListItem*)> onDeselected;

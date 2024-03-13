@@ -23,6 +23,18 @@ GraphicID EditorGraphicRef::getGraphicID() const
     return graphicID;
 }
 
+const std::string& EditorGraphicRef::getDisplayName() const
+{
+    const std::string* displayName{};
+    std::visit(
+        [&](const auto& underlying) {
+            displayName = &(underlying.get().displayName);
+        },
+        *this);
+
+    return *displayName;
+}
+
 bool EditorGraphicRef::getCollisionEnabled() const
 {
     bool collisionEnabled{false};
@@ -48,7 +60,7 @@ const BoundingBox& EditorGraphicRef::getModelBounds(
     return *modelBounds;
 }
 
-const EditorSprite& EditorGraphicRef::getFirstSprite() const
+const EditorSprite* EditorGraphicRef::getFirstSprite() const
 {
     const EditorSprite* spritePtr{nullptr};
     std::visit(VariantTools::Overload{
@@ -56,14 +68,16 @@ const EditorSprite& EditorGraphicRef::getFirstSprite() const
             spritePtr = &(sprite.get());
         },
         [&](std::reference_wrapper<const EditorAnimation> animation) {
-            spritePtr = &(animation.get().frames[0].sprite.get());
+            if (animation.get().frames.size() > 0) {
+                spritePtr = &(animation.get().frames[0].sprite.get());
+            }
         }
     }, *this);
 
-    return *spritePtr;
+    return spritePtr;
 }
 
-const EditorSprite& EditorGraphicRef::getSpriteAtTime(double animationTime) const
+const EditorSprite* EditorGraphicRef::getSpriteAtTime(double animationTime) const
 {
     const EditorSprite* spritePtr{nullptr};
     std::visit(VariantTools::Overload{
@@ -71,11 +85,11 @@ const EditorSprite& EditorGraphicRef::getSpriteAtTime(double animationTime) cons
             spritePtr = &(sprite.get());
         },
         [&](std::reference_wrapper<const EditorAnimation> animation) {
-            spritePtr = &(animation.get().getSpriteAtTime(animationTime));
+            spritePtr = animation.get().getSpriteAtTime(animationTime);
         }
     }, *this);
 
-    return *spritePtr;
+    return spritePtr;
 }
 
 } // End namespace ResourceImporter

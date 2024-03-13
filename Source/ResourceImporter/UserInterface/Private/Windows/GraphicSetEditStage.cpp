@@ -171,21 +171,27 @@ void GraphicSetEditStage::loadActiveGraphicSet(GraphicSet::Type graphicSetType,
 
 void GraphicSetEditStage::onAssignButtonPressed(std::size_t slotIndex)
 {
-    // If a graphic is selected, set this slot to it.
+    // If a graphic is selected, set the given slot to it.
+    // Note: This just uses the first selected graphic. Multi-select is ignored.
     const auto& selectedListItems{libraryWindow.getSelectedListItems()};
     if (selectedListItems.size() > 0) {
         for (const LibraryListItem* selectedItem : selectedListItems) {
-            // If this is a sprite or animation, update this slot in 
-            // the model.
+            // If this is a sprite or animation, update the given model slot.
             if (selectedItem->type == LibraryListItem::Type::Sprite) {
                 SpriteID spriteID{static_cast<SpriteID>(selectedItem->ID)};
                 dataModel.graphicSetModel.setGraphicSetSlot(
                     activeGraphicSetType, activeGraphicSetID, slotIndex,
                     toGraphicID(spriteID));
+                break;
             }
-            // TODO: Add animation support
-            //else if (selectedItem->type == LibraryListItem::Type::Animation) {
-            //}
+            else if (selectedItem->type == LibraryListItem::Type::Animation) {
+                AnimationID animationID{
+                    static_cast<AnimationID>(selectedItem->ID)};
+                dataModel.graphicSetModel.setGraphicSetSlot(
+                    activeGraphicSetType, activeGraphicSetID, slotIndex,
+                    toGraphicID(animationID));
+                break;
+            }
         }
     }
     else {
@@ -273,13 +279,22 @@ void GraphicSetEditStage::fillSlotGraphicData(GraphicSetSlot& slot,
 {
     // If this slot isn't empty, set the widget's data.
     if (graphicID) {
-        // Get the graphic's first sprite.
+        // Set the text.
         EditorGraphicRef graphic{dataModel.getGraphic(graphicID)};
-        const EditorSprite& sprite{graphic.getFirstSprite()};
+        slot.spriteNameText.setText(graphic.getDisplayName());
+
+        // Get the graphic's first sprite.
+        const EditorSprite* sprite{graphic.getFirstSprite()};
+        if (!sprite) {
+            // Graphic doesn't have a sprite (empty animation). Leave the 
+            // image blank.
+            slot.spriteImage.setIsVisible(false);
+            return;
+        }
 
         // Calc a square texture extent that shows the bottom of the sprite
         // (so we don't have to squash it).
-        SDL_Rect textureExtent{sprite.textureExtent};
+        SDL_Rect textureExtent{sprite->textureExtent};
         if (textureExtent.h > textureExtent.w) {
             int diff{textureExtent.h - textureExtent.w};
             textureExtent.h -= diff;
@@ -288,12 +303,9 @@ void GraphicSetEditStage::fillSlotGraphicData(GraphicSetSlot& slot,
 
         // Load the sprite's image into the slot.
         std::string imagePath{dataModel.getWorkingTexturesDir()};
-        imagePath += sprite.parentSpriteSheetPath;
+        imagePath += sprite->parentSpriteSheetPath;
         slot.spriteImage.setSimpleImage(imagePath, textureExtent);
         slot.spriteImage.setIsVisible(true);
-
-        // Set the text.
-        slot.spriteNameText.setText(sprite.displayName);
     }
     else {
         // Empty slot.

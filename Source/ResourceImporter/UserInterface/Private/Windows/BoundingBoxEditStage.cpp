@@ -1,6 +1,6 @@
 #include "BoundingBoxEditStage.h"
-#include "MainScreen.h"
 #include "DataModel.h"
+#include "LibraryWindow.h"
 #include "Paths.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
@@ -81,29 +81,38 @@ BoundingBoxEditStage::BoundingBoxEditStage(DataModel& inDataModel,
         });
 
     // When a library item is selected, update the preview button.
-    libraryWindow.listItemSelected
-        .connect<&BoundingBoxEditStage::onLibraryListItemSelected>(*this);
-    libraryWindow.listItemDeselected
-        .connect<&BoundingBoxEditStage::onLibraryListItemDeselected>(*this);
+    libraryWindow.selectedItemsChanged
+        .connect<&BoundingBoxEditStage::onLibrarySelectedItemsChanged>(*this);
 }
 
 void BoundingBoxEditStage::onPreviewSpriteButtonPressed()
 {
+    // If a graphic is selected, set it as the preview image.
+    // Note: This just uses the first selected sprite. Multi-select is ignored.
     const auto& selectedListItems{libraryWindow.getSelectedListItems()};
     bool imageSelected{false};
     for (const LibraryListItem* selectedItem : selectedListItems) {
-        // If a sprite is selected, set it as the preview image.
+        // If this is a sprite or animation, try to get a valid sprite from it.
+        const EditorSprite* sprite{nullptr};
         if (selectedItem->type == LibraryListItem::Type::Sprite) {
-            const EditorSprite& sprite{
-                dataModel.spriteModel.getSprite(selectedItem->ID)};
+            sprite = &(dataModel.spriteModel.getSprite(selectedItem->ID));
+        }
+        else if (selectedItem->type == LibraryListItem::Type::Animation) {
+            const EditorAnimation animation{
+                dataModel.animationModel.getAnimation(selectedItem->ID)};
+            // Note: This returns nullptr if the animation has no frames.
+            sprite = animation.getSpriteAtTime(0);
+        }
 
+        // If we got a valid sprite, set is as the preview image.
+        if (sprite) {
             // Load the sprite's image.
             std::string imagePath{dataModel.getWorkingTexturesDir()};
-            imagePath += sprite.parentSpriteSheetPath;
-            spriteImage.setSimpleImage(imagePath, sprite.textureExtent);
+            imagePath += sprite->parentSpriteSheetPath;
+            spriteImage.setSimpleImage(imagePath, sprite->textureExtent);
 
             // Center the sprite to the stage's X, but use a fixed Y.
-            SDL_Rect centeredSpriteExtent{sprite.textureExtent};
+            SDL_Rect centeredSpriteExtent{sprite->textureExtent};
             centeredSpriteExtent.x = logicalExtent.w / 2;
             centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
             centeredSpriteExtent.y = 212 - logicalExtent.y;
@@ -111,6 +120,8 @@ void BoundingBoxEditStage::onPreviewSpriteButtonPressed()
 
             spriteImage.setIsVisible(true);
             imageSelected = true;
+
+            break;
         }
     }
 
@@ -197,12 +208,17 @@ void BoundingBoxEditStage::onGizmoBoundingBoxUpdated(
     }
 }
 
-void BoundingBoxEditStage::onLibraryListItemSelected(
-    const LibraryListItem& selectedItem)
+void BoundingBoxEditStage::onLibrarySelectedItemsChanged(
+    const std::vector<LibraryListItem*>& selectedItems)
 {
-    // TODO: When we add multi-select, this will need to be updated.
+    // If there's no active bounding box, do nothing.
+    if (!activeBoundingBoxID) {
+        return;
+    }
+
     // If a sprite is selected, allow the user to preview it.
-    if (selectedItem.type == LibraryListItem::Type::Sprite) {
+    if ((selectedItems.size() > 0)
+        && (selectedItems[0]->type == LibraryListItem::Type::Sprite)) {
         previewSpriteButton.text.setText("Preview Sprite");
         previewSpriteButton.enable();
     }
@@ -214,22 +230,6 @@ void BoundingBoxEditStage::onLibraryListItemSelected(
     }
     else {
         // No selection and no image. Disable the button.
-        previewSpriteButton.text.setText("Preview Sprite");
-        previewSpriteButton.disable();
-    }
-}
-
-void BoundingBoxEditStage::onLibraryListItemDeselected(
-    const LibraryListItem& deselectedItem)
-{
-    // TODO: When we add multi-select, this will need to be updated.
-    // If an image is being previewed, allow the user to clear it.
-    if (spriteImage.getIsVisible()) {
-        previewSpriteButton.text.setText("Clear Preview");
-        previewSpriteButton.enable();
-    }
-    else {
-        // No image. Disable the button.
         previewSpriteButton.text.setText("Preview Sprite");
         previewSpriteButton.disable();
     }

@@ -90,7 +90,8 @@ private:
                         const TileLayerID& layerID, bool isFullPhantom);
 
     /**
-     * Returns the current sprite for the given entity data.
+     * Returns the current sprite for the given entity data, or nullptr if 
+     * the entity is using an empty animation.
      * Updates animationState's data if necessary.
      */
     const Sprite& getEntitySprite(const GraphicState& graphicState,

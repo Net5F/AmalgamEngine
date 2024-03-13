@@ -187,10 +187,9 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(
             *this);
 
     // When a library item is selected, update the preview button.
-    libraryWindow.listItemSelected
-        .connect<&AnimationPropertiesWindow::onLibraryListItemSelected>(*this);
-    libraryWindow.listItemDeselected
-        .connect<&AnimationPropertiesWindow::onLibraryListItemDeselected>(*this);
+    libraryWindow.selectedItemsChanged
+        .connect<&AnimationPropertiesWindow::onLibrarySelectedItemsChanged>(
+            *this);
 }
 
 void AnimationPropertiesWindow::onActiveLibraryItemChanged(
@@ -344,18 +343,17 @@ void AnimationPropertiesWindow::onAnimationCustomModelBoundsChanged(
         maxZInput.setText(toRoundedString(newCustomModelBounds.maxZ));
     }
 }
-
-void AnimationPropertiesWindow::onLibraryListItemSelected(
-    const LibraryListItem& selectedItem)
+void AnimationPropertiesWindow::onLibrarySelectedItemsChanged(
+    const std::vector<LibraryListItem*>& selectedItems)
 {
     // If there's no active animation, do nothing.
-    if (activeAnimationID == NULL_ANIMATION_ID) {
+    if (!activeAnimationID) {
         return;
     }
 
-    // TODO: When we add multi-select, this will need to be updated.
     // If a bounding box is selected, allow the user to assign it.
-    if (selectedItem.type == LibraryListItem::Type::BoundingBox) {
+    if ((selectedItems.size() > 0)
+        && (selectedItems[0]->type == LibraryListItem::Type::BoundingBox)) {
         boundingBoxButton.text.setText("Assign");
         boundingBoxButton.enable();
     }
@@ -369,28 +367,6 @@ void AnimationPropertiesWindow::onLibraryListItemSelected(
     }
     else {
         // Custom bounding box and no selection. Disable the button.
-        boundingBoxButton.text.setText("Assign");
-        boundingBoxButton.disable();
-    }
-}
-
-void AnimationPropertiesWindow::onLibraryListItemDeselected(
-    const LibraryListItem& deselectedItem)
-{
-    // If there's no active animation, do nothing.
-    if (activeAnimationID == NULL_ANIMATION_ID) {
-        return;
-    }
-
-    // If we have a shared bounding box assigned, allow the user to switch 
-    // to a custom bounding box.
-    if (dataModel.animationModel.getAnimation(activeAnimationID).modelBoundsID
-        != NULL_BOUNDING_BOX_ID) {
-        boundingBoxButton.text.setText("Custom");
-        boundingBoxButton.enable();
-    }
-    else {
-        // Custom bounding box. Disable the button.
         boundingBoxButton.text.setText("Assign");
         boundingBoxButton.disable();
     }
@@ -475,15 +451,17 @@ void AnimationPropertiesWindow::saveModelBoundsID()
     AnimationModel& animationModel{dataModel.animationModel};
 
     // If a bounding box is selected, assign it to the active animation.
+    // Note: This just uses the first selected graphic. Multi-select is ignored.
     const auto& selectedListItems{libraryWindow.getSelectedListItems()};
     bool boundingBoxIsSelected{false};
     for (const LibraryListItem* selectedItem : selectedListItems) {
-        // If this is a animation, update this slot in the model.
         if (selectedItem->type == LibraryListItem::Type::BoundingBox) {
             boundingBoxIsSelected = true;
             animationModel.setAnimationModelBoundsID(
                 activeAnimationID,
                 static_cast<BoundingBoxID>(selectedItem->ID));
+
+            break;
         }
     }
 

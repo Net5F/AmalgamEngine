@@ -47,7 +47,7 @@ void LibraryListItem::select()
     setIsSelected(true);
 
     // If the user set a callback for this event, call it.
-    if (onSelected != nullptr) {
+    if (onSelected) {
         onSelected(this);
     }
 }
@@ -63,7 +63,7 @@ void LibraryListItem::deselect()
     setIsSelected(false);
 
     // If the user set a callback for this event, call it.
-    if (onDeselected != nullptr) {
+    if (onDeselected) {
         onDeselected(this);
     }
 }
@@ -114,6 +114,16 @@ AUI::EventResult LibraryListItem::onMouseDown(AUI::MouseButtonType buttonType,
     if (!isSelected) {
         select();
     }
+    // If we're already selected and the ctrl key is held, deselect.
+    else {
+        const Uint8* keyStates{SDL_GetKeyboardState(nullptr)};
+        if (keyStates[SDL_SCANCODE_LCTRL] || keyStates[SDL_SCANCODE_RCTRL]) {
+            setIsSelected(false);
+            if (onDeselected) {
+                onDeselected(this);
+            }
+        }
+    }
 
     return AUI::EventResult{.wasHandled{true}};
 }
@@ -131,9 +141,23 @@ AUI::EventResult
     if (!isSelected) {
         select();
     }
+    // If we're already selected and the ctrl key is held, deselect.
+    else {
+        const Uint8* keyStates{SDL_GetKeyboardState(nullptr)};
+        if (keyStates[SDL_SCANCODE_LCTRL] || keyStates[SDL_SCANCODE_RCTRL]) {
+            setIsSelected(false);
+            if (onDeselected) {
+                onDeselected(this);
+            }
+
+            return AUI::EventResult{.wasHandled{true}};
+        }
+    }
 
     // If the user set a callback for this event, call it.
-    if (onActivated != nullptr) {
+    // Note: We don't activate if shift or ctrl is held, since the user is 
+    //       likely trying to quickly select multiple items.
+    if (onActivated && !modifierKeyIsHeld()) {
         onActivated(this);
     }
 
@@ -171,6 +195,17 @@ void LibraryListItem::setIsSelected(bool inIsSelected)
 {
     isSelected = inIsSelected;
     selectedImage.setIsVisible(isSelected);
+}
+
+bool LibraryListItem::modifierKeyIsHeld()
+{
+    const Uint8* keyStates{SDL_GetKeyboardState(nullptr)};
+    bool shiftIsHeld{keyStates[SDL_SCANCODE_LSHIFT]
+                     || keyStates[SDL_SCANCODE_RSHIFT]};
+    bool ctrlIsHeld{keyStates[SDL_SCANCODE_LCTRL]
+                    || keyStates[SDL_SCANCODE_RCTRL]};
+
+    return shiftIsHeld || ctrlIsHeld;
 }
 
 } // End namespace ResourceImporter
