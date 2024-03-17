@@ -39,6 +39,11 @@ private:
     void onAssignSpriteButtonPressed();
 
     /**
+     * Plays the currently active animation.
+     */
+    void onPlayButtonPressed();
+
+    /**
      * If the new active item is an animation, loads it's data onto this stage.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
@@ -70,13 +75,12 @@ private:
     /**
      * Displays the timeline's new selected sprite.
      */
-    void onTimelineSelectionChanged(const EditorSprite* selectedSprite);
+    void onTimelineSelectionChanged(Uint8 selectedFrameIndex);
 
     /**
      * Tells the model to move the sprite.
      */
-    void onTimelineSpriteMoved(Uint8 oldFrameIndex, Uint8 newFrameIndex,
-                               const EditorSprite* movedSprite);
+    void onTimelineSpriteMoved(Uint8 oldFrameIndex, Uint8 newFrameIndex);
 
     /**
      * Updates assignButton to show whether the selection is assign-able.
@@ -125,7 +129,7 @@ private:
     /** The timeline for editing the sprites in the animation. */
     AnimationTimeline* timeline;
 
-    AUI::Text descText1;
+    AUI::Text descText;
 };
 
 } // End namespace ResourceImporter

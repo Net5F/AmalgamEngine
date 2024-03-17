@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TimelineScrubber.h"
+#include "Timer.h"
 #include "AUI/Widget.h"
 #include "AUI/Text.h"
 #include "AUI/HorizontalGridContainer.h"
@@ -32,6 +33,12 @@ public:
     void setFrame(Uint8 frameNumber, bool hasSprite);
 
     /**
+     * Resets the scrubber to frame 0 and cycles through the frames at the 
+     * active animation's framerate.
+     */
+    void playAnimation();
+
+    /**
      * @return The currently selected frame (the one that the scrubber is 
      *         hovering over).
      */
@@ -41,21 +48,24 @@ public:
     // Callback registration
     //-------------------------------------------------------------------------
     /**
-     * @param inOnSelectionChanged A callback that expects the new selection's 
-     *                             sprite. If nullptr, the selection has no 
-     *                             sprite.
+     * @param inOnSelectionChanged A callback that expects the new selected 
+     *                             frame's index.
      */
     void setOnSelectionChanged(
-        std::function<void(const EditorSprite*)> inOnSelectionChanged);
+        std::function<void(Uint8 selectedFrameIndex)> inOnSelectionChanged);
 
     /**
-     * @param inOnSpriteMoved A callback that expects the old frame, new frame, 
-     *                        and the sprite that is being moved.
+     * @param inOnSpriteMoved A callback that expects the old and new frame 
+     *                        indices.
      */
     void setOnSpriteMoved(
-        std::function<void(Uint8 oldFrameIndex, Uint8 newFrameIndex,
-                           const EditorSprite*)>
+        std::function<void(Uint8 oldFrameIndex, Uint8 newFrameIndex)>
             inOnSpriteMoved);
+
+    //-------------------------------------------------------------------------
+    // Base class overrides
+    //-------------------------------------------------------------------------
+    void onTick(double timestepS) override;
 
 private:
     /**
@@ -95,12 +105,6 @@ private:
      */
     Uint8 getCursorFrame(const SDL_Point& cursorPosition);
 
-    /**
-     * Returns the sprite in the given frame of the current active animation, 
-     * or nullptr if the frame doesn't have a sprite.
-     */
-    const EditorSprite* getSpriteFromFrame(Uint8 frameNumber);
-
     void styleNumberText(AUI::Text& textObject, const std::string& text);
 
     /** Holds the number text that goes above the frames. */
@@ -125,9 +129,18 @@ private:
         sprite is being dragged over. */
     Uint8 currentSpriteDragFrameIndex;
 
-    std::function<void(const EditorSprite*)> onSelectionChanged;
+    /** Used for properly pacing the animation during playback. */
+    Timer animationTimer;
 
-    std::function<void(Uint8, Uint8, const EditorSprite*)> onSpriteMoved;
+    /** Accumulates time to keep animation playback smooth. */
+    double animationAccumulator;
+
+    /** If true, we're currently playing the animation. */
+    bool playingAnimation;
+
+    std::function<void(Uint8)> onSelectionChanged;
+
+    std::function<void(Uint8, Uint8)> onSpriteMoved;
 };
 
 } // End namespace ResourceImporter

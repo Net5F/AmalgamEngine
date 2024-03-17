@@ -24,7 +24,7 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel,
 , assignButton{{503, 642, 136, 46}, "Assign Sprite", "AssignButton"}
 , playButton{{659, 642, 136, 46}, "Play", "PlayButton"}
 , timelineScrollArea{{109, 704, 1080, 48}, "TimelineScrollArea"}
-, descText1{{24, 806, 1240, 24}, "DescText1"}
+, descText{{24, 806, 1240, 100}, "DescText1"}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(topText);
@@ -34,7 +34,7 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel,
     children.push_back(playButton);
     children.push_back(boundingBoxGizmo);
     children.push_back(timelineScrollArea);
-    children.push_back(descText1);
+    children.push_back(descText);
 
     /* Buttons */
     assignButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 16);
@@ -46,9 +46,11 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel,
     topText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
     topText.setText("Animation");
 
-    styleText(descText1);
-    descText1.setText("Sprites are the basic building block for graphics in "
-                      "The Amalgam Engine.");
+    styleText(descText);
+    descText.setText("To add sprites to the timeline: Click a sprite in the "
+                     "library (Ctrl+Click to select multiple), then press the "
+                     "Assign Sprite button.\n\nTo move sprites within the "
+                     "timeline: Right click and drag.");
 
     /* Active sprite and checkerboard background. */
     checkerboardImage.setTiledImage(Paths::TEXTURE_DIR
@@ -84,8 +86,7 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel,
         .connect<&AnimationEditStage::onAnimationRemoved>(*this);
 
     assignButton.setOnPressed([&] { onAssignSpriteButtonPressed(); });
-
-    // TODO: Play button
+    playButton.setOnPressed([&] { onPlayButtonPressed(); });
 
     // When the gizmo updates the active animation's bounds, push it to the model.
     boundingBoxGizmo.setOnBoundingBoxUpdated(
@@ -93,12 +94,11 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel,
             onGizmoBoundingBoxUpdated(updatedBounds);
         });
 
-    timeline->setOnSelectionChanged([&](const EditorSprite* sprite) {
-        onTimelineSelectionChanged(sprite);
+    timeline->setOnSelectionChanged([&](Uint8 selectedFrameIndex) {
+        onTimelineSelectionChanged(selectedFrameIndex);
     });
-    timeline->setOnSpriteMoved([&](Uint8 oldFrameIndex, Uint8 newFrameIndex,
-                                   const EditorSprite* movedSprite) {
-        onTimelineSpriteMoved(oldFrameIndex, newFrameIndex, movedSprite);
+    timeline->setOnSpriteMoved([&](Uint8 oldFrameIndex, Uint8 newFrameIndex) {
+        onTimelineSpriteMoved(oldFrameIndex, newFrameIndex);
     });
 
     // When a library item is selected, update the Assign button.
@@ -144,6 +144,11 @@ void AnimationEditStage::onAssignSpriteButtonPressed()
         dataModel.animationModel.setAnimationFrame(
             activeAnimationID, timeline->getSelectedFrameNumber(), nullptr);
     }
+}
+
+void AnimationEditStage::onPlayButtonPressed()
+{
+    timeline->playAnimation();
 }
 
 void AnimationEditStage::onActiveLibraryItemChanged(
@@ -266,10 +271,14 @@ void AnimationEditStage::onGizmoBoundingBoxUpdated(
     }
 }
 
-void AnimationEditStage::onTimelineSelectionChanged(
-    const EditorSprite* selectedSprite)
+void AnimationEditStage::onTimelineSelectionChanged(Uint8 selectedFrameIndex)
 {
+    const EditorAnimation& activeAnimation{
+        dataModel.animationModel.getAnimation(activeAnimationID)};
+
     // If the selected frame doesn't have a sprite, clear the stage and return.
+    const EditorSprite* selectedSprite{
+        activeAnimation.getSpriteAtFrame(selectedFrameIndex)};
     if (!selectedSprite) {
         spriteImage.setIsVisible(false);
         assignButton.text.setText("Assign Sprite");
@@ -289,7 +298,7 @@ void AnimationEditStage::onTimelineSelectionChanged(
     SDL_Rect centeredSpriteExtent{selectedSprite->textureExtent};
     centeredSpriteExtent.x = logicalExtent.w / 2;
     centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
-    centeredSpriteExtent.y = 104 - logicalExtent.y;
+    centeredSpriteExtent.y = 104;
     spriteImage.setLogicalExtent(centeredSpriteExtent);
 
     // Set the background and gizmo to the size of the sprite.
@@ -314,14 +323,21 @@ void AnimationEditStage::onTimelineSelectionChanged(
 }
 
 void AnimationEditStage::onTimelineSpriteMoved(Uint8 oldFrameIndex,
-                                               Uint8 newFrameIndex,
-                                               const EditorSprite* movedSprite)
+                                               Uint8 newFrameIndex)
 {
     AnimationModel& animationModel{dataModel.animationModel};
+    const EditorAnimation& activeAnimation{
+        animationModel.getAnimation(activeAnimationID)};
 
-    animationModel.setAnimationFrame(activeAnimationID, oldFrameIndex, nullptr);
+    // Swap the sprites (or clear if swapping with empty).
+    const EditorSprite* oldSprite{
+        activeAnimation.getSpriteAtFrame(oldFrameIndex)};
+    const EditorSprite* newSprite{
+        activeAnimation.getSpriteAtFrame(newFrameIndex)};
+    animationModel.setAnimationFrame(activeAnimationID, oldFrameIndex,
+                                     newSprite);
     animationModel.setAnimationFrame(activeAnimationID, newFrameIndex,
-                                     movedSprite);
+                                     oldSprite);
 }
 
 void AnimationEditStage::onLibrarySelectedItemsChanged(

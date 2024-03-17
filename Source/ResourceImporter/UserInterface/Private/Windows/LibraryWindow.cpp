@@ -276,7 +276,7 @@ void LibraryWindow::onAnimationAdded(AnimationID animationID,
     animationListItem->setOnActivated(
         [this, animationID](LibraryListItem*) {
             // Set this list item's associated animation as the active item.
-            dataModel.setActiveBoundingBox(animationID);
+            dataModel.setActiveAnimation(animationID);
         });
 
     // Add the new list item to the appropriate container.

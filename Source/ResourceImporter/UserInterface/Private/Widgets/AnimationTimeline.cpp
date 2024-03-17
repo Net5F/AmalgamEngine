@@ -21,6 +21,8 @@ AnimationTimeline::AnimationTimeline(const SDL_Rect& inLogicalExtent,
 , activeAnimation{nullptr}
 , originSpriteDragFrameIndex{0}
 , currentSpriteDragFrameIndex{0}
+, animationAccumulator{0}
+, playingAnimation{false}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(numberContainer);
@@ -73,26 +75,62 @@ void AnimationTimeline::setFrame(Uint8 frameNumber, bool hasSprite)
     }
 }
 
+void AnimationTimeline::playAnimation()
+{
+    setSelectedFrame(0);
+    animationTimer.reset();
+    animationAccumulator = 0;
+    playingAnimation = true;
+}
+
 Uint8 AnimationTimeline::getSelectedFrameNumber()
 {
     return selectedFrameNumber;
 }
 
 void AnimationTimeline::setOnSelectionChanged(
-    std::function<void(const EditorSprite*)> inOnSelectionChanged)
+    std::function<void(Uint8)> inOnSelectionChanged)
 {
     onSelectionChanged = std::move(inOnSelectionChanged);
 }
 
 
 void AnimationTimeline::setOnSpriteMoved(
-    std::function<void(Uint8, Uint8, const EditorSprite*)> inOnSpriteMoved)
+    std::function<void(Uint8, Uint8)> inOnSpriteMoved)
 {
     onSpriteMoved = std::move(inOnSpriteMoved);
 }
 
+void AnimationTimeline::onTick(double)
+{
+    // If we're playing an animation and enough time has passed, go to the 
+    // next frame.
+    if (playingAnimation) {
+        animationAccumulator += animationTimer.getTimeAndReset();
+
+        double animationTimestepS{1
+                                  / static_cast<double>(activeAnimation->fps)};
+        while (animationAccumulator > animationTimestepS) {
+            setSelectedFrame(selectedFrameNumber + 1);
+
+            animationAccumulator -= animationTimestepS;
+
+            // If we've hit the last frame, stop playing the animation.
+            if (selectedFrameNumber == (activeAnimation->frameCount - 1)) {
+                playingAnimation = false;
+                return;
+            }
+        }
+    }
+}
+
 void AnimationTimeline::onScrubberDragged(const SDL_Point& cursorPosition)
 {
+    // Ignore scrubber interactions if we're playing an animation.
+    if (playingAnimation) {
+        return;
+    }
+
     Uint8 cursorFrame{getCursorFrame(cursorPosition)};
 
     // If the cursor isn't aligned with the current selected frame, select the 
@@ -114,18 +152,28 @@ void AnimationTimeline::onSpriteDragStarted(Uint8 frameIndex,
 void AnimationTimeline::onSpriteDragged(Uint8 frameIndex,
                                         const SDL_Point& cursorPosition)
 {
-    // If the cursor is over a new frame, remove the current frame's circle 
-    // and add it to the new frame.
+    // If the cursor is over a new frame, reset the old frame's circle 
+    // and add one to the new frame.
     Uint8 cursorFrame{getCursorFrame(cursorPosition)};
     if (cursorFrame != currentSpriteDragFrameIndex) {
         TimelineFrame& oldCurrentFrame{static_cast<TimelineFrame&>(
             *frameContainer[currentSpriteDragFrameIndex])};
-        oldCurrentFrame.hasSprite = false;
+        TimelineFrame& newCurrentFrame{static_cast<TimelineFrame&>(
+            *frameContainer[cursorFrame])};
+
+        // If we're moving from the origin frame, remove its marker.
+        if (currentSpriteDragFrameIndex == originSpriteDragFrameIndex) {
+            oldCurrentFrame.hasSprite = false;
+        }
+        else {
+            // Not the origin frame, return it to whatever it was.
+            oldCurrentFrame.hasSprite = (activeAnimation->getSpriteAtFrame(
+                                             currentSpriteDragFrameIndex)
+                                         != nullptr);
+        }
+        newCurrentFrame.hasSprite = true;
 
         currentSpriteDragFrameIndex = cursorFrame;
-        TimelineFrame& newCurrentFrame{static_cast<TimelineFrame&>(
-            *frameContainer[currentSpriteDragFrameIndex])};
-        newCurrentFrame.hasSprite = true;
     }
 }
 
@@ -133,19 +181,20 @@ void AnimationTimeline::onSpriteDragReleased(Uint8 frameIndex,
                                              const SDL_Point& cursorPosition)
 {
     // Reset the display state.
-    TimelineFrame& currentFrame{static_cast<TimelineFrame&>(
-        *frameContainer[currentSpriteDragFrameIndex])};
-    currentFrame.hasSprite = false;
-
     TimelineFrame& originFrame{static_cast<TimelineFrame&>(
         *frameContainer[originSpriteDragFrameIndex])};
-    originFrame.hasSprite = true;
+    TimelineFrame& currentFrame{static_cast<TimelineFrame&>(
+        *frameContainer[currentSpriteDragFrameIndex])};
+
+    bool originHasSprite{originFrame.hasSprite};
+    bool currentHasSprite{currentFrame.hasSprite};
+    originFrame.hasSprite = currentHasSprite;
+    currentFrame.hasSprite = originHasSprite;
 
     // If the cursor is over a new frame, move the sprite to it.
     if ((currentSpriteDragFrameIndex != originSpriteDragFrameIndex)
         && onSpriteMoved) {
-        onSpriteMoved(originSpriteDragFrameIndex, currentSpriteDragFrameIndex,
-                      getSpriteFromFrame(originSpriteDragFrameIndex));
+        onSpriteMoved(originSpriteDragFrameIndex, currentSpriteDragFrameIndex);
     }
 }
 
@@ -211,7 +260,7 @@ void AnimationTimeline::setSelectedFrame(Uint8 frameNumber)
 
     // If the user set a callback, call it.
     if (onSelectionChanged) {
-        onSelectionChanged(getSpriteFromFrame(selectedFrameNumber));
+        onSelectionChanged(selectedFrameNumber);
     }
 }
 
@@ -232,20 +281,6 @@ Uint8 AnimationTimeline::getCursorFrame(const SDL_Point& cursorPosition)
                              static_cast<int>(frameContainer.size() - 1));
 
     return static_cast<Uint8>(cursorFrame);
-}
-
-const EditorSprite* AnimationTimeline::getSpriteFromFrame(Uint8 frameNumber)
-{
-    // Try to find a frame with the given number.
-    const auto& frames{activeAnimation->frames};
-    for (const EditorAnimation::Frame& frame : frames) {
-        if (frame.frameNumber == frameNumber) {
-            return &(frame.sprite.get());
-        }
-    }
-
-    // No sprite in the given frame. Return nullptr.
-    return nullptr;
 }
 
 void AnimationTimeline::styleNumberText(AUI::Text& textObject,

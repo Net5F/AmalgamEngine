@@ -84,6 +84,12 @@ struct EditorAnimation {
      * or nullptr if this animation has no frames.
      */
     const EditorSprite* getSpriteAtTime(double animationTime) const;
+
+    /**
+     * Returns the sprite at the given frame of the current active animation, 
+     * or nullptr if the frame doesn't have a sprite.
+     */
+    const EditorSprite* getSpriteAtFrame(Uint8 frameNumber) const;
 };
 
 } // namespace ResourceImporter
