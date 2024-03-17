@@ -96,13 +96,16 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel,
     timeline->setOnSelectionChanged([&](const EditorSprite* sprite) {
         onTimelineSelectionChanged(sprite);
     });
+    timeline->setOnSpriteMoved([&](Uint8 oldFrameIndex, Uint8 newFrameIndex,
+                                   const EditorSprite* movedSprite) {
+        onTimelineSpriteMoved(oldFrameIndex, newFrameIndex, movedSprite);
+    });
 
     // When a library item is selected, update the Assign button.
     libraryWindow.selectedItemsChanged
         .connect<&AnimationEditStage::onLibrarySelectedItemsChanged>(*this);
 }
 
-// TODO: Add cut+paste to move sprites
 void AnimationEditStage::onAssignSpriteButtonPressed()
 {
     if (!activeAnimationID) {
@@ -266,7 +269,7 @@ void AnimationEditStage::onGizmoBoundingBoxUpdated(
 void AnimationEditStage::onTimelineSelectionChanged(
     const EditorSprite* selectedSprite)
 {
-    // If the selected cell doesn't have a sprite, clear the stage and return.
+    // If the selected frame doesn't have a sprite, clear the stage and return.
     if (!selectedSprite) {
         spriteImage.setIsVisible(false);
         assignButton.text.setText("Assign Sprite");
@@ -308,6 +311,17 @@ void AnimationEditStage::onTimelineSelectionChanged(
     // Let the user clear the sprite.
     assignButton.text.setText("Clear Sprite");
     assignButton.enable();
+}
+
+void AnimationEditStage::onTimelineSpriteMoved(Uint8 oldFrameIndex,
+                                               Uint8 newFrameIndex,
+                                               const EditorSprite* movedSprite)
+{
+    AnimationModel& animationModel{dataModel.animationModel};
+
+    animationModel.setAnimationFrame(activeAnimationID, oldFrameIndex, nullptr);
+    animationModel.setAnimationFrame(activeAnimationID, newFrameIndex,
+                                     movedSprite);
 }
 
 void AnimationEditStage::onLibrarySelectedItemsChanged(

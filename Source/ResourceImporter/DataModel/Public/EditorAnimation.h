@@ -39,7 +39,8 @@ struct EditorAnimation {
         // Note: This gets serialized in ResourceData.json as "spriteID".
         std::reference_wrapper<const EditorSprite> sprite;
     };
-    /** The frames of this animation, ordered by ascending frameNumber. */
+    /** The frames of this animation, ordered by ascending frameNumber.
+        Only holds frames that actually contain a sprite. */
     std::vector<Frame> frames;
 
     /** If true, this animation's modelBounds will be used in collision checks.

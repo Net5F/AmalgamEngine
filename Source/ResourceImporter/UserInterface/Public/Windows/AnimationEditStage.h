@@ -73,6 +73,12 @@ private:
     void onTimelineSelectionChanged(const EditorSprite* selectedSprite);
 
     /**
+     * Tells the model to move the sprite.
+     */
+    void onTimelineSpriteMoved(Uint8 oldFrameIndex, Uint8 newFrameIndex,
+                               const EditorSprite* movedSprite);
+
+    /**
      * Updates assignButton to show whether the selection is assign-able.
      */
     void onLibrarySelectedItemsChanged(

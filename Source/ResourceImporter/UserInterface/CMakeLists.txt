@@ -9,7 +9,7 @@ target_sources(ResourceImporter
         Private/Widgets/MainTextInput.cpp
         Private/Widgets/MainThumbnail.cpp
         Private/Widgets/ParentListItem.cpp
-        Private/Widgets/TimelineCell.cpp
+        Private/Widgets/TimelineFrame.cpp
         Private/Widgets/TimelineScrubber.cpp
         Private/Widgets/TitleButton.cpp
         Private/Windows/AddIconSheetDialog.cpp
@@ -41,7 +41,7 @@ target_sources(ResourceImporter
         Public/Widgets/MainTextInput.h
         Public/Widgets/MainThumbnail.h
         Public/Widgets/ParentListItem.h
-        Public/Widgets/TimelineCell.h
+        Public/Widgets/TimelineFrame.h
         Public/Widgets/TimelineScrubber.h
         Public/Widgets/TitleButton.h
         Public/Windows/AddIconSheetDialog.h

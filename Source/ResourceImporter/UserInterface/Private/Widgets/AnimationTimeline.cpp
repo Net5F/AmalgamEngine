@@ -1,10 +1,11 @@
 #include "AnimationTimeline.h"
 #include "EditorAnimation.h"
-#include "TimelineCell.h"
+#include "TimelineFrame.h"
 #include "Paths.h"
 #include "AMAssert.h"
 #include "AUI/ScalingHelpers.h"
 #include "Log.h"
+#include <algorithm>
 
 namespace AM
 {
@@ -14,14 +15,16 @@ AnimationTimeline::AnimationTimeline(const SDL_Rect& inLogicalExtent,
                                      const std::string& inDebugName)
 : AUI::Widget(inLogicalExtent, inDebugName)
 , numberContainer{{0, 4, logicalExtent.w, 18}, "NumberContainer"}
-, cellContainer{{0, 24, logicalExtent.w, 26}, "CellContainer"}
+, frameContainer{{0, 24, logicalExtent.w, 26}, "FrameContainer"}
 , scrubber{}
 , selectedFrameNumber{0}
 , activeAnimation{nullptr}
+, originSpriteDragFrameIndex{0}
+, currentSpriteDragFrameIndex{0}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(numberContainer);
-    children.push_back(cellContainer);
+    children.push_back(frameContainer);
     children.push_back(scrubber);
 
     /* Numbers. */
@@ -30,11 +33,11 @@ AnimationTimeline::AnimationTimeline(const SDL_Rect& inLogicalExtent,
     numberContainer.setCellHeight(18);
     numberContainer.setScrollingEnabled(false);
 
-    /* Cell container. */
-    cellContainer.setNumRows(1);
-    cellContainer.setCellWidth(24);
-    cellContainer.setCellHeight(26);
-    cellContainer.setScrollingEnabled(false);
+    /* Frame container. */
+    frameContainer.setNumRows(1);
+    frameContainer.setCellWidth(24);
+    frameContainer.setCellHeight(26);
+    frameContainer.setScrollingEnabled(false);
 
     scrubber.setOnDragged([&](const SDL_Point& cursorPosition) {
         onScrubberDragged(cursorPosition);
@@ -46,22 +49,22 @@ void AnimationTimeline::setActiveAnimation(
 {
     activeAnimation = &newActiveAnimation;
 
-    refreshCells();
+    refreshFrames();
 
     setSelectedFrame(selectedFrameNumber);
 }
 
 void AnimationTimeline::setFrameCount(Uint8 newFrameCount)
 {
-    refreshCells();
+    refreshFrames();
 
     setSelectedFrame(selectedFrameNumber);
 }
 
 void AnimationTimeline::setFrame(Uint8 frameNumber, bool hasSprite)
 {
-    TimelineCell& cell{static_cast<TimelineCell&>(*cellContainer[frameNumber])};
-    cell.hasSprite = hasSprite;
+    TimelineFrame& frame{static_cast<TimelineFrame&>(*frameContainer[frameNumber])};
+    frame.hasSprite = hasSprite;
 
     // If the frame is currently selected, refresh it so the user gets notified 
     // of the sprite change.
@@ -81,38 +84,93 @@ void AnimationTimeline::setOnSelectionChanged(
     onSelectionChanged = std::move(inOnSelectionChanged);
 }
 
+
+void AnimationTimeline::setOnSpriteMoved(
+    std::function<void(Uint8, Uint8, const EditorSprite*)> inOnSpriteMoved)
+{
+    onSpriteMoved = std::move(inOnSpriteMoved);
+}
+
 void AnimationTimeline::onScrubberDragged(const SDL_Point& cursorPosition)
 {
-    // Offset the cursor to be relative to this widget's top left.
-    SDL_Point offsetCursorPosition{cursorPosition};
-    offsetCursorPosition.x -= clippedExtent.x;
-    offsetCursorPosition.y -= clippedExtent.y;
+    Uint8 cursorFrame{getCursorFrame(cursorPosition)};
 
-    // Calculate which cell the cursor is aligned with.
-    int cursorCell{
-        AUI::ScalingHelpers::actualToLogical(offsetCursorPosition.x)};
-    cursorCell /= TimelineCell::LOGICAL_WIDTH;
-
-    // If the cursor isn't aligned with the current cell, select the new one.
-    if ((selectedFrameNumber != cursorCell)
-        && (cursorCell < cellContainer.size())) {
-        setSelectedFrame(cursorCell);
+    // If the cursor isn't aligned with the current selected frame, select the 
+    // new one.
+    if ((selectedFrameNumber != cursorFrame)
+        && (cursorFrame < frameContainer.size())) {
+        setSelectedFrame(cursorFrame);
     }
 }
 
-void AnimationTimeline::refreshCells()
+void AnimationTimeline::onSpriteDragStarted(Uint8 frameIndex,
+                                            const SDL_Point& cursorPosition)
 {
-    // Fill the cell container with empty cells to match the animation's frame 
-    // count.
-    cellContainer.clear();
-    numberContainer.clear();
-    for (int i = 0; i < activeAnimation->frameCount; ++i) {
-        auto cell{std::make_unique<TimelineCell>()};
-        cell->setOnPressed([&, i]() { setSelectedFrame(i); });
+    // Remember where the drag started.
+    originSpriteDragFrameIndex = frameIndex;
+    currentSpriteDragFrameIndex = frameIndex;
+}
 
-        // Darken every 5th cell and add a number above it.
+void AnimationTimeline::onSpriteDragged(Uint8 frameIndex,
+                                        const SDL_Point& cursorPosition)
+{
+    // If the cursor is over a new frame, remove the current frame's circle 
+    // and add it to the new frame.
+    Uint8 cursorFrame{getCursorFrame(cursorPosition)};
+    if (cursorFrame != currentSpriteDragFrameIndex) {
+        TimelineFrame& oldCurrentFrame{static_cast<TimelineFrame&>(
+            *frameContainer[currentSpriteDragFrameIndex])};
+        oldCurrentFrame.hasSprite = false;
+
+        currentSpriteDragFrameIndex = cursorFrame;
+        TimelineFrame& newCurrentFrame{static_cast<TimelineFrame&>(
+            *frameContainer[currentSpriteDragFrameIndex])};
+        newCurrentFrame.hasSprite = true;
+    }
+}
+
+void AnimationTimeline::onSpriteDragReleased(Uint8 frameIndex,
+                                             const SDL_Point& cursorPosition)
+{
+    // Reset the display state.
+    TimelineFrame& currentFrame{static_cast<TimelineFrame&>(
+        *frameContainer[currentSpriteDragFrameIndex])};
+    currentFrame.hasSprite = false;
+
+    TimelineFrame& originFrame{static_cast<TimelineFrame&>(
+        *frameContainer[originSpriteDragFrameIndex])};
+    originFrame.hasSprite = true;
+
+    // If the cursor is over a new frame, move the sprite to it.
+    if ((currentSpriteDragFrameIndex != originSpriteDragFrameIndex)
+        && onSpriteMoved) {
+        onSpriteMoved(originSpriteDragFrameIndex, currentSpriteDragFrameIndex,
+                      getSpriteFromFrame(originSpriteDragFrameIndex));
+    }
+}
+
+void AnimationTimeline::refreshFrames()
+{
+    // Fill the frame container with empty frames to match the animation's frame 
+    // count.
+    frameContainer.clear();
+    numberContainer.clear();
+    for (Uint8 i{0}; i < activeAnimation->frameCount; ++i) {
+        auto frame{std::make_unique<TimelineFrame>()};
+        frame->setOnPressed([&, i]() { setSelectedFrame(i); });
+        frame->setOnSpriteDragStarted([&, i](const SDL_Point& cursorPosition) {
+            onSpriteDragStarted(i, cursorPosition);
+        });
+        frame->setOnSpriteDragged([&, i](const SDL_Point& cursorPosition) {
+            onSpriteDragged(i, cursorPosition);
+        });
+        frame->setOnSpriteDragReleased([&, i](const SDL_Point& cursorPosition) {
+            onSpriteDragReleased(i, cursorPosition);
+        });
+
+        // Darken every 5th frame and add a number above it.
         if (i % 5 == 0) {
-            cell->drawDarkBackground = true;
+            frame->drawDarkBackground = true;
 
             auto numberText{std::make_unique<AUI::Text>(SDL_Rect{0, 0, 24, 18},
                                                         "NumberText")};
@@ -120,22 +178,22 @@ void AnimationTimeline::refreshCells()
             numberContainer.push_back(std::move(numberText));
         }
 
-        cellContainer.push_back(std::move(cell));
+        frameContainer.push_back(std::move(frame));
     }
 
-    // Fill the cells that contain frames.
+    // Fill the frames that contain frames.
     for (const EditorAnimation::Frame& frame : activeAnimation->frames) {
-        AM_ASSERT(frame.frameNumber < cellContainer.size(),
-                  "Invalid cell index.");
-        TimelineCell& cell{
-            static_cast<TimelineCell&>(*cellContainer[frame.frameNumber])};
-        cell.hasSprite = true;
+        AM_ASSERT(frame.frameNumber < frameContainer.size(),
+                  "Invalid frame index.");
+        TimelineFrame& timelineFrame{
+            static_cast<TimelineFrame&>(*frameContainer[frame.frameNumber])};
+        timelineFrame.hasSprite = true;
     }
 
-    // Update this widget's width to match the cells.
+    // Update this widget's width to match the frames.
     SDL_Rect newLogicalExtent{logicalExtent};
     newLogicalExtent.w
-        = activeAnimation->frameCount * TimelineCell::LOGICAL_WIDTH;
+        = activeAnimation->frameCount * TimelineFrame::LOGICAL_WIDTH;
     setLogicalExtent(newLogicalExtent);
 }
 
@@ -145,26 +203,49 @@ void AnimationTimeline::setSelectedFrame(Uint8 frameNumber)
     selectedFrameNumber = frameNumber;
 
     // Center the scrubber over the new frame.
-    AM_ASSERT(frameNumber < cellContainer.size(), "Invalid frame number.");
+    AM_ASSERT(frameNumber < frameContainer.size(), "Invalid frame number.");
 
     SDL_Rect newScrubberExtent{scrubber.getLogicalExtent()};
-    newScrubberExtent.x = TimelineCell::LOGICAL_WIDTH * frameNumber;
+    newScrubberExtent.x = TimelineFrame::LOGICAL_WIDTH * frameNumber;
     scrubber.setLogicalExtent(newScrubberExtent);
 
     // If the user set a callback, call it.
     if (onSelectionChanged) {
-        // If this cell contains a frame, pass it to the user.
-        const auto& frames{activeAnimation->frames};
-        for (const EditorAnimation::Frame& frame : frames) {
-            if (frame.frameNumber == selectedFrameNumber) {
-                onSelectionChanged(&(frame.sprite.get()));
-                return;
-            }
-        }
-
-        // No frame in this cell. Pass nullptr.
-        onSelectionChanged(nullptr);
+        onSelectionChanged(getSpriteFromFrame(selectedFrameNumber));
     }
+}
+
+Uint8 AnimationTimeline::getCursorFrame(const SDL_Point& cursorPosition)
+{
+    // Offset the cursor to be relative to this widget's top left.
+    SDL_Point offsetCursorPosition{cursorPosition};
+    offsetCursorPosition.x -= clippedExtent.x;
+    offsetCursorPosition.y -= clippedExtent.y;
+
+    // Calculate which frame the cursor is aligned with.
+    int cursorFrame{
+        AUI::ScalingHelpers::actualToLogical(offsetCursorPosition.x)};
+    cursorFrame /= TimelineFrame::LOGICAL_WIDTH;
+
+    // Clamp to valid values.
+    cursorFrame = std::clamp(cursorFrame, 0,
+                             static_cast<int>(frameContainer.size() - 1));
+
+    return static_cast<Uint8>(cursorFrame);
+}
+
+const EditorSprite* AnimationTimeline::getSpriteFromFrame(Uint8 frameNumber)
+{
+    // Try to find a frame with the given number.
+    const auto& frames{activeAnimation->frames};
+    for (const EditorAnimation::Frame& frame : frames) {
+        if (frame.frameNumber == frameNumber) {
+            return &(frame.sprite.get());
+        }
+    }
+
+    // No sprite in the given frame. Return nullptr.
+    return nullptr;
 }
 
 void AnimationTimeline::styleNumberText(AUI::Text& textObject,

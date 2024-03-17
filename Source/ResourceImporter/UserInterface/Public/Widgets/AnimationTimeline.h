@@ -48,29 +48,66 @@ public:
     void setOnSelectionChanged(
         std::function<void(const EditorSprite*)> inOnSelectionChanged);
 
+    /**
+     * @param inOnSpriteMoved A callback that expects the old frame, new frame, 
+     *                        and the sprite that is being moved.
+     */
+    void setOnSpriteMoved(
+        std::function<void(Uint8 oldFrameIndex, Uint8 newFrameIndex,
+                           const EditorSprite*)>
+            inOnSpriteMoved);
+
 private:
     /**
-     * If the scrubber has been dragged far enough, selects a new cell.
+     * If the scrubber has been dragged far enough, selects a new frame.
      */
     void onScrubberDragged(const SDL_Point& cursorPosition);
 
     /**
-     * Refreshes cellContainer to match the current active animation.
+     * Handles a frame that contains a sprite being right-click dragged.
      */
-    void refreshCells();
+    void onSpriteDragStarted(Uint8 frameIndex, const SDL_Point& cursorPosition);
 
     /**
-     * Moves the scrubber to the given frame cell.
+     * If a frame containing a sprite has been dragged far enough, visually 
+     * moves the frame circle to the new hovered frame.
+     */
+    void onSpriteDragged(Uint8 frameIndex, const SDL_Point& cursorPosition);
+
+    /**
+     * If the cursor is over a frame other than originDragFrameIndex, moves the 
+     * sprite into that frame.
+     */
+    void onSpriteDragReleased(Uint8 frameIndex, const SDL_Point& cursorPosition);
+
+    /**
+     * Refreshes frameContainer to match the current active animation.
+     */
+    void refreshFrames();
+
+    /**
+     * Moves the scrubber to the given frame.
      */
     void setSelectedFrame(Uint8 frameNumber);
 
+    /** 
+     * Returns which frame the given cursor position is aligned with.
+     */
+    Uint8 getCursorFrame(const SDL_Point& cursorPosition);
+
+    /**
+     * Returns the sprite in the given frame of the current active animation, 
+     * or nullptr if the frame doesn't have a sprite.
+     */
+    const EditorSprite* getSpriteFromFrame(Uint8 frameNumber);
+
     void styleNumberText(AUI::Text& textObject, const std::string& text);
 
-    /** Holds the number text that goes above the cells. */
+    /** Holds the number text that goes above the frames. */
     AUI::HorizontalGridContainer numberContainer;
 
-    /** Holds the cells that contain the animation's frames. */
-    AUI::HorizontalGridContainer cellContainer;
+    /** Holds the frames that contain the animation's frames. */
+    AUI::HorizontalGridContainer frameContainer;
 
     /** Used to move between frames. */
     TimelineScrubber scrubber;
@@ -81,7 +118,16 @@ private:
     /** The animation that is currently loaded into this timeline. */
     const EditorAnimation* activeAnimation;
 
+    /** If a sprite is being dragged, this holds the original frame index. */
+    Uint8 originSpriteDragFrameIndex;
+
+    /** If a sprite is being dragged, this holds the current index that the 
+        sprite is being dragged over. */
+    Uint8 currentSpriteDragFrameIndex;
+
     std::function<void(const EditorSprite*)> onSelectionChanged;
+
+    std::function<void(Uint8, Uint8, const EditorSprite*)> onSpriteMoved;
 };
 
 } // End namespace ResourceImporter
