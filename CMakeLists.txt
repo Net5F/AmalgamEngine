@@ -152,7 +152,7 @@ option(SQLITE_ENABLE_ASSERT_HANDLER "Enable the user definition of a assertion_f
 option(SQLITECPP_RUN_CPPLINT "Run cpplint.py tool for Google C++ StyleGuide." OFF)
 option(SQLITECPP_RUN_CPPCHECK "Run cppcheck C++ static analysis tool." OFF)
 add_subdirectory("${PROJECT_SOURCE_DIR}/Libraries/SQLiteCpp/"
-                 "${PROJECT_BINARY_DIR}/Libraries/SQLiteCpp/")
+                 "${PROJECT_BINARY_DIR}/Libraries/SQLiteCpp/" EXCLUDE_FROM_ALL)
 
 # Configure header-only readerwriterqueue.
 include("${PROJECT_SOURCE_DIR}/CMake/readerwriterqueue.cmake")
