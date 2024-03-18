@@ -44,7 +44,7 @@ GraphicSetEditStage::GraphicSetEditStage(DataModel& inDataModel,
     topText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
 
     styleText(modifyText);
-    modifyText.setText("To modify: select a sprite in the Library window, then "
+    modifyText.setText("To modify: select a sprite or animation in the Library window, then "
                        "press one of the Assign buttons.");
     styleText(clearText);
     clearText.setText("To clear: click an empty area to clear your selection, "

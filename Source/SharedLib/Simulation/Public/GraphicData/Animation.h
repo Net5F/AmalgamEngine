@@ -9,6 +9,8 @@
 
 namespace AM
 {
+struct Sprite;
+
 /**
  * Holds the data for a single animation from ResourceData.json.
  *
@@ -39,7 +41,7 @@ struct Animation {
     struct Frame
     {
         Uint8 frameNumber{0};
-        std::reference_wrapper<Sprite> sprite;
+        std::reference_wrapper<const Sprite> sprite;
     };
     /** The frames of this animation, ordered by ascending frameNumber.
         Note: There will always be at least 1 frame present. If this animation 
@@ -60,28 +62,7 @@ struct Animation {
      * Returns the sprite that should be displayed at the given animation time, 
      * or nullptr if this animation has no frames.
      */
-    const Sprite& getSpriteAtTime(double animationTime) const
-    { 
-        // Calculate which frame should be displayed at the given time.
-        double frameDuration{1.0 / static_cast<double>(fps)};
-        std::size_t desiredFrame{
-            static_cast<std::size_t>(animationTime / frameDuration)};
-
-        // Wrap the frame number if necessary.
-        desiredFrame %= frames.size();
-
-        // Find the sprite closest to, but not surpassing, the desired frame.
-        const Sprite* sprite{&(frames[0].sprite.get())};
-        for (std::size_t i{0}; i < (frames.size() - 1); ++i) {
-            if ((frames[i].frameNumber <= desiredFrame) && 
-                (frames[i + 1].frameNumber > desiredFrame)) {
-                sprite = &(frames[i].sprite.get());
-                break;
-            }
-        }
-
-        return *sprite;
-    }
+    const Sprite& getSpriteAtTime(double animationTime) const;
 };
 
 } // namespace AM

@@ -426,9 +426,8 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     sprite.modelBoundsID = spriteJson.at("modelBoundsID");
 
     // Add the custom model-space bounds.
-    // Note: Even if this sprite uses a shared bounding box (modelBoundsID != 
-    //       NULL_BOUNDING_BOX_ID), we want to save customModelBounds to give 
-    //       the user a starting point if they switch to it.
+    // Note: We always save to modelBounds (even if this animation uses a shared
+    //       bounding box) because that's what the engine uses.
     sprite.customModelBounds.minX = spriteJson.at("modelBounds").at("minX");
     sprite.customModelBounds.maxX = spriteJson.at("modelBounds").at("maxX");
     sprite.customModelBounds.minY = spriteJson.at("modelBounds").at("minY");

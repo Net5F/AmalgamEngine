@@ -7,6 +7,7 @@ target_sources(SharedLib
         Private/ResourceData.cpp
         Private/Components/Camera.cpp
         Private/Components/Inventory.cpp
+        Private/GraphicData/Animation.cpp
         Private/GraphicData/GraphicDataBase.cpp
         Private/GraphicData/GraphicRef.cpp
         Private/IconData/IconDataBase.cpp

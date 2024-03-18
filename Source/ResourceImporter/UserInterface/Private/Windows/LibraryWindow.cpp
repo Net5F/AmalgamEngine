@@ -258,7 +258,7 @@ void LibraryWindow::onAnimationAdded(AnimationID animationID,
     // Construct a new list item for this animation.
     auto animationListItem{
         std::make_unique<LibraryListItem>(animation.displayName)};
-    animationListItem->type = LibraryListItem::Type::BoundingBox;
+    animationListItem->type = LibraryListItem::Type::Animation;
     animationListItem->ID = static_cast<int>(animationID);
     listItemMaps[LibraryListItem::Type::Animation].emplace(
         animationID, animationListItem.get());

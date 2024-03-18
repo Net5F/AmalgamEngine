@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Sprite.h"
+#include "Animation.h"
 #include "GraphicRef.h"
 #include "GraphicSets.h"
 #include "GraphicID.h"
@@ -40,6 +41,18 @@ public:
      * Errors in debug if the given ID doesn't exist.
      */
     const Sprite& getSprite(SpriteID numericID) const;
+
+    /**
+     * Returns the animation with the given string ID.
+     * Errors in debug if the given ID doesn't exist.
+     */
+    const Animation& getAnimation(const std::string& stringID) const;
+
+    /**
+     * Returns the animation with the given numeric ID.
+     * Errors in debug if the given ID doesn't exist.
+     */
+    const Animation& getAnimation(AnimationID numericID) const;
 
     /**
      * Returns the graphic with the given numeric ID.
@@ -89,8 +102,8 @@ protected:
      * Parses the given json, constructing sprites and pushing them into the
      * sprites vector.
      *
-     * @param json  The json to parse. Must be loaded from a valid
-     *              ResourceData.json.
+     * @param json The json to parse. Must be loaded from a valid
+     *             ResourceData.json.
      */
     void parseJson(const nlohmann::json& json);
 
@@ -98,18 +111,27 @@ protected:
      * Parses the given sprite json and adds the resulting sprite to the
      * sprites vector.
 
-     * @param spriteJson  The json to parse. Must be a valid sprite section
-     *                    from ResourceData.json.
+     * @param spriteJson The json to parse. Must be a valid sprite section
+     *                   from ResourceData.json.
      */
     void parseSprite(const nlohmann::json& spriteJson);
+
+    /**
+     * Parses the given animation json and adds the resulting animation to the
+     * animations vector.
+
+     * @param animationJson The json to parse. Must be a valid animation section
+     *                      from ResourceData.json.
+     */
+    void parseAnimation(const nlohmann::json& animationJson);
 
     /**
      * Parses the given graphic set json and adds the resulting graphic set to
      * the appropriate vector.
      *
-     * @param graphicSetJson  The json to parse. Must be a valid graphic set
-     *                        section from ResourceData.json, for the appropriate
-     *                        set type.
+     * @param graphicSetJson The json to parse. Must be a valid graphic set
+     *                       section from ResourceData.json, for the appropriate
+     *                       set type.
      */
     void parseFloorGraphicSet(const nlohmann::json& graphicSetJson);
     void parseFloorCoveringGraphicSet(const nlohmann::json& graphicSetJson);
@@ -118,6 +140,9 @@ protected:
 
     /** The loaded sprites, indexed by their numeric IDs. */
     std::vector<Sprite> sprites;
+
+    /** The loaded animations, indexed by their numeric IDs. */
+    std::vector<Animation> animations;
 
     /** The loaded graphic sets of each type. These are indexed by the set
         type's numeric IDs. (Each sprite set type has a unique ID space.) */
@@ -128,6 +153,9 @@ protected:
 
     /** A map for easily looking up sprites by their string ID. */
     std::unordered_map<std::string, const Sprite*> spriteStringMap;
+
+    /** A map for easily looking up animations by their string ID. */
+    std::unordered_map<std::string, const Animation*> animationStringMap;
 
     /** Maps for easily looking up graphic sets by their string ID. */
     std::unordered_map<std::string, const FloorGraphicSet*>

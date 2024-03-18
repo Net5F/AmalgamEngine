@@ -362,10 +362,8 @@ bool AnimationModel::parseAnimation(const nlohmann::json& animationJson)
     // Add modelBoundsID.
     animation.modelBoundsID = animationJson.at("modelBoundsID");
 
-    // Add the custom model-space bounds.
-    // Note: Even if this animation uses a shared bounding box (modelBoundsID != 
-    //       NULL_BOUNDING_BOX_ID), we want to save customModelBounds to give 
-    //       the user a starting point if they switch to it.
+    // Note: We always save to modelBounds (even if this animation uses a shared
+    //       bounding box) because that's what the engine uses.
     animation.customModelBounds.minX
         = animationJson.at("modelBounds").at("minX");
     animation.customModelBounds.maxX

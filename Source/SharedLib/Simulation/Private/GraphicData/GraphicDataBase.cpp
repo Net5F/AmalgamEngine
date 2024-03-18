@@ -1,13 +1,14 @@
 #include "GraphicDataBase.h"
-#include "SpriteID.h"
 #include "Paths.h"
 #include "Log.h"
+#include "AMAssert.h"
 #include "nlohmann/json.hpp"
 
 namespace AM
 {
 GraphicDataBase::GraphicDataBase(const nlohmann::json& resourceDataJson)
 : sprites{}
+, animations{}
 , floorGraphicSets{}
 , floorCoveringGraphicSets{}
 , wallGraphicSets{}
@@ -44,23 +45,38 @@ const Sprite& GraphicDataBase::getSprite(SpriteID numericID) const
     return sprites[numericID];
 }
 
-GraphicRef GraphicDataBase::getGraphic(GraphicID numericID) const
+const Animation& GraphicDataBase::getAnimation(const std::string& stringID) const
 {
-    if (numericID >= sprites.size()) {
-        LOG_ERROR("Invalid numeric ID while getting graphic: %d", numericID);
-        return {sprites[0]};
+    // Attempt to find the given string ID.
+    auto it{animationStringMap.find(stringID)};
+    if (it == animationStringMap.end()) {
+        LOG_ERROR("Failed to find animation with string ID: %s", stringID.c_str());
+        return animations[0];
     }
 
-    //bool isAnimation{(static_cast<Uint32>(numericID) & GRAPHIC_ID_TYPE_MASK)
-    //                 >> 31};
-    //if (isAnimation) {
-    //    AnimationID animationID{numericID & GRAPHIC_ID_VALUE_MASK};
-    //    return getAnimation(animationID);
-    //}
-    //else {
-        SpriteID spriteID{numericID & GRAPHIC_ID_VALUE_MASK};
+    return *(it->second);
+}
+
+const Animation& GraphicDataBase::getAnimation(AnimationID numericID) const
+{
+    if (numericID >= animations.size()) {
+        LOG_ERROR("Invalid numeric ID while getting animation: %d", numericID);
+        return animations[0];
+    }
+
+    return animations[numericID];
+}
+
+GraphicRef GraphicDataBase::getGraphic(GraphicID numericID) const
+{
+    if (isAnimationID(numericID)) {
+        AnimationID animationID{toAnimationID(numericID)};
+        return {getAnimation(animationID)};
+    }
+    else {
+        SpriteID spriteID{toSpriteID(numericID)};
         return {getSprite(spriteID)};
-    //}
+    }
 }
 
 const FloorGraphicSet&
@@ -188,8 +204,9 @@ const std::vector<ObjectGraphicSet>&
 
 void GraphicDataBase::parseJson(const nlohmann::json& json)
 {
-    // Add the null sprite and graphic sets.
+    // Add the null sprite, animation, and graphic sets.
     GraphicRef nullSprite{sprites.emplace_back("Null", "null", NULL_SPRITE_ID)};
+    animations.emplace_back("Null", "null", NULL_ANIMATION_ID);
     floorGraphicSets.emplace_back(GraphicSet{"Null", "null"},
                                   NULL_FLOOR_GRAPHIC_SET_ID, nullSprite);
     floorCoveringGraphicSets.emplace_back(
@@ -217,6 +234,11 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
             }
         }
 
+        // Add every animation.
+        for (auto& animationJson : json.at("animations").items()) {
+            parseAnimation(animationJson.value());
+        }
+
         // Add each type of graphic set.
         for (auto& floorJson : json.at("floors").items()) {
             parseFloorGraphicSet(floorJson.value());
@@ -239,6 +261,10 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
     // Add everything to the associated maps.
     for (const Sprite& sprite : sprites) {
         spriteStringMap.emplace(sprite.stringID, &sprites[sprite.numericID]);
+    }
+    for (const Animation& animation : animations) {
+        animationStringMap.emplace(animation.stringID,
+                                   &animations[animation.numericID]);
     }
     for (const FloorGraphicSet& set : floorGraphicSets) {
         floorGraphicSetStringMap.emplace(set.stringID,
@@ -278,6 +304,42 @@ void GraphicDataBase::parseSprite(const nlohmann::json& spriteJson)
     sprite.modelBounds.maxY = spriteJson.at("modelBounds").at("maxY");
     sprite.modelBounds.minZ = spriteJson.at("modelBounds").at("minZ");
     sprite.modelBounds.maxZ = spriteJson.at("modelBounds").at("maxZ");
+}
+
+void GraphicDataBase::parseAnimation(const nlohmann::json& animationJson)
+{
+    // Add the animation to the animations vector.
+    Animation& animation{animations.emplace_back()};
+
+    // Add the display name and IDs.
+    animation.numericID = animationJson.at("numericID");
+    animation.displayName = animationJson.at("displayName").get<std::string>();
+    animation.stringID = animationJson.at("stringID").get<std::string>();
+
+    // Add the frame count and fps.
+    animation.frameCount = animationJson.at("frameCount");
+    animation.fps = animationJson.at("fps");
+
+    // Add the frames.
+    // Note: If the animation is empty, the importer will give it a single 
+    //       frame with the null sprite. This gets handled the same as any 
+    //       other sprite by the renderer.
+    for (auto& [key, frameJson] : animationJson.at("frames").items()) {
+        SpriteID spriteID{frameJson.at("spriteID")};
+        const Sprite& sprite{getSprite(spriteID)};
+        animation.frames.emplace_back(frameJson.at("frameNumber"), sprite);
+    }
+
+    // Add whether the animation has a bounding box or not.
+    animation.collisionEnabled = animationJson.at("collisionEnabled");
+
+    // Add the model-space bounds.
+    animation.modelBounds.minX = animationJson.at("modelBounds").at("minX");
+    animation.modelBounds.maxX = animationJson.at("modelBounds").at("maxX");
+    animation.modelBounds.minY = animationJson.at("modelBounds").at("minY");
+    animation.modelBounds.maxY = animationJson.at("modelBounds").at("maxY");
+    animation.modelBounds.minZ = animationJson.at("modelBounds").at("minZ");
+    animation.modelBounds.maxZ = animationJson.at("modelBounds").at("maxZ");
 }
 
 void GraphicDataBase::parseFloorGraphicSet(const nlohmann::json& graphicSetJson)
