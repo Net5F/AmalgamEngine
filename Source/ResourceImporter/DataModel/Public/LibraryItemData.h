@@ -6,6 +6,7 @@
 #include "EditorFloorCoveringGraphicSet.h"
 #include "EditorWallGraphicSet.h"
 #include "EditorObjectGraphicSet.h"
+#include "EditorEntityGraphicSet.h"
 #include "EditorIcon.h"
 #include "EditorBoundingBox.h"
 #include <variant>
@@ -31,6 +32,7 @@ using LibraryItemData
                    std::reference_wrapper<const EditorFloorCoveringGraphicSet>,
                    std::reference_wrapper<const EditorWallGraphicSet>,
                    std::reference_wrapper<const EditorObjectGraphicSet>,
+                   std::reference_wrapper<const EditorEntityGraphicSet>,
                    std::reference_wrapper<const EditorIcon>,
                    std::reference_wrapper<const EditorBoundingBox>>;
 

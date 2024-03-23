@@ -27,6 +27,7 @@ struct EditorFloorGraphicSet;
 struct EditorFloorCoveringGraphicSet;
 struct EditorWallGraphicSet;
 struct EditorObjectGraphicSet;
+struct EditorEntityGraphicSet;
 struct EditorIconSheet;
 
 /**
@@ -66,7 +67,7 @@ private:
         FloorCoverings,
         Walls,
         Objects,
-        /*Entities,*/
+        Entities,
         IconSheets,
         Count,
         None
@@ -90,6 +91,8 @@ private:
                        const EditorObjectGraphicSet& object);
     template<typename T>
     void onGraphicSetAdded(Uint16 graphicSetID, const T& graphicSet);
+    void onEntityAdded(EntityGraphicSetID graphicSetID,
+                       const EditorEntityGraphicSet& entity);
     void onIconSheetAdded(int sheetID, const EditorIconSheet& sheet);
 
     /**
@@ -99,6 +102,7 @@ private:
     void onSpriteSheetRemoved(int sheetID);
     void onAnimationRemoved(AnimationID animationID);
     void onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID);
+    void onEntityRemoved(EntityGraphicSetID graphicSetID);
     void onIconSheetRemoved(int sheetID);
 
     /**
@@ -112,6 +116,8 @@ private:
                                        const std::string& newDisplayName);
     void onGraphicSetDisplayNameChanged(GraphicSet::Type type, Uint16 graphicSetID,
                                        const std::string& newDisplayName);
+    void onEntityDisplayNameChanged(EntityGraphicSetID graphicSetID,
+                                    const std::string& newDisplayName);
     void onIconDisplayNameChanged(IconID iconID,
                                   const std::string& newDisplayName);
 

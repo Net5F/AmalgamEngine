@@ -19,8 +19,8 @@ namespace ResourceImporter
 class DataModel;
 
 /**
- * Holds data for each type of graphic set (floor, floor covering, wall, and
- * object).
+ * Holds data for Floor, Floor Covering, Wall, and Object graphic sets.
+ * Entity graphic sets use EntityGraphicSetModel.
  */
 class GraphicSetModel
 {
@@ -105,7 +105,8 @@ private:
     std::map<Uint16, T>& getMapForGraphicSetType();
 
     /**
-     * Checks if the given name is unique among all graphic sets in the model.
+     * Checks if the given name is unique among all graphic sets of the same 
+     * type in the model.
      *
      * @param graphicSetID  The ID of the graphic set that might get displayName.
      *                      If it already is set to displayName, it won't be 

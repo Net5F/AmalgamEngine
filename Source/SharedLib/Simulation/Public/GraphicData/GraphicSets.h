@@ -2,10 +2,12 @@
 
 #include "GraphicSetIDs.h"
 #include "GraphicRef.h"
+#include "EntityGraphicType.h"
 #include "Wall.h"
 #include <SDL_stdinc.h>
 #include <string>
 #include <array>
+#include <unordered_map>
 #include <functional>
 #include <optional>
 
@@ -21,7 +23,7 @@ namespace AM
  *
  * Floor, FloorCovering, and Wall are only used for tiles.
  * Object is used for tiles (static objects) and entities (dynamic objects).
- * Character is only used for entities.
+ * Entity is only used for entities.
  */
 struct GraphicSet {
     enum Type : Uint8 {
@@ -30,7 +32,7 @@ struct GraphicSet {
         FloorCovering,
         Wall,
         Object,
-        // Entity,
+        Entity,
         Count,
         None
     };
@@ -89,6 +91,16 @@ struct ObjectGraphicSet : public GraphicSet {
 
     /** See FloorCoveringGraphicSet::graphics. */
     std::array<GraphicRef, VARIATION_COUNT> graphics;
+};
+
+struct EntityGraphicSet : public GraphicSet {
+    /** See FloorGraphicSet::numericID */
+    EntityGraphicSetID numericID{0};
+
+    /** The types of entity graphic that this set contains.
+        The IdleSouth graphic type will always be present. All others are 
+        optional. */
+    std::unordered_map<EntityGraphicType, GraphicRef> graphics;
 };
 
 } // namespace AM

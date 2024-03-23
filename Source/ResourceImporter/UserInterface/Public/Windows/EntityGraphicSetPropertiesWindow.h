@@ -16,62 +16,53 @@ namespace ResourceImporter
 class DataModel;
 
 /**
- * The properties window shown when the user loads a Floor, Floor Covering, Wall, 
- * or Object graphic set from the Library. Entity graphic sets use 
- * EntityGraphicPropertiesWindow.
+ * The properties window shown when the user loads an Entity graphic set.
  *
  * Allows the user to edit the active graphic set's properties.
+ *
+ * Note: This is separate from GraphicSetPropertiesWindow because entity 
+ *       graphic sets have significant differences from the others.
  */
-class GraphicSetPropertiesWindow : public AUI::Window
+class EntityGraphicSetPropertiesWindow : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    GraphicSetPropertiesWindow(DataModel& inDataModel);
+    EntityGraphicSetPropertiesWindow(DataModel& inDataModel);
 
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------
-    /** All fields below directly match a data field in an
-        Editor<type>GraphicSet class. */
+    /** All fields below directly match a data field in the 
+        EditorEntityGraphicSet class. */
     AUI::Text nameLabel;
     MainTextInput nameInput;
 
 private:
     /**
-     * If the new active item is a graphic set, loads it's data into this panel.
+     * If the new active item is an entity graphic set, loads it's data into 
+     * this panel.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If type/ID matches active set) Sets this panel back to its default
-     * state.
+     * (If ID matches active set) Sets this panel back to its default state.
      */
-    void onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID);
+    void onEntityRemoved(EntityGraphicSetID graphicSetID);
 
     /**
-     * (If type/ID matches active set) Updates this panel with the active
-     * graphic set's new properties.
+     * (If ID matches active set) Updates this panel with the active graphic 
+     * set's new properties.
      */
-    void onGraphicSetDisplayNameChanged(GraphicSet::Type type, Uint16 graphicSetID,
-                                       const std::string& newDisplayName);
-
-    /**
-     * Loads the given graphic set's data into this panel.
-     */
-    template<typename T>
-    void loadActiveGraphicSet(GraphicSet::Type graphicSetType,
-                             const T& newActiveGraphicSet);
+    void onEntityDisplayNameChanged(EntityGraphicSetID graphicSetID,
+                                    const std::string& newDisplayName);
 
     /** Used while setting user-inputted graphic set data. */
     DataModel& dataModel;
 
-    /** The active graphic set's type. */
-    GraphicSet::Type activeGraphicSetType;
-
     /** The active graphic set's ID. */
-    Uint16 activeGraphicSetID;
+    EntityGraphicSetID activeGraphicSetID;
 
     /** The below functions are all for validating and saving the user's data
         when the text is committed. */

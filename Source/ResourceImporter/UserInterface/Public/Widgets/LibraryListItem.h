@@ -72,7 +72,7 @@ public:
         FloorCovering,
         Wall,
         Object,
-        /*Entity,*/
+        Entity,
         IconSheet,
         Icon,
         Count,

@@ -14,6 +14,8 @@
 #include "AnimationPropertiesWindow.h"
 #include "GraphicSetEditStage.h"
 #include "GraphicSetPropertiesWindow.h"
+#include "EntityGraphicSetEditStage.h"
+#include "EntityGraphicSetPropertiesWindow.h"
 #include "IconEditStage.h"
 #include "IconPropertiesWindow.h"
 #include "TitleButton.h"
@@ -83,6 +85,7 @@ private:
     SpriteEditStage spriteEditStage;
     AnimationEditStage animationEditStage;
     GraphicSetEditStage graphicSetEditStage;
+    EntityGraphicSetEditStage entityGraphicSetEditStage;
     IconEditStage iconEditStage;
 
     // Properties windows
@@ -91,6 +94,7 @@ private:
     SpritePropertiesWindow spritePropertiesWindow;
     AnimationPropertiesWindow animationPropertiesWindow;
     GraphicSetPropertiesWindow graphicSetPropertiesWindow;
+    EntityGraphicSetPropertiesWindow entityGraphicSetPropertiesWindow;
     IconPropertiesWindow iconPropertiesWindow;
 
     /** Confirmation dialog. Child widgets can call openConfirmationDialog()

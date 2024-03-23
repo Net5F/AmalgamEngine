@@ -80,21 +80,23 @@ void AnimationModel::save(nlohmann::json& json)
         json["animations"][i]["fps"] = animation.fps;
 
         // If the animation has any filled frames, add them.
+        // Note: Frame numbers/IDs are parallel arrays to save file space. If we 
+        //       switch to a binary format, they can be combined into a single 
+        //       struct or used as key/value in a map.
         if ((animation.frames.size() > 0)
             && (animation.frames[0].sprite.get().numericID != NULL_SPRITE_ID)) {
             int j{0};
             for (auto& [frameNumber, sprite] : animation.frames) {
-                json["animations"][i]["frames"][j]["frameNumber"] = frameNumber;
-                json["animations"][i]["frames"][j]["spriteID"]
-                    = sprite.get().numericID;
+                json["animations"][i]["frameNumbers"][j] = frameNumber;
+                json["animations"][i]["spriteIDs"][j] = sprite.get().numericID;
 
                 j++;
             }
         }
         else {
             // No filled frames, add a null sprite.
-            json["animations"][i]["frames"][0]["frameNumber"] = 0;
-            json["animations"][i]["frames"][0]["spriteID"] = NULL_SPRITE_ID;
+            json["animations"][i]["frameNumbers"][0] = 0;
+            json["animations"][i]["spriteIDs"][0] = NULL_SPRITE_ID;
         }
 
         // Add collisionEnabled.
@@ -346,13 +348,19 @@ bool AnimationModel::parseAnimation(const nlohmann::json& animationJson)
     animation.fps = animationJson.at("fps");
 
     // Add the frames.
-    for (auto& [key, frameJson] : animationJson.at("frames").items()) {
+    // Note: Frame numbers/IDs are parallel arrays to save file space. If we 
+    //       switch to a binary format, they can be combined into a single 
+    //       struct or used as key/value in a map.
+    const auto& frameNumbersJson{animationJson.at("frameNumbers")};
+    const auto& spriteIdsJson{animationJson.at("spriteIDs")};
+    for (std::size_t i{0}; i < frameNumbersJson.size(); ++i) {
         // Note: We skip frames that contain the null sprite.
-        SpriteID spriteID{frameJson.at("spriteID")};
+        SpriteID spriteID{spriteIdsJson.at(i).get<SpriteID>()};
         if (spriteID) {
+            Uint8 frameNumber{frameNumbersJson.at(i).get<Uint8>()};
             const EditorSprite& sprite{
                 dataModel.spriteModel.getSprite(spriteID)};
-            animation.frames.emplace_back(frameJson.at("frameNumber"), sprite);
+            animation.frames.emplace_back(frameNumber, sprite);
         }
     }
 

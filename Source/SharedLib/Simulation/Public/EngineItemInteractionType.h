@@ -15,8 +15,8 @@ enum class EngineItemInteractionType : Uint8 {
     NotSet,
 
     // Note: All items support Examine, Destroy (handled by
-    // InventoryDeleteItem),
-    //       and UseOn (handled by CombineItems and UseItemOnEntityRequest).
+    //       InventoryDeleteItem), and UseOn (handled by CombineItems and 
+    //       UseItemOnEntityRequest).
     UseOn,
     Destroy,
     Examine,

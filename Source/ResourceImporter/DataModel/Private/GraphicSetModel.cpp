@@ -431,8 +431,8 @@ bool GraphicSetModel::parseFloorGraphicSet(const nlohmann::json& graphicSetJson)
     std::array<GraphicID, 1> graphicIDs{};
     for (std::size_t i = 0; i < graphicIDs.size(); ++i) {
         graphicIDs[i] = graphicIDJson[i].get<GraphicID>();
-        if (!graphicSetNameIsUnique<EditorFloorGraphicSet>(graphicIDs[i],
-                                                         displayName)) {
+        if (!graphicSetNameIsUnique<EditorFloorGraphicSet>(numericID,
+                                                           displayName)) {
             errorString = "Floor display name isn't unique: ";
             errorString += displayName.c_str();
             return false;
@@ -462,8 +462,8 @@ bool GraphicSetModel::parseFloorCoveringGraphicSet(
     std::array<GraphicID, Rotation::Direction::Count> graphicIDs{};
     for (std::size_t i = 0; i < graphicIDs.size(); ++i) {
         graphicIDs[i] = graphicIDJson[i].get<GraphicID>();
-        if (!graphicSetNameIsUnique<EditorFloorCoveringGraphicSet>(graphicIDs[i],
-                                                                 displayName)) {
+        if (!graphicSetNameIsUnique<EditorFloorCoveringGraphicSet>(
+                numericID, displayName)) {
             errorString = "Floor covering display name isn't unique: ";
             errorString += displayName.c_str();
             return false;
@@ -492,8 +492,8 @@ bool GraphicSetModel::parseWallGraphicSet(const nlohmann::json& graphicSetJson)
     std::array<GraphicID, Wall::Type::Count> graphicIDs{};
     for (std::size_t i = 0; i < graphicIDs.size(); ++i) {
         graphicIDs[i] = graphicIDJson[i].get<GraphicID>();
-        if (!graphicSetNameIsUnique<EditorWallGraphicSet>(graphicIDs[i],
-                                                        displayName)) {
+        if (!graphicSetNameIsUnique<EditorWallGraphicSet>(numericID,
+                                                          displayName)) {
             errorString = "Wall display name isn't unique: ";
             errorString += displayName.c_str();
             return false;
@@ -522,8 +522,8 @@ bool GraphicSetModel::parseObjectGraphicSet(const nlohmann::json& graphicSetJson
     std::array<GraphicID, Rotation::Direction::Count> graphicIDs{};
     for (std::size_t i = 0; i < graphicIDs.size(); ++i) {
         graphicIDs[i] = graphicIDJson[i].get<GraphicID>();
-        if (!graphicSetNameIsUnique<EditorObjectGraphicSet>(graphicIDs[i],
-                                                          displayName)) {
+        if (!graphicSetNameIsUnique<EditorObjectGraphicSet>(numericID,
+                                                            displayName)) {
             errorString = "Object display name isn't unique: ";
             errorString += displayName.c_str();
             return false;

@@ -4,6 +4,7 @@
 #include "LibraryItemData.h"
 #include "BoundingBoxModel.h"
 #include "GraphicSetModel.h"
+#include "EntityGraphicSetModel.h"
 #include "SpriteModel.h"
 #include "AnimationModel.h"
 #include "IconModel.h"
@@ -37,6 +38,7 @@ public:
 
     BoundingBoxModel boundingBoxModel;
     GraphicSetModel graphicSetModel;
+    EntityGraphicSetModel entityGraphicSetModel;
     SpriteModel spriteModel;
     AnimationModel animationModel;
     IconModel iconModel;

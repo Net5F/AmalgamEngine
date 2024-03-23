@@ -18,6 +18,7 @@ namespace ResourceImporter
 
 class DataModel;
 class GraphicSetModel;
+class EntityGraphicSetModel;
 
 /**
  * Holds data for sprites and their parent sprite sheets.
@@ -26,6 +27,7 @@ class SpriteModel
 {
 public:
     SpriteModel(DataModel& inDataModel, GraphicSetModel& inGraphicSetModel,
+                EntityGraphicSetModel& inEntityGraphicSetModel,
                 SDL_Renderer* inSdlRenderer);
 
     /**
@@ -139,6 +141,7 @@ private:
     DataModel& dataModel;
     /** Used to remove graphics from graphic sets when a graphic is deleted. */
     GraphicSetModel& graphicSetModel;
+    EntityGraphicSetModel& entityGraphicSetModel;
 
     /** Used for validating user-selected sprite sheet textures. */
     SDL_Renderer* sdlRenderer;

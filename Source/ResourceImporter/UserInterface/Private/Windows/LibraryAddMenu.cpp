@@ -7,7 +7,7 @@ namespace AM
 namespace ResourceImporter
 {
 LibraryAddMenu::LibraryAddMenu()
-: AUI::Window({310, 5, 169, 259}, "LibraryAddMenu")
+: AUI::Window({310, 5, 169, 291}, "LibraryAddMenu")
 , backgroundImage({0, 0, logicalExtent.w, logicalExtent.h})
 , addBoundingBoxButton({1, 1, 167, 32}, "AddBoundingBoxButton")
 , addSpriteSheetButton({1, 33, 167, 32}, "AddSpriteSheetButton")
@@ -16,7 +16,8 @@ LibraryAddMenu::LibraryAddMenu()
 , addFloorCoveringButton({1, 129, 167, 32}, "AddFloorCoveringButton")
 , addWallButton({1, 161, 167, 32}, "AddWallButton")
 , addObjectButton({1, 193, 167, 32}, "AddObjectButton")
-, addIconButton({1, 225, 167, 32}, "AddIconButton")
+, addEntityButton({1, 225, 167, 32}, "AddEntityButton")
+, addIconButton({1, 257, 167, 32}, "AddIconButton")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
@@ -27,6 +28,7 @@ LibraryAddMenu::LibraryAddMenu()
     children.push_back(addFloorCoveringButton);
     children.push_back(addWallButton);
     children.push_back(addObjectButton);
+    children.push_back(addEntityButton);
     children.push_back(addIconButton);
 
     // Flag ourselves as focusable, so we can close when focus is lost.
@@ -44,6 +46,7 @@ LibraryAddMenu::LibraryAddMenu()
     styleButton(addFloorCoveringButton, "Floor Covering");
     styleButton(addWallButton, "Wall");
     styleButton(addObjectButton, "Object");
+    styleButton(addEntityButton, "Entity");
     styleButton(addIconButton, "Icon");
 }
 

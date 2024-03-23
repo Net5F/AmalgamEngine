@@ -26,6 +26,7 @@ target_sources(SharedLib
         Public/DiscreteExtent.h
         Public/DiscreteImpl.h
         Public/DiscretePosition.h
+        Public/EngineEntityGraphicType.h
         Public/EngineEntityInteractionType.h
         Public/EngineItemInteractionType.h
         Public/EntityLocator.h

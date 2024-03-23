@@ -22,9 +22,11 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , animationEditStage{dataModel, libraryWindow}
 , iconEditStage{dataModel}
 , graphicSetEditStage{dataModel, libraryWindow}
+, entityGraphicSetEditStage{dataModel, libraryWindow}
 , spritePropertiesWindow{dataModel, libraryWindow}
 , animationPropertiesWindow{dataModel, libraryWindow}
 , graphicSetPropertiesWindow{dataModel}
+, entityGraphicSetPropertiesWindow{dataModel}
 , iconPropertiesWindow{dataModel}
 , confirmationDialog{{0, 0, 1920, 1080}, "ConfirmationDialog"}
 , addSpriteSheetDialog{dataModel}
@@ -38,10 +40,12 @@ MainScreen::MainScreen(DataModel& inDataModel)
     windows.push_back(spriteEditStage);
     windows.push_back(animationEditStage);
     windows.push_back(graphicSetEditStage);
+    windows.push_back(entityGraphicSetEditStage);
     windows.push_back(iconEditStage);
     windows.push_back(spritePropertiesWindow);
     windows.push_back(animationPropertiesWindow);
     windows.push_back(graphicSetPropertiesWindow);
+    windows.push_back(entityGraphicSetPropertiesWindow);
     windows.push_back(iconPropertiesWindow);
     windows.push_back(libraryAddMenu);
     windows.push_back(confirmationDialog);
@@ -122,6 +126,10 @@ MainScreen::MainScreen(DataModel& inDataModel)
         dataModel.graphicSetModel.addObject();
         dropFocus();
     });
+    libraryAddMenu.addEntityButton.setOnPressed([this]() {
+        dataModel.entityGraphicSetModel.addEntity();
+        dropFocus();
+    });
     libraryAddMenu.addIconButton.setOnPressed([this]() {
         addIconSheetDialog.setIsVisible(true);
         dropFocus();
@@ -143,6 +151,8 @@ MainScreen::MainScreen(DataModel& inDataModel)
     animationPropertiesWindow.setIsVisible(false);
     graphicSetEditStage.setIsVisible(false);
     graphicSetPropertiesWindow.setIsVisible(false);
+    entityGraphicSetEditStage.setIsVisible(false);
+    entityGraphicSetPropertiesWindow.setIsVisible(false);
     iconEditStage.setIsVisible(false);
     iconPropertiesWindow.setIsVisible(false);
 
@@ -207,6 +217,8 @@ void MainScreen::onActiveLibraryItemChanged(
     animationPropertiesWindow.setIsVisible(false);
     graphicSetEditStage.setIsVisible(false);
     graphicSetPropertiesWindow.setIsVisible(false);
+    entityGraphicSetEditStage.setIsVisible(false);
+    entityGraphicSetPropertiesWindow.setIsVisible(false);
     iconEditStage.setIsVisible(false);
     iconPropertiesWindow.setIsVisible(false);
 
@@ -223,12 +235,16 @@ void MainScreen::onActiveLibraryItemChanged(
         animationEditStage.setIsVisible(true);
         animationPropertiesWindow.setIsVisible(true);
     }
+    else if (holds_alternative<EditorEntityGraphicSet>(newActiveItem)) {
+        entityGraphicSetEditStage.setIsVisible(true);
+        entityGraphicSetPropertiesWindow.setIsVisible(true);
+    }
     else if (holds_alternative<EditorIcon>(newActiveItem)) {
         iconEditStage.setIsVisible(true);
         iconPropertiesWindow.setIsVisible(true);
     }
     else {
-        // The new active item is a graphic set.
+        // The new active item is a non-entity graphic set.
         graphicSetEditStage.setIsVisible(true);
         graphicSetPropertiesWindow.setIsVisible(true);
     }

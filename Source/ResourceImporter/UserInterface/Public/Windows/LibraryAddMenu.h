@@ -32,6 +32,7 @@ public:
     AUI::Button addFloorCoveringButton;
     AUI::Button addWallButton;
     AUI::Button addObjectButton;
+    AUI::Button addEntityButton;
     AUI::Button addIconButton;
 
     //-------------------------------------------------------------------------

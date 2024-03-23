@@ -17,7 +17,8 @@ namespace ResourceImporter
 DataModel::DataModel(SDL_Renderer* inSdlRenderer)
 : boundingBoxModel{*this}
 , graphicSetModel{*this}
-, spriteModel{*this, graphicSetModel, inSdlRenderer}
+, entityGraphicSetModel{*this}
+, spriteModel{*this, graphicSetModel, entityGraphicSetModel, inSdlRenderer}
 , animationModel{*this}
 , iconModel{*this, inSdlRenderer}
 , workingFilePath{""}
@@ -96,6 +97,9 @@ bool DataModel::load(const std::string& fullPath)
         else if (!graphicSetModel.load(json)) {
             parseError = graphicSetModel.getErrorString();
         }
+        else if (!entityGraphicSetModel.load(json)) {
+            parseError = entityGraphicSetModel.getErrorString();
+        }
         else if (!iconModel.load(json)) {
             parseError = iconModel.getErrorString();
         }
@@ -118,6 +122,7 @@ void DataModel::save()
     spriteModel.save(json);
     animationModel.save(json);
     graphicSetModel.save(json);
+    entityGraphicSetModel.save(json);
     iconModel.save(json);
 
     // Write the json to our working file.
@@ -198,6 +203,11 @@ void DataModel::setActiveGraphicSet(GraphicSet::Type type,
         case GraphicSet::Type::Object: {
             activeLibraryItemChangedSig.publish(
                 graphicSetModel.getObject(newActiveGraphicSetID));
+            return;
+        }
+        case GraphicSet::Type::Entity: {
+            activeLibraryItemChangedSig.publish(
+                entityGraphicSetModel.getEntity(newActiveGraphicSetID));
             return;
         }
         default: {
@@ -290,6 +300,7 @@ void DataModel::resetModelState()
 
     spriteModel.resetModelState();
     graphicSetModel.resetModelState();
+    entityGraphicSetModel.resetModelState();
     iconModel.resetModelState();
 }
 

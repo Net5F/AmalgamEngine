@@ -9,7 +9,7 @@ namespace AM
  * The types of entity interactions that the engine provides.
  *
  * Note: Don't use this enum directly, use EntityInteractionType (it combines
- * the engine's and the project's interactions).
+ *       the engine's and the project's interactions).
  */
 enum class EngineEntityInteractionType : Uint8 {
     NotSet,

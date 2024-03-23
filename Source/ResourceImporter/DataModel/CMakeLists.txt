@@ -6,6 +6,7 @@ target_sources(ResourceImporter
         Private/EditorAnimation.cpp
         Private/EditorGraphicRef.cpp
         Private/EditorSprite.cpp
+        Private/EntityGraphicSetModel.cpp
         Private/GraphicSetModel.cpp
         Private/IconModel.cpp
         Private/SpriteModel.cpp
@@ -15,6 +16,7 @@ target_sources(ResourceImporter
         Public/DataModel.h
         Public/EditorAnimation.h
         Public/EditorBoundingBox.h
+        Public/EditorEntityGraphicSet.h
         Public/EditorFloorCoveringGraphicSet.h
         Public/EditorFloorGraphicSet.h
         Public/EditorGraphicRef.h
@@ -24,6 +26,7 @@ target_sources(ResourceImporter
         Public/EditorSprite.h
         Public/EditorSpriteSheet.h
         Public/EditorWallGraphicSet.h
+        Public/EntityGraphicSetModel.h
         Public/GraphicSetModel.h
         Public/IconModel.h
         Public/LibraryItemData.h

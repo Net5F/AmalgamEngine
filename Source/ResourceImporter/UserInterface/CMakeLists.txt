@@ -18,6 +18,8 @@ target_sources(ResourceImporter
         Private/Windows/AnimationPropertiesWindow.cpp
         Private/Windows/BoundingBoxEditStage.cpp
         Private/Windows/BoundingBoxPropertiesWindow.cpp
+        Private/Windows/EntityGraphicSetEditStage.cpp
+        Private/Windows/EntityGraphicSetPropertiesWindow.cpp
         Private/Windows/GraphicSetEditStage.cpp
         Private/Windows/GraphicSetPropertiesWindow.cpp
         Private/Windows/IconEditStage.cpp
@@ -50,6 +52,8 @@ target_sources(ResourceImporter
         Public/Windows/AnimationPropertiesWindow.h
         Public/Windows/BoundingBoxEditStage.h
         Public/Windows/BoundingBoxPropertiesWindow.h
+        Public/Windows/EntityGraphicSetEditStage.h
+        Public/Windows/EntityGraphicSetPropertiesWindow.h
         Public/Windows/GraphicSetEditStage.h
         Public/Windows/GraphicSetPropertiesWindow.h
         Public/Windows/IconEditStage.h

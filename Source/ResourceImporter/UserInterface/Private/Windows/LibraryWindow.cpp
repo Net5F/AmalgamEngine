@@ -64,9 +64,9 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     auto objectContainer{
         std::make_unique<LibraryCollapsibleContainer>("Objects")};
     libraryContainer.push_back(std::move(objectContainer));
-    //auto entityContainer{
-    //    std::make_unique<LibraryCollapsibleContainer>("Entities")};
-    //libraryContainer.push_back(std::move(entityContainer));
+    auto entityContainer{
+        std::make_unique<LibraryCollapsibleContainer>("Entities")};
+    libraryContainer.push_back(std::move(entityContainer));
     auto iconSheetContainer{
         std::make_unique<LibraryCollapsibleContainer>("Icon Sheets")};
     libraryContainer.push_back(std::move(iconSheetContainer));
@@ -110,6 +110,9 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     graphicSetModel.objectAdded.connect<&LibraryWindow::onObjectAdded>(*this);
     graphicSetModel.graphicSetRemoved.connect<&LibraryWindow::onGraphicSetRemoved>(
         *this);
+    EntityGraphicSetModel& entityModel{dataModel.entityGraphicSetModel};
+    entityModel.entityAdded.connect<&LibraryWindow::onEntityAdded>(*this);
+    entityModel.entityRemoved.connect<&LibraryWindow::onEntityRemoved>(*this);
     IconModel& iconModel{dataModel.iconModel};
     iconModel.sheetAdded.connect<&LibraryWindow::onIconSheetAdded>(*this);
     iconModel.sheetRemoved.connect<&LibraryWindow::onIconSheetRemoved>(*this);
@@ -123,6 +126,8 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
         .connect<&LibraryWindow::onAnimationDisplayNameChanged>(*this);
     graphicSetModel.graphicSetDisplayNameChanged
         .connect<&LibraryWindow::onGraphicSetDisplayNameChanged>(*this);
+    entityModel.entityDisplayNameChanged
+        .connect<&LibraryWindow::onEntityDisplayNameChanged>(*this);
     iconModel.iconDisplayNameChanged
         .connect<&LibraryWindow::onIconDisplayNameChanged>(*this);
 }
@@ -355,6 +360,37 @@ void LibraryWindow::onGraphicSetAdded(Uint16 graphicSetID, const T& graphicSet)
     listItemContainer.push_back(std::move(graphicSetListItem));
 }
 
+void LibraryWindow::onEntityAdded(EntityGraphicSetID graphicSetID,
+                                  const EditorEntityGraphicSet& entity)
+{
+    // Construct a new list item for this bounding box.
+    auto entityListItem{std::make_unique<LibraryListItem>(entity.displayName)};
+    entityListItem->type = LibraryListItem::Type::Entity;
+    entityListItem->ID = static_cast<int>(graphicSetID);
+    listItemMaps[LibraryListItem::Type::Entity].emplace(graphicSetID,
+                                                        entityListItem.get());
+
+    entityListItem->setLeftPadding(32);
+
+    entityListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
+        processSelectedListItem(selectedListItem);
+    });
+    entityListItem->setOnDeselected(
+        [this](LibraryListItem* deselectedListItem) {
+        // Note: Deselect is handled in OnSelected and FocusLost.
+        selectedItemsChangedSig.publish(selectedListItems);
+    });
+    entityListItem->setOnActivated([this, graphicSetID](LibraryListItem*) {
+        // Set this list item's associated graphic set as the active item.
+        dataModel.setActiveGraphicSet(GraphicSet::Type::Entity, graphicSetID);
+    });
+
+    // Add the new list item to the appropriate container.
+    auto& listItemContainer{static_cast<LibraryCollapsibleContainer&>(
+        *libraryContainer[Category::Entities])};
+    listItemContainer.push_back(std::move(entityListItem));
+}
+
 void LibraryWindow::onIconSheetAdded(int sheetID, const EditorIconSheet& sheet)
 {
     // Create a container for the new sheet.
@@ -472,7 +508,30 @@ void LibraryWindow::onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSet
     graphicSetContainer.erase(graphicSetIt->second);
 
     // Remove the list item from the map.
-    listItemMaps[toListItemType(type)].erase(graphicSetIt);
+    listItemMap.erase(graphicSetIt);
+}
+
+void LibraryWindow::onEntityRemoved(EntityGraphicSetID graphicSetID)
+{
+    auto listItemMap{listItemMaps[LibraryListItem::Type::Entity]};
+    auto graphicSetIt{listItemMap.find(graphicSetID)};
+    if (graphicSetIt == listItemMap.end()) {
+        LOG_FATAL("Failed to find graphic set during removal.");
+    }
+
+    // Clear any list item selections.
+    for (LibraryListItem* listItem : selectedListItems) {
+        listItem->deselect();
+    }
+    selectedListItems.clear();
+
+    // Remove the list item from the container.
+    auto& graphicSetContainer{static_cast<LibraryCollapsibleContainer&>(
+        *libraryContainer[LibraryWindow::Category::Entities])};
+    graphicSetContainer.erase(graphicSetIt->second);
+
+    // Remove the list item from the map.
+    listItemMap.erase(graphicSetIt);
 }
 
 void LibraryWindow::onIconSheetRemoved(int sheetID)
@@ -545,6 +604,20 @@ void LibraryWindow::onGraphicSetDisplayNameChanged(
 {
     LibraryListItem::Type graphicSetListItemType{toListItemType(type)};
     auto graphicSetListItemMap{listItemMaps[graphicSetListItemType]};
+    auto graphicSetListItemIt{graphicSetListItemMap.find(graphicSetID)};
+    if (graphicSetListItemIt == graphicSetListItemMap.end()) {
+        LOG_FATAL("Failed to find a list item for the given graphic set.");
+    }
+
+    // Update the list item to use the graphic set's new display name.
+    LibraryListItem& graphicSetListItem{*(graphicSetListItemIt->second)};
+    graphicSetListItem.text.setText(newDisplayName);
+}
+
+void LibraryWindow::onEntityDisplayNameChanged(
+    EntityGraphicSetID graphicSetID, const std::string& newDisplayName)
+{
+    auto graphicSetListItemMap{listItemMaps[LibraryListItem::Type::Entity]};
     auto graphicSetListItemIt{graphicSetListItemMap.find(graphicSetID)};
     if (graphicSetListItemIt == graphicSetListItemMap.end()) {
         LOG_FATAL("Failed to find a list item for the given graphic set.");
