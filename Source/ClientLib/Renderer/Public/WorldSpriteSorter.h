@@ -21,7 +21,7 @@ namespace Client
 class TileMap;
 class GraphicData;
 class UserInterface;
-struct AnimationState;
+struct ClientGraphicState;
 
 /**
  * Gathers all of the World's entity and tile layer sprites and sorts them
@@ -92,10 +92,10 @@ private:
     /**
      * Returns the current sprite for the given entity data, or nullptr if 
      * the entity is using an empty animation.
-     * Updates animationState's data if necessary.
+     * Updates clientGraphicState's data if necessary.
      */
     const Sprite& getEntitySprite(const GraphicState& graphicState,
-                                  AnimationState& animationState);
+                                  ClientGraphicState& clientGraphicState);
 
     /**
      * Pushes the given entity sprite into the sorting vector.

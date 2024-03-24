@@ -12,7 +12,7 @@
 #include "SpriteRenderData.h"
 #include "Collision.h"
 #include "GraphicState.h"
-#include "AnimationState.h"
+#include "ClientGraphicState.h"
 #include "VariantTools.h"
 #include <SDL_rect.h>
 #include <cmath>
@@ -135,10 +135,10 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
                                                double alpha)
 {
     // Gather all entities that have a Position and GraphicState.
-    auto view = registry.view<Position, GraphicState, AnimationState>();
+    auto view = registry.view<Position, GraphicState, ClientGraphicState>();
     for (entt::entity entity : view) {
-        auto [position, graphicState, animationState]
-            = view.get<Position, GraphicState, AnimationState>(entity);
+        auto [position, graphicState, clientGraphicState]
+            = view.get<Position, GraphicState, ClientGraphicState>(entity);
 
         // If this entity has a previous position, calc a lerp'd position.
         Position renderPosition{position};
@@ -148,7 +148,7 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
                 previousPos, position, alpha);
         }
 
-        const Sprite& sprite{getEntitySprite(graphicState, animationState)};
+        const Sprite& sprite{getEntitySprite(graphicState, clientGraphicState)};
         pushEntitySprite(entity, renderPosition, sprite, camera);
     }
 
@@ -326,12 +326,13 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
 
 const Sprite&
     WorldSpriteSorter::getEntitySprite(const GraphicState& graphicState,
-                                       AnimationState& animationState)
+                                       ClientGraphicState& clientGraphicState)
 {
     // Get the current sprite for this graphic.
-    const ObjectGraphicSet& graphicSet{
-        graphicData.getObjectGraphicSet(graphicState.graphicSetID)};
-    const GraphicRef& graphic{graphicSet.graphics[graphicState.graphicIndex]};
+    const EntityGraphicSet& graphicSet{
+        graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
+    const GraphicRef& graphic{
+        graphicSet.graphics.at(clientGraphicState.graphicType)};
     const Sprite* sprite{nullptr};
     std::visit(VariantTools::Overload{
         [&](std::reference_wrapper<const Sprite> spriteRef) {
@@ -341,13 +342,13 @@ const Sprite&
             // Calc how far we are into this animation and get the appropriate
             // sprite.
             double animationTime{currentAnimationTimestamp
-                                 - animationState.animationStartTime};
+                                 - clientGraphicState.animationStartTime};
             sprite = &(animation.get().getSpriteAtTime(animationTime));
 
             // If this animation just began, set its start time.
-            if (animationState.setStartTime) {
-                animationState.animationStartTime = animationTimer.getTime();
-                animationState.setStartTime = false;
+            if (clientGraphicState.setStartTime) {
+                clientGraphicState.animationStartTime = animationTimer.getTime();
+                clientGraphicState.setStartTime = false;
             }
         }
     }, graphic);

@@ -74,14 +74,9 @@ void ClientConnectionSystem::processConnectEvents()
 
         world.addMovementComponents(newEntity, Rotation{});
 
-        // TODO: When we add character sprite sets, update this.
-        Uint16 graphicSetID{
-            graphicData
-                .getObjectGraphicSet(SharedConfig::DEFAULT_CHARACTER_SPRITE_SET)
-                .numericID};
-        GraphicState graphicState{
-            GraphicSet::Type::Object, graphicSetID,
-            SharedConfig::DEFAULT_CHARACTER_SPRITE_INDEX};
+        const EntityGraphicSet& graphicSet{graphicData.getEntityGraphicSet(
+            SharedConfig::DEFAULT_ENTITY_GRAPHIC_SET)};
+        GraphicState graphicState{graphicSet.numericID};
         world.addGraphicsComponents(newEntity, graphicState);
 
         // Add the new client entity to the network ID map.

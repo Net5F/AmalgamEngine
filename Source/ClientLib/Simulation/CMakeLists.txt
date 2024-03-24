@@ -37,7 +37,7 @@ target_sources(ClientLib
         Public/TileUpdateSystem.h
         Public/World.h
         Public/WorldObjectID.h
-        Public/Components/AnimationState.h
+        Public/Components/ClientGraphicState.h
         Public/Components/InputHistory.h
         Public/Components/NeedsAdjacentChunks.h
         Public/GraphicData/GraphicData.h

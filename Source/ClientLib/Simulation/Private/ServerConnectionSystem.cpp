@@ -9,7 +9,7 @@
 #include "Collision.h"
 #include "InputHistory.h"
 #include "Rotation.h"
-#include "AnimationState.h"
+#include "ClientGraphicState.h"
 #include "GraphicState.h"
 #include "IsClientEntity.h"
 #include "UserConfig.h"
@@ -145,15 +145,14 @@ void ServerConnectionSystem::initMockSimState()
     registry.emplace<Rotation>(newEntity);
     registry.emplace<InputHistory>(newEntity);
 
-    // TODO: When we add character sprite sets, update this.
-    const ObjectGraphicSet& graphicSet{graphicData.getObjectGraphicSet(
-        SharedConfig::DEFAULT_CHARACTER_SPRITE_SET)};
-    const auto& graphicState{registry.emplace<GraphicState>(
-        newEntity, GraphicSet::Type::Object, graphicSet.numericID,
-        SharedConfig::DEFAULT_CHARACTER_SPRITE_INDEX)};
-    const GraphicRef& graphic{
-        graphicSet.graphics[graphicState.graphicIndex]};
+    const EntityGraphicSet& graphicSet{graphicData.getEntityGraphicSet(
+        SharedConfig::DEFAULT_ENTITY_GRAPHIC_SET)};
+    const auto& graphicState{
+        registry.emplace<GraphicState>(newEntity, graphicSet.numericID)};
 
+    // Entity collision always comes from its IdleSouth graphic.
+    const GraphicRef& graphic{
+        graphicSet.graphics.at(EntityGraphicType::IdleSouth)};
     const BoundingBox& modelBounds{graphic.getModelBounds()};
     const Collision& collision{registry.emplace<Collision>(
         newEntity, modelBounds,
@@ -161,7 +160,9 @@ void ServerConnectionSystem::initMockSimState()
                                          registry.get<Position>(newEntity)))};
     world.entityLocator.setEntityLocation(newEntity, collision.worldBounds);
 
-    registry.emplace<AnimationState>(newEntity);
+    // Entities with GraphicState also get a ClientGraphicState.
+    registry.emplace<ClientGraphicState>(newEntity,
+                                         EntityGraphicType::IdleSouth);
 
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};

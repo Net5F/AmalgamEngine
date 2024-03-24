@@ -29,9 +29,23 @@ enum class EngineEntityGraphicType : Uint8 {
     RunNorthEast,
     RunEast,
     RunSouthEast,
-
-    // We reserve values 0 - 49. The project can start at 50.
-    PROJECT_START = 50
+    CrouchSouth,
+    CrouchSouthWest,
+    CrouchWest,
+    CrouchNorthWest,
+    CrouchNorth,
+    CrouchNorthEast,
+    CrouchEast,
+    CrouchSouthEast,
+    JumpSouth,
+    JumpSouthWest,
+    JumpWest,
+    JumpNorthWest,
+    JumpNorth,
+    JumpNorthEast,
+    JumpEast,
+    JumpSouthEast,
+    PROJECT_START
 };
 
 } // End namespace AM

@@ -79,11 +79,12 @@ void ComponentChangeSystem::onGraphicStateUpdated(entt::registry& registry,
 {
     // Since the graphic state was updated, we need to update the entity's
     // collision.
+    // Note: Entity collision always comes from its IdleSouth graphic.
     auto [position, graphicState]
         = registry.get<Position, GraphicState>(entity);
     GraphicRef newGraphic{
-        graphicData.getObjectGraphicSet(graphicState.graphicSetID)
-            .graphics[graphicState.graphicIndex]};
+        graphicData.getEntityGraphicSet(graphicState.graphicSetID)
+            .graphics.at(EntityGraphicType::IdleSouth)};
 
     // Note: We assume that an entity with GraphicState always has a
     //       Collision.

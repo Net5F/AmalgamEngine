@@ -74,14 +74,6 @@ private:
      */
     void fillSlotGraphicData(GraphicSetSlot& slot, GraphicID graphicID);
 
-    /** Converts an entity graphic type into the index within graphicContainer 
-        that the associated slot widget can be found. */
-    constexpr std::size_t toIndex(EntityGraphicType graphicType);
-
-    /** Converts a graphicContainer index into the entity graphic type 
-        associated with that index. */
-    constexpr EntityGraphicType toEntityGraphicType(Uint8 index);
-
     /** Used to get the current working dir when displaying the graphic. */
     DataModel& dataModel;
 

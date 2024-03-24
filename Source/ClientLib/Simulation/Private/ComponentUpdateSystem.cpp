@@ -4,6 +4,7 @@
 #include "Network.h"
 #include "GraphicData.h"
 #include "Collision.h"
+#include "ClientGraphicState.h"
 #include "Transforms.h"
 #include "Log.h"
 
@@ -88,15 +89,15 @@ void ComponentUpdateSystem::processComponentUpdate(
 }
 
 void ComponentUpdateSystem::onGraphicStateUpdated(entt::registry& registry,
-                                                    entt::entity entity)
+                                                  entt::entity entity)
 {
     // Since the graphic state was updated, we need to update the entity's
     // collision.
-    auto [position, graphicState]
-        = registry.get<Position, GraphicState>(entity);
+    auto [position, graphicState, clientGraphicState]
+        = registry.get<Position, GraphicState, ClientGraphicState>(entity);
     GraphicRef newGraphic{
-        graphicData.getObjectGraphicSet(graphicState.graphicSetID)
-            .graphics[graphicState.graphicIndex]};
+        graphicData.getEntityGraphicSet(graphicState.graphicSetID)
+            .graphics.at(clientGraphicState.graphicType)};
 
     // Note: We assume that an entity with GraphicState always has a
     //       Collision.

@@ -131,6 +131,19 @@ const ObjectGraphicSet&
     return *(it->second);
 }
 
+const EntityGraphicSet&
+    GraphicDataBase::getEntityGraphicSet(const std::string& stringID) const
+{
+    auto it{entityGraphicSetStringMap.find(stringID)};
+    if (it == entityGraphicSetStringMap.end()) {
+        LOG_ERROR("Failed to find graphic set with string ID: %s",
+                  stringID.c_str());
+        return entityGraphicSets[0];
+    }
+
+    return *(it->second);
+}
+
 const FloorGraphicSet&
     GraphicDataBase::getFloorGraphicSet(FloorGraphicSetID numericID) const
 {
@@ -175,6 +188,17 @@ const ObjectGraphicSet&
     return objectGraphicSets[numericID];
 }
 
+const EntityGraphicSet&
+    GraphicDataBase::getEntityGraphicSet(EntityGraphicSetID numericID) const
+{
+    if (numericID >= entityGraphicSets.size()) {
+        LOG_ERROR("Invalid numeric ID while getting graphic set: %d", numericID);
+        return entityGraphicSets[0];
+    }
+
+    return entityGraphicSets[numericID];
+}
+
 const std::vector<Sprite>& GraphicDataBase::getAllSprites() const
 {
     return sprites;
@@ -202,6 +226,12 @@ const std::vector<ObjectGraphicSet>&
     return objectGraphicSets;
 }
 
+const std::vector<EntityGraphicSet>&
+    GraphicDataBase::getAllEntityGraphicSets() const
+{
+    return entityGraphicSets;
+}
+
 void GraphicDataBase::parseJson(const nlohmann::json& json)
 {
     // Add the null sprite, animation, and graphic sets.
@@ -223,6 +253,8 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
         std::array<GraphicRef, ObjectGraphicSet::VARIATION_COUNT>{
             nullSprite, nullSprite, nullSprite, nullSprite, nullSprite,
             nullSprite, nullSprite, nullSprite});
+    entityGraphicSets.emplace_back(GraphicSet{"Null", "null"},
+                                   NULL_ENTITY_GRAPHIC_SET_ID);
 
     // Parse the json and catch any parsing errors.
     try {
@@ -251,6 +283,9 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
         }
         for (auto& objectJson : json.at("objects").items()) {
             parseObjectGraphicSet(objectJson.value());
+        }
+        for (auto& entityJson : json.at("entities").items()) {
+            parseEntityGraphicSet(entityJson.value());
         }
     } catch (nlohmann::json::type_error& e) {
         LOG_FATAL(
@@ -281,6 +316,10 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
     for (const ObjectGraphicSet& set : objectGraphicSets) {
         objectGraphicSetStringMap.emplace(set.stringID,
                                          &objectGraphicSets[set.numericID]);
+    }
+    for (const EntityGraphicSet& set : entityGraphicSets) {
+        entityGraphicSetStringMap.emplace(set.stringID,
+                                          &entityGraphicSets[set.numericID]);
     }
 }
 
@@ -324,10 +363,13 @@ void GraphicDataBase::parseAnimation(const nlohmann::json& animationJson)
     // Note: If the animation is empty, the importer will give it a single 
     //       frame with the null sprite. This gets handled the same as any 
     //       other sprite by the renderer.
-    for (auto& [key, frameJson] : animationJson.at("frames").items()) {
-        SpriteID spriteID{frameJson.at("spriteID")};
+    const auto& frameNumbersJson{animationJson.at("frameNumbers")};
+    const auto& spriteIdsJson{animationJson.at("spriteIDs")};
+    for (std::size_t i{0}; i < frameNumbersJson.size(); ++i) {
+        SpriteID spriteID{spriteIdsJson.at(i).get<SpriteID>()};
+        Uint8 frameNumber{frameNumbersJson.at(i).get<Uint8>()};
         const Sprite& sprite{getSprite(spriteID)};
-        animation.frames.emplace_back(frameJson.at("frameNumber"), sprite);
+        animation.frames.emplace_back(frameNumber, sprite);
     }
 
     // Add whether the animation has a bounding box or not.
@@ -432,6 +474,28 @@ void GraphicDataBase::parseObjectGraphicSet(
             graphicSet.graphics[index] = {sprites[0]};
         }
         index++;
+    }
+}
+
+void GraphicDataBase::parseEntityGraphicSet(
+    const nlohmann::json& graphicSetJson)
+{
+    // Add a graphic set to the appropriate vector.
+    GraphicRef nullSprite{sprites[0]};
+    EntityGraphicSet& graphicSet{entityGraphicSets.emplace_back(
+        GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
+                   graphicSetJson.at("stringID").get<std::string>()},
+        graphicSetJson.at("numericID"))};
+
+    // Add the graphics.
+    const auto& graphicIDTypesJson{graphicSetJson.at("graphicIDTypes")};
+    const auto& graphicIDValuesJson{graphicSetJson.at("graphicIDValues")};
+    for (std::size_t i{0}; i < graphicIDTypesJson.size(); ++i) {
+        EntityGraphicType graphicType{
+            graphicIDTypesJson.at(i).get<EntityGraphicType>()};
+        GraphicID graphicID{graphicIDValuesJson.at(i).get<GraphicID>()};
+
+        graphicSet.graphics.emplace(graphicType, getGraphic(graphicID));
     }
 }
 

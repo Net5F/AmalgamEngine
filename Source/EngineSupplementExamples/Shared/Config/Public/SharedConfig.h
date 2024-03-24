@@ -47,18 +47,8 @@ public:
     static constexpr float SQUARED_INTERACTION_DISTANCE{INTERACTION_DISTANCE
                                                         * INTERACTION_DISTANCE};
 
-    // TODO: We currently use an object sprite set for characters. When we
-    //       add character sprite sets, update this.
-    /** The string ID of the default sprite set for character entities.
-        This is the sprite set that players and NPCs get assigned before the
-        project's animation system gives them their real sprite. */
-    static constexpr const char* DEFAULT_CHARACTER_SPRITE_SET{"ghost"};
-    static constexpr Uint8 DEFAULT_CHARACTER_SPRITE_INDEX{0};
-
-    /** The string ID of the default sprite set for dynamic objects. */
-    static constexpr const char* DEFAULT_DYNAMIC_OBJECT_SPRITE_SET{"sunflower"};
-    /** The index of the default sprite for dynamic objects. */
-    static constexpr Uint8 DEFAULT_DYNAMIC_OBJECT_SPRITE_INDEX{2};
+    /** The string ID of the default graphic set for entities. */
+    static constexpr const char* DEFAULT_ENTITY_GRAPHIC_SET{"ghost"};
 
     /** The speed that entities will move at. Eventually we'll support
         dynamically setting this based on stats, for now it's a constant. */

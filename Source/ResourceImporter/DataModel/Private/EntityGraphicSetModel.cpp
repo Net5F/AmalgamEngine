@@ -240,7 +240,7 @@ bool EntityGraphicSetModel::parseEntityGraphicSet(const nlohmann::json& graphicS
 
     // If IdleSouth isn't present, error (must always be present).
     if (!(graphicIDs.contains(EntityGraphicType::IdleSouth))) {
-        errorString = "Entity is missing Idle graphic: ";
+        errorString = "Entity is missing IdleS graphic: ";
         errorString += displayName.c_str();
         return false;
     }

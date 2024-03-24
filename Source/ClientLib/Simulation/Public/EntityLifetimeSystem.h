@@ -1,12 +1,15 @@
 #pragma once
 
-#include "QueuedEvents.h"
+#include "Rotation.h"
 #include "EntityInit.h"
 #include "EntityDelete.h"
+#include "QueuedEvents.h"
 #include <queue>
 
 namespace AM
 {
+struct EntityGraphicSet;
+
 namespace Client
 {
 class Simulation;
@@ -46,6 +49,14 @@ private:
      * Handles any processing that's specific to the player entity.
      */
     void finishPlayerEntity();
+
+    /**
+     * Converts a direction to the associated idle graphic type.
+     * If the graphic set doesn't contain the desired direction, returns 
+     * IdleSouth.
+     */
+    EntityGraphicType toIdleGraphicType(const EntityGraphicSet& graphicSet,
+                                        Rotation::Direction direction) const;
 
     /** Used to get the current tick number. */
     Simulation& simulation;

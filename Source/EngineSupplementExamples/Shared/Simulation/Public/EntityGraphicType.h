@@ -33,7 +33,22 @@ enum class EntityGraphicType : Uint8 {
     RunNorthEast = static_cast<Uint8>(EngineEntityGraphicType::RunNorthEast),
     RunEast = static_cast<Uint8>(EngineEntityGraphicType::RunEast),
     RunSouthEast = static_cast<Uint8>(EngineEntityGraphicType::RunSouthEast),
-    // TODO: Crouch, Jump
+    CrouchSouth = static_cast<Uint8>(EngineEntityGraphicType::CrouchSouth),
+    CrouchSouthWest = static_cast<Uint8>(EngineEntityGraphicType::CrouchSouthWest),
+    CrouchWest = static_cast<Uint8>(EngineEntityGraphicType::CrouchWest),
+    CrouchNorthWest = static_cast<Uint8>(EngineEntityGraphicType::CrouchNorthWest),
+    CrouchNorth = static_cast<Uint8>(EngineEntityGraphicType::CrouchNorth),
+    CrouchNorthEast = static_cast<Uint8>(EngineEntityGraphicType::CrouchNorthEast),
+    CrouchEast = static_cast<Uint8>(EngineEntityGraphicType::CrouchEast),
+    CrouchSouthEast = static_cast<Uint8>(EngineEntityGraphicType::CrouchSouthEast),
+    JumpSouth = static_cast<Uint8>(EngineEntityGraphicType::JumpSouth),
+    JumpSouthWest = static_cast<Uint8>(EngineEntityGraphicType::JumpSouthWest),
+    JumpWest = static_cast<Uint8>(EngineEntityGraphicType::JumpWest),
+    JumpNorthWest = static_cast<Uint8>(EngineEntityGraphicType::JumpNorthWest),
+    JumpNorth = static_cast<Uint8>(EngineEntityGraphicType::JumpNorth),
+    JumpNorthEast = static_cast<Uint8>(EngineEntityGraphicType::JumpNorthEast),
+    JumpEast = static_cast<Uint8>(EngineEntityGraphicType::JumpEast),
+    JumpSouthEast = static_cast<Uint8>(EngineEntityGraphicType::JumpSouthEast),
 
     // Project graphic types.
     // MyGraphicType =
@@ -42,6 +57,33 @@ enum class EntityGraphicType : Uint8 {
 
 /** The number of entity graphic types (doesn't include NotSet).
     Must be maintained if EntityGraphicType is changed. */
-static constexpr Uint8 ENTITY_GRAPHIC_TYPE_COUNT{16};
+static constexpr Uint8 ENTITY_GRAPHIC_TYPE_COUNT{32};
+
+/**
+ * Converts an entity graphic type into an array index.
+ *
+ * The assumed array spans all valid graphic types, and matches the order 
+ * of their values in the enum.
+ */
+constexpr std::size_t toIndex(EntityGraphicType graphicType)
+{
+    AM_ASSERT(graphicType != EntityGraphicType::NotSet,
+              "Tried to get index of uninitialized entity graphic type.");
+
+    return static_cast<std::size_t>(graphicType) - 1;
+}
+
+/**
+ * Converts an array index into an entity graphic type.
+ *
+ * The assumed array spans all valid graphic types, and matches the order 
+ * of their values in the enum.
+ */
+constexpr EntityGraphicType toEntityGraphicType(Uint8 index)
+{
+    AM_ASSERT(index < ENTITY_GRAPHIC_TYPE_COUNT,
+              "Tried to get entity graphic type with too-large index.");
+    return static_cast<EntityGraphicType>(index + 1);
+}
 
 } // End namespace AM

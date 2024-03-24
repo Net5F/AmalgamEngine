@@ -70,6 +70,8 @@ public:
     const WallGraphicSet& getWallGraphicSet(const std::string& stringID) const;
     const ObjectGraphicSet&
         getObjectGraphicSet(const std::string& stringID) const;
+    const EntityGraphicSet&
+        getEntityGraphicSet(const std::string& stringID) const;
 
     /**
      * Returns the sprite set with the given numeric ID.
@@ -81,6 +83,8 @@ public:
     const WallGraphicSet& getWallGraphicSet(WallGraphicSetID numericID) const;
     const ObjectGraphicSet&
         getObjectGraphicSet(ObjectGraphicSetID numericID) const;
+    const EntityGraphicSet&
+        getEntityGraphicSet(EntityGraphicSetID numericID) const;
 
     /**
      * Get a reference to a vector containing all the sprites.
@@ -96,6 +100,7 @@ public:
         getAllFloorCoveringGraphicSets() const;
     const std::vector<WallGraphicSet>& getAllWallGraphicSets() const;
     const std::vector<ObjectGraphicSet>& getAllObjectGraphicSets() const;
+    const std::vector<EntityGraphicSet>& getAllEntityGraphicSets() const;
 
 protected:
     /**
@@ -137,6 +142,7 @@ protected:
     void parseFloorCoveringGraphicSet(const nlohmann::json& graphicSetJson);
     void parseWallGraphicSet(const nlohmann::json& graphicSetJson);
     void parseObjectGraphicSet(const nlohmann::json& graphicSetJson);
+    void parseEntityGraphicSet(const nlohmann::json& graphicSetJson);
 
     /** The loaded sprites, indexed by their numeric IDs. */
     std::vector<Sprite> sprites;
@@ -150,6 +156,7 @@ protected:
     std::vector<FloorCoveringGraphicSet> floorCoveringGraphicSets;
     std::vector<WallGraphicSet> wallGraphicSets;
     std::vector<ObjectGraphicSet> objectGraphicSets;
+    std::vector<EntityGraphicSet> entityGraphicSets;
 
     /** A map for easily looking up sprites by their string ID. */
     std::unordered_map<std::string, const Sprite*> spriteStringMap;
@@ -166,6 +173,8 @@ protected:
         wallGraphicSetStringMap;
     std::unordered_map<std::string, const ObjectGraphicSet*>
         objectGraphicSetStringMap;
+    std::unordered_map<std::string, const EntityGraphicSet*>
+        entityGraphicSetStringMap;
 };
 
 } // End namespace AM

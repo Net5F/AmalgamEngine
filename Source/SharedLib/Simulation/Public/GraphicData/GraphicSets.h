@@ -101,6 +101,21 @@ struct EntityGraphicSet : public GraphicSet {
         The IdleSouth graphic type will always be present. All others are 
         optional. */
     std::unordered_map<EntityGraphicType, GraphicRef> graphics;
+
+    /**
+     * Returns a graphic type that exists in this set and is safe to use.
+     *
+     * You must use this whenever trying to set an entity to anything other 
+     * than IdleSouth, since all other graphic types are optional in a set.
+     *
+     * currentType is used to favor the current direction if desiredType is a 
+     * direction that doesn't exist.
+     * 
+     * @param desiredType The graphic type that you want the entity to use.
+     * @param currentType The entity's current graphic type.
+     */
+    EntityGraphicType getSafeGraphicType(EntityGraphicType desiredType,
+                                         EntityGraphicType currentType) const;
 };
 
 } // namespace AM

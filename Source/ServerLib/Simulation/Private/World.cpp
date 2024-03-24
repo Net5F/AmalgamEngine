@@ -135,11 +135,11 @@ void World::addGraphicsComponents(entt::entity entity,
     // Add the GraphicState.
     registry.emplace<GraphicState>(entity, graphicState);
 
-    // TODO: When we add character sprite sets, update this.
     // Use the current graphic as the entity's collision bounds.
-    const ObjectGraphicSet& graphicSet{
-        graphicData.getObjectGraphicSet(graphicState.graphicSetID)};
-    const GraphicRef& graphic{graphicSet.graphics[graphicState.graphicIndex]};
+    const EntityGraphicSet& graphicSet{
+        graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
+    const GraphicRef& graphic{
+        graphicSet.graphics.at(EntityGraphicType::IdleSouth)};
 
     const BoundingBox modelBounds{graphic.getModelBounds()};
     const Position& position{registry.get<Position>(entity)};

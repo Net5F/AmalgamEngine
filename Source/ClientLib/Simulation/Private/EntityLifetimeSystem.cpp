@@ -11,7 +11,7 @@
 #include "Inventory.h"
 #include "InputHistory.h"
 #include "NeedsAdjacentChunks.h"
-#include "AnimationState.h"
+#include "ClientGraphicState.h"
 #include "GraphicState.h"
 #include "SDLHelpers.h"
 #include "Transforms.h"
@@ -163,10 +163,11 @@ void EntityLifetimeSystem::processEntityData(
     // When entities have a GraphicState, the server gives them a Collision.
     // It isn't replicated, so add it manually.
     if (const auto* graphicState{registry.try_get<GraphicState>(newEntity)}) {
-        const ObjectGraphicSet& graphicSet{
-            graphicData.getObjectGraphicSet(graphicState->graphicSetID)};
+        // Entity collision always comes from its IdleSouth graphic.
+        const EntityGraphicSet& graphicSet{
+            graphicData.getEntityGraphicSet(graphicState->graphicSetID)};
         const GraphicRef& graphic{
-            graphicSet.graphics[graphicState->graphicIndex]};
+            graphicSet.graphics.at(EntityGraphicType::IdleSouth)};
 
         const BoundingBox& modelBounds{graphic.getModelBounds()};
         const Position& position{registry.get<Position>(newEntity)};
@@ -178,8 +179,14 @@ void EntityLifetimeSystem::processEntityData(
         world.entityLocator.setEntityLocation(newEntity,
                                               collision.worldBounds);
 
-        // On the Client, entities with GraphicState also require AnimationState.
-        registry.emplace<AnimationState>(newEntity);
+        // Entities with GraphicState also get a ClientGraphicState.
+        // Set it to match the entity's Rotation, or IdleSouth if it has none.
+        EntityGraphicType initialGraphicType{EntityGraphicType::IdleSouth};
+        if (const auto* rotation{registry.try_get<Rotation>(newEntity)}) {
+            initialGraphicType
+                = toIdleGraphicType(graphicSet, rotation->direction);
+        }
+        registry.emplace<ClientGraphicState>(newEntity, initialGraphicType);
     }
 
     // If this is the player entity, add any client components specific to it.
@@ -209,6 +216,52 @@ void EntityLifetimeSystem::finishPlayerEntity()
 
     // Flag that we need to request all map data.
     registry.emplace<NeedsAdjacentChunks>(playerEntity);
+}
+
+EntityGraphicType
+    EntityLifetimeSystem::toIdleGraphicType(const EntityGraphicSet& graphicSet,
+                                            Rotation::Direction direction) const
+{
+    // Convert Rotation -> EntityGraphicType.
+    EntityGraphicType desiredType{EntityGraphicType::IdleSouth};
+    switch (direction) {
+        case Rotation::Direction::South:
+            desiredType = EntityGraphicType::IdleSouth;
+            break;
+        case Rotation::Direction::SouthWest:
+            desiredType = EntityGraphicType::IdleSouthWest;
+            break;
+        case Rotation::Direction::West:
+            desiredType = EntityGraphicType::IdleWest;
+            break;
+        case Rotation::Direction::NorthWest:
+            desiredType = EntityGraphicType::IdleNorthWest;
+            break;
+        case Rotation::Direction::North:
+            desiredType = EntityGraphicType::IdleNorth;
+            break;
+        case Rotation::Direction::NorthEast:
+            desiredType = EntityGraphicType::IdleNorthEast;
+            break;
+        case Rotation::Direction::East:
+            desiredType = EntityGraphicType::IdleEast;
+            break;
+        case Rotation::Direction::SouthEast:
+            desiredType = EntityGraphicType::IdleSouthEast;
+            break;
+        default: 
+            desiredType = EntityGraphicType::IdleSouth;
+            break;
+    }
+
+    // If the graphic set has the desired type, return it.
+    if (graphicSet.graphics.contains(desiredType)) {
+        return desiredType;
+    }
+    else {
+        // Doesn't contain the type, return IdleSouth (guaranteed to exist).
+        return EntityGraphicType::IdleSouth;
+    }
 }
 
 } // End namespace Client

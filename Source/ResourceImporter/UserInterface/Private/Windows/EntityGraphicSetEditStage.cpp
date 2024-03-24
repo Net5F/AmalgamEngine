@@ -225,21 +225,5 @@ void EntityGraphicSetEditStage::fillSlotGraphicData(GraphicSetSlot& slot,
     }
 }
 
-constexpr std::size_t
-    EntityGraphicSetEditStage::toIndex(EntityGraphicType graphicType)
-{
-    AM_ASSERT(graphicType != EntityGraphicType::NotSet,
-              "Tried to get index of uninitialized entity graphic type.");
-    return static_cast<std::size_t>(graphicType) - 1;
-}
-
-constexpr EntityGraphicType
-    EntityGraphicSetEditStage::toEntityGraphicType(Uint8 index)
-{
-    AM_ASSERT(index < ENTITY_GRAPHIC_TYPE_COUNT,
-              "Tried to get entity graphic type with too-large index.");
-    return static_cast<EntityGraphicType>(index + 1);
-}
-
 } // End namespace ResourceImporter
 } // End namespace AM
