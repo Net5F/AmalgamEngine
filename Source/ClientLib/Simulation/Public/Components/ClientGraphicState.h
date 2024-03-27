@@ -24,7 +24,7 @@ struct ClientGraphicState
     double animationStartTime{};
 
     /** If true, a new animation has begun and animationStartTime needs to be  
-        set when its first frame is rendered. */
+        reset when its first frame is rendered. */
     bool setStartTime{true};
 };
 

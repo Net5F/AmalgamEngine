@@ -93,11 +93,12 @@ void ComponentUpdateSystem::onGraphicStateUpdated(entt::registry& registry,
 {
     // Since the graphic state was updated, we need to update the entity's
     // collision.
+    // Note: Entity collision always comes from its IdleSouth graphic.
     auto [position, graphicState, clientGraphicState]
         = registry.get<Position, GraphicState, ClientGraphicState>(entity);
     GraphicRef newGraphic{
         graphicData.getEntityGraphicSet(graphicState.graphicSetID)
-            .graphics.at(clientGraphicState.graphicType)};
+            .graphics.at(EntityGraphicType::IdleSouth)};
 
     // Note: We assume that an entity with GraphicState always has a
     //       Collision.
@@ -110,6 +111,12 @@ void ComponentUpdateSystem::onGraphicStateUpdated(entt::registry& registry,
         })};
 
     world.entityLocator.setEntityLocation(entity, collision.worldBounds);
+
+    // Default the entity's current graphic type to IdleSouth since it 
+    // always must be valid and we don't know if the new graphic set has 
+    // the old type.
+    // GraphicSystem will set it to a real value the next time it runs.
+    clientGraphicState.graphicType = EntityGraphicType::IdleSouth;
 }
 
 } // namespace Client

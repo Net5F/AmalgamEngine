@@ -163,7 +163,7 @@ void EntityLifetimeSystem::processEntityData(
     // When entities have a GraphicState, the server gives them a Collision.
     // It isn't replicated, so add it manually.
     if (const auto* graphicState{registry.try_get<GraphicState>(newEntity)}) {
-        // Entity collision always comes from its IdleSouth graphic.
+        // Note: Entity collision always comes from its IdleSouth graphic.
         const EntityGraphicSet& graphicSet{
             graphicData.getEntityGraphicSet(graphicState->graphicSetID)};
         const GraphicRef& graphic{

@@ -12,6 +12,7 @@
 #include "ItemSystem.h"
 #include "InventorySystem.h"
 #include "ComponentUpdateSystem.h"
+#include "GraphicSystem.h"
 #include "CameraSystem.h"
 #include "Item.h"
 #include "Config.h"
@@ -161,6 +162,9 @@ void Simulation::tick()
         //       final state for this tick.
         componentUpdateSystem->processUpdates();
 
+        // Update every entity's graphic state.
+        graphicSystem->updateAnimations();
+
         // Move all cameras to their new positions.
         cameraSystem->moveCameras();
 
@@ -192,9 +196,10 @@ bool Simulation::handleOSEvent(SDL_Event& event)
 void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
 {
     extension = std::move(inExtension);
+    graphicSystem->setExtension(extension.get());
 
-    // Tell the project to initialize its systems.
     if (extension != nullptr) {
+        // Tell the project to initialize its systems.
         extension->initializeSystems();
     }
 }
@@ -235,6 +240,7 @@ void Simulation::initializeSystems()
     inventorySystem = std::make_unique<InventorySystem>(world, network);
     componentUpdateSystem = std::make_unique<ComponentUpdateSystem>(
         *this, world, network, graphicData);
+    graphicSystem = std::make_unique<GraphicSystem>(world, graphicData);
     cameraSystem = std::make_unique<CameraSystem>(world);
 
     // Tell the project to initialize its systems.

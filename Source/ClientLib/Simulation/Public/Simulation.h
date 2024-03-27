@@ -27,6 +27,7 @@ class NpcMovementSystem;
 class ItemSystem;
 class InventorySystem;
 class ComponentUpdateSystem;
+class GraphicSystem;
 class CameraSystem;
 
 /**
@@ -154,6 +155,7 @@ private:
     std::unique_ptr<ItemSystem> itemSystem;
     std::unique_ptr<InventorySystem> inventorySystem;
     std::unique_ptr<ComponentUpdateSystem> componentUpdateSystem;
+    std::unique_ptr<GraphicSystem> graphicSystem;
     std::unique_ptr<CameraSystem> cameraSystem;
 };
 

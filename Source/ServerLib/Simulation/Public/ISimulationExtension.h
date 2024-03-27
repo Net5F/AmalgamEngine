@@ -71,8 +71,9 @@ public:
     //-------------------------------------------------------------------------
     // Simulation System Hooks (Hooks into engine systems)
     //-------------------------------------------------------------------------
-    // These functions allow the project to place constraints on various
-    // World state modifications.
+    // These functions allow the project to affect various World state 
+    // modifications.
+
     /** @return true if the given extent is editable, else false. */
     virtual bool isTileExtentEditable(NetworkID netID,
                                       const TileExtent& tileExtent) const = 0;

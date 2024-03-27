@@ -26,11 +26,6 @@ NceLifetimeSystem::NceLifetimeSystem(World& inWorld, Network& inNetwork)
 {
 }
 
-void NceLifetimeSystem::setExtension(ISimulationExtension* inExtension)
-{
-    extension = std::move(inExtension);
-}
-
 void NceLifetimeSystem::processUpdateRequests()
 {
     // Process any entities that are waiting for re-initialization.
@@ -51,6 +46,11 @@ void NceLifetimeSystem::processUpdateRequests()
     while (entityDeleteRequestQueue.pop(entityDeleteRequest)) {
         handleDeleteRequest(entityDeleteRequest);
     }
+}
+
+void NceLifetimeSystem::setExtension(ISimulationExtension* inExtension)
+{
+    extension = std::move(inExtension);
 }
 
 void NceLifetimeSystem::handleInitRequest(
