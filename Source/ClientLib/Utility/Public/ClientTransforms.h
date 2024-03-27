@@ -25,9 +25,9 @@ public:
      * Returns a final screen space extent for the given position, camera,
      * and sprite.
      */
-    static SDL_Rect entityToScreenExtent(const Position& position,
-                                         const SpriteRenderData& renderData,
-                                         const Camera& camera);
+    static SDL_FRect entityToScreenExtent(const Position& position,
+                                          const SpriteRenderData& renderData,
+                                          const Camera& camera);
 
     /**
      * Calculates where a tile should be drawn on screen.
@@ -35,9 +35,9 @@ public:
      * Returns a final screen space extent for the given tile position, camera,
      * and sprite.
      */
-    static SDL_Rect tileToScreenExtent(const TilePosition& position,
-                                       const SpriteRenderData& renderData,
-                                       const Camera& camera);
+    static SDL_FRect tileToScreenExtent(const TilePosition& position,
+                                        const SpriteRenderData& renderData,
+                                        const Camera& camera);
 };
 
 } // End namespace Client

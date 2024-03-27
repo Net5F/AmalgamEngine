@@ -5,13 +5,12 @@
 #include "SpriteRenderData.h"
 #include "SharedConfig.h"
 #include "Log.h"
-#include <cmath>
 
 namespace AM
 {
 namespace Client
 {
-SDL_Rect
+SDL_FRect
     ClientTransforms::entityToScreenExtent(const Position& position,
                                            const SpriteRenderData& renderData,
                                            const Camera& camera)
@@ -39,21 +38,17 @@ SDL_Rect
         -= ((SharedConfig::TILE_SCREEN_HEIGHT / 2.f) * camera.zoomFactor);
 
     // Apply the camera position adjustment.
-    int adjustedX{
-        static_cast<int>(std::round(screenPoint.x - camera.extent.x))};
-    int adjustedY{
-        static_cast<int>(std::round(screenPoint.y - camera.extent.y))};
+    float adjustedX{screenPoint.x - camera.extent.x};
+    float adjustedY{screenPoint.y - camera.extent.y};
 
     // Apply the camera's zoom to the sprite size.
-    int zoomedWidth{static_cast<int>(
-        std::round(renderData.textureExtent.w * camera.zoomFactor))};
-    int zoomedHeight{static_cast<int>(
-        std::round(renderData.textureExtent.h * camera.zoomFactor))};
+    float zoomedWidth{renderData.textureExtent.w * camera.zoomFactor};
+    float zoomedHeight{renderData.textureExtent.h * camera.zoomFactor};
 
     return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 }
 
-SDL_Rect
+SDL_FRect
     ClientTransforms::tileToScreenExtent(const TilePosition& position,
                                          const SpriteRenderData& renderData,
                                          const Camera& camera)
@@ -77,14 +72,12 @@ SDL_Rect
     screenY *= camera.zoomFactor;
 
     // Apply the camera adjustment.
-    int adjustedX{static_cast<int>(std::round(screenX - camera.extent.x))};
-    int adjustedY{static_cast<int>(std::round(screenY - camera.extent.y))};
+    float adjustedX{screenX - camera.extent.x};
+    float adjustedY{screenY - camera.extent.y};
 
     // Apply the camera's zoom to the tile size.
-    int zoomedWidth{static_cast<int>(
-        std::round(renderData.textureExtent.w * camera.zoomFactor))};
-    int zoomedHeight{static_cast<int>(
-        std::round(renderData.textureExtent.h * camera.zoomFactor))};
+    float zoomedWidth{renderData.textureExtent.w * camera.zoomFactor};
+    float zoomedHeight{renderData.textureExtent.h * camera.zoomFactor};
 
     return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 }

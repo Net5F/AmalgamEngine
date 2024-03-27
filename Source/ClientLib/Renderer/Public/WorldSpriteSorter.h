@@ -8,7 +8,7 @@
 #include "entt/entity/registry.hpp"
 #include <vector>
 
-struct SDL_Rect;
+struct SDL_FRect;
 
 namespace AM
 {
@@ -132,7 +132,7 @@ private:
      * @param extent  An extent in final screen coordinates.
      * @param camera  The camera to use for screen width/height checks.
      */
-    bool isWithinScreenBounds(const SDL_Rect& extent, const Camera& camera);
+    bool isWithinScreenBounds(const SDL_FRect& extent, const Camera& camera);
 
     /**
      * Returns a color mod from spriteColorMods for the given world object ID

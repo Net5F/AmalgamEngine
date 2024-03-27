@@ -35,7 +35,7 @@ struct SpriteSortInfo {
     /** The screen extent that has been calculated for this sprite in the
         current frame, based on the associated entity's lerped position.
         Used during rendering and passed to the UI's locator. */
-    SDL_Rect screenExtent{};
+    SDL_FRect screenExtent{};
 
     /** If non-default, the UI wants us to multiply this sprite's color and
         transparency by these values. */

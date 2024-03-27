@@ -274,7 +274,7 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     // Get iso screen extent for this sprite.
     const SpriteRenderData& renderData{
         graphicData.getRenderData(sprite.numericID)};
-    SDL_Rect screenExtent{ClientTransforms::tileToScreenExtent(
+    SDL_FRect screenExtent{ClientTransforms::tileToScreenExtent(
         {layerID.x, layerID.y}, renderData, camera)};
 
     // If this sprite isn't on screen, skip it.
@@ -364,7 +364,7 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
     // Get the iso screen extent for the sprite.
     const SpriteRenderData& renderData{
         graphicData.getRenderData(sprite.numericID)};
-    SDL_Rect screenExtent{
+    SDL_FRect screenExtent{
         ClientTransforms::entityToScreenExtent(position, renderData, camera)};
 
     // If the sprite is on screen, push the render info.
@@ -446,14 +446,67 @@ void WorldSpriteSorter::visitSprite(SpriteSortInfo& spriteInfo, int& depthValue)
     }
 }
 
-bool WorldSpriteSorter::isWithinScreenBounds(const SDL_Rect& extent,
+// TEMP: Remove these when we upgrade SDL
+SDL_bool SDL_RectEmptyFloat(const SDL_FRect* r)
+{
+    return ((!r) || (r->w <= 0.0f) || (r->h <= 0.0f)) ? SDL_TRUE : SDL_FALSE;
+}
+
+SDL_bool SDL_HasRectIntersectionFloat(const SDL_FRect* A, const SDL_FRect* B)
+{
+    float Amin, Amax, Bmin, Bmax;
+
+    if (!A) {
+        SDL_InvalidParamError("A");
+        return SDL_FALSE;
+    }
+    else if (!B) {
+        SDL_InvalidParamError("B");
+        return SDL_FALSE;
+    }
+    else if (SDL_RectEmptyFloat(A) || SDL_RectEmptyFloat(B)) {
+        return SDL_FALSE; /* Special cases for empty rects */
+    }
+
+    /* Horizontal intersection */
+    Amin = A->x;
+    Amax = Amin + A->w;
+    Bmin = B->x;
+    Bmax = Bmin + B->w;
+    if (Bmin > Amin) {
+        Amin = Bmin;
+    }
+    if (Bmax < Amax) {
+        Amax = Bmax;
+    }
+    if (Amax <= Amin) {
+        return SDL_FALSE;
+    }
+    /* Vertical intersection */
+    Amin = A->y;
+    Amax = Amin + A->h;
+    Bmin = B->y;
+    Bmax = Bmin + B->h;
+    if (Bmin > Amin) {
+        Amin = Bmin;
+    }
+    if (Bmax < Amax) {
+        Amax = Bmax;
+    }
+    if (Amax <= Amin) {
+        return SDL_FALSE;
+    }
+    return SDL_TRUE;
+}
+// END TEMP: Remove these when we upgrade SDL
+
+bool WorldSpriteSorter::isWithinScreenBounds(const SDL_FRect& extent,
                                              const Camera& camera)
 {
     // The extent is in final screen coordinates, so we only need to check if
     // it's within the rect formed by (0, 0) and (camera.width, camera.height).
-    SDL_Rect cameraExtent{0, 0, static_cast<int>(camera.extent.w),
-                          static_cast<int>(camera.extent.h)};
-    return (SDL_HasIntersection(&extent, &cameraExtent) == SDL_TRUE);
+    SDL_FRect cameraExtent{0, 0, camera.extent.w, camera.extent.h};
+    return (SDL_HasRectIntersectionFloat(&extent, &cameraExtent) == SDL_TRUE);
 }
 
 } // End namespace Client
