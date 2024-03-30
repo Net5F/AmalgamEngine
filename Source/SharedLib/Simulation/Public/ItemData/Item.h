@@ -57,6 +57,9 @@ struct Item {
     /** The ID of this item's icon. */
     IconID iconID{NULL_ICON_ID};
 
+    /** How large a stack of this item can be, e.g. in an inventory slot. */
+    Uint8 maxStackSize{1};
+
     /** The interactions that this item supports.
         Elements are filled contiguously starting at index 0. Empty elements
         will be at the end.
@@ -168,6 +171,7 @@ void serialize(S& serializer, Item& item)
     serializer.text1b(item.stringID, Item::MAX_DISPLAY_NAME_LENGTH);
     serializer.value2b(item.numericID);
     serializer.value2b(item.iconID);
+    serializer.value1b(item.maxStackSize);
     serializer.container1b(item.supportedInteractions);
     serializer.container(item.properties, Item::MAX_PROPERTIES,
                          [](S& serializer, ItemProperty& property) {

@@ -26,6 +26,12 @@ struct CombineItems {
     /** The resulting item. */
     ItemID resultItemID{NULL_ITEM_ID};
 
+    /** How large a stack of the resulting item can be.
+        This value is available in the item's definition, but we have to send 
+        it here because the client may not yet have the definition.
+        When sent by the client, this field is ignored. */
+    Uint8 resultItemMaxStackSize{1};
+
     /** The resulting item's version number. Used by the client to tell if it
         already has the latest definition for this item, or if it needs
         to request it. */
@@ -38,6 +44,7 @@ void serialize(S& serializer, CombineItems& combineItems)
     serializer.value1b(combineItems.sourceSlotIndex);
     serializer.value1b(combineItems.targetSlotIndex);
     serializer.value2b(combineItems.resultItemID);
+    serializer.value1b(combineItems.resultItemMaxStackSize);
     serializer.value2b(combineItems.resultItemVersion);
 }
 

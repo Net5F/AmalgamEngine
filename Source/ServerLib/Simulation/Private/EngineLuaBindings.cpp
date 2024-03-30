@@ -42,8 +42,10 @@ void EngineLuaBindings::addBindings()
         "sendSystemMessage", &EngineLuaBindings::sendSystemMessage, this);
 
     // Item init
-    itemInitLua.set_function("addDescription",
-                             &EngineLuaBindings::addDescription, this);
+    itemInitLua.set_function("setDescription",
+                             &EngineLuaBindings::setDescription, this);
+    itemInitLua.set_function("setMaxStackSize",
+                             &EngineLuaBindings::setMaxStackSize, this);
     itemInitLua.set_function("addCombination",
                              &EngineLuaBindings::addCombination, this);
 }
@@ -99,12 +101,29 @@ void EngineLuaBindings::sendSystemMessage(const std::string& message)
     network.serializeAndSend(clientID, SystemMessage{message});
 }
 
-void EngineLuaBindings::addDescription(const std::string& description)
+void EngineLuaBindings::setDescription(const std::string& description)
 {
-    // All items support the Examine interaction, so we only need to add the
-    // description property.
+    // All items support the Examine interaction already, so we only need to 
+    // add the ItemDescription property.
     Item* item{itemInitLua.get<Item*>("selfItemPtr")};
+
+    // If the item already has a description, overwrite it.
+    for (ItemProperty& itemProperty : item->properties) {
+        if (auto* itemDescription{
+                std::get_if<ItemDescription>(&itemProperty)}) {
+            itemDescription->text = description;
+            return;
+        }
+    }
+
+    // The item doesn't already have a description. Add one.
     item->properties.push_back(ItemDescription{description});
+}
+
+void EngineLuaBindings::setMaxStackSize(Uint8 newMaxStackSize)
+{
+    Item* item{itemInitLua.get<Item*>("selfItemPtr")};
+    item->maxStackSize = newMaxStackSize;
 }
 
 void EngineLuaBindings::addCombination(const std::string& otherItemID,

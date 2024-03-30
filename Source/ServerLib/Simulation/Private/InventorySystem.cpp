@@ -35,7 +35,10 @@ void InventorySystem::sendInventoryInits()
 
         InventoryInit inventoryInit{inventory.size};
         for (const Inventory::ItemSlot& itemSlot : inventory.slots) {
-            ItemVersion version{world.itemData.getItemVersion(itemSlot.ID)};
+            ItemVersion version{0};
+            if (itemSlot.ID) {
+                version = world.itemData.getItemVersion(itemSlot.ID);
+            }
             inventoryInit.slots.emplace_back(itemSlot.ID, itemSlot.count,
                                              version);
         }

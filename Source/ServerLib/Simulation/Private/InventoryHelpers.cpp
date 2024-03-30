@@ -18,14 +18,15 @@ bool InventoryHelpers::addItem(ItemID itemID, Uint8 count,
                                std::optional<NetworkID> requesterID)
 {
     // Try to add the item.
-    bool itemExists{world.itemData.itemExists(itemID)};
+    auto* item{world.itemData.getItem(itemID)};
     auto* inventory{world.registry.try_get<Inventory>(entityToAddTo)};
-    if (itemExists && inventory && inventory->addItem(itemID, count)) {
+    if (item && inventory
+        && inventory->addItem(itemID, count, item->maxStackSize)) {
         // Success. If the target is a client entity, update it.
         if (auto* client{
                 world.registry.try_get<ClientSimData>(entityToAddTo)}) {
             InventoryOperation operation{
-                InventoryAddItem{entityToAddTo, itemID, count,
+                InventoryAddItem{entityToAddTo, itemID, count, item->maxStackSize,
                                  world.itemData.getItemVersion(itemID)}};
             network.serializeAndSend(client->netID, operation);
         }
@@ -34,7 +35,7 @@ bool InventoryHelpers::addItem(ItemID itemID, Uint8 count,
     }
     else if (requesterID) {
         // Failure. We were provided a client ID, send it an error message.
-        if (itemExists && inventory) {
+        if (item && inventory) {
             SystemMessage response{"Failed to add item: inventory is full."};
             network.serializeAndSend(requesterID.value(), response);
         }

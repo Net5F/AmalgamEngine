@@ -44,24 +44,28 @@ public:
 
     Inventory(Uint8 inSize = DEFAULT_INVENTORY_SIZE);
 
-    // Note: You likely don't want to call these directly.
-    //       See InventoryHelpers.h
     /**
-     * Adds the given item to the first available slot.
+     * Adds the given item to this inventory.
      *
-     * If no empty slot is available, adds one to the end.
+     * If a slot contains the same itemID and has room, adds to it.
+     * If not, tries to add to the first empty slot.
      *
      * @return true if the item was added, else false (inventory is full).
      *
      * Note: This doesn't check if itemID is a valid item.
+     * Note: On the Server, you likely don't want to call this directly. See 
+     *       InventoryHelpers.h.
      */
-    bool addItem(ItemID itemID, Uint8 count);
+    bool addItem(ItemID itemID, Uint8 count, Uint8 maxStackSize);
 
     /**
      * Removes the given count of items from the given inventory slot.
      *
      * @return true if the item was removed, else false (slot index isn't valid,
      *         count is 0).
+     *
+     * Note: On the Server, you likely don't want to call this directly. See 
+     *       InventoryHelpers.h.
      */
     bool removeItem(Uint8 slotIndex, Uint8 count);
 
@@ -120,7 +124,7 @@ public:
      * instead takes in the resulting item's ID.
      */
     void combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
-                      ItemID resultItemID);
+                      ItemID resultItemID, Uint8 resultItemMaxStackSize);
 
     /**
      * Resizes this inventory to match the given new size.

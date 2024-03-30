@@ -63,7 +63,7 @@ public:
      * "linear" = Linear filtering (supported by OpenGL and Direct3D).
      * "best" = Ansiotropic filtering (supported by Direct3D).
      */
-    static constexpr char SCALING_QUALITY[] = "linear";
+    static constexpr const char* SCALING_QUALITY{"nearest"};
 
     /** The rate at which the user interfaces fires off tick() events. */
     static constexpr unsigned int UI_TICKS_PER_SECOND{30};
@@ -78,7 +78,7 @@ public:
           1. If < ~.003, the scheduler may not give us time when we need it.
           2. If < ~.010, our low CPU usage might cause Windows to put us into
              energy saving mode, causing visual jitter. */
-    static constexpr double SLEEP_MINIMUM_TIME_S = .010;
+    static constexpr double SLEEP_MINIMUM_TIME_S{.010};
 
     /** If true, zooming with the mouse scroll wheel will be enabled. */
     static constexpr bool ENABLE_MOUSE_ZOOM{false};

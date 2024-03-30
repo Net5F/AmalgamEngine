@@ -26,6 +26,12 @@ struct InventoryAddItem {
     /** How many of the item to add. */
     Uint8 count{0};
 
+    /** How large a stack of this item can be.
+        This value is available in the item's definition, but we have to send 
+        it here because the client may not yet have the definition.
+        When sent by the client, this field is ignored. */
+    Uint8 maxStackSize{1};
+
     /** The item's version number. Used by the client to tell if it
         already has the latest definition for this item, or if it needs
         to request it.
@@ -39,6 +45,7 @@ void serialize(S& serializer, InventoryAddItem& inventoryAddItem)
     serializer.value4b(inventoryAddItem.entity);
     serializer.value2b(inventoryAddItem.itemID);
     serializer.value1b(inventoryAddItem.count);
+    serializer.value1b(inventoryAddItem.maxStackSize);
     serializer.value2b(inventoryAddItem.version);
 }
 

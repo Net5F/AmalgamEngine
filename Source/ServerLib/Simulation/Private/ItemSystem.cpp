@@ -94,10 +94,10 @@ void ItemSystem::processItemUpdates()
                 if (it != updatedItems.end()) {
                     const Item& item{*(world.itemData.getItem(itemSlot.ID))};
                     network.serializeAndSend(
-                        client.netID,
-                        ItemUpdate{item.displayName, item.stringID,
-                                   item.numericID, item.iconID,
-                                   item.supportedInteractions});
+                        client.netID, ItemUpdate{item.displayName,
+                                                 item.stringID, item.numericID,
+                                                 item.iconID, item.maxStackSize,
+                                                 item.supportedInteractions});
                 }
             }
         }
@@ -146,11 +146,13 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
             sourceSlotIndex, targetSlotIndex, world.itemData)};
         if (combination) {
             ItemID resultItemID{combination->resultItemID};
+            const Item* item{world.itemData.getItem(resultItemID)};
             ItemVersion resultItemVersion{
                 world.itemData.getItemVersion(resultItemID)};
             network.serializeAndSend(
-                clientID, CombineItems{sourceSlotIndex, targetSlotIndex,
-                                       resultItemID, resultItemVersion});
+                clientID,
+                CombineItems{sourceSlotIndex, targetSlotIndex, resultItemID,
+                             item->maxStackSize, resultItemVersion});
             network.serializeAndSend(clientID,
                                      SystemMessage{combination->description});
         }
@@ -234,9 +236,9 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 
     // Send the requester the new item's definition.
     network.serializeAndSend(itemInitRequest.netID,
-                             ItemUpdate{newItem->displayName,
-                                        newItem->stringID,
+                             ItemUpdate{newItem->displayName, newItem->stringID,
                                         newItem->numericID, newItem->iconID,
+                                        newItem->maxStackSize,
                                         newItem->supportedInteractions});
 }
 
@@ -246,7 +248,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
     std::string stringID{
         ItemDataBase::deriveStringID(itemChangeRequest.displayName)};
     ItemError::Type errorType{ItemError::NotSet};
-    if (!(world.itemData.itemExists(itemChangeRequest.itemID))) {
+    if (!(world.itemData.getItem(itemChangeRequest.itemID))) {
         errorType = ItemError::NumericIDNotFound;
     }
     // Check that the string ID isn't taken by another item.
@@ -288,6 +290,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
         itemChangeRequest.netID,
         ItemUpdate{updatedItem->displayName, updatedItem->stringID,
                    updatedItem->numericID, updatedItem->iconID,
+                   updatedItem->maxStackSize,
                    updatedItem->supportedInteractions});
 }
 
@@ -303,6 +306,7 @@ void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
                     itemDataRequest.netID,
                     ItemUpdate{item->displayName, item->stringID,
                                item->numericID, item->iconID,
+                               item->maxStackSize,
                                item->supportedInteractions});
             }
         },

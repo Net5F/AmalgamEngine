@@ -50,11 +50,12 @@ void InventorySystem::initInventory(const InventoryInit& inventoryInit)
                 inventory.slots[i].ID = itemSlot.ID;
                 inventory.slots[i].count = itemSlot.count;
 
-                // If we don't have the latest definition for an item, add it
-                // to the vector.
-                if ((itemSlot.ID && !(world.itemData.itemExists(itemSlot.ID)))
-                    || (world.itemData.getItemVersion(itemSlot.ID)
-                        < itemSlot.version)) {
+                // If this slot is non-empty and we don't have the latest 
+                // definition for the item in it, add it to the vector.
+                if (itemSlot.ID
+                    && (!(world.itemData.getItem(itemSlot.ID))
+                        || (world.itemData.getItemVersion(itemSlot.ID)
+                            < itemSlot.version))) {
                     itemsToRequest.push_back(itemSlot.ID);
                 }
             }
@@ -78,12 +79,13 @@ void InventorySystem::processOperation(const InventoryAddItem& inventoryAddItem)
     world.registry.patch<Inventory>(
         world.playerEntity, [&](Inventory& inventory) {
             ItemID itemID{inventoryAddItem.itemID};
-            if (inventory.addItem(itemID, inventoryAddItem.count)) {
+            if (inventory.addItem(itemID, inventoryAddItem.count,
+                                  inventoryAddItem.maxStackSize)) {
                 // Successfully added. If we don't have the latest definition
                 // for the item, request it.
                 ItemVersion itemVersion{inventoryAddItem.version};
-                if (!(world.itemData.itemExists(itemID))
-                    || world.itemData.getItemVersion(itemID) < itemVersion) {
+                if (!(world.itemData.getItem(itemID))
+                    || (world.itemData.getItemVersion(itemID) < itemVersion)) {
                     network.serializeAndSend(ItemDataRequest{itemID});
                 }
             }

@@ -22,6 +22,17 @@ class Network;
  * whole component, but doing so with a large inventory would be inefficient.
  * Instead, we use these functions to both update the inventory and send the
  * necessary client updates.
+ *
+ * Note: It may be reasonable to replace this approach with either:
+ *         1. Each inventory maintains an operation history. Observe Inventory 
+              updates, send operations to inventory owner.
+ *         2. Add a PreviousInventory component. Observe Inventory updates, 
+ *            send the diff as InventorySetSlot messages.
+ *       Our current approach is more efficient than either of these though, as 
+ *       it doesn't need to observe anything. The tradeoff is being less 
+ *       convenient, but we only call these functions in a couple places.
+ *       If we ever start commonly calling these functions, consider changing 
+ *       to one of the other approaches.
  */
 class InventoryHelpers
 {

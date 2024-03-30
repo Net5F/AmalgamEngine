@@ -39,10 +39,11 @@ void ItemSystem::processItemUpdates()
     while (itemUpdateQueue.pop(itemUpdate)) {
         // If the item exists, update it (even if there are no changes, it
         // doesn't hurt to update it).
-        Item item{itemUpdate.displayName, "", itemUpdate.itemID,
-                  itemUpdate.iconID, itemUpdate.supportedInteractions};
+        Item item{itemUpdate.displayName,  "",
+                  itemUpdate.itemID,       itemUpdate.iconID,
+                  itemUpdate.maxStackSize, itemUpdate.supportedInteractions};
         const Item* newItem{nullptr};
-        if (itemData.itemExists(itemUpdate.itemID)) {
+        if (itemData.getItem(itemUpdate.itemID)) {
             newItem = itemData.updateItem(item);
         }
         else {
@@ -61,13 +62,14 @@ void ItemSystem::processItemUpdates()
             world.playerEntity, [&](Inventory& inventory) {
                 inventory.combineItems(combineItems.sourceSlotIndex,
                                        combineItems.targetSlotIndex,
-                                       combineItems.resultItemID);
+                                       combineItems.resultItemID,
+                                       combineItems.resultItemMaxStackSize);
             });
 
         // If we don't have the latest definition for the new item, request
         // it.
         ItemID resultItemID{combineItems.resultItemID};
-        if (!(world.itemData.itemExists(resultItemID))
+        if (!(world.itemData.getItem(resultItemID))
             || (world.itemData.getItemVersion(resultItemID)
                 < combineItems.resultItemVersion)) {
             network.serializeAndSend(ItemDataRequest{resultItemID});

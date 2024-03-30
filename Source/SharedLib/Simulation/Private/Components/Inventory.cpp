@@ -10,8 +10,18 @@ Inventory::Inventory(Uint8 inSize)
 {
 }
 
-bool Inventory::addItem(ItemID itemID, Uint8 count)
+bool Inventory::addItem(ItemID itemID, Uint8 count, Uint8 maxStackSize)
 {
+    // If there's an existing slot with the same item type and enough room, 
+    // add to it.
+    for (ItemSlot& slot : slots) {
+        Uint16 combinedCount{static_cast<Uint16>(slot.count + count)};
+        if ((slot.ID == itemID) && (combinedCount <= maxStackSize)) {
+            slot.count = static_cast<Uint8>(combinedCount);
+            return true;
+        }
+    }
+
     // If there's an existing empty slot, fill it with the given item.
     for (ItemSlot& slot : slots) {
         if (slot.ID == NULL_ITEM_ID) {
@@ -145,14 +155,16 @@ const ItemCombination* Inventory::combineItems(Uint8 sourceSlotIndex,
         reduceItemCount(targetSlotIndex, 1);
 
         // Add the new item.
-        addItem(matchingCombination->resultItemID, 1);
+        const Item* resultItem{
+            itemData.getItem(matchingCombination->resultItemID)};
+        addItem(resultItem->numericID, 1, resultItem->maxStackSize);
     }
 
     return matchingCombination;
 }
 
 void Inventory::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
-                             ItemID resultItemID)
+                             ItemID resultItemID, Uint8 resultItemMaxStackSize)
 {
     // If either slot is invalid or empty, return false.
     if (!slotIndexIsValid(sourceSlotIndex) || !slotIndexIsValid(targetSlotIndex)
@@ -167,7 +179,7 @@ void Inventory::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
     reduceItemCount(targetSlotIndex, 1);
 
     // Add the new item.
-    addItem(resultItemID, 1);
+    addItem(resultItemID, 1, resultItemMaxStackSize);
 }
 
 void Inventory::resize(Uint8 newSize)

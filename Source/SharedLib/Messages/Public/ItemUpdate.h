@@ -31,6 +31,9 @@ struct ItemUpdate {
     /** The ID of this item's icon. */
     IconID iconID{NULL_ICON_ID};
 
+    /** How large a stack of this item can be, e.g. in an inventory slot. */
+    Uint8 maxStackSize{1};
+
     /** The interactions that this item supports. */
     std::array<ItemInteractionType, Item::MAX_CUSTOM_INTERACTIONS>
         supportedInteractions{};
@@ -43,6 +46,7 @@ void serialize(S& serializer, ItemUpdate& itemUpdate)
     serializer.text1b(itemUpdate.stringID, Item::MAX_DISPLAY_NAME_LENGTH);
     serializer.value2b(itemUpdate.itemID);
     serializer.value2b(itemUpdate.iconID);
+    serializer.value1b(itemUpdate.maxStackSize);
     serializer.container1b(itemUpdate.supportedInteractions);
 }
 

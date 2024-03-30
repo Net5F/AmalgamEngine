@@ -69,7 +69,8 @@ private:
     bool removeItem(const std::string& itemID, Uint8 count);
 
     /**
-     * Returns the count for the given item across all inventory slots.
+     * Returns the count for the given item across all slots in the client 
+     * entity's inventory.
      */
     std::size_t getItemCount(ItemID itemID);
 
@@ -80,9 +81,14 @@ private:
 
     // Item init
     /**
-     * Adds the description text for when an item is examined.
+     * Adds the description text that's shown the item is examined.
      */
-    void addDescription(const std::string& description);
+    void setDescription(const std::string& description);
+
+    /**
+     * Sets the max stack size, for when the item is stacked in an inventory.
+     */
+    void setMaxStackSize(Uint8 newMaxStackSize);
 
     /**
      * Adds a combination with the given item, which will result in a new item

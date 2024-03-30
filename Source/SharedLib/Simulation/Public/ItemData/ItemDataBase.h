@@ -78,18 +78,6 @@ public:
     const Item* getItem(ItemID numericID) const;
 
     /**
-     * @return If no item with the given ID exists, returns false. Else,
-     *         returns true.
-     */
-    bool itemExists(const std::string& stringID) const;
-
-    /**
-     * @return If no item with the given ID exists, returns false. Else,
-     *         returns true.
-     */
-    bool itemExists(ItemID numericID) const;
-
-    /**
      * Get an item's version number.
      * Version numbers increase incrementally each time an item's definition
      * is changed.

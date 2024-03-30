@@ -10,21 +10,18 @@ ItemDataBase::ItemDataBase()
 : itemMap{}
 , itemStringMap{}
 , itemVersionMap{}
-, nextItemID{0}
+, nextItemID{NULL_ITEM_ID + 1}
 , itemCreatedSig{}
 , itemUpdatedSig{}
 , itemCreated{itemCreatedSig}
 , itemUpdated{itemUpdatedSig}
 {
-    // Add the null item.
-    createItem(Item{"Null", "", NULL_ITEM_ID});
 }
 
 const Item* ItemDataBase::createItem(const Item& item)
 {
     // If the numeric ID is taken, do nothing.
-    if ((item.numericID != NULL_ITEM_ID)
-        && itemMap.find(item.numericID) != itemMap.end()) {
+    if (itemMap.find(item.numericID) != itemMap.end()) {
         return nullptr;
     }
 
@@ -65,7 +62,7 @@ const Item* ItemDataBase::updateItem(const Item& newItem)
 {
     // If the item doesn't exist, do nothing.
     auto itemIt{itemMap.find(newItem.numericID)};
-    if ((newItem.numericID == NULL_ITEM_ID) || (itemIt == itemMap.end())) {
+    if (itemIt == itemMap.end()) {
         return nullptr;
     }
 
@@ -119,28 +116,6 @@ const Item* ItemDataBase::getItem(ItemID numericID) const
     }
 
     return &(it->second);
-}
-
-bool ItemDataBase::itemExists(const std::string& stringID) const
-{
-    // The null item exists for use as a safe default, but is otherwise
-    // considered to not exist.
-    if (stringID == "null") {
-        return false;
-    }
-
-    return (itemStringMap.find(stringID) != itemStringMap.end());
-}
-
-bool ItemDataBase::itemExists(ItemID numericID) const
-{
-    // The null item exists for use as a safe default, but is otherwise
-    // considered to not exist.
-    if (numericID == NULL_ITEM_ID) {
-        return false;
-    }
-
-    return (itemMap.find(numericID) != itemMap.end());
 }
 
 ItemVersion ItemDataBase::getItemVersion(ItemID numericID)
