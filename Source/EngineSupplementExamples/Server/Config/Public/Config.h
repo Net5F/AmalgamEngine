@@ -91,7 +91,7 @@ public:
     /** How long we should wait before considering the client to be timed out.
         Arbitrarily chosen. If too high, we set ourselves up to take a huge
        spike of data for a very late client. */
-    static constexpr double CLIENT_TIMEOUT_S{1.5};
+    static constexpr double CLIENT_TIMEOUT_S{4};
 
     /** The minimum amount of time worth of tick differences that we'll
         remember. */

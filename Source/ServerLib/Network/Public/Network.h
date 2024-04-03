@@ -94,11 +94,6 @@ public:
     /** Used for passing us a pointer to the sim's currentTick. */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
 
-    /**
-     * Returns how much time in seconds is left until the next heartbeat.
-     */
-    double getTimeTillNextHeartbeat();
-
     /** Convenience for network-owned objects to get the current tick. */
     Uint32 getCurrentTick();
 

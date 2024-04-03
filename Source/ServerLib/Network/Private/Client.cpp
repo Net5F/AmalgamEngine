@@ -270,6 +270,9 @@ ReceiveResult Client::receiveMessage(Uint8* messageBuffer)
             return {NetworkResult::TimedOut};
         }
     }
+    else if (headerResult == NetworkResult::Disconnected) {
+        return {NetworkResult::Disconnected};
+    }
 
     return {NetworkResult::NoWaitingData};
 }

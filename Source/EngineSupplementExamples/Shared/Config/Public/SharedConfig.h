@@ -63,7 +63,7 @@ public:
         1.0 / static_cast<double>(SERVER_NETWORK_TICKS_PER_SECOND)};
 
     /** The rate at which the client will heartbeat (if necessary). */
-    static constexpr unsigned int CLIENT_NETWORK_TICKS_PER_SECOND{5};
+    static constexpr unsigned int CLIENT_NETWORK_TICKS_PER_SECOND{1};
     static constexpr double CLIENT_NETWORK_TICK_TIMESTEP_S{
         1.0 / static_cast<double>(CLIENT_NETWORK_TICKS_PER_SECOND)};
 
