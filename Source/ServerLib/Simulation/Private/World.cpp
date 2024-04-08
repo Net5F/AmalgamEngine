@@ -1,4 +1,6 @@
 #include "World.h"
+#include "EntityInitLua.h"
+#include "ItemInitLua.h"
 #include "Database.h"
 #include "ClientSimData.h"
 #include "ReplicatedComponentList.h"
@@ -52,8 +54,8 @@ void onComponentDestroyed(entt::registry& registry, entt::entity entity)
     }
 }
 
-World::World(GraphicData& inGraphicData, sol::state& inEntityInitLua,
-             sol::state& inItemInitLua)
+World::World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
+             ItemInitLua& inItemInitLua)
 : registry{}
 , itemData{}
 , tileMap{inGraphicData}
@@ -181,11 +183,9 @@ std::string World::runEntityInitScript(entt::entity entity,
                                        const EntityInitScript& initScript)
 {
     // Run the given script on the given entity.
-    // Note: We use "selfEntityID" to hold the ID of the entity that the init
-    //       script is being ran on.
-    entityInitLua["selfEntityID"] = entity;
-    auto result{
-        entityInitLua.script(initScript.script, &sol::script_pass_on_error)};
+    entityInitLua.selfEntity = entity;
+    auto result{entityInitLua.luaState.script(initScript.script,
+                                              &sol::script_pass_on_error)};
 
     // If the init script ran successfully, save it.
     std::string returnString{""};
@@ -206,10 +206,9 @@ std::string World::runItemInitScript(Item& item,
                                      const ItemInitScript& initScript)
 {
     // Run the given script on the given item.
-    // Note: We use "selfItemPtr" to hold the item that is being initialized.
-    itemInitLua["selfItemPtr"] = &item;
-    auto result{
-        itemInitLua.script(initScript.script, &sol::script_pass_on_error)};
+    itemInitLua.selfItem = &item;
+    auto result{itemInitLua.luaState.script(initScript.script,
+                                            &sol::script_pass_on_error)};
 
     // If the init script ran successfully, save it.
     std::string returnString{""};

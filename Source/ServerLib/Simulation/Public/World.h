@@ -9,11 +9,6 @@
 #include <unordered_map>
 #include <random>
 
-namespace sol
-{
-class state;
-}
-
 namespace AM
 {
 struct Position;
@@ -25,6 +20,8 @@ namespace Server
 {
 class GraphicData;
 class Database;
+struct EntityInitLua;
+struct ItemInitLua;
 
 /**
  * Owns and manages the persistence of all world state.
@@ -44,8 +41,8 @@ class Database;
 class World
 {
 public:
-    World(GraphicData& inGraphicData, sol::state& inEntityInitLua,
-          sol::state& inItemInitLua);
+    World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
+          ItemInitLua& inItemInitLua);
 
     ~World();
 
@@ -151,10 +148,10 @@ private:
     const GraphicData& graphicData;
 
     /** Used to run entity init scripts. */
-    sol::state& entityInitLua;
+    EntityInitLua& entityInitLua;
 
     /** Used to run item init scripts. */
-    sol::state& itemInitLua;
+    ItemInitLua& itemInitLua;
 
     // For random spawn points.
     std::random_device randomDevice;

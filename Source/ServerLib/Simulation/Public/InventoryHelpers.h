@@ -5,7 +5,7 @@
 #include "entt/fwd.hpp"
 #include <SDL_stdinc.h>
 #include <optional>
-#include <string>
+#include <string_view>
 
 namespace AM
 {
@@ -53,7 +53,7 @@ public:
     /**
      * Overload for string IDs.
      */
-    static bool addItem(const std::string& itemID, Uint8 count,
+    static bool addItem(std::string_view itemID, Uint8 count,
                         entt::entity entityToAddTo, World& world,
                         Network& network,
                         std::optional<NetworkID> requesterID = std::nullopt);
@@ -70,7 +70,7 @@ public:
     /**
      * Overload for string IDs.
      */
-    static bool removeItem(const std::string& itemID, Uint8 count,
+    static bool removeItem(std::string_view itemID, Uint8 count,
                            entt::entity entityToRemoveFrom, World& world,
                            Network& network);
 };

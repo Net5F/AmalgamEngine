@@ -1,5 +1,8 @@
 #include "Simulation.h"
 #include "Network.h"
+#include "EntityInitLua.h"
+#include "EntityItemHandlerLua.h"
+#include "ItemInitLua.h"
 #include "EnttGroups.h"
 #include "ISimulationExtension.h"
 #include "EntityInteractionRequest.h"
@@ -19,9 +22,9 @@ namespace Server
 {
 Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData)
 : network{inNetwork}
-, entityInitLua{std::make_unique<sol::state>()}
-, entityItemHandlerLua{std::make_unique<sol::state>()}
-, itemInitLua{std::make_unique<sol::state>()}
+, entityInitLua{std::make_unique<EntityInitLua>()}
+, entityItemHandlerLua{std::make_unique<EntityItemHandlerLua>()}
+, itemInitLua{std::make_unique<ItemInitLua>()}
 , world{inGraphicData, *entityInitLua, *itemInitLua}
 , currentTick{0}
 , engineLuaBindings{*entityInitLua, *entityItemHandlerLua, *itemInitLua, world,
@@ -51,9 +54,9 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData)
     EnttGroups::init(world.registry);
 
     // Initialize the Lua environments and add our bindings.
-    entityInitLua->open_libraries(sol::lib::base);
-    entityItemHandlerLua->open_libraries(sol::lib::base);
-    itemInitLua->open_libraries(sol::lib::base);
+    entityInitLua->luaState.open_libraries(sol::lib::base);
+    entityItemHandlerLua->luaState.open_libraries(sol::lib::base);
+    itemInitLua->luaState.open_libraries(sol::lib::base);
     engineLuaBindings.addBindings();
 
     // Register our current tick pointer with the classes that care.
@@ -160,17 +163,17 @@ World& Simulation::getWorld()
     return world;
 }
 
-sol::state& Simulation::getEntityInitLua()
+EntityInitLua& Simulation::getEntityInitLua()
 {
     return *entityInitLua;
 }
 
-sol::state& Simulation::getEntityItemHandlerLua()
+EntityItemHandlerLua& Simulation::getEntityItemHandlerLua()
 {
     return *entityItemHandlerLua;
 }
 
-sol::state& Simulation::getItemInitLua()
+ItemInitLua& Simulation::getItemInitLua()
 {
     return *itemInitLua;
 }

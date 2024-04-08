@@ -96,7 +96,7 @@ const Item* ItemDataBase::updateItem(const Item& newItem)
     return &item;
 }
 
-const Item* ItemDataBase::getItem(const std::string& stringID) const
+const Item* ItemDataBase::getItem(std::string_view stringID) const
 {
     // Attempt to find the given string ID.
     auto it{itemStringMap.find(stringID)};

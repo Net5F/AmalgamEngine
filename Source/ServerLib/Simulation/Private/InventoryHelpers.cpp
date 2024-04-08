@@ -50,7 +50,7 @@ bool InventoryHelpers::addItem(ItemID itemID, Uint8 count,
     return false;
 }
 
-bool InventoryHelpers::addItem(const std::string& itemID, Uint8 count,
+bool InventoryHelpers::addItem(std::string_view itemID, Uint8 count,
                                entt::entity entityToAddTo, World& world,
                                Network& network,
                                std::optional<NetworkID> requesterID)
@@ -87,7 +87,7 @@ bool InventoryHelpers::removeItem(Uint8 slotIndex, Uint8 count,
     return false;
 }
 
-bool InventoryHelpers::removeItem(const std::string& itemID, Uint8 count,
+bool InventoryHelpers::removeItem(std::string_view itemID, Uint8 count,
                                   entt::entity entityToRemoveFrom, World& world,
                                   Network& network)
 {

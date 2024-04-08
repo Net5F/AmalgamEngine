@@ -33,7 +33,6 @@ target_sources(ServerLib
 		Public/ComponentChangeSystem.h
 		Public/ComponentSyncSystem.h
 		Public/Database.h
-		Public/EngineLuaBindings.h
 		Public/EntityItemHandlerScript.h
 		Public/EnttGroups.h
 		Public/EventSorter.h
@@ -55,11 +54,16 @@ target_sources(ServerLib
 		Public/TileUpdateSystem.h
 		Public/World.h
 		Public/Components/ClientSimData.h
+		Public/Components/Dialogue.h
 		Public/Components/ItemHandlers.h
 		Public/Components/ReplicatedComponentList.h
 		Public/GraphicData/GraphicData.h
 		Public/IconData/IconData.h
 		Public/ItemData/ItemData.h
+		Public/Lua/EngineLuaBindings.h
+		Public/Lua/EntityInitLua.h
+		Public/Lua/EntityItemHandlerLua.h
+		Public/Lua/ItemInitLua.h
 		Public/TileMap/TileMap.h
         Public/TypeLists/EngineObservedComponentTypes.h
 		Public/TypeLists/EnginePersistedComponentTypes.h
@@ -78,6 +82,7 @@ target_include_directories(ServerLib
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/GraphicData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/IconData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/ItemData
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/Lua
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/TileMap
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/TypeLists
 )

@@ -2,6 +2,7 @@
 
 #include "Item.h"
 #include "IDPool.h"
+#include "HashTools.h"
 #include "entt/signal/sigh.hpp"
 #include <SDL_stdinc.h>
 #include <vector>
@@ -67,7 +68,7 @@ public:
      * Note: The null item doesn't technically exist, but we return a useful
      *       default for it.
      */
-    const Item* getItem(const std::string& stringID) const;
+    const Item* getItem(std::string_view stringID) const;
 
     /**
      * @return If no item with the given ID exists, returns nullptr. Else,
@@ -117,7 +118,8 @@ protected:
     std::unordered_map<ItemID, Item> itemMap;
 
     /** A map for easily looking up items by their string ID. */
-    std::unordered_map<std::string, Item*> itemStringMap;
+    std::unordered_map<std::string, Item*, string_hash, std::equal_to<>>
+        itemStringMap;
 
     /** Each item's version number, indexed by their numeric IDs. Each time an
         item's definition is changed, its version gets incremented.

@@ -27,17 +27,15 @@
 #include <queue>
 #include <memory>
 
-namespace sol
-{
-class state;
-}
-
 namespace AM
 {
 namespace Server
 {
 class Network;
 class GraphicData;
+struct EntityInitLua;
+struct EntityItemHandlerLua;
+struct ItemInitLua;
 class ISimulationExtension;
 
 /**
@@ -117,19 +115,19 @@ public:
      * Returns a reference to the simulation's Lua bindings for entity init
      * processing.
      */
-    sol::state& getEntityInitLua();
+    EntityInitLua& getEntityInitLua();
 
     /**
      * Returns a reference to the simulation's Lua bindings for entity item
      * handler processing.
      */
-    sol::state& getEntityItemHandlerLua();
+    EntityItemHandlerLua& getEntityItemHandlerLua();
 
     /**
      * Returns a reference to the simulation's Lua bindings for item init
      * processing.
      */
-    sol::state& getItemInitLua();
+    ItemInitLua& getItemInitLua();
 
     /**
      * Returns the simulation's current tick number.
@@ -159,13 +157,13 @@ private:
 
     /** Lua environment for entity init script processing.
         Kept as a pointer to speed up compilation. */
-    std::unique_ptr<sol::state> entityInitLua;
+    std::unique_ptr<EntityInitLua> entityInitLua;
 
     /** Lua environment for entity item handler script processing. */
-    std::unique_ptr<sol::state> entityItemHandlerLua;
+    std::unique_ptr<EntityItemHandlerLua> entityItemHandlerLua;
 
     /** Lua environment for item init script processing. */
-    std::unique_ptr<sol::state> itemInitLua;
+    std::unique_ptr<ItemInitLua> itemInitLua;
 
     /** The world's state. */
     World world;

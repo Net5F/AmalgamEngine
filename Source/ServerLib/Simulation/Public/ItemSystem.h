@@ -10,11 +10,6 @@
 #include "NetworkDefs.h"
 #include "QueuedEvents.h"
 
-namespace sol
-{
-class state;
-}
-
 namespace AM
 {
 namespace Server
@@ -23,6 +18,7 @@ class Simulation;
 class World;
 class Network;
 class ISimulationExtension;
+struct EntityItemHandlerLua;
 struct EntityItemHandlerScript;
 
 /**
@@ -32,7 +28,7 @@ class ItemSystem
 {
 public:
     ItemSystem(Simulation& inSimulation, Network& inNetwork,
-               sol::state& inEntityItemHandlerLua);
+               EntityItemHandlerLua& inEntityItemHandlerLua);
 
     /**
      * Processes the interactions that every item supports (UseOn, Destroy,
@@ -122,7 +118,7 @@ private:
     /** Used for receiving requests and sending item and inventory data. */
     Network& network;
     /** Used to run entity item handler scripts. */
-    sol::state& entityItemHandlerLua;
+    EntityItemHandlerLua& entityItemHandlerLua;
     /** If non-nullptr, contains the project's simulation extension functions.
         Used for checking if item item requests are valid. */
     ISimulationExtension* extension;

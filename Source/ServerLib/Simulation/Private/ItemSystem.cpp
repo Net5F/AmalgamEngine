@@ -3,6 +3,7 @@
 #include "World.h"
 #include "Database.h"
 #include "Network.h"
+#include "EntityItemHandlerLua.h"
 #include "ISimulationExtension.h"
 #include "ClientSimData.h"
 #include "Inventory.h"
@@ -20,7 +21,7 @@ namespace AM
 namespace Server
 {
 ItemSystem::ItemSystem(Simulation& inSimulation, Network& inNetwork,
-                       sol::state& inEntityItemHandlerLua)
+                       EntityItemHandlerLua& inEntityItemHandlerLua)
 : simulation{inSimulation}
 , world{inSimulation.getWorld()}
 , network{inNetwork}
@@ -357,11 +358,11 @@ void ItemSystem::runEntityItemHandlerScript(
     const EntityItemHandlerScript& itemHandlerScript)
 {
     // Run the given handler script.
-    entityItemHandlerLua["clientID"] = clientID;
-    entityItemHandlerLua["clientEntityID"] = clientEntity;
-    entityItemHandlerLua["targetEntityID"] = targetEntity;
-    auto result{entityItemHandlerLua.script(itemHandlerScript.script,
-                                            &sol::script_pass_on_error)};
+    entityItemHandlerLua.clientID = clientID;
+    entityItemHandlerLua.clientEntity = clientEntity;
+    entityItemHandlerLua.targetEntity = targetEntity;
+    auto result{entityItemHandlerLua.luaState.script(
+        itemHandlerScript.script, &sol::script_pass_on_error)};
 
     // If there was an error while running the handler script, tell the
     // user.

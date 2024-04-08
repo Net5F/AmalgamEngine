@@ -3,6 +3,7 @@
 #include "ItemID.h"
 #include "EntityItemHandlerScript.h"
 #include <vector>
+#include <string_view>
 
 namespace AM
 {
@@ -39,10 +40,11 @@ struct ItemHandlers {
      *
      * Note: Multiple handlers for the same item may exist.
      */
-    void add(ItemID itemToHandleID, const std::string& handlerScript)
+    void add(ItemID itemToHandleID, std::string_view handlerScript)
     {
-        handlerPairs.emplace_back(itemToHandleID,
-                                  EntityItemHandlerScript{handlerScript});
+        handlerPairs.emplace_back(
+            itemToHandleID,
+            EntityItemHandlerScript{std::string{handlerScript}});
     }
 };
 
