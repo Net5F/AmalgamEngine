@@ -6,6 +6,7 @@ target_sources(SharedLib
         Private/MovementHelpers.cpp
         Private/ResourceData.cpp
         Private/Components/Camera.cpp
+        Private/Components/Interaction.cpp
         Private/Components/Inventory.cpp
         Private/GraphicData/Animation.cpp
         Private/GraphicData/GraphicDataBase.cpp

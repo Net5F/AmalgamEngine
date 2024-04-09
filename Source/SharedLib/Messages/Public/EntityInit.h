@@ -57,6 +57,7 @@ void serialize(S& serializer, EntityInit::EntityData& entityData)
                       boost::mp11::mp_size<ReplicatedComponentTypes>::value,
                       [](typename S::BPEnabledType& serializer,
                          ReplicatedComponent& component) {
+                          // Note: This calls serialize() for each type.
                           serializer.ext(component, bitsery::ext::StdVariant{});
                       });
     });

@@ -43,6 +43,12 @@ public:
 private:
     // Entity init
     /**
+     * Adds the "Talk" interaction to the entity.
+     * Use the topic() Lua function to add dialogue.
+     */
+    void addTalkInteraction();
+
+    /**
      * Sets the given handler to be called when the given item is used on the
      * entity.
      */

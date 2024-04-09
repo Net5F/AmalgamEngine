@@ -32,11 +32,11 @@ struct ChunkSnapshot {
     };
 
     /** Used as a "we should never hit this" cap on the number of entries in a
-        palette. Only checked in debug builds. */
+        palette. */
     static constexpr std::size_t MAX_PALETTE_ENTRIES{1000};
 
     /** Used as a "we should never hit this" cap on the size of each ID string
-        in the palette. Only checked in debug builds. */
+        in the palette. */
     static constexpr std::size_t MAX_ID_LENGTH{50};
 
     /** Holds an entry for each graphic used in this chunk's tiles. Part of a

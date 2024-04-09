@@ -13,6 +13,7 @@ namespace AM
  */
 enum class EngineEntityInteractionType : Uint8 {
     NotSet,
+    Talk,
 
     // We reserve values 0 - 49. The project can start at 50.
     PROJECT_START = 50

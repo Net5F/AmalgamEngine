@@ -4,6 +4,7 @@
 #include "ItemInitLua.h"
 #include "World.h"
 #include "Network.h"
+#include "Interaction.h"
 #include "ItemHandlers.h"
 #include "Inventory.h"
 #include "SystemMessage.h"
@@ -34,6 +35,8 @@ void EngineLuaBindings::addBindings()
 {
     // Entity init
     entityInitLua.luaState.set_function(
+        "addTalkInteraction", &EngineLuaBindings::addTalkInteraction, this);
+    entityInitLua.luaState.set_function(
         "addItemHandler", &EngineLuaBindings::addItemHandler, this);
     entityInitLua.luaState.set_function("topic", &EngineLuaBindings::topic,
                                         this);
@@ -58,6 +61,16 @@ void EngineLuaBindings::addBindings()
 
     // Dialogue choice
     dialogueChoiceLua->set_function("choice", &EngineLuaBindings::choice, this);
+}
+
+void EngineLuaBindings::addTalkInteraction()
+{
+    Interaction& interaction{
+        world.registry.get_or_emplace<Interaction>(entityInitLua.selfEntity)};
+    if (!(interaction.add(EntityInteractionType::Talk))) {
+        throw std::runtime_error{"Failed to add Talk interaction (already "
+                                 "present or interaction limit reached)."};
+    }
 }
 
 void EngineLuaBindings::addItemHandler(std::string_view itemID,
@@ -195,8 +208,9 @@ void EngineLuaBindings::choice(std::string_view conditionScript,
                                std::string_view displayText,
                                std::string_view actionScript)
 {
-    currentDialogueTopic->choices.emplace_back(conditionScript, displayText,
-                                               actionScript);
+    currentDialogueTopic->choices.emplace_back(std::string{conditionScript},
+                                               std::string{displayText},
+                                               std::string{actionScript});
 }
 
 } // namespace Server

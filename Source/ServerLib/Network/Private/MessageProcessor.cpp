@@ -20,6 +20,7 @@
 #include "ItemInteractionRequest.h"
 #include "CombineItemsRequest.h"
 #include "UseItemOnEntityRequest.h"
+#include "DialogueChoiceRequest.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
@@ -143,6 +144,11 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
         }
         case EngineMessageType::UseItemOnEntityRequest: {
             dispatchWithNetID<UseItemOnEntityRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::DialogueChoiceRequest: {
+            dispatchWithNetID<DialogueChoiceRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }

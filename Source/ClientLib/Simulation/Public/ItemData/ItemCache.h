@@ -16,7 +16,7 @@ namespace Client
 struct ItemCache
 {
     /** Used as a "we should never hit this" cap on the number of items in the 
-        cache. Only checked in debug builds. */
+        cache. */
     static constexpr std::size_t MAX_ITEMS{10000};
 
     std::vector<Item> items{};

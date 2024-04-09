@@ -14,7 +14,7 @@ namespace Server
  */
 struct EntityItemHandlerScript {
     /** Used as a "we should never hit this" cap on the length of the script
-        string. Only checked in debug builds. */
+        string. */
     static constexpr std::size_t MAX_LENGTH{10000};
 
     /** The item handler script. */

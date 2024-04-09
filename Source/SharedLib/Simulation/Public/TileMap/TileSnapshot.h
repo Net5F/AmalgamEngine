@@ -13,7 +13,7 @@ namespace AM
  */
 struct TileSnapshot {
     /** Used as a "we should never hit this" cap on the number of layers in a
-        tile. Only checked in debug builds. */
+        tile. */
     static constexpr std::size_t MAX_SPRITE_LAYERS{100};
 
     /** The layers of sprites that make up this tile, stored bottom to top.

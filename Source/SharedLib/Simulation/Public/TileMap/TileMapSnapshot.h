@@ -15,7 +15,7 @@ namespace AM
  */
 struct TileMapSnapshot {
     /** Used as a "we should never hit this" cap on the number of chunks in a
-        map. Only checked in debug builds. */
+        map. */
     static constexpr std::size_t MAX_CHUNKS{10000};
 
     /** The version of the map format. Kept as just a 16-bit int for now, we

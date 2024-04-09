@@ -22,6 +22,12 @@ public:
     /** The max number of entities that we will allow. */
     static constexpr std::size_t MAX_ENTITIES{200};
 
+    /** The max number of interactions that an entity can support. */
+    static constexpr std::size_t MAX_ENTITY_INTERACTIONS{64};
+
+    /** The max number of non-built-in interactions that an item can support. */
+    static constexpr std::size_t MAX_ITEM_CUSTOM_INTERACTIONS{64};
+
     /** The x and y axis width, in world units, of our tiles. */
     static constexpr unsigned int TILE_WORLD_WIDTH{32};
 

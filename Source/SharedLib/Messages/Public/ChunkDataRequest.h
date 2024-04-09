@@ -18,7 +18,7 @@ public:
         EngineMessageType::ChunkDataRequest};
 
     /** Used as a "we should never hit this" cap on the number of chunks that
-        we request at once. Only checked in debug builds. */
+        we request at once. */
     static constexpr std::size_t MAX_CHUNKS{10};
 
     //--------------------------------------------------------------------------

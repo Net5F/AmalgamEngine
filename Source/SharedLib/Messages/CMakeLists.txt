@@ -7,6 +7,8 @@ target_sources(SharedLib
         Public/ComponentUpdate.h
         Public/ConnectionRequest.h
         Public/ConnectionResponse.h
+        Public/DialogueChoiceRequest.h
+        Public/DialogueTopicResponse.h
         Public/EngineMessageType.h
         Public/EntityDelete.h
         Public/EntityDeleteRequest.h

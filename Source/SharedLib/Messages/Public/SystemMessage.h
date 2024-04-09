@@ -18,7 +18,7 @@ struct SystemMessage {
         EngineMessageType::SystemMessage};
 
     /** Used as a "we should never hit this" cap on the length of the error
-        string. Only checked in debug builds. */
+        string. */
     static constexpr std::size_t MAX_LENGTH{500};
 
     /** The message string to display to the user. */

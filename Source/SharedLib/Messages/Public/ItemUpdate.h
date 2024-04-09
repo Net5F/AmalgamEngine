@@ -2,6 +2,7 @@
 
 #include "EngineMessageType.h"
 #include "Item.h"
+#include "SharedConfig.h"
 
 namespace AM
 {
@@ -35,8 +36,7 @@ struct ItemUpdate {
     Uint8 maxStackSize{1};
 
     /** The interactions that this item supports. */
-    std::array<ItemInteractionType, Item::MAX_CUSTOM_INTERACTIONS>
-        supportedInteractions{};
+    std::vector<ItemInteractionType> supportedInteractions{};
 };
 
 template<typename S>
@@ -47,7 +47,8 @@ void serialize(S& serializer, ItemUpdate& itemUpdate)
     serializer.value2b(itemUpdate.itemID);
     serializer.value2b(itemUpdate.iconID);
     serializer.value1b(itemUpdate.maxStackSize);
-    serializer.container1b(itemUpdate.supportedInteractions);
+    serializer.container1b(itemUpdate.supportedInteractions,
+                           SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS);
 }
 
 } // End namespace AM

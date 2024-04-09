@@ -17,7 +17,7 @@ public:
         EngineMessageType::ChunkUpdate};
 
     /** Used as a "we should never hit this" cap on the number of chunks that
-        we send at once. Only checked in debug builds. */
+        we send at once. */
     static constexpr std::size_t MAX_CHUNKS{50};
 
     /** The chunks that the client should load. */

@@ -32,6 +32,7 @@ enum class EngineMessageType : Uint8 {
     ItemInteractionRequest,
     CombineItemsRequest,
     UseItemOnEntityRequest,
+    DialogueChoiceRequest,
 
     // Server -> Client Messages
     ExplicitConfirmation,
@@ -48,6 +49,7 @@ enum class EngineMessageType : Uint8 {
     ItemUpdate,
     ItemInitScriptResponse,
     CombineItems,
+    DialogueTopicResponse,
 
     // Bidirectional Messages
     TileAddLayer,

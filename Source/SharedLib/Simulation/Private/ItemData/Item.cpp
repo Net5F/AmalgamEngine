@@ -1,30 +1,23 @@
 #include "Item.h"
+#include <algorithm>
 
 namespace AM
 {
-void Item::addInteraction(ItemInteractionType newInteraction)
+bool Item::addInteraction(ItemInteractionType newInteraction)
 {
-    if ((newInteraction == ItemInteractionType::UseOn)
-        || (newInteraction == ItemInteractionType::Destroy)
-        || (newInteraction == ItemInteractionType::Examine)) {
-        LOG_INFO(
-            "Tried to add UseOn, Destroy, or Examine interaction (the client "
-            "automatically adds these, no need to add them manually).");
-        return;
+    if (supportedInteractions.size()
+        == SharedConfig::MAX_ENTITY_INTERACTIONS) {
+        // The interaction limit has been reached.
+        return false;
+    }
+    else if (std::ranges::find(supportedInteractions, newInteraction)
+             != supportedInteractions.end()) {
+        // The interaction is already present.
+        return false;
     }
 
-    for (ItemInteractionType& interaction : supportedInteractions) {
-        if (interaction == newInteraction) {
-            LOG_INFO("Tried to add already-present interaction: %u",
-                     newInteraction);
-        }
-        else if (interaction == ItemInteractionType::NotSet) {
-            interaction = newInteraction;
-            return;
-        }
-    }
-
-    LOG_INFO("Tried to add interaction to full array.");
+    supportedInteractions.emplace_back(newInteraction);
+    return true;
 }
 
 bool Item::supportsInteraction(ItemInteractionType desiredInteraction) const
@@ -36,36 +29,19 @@ bool Item::supportsInteraction(ItemInteractionType desiredInteraction) const
         return true;
     }
 
-    for (ItemInteractionType interaction : supportedInteractions) {
-        if (interaction == desiredInteraction) {
-            return true;
-        }
-    }
-
-    return false;
+    return (std::ranges::find(supportedInteractions, desiredInteraction)
+            != supportedInteractions.end());
 }
 
-std::array<ItemInteractionType, Item::MAX_INTERACTIONS>
-    Item::getInteractionList() const
+std::vector<ItemInteractionType> Item::getInteractionList() const
 {
-    std::array<ItemInteractionType, MAX_INTERACTIONS> interactionList{};
-
     // First, fill the list with this item's supported interactions.
-    std::size_t nextIndex{0};
-    for (ItemInteractionType interactionType : supportedInteractions) {
-        if (interactionType != ItemInteractionType::NotSet) {
-            interactionList[nextIndex++] = interactionType;
-        }
-        else {
-            // No more interactions in supportedInteractions.
-            break;
-        }
-    }
+    std::vector<ItemInteractionType> interactionList(supportedInteractions);
 
     // Then, fill it with UseOn, Destroy, and Examine.
-    interactionList[nextIndex++] = ItemInteractionType::UseOn;
-    interactionList[nextIndex++] = ItemInteractionType::Destroy;
-    interactionList[nextIndex++] = ItemInteractionType::Examine;
+    interactionList.emplace_back(ItemInteractionType::UseOn);
+    interactionList.emplace_back(ItemInteractionType::Destroy);
+    interactionList.emplace_back(ItemInteractionType::Examine);
 
     return interactionList;
 }
@@ -74,7 +50,7 @@ ItemInteractionType Item::getDefaultInteraction() const
 {
     // If this item doesn't have any custom interactions, return UseOn (the
     // first built-in interaction).
-    if (supportedInteractions[0] == ItemInteractionType::NotSet) {
+    if (supportedInteractions.empty()) {
         return ItemInteractionType::UseOn;
     }
     else {
@@ -84,14 +60,7 @@ ItemInteractionType Item::getDefaultInteraction() const
 
 std::size_t Item::getInteractionCount() const
 {
-    std::size_t interactionCount{0};
-    for (ItemInteractionType interactionType : supportedInteractions) {
-        if (interactionType != ItemInteractionType::NotSet) {
-            interactionCount++;
-        }
-    }
-
-    return interactionCount + BUILTIN_INTERACTION_COUNT;
+    return supportedInteractions.size() + BUILTIN_INTERACTION_COUNT;
 }
 
 } // namespace AM

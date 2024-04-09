@@ -15,7 +15,7 @@ struct ConnectionRequest {
         EngineMessageType::ConnectionRequest};
 
     /** Used as a "we should never hit this" cap on the size of each name
-        string. Only checked in debug builds. */
+        string. */
     static constexpr std::size_t MAX_NAME_LENGTH{50};
 
     // Note: This will eventually change to login credentials and will be sent

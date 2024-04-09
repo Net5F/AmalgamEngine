@@ -17,8 +17,7 @@ namespace Server
  */
 struct ItemHandlers {
     /** Used as a "we should never hit this" cap on the number of item 
-        handlers that a component can have assigned.
-        Only checked in debug builds. */
+        handlers that a component can have assigned. */
     static constexpr std::size_t MAX_HANDLERS{500};
 
     /**
