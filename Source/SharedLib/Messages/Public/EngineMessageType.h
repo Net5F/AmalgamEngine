@@ -49,7 +49,7 @@ enum class EngineMessageType : Uint8 {
     ItemUpdate,
     ItemInitScriptResponse,
     CombineItems,
-    DialogueTopicResponse,
+    DialogueResponse,
 
     // Bidirectional Messages
     TileAddLayer,

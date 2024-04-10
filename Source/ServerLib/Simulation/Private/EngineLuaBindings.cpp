@@ -2,6 +2,8 @@
 #include "EntityInitLua.h"
 #include "EntityItemHandlerLua.h"
 #include "ItemInitLua.h"
+#include "DialogueLua.h"
+#include "DialogueChoiceConditionLua.h"
 #include "World.h"
 #include "Network.h"
 #include "Interaction.h"
@@ -20,14 +22,19 @@ namespace Server
 EngineLuaBindings::EngineLuaBindings(
     EntityInitLua& inEntityInitLua,
     EntityItemHandlerLua& inEntityItemHandlerLua, ItemInitLua& inItemInitLua,
-    World& inWorld, Network& inNetwork)
+    DialogueLua& inDialogueLua,
+    DialogueChoiceConditionLua& inDialogueChoiceConditionLua, World& inWorld,
+    Network& inNetwork)
 : entityInitLua{inEntityInitLua}
 , entityItemHandlerLua{inEntityItemHandlerLua}
 , itemInitLua{inItemInitLua}
+, dialogueLua{inDialogueLua}
+, dialogueChoiceConditionLua{inDialogueChoiceConditionLua}
 , world{inWorld}
 , network{inNetwork}
 , dialogueChoiceLua{std::make_unique<sol::state>()}
 , currentDialogueTopic{nullptr}
+, workString{}
 {
 }
 
@@ -93,13 +100,16 @@ void EngineLuaBindings::topic(std::string_view topicName,
     entt::entity entity{entityInitLua.selfEntity};
     Dialogue& dialogue{world.registry.get_or_emplace<Dialogue>(entity)};
     if ((dialogue.topics.size() - 1) == SDL_MAX_UINT8) {
-        throw std::runtime_error{
-            "Failed to add topic. Max count reached (256)."};
+        workString.clear();
+        workString.append("Failed to add topic \"");
+        workString.append(topicName);
+        workString.append("\". Topic limit reached (256)");
+        throw std::runtime_error{workString};
     }
 
     // Add the new topic to the vector and the map.
-    Dialogue::Topic& topic{
-        dialogue.topics.emplace_back(std::string{topicScript})};
+    Dialogue::Topic& topic{dialogue.topics.emplace_back(
+        std::string{topicName}, std::string{topicScript})};
     Uint8 topicIndex{static_cast<Uint8>(dialogue.topics.size() - 1)};
     dialogue.topicIndices.emplace(topicName, topicIndex);
 
@@ -108,12 +118,14 @@ void EngineLuaBindings::topic(std::string_view topicName,
     auto result{
         dialogueChoiceLua->script(choiceScript, &sol::script_pass_on_error)};
 
-    // If the choice script ran successfully, save it.
-    std::string returnString{""};
     if (!(result.valid())) {
-        // Error occurred while running the script.
         sol::error err = result;
-        throw std::runtime_error(err.what());
+        workString.clear();
+        workString.append("Error in choice script of topic \"");
+        workString.append(topicName);
+        workString.append("\": ");
+        workString.append(err.what());
+        throw std::runtime_error{workString};
     }
 }
 
@@ -191,16 +203,20 @@ void EngineLuaBindings::addCombination(std::string_view otherItemID,
                                             std::string{description});
     }
     else {
-        std::string errorString{
-            "Failed to add item combination. Item(s) not found: "};
+        workString.clear();
+        workString.append("Failed to add item combination. Item(s) not found: ");
         if (!otherItem) {
-            errorString += "\"" + std::string{otherItemID} + "\" ";
+            workString.append("\"");
+            workString.append(otherItemID);
+            workString.append("\" ");
         }
         if (!resultItem) {
-            errorString += "\"" + std::string{resultItemID} + "\" ";
+            workString.append("\"");
+            workString.append(resultItemID);
+            workString.append("\" ");
         }
 
-        throw std::runtime_error{errorString};
+        throw std::runtime_error{workString};
     }
 }
 

@@ -48,6 +48,9 @@ struct Dialogue {
      * A dialogue topic.
      */
     struct Topic {
+        /** This topic's name. */
+        std::string name{};
+
         /** The script to run when this topic is entered. */
         std::string topicScript{};
 
@@ -60,9 +63,13 @@ struct Dialogue {
     /** A map of topic names -> their index in the topics vector. */
     std::unordered_map<std::string, Uint8> topicIndices{};
 
-    /** Our look-up table for dialogue topics.
+    /** The available dialogue topics.
         Topics are added to this vector based on their order in the entity's 
-        init script. */
+        init script. The first topic will be the one sent in response to the 
+        Talk interaction, the rest are only reachable by using a goto().
+        Note: There should always be at least 1 topic present, since we only 
+              construct the Dialogue component when we have a topic to add, and 
+              you can't remove topics. */
     std::vector<Topic> topics{};
 };
 

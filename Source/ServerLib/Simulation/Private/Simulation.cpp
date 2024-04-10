@@ -3,6 +3,8 @@
 #include "EntityInitLua.h"
 #include "EntityItemHandlerLua.h"
 #include "ItemInitLua.h"
+#include "DialogueLua.h"
+#include "DialogueChoiceConditionLua.h"
 #include "EnttGroups.h"
 #include "ISimulationExtension.h"
 #include "EntityInteractionRequest.h"
@@ -25,9 +27,12 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData)
 , entityInitLua{std::make_unique<EntityInitLua>()}
 , entityItemHandlerLua{std::make_unique<EntityItemHandlerLua>()}
 , itemInitLua{std::make_unique<ItemInitLua>()}
+, dialogueLua{std::make_unique<DialogueLua>()}
+, dialogueChoiceConditionLua{std::make_unique<DialogueChoiceConditionLua>()}
 , world{inGraphicData, *entityInitLua, *itemInitLua}
 , currentTick{0}
-, engineLuaBindings{*entityInitLua, *entityItemHandlerLua, *itemInitLua, world,
+, engineLuaBindings{*entityInitLua, *entityItemHandlerLua,       *itemInitLua,
+                    *dialogueLua,   *dialogueChoiceConditionLua, world,
                     network}
 , extension{nullptr}
 , entityInteractionRequestQueue{inNetwork.getEventDispatcher()}
@@ -43,6 +48,7 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData)
 , aiSystem{world}
 , itemSystem{*this, network, *entityItemHandlerLua}
 , inventorySystem{world, network}
+, dialogueSystem{*this, network, *dialogueLua, *dialogueChoiceConditionLua}
 , clientAOISystem{*this, world, network}
 , movementSyncSystem{*this, world, network}
 , componentSyncSystem{*this, world, network, inGraphicData}
@@ -57,6 +63,8 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData)
     entityInitLua->luaState.open_libraries(sol::lib::base);
     entityItemHandlerLua->luaState.open_libraries(sol::lib::base);
     itemInitLua->luaState.open_libraries(sol::lib::base);
+    dialogueLua->luaState.open_libraries(sol::lib::base);
+    dialogueChoiceConditionLua->luaState.open_libraries(sol::lib::base);
     engineLuaBindings.addBindings();
 
     // Register our current tick pointer with the classes that care.
@@ -95,7 +103,7 @@ bool Simulation::popEntityInteractionRequest(
         const Position& clientPosition{registry.get<Position>(clientEntity)};
         const Position& targetPosition{registry.get<Position>(targetEntity)};
         if (clientPosition.squaredDistanceTo(targetPosition)
-            > (SharedConfig::SQUARED_INTERACTION_DISTANCE)) {
+            > SharedConfig::SQUARED_INTERACTION_DISTANCE) {
             network.serializeAndSend(
                 interactionRequest.netID,
                 SystemMessage{"You must move closer to interact with that."});
@@ -105,7 +113,7 @@ bool Simulation::popEntityInteractionRequest(
         // Check that the target actually has this interaction type.
         if (auto* interaction{registry.try_get<Interaction>(targetEntity)};
             !interaction
-            || !interaction->supports(interactionRequest.interactionType)) {
+            || !(interaction->supports(interactionRequest.interactionType))) {
             return false;
         }
 
@@ -178,6 +186,16 @@ ItemInitLua& Simulation::getItemInitLua()
     return *itemInitLua;
 }
 
+DialogueLua& Simulation::getDialogueLua()
+{
+    return *dialogueLua;
+}
+
+DialogueChoiceConditionLua& Simulation::getDialogueChoiceConditionLua()
+{
+    return *dialogueChoiceConditionLua;
+}
+
 Uint32 Simulation::getCurrentTick()
 {
     return currentTick;
@@ -233,6 +251,10 @@ void Simulation::tick()
 
     // Process inventory updates.
     inventorySystem.processInventoryUpdates();
+
+    // Process Talk interactions and dialogue choice requests, updating sim 
+    // state and sending responses as necessary.
+    dialogueSystem.processDialogueInteractions();
 
     // Call the project's post-sim-update logic.
     if (extension != nullptr) {

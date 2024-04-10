@@ -15,6 +15,7 @@
 #include "AISystem.h"
 #include "ItemSystem.h"
 #include "InventorySystem.h"
+#include "DialogueSystem.h"
 #include "ClientAOISystem.h"
 #include "MovementSyncSystem.h"
 #include "ComponentSyncSystem.h"
@@ -36,6 +37,8 @@ class GraphicData;
 struct EntityInitLua;
 struct EntityItemHandlerLua;
 struct ItemInitLua;
+struct DialogueLua;
+struct DialogueChoiceConditionLua;
 class ISimulationExtension;
 
 /**
@@ -112,22 +115,13 @@ public:
     World& getWorld();
 
     /**
-     * Returns a reference to the simulation's Lua bindings for entity init
-     * processing.
+     * Returns a reference to the simulation's Lua bindings.
      */
     EntityInitLua& getEntityInitLua();
-
-    /**
-     * Returns a reference to the simulation's Lua bindings for entity item
-     * handler processing.
-     */
     EntityItemHandlerLua& getEntityItemHandlerLua();
-
-    /**
-     * Returns a reference to the simulation's Lua bindings for item init
-     * processing.
-     */
     ItemInitLua& getItemInitLua();
+    DialogueLua& getDialogueLua();
+    DialogueChoiceConditionLua& getDialogueChoiceConditionLua();
 
     /**
      * Returns the simulation's current tick number.
@@ -164,6 +158,13 @@ private:
 
     /** Lua environment for item init script processing. */
     std::unique_ptr<ItemInitLua> itemInitLua;
+
+    /** Lua environment for dialogue topic and choice action script 
+        processing. */
+    std::unique_ptr<DialogueLua> dialogueLua;
+
+    /** Lua environment for dialogue choice condition script processing. */
+    std::unique_ptr<DialogueChoiceConditionLua> dialogueChoiceConditionLua;
 
     /** The world's state. */
     World world;
@@ -204,6 +205,7 @@ private:
     AISystem aiSystem;
     ItemSystem itemSystem;
     InventorySystem inventorySystem;
+    DialogueSystem dialogueSystem;
     ClientAOISystem clientAOISystem;
     MovementSyncSystem movementSyncSystem;
     ComponentSyncSystem componentSyncSystem;

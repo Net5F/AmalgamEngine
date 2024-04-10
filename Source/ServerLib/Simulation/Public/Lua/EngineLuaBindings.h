@@ -18,6 +18,8 @@ namespace Server
 struct EntityInitLua;
 struct EntityItemHandlerLua;
 struct ItemInitLua;
+struct DialogueLua;
+struct DialogueChoiceConditionLua;
 class World;
 class Network;
 
@@ -32,8 +34,9 @@ class EngineLuaBindings
 public:
     EngineLuaBindings(EntityInitLua& inEntityInitLua,
                       EntityItemHandlerLua& inEntityItemHandlerLua,
-                      ItemInitLua& inItemInitLua, World& inWorld,
-                      Network& inNetwork);
+                      ItemInitLua& inItemInitLua, DialogueLua& inDialogueLua,
+                      DialogueChoiceConditionLua& inDialogueChoiceConditionLua,
+                      World& inWorld, Network& inNetwork);
 
     /**
      * Adds our bindings to the lua object.
@@ -124,6 +127,8 @@ private:
     EntityInitLua& entityInitLua;
     EntityItemHandlerLua& entityItemHandlerLua;
     ItemInitLua& itemInitLua;
+    DialogueLua& dialogueLua;
+    DialogueChoiceConditionLua& dialogueChoiceConditionLua;
     World& world;
     Network& network;
 
@@ -136,6 +141,9 @@ private:
         the topic from the entity's Dialogue::topics that we're currently 
         adding to. */
     Dialogue::Topic* currentDialogueTopic;
+
+    /** A scratch buffer used while processing strings. */
+    std::string workString;
 };
 
 } // namespace Server

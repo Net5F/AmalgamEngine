@@ -17,7 +17,7 @@
 #include "ItemUpdate.h"
 #include "ItemInitScriptResponse.h"
 #include "CombineItems.h"
-#include "DialogueTopicResponse.h"
+#include "DialogueResponse.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
@@ -112,9 +112,9 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                           networkEventDispatcher);
             break;
         }
-        case EngineMessageType::DialogueTopicResponse: {
-            dispatchMessage<DialogueTopicResponse>(messageBuffer, messageSize,
-                                                   networkEventDispatcher);
+        case EngineMessageType::DialogueResponse: {
+            dispatchMessage<DialogueResponse>(messageBuffer, messageSize,
+                                              networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {

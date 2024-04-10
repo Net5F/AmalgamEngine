@@ -7,6 +7,7 @@ target_sources(ServerLib
 		Private/ComponentChangeSystem.cpp
 		Private/ComponentSyncSystem.cpp
 		Private/Database.cpp
+		Private/DialogueSystem.cpp
 		Private/EngineLuaBindings.cpp
 		Private/InputSystem.cpp
 		Private/InventoryHelpers.cpp
@@ -33,6 +34,7 @@ target_sources(ServerLib
 		Public/ComponentChangeSystem.h
 		Public/ComponentSyncSystem.h
 		Public/Database.h
+		Public/DialogueSystem.h
 		Public/EntityItemHandlerScript.h
 		Public/EnttGroups.h
 		Public/EventSorter.h
@@ -60,6 +62,8 @@ target_sources(ServerLib
 		Public/GraphicData/GraphicData.h
 		Public/IconData/IconData.h
 		Public/ItemData/ItemData.h
+		Public/Lua/DialogueLua.h
+		Public/Lua/DialogueChoiceConditionLua.h
 		Public/Lua/EngineLuaBindings.h
 		Public/Lua/EntityInitLua.h
 		Public/Lua/EntityItemHandlerLua.h

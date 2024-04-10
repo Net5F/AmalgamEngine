@@ -13,14 +13,17 @@ namespace AM
 {
 
 /**
- * Sent by the server to provide a client with a new section (topic) of an 
- * entity's dialogue tree.
+ * Sent by the server in response to a Talk interaction or a dialogue choice 
+ * selection.
+ * 
+ * Contains the response dialogue and choices that should be displayed to the 
+ * client.
  */
-struct DialogueTopicResponse {
+struct DialogueResponse {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::DialogueTopicResponse};
+        EngineMessageType::DialogueResponse};
 
     /** Used as a "we should never hit this" cap on the container lengths. */
     static constexpr std::size_t MAX_DIALOGUE_EVENTS{200};
@@ -53,38 +56,38 @@ struct DialogueTopicResponse {
 };
 
 template<typename S>
-void serialize(S& serializer, DialogueTopicResponse::Choice& choice)
+void serialize(S& serializer, DialogueResponse::Choice& choice)
 {
     serializer.value1b(choice.index);
     serializer.text1b(choice.displayText,
-                      DialogueTopicResponse::MAX_CHOICE_TEXT_LENGTH);
+                      DialogueResponse::MAX_CHOICE_TEXT_LENGTH);
 }
 
 template<typename S>
-void serialize(S& serializer, DialogueTopicResponse& dialogueTopicResponse)
+void serialize(S& serializer, DialogueResponse& dialogueResponse)
 {
-    serializer.value4b(dialogueTopicResponse.entity);
-    serializer.value1b(dialogueTopicResponse.topicIndex);
+    serializer.value4b(dialogueResponse.entity);
+    serializer.value1b(dialogueResponse.topicIndex);
     serializer.container(
-        dialogueTopicResponse.dialogueEvents,
-        DialogueTopicResponse::MAX_DIALOGUE_EVENTS,
+        dialogueResponse.dialogueEvents,
+        DialogueResponse::MAX_DIALOGUE_EVENTS,
         // Note: It's messy, but we choose to handle the variant here to avoid 
         //       putting a serialize(variant<string, float>) in the top-level  
         //       namespace (which might cause conflicts in the future).
-        [](S& serializer, DialogueTopicResponse::DialogueEvent& event) {
+        [](S& serializer, DialogueResponse::DialogueEvent& event) {
             serializer.ext(
                 event, bitsery::ext::StdVariant{
                            [](S& serializer, std::string& sayText) {
                                serializer.text1b(
                                    sayText,
-                                   DialogueTopicResponse::MAX_SAY_TEXT_LENGTH);
+                                   DialogueResponse::MAX_SAY_TEXT_LENGTH);
                            },
                            [](S& serializer, float& waitTime) {
                                serializer.value4b(waitTime);
                            }});
         });
-    serializer.container(dialogueTopicResponse.choices,
-                         DialogueTopicResponse::MAX_CHOICES);
+    serializer.container(dialogueResponse.choices,
+                         DialogueResponse::MAX_CHOICES);
 }
 
 } // End namespace AM
