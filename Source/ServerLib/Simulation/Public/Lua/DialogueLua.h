@@ -28,6 +28,10 @@ struct DialogueLua {
 
     /** (Out) The dialogue events that should be sent to the client. */
     std::vector<DialogueResponse::DialogueEvent>* dialogueEvents{};
+
+    /** (Out) The topic specified by the latest goto().
+        Will == "" if no goto() was called by the latest-ran script. */
+    std::string gotoTopicName{""};
 };
 
 } // namespace Server

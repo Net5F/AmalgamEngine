@@ -39,6 +39,12 @@ public:
     void processDialogueInteractions();
 
 private:
+    /** The maximum number of goto() calls that can be chained (e.g. a choice 
+        action script has a goto(), which leads to topic script with a goto(), 
+        etc).
+        We need to set a max, otherwise people could write infinite loops. */
+    const std::size_t GOTO_MAX{5};
+
     /**
      * Processes a Talk interaction, sending appropriate response messages.
      * Note: We pass the indivual members so we can avoid the big Simulation.h 
@@ -48,11 +54,30 @@ private:
                                 entt::entity targetEntity, NetworkID clientID);
 
     /**
+     * Runs the given topic's topicScript.
+     * @return If the script contained a valid goto(), returns the next topic.
+     *         Else, returns nullptr.
+     */
+    const Dialogue::Topic* runTopic(const Dialogue& dialogue,
+                                    const Dialogue::Topic& topic,
+                                    NetworkID clientID);
+
+    /**
      * Processes a dialogue choice request, sending appropriate response 
      * messages.
      */
     void processDialogueChoice(
         const DialogueChoiceRequest& choiceRequest);
+
+    /**
+     * Runs the given choice's actionScript.
+     * @return If the script contained a valid goto(), returns the next topic.
+     *         Else, returns nullptr.
+     */
+    const Dialogue::Topic* runChoice(const Dialogue& dialogue,
+                                     const Dialogue::Choice& choice,
+                                     const std::string_view& choiceTopicName,
+                                     Uint8 choiceIndex, NetworkID clientID);
 
     /**
      * Validates that the given request has valid data and that the choice's 
@@ -63,18 +88,28 @@ private:
      *         Else, returns nullptr and sends an appropriate error message.
      */
     const Dialogue*
-        validateDialogueChoice(const DialogueChoiceRequest& choiceRequest,
-                               entt::entity clientEntity);
+        validateChoiceRequest(const DialogueChoiceRequest& choiceRequest,
+                              entt::entity clientEntity);
 
     /**
      * Runs the given choice's condition script.
      * @return true if the script ran successfully and evaluated to true, else 
-     *         false. If false, sends an appropriate error message.
+     *         false. If false and sendErrorMessage == true, sends an 
+     *         appropriate error message.
      */
-    bool runChoiceCondition(const Dialogue::Topic& topic,
-                            const Dialogue::Choice& choice,
+    bool runChoiceCondition(const Dialogue::Choice& choice,
                             entt::entity clientEntity,
-                            entt::entity targetEntity, NetworkID clientID);
+                            entt::entity targetEntity, NetworkID clientID,
+                            bool sendErrorMessage);
+
+    /**
+     * Iterates the given choices, checking their conditions against clientEntity
+     * and targetEntity and adding them to the given response if they pass.
+     */
+    void addChoicesToResponse(const std::vector<Dialogue::Choice>& choices,
+                              entt::entity clientEntity,
+                              entt::entity targetEntity, NetworkID clientID,
+                              DialogueResponse& response);
 
     /** Used for getting Talk interaction requests. */
     Simulation& simulation;

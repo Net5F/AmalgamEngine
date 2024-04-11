@@ -61,24 +61,28 @@ void DialogueSystem::processTalkInteraction(entt::entity clientEntity,
     AM_ASSERT(dialogue->topics.size() > 0,
               "Dialogue should always have at least 1 topic.");
 
-    // Run the topic script, pushing dialogue events into a response.
-    DialogueResponse response{clientEntity, 0};
-    dialogueLua.dialogueEvents = &(response.dialogueEvents);
-    auto result{dialogueLua.luaState.script(
-        dialogue->topics[0].topicScript, &sol::script_pass_on_error)};
+    // Run the topic script, following any gotos and pushing dialogue events 
+    // into the response.
+    DialogueResponse dialogueResponse{clientEntity, 0};
+    dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
-    if (!(result.valid())) {
-        sol::error err = result;
-        workString.append("Error in topic script. Topic: \"");
-        workString.append(dialogue->topics[0].name);
-        workString.append("\", error: ");
-        workString.append(err.what());
-        network.serializeAndSend(clientID, SystemMessage{workString});
-        return;
+    std::size_t gotoCount{0};
+    const Dialogue::Topic* lastTopic{&(dialogue->topics[0])};
+    const Dialogue::Topic* nextTopic{
+        runTopic(*dialogue, dialogue->topics[0], clientID)};
+    while (nextTopic && (gotoCount < GOTO_MAX)) {
+        lastTopic = nextTopic;
+        nextTopic = runTopic(*dialogue, *nextTopic, clientID);
+        gotoCount++;
     }
 
+    // Add the last topic's choices to the response.
+    addChoicesToResponse(lastTopic->choices, clientEntity,
+                         targetEntity, clientID,
+                         dialogueResponse);
+
     // Send the dialogue to the client.
-    network.serializeAndSend(clientID, response);
+    network.serializeAndSend(clientID, dialogueResponse);
 }
 
 void DialogueSystem::processDialogueChoice(
@@ -93,18 +97,55 @@ void DialogueSystem::processDialogueChoice(
     // Validate the request.
     entt::entity clientEntity{clientEntityIt->second};
     const Dialogue* dialogue{
-        validateDialogueChoice(choiceRequest, clientEntity)};
+        validateChoiceRequest(choiceRequest, clientEntity)};
     if (!dialogue) {
         return;
     }
 
-    const Dialogue::Topic& topic{dialogue->topics[choiceRequest.topicIndex]};
-    const Dialogue::Choice& choice{topic.choices[choiceRequest.choiceIndex]};
+    // Get the choice that the request is asking to run.
+    // Note: These indices were already validated in validateChoice().
+    const Dialogue::Topic& choiceTopic{
+        dialogue->topics[choiceRequest.topicIndex]};
+    const Dialogue::Choice& choice{
+        choiceTopic.choices[choiceRequest.choiceIndex]};
 
-    // The request is valid. Run the choice's action script, pushing dialogue 
-    // events into the response.
+    // Run the choice's action script, pushing dialogue events into the response.
     DialogueResponse dialogueResponse{choiceRequest.entity, 0};
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
+
+    const Dialogue::Topic* nextTopic{
+        runChoice(*dialogue, choice, choiceTopic.name,
+                  choiceRequest.choiceIndex, choiceRequest.netID)};
+
+    // If the choice contained a valid goto(), run the next topic script, 
+    // following any gotos and pushing dialogue events into the response.
+    std::size_t gotoCount{1};
+    const Dialogue::Topic* lastTopic{nullptr};
+    while (nextTopic && (gotoCount < GOTO_MAX)) {
+        lastTopic = nextTopic;
+        nextTopic = runTopic(*dialogue, *nextTopic, choiceRequest.netID);
+        gotoCount++;
+    }
+
+    // If any topics were ran, add the last topic's choices to the response.
+    if (lastTopic) {
+        addChoicesToResponse(lastTopic->choices, clientEntity,
+                             choiceRequest.entity, choiceRequest.netID,
+                             dialogueResponse);
+    }
+
+    // Send the dialogue to the client.
+    network.serializeAndSend(choiceRequest.netID, dialogueResponse);
+}
+
+const Dialogue::Topic*
+    DialogueSystem::runChoice(const Dialogue& dialogue,
+                              const Dialogue::Choice& choice,
+                              const std::string_view& choiceTopicName,
+                              Uint8 choiceIndex, NetworkID clientID)
+{
+    // Run the choice's action script, pushing dialogue events into the response.
+    dialogueLua.gotoTopicName = "";
     auto scriptResult{dialogueLua.luaState.script(choice.actionScript,
                                                   &sol::script_pass_on_error)};
 
@@ -112,21 +153,37 @@ void DialogueSystem::processDialogueChoice(
         sol::error err = scriptResult;
         workString.clear();
         workString.append("Error in choice action script. Topic: \"");
-        workString.append(topic.name);
+        workString.append(choiceTopicName);
         workString.append("\", choiceIndex: ");
-        workString.append(std::to_string(choiceRequest.choiceIndex));
+        workString.append(std::to_string(choiceIndex));
         workString.append(", error: ");
         workString.append(err.what());
-        network.serializeAndSend(choiceRequest.netID,
+        network.serializeAndSend(clientID,
                                  SystemMessage{err.what()});
-        return;
+        return nullptr;
     }
 
-    // TODO: This is wrong. We need to track the latest goto and run this 
-    //       on the specified topic (if there is one).
+    // If a goto call occurred, check if it's valid.
+    if (dialogueLua.gotoTopicName != "") {
+        auto topicIndexIt{
+            dialogue.topicIndices.find(dialogueLua.gotoTopicName)};
+        if (topicIndexIt != dialogue.topicIndices.end()) {
+            // goto is valid, return the next topic.
+            return &(dialogue.topics[topicIndexIt->second]);
+        }
+    }
+
+    return nullptr;
+}
+
+const Dialogue::Topic* DialogueSystem::runTopic(const Dialogue& dialogue,
+                                                const Dialogue::Topic& topic,
+                                                NetworkID clientID)
+{
     // Run the topic script, pushing dialogue events into the response.
-    scriptResult = dialogueLua.luaState.script(topic.topicScript,
-                                               &sol::script_pass_on_error);
+    dialogueLua.gotoTopicName = "";
+    auto scriptResult{dialogueLua.luaState.script(
+        topic.topicScript, &sol::script_pass_on_error)};
 
     if (!(scriptResult.valid())) {
         sol::error err = scriptResult;
@@ -134,16 +191,24 @@ void DialogueSystem::processDialogueChoice(
         workString.append(topic.name);
         workString.append("\", error: ");
         workString.append(err.what());
-        network.serializeAndSend(choiceRequest.netID,
-                                 SystemMessage{workString});
-        return;
+        network.serializeAndSend(clientID, SystemMessage{workString});
+        return nullptr;
     }
 
-    // Send the dialogue to the client.
-    network.serializeAndSend(choiceRequest.netID, dialogueResponse);
+    // If a goto call occurred, check if it's valid.
+    if (dialogueLua.gotoTopicName != "") {
+        auto topicIndexIt{
+            dialogue.topicIndices.find(dialogueLua.gotoTopicName)};
+        if (topicIndexIt != dialogue.topicIndices.end()) {
+            // goto is valid, return the next topic.
+            return &(dialogue.topics[topicIndexIt->second]);
+        }
+    }
+
+    return nullptr;
 }
 
-const Dialogue* DialogueSystem::validateDialogueChoice(
+const Dialogue* DialogueSystem::validateChoiceRequest(
     const DialogueChoiceRequest& choiceRequest, entt::entity clientEntity)
 {
     const Dialogue* dialogue{
@@ -172,19 +237,19 @@ const Dialogue* DialogueSystem::validateDialogueChoice(
     // Check if the client entity can access the requested choice.
     const Dialogue::Topic& topic{dialogue->topics[choiceRequest.topicIndex]};
     const Dialogue::Choice& choice{topic.choices[choiceRequest.choiceIndex]};
-    if (!runChoiceCondition(topic, choice, clientEntity, choiceRequest.entity,
-                            choiceRequest.netID)) {
+    if (!runChoiceCondition(choice, clientEntity, choiceRequest.entity,
+                            choiceRequest.netID, true)) {
         return nullptr;
     }
 
     return dialogue;
 }
 
-bool DialogueSystem::runChoiceCondition(const Dialogue::Topic& topic,
-                                        const Dialogue::Choice& choice,
+bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
                                         entt::entity clientEntity,
                                         entt::entity targetEntity,
-                                        NetworkID clientID)
+                                        NetworkID clientID,
+                                        bool sendErrorMessage)
 {
     // Append "r=" to the script so the result gets saved to a variable.
     workString.clear();
@@ -207,14 +272,14 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Topic& topic,
 
     // Validate the result.
     const auto& conditionResult{dialogueChoiceConditionLua.luaState["r"]};
-    if (!(conditionResult.is<bool>())) {
+    if (sendErrorMessage && !(conditionResult.is<bool>())) {
         network.serializeAndSend(
             clientID,
             SystemMessage{
                 "Choice condition script did not evaluate to bool type."});
         return false;
     }
-    else if (!(conditionResult.get<bool>())) {
+    else if (sendErrorMessage && !(conditionResult.get<bool>())) {
         network.serializeAndSend(
             clientID,
             SystemMessage{
@@ -223,6 +288,22 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Topic& topic,
     }
 
     return true;
+}
+
+void DialogueSystem::addChoicesToResponse(
+    const std::vector<Dialogue::Choice>& choices, entt::entity clientEntity,
+    entt::entity targetEntity, NetworkID clientID, DialogueResponse& response)
+{
+    Uint8 index{0};
+    for (const Dialogue::Choice& choice : choices) {
+        // If the client entity can access this choice, add it to the response.
+        if (runChoiceCondition(choice, clientEntity, targetEntity, clientID,
+                               false)) {
+            response.choices.emplace_back(index, choice.displayText);
+        }
+
+        index++;
+    }
 }
 
 } // End namespace Server
