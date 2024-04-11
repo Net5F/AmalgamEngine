@@ -37,8 +37,9 @@ struct DialogueResponse {
     /** The index of this topic within the entity's Dialogue::topics. */
     Uint8 topicIndex{0};
 
-    /** A dialogue event. strings come from the say() command (a line of text 
-        to display). floats come from the wait() command (an amount of time to 
+    /** A dialogue event.
+        strings come from the say() command (a line of text to display).
+        floats come from the wait() command (an amount of time in seconds to 
         wait before proceeding). */
     using DialogueEvent = std::variant<std::string, float>;
     /** The dialogue events that comprise both the response to the previously 

@@ -21,6 +21,9 @@ struct DialogueChoiceConditionLua {
     /** Lua environment for dialogue choice condition script processing. */
     sol::state luaState{};
 
+    /** The network ID of the client that is controlling the dialogue. */
+    NetworkID clientID{0};
+
     /** The client entity that is controlling the dialogue. */
     entt::entity clientEntity{};
 

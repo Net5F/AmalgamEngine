@@ -39,11 +39,11 @@ public:
     void processDialogueInteractions();
 
 private:
-    /** The maximum number of goto() calls that can be chained (e.g. a choice 
-        action script has a goto(), which leads to topic script with a goto(), 
-        etc).
+    /** The maximum number of setNextTopic() calls that can be chained (e.g. a 
+        choice action script has a call, which leads to a topic script with a 
+        call, etc).
         We need to set a max, otherwise people could write infinite loops. */
-    const std::size_t GOTO_MAX{5};
+    const std::size_t TOPIC_NAVIGATION_MAX{5};
 
     /**
      * Processes a Talk interaction, sending appropriate response messages.
@@ -55,8 +55,8 @@ private:
 
     /**
      * Runs the given topic's topicScript.
-     * @return If the script contained a valid goto(), returns the next topic.
-     *         Else, returns nullptr.
+     * @return If the script contained a valid setNextTopic(), returns the next 
+     *         topic. Else, returns nullptr.
      */
     const Dialogue::Topic* runTopic(const Dialogue& dialogue,
                                     const Dialogue::Topic& topic,
@@ -71,12 +71,12 @@ private:
 
     /**
      * Runs the given choice's actionScript.
-     * @return If the script contained a valid goto(), returns the next topic.
-     *         Else, returns nullptr.
+     * @return If the script contained a valid setNextTopic(), returns the next
+     *         topic. Else, returns nullptr.
      */
     const Dialogue::Topic* runChoice(const Dialogue& dialogue,
                                      const Dialogue::Choice& choice,
-                                     const std::string_view& choiceTopicName,
+                                     std::string_view choiceTopicName,
                                      Uint8 choiceIndex, NetworkID clientID);
 
     /**

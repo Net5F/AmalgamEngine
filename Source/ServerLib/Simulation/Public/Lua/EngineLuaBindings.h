@@ -44,7 +44,16 @@ public:
     void addBindings();
 
 private:
+    void addEntityInitBindings();
+    void addEntityItemHandlerBindings();
+    void addItemInitBindings();
+    void addDialogueBindings();
+    void addDialogueChoiceConditionBindings();
+    void addDialogueChoiceBindings();
+
+    //-------------------------------------------------------------------------
     // Entity init
+    //-------------------------------------------------------------------------
     /**
      * Adds the "Talk" interaction to the entity.
      * Use the topic() Lua function to add dialogue.
@@ -64,34 +73,14 @@ private:
     void topic(std::string_view topicName, std::string_view topicScript,
                std::string_view choiceScript);
 
+    //-------------------------------------------------------------------------
     // Entity item handler
-    /**
-     * Attempts to add the given item to the first available slot in the client
-     * entity's inventory.
-     * @return true if the item was successfully added, else false (inventory
-     *         was full).
-     */
-    bool addItem(std::string_view itemID, Uint8 count);
+    //-------------------------------------------------------------------------
+    // TODO: getFlagPlayer/Self, setFlagPlayer/Self
 
-    /**
-     * Attempts to remove the given item from the client entity's inventory.
-     * @return true if the item was successfully removed, else false (inventory
-     *         didn't contain the item).
-     */
-    bool removeItem(std::string_view itemID, Uint8 count);
-
-    /**
-     * Returns the count for the given item across all slots in the client 
-     * entity's inventory.
-     */
-    std::size_t getItemCount(ItemID itemID);
-
-    /**
-     * Sends a system message to the client.
-     */
-    void sendSystemMessage(std::string_view message);
-
+    //-------------------------------------------------------------------------
     // Item init
+    //-------------------------------------------------------------------------
     /**
      * Adds the description text that's shown the item is examined.
      */
@@ -112,7 +101,36 @@ private:
                         std::string_view resultItemID,
                         std::string_view description);
 
+    //-------------------------------------------------------------------------
+    // Dialogue
+    //-------------------------------------------------------------------------
+    // TODO: getFlagPlayer/Self, setFlagPlayer/Self
+
+    /**
+     * Adds the given text to the dialogue event list.
+     */
+    void say(std::string_view text);
+
+    /**
+     * Adds a wait to the dialogue event list.
+     */
+    void wait(float timeS);
+
+    /**
+     * Sets the given topic as the next topic to navigate to.
+     * Does not immediately jump--the rest of the current script will finish.
+     * Calling this multiple times will overwrite previous calls.
+     */
+    void setNextTopic(std::string_view topicName);
+
+    //-------------------------------------------------------------------------
+    // Dialogue choice condition
+    //-------------------------------------------------------------------------
+    // TODO: getFlagPlayer/Self
+
+    //-------------------------------------------------------------------------
     // Dialogue choice
+    //-------------------------------------------------------------------------
     /**
      * Adds a dialogue choice.
      * @param conditionScript An optional condition, to guard access to this 
@@ -123,6 +141,38 @@ private:
      */
     void choice(std::string_view conditionScript, std::string_view displayText,
                 std::string_view actionScript);
+
+    //-------------------------------------------------------------------------
+    // Shared
+    //-------------------------------------------------------------------------
+    /**
+     * Attempts to add the given item to the first available slot in 
+     * entityToAddTo's inventory.
+     * @return true if the item was successfully added, else false (inventory
+     *         didn't exist, inventory was full).
+     */
+    bool addItem(std::string_view itemID, Uint8 count,
+                 entt::entity entityToAddTo, NetworkID clientID);
+
+    /**
+     * Attempts to remove the given item from the client entity's inventory.
+     * @return true if the item was successfully removed, else false (inventory
+     *         didn't contain the item).
+     */
+    bool removeItem(std::string_view itemID, Uint8 count,
+                    entt::entity entityToRemoveFrom, NetworkID clientID);
+
+    /**
+     * Returns the count for the given item across all slots in the given 
+     * entity's inventory.
+     */
+    std::size_t getItemCount(ItemID itemID, entt::entity entityToCount,
+                             NetworkID clientID);
+
+    /**
+     * Sends a system message to the client.
+     */
+    void sendSystemMessage(std::string_view message, NetworkID clientID);
 
     EntityInitLua& entityInitLua;
     EntityItemHandlerLua& entityItemHandlerLua;

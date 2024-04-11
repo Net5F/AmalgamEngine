@@ -21,7 +21,7 @@ struct EntityItemHandlerLua {
     /** The network ID of the client that used the item. */
     NetworkID clientID{0};
 
-    /** The entity that used the item. */
+    /** The client entity that used the item. */
     entt::entity clientEntity{};
 
     /** The entity that the item is being used on. */

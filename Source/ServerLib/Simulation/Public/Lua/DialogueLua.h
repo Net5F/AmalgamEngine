@@ -20,6 +20,9 @@ struct DialogueLua {
         processing. */
     sol::state luaState{};
 
+    /** The network ID of the client that is controlling the dialogue. */
+    NetworkID clientID{0};
+
     /** The client entity that is controlling the dialogue. */
     entt::entity clientEntity{};
 
@@ -29,9 +32,9 @@ struct DialogueLua {
     /** (Out) The dialogue events that should be sent to the client. */
     std::vector<DialogueResponse::DialogueEvent>* dialogueEvents{};
 
-    /** (Out) The topic specified by the latest goto().
-        Will == "" if no goto() was called by the latest-ran script. */
-    std::string gotoTopicName{""};
+    /** (Out) The topic specified by the latest setNextTopic().
+        Will == "" if no setNextTopic() was called by the latest-ran script. */
+    std::string nextTopicName{""};
 };
 
 } // namespace Server

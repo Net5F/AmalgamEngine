@@ -20,12 +20,12 @@ namespace Server
 struct Dialogue {
     /** Used as a "we should never hit this" cap on the container lengths. */
     static constexpr std::size_t MAX_CHOICE_CONDITION_SCRIPT_LENGTH{500};
-    static constexpr std::size_t MAX_CHOICE_DISPLAY_TEXT_LENGTH{500};
+    static constexpr std::size_t MAX_CHOICE_DISPLAY_TEXT_LENGTH{200};
     static constexpr std::size_t MAX_CHOICE_ACTION_SCRIPT_LENGTH{1000};
-    static constexpr std::size_t MAX_TOPIC_SCRIPT_LENGTH{500};
+    static constexpr std::size_t MAX_TOPIC_SCRIPT_LENGTH{1500};
     static constexpr std::size_t MAX_CHOICES{50};
-    static constexpr std::size_t MAX_TOPICS{500};
-    static constexpr std::size_t MAX_TOPIC_NAME_LENGTH{500};
+    static constexpr std::size_t MAX_TOPICS{100};
+    static constexpr std::size_t MAX_TOPIC_NAME_LENGTH{100};
 
     /**
      * A choice that the player can make.
@@ -66,7 +66,7 @@ struct Dialogue {
     /** The available dialogue topics.
         Topics are added to this vector based on their order in the entity's 
         init script. The first topic will be the one sent in response to the 
-        Talk interaction, the rest are only reachable by using a goto().
+        Talk interaction. The rest are only reachable using setNextTopic().
         Note: There should always be at least 1 topic present, since we only 
               construct the Dialogue component when we have a topic to add, and 
               you can't remove topics. */

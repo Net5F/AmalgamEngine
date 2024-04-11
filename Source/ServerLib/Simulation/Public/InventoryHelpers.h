@@ -65,14 +65,22 @@ public:
      */
     static bool removeItem(Uint8 slotIndex, Uint8 count,
                            entt::entity entityToRemoveFrom, World& world,
-                           Network& network);
+                           Network& network,
+                           std::optional<NetworkID> requesterID = std::nullopt);
 
     /**
-     * Overload for string IDs.
+     * Removes the given count of items from the entity's inventory.
+     * Note: This is different behavior from the above function, which acts on a 
+     *       specific index. 
+     *
+     * If the inventory doesn't have enough items, does nothing.
+     *
+     * @return true if successful, else false.
      */
     static bool removeItem(std::string_view itemID, Uint8 count,
                            entt::entity entityToRemoveFrom, World& world,
-                           Network& network);
+                           Network& network,
+                           std::optional<NetworkID> requesterID = std::nullopt);
 };
 
 } // namespace Server

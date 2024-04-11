@@ -61,19 +61,20 @@ void DialogueSystem::processTalkInteraction(entt::entity clientEntity,
     AM_ASSERT(dialogue->topics.size() > 0,
               "Dialogue should always have at least 1 topic.");
 
-    // Run the topic script, following any gotos and pushing dialogue events 
-    // into the response.
+    // Run the topic script, following any setNextTopic() and pushing dialogue 
+    // events into the response.
     DialogueResponse dialogueResponse{clientEntity, 0};
+    dialogueLua.clientID = clientID;
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
-    std::size_t gotoCount{0};
+    std::size_t topicNavigationCount{0};
     const Dialogue::Topic* lastTopic{&(dialogue->topics[0])};
     const Dialogue::Topic* nextTopic{
         runTopic(*dialogue, dialogue->topics[0], clientID)};
-    while (nextTopic && (gotoCount < GOTO_MAX)) {
+    while (nextTopic && (topicNavigationCount < TOPIC_NAVIGATION_MAX)) {
         lastTopic = nextTopic;
         nextTopic = runTopic(*dialogue, *nextTopic, clientID);
-        gotoCount++;
+        topicNavigationCount++;
     }
 
     // Add the last topic's choices to the response.
@@ -111,20 +112,21 @@ void DialogueSystem::processDialogueChoice(
 
     // Run the choice's action script, pushing dialogue events into the response.
     DialogueResponse dialogueResponse{choiceRequest.entity, 0};
+    dialogueLua.clientID = choiceRequest.netID;
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
     const Dialogue::Topic* nextTopic{
         runChoice(*dialogue, choice, choiceTopic.name,
                   choiceRequest.choiceIndex, choiceRequest.netID)};
 
-    // If the choice contained a valid goto(), run the next topic script, 
-    // following any gotos and pushing dialogue events into the response.
-    std::size_t gotoCount{1};
+    // If the choice contained a valid setNextTopic(), run the next topic script, 
+    // following any setNextTopic and pushing dialogue events into the response.
+    std::size_t topicNavigationCount{1};
     const Dialogue::Topic* lastTopic{nullptr};
-    while (nextTopic && (gotoCount < GOTO_MAX)) {
+    while (nextTopic && (topicNavigationCount < TOPIC_NAVIGATION_MAX)) {
         lastTopic = nextTopic;
         nextTopic = runTopic(*dialogue, *nextTopic, choiceRequest.netID);
-        gotoCount++;
+        topicNavigationCount++;
     }
 
     // If any topics were ran, add the last topic's choices to the response.
@@ -141,11 +143,11 @@ void DialogueSystem::processDialogueChoice(
 const Dialogue::Topic*
     DialogueSystem::runChoice(const Dialogue& dialogue,
                               const Dialogue::Choice& choice,
-                              const std::string_view& choiceTopicName,
+                              std::string_view choiceTopicName,
                               Uint8 choiceIndex, NetworkID clientID)
 {
     // Run the choice's action script, pushing dialogue events into the response.
-    dialogueLua.gotoTopicName = "";
+    dialogueLua.nextTopicName = "";
     auto scriptResult{dialogueLua.luaState.script(choice.actionScript,
                                                   &sol::script_pass_on_error)};
 
@@ -158,18 +160,24 @@ const Dialogue::Topic*
         workString.append(std::to_string(choiceIndex));
         workString.append(", error: ");
         workString.append(err.what());
-        network.serializeAndSend(clientID,
-                                 SystemMessage{err.what()});
+        network.serializeAndSend(clientID, SystemMessage{workString});
         return nullptr;
     }
 
-    // If a goto call occurred, check if it's valid.
-    if (dialogueLua.gotoTopicName != "") {
+    // If a setNextTopic() call occurred, check if it's valid.
+    if (dialogueLua.nextTopicName != "") {
         auto topicIndexIt{
-            dialogue.topicIndices.find(dialogueLua.gotoTopicName)};
+            dialogue.topicIndices.find(dialogueLua.nextTopicName)};
         if (topicIndexIt != dialogue.topicIndices.end()) {
-            // goto is valid, return the next topic.
+            // setNextTopic() is valid, return the next topic.
             return &(dialogue.topics[topicIndexIt->second]);
+        }
+        else {
+            workString.clear();
+            workString.append("Invalid setNextTopic(). Topic name: \"");
+            workString.append(dialogueLua.nextTopicName);
+            workString.append("\".");
+            network.serializeAndSend(clientID, SystemMessage{workString});
         }
     }
 
@@ -181,7 +189,7 @@ const Dialogue::Topic* DialogueSystem::runTopic(const Dialogue& dialogue,
                                                 NetworkID clientID)
 {
     // Run the topic script, pushing dialogue events into the response.
-    dialogueLua.gotoTopicName = "";
+    dialogueLua.nextTopicName = "";
     auto scriptResult{dialogueLua.luaState.script(
         topic.topicScript, &sol::script_pass_on_error)};
 
@@ -195,13 +203,20 @@ const Dialogue::Topic* DialogueSystem::runTopic(const Dialogue& dialogue,
         return nullptr;
     }
 
-    // If a goto call occurred, check if it's valid.
-    if (dialogueLua.gotoTopicName != "") {
+    // If a setNextTopic() call occurred, check if it's valid.
+    if (dialogueLua.nextTopicName != "") {
         auto topicIndexIt{
-            dialogue.topicIndices.find(dialogueLua.gotoTopicName)};
+            dialogue.topicIndices.find(dialogueLua.nextTopicName)};
         if (topicIndexIt != dialogue.topicIndices.end()) {
-            // goto is valid, return the next topic.
+            // setNextTopic() is valid, return the next topic.
             return &(dialogue.topics[topicIndexIt->second]);
+        }
+        else {
+            workString.clear();
+            workString.append("Invalid setNextTopic(). Topic name: \"");
+            workString.append(dialogueLua.nextTopicName);
+            workString.append("\".");
+            network.serializeAndSend(clientID, SystemMessage{workString});
         }
     }
 
