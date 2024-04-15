@@ -107,12 +107,19 @@ private:
     // TODO: getFlagPlayer/Self, setFlagPlayer/Self
 
     /**
-     * Adds the given text to the dialogue event list.
+     * Adds a piece of dialogue to the dialogue event list.
      */
     void say(std::string_view text);
 
     /**
+     * Adds a piece of narration to the dialogue event list.
+     */
+    void narrate(std::string_view text);
+
+    /**
      * Adds a wait to the dialogue event list.
+     * Note: The client will automatically add a wait between every say command.
+     *       This command is to add an additional wait.
      */
     void wait(float timeS);
 
@@ -133,14 +140,23 @@ private:
     //-------------------------------------------------------------------------
     /**
      * Adds a dialogue choice.
-     * @param conditionScript An optional condition, to guard access to this 
-     *                        choice.
      * @param displayText The text to display for this choice.
      * @param actionScript The actions to run if this choice is successfully 
      *                     selected.
      */
-    void choice(std::string_view conditionScript, std::string_view displayText,
-                std::string_view actionScript);
+    void choice(std::string_view displayText, std::string_view actionScript);
+
+    /**
+     * Adds a conditional dialogue choice.
+     * The condition will be used both when checking if the choice should be 
+     * sent, and when validating an incoming request to select the choice.
+     * @param conditionScript The condition to check against.
+     * @param displayText The text to display for this choice.
+     * @param actionScript The actions to run if this choice is successfully 
+     *                     selected.
+     */
+    void choiceIf(std::string_view conditionScript,
+                  std::string_view displayText, std::string_view actionScript);
 
     //-------------------------------------------------------------------------
     // Shared
@@ -166,8 +182,8 @@ private:
      * Returns the count for the given item across all slots in the given 
      * entity's inventory.
      */
-    std::size_t getItemCount(ItemID itemID, entt::entity entityToCount,
-                             NetworkID clientID);
+    std::size_t getItemCount(std::string_view itemID,
+                             entt::entity entityToCount, NetworkID clientID);
 
     /**
      * Sends a system message to the client.

@@ -20,6 +20,8 @@ public:
     {
         switch (interactionType) {
             // Engine interaction types.
+            case EntityInteractionType::Talk:
+                return "Talk";
             // Project interaction types.
             case EntityInteractionType::Replant:
                 return "Replant";

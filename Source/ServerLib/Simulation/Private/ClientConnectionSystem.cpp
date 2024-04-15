@@ -65,8 +65,9 @@ void ClientConnectionSystem::processConnectEvents()
         entt::entity newEntity{world.createEntity(world.getSpawnPoint())};
 
         registry.emplace<IsClientEntity>(newEntity);
-        registry.emplace<Name>(newEntity,
-                               std::to_string(static_cast<Uint32>(newEntity)));
+        registry.emplace<Name>(
+            newEntity,
+            "Player " + std::to_string(static_cast<Uint32>(newEntity)));
         registry.emplace<Inventory>(newEntity);
 
         registry.emplace<ClientSimData>(newEntity, clientConnected.clientID,

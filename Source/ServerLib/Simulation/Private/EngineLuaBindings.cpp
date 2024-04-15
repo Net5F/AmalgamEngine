@@ -81,14 +81,14 @@ void EngineLuaBindings::addEntityItemHandlerBindings()
                               entityItemHandlerLua.clientID);
         });
     entityItemHandlerLua.luaState.set_function(
-        "getItemCountPlayer", [&](ItemID itemID) {
-            getItemCount(itemID, entityItemHandlerLua.clientEntity,
-                         entityItemHandlerLua.clientID);
+        "getItemCountPlayer", [&](std::string_view itemID) {
+            return getItemCount(itemID, entityItemHandlerLua.clientEntity,
+                                entityItemHandlerLua.clientID);
         });
     entityItemHandlerLua.luaState.set_function(
-        "getItemCountSelf", [&](ItemID itemID) {
-            getItemCount(itemID, entityItemHandlerLua.targetEntity,
-                         entityItemHandlerLua.clientID);
+        "getItemCountSelf", [&](std::string_view itemID) {
+            return getItemCount(itemID, entityItemHandlerLua.targetEntity,
+                                entityItemHandlerLua.clientID);
         });
     entityItemHandlerLua.luaState.set_function(
         "sendSystemMessage", [&](std::string_view message) {
@@ -109,9 +109,11 @@ void EngineLuaBindings::addItemInitBindings()
 void EngineLuaBindings::addDialogueBindings()
 {
     dialogueLua.luaState.set_function("say", &EngineLuaBindings::say, this);
-    dialogueLua.luaState.set_function("wait", &EngineLuaBindings::say, this);
-    dialogueLua.luaState.set_function("setNextTopic", &EngineLuaBindings::say,
+    dialogueLua.luaState.set_function("narrate", &EngineLuaBindings::narrate,
                                       this);
+    dialogueLua.luaState.set_function("wait", &EngineLuaBindings::wait, this);
+    dialogueLua.luaState.set_function("setNextTopic",
+                                      &EngineLuaBindings::setNextTopic, this);
     dialogueLua.luaState.set_function(
         "addItemPlayer", [&](std::string_view itemID, Uint8 count) {
             return addItem(itemID, count, dialogueLua.clientEntity,
@@ -133,14 +135,14 @@ void EngineLuaBindings::addDialogueBindings()
                               dialogueLua.clientID);
         });
     dialogueLua.luaState.set_function(
-        "getItemCountPlayer", [&](ItemID itemID) {
-            getItemCount(itemID, dialogueLua.clientEntity,
-                         dialogueLua.clientID);
+        "getItemCountPlayer", [&](std::string_view itemID) {
+            return getItemCount(itemID, dialogueLua.clientEntity,
+                                dialogueLua.clientID);
         });
     dialogueLua.luaState.set_function(
-        "getItemCountSelf", [&](ItemID itemID) {
-            getItemCount(itemID, dialogueLua.targetEntity,
-                         dialogueLua.clientID);
+        "getItemCountSelf", [&](std::string_view itemID) {
+            return getItemCount(itemID, dialogueLua.targetEntity,
+                                dialogueLua.clientID);
         });
     dialogueLua.luaState.set_function(
         "sendSystemMessage", [&](std::string_view message) {
@@ -151,20 +153,22 @@ void EngineLuaBindings::addDialogueBindings()
 void EngineLuaBindings::addDialogueChoiceConditionBindings()
 {
     dialogueChoiceConditionLua.luaState.set_function(
-        "getItemCountPlayer", [&](ItemID itemID) {
-            getItemCount(itemID, dialogueChoiceConditionLua.clientEntity,
-                         dialogueChoiceConditionLua.clientID);
+        "getItemCountPlayer", [&](std::string_view itemID) {
+            return getItemCount(itemID, dialogueChoiceConditionLua.clientEntity,
+                                dialogueChoiceConditionLua.clientID);
         });
     dialogueChoiceConditionLua.luaState.set_function(
-        "getItemCountSelf", [&](ItemID itemID) {
-            getItemCount(itemID, dialogueChoiceConditionLua.targetEntity,
-                         dialogueChoiceConditionLua.clientID);
+        "getItemCountSelf", [&](std::string_view itemID) {
+            return getItemCount(itemID, dialogueChoiceConditionLua.targetEntity,
+                                dialogueChoiceConditionLua.clientID);
         });
 }
 
 void EngineLuaBindings::addDialogueChoiceBindings()
 {
     dialogueChoiceLua->set_function("choice", &EngineLuaBindings::choice, this);
+    dialogueChoiceLua->set_function("choiceIf", &EngineLuaBindings::choiceIf,
+                                    this);
 }
 
 void EngineLuaBindings::addTalkInteraction()
@@ -283,12 +287,17 @@ void EngineLuaBindings::addCombination(std::string_view otherItemID,
 
 void EngineLuaBindings::say(std::string_view text)
 {
-    dialogueLua.dialogueEvents->emplace_back(std::string{text});
+    dialogueLua.dialogueEvents->emplace_back(SayEvent{std::string{text}});
+}
+
+void EngineLuaBindings::narrate(std::string_view text)
+{
+    dialogueLua.dialogueEvents->emplace_back(NarrateEvent{std::string{text}});
 }
 
 void EngineLuaBindings::wait(float timeS)
 {
-    dialogueLua.dialogueEvents->emplace_back(timeS);
+    dialogueLua.dialogueEvents->emplace_back(WaitEvent{timeS});
 }
 
 void EngineLuaBindings::setNextTopic(std::string_view topicName)
@@ -297,9 +306,16 @@ void EngineLuaBindings::setNextTopic(std::string_view topicName)
     dialogueLua.nextTopicName = topicName;
 }
 
-void EngineLuaBindings::choice(std::string_view conditionScript,
-                               std::string_view displayText,
+void EngineLuaBindings::choice(std::string_view displayText,
                                std::string_view actionScript)
+{
+    currentDialogueTopic->choices.emplace_back("", std::string{displayText},
+                                               std::string{actionScript});
+}
+
+void EngineLuaBindings::choiceIf(std::string_view conditionScript,
+                                 std::string_view displayText,
+                                 std::string_view actionScript)
 {
     currentDialogueTopic->choices.emplace_back(std::string{conditionScript},
                                                std::string{displayText},
@@ -329,19 +345,20 @@ bool EngineLuaBindings::removeItem(std::string_view itemID, Uint8 count,
                                         world, network, clientID);
 }
 
-std::size_t EngineLuaBindings::getItemCount(ItemID itemID,
+std::size_t EngineLuaBindings::getItemCount(std::string_view itemID,
                                             entt::entity entityToCount,
                                             NetworkID clientID)
 {
     // Try to return the count for the given item.
-    if (auto* inventory{world.registry.try_get<Inventory>(entityToCount)}) {
-        return inventory->getItemCount(itemID);
+    const Item* item{world.itemData.getItem(itemID)};
+    auto* inventory{world.registry.try_get<Inventory>(entityToCount)};
+    if (item && inventory) {
+        return inventory->getItemCount(item->numericID);
     }
     else {
         network.serializeAndSend(
-            clientID,
-            SystemMessage{
-                "Failed to get item count: inventory doesn't exist."});
+            clientID, SystemMessage{"Failed to get item count: invalid item ID "
+                                    "or inventory doesn't exist."});
     }
 
     return 0;

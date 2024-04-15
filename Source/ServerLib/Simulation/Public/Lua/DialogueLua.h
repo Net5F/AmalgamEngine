@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DialogueResponse.h"
+#include "DialogueEvent.h"
 #include "sol/sol.hpp"
 #include "entt/fwd.hpp"
 
@@ -30,7 +30,7 @@ struct DialogueLua {
     entt::entity targetEntity{};
 
     /** (Out) The dialogue events that should be sent to the client. */
-    std::vector<DialogueResponse::DialogueEvent>* dialogueEvents{};
+    std::vector<DialogueEvent>* dialogueEvents{};
 
     /** (Out) The topic specified by the latest setNextTopic().
         Will == "" if no setNextTopic() was called by the latest-ran script. */

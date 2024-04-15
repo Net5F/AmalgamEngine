@@ -24,6 +24,7 @@ target_sources(SharedLib
         Public/BoundingBox.h
         Public/BoundingBoxID.h
         Public/Cylinder.h
+        Public/DialogueEvent.h
         Public/DiscreteExtent.h
         Public/DiscreteImpl.h
         Public/DiscretePosition.h

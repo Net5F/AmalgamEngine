@@ -63,7 +63,7 @@ void DialogueSystem::processTalkInteraction(entt::entity clientEntity,
 
     // Run the topic script, following any setNextTopic() and pushing dialogue 
     // events into the response.
-    DialogueResponse dialogueResponse{clientEntity, 0};
+    DialogueResponse dialogueResponse{targetEntity, 0};
     dialogueLua.clientID = clientID;
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
@@ -226,8 +226,22 @@ const Dialogue::Topic* DialogueSystem::runTopic(const Dialogue& dialogue,
 const Dialogue* DialogueSystem::validateChoiceRequest(
     const DialogueChoiceRequest& choiceRequest, entt::entity clientEntity)
 {
-    const Dialogue* dialogue{
-        world.registry.try_get<Dialogue>(choiceRequest.entity)};
+    entt::registry& registry{world.registry};
+
+    // Check that the client is in range of the target.
+    const Position& clientPosition{registry.get<Position>(clientEntity)};
+    const Position& targetPosition{
+        registry.get<Position>(choiceRequest.entity)};
+    if (clientPosition.squaredDistanceTo(targetPosition)
+        > SharedConfig::SQUARED_INTERACTION_DISTANCE) {
+        network.serializeAndSend(
+            choiceRequest.netID,
+            SystemMessage{"You're too far away to continue talking."});
+        return nullptr;
+    }
+
+    // Check that the dialogue is valid.
+    const Dialogue* dialogue{registry.try_get<Dialogue>(choiceRequest.entity)};
     if (!dialogue) {
         // This can happen if the init script has an addTalkInteraction() 
         // but doesn't have any topic() declarations.
@@ -241,19 +255,20 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
              || (choiceRequest.choiceIndex
                  >= dialogue->topics[choiceRequest.topicIndex]
                         .choices.size())) {
-        // This can happen if the entity is re-initialized while talking 
-        // to it.
+        // This can happen if the entity is re-initialized while a client is 
+        // talking to it, and some topics or choices are removed.
         network.serializeAndSend(
             choiceRequest.netID,
             SystemMessage{"Invalid dialogue request."});
         return nullptr;
     }
 
-    // Check if the client entity can access the requested choice.
+    // Check that the client entity can access the requested choice.
     const Dialogue::Topic& topic{dialogue->topics[choiceRequest.topicIndex]};
     const Dialogue::Choice& choice{topic.choices[choiceRequest.choiceIndex]};
-    if (!runChoiceCondition(choice, clientEntity, choiceRequest.entity,
-                            choiceRequest.netID, true)) {
+    if (!(choice.conditionScript.empty())
+        && !runChoiceCondition(choice, clientEntity, choiceRequest.entity,
+                               choiceRequest.netID, true)) {
         return nullptr;
     }
 
@@ -298,11 +313,11 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
         network.serializeAndSend(
             clientID,
             SystemMessage{
-                "Client entity does not have access to selected choice."});
+                "Player entity does not have access to selected choice."});
         return false;
     }
 
-    return true;
+    return conditionResult.get<bool>();
 }
 
 void DialogueSystem::addChoicesToResponse(
@@ -312,8 +327,9 @@ void DialogueSystem::addChoicesToResponse(
     Uint8 index{0};
     for (const Dialogue::Choice& choice : choices) {
         // If the client entity can access this choice, add it to the response.
-        if (runChoiceCondition(choice, clientEntity, targetEntity, clientID,
-                               false)) {
+        if (choice.conditionScript.empty()
+            || runChoiceCondition(choice, clientEntity, targetEntity, clientID,
+                                  false)) {
             response.choices.emplace_back(index, choice.displayText);
         }
 
