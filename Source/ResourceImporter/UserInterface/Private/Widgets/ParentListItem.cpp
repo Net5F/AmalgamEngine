@@ -26,11 +26,6 @@ ParentListItem::ParentListItem(const std::string& inHeaderText,
         childListItemContainer.headerText.getLogicalExtent()};
     childListItemContainer.setClickRegionLogicalExtent(
         {0, 0, textLogicalExtent.x, textLogicalExtent.h});
-
-    // If our child container expands or collapses, adjust our height to match.
-    childListItemContainer.setOnHeightChanged([this]() {
-        logicalExtent.h = childListItemContainer.getLogicalExtent().h;
-    });
 }
 
 AUI::EventResult ParentListItem::onMouseDown(AUI::MouseButtonType buttonType,
@@ -96,6 +91,19 @@ void ParentListItem::onMouseLeave()
     if (isHovered) {
         setIsHovered(false);
     }
+}
+
+void ParentListItem::measure(const SDL_Rect& availableExtent)
+{
+    // If our child container expands or collapses, adjust our height to match.
+    // Note: CollapsibleContainer doesn't actually use availableExtent, so we 
+    //       don't bother passing it an infinite height.
+    childListItemContainer.measure(availableExtent);
+
+    logicalExtent.h = childListItemContainer.getLogicalExtent().h;
+
+    // Run the normal measure step (measures our children).
+    Widget::measure(availableExtent);
 }
 
 } // End namespace ResourceImporter

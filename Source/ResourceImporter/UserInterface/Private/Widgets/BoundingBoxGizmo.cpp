@@ -79,12 +79,12 @@ void BoundingBoxGizmo::setOnBoundingBoxUpdated(
     onBoundingBoxUpdated = std::move(inOnBoundingBoxUpdated);
 }
 
-void BoundingBoxGizmo::updateLayout(const SDL_Point& startPosition,
-                                    const SDL_Rect& availableExtent,
-                                    AUI::WidgetLocator* widgetLocator)
+void BoundingBoxGizmo::arrange(const SDL_Point& startPosition,
+                               const SDL_Rect& availableExtent,
+                               AUI::WidgetLocator* widgetLocator)
 {
-    // Do the normal layout updating.
-    Widget::updateLayout(startPosition, availableExtent, widgetLocator);
+    // Run the normal arrange step.
+    Widget::arrange(startPosition, availableExtent, widgetLocator);
 
     // If this widget is fully clipped, return early.
     if (SDL_RectEmpty(&clippedExtent)) {

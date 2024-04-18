@@ -32,9 +32,9 @@ public:
     //-------------------------------------------------------------------------
     // Base class overrides
     //-------------------------------------------------------------------------
-    void updateLayout(const SDL_Point& startPosition,
-                      const SDL_Rect& availableExtent,
-                      AUI::WidgetLocator* widgetLocator) override;
+    void arrange(const SDL_Point& startPosition,
+                 const SDL_Rect& availableExtent,
+                 AUI::WidgetLocator* widgetLocator) override;
 
     void render(const SDL_Point& windowTopLeft) override;
 

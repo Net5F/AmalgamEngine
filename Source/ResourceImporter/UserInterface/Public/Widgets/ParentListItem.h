@@ -38,6 +38,8 @@ public:
 
     void onMouseLeave() override;
 
+    void measure(const SDL_Rect& availableExtent) override;
+
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------

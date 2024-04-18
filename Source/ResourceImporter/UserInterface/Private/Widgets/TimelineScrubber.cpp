@@ -23,19 +23,19 @@ void TimelineScrubber::setOnDragged(
     onDragged = std::move(inOnDragged);
 }
 
-void TimelineScrubber::updateLayout(const SDL_Point& startPosition,
-                                    const SDL_Rect& availableExtent,
-                                    AUI::WidgetLocator* widgetLocator)
+void TimelineScrubber::arrange(const SDL_Point& startPosition,
+                               const SDL_Rect& availableExtent,
+                               AUI::WidgetLocator* widgetLocator)
 {
-    // Do the normal layout updating.
-    Widget::updateLayout(startPosition, availableExtent, widgetLocator);
+    // Run the normal arrange step.
+    Widget::arrange(startPosition, availableExtent, widgetLocator);
 
     // If this widget is fully clipped, return early.
     if (SDL_RectEmpty(&clippedExtent)) {
         return;
     }
 
-    // Note: You could imagine creating widgets to wrap these graphics so 
+    // Note: One could imagine creating widgets to wrap these graphics so 
     //       they could be automatically managed by the layout system.
     //       It seems very heavyweight to add them to the widget tree just 
     //       for layout/rendering though, so we handle this manually.
