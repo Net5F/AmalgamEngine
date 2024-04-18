@@ -95,15 +95,12 @@ void ParentListItem::onMouseLeave()
 
 void ParentListItem::measure(const SDL_Rect& availableExtent)
 {
-    // If our child container expands or collapses, adjust our height to match.
-    // Note: CollapsibleContainer doesn't actually use availableExtent, so we 
-    //       don't bother passing it an infinite height.
-    childListItemContainer.measure(availableExtent);
-
-    logicalExtent.h = childListItemContainer.getLogicalExtent().h;
-
     // Run the normal measure step (measures our children).
     Widget::measure(availableExtent);
+
+    // Since our child container might expand or collapse, adjust our height to 
+    // match.
+    logicalExtent.h = childListItemContainer.getLogicalExtent().h;
 }
 
 } // End namespace ResourceImporter
