@@ -92,6 +92,7 @@ void BoundingBoxGizmo::arrange(const SDL_Point& startPosition,
     }
 
     // If the UI scaling has changed, refresh everything.
+    // Note: This has to be done after arranging, since it uses clippedExtent.
     if (lastUsedScreenSize != AUI::Core::getActualScreenSize()) {
         refreshScaling();
         lastUsedScreenSize = AUI::Core::getActualScreenSize();

@@ -95,7 +95,8 @@ void ParentListItem::onMouseLeave()
 
 void ParentListItem::measure(const SDL_Rect& availableExtent)
 {
-    // Run the normal measure step (measures our children).
+    // Run the normal measure step (measures our children and sets our 
+    // scaledExtent).
     Widget::measure(availableExtent);
 
     // Since our child container might expand or collapse, adjust our height to 
