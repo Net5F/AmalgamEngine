@@ -7,13 +7,14 @@ target_sources(ServerLib
         Private/SDLNetInitializer.cpp
     PUBLIC
         Public/Client.h
+        Public/ClientMap.h
+        Public/ClientConnectionEvent.h
         Public/ClientHandler.h
         Public/IMessageProcessorExtension.h
         Public/MessageProcessor.h
         Public/MessageProcessorExDependencies.h
         Public/Network.h
         Public/SDLNetInitializer.h
-        Public/ServerNetworkDefs.h
 )
 
 target_include_directories(ServerLib

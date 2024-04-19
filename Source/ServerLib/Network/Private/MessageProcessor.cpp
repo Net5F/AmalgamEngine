@@ -3,7 +3,6 @@
 #include "Deserialize.h"
 #include "DispatchMessage.h"
 #include "IMessageProcessorExtension.h"
-#include "ServerNetworkDefs.h"
 #include "Heartbeat.h"
 #include "InputChangeRequest.h"
 #include "EntityNameChangeRequest.h"

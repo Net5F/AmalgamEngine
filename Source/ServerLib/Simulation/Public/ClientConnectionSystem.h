@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NetworkDefs.h"
-#include "ServerNetworkDefs.h"
+#include "ClientConnectionEvent.h"
 #include "QueuedEvents.h"
 #include "entt/fwd.hpp"
 
@@ -34,12 +34,12 @@ private:
     /**
      * Processes all newly connected clients, adding them to the sim.
      */
-    void processConnectEvents();
+    void processConnectEvent(const ClientConnected& clientConnected);
 
     /**
      * Processes all newly disconnected clients, removing them from the sim.
      */
-    void processDisconnectEvents();
+    void processDisconnectEvent(const ClientDisconnected& clientDisconnected);
 
     /**
      * Sends a connection response to the client with the given networkID.
@@ -61,8 +61,7 @@ private:
         entities. */
     GraphicData& graphicData;
 
-    EventQueue<ClientConnected> clientConnectedQueue;
-    EventQueue<ClientDisconnected> clientDisconnectedQueue;
+    EventQueue<ClientConnectionEvent> clientConnectionEventQueue;
 };
 
 } // End namespace Server

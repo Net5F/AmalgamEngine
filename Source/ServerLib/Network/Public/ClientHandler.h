@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ServerNetworkDefs.h"
+#include "ClientMap.h"
 #include "Client.h"
 #include "Acceptor.h"
 #include "IDPool.h"

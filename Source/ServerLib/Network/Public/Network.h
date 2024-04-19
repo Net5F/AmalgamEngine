@@ -2,7 +2,7 @@
 
 #include "SharedConfig.h"
 #include "NetworkDefs.h"
-#include "ServerNetworkDefs.h"
+#include "ClientMap.h"
 #include "MessageProcessor.h"
 #include "ClientHandler.h"
 #include "Serialize.h"

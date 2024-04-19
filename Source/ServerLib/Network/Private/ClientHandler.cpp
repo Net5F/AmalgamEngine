@@ -2,6 +2,7 @@
 #include "Network.h"
 #include "NetworkDefs.h"
 #include "SocketSet.h"
+#include "ClientConnectionEvent.h"
 #include "Config.h"
 #include "Log.h"
 #include <shared_mutex>
@@ -150,7 +151,7 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
         clientCount++;
 
         // Notify the sim that a client was connected.
-        dispatcher.emplace<ClientConnected>(newID);
+        dispatcher.emplace<ClientConnectionEvent>(ClientConnected{newID});
 
         newPeer = acceptor.accept();
     }
@@ -181,7 +182,8 @@ void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
 
             // Notify the sim that a client was disconnected.
             LOG_INFO("Erased disconnected client with netID: %u.", clientID);
-            dispatcher.emplace<ClientDisconnected>(clientID);
+            dispatcher.emplace<ClientConnectionEvent>(
+                ClientDisconnected{clientID});
         }
         else {
             ++it;
