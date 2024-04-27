@@ -64,6 +64,8 @@ void DialogueSystem::processTalkInteraction(entt::entity clientEntity,
     // Run the topic script, following any setNextTopic() and pushing dialogue 
     // events into the response.
     DialogueResponse dialogueResponse{targetEntity, 0};
+    dialogueLua.luaState["user"] = clientEntity;
+    dialogueLua.luaState["self"] = targetEntity;
     dialogueLua.clientID = clientID;
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
@@ -89,8 +91,8 @@ void DialogueSystem::processTalkInteraction(entt::entity clientEntity,
 void DialogueSystem::processDialogueChoice(
     const DialogueChoiceRequest& choiceRequest)
 {
-    auto clientEntityIt{world.netIdMap.find(choiceRequest.netID)};
-    if (clientEntityIt == world.netIdMap.end()) {
+    auto clientEntityIt{world.netIDMap.find(choiceRequest.netID)};
+    if (clientEntityIt == world.netIDMap.end()) {
         // Client doesn't exist (may have disconnected), do nothing.
         return;
     }
@@ -111,7 +113,9 @@ void DialogueSystem::processDialogueChoice(
         choiceTopic.choices[choiceRequest.choiceIndex]};
 
     // Run the choice's action script, pushing dialogue events into the response.
-    DialogueResponse dialogueResponse{choiceRequest.entity, 0};
+    DialogueResponse dialogueResponse{choiceRequest.targetEntity, 0};
+    dialogueLua.luaState["user"] = clientEntity;
+    dialogueLua.luaState["self"] = choiceRequest.targetEntity;
     dialogueLua.clientID = choiceRequest.netID;
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
@@ -132,7 +136,7 @@ void DialogueSystem::processDialogueChoice(
     // If any topics were ran, add the last topic's choices to the response.
     if (lastTopic) {
         addChoicesToResponse(lastTopic->choices, clientEntity,
-                             choiceRequest.entity, choiceRequest.netID,
+                             choiceRequest.targetEntity, choiceRequest.netID,
                              dialogueResponse);
     }
 
@@ -190,11 +194,12 @@ const Dialogue::Topic* DialogueSystem::runTopic(const Dialogue& dialogue,
 {
     // Run the topic script, pushing dialogue events into the response.
     dialogueLua.nextTopicName = "";
-    auto scriptResult{dialogueLua.luaState.script(
-        topic.topicScript, &sol::script_pass_on_error)};
+    auto scriptResult{dialogueLua.luaState.script(topic.topicScript,
+                                                  &sol::script_pass_on_error)};
 
     if (!(scriptResult.valid())) {
         sol::error err = scriptResult;
+        workString.clear();
         workString.append("Error in topic script. Topic: \"");
         workString.append(topic.name);
         workString.append("\", error: ");
@@ -231,7 +236,7 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
     // Check that the client is in range of the target.
     const Position& clientPosition{registry.get<Position>(clientEntity)};
     const Position& targetPosition{
-        registry.get<Position>(choiceRequest.entity)};
+        registry.get<Position>(choiceRequest.targetEntity)};
     if (clientPosition.squaredDistanceTo(targetPosition)
         > SharedConfig::SQUARED_INTERACTION_DISTANCE) {
         network.serializeAndSend(
@@ -241,7 +246,8 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
     }
 
     // Check that the dialogue is valid.
-    const Dialogue* dialogue{registry.try_get<Dialogue>(choiceRequest.entity)};
+    const Dialogue* dialogue{
+        registry.try_get<Dialogue>(choiceRequest.targetEntity)};
     if (!dialogue) {
         // This can happen if the init script has an addTalkInteraction() 
         // but doesn't have any topic() declarations.
@@ -267,7 +273,7 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
     const Dialogue::Topic& topic{dialogue->topics[choiceRequest.topicIndex]};
     const Dialogue::Choice& choice{topic.choices[choiceRequest.choiceIndex]};
     if (!(choice.conditionScript.empty())
-        && !runChoiceCondition(choice, clientEntity, choiceRequest.entity,
+        && !runChoiceCondition(choice, clientEntity, choiceRequest.targetEntity,
                                choiceRequest.netID, true)) {
         return nullptr;
     }
@@ -279,7 +285,7 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
                                         entt::entity clientEntity,
                                         entt::entity targetEntity,
                                         NetworkID clientID,
-                                        bool sendErrorMessage)
+                                        bool sendAccessErrorMessage)
 {
     // Append "r=" to the script so the result gets saved to a variable.
     workString.clear();
@@ -287,10 +293,11 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
     workString.append(choice.conditionScript);
 
     // Run the condition script.
-    dialogueChoiceConditionLua.clientEntity = clientEntity;
-    dialogueChoiceConditionLua.targetEntity = targetEntity;
+    dialogueChoiceConditionLua.luaState["user"] = clientEntity;
+    dialogueChoiceConditionLua.luaState["self"] = targetEntity;
     auto scriptResult{dialogueChoiceConditionLua.luaState.script(
         workString, &sol::script_pass_on_error)};
+
     if (!(scriptResult.valid())) {
         sol::error err = scriptResult;
         workString.clear();
@@ -302,18 +309,21 @@ bool DialogueSystem::runChoiceCondition(const Dialogue::Choice& choice,
 
     // Validate the result.
     const auto& conditionResult{dialogueChoiceConditionLua.luaState["r"]};
-    if (sendErrorMessage && !(conditionResult.is<bool>())) {
+    if (!(conditionResult.is<bool>())) {
+        // We always send this error, since it's a malformed script.
         network.serializeAndSend(
-            clientID,
-            SystemMessage{
-                "Choice condition script did not evaluate to bool type."});
+            clientID, SystemMessage{"Error: Choice condition script did not "
+                                    "evaluate to bool type."});
         return false;
     }
-    else if (sendErrorMessage && !(conditionResult.get<bool>())) {
-        network.serializeAndSend(
-            clientID,
-            SystemMessage{
-                "Player entity does not have access to selected choice."});
+    else if (!(conditionResult.get<bool>())) {
+        // We only send this error when appropriate (when the player somehow 
+        // selects a choice that shouldn't have been sent to them).
+        if (sendAccessErrorMessage) {
+            network.serializeAndSend(
+                clientID, SystemMessage{"Error: Player entity does not have "
+                                        "access to selected choice."});
+        }
         return false;
     }
 

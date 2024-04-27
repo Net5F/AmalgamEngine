@@ -65,10 +65,10 @@ void InputSystem::processInputMessages()
         }
 
         // Find the entity associated with the given NetID.
-        auto clientEntityIt{world.netIdMap.find(inputChangeRequest.netID)};
+        auto clientEntityIt{world.netIDMap.find(inputChangeRequest.netID)};
 
         // Update the client entity's inputs.
-        if (clientEntityIt != world.netIdMap.end()) {
+        if (clientEntityIt != world.netIDMap.end()) {
             // Update the entity's Input component.
             entt::entity clientEntity{clientEntityIt->second};
             world.registry.replace<Input>(clientEntity,
@@ -89,8 +89,8 @@ void InputSystem::processInputMessages()
 void InputSystem::handleDroppedMessage(NetworkID clientID)
 {
     // Find the entity ID of the client that we dropped a message from.
-    auto clientEntityIt{world.netIdMap.find(clientID)};
-    if (clientEntityIt == world.netIdMap.end()) {
+    auto clientEntityIt{world.netIDMap.find(clientID)};
+    if (clientEntityIt == world.netIDMap.end()) {
         // The entity is gone, we don't need to process this drop.
         return;
     }

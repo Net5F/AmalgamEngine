@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Icon.h"
+#include "nlohmann/json_fwd.hpp"
 #include <vector>
 #include <unordered_map>
-#include "nlohmann/json_fwd.hpp"
+#include <string>
 
 namespace AM
 {
@@ -32,7 +33,7 @@ public:
      * Returns the icon with the given string ID.
      * Errors if the given ID doesn't exist.
      */
-    const Icon& getIcon(const std::string& stringID) const;
+    const Icon& getIcon(const std::string& stringID);
 
     /**
      * Returns the icon with the given numeric ID.
@@ -69,6 +70,9 @@ private:
 
     /** A map for easily looking up icons by their string ID. */
     std::unordered_map<std::string, const Icon*> iconStringMap;
+
+    /** A scratch buffer used while processing string IDs. */
+    std::string workStringID;
 };
 
 } // End namespace AM

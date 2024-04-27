@@ -17,17 +17,15 @@ namespace Server
  */
 struct DialogueLua {
     /** Lua environment for dialogue topic and choice action script 
-        processing. */
+        processing.
+        Global variables:
+          "user": The ID of the entity that is controlling the dialogue.
+          "self": The ID of the entity that is delivering the dialogue.
+          "GLOBAL": A constant used to identify the global value store. */
     sol::state luaState{};
 
     /** The network ID of the client that is controlling the dialogue. */
     NetworkID clientID{0};
-
-    /** The client entity that is controlling the dialogue. */
-    entt::entity clientEntity{};
-
-    /** The entity that is being talked to. */
-    entt::entity targetEntity{};
 
     /** (Out) The dialogue events that should be sent to the client. */
     std::vector<DialogueEvent>* dialogueEvents{};

@@ -1,5 +1,4 @@
 #include "ByteTools.h"
-#include "Peer.h"
 #include "Log.h"
 #include "AMAssert.h"
 #include <SDL_endian.h>

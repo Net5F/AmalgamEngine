@@ -83,7 +83,7 @@ void ClientConnectionSystem::processConnectEvent(
     world.addGraphicsComponents(newEntity, graphicState);
 
     // Add the new client entity to the network ID map.
-    world.netIdMap[clientConnected.clientID] = newEntity;
+    world.netIDMap[clientConnected.clientID] = newEntity;
 
     LOG_INFO("Constructed client entity with netID: %u, entityID: %u",
              clientConnected.clientID, newEntity);
@@ -97,8 +97,8 @@ void ClientConnectionSystem::processDisconnectEvent(
 {
     // Find the disconnected client's associated entity.
     auto disconnectedEntityIt{
-        world.netIdMap.find(clientDisconnected.clientID)};
-    if (disconnectedEntityIt != world.netIdMap.end()) {
+        world.netIDMap.find(clientDisconnected.clientID)};
+    if (disconnectedEntityIt != world.netIDMap.end()) {
         // Found the entity. Remove it from the entity locator.
         // Note: Since the entity was removed from the locator, its peers
         //       will be told by ClientAOISystem to delete it.
@@ -107,7 +107,7 @@ void ClientConnectionSystem::processDisconnectEvent(
 
         // Remove it from the registry and network ID map.
         world.registry.destroy(disconnectedEntity);
-        world.netIdMap.erase(disconnectedEntityIt);
+        world.netIDMap.erase(disconnectedEntityIt);
 
         LOG_INFO("Removed entity with entityID: %u", disconnectedEntity);
     }

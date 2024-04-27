@@ -35,7 +35,7 @@ target_link_libraries(ResourceImporter
 )
 
 # Compile with C++20.
-target_compile_features(ResourceImporter PRIVATE cxx_std_20)
+target_compile_features(ResourceImporter PRIVATE cxx_std_23)
 set_target_properties(ResourceImporter PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable compile warnings.

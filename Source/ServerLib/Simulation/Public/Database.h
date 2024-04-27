@@ -97,6 +97,7 @@ public:
                      static_cast<const Uint8*>(dataColumn.getBlob()),
                      dataColumn.getBytes());
         }
+        iterateEntitiesQuery->reset();
     }
 
     //-------------------------------------------------------------------------
@@ -136,6 +137,64 @@ public:
                      static_cast<const Uint8*>(dataColumn.getBlob()),
                      dataColumn.getBytes());
         }
+        iterateItemsQuery->reset();
+    }
+
+    //-------------------------------------------------------------------------
+    // Stored Values
+    //-------------------------------------------------------------------------
+    /**
+     * Adds or overwrites the entity stored value ID map entry.
+     *
+     * @param entityStoredValueIDMapBuffer A serialized 
+     *                                     World::entityStoredValueIDMap.
+     * @param dataSize The size of entityStoredValueIDDataBuffer.
+     */
+    void saveEntityStoredValueIDMap(Uint8* entityStoredValueIDMapBuffer,
+                                    std::size_t dataSize);
+
+    /**
+     * Calls the given callback on the entity stored value ID map data entry.
+     *
+     * @param callback A callback of form void(const Uint8*, std::size_t) that 
+     *                 expects a serialized entity stored value ID map.
+     */
+    template<typename Func>
+    void getEntityStoredValueIDMap(Func callback)
+    {
+        getEntityStoredValueIDMapQuery->executeStep();
+        SQLite::Column dataColumn{getEntityStoredValueIDMapQuery->getColumn(0)};
+        callback(static_cast<const Uint8*>(dataColumn.getBlob()),
+                 dataColumn.getBytes());
+
+        getEntityStoredValueIDMapQuery->reset();
+    }
+
+    /**
+     * Adds or overwrites the entity stored value ID map entry.
+     *
+     * @param globalStoredValueMapBuffer A serialized 
+     *                                   World::globalStoredValueMap.
+     * @param dataSize The size of globalStoredValueMapBuffer.
+     */
+    void saveGlobalStoredValueMap(Uint8* globalStoredValueMapBuffer,
+                                  std::size_t dataSize);
+
+    /**
+     * Calls the given callback on the entity stored value ID map data entry.
+     *
+     * @param callback A callback of form void(const Uint8*, std::size_t) that 
+     *                 expects a serialized entity stored value ID map.
+     */
+    template<typename Func>
+    void getGlobalStoredValueMap(Func callback)
+    {
+        getGlobalStoredValueMapQuery->executeStep();
+        SQLite::Column dataColumn{getGlobalStoredValueMapQuery->getColumn(0)};
+        callback(static_cast<const Uint8*>(dataColumn.getBlob()),
+                 dataColumn.getBytes());
+
+        getGlobalStoredValueMapQuery->reset();
     }
 
 protected:
@@ -184,6 +243,10 @@ protected:
     std::unique_ptr<SQLite::Statement> insertItemQuery;
     std::unique_ptr<SQLite::Statement> deleteItemQuery;
     std::unique_ptr<SQLite::Statement> iterateItemsQuery;
+    std::unique_ptr<SQLite::Statement> insertEntityStoredValueIDMapQuery;
+    std::unique_ptr<SQLite::Statement> getEntityStoredValueIDMapQuery;
+    std::unique_ptr<SQLite::Statement> insertGlobalStoredValueMapQuery;
+    std::unique_ptr<SQLite::Statement> getGlobalStoredValueMapQuery;
 };
 
 } // namespace Server

@@ -1,4 +1,5 @@
 #include "GraphicDataBase.h"
+#include "StringTools.h"
 #include "Paths.h"
 #include "Log.h"
 #include "AMAssert.h"
@@ -18,17 +19,22 @@ GraphicDataBase::GraphicDataBase(const nlohmann::json& resourceDataJson)
 , floorCoveringGraphicSetStringMap{}
 , wallGraphicSetStringMap{}
 , objectGraphicSetStringMap{}
+, workStringID{}
 {
     // Parse the json structure to construct our sprites and animations.
     parseJson(resourceDataJson);
 }
 
-const Sprite& GraphicDataBase::getSprite(const std::string& stringID) const
+const Sprite& GraphicDataBase::getSprite(const std::string& stringID)
 {
-    // Attempt to find the given string ID.
-    auto it{spriteStringMap.find(stringID)};
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stringID, workStringID);
+
+    // Attempt to find the string ID.
+    auto it{spriteStringMap.find(workStringID)};
     if (it == spriteStringMap.end()) {
-        LOG_ERROR("Failed to find sprite with string ID: %s", stringID.c_str());
+        LOG_ERROR("Failed to find sprite with string ID: %s",
+                  workStringID.c_str());
         return sprites[0];
     }
 
@@ -45,12 +51,16 @@ const Sprite& GraphicDataBase::getSprite(SpriteID numericID) const
     return sprites[numericID];
 }
 
-const Animation& GraphicDataBase::getAnimation(const std::string& stringID) const
+const Animation& GraphicDataBase::getAnimation(const std::string& stringID)
 {
-    // Attempt to find the given string ID.
-    auto it{animationStringMap.find(stringID)};
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stringID, workStringID);
+
+    // Attempt to find the string ID.
+    auto it{animationStringMap.find(workStringID)};
     if (it == animationStringMap.end()) {
-        LOG_ERROR("Failed to find animation with string ID: %s", stringID.c_str());
+        LOG_ERROR("Failed to find animation with string ID: %s",
+                  workStringID.c_str());
         return animations[0];
     }
 
@@ -80,12 +90,15 @@ GraphicRef GraphicDataBase::getGraphic(GraphicID numericID) const
 }
 
 const FloorGraphicSet&
-    GraphicDataBase::getFloorGraphicSet(const std::string& stringID) const
+    GraphicDataBase::getFloorGraphicSet(const std::string& stringID)
 {
-    auto it{floorGraphicSetStringMap.find(stringID)};
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stringID, workStringID);
+
+    auto it{floorGraphicSetStringMap.find(workStringID)};
     if (it == floorGraphicSetStringMap.end()) {
         LOG_ERROR("Failed to find graphic set with string ID: %s",
-                  stringID.c_str());
+                  workStringID.c_str());
         return floorGraphicSets[0];
     }
 
@@ -93,12 +106,13 @@ const FloorGraphicSet&
 }
 
 const FloorCoveringGraphicSet&
-    GraphicDataBase::getFloorCoveringGraphicSet(const std::string& stringID) const
+    GraphicDataBase::getFloorCoveringGraphicSet(const std::string& stringID)
 {
-    auto it{floorCoveringGraphicSetStringMap.find(stringID)};
+    StringTools::deriveStringID(stringID, workStringID);
+    auto it{floorCoveringGraphicSetStringMap.find(workStringID)};
     if (it == floorCoveringGraphicSetStringMap.end()) {
         LOG_ERROR("Failed to find graphic set with string ID: %s",
-                  stringID.c_str());
+                  workStringID.c_str());
         return floorCoveringGraphicSets[0];
     }
 
@@ -106,12 +120,13 @@ const FloorCoveringGraphicSet&
 }
 
 const WallGraphicSet&
-    GraphicDataBase::getWallGraphicSet(const std::string& stringID) const
+    GraphicDataBase::getWallGraphicSet(const std::string& stringID)
 {
-    auto it{wallGraphicSetStringMap.find(stringID)};
+    StringTools::deriveStringID(stringID, workStringID);
+    auto it{wallGraphicSetStringMap.find(workStringID)};
     if (it == wallGraphicSetStringMap.end()) {
         LOG_ERROR("Failed to find graphic set with string ID: %s",
-                  stringID.c_str());
+                  workStringID.c_str());
         return wallGraphicSets[0];
     }
 
@@ -119,12 +134,13 @@ const WallGraphicSet&
 }
 
 const ObjectGraphicSet&
-    GraphicDataBase::getObjectGraphicSet(const std::string& stringID) const
+    GraphicDataBase::getObjectGraphicSet(const std::string& stringID)
 {
-    auto it{objectGraphicSetStringMap.find(stringID)};
+    StringTools::deriveStringID(stringID, workStringID);
+    auto it{objectGraphicSetStringMap.find(workStringID)};
     if (it == objectGraphicSetStringMap.end()) {
         LOG_ERROR("Failed to find graphic set with string ID: %s",
-                  stringID.c_str());
+                  workStringID.c_str());
         return objectGraphicSets[0];
     }
 
@@ -132,12 +148,13 @@ const ObjectGraphicSet&
 }
 
 const EntityGraphicSet&
-    GraphicDataBase::getEntityGraphicSet(const std::string& stringID) const
+    GraphicDataBase::getEntityGraphicSet(const std::string& stringID)
 {
-    auto it{entityGraphicSetStringMap.find(stringID)};
+    StringTools::deriveStringID(stringID, workStringID);
+    auto it{entityGraphicSetStringMap.find(workStringID)};
     if (it == entityGraphicSetStringMap.end()) {
         LOG_ERROR("Failed to find graphic set with string ID: %s",
-                  stringID.c_str());
+                  workStringID.c_str());
         return entityGraphicSets[0];
     }
 

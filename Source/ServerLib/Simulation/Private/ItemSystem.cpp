@@ -11,6 +11,7 @@
 #include "ItemUpdate.h"
 #include "ItemError.h"
 #include "CombineItems.h"
+#include "StringTools.h"
 #include "SystemMessage.h"
 #include "Log.h"
 #include "sol/sol.hpp"
@@ -137,8 +138,8 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
                               NetworkID clientID)
 {
     // Find the client's entity ID.
-    auto it{world.netIdMap.find(clientID)};
-    if (it != world.netIdMap.end()) {
+    auto it{world.netIDMap.find(clientID)};
+    if (it != world.netIDMap.end()) {
         entt::entity clientEntity{it->second};
 
         // If the combination is successful, tell the client.
@@ -169,8 +170,8 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
                                  entt::entity targetEntity, NetworkID clientID)
 {
     // Find the client's entity ID.
-    auto it{world.netIdMap.find(clientID)};
-    if (it != world.netIdMap.end()) {
+    auto it{world.netIDMap.find(clientID)};
+    if (it != world.netIDMap.end()) {
         entt::entity clientEntity{it->second};
 
         // If the slot is invalid or empty, do nothing.
@@ -209,9 +210,9 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
 void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 {
     // If the string ID is already in use, send an error.
-    std::string stringID{
-        ItemDataBase::deriveStringID(itemInitRequest.displayName)};
-    if (world.itemData.getItem(stringID)) {
+    if (world.itemData.getItem(itemInitRequest.displayName)) {
+        std::string stringID{};
+        StringTools::deriveStringID(itemInitRequest.displayName, stringID);
         network.serializeAndSend(itemInitRequest.netID,
                                  ItemError{itemInitRequest.displayName,
                                            stringID, NULL_ITEM_ID,
@@ -246,20 +247,21 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
 {
     // Check that the numeric ID exists.
-    std::string stringID{
-        ItemDataBase::deriveStringID(itemChangeRequest.displayName)};
     ItemError::Type errorType{ItemError::NotSet};
     if (!(world.itemData.getItem(itemChangeRequest.itemID))) {
         errorType = ItemError::NumericIDNotFound;
     }
     // Check that the string ID isn't taken by another item.
-    else if (const Item* item{world.itemData.getItem(stringID)};
+    else if (const Item*
+                 item{world.itemData.getItem(itemChangeRequest.displayName)};
              item && (item->numericID != itemChangeRequest.itemID)) {
         errorType = ItemError::StringIDInUse;
     }
 
     // If we found an error, send it to the requesting client.
     if (errorType != ItemError::NotSet) {
+        std::string stringID{};
+        StringTools::deriveStringID(itemChangeRequest.displayName, stringID);
         network.serializeAndSend(itemChangeRequest.netID,
                                  ItemError{itemChangeRequest.displayName,
                                            stringID, itemChangeRequest.itemID,
@@ -359,8 +361,8 @@ void ItemSystem::runEntityItemHandlerScript(
 {
     // Run the given handler script.
     entityItemHandlerLua.clientID = clientID;
-    entityItemHandlerLua.clientEntity = clientEntity;
-    entityItemHandlerLua.targetEntity = targetEntity;
+    entityItemHandlerLua.luaState["user"] = clientEntity;
+    entityItemHandlerLua.luaState["self"] = targetEntity;
     auto result{entityItemHandlerLua.luaState.script(
         itemHandlerScript.script, &sol::script_pass_on_error)};
 

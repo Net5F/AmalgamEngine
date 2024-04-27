@@ -1,5 +1,6 @@
 #include "IconModel.h"
 #include "DataModel.h"
+#include "StringTools.h"
 #include "nlohmann/json.hpp"
 #include <SDL_render.h>
 #include <SDL_image.h>
@@ -71,8 +72,9 @@ void IconModel::save(nlohmann::json& json)
             json["iconSheets"][i]["icons"][j]["displayName"] = icon.displayName;
 
             // Derive the string ID from the display name and add it.
-            json["iconSheets"][i]["icons"][j]["stringID"]
-                = DataModel::deriveStringID(icon.displayName);
+            std::string stringID{};
+            StringTools::deriveStringID(icon.displayName, stringID);
+            json["iconSheets"][i]["icons"][j]["stringID"] = stringID;
 
             // Add the numeric ID.
             json["iconSheets"][i]["icons"][j]["numericID"] = iconID++;

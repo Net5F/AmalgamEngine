@@ -94,13 +94,13 @@ private:
     /**
      * Runs the given choice's condition script.
      * @return true if the script ran successfully and evaluated to true, else 
-     *         false. If false and sendErrorMessage == true, sends an 
-     *         appropriate error message.
+     *         false. If the script evaluated to false and sendAccessErrorMessage
+     *         == true, sends an appropriate error message.
      */
     bool runChoiceCondition(const Dialogue::Choice& choice,
                             entt::entity clientEntity,
                             entt::entity targetEntity, NetworkID clientID,
-                            bool sendErrorMessage);
+                            bool sendAccessErrorMessage);
 
     /**
      * Iterates the given choices, checking their conditions against clientEntity

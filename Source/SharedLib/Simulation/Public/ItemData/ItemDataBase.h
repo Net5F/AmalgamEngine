@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Item.h"
-#include "IDPool.h"
 #include "HashTools.h"
 #include "entt/signal/sigh.hpp"
 #include <SDL_stdinc.h>
@@ -68,7 +67,7 @@ public:
      * Note: The null item doesn't technically exist, but we return a useful
      *       default for it.
      */
-    const Item* getItem(std::string_view stringID) const;
+    const Item* getItem(std::string_view stringID);
 
     /**
      * @return If no item with the given ID exists, returns nullptr. Else,
@@ -93,23 +92,6 @@ public:
      */
     const std::unordered_map<ItemID, Item>& getAllItems() const;
 
-    /**
-     * Returns a vector containing all items that have had their definitions
-     * updated since the last time the vector was cleared.
-     */
-    const std::vector<ItemID>& getItemUpdateHistory();
-
-    /**
-     * Clears the item update history vector.
-     */
-    void clearItemUpdateHistory();
-
-    /**
-     * Derives a string ID from a display name by making it all lowercase and
-     * replacing spaces with underscores.
-     */
-    static std::string deriveStringID(std::string_view displayName);
-
 protected:
     // Note: We use unordered_map instead of vector for items/itemVersions
     //       so that we don't have to allocate/copy the whole vector when
@@ -130,6 +112,9 @@ protected:
     /** Tracks the next numeric item ID to use (typically 1 greater than the
         highest ID in our maps). */
     ItemID nextItemID{};
+
+    /** A scratch buffer used while processing string IDs. */
+    std::string workStringID;
 
 private:
     entt::sigh<void(ItemID)> itemCreatedSig;

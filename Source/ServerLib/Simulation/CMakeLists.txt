@@ -1,84 +1,91 @@
 target_sources(ServerLib
-	PRIVATE
-		Private/AISystem.cpp
-		Private/ChunkStreamingSystem.cpp
-		Private/ClientAOISystem.cpp
-		Private/ClientConnectionSystem.cpp
-		Private/ComponentChangeSystem.cpp
-		Private/ComponentSyncSystem.cpp
-		Private/Database.cpp
-		Private/DialogueSystem.cpp
-		Private/EngineLuaBindings.cpp
-		Private/InputSystem.cpp
-		Private/InventoryHelpers.cpp
-		Private/InventorySystem.cpp
-		Private/ItemSystem.cpp
-		Private/MovementSyncSystem.cpp
-		Private/MovementSystem.cpp
-		Private/NceLifetimeSystem.cpp
-		Private/SaveSystem.cpp
-		Private/ScriptDataSystem.cpp
-		Private/Simulation.cpp
-		Private/TileUpdateSystem.cpp
-		Private/World.cpp
+    PRIVATE
+        Private/AISystem.cpp
+        Private/ChunkStreamingSystem.cpp
+        Private/ClientAOISystem.cpp
+        Private/ClientConnectionSystem.cpp
+        Private/ComponentChangeSystem.cpp
+        Private/ComponentSyncSystem.cpp
+        Private/Database.cpp
+        Private/DialogueSystem.cpp
+        Private/InputSystem.cpp
+        Private/InventoryHelpers.cpp
+        Private/InventorySystem.cpp
+        Private/ItemSystem.cpp
+        Private/MovementSyncSystem.cpp
+        Private/MovementSystem.cpp
+        Private/NceLifetimeSystem.cpp
+        Private/SaveSystem.cpp
+        Private/ScriptDataSystem.cpp
+        Private/Simulation.cpp
+        Private/TileUpdateSystem.cpp
+        Private/World.cpp
+        Private/Components/StoredValues.cpp
         Private/GraphicData/GraphicData.cpp
         Private/IconData/IconData.cpp
-		Private/ItemData/ItemData.cpp
-		Private/TileMap/TileMap.cpp
-	PUBLIC
-		Public/AILogic.h
-		Public/AISystem.h
-		Public/ChunkStreamingSystem.h
-		Public/ClientAOISystem.h
-		Public/ClientConnectionSystem.h
-		Public/ComponentChangeSystem.h
-		Public/ComponentSyncSystem.h
-		Public/Database.h
-		Public/DialogueSystem.h
-		Public/EntityItemHandlerScript.h
-		Public/EnttGroups.h
-		Public/EventSorter.h
-		Public/InputSystem.h
-		Public/InventoryHelpers.h
-		Public/InventorySystem.h
-		Public/ISimulationExtension.h
-		Public/ItemSystem.h
-		Public/MovementSyncSystem.h
-		Public/MovementSystem.h
-		Public/NceLifetimeSystem.h
-		Public/PersistedComponent.h
-		Public/PersistedEntityData.h
-		Public/SaveSystem.h
-		Public/ScriptDataSystem.h
-		Public/Simulation.h
-		Public/SimulationExDependencies.h
-		Public/SpawnStrategy.h
-		Public/TileUpdateSystem.h
-		Public/World.h
-		Public/Components/ClientSimData.h
-		Public/Components/Dialogue.h
-		Public/Components/ItemHandlers.h
-		Public/Components/ReplicatedComponentList.h
-		Public/GraphicData/GraphicData.h
-		Public/IconData/IconData.h
-		Public/ItemData/ItemData.h
-		Public/Lua/DialogueLua.h
-		Public/Lua/DialogueChoiceConditionLua.h
-		Public/Lua/EngineLuaBindings.h
-		Public/Lua/EntityInitLua.h
-		Public/Lua/EntityItemHandlerLua.h
-		Public/Lua/ItemInitLua.h
-		Public/TileMap/TileMap.h
+        Private/ItemData/ItemData.cpp
+        Private/Lua/EngineLuaBindings.cpp
+        Private/TileMap/TileMap.cpp
+    PUBLIC
+        Public/AILogic.h
+        Public/AISystem.h
+        Public/ChunkStreamingSystem.h
+        Public/ClientAOISystem.h
+        Public/ClientConnectionSystem.h
+        Public/ComponentChangeSystem.h
+        Public/ComponentSyncSystem.h
+        Public/Database.h
+        Public/DialogueSystem.h
+        Public/EntityItemHandlerScript.h
+        Public/EntityStoredValueID.h
+        Public/EntityStoredValueIDMap.h
+        Public/EnttGroups.h
+        Public/EventSorter.h
+        Public/GlobalStoredValueMap.h
+        Public/InputSystem.h
+        Public/InventoryHelpers.h
+        Public/InventorySystem.h
+        Public/ISimulationExtension.h
+        Public/ItemSystem.h
+        Public/MovementSyncSystem.h
+        Public/MovementSystem.h
+        Public/NceLifetimeSystem.h
+        Public/PersistedComponent.h
+        Public/PersistedEntityData.h
+        Public/SaveSystem.h
+        Public/ScriptDataSystem.h
+        Public/Simulation.h
+        Public/SimulationExDependencies.h
+        Public/SpawnStrategy.h
+        Public/TileUpdateSystem.h
+        Public/World.h
+        Public/Components/ClientSimData.h
+        Public/Components/Dialogue.h
+        Public/Components/ItemHandlers.h
+        Public/Components/ReplicatedComponentList.h
+        Public/Components/StoredValues.h
+        Public/GraphicData/GraphicData.h
+        Public/IconData/IconData.h
+        Public/ItemData/ItemData.h
+        Public/Lua/DialogueLua.h
+        Public/Lua/DialogueChoiceConditionLua.h
+        Public/Lua/EngineLuaBindings.h
+        Public/Lua/EntityInitLua.h
+        Public/Lua/EntityItemHandlerLua.h
+        Public/Lua/ItemInitLua.h
+        Public/TileMap/TileMap.h
         Public/TypeLists/EngineObservedComponentTypes.h
-		Public/TypeLists/EnginePersistedComponentTypes.h
+        Public/TypeLists/EnginePersistedComponentTypes.h
 )
 
 target_include_directories(ServerLib
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/Components
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/GraphicData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/IconData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/ItemData
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/Lua
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/TileMap
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public

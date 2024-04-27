@@ -39,8 +39,9 @@ void addComponentsToVector(entt::registry& registry, entt::entity entity,
 
 SaveSystem::SaveSystem(World& inWorld)
 : world{inWorld}
-, saveTimer{}
 , updatedItems{}
+, saveTimer{}
+, workBuffer{}
 {
     // When an item is created or updated, add it to updatedItems.
     world.itemData.itemCreated.connect<&SaveSystem::itemUpdated>(this);
@@ -60,6 +61,7 @@ void SaveSystem::saveIfNecessary()
 
         saveNonClientEntities();
         saveItems();
+        saveStoredValues();
         // TODO: Track changed tiles and save to the database.
         world.tileMap.save("TileMap.bin");
 
@@ -86,16 +88,18 @@ void SaveSystem::saveNonClientEntities()
     // Queue all of our entity save queries.
     auto view{
         world.registry.view<entt::entity>(entt::exclude_t<ClientSimData>{})};
-    BinaryBuffer buffer{};
     for (entt::entity entity : view) {
         PersistedEntityData persistedEntityData{entity};
         addComponentsToVector(world.registry, entity,
                               persistedEntityData.components);
 
-        buffer.resize(Serialize::measureSize(persistedEntityData));
-        Serialize::toBuffer(buffer.data(), buffer.size(), persistedEntityData);
+        workBuffer.clear();
+        workBuffer.resize(Serialize::measureSize(persistedEntityData));
+        Serialize::toBuffer(workBuffer.data(), workBuffer.size(),
+                            persistedEntityData);
 
-        world.database->saveEntityData(entity, buffer.data(), buffer.size());
+        world.database->saveEntityData(entity, workBuffer.data(),
+                                       workBuffer.size());
     }
 }
 
@@ -108,18 +112,41 @@ void SaveSystem::saveItems()
         updatedItems.end());
 
     // Queue all of our item save queries.
-    BinaryBuffer buffer{};
     for (ItemID itemID : updatedItems) {
         const Item* updatedItem{world.itemData.getItem(itemID)};
 
-        buffer.resize(Serialize::measureSize(*updatedItem));
-        Serialize::toBuffer(buffer.data(), buffer.size(), *updatedItem);
+        workBuffer.clear();
+        workBuffer.resize(Serialize::measureSize(*updatedItem));
+        Serialize::toBuffer(workBuffer.data(), workBuffer.size(), *updatedItem);
 
-        world.database->saveItemData(updatedItem->numericID, buffer.data(),
-                                     buffer.size());
+        world.database->saveItemData(updatedItem->numericID, workBuffer.data(),
+                                     workBuffer.size());
     }
 
     updatedItems.clear();
+}
+
+void SaveSystem::saveStoredValues()
+{
+    // Serialize the entity stored value ID map.
+    workBuffer.clear();
+    workBuffer.resize(Serialize::measureSize(world.entityStoredValueIDMap));
+    Serialize::toBuffer(workBuffer.data(), workBuffer.size(),
+                        world.entityStoredValueIDMap);
+
+    // Queue the save query.
+    world.database->saveEntityStoredValueIDMap(workBuffer.data(),
+                                               workBuffer.size());
+
+    // Serialize the global stored value map.
+    workBuffer.clear();
+    workBuffer.resize(Serialize::measureSize(world.globalStoredValueMap));
+    Serialize::toBuffer(workBuffer.data(), workBuffer.size(),
+                        world.globalStoredValueMap);
+
+    // Queue the save query.
+    world.database->saveEntityStoredValueIDMap(workBuffer.data(),
+                                               workBuffer.size());
 }
 
 } // namespace Server

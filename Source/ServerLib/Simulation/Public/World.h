@@ -4,6 +4,9 @@
 #include "TileMap.h"
 #include "NetworkDefs.h"
 #include "EntityLocator.h"
+#include "EntityStoredValueID.h"
+#include "EntityStoredValueIDMap.h"
+#include "GlobalStoredValueMap.h"
 #include "SpawnStrategy.h"
 #include "entt/entity/registry.hpp"
 #include <unordered_map>
@@ -62,13 +65,21 @@ public:
         position. */
     EntityLocator entityLocator;
 
+    /** Maps entity stored value string IDs -> their associated numeric ID. */
+    EntityStoredValueIDMap entityStoredValueIDMap;
+
+    /** Global key-value store.
+        Note: Stored values are often cast to different types, but their 
+              underlying type is always Uint32. */
+    GlobalStoredValueMap globalStoredValueMap;
+
     /** The database for saving and loading world data.
         Kept as a pointer to speed up compilation. */
     std::unique_ptr<Database> database;
 
     /** Maps network IDs to entity IDs.
         Used for interfacing with the Network. */
-    std::unordered_map<NetworkID, entt::entity> netIdMap;
+    std::unordered_map<NetworkID, entt::entity> netIDMap;
 
     //-------------------------------------------------------------------------
     // Helper Functions
@@ -118,6 +129,41 @@ public:
     std::string runItemInitScript(Item& item, const ItemInitScript& initScript);
 
     /**
+     * Returns the numeric ID for the given entity stored value string ID.
+     * If stringID is not present in the map, adds it and generates the next 
+     * numeric ID.
+     * 
+     * @return If a flag with the given ID doesn't exist and the map is full, 
+     *         returns null. Otherwise, returns the numeric ID.
+     */
+    EntityStoredValueID getEntityStoredValueID(std::string_view stringID);
+
+    /**
+     * Adds a new value, or overwrites an existing value.
+     *
+     * If newValue == 0 (the default value), the value will be deleted.
+     *
+     * Note: Stored values are often cast to different types, but their 
+     *       underlying type is always Uint32.
+     *
+     * @param stringID The string ID of the value to add or overwrite.
+     * @param newValue The new value to use.
+     */
+    void storeGlobalValue(std::string_view stringID, Uint32 newValue);
+
+    /**
+     * Gets a stored value.
+     *
+     * Note: Stored values are often cast to different types, but their 
+     *       underlying type is always Uint32.
+     * 
+     * @param stringID The string ID of the value to get.
+     * @return The requested value. If not found, returns 0 (the default value 
+     *         that the value would have if it existed).
+     */
+    Uint32 getStoredValue(std::string_view stringID);
+
+    /**
      * Returns the spawn point position.
      * To configure, see Server::Config.
      */
@@ -144,6 +190,11 @@ private:
      */
     void loadItems();
 
+    /**
+     * Loads our saved entity stored value IDs and global stored values.
+     */
+    void loadStoredValues();
+
     /** Used to get graphics info. */
     const GraphicData& graphicData;
 
@@ -152,6 +203,13 @@ private:
 
     /** Used to run item init scripts. */
     ItemInitLua& itemInitLua;
+
+    /** Tracks the next numeric entity stored value ID to use (typically 1 greater 
+        than the highest ID in entityStoredValueIDMap). */
+    Uint32 nextStoredValueID;
+
+    /** A scratch buffer used while processing string IDs. */
+    std::string workStringID;
 
     // For random spawn points.
     std::random_device randomDevice;

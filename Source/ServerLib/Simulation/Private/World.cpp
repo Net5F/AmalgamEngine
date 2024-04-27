@@ -16,6 +16,7 @@
 #include "SharedConfig.h"
 #include "Config.h"
 #include "VariantTools.h"
+#include "StringTools.h"
 #include "Log.h"
 #include "AMAssert.h"
 #include "sol/sol.hpp"
@@ -60,11 +61,15 @@ World::World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
 , itemData{}
 , tileMap{inGraphicData}
 , entityLocator{registry}
+, entityStoredValueIDMap{}
+, globalStoredValueMap{}
 , database{std::make_unique<Database>()}
-, netIdMap{}
+, netIDMap{}
 , graphicData{inGraphicData}
 , entityInitLua{inEntityInitLua}
 , itemInitLua{inItemInitLua}
+, nextStoredValueID{NULL_ENTITY_STORED_VALUE_ID + 1}
+, workStringID{}
 , randomDevice{}
 , generator{randomDevice()}
 , xDistribution{Config::SPAWN_POINT_RANDOM_MIN_X,
@@ -100,6 +105,9 @@ World::World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
 
     // Load our saved item definitions.
     loadItems();
+
+    // Load our saved stored value data.
+    loadStoredValues();
 }
 
 World::~World() = default;
@@ -224,6 +232,66 @@ std::string World::runItemInitScript(Item& item,
     return returnString;
 }
 
+EntityStoredValueID World::getEntityStoredValueID(std::string_view stringID)
+{
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stringID, workStringID);
+
+    // If the value already exists, return its numeric ID.
+    auto storedValueIDIt{entityStoredValueIDMap.find(workStringID)};
+    if (storedValueIDIt != entityStoredValueIDMap.end()) {
+        return storedValueIDIt->second;
+    }
+    else {
+        // Check if we've ran out of IDs.
+        if (nextStoredValueID == SDL_MAX_UINT16) {
+            return NULL_ENTITY_STORED_VALUE_ID;
+        }
+
+        // Flag doesn't exist, add it to the map.
+        EntityStoredValueID newFlagID{static_cast<Uint16>(nextStoredValueID)};
+        entityStoredValueIDMap.emplace(workStringID, newFlagID);
+        nextStoredValueID++;
+
+        return newFlagID;
+    }
+}
+
+void World::storeGlobalValue(std::string_view stringID, Uint32 newValue)
+{
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stringID, workStringID);
+
+    // If we're setting the value to 0, don't add it to the map (default values 
+    // don't need to be stored).
+    if (newValue == 0) {
+        // If the value already exists, erase it.
+        auto valueIt{globalStoredValueMap.find(workStringID)};
+        if (valueIt != globalStoredValueMap.end()) {
+            globalStoredValueMap.erase(valueIt);
+        }
+
+        return;
+    }
+
+    globalStoredValueMap[workStringID] = newValue;
+}
+
+Uint32 World::getStoredValue(std::string_view stringID)
+{
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stringID, workStringID);
+
+    // If the value exists, return it.
+    auto valueIt{globalStoredValueMap.find(workStringID)};
+    if (valueIt != globalStoredValueMap.end()) {
+        return valueIt->second;
+    }
+
+    // Value doesn't exist. Return the default.
+    return 0;
+}
+
 Position World::getSpawnPoint()
 {
     switch (Config::SPAWN_STRATEGY) {
@@ -334,6 +402,28 @@ void World::loadItems()
     };
 
     database->iterateItems(std::move(loadItem));
+}
+
+void World::loadStoredValues()
+{
+    // Load the entity stored value IDs.
+    auto loadEntityMap = [&](const Uint8* dataBuffer, std::size_t dataSize) {
+        if (dataSize > 0) {
+            Deserialize::fromBuffer(dataBuffer, dataSize,
+                                    entityStoredValueIDMap);
+        }
+    };
+
+    database->getEntityStoredValueIDMap(std::move(loadEntityMap));
+
+    // Load the global stored values.
+    auto loadGlobalMap = [&](const Uint8* dataBuffer, std::size_t dataSize) {
+        if (dataSize > 0) {
+            Deserialize::fromBuffer(dataBuffer, dataSize, globalStoredValueMap);
+        }
+    };
+
+    database->getEntityStoredValueIDMap(std::move(loadGlobalMap));
 }
 
 } // namespace Server

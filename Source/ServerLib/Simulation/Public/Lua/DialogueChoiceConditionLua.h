@@ -18,17 +18,15 @@ namespace Server
  * relevant data to the environment's bound functions.
  */
 struct DialogueChoiceConditionLua {
-    /** Lua environment for dialogue choice condition script processing. */
+    /** Lua environment for dialogue choice condition script processing.
+        Global variables:
+          "user": The ID of the entity that is controlling the dialogue.
+          "self": The ID of the entity that is delivering the dialogue.
+          "GLOBAL": A constant used to identify the global value store. */
     sol::state luaState{};
 
     /** The network ID of the client that is controlling the dialogue. */
     NetworkID clientID{0};
-
-    /** The client entity that is controlling the dialogue. */
-    entt::entity clientEntity{};
-
-    /** The entity that is being talked to. */
-    entt::entity targetEntity{};
 };
 
 } // namespace Server

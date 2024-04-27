@@ -15,17 +15,16 @@ namespace Server
  * relevant data to the environment's bound functions.
  */
 struct EntityItemHandlerLua {
-    /** Lua environment for entity item handler script processing. */
+    /** Lua environment for entity item handler script processing.
+        Global variables:
+          "user": The ID of the entity that used the item.
+                  May be a non-player entity.
+          "self": The ID of the entity that the item is being used on.
+          "GLOBAL": A constant used to identify the global value store. */
     sol::state luaState{};
 
     /** The network ID of the client that used the item. */
     NetworkID clientID{0};
-
-    /** The client entity that used the item. */
-    entt::entity clientEntity{};
-
-    /** The entity that the item is being used on. */
-    entt::entity targetEntity{};
 };
 
 } // namespace Server

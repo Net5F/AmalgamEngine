@@ -22,7 +22,7 @@ struct DialogueChoiceRequest {
     // Networked data
     //--------------------------------------------------------------------------
     /** The entity that the client is talking to. */
-    entt::entity entity{entt::null};
+    entt::entity targetEntity{entt::null};
 
     /** The index of the desired topic within the entity's Dialogue::topics. */
     Uint8 topicIndex{0};
@@ -43,7 +43,7 @@ struct DialogueChoiceRequest {
 template<typename S>
 void serialize(S& serializer, DialogueChoiceRequest& dialogueChoiceRequest)
 {
-    serializer.value4b(dialogueChoiceRequest.entity);
+    serializer.value4b(dialogueChoiceRequest.targetEntity);
     serializer.value1b(dialogueChoiceRequest.topicIndex);
     serializer.value1b(dialogueChoiceRequest.choiceIndex);
 }

@@ -6,6 +6,7 @@
 #include "Inventory.h"
 #include "InventoryInit.h"
 #include "InventoryHelpers.h"
+#include "SystemMessage.h"
 #include "Log.h"
 #include <algorithm>
 
@@ -79,8 +80,17 @@ void InventorySystem::processOperation(NetworkID clientID,
     }
 
     // Try to add the item, sending messages appropriately.
-    InventoryHelpers::addItem(inventoryAddItem.itemID, inventoryAddItem.count,
-                              entityToAddTo, world, network, clientID);
+    auto result{InventoryHelpers::addItem(inventoryAddItem.itemID,
+                                          inventoryAddItem.count, entityToAddTo,
+                                          world, network)};
+    if (result == InventoryHelpers::AddResult::InventoryFull) {
+        network.serializeAndSend(
+            clientID, SystemMessage{"Failed to add item: Inventory is full."});
+    }
+    else if (result == InventoryHelpers::AddResult::ItemNotFound) {
+        network.serializeAndSend(
+            clientID, SystemMessage{"Failed to add item: Item not found."});
+    }
 }
 
 void InventorySystem::processOperation(
@@ -89,14 +99,24 @@ void InventorySystem::processOperation(
     // Note: "Remove item" always applies to the client's own inventory.
 
     // Find the client's entity ID.
-    auto it{world.netIdMap.find(clientID)};
-    if (it != world.netIdMap.end()) {
+    auto it{world.netIDMap.find(clientID)};
+    if (it != world.netIDMap.end()) {
         entt::entity clientEntity{it->second};
 
         // Try to remove the item, sending messages appropriately.
-        InventoryHelpers::removeItem(inventoryRemoveItem.slotIndex,
-                                     inventoryRemoveItem.count, clientEntity,
-                                     world, network);
+        auto result{InventoryHelpers::removeItem(inventoryRemoveItem.slotIndex,
+                                                 inventoryRemoveItem.count,
+                                                 clientEntity, world, network)};
+        if (result == InventoryHelpers::RemoveResult::InvalidSlotIndex) {
+            network.serializeAndSend(
+                clientID,
+                SystemMessage{"Failed to remove item: Invalid slot index."});
+        }
+        else if (result == InventoryHelpers::RemoveResult::InventoryNotFound) {
+            network.serializeAndSend(
+                clientID, SystemMessage{"Failed to remove item: Entity has no "
+                                        "Inventory component."});
+        }
     }
 }
 
@@ -106,8 +126,8 @@ void InventorySystem::processOperation(
     // Note: "Move item" always applies to the client's own inventory.
 
     // Find the client's entity ID.
-    auto it{world.netIdMap.find(clientID)};
-    if (it != world.netIdMap.end()) {
+    auto it{world.netIDMap.find(clientID)};
+    if (it != world.netIDMap.end()) {
         entt::entity clientEntity{it->second};
 
         // If the move is successful, tell the client.

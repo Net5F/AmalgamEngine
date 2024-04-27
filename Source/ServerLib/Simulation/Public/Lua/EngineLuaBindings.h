@@ -76,7 +76,6 @@ private:
     //-------------------------------------------------------------------------
     // Entity item handler
     //-------------------------------------------------------------------------
-    // TODO: getFlagPlayer/Self, setFlagPlayer/Self
 
     //-------------------------------------------------------------------------
     // Item init
@@ -104,8 +103,6 @@ private:
     //-------------------------------------------------------------------------
     // Dialogue
     //-------------------------------------------------------------------------
-    // TODO: getFlagPlayer/Self, setFlagPlayer/Self
-
     /**
      * Adds a piece of dialogue to the dialogue event list.
      */
@@ -133,7 +130,6 @@ private:
     //-------------------------------------------------------------------------
     // Dialogue choice condition
     //-------------------------------------------------------------------------
-    // TODO: getFlagPlayer/Self
 
     //-------------------------------------------------------------------------
     // Dialogue choice
@@ -167,23 +163,92 @@ private:
      * @return true if the item was successfully added, else false (inventory
      *         didn't exist, inventory was full).
      */
-    bool addItem(std::string_view itemID, Uint8 count,
-                 entt::entity entityToAddTo, NetworkID clientID);
+    bool addItem(entt::entity entityToAddTo, std::string_view itemID,
+                 Uint8 count, NetworkID clientID);
 
     /**
      * Attempts to remove the given item from the client entity's inventory.
      * @return true if the item was successfully removed, else false (inventory
      *         didn't contain the item).
      */
-    bool removeItem(std::string_view itemID, Uint8 count,
-                    entt::entity entityToRemoveFrom, NetworkID clientID);
+    bool removeItem(entt::entity entityToRemoveFrom, std::string_view itemID,
+                    Uint8 count, NetworkID clientID);
 
     /**
      * Returns the count for the given item across all slots in the given 
      * entity's inventory.
      */
-    std::size_t getItemCount(std::string_view itemID,
-                             entt::entity entityToCount, NetworkID clientID);
+    std::size_t getItemCount(entt::entity entityToCount,
+                             std::string_view itemID, NetworkID clientID);
+
+    /**
+     * Adds a new value, or overwrites an existing value.
+     *
+     * If newValue == 0 (the default value), the value will be deleted.
+     * 
+     * Note: There's no type safety with stored values. If you call storeInt 
+     *       on a value that was previously set as a bool, it will be  
+     *       overwritten without issue.
+     *
+     * @param entity The entity to store the value to. If == entt::null, the 
+     *               the value will be stored to the global store instead.
+     * @param stringID The string ID of the value to add or overwrite.
+     * @param newValue The new value to use.
+     */
+    void storeUint(entt::entity entity, std::string_view stringID,
+                   Uint32 newValue);
+    void storeBool(entt::entity entity, std::string_view stringID,
+                   bool newValue);
+    void storeInt(entt::entity entity, std::string_view stringID, int newValue);
+    void storeFloat(entt::entity entity, std::string_view stringID,
+                    float newValue);
+    /** @param newValue A time in seconds, since 0 UTC (Jan 1, 1970). */
+    void storeTime(entt::entity entity, std::string_view stringID,
+                   Uint32 newValue);
+    void storeBitSet(entt::entity entity, std::string_view stringID,
+                     Uint32 newValue);
+    /** @param bitToSet The bit to set, within the 32-bit stored value. Must be
+                        within the range [0, 31]. */
+    void storeBit(entt::entity entity, std::string_view stringID,
+                  Uint8 bitToSet, bool newValue);
+
+    /**
+     * Gets a stored value.
+     * 
+     * Note: There's no type safety with stored values. If you call getStoredInt 
+     *       on a value that was previously set as a bool, it will be returned 
+     *       as an int without issue.
+     *
+     * @param entity The entity to get the value from. If == entt::null, the 
+     *               the value will be retrieved from the global store instead.
+     * @param stringID The string ID of the value to get.
+     * @return The requested value. If not found, returns 0 (the default value 
+     *         that the flag would have if it existed).
+     */
+    Uint32 getStoredUint(entt::entity entity, std::string_view stringID);
+    bool getStoredBool(entt::entity entity, std::string_view stringID);
+    int getStoredInt(entt::entity entity, std::string_view stringID);
+    float getStoredFloat(entt::entity entity, std::string_view stringID);
+    /** @return A time in seconds, since 0 UTC (Jan 1, 1970). */
+    Uint32 getStoredTime(entt::entity entity, std::string_view stringID);
+    Uint32 getStoredBitSet(entt::entity entity, std::string_view stringID);
+    /** @param bitToGet The bit to get, within the 32-bit stored value. Must be
+                        within the range [0, 31]. */
+    bool getStoredBit(entt::entity entity, std::string_view stringID,
+                      Uint8 bitToGet);
+
+    /**
+     * Sets a bit in a bit set to the given value.
+     * Note: We take bitSet as a Uint32, since Lua doesn't have a matching 
+     *       concept and it's more efficient to 
+     *       
+     */
+    void setBit(Uint32& bitSet, Uint8 bitToSet, bool newValue);
+
+    /**
+     * Gets a bit from a bit set.
+     */
+    bool getBit(Uint32 bitSet, Uint8 bitToGet);
 
     /**
      * Sends a system message to the client.

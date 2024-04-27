@@ -4,7 +4,6 @@
 #include "Inventory.h"
 #include "ClientSimData.h"
 #include "InventoryOperation.h"
-#include "SystemMessage.h"
 #include <algorithm>
 
 namespace AM
@@ -12,67 +11,52 @@ namespace AM
 namespace Server
 {
 
-bool InventoryHelpers::addItem(ItemID itemID, Uint8 count,
-                               entt::entity entityToAddTo, World& world,
-                               Network& network,
-                               std::optional<NetworkID> requesterID)
+InventoryHelpers::AddResult
+    InventoryHelpers::addItem(ItemID itemID, Uint8 count,
+                              entt::entity entityToAddTo, World& world,
+                              Network& network)
 {
     // Try to add the item.
     auto* item{world.itemData.getItem(itemID)};
-    auto* inventory{world.registry.try_get<Inventory>(entityToAddTo)};
-    if (item && inventory
-        && inventory->addItem(itemID, count, item->maxStackSize)) {
+    auto& inventory{world.registry.get_or_emplace<Inventory>(entityToAddTo)};
+    if (item && inventory.addItem(itemID, count, item->maxStackSize)) {
         // Success. If the target is a client entity, update it.
         if (auto* client{
                 world.registry.try_get<ClientSimData>(entityToAddTo)}) {
-            InventoryOperation operation{
-                InventoryAddItem{entityToAddTo, itemID, count, item->maxStackSize,
-                                 world.itemData.getItemVersion(itemID)}};
+            InventoryOperation operation{InventoryAddItem{
+                entityToAddTo, itemID, count, item->maxStackSize,
+                world.itemData.getItemVersion(itemID)}};
             network.serializeAndSend(client->netID, operation);
         }
 
-        return true;
-    }
-    else if (requesterID) {
-        // Failure. We were provided a client ID, send it an error message.
-        if (item && inventory) {
-            network.serializeAndSend(
-                requesterID.value(),
-                SystemMessage{"Failed to add item: inventory is full."});
-        }
-        else {
-            network.serializeAndSend(
-                requesterID.value(),
-                SystemMessage{"Failed to add item: invalid item ID or "
-                              "inventory doesn't exist."});
-        }
+        return AddResult::Success;
     }
 
-    return false;
+    // Failure. Return an error code.
+    if (item) {
+        return AddResult::InventoryFull;
+    }
+    else {
+        return AddResult::ItemNotFound;
+    }
 }
 
-bool InventoryHelpers::addItem(std::string_view itemID, Uint8 count,
-                               entt::entity entityToAddTo, World& world,
-                               Network& network,
-                               std::optional<NetworkID> requesterID)
+InventoryHelpers::AddResult
+    InventoryHelpers::addItem(std::string_view itemID, Uint8 count,
+                              entt::entity entityToAddTo, World& world,
+                              Network& network)
 {
-    if (const Item* item{world.itemData.getItem(itemID)}) {
-        return addItem(item->numericID, count, entityToAddTo, world, network,
-                       requesterID);
-    }
-    else if (requesterID) {
-        network.serializeAndSend(
-            requesterID.value(),
-            SystemMessage{"Failed to add item: invalid item ID."});
+    if (const Item * item{world.itemData.getItem(itemID)}) {
+        return addItem(item->numericID, count, entityToAddTo, world, network);
     }
 
-    return false;
+    return AddResult::ItemNotFound;
 }
 
-bool InventoryHelpers::removeItem(Uint8 slotIndex, Uint8 count,
-                                  entt::entity entityToRemoveFrom, World& world,
-                                  Network& network,
-                                  std::optional<NetworkID> requesterID)
+InventoryHelpers::RemoveResult
+    InventoryHelpers::removeItem(Uint8 slotIndex, Uint8 count,
+                                 entt::entity entityToRemoveFrom, World& world,
+                                 Network& network)
 {
     // Try to remove the item.
     auto* inventory{world.registry.try_get<Inventory>(entityToRemoveFrom)};
@@ -84,30 +68,22 @@ bool InventoryHelpers::removeItem(Uint8 slotIndex, Uint8 count,
             network.serializeAndSend(client->netID, operation);
         }
 
-        return true;
-    }
-    else if (requesterID) {
-        // Failure. We were provided a client ID, send it an error message.
-        if (inventory) {
-            network.serializeAndSend(
-                requesterID.value(),
-                SystemMessage{"Failed to remove item: invalid slot index."});
-        }
-        else {
-            network.serializeAndSend(
-                requesterID.value(),
-                SystemMessage{
-                    "Failed to remove item: inventory doesn't exist."});
-        }
+        return RemoveResult::Success;
     }
 
-    return false;
+    // Failure. Return an error code.
+    if (inventory) {
+        return RemoveResult::InvalidSlotIndex;
+    }
+    else {
+        return RemoveResult::InventoryNotFound;
+    }
 }
 
-bool InventoryHelpers::removeItem(std::string_view itemID, Uint8 count,
-                                  entt::entity entityToRemoveFrom, World& world,
-                                  Network& network,
-                                  std::optional<NetworkID> requesterID)
+InventoryHelpers::RemoveResult
+    InventoryHelpers::removeItem(std::string_view itemID, Uint8 count,
+                                 entt::entity entityToRemoveFrom, World& world,
+                                 Network& network)
 {
     // If the entity's inventory has enough copies of the item to satisfy the
     // requested count, remove them.
@@ -141,25 +117,19 @@ bool InventoryHelpers::removeItem(std::string_view itemID, Uint8 count,
             }
         }
 
-        return true;
-    }
-    else if (requesterID) {
-        // Failure. We were provided a client ID, send it an error message.
-        if (item && inventory) {
-            network.serializeAndSend(
-                requesterID.value(),
-                SystemMessage{
-                    "Failed to remove item: not enough items present."});
-        }
-        else {
-            network.serializeAndSend(
-                requesterID.value(),
-                SystemMessage{"Failed to remove item: invalid item ID or "
-                              "inventory doesn't exist."});
-        }
+        return RemoveResult::Success;
     }
 
-    return false;
+    // Failure. Return an error code.
+    if (item && inventory) {
+        return RemoveResult::InsufficientItemCount;
+    }
+    else if (inventory) {
+        return RemoveResult::InventoryNotFound;
+    }
+    else {
+        return RemoveResult::ItemNotFound;
+    }
 }
 
 } // namespace Server

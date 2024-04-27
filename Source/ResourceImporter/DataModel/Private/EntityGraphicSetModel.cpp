@@ -1,5 +1,6 @@
 #include "EntityGraphicSetModel.h"
 #include "DataModel.h"
+#include "StringTools.h"
 #include "nlohmann/json.hpp"
 
 namespace AM
@@ -53,8 +54,9 @@ void EntityGraphicSetModel::save(nlohmann::json& json)
     for (auto& graphicSetPair : entityMap) {
         EditorEntityGraphicSet& graphicSet{graphicSetPair.second};
         json["entities"][i]["displayName"] = graphicSet.displayName;
-        json["entities"][i]["stringID"]
-            = DataModel::deriveStringID(graphicSet.displayName);
+        std::string stringID{};
+        StringTools::deriveStringID(graphicSet.displayName, stringID);
+        json["entities"][i]["stringID"] = stringID;
         json["entities"][i]["numericID"] = graphicSetID++;
 
         // Note: Types/Values are parallel arrays to save file space. If we 

@@ -86,8 +86,8 @@ bool Simulation::popEntityInteractionRequest(
         entt::registry& registry{world.registry};
 
         // Find the client's entity ID.
-        auto it{world.netIdMap.find(interactionRequest.netID)};
-        if (it == world.netIdMap.end()) {
+        auto it{world.netIDMap.find(interactionRequest.netID)};
+        if (it == world.netIDMap.end()) {
             // Client doesn't exist (may have disconnected), do nothing.
             return false;
         }
@@ -138,8 +138,8 @@ bool Simulation::popItemInteractionRequest(ItemInteractionType interactionType,
         queue.pop();
 
         // Find the client's entity ID.
-        auto it{world.netIdMap.find(interactionRequest.netID)};
-        if (it == world.netIdMap.end()) {
+        auto it{world.netIDMap.find(interactionRequest.netID)};
+        if (it == world.netIDMap.end()) {
             // Client doesn't exist (may have disconnected), do nothing.
             return false;
         }

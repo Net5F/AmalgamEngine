@@ -4,7 +4,6 @@
 #include "NetworkDefs.h"
 #include "entt/fwd.hpp"
 #include <SDL_stdinc.h>
-#include <optional>
 #include <string_view>
 
 namespace AM
@@ -23,7 +22,8 @@ class Network;
  * Instead, we use these functions to both update the inventory and send the
  * necessary client updates.
  *
- * Note: It may be reasonable to replace this approach with either:
+ * Note: It may be reasonable to replace this approach with something more 
+ *       automated, like:
  *         1. Each inventory maintains an operation history. Observe Inventory 
               updates, send operations to inventory owner.
  *         2. Add a PreviousInventory component. Observe Inventory updates, 
@@ -37,36 +37,40 @@ class Network;
 class InventoryHelpers
 {
 public:
+    enum class AddResult {
+        Success,
+        InventoryFull,
+        ItemNotFound
+    };
+    enum class RemoveResult {
+        Success,
+        InvalidSlotIndex,
+        InventoryNotFound,
+        ItemNotFound,
+        InsufficientItemCount
+    };
+
     /**
      * Adds the given item to the first available slot in the given entity's
      * inventory.
-     *
-     * @param requesterID The client that requested an item be added, if there
-     *                    was one. If non-null, error messages will be sent on
-     *                    failure.
-     * @return true if successful, else false.
      */
-    static bool addItem(ItemID itemID, Uint8 count, entt::entity entityToAddTo,
-                        World& world, Network& network,
-                        std::optional<NetworkID> requesterID = std::nullopt);
+    static AddResult addItem(ItemID itemID, Uint8 count,
+                             entt::entity entityToAddTo, World& world,
+                             Network& network);
 
     /**
      * Overload for string IDs.
      */
-    static bool addItem(std::string_view itemID, Uint8 count,
-                        entt::entity entityToAddTo, World& world,
-                        Network& network,
-                        std::optional<NetworkID> requesterID = std::nullopt);
+    static AddResult addItem(std::string_view itemID, Uint8 count,
+                             entt::entity entityToAddTo, World& world,
+                             Network& network);
 
     /**
      * Removes the item in the given slot in the given entity's inventory.
-     *
-     * @return true if successful, else false.
      */
-    static bool removeItem(Uint8 slotIndex, Uint8 count,
-                           entt::entity entityToRemoveFrom, World& world,
-                           Network& network,
-                           std::optional<NetworkID> requesterID = std::nullopt);
+    static RemoveResult removeItem(Uint8 slotIndex, Uint8 count,
+                                   entt::entity entityToRemoveFrom,
+                                   World& world, Network& network);
 
     /**
      * Removes the given count of items from the entity's inventory.
@@ -74,13 +78,10 @@ public:
      *       specific index. 
      *
      * If the inventory doesn't have enough items, does nothing.
-     *
-     * @return true if successful, else false.
      */
-    static bool removeItem(std::string_view itemID, Uint8 count,
-                           entt::entity entityToRemoveFrom, World& world,
-                           Network& network,
-                           std::optional<NetworkID> requesterID = std::nullopt);
+    static RemoveResult removeItem(std::string_view itemID, Uint8 count,
+                                   entt::entity entityToRemoveFrom,
+                                   World& world, Network& network);
 };
 
 } // namespace Server

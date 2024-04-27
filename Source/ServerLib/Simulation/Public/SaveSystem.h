@@ -2,6 +2,7 @@
 
 #include "ItemID.h"
 #include "Timer.h"
+#include "BinaryBuffer.h"
 #include <vector>
 
 namespace AM
@@ -45,6 +46,12 @@ private:
      */
     void saveItems();
 
+    /**
+     * Saves World::storedValueIDMap and World::globalStoredValueMap to the 
+     * in-memory database.
+     */
+    void saveStoredValues();
+
     World& world;
 
     /** Holds a history of items that have been updated.
@@ -53,6 +60,9 @@ private:
 
     /** Used to track how much time has passed since the last save. */
     Timer saveTimer;
+
+    /** A scratch buffer used while serializing data. */
+    BinaryBuffer workBuffer;
 };
 
 } // namespace Server

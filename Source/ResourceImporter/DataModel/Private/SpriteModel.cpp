@@ -3,6 +3,7 @@
 #include "GraphicSetModel.h"
 #include "EntityGraphicSetModel.h"
 #include "SpriteID.h"
+#include "StringTools.h"
 #include "nlohmann/json.hpp"
 #include <SDL_render.h>
 #include <SDL_image.h>
@@ -86,8 +87,9 @@ void SpriteModel::save(nlohmann::json& json)
                 = sprite.displayName;
 
             // Derive the string ID from the display name and add it.
-            json["spriteSheets"][i]["sprites"][j]["stringID"]
-                = DataModel::deriveStringID(sprite.displayName);
+            std::string stringID{};
+            StringTools::deriveStringID(sprite.displayName, stringID);
+            json["spriteSheets"][i]["sprites"][j]["stringID"] = stringID;
 
             // Add the numeric ID.
             json["spriteSheets"][i]["sprites"][j]["numericID"]

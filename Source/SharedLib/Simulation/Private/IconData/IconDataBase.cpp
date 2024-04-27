@@ -1,4 +1,5 @@
 #include "IconDataBase.h"
+#include "StringTools.h"
 #include "Paths.h"
 #include "Log.h"
 #include "nlohmann/json.hpp"
@@ -8,17 +9,22 @@ namespace AM
 IconDataBase::IconDataBase(const nlohmann::json& resourceDataJson)
 : icons{}
 , iconStringMap{}
+, workStringID{}
 {
     // Parse the json structure to construct our icons.
     parseJson(resourceDataJson);
 }
 
-const Icon& IconDataBase::getIcon(const std::string& stringID) const
+const Icon& IconDataBase::getIcon(const std::string& stringID)
 {
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stringID, workStringID);
+
     // Attempt to find the given string ID.
-    auto it{iconStringMap.find(stringID)};
+    auto it{iconStringMap.find(workStringID)};
     if (it == iconStringMap.end()) {
-        LOG_ERROR("Failed to find icon with string ID: %s", stringID.c_str());
+        LOG_ERROR("Failed to find icon with string ID: %s",
+                  workStringID.c_str());
         return icons[0];
     }
 

@@ -102,12 +102,6 @@ public:
     const std::string& getErrorString();
 
     /**
-     * Derives a string ID from a display name by making it all lowercase and
-     * replacing spaces with underscores.
-     */
-    static std::string deriveStringID(const std::string& displayName);
-
-    /**
      * Checks that the given relative path corresponds to a valid sprite
      * sheet image in the working Resources directory.
      *

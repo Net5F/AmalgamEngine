@@ -7,6 +7,7 @@ target_sources(SharedLib
         Private/Paths.cpp
         Private/PeriodicCaller.cpp
         Private/SDLHelpers.cpp
+        Private/StringTools.cpp
         Private/Timer.cpp
         Private/Transforms.cpp
     PUBLIC
@@ -25,6 +26,7 @@ target_sources(SharedLib
         Public/SDLHelpers.h
         Public/Serialize.h
         Public/SerializeBuffer.h
+        Public/StringTools.h
         Public/Timer.h
         Public/Transforms.h
         Public/VariantTools.h

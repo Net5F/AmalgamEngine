@@ -45,7 +45,7 @@ target_link_libraries(ServerLib
 )
 
 # Compile with C++20.
-target_compile_features(ServerLib PRIVATE cxx_std_20)
+target_compile_features(ServerLib PRIVATE cxx_std_23)
 set_target_properties(ServerLib PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable compile warnings.

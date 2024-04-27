@@ -1,5 +1,6 @@
 #include "GraphicSetModel.h"
 #include "DataModel.h"
+#include "StringTools.h"
 #include "nlohmann/json.hpp"
 
 namespace AM
@@ -648,8 +649,9 @@ void GraphicSetModel::saveFloors(nlohmann::json& json)
     for (auto& graphicSetPair : floorMap) {
         EditorFloorGraphicSet& graphicSet{graphicSetPair.second};
         json["floors"][i]["displayName"] = graphicSet.displayName;
-        json["floors"][i]["stringID"]
-            = DataModel::deriveStringID(graphicSet.displayName);
+        std::string stringID{};
+        StringTools::deriveStringID(graphicSet.displayName, stringID);
+        json["floors"][i]["stringID"] = stringID;
         json["floors"][i]["numericID"] = graphicSetID++;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["floors"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
@@ -669,8 +671,9 @@ void GraphicSetModel::saveFloorCoverings(nlohmann::json& json)
     for (auto& graphicSetPair : floorCoveringMap) {
         EditorFloorCoveringGraphicSet& graphicSet{graphicSetPair.second};
         json["floorCoverings"][i]["displayName"] = graphicSet.displayName;
-        json["floorCoverings"][i]["stringID"]
-            = DataModel::deriveStringID(graphicSet.displayName);
+        std::string stringID{};
+        StringTools::deriveStringID(graphicSet.displayName, stringID);
+        json["floorCoverings"][i]["stringID"] = stringID;
         json["floorCoverings"][i]["numericID"] = graphicSetID++;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["floorCoverings"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
@@ -690,8 +693,9 @@ void GraphicSetModel::saveWalls(nlohmann::json& json)
     for (auto& graphicSetPair : wallMap) {
         EditorWallGraphicSet& graphicSet{graphicSetPair.second};
         json["walls"][i]["displayName"] = graphicSet.displayName;
-        json["walls"][i]["stringID"]
-            = DataModel::deriveStringID(graphicSet.displayName);
+        std::string stringID{};
+        StringTools::deriveStringID(graphicSet.displayName, stringID);
+        json["walls"][i]["stringID"] = stringID;
         json["walls"][i]["numericID"] = graphicSetID++;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["walls"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
@@ -711,8 +715,9 @@ void GraphicSetModel::saveObjects(nlohmann::json& json)
     for (auto& graphicSetPair : objectMap) {
         EditorObjectGraphicSet& graphicSet{graphicSetPair.second};
         json["objects"][i]["displayName"] = graphicSet.displayName;
-        json["objects"][i]["stringID"]
-            = DataModel::deriveStringID(graphicSet.displayName);
+        std::string stringID{};
+        StringTools::deriveStringID(graphicSet.displayName, stringID);
+        json["objects"][i]["stringID"] = stringID;
         json["objects"][i]["numericID"] = graphicSetID++;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["objects"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];

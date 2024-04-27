@@ -1,8 +1,8 @@
 #include "ItemDataBase.h"
 #include "ItemID.h"
+#include "StringTools.h"
 #include "Log.h"
 #include "AMAssert.h"
-#include <algorithm>
 
 namespace AM
 {
@@ -11,6 +11,7 @@ ItemDataBase::ItemDataBase()
 , itemStringMap{}
 , itemVersionMap{}
 , nextItemID{NULL_ITEM_ID + 1}
+, workStringID{}
 , itemCreatedSig{}
 , itemUpdatedSig{}
 , itemCreated{itemCreatedSig}
@@ -26,8 +27,8 @@ const Item* ItemDataBase::createItem(const Item& item)
     }
 
     // Derive the string ID. If it's taken, do nothing.
-    std::string stringID{deriveStringID(item.displayName)};
-    if (itemStringMap.find(stringID) != itemStringMap.end()) {
+    StringTools::deriveStringID(item.displayName, workStringID);
+    if (itemStringMap.find(workStringID) != itemStringMap.end()) {
         return nullptr;
     }
 
@@ -42,10 +43,10 @@ const Item* ItemDataBase::createItem(const Item& item)
     //       elements are guaranteed to remain valid (for itemStringMap).
     itemMap[newItemID] = item;
     Item& newItem{itemMap[newItemID]};
-    newItem.stringID = stringID;
+    newItem.stringID = workStringID;
     newItem.numericID = newItemID;
     itemVersionMap[newItemID] = 0;
-    itemStringMap[stringID] = &newItem;
+    itemStringMap[workStringID] = &newItem;
 
     // Always update nextItemID to be 1 greater than the highest ID.
     if (newItemID >= nextItemID) {
@@ -67,25 +68,25 @@ const Item* ItemDataBase::updateItem(const Item& newItem)
     }
 
     // If the new derived string ID doesn't match the old one.
-    std::string stringID{deriveStringID(newItem.displayName)};
+    StringTools::deriveStringID(newItem.displayName, workStringID);
     Item& item{itemIt->second};
-    if (stringID != item.stringID) {
+    if (workStringID != item.stringID) {
         // If the new ID is taken, do nothing.
-        auto stringIt{itemStringMap.find(stringID)};
+        auto stringIt{itemStringMap.find(workStringID)};
         if (stringIt != itemStringMap.end()) {
             return nullptr;
         }
         else {
             // New ID isn't taken. Add it to the string ID map and remove the
             // old one.
-            itemStringMap[stringID] = &item;
+            itemStringMap[workStringID] = &item;
             itemStringMap.erase(item.stringID);
         }
     }
 
     // Update the item.
     item = newItem;
-    item.stringID = stringID;
+    item.stringID = workStringID;
 
     // Increment the version.
     itemVersionMap[newItem.numericID]++;
@@ -96,10 +97,13 @@ const Item* ItemDataBase::updateItem(const Item& newItem)
     return &item;
 }
 
-const Item* ItemDataBase::getItem(std::string_view stringID) const
+const Item* ItemDataBase::getItem(std::string_view stringID)
 {
-    // Attempt to find the given string ID.
-    auto it{itemStringMap.find(stringID)};
+    // Derive string ID in case the user accidentally passed a display name.
+    StringTools::deriveStringID(stringID, workStringID);
+
+    // Attempt to find the string ID.
+    auto it{itemStringMap.find(workStringID)};
     if (it == itemStringMap.end()) {
         return nullptr;
     }
@@ -133,19 +137,6 @@ ItemVersion ItemDataBase::getItemVersion(ItemID numericID)
 const std::unordered_map<ItemID, Item>& ItemDataBase::getAllItems() const
 {
     return itemMap;
-}
-
-std::string ItemDataBase::deriveStringID(std::string_view displayName)
-{
-    // Make the string all lowercase.
-    std::string stringID{displayName};
-    std::transform(stringID.begin(), stringID.end(), stringID.begin(),
-                   [](unsigned char c) { return std::tolower(c); });
-
-    // Replace spaces with underscores.
-    std::replace(stringID.begin(), stringID.end(), ' ', '_');
-
-    return stringID;
 }
 
 } // End namespace AM

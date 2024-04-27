@@ -39,7 +39,7 @@ target_link_libraries(ClientLib
 )
 
 # Compile with C++20.
-target_compile_features(ClientLib PRIVATE cxx_std_20)
+target_compile_features(ClientLib PRIVATE cxx_std_23)
 set_target_properties(ClientLib PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable compile warnings.

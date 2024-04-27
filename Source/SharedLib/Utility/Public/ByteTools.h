@@ -3,8 +3,7 @@
 #include <SDL_stdinc.h>
 
 /**
- * This file contains helper functions for writing to and reading from byte
- * buffers.
+ * Static functions for writing to and reading from byte buffers.
  *
  * Amalgam uses little endian ordering for network and file data.
  */

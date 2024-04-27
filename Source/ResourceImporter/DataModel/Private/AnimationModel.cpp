@@ -1,5 +1,6 @@
 #include "AnimationModel.h"
 #include "DataModel.h"
+#include "StringTools.h"
 #include "nlohmann/json.hpp"
 #include "Log.h"
 
@@ -69,8 +70,9 @@ void AnimationModel::save(nlohmann::json& json)
         json["animations"][i]["displayName"] = animation.displayName;
 
         // Derive the string ID from the display name and add it.
-        json["animations"][i]["stringID"]
-            = DataModel::deriveStringID(animation.displayName);
+        std::string stringID{};
+        StringTools::deriveStringID(animation.displayName, stringID);
+        json["animations"][i]["stringID"] = stringID;
 
         // Add the numeric ID.
         json["animations"][i]["numericID"] = animationID++;

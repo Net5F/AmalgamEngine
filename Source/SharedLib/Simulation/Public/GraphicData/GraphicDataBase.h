@@ -5,9 +5,10 @@
 #include "GraphicRef.h"
 #include "GraphicSets.h"
 #include "GraphicID.h"
+#include "nlohmann/json_fwd.hpp"
 #include <vector>
 #include <unordered_map>
-#include "nlohmann/json_fwd.hpp"
+#include <string>
 
 namespace AM
 {
@@ -34,7 +35,7 @@ public:
      * Returns the sprite with the given string ID.
      * Errors in debug if the given ID doesn't exist.
      */
-    const Sprite& getSprite(const std::string& stringID) const;
+    const Sprite& getSprite(const std::string& stringID);
 
     /**
      * Returns the sprite with the given numeric ID.
@@ -46,7 +47,7 @@ public:
      * Returns the animation with the given string ID.
      * Errors in debug if the given ID doesn't exist.
      */
-    const Animation& getAnimation(const std::string& stringID) const;
+    const Animation& getAnimation(const std::string& stringID);
 
     /**
      * Returns the animation with the given numeric ID.
@@ -64,14 +65,12 @@ public:
      * Returns the graphic set with the given string ID.
      * Errors if the given ID doesn't exist.
      */
-    const FloorGraphicSet& getFloorGraphicSet(const std::string& stringID) const;
+    const FloorGraphicSet& getFloorGraphicSet(const std::string& stringID);
     const FloorCoveringGraphicSet&
-        getFloorCoveringGraphicSet(const std::string& stringID) const;
-    const WallGraphicSet& getWallGraphicSet(const std::string& stringID) const;
-    const ObjectGraphicSet&
-        getObjectGraphicSet(const std::string& stringID) const;
-    const EntityGraphicSet&
-        getEntityGraphicSet(const std::string& stringID) const;
+        getFloorCoveringGraphicSet(const std::string& stringID);
+    const WallGraphicSet& getWallGraphicSet(const std::string& stringID);
+    const ObjectGraphicSet& getObjectGraphicSet(const std::string& stringID);
+    const EntityGraphicSet& getEntityGraphicSet(const std::string& stringID);
 
     /**
      * Returns the sprite set with the given numeric ID.
@@ -175,6 +174,9 @@ protected:
         objectGraphicSetStringMap;
     std::unordered_map<std::string, const EntityGraphicSet*>
         entityGraphicSetStringMap;
+
+    /** A scratch buffer used while processing string IDs. */
+    std::string workStringID;
 };
 
 } // End namespace AM

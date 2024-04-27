@@ -236,19 +236,6 @@ const std::string& DataModel::getErrorString()
     return errorString;
 }
 
-std::string DataModel::deriveStringID(const std::string& displayName)
-{
-    // Make the string all lowercase.
-    std::string stringID{displayName};
-    std::transform(stringID.begin(), stringID.end(), stringID.begin(),
-                   [](unsigned char c) { return std::tolower(c); });
-
-    // Replace spaces with underscores.
-    std::replace(stringID.begin(), stringID.end(), ' ', '_');
-
-    return stringID;
-}
-
 bool DataModel::validateRelPath(const std::string& relPath)
 {
     // Construct the file path.
