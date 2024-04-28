@@ -423,7 +423,7 @@ void World::loadStoredValues()
         }
     };
 
-    database->getEntityStoredValueIDMap(std::move(loadGlobalMap));
+    database->getGlobalStoredValueMap(std::move(loadGlobalMap));
 }
 
 } // namespace Server

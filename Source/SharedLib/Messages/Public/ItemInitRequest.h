@@ -11,7 +11,8 @@
 namespace AM
 {
 /**
- * Sent by the client to request that a new item be created.
+ * Sent by the client to request that a new item be created, or to
+ * request that an existing item be re-initialized with new data.
  */
 struct ItemInitRequest {
     // The EngineMessageType enum value that this message corresponds to.

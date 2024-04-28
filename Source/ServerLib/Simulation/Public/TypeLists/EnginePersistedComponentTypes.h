@@ -8,6 +8,7 @@
 #include "ItemHandlers.h"
 #include "Dialogue.h"
 #include "EntityInitScript.h"
+#include "StoredValues.h"
 #include "boost/mp11/list.hpp"
 
 namespace AM
@@ -28,7 +29,8 @@ namespace Server
  */
 using EnginePersistedComponentTypes
     = boost::mp11::mp_list<Name, Position, Rotation, GraphicState, Interaction,
-                           ItemHandlers, Dialogue, EntityInitScript>;
+                           ItemHandlers, Dialogue, EntityInitScript,
+                           StoredValues>;
 
 } // End namespace Server
 } // End namespace AM

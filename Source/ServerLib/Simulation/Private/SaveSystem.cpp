@@ -145,8 +145,8 @@ void SaveSystem::saveStoredValues()
                         world.globalStoredValueMap);
 
     // Queue the save query.
-    world.database->saveEntityStoredValueIDMap(workBuffer.data(),
-                                               workBuffer.size());
+    world.database->saveGlobalStoredValueMap(workBuffer.data(),
+                                             workBuffer.size());
 }
 
 } // namespace Server

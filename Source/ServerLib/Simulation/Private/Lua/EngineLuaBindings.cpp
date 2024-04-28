@@ -14,6 +14,7 @@
 #include "ItemProperties.h"
 #include "InventoryHelpers.h"
 #include "sol/sol.hpp"
+#include <time.h>
 
 namespace AM
 {
@@ -37,15 +38,16 @@ EngineLuaBindings::EngineLuaBindings(
 , currentDialogueTopic{nullptr}
 , workString{}
 {
-    // Add the GLOBAL Lua constant to the non-init environments.
-    entityItemHandlerLua.luaState["GLOBAL"] = static_cast<Uint32>(entt::null);
-    dialogueLua.luaState["GLOBAL"] = static_cast<Uint32>(entt::null);
-    dialogueChoiceConditionLua.luaState["GLOBAL"]
-        = static_cast<Uint32>(entt::null);
 }
 
 void EngineLuaBindings::addBindings()
 {
+    // Add the GLOBAL Lua constant to the non-init environments.
+    Uint32 nullEntityID{entt::to_integral(entt::entity{entt::null})};
+    entityItemHandlerLua.luaState["GLOBAL"] = nullEntityID;
+    dialogueLua.luaState["GLOBAL"] = nullEntityID;
+    dialogueChoiceConditionLua.luaState["GLOBAL"] = nullEntityID;
+
     addEntityInitBindings();
     addEntityItemHandlerBindings();
     addItemInitBindings();
@@ -112,6 +114,12 @@ void EngineLuaBindings::addEntityItemHandlerBindings()
         "getStoredBitSet", &EngineLuaBindings::getStoredBitSet, this);
     entityItemHandlerLua.luaState.set_function(
         "getStoredBit", &EngineLuaBindings::getStoredBit, this);
+    entityItemHandlerLua.luaState.set_function(
+        "getBit", &EngineLuaBindings::getBit, this);
+    entityItemHandlerLua.luaState.set_function(
+        "setBit", &EngineLuaBindings::setBit, this);
+    entityItemHandlerLua.luaState.set_function(
+        "getCurrentTime", &EngineLuaBindings::getCurrentTime, this);
     entityItemHandlerLua.luaState.set_function(
         "sendSystemMessage", [&](std::string_view message) {
             sendSystemMessage(message, entityItemHandlerLua.clientID);
@@ -180,6 +188,12 @@ void EngineLuaBindings::addDialogueBindings()
         "getStoredBitSet", &EngineLuaBindings::getStoredBitSet, this);
     dialogueLua.luaState.set_function("getStoredBit",
                                       &EngineLuaBindings::getStoredBit, this);
+    dialogueLua.luaState.set_function("getBit", &EngineLuaBindings::getBit,
+                                      this);
+    dialogueLua.luaState.set_function("setBit", &EngineLuaBindings::setBit,
+                                      this);
+    dialogueLua.luaState.set_function("getCurrentTime",
+                                      &EngineLuaBindings::getCurrentTime, this);
     dialogueLua.luaState.set_function(
         "sendSystemMessage", [&](std::string_view message) {
             sendSystemMessage(message, dialogueLua.clientID);
@@ -208,6 +222,8 @@ void EngineLuaBindings::addDialogueChoiceConditionBindings()
         "getStoredBitSet", &EngineLuaBindings::getStoredBitSet, this);
     dialogueChoiceConditionLua.luaState.set_function(
         "getStoredBit", &EngineLuaBindings::getStoredBit, this);
+    dialogueChoiceConditionLua.luaState.set_function(
+        "getCurrentTime", &EngineLuaBindings::getCurrentTime, this);
 }
 
 void EngineLuaBindings::addDialogueChoiceBindings()
@@ -470,7 +486,7 @@ void EngineLuaBindings::storeUint(entt::entity entity,
     }
     else {
         // We were given entt::null, use the global store.
-        world.storeGlobalValue(workString, newValue);
+        world.storeGlobalValue(stringID, newValue);
     }
 }
 
@@ -608,7 +624,8 @@ bool EngineLuaBindings::getStoredBit(entt::entity entity,
     return getBit(storedValue, bitToGet);
 }
 
-void EngineLuaBindings::setBit(Uint32& bitSet, Uint8 bitToSet, bool newValue)
+void EngineLuaBindings::setBit(std::reference_wrapper<Uint32> bitSet,
+                               Uint8 bitToSet, bool newValue)
 {
     if (bitToSet > 31) {
         throw std::runtime_error{
@@ -632,6 +649,12 @@ bool EngineLuaBindings::getBit(Uint32 bitSet, Uint8 bitToGet)
     }
 
     return (bitSet >> bitToGet) & static_cast<Uint32>(1);
+}
+
+Uint32 EngineLuaBindings::getCurrentTime()
+{
+    time_t timeValue{time(nullptr)};
+    return static_cast<Uint32>(timeValue);
 }
 
 void EngineLuaBindings::sendSystemMessage(std::string_view message,

@@ -5,6 +5,7 @@
 #include "entt/fwd.hpp"
 #include <SDL_stdinc.h>
 #include <string_view>
+#include <functional>
 
 namespace sol
 {
@@ -243,12 +244,20 @@ private:
      *       concept and it's more efficient to 
      *       
      */
-    void setBit(Uint32& bitSet, Uint8 bitToSet, bool newValue);
+    void setBit(std::reference_wrapper<Uint32> bitSet, Uint8 bitToSet,
+                bool newValue);
 
     /**
      * Gets a bit from a bit set.
      */
     bool getBit(Uint32 bitSet, Uint8 bitToGet);
+
+    /**
+     * Returns the current time in seconds since 0 UTC (Jan 1, 1970).
+     * Note: We define our own function instead of using Lua's os.time because 
+     *       many of the os library functions are not safe to expose to users.
+     */
+    Uint32 getCurrentTime();
 
     /**
      * Sends a system message to the client.

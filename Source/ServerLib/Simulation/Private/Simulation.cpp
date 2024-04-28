@@ -63,7 +63,7 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData)
     entityInitLua->luaState.open_libraries(sol::lib::base);
     entityItemHandlerLua->luaState.open_libraries(sol::lib::base);
     itemInitLua->luaState.open_libraries(sol::lib::base);
-    dialogueLua->luaState.open_libraries(sol::lib::base);
+    dialogueLua->luaState.open_libraries(sol::lib::base, sol::lib::os);
     dialogueChoiceConditionLua->luaState.open_libraries(sol::lib::base);
     engineLuaBindings.addBindings();
 
