@@ -387,20 +387,23 @@ Sint8 Client::calcAdjustment(
 }
 
 void Client::printAdjustmentInfo(
-    const CircularBuffer<Sint8, Config::TICKDIFF_HISTORY_LENGTH>&
-        tickDiffHistoryCopy,
-    unsigned int numFreshDiffsCopy, int truncatedAverage)
+    [[maybe_unused]] const CircularBuffer<
+        Sint8, Config::TICKDIFF_HISTORY_LENGTH>& tickDiffHistoryCopy,
+    [[maybe_unused]] unsigned int numFreshDiffsCopy,
+    [[maybe_unused]] int truncatedAverage)
 {
-    LOG_INFO("Calc'd adjustment. NetID: %u, adjustment: %d, iteration: %u",
-             netID, (Config::TICKDIFF_TARGET - truncatedAverage),
-             latestAdjIteration.load());
-    LOG_INFO("truncatedAverage: %d, numFreshDiffs: %u. Values:",
-             truncatedAverage, numFreshDiffsCopy);
+    LOG_DEBUG("Calc'd adjustment. NetID: %u, adjustment: %d, iteration: %u",
+              netID, (Config::TICKDIFF_TARGET - truncatedAverage),
+              latestAdjIteration.load());
+    LOG_DEBUG("truncatedAverage: %d, numFreshDiffs: %u. Values:",
+              truncatedAverage, numFreshDiffsCopy);
+#ifdef DEBUG
     std::printf("[");
-    for (unsigned int i = 0; i < Config::TICKDIFF_HISTORY_LENGTH; ++i) {
+    for (unsigned int i{0}; i < Config::TICKDIFF_HISTORY_LENGTH; ++i) {
         std::printf("%d, ", tickDiffHistoryCopy[i]);
     }
     std::printf("]\n");
+#endif
 }
 
 } // end namespace Server

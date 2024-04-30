@@ -18,7 +18,8 @@ namespace AM
  */
 struct ChunkSnapshot {
     struct PaletteEntry {
-        /** The type of tile layer that this entry represents. */
+        /** The type of tile layer that this entry represents.
+            Each layer type maps directly to a single graphic set type. */
         TileLayer::Type layerType{TileLayer::Type::None};
 
         /** The string ID of the graphic set that this entry refers to. */
@@ -42,10 +43,10 @@ struct ChunkSnapshot {
     /** Holds an entry for each graphic used in this chunk's tiles. Part of a
         space-saving approach that lets TileSnapshot hold indices into this
         palette instead of directly holding the data. */
-    std::vector<PaletteEntry> palette;
+    std::vector<PaletteEntry> palette{};
 
     /** The tiles that make up this chunk, stored in row-major order. */
-    std::array<TileSnapshot, SharedConfig::CHUNK_TILE_COUNT> tiles;
+    std::array<TileSnapshot, SharedConfig::CHUNK_TILE_COUNT> tiles{};
 
     /**
      * Returns the palette index for the given palette entry info.

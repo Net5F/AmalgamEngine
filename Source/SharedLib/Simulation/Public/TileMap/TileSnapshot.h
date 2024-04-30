@@ -20,7 +20,7 @@ struct TileSnapshot {
 
         This vector's elements are indices into the palette of the ChunkSnapshot
         or ChunkWireSnapshot that contains this tile snapshot. */
-    std::vector<Uint8> layers;
+    std::vector<Uint8> layers{};
 };
 
 template<typename S>

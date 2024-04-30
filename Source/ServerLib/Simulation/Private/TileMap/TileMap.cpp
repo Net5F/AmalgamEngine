@@ -53,7 +53,7 @@ void TileMap::save(const std::string& fileName)
     LOG_INFO("Saving map...");
 
     // Prime a timer.
-    Timer timer;
+    Timer timer{};
 
     /* Save this map's state into a snapshot. */
     // Save the header data.
