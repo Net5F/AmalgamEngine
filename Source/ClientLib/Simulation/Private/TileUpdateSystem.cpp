@@ -20,6 +20,9 @@ TileUpdateSystem::TileUpdateSystem(World& inWorld, Network& inNetwork)
 
 void TileUpdateSystem::updateTiles()
 {
+    // Disable auto collision rebuild (it's more efficient to do it all after).
+    world.tileMap.setAutoRebuildCollision(false);
+
     // Process any waiting tile updates from the server.
     TileClearLayers tileClearLayers{};
     while (clearLayersQueue.pop(tileClearLayers)) {
@@ -40,6 +43,9 @@ void TileUpdateSystem::updateTiles()
     while (removeLayerQueue.pop(tileRemoveLayer)) {
         remTileLayer(tileRemoveLayer);
     }
+
+    // Re-enable auto collision rebuild (rebuilds any dirty tiles).
+    world.tileMap.setAutoRebuildCollision(true);
 }
 
 void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SpriteSortInfo.h"
-#include "TileLayers.h"
 #include "PhantomSpriteInfo.h"
 #include "SpriteColorModInfo.h"
 #include "Timer.h"
@@ -14,6 +13,7 @@ namespace AM
 {
 struct Camera;
 class Tile;
+struct TileLayerID;
 struct GraphicState;
 
 namespace Client

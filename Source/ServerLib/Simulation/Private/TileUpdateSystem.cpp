@@ -69,6 +69,9 @@ void TileUpdateSystem::updateTiles()
 {
     ZoneScoped;
 
+    // Disable auto collision rebuild (it's more efficient to do it all after).
+    world.tileMap.setAutoRebuildCollision(false);
+
     // Process any waiting update requests.
     TileAddLayer addLayerRequest{};
     while (addLayerRequestQueue.pop(addLayerRequest)) {
@@ -89,6 +92,9 @@ void TileUpdateSystem::updateTiles()
     while (extentClearLayersRequestQueue.pop(clearExtentLayersRequest)) {
         clearExtentLayers(clearExtentLayersRequest);
     }
+
+    // Re-enable auto collision rebuild (rebuilds any dirty tiles).
+    world.tileMap.setAutoRebuildCollision(true);
 }
 
 void TileUpdateSystem::sendTileUpdates()

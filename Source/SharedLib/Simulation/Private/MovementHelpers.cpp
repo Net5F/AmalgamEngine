@@ -1,7 +1,6 @@
 #include "MovementHelpers.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Rotation.h"
 #include "BoundingBox.h"
 #include "TileMapBase.h"
 #include "EntityLocator.h"

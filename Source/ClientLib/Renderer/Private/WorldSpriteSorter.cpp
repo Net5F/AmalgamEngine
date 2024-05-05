@@ -7,6 +7,8 @@
 #include "MovementHelpers.h"
 #include "Transforms.h"
 #include "ClientTransforms.h"
+#include "TileLayer.h"
+#include "TileLayerID.h"
 #include "TileExtent.h"
 #include "SharedConfig.h"
 #include "SpriteRenderData.h"
@@ -163,25 +165,27 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
 void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
                                         int x, int y)
 {
-    const FloorTileLayer& floor{tile.getFloor()};
-    std::optional<GraphicRef> floorGraphic{floor.getGraphic()};
-    if (floorGraphic) {
-        // If the UI wants this sprite replaced with a phantom, replace it.
-        auto phantomSpriteInfo = std::find_if(
-            phantomSprites.begin(), phantomSprites.end(),
-            [&](const PhantomSpriteInfo& info) {
-                return ((info.layerType == TileLayer::Type::Floor)
-                        && (info.tileX == x) && (info.tileY == y));
-            });
-        if (phantomSpriteInfo != phantomSprites.end()) {
-            floorGraphic.emplace(*(phantomSpriteInfo->sprite));
-            phantomSprites.erase(phantomSpriteInfo);
-        }
+    std::span<const TileLayer> floors{tile.getLayers(TileLayer::Type::Floor)};
+    for (const TileLayer& floor : floors) {
+        GraphicRef graphic{floor.getGraphic()};
+        if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
+            // If the UI wants this sprite replaced with a phantom, replace it.
+            auto phantomSpriteInfo = std::find_if(
+                phantomSprites.begin(), phantomSprites.end(),
+                [&](const PhantomSpriteInfo& info) {
+                    return ((info.layerType == TileLayer::Type::Floor)
+                            && (info.tileX == x) && (info.tileY == y));
+                });
+            if (phantomSpriteInfo != phantomSprites.end()) {
+                graphic = GraphicRef{*(phantomSpriteInfo->sprite)};
+                phantomSprites.erase(phantomSpriteInfo);
+            }
 
-        pushTileSprite(
-            *floorGraphic, camera,
-            {x, y, TileLayer::Type::Floor, floor.graphicSet->numericID, 0},
-            false);
+            pushTileSprite(graphic, camera,
+                           {x, y, TileLayer::Type::Floor,
+                            floor.graphicSet.get().numericID, 0},
+                           false);
+        }
     }
 }
 
@@ -189,15 +193,15 @@ void WorldSpriteSorter::pushFloorCoveringSprites(const Tile& tile,
                                                  const Camera& camera, int x,
                                                  int y)
 {
-    const auto& floorCoverings{tile.getFloorCoverings()};
-    for (const FloorCoveringTileLayer& floorCovering : floorCoverings) {
-        std::optional<GraphicRef> floorCoveringGraphic{
-            floorCovering.getGraphic()};
-        if (floorCoveringGraphic) {
-            pushTileSprite(*floorCoveringGraphic, camera,
+    std::span<const TileLayer> floorCoverings{
+        tile.getLayers(TileLayer::Type::FloorCovering)};
+    for (const TileLayer& floorCovering : floorCoverings) {
+        GraphicRef graphic{floorCovering.getGraphic()};
+        if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
+            pushTileSprite(graphic, camera,
                            {x, y, TileLayer::Type::FloorCovering,
-                            floorCovering.graphicSet->numericID,
-                            floorCovering.direction},
+                            floorCovering.graphicSet.get().numericID,
+                            floorCovering.graphicIndex},
                            false);
         }
     }
@@ -206,10 +210,10 @@ void WorldSpriteSorter::pushFloorCoveringSprites(const Tile& tile,
 void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
                                         int x, int y)
 {
-    const std::array<WallTileLayer, 2>& walls{tile.getWalls()};
-    for (const WallTileLayer& wall : walls) {
-        std::optional<GraphicRef> wallGraphic{wall.getGraphic()};
-        if (wallGraphic) {
+    std::span<const TileLayer> walls{tile.getLayers(TileLayer::Type::Wall)};
+    for (const TileLayer& wall : walls) {
+        GraphicRef graphic{wall.getGraphic()};
+        if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
             // If the UI wants this sprite replaced with a phantom, replace it.
             auto phantomSpriteInfo = std::find_if(
                 phantomSprites.begin(), phantomSprites.end(),
@@ -217,18 +221,19 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
                     if ((info.layerType == TileLayer::Type::Wall)
                         && (info.tileX == x) && (info.tileY == y)) {
                         // Check if we need to replace a N with a NE fill.
-                        if ((wall.wallType == Wall::Type::North)
+                        if ((wall.graphicIndex == Wall::Type::North)
                             && (info.wallType
                                 == Wall::Type::NorthEastGapFill)) {
                             return true;
                         }
                         // Check if we need to replace a NW fill with a W or N.
-                        else if ((wall.wallType == Wall::Type::NorthWestGapFill)
+                        else if ((wall.graphicIndex
+                                  == Wall::Type::NorthWestGapFill)
                                  && ((info.wallType == Wall::Type::West)
                                      || (info.wallType == Wall::Type::North))) {
                             return true;
                         }
-                        else if (info.wallType == wall.wallType) {
+                        else if (info.wallType == wall.graphicIndex) {
                             // Otherwise, check if the type matches.
                             return true;
                         }
@@ -236,13 +241,13 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
                     return false;
                 });
             if (phantomSpriteInfo != phantomSprites.end()) {
-                wallGraphic.emplace(*(phantomSpriteInfo->sprite));
+                graphic = GraphicRef{*(phantomSpriteInfo->sprite)};
                 phantomSprites.erase(phantomSpriteInfo);
             }
 
-            pushTileSprite(*wallGraphic, camera,
+            pushTileSprite(graphic, camera,
                            {x, y, TileLayer::Type::Wall,
-                            wall.graphicSet->numericID, wall.wallType},
+                            wall.graphicSet.get().numericID, wall.graphicIndex},
                            false);
         }
     }
@@ -251,13 +256,14 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
 void WorldSpriteSorter::pushObjectSprites(const Tile& tile,
                                           const Camera& camera, int x, int y)
 {
-    const std::vector<ObjectTileLayer>& objects{tile.getObjects()};
-    for (const ObjectTileLayer& object : objects) {
-        std::optional<GraphicRef> objectGraphic{object.getGraphic()};
-        if (objectGraphic) {
-            pushTileSprite(*objectGraphic, camera,
+    std::span<const TileLayer> objects{tile.getLayers(TileLayer::Type::Object)};
+    for (const TileLayer& object : objects) {
+        GraphicRef graphic{object.getGraphic()};
+        if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
+            pushTileSprite(graphic, camera,
                            {x, y, TileLayer::Type::Object,
-                            object.graphicSet->numericID, object.direction},
+                            object.graphicSet.get().numericID,
+                            object.graphicIndex},
                            false);
         }
     }

@@ -4,6 +4,7 @@ target_sources(SharedLib
         Private/ByteTools.cpp
         Private/IDPool.cpp
         Private/Log.cpp
+        Private/Morton.cpp
         Private/Paths.cpp
         Private/PeriodicCaller.cpp
         Private/SDLHelpers.cpp
@@ -21,6 +22,7 @@ target_sources(SharedLib
         Public/IDPool.h
         Public/OSEventHandler.h
         Public/Log.h
+        Public/Morton.h
         Public/Paths.h
         Public/PeriodicCaller.h
         Public/SDLHelpers.h

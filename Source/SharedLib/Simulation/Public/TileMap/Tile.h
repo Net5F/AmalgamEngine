@@ -1,69 +1,101 @@
 #pragma once
 
 #include "BoundingBox.h"
-#include "TileLayers.h"
+#include "TileLayer.h"
 #include <vector>
 #include <span>
-#include <array>
-#include <memory>
 
 namespace AM
 {
 struct Sprite;
 
 /**
- * A 32x32-unit tile in the tile map.
+ * A tile in the tile map.
  *
- * A tile consists of layers of sprites, which can be floors, walls, etc.
+ * Tiles consist of layers of sprites, which can be floors, walls, etc.
  *
  * Tiles contain no logic. If something on a tile requires logic, e.g. a tree
  * growing over time, it must have a system act upon it.
+ *
+ * Tiles can have the following layer counts:
+ *   1 floor
+ *   Any number of floor coverings
+ *   2 walls
+ *   Any number of objects
+ * All layers are optional and may not be present in a given tile.
  */
 class Tile
 {
 public:
-    Tile();
-
     /**
      * Returns the collision boxes of each of this tile's layers.
-     * Note: The returned vector may be empty, if this tile has no walls or
-     *       objects.
+     * Note: The returned vector may be empty, if this tile has no collision.
      */
     const std::vector<BoundingBox>& getCollisionBoxes() const;
 
     /**
-     * @return This tile's floor layer.
+     * Adds the given layer to this tile.
      */
-    const FloorTileLayer& getFloor() const;
-    FloorTileLayer& getFloor();
+    void addLayer(TileLayer::Type layerType, const GraphicSet& graphicSet,
+                  Uint8 graphicIndex);
 
     /**
-     * @return This tile's floor covering layers.
+     * Removes any layers with a matching type, graphic index, and graphic set.
+     *
+     * Note: This function is named singularly even though it may remove 
+     *       multiple layers, because typically there will only be one layer 
+     *       that matches all 3 values.
+     *
+     * @return true if the tile had any matching layers to remove, else false.
      */
-    const std::vector<FloorCoveringTileLayer>& getFloorCoverings() const;
-    std::vector<FloorCoveringTileLayer>& getFloorCoverings();
+    bool removeLayer(TileLayer::Type layerType, Uint16 graphicSetID,
+                     Uint8 graphicIndex);
 
     /**
-     * @return This tile's wall layers.
+     * Removes any layers with a matching type and graphic index, regardless 
+     * of their graphic set.
+     *
+     * @return true if the tile had any matching layers to remove, else false.
      */
-    const std::array<WallTileLayer, 2>& getWalls() const;
-    std::array<WallTileLayer, 2>& getWalls();
+    bool removeLayers(TileLayer::Type layerType, Uint8 graphicIndex);
 
     /**
-     * @return This tile's object layers.
+     * Clears all layers of the given types from this tile.
+     *
+     * @return true if any layers were cleared. false if the tile was empty.
      */
-    const std::vector<ObjectTileLayer>& getObjects() const;
-    std::vector<ObjectTileLayer>& getObjects();
+    bool clearLayers(
+        const std::array<bool, TileLayer::Type::Count>& layerTypesToRemove);
 
     /**
-     * @return true if this tile has a West wall.
+     * Clears all of this tile's layers.
+     *
+     * @return true if any layers were cleared. false if the tile was empty.
      */
-    bool hasWestWall() const;
+    bool clear();
 
     /**
-     * @return true if this tile has a North wall.
+     * @return This tile's layers of the given type, if it has any.
+     * Note: This span will be invalidated if you add, remove, or clear any 
+     *       of this tile's layers.
      */
-    bool hasNorthWall() const;
+    std::span<TileLayer> getLayers(TileLayer::Type layerType);
+    std::span<const TileLayer> getLayers(TileLayer::Type layerType) const;
+
+    /**
+     * @return All of this tile's layers.
+     */
+    std::vector<TileLayer>& getAllLayers();
+    const std::vector<TileLayer>& getAllLayers() const;
+
+    /**
+     * Returns a pointer to the first matching layer in this tile. If one isn't 
+     * found, returns nullptr.
+     */
+    TileLayer* findLayer(TileLayer::Type type, Uint8 graphicIndex);
+    const TileLayer* findLayer(TileLayer::Type type, Uint8 graphicIndex) const;
+    TileLayer* findLayer(TileLayer::Type type);
+    const TileLayer* findLayer(TileLayer::Type type) const;
 
     /**
      * Clears the collisionBoxes vector, then refills it with all of this
@@ -75,41 +107,23 @@ public:
     void rebuildCollision(int tileX, int tileY);
 
 private:
-    // TODO: Maybe eventually switch to an alternative vector type that
-    //       has a smaller footprint but only supports forward iterators.
-    /** Holds this tile's collision boxes.
-        We pre-calculate these and store them contiguously to speed up collision
-        checking. */
-    std::vector<BoundingBox> collisionBoxes;
-
-    struct Layers {
-        /** Tiles can only have 1 floor.
-            If the floor is cleared, its sprite set will be nullptr. */
-        FloorTileLayer floor{};
-
-        /** Tiles can have any number of floor coverings. */
-        std::vector<FloorCoveringTileLayer> floorCoverings{};
-
-        /** Tiles can have up to 2 walls.
-            If a wall doesn't exist, its graphic set will be nullptr and its
-            WallType will be None.
-            Possible states: [None, None], [West, None], [None, North],
-                             [West, NEGapFill], [None, NWGapFill] */
-        std::array<WallTileLayer, 2> walls{};
-
-        /** Tiles can have any number of objects. */
-        std::vector<ObjectTileLayer> objects{};
-    };
-
-    /** The sprite layers that are on this tile.  */
-    std::unique_ptr<Layers> layers;
-
     /**
      * Returns the given graphic's modelBounds, translated to world space and
      * offset to the given tile coords.
      */
     BoundingBox calcWorldBoundsForGraphic(int tileX, int tileY,
                                           const GraphicRef& graphic);
+
+    /** Holds this tile's collision boxes.
+        We pre-calculate these and store them contiguously to speed up collision
+        checking. */
+    std::vector<BoundingBox> collisionBoxes{};
+
+    // TODO: Maybe eventually switch to an alternative vector type that
+    //       has a smaller footprint but only supports forward iterators.
+    /** The graphic layers that are on this tile, sorted by their 
+        TileLayer::Type in increasing order. */
+    std::vector<TileLayer> layers{};
 };
 
 } // End namespace AM

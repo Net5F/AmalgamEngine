@@ -44,16 +44,17 @@ struct GraphicSet {
         spaces with underscores and making everything lowercase.
         This ID will be consistent, and can be used for persistent state. */
     std::string stringID{"empty"};
-};
 
-struct FloorGraphicSet : public GraphicSet {
     /** This graphic set's unique numeric identifier.
+        Can be cast to FloorGraphicSetID, etc depending on this set's type.
         Each graphic set type has its own ID space.
         This value can be used safely at runtime, but shouldn't be used for
         persistent state since it may change when ResourceData.json is
         modified. */
-    FloorGraphicSetID numericID{0};
+    Uint16 numericID{0};
+};
 
+struct FloorGraphicSet : public GraphicSet {
     /** This floor's single graphic. */
     GraphicRef graphic;
 };
@@ -61,9 +62,6 @@ struct FloorGraphicSet : public GraphicSet {
 struct FloorCoveringGraphicSet : public GraphicSet {
     /** The number of variations that this graphic set can hold. */
     static constexpr std::size_t VARIATION_COUNT{8};
-
-    /** See FloorGraphicSet::numericID */
-    FloorCoveringGraphicSetID numericID{0};
 
     /** The 8 variations of this floor covering.
         If any slots weren't assigned a graphic, they will be set to the null 
@@ -75,9 +73,6 @@ struct FloorCoveringGraphicSet : public GraphicSet {
 };
 
 struct WallGraphicSet : public GraphicSet {
-    /** See FloorGraphicSet::numericID */
-    WallGraphicSetID numericID{0};
-
     /** The 4 types of wall graphic that we use for our modular wall system. */
     std::array<GraphicRef, Wall::Type::Count> graphics;
 };
@@ -86,17 +81,11 @@ struct ObjectGraphicSet : public GraphicSet {
     /** The number of variations that this graphic set can hold. */
     static constexpr std::size_t VARIATION_COUNT{8};
 
-    /** See FloorGraphicSet::numericID */
-    ObjectGraphicSetID numericID{0};
-
     /** See FloorCoveringGraphicSet::graphics. */
     std::array<GraphicRef, VARIATION_COUNT> graphics;
 };
 
 struct EntityGraphicSet : public GraphicSet {
-    /** See FloorGraphicSet::numericID */
-    EntityGraphicSetID numericID{0};
-
     /** The types of entity graphic that this set contains.
         The IdleSouth graphic type will always be present. All others are 
         optional. */

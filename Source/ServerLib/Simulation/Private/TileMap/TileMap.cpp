@@ -173,40 +173,10 @@ void TileMap::addTileLayersToSnapshot(const Tile& tile,
                                       TileSnapshot& tileSnapshot,
                                       ChunkSnapshot& chunkSnapshot)
 {
-    // Add the floor.
-    const FloorTileLayer& floor{tile.getFloor()};
-    if (floor.graphicSet != nullptr) {
+    // Add all of the tile's layers.
+    for (const TileLayer& layer : tile.getAllLayers()) {
         std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            TileLayer::Type::Floor, floor.graphicSet->stringID, 0)};
-        tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
-    }
-
-    // Add the floor coverings.
-    const auto& floorCoverings{tile.getFloorCoverings()};
-    for (const FloorCoveringTileLayer& floorCovering : floorCoverings) {
-        std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            TileLayer::Type::FloorCovering, floorCovering.graphicSet->stringID,
-            floorCovering.direction)};
-        tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
-    }
-
-    // Add the walls (skipping any empty elements).
-    const auto& walls{tile.getWalls()};
-    for (const WallTileLayer& wall : walls) {
-        if (wall.wallType != Wall::Type::None) {
-            std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-                TileLayer::Type::Wall, wall.graphicSet->stringID,
-                wall.wallType)};
-            tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
-        }
-    }
-
-    // Add the objects.
-    const auto& objects{tile.getObjects()};
-    for (const ObjectTileLayer& object : objects) {
-        std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            TileLayer::Type::Object, object.graphicSet->stringID,
-            object.direction)};
+            layer.type, layer.graphicSet.get().stringID, layer.graphicIndex)};
         tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
     }
 }

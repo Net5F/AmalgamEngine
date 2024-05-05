@@ -2,7 +2,7 @@
 
 #include "EngineMessageType.h"
 #include "TileExtent.h"
-#include "TileLayers.h"
+#include "TileLayer.h"
 #include "NetworkDefs.h"
 #include <SDL_stdinc.h>
 

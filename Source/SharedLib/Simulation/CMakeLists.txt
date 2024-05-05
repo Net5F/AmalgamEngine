@@ -18,6 +18,7 @@ target_sources(SharedLib
         Private/TileMap/ChunkPosition.cpp
         Private/TileMap/Tile.cpp
         Private/TileMap/TileExtent.cpp
+        Private/TileMap/TileLayer.cpp
         Private/TileMap/TileMapBase.cpp
         Private/TileMap/TilePosition.cpp
 	PUBLIC
@@ -71,8 +72,8 @@ target_sources(SharedLib
         Public/TileMap/ChunkPosition.h
         Public/TileMap/ChunkSnapshot.h
         Public/TileMap/Tile.h
+        Public/TileMap/TileLayer.h
         Public/TileMap/TileLayerID.h
-        Public/TileMap/TileLayers.h
         Public/TileMap/TileExtent.h
         Public/TileMap/TileMapBase.h
         Public/TileMap/TileMapSnapshot.h

@@ -29,6 +29,21 @@ struct DiscretePosition {
         return (x != other.x) || (y != other.y);
     }
 
+    bool operator<(const DiscretePosition<T>& other) const
+    {
+        if (x < other.x)
+            return true;
+        if (x > other.x)
+            return false;
+
+        if (y < other.y)
+            return true;
+        if (y > other.y)
+            return false;
+
+        return false;
+    }
+
     DiscretePosition<T> operator+(const DiscretePosition<T>& other) const
     {
         return {(x + other.x), (y + other.y)};

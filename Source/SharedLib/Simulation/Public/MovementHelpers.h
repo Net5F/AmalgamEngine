@@ -4,6 +4,7 @@
 #include "BoundingBox.h"
 #include "Tile.h"
 #include "TileExtent.h"
+#include "Rotation.h"
 #include "Log.h"
 #include "entt/fwd.hpp"
 #include <array>
@@ -12,7 +13,6 @@ namespace AM
 {
 struct Position;
 struct PreviousPosition;
-struct Rotation;
 class TileMapBase;
 class EntityLocator;
 

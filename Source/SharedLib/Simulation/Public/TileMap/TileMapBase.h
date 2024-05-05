@@ -6,13 +6,14 @@
 #include "Rotation.h"
 #include "Wall.h"
 #include "ChunkExtent.h"
+#include "TilePosition.h"
 #include "TileExtent.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
 #include "TileSnapshot.h"
-#include "TileLayers.h"
+#include "TileLayer.h"
 #include "AMAssert.h"
 #include <vector>
 #include <variant>
@@ -130,11 +131,12 @@ public:
     /**
      * Clears the given layer types from the given tile.
      *
-     * @tparam LayersToClear  The layer types to clear.
+     * @param layerTypesToClear The layer types to clear.
      * @return true if any layers were cleared. false if the tile was empty.
      */
-    template<IsTileLayerType... LayersToClear>
-    bool clearTileLayers(int tileX, int tileY);
+    bool clearTileLayers(
+        int tileX, int tileY,
+        const std::initializer_list<TileLayer::Type>& layerTypesToClear);
 
     /**
      * Override for clearing based on an array of bools. If a given index
@@ -154,11 +156,12 @@ public:
     /**
      * Clears the given layer types from all tiles within the given extent.
      *
-     * @tparam LayersToClear  The layer types to clear in each tile.
+     * @param layerTypesToClear The layer types to clear in each tile.
      * @return true if any layers were cleared. false if all tiles were empty.
      */
-    template<IsTileLayerType... LayersToClear>
-    bool clearExtentLayers(const TileExtent& extent);
+    bool clearExtentLayers(
+        const TileExtent& extent,
+        const std::initializer_list<TileLayer::Type>& layerTypesToClear);
 
     /**
      * Override for clearing based on an array of bools. If a given index
@@ -195,6 +198,25 @@ public:
      */
     const TileExtent& getTileExtent() const;
 
+    /**
+     * If true, when a tile is updated, its collision will be rebuilt.
+     *
+     * If false, the user must manually call rebuildDirtyTileCollision() after 
+     * finishing all of their tile updates.
+     *
+     * When set from false to true, rebuildDirtyTileCollision() is called.
+     */
+    void setAutoRebuildCollision(bool newAutoRebuildCollision);
+
+    /**
+     * Rebuilds the collision of any tiles that have been updated since the 
+     * last time this was called (while autoRebuildCollision is disabled).
+     *
+     * You normally don't need to call this manually, since it's called when 
+     * autoRebuildCollision is re-enabled.
+     */
+    void rebuildDirtyTileCollision();
+
     using TileUpdateVariant
         = std::variant<TileAddLayer, TileRemoveLayer, TileClearLayers,
                        TileExtentClearLayers>;
@@ -227,6 +249,12 @@ protected:
     }
 
     /**
+     * If auto rebuild is enabled, rebuilds the given tile's collision.
+     * Otherwise, queues the collision to be rebuilt.
+     */
+    void rebuildTileCollision(Tile& tile, int tileX, int tileY);
+
+    /**
      * Adds a North wall to the given tile and adds gap fills if necessary.
      */
     void addNorthWall(int tileX, int tileY, const WallGraphicSet& graphicSet);
@@ -256,11 +284,13 @@ protected:
         const std::array<bool, TileLayer::Type::Count>& layerTypesToClear);
 
     /**
-     * Returns an array of layer types to clear, based on the given
-     * LayersToClear.
+     * Returns a bool array of layer types to clear, based on the given
+     * list of type enums.
+     * We do things this way because it's more convenient for the caller to 
+     * pass a list of type enums than an array of bools.
      */
-    template<IsTileLayerType... LayersToClear>
-    std::array<bool, TileLayer::Type::Count> getLayerTypesToClear();
+    std::array<bool, TileLayer::Type::Count> toBoolArray(
+        const std::initializer_list<TileLayer::Type>& layerTypesToClear);
 
     /** The version of the map format. Kept as just a 16-bit int for now, we
         can see later if we care to make it more complicated. */
@@ -279,6 +309,15 @@ protected:
     std::vector<Tile> tiles;
 
 private:
+    /**
+     * If true, collision will be rebuilt every time a tile is modified.
+     * If false, the user must manually call rebuildDirtyTileCollision().
+     */
+    bool autoRebuildCollision;
+
+    /** A queue of tiles that need their collision rebuilt. */
+    std::vector<TilePosition> dirtyCollisionQueue;
+
     /** If true, all tile updates will be pushed into tileUpdateHistory. */
     bool trackTileUpdates;
 
@@ -288,19 +327,6 @@ private:
     std::vector<TileUpdateVariant> tileUpdateHistory;
 };
 
-template<IsTileLayerType... LayersToClear>
-bool TileMapBase::clearTileLayers(int tileX, int tileY)
-{
-    return clearTileLayers(tileX, tileY,
-                           getLayerTypesToClear<LayersToClear...>());
-}
-
-template<IsTileLayerType... LayersToClear>
-bool TileMapBase::clearExtentLayers(const TileExtent& extent)
-{
-    return clearExtentLayers(extent, getLayerTypesToClear<LayersToClear...>());
-}
-
 template<IsChunkSnapshotType T>
 void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
                                           const T& chunkSnapshot, int tileX,
@@ -308,81 +334,56 @@ void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
 {
     // Note: We can't use the set/add functions because they'll push updates
     //       into the history, and addWall() adds extra walls.
+
+    // Iterate the tile snapshot and add each tile layer.
     Tile& tile{tiles[linearizeTileIndex(tileX, tileY)]};
+    bool rebuildCollision{false};
     for (Uint8 paletteIndex : tileSnapshot.layers) {
         const auto& paletteEntry{chunkSnapshot.palette[paletteIndex]};
 
+        // Get this layer's graphic set.
+        const GraphicSet* graphicSet{nullptr};
         switch (paletteEntry.layerType) {
             case TileLayer::Type::Floor: {
-                const FloorGraphicSet& graphicSet{
-                    graphicData.getFloorGraphicSet(paletteEntry.graphicSetID)};
-                tile.getFloor().graphicSet = &graphicSet;
+                graphicSet = &(
+                    graphicData.getFloorGraphicSet(paletteEntry.graphicSetID));
+                rebuildCollision = true;
                 break;
             }
             case TileLayer::Type::FloorCovering: {
-                const auto& graphicSet{graphicData.getFloorCoveringGraphicSet(
-                    paletteEntry.graphicSetID)};
-                tile.getFloorCoverings().emplace_back(
-                    &graphicSet,
-                    static_cast<Rotation::Direction>(paletteEntry.graphicIndex));
+                graphicSet = &(graphicData.getFloorCoveringGraphicSet(
+                    paletteEntry.graphicSetID));
                 break;
             }
             case TileLayer::Type::Wall: {
-                std::array<WallTileLayer, 2>& walls{tile.getWalls()};
-                const WallGraphicSet& graphicSet{
-                    graphicData.getWallGraphicSet(paletteEntry.graphicSetID)};
-
-                Wall::Type newWallType{
-                    static_cast<Wall::Type>(paletteEntry.graphicIndex)};
-                if (newWallType == Wall::Type::West) {
-                    walls[0].graphicSet = &graphicSet;
-                    walls[0].wallType = newWallType;
-                }
-                else {
-                    walls[1].graphicSet = &graphicSet;
-                    walls[1].wallType = newWallType;
-                }
-                tile.rebuildCollision(tileX, tileY);
+                graphicSet = &(
+                    graphicData.getWallGraphicSet(paletteEntry.graphicSetID));
+                rebuildCollision = true;
                 break;
             }
             case TileLayer::Type::Object: {
-                const auto& graphicSet{
-                    graphicData.getObjectGraphicSet(paletteEntry.graphicSetID)};
-                tile.getObjects().emplace_back(
-                    &graphicSet,
-                    static_cast<Rotation::Direction>(paletteEntry.graphicIndex));
-                tile.rebuildCollision(tileX, tileY);
+                graphicSet = &(
+                    graphicData.getObjectGraphicSet(paletteEntry.graphicSetID));
+                rebuildCollision = true;
                 break;
             }
             default: {
                 break;
             }
         }
-    }
-}
 
-template<IsTileLayerType... LayersToClear>
-std::array<bool, TileLayer::Type::Count> TileMapBase::getLayerTypesToClear()
-{
-    std::array<bool, TileLayer::Type::Count> layerTypesToClear{};
-    if constexpr ((std::is_same_v<FloorTileLayer, LayersToClear> || ...)) {
-        layerTypesToClear[TileLayer::Type::Floor] = true;
-    }
+        if (!graphicSet) {
+            LOG_FATAL("Graphic set was not found for loaded tile layer.");
+        }
 
-    if constexpr ((std::is_same_v<FloorCoveringTileLayer,
-                                  LayersToClear> || ...)) {
-        layerTypesToClear[TileLayer::Type::FloorCovering] = true;
+        // Add the layer to the tile.
+        tile.addLayer(paletteEntry.layerType, *graphicSet,
+                      paletteEntry.graphicIndex);
     }
 
-    if constexpr ((std::is_same_v<WallTileLayer, LayersToClear> || ...)) {
-        layerTypesToClear[TileLayer::Type::Wall] = true;
+    if (rebuildCollision) {
+        dirtyCollisionQueue.emplace_back(tileX, tileY);
     }
-
-    if constexpr ((std::is_same_v<ObjectTileLayer, LayersToClear> || ...)) {
-        layerTypesToClear[TileLayer::Type::Object] = true;
-    }
-
-    return layerTypesToClear;
 }
 
 } // End namespace AM

@@ -254,24 +254,24 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
     // Add the null sprite, animation, and graphic sets.
     GraphicRef nullSprite{sprites.emplace_back("Null", "null", NULL_SPRITE_ID)};
     animations.emplace_back("Null", "null", NULL_ANIMATION_ID);
-    floorGraphicSets.emplace_back(GraphicSet{"Null", "null"},
-                                  NULL_FLOOR_GRAPHIC_SET_ID, nullSprite);
+    floorGraphicSets.emplace_back(
+        GraphicSet{"Null", "null", NULL_FLOOR_GRAPHIC_SET_ID}, nullSprite);
     floorCoveringGraphicSets.emplace_back(
-        GraphicSet{"Null", "null"}, NULL_FLOOR_COVERING_GRAPHIC_SET_ID,
+        GraphicSet{"Null", "null", NULL_FLOOR_COVERING_GRAPHIC_SET_ID},
         std::array<GraphicRef, FloorCoveringGraphicSet::VARIATION_COUNT>{
             nullSprite, nullSprite, nullSprite, nullSprite, nullSprite,
             nullSprite, nullSprite, nullSprite});
     wallGraphicSets.emplace_back(
-        GraphicSet{"Null", "null"}, NULL_WALL_GRAPHIC_SET_ID,
-        std::array<GraphicRef, Wall::Type::Count>{
-            nullSprite, nullSprite, nullSprite, nullSprite});
+        GraphicSet{"Null", "null", NULL_WALL_GRAPHIC_SET_ID},
+        std::array<GraphicRef, Wall::Type::Count>{nullSprite, nullSprite,
+                                                  nullSprite, nullSprite});
     objectGraphicSets.emplace_back(
-        GraphicSet{"Null", "null"}, NULL_OBJECT_GRAPHIC_SET_ID,
+        GraphicSet{"Null", "null", NULL_OBJECT_GRAPHIC_SET_ID},
         std::array<GraphicRef, ObjectGraphicSet::VARIATION_COUNT>{
             nullSprite, nullSprite, nullSprite, nullSprite, nullSprite,
             nullSprite, nullSprite, nullSprite});
-    entityGraphicSets.emplace_back(GraphicSet{"Null", "null"},
-                                   NULL_ENTITY_GRAPHIC_SET_ID);
+    entityGraphicSets.emplace_back(
+        GraphicSet{"Null", "null", NULL_ENTITY_GRAPHIC_SET_ID});
 
     // Parse the json and catch any parsing errors.
     try {
@@ -414,7 +414,7 @@ void GraphicDataBase::parseFloorGraphicSet(const nlohmann::json& graphicSetJson)
 
     // Save the graphic set in the appropriate vector.
     floorGraphicSets.emplace_back(
-        GraphicSet{displayName, stringID}, numericID,
+        GraphicSet{displayName, stringID, numericID},
         GraphicRef{getSprite(graphicIDJson[0].get<GraphicID>())});
 }
 
@@ -425,8 +425,8 @@ void GraphicDataBase::parseFloorCoveringGraphicSet(
     GraphicRef nullSprite{sprites[0]};
     FloorCoveringGraphicSet& graphicSet{floorCoveringGraphicSets.emplace_back(
         GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
-                   graphicSetJson.at("stringID").get<std::string>()},
-        graphicSetJson.at("numericID"),
+                   graphicSetJson.at("stringID").get<std::string>(),
+                   graphicSetJson.at("numericID")},
         std::array<GraphicRef, FloorCoveringGraphicSet::VARIATION_COUNT>{
             nullSprite, nullSprite, nullSprite, nullSprite, nullSprite,
             nullSprite, nullSprite, nullSprite})};
@@ -461,7 +461,7 @@ void GraphicDataBase::parseWallGraphicSet(const nlohmann::json& graphicSetJson)
 
     // Save the graphic set in the appropriate vector.
     wallGraphicSets.emplace_back(
-        GraphicSet{displayName, stringID}, numericID,
+        GraphicSet{displayName, stringID, numericID},
         std::array<GraphicRef, Wall::Type::Count>{
             westGraphic, northGraphic, northwestGraphic, northeastGraphic});
 }
@@ -473,8 +473,8 @@ void GraphicDataBase::parseObjectGraphicSet(
     GraphicRef nullSprite{sprites[0]};
     ObjectGraphicSet& graphicSet{objectGraphicSets.emplace_back(
         GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
-                   graphicSetJson.at("stringID").get<std::string>()},
-        graphicSetJson.at("numericID"),
+                   graphicSetJson.at("stringID").get<std::string>(),
+                   graphicSetJson.at("numericID")},
         std::array<GraphicRef, ObjectGraphicSet::VARIATION_COUNT>{
             nullSprite, nullSprite, nullSprite, nullSprite, nullSprite,
             nullSprite, nullSprite, nullSprite})};
@@ -501,8 +501,8 @@ void GraphicDataBase::parseEntityGraphicSet(
     GraphicRef nullSprite{sprites[0]};
     EntityGraphicSet& graphicSet{entityGraphicSets.emplace_back(
         GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
-                   graphicSetJson.at("stringID").get<std::string>()},
-        graphicSetJson.at("numericID"))};
+                   graphicSetJson.at("stringID").get<std::string>(),
+                   graphicSetJson.at("numericID")})};
 
     // Add the graphics.
     const auto& graphicIDTypesJson{graphicSetJson.at("graphicIDTypes")};

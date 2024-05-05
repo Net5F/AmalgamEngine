@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Sprite.h"
-#include "TileLayers.h"
 #include "WorldObjectID.h"
 #include <SDL_rect.h>
 #include <vector>

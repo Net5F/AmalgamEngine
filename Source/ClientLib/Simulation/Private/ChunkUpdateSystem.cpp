@@ -122,6 +122,9 @@ void ChunkUpdateSystem::requestNewInRangeChunks(
 
 void ChunkUpdateSystem::receiveAndApplyUpdates()
 {
+    // Disable auto collision rebuild (it's more efficient to do it all after).
+    world.tileMap.setAutoRebuildCollision(false);
+
     // Process any received chunk updates.
     std::shared_ptr<const ChunkUpdate> receivedUpdate{nullptr};
     while (chunkUpdateQueue.pop(receivedUpdate)) {
@@ -130,6 +133,9 @@ void ChunkUpdateSystem::receiveAndApplyUpdates()
             applyChunkSnapshot(chunk);
         }
     }
+
+    // Re-enable auto collision rebuild (rebuilds any dirty tiles).
+    world.tileMap.setAutoRebuildCollision(true);
 }
 
 void ChunkUpdateSystem::applyChunkSnapshot(
