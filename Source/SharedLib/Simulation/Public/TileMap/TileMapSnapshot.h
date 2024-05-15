@@ -26,10 +26,13 @@ struct TileMapSnapshot {
     //       x/y fields here if we ever support negative origins.
 
     /** The length, in chunks, of the map's X axis. */
-    Uint32 xLengthChunks{0};
+    Uint16 xLengthChunks{0};
 
     /** The length, in chunks, of the map's Y axis. */
-    Uint32 yLengthChunks{0};
+    Uint16 yLengthChunks{0};
+
+    /** The length, in chunks, of the map's Z axis. */
+    Uint16 zLengthChunks{0};
 
     /** The chunks that make up this map, stored in row-major order. */
     std::vector<ChunkSnapshot> chunks;
@@ -39,8 +42,9 @@ template<typename S>
 void serialize(S& serializer, TileMapSnapshot& tileMapSnapshot)
 {
     serializer.value2b(tileMapSnapshot.version);
-    serializer.value4b(tileMapSnapshot.xLengthChunks);
-    serializer.value4b(tileMapSnapshot.yLengthChunks);
+    serializer.value2b(tileMapSnapshot.xLengthChunks);
+    serializer.value2b(tileMapSnapshot.yLengthChunks);
+    serializer.value2b(tileMapSnapshot.zLengthChunks);
     serializer.container(tileMapSnapshot.chunks, TileMapSnapshot::MAX_CHUNKS);
 }
 

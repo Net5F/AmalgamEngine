@@ -130,6 +130,7 @@ void ClientConnectionSystem::sendConnectionResponse(NetworkID networkID,
     const ChunkExtent& mapChunkExtent{world.tileMap.getChunkExtent()};
     connectionResponse.mapXLengthChunks = mapChunkExtent.xLength;
     connectionResponse.mapYLengthChunks = mapChunkExtent.yLength;
+    connectionResponse.mapZLengthChunks = mapChunkExtent.zLength;
 
     // Send the connection response message.
     network.serializeAndSend(networkID, connectionResponse, currentTick);

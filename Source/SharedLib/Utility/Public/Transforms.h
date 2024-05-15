@@ -34,15 +34,15 @@ public:
 
     /**
      * Converts a point in screen space to a position in world space.
-     * Note: The resulting position will be a point on the ground (Z == 0).
-     *       For anything else, see screenToWorldRay().
+     * Note: The resulting position will be aligned along the Z axis with the 
+     *       given camera.target.z.
      */
     static Position screenToWorld(const SDL_FPoint& screenPoint,
                                   const Camera& camera);
 
     /**
      * Converts a point in screen space to a ray in world space.
-     * Note: The resulting ray starts at the ground (Z == 0) and points
+     * Note: The resulting ray starts at the given camera.target.z and points
      *       towards the camera. It does not point from the camera to the
      *       ground, as may be expected.
      */
@@ -57,10 +57,10 @@ public:
     static float screenYToWorldZ(float yCoord, float zoomFactor);
 
     /**
-     * Helper function, converts a camera-relative screen point to a tile
-     * position.
-     *
+     * Converts a point in screen space to a tile position in world space.
      * Mostly used for getting the tile that the mouse is over.
+     * Note: The resulting tile will be aligned along the Z axis with the given 
+     *       camera.target.z. To select higher or lower tiles, move the camera.
      */
     static TilePosition screenToTile(const SDL_FPoint& screenPoint,
                                      const Camera& camera);
@@ -99,6 +99,31 @@ public:
      */
     static Position boundsToEntityPosition(const BoundingBox& boundingBox,
                                            const Sprite& sprite);
+
+    //-------------------------------------------------------------------------
+    // Constants
+    //-------------------------------------------------------------------------
+    /** The scaling factor to use when going from world tiles to screen tiles. */
+    static constexpr float TILE_FACE_WIDTH_WORLD_TO_SCREEN{
+        static_cast<float>(SharedConfig::TILE_FACE_SCREEN_WIDTH)
+        / SharedConfig::TILE_WORLD_WIDTH};
+    static constexpr float TILE_FACE_HEIGHT_WORLD_TO_SCREEN{
+        static_cast<float>(SharedConfig::TILE_FACE_SCREEN_HEIGHT)
+        / SharedConfig::TILE_WORLD_WIDTH};
+    static constexpr float TILE_SIDE_HEIGHT_WORLD_TO_SCREEN{
+        static_cast<float>(SharedConfig::TILE_SIDE_SCREEN_HEIGHT)
+        / SharedConfig::TILE_WORLD_HEIGHT};
+
+    /** The scaling factor to use when going from screen tiles to world tiles. */
+    static constexpr float TILE_FACE_WIDTH_SCREEN_TO_WORLD{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
+        / SharedConfig::TILE_FACE_SCREEN_WIDTH};
+    static constexpr float TILE_FACE_HEIGHT_SCREEN_TO_WORLD{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
+        / SharedConfig::TILE_FACE_SCREEN_HEIGHT};
+    static constexpr float TILE_SIDE_HEIGHT_SCREEN_TO_WORLD{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
+        / SharedConfig::TILE_SIDE_SCREEN_HEIGHT};
 };
 
 } // End namespace AM

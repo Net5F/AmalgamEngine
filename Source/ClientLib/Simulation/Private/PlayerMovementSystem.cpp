@@ -134,7 +134,7 @@ void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates)
         = world.registry.get<Position, PreviousPosition, Rotation, Collision>(
             world.playerEntity);
 
-    // Calculate their desired next position.
+    // Calculate our desired next position.
     Position desiredPosition{position};
     desiredPosition = MovementHelpers::calcPosition(
         position, inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
@@ -161,7 +161,7 @@ void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates)
         collision.worldBounds = resolvedBounds;
     }
 
-    // If they did actually move, update their position in the locator.
+    // If we did actually move, update our position in the locator.
     if (position != previousPosition) {
         world.entityLocator.setEntityLocation(world.playerEntity,
                                               collision.worldBounds);

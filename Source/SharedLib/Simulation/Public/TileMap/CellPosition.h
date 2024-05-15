@@ -25,6 +25,7 @@ struct hash<AM::CellPosition> {
         std::size_t seed{0};
         AM::hash_combine(seed, position.x);
         AM::hash_combine(seed, position.y);
+        AM::hash_combine(seed, position.z);
         return seed;
     }
 };

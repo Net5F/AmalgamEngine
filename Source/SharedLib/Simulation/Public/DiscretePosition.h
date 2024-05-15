@@ -10,23 +10,23 @@ namespace AM
  */
 template<typename T>
 struct DiscretePosition {
-    // Note: Screens and maps start at (0, 0) so we could make these unsigned,
-    //       but these are signed to facilitate using this struct for things
-    //       like negative offsets.
     /** The X-axis coordinate of this position. */
     int x{0};
 
     /** The Y-axis coordinate of this position. */
     int y{0};
 
+    /** The Z-axis coordinate of this position. */
+    int z{0};
+
     bool operator==(const DiscretePosition<T>& other) const
     {
-        return (x == other.x) && (y == other.y);
+        return (x == other.x) && (y == other.y) && (z == other.z);
     }
 
     bool operator!=(const DiscretePosition<T>& other) const
     {
-        return (x != other.x) || (y != other.y);
+        return (x != other.x) || (y != other.y) || (z != other.z);
     }
 
     bool operator<(const DiscretePosition<T>& other) const
@@ -41,18 +41,37 @@ struct DiscretePosition {
         if (y > other.y)
             return false;
 
+        if (z < other.z)
+            return true;
+        if (z > other.z)
+            return false;
+
         return false;
     }
 
     DiscretePosition<T> operator+(const DiscretePosition<T>& other) const
     {
-        return {(x + other.x), (y + other.y)};
+        return {(x + other.x), (y + other.y), (z + other.z)};
     }
 
     DiscretePosition<T>& operator+=(const DiscretePosition<T>& other)
     {
         x += other.x;
         y += other.y;
+        z += other.z;
+        return *this;
+    }
+
+    DiscretePosition<T> operator-(const DiscretePosition<T>& other) const
+    {
+        return {(x - other.x), (y - other.y), (z - other.z)};
+    }
+
+    DiscretePosition<T>& operator-=(const DiscretePosition<T>& other)
+    {
+        x -= other.x;
+        y -= other.y;
+        z -= other.z;
         return *this;
     }
 
@@ -64,13 +83,15 @@ struct DiscretePosition {
         // Get the differences between the positions.
         int xDif{other.x - x};
         int yDif{other.y - y};
+        int zDif{other.z - z};
 
         // Square the differences.
         xDif *= xDif;
         yDif *= yDif;
+        zDif *= zDif;
 
         // If the absolute squared distance is within 1 unit, return true.
-        return (std::abs(xDif + yDif) <= 1);
+        return (std::abs(xDif + yDif + zDif) <= 1);
     }
 };
 

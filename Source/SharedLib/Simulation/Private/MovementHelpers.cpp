@@ -24,11 +24,14 @@ Position MovementHelpers::calcPosition(const Position& position,
     int xDown{static_cast<int>(inputStates[Input::XDown])};
     int yUp{static_cast<int>(inputStates[Input::YUp])};
     int yDown{static_cast<int>(inputStates[Input::YDown])};
+    int zUp{static_cast<int>(inputStates[Input::ZUp])};
+    int zDown{static_cast<int>(inputStates[Input::ZDown])};
 
     // Calculate our direction vector, based on the entity's inputs.
     // Note: Opposite inputs cancel eachother out.
     float xDirection{static_cast<float>(xUp - xDown)};
     float yDirection{static_cast<float>(yUp - yDown)};
+    float zDirection{static_cast<float>(zUp - zDown)};
 
     // If we're moving diagonally, normalize our direction vector.
     if ((xDirection != 0) && (yDirection != 0)) {
@@ -39,15 +42,13 @@ Position MovementHelpers::calcPosition(const Position& position,
     // Calc the velocity.
     float velocityX{xDirection * SharedConfig::MOVEMENT_VELOCITY};
     float velocityY{yDirection * SharedConfig::MOVEMENT_VELOCITY};
+    float velocityZ{zDirection * SharedConfig::MOVEMENT_VELOCITY};
 
     // Update the position.
     Position newPosition{position};
     newPosition.x += static_cast<float>((deltaSeconds * velocityX));
     newPosition.y += static_cast<float>((deltaSeconds * velocityY));
-
-    // Note: Disabled Z-axis since it's underdeveloped. Can re-enable for
-    //       for testing. Eventually, we'll incorporate it fully.
-    // newPosition.z += static_cast<float>((deltaSeconds * velocity.z));
+    newPosition.z += static_cast<float>((deltaSeconds * velocityZ));
 
     return newPosition;
 }
@@ -104,17 +105,26 @@ BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
         return currentBounds;
     }
 
-    // For each tile that the desired bounds is touching.
-    for (int y = boxTileExtent.y; y <= boxTileExtent.yMax(); ++y) {
-        for (int x = boxTileExtent.x; x <= boxTileExtent.xMax(); ++x) {
-            const Tile& tile{tileMap.getTile(x, y)};
+    // Check for vertical collision up to 1 tile above and below the bounds.
+    int minZ{boxTileExtent.z - 1};
+    minZ = std::max(minZ, mapExtent.z);
+    int maxZ{boxTileExtent.zMax() + 1};
+    maxZ = std::min(maxZ, mapExtent.zMax());
 
-            // For each collision box in this tile.
-            for (const BoundingBox& collisionBox : tile.getCollisionBoxes()) {
-                // If the desired movement would intersect this box, reject
-                // the move.
-                if (desiredBounds.intersects(collisionBox)) {
-                    return currentBounds;
+    // For each tile that the desired bounds is touching.
+    for (int z{minZ}; z <= maxZ; ++z) {
+        for (int y{boxTileExtent.y}; y <= boxTileExtent.yMax(); ++y) {
+            for (int x{boxTileExtent.x}; x <= boxTileExtent.xMax(); ++x) {
+                const Tile& tile{tileMap.getTile({x, y, z})};
+
+                // For each collision box in this tile.
+                for (const BoundingBox& collisionBox :
+                     tile.getCollisionBoxes()) {
+                    // If the desired movement would intersect this box, reject
+                    // the move.
+                    if (desiredBounds.intersects(collisionBox)) {
+                        return currentBounds;
+                    }
                 }
             }
         }

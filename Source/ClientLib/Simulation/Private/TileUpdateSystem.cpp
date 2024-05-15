@@ -51,25 +51,22 @@ void TileUpdateSystem::updateTiles()
 void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
 {
     if (addLayerRequest.layerType == TileLayer::Type::Floor) {
-        world.tileMap.setFloor(addLayerRequest.tileX, addLayerRequest.tileY,
+        world.tileMap.setFloor(addLayerRequest.tilePosition,
                                addLayerRequest.graphicSetID);
     }
     else if (addLayerRequest.layerType == TileLayer::Type::FloorCovering) {
         world.tileMap.addFloorCovering(
-            addLayerRequest.tileX, addLayerRequest.tileY,
-            addLayerRequest.graphicSetID,
+            addLayerRequest.tilePosition, addLayerRequest.graphicSetID,
             static_cast<Rotation::Direction>(addLayerRequest.graphicIndex));
     }
     else if (addLayerRequest.layerType == TileLayer::Type::Wall) {
         world.tileMap.addWall(
-            addLayerRequest.tileX, addLayerRequest.tileY,
-            addLayerRequest.graphicSetID,
+            addLayerRequest.tilePosition, addLayerRequest.graphicSetID,
             static_cast<Wall::Type>(addLayerRequest.graphicIndex));
     }
     else if (addLayerRequest.layerType == TileLayer::Type::Object) {
         world.tileMap.addObject(
-            addLayerRequest.tileX, addLayerRequest.tileY,
-            addLayerRequest.graphicSetID,
+            addLayerRequest.tilePosition, addLayerRequest.graphicSetID,
             static_cast<Rotation::Direction>(addLayerRequest.graphicIndex));
     }
 }
@@ -79,23 +76,21 @@ void TileUpdateSystem::remTileLayer(const TileRemoveLayer& remLayerRequest)
     if (remLayerRequest.layerType == TileLayer::Type::Floor) {
         // Note: We normally won't receive this, since the server uses the
         //       clearTileLayers path for removing floors.
-        world.tileMap.remFloor(remLayerRequest.tileX, remLayerRequest.tileY);
+        world.tileMap.remFloor(remLayerRequest.tilePosition);
     }
     else if (remLayerRequest.layerType == TileLayer::Type::FloorCovering) {
         world.tileMap.remFloorCovering(
-            remLayerRequest.tileX, remLayerRequest.tileY,
-            remLayerRequest.graphicSetID,
+            remLayerRequest.tilePosition, remLayerRequest.graphicSetID,
             static_cast<Rotation::Direction>(remLayerRequest.graphicIndex));
     }
     else if (remLayerRequest.layerType == TileLayer::Type::Wall) {
         world.tileMap.remWall(
-            remLayerRequest.tileX, remLayerRequest.tileY,
+            remLayerRequest.tilePosition,
             static_cast<Wall::Type>(remLayerRequest.graphicIndex));
     }
     else if (remLayerRequest.layerType == TileLayer::Type::Object) {
         world.tileMap.remObject(
-            remLayerRequest.tileX, remLayerRequest.tileY,
-            remLayerRequest.graphicSetID,
+            remLayerRequest.tilePosition, remLayerRequest.graphicSetID,
             static_cast<Rotation::Direction>(remLayerRequest.graphicIndex));
     }
 }
@@ -103,8 +98,7 @@ void TileUpdateSystem::remTileLayer(const TileRemoveLayer& remLayerRequest)
 void TileUpdateSystem::clearTileLayers(
     const TileClearLayers& clearLayersRequest)
 {
-    world.tileMap.clearTileLayers(clearLayersRequest.tileX,
-                                  clearLayersRequest.tileY,
+    world.tileMap.clearTileLayers(clearLayersRequest.tilePosition,
                                   clearLayersRequest.layerTypesToClear);
 }
 

@@ -34,10 +34,13 @@ public:
     };
 
     /** This chunk's X-axis coordinate. */
-    Uint16 x{0};
+    Sint16 x{0};
 
     /** This chunk's Y-axis coordinate. */
-    Uint16 y{0};
+    Sint16 y{0};
+
+    /** This chunk's Z-axis coordinate. */
+    Sint16 z{0};
 
     /** Holds an entry for each graphic used in this chunk's tiles. Part of a
         space-saving approach that lets TileSnapshot hold indices into this
@@ -94,6 +97,8 @@ void serialize(S& serializer, ChunkWireSnapshot& testChunk)
     serializer.value2b(testChunk.x);
 
     serializer.value2b(testChunk.y);
+
+    serializer.value2b(testChunk.z);
 
     serializer.container(testChunk.palette, ChunkSnapshot::MAX_PALETTE_ENTRIES);
 

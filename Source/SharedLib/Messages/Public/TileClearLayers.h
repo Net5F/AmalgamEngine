@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineMessageType.h"
+#include "TilePosition.h"
 #include "TileLayer.h"
 #include "NetworkDefs.h"
 #include <SDL_stdinc.h>
@@ -22,11 +23,8 @@ public:
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** The X coordinate of the tile to update. */
-    int tileX{0};
-
-    /** The Y coordinate of the tile to update. */
-    int tileY{0};
+    /** The position of the tile to update. */
+    TilePosition tilePosition{};
 
     /** The layer types that should be cleared from the specified tile. */
     std::array<bool, TileLayer::Type::Count> layerTypesToClear{};
@@ -46,8 +44,7 @@ public:
 template<typename S>
 void serialize(S& serializer, TileClearLayers& tileClearLayers)
 {
-    serializer.value4b(tileClearLayers.tileX);
-    serializer.value4b(tileClearLayers.tileY);
+    serializer.object(tileClearLayers.tilePosition);
 
     // Bit pack the input array.
     // It's an array of bools, so we can make it pretty small.

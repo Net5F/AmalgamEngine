@@ -105,14 +105,15 @@ void ServerConnectionSystem::initSimState(
 
     // Resize the world's tile map.
     world.tileMap.setMapSize(connectionResponse.mapXLengthChunks,
-                             connectionResponse.mapYLengthChunks);
-    LOG_INFO("Setting map size to: (%u, %u)ch.",
+                             connectionResponse.mapYLengthChunks,
+                             connectionResponse.mapZLengthChunks);
+    LOG_INFO("Setting map size to: (%u, %u, %u)ch.",
              connectionResponse.mapXLengthChunks,
-             connectionResponse.mapYLengthChunks);
+             connectionResponse.mapYLengthChunks,
+             connectionResponse.mapZLengthChunks);
 
     // Allocate the entity locator's grid.
-    world.entityLocator.setGridSize(world.tileMap.getTileExtent().xLength,
-                                    world.tileMap.getTileExtent().yLength);
+    world.entityLocator.setGridSize(world.tileMap.getTileExtent());
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.

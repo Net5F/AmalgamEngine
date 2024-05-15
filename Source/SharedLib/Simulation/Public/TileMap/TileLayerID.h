@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TilePosition.h"
 #include "TileLayer.h"
 #include "GraphicSetIDs.h"
 #include <SDL_stdinc.h>
@@ -15,11 +16,8 @@ namespace AM
  * isn't useful.
  */
 struct TileLayerID {
-    /** The tile's X coordinate. */
-    int x{0};
-
-    /** The tile's Y coordinate. */
-    int y{0};
+    /** The position of the tile that contains the layer. */
+    TilePosition tilePosition{};
 
     /** The tile layer's type. */
     TileLayer::Type type{TileLayer::Type::None};
@@ -35,8 +33,10 @@ struct TileLayerID {
 
     bool operator==(const TileLayerID& other) const
     {
-        return (x == other.x) && (y == other.y) && (type == other.type)
-               && (graphicSetID == other.graphicSetID)
+        return (tilePosition.x == other.tilePosition.x)
+               && (tilePosition.y == other.tilePosition.y)
+               && (tilePosition.z == other.tilePosition.z)
+               && (type == other.type) && (graphicSetID == other.graphicSetID)
                && (graphicIndex == other.graphicIndex);
     }
 };

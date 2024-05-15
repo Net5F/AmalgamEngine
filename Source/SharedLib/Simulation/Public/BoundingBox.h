@@ -49,6 +49,11 @@ public:
     Position get3dCenter() const;
 
     /**
+     * @return true if this box has no area.
+     */
+    bool isEmpty() const;
+
+    /**
      * Returns true if this box intersects the given other bounding box.
      */
     bool intersects(const BoundingBox& other) const;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EngineMessageType.h"
+#include "TilePosition.h"
 #include "TileLayer.h"
 #include "NetworkDefs.h"
 #include <SDL_stdinc.h>
@@ -21,11 +22,8 @@ public:
     //--------------------------------------------------------------------------
     // Networked data
     //--------------------------------------------------------------------------
-    /** The X coordinate of the tile to update. */
-    int tileX{0};
-
-    /** The Y coordinate of the tile to update. */
-    int tileY{0};
+    /** The position of the tile to update. */
+    TilePosition tilePosition{};
 
     /** The type of tile layer that should be removed. */
     TileLayer::Type layerType{TileLayer::Type::None};
@@ -56,8 +54,7 @@ public:
 template<typename S>
 void serialize(S& serializer, TileRemoveLayer& tileRemoveLayer)
 {
-    serializer.value4b(tileRemoveLayer.tileX);
-    serializer.value4b(tileRemoveLayer.tileY);
+    serializer.object(tileRemoveLayer.tilePosition);
     serializer.value1b(tileRemoveLayer.layerType);
     serializer.value2b(tileRemoveLayer.graphicSetID);
     serializer.value1b(tileRemoveLayer.graphicIndex);

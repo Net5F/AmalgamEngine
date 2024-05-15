@@ -12,7 +12,7 @@ struct TilePosition;
 struct ChunkPosition : public DiscretePosition<DiscreteImpl::ChunkTag> {
     ChunkPosition();
 
-    ChunkPosition(int inX, int inY);
+    ChunkPosition(int inX, int inY, int inZ);
 
     explicit ChunkPosition(const TilePosition& tilePosition);
 };
@@ -22,6 +22,7 @@ void serialize(S& serializer, ChunkPosition& chunkPosition)
 {
     serializer.value4b(chunkPosition.x);
     serializer.value4b(chunkPosition.y);
+    serializer.value4b(chunkPosition.z);
 }
 
 } // namespace AM

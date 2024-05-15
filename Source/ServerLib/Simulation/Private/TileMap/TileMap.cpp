@@ -10,6 +10,7 @@
 #include "Tile.h"
 #include "TileSnapshot.h"
 #include "ChunkSnapshot.h"
+#include "Morton.h"
 #include "SharedConfig.h"
 #include "Timer.h"
 #include "Log.h"
@@ -38,8 +39,8 @@ TileMap::TileMap(GraphicData& inGraphicData)
 
     // Print the time taken.
     double timeTaken{timer.getTime()};
-    LOG_INFO("Map loaded in %.6fs. Size: (%u, %u)ch.", timeTaken,
-             chunkExtent.xLength, chunkExtent.yLength);
+    LOG_INFO("Map loaded in %.6fs. Size: (%u, %u, %u)ch.", timeTaken,
+             chunkExtent.xLength, chunkExtent.yLength, chunkExtent.zLength);
 }
 
 TileMap::~TileMap()
@@ -59,49 +60,24 @@ void TileMap::save(const std::string& fileName)
     // Save the header data.
     TileMapSnapshot mapSnapshot{};
     mapSnapshot.version = MAP_FORMAT_VERSION;
-    mapSnapshot.xLengthChunks = chunkExtent.xLength;
-    mapSnapshot.yLengthChunks = chunkExtent.yLength;
+    mapSnapshot.xLengthChunks = static_cast<Uint16>(chunkExtent.xLength);
+    mapSnapshot.yLengthChunks = static_cast<Uint16>(chunkExtent.yLength);
+    mapSnapshot.zLengthChunks = static_cast<Uint16>(chunkExtent.zLength);
 
     // Allocate room for our chunks.
     mapSnapshot.chunks.resize(chunkExtent.getCount());
 
     // Save our tiles into the snapshot as chunks.
-    std::size_t startLinearTileIndex{0};
     int chunksProcessed{0};
-    for (std::size_t i = 0; i < chunkExtent.getCount(); ++i) {
+    for (std::size_t i{0}; i < chunkExtent.getCount(); ++i) {
+        Chunk& chunk{chunks[i]};
         ChunkSnapshot& chunkSnapshot{mapSnapshot.chunks[i]};
 
         // Process each tile in this chunk.
-        std::size_t nextLinearTileIndex{startLinearTileIndex};
-        std::size_t tilesProcessed{0};
-        for (std::size_t j = 0; j < SharedConfig::CHUNK_TILE_COUNT; ++j) {
+        for (std::size_t j{0}; j < SharedConfig::CHUNK_TILE_COUNT; ++j) {
             // Copy all of this tile's layers into the snapshot.
-            addTileLayersToSnapshot(tiles[nextLinearTileIndex],
+            addTileLayersToSnapshot(chunk.tiles[j],
                                     chunkSnapshot.tiles[j], chunkSnapshot);
-
-            // Increment to the next tile.
-            nextLinearTileIndex++;
-
-            // If we've processed all the tiles in this row, increment to the
-            // next row.
-            tilesProcessed++;
-            if (tilesProcessed == SharedConfig::CHUNK_WIDTH) {
-                nextLinearTileIndex
-                    += (tileExtent.xLength - SharedConfig::CHUNK_WIDTH);
-                tilesProcessed = 0;
-            }
-        }
-
-        // Increment to the next chunk.
-        startLinearTileIndex += SharedConfig::CHUNK_WIDTH;
-
-        // If we've processed all the chunks in this row, increment to the
-        // next row.
-        chunksProcessed++;
-        if (chunksProcessed == chunkExtent.xLength) {
-            startLinearTileIndex
-                += ((SharedConfig::CHUNK_WIDTH - 1) * tileExtent.xLength);
-            chunksProcessed = 0;
         }
     }
 
@@ -123,47 +99,62 @@ void TileMap::load(TileMapSnapshot& mapSnapshot)
 {
     /* Load the snapshot into this map. */
     // Load the header data.
-    // Note: We set x/y to 0 since our map origin is always (0, 0). Change
-    //       this if we ever support negative origins.
-    chunkExtent.x = 0;
-    chunkExtent.y = 0;
     chunkExtent.xLength = mapSnapshot.xLengthChunks;
     chunkExtent.yLength = mapSnapshot.yLengthChunks;
-    tileExtent.x = 0;
-    tileExtent.y = 0;
+    chunkExtent.zLength = mapSnapshot.zLengthChunks;
+    chunkExtent.x = -(chunkExtent.xLength / 2);
+    chunkExtent.y = -(chunkExtent.yLength / 2);
+    chunkExtent.z = 0;
+
     tileExtent.xLength = (chunkExtent.xLength * SharedConfig::CHUNK_WIDTH);
     tileExtent.yLength = (chunkExtent.yLength * SharedConfig::CHUNK_WIDTH);
+    tileExtent.zLength = chunkExtent.zLength;
+    tileExtent.x = (chunkExtent.x * SharedConfig::CHUNK_WIDTH);
+    tileExtent.y = (chunkExtent.y * SharedConfig::CHUNK_WIDTH);
+    tileExtent.z = 0;
 
     // Resize the tiles vector to fit the map.
-    tiles.resize(tileExtent.xLength * tileExtent.yLength);
+    chunks.resize(chunkExtent.getCount());
 
-    // Load the chunks into the tiles vector.
-    for (std::size_t chunkIndex = 0; chunkIndex < mapSnapshot.chunks.size();
+    // These vars track the x/y coords of the chunk at the current index, 
+    // translated into purely-positive space.
+    int posChunkX{0};
+    int posChunkY{0};
+
+    // Load all of the snapshot's chunks into the chunks vector.
+    static constexpr int CHUNK_WIDTH{
+        static_cast<int>(SharedConfig::CHUNK_WIDTH)};
+    for (std::size_t chunkIndex{0}; chunkIndex < mapSnapshot.chunks.size();
          ++chunkIndex) {
-        // Calc the coordinates of this chunk's first tile.
-        int startX{static_cast<int>((chunkIndex % chunkExtent.xLength)
-                                    * SharedConfig::CHUNK_WIDTH)};
-        int startY{static_cast<int>((chunkIndex / chunkExtent.xLength)
-                                    * SharedConfig::CHUNK_WIDTH)};
         ChunkSnapshot& chunkSnapshot{mapSnapshot.chunks[chunkIndex]};
+        int chunkZ{static_cast<int>(chunkIndex)
+                   / (chunkExtent.xLength * chunkExtent.yLength)};
+        int tileXOffset{(posChunkX + chunkExtent.x) * CHUNK_WIDTH};
+        int tileYOffset{(posChunkY + chunkExtent.y) * CHUNK_WIDTH};
 
-        // These vars track which tile we're looking at, with respect to the
-        // top left of the chunk.
-        int relativeX{0};
-        int relativeY{0};
+        // Iterate through the chunk snapshot's linear tile array, adding the 
+        // tiles to our map.
+        int tileIndex{0};
+        for (int tileY{0}; tileY < CHUNK_WIDTH; ++tileY) {
+            for (int tileX{0}; tileX < CHUNK_WIDTH; ++tileX) {
+                TilePosition tilePosition{tileX + tileXOffset,
+                                          tileY + tileYOffset, chunkZ};
+                addSnapshotLayersToTile(
+                    chunkSnapshot.tiles[Morton::m2D_lookup_16x16(tileX, tileY)],
+                    chunkSnapshot, tilePosition);
 
-        // Add all of this chunk's tiles to the tiles vector.
-        for (std::size_t i = 0; i < SharedConfig::CHUNK_TILE_COUNT; ++i) {
-            // Push all of the snapshot's sprites into the tile.
-            TileSnapshot& tileSnapshot{chunkSnapshot.tiles[i]};
-            addSnapshotLayersToTile(tileSnapshot, chunkSnapshot,
-                                    (startX + relativeX), (startY + relativeY));
+                tileIndex++;
+            }
+        }
 
-            // Increment the relative indices, wrapping at the chunk width.
-            relativeX++;
-            if (relativeX == SharedConfig::CHUNK_WIDTH) {
-                relativeY++;
-                relativeX = 0;
+        // Increment the chunk x/y coords, wrapping appropriately.
+        posChunkX++;
+        if (posChunkX == chunkExtent.xLength) {
+            posChunkY++;
+            posChunkX = 0;
+
+            if (posChunkY == chunkExtent.yLength) {
+                posChunkY = 0;
             }
         }
     }

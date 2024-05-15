@@ -32,13 +32,8 @@ namespace Client
  *       replace Sprite with GraphicRef.
  */
 struct PhantomSpriteInfo {
-    /** If this is a tile phantom, this is the X coordinate of the phantom's
-        tile. */
-    int tileX{0};
-
-    /** If this is a tile phantom, this is the Y coordinate of the phantom's
-        tile. */
-    int tileY{0};
+    /** If this is a tile phantom, this is the position of the phantom's tile. */
+    TilePosition tilePosition{};
 
     /** The phantom's tile layer type. If this != None, this is a tile phantom.
         If this == None, this is an entity phantom. */

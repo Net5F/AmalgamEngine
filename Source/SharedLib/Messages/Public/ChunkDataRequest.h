@@ -19,7 +19,7 @@ public:
 
     /** Used as a "we should never hit this" cap on the number of chunks that
         we request at once. */
-    static constexpr std::size_t MAX_CHUNKS{10};
+    static constexpr std::size_t MAX_CHUNKS{30};
 
     //--------------------------------------------------------------------------
     // Networked data

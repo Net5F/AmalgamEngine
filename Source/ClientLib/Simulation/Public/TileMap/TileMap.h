@@ -2,6 +2,7 @@
 
 #include "TileMapBase.h"
 #include "entt/signal/sigh.hpp"
+#include <SDL_stdinc.h>
 
 namespace AM
 {
@@ -26,10 +27,10 @@ public:
     TileMap(GraphicData& inGraphicData);
 
     /**
-     * Sets the size of the map and resizes the tiles vector.
+     * Sets the size of the map and resizes the chunks vector.
      */
-    void setMapSize(std::size_t inMapXLengthChunks,
-                    std::size_t inMapYLengthChunks);
+    void setMapSize(Uint16 inMapXLengthChunks, Uint16 inMapYLengthChunks,
+                    Uint16 inMapZLengthChunks);
 
 private:
     entt::sigh<void(TileExtent)> sizeChangedSig;

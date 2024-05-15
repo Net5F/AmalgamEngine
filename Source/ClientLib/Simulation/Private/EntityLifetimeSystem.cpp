@@ -86,7 +86,7 @@ void EntityLifetimeSystem::processEntityInits(Uint32 desiredTick)
         while (entityInitQueue.pop(entityInit)) {
             // If the player entity is present, process it and erase it from
             // the message.
-            for (auto it = entityInit.entityData.begin();
+            for (auto it{entityInit.entityData.begin()};
                  it != entityInit.entityData.end();) {
                 if (it->entity == world.playerEntity) {
                     processEntityData(entityInit.tickNum, *it);

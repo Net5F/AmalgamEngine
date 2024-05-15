@@ -34,12 +34,12 @@ static constexpr Uint64 magicbit2D_masks64[6]
     = {0x00000000FFFFFFFF, 0x0000FFFF0000FFFF, 0x00FF00FF00FF00FF,
        0x0F0F0F0F0F0F0F0F, 0x3333333333333333, 0x5555555555555555};
 
-constexpr Uint16 Morton::m2D_lookup_16x16(Uint8 x, Uint8 y)
+Uint16 Morton::m2D_lookup_16x16(Uint8 x, Uint8 y)
 {
     return static_cast<Uint16>(zValues[x][y]);
 }
 
-constexpr Uint32 Morton::m2D_e_magicbits_combined(Uint16 x, Uint16 y)
+Uint32 Morton::m2D_e_magicbits_combined(Uint16 x, Uint16 y)
 {
     Uint64 m = x
                | (static_cast<Uint64>(y)

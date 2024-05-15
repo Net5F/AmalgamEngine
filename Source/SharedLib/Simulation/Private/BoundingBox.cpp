@@ -50,6 +50,11 @@ Position BoundingBox::get3dCenter() const
     return centerPosition;
 }
 
+bool BoundingBox::isEmpty() const
+{
+    return ((minX == maxX) || (minY == maxY) || (minZ == maxZ));
+}
+
 bool BoundingBox::intersects(const BoundingBox& other) const
 {
     return ((minX < other.maxX) && (maxX > other.minX) && (minY < other.maxY)
@@ -61,6 +66,7 @@ bool BoundingBox::intersects(const Cylinder& cylinder) const
 {
     // Reference: https://stackoverflow.com/a/402010/4258629
 
+    // TODO: Consider Z
     Position boxCenter{get3dCenter()};
     float xLength{getXLength()};
     float yLength{getYLength()};
@@ -135,8 +141,10 @@ float BoundingBox::intersects(const Ray& ray) const
 
 bool BoundingBox::intersects(const TileExtent& tileExtent) const
 {
-    const int TILE_WORLD_WIDTH{
+    static constexpr int TILE_WORLD_WIDTH{
         static_cast<int>(SharedConfig::TILE_WORLD_WIDTH)};
+    static constexpr int TILE_WORLD_HEIGHT{
+        static_cast<int>(SharedConfig::TILE_WORLD_HEIGHT)};
 
     float tileMinX{static_cast<float>(tileExtent.x * TILE_WORLD_WIDTH)};
     float tileMaxX{static_cast<float>((tileExtent.x + tileExtent.xLength)
@@ -144,23 +152,31 @@ bool BoundingBox::intersects(const TileExtent& tileExtent) const
     float tileMinY{static_cast<float>(tileExtent.y) * TILE_WORLD_WIDTH};
     float tileMaxY{static_cast<float>((tileExtent.y + tileExtent.yLength)
                                       * TILE_WORLD_WIDTH)};
+    float tileMinZ{static_cast<float>(tileExtent.z) * TILE_WORLD_HEIGHT};
+    float tileMaxZ{static_cast<float>((tileExtent.z + tileExtent.zLength)
+                                      * TILE_WORLD_HEIGHT)};
 
     return ((maxX >= tileMinX) && (tileMaxX >= minX) && (maxY >= tileMinY)
-            && (tileMaxY >= minY));
+            && (tileMaxY >= minY) && (maxZ >= tileMinZ) && (tileMaxZ >= minZ));
 }
 
 TileExtent BoundingBox::asTileExtent() const
 {
-    TileExtent tileExtent{};
-    const float tileWorldWidth{
+    static constexpr float TILE_WORLD_WIDTH{
         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
+    static constexpr float TILE_WORLD_HEIGHT{
+        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
 
-    tileExtent.x = static_cast<int>(std::floor(minX / tileWorldWidth));
-    tileExtent.y = static_cast<int>(std::floor(minY / tileWorldWidth));
+    TileExtent tileExtent{};
+    tileExtent.x = static_cast<int>(std::floor(minX / TILE_WORLD_WIDTH));
+    tileExtent.y = static_cast<int>(std::floor(minY / TILE_WORLD_WIDTH));
+    tileExtent.z = static_cast<int>(std::floor(minZ / TILE_WORLD_HEIGHT));
     tileExtent.xLength
-        = (static_cast<int>(std::ceil(maxX / tileWorldWidth)) - tileExtent.x);
+        = (static_cast<int>(std::ceil(maxX / TILE_WORLD_WIDTH)) - tileExtent.x);
     tileExtent.yLength
-        = (static_cast<int>(std::ceil(maxY / tileWorldWidth)) - tileExtent.y);
+        = (static_cast<int>(std::ceil(maxY / TILE_WORLD_WIDTH)) - tileExtent.y);
+    tileExtent.zLength = (static_cast<int>(std::ceil(maxZ / TILE_WORLD_HEIGHT))
+                          - tileExtent.z);
 
     return tileExtent;
 }

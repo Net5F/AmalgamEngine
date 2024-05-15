@@ -82,8 +82,7 @@ World::World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
 , rowIndex{0}
 {
     // Allocate the entity locator's grid.
-    entityLocator.setGridSize(tileMap.getTileExtent().xLength,
-                              tileMap.getTileExtent().yLength);
+    entityLocator.setGridSize(tileMap.getTileExtent());
 
     // Add listeners for each client-relevant component. When the component is
     // constructed or destroyed, the associated entity's ReplicatedComponentList

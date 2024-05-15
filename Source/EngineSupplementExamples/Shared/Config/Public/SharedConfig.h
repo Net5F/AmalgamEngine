@@ -22,25 +22,36 @@ public:
     /** The max number of entities that we will allow. */
     static constexpr std::size_t MAX_ENTITIES{200};
 
-    /** The max number of interactions that an entity can support. */
+    /** The max number of interactions that an entity can support.
+        Interactions are the options that show up when you right-click an 
+        entity or item. */
     static constexpr std::size_t MAX_ENTITY_INTERACTIONS{64};
 
     /** The max number of non-built-in interactions that an item can support. */
     static constexpr std::size_t MAX_ITEM_CUSTOM_INTERACTIONS{64};
 
     /** The x and y axis width, in world units, of our tiles. */
-    static constexpr unsigned int TILE_WORLD_WIDTH{32};
+    static constexpr std::size_t TILE_WORLD_WIDTH{32};
 
-    /** The x and y axis width, in tiles, of our chunks. */
-    static constexpr unsigned int CHUNK_WIDTH{16};
+    /** The z axis height, in world units, of our tiles. */
+    static constexpr std::size_t TILE_WORLD_HEIGHT{78};
+
+    /** The x and y axis width, in tiles, of our chunks.
+        Note: This doesn't apply to the z axis. Chunks are always 1 tile tall. */
+    static constexpr std::size_t CHUNK_WIDTH{16};
 
     /** The number of tiles in a chunk. */
-    static constexpr unsigned int CHUNK_TILE_COUNT{CHUNK_WIDTH * CHUNK_WIDTH};
+    static constexpr std::size_t CHUNK_TILE_COUNT{CHUNK_WIDTH * CHUNK_WIDTH};
 
-    /** The x and y axis width, in tiles, of a cell in our spatial
-        partitioning grid.
-        Note: The map's size must be evenly divisible by this number. */
-    static constexpr unsigned int CELL_WIDTH{4};
+    /** The x and y axis width, in tiles, of a cell in our entity spatial
+        partitioning grid (EntityLocator).
+        Note: The tile map's size must be evenly divisible by this number. */
+    static constexpr std::size_t ENTITY_LOCATOR_CELL_WIDTH{4};
+
+    /** The z axis width, in tiles, of a cell in our entity spatial partitioning 
+        grid (EntityLocator).
+        Note: The tile map's size must be evenly divisible by this number. */
+    static constexpr std::size_t ENTITY_LOCATOR_CELL_HEIGHT{2};
 
     /** The number of world units around an entity that are considered to be
         within the entity's "Area of Interest".
@@ -93,26 +104,32 @@ public:
     //-------------------------------------------------------------------------
     // Renderer
     //-------------------------------------------------------------------------
-    /** The width of a tile in screen coordinates. */
-    static constexpr unsigned int TILE_SCREEN_WIDTH{256};
+    /** The width of the top face of a tile in screen coordinates. */
+    static constexpr unsigned int TILE_FACE_SCREEN_WIDTH{256};
     /** The height of the top face of a tile in screen coordinates. */
-    static constexpr unsigned int TILE_SCREEN_HEIGHT{128};
+    static constexpr unsigned int TILE_FACE_SCREEN_HEIGHT{128};
+    /** The height of the side of a tile in screen coordinates, i.e. how tall 
+        the world-space z axis height of a tile should appear on screen.
+        Since Z coordinate contribution to the screen Y axis is linear, 
+        this / TILE_WORLD_HEIGHT can be thought of as our "Z scaling factor" */
+    static constexpr unsigned int TILE_SIDE_SCREEN_HEIGHT{156};
 
     /** The total width of a standard tile sprite. */
     static constexpr unsigned int TILE_SPRITE_WIDTH{256};
     /** The total height of a standard tile sprite. */
     static constexpr unsigned int TILE_SPRITE_HEIGHT{512};
 
-    // Note: This solution is temporary. Eventually, the Tile concept will be
-    //       replaced with 3D Blocks and this value will be derivable like the
-    //       others.
-    /** The value used to scale world Z-axis units to screen Y-axis units. */
-    static constexpr float Z_SCREEN_SCALE{2.f};
-
     /** The number of world units around the player that are considered to be
         within the player's view range.
         Used to determine how much of the world should be rendered. */
     static constexpr float VIEW_RADIUS{TILE_WORLD_WIDTH * 8};
+
+    //-------------------------------------------------------------------------
+    // Project
+    //-------------------------------------------------------------------------
+    /** If true, build mode will only be allowed in the "build area".
+        If false, clients can make changes anywhere in the world. */
+    static constexpr bool RESTRICT_WORLD_CHANGES{false};
 };
 
 } // End namespace AM

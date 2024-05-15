@@ -333,7 +333,7 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
 
     // Set maxZ relative to the distance between the mouse and the
     // position control (the position control is always our reference
-    // for where z == 0 is.)
+    // for where minimum Z is.)
     float mouseZHeight{positionControlExtent.y + (scaledRectSize / 2.f)
                        - mouseScreenYPos};
 
@@ -344,14 +344,12 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     mouseZHeight = Transforms::screenYToWorldZ(mouseZHeight, 1.f);
 
     // Set maxZ, making sure it doesn't go below minZ.
-    if (mouseZHeight > boundingBox.minZ) {
-        BoundingBox updatedBounds{boundingBox};
-        updatedBounds.maxZ = mouseZHeight;
+    BoundingBox updatedBounds{boundingBox};
+    updatedBounds.maxZ = std::max(mouseZHeight, boundingBox.minZ);
 
-        // Signal the updated bounding box.
-        if (onBoundingBoxUpdated) {
-            onBoundingBoxUpdated(updatedBounds);
-        }
+    // Signal the updated bounding box.
+    if (onBoundingBoxUpdated) {
+        onBoundingBoxUpdated(updatedBounds);
     }
 }
 

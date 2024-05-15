@@ -2,6 +2,7 @@
 
 #include "BoundingBox.h"
 #include "TileLayer.h"
+#include "TilePosition.h"
 #include <vector>
 #include <span>
 
@@ -101,17 +102,16 @@ public:
      * Clears the collisionBoxes vector, then refills it with all of this
      * tile's walls and objects.
      *
-     * @param tileX  This tile's X-axis tile coordinate.
-     * @param tileY  This tile's Y-axis tile coordinate.
+     * @param tilePosition This tile's world coordinates.
      */
-    void rebuildCollision(int tileX, int tileY);
+    void rebuildCollision(const TilePosition& tilePosition);
 
 private:
     /**
      * Returns the given graphic's modelBounds, translated to world space and
      * offset to the given tile coords.
      */
-    BoundingBox calcWorldBoundsForGraphic(int tileX, int tileY,
+    BoundingBox calcWorldBoundsForGraphic(const TilePosition& tilePosition,
                                           const GraphicRef& graphic);
 
     /** Holds this tile's collision boxes.

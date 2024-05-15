@@ -94,19 +94,23 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
     // Gather all tiles that are in view.
     TileExtent tileViewExtent{
         camera.getTileViewExtent(tileMap.getTileExtent())};
-    for (int y = tileViewExtent.y; y <= tileViewExtent.yMax(); ++y) {
-        for (int x = tileViewExtent.x; x <= tileViewExtent.xMax(); ++x) {
-            // Push all of this tile's sprites into the appropriate vectors.
-            const Tile& tile{tileMap.getTile(x, y)};
-            pushFloorSprite(tile, camera, x, y);
-            pushFloorCoveringSprites(tile, camera, x, y);
+    for (int z{tileViewExtent.z}; z <= tileViewExtent.zMax(); ++z) {
+        for (int y{tileViewExtent.y}; y <= tileViewExtent.yMax(); ++y) {
+            for (int x{tileViewExtent.x}; x <= tileViewExtent.xMax(); ++x) {
+                TilePosition tilePosition{x, y, z};
 
-            // TODO: We temporarily are pushing objects before walls to fix
-            //       NW gap fills rendering in front of overlapping objects.
-            //       We should instead find a way to make objects and phantoms
-            //       consistently render in front of walls.
-            pushObjectSprites(tile, camera, x, y);
-            pushWallSprites(tile, camera, x, y);
+                // Push all of this tile's sprites into the appropriate vectors.
+                const Tile& tile{tileMap.getTile(tilePosition)};
+                pushFloorSprite(tile, camera, tilePosition);
+                pushFloorCoveringSprites(tile, camera, tilePosition);
+
+                // TODO: We temporarily are pushing objects before walls to fix
+                //       NW gap fills rendering in front of overlapping objects.
+                //       We should instead find a way to make objects and
+                //       phantoms consistently render in front of walls.
+                pushObjectSprites(tile, camera, tilePosition);
+                pushWallSprites(tile, camera, tilePosition);
+            }
         }
     }
 
@@ -115,8 +119,7 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
         if (info.layerType != TileLayer::Type::None) {
             GraphicRef graphic{*(info.sprite)};
             pushTileSprite(graphic, camera,
-                           {info.tileX, info.tileY, info.layerType, 0, 0},
-                           true);
+                           {info.tilePosition, info.layerType, 0, 0}, true);
         }
     }
 
@@ -163,7 +166,7 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
 }
 
 void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
-                                        int x, int y)
+                                        const TilePosition& tilePosition)
 {
     std::span<const TileLayer> floors{tile.getLayers(TileLayer::Type::Floor)};
     for (const TileLayer& floor : floors) {
@@ -174,7 +177,7 @@ void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
                 phantomSprites.begin(), phantomSprites.end(),
                 [&](const PhantomSpriteInfo& info) {
                     return ((info.layerType == TileLayer::Type::Floor)
-                            && (info.tileX == x) && (info.tileY == y));
+                            && (info.tilePosition == tilePosition));
                 });
             if (phantomSpriteInfo != phantomSprites.end()) {
                 graphic = GraphicRef{*(phantomSpriteInfo->sprite)};
@@ -182,16 +185,15 @@ void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
             }
 
             pushTileSprite(graphic, camera,
-                           {x, y, TileLayer::Type::Floor,
+                           {tilePosition, TileLayer::Type::Floor,
                             floor.graphicSet.get().numericID, 0},
                            false);
         }
     }
 }
 
-void WorldSpriteSorter::pushFloorCoveringSprites(const Tile& tile,
-                                                 const Camera& camera, int x,
-                                                 int y)
+void WorldSpriteSorter::pushFloorCoveringSprites(
+    const Tile& tile, const Camera& camera, const TilePosition& tilePosition)
 {
     std::span<const TileLayer> floorCoverings{
         tile.getLayers(TileLayer::Type::FloorCovering)};
@@ -199,7 +201,7 @@ void WorldSpriteSorter::pushFloorCoveringSprites(const Tile& tile,
         GraphicRef graphic{floorCovering.getGraphic()};
         if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
             pushTileSprite(graphic, camera,
-                           {x, y, TileLayer::Type::FloorCovering,
+                           {tilePosition, TileLayer::Type::FloorCovering,
                             floorCovering.graphicSet.get().numericID,
                             floorCovering.graphicIndex},
                            false);
@@ -208,7 +210,7 @@ void WorldSpriteSorter::pushFloorCoveringSprites(const Tile& tile,
 }
 
 void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
-                                        int x, int y)
+                                        const TilePosition& tilePosition)
 {
     std::span<const TileLayer> walls{tile.getLayers(TileLayer::Type::Wall)};
     for (const TileLayer& wall : walls) {
@@ -219,7 +221,7 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
                 phantomSprites.begin(), phantomSprites.end(),
                 [&](const PhantomSpriteInfo& info) {
                     if ((info.layerType == TileLayer::Type::Wall)
-                        && (info.tileX == x) && (info.tileY == y)) {
+                        && (info.tilePosition == tilePosition)) {
                         // Check if we need to replace a N with a NE fill.
                         if ((wall.graphicIndex == Wall::Type::North)
                             && (info.wallType
@@ -246,7 +248,7 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
             }
 
             pushTileSprite(graphic, camera,
-                           {x, y, TileLayer::Type::Wall,
+                           {tilePosition, TileLayer::Type::Wall,
                             wall.graphicSet.get().numericID, wall.graphicIndex},
                            false);
         }
@@ -254,14 +256,15 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
 }
 
 void WorldSpriteSorter::pushObjectSprites(const Tile& tile,
-                                          const Camera& camera, int x, int y)
+                                          const Camera& camera,
+                                          const TilePosition& tilePosition)
 {
     std::span<const TileLayer> objects{tile.getLayers(TileLayer::Type::Object)};
     for (const TileLayer& object : objects) {
         GraphicRef graphic{object.getGraphic()};
         if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
             pushTileSprite(graphic, camera,
-                           {x, y, TileLayer::Type::Object,
+                           {tilePosition, TileLayer::Type::Object,
                             object.graphicSet.get().numericID,
                             object.graphicIndex},
                            false);
@@ -281,7 +284,7 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     const SpriteRenderData& renderData{
         graphicData.getRenderData(sprite.numericID)};
     SDL_FRect screenExtent{ClientTransforms::tileToScreenExtent(
-        {layerID.x, layerID.y}, renderData, camera)};
+        layerID.tilePosition, renderData, camera)};
 
     // If this sprite isn't on screen, skip it.
     if (!isWithinScreenBounds(screenExtent, camera)) {
@@ -302,11 +305,8 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     // If this sprite is on a wall or object layer, push it to be sorted.
     if ((layerID.type == TileLayer::Type::Wall)
         || (layerID.type == TileLayer::Type::Object)) {
-        Position tilePosition{
-            static_cast<float>(layerID.x * SharedConfig::TILE_WORLD_WIDTH),
-            static_cast<float>(layerID.y * SharedConfig::TILE_WORLD_WIDTH), 0};
-        BoundingBox worldBounds{
-            Transforms::modelToWorld(sprite.modelBounds, tilePosition)};
+        BoundingBox worldBounds{Transforms::modelToWorld(
+            sprite.modelBounds, layerID.tilePosition.getOriginPosition())};
         spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
                                    screenExtent, colorMod);
     }
@@ -317,11 +317,8 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     }
     else if (layerID.type == TileLayer::Type::FloorCovering) {
         // Push floor coverings into their intermediate vector.
-        Position tilePosition{
-            static_cast<float>(layerID.x * SharedConfig::TILE_WORLD_WIDTH),
-            static_cast<float>(layerID.y * SharedConfig::TILE_WORLD_WIDTH), 0};
-        BoundingBox worldBounds{
-            Transforms::modelToWorld(sprite.modelBounds, tilePosition)};
+        BoundingBox worldBounds{Transforms::modelToWorld(
+            sprite.modelBounds, layerID.tilePosition.getOriginPosition())};
         floorCoveringSprites.emplace_back(&sprite, worldObjectID, worldBounds,
                                           screenExtent, colorMod);
     }
@@ -376,7 +373,7 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
     // If the sprite is on screen, push the render info.
     if (isWithinScreenBounds(screenExtent, camera)) {
         // Get an updated bounding box for this entity.
-        BoundingBox worldBox{
+        BoundingBox worldBounds{
             Transforms::modelToWorldCentered(sprite.modelBounds, position)};
 
         // If the UI wants a color mod on this sprite, use it.
@@ -389,7 +386,7 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
         }
 
         // Push the entity's render info for this frame.
-        spritesToSort.emplace_back(&sprite, ownerID, worldBox, screenExtent,
+        spritesToSort.emplace_back(&sprite, ownerID, worldBounds, screenExtent,
                                    colorMod);
     }
 }
@@ -415,8 +412,8 @@ void WorldSpriteSorter::sortSpritesByDepth()
 void WorldSpriteSorter::calcDepthDependencies()
 {
     // Calculate all dependencies.
-    for (std::size_t i = 0; i < spritesToSort.size(); ++i) {
-        for (std::size_t j = 0; j < spritesToSort.size(); ++j) {
+    for (std::size_t i{0}; i < spritesToSort.size(); ++i) {
+        for (std::size_t j{0}; j < spritesToSort.size(); ++j) {
             if (i != j) {
                 SpriteSortInfo& spriteA{spritesToSort[i]};
                 SpriteSortInfo& spriteB{spritesToSort[j]};
@@ -437,7 +434,7 @@ void WorldSpriteSorter::visitSprite(SpriteSortInfo& spriteInfo, int& depthValue)
     if (!(spriteInfo.visited)) {
         spriteInfo.visited = true;
 
-        for (std::size_t i = 0; i < spriteInfo.spritesBehind.size(); ++i) {
+        for (std::size_t i{0}; i < spriteInfo.spritesBehind.size(); ++i) {
             if (spriteInfo.spritesBehind[i] == nullptr) {
                 break;
             }

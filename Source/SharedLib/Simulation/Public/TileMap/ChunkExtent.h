@@ -12,7 +12,8 @@ struct TileExtent;
 struct ChunkExtent : public DiscreteExtent<DiscreteImpl::ChunkTag> {
     ChunkExtent();
 
-    ChunkExtent(int inX, int inY, int inXLength, int inYLength);
+    ChunkExtent(int inX, int inY, int inZ, int inXLength, int inYLength,
+                int inZLength);
 
     explicit ChunkExtent(const TileExtent& tileExtent);
 };

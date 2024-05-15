@@ -106,7 +106,33 @@ std::span<TileLayer> Tile::getLayers(TileLayer::Type layerType)
 
 std::span<const TileLayer> Tile::getLayers(TileLayer::Type layerType) const
 {
-    return const_cast<Tile*>(this)->getLayers(layerType);
+    auto begin{layers.end()};
+    auto end{layers.end()};
+    for (auto it{layers.begin()}; it != layers.end(); ++it) {
+        if (it->type == layerType) {
+            // If this is the first match, set our iterators.
+            if (begin == layers.end()) {
+                begin = it;
+                end = it + 1;
+            }
+            else {
+                // Found another match, move our end iterator forward.
+                end = it + 1;
+            }
+        }
+        else if (it->type == (layerType + 1)) {
+            // Reached a type past the one we were looking for, stop looking.
+            break;
+        }
+    }
+
+    // If we found any matches, return them.
+    if (begin != layers.end()) {
+        return {begin, end};
+    }
+    else {
+        return {};
+    }
 }
 
 std::vector<TileLayer>& Tile::getAllLayers()
@@ -137,7 +163,18 @@ TileLayer* Tile::findLayer(TileLayer::Type type, Uint8 graphicIndex)
 
 const TileLayer* Tile::findLayer(TileLayer::Type type, Uint8 graphicIndex) const
 {
-    return const_cast<Tile*>(this)->findLayer(type, graphicIndex);
+    for (const TileLayer& layer : layers) {
+        if ((layer.type == type)
+            && (layer.graphicIndex == graphicIndex)) {
+            return &layer;
+        }
+        else if (layer.type == (type + 1)) {
+            // We've reached a type past the desired one, stop looking.
+            return nullptr;
+        }
+    }
+
+    return nullptr;
 }
 
 TileLayer* Tile::findLayer(TileLayer::Type type)
@@ -157,40 +194,50 @@ TileLayer* Tile::findLayer(TileLayer::Type type)
 
 const TileLayer* Tile::findLayer(TileLayer::Type type) const
 {
-    return const_cast<Tile*>(this)->findLayer(type);
+    for (const TileLayer& layer : layers) {
+        if (layer.type == type) {
+            return &layer;
+        }
+        else if (layer.type == (type + 1)) {
+            // We've reached a type past the desired one, stop looking.
+            return nullptr;
+        }
+    }
+
+    return nullptr;
 }
 
-void Tile::rebuildCollision(int tileX, int tileY)
+void Tile::rebuildCollision(const TilePosition& tilePosition)
 {
     // Clear out the old collision boxes.
     collisionBoxes.clear();
 
-    // Add all of this tile's walls.
-    for (const TileLayer& wallLayer : getLayers(TileLayer::Type::Wall)) {
-        GraphicRef graphic{wallLayer.getGraphic()};
-        if (graphic.getCollisionEnabled()) {
-            collisionBoxes.push_back(
-                calcWorldBoundsForGraphic(tileX, tileY, graphic));
+    // Add all of this tile's layers that have collision.
+    for (const TileLayer& layer : layers) {
+        // Skip floor coverings (they never have collision).
+        if (layer.type == TileLayer::Type::FloorCovering) {
+            continue;
         }
-    }
 
-    // Add all of this tile's objects.
-    for (const TileLayer& objectLayer : getLayers(TileLayer::Type::Object)) {
-        GraphicRef graphic{objectLayer.getGraphic()};
+        GraphicRef graphic{layer.getGraphic()};
         if (graphic.getCollisionEnabled()) {
             collisionBoxes.push_back(
-                calcWorldBoundsForGraphic(tileX, tileY, graphic));
+                calcWorldBoundsForGraphic(tilePosition, graphic));
         }
     }
 }
 
-BoundingBox Tile::calcWorldBoundsForGraphic(int tileX, int tileY,
+BoundingBox Tile::calcWorldBoundsForGraphic(const TilePosition& tilePosition,
                                             const GraphicRef& graphic)
 {
-    Position tilePosition{
-        static_cast<float>(tileX * SharedConfig::TILE_WORLD_WIDTH),
-        static_cast<float>(tileY * SharedConfig::TILE_WORLD_WIDTH), 0};
-    return Transforms::modelToWorld(graphic.getModelBounds(), tilePosition);
+    // Cast constants to a float so we get float multiplication below.
+    static constexpr float TILE_WORLD_WIDTH{SharedConfig::TILE_WORLD_WIDTH};
+    static constexpr float TILE_WORLD_HEIGHT{SharedConfig::TILE_WORLD_HEIGHT};
+
+    Position position{tilePosition.x * TILE_WORLD_WIDTH,
+                      tilePosition.y * TILE_WORLD_WIDTH,
+                      tilePosition.z * TILE_WORLD_HEIGHT};
+    return Transforms::modelToWorld(graphic.getModelBounds(), position);
 }
 
 } // End namespace AM

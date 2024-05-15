@@ -10,14 +10,15 @@ namespace AM
  */
 template<typename T>
 struct DiscreteExtent {
-    // Note: Screens and maps start at (0, 0) so we could make these unsigned,
-    //       but these are signed to facilitate using this struct for things
-    //       like negative offsets.
-    /** The X-axis coordinate of the top left of the extent. */
+    /** The X-axis coordinate of this extent's origin. */
     int x{0};
 
-    /** The Y-axis coordinate of the top left of the extent. */
+    /** The Y-axis coordinate of this extent's origin. */
     int y{0};
+
+    /** The Z-axis coordinate of this extent's origin.
+        Increasing Z is upwards. */
+    int z{0};
 
     /** The X-axis length of this extent. */
     int xLength{0};
@@ -25,48 +26,60 @@ struct DiscreteExtent {
     /** The Y-axis length of this extent. */
     int yLength{0};
 
+    /** The Z-axis length of this extent. */
+    int zLength{0};
+
     DiscreteExtent()
     : x{0}
     , y{0}
+    , z{0}
     , xLength{0}
     , yLength{0}
+    , zLength{0}
     {
     }
 
-    DiscreteExtent(int inX, int inY, int inXLength, int inYLength)
+    DiscreteExtent(int inX, int inY, int inZ, int inXLength, int inYLength,
+                   int inZLength)
     : x{inX}
     , y{inY}
+    , z{inZ}
     , xLength{inXLength}
     , yLength{inYLength}
+    , zLength{inZLength}
     {
     }
 
     /**
-     * Constructor that takes a top left and bottom right point to form a
-     * extent.
+     * Constructor that takes origin and extreme points to form a extent.
      */
-    explicit DiscreteExtent(DiscretePosition<T> topLeft,
-                            DiscretePosition<T> bottomRight)
-    : x{topLeft.x}
-    , y{topLeft.y}
-    , xLength{bottomRight.x - topLeft.x}
-    , yLength{bottomRight.y - topLeft.y}
+    explicit DiscreteExtent(DiscretePosition<T> origin,
+                            DiscretePosition<T> extreme)
+    : x{origin.x}
+    , y{origin.y}
+    , z{origin.z}
+    , xLength{extreme.x - origin.x}
+    , yLength{extreme.y - origin.y}
+    , zLength{extreme.z - origin.z}
     {
     }
 
     /**
-     * Returns the max X position in this extent.
+     * Returns the max valid X position in this extent.
      * Note: Named differently from BoundingBox's 'maxX' member to avoid
      *       confusion (variable vs function).
      */
     int xMax() const { return (x + xLength - 1); }
 
     /**
-     * Returns the max Y position in this extent.
-     * Note: Named differently from BoundingBox's 'maxY' member to avoid
-     *       confusion (variable vs function).
+     * Returns the max valid Y position in this extent.
      */
     int yMax() const { return (y + yLength - 1); }
+
+    /**
+     * Returns the max valid Z position in this extent.
+     */
+    int zMax() const { return (z + zLength - 1); }
 
     /**
      * Sets this extent to the union between itself and the given extent.
@@ -76,7 +89,7 @@ struct DiscreteExtent {
         // Note: We can add some special fast cases for empty extents if we
         //       ever care to, but they likely wouldn't be exercised much.
 
-        /* Horizontal union. */
+        /* X union. */
         // Calc the min and max X coordinates for both ranges.
         int selfMin{x};
         int selfMax{x + xLength};
@@ -96,9 +109,8 @@ struct DiscreteExtent {
         x = selfMin;
         xLength = (selfMax - selfMin);
 
-        /* Vertical union. */
+        /* Y union. */
         // Copy the logic from above, replacing X with Y.
-
         selfMin = y;
         selfMax = y + yLength;
         otherMin = other.y;
@@ -114,6 +126,24 @@ struct DiscreteExtent {
 
         y = selfMin;
         yLength = (selfMax - selfMin);
+
+        /* Z union. */
+        // Copy the logic from above, replacing X with Z.
+        selfMin = z;
+        selfMax = z + zLength;
+        otherMin = other.z;
+        otherMax = other.z + other.zLength;
+
+        if (otherMin < selfMin) {
+            selfMin = otherMin;
+        }
+
+        if (otherMax > selfMax) {
+            selfMax = otherMax;
+        }
+
+        z = selfMin;
+        zLength = (selfMax - selfMin);
     }
 
     /**
@@ -124,7 +154,7 @@ struct DiscreteExtent {
         // Note: We can add some special fast cases for empty extents if we
         //       ever care to, but they likely wouldn't be exercised much.
 
-        /* Horizontal intersection. */
+        /* X intersection. */
         // Calc the min and max X coordinates for both ranges.
         int selfMin{x};
         int selfMax{x + xLength};
@@ -144,7 +174,7 @@ struct DiscreteExtent {
         x = selfMin;
         xLength = (selfMax - selfMin);
 
-        /* Vertical intersection. */
+        /* Y intersection. */
         // Copy the logic from above, replacing X with Y.
         selfMin = y;
         selfMax = y + yLength;
@@ -161,6 +191,24 @@ struct DiscreteExtent {
 
         y = selfMin;
         yLength = (selfMax - selfMin);
+
+        /* Z intersection. */
+        // Copy the logic from above, replacing X with Z.
+        selfMin = z;
+        selfMax = z + zLength;
+        otherMin = other.z;
+        otherMax = other.z + other.zLength;
+
+        if (otherMin > selfMin) {
+            selfMin = otherMin;
+        }
+
+        if (otherMax < selfMax) {
+            selfMax = otherMax;
+        }
+
+        z = selfMin;
+        zLength = (selfMax - selfMin);
     }
 
     /**
@@ -169,7 +217,8 @@ struct DiscreteExtent {
     bool containsPosition(const DiscretePosition<T>& position) const
     {
         return ((position.x >= x) && (position.x < (x + xLength))
-                && (position.y >= y) && (position.y < (y + yLength)));
+                && (position.y >= y) && (position.y < (y + yLength))
+                && (position.z >= z) && (position.z < (z + zLength)));
     }
 
     /**
@@ -178,22 +227,26 @@ struct DiscreteExtent {
      */
     bool containsExtent(const DiscreteExtent<T>& extent) const
     {
-        DiscretePosition<T> topLeft{extent.x, extent.y};
-        DiscretePosition<T> bottomRight{(extent.x + extent.xLength - 1),
-                                        (extent.y + extent.yLength - 1)};
-        return (containsPosition(topLeft) && containsPosition(bottomRight));
+        DiscretePosition<T> origin{extent.x, extent.y, extent.z};
+        DiscretePosition<T> extreme{(extent.x + extent.xLength - 1),
+                                    (extent.y + extent.yLength - 1),
+                                    (extent.z + extent.zLength - 1)};
+        return (containsPosition(origin) && containsPosition(extreme));
     }
 
     /**
      * @return true if this extent has no area.
      */
-    bool isEmpty() { return ((xLength <= 0) || (yLength <= 0)); }
+    bool isEmpty() const
+    {
+        return ((xLength <= 0) || (yLength <= 0) || (zLength <= 0));
+    }
 
     /**
      * @return A count of the number of discrete elements within this extent.
      *         Can also be thought of as the area of this extent.
      */
-    std::size_t getCount() const { return (xLength * yLength); }
+    std::size_t getCount() const { return (xLength * yLength * zLength); }
 };
 
 } // End namespace AM

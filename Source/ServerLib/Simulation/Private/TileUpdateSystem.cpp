@@ -24,8 +24,10 @@ struct InRangeExtentGetter {
         ChunkExtent chunkExtent{tileUpdate.tileExtent};
         chunkExtent.x -= 1;
         chunkExtent.y -= 1;
+        chunkExtent.z -= 1;
         chunkExtent.xLength += 2;
         chunkExtent.yLength += 2;
+        chunkExtent.zLength += 2;
         chunkExtent.intersectWith(tileMap.getChunkExtent());
         return chunkExtent;
     }
@@ -34,9 +36,13 @@ struct InRangeExtentGetter {
     template<typename T>
     ChunkExtent operator()(const T& tileUpdate)
     {
-        ChunkPosition centerChunk{
-            TilePosition{tileUpdate.tileX, tileUpdate.tileY}};
-        ChunkExtent chunkExtent{(centerChunk.x - 1), (centerChunk.y - 1), 3, 3};
+        ChunkPosition centerChunk{tileUpdate.tilePosition};
+        ChunkExtent chunkExtent{(centerChunk.x - 1),
+                                (centerChunk.y - 1),
+                                (centerChunk.z - 1),
+                                3,
+                                3,
+                                3};
         chunkExtent.intersectWith(tileMap.getChunkExtent());
         return chunkExtent;
     }
@@ -136,30 +142,28 @@ void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
     if ((extension != nullptr)
         && !(extension->isTileExtentEditable(
             addLayerRequest.netID,
-            {addLayerRequest.tileX, addLayerRequest.tileY, 1, 1}))) {
+            {addLayerRequest.tilePosition.x, addLayerRequest.tilePosition.y,
+             addLayerRequest.tilePosition.z, 1, 1, 1}))) {
         return;
     }
 
     if (addLayerRequest.layerType == TileLayer::Type::Floor) {
-        world.tileMap.setFloor(addLayerRequest.tileX, addLayerRequest.tileY,
+        world.tileMap.setFloor(addLayerRequest.tilePosition,
                                addLayerRequest.graphicSetID);
     }
     else if (addLayerRequest.layerType == TileLayer::Type::FloorCovering) {
         world.tileMap.addFloorCovering(
-            addLayerRequest.tileX, addLayerRequest.tileY,
-            addLayerRequest.graphicSetID,
+            addLayerRequest.tilePosition, addLayerRequest.graphicSetID,
             static_cast<Rotation::Direction>(addLayerRequest.graphicIndex));
     }
     else if (addLayerRequest.layerType == TileLayer::Type::Wall) {
         world.tileMap.addWall(
-            addLayerRequest.tileX, addLayerRequest.tileY,
-            addLayerRequest.graphicSetID,
+            addLayerRequest.tilePosition, addLayerRequest.graphicSetID,
             static_cast<Wall::Type>(addLayerRequest.graphicIndex));
     }
     else if (addLayerRequest.layerType == TileLayer::Type::Object) {
         world.tileMap.addObject(
-            addLayerRequest.tileX, addLayerRequest.tileY,
-            addLayerRequest.graphicSetID,
+            addLayerRequest.tilePosition, addLayerRequest.graphicSetID,
             static_cast<Rotation::Direction>(addLayerRequest.graphicIndex));
     }
 }
@@ -170,28 +174,27 @@ void TileUpdateSystem::remTileLayer(const TileRemoveLayer& remLayerRequest)
     if ((extension != nullptr)
         && !(extension->isTileExtentEditable(
             remLayerRequest.netID,
-            {remLayerRequest.tileX, remLayerRequest.tileY, 1, 1}))) {
+            {remLayerRequest.tilePosition.x, remLayerRequest.tilePosition.y,
+             remLayerRequest.tilePosition.z, 1, 1, 1}))) {
         return;
     }
 
     if (remLayerRequest.layerType == TileLayer::Type::Floor) {
-        world.tileMap.remFloor(remLayerRequest.tileX, remLayerRequest.tileY);
+        world.tileMap.remFloor(remLayerRequest.tilePosition);
     }
     else if (remLayerRequest.layerType == TileLayer::Type::FloorCovering) {
         world.tileMap.remFloorCovering(
-            remLayerRequest.tileX, remLayerRequest.tileY,
-            remLayerRequest.graphicSetID,
+            remLayerRequest.tilePosition, remLayerRequest.graphicSetID,
             static_cast<Rotation::Direction>(remLayerRequest.graphicIndex));
     }
     else if (remLayerRequest.layerType == TileLayer::Type::Wall) {
         world.tileMap.remWall(
-            remLayerRequest.tileX, remLayerRequest.tileY,
+            remLayerRequest.tilePosition,
             static_cast<Wall::Type>(remLayerRequest.graphicIndex));
     }
     else if (remLayerRequest.layerType == TileLayer::Type::Object) {
         world.tileMap.remObject(
-            remLayerRequest.tileX, remLayerRequest.tileY,
-            remLayerRequest.graphicSetID,
+            remLayerRequest.tilePosition, remLayerRequest.graphicSetID,
             static_cast<Rotation::Direction>(remLayerRequest.graphicIndex));
     }
 }
@@ -201,14 +204,15 @@ void TileUpdateSystem::clearTileLayers(
 {
     // If the project says the tile isn't editable, skip this request.
     if ((extension != nullptr)
-        && !(extension->isTileExtentEditable(
-            clearLayersRequest.netID,
-            {clearLayersRequest.tileX, clearLayersRequest.tileY, 1, 1}))) {
+        && !(extension->isTileExtentEditable(clearLayersRequest.netID,
+                                             {clearLayersRequest.tilePosition.x,
+                                              clearLayersRequest.tilePosition.y,
+                                              clearLayersRequest.tilePosition.z,
+                                              1, 1, 1}))) {
         return;
     }
 
-    world.tileMap.clearTileLayers(clearLayersRequest.tileX,
-                                  clearLayersRequest.tileY,
+    world.tileMap.clearTileLayers(clearLayersRequest.tilePosition,
                                   clearLayersRequest.layerTypesToClear);
 }
 

@@ -63,24 +63,14 @@ void ChunkStreamingSystem::addChunkToMessage(const ChunkPosition& chunkPosition,
     // Save the chunk's position.
     chunkSnapshot.x = chunkPosition.x;
     chunkSnapshot.y = chunkPosition.y;
+    chunkSnapshot.z = chunkPosition.z;
 
-    // Calc what the chunk's starting tile is.
-    int startX{chunkSnapshot.x * CHUNK_WIDTH};
-    int startY{chunkSnapshot.y * CHUNK_WIDTH};
-
-    // For each tile in the chunk.
-    int tileIndex{0};
-    for (int tileY = 0; tileY < CHUNK_WIDTH; ++tileY) {
-        for (int tileX = 0; tileX < CHUNK_WIDTH; ++tileX) {
-            // Copy all of this tile's layers to the snapshot.
-            const Tile& tile{
-                world.tileMap.getTile((startX + tileX), (startY + tileY))};
-            addTileLayersToSnapshot(tile, chunkSnapshot.tiles[tileIndex],
-                                    chunkSnapshot);
-
-            // Increment to the next linear index.
-            tileIndex++;
-        }
+    // Copy all of the chunk's tile layers into the snapshot.
+    const Chunk& chunk{world.tileMap.getChunk(chunkPosition)};
+    for (std::size_t tileIndex{0}; tileIndex < SharedConfig::CHUNK_TILE_COUNT;
+         tileIndex++) {
+        addTileLayersToSnapshot(chunk.tiles[tileIndex],
+                                chunkSnapshot.tiles[tileIndex], chunkSnapshot);
     }
 }
 

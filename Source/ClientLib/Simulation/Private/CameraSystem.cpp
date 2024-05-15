@@ -18,29 +18,21 @@ void CameraSystem::moveCameras()
 {
     auto cameraGroup = world.registry.group<Camera>(entt::get<Position>);
     for (auto [entity, camera, position] : cameraGroup.each()) {
-        // Save the camera's previous position.
-        camera.prevPosition.x = camera.position.x;
-        camera.prevPosition.y = camera.position.y;
+        // Save the camera's previous target position.
+        camera.prevTarget = camera.target;
 
-        // Update the camera to its new position based on its behavior.
+        // Update the camera to its new target position based on its behavior.
         switch (camera.behavior) {
             case Camera::Fixed:
                 // Doesn't move on its own.
                 break;
             case Camera::CenterOnEntity:
-                moveCameraToPosition(camera, position);
+                camera.target = position;
                 break;
             default:
                 break;
         }
     }
-}
-
-void CameraSystem::moveCameraToPosition(Camera& camera, Position& position)
-{
-    // Move the camera.
-    camera.position.x = position.x;
-    camera.position.y = position.y;
 }
 
 } // namespace Client

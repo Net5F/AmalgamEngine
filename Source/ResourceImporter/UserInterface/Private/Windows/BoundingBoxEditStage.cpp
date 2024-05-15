@@ -164,7 +164,7 @@ void BoundingBoxEditStage::onActiveLibraryItemChanged(
     // Set up the gizmo with the default sprite's data.
     // Note: Our default spriteImage has a 374px Y-offset.
     boundingBoxGizmo.setXOffset(
-        static_cast<int>(SharedConfig::TILE_SCREEN_WIDTH / 2.f));
+        static_cast<int>(SharedConfig::TILE_FACE_SCREEN_WIDTH / 2.f));
     boundingBoxGizmo.setYOffset(374);
     boundingBoxGizmo.setBoundingBox(newActiveBoundingBox->modelBounds);
 

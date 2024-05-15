@@ -4,6 +4,7 @@
 #include "WorldObjectID.h"
 #include "CellExtent.h"
 #include "CellPosition.h"
+#include "Config.h"
 #include <SDL_rect.h>
 #include <vector>
 #include <unordered_map>
@@ -27,7 +28,7 @@ namespace Client
  * draw order).
  *
  * Internally, world objects are organized into "cells", each of which has a
- * size corresponding to a configurable cell width. This value can be tweaked
+ * size corresponding to a configurable cell size. This value can be tweaked
  * to affect performance.
  */
 class WorldObjectLocator
@@ -90,14 +91,6 @@ public:
      */
     void setExtent(const TileExtent& inTileExtent);
 
-    /**
-     * Sets the width of the cells in the spatial partitioning hash map and
-     * clears the locator's state (since it's now invalid).
-     * Note: This isn't typically necessary, the default value should be fine
-     *       in most cases.
-     */
-    void setCellWidth(float inCellWidth);
-
 private:
     /** A simple structure for holding tracked objects. */
     struct WorldObject {
@@ -105,10 +98,14 @@ private:
         BoundingBox worldBounds{};
     };
 
-    /** The default width of the cells in the spatial partitioning hash map,
-        in world units. */
-    static constexpr float DEFAULT_CELL_WIDTH{SharedConfig::TILE_WORLD_WIDTH
-                                              * 4};
+    /** The width of a cell in world units. */
+    static constexpr float CELL_WORLD_WIDTH{
+        Config::WORLD_OBJECT_LOCATOR_CELL_WIDTH
+        * SharedConfig::TILE_WORLD_WIDTH};
+    /** The height of a cell in world units. */
+    static constexpr float CELL_WORLD_HEIGHT{
+        Config::WORLD_OBJECT_LOCATOR_CELL_HEIGHT
+        * SharedConfig::TILE_WORLD_HEIGHT};
 
     /**
      * Converts the given tile position to a cell position.
@@ -119,9 +116,6 @@ private:
      * Converts the given tile extent to a cell extent.
      */
     CellExtent tileToCellExtent(const TileExtent& tileExtent);
-
-    /** The width of a grid cell in world units. */
-    float cellWorldWidth;
 
     /** The part of the world map that this locator currently covers, in
         world units. */

@@ -22,11 +22,14 @@ struct ConnectionResponse {
      */
     entt::entity entity{entt::null};
 
-    /** The length, in tiles, of the tile map's X axis. */
-    Uint32 mapXLengthChunks{0};
+    /** The length, in chunks, of the tile map's X axis. */
+    Uint16 mapXLengthChunks{0};
 
-    /** The length, in tiles, of the tile map's Y axis. */
-    Uint32 mapYLengthChunks{0};
+    /** The length, in chunks, of the tile map's Y axis. */
+    Uint16 mapYLengthChunks{0};
+
+    /** The length, in chunks, of the tile map's Z axis. */
+    Uint16 mapZLengthChunks{0};
 };
 
 template<typename S>
@@ -34,8 +37,9 @@ void serialize(S& serializer, ConnectionResponse& connectionResponse)
 {
     serializer.value4b(connectionResponse.tickNum);
     serializer.value4b(connectionResponse.entity);
-    serializer.value4b(connectionResponse.mapXLengthChunks);
-    serializer.value4b(connectionResponse.mapYLengthChunks);
+    serializer.value2b(connectionResponse.mapXLengthChunks);
+    serializer.value2b(connectionResponse.mapYLengthChunks);
+    serializer.value2b(connectionResponse.mapZLengthChunks);
 }
 
 } // End namespace AM

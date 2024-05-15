@@ -104,16 +104,15 @@ Camera Renderer::getLerpedCamera(double alpha)
         = world.registry.get<Camera, Position, PreviousPosition>(
             world.playerEntity);
     Position cameraLerp{MovementHelpers::interpolatePosition(
-        playerCamera.prevPosition, playerCamera.position, alpha)};
+        playerCamera.prevTarget, playerCamera.target, alpha)};
 
-    // Set the camera at the lerped position.
+    // Point the camera at the lerped position.
     Camera lerpedCamera{playerCamera};
-    lerpedCamera.position.x = cameraLerp.x;
-    lerpedCamera.position.y = cameraLerp.y;
+    lerpedCamera.target = cameraLerp;
 
     // Get iso screen coords for the center point of camera.
     SDL_FPoint lerpedCameraCenter{Transforms::worldToScreen(
-        lerpedCamera.position, lerpedCamera.zoomFactor)};
+        lerpedCamera.target, lerpedCamera.zoomFactor)};
 
     // Calc where the top left of the lerpedCamera is in screen space.
     lerpedCamera.extent.x = lerpedCameraCenter.x - (lerpedCamera.extent.w / 2);
@@ -168,7 +167,7 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
         // Reset the texture's alpha.
         SDL_SetTextureAlphaMod(renderData.texture.get(), 255);
 
-        //        drawBoundingBox(spriteInfo.worldBounds, camera);
+        //drawBoundingBox(spriteInfo.worldBounds, camera);
     }
 }
 
@@ -203,7 +202,7 @@ void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
     // Fill Sint arrays with the verts.
     Sint16 xValues[8] = {};
     Sint16 yValues[8] = {};
-    for (unsigned int i = 0; i < 8; ++i) {
+    for (unsigned int i{0}; i < 8; ++i) {
         xValues[i] = static_cast<Sint16>(verts[i].x);
         yValues[i] = static_cast<Sint16>(verts[i].y);
     }

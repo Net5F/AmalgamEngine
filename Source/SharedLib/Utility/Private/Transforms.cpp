@@ -11,21 +11,15 @@ namespace AM
 {
 SDL_FPoint Transforms::worldToScreen(const Position& position, float zoomFactor)
 {
-    // Calc the scaling factor going from world tiles to screen tiles.
-    static const float TILE_WIDTH_SCALE{
-        static_cast<float>(SharedConfig::TILE_SCREEN_WIDTH)
-        / SharedConfig::TILE_WORLD_WIDTH};
-    static const float TILE_HEIGHT_SCALE{
-        static_cast<float>(SharedConfig::TILE_SCREEN_HEIGHT)
-        / SharedConfig::TILE_WORLD_WIDTH};
-
     // Convert cartesian world point to isometric screen point.
-    float screenX{(position.x - position.y) * (TILE_WIDTH_SCALE / 2.f)};
-    float screenY{(position.x + position.y) * (TILE_HEIGHT_SCALE / 2.f)};
+    float screenX{(position.x - position.y)
+                  * (TILE_FACE_WIDTH_WORLD_TO_SCREEN / 2.f)};
+    float screenY{(position.x + position.y)
+                  * (TILE_FACE_HEIGHT_WORLD_TO_SCREEN / 2.f)};
 
     // The Z coordinate contribution is independent of X/Y and only affects the
     // screen's Y axis. Scale and apply it.
-    screenY -= (position.z * SharedConfig::Z_SCREEN_SCALE);
+    screenY -= (position.z * TILE_SIDE_HEIGHT_WORLD_TO_SCREEN);
 
     // Apply the camera zoom.
     screenX *= zoomFactor;
@@ -36,14 +30,14 @@ SDL_FPoint Transforms::worldToScreen(const Position& position, float zoomFactor)
 
 float Transforms::worldZToScreenY(float zCoord, float zoomFactor)
 {
-    return zCoord * zoomFactor * SharedConfig::Z_SCREEN_SCALE;
+    return zCoord * zoomFactor * TILE_SIDE_HEIGHT_WORLD_TO_SCREEN;
 }
 
 Position Transforms::screenToWorld(const SDL_FPoint& screenPoint,
                                    const Camera& camera)
 {
     // Offset the screen point to include the camera position.
-    SDL_FPoint absolutePoint;
+    SDL_FPoint absolutePoint{};
     absolutePoint.x = screenPoint.x + camera.extent.x;
     absolutePoint.y = screenPoint.y + camera.extent.y;
 
@@ -51,19 +45,11 @@ Position Transforms::screenToWorld(const SDL_FPoint& screenPoint,
     float x{absolutePoint.x / camera.zoomFactor};
     float y{absolutePoint.y / camera.zoomFactor};
 
-    // Calc the scaling factor going from screen tiles to world tiles.
-    static const float TILE_WIDTH_SCALE{
-        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
-        / SharedConfig::TILE_SCREEN_WIDTH};
-    static const float TILE_HEIGHT_SCALE{
-        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
-        / SharedConfig::TILE_SCREEN_HEIGHT};
-
     // Calc the world position.
-    float worldX{((2.f * y) + x) * TILE_WIDTH_SCALE};
-    float worldY{((2.f * y) - x) * TILE_HEIGHT_SCALE / 2.f};
+    float worldX{((2.f * y) + x) * TILE_FACE_WIDTH_SCREEN_TO_WORLD};
+    float worldY{((2.f * y) - x) * TILE_FACE_HEIGHT_SCREEN_TO_WORLD / 2.f};
 
-    return {worldX, worldY, 0};
+    return {worldX, worldY, camera.target.z};
 }
 
 Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
@@ -71,30 +57,22 @@ Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
 {
     // Ref: https://gamedev.stackexchange.com/a/206067/124282
 
-    // Find where the screen point intersects the world at Z == 0.
+    // Find where the screen point intersects the world at camera.target.z.
     Position floorPos{screenToWorld(screenPoint, camera)};
-
-    // Calc the scaling factor going from world tiles to screen tiles.
-    static const float TILE_HEIGHT_SCALE{
-        static_cast<float>(SharedConfig::TILE_SCREEN_HEIGHT)
-        / SharedConfig::TILE_WORLD_WIDTH};
 
     // Return a ray that starts at the calculated position and points towards
     // the camera.
     return {floorPos.x,
             floorPos.y,
             floorPos.z,
-            SharedConfig::Z_SCREEN_SCALE,
-            SharedConfig::Z_SCREEN_SCALE,
-            TILE_HEIGHT_SCALE};
+            TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
+            TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
+            TILE_FACE_HEIGHT_WORLD_TO_SCREEN};
 }
 
 float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)
 {
-    // Calc the scaling factor going from screen Y units to world Z units.
-    static const float Z_WORLD_SCALE{1 / SharedConfig::Z_SCREEN_SCALE};
-
-    return yCoord * zoomFactor * Z_WORLD_SCALE;
+    return (yCoord / zoomFactor) * TILE_SIDE_HEIGHT_SCREEN_TO_WORLD;
 }
 
 TilePosition Transforms::screenToTile(const SDL_FPoint& screenPoint,
@@ -103,7 +81,7 @@ TilePosition Transforms::screenToTile(const SDL_FPoint& screenPoint,
     // Convert to world space.
     Position worldPos{screenToWorld(screenPoint, camera)};
 
-    // Convert to tile index.
+    // Convert to tile position.
     return worldPos.asTilePosition();
 }
 

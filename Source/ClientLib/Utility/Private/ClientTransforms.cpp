@@ -35,7 +35,7 @@ SDL_FRect
     // Note: This assumes that the sprite is 1 tile large. When we add support
     //       for other sizes, this will need to be updated.
     screenPoint.y
-        -= ((SharedConfig::TILE_SCREEN_HEIGHT / 2.f) * camera.zoomFactor);
+        -= ((SharedConfig::TILE_FACE_SCREEN_HEIGHT / 2.f) * camera.zoomFactor);
 
     // Apply the camera position adjustment.
     float adjustedX{screenPoint.x - camera.extent.x};
@@ -53,15 +53,20 @@ SDL_FRect
                                          const SpriteRenderData& renderData,
                                          const Camera& camera)
 {
-    // Convert tile position to isometric screen position.
+    // Convert tile position to isometric screen point.
     float screenX{(position.x - position.y)
-                  * (SharedConfig::TILE_SCREEN_WIDTH / 2.f)};
+                  * (SharedConfig::TILE_FACE_SCREEN_WIDTH / 2.f)};
     float screenY{(position.x + position.y)
-                  * (SharedConfig::TILE_SCREEN_HEIGHT / 2.f)};
+                  * (SharedConfig::TILE_FACE_SCREEN_HEIGHT / 2.f)};
+
+    // The Z coordinate contribution is independent of X/Y and only affects the
+    // screen's Y axis. Scale and apply it.
+    screenY -= (position.z * SharedConfig::TILE_WORLD_HEIGHT
+                * Transforms::TILE_SIDE_HEIGHT_WORLD_TO_SCREEN);
 
     // In an iso view, the (0, 0) point of a tile is halfway through the width
     // of the sprite. Thus, we have to shift the tile back to align it.
-    screenX -= (SharedConfig::TILE_SCREEN_WIDTH / 2.f);
+    screenX -= (SharedConfig::TILE_FACE_SCREEN_WIDTH / 2.f);
 
     // An iso sprite may have extra vertical space to show depth, we subtract
     // that space to align it.

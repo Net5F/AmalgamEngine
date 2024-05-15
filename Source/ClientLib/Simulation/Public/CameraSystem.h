@@ -23,14 +23,6 @@ public:
     void moveCameras();
 
 private:
-    /**
-     * Centers the camera on the given position.
-     * If the given entity has a sprite, offsets the position to center on it.
-     * @param camera  The camera to move.
-     * @param position  The entity's Position.
-     */
-    void moveCameraToPosition(Camera& camera, Position& position);
-
     World& world;
 };
 

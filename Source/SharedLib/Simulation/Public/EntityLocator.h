@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CellExtent.h"
+#include "CellPosition.h"
 #include "TileExtent.h"
 #include "ChunkExtent.h"
 #include "entt/fwd.hpp"
@@ -29,13 +30,10 @@ public:
     EntityLocator(entt::registry& inRegistry);
 
     /**
-     * Sets the size of the entity grid and resizes the entityGrid vector.
-     *
-     * @param inMapXLengthTiles  The X length of the tile map, in tiles.
-     * @param inMapYLengthTiles  The Y length of the tile map, in tiles.
+     * Sets the size of the entity grid to match the given extent and resizes 
+     * the entityGrid vector.
      */
-    void setGridSize(std::size_t inMapXLengthTiles,
-                     std::size_t inMapYLengthTiles);
+    void setGridSize(const TileExtent& tileExtent);
 
     /**
      * Sets the given entity's location to the location of the given bounding
@@ -100,6 +98,16 @@ public:
     void removeEntity(entt::entity entity);
 
 private:
+    /** The width of a grid cell in world units. */
+    static constexpr float CELL_WORLD_WIDTH{
+        SharedConfig::ENTITY_LOCATOR_CELL_WIDTH
+        * SharedConfig::TILE_WORLD_WIDTH};
+
+    /** The height of a grid cell in world units. */
+    static constexpr float CELL_WORLD_HEIGHT{
+        SharedConfig::ENTITY_LOCATOR_CELL_HEIGHT
+        * SharedConfig::TILE_WORLD_HEIGHT};
+
     /**
      * Performs a coarse pass to get all entities in cells intersected by
      * the given cylinder.
@@ -138,9 +146,19 @@ private:
      * Returns the index in the entityGrid vector where the cell with the given
      * coordinates can be found.
      */
-    inline std::size_t linearizeCellIndex(int x, int y) const
+    inline std::size_t
+        linearizeCellIndex(const CellPosition& cellPosition) const
     {
-        return (y * gridCellExtent.xLength) + x;
+        // Translate the given position from actual-space to positive-space.
+        CellPosition positivePosition{cellPosition.x - gridCellExtent.x,
+                                      cellPosition.y - gridCellExtent.y,
+                                      cellPosition.z - gridCellExtent.z};
+
+        return static_cast<std::size_t>(
+            (gridCellExtent.xLength * gridCellExtent.yLength
+             * positivePosition.z)
+            + (gridCellExtent.xLength * positivePosition.y)
+            + positivePosition.x);
     }
 
     /**
@@ -154,10 +172,7 @@ private:
     /** The grid's extent, with cells as the unit. */
     CellExtent gridCellExtent;
 
-    /** The width of a grid cell in world units. */
-    const float cellWorldWidth;
-
-    /** The outer vector is a 2D grid stored in row-major order, holding the
+    /** The outer vector is a 3D grid stored in row-major order, holding the
         grid's cells.
         Each element in the grid is a vector of entities--the entities that
         currently intersect with that cell. */

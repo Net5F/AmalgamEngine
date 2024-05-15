@@ -14,6 +14,7 @@ target_sources(SharedLib
         Private/IconData/IconDataBase.cpp
         Private/ItemData/Item.cpp
         Private/ItemData/ItemDataBase.cpp
+        Private/TileMap/Chunk.cpp
         Private/TileMap/ChunkExtent.cpp
         Private/TileMap/ChunkPosition.cpp
         Private/TileMap/Tile.cpp
@@ -68,6 +69,7 @@ target_sources(SharedLib
         Public/ItemData/ItemInitScript.h
         Public/TileMap/CellExtent.h
         Public/TileMap/CellPosition.h
+        Public/TileMap/Chunk.h
         Public/TileMap/ChunkExtent.h
         Public/TileMap/ChunkPosition.h
         Public/TileMap/ChunkSnapshot.h

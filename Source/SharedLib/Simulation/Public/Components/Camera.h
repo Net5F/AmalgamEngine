@@ -22,14 +22,17 @@ struct Camera {
     /** The camera's movement behavior. */
     MovementBehavior behavior{MovementBehavior::CenterOnEntity};
 
-    /** Center of the camera's view, in world coordinates. */
-    Position position{};
+    /** The position that the camera is pointing at.
+        Since our camera always faces the same direction, it's more useful to 
+        track the target than it is to track the camera's own position. */
+    Position target{};
 
-    /** The camera's previous position. Used for lerping in the renderer. */
-    PreviousPosition prevPosition{};
+    /** The position that the camera was previously pointing at. Used for 
+        lerping in the renderer. */
+    PreviousPosition prevTarget{};
 
     /** The camera's extent in screen space, calculated during the last render
-        tick. */
+        tick in Renderer::getLerpedCamera(). */
     SDL_FRect extent{0, 0, 0, 0};
 
     /** The amount that this camera is zoomed in or out. 1.0 is no zoom. */
@@ -41,9 +44,9 @@ struct Camera {
     /**
      * Returns the tile extent that is in view of this camera.
      *
-     * @param tileMapExtent  The tile map's bounds.
+     * @param mapTileExtent The tile map's bounds.
      */
-    TileExtent getTileViewExtent(const TileExtent& tileMapExtent) const;
+    TileExtent getTileViewExtent(const TileExtent& mapTileExtent) const;
 };
 
 } // namespace AM
