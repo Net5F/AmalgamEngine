@@ -7,19 +7,19 @@ namespace AM
 
 TileExtent Camera::getTileViewExtent(const TileExtent& mapTileExtent) const
 {
-    static constexpr int VIEW_WIDTH_TILES{
+    static constexpr int HALF_VIEW_WIDTH_TILES{
         static_cast<int>(SharedConfig::VIEW_RADIUS
                          / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))};
-    static constexpr int VIEW_HEIGHT_TILES{static_cast<int>(
+    static constexpr int HALF_VIEW_HEIGHT_TILES{static_cast<int>(
         SharedConfig::VIEW_RADIUS
         / static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT))};
 
     // Find the lowest x/y tile indices that this camera can see.
     TilePosition centerTile{target.asTilePosition()};
     TileExtent tileViewExtent{};
-    tileViewExtent.x = centerTile.x - VIEW_WIDTH_TILES;
-    tileViewExtent.y = centerTile.y - VIEW_WIDTH_TILES;
-    tileViewExtent.z = centerTile.z - VIEW_HEIGHT_TILES;
+    tileViewExtent.x = centerTile.x - HALF_VIEW_WIDTH_TILES;
+    tileViewExtent.y = centerTile.y - HALF_VIEW_WIDTH_TILES;
+    // Note: The camera can always see down to Z == 0.
 
     // Calc how far the player's view extends.
     // Note: We add 1 to the view radius to keep all sides even, since the

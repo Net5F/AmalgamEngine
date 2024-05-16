@@ -101,7 +101,7 @@ BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
     // If the desired movement would go outside of the map, reject the move.
     const TileExtent boxTileExtent{desiredBounds.asTileExtent()};
     const TileExtent mapExtent{tileMap.getTileExtent()};
-    if (!mapExtent.containsExtent(boxTileExtent) || (desiredBounds.minZ < 0)) {
+    if (!mapExtent.containsExtent(boxTileExtent)) {
         return currentBounds;
     }
 

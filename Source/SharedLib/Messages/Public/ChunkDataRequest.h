@@ -2,6 +2,7 @@
 
 #include "EngineMessageType.h"
 #include "ChunkPosition.h"
+#include "ChunkUpdate.h"
 #include "NetworkDefs.h"
 #include <vector>
 
@@ -16,10 +17,6 @@ public:
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
         EngineMessageType::ChunkDataRequest};
-
-    /** Used as a "we should never hit this" cap on the number of chunks that
-        we request at once. */
-    static constexpr std::size_t MAX_CHUNKS{30};
 
     //--------------------------------------------------------------------------
     // Networked data
@@ -43,7 +40,7 @@ template<typename S>
 void serialize(S& serializer, ChunkDataRequest& chunkDataRequest)
 {
     serializer.container(chunkDataRequest.requestedChunks,
-                         ChunkDataRequest::MAX_CHUNKS);
+                         ChunkUpdate::MAX_CHUNKS);
 }
 
 } // End namespace AM
