@@ -29,11 +29,11 @@ struct Position {
      */
     TilePosition asTilePosition() const
     {
-        float tileX{x / (static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))};
+        float tileX{x / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
         tileX = std::floor(tileX);
-        float tileY{y / (static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))};
+        float tileY{y / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
         tileY = std::floor(tileY);
-        float tileZ{z / (static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))};
+        float tileZ{z / static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
         tileZ = std::floor(tileZ);
 
         return {static_cast<int>(tileX), static_cast<int>(tileY),
@@ -45,14 +45,13 @@ struct Position {
      */
     ChunkPosition asChunkPosition() const
     {
-        float chunkX{(x / (static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))
-                      / static_cast<float>(SharedConfig::CHUNK_WIDTH))};
+        float chunkX{(x / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))
+                      / static_cast<float>(SharedConfig::CHUNK_WIDTH)};
         chunkX = std::floor(chunkX);
-        float chunkY{(y / (static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))
-                      / static_cast<float>(SharedConfig::CHUNK_WIDTH))};
+        float chunkY{(y / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))
+                      / static_cast<float>(SharedConfig::CHUNK_WIDTH)};
         chunkY = std::floor(chunkY);
-        float chunkZ{(z / (static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))
-                      / static_cast<float>(SharedConfig::CHUNK_WIDTH))};
+        float chunkZ{z / static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
         chunkZ = std::floor(chunkZ);
 
         return {static_cast<int>(chunkX), static_cast<int>(chunkY),

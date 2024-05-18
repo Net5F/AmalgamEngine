@@ -74,11 +74,9 @@ WorldObjectID
         return {};
     }
 
-    // Calc the ray we'll be tracing, from locator bounds -> the ground.
+    // Calc the ray we'll be tracing, from locator bounds -> the camera Z plane.
     Position rayOrigin{rayToCamera.getPositionAtT(intersectT)};
-    Ray ray{rayOrigin.x,
-            rayOrigin.y,
-            rayOrigin.z,
+    Ray ray{{rayOrigin.x, rayOrigin.y, rayOrigin.z},
             -rayToCamera.directionX,
             -rayToCamera.directionY,
             -rayToCamera.directionZ};
@@ -86,26 +84,32 @@ WorldObjectID
     // Calc the ratio of how long we have to travel along the ray to
     // fully move through 1 cell in each direction.
     // Note: Since our ray is from our iso camera, X/Y will always be equal.
-    const float stepX{std::abs(1 / ray.directionX)};
-    const float stepY{std::abs(1 / ray.directionY)};
-    const float stepZ{std::abs(1 / ray.directionZ)};
+    const float unitStepX{std::abs(1 / ray.directionX)};
+    const float unitStepZ{std::abs(1 / ray.directionZ)};
+    const float cellStepX{unitStepX * CELL_WORLD_WIDTH};
+    const float cellStepY{cellStepX};
+    const float cellStepZ{unitStepZ * CELL_WORLD_HEIGHT};
 
     // These hold the value (relative to stepX/Y/Z) where the next
     // intersection occurs in each direction.
-    float nextIntersectionX{
-        (std::fmod(ray.origin.x, CELL_WORLD_WIDTH) / CELL_WORLD_WIDTH) * stepX};
-    float nextIntersectionY{
-        (std::fmod(ray.origin.y, CELL_WORLD_WIDTH) / CELL_WORLD_WIDTH) * stepY};
-    float nextIntersectionZ{
-        (std::fmod(ray.origin.z, CELL_WORLD_HEIGHT) / CELL_WORLD_HEIGHT)
-        * stepZ};
-
-    // Walk along the ray, checking each cell for a hit world object.
+    // Note: Dividing by CELL_WORLD_ gives us a ratio of total cell size, 
+    //       which we can then multiply by cellStep to get "how much of a 
+    //       step would we have to make along the ray to reach the next cell".
     CellPosition currentCellPosition{
         tileToCellPosition(rayOrigin.asTilePosition())};
-    CellPosition endCellPosition{tileToCellPosition(Position{
-        rayToCamera.origin.x, rayToCamera.origin.y, rayToCamera.origin.z}
-                                                        .asTilePosition())};
+    float nextIntersectionX{
+        (ray.origin.x - (currentCellPosition.x * CELL_WORLD_WIDTH))
+        / CELL_WORLD_WIDTH * cellStepX};
+    float nextIntersectionY{
+        (ray.origin.y - (currentCellPosition.y * CELL_WORLD_WIDTH))
+        / CELL_WORLD_WIDTH * cellStepY};
+    float nextIntersectionZ{
+        (ray.origin.z - (currentCellPosition.z * CELL_WORLD_HEIGHT))
+        / CELL_WORLD_HEIGHT * cellStepZ};
+
+    // Walk along the ray, checking each cell for a hit world object.
+    CellPosition endCellPosition{
+        tileToCellPosition(rayToCamera.origin.asTilePosition())};
     // (We iterate until we walk past the end position along some axis).
     while ((currentCellPosition.x >= endCellPosition.x)
            && (currentCellPosition.y >= endCellPosition.y)
@@ -128,16 +132,16 @@ WorldObjectID
         // Move towards the next closest cell.
         if ((nextIntersectionX < nextIntersectionY)
             && (nextIntersectionX < nextIntersectionZ)) {
-            nextIntersectionX += stepX;
+            nextIntersectionX += cellStepX;
             currentCellPosition.x -= 1;
         }
         else if ((nextIntersectionY < nextIntersectionX)
             && (nextIntersectionY < nextIntersectionZ)) {
-            nextIntersectionY += stepY;
+            nextIntersectionY += cellStepY;
             currentCellPosition.y -= 1;
         }
         else {
-            nextIntersectionZ += stepZ;
+            nextIntersectionZ += cellStepZ;
             currentCellPosition.z -= 1;
         }
     }

@@ -29,8 +29,9 @@ TileExtent Camera::getTileViewExtent(const TileExtent& mapTileExtent) const
                                      / SharedConfig::TILE_WORLD_WIDTH));
     tileViewExtent.yLength = tileViewExtent.xLength;
     tileViewExtent.zLength
-        = static_cast<int>(std::ceil(((SharedConfig::VIEW_RADIUS * 2) + 1)
-                                     / SharedConfig::TILE_WORLD_HEIGHT));
+        = centerTile.z
+          + static_cast<int>(std::ceil(SharedConfig::VIEW_RADIUS
+                                       / SharedConfig::TILE_WORLD_HEIGHT));
 
     // Clip the view to the world bounds.
     tileViewExtent.intersectWith(mapTileExtent);

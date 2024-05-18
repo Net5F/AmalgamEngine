@@ -45,6 +45,15 @@ Position Transforms::screenToWorld(const SDL_FPoint& screenPoint,
     float x{absolutePoint.x / camera.zoomFactor};
     float y{absolutePoint.y / camera.zoomFactor};
 
+    // Offset the point to be relative to the closest world Z level that the 
+    // camera's target is above. I.e., treat whatever Z level the target is 
+    // standing above as the ground plane.
+    int zTileOffset{
+        static_cast<int>(camera.target.z / SharedConfig::TILE_WORLD_HEIGHT)};
+    float zScreenOffset{zTileOffset * SharedConfig::TILE_WORLD_HEIGHT
+                        * TILE_SIDE_HEIGHT_WORLD_TO_SCREEN};
+    y += zScreenOffset;
+
     // Calc the world position.
     float worldX{((2.f * y) + x) * TILE_FACE_WIDTH_SCREEN_TO_WORLD};
     float worldY{((2.f * y) - x) * TILE_FACE_HEIGHT_SCREEN_TO_WORLD / 2.f};
@@ -62,9 +71,7 @@ Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
 
     // Return a ray that starts at the calculated position and points towards
     // the camera.
-    return {floorPos.x,
-            floorPos.y,
-            floorPos.z,
+    return {{floorPos.x, floorPos.y, floorPos.z},
             TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
             TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
             TILE_FACE_HEIGHT_WORLD_TO_SCREEN};

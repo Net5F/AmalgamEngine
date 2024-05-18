@@ -122,7 +122,7 @@ public:
         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
         / SharedConfig::TILE_FACE_SCREEN_HEIGHT};
     static constexpr float TILE_SIDE_HEIGHT_SCREEN_TO_WORLD{
-        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
+        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)
         / SharedConfig::TILE_SIDE_SCREEN_HEIGHT};
 };
 

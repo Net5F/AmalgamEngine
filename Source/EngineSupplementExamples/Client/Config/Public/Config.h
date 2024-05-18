@@ -48,7 +48,7 @@ public:
         Note: The tile map's size must be evenly divisible by this number. */
     static constexpr std::size_t WORLD_OBJECT_LOCATOR_CELL_WIDTH{4};
 
-    /** The z axis width, in tiles, of a cell in our world object spatial
+    /** The z axis height, in tiles, of a cell in our world object spatial
         partitioning structure (WorldObjectLocator).
         Note: The tile map's size must be evenly divisible by this number. */
     static constexpr std::size_t WORLD_OBJECT_LOCATOR_CELL_HEIGHT{2};
