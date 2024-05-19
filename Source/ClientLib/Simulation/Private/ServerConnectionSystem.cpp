@@ -169,7 +169,7 @@ void ServerConnectionSystem::initMockSimState()
     UserConfig& userConfig{UserConfig::get()};
     registry.emplace<Camera>(
         newEntity, Camera::CenterOnEntity, Position{}, PreviousPosition{},
-        SDLHelpers::rectToFRect(userConfig.getWindowSize()));
+        BoundingBox{}, SDLHelpers::rectToFRect(userConfig.getWindowSize()));
 }
 
 void ServerConnectionSystem::clearSimState()

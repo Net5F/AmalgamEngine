@@ -32,6 +32,17 @@ void CameraSystem::moveCameras()
             default:
                 break;
         }
+
+        // Update the camera's view bounds.
+        camera.viewBounds.minX = camera.target.x - SharedConfig::VIEW_RADIUS;
+        camera.viewBounds.maxX = camera.target.x + SharedConfig::VIEW_RADIUS;
+        camera.viewBounds.minY = camera.target.y - SharedConfig::VIEW_RADIUS;
+        camera.viewBounds.maxY = camera.target.y + SharedConfig::VIEW_RADIUS;
+        // Note: The camera can always see down to Z == 0.
+        camera.viewBounds.minZ = 0;
+        camera.viewBounds.maxZ = camera.target.z + SharedConfig::VIEW_RADIUS;
+        // Note: We purposely don't clip to the tile map's bounds, because it's 
+        //       reasonable to view things outside of the map.
     }
 }
 

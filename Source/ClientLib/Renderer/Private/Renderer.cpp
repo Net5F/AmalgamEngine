@@ -115,13 +115,15 @@ Camera Renderer::getLerpedCamera(double alpha)
         lerpedCamera.target, lerpedCamera.zoomFactor)};
 
     // Calc where the top left of the lerpedCamera is in screen space.
-    lerpedCamera.extent.x = lerpedCameraCenter.x - (lerpedCamera.extent.w / 2);
-    lerpedCamera.extent.y = lerpedCameraCenter.y - (lerpedCamera.extent.h / 2);
+    lerpedCamera.screenExtent.x
+        = lerpedCameraCenter.x - (lerpedCamera.screenExtent.w / 2);
+    lerpedCamera.screenExtent.y
+        = lerpedCameraCenter.y - (lerpedCamera.screenExtent.h / 2);
 
     // Save the last calculated screen position of the camera for use in
     // screen -> world calcs.
-    playerCamera.extent.x = lerpedCamera.extent.x;
-    playerCamera.extent.y = lerpedCamera.extent.y;
+    playerCamera.screenExtent.x = lerpedCamera.screenExtent.x;
+    playerCamera.screenExtent.y = lerpedCamera.screenExtent.y;
 
     return lerpedCamera;
 }
@@ -195,8 +197,8 @@ void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
 
     // Adjust all verts for the camera.
     for (SDL_FPoint& vert : verts) {
-        vert.x = std::round(vert.x - camera.extent.x);
-        vert.y = std::round(vert.y - camera.extent.y);
+        vert.x = std::round(vert.x - camera.screenExtent.x);
+        vert.y = std::round(vert.y - camera.screenExtent.y);
     }
 
     // Fill Sint arrays with the verts.

@@ -4,6 +4,7 @@
 #include "BoundingBox.h"
 #include "Sprite.h"
 #include "SharedConfig.h"
+#include "AMAssert.h"
 #include "Log.h"
 #include <cmath>
 
@@ -33,32 +34,42 @@ float Transforms::worldZToScreenY(float zCoord, float zoomFactor)
     return zCoord * zoomFactor * TILE_SIDE_HEIGHT_WORLD_TO_SCREEN;
 }
 
-Position Transforms::screenToWorld(const SDL_FPoint& screenPoint,
-                                   const Camera& camera)
+Position Transforms::screenToWorldMinimum(const SDL_FPoint& screenPoint,
+                                          const Camera& camera)
 {
     // Offset the screen point to include the camera position.
     SDL_FPoint absolutePoint{};
-    absolutePoint.x = screenPoint.x + camera.extent.x;
-    absolutePoint.y = screenPoint.y + camera.extent.y;
+    absolutePoint.x = screenPoint.x + camera.screenExtent.x;
+    absolutePoint.y = screenPoint.y + camera.screenExtent.y;
 
     // Remove the camera zoom.
     float x{absolutePoint.x / camera.zoomFactor};
     float y{absolutePoint.y / camera.zoomFactor};
 
-    // Offset the point to be relative to the closest world Z level that the 
-    // camera's target is above. I.e., treat whatever Z level the target is 
-    // standing above as the ground plane.
-    int zTileOffset{
-        static_cast<int>(camera.target.z / SharedConfig::TILE_WORLD_HEIGHT)};
-    float zScreenOffset{zTileOffset * SharedConfig::TILE_WORLD_HEIGHT
-                        * TILE_SIDE_HEIGHT_WORLD_TO_SCREEN};
-    y += zScreenOffset;
+    // Offset the point to be relative to Z == 0.
+    // TODO: We may need to adjust this when we start testing Z > 0
+    y += (camera.target.z * TILE_SIDE_HEIGHT_WORLD_TO_SCREEN);
 
     // Calc the world position.
     float worldX{((2.f * y) + x) * TILE_FACE_WIDTH_SCREEN_TO_WORLD};
     float worldY{((2.f * y) - x) * TILE_FACE_HEIGHT_SCREEN_TO_WORLD / 2.f};
 
-    return {worldX, worldY, camera.target.z};
+    return {worldX, worldY, 0};
+}
+
+Position Transforms::screenToWorldTarget(const SDL_FPoint& screenPoint,
+                                         const Camera& camera)
+{
+    // Find the T where a ray cast from screenPoint intersects the camera 
+    // target's Z plane.
+    Ray ray{screenToWorldRay(screenPoint, camera)};
+    BoundingBox zPlane{-1'000'000.f, 1'000'000.f, -1'000'000.f,
+                       1'000'000.f,  -0.1f,      camera.target.z};
+    float intersectT{zPlane.getMinIntersection(ray)};
+    AM_ASSERT(intersectT > 0, "Screen ray failed to intersect Z plane.");
+
+    // Return the intersected position.
+    return ray.getPositionAtT(intersectT);
 }
 
 Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
@@ -66,30 +77,55 @@ Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
 {
     // Ref: https://gamedev.stackexchange.com/a/206067/124282
 
-    // Find where the screen point intersects the world at camera.target.z.
-    Position floorPos{screenToWorld(screenPoint, camera)};
+    // Find where screenPoint intersects the world at Z == 0.
+    Position minimum{screenToWorldMinimum(screenPoint, camera)};
 
-    // Return a ray that starts at the calculated position and points towards
-    // the camera.
-    return {{floorPos.x, floorPos.y, floorPos.z},
-            TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
-            TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
-            TILE_FACE_HEIGHT_WORLD_TO_SCREEN};
+    // Cast a ray up from the minimum position towards the camera.
+    // Find the furthest position where this ray intersects the 
+    // camera's view bounds.
+    Ray rayToCamera{minimum, TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
+                    TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
+                    TILE_FACE_HEIGHT_WORLD_TO_SCREEN};
+    rayToCamera.normalize();
+    float tMax{camera.viewBounds.getMaxIntersection(rayToCamera)};
+
+    Position viewBoundsIntersection{rayToCamera.getPositionAtT(tMax)};
+    AM_ASSERT(tMax > 0, "Screen ray failed to intersect camera bounds.");
+
+    // Return a ray that starts at the intersected position and points towards 
+    // the minimum.
+    return {viewBoundsIntersection,
+            -rayToCamera.directionX,
+            -rayToCamera.directionY,
+            -rayToCamera.directionZ};
+}
+
+TilePosition Transforms::screenToWorldTile(const SDL_FPoint& screenPoint,
+                                           const Camera& camera)
+{
+    // Find the Z position of the highest tile that the camera's target is 
+    // standing above.
+    int tileZCoord{
+        static_cast<int>(camera.target.z / SharedConfig::TILE_WORLD_HEIGHT)};
+    float tileZWorld{static_cast<float>(tileZCoord)
+                     * SharedConfig::TILE_WORLD_HEIGHT};
+
+    // Find the T where a ray cast from screenPoint intersects the tile's 
+    // Z plane.
+    Ray ray{screenToWorldRay(screenPoint, camera)};
+    BoundingBox zPlane{-1'000'000.f, 1'000'000.f, -1'000'000.f,
+                       1'000'000.f,  -0.1f,      tileZWorld};
+    float intersectT{zPlane.getMinIntersection(ray)};
+    AM_ASSERT(intersectT > 0, "Screen ray failed to intersect Z plane.");
+
+    // Return the intersected tile position.
+    Position intersectPos{ray.getPositionAtT(intersectT)};
+    return intersectPos.asTilePosition();
 }
 
 float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)
 {
     return (yCoord / zoomFactor) * TILE_SIDE_HEIGHT_SCREEN_TO_WORLD;
-}
-
-TilePosition Transforms::screenToTile(const SDL_FPoint& screenPoint,
-                                      const Camera& camera)
-{
-    // Convert to world space.
-    Position worldPos{screenToWorld(screenPoint, camera)};
-
-    // Convert to tile position.
-    return worldPos.asTilePosition();
 }
 
 BoundingBox Transforms::modelToWorld(const BoundingBox& modelBounds,

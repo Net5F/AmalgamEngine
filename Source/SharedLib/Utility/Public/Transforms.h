@@ -33,37 +33,42 @@ public:
     static float worldZToScreenY(float zCoord, float zoomFactor);
 
     /**
-     * Converts a point in screen space to a position in world space.
-     * Note: The resulting position will be aligned along the Z axis with the 
-     *       given camera.target.z.
+     * Converts a point in screen space to a position in world space, with 
+     * Z == 0.
      */
-    static Position screenToWorld(const SDL_FPoint& screenPoint,
-                                  const Camera& camera);
+    static Position screenToWorldMinimum(const SDL_FPoint& screenPoint,
+                                         const Camera& camera);
+
+    /**
+     * Converts a point in screen space to a position in world space, with 
+     * Z == camera.target.z.
+     */
+    static Position screenToWorldTarget(const SDL_FPoint& screenPoint,
+                                        const Camera& camera);
 
     /**
      * Converts a point in screen space to a ray in world space.
-     * Note: The resulting ray starts at the given camera.target.z and points
-     *       towards the camera. It does not point from the camera to the
-     *       ground, as may be expected.
+     * @return A ray starting at the closest intersection between screenPoint 
+     *         and the camera's view bounds, pointing in the normalized 
+     *         direction of the camera.
      */
     static Ray screenToWorldRay(const SDL_FPoint& screenPoint,
                                 const Camera& camera);
 
     /**
-     * Converts a Y coordinate in screen space to a Z coordinate in world space.
-     *
-     * @param zoomFactor  The camera's zoom factor.
-     */
-    static float screenYToWorldZ(float yCoord, float zoomFactor);
-
-    /**
      * Converts a point in screen space to a tile position in world space.
-     * Mostly used for getting the tile that the mouse is over.
      * Note: The resulting tile will be aligned along the Z axis with the given 
      *       camera.target.z. To select higher or lower tiles, move the camera.
      */
-    static TilePosition screenToTile(const SDL_FPoint& screenPoint,
-                                     const Camera& camera);
+    static TilePosition screenToWorldTile(const SDL_FPoint& screenPoint,
+                                          const Camera& camera);
+
+    /**
+     * Converts a Y coordinate in screen space to a Z coordinate in world space.
+     *
+     * @param zoomFactor The camera's zoom factor.
+     */
+    static float screenYToWorldZ(float yCoord, float zoomFactor);
 
     /**
      * Converts a model-space bounding box to a world-space box, placed at the

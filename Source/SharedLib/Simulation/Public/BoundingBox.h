@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 namespace AM
 {
 struct Position;
@@ -66,10 +68,9 @@ public:
     bool intersects(const Cylinder& cylinder) const;
 
     /**
-     * Returns the t at which this box intersects the given ray.
-     * Returns -1 if there's no intersection.
+     * Returns true if this box intersects the given ray.
      */
-    float intersects(const Ray& ray) const;
+    bool intersects(const Ray& ray) const;
 
     /**
      * Returns true if this box intersects the given tile extent.
@@ -81,11 +82,31 @@ public:
     bool intersects(const TileExtent& tileExtent) const;
 
     /**
+     * Returns the minimum t at which this box intersects the given ray.
+     * Returns -1 if there's no intersection.
+     */
+    float getMinIntersection(const Ray& ray) const;
+
+    /**
+     * Returns the maximum t at which this box intersects the given ray.
+     * Returns -1 if there's no intersection.
+     */
+    float getMaxIntersection(const Ray& ray) const;
+
+    /**
      * Returns the smallest tile extent that contains this bounding box.
      *
      * Note: The Z-axis is ignored in this conversion, as TileExtent is 2D.
      */
     TileExtent asTileExtent() const;
+
+private:
+    /**
+     * Returns tMin and tMax for the given ray's intersection with this 
+     * bounding box.
+     * @return {tMin, tMax}
+     */
+    std::array<float, 2> getIntersections(const Ray& ray) const;
 };
 
 } // End namespace AM

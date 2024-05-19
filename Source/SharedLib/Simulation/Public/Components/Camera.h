@@ -2,6 +2,7 @@
 
 #include "Position.h"
 #include "PreviousPosition.h"
+#include "BoundingBox.h"
 #include "TileExtent.h"
 #include <SDL_rect.h>
 
@@ -31,9 +32,13 @@ struct Camera {
         lerping in the renderer. */
     PreviousPosition prevTarget{};
 
-    /** The camera's extent in screen space, calculated during the last render
-        tick in Renderer::getLerpedCamera(). */
-    SDL_FRect extent{0, 0, 0, 0};
+    /** The area that the camera is viewing, in world space.
+        This is the total viewable area, at any zoom amount. */
+    BoundingBox viewBounds{};
+
+    /** The camera's view extent in screen space, calculated during the last 
+        render tick in Renderer::getLerpedCamera(). */
+    SDL_FRect screenExtent{0, 0, 0, 0};
 
     /** The amount that this camera is zoomed in or out. 1.0 is no zoom. */
     float zoomFactor{1.0};

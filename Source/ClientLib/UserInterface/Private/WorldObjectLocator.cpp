@@ -63,23 +63,8 @@ WorldObjectID
 
     // Cast a world-space ray from the plane formed by camera.target.z to the 
     // given point on the screen.
-    Ray rayToCamera{Transforms::screenToWorldRay(
+    Ray ray{Transforms::screenToWorldRay(
         SDLHelpers::pointToFPoint(screenPoint), camera)};
-    rayToCamera.normalize();
-
-    // Find where the ray intersects this locator's extent.
-    float intersectT{locatorBounds.intersects(rayToCamera)};
-    if (intersectT == -1) {
-        // If there's no intersection, return empty.
-        return {};
-    }
-
-    // Calc the ray we'll be tracing, from locator bounds -> the camera Z plane.
-    Position rayOrigin{rayToCamera.getPositionAtT(intersectT)};
-    Ray ray{{rayOrigin.x, rayOrigin.y, rayOrigin.z},
-            -rayToCamera.directionX,
-            -rayToCamera.directionY,
-            -rayToCamera.directionZ};
 
     // Calc the ratio of how long we have to travel along the ray to
     // fully move through 1 cell in each direction.
@@ -96,7 +81,7 @@ WorldObjectID
     //       which we can then multiply by cellStep to get "how much of a 
     //       step would we have to make along the ray to reach the next cell".
     CellPosition currentCellPosition{
-        tileToCellPosition(rayOrigin.asTilePosition())};
+        tileToCellPosition(ray.origin.asTilePosition())};
     float nextIntersectionX{
         (ray.origin.x - (currentCellPosition.x * CELL_WORLD_WIDTH))
         / CELL_WORLD_WIDTH * cellStepX};
@@ -107,9 +92,14 @@ WorldObjectID
         (ray.origin.z - (currentCellPosition.z * CELL_WORLD_HEIGHT))
         / CELL_WORLD_HEIGHT * cellStepZ};
 
-    // Walk along the ray, checking each cell for a hit world object.
+    // Find the furthest intersection between the ray and the camera's view 
+    // bounds so we know where to stop the walk.
+    float furthestT{camera.viewBounds.getMaxIntersection(ray)};
+    Position furthestViewIntersection{ray.getPositionAtT(furthestT)};
     CellPosition endCellPosition{
-        tileToCellPosition(rayToCamera.origin.asTilePosition())};
+        tileToCellPosition(furthestViewIntersection.asTilePosition())};
+
+    // Walk along the ray, checking each cell for a hit world object.
     // (We iterate until we walk past the end position along some axis).
     while ((currentCellPosition.x >= endCellPosition.x)
            && (currentCellPosition.y >= endCellPosition.y)
@@ -123,7 +113,7 @@ WorldObjectID
             for (auto it{objectVector.rbegin()}; it != objectVector.rend();
                  ++it) {
                 const WorldObject& object{*it};
-                if (object.worldBounds.intersects(ray) != -1) {
+                if (object.worldBounds.intersects(ray)) {
                     return object.objectID;
                 }
             }

@@ -508,7 +508,7 @@ bool WorldSpriteSorter::isWithinScreenBounds(const SDL_FRect& extent,
 {
     // The extent is in final screen coordinates, so we only need to check if
     // it's within the rect formed by (0, 0) and (camera.width, camera.height).
-    SDL_FRect cameraExtent{0, 0, camera.extent.w, camera.extent.h};
+    SDL_FRect cameraExtent{0, 0, camera.screenExtent.w, camera.screenExtent.h};
     return (SDL_HasRectIntersectionFloat(&extent, &cameraExtent) == SDL_TRUE);
 }
 

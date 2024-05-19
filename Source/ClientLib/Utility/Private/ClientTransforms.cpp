@@ -38,8 +38,8 @@ SDL_FRect
         -= ((SharedConfig::TILE_FACE_SCREEN_HEIGHT / 2.f) * camera.zoomFactor);
 
     // Apply the camera position adjustment.
-    float adjustedX{screenPoint.x - camera.extent.x};
-    float adjustedY{screenPoint.y - camera.extent.y};
+    float adjustedX{screenPoint.x - camera.screenExtent.x};
+    float adjustedY{screenPoint.y - camera.screenExtent.y};
 
     // Apply the camera's zoom to the sprite size.
     float zoomedWidth{renderData.textureExtent.w * camera.zoomFactor};
@@ -77,8 +77,8 @@ SDL_FRect
     screenY *= camera.zoomFactor;
 
     // Apply the camera adjustment.
-    float adjustedX{screenX - camera.extent.x};
-    float adjustedY{screenY - camera.extent.y};
+    float adjustedX{screenX - camera.screenExtent.x};
+    float adjustedY{screenY - camera.screenExtent.y};
 
     // Apply the camera's zoom to the tile size.
     float zoomedWidth{renderData.textureExtent.w * camera.zoomFactor};

@@ -103,40 +103,18 @@ bool BoundingBox::intersects(const Cylinder& cylinder) const
     return (cornerDistanceSquared <= (cylinder.radius * cylinder.radius));
 }
 
-float BoundingBox::intersects(const Ray& ray) const
+bool BoundingBox::intersects(const Ray& ray) const
 {
-    // Find the constant t where intersection occurs for each direction.
-    float tX1{(minX - ray.origin.x) / ray.directionX};
-    float tX2{(maxX - ray.origin.x) / ray.directionX};
-    float tY1{(minY - ray.origin.y) / ray.directionY};
-    float tY2{(maxY - ray.origin.y) / ray.directionY};
-    float tZ1{(minZ - ray.origin.z) / ray.directionZ};
-    float tZ2{(maxZ - ray.origin.z) / ray.directionZ};
-
-    // Find the min t in each direction, then find the max of those.
-    // This gives us the t where the ray first intersects the rect.
-    float tMin{std::max(std::max(std::min(tX1, tX2), std::min(tY1, tY2)),
-                        std::min(tZ1, tZ2))};
-
-    // Find the max t in each direction, then find the min of those.
-    // This gives us the t where the ray last intersects the rect.
-    float tMax{std::min(std::min(std::max(tX1, tX2), std::max(tY1, tY2)),
-                        std::max(tZ1, tZ2))};
+    auto [tMin, tMax] = getIntersections(ray);
 
     // If tMax is negative, the ray would have to go in the negative direction
     // to intersect the rect.
     // If tMin > tMax, no intersection.
     if ((tMax < 0) || (tMin > tMax)) {
-        return -1;
+        return false;
     }
 
-    // If tMin doesn't intersect in the forward direction, return tMax.
-    if (tMin < 0) {
-        return tMax;
-    }
-
-    // Default to returning tMin since it's the first intersection.
-    return tMin;
+    return true;
 }
 
 bool BoundingBox::intersects(const TileExtent& tileExtent) const
@@ -160,6 +138,39 @@ bool BoundingBox::intersects(const TileExtent& tileExtent) const
             && (tileMaxY >= minY) && (maxZ >= tileMinZ) && (tileMaxZ >= minZ));
 }
 
+float BoundingBox::getMinIntersection(const Ray& ray) const
+{
+    auto [tMin, tMax] = getIntersections(ray);
+
+    // If tMax is negative, the ray would have to go in the negative direction
+    // to intersect the rect.
+    // If tMin > tMax, no intersection.
+    if ((tMax < 0) || (tMin > tMax)) {
+        return -1;
+    }
+
+    // If tMin doesn't intersect in the forward direction, return tMax.
+    if (tMin < 0) {
+        return tMax;
+    }
+
+    return tMin;
+}
+
+float BoundingBox::getMaxIntersection(const Ray& ray) const
+{
+    auto [tMin, tMax] = getIntersections(ray);
+
+    // If tMax is negative, the ray would have to go in the negative direction
+    // to intersect the rect.
+    // If tMin > tMax, no intersection.
+    if ((tMax < 0) || (tMin > tMax)) {
+        return -1;
+    }
+
+    return tMax;
+}
+
 TileExtent BoundingBox::asTileExtent() const
 {
     static constexpr float TILE_WORLD_WIDTH{
@@ -179,6 +190,29 @@ TileExtent BoundingBox::asTileExtent() const
                           - tileExtent.z);
 
     return tileExtent;
+}
+
+std::array<float, 2> BoundingBox::getIntersections(const Ray& ray) const
+{
+    // Find the constant t where intersection occurs for each direction.
+    float tX1{(minX - ray.origin.x) / ray.directionX};
+    float tX2{(maxX - ray.origin.x) / ray.directionX};
+    float tY1{(minY - ray.origin.y) / ray.directionY};
+    float tY2{(maxY - ray.origin.y) / ray.directionY};
+    float tZ1{(minZ - ray.origin.z) / ray.directionZ};
+    float tZ2{(maxZ - ray.origin.z) / ray.directionZ};
+
+    // Find the min t in each direction, then find the max of those.
+    // This gives us the t where the ray first intersects the rect.
+    float tMin{std::max(std::max(std::min(tX1, tX2), std::min(tY1, tY2)),
+                        std::min(tZ1, tZ2))};
+
+    // Find the max t in each direction, then find the min of those.
+    // This gives us the t where the ray last intersects the rect.
+    float tMax{std::min(std::min(std::max(tX1, tX2), std::max(tY1, tY2)),
+                        std::max(tZ1, tZ2))};
+
+    return {tMin, tMax};
 }
 
 } // End namespace AM

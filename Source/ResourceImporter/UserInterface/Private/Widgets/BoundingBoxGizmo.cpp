@@ -187,7 +187,7 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
     SDL_FPoint offsetMouseScreenPoint{static_cast<float>(offsetMousePoint.x),
                                       static_cast<float>(offsetMousePoint.y)};
     Position mouseWorldPos{
-        Transforms::screenToWorld(offsetMouseScreenPoint, {})};
+        Transforms::screenToWorldMinimum(offsetMouseScreenPoint, {})};
 
     // Adjust the currently pressed control appropriately.
     switch (currentHeldControl) {
