@@ -44,6 +44,19 @@ void WorldObjectLocator::addWorldObject(const WorldObjectID& objectID,
                                                         / CELL_WORLD_HEIGHT))
                              - boxCellExtent.z);
 
+    // Make sure each length is at least 1, or else the box won't be added to 
+    // any cells.
+    // (This occurs if the box forms a plane.)
+    if (boxCellExtent.xLength < 1) {
+        boxCellExtent.xLength = 1;
+    }
+    if (boxCellExtent.yLength < 1) {
+        boxCellExtent.yLength = 1;
+    }
+    if (boxCellExtent.zLength < 1) {
+        boxCellExtent.zLength = 1;
+    }
+
     // Add the object to all the cells that it occupies.
     for (int z{boxCellExtent.z}; z <= boxCellExtent.zMax(); ++z) {
         for (int y{boxCellExtent.y}; y <= boxCellExtent.yMax(); ++y) {

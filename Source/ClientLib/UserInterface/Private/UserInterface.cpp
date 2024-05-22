@@ -67,8 +67,7 @@ void UserInterface::render(const Camera& camera,
     worldObjectLocator.clear();
     for (const SpriteSortInfo& spriteInfo : sortedSprites) {
         // If this sprite isn't a full phantom and it has bounds, add it.
-        if (!std::get_if<std::monostate>(&(spriteInfo.spriteOwnerID))
-            && !(spriteInfo.worldBounds.isEmpty())) {
+        if (!std::get_if<std::monostate>(&(spriteInfo.spriteOwnerID))) {
             worldObjectLocator.addWorldObject(spriteInfo.spriteOwnerID,
                                               spriteInfo.worldBounds);
         }
