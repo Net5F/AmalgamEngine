@@ -106,6 +106,9 @@ public:
      */
     void rebuildCollision(const TilePosition& tilePosition);
 
+    /** Returns a bounding plane for a floor tile layer at the given position. */
+    static BoundingBox getFloorWorldBounds(const TilePosition& tilePosition);
+
 private:
     /**
      * Returns the given graphic's modelBounds, translated to world space and

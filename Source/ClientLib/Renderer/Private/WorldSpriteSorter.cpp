@@ -34,8 +34,6 @@ WorldSpriteSorter::WorldSpriteSorter(entt::registry& inRegistry,
 , ui{inUI}
 , phantomSprites{}
 , spriteColorMods{}
-, floorSprites{}
-, floorCoveringSprites{}
 , sortedSprites{}
 , spritesToSort{}
 , animationTimer{}
@@ -103,13 +101,8 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
                 const Tile& tile{tileMap.getTile(tilePosition)};
                 pushFloorSprite(tile, camera, tilePosition);
                 pushFloorCoveringSprites(tile, camera, tilePosition);
-
-                // TODO: We temporarily are pushing objects before walls to fix
-                //       NW gap fills rendering in front of overlapping objects.
-                //       We should instead find a way to make objects and
-                //       phantoms consistently render in front of walls.
-                pushObjectSprites(tile, camera, tilePosition);
                 pushWallSprites(tile, camera, tilePosition);
+                pushObjectSprites(tile, camera, tilePosition);
             }
         }
     }
@@ -122,18 +115,6 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
                            {info.tilePosition, info.layerType, 0, 0}, true);
         }
     }
-
-    // Add all of the floors, then all of the floor coverings to the sorted
-    // sprites vector so they're in the correct rendering order.
-    // Note: The other sprites haven't been sorted yet, so the vector is empty.
-    sortedSprites.insert(sortedSprites.end(),
-                         std::make_move_iterator(floorSprites.begin()),
-                         std::make_move_iterator(floorSprites.end()));
-    floorSprites.clear();
-    sortedSprites.insert(sortedSprites.end(),
-                         std::make_move_iterator(floorCoveringSprites.begin()),
-                         std::make_move_iterator(floorCoveringSprites.end()));
-    floorCoveringSprites.clear();
 }
 
 void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
@@ -302,25 +283,25 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
         worldObjectID = layerID;
     }
 
-    // If this sprite is on a wall or object layer, push it to be sorted.
-    if ((layerID.type == TileLayer::Type::Wall)
-        || (layerID.type == TileLayer::Type::Object)) {
+    // Push the sprite to be sorted.
+    if (layerID.type == TileLayer::Type::Floor) {
+        spritesToSort.emplace_back(
+            &sprite, worldObjectID,
+            Tile::getFloorWorldBounds(layerID.tilePosition), screenExtent,
+            colorMod);
+    }
+    else if (layerID.type == TileLayer::Type::FloorCovering) {
         BoundingBox worldBounds{Transforms::modelToWorld(
             sprite.modelBounds, layerID.tilePosition.getOriginPosition())};
         spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
                                    screenExtent, colorMod);
     }
-    else if (layerID.type == TileLayer::Type::Floor) {
-        // Push floors into their intermediate vector.
-        floorSprites.emplace_back(&sprite, worldObjectID, BoundingBox{},
-                                  screenExtent, colorMod);
-    }
-    else if (layerID.type == TileLayer::Type::FloorCovering) {
-        // Push floor coverings into their intermediate vector.
+    else if ((layerID.type == TileLayer::Type::Wall)
+             || (layerID.type == TileLayer::Type::Object)) {
         BoundingBox worldBounds{Transforms::modelToWorld(
             sprite.modelBounds, layerID.tilePosition.getOriginPosition())};
-        floorCoveringSprites.emplace_back(&sprite, worldObjectID, worldBounds,
-                                          screenExtent, colorMod);
+        spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
+                                   screenExtent, colorMod);
     }
     else {
         LOG_ERROR("Invalid layer type.");

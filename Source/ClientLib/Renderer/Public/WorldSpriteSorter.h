@@ -164,14 +164,6 @@ private:
         We make a copy so that we can remove them as they get used. */
     std::vector<SpriteColorModInfo> spriteColorMods;
 
-    /** Holds floor sprites during the gather step before they get pushed into
-        sortedSprites. */
-    std::vector<SpriteSortInfo> floorSprites;
-
-    /** Holds floor covering sprites during the gather step before they get
-        pushed into sortedSprites. */
-    std::vector<SpriteSortInfo> floorCoveringSprites;
-
     /** Stores the sorted sprite info from the last prepareSprites() call.
         Calculations and sorting are done in-place. */
     std::vector<SpriteSortInfo> sortedSprites;

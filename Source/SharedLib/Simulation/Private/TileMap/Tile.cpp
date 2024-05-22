@@ -214,17 +214,35 @@ void Tile::rebuildCollision(const TilePosition& tilePosition)
 
     // Add all of this tile's layers that have collision.
     for (const TileLayer& layer : layers) {
-        // Skip floor coverings (they never have collision).
+        GraphicRef graphic{layer.getGraphic()};
+
+        // If it's a floor covering, skip it (they never have collision).
         if (layer.type == TileLayer::Type::FloorCovering) {
             continue;
         }
-
-        GraphicRef graphic{layer.getGraphic()};
-        if (graphic.getCollisionEnabled()) {
+        // If it's a floor, generate a collision plane for it.
+        // (We ignore modelBounds and collisionEnabled on floor graphics, all 
+        // floors get a generated collision plane). 
+        else if (layer.type == TileLayer::Type::Floor) {
+            collisionBoxes.push_back(getFloorWorldBounds(tilePosition));
+        }
+        // If it's a wall or object, add its assigned collision.
+        else if (graphic.getCollisionEnabled()) {
             collisionBoxes.push_back(
                 calcWorldBoundsForGraphic(tilePosition, graphic));
         }
     }
+}
+
+BoundingBox Tile::getFloorWorldBounds(const TilePosition& tilePosition)
+{
+    static constexpr float TILE_WORLD_WIDTH{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
+
+    Position tileOrigin{tilePosition.getOriginPosition()};
+    return {tileOrigin.x, tileOrigin.x + TILE_WORLD_WIDTH,
+            tileOrigin.y, tileOrigin.y + TILE_WORLD_WIDTH,
+            tileOrigin.z, tileOrigin.z};
 }
 
 BoundingBox Tile::calcWorldBoundsForGraphic(const TilePosition& tilePosition,

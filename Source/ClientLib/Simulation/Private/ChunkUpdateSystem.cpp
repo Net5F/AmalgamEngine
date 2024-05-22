@@ -64,11 +64,11 @@ void ChunkUpdateSystem::requestAllInRangeChunks(
 {
     // Determine which chunks are in range of the given position.
     // Note: The range is hardcoded to be all chunks directly surrounding the 
-    //       given chunk in the X/Y directions, and every chunk in the Z 
-    //       direction.
+    //       given chunk in the X/Y directions, and every chunk along the Z 
+    //       axis.
     const ChunkExtent& mapChunkExtent{world.tileMap.getChunkExtent()};
     ChunkExtent currentExtent{
-        (currentChunk.x - 1),  (currentChunk.y - 1), 0, 3, 3,
+        (currentChunk.x - 1),  (currentChunk.y - 1), mapChunkExtent.z, 3, 3,
         mapChunkExtent.zLength};
 
     // Bound the range to the map boundaries.

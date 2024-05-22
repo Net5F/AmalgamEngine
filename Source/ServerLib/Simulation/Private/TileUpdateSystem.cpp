@@ -15,20 +15,22 @@ namespace Server
 {
 /** Returns the extent that's in range of a given tile update.
     Note: This matches ChunkUpdateSystem's behavior, which includes all
-          directly surrounding chunks. */
+          directly surrounding chunks in the X/Y directions, and every chunk 
+          along the Z axis. */
 struct InRangeExtentGetter {
     TileMap& tileMap;
 
     ChunkExtent operator()(const TileExtentClearLayers& tileUpdate)
     {
+        const ChunkExtent& mapChunkExtent{tileMap.getChunkExtent()};
         ChunkExtent chunkExtent{tileUpdate.tileExtent};
         chunkExtent.x -= 1;
         chunkExtent.y -= 1;
-        chunkExtent.z -= 1;
+        chunkExtent.z = mapChunkExtent.z;
         chunkExtent.xLength += 2;
         chunkExtent.yLength += 2;
-        chunkExtent.zLength += 2;
-        chunkExtent.intersectWith(tileMap.getChunkExtent());
+        chunkExtent.zLength = mapChunkExtent.zLength;
+        chunkExtent.intersectWith(mapChunkExtent);
         return chunkExtent;
     }
 
@@ -36,13 +38,14 @@ struct InRangeExtentGetter {
     template<typename T>
     ChunkExtent operator()(const T& tileUpdate)
     {
+        const ChunkExtent& mapChunkExtent{tileMap.getChunkExtent()};
         ChunkPosition centerChunk{tileUpdate.tilePosition};
         ChunkExtent chunkExtent{(centerChunk.x - 1),
                                 (centerChunk.y - 1),
-                                (centerChunk.z - 1),
+                                mapChunkExtent.z,
                                 3,
                                 3,
-                                3};
+                                mapChunkExtent.zLength};
         chunkExtent.intersectWith(tileMap.getChunkExtent());
         return chunkExtent;
     }

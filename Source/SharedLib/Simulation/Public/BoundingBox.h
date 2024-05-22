@@ -100,7 +100,6 @@ public:
      */
     TileExtent asTileExtent() const;
 
-private:
     /**
      * Returns tMin and tMax for the given ray's intersection with this 
      * bounding box.

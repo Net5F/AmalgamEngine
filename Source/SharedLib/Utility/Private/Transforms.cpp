@@ -46,10 +46,6 @@ Position Transforms::screenToWorldMinimum(const SDL_FPoint& screenPoint,
     float x{absolutePoint.x / camera.zoomFactor};
     float y{absolutePoint.y / camera.zoomFactor};
 
-    // Offset the point to be relative to Z == 0.
-    // TODO: We may need to adjust this when we start testing Z > 0
-    y += (camera.target.z * TILE_SIDE_HEIGHT_WORLD_TO_SCREEN);
-
     // Calc the world position.
     float worldX{((2.f * y) + x) * TILE_FACE_WIDTH_SCREEN_TO_WORLD};
     float worldY{((2.f * y) - x) * TILE_FACE_HEIGHT_SCREEN_TO_WORLD / 2.f};
@@ -88,9 +84,9 @@ Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
                     TILE_FACE_HEIGHT_WORLD_TO_SCREEN};
     rayToCamera.normalize();
     float tMax{camera.viewBounds.getMaxIntersection(rayToCamera)};
+    AM_ASSERT(tMax > 0, "Screen ray failed to intersect camera bounds.");
 
     Position viewBoundsIntersection{rayToCamera.getPositionAtT(tMax)};
-    AM_ASSERT(tMax > 0, "Screen ray failed to intersect camera bounds.");
 
     // Return a ray that starts at the intersected position and points towards 
     // the minimum.

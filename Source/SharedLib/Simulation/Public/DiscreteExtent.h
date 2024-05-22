@@ -82,6 +82,16 @@ struct DiscreteExtent {
     int zMax() const { return (z + zLength - 1); }
 
     /**
+     * Returns the minimum position of this extent.
+     */
+    DiscretePosition<T> minimum() { return {x, y, z}; }
+
+    /**
+     * Returns the maximum position of this extent.
+     */
+    DiscretePosition<T> maximum() { return {xMax(), yMax(), zMax()}; }
+
+    /**
      * Sets this extent to the union between itself and the given extent.
      */
     void unionWith(const DiscreteExtent<T>& other)
