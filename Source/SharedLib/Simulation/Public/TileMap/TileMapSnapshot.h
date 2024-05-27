@@ -1,7 +1,9 @@
 #pragma once
 
+#include "ChunkPosition.h"
 #include "ChunkSnapshot.h"
-#include <vector>
+#include "bitsery/ext/std_map.h"
+#include <unordered_map>
 
 namespace AM
 {
@@ -15,8 +17,8 @@ namespace AM
  */
 struct TileMapSnapshot {
     /** Used as a "we should never hit this" cap on the number of chunks in a
-        map. */
-    static constexpr std::size_t MAX_CHUNKS{10000};
+        map. Currently set to 64*64*10. */
+    static constexpr std::size_t MAX_CHUNKS{40960};
 
     /** The version of the map format. Kept as just a 16-bit int for now, we
         can see later if we care to make it more complicated. */
@@ -35,7 +37,7 @@ struct TileMapSnapshot {
     Uint16 zLengthChunks{0};
 
     /** The chunks that make up this map, stored in row-major order. */
-    std::vector<ChunkSnapshot> chunks;
+    std::unordered_map<ChunkPosition, ChunkSnapshot> chunks;
 };
 
 template<typename S>
@@ -45,7 +47,13 @@ void serialize(S& serializer, TileMapSnapshot& tileMapSnapshot)
     serializer.value2b(tileMapSnapshot.xLengthChunks);
     serializer.value2b(tileMapSnapshot.yLengthChunks);
     serializer.value2b(tileMapSnapshot.zLengthChunks);
-    serializer.container(tileMapSnapshot.chunks, TileMapSnapshot::MAX_CHUNKS);
+    serializer.ext(tileMapSnapshot.chunks,
+                   bitsery::ext::StdMap{TileMapSnapshot::MAX_CHUNKS},
+                   [](S& serializer, ChunkPosition& chunkPosition,
+                      ChunkSnapshot& chunkSnapshot) {
+                       serializer.object(chunkPosition);
+                       serializer.object(chunkSnapshot);
+                   });
 }
 
 } // End namespace AM

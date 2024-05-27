@@ -54,23 +54,26 @@ void ChunkStreamingSystem::sendChunkUpdate(
 void ChunkStreamingSystem::addChunkToMessage(const ChunkPosition& chunkPosition,
                                              ChunkUpdate& chunkUpdate)
 {
-    const int CHUNK_WIDTH{static_cast<int>(SharedConfig::CHUNK_WIDTH)};
+    if (const Chunk* chunk{world.tileMap.cgetChunk(chunkPosition)}) {
+        // Push the new chunk and get a ref to it.
+        chunkUpdate.chunks.emplace_back();
+        ChunkWireSnapshot& chunkSnapshot{chunkUpdate.chunks.back()};
 
-    // Push the new chunk and get a ref to it.
-    chunkUpdate.chunks.emplace_back();
-    ChunkWireSnapshot& chunkSnapshot{chunkUpdate.chunks.back()};
+        // Save the chunk's position.
+        chunkSnapshot.x = chunkPosition.x;
+        chunkSnapshot.y = chunkPosition.y;
+        chunkSnapshot.z = chunkPosition.z;
 
-    // Save the chunk's position.
-    chunkSnapshot.x = chunkPosition.x;
-    chunkSnapshot.y = chunkPosition.y;
-    chunkSnapshot.z = chunkPosition.z;
-
-    // Copy all of the chunk's tile layers into the snapshot.
-    const Chunk& chunk{world.tileMap.getChunk(chunkPosition)};
-    for (std::size_t tileIndex{0}; tileIndex < SharedConfig::CHUNK_TILE_COUNT;
-         tileIndex++) {
-        addTileLayersToSnapshot(chunk.tiles[tileIndex],
-                                chunkSnapshot.tiles[tileIndex], chunkSnapshot);
+        // Copy all of the chunk's tile layers into the snapshot.
+        for (std::size_t tileIndex{0};
+             tileIndex < SharedConfig::CHUNK_TILE_COUNT; tileIndex++) {
+            addTileLayersToSnapshot(chunk->tiles[tileIndex],
+                                    chunkSnapshot.tiles[tileIndex],
+                                    chunkSnapshot);
+        }
+    }
+    else {
+        // This chunk doesn't exist, we don't need to send anything.
     }
 }
 

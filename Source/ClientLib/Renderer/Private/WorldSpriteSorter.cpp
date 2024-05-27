@@ -98,11 +98,12 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
                 TilePosition tilePosition{x, y, z};
 
                 // Push all of this tile's sprites into the appropriate vectors.
-                const Tile& tile{tileMap.getTile(tilePosition)};
-                pushFloorSprite(tile, camera, tilePosition);
-                pushFloorCoveringSprites(tile, camera, tilePosition);
-                pushWallSprites(tile, camera, tilePosition);
-                pushObjectSprites(tile, camera, tilePosition);
+                if (const Tile* tile{tileMap.cgetTile(tilePosition)}) {
+                    pushFloorSprite(*tile, camera, tilePosition);
+                    pushFloorCoveringSprites(*tile, camera, tilePosition);
+                    pushWallSprites(*tile, camera, tilePosition);
+                    pushObjectSprites(*tile, camera, tilePosition);
+                }
             }
         }
     }

@@ -159,8 +159,8 @@ void ChunkUpdateSystem::applyChunkSnapshot(
 
     // Iterate through the chunk snapshot's linear tile array, adding the tiles
     // to our map.
-    for (int tileY{0}; tileY < CHUNK_WIDTH; ++tileY) {
-        for (int tileX{0}; tileX < CHUNK_WIDTH; ++tileX) {
+    for (int tileX{0}; tileX < CHUNK_WIDTH; ++tileX) {
+        for (int tileY{0}; tileY < CHUNK_WIDTH; ++tileY) {
             // Calculate where this tile is.
             TilePosition tilePosition{tileX, tileY, chunkSnapshot.z};
             tilePosition.x += (chunkSnapshot.x * CHUNK_WIDTH);

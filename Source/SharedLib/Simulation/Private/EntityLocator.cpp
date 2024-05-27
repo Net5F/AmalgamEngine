@@ -27,11 +27,17 @@ void EntityLocator::setGridSize(const TileExtent& mapTileExtent)
     static constexpr int CELL_HEIGHT{
         static_cast<int>(SharedConfig::ENTITY_LOCATOR_CELL_HEIGHT)};
 
-    if (((mapTileExtent.xLength % CELL_WIDTH) != 0)
-        || ((mapTileExtent.yLength % CELL_WIDTH) != 0)
-        || ((mapTileExtent.zLength % CELL_HEIGHT) != 0)) {
-        LOG_FATAL("Map lengths must be divisible by "
-                  "ENTITY_LOCATOR_CELL_WIDTH/ENTITY_LOCATOR_CELL_HEIGHT.");
+    if ((mapTileExtent.xLength % CELL_WIDTH) != 0) {
+        LOG_FATAL(
+            "Map X length must be divisible by ENTITY_LOCATOR_CELL_WIDTH.");
+    }
+    else if ((mapTileExtent.yLength % CELL_WIDTH) != 0) {
+        LOG_FATAL(
+            "Map Y length must be divisible by ENTITY_LOCATOR_CELL_WIDTH.");
+    }
+    else if ((mapTileExtent.zLength % CELL_HEIGHT) != 0) {
+        LOG_FATAL(
+            "Map Z length must be divisible by ENTITY_LOCATOR_CELL_HEIGHT.");
     }
 
     // Set our grid size to match the tile map.

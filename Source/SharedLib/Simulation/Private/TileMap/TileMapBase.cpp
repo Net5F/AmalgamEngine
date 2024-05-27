@@ -30,22 +30,15 @@ TileMapBase::TileMapBase(GraphicDataBase& inGraphicData, bool inTrackTileUpdates
 void TileMapBase::setFloor(const TilePosition& tilePosition,
                            const FloorGraphicSet& graphicSet)
 {
-    AM_ASSERT(tileExtent.containsPosition(tilePosition),
-              "Tile coords out of bounds: %d, %d, %d.", tilePosition.x,
-              tilePosition.y, tilePosition.z);
-
-    // If there's an existing floor, replace it.
-    Tile& tile{getTile(tilePosition)};
-    if (TileLayer* floor{tile.findLayer(TileLayer::Type::Floor)}) {
-        floor->graphicSet = graphicSet;
-    }
-    else {
-        // No existing floor, add one.
-        tile.addLayer(TileLayer::Type::Floor, graphicSet, 0);
+    Tile* tile{
+        addTileLayer(tilePosition, TileLayer::Type::Floor, graphicSet, 0)};
+    if (!tile) {
+        // tilePosition is outside of the map bounds.
+        return;
     }
 
     // Rebuild the affected tile's collision.
-    rebuildTileCollision(tile, tilePosition);
+    rebuildTileCollision(*tile, tilePosition);
 
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates) {
@@ -77,12 +70,12 @@ void TileMapBase::addFloorCovering(const TilePosition& tilePosition,
                                    const FloorCoveringGraphicSet& graphicSet,
                                    Rotation::Direction rotation)
 {
-    AM_ASSERT(tileExtent.containsPosition(tilePosition),
-              "Tile coords out of bounds: %d, %d, %d.", tilePosition.x,
-              tilePosition.y, tilePosition.z);
-
-    Tile& tile{getTile(tilePosition)};
-    tile.addLayer(TileLayer::Type::FloorCovering, graphicSet, rotation);
+    Tile* tile{addTileLayer(tilePosition, TileLayer::Type::FloorCovering,
+                            graphicSet, rotation)};
+    if (!tile) {
+        // tilePosition is outside of the map bounds.
+        return;
+    }
 
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates) {
@@ -130,32 +123,22 @@ bool TileMapBase::remFloorCovering(const TilePosition& tilePosition,
 bool TileMapBase::remFloorCovering(const TilePosition& tilePosition, Uint16 graphicSetID,
                                    Rotation::Direction rotation)
 {
-    AM_ASSERT(tileExtent.containsPosition(tilePosition),
-              "Tile coords out of bounds: %d, %d, %d.", tilePosition.x,
-              tilePosition.y, tilePosition.z);
-
-    // Remove any matching layers.
-    Tile& tile{getTile(tilePosition)};
-    bool layerWasRemoved{tile.removeLayer(TileLayer::Type::FloorCovering,
-                                          graphicSetID, rotation)};
+    Tile* tile{remTileLayer(tilePosition, TileLayer::Type::FloorCovering,
+                            graphicSetID, rotation)};
 
     // If we're tracking tile updates, add this one to the history.
-    if (trackTileUpdates && layerWasRemoved) {
+    if (trackTileUpdates && tile) {
         tileUpdateHistory.emplace_back(
             TileRemoveLayer{tilePosition, TileLayer::Type::FloorCovering,
                             graphicSetID, rotation});
     }
 
-    return layerWasRemoved;
+    return (tile != nullptr);
 }
 
 void TileMapBase::addWall(const TilePosition& tilePosition, const WallGraphicSet& graphicSet,
                           Wall::Type wallType)
 {
-    AM_ASSERT(tileExtent.containsPosition(tilePosition),
-              "Tile coords out of bounds: %d, %d, %d.", tilePosition.x,
-              tilePosition.y, tilePosition.z);
-
     switch (wallType) {
         case Wall::Type::North: {
             addNorthWall(tilePosition, graphicSet);
@@ -194,10 +177,6 @@ void TileMapBase::addWall(const TilePosition& tilePosition, Uint16 graphicSetID,
 
 bool TileMapBase::remWall(const TilePosition& tilePosition, Wall::Type wallType)
 {
-    AM_ASSERT(tileExtent.containsPosition(tilePosition),
-              "Tile coords out of bounds: %d, %d, %d.", tilePosition.x,
-              tilePosition.y, tilePosition.z);
-
     bool wallWasRemoved{false};
     switch (wallType) {
         case Wall::Type::North: {
@@ -229,15 +208,15 @@ void TileMapBase::addObject(const TilePosition& tilePosition,
                             const ObjectGraphicSet& graphicSet,
                             Rotation::Direction rotation)
 {
-    AM_ASSERT(tileExtent.containsPosition(tilePosition),
-              "Tile coords out of bounds: %d, %d, %d.", tilePosition.x,
-              tilePosition.y, tilePosition.z);
-
-    Tile& tile{getTile(tilePosition)};
-    tile.addLayer(TileLayer::Type::Object, graphicSet, rotation);
+    Tile* tile{addTileLayer(tilePosition, TileLayer::Type::Object, graphicSet,
+                            rotation)};
+    if (!tile) {
+        // tilePosition is outside of the map bounds.
+        return;
+    }
 
     // Rebuild the affected tile's collision.
-    rebuildTileCollision(tile, tilePosition);
+    rebuildTileCollision(*tile, tilePosition);
 
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates) {
@@ -246,6 +225,7 @@ void TileMapBase::addObject(const TilePosition& tilePosition,
                          static_cast<Uint16>(graphicSet.numericID),
                          static_cast<Uint8>(rotation)});
     }
+
 }
 
 void TileMapBase::addObject(const TilePosition& tilePosition,
@@ -267,44 +247,38 @@ bool TileMapBase::remObject(const TilePosition& tilePosition,
                             const ObjectGraphicSet& graphicSet,
                             Rotation::Direction rotation)
 {
-    AM_ASSERT(tileExtent.containsPosition(tilePosition),
-              "Tile coords out of bounds: %d, %d, %d.", tilePosition.x,
-              tilePosition.y, tilePosition.z);
-
-    // Remove any matching layers.
-    Tile& tile{getTile(tilePosition)};
-    bool layerWasRemoved{tile.removeLayer(TileLayer::Type::Object,
-                                          graphicSet.numericID, rotation)};
-
-    // If an object was removed, rebuild the affected tile's collision.
-    if (layerWasRemoved) {
-        rebuildTileCollision(tile, tilePosition);
-    }
-
-    // If we're tracking tile updates, add this one to the history.
-    if (trackTileUpdates && layerWasRemoved) {
-        tileUpdateHistory.emplace_back(
-            TileRemoveLayer{tilePosition, TileLayer::Type::Object,
-                            static_cast<Uint16>(graphicSet.numericID),
-                            static_cast<Uint8>(rotation)});
-    }
-
-    return layerWasRemoved;
+    return remObject(tilePosition, graphicSet.numericID, rotation);
 }
 
 bool TileMapBase::remObject(const TilePosition& tilePosition,
                             const std::string& graphicSetID,
                             Rotation::Direction rotation)
 {
-    return remObject(tilePosition, graphicData.getObjectGraphicSet(graphicSetID),
+    return remObject(tilePosition,
+                     graphicData.getObjectGraphicSet(graphicSetID).numericID,
                      rotation);
 }
 
 bool TileMapBase::remObject(const TilePosition& tilePosition, Uint16 graphicSetID,
                             Rotation::Direction rotation)
 {
-    return remObject(tilePosition, graphicData.getObjectGraphicSet(graphicSetID),
-                     rotation);
+    Tile* tile{remTileLayer(tilePosition, TileLayer::Type::Object, graphicSetID,
+                            rotation)};
+
+    // If an object was removed, rebuild the affected tile's collision.
+    if (tile) {
+        rebuildTileCollision(*tile, tilePosition);
+    }
+
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates && tile) {
+        tileUpdateHistory.emplace_back(
+            TileRemoveLayer{tilePosition, TileLayer::Type::Object,
+                            graphicSetID,
+                            static_cast<Uint8>(rotation)});
+    }
+
+    return (tile != nullptr);
 }
 
 bool TileMapBase::clearTileLayers(
@@ -319,17 +293,12 @@ bool TileMapBase::clearTileLayers(
     const TilePosition& tilePosition,
     const std::array<bool, TileLayer::Type::Count>& layerTypesToClear)
 {
-    AM_ASSERT(tileExtent.containsPosition(tilePosition),
-              "Tile coords out of bounds: %d, %d, %d.", tilePosition.x,
-              tilePosition.y, tilePosition.z);
-
-    bool layerWasCleared{
+    Tile* clearedTile{
         clearTileLayersInternal(tilePosition, layerTypesToClear)};
 
     // If a layer was cleared, rebuild the affected tile's collision.
-    if (layerWasCleared) {
-        Tile& tile{getTile(tilePosition)};
-        rebuildTileCollision(tile, tilePosition);
+    if (clearedTile) {
+        rebuildTileCollision(*clearedTile, tilePosition);
     }
 
     // If we're tracking tile updates, add this one to the history.
@@ -338,7 +307,7 @@ bool TileMapBase::clearTileLayers(
             TileClearLayers{tilePosition, layerTypesToClear});
     }
 
-    return layerWasCleared;
+    return (clearedTile != nullptr);
 }
 
 bool TileMapBase::clearTile(const TilePosition& tilePosition)
@@ -359,24 +328,20 @@ bool TileMapBase::clearExtentLayers(
     const TileExtent& extent,
     const std::array<bool, TileLayer::Type::Count>& layerTypesToClear)
 {
-    AM_ASSERT(tileExtent.containsExtent(extent),
-              "Tile extent out of bounds: %d, %d, %d, %d, %d, %d.", extent.x,
-              extent.y, extent.z, extent.xLength, extent.yLength,
-              extent.zLength);
-
     // Clear the given layers from each tile in the given extent.
     bool layerWasCleared{false};
     for (int z{extent.z}; z <= extent.zMax(); ++z) {
         for (int y{extent.y}; y <= extent.yMax(); ++y) {
             for (int x{extent.x}; x <= extent.xMax(); ++x) {
                 TilePosition tilePosition{x, y, z};
-                if (clearTileLayersInternal(tilePosition, layerTypesToClear)) {
+                Tile* clearedTile{
+                    clearTileLayersInternal(tilePosition, layerTypesToClear)};
+                if (clearedTile) {
                     layerWasCleared = true;
 
                     // A layer was cleared. Rebuild the affected tile's
                     // collision.
-                    Tile& tile{getTile(tilePosition)};
-                    rebuildTileCollision(tile, tilePosition);
+                    rebuildTileCollision(*clearedTile, tilePosition);
                 }
             }
         }
@@ -406,37 +371,40 @@ void TileMapBase::clear()
     tileUpdateHistory.clear();
 }
 
-const Chunk& TileMapBase::getChunk(const ChunkPosition& chunkPosition) const
+const Chunk* TileMapBase::getChunk(const ChunkPosition& chunkPosition) const
 {
-    std::size_t chunkIndex{linearizeChunkIndex(chunkPosition)};
-    if (chunkIndex >= chunks.size()) {
-        LOG_ERROR("Invalid chunk requested: (%d, %d, %d)", chunkPosition.x,
-                  chunkPosition.y, chunkPosition.z);
-        return chunks[0];
+    auto chunkIt{chunks.find(chunkPosition)};
+    if (chunkIt != chunks.end()) {
+        return &(chunkIt->second);
     }
 
-    return chunks[chunkIndex];
+    // The requested chunk is empty or out of bounds.
+    return nullptr;
 }
 
-const Tile& TileMapBase::getTile(const TilePosition& tilePosition) const
+const Chunk* TileMapBase::cgetChunk(const ChunkPosition& chunkPosition) const
 {
-    AM_ASSERT(tileExtent.containsPosition(tilePosition),
-              "Tile coords out of bounds: %d, %d, %d.", tilePosition.x,
-              tilePosition.y, tilePosition.z);
+    return getChunk(chunkPosition);
+}
 
-    // Get the index of the chunk containing the tile.
+const Tile* TileMapBase::getTile(const TilePosition& tilePosition) const
+{
+    const int CHUNK_WIDTH{static_cast<int>(SharedConfig::CHUNK_WIDTH)};
+
+    // If the chunk doesn't exist, return early.
     ChunkPosition chunkPosition{tilePosition};
-    std::size_t chunkIndex{linearizeChunkIndex(chunkPosition)};
+    const Chunk* chunk{getChunk(chunkPosition)};
+    if (!chunk) {
+        return nullptr;
+    }
 
     // Get the tile's relative position within the chunk.
-    const int CHUNK_WIDTH{static_cast<int>(SharedConfig::CHUNK_WIDTH)};
     int relativeTileX{tilePosition.x - (chunkPosition.x * CHUNK_WIDTH)};
     int relativeTileY{tilePosition.y - (chunkPosition.y * CHUNK_WIDTH)};
-
-    return chunks[chunkIndex].getTile(relativeTileX, relativeTileY);
+    return &(chunk->getTile(relativeTileX, relativeTileY));
 }
 
-const Tile& TileMapBase::cgetTile(const TilePosition& tilePosition) const
+const Tile* TileMapBase::cgetTile(const TilePosition& tilePosition) const
 {
     return getTile(tilePosition);
 }
@@ -470,8 +438,9 @@ void TileMapBase::rebuildDirtyTileCollision()
 
     // Rebuild the collision of any dirty tiles.
     for (auto it{dirtyCollisionQueue.begin()}; it != lastIt; ++it) {
-        Tile& tile{getTile(*it)};
-        tile.rebuildCollision(*it);
+        if (auto tileResult{getTile(*it)}) {
+            tileResult->tile.get().rebuildCollision(*it);
+        }
     }
 
     dirtyCollisionQueue.clear();
@@ -488,10 +457,142 @@ void TileMapBase::clearTileUpdateHistory()
     tileUpdateHistory.clear();
 }
 
-Tile& TileMapBase::getTile(const TilePosition& tilePosition)
+std::expected<std::reference_wrapper<Chunk>, TileMapBase::ChunkError>
+    TileMapBase::getChunk(const ChunkPosition& chunkPosition)
 {
-    return const_cast<Tile&>(
-        static_cast<const TileMapBase&>(*this).getTile(tilePosition));
+    if (!(chunkExtent.containsPosition(chunkPosition))) {
+        AM_ASSERT(false, "Failed to get chunk: Invalid chunk position");
+        return std::unexpected{ChunkError::InvalidPosition};
+    }
+
+    // Find the requested tile's parent chunk. If it doesn't exist, return an 
+    // error.
+    auto chunkIt{chunks.find(chunkPosition)};
+    if (chunkIt == chunks.end()) {
+        return std::unexpected{ChunkError::NotFound};
+    }
+
+    return chunkIt->second;
+}
+
+std::expected<TileMapBase::ChunkTilePair, TileMapBase::ChunkError>
+    TileMapBase::getTile(const TilePosition& tilePosition)
+{
+    ChunkPosition chunkPosition{tilePosition};
+    if (auto chunkResult{getChunk(chunkPosition)}) {
+        return ChunkTilePair{
+            *chunkResult, getTile(*chunkResult, chunkPosition, tilePosition)};
+    }
+    else if (chunkResult.error() == ChunkError::InvalidPosition) {
+        AM_ASSERT(false, "Failed to get tile: Invalid tile position");
+        return std::unexpected{chunkResult.error()};
+    }
+    else {
+        return std::unexpected{chunkResult.error()};
+    }
+}
+
+Tile& TileMapBase::getTile(Chunk& chunk, const ChunkPosition& chunkPosition,
+                           const TilePosition& tilePosition)
+{
+    // Calc the tile's relative position within the chunk.
+    const int CHUNK_WIDTH{static_cast<int>(SharedConfig::CHUNK_WIDTH)};
+    int relativeTileX{tilePosition.x - (chunkPosition.x * CHUNK_WIDTH)};
+    int relativeTileY{tilePosition.y - (chunkPosition.y * CHUNK_WIDTH)};
+
+    return chunk.getTile(relativeTileX, relativeTileY);
+}
+
+Chunk* TileMapBase::getOrCreateChunk(const ChunkPosition& chunkPosition)
+{
+    // Get the chunk.
+    if (auto chunkResult{getChunk(chunkPosition)}) {
+        // Chunk exists.
+        return &(chunkResult->get());
+    }
+    else if (chunkResult.error() == ChunkError::NotFound) {
+        // Chunk doesn't exist, create it.
+        auto chunkIt{chunks.emplace(chunkPosition, Chunk{}).first};
+        return &(chunkIt->second);
+    }
+    else if (chunkResult.error() == ChunkError::InvalidPosition) {
+        AM_ASSERT(false, "Failed to get chunk: Invalid chunk position");
+        return nullptr;
+    }
+
+    return nullptr;
+}
+
+TileMapBase::ChunkTilePtrPair
+    TileMapBase::getOrCreateTile(const TilePosition& tilePosition)
+{
+    // Get the chunk.
+    ChunkPosition chunkPosition{tilePosition};
+    Chunk* chunk{};
+    if (auto chunkResult{getChunk(chunkPosition)}) {
+        // Chunk exists.
+        chunk = &(chunkResult->get());
+    }
+    else if (chunkResult.error() == ChunkError::NotFound) {
+        // Chunk doesn't exist, create it.
+        auto chunkIt{chunks.emplace(chunkPosition, Chunk{}).first};
+        chunk = &(chunkIt->second);
+    }
+    else if (chunkResult.error() == ChunkError::InvalidPosition) {
+        AM_ASSERT(false, "Failed to get tile: Invalid tile position");
+        return {nullptr, nullptr};
+    }
+
+    // Get the tile.
+    Tile& tile{getTile(*chunk, chunkPosition, tilePosition)};
+
+    return {chunk, &tile};
+}
+
+Tile* TileMapBase::addTileLayer(const TilePosition& tilePosition,
+                               TileLayer::Type layerType,
+                               const GraphicSet& graphicSet,
+                               Uint8 graphicIndex)
+{
+    // Get or create the tile, return nullptr if tilePosition is invalid.
+    auto [chunk, tile] = getOrCreateTile(tilePosition);
+    if (!tile) {
+        return nullptr;
+    }
+
+    // Add the layer.
+    addTileLayer(*chunk, *tile, layerType, graphicSet, graphicIndex);
+
+    return tile;
+}
+
+void TileMapBase::addTileLayer(Chunk& chunk, Tile& tile,
+                               TileLayer::Type layerType,
+                               const GraphicSet& graphicSet, Uint8 graphicIndex)
+{
+    // Add the layer.
+    bool layerWasAdded{false};
+    if (layerType == TileLayer::Type::Floor) {
+        // If there's an existing floor, replace it.
+        if (TileLayer* floor{tile.findLayer(TileLayer::Type::Floor)}) {
+            floor->graphicSet = graphicSet;
+        }
+        else {
+            // No existing floor, add one.
+            tile.addLayer(TileLayer::Type::Floor, graphicSet, 0);
+            layerWasAdded = true;
+        }
+    }
+    else {
+        tile.addLayer(layerType, graphicSet, graphicIndex);
+        layerWasAdded = true;
+    }
+
+    // If we added a layer and the tile was empty, increment the chunk's empty 
+    // tile count.
+    if (layerWasAdded && (tile.getAllLayers().size() == 1)) {
+        chunk.nonEmptyTileCount++;
+    }
 }
 
 void TileMapBase::rebuildTileCollision(Tile& tile, const TilePosition& tilePosition)
@@ -509,18 +610,22 @@ void TileMapBase::rebuildTileCollision(Tile& tile, const TilePosition& tilePosit
 void TileMapBase::addNorthWall(const TilePosition& tilePosition,
                                const WallGraphicSet& graphicSet)
 {
-    Tile& tile{getTile(tilePosition)};
+    // If tilePosition isn't a valid position in the map, return early.
+    auto [chunk, tile] = getOrCreateTile(tilePosition);
+    if (!tile) {
+        return;
+    }
 
     // If the tile has a West wall, add a NE gap fill.
-    if (tile.findLayer(TileLayer::Type::Wall, Wall::Type::West)) {
-        tile.addLayer(TileLayer::Type::Wall, graphicSet,
-                      Wall::Type::NorthEastGapFill);
+    if (tile->findLayer(TileLayer::Type::Wall, Wall::Type::West)) {
+        addTileLayer(*chunk, *tile, TileLayer::Type::Wall, graphicSet,
+                     Wall::Type::NorthEastGapFill);
     }
     else {
         // No West wall. If there's an existing North wall or NW gap fill, 
         // replace it.
         bool replacedWall{false};
-        for (TileLayer& layer : tile.getLayers(TileLayer::Type::Wall)) {
+        for (TileLayer& layer : tile->getLayers(TileLayer::Type::Wall)) {
             if ((layer.graphicIndex == Wall::Type::North)
                 || (layer.graphicIndex == Wall::Type::NorthWestGapFill)) {
                 layer.graphicSet = graphicSet;
@@ -532,38 +637,37 @@ void TileMapBase::addNorthWall(const TilePosition& tilePosition,
 
         // If there was no existing North wall, add one.
         if (!replacedWall) {
-            tile.addLayer(TileLayer::Type::Wall, graphicSet, Wall::Type::North);
+            addTileLayer(*chunk, *tile, TileLayer::Type::Wall, graphicSet,
+                         Wall::Type::North);
         }
     }
 
     // Rebuild the affected tile's collision.
-    rebuildTileCollision(tile, tilePosition);
+    rebuildTileCollision(*tile, tilePosition);
 
     // If there's a tile to the NE that we might've formed a corner with.
-    if (tileExtent.containsPosition(
-            {tilePosition.x + 1, tilePosition.y - 1, tilePosition.z})) {
-        Tile& northeastTile{
-            getTile({tilePosition.x + 1, tilePosition.y - 1, tilePosition.z})};
-
+    TilePosition northeastPos{tilePosition.x + 1, tilePosition.y - 1,
+                              tilePosition.z};
+    if (const Tile* northeastTile{cgetTile(northeastPos)}) {
         // If the NorthEast tile has a West wall.
-        if (TileLayer* 
-              northeastWestWall{northeastTile.findLayer(TileLayer::Type::Wall,
-                                                        Wall::Type::West)}) {
-            // We formed a corner. Check if the tile to the East has a wall.
+        if (const TileLayer* 
+              northeastWestWall{northeastTile->findLayer(TileLayer::Type::Wall,
+                                                         Wall::Type::West)}) {
             // Note: We know this tile is valid cause there's a NorthEast tile.
-            Tile& eastTile{
-                getTile({tilePosition.x + 1, tilePosition.y, tilePosition.z})};
-            if (eastTile.getLayers(TileLayer::Type::Wall).size() == 0) {
+            TilePosition eastPos{tilePosition.x + 1, tilePosition.y,
+                                 tilePosition.z};
+            auto [eastChunk, eastTile] = getOrCreateTile(eastPos);
+
+            // We formed a corner. Check if the tile to the East has a wall.
+            if (eastTile->getLayers(TileLayer::Type::Wall).size() == 0) {
                 // The East tile has no walls. Add a NorthWestGapFill.
-                eastTile.addLayer(TileLayer::Type::Wall, graphicSet,
-                                  Wall::Type::NorthWestGapFill);
-                rebuildTileCollision(
-                    eastTile,
-                    {tilePosition.x + 1, tilePosition.y, tilePosition.z});
+                addTileLayer(*eastChunk, *eastTile, TileLayer::Type::Wall,
+                             graphicSet, Wall::Type::NorthWestGapFill);
+                rebuildTileCollision(*eastTile, eastPos);
             }
             else if (TileLayer* eastNorthWestGapFill{
-                         eastTile.findLayer(TileLayer::Type::Wall,
-                                            Wall::Type::NorthWestGapFill)}) {
+                         eastTile->findLayer(TileLayer::Type::Wall,
+                                             Wall::Type::NorthWestGapFill)}) {
                 // The East tile has a NW gap fill. If its graphic set no longer
                 // matches either surrounding wall, make it match the new wall.
                 int gapFillID{eastNorthWestGapFill->graphicSet.get().numericID};
@@ -572,9 +676,7 @@ void TileMapBase::addNorthWall(const TilePosition& tilePosition,
                 if ((gapFillID != newNorthID) && (gapFillID != westID)) {
                     eastNorthWestGapFill->graphicSet = graphicSet;
                 }
-                rebuildTileCollision(
-                    eastTile,
-                    {tilePosition.x + 1, tilePosition.y, tilePosition.z});
+                rebuildTileCollision(*eastTile, eastPos);
             }
         }
     }
@@ -583,57 +685,59 @@ void TileMapBase::addNorthWall(const TilePosition& tilePosition,
 void TileMapBase::addWestWall(const TilePosition& tilePosition,
                               const WallGraphicSet& graphicSet)
 {
-    Tile& tile{getTile(tilePosition)};
+    // If tilePosition isn't a valid position in the map, return early.
+    auto [chunk, tile] = getOrCreateTile(tilePosition);
+    if (!tile) {
+        return;
+    }
 
     // If there's an existing West wall, replace it.
-    if (TileLayer* westWall{tile.findLayer(TileLayer::Type::Wall,
-                                           Wall::Type::West)}) {
+    if (TileLayer* westWall{tile->findLayer(TileLayer::Type::Wall,
+                                            Wall::Type::West)}) {
         westWall->graphicSet = graphicSet;
     }
     else {
         // No existing West wall, add one.
-        tile.addLayer(TileLayer::Type::Wall, graphicSet, Wall::Type::West);
+        addTileLayer(*chunk, *tile, TileLayer::Type::Wall, graphicSet,
+                     Wall::Type::West);
     }
 
     // If the tile has a North wall, switch it to a NorthEast gap fill.
-    if (TileLayer* northWall{tile.findLayer(TileLayer::Type::Wall,
-                                            Wall::Type::North)}) {
+    if (TileLayer* northWall{tile->findLayer(TileLayer::Type::Wall,
+                                             Wall::Type::North)}) {
         // Note: We don't change the graphic set. Only the type changes.
         northWall->graphicIndex = Wall::Type::NorthEastGapFill;
     }
     // Else if the tile has a NorthWest gap fill, remove it.
     else {
-        tile.removeLayers(TileLayer::Type::Wall, Wall::Type::NorthWestGapFill);
+        remTileLayers(*chunk, *tile, ChunkPosition{tilePosition},
+                      TileLayer::Type::Wall, Wall::Type::NorthWestGapFill);
     }
 
     // Rebuild the affected tile's collision.
-    rebuildTileCollision(tile, tilePosition);
+    rebuildTileCollision(*tile, tilePosition);
 
     // If there's a tile to the SW that we might've formed a corner with.
-    if (tileExtent.containsPosition(
-            {tilePosition.x - 1, tilePosition.y + 1, tilePosition.z})) {
-        Tile& southwestTile{
-            getTile({tilePosition.x - 1, tilePosition.y + 1, tilePosition.z})};
-
+    TilePosition southwestPos{tilePosition.x - 1, tilePosition.y + 1,
+                              tilePosition.z};
+    if (const Tile* southwestTile{cgetTile(southwestPos)}) {
         // If the SouthWest tile has a North wall or a NE gap fill.
-        TileLayer* southwestNorthWall{
-            southwestTile.findLayer(TileLayer::Type::Wall, Wall::Type::North)};
-        TileLayer* southwestNorthEastGapFill{southwestTile.findLayer(
+        const TileLayer* southwestNorthWall{
+            southwestTile->findLayer(TileLayer::Type::Wall, Wall::Type::North)};
+        const TileLayer* southwestNorthEastGapFill{southwestTile->findLayer(
             TileLayer::Type::Wall, Wall::Type::NorthEastGapFill)};
         if (southwestNorthWall || southwestNorthEastGapFill) {
             // We formed a corner. Check if the tile to the South has a wall.
             // Note: We know this tile is valid cause there's a SouthWest tile.
-            Tile& southTile{
-                getTile({tilePosition.x, tilePosition.y + 1, tilePosition.z})};
-            if (southTile.getLayers(TileLayer::Type::Wall).size() == 0) {
+            TilePosition southPos{tilePosition.x, tilePosition.y + 1,
+                                  tilePosition.z};
+            auto [southChunk, southTile] = getOrCreateTile(southPos);
+            if (southTile->getLayers(TileLayer::Type::Wall).size() == 0) {
                 // The South tile has no walls. Add a NorthWestGapFill.
-                southTile.addLayer(TileLayer::Type::Wall, graphicSet,
-                                   Wall::Type::NorthWestGapFill);
-                rebuildTileCollision(
-                    southTile,
-                    {tilePosition.x, tilePosition.y + 1, tilePosition.z});
+                addTileLayer(*southChunk, *southTile, TileLayer::Type::Wall,
+                             graphicSet, Wall::Type::NorthWestGapFill);
             }
-            else if (TileLayer* southNorthWestGapFill{southTile.findLayer(
+            else if (TileLayer* southNorthWestGapFill{southTile->findLayer(
                          TileLayer::Type::Wall, Wall::Type::NorthWestGapFill)}) {
                 // The South tile has a NW gap fill. If its graphic set no longer
                 // matches either surrounding wall, make it match the new wall.
@@ -646,24 +750,96 @@ void TileMapBase::addWestWall(const TilePosition& tilePosition,
                 if ((gapFillID != newWestID) && (gapFillID != northID)) {
                     southNorthWestGapFill->graphicSet = graphicSet;
                 }
-                rebuildTileCollision(
-                    southTile,
-                    {tilePosition.x, tilePosition.y + 1, tilePosition.z});
             }
+            rebuildTileCollision(*southTile, southPos);
         }
     }
 }
 
+Tile* TileMapBase::remTileLayer(const TilePosition& tilePosition,
+                                TileLayer::Type layerType, Uint16 graphicSetID,
+                                Uint8 graphicIndex)
+{
+    // Get the chunk.
+    ChunkPosition chunkPosition{tilePosition};
+    Chunk* chunk{};
+    if (auto chunkResult{getChunk(chunkPosition)}) {
+        // Chunk exists.
+        chunk = &(chunkResult->get());
+    }
+    else {
+        return nullptr;
+    }
+
+    // Get the tile.
+    Tile& tile{getTile(*chunk, chunkPosition, tilePosition)};
+
+    // Remove any matching layers.
+    remTileLayer(*chunk, tile, chunkPosition, layerType, graphicSetID,
+                 graphicIndex);
+
+    return &tile;
+}
+
+bool TileMapBase::remTileLayer(Chunk& chunk, Tile& tile,
+                               const ChunkPosition& chunkPosition,
+                               TileLayer::Type layerType, Uint16 graphicSetID,
+                               Uint8 graphicIndex)
+{
+    // Remove any matching layers.
+    bool layerWasRemoved{tile.removeLayer(layerType, graphicSetID, graphicIndex)};
+
+    // If we removed a layer and the tile is now empty, decrement the chunk's 
+    // empty tile count.
+    if (layerWasRemoved && (tile.getAllLayers().size() == 0)) {
+        chunk.nonEmptyTileCount--;
+
+        // If the chunk is now completely empty, erase it.
+        if (chunk.nonEmptyTileCount == 0) {
+            chunks.erase(chunkPosition);
+        }
+    }
+
+    return layerWasRemoved;
+}
+
+bool TileMapBase::remTileLayers(Chunk& chunk, Tile& tile,
+                                const ChunkPosition& chunkPosition,
+                                TileLayer::Type layerType, Uint8 graphicIndex)
+{
+    // Remove any matching layers.
+    bool layerWasRemoved{tile.removeLayers(layerType, graphicIndex)};
+
+    // If we removed a layer and the tile is now empty, decrement the chunk's 
+    // empty tile count.
+    if (layerWasRemoved && (tile.getAllLayers().size() == 0)) {
+        chunk.nonEmptyTileCount--;
+
+        // If the chunk is now completely empty, erase it.
+        if (chunk.nonEmptyTileCount == 0) {
+            chunks.erase(chunkPosition);
+        }
+    }
+
+    return layerWasRemoved;
+}
+
 bool TileMapBase::remNorthWall(const TilePosition& tilePosition)
 {
-    Tile& tile{getTile(tilePosition)};
+    auto tileResult{getTile(tilePosition)};
+    if (!tileResult) {
+        return false;
+    }
+    auto [chunk, tile] = *tileResult;
 
     // If the tile has a North wall or NE gap fill, remove it.
-    bool wallWasRemoved{
-        tile.removeLayers(TileLayer::Type::Wall, Wall::Type::North)};
+    ChunkPosition chunkPosition{tilePosition};
+    bool wallWasRemoved{remTileLayers(
+        chunk, tile, chunkPosition, TileLayer::Type::Wall, Wall::Type::North)};
     if (!wallWasRemoved) {
-        wallWasRemoved = tile.removeLayers(
-            TileLayer::Type::Wall, Wall::Type::NorthEastGapFill);
+        wallWasRemoved
+            = remTileLayers(chunk, tile, chunkPosition, TileLayer::Type::Wall,
+                            Wall::Type::NorthEastGapFill);
     }
 
     // If a wall was removed.
@@ -672,17 +848,17 @@ bool TileMapBase::remNorthWall(const TilePosition& tilePosition)
         rebuildTileCollision(tile, tilePosition);
 
         // Check if there's a NW gap fill to the East.
-        if (tileExtent.containsPosition(
-                {tilePosition.x + 1, tilePosition.y, tilePosition.z})) {
-            Tile& eastTile{
-                getTile({tilePosition.x + 1, tilePosition.y, tilePosition.z})};
+        TilePosition eastTilePosition{tilePosition.x + 1, tilePosition.y,
+                                      tilePosition.z};
+        if (auto eastTileResult{getTile(eastTilePosition)}) {
+            auto [eastChunk, eastTile] = *eastTileResult;
+
             // If the East tile has a gap fill for a corner that we just broke,
             // remove it.
-            if (eastTile.removeLayers(TileLayer::Type::Wall,
-                                      Wall::Type::NorthWestGapFill)) {
-                rebuildTileCollision(
-                    eastTile,
-                    {tilePosition.x + 1, tilePosition.y, tilePosition.z});
+            if (remTileLayers(
+                    eastChunk, eastTile, ChunkPosition{eastTilePosition},
+                    TileLayer::Type::Wall, Wall::Type::NorthWestGapFill)) {
+                rebuildTileCollision(eastTile, tilePosition);
             }
         }
     }
@@ -692,13 +868,19 @@ bool TileMapBase::remNorthWall(const TilePosition& tilePosition)
 
 bool TileMapBase::remWestWall(const TilePosition& tilePosition)
 {
-    Tile& tile{getTile(tilePosition)};
+    auto tileResult{getTile(tilePosition)};
+    if (!tileResult) {
+        return false;
+    }
+    auto [chunk, tile] = *tileResult;
 
     // If the tile has a West wall, remove it.
-    if (tile.removeLayers(TileLayer::Type::Wall, Wall::Type::West)) {
+    ChunkPosition chunkPosition{tilePosition};
+    if (remTileLayers(chunk, tile, chunkPosition, TileLayer::Type::Wall,
+                      Wall::Type::West)) {
         // If the tile has a NE gap fill, change it to a North.
-        if (TileLayer* northEastGapFill{tile.findLayer(TileLayer::Type::Wall,
-               Wall::Type::NorthEastGapFill)}) {
+        if (TileLayer* northEastGapFill{tile.get().findLayer(
+                TileLayer::Type::Wall, Wall::Type::NorthEastGapFill)}) {
             northEastGapFill->graphicIndex = Wall::Type::North;
         }
 
@@ -706,16 +888,17 @@ bool TileMapBase::remWestWall(const TilePosition& tilePosition)
         rebuildTileCollision(tile, tilePosition);
 
         // Check if there's a NW gap fill to the South
-        if (tileExtent.containsPosition(
-                {tilePosition.x, tilePosition.y + 1, tilePosition.z})) {
-            Tile& southTile{
-                getTile({tilePosition.x, tilePosition.y + 1, tilePosition.z})};
+        TilePosition southTilePosition{tilePosition.x, tilePosition.y + 1,
+                                       tilePosition.z};
+        if (auto southTileResult{getTile(southTilePosition)}) {
+            auto [southChunk, southTile] = *southTileResult;
+
             // If the South tile has a gap fill for a corner that we just broke,
             // remove it.
-            if (southTile.removeLayers(TileLayer::Type::Wall,
-                                       Wall::Type::NorthWestGapFill)) {
-                dirtyCollisionQueue.emplace_back(
-                    tilePosition.x, tilePosition.y + 1, tilePosition.z);
+            if (remTileLayers(
+                    southChunk, southTile, ChunkPosition{southTilePosition},
+                    TileLayer::Type::Wall, Wall::Type::NorthWestGapFill)) {
+                rebuildTileCollision(southTile, tilePosition);
             }
         }
 
@@ -725,22 +908,45 @@ bool TileMapBase::remWestWall(const TilePosition& tilePosition)
     return false;
 }
 
-bool TileMapBase::clearTileLayersInternal(
+Tile* TileMapBase::clearTileLayersInternal(
     const TilePosition& tilePosition,
     const std::array<bool, TileLayer::Type::Count>& layerTypesToClear)
 {
-    bool layerWasCleared{false};
-    Tile& tile{getTile(tilePosition)};
+    Chunk* chunk{};
+    Tile* tile{};
+    if (auto tileResult{getTile(tilePosition)}) {
+        // Tile exists.
+        chunk = &(tileResult->chunk.get());
+        tile = &(tileResult->tile.get());
+    }
+    else {
+        return nullptr;
+    }
 
     // If we're being asked to clear every layer, clear the whole tile.
+    bool layerWasCleared{false};
     if (layerTypesToClear[TileLayer::Type::Floor]
         && layerTypesToClear[TileLayer::Type::FloorCovering]
         && layerTypesToClear[TileLayer::Type::Wall]
         && layerTypesToClear[TileLayer::Type::Object]) {
-        return tile.clear();
+        layerWasCleared = tile->clear();
+    }
+    else {
+        layerWasCleared = tile->clearLayers(layerTypesToClear);
     }
 
-    return tile.clearLayers(layerTypesToClear);
+    // If we cleared any layers and the tile is now empty, decrement the chunk's 
+    // empty tile count.
+    if (layerWasCleared && (tile->getAllLayers().size() == 0)) {
+        chunk->nonEmptyTileCount--;
+
+        // If the chunk is now completely empty, erase it.
+        if (chunk->nonEmptyTileCount == 0) {
+            chunks.erase(ChunkPosition{tilePosition});
+        }
+    }
+
+    return layerWasCleared ? tile : nullptr;
 }
 
 std::array<bool, TileLayer::Type::Count> TileMapBase::toBoolArray(

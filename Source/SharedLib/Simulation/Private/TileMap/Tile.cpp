@@ -29,28 +29,50 @@ bool Tile::removeLayer(TileLayer::Type layerType, Uint16 graphicSetID,
                        Uint8 graphicIndex)
 {
     // Erase any layers with a matching type, graphic index, and graphic set.
-    std::size_t erasedCount{std::erase_if(layers, [&](const TileLayer& layer) {
+    std::size_t numErased{0};
+    for (auto it{layers.begin()}; it != layers.end();) {
+        TileLayer& layer{*it};
+
+        // If this layer matches, erase it.
         if ((layer.type == layerType) && (layer.graphicIndex == graphicIndex)
             && (layer.graphicSet.get().numericID == graphicSetID)) {
-            return true;
+            it = layers.erase(it);
+            numErased++;
         }
-        return false;
-    })};
+        // If we've reached a type past the desired one, stop looking.
+        else if (layer.type == (layerType + 1)) {
+            break;
+        }
+        else {
+            it++;
+        }
+    }
 
-    return (erasedCount > 0);
+    return (numErased > 0);
 }
 
 bool Tile::removeLayers(TileLayer::Type layerType, Uint8 graphicIndex)
 {
     // Erase any layers with a matching type and graphic index.
-    std::size_t erasedCount{std::erase_if(layers, [&](const TileLayer& layer) {
-        if ((layer.type == layerType) && (layer.graphicIndex == graphicIndex)) {
-            return true;
-        }
-        return false;
-    })};
+    std::size_t numErased{0};
+    for (auto it{layers.begin()}; it != layers.end();) {
+        TileLayer& layer{*it};
 
-    return (erasedCount > 0);
+        // If this layer matches, erase it.
+        if ((layer.type == layerType) && (layer.graphicIndex == graphicIndex)) {
+            it = layers.erase(it);
+            numErased++;
+        }
+        // If we've reached a type past the desired one, stop looking.
+        else if (layer.type == (layerType + 1)) {
+            break;
+        }
+        else {
+            it++;
+        }
+    }
+
+    return (numErased > 0);
 }
 
 bool Tile::clearLayers(
@@ -145,14 +167,14 @@ const std::vector<TileLayer>& Tile::getAllLayers() const
     return layers;
 }
 
-TileLayer* Tile::findLayer(TileLayer::Type type, Uint8 graphicIndex)
+TileLayer* Tile::findLayer(TileLayer::Type layerType, Uint8 graphicIndex)
 {
     for (TileLayer& layer : layers) {
-        if ((layer.type == type)
+        if ((layer.type == layerType)
             && (layer.graphicIndex == graphicIndex)) {
             return &layer;
         }
-        else if (layer.type == (type + 1)) {
+        else if (layer.type == (layerType + 1)) {
             // We've reached a type past the desired one, stop looking.
             return nullptr;
         }
@@ -161,14 +183,15 @@ TileLayer* Tile::findLayer(TileLayer::Type type, Uint8 graphicIndex)
     return nullptr;
 }
 
-const TileLayer* Tile::findLayer(TileLayer::Type type, Uint8 graphicIndex) const
+const TileLayer* Tile::findLayer(TileLayer::Type layerType,
+                                 Uint8 graphicIndex) const
 {
     for (const TileLayer& layer : layers) {
-        if ((layer.type == type)
+        if ((layer.type == layerType)
             && (layer.graphicIndex == graphicIndex)) {
             return &layer;
         }
-        else if (layer.type == (type + 1)) {
+        else if (layer.type == (layerType + 1)) {
             // We've reached a type past the desired one, stop looking.
             return nullptr;
         }
@@ -177,13 +200,13 @@ const TileLayer* Tile::findLayer(TileLayer::Type type, Uint8 graphicIndex) const
     return nullptr;
 }
 
-TileLayer* Tile::findLayer(TileLayer::Type type)
+TileLayer* Tile::findLayer(TileLayer::Type layerType)
 {
     for (TileLayer& layer : layers) {
-        if (layer.type == type) {
+        if (layer.type == layerType) {
             return &layer;
         }
-        else if (layer.type == (type + 1)) {
+        else if (layer.type == (layerType + 1)) {
             // We've reached a type past the desired one, stop looking.
             return nullptr;
         }
@@ -192,13 +215,13 @@ TileLayer* Tile::findLayer(TileLayer::Type type)
     return nullptr;
 }
 
-const TileLayer* Tile::findLayer(TileLayer::Type type) const
+const TileLayer* Tile::findLayer(TileLayer::Type layerType) const
 {
     for (const TileLayer& layer : layers) {
-        if (layer.type == type) {
+        if (layer.type == layerType) {
             return &layer;
         }
-        else if (layer.type == (type + 1)) {
+        else if (layer.type == (layerType + 1)) {
             // We've reached a type past the desired one, stop looking.
             return nullptr;
         }
@@ -243,6 +266,11 @@ BoundingBox Tile::getFloorWorldBounds(const TilePosition& tilePosition)
     return {tileOrigin.x, tileOrigin.x + TILE_WORLD_WIDTH,
             tileOrigin.y, tileOrigin.y + TILE_WORLD_WIDTH,
             tileOrigin.z, tileOrigin.z};
+}
+
+bool Tile::isEmpty() const
+{
+    return layers.empty();
 }
 
 BoundingBox Tile::calcWorldBoundsForGraphic(const TilePosition& tilePosition,

@@ -93,10 +93,11 @@ public:
      * Returns a pointer to the first matching layer in this tile. If one isn't 
      * found, returns nullptr.
      */
-    TileLayer* findLayer(TileLayer::Type type, Uint8 graphicIndex);
-    const TileLayer* findLayer(TileLayer::Type type, Uint8 graphicIndex) const;
-    TileLayer* findLayer(TileLayer::Type type);
-    const TileLayer* findLayer(TileLayer::Type type) const;
+    TileLayer* findLayer(TileLayer::Type layerType, Uint8 graphicIndex);
+    const TileLayer* findLayer(TileLayer::Type layerType,
+                               Uint8 graphicIndex) const;
+    TileLayer* findLayer(TileLayer::Type layerType);
+    const TileLayer* findLayer(TileLayer::Type layerType) const;
 
     /**
      * Clears the collisionBoxes vector, then refills it with all of this
@@ -108,6 +109,9 @@ public:
 
     /** Returns a bounding plane for a floor tile layer at the given position. */
     static BoundingBox getFloorWorldBounds(const TilePosition& tilePosition);
+
+    /** Returns true if this tile has no layers, else false. */
+    bool isEmpty() const;
 
 private:
     /**

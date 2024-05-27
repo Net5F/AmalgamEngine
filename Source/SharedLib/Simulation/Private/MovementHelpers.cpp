@@ -115,11 +115,15 @@ BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
     for (int z{minZ}; z <= maxZ; ++z) {
         for (int y{boxTileExtent.y}; y <= boxTileExtent.yMax(); ++y) {
             for (int x{boxTileExtent.x}; x <= boxTileExtent.xMax(); ++x) {
-                const Tile& tile{tileMap.getTile({x, y, z})};
+                // If this tile doesn't exist, it's empty so we can skip it.
+                const Tile* tile{tileMap.cgetTile({x, y, z})};
+                if (!tile) {
+                    continue;
+                }
 
                 // For each collision box in this tile.
                 for (const BoundingBox& collisionBox :
-                     tile.getCollisionBoxes()) {
+                     tile->getCollisionBoxes()) {
                     // If the desired movement would intersect this box, reject
                     // the move.
                     if (desiredBounds.intersects(collisionBox)) {

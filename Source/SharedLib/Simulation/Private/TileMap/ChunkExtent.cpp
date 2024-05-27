@@ -27,4 +27,12 @@ ChunkExtent::ChunkExtent(const TileExtent& tileExtent)
 {
 }
 
+ChunkExtent ChunkExtent::fromMapLengths(Uint16 mapXLengthChunks,
+                                        Uint16 mapYLengthChunks,
+                                        Uint16 mapZLengthChunks)
+{
+    return {-(mapXLengthChunks / 2), -(mapYLengthChunks / 2), 0,
+            mapXLengthChunks,        mapYLengthChunks,        mapZLengthChunks};
+}
+
 } // End namespace AM

@@ -33,11 +33,9 @@ TileMap::TileMap(GraphicData& inGraphicData)
             graphicData.getAllFloorGraphicSets()};
         if (floorGraphicSets.size() > 0) {
             const FloorGraphicSet& floorGraphicSet{floorGraphicSets[0]};
-            for (int z{tileExtent.z}; z <= tileExtent.zMax(); ++z) {
+            for (int x{tileExtent.x}; x <= tileExtent.xMax(); ++x) {
                 for (int y{tileExtent.y}; y <= tileExtent.yMax(); ++y) {
-                    for (int x{tileExtent.x}; x <= tileExtent.xMax(); ++x) {
-                        setFloor({x, y, z}, floorGraphicSet);
-                    }
+                    setFloor({x, y, 0}, floorGraphicSet);
                 }
             }
         }
@@ -48,22 +46,9 @@ void TileMap::setMapSize(Uint16 inMapXLengthChunks, Uint16 inMapYLengthChunks,
                          Uint16 inMapZLengthChunks)
 {
     // Set our map size.
-    chunkExtent.xLength = inMapXLengthChunks;
-    chunkExtent.yLength = inMapYLengthChunks;
-    chunkExtent.zLength = inMapZLengthChunks;
-    chunkExtent.x = -(chunkExtent.xLength / 2);
-    chunkExtent.y = -(chunkExtent.yLength / 2);
-    chunkExtent.z = 0;
-
-    tileExtent.xLength = (chunkExtent.xLength * SharedConfig::CHUNK_WIDTH);
-    tileExtent.yLength = (chunkExtent.yLength * SharedConfig::CHUNK_WIDTH);
-    tileExtent.zLength = chunkExtent.zLength;
-    tileExtent.x = (chunkExtent.x * SharedConfig::CHUNK_WIDTH);
-    tileExtent.y = (chunkExtent.y * SharedConfig::CHUNK_WIDTH);
-    tileExtent.z = 0;
-
-    // Resize the chunks vector to fit the map.
-    chunks.resize(chunkExtent.getCount());
+    chunkExtent = ChunkExtent::fromMapLengths(
+        inMapXLengthChunks, inMapYLengthChunks, inMapZLengthChunks);
+    tileExtent = TileExtent{chunkExtent};
 
     // Signal that the size changed.
     sizeChangedSig.publish(tileExtent);
