@@ -2,8 +2,8 @@
 
 #include "EditorSprite.h"
 #include "EditorAnimation.h"
+#include "EditorTerrainGraphicSet.h"
 #include "EditorFloorGraphicSet.h"
-#include "EditorFloorCoveringGraphicSet.h"
 #include "EditorWallGraphicSet.h"
 #include "EditorObjectGraphicSet.h"
 #include "EditorEntityGraphicSet.h"
@@ -28,8 +28,8 @@ namespace ResourceImporter
 using LibraryItemData
     = std::variant<std::monostate, std::reference_wrapper<const EditorSprite>,
                    std::reference_wrapper<const EditorAnimation>,
+                   std::reference_wrapper<const EditorTerrainGraphicSet>,
                    std::reference_wrapper<const EditorFloorGraphicSet>,
-                   std::reference_wrapper<const EditorFloorCoveringGraphicSet>,
                    std::reference_wrapper<const EditorWallGraphicSet>,
                    std::reference_wrapper<const EditorObjectGraphicSet>,
                    std::reference_wrapper<const EditorEntityGraphicSet>,

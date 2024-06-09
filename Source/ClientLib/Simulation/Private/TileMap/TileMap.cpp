@@ -28,14 +28,15 @@ TileMap::TileMap(GraphicData& inGraphicData)
         // Set our map size.
         setMapSize(1, 1, 1);
 
-        // If we have any floor graphic sets, fill the map with the first one.
-        const std::vector<FloorGraphicSet>& floorGraphicSets{
-            graphicData.getAllFloorGraphicSets()};
-        if (floorGraphicSets.size() > 0) {
-            const FloorGraphicSet& floorGraphicSet{floorGraphicSets[0]};
+        // If we have any terrain graphic sets, fill the map with the first one.
+        const std::vector<TerrainGraphicSet>& terrainGraphicSets{
+            graphicData.getAllTerrainGraphicSets()};
+        if (terrainGraphicSets.size() > 0) {
+            const TerrainGraphicSet& terrainGraphicSet{terrainGraphicSets[0]};
             for (int x{tileExtent.x}; x <= tileExtent.xMax(); ++x) {
                 for (int y{tileExtent.y}; y <= tileExtent.yMax(); ++y) {
-                    setFloor({x, y, 0}, floorGraphicSet);
+                    addTerrain({x, y, 0}, terrainGraphicSet,
+                               Terrain::Type::Flat);
                 }
             }
         }

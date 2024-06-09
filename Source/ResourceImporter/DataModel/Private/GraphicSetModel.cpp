@@ -9,20 +9,20 @@ namespace ResourceImporter
 {
 GraphicSetModel::GraphicSetModel(DataModel& inDataModel)
 : dataModel{inDataModel}
+, terrainIDPool{SDL_MAX_UINT16}
 , floorIDPool{SDL_MAX_UINT16}
-, floorCoveringIDPool{SDL_MAX_UINT16}
 , wallIDPool{SDL_MAX_UINT16}
 , objectIDPool{SDL_MAX_UINT16}
 , errorString{}
+, terrainAddedSig{}
 , floorAddedSig{}
-, floorCoveringAddedSig{}
 , wallAddedSig{}
 , objectAddedSig{}
 , graphicSetRemovedSig{}
 , graphicSetSlotChangedSig{}
 , graphicSetDisplayNameChangedSig{}
+, terrainAdded{terrainAddedSig}
 , floorAdded{floorAddedSig}
-, floorCoveringAdded{floorCoveringAddedSig}
 , wallAdded{wallAddedSig}
 , objectAdded{objectAddedSig}
 , graphicSetRemoved{graphicSetRemovedSig}
@@ -31,8 +31,8 @@ GraphicSetModel::GraphicSetModel(DataModel& inDataModel)
 {
     // Reserve the null ID for each graphic set type (the engine provides it in 
     // code, so we don't need it in the json).
+    terrainIDPool.reserveID();
     floorIDPool.reserveID();
-    floorCoveringIDPool.reserveID();
     wallIDPool.reserveID();
     objectIDPool.reserveID();
 }
@@ -41,14 +41,14 @@ bool GraphicSetModel::load(const nlohmann::json& json)
 {
     try {
         // Add each type of graphic set.
-        for (auto& floorJson : json.at("floors").items()) {
-            if (!parseFloorGraphicSet(floorJson.value())) {
+        for (auto& terrainJson : json.at("terrain").items()) {
+            if (!parseTerrainGraphicSet(terrainJson.value())) {
                 resetModelState();
                 return false;
             }
         }
-        for (auto& floorCoveringJson : json.at("floorCoverings").items()) {
-            if (!parseFloorCoveringGraphicSet(floorCoveringJson.value())) {
+        for (auto& floorJson : json.at("floors").items()) {
+            if (!parseFloorGraphicSet(floorJson.value())) {
                 resetModelState();
                 return false;
             }
@@ -78,10 +78,40 @@ bool GraphicSetModel::load(const nlohmann::json& json)
 
 void GraphicSetModel::save(nlohmann::json& json)
 {
+    saveTerrain(json);
     saveFloors(json);
-    saveFloorCoverings(json);
     saveWalls(json);
     saveObjects(json);
+}
+
+bool GraphicSetModel::addTerrain()
+{
+    TerrainGraphicSetID numericID{
+        static_cast<TerrainGraphicSetID>(terrainIDPool.reserveID())};
+
+    // Generate a unique name.
+    int nameCount{0};
+    std::string displayName{"NewTerrain"};
+    while (!graphicSetNameIsUnique<EditorTerrainGraphicSet>(numericID,
+                                                                displayName)) {
+        displayName = "NewTerrain" + std::to_string(nameCount);
+        nameCount++;
+    }
+
+    // Add the new, empty graphic set to the map.
+    std::array<GraphicID, Terrain::Type::Count> graphicIDs{
+        /* NULL_GRAPHIC_ID */};
+    terrainMap.emplace(numericID, EditorTerrainGraphicSet{
+                                            numericID, displayName, graphicIDs});
+
+    // Signal the new graphic set to the UI.
+    EditorTerrainGraphicSet& graphicSet{terrainMap[numericID]};
+    terrainAddedSig.publish(numericID, graphicSet);
+
+    // Set the new graphic as the active library item.
+    dataModel.setActiveGraphicSet(GraphicSet::Type::Terrain, numericID);
+
+    return true;
 }
 
 bool GraphicSetModel::addFloor()
@@ -98,7 +128,8 @@ bool GraphicSetModel::addFloor()
     }
 
     // Add the new, empty graphic set to the map.
-    std::array<GraphicID, 1> graphicIDs{NULL_GRAPHIC_ID};
+    std::array<GraphicID, Rotation::Direction::Count> graphicIDs{
+        /* NULL_GRAPHIC_ID */};
     floorMap.emplace(numericID,
                      EditorFloorGraphicSet{numericID, displayName, graphicIDs});
 
@@ -108,37 +139,6 @@ bool GraphicSetModel::addFloor()
 
     // Set the new graphic set as the active library item.
     dataModel.setActiveGraphicSet(GraphicSet::Type::Floor, numericID);
-
-    return true;
-}
-
-bool GraphicSetModel::addFloorCovering()
-{
-    FloorCoveringGraphicSetID numericID{
-        static_cast<FloorCoveringGraphicSetID>(floorCoveringIDPool.reserveID())};
-
-    // Generate a unique name.
-    int nameCount{0};
-    std::string displayName{"NewFloorCovering"};
-    while (!graphicSetNameIsUnique<EditorFloorCoveringGraphicSet>(numericID,
-                                                                displayName)) {
-        displayName = "NewFloorCovering" + std::to_string(nameCount);
-        nameCount++;
-    }
-
-    // Add the new, empty graphic set to the map.
-    std::array<GraphicID, Rotation::Direction::Count> graphicIDs{
-        NULL_GRAPHIC_ID, NULL_GRAPHIC_ID, NULL_GRAPHIC_ID, NULL_GRAPHIC_ID,
-        NULL_GRAPHIC_ID, NULL_GRAPHIC_ID, NULL_GRAPHIC_ID, NULL_GRAPHIC_ID};
-    floorCoveringMap.emplace(numericID, EditorFloorCoveringGraphicSet{
-                                            numericID, displayName, graphicIDs});
-
-    // Signal the new graphic set to the UI.
-    EditorFloorCoveringGraphicSet& graphicSet{floorCoveringMap[numericID]};
-    floorCoveringAddedSig.publish(numericID, graphicSet);
-
-    // Set the new graphic as the active library item.
-    dataModel.setActiveGraphicSet(GraphicSet::Type::FloorCovering, numericID);
 
     return true;
 }
@@ -159,7 +159,7 @@ bool GraphicSetModel::addWall()
 
     // Add the new, empty graphic set to the map.
     std::array<GraphicID, Wall::Type::Count> graphicIDs{
-        NULL_GRAPHIC_ID, NULL_GRAPHIC_ID, NULL_GRAPHIC_ID, NULL_GRAPHIC_ID};
+        /* NULL_GRAPHIC_ID */};
     wallMap.emplace(numericID,
                     EditorWallGraphicSet{numericID, displayName, graphicIDs});
 
@@ -189,8 +189,7 @@ bool GraphicSetModel::addObject()
 
     // Add the new, empty graphic set to the map.
     std::array<GraphicID, Rotation::Direction::Count> graphicIDs{
-        NULL_GRAPHIC_ID, NULL_GRAPHIC_ID, NULL_GRAPHIC_ID, NULL_GRAPHIC_ID,
-        NULL_GRAPHIC_ID, NULL_GRAPHIC_ID, NULL_GRAPHIC_ID, NULL_GRAPHIC_ID};
+        /* NULL_GRAPHIC_ID */};
     objectMap.emplace(numericID,
                       EditorObjectGraphicSet{numericID, displayName, graphicIDs});
 
@@ -202,6 +201,21 @@ bool GraphicSetModel::addObject()
     dataModel.setActiveGraphicSet(GraphicSet::Type::Object, numericID);
 
     return true;
+}
+
+void GraphicSetModel::remTerrain(TerrainGraphicSetID terrainID)
+{
+    // Find the terrain in the map.
+    auto terrainIt{terrainMap.find(terrainID)};
+    if (terrainIt == terrainMap.end()) {
+        LOG_FATAL("Invalid ID while removing terrain.");
+    }
+
+    // Erase the terrain.
+    terrainMap.erase(terrainIt);
+
+    // Signal that the graphic set was erased.
+    graphicSetRemovedSig.publish(GraphicSet::Type::Terrain, terrainID);
 }
 
 void GraphicSetModel::remFloor(FloorGraphicSetID floorID)
@@ -217,22 +231,6 @@ void GraphicSetModel::remFloor(FloorGraphicSetID floorID)
 
     // Signal that the graphic set was erased.
     graphicSetRemovedSig.publish(GraphicSet::Type::Floor, floorID);
-}
-
-void GraphicSetModel::remFloorCovering(FloorCoveringGraphicSetID floorCoveringID)
-{
-    // Find the floor covering in the map.
-    auto floorCoveringIt{floorCoveringMap.find(floorCoveringID)};
-    if (floorCoveringIt == floorCoveringMap.end()) {
-        LOG_FATAL("Invalid ID while removing floor covering.");
-    }
-
-    // Erase the floor covering.
-    floorCoveringMap.erase(floorCoveringIt);
-
-    // Signal that the graphic set was erased.
-    graphicSetRemovedSig.publish(GraphicSet::Type::FloorCovering,
-                                floorCoveringID);
 }
 
 void GraphicSetModel::remWall(WallGraphicSetID wallID)
@@ -265,6 +263,17 @@ void GraphicSetModel::remObject(ObjectGraphicSetID objectID)
     graphicSetRemovedSig.publish(GraphicSet::Type::Object, objectID);
 }
 
+const EditorTerrainGraphicSet&
+    GraphicSetModel::getTerrain(TerrainGraphicSetID terrainID)
+{
+    auto terrainIt{terrainMap.find(terrainID)};
+    if (terrainIt == terrainMap.end()) {
+        LOG_FATAL("Tried to get terrain with invalid ID: %d", terrainID);
+    }
+
+    return terrainIt->second;
+}
+
 const EditorFloorGraphicSet& GraphicSetModel::getFloor(FloorGraphicSetID floorID)
 {
     auto floorIt{floorMap.find(floorID)};
@@ -273,18 +282,6 @@ const EditorFloorGraphicSet& GraphicSetModel::getFloor(FloorGraphicSetID floorID
     }
 
     return floorIt->second;
-}
-
-const EditorFloorCoveringGraphicSet&
-    GraphicSetModel::getFloorCovering(FloorCoveringGraphicSetID floorCoveringID)
-{
-    auto floorCoveringIt{floorCoveringMap.find(floorCoveringID)};
-    if (floorCoveringIt == floorCoveringMap.end()) {
-        LOG_FATAL("Tried to get floorCovering with invalid ID: %d",
-                  floorCoveringID);
-    }
-
-    return floorCoveringIt->second;
 }
 
 const EditorWallGraphicSet& GraphicSetModel::getWall(WallGraphicSetID wallID)
@@ -313,14 +310,14 @@ void GraphicSetModel::setGraphicSetDisplayName(GraphicSet::Type type,
                                              const std::string& newDisplayName)
 {
     switch (type) {
+        case GraphicSet::Type::Terrain: {
+            setGraphicSetDisplayName<EditorTerrainGraphicSet>(
+                type, graphicSetID, newDisplayName);
+            break;
+        }
         case GraphicSet::Type::Floor: {
             setGraphicSetDisplayName<EditorFloorGraphicSet>(type, graphicSetID,
                                                           newDisplayName);
-            break;
-        }
-        case GraphicSet::Type::FloorCovering: {
-            setGraphicSetDisplayName<EditorFloorCoveringGraphicSet>(
-                type, graphicSetID, newDisplayName);
             break;
         }
         case GraphicSet::Type::Wall: {
@@ -344,14 +341,14 @@ void GraphicSetModel::setGraphicSetSlot(GraphicSet::Type type, Uint16 graphicSet
                                       std::size_t index, GraphicID newGraphicID)
 {
     switch (type) {
+        case GraphicSet::Type::Terrain: {
+            setGraphicSetSlot<EditorTerrainGraphicSet>(type, graphicSetID,
+                                                       index, newGraphicID);
+            break;
+        }
         case GraphicSet::Type::Floor: {
             setGraphicSetSlot<EditorFloorGraphicSet>(type, graphicSetID, index,
                                                    newGraphicID);
-            break;
-        }
-        case GraphicSet::Type::FloorCovering: {
-            setGraphicSetSlot<EditorFloorCoveringGraphicSet>(type, graphicSetID,
-                                                           index, newGraphicID);
             break;
         }
         case GraphicSet::Type::Wall: {
@@ -373,12 +370,12 @@ void GraphicSetModel::setGraphicSetSlot(GraphicSet::Type type, Uint16 graphicSet
 
 void GraphicSetModel::resetModelState()
 {
+    terrainMap.clear();
     floorMap.clear();
-    floorCoveringMap.clear();
     wallMap.clear();
     objectMap.clear();
+    terrainIDPool.freeAllIDs();
     floorIDPool.freeAllIDs();
-    floorCoveringIDPool.freeAllIDs();
     wallIDPool.freeAllIDs();
     objectIDPool.freeAllIDs();
 }
@@ -408,8 +405,8 @@ void GraphicSetModel::removeGraphicIDFromSets(GraphicID graphicID)
         }
     };
 
+    replaceIDInSets(terrainMap, GraphicSet::Type::Terrain, graphicID);
     replaceIDInSets(floorMap, GraphicSet::Type::Floor, graphicID);
-    replaceIDInSets(floorCoveringMap, GraphicSet::Type::FloorCovering, graphicID);
     replaceIDInSets(wallMap, GraphicSet::Type::Wall, graphicID);
     replaceIDInSets(objectMap, GraphicSet::Type::Object, graphicID);
 }
@@ -419,6 +416,37 @@ const std::string& GraphicSetModel::getErrorString()
     return errorString;
 }
 
+bool GraphicSetModel::parseTerrainGraphicSet(
+    const nlohmann::json& graphicSetJson)
+{
+    TerrainGraphicSetID numericID{
+        static_cast<TerrainGraphicSetID>(terrainIDPool.reserveID())};
+    std::string displayName{graphicSetJson.at("displayName").get<std::string>()};
+
+    // Add the graphic set's graphics.
+    const nlohmann::json& graphicIDJson{graphicSetJson.at("graphicIDs")};
+    std::array<GraphicID, Terrain::Type::Count> graphicIDs{};
+    for (std::size_t i = 0; i < graphicIDs.size(); ++i) {
+        graphicIDs[i] = graphicIDJson[i].get<GraphicID>();
+        if (!graphicSetNameIsUnique<EditorTerrainGraphicSet>(
+                numericID, displayName)) {
+            errorString = "Terrain display name isn't unique: ";
+            errorString += displayName.c_str();
+            return false;
+        }
+    }
+
+    // Save the graphic set in the appropriate map.
+    terrainMap.emplace(
+        numericID, EditorTerrainGraphicSet{numericID, displayName, graphicIDs});
+
+    // Signal the new graphic set to the UI.
+    EditorTerrainGraphicSet& graphicSet{terrainMap[numericID]};
+    terrainAddedSig.publish(numericID, graphicSet);
+
+    return true;
+}
+
 bool GraphicSetModel::parseFloorGraphicSet(const nlohmann::json& graphicSetJson)
 {
     FloorGraphicSetID numericID{
@@ -426,10 +454,8 @@ bool GraphicSetModel::parseFloorGraphicSet(const nlohmann::json& graphicSetJson)
     std::string displayName{graphicSetJson.at("displayName").get<std::string>()};
 
     // Add the graphic set's graphics.
-    // Note: Floors just have 1 graphic, but the json uses an array in case we
-    //       want to add variations in the future.
     const nlohmann::json& graphicIDJson{graphicSetJson.at("graphicIDs")};
-    std::array<GraphicID, 1> graphicIDs{};
+    std::array<GraphicID, Rotation::Direction::Count> graphicIDs{};
     for (std::size_t i = 0; i < graphicIDs.size(); ++i) {
         graphicIDs[i] = graphicIDJson[i].get<GraphicID>();
         if (!graphicSetNameIsUnique<EditorFloorGraphicSet>(numericID,
@@ -447,37 +473,6 @@ bool GraphicSetModel::parseFloorGraphicSet(const nlohmann::json& graphicSetJson)
     // Signal the new graphic set to the UI.
     EditorFloorGraphicSet& graphicSet{floorMap[numericID]};
     floorAddedSig.publish(numericID, graphicSet);
-
-    return true;
-}
-
-bool GraphicSetModel::parseFloorCoveringGraphicSet(
-    const nlohmann::json& graphicSetJson)
-{
-    FloorCoveringGraphicSetID numericID{
-        static_cast<FloorCoveringGraphicSetID>(floorCoveringIDPool.reserveID())};
-    std::string displayName{graphicSetJson.at("displayName").get<std::string>()};
-
-    // Add the graphic set's graphics.
-    const nlohmann::json& graphicIDJson{graphicSetJson.at("graphicIDs")};
-    std::array<GraphicID, Rotation::Direction::Count> graphicIDs{};
-    for (std::size_t i = 0; i < graphicIDs.size(); ++i) {
-        graphicIDs[i] = graphicIDJson[i].get<GraphicID>();
-        if (!graphicSetNameIsUnique<EditorFloorCoveringGraphicSet>(
-                numericID, displayName)) {
-            errorString = "Floor covering display name isn't unique: ";
-            errorString += displayName.c_str();
-            return false;
-        }
-    }
-
-    // Save the graphic set in the appropriate map.
-    floorCoveringMap.emplace(numericID, EditorFloorCoveringGraphicSet{
-                                            numericID, displayName, graphicIDs});
-
-    // Signal the new graphic set to the UI.
-    EditorFloorCoveringGraphicSet& graphicSet{floorCoveringMap[numericID]};
-    floorCoveringAddedSig.publish(numericID, graphicSet);
 
     return true;
 }
@@ -546,11 +541,11 @@ template<typename T>
 std::map<Uint16, T>& GraphicSetModel::getMapForGraphicSetType()
 {
     std::map<Uint16, T>* map{nullptr};
-    if constexpr (std::same_as<T, EditorFloorGraphicSet>) {
-        return floorMap;
+    if constexpr (std::same_as<T, EditorTerrainGraphicSet>) {
+        return terrainMap;
     }
-    else if constexpr (std::same_as<T, EditorFloorCoveringGraphicSet>) {
-        return floorCoveringMap;
+    else if constexpr (std::same_as<T, EditorFloorGraphicSet>) {
+        return floorMap;
     }
     else if constexpr (std::same_as<T, EditorWallGraphicSet>) {
         return wallMap;
@@ -639,6 +634,28 @@ void GraphicSetModel::setGraphicSetSlot(GraphicSet::Type type, Uint16 graphicSet
     graphicSetSlotChangedSig.publish(type, graphicSetID, index, newGraphicID);
 }
 
+void GraphicSetModel::saveTerrain(nlohmann::json& json)
+{
+    json["terrain"] = nlohmann::json::array();
+
+    // Fill the json with each terrain graphic set in the model.
+    int i{0};
+    TerrainGraphicSetID graphicSetID{1};
+    for (auto& graphicSetPair : terrainMap) {
+        EditorTerrainGraphicSet& graphicSet{graphicSetPair.second};
+        json["terrain"][i]["displayName"] = graphicSet.displayName;
+        std::string stringID{};
+        StringTools::deriveStringID(graphicSet.displayName, stringID);
+        json["terrain"][i]["stringID"] = stringID;
+        json["terrain"][i]["numericID"] = graphicSetID++;
+        for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
+            json["terrain"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
+        }
+
+        i++;
+    }
+}
+
 void GraphicSetModel::saveFloors(nlohmann::json& json)
 {
     json["floors"] = nlohmann::json::array();
@@ -655,28 +672,6 @@ void GraphicSetModel::saveFloors(nlohmann::json& json)
         json["floors"][i]["numericID"] = graphicSetID++;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["floors"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
-        }
-
-        i++;
-    }
-}
-
-void GraphicSetModel::saveFloorCoverings(nlohmann::json& json)
-{
-    json["floorCoverings"] = nlohmann::json::array();
-
-    // Fill the json with each floor covering graphic set in the model.
-    int i{0};
-    FloorCoveringGraphicSetID graphicSetID{1};
-    for (auto& graphicSetPair : floorCoveringMap) {
-        EditorFloorCoveringGraphicSet& graphicSet{graphicSetPair.second};
-        json["floorCoverings"][i]["displayName"] = graphicSet.displayName;
-        std::string stringID{};
-        StringTools::deriveStringID(graphicSet.displayName, stringID);
-        json["floorCoverings"][i]["stringID"] = stringID;
-        json["floorCoverings"][i]["numericID"] = graphicSetID++;
-        for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
-            json["floorCoverings"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
         }
 
         i++;

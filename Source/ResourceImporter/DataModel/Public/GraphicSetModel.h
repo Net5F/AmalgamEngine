@@ -2,7 +2,7 @@
 
 #include "GraphicSets.h"
 #include "EditorFloorGraphicSet.h"
-#include "EditorFloorCoveringGraphicSet.h"
+#include "EditorTerrainGraphicSet.h"
 #include "EditorWallGraphicSet.h"
 #include "EditorObjectGraphicSet.h"
 #include "IDPool.h"
@@ -45,8 +45,8 @@ public:
     /**
      * Adds a blank graphic set of the appropriate type and loads it.
      */
+    bool addTerrain();
     bool addFloor();
-    bool addFloorCovering();
     bool addWall();
     bool addObject();
 
@@ -58,14 +58,14 @@ public:
      *
      * @param graphicSetID  The editor ID of the graphic set to remove.
      */
-    void remFloor(FloorGraphicSetID floorID);
-    void remFloorCovering(FloorCoveringGraphicSetID floorCoveringID);
+    void remTerrain(TerrainGraphicSetID terrainID);
+    void remFloor(FloorGraphicSetID floorCoveringID);
     void remWall(WallGraphicSetID wallID);
     void remObject(ObjectGraphicSetID objectID);
 
-    const EditorFloorGraphicSet& getFloor(FloorGraphicSetID floorID);
-    const EditorFloorCoveringGraphicSet&
-        getFloorCovering(FloorCoveringGraphicSetID floorCoveringID);
+    const EditorTerrainGraphicSet& getTerrain(TerrainGraphicSetID terrainID);
+    const EditorFloorGraphicSet&
+        getFloor(FloorGraphicSetID floorID);
     const EditorWallGraphicSet& getWall(WallGraphicSetID wallID);
     const EditorObjectGraphicSet& getObject(ObjectGraphicSetID objectID);
 
@@ -93,8 +93,8 @@ private:
      *                        section from ResourceData.json, for the appropriate
      *                        set type.
      */
+    bool parseTerrainGraphicSet(const nlohmann::json& graphicSetJson);
     bool parseFloorGraphicSet(const nlohmann::json& graphicSetJson);
-    bool parseFloorCoveringGraphicSet(const nlohmann::json& graphicSetJson);
     bool parseWallGraphicSet(const nlohmann::json& graphicSetJson);
     bool parseObjectGraphicSet(const nlohmann::json& graphicSetJson);
 
@@ -132,8 +132,8 @@ private:
                           std::size_t index, GraphicID newGraphicID);
 
     // Save functions.
+    void saveTerrain(nlohmann::json& json);
     void saveFloors(nlohmann::json& json);
-    void saveFloorCoverings(nlohmann::json& json);
     void saveWalls(nlohmann::json& json);
     void saveObjects(nlohmann::json& json);
 
@@ -141,13 +141,13 @@ private:
 
     // Note: These all use Uint16 instead of the specific ID type, so we can 
     //       interact with them generically.
-    /** Maps floor IDs -> the floor graphic sets that we currently have loaded.
+    /** Maps terrain IDs -> the terrain graphic sets that we currently have 
+        loaded. */
+    std::map<Uint16, EditorTerrainGraphicSet> terrainMap;
+
+    /** Maps floor IDs -> the floor graphic sets that we currently have loaded. 
      */
     std::map<Uint16, EditorFloorGraphicSet> floorMap;
-
-    /** Maps floor covering IDs -> the floor graphic sets that we currently have
-        loaded. */
-    std::map<Uint16, EditorFloorCoveringGraphicSet> floorCoveringMap;
 
     /** Maps wall IDs -> the wall graphic sets that we currently have loaded. */
     std::map<Uint16, EditorWallGraphicSet> wallMap;
@@ -158,8 +158,8 @@ private:
 
     /** Used for generating temporary graphic set IDs that are only used
         internally by this editor. */
+    IDPool terrainIDPool;
     IDPool floorIDPool;
-    IDPool floorCoveringIDPool;
     IDPool wallIDPool;
     IDPool objectIDPool;
 
@@ -170,12 +170,12 @@ private:
     //-------------------------------------------------------------------------
     // Signals
     //-------------------------------------------------------------------------
-    entt::sigh<void(FloorGraphicSetID floorID,
-                    const EditorFloorGraphicSet& floor)>
+    entt::sigh<void(TerrainGraphicSetID floorID,
+                    const EditorTerrainGraphicSet& floor)>
+        terrainAddedSig;
+    entt::sigh<void(FloorGraphicSetID floorCoveringID,
+                    const EditorFloorGraphicSet& floorCovering)>
         floorAddedSig;
-    entt::sigh<void(FloorCoveringGraphicSetID floorCoveringID,
-                    const EditorFloorCoveringGraphicSet& floorCovering)>
-        floorCoveringAddedSig;
     entt::sigh<void(WallGraphicSetID wallID, const EditorWallGraphicSet& wall)>
         wallAddedSig;
     entt::sigh<void(ObjectGraphicSetID objectID,
@@ -195,15 +195,15 @@ public:
     //-------------------------------------------------------------------------
     // Signal Sinks
     //-------------------------------------------------------------------------
+    /** A terrain graphic set was added to the model. */
+    entt::sink<
+        entt::sigh<void(TerrainGraphicSetID terrainID,
+                        const EditorTerrainGraphicSet& terrain)>>
+        terrainAdded;
     /** A floor graphic set was added to the model. */
     entt::sink<entt::sigh<void(FloorGraphicSetID floorID,
                                const EditorFloorGraphicSet& floor)>>
         floorAdded;
-    /** A floor covering graphic set was added to the model. */
-    entt::sink<
-        entt::sigh<void(FloorCoveringGraphicSetID floorCoveringID,
-                        const EditorFloorCoveringGraphicSet& floorCovering)>>
-        floorCoveringAdded;
     /** A wall graphic set was added to the model. */
     entt::sink<entt::sigh<void(WallGraphicSetID wallID,
                                const EditorWallGraphicSet& wall)>>

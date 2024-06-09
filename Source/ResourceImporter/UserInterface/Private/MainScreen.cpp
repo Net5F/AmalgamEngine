@@ -110,12 +110,12 @@ MainScreen::MainScreen(DataModel& inDataModel)
         dataModel.animationModel.addAnimation();
         dropFocus();
     });
-    libraryAddMenu.addFloorButton.setOnPressed([this]() {
-        dataModel.graphicSetModel.addFloor();
+    libraryAddMenu.addTerrainButton.setOnPressed([this]() {
+        dataModel.graphicSetModel.addTerrain();
         dropFocus();
     });
-    libraryAddMenu.addFloorCoveringButton.setOnPressed([this]() {
-        dataModel.graphicSetModel.addFloorCovering();
+    libraryAddMenu.addFloorButton.setOnPressed([this]() {
+        dataModel.graphicSetModel.addFloor();
         dropFocus();
     });
     libraryAddMenu.addWallButton.setOnPressed([this]() {

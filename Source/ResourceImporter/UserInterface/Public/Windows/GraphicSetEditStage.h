@@ -106,11 +106,7 @@ private:
     /** Holds this graphic set's graphics. */
     AUI::VerticalGridContainer graphicContainer;
 
-    AUI::Text descText1;
-    AUI::Text descText2;
-    AUI::Text descText3;
-    AUI::Text descText4;
-    AUI::Text descText5;
+    AUI::Text descText;
 };
 
 } // End namespace ResourceImporter

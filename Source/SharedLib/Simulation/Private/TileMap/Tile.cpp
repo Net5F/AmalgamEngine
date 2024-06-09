@@ -239,15 +239,15 @@ void Tile::rebuildCollision(const TilePosition& tilePosition)
     for (const TileLayer& layer : layers) {
         GraphicRef graphic{layer.getGraphic()};
 
-        // If it's a floor covering, skip it (they never have collision).
-        if (layer.type == TileLayer::Type::FloorCovering) {
-            continue;
+        // If it's terrain, generate collision for it.
+        // (We ignore modelBounds and collisionEnabled on terrain, all terrain 
+        // gets generated collision). 
+        if (layer.type == TileLayer::Type::Floor) {
+            collisionBoxes.push_back(getTerrainWorldBounds(tilePosition));
         }
-        // If it's a floor, generate a collision plane for it.
-        // (We ignore modelBounds and collisionEnabled on floor graphics, all 
-        // floors get a generated collision plane). 
+        // If it's a floor, skip it (they never have collision).
         else if (layer.type == TileLayer::Type::Floor) {
-            collisionBoxes.push_back(getFloorWorldBounds(tilePosition));
+            continue;
         }
         // If it's a wall or object, add its assigned collision.
         else if (graphic.getCollisionEnabled()) {
@@ -257,7 +257,7 @@ void Tile::rebuildCollision(const TilePosition& tilePosition)
     }
 }
 
-BoundingBox Tile::getFloorWorldBounds(const TilePosition& tilePosition)
+BoundingBox Tile::getTerrainWorldBounds(const TilePosition& tilePosition)
 {
     static constexpr float TILE_WORLD_WIDTH{
         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};

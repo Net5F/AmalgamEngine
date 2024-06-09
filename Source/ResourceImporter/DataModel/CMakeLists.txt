@@ -17,7 +17,6 @@ target_sources(ResourceImporter
         Public/EditorAnimation.h
         Public/EditorBoundingBox.h
         Public/EditorEntityGraphicSet.h
-        Public/EditorFloorCoveringGraphicSet.h
         Public/EditorFloorGraphicSet.h
         Public/EditorGraphicRef.h
         Public/EditorIcon.h
@@ -25,6 +24,7 @@ target_sources(ResourceImporter
         Public/EditorObjectGraphicSet.h
         Public/EditorSprite.h
         Public/EditorSpriteSheet.h
+        Public/EditorTerrainGraphicSet.h
         Public/EditorWallGraphicSet.h
         Public/EntityGraphicSetModel.h
         Public/GraphicSetModel.h

@@ -107,8 +107,9 @@ public:
      */
     void rebuildCollision(const TilePosition& tilePosition);
 
-    /** Returns a bounding plane for a floor tile layer at the given position. */
-    static BoundingBox getFloorWorldBounds(const TilePosition& tilePosition);
+    /** Returns a bounding volume for a terrain tile layer at the given 
+        position. */
+    static BoundingBox getTerrainWorldBounds(const TilePosition& tilePosition);
 
     /** Returns true if this tile has no layers, else false. */
     bool isEmpty() const;

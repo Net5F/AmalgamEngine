@@ -3,6 +3,7 @@
 #include "GraphicSetIDs.h"
 #include "GraphicRef.h"
 #include "EntityGraphicType.h"
+#include "Terrain.h"
 #include "Wall.h"
 #include <SDL_stdinc.h>
 #include <string>
@@ -18,18 +19,18 @@ namespace AM
  * Base class for a single graphic set from ResourceData.json.
  *
  * Graphic sets are used for grouping graphic into a higher-level concept. A
- * FloorCoveringGraphicSet, for example, holds all of the available rotations
- * of a single floor covering, such as a rug.
+ * FloorGraphicSet, for example, holds all of the available rotations of a 
+ * single floor covering, such as a rug.
  *
- * Floor, FloorCovering, and Wall are only used for tiles.
- * Object is used for tiles (static objects) and entities (dynamic objects).
+ * Terrain, Floor, Wall, and Object are only used for tiles.
  * Entity is only used for entities.
  */
 struct GraphicSet {
     enum Type : Uint8 {
+        Terrain,
+        /** Floors are display-only, they have no collision. They're used for 
+            things like grass, carpets, flooring, etc. */
         Floor,
-        /** Floor coverings are things like rugs, flowers, puddles, etc. */
-        FloorCovering,
         Wall,
         Object,
         Entity,
@@ -54,12 +55,12 @@ struct GraphicSet {
     Uint16 numericID{0};
 };
 
-struct FloorGraphicSet : public GraphicSet {
-    /** This floor's single graphic. */
-    GraphicRef graphic;
+struct TerrainGraphicSet : public GraphicSet {
+    /** The 37 types of terrain graphic that we use for our terrain system. */
+    std::array<GraphicRef, Terrain::Type::Count> graphics;
 };
 
-struct FloorCoveringGraphicSet : public GraphicSet {
+struct FloorGraphicSet : public GraphicSet {
     /** The number of variations that this graphic set can hold. */
     static constexpr std::size_t VARIATION_COUNT{8};
 
@@ -90,21 +91,6 @@ struct EntityGraphicSet : public GraphicSet {
         The IdleSouth graphic type will always be present. All others are 
         optional. */
     std::unordered_map<EntityGraphicType, GraphicRef> graphics;
-
-    /**
-     * Returns a graphic type that exists in this set and is safe to use.
-     *
-     * You must use this whenever trying to set an entity to anything other 
-     * than IdleSouth, since all other graphic types are optional in a set.
-     *
-     * currentType is used to favor the current direction if desiredType is a 
-     * direction that doesn't exist.
-     * 
-     * @param desiredType The graphic type that you want the entity to use.
-     * @param currentType The entity's current graphic type.
-     */
-    EntityGraphicType getSafeGraphicType(EntityGraphicType desiredType,
-                                         EntityGraphicType currentType) const;
 };
 
 } // namespace AM

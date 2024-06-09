@@ -6,7 +6,7 @@ namespace AM
 {
 struct Wall {
     /**
-     * The types of wall sprites that we use for our modular wall system.
+     * The types of wall graphics that we use for our modular wall system.
      */
     enum Type : Uint8 {
         /** A West wall. */

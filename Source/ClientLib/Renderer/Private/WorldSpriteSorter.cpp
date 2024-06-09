@@ -99,8 +99,8 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
 
                 // Push all of this tile's sprites into the appropriate vectors.
                 if (const Tile* tile{tileMap.cgetTile(tilePosition)}) {
+                    pushTerrainSprites(*tile, camera, tilePosition);
                     pushFloorSprite(*tile, camera, tilePosition);
-                    pushFloorCoveringSprites(*tile, camera, tilePosition);
                     pushWallSprites(*tile, camera, tilePosition);
                     pushObjectSprites(*tile, camera, tilePosition);
                 }
@@ -147,18 +147,21 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
     }
 }
 
-void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
-                                        const TilePosition& tilePosition)
+void WorldSpriteSorter::pushTerrainSprites(
+    const Tile& tile, const Camera& camera, const TilePosition& tilePosition)
 {
-    std::span<const TileLayer> floors{tile.getLayers(TileLayer::Type::Floor)};
-    for (const TileLayer& floor : floors) {
-        GraphicRef graphic{floor.getGraphic()};
+    // Note: Each tile can only have 1 terrain, but we get a span just to 
+    //       follow the pattern of the other types.
+    std::span<const TileLayer> terrains{
+        tile.getLayers(TileLayer::Type::Terrain)};
+    for (const TileLayer& terrain : terrains) {
+        GraphicRef graphic{terrain.getGraphic()};
         if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
             // If the UI wants this sprite replaced with a phantom, replace it.
             auto phantomSpriteInfo = std::find_if(
                 phantomSprites.begin(), phantomSprites.end(),
                 [&](const PhantomSpriteInfo& info) {
-                    return ((info.layerType == TileLayer::Type::Floor)
+                    return ((info.layerType == TileLayer::Type::Terrain)
                             && (info.tilePosition == tilePosition));
                 });
             if (phantomSpriteInfo != phantomSprites.end()) {
@@ -167,25 +170,26 @@ void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
             }
 
             pushTileSprite(graphic, camera,
-                           {tilePosition, TileLayer::Type::Floor,
-                            floor.graphicSet.get().numericID, 0},
+                           {tilePosition, TileLayer::Type::Terrain,
+                            terrain.graphicSet.get().numericID,
+                            terrain.graphicIndex},
                            false);
         }
     }
 }
 
-void WorldSpriteSorter::pushFloorCoveringSprites(
-    const Tile& tile, const Camera& camera, const TilePosition& tilePosition)
+void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
+                                        const TilePosition& tilePosition)
 {
-    std::span<const TileLayer> floorCoverings{
-        tile.getLayers(TileLayer::Type::FloorCovering)};
-    for (const TileLayer& floorCovering : floorCoverings) {
-        GraphicRef graphic{floorCovering.getGraphic()};
+    std::span<const TileLayer> floors{
+        tile.getLayers(TileLayer::Type::Floor)};
+    for (const TileLayer& floor : floors) {
+        GraphicRef graphic{floor.getGraphic()};
         if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
             pushTileSprite(graphic, camera,
-                           {tilePosition, TileLayer::Type::FloorCovering,
-                            floorCovering.graphicSet.get().numericID,
-                            floorCovering.graphicIndex},
+                           {tilePosition, TileLayer::Type::Floor,
+                            floor.graphicSet.get().numericID,
+                            floor.graphicIndex},
                            false);
         }
     }
@@ -285,13 +289,13 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     }
 
     // Push the sprite to be sorted.
-    if (layerID.type == TileLayer::Type::Floor) {
+    if (layerID.type == TileLayer::Type::Terrain) {
         spritesToSort.emplace_back(
             &sprite, worldObjectID,
-            Tile::getFloorWorldBounds(layerID.tilePosition), screenExtent,
+            Tile::getTerrainWorldBounds(layerID.tilePosition), screenExtent,
             colorMod);
     }
-    else if (layerID.type == TileLayer::Type::FloorCovering) {
+    else if (layerID.type == TileLayer::Type::Floor) {
         BoundingBox worldBounds{Transforms::modelToWorld(
             sprite.modelBounds, layerID.tilePosition.getOriginPosition())};
         spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,

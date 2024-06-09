@@ -50,12 +50,13 @@ void TileUpdateSystem::updateTiles()
 
 void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
 {
-    if (addLayerRequest.layerType == TileLayer::Type::Floor) {
-        world.tileMap.setFloor(addLayerRequest.tilePosition,
-                               addLayerRequest.graphicSetID);
+    if (addLayerRequest.layerType == TileLayer::Type::Terrain) {
+        world.tileMap.addTerrain(
+            addLayerRequest.tilePosition, addLayerRequest.graphicSetID,
+            static_cast<Terrain::Type>(addLayerRequest.graphicIndex));
     }
-    else if (addLayerRequest.layerType == TileLayer::Type::FloorCovering) {
-        world.tileMap.addFloorCovering(
+    else if (addLayerRequest.layerType == TileLayer::Type::Floor) {
+        world.tileMap.addFloor(
             addLayerRequest.tilePosition, addLayerRequest.graphicSetID,
             static_cast<Rotation::Direction>(addLayerRequest.graphicIndex));
     }
@@ -73,13 +74,13 @@ void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
 
 void TileUpdateSystem::remTileLayer(const TileRemoveLayer& remLayerRequest)
 {
-    if (remLayerRequest.layerType == TileLayer::Type::Floor) {
-        // Note: We normally won't receive this, since the server uses the
-        //       clearTileLayers path for removing floors.
-        world.tileMap.remFloor(remLayerRequest.tilePosition);
+    if (remLayerRequest.layerType == TileLayer::Type::Terrain) {
+        world.tileMap.remTerrain(
+            remLayerRequest.tilePosition, remLayerRequest.graphicSetID,
+            static_cast<Terrain::Type>(remLayerRequest.graphicIndex));
     }
-    else if (remLayerRequest.layerType == TileLayer::Type::FloorCovering) {
-        world.tileMap.remFloorCovering(
+    else if (remLayerRequest.layerType == TileLayer::Type::Floor) {
+        world.tileMap.remFloor(
             remLayerRequest.tilePosition, remLayerRequest.graphicSetID,
             static_cast<Rotation::Direction>(remLayerRequest.graphicIndex));
     }

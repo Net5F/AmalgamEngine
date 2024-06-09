@@ -185,14 +185,14 @@ void DataModel::setActiveGraphicSet(GraphicSet::Type type,
     //   1. Get the set with the given ID (error if it doesn't exist).
     //   2. Signal it out.
     switch (type) {
+        case GraphicSet::Type::Terrain: {
+            activeLibraryItemChangedSig.publish(
+                graphicSetModel.getTerrain(newActiveGraphicSetID));
+            return;
+        }
         case GraphicSet::Type::Floor: {
             activeLibraryItemChangedSig.publish(
                 graphicSetModel.getFloor(newActiveGraphicSetID));
-            return;
-        }
-        case GraphicSet::Type::FloorCovering: {
-            activeLibraryItemChangedSig.publish(
-                graphicSetModel.getFloorCovering(newActiveGraphicSetID));
             return;
         }
         case GraphicSet::Type::Wall: {

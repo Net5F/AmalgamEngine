@@ -167,7 +167,8 @@ void EntityGraphicSetEditStage::initGraphicContainer()
         EntityGraphicType graphicType{toEntityGraphicType(i)};
 
         // Construct the new slot widget.
-        std::unique_ptr<AUI::Widget> slotPtr{std::make_unique<GraphicSetSlot>()};
+        std::unique_ptr<AUI::Widget> slotPtr{
+            std::make_unique<GraphicSetSlot>(180)};
         GraphicSetSlot& slot{static_cast<GraphicSetSlot&>(*slotPtr)};
 
         // Set the top text.

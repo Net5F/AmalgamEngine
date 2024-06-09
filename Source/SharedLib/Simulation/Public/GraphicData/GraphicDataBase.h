@@ -65,9 +65,8 @@ public:
      * Returns the graphic set with the given string ID.
      * Errors if the given ID doesn't exist.
      */
+    const TerrainGraphicSet& getTerrainGraphicSet(const std::string& stringID);
     const FloorGraphicSet& getFloorGraphicSet(const std::string& stringID);
-    const FloorCoveringGraphicSet&
-        getFloorCoveringGraphicSet(const std::string& stringID);
     const WallGraphicSet& getWallGraphicSet(const std::string& stringID);
     const ObjectGraphicSet& getObjectGraphicSet(const std::string& stringID);
     const EntityGraphicSet& getEntityGraphicSet(const std::string& stringID);
@@ -76,9 +75,9 @@ public:
      * Returns the sprite set with the given numeric ID.
      * Errors if the given ID doesn't exist.
      */
+    const TerrainGraphicSet&
+        getTerrainGraphicSet(TerrainGraphicSetID numericID) const;
     const FloorGraphicSet& getFloorGraphicSet(FloorGraphicSetID numericID) const;
-    const FloorCoveringGraphicSet&
-        getFloorCoveringGraphicSet(FloorCoveringGraphicSetID numericID) const;
     const WallGraphicSet& getWallGraphicSet(WallGraphicSetID numericID) const;
     const ObjectGraphicSet&
         getObjectGraphicSet(ObjectGraphicSetID numericID) const;
@@ -94,9 +93,8 @@ public:
      * Get a reference to a vector containing all the graphic sets of a
      * particular type.
      */
+    const std::vector<TerrainGraphicSet>& getAllTerrainGraphicSets() const;
     const std::vector<FloorGraphicSet>& getAllFloorGraphicSets() const;
-    const std::vector<FloorCoveringGraphicSet>&
-        getAllFloorCoveringGraphicSets() const;
     const std::vector<WallGraphicSet>& getAllWallGraphicSets() const;
     const std::vector<ObjectGraphicSet>& getAllObjectGraphicSets() const;
     const std::vector<EntityGraphicSet>& getAllEntityGraphicSets() const;
@@ -137,8 +135,8 @@ protected:
      *                       section from ResourceData.json, for the appropriate
      *                       set type.
      */
+    void parseTerrainGraphicSet(const nlohmann::json& graphicSetJson);
     void parseFloorGraphicSet(const nlohmann::json& graphicSetJson);
-    void parseFloorCoveringGraphicSet(const nlohmann::json& graphicSetJson);
     void parseWallGraphicSet(const nlohmann::json& graphicSetJson);
     void parseObjectGraphicSet(const nlohmann::json& graphicSetJson);
     void parseEntityGraphicSet(const nlohmann::json& graphicSetJson);
@@ -151,8 +149,8 @@ protected:
 
     /** The loaded graphic sets of each type. These are indexed by the set
         type's numeric IDs. (Each sprite set type has a unique ID space.) */
+    std::vector<TerrainGraphicSet> terrainGraphicSets;
     std::vector<FloorGraphicSet> floorGraphicSets;
-    std::vector<FloorCoveringGraphicSet> floorCoveringGraphicSets;
     std::vector<WallGraphicSet> wallGraphicSets;
     std::vector<ObjectGraphicSet> objectGraphicSets;
     std::vector<EntityGraphicSet> entityGraphicSets;
@@ -164,10 +162,10 @@ protected:
     std::unordered_map<std::string, const Animation*> animationStringMap;
 
     /** Maps for easily looking up graphic sets by their string ID. */
+    std::unordered_map<std::string, const TerrainGraphicSet*>
+        terrainGraphicSetStringMap;
     std::unordered_map<std::string, const FloorGraphicSet*>
         floorGraphicSetStringMap;
-    std::unordered_map<std::string, const FloorCoveringGraphicSet*>
-        floorCoveringGraphicSetStringMap;
     std::unordered_map<std::string, const WallGraphicSet*>
         wallGraphicSetStringMap;
     std::unordered_map<std::string, const ObjectGraphicSet*>

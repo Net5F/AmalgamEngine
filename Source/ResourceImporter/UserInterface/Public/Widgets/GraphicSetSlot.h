@@ -18,7 +18,11 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    GraphicSetSlot();
+    /**
+     * @param logicalWidth The widget's width. Only affects the text width, the 
+     *                     other elements are all centered.
+     */
+    GraphicSetSlot(int logicalWidth);
 
     //-------------------------------------------------------------------------
     // Public child widgets

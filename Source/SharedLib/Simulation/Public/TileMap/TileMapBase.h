@@ -65,46 +65,54 @@ public:
     TileMapBase(GraphicDataBase& inGraphicData, bool inTrackTileUpdates);
 
     /**
-     * Sets the given tile's floor to the given floor.
-     * Note: Floor graphic sets only have 1 graphic, so you don't need to 
-     *       specify which graphic from the set to use.
-     */
-    void setFloor(const TilePosition& tilePosition,
-                  const FloorGraphicSet& graphicSet);
-    void setFloor(const TilePosition& tilePosition,
-                  const std::string& graphicSetID);
-    void setFloor(const TilePosition& tilePosition, Uint16 graphicSetID);
-
-    /**
-     * Removes the given tile's floor. Since tiles only have 1 floor, this is
-     * equivalent to clearTileLayers<FloorTileLayer>().
-     */
-    bool remFloor(const TilePosition& tilePosition);
-
-    /**
      * Adds the given floor covering to the given tile.
      */
-    void addFloorCovering(const TilePosition& tilePosition,
-                          const FloorCoveringGraphicSet& graphicSet,
-                          Rotation::Direction rotation);
-    void addFloorCovering(const TilePosition& tilePosition,
-                          const std::string& graphicSetID,
-                          Rotation::Direction rotation);
-    void addFloorCovering(const TilePosition& tilePosition, Uint16 graphicSetID,
-                          Rotation::Direction rotation);
+    void addTerrain(const TilePosition& tilePosition,
+                    const TerrainGraphicSet& graphicSet,
+                    Terrain::Type terrainType);
+    void addTerrain(const TilePosition& tilePosition,
+                    const std::string& graphicSetID,
+                    Terrain::Type terrainType);
+    void addTerrain(const TilePosition& tilePosition, Uint16 graphicSetID,
+                    Terrain::Type terrainType);
 
     /**
      * Removes the given floor covering from the given tile.
      * @return true if the tile had a floor covering to remove, else false.
      */
-    bool remFloorCovering(const TilePosition& tilePosition,
-                          const FloorCoveringGraphicSet& graphicSet,
-                          Rotation::Direction rotation);
-    bool remFloorCovering(const TilePosition& tilePosition,
-                          const std::string& graphicSetID,
-                          Rotation::Direction rotation);
-    bool remFloorCovering(const TilePosition& tilePosition, Uint16 graphicSetID,
-                          Rotation::Direction rotation);
+    bool remTerrain(const TilePosition& tilePosition,
+                    const TerrainGraphicSet& graphicSet,
+                    Terrain::Type terrainType);
+    bool remTerrain(const TilePosition& tilePosition,
+                    const std::string& graphicSetID,
+                    Terrain::Type terrainType);
+    bool remTerrain(const TilePosition& tilePosition, Uint16 graphicSetID,
+                    Terrain::Type terrainType);
+
+    /**
+     * Adds the given floor to the given tile.
+     */
+    void addFloor(const TilePosition& tilePosition,
+                  const FloorGraphicSet& graphicSet,
+                  Rotation::Direction rotation);
+    void addFloor(const TilePosition& tilePosition,
+                  const std::string& graphicSetID,
+                  Rotation::Direction rotation);
+    void addFloor(const TilePosition& tilePosition, Uint16 graphicSetID,
+                  Rotation::Direction rotation);
+
+    /**
+     * Removes the given object from the given tile.
+     * @return true if the tile had an object to remove, else false.
+     */
+    bool remFloor(const TilePosition& tilePosition,
+                  const FloorGraphicSet& graphicSet,
+                  Rotation::Direction rotation);
+    bool remFloor(const TilePosition& tilePosition,
+                  const std::string& graphicSetID,
+                  Rotation::Direction rotation);
+    bool remFloor(const TilePosition& tilePosition, Uint16 graphicSetID,
+                  Rotation::Direction rotation);
 
     /**
      * Adds the given wall to the given tile.
@@ -472,15 +480,15 @@ void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
         // Get this layer's graphic set.
         const GraphicSet* graphicSet{nullptr};
         switch (paletteEntry.layerType) {
-            case TileLayer::Type::Floor: {
-                graphicSet = &(
-                    graphicData.getFloorGraphicSet(paletteEntry.graphicSetID));
+            case TileLayer::Type::Terrain: {
+                graphicSet = &(graphicData.getTerrainGraphicSet(
+                    paletteEntry.graphicSetID));
                 rebuildCollision = true;
                 break;
             }
-            case TileLayer::Type::FloorCovering: {
-                graphicSet = &(graphicData.getFloorCoveringGraphicSet(
-                    paletteEntry.graphicSetID));
+            case TileLayer::Type::Floor: {
+                graphicSet = &(
+                    graphicData.getFloorGraphicSet(paletteEntry.graphicSetID));
                 break;
             }
             case TileLayer::Type::Wall: {

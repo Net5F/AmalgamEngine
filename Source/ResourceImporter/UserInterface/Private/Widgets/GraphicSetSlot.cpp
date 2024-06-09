@@ -5,8 +5,8 @@ namespace AM
 {
 namespace ResourceImporter
 {
-GraphicSetSlot::GraphicSetSlot()
-: AUI::Widget({0, 0, 180, 255}, "GraphicSetSlot")
+GraphicSetSlot::GraphicSetSlot(int logicalWidth)
+: AUI::Widget({0, 0, logicalWidth, 255}, "GraphicSetSlot")
 , topText{{0, 0, logicalExtent.w, 27}}
 , checkerboardImage{{30, 45, 120, 120}}
 , spriteImage{{30, 45, 120, 120}}

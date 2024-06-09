@@ -25,7 +25,8 @@ struct EditorEntityGraphicSet {
 
     /** The numeric IDs for each graphic in this set.
         The Idle graphic type will always be present. All others are optional. */
-    std::unordered_map<EntityGraphicType, GraphicID> graphicIDs{};
+    std::unordered_map<EntityGraphicType, GraphicID> graphicIDs{
+        /* NULL_GRAPHIC_ID */};
 };
 
 } // namespace ResourceImporter

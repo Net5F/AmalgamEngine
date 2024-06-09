@@ -15,8 +15,8 @@ namespace AM
  * If we ever care to, we can replace everywhere we cast to Uint16 with a 
  * variant that contains these types.
  */
+using TerrainGraphicSetID = Uint16;
 using FloorGraphicSetID = Uint16;
-using FloorCoveringGraphicSetID = Uint16;
 using WallGraphicSetID = Uint16;
 using ObjectGraphicSetID = Uint16;
 using EntityGraphicSetID = Uint16;
@@ -27,8 +27,8 @@ using EntityGraphicSetID = Uint16;
  *
  * Note: Since the null ID is 0, you can do null checks like "if (graphicSetID)".
  */
+static constexpr TerrainGraphicSetID NULL_TERRAIN_GRAPHIC_SET_ID{0};
 static constexpr FloorGraphicSetID NULL_FLOOR_GRAPHIC_SET_ID{0};
-static constexpr FloorCoveringGraphicSetID NULL_FLOOR_COVERING_GRAPHIC_SET_ID{0};
 static constexpr WallGraphicSetID NULL_WALL_GRAPHIC_SET_ID{0};
 static constexpr ObjectGraphicSetID NULL_OBJECT_GRAPHIC_SET_ID{0};
 static constexpr EntityGraphicSetID NULL_ENTITY_GRAPHIC_SET_ID{0};

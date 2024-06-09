@@ -27,11 +27,78 @@ TileMapBase::TileMapBase(GraphicDataBase& inGraphicData, bool inTrackTileUpdates
 {
 }
 
-void TileMapBase::setFloor(const TilePosition& tilePosition,
-                           const FloorGraphicSet& graphicSet)
+void TileMapBase::addTerrain(const TilePosition& tilePosition,
+                             const TerrainGraphicSet& graphicSet,
+                             Terrain::Type terrainType)
 {
-    Tile* tile{
-        addTileLayer(tilePosition, TileLayer::Type::Floor, graphicSet, 0)};
+    Tile* tile{addTileLayer(tilePosition, TileLayer::Type::Terrain, graphicSet,
+                            terrainType)};
+    if (!tile) {
+        // tilePosition is outside of the map bounds.
+        return;
+    }
+
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates) {
+        tileUpdateHistory.emplace_back(
+            TileAddLayer{tilePosition, TileLayer::Type::Terrain,
+                         static_cast<Uint16>(graphicSet.numericID),
+                         static_cast<Uint8>(terrainType)});
+    }
+}
+
+void TileMapBase::addTerrain(const TilePosition& tilePosition,
+                             const std::string& graphicSetID,
+                             Terrain::Type terrainType)
+{
+    addTerrain(tilePosition, graphicData.getTerrainGraphicSet(graphicSetID),
+               terrainType);
+}
+
+void TileMapBase::addTerrain(const TilePosition& tilePosition,
+                             Uint16 graphicSetID, Terrain::Type terrainType)
+{
+    addTerrain(tilePosition, graphicData.getTerrainGraphicSet(graphicSetID),
+               terrainType);
+}
+
+bool TileMapBase::remTerrain(const TilePosition& tilePosition,
+                             const TerrainGraphicSet& graphicSet,
+                             Terrain::Type terrainType)
+{
+    return remTerrain(tilePosition, graphicSet.numericID, terrainType);
+}
+
+bool TileMapBase::remTerrain(const TilePosition& tilePosition,
+                             const std::string& graphicSetID,
+                             Terrain::Type terrainType)
+{
+    return remTerrain(tilePosition,
+                      graphicData.getTerrainGraphicSet(graphicSetID).numericID,
+                      terrainType);
+}
+
+bool TileMapBase::remTerrain(const TilePosition& tilePosition,
+                             Uint16 graphicSetID, Terrain::Type terrainType)
+{
+    Tile* tile{remTileLayer(tilePosition, TileLayer::Type::Terrain,
+                            graphicSetID, terrainType)};
+
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates && tile) {
+        tileUpdateHistory.emplace_back(TileRemoveLayer{
+            tilePosition, TileLayer::Type::Terrain, graphicSetID, terrainType});
+    }
+
+    return (tile != nullptr);
+}
+
+void TileMapBase::addFloor(const TilePosition& tilePosition,
+                           const FloorGraphicSet& graphicSet,
+                           Rotation::Direction rotation)
+{
+    Tile* tile{addTileLayer(tilePosition, TileLayer::Type::Floor, graphicSet,
+                            rotation)};
     if (!tile) {
         // tilePosition is outside of the map bounds.
         return;
@@ -44,96 +111,64 @@ void TileMapBase::setFloor(const TilePosition& tilePosition,
     if (trackTileUpdates) {
         tileUpdateHistory.emplace_back(
             TileAddLayer{tilePosition, TileLayer::Type::Floor,
-                         static_cast<Uint16>(graphicSet.numericID), 0});
-    }
-}
-
-void TileMapBase::setFloor(const TilePosition& tilePosition,
-                           const std::string& graphicSetID)
-{
-    setFloor(tilePosition, graphicData.getFloorGraphicSet(graphicSetID));
-}
-
-void TileMapBase::setFloor(const TilePosition& tilePosition,
-                           Uint16 graphicSetID)
-{
-    setFloor(tilePosition, graphicData.getFloorGraphicSet(graphicSetID));
-}
-
-bool TileMapBase::remFloor(const TilePosition& tilePosition)
-{
-    // Since there's only 1 floor per tile, we can just clear it.
-    return clearTileLayers(tilePosition, {TileLayer::Type::Floor});
-}
-
-void TileMapBase::addFloorCovering(const TilePosition& tilePosition,
-                                   const FloorCoveringGraphicSet& graphicSet,
-                                   Rotation::Direction rotation)
-{
-    Tile* tile{addTileLayer(tilePosition, TileLayer::Type::FloorCovering,
-                            graphicSet, rotation)};
-    if (!tile) {
-        // tilePosition is outside of the map bounds.
-        return;
-    }
-
-    // If we're tracking tile updates, add this one to the history.
-    if (trackTileUpdates) {
-        tileUpdateHistory.emplace_back(
-            TileAddLayer{tilePosition, TileLayer::Type::FloorCovering,
                          static_cast<Uint16>(graphicSet.numericID),
                          static_cast<Uint8>(rotation)});
     }
 }
 
-void TileMapBase::addFloorCovering(const TilePosition& tilePosition,
-                                   const std::string& graphicSetID,
-                                   Rotation::Direction rotation)
+void TileMapBase::addFloor(const TilePosition& tilePosition,
+                           const std::string& graphicSetID,
+                           Rotation::Direction rotation)
 {
-    addFloorCovering(tilePosition,
-                     graphicData.getFloorCoveringGraphicSet(graphicSetID),
-                     rotation);
+    addFloor(tilePosition, graphicData.getFloorGraphicSet(graphicSetID),
+             rotation);
 }
 
-void TileMapBase::addFloorCovering(const TilePosition& tilePosition, Uint16 graphicSetID,
-                                   Rotation::Direction rotation)
+void TileMapBase::addFloor(const TilePosition& tilePosition,
+                           Uint16 graphicSetID, Rotation::Direction rotation)
 {
-    addFloorCovering(tilePosition,
-                     graphicData.getFloorCoveringGraphicSet(graphicSetID),
-                     rotation);
+    addFloor(tilePosition, graphicData.getFloorGraphicSet(graphicSetID),
+             rotation);
 }
 
-bool TileMapBase::remFloorCovering(const TilePosition& tilePosition,
-                                   const FloorCoveringGraphicSet& graphicSet,
-                                   Rotation::Direction rotation)
+bool TileMapBase::remFloor(const TilePosition& tilePosition,
+                            const FloorGraphicSet& graphicSet,
+                            Rotation::Direction rotation)
 {
-    return remFloorCovering(tilePosition, graphicSet.numericID, rotation);
+    return remFloor(tilePosition, graphicSet.numericID, rotation);
 }
 
-bool TileMapBase::remFloorCovering(const TilePosition& tilePosition,
-                                   const std::string& graphicSetID,
-                                   Rotation::Direction rotation)
+bool TileMapBase::remFloor(const TilePosition& tilePosition,
+                            const std::string& graphicSetID,
+                            Rotation::Direction rotation)
 {
-    return remFloorCovering(
-        tilePosition,
-        graphicData.getFloorCoveringGraphicSet(graphicSetID).numericID,
-        rotation);
+    return remFloor(tilePosition,
+                    graphicData.getFloorGraphicSet(graphicSetID).numericID,
+                    rotation);
 }
 
-bool TileMapBase::remFloorCovering(const TilePosition& tilePosition, Uint16 graphicSetID,
-                                   Rotation::Direction rotation)
+bool TileMapBase::remFloor(const TilePosition& tilePosition, Uint16 graphicSetID,
+                            Rotation::Direction rotation)
 {
-    Tile* tile{remTileLayer(tilePosition, TileLayer::Type::FloorCovering,
-                            graphicSetID, rotation)};
-
-    // If we're tracking tile updates, add this one to the history.
-    if (trackTileUpdates && tile) {
-        tileUpdateHistory.emplace_back(
-            TileRemoveLayer{tilePosition, TileLayer::Type::FloorCovering,
-                            graphicSetID, rotation});
+    Tile* tile{remTileLayer(tilePosition, TileLayer::Type::Floor, graphicSetID,
+                            rotation)};
+    if (!tile) {
+        // Floor wasn't found.
+        return false;
     }
 
-    return (tile != nullptr);
+    // If a floor was removed, rebuild the affected tile's collision.
+    rebuildTileCollision(*tile, tilePosition);
+
+    // If we're tracking tile updates, add this one to the history.
+    if (trackTileUpdates) {
+        tileUpdateHistory.emplace_back(
+            TileRemoveLayer{tilePosition, TileLayer::Type::Floor,
+                            graphicSetID,
+                            static_cast<Uint8>(rotation)});
+    }
+
+    return true;
 }
 
 void TileMapBase::addWall(const TilePosition& tilePosition, const WallGraphicSet& graphicSet,
@@ -264,21 +299,23 @@ bool TileMapBase::remObject(const TilePosition& tilePosition, Uint16 graphicSetI
 {
     Tile* tile{remTileLayer(tilePosition, TileLayer::Type::Object, graphicSetID,
                             rotation)};
-
-    // If an object was removed, rebuild the affected tile's collision.
-    if (tile) {
-        rebuildTileCollision(*tile, tilePosition);
+    if (!tile) {
+        // Object wasn't found.
+        return false;
     }
 
+    // Rebuild the affected tile's collision.
+    rebuildTileCollision(*tile, tilePosition);
+
     // If we're tracking tile updates, add this one to the history.
-    if (trackTileUpdates && tile) {
+    if (trackTileUpdates) {
         tileUpdateHistory.emplace_back(
             TileRemoveLayer{tilePosition, TileLayer::Type::Object,
                             graphicSetID,
                             static_cast<Uint8>(rotation)});
     }
 
-    return (tile != nullptr);
+    return true;
 }
 
 bool TileMapBase::clearTileLayers(
@@ -313,8 +350,7 @@ bool TileMapBase::clearTileLayers(
 bool TileMapBase::clearTile(const TilePosition& tilePosition)
 {
     return clearTileLayers(tilePosition,
-                           {TileLayer::Type::Floor,
-                            TileLayer::Type::FloorCovering,
+                           {TileLayer::Type::Terrain, TileLayer::Type::Floor,
                             TileLayer::Type::Wall, TileLayer::Type::Object});
 }
 
@@ -359,7 +395,7 @@ bool TileMapBase::clearExtentLayers(
 bool TileMapBase::clearExtent(const TileExtent& extent)
 {
     return clearExtentLayers(
-        extent, {TileLayer::Type::Floor, TileLayer::Type::FloorCovering,
+        extent, {TileLayer::Type::Terrain, TileLayer::Type::Floor,
                  TileLayer::Type::Wall, TileLayer::Type::Object});
 }
 
@@ -572,14 +608,14 @@ void TileMapBase::addTileLayer(Chunk& chunk, Tile& tile,
 {
     // Add the layer.
     bool layerWasAdded{false};
-    if (layerType == TileLayer::Type::Floor) {
-        // If there's an existing floor, replace it.
-        if (TileLayer* floor{tile.findLayer(TileLayer::Type::Floor)}) {
-            floor->graphicSet = graphicSet;
+    if (layerType == TileLayer::Type::Terrain) {
+        // If there's an existing terrain, replace it.
+        if (TileLayer* terrain{tile.findLayer(TileLayer::Type::Terrain)}) {
+            terrain->graphicSet = graphicSet;
         }
         else {
-            // No existing floor, add one.
-            tile.addLayer(TileLayer::Type::Floor, graphicSet, 0);
+            // No existing terrain, add one.
+            tile.addLayer(TileLayer::Type::Terrain, graphicSet, graphicIndex);
             layerWasAdded = true;
         }
     }
@@ -925,8 +961,8 @@ Tile* TileMapBase::clearTileLayersInternal(
 
     // If we're being asked to clear every layer, clear the whole tile.
     bool layerWasCleared{false};
-    if (layerTypesToClear[TileLayer::Type::Floor]
-        && layerTypesToClear[TileLayer::Type::FloorCovering]
+    if (layerTypesToClear[TileLayer::Type::Terrain]
+        && layerTypesToClear[TileLayer::Type::Floor]
         && layerTypesToClear[TileLayer::Type::Wall]
         && layerTypesToClear[TileLayer::Type::Object]) {
         layerWasCleared = tile->clear();

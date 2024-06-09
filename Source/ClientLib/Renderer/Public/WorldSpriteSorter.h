@@ -75,10 +75,10 @@ private:
 
     // All of these just call pushTileSprite(), but Floor and Wall also check
     // if the UI wants to swap any of their sprites with a phantom.
+    void pushTerrainSprites(const Tile& tile, const Camera& camera,
+                            const TilePosition& tilePosition);
     void pushFloorSprite(const Tile& tile, const Camera& camera,
                          const TilePosition& tilePosition);
-    void pushFloorCoveringSprites(const Tile& tile, const Camera& camera,
-                                  const TilePosition& tilePosition);
     void pushWallSprites(const Tile& tile, const Camera& camera,
                          const TilePosition& tilePosition);
     void pushObjectSprites(const Tile& tile, const Camera& camera,

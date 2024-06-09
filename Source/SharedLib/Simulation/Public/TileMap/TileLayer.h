@@ -15,9 +15,10 @@ struct GraphicSet;
 struct TileLayer {
     /** The types of layers that our tiles support. */
     enum Type : Uint8 {
+        Terrain,
+        /** Floors are display-only, they have no collision. They're used for 
+            things like grass, carpets, flooring, etc. */
         Floor,
-        /** Floor coverings are things like rugs, flowers, puddles, etc. */
-        FloorCovering,
         Wall,
         Object,
         Count,

@@ -5,18 +5,43 @@
 #include "AMAssert.h"
 #include "nlohmann/json.hpp"
 
+namespace detail
+{
+template<size_t, class T>
+constexpr T&& identity(T&& x)
+{
+    return std::forward<T>(x);
+}
+
+template<class T, size_t... Indices>
+constexpr auto array_repeat_impl(T&& x, std::index_sequence<Indices...>)
+{
+    return std::array{identity<Indices>(x)...};
+}
+
+} // namespace detail
+
+// Used to fill our non-default-constructible GraphicRef arrays.
+// Ref: https://stackoverflow.com/a/63821008/4258629
+template<size_t N, class T>
+constexpr auto constructAndFillArray(T&& x)
+{
+    return detail::array_repeat_impl(std::forward<T>(x),
+                                     std::make_index_sequence<N>());
+}
+
 namespace AM
 {
 GraphicDataBase::GraphicDataBase(const nlohmann::json& resourceDataJson)
 : sprites{}
 , animations{}
+, terrainGraphicSets{}
 , floorGraphicSets{}
-, floorCoveringGraphicSets{}
 , wallGraphicSets{}
 , objectGraphicSets{}
 , spriteStringMap{}
+, terrainGraphicSetStringMap{}
 , floorGraphicSetStringMap{}
-, floorCoveringGraphicSetStringMap{}
 , wallGraphicSetStringMap{}
 , objectGraphicSetStringMap{}
 , workStringID{}
@@ -89,6 +114,20 @@ GraphicRef GraphicDataBase::getGraphic(GraphicID numericID) const
     }
 }
 
+const TerrainGraphicSet&
+    GraphicDataBase::getTerrainGraphicSet(const std::string& stringID)
+{
+    StringTools::deriveStringID(stringID, workStringID);
+    auto it{terrainGraphicSetStringMap.find(workStringID)};
+    if (it == terrainGraphicSetStringMap.end()) {
+        LOG_ERROR("Failed to find graphic set with string ID: %s",
+                  workStringID.c_str());
+        return terrainGraphicSets[0];
+    }
+
+    return *(it->second);
+}
+
 const FloorGraphicSet&
     GraphicDataBase::getFloorGraphicSet(const std::string& stringID)
 {
@@ -100,20 +139,6 @@ const FloorGraphicSet&
         LOG_ERROR("Failed to find graphic set with string ID: %s",
                   workStringID.c_str());
         return floorGraphicSets[0];
-    }
-
-    return *(it->second);
-}
-
-const FloorCoveringGraphicSet&
-    GraphicDataBase::getFloorCoveringGraphicSet(const std::string& stringID)
-{
-    StringTools::deriveStringID(stringID, workStringID);
-    auto it{floorCoveringGraphicSetStringMap.find(workStringID)};
-    if (it == floorCoveringGraphicSetStringMap.end()) {
-        LOG_ERROR("Failed to find graphic set with string ID: %s",
-                  workStringID.c_str());
-        return floorCoveringGraphicSets[0];
     }
 
     return *(it->second);
@@ -161,6 +186,17 @@ const EntityGraphicSet&
     return *(it->second);
 }
 
+const TerrainGraphicSet& GraphicDataBase::getTerrainGraphicSet(
+    TerrainGraphicSetID numericID) const
+{
+    if (numericID >= terrainGraphicSets.size()) {
+        LOG_ERROR("Invalid numeric ID while getting graphic set: %d", numericID);
+        return terrainGraphicSets[0];
+    }
+
+    return terrainGraphicSets[numericID];
+}
+
 const FloorGraphicSet&
     GraphicDataBase::getFloorGraphicSet(FloorGraphicSetID numericID) const
 {
@@ -170,17 +206,6 @@ const FloorGraphicSet&
     }
 
     return floorGraphicSets[numericID];
-}
-
-const FloorCoveringGraphicSet& GraphicDataBase::getFloorCoveringGraphicSet(
-    FloorCoveringGraphicSetID numericID) const
-{
-    if (numericID >= floorCoveringGraphicSets.size()) {
-        LOG_ERROR("Invalid numeric ID while getting graphic set: %d", numericID);
-        return floorCoveringGraphicSets[0];
-    }
-
-    return floorCoveringGraphicSets[numericID];
 }
 
 const WallGraphicSet&
@@ -221,15 +246,15 @@ const std::vector<Sprite>& GraphicDataBase::getAllSprites() const
     return sprites;
 }
 
+const std::vector<TerrainGraphicSet>&
+    GraphicDataBase::getAllTerrainGraphicSets() const
+{
+    return terrainGraphicSets;
+}
+
 const std::vector<FloorGraphicSet>& GraphicDataBase::getAllFloorGraphicSets() const
 {
     return floorGraphicSets;
-}
-
-const std::vector<FloorCoveringGraphicSet>&
-    GraphicDataBase::getAllFloorCoveringGraphicSets() const
-{
-    return floorCoveringGraphicSets;
 }
 
 const std::vector<WallGraphicSet>& GraphicDataBase::getAllWallGraphicSets() const
@@ -254,22 +279,18 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
     // Add the null sprite, animation, and graphic sets.
     GraphicRef nullSprite{sprites.emplace_back("Null", "null", NULL_SPRITE_ID)};
     animations.emplace_back("Null", "null", NULL_ANIMATION_ID);
+    terrainGraphicSets.emplace_back(
+        GraphicSet{"Null", "null", NULL_TERRAIN_GRAPHIC_SET_ID},
+        constructAndFillArray<Terrain::Type::Count>(nullSprite));
     floorGraphicSets.emplace_back(
-        GraphicSet{"Null", "null", NULL_FLOOR_GRAPHIC_SET_ID}, nullSprite);
-    floorCoveringGraphicSets.emplace_back(
-        GraphicSet{"Null", "null", NULL_FLOOR_COVERING_GRAPHIC_SET_ID},
-        std::array<GraphicRef, FloorCoveringGraphicSet::VARIATION_COUNT>{
-            nullSprite, nullSprite, nullSprite, nullSprite, nullSprite,
-            nullSprite, nullSprite, nullSprite});
+        GraphicSet{"Null", "null", NULL_FLOOR_GRAPHIC_SET_ID},
+        constructAndFillArray<FloorGraphicSet::VARIATION_COUNT>(nullSprite));
     wallGraphicSets.emplace_back(
         GraphicSet{"Null", "null", NULL_WALL_GRAPHIC_SET_ID},
-        std::array<GraphicRef, Wall::Type::Count>{nullSprite, nullSprite,
-                                                  nullSprite, nullSprite});
+        constructAndFillArray<Wall::Type::Count>(nullSprite));
     objectGraphicSets.emplace_back(
         GraphicSet{"Null", "null", NULL_OBJECT_GRAPHIC_SET_ID},
-        std::array<GraphicRef, ObjectGraphicSet::VARIATION_COUNT>{
-            nullSprite, nullSprite, nullSprite, nullSprite, nullSprite,
-            nullSprite, nullSprite, nullSprite});
+        constructAndFillArray<ObjectGraphicSet::VARIATION_COUNT>(nullSprite));
     entityGraphicSets.emplace_back(
         GraphicSet{"Null", "null", NULL_ENTITY_GRAPHIC_SET_ID});
 
@@ -289,11 +310,11 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
         }
 
         // Add each type of graphic set.
+        for (auto& terrainJson : json.at("terrain").items()) {
+            parseTerrainGraphicSet(terrainJson.value());
+        }
         for (auto& floorJson : json.at("floors").items()) {
             parseFloorGraphicSet(floorJson.value());
-        }
-        for (auto& floorCoveringJson : json.at("floorCoverings").items()) {
-            parseFloorCoveringGraphicSet(floorCoveringJson.value());
         }
         for (auto& wallJson : json.at("walls").items()) {
             parseWallGraphicSet(wallJson.value());
@@ -318,13 +339,13 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
         animationStringMap.emplace(animation.stringID,
                                    &animations[animation.numericID]);
     }
+    for (const TerrainGraphicSet& set : terrainGraphicSets) {
+        terrainGraphicSetStringMap.emplace(
+            set.stringID, &terrainGraphicSets[set.numericID]);
+    }
     for (const FloorGraphicSet& set : floorGraphicSets) {
         floorGraphicSetStringMap.emplace(set.stringID,
                                         &floorGraphicSets[set.numericID]);
-    }
-    for (const FloorCoveringGraphicSet& set : floorCoveringGraphicSets) {
-        floorCoveringGraphicSetStringMap.emplace(
-            set.stringID, &floorCoveringGraphicSets[set.numericID]);
     }
     for (const WallGraphicSet& set : wallGraphicSets) {
         wallGraphicSetStringMap.emplace(set.stringID,
@@ -401,35 +422,41 @@ void GraphicDataBase::parseAnimation(const nlohmann::json& animationJson)
     animation.modelBounds.maxZ = animationJson.at("modelBounds").at("maxZ");
 }
 
-void GraphicDataBase::parseFloorGraphicSet(const nlohmann::json& graphicSetJson)
+void GraphicDataBase::parseTerrainGraphicSet(const nlohmann::json& graphicSetJson)
 {
-    FloorGraphicSetID numericID{graphicSetJson.at("numericID")};
-    std::string displayName{graphicSetJson.at("displayName").get<std::string>()};
-    std::string stringID{graphicSetJson.at("stringID").get<std::string>()};
+    // Add a graphic set to the appropriate vector.
+    GraphicRef nullSprite{sprites[0]};
+    TerrainGraphicSet& graphicSet{terrainGraphicSets.emplace_back(
+        GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
+                   graphicSetJson.at("stringID").get<std::string>(),
+                   graphicSetJson.at("numericID")},
+        constructAndFillArray<Terrain::Type::Count>(nullSprite))};
 
     // Add the graphics.
-    // Note: Floors just have 1 sprite, but the json uses an array in case we
-    //       want to add variations in the future.
-    const nlohmann::json& graphicIDJson{graphicSetJson.at("graphicIDs")};
-
-    // Save the graphic set in the appropriate vector.
-    floorGraphicSets.emplace_back(
-        GraphicSet{displayName, stringID, numericID},
-        GraphicRef{getSprite(graphicIDJson[0].get<GraphicID>())});
+    std::size_t index{0};
+    for (auto& graphicIDJson : graphicSetJson.at("graphicIDs").items()) {
+        GraphicID graphicID{graphicIDJson.value().get<GraphicID>()};
+        if (graphicID) {
+            graphicSet.graphics[index] = getGraphic(graphicID);
+        }
+        else {
+            // Empty slot. Set it to the null sprite.
+            graphicSet.graphics[index] = {sprites[0]};
+        }
+        index++;
+    }
 }
 
-void GraphicDataBase::parseFloorCoveringGraphicSet(
+void GraphicDataBase::parseFloorGraphicSet(
     const nlohmann::json& graphicSetJson)
 {
     // Add a graphic set to the appropriate vector.
     GraphicRef nullSprite{sprites[0]};
-    FloorCoveringGraphicSet& graphicSet{floorCoveringGraphicSets.emplace_back(
+    FloorGraphicSet& graphicSet{floorGraphicSets.emplace_back(
         GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
                    graphicSetJson.at("stringID").get<std::string>(),
                    graphicSetJson.at("numericID")},
-        std::array<GraphicRef, FloorCoveringGraphicSet::VARIATION_COUNT>{
-            nullSprite, nullSprite, nullSprite, nullSprite, nullSprite,
-            nullSprite, nullSprite, nullSprite})};
+        constructAndFillArray<FloorGraphicSet::VARIATION_COUNT>(nullSprite))};
 
     // Add the graphics.
     std::size_t index{0};
@@ -475,9 +502,7 @@ void GraphicDataBase::parseObjectGraphicSet(
         GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
                    graphicSetJson.at("stringID").get<std::string>(),
                    graphicSetJson.at("numericID")},
-        std::array<GraphicRef, ObjectGraphicSet::VARIATION_COUNT>{
-            nullSprite, nullSprite, nullSprite, nullSprite, nullSprite,
-            nullSprite, nullSprite, nullSprite})};
+        constructAndFillArray<ObjectGraphicSet::VARIATION_COUNT>(nullSprite))};
 
     // Add the graphics.
     std::size_t index{0};

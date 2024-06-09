@@ -33,8 +33,8 @@ public:
     Uint16 graphicSetID{0};
 
     /** The index within graphicSet.graphics that the new layer should use.
-        For Floors, this will always be 0.
-        For FloorCoverings and Objects, this should be cast to Rotation.
+        For Terrain, this should be cast to Terrain::Type.
+        For Floors and Objects, this should be cast to Rotation::Direction.
         For Walls, this should be cast to Wall::Type. */
     Uint8 graphicIndex{0};
 

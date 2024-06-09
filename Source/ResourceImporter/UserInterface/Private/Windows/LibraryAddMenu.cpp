@@ -12,8 +12,8 @@ LibraryAddMenu::LibraryAddMenu()
 , addBoundingBoxButton({1, 1, 167, 32}, "AddBoundingBoxButton")
 , addSpriteSheetButton({1, 33, 167, 32}, "AddSpriteSheetButton")
 , addAnimationButton({1, 65, 167, 32}, "AddAnimationButton")
+, addTerrainButton({1, 129, 167, 32}, "AddTerrainButton")
 , addFloorButton({1, 97, 167, 32}, "AddFloorButton")
-, addFloorCoveringButton({1, 129, 167, 32}, "AddFloorCoveringButton")
 , addWallButton({1, 161, 167, 32}, "AddWallButton")
 , addObjectButton({1, 193, 167, 32}, "AddObjectButton")
 , addEntityButton({1, 225, 167, 32}, "AddEntityButton")
@@ -24,8 +24,8 @@ LibraryAddMenu::LibraryAddMenu()
     children.push_back(addBoundingBoxButton);
     children.push_back(addSpriteSheetButton);
     children.push_back(addAnimationButton);
+    children.push_back(addTerrainButton);
     children.push_back(addFloorButton);
-    children.push_back(addFloorCoveringButton);
     children.push_back(addWallButton);
     children.push_back(addObjectButton);
     children.push_back(addEntityButton);
@@ -42,8 +42,8 @@ LibraryAddMenu::LibraryAddMenu()
     styleButton(addBoundingBoxButton, "Bounding Box");
     styleButton(addSpriteSheetButton, "Sprite Sheet");
     styleButton(addAnimationButton, "Animation");
+    styleButton(addTerrainButton, "Terrain");
     styleButton(addFloorButton, "Floor");
-    styleButton(addFloorCoveringButton, "Floor Covering");
     styleButton(addWallButton, "Wall");
     styleButton(addObjectButton, "Object");
     styleButton(addEntityButton, "Entity");

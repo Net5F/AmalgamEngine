@@ -23,8 +23,8 @@ struct EditorBoundingBox;
 struct EditorSpriteSheet;
 struct EditorAnimation;
 class ParentListItem;
+struct EditorTerrainGraphicSet;
 struct EditorFloorGraphicSet;
-struct EditorFloorCoveringGraphicSet;
 struct EditorWallGraphicSet;
 struct EditorObjectGraphicSet;
 struct EditorEntityGraphicSet;
@@ -63,8 +63,8 @@ private:
         BoundingBoxes,
         SpriteSheets,
         Animations,
+        Terrain,
         Floors,
-        FloorCoverings,
         Walls,
         Objects,
         Entities,
@@ -81,11 +81,10 @@ private:
     void onSpriteSheetAdded(int sheetID, const EditorSpriteSheet& sheet);
     void onAnimationAdded(AnimationID animationID,
                           const EditorAnimation& animation);
+    void onTerrainAdded(TerrainGraphicSetID terrainID,
+                        const EditorTerrainGraphicSet& terrain);
     void onFloorAdded(FloorGraphicSetID floorID,
                       const EditorFloorGraphicSet& floor);
-    void
-        onFloorCoveringAdded(FloorCoveringGraphicSetID floorCoveringID,
-                             const EditorFloorCoveringGraphicSet& floorCovering);
     void onWallAdded(WallGraphicSetID wallID, const EditorWallGraphicSet& wall);
     void onObjectAdded(ObjectGraphicSetID objectID,
                        const EditorObjectGraphicSet& object);

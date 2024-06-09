@@ -65,13 +65,13 @@ GraphicSetPropertiesWindow::GraphicSetPropertiesWindow(DataModel& inDataModel)
 void GraphicSetPropertiesWindow::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
-    if (holds_alternative<EditorFloorGraphicSet>(newActiveItem)) {
+    if (holds_alternative<EditorTerrainGraphicSet>(newActiveItem)) {
+        loadActiveGraphicSet(GraphicSet::Type::Terrain,
+                             get<EditorTerrainGraphicSet>(newActiveItem));
+    }
+    else if (holds_alternative<EditorFloorGraphicSet>(newActiveItem)) {
         loadActiveGraphicSet(GraphicSet::Type::Floor,
                              get<EditorFloorGraphicSet>(newActiveItem));
-    }
-    else if (holds_alternative<EditorFloorCoveringGraphicSet>(newActiveItem)) {
-        loadActiveGraphicSet(GraphicSet::Type::FloorCovering,
-                             get<EditorFloorCoveringGraphicSet>(newActiveItem));
     }
     else if (holds_alternative<EditorWallGraphicSet>(newActiveItem)) {
         loadActiveGraphicSet(GraphicSet::Type::Wall,
@@ -115,12 +115,12 @@ void GraphicSetPropertiesWindow::loadActiveGraphicSet(
     activeGraphicSetID = newActiveGraphicSet.numericID;
 
     switch (activeGraphicSetType) {
-        case GraphicSet::Type::Floor: {
-            windowLabel.setText("Floor Properties");
+        case GraphicSet::Type::Terrain: {
+            windowLabel.setText("Terrain Properties");
             break;
         }
-        case GraphicSet::Type::FloorCovering: {
-            windowLabel.setText("Floor Covering Properties");
+        case GraphicSet::Type::Floor: {
+            windowLabel.setText("Floor Properties");
             break;
         }
         case GraphicSet::Type::Wall: {

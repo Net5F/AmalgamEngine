@@ -103,9 +103,8 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     animationModel.animationRemoved.connect<&LibraryWindow::onAnimationRemoved>(
         *this);
     GraphicSetModel& graphicSetModel{dataModel.graphicSetModel};
+    graphicSetModel.terrainAdded.connect<&LibraryWindow::onTerrainAdded>(*this);
     graphicSetModel.floorAdded.connect<&LibraryWindow::onFloorAdded>(*this);
-    graphicSetModel.floorCoveringAdded
-        .connect<&LibraryWindow::onFloorCoveringAdded>(*this);
     graphicSetModel.wallAdded.connect<&LibraryWindow::onWallAdded>(*this);
     graphicSetModel.objectAdded.connect<&LibraryWindow::onObjectAdded>(*this);
     graphicSetModel.graphicSetRemoved.connect<&LibraryWindow::onGraphicSetRemoved>(
@@ -290,18 +289,16 @@ void LibraryWindow::onAnimationAdded(AnimationID animationID,
     listItemContainer.push_back(std::move(animationListItem));
 }
 
+void LibraryWindow::onTerrainAdded(TerrainGraphicSetID terrainID,
+                                   const EditorTerrainGraphicSet& terrain)
+{
+    onGraphicSetAdded<EditorTerrainGraphicSet>(terrainID, terrain);
+}
+
 void LibraryWindow::onFloorAdded(FloorGraphicSetID floorID,
                                  const EditorFloorGraphicSet& floor)
 {
     onGraphicSetAdded<EditorFloorGraphicSet>(floorID, floor);
-}
-
-void LibraryWindow::onFloorCoveringAdded(
-    FloorCoveringGraphicSetID floorCoveringID,
-    const EditorFloorCoveringGraphicSet& floorCovering)
-{
-    onGraphicSetAdded<EditorFloorCoveringGraphicSet>(floorCoveringID,
-                                                   floorCovering);
 }
 
 void LibraryWindow::onWallAdded(WallGraphicSetID wallID,
@@ -321,11 +318,11 @@ void LibraryWindow::onGraphicSetAdded(Uint16 graphicSetID, const T& graphicSet)
 {
     // Get the appropriate enum values for the given graphic set type.
     GraphicSet::Type graphicSetType{};
-    if constexpr (std::is_same_v<T, EditorFloorGraphicSet>) {
-        graphicSetType = GraphicSet::Type::Floor;
+    if constexpr (std::is_same_v<T, EditorTerrainGraphicSet>) {
+        graphicSetType = GraphicSet::Type::Terrain;
     }
-    else if constexpr (std::is_same_v<T, EditorFloorCoveringGraphicSet>) {
-        graphicSetType = GraphicSet::Type::FloorCovering;
+    else if constexpr (std::is_same_v<T, EditorFloorGraphicSet>) {
+        graphicSetType = GraphicSet::Type::Floor;
     }
     else if constexpr (std::is_same_v<T, EditorWallGraphicSet>) {
         graphicSetType = GraphicSet::Type::Wall;
@@ -770,14 +767,14 @@ void LibraryWindow::removeListItem(LibraryListItem* listItem)
             dataModel.spriteModel.remSpriteSheet(listItem->ID);
             break;
         }
+        case LibraryListItem::Type::Terrain: {
+            graphicSetModel.remTerrain(
+                static_cast<TerrainGraphicSetID>(listItem->ID));
+            break;
+        }
         case LibraryListItem::Type::Floor: {
             graphicSetModel.remFloor(
                 static_cast<FloorGraphicSetID>(listItem->ID));
-            break;
-        }
-        case LibraryListItem::Type::FloorCovering: {
-            graphicSetModel.remFloorCovering(
-                static_cast<FloorCoveringGraphicSetID>(listItem->ID));
             break;
         }
         case LibraryListItem::Type::Wall: {
@@ -799,11 +796,11 @@ LibraryListItem::Type
     LibraryWindow::toListItemType(GraphicSet::Type graphicSetType)
 {
     switch (graphicSetType) {
+        case GraphicSet::Type::Terrain: {
+            return LibraryListItem::Type::Terrain;
+        }
         case GraphicSet::Type::Floor: {
             return LibraryListItem::Type::Floor;
-        }
-        case GraphicSet::Type::FloorCovering: {
-            return LibraryListItem::Type::FloorCovering;
         }
         case GraphicSet::Type::Wall: {
             return LibraryListItem::Type::Wall;
@@ -823,11 +820,11 @@ LibraryListItem::Type
 LibraryWindow::Category LibraryWindow::toCategory(GraphicSet::Type graphicSetType)
 {
     switch (graphicSetType) {
+        case GraphicSet::Type::Terrain: {
+            return Category::Terrain;
+        }
         case GraphicSet::Type::Floor: {
             return Category::Floors;
-        }
-        case GraphicSet::Type::FloorCovering: {
-            return Category::FloorCoverings;
         }
         case GraphicSet::Type::Wall: {
             return Category::Walls;
