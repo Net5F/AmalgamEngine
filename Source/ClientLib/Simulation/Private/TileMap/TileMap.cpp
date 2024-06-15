@@ -36,7 +36,7 @@ TileMap::TileMap(GraphicData& inGraphicData)
             for (int x{tileExtent.x}; x <= tileExtent.xMax(); ++x) {
                 for (int y{tileExtent.y}; y <= tileExtent.yMax(); ++y) {
                     addTerrain({x, y, 0}, terrainGraphicSet,
-                               Terrain::Type::Flat);
+                               Terrain::Height::Flat);
                 }
             }
         }

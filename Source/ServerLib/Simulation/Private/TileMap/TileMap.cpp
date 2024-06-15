@@ -130,7 +130,7 @@ void TileMap::addTileLayersToSnapshot(const Tile& tile,
     // Add all of the tile's layers.
     for (const TileLayer& layer : tile.getAllLayers()) {
         std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            layer.type, layer.graphicSet.get().stringID, layer.graphicIndex)};
+            layer.type, layer.graphicSet.get().stringID, layer.graphicValue)};
         tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
     }
 }

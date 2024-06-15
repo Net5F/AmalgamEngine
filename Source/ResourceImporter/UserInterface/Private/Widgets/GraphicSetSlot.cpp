@@ -6,12 +6,12 @@ namespace AM
 namespace ResourceImporter
 {
 GraphicSetSlot::GraphicSetSlot(int logicalWidth)
-: AUI::Widget({0, 0, logicalWidth, 255}, "GraphicSetSlot")
-, topText{{0, 0, logicalExtent.w, 27}}
-, checkerboardImage{{30, 45, 120, 120}}
-, spriteImage{{30, 45, 120, 120}}
+: AUI::Widget({0, 0, logicalWidth, 247}, "GraphicSetSlot")
+, topText{{0, 0, logicalExtent.w, 30}}
+, checkerboardImage{{(logicalExtent.w - 120) / 2, 45, 120, 120}}
+, spriteImage{{(logicalExtent.w - 120) / 2, 45, 120, 120}}
 , spriteNameText{{0, 175, logicalExtent.w, 27}}
-, assignButton{{34, 208, 112, 38}, "Assign"}
+, assignButton{{(logicalExtent.w - 112) / 2, 208, 112, 38}, "Assign"}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(topText);

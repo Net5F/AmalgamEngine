@@ -69,12 +69,12 @@ public:
      */
     void addTerrain(const TilePosition& tilePosition,
                     const TerrainGraphicSet& graphicSet,
-                    Terrain::Type terrainType);
+                    Terrain::Height terrainHeight);
     void addTerrain(const TilePosition& tilePosition,
                     const std::string& graphicSetID,
-                    Terrain::Type terrainType);
+                    Terrain::Height terrainHeight);
     void addTerrain(const TilePosition& tilePosition, Uint16 graphicSetID,
-                    Terrain::Type terrainType);
+                    Terrain::Height terrainHeight);
 
     /**
      * Removes the given floor covering from the given tile.
@@ -82,12 +82,12 @@ public:
      */
     bool remTerrain(const TilePosition& tilePosition,
                     const TerrainGraphicSet& graphicSet,
-                    Terrain::Type terrainType);
+                    Terrain::Height terrainHeight);
     bool remTerrain(const TilePosition& tilePosition,
                     const std::string& graphicSetID,
-                    Terrain::Type terrainType);
+                    Terrain::Height terrainHeight);
     bool remTerrain(const TilePosition& tilePosition, Uint16 graphicSetID,
-                    Terrain::Type terrainType);
+                    Terrain::Height terrainHeight);
 
     /**
      * Adds the given floor to the given tile.
@@ -514,7 +514,7 @@ void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
 
         // Add the layer to the tile.
         addTileLayer(*chunk, *tile, paletteEntry.layerType, *graphicSet,
-                     paletteEntry.graphicIndex);
+                     paletteEntry.graphicValue);
     }
 
     if (rebuildCollision) {

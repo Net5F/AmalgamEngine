@@ -99,7 +99,7 @@ bool GraphicSetModel::addTerrain()
     }
 
     // Add the new, empty graphic set to the map.
-    std::array<GraphicID, Terrain::Type::Count> graphicIDs{
+    std::array<GraphicID, Terrain::Height::Count> graphicIDs{
         /* NULL_GRAPHIC_ID */};
     terrainMap.emplace(numericID, EditorTerrainGraphicSet{
                                             numericID, displayName, graphicIDs});
@@ -425,7 +425,7 @@ bool GraphicSetModel::parseTerrainGraphicSet(
 
     // Add the graphic set's graphics.
     const nlohmann::json& graphicIDJson{graphicSetJson.at("graphicIDs")};
-    std::array<GraphicID, Terrain::Type::Count> graphicIDs{};
+    std::array<GraphicID, Terrain::Height::Count> graphicIDs{};
     for (std::size_t i = 0; i < graphicIDs.size(); ++i) {
         graphicIDs[i] = graphicIDJson[i].get<GraphicID>();
         if (!graphicSetNameIsUnique<EditorTerrainGraphicSet>(

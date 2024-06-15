@@ -172,7 +172,7 @@ void WorldSpriteSorter::pushTerrainSprites(
             pushTileSprite(graphic, camera,
                            {tilePosition, TileLayer::Type::Terrain,
                             terrain.graphicSet.get().numericID,
-                            terrain.graphicIndex},
+                            terrain.graphicValue},
                            false);
         }
     }
@@ -189,7 +189,7 @@ void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
             pushTileSprite(graphic, camera,
                            {tilePosition, TileLayer::Type::Floor,
                             floor.graphicSet.get().numericID,
-                            floor.graphicIndex},
+                            floor.graphicValue},
                            false);
         }
     }
@@ -209,19 +209,19 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
                     if ((info.layerType == TileLayer::Type::Wall)
                         && (info.tilePosition == tilePosition)) {
                         // Check if we need to replace a N with a NE fill.
-                        if ((wall.graphicIndex == Wall::Type::North)
+                        if ((wall.graphicValue == Wall::Type::North)
                             && (info.wallType
                                 == Wall::Type::NorthEastGapFill)) {
                             return true;
                         }
                         // Check if we need to replace a NW fill with a W or N.
-                        else if ((wall.graphicIndex
+                        else if ((wall.graphicValue
                                   == Wall::Type::NorthWestGapFill)
                                  && ((info.wallType == Wall::Type::West)
                                      || (info.wallType == Wall::Type::North))) {
                             return true;
                         }
-                        else if (info.wallType == wall.graphicIndex) {
+                        else if (info.wallType == wall.graphicValue) {
                             // Otherwise, check if the type matches.
                             return true;
                         }
@@ -235,7 +235,7 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
 
             pushTileSprite(graphic, camera,
                            {tilePosition, TileLayer::Type::Wall,
-                            wall.graphicSet.get().numericID, wall.graphicIndex},
+                            wall.graphicSet.get().numericID, wall.graphicValue},
                            false);
         }
     }
@@ -252,7 +252,7 @@ void WorldSpriteSorter::pushObjectSprites(const Tile& tile,
             pushTileSprite(graphic, camera,
                            {tilePosition, TileLayer::Type::Object,
                             object.graphicSet.get().numericID,
-                            object.graphicIndex},
+                            object.graphicValue},
                            false);
         }
     }
@@ -290,26 +290,19 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
 
     // Push the sprite to be sorted.
     if (layerID.type == TileLayer::Type::Terrain) {
-        spritesToSort.emplace_back(
-            &sprite, worldObjectID,
-            Tile::getTerrainWorldBounds(layerID.tilePosition), screenExtent,
-            colorMod);
-    }
-    else if (layerID.type == TileLayer::Type::Floor) {
-        BoundingBox worldBounds{Transforms::modelToWorld(
-            sprite.modelBounds, layerID.tilePosition.getOriginPosition())};
-        spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
-                                   screenExtent, colorMod);
-    }
-    else if ((layerID.type == TileLayer::Type::Wall)
-             || (layerID.type == TileLayer::Type::Object)) {
-        BoundingBox worldBounds{Transforms::modelToWorld(
-            sprite.modelBounds, layerID.tilePosition.getOriginPosition())};
+        // Terrain is unique: we ignore the sprite's modelBounds and instead 
+        // generate a bounding volume based on the terrain type.
+        BoundingBox worldBounds{
+            tileMap.getTile(layerID.tilePosition)
+                ->getTerrainWorldBounds(layerID.tilePosition)};
         spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
                                    screenExtent, colorMod);
     }
     else {
-        LOG_ERROR("Invalid layer type.");
+        BoundingBox worldBounds{Transforms::modelToWorld(
+            sprite.modelBounds, layerID.tilePosition.getOriginPosition())};
+        spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
+                                   screenExtent, colorMod);
     }
 }
 

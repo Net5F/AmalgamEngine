@@ -149,6 +149,7 @@ private:
     inline std::size_t
         linearizeCellIndex(const CellPosition& cellPosition) const
     {
+        // TODO: Switch to 3d morton code
         // Translate the given position from actual-space to positive-space.
         CellPosition positivePosition{cellPosition.x - gridCellExtent.x,
                                       cellPosition.y - gridCellExtent.y,

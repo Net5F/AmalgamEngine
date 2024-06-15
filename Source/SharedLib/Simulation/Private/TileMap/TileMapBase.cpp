@@ -29,10 +29,10 @@ TileMapBase::TileMapBase(GraphicDataBase& inGraphicData, bool inTrackTileUpdates
 
 void TileMapBase::addTerrain(const TilePosition& tilePosition,
                              const TerrainGraphicSet& graphicSet,
-                             Terrain::Type terrainType)
+                             Terrain::Height terrainHeight)
 {
     Tile* tile{addTileLayer(tilePosition, TileLayer::Type::Terrain, graphicSet,
-                            terrainType)};
+                            terrainHeight)};
     if (!tile) {
         // tilePosition is outside of the map bounds.
         return;
@@ -43,51 +43,52 @@ void TileMapBase::addTerrain(const TilePosition& tilePosition,
         tileUpdateHistory.emplace_back(
             TileAddLayer{tilePosition, TileLayer::Type::Terrain,
                          static_cast<Uint16>(graphicSet.numericID),
-                         static_cast<Uint8>(terrainType)});
+                         static_cast<Uint8>(terrainHeight)});
     }
 }
 
 void TileMapBase::addTerrain(const TilePosition& tilePosition,
                              const std::string& graphicSetID,
-                             Terrain::Type terrainType)
+                             Terrain::Height terrainHeight)
 {
     addTerrain(tilePosition, graphicData.getTerrainGraphicSet(graphicSetID),
-               terrainType);
+               terrainHeight);
 }
 
 void TileMapBase::addTerrain(const TilePosition& tilePosition,
-                             Uint16 graphicSetID, Terrain::Type terrainType)
+                             Uint16 graphicSetID, Terrain::Height terrainHeight)
 {
     addTerrain(tilePosition, graphicData.getTerrainGraphicSet(graphicSetID),
-               terrainType);
+               terrainHeight);
 }
 
 bool TileMapBase::remTerrain(const TilePosition& tilePosition,
                              const TerrainGraphicSet& graphicSet,
-                             Terrain::Type terrainType)
+                             Terrain::Height terrainHeight)
 {
-    return remTerrain(tilePosition, graphicSet.numericID, terrainType);
+    return remTerrain(tilePosition, graphicSet.numericID, terrainHeight);
 }
 
 bool TileMapBase::remTerrain(const TilePosition& tilePosition,
                              const std::string& graphicSetID,
-                             Terrain::Type terrainType)
+                             Terrain::Height terrainHeight)
 {
     return remTerrain(tilePosition,
                       graphicData.getTerrainGraphicSet(graphicSetID).numericID,
-                      terrainType);
+                      terrainHeight);
 }
 
 bool TileMapBase::remTerrain(const TilePosition& tilePosition,
-                             Uint16 graphicSetID, Terrain::Type terrainType)
+                             Uint16 graphicSetID, Terrain::Height terrainHeight)
 {
     Tile* tile{remTileLayer(tilePosition, TileLayer::Type::Terrain,
-                            graphicSetID, terrainType)};
+                            graphicSetID, terrainHeight)};
 
     // If we're tracking tile updates, add this one to the history.
     if (trackTileUpdates && tile) {
-        tileUpdateHistory.emplace_back(TileRemoveLayer{
-            tilePosition, TileLayer::Type::Terrain, graphicSetID, terrainType});
+        tileUpdateHistory.emplace_back(
+            TileRemoveLayer{tilePosition, TileLayer::Type::Terrain,
+                            graphicSetID, terrainHeight});
     }
 
     return (tile != nullptr);
@@ -662,10 +663,10 @@ void TileMapBase::addNorthWall(const TilePosition& tilePosition,
         // replace it.
         bool replacedWall{false};
         for (TileLayer& layer : tile->getLayers(TileLayer::Type::Wall)) {
-            if ((layer.graphicIndex == Wall::Type::North)
-                || (layer.graphicIndex == Wall::Type::NorthWestGapFill)) {
+            if ((layer.graphicValue == Wall::Type::North)
+                || (layer.graphicValue == Wall::Type::NorthWestGapFill)) {
                 layer.graphicSet = graphicSet;
-                layer.graphicIndex = Wall::Type::North;
+                layer.graphicValue = Wall::Type::North;
                 replacedWall = true;
                 break;
             }
@@ -742,7 +743,7 @@ void TileMapBase::addWestWall(const TilePosition& tilePosition,
     if (TileLayer* northWall{tile->findLayer(TileLayer::Type::Wall,
                                              Wall::Type::North)}) {
         // Note: We don't change the graphic set. Only the type changes.
-        northWall->graphicIndex = Wall::Type::NorthEastGapFill;
+        northWall->graphicValue = Wall::Type::NorthEastGapFill;
     }
     // Else if the tile has a NorthWest gap fill, remove it.
     else {
@@ -917,7 +918,7 @@ bool TileMapBase::remWestWall(const TilePosition& tilePosition)
         // If the tile has a NE gap fill, change it to a North.
         if (TileLayer* northEastGapFill{tile.get().findLayer(
                 TileLayer::Type::Wall, Wall::Type::NorthEastGapFill)}) {
-            northEastGapFill->graphicIndex = Wall::Type::North;
+            northEastGapFill->graphicValue = Wall::Type::North;
         }
 
         // Rebuild the affected tile's collision.

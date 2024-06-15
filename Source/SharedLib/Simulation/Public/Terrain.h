@@ -1,66 +1,71 @@
 #pragma once
 
+#include "BoundingBox.h"
 #include <SDL_stdinc.h>
 
 namespace AM
 {
+struct TilePosition;
+
 struct Terrain {
     /**
-     * The types of terrain graphics that we use for our terrain system.
+     * A terrain value is made up of 2 parts:
+     *   Block Height (4b)
+     *     How tall the terrain block is, relative to our tile height.
+     *   Start Height (4b)
+     *     How high the terrain block should be placed within the tile.
+     *
+     * Note: Terrain must never extend beyond the bounds of its tile.
      */
-    enum Type : Uint8 {
-        /** A flat floor. */
+    using Value = Uint8;
+
+    /**
+     * A Z-axis height value, relative to SharedConfig::TILE_WORLD_HEIGHT.
+     *
+     * Since we only have one terrain shape, this is enough information to 
+     * describe which graphic to use for a given piece of terrain.
+     */
+    enum Height : Uint8 {
         Flat,
-        /** Cubic blocks. */
-        BlockOneQuarter,
-        BlockHalf,
-        BlockThreeQuarter,
-        BlockFull,
-        /** South wedge. */
-        WedgeSOneQuarter,
-        WedgeSHalf,
-        WedgeSThreeQuarter,
-        WedgeSFull,
-        /** SouthWest wedge. */
-        WedgeSWOneQuarter,
-        WedgeSWHalf,
-        WedgeSWThreeQuarter,
-        WedgeSWFull,
-        /** West wedge. */
-        WedgeWOneQuarter,
-        WedgeWHalf,
-        WedgeWThreeQuarter,
-        WedgeWFull,
-        /** NorthWest wedge. */
-        WedgeNWOneQuarter,
-        WedgeNWHalf,
-        WedgeNWThreeQuarter,
-        WedgeNWFull,
-        /** North wedge. */
-        WedgeNOneQuarter,
-        WedgeNHalf,
-        WedgeNThreeQuarter,
-        WedgeNFull,
-        /** NorthEast wedge. */
-        WedgeNEOneQuarter,
-        WedgeNEHalf,
-        WedgeNEThreeQuarter,
-        WedgeNEFull,
-        /** East wedge. */
-        WedgeEOneQuarter,
-        WedgeEHalf,
-        WedgeEThreeQuarter,
-        WedgeEFull,
-        /** SouthEast wedge. */
-        WedgeSEOneQuarter,
-        WedgeSEHalf,
-        WedgeSEThreeQuarter,
-        WedgeSEFull,
-        /** The number of different terrain types that we have. */
-        Count,
-        /** Used to tell if a tile doesn't contain any terrain. */
-        None
+        OneThird,
+        TwoThird,
+        Full,
+        Count
     };
+
+    /** Bitmask for getting the height of the terrain. */
+    static constexpr Uint8 HEIGHT_MASK{0b11110000};
+    /** Bitmask for getting the starting height of the terrain. */
+    static constexpr Uint8 START_HEIGHT_MASK{0b00001111};
+
+    /**
+     * Returns the height field from the given terrain value.
+     */
+    static Height getHeight(Value value);
+
+    /**
+     * Returns the start height field from the given terrain value.
+     */
+    static Height getStartHeight(Value value);
+
+    struct InfoReturn
+    {
+        /** The terrain's height. */
+        Height height{};
+        /** The terrain's starting height. */
+        Height startHeight{};
+    };
+    /**
+     * Returns the separate terrain info fields that are bitpacked in the 
+     * given value.
+     */
+    static InfoReturn getInfo(Value value);
+
+    /**
+     * Returns an appropriate bounding box for the given terrain info.
+     */
+    static BoundingBox getWorldBounds(const TilePosition& tilePosition,
+                                      Height height, Height startHeight);
 };
 
 } // End namespace AM

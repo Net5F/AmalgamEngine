@@ -21,32 +21,24 @@ EntityLocator::EntityLocator(entt::registry& inRegistry)
 
 void EntityLocator::setGridSize(const TileExtent& mapTileExtent)
 {
-    // Cast constants to int so we get integer division below.
+    // Cast constants so we get appropriate division below.
     static constexpr int CELL_WIDTH{
         static_cast<int>(SharedConfig::ENTITY_LOCATOR_CELL_WIDTH)};
     static constexpr int CELL_HEIGHT{
         static_cast<int>(SharedConfig::ENTITY_LOCATOR_CELL_HEIGHT)};
-
-    if ((mapTileExtent.xLength % CELL_WIDTH) != 0) {
-        LOG_FATAL(
-            "Map X length must be divisible by ENTITY_LOCATOR_CELL_WIDTH.");
-    }
-    else if ((mapTileExtent.yLength % CELL_WIDTH) != 0) {
-        LOG_FATAL(
-            "Map Y length must be divisible by ENTITY_LOCATOR_CELL_WIDTH.");
-    }
-    else if ((mapTileExtent.zLength % CELL_HEIGHT) != 0) {
-        LOG_FATAL(
-            "Map Z length must be divisible by ENTITY_LOCATOR_CELL_HEIGHT.");
-    }
+    static constexpr float CELL_WIDTH_F{static_cast<float>(CELL_WIDTH)};
+    static constexpr float CELL_HEIGHT_F{static_cast<float>(CELL_HEIGHT)};
 
     // Set our grid size to match the tile map.
     gridCellExtent.x = mapTileExtent.x / CELL_WIDTH;
     gridCellExtent.y = mapTileExtent.y / CELL_WIDTH;
     gridCellExtent.z = mapTileExtent.z / CELL_HEIGHT;
-    gridCellExtent.xLength = mapTileExtent.xLength / CELL_WIDTH;
-    gridCellExtent.yLength = mapTileExtent.yLength / CELL_WIDTH;
-    gridCellExtent.zLength = mapTileExtent.zLength / CELL_HEIGHT;
+    gridCellExtent.xLength
+        = static_cast<int>(std::ceil(mapTileExtent.xLength / CELL_WIDTH_F));
+    gridCellExtent.yLength
+        = static_cast<int>(std::ceil(mapTileExtent.yLength / CELL_WIDTH_F));
+    gridCellExtent.zLength
+        = static_cast<int>(std::ceil(mapTileExtent.zLength / CELL_HEIGHT_F));
 
     // Resize the grid to fit the map.
     entityGrid.resize(gridCellExtent.xLength * gridCellExtent.yLength
@@ -75,11 +67,12 @@ void EntityLocator::setEntityLocation(entt::entity entity,
            - boxCellExtent.z);
 
     if (!(gridCellExtent.containsExtent(boxCellExtent))) {
-        LOG_FATAL("Tried to track entity that is outside of the locator's "
+        LOG_ERROR("Tried to track entity that is outside of the locator's "
                   "grid: (%d, %d, %d, %d, %d, %d)ce.",
                   boxCellExtent.x, boxCellExtent.y, boxCellExtent.z,
                   boxCellExtent.xLength, boxCellExtent.yLength,
                   boxCellExtent.zLength);
+        return;
     }
 
     // If we already have a location for the entity, clear it.

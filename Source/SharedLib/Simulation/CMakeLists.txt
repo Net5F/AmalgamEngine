@@ -5,6 +5,7 @@ target_sources(SharedLib
         Private/EntityLocator.cpp
         Private/MovementHelpers.cpp
         Private/ResourceData.cpp
+        Private/Terrain.cpp
         Private/Components/Camera.cpp
         Private/Components/Interaction.cpp
         Private/Components/Inventory.cpp
@@ -38,6 +39,7 @@ target_sources(SharedLib
         Public/Ray.h
         Public/ReplicatedComponent.h
         Public/ResourceData.h
+        Public/Terrain.h
         Public/Wall.h
         Public/Components/Camera.h
         Public/Components/Collision.h

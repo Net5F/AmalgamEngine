@@ -29,16 +29,16 @@ class Tile
 {
 public:
     /**
-     * Returns the collision boxes of each of this tile's layers.
+     * Returns the collision volumes of each of this tile's layers.
      * Note: The returned vector may be empty, if this tile has no collision.
      */
-    const std::vector<BoundingBox>& getCollisionBoxes() const;
+    const std::vector<BoundingBox>& getCollisionVolumes() const;
 
     /**
      * Adds the given layer to this tile.
      */
     void addLayer(TileLayer::Type layerType, const GraphicSet& graphicSet,
-                  Uint8 graphicIndex);
+                  Uint8 graphicValue);
 
     /**
      * Removes any layers with a matching type, graphic index, and graphic set.
@@ -50,7 +50,7 @@ public:
      * @return true if the tile had any matching layers to remove, else false.
      */
     bool removeLayer(TileLayer::Type layerType, Uint16 graphicSetID,
-                     Uint8 graphicIndex);
+                     Uint8 graphicValue);
 
     /**
      * Removes any layers with a matching type and graphic index, regardless 
@@ -58,7 +58,7 @@ public:
      *
      * @return true if the tile had any matching layers to remove, else false.
      */
-    bool removeLayers(TileLayer::Type layerType, Uint8 graphicIndex);
+    bool removeLayers(TileLayer::Type layerType, Uint8 graphicValue);
 
     /**
      * Clears all layers of the given types from this tile.
@@ -93,23 +93,28 @@ public:
      * Returns a pointer to the first matching layer in this tile. If one isn't 
      * found, returns nullptr.
      */
-    TileLayer* findLayer(TileLayer::Type layerType, Uint8 graphicIndex);
+    TileLayer* findLayer(TileLayer::Type layerType, Uint8 graphicValue);
     const TileLayer* findLayer(TileLayer::Type layerType,
-                               Uint8 graphicIndex) const;
+                               Uint8 graphicValue) const;
     TileLayer* findLayer(TileLayer::Type layerType);
     const TileLayer* findLayer(TileLayer::Type layerType) const;
 
     /**
-     * Clears the collisionBoxes vector, then refills it with all of this
+     * Clears the collisionVolumes vector, then refills it with all of this
      * tile's walls and objects.
      *
      * @param tilePosition This tile's world coordinates.
      */
     void rebuildCollision(const TilePosition& tilePosition);
 
-    /** Returns a bounding volume for a terrain tile layer at the given 
-        position. */
-    static BoundingBox getTerrainWorldBounds(const TilePosition& tilePosition);
+    /**
+     * Returns a bounding volume for this tile's terrain layer, if present.
+     * If this tile has no terrain, returns a default box.
+     *
+     * Note: Terrain always uses AABBs for collision volumes.
+     */
+    BoundingBox
+        getTerrainWorldBounds(const TilePosition& tilePosition) const;
 
     /** Returns true if this tile has no layers, else false. */
     bool isEmpty() const;
@@ -122,10 +127,10 @@ private:
     BoundingBox calcWorldBoundsForGraphic(const TilePosition& tilePosition,
                                           const GraphicRef& graphic);
 
-    /** Holds this tile's collision boxes.
+    /** Holds this tile's collision volumes.
         We pre-calculate these and store them contiguously to speed up collision
         checking. */
-    std::vector<BoundingBox> collisionBoxes{};
+    std::vector<BoundingBox> collisionVolumes{};
 
     // TODO: Maybe eventually switch to an alternative vector type that
     //       has a smaller footprint but only supports forward iterators.

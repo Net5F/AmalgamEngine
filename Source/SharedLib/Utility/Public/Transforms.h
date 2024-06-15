@@ -71,19 +71,20 @@ public:
     static float screenYToWorldZ(float yCoord, float zoomFactor);
 
     /**
-     * Converts a model-space bounding box to a world-space box, placed at the
-     * given position.
+     * Converts a model-space bounding volume to a world-space volume, starting  
+     * at the given position.
      *
-     * Mostly used to place a bounding box associated with a tile.
+     * Mostly used for tiles, since their bounds start at their coordinate.
      */
     static BoundingBox modelToWorld(const BoundingBox& modelBounds,
                                     const Position& position);
 
     /**
-     * Converts a model-space bounding box to a world-space box, centered on
-     * the given position.
+     * Converts a model-space bounding volume to a world-space volume, centered 
+     * on the given position.
      *
-     * Mostly used to center a bounding box on an entity's position.
+     * Mostly used for entities, since their bounds are centered on their 
+     * position.
      *
      * Note: This function takes care to center the bounds based on the
      *       sprite's "stage size". If you naively center based on the size of
@@ -91,19 +92,6 @@ public:
      */
     static BoundingBox modelToWorldCentered(const BoundingBox& modelBounds,
                                             const Position& position);
-
-    /**
-     * Returns an entity's position, given that entity's BoundingBox and Sprite
-     * components.
-     *
-     * Note: This function takes care to consider the sprite's "stage size".
-     *       If you naively take the center of the bounds as the entity's
-     *       position, it won't be correct.
-     * Note: This isn't a transform between spaces, but it's related to
-     *       modelToWorldCentered() so it's nice to have in this file.
-     */
-    static Position boundsToEntityPosition(const BoundingBox& boundingBox,
-                                           const Sprite& sprite);
 
     //-------------------------------------------------------------------------
     // Constants

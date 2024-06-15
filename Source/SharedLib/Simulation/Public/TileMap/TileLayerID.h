@@ -12,8 +12,8 @@ namespace AM
  * The minimum information needed to uniquely identify a tile layer.
  *
  * Technically, multiple layers may be the same type and use the same
- * set ID and sprite index, but they'll be exactly the same so differentiation
- * isn't useful.
+ * graphic set ID and graphic value, but they'll be exactly the same so 
+ * differentiation isn't useful.
  */
 struct TileLayerID {
     /** The position of the tile that contains the layer. */
@@ -25,11 +25,12 @@ struct TileLayerID {
     /** The numeric ID of the layer's graphic set. */
     Uint16 graphicSetID{0};
 
-    /** The index of the layer's graphic, within the layer's graphic set.
-        For Floors, this will always be 0.
-        For FloorCoverings and Objects, this should be cast to Rotation.
-        For Walls, this should be cast to Wall::Type. */
-    Uint8 graphicIndex{0};
+    /** A value that describes this layer's graphic.
+        For all types except Terrain, this is simply an index into 
+        graphicSet.graphics. For Terrain, this is a bit-packed value.
+        For Terrain, cast this to Terrain::Value. For Walls, cast this to 
+        Wall::Type. For Floors and Objects, cast this to Rotation::Direction. */
+    Uint8 graphicValue{0};
 
     bool operator==(const TileLayerID& other) const
     {
@@ -37,7 +38,7 @@ struct TileLayerID {
                && (tilePosition.y == other.tilePosition.y)
                && (tilePosition.z == other.tilePosition.z)
                && (type == other.type) && (graphicSetID == other.graphicSetID)
-               && (graphicIndex == other.graphicIndex);
+               && (graphicValue == other.graphicValue);
     }
 };
 

@@ -11,20 +11,20 @@ GraphicRef TileLayer::getGraphic() const
     //       graphic, because the null graphic is fine to return.
     if (type == Type::Terrain) {
         return static_cast<const TerrainGraphicSet&>(graphicSet.get())
-            .graphics[graphicIndex];
+            .graphics[graphicValue];
     }
     else if (type == Type::Floor) {
         return static_cast<const FloorGraphicSet&>(graphicSet.get())
-            .graphics[graphicIndex];
+            .graphics[graphicValue];
     }
     else if (type == Type::Wall) {
         return static_cast<const WallGraphicSet&>(graphicSet.get())
-            .graphics[graphicIndex];
+            .graphics[graphicValue];
     }
     else {
         // Type::Object
         return static_cast<const ObjectGraphicSet&>(graphicSet.get())
-            .graphics[graphicIndex];
+            .graphics[graphicValue];
     }
 }
 

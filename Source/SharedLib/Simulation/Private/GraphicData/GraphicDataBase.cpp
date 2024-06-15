@@ -281,7 +281,7 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
     animations.emplace_back("Null", "null", NULL_ANIMATION_ID);
     terrainGraphicSets.emplace_back(
         GraphicSet{"Null", "null", NULL_TERRAIN_GRAPHIC_SET_ID},
-        constructAndFillArray<Terrain::Type::Count>(nullSprite));
+        constructAndFillArray<Terrain::Height::Count>(nullSprite));
     floorGraphicSets.emplace_back(
         GraphicSet{"Null", "null", NULL_FLOOR_GRAPHIC_SET_ID},
         constructAndFillArray<FloorGraphicSet::VARIATION_COUNT>(nullSprite));
@@ -430,7 +430,7 @@ void GraphicDataBase::parseTerrainGraphicSet(const nlohmann::json& graphicSetJso
         GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
                    graphicSetJson.at("stringID").get<std::string>(),
                    graphicSetJson.at("numericID")},
-        constructAndFillArray<Terrain::Type::Count>(nullSprite))};
+        constructAndFillArray<Terrain::Height::Count>(nullSprite))};
 
     // Add the graphics.
     std::size_t index{0};

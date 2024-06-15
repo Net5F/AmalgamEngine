@@ -44,13 +44,11 @@ public:
     static constexpr std::size_t CHUNK_TILE_COUNT{CHUNK_WIDTH * CHUNK_WIDTH};
 
     /** The x and y axis width, in tiles, of a cell in our entity spatial
-        partitioning grid (EntityLocator).
-        Note: The tile map's size must be evenly divisible by this number. */
+        partitioning grid (EntityLocator). */
     static constexpr std::size_t ENTITY_LOCATOR_CELL_WIDTH{4};
 
     /** The z axis width, in tiles, of a cell in our entity spatial partitioning 
-        grid (EntityLocator).
-        Note: The tile map's size must be evenly divisible by this number. */
+        grid (EntityLocator). */
     static constexpr std::size_t ENTITY_LOCATOR_CELL_HEIGHT{2};
 
     /** The number of world units around an entity that are considered to be

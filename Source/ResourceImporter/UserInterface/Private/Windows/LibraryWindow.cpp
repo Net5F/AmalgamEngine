@@ -53,12 +53,12 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     auto animationContainer{
         std::make_unique<LibraryCollapsibleContainer>("Animations")};
     libraryContainer.push_back(std::move(animationContainer));
+    auto terrainContainer{
+        std::make_unique<LibraryCollapsibleContainer>("Terrain")};
+    libraryContainer.push_back(std::move(terrainContainer));
     auto floorContainer{
         std::make_unique<LibraryCollapsibleContainer>("Floors")};
     libraryContainer.push_back(std::move(floorContainer));
-    auto floorCoveringContainer{
-        std::make_unique<LibraryCollapsibleContainer>("Floor Coverings")};
-    libraryContainer.push_back(std::move(floorCoveringContainer));
     auto wallContainer{std::make_unique<LibraryCollapsibleContainer>("Walls")};
     libraryContainer.push_back(std::move(wallContainer));
     auto objectContainer{

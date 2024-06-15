@@ -19,18 +19,20 @@ namespace AM
 struct ChunkWireSnapshot {
 public:
     struct PaletteEntry {
+        /** The numeric ID of the graphic set that this entry refers to. */
+        Uint16 graphicSetID{0};
+
         /** The type of tile layer that this entry represents.
             Each layer type maps directly to a single graphic set type. */
         TileLayer::Type layerType{TileLayer::Type::None};
 
-        /** The numeric ID of the graphic set that this entry refers to. */
-        Uint16 graphicSetID{0};
-
-        /** The index within graphicSet.graphics that this entry refers to.
-            For Walls, cast this to Wall::Type. For Floor Coverings and Objects,
-            cast this to Rotation::Direction. For Floors, this will always be 0
-            (floor graphic sets only have 1 graphic). */
-        Uint8 graphicIndex{0};
+        /** The layer's graphic value.
+            For all types except Terrain, this is simply an index into 
+            graphicSet.graphics. For Terrain, this is a bit-packed value.
+            For Terrain, cast this to Terrain::Value. For Walls, cast this to 
+            Wall::Type. For Floors and Objects, cast this to 
+            Rotation::Direction. */
+        Uint8 graphicValue{0};
     };
 
     /** This chunk's X-axis coordinate. */
@@ -55,7 +57,7 @@ public:
      * If the palette doesn't have a matching entry, it will be added.
      */
     std::size_t getPaletteIndex(TileLayer::Type tileLayerType,
-                                Uint16 graphicSetID, Uint8 graphicIndex)
+                                Uint16 graphicSetID, Uint8 graphicValue)
     {
         // TODO: If this gets to be a performance issue, we can look into
         //       switching palette to a map. Serialization will be more
@@ -64,7 +66,7 @@ public:
         for (std::size_t i = 0; i < palette.size(); ++i) {
             if ((palette[i].layerType == tileLayerType)
                 && (palette[i].graphicSetID == graphicSetID)
-                && (palette[i].graphicIndex == graphicIndex)) {
+                && (palette[i].graphicValue == graphicValue)) {
                 // We already have the string, returns its index.
                 return i;
             }
@@ -72,7 +74,7 @@ public:
 
         // We didn't have a matching entry, add it.
         if (palette.size() < UINT8_MAX) {
-            palette.emplace_back(tileLayerType, graphicSetID, graphicIndex);
+            palette.emplace_back(graphicSetID, tileLayerType, graphicValue);
         }
         else {
             // TODO: If this becomes an issue, either switch to Uint16 or
@@ -86,9 +88,9 @@ public:
 template<typename S>
 void serialize(S& serializer, ChunkWireSnapshot::PaletteEntry& paletteEntry)
 {
-    serializer.value1b(paletteEntry.layerType);
     serializer.value2b(paletteEntry.graphicSetID);
-    serializer.value1b(paletteEntry.graphicIndex);
+    serializer.value1b(paletteEntry.layerType);
+    serializer.value1b(paletteEntry.graphicValue);
 }
 
 template<typename S>

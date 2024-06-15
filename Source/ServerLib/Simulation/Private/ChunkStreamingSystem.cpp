@@ -84,7 +84,7 @@ void ChunkStreamingSystem::addTileLayersToSnapshot(
     // Add all of the tile's layers.
     for (const TileLayer& layer : tile.getAllLayers()) {
         std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            layer.type, layer.graphicSet.get().numericID, layer.graphicIndex)};
+            layer.type, layer.graphicSet.get().numericID, layer.graphicValue)};
         tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
     }
 }

@@ -100,8 +100,7 @@ private:
     // Private child widgets
     //-------------------------------------------------------------------------
     AUI::Text topText;
-    AUI::Text modifyText;
-    AUI::Text clearText;
+    AUI::Text actionText;
 
     /** Holds this graphic set's graphics. */
     AUI::VerticalGridContainer graphicContainer;

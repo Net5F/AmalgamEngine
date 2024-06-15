@@ -33,11 +33,12 @@ public:
         For Walls, this won't be used (we only need the Wall::Type). */
     Uint16 graphicSetID{0};
 
-    /** The index of the layer's graphic, within the layer's graphic set.
-        For Floors, this will always be 0.
-        For FloorCoverings and Objects, this should be cast to Rotation.
-        For Walls, this should be cast to Wall::Type. */
-    Uint8 graphicIndex{0};
+    /** The layer's graphic value.
+        For all types except Terrain, this is simply an index into 
+        graphicSet.graphics. For Terrain, this is a bit-packed value.
+        For Terrain, cast this to Terrain::Value. For Walls, cast this to 
+        Wall::Type. For Floors and Objects, cast this to Rotation::Direction. */
+    Uint8 graphicValue{0};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -57,7 +58,7 @@ void serialize(S& serializer, TileRemoveLayer& tileRemoveLayer)
     serializer.object(tileRemoveLayer.tilePosition);
     serializer.value1b(tileRemoveLayer.layerType);
     serializer.value2b(tileRemoveLayer.graphicSetID);
-    serializer.value1b(tileRemoveLayer.graphicIndex);
+    serializer.value1b(tileRemoveLayer.graphicValue);
 }
 
 } // End namespace AM

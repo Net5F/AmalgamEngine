@@ -24,10 +24,8 @@ struct EditorTerrainGraphicSet {
     std::string displayName{""};
 
     /** The numeric IDs for each graphic in this set.
-        A full terrain set has 37 graphic types, but fewer can be used if 
-        desired (e.g. not using 1/4 and 3/4 heights). If a graphic isn't 
-        provided, it should be set to NULL_GRAPHIC_ID. */
-    std::array<GraphicID, Terrain::Type::Count> graphicIDs{
+        If a graphic isn't provided, it should be set to NULL_GRAPHIC_ID. */
+    std::array<GraphicID, Terrain::Height::Count> graphicIDs{
         /* NULL_GRAPHIC_ID */ };
 };
 

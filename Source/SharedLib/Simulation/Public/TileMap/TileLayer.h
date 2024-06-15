@@ -2,6 +2,7 @@
 
 #include "GraphicRef.h"
 #include "Wall.h"
+#include "Terrain.h"
 #include <span>
 
 namespace AM
@@ -29,14 +30,14 @@ struct TileLayer {
         This must always be set to a valid type (not None). */
     Type type{};
 
-    /** The index within graphicSet->graphics of the graphic that is on this 
-        layer.
-        For Walls, cast this to Wall::Type. For Floor Coverings and Objects,
-        cast this to Rotation::Direction. For Floors, this will always be 0
-        (floor graphic sets only have 1 graphic).
+    /** A value that describes this layer's graphic.
+        For all types except Terrain, this is simply an index into 
+        graphicSet.graphics. For Terrain, this is a bit-packed value.
+        For Terrain, cast this to Terrain::Value. For Walls, cast this to 
+        Wall::Type. For Floors and Objects, cast this to Rotation::Direction.
         Note: It'd be more intuitive to put this after graphicSet, but alignment
               would cause this struct to be larger if we did so. */
-    Uint8 graphicIndex{0};
+    Uint8 graphicValue{0};
 
     /** A polymorphic reference to this layer's graphic set.
         Each layer type maps directly to a single graphic set type, e.g. Floor 

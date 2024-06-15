@@ -121,12 +121,12 @@ BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
                     continue;
                 }
 
-                // For each collision box in this tile.
-                for (const BoundingBox& collisionBox :
-                     tile->getCollisionBoxes()) {
-                    // If the desired movement would intersect this box, reject
-                    // the move.
-                    if (desiredBounds.intersects(collisionBox)) {
+                // For each collision volume in this tile.
+                for (const BoundingBox& collisionVolume :
+                     tile->getCollisionVolumes()) {
+                    // If the desired movement would intersect this volume, 
+                    // reject the move.
+                    if (desiredBounds.intersects(collisionVolume)) {
                         return currentBounds;
                     }
                 }

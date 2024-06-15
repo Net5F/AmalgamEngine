@@ -7,16 +7,16 @@
 namespace AM
 {
 
-const std::vector<BoundingBox>& Tile::getCollisionBoxes() const
+const std::vector<BoundingBox>& Tile::getCollisionVolumes() const
 {
-    return collisionBoxes;
+    return collisionVolumes;
 }
 
 void Tile::addLayer(TileLayer::Type layerType, const GraphicSet& graphicSet,
-                    Uint8 graphicIndex)
+                    Uint8 graphicValue)
 {
     // Insert the new layer, being careful to keep the vector sorted.
-    TileLayer newLayer{layerType, graphicIndex, graphicSet};
+    TileLayer newLayer{layerType, graphicValue, graphicSet};
     layers.insert(
         std::lower_bound(layers.begin(), layers.end(), newLayer,
                          [](const TileLayer& layer, const TileLayer& newLayer) {
@@ -26,7 +26,7 @@ void Tile::addLayer(TileLayer::Type layerType, const GraphicSet& graphicSet,
 }
 
 bool Tile::removeLayer(TileLayer::Type layerType, Uint16 graphicSetID,
-                       Uint8 graphicIndex)
+                       Uint8 graphicValue)
 {
     // Erase any layers with a matching type, graphic index, and graphic set.
     std::size_t numErased{0};
@@ -34,7 +34,7 @@ bool Tile::removeLayer(TileLayer::Type layerType, Uint16 graphicSetID,
         TileLayer& layer{*it};
 
         // If this layer matches, erase it.
-        if ((layer.type == layerType) && (layer.graphicIndex == graphicIndex)
+        if ((layer.type == layerType) && (layer.graphicValue == graphicValue)
             && (layer.graphicSet.get().numericID == graphicSetID)) {
             it = layers.erase(it);
             numErased++;
@@ -51,7 +51,7 @@ bool Tile::removeLayer(TileLayer::Type layerType, Uint16 graphicSetID,
     return (numErased > 0);
 }
 
-bool Tile::removeLayers(TileLayer::Type layerType, Uint8 graphicIndex)
+bool Tile::removeLayers(TileLayer::Type layerType, Uint8 graphicValue)
 {
     // Erase any layers with a matching type and graphic index.
     std::size_t numErased{0};
@@ -59,7 +59,7 @@ bool Tile::removeLayers(TileLayer::Type layerType, Uint8 graphicIndex)
         TileLayer& layer{*it};
 
         // If this layer matches, erase it.
-        if ((layer.type == layerType) && (layer.graphicIndex == graphicIndex)) {
+        if ((layer.type == layerType) && (layer.graphicValue == graphicValue)) {
             it = layers.erase(it);
             numErased++;
         }
@@ -167,11 +167,11 @@ const std::vector<TileLayer>& Tile::getAllLayers() const
     return layers;
 }
 
-TileLayer* Tile::findLayer(TileLayer::Type layerType, Uint8 graphicIndex)
+TileLayer* Tile::findLayer(TileLayer::Type layerType, Uint8 graphicValue)
 {
     for (TileLayer& layer : layers) {
         if ((layer.type == layerType)
-            && (layer.graphicIndex == graphicIndex)) {
+            && (layer.graphicValue == graphicValue)) {
             return &layer;
         }
         else if (layer.type == (layerType + 1)) {
@@ -184,11 +184,11 @@ TileLayer* Tile::findLayer(TileLayer::Type layerType, Uint8 graphicIndex)
 }
 
 const TileLayer* Tile::findLayer(TileLayer::Type layerType,
-                                 Uint8 graphicIndex) const
+                                 Uint8 graphicValue) const
 {
     for (const TileLayer& layer : layers) {
         if ((layer.type == layerType)
-            && (layer.graphicIndex == graphicIndex)) {
+            && (layer.graphicValue == graphicValue)) {
             return &layer;
         }
         else if (layer.type == (layerType + 1)) {
@@ -232,8 +232,8 @@ const TileLayer* Tile::findLayer(TileLayer::Type layerType) const
 
 void Tile::rebuildCollision(const TilePosition& tilePosition)
 {
-    // Clear out the old collision boxes.
-    collisionBoxes.clear();
+    // Clear out the old collision volumes.
+    collisionVolumes.clear();
 
     // Add all of this tile's layers that have collision.
     for (const TileLayer& layer : layers) {
@@ -243,7 +243,7 @@ void Tile::rebuildCollision(const TilePosition& tilePosition)
         // (We ignore modelBounds and collisionEnabled on terrain, all terrain 
         // gets generated collision). 
         if (layer.type == TileLayer::Type::Floor) {
-            collisionBoxes.push_back(getTerrainWorldBounds(tilePosition));
+            collisionVolumes.push_back(getTerrainWorldBounds(tilePosition));
         }
         // If it's a floor, skip it (they never have collision).
         else if (layer.type == TileLayer::Type::Floor) {
@@ -251,21 +251,26 @@ void Tile::rebuildCollision(const TilePosition& tilePosition)
         }
         // If it's a wall or object, add its assigned collision.
         else if (graphic.getCollisionEnabled()) {
-            collisionBoxes.push_back(
+            collisionVolumes.push_back(
                 calcWorldBoundsForGraphic(tilePosition, graphic));
         }
     }
 }
 
-BoundingBox Tile::getTerrainWorldBounds(const TilePosition& tilePosition)
+BoundingBox
+    Tile::getTerrainWorldBounds(const TilePosition& tilePosition) const
 {
-    static constexpr float TILE_WORLD_WIDTH{
-        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
+    // If this tile doesn't have terrain, return a default box.
+    if ((layers.size() == 0) || (layers[0].type != TileLayer::Type::Terrain)) {
+        return {};
+    }
 
-    Position tileOrigin{tilePosition.getOriginPosition()};
-    return {tileOrigin.x, tileOrigin.x + TILE_WORLD_WIDTH,
-            tileOrigin.y, tileOrigin.y + TILE_WORLD_WIDTH,
-            tileOrigin.z, tileOrigin.z};
+    // Split the bit-packed terrain value.
+    auto [terrainHeight,
+          terrainStartHeight]{Terrain::getInfo(layers[0].graphicValue)};
+
+    return Terrain::getWorldBounds(tilePosition, terrainHeight,
+                                   terrainStartHeight);
 }
 
 bool Tile::isEmpty() const
@@ -274,7 +279,7 @@ bool Tile::isEmpty() const
 }
 
 BoundingBox Tile::calcWorldBoundsForGraphic(const TilePosition& tilePosition,
-                                            const GraphicRef& graphic)
+                                               const GraphicRef& graphic)
 {
     // Cast constants to a float so we get float multiplication below.
     static constexpr float TILE_WORLD_WIDTH{SharedConfig::TILE_WORLD_WIDTH};

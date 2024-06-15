@@ -32,11 +32,12 @@ public:
         If the type is Floor, the existing floor will be overwritten. */
     Uint16 graphicSetID{0};
 
-    /** The index within graphicSet.graphics that the new layer should use.
-        For Terrain, this should be cast to Terrain::Type.
-        For Floors and Objects, this should be cast to Rotation::Direction.
-        For Walls, this should be cast to Wall::Type. */
-    Uint8 graphicIndex{0};
+    /** The graphic value that the new layer should use.
+        For all types except Terrain, this is simply an index into 
+        graphicSet.graphics. For Terrain, this is a bit-packed value.
+        For Terrain, cast this to Terrain::Value. For Walls, cast this to 
+        Wall::Type. For Floors and Objects, cast this to Rotation::Direction. */
+    Uint8 graphicValue{0};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -56,7 +57,7 @@ void serialize(S& serializer, TileAddLayer& tileAddLayer)
     serializer.object(tileAddLayer.tilePosition);
     serializer.value1b(tileAddLayer.layerType);
     serializer.value2b(tileAddLayer.graphicSetID);
-    serializer.value1b(tileAddLayer.graphicIndex);
+    serializer.value1b(tileAddLayer.graphicValue);
 }
 
 } // End namespace AM

@@ -56,8 +56,8 @@ struct GraphicSet {
 };
 
 struct TerrainGraphicSet : public GraphicSet {
-    /** The 37 types of terrain graphic that we use for our terrain system. */
-    std::array<GraphicRef, Terrain::Type::Count> graphics;
+    /** The 4 heights of terrain graphic that we use for our terrain system. */
+    std::array<GraphicRef, Terrain::Height::Count> graphics;
 };
 
 struct FloorGraphicSet : public GraphicSet {

@@ -18,15 +18,13 @@ GraphicSetEditStage::GraphicSetEditStage(DataModel& inDataModel,
 , activeGraphicSetType{GraphicSet::Type::None}
 , activeGraphicSetID{SDL_MAX_UINT16}
 , topText{{0, 0, logicalExtent.w, 34}, "TopText"}
-, modifyText{{277, 58, 800, 24}, "ModifyText"}
-, clearText{{277, 88, 800, 24}, "ClearText"}
-, graphicContainer{{249, 180, 180, 255}, "GraphicContainer"}
-, descText{{24, 806, 1240, 156}, "DescText"}
+, actionText{{184, 58, 929, 50}, "ActionText"}
+, graphicContainer{{249, 180, 800, 516}, "GraphicContainer"}
+, descText{{24, 806, 1240, 220}, "DescText"}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(topText);
-    children.push_back(modifyText);
-    children.push_back(clearText);
+    children.push_back(actionText);
     children.push_back(graphicContainer);
     children.push_back(descText);
 
@@ -35,18 +33,17 @@ GraphicSetEditStage::GraphicSetEditStage(DataModel& inDataModel,
     topText.setColor({255, 255, 255, 255});
     topText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
 
-    styleText(modifyText);
-    modifyText.setText("To modify: select a sprite or animation in the Library window, then "
-                       "press one of the Assign buttons.");
-    styleText(clearText);
-    clearText.setText("To clear: click an empty area to clear your selection, "
-                      "then press one of the Assign buttons.");
+    styleText(actionText);
+    actionText.setText(
+        "To modify: select a sprite or animation in the Library window, then "
+        "press one of the Assign buttons.\nTo clear: click an empty area to "
+        "clear your selection, then press one of the Assign buttons.");
     styleText(descText);
 
     /* Container */
     graphicContainer.setNumColumns(4);
     graphicContainer.setCellWidth(200);
-    graphicContainer.setCellHeight(255 + 14);
+    graphicContainer.setCellHeight(247 + 22);
 
     // When the active graphic set is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
@@ -114,7 +111,7 @@ void GraphicSetEditStage::onGraphicSetSlotChanged(GraphicSet::Type type,
 
 template<typename T>
 void GraphicSetEditStage::loadActiveGraphicSet(GraphicSet::Type graphicSetType,
-                                             const T& newActiveGraphicSet)
+                                               const T& newActiveGraphicSet)
 {
     activeGraphicSetType = graphicSetType;
     activeGraphicSetID = newActiveGraphicSet.numericID;
@@ -141,14 +138,6 @@ void GraphicSetEditStage::loadActiveGraphicSet(GraphicSet::Type graphicSetType,
         });
 
         graphicContainer.push_back(std::move(slotPtr));
-    }
-
-    // Move and resize the container for the new type.
-    if (activeGraphicSetType == GraphicSet::Type::Floor) {
-        graphicContainer.setLogicalExtent({559, 180, 180, 255});
-    }
-    else {
-        graphicContainer.setLogicalExtent({280, 180, 720, 524});
     }
 
     // Make sure the container is visible.
@@ -202,83 +191,18 @@ std::string GraphicSetEditStage::getSlotTopText(std::size_t graphicSetIndex)
     switch (activeGraphicSetType) {
         case GraphicSet::Type::Terrain: {
             switch (graphicSetIndex) {
-                case Terrain::Type::Flat:
+                case Terrain::Height::Flat:
                     return "Flat";
-                case Terrain::Type::BlockOneQuarter:
-                    return "Block 1/4";
-                case Terrain::Type::BlockHalf:
-                    return "Block 1/2";
-                case Terrain::Type::BlockThreeQuarter:
-                    return "Block 3/4";
-                case Terrain::Type::BlockFull:
-                    return "Block Full";
-                case Terrain::Type::WedgeSOneQuarter:
-                    return "Wedge S 1/4";
-                case Terrain::Type::WedgeSHalf:
-                    return "Wedge S 1/2";
-                case Terrain::Type::WedgeSThreeQuarter:
-                    return "Wedge S 3/4";
-                case Terrain::Type::WedgeSFull:
-                    return "Wedge S Full";
-                case Terrain::Type::WedgeSWOneQuarter:
-                    return "Wedge SW 1/4";
-                case Terrain::Type::WedgeSWHalf:
-                    return "Wedge SW 1/2";
-                case Terrain::Type::WedgeSWThreeQuarter:
-                    return "Wedge SW 3/4";
-                case Terrain::Type::WedgeSWFull:
-                    return "Wedge SW Full";
-                case Terrain::Type::WedgeWOneQuarter:
-                    return "Wedge W 1/4";
-                case Terrain::Type::WedgeWHalf:
-                    return "Wedge W 1/2";
-                case Terrain::Type::WedgeWThreeQuarter:
-                    return "Wedge W 3/4";
-                case Terrain::Type::WedgeWFull:
-                    return "Wedge W Full";
-                case Terrain::Type::WedgeNWOneQuarter:
-                    return "Wedge NW 1/4";
-                case Terrain::Type::WedgeNWHalf:
-                    return "Wedge NW 1/2";
-                case Terrain::Type::WedgeNWThreeQuarter:
-                    return "Wedge NW 3/4";
-                case Terrain::Type::WedgeNWFull:
-                    return "Wedge NW Full";
-                case Terrain::Type::WedgeNOneQuarter:
-                    return "Wedge N 1/4";
-                case Terrain::Type::WedgeNHalf:
-                    return "Wedge N 1/2";
-                case Terrain::Type::WedgeNThreeQuarter:
-                    return "Wedge N 3/4";
-                case Terrain::Type::WedgeNFull:
-                    return "Wedge N Full";
-                case Terrain::Type::WedgeNEOneQuarter:
-                    return "Wedge NE 1/4";
-                case Terrain::Type::WedgeNEHalf:
-                    return "Wedge NE 1/2";
-                case Terrain::Type::WedgeNEThreeQuarter:
-                    return "Wedge NE 3/4";
-                case Terrain::Type::WedgeNEFull:
-                    return "Wedge NE Full";
-                case Terrain::Type::WedgeEOneQuarter:
-                    return "Wedge E 1/4";
-                case Terrain::Type::WedgeEHalf:
-                    return "Wedge E 1/2";
-                case Terrain::Type::WedgeEThreeQuarter:
-                    return "Wedge E 3/4";
-                case Terrain::Type::WedgeEFull:
-                    return "Wedge E Full";
-                case Terrain::Type::WedgeSEOneQuarter:
-                    return "Wedge SE 1/4";
-                case Terrain::Type::WedgeSEHalf:
-                    return "Wedge SE 1/2";
-                case Terrain::Type::WedgeSEThreeQuarter:
-                    return "Wedge SE 3/4";
-                case Terrain::Type::WedgeSEFull:
-                    return "Wedge SE Full";
+                case Terrain::Height::OneThird:
+                    return "1/3 Height";
+                case Terrain::Height::TwoThird:
+                    return "2/3 Height";
+                case Terrain::Height::Full:
+                    return "Full Height";
             }
         }
         case GraphicSet::Type::Floor:
+            [[fallthrough]];
         case GraphicSet::Type::Object: {
             switch (graphicSetIndex) {
                 case Rotation::Direction::South:
@@ -369,32 +293,30 @@ void GraphicSetEditStage::fillDescriptionTexts()
         case GraphicSet::Type::Terrain: {
             topText.setText("Terrain Graphic Set");
             descText.setText(
-                "Terrain is comprised of flat ground, blocks, and wedges. "
-                "Blocks and wedges each have 4 height options, with “Full” "
-                "height equaling the height of a world tile. Wedges can face "
-                "any of the 8 directions.\n\nAll terrain graphics are "
-                "optional. This allows developers to leave out graphics if "
-                "they aren't going to use them, e.g. only implementing 1/2 and "
-                "full heights and leaving out 1/4 and 3/4. It's up to the "
-                "build tool to properly surface valid options.\n\nCollision "
-                "geometry is auto-generated for each piece of terrain based on "
-                "its type. You don't need to bother adding bounding geometry "
-                "to terrain sprites. All terrain has collision, regardless of "
-                "each sprite's collisionEnabled.");
+                "Terrain is comprised of blocks of various heights. All block "
+                "heights are relative to the height of a world-space tile "
+                "(SharedConfig::TILE_WORLD_HEIGHT).\n\nAt least 1 graphic must "
+                "be set, but you don't need to set every graphic. The build "
+                "tool should skip missing graphics.\n\nCollision geometry is "
+                "auto-generated for each piece of terrain based on its height. "
+                "You don't need to bother adding bounding geometry to terrain "
+                "graphic. All terrain has collision, regardless of each "
+                "graphic's collisionEnabled.");
             break;
         }
         case GraphicSet::Type::Floor: {
             topText.setText("Floor Graphic Set");
             descText.setText(
-                "Floors are things like grass, rugs, flooring, etc.\n\nEach "
+                "Floors are things like grass, rugs, flooring, etc. They sit "
+                "on top of the terrain and have no collision (regardless of "
+                "each graphic's collisionEnabled).\n\nMake sure to draw "
+                "appropriate bounding volumes on each floor graphic, as they "
+                "will be used when clicking the floor in build mode.\n\nEach "
                 "index is associated with a direction (in parenthesis). You "
                 "can ignore it if it isn't applicable to your set of "
-                "graphics.\n\nFloors have no collision, regardless of each "
-                "graphic's collisionEnabled.\n\nMake sure to draw appropriate "
-                "bounding boxes on each graphic, as they will be used when "
-                "clicking the floor in build mode.\n\nYou don't need to set "
-                "graphics for every index. Missing indices will be skipped by "
-                "the build tool.");
+                "graphics.\nAt least 1 graphic must be set, but you don't need "
+                "to set every graphic. The build tool should skip missing "
+                "graphics.");
             break;
         }
         case GraphicSet::Type::Wall: {
@@ -404,7 +326,7 @@ void GraphicSetEditStage::fillDescriptionTexts()
                 "system is able to form any shape of wall.\n\nWalls may have "
                 "collision. You can control this using each graphic's "
                 "collisionEnabled.\n\nMake sure to draw appropriate bounding "
-                "boxes on each graphic, as they will be used when clicking the "
+                "volumes on each graphic, as they will be used when clicking the "
                 "object in build mode.\n\nAll 4 graphics must be set.");
             break;
         }
@@ -412,15 +334,15 @@ void GraphicSetEditStage::fillDescriptionTexts()
             topText.setText("Object Graphic Set");
             descText.setText(
                 "Objects are anything that doesn't fit into the other "
-                "categories. Their render order is based on their bounding "
-                "box.\n\nEach index is associated with a direction (in "
+                "categories.\n\nEach index is associated with a direction (in "
                 "parenthesis). You can ignore it if it isn't applicable to "
-                "your set of graphics.\n\nObjects may have collision. You can "
-                "control this using each graphic's collisionEnabled.\n\nMake "
-                "sure to draw appropriate bounding boxes on each graphic, as "
-                "they will be used when clicking the object in build "
-                "mode.\n\nYou don't need to set a graphic for every index. "
-                "Missing indices will be skipped by the build tool.");
+                "your set of sprites.\n\nMake sure to draw appropriate "
+                "bounding volumes on each graphic, as they will be used when "
+                "clicking the object in build mode.\n\nObjects may have "
+                "collision. You can control this using each graphic's "
+                "collisionEnabled.\n\nAt least 1 graphic must be set, but you "
+                "don't need to set graphics for every index. The build tool "
+                "should skip missing graphics.");
             break;
         }
         default: {

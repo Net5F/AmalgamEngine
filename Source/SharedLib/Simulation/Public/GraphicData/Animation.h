@@ -53,10 +53,10 @@ struct Animation {
         carpets usually don't need collision. */
     bool collisionEnabled{false};
 
-    /** Model-space bounding box. Defines the animation's 3D volume.
-        Note: Tiles use these bounds, but dynamic entities use the bounds
-              defined by their Collision component. */
-    BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
+    /** This animation's model-space bounding volume.
+        Note: Tiles use these bounds, but entities use the bounds defined by 
+              their Collision component. */
+    BoundingBox modelBounds{};
 
     /**
      * Returns the sprite that should be displayed at the given animation time, 

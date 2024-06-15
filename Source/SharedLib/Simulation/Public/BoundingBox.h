@@ -10,7 +10,7 @@ struct Ray;
 struct TileExtent;
 
 /**
- * Represents a set of axis-aligned 3D bounds, forming a box.
+ * A 3D axis-aligned box shape.
  */
 struct BoundingBox {
 public:
