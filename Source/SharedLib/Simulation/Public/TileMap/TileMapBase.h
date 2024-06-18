@@ -65,29 +65,29 @@ public:
     TileMapBase(GraphicDataBase& inGraphicData, bool inTrackTileUpdates);
 
     /**
-     * Adds the given floor covering to the given tile.
+     * Adds the given terrain to the given tile.
      */
     void addTerrain(const TilePosition& tilePosition,
                     const TerrainGraphicSet& graphicSet,
-                    Terrain::Height terrainHeight);
+                    Terrain::Value terrainValue);
     void addTerrain(const TilePosition& tilePosition,
                     const std::string& graphicSetID,
-                    Terrain::Height terrainHeight);
+                    Terrain::Value terrainValue);
     void addTerrain(const TilePosition& tilePosition, Uint16 graphicSetID,
-                    Terrain::Height terrainHeight);
+                    Terrain::Value terrainValue);
 
     /**
-     * Removes the given floor covering from the given tile.
-     * @return true if the tile had a floor covering to remove, else false.
+     * Removes the terrain from the given tile.
+     * @return true if the tile had terrain to remove, else false.
      */
     bool remTerrain(const TilePosition& tilePosition,
                     const TerrainGraphicSet& graphicSet,
-                    Terrain::Height terrainHeight);
+                    Terrain::Value terrainValue);
     bool remTerrain(const TilePosition& tilePosition,
                     const std::string& graphicSetID,
-                    Terrain::Height terrainHeight);
+                    Terrain::Value terrainValue);
     bool remTerrain(const TilePosition& tilePosition, Uint16 graphicSetID,
-                    Terrain::Height terrainHeight);
+                    Terrain::Value terrainValue);
 
     /**
      * Adds the given floor to the given tile.
@@ -343,13 +343,13 @@ protected:
      */
     Tile* addTileLayer(const TilePosition& tilePosition,
                        TileLayer::Type layerType, const GraphicSet& graphicSet,
-                       Uint8 graphicIndex);
+                       Uint8 graphicValue);
 
     /**
      * Adds the given layer to the given tile.
      */
     void addTileLayer(Chunk& chunk, Tile& tile, TileLayer::Type layerType,
-                      const GraphicSet& graphicSet, Uint8 graphicIndex);
+                      const GraphicSet& graphicSet, Uint8 graphicValue);
 
     /**
      * If auto rebuild is enabled, rebuilds the given tile's collision.
@@ -377,7 +377,7 @@ protected:
      */
     Tile* remTileLayer(const TilePosition& tilePosition,
                        TileLayer::Type layerType, Uint16 graphicSetID,
-                       Uint8 graphicIndex);
+                       Uint8 graphicValue);
 
     /**
      * Removes any layers with a matching type, graphic index, and graphic set 
@@ -387,7 +387,7 @@ protected:
     bool remTileLayer(Chunk& chunk, Tile& tile,
                       const ChunkPosition& chunkPosition,
                       TileLayer::Type layerType, Uint16 graphicSetID,
-                      Uint8 graphicIndex);
+                      Uint8 graphicValue);
 
     /**
      * Removes any layers with a matching type and graphic index, regardless 
@@ -396,7 +396,7 @@ protected:
      */
     bool remTileLayers(Chunk& chunk, Tile& tile,
                        const ChunkPosition& chunkPosition,
-                       TileLayer::Type layerType, Uint8 graphicIndex);
+                       TileLayer::Type layerType, Uint8 graphicValue);
 
     /**
      * Removes the North wall from the given tile. If a corner was broken,

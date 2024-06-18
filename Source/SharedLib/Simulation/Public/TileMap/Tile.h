@@ -107,15 +107,6 @@ public:
      */
     void rebuildCollision(const TilePosition& tilePosition);
 
-    /**
-     * Returns a bounding volume for this tile's terrain layer, if present.
-     * If this tile has no terrain, returns a default box.
-     *
-     * Note: Terrain always uses AABBs for collision volumes.
-     */
-    BoundingBox
-        getTerrainWorldBounds(const TilePosition& tilePosition) const;
-
     /** Returns true if this tile has no layers, else false. */
     bool isEmpty() const;
 

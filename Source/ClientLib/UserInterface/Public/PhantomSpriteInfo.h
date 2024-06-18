@@ -2,6 +2,7 @@
 
 #include "TileLayer.h"
 #include "Wall.h"
+#include "Terrain.h"
 #include "Position.h"
 #include "Sprite.h"
 
@@ -41,6 +42,9 @@ struct PhantomSpriteInfo {
 
     /** If layerType == Wall, this is the type of wall. */
     Wall::Type wallType{Wall::Type::None};
+
+    /** If layerType == Terrain, this is the starting height. */
+    Terrain::Height terrainStartHeight{Terrain::Height::Flat};
 
     /** If this is an entity phantom (layerType == None), this is the phantom's
         world position. */

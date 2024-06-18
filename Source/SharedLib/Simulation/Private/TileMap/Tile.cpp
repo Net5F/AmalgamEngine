@@ -242,8 +242,9 @@ void Tile::rebuildCollision(const TilePosition& tilePosition)
         // If it's terrain, generate collision for it.
         // (We ignore modelBounds and collisionEnabled on terrain, all terrain 
         // gets generated collision). 
-        if (layer.type == TileLayer::Type::Floor) {
-            collisionVolumes.push_back(getTerrainWorldBounds(tilePosition));
+        if (layer.type == TileLayer::Type::Terrain) {
+            collisionVolumes.push_back(Terrain::calcWorldBounds(
+                tilePosition, static_cast<Terrain::Value>(layer.graphicValue)));
         }
         // If it's a floor, skip it (they never have collision).
         else if (layer.type == TileLayer::Type::Floor) {
@@ -255,22 +256,6 @@ void Tile::rebuildCollision(const TilePosition& tilePosition)
                 calcWorldBoundsForGraphic(tilePosition, graphic));
         }
     }
-}
-
-BoundingBox
-    Tile::getTerrainWorldBounds(const TilePosition& tilePosition) const
-{
-    // If this tile doesn't have terrain, return a default box.
-    if ((layers.size() == 0) || (layers[0].type != TileLayer::Type::Terrain)) {
-        return {};
-    }
-
-    // Split the bit-packed terrain value.
-    auto [terrainHeight,
-          terrainStartHeight]{Terrain::getInfo(layers[0].graphicValue)};
-
-    return Terrain::getWorldBounds(tilePosition, terrainHeight,
-                                   terrainStartHeight);
 }
 
 bool Tile::isEmpty() const

@@ -34,7 +34,7 @@ public:
     static constexpr std::size_t TILE_WORLD_WIDTH{32};
 
     /** The z axis height, in world units, of our tiles. */
-    static constexpr std::size_t TILE_WORLD_HEIGHT{78};
+    static constexpr std::size_t TILE_WORLD_HEIGHT{84};
 
     /** The x and y axis width, in tiles, of our chunks.
         Note: This doesn't apply to the z axis. Chunks are always 1 tile tall. */
@@ -110,7 +110,7 @@ public:
         the world-space z axis height of a tile should appear on screen.
         Since Z coordinate contribution to the screen Y axis is linear, 
         this / TILE_WORLD_HEIGHT can be thought of as our "Z scaling factor" */
-    static constexpr unsigned int TILE_SIDE_SCREEN_HEIGHT{156};
+    static constexpr unsigned int TILE_SIDE_SCREEN_HEIGHT{168};
 
     /** The total width of a standard tile sprite. */
     static constexpr unsigned int TILE_SPRITE_WIDTH{256};

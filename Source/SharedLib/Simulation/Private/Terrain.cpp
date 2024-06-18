@@ -14,10 +14,10 @@ static constexpr float TWO_THIRD_HEIGHT{(SharedConfig::TILE_WORLD_HEIGHT / 3)
 
 /** World-space bounding boxes for each terrain height. */
 static constexpr std::array<BoundingBox, Terrain::Height::Count> TERRAIN_BOXES{
-    {{0, 0, 0, WIDTH, WIDTH, 0},
-     {0, 0, 0, WIDTH, WIDTH, ONE_THIRD_HEIGHT},
-     {0, 0, 0, WIDTH, WIDTH, TWO_THIRD_HEIGHT},
-     {0, 0, 0, WIDTH, WIDTH, HEIGHT}}};
+    {{0, WIDTH, 0, WIDTH, 0, 0},
+     {0, WIDTH, 0, WIDTH, 0, ONE_THIRD_HEIGHT},
+     {0, WIDTH, 0, WIDTH, 0, TWO_THIRD_HEIGHT},
+     {0, WIDTH, 0, WIDTH, 0, HEIGHT}}};
 
 /** World-space height offsets for each height value. */
 static constexpr std::array<float, Terrain::Height::Count> HEIGHT_VALUES{
@@ -29,7 +29,7 @@ static constexpr std::array<float, Terrain::Height::Count> HEIGHT_VALUES{
 
 Terrain::Height Terrain::getHeight(Value value)
 {
-    Height height{static_cast<Height>(value & HEIGHT_MASK)};
+    Height height{static_cast<Height>(value >> 4)};
     AM_ASSERT(height < Height::Count, "Invalid terrain height.");
 
     return height;
@@ -43,9 +43,9 @@ Terrain::Height Terrain::getStartHeight(Value value)
     return startHeight;
 }
 
-Terrain::InfoReturn Terrain::getInfo(Terrain::Value value)
+Terrain::InfoReturn Terrain::getInfo(Value value)
 {
-    Height height{static_cast<Height>(value & HEIGHT_MASK)};
+    Height height{static_cast<Height>(value >> 4)};
     Height startHeight{static_cast<Height>(value & START_HEIGHT_MASK)};
     AM_ASSERT(height < Height::Count, "Invalid terrain height.");
     AM_ASSERT(startHeight < Height::Count, "Invalid terrain start height.");
@@ -53,11 +53,20 @@ Terrain::InfoReturn Terrain::getInfo(Terrain::Value value)
     return {height, startHeight};
 }
 
-BoundingBox Terrain::getWorldBounds(const TilePosition& tilePosition,
-                                    Height height, Height startHeight)
+Terrain::Value Terrain::toValue(Height height, Height startHeight)
 {
-    AM_ASSERT(height < Height::Count, "Invalid terrain height.");
-    AM_ASSERT(startHeight < Height::Count, "Invalid terrain start height.");
+    return (height << 4) | startHeight;
+}
+
+float Terrain::getHeightWorldValue(Height height)
+{
+    return HEIGHT_VALUES[height];
+}
+
+BoundingBox Terrain::calcWorldBounds(const TilePosition& tilePosition,
+                                     Value value)
+{
+    auto [height, startHeight]{getInfo(value)};
 
     // Get the appropriate bounds for the given tile height.
     BoundingBox bounds{TERRAIN_BOXES[height]};

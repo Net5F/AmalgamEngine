@@ -153,7 +153,7 @@ void TileUpdateSystem::addTileLayer(const TileAddLayer& addLayerRequest)
     if (addLayerRequest.layerType == TileLayer::Type::Terrain) {
         world.tileMap.addTerrain(
             addLayerRequest.tilePosition, addLayerRequest.graphicSetID,
-            static_cast<Terrain::Height>(addLayerRequest.graphicValue));
+            static_cast<Terrain::Value>(addLayerRequest.graphicValue));
     }
     else if (addLayerRequest.layerType == TileLayer::Type::Floor) {
         world.tileMap.addFloor(

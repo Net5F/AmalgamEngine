@@ -112,8 +112,10 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
     for (const PhantomSpriteInfo& info : phantomSprites) {
         if (info.layerType != TileLayer::Type::None) {
             GraphicRef graphic{*(info.sprite)};
-            pushTileSprite(graphic, camera,
-                           {info.tilePosition, info.layerType, 0, 0}, true);
+            pushTileSprite(
+                graphic, camera,
+                {info.tilePosition, info.layerType, 0, info.terrainStartHeight},
+                true);
         }
     }
 }
@@ -156,6 +158,7 @@ void WorldSpriteSorter::pushTerrainSprites(
         tile.getLayers(TileLayer::Type::Terrain)};
     for (const TileLayer& terrain : terrains) {
         GraphicRef graphic{terrain.getGraphic()};
+        Terrain::Value terrainValue{terrain.graphicValue};
         if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
             // If the UI wants this sprite replaced with a phantom, replace it.
             auto phantomSpriteInfo = std::find_if(
@@ -166,13 +169,13 @@ void WorldSpriteSorter::pushTerrainSprites(
                 });
             if (phantomSpriteInfo != phantomSprites.end()) {
                 graphic = GraphicRef{*(phantomSpriteInfo->sprite)};
+                terrainValue = phantomSpriteInfo->terrainStartHeight;
                 phantomSprites.erase(phantomSpriteInfo);
             }
 
             pushTileSprite(graphic, camera,
                            {tilePosition, TileLayer::Type::Terrain,
-                            terrain.graphicSet.get().numericID,
-                            terrain.graphicValue},
+                            terrain.graphicSet.get().numericID, terrainValue},
                            false);
         }
     }
@@ -272,6 +275,14 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     SDL_FRect screenExtent{ClientTransforms::tileToScreenExtent(
         layerID.tilePosition, renderData, camera)};
 
+    // If this is a terrain sprite, offset it by its starting height.
+    if (layerID.type == TileLayer::Type::Terrain) {
+        Terrain::Height startHeight{
+            Terrain::getStartHeight(layerID.graphicValue)};
+        screenExtent.y -= Transforms::worldZToScreenY(
+            Terrain::getHeightWorldValue(startHeight), camera.zoomFactor);
+    }
+
     // If this sprite isn't on screen, skip it.
     if (!isWithinScreenBounds(screenExtent, camera)) {
         return;
@@ -292,9 +303,8 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     if (layerID.type == TileLayer::Type::Terrain) {
         // Terrain is unique: we ignore the sprite's modelBounds and instead 
         // generate a bounding volume based on the terrain type.
-        BoundingBox worldBounds{
-            tileMap.getTile(layerID.tilePosition)
-                ->getTerrainWorldBounds(layerID.tilePosition)};
+        BoundingBox worldBounds{Terrain::calcWorldBounds(layerID.tilePosition,
+                                                         layerID.graphicValue)};
         spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
                                    screenExtent, colorMod);
     }

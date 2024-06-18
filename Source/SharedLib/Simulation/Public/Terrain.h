@@ -38,6 +38,10 @@ struct Terrain {
     /** Bitmask for getting the starting height of the terrain. */
     static constexpr Uint8 START_HEIGHT_MASK{0b00001111};
 
+    /** The maximum value that height + startHeight can equal.
+        Any higher value would push the terrain above the tile bounds. */
+    static constexpr Uint8 MAX_COMBINED_HEIGHT{4};
+
     /**
      * Returns the height field from the given terrain value.
      */
@@ -62,10 +66,23 @@ struct Terrain {
     static InfoReturn getInfo(Value value);
 
     /**
-     * Returns an appropriate bounding box for the given terrain info.
+     * Builds a Value out of the given terrain height and start height.
      */
-    static BoundingBox getWorldBounds(const TilePosition& tilePosition,
-                                      Height height, Height startHeight);
+    static Value toValue(Height height, Height startHeight);
+
+    /**
+     * Returns the given height value in Z-axis world units.
+     */
+    static float getHeightWorldValue(Height height);
+
+    /**
+     * Returns a bounding volume matching the given terrain value, translated to
+     * world space and offset to the given tile coords.
+     *
+     * Note: Terrain always uses AABBs for collision volumes.
+     */
+    static BoundingBox calcWorldBounds(const TilePosition& tilePosition,
+                                       Value value);
 };
 
 } // End namespace AM
