@@ -44,20 +44,13 @@ private:
     void sendChunkUpdate(const ChunkDataRequest& chunkDataRequest);
 
     /**
-     * Adds the given chunk to the given UpdateChunks message.
+     * Adds the given chunk to the given ChunkUpdate message.
      *
      * @param chunkPosition  The position of the chunk to add.
      * @param chunkUpdate  The message struct to add the chunk to.
      */
     void addChunkToMessage(const ChunkPosition& chunkPosition,
                            ChunkUpdate& chunkUpdate);
-
-    /**
-     * Adds the sprite layers from the given tile to the given tile snapshot
-     * and the given chunk snapshot's palette.
-     */
-    void addTileLayersToSnapshot(const Tile& tile, TileSnapshot& tileSnapshot,
-                                 ChunkWireSnapshot& chunkSnapshot);
 
     /** Used for fetching entity, component, and map data. */
     World& world;

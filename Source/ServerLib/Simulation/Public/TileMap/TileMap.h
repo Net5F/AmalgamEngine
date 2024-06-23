@@ -52,11 +52,9 @@ private:
     void load(TileMapSnapshot& mapSnapshot);
 
     /**
-     * Adds the sprite layers from the given tile to the given tile snapshot
-     * and the given chunk snapshot's palette.
+     * Copies the given chunk's data into the given snapshot.
      */
-    void addTileLayersToSnapshot(const Tile& tile, TileSnapshot& tileSnapshot,
-                                 ChunkSnapshot& chunkSnapshot);
+    void saveChunkToSnapshot(const Chunk& chunk, ChunkSnapshot& chunkSnapshot);
 };
 
 } // End namespace Server

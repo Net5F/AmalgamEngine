@@ -7,7 +7,6 @@
 #include "PreviousPosition.h"
 #include "ChunkUpdate.h"
 #include "Tile.h"
-#include "TileSnapshot.h"
 #include "ChunkWireSnapshot.h"
 #include "SharedConfig.h"
 #include "Log.h"
@@ -65,27 +64,34 @@ void ChunkStreamingSystem::addChunkToMessage(const ChunkPosition& chunkPosition,
         chunkSnapshot.z = chunkPosition.z;
 
         // Copy all of the chunk's tile layers into the snapshot.
+        chunkSnapshot.tileLayers.resize(chunk->tileLayerCount);
+        std::size_t tileLayersIndex{0};
         for (std::size_t tileIndex{0};
              tileIndex < SharedConfig::CHUNK_TILE_COUNT; tileIndex++) {
-            addTileLayersToSnapshot(chunk->tiles[tileIndex],
-                                    chunkSnapshot.tiles[tileIndex],
-                                    chunkSnapshot);
+            // Add this tile's layer count.
+            const Tile& tile{chunk->tiles[tileIndex]};
+            chunkSnapshot.tileLayerCounts[tileIndex]
+                = static_cast<Uint8>(tile.getAllLayers().size());
+
+            // Add all of this tile's layers.
+            for (const TileLayer& layer : tile.getAllLayers()) {
+                std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
+                    layer.type, layer.graphicSet.get().numericID,
+                    layer.graphicValue)};
+                chunkSnapshot.tileLayers[tileLayersIndex]
+                    = static_cast<Uint8>(paletteIndex);
+                tileLayersIndex++;
+
+                // If this is a Floor or Object, add its tile offset.
+                if ((layer.type == TileLayer::Type::Floor)
+                    || (layer.type == TileLayer::Type::Object)) {
+                    chunkSnapshot.tileOffsets.emplace_back(layer.tileOffset);
+                }
+            }
         }
     }
     else {
         // This chunk doesn't exist, we don't need to send anything.
-    }
-}
-
-void ChunkStreamingSystem::addTileLayersToSnapshot(
-    const Tile& tile, TileSnapshot& tileSnapshot,
-    ChunkWireSnapshot& chunkSnapshot)
-{
-    // Add all of the tile's layers.
-    for (const TileLayer& layer : tile.getAllLayers()) {
-        std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            layer.type, layer.graphicSet.get().numericID, layer.graphicValue)};
-        tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
     }
 }
 

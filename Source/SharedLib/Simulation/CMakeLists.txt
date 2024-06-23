@@ -39,8 +39,6 @@ target_sources(SharedLib
         Public/Ray.h
         Public/ReplicatedComponent.h
         Public/ResourceData.h
-        Public/Terrain.h
-        Public/Wall.h
         Public/Components/Camera.h
         Public/Components/Collision.h
         Public/Components/EntityInitScript.h
@@ -75,14 +73,16 @@ target_sources(SharedLib
         Public/TileMap/ChunkExtent.h
         Public/TileMap/ChunkPosition.h
         Public/TileMap/ChunkSnapshot.h
+        Public/TileMap/Terrain.h
         Public/TileMap/Tile.h
         Public/TileMap/TileLayer.h
         Public/TileMap/TileLayerID.h
         Public/TileMap/TileExtent.h
         Public/TileMap/TileMapBase.h
         Public/TileMap/TileMapSnapshot.h
+        Public/TileMap/TileOffset.h
         Public/TileMap/TilePosition.h
-        Public/TileMap/TileSnapshot.h
+        Public/TileMap/Wall.h
         Public/TypeLists/EngineReplicatedComponentTypes.h
 )
 

@@ -37,43 +37,49 @@ public:
     /**
      * Adds the given layer to this tile.
      */
-    void addLayer(TileLayer::Type layerType, const GraphicSet& graphicSet,
-                  Uint8 graphicValue);
+    void addLayer(const TileOffset& tileOffset, TileLayer::Type layerType,
+                  const GraphicSet& graphicSet, Uint8 graphicValue);
+
+    /**
+     * Removes any layers with a matching offset, type, graphic index, and
+     * graphic set.
+     *
+     * @return true if the tile had any matching layers to remove, else false.
+     */
+    std::size_t removeLayers(const TileOffset& tileOffset,
+                             TileLayer::Type layerType, Uint16 graphicSetID,
+                             Uint8 graphicValue);
 
     /**
      * Removes any layers with a matching type, graphic index, and graphic set.
      *
-     * Note: This function is named singularly even though it may remove 
-     *       multiple layers, because typically there will only be one layer 
-     *       that matches all 3 values.
-     *
      * @return true if the tile had any matching layers to remove, else false.
      */
-    bool removeLayer(TileLayer::Type layerType, Uint16 graphicSetID,
-                     Uint8 graphicValue);
+    std::size_t removeLayers(TileLayer::Type layerType, Uint16 graphicSetID,
+                             Uint8 graphicValue);
 
     /**
      * Removes any layers with a matching type and graphic index, regardless 
-     * of their graphic set.
+     * of their graphic set or offset.
      *
-     * @return true if the tile had any matching layers to remove, else false.
+     * @return The number of matching layers that were removed.
      */
-    bool removeLayers(TileLayer::Type layerType, Uint8 graphicValue);
+    std::size_t removeLayers(TileLayer::Type layerType, Uint8 graphicValue);
 
     /**
      * Clears all layers of the given types from this tile.
      *
-     * @return true if any layers were cleared. false if the tile was empty.
+     * @return The number of matching layers that were cleared.
      */
-    bool clearLayers(
+    std::size_t clearLayers(
         const std::array<bool, TileLayer::Type::Count>& layerTypesToRemove);
 
     /**
      * Clears all of this tile's layers.
      *
-     * @return true if any layers were cleared. false if the tile was empty.
+     * @return The number of layers that were cleared.
      */
-    bool clear();
+    std::size_t clear();
 
     /**
      * @return This tile's layers of the given type, if it has any.

@@ -15,6 +15,10 @@ struct Terrain {
      *   Start Height (4b)
      *     How high the terrain block should be placed within the tile.
      *
+     * The start height field allows us to conserve space. One could imagine 
+     * using Terrain::tileOffset instead, but packing it into graphicValue 
+     * saves us from sending an extra 3B for every piece of terrain.
+     *
      * Note: Terrain must never extend beyond the bounds of its tile.
      */
     using Value = Uint8;
@@ -51,6 +55,12 @@ struct Terrain {
      * Returns the start height field from the given terrain value.
      */
     static Height getStartHeight(Value value);
+
+    /**
+     * Returns the height of the top face of the given terrain value.
+     * This is equal to height + start height.
+     */
+    static Height getTotalHeight(Value value);
 
     struct InfoReturn
     {

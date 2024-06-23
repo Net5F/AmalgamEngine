@@ -3,6 +3,9 @@
 #include "Camera.h"
 #include "Sprite.h"
 #include "SpriteRenderData.h"
+#include "Position.h"
+#include "TilePosition.h"
+#include "TileOffset.h"
 #include "SharedConfig.h"
 #include "Log.h"
 
@@ -48,37 +51,32 @@ SDL_FRect
     return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 }
 
-SDL_FRect
-    ClientTransforms::tileToScreenExtent(const TilePosition& position,
-                                         const SpriteRenderData& renderData,
-                                         const Camera& camera)
+SDL_FRect ClientTransforms::tileToScreenExtent(
+    const TilePosition& tilePosition, const TileOffset& tileOffset,
+    const SpriteRenderData& renderData, const Camera& camera)
 {
-    // Convert tile position to isometric screen point.
-    float screenX{(position.x - position.y)
-                  * (SharedConfig::TILE_FACE_SCREEN_WIDTH / 2.f)};
-    float screenY{(position.x + position.y)
-                  * (SharedConfig::TILE_FACE_SCREEN_HEIGHT / 2.f)};
-
-    // The Z coordinate contribution is independent of X/Y and only affects the
-    // screen's Y axis. Scale and apply it.
-    screenY -= (position.z * SharedConfig::TILE_WORLD_HEIGHT
-                * Transforms::TILE_SIDE_HEIGHT_WORLD_TO_SCREEN);
+    // Transform the position to a point in screen space.
+    // Note: This applies the camera's zoom to the position, so we don't need
+    //       to do it again.
+    Position tileOrigin{tilePosition.getOriginPosition()};
+    Position position{tileOrigin.x + static_cast<float>(tileOffset.x),
+                      tileOrigin.y + static_cast<float>(tileOffset.y),
+                      tileOrigin.z + static_cast<float>(tileOffset.z)};
+    SDL_FPoint screenPoint{
+        Transforms::worldToScreen(position, camera.zoomFactor)};
 
     // In an iso view, the (0, 0) point of a tile is halfway through the width
     // of the sprite. Thus, we have to shift the tile back to align it.
-    screenX -= (SharedConfig::TILE_FACE_SCREEN_WIDTH / 2.f);
+    screenPoint.x
+        -= (SharedConfig::TILE_FACE_SCREEN_WIDTH / 2.f * camera.zoomFactor);
 
     // An iso sprite may have extra vertical space to show depth, we subtract
     // that space to align it.
-    screenY -= renderData.yOffset;
-
-    // Apply the camera zoom.
-    screenX *= camera.zoomFactor;
-    screenY *= camera.zoomFactor;
+    screenPoint.y -= (renderData.yOffset * camera.zoomFactor);
 
     // Apply the camera adjustment.
-    float adjustedX{screenX - camera.screenExtent.x};
-    float adjustedY{screenY - camera.screenExtent.y};
+    float adjustedX{screenPoint.x - camera.screenExtent.x};
+    float adjustedY{screenPoint.y - camera.screenExtent.y};
 
     // Apply the camera's zoom to the tile size.
     float zoomedWidth{renderData.textureExtent.w * camera.zoomFactor};

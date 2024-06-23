@@ -137,6 +137,11 @@ private:
     bool isWithinScreenBounds(const SDL_FRect& extent, const Camera& camera);
 
     /**
+     * Returns an appropriate graphic for the given phantom info.
+     */
+    GraphicRef getPhantomGraphic(const PhantomSpriteInfo& phantomSpriteInfo);
+
+    /**
      * Returns a color mod from spriteColorMods for the given world object ID
      * if one exists, else returns {255, 255, 255, 255}.
      * If a color mod is returned, it will be removed from spriteColorMods.

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "GraphicRef.h"
-#include "Wall.h"
-#include "Terrain.h"
+#include "TileOffset.h"
 #include <span>
+#include <functional>
 
 namespace AM
 {
@@ -25,6 +25,12 @@ struct TileLayer {
         Count,
         None
     };
+
+    /** If type == Floor or Object, this is how far this layer is offset from 
+        its tile position.
+        Note: Terrain and Walls don't use this. Terrain is always aligned to 
+              the tile, and Walls always match the Terrain height. */
+    TileOffset tileOffset{};
 
     /** This layer's type.
         This must always be set to a valid type (not None). */
@@ -49,6 +55,8 @@ struct TileLayer {
      * graphicSet.graphics[graphicIndex].
      */
     GraphicRef getGraphic() const;
+    static GraphicRef getGraphic(Type type, const GraphicSet& graphicSet,
+                                 Uint8 graphicValue);
 };
 
 } // End namespace AM

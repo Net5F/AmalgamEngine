@@ -36,7 +36,7 @@ struct TileMapSnapshot {
     /** The length, in chunks, of the map's Z axis. */
     Uint16 zLengthChunks{0};
 
-    /** The chunks that make up this map, stored in row-major order. */
+    /** The chunks that make up this map. */
     std::unordered_map<ChunkPosition, ChunkSnapshot> chunks;
 };
 

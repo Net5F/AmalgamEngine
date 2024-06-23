@@ -14,8 +14,8 @@
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
 #include "TileExtentClearLayers.h"
-#include "TileSnapshot.h"
 #include "TileLayer.h"
+#include "Morton.h"
 #include "AMAssert.h"
 #include <vector>
 #include <unordered_map>
@@ -23,17 +23,11 @@
 #include <type_traits>
 #include <expected>
 
-/** Concept to match ChunkSnapshot and ChunkWireSnapshot. */
-template<typename T>
-concept IsChunkSnapshotType = requires(T a)
-{
-    a.palette;
-    a.tiles;
-};
-
 namespace AM
 {
 struct TileMapSnapshot;
+struct ChunkSnapshot;
+struct ChunkWireSnapshot;
 
 /**
  * Owns and manages the world's tile map state.
@@ -80,25 +74,21 @@ public:
      * Removes the terrain from the given tile.
      * @return true if the tile had terrain to remove, else false.
      */
-    bool remTerrain(const TilePosition& tilePosition,
-                    const TerrainGraphicSet& graphicSet,
-                    Terrain::Value terrainValue);
-    bool remTerrain(const TilePosition& tilePosition,
-                    const std::string& graphicSetID,
-                    Terrain::Value terrainValue);
-    bool remTerrain(const TilePosition& tilePosition, Uint16 graphicSetID,
-                    Terrain::Value terrainValue);
+    bool remTerrain(const TilePosition& tilePosition);
 
     /**
      * Adds the given floor to the given tile.
      */
     void addFloor(const TilePosition& tilePosition,
+                  const TileOffset& tileOffset,
                   const FloorGraphicSet& graphicSet,
                   Rotation::Direction rotation);
     void addFloor(const TilePosition& tilePosition,
+                  const TileOffset& tileOffset,
                   const std::string& graphicSetID,
                   Rotation::Direction rotation);
-    void addFloor(const TilePosition& tilePosition, Uint16 graphicSetID,
+    void addFloor(const TilePosition& tilePosition,
+                  const TileOffset& tileOffset, Uint16 graphicSetID,
                   Rotation::Direction rotation);
 
     /**
@@ -106,12 +96,14 @@ public:
      * @return true if the tile had an object to remove, else false.
      */
     bool remFloor(const TilePosition& tilePosition,
+                  const TileOffset& tileOffset,
                   const FloorGraphicSet& graphicSet,
                   Rotation::Direction rotation);
     bool remFloor(const TilePosition& tilePosition,
-                  const std::string& graphicSetID,
+                  const TileOffset& tileOffset, const std::string& graphicSetID,
                   Rotation::Direction rotation);
-    bool remFloor(const TilePosition& tilePosition, Uint16 graphicSetID,
+    bool remFloor(const TilePosition& tilePosition,
+                  const TileOffset& tileOffset, Uint16 graphicSetID,
                   Rotation::Direction rotation);
 
     /**
@@ -138,12 +130,15 @@ public:
      * Adds the given object to the given tile.
      */
     void addObject(const TilePosition& tilePosition,
+                   const TileOffset& tileOffset,
                    const ObjectGraphicSet& graphicSet,
                    Rotation::Direction rotation);
     void addObject(const TilePosition& tilePosition,
+                   const TileOffset& tileOffset,
                    const std::string& graphicSetID,
                    Rotation::Direction rotation);
-    void addObject(const TilePosition& tilePosition, Uint16 graphicSetID,
+    void addObject(const TilePosition& tilePosition,
+                   const TileOffset& tileOffset, Uint16 graphicSetID,
                    Rotation::Direction rotation);
 
     /**
@@ -151,12 +146,15 @@ public:
      * @return true if the tile had an object to remove, else false.
      */
     bool remObject(const TilePosition& tilePosition,
+                   const TileOffset& tileOffset,
                    const ObjectGraphicSet& graphicSet,
                    Rotation::Direction rotation);
     bool remObject(const TilePosition& tilePosition,
+                   const TileOffset& tileOffset,
                    const std::string& graphicSetID,
                    Rotation::Direction rotation);
-    bool remObject(const TilePosition& tilePosition, Uint16 graphicSetID,
+    bool remObject(const TilePosition& tilePosition,
+                   const TileOffset& tileOffset, Uint16 graphicSetID,
                    Rotation::Direction rotation);
 
     /**
@@ -217,6 +215,7 @@ public:
     /**
      * Returns a const pointer to the chunk at the given coordinates, or nullptr 
      * if the chunk doesn't exist (out of bounds, empty).
+     * Note: Make sure to nullptr check these! Chunks are commonly empty. 
      */
     const Chunk* getChunk(const ChunkPosition& chunkPosition) const;
     /** This lets us call getChunk on a non-const TileMap& without casting. */
@@ -225,6 +224,7 @@ public:
     /**
      * Returns a const pointer to the tile at the given coordinates, or nullptr 
      * if the tile doesn't exist (out of bounds, parent chunk is empty).
+     * Note: Make sure to nullptr check these! Chunks are commonly empty. 
      */
     const Tile* getTile(const TilePosition& tilePosition) const;
     const Tile* cgetTile(const TilePosition& tilePosition) const;
@@ -273,12 +273,12 @@ public:
     void clearTileUpdateHistory();
 
     /**
-     * Adds the graphic layers from the given snapshot to the given tile.
+     * Adds the tile layers from the given chunk snapshot to the map.
      */
-    template<IsChunkSnapshotType T>
-    void addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
-                                 const T& chunkSnapshot,
-                                 const TilePosition& tilePosition);
+    void loadChunk(const ChunkSnapshot& chunkSnapshot,
+                   const ChunkPosition& chunkPosition);
+    void loadChunk(const ChunkWireSnapshot& chunkSnapshot,
+                   const ChunkPosition& chunkPosition);
 
 protected:
     enum class ChunkError {
@@ -342,14 +342,15 @@ protected:
      *         the map bounds).
      */
     Tile* addTileLayer(const TilePosition& tilePosition,
-                       TileLayer::Type layerType, const GraphicSet& graphicSet,
-                       Uint8 graphicValue);
+                       const TileOffset& tileOffset, TileLayer::Type layerType,
+                       const GraphicSet& graphicSet, Uint8 graphicValue);
 
     /**
      * Adds the given layer to the given tile.
      */
-    void addTileLayer(Chunk& chunk, Tile& tile, TileLayer::Type layerType,
-                      const GraphicSet& graphicSet, Uint8 graphicValue);
+    void addTileLayer(Chunk& chunk, Tile& tile, const TileOffset& tileOffset,
+                      TileLayer::Type layerType, const GraphicSet& graphicSet,
+                      Uint8 graphicValue);
 
     /**
      * If auto rebuild is enabled, rebuilds the given tile's collision.
@@ -370,7 +371,17 @@ protected:
                      const WallGraphicSet& graphicSet);
 
     /**
-     * Removes any layers with a matching type, graphic index, and graphic set 
+     * Removes any layers with a matching offset, type, graphic index, and
+     * graphic set from the specified tile.
+     * @return The tile that was removed from, or nullptr (tilePosition was 
+     *         outside of the map bounds, layer didn't exist).
+     */
+    Tile* remTileLayer(const TilePosition& tilePosition,
+                       const TileOffset& tileOffset, TileLayer::Type layerType,
+                       Uint16 graphicSetID, Uint8 graphicValue);
+
+    /**
+     * Removes any layers with a matching, type, graphic index, and graphic set
      * from the specified tile.
      * @return The tile that was removed from, or nullptr (tilePosition was 
      *         outside of the map bounds, layer didn't exist).
@@ -380,7 +391,17 @@ protected:
                        Uint8 graphicValue);
 
     /**
-     * Removes any layers with a matching type, graphic index, and graphic set 
+     * Removes any layers with a matching offset, type, graphic index, and
+     * graphic set from the given tile.
+     * @return true if the tile had any matching layers to remove, else false.
+     */
+    bool remTileLayer(Chunk& chunk, Tile& tile,
+                      const ChunkPosition& chunkPosition,
+                      const TileOffset& tileOffset, TileLayer::Type layerType,
+                      Uint16 graphicSetID, Uint8 graphicValue);
+
+    /**
+     * Removes any layers with a matching type, graphic index, and graphic set
      * from the given tile.
      * @return true if the tile had any matching layers to remove, else false.
      */
@@ -391,7 +412,7 @@ protected:
 
     /**
      * Removes any layers with a matching type and graphic index, regardless 
-     * of their graphic set.
+     * of their graphic set or offset.
      * @return true if the tile had any matching layers to remove, else false.
      */
     bool remTileLayers(Chunk& chunk, Tile& tile,
@@ -418,6 +439,13 @@ protected:
     Tile* clearTileLayersInternal(
         const TilePosition& tilePosition,
         const std::array<bool, TileLayer::Type::Count>& layerTypesToClear);
+
+    /**
+     * Adds the tile layers from the given chunk snapshot to the map.
+     */
+    template<typename T>
+    void loadChunkInternal(const T& chunkSnapshot,
+                           const ChunkPosition& chunkPosition);
 
     /**
      * Returns a bool array of layer types to clear, based on the given
@@ -462,64 +490,5 @@ private:
         clears it. */
     std::vector<TileUpdateVariant> tileUpdateHistory;
 };
-
-template<IsChunkSnapshotType T>
-void TileMapBase::addSnapshotLayersToTile(const TileSnapshot& tileSnapshot,
-                                          const T& chunkSnapshot,
-                                          const TilePosition& tilePosition)
-{
-    // Note: We can't use the set/add functions because they'll push updates
-    //       into the history, and addWall() adds extra walls.
-
-    // Iterate the tile snapshot and add each tile layer.
-    bool rebuildCollision{false};
-    auto [chunk, tile] = getOrCreateTile(tilePosition);
-    for (Uint8 paletteIndex : tileSnapshot.layers) {
-        const auto& paletteEntry{chunkSnapshot.palette[paletteIndex]};
-
-        // Get this layer's graphic set.
-        const GraphicSet* graphicSet{nullptr};
-        switch (paletteEntry.layerType) {
-            case TileLayer::Type::Terrain: {
-                graphicSet = &(graphicData.getTerrainGraphicSet(
-                    paletteEntry.graphicSetID));
-                rebuildCollision = true;
-                break;
-            }
-            case TileLayer::Type::Floor: {
-                graphicSet = &(
-                    graphicData.getFloorGraphicSet(paletteEntry.graphicSetID));
-                break;
-            }
-            case TileLayer::Type::Wall: {
-                graphicSet = &(
-                    graphicData.getWallGraphicSet(paletteEntry.graphicSetID));
-                rebuildCollision = true;
-                break;
-            }
-            case TileLayer::Type::Object: {
-                graphicSet = &(
-                    graphicData.getObjectGraphicSet(paletteEntry.graphicSetID));
-                rebuildCollision = true;
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-
-        if (!graphicSet) {
-            LOG_FATAL("Graphic set was not found for loaded tile layer.");
-        }
-
-        // Add the layer to the tile.
-        addTileLayer(*chunk, *tile, paletteEntry.layerType, *graphicSet,
-                     paletteEntry.graphicValue);
-    }
-
-    if (rebuildCollision) {
-        rebuildTileCollision(*tile, tilePosition);
-    }
-}
 
 } // End namespace AM

@@ -43,6 +43,12 @@ Terrain::Height Terrain::getStartHeight(Value value)
     return startHeight;
 }
 
+Terrain::Height Terrain::getTotalHeight(Value value)
+{
+    auto [height, startHeight]{getInfo(value)};
+    return static_cast<Terrain::Height>(height + startHeight);
+}
+
 Terrain::InfoReturn Terrain::getInfo(Value value)
 {
     Height height{static_cast<Height>(value >> 4)};
@@ -71,14 +77,14 @@ BoundingBox Terrain::calcWorldBounds(const TilePosition& tilePosition,
     // Get the appropriate bounds for the given tile height.
     BoundingBox bounds{TERRAIN_BOXES[height]};
 
-    // Move the bounds to the tile position.
-    Position tilePos{tilePosition.getOriginPosition()};
-    bounds.minX += tilePos.x;
-    bounds.maxX += tilePos.x;
-    bounds.minY += tilePos.y;
-    bounds.maxY += tilePos.y;
-    bounds.minZ += tilePos.z;
-    bounds.maxZ += tilePos.z;
+    // Move the bounds to the tile's origin.
+    Position tileOrigin{tilePosition.getOriginPosition()};
+    bounds.minX += tileOrigin.x;
+    bounds.maxX += tileOrigin.x;
+    bounds.minY += tileOrigin.y;
+    bounds.maxY += tileOrigin.y;
+    bounds.minZ += tileOrigin.z;
+    bounds.maxZ += tileOrigin.z;
 
     // Raise the bounds based on the given start height.
     bounds.minZ += HEIGHT_VALUES[startHeight];

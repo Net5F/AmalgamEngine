@@ -12,11 +12,16 @@ const std::vector<BoundingBox>& Tile::getCollisionVolumes() const
     return collisionVolumes;
 }
 
-void Tile::addLayer(TileLayer::Type layerType, const GraphicSet& graphicSet,
-                    Uint8 graphicValue)
+void Tile::addLayer(const TileOffset& tileOffset, TileLayer::Type layerType,
+                    const GraphicSet& graphicSet, Uint8 graphicValue)
 {
+    if (layers.size() == UINT8_MAX) {
+        LOG_INFO("Failed to add layer: limit reached.");
+        return;
+    }
+
     // Insert the new layer, being careful to keep the vector sorted.
-    TileLayer newLayer{layerType, graphicValue, graphicSet};
+    TileLayer newLayer{tileOffset, layerType, graphicValue, graphicSet};
     layers.insert(
         std::lower_bound(layers.begin(), layers.end(), newLayer,
                          [](const TileLayer& layer, const TileLayer& newLayer) {
@@ -25,7 +30,34 @@ void Tile::addLayer(TileLayer::Type layerType, const GraphicSet& graphicSet,
         newLayer);
 }
 
-bool Tile::removeLayer(TileLayer::Type layerType, Uint16 graphicSetID,
+std::size_t Tile::removeLayers(const TileOffset& tileOffset, TileLayer::Type layerType,
+                       Uint16 graphicSetID, Uint8 graphicValue)
+{
+    // Erase any layers with a matching type, graphic index, and graphic set.
+    std::size_t numErased{0};
+    for (auto it{layers.begin()}; it != layers.end();) {
+        TileLayer& layer{*it};
+
+        // If this layer matches, erase it.
+        if ((layer.tileOffset == tileOffset) && (layer.type == layerType)
+            && (layer.graphicValue == graphicValue)
+            && (layer.graphicSet.get().numericID == graphicSetID)) {
+            it = layers.erase(it);
+            numErased++;
+        }
+        // If we've reached a type past the desired one, stop looking.
+        else if (layer.type == (layerType + 1)) {
+            break;
+        }
+        else {
+            it++;
+        }
+    }
+
+    return numErased;
+}
+
+std::size_t Tile::removeLayers(TileLayer::Type layerType, Uint16 graphicSetID,
                        Uint8 graphicValue)
 {
     // Erase any layers with a matching type, graphic index, and graphic set.
@@ -48,10 +80,10 @@ bool Tile::removeLayer(TileLayer::Type layerType, Uint16 graphicSetID,
         }
     }
 
-    return (numErased > 0);
+    return numErased;
 }
 
-bool Tile::removeLayers(TileLayer::Type layerType, Uint8 graphicValue)
+std::size_t Tile::removeLayers(TileLayer::Type layerType, Uint8 graphicValue)
 {
     // Erase any layers with a matching type and graphic index.
     std::size_t numErased{0};
@@ -72,10 +104,10 @@ bool Tile::removeLayers(TileLayer::Type layerType, Uint8 graphicValue)
         }
     }
 
-    return (numErased > 0);
+    return numErased;
 }
 
-bool Tile::clearLayers(
+std::size_t Tile::clearLayers(
     const std::array<bool, TileLayer::Type::Count>& layerTypesToClear)
 {
     // Erase any layers with a matching type.
@@ -83,16 +115,16 @@ bool Tile::clearLayers(
         return layerTypesToClear[layer.type];
     })};
 
-    return (numErased > 0);
+    return numErased;
 }
 
-bool Tile::clear()
+std::size_t Tile::clear()
 {
-    bool notEmpty{layers.size() > 0};
+    std::size_t layerCount{layers.size()};
 
     layers.clear();
 
-    return notEmpty;
+    return layerCount;
 }
 
 std::span<TileLayer> Tile::getLayers(TileLayer::Type layerType)
@@ -236,15 +268,18 @@ void Tile::rebuildCollision(const TilePosition& tilePosition)
     collisionVolumes.clear();
 
     // Add all of this tile's layers that have collision.
+    float terrainHeight{0};
     for (const TileLayer& layer : layers) {
         GraphicRef graphic{layer.getGraphic()};
 
         // If it's terrain, generate collision for it.
         // (We ignore modelBounds and collisionEnabled on terrain, all terrain 
         // gets generated collision). 
+        BoundingBox bounds{};
         if (layer.type == TileLayer::Type::Terrain) {
-            collisionVolumes.push_back(Terrain::calcWorldBounds(
-                tilePosition, static_cast<Terrain::Value>(layer.graphicValue)));
+            bounds = Terrain::calcWorldBounds(
+                tilePosition, static_cast<Terrain::Value>(layer.graphicValue));
+            terrainHeight = bounds.maxZ;
         }
         // If it's a floor, skip it (they never have collision).
         else if (layer.type == TileLayer::Type::Floor) {
@@ -252,9 +287,16 @@ void Tile::rebuildCollision(const TilePosition& tilePosition)
         }
         // If it's a wall or object, add its assigned collision.
         else if (graphic.getCollisionEnabled()) {
-            collisionVolumes.push_back(
-                calcWorldBoundsForGraphic(tilePosition, graphic));
+            bounds = calcWorldBoundsForGraphic(tilePosition, graphic);
+
+            // If it's a wall, add the terrain height.
+            if (layer.type == TileLayer::Type::Wall) {
+                bounds.minZ += terrainHeight;
+                bounds.maxZ += terrainHeight;
+            }
         }
+
+        collisionVolumes.push_back(bounds);
     }
 }
 

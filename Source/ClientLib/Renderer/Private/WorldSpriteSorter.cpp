@@ -98,6 +98,7 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
                 TilePosition tilePosition{x, y, z};
 
                 // Push all of this tile's sprites into the appropriate vectors.
+                // Note: tile will be nullptr if the chunk is empty.
                 if (const Tile* tile{tileMap.cgetTile(tilePosition)}) {
                     pushTerrainSprites(*tile, camera, tilePosition);
                     pushFloorSprite(*tile, camera, tilePosition);
@@ -111,11 +112,11 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
     // Gather all of the UI's phantom tile sprites that weren't already used.
     for (const PhantomSpriteInfo& info : phantomSprites) {
         if (info.layerType != TileLayer::Type::None) {
-            GraphicRef graphic{*(info.sprite)};
-            pushTileSprite(
-                graphic, camera,
-                {info.tilePosition, info.layerType, 0, info.terrainStartHeight},
-                true);
+            GraphicRef graphic{getPhantomGraphic(info)};
+            pushTileSprite(graphic, camera,
+                           {info.tilePosition, info.tileOffset, info.layerType,
+                            info.graphicValue},
+                           true);
         }
     }
 }
@@ -144,7 +145,9 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
     // Gather all of the UI's phantom entity sprites.
     for (const PhantomSpriteInfo& info : phantomSprites) {
         if (info.layerType == TileLayer::Type::None) {
-            pushEntitySprite(entt::null, info.position, *(info.sprite), camera);
+            GraphicRef graphic{getPhantomGraphic(info)};
+            pushEntitySprite(entt::null, info.position,
+                             graphic.getFirstSprite(), camera);
         }
     }
 }
@@ -158,8 +161,9 @@ void WorldSpriteSorter::pushTerrainSprites(
         tile.getLayers(TileLayer::Type::Terrain)};
     for (const TileLayer& terrain : terrains) {
         GraphicRef graphic{terrain.getGraphic()};
-        Terrain::Value terrainValue{terrain.graphicValue};
         if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
+            Uint8 graphicValue{terrain.graphicValue};
+
             // If the UI wants this sprite replaced with a phantom, replace it.
             auto phantomSpriteInfo = std::find_if(
                 phantomSprites.begin(), phantomSprites.end(),
@@ -168,14 +172,15 @@ void WorldSpriteSorter::pushTerrainSprites(
                             && (info.tilePosition == tilePosition));
                 });
             if (phantomSpriteInfo != phantomSprites.end()) {
-                graphic = GraphicRef{*(phantomSpriteInfo->sprite)};
-                terrainValue = phantomSpriteInfo->terrainStartHeight;
+                graphic = getPhantomGraphic(*phantomSpriteInfo);
+                graphicValue = phantomSpriteInfo->graphicValue;
                 phantomSprites.erase(phantomSpriteInfo);
             }
 
             pushTileSprite(graphic, camera,
-                           {tilePosition, TileLayer::Type::Terrain,
-                            terrain.graphicSet.get().numericID, terrainValue},
+                           {tilePosition, TileOffset{},
+                            TileLayer::Type::Terrain,
+                            terrain.graphicSet.get().numericID, graphicValue},
                            false);
         }
     }
@@ -189,11 +194,11 @@ void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
     for (const TileLayer& floor : floors) {
         GraphicRef graphic{floor.getGraphic()};
         if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
-            pushTileSprite(graphic, camera,
-                           {tilePosition, TileLayer::Type::Floor,
-                            floor.graphicSet.get().numericID,
-                            floor.graphicValue},
-                           false);
+            pushTileSprite(
+                graphic, camera,
+                {tilePosition, floor.tileOffset, TileLayer::Type::Floor,
+                 floor.graphicSet.get().numericID, floor.graphicValue},
+                false);
         }
     }
 }
@@ -201,6 +206,15 @@ void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
 void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
                                         const TilePosition& tilePosition)
 {
+    // Determine how high this tile's terrain is.
+    // Note: Walls don't normally use offsets, but it's convenient to do it 
+    //       this way, so pushTileSprite() doesn't need to find the terrain.
+    TileOffset tileOffset{0, 0, 0};
+    if (auto* terrain{tile.findLayer(TileLayer::Type::Terrain)}) {
+        Terrain::Height height{Terrain::getTotalHeight(terrain->graphicValue)};
+        tileOffset.z = static_cast<Uint8>(Terrain::getHeightWorldValue(height));
+    }
+
     std::span<const TileLayer> walls{tile.getLayers(TileLayer::Type::Wall)};
     for (const TileLayer& wall : walls) {
         GraphicRef graphic{wall.getGraphic()};
@@ -232,13 +246,13 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
                     return false;
                 });
             if (phantomSpriteInfo != phantomSprites.end()) {
-                graphic = GraphicRef{*(phantomSpriteInfo->sprite)};
+                graphic = getPhantomGraphic(*phantomSpriteInfo);
                 phantomSprites.erase(phantomSpriteInfo);
             }
 
             pushTileSprite(graphic, camera,
-                           {tilePosition, TileLayer::Type::Wall,
-                            wall.graphicSet.get().numericID, wall.graphicValue},
+                           {tilePosition, tileOffset, TileLayer::Type::Wall,
+                            wall.graphicSet.get().numericID, 0},
                            false);
         }
     }
@@ -252,11 +266,11 @@ void WorldSpriteSorter::pushObjectSprites(const Tile& tile,
     for (const TileLayer& object : objects) {
         GraphicRef graphic{object.getGraphic()};
         if (graphic.getGraphicID() != NULL_GRAPHIC_ID) {
-            pushTileSprite(graphic, camera,
-                           {tilePosition, TileLayer::Type::Object,
-                            object.graphicSet.get().numericID,
-                            object.graphicValue},
-                           false);
+            pushTileSprite(
+                graphic, camera,
+                {tilePosition, object.tileOffset, TileLayer::Type::Object,
+                 object.graphicSet.get().numericID, object.graphicValue},
+                false);
         }
     }
 }
@@ -269,13 +283,15 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     // Get the current sprite for this graphic.
     const Sprite& sprite{graphic.getSpriteAtTime(animationTimer.getTime())};
 
-    // Get iso screen extent for this sprite.
+    // Get the iso screen extent for this sprite.
     const SpriteRenderData& renderData{
         graphicData.getRenderData(sprite.numericID)};
     SDL_FRect screenExtent{ClientTransforms::tileToScreenExtent(
-        layerID.tilePosition, renderData, camera)};
+        layerID.tilePosition, layerID.tileOffset, renderData, camera)};
 
-    // If this is a terrain sprite, offset it by its starting height.
+    // If this is a Terrain layer, offset it based on its starting height.
+    // Note: We only need to do this visually, Terrain::calcWorldBounds adds 
+    //       start height to the bounds appropriately below.
     if (layerID.type == TileLayer::Type::Terrain) {
         Terrain::Height startHeight{
             Terrain::getStartHeight(layerID.graphicValue)};
@@ -299,21 +315,28 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
         worldObjectID = layerID;
     }
 
-    // Push the sprite to be sorted.
+    // Calc the sprite's world bounds.
+    BoundingBox worldBounds{};
     if (layerID.type == TileLayer::Type::Terrain) {
         // Terrain is unique: we ignore the sprite's modelBounds and instead 
         // generate a bounding volume based on the terrain type.
-        BoundingBox worldBounds{Terrain::calcWorldBounds(layerID.tilePosition,
-                                                         layerID.graphicValue)};
-        spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
-                                   screenExtent, colorMod);
+        worldBounds = Terrain::calcWorldBounds(layerID.tilePosition,
+                                               layerID.graphicValue);
     }
     else {
-        BoundingBox worldBounds{Transforms::modelToWorld(
-            sprite.modelBounds, layerID.tilePosition.getOriginPosition())};
-        spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
-                                   screenExtent, colorMod);
+        worldBounds = Transforms::modelToWorld(
+            sprite.modelBounds, layerID.tilePosition.getOriginPosition());
     }
+    worldBounds.minX += layerID.tileOffset.x;
+    worldBounds.maxX += layerID.tileOffset.x;
+    worldBounds.minY += layerID.tileOffset.y;
+    worldBounds.maxY += layerID.tileOffset.y;
+    worldBounds.minZ += layerID.tileOffset.z;
+    worldBounds.maxZ += layerID.tileOffset.z;
+
+    // Push the sprite to be sorted.
+    spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
+                               screenExtent, colorMod);
 }
 
 const Sprite&
@@ -499,6 +522,35 @@ bool WorldSpriteSorter::isWithinScreenBounds(const SDL_FRect& extent,
     // it's within the rect formed by (0, 0) and (camera.width, camera.height).
     SDL_FRect cameraExtent{0, 0, camera.screenExtent.w, camera.screenExtent.h};
     return (SDL_HasRectIntersectionFloat(&extent, &cameraExtent) == SDL_TRUE);
+}
+
+GraphicRef WorldSpriteSorter::getPhantomGraphic(
+    const PhantomSpriteInfo& phantomSpriteInfo)
+{
+    // If the set is null for whatever reason, return the null sprite.
+    if (!(phantomSpriteInfo.graphicSet)) {
+        return GraphicRef{graphicData.getSprite(NULL_SPRITE_ID)};
+    }
+
+    // If layerType != None, this is a tile phantom.
+    if (phantomSpriteInfo.layerType != TileLayer::Type::None) {
+        return TileLayer::getGraphic(phantomSpriteInfo.layerType,
+                                     *(phantomSpriteInfo.graphicSet),
+                                     phantomSpriteInfo.graphicValue);
+    }
+    else {
+        // Entity phantom.
+        EntityGraphicType type{
+            static_cast<EntityGraphicType>(phantomSpriteInfo.graphicValue)};
+        const EntityGraphicSet& graphicSet{static_cast<const EntityGraphicSet&>(
+            *(phantomSpriteInfo.graphicSet))};
+        auto graphicIt{graphicSet.graphics.find(type)};
+        if (graphicIt != graphicSet.graphics.end()) {
+            return graphicIt->second;
+        }
+    }
+
+    return GraphicRef{graphicData.getSprite(NULL_SPRITE_ID)};
 }
 
 } // End namespace Client

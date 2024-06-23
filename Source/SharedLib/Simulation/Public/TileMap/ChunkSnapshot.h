@@ -1,7 +1,6 @@
 #pragma once
 
 #include "TileLayer.h"
-#include "TileSnapshot.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include <vector>
@@ -42,13 +41,30 @@ struct ChunkSnapshot {
         in the palette. */
     static constexpr std::size_t MAX_ID_LENGTH{50};
 
+    /** Used as a "we should never hit this" cap on the number of tile layers 
+        that a single chunk can contain. */
+    static constexpr std::size_t MAX_TILE_LAYERS{256 * 10};
+
     /** Holds an entry for each graphic used in this chunk's tiles. Part of a
         space-saving approach that lets TileSnapshot hold indices into this
         palette instead of directly holding the data. */
     std::vector<PaletteEntry> palette{};
 
-    /** The tiles that make up this chunk, stored in row-major order. */
-    std::array<TileSnapshot, SharedConfig::CHUNK_TILE_COUNT> tiles{};
+    /** The number of layers that each tile in this chunk has, stored in row-
+        major order. */
+    std::array<Uint8, SharedConfig::CHUNK_TILE_COUNT> tileLayerCounts{};
+
+    /** This vector's elements are indices into the palette, each index  
+        representing a tile layer that is owned by a tile in this chunk.
+        These layers are ordered by tile coordinate in morton order, and by 
+        the usual bottom-to-top type order within each tile.
+        To iterate, use tileLayerCounts to determine how many layers belong to 
+        each tile. */
+    std::vector<Uint8> tileLayers{};
+
+    /** The tile offset for each Floor and Object tile layer in tileLayers, 
+        stored in the order that they'll be encountered while iterating. */
+    std::vector<TileOffset> tileOffsets{};
 
     /**
      * Returns the palette index for the given palette entry info.
@@ -78,7 +94,8 @@ struct ChunkSnapshot {
         else {
             // TODO: If this becomes an issue, either switch to Uint16 or
             //       find some more efficient way to grow the space.
-            LOG_FATAL("Ran out of palette slots.");
+            LOG_ERROR("Ran out of palette slots.");
+            return 0;
         }
         return (palette.size() - 1);
     }
@@ -97,7 +114,11 @@ void serialize(S& serializer, ChunkSnapshot& chunkSnapshot)
 {
     serializer.container(chunkSnapshot.palette,
                          ChunkSnapshot::MAX_PALETTE_ENTRIES);
-    serializer.container(chunkSnapshot.tiles);
+    serializer.container1b(chunkSnapshot.tileLayerCounts);
+    serializer.container1b(chunkSnapshot.tileLayers,
+                           ChunkSnapshot::MAX_TILE_LAYERS);
+    serializer.container(chunkSnapshot.tileOffsets,
+                         ChunkSnapshot::MAX_TILE_LAYERS);
 }
 
 } // End namespace AM

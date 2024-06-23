@@ -1,8 +1,8 @@
 #pragma once
 
 #include "TileLayer.h"
+#include "TileOffset.h"
 #include "Wall.h"
-#include "Terrain.h"
 #include "Position.h"
 #include "Sprite.h"
 
@@ -21,8 +21,9 @@ namespace Client
  * Phantoms are visual-only, so they're purely a UI/Renderer concern and don't
  * get added to the simulation.
  *
- * Floor and Wall tile layer phantoms will replace any sprites in the same spot.
- * Entities and other tile layer types get added on top instead of replacing.
+ * Terrain and Wall tile layer phantoms will replace any sprites in the same 
+ * spot. Objects and other tile layer types will be added on top instead of 
+ * replacing.
  *
  * An example usage is when a user is in build mode and is trying to place a
  * wall. A phantom wall sprite will follow the user's mouse to show where the
@@ -36,6 +37,10 @@ struct PhantomSpriteInfo {
     /** If this is a tile phantom, this is the position of the phantom's tile. */
     TilePosition tilePosition{};
 
+    /** If this is a tile phantom, this is the phantom's offset relative to 
+        tilePosition. */
+    TileOffset tileOffset{};
+
     /** The phantom's tile layer type. If this != None, this is a tile phantom.
         If this == None, this is an entity phantom. */
     TileLayer::Type layerType{TileLayer::Type::None};
@@ -43,15 +48,15 @@ struct PhantomSpriteInfo {
     /** If layerType == Wall, this is the type of wall. */
     Wall::Type wallType{Wall::Type::None};
 
-    /** If layerType == Terrain, this is the starting height. */
-    Terrain::Height terrainStartHeight{Terrain::Height::Flat};
-
     /** If this is an entity phantom (layerType == None), this is the phantom's
         world position. */
     Position position{};
 
-    /** The phantom sprite to add. */
-    const Sprite* sprite{nullptr};
+    /** The graphic set of the phantom sprite to add. */
+    const GraphicSet* graphicSet{nullptr};
+
+    /** The graphic value of the phantom sprite to add. */
+    Uint8 graphicValue{};
 };
 
 } // End namespace Client

@@ -22,7 +22,7 @@ class Chunk
 public:
     /** The number of tiles in the tiles array that are non-empty.
         Used to tell when this chunk is empty and can be deleted. */
-    Uint8 nonEmptyTileCount{0};
+    Uint16 tileLayerCount{0};
 
     /** The tiles that make up this chunk, stored in morton order. */
     std::array<Tile, SharedConfig::CHUNK_TILE_COUNT> tiles{};

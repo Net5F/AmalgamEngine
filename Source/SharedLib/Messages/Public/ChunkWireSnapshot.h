@@ -1,6 +1,5 @@
 #pragma once
 
-#include "TileSnapshot.h"
 #include "ChunkSnapshot.h"
 #include "SharedConfig.h"
 #include "Log.h"
@@ -49,8 +48,21 @@ public:
         palette instead of directly holding the data. */
     std::vector<PaletteEntry> palette{};
 
-    /** The tiles that make up this chunk, stored in row-major order. */
-    std::array<TileSnapshot, SharedConfig::CHUNK_TILE_COUNT> tiles{};
+    /** The number of layers that each tile in this chunk has, stored in row-
+        major order. */
+    std::array<Uint8, SharedConfig::CHUNK_TILE_COUNT> tileLayerCounts{};
+
+    /** This vector's elements are indices into the palette, each index  
+        representing a tile layer that is owned by a tile in this chunk.
+        These layers are ordered by tile coordinate in morton order, and by 
+        the usual bottom-to-top type order within each tile.
+        To iterate, use tileLayerCounts to determine how many layers belong to 
+        each tile. */
+    std::vector<Uint8> tileLayers{};
+
+    /** The tile offset for each Floor and Object tile layer in tileLayers, 
+        stored in the order that they'll be encountered while iterating. */
+    std::vector<TileOffset> tileOffsets{};
 
     /**
      * Returns the palette index for the given palette entry info.
@@ -79,7 +91,8 @@ public:
         else {
             // TODO: If this becomes an issue, either switch to Uint16 or
             //       find some more efficient way to grow the space.
-            LOG_FATAL("Ran out of palette slots.");
+            LOG_ERROR("Ran out of palette slots.");
+            return 0;
         }
         return (palette.size() - 1);
     }
@@ -94,17 +107,18 @@ void serialize(S& serializer, ChunkWireSnapshot::PaletteEntry& paletteEntry)
 }
 
 template<typename S>
-void serialize(S& serializer, ChunkWireSnapshot& testChunk)
+void serialize(S& serializer, ChunkWireSnapshot& chunkSnapshot)
 {
-    serializer.value2b(testChunk.x);
-
-    serializer.value2b(testChunk.y);
-
-    serializer.value2b(testChunk.z);
-
-    serializer.container(testChunk.palette, ChunkSnapshot::MAX_PALETTE_ENTRIES);
-
-    serializer.container(testChunk.tiles);
+    serializer.value2b(chunkSnapshot.x);
+    serializer.value2b(chunkSnapshot.y);
+    serializer.value2b(chunkSnapshot.z);
+    serializer.container(chunkSnapshot.palette,
+                         ChunkSnapshot::MAX_PALETTE_ENTRIES);
+    serializer.container1b(chunkSnapshot.tileLayerCounts);
+    serializer.container1b(chunkSnapshot.tileLayers,
+                           ChunkSnapshot::MAX_TILE_LAYERS);
+    serializer.container(chunkSnapshot.tileOffsets,
+                         ChunkSnapshot::MAX_TILE_LAYERS);
 }
 
 } // End namespace AM

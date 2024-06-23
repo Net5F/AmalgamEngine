@@ -8,7 +8,6 @@
 #include "ByteTools.h"
 #include "TileMapSnapshot.h"
 #include "Tile.h"
-#include "TileSnapshot.h"
 #include "ChunkSnapshot.h"
 #include "Morton.h"
 #include "SharedConfig.h"
@@ -69,14 +68,7 @@ void TileMap::save(const std::string& fileName)
         static_cast<int>(SharedConfig::CHUNK_WIDTH)};
     for (auto& [chunkPosition, chunk] : chunks) {
         ChunkSnapshot& chunkSnapshot{mapSnapshot.chunks[chunkPosition]};
-
-        // Process each tile in this chunk.
-        for (std::size_t i{0}; i < SharedConfig::CHUNK_TILE_COUNT;
-             ++i) {
-            // Copy all of this tile's layers into the snapshot.
-            addTileLayersToSnapshot(chunk.tiles[i], chunkSnapshot.tiles[i],
-                                    chunkSnapshot);
-        }
+        saveChunkToSnapshot(chunk, chunkSnapshot);
     }
 
     // Serialize the map snapshot and write it to the file.
@@ -106,32 +98,39 @@ void TileMap::load(TileMapSnapshot& mapSnapshot)
     static constexpr int CHUNK_WIDTH{
         static_cast<int>(SharedConfig::CHUNK_WIDTH)};
     for (auto& [chunkPosition, chunkSnapshot] : mapSnapshot.chunks) {
-        int tileXOffset{chunkPosition.x * CHUNK_WIDTH};
-        int tileYOffset{chunkPosition.y * CHUNK_WIDTH};
-
-        // Iterate through the chunk snapshot's linear tile array, adding the 
-        // tiles to our map.
-        for (int tileX{0}; tileX < CHUNK_WIDTH; ++tileX) {
-            for (int tileY{0}; tileY < CHUNK_WIDTH; ++tileY) {
-                TilePosition tilePosition{tileX + tileXOffset,
-                                          tileY + tileYOffset, chunkPosition.z};
-                addSnapshotLayersToTile(
-                    chunkSnapshot.tiles[Morton::m2D_lookup_16x16(tileX, tileY)],
-                    chunkSnapshot, tilePosition);
-            }
-        }
+        loadChunk(chunkSnapshot,
+                  {chunkPosition.x, chunkPosition.y, chunkPosition.z});
     }
 }
 
-void TileMap::addTileLayersToSnapshot(const Tile& tile,
-                                      TileSnapshot& tileSnapshot,
-                                      ChunkSnapshot& chunkSnapshot)
+void TileMap::saveChunkToSnapshot(const Chunk& chunk,
+                                  ChunkSnapshot& chunkSnapshot)
 {
-    // Add all of the tile's layers.
-    for (const TileLayer& layer : tile.getAllLayers()) {
-        std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
-            layer.type, layer.graphicSet.get().stringID, layer.graphicValue)};
-        tileSnapshot.layers.push_back(static_cast<Uint8>(paletteIndex));
+    // Copy all of the chunk's tile layers into the snapshot.
+    chunkSnapshot.tileLayers.resize(chunk.tileLayerCount);
+    std::size_t tileLayersIndex{0};
+    for (std::size_t tileIndex{0};
+         tileIndex < SharedConfig::CHUNK_TILE_COUNT; tileIndex++) {
+        // Add this tile's layer count.
+        const Tile& tile{chunk.tiles[tileIndex]};
+        chunkSnapshot.tileLayerCounts[tileIndex]
+            = static_cast<Uint8>(tile.getAllLayers().size());
+
+        // Add all of this tile's layers.
+        for (const TileLayer& layer : tile.getAllLayers()) {
+            std::size_t paletteIndex{chunkSnapshot.getPaletteIndex(
+                layer.type, layer.graphicSet.get().stringID,
+                layer.graphicValue)};
+            chunkSnapshot.tileLayers[tileLayersIndex]
+                = static_cast<Uint8>(paletteIndex);
+            tileLayersIndex++;
+
+            // If this is a Floor or Object, add its tile offset.
+            if ((layer.type == TileLayer::Type::Floor)
+                || (layer.type == TileLayer::Type::Object)) {
+                chunkSnapshot.tileOffsets.emplace_back(layer.tileOffset);
+            }
+        }
     }
 }
 

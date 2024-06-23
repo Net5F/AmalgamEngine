@@ -11,13 +11,18 @@ namespace AM
 /**
  * The minimum information needed to uniquely identify a tile layer.
  *
- * Technically, multiple layers may be the same type and use the same
- * graphic set ID and graphic value, but they'll be exactly the same so 
- * differentiation isn't useful.
+ * Technically, multiple layers may have the same information, but they'll be 
+ * exactly the same so differentiation isn't useful.
  */
 struct TileLayerID {
     /** The position of the tile that contains the layer. */
     TilePosition tilePosition{};
+
+    /** If type == Floor or Object, this is how far the layer is offset from 
+        tilePosition.
+        Note: Terrain and Walls don't use this. Terrain is always aligned to 
+              the tile, and Walls always match the Terrain height. */
+    TileOffset tileOffset{};
 
     /** The tile layer's type. */
     TileLayer::Type type{TileLayer::Type::None};
@@ -34,10 +39,9 @@ struct TileLayerID {
 
     bool operator==(const TileLayerID& other) const
     {
-        return (tilePosition.x == other.tilePosition.x)
-               && (tilePosition.y == other.tilePosition.y)
-               && (tilePosition.z == other.tilePosition.z)
-               && (type == other.type) && (graphicSetID == other.graphicSetID)
+        return (tilePosition == other.tilePosition)
+               && (tileOffset == other.tileOffset) && (type == other.type)
+               && (graphicSetID == other.graphicSetID)
                && (graphicValue == other.graphicValue);
     }
 };

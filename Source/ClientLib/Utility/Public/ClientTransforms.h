@@ -1,13 +1,15 @@
 #pragma once
 
-#include "Position.h"
-#include "TilePosition.h"
 #include <SDL_rect.h>
 
 namespace AM
 {
 struct Camera;
 struct Sprite;
+struct Position;
+struct TilePosition;
+struct TileOffset;
+
 namespace Client
 {
 struct SpriteRenderData;
@@ -35,7 +37,8 @@ public:
      * Returns a final screen space extent for the given tile position, camera,
      * and sprite.
      */
-    static SDL_FRect tileToScreenExtent(const TilePosition& position,
+    static SDL_FRect tileToScreenExtent(const TilePosition& tilePosition,
+                                        const TileOffset& tileOffset,
                                         const SpriteRenderData& renderData,
                                         const Camera& camera);
 };

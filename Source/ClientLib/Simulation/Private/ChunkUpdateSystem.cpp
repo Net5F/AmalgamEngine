@@ -154,29 +154,9 @@ void ChunkUpdateSystem::receiveAndApplyUpdates()
 void ChunkUpdateSystem::applyChunkSnapshot(
     const ChunkWireSnapshot& chunkSnapshot)
 {
-    static constexpr int CHUNK_WIDTH{
-        static_cast<int>(SharedConfig::CHUNK_WIDTH)};
-
-    // Iterate through the chunk snapshot's linear tile array, adding the tiles
-    // to our map.
-    for (int tileX{0}; tileX < CHUNK_WIDTH; ++tileX) {
-        for (int tileY{0}; tileY < CHUNK_WIDTH; ++tileY) {
-            // Calculate where this tile is.
-            TilePosition tilePosition{tileX, tileY, chunkSnapshot.z};
-            tilePosition.x += (chunkSnapshot.x * CHUNK_WIDTH);
-            tilePosition.y += (chunkSnapshot.y * CHUNK_WIDTH);
-
-            // Clear the tile.
-            world.tileMap.clearTile(tilePosition);
-
-            // Copy all of the snapshot tile's sprite layers to our map
-            // tile.
-            const TileSnapshot& tileSnapshot{
-                chunkSnapshot.tiles[Morton::m2D_lookup_16x16(tileX, tileY)]};
-            world.tileMap.addSnapshotLayersToTile(
-                tileSnapshot, chunkSnapshot, tilePosition);
-        }
-    }
+    // Load the chunk snapshot into our map.
+    world.tileMap.loadChunk(
+        chunkSnapshot, {chunkSnapshot.x, chunkSnapshot.y, chunkSnapshot.z});
 }
 
 } // namespace Client

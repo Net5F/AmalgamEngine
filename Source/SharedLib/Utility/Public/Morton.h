@@ -18,9 +18,19 @@ class Morton
 public:
     /**
      * Returns a morton code for values of up to 16 using a lookup table.
-     * Note that this is for values up to numeric 16, not 16 bits.
+     * Note that this is for values up to the number 16, not 16 bits.
      */
-    static Uint16 m2D_lookup_16x16(Uint8 x, Uint8 y);
+    static Uint8 m2D_lookup_16x16(Uint8 x, Uint8 y);
+
+    struct Result2D
+    {
+        Uint8 x{};
+        Uint8 y{};
+    };
+    /**
+     * Returns the x, y values for a given morton code in the 16x16 value space.
+     */
+    static Result2D m2D_reverse_lookup_16x16(Uint8 code);
 
     /**
      * Returns a morton code for values of up to 16 bits.

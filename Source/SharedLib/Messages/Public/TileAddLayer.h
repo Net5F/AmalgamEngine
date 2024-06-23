@@ -2,6 +2,7 @@
 
 #include "EngineMessageType.h"
 #include "TilePosition.h"
+#include "TileOffset.h"
 #include "TileLayer.h"
 #include "NetworkDefs.h"
 #include <SDL_stdinc.h>
@@ -24,6 +25,12 @@ public:
     //--------------------------------------------------------------------------
     /** The position of the tile to update. */
     TilePosition tilePosition{};
+
+    /** If type == Floor or Object, this is how far the layer should be offset 
+        from tilePosition.
+        Note: Terrain and Walls don't use this. Terrain is always aligned to 
+              the tile, and Walls always match the Terrain height. */
+    TileOffset tileOffset{};
 
     /** The type of tile layer that should be added. */
     TileLayer::Type layerType{TileLayer::Type::None};
@@ -55,6 +62,7 @@ template<typename S>
 void serialize(S& serializer, TileAddLayer& tileAddLayer)
 {
     serializer.object(tileAddLayer.tilePosition);
+    serializer.object(tileAddLayer.tileOffset);
     serializer.value1b(tileAddLayer.layerType);
     serializer.value2b(tileAddLayer.graphicSetID);
     serializer.value1b(tileAddLayer.graphicValue);
