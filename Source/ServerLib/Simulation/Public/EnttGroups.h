@@ -3,6 +3,7 @@
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
+#include "Movement.h"
 #include "Rotation.h"
 #include "Collision.h"
 #include "entt/entity/registry.hpp"
@@ -28,7 +29,7 @@ public:
     {
         // movementGroup: Used for moving an entity.
         registry
-            .group<Input, Position, PreviousPosition, Rotation, Collision>();
+            .group<Input, Position, PreviousPosition, Movement, Rotation, Collision>();
     }
 };
 

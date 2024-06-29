@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
+#include "Movement.h"
 #include "Rotation.h"
 #include "Collision.h"
 #include "SharedConfig.h"
@@ -25,13 +26,18 @@ void MovementSystem::processMovements()
     ZoneScoped;
 
     // Move all entities that have the required components.
-    auto group
-        = world.registry
-              .group<Input, Position, PreviousPosition, Rotation, Collision>();
-    for (auto [entity, input, position, previousPosition, rotation, collision] :
-         group.each()) {
+    auto group = world.registry.group<Input, Position, PreviousPosition,
+                                      Movement, Rotation, Collision>();
+    for (auto [entity, input, position, previousPosition, movement, rotation,
+               collision] : group.each()) {
+        // TODO: Early-out if !isFalling and no inputs are pressed
+
         // Save their old position.
         previousPosition = position;
+
+        // TODO: Calc velocity
+
+        // TODO: Call project hook to update velocity
 
         // Calculate their desired next position.
         Position desiredPosition{position};

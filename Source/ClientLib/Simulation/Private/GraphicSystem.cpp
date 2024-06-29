@@ -75,10 +75,8 @@ bool GraphicSystem::isMoving(entt::entity entity)
 {
     // If any inputs are pressed, return true.
     if (const Input* input{world.registry.try_get<Input>(entity)}) {
-        for (Input::State state : input->inputStates) {
-            if (state == Input::State::Pressed) {
-                return true;
-            }
+        if (input->inputStates.any()) {
+            return true;
         }
     }
 

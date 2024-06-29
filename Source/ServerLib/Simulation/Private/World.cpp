@@ -7,6 +7,7 @@
 #include "ReplicatedComponent.h"
 #include "Position.h"
 #include "PreviousPosition.h"
+#include "Movement.h"
 #include "GraphicState.h"
 #include "Collision.h"
 #include "EntityInitScript.h"
@@ -172,6 +173,10 @@ void World::addMovementComponents(entt::entity entity, const Rotation& rotation)
         // Note: All entities have a Position component.
         registry.emplace<PreviousPosition>(entity,
                                            registry.get<Position>(entity));
+    }
+
+    if (!(registry.all_of<Movement>(entity))) {
+        registry.emplace<Movement>(entity);
     }
 
     if (!(registry.all_of<Rotation>(entity))) {

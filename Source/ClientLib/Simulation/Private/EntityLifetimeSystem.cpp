@@ -5,6 +5,7 @@
 #include "GraphicData.h"
 #include "Name.h"
 #include "PreviousPosition.h"
+#include "Movement.h"
 #include "Collision.h"
 #include "UserConfig.h"
 #include "Camera.h"
@@ -154,10 +155,12 @@ void EntityLifetimeSystem::processEntityData(
     //       are added to the same group, the ref will be invalidated.
 
     // Entities with an Input are capable of movement, so we add a
-    // PreviousPosition. They'll also already have a replicated Rotation.
+    // PreviousPosition and Movement. They'll also already have a replicated 
+    // Rotation.
     if (registry.all_of<Input>(newEntity)) {
         const Position& position{registry.get<Position>(newEntity)};
         registry.emplace<PreviousPosition>(newEntity, position);
+        registry.emplace<Movement>(newEntity);
     }
 
     // When entities have a GraphicState, the server gives them a Collision.

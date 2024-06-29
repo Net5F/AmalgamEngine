@@ -3,6 +3,7 @@
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
+#include "Movement.h"
 #include "Rotation.h"
 #include "Collision.h"
 #include "InputHistory.h"
@@ -29,8 +30,9 @@ public:
     static void init(entt::registry& registry)
     {
         // movementGroup: Used for NPC movement and dynamic entity sorting.
-        registry.group<Input, Position, PreviousPosition, Rotation, Collision>(
-            entt::get<GraphicState>, entt::exclude<InputHistory>);
+        registry.group<Input, Position, PreviousPosition, Movement, Rotation,
+                       Collision>(entt::get<GraphicState>,
+                                  entt::exclude<InputHistory>);
     }
 };
 

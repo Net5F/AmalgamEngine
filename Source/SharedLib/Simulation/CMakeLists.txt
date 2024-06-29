@@ -47,6 +47,7 @@ target_sources(SharedLib
         Public/Components/Interaction.h
         Public/Components/Inventory.h
         Public/Components/IsClientEntity.h
+        Public/Components/Movement.h
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h

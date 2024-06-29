@@ -18,6 +18,8 @@ struct MovementState {
 
     Input input{};
     Position position{};
+    // Note: velocityZ is all we need to network from the Movement component.
+    float movementVelocityZ{};
     // Note: Rotation is calculated client-side.
 };
 
@@ -30,6 +32,7 @@ void serialize(S& serializer, MovementState& movementState)
             sbp.object(movementState.input);
         });
     serializer.object(movementState.position);
+    serializer.value4b(movementState.movementVelocityZ);
 }
 
 } // End namespace AM

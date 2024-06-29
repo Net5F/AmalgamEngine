@@ -5,9 +5,10 @@
 #include "MovementHelpers.h"
 #include "MovementUpdate.h"
 #include "Name.h"
+#include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
-#include "Input.h"
+#include "Movement.h"
 #include "Rotation.h"
 #include "Collision.h"
 #include "InputHistory.h"
@@ -93,12 +94,11 @@ void NpcMovementSystem::initLastProcessedTick()
 
 void NpcMovementSystem::moveAllNpcs()
 {
-    auto movementGroup
-        = world.registry
-              .group<Input, Position, PreviousPosition, Rotation, Collision>(
-                  entt::get<GraphicState>, entt::exclude<InputHistory>);
-    for (auto [entity, input, position, previousPosition, rotation, collision,
-               graphicState] : movementGroup.each()) {
+    auto movementGroup = world.registry.group<Input, Position, PreviousPosition,
+                                              Movement, Rotation, Collision>(
+        entt::get<GraphicState>, entt::exclude<InputHistory>);
+    for (auto [entity, input, position, previousPosition, movement, rotation,
+               collision, graphicState] : movementGroup.each()) {
         // Save their old position.
         previousPosition = position;
 
@@ -141,10 +141,9 @@ void NpcMovementSystem::applyUpdateMessage(
     const MovementUpdate& npcMovementUpdate)
 {
     entt::registry& registry{world.registry};
-    auto movementGroup
-        = registry
-              .group<Input, Position, PreviousPosition, Rotation, Collision>(
-                  entt::get<GraphicState>, entt::exclude<InputHistory>);
+    auto movementGroup = registry.group<Input, Position, PreviousPosition,
+                                        Movement, Rotation, Collision>(
+        entt::get<GraphicState>, entt::exclude<InputHistory>);
 
     // Apply each updated entity's new state.
     for (const MovementState& movementState :
@@ -162,14 +161,14 @@ void NpcMovementSystem::applyUpdateMessage(
         }
 
         // Get the entity's components.
-        auto [input, position, previousPosition, rotation, collision]
-            = movementGroup
-                  .get<Input, Position, PreviousPosition, Rotation, Collision>(
-                      entity);
+        auto [input, position, previousPosition, movement, rotation, collision]
+            = movementGroup.get<Input, Position, PreviousPosition, Movement,
+                                Rotation, Collision>(entity);
 
         // Apply the received component updates.
         input = movementState.input;
         position = movementState.position;
+        movement.velocityZ = movementState.movementVelocityZ;
         rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
 
         // If the previous position hasn't been initialized, set it to the

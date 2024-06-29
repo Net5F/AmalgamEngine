@@ -7,6 +7,7 @@
 #include "Input.h"
 #include "InputHistory.h"
 #include "PreviousPosition.h"
+#include "Movement.h"
 #include "Rotation.h"
 #include "Sprite.h"
 #include "Collision.h"
@@ -65,9 +66,10 @@ void PlayerMovementSystem::processMovement()
 Uint32 PlayerMovementSystem::processPlayerUpdates()
 {
     entt::registry& registry{world.registry};
-    auto [input, position, previousPosition, rotation, collision, inputHistory]
-        = registry.get<Input, Position, PreviousPosition, Rotation, Collision,
-                       InputHistory>(world.playerEntity);
+    auto [input, position, previousPosition, movement, rotation, collision,
+          inputHistory]
+        = registry.get<Input, Position, PreviousPosition, Movement, Rotation,
+                       Collision, InputHistory>(world.playerEntity);
 
     /* Process any messages for us from the server. */
     PlayerMovementUpdate movementUpdate{};
@@ -83,6 +85,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
         // Apply the received movement state.
         position = movementUpdate.position;
         rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
+        movement.velocityZ = movementUpdate.movementVelocityZ;
         collision.worldBounds
             = Transforms::modelToWorldCentered(collision.modelBounds, position);
 
