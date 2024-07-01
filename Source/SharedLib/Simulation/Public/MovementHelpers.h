@@ -69,8 +69,6 @@ public:
     static Position interpolatePosition(const PreviousPosition& previousPos,
                                         const Position& position, double alpha);
 
-    // TODO: Do we want to pass all of this stuff along with the components?
-    //       Or is there some better way?
     /**
      * Resolves collisions between the given desiredBox and other nearby
      * bounding boxes in the world.
