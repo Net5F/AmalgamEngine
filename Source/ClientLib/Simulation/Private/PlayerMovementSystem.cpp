@@ -27,6 +27,7 @@ PlayerMovementSystem::PlayerMovementSystem(Simulation& inSimulation,
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
+, entityMover{world.registry, world.tileMap, world.entityLocator}
 , playerMovementUpdateQueue{inNetwork.getEventDispatcher()}
 {
 }
@@ -101,7 +102,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
             // TODO: This may be incorrect, but it's uncommon and hard to
             // verify. We may want to more carefully overwrite existing inputs.
             input.inputStates = receivedInput.inputStates;
-            for (unsigned int i = 0; i <= tickDiff; ++i) {
+            for (std::size_t i{0}; i <= tickDiff; ++i) {
                 inputHistory.inputHistory[i] = receivedInput.inputStates;
             }
 
@@ -137,58 +138,11 @@ void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates)
         = world.registry
               .get<Position, PreviousPosition, Movement, Rotation, Collision>(
                   world.playerEntity);
-    // If no inputs are pressed and they aren't falling, nothing needs to 
-    // be done.
-    if (inputStates.none() && !(movement.isFalling)) {
-        return;
-    }
 
-    // Calculate their updated velocity.
-    Velocity updatedVelocity{MovementHelpers::calcVelocity(
-        inputStates, movement, SharedConfig::SIM_TICK_TIMESTEP_S)};
-
-    // Calculate our desired next position.
-    Position desiredPosition{position};
-    desiredPosition = MovementHelpers::calcPosition(
-        position, updatedVelocity, SharedConfig::SIM_TICK_TIMESTEP_S);
-
-    // Update the direction we're facing, based on our current inputs.
-    rotation = MovementHelpers::calcRotation(rotation, inputStates);
-
-    // If we're trying to move, resolve collisions.
-    if (desiredPosition != position) {
-        // Calculate a new bounding box to match our desired position.
-        BoundingBox desiredBounds{Transforms::modelToWorldCentered(
-            collision.modelBounds, desiredPosition)};
-
-        // Resolve any collisions with the surrounding bounding boxes.
-        BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(
-            collision.worldBounds, desiredBounds, world.playerEntity,
-            world.registry, world.tileMap, world.entityLocator)};
-
-        // Update our collision box and position.
-        // Note: Since desiredBounds was properly offset, we can do a simple
-        //       diff to get the position.
-        position += (resolvedBounds.getMinPosition()
-                     - collision.worldBounds.getMinPosition());
-        collision.worldBounds = resolvedBounds;
-
-        // TEMP
-        // If they're moving up or down, flag them as falling.
-        if (resolvedBounds.minZ != collision.worldBounds.minZ) {
-            movement.isFalling = true;
-        }
-        else {
-            movement.isFalling = false;
-        }
-        // TEMP
-    }
-
-    // If we did actually move, update our position in the locator.
-    if (position != previousPosition) {
-        world.entityLocator.setEntityLocation(world.playerEntity,
-                                              collision.worldBounds);
-    }
+    // Move the entity.
+    entityMover.moveEntity(world.playerEntity, inputStates, position,
+                           previousPosition, movement, rotation, collision,
+                           SharedConfig::SIM_TICK_TIMESTEP_S);
 }
 
 void PlayerMovementSystem::emitUpdateSignals()

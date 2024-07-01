@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EntityMover.h"
 #include "QueuedEvents.h"
 #include <SDL_stdinc.h>
 
@@ -65,6 +66,8 @@ private:
     World& world;
     /** Used to send entity info request messages. */
     Network& network;
+
+    EntityMover entityMover;
 
     EventQueue<std::shared_ptr<const MovementUpdate>> npcMovementUpdateQueue;
 

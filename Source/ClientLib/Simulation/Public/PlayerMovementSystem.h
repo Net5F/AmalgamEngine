@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EntityMover.h"
 #include "PlayerMovementUpdate.h"
 #include "QueuedEvents.h"
 #include <SDL_stdinc.h>
@@ -74,6 +75,8 @@ private:
     World& world;
     /** Used to get the latest received tick. */
     Network& network;
+
+    EntityMover entityMover;
 
     EventQueue<PlayerMovementUpdate> playerMovementUpdateQueue;
 };

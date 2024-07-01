@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EntityMover.h"
+
 namespace AM
 {
 namespace Server
@@ -21,6 +23,8 @@ public:
 
 private:
     World& world;
+
+    EntityMover entityMover;
 };
 
 } // namespace Server

@@ -28,6 +28,7 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSimulation, World& inWorld,
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
+, entityMover{world.registry, world.tileMap, world.entityLocator}
 , npcMovementUpdateQueue{network.getEventDispatcher()}
 , lastProcessedTick{0}
 {
@@ -99,61 +100,13 @@ void NpcMovementSystem::moveAllNpcs()
         entt::get<GraphicState>, entt::exclude<InputHistory>);
     for (auto [entity, input, position, previousPosition, movement, rotation,
                collision, graphicState] : movementGroup.each()) {
-        // If no inputs are pressed and they aren't falling, nothing needs to 
-        // be done.
-        if (input.inputStates.none() && !(movement.isFalling)) {
-            return;
-        }
-
         // Save their old position.
         previousPosition = position;
 
-        // Calculate their updated velocity.
-        Velocity updatedVelocity{MovementHelpers::calcVelocity(
-            input.inputStates, movement, SharedConfig::SIM_TICK_TIMESTEP_S)};
-
-        // Calculate their desired next position.
-        Position desiredPosition{position};
-        desiredPosition = MovementHelpers::calcPosition(
-            position, updatedVelocity, SharedConfig::SIM_TICK_TIMESTEP_S);
-
-        // Update the direction they're facing, based on their current inputs.
-        rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
-
-        // If they're trying to move, resolve collisions.
-        if (desiredPosition != position) {
-            // Calculate a new bounding box to match their desired position.
-            BoundingBox desiredBounds{Transforms::modelToWorldCentered(
-                collision.modelBounds, desiredPosition)};
-
-            // Resolve any collisions with the surrounding bounding boxes.
-            BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(
-                collision.worldBounds, desiredBounds, entity, world.registry,
-                world.tileMap, world.entityLocator)};
-
-            // Update their collision box and position.
-            // Note: Since desiredBounds was properly offset, we can do a
-            //       simple diff to get the position.
-            position += (resolvedBounds.getMinPosition()
-                         - collision.worldBounds.getMinPosition());
-            collision.worldBounds = resolvedBounds;
-
-            // TEMP
-            // If they're moving up or down, flag them as falling.
-            if (resolvedBounds.minZ != collision.worldBounds.minZ) {
-                movement.isFalling = true;
-            }
-            else {
-                movement.isFalling = false;
-            }
-            // TEMP
-        }
-
-        // If they did actually move, update their position in the locator.
-        if (position != previousPosition) {
-            world.entityLocator.setEntityLocation(entity,
-                                                  collision.worldBounds);
-        }
+        // Move the entity.
+        entityMover.moveEntity(world.playerEntity, input.inputStates, position,
+                               previousPosition, movement, rotation, collision,
+                               SharedConfig::SIM_TICK_TIMESTEP_S);
     }
 }
 

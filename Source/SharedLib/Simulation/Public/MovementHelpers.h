@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Velocity.h"
 #include "Input.h"
+#include "Velocity.h"
 #include "BoundingBox.h"
 #include "Tile.h"
 #include "TileExtent.h"
@@ -12,9 +12,10 @@
 
 namespace AM
 {
-struct Movement;
 struct Position;
 struct PreviousPosition;
+struct Movement;
+struct Collision;
 class TileMapBase;
 class EntityLocator;
 
@@ -68,6 +69,8 @@ public:
     static Position interpolatePosition(const PreviousPosition& previousPos,
                                         const Position& position, double alpha);
 
+    // TODO: Do we want to pass all of this stuff along with the components?
+    //       Or is there some better way?
     /**
      * Resolves collisions between the given desiredBox and other nearby
      * bounding boxes in the world.
