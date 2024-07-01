@@ -58,10 +58,10 @@ void PlayerInputSystem::processHeldInputs()
         newInputStates[Input::XUp] = Input::Pressed;
     }
     if (keyStates[SDL_SCANCODE_SPACE]) {
-        newInputStates[Input::ZUp] = Input::Pressed;
+        newInputStates[Input::Jump] = Input::Pressed;
     }
-    if (keyStates[SDL_SCANCODE_X]) {
-        newInputStates[Input::ZDown] = Input::Pressed;
+    if (keyStates[SDL_SCANCODE_LCTRL]) {
+        newInputStates[Input::Crouch] = Input::Pressed;
     }
 
     // Update our saved input state.

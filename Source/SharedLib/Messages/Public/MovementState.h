@@ -2,6 +2,7 @@
 
 #include "Input.h"
 #include "Position.h"
+#include "Movement.h"
 #include "entt/entity/registry.hpp"
 #include "bitsery/bitsery.h"
 
@@ -18,8 +19,7 @@ struct MovementState {
 
     Input input{};
     Position position{};
-    // Note: velocityZ is all we need to network from the Movement component.
-    float movementVelocityZ{};
+    Movement movement{};
     // Note: Rotation is calculated client-side.
 };
 
@@ -32,7 +32,7 @@ void serialize(S& serializer, MovementState& movementState)
             sbp.object(movementState.input);
         });
     serializer.object(movementState.position);
-    serializer.value4b(movementState.movementVelocityZ);
+    serializer.object(movementState.movement);
 }
 
 } // End namespace AM

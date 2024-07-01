@@ -39,6 +39,7 @@ target_sources(SharedLib
         Public/Ray.h
         Public/ReplicatedComponent.h
         Public/ResourceData.h
+        Public/Velocity.h
         Public/Components/Camera.h
         Public/Components/Collision.h
         Public/Components/EntityInitScript.h

@@ -85,7 +85,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
         // Apply the received movement state.
         position = movementUpdate.position;
         rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
-        movement.velocityZ = movementUpdate.movementVelocityZ;
+        movement = movementUpdate.movement;
         collision.worldBounds
             = Transforms::modelToWorldCentered(collision.modelBounds, position);
 
@@ -133,14 +133,24 @@ void PlayerMovementSystem::replayInputs(Uint32 lastUpdateTick)
 
 void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates)
 {
-    auto [position, previousPosition, rotation, collision]
-        = world.registry.get<Position, PreviousPosition, Rotation, Collision>(
-            world.playerEntity);
+    auto [position, previousPosition, movement, rotation, collision]
+        = world.registry
+              .get<Position, PreviousPosition, Movement, Rotation, Collision>(
+                  world.playerEntity);
+    // If no inputs are pressed and they aren't falling, nothing needs to 
+    // be done.
+    if (inputStates.none() && !(movement.isFalling)) {
+        return;
+    }
+
+    // Calculate their updated velocity.
+    Velocity updatedVelocity{MovementHelpers::calcVelocity(
+        inputStates, movement, SharedConfig::SIM_TICK_TIMESTEP_S)};
 
     // Calculate our desired next position.
     Position desiredPosition{position};
     desiredPosition = MovementHelpers::calcPosition(
-        position, inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
+        position, updatedVelocity, SharedConfig::SIM_TICK_TIMESTEP_S);
 
     // Update the direction we're facing, based on our current inputs.
     rotation = MovementHelpers::calcRotation(rotation, inputStates);
@@ -162,6 +172,16 @@ void PlayerMovementSystem::movePlayerEntity(Input::StateArr& inputStates)
         position += (resolvedBounds.getMinPosition()
                      - collision.worldBounds.getMinPosition());
         collision.worldBounds = resolvedBounds;
+
+        // TEMP
+        // If they're moving up or down, flag them as falling.
+        if (resolvedBounds.minZ != collision.worldBounds.minZ) {
+            movement.isFalling = true;
+        }
+        else {
+            movement.isFalling = false;
+        }
+        // TEMP
     }
 
     // If we did actually move, update our position in the locator.

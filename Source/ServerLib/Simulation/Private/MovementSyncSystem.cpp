@@ -85,7 +85,7 @@ void MovementSyncSystem::sendEntityUpdate(ClientSimData& client)
         auto [input, position, movement]
             = movementGroup.get<Input, Position, Movement>(entityToSend);
         movementUpdate.movementStates.push_back(
-            {entityToSend, input, position, movement.velocityZ});
+            {entityToSend, input, position, movement});
     }
 
     // Finish filling the other fields.

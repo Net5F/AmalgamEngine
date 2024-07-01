@@ -1,6 +1,7 @@
 #include "MovementHelpers.h"
 #include "Position.h"
 #include "PreviousPosition.h"
+#include "Movement.h"
 #include "BoundingBox.h"
 #include "TileMapBase.h"
 #include "EntityLocator.h"
@@ -15,40 +16,87 @@ const float DIAGONAL_NORMALIZATION_CONSTANT{0.70710678118f};
 
 namespace AM
 {
-Position MovementHelpers::calcPosition(const Position& position,
-                                       const Input::StateArr& inputStates,
-                                       double deltaSeconds)
+Velocity MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
+                                       Movement& movement, double)
 {
-    // Direction values. 0 == no movement, 1 == movement.
-    int xUp{static_cast<int>(inputStates[Input::XUp])};
-    int xDown{static_cast<int>(inputStates[Input::XDown])};
-    int yUp{static_cast<int>(inputStates[Input::YUp])};
-    int yDown{static_cast<int>(inputStates[Input::YDown])};
-    int zUp{static_cast<int>(inputStates[Input::ZUp])};
-    int zDown{static_cast<int>(inputStates[Input::ZDown])};
+    // If the entity isn't in the air (or if they can fly), calc the new X/Y 
+    // velocity.
+    // Note: If they're in the air, they'll keep traveling with their current 
+    //       X/Y velocity.
+    Velocity updatedVelocity{movement.velocity};
+    if (!(movement.isFalling) || movement.canFly) {
+        // Direction values. 0 == no movement, 1 == movement.
+        int xUp{static_cast<int>(inputStates[Input::XUp])};
+        int xDown{static_cast<int>(inputStates[Input::XDown])};
+        int yUp{static_cast<int>(inputStates[Input::YUp])};
+        int yDown{static_cast<int>(inputStates[Input::YDown])};
 
-    // Calculate our direction vector, based on the entity's inputs.
-    // Note: Opposite inputs cancel eachother out.
-    float xDirection{static_cast<float>(xUp - xDown)};
-    float yDirection{static_cast<float>(yUp - yDown)};
-    float zDirection{static_cast<float>(zUp - zDown)};
+        // Calculate our direction vector, based on the entity's inputs.
+        // Note: Opposite inputs cancel eachother out.
+        float xDirection{static_cast<float>(xUp - xDown)};
+        float yDirection{static_cast<float>(yUp - yDown)};
 
-    // If we're moving diagonally, normalize our direction vector.
-    if ((xDirection != 0) && (yDirection != 0)) {
-        xDirection *= DIAGONAL_NORMALIZATION_CONSTANT;
-        yDirection *= DIAGONAL_NORMALIZATION_CONSTANT;
+        // If we're moving diagonally, normalize our direction vector.
+        if ((xDirection != 0) && (yDirection != 0)) {
+            xDirection *= DIAGONAL_NORMALIZATION_CONSTANT;
+            yDirection *= DIAGONAL_NORMALIZATION_CONSTANT;
+        }
+
+        // Calc the new X/Y velocity.
+        updatedVelocity.x = xDirection * movement.runSpeed;
+        updatedVelocity.y = yDirection * movement.runSpeed;
     }
 
-    // Calc the velocity.
-    float velocityX{xDirection * SharedConfig::MOVEMENT_VELOCITY};
-    float velocityY{yDirection * SharedConfig::MOVEMENT_VELOCITY};
-    float velocityZ{zDirection * SharedConfig::MOVEMENT_VELOCITY};
+    /** Calc the new Z velocity. **/
+    // If the entity can fly and the user is trying to go up or down, treat 
+    // it similar to running.
+    if (movement.canFly) {
+        if (inputStates[Input::Jump] || inputStates[Input::Crouch]) {
+            int zUp{static_cast<int>(inputStates[Input::Jump])};
+            int zDown{static_cast<int>(inputStates[Input::Crouch])};
+            float zDirection{static_cast<float>(zUp - zDown)};
 
+            updatedVelocity.z = zDirection * movement.runSpeed;
+        }
+        // Note: Since they're flying, we don't apply gravity.
+    }
+    else {
+        // Not flying. If they're trying and able to jump, do so.
+        if (inputStates[Input::Jump] && !(movement.jumpHeld)
+            && (movement.jumpCount < movement.maxJumpCount)) {
+            updatedVelocity.z += static_cast<float>(movement.jumpHeight);
+            movement.jumpCount++;
+            movement.jumpHeld = true;
+        }
+
+        // Always apply gravity.
+        //updatedVelocity.z -= SharedConfig::FORCE_OF_GRAVITY;
+
+        // If jump isn't held, reset our bool.
+        if (!inputStates[Input::Jump]) {
+            movement.jumpHeld = false;
+        }
+    }
+
+    // Apply the project's velocity mod.
+    updatedVelocity += movement.velocityMod;
+
+    // Clamp Z to the terminal velocity.
+    updatedVelocity.z
+        = std::max(updatedVelocity.z, SharedConfig::TERMINAL_VELOCITY);
+
+    return updatedVelocity;
+}
+
+Position MovementHelpers::calcPosition(const Position& position,
+                                       const Velocity& velocity,
+                                       double deltaSeconds)
+{
     // Update the position.
     Position newPosition{position};
-    newPosition.x += static_cast<float>((deltaSeconds * velocityX));
-    newPosition.y += static_cast<float>((deltaSeconds * velocityY));
-    newPosition.z += static_cast<float>((deltaSeconds * velocityZ));
+    newPosition.x += static_cast<float>((deltaSeconds * velocity.x));
+    newPosition.y += static_cast<float>((deltaSeconds * velocity.y));
+    newPosition.z += static_cast<float>((deltaSeconds * velocity.z));
 
     return newPosition;
 }
@@ -136,6 +184,8 @@ BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
 
     // If any non-client entity (besides the entity trying to move) intersects
     // the desired bounds, reject the move.
+    // TODO: This probably needs to return {box, entity}, or have a different 
+    //       interface that lets us test as we go
     std::vector<entt::entity>& collidedEntities{
         entityLocator.getCollisions(desiredBounds)};
     for (entt::entity collidedEntity : collidedEntities) {

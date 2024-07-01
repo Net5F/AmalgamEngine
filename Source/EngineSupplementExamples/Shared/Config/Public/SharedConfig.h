@@ -65,9 +65,11 @@ public:
     /** The string ID of the default graphic set for entities. */
     static constexpr const char* DEFAULT_ENTITY_GRAPHIC_SET{"ghost"};
 
-    /** The speed that entities will move at. Eventually we'll support
-        dynamically setting this based on stats, for now it's a constant. */
-    static constexpr float MOVEMENT_VELOCITY{50};
+    /** The force of gravity in world units per second. */
+    static constexpr float FORCE_OF_GRAVITY{10};
+
+    /** The maximum negative Z velocity that entities can reach. */
+    static constexpr float TERMINAL_VELOCITY{-50};
 
     //-------------------------------------------------------------------------
     // Network

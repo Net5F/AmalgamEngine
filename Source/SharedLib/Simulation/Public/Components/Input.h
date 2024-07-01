@@ -14,7 +14,7 @@ namespace AM
  * changing its inputs, you can just registry.patch() with no changes.
  */
 struct Input {
-    enum Type : Uint8 { XUp, XDown, YUp, YDown, ZUp, ZDown, Count, None };
+    enum Type : Uint8 { XUp, XDown, YUp, YDown, Jump, Crouch, Count, None };
 
     enum State : Uint8 { Released, Pressed };
 

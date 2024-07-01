@@ -69,10 +69,9 @@ public:
     /**
      * Returns all entities whose collision boxes intersect the given cylinder.
      *
-     * Note: Because this uses collision and collision boxes vary in size and
-     *       position, it does not exhibit the commutative property (if a
-     *       cylinder centered on entityA returns entityB, the reverse may not
-     *       be true).
+     * Note: Because collision boxes vary in size, results are not commutative
+     *       (if a cylinder centered on entityA intersects entityB, the reverse 
+     *       may not be true).
      */
     std::vector<entt::entity>& getCollisions(const Cylinder& cylinder);
 
@@ -109,30 +108,30 @@ private:
         * SharedConfig::TILE_WORLD_HEIGHT};
 
     /**
-     * Performs a coarse pass to get all entities in cells intersected by
+     * Performs a broad phase to get all entities in cells intersected by
      * the given cylinder.
      *
      * Note: All entities in the intersected cells are returned, which may
      *       include entities that aren't actually within the radius.
      */
-    std::vector<entt::entity>& getEntitiesCoarse(const Cylinder& cylinder);
+    std::vector<entt::entity>& getEntitiesBroad(const Cylinder& cylinder);
 
     /**
      * Overload for BoundingBox.
      */
     std::vector<entt::entity>&
-        getEntitiesCoarse(const BoundingBox& boundingBox);
+        getEntitiesBroad(const BoundingBox& boundingBox);
 
     /**
      * Overload for TileExtent.
      */
-    std::vector<entt::entity>& getEntitiesCoarse(const TileExtent& tileExtent);
+    std::vector<entt::entity>& getEntitiesBroad(const TileExtent& tileExtent);
 
     /**
      * Overload for ChunkExtent.
      */
     std::vector<entt::entity>&
-        getEntitiesCoarse(const ChunkExtent& chunkExtent);
+        getEntitiesBroad(const ChunkExtent& chunkExtent);
 
     /**
      * Removes the given entity from the cells within the given extent.
@@ -167,7 +166,7 @@ private:
      */
     CellExtent tileToCellExtent(const TileExtent& tileExtent);
 
-    /** Used for fetching entity bounding boxes while doing a fine pass. */
+    /** Used for fetching entity bounding boxes during narrow phases. */
     entt::registry& registry;
 
     /** The grid's extent, with cells as the unit. */

@@ -104,8 +104,8 @@ std::vector<entt::entity>& EntityLocator::getEntities(const Cylinder& cylinder)
 {
     AM_ASSERT(cylinder.radius >= 0, "Cylinder can't have negative radius.");
 
-    // Run a coarse pass.
-    getEntitiesCoarse(cylinder);
+    // Perform a broad phase.
+    getEntitiesBroad(cylinder);
 
     // Erase any entities whose position isn't within the cylinder.
     std::erase_if(returnVector, [this, &cylinder](entt::entity entity) {
@@ -119,8 +119,8 @@ std::vector<entt::entity>& EntityLocator::getEntities(const Cylinder& cylinder)
 std::vector<entt::entity>&
     EntityLocator::getEntities(const TileExtent& tileExtent)
 {
-    // Run a coarse pass.
-    getEntitiesCoarse(tileExtent);
+    // Perform a broad phase.
+    getEntitiesBroad(tileExtent);
 
     // Erase any entities that don't actually intersect the extent.
     std::erase_if(returnVector, [this, &tileExtent](entt::entity entity) {
@@ -145,8 +145,8 @@ std::vector<entt::entity>&
 {
     AM_ASSERT(cylinder.radius >= 0, "Cylinder can't have negative radius.");
 
-    // Run a coarse pass.
-    getEntitiesCoarse(cylinder);
+    // Perform a broad phase.
+    getEntitiesBroad(cylinder);
 
     // Erase any entities that don't actually intersect the cylinder.
     std::erase_if(returnVector, [this, &cylinder](entt::entity entity) {
@@ -160,8 +160,8 @@ std::vector<entt::entity>&
 std::vector<entt::entity>&
     EntityLocator::getCollisions(const BoundingBox& boundingBox)
 {
-    // Run a coarse pass.
-    getEntitiesCoarse(boundingBox);
+    // Perform a broad phase.
+    getEntitiesBroad(boundingBox);
 
     // Erase any entities that don't actually intersect the extent.
     std::erase_if(returnVector, [this, &boundingBox](entt::entity entity) {
@@ -175,8 +175,8 @@ std::vector<entt::entity>&
 std::vector<entt::entity>&
     EntityLocator::getCollisions(const TileExtent& tileExtent)
 {
-    // Run a coarse pass.
-    getEntitiesCoarse(tileExtent);
+    // Perform a broad phase.
+    getEntitiesBroad(tileExtent);
 
     // Erase any entities that don't actually intersect the extent.
     std::erase_if(returnVector, [this, &tileExtent](entt::entity entity) {
@@ -209,7 +209,7 @@ void EntityLocator::removeEntity(entt::entity entity)
 }
 
 std::vector<entt::entity>&
-    EntityLocator::getEntitiesCoarse(const Cylinder& cylinder)
+    EntityLocator::getEntitiesBroad(const Cylinder& cylinder)
 {
     // Clear the return vector.
     returnVector.clear();
@@ -263,14 +263,14 @@ std::vector<entt::entity>&
 }
 
 std::vector<entt::entity>&
-    EntityLocator::getEntitiesCoarse(const BoundingBox& boundingBox)
+    EntityLocator::getEntitiesBroad(const BoundingBox& boundingBox)
 {
     // Convert to TileExtent.
-    return getEntitiesCoarse(boundingBox.asTileExtent());
+    return getEntitiesBroad(boundingBox.asTileExtent());
 }
 
 std::vector<entt::entity>&
-    EntityLocator::getEntitiesCoarse(const TileExtent& tileExtent)
+    EntityLocator::getEntitiesBroad(const TileExtent& tileExtent)
 {
     // Clear the return vector.
     returnVector.clear();
@@ -304,12 +304,12 @@ std::vector<entt::entity>&
 }
 
 std::vector<entt::entity>&
-    EntityLocator::getEntitiesCoarse(const ChunkExtent& chunkExtent)
+    EntityLocator::getEntitiesBroad(const ChunkExtent& chunkExtent)
 {
     // Convert to TileExtent.
     TileExtent tileExtent{chunkExtent};
 
-    return getEntitiesCoarse(tileExtent);
+    return getEntitiesBroad(tileExtent);
 }
 
 void EntityLocator::clearEntityLocation(entt::entity entity,

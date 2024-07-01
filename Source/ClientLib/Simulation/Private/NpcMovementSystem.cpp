@@ -99,13 +99,23 @@ void NpcMovementSystem::moveAllNpcs()
         entt::get<GraphicState>, entt::exclude<InputHistory>);
     for (auto [entity, input, position, previousPosition, movement, rotation,
                collision, graphicState] : movementGroup.each()) {
+        // If no inputs are pressed and they aren't falling, nothing needs to 
+        // be done.
+        if (input.inputStates.none() && !(movement.isFalling)) {
+            return;
+        }
+
         // Save their old position.
         previousPosition = position;
+
+        // Calculate their updated velocity.
+        Velocity updatedVelocity{MovementHelpers::calcVelocity(
+            input.inputStates, movement, SharedConfig::SIM_TICK_TIMESTEP_S)};
 
         // Calculate their desired next position.
         Position desiredPosition{position};
         desiredPosition = MovementHelpers::calcPosition(
-            position, input.inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
+            position, updatedVelocity, SharedConfig::SIM_TICK_TIMESTEP_S);
 
         // Update the direction they're facing, based on their current inputs.
         rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
@@ -127,6 +137,16 @@ void NpcMovementSystem::moveAllNpcs()
             position += (resolvedBounds.getMinPosition()
                          - collision.worldBounds.getMinPosition());
             collision.worldBounds = resolvedBounds;
+
+            // TEMP
+            // If they're moving up or down, flag them as falling.
+            if (resolvedBounds.minZ != collision.worldBounds.minZ) {
+                movement.isFalling = true;
+            }
+            else {
+                movement.isFalling = false;
+            }
+            // TEMP
         }
 
         // If they did actually move, update their position in the locator.
@@ -168,7 +188,7 @@ void NpcMovementSystem::applyUpdateMessage(
         // Apply the received component updates.
         input = movementState.input;
         position = movementState.position;
-        movement.velocityZ = movementState.movementVelocityZ;
+        movement = movementState.movement;
         rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
 
         // If the previous position hasn't been initialized, set it to the

@@ -30,23 +30,32 @@ void MovementSystem::processMovements()
                                       Movement, Rotation, Collision>();
     for (auto [entity, input, position, previousPosition, movement, rotation,
                collision] : group.each()) {
-        // TODO: Early-out if !isFalling and no inputs are pressed
+        // If no inputs are pressed and they aren't falling, nothing needs to 
+        // be done.
+        if (input.inputStates.none() && !(movement.isFalling)) {
+            continue;
+        }
 
         // Save their old position.
         previousPosition = position;
 
-        // TODO: Calc velocity
-
-        // TODO: Call project hook to update velocity
+        // Calculate their updated velocity.
+        Velocity updatedVelocity{MovementHelpers::calcVelocity(
+            input.inputStates, movement, SharedConfig::SIM_TICK_TIMESTEP_S)};
+        LOG_INFO("New X velocity: %.4f", updatedVelocity.x);
 
         // Calculate their desired next position.
         Position desiredPosition{position};
         desiredPosition = MovementHelpers::calcPosition(
-            position, input.inputStates, SharedConfig::SIM_TICK_TIMESTEP_S);
+            position, updatedVelocity, SharedConfig::SIM_TICK_TIMESTEP_S);
+        LOG_INFO("New X position: %.4f, %.4f", position.x, desiredPosition.x);
 
         // Update the direction they're facing, based on their current inputs.
         rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
 
+        // TODO: Figure out how to tell if they're falling or not, set 
+        //       isFalling, and figure out how to share this with the other 
+        //       locations
         // If they're trying to move, resolve collisions.
         if (desiredPosition != position) {
             // Calculate a new bounding box to match their desired position.
@@ -57,6 +66,8 @@ void MovementSystem::processMovements()
             BoundingBox resolvedBounds{MovementHelpers::resolveCollisions(
                 collision.worldBounds, desiredBounds, entity, world.registry,
                 world.tileMap, world.entityLocator)};
+            LOG_INFO("%.4f (%.4f) -> %.4f", collision.worldBounds.minX,
+                     desiredBounds.minX, resolvedBounds.minX);
 
             // Update their bounding box and position.
             // Note: Since desiredBounds was properly offset, we can do a
@@ -64,6 +75,16 @@ void MovementSystem::processMovements()
             position += (resolvedBounds.getMinPosition()
                          - collision.worldBounds.getMinPosition());
             collision.worldBounds = resolvedBounds;
+
+            // TEMP
+            // If they're moving up or down, flag them as falling.
+            if (resolvedBounds.minZ != collision.worldBounds.minZ) {
+                movement.isFalling = true;
+            }
+            else {
+                movement.isFalling = false;
+            }
+            // TEMP
         }
 
         // If they did actually move, update their position in the locator.

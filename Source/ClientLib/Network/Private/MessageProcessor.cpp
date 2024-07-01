@@ -218,7 +218,7 @@ void MessageProcessor::handleMovementUpdate(Uint8* messageBuffer,
         if (movementState.entity == playerEntity) {
             PlayerMovementUpdate playerMovementUpdate{
                 movementState.entity, movementState.input,
-                movementState.position, movementState.movementVelocityZ,
+                movementState.position, movementState.movement,
                 movementUpdate->tickNum};
             networkEventDispatcher.push(playerMovementUpdate);
 

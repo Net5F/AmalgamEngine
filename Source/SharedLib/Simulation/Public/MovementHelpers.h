@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Velocity.h"
 #include "Input.h"
 #include "BoundingBox.h"
 #include "Tile.h"
@@ -11,6 +12,7 @@
 
 namespace AM
 {
+struct Movement;
 struct Position;
 struct PreviousPosition;
 class TileMapBase;
@@ -23,19 +25,31 @@ class MovementHelpers
 {
 public:
     /**
-     * Calculates an updated position based on the current position, input
-     * state, and a time delta.
+     * Calculates an updated velocity based on the given data.
+
+     * @param inputStates The current input state.
+     * @param[out] movement The current movement state (may update velocity 
+     *                      and jumpCount).
+     * @param deltaSeconds The number of seconds that have passed since the
+     *                     last update.
+     *
+     * @return The updated velocity.
+     */
+    static Velocity calcVelocity(const Input::StateArr& inputStates,
+                                 Movement& movement, double deltaSeconds);
+
+    /**
+     * Calculates an updated position based on the given data.
      *
      * @param position The current position.
-     * @param inputStates The current input state.
+     * @param velocity  The current velocity.
      * @param deltaSeconds The number of seconds that have passed since the
      *                     last update.
      *
      * @return The updated position.
      */
     static Position calcPosition(const Position& position,
-                                 const Input::StateArr& inputStates,
-                                 double deltaSeconds);
+                                 const Velocity& velocity, double deltaSeconds);
 
     /**
      * Calculates a rotation based on the given input state.
