@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Input.h"
-#include "Velocity.h"
+#include "Vector3.h"
 #include "BoundingBox.h"
 #include "Tile.h"
 #include "TileExtent.h"
@@ -36,21 +36,21 @@ public:
      *
      * @return The updated velocity.
      */
-    static Velocity calcVelocity(const Input::StateArr& inputStates,
-                                 Movement& movement, double deltaSeconds);
+    static Vector3 calcVelocity(const Input::StateArr& inputStates,
+                                Movement& movement, double deltaSeconds);
 
     /**
      * Calculates an updated position based on the given data.
      *
      * @param position The current position.
-     * @param velocity  The current velocity.
+     * @param velocity The current velocity.
      * @param deltaSeconds The number of seconds that have passed since the
      *                     last update.
      *
      * @return The updated position.
      */
     static Position calcPosition(const Position& position,
-                                 const Velocity& velocity, double deltaSeconds);
+                                 const Vector3& velocity, double deltaSeconds);
 
     /**
      * Calculates a rotation based on the given input state.
@@ -68,26 +68,6 @@ public:
      */
     static Position interpolatePosition(const PreviousPosition& previousPos,
                                         const Position& position, double alpha);
-
-    /**
-     * Resolves collisions between the given desiredBox and other nearby
-     * bounding boxes in the world.
-     *
-     * @param currentBounds The bounding box, at its current position.
-     * @param desiredBounds The bounding box, at its desired position.
-     * @param movingEntity The entity that's trying to move.
-     * @param registry The world's entity registry.
-     * @param tileMap The world's tile map.
-     * @param entityLocator The world's entity locator.
-     *
-     * @return The desired bounding box, moved to resolve collisions.
-     */
-    static BoundingBox resolveCollisions(const BoundingBox& currentBounds,
-                                         const BoundingBox& desiredBounds,
-                                         entt::entity movingEntity,
-                                         const entt::registry& registry,
-                                         const TileMapBase& tileMap,
-                                         EntityLocator& entityLocator);
 
 private:
     /**

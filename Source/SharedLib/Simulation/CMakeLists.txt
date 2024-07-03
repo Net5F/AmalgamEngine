@@ -37,11 +37,12 @@ target_sources(SharedLib
         Public/EngineItemInteractionType.h
         Public/EntityLocator.h
         Public/EntityMover.h
+        Public/MinMaxBox.h
         Public/MovementHelpers.h
         Public/Ray.h
         Public/ReplicatedComponent.h
         Public/ResourceData.h
-        Public/Velocity.h
+        Public/Vector3.h
         Public/Components/Camera.h
         Public/Components/Collision.h
         Public/Components/EntityInitScript.h

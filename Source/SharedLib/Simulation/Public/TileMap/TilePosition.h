@@ -5,8 +5,8 @@
 
 namespace AM
 {
+struct Vector3;
 struct ChunkPosition;
-struct Position;
 
 /**
  * A strong type alias, describing the position of a particular map tile.
@@ -16,18 +16,23 @@ struct TilePosition : public DiscretePosition<DiscreteImpl::TileTag> {
 
     TilePosition(int inX, int inY, int inZ);
 
+    /**
+     * Calculates the position of the tile that contains the given point.
+     */
+    explicit TilePosition(const Vector3& worldPoint);
+
     explicit TilePosition(const ChunkPosition& chunkPosition);
 
-    /** Returns the world position at this tile's origin (the least extreme 
+    /** Returns the world point at this tile's origin (the least extreme 
         point along all axes). */
-    Position getOriginPosition() const;
+    Vector3 getOriginPoint() const;
 
-    /** Returns the world position at the 3D center of this tile. */
-    Position getCenterPosition() const;
+    /** Returns the world point at the 3D center of this tile. */
+    Vector3 getCenterPoint() const;
 
-    /** Returns the world position centered in the X and Y axis, but at the 
+    /** Returns the world point centered in the X and Y axis, but at the 
         lowest Z position of this tile. */
-    Position getCenteredBottomPosition() const;
+    Vector3 getCenteredBottomPoint() const;
 };
 
 template<typename S>

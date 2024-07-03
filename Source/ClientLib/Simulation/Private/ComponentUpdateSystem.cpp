@@ -3,6 +3,7 @@
 #include "World.h"
 #include "Network.h"
 #include "GraphicData.h"
+#include "Position.h"
 #include "Collision.h"
 #include "ClientGraphicState.h"
 #include "Transforms.h"
@@ -107,7 +108,7 @@ void ComponentUpdateSystem::onGraphicStateUpdated(entt::registry& registry,
         registry.patch<Collision>(entity, [&](Collision& collision) {
             collision.modelBounds = modelBounds;
             collision.worldBounds
-                = Transforms::modelToWorldCentered(modelBounds, position);
+                = Transforms::modelToWorldEntity(modelBounds, position);
         })};
 
     world.entityLocator.setEntityLocation(entity, collision.worldBounds);

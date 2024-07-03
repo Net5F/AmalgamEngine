@@ -1,7 +1,6 @@
 #pragma once
 
-#include "TilePosition.h"
-#include "Position.h"
+#include "Vector3.h"
 #include <array>
 #include <cmath>
 
@@ -16,33 +15,31 @@ namespace AM
  */
 struct Ray {
     /** Origin point. */
-    Position origin{};
+    Vector3 origin{};
 
     /** Direction vector. */
-    float directionX{0};
-    float directionY{0};
-    float directionZ{0};
+    Vector3 direction{};
 
     /**
      * Normalizes this ray's current direction vector.
      */
     void normalize()
     {
-        const float length{std::sqrt((directionX * directionX)
-                                     + (directionY * directionY)
-                                     + (directionZ * directionZ))};
-        directionX /= length;
-        directionY /= length;
-        directionZ /= length;
+        const float length{std::sqrt((direction.x * direction.x)
+                                     + (direction.y * direction.y)
+                                     + (direction.z * direction.z))};
+        direction.x /= length;
+        direction.y /= length;
+        direction.z /= length;
     }
 
     /**
-     * Returns the position along this ray at the given t.
+     * Returns the point along this ray at the given t.
      */
-    Position getPositionAtT(float t)
+    Vector3 getPointAtT(float t)
     {
-        return {(origin.x + (directionX * t)), (origin.y + (directionY * t)),
-                (origin.z + (directionZ * t))};
+        return {(origin.x + (direction.x * t)), (origin.y + (direction.y * t)),
+                (origin.z + (direction.z * t))};
     }
 };
 

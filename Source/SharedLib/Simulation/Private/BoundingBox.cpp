@@ -1,4 +1,5 @@
 #include "BoundingBox.h"
+#include "MinMaxBox.h"
 #include "Position.h"
 #include "Cylinder.h"
 #include "Ray.h"
@@ -8,58 +9,81 @@
 namespace AM
 {
 
+BoundingBox::BoundingBox()
+: center{}
+, halfExtents{}
+{
+}
+
+BoundingBox::BoundingBox(const MinMaxBox& box)
+: center{}
+, halfExtents{}
+{
+    halfExtents.x = (box.max.x - box.min.x) / 2.f;
+    halfExtents.y = (box.max.y - box.min.y) / 2.f;
+    halfExtents.z = (box.max.z - box.min.z) / 2.f;
+    center.x = box.min.x + halfExtents.x;
+    center.y = box.min.y + halfExtents.y;
+    center.z = box.min.z + halfExtents.z;
+}
+
 bool BoundingBox::operator==(const BoundingBox& other)
 {
-    return (minX == other.minX) && (maxX == other.maxX) && (minY == other.minY)
-           && (maxY == other.maxY) && (minZ == other.minZ)
-           && (maxZ == other.maxZ);
+    return (center == other.center) && (halfExtents == other.halfExtents);
 }
 
 float BoundingBox::getXLength() const
 {
-    return (maxX - minX);
+    return (halfExtents.x * 2);
 }
 
 float BoundingBox::getYLength() const
 {
-    return (maxY - minY);
+    return (halfExtents.y * 2);
 }
 
 float BoundingBox::getZLength() const
 {
-    return (maxZ - minZ);
+    return (halfExtents.z * 2);
 }
 
-Position BoundingBox::getMinPosition() const
+Vector3 BoundingBox::getMinPoint() const
 {
-    return {minX, minY, minZ};
+    return {(center.x - halfExtents.x), (center.y - halfExtents.y),
+            (center.z - halfExtents.z)};
 }
 
-Position BoundingBox::getMaxPosition() const
+Vector3 BoundingBox::getMaxPoint() const
 {
-    return {maxX, maxY, maxZ};
+    return {(center.x + halfExtents.x), (center.y + halfExtents.y),
+            (center.z + halfExtents.z)};
 }
 
-Position BoundingBox::get3dCenter() const
+Vector3 BoundingBox::getBottomCenterPoint() const
 {
-    Position centerPosition{};
-    centerPosition.x = minX + ((maxX - minX) / 2);
-    centerPosition.y = minY + ((maxY - minY) / 2);
-    centerPosition.z = minZ + ((maxZ - minZ) / 2);
-
-    return centerPosition;
+    return {center.x, center.y, (center.z - halfExtents.z)};
 }
 
 bool BoundingBox::isEmpty() const
 {
-    return ((minX == maxX) || (minY == maxY) || (minZ == maxZ));
+    return (halfExtents.x == 0) || (halfExtents.y == 0) || (halfExtents.z == 0);
+}
+
+void BoundingBox::moveMinimumTo(const Vector3& point)
+{
+    center.x = point.x + halfExtents.x;
+    center.y = point.y + halfExtents.y;
+    center.z = point.z + halfExtents.z;
 }
 
 bool BoundingBox::intersects(const BoundingBox& other) const
 {
-    return ((minX < other.maxX) && (maxX > other.minX) && (minY < other.maxY)
-            && (maxY > other.minY) && (minZ < other.maxZ)
-            && (maxZ > other.minZ));
+    return ((std::abs(center.x - other.center.x)
+             < (halfExtents.x + other.halfExtents.x))
+            && (std::abs(center.y - other.center.y)
+                < (halfExtents.y + other.halfExtents.y))
+            && (std::abs(center.z - other.center.z)
+                < (halfExtents.z + other.halfExtents.z)));
 }
 
 bool BoundingBox::intersects(const Cylinder& cylinder) const
@@ -67,13 +91,12 @@ bool BoundingBox::intersects(const Cylinder& cylinder) const
     // Reference: https://stackoverflow.com/a/402010/4258629
 
     // TODO: Consider Z
-    Position boxCenter{get3dCenter()};
     float xLength{getXLength()};
     float yLength{getYLength()};
 
     // Get the X and Y distances between the centers.
-    float circleDistanceX{std::abs(cylinder.center.x - boxCenter.x)};
-    float circleDistanceY{std::abs(cylinder.center.y - boxCenter.y)};
+    float circleDistanceX{std::abs(cylinder.center.x - center.x)};
+    float circleDistanceY{std::abs(cylinder.center.y - center.y)};
 
     // If the circle is far enough away that no intersection is possible,
     // return false.
@@ -124,18 +147,21 @@ bool BoundingBox::intersects(const TileExtent& tileExtent) const
     static constexpr int TILE_WORLD_HEIGHT{
         static_cast<int>(SharedConfig::TILE_WORLD_HEIGHT)};
 
-    float tileMinX{static_cast<float>(tileExtent.x * TILE_WORLD_WIDTH)};
-    float tileMaxX{static_cast<float>((tileExtent.x + tileExtent.xLength)
-                                      * TILE_WORLD_WIDTH)};
-    float tileMinY{static_cast<float>(tileExtent.y) * TILE_WORLD_WIDTH};
-    float tileMaxY{static_cast<float>((tileExtent.y + tileExtent.yLength)
-                                      * TILE_WORLD_WIDTH)};
-    float tileMinZ{static_cast<float>(tileExtent.z) * TILE_WORLD_HEIGHT};
-    float tileMaxZ{static_cast<float>((tileExtent.z + tileExtent.zLength)
-                                      * TILE_WORLD_HEIGHT)};
+    BoundingBox tileExtentBox{};
+    tileExtentBox.halfExtents.x
+        = ((tileExtent.xLength * TILE_WORLD_WIDTH) / 2.f);
+    tileExtentBox.halfExtents.y
+        = ((tileExtent.yLength * TILE_WORLD_WIDTH) / 2.f);
+    tileExtentBox.halfExtents.z
+        = ((tileExtent.zLength * TILE_WORLD_HEIGHT) / 2.f);
+    tileExtentBox.center.x
+        = (tileExtent.x * TILE_WORLD_WIDTH) + tileExtentBox.halfExtents.x;
+    tileExtentBox.center.y
+        = (tileExtent.y * TILE_WORLD_WIDTH) + tileExtentBox.halfExtents.y;
+    tileExtentBox.center.z
+        = (tileExtent.z * TILE_WORLD_HEIGHT) + tileExtentBox.halfExtents.z;
 
-    return ((maxX >= tileMinX) && (tileMaxX >= minX) && (maxY >= tileMinY)
-            && (tileMaxY >= minY) && (maxZ >= tileMinZ) && (tileMaxZ >= minZ));
+    return intersects(tileExtentBox);
 }
 
 float BoundingBox::getMinIntersection(const Ray& ray) const
@@ -171,36 +197,16 @@ float BoundingBox::getMaxIntersection(const Ray& ray) const
     return tMax;
 }
 
-TileExtent BoundingBox::asTileExtent() const
-{
-    static constexpr float TILE_WORLD_WIDTH{
-        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
-    static constexpr float TILE_WORLD_HEIGHT{
-        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
-
-    TileExtent tileExtent{};
-    tileExtent.x = static_cast<int>(std::floor(minX / TILE_WORLD_WIDTH));
-    tileExtent.y = static_cast<int>(std::floor(minY / TILE_WORLD_WIDTH));
-    tileExtent.z = static_cast<int>(std::floor(minZ / TILE_WORLD_HEIGHT));
-    tileExtent.xLength
-        = (static_cast<int>(std::ceil(maxX / TILE_WORLD_WIDTH)) - tileExtent.x);
-    tileExtent.yLength
-        = (static_cast<int>(std::ceil(maxY / TILE_WORLD_WIDTH)) - tileExtent.y);
-    tileExtent.zLength = (static_cast<int>(std::ceil(maxZ / TILE_WORLD_HEIGHT))
-                          - tileExtent.z);
-
-    return tileExtent;
-}
-
 std::array<float, 2> BoundingBox::getIntersections(const Ray& ray) const
 {
     // Find the constant t where intersection occurs for each direction.
-    float tX1{(minX - ray.origin.x) / ray.directionX};
-    float tX2{(maxX - ray.origin.x) / ray.directionX};
-    float tY1{(minY - ray.origin.y) / ray.directionY};
-    float tY2{(maxY - ray.origin.y) / ray.directionY};
-    float tZ1{(minZ - ray.origin.z) / ray.directionZ};
-    float tZ2{(maxZ - ray.origin.z) / ray.directionZ};
+    MinMaxBox box{*this};
+    float tX1{(box.min.x - ray.origin.x) / ray.direction.x};
+    float tX2{(box.max.x - ray.origin.x) / ray.direction.x};
+    float tY1{(box.min.y - ray.origin.y) / ray.direction.y};
+    float tY2{(box.max.y - ray.origin.y) / ray.direction.y};
+    float tZ1{(box.min.z - ray.origin.z) / ray.direction.z};
+    float tZ2{(box.max.z - ray.origin.z) / ray.direction.z};
 
     // Find the min t in each direction, then find the max of those.
     // This gives us the t where the ray first intersects the rect.
@@ -213,6 +219,28 @@ std::array<float, 2> BoundingBox::getIntersections(const Ray& ray) const
                         std::max(tZ1, tZ2))};
 
     return {tMin, tMax};
+}
+
+TileExtent BoundingBox::asTileExtent() const
+{
+    static constexpr float TILE_WORLD_WIDTH{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
+    static constexpr float TILE_WORLD_HEIGHT{
+        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
+
+    TileExtent tileExtent{};
+    Vector3 minPoint{getMinPoint()};
+    tileExtent.x = static_cast<int>(std::floor(minPoint.x / TILE_WORLD_WIDTH));
+    tileExtent.y = static_cast<int>(std::floor(minPoint.y / TILE_WORLD_WIDTH));
+    tileExtent.z = static_cast<int>(std::floor(minPoint.z / TILE_WORLD_HEIGHT));
+    tileExtent.xLength
+        = static_cast<int>(std::ceil((halfExtents.x * 2.f) / TILE_WORLD_WIDTH));
+    tileExtent.yLength
+        = static_cast<int>(std::ceil((halfExtents.y * 2.f) / TILE_WORLD_WIDTH));
+    tileExtent.zLength = static_cast<int>(
+        std::ceil((halfExtents.z * 2.f) / TILE_WORLD_HEIGHT));
+
+    return tileExtent;
 }
 
 } // End namespace AM

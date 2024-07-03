@@ -50,21 +50,19 @@ void EntityLocator::setEntityLocation(entt::entity entity,
 {
     // Find the cells that the bounding box intersects.
     CellExtent boxCellExtent{};
+    Vector3 boxMin{boundingBox.getMinPoint()};
     boxCellExtent.x
-        = static_cast<int>(std::floor(boundingBox.minX / CELL_WORLD_WIDTH));
+        = static_cast<int>(std::floor(boxMin.x / CELL_WORLD_WIDTH));
     boxCellExtent.y
-        = static_cast<int>(std::floor(boundingBox.minY / CELL_WORLD_WIDTH));
+        = static_cast<int>(std::floor(boxMin.y / CELL_WORLD_WIDTH));
     boxCellExtent.z
-        = static_cast<int>(std::floor(boundingBox.minZ / CELL_WORLD_HEIGHT));
-    boxCellExtent.xLength
-        = (static_cast<int>(std::ceil(boundingBox.maxX / CELL_WORLD_WIDTH))
-           - boxCellExtent.x);
-    boxCellExtent.yLength
-        = (static_cast<int>(std::ceil(boundingBox.maxY / CELL_WORLD_WIDTH))
-           - boxCellExtent.y);
-    boxCellExtent.zLength
-        = (static_cast<int>(std::ceil(boundingBox.maxZ / CELL_WORLD_HEIGHT))
-           - boxCellExtent.z);
+        = static_cast<int>(std::floor(boxMin.z / CELL_WORLD_HEIGHT));
+    boxCellExtent.xLength = static_cast<int>(
+        std::ceil(boundingBox.halfExtents.x * 2.f / CELL_WORLD_WIDTH));
+    boxCellExtent.yLength = static_cast<int>(
+        std::ceil(boundingBox.halfExtents.y * 2.f / CELL_WORLD_WIDTH));
+    boxCellExtent.zLength = static_cast<int>(
+        std::ceil(boundingBox.halfExtents.z * 2.f / CELL_WORLD_HEIGHT));
 
     if (!(gridCellExtent.containsExtent(boxCellExtent))) {
         LOG_ERROR("Tried to track entity that is outside of the locator's "
@@ -100,6 +98,18 @@ void EntityLocator::setEntityLocation(entt::entity entity,
     }
 }
 
+void EntityLocator::removeEntity(entt::entity entity)
+{
+    auto entityIt{entityMap.find(entity)};
+    if (entityIt != entityMap.end()) {
+        // Remove the entity from each cell that it's located in.
+        clearEntityLocation(entity, entityIt->second);
+
+        // Remove the entity from the map.
+        entityMap.erase(entityIt);
+    }
+}
+
 std::vector<entt::entity>& EntityLocator::getEntities(const Cylinder& cylinder)
 {
     AM_ASSERT(cylinder.radius >= 0, "Cylinder can't have negative radius.");
@@ -125,7 +135,7 @@ std::vector<entt::entity>&
     // Erase any entities that don't actually intersect the extent.
     std::erase_if(returnVector, [this, &tileExtent](entt::entity entity) {
         const Position& position{registry.get<Position>(entity)};
-        return !(tileExtent.containsPosition(position.asTilePosition()));
+        return !(tileExtent.containsPosition(TilePosition(position)));
     });
 
     return returnVector;
@@ -194,18 +204,6 @@ std::vector<entt::entity>&
     TileExtent tileExtent{chunkExtent};
 
     return getCollisions(tileExtent);
-}
-
-void EntityLocator::removeEntity(entt::entity entity)
-{
-    auto entityIt{entityMap.find(entity)};
-    if (entityIt != entityMap.end()) {
-        // Remove the entity from each cell that it's located in.
-        clearEntityLocation(entity, entityIt->second);
-
-        // Remove the entity from the map.
-        entityMap.erase(entityIt);
-    }
 }
 
 std::vector<entt::entity>&

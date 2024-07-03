@@ -375,12 +375,12 @@ void GraphicDataBase::parseSprite(const nlohmann::json& spriteJson)
     sprite.collisionEnabled = spriteJson.at("collisionEnabled");
 
     // Add the model-space bounds.
-    sprite.modelBounds.minX = spriteJson.at("modelBounds").at("minX");
-    sprite.modelBounds.maxX = spriteJson.at("modelBounds").at("maxX");
-    sprite.modelBounds.minY = spriteJson.at("modelBounds").at("minY");
-    sprite.modelBounds.maxY = spriteJson.at("modelBounds").at("maxY");
-    sprite.modelBounds.minZ = spriteJson.at("modelBounds").at("minZ");
-    sprite.modelBounds.maxZ = spriteJson.at("modelBounds").at("maxZ");
+    sprite.modelBounds.center.x = spriteJson.at("modelBounds").at("centerX");
+    sprite.modelBounds.center.y = spriteJson.at("modelBounds").at("centerY");
+    sprite.modelBounds.center.z = spriteJson.at("modelBounds").at("centerZ");
+    sprite.modelBounds.halfExtents.x = spriteJson.at("modelBounds").at("halfX");
+    sprite.modelBounds.halfExtents.y = spriteJson.at("modelBounds").at("halfY");
+    sprite.modelBounds.halfExtents.z = spriteJson.at("modelBounds").at("halfZ");
 }
 
 void GraphicDataBase::parseAnimation(const nlohmann::json& animationJson)
@@ -414,12 +414,18 @@ void GraphicDataBase::parseAnimation(const nlohmann::json& animationJson)
     animation.collisionEnabled = animationJson.at("collisionEnabled");
 
     // Add the model-space bounds.
-    animation.modelBounds.minX = animationJson.at("modelBounds").at("minX");
-    animation.modelBounds.maxX = animationJson.at("modelBounds").at("maxX");
-    animation.modelBounds.minY = animationJson.at("modelBounds").at("minY");
-    animation.modelBounds.maxY = animationJson.at("modelBounds").at("maxY");
-    animation.modelBounds.minZ = animationJson.at("modelBounds").at("minZ");
-    animation.modelBounds.maxZ = animationJson.at("modelBounds").at("maxZ");
+    animation.modelBounds.center.x
+        = animationJson.at("modelBounds").at("centerX");
+    animation.modelBounds.center.y
+        = animationJson.at("modelBounds").at("centerY");
+    animation.modelBounds.center.z
+        = animationJson.at("modelBounds").at("centerZ");
+    animation.modelBounds.halfExtents.x
+        = animationJson.at("modelBounds").at("halfX");
+    animation.modelBounds.halfExtents.y
+        = animationJson.at("modelBounds").at("halfY");
+    animation.modelBounds.halfExtents.z
+        = animationJson.at("modelBounds").at("halfZ");
 }
 
 void GraphicDataBase::parseTerrainGraphicSet(const nlohmann::json& graphicSetJson)

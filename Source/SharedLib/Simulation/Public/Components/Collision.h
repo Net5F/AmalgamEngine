@@ -20,11 +20,11 @@ struct Collision {
               define the default entity collision. If the project dev wants
               different default collision for different entities, they can
               handle it in a project system. */
-    BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
+    BoundingBox modelBounds{};
 
     /** World-space bounding box. This is modelBounds, moved to the entity's
         position in the world. */
-    BoundingBox worldBounds{0, 0, 0, 0, 0, 0};
+    BoundingBox worldBounds{};
 };
 
 } // End namespace AM

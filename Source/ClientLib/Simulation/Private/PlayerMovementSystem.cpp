@@ -88,7 +88,7 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
         rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
         movement = movementUpdate.movement;
         collision.worldBounds
-            = Transforms::modelToWorldCentered(collision.modelBounds, position);
+            = Transforms::modelToWorldEntity(collision.modelBounds, position);
 
         // Check that the diff is valid.
         Uint32 tickDiff{simulation.getCurrentTick() - updateTick};

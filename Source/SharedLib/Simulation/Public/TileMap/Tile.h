@@ -117,13 +117,6 @@ public:
     bool isEmpty() const;
 
 private:
-    /**
-     * Returns the given graphic's modelBounds, translated to world space and
-     * offset to the given tile coords.
-     */
-    BoundingBox calcWorldBoundsForGraphic(const TilePosition& tilePosition,
-                                          const GraphicRef& graphic);
-
     /** Holds this tile's collision volumes.
         We pre-calculate these and store them contiguously to speed up collision
         checking. */

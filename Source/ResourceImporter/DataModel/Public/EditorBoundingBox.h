@@ -21,7 +21,7 @@ struct EditorBoundingBox {
     std::string displayName{""};
 
     /** Model-space bounding box. */
-    BoundingBox modelBounds{0, 0, 0, 0, 0, 0};
+    BoundingBox modelBounds{};
 };
 
 } // namespace ResourceImporter

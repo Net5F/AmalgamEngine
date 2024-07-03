@@ -29,7 +29,7 @@ struct SpriteSortInfo {
         in the current frame, based on the associated entity's lerped
         position.
         Used during topological sorting. */
-    BoundingBox worldBounds{0, 0, 0, 0, 0, 0};
+    BoundingBox worldBounds{};
 
     /** The screen extent that has been calculated for this sprite in the
         current frame, based on the associated entity's lerped position.

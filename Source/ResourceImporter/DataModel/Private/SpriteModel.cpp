@@ -119,22 +119,22 @@ void SpriteModel::save(nlohmann::json& json)
 
             // Add the model-space bounds.
             // Note: This will either be a shared bounding box or a custom one 
-            //       depending on modelBoundsID. The engine doesn't care either 
-            //       way, it just needs to know what the bounds are. 
+            //       depending on modelBoundsID. In either case, we always save
+            //       to modelBounds because that's what the engine uses. 
             const BoundingBox& spriteModelBounds{
                 sprite.getModelBounds(dataModel.boundingBoxModel)}; 
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minX"]
-                = spriteModelBounds.minX;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxX"]
-                = spriteModelBounds.maxX;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minY"]
-                = spriteModelBounds.minY;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxY"]
-                = spriteModelBounds.maxY;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minZ"]
-                = spriteModelBounds.minZ;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxZ"]
-                = spriteModelBounds.maxZ;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["centerX"]
+                = spriteModelBounds.center.x;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["centerY"]
+                = spriteModelBounds.center.y;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["centerZ"]
+                = spriteModelBounds.center.z;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["halfX"]
+                = spriteModelBounds.halfExtents.x;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["halfY"]
+                = spriteModelBounds.halfExtents.y;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["halfZ"]
+                = spriteModelBounds.halfExtents.z;
         }
 
         i++;
@@ -216,7 +216,7 @@ bool SpriteModel::addSpriteSheet(const std::string& relPath,
             SDL_Rect textureExtent{x, y, spriteWidthI, spriteHeightI};
 
             // Default to a non-0 bounding box so it's easier to click.
-            static constexpr BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
+            static constexpr BoundingBox defaultBox{{10, 10, 10}, {10, 10, 10}};
 
             // Add the sprite to the map and sheet.
             SpriteID spriteID{static_cast<SpriteID>(spriteIDPool.reserveID())};
@@ -431,15 +431,20 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     // Add modelBoundsID.
     sprite.modelBoundsID = spriteJson.at("modelBoundsID");
 
-    // Add the custom model-space bounds.
-    // Note: We always save to modelBounds (even if this animation uses a shared
-    //       bounding box) because that's what the engine uses.
-    sprite.customModelBounds.minX = spriteJson.at("modelBounds").at("minX");
-    sprite.customModelBounds.maxX = spriteJson.at("modelBounds").at("maxX");
-    sprite.customModelBounds.minY = spriteJson.at("modelBounds").at("minY");
-    sprite.customModelBounds.maxY = spriteJson.at("modelBounds").at("maxY");
-    sprite.customModelBounds.minZ = spriteJson.at("modelBounds").at("minZ");
-    sprite.customModelBounds.maxZ = spriteJson.at("modelBounds").at("maxZ");
+    // Default our custom bounds to the saved modelBounds, regardless of 
+    // whether we use a shared bounding box or not.
+    sprite.customModelBounds.center.x
+        = spriteJson.at("modelBounds").at("centerX");
+    sprite.customModelBounds.center.y
+        = spriteJson.at("modelBounds").at("centerY");
+    sprite.customModelBounds.center.z
+        = spriteJson.at("modelBounds").at("centerZ");
+    sprite.customModelBounds.halfExtents.x
+        = spriteJson.at("modelBounds").at("halfX");
+    sprite.customModelBounds.halfExtents.y
+        = spriteJson.at("modelBounds").at("halfY");
+    sprite.customModelBounds.halfExtents.z
+        = spriteJson.at("modelBounds").at("halfZ");
 
     return true;
 }

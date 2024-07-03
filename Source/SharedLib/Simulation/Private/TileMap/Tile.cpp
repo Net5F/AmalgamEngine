@@ -279,7 +279,7 @@ void Tile::rebuildCollision(const TilePosition& tilePosition)
         if (layer.type == TileLayer::Type::Terrain) {
             bounds = Terrain::calcWorldBounds(
                 tilePosition, static_cast<Terrain::Value>(layer.graphicValue));
-            terrainHeight = bounds.maxZ;
+            terrainHeight = bounds.center.z + bounds.halfExtents.z;
         }
         // If it's a floor, skip it (they never have collision).
         else if (layer.type == TileLayer::Type::Floor) {
@@ -287,12 +287,12 @@ void Tile::rebuildCollision(const TilePosition& tilePosition)
         }
         // If it's a wall or object, add its assigned collision.
         else if (graphic.getCollisionEnabled()) {
-            bounds = calcWorldBoundsForGraphic(tilePosition, graphic);
+            bounds = Transforms::modelToWorldTile(graphic.getModelBounds(),
+                                                  tilePosition);
 
             // If it's a wall, add the terrain height.
             if (layer.type == TileLayer::Type::Wall) {
-                bounds.minZ += terrainHeight;
-                bounds.maxZ += terrainHeight;
+                bounds.center.z += terrainHeight;
             }
         }
 
@@ -303,19 +303,6 @@ void Tile::rebuildCollision(const TilePosition& tilePosition)
 bool Tile::isEmpty() const
 {
     return layers.empty();
-}
-
-BoundingBox Tile::calcWorldBoundsForGraphic(const TilePosition& tilePosition,
-                                               const GraphicRef& graphic)
-{
-    // Cast constants to a float so we get float multiplication below.
-    static constexpr float TILE_WORLD_WIDTH{SharedConfig::TILE_WORLD_WIDTH};
-    static constexpr float TILE_WORLD_HEIGHT{SharedConfig::TILE_WORLD_HEIGHT};
-
-    Position position{tilePosition.x * TILE_WORLD_WIDTH,
-                      tilePosition.y * TILE_WORLD_WIDTH,
-                      tilePosition.z * TILE_WORLD_HEIGHT};
-    return Transforms::modelToWorld(graphic.getModelBounds(), position);
 }
 
 } // End namespace AM

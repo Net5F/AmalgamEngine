@@ -1,6 +1,7 @@
 #include "WorldObjectLocator.h"
 #include "SDLHelpers.h"
 #include "Transforms.h"
+#include "MinMaxBox.h"
 #include "entt/entity/entity.hpp"
 #include <stdexcept>
 #include <cmath>
@@ -28,21 +29,19 @@ void WorldObjectLocator::addWorldObject(const WorldObjectID& objectID,
 
     // Find the cells that the bounding box intersects.
     CellExtent boxCellExtent{};
-    boxCellExtent.x = static_cast<int>(
-        std::floor(objectWorldBounds.minX / CELL_WORLD_WIDTH));
-    boxCellExtent.y = static_cast<int>(
-        std::floor(objectWorldBounds.minY / CELL_WORLD_WIDTH));
-    boxCellExtent.z = static_cast<int>(
-        std::floor(objectWorldBounds.minZ / CELL_WORLD_HEIGHT));
-    boxCellExtent.xLength = (static_cast<int>(std::ceil(objectWorldBounds.maxX
-                                                        / CELL_WORLD_WIDTH))
-                             - boxCellExtent.x);
-    boxCellExtent.yLength = (static_cast<int>(std::ceil(objectWorldBounds.maxY
-                                                        / CELL_WORLD_WIDTH))
-                             - boxCellExtent.y);
-    boxCellExtent.zLength = (static_cast<int>(std::ceil(objectWorldBounds.maxZ
-                                                        / CELL_WORLD_HEIGHT))
-                             - boxCellExtent.z);
+    Vector3 boxMin{objectWorldBounds.getMinPoint()};
+    boxCellExtent.x
+        = static_cast<int>(std::floor(boxMin.x / CELL_WORLD_WIDTH));
+    boxCellExtent.y
+        = static_cast<int>(std::floor(boxMin.y / CELL_WORLD_WIDTH));
+    boxCellExtent.z
+        = static_cast<int>(std::floor(boxMin.z / CELL_WORLD_HEIGHT));
+    boxCellExtent.xLength = static_cast<int>(
+        std::ceil(objectWorldBounds.halfExtents.x * 2.f / CELL_WORLD_WIDTH));
+    boxCellExtent.yLength = static_cast<int>(
+        std::ceil(objectWorldBounds.halfExtents.y * 2.f / CELL_WORLD_WIDTH));
+    boxCellExtent.zLength = static_cast<int>(
+        std::ceil(objectWorldBounds.halfExtents.z * 2.f / CELL_WORLD_HEIGHT));
 
     // Make sure each length is at least 1, or else the box won't be added to 
     // any cells.
@@ -82,8 +81,8 @@ WorldObjectID
     // Calc the ratio of how long we have to travel along the ray to
     // fully move through 1 cell in each direction.
     // Note: Since our ray is from our iso camera, X/Y will always be equal.
-    const float unitStepX{std::abs(1 / ray.directionX)};
-    const float unitStepZ{std::abs(1 / ray.directionZ)};
+    const float unitStepX{std::abs(1 / ray.direction.x)};
+    const float unitStepZ{std::abs(1 / ray.direction.z)};
     const float cellStepX{unitStepX * CELL_WORLD_WIDTH};
     const float cellStepY{cellStepX};
     const float cellStepZ{unitStepZ * CELL_WORLD_HEIGHT};
@@ -94,7 +93,7 @@ WorldObjectID
     //       which we can then multiply by cellStep to get "how much of a 
     //       step would we have to make along the ray to reach the next cell".
     CellPosition currentCellPosition{
-        tileToCellPosition(ray.origin.asTilePosition())};
+        tileToCellPosition(TilePosition(ray.origin))};
     float nextIntersectionX{
         (ray.origin.x - (currentCellPosition.x * CELL_WORLD_WIDTH))
         / CELL_WORLD_WIDTH * cellStepX};
@@ -108,9 +107,9 @@ WorldObjectID
     // Find the furthest intersection between the ray and the camera's view 
     // bounds so we know where to stop the walk.
     float furthestT{camera.viewBounds.getMaxIntersection(ray)};
-    Position furthestViewIntersection{ray.getPositionAtT(furthestT)};
+    Position furthestViewIntersection{ray.getPointAtT(furthestT)};
     CellPosition endCellPosition{
-        tileToCellPosition(furthestViewIntersection.asTilePosition())};
+        tileToCellPosition(TilePosition(furthestViewIntersection))};
 
     // Walk along the ray, checking each cell for a hit world object.
     // (We iterate until we walk past the end position along some axis).
@@ -165,22 +164,22 @@ void WorldObjectLocator::setCamera(const Camera& inCamera)
 
 void WorldObjectLocator::setExtent(const TileExtent& inTileExtent)
 {
-    locatorBounds.minX
-        = inTileExtent.x * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
-    locatorBounds.maxX = (inTileExtent.x + inTileExtent.xLength)
-                         * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
-    locatorBounds.minY
-        = inTileExtent.y * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
-    locatorBounds.maxY = (inTileExtent.y + inTileExtent.yLength)
-                         * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH);
+    static constexpr float TILE_WORLD_WIDTH{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
+    static constexpr float TILE_WORLD_HEIGHT{
+        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
+
+    MinMaxBox bounds{};
+    bounds.min.x = inTileExtent.x * TILE_WORLD_WIDTH;
+    bounds.max.x = (inTileExtent.x + inTileExtent.xLength) * TILE_WORLD_WIDTH;
+    bounds.min.y = inTileExtent.y * TILE_WORLD_WIDTH;
+    bounds.max.y = (inTileExtent.y + inTileExtent.yLength) * TILE_WORLD_WIDTH;
     // Note: We don't want our rays to immediately intersect with these bounds,
     //       so we drop the Z bound below the extent.
-    locatorBounds.minZ
-        = (inTileExtent.z * static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT))
-          - 0.1f;
-    locatorBounds.maxZ = (inTileExtent.z + inTileExtent.zLength)
-                         * static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT);
+    bounds.min.z = (inTileExtent.z * TILE_WORLD_HEIGHT) - 0.1f;
+    bounds.max.z = (inTileExtent.z + inTileExtent.zLength) * TILE_WORLD_HEIGHT;
 
+    locatorBounds = BoundingBox(bounds);
     locatorCellExtent = tileToCellExtent(inTileExtent);
 }
 

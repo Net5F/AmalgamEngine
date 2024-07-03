@@ -48,6 +48,12 @@ public:
     void setEntityLocation(entt::entity entity, const BoundingBox& boundingBox);
 
     /**
+     * If we're tracking the given entity, removes it from the entityGrid and
+     * entityMap.
+     */
+    void removeEntity(entt::entity entity);
+
+    /**
      * Returns all entities whose positions intersect the given cylinder.
      *
      * Note: Because this uses position, it exhibits the commutative property
@@ -70,7 +76,7 @@ public:
      * Returns all entities whose collision boxes intersect the given cylinder.
      *
      * Note: Because collision boxes vary in size, results are not commutative
-     *       (if a cylinder centered on entityA intersects entityB, the reverse 
+     *       (if a cylinder centered on entityA intersects entityB, the reverse
      *       may not be true).
      */
     std::vector<entt::entity>& getCollisions(const Cylinder& cylinder);
@@ -89,23 +95,6 @@ public:
      * Overload for ChunkExtent.
      */
     std::vector<entt::entity>& getCollisions(const ChunkExtent& chunkExtent);
-
-    /**
-     * If we're tracking the given entity, removes it from the entityGrid and
-     * entityMap.
-     */
-    void removeEntity(entt::entity entity);
-
-private:
-    /** The width of a grid cell in world units. */
-    static constexpr float CELL_WORLD_WIDTH{
-        SharedConfig::ENTITY_LOCATOR_CELL_WIDTH
-        * SharedConfig::TILE_WORLD_WIDTH};
-
-    /** The height of a grid cell in world units. */
-    static constexpr float CELL_WORLD_HEIGHT{
-        SharedConfig::ENTITY_LOCATOR_CELL_HEIGHT
-        * SharedConfig::TILE_WORLD_HEIGHT};
 
     /**
      * Performs a broad phase to get all entities in cells intersected by
@@ -132,6 +121,17 @@ private:
      */
     std::vector<entt::entity>&
         getEntitiesBroad(const ChunkExtent& chunkExtent);
+
+private:
+    /** The width of a grid cell in world units. */
+    static constexpr float CELL_WORLD_WIDTH{
+        SharedConfig::ENTITY_LOCATOR_CELL_WIDTH
+        * SharedConfig::TILE_WORLD_WIDTH};
+
+    /** The height of a grid cell in world units. */
+    static constexpr float CELL_WORLD_HEIGHT{
+        SharedConfig::ENTITY_LOCATOR_CELL_HEIGHT
+        * SharedConfig::TILE_WORLD_HEIGHT};
 
     /**
      * Removes the given entity from the cells within the given extent.

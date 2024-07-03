@@ -10,17 +10,17 @@
 
 namespace AM
 {
-SDL_FPoint Transforms::worldToScreen(const Position& position, float zoomFactor)
+SDL_FPoint Transforms::worldToScreen(const Vector3& point, float zoomFactor)
 {
     // Convert cartesian world point to isometric screen point.
-    float screenX{(position.x - position.y)
+    float screenX{(point.x - point.y)
                   * (TILE_FACE_WIDTH_WORLD_TO_SCREEN / 2.f)};
-    float screenY{(position.x + position.y)
+    float screenY{(point.x + point.y)
                   * (TILE_FACE_HEIGHT_WORLD_TO_SCREEN / 2.f)};
 
     // The Z coordinate contribution is independent of X/Y and only affects the
     // screen's Y axis. Scale and apply it.
-    screenY -= (position.z * TILE_SIDE_HEIGHT_WORLD_TO_SCREEN);
+    screenY -= (point.z * TILE_SIDE_HEIGHT_WORLD_TO_SCREEN);
 
     // Apply the camera zoom.
     screenX *= zoomFactor;
@@ -34,7 +34,7 @@ float Transforms::worldZToScreenY(float zCoord, float zoomFactor)
     return zCoord * zoomFactor * TILE_SIDE_HEIGHT_WORLD_TO_SCREEN;
 }
 
-Position Transforms::screenToWorldMinimum(const SDL_FPoint& screenPoint,
+Vector3 Transforms::screenToWorldMinimum(const SDL_FPoint& screenPoint,
                                           const Camera& camera)
 {
     // Offset the screen point to include the camera position.
@@ -46,26 +46,28 @@ Position Transforms::screenToWorldMinimum(const SDL_FPoint& screenPoint,
     float x{absolutePoint.x / camera.zoomFactor};
     float y{absolutePoint.y / camera.zoomFactor};
 
-    // Calc the world position.
+    // Calc the world point.
     float worldX{((2.f * y) + x) * TILE_FACE_WIDTH_SCREEN_TO_WORLD};
     float worldY{((2.f * y) - x) * TILE_FACE_HEIGHT_SCREEN_TO_WORLD / 2.f};
 
     return {worldX, worldY, 0};
 }
 
-Position Transforms::screenToWorldTarget(const SDL_FPoint& screenPoint,
-                                         const Camera& camera)
+Vector3 Transforms::screenToWorldTarget(const SDL_FPoint& screenPoint,
+                                        const Camera& camera)
 {
     // Find the T where a ray cast from screenPoint intersects the camera 
     // target's Z plane.
     Ray ray{screenToWorldRay(screenPoint, camera)};
-    BoundingBox zPlane{-1'000'000.f, 1'000'000.f, -1'000'000.f,
-                       1'000'000.f,  -0.1f,      camera.target.z};
+    float zHalfExtent{camera.target.z / 2.f};
+    BoundingBox zPlane{
+        {0, 0, (zHalfExtent - 0.05f)},
+        {1'000'000.f, 1'000'000.f, (zHalfExtent + 0.05f)}};
     float intersectT{zPlane.getMinIntersection(ray)};
     AM_ASSERT(intersectT > 0, "Screen ray failed to intersect Z plane.");
 
-    // Return the intersected position.
-    return ray.getPositionAtT(intersectT);
+    // Return the intersected point.
+    return ray.getPointAtT(intersectT);
 }
 
 Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
@@ -74,26 +76,26 @@ Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
     // Ref: https://gamedev.stackexchange.com/a/206067/124282
 
     // Find where screenPoint intersects the world at Z == 0.
-    Position minimum{screenToWorldMinimum(screenPoint, camera)};
+    Vector3 minimum{screenToWorldMinimum(screenPoint, camera)};
 
-    // Cast a ray up from the minimum position towards the camera.
-    // Find the furthest position where this ray intersects the 
-    // camera's view bounds.
-    Ray rayToCamera{minimum, TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
-                    TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
-                    TILE_FACE_HEIGHT_WORLD_TO_SCREEN};
+    // Cast a ray up from the minimum point towards the camera.
+    // Find the furthest point where this ray intersects the camera's bounds.
+    Ray rayToCamera{minimum,
+                    {TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
+                     TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
+                     TILE_FACE_HEIGHT_WORLD_TO_SCREEN}};
     rayToCamera.normalize();
     float tMax{camera.viewBounds.getMaxIntersection(rayToCamera)};
     AM_ASSERT(tMax > 0, "Screen ray failed to intersect camera bounds.");
 
-    Position viewBoundsIntersection{rayToCamera.getPositionAtT(tMax)};
+    Vector3 viewBoundsIntersection{rayToCamera.getPointAtT(tMax)};
 
     // Return a ray that starts at the intersected position and points towards 
     // the minimum.
     return {viewBoundsIntersection,
-            -rayToCamera.directionX,
-            -rayToCamera.directionY,
-            -rayToCamera.directionZ};
+            -rayToCamera.direction.x,
+            -rayToCamera.direction.y,
+            -rayToCamera.direction.z};
 }
 
 TilePosition Transforms::screenToWorldTile(const SDL_FPoint& screenPoint,
@@ -109,14 +111,16 @@ TilePosition Transforms::screenToWorldTile(const SDL_FPoint& screenPoint,
     // Find the T where a ray cast from screenPoint intersects the tile's 
     // Z plane.
     Ray ray{screenToWorldRay(screenPoint, camera)};
-    BoundingBox zPlane{-1'000'000.f, 1'000'000.f, -1'000'000.f,
-                       1'000'000.f,  -0.1f,      tileZWorld};
+    float zHalfExtent{tileZWorld / 2.f};
+    BoundingBox zPlane{
+        {0, 0, (zHalfExtent - 0.05f)},
+        {1'000'000.f, 1'000'000.f, (zHalfExtent + 0.05f)}};
     float intersectT{zPlane.getMinIntersection(ray)};
     AM_ASSERT(intersectT > 0, "Screen ray failed to intersect Z plane.");
 
     // Return the intersected tile position.
-    Position intersectPos{ray.getPositionAtT(intersectT)};
-    return intersectPos.asTilePosition();
+    Vector3 intersectPoint{ray.getPointAtT(intersectT)};
+    return TilePosition{intersectPoint};
 }
 
 float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)
@@ -124,41 +128,38 @@ float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)
     return (yCoord / zoomFactor) * TILE_SIDE_HEIGHT_SCREEN_TO_WORLD;
 }
 
-BoundingBox Transforms::modelToWorld(const BoundingBox& modelBounds,
-                                     const Position& position)
+BoundingBox Transforms::modelToWorldTile(const BoundingBox& modelBounds,
+                                         const TilePosition& tilePosition)
 {
-    // Place the model-space bounding box at the given position.
-    BoundingBox movedBox{};
-    movedBox.minX = position.x + modelBounds.minX;
-    movedBox.maxX = position.x + modelBounds.maxX;
-    movedBox.minY = position.y + modelBounds.minY;
-    movedBox.maxY = position.y + modelBounds.maxY;
-    movedBox.minZ = position.z + modelBounds.minZ;
-    movedBox.maxZ = position.z + modelBounds.maxZ;
+    // Cast constants to a float so we get float multiplication below.
+    static constexpr float TILE_WORLD_WIDTH{SharedConfig::TILE_WORLD_WIDTH};
+    static constexpr float TILE_WORLD_HEIGHT{SharedConfig::TILE_WORLD_HEIGHT};
+
+    // Offset the model-space bounding box to align it with the tile
+    Vector3 offset{tilePosition.x * TILE_WORLD_WIDTH,
+                   tilePosition.y * TILE_WORLD_WIDTH,
+                   tilePosition.z * TILE_WORLD_HEIGHT};
+    BoundingBox movedBox{modelBounds};
+    movedBox.center += offset;
 
     return movedBox;
 }
 
-BoundingBox Transforms::modelToWorldCentered(const BoundingBox& modelBounds,
-                                             const Position& position)
+BoundingBox Transforms::modelToWorldEntity(const BoundingBox& modelBounds,
+                                           const Position& position)
 {
     // Place the model-space bounding box at the given position, offset back
     // by half of the sprite's stage size to center it in the X/Y.
     // Note: This assumes that the sprite's stage is 1 tile large. When we add
     //       support for other sizes, this will need to be updated.
-    BoundingBox offsetBounds{};
-    offsetBounds.minX
-        = position.x + modelBounds.minX - (SharedConfig::TILE_WORLD_WIDTH / 2);
-    offsetBounds.minY
-        = position.y + modelBounds.minY - (SharedConfig::TILE_WORLD_WIDTH / 2);
-    offsetBounds.maxX = offsetBounds.minX + modelBounds.getXLength();
-    offsetBounds.maxY = offsetBounds.minY + modelBounds.getYLength();
+    BoundingBox offsetBounds{modelBounds};
+    offsetBounds.center.x += position.x - (SharedConfig::TILE_WORLD_WIDTH / 2);
+    offsetBounds.center.y += position.y - (SharedConfig::TILE_WORLD_WIDTH / 2);
 
-    // Place the bottom of the stage flush with the given position.
-    // (e.g. if this is an entity's position, the bottom of the stage is at
-    // their feet).
-    offsetBounds.minZ = position.z + modelBounds.minZ;
-    offsetBounds.maxZ = position.z + modelBounds.maxZ;
+    // Note: We don't need to offset the Z position because sprites are only 
+    //       assumed to be centered on the stage in the X and Y axis. They're
+    //       assumed to start on the stage at Z == 0.
+    offsetBounds.center.z += position.z;
 
     return offsetBounds;
 }

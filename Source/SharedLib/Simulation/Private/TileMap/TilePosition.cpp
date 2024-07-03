@@ -15,6 +15,17 @@ TilePosition::TilePosition(int inX, int inY, int inZ)
 {
 }
 
+TilePosition::TilePosition(const Vector3& worldPoint)
+: DiscretePosition<DiscreteImpl::TileTag>(
+    static_cast<int>(std::floor(
+        worldPoint.x / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))),
+    static_cast<int>(std::floor(
+        worldPoint.y / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))),
+    static_cast<int>(std::floor(
+        worldPoint.z / static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT))))
+{
+}
+
 TilePosition::TilePosition(const ChunkPosition& chunkPosition)
 : DiscretePosition<DiscreteImpl::TileTag>(
     static_cast<int>(chunkPosition.x * SharedConfig::CHUNK_WIDTH),
@@ -23,7 +34,7 @@ TilePosition::TilePosition(const ChunkPosition& chunkPosition)
 {
 }
 
-Position TilePosition::getOriginPosition() const
+Vector3 TilePosition::getOriginPoint() const
 {
     static constexpr float TILE_WIDTH{
         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
@@ -33,7 +44,7 @@ Position TilePosition::getOriginPosition() const
     return {x * TILE_WIDTH, y * TILE_WIDTH, z * TILE_HEIGHT};
 }
 
-Position TilePosition::getCenterPosition() const
+Vector3 TilePosition::getCenterPoint() const
 {
     static constexpr float TILE_WIDTH{
         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
@@ -46,7 +57,7 @@ Position TilePosition::getCenterPosition() const
             ((z * TILE_HEIGHT) + HALF_HEIGHT)};
 }
 
-Position TilePosition::getCenteredBottomPosition() const
+Vector3 TilePosition::getCenteredBottomPoint() const
 {
     static constexpr float TILE_WIDTH{
         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};

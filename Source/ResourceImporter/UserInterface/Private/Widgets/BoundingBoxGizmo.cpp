@@ -4,6 +4,7 @@
 #include "Transforms.h"
 #include "Position.h"
 #include "Camera.h"
+#include "MinMaxBox.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include "AUI/Core.h"
@@ -251,10 +252,11 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 
     // Note: The expected behavior is to move along the x/y plane and
     //       leave minZ where it was.
-    float& minX{boundingBox.minX};
-    float& minY{boundingBox.minY};
-    float& maxX{boundingBox.maxX};
-    float& maxY{boundingBox.maxY};
+    MinMaxBox updatedBounds(boundingBox);
+    float& minX{updatedBounds.min.x};
+    float& minY{updatedBounds.min.y};
+    float& maxX{updatedBounds.max.x};
+    float& maxY{updatedBounds.max.y};
 
     // Move the min bounds to follow the max bounds.
     float diffX{mouseWorldPos.x - maxX};
@@ -293,35 +295,33 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
     // Note: We don't update our internal bounding box until our owner 
     //       saves the update in the model and calls setBoundingBox().
     if (onBoundingBoxUpdated) {
-        BoundingBox updatedBounds{
-            minX, maxX, minY, maxY, boundingBox.minZ, boundingBox.maxZ};
-        onBoundingBoxUpdated(updatedBounds);
+        onBoundingBoxUpdated(BoundingBox(updatedBounds));
     }
 }
 
 void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    BoundingBox updatedBounds{boundingBox};
-    updatedBounds.minX = std::clamp(mouseWorldPos.x, 0.f, updatedBounds.maxX);
+    MinMaxBox updatedBounds(boundingBox);
+    updatedBounds.min.x = std::clamp(mouseWorldPos.x, 0.f, updatedBounds.max.x);
 
     // Signal the updated bounding box.
     // Note: We don't update our internal bounding box until our owner 
     //       saves the update in the model and calls setBoundingBox().
     if (onBoundingBoxUpdated) {
-        onBoundingBoxUpdated(updatedBounds);
+        onBoundingBoxUpdated(BoundingBox(updatedBounds));
     }
 }
 
 void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    BoundingBox updatedBounds{boundingBox};
-    updatedBounds.minY = std::clamp(mouseWorldPos.y, 0.f, updatedBounds.maxY);
+    MinMaxBox updatedBounds(boundingBox);
+    updatedBounds.min.y = std::clamp(mouseWorldPos.y, 0.f, updatedBounds.max.y);
 
     // Signal the updated bounding box.
     if (onBoundingBoxUpdated) {
-        onBoundingBoxUpdated(updatedBounds);
+        onBoundingBoxUpdated(BoundingBox(updatedBounds));
     }
 }
 
@@ -344,12 +344,12 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     mouseZHeight = Transforms::screenYToWorldZ(mouseZHeight, 1.f);
 
     // Set maxZ, making sure it doesn't go below minZ.
-    BoundingBox updatedBounds{boundingBox};
-    updatedBounds.maxZ = std::max(mouseZHeight, boundingBox.minZ);
+    MinMaxBox updatedBounds(boundingBox);
+    updatedBounds.max.z = std::max(mouseZHeight, updatedBounds.min.z);
 
     // Signal the updated bounding box.
     if (onBoundingBoxUpdated) {
-        onBoundingBoxUpdated(updatedBounds);
+        onBoundingBoxUpdated(BoundingBox(updatedBounds));
     }
 }
 
@@ -357,38 +357,38 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
     std::vector<SDL_Point>& boundsScreenPoints)
 {
     /* Transform the world positions to screen points. */
-    // Set up a vector of float points so we can maintain precision until
-    // the end.
-    std::array<SDL_FPoint, 7> floatPoints{};
+    std::array<SDL_FPoint, 7> screenPoints{};
 
     // Push the points in the correct order.
-    Position position{boundingBox.minX, boundingBox.maxY, boundingBox.minZ};
-    floatPoints[0] = Transforms::worldToScreen(position, 1);
+    Vector3 minPoint{boundingBox.getMinPoint()};
+    Vector3 maxPoint{boundingBox.getMaxPoint()};
+    Vector3 point{minPoint.x, maxPoint.y, minPoint.z};
+    screenPoints[0] = Transforms::worldToScreen(point, 1);
 
-    position = {boundingBox.maxX, boundingBox.maxY, boundingBox.minZ};
-    floatPoints[1] = Transforms::worldToScreen(position, 1);
+    point = {maxPoint.x, maxPoint.y, minPoint.z};
+    screenPoints[1] = Transforms::worldToScreen(point, 1);
 
-    position = {boundingBox.maxX, boundingBox.minY, boundingBox.minZ};
-    floatPoints[2] = Transforms::worldToScreen(position, 1);
+    point = {maxPoint.x, minPoint.y, minPoint.z};
+    screenPoints[2] = Transforms::worldToScreen(point, 1);
 
-    position = {boundingBox.minX, boundingBox.maxY, boundingBox.maxZ};
-    floatPoints[3] = Transforms::worldToScreen(position, 1);
+    point = {minPoint.x, maxPoint.y, maxPoint.z};
+    screenPoints[3] = Transforms::worldToScreen(point, 1);
 
-    position = {boundingBox.maxX, boundingBox.maxY, boundingBox.maxZ};
-    floatPoints[4] = Transforms::worldToScreen(position, 1);
+    point = {maxPoint.x, maxPoint.y, maxPoint.z};
+    screenPoints[4] = Transforms::worldToScreen(point, 1);
 
-    position = {boundingBox.maxX, boundingBox.minY, boundingBox.maxZ};
-    floatPoints[5] = Transforms::worldToScreen(position, 1);
+    point = {maxPoint.x, minPoint.y, maxPoint.z};
+    screenPoints[5] = Transforms::worldToScreen(point, 1);
 
-    position = {boundingBox.minX, boundingBox.minY, boundingBox.maxZ};
-    floatPoints[6] = Transforms::worldToScreen(position, 1);
+    point = {minPoint.x, minPoint.y, maxPoint.z};
+    screenPoints[6] = Transforms::worldToScreen(point, 1);
 
     // Account for this widget's position.
     int finalXOffset{xOffset + clippedExtent.x};
     int finalYOffset{yOffset + clippedExtent.y};
 
     // Scale and offset each point, then push it into the return vector.
-    for (SDL_FPoint& point : floatPoints) {
+    for (SDL_FPoint& point : screenPoints) {
         // Scale and round the point.
         point.x = std::round(AUI::ScalingHelpers::logicalToActual(point.x));
         point.y = std::round(AUI::ScalingHelpers::logicalToActual(point.y));

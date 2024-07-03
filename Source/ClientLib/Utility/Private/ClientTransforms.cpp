@@ -58,12 +58,12 @@ SDL_FRect ClientTransforms::tileToScreenExtent(
     // Transform the position to a point in screen space.
     // Note: This applies the camera's zoom to the position, so we don't need
     //       to do it again.
-    Position tileOrigin{tilePosition.getOriginPosition()};
-    Position position{tileOrigin.x + static_cast<float>(tileOffset.x),
-                      tileOrigin.y + static_cast<float>(tileOffset.y),
-                      tileOrigin.z + static_cast<float>(tileOffset.z)};
+    Vector3 tileOrigin{tilePosition.getOriginPoint()};
+    Vector3 worldPoint{tileOrigin.x + static_cast<float>(tileOffset.x),
+                       tileOrigin.y + static_cast<float>(tileOffset.y),
+                       tileOrigin.z + static_cast<float>(tileOffset.z)};
     SDL_FPoint screenPoint{
-        Transforms::worldToScreen(position, camera.zoomFactor)};
+        Transforms::worldToScreen(worldPoint, camera.zoomFactor)};
 
     // In an iso view, the (0, 0) point of a tile is halfway through the width
     // of the sprite. Thus, we have to shift the tile back to align it.

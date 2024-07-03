@@ -137,7 +137,7 @@ private:
     void updateZBounds(int mouseScreenYPos);
 
     /**
-     * Transforms the positions in the current boundingBox from world space 
+     * Transforms the vertices in the current boundingBox from world space 
      * to screen space, scales them to the current UI scaling, and offsets 
      * them using the current offsets.
      *

@@ -65,18 +65,18 @@ void BoundingBoxModel::save(nlohmann::json& json)
         json["boundingBoxes"][i]["numericID"] = boundingBoxID++;
 
         // Add the model-space bounds.
-        json["boundingBoxes"][i]["modelBounds"]["minX"]
-            = bounds.modelBounds.minX;
-        json["boundingBoxes"][i]["modelBounds"]["maxX"]
-            = bounds.modelBounds.maxX;
-        json["boundingBoxes"][i]["modelBounds"]["minY"]
-            = bounds.modelBounds.minY;
-        json["boundingBoxes"][i]["modelBounds"]["maxY"]
-            = bounds.modelBounds.maxY;
-        json["boundingBoxes"][i]["modelBounds"]["minZ"]
-            = bounds.modelBounds.minZ;
-        json["boundingBoxes"][i]["modelBounds"]["maxZ"]
-            = bounds.modelBounds.maxZ;
+        json["boundingBoxes"][i]["modelBounds"]["centerX"]
+            = bounds.modelBounds.center.x;
+        json["boundingBoxes"][i]["modelBounds"]["centerY"]
+            = bounds.modelBounds.center.y;
+        json["boundingBoxes"][i]["modelBounds"]["centerZ"]
+            = bounds.modelBounds.center.z;
+        json["boundingBoxes"][i]["modelBounds"]["halfX"]
+            = bounds.modelBounds.halfExtents.x;
+        json["boundingBoxes"][i]["modelBounds"]["halfY"]
+            = bounds.modelBounds.halfExtents.y;
+        json["boundingBoxes"][i]["modelBounds"]["halfZ"]
+            = bounds.modelBounds.halfExtents.z;
 
         i++;
     }
@@ -97,9 +97,10 @@ bool BoundingBoxModel::addBoundingBox()
 
     // Add the new bounding box to the map. Default to a non-0 bounding box so 
     // it's easier to click.
-    boundingBoxMap.emplace(
-        numericID,
-        EditorBoundingBox{numericID, displayName, {0, 20, 0, 20, 0, 20}});
+    boundingBoxMap.emplace(numericID,
+                           EditorBoundingBox{numericID,
+                                             displayName,
+                                             {{10, 10, 10}, {10, 10, 10}}});
 
     // Signal the new bounding box to the UI.
     EditorBoundingBox& boundingBox{boundingBoxMap[numericID]};
@@ -213,12 +214,18 @@ bool BoundingBoxModel::parseBoundingBox(const nlohmann::json& boundsJson)
     boundingBox.displayName = displayName;
 
     // Add the model-space bounds.
-    boundingBox.modelBounds.minX = boundsJson.at("modelBounds").at("minX");
-    boundingBox.modelBounds.maxX = boundsJson.at("modelBounds").at("maxX");
-    boundingBox.modelBounds.minY = boundsJson.at("modelBounds").at("minY");
-    boundingBox.modelBounds.maxY = boundsJson.at("modelBounds").at("maxY");
-    boundingBox.modelBounds.minZ = boundsJson.at("modelBounds").at("minZ");
-    boundingBox.modelBounds.maxZ = boundsJson.at("modelBounds").at("maxZ");
+    boundingBox.modelBounds.center.x
+        = boundsJson.at("modelBounds").at("centerX");
+    boundingBox.modelBounds.center.y
+        = boundsJson.at("modelBounds").at("centerY");
+    boundingBox.modelBounds.center.z
+        = boundsJson.at("modelBounds").at("centerZ");
+    boundingBox.modelBounds.halfExtents.x
+        = boundsJson.at("modelBounds").at("halfX");
+    boundingBox.modelBounds.halfExtents.y
+        = boundsJson.at("modelBounds").at("halfY");
+    boundingBox.modelBounds.halfExtents.z
+        = boundsJson.at("modelBounds").at("halfZ");
 
     // Signal the new bounding box to the UI.
     boundingBoxAddedSig.publish(boundingBoxID, boundingBox);

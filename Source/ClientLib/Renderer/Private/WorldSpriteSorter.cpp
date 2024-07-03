@@ -324,15 +324,12 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
                                                layerID.graphicValue);
     }
     else {
-        worldBounds = Transforms::modelToWorld(
-            sprite.modelBounds, layerID.tilePosition.getOriginPosition());
+        worldBounds = Transforms::modelToWorldTile(sprite.modelBounds,
+                                                   layerID.tilePosition);
     }
-    worldBounds.minX += layerID.tileOffset.x;
-    worldBounds.maxX += layerID.tileOffset.x;
-    worldBounds.minY += layerID.tileOffset.y;
-    worldBounds.maxY += layerID.tileOffset.y;
-    worldBounds.minZ += layerID.tileOffset.z;
-    worldBounds.maxZ += layerID.tileOffset.z;
+    worldBounds.center.x += layerID.tileOffset.x;
+    worldBounds.center.y += layerID.tileOffset.y;
+    worldBounds.center.z += layerID.tileOffset.z;
 
     // Push the sprite to be sorted.
     spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
@@ -386,7 +383,7 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
     if (isWithinScreenBounds(screenExtent, camera)) {
         // Get an updated bounding box for this entity.
         BoundingBox worldBounds{
-            Transforms::modelToWorldCentered(sprite.modelBounds, position)};
+            Transforms::modelToWorldEntity(sprite.modelBounds, position)};
 
         // If the UI wants a color mod on this sprite, use it.
         SDL_Color colorMod{getColorMod<entt::entity>(entity)};
@@ -430,9 +427,11 @@ void WorldSpriteSorter::calcDepthDependencies()
                 SpriteSortInfo& spriteA{spritesToSort[i]};
                 SpriteSortInfo& spriteB{spritesToSort[j]};
 
-                if ((spriteB.worldBounds.minX < spriteA.worldBounds.maxX)
-                    && (spriteB.worldBounds.minY < spriteA.worldBounds.maxY)
-                    && (spriteB.worldBounds.minZ < spriteA.worldBounds.maxZ)) {
+                Vector3 spriteAMax{spriteA.worldBounds.getMaxPoint()};
+                Vector3 spriteBMin{spriteB.worldBounds.getMinPoint()};
+                if ((spriteBMin.x < spriteAMax.x)
+                    && (spriteBMin.y < spriteAMax.y)
+                    && (spriteBMin.z < spriteAMax.z)) {
                     // B is behind A, push it into A.spritesBehind.
                     spriteA.spritesBehind.push_back(&spriteB);
                 }

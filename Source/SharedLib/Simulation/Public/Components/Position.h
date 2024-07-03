@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Vector3.h"
 #include "TilePosition.h"
 #include "ChunkPosition.h"
 #include "SharedConfig.h"
@@ -9,105 +10,19 @@ namespace AM
 /**
  * Represents a position in the world.
  *
- * If used as a component attached to an entity, this will correspond to a
- * a centered point under the entity's feet.
- * This means that an entity's sprite and bounding box will be centered on this
- * position in the X and Y axis, and will sit on top of this position in the Z
- * axis.
- * All entities possess a Position component.
+ * Note: An entity's position component refers to a centered point under its 
+ *       feet (equivalent to BoundingBox::getBottomCenterPoint()). Do not 
+ *       confuse this for the 3D center of a bounding box.
  *
- * We also commonly use this for 3D math.
+ * All entities possess a Position component.
  */
-struct Position {
-    /** Current position. */
-    float x{0};
-    float y{0};
-    float z{0};
-
-    /**
-     * Returns the coordinates of the tile that this position is within.
-     */
-    TilePosition asTilePosition() const
+struct Position : Vector3 {
+    Position operator=(const Vector3& vector)
     {
-        float tileX{x / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
-        tileX = std::floor(tileX);
-        float tileY{y / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
-        tileY = std::floor(tileY);
-        float tileZ{z / static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
-        tileZ = std::floor(tileZ);
-
-        return {static_cast<int>(tileX), static_cast<int>(tileY),
-                static_cast<int>(tileZ)};
-    }
-
-    /**
-     * Returns the coordinates of the chunk that this position is within.
-     */
-    ChunkPosition asChunkPosition() const
-    {
-        float chunkX{(x / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))
-                      / static_cast<float>(SharedConfig::CHUNK_WIDTH)};
-        chunkX = std::floor(chunkX);
-        float chunkY{(y / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))
-                      / static_cast<float>(SharedConfig::CHUNK_WIDTH)};
-        chunkY = std::floor(chunkY);
-        float chunkZ{z / static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
-        chunkZ = std::floor(chunkZ);
-
-        return {static_cast<int>(chunkX), static_cast<int>(chunkY),
-                static_cast<int>(chunkZ)};
-    }
-
-    /**
-     * Returns the squared distance between this position and the given
-     * position.
-     * We keep it squared to avoid an expensive sqrt. You can use this by
-     * squaring the distance you're comparing it to.
-     */
-    float squaredDistanceTo(const Position& other) const
-    {
-        float distanceX{std::abs(x - other.x)};
-        float distanceY{std::abs(y - other.y)};
-        float distanceZ{std::abs(z - other.z)};
-
-        return {(distanceX * distanceX) + (distanceY * distanceY)
-                + (distanceZ * distanceZ)};
-    }
-
-    Position operator+(const Position& other) const
-    {
-        return {(x + other.x), (y + other.y), (z + other.z)};
-    }
-
-    Position operator-(const Position& other) const
-    {
-        return {(x - other.x), (y - other.y), (z - other.z)};
-    }
-
-    Position& operator+=(const Position& other)
-    {
-        x += other.x;
-        y += other.y;
-        z += other.z;
+        x = vector.x;
+        y = vector.y;
+        z = vector.z;
         return *this;
-    }
-
-    Position& operator-=(const Position& other)
-    {
-        x -= other.x;
-        y -= other.y;
-        z -= other.z;
-        return *this;
-    }
-
-    bool operator==(const Position& other) const
-    {
-        return (x == other.x) && (y == other.y) && (z == other.z);
-    }
-
-    bool operator!=(const Position& other) const
-    {
-        return (x != other.x) || (y != other.y) || (z != other.z);
     }
 };
 

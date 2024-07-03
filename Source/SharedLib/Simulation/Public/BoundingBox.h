@@ -1,27 +1,36 @@
 #pragma once
 
-#include <array>
+#include "Vector3.h"
 
 namespace AM
 {
+struct MinMaxBox;
 struct Position;
 struct Cylinder;
 struct Ray;
 struct TileExtent;
+struct TilePosition;
 
 /**
  * A 3D axis-aligned box shape.
  */
 struct BoundingBox {
 public:
-    float minX{0};
-    float maxX{0};
+    /** This box's center point. */
+    Vector3 center{};
 
-    float minY{0};
-    float maxY{0};
+    /** This box's half extents in each direction. */
+    Vector3 halfExtents{};
 
-    float minZ{0};
-    float maxZ{0};
+    BoundingBox();
+
+    constexpr BoundingBox(const Vector3& inCenter, const Vector3& inHalfExtents)
+    : center{inCenter}
+    , halfExtents{inHalfExtents}
+    {
+    }
+
+    explicit BoundingBox(const MinMaxBox& box);
 
     bool operator==(const BoundingBox& other);
 
@@ -32,28 +41,40 @@ public:
     float getZLength() const;
 
     /**
-     * Returns a position at the minimum point of this bounding box.
+     * Returns the minimum point of this bounding box.
      */
-    Position getMinPosition() const;
+    Vector3 getMinPoint() const;
 
     /**
-     * Returns a position at the maximum point of this bounding box.
+     * Returns the maximum point of this bounding box.
      */
-    Position getMaxPosition() const;
+    Vector3 getMaxPoint() const;
 
     /**
-     * Returns a position at the center of this bounding box.
+     * Returns the point centered on this bounding box in the X and Y axis,
+     * and at this box's minimum Z value.
      *
-     * Note: This center position is different than an entity's Position
-     *       component. This one is centered in all axis, while an entity's
-     *       Position is centered in the X/Y but is at the minimum Z.
+     * This matches the placement of an entity's Position component, in 
+     * relation to the entity's bounding volume.
      */
-    Position get3dCenter() const;
+    Vector3 getBottomCenterPoint() const;
 
     /**
      * @return true if this box has no area.
      */
     bool isEmpty() const;
+
+    /**
+     * Translates this bounding box so that its minimum point is at the given 
+     * point, but its extent remains unchanged.
+     */
+    void moveMinimumTo(const Vector3& point);
+
+    /**
+     * Translates this bounding box so that its bottom center point is at the 
+     * given entity position, but its extent remains unchanged.
+     */
+    void moveToEntityPosition(const Position& position);
 
     /**
      * Returns true if this box intersects the given other bounding box.
@@ -94,18 +115,18 @@ public:
     float getMaxIntersection(const Ray& ray) const;
 
     /**
-     * Returns the smallest tile extent that contains this bounding box.
-     *
-     * Note: The Z-axis is ignored in this conversion, as TileExtent is 2D.
-     */
-    TileExtent asTileExtent() const;
-
-    /**
      * Returns tMin and tMax for the given ray's intersection with this 
      * bounding box.
      * @return {tMin, tMax}
      */
     std::array<float, 2> getIntersections(const Ray& ray) const;
+
+    /**
+     * Returns the smallest tile extent that contains this bounding box.
+     *
+     * Note: The Z-axis is ignored in this conversion, as TileExtent is 2D.
+     */
+    TileExtent asTileExtent() const;
 };
 
 } // End namespace AM

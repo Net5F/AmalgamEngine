@@ -3,11 +3,7 @@
 #include "PreviousPosition.h"
 #include "Movement.h"
 #include "BoundingBox.h"
-#include "TileMapBase.h"
-#include "EntityLocator.h"
-#include "IsClientEntity.h"
 #include "SharedConfig.h"
-#include "entt/entity/registry.hpp"
 
 /** The constant to multiply by when normalizing a diagonal direction vector
     to be equal magnitude to movement in cardinal directions.
@@ -16,14 +12,14 @@ const float DIAGONAL_NORMALIZATION_CONSTANT{0.70710678118f};
 
 namespace AM
 {
-Velocity MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
-                                       Movement& movement, double)
+Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
+                                      Movement& movement, double)
 {
     // If the entity isn't in the air (or if they can fly), calc the new X/Y 
     // velocity.
     // Note: If they're in the air, they'll keep traveling with their current 
     //       X/Y velocity.
-    Velocity updatedVelocity{movement.velocity};
+    Vector3 updatedVelocity{movement.velocity};
     if (!(movement.isFalling) || movement.canFly) {
         // Direction values. 0 == no movement, 1 == movement.
         int xUp{static_cast<int>(inputStates[Input::XUp])};
@@ -89,7 +85,7 @@ Velocity MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
 }
 
 Position MovementHelpers::calcPosition(const Position& position,
-                                       const Velocity& velocity,
+                                       const Vector3& velocity,
                                        double deltaSeconds)
 {
     // Update the position.
@@ -135,67 +131,6 @@ Position
     double interpZ{(position.z * alpha) + (previousPos.z * (1.0 - alpha))};
     return {static_cast<float>(interpX), static_cast<float>(interpY),
             static_cast<float>(interpZ)};
-}
-
-BoundingBox MovementHelpers::resolveCollisions(const BoundingBox& currentBounds,
-                                               const BoundingBox& desiredBounds,
-                                               entt::entity movingEntity,
-                                               const entt::registry& registry,
-                                               const TileMapBase& tileMap,
-                                               EntityLocator& entityLocator)
-{
-    // TODO: Replace this logic with real sliding collision.
-
-    // If the desired movement would go outside of the map, reject the move.
-    const TileExtent boxTileExtent{desiredBounds.asTileExtent()};
-    const TileExtent mapExtent{tileMap.getTileExtent()};
-    if (!mapExtent.containsExtent(boxTileExtent)) {
-        return currentBounds;
-    }
-
-    // Check for vertical collision up to 1 tile above and below the bounds.
-    int minZ{boxTileExtent.z - 1};
-    minZ = std::max(minZ, mapExtent.z);
-    int maxZ{boxTileExtent.zMax() + 1};
-    maxZ = std::min(maxZ, mapExtent.zMax());
-
-    // For each tile that the desired bounds is touching.
-    for (int z{minZ}; z <= maxZ; ++z) {
-        for (int y{boxTileExtent.y}; y <= boxTileExtent.yMax(); ++y) {
-            for (int x{boxTileExtent.x}; x <= boxTileExtent.xMax(); ++x) {
-                // If this tile doesn't exist, it's empty so we can skip it.
-                const Tile* tile{tileMap.cgetTile({x, y, z})};
-                if (!tile) {
-                    continue;
-                }
-
-                // For each collision volume in this tile.
-                for (const BoundingBox& collisionVolume :
-                     tile->getCollisionVolumes()) {
-                    // If the desired movement would intersect this volume, 
-                    // reject the move.
-                    if (desiredBounds.intersects(collisionVolume)) {
-                        return currentBounds;
-                    }
-                }
-            }
-        }
-    }
-
-    // If any non-client entity (besides the entity trying to move) intersects
-    // the desired bounds, reject the move.
-    // TODO: This probably needs to return {box, entity}, or have a different 
-    //       interface that lets us test as we go
-    std::vector<entt::entity>& collidedEntities{
-        entityLocator.getCollisions(desiredBounds)};
-    for (entt::entity collidedEntity : collidedEntities) {
-        if ((collidedEntity != movingEntity)
-            && !(registry.all_of<IsClientEntity>(collidedEntity))) {
-            return currentBounds;
-        }
-    }
-
-    return desiredBounds;
 }
 
 Rotation::Direction MovementHelpers::directionIntToDirection(int directionInt)

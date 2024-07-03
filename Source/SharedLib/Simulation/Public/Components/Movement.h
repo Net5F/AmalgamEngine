@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Velocity.h"
+#include "Vector3.h"
 #include <SDL_stdinc.h>
 
 namespace AM
@@ -19,7 +19,7 @@ struct Movement {
     /** The entity's current velocity, in world units per second.
         This is managed by the engine. Project devs should instead use 
         velocityMod. */
-    Velocity velocity{};
+    Vector3 velocity{};
 
     // TODO: Figure out how we're gonna detect this, and a standard way to 
     //       do it in the 3 places where we resolve collisions.
@@ -42,7 +42,7 @@ struct Movement {
     /** Velocity modifiers, to apply to the entity on the next tick.
         The project should change these when it wants to influence an entity's 
         movement. */
-    Velocity velocityMod{};
+    Vector3 velocityMod{};
 
     /** The distance that the entity can travel per second, in world units.
         The project is responsible for managing this. The engine will never 

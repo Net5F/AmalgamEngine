@@ -155,7 +155,7 @@ void World::addGraphicsComponents(entt::entity entity,
     const Position& position{registry.get<Position>(entity)};
     const Collision& collision{registry.emplace<Collision>(
         entity, modelBounds,
-        Transforms::modelToWorldCentered(modelBounds, position))};
+        Transforms::modelToWorldEntity(modelBounds, position))};
 
     // Add the entity to the locator.
     // Note: Since we're adding the entity to the locator, clients

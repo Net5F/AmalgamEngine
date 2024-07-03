@@ -5,6 +5,7 @@
 
 namespace AM
 {
+struct Vector3;
 struct TilePosition;
 
 /**
@@ -14,6 +15,11 @@ struct ChunkPosition : public DiscretePosition<DiscreteImpl::ChunkTag> {
     ChunkPosition();
 
     ChunkPosition(int inX, int inY, int inZ);
+
+    /**
+     * Calculates the position of the chunk that contains the given point.
+     */
+    explicit ChunkPosition(const Vector3& worldPoint);
 
     explicit ChunkPosition(const TilePosition& tilePosition);
 };

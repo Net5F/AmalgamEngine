@@ -110,22 +110,22 @@ void AnimationModel::save(nlohmann::json& json)
 
         // Add the model-space bounds.
         // Note: This will either be a shared bounding box or a custom one 
-        //       depending on modelBoundsID. The engine doesn't care either 
-        //       way, it just needs to know what the bounds are. 
+        //       depending on modelBoundsID. In either case, we always save to 
+        //       modelBounds because that's what the engine uses. 
         const BoundingBox& animationModelBounds{
             animation.getModelBounds(dataModel.boundingBoxModel)}; 
-        json["animations"][i]["modelBounds"]["minX"]
-            = animationModelBounds.minX;
-        json["animations"][i]["modelBounds"]["maxX"]
-            = animationModelBounds.maxX;
-        json["animations"][i]["modelBounds"]["minY"]
-            = animationModelBounds.minY;
-        json["animations"][i]["modelBounds"]["maxY"]
-            = animationModelBounds.maxY;
-        json["animations"][i]["modelBounds"]["minZ"]
-            = animationModelBounds.minZ;
-        json["animations"][i]["modelBounds"]["maxZ"]
-            = animationModelBounds.maxZ;
+        json["animations"][i]["modelBounds"]["centerX"]
+            = animationModelBounds.center.x;
+        json["animations"][i]["modelBounds"]["centerY"]
+            = animationModelBounds.center.y;
+        json["animations"][i]["modelBounds"]["centerZ"]
+            = animationModelBounds.center.z;
+        json["animations"][i]["modelBounds"]["halfX"]
+            = animationModelBounds.halfExtents.x;
+        json["animations"][i]["modelBounds"]["halfY"]
+            = animationModelBounds.halfExtents.y;
+        json["animations"][i]["modelBounds"]["halfZ"]
+            = animationModelBounds.halfExtents.z;
 
         i++;
     }
@@ -149,7 +149,7 @@ bool AnimationModel::addAnimation()
 
     // Default to a non-0 bounding box so it's easier to click.
     EditorAnimation& animation{animationMap[numericID]};
-    static constexpr BoundingBox defaultBox{0, 20, 0, 20, 0, 20};
+    static constexpr BoundingBox defaultBox{{10, 10, 10}, {10, 10, 10}};
     animation.customModelBounds = defaultBox;
 
     // Signal the new animation to the UI.
@@ -372,20 +372,20 @@ bool AnimationModel::parseAnimation(const nlohmann::json& animationJson)
     // Add modelBoundsID.
     animation.modelBoundsID = animationJson.at("modelBoundsID");
 
-    // Note: We always save to modelBounds (even if this animation uses a shared
-    //       bounding box) because that's what the engine uses.
-    animation.customModelBounds.minX
-        = animationJson.at("modelBounds").at("minX");
-    animation.customModelBounds.maxX
-        = animationJson.at("modelBounds").at("maxX");
-    animation.customModelBounds.minY
-        = animationJson.at("modelBounds").at("minY");
-    animation.customModelBounds.maxY
-        = animationJson.at("modelBounds").at("maxY");
-    animation.customModelBounds.minZ
-        = animationJson.at("modelBounds").at("minZ");
-    animation.customModelBounds.maxZ
-        = animationJson.at("modelBounds").at("maxZ");
+    // Default our custom bounds to the saved modelBounds, regardless of 
+    // whether we use a shared bounding box or not.
+    animation.customModelBounds.center.x
+        = animationJson.at("modelBounds").at("centerX");
+    animation.customModelBounds.center.y
+        = animationJson.at("modelBounds").at("centerY");
+    animation.customModelBounds.center.z
+        = animationJson.at("modelBounds").at("centerZ");
+    animation.customModelBounds.halfExtents.x
+        = animationJson.at("modelBounds").at("halfX");
+    animation.customModelBounds.halfExtents.y
+        = animationJson.at("modelBounds").at("halfY");
+    animation.customModelBounds.halfExtents.z
+        = animationJson.at("modelBounds").at("halfZ");
 
     // Signal the new animation to the UI.
     animationAddedSig.publish(animationID, animation);

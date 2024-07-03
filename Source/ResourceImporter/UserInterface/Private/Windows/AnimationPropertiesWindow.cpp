@@ -5,6 +5,7 @@
 #include "AnimationID.h"
 #include "Paths.h"
 #include "Camera.h"
+#include "MinMaxBox.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include <string>
@@ -227,14 +228,14 @@ void AnimationPropertiesWindow::onActiveLibraryItemChanged(
         setBoundsFieldsEnabled(true);
     }
 
-    const BoundingBox& animationModelBounds{
+    MinMaxBox animationModelBounds{
         newActiveAnimation->getModelBounds(dataModel.boundingBoxModel)};
-    minXInput.setText(toRoundedString(animationModelBounds.minX));
-    minYInput.setText(toRoundedString(animationModelBounds.minY));
-    minZInput.setText(toRoundedString(animationModelBounds.minZ));
-    maxXInput.setText(toRoundedString(animationModelBounds.maxX));
-    maxYInput.setText(toRoundedString(animationModelBounds.maxY));
-    maxZInput.setText(toRoundedString(animationModelBounds.maxZ));
+    minXInput.setText(toRoundedString(animationModelBounds.min.x));
+    minYInput.setText(toRoundedString(animationModelBounds.min.y));
+    minZInput.setText(toRoundedString(animationModelBounds.min.z));
+    maxXInput.setText(toRoundedString(animationModelBounds.max.x));
+    maxYInput.setText(toRoundedString(animationModelBounds.max.y));
+    maxZInput.setText(toRoundedString(animationModelBounds.max.z));
 
     if (newActiveAnimation->collisionEnabled) {
         collisionEnabledInput.setCurrentState(AUI::Checkbox::State::Checked);
@@ -309,8 +310,6 @@ void AnimationPropertiesWindow::onAnimationModelBoundsIDChanged(
     // Whether they're enabled or not, the fields should show the correct bounds.
     const EditorAnimation& animation{
         dataModel.animationModel.getAnimation(animationID)};
-    const BoundingBox& newModelBounds{
-        animation.getModelBounds(dataModel.boundingBoxModel)};
 
     if (newModelBoundsID) {
         const EditorBoundingBox& boundingBox{
@@ -323,24 +322,27 @@ void AnimationPropertiesWindow::onAnimationModelBoundsIDChanged(
         setBoundsFieldsEnabled(true);
     }
 
-    minXInput.setText(toRoundedString(newModelBounds.minX));
-    minYInput.setText(toRoundedString(newModelBounds.minY));
-    minZInput.setText(toRoundedString(newModelBounds.minZ));
-    maxXInput.setText(toRoundedString(newModelBounds.maxX));
-    maxYInput.setText(toRoundedString(newModelBounds.maxY));
-    maxZInput.setText(toRoundedString(newModelBounds.maxZ));
+    MinMaxBox newModelBounds{
+        animation.getModelBounds(dataModel.boundingBoxModel)};
+    minXInput.setText(toRoundedString(newModelBounds.min.x));
+    minYInput.setText(toRoundedString(newModelBounds.min.y));
+    minZInput.setText(toRoundedString(newModelBounds.min.z));
+    maxXInput.setText(toRoundedString(newModelBounds.max.x));
+    maxYInput.setText(toRoundedString(newModelBounds.max.y));
+    maxZInput.setText(toRoundedString(newModelBounds.max.z));
 }
 
 void AnimationPropertiesWindow::onAnimationCustomModelBoundsChanged(
     AnimationID animationID, const BoundingBox& newCustomModelBounds)
 {
     if (animationID == activeAnimationID) {
-        minXInput.setText(toRoundedString(newCustomModelBounds.minX));
-        minYInput.setText(toRoundedString(newCustomModelBounds.minY));
-        minZInput.setText(toRoundedString(newCustomModelBounds.minZ));
-        maxXInput.setText(toRoundedString(newCustomModelBounds.maxX));
-        maxYInput.setText(toRoundedString(newCustomModelBounds.maxY));
-        maxZInput.setText(toRoundedString(newCustomModelBounds.maxZ));
+        MinMaxBox newModelBounds{newCustomModelBounds};
+        minXInput.setText(toRoundedString(newModelBounds.min.x));
+        minYInput.setText(toRoundedString(newModelBounds.min.y));
+        minZInput.setText(toRoundedString(newModelBounds.min.z));
+        maxXInput.setText(toRoundedString(newModelBounds.max.x));
+        maxYInput.setText(toRoundedString(newModelBounds.max.y));
+        maxZInput.setText(toRoundedString(newModelBounds.max.z));
     }
 }
 void AnimationPropertiesWindow::onLibrarySelectedItemsChanged(
@@ -487,13 +489,13 @@ void AnimationPropertiesWindow::saveMinX()
         // Clamp the value to its bounds.
         const EditorAnimation& activeAnimation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
-        BoundingBox newModelBounds{
-            activeAnimation.getModelBounds(dataModel.boundingBoxModel)};
-        newModelBounds.minX = std::clamp(newMinX, 0.f, newModelBounds.maxX);
+        MinMaxBox newModelBounds(
+            activeAnimation.getModelBounds(dataModel.boundingBoxModel));
+        newModelBounds.min.x = std::clamp(newMinX, 0.f, newModelBounds.max.x);
 
         // Apply the new value.
-        dataModel.animationModel.setAnimationCustomModelBounds(activeAnimationID,
-                                                         newModelBounds);
+        dataModel.animationModel.setAnimationCustomModelBounds(
+            activeAnimationID, BoundingBox(newModelBounds));
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinX));
@@ -510,13 +512,13 @@ void AnimationPropertiesWindow::saveMinY()
         // Clamp the value to its bounds.
         const EditorAnimation& activeAnimation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
-        BoundingBox newModelBounds{
-            activeAnimation.getModelBounds(dataModel.boundingBoxModel)};
-        newModelBounds.minY = std::clamp(newMinY, 0.f, newModelBounds.maxY);
+        MinMaxBox newModelBounds(
+            activeAnimation.getModelBounds(dataModel.boundingBoxModel));
+        newModelBounds.min.y = std::clamp(newMinY, 0.f, newModelBounds.max.y);
 
         // Apply the new value.
-        dataModel.animationModel.setAnimationCustomModelBounds(activeAnimationID,
-                                                         newModelBounds);
+        dataModel.animationModel.setAnimationCustomModelBounds(
+            activeAnimationID, BoundingBox(newModelBounds));
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinY));
@@ -533,13 +535,13 @@ void AnimationPropertiesWindow::saveMinZ()
         // Clamp the value to its bounds.
         const EditorAnimation& activeAnimation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
-        BoundingBox newModelBounds{
-            activeAnimation.getModelBounds(dataModel.boundingBoxModel)};
-        newModelBounds.minY = std::clamp(newMinZ, 0.f, newModelBounds.maxZ);
+        MinMaxBox newModelBounds(
+            activeAnimation.getModelBounds(dataModel.boundingBoxModel));
+        newModelBounds.min.z = std::clamp(newMinZ, 0.f, newModelBounds.max.z);
 
         // Apply the new value.
-        dataModel.animationModel.setAnimationCustomModelBounds(activeAnimationID,
-                                                         newModelBounds);
+        dataModel.animationModel.setAnimationCustomModelBounds(
+            activeAnimationID, BoundingBox(newModelBounds));
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinZ));
@@ -556,15 +558,15 @@ void AnimationPropertiesWindow::saveMaxX()
         // Clamp the value to its bounds.
         const EditorAnimation& activeAnimation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
-        BoundingBox newModelBounds{
-            activeAnimation.getModelBounds(dataModel.boundingBoxModel)};
-        newModelBounds.maxX
-            = std::clamp(newMaxX, newModelBounds.minX,
+        MinMaxBox newModelBounds(
+            activeAnimation.getModelBounds(dataModel.boundingBoxModel));
+        newModelBounds.max.x
+            = std::clamp(newMaxX, newModelBounds.min.x,
                          static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
         // Apply the new value.
-        dataModel.animationModel.setAnimationCustomModelBounds(activeAnimationID,
-                                                         newModelBounds);
+        dataModel.animationModel.setAnimationCustomModelBounds(
+            activeAnimationID, BoundingBox(newModelBounds));
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxXInput.setText(std::to_string(committedMaxX));
@@ -581,15 +583,15 @@ void AnimationPropertiesWindow::saveMaxY()
         // Clamp the value to its bounds.
         const EditorAnimation& activeAnimation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
-        BoundingBox newModelBounds{
-            activeAnimation.getModelBounds(dataModel.boundingBoxModel)};
-        newModelBounds.maxY
-            = std::clamp(newMaxY, newModelBounds.minY,
+        MinMaxBox newModelBounds(
+            activeAnimation.getModelBounds(dataModel.boundingBoxModel));
+        newModelBounds.max.y
+            = std::clamp(newMaxY, newModelBounds.min.y,
                          static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
         // Apply the new value.
-        dataModel.animationModel.setAnimationCustomModelBounds(activeAnimationID,
-                                                         newModelBounds);
+        dataModel.animationModel.setAnimationCustomModelBounds(
+            activeAnimationID, BoundingBox(newModelBounds));
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));
@@ -608,18 +610,14 @@ void AnimationPropertiesWindow::saveMaxZ()
         //       and not very useful. Can add if we ever care to.
         const EditorAnimation& activeAnimation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
-        BoundingBox newModelBounds{
-            activeAnimation.getModelBounds(dataModel.boundingBoxModel)};
-        float minZ{newModelBounds.minZ};
-        if (newMaxZ < minZ) {
-            newMaxZ = minZ;
-        }
-
-        newModelBounds.maxZ = newMaxZ;
+        MinMaxBox newModelBounds(
+            activeAnimation.getModelBounds(dataModel.boundingBoxModel));
+        newMaxZ = std::max(newMaxZ, newModelBounds.min.z);
+        newModelBounds.max.z = newMaxZ;
 
         // Apply the new value.
-        dataModel.animationModel.setAnimationCustomModelBounds(activeAnimationID,
-                                                         newModelBounds);
+        dataModel.animationModel.setAnimationCustomModelBounds(
+            activeAnimationID, BoundingBox(newModelBounds));
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));

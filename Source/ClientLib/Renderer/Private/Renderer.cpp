@@ -10,6 +10,7 @@
 #include "IRendererExtension.h"
 #include "Transforms.h"
 #include "MovementHelpers.h"
+#include "MinMaxBox.h"
 #include "Log.h"
 #include <SDL_render.h>
 #include <SDL2_gfxPrimitives.h>
@@ -177,23 +178,24 @@ void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
 {
     // Transform all the vertices to screen space.
     std::vector<SDL_FPoint> verts;
-    Position position{box.minX, box.minY, box.minZ};
-    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
-    position = {box.maxX, box.minY, box.minZ};
-    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
-    position = {box.maxX, box.maxY, box.minZ};
-    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
-    position = {box.minX, box.maxY, box.minZ};
-    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
+    MinMaxBox minMaxBox(box);
+    Vector3 point{minMaxBox.min.x, minMaxBox.min.y, minMaxBox.min.z};
+    verts.push_back(Transforms::worldToScreen(point, camera.zoomFactor));
+    point = {minMaxBox.max.x, minMaxBox.min.y, minMaxBox.min.z};
+    verts.push_back(Transforms::worldToScreen(point, camera.zoomFactor));
+    point = {minMaxBox.max.x, minMaxBox.max.y, minMaxBox.min.z};
+    verts.push_back(Transforms::worldToScreen(point, camera.zoomFactor));
+    point = {minMaxBox.min.x, minMaxBox.max.y, minMaxBox.min.z};
+    verts.push_back(Transforms::worldToScreen(point, camera.zoomFactor));
 
-    position = {box.minX, box.minY, box.maxZ};
-    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
-    position = {box.maxX, box.minY, box.maxZ};
-    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
-    position = {box.maxX, box.maxY, box.maxZ};
-    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
-    position = {box.minX, box.maxY, box.maxZ};
-    verts.push_back(Transforms::worldToScreen(position, camera.zoomFactor));
+    point = {minMaxBox.min.x, minMaxBox.min.y, minMaxBox.max.z};
+    verts.push_back(Transforms::worldToScreen(point, camera.zoomFactor));
+    point = {minMaxBox.max.x, minMaxBox.min.y, minMaxBox.max.z};
+    verts.push_back(Transforms::worldToScreen(point, camera.zoomFactor));
+    point = {minMaxBox.max.x, minMaxBox.max.y, minMaxBox.max.z};
+    verts.push_back(Transforms::worldToScreen(point, camera.zoomFactor));
+    point = {minMaxBox.min.x, minMaxBox.max.y, minMaxBox.max.z};
+    verts.push_back(Transforms::worldToScreen(point, camera.zoomFactor));
 
     // Adjust all verts for the camera.
     for (SDL_FPoint& vert : verts) {

@@ -159,8 +159,8 @@ void ServerConnectionSystem::initMockSimState()
     const BoundingBox& modelBounds{graphic.getModelBounds()};
     const Collision& collision{registry.emplace<Collision>(
         newEntity, modelBounds,
-        Transforms::modelToWorldCentered(modelBounds,
-                                         registry.get<Position>(newEntity)))};
+        Transforms::modelToWorldEntity(modelBounds,
+                                       registry.get<Position>(newEntity)))};
     world.entityLocator.setEntityLocation(newEntity, collision.worldBounds);
 
     // Entities with GraphicState also get a ClientGraphicState.

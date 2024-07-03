@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TilePosition.h"
-#include "Position.h"
+#include "Vector3.h"
 #include "BoundingBox.h"
 #include "Ray.h"
 #include "SharedConfig.h"
@@ -11,6 +11,7 @@ namespace AM
 {
 struct Sprite;
 struct Camera;
+struct Position;
 
 /**
  * Static functions for transforming between world, screen, and model space.
@@ -19,32 +20,32 @@ class Transforms
 {
 public:
     /**
-     * Converts a position in world space to a point in screen space.
+     * Converts a point in world space to a point in screen space.
      *
-     * @param zoomFactor  The camera's zoom factor.
+     * @param zoomFactor The camera's zoom factor.
      */
-    static SDL_FPoint worldToScreen(const Position& position, float zoomFactor);
+    static SDL_FPoint worldToScreen(const Vector3& point, float zoomFactor);
 
     /**
      * Converts a Z coordinate in world space to a Y coordinate in screen space.
      *
-     * @param zoomFactor  The camera's zoom factor.
+     * @param zoomFactor The camera's zoom factor.
      */
     static float worldZToScreenY(float zCoord, float zoomFactor);
 
     /**
-     * Converts a point in screen space to a position in world space, with 
+     * Converts a point in screen space to a point in world space, with 
      * Z == 0.
      */
-    static Position screenToWorldMinimum(const SDL_FPoint& screenPoint,
-                                         const Camera& camera);
+    static Vector3 screenToWorldMinimum(const SDL_FPoint& screenPoint,
+                                        const Camera& camera);
 
     /**
-     * Converts a point in screen space to a position in world space, with 
+     * Converts a point in screen space to a point in world space, with 
      * Z == camera.target.z.
      */
-    static Position screenToWorldTarget(const SDL_FPoint& screenPoint,
-                                        const Camera& camera);
+    static Vector3 screenToWorldTarget(const SDL_FPoint& screenPoint,
+                                       const Camera& camera);
 
     /**
      * Converts a point in screen space to a ray in world space.
@@ -71,27 +72,20 @@ public:
     static float screenYToWorldZ(float yCoord, float zoomFactor);
 
     /**
-     * Converts a model-space bounding volume to a world-space volume, starting  
-     * at the given position.
-     *
-     * Mostly used for tiles, since their bounds start at their coordinate.
+     * Places the given model-space bounding volume at the given tile position.
      */
-    static BoundingBox modelToWorld(const BoundingBox& modelBounds,
-                                    const Position& position);
+    static BoundingBox modelToWorldTile(const BoundingBox& modelBounds,
+                                        const TilePosition& tilePosition);
 
     /**
-     * Converts a model-space bounding volume to a world-space volume, centered 
-     * on the given position.
-     *
-     * Mostly used for entities, since their bounds are centered on their 
-     * position.
+     * Places the given model-space bounding volume at the given entity position.
      *
      * Note: This function takes care to center the bounds based on the
      *       sprite's "stage size". If you naively center based on the size of
      *       the box, you won't get the correct positioning.
      */
-    static BoundingBox modelToWorldCentered(const BoundingBox& modelBounds,
-                                            const Position& position);
+    static BoundingBox modelToWorldEntity(const BoundingBox& modelBounds,
+                                          const Position& position);
 
     //-------------------------------------------------------------------------
     // Constants

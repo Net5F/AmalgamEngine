@@ -3,6 +3,7 @@
 #include "DataModel.h"
 #include "Paths.h"
 #include "Camera.h"
+#include "MinMaxBox.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include <string>
@@ -142,13 +143,13 @@ void BoundingBoxPropertiesWindow::onActiveLibraryItemChanged(
     // Update all of our property fields to match the new active bounds data.
     nameInput.setText(newActiveBoundingBox->displayName);
 
-    const BoundingBox& modelBounds{newActiveBoundingBox->modelBounds};
-    minXInput.setText(toRoundedString(modelBounds.minX));
-    minYInput.setText(toRoundedString(modelBounds.minY));
-    minZInput.setText(toRoundedString(modelBounds.minZ));
-    maxXInput.setText(toRoundedString(modelBounds.maxX));
-    maxYInput.setText(toRoundedString(modelBounds.maxY));
-    maxZInput.setText(toRoundedString(modelBounds.maxZ));
+    MinMaxBox modelBounds{newActiveBoundingBox->modelBounds};
+    minXInput.setText(toRoundedString(modelBounds.min.x));
+    minYInput.setText(toRoundedString(modelBounds.min.y));
+    minZInput.setText(toRoundedString(modelBounds.min.z));
+    maxXInput.setText(toRoundedString(modelBounds.max.x));
+    maxYInput.setText(toRoundedString(modelBounds.max.y));
+    maxZInput.setText(toRoundedString(modelBounds.max.z));
 }
 
 void BoundingBoxPropertiesWindow::onBoundingBoxRemoved(
@@ -178,12 +179,13 @@ void BoundingBoxPropertiesWindow::onBoundingBoxBoundsChanged(
     BoundingBoxID boundingBoxID, const BoundingBox& newBounds)
 {
     if (boundingBoxID == activeBoundingBoxID) {
-        minXInput.setText(toRoundedString(newBounds.minX));
-        minYInput.setText(toRoundedString(newBounds.minY));
-        minZInput.setText(toRoundedString(newBounds.minZ));
-        maxXInput.setText(toRoundedString(newBounds.maxX));
-        maxYInput.setText(toRoundedString(newBounds.maxY));
-        maxZInput.setText(toRoundedString(newBounds.maxZ));
+        MinMaxBox newMinMaxBounds{newBounds};
+        minXInput.setText(toRoundedString(newMinMaxBounds.min.x));
+        minYInput.setText(toRoundedString(newMinMaxBounds.min.y));
+        minZInput.setText(toRoundedString(newMinMaxBounds.min.z));
+        maxXInput.setText(toRoundedString(newMinMaxBounds.max.x));
+        maxYInput.setText(toRoundedString(newMinMaxBounds.max.y));
+        maxZInput.setText(toRoundedString(newMinMaxBounds.max.z));
     }
 }
 
@@ -210,12 +212,12 @@ void BoundingBoxPropertiesWindow::saveMinX()
         // Clamp the value to its bounds.
         const EditorBoundingBox& activeBoundingBox{
             dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
-        newModelBounds.minX = std::clamp(newMinX, 0.f, newModelBounds.maxX);
+        MinMaxBox newModelBounds{activeBoundingBox.modelBounds};
+        newModelBounds.min.x = std::clamp(newMinX, 0.f, newModelBounds.max.x);
 
         // Apply the new value.
-        dataModel.boundingBoxModel.setBoundingBoxBounds(activeBoundingBoxID,
-                                                        newModelBounds);
+        dataModel.boundingBoxModel.setBoundingBoxBounds(
+            activeBoundingBoxID, BoundingBox(newModelBounds));
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinX));
@@ -232,12 +234,12 @@ void BoundingBoxPropertiesWindow::saveMinY()
         // Clamp the value to its bounds.
         const EditorBoundingBox& activeBoundingBox{
             dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
-        newModelBounds.minY = std::clamp(newMinY, 0.f, newModelBounds.maxY);
+        MinMaxBox newModelBounds{activeBoundingBox.modelBounds};
+        newModelBounds.min.y = std::clamp(newMinY, 0.f, newModelBounds.max.y);
 
         // Apply the new value.
-        dataModel.boundingBoxModel.setBoundingBoxBounds(activeBoundingBoxID,
-                                                        newModelBounds);
+        dataModel.boundingBoxModel.setBoundingBoxBounds(
+            activeBoundingBoxID, BoundingBox(newModelBounds));
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinY));
@@ -254,12 +256,12 @@ void BoundingBoxPropertiesWindow::saveMinZ()
         // Clamp the value to its bounds.
         const EditorBoundingBox& activeBoundingBox{
             dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
-        newModelBounds.minY = std::clamp(newMinZ, 0.f, newModelBounds.maxZ);
+        MinMaxBox newModelBounds{activeBoundingBox.modelBounds};
+        newModelBounds.min.z = std::clamp(newMinZ, 0.f, newModelBounds.max.z);
 
         // Apply the new value.
-        dataModel.boundingBoxModel.setBoundingBoxBounds(activeBoundingBoxID,
-                                                        newModelBounds);
+        dataModel.boundingBoxModel.setBoundingBoxBounds(
+            activeBoundingBoxID, BoundingBox(newModelBounds));
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinZ));
@@ -276,14 +278,14 @@ void BoundingBoxPropertiesWindow::saveMaxX()
         // Clamp the value to its bounds.
         const EditorBoundingBox& activeBoundingBox{
             dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
-        newModelBounds.maxX
-            = std::clamp(newMaxX, newModelBounds.minX,
+        MinMaxBox newModelBounds{activeBoundingBox.modelBounds};
+        newModelBounds.max.x
+            = std::clamp(newMaxX, newModelBounds.min.x,
                          static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
         // Apply the new value.
-        dataModel.boundingBoxModel.setBoundingBoxBounds(activeBoundingBoxID,
-                                                        newModelBounds);
+        dataModel.boundingBoxModel.setBoundingBoxBounds(
+            activeBoundingBoxID, BoundingBox(newModelBounds));
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxXInput.setText(std::to_string(committedMaxX));
@@ -300,14 +302,14 @@ void BoundingBoxPropertiesWindow::saveMaxY()
         // Clamp the value to its bounds.
         const EditorBoundingBox& activeBoundingBox{
             dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
-        newModelBounds.maxY
-            = std::clamp(newMaxY, newModelBounds.minY,
+        MinMaxBox newModelBounds{activeBoundingBox.modelBounds};
+        newModelBounds.max.y
+            = std::clamp(newMaxY, newModelBounds.min.y,
                          static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
 
         // Apply the new value.
-        dataModel.boundingBoxModel.setBoundingBoxBounds(activeBoundingBoxID,
-                                                        newModelBounds);
+        dataModel.boundingBoxModel.setBoundingBoxBounds(
+            activeBoundingBoxID, BoundingBox(newModelBounds));
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));
@@ -326,17 +328,13 @@ void BoundingBoxPropertiesWindow::saveMaxZ()
         //       and not very useful. Can add if we ever care to.
         const EditorBoundingBox& activeBoundingBox{
             dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
-        float minZ{newModelBounds.minZ};
-        if (newMaxZ < minZ) {
-            newMaxZ = minZ;
-        }
-
-        newModelBounds.maxZ = newMaxZ;
+        MinMaxBox newModelBounds{activeBoundingBox.modelBounds};
+        newMaxZ = std::max(newMaxZ, newModelBounds.min.z);
+        newModelBounds.max.z = newMaxZ;
 
         // Apply the new value.
-        dataModel.boundingBoxModel.setBoundingBoxBounds(activeBoundingBoxID,
-                                                        newModelBounds);
+        dataModel.boundingBoxModel.setBoundingBoxBounds(
+            activeBoundingBoxID, BoundingBox(newModelBounds));
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));
