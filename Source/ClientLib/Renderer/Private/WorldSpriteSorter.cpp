@@ -113,8 +113,15 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
     for (const PhantomSpriteInfo& info : phantomSprites) {
         if (info.layerType != TileLayer::Type::None) {
             GraphicRef graphic{getPhantomGraphic(info)};
+
+            // If it's a wall phantom, make it match the terrain height.
+            TileOffset tileOffset{info.tileOffset};
+            if (info.layerType == TileLayer::Type::Wall) {
+                tileOffset.z = getTerrainHeight(info.tilePosition);
+            }
+
             pushTileSprite(graphic, camera,
-                           {info.tilePosition, info.tileOffset, info.layerType,
+                           {info.tilePosition, tileOffset, info.layerType,
                             info.graphicValue},
                            true);
         }
@@ -206,14 +213,10 @@ void WorldSpriteSorter::pushFloorSprite(const Tile& tile, const Camera& camera,
 void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
                                         const TilePosition& tilePosition)
 {
-    // Determine how high this tile's terrain is.
+    // Make this wall match the tile's terrain height.
     // Note: Walls don't normally use offsets, but it's convenient to do it 
-    //       this way, so pushTileSprite() doesn't need to find the terrain.
-    TileOffset tileOffset{0, 0, 0};
-    if (auto* terrain{tile.findLayer(TileLayer::Type::Terrain)}) {
-        Terrain::Height height{Terrain::getTotalHeight(terrain->graphicValue)};
-        tileOffset.z = static_cast<Uint8>(Terrain::getHeightWorldValue(height));
-    }
+    //       this way.
+    TileOffset tileOffset{0, 0, getTerrainHeight(tilePosition)};
 
     std::span<const TileLayer> walls{tile.getLayers(TileLayer::Type::Wall)};
     for (const TileLayer& wall : walls) {
@@ -252,7 +255,7 @@ void WorldSpriteSorter::pushWallSprites(const Tile& tile, const Camera& camera,
 
             pushTileSprite(graphic, camera,
                            {tilePosition, tileOffset, TileLayer::Type::Wall,
-                            wall.graphicSet.get().numericID, 0},
+                            wall.graphicSet.get().numericID, wall.graphicValue},
                            false);
         }
     }
@@ -550,6 +553,19 @@ GraphicRef WorldSpriteSorter::getPhantomGraphic(
     }
 
     return GraphicRef{graphicData.getSprite(NULL_SPRITE_ID)};
+}
+
+Uint8 WorldSpriteSorter::getTerrainHeight(const TilePosition& tilePosition)
+{
+    if (const Tile* tile{tileMap.getTile(tilePosition)}) {
+        if (auto* terrain{tile->findLayer(TileLayer::Type::Terrain)}) {
+            Terrain::Height height{
+                Terrain::getTotalHeight(terrain->graphicValue)};
+            return static_cast<Uint8>(Terrain::getHeightWorldValue(height));
+        }
+    }
+
+    return 0;
 }
 
 } // End namespace Client

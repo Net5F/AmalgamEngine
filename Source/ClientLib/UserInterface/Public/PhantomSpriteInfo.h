@@ -37,8 +37,10 @@ struct PhantomSpriteInfo {
     /** If this is a tile phantom, this is the position of the phantom's tile. */
     TilePosition tilePosition{};
 
-    /** If this is a tile phantom, this is the phantom's offset relative to 
-        tilePosition. */
+    /** If this is a Floor or Object tile phantom, this is the phantom's offset
+        relative to tilePosition.
+        Note: Terrain and Wall phantoms shouldn't be given offsets, 
+              they're already handled by WorldSpriteSorter. */
     TileOffset tileOffset{};
 
     /** The phantom's tile layer type. If this != None, this is a tile phantom.

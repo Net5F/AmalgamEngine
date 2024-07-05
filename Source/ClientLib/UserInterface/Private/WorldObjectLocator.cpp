@@ -75,8 +75,8 @@ WorldObjectID
 
     // Cast a world-space ray from the plane formed by camera.target.z to the 
     // given point on the screen.
-    Ray ray{Transforms::screenToWorldRay(
-        SDLHelpers::pointToFPoint(screenPoint), camera)};
+    Ray ray{Transforms::screenToWorldRay(SDLHelpers::pointToFPoint(screenPoint),
+                                         camera)};
 
     // Calc the ratio of how long we have to travel along the ray to
     // fully move through 1 cell in each direction.

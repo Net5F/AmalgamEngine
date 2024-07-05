@@ -15,7 +15,8 @@ namespace Client
 {
 
 UserInterface::UserInterface()
-: eventDispatcher{}
+: world{}
+, eventDispatcher{}
 , extension{nullptr}
 , worldObjectLocator{}
 {

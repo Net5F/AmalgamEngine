@@ -149,6 +149,11 @@ private:
     template<typename T>
     SDL_Color getColorMod(const T& objectID);
 
+    /**
+     * Returns the height of the terrain at the given position, in world units.
+     */
+    Uint8 getTerrainHeight(const TilePosition& tilePosition);
+
     /** Used for gathering sprites. */
     entt::registry& registry;
 
