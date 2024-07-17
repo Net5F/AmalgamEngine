@@ -47,13 +47,13 @@ float BoundingBox::getZLength() const
     return (halfExtents.z * 2);
 }
 
-Vector3 BoundingBox::getMinPoint() const
+Vector3 BoundingBox::min() const
 {
     return {(center.x - halfExtents.x), (center.y - halfExtents.y),
             (center.z - halfExtents.z)};
 }
 
-Vector3 BoundingBox::getMaxPoint() const
+Vector3 BoundingBox::max() const
 {
     return {(center.x + halfExtents.x), (center.y + halfExtents.y),
             (center.z + halfExtents.z)};
@@ -221,26 +221,44 @@ std::array<float, 2> BoundingBox::getIntersections(const Ray& ray) const
     return {tMin, tMax};
 }
 
+void BoundingBox::unionWith(const BoundingBox& other)
+{
+    MinMaxBox box{*this};
+    MinMaxBox otherBox{other};
+    MinMaxBox finalBox{};
+
+    finalBox.min.x = (box.min.x < otherBox.min.x) ? box.min.x : otherBox.min.x;
+    finalBox.min.y = (box.min.y < otherBox.min.y) ? box.min.y : otherBox.min.y;
+    finalBox.min.z = (box.min.z < otherBox.min.z) ? box.min.z : otherBox.min.z;
+
+    finalBox.max.x = (box.max.x > otherBox.max.x) ? box.max.x : otherBox.max.x;
+    finalBox.max.y = (box.max.y > otherBox.max.y) ? box.max.y : otherBox.max.y;
+    finalBox.max.z = (box.max.z > otherBox.max.z) ? box.max.z : otherBox.max.z;
+
+    *this = BoundingBox(finalBox);
+}
+
+Vector3 BoundingBox::getOverlap(const BoundingBox& other) const
+{
+    Vector3 delta{std::abs(center.x - other.center.x),
+                  std::abs(center.y - other.center.y),
+                  std::abs(center.z - other.center.z)};
+    return {(halfExtents.x + other.halfExtents.x - delta.x),
+            (halfExtents.y + other.halfExtents.y - delta.y),
+            (halfExtents.z + other.halfExtents.z - delta.z)};
+}
+
 TileExtent BoundingBox::asTileExtent() const
 {
-    static constexpr float TILE_WORLD_WIDTH{
-        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
-    static constexpr float TILE_WORLD_HEIGHT{
-        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
+    MinMaxBox box{*this};
+    return box.asTileExtent();
+}
 
-    TileExtent tileExtent{};
-    Vector3 minPoint{getMinPoint()};
-    tileExtent.x = static_cast<int>(std::floor(minPoint.x / TILE_WORLD_WIDTH));
-    tileExtent.y = static_cast<int>(std::floor(minPoint.y / TILE_WORLD_WIDTH));
-    tileExtent.z = static_cast<int>(std::floor(minPoint.z / TILE_WORLD_HEIGHT));
-    tileExtent.xLength
-        = static_cast<int>(std::ceil((halfExtents.x * 2.f) / TILE_WORLD_WIDTH));
-    tileExtent.yLength
-        = static_cast<int>(std::ceil((halfExtents.y * 2.f) / TILE_WORLD_WIDTH));
-    tileExtent.zLength = static_cast<int>(
-        std::ceil((halfExtents.z * 2.f) / TILE_WORLD_HEIGHT));
-
-    return tileExtent;
+void BoundingBox::print() const
+{
+    LOG_INFO("center: (%.4f, %.4f, %.4f) halfExtents: (%.4f, %.4f, %.4f)",
+             center.x, center.y, center.z, halfExtents.x, halfExtents.y,
+             halfExtents.z);
 }
 
 } // End namespace AM

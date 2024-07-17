@@ -3,6 +3,8 @@
 #include "IsClientEntity.h"
 #include "Name.h"
 #include "Input.h"
+#include "Movement.h"
+#include "MovementModifiers.h"
 #include "Rotation.h"
 #include "GraphicState.h"
 #include "Interaction.h"
@@ -26,7 +28,8 @@ namespace AM
  * Note: We need Rotation, otherwise entities will face the wrong way on init.
  */
 using EngineReplicatedComponentTypes
-    = boost::mp11::mp_list<IsClientEntity, Name, Input, Rotation,
-                           GraphicState, Interaction>;
+    = boost::mp11::mp_list<IsClientEntity, Name, Input, Movement,
+                           MovementModifiers, Rotation, GraphicState,
+                           Interaction>;
 
 } // End namespace AM

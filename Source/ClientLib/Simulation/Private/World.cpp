@@ -1,6 +1,5 @@
 #include "World.h"
-#include "SharedConfig.h"
-#include <SDL_rect.h>
+#include "EnttGroups.h"
 
 namespace AM
 {
@@ -13,6 +12,8 @@ World::World(GraphicData& graphicData)
 , tileMap{graphicData}
 , entityLocator{registry}
 {
+    // Initialize our entt groups, before anyone tries to use them.
+    EnttGroups::init(registry);
 }
 
 } // End namespace Client

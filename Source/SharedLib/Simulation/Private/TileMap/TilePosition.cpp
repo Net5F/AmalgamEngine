@@ -2,6 +2,7 @@
 #include "ChunkPosition.h"
 #include "Position.h"
 #include "SharedConfig.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -67,6 +68,11 @@ Vector3 TilePosition::getCenteredBottomPoint() const
 
     return {((x * TILE_WIDTH) + HALF_WIDTH), ((y * TILE_WIDTH) + HALF_WIDTH),
             (z * TILE_HEIGHT)};
+}
+
+void TilePosition::print() const
+{
+    LOG_INFO("(%d, %d, %d)", x, y, z);
 }
 
 } // End namespace AM

@@ -19,6 +19,11 @@ struct ChunkExtent : public DiscreteExtent<DiscreteImpl::ChunkTag> {
     explicit ChunkExtent(const TileExtent& tileExtent);
 
     /**
+     * Prints this extent's current values.
+     */
+    void print() const;
+
+    /**
      * Builds a ChunkExtent from the given tile map lengths, centering it 
      * around (0, 0) in the x and y directions, and starting at 0 in the z 
      * direction.

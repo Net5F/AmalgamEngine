@@ -16,6 +16,11 @@ struct TileExtent : public DiscreteExtent<DiscreteImpl::TileTag> {
                int inZLength);
 
     explicit TileExtent(const ChunkExtent& chunkExtent);
+
+    /**
+     * Prints this extent's current values.
+     */
+    void print() const;
 };
 
 template<typename S>

@@ -2,6 +2,7 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Movement.h"
+#include "MovementModifiers.h"
 #include "BoundingBox.h"
 #include "SharedConfig.h"
 
@@ -13,14 +14,17 @@ const float DIAGONAL_NORMALIZATION_CONSTANT{0.70710678118f};
 namespace AM
 {
 Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
-                                      Movement& movement, double)
+                                      Movement& movement,
+                                      const MovementModifiers& movementMods)
 {
     // If the entity isn't in the air (or if they can fly), calc the new X/Y 
     // velocity.
     // Note: If they're in the air, they'll keep traveling with their current 
     //       X/Y velocity.
     Vector3 updatedVelocity{movement.velocity};
-    if (!(movement.isFalling) || movement.canFly) {
+    // TODO: If they hit something on the way up in a jump then stop hitting 
+    //       it, they should start moving forward again
+    if (!(movement.isFalling) || movementMods.canFly) {
         // Direction values. 0 == no movement, 1 == movement.
         int xUp{static_cast<int>(inputStates[Input::XUp])};
         int xDown{static_cast<int>(inputStates[Input::XDown])};
@@ -39,34 +43,40 @@ Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
         }
 
         // Calc the new X/Y velocity.
-        updatedVelocity.x = xDirection * movement.runSpeed;
-        updatedVelocity.y = yDirection * movement.runSpeed;
+        updatedVelocity.x = xDirection * movementMods.runSpeed;
+        updatedVelocity.y = yDirection * movementMods.runSpeed;
     }
 
     /** Calc the new Z velocity. **/
     // If the entity can fly and the user is trying to go up or down, treat 
     // it similar to running.
-    if (movement.canFly) {
+    if (movementMods.canFly) {
         if (inputStates[Input::Jump] || inputStates[Input::Crouch]) {
             int zUp{static_cast<int>(inputStates[Input::Jump])};
             int zDown{static_cast<int>(inputStates[Input::Crouch])};
             float zDirection{static_cast<float>(zUp - zDown)};
 
-            updatedVelocity.z = zDirection * movement.runSpeed;
+            updatedVelocity.z = zDirection * movementMods.runSpeed;
         }
         // Note: Since they're flying, we don't apply gravity.
     }
     else {
         // Not flying. If they're trying and able to jump, do so.
         if (inputStates[Input::Jump] && !(movement.jumpHeld)
-            && (movement.jumpCount < movement.maxJumpCount)) {
-            updatedVelocity.z += static_cast<float>(movement.jumpHeight);
+            && (movement.jumpCount < movementMods.maxJumpCount)) {
+            LOG_INFO("Jump. %u, %u, %u", inputStates[Input::Jump],
+                     movement.jumpHeld, movement.jumpCount);
+            updatedVelocity.z += static_cast<float>(movementMods.jumpHeight);
             movement.jumpCount++;
             movement.jumpHeld = true;
         }
+        else if (inputStates[Input::Jump]) {
+            LOG_INFO("Jump denied. %u, %u, %u", inputStates[Input::Jump],
+                     movement.jumpHeld, movement.jumpCount);
+        }
 
         // Always apply gravity.
-        //updatedVelocity.z -= SharedConfig::FORCE_OF_GRAVITY;
+        updatedVelocity.z -= SharedConfig::FORCE_OF_GRAVITY;
 
         // If jump isn't held, reset our bool.
         if (!inputStates[Input::Jump]) {
@@ -75,11 +85,19 @@ Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
     }
 
     // Apply the project's velocity mod.
-    updatedVelocity += movement.velocityMod;
+    updatedVelocity += movementMods.velocityMod;
 
     // Clamp Z to the terminal velocity.
     updatedVelocity.z
         = std::max(updatedVelocity.z, SharedConfig::TERMINAL_VELOCITY);
+
+    if (updatedVelocity.z != 0) {
+        movement.isFalling = true;
+        LOG_INFO("isFalling = %u", movement.isFalling);
+    }
+
+    //LOG_INFO("New velocity:");
+    //updatedVelocity.print();
 
     return updatedVelocity;
 }

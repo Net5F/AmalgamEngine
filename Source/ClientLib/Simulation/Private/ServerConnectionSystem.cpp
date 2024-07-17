@@ -7,6 +7,7 @@
 #include "PreviousPosition.h"
 #include "Position.h"
 #include "Movement.h"
+#include "MovementModifiers.h"
 #include "Collision.h"
 #include "InputHistory.h"
 #include "Rotation.h"
@@ -145,6 +146,7 @@ void ServerConnectionSystem::initMockSimState()
     registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<PreviousPosition>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<Movement>(newEntity);
+    registry.emplace<MovementModifiers>(newEntity);
     registry.emplace<Rotation>(newEntity);
     registry.emplace<InputHistory>(newEntity);
 

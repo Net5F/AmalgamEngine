@@ -5,7 +5,6 @@
 #include "ItemInitLua.h"
 #include "DialogueLua.h"
 #include "DialogueChoiceConditionLua.h"
-#include "EnttGroups.h"
 #include "ISimulationExtension.h"
 #include "EntityInteractionRequest.h"
 #include "Interaction.h"
@@ -56,9 +55,6 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData)
 , scriptDataSystem{world, network}
 , saveSystem{world}
 {
-    // Initialize our entt groups.
-    EnttGroups::init(world.registry);
-
     // Initialize the Lua environments and add our bindings.
     entityInitLua->luaState.open_libraries(sol::lib::base);
     entityItemHandlerLua->luaState.open_libraries(sol::lib::base);

@@ -84,7 +84,7 @@ BoundingBox Terrain::calcWorldBounds(const TilePosition& tilePosition,
     BoundingBox bounds{TERRAIN_BOXES[height]};
 
     // Move the bounds to the tile's origin.
-    bounds.moveMinimumTo(tilePosition.getOriginPoint());
+    bounds.center += tilePosition.getOriginPoint();
 
     // Raise the bounds based on the given start height.
     bounds.center.z += HEIGHT_VALUES[startHeight];

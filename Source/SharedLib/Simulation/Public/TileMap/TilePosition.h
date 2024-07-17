@@ -33,6 +33,11 @@ struct TilePosition : public DiscretePosition<DiscreteImpl::TileTag> {
     /** Returns the world point centered in the X and Y axis, but at the 
         lowest Z position of this tile. */
     Vector3 getCenteredBottomPoint() const;
+
+    /**
+     * Prints this position's current values.
+     */
+    void print() const;
 };
 
 template<typename S>

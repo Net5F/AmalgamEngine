@@ -3,8 +3,8 @@
 #include "Input.h"
 #include "Position.h"
 #include "Movement.h"
+#include "MovementModifiers.h"
 #include "entt/entity/registry.hpp"
-#include "bitsery/bitsery.h"
 
 namespace AM
 {
@@ -20,6 +20,8 @@ struct MovementState {
     Input input{};
     Position position{};
     Movement movement{};
+    MovementModifiers movementMods{};
+
     // Note: Rotation is calculated client-side.
 };
 
@@ -33,6 +35,7 @@ void serialize(S& serializer, MovementState& movementState)
         });
     serializer.object(movementState.position);
     serializer.object(movementState.movement);
+    serializer.object(movementState.movementMods);
 }
 
 } // End namespace AM

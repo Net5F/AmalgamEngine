@@ -66,10 +66,10 @@ public:
     static constexpr const char* DEFAULT_ENTITY_GRAPHIC_SET{"ghost"};
 
     /** The force of gravity in world units per second. */
-    static constexpr float FORCE_OF_GRAVITY{10};
+    static constexpr float FORCE_OF_GRAVITY{15};
 
     /** The maximum negative Z velocity that entities can reach. */
-    static constexpr float TERMINAL_VELOCITY{-50};
+    static constexpr float TERMINAL_VELOCITY{-125};
 
     //-------------------------------------------------------------------------
     // Network

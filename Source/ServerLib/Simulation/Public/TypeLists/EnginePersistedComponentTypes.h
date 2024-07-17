@@ -21,7 +21,8 @@ namespace Server
  * All of the engine's component types that should be saved to the database 
  * and loaded at startup.
  *
- * Note: Rotation implies Input and PreviousPosition (movement components).
+ * Note: Rotation implies Input, PreviousPosition, Movement, and 
+ *       MovementModifiers (movement components).
  *       GraphicState implies Collision (graphics components).
  * Note: We currently don't have a versioning system for these. If you make a 
  *       change to either a component or the list itself, you must write a 

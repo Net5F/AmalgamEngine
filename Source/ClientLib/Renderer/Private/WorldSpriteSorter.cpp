@@ -430,8 +430,8 @@ void WorldSpriteSorter::calcDepthDependencies()
                 SpriteSortInfo& spriteA{spritesToSort[i]};
                 SpriteSortInfo& spriteB{spritesToSort[j]};
 
-                Vector3 spriteAMax{spriteA.worldBounds.getMaxPoint()};
-                Vector3 spriteBMin{spriteB.worldBounds.getMinPoint()};
+                Vector3 spriteAMax{spriteA.worldBounds.max()};
+                Vector3 spriteBMin{spriteB.worldBounds.min()};
                 if ((spriteBMin.x < spriteAMax.x)
                     && (spriteBMin.y < spriteAMax.y)
                     && (spriteBMin.z < spriteAMax.z)) {

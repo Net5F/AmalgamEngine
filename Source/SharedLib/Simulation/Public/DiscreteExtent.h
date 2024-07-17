@@ -84,12 +84,12 @@ struct DiscreteExtent {
     /**
      * Returns the minimum position of this extent.
      */
-    DiscretePosition<T> minimum() { return {x, y, z}; }
+    DiscretePosition<T> min() { return {x, y, z}; }
 
     /**
      * Returns the maximum position of this extent.
      */
-    DiscretePosition<T> maximum() { return {xMax(), yMax(), zMax()}; }
+    DiscretePosition<T> max() { return {xMax(), yMax(), zMax()}; }
 
     /**
      * Sets this extent to the union between itself and the given extent.

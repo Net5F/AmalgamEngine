@@ -5,6 +5,7 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Movement.h"
+#include "MovementModifiers.h"
 #include "Rotation.h"
 #include "Collision.h"
 #include "SharedConfig.h"
@@ -27,16 +28,18 @@ void MovementSystem::processMovements()
     ZoneScoped;
 
     // Move all entities that have the required components.
-    auto group = world.registry.group<Input, Position, PreviousPosition,
-                                      Movement, Rotation, Collision>();
-    for (auto [entity, input, position, previousPosition, movement, rotation,
-               collision] : group.each()) {
+    auto group
+        = world.registry.group<Input, Position, PreviousPosition, Movement,
+                               MovementModifiers, Rotation, Collision>();
+    for (auto [entity, input, position, previousPosition, movement,
+               movementMods, rotation, collision] : group.each()) {
         // Save their old position.
         previousPosition = position;
 
         // Move the entity.
         entityMover.moveEntity(entity, input.inputStates, position,
-                               previousPosition, movement, rotation, collision,
+                               previousPosition, movement, movementMods,
+                               rotation, collision,
                                SharedConfig::SIM_TICK_TIMESTEP_S);
     }
 }

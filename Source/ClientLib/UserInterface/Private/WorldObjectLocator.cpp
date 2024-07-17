@@ -29,19 +29,22 @@ void WorldObjectLocator::addWorldObject(const WorldObjectID& objectID,
 
     // Find the cells that the bounding box intersects.
     CellExtent boxCellExtent{};
-    Vector3 boxMin{objectWorldBounds.getMinPoint()};
+    MinMaxBox box{objectWorldBounds};
     boxCellExtent.x
-        = static_cast<int>(std::floor(boxMin.x / CELL_WORLD_WIDTH));
+        = static_cast<int>(std::floor(box.min.x / CELL_WORLD_WIDTH));
     boxCellExtent.y
-        = static_cast<int>(std::floor(boxMin.y / CELL_WORLD_WIDTH));
+        = static_cast<int>(std::floor(box.min.y / CELL_WORLD_WIDTH));
     boxCellExtent.z
-        = static_cast<int>(std::floor(boxMin.z / CELL_WORLD_HEIGHT));
-    boxCellExtent.xLength = static_cast<int>(
-        std::ceil(objectWorldBounds.halfExtents.x * 2.f / CELL_WORLD_WIDTH));
-    boxCellExtent.yLength = static_cast<int>(
-        std::ceil(objectWorldBounds.halfExtents.y * 2.f / CELL_WORLD_WIDTH));
-    boxCellExtent.zLength = static_cast<int>(
-        std::ceil(objectWorldBounds.halfExtents.z * 2.f / CELL_WORLD_HEIGHT));
+        = static_cast<int>(std::floor(box.min.z / CELL_WORLD_HEIGHT));
+    boxCellExtent.xLength
+        = (static_cast<int>(std::ceil(box.max.x / CELL_WORLD_WIDTH))
+           - boxCellExtent.x);
+    boxCellExtent.yLength
+        = (static_cast<int>(std::ceil(box.max.y / CELL_WORLD_WIDTH))
+           - boxCellExtent.y);
+    boxCellExtent.zLength
+        = (static_cast<int>(std::ceil(box.max.z / CELL_WORLD_HEIGHT))
+           - boxCellExtent.z);
 
     // Make sure each length is at least 1, or else the box won't be added to 
     // any cells.

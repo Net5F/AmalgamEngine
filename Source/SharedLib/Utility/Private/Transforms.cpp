@@ -84,7 +84,7 @@ Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
                     {TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
                      TILE_SIDE_HEIGHT_WORLD_TO_SCREEN,
                      TILE_FACE_HEIGHT_WORLD_TO_SCREEN}};
-    rayToCamera.normalize();
+    rayToCamera.direction.normalize();
     float tMax{camera.viewBounds.getMaxIntersection(rayToCamera)};
     AM_ASSERT(tMax > 0, "Screen ray failed to intersect camera bounds.");
 

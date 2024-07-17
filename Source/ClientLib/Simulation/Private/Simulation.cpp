@@ -1,7 +1,6 @@
 #include "Simulation.h"
 #include "Network.h"
 #include "GraphicData.h"
-#include "EnttGroups.h"
 #include "ISimulationExtension.h"
 #include "ChunkUpdateSystem.h"
 #include "TileUpdateSystem.h"
@@ -35,9 +34,6 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 , serverConnectionSystem{world, inUiEventDispatcher, network, inGraphicData,
                          currentTick}
 {
-    // Initialize our entt groups.
-    EnttGroups::init(world.registry);
-
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);

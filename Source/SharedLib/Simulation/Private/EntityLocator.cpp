@@ -3,6 +3,7 @@
 #include "Position.h"
 #include "Cylinder.h"
 #include "BoundingBox.h"
+#include "MinMaxBox.h"
 #include "Collision.h"
 #include "CellPosition.h"
 #include "Log.h"
@@ -50,19 +51,22 @@ void EntityLocator::setEntityLocation(entt::entity entity,
 {
     // Find the cells that the bounding box intersects.
     CellExtent boxCellExtent{};
-    Vector3 boxMin{boundingBox.getMinPoint()};
+    MinMaxBox box{boundingBox};
     boxCellExtent.x
-        = static_cast<int>(std::floor(boxMin.x / CELL_WORLD_WIDTH));
+        = static_cast<int>(std::floor(box.min.x / CELL_WORLD_WIDTH));
     boxCellExtent.y
-        = static_cast<int>(std::floor(boxMin.y / CELL_WORLD_WIDTH));
+        = static_cast<int>(std::floor(box.min.y / CELL_WORLD_WIDTH));
     boxCellExtent.z
-        = static_cast<int>(std::floor(boxMin.z / CELL_WORLD_HEIGHT));
-    boxCellExtent.xLength = static_cast<int>(
-        std::ceil(boundingBox.halfExtents.x * 2.f / CELL_WORLD_WIDTH));
-    boxCellExtent.yLength = static_cast<int>(
-        std::ceil(boundingBox.halfExtents.y * 2.f / CELL_WORLD_WIDTH));
-    boxCellExtent.zLength = static_cast<int>(
-        std::ceil(boundingBox.halfExtents.z * 2.f / CELL_WORLD_HEIGHT));
+        = static_cast<int>(std::floor(box.min.z / CELL_WORLD_HEIGHT));
+    boxCellExtent.xLength
+        = (static_cast<int>(std::ceil(box.max.x / CELL_WORLD_WIDTH))
+           - boxCellExtent.x);
+    boxCellExtent.yLength
+        = (static_cast<int>(std::ceil(box.max.y / CELL_WORLD_WIDTH))
+           - boxCellExtent.y);
+    boxCellExtent.zLength
+        = (static_cast<int>(std::ceil(box.max.z / CELL_WORLD_HEIGHT))
+           - boxCellExtent.z);
 
     if (!(gridCellExtent.containsExtent(boxCellExtent))) {
         LOG_ERROR("Tried to track entity that is outside of the locator's "
@@ -262,6 +266,13 @@ std::vector<entt::entity>&
 
 std::vector<entt::entity>&
     EntityLocator::getEntitiesBroad(const BoundingBox& boundingBox)
+{
+    // Convert to TileExtent.
+    return getEntitiesBroad(boundingBox.asTileExtent());
+}
+
+std::vector<entt::entity>&
+    EntityLocator::getEntitiesBroad(const MinMaxBox& boundingBox)
 {
     // Convert to TileExtent.
     return getEntitiesBroad(boundingBox.asTileExtent());

@@ -15,54 +15,39 @@ struct Vector3 {
     float y{0};
     float z{0};
 
-    Vector3 operator+(const Vector3& other) const
-    {
-        return {(x + other.x), (y + other.y), (z + other.z)};
-    }
+    Vector3 operator+(const Vector3& other) const;
 
-    Vector3 operator-(const Vector3& other) const
-    {
-        return {(x - other.x), (y - other.y), (z - other.z)};
-    }
+    Vector3 operator-(const Vector3& other) const;
 
-    Vector3 operator*(const Vector3& other) const
-    {
-        return {(x * other.x), (y * other.y), (z * other.z)};
-    }
+    Vector3 operator*(const Vector3& other) const;
 
-    Vector3& operator+=(const Vector3& other)
-    {
-        x += other.x;
-        y += other.y;
-        z += other.z;
-        return *this;
-    }
+    Vector3 operator*(float scalar) const;
 
-    Vector3& operator-=(const Vector3& other)
-    {
-        x -= other.x;
-        y -= other.y;
-        z -= other.z;
-        return *this;
-    }
+    Vector3& operator+=(const Vector3& other);
 
-    Vector3& operator*=(const Vector3& other)
-    {
-        x *= other.x;
-        y *= other.y;
-        z *= other.z;
-        return *this;
-    }
+    Vector3& operator-=(const Vector3& other);
 
-    bool operator==(const Vector3& other) const
-    {
-        return (x == other.x) && (y == other.y) && (z == other.z);
-    }
+    Vector3& operator*=(const Vector3& other);
 
-    bool operator!=(const Vector3& other) const
-    {
-        return (x != other.x) || (y != other.y) || (z != other.z);
-    }
+    bool operator==(const Vector3& other) const;
+
+    bool operator!=(const Vector3& other) const;
+
+    /**
+     * Normalizes this vector.
+     */
+    void normalize();
+
+    /**
+     * Returns the dot product of this vector and the given vector.
+     */
+    float dot(const Vector3& other);
+
+    /**
+     * Returns a new vector slid along a plane defined by the given normal.
+     * (i.e. returns the component of this vector that lies along the plane)
+     */
+    Vector3 slide(const Vector3& normal);
 
     /**
      * Returns the squared distance between this vector and the given
@@ -70,13 +55,12 @@ struct Vector3 {
      * We keep it squared to avoid an expensive sqrt. You can use this by
      * squaring the distance you're comparing it to.
      */
-    float squaredDistanceTo(const Vector3& other) const
-    {
-        Vector3 distance{std::abs(x - other.x), std::abs(y - other.y),
-                         std::abs(z - other.z)};
-        return {(distance.x * distance.x) + (distance.y * distance.y)
-                + (distance.z * distance.z)};
-    }
+    float squaredDistanceTo(const Vector3& other) const;
+
+    /**
+     * Prints this box's current values.
+     */
+    void print() const;
 };
 
 template<typename S>

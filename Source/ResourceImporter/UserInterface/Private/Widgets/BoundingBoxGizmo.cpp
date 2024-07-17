@@ -360,8 +360,8 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
     std::array<SDL_FPoint, 7> screenPoints{};
 
     // Push the points in the correct order.
-    Vector3 minPoint{boundingBox.getMinPoint()};
-    Vector3 maxPoint{boundingBox.getMaxPoint()};
+    Vector3 minPoint{boundingBox.min()};
+    Vector3 maxPoint{boundingBox.max()};
     Vector3 point{minPoint.x, maxPoint.y, minPoint.z};
     screenPoints[0] = Transforms::worldToScreen(point, 1);
 

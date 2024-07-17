@@ -21,19 +21,6 @@ struct Ray {
     Vector3 direction{};
 
     /**
-     * Normalizes this ray's current direction vector.
-     */
-    void normalize()
-    {
-        const float length{std::sqrt((direction.x * direction.x)
-                                     + (direction.y * direction.y)
-                                     + (direction.z * direction.z))};
-        direction.x /= length;
-        direction.y /= length;
-        direction.z /= length;
-    }
-
-    /**
      * Returns the point along this ray at the given t.
      */
     Vector3 getPointAtT(float t)

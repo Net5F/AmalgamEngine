@@ -2,6 +2,7 @@
 #include "Vector3.h"
 #include "TilePosition.h"
 #include "SharedConfig.h"
+#include "Log.h"
 
 namespace AM
 {
@@ -35,6 +36,11 @@ ChunkPosition::ChunkPosition(const TilePosition& tilePosition)
     static_cast<int>(tilePosition.y / SharedConfig::CHUNK_WIDTH),
     tilePosition.z)
 {
+}
+
+void ChunkPosition::print() const
+{
+    LOG_INFO("(%d, %d, %d)", x, y, z);
 }
 
 } // End namespace AM

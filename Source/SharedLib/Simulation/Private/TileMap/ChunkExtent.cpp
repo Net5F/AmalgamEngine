@@ -27,6 +27,11 @@ ChunkExtent::ChunkExtent(const TileExtent& tileExtent)
 {
 }
 
+void ChunkExtent::print() const
+{
+    LOG_INFO("(%d, %d, %d, %d, %d, %d)", x, y, z, xLength, yLength, zLength);
+}
+
 ChunkExtent ChunkExtent::fromMapLengths(Uint16 mapXLengthChunks,
                                         Uint16 mapYLengthChunks,
                                         Uint16 mapZLengthChunks)

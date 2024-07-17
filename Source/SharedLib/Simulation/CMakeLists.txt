@@ -4,9 +4,11 @@ target_sources(SharedLib
         Private/Cylinder.cpp
         Private/EntityLocator.cpp
         Private/EntityMover.cpp
+        Private/MinMaxBox.cpp
         Private/MovementHelpers.cpp
         Private/ResourceData.cpp
         Private/Terrain.cpp
+        Private/Vector3.cpp
         Private/Components/Camera.cpp
         Private/Components/Interaction.cpp
         Private/Components/Inventory.cpp
@@ -52,6 +54,7 @@ target_sources(SharedLib
         Public/Components/Inventory.h
         Public/Components/IsClientEntity.h
         Public/Components/Movement.h
+        Public/Components/MovementModifiers.h
         Public/Components/Name.h
         Public/Components/Position.h
         Public/Components/PreviousPosition.h

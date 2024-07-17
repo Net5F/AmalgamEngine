@@ -1,4 +1,5 @@
 #include "World.h"
+#include "EnttGroups.h"
 #include "EntityInitLua.h"
 #include "ItemInitLua.h"
 #include "Database.h"
@@ -8,6 +9,7 @@
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Movement.h"
+#include "MovementModifiers.h"
 #include "GraphicState.h"
 #include "Collision.h"
 #include "EntityInitScript.h"
@@ -82,6 +84,9 @@ World::World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
 , columnIndex{0}
 , rowIndex{0}
 {
+    // Initialize our entt groups.
+    EnttGroups::init(registry);
+
     // Allocate the entity locator's grid.
     entityLocator.setGridSize(tileMap.getTileExtent());
 
@@ -177,6 +182,10 @@ void World::addMovementComponents(entt::entity entity, const Rotation& rotation)
 
     if (!(registry.all_of<Movement>(entity))) {
         registry.emplace<Movement>(entity);
+    }
+
+    if (!(registry.all_of<MovementModifiers>(entity))) {
+        registry.emplace<MovementModifiers>(entity);
     }
 
     if (!(registry.all_of<Rotation>(entity))) {
@@ -300,10 +309,11 @@ Position World::getSpawnPoint()
 {
     switch (Config::SPAWN_STRATEGY) {
         case SpawnStrategy::Fixed: {
-            return {Config::SPAWN_POINT_FIXED_X, Config::SPAWN_POINT_FIXED_Y};
+            return {Config::SPAWN_POINT_FIXED_X, Config::SPAWN_POINT_FIXED_Y,
+                    0.1f};
         }
         case SpawnStrategy::Random: {
-            return {xDistribution(generator), yDistribution(generator), 0};
+            return {xDistribution(generator), yDistribution(generator), 0.1f};
         }
         case SpawnStrategy::Grouped: {
             return getGroupedSpawnPoint();
@@ -318,7 +328,7 @@ Position World::getSpawnPoint()
 Position World::getGroupedSpawnPoint()
 {
     // Calculate the next spawn point.
-    Position spawnPoint{groupX, groupY};
+    Position spawnPoint{groupX, groupY, 0.1f};
     spawnPoint.x += (columnIndex * Config::SPAWN_POINT_GROUP_PADDING_X);
     spawnPoint.y += (rowIndex * Config::SPAWN_POINT_GROUP_PADDING_Y);
 

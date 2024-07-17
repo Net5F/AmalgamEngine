@@ -43,12 +43,12 @@ public:
     /**
      * Returns the minimum point of this bounding box.
      */
-    Vector3 getMinPoint() const;
+    Vector3 min() const;
 
     /**
      * Returns the maximum point of this bounding box.
      */
-    Vector3 getMaxPoint() const;
+    Vector3 max() const;
 
     /**
      * Returns the point centered on this bounding box in the X and Y axis,
@@ -78,6 +78,7 @@ public:
 
     /**
      * Returns true if this box intersects the given other bounding box.
+     * Note: Shared edges are not considered to be intersecting.
      */
     bool intersects(const BoundingBox& other) const;
 
@@ -122,11 +123,25 @@ public:
     std::array<float, 2> getIntersections(const Ray& ray) const;
 
     /**
+     * Sets this box to the union between itself and the given box.
+     */
+    void unionWith(const BoundingBox& other);
+
+    /**
+     * Returns the amount of overlap between this bounding box and the given 
+     * bounding box along each axis.
+     */
+    Vector3 getOverlap(const BoundingBox& other) const;
+
+    /**
      * Returns the smallest tile extent that contains this bounding box.
-     *
-     * Note: The Z-axis is ignored in this conversion, as TileExtent is 2D.
      */
     TileExtent asTileExtent() const;
+
+    /**
+     * Prints this box's current values.
+     */
+    void print() const;
 };
 
 } // End namespace AM

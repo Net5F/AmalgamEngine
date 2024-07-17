@@ -5,13 +5,7 @@
 #include "MovementHelpers.h"
 #include "MovementUpdate.h"
 #include "Name.h"
-#include "Input.h"
-#include "Position.h"
-#include "PreviousPosition.h"
-#include "Movement.h"
-#include "Rotation.h"
-#include "Collision.h"
-#include "InputHistory.h"
+#include "EnttGroups.h"
 #include "Transforms.h"
 #include "Config.h"
 #include "SharedConfig.h"
@@ -95,17 +89,17 @@ void NpcMovementSystem::initLastProcessedTick()
 
 void NpcMovementSystem::moveAllNpcs()
 {
-    auto movementGroup = world.registry.group<Input, Position, PreviousPosition,
-                                              Movement, Rotation, Collision>(
-        entt::get<GraphicState>, entt::exclude<InputHistory>);
-    for (auto [entity, input, position, previousPosition, movement, rotation,
-               collision, graphicState] : movementGroup.each()) {
+    auto movementGroup{EnttGroups::getMovementGroup(world.registry)};
+    for (auto [entity, input, position, previousPosition, movement,
+               movementMods, rotation, collision, graphicState] :
+         movementGroup.each()) {
         // Save their old position.
         previousPosition = position;
 
         // Move the entity.
         entityMover.moveEntity(world.playerEntity, input.inputStates, position,
-                               previousPosition, movement, rotation, collision,
+                               previousPosition, movement, movementMods,
+                               rotation, collision,
                                SharedConfig::SIM_TICK_TIMESTEP_S);
     }
 }
@@ -114,9 +108,7 @@ void NpcMovementSystem::applyUpdateMessage(
     const MovementUpdate& npcMovementUpdate)
 {
     entt::registry& registry{world.registry};
-    auto movementGroup = registry.group<Input, Position, PreviousPosition,
-                                        Movement, Rotation, Collision>(
-        entt::get<GraphicState>, entt::exclude<InputHistory>);
+    auto movementGroup{EnttGroups::getMovementGroup(registry)};
 
     // Apply each updated entity's new state.
     for (const MovementState& movementState :

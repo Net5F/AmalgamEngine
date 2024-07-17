@@ -1163,10 +1163,12 @@ void TileMapBase::loadChunkInternal(const T& chunkSnapshot,
 
         // Rebuild the tile's collision if necessary.
         if (rebuildCollision) {
-            Morton::Result2D xyValues{Morton::m2D_reverse_lookup_16x16(
+            Morton::Result2D xyOffsets{Morton::m2D_reverse_lookup_16x16(
                 static_cast<Uint8>(currentTileIndex))};
-            rebuildTileCollision(tile,
-                                 {xyValues.x, xyValues.y, chunkPosition.z});
+            TilePosition tilePosition(chunkPosition);
+            tilePosition.x += xyOffsets.x;
+            tilePosition.y += xyOffsets.y;
+            rebuildTileCollision(tile, tilePosition);
         }
 
         currentTileLayerStartIndex += tileLayerCount;

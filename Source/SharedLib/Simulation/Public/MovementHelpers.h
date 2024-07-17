@@ -15,6 +15,7 @@ namespace AM
 struct Position;
 struct PreviousPosition;
 struct Movement;
+struct MovementModifiers;
 struct Collision;
 class TileMapBase;
 class EntityLocator;
@@ -31,13 +32,13 @@ public:
      * @param inputStates The current input state.
      * @param[out] movement The current movement state (may update velocity 
      *                      and jumpCount).
-     * @param deltaSeconds The number of seconds that have passed since the
-     *                     last update.
+     * @param movementMods The current movement mod state.
      *
      * @return The updated velocity.
      */
     static Vector3 calcVelocity(const Input::StateArr& inputStates,
-                                Movement& movement, double deltaSeconds);
+                                Movement& movement,
+                                const MovementModifiers& movementMods);
 
     /**
      * Calculates an updated position based on the given data.

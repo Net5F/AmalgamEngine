@@ -22,6 +22,11 @@ struct ChunkPosition : public DiscretePosition<DiscreteImpl::ChunkTag> {
     explicit ChunkPosition(const Vector3& worldPoint);
 
     explicit ChunkPosition(const TilePosition& tilePosition);
+
+    /**
+     * Prints this position's current values.
+     */
+    void print() const;
 };
 
 template<typename S>

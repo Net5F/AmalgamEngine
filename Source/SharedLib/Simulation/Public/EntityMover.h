@@ -11,6 +11,7 @@ class EntityLocator;
 struct Position;
 struct PreviousPosition;
 struct Movement;
+struct MovementModifiers;
 struct Rotation;
 struct Collision;
 
@@ -40,8 +41,9 @@ public:
     void moveEntity(entt::entity entity, const Input::StateArr& inputStates,
                     Position& position,
                     const PreviousPosition& previousPosition,
-                    Movement& movement, Rotation& rotation,
-                    Collision& collision, double deltaSeconds);
+                    Movement& movement, const MovementModifiers& movementMods,
+                    Rotation& rotation, Collision& collision,
+                    double deltaSeconds);
 
 private:
     /**
@@ -49,24 +51,34 @@ private:
      * bounding boxes in the world.
      *
      * @param currentBounds The bounding box, at its current position.
-     * @param desiredBounds The bounding box, at its desired position.
      * @param movingEntity The entity that's trying to move.
      * @param movement The entity's movement component.
      *
      * @return The desired bounding box, moved to resolve collisions.
      */
     BoundingBox resolveCollisions(const BoundingBox& currentBounds,
-                                  const BoundingBox& desiredBounds,
                                   entt::entity movingEntity,
-                                  Movement& movement);
+                                  Movement& movement, double deltaSeconds);
+
+    struct NarrowPhaseResult {
+        BoundingBox resolvedBounds{};
+        bool didCollide{};
+        float remainingTime{};
+    };
+    /**
+     * Performs a single iteration of narrow phase collision resolution between 
+     * the given bounds and all volumes in broadPhaseMatches.
+     */
+    NarrowPhaseResult narrowPhase(const BoundingBox& desiredBounds,
+                                  Movement& movement, double deltaSeconds,
+                                  float remainingTime);
 
     const entt::registry& registry;
     const TileMapBase& tileMap;
     EntityLocator& entityLocator;
 
-    /** Scratch vector for holding bounds that intersect the desired bounds 
-        during collision detection. */
-    std::vector<BoundingBox> detectedMatches;
+    /** Scratch vector for holding volumes that are found in the broad phase. */
+    std::vector<BoundingBox> broadPhaseMatches;
 };
 
 } // namespace AM

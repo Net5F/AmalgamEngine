@@ -3,13 +3,9 @@
 #include "World.h"
 #include "Network.h"
 #include "MovementUpdate.h"
-#include "Input.h"
-#include "Position.h"
-#include "PreviousPosition.h"
-#include "Movement.h"
-#include "Rotation.h"
-#include "Collision.h"
+#include "EnttGroups.h"
 #include "ClientSimData.h"
+#include "MovementModifiers.h"
 #include "Log.h"
 #include "tracy/Tracy.hpp"
 #include <algorithm>
@@ -25,7 +21,8 @@ MovementSyncSystem::MovementSyncSystem(Simulation& inSimulation, World& inWorld,
 , network{inNetwork}
 , updatedEntities{}
 , entitiesToSend{}
-, inputObserver{world.registry, entt::collector.update<Input>()}
+, inputObserver{world.registry,
+                entt::collector.update<Input>().update<MovementModifiers>()}
 {
 }
 
@@ -76,16 +73,16 @@ void MovementSyncSystem::collectEntitiesToSend(ClientSimData& client)
 
 void MovementSyncSystem::sendEntityUpdate(ClientSimData& client)
 {
-    auto movementGroup = world.registry.group<Input, Position, PreviousPosition,
-                                              Movement, Rotation, Collision>();
+    auto movementGroup{EnttGroups::getMovementGroup(world.registry)};
     MovementUpdate movementUpdate{};
 
     // Add the entities to the message.
     for (entt::entity entityToSend : entitiesToSend) {
-        auto [input, position, movement]
-            = movementGroup.get<Input, Position, Movement>(entityToSend);
+        auto [input, position, movement, movementMods]
+            = movementGroup.get<Input, Position, Movement, MovementModifiers>(
+                entityToSend);
         movementUpdate.movementStates.push_back(
-            {entityToSend, input, position, movement});
+            {entityToSend, input, position, movement, movementMods});
     }
 
     // Finish filling the other fields.
