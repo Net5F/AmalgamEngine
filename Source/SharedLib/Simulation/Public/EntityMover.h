@@ -62,14 +62,13 @@ private:
 
     struct NarrowPhaseResult {
         BoundingBox resolvedBounds{};
-        bool didCollide{};
         float remainingTime{};
     };
     /**
      * Performs a single iteration of narrow phase collision resolution between 
      * the given bounds and all volumes in broadPhaseMatches.
      */
-    NarrowPhaseResult narrowPhase(const BoundingBox& desiredBounds,
+    NarrowPhaseResult narrowPhase(const BoundingBox& currentBounds,
                                   Movement& movement, double deltaSeconds,
                                   float remainingTime);
 

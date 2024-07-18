@@ -22,8 +22,6 @@ Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
     // Note: If they're in the air, they'll keep traveling with their current 
     //       X/Y velocity.
     Vector3 updatedVelocity{movement.velocity};
-    // TODO: If they hit something on the way up in a jump then stop hitting 
-    //       it, they should start moving forward again
     if (!(movement.isFalling) || movementMods.canFly) {
         // Direction values. 0 == no movement, 1 == movement.
         int xUp{static_cast<int>(inputStates[Input::XUp])};
@@ -64,15 +62,9 @@ Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
         // Not flying. If they're trying and able to jump, do so.
         if (inputStates[Input::Jump] && !(movement.jumpHeld)
             && (movement.jumpCount < movementMods.maxJumpCount)) {
-            LOG_INFO("Jump. %u, %u, %u", inputStates[Input::Jump],
-                     movement.jumpHeld, movement.jumpCount);
             updatedVelocity.z += static_cast<float>(movementMods.jumpHeight);
             movement.jumpCount++;
             movement.jumpHeld = true;
-        }
-        else if (inputStates[Input::Jump]) {
-            LOG_INFO("Jump denied. %u, %u, %u", inputStates[Input::Jump],
-                     movement.jumpHeld, movement.jumpCount);
         }
 
         // Always apply gravity.
@@ -93,11 +85,7 @@ Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
 
     if (updatedVelocity.z != 0) {
         movement.isFalling = true;
-        LOG_INFO("isFalling = %u", movement.isFalling);
     }
-
-    //LOG_INFO("New velocity:");
-    //updatedVelocity.print();
 
     return updatedVelocity;
 }

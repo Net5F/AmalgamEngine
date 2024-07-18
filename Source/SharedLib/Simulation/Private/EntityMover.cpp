@@ -133,7 +133,7 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
         resolvedBounds = result.resolvedBounds;
         remainingTime = result.remainingTime;
 
-        if (!(result.didCollide) || (result.remainingTime == 0)) {
+        if (result.remainingTime == 0) {
             break;
         }
     }
@@ -142,7 +142,6 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
     // move.
     TileExtent resolvedTileExtent{resolvedBounds.asTileExtent()};
     if (!tileMap.getTileExtent().containsExtent(resolvedTileExtent)) {
-        LOG_INFO("Outside map bounds");
         return currentBounds;
     }
 
@@ -160,7 +159,6 @@ EntityMover::NarrowPhaseResult
     // Find the time of the first collision.
     float collisionTime{remainingTime};
     Vector3 normalToUse{};
-    bool didCollide{false};
     for (const BoundingBox& otherBounds : broadPhaseMatches) {
         Vector3 entryDistance{};
         Vector3 exitDistance{};
@@ -192,7 +190,6 @@ EntityMover::NarrowPhaseResult
         // Velocity == 0. If this axis isn't intersecting, it never will.
         else if (currentBox.max.x <= otherBox.min.x
                  || currentBox.min.x >= otherBox.max.x) {
-            //LOG_INFO("Zero velocity, X not intersecting. Early bail.");
             continue;
         }
         // Else velocity == 0 and the boxes are intersecting. Entry/exit times 
@@ -212,7 +209,6 @@ EntityMover::NarrowPhaseResult
         }
         else if (currentBox.max.y <= otherBox.min.y
                  || currentBox.min.y >= otherBox.max.y) {
-            //LOG_INFO("Zero velocity, Y not intersecting. Early bail.");
             continue;
         }
 
@@ -230,21 +226,8 @@ EntityMover::NarrowPhaseResult
         }
         else if (currentBox.max.z <= otherBox.min.z
                  || currentBox.min.z >= otherBox.max.z) {
-            //LOG_INFO("Zero velocity, Z not intersecting. Early bail.");
             continue;
         }
-
-        //LOG_INFO("Velocity");
-        //realVelocity.print();
-        //LOG_INFO("Entity box:");
-        //currentBox.print();
-        //LOG_INFO("Other box:");
-        //otherBox.print();
-        //LOG_INFO("Entry times:");
-        //entryTimes.print();
-        //LOG_INFO("Exit times:");
-        //exitTimes.print();
-        //LOG_INFO("RemainingTime: %.4f", remainingTime);
 
         // Determine if the time intervals ever overlap within the 0 - 1 range
         // (i.e. if the boxes ever intersect in all 3 axes during our desired 
@@ -268,14 +251,10 @@ EntityMover::NarrowPhaseResult
             || (entryTimes.x > remainingTime) || (entryTimes.y > remainingTime)
             || (entryTimes.z > remainingTime)) {
             // collisionTime is already set to 1.
-            //LOG_INFO("No collision");
             continue;
         }
         else {
-            //LOG_INFO("Collided");
-            // TODO: Do we need these != 0 checks and else?
-            if (realVelocity.x != 0 && entryTimes.x > entryTimes.y
-                && entryTimes.x > entryTimes.z) {
+            if (entryTimes.x > entryTimes.y && entryTimes.x > entryTimes.z) {
                 if (entryDistance.x < 0.f) {
                     normal.x = 1.f;
                 }
@@ -283,7 +262,7 @@ EntityMover::NarrowPhaseResult
                     normal.x = -1.f;
                 }
             }
-            else if (realVelocity.y != 0 && entryTimes.y > entryTimes.z) {
+            else if (entryTimes.y > entryTimes.z) {
                 if (entryDistance.y < 0.f) {
                     normal.y = 1.f;
                 }
@@ -291,7 +270,7 @@ EntityMover::NarrowPhaseResult
                     normal.y = -1.f;
                 }
             }
-            else if (realVelocity.z != 0) {
+            else {
                 if (entryDistance.z < 0.f) {
                     normal.z = 1.f;
                 }
@@ -299,10 +278,6 @@ EntityMover::NarrowPhaseResult
                     normal.z = -1.f;
                 }
             }
-            else {
-                continue;
-            }
-            didCollide = true;
         }
 
         // We collided. If this collision time is the smallest so far, use it.
@@ -314,35 +289,16 @@ EntityMover::NarrowPhaseResult
 
     BoundingBox resolvedBounds{currentBounds};
     resolvedBounds.center += (realVelocity * collisionTime);
-    if (normalToUse.x != 0) {
-        //LOG_INFO("Resolving X");
-    }
-    else if (normalToUse.y != 0) {
-        //LOG_INFO("Resolving Y");
-    }
-    else if (normalToUse.z != 0) {
-        //LOG_INFO("Resolving Z");
+    if (normalToUse.z != 0) {
         movement.isFalling = false;
-        //LOG_INFO("isFalling = %u", movement.isFalling);
         movement.jumpCount = 0;
     }
-    //LOG_INFO("Current bounds:");
-    //currentBounds.print();
-    //LOG_INFO("Resolved bounds:");
-    //resolvedBounds.print();
-    //LOG_INFO("RemainingTime: %.4f", (remainingTime - collisionTime));
 
+    // TODO: If they hit something on the way up in a jump then stop hitting 
+    //       it, they should start moving forward again
     movement.velocity = movement.velocity.slide(normalToUse);
 
-    //LOG_INFO("Normal:");
-    //normal.print();
-    //LOG_INFO("Slide vector:");
-    //movement.velocity.print();
-    //LOG_INFO("Slid bounds:");
-    //resolvedBounds.print();
-
-    // TODO: We don't really need didCollide, we can just use all the time
-    return {resolvedBounds, didCollide, (remainingTime - collisionTime)};
+    return {resolvedBounds, (remainingTime - collisionTime)};
 }
 
 } // End namespace AM
