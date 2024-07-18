@@ -32,10 +32,6 @@ void EntityMover::moveEntity(
     const MovementModifiers& movementMods, Rotation& rotation,
     Collision& collision, double deltaSeconds)
 {
-    //LOG_INFO("Velocity before:");
-    //movement.velocity.print();
-    //LOG_INFO("Bounds before:");
-    //collision.worldBounds.print();
     // If no inputs are pressed and they aren't falling, nothing needs to 
     // be done.
     if (inputStates.none() && !(movement.isFalling)) {
@@ -67,10 +63,6 @@ void EntityMover::moveEntity(
 
     // If they did actually move, update their position in the locator.
     if (position != previousPosition) {
-        //LOG_INFO("Inputs: %u, New position:", inputStates);
-        //position.print();
-        //LOG_INFO("Velocity after:");
-        //movement.velocity.print();
         entityLocator.setEntityLocation(entity, collision.worldBounds);
     }
 }
@@ -127,7 +119,7 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
     // Perform the iterations of the narrow phase to resolve any collisions.
     BoundingBox resolvedBounds{currentBounds};
     float remainingTime{1.f};
-    for (int i{0}; i < 3; ++i) {
+    for (int i{0}; i < NARROW_PHASE_ITERATION_COUNT; ++i) {
         NarrowPhaseResult result{
             narrowPhase(resolvedBounds, movement, deltaSeconds, remainingTime)};
         resolvedBounds = result.resolvedBounds;
@@ -229,9 +221,9 @@ EntityMover::NarrowPhaseResult
             continue;
         }
 
-        // Determine if the time intervals ever overlap within the 0 - 1 range
-        // (i.e. if the boxes ever intersect in all 3 axes during our desired 
-        // movement).
+        // Determine if the time intervals ever overlap eachother within the 
+        // range [0, remainingTime] (i.e. if the boxes ever intersect in all 3 
+        // axes during our desired movement).
         float maxEntryTime{
             std::max({entryTimes.x, entryTimes.y, entryTimes.z})};
         float minExitTime{
@@ -240,62 +232,52 @@ EntityMover::NarrowPhaseResult
         // No-collision cases:
         //   1. If maxEntry > minExit, all axes haven't entered until after 
         //      one has already left.
-        //   2. If all entry times are <= 0, the boxes are either already 
+        //   2. If all entry times are < 0, the boxes are either already 
         //      colliding or have passed eachother.
         //   3. If maxEntryTime > remainingTime, a collision won't happen 
         //      during this movement.
-        // If there was no collision, take the full movement.
-        Vector3 normal{};
         if (maxEntryTime > minExitTime
             || (entryTimes.x < 0.f && entryTimes.y < 0.f && entryTimes.z < 0.f)
             || (entryTimes.x > remainingTime) || (entryTimes.y > remainingTime)
             || (entryTimes.z > remainingTime)) {
-            // collisionTime is already set to 1.
             continue;
         }
+
+        // There was a collision. Find the axis of rejection by determining 
+        // which axis collided last, then use the opposite sign of our velocity
+        // along that axis to get a surface normal.
+        Vector3 normal{};
+        if ((entryTimes.x > entryTimes.y) && (entryTimes.x > entryTimes.z)) {
+            normal.x = -std::copysign(1.f, realVelocity.x);
+        }
+        else if (entryTimes.y > entryTimes.z) {
+            normal.y = -std::copysign(1.f, realVelocity.y);
+        }
         else {
-            if (entryTimes.x > entryTimes.y && entryTimes.x > entryTimes.z) {
-                if (entryDistance.x < 0.f) {
-                    normal.x = 1.f;
-                }
-                else {
-                    normal.x = -1.f;
-                }
-            }
-            else if (entryTimes.y > entryTimes.z) {
-                if (entryDistance.y < 0.f) {
-                    normal.y = 1.f;
-                }
-                else {
-                    normal.y = -1.f;
-                }
-            }
-            else {
-                if (entryDistance.z < 0.f) {
-                    normal.z = 1.f;
-                }
-                else {
-                    normal.z = -1.f;
-                }
-            }
+            normal.z = -std::copysign(1.f, realVelocity.z);
         }
 
-        // We collided. If this collision time is the smallest so far, use it.
+        // If this collision time is the smallest so far, use it.
         if (maxEntryTime < collisionTime) {
             collisionTime = maxEntryTime;
             normalToUse = normal;
         }
     }
 
+    // Move the bounds to resolve the collision.
     BoundingBox resolvedBounds{currentBounds};
     resolvedBounds.center += (realVelocity * collisionTime);
-    if (normalToUse.z != 0) {
+
+    // If they collided with the ground, reset their falling state.
+    if (normalToUse.z == 1.f) {
         movement.isFalling = false;
         movement.jumpCount = 0;
     }
 
     // TODO: If they hit something on the way up in a jump then stop hitting 
     //       it, they should start moving forward again
+    // Set the velocity such that they'll slide along the collided surface 
+    // on the next tick.
     movement.velocity = movement.velocity.slide(normalToUse);
 
     return {resolvedBounds, (remainingTime - collisionTime)};

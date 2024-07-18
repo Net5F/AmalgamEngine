@@ -47,6 +47,12 @@ public:
 
 private:
     /**
+     * The maximum number of iterations that the narrow phase of collision 
+     * resolution should perform.
+     */
+    static constexpr int NARROW_PHASE_ITERATION_COUNT{3};
+
+    /**
      * Resolves collisions between the given desiredBounds and other nearby
      * bounding boxes in the world.
      *
