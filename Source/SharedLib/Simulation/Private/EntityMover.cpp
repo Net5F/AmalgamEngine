@@ -117,6 +117,7 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
     }
 
     // Perform the iterations of the narrow phase to resolve any collisions.
+    Vector3 originalVelocity{movement.velocity};
     BoundingBox resolvedBounds{currentBounds};
     float remainingTime{1.f};
     for (int i{0}; i < NARROW_PHASE_ITERATION_COUNT; ++i) {
@@ -129,6 +130,14 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
             break;
         }
     }
+
+    // If the entity is in the air, maintain their X/Y velocity. This lets 
+    // them continue moving, even if they temporarily get hung up on something
+    // (e.g. hitting their feet on a wall while trying to jump onto it).
+    // If the entity is grounded, this won't do anything (their X/Y velocity 
+    // will be overwritten on the next tick).
+    movement.velocity.x = originalVelocity.x;
+    movement.velocity.y = originalVelocity.y;
 
     // If the final resolved bounds are outside of the map bounds, reject the 
     // move.
@@ -274,8 +283,6 @@ EntityMover::NarrowPhaseResult
         movement.jumpCount = 0;
     }
 
-    // TODO: If they hit something on the way up in a jump then stop hitting 
-    //       it, they should start moving forward again
     // Set the velocity such that they'll slide along the collided surface 
     // on the next tick.
     movement.velocity = movement.velocity.slide(normalToUse);

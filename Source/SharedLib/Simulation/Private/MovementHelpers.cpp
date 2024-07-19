@@ -62,7 +62,7 @@ Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
         // Not flying. If they're trying and able to jump, do so.
         if (inputStates[Input::Jump] && !(movement.jumpHeld)
             && (movement.jumpCount < movementMods.maxJumpCount)) {
-            updatedVelocity.z += static_cast<float>(movementMods.jumpHeight);
+            updatedVelocity.z += static_cast<float>(movementMods.jumpImpulse);
             movement.jumpCount++;
             movement.jumpHeld = true;
         }

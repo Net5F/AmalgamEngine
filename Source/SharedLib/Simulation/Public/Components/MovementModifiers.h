@@ -25,9 +25,9 @@ struct MovementModifiers {
     /** The distance that the entity can travel per second, in world units. */
     Uint16 runSpeed{48};
 
-    /** The height of the entity's jump, from the bottom of the jump to the 
-        peak height, in world units. */
-    Uint16 jumpHeight{200};
+    /** The vertical impulse added to the entity when jumping, in world units 
+        per second. */
+    Uint16 jumpImpulse{200};
 
     /** The maximum number of times the entity can jump before needing to 
         touch the ground. */
@@ -43,7 +43,7 @@ void serialize(S& serializer, MovementModifiers& movementMods)
 {
     serializer.object(movementMods.velocityMod);
     serializer.value2b(movementMods.runSpeed);
-    serializer.value2b(movementMods.jumpHeight);
+    serializer.value2b(movementMods.jumpImpulse);
     serializer.value1b(movementMods.maxJumpCount);
     serializer.boolValue(movementMods.canFly);
 }
