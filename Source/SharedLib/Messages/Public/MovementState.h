@@ -29,10 +29,7 @@ template<typename S>
 void serialize(S& serializer, MovementState& movementState)
 {
     serializer.value4b(movementState.entity);
-    serializer.enableBitPacking(
-        [&movementState](typename S::BPEnabledType& sbp) {
-            sbp.object(movementState.input);
-        });
+    serializer.object(movementState.input);
     serializer.object(movementState.position);
     serializer.object(movementState.movement);
     serializer.object(movementState.movementMods);

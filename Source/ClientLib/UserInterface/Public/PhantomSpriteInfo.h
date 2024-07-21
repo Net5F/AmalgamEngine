@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TilePosition.h"
 #include "TileLayer.h"
 #include "TileOffset.h"
 #include "Wall.h"

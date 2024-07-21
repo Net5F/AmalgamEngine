@@ -2,6 +2,7 @@
 #include "ChunkPosition.h"
 #include "Position.h"
 #include "SharedConfig.h"
+#include "MovementHelpers.h"
 #include "Log.h"
 
 namespace AM
@@ -17,14 +18,20 @@ TilePosition::TilePosition(int inX, int inY, int inZ)
 }
 
 TilePosition::TilePosition(const Vector3& worldPoint)
-: DiscretePosition<DiscreteImpl::TileTag>(
-    static_cast<int>(std::floor(
-        worldPoint.x / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))),
-    static_cast<int>(std::floor(
-        worldPoint.y / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH))),
-    static_cast<int>(std::floor(
-        worldPoint.z / static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT))))
 {
+    static constexpr float TILE_WIDTH{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
+    static constexpr float TILE_HEIGHT{
+        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
+
+    // Add the epsilon to each value in the point, then round down. If the value
+    // was within epsilon range of the integer above it, it'll end up rounded up.
+    x = static_cast<int>(std::floor(
+        (worldPoint.x + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
+    y = static_cast<int>(std::floor(
+        (worldPoint.y + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
+    z = static_cast<int>(std::floor(
+        (worldPoint.z + MovementHelpers::WORLD_EPSILON) / TILE_HEIGHT));
 }
 
 TilePosition::TilePosition(const ChunkPosition& chunkPosition)

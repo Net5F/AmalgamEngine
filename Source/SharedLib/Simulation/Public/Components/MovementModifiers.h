@@ -27,7 +27,7 @@ struct MovementModifiers {
 
     /** The vertical impulse added to the entity when jumping, in world units 
         per second. */
-    Uint16 jumpImpulse{200};
+    Uint16 jumpImpulse{250};
 
     /** The maximum number of times the entity can jump before needing to 
         touch the ground. */
@@ -45,7 +45,17 @@ void serialize(S& serializer, MovementModifiers& movementMods)
     serializer.value2b(movementMods.runSpeed);
     serializer.value2b(movementMods.jumpImpulse);
     serializer.value1b(movementMods.maxJumpCount);
-    serializer.boolValue(movementMods.canFly);
+
+    // Note: Packing this field is necessary, otherwise it wouldn't match 
+    //       MeasureSize (which always has bit packing enabled).
+    serializer.enableBitPacking(
+        [&movementMods](typename S::BPEnabledType& sbp) {
+            sbp.boolValue(movementMods.canFly);
+        });
+
+    // Align after bit-packing to make sure the following bytes can be easily
+    // processed.
+    serializer.adapter().align();
 }
 
 } // namespace AM

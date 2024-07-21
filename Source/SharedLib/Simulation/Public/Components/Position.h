@@ -1,9 +1,6 @@
 #pragma once
 
 #include "Vector3.h"
-#include "TilePosition.h"
-#include "ChunkPosition.h"
-#include "SharedConfig.h"
 
 namespace AM
 {

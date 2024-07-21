@@ -30,6 +30,9 @@ public:
     /** The max number of non-built-in interactions that an item can support. */
     static constexpr std::size_t MAX_ITEM_CUSTOM_INTERACTIONS{64};
 
+    /** The maximum map size that we'll load, in tiles. */
+    static constexpr std::size_t MAX_MAP_WIDTH_TILES{1'000};
+
     /** The x and y axis width, in world units, of our tiles. */
     static constexpr std::size_t TILE_WORLD_WIDTH{32};
 
@@ -66,10 +69,10 @@ public:
     static constexpr const char* DEFAULT_ENTITY_GRAPHIC_SET{"ghost"};
 
     /** The force of gravity in world units per second. */
-    static constexpr float FORCE_OF_GRAVITY{15};
+    static constexpr float FORCE_OF_GRAVITY{20};
 
     /** The maximum negative Z velocity that entities can reach. */
-    static constexpr float TERMINAL_VELOCITY{-125};
+    static constexpr float TERMINAL_VELOCITY{-300};
 
     //-------------------------------------------------------------------------
     // Network

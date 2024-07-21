@@ -24,16 +24,17 @@ struct Input {
 };
 
 template<typename S>
-void serialize(S& sbp, Input& input)
+void serialize(S& serializer, Input& input)
 {
     // Bit pack the input bitset.
-    // Note: We expect the outer context (such as EntityUpdate) to
-    //       enable bit packing.
-    sbp.ext(input.inputStates, bitsery::ext::StdBitset{});
+    serializer.enableBitPacking(
+        [&input](typename S::BPEnabledType& sbp) {
+            sbp.ext(input.inputStates, bitsery::ext::StdBitset{});
+        });
 
     // Align after bit-packing to make sure the following bytes can be easily
     // processed.
-    sbp.adapter().align();
+    serializer.adapter().align();
 }
 
 } // namespace AM

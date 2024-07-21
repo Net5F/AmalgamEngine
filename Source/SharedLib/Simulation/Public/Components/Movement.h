@@ -23,11 +23,6 @@ struct Movement {
         velocityMod. */
     Vector3 velocity{};
 
-    // TODO: Do we need this, or can we just observe velocity.z?
-    /** If false, the entity is currently standing on top of something.
-        If true, the entity is falling through the air. */
-    bool isFalling{false};
-
     /** The number of times the entity has jumped since last touching the 
         ground. */
     Uint8 jumpCount{0};
@@ -43,9 +38,11 @@ void serialize(S& serializer, Movement& movement)
 {
     serializer.object(movement.velocity);
     serializer.value1b(movement.jumpCount);
+
+    // Note: Packing this field is necessary, otherwise it wouldn't match 
+    //       MeasureSize (which always has bit packing enabled).
     serializer.enableBitPacking(
         [&movement](typename S::BPEnabledType& sbp) {
-            sbp.boolValue(movement.isFalling);
             sbp.boolValue(movement.jumpHeld);
         });
 

@@ -6,6 +6,7 @@
 #include "MinMaxBox.h"
 #include "Collision.h"
 #include "CellPosition.h"
+#include "TilePosition.h"
 #include "Log.h"
 #include "AMAssert.h"
 #include "entt/entity/registry.hpp"

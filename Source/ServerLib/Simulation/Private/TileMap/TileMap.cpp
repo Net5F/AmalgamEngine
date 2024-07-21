@@ -94,6 +94,16 @@ void TileMap::load(TileMapSnapshot& mapSnapshot)
                                               mapSnapshot.zLengthChunks);
     tileExtent = TileExtent{chunkExtent};
 
+    // If the map is too big, exit.
+    static constexpr int MAX_MAP_WIDTH_TILES{
+        static_cast<int>(SharedConfig::MAX_MAP_WIDTH_TILES)};
+    if ((tileExtent.xLength > MAX_MAP_WIDTH_TILES)
+        || (tileExtent.yLength > MAX_MAP_WIDTH_TILES)
+        || (tileExtent.zLength > MAX_MAP_WIDTH_TILES)) {
+        LOG_FATAL("Failed to load map: Map width is larger than "
+                  "MAX_MAP_WIDTH_TILES.");
+    }
+
     // Load all of the snapshot's chunks into our map.
     static constexpr int CHUNK_WIDTH{
         static_cast<int>(SharedConfig::CHUNK_WIDTH)};

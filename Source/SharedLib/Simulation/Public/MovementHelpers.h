@@ -1,14 +1,10 @@
 #pragma once
 
 #include "Input.h"
+#include "Position.h"
 #include "Vector3.h"
-#include "BoundingBox.h"
-#include "Tile.h"
-#include "TileExtent.h"
 #include "Rotation.h"
-#include "Log.h"
-#include "entt/fwd.hpp"
-#include <array>
+#include "SharedConfig.h"
 
 namespace AM
 {
@@ -69,6 +65,18 @@ public:
      */
     static Position interpolatePosition(const PreviousPosition& previousPos,
                                         const Position& position, double alpha);
+
+    /** An epsilon that can be used when comparing float world positions to 
+        integer values, to account for float precision loss.
+        Calculated by finding the float precision at the furthest position of 
+        the largest map that we support.
+        Reference: https://blog.demofox.org/2017/11/21/floating-point-precision/
+        Note: The division by 2 is because we center the map on the origin. */
+    static constexpr float MAX_WORLD_VALUE{SharedConfig::MAX_MAP_WIDTH_TILES
+                                           * SharedConfig::TILE_WORLD_WIDTH
+                                           / 2.f};
+    static constexpr float WORLD_EPSILON{MAX_WORLD_VALUE
+                                         / static_cast<float>(1 << 23)};
 
 private:
     /**

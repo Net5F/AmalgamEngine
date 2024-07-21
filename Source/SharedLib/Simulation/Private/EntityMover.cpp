@@ -34,7 +34,7 @@ void EntityMover::moveEntity(
 {
     // If no inputs are pressed and they aren't falling, nothing needs to 
     // be done.
-    if (inputStates.none() && !(movement.isFalling)) {
+    if (inputStates.none() && (movement.velocity.z == 0)) {
         movement.velocity = {0, 0, 0};
         return;
     }
@@ -279,7 +279,6 @@ EntityMover::NarrowPhaseResult
 
     // If they collided with the ground, reset their falling state.
     if (normalToUse.z == 1.f) {
-        movement.isFalling = false;
         movement.jumpCount = 0;
     }
 
