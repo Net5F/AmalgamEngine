@@ -55,9 +55,13 @@ public:
     static constexpr std::size_t ENTITY_LOCATOR_CELL_HEIGHT{2};
 
     /** The number of world units around an entity that are considered to be
-        within the entity's "Area of Interest".
+        within the entity's "Area of Interest" cylinder.
         Used in the simulation to tell if data is relevant to a client. */
     static constexpr float AOI_RADIUS{TILE_WORLD_WIDTH * 8};
+
+    /** The number of world units above and below an entity that are considered
+        to be within the entity's "Area of Interest" cylinder. */
+    static constexpr float AOI_HALF_HEIGHT{TILE_WORLD_HEIGHT * 3};
 
     /** How close you need to be to an entity, in world units, to interact
         with it. */

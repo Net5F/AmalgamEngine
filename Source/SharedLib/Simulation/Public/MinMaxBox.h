@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Vector3.h"
-#include "TileExtent.h"
-#include "Log.h"
 
 namespace AM
 {
@@ -28,17 +26,8 @@ public:
     MinMaxBox(const Vector3& inMin, const Vector3& inMax);
 
     explicit MinMaxBox(const BoundingBox& box);
-
-    /**
-     * Returns the smallest tile extent that contains this bounding box.
-     */
-    TileExtent asTileExtent() const;
     
-    void print()
-    {
-        LOG_INFO("Min: (%.4f, %.4f, %.4f), Max: (%.4f, %.4f, %.4f)", min.x,
-                 min.y, min.z, max.x, max.y, max.z);
-    }
+    void print();
 };
 
 } // End namespace AM

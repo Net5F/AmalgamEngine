@@ -75,7 +75,8 @@ void ClientAOISystem::updateAOILists()
         // Get the list of entities that are in this entity's AOI.
         std::vector<entt::entity>& currentAOIEntities{
             world.entityLocator.getEntities(
-                Cylinder{position, SharedConfig::AOI_RADIUS})};
+                Cylinder{position, SharedConfig::AOI_RADIUS,
+                         SharedConfig::AOI_HALF_HEIGHT})};
 
         // Sort the list.
         std::sort(currentAOIEntities.begin(), currentAOIEntities.end());

@@ -28,23 +28,8 @@ void WorldObjectLocator::addWorldObject(const WorldObjectID& objectID,
     }
 
     // Find the cells that the bounding box intersects.
-    CellExtent boxCellExtent{};
-    MinMaxBox box{objectWorldBounds};
-    boxCellExtent.x
-        = static_cast<int>(std::floor(box.min.x / CELL_WORLD_WIDTH));
-    boxCellExtent.y
-        = static_cast<int>(std::floor(box.min.y / CELL_WORLD_WIDTH));
-    boxCellExtent.z
-        = static_cast<int>(std::floor(box.min.z / CELL_WORLD_HEIGHT));
-    boxCellExtent.xLength
-        = (static_cast<int>(std::ceil(box.max.x / CELL_WORLD_WIDTH))
-           - boxCellExtent.x);
-    boxCellExtent.yLength
-        = (static_cast<int>(std::ceil(box.max.y / CELL_WORLD_WIDTH))
-           - boxCellExtent.y);
-    boxCellExtent.zLength
-        = (static_cast<int>(std::ceil(box.max.z / CELL_WORLD_HEIGHT))
-           - boxCellExtent.z);
+    MinMaxBox box(objectWorldBounds);
+    CellExtent boxCellExtent(box, CELL_WORLD_WIDTH, CELL_WORLD_HEIGHT);
 
     // Make sure each length is at least 1, or else the box won't be added to 
     // any cells.
@@ -95,8 +80,9 @@ WorldObjectID
     // Note: Dividing by CELL_WORLD_ gives us a ratio of total cell size, 
     //       which we can then multiply by cellStep to get "how much of a 
     //       step would we have to make along the ray to reach the next cell".
-    CellPosition currentCellPosition{
-        tileToCellPosition(TilePosition(ray.origin))};
+    CellPosition currentCellPosition(TilePosition(ray.origin),
+                                     Config::WORLD_OBJECT_LOCATOR_CELL_WIDTH,
+                                     Config::WORLD_OBJECT_LOCATOR_CELL_HEIGHT);
     float nextIntersectionX{
         (ray.origin.x - (currentCellPosition.x * CELL_WORLD_WIDTH))
         / CELL_WORLD_WIDTH * cellStepX};
@@ -111,8 +97,9 @@ WorldObjectID
     // bounds so we know where to stop the walk.
     float furthestT{camera.viewBounds.getMaxIntersection(ray)};
     Position furthestViewIntersection{ray.getPointAtT(furthestT)};
-    CellPosition endCellPosition{
-        tileToCellPosition(TilePosition(furthestViewIntersection))};
+    CellPosition endCellPosition{TilePosition(furthestViewIntersection),
+                                 Config::WORLD_OBJECT_LOCATOR_CELL_WIDTH,
+                                 Config::WORLD_OBJECT_LOCATOR_CELL_HEIGHT};
 
     // Walk along the ray, checking each cell for a hit world object.
     // (We iterate until we walk past the end position along some axis).
@@ -183,48 +170,9 @@ void WorldObjectLocator::setExtent(const TileExtent& inTileExtent)
     bounds.max.z = (inTileExtent.z + inTileExtent.zLength) * TILE_WORLD_HEIGHT;
 
     locatorBounds = BoundingBox(bounds);
-    locatorCellExtent = tileToCellExtent(inTileExtent);
-}
-
-CellPosition WorldObjectLocator::tileToCellPosition(
-    const TilePosition& tilePosition) const
-{
-    // Cast constants to a float so we get float division below.
-    static constexpr float CELL_WIDTH{Config::WORLD_OBJECT_LOCATOR_CELL_WIDTH};
-    static constexpr float CELL_HEIGHT{
-        Config::WORLD_OBJECT_LOCATOR_CELL_HEIGHT};
-
-    return {static_cast<int>(std::floor(tilePosition.x / CELL_WIDTH)),
-            static_cast<int>(std::floor(tilePosition.y / CELL_WIDTH)),
-            static_cast<int>(std::floor(tilePosition.z / CELL_HEIGHT))};
-}
-
-CellExtent WorldObjectLocator::tileToCellExtent(const TileExtent& tileExtent)
-{
-    // Cast constants to a float so we get float division below.
-    static constexpr float CELL_WIDTH{Config::WORLD_OBJECT_LOCATOR_CELL_WIDTH};
-    static constexpr float CELL_HEIGHT{
-        Config::WORLD_OBJECT_LOCATOR_CELL_HEIGHT};
-
-    CellPosition origin{};
-    origin.x = static_cast<int>(std::floor(tileExtent.x / CELL_WIDTH));
-    origin.y = static_cast<int>(std::floor(tileExtent.y / CELL_WIDTH));
-    origin.z = static_cast<int>(std::floor(tileExtent.z / CELL_HEIGHT));
-
-    CellPosition extreme{};
-    extreme.x = static_cast<int>(
-        std::ceil((tileExtent.x + tileExtent.xLength) / CELL_WIDTH));
-    extreme.y = static_cast<int>(
-        std::ceil((tileExtent.y + tileExtent.yLength) / CELL_WIDTH));
-    extreme.z = static_cast<int>(
-        std::ceil((tileExtent.z + tileExtent.zLength) / CELL_HEIGHT));
-
-    return {origin.x,
-            origin.y,
-            origin.z,
-            (extreme.x - origin.x),
-            (extreme.y - origin.y),
-            (extreme.z - origin.z)};
+    locatorCellExtent
+        = CellExtent(inTileExtent, Config::WORLD_OBJECT_LOCATOR_CELL_WIDTH,
+                     Config::WORLD_OBJECT_LOCATOR_CELL_HEIGHT);
 }
 
 } // End namespace Client

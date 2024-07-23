@@ -7,7 +7,7 @@ namespace AM
 
 TileExtent Camera::getTileViewExtent(const TileExtent& mapTileExtent) const
 {
-    TileExtent tileViewExtent{viewBounds.asTileExtent()};
+    TileExtent tileViewExtent(viewBounds);
 
     // Clip the view to the tile map's bounds.
     tileViewExtent.intersectWith(mapTileExtent);

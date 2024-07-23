@@ -107,16 +107,6 @@ private:
         Config::WORLD_OBJECT_LOCATOR_CELL_HEIGHT
         * SharedConfig::TILE_WORLD_HEIGHT};
 
-    /**
-     * Converts the given tile position to a cell position.
-     */
-    CellPosition tileToCellPosition(const TilePosition& tilePosition) const;
-
-    /**
-     * Converts the given tile extent to a cell extent.
-     */
-    CellExtent tileToCellExtent(const TileExtent& tileExtent);
-
     /** The part of the world map that this locator currently covers, in
         world units. */
     BoundingBox locatorBounds;

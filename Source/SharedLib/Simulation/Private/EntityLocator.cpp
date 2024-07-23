@@ -51,23 +51,8 @@ void EntityLocator::setEntityLocation(entt::entity entity,
                                       const BoundingBox& boundingBox)
 {
     // Find the cells that the bounding box intersects.
-    CellExtent boxCellExtent{};
-    MinMaxBox box{boundingBox};
-    boxCellExtent.x
-        = static_cast<int>(std::floor(box.min.x / CELL_WORLD_WIDTH));
-    boxCellExtent.y
-        = static_cast<int>(std::floor(box.min.y / CELL_WORLD_WIDTH));
-    boxCellExtent.z
-        = static_cast<int>(std::floor(box.min.z / CELL_WORLD_HEIGHT));
-    boxCellExtent.xLength
-        = (static_cast<int>(std::ceil(box.max.x / CELL_WORLD_WIDTH))
-           - boxCellExtent.x);
-    boxCellExtent.yLength
-        = (static_cast<int>(std::ceil(box.max.y / CELL_WORLD_WIDTH))
-           - boxCellExtent.y);
-    boxCellExtent.zLength
-        = (static_cast<int>(std::ceil(box.max.z / CELL_WORLD_HEIGHT))
-           - boxCellExtent.z);
+    MinMaxBox box(boundingBox);
+    CellExtent boxCellExtent(box, CELL_WORLD_WIDTH, CELL_WORLD_HEIGHT);
 
     if (!(gridCellExtent.containsExtent(boxCellExtent))) {
         LOG_ERROR("Tried to track entity that is outside of the locator's "
@@ -118,6 +103,8 @@ void EntityLocator::removeEntity(entt::entity entity)
 std::vector<entt::entity>& EntityLocator::getEntities(const Cylinder& cylinder)
 {
     AM_ASSERT(cylinder.radius >= 0, "Cylinder can't have negative radius.");
+    AM_ASSERT(cylinder.halfHeight >= 0,
+              "Cylinder can't have negative half height.");
 
     // Perform a broad phase.
     getEntitiesBroad(cylinder);
@@ -223,9 +210,8 @@ std::vector<entt::entity>&
         std::floor((cylinder.center.x - cylinder.radius) / CELL_WORLD_WIDTH));
     cylinderCellExtent.y = static_cast<int>(
         std::floor((cylinder.center.y - cylinder.radius) / CELL_WORLD_WIDTH));
-    // TODO: This is incorrect
-    cylinderCellExtent.z = static_cast<int>(
-        std::floor((cylinder.center.z - cylinder.radius) / CELL_WORLD_HEIGHT));
+    cylinderCellExtent.z = static_cast<int>(std::floor(
+        (cylinder.center.z - cylinder.halfHeight) / CELL_WORLD_HEIGHT));
     cylinderCellExtent.xLength
         = (static_cast<int>(std::ceil((cylinder.center.x + cylinder.radius)
                                       / CELL_WORLD_WIDTH))
@@ -235,7 +221,7 @@ std::vector<entt::entity>&
                                       / CELL_WORLD_WIDTH))
            - cylinderCellExtent.y);
     cylinderCellExtent.zLength
-        = (static_cast<int>(std::ceil((cylinder.center.z + cylinder.radius)
+        = (static_cast<int>(std::ceil((cylinder.center.z + cylinder.halfHeight)
                                       / CELL_WORLD_HEIGHT))
            - cylinderCellExtent.z);
 
@@ -269,14 +255,14 @@ std::vector<entt::entity>&
     EntityLocator::getEntitiesBroad(const BoundingBox& boundingBox)
 {
     // Convert to TileExtent.
-    return getEntitiesBroad(boundingBox.asTileExtent());
+    return getEntitiesBroad(TileExtent(boundingBox));
 }
 
 std::vector<entt::entity>&
     EntityLocator::getEntitiesBroad(const MinMaxBox& boundingBox)
 {
     // Convert to TileExtent.
-    return getEntitiesBroad(boundingBox.asTileExtent());
+    return getEntitiesBroad(TileExtent(boundingBox));
 }
 
 std::vector<entt::entity>&
@@ -286,7 +272,9 @@ std::vector<entt::entity>&
     returnVector.clear();
 
     // Calc the cell extent that is intersected by the tile extent.
-    CellExtent tileCellExtent{tileToCellExtent(tileExtent)};
+    CellExtent tileCellExtent(tileExtent,
+                              SharedConfig::ENTITY_LOCATOR_CELL_WIDTH,
+                              SharedConfig::ENTITY_LOCATOR_CELL_HEIGHT);
 
     // Clip the extent to the grid's bounds.
     tileCellExtent.intersectWith(gridCellExtent);
@@ -343,35 +331,6 @@ void EntityLocator::clearEntityLocation(entt::entity entity,
             }
         }
     }
-}
-
-CellExtent EntityLocator::tileToCellExtent(const TileExtent& tileExtent)
-{
-    // Cast constants to float so we get float division below.
-    static constexpr float CELL_WIDTH{
-        static_cast<float>(SharedConfig::ENTITY_LOCATOR_CELL_WIDTH)};
-    static constexpr float CELL_HEIGHT{
-        static_cast<float>(SharedConfig::ENTITY_LOCATOR_CELL_HEIGHT)};
-
-    CellPosition origin{};
-    origin.x = static_cast<int>(std::floor(tileExtent.x / CELL_WIDTH));
-    origin.y = static_cast<int>(std::floor(tileExtent.y / CELL_WIDTH));
-    origin.z = static_cast<int>(std::floor(tileExtent.z / CELL_HEIGHT));
-
-    CellPosition extent{};
-    extent.x = static_cast<int>(
-        std::ceil((tileExtent.x + tileExtent.xLength) / CELL_WIDTH));
-    extent.y = static_cast<int>(
-        std::ceil((tileExtent.y + tileExtent.yLength) / CELL_WIDTH));
-    extent.z = static_cast<int>(
-        std::ceil((tileExtent.z + tileExtent.zLength) / CELL_HEIGHT));
-
-    return {origin.x,
-            origin.y,
-            origin.z,
-            (extent.x - origin.x),
-            (extent.y - origin.y),
-            (extent.z - origin.z)};
 }
 
 } // End namespace AM

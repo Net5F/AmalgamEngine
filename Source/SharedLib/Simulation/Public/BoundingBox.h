@@ -78,7 +78,7 @@ public:
 
     /**
      * Returns true if this box intersects the given other bounding box.
-     * Note: Shared edges are not considered to be intersecting.
+     * Note: Shared edges are considered to be intersecting.
      */
     bool intersects(const BoundingBox& other) const;
 
@@ -132,11 +132,6 @@ public:
      * bounding box along each axis.
      */
     Vector3 getOverlap(const BoundingBox& other) const;
-
-    /**
-     * Returns the smallest tile extent that contains this bounding box.
-     */
-    TileExtent asTileExtent() const;
 
     /**
      * Prints this box's current values.

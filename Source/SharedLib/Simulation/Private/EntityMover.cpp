@@ -80,9 +80,19 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
         += (movement.velocity * static_cast<float>(deltaSeconds));
 
     // Calc an extent that encompasses the entire potential movement.
+    // Note: We add epsilon so that, if a box exactly lines up with the line  
+    //       where two tiles meet, both tiles will be included.
+    //       See the note in TileExtent(MinMaxBox) for info on why this isn't 
+    //       the standard behavior.
     BoundingBox broadPhaseBounds{currentBounds};
     broadPhaseBounds.unionWith(desiredBounds);
-    TileExtent broadPhaseTileExtent{broadPhaseBounds.asTileExtent()};
+    broadPhaseBounds.halfExtents.x += MovementHelpers::WORLD_EPSILON;
+    broadPhaseBounds.halfExtents.y += MovementHelpers::WORLD_EPSILON;
+    broadPhaseBounds.halfExtents.z += MovementHelpers::WORLD_EPSILON;
+
+    // Clip the extent to the tile map's bounds.
+    TileExtent broadPhaseTileExtent(broadPhaseBounds);
+    broadPhaseTileExtent.intersectWith(tileMap.getTileExtent());
 
     // Collect the volumes of any tiles that intersect the broad phase bounds.
     for (int z{broadPhaseTileExtent.z}; z <= broadPhaseTileExtent.zMax(); ++z) {
@@ -107,7 +117,7 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
     // Collect the volumes of any non-client entities (besides the entity trying
     // to move) that intersect the broad phase bounds.
     std::vector<entt::entity>& entitiesBroadPhase{
-        entityLocator.getEntitiesBroad(broadPhaseBounds)};
+        entityLocator.getEntitiesBroad(broadPhaseTileExtent)};
     for (entt::entity entity : entitiesBroadPhase) {
         if ((entity != movingEntity)
             && !(registry.all_of<IsClientEntity>(entity))) {
@@ -141,7 +151,7 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
 
     // If the final resolved bounds are outside of the map bounds, reject the 
     // move.
-    TileExtent resolvedTileExtent{resolvedBounds.asTileExtent()};
+    TileExtent resolvedTileExtent(resolvedBounds);
     if (!tileMap.getTileExtent().containsExtent(resolvedTileExtent)) {
         return currentBounds;
     }

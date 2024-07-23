@@ -168,11 +168,6 @@ private:
             + positivePosition.x);
     }
 
-    /**
-     * Converts the given tile extent to a cell extent.
-     */
-    CellExtent tileToCellExtent(const TileExtent& tileExtent);
-
     /** Used for fetching entity bounding boxes during narrow phases. */
     entt::registry& registry;
 

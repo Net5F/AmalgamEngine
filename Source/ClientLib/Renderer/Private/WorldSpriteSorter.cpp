@@ -122,7 +122,7 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
 
             pushTileSprite(graphic, camera,
                            {info.tilePosition, tileOffset, info.layerType,
-                            info.graphicValue},
+                            info.graphicSet->numericID, info.graphicValue},
                            true);
         }
     }

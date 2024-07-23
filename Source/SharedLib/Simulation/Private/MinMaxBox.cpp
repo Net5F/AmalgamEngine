@@ -1,6 +1,8 @@
 #include "MinMaxBox.h"
 #include "BoundingBox.h"
+#include "MovementHelpers.h"
 #include "SharedConfig.h"
+#include "Log.h"
 #include <cmath>
 
 namespace AM
@@ -28,28 +30,10 @@ MinMaxBox::MinMaxBox(const BoundingBox& box)
 {
 }
 
-TileExtent MinMaxBox::asTileExtent() const
+void MinMaxBox::print()
 {
-    static constexpr float TILE_WORLD_WIDTH{
-        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
-    static constexpr float TILE_WORLD_HEIGHT{
-        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
-
-    TileExtent tileExtent{};
-    tileExtent.x = static_cast<int>(std::floor(min.x / TILE_WORLD_WIDTH));
-    tileExtent.y = static_cast<int>(std::floor(min.y / TILE_WORLD_WIDTH));
-    tileExtent.z = static_cast<int>(std::floor(min.z / TILE_WORLD_HEIGHT));
-    tileExtent.xLength
-        = (static_cast<int>(std::ceil(max.x / TILE_WORLD_WIDTH))
-           - tileExtent.x);
-    tileExtent.yLength
-        = (static_cast<int>(std::ceil(max.y / TILE_WORLD_WIDTH))
-           - tileExtent.y);
-    tileExtent.zLength
-        = (static_cast<int>(std::ceil(max.z / TILE_WORLD_HEIGHT))
-           - tileExtent.z);
-
-    return tileExtent;
+    LOG_INFO("Min: (%.4f, %.4f, %.4f), Max: (%.4f, %.4f, %.4f)", min.x,
+             min.y, min.z, max.x, max.y, max.z);
 }
 
 } // End namespace AM

@@ -7,18 +7,17 @@ namespace AM
 struct BoundingBox;
 
 /**
- * Represents a cylinder.
- *
- * Note: We currently ignore the Z-axis, so this actually is effectively a
- *       circle. If it's ever useful to incorporate a Z-axis length, we can do
- *       so.
+ * Represents a capped cylinder.
  */
 struct Cylinder {
     /** Center point. */
     Position center{};
 
-    /** Radius in X/Y directions. */
+    /** Radius along the X/Y axes. */
     float radius{0};
+
+    /** Half height along the Z axis. */
+    float halfHeight{0};
 
     /**
      * Returns true if this cylinder intersects the given position.

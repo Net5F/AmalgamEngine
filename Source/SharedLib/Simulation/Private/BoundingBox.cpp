@@ -79,47 +79,57 @@ void BoundingBox::moveMinimumTo(const Vector3& point)
 bool BoundingBox::intersects(const BoundingBox& other) const
 {
     return ((std::abs(center.x - other.center.x)
-             < (halfExtents.x + other.halfExtents.x))
+             <= (halfExtents.x + other.halfExtents.x))
             && (std::abs(center.y - other.center.y)
-                < (halfExtents.y + other.halfExtents.y))
+                <= (halfExtents.y + other.halfExtents.y))
             && (std::abs(center.z - other.center.z)
-                < (halfExtents.z + other.halfExtents.z)));
+                <= (halfExtents.z + other.halfExtents.z)));
 }
 
 bool BoundingBox::intersects(const Cylinder& cylinder) const
 {
     // Reference: https://stackoverflow.com/a/402010/4258629
 
-    // TODO: Consider Z
-    float xLength{getXLength()};
-    float yLength{getYLength()};
+    // If the cylinder doesn't intersect along the Z axis, return false.
+    float cylinderMinZ{cylinder.center.z - cylinder.halfHeight};
+    float cylinderMaxZ{cylinder.center.z + cylinder.halfHeight};
+    if ((cylinderMinZ < (center.z - halfExtents.z))
+        || (cylinderMaxZ > (center.z + halfExtents.z))) {
+        return false;
+    }
 
-    // Get the X and Y distances between the centers.
+    // The cylinder intersects along the Z axis. The rest of the test now 
+    // reduces to a 2D circle/rectangle intersection.
+
+    // Get the distances between the centers.
     float circleDistanceX{std::abs(cylinder.center.x - center.x)};
     float circleDistanceY{std::abs(cylinder.center.y - center.y)};
+    float circleDistanceZ{std::abs(cylinder.center.z - center.z)};
 
     // If the circle is far enough away that no intersection is possible,
     // return false.
-    if (circleDistanceX > ((xLength / 2) + cylinder.radius)) {
+    float halfXLength{getXLength() / 2.f};
+    float halfYLength{getYLength() / 2.f};
+    if (circleDistanceX > (halfXLength + cylinder.radius)) {
         return false;
     }
-    if (circleDistanceY > ((yLength / 2) + cylinder.radius)) {
+    if (circleDistanceY > (halfYLength + cylinder.radius)) {
         return false;
     }
 
     // If the circle is close enough that an intersection is guaranteed,
     // return true.
-    if (circleDistanceX <= (xLength / 2)) {
+    if (circleDistanceX <= halfXLength) {
         return true;
     }
-    if (circleDistanceY <= (yLength / 2)) {
+    if (circleDistanceY <= halfYLength) {
         return true;
     }
 
     // Calculate the distance from the center of the circle to the corner
     // of the box.
-    float xDif{circleDistanceX - (xLength / 2)};
-    float yDif{circleDistanceY - (yLength / 2)};
+    float xDif{circleDistanceX - halfXLength};
+    float yDif{circleDistanceY - halfYLength};
     float cornerDistanceSquared{(xDif * xDif) + (yDif * yDif)};
 
     // If the distance is less than the radius, return true.
@@ -246,12 +256,6 @@ Vector3 BoundingBox::getOverlap(const BoundingBox& other) const
     return {(halfExtents.x + other.halfExtents.x - delta.x),
             (halfExtents.y + other.halfExtents.y - delta.y),
             (halfExtents.z + other.halfExtents.z - delta.z)};
-}
-
-TileExtent BoundingBox::asTileExtent() const
-{
-    MinMaxBox box{*this};
-    return box.asTileExtent();
 }
 
 void BoundingBox::print() const

@@ -24,8 +24,9 @@ TilePosition::TilePosition(const Vector3& worldPoint)
     static constexpr float TILE_HEIGHT{
         static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
 
-    // Add the epsilon to each value in the point, then round down. If the value
-    // was within epsilon range of the integer above it, it'll end up rounded up.
+    // To account for float precision issues: add the epsilon to each value in 
+    // the point, then round down. If the point was within epsilon range of a 
+    // tile in the positive direction, it'll count as being in that tile.
     x = static_cast<int>(std::floor(
         (worldPoint.x + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
     y = static_cast<int>(std::floor(

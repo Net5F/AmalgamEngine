@@ -5,6 +5,8 @@
 namespace AM
 {
 struct ChunkExtent;
+struct BoundingBox;
+struct MinMaxBox;
 
 /**
  * A strong type alias, describing an extent of map tiles.
@@ -16,6 +18,22 @@ struct TileExtent : public DiscreteExtent<DiscreteImpl::TileTag> {
                int inZLength);
 
     explicit TileExtent(const ChunkExtent& chunkExtent);
+
+    /**
+     * Constructs the smallest tile extent that contains the given bounding box.
+     *
+     * If the box is exactly on the edge of a tile, that tile will not be 
+     * included in this extent.
+     */
+    explicit TileExtent(const BoundingBox& boundingBox);
+
+    /**
+     * Constructs the smallest tile extent that contains the given min max box.
+     *
+     * If the box is exactly on the edge of a tile, that tile will not be 
+     * included in this extent.
+     */
+    explicit TileExtent(const MinMaxBox& box);
 
     /**
      * Prints this extent's current values.

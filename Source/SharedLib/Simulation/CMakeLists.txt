@@ -18,6 +18,8 @@ target_sources(SharedLib
         Private/IconData/IconDataBase.cpp
         Private/ItemData/Item.cpp
         Private/ItemData/ItemDataBase.cpp
+        Private/TileMap/CellExtent.cpp
+        Private/TileMap/CellPosition.cpp
         Private/TileMap/Chunk.cpp
         Private/TileMap/ChunkExtent.cpp
         Private/TileMap/ChunkPosition.cpp
