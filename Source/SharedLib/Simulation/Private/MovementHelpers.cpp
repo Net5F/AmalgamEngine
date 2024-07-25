@@ -22,7 +22,7 @@ Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
     // Note: If they're in the air, they'll keep traveling with their current 
     //       X/Y velocity.
     Vector3 updatedVelocity{movement.velocity};
-    if ((movement.velocity.z == 0) || movementMods.canFly) {
+    if (!(movement.isFalling) || movementMods.canFly) {
         // Direction values. 0 == no movement, 1 == movement.
         int xUp{static_cast<int>(inputStates[Input::XUp])};
         int xDown{static_cast<int>(inputStates[Input::XDown])};
@@ -82,6 +82,12 @@ Vector3 MovementHelpers::calcVelocity(const Input::StateArr& inputStates,
     // Clamp Z to the terminal velocity.
     updatedVelocity.z
         = std::max(updatedVelocity.z, SharedConfig::TERMINAL_VELOCITY);
+
+    // If the entity has Z velocity, assume they're falling. When they collide 
+    // with the ground, this will be set to false by the collision logic.
+    if (updatedVelocity.z != 0) {
+        movement.isFalling = true;
+    }
 
     return updatedVelocity;
 }

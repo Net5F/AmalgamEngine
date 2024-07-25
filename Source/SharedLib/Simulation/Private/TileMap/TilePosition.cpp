@@ -24,15 +24,9 @@ TilePosition::TilePosition(const Vector3& worldPoint)
     static constexpr float TILE_HEIGHT{
         static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
 
-    // To account for float precision issues: add the epsilon to each value in 
-    // the point, then round down. If the point was within epsilon range of a 
-    // tile in the positive direction, it'll count as being in that tile.
-    x = static_cast<int>(std::floor(
-        (worldPoint.x + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
-    y = static_cast<int>(std::floor(
-        (worldPoint.y + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
-    z = static_cast<int>(std::floor(
-        (worldPoint.z + MovementHelpers::WORLD_EPSILON) / TILE_HEIGHT));
+    x = static_cast<int>(std::floor(worldPoint.x / TILE_WIDTH));
+    y = static_cast<int>(std::floor(worldPoint.y / TILE_WIDTH));
+    z = static_cast<int>(std::floor(worldPoint.z / TILE_HEIGHT));
 }
 
 TilePosition::TilePosition(const ChunkPosition& chunkPosition)

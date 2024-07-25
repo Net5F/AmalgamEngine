@@ -34,7 +34,7 @@ void EntityMover::moveEntity(
 {
     // If no inputs are pressed and they aren't falling, nothing needs to 
     // be done.
-    if (inputStates.none() && (movement.velocity.z == 0)) {
+    if (inputStates.none() && !(movement.isFalling)) {
         movement.velocity = {0, 0, 0};
         return;
     }
@@ -48,13 +48,15 @@ void EntityMover::moveEntity(
                                                  movement, deltaSeconds)};
 
     // Update their bounding box and position.
-    // Note: The model bounds stage is centered on the position, not the 
-    //       model bounds directly. Because of this, we can't just get 
-    //       the position from the bottom center of the resolved bounds.
+    // Note: The entity's position is centered on the model bounds stage, not 
+    //       the model bounds directly. Because of this, we can't just get 
+    //       the X/Y position from the center of the resolved bounds.
+    //       We can get the Z position directly from it, though.
     position += (resolvedBounds.center - collision.worldBounds.center);
+    position.z = (resolvedBounds.min().z);
     // Note: Since clients calc bounds from the replicated position, we need to 
     //       use the same math here (instead of using resolvedBounds directly) 
-    //       or the float result will end up slightly different.
+    //       or the float result may end up slightly different.
     collision.worldBounds
         = Transforms::modelToWorldEntity(collision.modelBounds, position);
 
@@ -287,8 +289,18 @@ EntityMover::NarrowPhaseResult
     BoundingBox resolvedBounds{currentBounds};
     resolvedBounds.center += (realVelocity * collisionTime);
 
+    // Due to float precision loss, the resolved bounds may actually be 
+    // slightly clipped inside the other bounds. To resolve this, move backwards
+    // by an amount equal to our epsilon.
+    Vector3 backoff{MovementHelpers::WORLD_EPSILON,
+                    MovementHelpers::WORLD_EPSILON,
+                    MovementHelpers::WORLD_EPSILON};
+    backoff *= normalToUse;
+    resolvedBounds.center += backoff;
+
     // If they collided with the ground, reset their falling state.
     if (normalToUse.z == 1.f) {
+        movement.isFalling = false;
         movement.jumpCount = 0;
     }
 

@@ -23,6 +23,10 @@ struct Movement {
         velocityMod. */
     Vector3 velocity{};
 
+    /** If false, the entity is currently standing on top of something.
+        If true, the entity is falling through the air. */
+    bool isFalling{false};
+
     /** The number of times the entity has jumped since last touching the 
         ground. */
     Uint8 jumpCount{0};
@@ -43,6 +47,7 @@ void serialize(S& serializer, Movement& movement)
     //       MeasureSize (which always has bit packing enabled).
     serializer.enableBitPacking(
         [&movement](typename S::BPEnabledType& sbp) {
+            sbp.boolValue(movement.isFalling);
             sbp.boolValue(movement.jumpHeld);
         });
 
