@@ -85,6 +85,22 @@ private:
      *                     from the formula (3 * (yDown - yUp) + xUp - xDown).
      */
     static Rotation::Direction directionIntToDirection(int directionInt);
+
+    /**
+     * Performs the first step of velocity calculations, assuming the entity 
+     * can fly.
+     */
+    static Vector3 calcVelocityCanFly(const Input::StateArr& inputStates,
+                                      Movement& movement,
+                                      const MovementModifiers& movementMods);
+
+    /**
+     * Performs the first step of velocity calculations, assuming the entity 
+     * cannot fly.
+     */
+    static Vector3 calcVelocityNoFly(const Input::StateArr& inputStates,
+                                     Movement& movement,
+                                     const MovementModifiers& movementMods);
 };
 
 } // End namespace AM

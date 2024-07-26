@@ -32,8 +32,9 @@ struct Movement {
     Uint8 jumpCount{0};
 
     /** If true, the jump input has already been processed and is being held.
-        Used to ensure the input is released and re-pressed, to prevent 
-        accidental air jumps. */
+        We track this separately from Input.inputStates[Input::Jump] so that we 
+        can compare the previous tick's state to the current. This lets us ensure
+        the input is released and re-pressed, to prevent accidental air jumps. */
     bool jumpHeld{false};
 };
 

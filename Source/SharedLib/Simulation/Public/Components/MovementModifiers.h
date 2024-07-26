@@ -31,7 +31,7 @@ struct MovementModifiers {
 
     /** The maximum number of times the entity can jump before needing to 
         touch the ground. */
-    Uint8 maxJumpCount{1};
+    Uint8 maxJumpCount{3};
 
     /** If true, the entity will not be affected by gravity, and its jump and 
         crouch inputs will instead raise and lower it in the air. */

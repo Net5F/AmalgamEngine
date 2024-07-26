@@ -78,6 +78,12 @@ public:
     /** The maximum negative Z velocity that entities can reach. */
     static constexpr float TERMINAL_VELOCITY{-300};
 
+    /** The amount of velocity that's added to the player if they try to move 
+        while falling straight through the air, e.g. after jumping straight up.
+        This is a constant instead of being affected by runspeed, because it's 
+        intended to be a consistent, small movement. */
+    static constexpr float VERTICAL_FALL_MOVE_VELOCITY{15};
+
     //-------------------------------------------------------------------------
     // Network
     //-------------------------------------------------------------------------
