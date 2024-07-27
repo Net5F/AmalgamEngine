@@ -83,7 +83,7 @@ void ComponentSyncSystem::sendUpdates()
             }
             else {
                 const auto& component{registry.get<ComponentType>(entity)};
-                componentUpdateMap[entity].components.push_back(component);
+                componentUpdateMap[entity].components.emplace_back(component);
             }
         }
 

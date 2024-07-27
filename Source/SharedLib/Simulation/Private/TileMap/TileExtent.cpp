@@ -72,6 +72,22 @@ TileExtent::TileExtent(const MinMaxBox& box)
     zLength = (static_cast<int>(maxTileZ) - z);
 }
 
+bool TileExtent::contains(const BoundingBox& box) const
+{
+    static constexpr float TILE_WIDTH{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
+    static constexpr float TILE_HEIGHT{
+        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
+
+    MinMaxBox extentMinMaxBox{{x * TILE_WIDTH, y * TILE_WIDTH, z * TILE_HEIGHT},
+                              {(x + xLength) * TILE_WIDTH,
+                               (y + yLength) * TILE_WIDTH,
+                               (z + zLength) * TILE_HEIGHT}};
+    BoundingBox extentBox{extentMinMaxBox};
+
+    return extentBox.contains(box);
+}
+
 void TileExtent::print() const
 {
     LOG_INFO("(%d, %d, %d, %d, %d, %d)", x, y, z, xLength, yLength, zLength);

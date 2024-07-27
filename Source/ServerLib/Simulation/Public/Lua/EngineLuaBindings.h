@@ -165,7 +165,7 @@ private:
      *         didn't exist, inventory was full).
      */
     bool addItem(entt::entity entityToAddTo, std::string_view itemID,
-                 Uint8 count, NetworkID clientID);
+                 Uint8 count);
 
     /**
      * Attempts to remove the given item from the client entity's inventory.
@@ -173,14 +173,14 @@ private:
      *         didn't contain the item).
      */
     bool removeItem(entt::entity entityToRemoveFrom, std::string_view itemID,
-                    Uint8 count, NetworkID clientID);
+                    Uint8 count);
 
     /**
      * Returns the count for the given item across all slots in the given 
      * entity's inventory.
      */
     std::size_t getItemCount(entt::entity entityToCount,
-                             std::string_view itemID, NetworkID clientID);
+                             std::string_view itemID);
 
     /**
      * Adds a new value, or overwrites an existing value.

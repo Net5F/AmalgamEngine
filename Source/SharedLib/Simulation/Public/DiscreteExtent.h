@@ -224,7 +224,7 @@ struct DiscreteExtent {
     /**
      * @return true if the given position is within this extent, else false.
      */
-    bool containsPosition(const DiscretePosition<T>& position) const
+    bool contains(const DiscretePosition<T>& position) const
     {
         return ((position.x >= x) && (position.x < (x + xLength))
                 && (position.y >= y) && (position.y < (y + yLength))
@@ -235,13 +235,13 @@ struct DiscreteExtent {
      * @return true if the given extent is fully within this extent, else
      *         false.
      */
-    bool containsExtent(const DiscreteExtent<T>& extent) const
+    bool contains(const DiscreteExtent<T>& extent) const
     {
         DiscretePosition<T> origin{extent.x, extent.y, extent.z};
         DiscretePosition<T> extreme{(extent.x + extent.xLength - 1),
                                     (extent.y + extent.yLength - 1),
                                     (extent.z + extent.zLength - 1)};
-        return (containsPosition(origin) && containsPosition(extreme));
+        return (contains(origin) && contains(extreme));
     }
 
     /**

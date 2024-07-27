@@ -24,48 +24,32 @@ static constexpr Uint32 GRAPHIC_ID_ANIMATION_VALUE{0x80000000};
 /**
  * Returns true if the given graphic ID is for a sprite. Else, returns false.
  */
-static bool isSpriteID(GraphicID graphicID)
-{
-    return !((static_cast<Uint32>(graphicID) & GRAPHIC_ID_TYPE_MASK) >> 31);
-}
+bool isSpriteID(GraphicID graphicID);
 
 /**
  * Returns true if the given graphic ID is for an animation. Else, returns false.
  */
-static bool isAnimationID(GraphicID graphicID)
-{
-    return ((static_cast<Uint32>(graphicID) & GRAPHIC_ID_TYPE_MASK) >> 31);
-}
+bool isAnimationID(GraphicID graphicID);
 
-static SpriteID toSpriteID(GraphicID graphicID)
-{
-    if (!isSpriteID(graphicID)) {
-        return NULL_SPRITE_ID;
-    }
+/**
+ * Converts the given graphic ID into a sprite ID.
+ */
+SpriteID toSpriteID(GraphicID graphicID);
 
-    return (static_cast<SpriteID>(graphicID) & GRAPHIC_ID_VALUE_MASK);
-}
+/**
+ * Converts the given graphic ID into a animation ID.
+ */
+AnimationID toAnimationID(GraphicID graphicID);
 
-static AnimationID toAnimationID(GraphicID graphicID)
-{
-    if (!isAnimationID(graphicID)) {
-        return NULL_ANIMATION_ID;
-    }
+/**
+ * Converts the given sprite ID into a graphic ID.
+ */
+GraphicID toGraphicID(SpriteID spriteID);
 
-    return (static_cast<AnimationID>(graphicID) & GRAPHIC_ID_VALUE_MASK);
-}
-
-static GraphicID toGraphicID(SpriteID spriteID)
-{
-    // Sprite IDs don't need any special changes.
-    return static_cast<GraphicID>(spriteID);
-}
-
-static GraphicID toGraphicID(AnimationID animationID)
-{
-    // Set the top bit to indicate that this is an animation.
-    return static_cast<GraphicID>(animationID | GRAPHIC_ID_ANIMATION_VALUE);
-}
+/**
+ * Converts the given animation ID into a graphic ID.
+ */
+GraphicID toGraphicID(AnimationID animationID);
 
 /**
  * The ID of the "null graphic", or the ID used to indicate that a graphic 

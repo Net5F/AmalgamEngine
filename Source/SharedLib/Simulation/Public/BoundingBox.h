@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vector3.h"
+#include <array>
 
 namespace AM
 {
@@ -84,7 +85,6 @@ public:
 
     /**
      * Returns true if this box intersects the given cylinder.
-     *
      * Note: Shared edges are considered to be intersecting.
      */
     bool intersects(const Cylinder& cylinder) const;
@@ -102,6 +102,12 @@ public:
      * Note: Shared edges are considered to be intersecting.
      */
     bool intersects(const TileExtent& tileExtent) const;
+
+    /**
+     * Returns true if this box fully encloses the given other bounding box.
+     * Note: Shared edges are considered to be contained.
+     */
+    bool contains(const BoundingBox& boundingBox) const;
 
     /**
      * Returns the minimum t at which this box intersects the given ray.

@@ -44,7 +44,7 @@ target_link_libraries(ServerLib
         Tracy::TracyClient
 )
 
-# Compile with C++20.
+# Compile with C++23.
 target_compile_features(ServerLib PRIVATE cxx_std_23)
 set_target_properties(ServerLib PROPERTIES CXX_EXTENSIONS OFF)
 

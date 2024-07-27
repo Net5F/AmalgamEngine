@@ -47,7 +47,7 @@ struct DialogueResponse {
         std::string displayText{};
     };
     /** The available dialogue choices. */
-    std::vector<Choice> choices;
+    std::vector<Choice> choices{};
 };
 
 template<typename S>

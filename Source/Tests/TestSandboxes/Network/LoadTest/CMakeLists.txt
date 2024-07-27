@@ -11,7 +11,7 @@ add_executable(LoadTestClient
     Public/WorldSimulation.h
     
     # Client objects
-    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Public/Config.h
+    ${PROJECT_SOURCE_DIR}/Source/EngineSupplementExamples/Client/Config/Public/Config.h
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Private/UserConfig.cpp
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Public/UserConfig.h
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/ConnectionError.h
@@ -29,6 +29,7 @@ target_include_directories(LoadTestClient
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 
         # Client objects
+        ${PROJECT_SOURCE_DIR}/Source/EngineSupplementExamples/Client/Config/Public
         ${PROJECT_SOURCE_DIR}/Source/ClientLib/Config/Public
         ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public
 )
@@ -51,8 +52,8 @@ target_link_libraries(LoadTestClient
         SharedLib
 )
 
-# Compile with C++20
-target_compile_features(LoadTestClient PRIVATE cxx_std_20)
+# Compile with C++23.
+target_compile_features(LoadTestClient PRIVATE cxx_std_23)
 set_target_properties(LoadTestClient PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable compile warnings.

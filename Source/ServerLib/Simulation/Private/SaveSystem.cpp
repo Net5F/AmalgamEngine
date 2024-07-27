@@ -89,7 +89,7 @@ void SaveSystem::saveNonClientEntities()
     auto view{
         world.registry.view<entt::entity>(entt::exclude_t<ClientSimData>{})};
     for (entt::entity entity : view) {
-        PersistedEntityData persistedEntityData{entity};
+        PersistedEntityData persistedEntityData{};
         addComponentsToVector(world.registry, entity,
                               persistedEntityData.components);
 

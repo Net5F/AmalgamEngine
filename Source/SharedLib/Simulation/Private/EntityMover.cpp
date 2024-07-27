@@ -153,8 +153,10 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
 
     // If the final resolved bounds are outside of the map bounds, reject the 
     // move.
-    TileExtent resolvedTileExtent(resolvedBounds);
-    if (!tileMap.getTileExtent().containsExtent(resolvedTileExtent)) {
+    if (!tileMap.getTileExtent().contains(resolvedBounds)) {
+        // We need to reset their velocity so they don't get stuck if they 
+        // were jumping.
+        movement.velocity = {};
         return currentBounds;
     }
 

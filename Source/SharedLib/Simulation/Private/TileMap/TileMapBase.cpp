@@ -519,7 +519,7 @@ void TileMapBase::loadChunk(const ChunkWireSnapshot& chunkSnapshot,
 std::expected<std::reference_wrapper<Chunk>, TileMapBase::ChunkError>
     TileMapBase::getChunk(const ChunkPosition& chunkPosition)
 {
-    if (!(chunkExtent.containsPosition(chunkPosition))) {
+    if (!(chunkExtent.contains(chunkPosition))) {
         AM_ASSERT(false, "Failed to get chunk: Invalid chunk position");
         return std::unexpected{ChunkError::InvalidPosition};
     }

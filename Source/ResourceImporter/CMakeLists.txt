@@ -34,7 +34,7 @@ target_link_libraries(ResourceImporter
         SharedLib
 )
 
-# Compile with C++20.
+# Compile with C++23.
 target_compile_features(ResourceImporter PRIVATE cxx_std_23)
 set_target_properties(ResourceImporter PROPERTIES CXX_EXTENSIONS OFF)
 

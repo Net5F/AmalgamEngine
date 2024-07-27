@@ -529,7 +529,6 @@ void GraphicDataBase::parseEntityGraphicSet(
     const nlohmann::json& graphicSetJson)
 {
     // Add a graphic set to the appropriate vector.
-    GraphicRef nullSprite{sprites[0]};
     EntityGraphicSet& graphicSet{entityGraphicSets.emplace_back(
         GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
                    graphicSetJson.at("stringID").get<std::string>(),

@@ -109,7 +109,7 @@ TcpSocket TcpSocket::accept()
 {
     TCPsocket newSocket{SDLNet_TCP_Accept(socket)};
     if (newSocket != nullptr) {
-        return std::move(TcpSocket{newSocket});
+        return TcpSocket{newSocket};
     }
     else {
         return TcpSocket{};

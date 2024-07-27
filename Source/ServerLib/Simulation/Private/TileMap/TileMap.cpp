@@ -64,8 +64,6 @@ void TileMap::save(const std::string& fileName)
     mapSnapshot.zLengthChunks = static_cast<Uint16>(chunkExtent.zLength);
 
     // Save our tiles into the snapshot as chunks.
-    static constexpr int CHUNK_WIDTH{
-        static_cast<int>(SharedConfig::CHUNK_WIDTH)};
     for (auto& [chunkPosition, chunk] : chunks) {
         ChunkSnapshot& chunkSnapshot{mapSnapshot.chunks[chunkPosition]};
         saveChunkToSnapshot(chunk, chunkSnapshot);
@@ -105,8 +103,6 @@ void TileMap::load(TileMapSnapshot& mapSnapshot)
     }
 
     // Load all of the snapshot's chunks into our map.
-    static constexpr int CHUNK_WIDTH{
-        static_cast<int>(SharedConfig::CHUNK_WIDTH)};
     for (auto& [chunkPosition, chunkSnapshot] : mapSnapshot.chunks) {
         loadChunk(chunkSnapshot,
                   {chunkPosition.x, chunkPosition.y, chunkPosition.z});

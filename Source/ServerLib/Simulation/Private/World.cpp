@@ -12,6 +12,7 @@
 #include "MovementModifiers.h"
 #include "GraphicState.h"
 #include "Collision.h"
+#include "MinMaxBox.h"
 #include "EntityInitScript.h"
 #include "PersistedEntityData.h"
 #include "Deserialize.h"
@@ -79,13 +80,23 @@ World::World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
                 Config::SPAWN_POINT_RANDOM_MAX_X}
 , yDistribution{Config::SPAWN_POINT_RANDOM_MIN_Y,
                 Config::SPAWN_POINT_RANDOM_MAX_Y}
-, groupX{Config::SPAWN_POINT_GROUP_MIN_X}
-, groupY{Config::SPAWN_POINT_GROUP_MIN_Y}
+, groupX{}
+, groupY{}
 , columnIndex{0}
 , rowIndex{0}
 {
     // Initialize our entt groups.
     EnttGroups::init(registry);
+
+    // Calc our group spawn point starting position. We add padding to make 
+    // sure they don't clip the North or West edges of the map.
+    TileExtent tileMapExtent{tileMap.getTileExtent()};
+    groupX
+        = tileMapExtent.x * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
+          + Config::SPAWN_POINT_GROUP_PADDING_X;
+    groupY
+        = tileMapExtent.y * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
+          + Config::SPAWN_POINT_GROUP_PADDING_Y;
 
     // Allocate the entity locator's grid.
     entityLocator.setGridSize(tileMap.getTileExtent());
@@ -341,8 +352,28 @@ Position World::getGroupedSpawnPoint()
 
     // If the row wrapped, increment our group position.
     if (previousRow > rowIndex) {
-        groupX += Config::SPAWN_POINT_GROUP_OFFSET_X;
-        groupY += Config::SPAWN_POINT_GROUP_OFFSET_Y;
+        // The width of a full group of entities. We add one extra padding to 
+        // make sure they don't clip the Eastern edge of the map.
+        const float GROUP_WIDTH{Config::SPAWN_POINT_GROUP_PADDING_X
+                                    * Config::SPAWN_POINT_GROUP_COLUMNS
+                                + Config::SPAWN_POINT_GROUP_PADDING_X};
+
+        // If we have enough room to increment the X offset, do so.
+        MinMaxBox nextGroupExtent{
+            spawnPoint,
+            {spawnPoint.x + GROUP_WIDTH, spawnPoint.y, spawnPoint.z}};
+        if (tileMap.getTileExtent().contains(BoundingBox(nextGroupExtent))) {
+            groupX = 0;
+            groupY += Config::SPAWN_POINT_GROUP_OFFSET_Y;
+        }
+        // Else the next group would go off the East edge of the map, increment
+        // the starting Y offset and reset the X offset.
+        else {
+            groupX += Config::SPAWN_POINT_GROUP_OFFSET_X;
+        }
+
+        columnIndex = 0;
+        rowIndex = 0;
     }
 
     return spawnPoint;
@@ -368,11 +399,11 @@ void World::loadNonClientEntities()
                                 persistedEntityData);
 
         // Add the entity to the registry.
-        entt::entity newEntity{registry.create(persistedEntityData.entity)};
-        if (newEntity != persistedEntityData.entity) {
+        entt::entity newEntity{registry.create(entity)};
+        if (newEntity != entity) {
             LOG_FATAL("Created entity ID doesn't match saved entity ID. "
                       "Created: %u, saved: %u",
-                      newEntity, persistedEntityData.entity);
+                      newEntity, entity);
         }
 
         // Add RelicatedComponentList so it gets updated as we add others.
@@ -410,6 +441,7 @@ void World::loadItems()
         // Deserialize the item's data.
         Item item{};
         Deserialize::fromBuffer(itemDataBuffer, dataSize, item);
+        item.numericID = itemID;
 
         // Add the item to ItemData.
         itemData.createItem(item);

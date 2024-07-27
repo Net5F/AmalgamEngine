@@ -18,9 +18,6 @@ namespace Server
  * Contains the full persistent state for a single entity.
  */
 struct PersistedEntityData {
-    /** This entity's ID. */
-    entt::entity entity{entt::null};
-
     /** This entity's persisted components. */
     std::vector<PersistedComponent> components{};
 };
@@ -28,7 +25,6 @@ struct PersistedEntityData {
 template<typename S>
 void serialize(S& serializer, PersistedEntityData& persistedEntityData)
 {
-    serializer.value4b(persistedEntityData.entity);
     serializer.enableBitPacking([&](typename S::BPEnabledType& sbp) {
         sbp.container(persistedEntityData.components,
                       boost::mp11::mp_size<PersistedComponentTypes>::value,

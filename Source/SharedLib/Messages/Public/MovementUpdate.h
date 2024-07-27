@@ -33,11 +33,8 @@ template<typename S>
 void serialize(S& serializer, MovementUpdate& movementUpdate)
 {
     serializer.value4b(movementUpdate.tickNum);
-    serializer.enableBitPacking(
-        [&movementUpdate](typename S::BPEnabledType& sbp) {
-            sbp.container(movementUpdate.movementStates,
-                          SharedConfig::MAX_ENTITIES);
-        });
+    serializer.container(movementUpdate.movementStates,
+                         SharedConfig::MAX_ENTITIES);
 }
 
 } // End namespace AM

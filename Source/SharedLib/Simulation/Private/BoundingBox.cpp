@@ -104,7 +104,6 @@ bool BoundingBox::intersects(const Cylinder& cylinder) const
     // Get the distances between the centers.
     float circleDistanceX{std::abs(cylinder.center.x - center.x)};
     float circleDistanceY{std::abs(cylinder.center.y - center.y)};
-    float circleDistanceZ{std::abs(cylinder.center.z - center.z)};
 
     // If the circle is far enough away that no intersection is possible,
     // return false.
@@ -172,6 +171,16 @@ bool BoundingBox::intersects(const TileExtent& tileExtent) const
         = (tileExtent.z * TILE_WORLD_HEIGHT) + tileExtentBox.halfExtents.z;
 
     return intersects(tileExtentBox);
+}
+
+bool BoundingBox::contains(const BoundingBox& boundingBox) const
+{
+    MinMaxBox box{*this};
+    MinMaxBox otherBox{boundingBox};
+
+    return (box.min.x <= otherBox.min.x) && (box.max.x >= otherBox.max.x)
+           && (box.min.y <= otherBox.min.y) && (box.max.y >= otherBox.max.y)
+           && (box.min.z <= otherBox.min.z) && (box.max.z >= otherBox.max.z);
 }
 
 float BoundingBox::getMinIntersection(const Ray& ray) const

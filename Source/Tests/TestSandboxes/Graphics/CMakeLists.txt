@@ -19,5 +19,5 @@ target_link_libraries(FrameTimeTest
         Shared
 )
 
-target_compile_features(FrameTimeTest PRIVATE cxx_std_20)
+target_compile_features(FrameTimeTest PRIVATE cxx_std_23)
 set_target_properties(FrameTimeTest PROPERTIES CXX_EXTENSIONS OFF)

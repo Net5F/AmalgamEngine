@@ -32,8 +32,9 @@ void serialize(S& serializer, Input& input)
             sbp.ext(input.inputStates, bitsery::ext::StdBitset{});
         });
 
-    // Align after bit-packing to make sure the following bytes can be easily
-    // processed.
+    // Note: We shouldn't need to align after bit packing (when the context ends,
+    //       it'll auto-align), but measureSize() enables bit packing for 
+    //       everything, so the context never ends and aligns itself.
     serializer.adapter().align();
 }
 

@@ -41,8 +41,8 @@ target_link_libraries(UnitTests
         Catch2::Catch2
 )
 
-# Compile with C++20
-target_compile_features(UnitTests PRIVATE cxx_std_20)
+# Compile with C++23.
+target_compile_features(UnitTests PRIVATE cxx_std_23)
 set_target_properties(UnitTests PROPERTIES CXX_EXTENSIONS OFF)
 
 # Enable compile warnings.

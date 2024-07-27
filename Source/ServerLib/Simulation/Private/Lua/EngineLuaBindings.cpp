@@ -71,20 +71,17 @@ void EngineLuaBindings::addEntityItemHandlerBindings()
     entityItemHandlerLua.luaState.set_function(
         "addItem",
         [&](entt::entity entityToAddTo, std::string_view itemID, Uint8 count) {
-            return addItem(entityToAddTo, itemID, count,
-                           entityItemHandlerLua.clientID);
+            return addItem(entityToAddTo, itemID, count);
         });
     entityItemHandlerLua.luaState.set_function(
         "removeItem", [&](entt::entity entityToRemoveFrom,
                           std::string_view itemID, Uint8 count) {
-            return removeItem(entityToRemoveFrom, itemID, count,
-                              entityItemHandlerLua.clientID);
+            return removeItem(entityToRemoveFrom, itemID, count);
         });
     entityItemHandlerLua.luaState.set_function(
         "getItemCount",
         [&](entt::entity entityToCount, std::string_view itemID) {
-            return getItemCount(entityToCount, itemID,
-                                entityItemHandlerLua.clientID);
+            return getItemCount(entityToCount, itemID);
         });
     entityItemHandlerLua.luaState.set_function(
         "storeUint", &EngineLuaBindings::storeUint, this);
@@ -147,18 +144,17 @@ void EngineLuaBindings::addDialogueBindings()
     dialogueLua.luaState.set_function(
         "addItem",
         [&](entt::entity entityToAddTo, std::string_view itemID, Uint8 count) {
-            return addItem(entityToAddTo, itemID, count, dialogueLua.clientID);
+            return addItem(entityToAddTo, itemID, count);
         });
     dialogueLua.luaState.set_function(
         "removeItem", [&](entt::entity entityToRemoveFrom,
                           std::string_view itemID, Uint8 count) {
-            return removeItem(entityToRemoveFrom, itemID, count,
-                              dialogueLua.clientID);
+            return removeItem(entityToRemoveFrom, itemID, count);
         });
     dialogueLua.luaState.set_function(
         "getItemCount",
         [&](entt::entity entityToCount, std::string_view itemID) {
-            return getItemCount(entityToCount, itemID, dialogueLua.clientID);
+            return getItemCount(entityToCount, itemID);
         });
     dialogueLua.luaState.set_function("storeUint",
                                       &EngineLuaBindings::storeUint, this);
@@ -205,8 +201,7 @@ void EngineLuaBindings::addDialogueChoiceConditionBindings()
     dialogueChoiceConditionLua.luaState.set_function(
         "getItemCount",
         [&](entt::entity entityToCount, std::string_view itemID) {
-            return getItemCount(entityToCount, itemID,
-                                dialogueChoiceConditionLua.clientID);
+            return getItemCount(entityToCount, itemID);
         });
     dialogueChoiceConditionLua.luaState.set_function(
         "getStoredUint", &EngineLuaBindings::getStoredUint, this);
@@ -308,7 +303,7 @@ void EngineLuaBindings::setDescription(std::string_view description)
     }
 
     // The item doesn't already have a description. Add one.
-    item->properties.push_back(ItemDescription{std::string{description}});
+    item->properties.emplace_back(ItemDescription{std::string{description}});
 }
 
 void EngineLuaBindings::setMaxStackSize(Uint8 newMaxStackSize)
@@ -384,8 +379,7 @@ void EngineLuaBindings::choiceIf(std::string_view conditionScript,
 }
 
 bool EngineLuaBindings::addItem(entt::entity entityToAddTo,
-                                std::string_view itemID, Uint8 count,
-                                NetworkID clientID)
+                                std::string_view itemID, Uint8 count)
 {
     if (!(world.registry.valid(entityToAddTo))) {
         throw std::runtime_error{"Failed to add item: Invalid entity ID."};
@@ -409,8 +403,7 @@ bool EngineLuaBindings::addItem(entt::entity entityToAddTo,
 }
 
 bool EngineLuaBindings::removeItem(entt::entity entityToRemoveFrom,
-                                   std::string_view itemID, Uint8 count,
-                                   NetworkID clientID)
+                                   std::string_view itemID, Uint8 count)
 {
     if (!(world.registry.valid(entityToRemoveFrom))) {
         throw std::runtime_error{"Failed to remove item: Invalid entity ID."};
@@ -441,8 +434,7 @@ bool EngineLuaBindings::removeItem(entt::entity entityToRemoveFrom,
 }
 
 std::size_t EngineLuaBindings::getItemCount(entt::entity entityToCount,
-                                            std::string_view itemID,
-                                            NetworkID clientID)
+                                            std::string_view itemID)
 {
     if (!(world.registry.valid(entityToCount))) {
         throw std::runtime_error{

@@ -121,7 +121,7 @@ void ChunkUpdateSystem::requestNewInRangeChunks(
                                             currentExtent.y + y,
                                             currentExtent.z + z};
 
-                if (!(previousExtent.containsPosition(chunkPosition))) {
+                if (!(previousExtent.contains(chunkPosition))) {
                     chunkDataRequest.requestedChunks.emplace_back(
                         chunkPosition.x, chunkPosition.y, chunkPosition.z);
                 }

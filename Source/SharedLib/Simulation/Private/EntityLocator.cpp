@@ -51,10 +51,9 @@ void EntityLocator::setEntityLocation(entt::entity entity,
                                       const BoundingBox& boundingBox)
 {
     // Find the cells that the bounding box intersects.
-    MinMaxBox box(boundingBox);
-    CellExtent boxCellExtent(box, CELL_WORLD_WIDTH, CELL_WORLD_HEIGHT);
+    CellExtent boxCellExtent(boundingBox, CELL_WORLD_WIDTH, CELL_WORLD_HEIGHT);
 
-    if (!(gridCellExtent.containsExtent(boxCellExtent))) {
+    if (!(gridCellExtent.contains(boxCellExtent))) {
         LOG_ERROR("Tried to track entity that is outside of the locator's "
                   "grid: (%d, %d, %d, %d, %d, %d)ce.",
                   boxCellExtent.x, boxCellExtent.y, boxCellExtent.z,
@@ -127,7 +126,7 @@ std::vector<entt::entity>&
     // Erase any entities that don't actually intersect the extent.
     std::erase_if(returnVector, [this, &tileExtent](entt::entity entity) {
         const Position& position{registry.get<Position>(entity)};
-        return !(tileExtent.containsPosition(TilePosition(position)));
+        return !(tileExtent.contains(TilePosition(position)));
     });
 
     return returnVector;

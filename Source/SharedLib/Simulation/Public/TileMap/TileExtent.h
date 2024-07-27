@@ -35,6 +35,13 @@ struct TileExtent : public DiscreteExtent<DiscreteImpl::TileTag> {
      */
     explicit TileExtent(const MinMaxBox& box);
 
+    using DiscreteExtent<DiscreteImpl::TileTag>::contains;
+    /**
+     * @return true if the given box is fully within this extent, else
+     *         false.
+     */
+    bool contains(const BoundingBox& box) const;
+
     /**
      * Prints this extent's current values.
      */

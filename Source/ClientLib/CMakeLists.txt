@@ -38,7 +38,7 @@ target_link_libraries(ClientLib
         SharedLib
 )
 
-# Compile with C++20.
+# Compile with C++23.
 target_compile_features(ClientLib PRIVATE cxx_std_23)
 set_target_properties(ClientLib PROPERTIES CXX_EXTENSIONS OFF)
 

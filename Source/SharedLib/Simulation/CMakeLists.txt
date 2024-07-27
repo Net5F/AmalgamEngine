@@ -14,6 +14,7 @@ target_sources(SharedLib
         Private/Components/Inventory.cpp
         Private/GraphicData/Animation.cpp
         Private/GraphicData/GraphicDataBase.cpp
+        Private/GraphicData/GraphicID.cpp
         Private/GraphicData/GraphicRef.cpp
         Private/IconData/IconDataBase.cpp
         Private/ItemData/Item.cpp

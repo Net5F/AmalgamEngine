@@ -152,8 +152,7 @@ void ServerConnectionSystem::initMockSimState()
 
     const EntityGraphicSet& graphicSet{graphicData.getEntityGraphicSet(
         SharedConfig::DEFAULT_ENTITY_GRAPHIC_SET)};
-    const auto& graphicState{
-        registry.emplace<GraphicState>(newEntity, graphicSet.numericID)};
+    registry.emplace<GraphicState>(newEntity, graphicSet.numericID);
 
     // Entity collision always comes from its IdleSouth graphic.
     const GraphicRef& graphic{

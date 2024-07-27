@@ -29,7 +29,7 @@ target_link_libraries(SharedLib
         Tracy::TracyClient
 )
 
-# Compile with C++20.
+# Compile with C++23.
 target_compile_features(SharedLib PRIVATE cxx_std_23)
 set_target_properties(SharedLib PROPERTIES CXX_EXTENSIONS OFF)
 
