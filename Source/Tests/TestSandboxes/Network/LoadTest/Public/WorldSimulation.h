@@ -12,15 +12,12 @@ namespace AM
 {
 struct InputChangeRequest;
 
-namespace Client
-{
-class Network;
-}
-
 namespace LTC
 {
+struct NetworkSimulation;
+
 /**
- * Represents the simulation for a single simulated client.
+ * Represents the Simulation for a single simulated client.
  *
  * This is a minimal form of the sim, just maintaining tick timing and sending
  * inputs once in a while.
@@ -28,8 +25,7 @@ namespace LTC
 class WorldSimulation
 {
 public:
-    WorldSimulation(EventDispatcher& inNetworkEventDispatcher,
-                    Client::Network& inNetwork, unsigned int inInputsPerSecond);
+    WorldSimulation(NetworkSimulation& network, unsigned int inInputsPerSecond);
 
     /**
      * Requests to connect to the game server, waits for a ConnectionResponse.
@@ -53,7 +49,7 @@ private:
         response, in microseconds. */
     static constexpr int CONNECTION_RESPONSE_WAIT_US{1 * 1000 * 1000};
 
-    Client::Network& network;
+    NetworkSimulation& network;
 
     /** Connection responses, received from the server. */
     EventQueue<ConnectionResponse> connectionResponseQueue;

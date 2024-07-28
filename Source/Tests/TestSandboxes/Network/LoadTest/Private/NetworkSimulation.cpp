@@ -1,19 +1,18 @@
-#include "Network.h"
+#include "NetworkSimulation.h"
 #include "Heartbeat.h"
 #include "ConnectionError.h"
 #include "Config.h"
 #include "UserConfig.h"
-#include "NetworkStats.h"
-#include "IMessageProcessorExtension.h"
 #include "AMAssert.h"
 #include <SDL_net.h>
 
 namespace AM
 {
-namespace Client
+namespace LTC
 {
-Network::Network()
+NetworkSimulation::NetworkSimulation()
 : server{nullptr}
+, serverConnected{false}
 , eventDispatcher{}
 , messageProcessor{eventDispatcher}
 , tickAdjustment{0}
@@ -21,87 +20,110 @@ Network::Network()
 , isApplyingTickAdjustment{false}
 , messagesSentSinceTick{0}
 , currentTickPtr{nullptr}
-, receiveThreadObj{}
-, exitRequested{false}
 , headerRecBuffer(SERVER_HEADER_SIZE)
 , batchRecBuffer(SharedConfig::MAX_BATCH_SIZE)
 , decompressedBatchRecBuffer(SharedConfig::MAX_BATCH_SIZE)
-, netstatsLoggingEnabled{true}
-, ticksSinceNetstatsLog{0}
 {
-    if (!Config::RUN_OFFLINE) {
-        SDLNet_Init();
-    }
 }
 
-Network::~Network()
-{
-    exitRequested = true;
-
-    if (!Config::RUN_OFFLINE) {
-        if (receiveThreadObj.joinable()) {
-            receiveThreadObj.join();
-        }
-        SDLNet_Quit();
-    }
-}
-
-void Network::connect()
+void NetworkSimulation::connect()
 {
     if (server != nullptr) {
         LOG_INFO("Attempted to connect while connected.");
         return;
     }
 
-    // Spin up the receive thread (will start the connection attempt).
-    exitRequested = false;
-    receiveThreadObj = std::jthread(&Network::connectAndReceive, this);
+    // Try to connect.
+    Client::ServerAddress serverAddress{
+        Client::UserConfig::get().getServerAddress()};
+    server = Peer::initiate(serverAddress.IP, serverAddress.port);
+    if (server != nullptr) {
+        // Note: The server sends us a ConnectionResponse when we connect the
+        //       socket. Eventually, we'll instead send a ConnectionRequest to
+        //       the login server here.
+
+        serverConnected = true;
+    }
+    else {
+        eventDispatcher.emplace<Client::ConnectionError>(
+            Client::ConnectionError::Type::Failed);
+        return;
+    }
 }
 
-void Network::disconnect()
+void NetworkSimulation::disconnect()
 {
-    // Spin down the receive thread.
-    exitRequested = true;
-    if (receiveThreadObj.joinable()) {
-        receiveThreadObj.join();
-    }
     server = nullptr;
+    serverConnected = false;
     adjustmentIteration = 0;
     isApplyingTickAdjustment = false;
     messagesSentSinceTick = 0;
-    ticksSinceNetstatsLog = 0;
 }
 
-void Network::tick()
+void NetworkSimulation::tick()
 {
-    if (!Config::RUN_OFFLINE && (server != nullptr)) {
-        // If the sim is running, send a heartbeat if we need to.
-        if (*currentTickPtr != 0) {
-            sendHeartbeatIfNecessary();
-        }
+    // If the server connection isn't established, do nothing (we don't want 
+    // to try to read the server var while connect() is potentially running 
+    // on another thread).
+    if (!serverConnected) {
+        return;
+    }
 
-        // If it's time to log our network statistics, do so.
-        if (netstatsLoggingEnabled) {
-            ticksSinceNetstatsLog++;
-            if (ticksSinceNetstatsLog == TICKS_TILL_STATS_DUMP) {
-                logNetworkStatistics();
-                ticksSinceNetstatsLog = 0;
-            }
-        }
+    // Receive any waiting messages for this client.
+    receiveAndProcess();
+
+    // Send a heartbeat if we need to.
+    if (*currentTickPtr != 0) {
+        sendHeartbeatIfNecessary();
     }
 }
 
-EventDispatcher& Network::getEventDispatcher()
+void NetworkSimulation::receiveAndProcess()
+{
+    // If the server connection isn't established, do nothing (we don't want 
+    // to try to read the server var while connect() is potentially running 
+    // on another thread).
+    if (!serverConnected) {
+        return;
+    }
+
+    // Receive message batches from the server.
+    NetworkResult headerResult{
+        server->receiveBytes(headerRecBuffer.data(), SERVER_HEADER_SIZE, true)};
+    while (headerResult != NetworkResult::NoWaitingData) {
+        switch (headerResult) {
+            case NetworkResult::Success: {
+                processBatch();
+                break;
+            }
+            case NetworkResult::Disconnected: {
+                LOG_INFO("Found server to be disconnected while trying to "
+                         "receive header.");
+                eventDispatcher.emplace<Client::ConnectionError>(
+                    Client::ConnectionError::Type::Disconnected);
+                return;
+            }
+            default: {
+                break;
+            }
+        }
+
+        headerResult = server->receiveBytes(headerRecBuffer.data(),
+                                            SERVER_HEADER_SIZE, true);
+    }
+}
+
+EventDispatcher& NetworkSimulation::getEventDispatcher()
 {
     return eventDispatcher;
 }
 
-Uint32 Network::getLastReceivedTick()
+Uint32 NetworkSimulation::getLastReceivedTick()
 {
     return messageProcessor.getLastReceivedTick();
 }
 
-int Network::transferTickAdjustment()
+int NetworkSimulation::transferTickAdjustment()
 {
     if (isApplyingTickAdjustment) {
         int currentAdjustment = tickAdjustment;
@@ -129,24 +151,13 @@ int Network::transferTickAdjustment()
     }
 }
 
-void Network::registerCurrentTickPtr(
+void NetworkSimulation::registerCurrentTickPtr(
     const std::atomic<Uint32>* inCurrentTickPtr)
 {
     currentTickPtr = inCurrentTickPtr;
 }
 
-void Network::setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled)
-{
-    netstatsLoggingEnabled = inNetstatsLoggingEnabled;
-}
-
-void Network::setMessageProcessorExtension(
-    std::unique_ptr<IMessageProcessorExtension> extension)
-{
-    messageProcessor.setExtension(std::move(extension));
-}
-
-void Network::send(const BinaryBufferSharedPtr& message)
+void NetworkSimulation::send(const BinaryBufferSharedPtr& message)
 {
     if ((server == nullptr) || !(server->isConnected())) {
         // Note: Receive thread is responsible for emitting ConnectionError.
@@ -158,10 +169,6 @@ void Network::send(const BinaryBufferSharedPtr& message)
     NetworkResult result{server->send(message)};
     if (result == NetworkResult::Success) {
         messagesSentSinceTick++;
-
-        // Record the number of sent bytes.
-        NetworkStats::recordBytesSent(
-            static_cast<unsigned int>(message->size()));
     }
     else {
         // Note: Receive thread is responsible for emitting ConnectionError.
@@ -169,7 +176,7 @@ void Network::send(const BinaryBufferSharedPtr& message)
     }
 }
 
-void Network::sendHeartbeatIfNecessary()
+void NetworkSimulation::sendHeartbeatIfNecessary()
 {
     // If we haven't sent any relevant messages since the last tick.
     if (messagesSentSinceTick == 0) {
@@ -180,56 +187,8 @@ void Network::sendHeartbeatIfNecessary()
     messagesSentSinceTick = 0;
 }
 
-void Network::connectAndReceive()
+void NetworkSimulation::processBatch()
 {
-    // Try to connect.
-    ServerAddress serverAddress{UserConfig::get().getServerAddress()};
-    server = Peer::initiate(serverAddress.IP, serverAddress.port);
-    if (server != nullptr) {
-        // Note: The server sends us a ConnectionResponse when we connect the
-        //       socket. Eventually, we'll instead send a ConnectionRequest to
-        //       the login server here.
-    }
-    else {
-        eventDispatcher.emplace<ConnectionError>(ConnectionError::Type::Failed);
-        return;
-    }
-
-    // Receive message batches from the server.
-    while (!exitRequested) {
-        NetworkResult headerResult{server->receiveBytes(
-            headerRecBuffer.data(), SERVER_HEADER_SIZE, true)};
-
-        switch (headerResult) {
-            case NetworkResult::Success: {
-                processBatch();
-                break;
-            }
-            case NetworkResult::Disconnected: {
-                LOG_INFO("Found server to be disconnected while trying to "
-                         "receive header.");
-                eventDispatcher.emplace<ConnectionError>(
-                    ConnectionError::Type::Disconnected);
-                return;
-            }
-            case NetworkResult::NoWaitingData: {
-                // There wasn't any activity, delay so we don't waste CPU
-                // spinning.
-                SDL_Delay(INACTIVE_DELAY_TIME_MS);
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-    }
-}
-
-void Network::processBatch()
-{
-    // Start tracking the number of received bytes.
-    unsigned int bytesReceived{SERVER_HEADER_SIZE};
-
     // Check if we need to adjust the tick offset.
     adjustIfNeeded(headerRecBuffer[ServerHeaderIndex::TickAdjustment],
                    headerRecBuffer[ServerHeaderIndex::AdjustmentIteration]);
@@ -252,9 +211,6 @@ void Network::processBatch()
         if (result != NetworkResult::Success) {
             LOG_INFO("Failed to receive expected bytes.");
         }
-
-        // Track the number of bytes we've received.
-        bytesReceived += MESSAGE_HEADER_SIZE + batchSize;
 
         // If the payload is compressed, decompress it.
         Uint8* bufferToUse{&(batchRecBuffer[0])};
@@ -289,12 +245,9 @@ void Network::processBatch()
                   "Didn't process correct number of bytes. %u, %u", bufferIndex,
                   batchSize);
     }
-
-    // Record the number of received bytes.
-    NetworkStats::recordBytesReceived(bytesReceived);
 }
 
-void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
+void NetworkSimulation::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
 {
     if (receivedTickAdj != 0) {
         Uint8 currentAdjIteration{adjustmentIteration};
@@ -305,8 +258,8 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
             // Set the adjustment to be applied.
             tickAdjustment += receivedTickAdj;
             isApplyingTickAdjustment = true;
-            LOG_INFO("Received tick adjustment: %d, iteration: %u",
-                     receivedTickAdj, receivedAdjIteration);
+            //LOG_INFO("Received tick adjustment: %d, iteration: %u",
+            //         receivedTickAdj, receivedAdjIteration);
         }
         else if (receivedAdjIteration > currentAdjIteration) {
             if (isApplyingTickAdjustment) {
@@ -323,19 +276,5 @@ void Network::adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration)
     }
 }
 
-void Network::logNetworkStatistics()
-{
-    // Dump the stats from the tracker.
-    NetStatsDump netStats{NetworkStats::dumpStats()};
-
-    // Log the stats.
-    float bytesSentPerSecond{netStats.bytesSent
-                             / static_cast<float>(SECONDS_TILL_STATS_DUMP)};
-    float bytesReceivedPerSecond{netStats.bytesReceived
-                                 / static_cast<float>(SECONDS_TILL_STATS_DUMP)};
-    LOG_INFO("Bytes sent per second: %.0f, Bytes received per second: %.0f",
-             bytesSentPerSecond, bytesReceivedPerSecond);
-}
-
-} // namespace Client
+} // End namespace LTC
 } // namespace AM

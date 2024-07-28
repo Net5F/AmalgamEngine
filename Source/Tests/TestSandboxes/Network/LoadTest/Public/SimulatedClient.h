@@ -1,10 +1,8 @@
 #pragma once
 
-#include "QueuedEvents.h"
-#include "Network.h"
+#include "NetworkSimulation.h"
 #include "WorldSimulation.h"
 #include "PeriodicCaller.h"
-#include <SDL_stdinc.h>
 #include <atomic>
 
 namespace AM
@@ -27,19 +25,24 @@ public:
     void connect();
 
     /**
+     * Calls networkSim.receiveAndProcess().
+     */
+    void receiveAndProcess();
+
+    /**
      * Calls the sim and network ticks.
      */
     void tick();
 
-    void setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled);
-
 private:
-    Client::Network network;
+    NetworkSimulation networkSim;
     PeriodicCaller networkCaller;
 
     WorldSimulation worldSim;
     PeriodicCaller simCaller;
 
+    /** If true, this client is connected to the server and we've processed the 
+        ConnectionResponse. */
     std::atomic<bool> isConnected;
 };
 

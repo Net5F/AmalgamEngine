@@ -20,7 +20,7 @@ public:
         1.0 / static_cast<double>(SIM_TICKS_PER_SECOND)};
 
     /** The max number of entities that we will allow. */
-    static constexpr std::size_t MAX_ENTITIES{200};
+    static constexpr std::size_t MAX_ENTITIES{1100};
 
     /** The max number of interactions that an entity can support.
         Interactions are the options that show up when you right-click an 

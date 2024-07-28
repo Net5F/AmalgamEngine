@@ -54,8 +54,8 @@ public:
     static constexpr float SPAWN_POINT_GROUP_PADDING_Y{32};
 
     /** The offset between groups. */
-    static constexpr float SPAWN_POINT_GROUP_OFFSET_X{400};
-    static constexpr float SPAWN_POINT_GROUP_OFFSET_Y{400};
+    static constexpr float SPAWN_POINT_GROUP_OFFSET_X{500};
+    static constexpr float SPAWN_POINT_GROUP_OFFSET_Y{500};
 
     /** How often the world's data (tile map, entities, etc) should be saved, 
         in seconds. */

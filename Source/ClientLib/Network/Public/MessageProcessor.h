@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ReplicatedComponent.h"
+#include "IMessageProcessorExtension.h"
 #include "entt/fwd.hpp"
 #include <SDL_stdinc.h>
 #include <memory>
@@ -11,12 +11,9 @@
 namespace AM
 {
 class EventDispatcher;
-struct MovementUpdate;
 
 namespace Client
 {
-class IMessageProcessorExtension;
-
 /**
  * Processes received messages.
  *

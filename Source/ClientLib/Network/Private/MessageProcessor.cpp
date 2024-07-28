@@ -2,7 +2,6 @@
 #include "QueuedEvents.h"
 #include "Deserialize.h"
 #include "DispatchMessage.h"
-#include "IMessageProcessorExtension.h"
 #include "ExplicitConfirmation.h"
 #include "ConnectionResponse.h"
 #include "SystemMessage.h"

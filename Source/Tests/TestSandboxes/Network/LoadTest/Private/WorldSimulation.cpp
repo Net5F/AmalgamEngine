@@ -1,5 +1,5 @@
 #include "WorldSimulation.h"
-#include "Network.h"
+#include "NetworkSimulation.h"
 #include "Config.h"
 #include "Serialize.h"
 #include "InputChangeRequest.h"
@@ -13,12 +13,11 @@ namespace AM
 namespace LTC
 {
 
-WorldSimulation::WorldSimulation(EventDispatcher& inNetworkEventDispatcher,
-                                 Client::Network& inNetwork,
+WorldSimulation::WorldSimulation(NetworkSimulation& inNetwork,
                                  unsigned int inInputsPerSecond)
 : network{inNetwork}
-, connectionResponseQueue{inNetworkEventDispatcher}
-, connectionErrorQueue{inNetworkEventDispatcher}
+, connectionResponseQueue{network.getEventDispatcher()}
+, connectionErrorQueue{network.getEventDispatcher()}
 , clientEntity{entt::null}
 , currentTick{0}
 , inputsPerSecond{inInputsPerSecond}

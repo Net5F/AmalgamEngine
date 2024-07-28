@@ -1,6 +1,5 @@
 #pragma once
 
-#include "SharedConfig.h"
 #include "NetworkDefs.h"
 #include "MessageProcessor.h"
 #include "QueuedEvents.h"
@@ -10,58 +9,36 @@
 #include "ByteTools.h"
 #include "Log.h"
 #include <SDL_stdinc.h>
-#include <string>
-#include <memory>
 #include <atomic>
-#include <thread>
 
 namespace AM
 {
-struct ConnectionResponse;
-struct EntityUpdate;
-
-namespace Client
+namespace LTC
 {
-class IMessageProcessorExtension;
 /**
- * Provides a convenient interface for connecting to the server, sending
- * and receiving messages, and other network-related functionality.
+ * Represents the Network for a single simulated client.
  *
- * Note: ServerConnectionSystem is responsible for calling connect() and
- * disconnect(). If a connection error is detected, this class will push a
- * ConnectionError event and ServerConnectionSystem will handle it.
+ * We can't use the actual Client::Network class because it would spin up a 
+ * thread for each client.
  */
-class Network
+class NetworkSimulation 
 {
 public:
-    Network();
+    NetworkSimulation();
 
-    ~Network();
-
-    // TODO: If the IP provided in UserConfig.json is invalid, the receive
-    //       thread will stall for a long time while waiting for
-    //       SDLNet_TCP_Open() to return. If we move off SDL_Net, improve this.
     /**
-     * Spins up the connectAndReceive thread.
-     *
-     * Note: ServerConnectionSystem is responsible for calling this. See class
-     *       comment.
+     * Attempts to connect to the server.
      */
     void connect();
 
     /**
-     * Cleans up our server connection and spins down the receive thread.
-     *
-     * Note: ServerConnectionSystem is responsible for calling this. See class
-     *       comment.
+     * Cleans up our server connection.
      */
     void disconnect();
 
     /**
      * Updates accumulatedTime. If greater than the tick timestep and no
      * messages have been sent since the last heartbeat, sends a message.
-     *
-     * Also logs network statistics periodically.
      */
     void tick();
 
@@ -76,6 +53,11 @@ public:
     void serializeAndSend(const T& messageStruct);
 
     /**
+     * Attempts to receive messages from the server.
+     */
+    void receiveAndProcess();
+
+    /**
      * Returns the Network event dispatcher. All messages that we receive
      * from the server are pushed into this dispatcher.
      */
@@ -86,7 +68,6 @@ public:
      */
     Uint32 getLastReceivedTick();
 
-    // TODO: Just return the total adjustment and let the sim figure it out.
     /**
      * Returns the amount that the sim tick should be adjusted by.
      *
@@ -103,17 +84,6 @@ public:
      * Used for passing us a pointer to the Simulation's currentTick.
      */
     void registerCurrentTickPtr(const std::atomic<Uint32>* inCurrentTickPtr);
-
-    /**
-     * Enables the periodic printing and logging of network stats.
-     */
-    void setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled);
-
-    /**
-     * See MessageProcessor::extension member comment.
-     */
-    void setMessageProcessorExtension(
-        std::unique_ptr<IMessageProcessorExtension> extension);
 
 private:
     /**
@@ -135,15 +105,6 @@ private:
     void sendHeartbeatIfNecessary();
 
     /**
-     * Thread function, started from connect().
-     *
-     * First, tries to connect to the server.
-     * If successful, receives messages from the server and passes them to
-     * processBatch().
-     */
-    void connectAndReceive();
-
-    /**
      * Processes the received header and following batch.
      * If any messages are expected, receives the messages.
      */
@@ -158,19 +119,17 @@ private:
      */
     void adjustIfNeeded(Sint8 receivedTickAdj, Uint8 receivedAdjIteration);
 
-    /**
-     * Logs the network stats such as bytes sent/received per second.
-     */
-    void logNetworkStatistics();
-
     std::shared_ptr<Peer> server;
+
+    /** If true, the server connection has been established. */
+    std::atomic<bool> serverConnected;
 
     /** Used to dispatch events from the network to the simulation. */
     EventDispatcher eventDispatcher;
 
     /** Deserializes messages, does any network-layer message handling, and
         pushes messages into the eventDispatcher. */
-    MessageProcessor messageProcessor;
+    Client::MessageProcessor messageProcessor;
 
     /** The adjustment that the server has told us to apply to the tick. */
     std::atomic<int> tickAdjustment;
@@ -189,11 +148,6 @@ private:
     /** Pointer to the game's current tick. */
     const std::atomic<Uint32>* currentTickPtr;
 
-    /** Calls pollForMessages(). */
-    std::jthread receiveThreadObj;
-    /** Turn false to signal that the receive thread should end. */
-    std::atomic<bool> exitRequested;
-
     /** Holds a received server header while we process it. */
     BinaryBuffer headerRecBuffer;
     /** Holds a received message batch while we pass its messages to
@@ -202,24 +156,10 @@ private:
     /** If a batch is compressed, it's decompressed into this buffer before
         processing. */
     BinaryBuffer decompressedBatchRecBuffer;
-
-    /** The number of seconds we'll wait before logging our network
-        statistics. */
-    static constexpr unsigned int SECONDS_TILL_STATS_DUMP{5};
-    static constexpr unsigned int TICKS_TILL_STATS_DUMP{
-        static_cast<unsigned int>(
-            (1 / SharedConfig::CLIENT_NETWORK_TICK_TIMESTEP_S)
-            * SECONDS_TILL_STATS_DUMP)};
-
-    /** Whether network statistics logging is enabled or not. */
-    bool netstatsLoggingEnabled;
-
-    /** The number of ticks since we last logged our network statistics. */
-    unsigned int ticksSinceNetstatsLog;
 };
 
 template<typename T>
-void Network::serializeAndSend(const T& messageStruct)
+void NetworkSimulation::serializeAndSend(const T& messageStruct)
 {
     // Allocate the buffer.
     std::size_t totalMessageSize{CLIENT_HEADER_SIZE + MESSAGE_HEADER_SIZE
@@ -260,5 +200,5 @@ void Network::serializeAndSend(const T& messageStruct)
     send(messageBuffer);
 }
 
-} // namespace Client
-} // namespace AM
+} // End namespace LTC
+} // End namespace AM

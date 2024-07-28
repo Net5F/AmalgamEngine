@@ -338,6 +338,8 @@ Position World::getSpawnPoint()
 
 Position World::getGroupedSpawnPoint()
 {
+    static constexpr float TILE_WIDTH{SharedConfig::TILE_WORLD_WIDTH};
+
     // Calculate the next spawn point.
     Position spawnPoint{groupX, groupY, 0.1f};
     spawnPoint.x += (columnIndex * Config::SPAWN_POINT_GROUP_PADDING_X);
@@ -358,18 +360,17 @@ Position World::getGroupedSpawnPoint()
                                     * Config::SPAWN_POINT_GROUP_COLUMNS
                                 + Config::SPAWN_POINT_GROUP_PADDING_X};
 
-        // If we have enough room to increment the X offset, do so.
-        MinMaxBox nextGroupExtent{
-            spawnPoint,
-            {spawnPoint.x + GROUP_WIDTH, spawnPoint.y, spawnPoint.z}};
-        if (tileMap.getTileExtent().contains(BoundingBox(nextGroupExtent))) {
-            groupX = 0;
+        // Increment the group X offset.
+        groupX += Config::SPAWN_POINT_GROUP_OFFSET_X;
+
+        // If the new group would go off the East edge of the map, reset the 
+        // X offset and increment the Y offset.
+        TileExtent tileMapExtent{tileMap.getTileExtent()};
+        float tileMapMaxX{tileMapExtent.xMax() * TILE_WIDTH};
+        if ((groupX + GROUP_WIDTH) > tileMapMaxX) {
+            groupX = tileMapExtent.x * TILE_WIDTH
+                     + Config::SPAWN_POINT_GROUP_PADDING_X;
             groupY += Config::SPAWN_POINT_GROUP_OFFSET_Y;
-        }
-        // Else the next group would go off the East edge of the map, increment
-        // the starting Y offset and reset the X offset.
-        else {
-            groupX += Config::SPAWN_POINT_GROUP_OFFSET_X;
         }
 
         columnIndex = 0;

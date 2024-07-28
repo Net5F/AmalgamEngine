@@ -1,15 +1,15 @@
 #include "SimulatedClient.h"
 #include "SharedConfig.h"
+#include <functional>
 
 namespace AM
 {
 namespace LTC
 {
 SimulatedClient::SimulatedClient(unsigned int inInputsPerSecond)
-: network()
-, networkCaller(std::bind_front(&Client::Network::tick, &network),
+: networkCaller(std::bind_front(&NetworkSimulation::tick, &networkSim),
                 SharedConfig::CLIENT_NETWORK_TICK_TIMESTEP_S, "Network", true)
-, worldSim(network.getEventDispatcher(), network, inInputsPerSecond)
+, worldSim(networkSim, inInputsPerSecond)
 , simCaller(std::bind_front(&WorldSimulation::tick, &worldSim),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false)
 , isConnected(false)
@@ -28,20 +28,22 @@ void SimulatedClient::connect()
     isConnected = true;
 }
 
-void SimulatedClient::tick()
+void SimulatedClient::receiveAndProcess()
 {
-    if (isConnected) {
-        // Process the world sim.
-        simCaller.update();
-
-        // Process the network.
-        networkCaller.update();
-    }
+    // Note: This is safe to call, even if connect() is running on another 
+    //       thread (it has an internal check).
+    networkSim.receiveAndProcess();
 }
 
-void SimulatedClient::setNetstatsLoggingEnabled(bool inNetstatsLoggingEnabled)
+void SimulatedClient::tick()
 {
-    network.setNetstatsLoggingEnabled(inNetstatsLoggingEnabled);
+    // Process the network.
+    networkCaller.update();
+
+    // If we're connected, process the world sim.
+    if (isConnected) {
+        simCaller.update();
+    }
 }
 
 } // End namespace LTC

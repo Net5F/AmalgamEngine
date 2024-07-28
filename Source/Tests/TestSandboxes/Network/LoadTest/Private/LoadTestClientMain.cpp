@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <SDL_net.h>
 #include "SDL2pp/SDL.hh"
 #include "SDL2pp/Window.hh"
 #include "SDL2pp/Renderer.hh"
@@ -39,7 +40,7 @@ void connectClients(unsigned int numClients, unsigned int connectionWaitTimeMs,
              connectionWaitTimeMs);
 
     // Open all of the connections.
-    for (unsigned int i = 0; i < numClients; ++i) {
+    for (unsigned int i{0}; i < numClients; ++i) {
         (*clients)[i]->connect();
 
         // Sleep for our wait time.
@@ -122,25 +123,23 @@ try {
         }
     }
 
+    // Init SDL_net once for all clients to use.
+    SDLNet_Init();
+
     // Construct the clients.
     LOG_INFO("Client entities will move at %u inputs per second.",
              inputsPerSecond);
-    std::vector<std::unique_ptr<SimulatedClient>> clients;
-    for (unsigned int i = 0; i < numClients; ++i) {
-        clients.push_back(std::make_unique<SimulatedClient>(inputsPerSecond));
-        clients[i]->setNetstatsLoggingEnabled(false);
+    std::vector<std::unique_ptr<SimulatedClient>> clients(numClients);
+    for (std::size_t i{0}; i < clients.size(); ++i) {
+        clients[i] = std::make_unique<SimulatedClient>(inputsPerSecond);
     }
-
-    // Enable only one client's logging so we don't get spammed.
-    // Netstats logging is static, so it'll get the data from all clients.
-    clients[0]->setNetstatsLoggingEnabled(true);
 
     // Start the client connections thread.
     std::thread connectionThreadObj(connectClients, numClients,
                                     connectionWaitTimeMs, &clients);
 
     // Start the main loop.
-    std::atomic<bool> exitRequested = false;
+    std::atomic<bool> exitRequested{false};
     while (!exitRequested) {
         // Check for attempts to exit.
         SDL_Event event;
@@ -152,6 +151,9 @@ try {
 
         // Process the simulated clients.
         for (auto& client : clients) {
+            // Note: These are both safe to do, whether the client is connected
+            //       or not.
+            client->receiveAndProcess();
             client->tick();
         }
     }

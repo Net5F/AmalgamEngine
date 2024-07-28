@@ -5,6 +5,8 @@ message(STATUS "Configuring Amalgam Engine Load Test Client")
 # Load test client
 add_executable(LoadTestClient
     Private/LoadTestClientMain.cpp
+    Private/NetworkSimulation.cpp
+    Public/NetworkSimulation.h
     Private/SimulatedClient.cpp
     Public/SimulatedClient.h
     Private/WorldSimulation.cpp
@@ -17,8 +19,7 @@ add_executable(LoadTestClient
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/ConnectionError.h
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/MessageProcessor.cpp
     ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/MessageProcessor.h
-    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Private/Network.cpp
-    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/Network.h
+    ${PROJECT_SOURCE_DIR}/Source/ClientLib/Network/Public/IMessageProcessorExtension.h
 )
 
 target_include_directories(LoadTestClient
