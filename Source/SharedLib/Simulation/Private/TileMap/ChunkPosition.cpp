@@ -16,6 +16,12 @@ ChunkPosition::ChunkPosition(int inX, int inY, int inZ)
 {
 }
 
+ChunkPosition::ChunkPosition(
+    const DiscretePosition<DiscreteImpl::ChunkTag>& chunkPosition)
+: DiscretePosition<DiscreteImpl::ChunkTag>(chunkPosition)
+{
+}
+
 ChunkPosition::ChunkPosition(const Vector3& worldPoint)
 : DiscretePosition<DiscreteImpl::ChunkTag>(
     static_cast<int>(std::floor(

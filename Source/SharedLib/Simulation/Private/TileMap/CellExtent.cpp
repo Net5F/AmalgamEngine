@@ -21,6 +21,12 @@ CellExtent::CellExtent(int inX, int inY, int inZ, int inXLength, int inYLength,
 {
 }
 
+CellExtent::CellExtent(
+    const DiscreteExtent<DiscreteImpl::CellTag>& cellExtent)
+: DiscreteExtent<DiscreteImpl::CellTag>(cellExtent)
+{
+}
+
 CellExtent::CellExtent(const TileExtent& tileExtent, std::size_t cellWidthTiles,
                        std::size_t cellHeightTiles)
 {

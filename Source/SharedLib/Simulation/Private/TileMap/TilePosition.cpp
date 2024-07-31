@@ -17,6 +17,12 @@ TilePosition::TilePosition(int inX, int inY, int inZ)
 {
 }
 
+TilePosition::TilePosition(
+    const DiscretePosition<DiscreteImpl::TileTag>& tilePosition)
+: DiscretePosition<DiscreteImpl::TileTag>(tilePosition)
+{
+}
+
 TilePosition::TilePosition(const Vector3& worldPoint)
 {
     static constexpr float TILE_WIDTH{

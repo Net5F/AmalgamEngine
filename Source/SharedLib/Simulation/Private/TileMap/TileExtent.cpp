@@ -20,6 +20,12 @@ TileExtent::TileExtent(int inX, int inY, int inZ, int inXLength, int inYLength,
 {
 }
 
+TileExtent::TileExtent(
+    const DiscreteExtent<DiscreteImpl::TileTag>& tileExtent)
+: DiscreteExtent<DiscreteImpl::TileTag>(tileExtent)
+{
+}
+
 TileExtent::TileExtent(const ChunkExtent& chunkExtent)
 : DiscreteExtent<DiscreteImpl::TileTag>(
     static_cast<int>(chunkExtent.x * SharedConfig::CHUNK_WIDTH),

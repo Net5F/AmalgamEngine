@@ -16,6 +16,8 @@ struct TilePosition : public DiscretePosition<DiscreteImpl::TileTag> {
 
     TilePosition(int inX, int inY, int inZ);
 
+    TilePosition(const DiscretePosition<DiscreteImpl::TileTag>& tilePosition);
+
     /**
      * Calculates the position of the tile that contains the given point.
      */

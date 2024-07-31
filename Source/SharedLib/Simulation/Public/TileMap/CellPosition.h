@@ -17,6 +17,8 @@ struct CellPosition : public DiscretePosition<DiscreteImpl::CellTag> {
 
     CellPosition(int inX, int inY, int inZ);
 
+    CellPosition(const DiscretePosition<DiscreteImpl::CellTag>& cellPosition);
+
     /**
      * Calculates the position of the cell that contains the given point.
      */

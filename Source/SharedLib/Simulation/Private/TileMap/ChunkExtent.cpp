@@ -16,6 +16,12 @@ ChunkExtent::ChunkExtent(int inX, int inY, int inZ, int inXLength,
 {
 }
 
+ChunkExtent::ChunkExtent(
+    const DiscreteExtent<DiscreteImpl::ChunkTag>& chunkExtent)
+: DiscreteExtent<DiscreteImpl::ChunkTag>(chunkExtent)
+{
+}
+
 ChunkExtent::ChunkExtent(const TileExtent& tileExtent)
 : DiscreteExtent<DiscreteImpl::ChunkTag>(
     static_cast<int>(tileExtent.x / SharedConfig::CHUNK_WIDTH),

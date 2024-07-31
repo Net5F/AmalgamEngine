@@ -18,6 +18,8 @@ struct CellExtent : public DiscreteExtent<DiscreteImpl::CellTag> {
     CellExtent(int inX, int inY, int inZ, int inXLength, int inYLength,
                int inZLength);
 
+    CellExtent(const DiscreteExtent<DiscreteImpl::CellTag>& cellExtent);
+
     /**
      * Constructs the smallest cell extent that contains the given tile extent.
      *

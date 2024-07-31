@@ -17,6 +17,12 @@ CellPosition::CellPosition(int inX, int inY, int inZ)
 {
 }
 
+CellPosition::CellPosition(
+    const DiscretePosition<DiscreteImpl::CellTag>& cellPosition)
+: DiscretePosition<DiscreteImpl::CellTag>(cellPosition)
+{
+}
+
 CellPosition::CellPosition(const Vector3& worldPoint)
 {
     static constexpr float TILE_WIDTH{

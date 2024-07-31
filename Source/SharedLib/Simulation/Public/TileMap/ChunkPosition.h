@@ -16,6 +16,8 @@ struct ChunkPosition : public DiscretePosition<DiscreteImpl::ChunkTag> {
 
     ChunkPosition(int inX, int inY, int inZ);
 
+    ChunkPosition(const DiscretePosition<DiscreteImpl::ChunkTag>& chunkPosition);
+
     /**
      * Calculates the position of the chunk that contains the given point.
      */

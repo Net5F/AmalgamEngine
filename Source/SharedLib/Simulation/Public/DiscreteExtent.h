@@ -84,12 +84,12 @@ struct DiscreteExtent {
     /**
      * Returns the minimum position of this extent.
      */
-    DiscretePosition<T> min() { return {x, y, z}; }
+    DiscretePosition<T> min() const { return {x, y, z}; }
 
     /**
      * Returns the maximum position of this extent.
      */
-    DiscretePosition<T> max() { return {xMax(), yMax(), zMax()}; }
+    DiscretePosition<T> max() const { return {xMax(), yMax(), zMax()}; }
 
     /**
      * Sets this extent to the union between itself and the given extent.
@@ -254,9 +254,9 @@ struct DiscreteExtent {
 
     /**
      * @return A count of the number of discrete elements within this extent.
-     *         Can also be thought of as the area of this extent.
+     *         Can also be thought of as the volume of this extent.
      */
-    std::size_t getCount() const { return (xLength * yLength * zLength); }
+    std::size_t size() const { return (xLength * yLength * zLength); }
 };
 
 } // End namespace AM
