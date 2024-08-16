@@ -336,9 +336,6 @@ std::vector<BoundingBox>&
     CollisionLocator::getCollisionsBroad(const TileExtent& tileExtent,
                                          CollisionObjectTypeMask objectTypeMask)
 {
-    // Clear the return vector.
-    returnVector.clear();
-
     // Calc the cell extent that is intersected by the tile extent.
     CellExtent tileCellExtent(tileExtent,
                               SharedConfig::ENTITY_LOCATOR_CELL_WIDTH,

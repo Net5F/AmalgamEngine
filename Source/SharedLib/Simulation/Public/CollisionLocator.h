@@ -112,21 +112,6 @@ public:
         getCollisions(const TileExtent& tileExtent,
                       CollisionObjectTypeMask objectTypeMask);
 
-    struct CollisionVolumeInfo
-    {
-        BoundingBox collisionVolume{};
-
-        /** The type of world object that this volume belongs to. */
-        CollisionObjectType::Value objectType{};
-
-        /** If objectType is one of the entity types, this is the entity's 
-            ID. */
-        entt::entity entity{};
-    };
-    //std::vector<CollisionVolumeInfo*>&
-    //    getCollisions2(const TileExtent& tileExtent,
-    //                  CollisionObjectTypeMask objectTypeMask);
-
     /**
      * Overload for ChunkExtent.
      */
@@ -240,6 +225,17 @@ private:
     /** The grid's extent, with cells as the unit. */
     CellExtent gridCellExtent;
 
+    struct CollisionVolumeInfo
+    {
+        BoundingBox collisionVolume{};
+
+        /** The type of world object that this volume belongs to. */
+        CollisionObjectType::Value objectType{};
+
+        /** If objectType is one of the entity types, this is the entity's 
+            ID. */
+        entt::entity entity{};
+    };
     /** The collision volume and related info for each world object that this 
         locator is tracking. */
     std::vector<CollisionVolumeInfo> collisionVolumes;
@@ -277,9 +273,6 @@ private:
 
     /** The vector that we use to return results. */
     std::vector<BoundingBox> returnVector;
-
-    /** The vector that we use to return results. */
-    std::vector<CollisionVolumeInfo*> returnVector2;
 };
 
 } // End namespace AM
