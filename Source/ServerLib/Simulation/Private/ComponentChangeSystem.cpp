@@ -5,6 +5,7 @@
 #include "Position.h"
 #include "Collision.h"
 #include "ClientSimData.h"
+#include "IsClientEntity.h"
 #include "ISimulationExtension.h"
 #include "Transforms.h"
 #include "Log.h"
@@ -97,7 +98,13 @@ void ComponentChangeSystem::onGraphicStateUpdated(entt::registry& registry,
                 = Transforms::modelToWorldEntity(modelBounds, position);
         })};
 
-    world.entityLocator.setEntityLocation(entity, collision.worldBounds);
+    // Update their collision in the locator.
+    CollisionObjectType::Value objectType{
+        world.registry.all_of<IsClientEntity>(entity)
+            ? CollisionObjectType::ClientEntity
+            : CollisionObjectType::NonClientEntity};
+    world.collisionLocator.updateEntity(entity, collision.worldBounds,
+                                        objectType);
 }
 
 } // namespace Server

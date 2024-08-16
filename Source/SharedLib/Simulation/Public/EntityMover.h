@@ -8,6 +8,7 @@ namespace AM
 {
 class TileMapBase;
 class EntityLocator;
+class CollisionLocator;
 struct Position;
 struct PreviousPosition;
 struct Movement;
@@ -32,7 +33,8 @@ struct Collision;
 class EntityMover {
 public:
     EntityMover(const entt::registry& inRegistry, const TileMapBase& inTileMap,
-                EntityLocator& inEntityLocator);
+                EntityLocator& inEntityLocator,
+                CollisionLocator& inCollisionLocator);
 
     /**
      * Processes a tick of entity movement, updating the given components 
@@ -57,13 +59,11 @@ private:
      * bounding boxes in the world.
      *
      * @param currentBounds The bounding box, at its current position.
-     * @param movingEntity The entity that's trying to move.
      * @param movement The entity's movement component.
      *
      * @return The desired bounding box, moved to resolve collisions.
      */
     BoundingBox resolveCollisions(const BoundingBox& currentBounds,
-                                  entt::entity movingEntity,
                                   Movement& movement, double deltaSeconds);
 
     struct NarrowPhaseResult {
@@ -74,16 +74,15 @@ private:
      * Performs a single iteration of narrow phase collision resolution between 
      * the given bounds and all volumes in broadPhaseMatches.
      */
-    NarrowPhaseResult narrowPhase(const BoundingBox& currentBounds,
-                                  Movement& movement, double deltaSeconds,
-                                  float remainingTime);
+    NarrowPhaseResult
+        narrowPhase(const std::vector<BoundingBox>& broadPhaseMatches,
+                    const BoundingBox& currentBounds, Movement& movement,
+                    double deltaSeconds, float remainingTime);
 
     const entt::registry& registry;
     const TileMapBase& tileMap;
     EntityLocator& entityLocator;
-
-    /** Scratch vector for holding volumes that are found in the broad phase. */
-    std::vector<BoundingBox> broadPhaseMatches;
+    CollisionLocator& collisionLocator;
 };
 
 } // namespace AM

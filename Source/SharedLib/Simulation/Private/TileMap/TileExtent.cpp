@@ -2,6 +2,7 @@
 #include "ChunkExtent.h"
 #include "BoundingBox.h"
 #include "MinMaxBox.h"
+#include "Vector3.h"
 #include "MovementHelpers.h"
 #include "SharedConfig.h"
 #include "Log.h"
@@ -92,6 +93,25 @@ bool TileExtent::contains(const BoundingBox& box) const
     BoundingBox extentBox{extentMinMaxBox};
 
     return extentBox.contains(box);
+}
+
+bool TileExtent::contains(const Vector3& worldPoint) const
+{
+    static constexpr float TILE_WIDTH{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
+    static constexpr float TILE_HEIGHT{
+        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
+
+    MinMaxBox extentBox{{x * TILE_WIDTH, y * TILE_WIDTH, z * TILE_HEIGHT},
+                        {(x + xLength) * TILE_WIDTH, (y + yLength) * TILE_WIDTH,
+                         (z + zLength) * TILE_HEIGHT}};
+
+    return (extentBox.min.x <= worldPoint.x)
+           && (extentBox.max.x >= worldPoint.x)
+           && (extentBox.min.y <= worldPoint.y)
+           && (extentBox.max.y >= worldPoint.y)
+           && (extentBox.min.z <= worldPoint.z)
+           && (extentBox.max.z >= worldPoint.z);
 }
 
 void TileExtent::print() const

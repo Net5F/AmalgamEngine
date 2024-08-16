@@ -21,9 +21,16 @@ struct MinMaxBox;
  * Used to quickly determine which entities are located within a given extent
  * of the world.
  *
+ * This locator only tracks entities, and it tracks them by their Position 
+ * component. This is commonly used for networking-related queries (e.g. find all
+ * entities that are within a given AoI, so we can send them network updates).
+ * All entities have a Position, so they will be tracked by this locator.
+ * For Collision-related queries for both entities and tile layers, see 
+ * CollisionLocator.h.
+ *
  * Internally, entities are organized into "cells", each of which has a size
- * corresponding to SharedConfig::CELL_WIDTH. This value can be tweaked to
- * affect performance.
+ * corresponding to SharedConfig::ENTITY_LOCATOR_CELL_WIDTH/HEIGHT. These values
+ * can be tweaked to affect performance.
  */
 class EntityLocator
 {
@@ -31,26 +38,18 @@ public:
     EntityLocator(entt::registry& inRegistry);
 
     /**
-     * Sets the size of the entity grid to match the given extent and resizes 
-     * the entityGrid vector.
+     * Sets this locator's internal grid size to match the given extent.
      */
     void setGridSize(const TileExtent& tileExtent);
 
     /**
-     * Sets the given entity's location to the location of the given bounding
-     * box.
-     *
-     * Note: Assumes all values are valid. Don't pass in values that are
-     *       outside of the map bounds.
-     *
-     * @param entity  The entity to set the location of.
-     * @param boundingBox  The entity's bounding box.
+     * Adds the given entity to this locator at the given position, or updates 
+     * it if it's already added.
      */
-    void setEntityLocation(entt::entity entity, const BoundingBox& boundingBox);
+    void updateEntity(entt::entity entity, const Position& position);
 
     /**
-     * If we're tracking the given entity, removes it from the entityGrid and
-     * entityMap.
+     * Removes the given entity from this locator, if present.
      */
     void removeEntity(entt::entity entity);
 
@@ -72,30 +71,6 @@ public:
      * Overload for ChunkExtent.
      */
     std::vector<entt::entity>& getEntities(const ChunkExtent& chunkExtent);
-
-    /**
-     * Returns all entities whose collision boxes intersect the given cylinder.
-     *
-     * Note: Because collision boxes vary in size, results are not commutative
-     *       (if a cylinder centered on entityA intersects entityB, the reverse
-     *       may not be true).
-     */
-    std::vector<entt::entity>& getCollisions(const Cylinder& cylinder);
-
-    /**
-     * Overload for BoundingBox.
-     */
-    std::vector<entt::entity>& getCollisions(const BoundingBox& boundingBox);
-
-    /**
-     * Overload for TileExtent.
-     */
-    std::vector<entt::entity>& getCollisions(const TileExtent& tileExtent);
-
-    /**
-     * Overload for ChunkExtent.
-     */
-    std::vector<entt::entity>& getCollisions(const ChunkExtent& chunkExtent);
 
     /**
      * Performs a broad phase to get all entities in cells intersected by
@@ -141,21 +116,36 @@ private:
         * SharedConfig::TILE_WORLD_HEIGHT};
 
     /**
-     * Removes the given entity from the cells within the given extent.
+     * Removes the given entity from the given cell.
      *
      * Note: This leaves the entity's ID in the entityMap. Only the tracked
      *       location is cleared out.
      */
-    void clearEntityLocation(entt::entity entity, CellExtent& clearExtent);
+    void clearEntityFromCell(entt::entity entity,
+                             const CellPosition& clearPosition);
 
     /**
      * Returns the index in the entityGrid vector where the cell with the given
      * coordinates can be found.
      */
+    // TODO: Test morton vs row-major
+    //inline std::size_t
+    //    linearizeCellIndex(const CellPosition& cellPosition) const
+    //{
+    //    // Translate the given position from actual-space to positive-space.
+    //    CellPosition positivePosition{cellPosition.x - gridCellExtent.x,
+    //                                  cellPosition.y - gridCellExtent.y,
+    //                                  cellPosition.z - gridCellExtent.z};
+
+    //    // Get the 2D morton index from our x/y position, then offset it into 
+    //    // the correct Z range.
+    //    return static_cast<std::size_t>(
+    //        Morton::encode32(positivePosition.x, positivePosition.y)
+    //        + (cellPosition.z * xyLength));
+    //}
     inline std::size_t
         linearizeCellIndex(const CellPosition& cellPosition) const
     {
-        // TODO: Switch to 3d morton code
         // Translate the given position from actual-space to positive-space.
         CellPosition positivePosition{cellPosition.x - gridCellExtent.x,
                                       cellPosition.y - gridCellExtent.y,
@@ -168,22 +158,23 @@ private:
             + positivePosition.x);
     }
 
-    /** Used for fetching entity bounding boxes during narrow phases. */
+    /** Used for fetching entity positions during narrow phases. */
     entt::registry& registry;
 
     /** The grid's extent, with cells as the unit. */
     CellExtent gridCellExtent;
 
-    /** The outer vector is a 3D grid stored in row-major order, holding the
-        grid's cells.
+    // TODO: Update comment if we don't go with morton
+    /** The outer vector is a 3D grid holding the locator's cells, indexed by 
+        morton2D(x, y) + (z * xLength * yLength). I.e., we morton-index an 
+        entire X/Y level of the grid, then proceed to the next Z.
         Each element in the grid is a vector of entities--the entities that
         currently intersect with that cell. */
     std::vector<std::vector<entt::entity>> entityGrid;
 
-    /** A map of entity ID -> the cells that the entity is located in.
-        Used to easily clear out old entity data before setting their new
-        location. */
-    std::unordered_map<entt::entity, CellExtent> entityMap;
+    /** A map of entity ID -> the cell that the entity is located in.
+        Used to easily find the entity during removal. */
+    std::unordered_map<entt::entity, CellPosition> entityMap;
 
     /** The vector that we use to return results. */
     std::vector<entt::entity> returnVector;

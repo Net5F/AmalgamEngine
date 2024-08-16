@@ -1,5 +1,6 @@
 #include "TileMap.h"
 #include "GraphicData.h"
+#include "CollisionLocator.h"
 #include "Sprite.h"
 #include "Paths.h"
 #include "Position.h"
@@ -19,8 +20,9 @@ namespace AM
 {
 namespace Server
 {
-TileMap::TileMap(GraphicData& inGraphicData)
-: TileMapBase{inGraphicData, true}
+TileMap::TileMap(GraphicData& inGraphicData,
+                 CollisionLocator& inCollisionLocator)
+: TileMapBase{inGraphicData, inCollisionLocator, true}
 {
     // Prime a timer.
     Timer timer;
@@ -100,6 +102,11 @@ void TileMap::load(TileMapSnapshot& mapSnapshot)
         LOG_FATAL("Failed to load map: Map width is larger than "
                   "MAX_MAP_WIDTH_TILES.");
     }
+
+    // Allocate the collision locator grid.
+    // Note: We need to do this here instead of in World() because the locator
+    //       will be used below.
+    collisionLocator.setGridSize(tileExtent);
 
     // Load all of the snapshot's chunks into our map.
     for (auto& [chunkPosition, chunkSnapshot] : mapSnapshot.chunks) {

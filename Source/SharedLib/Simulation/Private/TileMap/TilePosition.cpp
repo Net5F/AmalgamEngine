@@ -2,7 +2,6 @@
 #include "ChunkPosition.h"
 #include "Position.h"
 #include "SharedConfig.h"
-#include "MovementHelpers.h"
 #include "Log.h"
 
 namespace AM
@@ -30,6 +29,10 @@ TilePosition::TilePosition(const Vector3& worldPoint)
     static constexpr float TILE_HEIGHT{
         static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
 
+    // Note: We may want to account for float precision loss here using an 
+    //       epsilon, but it's unclear how that rounding would behave (do you 
+    //       round up? round down? round either direction if within epsilon 
+    //       range?) This also applies for ChunkPosition and CellPosition.
     x = static_cast<int>(std::floor(worldPoint.x / TILE_WIDTH));
     y = static_cast<int>(std::floor(worldPoint.y / TILE_WIDTH));
     z = static_cast<int>(std::floor(worldPoint.z / TILE_HEIGHT));

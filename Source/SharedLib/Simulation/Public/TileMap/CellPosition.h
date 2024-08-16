@@ -21,15 +21,23 @@ struct CellPosition : public DiscretePosition<DiscreteImpl::CellTag> {
 
     /**
      * Calculates the position of the cell that contains the given point.
+     *
+     * @param cellWidth The width of a cell, in world units.
+     * @param cellHeight The height of a cell, in world units.
      */
-    explicit CellPosition(const Vector3& worldPoint);
+    explicit CellPosition(const Vector3& worldPoint, float cellWidth,
+                          float cellHeight);
 
     /**
      * Calculates the position of the cell that contains the given tile 
      * position.
+     *
+     * @param cellWidthTiles The width of a cell, in tiles.
+     * @param cellHeightTiles The height of a cell, in tiles.
      */
     explicit CellPosition(const TilePosition& tilePosition,
-                          std::size_t cellWidth, std::size_t cellHeight);
+                          std::size_t cellWidthTiles,
+                          std::size_t cellHeightTiles);
 
     /**
      * Prints this position's current values.

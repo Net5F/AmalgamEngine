@@ -82,7 +82,7 @@ void Simulation::tick()
 
         // If we aren't connected, return early.
         if (serverConnectionSystem.getConnectionState()
-            != ServerConnectionSystem::ConnectionState::Connected) {
+            != ConnectionState::Connected) {
             return;
         }
     }

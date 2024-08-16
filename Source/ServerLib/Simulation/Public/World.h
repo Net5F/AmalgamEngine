@@ -4,6 +4,7 @@
 #include "TileMap.h"
 #include "NetworkDefs.h"
 #include "EntityLocator.h"
+#include "CollisionLocator.h"
 #include "EntityStoredValueID.h"
 #include "EntityStoredValueIDMap.h"
 #include "GlobalStoredValueMap.h"
@@ -58,12 +59,16 @@ public:
     /** Item data templates. */
     ItemData itemData;
 
+    /** Spatial partitioning grid for efficiently locating entities by
+        their position. */
+    EntityLocator entityLocator;
+
+    /** Spatial partitioning grid for efficiently locating entities and tile 
+        layers by their collision volumes. */
+    CollisionLocator collisionLocator;
+
     /** The tile map that makes up the world. */
     TileMap tileMap;
-
-    /** Spatial partitioning grid for efficiently locating entities by
-        position. */
-    EntityLocator entityLocator;
 
     /** Maps entity stored value string IDs -> their associated numeric ID. */
     EntityStoredValueIDMap entityStoredValueIDMap;

@@ -64,6 +64,7 @@ void EntityLifetimeSystem::processEntityDeletes(Uint32 desiredTick)
            && (entityDelete->tickNum <= desiredTick)) {
         if (registry.valid(entityDelete->entity)) {
             world.entityLocator.removeEntity(entityDelete->entity);
+            world.collisionLocator.removeEntity(entityDelete->entity);
             registry.destroy(entityDelete->entity);
 
             LOG_INFO("Entity removed: %u. Desired tick: %u, Message tick: %u",
@@ -140,6 +141,7 @@ void EntityLifetimeSystem::processEntityData(
 
     // All entities have a position.
     registry.emplace<Position>(newEntity, entityData.position);
+    world.entityLocator.updateEntity(newEntity, entityData.position);
 
     // Add any replicated components that the server sent.
     for (const ReplicatedComponent& componentVariant : entityData.components) {
@@ -179,8 +181,12 @@ void EntityLifetimeSystem::processEntityData(
             Transforms::modelToWorldEntity(modelBounds, position))};
 
         // Entities with Collision get added to the locator.
-        world.entityLocator.setEntityLocation(newEntity,
-                                              collision.worldBounds);
+        CollisionObjectType::Value objectType{
+            world.registry.all_of<IsClientEntity>(newEntity)
+                ? CollisionObjectType::ClientEntity
+                : CollisionObjectType::NonClientEntity};
+        world.collisionLocator.updateEntity(newEntity, collision.worldBounds,
+                                            objectType);
 
         // Entities with GraphicState also get a ClientGraphicState.
         // Set it to match the entity's Rotation, or IdleSouth if it has none.

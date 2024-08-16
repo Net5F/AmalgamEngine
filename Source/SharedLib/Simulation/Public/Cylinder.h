@@ -32,6 +32,11 @@ struct Cylinder {
      * Note: Shared edges are considered to be intersecting.
      */
     bool intersects(const BoundingBox& boundingBox) const;
+
+    /**
+     * Prints this cylinder's current values.
+     */
+    void print() const;
 };
 
 } // End namespace AM

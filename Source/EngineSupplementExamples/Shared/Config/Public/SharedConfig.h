@@ -54,6 +54,14 @@ public:
         grid (EntityLocator). */
     static constexpr std::size_t ENTITY_LOCATOR_CELL_HEIGHT{2};
 
+    /** The x and y axis width, in tiles, of a cell in our collision spatial
+        partitioning grid (CollisionLocator). */
+    static constexpr std::size_t COLLISION_LOCATOR_CELL_WIDTH{4};
+
+    /** The z axis width, in tiles, of a cell in our collision spatial 
+        partitioning grid (CollisionLocator). */
+    static constexpr std::size_t COLLISION_LOCATOR_CELL_HEIGHT{2};
+
     /** The number of world units around an entity that are considered to be
         within the entity's "Area of Interest" cylinder.
         Used in the simulation to tell if data is relevant to a client. */

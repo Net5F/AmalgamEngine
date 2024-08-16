@@ -6,6 +6,8 @@
 
 namespace AM
 {
+class CollisionLocator;
+
 namespace Client
 {
 class GraphicData;
@@ -24,7 +26,7 @@ public:
      *
      * Errors if TileMap.bin doesn't exist or it fails to parse.
      */
-    TileMap(GraphicData& inGraphicData);
+    TileMap(GraphicData& inGraphicData, CollisionLocator& inCollisionLocator);
 
     /**
      * Sets the size of the map and resizes the chunks vector.

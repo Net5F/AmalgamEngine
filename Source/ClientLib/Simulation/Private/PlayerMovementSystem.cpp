@@ -28,7 +28,8 @@ PlayerMovementSystem::PlayerMovementSystem(Simulation& inSimulation,
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
-, entityMover{world.registry, world.tileMap, world.entityLocator}
+, entityMover{world.registry, world.tileMap, world.entityLocator,
+              world.collisionLocator}
 , playerMovementUpdateQueue{inNetwork.getEventDispatcher()}
 {
 }

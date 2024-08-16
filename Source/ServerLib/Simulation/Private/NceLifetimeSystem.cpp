@@ -6,6 +6,7 @@
 #include "Position.h"
 #include "EntityInitScript.h"
 #include "IsClientEntity.h"
+#include "Collision.h"
 #include "SystemMessage.h"
 #include "ISimulationExtension.h"
 #include "ItemHandlers.h"
@@ -66,13 +67,16 @@ void NceLifetimeSystem::handleInitRequest(
     if (entityInitRequest.entity != entt::null) {
         // Double-check that the ID is actually in use.
         if (world.registry.valid(entityInitRequest.entity)) {
+            // Remove it from the locators.
+            world.entityLocator.removeEntity(entityInitRequest.entity);
+            if (world.registry.all_of<Collision>(entityInitRequest.entity)) {
+                world.collisionLocator.removeEntity(entityInitRequest.entity);
+            }
+
             // This is an existing entity. Remove all of its components.
             for (auto [id, storage] : world.registry.storage()) {
                 storage.remove(entityInitRequest.entity);
             }
-
-            // Remove it from the entity locator.
-            world.entityLocator.removeEntity(entityInitRequest.entity);
 
             // Queue an init for next tick.
             // Note: Since the entity was removed from the locator, AOISystem

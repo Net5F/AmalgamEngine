@@ -3,6 +3,7 @@
 #include "ItemData.h"
 #include "TileMap.h"
 #include "EntityLocator.h"
+#include "CollisionLocator.h"
 #include "entt/entity/registry.hpp"
 
 struct SDL_Rect;
@@ -38,12 +39,16 @@ public:
     /** The entity that this client is controlling. */
     entt::entity playerEntity;
 
-    /** The tile map that makes up the world. */
-    TileMap tileMap;
-
     /** Spatial partitioning grid for efficiently locating entities by
         position. */
     EntityLocator entityLocator;
+
+    /** Spatial partitioning grid for efficiently locating entities and tile 
+        layers by their collision volumes. */
+    CollisionLocator collisionLocator;
+
+    /** The tile map that makes up the world. */
+    TileMap tileMap;
 };
 
 } // namespace Client

@@ -7,6 +7,7 @@ namespace AM
 struct ChunkExtent;
 struct BoundingBox;
 struct MinMaxBox;
+struct Vector3;
 
 /**
  * A strong type alias, describing an extent of map tiles.
@@ -43,6 +44,11 @@ struct TileExtent : public DiscreteExtent<DiscreteImpl::TileTag> {
      *         false.
      */
     bool contains(const BoundingBox& box) const;
+
+    /**
+     * @return true if the given world point is within this extent.
+     */
+    bool contains(const Vector3& point) const;
 
     /**
      * Prints this extent's current values.

@@ -1,16 +1,10 @@
 #include "Tile.h"
 #include "GraphicSets.h"
-#include "Transforms.h"
 #include "SharedConfig.h"
 #include <algorithm>
 
 namespace AM
 {
-
-const std::vector<BoundingBox>& Tile::getCollisionVolumes() const
-{
-    return collisionVolumes;
-}
 
 void Tile::addLayer(const TileOffset& tileOffset, TileLayer::Type layerType,
                     const GraphicSet& graphicSet, Uint8 graphicValue)
@@ -260,44 +254,6 @@ const TileLayer* Tile::findLayer(TileLayer::Type layerType) const
     }
 
     return nullptr;
-}
-
-void Tile::rebuildCollision(const TilePosition& tilePosition)
-{
-    // Clear out the old collision volumes.
-    collisionVolumes.clear();
-
-    // Add all of this tile's layers that have collision.
-    float terrainHeight{0};
-    for (const TileLayer& layer : layers) {
-        GraphicRef graphic{layer.getGraphic()};
-
-        // If it's terrain, generate collision for it.
-        // (We ignore modelBounds and collisionEnabled on terrain, all terrain 
-        // gets generated collision). 
-        BoundingBox bounds{};
-        if (layer.type == TileLayer::Type::Terrain) {
-            bounds = Terrain::calcWorldBounds(
-                tilePosition, static_cast<Terrain::Value>(layer.graphicValue));
-            terrainHeight = bounds.center.z + bounds.halfExtents.z;
-        }
-        // If it's a floor, skip it (they never have collision).
-        else if (layer.type == TileLayer::Type::Floor) {
-            continue;
-        }
-        // If it's a wall or object, add its assigned collision.
-        else if (graphic.getCollisionEnabled()) {
-            bounds = Transforms::modelToWorldTile(graphic.getModelBounds(),
-                                                  tilePosition);
-
-            // If it's a wall, add the terrain height.
-            if (layer.type == TileLayer::Type::Wall) {
-                bounds.center.z += terrainHeight;
-            }
-        }
-
-        collisionVolumes.push_back(bounds);
-    }
 }
 
 bool Tile::isEmpty() const

@@ -1,5 +1,6 @@
 #include "TileMapBase.h"
 #include "GraphicDataBase.h"
+#include "CollisionLocator.h"
 #include "Paths.h"
 #include "Position.h"
 #include "Transforms.h"
@@ -21,8 +22,11 @@ static_assert(SharedConfig::TILE_WORLD_WIDTH <= SDL_MAX_UINT8,
 static_assert(SharedConfig::TILE_WORLD_HEIGHT <= SDL_MAX_UINT8,
               "TILE_WORLD_HEIGHT must fit within a Uint8 for TileOffset.");
 
-TileMapBase::TileMapBase(GraphicDataBase& inGraphicData, bool inTrackTileUpdates)
+TileMapBase::TileMapBase(GraphicDataBase& inGraphicData,
+                         CollisionLocator& inCollisionLocator,
+                         bool inTrackTileUpdates)
 : graphicData{inGraphicData}
+, collisionLocator{inCollisionLocator}
 , chunkExtent{}
 , tileExtent{}
 , chunks{}
@@ -486,7 +490,7 @@ void TileMapBase::rebuildDirtyTileCollision()
     // Rebuild the collision of any dirty tiles.
     for (auto it{dirtyCollisionQueue.begin()}; it != lastIt; ++it) {
         if (auto tileResult{getTile(*it)}) {
-            tileResult->tile.get().rebuildCollision(*it);
+            collisionLocator.updateTile(*it, tileResult->tile);
         }
     }
 
@@ -662,7 +666,7 @@ void TileMapBase::rebuildTileCollision(Tile& tile, const TilePosition& tilePosit
 {
     // If auto rebuild is enabled, rebuild the affected tile's collision.
     if (autoRebuildCollision) {
-        tile.rebuildCollision(tilePosition);
+        collisionLocator.updateTile(tilePosition, tile);
     }
     else {
         // Not enabled. Queue the affected tile to have its collision rebuilt.
@@ -1163,8 +1167,8 @@ void TileMapBase::loadChunkInternal(const T& chunkSnapshot,
 
         // Rebuild the tile's collision if necessary.
         if (rebuildCollision) {
-            Morton::Result2D xyOffsets{Morton::m2D_reverse_lookup_16x16(
-                static_cast<Uint8>(currentTileIndex))};
+            Morton::Result2D xyOffsets{
+                Morton::decode16x16(static_cast<Uint8>(currentTileIndex))};
             TilePosition tilePosition(chunkPosition);
             tilePosition.x += xyOffsets.x;
             tilePosition.y += xyOffsets.y;

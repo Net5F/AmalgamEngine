@@ -27,7 +27,7 @@ BoundingBox::BoundingBox(const MinMaxBox& box)
     center.z = box.min.z + halfExtents.z;
 }
 
-bool BoundingBox::operator==(const BoundingBox& other)
+bool BoundingBox::operator==(const BoundingBox& other) const
 {
     return (center == other.center) && (halfExtents == other.halfExtents);
 }

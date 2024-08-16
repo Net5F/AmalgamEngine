@@ -40,7 +40,7 @@ private:
      * We use morton codes to lay out our tiles in a more cache-friendly way 
      * since we're likely to be accessing neighbors at the same time.
      */
-    Uint32 mortonEncode32(Uint16 x, Uint16 y) const;
+    Uint32 mortonEncode(Uint16 x, Uint16 y) const;
 };
 
 } // End namespace AM

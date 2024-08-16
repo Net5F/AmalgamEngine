@@ -1,4 +1,5 @@
 #include "World.h"
+#include "GraphicData.h"
 #include "EnttGroups.h"
 #include "EntityInitLua.h"
 #include "ItemInitLua.h"
@@ -63,8 +64,9 @@ World::World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
              ItemInitLua& inItemInitLua)
 : registry{}
 , itemData{}
-, tileMap{inGraphicData}
 , entityLocator{registry}
+, collisionLocator{}
+, tileMap{inGraphicData, collisionLocator}
 , entityStoredValueIDMap{}
 , globalStoredValueMap{}
 , database{std::make_unique<Database>()}
@@ -98,7 +100,7 @@ World::World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
         = tileMapExtent.y * static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
           + Config::SPAWN_POINT_GROUP_PADDING_Y;
 
-    // Allocate the entity locator's grid.
+    // Allocate the entity locator grid.
     entityLocator.setGridSize(tileMap.getTileExtent());
 
     // Add listeners for each client-relevant component. When the component is
@@ -145,6 +147,7 @@ entt::entity World::createEntity(const Position& position,
 
     // All entities have a position.
     registry.emplace<Position>(newEntity, position);
+    entityLocator.updateEntity(newEntity, position);
 
     return newEntity;
 }
@@ -173,10 +176,12 @@ void World::addGraphicsComponents(entt::entity entity,
         entity, modelBounds,
         Transforms::modelToWorldEntity(modelBounds, position))};
 
-    // Add the entity to the locator.
-    // Note: Since we're adding the entity to the locator, clients
-    //       will be told by ClientAOISystem to replicate it.
-    entityLocator.setEntityLocation(entity, collision.worldBounds);
+    // Entities with Collision get added to the locator.
+    CollisionObjectType::Value objectType{
+        registry.all_of<IsClientEntity>(entity)
+            ? CollisionObjectType::ClientEntity
+            : CollisionObjectType::NonClientEntity};
+    collisionLocator.updateEntity(entity, collision.worldBounds, objectType);
 }
 
 void World::addMovementComponents(entt::entity entity, const Rotation& rotation)
@@ -382,10 +387,17 @@ Position World::getGroupedSpawnPoint()
 
 void World::onEntityDestroyed(entt::entity entity)
 {
-    // Remove it from the locator.
+    // Remove it from the locators.
+    // Note: Client entities could easily be removed where we delete them, but 
+    //       NCEs may be deleted at any point by project code, so we handle it
+    //       here to avoid bugs. 
     entityLocator.removeEntity(entity);
+    if (registry.all_of<Collision>(entity)) {
+        collisionLocator.removeEntity(entity);
+    }
 
     // If the entity is in the database, delete it (does nothing if it isn't).
+    // Note: This is to delete non-client entities, since they get persisted.
     database->deleteEntityData(entity);
 }
 

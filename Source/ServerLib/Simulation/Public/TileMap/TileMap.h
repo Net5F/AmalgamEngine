@@ -1,7 +1,6 @@
 #pragma once
 
 #include "TileMapBase.h"
-#include "GraphicData.h"
 
 namespace AM
 {
@@ -12,6 +11,7 @@ struct ChunkSnapshot;
 
 namespace Server
 {
+class GraphicData;
 
 /**
  * Owns and manages the world's tile map state.
@@ -30,7 +30,7 @@ public:
      *
      * Errors if TileMap.bin doesn't exist or it fails to parse.
      */
-    TileMap(GraphicData& inGraphicData);
+    TileMap(GraphicData& inGraphicData, CollisionLocator& inCollisionLocator);
 
     /**
      * Attempts to save the current tile map state to TileMap.bin.

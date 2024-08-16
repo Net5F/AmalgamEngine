@@ -29,12 +29,6 @@ class Tile
 {
 public:
     /**
-     * Returns the collision volumes of each of this tile's layers.
-     * Note: The returned vector may be empty, if this tile has no collision.
-     */
-    const std::vector<BoundingBox>& getCollisionVolumes() const;
-
-    /**
      * Adds the given layer to this tile.
      */
     void addLayer(const TileOffset& tileOffset, TileLayer::Type layerType,
@@ -105,23 +99,10 @@ public:
     TileLayer* findLayer(TileLayer::Type layerType);
     const TileLayer* findLayer(TileLayer::Type layerType) const;
 
-    /**
-     * Clears the collisionVolumes vector, then refills it with all of this
-     * tile's walls and objects.
-     *
-     * @param tilePosition This tile's world coordinates.
-     */
-    void rebuildCollision(const TilePosition& tilePosition);
-
     /** Returns true if this tile has no layers, else false. */
     bool isEmpty() const;
 
 private:
-    /** Holds this tile's collision volumes.
-        We pre-calculate these and store them contiguously to speed up collision
-        checking. */
-    std::vector<BoundingBox> collisionVolumes{};
-
     // TODO: Maybe eventually switch to an alternative vector type that
     //       has a smaller footprint but only supports forward iterators.
     /** The graphic layers that are on this tile, sorted by their 

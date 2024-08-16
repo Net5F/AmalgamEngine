@@ -7,6 +7,7 @@ namespace AM
 struct TileExtent;
 struct BoundingBox;
 struct MinMaxBox;
+struct Cylinder;
 
 /**
  * A strong type alias, describing an extent of spatial partitioning grid
@@ -32,14 +33,29 @@ struct CellExtent : public DiscreteExtent<DiscreteImpl::CellTag> {
 
     /**
      * Constructs the smallest cell extent that contains the given bounding box.
+     *
+     * @param cellWidth The width of a cell, in world units.
+     * @param cellHeight The height of a cell, in world units.
      */
     explicit CellExtent(const BoundingBox& boundingBox, float cellWidth,
                         float cellHeight);
 
     /**
      * Constructs the smallest cell extent that contains the given min max box.
+     *
+     * @param cellWidth The width of a cell, in world units.
+     * @param cellHeight The height of a cell, in world units.
      */
     explicit CellExtent(const MinMaxBox& box, float cellWidth,
+                        float cellHeight);
+
+    /**
+     * Constructs the smallest cell extent that contains the given cylinder.
+     *
+     * @param cellWidth The width of a cell, in world units.
+     * @param cellHeight The height of a cell, in world units.
+     */
+    explicit CellExtent(const Cylinder& cylinder, float cellWidth,
                         float cellHeight);
 
     /**

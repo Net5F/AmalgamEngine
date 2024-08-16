@@ -23,17 +23,15 @@ ChunkPosition::ChunkPosition(
 }
 
 ChunkPosition::ChunkPosition(const Vector3& worldPoint)
-: DiscretePosition<DiscreteImpl::ChunkTag>(
-    static_cast<int>(std::floor(
-        worldPoint.x / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
-        / static_cast<float>(SharedConfig::CHUNK_WIDTH))),
-    static_cast<int>(std::floor(
-        worldPoint.y / static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)
-        / static_cast<float>(SharedConfig::CHUNK_WIDTH))),
-    static_cast<int>(std::floor(
-        worldPoint.z / static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)
-        / static_cast<float>(SharedConfig::CHUNK_WIDTH))))
 {
+    static constexpr float CHUNK_WIDTH{static_cast<float>(
+        SharedConfig::TILE_WORLD_WIDTH * SharedConfig::CHUNK_WIDTH)};
+    static constexpr float CHUNK_HEIGHT{
+        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
+
+    x = static_cast<int>(std::floor(worldPoint.x / CHUNK_WIDTH));
+    y = static_cast<int>(std::floor(worldPoint.y / CHUNK_WIDTH));
+    z = static_cast<int>(std::floor(worldPoint.z / CHUNK_HEIGHT));
 }
 
 ChunkPosition::ChunkPosition(const TilePosition& tilePosition)

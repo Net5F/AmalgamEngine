@@ -25,6 +25,7 @@
 
 namespace AM
 {
+class CollisionLocator;
 struct TileMapSnapshot;
 struct ChunkSnapshot;
 struct ChunkWireSnapshot;
@@ -56,7 +57,8 @@ public:
      * @param inTrackTileUpdates  If true, tile updates will be pushed into
      *                            tileUpdateHistory.
      */
-    TileMapBase(GraphicDataBase& inGraphicData, bool inTrackTileUpdates);
+    TileMapBase(GraphicDataBase& inGraphicData,
+                CollisionLocator& inCollisionLocator, bool inTrackTileUpdates);
 
     /**
      * Adds the given terrain to the given tile.
@@ -462,6 +464,9 @@ protected:
 
     /** Used to get graphics while constructing tiles. */
     GraphicDataBase& graphicData;
+
+    /** Used when rebuilding tile collision. */
+    CollisionLocator& collisionLocator;
 
     /** The map's extent, with chunks as the unit. */
     ChunkExtent chunkExtent;

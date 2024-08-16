@@ -2,6 +2,7 @@
 #include "TileExtent.h"
 #include "BoundingBox.h"
 #include "MinMaxBox.h"
+#include "Cylinder.h"
 #include "MovementHelpers.h"
 #include "SharedConfig.h"
 #include "Log.h"
@@ -33,6 +34,8 @@ CellExtent::CellExtent(const TileExtent& tileExtent, std::size_t cellWidthTiles,
     const float CELL_WIDTH{static_cast<float>(cellWidthTiles)};
     const float CELL_HEIGHT{static_cast<float>(cellHeightTiles)};
 
+    // Note: We use floor instead of integer division because negative values
+    //       still need to round down.
     x = static_cast<int>(std::floor(tileExtent.x / CELL_WIDTH));
     y = static_cast<int>(std::floor(tileExtent.y / CELL_WIDTH));
     z = static_cast<int>(std::floor(tileExtent.z / CELL_HEIGHT));
@@ -58,9 +61,15 @@ CellExtent::CellExtent(const BoundingBox& boundingBox, float cellWidth,
 CellExtent::CellExtent(const MinMaxBox& box, float cellWidth,
                        float cellHeight)
 {
+    // Note: One could imagine doing the opposite logic here (if a box is 
+    //       exactly touching the edge of a cell, include it in the extent).
+    //       However, this would make it so that a box with the exact bounds 
+    //       of a cell would convert into an extent that includes every cell 
+    //       around it, which seems unexpected.
+
     // To account for float precision issues: add the epsilon to each min value,
-    // then round down. If the value was within epsilon range of the integer 
-    // above it, it'll end up rounded up.
+    // then round down. If the box is within epsilon range of a cell in the 
+    // negative direction, it won't be included in this extent.
     x = static_cast<int>(std::floor(
         (box.min.x + MovementHelpers::WORLD_EPSILON) / cellWidth));
     y = static_cast<int>(std::floor(
@@ -68,8 +77,9 @@ CellExtent::CellExtent(const MinMaxBox& box, float cellWidth,
     z = static_cast<int>(std::floor(
         (box.min.z + MovementHelpers::WORLD_EPSILON) / cellHeight));
 
-    // Subtract the epsilon from each max value, then round up. If the value was 
-    // within epsilon range of the integer below it, it'll end up rounded down.
+    // Subtract the epsilon from each max value, then round up. If the box is 
+    // within epsilon range of a cell in the positive direction, it won't be 
+    // included in this extent.
     float maxTileX{
         std::ceil((box.max.x - MovementHelpers::WORLD_EPSILON) / cellWidth)};
     float maxTileY{
@@ -79,6 +89,30 @@ CellExtent::CellExtent(const MinMaxBox& box, float cellWidth,
     xLength = (static_cast<int>(maxTileX) - x);
     yLength = (static_cast<int>(maxTileY) - y);
     zLength = (static_cast<int>(maxTileZ) - z);
+}
+
+CellExtent::CellExtent(const Cylinder& cylinder, float cellWidth,
+                       float cellHeight)
+{
+    x = static_cast<int>(
+        std::floor((cylinder.center.x - cylinder.radius) / cellWidth));
+    y = static_cast<int>(
+        std::floor((cylinder.center.y - cylinder.radius) / cellWidth));
+    z = static_cast<int>(
+        std::floor((cylinder.center.z - cylinder.halfHeight) / cellHeight));
+
+    // Note: Be careful not to do this sort of thing in an initializer list 
+    //       through the base class's constructor (we're subtracting other 
+    //       struct members, which wouldn't yet be initialized).
+    xLength = static_cast<int>(
+                  std::ceil((cylinder.center.x + cylinder.radius) / cellWidth))
+              - x;
+    yLength = static_cast<int>(
+                  std::ceil((cylinder.center.y + cylinder.radius) / cellWidth))
+              - y;
+    zLength = static_cast<int>(std::ceil(
+                  (cylinder.center.z + cylinder.halfHeight) / cellHeight))
+              - z;
 }
 
 void CellExtent::print() const

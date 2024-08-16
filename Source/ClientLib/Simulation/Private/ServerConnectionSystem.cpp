@@ -114,8 +114,9 @@ void ServerConnectionSystem::initSimState(
              connectionResponse.mapYLengthChunks,
              connectionResponse.mapZLengthChunks);
 
-    // Allocate the entity locator's grid.
+    // Allocate the locator grids.
     world.entityLocator.setGridSize(world.tileMap.getTileExtent());
+    world.collisionLocator.setGridSize(world.tileMap.getTileExtent());
 
     // Aim our tick for some reasonable point ahead of the server.
     // The server will adjust us after the first message anyway.
@@ -144,6 +145,7 @@ void ServerConnectionSystem::initMockSimState()
 
     registry.emplace<Input>(newEntity);
     registry.emplace<Position>(newEntity, 0.0f, 0.0f, 0.0f);
+    world.entityLocator.updateEntity(newEntity, {0.0f, 0.0f, 0.0f});
     registry.emplace<PreviousPosition>(newEntity, 0.0f, 0.0f, 0.0f);
     registry.emplace<Movement>(newEntity);
     registry.emplace<MovementModifiers>(newEntity);
@@ -162,7 +164,14 @@ void ServerConnectionSystem::initMockSimState()
         newEntity, modelBounds,
         Transforms::modelToWorldEntity(modelBounds,
                                        registry.get<Position>(newEntity)))};
-    world.entityLocator.setEntityLocation(newEntity, collision.worldBounds);
+
+    // Entities with Collision get added to the locator.
+    CollisionObjectType::Value objectType{
+        world.registry.all_of<IsClientEntity>(newEntity)
+            ? CollisionObjectType::ClientEntity
+            : CollisionObjectType::NonClientEntity};
+    world.collisionLocator.updateEntity(newEntity, collision.worldBounds,
+                                        objectType);
 
     // Entities with GraphicState also get a ClientGraphicState.
     registry.emplace<ClientGraphicState>(newEntity,

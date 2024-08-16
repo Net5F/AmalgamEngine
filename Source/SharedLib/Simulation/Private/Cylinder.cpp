@@ -33,4 +33,10 @@ bool Cylinder::intersects(const BoundingBox& boundingBox) const
     return boundingBox.intersects(*this);
 }
 
+void Cylinder::print() const
+{
+    LOG_INFO("(%.4f, %.4f, %.4f), %.4f, %.4f", center.x, center.y, center.z,
+             radius, halfHeight);
+}
+
 } // End namespace AM

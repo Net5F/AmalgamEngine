@@ -23,6 +23,7 @@ target_link_libraries(SharedLib
         SDL2pp
         boost_mp11
         lz4_static
+        libmorton::libmorton 
         EnTT::EnTT
         Bitsery::bitsery
         nlohmann_json::nlohmann_json

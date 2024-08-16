@@ -1,6 +1,7 @@
 #include "EntityMover.h"
 #include "TileMapBase.h"
 #include "EntityLocator.h"
+#include "CollisionLocator.h"
 #include "Input.h"
 #include "Position.h"
 #include "PreviousPosition.h"
@@ -18,11 +19,12 @@ namespace AM
 {
 EntityMover::EntityMover(const entt::registry& inRegistry,
                          const TileMapBase& inTileMap,
-                         EntityLocator& inEntityLocator)
+                         EntityLocator& inEntityLocator,
+                         CollisionLocator& inCollisionLocator)
 : registry{inRegistry}
 , tileMap{inTileMap}
 , entityLocator{inEntityLocator}
-, broadPhaseMatches{}
+, collisionLocator{inCollisionLocator}
 {
 }
 
@@ -44,8 +46,8 @@ void EntityMover::moveEntity(
         = MovementHelpers::calcVelocity(inputStates, movement, movementMods);
 
     // Resolve any collisions with the surrounding bounding boxes.
-    BoundingBox resolvedBounds{resolveCollisions(collision.worldBounds, entity,
-                                                 movement, deltaSeconds)};
+    BoundingBox resolvedBounds{
+        resolveCollisions(collision.worldBounds, movement, deltaSeconds)};
 
     // Update their bounding box and position.
     // Note: The entity's position is centered on the model bounds stage, not 
@@ -63,19 +65,22 @@ void EntityMover::moveEntity(
     // Update the direction they're facing, based on their current inputs.
     rotation = MovementHelpers::calcRotation(rotation, inputStates);
 
-    // If they did actually move, update their position in the locator.
+    // If they did actually move, update their position in the locators.
     if (position != previousPosition) {
-        entityLocator.setEntityLocation(entity, collision.worldBounds);
+        entityLocator.updateEntity(entity, position);
+
+        CollisionObjectType::Value objectType{
+            registry.all_of<IsClientEntity>(entity)
+                ? CollisionObjectType::ClientEntity
+                : CollisionObjectType::NonClientEntity};
+        collisionLocator.updateEntity(entity, collision.worldBounds, objectType);
     }
 }
 
 BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
-                                           entt::entity movingEntity,
                                            Movement& movement,
                                            double deltaSeconds)
 {
-    broadPhaseMatches.clear();
-
     // Calc where the bounds will end up if there are no collisions.
     BoundingBox desiredBounds{currentBounds};
     desiredBounds.center
@@ -96,45 +101,21 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
     TileExtent broadPhaseTileExtent(broadPhaseBounds);
     broadPhaseTileExtent.intersectWith(tileMap.getTileExtent());
 
-    // Collect the volumes of any tiles that intersect the broad phase bounds.
-    for (int z{broadPhaseTileExtent.z}; z <= broadPhaseTileExtent.zMax(); ++z) {
-        for (int y{broadPhaseTileExtent.y}; y <= broadPhaseTileExtent.yMax();
-             ++y) {
-            for (int x{broadPhaseTileExtent.x};
-                 x <= broadPhaseTileExtent.xMax(); ++x) {
-                // If this tile doesn't exist, it's empty so we can skip it.
-                const Tile* tile{tileMap.cgetTile({x, y, z})};
-                if (!tile) {
-                    continue;
-                }
-
-                for (const BoundingBox& collisionVolume :
-                     tile->getCollisionVolumes()) {
-                    broadPhaseMatches.emplace_back(collisionVolume);
-                }
-            }
-        }
-    }
-
-    // Collect the volumes of any non-client entities (besides the entity trying
-    // to move) that intersect the broad phase bounds.
-    std::vector<entt::entity>& entitiesBroadPhase{
-        entityLocator.getEntitiesBroad(broadPhaseTileExtent)};
-    for (entt::entity entity : entitiesBroadPhase) {
-        if ((entity != movingEntity)
-            && !(registry.all_of<IsClientEntity>(entity))) {
-            const Collision& collision{registry.get<Collision>(entity)};
-            broadPhaseMatches.emplace_back(collision.worldBounds);
-        }
-    }
+    // Collect the volumes of all non-client entities and tiles that intersect 
+    // the broad phase bounds.
+    static constexpr CollisionObjectTypeMask COLLISION_MASK{
+        CollisionObjectType::NonClientEntity | CollisionObjectType::TileLayer};
+    std::vector<BoundingBox>& broadPhaseMatches{
+        collisionLocator.getCollisions(broadPhaseTileExtent, COLLISION_MASK)};
 
     // Perform the iterations of the narrow phase to resolve any collisions.
     Vector3 originalVelocity{movement.velocity};
     BoundingBox resolvedBounds{currentBounds};
     float remainingTime{1.f};
     for (int i{0}; i < NARROW_PHASE_ITERATION_COUNT; ++i) {
-        NarrowPhaseResult result{
-            narrowPhase(resolvedBounds, movement, deltaSeconds, remainingTime)};
+        NarrowPhaseResult result{narrowPhase(broadPhaseMatches, resolvedBounds,
+                                             movement, deltaSeconds,
+                                             remainingTime)};
         resolvedBounds = result.resolvedBounds;
         remainingTime = result.remainingTime;
 
@@ -164,7 +145,8 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
 }
 
 EntityMover::NarrowPhaseResult
-    EntityMover::narrowPhase(const BoundingBox& currentBounds,
+    EntityMover::narrowPhase(const std::vector<BoundingBox>& broadPhaseMatches,
+                             const BoundingBox& currentBounds,
                              Movement& movement, double deltaSeconds,
                              float remainingTime)
 {

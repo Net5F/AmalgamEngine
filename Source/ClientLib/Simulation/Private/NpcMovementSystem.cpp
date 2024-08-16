@@ -22,7 +22,8 @@ NpcMovementSystem::NpcMovementSystem(Simulation& inSimulation, World& inWorld,
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
-, entityMover{world.registry, world.tileMap, world.entityLocator}
+, entityMover{world.registry, world.tileMap, world.entityLocator,
+              world.collisionLocator}
 , npcMovementUpdateQueue{network.getEventDispatcher()}
 , lastProcessedTick{0}
 {

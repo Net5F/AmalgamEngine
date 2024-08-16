@@ -23,33 +23,25 @@ CellPosition::CellPosition(
 {
 }
 
-CellPosition::CellPosition(const Vector3& worldPoint)
+CellPosition::CellPosition(const Vector3& worldPoint, float cellWidth,
+                           float cellHeight)
+: DiscretePosition<DiscreteImpl::CellTag>(
+    static_cast<int>(std::floor(worldPoint.x / cellWidth)),
+    static_cast<int>(std::floor(worldPoint.y / cellWidth)),
+    static_cast<int>(std::floor(worldPoint.z / cellHeight)))
 {
-    static constexpr float TILE_WIDTH{
-        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
-    static constexpr float TILE_HEIGHT{
-        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
-
-    // To account for float precision issues: add the epsilon to each value in 
-    // the point, then round down. If the value was within epsilon range of the
-    // integer above it, it'll end up rounded up.
-    x = static_cast<int>(std::floor(
-        (worldPoint.x + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
-    y = static_cast<int>(std::floor(
-        (worldPoint.y + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
-    z = static_cast<int>(std::floor(
-        (worldPoint.z + MovementHelpers::WORLD_EPSILON) / TILE_HEIGHT));
 }
 
 CellPosition::CellPosition(const TilePosition& tilePosition,
-                           std::size_t cellWidth, std::size_t cellHeight)
+                           std::size_t cellWidthTiles,
+                           std::size_t cellHeightTiles)
 : DiscretePosition<DiscreteImpl::CellTag>(
     static_cast<int>(
-        std::floor(tilePosition.x / static_cast<float>(cellWidth))),
+        std::floor(tilePosition.x / static_cast<float>(cellWidthTiles))),
     static_cast<int>(
-        std::floor(tilePosition.y / static_cast<float>(cellWidth))),
+        std::floor(tilePosition.y / static_cast<float>(cellWidthTiles))),
     static_cast<int>(
-        std::floor(tilePosition.z / static_cast<float>(cellHeight))))
+        std::floor(tilePosition.z / static_cast<float>(cellHeightTiles))))
 {
 }
 

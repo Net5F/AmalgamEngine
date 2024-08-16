@@ -19,7 +19,8 @@ namespace Server
 {
 MovementSystem::MovementSystem(World& inWorld)
 : world(inWorld)
-, entityMover{world.registry, world.tileMap, world.entityLocator}
+, entityMover{world.registry, world.tileMap, world.entityLocator,
+              world.collisionLocator}
 {
 }
 

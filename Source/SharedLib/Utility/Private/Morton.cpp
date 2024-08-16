@@ -1,4 +1,5 @@
 #include "Morton.h"
+#include "libmorton/morton.h"
 #include <cstdint>
 
 namespace AM
@@ -32,7 +33,7 @@ static constexpr std::array<std::array<Uint8, 16>, 16> zValues16x16{
 
 /** A reverse lookup table of x/y values given a morton code, for up to a 
     16x16 value space. */
-static constexpr std::array<Morton::Result2D, 256> xyValues16x16{
+static constexpr std::array<Morton::Result2D<Uint8>, 256> xyValues16x16{
     {{0, 0},   {1, 0},   {0, 1},   {1, 1},   {2, 0},   {3, 0},   {2, 1},
      {3, 1},   {0, 2},   {1, 2},   {0, 3},   {1, 3},   {2, 2},   {3, 2},
      {2, 3},   {3, 3},   {4, 0},   {5, 0},   {4, 1},   {5, 1},   {6, 0},
@@ -75,29 +76,42 @@ static constexpr Uint64 magicbit2D_masks64[6]
     = {0x00000000FFFFFFFF, 0x0000FFFF0000FFFF, 0x00FF00FF00FF00FF,
        0x0F0F0F0F0F0F0F0F, 0x3333333333333333, 0x5555555555555555};
 
-Uint8 Morton::m2D_lookup_16x16(Uint8 x, Uint8 y)
+Uint8 Morton::encode16x16(Uint8 x, Uint8 y)
 {
     return static_cast<Uint8>(zValues16x16[x][y]);
 }
 
-Morton::Result2D Morton::m2D_reverse_lookup_16x16(Uint8 code)
+Morton::Result2D<Uint8> Morton::decode16x16(Uint8 code)
 {
     return xyValues16x16[code];
 }
 
-Uint32 Morton::m2D_e_magicbits_combined(Uint16 x, Uint16 y)
+Uint32 Morton::encode32(Uint16 x, Uint16 y)
 {
-    Uint64 m = x
-               | (static_cast<Uint64>(y)
-                  << 32); // put Y in upper 32 bits, X in lower 32 bits
-    m = (m | (m << 8)) & magicbit2D_masks64[2];
-    m = (m | (m << 4)) & magicbit2D_masks64[3];
-    m = (m | (m << 2)) & magicbit2D_masks64[4];
-    m = (m | (m << 1)) & magicbit2D_masks64[5];
-    m = m | (m >> 31); // merge X and Y back together
-    // Note: This is a hard cut off at 32 bits, to drop the split Y-version in 
-    //       the upper 32 bits.
-    return static_cast<Uint32>(m);
+    return libmorton::morton2D_32_encode(x, y);
+}
+
+Uint64 Morton::encode64(Uint32 x, Uint32 y)
+{
+    return libmorton::morton2D_64_encode(x, y);
+}
+
+Morton::Result2D<Uint16> Morton::decode32(Uint32 code)
+{
+    uint_fast16_t x{};
+    uint_fast16_t y{};
+    libmorton::morton2D_32_decode(code, x, y);
+
+    return {static_cast<Uint16>(x), static_cast<Uint16>(y)};
+}
+
+Morton::Result2D<Uint32> Morton::decode64(Uint64 code)
+{
+    uint_fast32_t x{};
+    uint_fast32_t y{};
+    libmorton::morton2D_64_decode(code, x, y);
+
+    return {static_cast<Uint32>(x), static_cast<Uint32>(y)};
 }
 
 } // End namespace AM

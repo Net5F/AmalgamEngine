@@ -1,5 +1,6 @@
 #include "TileMap.h"
 #include "GraphicData.h"
+#include "CollisionLocator.h"
 #include "Paths.h"
 #include "Position.h"
 #include "Transforms.h"
@@ -17,8 +18,9 @@ namespace AM
 {
 namespace Client
 {
-TileMap::TileMap(GraphicData& inGraphicData)
-: TileMapBase{inGraphicData, false}
+TileMap::TileMap(GraphicData& inGraphicData,
+                 CollisionLocator& inCollisionLocator)
+: TileMapBase{inGraphicData, inCollisionLocator, false}
 , sizeChangedSig{}
 , sizeChanged{sizeChangedSig}
 {

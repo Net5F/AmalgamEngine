@@ -64,6 +64,13 @@ struct DiscreteExtent {
     {
     }
 
+    bool operator==(const DiscreteExtent<T>& other) const
+    {
+        return (x == other.x) && (y == other.y) && (z == other.z)
+               && (xLength == other.xLength) && (yLength == other.yLength)
+               && (zLength == other.zLength);
+    }
+
     /**
      * Returns the max valid X position in this extent.
      * Note: Named differently from BoundingBox's 'maxX' member to avoid

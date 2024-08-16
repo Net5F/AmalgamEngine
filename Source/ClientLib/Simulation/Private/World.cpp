@@ -9,8 +9,9 @@ World::World(GraphicData& graphicData)
 : registry{}
 , itemData{}
 , playerEntity{entt::null}
-, tileMap{graphicData}
 , entityLocator{registry}
+, collisionLocator{}
+, tileMap{graphicData, collisionLocator}
 {
     // Initialize our entt groups, before anyone tries to use them.
     EnttGroups::init(registry);

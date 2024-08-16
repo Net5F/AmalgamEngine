@@ -43,3 +43,6 @@
 [submodule "Libraries/SQLiteCpp"]
 	path = Libraries/SQLiteCpp
 	url = git@github.com:SRombauts/SQLiteCpp.git
+[submodule "Libraries/libmorton"]
+	path = Libraries/libmorton
+	url = git@github.com:Forceflow/libmorton.git

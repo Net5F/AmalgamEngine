@@ -22,10 +22,10 @@ namespace Client
  * Used by the UI to quickly find which tile layer or entity the mouse is
  * hovering over.
  *
- * In constract to the similar EntityLocator, this class is UI-centric (for
- * hit testing mouse events), whereas EntityLocator is sim-centric (for getting
- * all entities at a particular location in the world, with no regard for
- * draw order).
+ * In constract to the similar EntityLocator and CollisionLocator, this class 
+ * is UI-centric (for hit testing mouse events), whereas the others are sim-
+ * centric (for getting all entities at a particular location in the world, 
+ * with no regard for draw order).
  *
  * Internally, world objects are organized into "cells", each of which has a
  * size corresponding to a configurable cell size. This value can be tweaked

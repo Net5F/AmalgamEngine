@@ -99,13 +99,10 @@ void ClientConnectionSystem::processDisconnectEvent(
     auto disconnectedEntityIt{
         world.netIDMap.find(clientDisconnected.clientID)};
     if (disconnectedEntityIt != world.netIDMap.end()) {
-        // Found the entity. Remove it from the entity locator.
-        // Note: Since the entity was removed from the locator, its peers
-        //       will be told by ClientAOISystem to delete it.
+        // Found the entity. Remove it from the registry and network ID map.
+        // Note: This will cause it to be removed from the entity locator, 
+        //       triggering ClientAOISystem to tell peers to delete it.
         entt::entity disconnectedEntity{disconnectedEntityIt->second};
-        world.entityLocator.removeEntity(disconnectedEntity);
-
-        // Remove it from the registry and network ID map.
         world.registry.destroy(disconnectedEntity);
         world.netIDMap.erase(disconnectedEntityIt);
 

@@ -33,7 +33,7 @@ public:
 
     explicit BoundingBox(const MinMaxBox& box);
 
-    bool operator==(const BoundingBox& other);
+    bool operator==(const BoundingBox& other) const;
 
     float getXLength() const;
 
