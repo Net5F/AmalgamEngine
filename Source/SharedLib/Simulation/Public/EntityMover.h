@@ -2,13 +2,13 @@
 
 #include "Input.h"
 #include "BoundingBox.h"
+#include "CollisionLocator.h"
 #include "entt/fwd.hpp"
 
 namespace AM
 {
 class TileMapBase;
 class EntityLocator;
-class CollisionLocator;
 struct Position;
 struct PreviousPosition;
 struct Movement;
@@ -75,7 +75,8 @@ private:
      * the given bounds and all volumes in broadPhaseMatches.
      */
     NarrowPhaseResult
-        narrowPhase(const std::vector<BoundingBox>& broadPhaseMatches,
+        narrowPhase(const std::vector<const CollisionLocator::CollisionInfo*>&
+                        broadPhaseMatches,
                     const BoundingBox& currentBounds, Movement& movement,
                     double deltaSeconds, float remainingTime);
 

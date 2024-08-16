@@ -56,7 +56,7 @@ void CollisionLocator::updateEntity(entt::entity entity,
     auto entityIt{entityMap.find(entity)};
     Uint16 volumeIndex{};
     if (entityIt != entityMap.end()) {
-        CollisionVolumeInfo& volumeInfo{collisionVolumes[entityIt->second]};
+        CollisionInfo& volumeInfo{collisionVolumes[entityIt->second]};
         CellExtent oldCellExtent(volumeInfo.collisionVolume, CELL_WORLD_WIDTH,
                                  CELL_WORLD_HEIGHT);
         
@@ -64,6 +64,7 @@ void CollisionLocator::updateEntity(entt::entity entity,
         volumeIndex = entityIt->second;
         collisionVolumes[volumeIndex].collisionVolume = collisionVolume;
         collisionVolumes[volumeIndex].objectType = objectType;
+        collisionVolumes[volumeIndex].entity = entity;
 
         // If the cell extent hasn't changed, exit early.
         if (cellExtent == oldCellExtent) {
@@ -83,10 +84,11 @@ void CollisionLocator::updateEntity(entt::entity entity,
 
             collisionVolumes[volumeIndex].collisionVolume = collisionVolume;
             collisionVolumes[volumeIndex].objectType = objectType;
+            collisionVolumes[volumeIndex].entity = entity;
         }
         else {
             // No free indices, add the volume to the back.
-            collisionVolumes.emplace_back(collisionVolume, objectType);
+            collisionVolumes.emplace_back(collisionVolume, objectType, entity);
             volumeIndex = static_cast<Uint16>(collisionVolumes.size() - 1);
         }
 
@@ -106,7 +108,7 @@ void CollisionLocator::updateTile(const TilePosition& tilePosition,
     if (tileIt != tileMap.end()) {
         // For each layer that was in the tile.
         for (Uint16 volumeIndex : tileIt->second) {
-            CollisionVolumeInfo& volumeInfo{collisionVolumes[volumeIndex]};
+            CollisionInfo& volumeInfo{collisionVolumes[volumeIndex]};
 
             // Clear it from the grid.
             CellExtent cellExtent(volumeInfo.collisionVolume, CELL_WORLD_WIDTH,
@@ -202,7 +204,7 @@ void CollisionLocator::removeEntity(entt::entity entity)
     }
 
     // Remove the entity from the cells that it's located in.
-    const CollisionVolumeInfo& volumeInfo{
+    const CollisionInfo& volumeInfo{
         collisionVolumes[entityIt->second]};
     CellExtent cellExtent(volumeInfo.collisionVolume, CELL_WORLD_WIDTH,
                           CELL_WORLD_HEIGHT);
@@ -215,7 +217,7 @@ void CollisionLocator::removeEntity(entt::entity entity)
     entityMap.erase(entityIt);
 }
 
-std::vector<BoundingBox>&
+std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisions(const Cylinder& cylinder,
                                     CollisionObjectTypeMask objectTypeMask)
 {
@@ -226,14 +228,14 @@ std::vector<BoundingBox>&
 
     // Erase any volumes that don't actually intersect the extent.
     std::erase_if(returnVector,
-                  [this, &cylinder](const BoundingBox& otherBox) {
-                      return !(otherBox.intersects(cylinder));
+                  [this, &cylinder](const CollisionInfo* otherInfo) {
+                      return !(otherInfo->collisionVolume.intersects(cylinder));
                   });
 
     return returnVector;
 }
 
-std::vector<BoundingBox>&
+std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisions(const BoundingBox& boundingBox,
                                     CollisionObjectTypeMask objectTypeMask)
 {
@@ -241,15 +243,15 @@ std::vector<BoundingBox>&
     getCollisionsBroad(boundingBox, objectTypeMask);
 
     // Erase any volumes that don't actually intersect the extent.
-    std::erase_if(returnVector,
-                  [this, &boundingBox](const BoundingBox& otherBox) {
-                      return !(otherBox.intersects(boundingBox));
-                  });
+    std::erase_if(
+        returnVector, [this, &boundingBox](const CollisionInfo* otherInfo) {
+            return !(otherInfo->collisionVolume.intersects(boundingBox));
+        });
 
     return returnVector;
 }
 
-std::vector<BoundingBox>&
+std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisions(const TileExtent& tileExtent,
                                     CollisionObjectTypeMask objectTypeMask)
 {
@@ -257,15 +259,15 @@ std::vector<BoundingBox>&
     getCollisionsBroad(tileExtent, objectTypeMask);
 
     // Erase any volumes that don't actually intersect the extent.
-    std::erase_if(returnVector,
-                  [this, &tileExtent](const BoundingBox& otherBox) {
-                      return !(otherBox.intersects(tileExtent));
-                  });
+    std::erase_if(
+        returnVector, [this, &tileExtent](const CollisionInfo* otherInfo) {
+            return !(otherInfo->collisionVolume.intersects(tileExtent));
+        });
 
     return returnVector;
 }
 
-std::vector<BoundingBox>&
+std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisions(const ChunkExtent& chunkExtent,
                                     CollisionObjectTypeMask objectTypeMask)
 {
@@ -273,7 +275,7 @@ std::vector<BoundingBox>&
     return getCollisions(TileExtent(chunkExtent), objectTypeMask);
 }
 
-std::vector<BoundingBox>&
+std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisionsBroad(const Cylinder& cylinder,
                                          CollisionObjectTypeMask objectTypeMask)
 {
@@ -305,18 +307,18 @@ std::vector<BoundingBox>&
     // Push the collision volumes into the return vector.
     returnVector.clear();
     for (Uint16 volumeIndex : indexVector) {
-        const CollisionVolumeInfo& volumeInfo{collisionVolumes[volumeIndex]};
+        const CollisionInfo& volumeInfo{collisionVolumes[volumeIndex]};
 
         // Filter out any objects that don't match the mask.
         if (volumeInfo.objectType & objectTypeMask) {
-            returnVector.push_back(volumeInfo.collisionVolume);
+            returnVector.push_back(&volumeInfo);
         }
     }
 
     return returnVector;
 }
 
-std::vector<BoundingBox>&
+std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisionsBroad(const BoundingBox& boundingBox,
                                          CollisionObjectTypeMask objectTypeMask)
 {
@@ -324,7 +326,7 @@ std::vector<BoundingBox>&
     return getCollisionsBroad(TileExtent(boundingBox), objectTypeMask);
 }
 
-std::vector<BoundingBox>&
+std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisionsBroad(const MinMaxBox& boundingBox,
                                          CollisionObjectTypeMask objectTypeMask)
 {
@@ -332,7 +334,7 @@ std::vector<BoundingBox>&
     return getCollisionsBroad(TileExtent(boundingBox), objectTypeMask);
 }
 
-std::vector<BoundingBox>&
+std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisionsBroad(const TileExtent& tileExtent,
                                          CollisionObjectTypeMask objectTypeMask)
 {
@@ -364,18 +366,18 @@ std::vector<BoundingBox>&
     // Push the collision volumes into the return vector.
     returnVector.clear();
     for (Uint16 volumeIndex : indexVector) {
-        const CollisionVolumeInfo& volumeInfo{collisionVolumes[volumeIndex]};
+        const CollisionInfo& volumeInfo{collisionVolumes[volumeIndex]};
 
         // Filter out any objects that don't match the mask.
         if (volumeInfo.objectType & objectTypeMask) {
-            returnVector.push_back(volumeInfo.collisionVolume);
+            returnVector.push_back(&volumeInfo);
         }
     }
 
     return returnVector;
 }
 
-std::vector<BoundingBox>&
+std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisionsBroad(const ChunkExtent& chunkExtent,
                                          CollisionObjectTypeMask objectTypeMask)
 {

@@ -128,21 +128,6 @@ private:
      * Returns the index in the entityGrid vector where the cell with the given
      * coordinates can be found.
      */
-    // TODO: Test morton vs row-major
-    //inline std::size_t
-    //    linearizeCellIndex(const CellPosition& cellPosition) const
-    //{
-    //    // Translate the given position from actual-space to positive-space.
-    //    CellPosition positivePosition{cellPosition.x - gridCellExtent.x,
-    //                                  cellPosition.y - gridCellExtent.y,
-    //                                  cellPosition.z - gridCellExtent.z};
-
-    //    // Get the 2D morton index from our x/y position, then offset it into 
-    //    // the correct Z range.
-    //    return static_cast<std::size_t>(
-    //        Morton::encode32(positivePosition.x, positivePosition.y)
-    //        + (cellPosition.z * xyLength));
-    //}
     inline std::size_t
         linearizeCellIndex(const CellPosition& cellPosition) const
     {
@@ -164,10 +149,8 @@ private:
     /** The grid's extent, with cells as the unit. */
     CellExtent gridCellExtent;
 
-    // TODO: Update comment if we don't go with morton
-    /** The outer vector is a 3D grid holding the locator's cells, indexed by 
-        morton2D(x, y) + (z * xLength * yLength). I.e., we morton-index an 
-        entire X/Y level of the grid, then proceed to the next Z.
+    /** The outer vector is a 3D grid stored in row-major order, holding the
+        grid's cells.
         Each element in the grid is a vector of entities--the entities that
         currently intersect with that cell. */
     std::vector<std::vector<entt::entity>> entityGrid;

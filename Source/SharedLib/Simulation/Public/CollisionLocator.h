@@ -84,6 +84,22 @@ public:
     void removeEntity(entt::entity entity);
 
     /**
+     * A world object's collision information.
+     */
+    struct CollisionInfo
+    {
+        /** The world object's collision volume. */
+        BoundingBox collisionVolume{};
+
+        /** The type of world object that this volume belongs to. */
+        CollisionObjectType::Value objectType{};
+
+        /** If objectType is one of the entity types, this is the entity's 
+            ID. */
+        entt::entity entity{};
+    };
+
+    /**
      * Returns all collision volumes that intersect the given cylinder.
      *
      * Note: Because collision boxes vary in size, results are not commutative
@@ -94,28 +110,28 @@ public:
      *                       object type is present in the mask, it will be 
      *                       included in the results.
      */
-    std::vector<BoundingBox>&
+    std::vector<const CollisionInfo*>&
         getCollisions(const Cylinder& cylinder,
                       CollisionObjectTypeMask objectTypeMask);
 
     /**
      * Overload for BoundingBox.
      */
-    std::vector<BoundingBox>&
+    std::vector<const CollisionInfo*>&
         getCollisions(const BoundingBox& boundingBox,
                       CollisionObjectTypeMask objectTypeMask);
 
     /**
      * Overload for TileExtent.
      */
-    std::vector<BoundingBox>&
+    std::vector<const CollisionInfo*>&
         getCollisions(const TileExtent& tileExtent,
                       CollisionObjectTypeMask objectTypeMask);
 
     /**
      * Overload for ChunkExtent.
      */
-    std::vector<BoundingBox>&
+    std::vector<const CollisionInfo*>&
         getCollisions(const ChunkExtent& chunkExtent,
                       CollisionObjectTypeMask objectTypeMask);
 
@@ -130,35 +146,35 @@ public:
      *                       object type is present in the mask, it will be
      *                       included in the results.
      */
-    std::vector<BoundingBox>&
+    std::vector<const CollisionInfo*>&
         getCollisionsBroad(const Cylinder& cylinder,
                            CollisionObjectTypeMask objectTypeMask);
 
     /**
      * Overload for BoundingBox.
      */
-    std::vector<BoundingBox>&
+    std::vector<const CollisionInfo*>&
         getCollisionsBroad(const BoundingBox& boundingBox,
                            CollisionObjectTypeMask objectTypeMask);
 
     /**
      * Overload for MinMaxBox.
      */
-    std::vector<BoundingBox>&
+    std::vector<const CollisionInfo*>&
         getCollisionsBroad(const MinMaxBox& boundingBox,
                            CollisionObjectTypeMask objectTypeMask);
 
     /**
      * Overload for TileExtent.
      */
-    std::vector<BoundingBox>&
+    std::vector<const CollisionInfo*>&
         getCollisionsBroad(const TileExtent& tileExtent,
                            CollisionObjectTypeMask objectTypeMask);
 
     /**
      * Overload for ChunkExtent.
      */
-    std::vector<BoundingBox>&
+    std::vector<const CollisionInfo*>&
         getCollisionsBroad(const ChunkExtent& chunkExtent,
                            CollisionObjectTypeMask objectTypeMask);
 
@@ -189,24 +205,6 @@ private:
      * Returns the index in the collisionGrid vector where the cell with the 
      * given coordinates can be found.
      */
-    // TODO: Test morton vs row-major
-    //inline std::size_t
-    //    linearizeCellIndex(const CellPosition& cellPosition) const
-    //{
-    //    // Translate the given position from actual-space to positive-space.
-    //    CellPosition positivePosition{cellPosition.x - gridCellExtent.x,
-    //                                  cellPosition.y - gridCellExtent.y,
-    //                                  cellPosition.z - gridCellExtent.z};
-
-    //    // Get the 2D morton index from our x/y position, then offset it into 
-    //    // the correct Z range.
-    //    return static_cast<std::size_t>(
-    //        Morton::encode32(positivePosition.x, positivePosition.y)
-    //        + (cellPosition.z * xyLength));
-    //}
-    ///** The X * Y length of gridCellExtent. Pre-computed for linearizeCellIndex
-    //    to use. */
-    //int xyLength{};
     inline std::size_t
         linearizeCellIndex(const CellPosition& cellPosition) const
     {
@@ -225,29 +223,16 @@ private:
     /** The grid's extent, with cells as the unit. */
     CellExtent gridCellExtent;
 
-    struct CollisionVolumeInfo
-    {
-        BoundingBox collisionVolume{};
-
-        /** The type of world object that this volume belongs to. */
-        CollisionObjectType::Value objectType{};
-
-        /** If objectType is one of the entity types, this is the entity's 
-            ID. */
-        entt::entity entity{};
-    };
     /** The collision volume and related info for each world object that this 
         locator is tracking. */
-    std::vector<CollisionVolumeInfo> collisionVolumes;
+    std::vector<CollisionInfo> collisionVolumes;
 
     /** Tracks which indices in collisionVolumes are free to use. */
     std::vector<Uint16> freeCollisionVolumesIndices;
 
-    // TODO: If we don't go with morton, change this comment back
-    /** The outer vector is a 3D grid holding the locator's cells, indexed by 
-        morton2D(x, y) + (z * xLength * yLength). I.e., we morton-index an 
-        entire X/Y level of the grid, then proceed to the next Z.
-        Each element in the grid is a vector of entities--the entities that
+    /** The outer vector is a 3D grid stored in row-major order, holding the
+        grid's cells.
+        Each element in the grid is a vector of volumes--the volumes that
         currently intersect with that cell (represented by their index in 
         collisionVolumes). */
     std::vector<std::vector<Uint16>> collisionGrid;
@@ -272,7 +257,7 @@ private:
     std::vector<Uint16> indexVector;
 
     /** The vector that we use to return results. */
-    std::vector<BoundingBox> returnVector;
+    std::vector<const CollisionInfo*> returnVector;
 };
 
 } // End namespace AM

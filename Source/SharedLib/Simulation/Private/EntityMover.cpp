@@ -105,7 +105,7 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
     // the broad phase bounds.
     static constexpr CollisionObjectTypeMask COLLISION_MASK{
         CollisionObjectType::NonClientEntity | CollisionObjectType::TileLayer};
-    std::vector<BoundingBox>& broadPhaseMatches{
+    const auto& broadPhaseMatches{
         collisionLocator.getCollisions(broadPhaseTileExtent, COLLISION_MASK)};
 
     // Perform the iterations of the narrow phase to resolve any collisions.
@@ -144,11 +144,11 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
     return resolvedBounds;
 }
 
-EntityMover::NarrowPhaseResult
-    EntityMover::narrowPhase(const std::vector<BoundingBox>& broadPhaseMatches,
-                             const BoundingBox& currentBounds,
-                             Movement& movement, double deltaSeconds,
-                             float remainingTime)
+EntityMover::NarrowPhaseResult EntityMover::narrowPhase(
+    const std::vector<const CollisionLocator::CollisionInfo*>&
+        broadPhaseMatches,
+    const BoundingBox& currentBounds, Movement& movement, double deltaSeconds,
+    float remainingTime)
 {
     // This is the real distance that we're trying to move on this frame.
     Vector3 realVelocity{movement.velocity * static_cast<float>(deltaSeconds)};
@@ -156,7 +156,7 @@ EntityMover::NarrowPhaseResult
     // Find the time of the first collision.
     float collisionTime{remainingTime};
     Vector3 normalToUse{};
-    for (const BoundingBox& otherBounds : broadPhaseMatches) {
+    for (const auto* otherVolumeInfo : broadPhaseMatches) {
         Vector3 entryDistance{};
         Vector3 exitDistance{};
         Vector3 entryTimes{-std::numeric_limits<float>::infinity(),
@@ -167,7 +167,7 @@ EntityMover::NarrowPhaseResult
                           std::numeric_limits<float>::infinity()};
 
         MinMaxBox currentBox{currentBounds};
-        MinMaxBox otherBox{otherBounds};
+        MinMaxBox otherBox{otherVolumeInfo->collisionVolume};
 
         // Calc the distances required for resolvedBounds to enter and exit 
         // otherBounds along each axis, then calc the time intervals where 
