@@ -7,6 +7,9 @@ namespace AM
 {
 struct TilePosition;
 
+/**
+ * Definitions and helper functions for working with Terrain tile layers.
+ */
 struct Terrain {
     /**
      * A terrain value is made up of 2 parts:

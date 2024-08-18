@@ -5,6 +5,7 @@
 namespace AM
 {
 struct ChunkExtent;
+struct CellExtent;
 struct BoundingBox;
 struct MinMaxBox;
 struct Vector3;
@@ -21,6 +22,14 @@ struct TileExtent : public DiscreteExtent<DiscreteImpl::TileTag> {
     TileExtent(const DiscreteExtent<DiscreteImpl::TileTag>& tileExtent);
 
     explicit TileExtent(const ChunkExtent& chunkExtent);
+
+    /**
+     * @param cellWidthTiles The width of a cell, in tiles.
+     * @param cellHeightTiles The height of a cell, in tiles.
+     */
+    explicit TileExtent(const CellExtent& cellExtent,
+                        std::size_t cellWidthTiles,
+                        std::size_t cellHeightTiles);
 
     /**
      * Constructs the smallest tile extent that contains the given bounding box.

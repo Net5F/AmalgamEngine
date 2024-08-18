@@ -102,6 +102,7 @@ private:
     static constexpr float CELL_WORLD_WIDTH{
         Config::WORLD_OBJECT_LOCATOR_CELL_WIDTH
         * SharedConfig::TILE_WORLD_WIDTH};
+
     /** The height of a cell in world units. */
     static constexpr float CELL_WORLD_HEIGHT{
         Config::WORLD_OBJECT_LOCATOR_CELL_HEIGHT

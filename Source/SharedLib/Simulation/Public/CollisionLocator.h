@@ -109,6 +109,9 @@ public:
      * @param objectTypeMask The bitmask to use when filtering objects. If an 
      *                       object type is present in the mask, it will be 
      *                       included in the results.
+     * @return Pointers to the info of each hit world object. These pointers 
+     *         are not stable, and may become invalid when any of this locator's 
+     *         functions are called.
      */
     std::vector<const CollisionInfo*>&
         getCollisions(const Cylinder& cylinder,
@@ -189,17 +192,47 @@ private:
         SharedConfig::COLLISION_LOCATOR_CELL_HEIGHT
         * SharedConfig::TILE_WORLD_HEIGHT};
 
+    /** A value to use in terrainGrid to indicate that a tile has no terrain. */
+    static constexpr Terrain::Value EMPTY_TERRAIN{SDL_MAX_UINT8};
+
     /**
-     * Adds the given index to the cells within the given extent.
+     * Adds the given index to the collisionGrid cells within the given extent.
      */
     void addCollisionVolumeToCells(Uint16 volumeIndex,
                                    const CellExtent& cellExtent);
 
     /**
-     * Removes the given index from the cells within the given extent.
+     * Removes the given index from the collisionGrid cells within the given 
+     * extent.
      */
     void clearCollisionVolumeFromCells(Uint16 volumeIndex,
                                        const CellExtent& clearExtent);
+
+    /**
+     * Adds the given tile's collision volumes to the collision and terrain 
+     * grids.
+     */
+    void addTileCollisionVolumes(const TilePosition& tilePosition,
+                                 const Tile& tile);
+
+    /**
+     * Performs a broad phase to get all collision volumes in cells intersected
+     * by the given cylinder.
+     *
+     * Note: All volumes in the intersected cells are returned, which may
+     *       include volumes that aren't actually within the radius.
+     *
+     * @param objectTypeMask The bitmask to use when filtering objects. If an
+     *                       object type is present in the mask, it will be
+     *                       included in the results.
+     *
+     * @pre tileExtent and cellExtent must be pre-clipped to this locator's 
+     *      bounds.
+     */
+    std::vector<const CollisionInfo*>&
+        getCollisionsBroad(const TileExtent& tileExtent,
+                           const CellExtent& cellExtent,
+                           CollisionObjectTypeMask objectTypeMask);
 
     /**
      * Returns the index in the collisionGrid vector where the cell with the 
@@ -219,6 +252,28 @@ private:
             + (gridCellExtent.xLength * positivePosition.y)
             + positivePosition.x);
     }
+
+    /**
+     * Returns the index in the terrainGrid vector where the tile with the 
+     * given coordinates can be found.
+     */
+    inline std::size_t
+        linearizeTileIndex(const TilePosition& tilePosition) const
+    {
+        // Translate the given position from actual-space to positive-space.
+        TilePosition positivePosition{tilePosition.x - gridTileExtent.x,
+                                      tilePosition.y - gridTileExtent.y,
+                                      tilePosition.z - gridTileExtent.z};
+
+        return static_cast<std::size_t>(
+            (gridTileExtent.xLength * gridTileExtent.yLength
+             * positivePosition.z)
+            + (gridTileExtent.xLength * positivePosition.y)
+            + positivePosition.x);
+    }
+
+    /** The grid's extent, with tiles as the unit. */
+    TileExtent gridTileExtent;
 
     /** The grid's extent, with cells as the unit. */
     CellExtent gridCellExtent;
@@ -244,14 +299,15 @@ private:
         collisionVolumes. */
     std::unordered_map<TilePosition, std::vector<Uint16>> tileMap;
 
-    // TODO: Is this actually more efficient? Put it all in collisionGrid first
-    //       and compare
-    // TODO: Add indexing comment based on morton/row decision
-    /** A 3D grid holding the terrain contained in each tile.
+    /** A 3D grid where each element holds the terrain of the associated tile.
         Since terrain can be fully described by its 1B value, it's more 
         efficient to store the value and construct the bounding box as needed 
         instead of storing it in collisionGrid. */
     std::vector<Terrain::Value> terrainGrid;
+
+    /** Holds the collision info of any Terrain tile layers that were hit during
+        the last query (so that the query result has somewhere to point to). */
+    std::vector<CollisionInfo> terrainCollisionVolumes;
 
     /** A scratch vector used for gathering results during the broad phase. */
     std::vector<Uint16> indexVector;

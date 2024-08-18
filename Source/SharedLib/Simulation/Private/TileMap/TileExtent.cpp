@@ -1,5 +1,6 @@
 #include "TileExtent.h"
 #include "ChunkExtent.h"
+#include "CellExtent.h"
 #include "BoundingBox.h"
 #include "MinMaxBox.h"
 #include "Vector3.h"
@@ -21,8 +22,7 @@ TileExtent::TileExtent(int inX, int inY, int inZ, int inXLength, int inYLength,
 {
 }
 
-TileExtent::TileExtent(
-    const DiscreteExtent<DiscreteImpl::TileTag>& tileExtent)
+TileExtent::TileExtent(const DiscreteExtent<DiscreteImpl::TileTag>& tileExtent)
 : DiscreteExtent<DiscreteImpl::TileTag>(tileExtent)
 {
 }
@@ -34,6 +34,18 @@ TileExtent::TileExtent(const ChunkExtent& chunkExtent)
     static_cast<int>(chunkExtent.xLength * SharedConfig::CHUNK_WIDTH),
     static_cast<int>(chunkExtent.yLength * SharedConfig::CHUNK_WIDTH),
     chunkExtent.zLength)
+{
+}
+
+TileExtent::TileExtent(const CellExtent& cellExtent, std::size_t cellWidthTiles,
+                       std::size_t cellHeightTiles)
+: DiscreteExtent<DiscreteImpl::TileTag>(
+    static_cast<int>(cellExtent.x * cellWidthTiles),
+    static_cast<int>(cellExtent.y * cellWidthTiles),
+    static_cast<int>(cellExtent.z * cellHeightTiles),
+    static_cast<int>(cellExtent.xLength * cellWidthTiles),
+    static_cast<int>(cellExtent.yLength * cellWidthTiles),
+    static_cast<int>(cellExtent.zLength * cellHeightTiles))
 {
 }
 
