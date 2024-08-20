@@ -29,6 +29,12 @@ struct Vector3 {
 
     Vector3& operator*=(const Vector3& other);
 
+    Vector3& operator*=(float scalar);
+
+    Vector3& operator/=(const Vector3& other);
+
+    Vector3& operator/=(float scalar);
+
     bool operator==(const Vector3& other) const;
 
     bool operator!=(const Vector3& other) const;
@@ -41,13 +47,13 @@ struct Vector3 {
     /**
      * Returns the dot product of this vector and the given vector.
      */
-    float dot(const Vector3& other);
+    [[nodiscard]] float dot(const Vector3& other);
 
     /**
      * Returns a new vector slid along a plane defined by the given normal.
      * (i.e. returns the component of this vector that lies along the plane)
      */
-    Vector3 slide(const Vector3& normal);
+    [[nodiscard]] Vector3 slide(const Vector3& normal);
 
     /**
      * Returns the squared distance between this vector and the given

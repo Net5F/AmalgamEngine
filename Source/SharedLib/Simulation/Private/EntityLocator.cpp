@@ -3,7 +3,6 @@
 #include "Position.h"
 #include "Cylinder.h"
 #include "BoundingBox.h"
-#include "MinMaxBox.h"
 #include "Collision.h"
 #include "CellPosition.h"
 #include "TilePosition.h"
@@ -139,7 +138,7 @@ std::vector<entt::entity>&
                                   CELL_WORLD_HEIGHT);
 
     // Clip the extent to the grid's bounds.
-    cylinderCellExtent.intersectWith(gridCellExtent);
+    cylinderCellExtent = cylinderCellExtent.intersectWith(gridCellExtent);
 
     // Add the entities in every intersected cell to the return vector.
     for (int z{cylinderCellExtent.z}; z <= cylinderCellExtent.zMax(); ++z) {
@@ -170,13 +169,6 @@ std::vector<entt::entity>&
 }
 
 std::vector<entt::entity>&
-    EntityLocator::getEntitiesBroad(const MinMaxBox& boundingBox)
-{
-    // Convert to TileExtent.
-    return getEntitiesBroad(TileExtent(boundingBox));
-}
-
-std::vector<entt::entity>&
     EntityLocator::getEntitiesBroad(const TileExtent& tileExtent)
 {
     // Clear the return vector.
@@ -188,7 +180,7 @@ std::vector<entt::entity>&
                               SharedConfig::ENTITY_LOCATOR_CELL_HEIGHT);
 
     // Clip the extent to the grid's bounds.
-    tileCellExtent.intersectWith(gridCellExtent);
+    tileCellExtent = tileCellExtent.intersectWith(gridCellExtent);
 
     // Add the entities in every intersected cell to the return vector.
     for (int z{tileCellExtent.z}; z <= tileCellExtent.zMax(); ++z) {

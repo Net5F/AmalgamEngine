@@ -1,5 +1,4 @@
 #include "BoundingBox.h"
-#include "MinMaxBox.h"
 #include "Position.h"
 #include "Cylinder.h"
 #include "Ray.h"
@@ -10,80 +9,71 @@ namespace AM
 {
 
 BoundingBox::BoundingBox()
-: center{}
-, halfExtents{}
+: min{}
+, max{}
 {
-}
-
-BoundingBox::BoundingBox(const MinMaxBox& box)
-: center{}
-, halfExtents{}
-{
-    halfExtents.x = (box.max.x - box.min.x) / 2.f;
-    halfExtents.y = (box.max.y - box.min.y) / 2.f;
-    halfExtents.z = (box.max.z - box.min.z) / 2.f;
-    center.x = box.min.x + halfExtents.x;
-    center.y = box.min.y + halfExtents.y;
-    center.z = box.min.z + halfExtents.z;
 }
 
 bool BoundingBox::operator==(const BoundingBox& other) const
 {
-    return (center == other.center) && (halfExtents == other.halfExtents);
+    return (min.x == other.min.x) && (max.x == other.max.x)
+           && (min.y == other.min.y) && (max.y == other.max.y)
+           && (min.z == other.min.z) && (max.z == other.max.z);
+}
+
+BoundingBox::BoundingBox(const TileExtent& tileExtent)
+{
+    static constexpr float TILE_WORLD_WIDTH{
+        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
+    static constexpr float TILE_WORLD_HEIGHT{
+        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
+
+    min.x = tileExtent.x * TILE_WORLD_WIDTH;
+    min.y = tileExtent.y * TILE_WORLD_WIDTH;
+    min.z = tileExtent.z * TILE_WORLD_HEIGHT;
+
+    max.x = (tileExtent.x + tileExtent.xLength) * TILE_WORLD_WIDTH;
+    max.y = (tileExtent.y + tileExtent.yLength) * TILE_WORLD_WIDTH;
+    max.z = (tileExtent.z + tileExtent.zLength) * TILE_WORLD_HEIGHT;
 }
 
 float BoundingBox::getXLength() const
 {
-    return (halfExtents.x * 2);
+    return (max.x - min.x);
 }
 
 float BoundingBox::getYLength() const
 {
-    return (halfExtents.y * 2);
+    return (max.y - min.y);
 }
 
 float BoundingBox::getZLength() const
 {
-    return (halfExtents.z * 2);
-}
-
-Vector3 BoundingBox::min() const
-{
-    return {(center.x - halfExtents.x), (center.y - halfExtents.y),
-            (center.z - halfExtents.z)};
-}
-
-Vector3 BoundingBox::max() const
-{
-    return {(center.x + halfExtents.x), (center.y + halfExtents.y),
-            (center.z + halfExtents.z)};
+    return (max.z - min.z);
 }
 
 Vector3 BoundingBox::getBottomCenterPoint() const
 {
-    return {center.x, center.y, (center.z - halfExtents.z)};
+    return {min.x + ((max.x - min.x) / 2.f), min.y + ((max.y - min.y) / 2.f),
+            min.z};
+}
+
+Vector3 BoundingBox::get3DCenterPoint() const
+{
+    return {min.x + ((max.x - min.x) / 2.f), min.y + ((max.y - min.y) / 2.f),
+            min.z + ((max.z - min.z) / 2.f)};
 }
 
 bool BoundingBox::isEmpty() const
 {
-    return (halfExtents.x == 0) || (halfExtents.y == 0) || (halfExtents.z == 0);
-}
-
-void BoundingBox::moveMinimumTo(const Vector3& point)
-{
-    center.x = point.x + halfExtents.x;
-    center.y = point.y + halfExtents.y;
-    center.z = point.z + halfExtents.z;
+    return ((min.x == max.x) || (min.y == max.y) || (min.z == max.z));
 }
 
 bool BoundingBox::intersects(const BoundingBox& other) const
 {
-    return ((std::abs(center.x - other.center.x)
-             <= (halfExtents.x + other.halfExtents.x))
-            && (std::abs(center.y - other.center.y)
-                <= (halfExtents.y + other.halfExtents.y))
-            && (std::abs(center.z - other.center.z)
-                <= (halfExtents.z + other.halfExtents.z)));
+    return ((min.x <= other.max.x) && (max.x >= other.min.x)
+            && (min.y <= other.max.y) && (max.y >= other.min.y)
+            && (min.z <= other.max.z) && (max.z >= other.min.z));
 }
 
 bool BoundingBox::intersects(const Cylinder& cylinder) const
@@ -93,17 +83,18 @@ bool BoundingBox::intersects(const Cylinder& cylinder) const
     // If the cylinder doesn't intersect along the Z axis, return false.
     float cylinderMinZ{cylinder.center.z - cylinder.halfHeight};
     float cylinderMaxZ{cylinder.center.z + cylinder.halfHeight};
-    if ((cylinderMinZ < (center.z - halfExtents.z))
-        || (cylinderMaxZ > (center.z + halfExtents.z))) {
+    if ((cylinderMaxZ < min.z) || (cylinderMinZ > max.z)) {
         return false;
     }
 
     // The cylinder intersects along the Z axis. The rest of the test now 
     // reduces to a 2D circle/rectangle intersection.
 
-    // Get the distances between the centers.
-    float circleDistanceX{std::abs(cylinder.center.x - center.x)};
-    float circleDistanceY{std::abs(cylinder.center.y - center.y)};
+    // Get the X and Y distances between the centers.
+    float centerX{min.x + ((max.x - min.x) / 2.f)};
+    float centerY{min.y + ((max.y - min.y) / 2.f)};
+    float circleDistanceX{std::abs(cylinder.center.x - centerX)};
+    float circleDistanceY{std::abs(cylinder.center.y - centerY)};
 
     // If the circle is far enough away that no intersection is possible,
     // return false.
@@ -151,36 +142,21 @@ bool BoundingBox::intersects(const Ray& ray) const
 
 bool BoundingBox::intersects(const TileExtent& tileExtent) const
 {
-    static constexpr int TILE_WORLD_WIDTH{
-        static_cast<int>(SharedConfig::TILE_WORLD_WIDTH)};
-    static constexpr int TILE_WORLD_HEIGHT{
-        static_cast<int>(SharedConfig::TILE_WORLD_HEIGHT)};
-
-    BoundingBox tileExtentBox{};
-    tileExtentBox.halfExtents.x
-        = ((tileExtent.xLength * TILE_WORLD_WIDTH) / 2.f);
-    tileExtentBox.halfExtents.y
-        = ((tileExtent.yLength * TILE_WORLD_WIDTH) / 2.f);
-    tileExtentBox.halfExtents.z
-        = ((tileExtent.zLength * TILE_WORLD_HEIGHT) / 2.f);
-    tileExtentBox.center.x
-        = (tileExtent.x * TILE_WORLD_WIDTH) + tileExtentBox.halfExtents.x;
-    tileExtentBox.center.y
-        = (tileExtent.y * TILE_WORLD_WIDTH) + tileExtentBox.halfExtents.y;
-    tileExtentBox.center.z
-        = (tileExtent.z * TILE_WORLD_HEIGHT) + tileExtentBox.halfExtents.z;
-
-    return intersects(tileExtentBox);
+    return intersects(BoundingBox(tileExtent));
 }
 
 bool BoundingBox::contains(const BoundingBox& boundingBox) const
 {
-    MinMaxBox box{*this};
-    MinMaxBox otherBox{boundingBox};
+    return (min.x <= boundingBox.min.x) && (max.x >= boundingBox.max.x)
+           && (min.y <= boundingBox.min.y) && (max.y >= boundingBox.max.y)
+           && (min.z <= boundingBox.min.z) && (max.z >= boundingBox.max.z);
+}
 
-    return (box.min.x <= otherBox.min.x) && (box.max.x >= otherBox.max.x)
-           && (box.min.y <= otherBox.min.y) && (box.max.y >= otherBox.max.y)
-           && (box.min.z <= otherBox.min.z) && (box.max.z >= otherBox.max.z);
+bool BoundingBox::contains(const Vector3& worldPoint) const
+{
+    return (min.x <= worldPoint.x) && (max.x >= worldPoint.x)
+           && (min.y <= worldPoint.y) && (max.y >= worldPoint.y)
+           && (min.z <= worldPoint.z) && (max.z >= worldPoint.z);
 }
 
 float BoundingBox::getMinIntersection(const Ray& ray) const
@@ -219,13 +195,12 @@ float BoundingBox::getMaxIntersection(const Ray& ray) const
 std::array<float, 2> BoundingBox::getIntersections(const Ray& ray) const
 {
     // Find the constant t where intersection occurs for each direction.
-    MinMaxBox box{*this};
-    float tX1{(box.min.x - ray.origin.x) / ray.direction.x};
-    float tX2{(box.max.x - ray.origin.x) / ray.direction.x};
-    float tY1{(box.min.y - ray.origin.y) / ray.direction.y};
-    float tY2{(box.max.y - ray.origin.y) / ray.direction.y};
-    float tZ1{(box.min.z - ray.origin.z) / ray.direction.z};
-    float tZ2{(box.max.z - ray.origin.z) / ray.direction.z};
+    float tX1{(min.x - ray.origin.x) / ray.direction.x};
+    float tX2{(max.x - ray.origin.x) / ray.direction.x};
+    float tY1{(min.y - ray.origin.y) / ray.direction.y};
+    float tY2{(max.y - ray.origin.y) / ray.direction.y};
+    float tZ1{(min.z - ray.origin.z) / ray.direction.z};
+    float tZ2{(max.z - ray.origin.z) / ray.direction.z};
 
     // Find the min t in each direction, then find the max of those.
     // This gives us the t where the ray first intersects the rect.
@@ -240,38 +215,39 @@ std::array<float, 2> BoundingBox::getIntersections(const Ray& ray) const
     return {tMin, tMax};
 }
 
-void BoundingBox::unionWith(const BoundingBox& other)
+BoundingBox BoundingBox::translateBy(const Vector3& amountToMove) const
 {
-    MinMaxBox box{*this};
-    MinMaxBox otherBox{other};
-    MinMaxBox finalBox{};
-
-    finalBox.min.x = (box.min.x < otherBox.min.x) ? box.min.x : otherBox.min.x;
-    finalBox.min.y = (box.min.y < otherBox.min.y) ? box.min.y : otherBox.min.y;
-    finalBox.min.z = (box.min.z < otherBox.min.z) ? box.min.z : otherBox.min.z;
-
-    finalBox.max.x = (box.max.x > otherBox.max.x) ? box.max.x : otherBox.max.x;
-    finalBox.max.y = (box.max.y > otherBox.max.y) ? box.max.y : otherBox.max.y;
-    finalBox.max.z = (box.max.z > otherBox.max.z) ? box.max.z : otherBox.max.z;
-
-    *this = BoundingBox(finalBox);
+    BoundingBox newBox{*this};
+    newBox.min += amountToMove;
+    newBox.max += amountToMove;
+    return newBox;
 }
 
-Vector3 BoundingBox::getOverlap(const BoundingBox& other) const
+BoundingBox BoundingBox::unionWith(const BoundingBox& other) const
 {
-    Vector3 delta{std::abs(center.x - other.center.x),
-                  std::abs(center.y - other.center.y),
-                  std::abs(center.z - other.center.z)};
-    return {(halfExtents.x + other.halfExtents.x - delta.x),
-            (halfExtents.y + other.halfExtents.y - delta.y),
-            (halfExtents.z + other.halfExtents.z - delta.z)};
+    BoundingBox finalBox{*this};
+
+    finalBox.min.x = (min.x < other.min.x) ? min.x : other.min.x;
+    finalBox.min.y = (min.y < other.min.y) ? min.y : other.min.y;
+    finalBox.min.z = (min.z < other.min.z) ? min.z : other.min.z;
+
+    finalBox.max.x = (max.x > other.max.x) ? max.x : other.max.x;
+    finalBox.max.y = (max.y > other.max.y) ? max.y : other.max.y;
+    finalBox.max.z = (max.z > other.max.z) ? max.z : other.max.z;
+
+    return finalBox;
+}
+
+BoundingBox BoundingBox::expandBy(float amountToExpandBy) const
+{
+    Vector3 expandVector{amountToExpandBy, amountToExpandBy, amountToExpandBy};
+    return {min - expandVector, max + expandVector};
 }
 
 void BoundingBox::print() const
 {
-    LOG_INFO("center: (%.4f, %.4f, %.4f) halfExtents: (%.4f, %.4f, %.4f)",
-             center.x, center.y, center.z, halfExtents.x, halfExtents.y,
-             halfExtents.z);
+    LOG_INFO("Min: (%.4f, %.4f, %.4f), Max: (%.4f, %.4f, %.4f)", min.x, min.y,
+             min.z, max.x, max.y, max.z);
 }
 
 } // End namespace AM

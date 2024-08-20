@@ -30,8 +30,7 @@ struct InRangeExtentGetter {
         chunkExtent.xLength += 2;
         chunkExtent.yLength += 2;
         chunkExtent.zLength = mapChunkExtent.zLength;
-        chunkExtent.intersectWith(mapChunkExtent);
-        return chunkExtent;
+        return chunkExtent.intersectWith(mapChunkExtent);
     }
 
     // TileAddLayer, TileRemoveLayer, TileClearLayers
@@ -46,8 +45,7 @@ struct InRangeExtentGetter {
                                 3,
                                 3,
                                 mapChunkExtent.zLength};
-        chunkExtent.intersectWith(tileMap.getChunkExtent());
-        return chunkExtent;
+        return chunkExtent.intersectWith(tileMap.getChunkExtent());
     }
 };
 

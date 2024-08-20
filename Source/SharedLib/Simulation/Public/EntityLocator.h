@@ -13,7 +13,6 @@ namespace AM
 struct Position;
 struct Cylinder;
 struct BoundingBox;
-struct MinMaxBox;
 
 /**
  * A spatial partitioning grid that tracks where entities are located.
@@ -86,12 +85,6 @@ public:
      */
     std::vector<entt::entity>&
         getEntitiesBroad(const BoundingBox& boundingBox);
-
-    /**
-     * Overload for MinMaxBox.
-     */
-    std::vector<entt::entity>&
-        getEntitiesBroad(const MinMaxBox& boundingBox);
 
     /**
      * Overload for TileExtent.

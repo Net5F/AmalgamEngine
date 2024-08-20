@@ -72,7 +72,7 @@ void ChunkUpdateSystem::requestAllInRangeChunks(
         mapChunkExtent.zLength};
 
     // Bound the range to the map boundaries.
-    currentExtent.intersectWith(mapChunkExtent);
+    currentExtent = currentExtent.intersectWith(mapChunkExtent);
 
     // Iterate over the range, adding all chunks to a request.
     ChunkDataRequest chunkDataRequest{};
@@ -108,8 +108,8 @@ void ChunkUpdateSystem::requestNewInRangeChunks(
         mapChunkExtent.zLength};
 
     // Bound each range to the map boundaries.
-    previousExtent.intersectWith(mapChunkExtent);
-    currentExtent.intersectWith(mapChunkExtent);
+    previousExtent = previousExtent.intersectWith(mapChunkExtent);
+    currentExtent = currentExtent.intersectWith(mapChunkExtent);
 
     // Iterate over the current extent, adding any new chunks to a request.
     ChunkDataRequest chunkDataRequest;

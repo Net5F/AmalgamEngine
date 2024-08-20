@@ -5,7 +5,6 @@
 #include "SpriteID.h"
 #include "Paths.h"
 #include "Camera.h"
-#include "MinMaxBox.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include <string>
@@ -194,7 +193,7 @@ void SpritePropertiesWindow::onActiveLibraryItemChanged(
         setBoundsFieldsEnabled(true);
     }
 
-    MinMaxBox spriteModelBounds{
+    const BoundingBox& spriteModelBounds{
         newActiveSprite->getModelBounds(dataModel.boundingBoxModel)};
     minXInput.setText(toRoundedString(spriteModelBounds.min.x));
     minYInput.setText(toRoundedString(spriteModelBounds.min.y));
@@ -271,7 +270,8 @@ void SpritePropertiesWindow::onSpriteModelBoundsIDChanged(
         setBoundsFieldsEnabled(true);
     }
 
-    MinMaxBox newModelBounds{sprite.getModelBounds(dataModel.boundingBoxModel)};
+    const BoundingBox& newModelBounds{
+        sprite.getModelBounds(dataModel.boundingBoxModel)};
     minXInput.setText(toRoundedString(newModelBounds.min.x));
     minYInput.setText(toRoundedString(newModelBounds.min.y));
     minZInput.setText(toRoundedString(newModelBounds.min.z));
@@ -284,7 +284,7 @@ void SpritePropertiesWindow::onSpriteCustomModelBoundsChanged(
     SpriteID spriteID, const BoundingBox& newCustomModelBounds)
 {
     if (spriteID == activeSpriteID) {
-        MinMaxBox newModelBounds{newCustomModelBounds};
+        const BoundingBox& newModelBounds{newCustomModelBounds};
         minXInput.setText(toRoundedString(newModelBounds.min.x));
         minYInput.setText(toRoundedString(newModelBounds.min.y));
         minZInput.setText(toRoundedString(newModelBounds.min.z));
@@ -403,7 +403,7 @@ void SpritePropertiesWindow::saveMinX()
         // Clamp the value to its bounds.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
-        MinMaxBox newModelBounds{
+        BoundingBox newModelBounds{
             activeSprite.getModelBounds(dataModel.boundingBoxModel)};
         newModelBounds.min.x = std::clamp(newMinX, 0.f, newModelBounds.max.x);
 
@@ -426,7 +426,7 @@ void SpritePropertiesWindow::saveMinY()
         // Clamp the value to its bounds.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
-        MinMaxBox newModelBounds{
+        BoundingBox newModelBounds{
             activeSprite.getModelBounds(dataModel.boundingBoxModel)};
         newModelBounds.min.y = std::clamp(newMinY, 0.f, newModelBounds.max.y);
 
@@ -449,7 +449,7 @@ void SpritePropertiesWindow::saveMinZ()
         // Clamp the value to its bounds.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
-        MinMaxBox newModelBounds{
+        BoundingBox newModelBounds{
             activeSprite.getModelBounds(dataModel.boundingBoxModel)};
         newModelBounds.min.z = std::clamp(newMinZ, 0.f, newModelBounds.max.z);
 
@@ -472,7 +472,7 @@ void SpritePropertiesWindow::saveMaxX()
         // Clamp the value to its bounds.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
-        MinMaxBox newModelBounds{
+        BoundingBox newModelBounds{
             activeSprite.getModelBounds(dataModel.boundingBoxModel)};
         newModelBounds.max.x
             = std::clamp(newMaxX, newModelBounds.min.x,
@@ -497,7 +497,7 @@ void SpritePropertiesWindow::saveMaxY()
         // Clamp the value to its bounds.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
-        MinMaxBox newModelBounds{
+        BoundingBox newModelBounds{
             activeSprite.getModelBounds(dataModel.boundingBoxModel)};
         newModelBounds.max.y
             = std::clamp(newMaxY, newModelBounds.min.y,
@@ -524,7 +524,7 @@ void SpritePropertiesWindow::saveMaxZ()
         //       and not very useful. Can add if we ever care to.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
-        MinMaxBox newModelBounds{
+        BoundingBox newModelBounds{
             activeSprite.getModelBounds(dataModel.boundingBoxModel)};
         newMaxZ = std::max(newMaxZ, newModelBounds.min.z);
         newModelBounds.max.z = newMaxZ;

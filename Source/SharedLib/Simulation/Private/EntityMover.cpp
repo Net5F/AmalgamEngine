@@ -9,7 +9,6 @@
 #include "Rotation.h"
 #include "Collision.h"
 #include "IsClientEntity.h"
-#include "MinMaxBox.h"
 #include "MovementHelpers.h"
 #include "Transforms.h"
 #include "Log.h"
@@ -54,8 +53,8 @@ void EntityMover::moveEntity(
     //       the model bounds directly. Because of this, we can't just get 
     //       the X/Y position from the center of the resolved bounds.
     //       We can get the Z position directly from it, though.
-    position += (resolvedBounds.center - collision.worldBounds.center);
-    position.z = (resolvedBounds.min().z);
+    position += (resolvedBounds.min - collision.worldBounds.min);
+    position.z = resolvedBounds.min.z;
     // Note: Since clients calc bounds from the replicated position, we need to 
     //       use the same math here (instead of using resolvedBounds directly) 
     //       or the float result may end up slightly different.
@@ -82,24 +81,21 @@ BoundingBox EntityMover::resolveCollisions(const BoundingBox& currentBounds,
                                            double deltaSeconds)
 {
     // Calc where the bounds will end up if there are no collisions.
-    BoundingBox desiredBounds{currentBounds};
-    desiredBounds.center
-        += (movement.velocity * static_cast<float>(deltaSeconds));
+    BoundingBox desiredBounds{currentBounds.translateBy(
+        movement.velocity * static_cast<float>(deltaSeconds))};
 
     // Calc an extent that encompasses the entire potential movement.
     // Note: We add epsilon so that, if a box exactly lines up with the line  
     //       where two tiles meet, both tiles will be included.
-    //       See the note in TileExtent(MinMaxBox) for info on why this isn't 
+    //       See the note in TileExtent(BoundingBox) for info on why this isn't 
     //       the standard behavior.
-    BoundingBox broadPhaseBounds{currentBounds};
-    broadPhaseBounds.unionWith(desiredBounds);
-    broadPhaseBounds.halfExtents.x += MovementHelpers::WORLD_EPSILON;
-    broadPhaseBounds.halfExtents.y += MovementHelpers::WORLD_EPSILON;
-    broadPhaseBounds.halfExtents.z += MovementHelpers::WORLD_EPSILON;
+    BoundingBox broadPhaseBounds{currentBounds.unionWith(desiredBounds)
+                                     .expandBy(MovementHelpers::WORLD_EPSILON)};
 
     // Clip the extent to the tile map's bounds.
     TileExtent broadPhaseTileExtent(broadPhaseBounds);
-    broadPhaseTileExtent.intersectWith(tileMap.getTileExtent());
+    broadPhaseTileExtent
+        = broadPhaseTileExtent.intersectWith(tileMap.getTileExtent());
 
     // Collect the volumes of all non-client entities and tiles that intersect 
     // the broad phase bounds.
@@ -166,8 +162,8 @@ EntityMover::NarrowPhaseResult EntityMover::narrowPhase(
                           std::numeric_limits<float>::infinity(),
                           std::numeric_limits<float>::infinity()};
 
-        MinMaxBox currentBox{currentBounds};
-        MinMaxBox otherBox{otherVolumeInfo->collisionVolume};
+        const BoundingBox& currentBox{currentBounds};
+        const BoundingBox& otherBox{otherVolumeInfo->collisionVolume};
 
         // Calc the distances required for resolvedBounds to enter and exit 
         // otherBounds along each axis, then calc the time intervals where 
@@ -270,17 +266,16 @@ EntityMover::NarrowPhaseResult EntityMover::narrowPhase(
     }
 
     // Move the bounds to resolve the collision.
-    BoundingBox resolvedBounds{currentBounds};
-    resolvedBounds.center += (realVelocity * collisionTime);
+    Vector3 resolvedDistance{realVelocity * collisionTime};
+    BoundingBox resolvedBounds{currentBounds.translateBy(resolvedDistance)};
 
     // Due to float precision loss, the resolved bounds may actually be 
     // slightly clipped inside the other bounds. To resolve this, move backwards
     // by an amount equal to our epsilon.
-    Vector3 backoff{MovementHelpers::WORLD_EPSILON,
-                    MovementHelpers::WORLD_EPSILON,
-                    MovementHelpers::WORLD_EPSILON};
-    backoff *= normalToUse;
-    resolvedBounds.center += backoff;
+    static constexpr Vector3 BACKOFF_AMOUNT{MovementHelpers::WORLD_EPSILON,
+                                            MovementHelpers::WORLD_EPSILON,
+                                            MovementHelpers::WORLD_EPSILON};
+    resolvedBounds = resolvedBounds.translateBy(BACKOFF_AMOUNT * normalToUse);
 
     // If they collided with the ground, reset their falling state.
     if (normalToUse.z == 1.f) {

@@ -1,7 +1,6 @@
 #include "CellExtent.h"
 #include "TileExtent.h"
 #include "BoundingBox.h"
-#include "MinMaxBox.h"
 #include "Cylinder.h"
 #include "MovementHelpers.h"
 #include "SharedConfig.h"
@@ -52,13 +51,7 @@ CellExtent::CellExtent(const TileExtent& tileExtent, std::size_t cellWidthTiles,
     zLength = (maxZ - z);
 }
 
-CellExtent::CellExtent(const BoundingBox& boundingBox, float cellWidth,
-                        float cellHeight)
-: CellExtent(MinMaxBox(boundingBox), cellWidth, cellHeight)
-{
-}
-
-CellExtent::CellExtent(const MinMaxBox& box, float cellWidth,
+CellExtent::CellExtent(const BoundingBox& box, float cellWidth,
                        float cellHeight)
 {
     // Note: One could imagine doing the opposite logic here (if a box is 

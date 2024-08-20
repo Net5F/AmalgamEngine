@@ -99,10 +99,13 @@ struct DiscreteExtent {
     DiscretePosition<T> max() const { return {xMax(), yMax(), zMax()}; }
 
     /**
-     * Sets this extent to the union between itself and the given extent.
+     * Returns the union between this extent and the given extent.
      */
-    void unionWith(const DiscreteExtent<T>& other)
+    [[nodiscard]] DiscreteExtent<T>
+        unionWith(const DiscreteExtent<T>& other) const
     {
+        DiscreteExtent<T> finalExtent{*this};
+
         // Note: We can add some special fast cases for empty extents if we
         //       ever care to, but they likely wouldn't be exercised much.
 
@@ -123,8 +126,8 @@ struct DiscreteExtent {
         }
 
         // Save the new min and length.
-        x = selfMin;
-        xLength = (selfMax - selfMin);
+        finalExtent.x = selfMin;
+        finalExtent.xLength = (selfMax - selfMin);
 
         /* Y union. */
         // Copy the logic from above, replacing X with Y.
@@ -141,8 +144,8 @@ struct DiscreteExtent {
             selfMax = otherMax;
         }
 
-        y = selfMin;
-        yLength = (selfMax - selfMin);
+        finalExtent.y = selfMin;
+        finalExtent.yLength = (selfMax - selfMin);
 
         /* Z union. */
         // Copy the logic from above, replacing X with Z.
@@ -159,15 +162,20 @@ struct DiscreteExtent {
             selfMax = otherMax;
         }
 
-        z = selfMin;
-        zLength = (selfMax - selfMin);
+        finalExtent.z = selfMin;
+        finalExtent.zLength = (selfMax - selfMin);
+
+        return finalExtent;
     }
 
     /**
-     * Sets this extent to the intersection between itself and the given extent.
+     * Returns the intersection between this extent and the given extent.
      */
-    void intersectWith(const DiscreteExtent<T>& other)
+    [[nodiscard]] DiscreteExtent<T>
+        intersectWith(const DiscreteExtent<T>& other) const
     {
+        DiscreteExtent<T> finalExtent{*this};
+
         // Note: We can add some special fast cases for empty extents if we
         //       ever care to, but they likely wouldn't be exercised much.
 
@@ -188,8 +196,8 @@ struct DiscreteExtent {
         }
 
         // Save the new min and length.
-        x = selfMin;
-        xLength = (selfMax - selfMin);
+        finalExtent.x = selfMin;
+        finalExtent.xLength = (selfMax - selfMin);
 
         /* Y intersection. */
         // Copy the logic from above, replacing X with Y.
@@ -206,8 +214,8 @@ struct DiscreteExtent {
             selfMax = otherMax;
         }
 
-        y = selfMin;
-        yLength = (selfMax - selfMin);
+        finalExtent.y = selfMin;
+        finalExtent.yLength = (selfMax - selfMin);
 
         /* Z intersection. */
         // Copy the logic from above, replacing X with Z.
@@ -224,8 +232,10 @@ struct DiscreteExtent {
             selfMax = otherMax;
         }
 
-        z = selfMin;
-        zLength = (selfMax - selfMin);
+        finalExtent.z = selfMin;
+        finalExtent.zLength = (selfMax - selfMin);
+
+        return finalExtent;
     }
 
     /**

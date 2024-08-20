@@ -47,6 +47,30 @@ Vector3& Vector3::operator*=(const Vector3& other)
     return *this;
 }
 
+Vector3& Vector3::operator*=(float scalar)
+{
+    x *= scalar;
+    y *= scalar;
+    z *= scalar;
+    return *this;
+}
+
+Vector3& Vector3::operator/=(const Vector3& other)
+{
+    x /= other.x;
+    y /= other.y;
+    z /= other.z;
+    return *this;
+}
+
+Vector3& Vector3::operator/=(float scalar)
+{
+    x /= scalar;
+    y /= scalar;
+    z /= scalar;
+    return *this;
+}
+
 bool Vector3::operator==(const Vector3& other) const
 {
     return (x == other.x) && (y == other.y) && (z == other.z);
@@ -60,9 +84,7 @@ bool Vector3::operator!=(const Vector3& other) const
 void Vector3::normalize()
 {
     const float length{std::sqrt((x * x) + (y * y) + (z * z))};
-    x /= length;
-    y /= length;
-    z /= length;
+    *this /= length;
 }
 
 float Vector3::dot(const Vector3& other)

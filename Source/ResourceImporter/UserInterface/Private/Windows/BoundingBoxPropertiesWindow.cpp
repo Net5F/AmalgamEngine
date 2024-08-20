@@ -3,7 +3,6 @@
 #include "DataModel.h"
 #include "Paths.h"
 #include "Camera.h"
-#include "MinMaxBox.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
 #include <string>
@@ -143,7 +142,7 @@ void BoundingBoxPropertiesWindow::onActiveLibraryItemChanged(
     // Update all of our property fields to match the new active bounds data.
     nameInput.setText(newActiveBoundingBox->displayName);
 
-    MinMaxBox modelBounds{newActiveBoundingBox->modelBounds};
+    const BoundingBox& modelBounds{newActiveBoundingBox->modelBounds};
     minXInput.setText(toRoundedString(modelBounds.min.x));
     minYInput.setText(toRoundedString(modelBounds.min.y));
     minZInput.setText(toRoundedString(modelBounds.min.z));
@@ -179,7 +178,7 @@ void BoundingBoxPropertiesWindow::onBoundingBoxBoundsChanged(
     BoundingBoxID boundingBoxID, const BoundingBox& newBounds)
 {
     if (boundingBoxID == activeBoundingBoxID) {
-        MinMaxBox newMinMaxBounds{newBounds};
+        const BoundingBox& newMinMaxBounds{newBounds};
         minXInput.setText(toRoundedString(newMinMaxBounds.min.x));
         minYInput.setText(toRoundedString(newMinMaxBounds.min.y));
         minZInput.setText(toRoundedString(newMinMaxBounds.min.z));
@@ -212,7 +211,7 @@ void BoundingBoxPropertiesWindow::saveMinX()
         // Clamp the value to its bounds.
         const EditorBoundingBox& activeBoundingBox{
             dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        MinMaxBox newModelBounds{activeBoundingBox.modelBounds};
+        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
         newModelBounds.min.x = std::clamp(newMinX, 0.f, newModelBounds.max.x);
 
         // Apply the new value.
@@ -234,7 +233,7 @@ void BoundingBoxPropertiesWindow::saveMinY()
         // Clamp the value to its bounds.
         const EditorBoundingBox& activeBoundingBox{
             dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        MinMaxBox newModelBounds{activeBoundingBox.modelBounds};
+        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
         newModelBounds.min.y = std::clamp(newMinY, 0.f, newModelBounds.max.y);
 
         // Apply the new value.
@@ -256,7 +255,7 @@ void BoundingBoxPropertiesWindow::saveMinZ()
         // Clamp the value to its bounds.
         const EditorBoundingBox& activeBoundingBox{
             dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        MinMaxBox newModelBounds{activeBoundingBox.modelBounds};
+        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
         newModelBounds.min.z = std::clamp(newMinZ, 0.f, newModelBounds.max.z);
 
         // Apply the new value.
@@ -278,7 +277,7 @@ void BoundingBoxPropertiesWindow::saveMaxX()
         // Clamp the value to its bounds.
         const EditorBoundingBox& activeBoundingBox{
             dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        MinMaxBox newModelBounds{activeBoundingBox.modelBounds};
+        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
         newModelBounds.max.x
             = std::clamp(newMaxX, newModelBounds.min.x,
                          static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
@@ -302,7 +301,7 @@ void BoundingBoxPropertiesWindow::saveMaxY()
         // Clamp the value to its bounds.
         const EditorBoundingBox& activeBoundingBox{
             dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        MinMaxBox newModelBounds{activeBoundingBox.modelBounds};
+        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
         newModelBounds.max.y
             = std::clamp(newMaxY, newModelBounds.min.y,
                          static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
@@ -328,7 +327,7 @@ void BoundingBoxPropertiesWindow::saveMaxZ()
         //       and not very useful. Can add if we ever care to.
         const EditorBoundingBox& activeBoundingBox{
             dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        MinMaxBox newModelBounds{activeBoundingBox.modelBounds};
+        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
         newMaxZ = std::max(newMaxZ, newModelBounds.min.z);
         newModelBounds.max.z = newMaxZ;
 

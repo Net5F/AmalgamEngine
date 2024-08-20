@@ -13,7 +13,6 @@
 #include "MovementModifiers.h"
 #include "GraphicState.h"
 #include "Collision.h"
-#include "MinMaxBox.h"
 #include "EntityInitScript.h"
 #include "PersistedEntityData.h"
 #include "Deserialize.h"

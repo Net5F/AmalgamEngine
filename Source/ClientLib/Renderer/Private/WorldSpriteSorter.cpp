@@ -330,9 +330,12 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
         worldBounds = Transforms::modelToWorldTile(sprite.modelBounds,
                                                    layerID.tilePosition);
     }
-    worldBounds.center.x += layerID.tileOffset.x;
-    worldBounds.center.y += layerID.tileOffset.y;
-    worldBounds.center.z += layerID.tileOffset.z;
+    worldBounds.min.x += layerID.tileOffset.x;
+    worldBounds.min.y += layerID.tileOffset.y;
+    worldBounds.min.z += layerID.tileOffset.z;
+    worldBounds.max.x += layerID.tileOffset.x;
+    worldBounds.max.y += layerID.tileOffset.y;
+    worldBounds.max.z += layerID.tileOffset.z;
 
     // Push the sprite to be sorted.
     spritesToSort.emplace_back(&sprite, worldObjectID, worldBounds,
@@ -430,11 +433,10 @@ void WorldSpriteSorter::calcDepthDependencies()
                 SpriteSortInfo& spriteA{spritesToSort[i]};
                 SpriteSortInfo& spriteB{spritesToSort[j]};
 
-                Vector3 spriteAMax{spriteA.worldBounds.max()};
-                Vector3 spriteBMin{spriteB.worldBounds.min()};
-                if ((spriteBMin.x < spriteAMax.x)
-                    && (spriteBMin.y < spriteAMax.y)
-                    && (spriteBMin.z < spriteAMax.z)) {
+                if ((spriteB.worldBounds.min.x < spriteA.worldBounds.max.x)
+                    && (spriteB.worldBounds.min.y < spriteA.worldBounds.max.y)
+                    && (spriteB.worldBounds.min.z
+                        < spriteA.worldBounds.max.z)) {
                     // B is behind A, push it into A.spritesBehind.
                     spriteA.spritesBehind.push_back(&spriteB);
                 }

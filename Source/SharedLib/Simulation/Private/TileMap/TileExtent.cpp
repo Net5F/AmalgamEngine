@@ -2,7 +2,6 @@
 #include "ChunkExtent.h"
 #include "CellExtent.h"
 #include "BoundingBox.h"
-#include "MinMaxBox.h"
 #include "Vector3.h"
 #include "MovementHelpers.h"
 #include "SharedConfig.h"
@@ -50,11 +49,6 @@ TileExtent::TileExtent(const CellExtent& cellExtent, std::size_t cellWidthTiles,
 }
 
 TileExtent::TileExtent(const BoundingBox& boundingBox)
-: TileExtent(MinMaxBox(boundingBox))
-{
-}
-
-TileExtent::TileExtent(const MinMaxBox& box)
 {
     static constexpr float TILE_WIDTH{
         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
@@ -70,22 +64,22 @@ TileExtent::TileExtent(const MinMaxBox& box)
     // To account for float precision issues: add the epsilon to each min value,
     // then round down. If the box is within epsilon range of a tile in the 
     // negative direction, it won't be included in this extent.
-    x = static_cast<int>(
-        std::floor((box.min.x + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
-    y = static_cast<int>(
-        std::floor((box.min.y + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
-    z = static_cast<int>(
-        std::floor((box.min.z + MovementHelpers::WORLD_EPSILON) / TILE_HEIGHT));
+    x = static_cast<int>(std::floor(
+        (boundingBox.min.x + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
+    y = static_cast<int>(std::floor(
+        (boundingBox.min.y + MovementHelpers::WORLD_EPSILON) / TILE_WIDTH));
+    z = static_cast<int>(std::floor(
+        (boundingBox.min.z + MovementHelpers::WORLD_EPSILON) / TILE_HEIGHT));
 
-    // Subtract the epsilon from each max value, then round up. If the box is 
-    // within epsilon range of a tile in the positive direction, it won't be 
-    // included in this extent.
-    float maxTileX{
-        std::ceil((box.max.x - MovementHelpers::WORLD_EPSILON) / TILE_WIDTH)};
-    float maxTileY{
-        std::ceil((box.max.y - MovementHelpers::WORLD_EPSILON) / TILE_WIDTH)};
-    float maxTileZ{
-        std::ceil((box.max.z - MovementHelpers::WORLD_EPSILON) / TILE_HEIGHT)};
+    // Subtract the epsilon from each max value, then round up. If the
+    // boundingBox is within epsilon range of a tile in the positive direction,
+    // it won't be included in this extent.
+    float maxTileX{std::ceil(
+        (boundingBox.max.x - MovementHelpers::WORLD_EPSILON) / TILE_WIDTH)};
+    float maxTileY{std::ceil(
+        (boundingBox.max.y - MovementHelpers::WORLD_EPSILON) / TILE_WIDTH)};
+    float maxTileZ{std::ceil(
+        (boundingBox.max.z - MovementHelpers::WORLD_EPSILON) / TILE_HEIGHT)};
     xLength = (static_cast<int>(maxTileX) - x);
     yLength = (static_cast<int>(maxTileY) - y);
     zLength = (static_cast<int>(maxTileZ) - z);
@@ -93,37 +87,14 @@ TileExtent::TileExtent(const MinMaxBox& box)
 
 bool TileExtent::contains(const BoundingBox& box) const
 {
-    static constexpr float TILE_WIDTH{
-        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
-    static constexpr float TILE_HEIGHT{
-        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
-
-    MinMaxBox extentMinMaxBox{{x * TILE_WIDTH, y * TILE_WIDTH, z * TILE_HEIGHT},
-                              {(x + xLength) * TILE_WIDTH,
-                               (y + yLength) * TILE_WIDTH,
-                               (z + zLength) * TILE_HEIGHT}};
-    BoundingBox extentBox{extentMinMaxBox};
-
+    BoundingBox extentBox(*this);
     return extentBox.contains(box);
 }
 
 bool TileExtent::contains(const Vector3& worldPoint) const
 {
-    static constexpr float TILE_WIDTH{
-        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
-    static constexpr float TILE_HEIGHT{
-        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
-
-    MinMaxBox extentBox{{x * TILE_WIDTH, y * TILE_WIDTH, z * TILE_HEIGHT},
-                        {(x + xLength) * TILE_WIDTH, (y + yLength) * TILE_WIDTH,
-                         (z + zLength) * TILE_HEIGHT}};
-
-    return (extentBox.min.x <= worldPoint.x)
-           && (extentBox.max.x >= worldPoint.x)
-           && (extentBox.min.y <= worldPoint.y)
-           && (extentBox.max.y >= worldPoint.y)
-           && (extentBox.min.z <= worldPoint.z)
-           && (extentBox.max.z >= worldPoint.z);
+    BoundingBox extentBox(*this);
+    return extentBox.contains(worldPoint);
 }
 
 void TileExtent::print() const

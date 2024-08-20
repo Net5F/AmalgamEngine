@@ -8,22 +8,15 @@ namespace AM
 {
 static constexpr float WIDTH{SharedConfig::TILE_WORLD_WIDTH};
 static constexpr float HEIGHT{SharedConfig::TILE_WORLD_HEIGHT};
-static constexpr float HALF_WIDTH{WIDTH / 2};
-static constexpr float HALF_HEIGHT{HEIGHT / 2};
 static constexpr float ONE_THIRD_HEIGHT{HEIGHT / 3};
 static constexpr float TWO_THIRD_HEIGHT{(HEIGHT / 3) * 2};
-static constexpr float HALF_ONE_THIRD_HEIGHT{ONE_THIRD_HEIGHT / 2};
-static constexpr float HALF_TWO_THIRD_HEIGHT{TWO_THIRD_HEIGHT / 2};
 
 /** World-space bounding boxes for each terrain height. */
 static constexpr std::array<BoundingBox, Terrain::Height::Count> TERRAIN_BOXES{
-    {{{HALF_WIDTH, HALF_WIDTH, 0}, {HALF_WIDTH, HALF_WIDTH, 0}},
-     {{HALF_WIDTH, HALF_WIDTH, HALF_ONE_THIRD_HEIGHT},
-      {HALF_WIDTH, HALF_WIDTH, HALF_ONE_THIRD_HEIGHT}},
-     {{HALF_WIDTH, HALF_WIDTH, HALF_TWO_THIRD_HEIGHT},
-      {HALF_WIDTH, HALF_WIDTH, HALF_TWO_THIRD_HEIGHT}},
-     {{HALF_WIDTH, HALF_WIDTH, HALF_HEIGHT},
-      {HALF_WIDTH, HALF_WIDTH, HALF_HEIGHT}}}};
+    {{{0, 0, 0}, {WIDTH, WIDTH, 0}},
+     {{0, 0, 0}, {WIDTH, WIDTH, ONE_THIRD_HEIGHT}},
+     {{0, 0, 0}, {WIDTH, WIDTH, TWO_THIRD_HEIGHT}},
+     {{0, 0, 0}, {WIDTH, WIDTH, HEIGHT}}}};
 
 /** World-space height offsets for each height value. */
 static constexpr std::array<float, Terrain::Height::Count> HEIGHT_VALUES{
@@ -83,13 +76,11 @@ BoundingBox Terrain::calcWorldBounds(const TilePosition& tilePosition,
     // Get the appropriate bounds for the given tile height.
     BoundingBox bounds{TERRAIN_BOXES[height]};
 
-    // Move the bounds to the tile's origin.
-    bounds.center += tilePosition.getOriginPoint();
+    // Move the bounds to the tile's origin + the given start height.
+    Vector3 tileOrigin{tilePosition.getOriginPoint()};
+    tileOrigin.z += HEIGHT_VALUES[startHeight];
 
-    // Raise the bounds based on the given start height.
-    bounds.center.z += HEIGHT_VALUES[startHeight];
-
-    return bounds;
+    return bounds.translateBy(tileOrigin);
 }
 
 } // End namespace AM

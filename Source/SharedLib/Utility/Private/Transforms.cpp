@@ -59,10 +59,8 @@ Vector3 Transforms::screenToWorldTarget(const SDL_FPoint& screenPoint,
     // Find the T where a ray cast from screenPoint intersects the camera 
     // target's Z plane.
     Ray ray{screenToWorldRay(screenPoint, camera)};
-    float zHalfExtent{camera.target.z / 2.f};
-    BoundingBox zPlane{
-        {0, 0, (zHalfExtent - 0.05f)},
-        {1'000'000.f, 1'000'000.f, (zHalfExtent + 0.05f)}};
+    BoundingBox zPlane{{-1'000'000.f, -1'000'000.f, -0.1f},
+                       {1'000'000.f, 1'000'000.f, camera.target.z}};
     float intersectT{zPlane.getMinIntersection(ray)};
     AM_ASSERT(intersectT > 0, "Screen ray failed to intersect Z plane.");
 
@@ -111,10 +109,8 @@ TilePosition Transforms::screenToWorldTile(const SDL_FPoint& screenPoint,
     // Find the T where a ray cast from screenPoint intersects the tile's 
     // Z plane.
     Ray ray{screenToWorldRay(screenPoint, camera)};
-    float zHalfExtent{tileZWorld / 2.f};
-    BoundingBox zPlane{
-        {0, 0, (zHalfExtent - 0.05f)},
-        {1'000'000.f, 1'000'000.f, (zHalfExtent + 0.05f)}};
+    BoundingBox zPlane{{-1'000'000.f, -1'000'000.f, -0.1f},
+                       {1'000'000.f, 1'000'000.f, tileZWorld}};
     float intersectT{zPlane.getMinIntersection(ray)};
     AM_ASSERT(intersectT > 0, "Screen ray failed to intersect Z plane.");
 
@@ -139,10 +135,8 @@ BoundingBox Transforms::modelToWorldTile(const BoundingBox& modelBounds,
     Vector3 offset{tilePosition.x * TILE_WORLD_WIDTH,
                    tilePosition.y * TILE_WORLD_WIDTH,
                    tilePosition.z * TILE_WORLD_HEIGHT};
-    BoundingBox movedBox{modelBounds};
-    movedBox.center += offset;
 
-    return movedBox;
+    return modelBounds.translateBy(offset);
 }
 
 BoundingBox Transforms::modelToWorldEntity(const BoundingBox& modelBounds,
@@ -152,16 +146,14 @@ BoundingBox Transforms::modelToWorldEntity(const BoundingBox& modelBounds,
     // by half of the sprite's stage size to center it in the X/Y.
     // Note: This assumes that the sprite's stage is 1 tile large. When we add
     //       support for other sizes, this will need to be updated.
-    BoundingBox offsetBounds{modelBounds};
-    offsetBounds.center.x += position.x - (SharedConfig::TILE_WORLD_WIDTH / 2);
-    offsetBounds.center.y += position.y - (SharedConfig::TILE_WORLD_WIDTH / 2);
-
     // Note: We don't need to offset the Z position because sprites are only 
     //       assumed to be centered on the stage in the X and Y axis. They're
     //       assumed to start on the stage at Z == 0.
-    offsetBounds.center.z += position.z;
+    Vector3 offset{position.x - (SharedConfig::TILE_WORLD_WIDTH / 2.f),
+                   position.y - (SharedConfig::TILE_WORLD_WIDTH / 2.f),
+                   position.z};
 
-    return offsetBounds;
+    return modelBounds.translateBy(offset);
 }
 
 } // End namespace AM

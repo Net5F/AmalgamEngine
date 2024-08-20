@@ -3,7 +3,6 @@
 #include "Tile.h"
 #include "Cylinder.h"
 #include "BoundingBox.h"
-#include "MinMaxBox.h"
 #include "Collision.h"
 #include "CellPosition.h"
 #include "Transforms.h"
@@ -205,9 +204,10 @@ std::vector<const CollisionLocator::CollisionInfo*>&
     getCollisionsBroad(tileExtent, objectTypeMask);
 
     // Erase any volumes that don't actually intersect the extent.
+    BoundingBox tileExtentBox(tileExtent);
     std::erase_if(
-        returnVector, [this, &tileExtent](const CollisionInfo* otherInfo) {
-            return !(otherInfo->collisionVolume.intersects(tileExtent));
+        returnVector, [this, &tileExtentBox](const CollisionInfo* otherInfo) {
+            return !(otherInfo->collisionVolume.intersects(tileExtentBox));
         });
 
     return returnVector;
@@ -230,7 +230,7 @@ std::vector<const CollisionLocator::CollisionInfo*>&
                                   CELL_WORLD_HEIGHT);
 
     // Clip the extent to the grid's bounds.
-    cylinderCellExtent.intersectWith(gridCellExtent);
+    cylinderCellExtent = cylinderCellExtent.intersectWith(gridCellExtent);
 
     TileExtent cylinderTileExtent(cylinderCellExtent,
                                   SharedConfig::COLLISION_LOCATOR_CELL_WIDTH,
@@ -248,14 +248,6 @@ std::vector<const CollisionLocator::CollisionInfo*>&
 }
 
 std::vector<const CollisionLocator::CollisionInfo*>&
-    CollisionLocator::getCollisionsBroad(const MinMaxBox& boundingBox,
-                                         CollisionObjectTypeMask objectTypeMask)
-{
-    // Convert to TileExtent.
-    return getCollisionsBroad(TileExtent(boundingBox), objectTypeMask);
-}
-
-std::vector<const CollisionLocator::CollisionInfo*>&
     CollisionLocator::getCollisionsBroad(const TileExtent& tileExtent,
                                          CollisionObjectTypeMask objectTypeMask)
 {
@@ -264,10 +256,9 @@ std::vector<const CollisionLocator::CollisionInfo*>&
                               SharedConfig::ENTITY_LOCATOR_CELL_WIDTH,
                               SharedConfig::ENTITY_LOCATOR_CELL_HEIGHT);
 
-    // Clip the extent to the grid's bounds.
-    tileCellExtent.intersectWith(gridCellExtent);
-    TileExtent clippedTileExtent{tileExtent};
-    clippedTileExtent.intersectWith(gridTileExtent);
+    // Clip the extents to the grid's bounds.
+    tileCellExtent = tileCellExtent.intersectWith(gridCellExtent);
+    TileExtent clippedTileExtent{tileExtent.intersectWith(gridTileExtent)};
 
     return getCollisionsBroad(clippedTileExtent, tileCellExtent,
                               objectTypeMask);
@@ -343,8 +334,7 @@ void CollisionLocator::addTileCollisionVolumes(const TilePosition& tilePosition,
             // offset for the other layers.
             collisionVolume = Terrain::calcWorldBounds(
                 tilePosition, static_cast<Terrain::Value>(layer.graphicValue));
-            terrainHeight
-                = collisionVolume.center.z + collisionVolume.halfExtents.z;
+            terrainHeight = collisionVolume.max.z;
 
             // Continue to the next layer, to avoid this terrain being added to
             // the collisionGrid.
@@ -361,7 +351,8 @@ void CollisionLocator::addTileCollisionVolumes(const TilePosition& tilePosition,
 
             // If it's a wall, add the terrain height.
             if (layer.type == TileLayer::Type::Wall) {
-                collisionVolume.center.z += terrainHeight;
+                collisionVolume.min.z += terrainHeight;
+                collisionVolume.max.z += terrainHeight;
             }
         }
 
@@ -404,10 +395,10 @@ std::vector<const CollisionLocator::CollisionInfo*>&
                                          const CellExtent& cellExtent,
                                          CollisionObjectTypeMask objectTypeMask)
 {
-    // Generate any intersected terrain and add it to the return vector.
+    // Generate any intersected terrain and add it to the temporary terrain 
+    // vector.
     // Note: We ignore modelBounds and collisionEnabled on terrain, all terrain
     //       gets generated collision. 
-    returnVector.clear();
     terrainCollisionVolumes.clear();
     for (int z{tileExtent.z}; z <= tileExtent.zMax(); ++z) {
         for (int y{tileExtent.y}; y <= tileExtent.yMax(); ++y) {
@@ -419,18 +410,22 @@ std::vector<const CollisionLocator::CollisionInfo*>&
                     continue;
                 }
 
-                BoundingBox collisionVolume{Terrain::calcWorldBounds(
-                    tilePosition, terrainValue)};
-                const CollisionInfo& collisionInfo{
-                    terrainCollisionVolumes.emplace_back(
-                        collisionVolume, CollisionObjectType::TileLayer)};
-                returnVector.emplace_back(&(collisionInfo));
+                BoundingBox collisionVolume{
+                    Terrain::calcWorldBounds(tilePosition, terrainValue)};
+                terrainCollisionVolumes.emplace_back(
+                    collisionVolume, CollisionObjectType::TileLayer);
             }
         }
     }
 
+    // Push the temporary terrain collision volumes into the return vector.
+    returnVector.clear();
+    for (const CollisionInfo& collisionInfo : terrainCollisionVolumes) {
+        returnVector.emplace_back(&(collisionInfo));
+    }
+
     // Add the indices in every intersected collisionGrid cell to the scratch 
-    // vector.
+    // index vector.
     indexVector.clear();
     for (int z{cellExtent.z}; z <= cellExtent.zMax(); ++z) {
         for (int y{cellExtent.y}; y <= cellExtent.yMax(); ++y) {
@@ -442,12 +437,12 @@ std::vector<const CollisionLocator::CollisionInfo*>&
         }
     }
 
-    // Sort and remove duplicates from the scratch vector.
+    // Sort and remove duplicates from the scratch index vector.
     std::sort(indexVector.begin(), indexVector.end());
     indexVector.erase(std::unique(indexVector.begin(), indexVector.end()),
                       indexVector.end());
 
-    // Push the collision volumes into the return vector.
+    // Push the non-terrain collision volumes into the return vector.
     for (Uint16 volumeIndex : indexVector) {
         const CollisionInfo& volumeInfo{collisionVolumes[volumeIndex]};
 

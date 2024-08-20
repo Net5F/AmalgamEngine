@@ -5,7 +5,6 @@ target_sources(SharedLib
         Private/Cylinder.cpp
         Private/EntityLocator.cpp
         Private/EntityMover.cpp
-        Private/MinMaxBox.cpp
         Private/MovementHelpers.cpp
         Private/ResourceData.cpp
         Private/Terrain.cpp
@@ -44,7 +43,6 @@ target_sources(SharedLib
         Public/EngineItemInteractionType.h
         Public/EntityLocator.h
         Public/EntityMover.h
-        Public/MinMaxBox.h
         Public/MovementHelpers.h
         Public/Ray.h
         Public/ReplicatedComponent.h

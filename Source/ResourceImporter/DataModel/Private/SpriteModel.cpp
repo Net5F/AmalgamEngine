@@ -123,18 +123,18 @@ void SpriteModel::save(nlohmann::json& json)
             //       to modelBounds because that's what the engine uses. 
             const BoundingBox& spriteModelBounds{
                 sprite.getModelBounds(dataModel.boundingBoxModel)}; 
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["centerX"]
-                = spriteModelBounds.center.x;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["centerY"]
-                = spriteModelBounds.center.y;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["centerZ"]
-                = spriteModelBounds.center.z;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["halfX"]
-                = spriteModelBounds.halfExtents.x;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["halfY"]
-                = spriteModelBounds.halfExtents.y;
-            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["halfZ"]
-                = spriteModelBounds.halfExtents.z;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minX"]
+                = spriteModelBounds.min.x;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxX"]
+                = spriteModelBounds.max.x;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minY"]
+                = spriteModelBounds.min.y;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxY"]
+                = spriteModelBounds.max.y;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["minZ"]
+                = spriteModelBounds.min.z;
+            json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxZ"]
+                = spriteModelBounds.max.z;
         }
 
         i++;
@@ -216,7 +216,7 @@ bool SpriteModel::addSpriteSheet(const std::string& relPath,
             SDL_Rect textureExtent{x, y, spriteWidthI, spriteHeightI};
 
             // Default to a non-0 bounding box so it's easier to click.
-            static constexpr BoundingBox defaultBox{{10, 10, 10}, {10, 10, 10}};
+            static constexpr BoundingBox defaultBox{{0, 0, 0}, {20, 20, 20}};
 
             // Add the sprite to the map and sheet.
             SpriteID spriteID{static_cast<SpriteID>(spriteIDPool.reserveID())};
@@ -433,18 +433,12 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
 
     // Default our custom bounds to the saved modelBounds, regardless of 
     // whether we use a shared bounding box or not.
-    sprite.customModelBounds.center.x
-        = spriteJson.at("modelBounds").at("centerX");
-    sprite.customModelBounds.center.y
-        = spriteJson.at("modelBounds").at("centerY");
-    sprite.customModelBounds.center.z
-        = spriteJson.at("modelBounds").at("centerZ");
-    sprite.customModelBounds.halfExtents.x
-        = spriteJson.at("modelBounds").at("halfX");
-    sprite.customModelBounds.halfExtents.y
-        = spriteJson.at("modelBounds").at("halfY");
-    sprite.customModelBounds.halfExtents.z
-        = spriteJson.at("modelBounds").at("halfZ");
+    sprite.customModelBounds.min.x = spriteJson.at("modelBounds").at("minX");
+    sprite.customModelBounds.max.x = spriteJson.at("modelBounds").at("maxX");
+    sprite.customModelBounds.min.y = spriteJson.at("modelBounds").at("minY");
+    sprite.customModelBounds.max.y = spriteJson.at("modelBounds").at("maxY");
+    sprite.customModelBounds.min.z = spriteJson.at("modelBounds").at("minZ");
+    sprite.customModelBounds.max.z = spriteJson.at("modelBounds").at("maxZ");
 
     return true;
 }

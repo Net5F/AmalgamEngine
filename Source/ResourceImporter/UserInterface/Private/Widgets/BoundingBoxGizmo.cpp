@@ -4,7 +4,6 @@
 #include "Transforms.h"
 #include "Position.h"
 #include "Camera.h"
-#include "MinMaxBox.h"
 #include "SharedConfig.h"
 #include "Log.h"
 #include "AUI/Core.h"
@@ -252,7 +251,7 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 
     // Note: The expected behavior is to move along the x/y plane and
     //       leave minZ where it was.
-    MinMaxBox updatedBounds(boundingBox);
+    BoundingBox updatedBounds(boundingBox);
     float& minX{updatedBounds.min.x};
     float& minY{updatedBounds.min.y};
     float& maxX{updatedBounds.max.x};
@@ -302,7 +301,7 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    MinMaxBox updatedBounds(boundingBox);
+    BoundingBox updatedBounds(boundingBox);
     updatedBounds.min.x = std::clamp(mouseWorldPos.x, 0.f, updatedBounds.max.x);
 
     // Signal the updated bounding box.
@@ -316,7 +315,7 @@ void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
 void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    MinMaxBox updatedBounds(boundingBox);
+    BoundingBox updatedBounds(boundingBox);
     updatedBounds.min.y = std::clamp(mouseWorldPos.y, 0.f, updatedBounds.max.y);
 
     // Signal the updated bounding box.
@@ -344,7 +343,7 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     mouseZHeight = Transforms::screenYToWorldZ(mouseZHeight, 1.f);
 
     // Set maxZ, making sure it doesn't go below minZ.
-    MinMaxBox updatedBounds(boundingBox);
+    BoundingBox updatedBounds(boundingBox);
     updatedBounds.max.z = std::max(mouseZHeight, updatedBounds.min.z);
 
     // Signal the updated bounding box.
@@ -360,8 +359,8 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
     std::array<SDL_FPoint, 7> screenPoints{};
 
     // Push the points in the correct order.
-    Vector3 minPoint{boundingBox.min()};
-    Vector3 maxPoint{boundingBox.max()};
+    const Vector3& minPoint{boundingBox.min};
+    const Vector3& maxPoint{boundingBox.max};
     Vector3 point{minPoint.x, maxPoint.y, minPoint.z};
     screenPoints[0] = Transforms::worldToScreen(point, 1);
 

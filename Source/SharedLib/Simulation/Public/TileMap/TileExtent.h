@@ -7,7 +7,6 @@ namespace AM
 struct ChunkExtent;
 struct CellExtent;
 struct BoundingBox;
-struct MinMaxBox;
 struct Vector3;
 
 /**
@@ -38,14 +37,6 @@ struct TileExtent : public DiscreteExtent<DiscreteImpl::TileTag> {
      * included in this extent.
      */
     explicit TileExtent(const BoundingBox& boundingBox);
-
-    /**
-     * Constructs the smallest tile extent that contains the given min max box.
-     *
-     * If the box is exactly on the edge of a tile, that tile will not be 
-     * included in this extent.
-     */
-    explicit TileExtent(const MinMaxBox& box);
 
     using DiscreteExtent<DiscreteImpl::TileTag>::contains;
     /**

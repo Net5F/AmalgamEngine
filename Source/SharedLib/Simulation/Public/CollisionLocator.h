@@ -15,7 +15,6 @@ namespace AM
 class Tile;
 struct Cylinder;
 struct BoundingBox;
-struct MinMaxBox;
 
 /**
  * The types of world objects that can be collided with.
@@ -158,13 +157,6 @@ public:
      */
     std::vector<const CollisionInfo*>&
         getCollisionsBroad(const BoundingBox& boundingBox,
-                           CollisionObjectTypeMask objectTypeMask);
-
-    /**
-     * Overload for MinMaxBox.
-     */
-    std::vector<const CollisionInfo*>&
-        getCollisionsBroad(const MinMaxBox& boundingBox,
                            CollisionObjectTypeMask objectTypeMask);
 
     /**

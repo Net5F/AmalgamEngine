@@ -1,7 +1,6 @@
 #include "WorldObjectLocator.h"
 #include "SDLHelpers.h"
 #include "Transforms.h"
-#include "MinMaxBox.h"
 #include "entt/entity/entity.hpp"
 #include <stdexcept>
 #include <cmath>
@@ -28,8 +27,8 @@ void WorldObjectLocator::addWorldObject(const WorldObjectID& objectID,
     }
 
     // Find the cells that the bounding box intersects.
-    MinMaxBox box(objectWorldBounds);
-    CellExtent boxCellExtent(box, CELL_WORLD_WIDTH, CELL_WORLD_HEIGHT);
+    CellExtent boxCellExtent(objectWorldBounds, CELL_WORLD_WIDTH,
+                             CELL_WORLD_HEIGHT);
 
     // Make sure each length is at least 1, or else the box won't be added to 
     // any cells.
@@ -154,22 +153,11 @@ void WorldObjectLocator::setCamera(const Camera& inCamera)
 
 void WorldObjectLocator::setExtent(const TileExtent& inTileExtent)
 {
-    static constexpr float TILE_WORLD_WIDTH{
-        static_cast<float>(SharedConfig::TILE_WORLD_WIDTH)};
-    static constexpr float TILE_WORLD_HEIGHT{
-        static_cast<float>(SharedConfig::TILE_WORLD_HEIGHT)};
-
-    MinMaxBox bounds{};
-    bounds.min.x = inTileExtent.x * TILE_WORLD_WIDTH;
-    bounds.max.x = (inTileExtent.x + inTileExtent.xLength) * TILE_WORLD_WIDTH;
-    bounds.min.y = inTileExtent.y * TILE_WORLD_WIDTH;
-    bounds.max.y = (inTileExtent.y + inTileExtent.yLength) * TILE_WORLD_WIDTH;
+    locatorBounds = BoundingBox(inTileExtent);
     // Note: We don't want our rays to immediately intersect with these bounds,
     //       so we drop the Z bound below the extent.
-    bounds.min.z = (inTileExtent.z * TILE_WORLD_HEIGHT) - 0.1f;
-    bounds.max.z = (inTileExtent.z + inTileExtent.zLength) * TILE_WORLD_HEIGHT;
+    locatorBounds.min.z -= 0.1f;
 
-    locatorBounds = BoundingBox(bounds);
     locatorCellExtent
         = CellExtent(inTileExtent, Config::WORLD_OBJECT_LOCATOR_CELL_WIDTH,
                      Config::WORLD_OBJECT_LOCATOR_CELL_HEIGHT);
