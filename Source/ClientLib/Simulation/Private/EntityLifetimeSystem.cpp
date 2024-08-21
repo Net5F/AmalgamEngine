@@ -216,9 +216,11 @@ void EntityLifetimeSystem::finishPlayerEntity()
 
     // TODO: Switch to logical screen size and do scaling in Renderer.
     UserConfig& userConfig{UserConfig::get()};
+    const Position& position{registry.get<Position>(playerEntity)};
     registry.emplace<Camera>(
-        playerEntity, Camera::CenterOnEntity, Position{}, PreviousPosition{},
-        BoundingBox{}, SDLHelpers::rectToFRect(userConfig.getWindowSize()));
+        playerEntity, Camera::CenterOnEntity, position,
+        PreviousPosition{position}, BoundingBox{},
+        SDLHelpers::rectToFRect(userConfig.getWindowSize()));
 
     registry.emplace<Inventory>(playerEntity);
     registry.emplace<InputHistory>(playerEntity);

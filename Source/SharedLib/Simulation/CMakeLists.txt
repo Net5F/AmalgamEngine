@@ -6,6 +6,7 @@ target_sources(SharedLib
         Private/EntityLocator.cpp
         Private/EntityMover.cpp
         Private/MovementHelpers.cpp
+        Private/Ray.cpp
         Private/ResourceData.cpp
         Private/Terrain.cpp
         Private/Vector3.cpp

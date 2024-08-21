@@ -23,11 +23,12 @@ struct Ray {
     /**
      * Returns the point along this ray at the given t.
      */
-    Vector3 getPointAtT(float t)
-    {
-        return {(origin.x + (direction.x * t)), (origin.y + (direction.y * t)),
-                (origin.z + (direction.z * t))};
-    }
+    Vector3 getPointAtT(float t);
+
+    /**
+     * Prints this ray's current values.
+     */
+    void print() const;
 };
 
 } // namespace AM

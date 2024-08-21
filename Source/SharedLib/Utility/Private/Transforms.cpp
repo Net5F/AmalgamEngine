@@ -35,7 +35,7 @@ float Transforms::worldZToScreenY(float zCoord, float zoomFactor)
 }
 
 Vector3 Transforms::screenToWorldMinimum(const SDL_FPoint& screenPoint,
-                                          const Camera& camera)
+                                         const Camera& camera)
 {
     // Offset the screen point to include the camera position.
     SDL_FPoint absolutePoint{};
