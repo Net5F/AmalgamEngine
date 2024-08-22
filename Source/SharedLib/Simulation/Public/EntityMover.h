@@ -25,10 +25,9 @@ struct Collision;
  *
  * Note: Since player movement is predicted on clients, a player colliding with 
  *       a moving NPC is always going to cause mis-predictions and rollback.
- *       This is fine for the player experience, since devs should know to not 
- *       give collision to NPCs that move. It also means that we can get away 
- *       with not considering the moving NPC's velocity when resolving 
- *       collisions.
+ *       To avoid this, we have a blanket rule of "a moving entity (player or 
+ *       NPC) will ignore the collision of all movement-enabled entities
+ *       (whether they're currently moving or not)".
  */
 class EntityMover {
 public:
