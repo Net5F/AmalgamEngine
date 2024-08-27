@@ -34,11 +34,11 @@ public:
 
     bool operator==(const BoundingBox& other) const;
 
-    float getXLength() const;
+    float xLength() const;
 
-    float getYLength() const;
+    float yLength() const;
 
-    float getZLength() const;
+    float zLength() const;
 
     /**
      * Returns the point centered on this bounding box in the X and Y axis,
@@ -120,7 +120,12 @@ public:
     std::array<float, 2> getIntersections(const Ray& ray) const;
 
     /**
-     * Returns a box with its position translated by the given amount.
+     * Returns this box with its min point moved to the given point.
+     */
+    [[nodiscard]] BoundingBox moveTo(const Vector3& newMin) const;
+
+    /**
+     * Returns this box with its position translated by the given amount.
      */
     [[nodiscard]] BoundingBox translateBy(const Vector3& amountToMove) const;
 

@@ -37,31 +37,32 @@ BoundingBox::BoundingBox(const TileExtent& tileExtent)
     max.z = (tileExtent.z + tileExtent.zLength) * TILE_WORLD_HEIGHT;
 }
 
-float BoundingBox::getXLength() const
+float BoundingBox::xLength() const
 {
     return (max.x - min.x);
 }
 
-float BoundingBox::getYLength() const
+float BoundingBox::yLength() const
 {
     return (max.y - min.y);
 }
 
-float BoundingBox::getZLength() const
+float BoundingBox::zLength() const
 {
     return (max.z - min.z);
 }
 
 Vector3 BoundingBox::getBottomCenterPoint() const
 {
-    return {min.x + ((max.x - min.x) / 2.f), min.y + ((max.y - min.y) / 2.f),
-            min.z};
+    return {(min.x + ((max.x - min.x) / 2.f)),
+            (min.y + ((max.y - min.y) / 2.f)), min.z};
 }
 
 Vector3 BoundingBox::get3DCenterPoint() const
 {
-    return {min.x + ((max.x - min.x) / 2.f), min.y + ((max.y - min.y) / 2.f),
-            min.z + ((max.z - min.z) / 2.f)};
+    return {(min.x + ((max.x - min.x) / 2.f)),
+            (min.y + ((max.y - min.y) / 2.f)),
+            (min.z + ((max.z - min.z) / 2.f))};
 }
 
 bool BoundingBox::isEmpty() const
@@ -98,8 +99,8 @@ bool BoundingBox::intersects(const Cylinder& cylinder) const
 
     // If the circle is far enough away that no intersection is possible,
     // return false.
-    float halfXLength{getXLength() / 2.f};
-    float halfYLength{getYLength() / 2.f};
+    float halfXLength{xLength() / 2.f};
+    float halfYLength{yLength() / 2.f};
     if (circleDistanceX > (halfXLength + cylinder.radius)) {
         return false;
     }
@@ -213,6 +214,15 @@ std::array<float, 2> BoundingBox::getIntersections(const Ray& ray) const
                         std::max(tZ1, tZ2))};
 
     return {tMin, tMax};
+}
+
+BoundingBox BoundingBox::moveTo(const Vector3& newMin) const
+{
+    BoundingBox newBox{*this};
+    Vector3 diff{newMin - newBox.min};
+    newBox.min = newMin;
+    newBox.max += diff;
+    return newBox;
 }
 
 BoundingBox BoundingBox::translateBy(const Vector3& amountToMove) const

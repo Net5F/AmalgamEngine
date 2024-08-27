@@ -49,7 +49,7 @@ void EntityMover::moveEntity(
         resolveCollisions(collision.worldBounds, movement, deltaSeconds)};
 
     // Update their bounding box and position.
-    // Note: The entity's position is centered on the model bounds stage, not 
+    // Note: The entity's position is relative to the model bounds stage, not 
     //       the model bounds directly. Because of this, we can't just get 
     //       the X/Y position from the center of the resolved bounds.
     //       We can get the Z position directly from it, though.
