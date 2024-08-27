@@ -68,7 +68,8 @@ public:
     bool addSpriteSheet(const std::string& relPath,
                         const std::string& spriteWidth,
                         const std::string& spriteHeight,
-                        const std::string& yOffset,
+                        const std::string& stageOriginX,
+                        const std::string& stageOriginY,
                         const std::string& baseName);
 
     /**

@@ -109,7 +109,7 @@ AddSpriteSheetDialog::AddSpriteSheetDialog(DataModel& inDataModel)
         // Pass the user-inputted data to the model.
         bool result{dataModel.spriteModel.addSpriteSheet(
             pathInput.getText(), widthInput.getText(), heightInput.getText(),
-            offsetInput.getText(), nameInput.getText())};
+            "128", offsetInput.getText(), nameInput.getText())};
 
         // If the data was valid.
         if (result) {

@@ -113,9 +113,7 @@ void SpriteEditStage::onActiveLibraryItemChanged(
     spriteImage.setIsVisible(true);
 
     // Set up the gizmo with the new sprite's data.
-    boundingBoxGizmo.setXOffset(
-        static_cast<int>(newActiveSprite->textureExtent.w / 2.f));
-    boundingBoxGizmo.setYOffset(newActiveSprite->yOffset);
+    boundingBoxGizmo.setStageOrigin(newActiveSprite->stageOrigin);
     boundingBoxGizmo.setBoundingBox(
         newActiveSprite->getModelBounds(dataModel.boundingBoxModel));
 

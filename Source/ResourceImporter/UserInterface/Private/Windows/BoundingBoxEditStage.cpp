@@ -162,10 +162,7 @@ void BoundingBoxEditStage::onActiveLibraryItemChanged(
     checkerboardImage.setIsVisible(true);
 
     // Set up the gizmo with the default sprite's data.
-    // Note: Our default spriteImage has a 374px Y-offset.
-    boundingBoxGizmo.setXOffset(
-        static_cast<int>(SharedConfig::TILE_FACE_SCREEN_WIDTH / 2.f));
-    boundingBoxGizmo.setYOffset(374);
+    boundingBoxGizmo.setStageOrigin({128, 374});
     boundingBoxGizmo.setBoundingBox(newActiveBoundingBox->modelBounds);
 
     // If the gizmo isn't visible, make it visible.

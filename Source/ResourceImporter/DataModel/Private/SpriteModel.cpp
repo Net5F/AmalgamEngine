@@ -105,8 +105,11 @@ void SpriteModel::save(nlohmann::json& json)
             json["spriteSheets"][i]["sprites"][j]["textureExtent"]["h"]
                 = sprite.textureExtent.h;
 
-            // Add the Y offset.
-            json["spriteSheets"][i]["sprites"][j]["yOffset"] = sprite.yOffset;
+            // Add the stage origin.
+            json["spriteSheets"][i]["sprites"][j]["stageX"]
+                = sprite.stageOrigin.x;
+            json["spriteSheets"][i]["sprites"][j]["stageY"]
+                = sprite.stageOrigin.y;
 
             // Add collisionEnabled.
             json["spriteSheets"][i]["sprites"][j]["collisionEnabled"]
@@ -144,7 +147,8 @@ void SpriteModel::save(nlohmann::json& json)
 bool SpriteModel::addSpriteSheet(const std::string& relPath,
                                  const std::string& spriteWidth,
                                  const std::string& spriteHeight,
-                                 const std::string& yOffset,
+                                 const std::string& stageOriginX,
+                                 const std::string& stageOriginY,
                                  const std::string& baseName)
 {
     /* Validate the data. */
@@ -179,14 +183,17 @@ bool SpriteModel::addSpriteSheet(const std::string& relPath,
         return false;
     }
 
-    // Validate the width/height/yOffset.
+    // Validate the width/height/stage origin.
     int spriteWidthI{0};
     int spriteHeightI{0};
     int yOffsetI{0};
+    int stageOriginXI{0};
+    int stageOriginYI{0};
     try {
         spriteWidthI = std::stoi(spriteWidth);
         spriteHeightI = std::stoi(spriteHeight);
-        yOffsetI = std::stoi(yOffset);
+        stageOriginXI = std::stoi(stageOriginX);
+        stageOriginYI = std::stoi(stageOriginY);
     } catch (std::exception&) {
         errorString
             = "Error: Width, height, or Y offset is not a valid integer.";
@@ -220,10 +227,11 @@ bool SpriteModel::addSpriteSheet(const std::string& relPath,
 
             // Add the sprite to the map and sheet.
             SpriteID spriteID{static_cast<SpriteID>(spriteIDPool.reserveID())};
-            spriteMap.emplace(
-                spriteID, EditorSprite{spriteID, spriteSheet.relPath,
-                                       displayName, textureExtent, yOffsetI,
-                                       true, NULL_BOUNDING_BOX_ID, defaultBox});
+            spriteMap.emplace(spriteID,
+                              EditorSprite{spriteID, spriteSheet.relPath,
+                                           displayName, textureExtent,
+                                           stageOriginXI, stageOriginYI, true,
+                                           NULL_BOUNDING_BOX_ID, defaultBox});
             spriteSheet.spriteIDs.push_back(spriteID);
 
             // Increment the count (used for the display name).
@@ -422,8 +430,9 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     sprite.textureExtent.w = spriteJson.at("textureExtent").at("w");
     sprite.textureExtent.h = spriteJson.at("textureExtent").at("h");
 
-    // Add the Y offset.
-    sprite.yOffset = spriteJson.at("yOffset");
+    // Add the stage origin. 
+    sprite.stageOrigin.x = spriteJson.at("stageX");
+    sprite.stageOrigin.y = spriteJson.at("stageY");
 
     // Add collisionEnabled.
     sprite.collisionEnabled = spriteJson.at("collisionEnabled");

@@ -41,22 +41,9 @@ public:
     void disable();
 
     /**
-     * Sets the X-axis offset used when translating cursor position to 
-     * world position.
-     *
-     * This will often be half of the screen-space width of the sprite's 
-     * stage, to make the cursor relative to (0, 0).
+     * Sets the offset used when translating cursor position to world position.
      */
-    void setXOffset(int inLogicalXOffset);
-
-    /**
-     * Sets the Y-axis offset used when translating cursor position to 
-     * world position.
-     *
-     * This will often be the sprite's yOffset field, to make the cursor 
-     * relative to (0, 0).
-     */
-    void setYOffset(int inLogicalYOffset);
+    void setStageOrigin(SDL_Point inLogicalStageOrigin);
 
     /**
      * Sets this gizmo to match newBoundingBox.
@@ -205,13 +192,8 @@ private:
     /** The scaled width of the lines. */
     int scaledLineWidth;
 
-    /** Sets the X-axis offset used when translating cursor position to world 
-        position. */
-    int xOffset;
-
-    /** Sets the Y-axis offset used when translating cursor position to world 
-        position. */
-    int yOffset;
+    /** The offset used when translating cursor position to world position. */
+    SDL_Point stageOrigin;
 
     // Controls (scaled extents, without parent offsets)
     /** The extent of the box position control, (maxX, maxY, minZ). */

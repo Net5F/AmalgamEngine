@@ -75,8 +75,9 @@ void GraphicData::parseSprite(const nlohmann::json& spriteJson,
     spriteRenderData.textureExtent.w = spriteJson.at("textureExtent").at("w");
     spriteRenderData.textureExtent.h = spriteJson.at("textureExtent").at("h");
 
-    // Add the Y offset.
-    spriteRenderData.yOffset = spriteJson.at("yOffset");
+    // Add the stage origin.
+    spriteRenderData.stageOrigin.x = spriteJson.at("stageX");
+    spriteRenderData.stageOrigin.y = spriteJson.at("stageY");
 }
 
 } // End namespace Client

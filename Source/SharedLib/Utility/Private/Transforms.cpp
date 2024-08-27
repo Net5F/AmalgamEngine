@@ -127,7 +127,6 @@ float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)
 BoundingBox Transforms::modelToWorldTile(const BoundingBox& modelBounds,
                                          const TilePosition& tilePosition)
 {
-    // Cast constants to a float so we get float multiplication below.
     static constexpr float TILE_WORLD_WIDTH{SharedConfig::TILE_WORLD_WIDTH};
     static constexpr float TILE_WORLD_HEIGHT{SharedConfig::TILE_WORLD_HEIGHT};
 
@@ -139,6 +138,8 @@ BoundingBox Transforms::modelToWorldTile(const BoundingBox& modelBounds,
     return modelBounds.translateBy(offset);
 }
 
+// TODO: What are we defaulting to?
+// TODO: Once we have alignment anchor, use it here
 BoundingBox Transforms::modelToWorldEntity(const BoundingBox& modelBounds,
                                            const Position& position)
 {

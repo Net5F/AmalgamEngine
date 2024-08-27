@@ -24,13 +24,10 @@ SDL_FRect
     SDL_FPoint screenPoint{
         Transforms::worldToScreen(position, camera.zoomFactor)};
 
-    // Offset the sprite horizontally to line up with our tile positioning.
-    // Note: We assume the sprite's x = 0 point is in its horizontal center.
-    screenPoint.x -= ((renderData.textureExtent.w / 2.f) * camera.zoomFactor);
-
-    // An iso sprite may have extra vertical space to show depth, we subtract
-    // that space to align it.
-    screenPoint.y -= (renderData.yOffset * camera.zoomFactor);
+    // Offset the sprite to line up with where the "stage" starts within the 
+    // image.
+    screenPoint.x -= (renderData.stageOrigin.x * camera.zoomFactor);
+    screenPoint.y -= (renderData.stageOrigin.y * camera.zoomFactor);
 
     // screenPoint currently would give us a rect that starts at the given
     // position instead of being centered on it. Pull the point back by a half
@@ -65,14 +62,10 @@ SDL_FRect ClientTransforms::tileToScreenExtent(
     SDL_FPoint screenPoint{
         Transforms::worldToScreen(worldPoint, camera.zoomFactor)};
 
-    // In an iso view, the (0, 0) point of a tile is halfway through the width
-    // of the sprite. Thus, we have to shift the tile back to align it.
-    screenPoint.x
-        -= (SharedConfig::TILE_FACE_SCREEN_WIDTH / 2.f * camera.zoomFactor);
-
-    // An iso sprite may have extra vertical space to show depth, we subtract
-    // that space to align it.
-    screenPoint.y -= (renderData.yOffset * camera.zoomFactor);
+    // Offset the sprite to line up with where the "stage" starts within the 
+    // image.
+    screenPoint.x -= (renderData.stageOrigin.x * camera.zoomFactor);
+    screenPoint.y -= (renderData.stageOrigin.y * camera.zoomFactor);
 
     // Apply the camera adjustment.
     float adjustedX{screenPoint.x - camera.screenExtent.x};

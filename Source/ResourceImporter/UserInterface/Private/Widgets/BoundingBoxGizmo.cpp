@@ -25,8 +25,7 @@ BoundingBoxGizmo::BoundingBoxGizmo(DataModel& inDataModel)
 , isEnabled{true}
 , scaledRectSize{AUI::ScalingHelpers::logicalToActual(LOGICAL_RECT_SIZE)}
 , scaledLineWidth{AUI::ScalingHelpers::logicalToActual(LOGICAL_LINE_WIDTH)}
-, xOffset{0}
-, yOffset{0}
+, stageOrigin{0, 0}
 , positionControlExtent{0, 0, scaledRectSize, scaledRectSize}
 , xControlExtent{0, 0, scaledRectSize, scaledRectSize}
 , yControlExtent{0, 0, scaledRectSize, scaledRectSize}
@@ -55,15 +54,9 @@ void BoundingBoxGizmo::disable()
     refresh();
 }
 
-void BoundingBoxGizmo::setXOffset(int inLogicalXOffset)
+void BoundingBoxGizmo::setStageOrigin(SDL_Point inLogicalStageOrigin)
 {
-    xOffset = AUI::ScalingHelpers::logicalToActual(inLogicalXOffset);
-    refresh();
-}
-
-void BoundingBoxGizmo::setYOffset(int inLogicalYOffset)
-{
-    yOffset = AUI::ScalingHelpers::logicalToActual(inLogicalYOffset);
+    stageOrigin = AUI::ScalingHelpers::logicalToActual(inLogicalStageOrigin);
     refresh();
 }
 
@@ -175,8 +168,8 @@ AUI::EventResult BoundingBoxGizmo::onMouseMove(const SDL_Point& cursorPosition)
 
     /* Translate the mouse position to world space. */
     // Account for this widget's position.
-    int finalXOffset{xOffset + clippedExtent.x};
-    int finalYOffset{yOffset + clippedExtent.y};
+    int finalXOffset{stageOrigin.x + clippedExtent.x};
+    int finalYOffset{stageOrigin.y + clippedExtent.y};
 
     // Apply the offset to the mouse position and convert to logical space.
     SDL_Point offsetMousePoint{cursorPosition.x - finalXOffset,
@@ -383,8 +376,8 @@ void BoundingBoxGizmo::calcOffsetScreenPoints(
     screenPoints[6] = Transforms::worldToScreen(point, 1);
 
     // Account for this widget's position.
-    int finalXOffset{xOffset + clippedExtent.x};
-    int finalYOffset{yOffset + clippedExtent.y};
+    int finalXOffset{stageOrigin.x + clippedExtent.x};
+    int finalYOffset{stageOrigin.y + clippedExtent.y};
 
     // Scale and offset each point, then push it into the return vector.
     for (SDL_FPoint& point : screenPoints) {

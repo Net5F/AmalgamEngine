@@ -310,9 +310,7 @@ void AnimationEditStage::onTimelineSelectionChanged(Uint8 selectedFrameIndex)
     checkerboardImage.setIsVisible(true);
 
     // Set up the gizmo with the new sprite's data.
-    boundingBoxGizmo.setXOffset(
-        static_cast<int>(selectedSprite->textureExtent.w / 2.f));
-    boundingBoxGizmo.setYOffset(selectedSprite->yOffset);
+    boundingBoxGizmo.setStageOrigin(selectedSprite->stageOrigin);
 
     // If the gizmo isn't visible, make it visible.
     boundingBoxGizmo.setIsVisible(true);

@@ -30,9 +30,10 @@ struct EditorSprite {
     /** UV position and size in texture. */
     SDL_Rect textureExtent{0, 0, 0, 0};
 
-    /** How much this sprite should be offset in the Y direction to line up
-        with its tile. Used to support tall tiles for the iso depth effect. */
-    int yOffset{0};
+    /** The point within the sprite where the "stage" starts.
+        The "stage" is the coordinate space that we overlay onto the sprite 
+        image. */
+    SDL_Point stageOrigin{0, 0};
 
     /** If true, this sprite's modelBounds will be used in collision checks.
         Most sprites will want collision enabled, but things like floors and
