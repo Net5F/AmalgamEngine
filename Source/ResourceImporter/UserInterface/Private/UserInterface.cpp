@@ -11,13 +11,12 @@ namespace ResourceImporter
 UserInterface::UserInterface(SDL_Renderer* inRenderer, AssetCache& inAssetCache,
                              DataModel& inDataModel)
 : auiInitializer{inRenderer,
-                 {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT}}
+                 {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT},
+                 {Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT}}
 , titleScreen{*this, inDataModel}
 , mainScreen{inDataModel}
 , currentScreen{&titleScreen}
 {
-    AUI::Core::setActualScreenSize(
-        {Config::ACTUAL_SCREEN_WIDTH, Config::ACTUAL_SCREEN_HEIGHT});
 }
 
 void UserInterface::changeScreenTo(ScreenType screenType)

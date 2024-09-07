@@ -20,7 +20,7 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel,
 , topText{{0, 0, logicalExtent.w, 34}, "TopText"}
 , checkerboardImage{{0, 0, 100, 100}, "BackgroundImage"}
 , spriteImage{{0, 0, 100, 100}, "SpriteImage"}
-, boundingBoxGizmo{inDataModel}
+, boundingBoxGizmo{{0, 52, 1297, 732}, inDataModel}
 , assignButton{{503, 642, 136, 46}, "Assign Sprite", "AssignButton"}
 , playButton{{659, 642, 136, 46}, "Play", "PlayButton"}
 , timelineScrollArea{{109, 704, 1080, 48}, "TimelineScrollArea"}

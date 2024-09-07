@@ -22,10 +22,10 @@ struct SpriteRenderData {
     /** The texture that contains this sprite. */
     std::shared_ptr<SDL_Texture> texture{};
 
-    /** UV position and size in texture. */
+    /** This sprite's actual-space UV position and size within its texture. */
     SDL_Rect textureExtent{0, 0, 0, 0};
 
-    /** The point within the sprite where the "stage" starts.
+    /** The actual-space point within the sprite where the "stage" starts.
         The "stage" is the coordinate space that we overlay onto the sprite 
         image. */
     SDL_Point stageOrigin{0, 0};

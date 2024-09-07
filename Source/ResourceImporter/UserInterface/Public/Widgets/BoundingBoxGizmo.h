@@ -25,7 +25,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BoundingBoxGizmo(DataModel& inDataModel);
+    BoundingBoxGizmo(const SDL_Rect& inLogicalExtent, DataModel& inDataModel);
 
     virtual ~BoundingBoxGizmo() = default;
 
@@ -41,14 +41,27 @@ public:
     void disable();
 
     /**
-     * Sets the offset used when translating cursor position to world position.
+     * Sets the size of the sprite image that this gizmo is drawing over.
+     * The resulting extent will be centered within this widget.
      */
-    void setStageOrigin(SDL_Point inLogicalStageOrigin);
+    void setSpriteImageSize(int logicalSpriteWidth, int logicalSpriteHeight);
+
+    /**
+     * Sets the stage's screen-space origin offset, relative to the top left of 
+     * the image.
+     */
+    void setStageOrigin(const SDL_Point& inLogicalStageOrigin);
 
     /**
      * Sets this gizmo to match newBoundingBox.
      */
     void setBoundingBox(const BoundingBox& newBoundingBox);
+    
+    /**
+     * Returns the sprite image extent that was set by the last call to 
+     * setSpriteImageSize(), centered within this widget.
+     */
+    const SDL_Rect& getLogicalCenteredSpriteExtent() const;
 
     //-------------------------------------------------------------------------
     // Callback registration
@@ -63,8 +76,10 @@ public:
     //-------------------------------------------------------------------------
     // Base class overrides
     //-------------------------------------------------------------------------
+    void setLogicalExtent(const SDL_Rect& inLogicalExtent) override;
+
     /**
-     * Calls Widget::arrange() and refreshes our controls.
+     * If the UI scaling has changed, refreshes our controls.
      */
     void arrange(const SDL_Point& startPosition,
                  const SDL_Rect& availableExtent,
@@ -81,8 +96,6 @@ public:
     AUI::EventResult onMouseMove(const SDL_Point& cursorPosition) override;
 
 private:
-    void refreshScaling();
-
     /** The base transparency value for a selected gizmo. */
     static constexpr float BASE_ALPHA{255};
 
@@ -96,11 +109,20 @@ private:
      * The list of our clickable controls.
      */
     enum class Control { None, Position, X, Y, Z };
+    
+    void refreshScaling();
 
     /**
-     * Refreshes this widget's UI to match its internal state.
+     * Updates stageWorldExtent to match the current stageOrigin and widget 
+     * size.
      */
-    void refresh();
+    void updateStageExtent();
+
+    /**
+     * Refreshes this widget's graphics (controls/lines/planes) to match its
+     * internal state.
+     */
+    void refreshGraphics();
 
     /**
      * Updates the active sprite's maxX and maxY bounds to match the given
@@ -133,7 +155,8 @@ private:
      *     (minX, maxY, maxZ), (maxX, maxY, maxZ), (maxX, minY, maxZ),
      *     (minX, minY, maxZ)
      */
-    void calcOffsetScreenPoints(std::vector<SDL_Point>& boundsScreenPoints);
+    void
+        calcBoundingBoxScreenPoints(std::vector<SDL_Point>& boundsScreenPoints);
 
     /**
      * Moves the control extents to their proper screen position.
@@ -141,12 +164,12 @@ private:
     void moveControls(std::vector<SDL_Point>& boundsScreenPoints);
 
     /**
-     * Moves the line extents to their proper screen position.
+     * Moves the line points to their proper screen position.
      */
     void moveLines(std::vector<SDL_Point>& boundsScreenPoints);
 
     /**
-     * Moves the plane extents to their proper screen position.
+     * Moves the plane coords to their proper screen position.
      */
     void movePlanes(std::vector<SDL_Point>& boundsScreenPoints);
 
@@ -192,8 +215,17 @@ private:
     /** The scaled width of the lines. */
     int scaledLineWidth;
 
-    /** The offset used when translating cursor position to world position. */
-    SDL_Point stageOrigin;
+    /** Sets the extent where the sprite image will be placed, relative to the
+        top left of this widget. */
+    SDL_Rect logicalSpriteImageExtent;
+
+    /** The stage's screen-space origin offset, relative to the top left of 
+        the image. */
+    SDL_Point logicalStageOrigin;
+
+    /** The stage's world-space extent.
+        We limit this extent to the edges of the sprite image. */
+    BoundingBox stageWorldExtent;
 
     // Controls (scaled extents, without parent offsets)
     /** The extent of the box position control, (maxX, maxY, minZ). */
@@ -209,14 +241,14 @@ private:
     SDL_Rect zControlExtent;
 
     // Lines
-    SDL_Point xMinPoint;
-    SDL_Point xMaxPoint;
+    SDL_Point lineXMinPoint;
+    SDL_Point lineXMaxPoint;
 
-    SDL_Point yMinPoint;
-    SDL_Point yMaxPoint;
+    SDL_Point lineYMinPoint;
+    SDL_Point lineYMaxPoint;
 
-    SDL_Point zMinPoint;
-    SDL_Point zMaxPoint;
+    SDL_Point lineZMinPoint;
+    SDL_Point lineZMaxPoint;
 
     // Planes (each polygon takes 4 coordinates)
     std::array<Sint16, 12> planeXCoords;

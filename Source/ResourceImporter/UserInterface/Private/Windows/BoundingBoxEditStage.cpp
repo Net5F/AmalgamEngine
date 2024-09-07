@@ -19,7 +19,7 @@ BoundingBoxEditStage::BoundingBoxEditStage(DataModel& inDataModel,
 , modifyText{{0, 58, 1297, 24}, "ModifyText"}
 , checkerboardImage{{0, 0, 100, 100}, "BackgroundImage"}
 , spriteImage{{0, 0, 256, 512}, "SpriteImage"}
-, boundingBoxGizmo{inDataModel}
+, boundingBoxGizmo{{0, 52, 1297, 732}, inDataModel}
 , previewSpriteButton{{581, 692, 136, 46},
                       "Preview Sprite",
                       "PreviewSpriteButton"}

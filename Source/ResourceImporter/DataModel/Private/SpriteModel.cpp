@@ -433,7 +433,7 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     // Add the stage origin. 
     sprite.stageOrigin.x = spriteJson.at("stageX");
     sprite.stageOrigin.y = spriteJson.at("stageY");
-
+    
     // Add collisionEnabled.
     sprite.collisionEnabled = spriteJson.at("collisionEnabled");
 

@@ -71,6 +71,7 @@ add_subdirectory(DataModel)
 add_subdirectory(Launch)
 add_subdirectory(Renderer)
 add_subdirectory(UserInterface)
+add_subdirectory(Utility)
 
 ###############################################################################
 # Install Step (Packaging the application)

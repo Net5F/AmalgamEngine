@@ -5,7 +5,7 @@
 #include <string>
 
 /**
- * This file contains helper functions for hashing custom types.
+ * Helper functions for hashing custom types.
  */
 namespace AM
 {

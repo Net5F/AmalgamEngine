@@ -6,7 +6,9 @@
 #include "Paths.h"
 #include "Camera.h"
 #include "Transforms.h"
+#include "SpriteTools.h"
 #include "SharedConfig.h"
+#include "AUI/ScalingHelpers.h"
 #include <string>
 #include <iomanip>
 #include <sstream>
@@ -474,9 +476,10 @@ void SpritePropertiesWindow::saveMaxX()
             dataModel.spriteModel.getSprite(activeSpriteID)};
         BoundingBox newModelBounds{
             activeSprite.getModelBounds(dataModel.boundingBoxModel)};
+        BoundingBox stageWorldExtent{SpriteTools::calcSpriteStageWorldExtent(
+            activeSprite.textureExtent, activeSprite.stageOrigin)};
         newModelBounds.max.x
-            = std::clamp(newMaxX, newModelBounds.min.x,
-                         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
+            = std::clamp(newMaxX, newModelBounds.min.x, stageWorldExtent.max.x);
 
         // Apply the new value.
         dataModel.spriteModel.setSpriteCustomModelBounds(
@@ -499,9 +502,10 @@ void SpritePropertiesWindow::saveMaxY()
             dataModel.spriteModel.getSprite(activeSpriteID)};
         BoundingBox newModelBounds{
             activeSprite.getModelBounds(dataModel.boundingBoxModel)};
+        BoundingBox stageWorldExtent{SpriteTools::calcSpriteStageWorldExtent(
+            activeSprite.textureExtent, activeSprite.stageOrigin)};
         newModelBounds.max.y
-            = std::clamp(newMaxY, newModelBounds.min.y,
-                         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
+            = std::clamp(newMaxY, newModelBounds.min.y, stageWorldExtent.max.y);
 
         // Apply the new value.
         dataModel.spriteModel.setSpriteCustomModelBounds(
@@ -520,14 +524,14 @@ void SpritePropertiesWindow::saveMaxZ()
         float newMaxZ{std::stof(maxZInput.getText())};
 
         // Clamp the value to its lower bound.
-        // Note: We don't clamp to an upper bound cause it's hard to calc
-        //       and not very useful. Can add if we ever care to.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
         BoundingBox newModelBounds{
             activeSprite.getModelBounds(dataModel.boundingBoxModel)};
-        newMaxZ = std::max(newMaxZ, newModelBounds.min.z);
-        newModelBounds.max.z = newMaxZ;
+        BoundingBox stageWorldExtent{SpriteTools::calcSpriteStageWorldExtent(
+            activeSprite.textureExtent, activeSprite.stageOrigin)};
+        newModelBounds.max.z
+            = std::clamp(newMaxZ, newModelBounds.min.z, stageWorldExtent.max.z);
 
         // Apply the new value.
         dataModel.spriteModel.setSpriteCustomModelBounds(

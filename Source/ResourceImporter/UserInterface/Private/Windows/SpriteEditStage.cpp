@@ -4,8 +4,11 @@
 #include "DataModel.h"
 #include "SpriteID.h"
 #include "Paths.h"
+#include "Transforms.h"
+#include "SpriteTools.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
+#include <SDL2_gfxPrimitives.h>
 
 namespace AM
 {
@@ -15,24 +18,20 @@ SpriteEditStage::SpriteEditStage(DataModel& inDataModel)
 : AUI::Window({320, 58, 1297, 1022}, "SpriteEditStage")
 , dataModel{inDataModel}
 , activeSpriteID{NULL_SPRITE_ID}
+, stageXCoords{}
+, stageYCoords{}
 , topText{{0, 0, logicalExtent.w, 34}, "TopText"}
 , checkerboardImage{{0, 0, 100, 100}, "BackgroundImage"}
 , spriteImage{{0, 0, 100, 100}, "SpriteImage"}
-, boundingBoxGizmo{inDataModel}
-, descText1{{24, 806, 1240, 24}, "DescText1"}
-, descText2{{24, 846, 1240, 24}, "DescText2"}
-, descText3{{24, 886, 1240, 24}, "DescText3"}
-, descText4{{24, 926, 1240, 24}, "DescText4"}
+, boundingBoxGizmo{{0, 52, 1297, 732}, inDataModel}
+, descText{{24, 806, 1240, 200}, "DescText"}
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(topText);
     children.push_back(checkerboardImage);
     children.push_back(spriteImage);
     children.push_back(boundingBoxGizmo);
-    children.push_back(descText1);
-    children.push_back(descText2);
-    children.push_back(descText3);
-    children.push_back(descText4);
+    children.push_back(descText);
 
     /* Text */
     topText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 26);
@@ -40,19 +39,14 @@ SpriteEditStage::SpriteEditStage(DataModel& inDataModel)
     topText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
     topText.setText("Sprite");
 
-    styleText(descText1);
-    descText1.setText("Sprites are the basic building block for graphics in "
-                      "The Amalgam Engine.");
-    styleText(descText2);
-    descText2.setText(
-        "The bounding box that you set for this sprite will be used for render "
-        "sorting, mouse hit detection, and (if enabled) collision.");
-    styleText(descText3);
-    descText3.setText(
-        "Sprites must be added to a Sprite Set to be used in the engine.");
-    styleText(descText4);
-    descText4.setText("Sprite Sets come in various types: Floor, Floor "
-                      "Covering, Wall, and Object.");
+    styleText(descText);
+    descText.setText(
+        "Sprites are the basic building block for graphics in The Amalgam "
+        "Engine.\n\nThe bounding box that you set for this sprite will be used "
+        "for render sorting, mouse hit detection, and (if enabled) "
+        "collision.\n\nSprites must be added to a Sprite Set to be used in the "
+        "engine.\n\nSprite Sets come in various types: Terrain, Floor, Wall, "
+        "Object, and Entity.");
 
     /* Active sprite and checkerboard background. */
     checkerboardImage.setTiledImage(Paths::TEXTURE_DIR
@@ -80,6 +74,35 @@ SpriteEditStage::SpriteEditStage(DataModel& inDataModel)
         });
 }
 
+void SpriteEditStage::render()
+{
+    // If this widget is fully clipped, don't render it.
+    if (SDL_RectEmpty(&clippedExtent)) {
+        return;
+    }
+
+    // Render each widget manually so that we can render the stage graphic in
+    // between the background and the sprite.
+    if (topText.getIsVisible()) {
+        topText.render({scaledExtent.x, scaledExtent.y});
+    }
+    if (checkerboardImage.getIsVisible()) {
+        checkerboardImage.render({scaledExtent.x, scaledExtent.y});
+    }
+    if (descText.getIsVisible()) {
+        descText.render({scaledExtent.x, scaledExtent.y});
+    }
+    if (boundingBoxGizmo.getIsVisible()) {
+        renderStage({scaledExtent.x, scaledExtent.y});
+    }
+    if (spriteImage.getIsVisible()) {
+        spriteImage.render({scaledExtent.x, scaledExtent.y});
+    }
+    if (boundingBoxGizmo.getIsVisible()) {
+        boundingBoxGizmo.render({scaledExtent.x, scaledExtent.y});
+    }
+}
+
 void SpriteEditStage::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
@@ -97,32 +120,47 @@ void SpriteEditStage::onActiveLibraryItemChanged(
     imagePath += newActiveSprite->parentSpriteSheetPath;
     spriteImage.setSimpleImage(imagePath, newActiveSprite->textureExtent);
 
-    // Center the sprite to the stage's X, but use a fixed Y.
-    SDL_Rect centeredSpriteExtent{newActiveSprite->textureExtent};
-    centeredSpriteExtent.x = logicalExtent.w / 2;
-    centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
-    centeredSpriteExtent.y = 212 - logicalExtent.y;
-    spriteImage.setLogicalExtent(centeredSpriteExtent);
-
-    // Set the background and gizmo to the size of the sprite.
-    checkerboardImage.setLogicalExtent(spriteImage.getLogicalExtent());
-    boundingBoxGizmo.setLogicalExtent(spriteImage.getLogicalExtent());
-
-    // Set the sprite and background to be visible.
-    checkerboardImage.setIsVisible(true);
-    spriteImage.setIsVisible(true);
-
-    // Set up the gizmo with the new sprite's data.
+    // Set up the gizmo with the new sprite's size and data.
+    // Note: The sprite's native size is used as the logical size.
+    boundingBoxGizmo.setSpriteImageSize(newActiveSprite->textureExtent.w,
+                                        newActiveSprite->textureExtent.h);
     boundingBoxGizmo.setStageOrigin(newActiveSprite->stageOrigin);
     boundingBoxGizmo.setBoundingBox(
         newActiveSprite->getModelBounds(dataModel.boundingBoxModel));
 
-    // If the gizmo isn't visible, make it visible.
+    // If the sprite is using a shared bounding box, disable the gizmo.
+    if (newActiveSprite->modelBoundsID) {
+        boundingBoxGizmo.disable();
+    }
+    else {
+        // The sprite is using custom bounds, enable the gizmo.
+        boundingBoxGizmo.enable();
+    }
+
+    // Use the gizmo's centered sprite extent to set the background and sprite
+    // extents.
+    SDL_Rect logicalSpriteExtent{
+        boundingBoxGizmo.getLogicalCenteredSpriteExtent()};
+    logicalSpriteExtent.x += boundingBoxGizmo.getLogicalExtent().x;
+    logicalSpriteExtent.y += boundingBoxGizmo.getLogicalExtent().y;
+    checkerboardImage.setLogicalExtent(logicalSpriteExtent);
+    spriteImage.setLogicalExtent(logicalSpriteExtent);
+
+    // Make sure everything is visible.
     boundingBoxGizmo.setIsVisible(true);
+    checkerboardImage.setIsVisible(true);
+    spriteImage.setIsVisible(true);
+
+    // Calculate where the stage is on the screen, for our generated graphics.
+    std::vector<SDL_Point> screenPoints{};
+    calcStageScreenPoints(screenPoints);
+
+    // Move the stage graphic coords to the correct positions.
+    moveStageGraphic(screenPoints);
 }
 
-void SpriteEditStage::onSpriteModelBoundsIDChanged(SpriteID spriteID,
-    BoundingBoxID newModelBoundsID)
+void SpriteEditStage::onSpriteModelBoundsIDChanged(
+    SpriteID spriteID, BoundingBoxID newModelBoundsID)
 {
     // If the sprite isn't active, do nothing.
     if (spriteID != activeSpriteID) {
@@ -171,10 +209,11 @@ void SpriteEditStage::onSpriteRemoved(SpriteID spriteID)
     }
 }
 
-void SpriteEditStage::onGizmoBoundingBoxUpdated(const BoundingBox& updatedBounds)
+void SpriteEditStage::onGizmoBoundingBoxUpdated(
+    const BoundingBox& updatedBounds)
 {
     if (activeSpriteID != NULL_SPRITE_ID) {
-        // If the sprite isn't set to use a custom model, do nothing (should 
+        // If the sprite isn't set to use a custom model, do nothing (should
         // never happen since the gizmo should be disabled).
         const EditorSprite& sprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
@@ -192,6 +231,92 @@ void SpriteEditStage::styleText(AUI::Text& text)
 {
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     text.setColor({255, 255, 255, 255});
+}
+
+void SpriteEditStage::calcStageScreenPoints(
+    std::vector<SDL_Point>& stageScreenPoints)
+{
+    /* Transform the world positions to screen points. */
+    std::array<SDL_FPoint, 4> screenPoints{};
+
+    // Push the points in the correct order.
+    const EditorSprite& activeSprite{
+        dataModel.spriteModel.getSprite(activeSpriteID)};
+    BoundingBox stageWorldExtent{SpriteTools::calcSpriteStageWorldExtent(
+        activeSprite.textureExtent, activeSprite.stageOrigin)};
+    const Vector3& minPoint{stageWorldExtent.min};
+    const Vector3& maxPoint{stageWorldExtent.max};
+    Vector3 point{minPoint.x, minPoint.y, minPoint.z};
+    screenPoints[0] = Transforms::worldToScreen(point, 1);
+
+    point = {maxPoint.x, minPoint.y, minPoint.z};
+    screenPoints[1] = Transforms::worldToScreen(point, 1);
+
+    point = {maxPoint.x, maxPoint.y, minPoint.z};
+    screenPoints[2] = Transforms::worldToScreen(point, 1);
+
+    point = {minPoint.x, maxPoint.y, minPoint.z};
+    screenPoints[3] = Transforms::worldToScreen(point, 1);
+
+    // Account for the gizmo's position and the image's position.
+    const SDL_Rect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
+    SDL_Rect spriteExtent{AUI::ScalingHelpers::logicalToActual(
+        boundingBoxGizmo.getLogicalCenteredSpriteExtent())};
+    SDL_Point logicalStageOrigin{
+        AUI::ScalingHelpers::logicalToActual(activeSprite.stageOrigin)};
+    int finalXOffset{gizmoClippedExtent.x + spriteExtent.x
+                     + logicalStageOrigin.x};
+    int finalYOffset{gizmoClippedExtent.y + spriteExtent.y
+                     + logicalStageOrigin.y};
+
+    // Scale and offset each point, then push it into the return vector.
+    for (SDL_FPoint& point : screenPoints) {
+        // Scale and round the point.
+        point.x = std::round(AUI::ScalingHelpers::logicalToActual(point.x));
+        point.y = std::round(AUI::ScalingHelpers::logicalToActual(point.y));
+
+        // Offset the point.
+        point.x += finalXOffset;
+        point.y += finalYOffset;
+
+        // Cast to int and push into the return vector.
+        stageScreenPoints.push_back(
+            {static_cast<int>(point.x), static_cast<int>(point.y)});
+    }
+}
+
+void SpriteEditStage::moveStageGraphic(
+    std::vector<SDL_Point>& stageScreenPoints)
+{
+    // Set the coords for the bottom face of the stage. (coords 0 - 3, starting
+    // from top left and going clockwise.)
+    stageXCoords[0] = stageScreenPoints[0].x;
+    stageYCoords[0] = stageScreenPoints[0].y;
+    stageXCoords[1] = stageScreenPoints[1].x;
+    stageYCoords[1] = stageScreenPoints[1].y;
+    stageXCoords[2] = stageScreenPoints[2].x;
+    stageYCoords[2] = stageScreenPoints[2].y;
+    stageXCoords[3] = stageScreenPoints[3].x;
+    stageYCoords[3] = stageScreenPoints[3].y;
+}
+
+void SpriteEditStage::renderStage(const SDL_Point& windowTopLeft)
+{
+    /* Offset all the points. */
+    std::array<Sint16, 4> offsetXCoords{};
+    for (std::size_t i = 0; i < offsetXCoords.size(); ++i) {
+        offsetXCoords[i] = stageXCoords[i] + windowTopLeft.x;
+    }
+
+    std::array<Sint16, 4> offsetYCoords{};
+    for (std::size_t i = 0; i < offsetYCoords.size(); ++i) {
+        offsetYCoords[i] = stageYCoords[i] + windowTopLeft.y;
+    }
+
+    /* Draw the stage's floor bounds. */
+    filledPolygonRGBA(AUI::Core::getRenderer(), &(offsetXCoords[0]),
+                      &(offsetYCoords[0]), 4, 0, 149, 0,
+                      static_cast<Uint8>(STAGE_ALPHA));
 }
 
 } // End namespace ResourceImporter
