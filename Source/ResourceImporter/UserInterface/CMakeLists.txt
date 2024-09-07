@@ -14,20 +14,20 @@ target_sources(ResourceImporter
         Private/Widgets/TitleButton.cpp
         Private/Windows/AddIconSheetDialog.cpp
         Private/Windows/AddSpriteSheetDialog.cpp
-        Private/Windows/AnimationEditStage.cpp
+        Private/Windows/AnimationEditView.cpp
         Private/Windows/AnimationPropertiesWindow.cpp
-        Private/Windows/BoundingBoxEditStage.cpp
+        Private/Windows/BoundingBoxEditView.cpp
         Private/Windows/BoundingBoxPropertiesWindow.cpp
-        Private/Windows/EntityGraphicSetEditStage.cpp
+        Private/Windows/EntityGraphicSetEditView.cpp
         Private/Windows/EntityGraphicSetPropertiesWindow.cpp
-        Private/Windows/GraphicSetEditStage.cpp
+        Private/Windows/GraphicSetEditView.cpp
         Private/Windows/GraphicSetPropertiesWindow.cpp
-        Private/Windows/IconEditStage.cpp
+        Private/Windows/IconEditView.cpp
         Private/Windows/IconPropertiesWindow.cpp
         Private/Windows/LibraryAddMenu.cpp
         Private/Windows/LibraryWindow.cpp
         Private/Windows/SaveButtonWindow.cpp
-        Private/Windows/SpriteEditStage.cpp
+        Private/Windows/SpriteEditView.cpp
         Private/Windows/SpritePropertiesWindow.cpp
         Private/Windows/TitleWindow.cpp
         Private/MainScreen.cpp
@@ -48,20 +48,20 @@ target_sources(ResourceImporter
         Public/Widgets/TitleButton.h
         Public/Windows/AddIconSheetDialog.h
         Public/Windows/AddSpriteSheetDialog.h
-        Public/Windows/AnimationEditStage.h
+        Public/Windows/AnimationEditView.h
         Public/Windows/AnimationPropertiesWindow.h
-        Public/Windows/BoundingBoxEditStage.h
+        Public/Windows/BoundingBoxEditView.h
         Public/Windows/BoundingBoxPropertiesWindow.h
-        Public/Windows/EntityGraphicSetEditStage.h
+        Public/Windows/EntityGraphicSetEditView.h
         Public/Windows/EntityGraphicSetPropertiesWindow.h
-        Public/Windows/GraphicSetEditStage.h
+        Public/Windows/GraphicSetEditView.h
         Public/Windows/GraphicSetPropertiesWindow.h
-        Public/Windows/IconEditStage.h
+        Public/Windows/IconEditView.h
         Public/Windows/IconPropertiesWindow.h
         Public/Windows/LibraryAddMenu.h
         Public/Windows/LibraryWindow.h
         Public/Windows/SaveButtonWindow.h
-        Public/Windows/SpriteEditStage.h
+        Public/Windows/SpriteEditView.h
         Public/Windows/SpritePropertiesWindow.h
         Public/Windows/TitleWindow.h
         Public/MainScreen.h

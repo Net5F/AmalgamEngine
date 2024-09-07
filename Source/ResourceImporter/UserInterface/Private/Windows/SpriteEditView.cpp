@@ -1,4 +1,4 @@
-#include "SpriteEditStage.h"
+#include "SpriteEditView.h"
 #include "MainScreen.h"
 #include "EditorSprite.h"
 #include "DataModel.h"
@@ -14,8 +14,8 @@ namespace AM
 {
 namespace ResourceImporter
 {
-SpriteEditStage::SpriteEditStage(DataModel& inDataModel)
-: AUI::Window({320, 58, 1297, 1022}, "SpriteEditStage")
+SpriteEditView::SpriteEditView(DataModel& inDataModel)
+: AUI::Window({320, 58, 1297, 1022}, "SpriteEditView")
 , dataModel{inDataModel}
 , activeSpriteID{NULL_SPRITE_ID}
 , stageXCoords{}
@@ -50,7 +50,7 @@ SpriteEditStage::SpriteEditStage(DataModel& inDataModel)
 
     /* Active sprite and checkerboard background. */
     checkerboardImage.setTiledImage(Paths::TEXTURE_DIR
-                                    + "SpriteEditStage/Checkerboard.png");
+                                    + "SpriteEditView/Checkerboard.png");
     checkerboardImage.setIsVisible(false);
     spriteImage.setIsVisible(false);
 
@@ -59,13 +59,13 @@ SpriteEditStage::SpriteEditStage(DataModel& inDataModel)
 
     // When the active sprite is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
-        .connect<&SpriteEditStage::onActiveLibraryItemChanged>(*this);
+        .connect<&SpriteEditView::onActiveLibraryItemChanged>(*this);
     dataModel.spriteModel.spriteModelBoundsIDChanged
-        .connect<&SpriteEditStage::onSpriteModelBoundsIDChanged>(*this);
+        .connect<&SpriteEditView::onSpriteModelBoundsIDChanged>(*this);
     dataModel.spriteModel.spriteCustomModelBoundsChanged
-        .connect<&SpriteEditStage::onSpriteCustomModelBoundsChanged>(*this);
+        .connect<&SpriteEditView::onSpriteCustomModelBoundsChanged>(*this);
     dataModel.spriteModel.spriteRemoved
-        .connect<&SpriteEditStage::onSpriteRemoved>(*this);
+        .connect<&SpriteEditView::onSpriteRemoved>(*this);
 
     // When the gizmo updates the active sprite's bounds, push it to the model.
     boundingBoxGizmo.setOnBoundingBoxUpdated(
@@ -74,7 +74,7 @@ SpriteEditStage::SpriteEditStage(DataModel& inDataModel)
         });
 }
 
-void SpriteEditStage::render()
+void SpriteEditView::render()
 {
     // If this widget is fully clipped, don't render it.
     if (SDL_RectEmpty(&clippedExtent)) {
@@ -103,7 +103,7 @@ void SpriteEditStage::render()
     }
 }
 
-void SpriteEditStage::onActiveLibraryItemChanged(
+void SpriteEditView::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
     // Check if the new active item is a sprite and return early if not.
@@ -159,7 +159,7 @@ void SpriteEditStage::onActiveLibraryItemChanged(
     moveStageGraphic(screenPoints);
 }
 
-void SpriteEditStage::onSpriteModelBoundsIDChanged(
+void SpriteEditView::onSpriteModelBoundsIDChanged(
     SpriteID spriteID, BoundingBoxID newModelBoundsID)
 {
     // If the sprite isn't active, do nothing.
@@ -184,7 +184,7 @@ void SpriteEditStage::onSpriteModelBoundsIDChanged(
     boundingBoxGizmo.setBoundingBox(newModelBounds);
 }
 
-void SpriteEditStage::onSpriteCustomModelBoundsChanged(
+void SpriteEditView::onSpriteCustomModelBoundsChanged(
     SpriteID spriteID, const BoundingBox& newCustomModelBounds)
 {
     // If the sprite isn't active or isn't set to custom bounds, do nothing.
@@ -197,7 +197,7 @@ void SpriteEditStage::onSpriteCustomModelBoundsChanged(
     boundingBoxGizmo.setBoundingBox(newCustomModelBounds);
 }
 
-void SpriteEditStage::onSpriteRemoved(SpriteID spriteID)
+void SpriteEditView::onSpriteRemoved(SpriteID spriteID)
 {
     if (spriteID == activeSpriteID) {
         activeSpriteID = NULL_SPRITE_ID;
@@ -209,7 +209,7 @@ void SpriteEditStage::onSpriteRemoved(SpriteID spriteID)
     }
 }
 
-void SpriteEditStage::onGizmoBoundingBoxUpdated(
+void SpriteEditView::onGizmoBoundingBoxUpdated(
     const BoundingBox& updatedBounds)
 {
     if (activeSpriteID != NULL_SPRITE_ID) {
@@ -227,13 +227,13 @@ void SpriteEditStage::onGizmoBoundingBoxUpdated(
     }
 }
 
-void SpriteEditStage::styleText(AUI::Text& text)
+void SpriteEditView::styleText(AUI::Text& text)
 {
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     text.setColor({255, 255, 255, 255});
 }
 
-void SpriteEditStage::calcStageScreenPoints(
+void SpriteEditView::calcStageScreenPoints(
     std::vector<SDL_Point>& stageScreenPoints)
 {
     /* Transform the world positions to screen points. */
@@ -285,7 +285,7 @@ void SpriteEditStage::calcStageScreenPoints(
     }
 }
 
-void SpriteEditStage::moveStageGraphic(
+void SpriteEditView::moveStageGraphic(
     std::vector<SDL_Point>& stageScreenPoints)
 {
     // Set the coords for the bottom face of the stage. (coords 0 - 3, starting
@@ -300,7 +300,7 @@ void SpriteEditStage::moveStageGraphic(
     stageYCoords[3] = stageScreenPoints[3].y;
 }
 
-void SpriteEditStage::renderStage(const SDL_Point& windowTopLeft)
+void SpriteEditView::renderStage(const SDL_Point& windowTopLeft)
 {
     /* Offset all the points. */
     std::array<Sint16, 4> offsetXCoords{};

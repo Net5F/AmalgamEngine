@@ -1,4 +1,4 @@
-#include "GraphicSetEditStage.h"
+#include "GraphicSetEditView.h"
 #include "MainScreen.h"
 #include "DataModel.h"
 #include "SpriteID.h"
@@ -10,9 +10,9 @@ namespace AM
 {
 namespace ResourceImporter
 {
-GraphicSetEditStage::GraphicSetEditStage(DataModel& inDataModel,
+GraphicSetEditView::GraphicSetEditView(DataModel& inDataModel,
                                        const LibraryWindow& inLibraryWindow)
-: AUI::Window({320, 58, 1297, 1022}, "GraphicSetEditStage")
+: AUI::Window({320, 58, 1297, 1022}, "GraphicSetEditView")
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
 , activeGraphicSetType{GraphicSet::Type::None}
@@ -47,14 +47,14 @@ GraphicSetEditStage::GraphicSetEditStage(DataModel& inDataModel,
 
     // When the active graphic set is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
-        .connect<&GraphicSetEditStage::onActiveLibraryItemChanged>(*this);
+        .connect<&GraphicSetEditView::onActiveLibraryItemChanged>(*this);
     dataModel.graphicSetModel.graphicSetRemoved
-        .connect<&GraphicSetEditStage::onGraphicSetRemoved>(*this);
+        .connect<&GraphicSetEditView::onGraphicSetRemoved>(*this);
     dataModel.graphicSetModel.graphicSetSlotChanged
-        .connect<&GraphicSetEditStage::onGraphicSetSlotChanged>(*this);
+        .connect<&GraphicSetEditView::onGraphicSetSlotChanged>(*this);
 }
 
-void GraphicSetEditStage::onActiveLibraryItemChanged(
+void GraphicSetEditView::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
     if (holds_alternative<EditorTerrainGraphicSet>(newActiveItem)) {
@@ -81,7 +81,7 @@ void GraphicSetEditStage::onActiveLibraryItemChanged(
     }
 }
 
-void GraphicSetEditStage::onGraphicSetRemoved(GraphicSet::Type type,
+void GraphicSetEditView::onGraphicSetRemoved(GraphicSet::Type type,
                                             Uint16 graphicSetID)
 {
     if ((type == activeGraphicSetType) && (graphicSetID == activeGraphicSetID)) {
@@ -91,7 +91,7 @@ void GraphicSetEditStage::onGraphicSetRemoved(GraphicSet::Type type,
     }
 }
 
-void GraphicSetEditStage::onGraphicSetSlotChanged(GraphicSet::Type type,
+void GraphicSetEditView::onGraphicSetSlotChanged(GraphicSet::Type type,
                                                 Uint16 graphicSetID,
                                                 std::size_t index,
                                                 GraphicID newGraphicID)
@@ -110,7 +110,7 @@ void GraphicSetEditStage::onGraphicSetSlotChanged(GraphicSet::Type type,
 }
 
 template<typename T>
-void GraphicSetEditStage::loadActiveGraphicSet(GraphicSet::Type graphicSetType,
+void GraphicSetEditView::loadActiveGraphicSet(GraphicSet::Type graphicSetType,
                                                const T& newActiveGraphicSet)
 {
     activeGraphicSetType = graphicSetType;
@@ -147,7 +147,7 @@ void GraphicSetEditStage::loadActiveGraphicSet(GraphicSet::Type graphicSetType,
     fillDescriptionTexts();
 }
 
-void GraphicSetEditStage::onAssignButtonPressed(std::size_t slotIndex)
+void GraphicSetEditView::onAssignButtonPressed(std::size_t slotIndex)
 {
     // If a graphic is selected, set the given slot to it.
     // Note: This just uses the first selected graphic. Multi-select is ignored.
@@ -180,13 +180,13 @@ void GraphicSetEditStage::onAssignButtonPressed(std::size_t slotIndex)
     }
 }
 
-void GraphicSetEditStage::styleText(AUI::Text& text)
+void GraphicSetEditView::styleText(AUI::Text& text)
 {
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     text.setColor({255, 255, 255, 255});
 }
 
-std::string GraphicSetEditStage::getSlotTopText(std::size_t graphicSetIndex)
+std::string GraphicSetEditView::getSlotTopText(std::size_t graphicSetIndex)
 {
     switch (activeGraphicSetType) {
         case GraphicSet::Type::Terrain: {
@@ -247,7 +247,7 @@ std::string GraphicSetEditStage::getSlotTopText(std::size_t graphicSetIndex)
     return "";
 }
 
-void GraphicSetEditStage::fillSlotGraphicData(GraphicSetSlot& slot,
+void GraphicSetEditView::fillSlotGraphicData(GraphicSetSlot& slot,
                                               GraphicID graphicID)
 {
     // If this slot isn't empty, set the widget's data.
@@ -287,7 +287,7 @@ void GraphicSetEditStage::fillSlotGraphicData(GraphicSetSlot& slot,
     }
 }
 
-void GraphicSetEditStage::fillDescriptionTexts()
+void GraphicSetEditView::fillDescriptionTexts()
 {
     switch (activeGraphicSetType) {
         case GraphicSet::Type::Terrain: {

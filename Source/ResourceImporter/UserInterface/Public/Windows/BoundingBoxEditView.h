@@ -20,13 +20,13 @@ class LibraryListItem;
  * The center stage shown when the user loads a bounding box from the Library.
  * Allows the user to edit the bounding box, for use by sprites and animations.
  */
-class BoundingBoxEditStage : public AUI::Window
+class BoundingBoxEditView : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    BoundingBoxEditStage(DataModel& inDataModel,
+    BoundingBoxEditView(DataModel& inDataModel,
                          LibraryWindow& inLibraryWindow);
 
 private:

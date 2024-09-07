@@ -1,4 +1,4 @@
-#include "EntityGraphicSetEditStage.h"
+#include "EntityGraphicSetEditView.h"
 #include "MainScreen.h"
 #include "DataModel.h"
 #include "SpriteID.h"
@@ -11,9 +11,9 @@ namespace AM
 {
 namespace ResourceImporter
 {
-EntityGraphicSetEditStage::EntityGraphicSetEditStage(DataModel& inDataModel,
+EntityGraphicSetEditView::EntityGraphicSetEditView(DataModel& inDataModel,
                                        const LibraryWindow& inLibraryWindow)
-: AUI::Window({320, 58, 1297, 1022}, "EntityGraphicSetEditStage")
+: AUI::Window({320, 58, 1297, 1022}, "EntityGraphicSetEditView")
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
 , activeGraphicSetID{SDL_MAX_UINT16}
@@ -59,14 +59,14 @@ EntityGraphicSetEditStage::EntityGraphicSetEditStage(DataModel& inDataModel,
 
     // When the active graphic set is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
-        .connect<&EntityGraphicSetEditStage::onActiveLibraryItemChanged>(*this);
+        .connect<&EntityGraphicSetEditView::onActiveLibraryItemChanged>(*this);
     dataModel.entityGraphicSetModel.entityRemoved
-        .connect<&EntityGraphicSetEditStage::onEntityRemoved>(*this);
+        .connect<&EntityGraphicSetEditView::onEntityRemoved>(*this);
     dataModel.entityGraphicSetModel.entitySlotChanged
-        .connect<&EntityGraphicSetEditStage::onEntitySlotChanged>(*this);
+        .connect<&EntityGraphicSetEditView::onEntitySlotChanged>(*this);
 }
 
-void EntityGraphicSetEditStage::onActiveLibraryItemChanged(
+void EntityGraphicSetEditView::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
     // Check if the new active item is an entity graphic set and return early if 
@@ -99,7 +99,7 @@ void EntityGraphicSetEditStage::onActiveLibraryItemChanged(
     graphicContainer.setIsVisible(true);
 }
 
-void EntityGraphicSetEditStage::onEntityRemoved(EntityGraphicSetID graphicSetID)
+void EntityGraphicSetEditView::onEntityRemoved(EntityGraphicSetID graphicSetID)
 {
     if (graphicSetID == activeGraphicSetID) {
         activeGraphicSetID = SDL_MAX_UINT16;
@@ -107,7 +107,7 @@ void EntityGraphicSetEditStage::onEntityRemoved(EntityGraphicSetID graphicSetID)
     }
 }
 
-void EntityGraphicSetEditStage::onEntitySlotChanged(
+void EntityGraphicSetEditView::onEntitySlotChanged(
     EntityGraphicSetID graphicSetID, EntityGraphicType graphicType,
     GraphicID newGraphicID)
 {
@@ -122,7 +122,7 @@ void EntityGraphicSetEditStage::onEntitySlotChanged(
     fillSlotGraphicData(slot, newGraphicID);
 }
 
-void EntityGraphicSetEditStage::onAssignButtonPressed(
+void EntityGraphicSetEditView::onAssignButtonPressed(
     EntityGraphicType graphicType)
 {
     // If a graphic is selected, set the given slot to it.
@@ -153,13 +153,13 @@ void EntityGraphicSetEditStage::onAssignButtonPressed(
     }
 }
 
-void EntityGraphicSetEditStage::styleText(AUI::Text& text)
+void EntityGraphicSetEditView::styleText(AUI::Text& text)
 {
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     text.setColor({255, 255, 255, 255});
 }
 
-void EntityGraphicSetEditStage::initGraphicContainer()
+void EntityGraphicSetEditView::initGraphicContainer()
 {
     // Fill the container with a slot widget for each EntityGraphicType.
     graphicContainer.clear();
@@ -186,7 +186,7 @@ void EntityGraphicSetEditStage::initGraphicContainer()
     }
 }
 
-void EntityGraphicSetEditStage::fillSlotGraphicData(GraphicSetSlot& slot,
+void EntityGraphicSetEditView::fillSlotGraphicData(GraphicSetSlot& slot,
                                               GraphicID graphicID)
 {
     // If this slot isn't empty, set the widget's data.

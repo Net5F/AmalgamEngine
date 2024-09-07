@@ -1,4 +1,4 @@
-#include "BoundingBoxEditStage.h"
+#include "BoundingBoxEditView.h"
 #include "DataModel.h"
 #include "LibraryWindow.h"
 #include "Paths.h"
@@ -9,9 +9,9 @@ namespace AM
 {
 namespace ResourceImporter
 {
-BoundingBoxEditStage::BoundingBoxEditStage(DataModel& inDataModel,
+BoundingBoxEditView::BoundingBoxEditView(DataModel& inDataModel,
                                            LibraryWindow& inLibraryWindow)
-: AUI::Window({320, 58, 1297, 1022}, "BoundingBoxEditStage")
+: AUI::Window({320, 58, 1297, 1022}, "BoundingBoxEditView")
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
 , activeBoundingBoxID{NULL_BOUNDING_BOX_ID}
@@ -55,7 +55,7 @@ BoundingBoxEditStage::BoundingBoxEditStage(DataModel& inDataModel,
 
     /* Active sprite and checkerboard background. */
     checkerboardImage.setTiledImage(Paths::TEXTURE_DIR
-                                    + "SpriteEditStage/Checkerboard.png");
+                                    + "SpriteEditView/Checkerboard.png");
     checkerboardImage.setIsVisible(false);
     spriteImage.setIsVisible(false);
 
@@ -68,11 +68,11 @@ BoundingBoxEditStage::BoundingBoxEditStage(DataModel& inDataModel,
 
     // When the active bounding box is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
-        .connect<&BoundingBoxEditStage::onActiveLibraryItemChanged>(*this);
+        .connect<&BoundingBoxEditView::onActiveLibraryItemChanged>(*this);
     dataModel.boundingBoxModel.boundingBoxBoundsChanged
-        .connect<&BoundingBoxEditStage::onBoundingBoxBoundsChanged>(*this);
+        .connect<&BoundingBoxEditView::onBoundingBoxBoundsChanged>(*this);
     dataModel.boundingBoxModel.boundingBoxRemoved
-        .connect<&BoundingBoxEditStage::onBoundingBoxRemoved>(*this);
+        .connect<&BoundingBoxEditView::onBoundingBoxRemoved>(*this);
 
     // When the gizmo updates the active sprite's bounds, push it to the model.
     boundingBoxGizmo.setOnBoundingBoxUpdated(
@@ -82,10 +82,10 @@ BoundingBoxEditStage::BoundingBoxEditStage(DataModel& inDataModel,
 
     // When a library item is selected, update the preview button.
     libraryWindow.selectedItemsChanged
-        .connect<&BoundingBoxEditStage::onLibrarySelectedItemsChanged>(*this);
+        .connect<&BoundingBoxEditView::onLibrarySelectedItemsChanged>(*this);
 }
 
-void BoundingBoxEditStage::onPreviewSpriteButtonPressed()
+void BoundingBoxEditView::onPreviewSpriteButtonPressed()
 {
     // If a graphic is selected, set it as the preview image.
     // Note: This just uses the first selected sprite. Multi-select is ignored.
@@ -133,7 +133,7 @@ void BoundingBoxEditStage::onPreviewSpriteButtonPressed()
     }
 }
 
-void BoundingBoxEditStage::onActiveLibraryItemChanged(
+void BoundingBoxEditView::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
     // Check if the new active item is a bounding box and return early if not.
@@ -169,7 +169,7 @@ void BoundingBoxEditStage::onActiveLibraryItemChanged(
     boundingBoxGizmo.setIsVisible(true);
 }
 
-void BoundingBoxEditStage::onBoundingBoxBoundsChanged(
+void BoundingBoxEditView::onBoundingBoxBoundsChanged(
     BoundingBoxID boundingBoxID, const BoundingBox& newBounds)
 {
     // If the box isn't active, do nothing.
@@ -183,7 +183,7 @@ void BoundingBoxEditStage::onBoundingBoxBoundsChanged(
     boundingBoxGizmo.setBoundingBox(boundingBox.modelBounds);
 }
 
-void BoundingBoxEditStage::onBoundingBoxRemoved(BoundingBoxID boundingBoxID)
+void BoundingBoxEditView::onBoundingBoxRemoved(BoundingBoxID boundingBoxID)
 {
     if (boundingBoxID == activeBoundingBoxID) {
         activeBoundingBoxID = NULL_BOUNDING_BOX_ID;
@@ -195,7 +195,7 @@ void BoundingBoxEditStage::onBoundingBoxRemoved(BoundingBoxID boundingBoxID)
     }
 }
 
-void BoundingBoxEditStage::onGizmoBoundingBoxUpdated(
+void BoundingBoxEditView::onGizmoBoundingBoxUpdated(
     const BoundingBox& updatedBounds)
 {
     if (activeBoundingBoxID) {
@@ -205,7 +205,7 @@ void BoundingBoxEditStage::onGizmoBoundingBoxUpdated(
     }
 }
 
-void BoundingBoxEditStage::onLibrarySelectedItemsChanged(
+void BoundingBoxEditView::onLibrarySelectedItemsChanged(
     const std::vector<LibraryListItem*>& selectedItems)
 {
     // If there's no active bounding box, do nothing.
@@ -232,7 +232,7 @@ void BoundingBoxEditStage::onLibrarySelectedItemsChanged(
     }
 }
 
-void BoundingBoxEditStage::styleText(AUI::Text& text)
+void BoundingBoxEditView::styleText(AUI::Text& text)
 {
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     text.setColor({255, 255, 255, 255});

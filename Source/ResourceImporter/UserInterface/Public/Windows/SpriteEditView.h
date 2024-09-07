@@ -17,13 +17,13 @@ class DataModel;
  * The center stage shown when the user loads a sprite from the Library.
  * Allows the user to edit the active sprite's bounding box.
  */
-class SpriteEditStage : public AUI::Window
+class SpriteEditView : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpriteEditStage(DataModel& inDataModel);
+    SpriteEditView(DataModel& inDataModel);
 
     //-------------------------------------------------------------------------
     // Base class overrides

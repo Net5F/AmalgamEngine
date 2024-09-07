@@ -15,13 +15,13 @@ class DataModel;
 /**
  * The center stage shown when the user loads an icon from the Library.
  */
-class IconEditStage : public AUI::Window
+class IconEditView : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    IconEditStage(DataModel& inDataModel);
+    IconEditView(DataModel& inDataModel);
 
 private:
     /**

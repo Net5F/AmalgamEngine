@@ -17,47 +17,51 @@ class DataModel;
 class LibraryWindow;
 
 /**
- * The center stage shown when the user loads an Entity graphic set.
+ * The center stage shown when the user loads a Floor, Floor Covering, Wall, 
+ * or Object graphic set from the Library. Entity graphic sets use 
+ * EntityGraphicSetEditView.
  *
  * Allows the user to edit the active graphic set's graphic slots.
- *
- * Note: This is separate from GraphicSetEditStage because entity graphic sets 
- *       have significant differences from the others.
  */
-class EntityGraphicSetEditStage : public AUI::Window
+class GraphicSetEditView : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    EntityGraphicSetEditStage(DataModel& inDataModel,
+    GraphicSetEditView(DataModel& inDataModel,
                        const LibraryWindow& inLibraryWindow);
 
 private:
     /**
-     * If the new active item is an entity graphic set, loads it's data into 
-     * this panel.
+     * If the new active item is a graphic set, loads it's data onto this stage.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
 
     /**
-     * (If ID matches active set) Sets this panel back to its default state.
+     * (If type/ID matches active set) Sets this stage back to its default
+     * state.
      */
-    void onEntityRemoved(EntityGraphicSetID graphicSetID);
+    void onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID);
 
     /**
-     * (If ID matches active set) Sets the given graphic type to the given 
-     * graphic, adding or removing slot widgets as necessary.
+     * (If type/ID matches active set) Sets the given index to the given graphic.
      */
-    void onEntitySlotChanged(EntityGraphicSetID graphicSetID,
-                             EntityGraphicType graphicType,
-                             GraphicID newGraphicID);
+    void onGraphicSetSlotChanged(GraphicSet::Type type, Uint16 graphicSetID,
+                                std::size_t index, GraphicID newGraphicID);
+
+    /**
+     * Loads the given graphic set's data onto this stage.
+     */
+    template<typename T>
+    void loadActiveGraphicSet(GraphicSet::Type graphicSetType,
+                             const T& newActiveGraphicSet);
 
     /**
      * Attempts to assign the currently selected library item to the 
-     * given graphic type's slot.
+     * given slot.
      */
-    void onAssignButtonPressed(EntityGraphicType graphicType);
+    void onAssignButtonPressed(std::size_t slotIndex);
 
     /**
      * Styles the given text.
@@ -65,14 +69,20 @@ private:
     void styleText(AUI::Text& text);
 
     /**
-     * Fills graphicContainer with empty slot widgets for each EntityGraphicType.
+     * Returns the appropriate top text for the given index.
      */
-    void initGraphicContainer();
+    std::string getSlotTopText(std::size_t graphicSetIndex);
 
     /**
      * Fills the given slot widget with the given graphic's image and name.
      */
     void fillSlotGraphicData(GraphicSetSlot& slot, GraphicID graphicID);
+
+    /**
+     * Fills the description text widgets with the appropriate strings, based
+     * on the current activeGraphicSetType.
+     */
+    void fillDescriptionTexts();
 
     /** Used to get the current working dir when displaying the graphic. */
     DataModel& dataModel;
@@ -80,15 +90,17 @@ private:
     /** Used to get the currently selected list item. */
     const LibraryWindow& libraryWindow;
 
+    /** The active graphic set's type. */
+    GraphicSet::Type activeGraphicSetType;
+
     /** The active graphic set's ID. */
-    EntityGraphicSetID activeGraphicSetID;
+    Uint16 activeGraphicSetID;
 
     //-------------------------------------------------------------------------
     // Private child widgets
     //-------------------------------------------------------------------------
     AUI::Text topText;
-    AUI::Text modifyText;
-    AUI::Text clearText;
+    AUI::Text actionText;
 
     /** Holds this graphic set's graphics. */
     AUI::VerticalGridContainer graphicContainer;

@@ -1,4 +1,4 @@
-#include "AnimationEditStage.h"
+#include "AnimationEditView.h"
 #include "DataModel.h"
 #include "LibraryWindow.h"
 #include "AnimationTimeline.h"
@@ -11,9 +11,9 @@ namespace AM
 {
 namespace ResourceImporter
 {
-AnimationEditStage::AnimationEditStage(DataModel& inDataModel,
+AnimationEditView::AnimationEditView(DataModel& inDataModel,
                                        LibraryWindow& inLibraryWindow)
-: AUI::Window({320, 58, 1297, 1022}, "AnimationEditStage")
+: AUI::Window({320, 58, 1297, 1022}, "AnimationEditView")
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
 , activeAnimationID{NULL_SPRITE_ID}
@@ -54,7 +54,7 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel,
 
     /* Active sprite and checkerboard background. */
     checkerboardImage.setTiledImage(Paths::TEXTURE_DIR
-                                    + "SpriteEditStage/Checkerboard.png");
+                                    + "SpriteEditView/Checkerboard.png");
     checkerboardImage.setIsVisible(false);
     spriteImage.setIsVisible(false);
 
@@ -72,18 +72,18 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel,
 
     // When the active animation is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
-        .connect<&AnimationEditStage::onActiveLibraryItemChanged>(*this);
+        .connect<&AnimationEditView::onActiveLibraryItemChanged>(*this);
     AnimationModel& animationModel{dataModel.animationModel};
     animationModel.animationFrameCountChanged
-        .connect<&AnimationEditStage::onAnimationFrameCountChanged>(*this);
+        .connect<&AnimationEditView::onAnimationFrameCountChanged>(*this);
     animationModel.animationFrameChanged
-        .connect<&AnimationEditStage::onAnimationFrameChanged>(*this);
+        .connect<&AnimationEditView::onAnimationFrameChanged>(*this);
     animationModel.animationModelBoundsIDChanged
-        .connect<&AnimationEditStage::onAnimationModelBoundsIDChanged>(*this);
+        .connect<&AnimationEditView::onAnimationModelBoundsIDChanged>(*this);
     animationModel.animationCustomModelBoundsChanged
-        .connect<&AnimationEditStage::onAnimationCustomModelBoundsChanged>(*this);
+        .connect<&AnimationEditView::onAnimationCustomModelBoundsChanged>(*this);
     animationModel.animationRemoved
-        .connect<&AnimationEditStage::onAnimationRemoved>(*this);
+        .connect<&AnimationEditView::onAnimationRemoved>(*this);
 
     assignButton.setOnPressed([&] { onAssignSpriteButtonPressed(); });
     playButton.setOnPressed([&] { onPlayButtonPressed(); });
@@ -103,10 +103,10 @@ AnimationEditStage::AnimationEditStage(DataModel& inDataModel,
 
     // When a library item is selected, update the Assign button.
     libraryWindow.selectedItemsChanged
-        .connect<&AnimationEditStage::onLibrarySelectedItemsChanged>(*this);
+        .connect<&AnimationEditView::onLibrarySelectedItemsChanged>(*this);
 }
 
-void AnimationEditStage::onAssignSpriteButtonPressed()
+void AnimationEditView::onAssignSpriteButtonPressed()
 {
     if (!activeAnimationID) {
         return;
@@ -146,12 +146,12 @@ void AnimationEditStage::onAssignSpriteButtonPressed()
     }
 }
 
-void AnimationEditStage::onPlayButtonPressed()
+void AnimationEditView::onPlayButtonPressed()
 {
     timeline->playAnimation();
 }
 
-void AnimationEditStage::onActiveLibraryItemChanged(
+void AnimationEditView::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
     // Check if the new active item is an animation and return early if not.
@@ -172,7 +172,7 @@ void AnimationEditStage::onActiveLibraryItemChanged(
     timeline->setActiveAnimation(*newActiveAnimation);
 }
 
-void AnimationEditStage::onAnimationFrameCountChanged(AnimationID animationID,
+void AnimationEditView::onAnimationFrameCountChanged(AnimationID animationID,
                                                       Uint8 newFrameCount)
 {
     if (animationID == activeAnimationID) {
@@ -180,7 +180,7 @@ void AnimationEditStage::onAnimationFrameCountChanged(AnimationID animationID,
     }
 }
 
-void AnimationEditStage::onAnimationFrameChanged(AnimationID animationID,
+void AnimationEditView::onAnimationFrameChanged(AnimationID animationID,
                                                  Uint8 frameNumber,
                                                  const EditorSprite* newSprite)
 {
@@ -202,7 +202,7 @@ void AnimationEditStage::onAnimationFrameChanged(AnimationID animationID,
     }
 }
 
-void AnimationEditStage::onAnimationModelBoundsIDChanged(
+void AnimationEditView::onAnimationModelBoundsIDChanged(
     AnimationID animationID, BoundingBoxID newModelBoundsID)
 {
     // If the animation isn't active, do nothing.
@@ -227,7 +227,7 @@ void AnimationEditStage::onAnimationModelBoundsIDChanged(
     boundingBoxGizmo.setBoundingBox(newModelBounds);
 }
 
-void AnimationEditStage::onAnimationCustomModelBoundsChanged(
+void AnimationEditView::onAnimationCustomModelBoundsChanged(
     AnimationID animationID, const BoundingBox& newCustomModelBounds)
 {
     // If the animation isn't active or isn't set to custom bounds, do nothing.
@@ -241,7 +241,7 @@ void AnimationEditStage::onAnimationCustomModelBoundsChanged(
     boundingBoxGizmo.setBoundingBox(newCustomModelBounds);
 }
 
-void AnimationEditStage::onAnimationRemoved(AnimationID animationID)
+void AnimationEditView::onAnimationRemoved(AnimationID animationID)
 {
     if (animationID == activeAnimationID) {
         activeAnimationID = NULL_ANIMATION_ID;
@@ -253,7 +253,7 @@ void AnimationEditStage::onAnimationRemoved(AnimationID animationID)
     }
 }
 
-void AnimationEditStage::onGizmoBoundingBoxUpdated(
+void AnimationEditView::onGizmoBoundingBoxUpdated(
     const BoundingBox& updatedBounds)
 {
     if (activeAnimationID != NULL_ANIMATION_ID) {
@@ -271,7 +271,7 @@ void AnimationEditStage::onGizmoBoundingBoxUpdated(
     }
 }
 
-void AnimationEditStage::onTimelineSelectionChanged(Uint8 selectedFrameIndex)
+void AnimationEditView::onTimelineSelectionChanged(Uint8 selectedFrameIndex)
 {
     const EditorAnimation& activeAnimation{
         dataModel.animationModel.getAnimation(activeAnimationID)};
@@ -320,7 +320,7 @@ void AnimationEditStage::onTimelineSelectionChanged(Uint8 selectedFrameIndex)
     assignButton.enable();
 }
 
-void AnimationEditStage::onTimelineSpriteMoved(Uint8 oldFrameIndex,
+void AnimationEditView::onTimelineSpriteMoved(Uint8 oldFrameIndex,
                                                Uint8 newFrameIndex)
 {
     AnimationModel& animationModel{dataModel.animationModel};
@@ -338,7 +338,7 @@ void AnimationEditStage::onTimelineSpriteMoved(Uint8 oldFrameIndex,
                                      oldSprite);
 }
 
-void AnimationEditStage::onLibrarySelectedItemsChanged(
+void AnimationEditView::onLibrarySelectedItemsChanged(
     const std::vector<LibraryListItem*>& selectedItems)
 {
     // If there's no active animation, do nothing.
@@ -365,7 +365,7 @@ void AnimationEditStage::onLibrarySelectedItemsChanged(
     }
 }
 
-void AnimationEditStage::styleText(AUI::Text& text)
+void AnimationEditView::styleText(AUI::Text& text)
 {
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     text.setColor({255, 255, 255, 255});

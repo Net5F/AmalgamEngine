@@ -32,7 +32,7 @@ GraphicSetSlot::GraphicSetSlot(int logicalWidth)
 
     // Set our background image.
     checkerboardImage.setTiledImage(Paths::TEXTURE_DIR
-                                    + "SpriteEditStage/Checkerboard.png");
+                                    + "SpriteEditView/Checkerboard.png");
 }
 
 } // End namespace ResourceImporter

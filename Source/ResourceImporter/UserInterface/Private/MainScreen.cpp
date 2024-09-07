@@ -16,13 +16,13 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , libraryWindow{*this, dataModel}
 , libraryAddMenu{}
 , saveButtonWindow{*this, dataModel}
-, boundingBoxEditStage{dataModel, libraryWindow}
+, boundingBoxEditView{dataModel, libraryWindow}
 , boundingBoxPropertiesWindow{dataModel, libraryWindow}
-, spriteEditStage{dataModel}
-, animationEditStage{dataModel, libraryWindow}
-, iconEditStage{dataModel}
-, graphicSetEditStage{dataModel, libraryWindow}
-, entityGraphicSetEditStage{dataModel, libraryWindow}
+, spriteEditView{dataModel}
+, animationEditView{dataModel, libraryWindow}
+, iconEditView{dataModel}
+, graphicSetEditView{dataModel, libraryWindow}
+, entityGraphicSetEditView{dataModel, libraryWindow}
 , spritePropertiesWindow{dataModel, libraryWindow}
 , animationPropertiesWindow{dataModel, libraryWindow}
 , graphicSetPropertiesWindow{dataModel}
@@ -35,13 +35,13 @@ MainScreen::MainScreen(DataModel& inDataModel)
     // Add our windows so they're included in rendering, etc.
     windows.push_back(libraryWindow);
     windows.push_back(saveButtonWindow);
-    windows.push_back(boundingBoxEditStage);
+    windows.push_back(boundingBoxEditView);
     windows.push_back(boundingBoxPropertiesWindow);
-    windows.push_back(spriteEditStage);
-    windows.push_back(animationEditStage);
-    windows.push_back(graphicSetEditStage);
-    windows.push_back(entityGraphicSetEditStage);
-    windows.push_back(iconEditStage);
+    windows.push_back(spriteEditView);
+    windows.push_back(animationEditView);
+    windows.push_back(graphicSetEditView);
+    windows.push_back(entityGraphicSetEditView);
+    windows.push_back(iconEditView);
     windows.push_back(spritePropertiesWindow);
     windows.push_back(animationPropertiesWindow);
     windows.push_back(graphicSetPropertiesWindow);
@@ -143,17 +143,17 @@ MainScreen::MainScreen(DataModel& inDataModel)
 
     /* Edit Stages and Properties Windows. */
     // Make the edit stages and properties windows invisible
-    boundingBoxEditStage.setIsVisible(false);
+    boundingBoxEditView.setIsVisible(false);
     boundingBoxPropertiesWindow.setIsVisible(false);
-    spriteEditStage.setIsVisible(false);
+    spriteEditView.setIsVisible(false);
     spritePropertiesWindow.setIsVisible(false);
-    animationEditStage.setIsVisible(false);
+    animationEditView.setIsVisible(false);
     animationPropertiesWindow.setIsVisible(false);
-    graphicSetEditStage.setIsVisible(false);
+    graphicSetEditView.setIsVisible(false);
     graphicSetPropertiesWindow.setIsVisible(false);
-    entityGraphicSetEditStage.setIsVisible(false);
+    entityGraphicSetEditView.setIsVisible(false);
     entityGraphicSetPropertiesWindow.setIsVisible(false);
-    iconEditStage.setIsVisible(false);
+    iconEditView.setIsVisible(false);
     iconPropertiesWindow.setIsVisible(false);
 
     // When the user selects a new item in the library, make the proper windows
@@ -209,43 +209,43 @@ void MainScreen::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
     // Make everything invisible.
-    boundingBoxEditStage.setIsVisible(false);
+    boundingBoxEditView.setIsVisible(false);
     boundingBoxPropertiesWindow.setIsVisible(false);
-    spriteEditStage.setIsVisible(false);
+    spriteEditView.setIsVisible(false);
     spritePropertiesWindow.setIsVisible(false);
-    animationEditStage.setIsVisible(false);
+    animationEditView.setIsVisible(false);
     animationPropertiesWindow.setIsVisible(false);
-    graphicSetEditStage.setIsVisible(false);
+    graphicSetEditView.setIsVisible(false);
     graphicSetPropertiesWindow.setIsVisible(false);
-    entityGraphicSetEditStage.setIsVisible(false);
+    entityGraphicSetEditView.setIsVisible(false);
     entityGraphicSetPropertiesWindow.setIsVisible(false);
-    iconEditStage.setIsVisible(false);
+    iconEditView.setIsVisible(false);
     iconPropertiesWindow.setIsVisible(false);
 
     // Make the appropriate windows visible, based on the new item's type.
     if (holds_alternative<EditorBoundingBox>(newActiveItem)) {
-        boundingBoxEditStage.setIsVisible(true);
+        boundingBoxEditView.setIsVisible(true);
         boundingBoxPropertiesWindow.setIsVisible(true);
     }
     else if (holds_alternative<EditorSprite>(newActiveItem)) {
-        spriteEditStage.setIsVisible(true);
+        spriteEditView.setIsVisible(true);
         spritePropertiesWindow.setIsVisible(true);
     }
     else if (holds_alternative<EditorAnimation>(newActiveItem)) {
-        animationEditStage.setIsVisible(true);
+        animationEditView.setIsVisible(true);
         animationPropertiesWindow.setIsVisible(true);
     }
     else if (holds_alternative<EditorEntityGraphicSet>(newActiveItem)) {
-        entityGraphicSetEditStage.setIsVisible(true);
+        entityGraphicSetEditView.setIsVisible(true);
         entityGraphicSetPropertiesWindow.setIsVisible(true);
     }
     else if (holds_alternative<EditorIcon>(newActiveItem)) {
-        iconEditStage.setIsVisible(true);
+        iconEditView.setIsVisible(true);
         iconPropertiesWindow.setIsVisible(true);
     }
     else {
         // The new active item is a non-entity graphic set.
-        graphicSetEditStage.setIsVisible(true);
+        graphicSetEditView.setIsVisible(true);
         graphicSetPropertiesWindow.setIsVisible(true);
     }
 }

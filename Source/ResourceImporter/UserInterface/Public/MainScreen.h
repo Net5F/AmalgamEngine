@@ -6,17 +6,17 @@
 #include "LibraryItemData.h"
 #include "LibraryWindow.h"
 #include "SaveButtonWindow.h"
-#include "BoundingBoxEditStage.h"
+#include "BoundingBoxEditView.h"
 #include "BoundingBoxPropertiesWindow.h"
-#include "SpriteEditStage.h"
+#include "SpriteEditView.h"
 #include "SpritePropertiesWindow.h"
-#include "AnimationEditStage.h"
+#include "AnimationEditView.h"
 #include "AnimationPropertiesWindow.h"
-#include "GraphicSetEditStage.h"
+#include "GraphicSetEditView.h"
 #include "GraphicSetPropertiesWindow.h"
-#include "EntityGraphicSetEditStage.h"
+#include "EntityGraphicSetEditView.h"
 #include "EntityGraphicSetPropertiesWindow.h"
-#include "IconEditStage.h"
+#include "IconEditView.h"
 #include "IconPropertiesWindow.h"
 #include "TitleButton.h"
 #include "LibraryAddMenu.h"
@@ -79,14 +79,14 @@ private:
     /** The save button at the top of the screen, next to the properties. */
     SaveButtonWindow saveButtonWindow;
 
-    // Edit stages
+    // Edit views
     /** The center stage for editing the active item. */
-    BoundingBoxEditStage boundingBoxEditStage;
-    SpriteEditStage spriteEditStage;
-    AnimationEditStage animationEditStage;
-    GraphicSetEditStage graphicSetEditStage;
-    EntityGraphicSetEditStage entityGraphicSetEditStage;
-    IconEditStage iconEditStage;
+    BoundingBoxEditView boundingBoxEditView;
+    SpriteEditView spriteEditView;
+    AnimationEditView animationEditView;
+    GraphicSetEditView graphicSetEditView;
+    EntityGraphicSetEditView entityGraphicSetEditView;
+    IconEditView iconEditView;
 
     // Properties windows
     /** The right-side panel for viewing and editing the active item's data. */

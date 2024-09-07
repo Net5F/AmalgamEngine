@@ -23,13 +23,13 @@ class LibraryListItem;
  * Allows the user to add sprites to the animation, set fps and frame count, 
  * and edit its bounding box.
  */
-class AnimationEditStage : public AUI::Window
+class AnimationEditView : public AUI::Window
 {
 public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    AnimationEditStage(DataModel& inDataModel, LibraryWindow& inLibraryWindow);
+    AnimationEditView(DataModel& inDataModel, LibraryWindow& inLibraryWindow);
 
 private:
     /**

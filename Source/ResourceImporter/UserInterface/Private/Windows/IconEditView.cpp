@@ -1,4 +1,4 @@
-#include "IconEditStage.h"
+#include "IconEditView.h"
 #include "MainScreen.h"
 #include "EditorIcon.h"
 #include "DataModel.h"
@@ -10,8 +10,8 @@ namespace AM
 {
 namespace ResourceImporter
 {
-IconEditStage::IconEditStage(DataModel& inDataModel)
-: AUI::Window({320, 58, 1297, 1022}, "IconEditStage")
+IconEditView::IconEditView(DataModel& inDataModel)
+: AUI::Window({320, 58, 1297, 1022}, "IconEditView")
 , dataModel{inDataModel}
 , activeIconID{NULL_ICON_ID}
 , topText{{0, 0, logicalExtent.w, 34}, "TopText"}
@@ -37,18 +37,18 @@ IconEditStage::IconEditStage(DataModel& inDataModel)
 
     /* Active icon and checkerboard background. */
     checkerboardImage.setTiledImage(Paths::TEXTURE_DIR
-                                    + "SpriteEditStage/Checkerboard.png");
+                                    + "SpriteEditView/Checkerboard.png");
     checkerboardImage.setIsVisible(false);
     iconImage.setIsVisible(false);
 
     // When the active sprite is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
-        .connect<&IconEditStage::onActiveLibraryItemChanged>(*this);
-    dataModel.iconModel.iconRemoved.connect<&IconEditStage::onIconRemoved>(
+        .connect<&IconEditView::onActiveLibraryItemChanged>(*this);
+    dataModel.iconModel.iconRemoved.connect<&IconEditView::onIconRemoved>(
         *this);
 }
 
-void IconEditStage::onActiveLibraryItemChanged(
+void IconEditView::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
     // Check if the new active item is a icon and return early if not.
@@ -82,7 +82,7 @@ void IconEditStage::onActiveLibraryItemChanged(
     iconImage.setIsVisible(true);
 }
 
-void IconEditStage::onIconRemoved(IconID iconID)
+void IconEditView::onIconRemoved(IconID iconID)
 {
     if (iconID == activeIconID) {
         activeIconID = NULL_ICON_ID;
@@ -93,7 +93,7 @@ void IconEditStage::onIconRemoved(IconID iconID)
     }
 }
 
-void IconEditStage::styleText(AUI::Text& text)
+void IconEditView::styleText(AUI::Text& text)
 {
     text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
     text.setColor({255, 255, 255, 255});
