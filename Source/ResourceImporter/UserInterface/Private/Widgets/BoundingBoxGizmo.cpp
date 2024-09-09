@@ -61,9 +61,9 @@ void BoundingBoxGizmo::setSpriteImageSize(int logicalSpriteWidth,
                                           int logicalSpriteHeight)
 {
     logicalSpriteImageExtent.x
-        = (clippedExtent.w / 2) - (logicalSpriteWidth / 2);
+        = (logicalExtent.w / 2) - (logicalSpriteWidth / 2);
     logicalSpriteImageExtent.y
-        = (clippedExtent.h / 2) - (logicalSpriteHeight / 2);
+        = (logicalExtent.h / 2) - (logicalSpriteHeight / 2);
     logicalSpriteImageExtent.w = logicalSpriteWidth;
     logicalSpriteImageExtent.h = logicalSpriteHeight;
 

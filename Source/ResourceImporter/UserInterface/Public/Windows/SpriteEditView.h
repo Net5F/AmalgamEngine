@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LibraryItemData.h"
+#include "StageGraphic.h"
 #include "BoundingBoxGizmo.h"
 #include "AUI/Window.h"
 #include "AUI/Screen.h"
@@ -25,15 +26,7 @@ public:
     //-------------------------------------------------------------------------
     SpriteEditView(DataModel& inDataModel);
 
-    //-------------------------------------------------------------------------
-    // Base class overrides
-    //-------------------------------------------------------------------------
-    void render() override;
-
 private:
-    /** The transparency value for the stage graphic. */
-    static constexpr float STAGE_ALPHA{127};
-
     /**
      * If the new active item is a sprite, loads it's data onto this stage.
      */
@@ -64,36 +57,11 @@ private:
      */
     void styleText(AUI::Text& text);
 
-    /**
-     * Transforms the vertices that make up the stage's bottom face from world
-     * space to screen space, scales them to the current UI scaling, and 
-     * offsets them using the current offsets.
-     *
-     * The finished points are pushed into the given vector in the order:
-     *     (minX, minY, minZ), (maxX, minY, minZ), (maxX, maxY, minZ),
-     *     (minX, maxY, minZ)
-     */
-    void calcStageScreenPoints(std::vector<SDL_Point>& stageScreenPoints);
-
-    /**
-     * Moves the stage graphic coords to their proper screen position.
-     */
-    void moveStageGraphic(std::vector<SDL_Point>& stageScreenPoints);
-
-    /**
-     * Renders the stage's bottom face.
-     */
-    void renderStage(const SDL_Point& windowTopLeft);
-
     /** Used to get the current working dir when displaying the sprite. */
     DataModel& dataModel;
 
     /** The active sprite's ID. */
     SpriteID activeSpriteID;
-
-    // Stage (1 polygon, 4 coordinates)
-    std::array<Sint16, 4> stageXCoords;
-    std::array<Sint16, 4> stageYCoords;
 
     //-------------------------------------------------------------------------
     // Private child widgets
@@ -102,6 +70,9 @@ private:
 
     /** Checkerboard image, tiled as the background for the loaded sprite. */
     AUI::Image checkerboardImage;
+
+    /** The transparent graphic that shows the stage bounds. */
+    StageGraphic stageGraphic;
 
     /** The sprite that is currently loaded onto the stage. */
     AUI::Image spriteImage;
