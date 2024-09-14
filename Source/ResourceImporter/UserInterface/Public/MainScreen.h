@@ -22,6 +22,7 @@
 #include "LibraryAddMenu.h"
 #include "AddSpriteSheetDialog.h"
 #include "AddIconSheetDialog.h"
+#include "SaveBoundingBoxDialog.h"
 
 namespace AM
 {
@@ -47,6 +48,13 @@ public:
     void openConfirmationDialog(const std::string& bodyText,
                                 const std::string& confirmButtonText,
                                 std::function<void(void)> onConfirmation);
+
+    /**
+     * Opens the dialog for saving a BoundingBox to the Library.
+     */
+    void openSaveBoundingBoxDialog(
+        const BoundingBox& modelBoundsToSave,
+        std::function<void(BoundingBoxID)> saveCallback);
 
     /**
      * Opens the Library's "add list item" menu.
@@ -106,6 +114,9 @@ private:
 
     /** Dialog for adding an icon sheet to the IconSheetPanel. */
     AddIconSheetDialog addIconSheetDialog;
+
+    /** Dialog for adding a BoundingBox to the Library. */
+    SaveBoundingBoxDialog saveBoundingBoxDialog;
 };
 
 } // End namespace ResourceImporter

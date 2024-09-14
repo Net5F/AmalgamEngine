@@ -11,6 +11,7 @@ namespace ResourceImporter
 BoundingBoxModel::BoundingBoxModel(DataModel& inDataModel)
 : dataModel{inDataModel}
 , boundingBoxMap{}
+, boundingBoxNameMap{}
 , boundingBoxIDPool{MAX_BOUNDING_BOXES}
 , errorString{}
 , boundingBoxAddedSig{}
@@ -84,32 +85,43 @@ void BoundingBoxModel::save(nlohmann::json& json)
 
 bool BoundingBoxModel::addBoundingBox()
 {
-    BoundingBoxID numericID{
-        static_cast<BoundingBoxID>(boundingBoxIDPool.reserveID())};
-
     // Generate a unique name.
     int nameCount{0};
     std::string displayName{"NewBoundingBox"};
-    while (!boundingBoxNameIsUnique(numericID, displayName)) {
+    while (!boundingBoxNameIsUnique(NULL_BOUNDING_BOX_ID, displayName)) {
         displayName = "NewBoundingBox" + std::to_string(nameCount);
         nameCount++;
     }
 
-    // Add the new bounding box to the map. Default to a non-0 bounding box so 
-    // it's easier to click.
-    boundingBoxMap.emplace(numericID,
-                           EditorBoundingBox{numericID,
-                                             displayName,
-                                             {{0, 0, 0}, {20, 20, 20}}});
-
-    // Signal the new bounding box to the UI.
-    EditorBoundingBox& boundingBox{boundingBoxMap[numericID]};
-    boundingBoxAddedSig.publish(numericID, boundingBox);
+    // Add the box and signal to the UI that it was added.
+    EditorBoundingBox& boundingBox{
+        addBoundingBoxInternal(displayName, {{0, 0, 0}, {20, 20, 20}})};
 
     // Set the new bounding box as the active library item.
-    dataModel.setActiveBoundingBox(numericID);
+    dataModel.setActiveBoundingBox(boundingBox.numericID);
 
     return true;
+}
+
+BoundingBoxID
+    BoundingBoxModel::addOrUpdateBoundingBox(const std::string& displayName,
+                                             const BoundingBox& modelBounds)
+{
+    // If the name isn't taken, add a new box and signal to the UI that it 
+    // was added.
+    auto it{boundingBoxNameMap.find(displayName)};
+    if (it == boundingBoxNameMap.end()) {
+        EditorBoundingBox& boundingBox{
+            addBoundingBoxInternal(displayName, modelBounds)};
+        return boundingBox.numericID;
+    }
+
+    // A box already exists with the given name. Update it and signal to the UI 
+    // that it was updated.
+    BoundingBoxID boundingBoxID{it->second};
+    setBoundingBoxBounds(boundingBoxID, modelBounds);
+
+    return boundingBoxID;
 }
 
 void BoundingBoxModel::remBoundingBox(BoundingBoxID boundingBoxID)
@@ -121,6 +133,7 @@ void BoundingBoxModel::remBoundingBox(BoundingBoxID boundingBoxID)
     }
 
     // Erase the bounding box.
+    boundingBoxNameMap.erase(boundingBoxIt->second.displayName);
     boundingBoxMap.erase(boundingBoxIt);
 
     // Signal that the bounding box was erased.
@@ -142,7 +155,7 @@ const EditorBoundingBox&
 void BoundingBoxModel::setBoundingBoxDisplayName(
     BoundingBoxID boundingBoxID, const std::string& newDisplayName)
 {
-    auto boundingBoxPair{boundingBoxMap.find(boundingBoxID)};
+    auto boundingBoxPair{ boundingBoxMap.find(boundingBoxID) };
     if (boundingBoxPair == boundingBoxMap.end()) {
         LOG_FATAL("Tried to set name using invalid bounding box ID.");
     }
@@ -150,30 +163,32 @@ void BoundingBoxModel::setBoundingBoxDisplayName(
     // Set the new display name and make it unique.
     // Note: All characters that a user can enter are valid in the display
     //       name string, so we don't need to validate.
-    int appendedNum{0};
-    std::string uniqueDisplayName{newDisplayName};
+    int appendedNum{ 0 };
+    std::string uniqueDisplayName{ newDisplayName };
     while (!boundingBoxNameIsUnique(boundingBoxID, uniqueDisplayName)) {
         uniqueDisplayName = newDisplayName + std::to_string(appendedNum);
         appendedNum++;
     }
 
-    EditorBoundingBox& boundingBox{boundingBoxPair->second};
+    EditorBoundingBox& boundingBox{ boundingBoxPair->second };
+    boundingBoxNameMap.erase(boundingBox.displayName);
+    boundingBoxNameMap.emplace(uniqueDisplayName, boundingBoxID);
     boundingBox.displayName = uniqueDisplayName;
 
     // Signal the change.
     boundingBoxDisplayNameChangedSig.publish(boundingBoxID,
-                                             boundingBox.displayName);
+        boundingBox.displayName);
 }
 
 void BoundingBoxModel::setBoundingBoxBounds(
     BoundingBoxID boundingBoxID, const BoundingBox& newBounds)
 {
-    auto boundingBoxPair{boundingBoxMap.find(boundingBoxID)};
+    auto boundingBoxPair{ boundingBoxMap.find(boundingBoxID) };
     if (boundingBoxPair == boundingBoxMap.end()) {
         LOG_FATAL("Tried to set bounds using invalid bounding box ID.");
     }
 
-    EditorBoundingBox& boundingBox{boundingBoxPair->second};
+    EditorBoundingBox& boundingBox{ boundingBoxPair->second };
     boundingBox.modelBounds = newBounds;
 
     // Signal the change.
@@ -195,20 +210,21 @@ bool BoundingBoxModel::parseBoundingBox(const nlohmann::json& boundsJson)
 {
     // Mark the bounding box's ID as reserved so it doesn't get reused.
     BoundingBoxID boundingBoxID{
-        boundsJson.at("numericID").get<BoundingBoxID>()};
+        boundsJson.at("numericID").get<BoundingBoxID>() };
     boundingBoxIDPool.markIDAsReserved(boundingBoxID);
 
-    boundingBoxMap.emplace(boundingBoxID, EditorBoundingBox{boundingBoxID});
-    EditorBoundingBox& boundingBox{boundingBoxMap[boundingBoxID]};
+    boundingBoxMap.emplace(boundingBoxID, EditorBoundingBox{ boundingBoxID });
+    EditorBoundingBox& boundingBox{ boundingBoxMap[boundingBoxID] };
 
     // If the display name isn't unique, fail.
     std::string displayName{
-        boundsJson.at("displayName").get<std::string>()};
+        boundsJson.at("displayName").get<std::string>() };
     if (!boundingBoxNameIsUnique(boundingBoxID, displayName)) {
         errorString = "Bounding box display name isn't unique: ";
         errorString += boundingBox.displayName.c_str();
         return false;
     }
+    boundingBoxNameMap.emplace(displayName, boundingBoxID);
 
     // Add the display name.
     boundingBox.displayName = displayName;
@@ -228,22 +244,37 @@ bool BoundingBoxModel::parseBoundingBox(const nlohmann::json& boundsJson)
 }
 
 bool BoundingBoxModel::boundingBoxNameIsUnique(BoundingBoxID boundingBoxID,
-                                               const std::string& displayName)
+    const std::string& displayName)
 {
-    // Dumbly look through all names for a match.
-    // Note: Eventually, this should change to a name map that we keep updated.
-    bool isUnique{true};
-    for (const auto& boundsPair : boundingBoxMap) {
-        IconID idToCheck{boundsPair.first};
-        const EditorBoundingBox& boundingBox{boundsPair.second};
-
-        if ((idToCheck != boundingBoxID)
-            && (displayName == boundingBox.displayName)) {
-            isUnique = false;
-        }
+    // If the desired name is already in the map, and the owner of the name 
+    // isn't the given ID, the name isn't unique.
+    auto it{boundingBoxNameMap.find(displayName)};
+    if ((it != boundingBoxNameMap.end()) && (it->second != boundingBoxID)) {
+        return false;
     }
 
-    return isUnique;
+    // Name isn't in the map, or it's owned by the same ID.
+    return true;
+}
+
+EditorBoundingBox&
+    BoundingBoxModel::addBoundingBoxInternal(const std::string& displayName,
+                                             const BoundingBox& modelBounds)
+{
+    BoundingBoxID numericID{
+        static_cast<BoundingBoxID>(boundingBoxIDPool.reserveID())};
+
+    // Add the new bounding box to the maps. Default to a non-0 bounding box so 
+    // it's easier to click.
+    boundingBoxMap.emplace(
+        numericID, EditorBoundingBox{numericID, displayName, modelBounds});
+    boundingBoxNameMap.emplace(displayName, numericID);
+
+    // Signal the new bounding box to the UI.
+    EditorBoundingBox& boundingBox{boundingBoxMap[numericID]};
+    boundingBoxAddedSig.publish(numericID, boundingBox);
+
+    return boundingBox;
 }
 
 } // End namespace ResourceImporter

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LibraryItemData.h"
+#include "StageGraphic.h"
 #include "BoundingBoxGizmo.h"
 #include "MainButton.h"
 #include "AUI/Window.h"
@@ -86,6 +87,9 @@ private:
 
     /** Checkerboard image, tiled as the background for the loaded sprite. */
     AUI::Image checkerboardImage;
+
+    /** The transparent graphic that shows the stage bounds. */
+    StageGraphic stageGraphic;
 
     /** The preview image that is currently loaded onto the stage, if any. */
     AUI::Image spriteImage;

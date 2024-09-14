@@ -1,8 +1,8 @@
 #pragma once
 
 #include "LibraryItemData.h"
+#include "StageGraphic.h"
 #include "BoundingBoxGizmo.h"
-#include "MainButton.h"
 #include "AUI/Window.h"
 #include "AUI/Screen.h"
 #include "AUI/Text.h"
@@ -31,18 +31,12 @@ public:
     //-------------------------------------------------------------------------
     AnimationEditView(DataModel& inDataModel, LibraryWindow& inLibraryWindow);
 
+    //-------------------------------------------------------------------------
+    // Base class overrides
+    //-------------------------------------------------------------------------
+    AUI::EventResult onKeyDown(SDL_Keycode keyCode) override;
+
 private:
-    /**
-     * Adds or removes sprites from the currently selected frame, depending 
-     * on whether a sprite is selected in the library.
-     */
-    void onAssignSpriteButtonPressed();
-
-    /**
-     * Plays the currently active animation.
-     */
-    void onPlayButtonPressed();
-
     /**
      * If the new active item is an animation, loads it's data onto this stage.
      */
@@ -83,12 +77,6 @@ private:
     void onTimelineSpriteMoved(Uint8 oldFrameIndex, Uint8 newFrameIndex);
 
     /**
-     * Updates assignButton to show whether the selection is assign-able.
-     */
-    void onLibrarySelectedItemsChanged(
-        const std::vector<LibraryListItem*>& selectedItems);
-
-    /**
      * Styles the given text.
      */
     void styleText(AUI::Text& text);
@@ -111,17 +99,14 @@ private:
         sprite. */
     AUI::Image checkerboardImage;
 
+    /** The transparent graphic that shows the stage bounds. */
+    StageGraphic stageGraphic;
+
     /** The sprite for the currently selected frame. */
     AUI::Image spriteImage;
 
     /** The gizmo for editing the animation's bounding box. */
     BoundingBoxGizmo boundingBoxGizmo;
-
-    /** The button for assigning sprites to the curretn selected frame. */
-    MainButton assignButton;
-
-    /** The button for playing the animation. */
-    MainButton playButton;
 
     /** Holds the AnimationTimeline so it can be scrolled horizontally. */
     AUI::ScrollArea timelineScrollArea;

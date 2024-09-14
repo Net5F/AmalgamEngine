@@ -24,13 +24,14 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , graphicSetEditView{dataModel, libraryWindow}
 , entityGraphicSetEditView{dataModel, libraryWindow}
 , spritePropertiesWindow{dataModel, libraryWindow}
-, animationPropertiesWindow{dataModel, libraryWindow}
+, animationPropertiesWindow{*this, dataModel, libraryWindow}
 , graphicSetPropertiesWindow{dataModel}
 , entityGraphicSetPropertiesWindow{dataModel}
 , iconPropertiesWindow{dataModel}
 , confirmationDialog{{0, 0, 1920, 1080}, "ConfirmationDialog"}
 , addSpriteSheetDialog{dataModel}
 , addIconSheetDialog{dataModel}
+, saveBoundingBoxDialog{dataModel}
 {
     // Add our windows so they're included in rendering, etc.
     windows.push_back(libraryWindow);
@@ -51,6 +52,7 @@ MainScreen::MainScreen(DataModel& inDataModel)
     windows.push_back(confirmationDialog);
     windows.push_back(addSpriteSheetDialog);
     windows.push_back(addIconSheetDialog);
+    windows.push_back(saveBoundingBoxDialog);
 
     /* Confirmation dialog. */
     // Background shadow image.
@@ -136,10 +138,11 @@ MainScreen::MainScreen(DataModel& inDataModel)
     });
 
     // Make the modal dialogs invisible.
+    libraryAddMenu.setIsVisible(false);
     confirmationDialog.setIsVisible(false);
     addSpriteSheetDialog.setIsVisible(false);
     addIconSheetDialog.setIsVisible(false);
-    libraryAddMenu.setIsVisible(false);
+    saveBoundingBoxDialog.setIsVisible(false);
 
     /* Edit Stages and Properties Windows. */
     // Make the edit stages and properties windows invisible
@@ -182,6 +185,15 @@ void MainScreen::openConfirmationDialog(
 
     // Open the dialog.
     confirmationDialog.setIsVisible(true);
+}
+
+void MainScreen::openSaveBoundingBoxDialog(
+    const BoundingBox& modelBoundsToSave,
+    std::function<void(BoundingBoxID)> saveCallback)
+{
+    saveBoundingBoxDialog.setSaveData(modelBoundsToSave,
+                                      std::move(saveCallback));
+    saveBoundingBoxDialog.setIsVisible(true);
 }
 
 void MainScreen::openLibraryAddMenu()

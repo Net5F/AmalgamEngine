@@ -14,6 +14,7 @@ struct BoundingBox;
 
 namespace ResourceImporter
 {
+class MainScreen;
 class DataModel;
 class LibraryWindow;
 class LibraryListItem;
@@ -28,8 +29,8 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    AnimationPropertiesWindow(DataModel& ineDataModel,
-                           LibraryWindow& inLibraryWindow);
+    AnimationPropertiesWindow(MainScreen& inScreen, DataModel& ineDataModel,
+                              LibraryWindow& inLibraryWindow);
 
     //-------------------------------------------------------------------------
     // Public child widgets
@@ -110,6 +111,9 @@ private:
      */
     void setBoundsFieldsEnabled(bool isEnabled);
 
+    /** Used to open the confirmation dialog when saving a bounding box. */
+    MainScreen& mainScreen;
+
     /** Used while setting user-inputted animation data. */
     DataModel& dataModel;
 
@@ -124,12 +128,13 @@ private:
      */
     std::string toRoundedString(float value);
 
+    void onBoundingBoxButtonPressed();
+
     /** The below functions are all for validating and saving the user's data
         when the text is committed. */
     void saveName();
     void saveFrameCount();
     void saveFps();
-    void saveModelBoundsID();
     void saveMinX();
     void saveMinY();
     void saveMinZ();

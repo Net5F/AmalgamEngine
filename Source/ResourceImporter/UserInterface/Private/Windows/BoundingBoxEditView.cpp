@@ -18,6 +18,7 @@ BoundingBoxEditView::BoundingBoxEditView(DataModel& inDataModel,
 , topText{{0, 0, logicalExtent.w, 34}, "TopText"}
 , modifyText{{0, 58, 1297, 24}, "ModifyText"}
 , checkerboardImage{{0, 0, 100, 100}, "BackgroundImage"}
+, stageGraphic{logicalExtent}
 , spriteImage{{0, 0, 256, 512}, "SpriteImage"}
 , boundingBoxGizmo{{0, 52, 1297, 732}, inDataModel}
 , previewSpriteButton{{581, 692, 136, 46},
@@ -29,6 +30,7 @@ BoundingBoxEditView::BoundingBoxEditView(DataModel& inDataModel,
     children.push_back(topText);
     children.push_back(modifyText);
     children.push_back(checkerboardImage);
+    children.push_back(stageGraphic);
     children.push_back(spriteImage);
     children.push_back(boundingBoxGizmo);
     children.push_back(previewSpriteButton);
@@ -146,27 +148,36 @@ void BoundingBoxEditView::onActiveLibraryItemChanged(
 
     activeBoundingBoxID = newActiveBoundingBox->numericID;
 
-    // Build our default spriteImage: a 256x512 sprite. Center it to the 
-    // stage's X, but use a fixed Y.
-    SDL_Rect centeredSpriteExtent{0, 0, 256, 512};
-    centeredSpriteExtent.x = logicalExtent.w / 2;
-    centeredSpriteExtent.x -= (centeredSpriteExtent.w / 2);
-    centeredSpriteExtent.y = 212 - logicalExtent.y;
-    spriteImage.setLogicalExtent(centeredSpriteExtent);
-
-    // Set the background and gizmo to the size of the sprite.
-    checkerboardImage.setLogicalExtent(spriteImage.getLogicalExtent());
-    boundingBoxGizmo.setLogicalExtent(spriteImage.getLogicalExtent());
-
-    // Set the background to be visible.
-    checkerboardImage.setIsVisible(true);
-
-    // Set up the gizmo with the default sprite's data.
-    boundingBoxGizmo.setStageOrigin({128, 374});
+    // Set up the gizmo with the default sprite's size and data.
+    const SDL_Rect defaultSpriteExtent{0, 0, 256, 512};
+    const SDL_Point defaultSpriteOrigin{128, 374};
+    boundingBoxGizmo.setSpriteImageSize(defaultSpriteExtent.w,
+                                        defaultSpriteExtent.h);
+    boundingBoxGizmo.setStageOrigin(defaultSpriteOrigin);
     boundingBoxGizmo.setBoundingBox(newActiveBoundingBox->modelBounds);
 
-    // If the gizmo isn't visible, make it visible.
+    // Use the gizmo's centered sprite extent to set the background and sprite
+    // extents.
+    SDL_Rect logicalSpriteExtent{
+        boundingBoxGizmo.getLogicalCenteredSpriteExtent()};
+    logicalSpriteExtent.x += boundingBoxGizmo.getLogicalExtent().x;
+    logicalSpriteExtent.y += boundingBoxGizmo.getLogicalExtent().y;
+    checkerboardImage.setLogicalExtent(logicalSpriteExtent);
+    spriteImage.setLogicalExtent(logicalSpriteExtent);
+
+    // Set up the stage graphic.
+    const SDL_Rect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
+    SDL_Rect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
+        boundingBoxGizmo.getLogicalCenteredSpriteExtent())};
+    stageGraphic.updateStage(defaultSpriteExtent, defaultSpriteOrigin,
+                             {(gizmoClippedExtent.x + actualSpriteExtent.x),
+                              (gizmoClippedExtent.y + actualSpriteExtent.y)});
+
+    // Make sure everything is visible.
     boundingBoxGizmo.setIsVisible(true);
+    checkerboardImage.setIsVisible(true);
+    stageGraphic.setIsVisible(true);
+    spriteImage.setIsVisible(true);
 }
 
 void BoundingBoxEditView::onBoundingBoxBoundsChanged(

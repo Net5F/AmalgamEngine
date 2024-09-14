@@ -116,7 +116,7 @@ AddIconSheetDialog::AddIconSheetDialog(DataModel& inDataModel)
 
     // Add a callback to remove the dialog on cancel.
     cancelButton.setOnPressed([&]() {
-        // Clear the text inputs.
+        // Clear the text inputs and labels.
         clear();
 
         // Remove the dialog.

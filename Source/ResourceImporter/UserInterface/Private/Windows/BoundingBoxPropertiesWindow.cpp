@@ -4,6 +4,7 @@
 #include "Paths.h"
 #include "Camera.h"
 #include "Transforms.h"
+#include "SpriteTools.h"
 #include "SharedConfig.h"
 #include <string>
 #include <iomanip>

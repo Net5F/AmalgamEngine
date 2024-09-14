@@ -46,14 +46,14 @@ private:
         We prioritize the PeriodicCallers getting called on time, so we only
         dispatch events if there's a reasonable gap until the next needs to be
         called. */
-    static constexpr double DISPATCH_MINIMUM_TIME_S = .003;
+    static constexpr double DISPATCH_MINIMUM_TIME_S{.003};
 
     /** The minimum "time to next call" required to trigger a main loop sleep.
         We sleep for 1ms when possible to reduce our CPU usage. We can't trust
         the scheduler to come back to us after exactly 1ms though, so we busy
         wait if something needs to be called soon.
         Higher value == more CPU usage. */
-    static constexpr double SLEEP_MINIMUM_TIME_S = .003;
+    static constexpr double SLEEP_MINIMUM_TIME_S{.003};
 
     /**
      * Dispatches waiting events to the eventHandlers.

@@ -27,6 +27,7 @@ target_sources(ResourceImporter
         Private/Windows/IconPropertiesWindow.cpp
         Private/Windows/LibraryAddMenu.cpp
         Private/Windows/LibraryWindow.cpp
+        Private/Windows/SaveBoundingBoxDialog.cpp
         Private/Windows/SaveButtonWindow.cpp
         Private/Windows/SpriteEditView.cpp
         Private/Windows/SpritePropertiesWindow.cpp
@@ -62,6 +63,7 @@ target_sources(ResourceImporter
         Public/Windows/IconPropertiesWindow.h
         Public/Windows/LibraryAddMenu.h
         Public/Windows/LibraryWindow.h
+        Public/Windows/SaveBoundingBoxDialog.h
         Public/Windows/SaveButtonWindow.h
         Public/Windows/SpriteEditView.h
         Public/Windows/SpritePropertiesWindow.h

@@ -6,6 +6,7 @@
 #include "Paths.h"
 #include "Camera.h"
 #include "Transforms.h"
+#include "SpriteTools.h"
 #include "SharedConfig.h"
 #include <string>
 #include <iomanip>
@@ -17,9 +18,10 @@ namespace AM
 {
 namespace ResourceImporter
 {
-AnimationPropertiesWindow::AnimationPropertiesWindow(
+AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
     DataModel& inDataModel, LibraryWindow& inLibraryWindow)
 : AUI::Window({1617, 0, 303, 705}, "AnimationPropertiesWindow")
+, mainScreen{inScreen}
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
 , nameInput{{24, 84, 255, 38}, "NameInput"}
 , frameCountLabel{{24, 166, 110, 28}, "FrameCountLabel"}
@@ -132,7 +134,7 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(
     styleLabel(boundingBoxNameLabel, "", 16);
 
     boundingBoxButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 14);
-    boundingBoxButton.setOnPressed([&]() { saveModelBoundsID(); });
+    boundingBoxButton.setOnPressed([&]() { onBoundingBoxButtonPressed(); });
 
     // Bounds entry labels.
     styleLabel(minXLabel, "Min X", 21);
@@ -217,13 +219,11 @@ void AnimationPropertiesWindow::onActiveLibraryItemChanged(
                 newActiveAnimation->modelBoundsID)};
         boundingBoxNameLabel.setText(boundingBox.displayName);
         boundingBoxButton.text.setText("Custom");
-        boundingBoxButton.enable();
         setBoundsFieldsEnabled(false);
     }
     else {
         boundingBoxNameLabel.setText("<Custom>");
-        boundingBoxButton.text.setText("Assign");
-        boundingBoxButton.disable();
+        boundingBoxButton.text.setText("Save as");
         setBoundsFieldsEnabled(true);
     }
 
@@ -314,10 +314,12 @@ void AnimationPropertiesWindow::onAnimationModelBoundsIDChanged(
         const EditorBoundingBox& boundingBox{
             dataModel.boundingBoxModel.getBoundingBox(newModelBoundsID)};
         boundingBoxNameLabel.setText(boundingBox.displayName);
+        boundingBoxButton.text.setText("Custom");
         setBoundsFieldsEnabled(false);
     }
     else {
         boundingBoxNameLabel.setText("<Custom>");
+        boundingBoxButton.text.setText("Save as");
         setBoundsFieldsEnabled(true);
     }
 
@@ -355,7 +357,6 @@ void AnimationPropertiesWindow::onLibrarySelectedItemsChanged(
     if ((selectedItems.size() > 0)
         && (selectedItems[0]->type == LibraryListItem::Type::BoundingBox)) {
         boundingBoxButton.text.setText("Assign");
-        boundingBoxButton.enable();
     }
     // If we have a shared bounding box assigned, allow the user to switch 
     // to a custom bounding box.
@@ -363,12 +364,10 @@ void AnimationPropertiesWindow::onLibrarySelectedItemsChanged(
                  .modelBoundsID
              != NULL_BOUNDING_BOX_ID) {
         boundingBoxButton.text.setText("Custom");
-        boundingBoxButton.enable();
     }
     else {
-        // Custom bounding box and no selection. Disable the button.
-        boundingBoxButton.text.setText("Assign");
-        boundingBoxButton.disable();
+        // Custom bounding box and no selection. Allow the user to save it.
+        boundingBoxButton.text.setText("Save as");
     }
 }
 
@@ -446,34 +445,51 @@ void AnimationPropertiesWindow::saveFps()
     }
 }
 
-void AnimationPropertiesWindow::saveModelBoundsID()
+void AnimationPropertiesWindow::onBoundingBoxButtonPressed()
 {
     AnimationModel& animationModel{dataModel.animationModel};
 
-    // If a bounding box is selected, assign it to the active animation.
-    // Note: This just uses the first selected graphic. Multi-select is ignored.
-    const auto& selectedListItems{libraryWindow.getSelectedListItems()};
-    bool boundingBoxIsSelected{false};
-    for (const LibraryListItem* selectedItem : selectedListItems) {
-        if (selectedItem->type == LibraryListItem::Type::BoundingBox) {
-            boundingBoxIsSelected = true;
-            animationModel.setAnimationModelBoundsID(
-                activeAnimationID,
-                static_cast<BoundingBoxID>(selectedItem->ID));
+    const std::string buttonText{boundingBoxButton.text.asString()};
+    if (buttonText == "Assign") {
+        // If a bounding box is selected, assign it to the active animation.
+        // Note: This just uses the first selected graphic. Multi-select is 
+        //       ignored.
+        const auto& selectedListItems{libraryWindow.getSelectedListItems()};
+        bool boundingBoxIsSelected{false};
+        for (const LibraryListItem* selectedItem : selectedListItems) {
+            if (selectedItem->type == LibraryListItem::Type::BoundingBox) {
+                boundingBoxIsSelected = true;
+                animationModel.setAnimationModelBoundsID(
+                    activeAnimationID,
+                    static_cast<BoundingBoxID>(selectedItem->ID));
 
-            break;
+                break;
+            }
         }
     }
-
-    // If a bounding box isn't selected and the animation isn't already set to a 
-    // custom bounding box, set it.
-    if (!boundingBoxIsSelected
-        && (animationModel.getAnimation(activeAnimationID).modelBoundsID
-            != NULL_BOUNDING_BOX_ID)) {
-        animationModel.setAnimationModelBoundsID(activeAnimationID,
-                                           NULL_BOUNDING_BOX_ID);
-        boundingBoxButton.text.setText("Assign");
-        boundingBoxButton.disable();
+    else if (buttonText == "Custom") {
+        // If the animation isn't already using a custom bounding box, set it.
+        if (animationModel.getAnimation(activeAnimationID).modelBoundsID
+            != NULL_BOUNDING_BOX_ID) {
+            animationModel.setAnimationModelBoundsID(activeAnimationID,
+                                                     NULL_BOUNDING_BOX_ID);
+        }
+    }
+    else if (buttonText == "Save as") {
+        // If the animation is using a custom bounding box, open the "Save as" 
+        // menu.
+        const EditorAnimation& animation{
+            animationModel.getAnimation(activeAnimationID)};
+        if (animation.modelBoundsID == NULL_BOUNDING_BOX_ID) {
+            mainScreen.openSaveBoundingBoxDialog(
+                animation.customModelBounds,
+                [&](BoundingBoxID newModelBoundsID) {
+                    // The save was completed, set the shared bounding box as
+                    // this animation's model bounds.
+                    dataModel.animationModel.setAnimationModelBoundsID(
+                        activeAnimationID, newModelBoundsID);
+                });
+        }
     }
 }
 
@@ -556,11 +572,16 @@ void AnimationPropertiesWindow::saveMaxX()
         // Clamp the value to its bounds.
         const EditorAnimation& activeAnimation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
+        AM_ASSERT(activeAnimation.frames.size() > 0,
+                  "Animation must always have at least 1 frame.");
+        const EditorSprite& firstSprite{activeAnimation.frames[0].sprite.get()};
+        BoundingBox stageWorldExtent{SpriteTools::calcSpriteStageWorldExtent(
+            firstSprite.textureExtent, firstSprite.stageOrigin)};
+
         BoundingBox newModelBounds(
             activeAnimation.getModelBounds(dataModel.boundingBoxModel));
         newModelBounds.max.x
-            = std::clamp(newMaxX, newModelBounds.min.x,
-                         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
+            = std::clamp(newMaxX, newModelBounds.min.x, stageWorldExtent.max.x);
 
         // Apply the new value.
         dataModel.animationModel.setAnimationCustomModelBounds(
@@ -581,6 +602,12 @@ void AnimationPropertiesWindow::saveMaxY()
         // Clamp the value to its bounds.
         const EditorAnimation& activeAnimation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
+        AM_ASSERT(activeAnimation.frames.size() > 0,
+                  "Animation must always have at least 1 frame.");
+        const EditorSprite& firstSprite{activeAnimation.frames[0].sprite.get()};
+        BoundingBox stageWorldExtent{SpriteTools::calcSpriteStageWorldExtent(
+            firstSprite.textureExtent, firstSprite.stageOrigin)};
+
         BoundingBox newModelBounds(
             activeAnimation.getModelBounds(dataModel.boundingBoxModel));
         newModelBounds.max.y
@@ -608,10 +635,16 @@ void AnimationPropertiesWindow::saveMaxZ()
         //       and not very useful. Can add if we ever care to.
         const EditorAnimation& activeAnimation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
+        AM_ASSERT(activeAnimation.frames.size() > 0,
+                  "Animation must always have at least 1 frame.");
+        const EditorSprite& firstSprite{activeAnimation.frames[0].sprite.get()};
+        BoundingBox stageWorldExtent{SpriteTools::calcSpriteStageWorldExtent(
+            firstSprite.textureExtent, firstSprite.stageOrigin)};
+
         BoundingBox newModelBounds(
             activeAnimation.getModelBounds(dataModel.boundingBoxModel));
-        newMaxZ = std::max(newMaxZ, newModelBounds.min.z);
-        newModelBounds.max.z = newMaxZ;
+        newModelBounds.max.z
+            = std::clamp(newMaxZ, newModelBounds.min.z, stageWorldExtent.max.z);
 
         // Apply the new value.
         dataModel.animationModel.setAnimationCustomModelBounds(

@@ -49,6 +49,13 @@ public:
     bool addBoundingBox();
 
     /**
+     * Adds a bounding box with the given name and bounds, or updates an 
+     * existing one if the name is already taken.
+     */
+    BoundingBoxID addOrUpdateBoundingBox(const std::string& displayName,
+                                         const BoundingBox& modelBounds);
+
+    /**
      * Removes the bounding box with the given ID from the associated map.
      *
      * Error if the given ID isn't present in the map.
@@ -89,11 +96,23 @@ private:
     bool boundingBoxNameIsUnique(BoundingBoxID boundingBoxID,
                                  const std::string& displayName);
 
+    /**
+     * Adds a bounding box with the given name, signals to the UI that 
+     * the box was added, and returns it.
+     * Note: This doesn't check that the name is unique. You must ensure that 
+     *       yourself.
+     */
+    EditorBoundingBox& addBoundingBoxInternal(const std::string& displayName,
+                                              const BoundingBox& modelBounds);
+
     DataModel& dataModel;
 
     /** Maps bounding box IDs -> the bounding boxes that we currently have 
         loaded. */
     std::map<BoundingBoxID, EditorBoundingBox> boundingBoxMap;
+
+    /** Maps bounding box names -> their ID. */
+    std::unordered_map<std::string, BoundingBoxID> boundingBoxNameMap;
 
     /** Used for generating temporary bounding box IDs that are only used
         internally by this editor. */
