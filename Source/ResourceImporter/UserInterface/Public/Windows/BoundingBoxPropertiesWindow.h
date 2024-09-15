@@ -29,7 +29,7 @@ public:
     // Public interface
     //-------------------------------------------------------------------------
     BoundingBoxPropertiesWindow(DataModel& ineDataModel,
-                           const LibraryWindow& inLibraryWindow);
+                                const LibraryWindow& inLibraryWindow);
 
     //-------------------------------------------------------------------------
     // Public child widgets
@@ -92,25 +92,6 @@ private:
      * Converts the given float to a string with 3 decimals of precision.
      */
     std::string toRoundedString(float value);
-
-    /** The below functions are all for validating and saving the user's data
-        when the text is committed. */
-    void saveName();
-    void saveMinX();
-    void saveMinY();
-    void saveMinZ();
-    void saveMaxX();
-    void saveMaxY();
-    void saveMaxZ();
-
-    /** The below floats save the committed values, so we can revert to them
-        if the user inputs invalid characters. */
-    float committedMinX;
-    float committedMinY;
-    float committedMinZ;
-    float committedMaxX;
-    float committedMaxY;
-    float committedMaxZ;
 
     //-------------------------------------------------------------------------
     // Private child widgets

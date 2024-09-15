@@ -32,11 +32,6 @@ public:
 
 private:
     /**
-     * If a sprite is selected in the library, adds it to the stage.
-     */
-    void onPreviewSpriteButtonPressed();
-
-    /**
      * If the new active item is a bounding box, loads it's data onto this stage.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
@@ -58,12 +53,6 @@ private:
      * Pushes the gizmo's updated bounding box to the model.
      */
     void onGizmoBoundingBoxUpdated(const BoundingBox& updatedBounds);
-
-    /**
-     * Updates previewSpriteButton to show whether the selection is preview-able.
-     */
-    void onLibrarySelectedItemsChanged(
-        const std::vector<LibraryListItem*>& selectedItems);
 
     /**
      * Styles the given text.
@@ -96,9 +85,6 @@ private:
 
     /** The gizmo for editing the sprite's bounding box. */
     BoundingBoxGizmo boundingBoxGizmo;
-
-    /** Used to preview a sprite, to make drawing the bounding box easier. */
-    MainButton previewSpriteButton;
 
     AUI::Text descText;
 };

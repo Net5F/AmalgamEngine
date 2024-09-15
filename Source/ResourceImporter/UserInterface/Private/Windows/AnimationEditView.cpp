@@ -44,8 +44,8 @@ AnimationEditView::AnimationEditView(DataModel& inDataModel,
     topText.setText("Animation");
 
     styleText(descText);
-    descText.setText("To play the animation: Press the space bar.\n\nTo move "
-                     "sprites within the timeline: Right click and drag.");
+    descText.setText("To play the animation: press the space bar.\n\nTo move "
+                     "sprites within the timeline: right click and drag.");
 
     /* Active sprite and checkerboard background. */
     checkerboardImage.setTiledImage(Paths::TEXTURE_DIR

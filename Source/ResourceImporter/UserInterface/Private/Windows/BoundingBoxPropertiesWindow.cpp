@@ -36,12 +36,6 @@ BoundingBoxPropertiesWindow::BoundingBoxPropertiesWindow(
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
 , activeBoundingBoxID{NULL_BOUNDING_BOX_ID}
-, committedMinX{0.0}
-, committedMinY{0.0}
-, committedMinZ{0.0}
-, committedMaxX{0.0}
-, committedMaxY{0.0}
-, committedMaxZ{0.0}
 , backgroundImage{{0, 0, 303, 474}, "PropertiesBackground"}
 , headerImage{{0, 0, 303, 40}, "PropertiesHeader"}
 , windowLabel{{12, 0, 282, 40}, "PropertiesWindowLabel"}
@@ -89,7 +83,7 @@ BoundingBoxPropertiesWindow::BoundingBoxPropertiesWindow(
         textInput.setPadding({0, 8, 0, 8});
     };
     styleTextInput(nameInput);
-    nameInput.setOnTextCommitted([this]() { saveName(); });
+    nameInput.disable();
 
     // Bounds entry labels.
     styleLabel(minXLabel, "Min X", 21);
@@ -106,12 +100,12 @@ BoundingBoxPropertiesWindow::BoundingBoxPropertiesWindow(
     styleTextInput(maxXInput);
     styleTextInput(maxYInput);
     styleTextInput(maxZInput);
-    minXInput.setOnTextCommitted([this]() { saveMinX(); });
-    minYInput.setOnTextCommitted([this]() { saveMinY(); });
-    minZInput.setOnTextCommitted([this]() { saveMinZ(); });
-    maxXInput.setOnTextCommitted([this]() { saveMaxX(); });
-    maxYInput.setOnTextCommitted([this]() { saveMaxY(); });
-    maxZInput.setOnTextCommitted([this]() { saveMaxZ(); });
+    minXInput.disable();
+    minYInput.disable();
+    minZInput.disable();
+    maxXInput.disable();
+    maxYInput.disable();
+    maxZInput.disable();
 
     // When the active sprite is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
@@ -194,151 +188,6 @@ std::string BoundingBoxPropertiesWindow::toRoundedString(float value)
     std::stringstream stream;
     stream << std::fixed << std::setprecision(3) << value;
     return stream.str();
-}
-
-void BoundingBoxPropertiesWindow::saveName()
-{
-    dataModel.boundingBoxModel.setBoundingBoxDisplayName(activeBoundingBoxID,
-                                                         nameInput.getText());
-}
-
-void BoundingBoxPropertiesWindow::saveMinX()
-{
-    // Validate the user input as a valid float.
-    try {
-        // Convert the input string to a float.
-        float newMinX{std::stof(minXInput.getText())};
-
-        // Clamp the value to its bounds.
-        const EditorBoundingBox& activeBoundingBox{
-            dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
-        newModelBounds.min.x = std::clamp(newMinX, 0.f, newModelBounds.max.x);
-
-        // Apply the new value.
-        dataModel.boundingBoxModel.setBoundingBoxBounds(
-            activeBoundingBoxID, BoundingBox(newModelBounds));
-    } catch (std::exception&) {
-        // Input was not valid, reset the field to what it was.
-        minXInput.setText(std::to_string(committedMinX));
-    }
-}
-
-void BoundingBoxPropertiesWindow::saveMinY()
-{
-    // Validate the user input as a valid float.
-    try {
-        // Convert the input string to a float.
-        float newMinY{std::stof(minYInput.getText())};
-
-        // Clamp the value to its bounds.
-        const EditorBoundingBox& activeBoundingBox{
-            dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
-        newModelBounds.min.y = std::clamp(newMinY, 0.f, newModelBounds.max.y);
-
-        // Apply the new value.
-        dataModel.boundingBoxModel.setBoundingBoxBounds(
-            activeBoundingBoxID, BoundingBox(newModelBounds));
-    } catch (std::exception&) {
-        // Input was not valid, reset the field to what it was.
-        minXInput.setText(std::to_string(committedMinY));
-    }
-}
-
-void BoundingBoxPropertiesWindow::saveMinZ()
-{
-    // Validate the user input as a valid float.
-    try {
-        // Convert the input string to a float.
-        float newMinZ{std::stof(minZInput.getText())};
-
-        // Clamp the value to its bounds.
-        const EditorBoundingBox& activeBoundingBox{
-            dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
-        newModelBounds.min.z = std::clamp(newMinZ, 0.f, newModelBounds.max.z);
-
-        // Apply the new value.
-        dataModel.boundingBoxModel.setBoundingBoxBounds(
-            activeBoundingBoxID, BoundingBox(newModelBounds));
-    } catch (std::exception&) {
-        // Input was not valid, reset the field to what it was.
-        minXInput.setText(std::to_string(committedMinZ));
-    }
-}
-
-void BoundingBoxPropertiesWindow::saveMaxX()
-{
-    // Validate the user input as a valid float.
-    try {
-        // Convert the input string to a float.
-        float newMaxX{std::stof(maxXInput.getText())};
-
-        // Clamp the value to its bounds.
-        const EditorBoundingBox& activeBoundingBox{
-            dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
-        newModelBounds.max.x
-            = std::clamp(newMaxX, newModelBounds.min.x,
-                         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
-
-        // Apply the new value.
-        dataModel.boundingBoxModel.setBoundingBoxBounds(
-            activeBoundingBoxID, BoundingBox(newModelBounds));
-    } catch (std::exception&) {
-        // Input was not valid, reset the field to what it was.
-        maxXInput.setText(std::to_string(committedMaxX));
-    }
-}
-
-void BoundingBoxPropertiesWindow::saveMaxY()
-{
-    // Validate the user input as a valid float.
-    try {
-        // Convert the input string to a float.
-        float newMaxY{std::stof(maxYInput.getText())};
-
-        // Clamp the value to its bounds.
-        const EditorBoundingBox& activeBoundingBox{
-            dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
-        newModelBounds.max.y
-            = std::clamp(newMaxY, newModelBounds.min.y,
-                         static_cast<float>(SharedConfig::TILE_WORLD_WIDTH));
-
-        // Apply the new value.
-        dataModel.boundingBoxModel.setBoundingBoxBounds(
-            activeBoundingBoxID, BoundingBox(newModelBounds));
-    } catch (std::exception&) {
-        // Input was not valid, reset the field to what it was.
-        maxYInput.setText(std::to_string(committedMaxY));
-    }
-}
-
-void BoundingBoxPropertiesWindow::saveMaxZ()
-{
-    // Validate the user input as a valid float.
-    try {
-        // Convert the input string to a float.
-        float newMaxZ{std::stof(maxZInput.getText())};
-
-        // Clamp the value to its lower bound.
-        // Note: We don't clamp to an upper bound cause it's hard to calc
-        //       and not very useful. Can add if we ever care to.
-        const EditorBoundingBox& activeBoundingBox{
-            dataModel.boundingBoxModel.getBoundingBox(activeBoundingBoxID)};
-        BoundingBox newModelBounds{activeBoundingBox.modelBounds};
-        newMaxZ = std::max(newMaxZ, newModelBounds.min.z);
-        newModelBounds.max.z = newMaxZ;
-
-        // Apply the new value.
-        dataModel.boundingBoxModel.setBoundingBoxBounds(
-            activeBoundingBoxID, BoundingBox(newModelBounds));
-    } catch (std::exception&) {
-        // Input was not valid, reset the field to what it was.
-        maxYInput.setText(std::to_string(committedMaxY));
-    }
 }
 
 } // End namespace ResourceImporter
