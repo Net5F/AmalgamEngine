@@ -64,10 +64,10 @@ public:
      * The types of list items that we hold in the library.
      */
     enum Type {
-        BoundingBox,
         SpriteSheet,
         Sprite,
         Animation,
+        BoundingBox,
         Terrain,
         Floor,
         Wall,

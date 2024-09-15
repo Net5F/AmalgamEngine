@@ -25,7 +25,6 @@ public:
     /** The menu's background */
     AUI::Image backgroundImage;
 
-    AUI::Button addBoundingBoxButton;
     AUI::Button addSpriteSheetButton;
     AUI::Button addAnimationButton;
     AUI::Button addTerrainButton;
@@ -33,7 +32,7 @@ public:
     AUI::Button addWallButton;
     AUI::Button addObjectButton;
     AUI::Button addEntityButton;
-    AUI::Button addIconButton;
+    AUI::Button addIconSheetButton;
 
     //-------------------------------------------------------------------------
     // Base class overrides

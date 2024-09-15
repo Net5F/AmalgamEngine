@@ -19,9 +19,9 @@ namespace ResourceImporter
 {
 class MainScreen;
 class DataModel;
-struct EditorBoundingBox;
 struct EditorSpriteSheet;
 struct EditorAnimation;
+struct EditorBoundingBox;
 class ParentListItem;
 struct EditorTerrainGraphicSet;
 struct EditorFloorGraphicSet;
@@ -60,9 +60,9 @@ private:
      * These values are used to index into libraryContainer.
      */
     enum Category {
-        BoundingBoxes,
         SpriteSheets,
         Animations,
+        BoundingBoxes,
         Terrain,
         Floors,
         Walls,
@@ -76,11 +76,11 @@ private:
     /**
      * Adds the given item to the library.
      */
-    void onBoundingBoxAdded(BoundingBoxID boundingBoxID,
-                            const EditorBoundingBox& bounds);
     void onSpriteSheetAdded(int sheetID, const EditorSpriteSheet& sheet);
     void onAnimationAdded(AnimationID animationID,
                           const EditorAnimation& animation);
+    void onBoundingBoxAdded(BoundingBoxID boundingBoxID,
+                            const EditorBoundingBox& bounds);
     void onTerrainAdded(TerrainGraphicSetID terrainID,
                         const EditorTerrainGraphicSet& terrain);
     void onFloorAdded(FloorGraphicSetID floorID,
@@ -97,9 +97,9 @@ private:
     /**
      * Removes the given item from the library.
      */
-    void onBoundingBoxRemoved(BoundingBoxID boundingBoxID);
     void onSpriteSheetRemoved(int sheetID);
     void onAnimationRemoved(AnimationID animationID);
+    void onBoundingBoxRemoved(BoundingBoxID boundingBoxID);
     void onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID);
     void onEntityRemoved(EntityGraphicSetID graphicSetID);
     void onIconSheetRemoved(int sheetID);
@@ -107,12 +107,12 @@ private:
     /**
      * Updates the display name on the associated list item.
      */
-    void onBoundingBoxDisplayNameChanged(BoundingBoxID boundingBoxID,
-                                         const std::string& newDisplayName);
     void onSpriteDisplayNameChanged(SpriteID spriteID,
                                     const std::string& newDisplayName);
     void onAnimationDisplayNameChanged(AnimationID animationID,
                                        const std::string& newDisplayName);
+    void onBoundingBoxDisplayNameChanged(BoundingBoxID boundingBoxID,
+                                         const std::string& newDisplayName);
     void onGraphicSetDisplayNameChanged(GraphicSet::Type type, Uint16 graphicSetID,
                                        const std::string& newDisplayName);
     void onEntityDisplayNameChanged(EntityGraphicSetID graphicSetID,

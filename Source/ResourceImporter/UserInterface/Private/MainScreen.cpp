@@ -99,11 +99,6 @@ MainScreen::MainScreen(DataModel& inDataModel)
     });
 
     /* Library add menu. */
-    libraryAddMenu.addBoundingBoxButton.setOnPressed([this]() {
-        dataModel.boundingBoxModel.addBoundingBox();
-        // When we drop focus, the menu will close itself.
-        dropFocus();
-    });
     libraryAddMenu.addSpriteSheetButton.setOnPressed([this]() {
         addSpriteSheetDialog.setIsVisible(true);
         dropFocus();
@@ -132,7 +127,7 @@ MainScreen::MainScreen(DataModel& inDataModel)
         dataModel.entityGraphicSetModel.addEntity();
         dropFocus();
     });
-    libraryAddMenu.addIconButton.setOnPressed([this]() {
+    libraryAddMenu.addIconSheetButton.setOnPressed([this]() {
         addIconSheetDialog.setIsVisible(true);
         dropFocus();
     });
