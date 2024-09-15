@@ -353,9 +353,11 @@ void AnimationPropertiesWindow::onLibrarySelectedItemsChanged(
         return;
     }
 
-    // If a bounding box is selected, allow the user to assign it.
+    // If a new bounding box is selected, allow the user to assign it.
     if ((selectedItems.size() > 0)
-        && (selectedItems[0]->type == LibraryListItem::Type::BoundingBox)) {
+        && (selectedItems[0]->type == LibraryListItem::Type::BoundingBox)
+        && (selectedItems[0]->text.asString()
+            != boundingBoxNameLabel.asString())) {
         boundingBoxButton.text.setText("Assign");
     }
     // If we have a shared bounding box assigned, allow the user to switch 
@@ -631,8 +633,6 @@ void AnimationPropertiesWindow::saveMaxZ()
         float newMaxZ{std::stof(maxZInput.getText())};
 
         // Clamp the value to its lower bound.
-        // Note: We don't clamp to an upper bound cause it's hard to calc
-        //       and not very useful. Can add if we ever care to.
         const EditorAnimation& activeAnimation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
         AM_ASSERT(activeAnimation.frames.size() > 0,

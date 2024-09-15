@@ -128,6 +128,7 @@ private:
      */
     std::string toRoundedString(float value);
 
+    /** Handles the context-sensitive bounding box button behavior. */
     void onBoundingBoxButtonPressed();
 
     /** The below functions are all for validating and saving the user's data

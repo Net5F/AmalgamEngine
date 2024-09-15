@@ -23,7 +23,7 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , iconEditView{dataModel}
 , graphicSetEditView{dataModel, libraryWindow}
 , entityGraphicSetEditView{dataModel, libraryWindow}
-, spritePropertiesWindow{dataModel, libraryWindow}
+, spritePropertiesWindow{*this, dataModel, libraryWindow}
 , animationPropertiesWindow{*this, dataModel, libraryWindow}
 , graphicSetPropertiesWindow{dataModel}
 , entityGraphicSetPropertiesWindow{dataModel}

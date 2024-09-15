@@ -19,9 +19,11 @@ namespace AM
 {
 namespace ResourceImporter
 {
-SpritePropertiesWindow::SpritePropertiesWindow(
-    DataModel& inDataModel, LibraryWindow& inLibraryWindow)
+SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
+                                               DataModel& inDataModel,
+                                               LibraryWindow& inLibraryWindow)
 : AUI::Window({1617, 0, 303, 579}, "SpritePropertiesWindow")
+, mainScreen{inScreen}
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
 , nameInput{{24, 84, 255, 38}, "NameInput"}
 , boundingBoxLabel{{24, 160, 210, 27}, "BoundingBoxLabel"}
@@ -109,7 +111,7 @@ SpritePropertiesWindow::SpritePropertiesWindow(
     styleLabel(boundingBoxNameLabel, "", 16);
 
     boundingBoxButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 14);
-    boundingBoxButton.setOnPressed([&]() { saveModelBoundsID(); });
+    boundingBoxButton.setOnPressed([&]() { onBoundingBoxButtonPressed(); });
 
     // Bounds entry labels.
     styleLabel(minXLabel, "Min X", 21);
@@ -185,13 +187,11 @@ void SpritePropertiesWindow::onActiveLibraryItemChanged(
                 newActiveSprite->modelBoundsID)};
         boundingBoxNameLabel.setText(boundingBox.displayName);
         boundingBoxButton.text.setText("Custom");
-        boundingBoxButton.enable();
         setBoundsFieldsEnabled(false);
     }
     else {
         boundingBoxNameLabel.setText("<Custom>");
-        boundingBoxButton.text.setText("Assign");
-        boundingBoxButton.disable();
+        boundingBoxButton.text.setText("Save as");
         setBoundsFieldsEnabled(true);
     }
 
@@ -265,10 +265,12 @@ void SpritePropertiesWindow::onSpriteModelBoundsIDChanged(
         const EditorBoundingBox& boundingBox{
             dataModel.boundingBoxModel.getBoundingBox(newModelBoundsID)};
         boundingBoxNameLabel.setText(boundingBox.displayName);
+        boundingBoxButton.text.setText("Custom");
         setBoundsFieldsEnabled(false);
     }
     else {
         boundingBoxNameLabel.setText("<Custom>");
+        boundingBoxButton.text.setText("Save as");
         setBoundsFieldsEnabled(true);
     }
 
@@ -304,23 +306,22 @@ void SpritePropertiesWindow::onLibrarySelectedItemsChanged(
         return;
     }
 
-    // If a bounding box is selected, allow the user to assign it.
+    // If a new bounding box is selected, allow the user to assign it.
     if ((selectedItems.size() > 0)
-        && (selectedItems[0]->type == LibraryListItem::Type::BoundingBox)) {
+        && (selectedItems[0]->type == LibraryListItem::Type::BoundingBox)
+        && (selectedItems[0]->text.asString()
+            != boundingBoxNameLabel.asString())) {
         boundingBoxButton.text.setText("Assign");
-        boundingBoxButton.enable();
     }
     // If we have a shared bounding box assigned, allow the user to switch 
     // to a custom bounding box.
     else if (dataModel.spriteModel.getSprite(activeSpriteID).modelBoundsID
              != NULL_BOUNDING_BOX_ID) {
         boundingBoxButton.text.setText("Custom");
-        boundingBoxButton.enable();
     }
     else {
-        // Custom bounding box and no selection. Disable the button.
-        boundingBoxButton.text.setText("Assign");
-        boundingBoxButton.disable();
+        // Custom bounding box and no selection. Allow the user to save it.
+        boundingBoxButton.text.setText("Save as");
     }
 }
 
@@ -351,48 +352,55 @@ std::string SpritePropertiesWindow::toRoundedString(float value)
     return stream.str();
 }
 
+void SpritePropertiesWindow::onBoundingBoxButtonPressed()
+{
+    SpriteModel& spriteModel{dataModel.spriteModel};
+
+    const std::string buttonText{boundingBoxButton.text.asString()};
+    if (buttonText == "Assign") {
+        // If a bounding box is selected, assign it to the active animation.
+        // Note: This just uses the first selected graphic. Multi-select is 
+        //       ignored.
+        const auto& selectedListItems{libraryWindow.getSelectedListItems()};
+        bool boundingBoxIsSelected{false};
+        for (const LibraryListItem* selectedItem : selectedListItems) {
+            if (selectedItem->type == LibraryListItem::Type::BoundingBox) {
+                boundingBoxIsSelected = true;
+                spriteModel.setSpriteModelBoundsID(
+                    activeSpriteID, static_cast<BoundingBoxID>(selectedItem->ID));
+
+                break;
+            }
+        }
+    }
+    else if (buttonText == "Custom") {
+        // If the sprite isn't already using a custom bounding box, set it.
+        if (spriteModel.getSprite(activeSpriteID).modelBoundsID
+            != NULL_BOUNDING_BOX_ID) {
+            spriteModel.setSpriteModelBoundsID(activeSpriteID,
+                                               NULL_BOUNDING_BOX_ID);
+        }
+    }
+    else if (buttonText == "Save as") {
+        // If the sprite is using a custom bounding box, open the "Save as" 
+        // menu.
+        const EditorSprite& sprite{spriteModel.getSprite(activeSpriteID)};
+        if (sprite.modelBoundsID == NULL_BOUNDING_BOX_ID) {
+            mainScreen.openSaveBoundingBoxDialog(
+                sprite.customModelBounds, [&](BoundingBoxID newModelBoundsID) {
+                    // The save was completed, set the shared bounding box as
+                    // this sprite's model bounds.
+                    dataModel.spriteModel.setSpriteModelBoundsID(
+                        activeSpriteID, newModelBoundsID);
+                });
+        }
+    }
+}
+
 void SpritePropertiesWindow::saveName()
 {
     dataModel.spriteModel.setSpriteDisplayName(activeSpriteID,
                                                nameInput.getText());
-}
-
-void SpritePropertiesWindow::saveCollisionEnabled()
-{
-    bool collisionEnabled{(collisionEnabledInput.getCurrentState()
-                           == AUI::Checkbox::State::Checked)};
-    dataModel.spriteModel.setSpriteCollisionEnabled(activeSpriteID,
-                                                    collisionEnabled);
-}
-
-void SpritePropertiesWindow::saveModelBoundsID()
-{
-    SpriteModel& spriteModel{dataModel.spriteModel};
-
-    // If a bounding box is selected, assign it to the active sprite.
-    // Note: This just uses the first selected sprite. Multi-select is ignored.
-    const auto& selectedListItems{libraryWindow.getSelectedListItems()};
-    bool boundingBoxIsSelected{false};
-    for (const LibraryListItem* selectedItem : selectedListItems) {
-        if (selectedItem->type == LibraryListItem::Type::BoundingBox) {
-            boundingBoxIsSelected = true;
-            spriteModel.setSpriteModelBoundsID(
-                activeSpriteID, static_cast<BoundingBoxID>(selectedItem->ID));
-
-            break;
-        }
-    }
-
-    // If a bounding box isn't selected and the sprite isn't already set to a 
-    // custom bounding box, set it.
-    if (!boundingBoxIsSelected
-        && (spriteModel.getSprite(activeSpriteID).modelBoundsID
-            != NULL_BOUNDING_BOX_ID)) {
-        spriteModel.setSpriteModelBoundsID(activeSpriteID,
-                                           NULL_BOUNDING_BOX_ID);
-        boundingBoxButton.text.setText("Assign");
-        boundingBoxButton.disable();
-    }
 }
 
 void SpritePropertiesWindow::saveMinX()
@@ -540,6 +548,14 @@ void SpritePropertiesWindow::saveMaxZ()
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));
     }
+}
+
+void SpritePropertiesWindow::saveCollisionEnabled()
+{
+    bool collisionEnabled{(collisionEnabledInput.getCurrentState()
+                           == AUI::Checkbox::State::Checked)};
+    dataModel.spriteModel.setSpriteCollisionEnabled(activeSpriteID,
+                                                    collisionEnabled);
 }
 
 } // End namespace ResourceImporter

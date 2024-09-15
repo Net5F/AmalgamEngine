@@ -14,6 +14,7 @@ struct BoundingBox;
 
 namespace ResourceImporter
 {
+class MainScreen;
 class DataModel;
 class LibraryWindow;
 class LibraryListItem;
@@ -28,7 +29,7 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    SpritePropertiesWindow(DataModel& ineDataModel,
+    SpritePropertiesWindow(MainScreen& inScreen, DataModel& ineDataModel,
                            LibraryWindow& inLibraryWindow);
 
     //-------------------------------------------------------------------------
@@ -100,6 +101,9 @@ private:
      */
     void setBoundsFieldsEnabled(bool isEnabled);
 
+    /** Used to open the confirmation dialog when saving a bounding box. */
+    MainScreen& mainScreen;
+
     /** Used while setting user-inputted sprite data. */
     DataModel& dataModel;
 
@@ -114,17 +118,19 @@ private:
      */
     std::string toRoundedString(float value);
 
+    /** Handles the context-sensitive bounding box button behavior. */
+    void onBoundingBoxButtonPressed();
+
     /** The below functions are all for validating and saving the user's data
         when the text is committed. */
     void saveName();
-    void saveCollisionEnabled();
-    void saveModelBoundsID();
     void saveMinX();
     void saveMinY();
     void saveMinZ();
     void saveMaxX();
     void saveMaxY();
     void saveMaxZ();
+    void saveCollisionEnabled();
 
     /** The below floats save the committed values, so we can revert to them
         if the user inputs invalid characters. */
