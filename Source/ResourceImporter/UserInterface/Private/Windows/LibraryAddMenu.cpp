@@ -7,21 +7,19 @@ namespace AM
 namespace ResourceImporter
 {
 LibraryAddMenu::LibraryAddMenu()
-: AUI::Window({310, 5, 169, 259}, "LibraryAddMenu")
+: AUI::Window({310, 5, 169, 227}, "LibraryAddMenu")
 , backgroundImage({0, 0, logicalExtent.w, logicalExtent.h})
 , addSpriteSheetButton({1, 1, 167, 32}, "AddSpriteSheetButton")
-, addAnimationButton({1, 33, 167, 32}, "AddAnimationButton")
-, addTerrainButton({1, 65, 167, 32}, "AddTerrainButton")
-, addFloorButton({1, 97, 167, 32}, "AddFloorButton")
-, addWallButton({1, 129, 167, 32}, "AddWallButton")
-, addObjectButton({1, 161, 167, 32}, "AddObjectButton")
-, addEntityButton({1, 193, 167, 32}, "AddEntityButton")
-, addIconSheetButton({1, 225, 167, 32}, "AddIconSheetButton")
+, addTerrainButton({1, 33, 167, 32}, "AddTerrainButton")
+, addFloorButton({1, 65, 167, 32}, "AddFloorButton")
+, addWallButton({1, 97, 167, 32}, "AddWallButton")
+, addObjectButton({1, 129, 167, 32}, "AddObjectButton")
+, addEntityButton({1, 161, 167, 32}, "AddEntityButton")
+, addIconSheetButton({1, 193, 167, 32}, "AddIconSheetButton")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(backgroundImage);
     children.push_back(addSpriteSheetButton);
-    children.push_back(addAnimationButton);
     children.push_back(addTerrainButton);
     children.push_back(addFloorButton);
     children.push_back(addWallButton);
@@ -38,7 +36,6 @@ LibraryAddMenu::LibraryAddMenu()
 
     /* Buttons. */
     styleButton(addSpriteSheetButton, "Sprite Sheet");
-    styleButton(addAnimationButton, "Animation");
     styleButton(addTerrainButton, "Terrain");
     styleButton(addFloorButton, "Floor");
     styleButton(addWallButton, "Wall");

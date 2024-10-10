@@ -133,7 +133,6 @@ private:
 
     /** The below functions are all for validating and saving the user's data
         when the text is committed. */
-    void saveName();
     void saveFrameCount();
     void saveFps();
     void saveMinX();

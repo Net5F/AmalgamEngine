@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LibraryListItem.h"
+#include "SpriteSheetID.h"
 #include "BoundingBoxID.h"
 #include "AnimationID.h"
 #include "GraphicSets.h"
@@ -107,6 +108,8 @@ private:
     /**
      * Updates the display name on the associated list item.
      */
+    void onSpriteSheetDisplayNameChanged(SpriteSheetID spriteSheetID,
+                                         const std::string& newDisplayName);
     void onSpriteDisplayNameChanged(SpriteID spriteID,
                                     const std::string& newDisplayName);
     void onAnimationDisplayNameChanged(AnimationID animationID,
@@ -138,11 +141,6 @@ private:
      * list item is compatible with them. If so, adds it to the vector.
      */
     void processSelectedListItem(LibraryListItem* selectedListItem);
-
-    /**
-     * @return true if the given type is removable.
-     */
-    bool isRemovable(LibraryListItem::Type listItemType);
 
     /**
      * Removes the given list item widget from the library and all secondary

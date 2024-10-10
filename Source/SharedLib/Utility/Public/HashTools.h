@@ -26,7 +26,7 @@ inline void hash_combine(std::size_t& seed, T const& value)
 
 /**
  * A hashing functor that we use to enable heterogenous access, e.g.:
- *   std::unordered_map<std::string, int, string_hash, std::equal_to> map;
+ *   std::unordered_map<std::string, int, string_hash, std::equal_to<>> map;
  *   map.find(std::string_view{"Hi"});
  * (notice that the key type is std::string, but we pass in a std::string_view).
  *

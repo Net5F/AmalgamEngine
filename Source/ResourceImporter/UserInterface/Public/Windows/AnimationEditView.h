@@ -69,12 +69,12 @@ private:
     /**
      * Displays the timeline's new selected sprite.
      */
-    void onTimelineSelectionChanged(Uint8 selectedFrameIndex);
+    void onTimelineSelectionChanged(Uint8 selectedFrameNumber);
 
     /**
      * Tells the model to move the sprite.
      */
-    void onTimelineSpriteMoved(Uint8 oldFrameIndex, Uint8 newFrameIndex);
+    void onTimelineSpriteMoved(Uint8 oldFrameNumber, Uint8 newFrameNumber);
 
     /**
      * Styles the given text.

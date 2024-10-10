@@ -123,7 +123,6 @@ private:
 
     /** The below functions are all for validating and saving the user's data
         when the text is committed. */
-    void saveName();
     void saveMinX();
     void saveMinY();
     void saveMinZ();

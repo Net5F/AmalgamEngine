@@ -27,15 +27,26 @@ public:
     AssetCache(SDL_Renderer* inSdlRenderer);
 
     /**
-     * Loads the image file at the given path into a texture and returns a
-     * handle to it.
+     * If a texture with the given resource ID is in the cache, returns it.
+     * If not and the resource ID is a valid file path to an image, adds the 
+     * image to the cache and returns it.
      *
-     * If the texture is already loaded, returns a handle to it without re-
-     * loading.
-     *
-     * @param imagePath  The image file's full path.
+     * @param resourceID An abstract resource ID (for textures added using 
+     *                   addTexture()), or the full path to an image file.
+     * @return A valid texture if one was found, else nullptr.
      */
-    TextureHandle loadTexture(const std::string& imagePath);
+    std::shared_ptr<SDL_Texture> requestTexture(const std::string& resourceID);
+
+    /**
+     * Adds the given texture to the cache, using the given ID.
+     * If a texture already exists with the given ID, it will be overwritten.
+     *
+     * Note: The texture will be copied, so the given pointer does not need 
+     *       to remain valid.
+     * @return A managed copy of the given texture.
+     */
+    std::shared_ptr<SDL_Texture> addTexture(SDL_Texture* rawTexture,
+                                            const std::string& resourceID);
 
     /**
      * Removes the texture associated with the given path from the cache.

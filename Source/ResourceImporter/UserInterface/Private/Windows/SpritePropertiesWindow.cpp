@@ -104,7 +104,8 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
         textInput.setPadding({0, 8, 0, 8});
     };
     styleTextInput(nameInput);
-    nameInput.setOnTextCommitted([this]() { saveName(); });
+    // Note: Display name is auto-generated from image name and can't be changed.
+    nameInput.disable();
 
     /* Bounding box selection. */
     styleLabel(boundingBoxLabel, "Bounding Box", 21);
@@ -395,12 +396,6 @@ void SpritePropertiesWindow::onBoundingBoxButtonPressed()
                 });
         }
     }
-}
-
-void SpritePropertiesWindow::saveName()
-{
-    dataModel.spriteModel.setSpriteDisplayName(activeSpriteID,
-                                               nameInput.getText());
 }
 
 void SpritePropertiesWindow::saveMinX()

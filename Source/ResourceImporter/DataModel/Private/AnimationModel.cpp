@@ -12,6 +12,7 @@ namespace ResourceImporter
 AnimationModel::AnimationModel(DataModel& inDataModel)
 : dataModel{inDataModel}
 , animationMap{}
+, animationNameMap{}
 , animationIDPool{MAX_ANIMATIONS}
 , errorString{}
 , animationAddedSig{}
@@ -144,11 +145,12 @@ bool AnimationModel::addAnimation()
         nameCount++;
     }
 
-    // Add the new animation to the map.
+    // Add the new animation to the maps.
     animationMap.emplace(numericID, EditorAnimation{numericID, displayName});
+    animationNameMap.emplace(displayName, numericID);
 
     // Default to a non-0 bounding box so it's easier to click.
-    EditorAnimation& animation{animationMap[numericID]};
+    EditorAnimation& animation{animationMap.at(numericID)};
     static constexpr BoundingBox defaultBox{{0, 0, 0}, {20, 20, 20}};
     animation.customModelBounds = defaultBox;
 
@@ -170,6 +172,7 @@ void AnimationModel::remAnimation(AnimationID animationID)
     }
 
     // Erase the animation.
+    animationNameMap.erase(animationIt->second.displayName);
     animationMap.erase(animationIt);
 
     // Signal that the animation was erased.
@@ -188,30 +191,15 @@ const EditorAnimation&
     return animationIt->second;
 }
 
-void AnimationModel::setAnimationDisplayName(
-    AnimationID animationID, const std::string& newDisplayName)
+const EditorAnimation*
+    AnimationModel::getAnimation(std::string_view displayName) const
 {
-    auto animationPair{animationMap.find(animationID)};
-    if (animationPair == animationMap.end()) {
-        LOG_FATAL("Tried to set name using invalid animation ID.");
+    auto animationNameIt{animationNameMap.find(displayName)};
+    if (animationNameIt == animationNameMap.end()) {
+        return nullptr;
     }
 
-    // Set the new display name and make it unique.
-    // Note: All characters that a user can enter are valid in the display
-    //       name string, so we don't need to validate.
-    int appendedNum{0};
-    std::string uniqueDisplayName{newDisplayName};
-    while (!animationNameIsUnique(animationID, uniqueDisplayName)) {
-        uniqueDisplayName = newDisplayName + std::to_string(appendedNum);
-        appendedNum++;
-    }
-
-    EditorAnimation& animation{animationPair->second};
-    animation.displayName = uniqueDisplayName;
-
-    // Signal the change.
-    animationDisplayNameChangedSig.publish(animationID,
-                                             animation.displayName);
+    return &(animationMap.at(animationNameIt->second));
 }
 
 void AnimationModel::setAnimationFrameCount(AnimationID animationID,
@@ -241,29 +229,6 @@ void AnimationModel::setAnimationFps(AnimationID animationID, Uint8 newFps)
     animation.fps = newFps;
 
     animationFpsChangedSig.publish(animationID, newFps);
-}
-
-void AnimationModel::setAnimationFrame(AnimationID animationID,
-                                       Uint8 frameNumber,
-                                       const EditorSprite* newSprite)
-{
-    auto animationPair{animationMap.find(animationID)};
-    if (animationPair == animationMap.end()) {
-        LOG_FATAL("Tried to set frame using invalid animation ID.");
-    }
-
-    // If newSprite is valid, add it to the frame.
-    EditorAnimation& animation{animationPair->second};
-    if (newSprite) {
-        animation.setFrame(frameNumber, *newSprite);
-    }
-    else {
-        // newSprite is nullptr, clear the frame.
-        animation.clearFrame(frameNumber);
-    }
-
-    // Signal the change.
-    animationFrameChangedSig.publish(animationID, frameNumber, newSprite);
 }
 
 void AnimationModel::setAnimationModelBoundsID(AnimationID animationID,
@@ -312,6 +277,133 @@ void AnimationModel::setAnimationCollisionEnabled(AnimationID animationID,
                                                 newCollisionEnabled);
 }
 
+void AnimationModel::addAnimationFrame(AnimationID animationID,
+                                       const EditorSprite& newSprite)
+{
+    auto animationPair{animationMap.find(animationID)};
+    if (animationPair == animationMap.end()) {
+        LOG_FATAL("Tried to add frame using invalid animation ID.");
+    }
+
+    // If there's room, add to the first empty frame.
+    EditorAnimation& animation{animationPair->second};
+    Uint8 frameNumber{0};
+    if (animation.frames.size() < animation.frameCount) {
+        std::vector<EditorAnimation::Frame>& frames{animation.frames};
+        for (auto it{frames.begin()}; it != frames.end(); ++it) {
+            if (it->frameNumber != frameNumber) {
+                // Found an unused number. Insert our frame.
+                frames.insert(it, {frameNumber, newSprite});
+                break;
+            }
+            else {
+                frameNumber++;
+            }
+        }
+    }
+    else {
+        // No room. Increase frameCount and add a frame to the end.
+        animation.frameCount++;
+        animationFrameCountChangedSig.publish(animationID,
+                                              animation.frameCount);
+
+        frameNumber = (animation.frameCount - 1);
+        animation.frames.emplace_back(frameNumber, newSprite);
+    }
+
+    // Signal the change.
+    animationFrameChangedSig.publish(animationID, frameNumber, &newSprite);
+}
+
+void AnimationModel::swapAnimationFrames(AnimationID animationID,
+                                         Uint8 sourceFrameNumber,
+                                         Uint8 destFrameNumber)
+{
+    auto animationPair{animationMap.find(animationID)};
+    if (animationPair == animationMap.end()) {
+        LOG_FATAL("Tried to swap frames using invalid animation ID.");
+    }
+
+    EditorAnimation& animation{animationPair->second};
+    AM_ASSERT(sourceFrameNumber < animation.frameCount,
+              "Invalid frame number.");
+    AM_ASSERT(destFrameNumber < animation.frameCount,
+              "Invalid frame number.");
+
+    // Try to find the requested frames (if they're empty, they won't exist).
+    std::vector<EditorAnimation::Frame>& frames{animation.frames};
+    auto sourceFrame{frames.end()};
+    auto destFrame{frames.end()};
+    for (auto it{frames.begin()}; it != frames.end(); ++it) {
+        if (it->frameNumber == sourceFrameNumber) {
+            sourceFrame = it;
+        }
+        else if (it->frameNumber == destFrameNumber) {
+            destFrame = it;
+        }
+    }
+
+    // If we found both frames, swap their contents.
+    const EditorSprite* newSourceSprite{nullptr};
+    const EditorSprite* newDestSprite{nullptr};
+    if ((sourceFrame != frames.end()) && (destFrame != frames.end())) {
+        auto sourceSprite{sourceFrame->sprite};
+        sourceFrame->sprite = destFrame->sprite;
+        destFrame->sprite = sourceSprite;
+        newSourceSprite = &(sourceFrame->sprite.get());
+        newDestSprite = &(destFrame->sprite.get());
+    }
+    else if (sourceFrame != frames.end()) {
+        // Swapping source with empty.
+        destFrame->sprite = sourceFrame->sprite;
+        frames.erase(sourceFrame);
+        newDestSprite = &(destFrame->sprite.get());
+    }
+    else if (sourceFrame != frames.end()) {
+        // Swapping dest with empty.
+        sourceFrame->sprite = destFrame->sprite;
+        frames.erase(destFrame);
+        newSourceSprite = &(sourceFrame->sprite.get());
+    }
+    else {
+        // Swapping two empty frames, do nothing.
+        return;
+    }
+
+    // Signal the changes.
+    animationFrameChangedSig.publish(animationID, sourceFrameNumber,
+                                     newSourceSprite);
+    animationFrameChangedSig.publish(animationID, destFrameNumber,
+                                     newDestSprite);
+}
+
+void AnimationModel::clearAnimationFrame(AnimationID animationID,
+                                         Uint8 frameNumber)
+{
+    auto animationPair{animationMap.find(animationID)};
+    if (animationPair == animationMap.end()) {
+        LOG_FATAL("Tried to clear frame using invalid animation ID.");
+    }
+
+    EditorAnimation& animation{animationPair->second};
+    AM_ASSERT(frameNumber < animation.frameCount, "Invalid frame number.");
+
+    // If a frame matches the given number, erase it.
+    std::vector<EditorAnimation::Frame>& frames{animation.frames};
+    bool wasErased{false};
+    for (auto it = frames.begin(); it != frames.end(); ++it) {
+        if (it->frameNumber == frameNumber) {
+            frames.erase(it);
+            wasErased = true;
+        }
+    }
+
+    // Signal the change.
+    if (wasErased) {
+        animationFrameChangedSig.publish(animationID, frameNumber, nullptr);
+    }
+}
+
 void AnimationModel::resetModelState()
 {
     animationMap.clear();
@@ -341,6 +433,7 @@ bool AnimationModel::parseAnimation(const nlohmann::json& animationJson)
         errorString += animation.displayName.c_str();
         return false;
     }
+    animationNameMap.emplace(displayName, animationID);
 
     // Add the display name.
     animation.displayName = displayName;
@@ -396,20 +489,15 @@ bool AnimationModel::parseAnimation(const nlohmann::json& animationJson)
 bool AnimationModel::animationNameIsUnique(AnimationID animationID,
                                                const std::string& displayName)
 {
-    // Dumbly look through all names for a match.
-    // Note: Eventually, this should change to a name map that we keep updated.
-    bool isUnique{true};
-    for (const auto& animationPair : animationMap) {
-        IconID idToCheck{animationPair.first};
-        const EditorAnimation& animation{animationPair.second};
-
-        if ((idToCheck != animationID)
-            && (displayName == animation.displayName)) {
-            isUnique = false;
-        }
+    // If the desired name is already in the map, and the owner of the name 
+    // isn't the given ID, the name isn't unique.
+    auto it{animationNameMap.find(displayName)};
+    if ((it != animationNameMap.end()) && (it->second != animationID)) {
+        return false;
     }
 
-    return isUnique;
+    // Name isn't in the map, or it's owned by the same ID.
+    return true;
 }
 
 } // End namespace ResourceImporter

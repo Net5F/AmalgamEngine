@@ -21,9 +21,7 @@ public:
     TitleWindow(UserInterface& inUserInterface, DataModel& inDataModel);
 
 private:
-    void onNewButtonPressed();
-
-    void onLoadButtonPressed();
+    void onOpenButtonPressed();
 
     /** Used for switching to the main screen. */
     UserInterface& userInterface;
@@ -35,9 +33,9 @@ private:
     //-------------------------------------------------------------------------
     AUI::Text titleText;
 
-    TitleButton newButton;
+    AUI::Text directionText;
 
-    TitleButton loadButton;
+    TitleButton openButton;
 
     AUI::Text errorText;
 };

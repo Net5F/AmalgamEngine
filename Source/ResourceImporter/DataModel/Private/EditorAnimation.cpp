@@ -1,41 +1,11 @@
 #include "EditorAnimation.h"
 #include "BoundingBoxModel.h"
+#include "AMAssert.h"
 
 namespace AM
 {
 namespace ResourceImporter
 {
-
-void EditorAnimation::setFrame(Uint8 frameNumber, const EditorSprite& sprite)
-{
-    for (auto it = frames.begin(); it != frames.end(); ++it) {
-        // If a frame matches the given number, overwrite it.
-        if (it->frameNumber == frameNumber) {
-            it->sprite = sprite;
-            return;
-        }
-        // If we reach a frame higher than frameNumber, insert the new frame 
-        // in front of it.
-        else if (it->frameNumber > frameNumber) {
-            frames.insert(it, {frameNumber, sprite});
-            return;
-        }
-    }
-
-    // No match, insert a new frame at the end.
-    frames.insert(frames.end(), {frameNumber, sprite});
-}
-
-void EditorAnimation::clearFrame(Uint8 frameNumber)
-{
-    // If a frame matches the given number, erase it.
-    for (auto it = frames.begin(); it != frames.end(); ++it) {
-        if (it->frameNumber == frameNumber) {
-            frames.erase(it);
-            return;
-        }
-    }
-}
 
 const BoundingBox&
     EditorAnimation::getModelBounds(const BoundingBoxModel& boundingBoxModel) const

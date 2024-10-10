@@ -1,5 +1,4 @@
 #include "MainScreen.h"
-#include "AssetCache.h"
 #include "DataModel.h"
 #include "Paths.h"
 #include "AUI/Core.h"
@@ -16,33 +15,36 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , libraryWindow{*this, dataModel}
 , libraryAddMenu{}
 , saveButtonWindow{*this, dataModel}
+, spriteSheetEditView{dataModel}
 , boundingBoxEditView{dataModel, libraryWindow}
-, boundingBoxPropertiesWindow{dataModel, libraryWindow}
 , spriteEditView{dataModel}
 , animationEditView{dataModel, libraryWindow}
 , iconEditView{dataModel}
 , graphicSetEditView{dataModel, libraryWindow}
 , entityGraphicSetEditView{dataModel, libraryWindow}
+, spriteSheetPropertiesWindow{*this, dataModel}
+, boundingBoxPropertiesWindow{dataModel, libraryWindow}
 , spritePropertiesWindow{*this, dataModel, libraryWindow}
 , animationPropertiesWindow{*this, dataModel, libraryWindow}
 , graphicSetPropertiesWindow{dataModel}
 , entityGraphicSetPropertiesWindow{dataModel}
 , iconPropertiesWindow{dataModel}
 , confirmationDialog{{0, 0, 1920, 1080}, "ConfirmationDialog"}
-, addSpriteSheetDialog{dataModel}
 , addIconSheetDialog{dataModel}
 , saveBoundingBoxDialog{dataModel}
 {
     // Add our windows so they're included in rendering, etc.
     windows.push_back(libraryWindow);
     windows.push_back(saveButtonWindow);
+    windows.push_back(spriteSheetEditView);
     windows.push_back(boundingBoxEditView);
-    windows.push_back(boundingBoxPropertiesWindow);
     windows.push_back(spriteEditView);
     windows.push_back(animationEditView);
     windows.push_back(graphicSetEditView);
     windows.push_back(entityGraphicSetEditView);
     windows.push_back(iconEditView);
+    windows.push_back(spriteSheetPropertiesWindow);
+    windows.push_back(boundingBoxPropertiesWindow);
     windows.push_back(spritePropertiesWindow);
     windows.push_back(animationPropertiesWindow);
     windows.push_back(graphicSetPropertiesWindow);
@@ -50,7 +52,6 @@ MainScreen::MainScreen(DataModel& inDataModel)
     windows.push_back(iconPropertiesWindow);
     windows.push_back(libraryAddMenu);
     windows.push_back(confirmationDialog);
-    windows.push_back(addSpriteSheetDialog);
     windows.push_back(addIconSheetDialog);
     windows.push_back(saveBoundingBoxDialog);
 
@@ -61,14 +62,14 @@ MainScreen::MainScreen(DataModel& inDataModel)
                                                   + "Dialogs/Shadow.png");
 
     // Background image.
-    confirmationDialog.backgroundImage.setLogicalExtent({721, 358, 474, 248});
+    confirmationDialog.backgroundImage.setLogicalExtent({733, 370, 454, 224});
     confirmationDialog.backgroundImage.setNineSliceImage(
         (Paths::TEXTURE_DIR + "WindowBackground.png"), {1, 1, 1, 1});
 
     // Body text.
-    confirmationDialog.bodyText.setLogicalExtent({763, 400, 400, 60});
+    confirmationDialog.bodyText.setLogicalExtent({747, 388, 426, 132});
     confirmationDialog.bodyText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"),
-                                        21);
+                                        20);
     confirmationDialog.bodyText.setColor({255, 255, 255, 255});
 
     // Buttons.
@@ -88,8 +89,8 @@ MainScreen::MainScreen(DataModel& inDataModel)
         button.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
         button.text.setColor({255, 255, 255, 255});
     };
-    styleDialogButton(confirmationDialog.confirmButton, {1045, 520, 123, 56});
-    styleDialogButton(confirmationDialog.cancelButton, {903, 520, 123, 56});
+    styleDialogButton(confirmationDialog.confirmButton, {1053, 530, 120, 50});
+    styleDialogButton(confirmationDialog.cancelButton, {919, 530, 120, 50});
     confirmationDialog.cancelButton.text.setText("Cancel");
 
     // Set up the dialog's cancel button callback.
@@ -100,11 +101,7 @@ MainScreen::MainScreen(DataModel& inDataModel)
 
     /* Library add menu. */
     libraryAddMenu.addSpriteSheetButton.setOnPressed([this]() {
-        addSpriteSheetDialog.setIsVisible(true);
-        dropFocus();
-    });
-    libraryAddMenu.addAnimationButton.setOnPressed([this]() {
-        dataModel.animationModel.addAnimation();
+        dataModel.spriteModel.addSpriteSheet();
         dropFocus();
     });
     libraryAddMenu.addTerrainButton.setOnPressed([this]() {
@@ -135,12 +132,13 @@ MainScreen::MainScreen(DataModel& inDataModel)
     // Make the modal dialogs invisible.
     libraryAddMenu.setIsVisible(false);
     confirmationDialog.setIsVisible(false);
-    addSpriteSheetDialog.setIsVisible(false);
     addIconSheetDialog.setIsVisible(false);
     saveBoundingBoxDialog.setIsVisible(false);
 
     /* Edit Stages and Properties Windows. */
     // Make the edit stages and properties windows invisible
+    spriteSheetEditView.setIsVisible(false);
+    spriteSheetPropertiesWindow.setIsVisible(false);
     boundingBoxEditView.setIsVisible(false);
     boundingBoxPropertiesWindow.setIsVisible(false);
     spriteEditView.setIsVisible(false);
@@ -164,9 +162,10 @@ void MainScreen::openConfirmationDialog(
     const std::string& bodyText, const std::string& confirmButtonText,
     std::function<void(void)> onConfirmation)
 {
-    // Set the dialog's text.
+    // Set the dialog's text and make sure the cancel button is visible.
     confirmationDialog.bodyText.setText(bodyText);
     confirmationDialog.confirmButton.text.setText(confirmButtonText);
+    confirmationDialog.cancelButton.setIsVisible(true);
 
     // Set the dialog's confirmation callback.
     userOnConfirmation = std::move(onConfirmation);
@@ -177,6 +176,26 @@ void MainScreen::openConfirmationDialog(
         // Close the dialog.
         confirmationDialog.setIsVisible(false);
     });
+
+    // Open the dialog.
+    confirmationDialog.setIsVisible(true);
+}
+
+void MainScreen::openErrorDialog(const std::string& bodyText)
+{
+    // Note: We just repurpose the confirmationDialog by hiding the cancel 
+    //       button and using the confirm button to cancel.
+
+    // Hide the "Cancel" button and repurpose the "Confirm" button for closing.
+    confirmationDialog.cancelButton.setIsVisible(false);
+    confirmationDialog.confirmButton.text.setText("Okay");
+    confirmationDialog.confirmButton.setOnPressed([&]() {
+        // Close the dialog.
+        confirmationDialog.setIsVisible(false);
+    });
+
+    // Set the dialog's text.
+    confirmationDialog.bodyText.setText(bodyText);
 
     // Open the dialog.
     confirmationDialog.setIsVisible(true);
@@ -216,6 +235,8 @@ void MainScreen::onActiveLibraryItemChanged(
     const LibraryItemData& newActiveItem)
 {
     // Make everything invisible.
+    spriteSheetEditView.setIsVisible(false);
+    spriteSheetPropertiesWindow.setIsVisible(false);
     boundingBoxEditView.setIsVisible(false);
     boundingBoxPropertiesWindow.setIsVisible(false);
     spriteEditView.setIsVisible(false);
@@ -230,7 +251,11 @@ void MainScreen::onActiveLibraryItemChanged(
     iconPropertiesWindow.setIsVisible(false);
 
     // Make the appropriate windows visible, based on the new item's type.
-    if (holds_alternative<EditorBoundingBox>(newActiveItem)) {
+    if (holds_alternative<EditorSpriteSheet>(newActiveItem)) {
+        spriteSheetEditView.setIsVisible(true);
+        spriteSheetPropertiesWindow.setIsVisible(true);
+    }
+    else if (holds_alternative<EditorBoundingBox>(newActiveItem)) {
         boundingBoxEditView.setIsVisible(true);
         boundingBoxPropertiesWindow.setIsVisible(true);
     }

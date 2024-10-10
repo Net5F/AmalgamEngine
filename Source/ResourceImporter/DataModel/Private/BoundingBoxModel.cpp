@@ -271,7 +271,7 @@ EditorBoundingBox&
     boundingBoxNameMap.emplace(displayName, numericID);
 
     // Signal the new bounding box to the UI.
-    EditorBoundingBox& boundingBox{boundingBoxMap[numericID]};
+    EditorBoundingBox& boundingBox{boundingBoxMap.at(numericID)};
     boundingBoxAddedSig.publish(numericID, boundingBox);
 
     return boundingBox;

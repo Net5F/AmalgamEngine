@@ -5,6 +5,8 @@
 #include "AUI/ConfirmationDialog.h"
 #include "LibraryItemData.h"
 #include "LibraryWindow.h"
+#include "SpriteSheetEditView.h"
+#include "SpriteSheetPropertiesWindow.h"
 #include "SaveButtonWindow.h"
 #include "BoundingBoxEditView.h"
 #include "BoundingBoxPropertiesWindow.h"
@@ -20,7 +22,6 @@
 #include "IconPropertiesWindow.h"
 #include "TitleButton.h"
 #include "LibraryAddMenu.h"
-#include "AddSpriteSheetDialog.h"
 #include "AddIconSheetDialog.h"
 #include "SaveBoundingBoxDialog.h"
 
@@ -39,15 +40,23 @@ public:
     MainScreen(DataModel& inDataModel);
 
     /**
-     * Opens a confirmation dialog.
+     * Opens a confirmation dialog with a "Confirm" button and a "Cancel" 
+     * button.
      *
-     * @param bodyText  The main dialog text.
-     * @param confirmButtonText  The text on the confirm button.
-     * @param onConfirmation  Called when the user presses the confirm button.
+     * @param bodyText The main dialog text.
+     * @param confirmButtonText The text on the confirm button.
+     * @param onConfirmation Called when the user presses the confirm button.
      */
     void openConfirmationDialog(const std::string& bodyText,
                                 const std::string& confirmButtonText,
                                 std::function<void(void)> onConfirmation);
+
+    /**
+     * Opens an error dialog with a "Cancel" button.
+     *
+     * @param bodyText The main dialog text.
+     */
+    void openErrorDialog(const std::string& bodyText);
 
     /**
      * Opens the dialog for saving a BoundingBox to the Library.
@@ -89,6 +98,7 @@ private:
 
     // Edit views
     /** The center stage for editing the active item. */
+    SpriteSheetEditView spriteSheetEditView;
     BoundingBoxEditView boundingBoxEditView;
     SpriteEditView spriteEditView;
     AnimationEditView animationEditView;
@@ -98,6 +108,7 @@ private:
 
     // Properties windows
     /** The right-side panel for viewing and editing the active item's data. */
+    SpriteSheetPropertiesWindow spriteSheetPropertiesWindow;
     BoundingBoxPropertiesWindow boundingBoxPropertiesWindow;
     SpritePropertiesWindow spritePropertiesWindow;
     AnimationPropertiesWindow animationPropertiesWindow;
@@ -108,9 +119,6 @@ private:
     /** Confirmation dialog. Child widgets can call openConfirmationDialog()
         to use it. */
     AUI::ConfirmationDialog confirmationDialog;
-
-    /** Dialog for adding a sprite sheet to the SpriteSheetPanel. */
-    AddSpriteSheetDialog addSpriteSheetDialog;
 
     /** Dialog for adding an icon sheet to the IconSheetPanel. */
     AddIconSheetDialog addIconSheetDialog;

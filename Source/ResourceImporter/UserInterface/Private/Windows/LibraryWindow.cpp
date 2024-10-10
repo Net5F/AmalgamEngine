@@ -117,6 +117,8 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     iconModel.sheetRemoved.connect<&LibraryWindow::onIconSheetRemoved>(*this);
 
     // When a display name is updated, update the matching thumbnail.
+    spriteModel.spriteSheetDisplayNameChanged
+        .connect<&LibraryWindow::onSpriteSheetDisplayNameChanged>(*this);
     spriteModel.spriteDisplayNameChanged
         .connect<&LibraryWindow::onSpriteDisplayNameChanged>(*this);
     animationModel.animationDisplayNameChanged
@@ -159,15 +161,9 @@ AUI::EventResult LibraryWindow::onKeyDown(SDL_Keycode keyCode)
 
         // Add the selected items to a vector so any accidental selection
         // changes don't affect the operation.
-        // If any of the selected items aren't removable, return early.
         itemsToRemove.clear();
         for (LibraryListItem* listItem : selectedListItems) {
-            if (!isRemovable(listItem->type)) {
-                return AUI::EventResult{.wasHandled{false}};
-            }
-            else {
-                itemsToRemove.push_back(listItem);
-            }
+            itemsToRemove.push_back(listItem);
         }
 
         // Set up our data for the confirmation dialog.
@@ -198,7 +194,7 @@ void LibraryWindow::onSpriteSheetAdded(int sheetID,
                                        const EditorSpriteSheet& sheet)
 {
     // Create a container for the new sheet.
-    auto sheetListItem{std::make_unique<ParentListItem>(sheet.relPath)};
+    auto sheetListItem{std::make_unique<ParentListItem>(sheet.displayName)};
     sheetListItem->type = LibraryListItem::Type::SpriteSheet;
     sheetListItem->ID = sheetID;
     listItemMaps[LibraryListItem::Type::SpriteSheet].emplace(
@@ -554,6 +550,23 @@ void LibraryWindow::onIconSheetRemoved(int sheetID)
     sheetListItemMap.erase(sheetIt);
 }
 
+void LibraryWindow::onSpriteSheetDisplayNameChanged(
+    SpriteSheetID spriteSheetID, const std::string& newDisplayName)
+{
+    auto spriteSheetListItemMap{
+        listItemMaps[LibraryListItem::Type::SpriteSheet]};
+    auto spriteSheetListItemIt{spriteSheetListItemMap.find(spriteSheetID)};
+    if (spriteSheetListItemIt == spriteSheetListItemMap.end()) {
+        LOG_FATAL("Failed to find a list item for the given sprite sheet.");
+    }
+
+    // Update the list item to use the sprite sheet's new display name.
+    ParentListItem& spriteSheetListItem{
+        static_cast<ParentListItem&>(*(spriteSheetListItemIt->second))};
+    spriteSheetListItem.childListItemContainer.headerText.setText(
+        newDisplayName);
+}
+
 void LibraryWindow::onSpriteDisplayNameChanged(
     SpriteID spriteID, const std::string& newDisplayName)
 {
@@ -744,16 +757,6 @@ void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
     selectedItemsChangedSig.publish(selectedListItems);
 }
 
-bool LibraryWindow::isRemovable(LibraryListItem::Type listItemType)
-{
-    if (listItemType == LibraryListItem::Type::Sprite) {
-        return false;
-    }
-    else {
-        return true;
-    }
-}
-
 void LibraryWindow::removeListItem(LibraryListItem* listItem)
 {
     // Sprites can't be individually removed, return early.
@@ -765,6 +768,10 @@ void LibraryWindow::removeListItem(LibraryListItem* listItem)
     switch (listItem->type) {
         case LibraryListItem::Type::SpriteSheet: {
             dataModel.spriteModel.remSpriteSheet(listItem->ID);
+            break;
+        }
+        case LibraryListItem::Type::Sprite: {
+            dataModel.spriteModel.remSprite(listItem->ID);
             break;
         }
         case LibraryListItem::Type::IconSheet: {

@@ -86,11 +86,11 @@ AnimationEditView::AnimationEditView(DataModel& inDataModel,
             onGizmoBoundingBoxUpdated(updatedBounds);
         });
 
-    timeline->setOnSelectionChanged([&](Uint8 selectedFrameIndex) {
-        onTimelineSelectionChanged(selectedFrameIndex);
+    timeline->setOnSelectionChanged([&](Uint8 selectedFrameNumber) {
+        onTimelineSelectionChanged(selectedFrameNumber);
     });
-    timeline->setOnSpriteMoved([&](Uint8 oldFrameIndex, Uint8 newFrameIndex) {
-        onTimelineSpriteMoved(oldFrameIndex, newFrameIndex);
+    timeline->setOnSpriteMoved([&](Uint8 oldFrameNumber, Uint8 newFrameNumber) {
+        onTimelineSpriteMoved(oldFrameNumber, newFrameNumber);
     });
 }
 
@@ -248,14 +248,14 @@ void AnimationEditView::onGizmoBoundingBoxUpdated(
     }
 }
 
-void AnimationEditView::onTimelineSelectionChanged(Uint8 selectedFrameIndex)
+void AnimationEditView::onTimelineSelectionChanged(Uint8 selectedFrameNumber)
 {
     const EditorAnimation& activeAnimation{
         dataModel.animationModel.getAnimation(activeAnimationID)};
 
     // If the selected frame doesn't have a sprite, clear the stage and return.
     const EditorSprite* selectedSprite{
-        activeAnimation.getSpriteAtFrame(selectedFrameIndex)};
+        activeAnimation.getSpriteAtFrame(selectedFrameNumber)};
     if (!selectedSprite) {
         spriteImage.setIsVisible(false);
         return;
@@ -263,27 +263,18 @@ void AnimationEditView::onTimelineSelectionChanged(Uint8 selectedFrameIndex)
 
     // Load the selected sprite image.
     std::string imagePath{dataModel.getWorkingTexturesDir()};
-    imagePath += selectedSprite->parentSpriteSheetPath;
-    spriteImage.setSimpleImage(imagePath, selectedSprite->textureExtent);
-
+    imagePath += selectedSprite->imagePath;
+    spriteImage.setSimpleImage(imagePath,
+                               {0, 0, selectedSprite->textureExtent.w,
+                                selectedSprite->textureExtent.h});
 }
 
-void AnimationEditView::onTimelineSpriteMoved(Uint8 oldFrameIndex,
-                                               Uint8 newFrameIndex)
+void AnimationEditView::onTimelineSpriteMoved(Uint8 oldFrameNumber,
+                                              Uint8 newFrameNumber)
 {
-    AnimationModel& animationModel{dataModel.animationModel};
-    const EditorAnimation& activeAnimation{
-        animationModel.getAnimation(activeAnimationID)};
-
     // Swap the sprites (or clear if swapping with empty).
-    const EditorSprite* oldSprite{
-        activeAnimation.getSpriteAtFrame(oldFrameIndex)};
-    const EditorSprite* newSprite{
-        activeAnimation.getSpriteAtFrame(newFrameIndex)};
-    animationModel.setAnimationFrame(activeAnimationID, oldFrameIndex,
-                                     newSprite);
-    animationModel.setAnimationFrame(activeAnimationID, newFrameIndex,
-                                     oldSprite);
+    dataModel.animationModel.swapAnimationFrames(
+        activeAnimationID, oldFrameNumber, newFrameNumber);
 }
 
 void AnimationEditView::styleText(AUI::Text& text)

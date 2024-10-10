@@ -49,17 +49,17 @@ public:
     //-------------------------------------------------------------------------
     /**
      * @param inOnSelectionChanged A callback that expects the new selected 
-     *                             frame's index.
+     *                             frame's number.
      */
     void setOnSelectionChanged(
-        std::function<void(Uint8 selectedFrameIndex)> inOnSelectionChanged);
+        std::function<void(Uint8 selectedFrameNumber)> inOnSelectionChanged);
 
     /**
      * @param inOnSpriteMoved A callback that expects the old and new frame 
      *                        indices.
      */
     void setOnSpriteMoved(
-        std::function<void(Uint8 oldFrameIndex, Uint8 newFrameIndex)>
+        std::function<void(Uint8 oldFrameNumber, Uint8 newFrameNumber)>
             inOnSpriteMoved);
 
     //-------------------------------------------------------------------------
@@ -76,19 +76,21 @@ private:
     /**
      * Handles a frame that contains a sprite being right-click dragged.
      */
-    void onSpriteDragStarted(Uint8 frameIndex, const SDL_Point& cursorPosition);
+    void onSpriteDragStarted(Uint8 frameNumber,
+                             const SDL_Point& cursorPosition);
 
     /**
      * If a frame containing a sprite has been dragged far enough, visually 
      * moves the frame circle to the new hovered frame.
      */
-    void onSpriteDragged(Uint8 frameIndex, const SDL_Point& cursorPosition);
+    void onSpriteDragged(Uint8 frameNumber, const SDL_Point& cursorPosition);
 
     /**
-     * If the cursor is over a frame other than originDragFrameIndex, moves the 
-     * sprite into that frame.
+     * If the cursor is over a frame other than originDragSpriteFrameNumber, 
+     * moves the sprite into that frame.
      */
-    void onSpriteDragReleased(Uint8 frameIndex, const SDL_Point& cursorPosition);
+    void onSpriteDragReleased(Uint8 frameNumber,
+                              const SDL_Point& cursorPosition);
 
     /**
      * Refreshes frameContainer to match the current active animation.
@@ -122,12 +124,12 @@ private:
     /** The animation that is currently loaded into this timeline. */
     const EditorAnimation* activeAnimation;
 
-    /** If a sprite is being dragged, this holds the original frame index. */
-    Uint8 originSpriteDragFrameIndex;
+    /** If a sprite is being dragged, this holds the original frame number. */
+    Uint8 originSpriteDragFrameNumber;
 
-    /** If a sprite is being dragged, this holds the current index that the 
-        sprite is being dragged over. */
-    Uint8 currentSpriteDragFrameIndex;
+    /** If a sprite is being dragged, this holds the current frame number that 
+        the sprite is being dragged over. */
+    Uint8 currentSpriteDragFrameNumber;
 
     /** Used for properly pacing the animation during playback. */
     Timer animationTimer;

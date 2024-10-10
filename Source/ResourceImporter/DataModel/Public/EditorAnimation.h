@@ -59,18 +59,6 @@ struct EditorAnimation {
     BoundingBox customModelBounds{};
 
     /**
-     * Sets the given frame to the given sprite.
-     * If the frame already exists, it will be overwritten.
-     */
-    void setFrame(Uint8 frameNumber, const EditorSprite& sprite);
-
-    /**
-     * Clears the given frame, removing it from the frames vector.
-     * If the frame doesn't exist, does nothing.
-     */
-    void clearFrame(Uint8 frameNumber);
-
-    /**
      * Returns this animation's model-space bounding box.
      *
      * If modelBoundsID is non-null, returns the associated bounding box. Else, 

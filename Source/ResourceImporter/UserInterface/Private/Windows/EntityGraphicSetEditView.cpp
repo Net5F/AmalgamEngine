@@ -215,7 +215,7 @@ void EntityGraphicSetEditView::fillSlotGraphicData(GraphicSetSlot& slot,
 
         // Load the sprite's image into the slot.
         std::string imagePath{dataModel.getWorkingTexturesDir()};
-        imagePath += sprite->parentSpriteSheetPath;
+        imagePath += sprite->imagePath;
         slot.spriteImage.setSimpleImage(imagePath, textureExtent);
         slot.spriteImage.setIsVisible(true);
     }

@@ -36,34 +36,21 @@ class DataModel
 public:
     DataModel(SDL_Renderer* inSdlRenderer);
 
+    SpriteModel spriteModel;
+    AnimationModel animationModel;
     BoundingBoxModel boundingBoxModel;
     GraphicSetModel graphicSetModel;
     EntityGraphicSetModel entityGraphicSetModel;
-    SpriteModel spriteModel;
-    AnimationModel animationModel;
     IconModel iconModel;
 
     /**
      * Creates a new ResourceData.json file at the given path and saves to it.
      *
-     * @param fullPath  The full path to the directory where ResourceData.json
-     *                  should be created.
-     * @return An empty string if the file at the given path parses
-     *         successfully, else a string containing the failure message.
+     * @param resourcesPath The path to the Resources directory.
      * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
-    bool create(const std::string& fullPath);
-
-    /**
-     * Attempts to open the ResourceData.json at the given path, parse it,
-     * and load the data into this model.
-     *
-     * @param fullPath  The full path to the ResourceData.json file.
-     * @return true if successful. If false, getErrorString() will return more
-     *         information.
-     */
-    bool load(const std::string& fullPath);
+    bool open(std::string_view resourcesPath);
 
     /**
      * Saves the current state of this data model into the ResourceData.json
@@ -81,14 +68,17 @@ public:
     // Note: Each of these "setActive" functions affect the current active 
     //       library item. There's only 1 active library item at a time, these 
     //       are only set up like this because they aren't easily templated.
-    /** Sets the current active library item to the given bounding box. */
-    void setActiveBoundingBox(BoundingBoxID newActiveBoundingBoxID);
+    /** Sets the current active library item to the given sprite sheet. */
+    void setActiveSpriteSheet(int newActiveSpriteSheetID);
 
     /** Sets the current active library item to the given sprite. */
     void setActiveSprite(SpriteID newActiveSpriteID);
 
     /** Sets the current active library item to the given animation. */
     void setActiveAnimation(AnimationID newActiveAnimationID);
+
+    /** Sets the current active library item to the given bounding box. */
+    void setActiveBoundingBox(BoundingBoxID newActiveBoundingBoxID);
 
     /** Sets the current active library item to the given graphic set. */
     void setActiveGraphicSet(GraphicSet::Type type,
@@ -98,6 +88,7 @@ public:
     void setActiveIcon(IconID newActiveIconID);
 
     const std::string& getWorkingTexturesDir();
+    const std::string& getWorkingIndividualSpritesDir();
 
     const std::string& getErrorString();
 
@@ -112,20 +103,36 @@ public:
 
 private:
     /**
-     * Sets currentWorkingDir to the parent directory of
-     * currentWorkingFilePath + "/Assets/Textures".
+     * Creates a new ResourceData.json file at the given path and saves to it.
+     *
+     * @param inJsonFilePath The full path to the ResourceData.json file.
+     * @return true if successful. If false, getErrorString() will return more
+     *         information.
      */
-    bool setWorkingTexturesDir();
+    bool createJson(const std::string& inJsonFilePath);
+
+    /**
+     * Attempts to open the ResourceData.json at the given path, parse it,
+     * and load the data into this model.
+     *
+     * @param inJsonFilePath The full path to the ResourceData.json file.
+     * @return true if successful. If false, getErrorString() will return more
+     *         information.
+     */
+    bool loadJson(const std::string& inJsonFilePath);
 
     /** Resets the model state, setting it back to default. */
     void resetModelState();
 
     /** The ResourceData.json file that we currently have loaded and are working
         on. */
-    std::string workingFilePath;
+    std::string workingJsonPath;
 
-    /** The parent directory of currentWorkingFilePath + "/Assets/Textures". */
+    /** The Client/Common/Assets/Textures directory path. */
     std::string workingTexturesDir;
+
+    /** The Client/Common/Assets/IndividualSprites directory path. */
+    std::string workingIndividualSpritesDir;
 
     /** If one of our member model's load functions returns false, this holds a
         string describing the error that occurred. */

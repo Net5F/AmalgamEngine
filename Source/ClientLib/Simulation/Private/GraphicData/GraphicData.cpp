@@ -43,7 +43,7 @@ void GraphicData::parseJson(const nlohmann::json& json, AssetCache& assetCache)
             // Get this sheet's texture.
             std::string texturePath{Paths::TEXTURE_DIR};
             texturePath += sheetJson.value()["relPath"].get<std::string>();
-            TextureHandle texture{assetCache.loadTexture(texturePath)};
+            TextureHandle texture{assetCache.requestTexture(texturePath)};
 
             // Parse every sprite in this sheet.
             for (auto& spriteJson : sheetJson.value()["sprites"].items()) {

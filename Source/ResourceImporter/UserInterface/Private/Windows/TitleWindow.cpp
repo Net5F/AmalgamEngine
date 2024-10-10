@@ -16,14 +16,14 @@ TitleWindow::TitleWindow(UserInterface& inUserInterface, DataModel& inDataModel)
 , userInterface{inUserInterface}
 , dataModel{inDataModel}
 , titleText({0, 193, 1920, 75}, "TitleText")
-, newButton({724, 432, 472, 96}, "New", "NewButton")
-, loadButton({724, 589, 472, 96}, "Load", "LoadButton")
+, directionText({0, 482, 1920, 300}, "DirectionText")
+, openButton({724, 548, 472, 96}, "Open", "OpenButton")
 , errorText({20, 721, 1880, 300}, "ErrorText")
 {
     // Add our children so they're included in rendering, etc.
     children.push_back(titleText);
-    children.push_back(newButton);
-    children.push_back(loadButton);
+    children.push_back(directionText);
+    children.push_back(openButton);
     children.push_back(errorText);
 
     /* Title text. */
@@ -32,75 +32,42 @@ TitleWindow::TitleWindow(UserInterface& inUserInterface, DataModel& inDataModel)
     titleText.setText("Amalgam Engine Resource Importer");
     titleText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
 
-    /* Error text. */
-    errorText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 36);
+    /* Other text. */
+    directionText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 28);
+    directionText.setColor({255, 255, 255, 255});
+    directionText.setText("Please locate your project's Resources directory:");
+    directionText.setHorizontalAlignment(
+        AUI::Text::HorizontalAlignment::Center);
+
+    errorText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 28);
     errorText.setColor({255, 255, 255, 255});
     errorText.setText("Uninitialized.");
     errorText.setHorizontalAlignment(AUI::Text::HorizontalAlignment::Center);
     errorText.setIsVisible(false);
 
     // Register our event handlers.
-    newButton.setOnPressed(std::bind(&TitleWindow::onNewButtonPressed, this));
-    loadButton.setOnPressed(std::bind(&TitleWindow::onLoadButtonPressed, this));
+    openButton.setOnPressed(std::bind(&TitleWindow::onOpenButtonPressed, this));
 }
 
-void TitleWindow::onNewButtonPressed()
-{
-    // Open the file select dialog and save the selected path.
-    nfdchar_t* selectedPath{nullptr};
-    nfdresult_t result = NFD::PickFolder(selectedPath);
-
-    if (result == NFD_OKAY) {
-        // If we successfully created a new file, change to the main screen.
-        std::string resultString{dataModel.create(selectedPath)};
-        if (resultString == "") {
-            userInterface.changeScreenTo(UserInterface::ScreenType::MainScreen);
-        }
-        else {
-            // Failed to create file or dir, display the error text.
-            resultString = "Error: " + resultString;
-            errorText.setText(resultString);
-            errorText.setIsVisible(true);
-        }
-
-        NFD::FreePath(selectedPath);
-    }
-    else if (result != NFD_CANCEL) {
-        // The dialog operation didn't succeed and the user didn't simply press
-        // cancel. Print the error.
-        LOG_INFO("Error: %s", NFD_GetError());
-    }
-}
-
-void TitleWindow::onLoadButtonPressed()
+void TitleWindow::onOpenButtonPressed()
 {
     // New attempt, make sure the error text is hidden.
     errorText.setIsVisible(false);
 
     // Open the file select dialog and save the selected path.
+    // Note: This will block the main thread, but that's fine. Our 
+    //       PeriodicUpdaters in Application are set up to skip late steps.
     nfdchar_t* selectedPath{nullptr};
-    nfdfilteritem_t filterItem[1] = {{"ResourceData.json", "json"}};
-    nfdresult_t result = NFD::OpenDialog(selectedPath, filterItem, 1);
+    nfdresult_t result = NFD::PickFolder(selectedPath);
 
     if (result == NFD_OKAY) {
-        // Validate the selected file's name.
-        if (std::strstr(selectedPath, "ResourceData.json") != 0) {
-            // Valid file name.
-            // If it loads successfully, change to the main screen.
-            if (dataModel.load(selectedPath)) {
-                userInterface.changeScreenTo(
-                    UserInterface::ScreenType::MainScreen);
-            }
-            else {
-                // Failed to parse, display the error text.
-                errorText.setText("Error: " + dataModel.getErrorString());
-                errorText.setIsVisible(true);
-            }
+        // Try to open the project.
+        if (dataModel.open(selectedPath)) {
+            userInterface.changeScreenTo(UserInterface::ScreenType::MainScreen);
         }
         else {
-            // Invalid file name, display the error text.
-            errorText.setText("Error: Must select a ResourceData.json file to"
-                              " load.");
+            // Failed to open project, display the error text.
+            errorText.setText("Error: " + dataModel.getErrorString());
             errorText.setIsVisible(true);
         }
 

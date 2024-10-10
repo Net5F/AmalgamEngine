@@ -3,6 +3,7 @@
 #include "AnimationID.h"
 #include "EditorAnimation.h"
 #include "IDPool.h"
+#include "HashTools.h"
 #include "entt/signal/sigh.hpp"
 #include "nlohmann/json_fwd.hpp"
 #include <map>
@@ -51,24 +52,37 @@ public:
     void remAnimation(AnimationID animationID);
 
     const EditorAnimation& getAnimation(AnimationID animationID) const;
+    const EditorAnimation* getAnimation(std::string_view displayName) const;
 
     // Animation properties.
-    void setAnimationDisplayName(AnimationID animationID,
-                                   const std::string& newDisplayName);
+    // Note: We don't offer a setter for DisplayName because it should always 
+    //       be based on the sprite image filename.
     void setAnimationFrameCount(AnimationID animationID, Uint8 newFrameCount);
     void setAnimationFps(AnimationID animationID, Uint8 newFps);
-    /** 
-     * @param frameNumber The frame number that was updated.
-     * @param newSprite The frame's new sprite. Set to nullptr to clear frame.
-     */
-    void setAnimationFrame(AnimationID animationID, Uint8 frameNumber,
-                           const EditorSprite* newSprite);
     void setAnimationModelBoundsID(AnimationID animationID,
                                 BoundingBoxID newModelBoundsID);
     void setAnimationCustomModelBounds(AnimationID animationID,
                                     const BoundingBox& newModelBounds);
     void setAnimationCollisionEnabled(AnimationID animationID,
                                       bool newCollisionEnabled);
+    /**
+     * Adds the given sprite as a frame in the given animation.
+     * The sprite will be added to the first empty frame. If there are no 
+     * empty frames, the animation will be made longer by 1 frame to make 
+     * room.
+     */
+    void addAnimationFrame(AnimationID animationID, const EditorSprite& sprite);
+    /**
+     * Swaps the contents of two frames in the given animation.
+     */
+    void swapAnimationFrames(AnimationID animationID, Uint8 sourceFrameNumber,
+                             Uint8 destFrameNumber);
+    /**
+     * Clears a frame from the given animation, removing it from its frames
+     * vector.
+     * If the frame doesn't exist, does nothing.
+     */
+    void clearAnimationFrame(AnimationID animationID, Uint8 frameNumber);
 
     /** Resets the model state, setting it back to default. */
     void resetModelState();
@@ -100,6 +114,10 @@ private:
 
     /** Maps animation IDs -> the animation that we currently have loaded. */
     std::map<AnimationID, EditorAnimation> animationMap;
+
+    /** Maps animation names -> their ID. */
+    std::unordered_map<std::string, AnimationID, string_hash, std::equal_to<>>
+        animationNameMap;
 
     /** Used for generating temporary animation IDs that are only used
         internally by this editor. */

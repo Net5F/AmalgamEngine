@@ -31,6 +31,7 @@ target_sources(ResourceImporter
         Public/IconModel.h
         Public/LibraryItemData.h
         Public/SpriteModel.h
+        Public/SpriteSheetID.h
 )
 
 target_include_directories(ResourceImporter

@@ -383,7 +383,7 @@ void GraphicSetModel::resetModelState()
 void GraphicSetModel::removeGraphicIDFromSets(GraphicID graphicID)
 {
     // Given one of the graphic set maps, this will replace all instances of
-    // oldGraphicID with newGraphicID and emit a graphicSetGraphicIDChanged.
+    // graphicID with NULL_GRAPHIC_ID and emit a graphicSetGraphicIDChanged.
     auto replaceIDInSets = [this]<typename T>(std::map<Uint16, T>& graphicSetMap,
                                               GraphicSet::Type type,
                                               GraphicID graphicID) {

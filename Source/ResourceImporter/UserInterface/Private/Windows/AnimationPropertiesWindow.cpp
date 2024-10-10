@@ -113,7 +113,9 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
         textInput.setPadding({0, 8, 0, 8});
     };
     styleTextInput(nameInput);
-    nameInput.setOnTextCommitted([this]() { saveName(); });
+    // Note: Display name is auto-generated from sprite image name and can't be 
+    //       changed.
+    nameInput.disable();
 
     /* Frame count entry. */
     styleLabel(frameCountLabel, "Frames", 21);
@@ -398,12 +400,6 @@ std::string AnimationPropertiesWindow::toRoundedString(float value)
     std::stringstream stream;
     stream << std::fixed << std::setprecision(3) << value;
     return stream.str();
-}
-
-void AnimationPropertiesWindow::saveName()
-{
-    dataModel.animationModel.setAnimationDisplayName(activeAnimationID,
-                                               nameInput.getText());
 }
 
 void AnimationPropertiesWindow::saveFrameCount()

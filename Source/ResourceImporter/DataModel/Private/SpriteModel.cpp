@@ -7,20 +7,14 @@
 #include "nlohmann/json.hpp"
 #include <SDL_render.h>
 #include <SDL_image.h>
-#include <filesystem>
 #include "Log.h"
 
 namespace AM
 {
 namespace ResourceImporter
 {
-SpriteModel::SpriteModel(DataModel& inDataModel,
-                         GraphicSetModel& inGraphicSetModel,
-                         EntityGraphicSetModel& inEntityGraphicSetModel,
-                         SDL_Renderer* inSdlRenderer)
-: graphicSetModel{inGraphicSetModel}
-, entityGraphicSetModel{inEntityGraphicSetModel}
-, dataModel{inDataModel}
+SpriteModel::SpriteModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer)
+: dataModel{inDataModel}
 , sdlRenderer{inSdlRenderer}
 , spriteSheetMap{}
 , spriteMap{}
@@ -30,13 +24,16 @@ SpriteModel::SpriteModel(DataModel& inDataModel,
 , sheetAddedSig{}
 , sheetRemovedSig{}
 , spriteRemovedSig{}
+, spriteSheetDisplayNameChangedSig{}
 , spriteDisplayNameChangedSig{}
 , spriteModelBoundsIDChangedSig{}
 , spriteCustomModelBoundsChangedSig{}
 , spriteCollisionEnabledChangedSig{}
 , sheetAdded{sheetAddedSig}
 , sheetRemoved{sheetRemovedSig}
+, spriteAdded{spriteAddedSig}
 , spriteRemoved{spriteRemovedSig}
+, spriteSheetDisplayNameChanged{spriteSheetDisplayNameChangedSig}
 , spriteDisplayNameChanged{spriteDisplayNameChangedSig}
 , spriteModelBoundsIDChanged{spriteModelBoundsIDChangedSig}
 , spriteCustomModelBoundsChanged{spriteCustomModelBoundsChangedSig}
@@ -75,9 +72,9 @@ void SpriteModel::save(nlohmann::json& json)
     int i{0};
     SpriteID spriteID{1};
     for (auto& sheetPair : spriteSheetMap) {
-        // Add this sheet's relative path.
+        // Add this sheet's display name.
         EditorSpriteSheet& spriteSheet{sheetPair.second};
-        json["spriteSheets"][i]["relPath"] = spriteSheet.relPath;
+        json["spriteSheets"][i]["displayName"] = spriteSheet.displayName;
 
         // For each sprite in this sheet.
         for (std::size_t j = 0; j < spriteSheet.spriteIDs.size(); ++j) {
@@ -144,108 +141,35 @@ void SpriteModel::save(nlohmann::json& json)
     }
 }
 
-bool SpriteModel::addSpriteSheet(const std::string& relPath,
-                                 const std::string& spriteWidth,
-                                 const std::string& spriteHeight,
-                                 const std::string& stageOriginX,
-                                 const std::string& stageOriginY,
-                                 const std::string& baseName)
+bool SpriteModel::addSpriteSheet()
 {
-    /* Validate the data. */
-    // Check if we already have the given sheet.
-    for (const auto& sheetPair : spriteSheetMap) {
-        if (sheetPair.second.relPath == relPath) {
-            errorString = "Error: Path conflicts with existing sprite sheet.";
-            return false;
-        }
+    SpriteSheetID numericID{
+        static_cast<SpriteSheetID>(sheetIDPool.reserveID())};
+
+    // Generate a unique name.
+    int nameCount{0};
+    std::string displayName{"NewSpriteSheet"};
+    while (!spriteSheetNameIsUnique(numericID, displayName)) {
+        displayName = "NewSpriteSheet" + std::to_string(nameCount);
+        nameCount++;
     }
 
-    // Prepend the texture directory to the given relative path.
-    std::string fullPath{dataModel.getWorkingTexturesDir()};
-    fullPath += relPath;
-
-    // Validate that the file at the given path is a valid texture.
-    int sheetWidth{0};
-    int sheetHeight{0};
-    SDL_Texture* sheetTexture{IMG_LoadTexture(sdlRenderer, fullPath.c_str())};
-    if (sheetTexture != nullptr) {
-        // Save the texture size for later.
-        SDL_QueryTexture(sheetTexture, nullptr, nullptr, &sheetWidth,
-                         &sheetHeight);
-
-        // We don't need the actual texture right now, destroy it.
-        SDL_DestroyTexture(sheetTexture);
-    }
-    else {
-        errorString = "Error: File at given path is not a valid image. Path: ";
-        errorString += dataModel.getWorkingTexturesDir();
-        errorString += relPath;
-        return false;
-    }
-
-    // Validate the width/height/stage origin.
-    int spriteWidthI{0};
-    int spriteHeightI{0};
-    int yOffsetI{0};
-    int stageOriginXI{0};
-    int stageOriginYI{0};
-    try {
-        spriteWidthI = std::stoi(spriteWidth);
-        spriteHeightI = std::stoi(spriteHeight);
-        stageOriginXI = std::stoi(stageOriginX);
-        stageOriginYI = std::stoi(stageOriginY);
-    } catch (std::exception&) {
-        errorString
-            = "Error: Width, height, or Y offset is not a valid integer.";
-        return false;
-    }
-
-    // Validate the size of the texture.
-    if ((spriteWidthI > sheetWidth) || (spriteHeightI > sheetHeight)) {
-        errorString = "Error: Sheet must be larger than sprite size.";
-        return false;
-    }
-
-    /* Add the sprite sheet and sprites. */
-    int sheetID{static_cast<int>(sheetIDPool.reserveID())};
-    spriteSheetMap.emplace(sheetID, EditorSpriteSheet{relPath, {}});
-
-    // For each sprite in this texture.
-    EditorSpriteSheet& spriteSheet{spriteSheetMap[sheetID]};
-    int spriteCount{0};
-    for (int y = 0; y <= (sheetHeight - spriteHeightI); y += spriteHeightI) {
-        for (int x = 0; x <= (sheetWidth - spriteWidthI); x += spriteWidthI) {
-            // Build the sprite's display name (baseName_count).
-            std::string displayName{baseName};
-            displayName += std::to_string(spriteCount);
-
-            // Find the sprite's extent within the sheet texture.
-            SDL_Rect textureExtent{x, y, spriteWidthI, spriteHeightI};
-
-            // Default to a non-0 bounding box so it's easier to click.
-            static constexpr BoundingBox defaultBox{{0, 0, 0}, {20, 20, 20}};
-
-            // Add the sprite to the map and sheet.
-            SpriteID spriteID{static_cast<SpriteID>(spriteIDPool.reserveID())};
-            spriteMap.emplace(spriteID,
-                              EditorSprite{spriteID, spriteSheet.relPath,
-                                           displayName, textureExtent,
-                                           stageOriginXI, stageOriginYI, true,
-                                           NULL_BOUNDING_BOX_ID, defaultBox});
-            spriteSheet.spriteIDs.push_back(spriteID);
-
-            // Increment the count (used for the display name).
-            spriteCount++;
-        }
-    }
+    // Add the new sprite sheet to the maps.
+    spriteSheetMap.emplace(numericID,
+                           EditorSpriteSheet{numericID, displayName});
+    spriteSheetNameMap.emplace(displayName, numericID);
 
     // Signal the new sheet to the UI.
-    sheetAddedSig.publish(sheetID, spriteSheet);
+    EditorSpriteSheet& spriteSheet{spriteSheetMap.at(numericID)};
+    sheetAddedSig.publish(numericID, spriteSheet);
+
+    // Set the new sheet as the active library item.
+    dataModel.setActiveSpriteSheet(numericID);
 
     return true;
 }
 
-void SpriteModel::remSpriteSheet(int sheetID)
+void SpriteModel::remSpriteSheet(SpriteSheetID sheetID)
 {
     // Find the sheet in the map.
     auto sheetIt{spriteSheetMap.find(sheetID)};
@@ -259,10 +183,57 @@ void SpriteModel::remSpriteSheet(int sheetID)
     }
 
     // Erase the sheet.
+    spriteSheetNameMap.erase(sheetIt->second.displayName);
     spriteSheetMap.erase(sheetIt);
 
     // Signal that the sheet was erased.
     sheetRemovedSig.publish(sheetID);
+}
+
+bool SpriteModel::addSprite(const std::string& imagePath,
+                            SpriteSheetID parentSpriteSheetID)
+{
+    // Get the file name from the image path (we use the file name as the 
+    // sprite's display name).
+    std::string displayName{StringTools::getFileName(imagePath)};
+
+    // If the given name isn't unique, fail.
+    if (!spriteNameIsUnique(NULL_SPRITE_ID, displayName)) {
+        errorString = "Name is already in use.";
+        return false;
+    }
+
+    // Get the sprite texture's size.
+    std::string fullImagePath{dataModel.getWorkingTexturesDir()};
+    fullImagePath += imagePath;
+    SDL_Texture* texture{IMG_LoadTexture(sdlRenderer, fullImagePath.c_str())};
+    if (texture) {
+        errorString = "Failed to load texture: ";
+        errorString += imagePath.c_str();
+        return false;
+    }
+    SDL_Rect textureExtent{};
+    SDL_QueryTexture(texture, nullptr, nullptr,
+                     &(textureExtent.w), &(textureExtent.h));
+    SDL_DestroyTexture(texture);
+
+    // Add the new sprite to the maps.
+    SpriteID numericID{static_cast<SpriteID>(spriteIDPool.reserveID())};
+    spriteMap.emplace(numericID, EditorSprite{numericID, imagePath, displayName,
+                                              textureExtent});
+    spriteNameMap.emplace(displayName, numericID);
+
+    // Refresh the sheet to account for the new sprite.
+    refreshSpriteSheet(mgetSpriteSheet(parentSpriteSheetID));
+
+    // Signal the new sprite to the UI.
+    EditorSprite& sprite{spriteMap.at(numericID)};
+    spriteAddedSig.publish(numericID, sprite);
+
+    // Add the sprite to an animation if necessary.
+    addSpriteToAnimationIfNecessary(sprite);
+
+    return true;
 }
 
 void SpriteModel::remSprite(SpriteID spriteID)
@@ -273,18 +244,57 @@ void SpriteModel::remSprite(SpriteID spriteID)
         LOG_FATAL("Invalid ID while removing sprite.");
     }
 
+    // Find the sheet that contains this sprite and remove it.
+    EditorSpriteSheet* parentSpriteSheet{nullptr};
+    for (auto& [spriteSheetID, spriteSheet] : spriteSheetMap) {
+        std::vector<int>& spriteIDs{spriteSheet.spriteIDs};
+        for (auto it{spriteIDs.begin()}; it != spriteIDs.end(); ++it) {
+            if (*it == spriteID) {
+                spriteIDs.erase(it);
+                parentSpriteSheet = &spriteSheet;
+                break;
+            }
+        }
+
+        // If we found the sprite, stop looking.
+        if (parentSpriteSheet) {
+            break;
+        }
+    }
+    AM_ASSERT(parentSpriteSheet, "Sprite did not belong to a sprite sheet.");
+
+    // Refresh the sheet to account for the removed sprite.
+    refreshSpriteSheet(*parentSpriteSheet);
+
+    // If the sprite is in an animation, remove it.
+    remSpriteFromAnimationIfNecessary(spriteIt->second);
+
+    // Clear this sprite from any sets that reference it.
+    dataModel.graphicSetModel.removeGraphicIDFromSets(toGraphicID(spriteID));
+    dataModel.entityGraphicSetModel.removeGraphicIDFromSets(
+        toGraphicID(spriteID));
+
     // Erase the sprite.
+    spriteNameMap.erase(spriteIt->second.displayName);
     spriteMap.erase(spriteIt);
 
     // Signal that the sprite was erased.
     spriteRemovedSig.publish(spriteID);
-
-    // Clear this sprite from any sets that reference it.
-    graphicSetModel.removeGraphicIDFromSets(toGraphicID(spriteID));
-    entityGraphicSetModel.removeGraphicIDFromSets(toGraphicID(spriteID));
 }
 
-const EditorSprite& SpriteModel::getSprite(SpriteID spriteID)
+const EditorSpriteSheet&
+    SpriteModel::getSpriteSheet(SpriteSheetID sheetID) const
+{
+    auto spriteSheetIt{spriteSheetMap.find(sheetID)};
+    if (spriteSheetIt == spriteSheetMap.end()) {
+        LOG_FATAL("Tried to get sprite sheet with invalid ID: %d",
+                  sheetID);
+    }
+
+    return spriteSheetIt->second;
+}
+
+const EditorSprite& SpriteModel::getSprite(SpriteID spriteID) const
 {
     auto spriteIt{spriteMap.find(spriteID)};
     if (spriteIt == spriteMap.end()) {
@@ -294,12 +304,12 @@ const EditorSprite& SpriteModel::getSprite(SpriteID spriteID)
     return spriteIt->second;
 }
 
-void SpriteModel::setSpriteDisplayName(SpriteID spriteID,
-                                       const std::string& newDisplayName)
+void SpriteModel::setSpriteSheetDisplayName(SpriteSheetID spriteSheetID,
+                                            const std::string& newDisplayName)
 {
-    auto spritePair{spriteMap.find(spriteID)};
-    if (spritePair == spriteMap.end()) {
-        LOG_FATAL("Tried to set name using invalid sprite ID.");
+    auto spriteSheetPair{spriteSheetMap.find(spriteSheetID)};
+    if (spriteSheetPair == spriteSheetMap.end()) {
+        LOG_FATAL("Tried to set name using invalid sprite sheet ID.");
     }
 
     // Set the new display name and make it unique.
@@ -307,16 +317,17 @@ void SpriteModel::setSpriteDisplayName(SpriteID spriteID,
     //       name string, so we don't need to validate.
     int appendedNum{0};
     std::string uniqueDisplayName{newDisplayName};
-    while (!spriteNameIsUnique(spriteID, uniqueDisplayName)) {
+    while (!spriteSheetNameIsUnique(spriteSheetID, uniqueDisplayName)) {
         uniqueDisplayName = newDisplayName + std::to_string(appendedNum);
         appendedNum++;
     }
 
-    EditorSprite& sprite{spritePair->second};
-    sprite.displayName = uniqueDisplayName;
+    EditorSpriteSheet& spriteSheet{spriteSheetPair->second};
+    spriteSheet.displayName = uniqueDisplayName;
 
     // Signal the change.
-    spriteDisplayNameChangedSig.publish(spriteID, sprite.displayName);
+    spriteSheetDisplayNameChangedSig.publish(spriteSheetID,
+                                             spriteSheet.displayName);
 }
 
 void SpriteModel::setSpriteModelBoundsID(SpriteID spriteID,
@@ -377,24 +388,58 @@ const std::string& SpriteModel::getErrorString()
     return errorString;
 }
 
+EditorSpriteSheet& SpriteModel::mgetSpriteSheet(SpriteSheetID sheetID)
+{
+    auto spriteSheetIt{spriteSheetMap.find(sheetID)};
+    if (spriteSheetIt == spriteSheetMap.end()) {
+        LOG_FATAL("Tried to get sprite sheet with invalid ID: %d",
+                  sheetID);
+    }
+
+    return spriteSheetIt->second;
+}
+
+EditorSprite& SpriteModel::mgetSprite(SpriteID spriteID)
+{
+    auto spriteIt{spriteMap.find(spriteID)};
+    if (spriteIt == spriteMap.end()) {
+        LOG_FATAL("Tried to get sprite with invalid ID: %d", spriteID);
+    }
+
+    return spriteIt->second;
+}
+
 bool SpriteModel::parseSpriteSheet(const nlohmann::json& sheetJson)
 {
     int sheetID{static_cast<int>(sheetIDPool.reserveID())};
     spriteSheetMap.emplace(sheetID, EditorSpriteSheet{});
     EditorSpriteSheet& spriteSheet{spriteSheetMap[sheetID]};
 
-    // Add this sheet's relative path.
-    spriteSheet.relPath = sheetJson.at("relPath").get<std::string>();
-    if (!(dataModel.validateRelPath(spriteSheet.relPath))) {
+    // If the display name isn't unique, fail.
+    std::string displayName{sheetJson.at("displayName").get<std::string>()};
+    if (!spriteSheetNameIsUnique(sheetID, displayName)) {
+        errorString = "Sprite sheet display name isn't unique: ";
+        errorString += spriteSheet.displayName.c_str();
         return false;
     }
+    spriteNameMap.emplace(displayName, sheetID);
 
-    // For every sprite in the sheet.
+    // Add the display name.
+    spriteSheet.displayName = displayName;
+
+    // Add the texture size.
+    spriteSheet.textureWidth = sheetJson.at("textureWidth");
+    spriteSheet.textureHeight = sheetJson.at("textureHeight");
+
+    // Parse every sprite in this sheet.
     for (auto& spriteJson : sheetJson.at("sprites").items()) {
         if (!parseSprite(spriteJson.value(), spriteSheet)) {
             return false;
         }
     }
+
+    // Set the sheet size and each sprite's texture position.
+    refreshSpriteSheet(spriteSheet);
 
     // Signal the new sheet to the UI.
     sheetAddedSig.publish(sheetID, spriteSheet);
@@ -409,9 +454,13 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     SpriteID spriteID{spriteJson.at("numericID").get<SpriteID>()};
     spriteIDPool.markIDAsReserved(spriteID);
 
-    spriteMap.emplace(spriteID, EditorSprite{spriteID, spriteSheet.relPath});
+    spriteMap.emplace(spriteID, EditorSprite{spriteID});
     spriteSheet.spriteIDs.push_back(spriteID);
     EditorSprite& sprite{spriteMap[spriteID]};
+
+    // Add the image path.
+    std::string imagePath{spriteJson.at("imagePath").get<std::string>()};
+    sprite.imagePath = imagePath;
 
     // If the display name isn't unique, fail.
     std::string displayName{spriteJson.at("displayName").get<std::string>()};
@@ -420,6 +469,7 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
         errorString += sprite.displayName.c_str();
         return false;
     }
+    spriteNameMap.emplace(displayName, spriteID);
 
     // Add the display name.
     sprite.displayName = displayName;
@@ -452,22 +502,170 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     return true;
 }
 
+bool SpriteModel::spriteSheetNameIsUnique(SpriteSheetID spriteSheetID,
+                                          const std::string& displayName)
+{
+    // If the desired name is already in the map, and the owner of the name 
+    // isn't the given ID, the name isn't unique.
+    auto it{spriteSheetNameMap.find(displayName)};
+    if ((it != spriteSheetNameMap.end()) && (it->second != spriteSheetID)) {
+        return false;
+    }
+
+    // Name isn't in the map, or it's owned by the same ID.
+    return true;
+}
+
 bool SpriteModel::spriteNameIsUnique(SpriteID spriteID,
                                      const std::string& displayName)
 {
-    // Dumbly look through all names for a match.
-    // Note: Eventually, this should change to a name map that we keep updated.
-    bool isUnique{true};
-    for (const auto& spritePair : spriteMap) {
-        SpriteID idToCheck{spritePair.first};
-        const EditorSprite& sprite{spritePair.second};
+    // If the desired name is already in the map, and the owner of the name 
+    // isn't the given ID, the name isn't unique.
+    auto it{spriteNameMap.find(displayName)};
+    if ((it != spriteNameMap.end()) && (it->second != spriteID)) {
+        return false;
+    }
 
-        if ((idToCheck != spriteID) && (displayName == sprite.displayName)) {
-            isUnique = false;
+    // Name isn't in the map, or it's owned by the same ID.
+    return true;
+}
+
+void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
+{
+    // Algorithm: For now, we just build a grid where each cell is large 
+    //            enough to fit the largest sprite.
+    //            Ideally, this would more intelligently pack the sprites to 
+    //            minimize empty space.
+
+    // Determine the largest sprite size.
+    int maxSpriteWidth{0};
+    int maxSpriteHeight{0};
+    for (SpriteID spriteID : spriteSheet.spriteIDs) {
+        EditorSprite& sprite{mgetSprite(spriteID)};
+
+        if (sprite.textureExtent.w > maxSpriteWidth) {
+            maxSpriteWidth = sprite.textureExtent.w;
+        }
+        if (sprite.textureExtent.h > maxSpriteHeight) {
+            maxSpriteHeight = sprite.textureExtent.h;
         }
     }
 
-    return isUnique;
+    // Use the max sprite size to calc the grid and sheet dimensions.
+    std::size_t spriteCount{spriteSheet.spriteIDs.size()};
+    // Note: This expression comes from solving the following equation for x:
+    //         n = 2^x * 2^x
+    //       This equation asks the question: which power of 2 do the sides of
+    //       the grid need to use to fit all of the sprites?
+    int powerOfTwo{
+        static_cast<int>(std::ceil(std::log(spriteCount) / (2 * std::log(2))))};
+    int gridSideLength{static_cast<int>(std::pow(2, powerOfTwo))};
+    spriteSheet.textureWidth = gridSideLength * maxSpriteWidth;
+    spriteSheet.textureHeight = gridSideLength * maxSpriteHeight;
+
+    // Place the sprites.
+    int gridX{0};
+    int gridY{0};
+    for (SpriteID spriteID : spriteSheet.spriteIDs) {
+        EditorSprite& sprite{mgetSprite(spriteID)};
+
+        sprite.textureExtent.x = gridX * maxSpriteWidth;
+        sprite.textureExtent.y = gridY * maxSpriteHeight;
+
+        // If X == max, wrap to the next row.
+        gridX++;
+        if (gridX == gridSideLength) {
+            gridX = 0;
+            gridY++;
+        }
+    }
+}
+
+void SpriteModel::addSpriteToAnimationIfNecessary(const EditorSprite& sprite)
+{
+    // If the sprite's display name contains a frame number, add it to an 
+    // animation.
+    // Note: Since we don't want to re-arrange someone's animation if they've 
+    //       changed the order, we just add the sprite to the end. If we're 
+    //       bulk adding sprites to an animation, the file system should serve 
+    //       them to us in order anyway.
+    if (getFrameNumber(sprite.displayName) != -1) {
+        // Name contains a frame number. Check if the animation already exists.
+        std::string_view animationName{deriveAnimationName(sprite.displayName)};
+        AnimationModel& animationModel{dataModel.animationModel};
+        if (const EditorAnimation
+            * animation{animationModel.getAnimation(animationName)}) {
+            // Animation exists. Add this frame to the end.
+            animationModel.addAnimationFrame(animation->numericID, sprite);
+        }
+        else {
+            // Animation doesn't exist. Add it.
+        }
+    }
+}
+
+void SpriteModel::remSpriteFromAnimationIfNecessary(const EditorSprite& sprite)
+{
+    // If the sprite's display name contains a frame number, remove it from the
+    // animation.
+    if (getFrameNumber(sprite.displayName) != -1) {
+        // Name contains a frame number. Get the animation.
+        std::string_view animationName{deriveAnimationName(sprite.displayName)};
+        AnimationModel& animationModel{dataModel.animationModel};
+        if (const EditorAnimation
+            * animation{animationModel.getAnimation(animationName)}) {
+            // Find which frame the sprite is in.
+            // Note: This may be different than the frame number in the sprite's
+            //       name, since frames can be reordered.
+            int frameNumber{-1};
+            for (const auto& frame : animation->frames) {
+                if (frame.sprite.get().numericID == sprite.numericID) {
+                    frameNumber = frame.frameNumber;
+                    break;
+                }
+            }
+            AM_ASSERT(frameNumber != -1, "Failed to find sprite in animation.");
+
+            dataModel.animationModel.clearAnimationFrame(
+                animation->numericID, static_cast<Uint8>(frameNumber));
+        }
+        else {
+            AM_ASSERT(false, "Animation did not exist when expected.");
+        }
+    }
+}
+
+int SpriteModel::getFrameNumber(const std::string& displayName)
+{
+    // If the sprite's name ends in "_n" where n is a positive number, return 
+    // it.
+    if (auto pos{displayName.find_last_of('_')}; pos != displayName.npos) {
+        // Get the string following the '_' and convert it to an integer.
+        std::string frameNumberString{displayName.substr(pos + 1)};
+        int frameNumber{-1};
+        try {
+            frameNumber = std::stoi(frameNumberString);
+        } catch (std::exception&) {
+            // The string following the '_' was not a valid number. Return
+            // early.
+            return -1;
+        }
+
+        // Check that the integer is valid.
+        if (frameNumber < 0) {
+            return -1;
+        }
+
+        return frameNumber;
+    }
+
+    return -1;
+}
+
+std::string_view
+    SpriteModel::deriveAnimationName(std::string_view spriteDisplayName)
+{
+    return spriteDisplayName.substr(0, spriteDisplayName.find_first_of('_'));
 }
 
 } // End namespace ResourceImporter

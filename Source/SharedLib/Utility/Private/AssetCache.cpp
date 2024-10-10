@@ -8,28 +8,45 @@ AssetCache::AssetCache(SDL_Renderer* inSdlRenderer)
 {
 }
 
-TextureHandle AssetCache::loadTexture(const std::string& imagePath)
+std::shared_ptr<SDL_Texture>
+    AssetCache::requestTexture(const std::string& resourceID)
 {
-    // If the texture is already loaded, return it.
-    auto it{textureCache.find(imagePath)};
+    // If the texture is already in the cache, return it.
+    auto it{textureCache.find(resourceID)};
     if (it != textureCache.end()) {
         return it->second;
     }
 
-    // Load the texture.
-    SDL_Texture* texture{IMG_LoadTexture(sdlRenderer, imagePath.c_str())};
-    if (texture == nullptr) {
-        LOG_FATAL("Failed to load texture: %s", imagePath.c_str());
+    // The ID wasn't found in the cache, assume it's a path to an image and 
+    // try to load it.
+    SDL_Texture* rawTexture{IMG_LoadTexture(sdlRenderer, resourceID.c_str())};
+    if (rawTexture == nullptr) {
+        LOG_ERROR("Failed to load texture: %s", resourceID.c_str());
+        return nullptr;
     }
 
     // Wrap the texture in a shared_ptr.
-    TextureHandle handle{texture,
-                         [](SDL_Texture* p) { SDL_DestroyTexture(p); }};
+    std::shared_ptr<SDL_Texture> texture{
+        rawTexture, [](SDL_Texture* p) { SDL_DestroyTexture(p); }};
 
     // Save the texture in the cache.
-    textureCache[imagePath] = handle;
+    textureCache[resourceID] = texture;
 
-    return handle;
+    return texture;
+}
+
+std::shared_ptr<SDL_Texture>
+    AssetCache::addTexture(SDL_Texture* rawTexture,
+                           const std::string& resourceID)
+{
+    // Wrap the texture in a shared_ptr.
+    std::shared_ptr<SDL_Texture> texture{
+        rawTexture, [](SDL_Texture* p) { SDL_DestroyTexture(p); }};
+
+    // Save the texture in the cache.
+    textureCache[resourceID] = texture;
+
+    return texture;
 }
 
 bool AssetCache::discardTexture(const std::string& imagePath)

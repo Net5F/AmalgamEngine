@@ -8,7 +8,7 @@ namespace AM
 {
 namespace ResourceImporter
 {
-UserInterface::UserInterface(SDL_Renderer* inRenderer, AssetCache& inAssetCache,
+UserInterface::UserInterface(SDL_Renderer* inRenderer, AssetCache&,
                              DataModel& inDataModel)
 : auiInitializer{inRenderer,
                  {Config::LOGICAL_SCREEN_WIDTH, Config::LOGICAL_SCREEN_HEIGHT},

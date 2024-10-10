@@ -21,13 +21,17 @@ struct EditorSprite {
     /** This sprite's unique numeric identifier. */
     SpriteID numericID{NULL_SPRITE_ID};
 
-    /** The unique relPath of the sprite sheet that this sprite is from. */
-    std::string parentSpriteSheetPath{""};
+    /** The relPath to the individual image file for this sprite.
+        Note: This path isn't used by the engine, but we need to save it to 
+              the json for use by the editor (we use it when building sprite 
+              sheets). */
+    std::string imagePath{""};
 
     /** Unique display name, shown in the UI.  */
     std::string displayName{""};
 
-    /** This sprite's actual-space UV position and size within its texture. */
+    /** This sprite's actual-space UV position and size within its parent 
+        sprite sheet texture. */
     SDL_Rect textureExtent{0, 0, 0, 0};
 
     /** The actual-space point within the sprite where the "stage" starts.

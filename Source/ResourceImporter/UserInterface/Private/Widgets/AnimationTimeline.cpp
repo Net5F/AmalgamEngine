@@ -19,8 +19,8 @@ AnimationTimeline::AnimationTimeline(const SDL_Rect& inLogicalExtent,
 , scrubber{}
 , selectedFrameNumber{0}
 , activeAnimation{nullptr}
-, originSpriteDragFrameIndex{0}
-, currentSpriteDragFrameIndex{0}
+, originSpriteDragFrameNumber{0}
+, currentSpriteDragFrameNumber{0}
 , animationAccumulator{0}
 , playingAnimation{false}
 {
@@ -141,50 +141,50 @@ void AnimationTimeline::onScrubberDragged(const SDL_Point& cursorPosition)
     }
 }
 
-void AnimationTimeline::onSpriteDragStarted(Uint8 frameIndex,
+void AnimationTimeline::onSpriteDragStarted(Uint8 frameNumber,
                                             const SDL_Point& cursorPosition)
 {
     // Remember where the drag started.
-    originSpriteDragFrameIndex = frameIndex;
-    currentSpriteDragFrameIndex = frameIndex;
+    originSpriteDragFrameNumber = frameNumber;
+    currentSpriteDragFrameNumber = frameNumber;
 }
 
-void AnimationTimeline::onSpriteDragged(Uint8 frameIndex,
+void AnimationTimeline::onSpriteDragged(Uint8 frameNumber,
                                         const SDL_Point& cursorPosition)
 {
     // If the cursor is over a new frame, reset the old frame's circle 
     // and add one to the new frame.
     Uint8 cursorFrame{getCursorFrame(cursorPosition)};
-    if (cursorFrame != currentSpriteDragFrameIndex) {
+    if (cursorFrame != currentSpriteDragFrameNumber) {
         TimelineFrame& oldCurrentFrame{static_cast<TimelineFrame&>(
-            *frameContainer[currentSpriteDragFrameIndex])};
+            *frameContainer[currentSpriteDragFrameNumber])};
         TimelineFrame& newCurrentFrame{static_cast<TimelineFrame&>(
             *frameContainer[cursorFrame])};
 
         // If we're moving from the origin frame, remove its marker.
-        if (currentSpriteDragFrameIndex == originSpriteDragFrameIndex) {
+        if (currentSpriteDragFrameNumber == originSpriteDragFrameNumber) {
             oldCurrentFrame.hasSprite = false;
         }
         else {
             // Not the origin frame, return it to whatever it was.
             oldCurrentFrame.hasSprite = (activeAnimation->getSpriteAtFrame(
-                                             currentSpriteDragFrameIndex)
+                                             currentSpriteDragFrameNumber)
                                          != nullptr);
         }
         newCurrentFrame.hasSprite = true;
 
-        currentSpriteDragFrameIndex = cursorFrame;
+        currentSpriteDragFrameNumber = cursorFrame;
     }
 }
 
-void AnimationTimeline::onSpriteDragReleased(Uint8 frameIndex,
+void AnimationTimeline::onSpriteDragReleased(Uint8 frameNumber,
                                              const SDL_Point& cursorPosition)
 {
     // Reset the display state.
     TimelineFrame& originFrame{static_cast<TimelineFrame&>(
-        *frameContainer[originSpriteDragFrameIndex])};
+        *frameContainer[originSpriteDragFrameNumber])};
     TimelineFrame& currentFrame{static_cast<TimelineFrame&>(
-        *frameContainer[currentSpriteDragFrameIndex])};
+        *frameContainer[currentSpriteDragFrameNumber])};
 
     bool originHasSprite{originFrame.hasSprite};
     bool currentHasSprite{currentFrame.hasSprite};
@@ -192,9 +192,10 @@ void AnimationTimeline::onSpriteDragReleased(Uint8 frameIndex,
     currentFrame.hasSprite = originHasSprite;
 
     // If the cursor is over a new frame, move the sprite to it.
-    if ((currentSpriteDragFrameIndex != originSpriteDragFrameIndex)
+    if ((currentSpriteDragFrameNumber != originSpriteDragFrameNumber)
         && onSpriteMoved) {
-        onSpriteMoved(originSpriteDragFrameIndex, currentSpriteDragFrameIndex);
+        onSpriteMoved(originSpriteDragFrameNumber,
+                      currentSpriteDragFrameNumber);
     }
 }
 
@@ -233,7 +234,7 @@ void AnimationTimeline::refreshFrames()
     // Fill the frames that contain frames.
     for (const EditorAnimation::Frame& frame : activeAnimation->frames) {
         AM_ASSERT(frame.frameNumber < frameContainer.size(),
-                  "Invalid frame index.");
+                  "Invalid frame number.");
         TimelineFrame& timelineFrame{
             static_cast<TimelineFrame&>(*frameContainer[frame.frameNumber])};
         timelineFrame.hasSprite = true;

@@ -2,6 +2,7 @@
 
 #include "EditorSpriteSheet.h"
 #include "EditorSprite.h"
+#include "SpriteSheetID.h"
 #include "BoundingBox.h"
 #include "IDPool.h"
 #include "entt/signal/sigh.hpp"
@@ -17,8 +18,6 @@ namespace ResourceImporter
 {
 
 class DataModel;
-class GraphicSetModel;
-class EntityGraphicSetModel;
 
 /**
  * Holds data for sprites and their parent sprite sheets.
@@ -26,9 +25,7 @@ class EntityGraphicSetModel;
 class SpriteModel
 {
 public:
-    SpriteModel(DataModel& inDataModel, GraphicSetModel& inGraphicSetModel,
-                EntityGraphicSetModel& inEntityGraphicSetModel,
-                SDL_Renderer* inSdlRenderer);
+    SpriteModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer);
 
     /**
      * Attempts to load the "spriteSheets" section of the given json into this
@@ -46,31 +43,9 @@ public:
     void save(nlohmann::json& json);
 
     /**
-     * If the given data is valid, adds a new sprite sheet to the back of the
-     * spriteSheets vector. All sprites in the sheet will be extracted and
-     * added to the sheet's sprites vector.
-     *
-     * Note: We currently only support sprite sheets with consistent sprite
-     *       sizes and no padding.
-     *
-     * @param relPath The path to the desired sprite sheet, relative to
-     *                the application's base directory.
-     * @param spriteWidth How wide each sprite is.
-     * @param spriteHeight How tall each sprite is.
-     * @param yOffset How much each sprite should be offset in the Y direction
-     *                to line up with their tile.
-     * @param baseName The name to prepend to each sprite's number. (e.g.
-     *                 "mob_" results in "mob_0", "mob_1", etc.)
-     *
-     * @return true if successful. If false, getErrorString() will return more
-     *         information.
+     * Adds an empty sprite sheet to the back of the spriteSheets vector.
      */
-    bool addSpriteSheet(const std::string& relPath,
-                        const std::string& spriteWidth,
-                        const std::string& spriteHeight,
-                        const std::string& stageOriginX,
-                        const std::string& stageOriginY,
-                        const std::string& baseName);
+    bool addSpriteSheet();
 
     /**
      * Removes the sprite sheet with the given ID from the sprite sheet map.
@@ -79,7 +54,20 @@ public:
      *
      * @param sheetID The editor ID of the sheet to remove.
      */
-    void remSpriteSheet(int sheetID);
+    void remSpriteSheet(SpriteSheetID sheetID);
+
+    /**
+     * Adds a sprite with the given image.
+     * The sprite's name will be derived from its filename. If the name ends in
+     * "_<n>", the new sprite will also be added to an Animation.
+     *
+     * @param imagePath The relative path to the sprite's individual image file.
+     *
+     * @return true if successful. If false, getErrorString() will return more
+     *         information.
+     */
+    bool addSprite(const std::string& imagePath,
+                   SpriteSheetID parentSpriteSheetID);
 
     /**
      * Removes the sprite with the given ID from the sprite map.
@@ -90,11 +78,16 @@ public:
      */
     void remSprite(SpriteID spriteID);
 
-    const EditorSprite& getSprite(SpriteID spriteID);
+    const EditorSpriteSheet& getSpriteSheet(SpriteSheetID sheetID) const;
+    const EditorSprite& getSprite(SpriteID spriteID) const;
+
+    // Sprite sheet properties.
+    void setSpriteSheetDisplayName(SpriteSheetID spriteSheetID,
+                                   const std::string& newDisplayName);
 
     // Sprite properties.
-    void setSpriteDisplayName(SpriteID spriteID,
-                              const std::string& newDisplayName);
+    // Note: We don't offer a setter for DisplayName because it should always 
+    //       be based on the image filename.
     void setSpriteModelBoundsID(SpriteID spriteID,
                                 BoundingBoxID newModelBoundsID);
     void setSpriteCustomModelBounds(SpriteID spriteID,
@@ -110,6 +103,11 @@ private:
     // Note: These were arbitrarily chosen and can be increased if necessary.
     static constexpr std::size_t MAX_SPRITE_SHEETS{1000};
     static constexpr std::size_t MAX_SPRITES{MAX_SPRITE_SHEETS * 100};
+
+    // Note: These are named differently to disambiguate them, since they aren't 
+    //       accessible outside of this class.
+    EditorSpriteSheet& mgetSpriteSheet(SpriteSheetID sheetID);
+    EditorSprite& mgetSprite(SpriteID spriteID);
 
     // Parsing functions.
     /**
@@ -130,6 +128,17 @@ private:
                      EditorSpriteSheet& spriteSheet);
 
     /**
+     * Checks if the given name is unique among all sprite sheets in the model.
+     *
+     * @param spriteSheetID The ID of the sprite sheet that might get 
+     *                      displayName. If it already is set to displayName, 
+     *                      it won't be counted as non-unique.
+     * @param displayName The display name that the sprite will be set to.
+     */
+    bool spriteSheetNameIsUnique(SpriteSheetID spriteSheetID,
+                                 const std::string& displayName);
+
+    /**
      * Checks if the given name is unique among all sprites in the model.
      *
      * @param spriteID The ID of the sprite that might get displayName. If it
@@ -139,19 +148,53 @@ private:
      */
     bool spriteNameIsUnique(SpriteID spriteID, const std::string& displayName);
 
+    /**
+     * Sets the texture position of each sprite in the given sheet, and sets the 
+     * sheet's size.
+     */
+    void refreshSpriteSheet(EditorSpriteSheet& spriteSheet);
+
+    /**
+     * If the given sprite is named such that it should be added to an 
+     * animation, adds it. If the animation doesn't already exist, it will be 
+     * created.
+     */
+    void addSpriteToAnimationIfNecessary(const EditorSprite& sprite);
+
+    /**
+     * If the given sprite is in an animation, removes it.
+     */
+    void remSpriteFromAnimationIfNecessary(const EditorSprite& sprite);
+
+    /**
+     * Returns a frame number from the end of the given sprite display name,
+     * if one is present.
+     * If the file name has no trailing frame number, returns -1.
+     */
+    int getFrameNumber(const std::string& displayName);
+
+    /**
+     * Derives an Animation display name from a given Sprite's display name by 
+     * removing the trailing frame number.
+     */
+    std::string_view deriveAnimationName(std::string_view spriteDisplayName);
+
     DataModel& dataModel;
-    /** Used to remove graphics from graphic sets when a graphic is deleted. */
-    GraphicSetModel& graphicSetModel;
-    EntityGraphicSetModel& entityGraphicSetModel;
 
     /** Used for validating user-selected sprite sheet textures. */
     SDL_Renderer* sdlRenderer;
 
     /** Maps sheet IDs -> the sprite sheets that we currently have loaded. */
-    std::map<int, EditorSpriteSheet> spriteSheetMap;
+    std::map<SpriteSheetID, EditorSpriteSheet> spriteSheetMap;
 
     /** Maps sprite IDs -> the sprites that we currently have loaded. */
     std::map<SpriteID, EditorSprite> spriteMap;
+
+    /** Maps sprite sheet names -> their ID. */
+    std::unordered_map<std::string, SpriteSheetID> spriteSheetNameMap;
+
+    /** Maps sprite names -> their ID. */
+    std::unordered_map<std::string, SpriteID> spriteNameMap;
 
     /** Used for generating temporary sprite sheet IDs that are only used
         internally by this editor. */
@@ -165,9 +208,16 @@ private:
     //-------------------------------------------------------------------------
     // Signals
     //-------------------------------------------------------------------------
-    entt::sigh<void(int sheetID, const EditorSpriteSheet& sheet)> sheetAddedSig;
-    entt::sigh<void(int sheetID)> sheetRemovedSig;
+    entt::sigh<void(SpriteSheetID sheetID, const EditorSpriteSheet& sheet)>
+        sheetAddedSig;
+    entt::sigh<void(SpriteSheetID sheetID)> sheetRemovedSig;
+    entt::sigh<void(SpriteID spriteID, const EditorSprite& sprite)>
+        spriteAddedSig;
     entt::sigh<void(SpriteID spriteID)> spriteRemovedSig;
+
+    entt::sigh<void(SpriteSheetID spriteSheetID,
+                    const std::string& newDisplayName)>
+        spriteSheetDisplayNameChangedSig;
 
     entt::sigh<void(SpriteID spriteID, const std::string& newDisplayName)>
         spriteDisplayNameChangedSig;
@@ -183,12 +233,21 @@ public:
     // Signal Sinks
     //-------------------------------------------------------------------------
     /** A sprite sheet was added to the model. */
-    entt::sink<entt::sigh<void(int sheetID, const EditorSpriteSheet& sheet)>>
+    entt::sink<
+        entt::sigh<void(SpriteSheetID sheetID, const EditorSpriteSheet& sheet)>>
         sheetAdded;
     /** A sprite sheet was removed from the model. */
-    entt::sink<entt::sigh<void(int sheetID)>> sheetRemoved;
+    entt::sink<entt::sigh<void(SpriteSheetID sheetID)>> sheetRemoved;
+    /** A sprite was added to from the model. */
+    entt::sink<entt::sigh<void(SpriteID spriteID, const EditorSprite& sprite)>>
+        spriteAdded;
     /** A sprite was removed from the model. */
     entt::sink<entt::sigh<void(SpriteID spriteID)>> spriteRemoved;
+
+    /** A sprite sheet's display name has changed. */
+    entt::sink<entt::sigh<void(SpriteSheetID spriteSheetID,
+                               const std::string& newDisplayName)>>
+        spriteSheetDisplayNameChanged;
 
     /** A sprite's display name has changed. */
     entt::sink<

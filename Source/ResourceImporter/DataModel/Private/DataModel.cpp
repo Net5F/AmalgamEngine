@@ -15,99 +15,69 @@ namespace AM
 namespace ResourceImporter
 {
 DataModel::DataModel(SDL_Renderer* inSdlRenderer)
-: boundingBoxModel{*this}
+: spriteModel{*this, inSdlRenderer}
+, animationModel{*this}
+, boundingBoxModel{*this}
 , graphicSetModel{*this}
 , entityGraphicSetModel{*this}
-, spriteModel{*this, graphicSetModel, entityGraphicSetModel, inSdlRenderer}
-, animationModel{*this}
 , iconModel{*this, inSdlRenderer}
-, workingFilePath{""}
+, workingJsonPath{""}
 , workingTexturesDir{""}
+, workingIndividualSpritesDir{""}
 , activeLibraryItemChangedSig{}
 , activeLibraryItemChanged{activeLibraryItemChangedSig}
 {
 }
 
-bool DataModel::create(const std::string& fullPath)
+bool DataModel::open(std::string_view resourcesPath)
 {
-    // If a ResourceData.json already exists at the given path, return false.
-    workingFilePath = fullPath;
-    workingFilePath += "/ResourceData.json";
-    if (std::filesystem::exists(workingFilePath)) {
-        workingFilePath = "";
+    // Check that the selected path is a directory named "Resources".
+    if (!(resourcesPath.ends_with("Resources"))) {
         errorString
-            = "ResourceData.json file already exists at the selected path.";
+            = "Please select the \"Resources\" directory in your project.";
         return false;
     }
 
-    // Create the file.
-    std::ofstream workingFile(workingFilePath, std::ios::app);
-    workingFile.close();
-
-    // Set the working directory.
-    if (!setWorkingTexturesDir()) {
-        errorString = "Failed to create Resources directory.";
-        return false;
-    }
-
-    // Save our empty model structure.
-    save();
-
-    return true;
-}
-
-bool DataModel::load(const std::string& fullPath)
-{
-    // Open the file.
-    std::ifstream workingFile(fullPath);
-    if (workingFile.is_open()) {
-        workingFilePath = fullPath;
-
-        // Set the working directory.
-        if (!setWorkingTexturesDir()) {
-            errorString = "Failed to create Resources directory.";
-            return false;
-        }
+    // If there's already a ResourceData.json, load it.
+    workingJsonPath = resourcesPath;
+    workingJsonPath += "/Shared/Common/ResourceData.json";
+    bool result{false};
+    if (std::filesystem::exists(workingJsonPath)) {
+        result = loadJson(workingJsonPath);
     }
     else {
-        errorString = "File failed to open.";
+        // Json doesn't exist. Create it.
+        std::string jsonParentPath{resourcesPath};
+        jsonParentPath += "/Shared/Common/";
+        result = createJson(jsonParentPath);
+    }
+
+    // If the operation failed, return early.
+    if (!result) {
+        workingJsonPath = "";
         return false;
     }
 
-    // Parse the file into a json structure.
-    nlohmann::json json;
-    std::string parseError{""};
-    try {
-        json = nlohmann::json::parse(workingFile, nullptr);
-    } catch (nlohmann::json::exception& e) {
-        parseError = e.what();
+    // Check that the asset directories exist.
+    std::string texturesDir{resourcesPath};
+    texturesDir.append("/Client/Common/Assets/Textures");
+    if (std::filesystem::exists(texturesDir)) {
+        workingTexturesDir = texturesDir;
+    }
+    else {
+        errorString = "Textures directory does not exist. Please adopt the "
+                      "expected project layout.";
+        return false;
     }
 
-    // Load the data into each model.
-    if (parseError == "") {
-        if (!boundingBoxModel.load(json)) {
-            parseError = boundingBoxModel.getErrorString();
-        }
-        else if (!spriteModel.load(json)) {
-            parseError = spriteModel.getErrorString();
-        }
-        else if (!animationModel.load(json)) {
-            parseError = animationModel.getErrorString();
-        }
-        else if (!graphicSetModel.load(json)) {
-            parseError = graphicSetModel.getErrorString();
-        }
-        else if (!entityGraphicSetModel.load(json)) {
-            parseError = entityGraphicSetModel.getErrorString();
-        }
-        else if (!iconModel.load(json)) {
-            parseError = iconModel.getErrorString();
-        }
+    std::string individualSpritessDir{resourcesPath};
+    individualSpritessDir.append("/Client/Common/Assets/IndividualSprites");
+    if (std::filesystem::exists(individualSpritessDir)) {
+        workingIndividualSpritesDir = individualSpritessDir;
     }
-
-    if (parseError != "") {
-        resetModelState();
-        errorString = "Parse failure - " + parseError;
+    else {
+        errorString = "IndividualSprites directory does not exist. Please "
+                      "adopt the expected project layout.";
         return false;
     }
 
@@ -126,9 +96,9 @@ void DataModel::save()
     iconModel.save(json);
 
     // Write the json to our working file.
-    std::ofstream workingFile(workingFilePath, std::ios::trunc);
+    std::ofstream workingFile(workingJsonPath, std::ios::trunc);
     if (!(workingFile.is_open())) {
-        LOG_FATAL("File failed to open: %s.", workingFilePath.c_str());
+        LOG_FATAL("File failed to open: %s.", workingJsonPath.c_str());
     }
 
     std::string jsonDump{json.dump(4)};
@@ -146,15 +116,15 @@ EditorGraphicRef DataModel::getGraphic(GraphicID graphicID)
     }
 }
 
-void DataModel::setActiveBoundingBox(BoundingBoxID newActiveBoundingBoxID)
+void DataModel::setActiveSpriteSheet(int newActiveSpriteSheetID)
 {
-    // Note: This will error if the ID is invalid. This is good, since we don't
-    //       expect any invalid IDs to be floating around.
-    const EditorBoundingBox& boundingBox{
-        boundingBoxModel.getBoundingBox(newActiveBoundingBoxID)};
+    // Note: This will error if the sheet ID is invalid. This is good, since
+    //       we don't expect any invalid IDs to be floating around.
+    const EditorSpriteSheet& spriteSheet{
+        spriteModel.getSpriteSheet(newActiveSpriteSheetID)};
 
-    // Signal the active bounding box to the UI.
-    activeLibraryItemChangedSig.publish(boundingBox);
+    // Signal the active sprite to the UI.
+    activeLibraryItemChangedSig.publish(spriteSheet);
 }
 
 void DataModel::setActiveSprite(SpriteID newActiveSpriteID)
@@ -176,6 +146,17 @@ void DataModel::setActiveAnimation(AnimationID newActiveAnimationID)
 
     // Signal the active animation to the UI.
     activeLibraryItemChangedSig.publish(animation);
+}
+
+void DataModel::setActiveBoundingBox(BoundingBoxID newActiveBoundingBoxID)
+{
+    // Note: This will error if the ID is invalid. This is good, since we don't
+    //       expect any invalid IDs to be floating around.
+    const EditorBoundingBox& boundingBox{
+        boundingBoxModel.getBoundingBox(newActiveBoundingBoxID)};
+
+    // Signal the active bounding box to the UI.
+    activeLibraryItemChangedSig.publish(boundingBox);
 }
 
 void DataModel::setActiveGraphicSet(GraphicSet::Type type,
@@ -231,6 +212,11 @@ const std::string& DataModel::getWorkingTexturesDir()
     return workingTexturesDir;
 }
 
+const std::string& DataModel::getWorkingIndividualSpritesDir()
+{
+    return workingIndividualSpritesDir;
+}
+
 const std::string& DataModel::getErrorString()
 {
     return errorString;
@@ -240,7 +226,7 @@ bool DataModel::validateRelPath(const std::string& relPath)
 {
     // Construct the file path.
     std::filesystem::path filePath{getWorkingTexturesDir()};
-    filePath /= relPath;
+    filePath.append(relPath);
 
     // Check if the file exists.
     if (std::filesystem::exists(filePath)) {
@@ -253,37 +239,72 @@ bool DataModel::validateRelPath(const std::string& relPath)
     }
 }
 
-bool DataModel::setWorkingTexturesDir()
+bool DataModel::createJson(const std::string& inJsonFilePath)
 {
-    // Construct the assets dir path.
-    std::filesystem::path texturesDirPath{workingFilePath};
-    texturesDirPath = texturesDirPath.parent_path();
-    texturesDirPath /= "Assets/Textures/";
+    // Create the file.
+    std::ofstream workingJson(inJsonFilePath, std::ios::app);
+    workingJson.close();
 
-    // Check if the textures dir exists.
-    if (!std::filesystem::exists(texturesDirPath)) {
-        // Directory doesn't exist, create it.
-        try {
-            std::filesystem::create_directories(texturesDirPath);
-        } catch (std::filesystem::filesystem_error& e) {
-            LOG_INFO("Failed to create Textures directory. Path: %s, Error: %s",
-                     texturesDirPath.string().c_str(), e.what());
-            return false;
+    // Save our empty model structure.
+    save();
+
+    return true;
+}
+
+bool DataModel::loadJson(const std::string& inJsonFilePath)
+{
+    // Open the file.
+    std::ifstream workingJsonFile(inJsonFilePath);
+    if (!(workingJsonFile.is_open())) {
+        errorString = "File failed to open.";
+        return false;
+    }
+
+    // Parse the file into a json structure.
+    nlohmann::json json;
+    std::string parseError{""};
+    try {
+        json = nlohmann::json::parse(workingJsonFile, nullptr);
+    } catch (nlohmann::json::exception& e) {
+        parseError = e.what();
+    }
+
+    // Load the data into each model.
+    if (parseError == "") {
+        if (!boundingBoxModel.load(json)) {
+            parseError = boundingBoxModel.getErrorString();
+        }
+        else if (!spriteModel.load(json)) {
+            parseError = spriteModel.getErrorString();
+        }
+        else if (!animationModel.load(json)) {
+            parseError = animationModel.getErrorString();
+        }
+        else if (!graphicSetModel.load(json)) {
+            parseError = graphicSetModel.getErrorString();
+        }
+        else if (!entityGraphicSetModel.load(json)) {
+            parseError = entityGraphicSetModel.getErrorString();
+        }
+        else if (!iconModel.load(json)) {
+            parseError = iconModel.getErrorString();
         }
     }
 
-    // Save the path as a UTF-8 string.
-    // Note: We've had trouble consistently getting a UTF-8 string from a
-    //       fs::path. If this breaks on some platform, we'll have to revisit.
-    workingTexturesDir = texturesDirPath.generic_string();
+    if (parseError != "") {
+        resetModelState();
+        errorString = parseError;
+        return false;
+    }
 
     return true;
 }
 
 void DataModel::resetModelState()
 {
-    workingFilePath = "";
+    workingJsonPath = "";
     workingTexturesDir = "";
+    workingIndividualSpritesDir = "";
 
     spriteModel.resetModelState();
     graphicSetModel.resetModelState();

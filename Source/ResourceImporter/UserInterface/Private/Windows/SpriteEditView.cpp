@@ -85,8 +85,10 @@ void SpriteEditView::onActiveLibraryItemChanged(
 
     // Load the sprite's image.
     std::string imagePath{dataModel.getWorkingTexturesDir()};
-    imagePath += newActiveSprite->parentSpriteSheetPath;
-    spriteImage.setSimpleImage(imagePath, newActiveSprite->textureExtent);
+    imagePath += newActiveSprite->imagePath;
+    spriteImage.setSimpleImage(imagePath,
+                               {0, 0, newActiveSprite->textureExtent.w,
+                                newActiveSprite->textureExtent.h});
 
     // Set up the gizmo with the new sprite's size and data.
     // Note: The sprite's native size is used as the logical size.

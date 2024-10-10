@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SpriteSheetID.h"
+#include <SDL_rect.h>
 #include <string>
 #include <vector>
 
@@ -12,9 +14,16 @@ namespace ResourceImporter
  * Part of SpriteModel.
  */
 struct EditorSpriteSheet {
-    /** The path to the sprite sheet image file, relative to the application's
-        base directory. */
-    std::string relPath{};
+    /** This sprite sheet's unique numeric identifier. */
+    SpriteSheetID numericID{NULL_SPRITE_SHEET_ID};
+
+    /** Unique display name, shown in the UI.  */
+    std::string displayName{""};
+
+    /** The width of the generated sprite sheet texture. */
+    int textureWidth{0};
+    /** The height of the generated sprite sheet texture. */
+    int textureHeight{0};
 
     /** The runtime IDs for each sprite in this sheet. */
     std::vector<int> spriteIDs{};

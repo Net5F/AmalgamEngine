@@ -6,14 +6,6 @@
 #include <string_view>
 #include <utility>
 
-/**
- * Name: PeriodicCaller
- * Constraints: derived has tick()
- * Members: timer, timestep
- * Passed in: debugName, timestep, shouldProcessLateTicks
- * Functions: update(), getTimeTillNextIteration()
- */
-
 namespace AM
 {
 /**

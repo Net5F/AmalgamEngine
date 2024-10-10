@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EditorSpriteSheet.h"
 #include "EditorSprite.h"
 #include "EditorAnimation.h"
 #include "EditorTerrainGraphicSet.h"
@@ -26,15 +27,17 @@ namespace ResourceImporter
  *       We just use them because std::reference_wrapper is 
  */
 using LibraryItemData
-    = std::variant<std::monostate, std::reference_wrapper<const EditorSprite>,
+    = std::variant<std::monostate, 
+                   std::reference_wrapper<const EditorSpriteSheet>,
+                   std::reference_wrapper<const EditorSprite>,
                    std::reference_wrapper<const EditorAnimation>,
+                   std::reference_wrapper<const EditorBoundingBox>,
                    std::reference_wrapper<const EditorTerrainGraphicSet>,
                    std::reference_wrapper<const EditorFloorGraphicSet>,
                    std::reference_wrapper<const EditorWallGraphicSet>,
                    std::reference_wrapper<const EditorObjectGraphicSet>,
                    std::reference_wrapper<const EditorEntityGraphicSet>,
-                   std::reference_wrapper<const EditorIcon>,
-                   std::reference_wrapper<const EditorBoundingBox>>;
+                   std::reference_wrapper<const EditorIcon>>;
 
 // Note: We define these convenience functions because variant<reference_wrapper>
 //       is very noisy otherwise.

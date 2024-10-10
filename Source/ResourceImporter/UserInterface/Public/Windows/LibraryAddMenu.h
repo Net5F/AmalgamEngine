@@ -26,7 +26,6 @@ public:
     AUI::Image backgroundImage;
 
     AUI::Button addSpriteSheetButton;
-    AUI::Button addAnimationButton;
     AUI::Button addTerrainButton;
     AUI::Button addFloorButton;
     AUI::Button addWallButton;

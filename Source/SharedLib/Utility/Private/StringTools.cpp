@@ -20,4 +20,14 @@ void StringTools::deriveStringID(std::string_view displayName,
                    });
 }
 
+std::string_view StringTools::getFileName(std::string_view filePath)
+{
+    return filePath.substr(filePath.find_last_of("/\\") + 1);
+}
+
+std::string_view StringTools::getFileNameNoExtension(std::string_view filePath)
+{
+    return getFileName(filePath).substr(0, filePath.find_last_of('.'));
+}
+
 } // End namespace AM
