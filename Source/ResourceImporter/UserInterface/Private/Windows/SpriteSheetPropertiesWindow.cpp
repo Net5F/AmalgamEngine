@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "DataModel.h"
 #include "EditorSpriteSheet.h"
+#include "StringTools.h"
 #include "Paths.h"
 #include "SharedConfig.h"
 #include "nfd.hpp"
@@ -94,24 +95,20 @@ void SpriteSheetPropertiesWindow::onAddImagesButtonPressed()
     //       PeriodicUpdaters in Application are set up to skip late steps.
     NFD::UniquePathSet selectedPaths{};
     nfdfilteritem_t filterItem[1] = {{"Supported Image Types", "png, jpg"}};
-    nfdresult_t result = NFD::OpenDialogMultiple(
-        selectedPaths, filterItem, 1,
-        dataModel.getWorkingIndividualSpritesDir().c_str());
-    // TODO: Why is this not working?
-    LOG_INFO("Default path: %s",
-             dataModel.getWorkingIndividualSpritesDir().c_str());
+    nfdresult_t result = NFD::OpenDialogMultiple(selectedPaths, filterItem, 1);
 
     if (result == NFD_OKAY) {
         nfdpathsetsize_t numPaths;
         NFD::PathSet::Count(selectedPaths, numPaths);
 
-        // Check that all of the paths are in the IndividualSprites directory.
+        // Check that all of the paths start with the working IndividualSprites
+        // directory.
         for (nfdpathsetsize_t i{0}; i < numPaths; ++i) {
             NFD::UniquePathSetPath path{};
             NFD::PathSet::GetPath(selectedPaths, i, path);
 
-            std::string pathString{path.get()};
-            if (!(pathString.contains("IndividualSprites"))) {
+            if (!(StringTools::pathStartsWith(
+                    path.get(), dataModel.getWorkingIndividualSpritesDir()))) {
                 std::string errorString{
                     "Failed to add images: Sprite images must be placed in the "
                     "IndividualSprites directory."};
@@ -121,11 +118,24 @@ void SpriteSheetPropertiesWindow::onAddImagesButtonPressed()
         }
 
         // Add the sprite images to the model.
+        std::size_t spritesDirSize{
+            dataModel.getWorkingIndividualSpritesDir().size()};
         for (nfdpathsetsize_t i{0}; i < numPaths; ++i) {
             NFD::UniquePathSetPath path{};
             NFD::PathSet::GetPath(selectedPaths, i, path);
 
-            dataModel.spriteModel.addSprite(path.get(), activeSpriteSheetID);
+            // Trim the full path down to a path relative to the working 
+            // IndividualSprites directory.
+            std::string relPath{path.get()};
+            relPath = relPath.substr(spritesDirSize);
+
+            if (!(dataModel.spriteModel.addSprite(relPath,
+                                                  activeSpriteSheetID))) {
+                std::string errorString{"Failed to add sprite: "};
+                errorString += dataModel.spriteModel.getErrorString();
+                mainScreen.openErrorDialog(errorString);
+                return;
+            }
         }
     }
     else if (result != NFD_CANCEL) {

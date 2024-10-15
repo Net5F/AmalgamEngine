@@ -27,7 +27,36 @@ std::string_view StringTools::getFileName(std::string_view filePath)
 
 std::string_view StringTools::getFileNameNoExtension(std::string_view filePath)
 {
-    return getFileName(filePath).substr(0, filePath.find_last_of('.'));
+    std::string_view fileName{getFileName(filePath)};
+    return fileName.substr(0, fileName.find_last_of('.'));
+}
+
+bool StringTools::pathStartsWith(std::string_view pathA, std::string_view pathB)
+{
+    // If pathB is longer than pathA, pathA can't possibly start with it.
+    if (pathB.size() > pathA.size()) {
+        return false;
+    }
+
+    // Compare char-by-char.
+    for (int index{0}; index < pathB.size(); ++index) {
+        char charA{pathA.at(index)};
+        char charB{pathB.at(index)};
+
+        // Normalize slashes to '/';
+        if (charA == '\\') {
+            charA = '/';
+        }
+        if (charB == '\\') {
+            charB = '/';
+        }
+
+        if (charA != charB) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 } // End namespace AM

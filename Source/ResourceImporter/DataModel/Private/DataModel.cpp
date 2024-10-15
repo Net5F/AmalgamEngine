@@ -60,7 +60,7 @@ bool DataModel::open(std::string_view resourcesPath)
 
     // Check that the asset directories exist.
     std::string texturesDir{resourcesPath};
-    texturesDir.append("/Client/Common/Assets/Textures");
+    texturesDir.append("/Client/Common/Assets/Textures/");
     if (std::filesystem::exists(texturesDir)) {
         workingTexturesDir = texturesDir;
     }
@@ -71,7 +71,7 @@ bool DataModel::open(std::string_view resourcesPath)
     }
 
     std::string individualSpritessDir{resourcesPath};
-    individualSpritessDir.append("/Client/Common/Assets/IndividualSprites");
+    individualSpritessDir.append("/Client/Common/Assets/IndividualSprites/");
     if (std::filesystem::exists(individualSpritessDir)) {
         workingIndividualSpritesDir = individualSpritessDir;
     }

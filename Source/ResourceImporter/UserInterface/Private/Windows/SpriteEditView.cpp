@@ -84,9 +84,9 @@ void SpriteEditView::onActiveLibraryItemChanged(
     activeSpriteID = newActiveSprite->numericID;
 
     // Load the sprite's image.
-    std::string imagePath{dataModel.getWorkingTexturesDir()};
-    imagePath += newActiveSprite->imagePath;
-    spriteImage.setSimpleImage(imagePath,
+    std::string fullImagePath{dataModel.getWorkingIndividualSpritesDir()};
+    fullImagePath += newActiveSprite->imagePath;
+    spriteImage.setSimpleImage(fullImagePath,
                                {0, 0, newActiveSprite->textureExtent.w,
                                 newActiveSprite->textureExtent.h});
 

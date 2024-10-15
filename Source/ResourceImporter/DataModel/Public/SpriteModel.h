@@ -61,13 +61,14 @@ public:
      * The sprite's name will be derived from its filename. If the name ends in
      * "_<n>", the new sprite will also be added to an Animation.
      *
-     * @param imagePath The relative path to the sprite's individual image file.
+     * @param imageRelPath The relative path to the sprite's individual image 
+     *                     file.
      *
      * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
-    bool addSprite(const std::string& imagePath,
-                   SpriteSheetID parentSpriteSheetID);
+    bool addSprite(const std::string& imageRelPath,
+                   SpriteSheetID parentSheetID);
 
     /**
      * Removes the sprite with the given ID from the sprite map.
@@ -211,9 +212,11 @@ private:
     entt::sigh<void(SpriteSheetID sheetID, const EditorSpriteSheet& sheet)>
         sheetAddedSig;
     entt::sigh<void(SpriteSheetID sheetID)> sheetRemovedSig;
-    entt::sigh<void(SpriteID spriteID, const EditorSprite& sprite)>
+    entt::sigh<void(SpriteID spriteID, const EditorSprite& sprite,
+                    SpriteSheetID parentSheetID)>
         spriteAddedSig;
-    entt::sigh<void(SpriteID spriteID)> spriteRemovedSig;
+    entt::sigh<void(SpriteID spriteID, SpriteSheetID parentSheetID)>
+        spriteRemovedSig;
 
     entt::sigh<void(SpriteSheetID spriteSheetID,
                     const std::string& newDisplayName)>
@@ -239,10 +242,12 @@ public:
     /** A sprite sheet was removed from the model. */
     entt::sink<entt::sigh<void(SpriteSheetID sheetID)>> sheetRemoved;
     /** A sprite was added to from the model. */
-    entt::sink<entt::sigh<void(SpriteID spriteID, const EditorSprite& sprite)>>
+    entt::sink<entt::sigh<void(SpriteID spriteID, const EditorSprite& sprite,
+                               SpriteSheetID parentSheetID)>>
         spriteAdded;
     /** A sprite was removed from the model. */
-    entt::sink<entt::sigh<void(SpriteID spriteID)>> spriteRemoved;
+    entt::sink<entt::sigh<void(SpriteID spriteID, SpriteSheetID parentSheetID)>>
+        spriteRemoved;
 
     /** A sprite sheet's display name has changed. */
     entt::sink<entt::sigh<void(SpriteSheetID spriteSheetID,

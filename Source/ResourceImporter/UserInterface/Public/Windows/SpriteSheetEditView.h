@@ -4,12 +4,7 @@
 #include "AUI/Window.h"
 #include "AUI/Screen.h"
 #include "AUI/Text.h"
-#include "AUI/ScrollArea.h"
-
-namespace AUI
-{
-class Image;
-}
+#include "AUI/Image.h"
 
 namespace AM
 {
@@ -53,6 +48,11 @@ private:
     void styleText(AUI::Text& text);
 
     /**
+     * Updates spriteSheetImage to match the given sprite sheet.
+     */
+    void refreshSpriteSheetImage(const EditorSpriteSheet& spriteSheet);
+
+    /**
      * Generates a sprite sheet texture containing all of the sheet's sprites, 
      * placed at their current textureExtents.
      */
@@ -65,16 +65,19 @@ private:
     /** The active sprite sheet's ID. */
     SpriteSheetID activeSpriteSheetID;
 
+    /** The maximum extent that spriteSheetImage can take up. */
+    const SDL_Rect MAX_SPRITESHEET_IMAGE_EXTENT;
+
     //-------------------------------------------------------------------------
     // Private child widgets
     //-------------------------------------------------------------------------
     AUI::Text topText;
 
-    /** Holds the sprite sheet image so it can be scrolled. */
-    AUI::ScrollArea spriteSheetScrollArea;
+    /** Checkerboard image, tiled as the background for the loaded sheet. */
+    AUI::Image checkerboardImage;
 
     /** The sprite sheet that is currently loaded. */
-    AUI::Image* spriteSheetImage;
+    AUI::Image spriteSheetImage;
 
     AUI::Text descText;
 };

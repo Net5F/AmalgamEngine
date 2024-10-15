@@ -92,6 +92,8 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     spriteModel.sheetAdded.connect<&LibraryWindow::onSpriteSheetAdded>(*this);
     spriteModel.sheetRemoved.connect<&LibraryWindow::onSpriteSheetRemoved>(
         *this);
+    spriteModel.spriteAdded.connect<&LibraryWindow::onSpriteAdded>(*this);
+    spriteModel.spriteRemoved.connect<&LibraryWindow::onSpriteRemoved>(*this);
     AnimationModel& animationModel{dataModel.animationModel};
     animationModel.animationAdded.connect<&LibraryWindow::onAnimationAdded>(
         *this);
@@ -190,13 +192,13 @@ AUI::EventResult LibraryWindow::onKeyDown(SDL_Keycode keyCode)
     return AUI::EventResult{.wasHandled{false}};
 }
 
-void LibraryWindow::onSpriteSheetAdded(int sheetID,
+void LibraryWindow::onSpriteSheetAdded(SpriteSheetID sheetID,
                                        const EditorSpriteSheet& sheet)
 {
-    // Create a container for the new sheet.
+    // Construct a parent list item for this sheet.
     auto sheetListItem{std::make_unique<ParentListItem>(sheet.displayName)};
     sheetListItem->type = LibraryListItem::Type::SpriteSheet;
-    sheetListItem->ID = sheetID;
+    sheetListItem->ID = static_cast<int>(sheetID);
     listItemMaps[LibraryListItem::Type::SpriteSheet].emplace(
         sheetID, sheetListItem.get());
 
@@ -207,16 +209,47 @@ void LibraryWindow::onSpriteSheetAdded(int sheetID,
         // Note: Deselect is handled in OnSelected and FocusLost.
         selectedItemsChangedSig.publish(selectedListItems);
     });
-
-    // Add each of the new sheet's sprites to its child container.
-    for (SpriteID spriteID : sheet.spriteIDs) {
-        addSpriteToSheetListItem(*sheetListItem, sheet, spriteID);
-    }
+    sheetListItem->setOnActivated(
+        [this, sheetID](LibraryListItem* activatedListItem) {
+            // Set this item's associated sheet as the active item.
+            dataModel.setActiveSpriteSheet(sheetID);
+        });
 
     // Add the sheet list item to the sheet container.
     auto& sheetContainer{static_cast<LibraryCollapsibleContainer&>(
         *libraryContainer[Category::SpriteSheets])};
     sheetContainer.push_back(std::move(sheetListItem));
+}
+
+void LibraryWindow::onSpriteAdded(SpriteID spriteID, const EditorSprite& sprite,
+                                  SpriteSheetID parentSheetID)
+{
+    // Construct a new list item for this sprite.
+    auto spriteListItem{std::make_unique<LibraryListItem>(sprite.displayName)};
+    spriteListItem->type = LibraryListItem::Type::Sprite;
+    spriteListItem->ID = spriteID;
+    listItemMaps[LibraryListItem::Type::Sprite].emplace(spriteID,
+                                                        spriteListItem.get());
+
+    spriteListItem->setLeftPadding(57);
+
+    spriteListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
+        processSelectedListItem(selectedListItem);
+    });
+    spriteListItem->setOnDeselected([this](LibraryListItem* deselectedListItem) {
+        // Note: Deselect is handled in OnSelected and FocusLost.
+        selectedItemsChangedSig.publish(selectedListItems);
+    });
+    spriteListItem->setOnActivated(
+        [this, spriteID](LibraryListItem* activatedListItem) {
+            // Set this item's associated sprite as the active item.
+            dataModel.setActiveSprite(spriteID);
+        });
+
+    // Add the sprite list item to the sheet list item.
+    ParentListItem* sheetListItem{static_cast<ParentListItem*>(
+        listItemMaps[LibraryListItem::Type::SpriteSheet].at(parentSheetID))};
+    sheetListItem->childListItemContainer.push_back(std::move(spriteListItem));
 }
 
 void LibraryWindow::onAnimationAdded(AnimationID animationID,
@@ -412,7 +445,7 @@ void LibraryWindow::onIconSheetAdded(int sheetID, const EditorIconSheet& sheet)
     sheetContainer.push_back(std::move(sheetListItem));
 }
 
-void LibraryWindow::onSpriteSheetRemoved(int sheetID)
+void LibraryWindow::onSpriteSheetRemoved(SpriteSheetID sheetID)
 {
     auto sheetListItemMap{listItemMaps[LibraryListItem::Type::SpriteSheet]};
     auto sheetIt{sheetListItemMap.find(sheetID)};
@@ -433,6 +466,30 @@ void LibraryWindow::onSpriteSheetRemoved(int sheetID)
 
     // Remove the list item from the map.
     sheetListItemMap.erase(sheetIt);
+}
+
+void LibraryWindow::onSpriteRemoved(SpriteID spriteID,
+                                    SpriteSheetID parentSheetID)
+{
+    auto spriteListItemMap{listItemMaps[LibraryListItem::Type::Sprite]};
+    auto spriteIt{spriteListItemMap.find(spriteID)};
+    if (spriteIt == spriteListItemMap.end()) {
+        LOG_FATAL("Failed to find sprite during removal.");
+    }
+
+    // Clear any list item selections.
+    for (LibraryListItem* listItem : selectedListItems) {
+        listItem->deselect();
+    }
+    selectedListItems.clear();
+
+    // Remove the sprite from the parent sheet list item.
+    ParentListItem* sheetListItem{static_cast<ParentListItem*>(
+        listItemMaps[LibraryListItem::Type::SpriteSheet].at(parentSheetID))};
+    sheetListItem->childListItemContainer.erase(spriteIt->second);
+
+    // Remove the list item from the map.
+    spriteListItemMap.erase(spriteIt);
 }
 
 void LibraryWindow::onAnimationRemoved(AnimationID animationID)
@@ -652,37 +709,6 @@ void LibraryWindow::onIconDisplayNameChanged(IconID iconID,
     iconListItem.text.setText(newDisplayName);
 }
 
-void LibraryWindow::addSpriteToSheetListItem(ParentListItem& sheetListItem,
-                                             const EditorSpriteSheet& sheet,
-                                             SpriteID spriteID)
-{
-    // Construct a new list item for this sprite.
-    const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
-    auto spriteListItem{std::make_unique<LibraryListItem>(sprite.displayName)};
-    spriteListItem->type = LibraryListItem::Type::Sprite;
-    spriteListItem->ID = spriteID;
-    listItemMaps[LibraryListItem::Type::Sprite].emplace(spriteID,
-                                                        spriteListItem.get());
-
-    spriteListItem->setLeftPadding(57);
-
-    spriteListItem->setOnSelected([this](LibraryListItem* selectedListItem) {
-        processSelectedListItem(selectedListItem);
-    });
-    spriteListItem->setOnDeselected([this](LibraryListItem* deselectedListItem) {
-        // Note: Deselect is handled in OnSelected and FocusLost.
-        selectedItemsChangedSig.publish(selectedListItems);
-    });
-    spriteListItem->setOnActivated(
-        [this, spriteID](LibraryListItem* activatedListItem) {
-            // Set this item's associated sprite as the active item.
-            dataModel.setActiveSprite(spriteID);
-        });
-
-    // Add the sprite list item to the sheet list item.
-    sheetListItem.childListItemContainer.push_back(std::move(spriteListItem));
-}
-
 void LibraryWindow::addIconToSheetListItem(ParentListItem& sheetListItem,
                                            const EditorIconSheet& sheet,
                                            IconID iconID)
@@ -759,11 +785,6 @@ void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
 
 void LibraryWindow::removeListItem(LibraryListItem* listItem)
 {
-    // Sprites can't be individually removed, return early.
-    if (listItem->type == LibraryListItem::Type::Sprite) {
-        return;
-    }
-
     GraphicSetModel& graphicSetModel{dataModel.graphicSetModel};
     switch (listItem->type) {
         case LibraryListItem::Type::SpriteSheet: {

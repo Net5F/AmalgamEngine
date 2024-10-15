@@ -2,6 +2,7 @@
 
 #include "LibraryListItem.h"
 #include "SpriteSheetID.h"
+#include "SpriteID.h"
 #include "BoundingBoxID.h"
 #include "AnimationID.h"
 #include "GraphicSets.h"
@@ -21,6 +22,7 @@ namespace ResourceImporter
 class MainScreen;
 class DataModel;
 struct EditorSpriteSheet;
+struct EditorSprite;
 struct EditorAnimation;
 struct EditorBoundingBox;
 class ParentListItem;
@@ -77,7 +79,10 @@ private:
     /**
      * Adds the given item to the library.
      */
-    void onSpriteSheetAdded(int sheetID, const EditorSpriteSheet& sheet);
+    void onSpriteSheetAdded(SpriteSheetID sheetID,
+                            const EditorSpriteSheet& sheet);
+    void onSpriteAdded(SpriteID spriteID, const EditorSprite& sprite,
+                       SpriteSheetID parentSheetID);
     void onAnimationAdded(AnimationID animationID,
                           const EditorAnimation& animation);
     void onBoundingBoxAdded(BoundingBoxID boundingBoxID,
@@ -98,7 +103,8 @@ private:
     /**
      * Removes the given item from the library.
      */
-    void onSpriteSheetRemoved(int sheetID);
+    void onSpriteRemoved(SpriteID spriteID, SpriteSheetID parentSheetID);
+    void onSpriteSheetRemoved(SpriteSheetID sheetID);
     void onAnimationRemoved(AnimationID animationID);
     void onBoundingBoxRemoved(BoundingBoxID boundingBoxID);
     void onGraphicSetRemoved(GraphicSet::Type type, Uint16 graphicSetID);
@@ -122,13 +128,6 @@ private:
                                     const std::string& newDisplayName);
     void onIconDisplayNameChanged(IconID iconID,
                                   const std::string& newDisplayName);
-
-    /**
-     * Adds the given sprite to the given sprite sheet list item.
-     */
-    void addSpriteToSheetListItem(ParentListItem& sheetListItem,
-                                  const EditorSpriteSheet& sheet,
-                                  SpriteID spriteID);
 
     /**
      * Adds the given icon to the given icon sheet list item.

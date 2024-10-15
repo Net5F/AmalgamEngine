@@ -20,7 +20,7 @@ std::shared_ptr<SDL_Texture>
     // The ID wasn't found in the cache, assume it's a path to an image and 
     // try to load it.
     SDL_Texture* rawTexture{IMG_LoadTexture(sdlRenderer, resourceID.c_str())};
-    if (rawTexture == nullptr) {
+    if (!rawTexture) {
         LOG_ERROR("Failed to load texture: %s", resourceID.c_str());
         return nullptr;
     }

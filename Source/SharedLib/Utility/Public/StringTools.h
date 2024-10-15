@@ -30,6 +30,12 @@ public:
      * Returns the name of the file at the given path, with no extension.
      */
     static std::string_view getFileNameNoExtension(std::string_view filePath);
+
+    /**
+     * Returns true if pathA starts with the characters in pathB, ignoring 
+     * differences in slash type used ('/' vs '\').
+     */
+    static bool pathStartsWith(std::string_view pathA, std::string_view pathB);
 };
 
 } // End namespace AM

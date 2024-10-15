@@ -39,9 +39,10 @@ SpriteModel::SpriteModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer)
 , spriteCustomModelBoundsChanged{spriteCustomModelBoundsChangedSig}
 , spriteCollisionEnabledChanged{spriteCollisionEnabledChangedSig}
 {
-    // Reserve the null sprite's ID (the engine provides it in code, so we don't
-    // need it in the json).
+    // Reserve the null sprite and sheet's ID (the engine provides it in code, 
+    // so we don't need it in the json).
     spriteIDPool.reserveID();
+    sheetIDPool.reserveID();
 }
 
 bool SpriteModel::load(const nlohmann::json& json)
@@ -190,12 +191,12 @@ void SpriteModel::remSpriteSheet(SpriteSheetID sheetID)
     sheetRemovedSig.publish(sheetID);
 }
 
-bool SpriteModel::addSprite(const std::string& imagePath,
-                            SpriteSheetID parentSpriteSheetID)
+bool SpriteModel::addSprite(const std::string& imageRelPath,
+                            SpriteSheetID parentSheetID)
 {
     // Get the file name from the image path (we use the file name as the 
     // sprite's display name).
-    std::string displayName{StringTools::getFileName(imagePath)};
+    std::string displayName{StringTools::getFileNameNoExtension(imageRelPath)};
 
     // If the given name isn't unique, fail.
     if (!spriteNameIsUnique(NULL_SPRITE_ID, displayName)) {
@@ -204,12 +205,12 @@ bool SpriteModel::addSprite(const std::string& imagePath,
     }
 
     // Get the sprite texture's size.
-    std::string fullImagePath{dataModel.getWorkingTexturesDir()};
-    fullImagePath += imagePath;
+    std::string fullImagePath{dataModel.getWorkingIndividualSpritesDir()};
+    fullImagePath += imageRelPath;
     SDL_Texture* texture{IMG_LoadTexture(sdlRenderer, fullImagePath.c_str())};
-    if (texture) {
+    if (!texture) {
         errorString = "Failed to load texture: ";
-        errorString += imagePath.c_str();
+        errorString += fullImagePath.c_str();
         return false;
     }
     SDL_Rect textureExtent{};
@@ -219,16 +220,21 @@ bool SpriteModel::addSprite(const std::string& imagePath,
 
     // Add the new sprite to the maps.
     SpriteID numericID{static_cast<SpriteID>(spriteIDPool.reserveID())};
-    spriteMap.emplace(numericID, EditorSprite{numericID, imagePath, displayName,
-                                              textureExtent});
+    // TODO: Fill in stage origin
+    spriteMap.emplace(numericID, EditorSprite{numericID, imageRelPath,
+                                              displayName, textureExtent});
     spriteNameMap.emplace(displayName, numericID);
 
+    // Add the sprite to its parent sheet.
+    EditorSpriteSheet& parentSheet{mgetSpriteSheet(parentSheetID)};
+    parentSheet.spriteIDs.push_back(numericID);
+
     // Refresh the sheet to account for the new sprite.
-    refreshSpriteSheet(mgetSpriteSheet(parentSpriteSheetID));
+    refreshSpriteSheet(parentSheet);
 
     // Signal the new sprite to the UI.
     EditorSprite& sprite{spriteMap.at(numericID)};
-    spriteAddedSig.publish(numericID, sprite);
+    spriteAddedSig.publish(numericID, sprite, parentSheetID);
 
     // Add the sprite to an animation if necessary.
     addSpriteToAnimationIfNecessary(sprite);
@@ -279,7 +285,7 @@ void SpriteModel::remSprite(SpriteID spriteID)
     spriteMap.erase(spriteIt);
 
     // Signal that the sprite was erased.
-    spriteRemovedSig.publish(spriteID);
+    spriteRemovedSig.publish(spriteID, parentSpriteSheet->numericID);
 }
 
 const EditorSpriteSheet&
@@ -542,7 +548,6 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
     int maxSpriteHeight{0};
     for (SpriteID spriteID : spriteSheet.spriteIDs) {
         EditorSprite& sprite{mgetSprite(spriteID)};
-
         if (sprite.textureExtent.w > maxSpriteWidth) {
             maxSpriteWidth = sprite.textureExtent.w;
         }
@@ -551,17 +556,36 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
         }
     }
 
-    // Use the max sprite size to calc the grid and sheet dimensions.
-    std::size_t spriteCount{spriteSheet.spriteIDs.size()};
-    // Note: This expression comes from solving the following equation for x:
-    //         n = 2^x * 2^x
-    //       This equation asks the question: which power of 2 do the sides of
-    //       the grid need to use to fit all of the sprites?
-    int powerOfTwo{
-        static_cast<int>(std::ceil(std::log(spriteCount) / (2 * std::log(2))))};
-    int gridSideLength{static_cast<int>(std::pow(2, powerOfTwo))};
-    spriteSheet.textureWidth = gridSideLength * maxSpriteWidth;
-    spriteSheet.textureHeight = gridSideLength * maxSpriteHeight;
+    // Find the power of two that our texture's side lengths should be in 
+    // order to fit all of the sprites (assuming a square grid).
+    int spriteCount{static_cast<int>(spriteSheet.spriteIDs.size())};
+    int gridSideLength{0};
+    for (int powerOfTwo{0}; true; ++powerOfTwo) {
+        gridSideLength = static_cast<int>(std::pow(2, powerOfTwo));
+
+        // Determine how many sprites can fit with this side length.
+        int spritesPerRow{gridSideLength / maxSpriteWidth};
+        int spritesPerColumn{gridSideLength / maxSpriteHeight};
+        if ((spritesPerRow < 1) || (spritesPerColumn < 1)) {
+            // Can't fit any, continue to the next power of two.
+            continue;
+        }
+
+        // If this power of two can fit all of the sprites, set it as our 
+        // texture size.
+        int gridCellCount{spritesPerRow * spritesPerColumn};
+        if (gridCellCount >= spriteCount) {
+            spriteSheet.textureWidth = gridSideLength;
+            spriteSheet.textureHeight = gridSideLength;
+
+            // If we're only going to fill half of the sheet or less, halve the 
+            // height to save space.
+            if (spriteCount <= (gridCellCount / 2)) {
+                spriteSheet.textureHeight /= 2;
+            }
+            break;
+        }
+    }
 
     // Place the sprites.
     int gridX{0};
@@ -569,12 +593,13 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
     for (SpriteID spriteID : spriteSheet.spriteIDs) {
         EditorSprite& sprite{mgetSprite(spriteID)};
 
-        sprite.textureExtent.x = gridX * maxSpriteWidth;
-        sprite.textureExtent.y = gridY * maxSpriteHeight;
+        sprite.textureExtent.x = (gridX * maxSpriteWidth);
+        sprite.textureExtent.y = (gridY * maxSpriteHeight);
 
-        // If X == max, wrap to the next row.
+        // If the next sprite would go past the edge of the grid, wrap to the 
+        // next row.
         gridX++;
-        if (gridX == gridSideLength) {
+        if ((gridX * maxSpriteWidth) >= gridSideLength) {
             gridX = 0;
             gridY++;
         }

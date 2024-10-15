@@ -38,12 +38,10 @@ AUI::EventResult ParentListItem::onMouseDown(AUI::MouseButtonType buttonType,
 
     // If our text was clicked, select this widget.
     if (SDL_PointInRect(&cursorPosition, &(text.getClippedExtent()))) {
-        // If we're already selected, do nothing.
-        if (!isSelected) {
-            select();
-        }
-
-        return AUI::EventResult{.wasHandled{true}};
+        // Note: Our only difference in behavior from LibraryListItem is that 
+        //       we only react to clicking on the text region, so we can just 
+        //       call its handler.
+        LibraryListItem::onMouseDown(buttonType, cursorPosition);
     }
 
     // Note: If our arrow was clicked, it'll be handled when this propagates
@@ -55,8 +53,22 @@ AUI::EventResult
     ParentListItem::onMouseDoubleClick(AUI::MouseButtonType buttonType,
                                        const SDL_Point& cursorPosition)
 {
-    // We treat additional clicks as regular MouseDown events.
-    return onMouseDown(buttonType, cursorPosition);
+    // Only respond to the left mouse button.
+    if (buttonType != AUI::MouseButtonType::Left) {
+        return AUI::EventResult{.wasHandled{false}};
+    }
+
+    // If our text was clicked, select this widget.
+    if (SDL_PointInRect(&cursorPosition, &(text.getClippedExtent()))) {
+        // Note: Our only difference in behavior from LibraryListItem is that 
+        //       we only react to clicking on the text region, so we can just 
+        //       call its handler.
+        LibraryListItem::onMouseDoubleClick(buttonType, cursorPosition);
+    }
+
+    // Note: If our arrow was clicked, it'll be handled when this propagates
+    //       to our child collapsible container.
+    return AUI::EventResult{.wasHandled{false}};
 }
 
 AUI::EventResult ParentListItem::onMouseMove(const SDL_Point& cursorPosition)
