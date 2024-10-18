@@ -125,7 +125,7 @@ void AnimationEditView::onActiveLibraryItemChanged(
 
     // Set up the gizmo with the new animation's size and data.
     AM_ASSERT(newActiveAnimation->frames.size() > 0,
-              "Animation must always have at least 1 frame.");
+              "Animations must always have at least 1 frame.");
     const EditorSprite& firstSprite{newActiveAnimation->frames[0].sprite.get()};
     boundingBoxGizmo.setSpriteImageSize(firstSprite.textureExtent.w,
                                         firstSprite.textureExtent.h);
@@ -262,7 +262,7 @@ void AnimationEditView::onTimelineSelectionChanged(Uint8 selectedFrameNumber)
     }
 
     // Load the selected sprite image.
-    std::string imagePath{dataModel.getWorkingTexturesDir()};
+    std::string imagePath{dataModel.getWorkingIndividualSpritesDir()};
     imagePath += selectedSprite->imagePath;
     spriteImage.setSimpleImage(imagePath,
                                {0, 0, selectedSprite->textureExtent.w,

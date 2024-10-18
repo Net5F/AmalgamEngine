@@ -44,8 +44,8 @@ struct Animation {
         std::reference_wrapper<const Sprite> sprite;
     };
     /** The frames of this animation, ordered by ascending frameNumber.
-        Note: There will always be at least 1 frame present. If this animation 
-              was left empty in the editor, it will be given the null sprite. */
+        Only holds frames that actually contain a sprite.
+        Note: There will always be at least 1 frame present. */
     std::vector<Frame> frames;
 
     /** If true, this animation's modelBounds will be used in collision checks.

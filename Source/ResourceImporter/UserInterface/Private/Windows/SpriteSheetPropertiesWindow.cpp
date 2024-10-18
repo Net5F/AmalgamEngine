@@ -102,7 +102,10 @@ void SpriteSheetPropertiesWindow::onAddImagesButtonPressed()
         NFD::PathSet::Count(selectedPaths, numPaths);
 
         // Check that all of the paths start with the working IndividualSprites
-        // directory.
+        // directory and pack them into a vector.
+        std::vector<std::string> paths(numPaths);
+        std::size_t spritesDirSize{
+            dataModel.getWorkingIndividualSpritesDir().size()};
         for (nfdpathsetsize_t i{0}; i < numPaths; ++i) {
             NFD::UniquePathSetPath path{};
             NFD::PathSet::GetPath(selectedPaths, i, path);
@@ -115,28 +118,15 @@ void SpriteSheetPropertiesWindow::onAddImagesButtonPressed()
                 mainScreen.openErrorDialog(errorString);
                 return;
             }
-        }
-
-        // Add the sprite images to the model.
-        std::size_t spritesDirSize{
-            dataModel.getWorkingIndividualSpritesDir().size()};
-        for (nfdpathsetsize_t i{0}; i < numPaths; ++i) {
-            NFD::UniquePathSetPath path{};
-            NFD::PathSet::GetPath(selectedPaths, i, path);
 
             // Trim the full path down to a path relative to the working 
             // IndividualSprites directory.
-            std::string relPath{path.get()};
-            relPath = relPath.substr(spritesDirSize);
-
-            if (!(dataModel.spriteModel.addSprite(relPath,
-                                                  activeSpriteSheetID))) {
-                std::string errorString{"Failed to add sprite: "};
-                errorString += dataModel.spriteModel.getErrorString();
-                mainScreen.openErrorDialog(errorString);
-                return;
-            }
+            paths.at(i) = path.get();
+            paths.at(i) = paths.at(i).substr(spritesDirSize);
         }
+
+        // Open the add menu to finish the process.
+        mainScreen.openAddSpriteDialog(paths);
     }
     else if (result != NFD_CANCEL) {
         // The dialog operation didn't succeed and the user didn't simply press

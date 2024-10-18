@@ -40,9 +40,10 @@ public:
     void save(nlohmann::json& json);
 
     /**
-     * Adds a default animation and loads it.
+     * Returns an animation with the given name. If it doesn't already exist, 
+     * a new empty animation will be created.
      */
-    bool addAnimation();
+    AnimationID addOrGetAnimation(std::string_view displayName);
 
     /**
      * Removes the animation with the given ID from the associated map.
@@ -109,6 +110,11 @@ private:
      */
     bool animationNameIsUnique(AnimationID animationID,
                                  const std::string& displayName);
+
+    /**
+     * Adds a new animation with the given name and returns its ID.
+     */
+    AnimationID addAnimation(std::string_view displayName);
 
     DataModel& dataModel;
 

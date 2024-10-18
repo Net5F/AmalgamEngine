@@ -78,27 +78,25 @@ void SpriteSheetEditView::onActiveLibraryItemChanged(
     refreshSpriteSheetImage(*newActiveSpriteSheet);
 }
 
-void SpriteSheetEditView::onSpriteAdded(SpriteID spriteID)
+void SpriteSheetEditView::onSpriteAdded(SpriteID spriteID, const EditorSprite&,
+                                        SpriteSheetID parentSheetID)
 {
-    // If the added sprite is in the loaded sheet, refresh the image.
-    if (activeSpriteSheetID) {
+    // If the added sprite is in the active sheet, refresh the image.
+    if (parentSheetID == activeSpriteSheetID) {
         const EditorSpriteSheet& spriteSheet{
             dataModel.spriteModel.getSpriteSheet(activeSpriteSheetID)};
-        if (std::ranges::contains(spriteSheet.spriteIDs, spriteID)) {
-            refreshSpriteSheetImage(spriteSheet);
-        }
+        refreshSpriteSheetImage(spriteSheet);
     }
 }
 
-void SpriteSheetEditView::onSpriteRemoved(SpriteID spriteID)
+void SpriteSheetEditView::onSpriteRemoved(SpriteID spriteID,
+                                          SpriteSheetID parentSheetID)
 {
-    // If the removed sprite is in the loaded sheet, refresh the image.
-    if (activeSpriteSheetID) {
+    // If the removed sprite is in the active sheet, refresh the image.
+    if (parentSheetID == activeSpriteSheetID) {
         const EditorSpriteSheet& spriteSheet{
             dataModel.spriteModel.getSpriteSheet(activeSpriteSheetID)};
-        if (std::ranges::contains(spriteSheet.spriteIDs, spriteID)) {
-            refreshSpriteSheetImage(spriteSheet);
-        }
+        refreshSpriteSheetImage(spriteSheet);
     }
 }
 

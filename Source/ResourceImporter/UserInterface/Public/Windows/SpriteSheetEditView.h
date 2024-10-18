@@ -33,14 +33,15 @@ private:
     /**
      * Adds the sprite to the active sheet and refreshes the texture.
      */
-    void onSpriteAdded(SpriteID spriteID);
+    void onSpriteAdded(SpriteID spriteID, const EditorSprite& sprite,
+                       SpriteSheetID parentSheetID);
 
     /**
      * Removes the sprite from the active sheet and refreshes the texture.
      * (If active sprite was removed) Sets activeSprite to invalid and returns
      * the stage to its default state.
      */
-    void onSpriteRemoved(SpriteID spriteID);
+    void onSpriteRemoved(SpriteID spriteID, SpriteSheetID parentSheetID);
 
     /**
      * Styles the given text.

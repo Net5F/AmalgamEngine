@@ -23,6 +23,7 @@
 #include "TitleButton.h"
 #include "LibraryAddMenu.h"
 #include "AddIconSheetDialog.h"
+#include "AddSpriteDialog.h"
 #include "SaveBoundingBoxDialog.h"
 
 namespace AM
@@ -69,6 +70,14 @@ public:
      * Opens the Library's "add list item" menu.
      */
     void openLibraryAddMenu();
+
+    /**
+     * Opens the "add sprite" dialog.
+     *
+     * @param spriteImageRelPaths The sprite images to add.
+     */
+    void openAddSpriteDialog(
+        const std::vector<std::string>& spriteImageRelPaths);
 
     void render() override;
 
@@ -119,6 +128,9 @@ private:
     /** Confirmation dialog. Child widgets can call openConfirmationDialog()
         to use it. */
     AUI::ConfirmationDialog confirmationDialog;
+
+    /** Dialog for adding a sprite to the active sprite sheet. */
+    AddSpriteDialog addSpriteDialog;
 
     /** Dialog for adding an icon sheet to the IconSheetPanel. */
     AddIconSheetDialog addIconSheetDialog;

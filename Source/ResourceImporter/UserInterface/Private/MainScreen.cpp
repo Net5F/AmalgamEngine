@@ -30,6 +30,7 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , entityGraphicSetPropertiesWindow{dataModel}
 , iconPropertiesWindow{dataModel}
 , confirmationDialog{{0, 0, 1920, 1080}, "ConfirmationDialog"}
+, addSpriteDialog{*this, dataModel}
 , addIconSheetDialog{dataModel}
 , saveBoundingBoxDialog{dataModel}
 {
@@ -52,6 +53,7 @@ MainScreen::MainScreen(DataModel& inDataModel)
     windows.push_back(iconPropertiesWindow);
     windows.push_back(libraryAddMenu);
     windows.push_back(confirmationDialog);
+    windows.push_back(addSpriteDialog);
     windows.push_back(addIconSheetDialog);
     windows.push_back(saveBoundingBoxDialog);
 
@@ -132,6 +134,7 @@ MainScreen::MainScreen(DataModel& inDataModel)
     // Make the modal dialogs invisible.
     libraryAddMenu.setIsVisible(false);
     confirmationDialog.setIsVisible(false);
+    addSpriteDialog.setIsVisible(false);
     addIconSheetDialog.setIsVisible(false);
     saveBoundingBoxDialog.setIsVisible(false);
 
@@ -218,6 +221,14 @@ void MainScreen::openLibraryAddMenu()
         libraryAddMenu.setIsVisible(true);
         setFocusAfterNextLayout(&libraryAddMenu);
     }
+}
+
+void MainScreen::openAddSpriteDialog(
+    const std::vector<std::string>& spriteImageRelPaths)
+{
+    // Pass the vector through and open the dialog.
+    addSpriteDialog.setSpriteImageRelPaths(spriteImageRelPaths);
+    addSpriteDialog.setIsVisible(true);
 }
 
 void MainScreen::render()

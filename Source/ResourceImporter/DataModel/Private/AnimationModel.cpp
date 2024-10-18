@@ -132,35 +132,17 @@ void AnimationModel::save(nlohmann::json& json)
     }
 }
 
-bool AnimationModel::addAnimation()
+AnimationID AnimationModel::addOrGetAnimation(std::string_view displayName)
 {
-    AnimationID numericID{
-        static_cast<AnimationID>(animationIDPool.reserveID())};
-
-    // Generate a unique name.
-    int nameCount{0};
-    std::string displayName{"NewAnimation"};
-    while (!animationNameIsUnique(numericID, displayName)) {
-        displayName = "NewAnimation" + std::to_string(nameCount);
-        nameCount++;
+    // Try to find an animation with the given name.
+    auto animationNameIt{animationNameMap.find(displayName)};
+    if (animationNameIt == animationNameMap.end()) {
+        // Doesn't exist. Add a new animation and return its ID.
+        return addAnimation(displayName);
     }
 
-    // Add the new animation to the maps.
-    animationMap.emplace(numericID, EditorAnimation{numericID, displayName});
-    animationNameMap.emplace(displayName, numericID);
-
-    // Default to a non-0 bounding box so it's easier to click.
-    EditorAnimation& animation{animationMap.at(numericID)};
-    static constexpr BoundingBox defaultBox{{0, 0, 0}, {20, 20, 20}};
-    animation.customModelBounds = defaultBox;
-
-    // Signal the new animation to the UI.
-    animationAddedSig.publish(numericID, animation);
-
-    // Set the new animation as the active library item.
-    dataModel.setActiveAnimation(numericID);
-
-    return true;
+    // Return the existing animation's ID.
+    return animationNameIt->second;
 }
 
 void AnimationModel::remAnimation(AnimationID animationID)
@@ -285,30 +267,37 @@ void AnimationModel::addAnimationFrame(AnimationID animationID,
         LOG_FATAL("Tried to add frame using invalid animation ID.");
     }
 
-    // If there's room, add to the first empty frame.
     EditorAnimation& animation{animationPair->second};
+    std::vector<EditorAnimation::Frame>& frames{animation.frames};
     Uint8 frameNumber{0};
-    if (animation.frames.size() < animation.frameCount) {
-        std::vector<EditorAnimation::Frame>& frames{animation.frames};
-        for (auto it{frames.begin()}; it != frames.end(); ++it) {
-            if (it->frameNumber != frameNumber) {
-                // Found an unused number. Insert our frame.
-                frames.insert(it, {frameNumber, newSprite});
-                break;
-            }
-            else {
-                frameNumber++;
-            }
+    bool frameInserted{false};
+    for (Uint8 i{0}; i < animation.frameCount; ++i) {
+        // If this is a gap between frames, insert our frame.
+        if ((i < frames.size()) && (frames.at(i).frameNumber != i)) {
+            frames.insert(frames.begin() + i, {i, newSprite});
+            frameNumber = i;
+            frameInserted = true;
+            break;
+        }
+        // Else if this is a gap at the end of the frames, insert our frame.
+        else if ((i >= frames.size())
+                 && (frames.size() < animation.frameCount)) {
+            frames.insert(frames.begin() + i, {i, newSprite});
+            frameNumber = i;
+            frameInserted = true;
+            break;
         }
     }
-    else {
-        // No room. Increase frameCount and add a frame to the end.
+
+    // If no frame was inserted, there are no gaps. Add our frame to the end 
+    // and increment frameCount.
+    if (!frameInserted) {
+        frameNumber = static_cast<Uint8>(frames.size());
+        frames.emplace_back(frameNumber, newSprite);
+
         animation.frameCount++;
         animationFrameCountChangedSig.publish(animationID,
                                               animation.frameCount);
-
-        frameNumber = (animation.frameCount - 1);
-        animation.frames.emplace_back(frameNumber, newSprite);
     }
 
     // Signal the change.
@@ -498,6 +487,30 @@ bool AnimationModel::animationNameIsUnique(AnimationID animationID,
 
     // Name isn't in the map, or it's owned by the same ID.
     return true;
+}
+
+AnimationID AnimationModel::addAnimation(std::string_view displayName)
+{
+    AM_ASSERT(animationNameMap.find(displayName) == animationNameMap.end(),
+              "Animation name already in use.");
+
+    AnimationID numericID{
+        static_cast<AnimationID>(animationIDPool.reserveID())};
+
+    // Add the new animation to the maps.
+    animationMap.emplace(numericID,
+                         EditorAnimation{numericID, std::string{displayName}});
+    animationNameMap.emplace(displayName, numericID);
+
+    // Default to a non-0 bounding box so it's easier to click.
+    EditorAnimation& animation{animationMap.at(numericID)};
+    static constexpr BoundingBox defaultBox{{0, 0, 0}, {20, 20, 20}};
+    animation.customModelBounds = defaultBox;
+
+    // Signal the new animation to the UI.
+    animationAddedSig.publish(numericID, animation);
+
+    return numericID;
 }
 
 } // End namespace ResourceImporter

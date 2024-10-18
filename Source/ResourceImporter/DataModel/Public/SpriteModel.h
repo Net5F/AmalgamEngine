@@ -43,7 +43,7 @@ public:
     void save(nlohmann::json& json);
 
     /**
-     * Adds an empty sprite sheet to the back of the spriteSheets vector.
+     * Adds a new empty sprite sheet and loads it.
      */
     bool addSpriteSheet();
 
@@ -63,12 +63,16 @@ public:
      *
      * @param imageRelPath The relative path to the sprite's individual image 
      *                     file.
+     * @param parentSheetID The ID of the sprite's parent sprite sheet.
+     * @param stageOriginX/Y Where the stage should begin, relative to the top 
+     *                       left of the sprite image.
      *
      * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
-    bool addSprite(const std::string& imageRelPath,
-                   SpriteSheetID parentSheetID);
+    bool addSprite(const std::string& imageRelPath, SpriteSheetID parentSheetID,
+                   const std::string& stageOriginX,
+                   const std::string& stageOriginY);
 
     /**
      * Removes the sprite with the given ID from the sprite map.

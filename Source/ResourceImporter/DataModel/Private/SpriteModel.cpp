@@ -192,7 +192,9 @@ void SpriteModel::remSpriteSheet(SpriteSheetID sheetID)
 }
 
 bool SpriteModel::addSprite(const std::string& imageRelPath,
-                            SpriteSheetID parentSheetID)
+                            SpriteSheetID parentSheetID,
+                            const std::string& stageOriginX,
+                            const std::string& stageOriginY)
 {
     // Get the file name from the image path (we use the file name as the 
     // sprite's display name).
@@ -218,11 +220,21 @@ bool SpriteModel::addSprite(const std::string& imageRelPath,
                      &(textureExtent.w), &(textureExtent.h));
     SDL_DestroyTexture(texture);
 
+    // Validate the stage origin.
+    SDL_Point stageOrigin{};
+    try {
+        stageOrigin.x = std::stoi(stageOriginX);
+        stageOrigin.y = std::stoi(stageOriginY);
+    } catch (std::exception&) {
+        errorString = "Error: Stage origin X or Y is not a valid integer.";
+        return false;
+    }
+
     // Add the new sprite to the maps.
     SpriteID numericID{static_cast<SpriteID>(spriteIDPool.reserveID())};
-    // TODO: Fill in stage origin
-    spriteMap.emplace(numericID, EditorSprite{numericID, imageRelPath,
-                                              displayName, textureExtent});
+    spriteMap.emplace(numericID,
+                      EditorSprite{numericID, imageRelPath, displayName,
+                                   textureExtent, stageOrigin});
     spriteNameMap.emplace(displayName, numericID);
 
     // Add the sprite to its parent sheet.
@@ -556,7 +568,7 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
         }
     }
 
-    // Find the power of two that our texture's side lengths should be in 
+    // Find the power of two that our texture's side lengths should equal, in 
     // order to fit all of the sprites (assuming a square grid).
     int spriteCount{static_cast<int>(spriteSheet.spriteIDs.size())};
     int gridSideLength{0};
@@ -615,17 +627,14 @@ void SpriteModel::addSpriteToAnimationIfNecessary(const EditorSprite& sprite)
     //       bulk adding sprites to an animation, the file system should serve 
     //       them to us in order anyway.
     if (getFrameNumber(sprite.displayName) != -1) {
-        // Name contains a frame number. Check if the animation already exists.
-        std::string_view animationName{deriveAnimationName(sprite.displayName)};
+        // Name contains a frame number. Derive the associated animation's name.
         AnimationModel& animationModel{dataModel.animationModel};
-        if (const EditorAnimation
-            * animation{animationModel.getAnimation(animationName)}) {
-            // Animation exists. Add this frame to the end.
-            animationModel.addAnimationFrame(animation->numericID, sprite);
-        }
-        else {
-            // Animation doesn't exist. Add it.
-        }
+        std::string_view animationName{deriveAnimationName(sprite.displayName)};
+
+        // Add this frame to the end of the animation.
+        AnimationID animationID{
+            animationModel.addOrGetAnimation(animationName)};
+        animationModel.addAnimationFrame(animationID, sprite);
     }
 }
 
@@ -690,7 +699,7 @@ int SpriteModel::getFrameNumber(const std::string& displayName)
 std::string_view
     SpriteModel::deriveAnimationName(std::string_view spriteDisplayName)
 {
-    return spriteDisplayName.substr(0, spriteDisplayName.find_first_of('_'));
+    return spriteDisplayName.substr(0, spriteDisplayName.find_last_of('_'));
 }
 
 } // End namespace ResourceImporter

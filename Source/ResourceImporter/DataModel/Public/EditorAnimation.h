@@ -28,7 +28,7 @@ struct EditorAnimation {
     std::string displayName{""};
 
     /** How long this animation is, in frames. */
-    Uint8 frameCount{10};
+    Uint8 frameCount{1};
 
     /** This animation's framerate (frames per second). */
     Uint8 fps{10};
@@ -40,7 +40,8 @@ struct EditorAnimation {
         std::reference_wrapper<const EditorSprite> sprite;
     };
     /** The frames of this animation, ordered by ascending frameNumber.
-        Only holds frames that actually contain a sprite. */
+        Only holds frames that actually contain a sprite.
+        Note: There will always be at least 1 frame present. */
     std::vector<Frame> frames;
 
     /** If true, this animation's modelBounds will be used in collision checks.

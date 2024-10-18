@@ -14,6 +14,7 @@ target_sources(ResourceImporter
         Private/Widgets/TimelineScrubber.cpp
         Private/Widgets/TitleButton.cpp
         Private/Windows/AddIconSheetDialog.cpp
+        Private/Windows/AddSpriteDialog.cpp
         Private/Windows/AnimationEditView.cpp
         Private/Windows/AnimationPropertiesWindow.cpp
         Private/Windows/BoundingBoxEditView.cpp
@@ -51,6 +52,7 @@ target_sources(ResourceImporter
         Public/Widgets/TimelineScrubber.h
         Public/Widgets/TitleButton.h
         Public/Windows/AddIconSheetDialog.h
+        Public/Windows/AddSpriteDialog.h
         Public/Windows/AnimationEditView.h
         Public/Windows/AnimationPropertiesWindow.h
         Public/Windows/BoundingBoxEditView.h
