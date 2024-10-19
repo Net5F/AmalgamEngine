@@ -226,8 +226,29 @@ bool SpriteModel::addSprite(const std::string& imageRelPath,
         stageOrigin.x = std::stoi(stageOriginX);
         stageOrigin.y = std::stoi(stageOriginY);
     } catch (std::exception&) {
-        errorString = "Error: Stage origin X or Y is not a valid integer.";
+        errorString = "Stage origin X or Y is not a valid integer.";
         return false;
+    }
+
+    // If the sprite is going to be added to an existing animation, validate 
+    // the texture size (all sprites in an animation must be the same size).
+    if (getFrameNumber(displayName) != -1) {
+        AnimationModel& animationModel{dataModel.animationModel};
+        std::string_view animationName{deriveAnimationName(displayName)};
+        if (const EditorAnimation
+            * animation{animationModel.getAnimation(animationName)}) {
+            // Sprite is going to be added to this animation. Validate size.
+            for (const auto& frame : animation->frames) {
+                const SDL_Rect& animTextureExtent{
+                    frame.sprite.get().textureExtent};
+                if ((textureExtent.w != animTextureExtent.w)
+                    || (textureExtent.h != animTextureExtent.h)) {
+                    errorString
+                        = "All sprites in an animation must be the same size.";
+                    return false;
+                }
+            }
+        }
     }
 
     // Add the new sprite to the maps.
@@ -555,6 +576,13 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
     //            Ideally, this would more intelligently pack the sprites to 
     //            minimize empty space.
 
+    // If there are no sprites, exit early.
+    if (spriteSheet.spriteIDs.size() == 0) {
+        spriteSheet.textureWidth = 0;
+        spriteSheet.textureHeight = 0;
+        return;
+    }
+
     // Determine the largest sprite size.
     int maxSpriteWidth{0};
     int maxSpriteHeight{0};
@@ -593,7 +621,12 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
             // If we're only going to fill half of the sheet or less, halve the 
             // height to save space.
             if (spriteCount <= (gridCellCount / 2)) {
-                spriteSheet.textureHeight /= 2;
+                if (spriteCount == 1) {
+                    spriteSheet.textureWidth /= 2;
+                }
+                else {
+                    spriteSheet.textureHeight /= 2;
+                }
             }
             break;
         }
@@ -632,9 +665,9 @@ void SpriteModel::addSpriteToAnimationIfNecessary(const EditorSprite& sprite)
         std::string_view animationName{deriveAnimationName(sprite.displayName)};
 
         // Add this frame to the end of the animation.
-        AnimationID animationID{
+        const EditorAnimation& animation{
             animationModel.addOrGetAnimation(animationName)};
-        animationModel.addAnimationFrame(animationID, sprite);
+        animationModel.addAnimationFrame(animation.numericID, sprite);
     }
 }
 
@@ -660,8 +693,14 @@ void SpriteModel::remSpriteFromAnimationIfNecessary(const EditorSprite& sprite)
             }
             AM_ASSERT(frameNumber != -1, "Failed to find sprite in animation.");
 
+            // Remove the sprite from the animation frame.
             dataModel.animationModel.clearAnimationFrame(
                 animation->numericID, static_cast<Uint8>(frameNumber));
+
+            // If the animation is now empty, delete it.
+            if (animation->frames.empty()) {
+                dataModel.animationModel.remAnimation(animation->numericID);
+            }
         }
         else {
             AM_ASSERT(false, "Animation did not exist when expected.");

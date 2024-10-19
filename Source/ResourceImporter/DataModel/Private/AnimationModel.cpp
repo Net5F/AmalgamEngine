@@ -132,7 +132,8 @@ void AnimationModel::save(nlohmann::json& json)
     }
 }
 
-AnimationID AnimationModel::addOrGetAnimation(std::string_view displayName)
+const EditorAnimation&
+    AnimationModel::addOrGetAnimation(std::string_view displayName)
 {
     // Try to find an animation with the given name.
     auto animationNameIt{animationNameMap.find(displayName)};
@@ -141,8 +142,8 @@ AnimationID AnimationModel::addOrGetAnimation(std::string_view displayName)
         return addAnimation(displayName);
     }
 
-    // Return the existing animation's ID.
-    return animationNameIt->second;
+    // Return the existing animation.
+    return animationMap.at(animationNameIt->second);
 }
 
 void AnimationModel::remAnimation(AnimationID animationID)
@@ -268,39 +269,56 @@ void AnimationModel::addAnimationFrame(AnimationID animationID,
     }
 
     EditorAnimation& animation{animationPair->second};
-    std::vector<EditorAnimation::Frame>& frames{animation.frames};
-    Uint8 frameNumber{0};
-    bool frameInserted{false};
-    for (Uint8 i{0}; i < animation.frameCount; ++i) {
-        // If this is a gap between frames, insert our frame.
-        if ((i < frames.size()) && (frames.at(i).frameNumber != i)) {
-            frames.insert(frames.begin() + i, {i, newSprite});
-            frameNumber = i;
-            frameInserted = true;
-            break;
-        }
-        // Else if this is a gap at the end of the frames, insert our frame.
-        else if ((i >= frames.size())
-                 && (frames.size() < animation.frameCount)) {
-            frames.insert(frames.begin() + i, {i, newSprite});
-            frameNumber = i;
-            frameInserted = true;
-            break;
+    std::vector<const EditorSprite*> frames{animation.getExpandedFrameVector()};
+
+    // If the new sprite isn't the same size as the other sprites, don't add it.
+    for (const EditorAnimation::Frame& frame : animation.frames) {
+        const SDL_Rect& textureExtent{frame.sprite.get().textureExtent};
+        if ((newSprite.textureExtent.w != textureExtent.w)
+            || (newSprite.textureExtent.h != textureExtent.h)) {
+            return;
         }
     }
 
-    // If no frame was inserted, there are no gaps. Add our frame to the end 
-    // and increment frameCount.
-    if (!frameInserted) {
-        frameNumber = static_cast<Uint8>(frames.size());
-        frames.emplace_back(frameNumber, newSprite);
+    // If there are no filled frames in the animation, and there are empty 
+    // frames, add the sprite to the first frame.
+    // Note: This should only occur with newly created animations.
+    int frameNumber{-1};
+    if ((animation.frames.size() == 0) && (animation.frameCount > 0)) {
+        frames.at(0) = &newSprite;
+        frameNumber = 0;
+    }
+    else {
+        // The animation has filled frames. If the last filled frame has an 
+        // empty slot after it, add the sprite to that slot.
+        for (std::size_t i{frames.size()}; i-- > 0;) {
+            if (frames.at(i)) {
+                // Found the last filled frame. Is there an empty frame after it?
+                if ((i + 1) < frames.size()) {
+                    // There's an empty frame after, add the sprite to it.
+                    frames.at(i + 1) = &newSprite;
+                    frameNumber = static_cast<Uint8>(i + 1);
+                }
 
-        animation.frameCount++;
-        animationFrameCountChangedSig.publish(animationID,
-                                              animation.frameCount);
+                break;
+            }
+        }
+
+        // If the last frame wasn't followed by an empty slot, add the sprite 
+        // to a new frame at the end.
+        if (frameNumber == -1) {
+            frames.emplace_back(&newSprite);
+            frameNumber = static_cast<Uint8>(frames.size() - 1);
+
+            // Update the frame count, since we added a frame.
+            animation.frameCount = static_cast<Uint8>(frames.size());
+            animationFrameCountChangedSig.publish(animationID,
+                                                  animation.frameCount);
+        }
     }
 
-    // Signal the change.
+    // Update the animation and signal the change.
+    animation.setFromExpandedFrameVector(frames);
     animationFrameChangedSig.publish(animationID, frameNumber, &newSprite);
 }
 
@@ -318,52 +336,19 @@ void AnimationModel::swapAnimationFrames(AnimationID animationID,
               "Invalid frame number.");
     AM_ASSERT(destFrameNumber < animation.frameCount,
               "Invalid frame number.");
+    std::vector<const EditorSprite*> frames{animation.getExpandedFrameVector()};
 
-    // Try to find the requested frames (if they're empty, they won't exist).
-    std::vector<EditorAnimation::Frame>& frames{animation.frames};
-    auto sourceFrame{frames.end()};
-    auto destFrame{frames.end()};
-    for (auto it{frames.begin()}; it != frames.end(); ++it) {
-        if (it->frameNumber == sourceFrameNumber) {
-            sourceFrame = it;
-        }
-        else if (it->frameNumber == destFrameNumber) {
-            destFrame = it;
-        }
-    }
+    // Swap the frames.
+    const EditorSprite* oldSourceSprite{frames.at(sourceFrameNumber)};
+    frames.at(sourceFrameNumber) = frames.at(destFrameNumber);
+    frames.at(destFrameNumber) = oldSourceSprite;
 
-    // If we found both frames, swap their contents.
-    const EditorSprite* newSourceSprite{nullptr};
-    const EditorSprite* newDestSprite{nullptr};
-    if ((sourceFrame != frames.end()) && (destFrame != frames.end())) {
-        auto sourceSprite{sourceFrame->sprite};
-        sourceFrame->sprite = destFrame->sprite;
-        destFrame->sprite = sourceSprite;
-        newSourceSprite = &(sourceFrame->sprite.get());
-        newDestSprite = &(destFrame->sprite.get());
-    }
-    else if (sourceFrame != frames.end()) {
-        // Swapping source with empty.
-        destFrame->sprite = sourceFrame->sprite;
-        frames.erase(sourceFrame);
-        newDestSprite = &(destFrame->sprite.get());
-    }
-    else if (sourceFrame != frames.end()) {
-        // Swapping dest with empty.
-        sourceFrame->sprite = destFrame->sprite;
-        frames.erase(destFrame);
-        newSourceSprite = &(sourceFrame->sprite.get());
-    }
-    else {
-        // Swapping two empty frames, do nothing.
-        return;
-    }
-
-    // Signal the changes.
+    // Update the animation and signal the changes.
+    animation.setFromExpandedFrameVector(frames);
     animationFrameChangedSig.publish(animationID, sourceFrameNumber,
-                                     newSourceSprite);
+                                     frames.at(sourceFrameNumber));
     animationFrameChangedSig.publish(animationID, destFrameNumber,
-                                     newDestSprite);
+                                     frames.at(destFrameNumber));
 }
 
 void AnimationModel::clearAnimationFrame(AnimationID animationID,
@@ -384,6 +369,7 @@ void AnimationModel::clearAnimationFrame(AnimationID animationID,
         if (it->frameNumber == frameNumber) {
             frames.erase(it);
             wasErased = true;
+            break;
         }
     }
 
@@ -489,7 +475,8 @@ bool AnimationModel::animationNameIsUnique(AnimationID animationID,
     return true;
 }
 
-AnimationID AnimationModel::addAnimation(std::string_view displayName)
+const EditorAnimation&
+    AnimationModel::addAnimation(std::string_view displayName)
 {
     AM_ASSERT(animationNameMap.find(displayName) == animationNameMap.end(),
               "Animation name already in use.");
@@ -510,7 +497,7 @@ AnimationID AnimationModel::addAnimation(std::string_view displayName)
     // Signal the new animation to the UI.
     animationAddedSig.publish(numericID, animation);
 
-    return numericID;
+    return animation;
 }
 
 } // End namespace ResourceImporter

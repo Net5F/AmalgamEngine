@@ -43,7 +43,7 @@ public:
      * Returns an animation with the given name. If it doesn't already exist, 
      * a new empty animation will be created.
      */
-    AnimationID addOrGetAnimation(std::string_view displayName);
+    const EditorAnimation& addOrGetAnimation(std::string_view displayName);
 
     /**
      * Removes the animation with the given ID from the associated map.
@@ -112,9 +112,9 @@ private:
                                  const std::string& displayName);
 
     /**
-     * Adds a new animation with the given name and returns its ID.
+     * Adds a new animation with the given name and returns it.
      */
-    AnimationID addAnimation(std::string_view displayName);
+    const EditorAnimation& addAnimation(std::string_view displayName);
 
     DataModel& dataModel;
 

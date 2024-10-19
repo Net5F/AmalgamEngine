@@ -409,10 +409,21 @@ void AnimationPropertiesWindow::saveFrameCount()
         // Convert the input string to an int.
         int newFrameCount{std::stoi(frameCountInput.getText())};
 
+        // Determine the lower bound. There must always be at least 1 frame 
+        // in every animation.
+        // If the animation has filled frames, only let it be reduced to the 
+        // position of the last filled frame.
+        int lowerBound{1};
+        const EditorAnimation& animation{
+            dataModel.animationModel.getAnimation(activeAnimationID)};
+        if (!(animation.frames.empty())) {
+            lowerBound = (animation.frames.back().frameNumber + 1);
+        }
+
         // Clamp the value to its bounds.
         // Note: There must be at least 1 frame in every animation.
         // Note: 1000 was chosen randomly. Adjust it if it's a problem.
-        newFrameCount = std::clamp(newFrameCount, 1, 1000);
+        newFrameCount = std::clamp(newFrameCount, lowerBound, 1000);
 
         // Apply the new value.
         dataModel.animationModel.setAnimationFrameCount(activeAnimationID,

@@ -226,6 +226,7 @@ void AnimationEditView::onAnimationRemoved(AnimationID animationID)
         // Set everything back to being invisible.
         spriteImage.setIsVisible(false);
         checkerboardImage.setIsVisible(false);
+        stageGraphic.setIsVisible(false);
         boundingBoxGizmo.setIsVisible(false);
     }
 }
@@ -261,7 +262,7 @@ void AnimationEditView::onTimelineSelectionChanged(Uint8 selectedFrameNumber)
         return;
     }
 
-    // Load the selected sprite image.
+    // Load the appropriate sprite image.
     std::string imagePath{dataModel.getWorkingIndividualSpritesDir()};
     imagePath += selectedSprite->imagePath;
     spriteImage.setSimpleImage(imagePath,

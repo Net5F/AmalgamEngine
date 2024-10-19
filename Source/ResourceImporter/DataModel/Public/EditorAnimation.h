@@ -75,10 +75,27 @@ struct EditorAnimation {
     const EditorSprite* getSpriteAtTime(double animationTime) const;
 
     /**
-     * Returns the sprite at the given frame of the current active animation, 
-     * or nullptr if the frame doesn't have a sprite.
+     * Returns the sprite that should be displayed at the given frame.
+     * If the given frame doesn't have a sprite, returns the closest sprite 
+     * from a previous frame.
+     * If there are no previous frames with a sprite, returns nullptr.
      */
     const EditorSprite* getSpriteAtFrame(Uint8 frameNumber) const;
+
+    /**
+     * Returns a vector that contains all the frames of this animation, 
+     * including empty frames (as nullptr).
+     *
+     * This form is more convenient during modifications (add, swap, remove), 
+     * but less convenient to iterate through.
+     */
+    std::vector<const EditorSprite*> getExpandedFrameVector() const;
+
+    /**
+     * Clears this animation and fills it to match the given vector.
+     */
+    void setFromExpandedFrameVector(
+        const std::vector<const EditorSprite*>& expandedFrameVector);
 };
 
 } // namespace ResourceImporter

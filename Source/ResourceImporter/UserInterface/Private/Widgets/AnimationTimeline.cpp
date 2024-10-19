@@ -167,9 +167,12 @@ void AnimationTimeline::onSpriteDragged(Uint8 frameNumber,
         }
         else {
             // Not the origin frame, return it to whatever it was.
-            oldCurrentFrame.hasSprite = (activeAnimation->getSpriteAtFrame(
-                                             currentSpriteDragFrameNumber)
-                                         != nullptr);
+            // Note: We don't use getSpriteAtFrame() because it may return a 
+            //       sprite from a previous frame.
+            auto expandedFrameVector{activeAnimation->getExpandedFrameVector()};
+            oldCurrentFrame.hasSprite
+                = (expandedFrameVector.at(currentSpriteDragFrameNumber)
+                   != nullptr);
         }
         newCurrentFrame.hasSprite = true;
 
