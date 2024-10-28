@@ -87,10 +87,10 @@ public:
     /** Sets the current active library item to the given icon. */
     void setActiveIcon(IconID newActiveIconID);
 
-    const std::string& getWorkingTexturesDir();
-    const std::string& getWorkingIndividualSpritesDir();
+    const std::string& getWorkingTexturesDir() const;
+    const std::string& getWorkingIndividualSpritesDir() const;
 
-    const std::string& getErrorString();
+    const std::string& getErrorString() const;
 
     /**
      * Checks that the given relative path corresponds to a valid sprite

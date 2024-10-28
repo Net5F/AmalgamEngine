@@ -1,6 +1,10 @@
 #pragma once
 
+#include <string>
 #include <SDL_rect.h>
+
+struct SDL_Renderer;
+struct SDL_Texture;
 
 namespace AM
 {
@@ -45,6 +49,15 @@ public:
      * the nearest whole number.
      */
     static SDL_Rect roundFRect(const SDL_FRect& rect);
+
+    /**
+     * Saves the given texture to a png file at the given path.
+     * If the file already exists, it will be overwritten.
+     *
+     * @return true if successful, else false.
+     */
+    static bool savePng(const std::string& filePath, SDL_Renderer* renderer,
+                        SDL_Texture* texture);
 };
 
 } // namespace AM

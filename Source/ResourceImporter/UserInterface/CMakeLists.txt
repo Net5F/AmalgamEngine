@@ -23,12 +23,13 @@ target_sources(ResourceImporter
         Private/Windows/EntityGraphicSetPropertiesWindow.cpp
         Private/Windows/GraphicSetEditView.cpp
         Private/Windows/GraphicSetPropertiesWindow.cpp
+        Private/Windows/HamburgerButtonWindow.cpp
+        Private/Windows/HamburgerMenu.cpp
         Private/Windows/IconEditView.cpp
         Private/Windows/IconPropertiesWindow.cpp
         Private/Windows/LibraryAddMenu.cpp
         Private/Windows/LibraryWindow.cpp
         Private/Windows/SaveBoundingBoxDialog.cpp
-        Private/Windows/SaveButtonWindow.cpp
         Private/Windows/SpriteEditView.cpp
         Private/Windows/SpritePropertiesWindow.cpp
         Private/Windows/SpriteSheetEditView.cpp
@@ -61,12 +62,13 @@ target_sources(ResourceImporter
         Public/Windows/EntityGraphicSetPropertiesWindow.h
         Public/Windows/GraphicSetEditView.h
         Public/Windows/GraphicSetPropertiesWindow.h
+        Public/Windows/HamburgerButtonWindow.h
+        Public/Windows/HamburgerMenu.h
         Public/Windows/IconEditView.h
         Public/Windows/IconPropertiesWindow.h
         Public/Windows/LibraryAddMenu.h
         Public/Windows/LibraryWindow.h
         Public/Windows/SaveBoundingBoxDialog.h
-        Public/Windows/SaveButtonWindow.h
         Public/Windows/SpriteEditView.h
         Public/Windows/SpritePropertiesWindow.h
         Public/Windows/SpriteSheetEditView.h

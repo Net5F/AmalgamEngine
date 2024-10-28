@@ -43,6 +43,12 @@ public:
     void save(nlohmann::json& json);
 
     /**
+     * Generates images for each sprite sheet and saves them to the SpriteSheets
+     * directory.
+     */
+    void exportSpriteSheetImages();
+
+    /**
      * Adds a new empty sprite sheet and loads it.
      */
     bool addSpriteSheet();

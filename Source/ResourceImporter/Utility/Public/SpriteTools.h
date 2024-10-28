@@ -3,10 +3,15 @@
 #include "BoundingBox.h"
 #include <SDL_rect.h>
 
+struct SDL_Texture;
+
 namespace AM
 {
 namespace ResourceImporter
 {
+class DataModel;
+struct EditorSpriteSheet;
+
 /**
  * Helper functions for working with sprite images.
  */
@@ -23,6 +28,14 @@ public:
     static BoundingBox
         calcSpriteStageWorldExtent(const SDL_Rect& spriteImageExtent,
                                    const SDL_Point& stageOrigin);
+
+    /**
+     * Generates a sprite sheet texture containing all of the sheet's sprites, 
+     * placed at their current textureExtents.
+     */
+    static SDL_Texture*
+        generateSpriteSheetTexture(const DataModel& dataModel,
+                                   const EditorSpriteSheet& spriteSheet);
 };
 
 } // End namespace ResourceImporter

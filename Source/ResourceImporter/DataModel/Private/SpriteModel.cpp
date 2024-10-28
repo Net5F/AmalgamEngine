@@ -4,10 +4,13 @@
 #include "EntityGraphicSetModel.h"
 #include "SpriteID.h"
 #include "StringTools.h"
+#include "SpriteTools.h"
+#include "SDLHelpers.h"
+#include "Log.h"
 #include "nlohmann/json.hpp"
 #include <SDL_render.h>
 #include <SDL_image.h>
-#include "Log.h"
+#include <filesystem>
 
 namespace AM
 {
@@ -139,6 +142,30 @@ void SpriteModel::save(nlohmann::json& json)
         }
 
         i++;
+    }
+}
+
+void SpriteModel::exportSpriteSheetImages()
+{
+    // Delete all of the existing files in the SpriteSheets directory.
+    std::string spriteSheetsPath{dataModel.getWorkingTexturesDir()
+                                 + "SpriteSheets"};
+    for (const std::filesystem::directory_entry& entry :
+         std::filesystem::directory_iterator(spriteSheetsPath)) {
+        std::filesystem::remove_all(entry.path());
+    }
+
+    // Generate a texture for each sprite sheet and save it to a png file.
+    for (auto& [spriteSheetID, spriteSheet] : spriteSheetMap) {
+        SDL_Texture* spriteSheetTexture{
+            SpriteTools::generateSpriteSheetTexture(dataModel, spriteSheet)};
+
+        std::string filePath{spriteSheetsPath};
+        filePath += "/" + spriteSheet.displayName + ".png";
+        if (!(SDLHelpers::savePng(filePath, sdlRenderer, spriteSheetTexture))) {
+            LOG_INFO("Failed to generate image for sprite sheet: %s",
+                     spriteSheet.displayName.c_str());
+        }
     }
 }
 

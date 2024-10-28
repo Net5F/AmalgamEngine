@@ -207,17 +207,17 @@ void DataModel::setActiveIcon(IconID newActiveIconID)
     activeLibraryItemChangedSig.publish(icon);
 }
 
-const std::string& DataModel::getWorkingTexturesDir()
+const std::string& DataModel::getWorkingTexturesDir() const
 {
     return workingTexturesDir;
 }
 
-const std::string& DataModel::getWorkingIndividualSpritesDir()
+const std::string& DataModel::getWorkingIndividualSpritesDir() const
 {
     return workingIndividualSpritesDir;
 }
 
-const std::string& DataModel::getErrorString()
+const std::string& DataModel::getErrorString() const
 {
     return errorString;
 }

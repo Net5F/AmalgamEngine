@@ -7,7 +7,6 @@
 #include "LibraryWindow.h"
 #include "SpriteSheetEditView.h"
 #include "SpriteSheetPropertiesWindow.h"
-#include "SaveButtonWindow.h"
 #include "BoundingBoxEditView.h"
 #include "BoundingBoxPropertiesWindow.h"
 #include "SpriteEditView.h"
@@ -22,6 +21,8 @@
 #include "IconPropertiesWindow.h"
 #include "TitleButton.h"
 #include "LibraryAddMenu.h"
+#include "HamburgerButtonWindow.h"
+#include "HamburgerMenu.h"
 #include "AddIconSheetDialog.h"
 #include "AddSpriteDialog.h"
 #include "SaveBoundingBoxDialog.h"
@@ -72,6 +73,11 @@ public:
     void openLibraryAddMenu();
 
     /**
+     * Opens the hamburger menu.
+     */
+    void openHamburgerMenu();
+
+    /**
      * Opens the "add sprite" dialog.
      *
      * @param spriteImageRelPaths The sprite images to add.
@@ -99,12 +105,6 @@ private:
     /** The left-side window for managing sprite sheets, sprites, etc. */
     LibraryWindow libraryWindow;
 
-    /** The menu for adding new items that opens when you press the "+". */
-    LibraryAddMenu libraryAddMenu;
-
-    /** The save button at the top of the screen, next to the properties. */
-    SaveButtonWindow saveButtonWindow;
-
     // Edit views
     /** The center stage for editing the active item. */
     SpriteSheetEditView spriteSheetEditView;
@@ -124,6 +124,16 @@ private:
     GraphicSetPropertiesWindow graphicSetPropertiesWindow;
     EntityGraphicSetPropertiesWindow entityGraphicSetPropertiesWindow;
     IconPropertiesWindow iconPropertiesWindow;
+
+    /** The menu for adding new items that opens when you press the "+". */
+    LibraryAddMenu libraryAddMenu;
+
+    /** The hamburger button at the top of the screen, next to the properties
+        window. */
+    HamburgerButtonWindow hamburgerButtonWindow;
+
+    /** The menu that opens when you press the hamburger button. */
+    HamburgerMenu hamburgerMenu;
 
     /** Confirmation dialog. Child widgets can call openConfirmationDialog()
         to use it. */

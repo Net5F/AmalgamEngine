@@ -53,13 +53,6 @@ private:
      */
     void refreshSpriteSheetImage(const EditorSpriteSheet& spriteSheet);
 
-    /**
-     * Generates a sprite sheet texture containing all of the sheet's sprites, 
-     * placed at their current textureExtents.
-     */
-    SDL_Texture*
-        generateSpriteSheetTexture(const EditorSpriteSheet& spriteSheet);
-
     /** Used to get the current working dir when displaying the sprite sheet. */
     DataModel& dataModel;
 

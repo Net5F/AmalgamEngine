@@ -2,6 +2,7 @@
 #include "MainScreen.h"
 #include "EditorSpriteSheet.h"
 #include "DataModel.h"
+#include "SpriteTools.h"
 #include "Paths.h"
 #include "AUI/ScalingHelpers.h"
 #include "AUI/Core.h"
@@ -117,7 +118,8 @@ void SpriteSheetEditView::refreshSpriteSheetImage(
     }
 
     // Generate the sheet's texture and load it into the Image widget.
-    SDL_Texture* spriteSheetTexture{generateSpriteSheetTexture(spriteSheet)};
+    SDL_Texture* spriteSheetTexture{
+        SpriteTools::generateSpriteSheetTexture(dataModel, spriteSheet)};
     spriteSheetImage.setSimpleImage(spriteSheetTexture, "GenSpriteSheet");
 
     // Calc a scaled texture extent that fits inside the max image bounds 
@@ -160,57 +162,6 @@ void SpriteSheetEditView::refreshSpriteSheetImage(
     // Make sure everything is visible.
     checkerboardImage.setIsVisible(true);
     spriteSheetImage.setIsVisible(true);
-}
-
-SDL_Texture* SpriteSheetEditView::generateSpriteSheetTexture(
-    const EditorSpriteSheet& spriteSheet)
-{
-    // Create an empty texture to hold the sprite sheet.
-    SDL_RendererInfo info{};
-    SDL_GetRendererInfo(AUI::Core::getRenderer(), &info);
-    AM_ASSERT(info.num_texture_formats != 0, "No supported pixel formats.");
-    SDL_Texture* spriteSheetTexture{
-        SDL_CreateTexture(AUI::Core::getRenderer(), info.texture_formats[0],
-                          SDL_TEXTUREACCESS_TARGET, spriteSheet.textureWidth,
-                          spriteSheet.textureHeight)};
-
-    // Set the blend mode (default is NONE, which causes black backgrounds).
-    SDL_SetTextureBlendMode(spriteSheetTexture, SDL_BLENDMODE_BLEND);
-
-    // Set the texture as the render target.
-    SDL_Texture* previousRenderTarget{
-        SDL_GetRenderTarget(AUI::Core::getRenderer())};
-    SDL_SetRenderTarget(AUI::Core::getRenderer(), spriteSheetTexture);
-
-    // Copy all of the sprites into the sprite sheet texture.
-    std::string fullImagePath{};
-    for (SpriteID spriteID : spriteSheet.spriteIDs) {
-        const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
-
-        // Load the sprite's texture.
-        fullImagePath = dataModel.getWorkingIndividualSpritesDir();
-        fullImagePath += sprite.imagePath;
-        SDL_Texture* spriteTexture{
-            IMG_LoadTexture(AUI::Core::getRenderer(), fullImagePath.c_str())};
-        if (!spriteTexture) {
-            LOG_INFO("Failed to load texture: %s", fullImagePath.c_str());
-            break;
-        }
-
-        // Copy the sprite into the sheet texture;
-        SDL_Rect sourceRect{0, 0, sprite.textureExtent.w,
-                            sprite.textureExtent.h};
-        SDL_RenderCopy(AUI::Core::getRenderer(), spriteTexture, &sourceRect,
-                       &(sprite.textureExtent));
-
-        // Clean up the sprite texture.
-        SDL_DestroyTexture(spriteTexture);
-    }
-
-    // Set the render target back to what it was.
-    SDL_SetRenderTarget(AUI::Core::getRenderer(), previousRenderTarget);
-
-    return spriteSheetTexture;
 }
 
 } // End namespace ResourceImporter

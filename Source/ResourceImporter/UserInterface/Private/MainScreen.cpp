@@ -13,8 +13,6 @@ MainScreen::MainScreen(DataModel& inDataModel)
 : AUI::Screen("MainScreen")
 , dataModel{inDataModel}
 , libraryWindow{*this, dataModel}
-, libraryAddMenu{}
-, saveButtonWindow{*this, dataModel}
 , spriteSheetEditView{dataModel}
 , boundingBoxEditView{dataModel, libraryWindow}
 , spriteEditView{dataModel}
@@ -29,6 +27,9 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , graphicSetPropertiesWindow{dataModel}
 , entityGraphicSetPropertiesWindow{dataModel}
 , iconPropertiesWindow{dataModel}
+, libraryAddMenu{}
+, hamburgerButtonWindow{*this}
+, hamburgerMenu{}
 , confirmationDialog{{0, 0, 1920, 1080}, "ConfirmationDialog"}
 , addSpriteDialog{*this, dataModel}
 , addIconSheetDialog{dataModel}
@@ -36,7 +37,7 @@ MainScreen::MainScreen(DataModel& inDataModel)
 {
     // Add our windows so they're included in rendering, etc.
     windows.push_back(libraryWindow);
-    windows.push_back(saveButtonWindow);
+    windows.push_back(spriteSheetEditView);
     windows.push_back(spriteSheetEditView);
     windows.push_back(boundingBoxEditView);
     windows.push_back(spriteEditView);
@@ -52,6 +53,8 @@ MainScreen::MainScreen(DataModel& inDataModel)
     windows.push_back(entityGraphicSetPropertiesWindow);
     windows.push_back(iconPropertiesWindow);
     windows.push_back(libraryAddMenu);
+    windows.push_back(hamburgerButtonWindow);
+    windows.push_back(hamburgerMenu);
     windows.push_back(confirmationDialog);
     windows.push_back(addSpriteDialog);
     windows.push_back(addIconSheetDialog);
@@ -64,12 +67,12 @@ MainScreen::MainScreen(DataModel& inDataModel)
                                                   + "Dialogs/Shadow.png");
 
     // Background image.
-    confirmationDialog.backgroundImage.setLogicalExtent({733, 370, 454, 224});
+    confirmationDialog.backgroundImage.setLogicalExtent({710, 370, 500, 300});
     confirmationDialog.backgroundImage.setNineSliceImage(
         (Paths::TEXTURE_DIR + "WindowBackground.png"), {1, 1, 1, 1});
 
     // Body text.
-    confirmationDialog.bodyText.setLogicalExtent({747, 388, 426, 132});
+    confirmationDialog.bodyText.setLogicalExtent({734, 390, 426, 132});
     confirmationDialog.bodyText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"),
                                         20);
     confirmationDialog.bodyText.setColor({255, 255, 255, 255});
@@ -91,8 +94,8 @@ MainScreen::MainScreen(DataModel& inDataModel)
         button.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
         button.text.setColor({255, 255, 255, 255});
     };
-    styleDialogButton(confirmationDialog.confirmButton, {1053, 530, 120, 50});
-    styleDialogButton(confirmationDialog.cancelButton, {919, 530, 120, 50});
+    styleDialogButton(confirmationDialog.confirmButton, {1074, 604, 120, 50});
+    styleDialogButton(confirmationDialog.cancelButton, {940, 604, 120, 50});
     confirmationDialog.cancelButton.text.setText("Cancel");
 
     // Set up the dialog's cancel button callback.
@@ -131,14 +134,29 @@ MainScreen::MainScreen(DataModel& inDataModel)
         dropFocus();
     });
 
+    /* Hamburger menu. */
+    hamburgerMenu.saveButton.setOnPressed([this]() {
+        openConfirmationDialog("Save over existing ResourceData.json?", "Save",
+                               [&]() { dataModel.save(); });
+        dropFocus();
+    });
+    hamburgerMenu.exportButton.setOnPressed([this]() {
+        openConfirmationDialog(
+            "This will export sprite sheet image files into the SpriteSheets "
+            "directory, overwriting any files currently present.\n\nProceed?",
+            "Export",
+            [&]() { dataModel.spriteModel.exportSpriteSheetImages(); });
+        dropFocus();
+    });
+
     // Make the modal dialogs invisible.
     libraryAddMenu.setIsVisible(false);
+    hamburgerMenu.setIsVisible(false);
     confirmationDialog.setIsVisible(false);
     addSpriteDialog.setIsVisible(false);
     addIconSheetDialog.setIsVisible(false);
     saveBoundingBoxDialog.setIsVisible(false);
 
-    /* Edit Stages and Properties Windows. */
     // Make the edit stages and properties windows invisible
     spriteSheetEditView.setIsVisible(false);
     spriteSheetPropertiesWindow.setIsVisible(false);
@@ -220,6 +238,16 @@ void MainScreen::openLibraryAddMenu()
         // Open the menu and focus it, so it can close itself if necessary.
         libraryAddMenu.setIsVisible(true);
         setFocusAfterNextLayout(&libraryAddMenu);
+    }
+}
+
+void MainScreen::openHamburgerMenu()
+{
+    // If the menu isn't already open.
+    if (!hamburgerMenu.getIsVisible()) {
+        // Open the menu and focus it, so it can close itself if necessary.
+        hamburgerMenu.setIsVisible(true);
+        setFocusAfterNextLayout(&hamburgerMenu);
     }
 }
 
