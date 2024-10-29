@@ -22,7 +22,7 @@ namespace ResourceImporter
 SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
                                                DataModel& inDataModel,
                                                LibraryWindow& inLibraryWindow)
-: AUI::Window({1617, 0, 303, 579}, "SpritePropertiesWindow")
+: AUI::Window({1617, 0, 303, 705}, "SpritePropertiesWindow")
 , mainScreen{inScreen}
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
 , nameInput{{24, 84, 255, 38}, "NameInput"}
@@ -43,6 +43,10 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
 , maxZInput{{150, 476, 129, 38}, "MaxZInput"}
 , collisionEnabledLabel{{24, 526, 210, 27}, "CollisionLabel"}
 , collisionEnabledInput{{257, 528, 22, 22}, "CollisionInput"}
+, stageOriginXLabel{{24, 597, 110, 38}, "StageOriginXLabel"}
+, stageOriginXInput{{150, 591, 129, 38}, "StageOriginXInput"}
+, stageOriginYLabel{{24, 647, 110, 38}, "StageOriginYLabel"}
+, stageOriginYInput{{150, 641, 129, 38}, "StageOriginYInput"}
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
 , activeSpriteID{NULL_SPRITE_ID}
@@ -52,8 +56,11 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
 , committedMaxX{0.0}
 , committedMaxY{0.0}
 , committedMaxZ{0.0}
-, backgroundImage{{0, 0, 303, 579}, "PropertiesBackground"}
-, headerImage{{0, 0, 303, 40}, "PropertiesHeader"}
+, committedStageOriginX{0}
+, committedStageOriginY{0}
+, backgroundImage{{0, 0, logicalExtent.w, logicalExtent.h},
+                  "PropertiesBackground"}
+, headerImage{{0, 0, logicalExtent.w, 40}, "PropertiesHeader"}
 , windowLabel{{12, 0, 282, 40}, "PropertiesWindowLabel"}
 {
     // Add our children so they're included in rendering, etc.
@@ -79,6 +86,10 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
     children.push_back(maxZInput);
     children.push_back(collisionEnabledLabel);
     children.push_back(collisionEnabledInput);
+    children.push_back(stageOriginXLabel);
+    children.push_back(stageOriginXInput);
+    children.push_back(stageOriginYLabel);
+    children.push_back(stageOriginYInput);
 
     /* Window setup */
     backgroundImage.setNineSliceImage(
@@ -146,6 +157,14 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
     collisionEnabledInput.setOnChecked([this]() { saveCollisionEnabled(); });
     collisionEnabledInput.setOnUnchecked([this]() { saveCollisionEnabled(); });
 
+    /* Stage origin entry. */
+    styleLabel(stageOriginXLabel, "Stage X", 21);
+    styleLabel(stageOriginYLabel, "Stage Y", 21);
+    styleTextInput(stageOriginXInput);
+    styleTextInput(stageOriginYInput);
+    stageOriginXInput.setOnTextCommitted([this]() { saveStageOriginX(); });
+    stageOriginYInput.setOnTextCommitted([this]() { saveStageOriginY(); });
+
     // When the active sprite is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
         .connect<&SpritePropertiesWindow::onActiveLibraryItemChanged>(*this);
@@ -161,6 +180,8 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
     spriteModel.spriteCollisionEnabledChanged
         .connect<&SpritePropertiesWindow::onSpriteCollisionEnabledChanged>(
             *this);
+    spriteModel.spriteStageOriginChanged
+        .connect<&SpritePropertiesWindow::onSpriteStageOriginChanged>(*this);
 
     // When a library item is selected, update the preview button.
     libraryWindow.selectedItemsChanged
@@ -204,6 +225,8 @@ void SpritePropertiesWindow::onActiveLibraryItemChanged(
     maxXInput.setText(toRoundedString(spriteModelBounds.max.x));
     maxYInput.setText(toRoundedString(spriteModelBounds.max.y));
     maxZInput.setText(toRoundedString(spriteModelBounds.max.z));
+    stageOriginXInput.setText(std::to_string(newActiveSprite->stageOrigin.x));
+    stageOriginYInput.setText(std::to_string(newActiveSprite->stageOrigin.y));
 
     if (newActiveSprite->collisionEnabled) {
         collisionEnabledInput.setCurrentState(AUI::Checkbox::State::Checked);
@@ -225,6 +248,8 @@ void SpritePropertiesWindow::onSpriteRemoved(SpriteID spriteID)
         maxXInput.setText("");
         maxYInput.setText("");
         maxZInput.setText("");
+        stageOriginXInput.setText("");
+        stageOriginYInput.setText("");
     }
 }
 
@@ -233,21 +258,6 @@ void SpritePropertiesWindow::onSpriteDisplayNameChanged(
 {
     if (spriteID == activeSpriteID) {
         nameInput.setText(newDisplayName);
-    }
-}
-
-void SpritePropertiesWindow::onSpriteCollisionEnabledChanged(
-    SpriteID spriteID, bool newCollisionEnabled)
-{
-    if (spriteID == activeSpriteID) {
-        if (newCollisionEnabled) {
-            collisionEnabledInput.setCurrentState(
-                AUI::Checkbox::State::Checked);
-        }
-        else {
-            collisionEnabledInput.setCurrentState(
-                AUI::Checkbox::State::Unchecked);
-        }
     }
 }
 
@@ -296,6 +306,30 @@ void SpritePropertiesWindow::onSpriteCustomModelBoundsChanged(
         maxXInput.setText(toRoundedString(newModelBounds.max.x));
         maxYInput.setText(toRoundedString(newModelBounds.max.y));
         maxZInput.setText(toRoundedString(newModelBounds.max.z));
+    }
+}
+
+void SpritePropertiesWindow::onSpriteCollisionEnabledChanged(
+    SpriteID spriteID, bool newCollisionEnabled)
+{
+    if (spriteID == activeSpriteID) {
+        if (newCollisionEnabled) {
+            collisionEnabledInput.setCurrentState(
+                AUI::Checkbox::State::Checked);
+        }
+        else {
+            collisionEnabledInput.setCurrentState(
+                AUI::Checkbox::State::Unchecked);
+        }
+    }
+}
+
+void SpritePropertiesWindow::onSpriteStageOriginChanged(
+    SpriteID spriteID, const SDL_Point& newStageOrigin)
+{
+    if (spriteID == activeSpriteID) {
+        stageOriginXInput.setText(std::to_string(newStageOrigin.x));
+        stageOriginYInput.setText(std::to_string(newStageOrigin.y));
     }
 }
 
@@ -413,8 +447,8 @@ void SpritePropertiesWindow::saveMinX()
         newModelBounds.min.x = std::clamp(newMinX, 0.f, newModelBounds.max.x);
 
         // Apply the new value.
-        dataModel.spriteModel.setSpriteCustomModelBounds(
-            activeSpriteID, BoundingBox(newModelBounds));
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinX));
@@ -436,8 +470,8 @@ void SpritePropertiesWindow::saveMinY()
         newModelBounds.min.y = std::clamp(newMinY, 0.f, newModelBounds.max.y);
 
         // Apply the new value.
-        dataModel.spriteModel.setSpriteCustomModelBounds(
-            activeSpriteID, BoundingBox(newModelBounds));
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinY));
@@ -459,8 +493,8 @@ void SpritePropertiesWindow::saveMinZ()
         newModelBounds.min.z = std::clamp(newMinZ, 0.f, newModelBounds.max.z);
 
         // Apply the new value.
-        dataModel.spriteModel.setSpriteCustomModelBounds(
-            activeSpriteID, BoundingBox(newModelBounds));
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinZ));
@@ -485,8 +519,8 @@ void SpritePropertiesWindow::saveMaxX()
             = std::clamp(newMaxX, newModelBounds.min.x, stageWorldExtent.max.x);
 
         // Apply the new value.
-        dataModel.spriteModel.setSpriteCustomModelBounds(
-            activeSpriteID, BoundingBox(newModelBounds));
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxXInput.setText(std::to_string(committedMaxX));
@@ -511,8 +545,8 @@ void SpritePropertiesWindow::saveMaxY()
             = std::clamp(newMaxY, newModelBounds.min.y, stageWorldExtent.max.y);
 
         // Apply the new value.
-        dataModel.spriteModel.setSpriteCustomModelBounds(
-            activeSpriteID, BoundingBox(newModelBounds));
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));
@@ -526,7 +560,7 @@ void SpritePropertiesWindow::saveMaxZ()
         // Convert the input string to a float.
         float newMaxZ{std::stof(maxZInput.getText())};
 
-        // Clamp the value to its lower bound.
+        // Clamp the value to its bounds.
         const EditorSprite& activeSprite{
             dataModel.spriteModel.getSprite(activeSpriteID)};
         BoundingBox newModelBounds{
@@ -537,8 +571,8 @@ void SpritePropertiesWindow::saveMaxZ()
             = std::clamp(newMaxZ, newModelBounds.min.z, stageWorldExtent.max.z);
 
         // Apply the new value.
-        dataModel.spriteModel.setSpriteCustomModelBounds(
-            activeSpriteID, BoundingBox(newModelBounds));
+        dataModel.spriteModel.setSpriteCustomModelBounds(activeSpriteID,
+                                                         newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));
@@ -551,6 +585,52 @@ void SpritePropertiesWindow::saveCollisionEnabled()
                            == AUI::Checkbox::State::Checked)};
     dataModel.spriteModel.setSpriteCollisionEnabled(activeSpriteID,
                                                     collisionEnabled);
+}
+
+void SpritePropertiesWindow::saveStageOriginX()
+{
+    // Validate the user input as a valid int.
+    try {
+        // Convert the input string to an int.
+        int newStageOriginX{std::stoi(stageOriginXInput.getText())};
+
+        // Clamp the value to its bounds.
+        const EditorSprite& activeSprite{
+            dataModel.spriteModel.getSprite(activeSpriteID)};
+        SDL_Point newStageOrigin{activeSprite.stageOrigin};
+        newStageOrigin.x
+            = std::clamp(newStageOriginX, 0, activeSprite.textureExtent.w);
+
+        // Apply the new value.
+        dataModel.spriteModel.setSpriteStageOrigin(activeSpriteID,
+                                                   newStageOrigin);
+    } catch (std::exception&) {
+        // Input was not valid, reset the field to what it was.
+        stageOriginXInput.setText(std::to_string(committedStageOriginX));
+    }
+}
+
+void SpritePropertiesWindow::saveStageOriginY()
+{
+    // Validate the user input as a valid int.
+    try {
+        // Convert the input string to an int.
+        int newStageOriginY{std::stoi(stageOriginYInput.getText())};
+
+        // Clamp the value to its bounds.
+        const EditorSprite& activeSprite{
+            dataModel.spriteModel.getSprite(activeSpriteID)};
+        SDL_Point newStageOrigin{activeSprite.stageOrigin};
+        newStageOrigin.y
+            = std::clamp(newStageOriginY, 0, activeSprite.textureExtent.h);
+
+        // Apply the new value.
+        dataModel.spriteModel.setSpriteStageOrigin(activeSpriteID,
+                                                   newStageOrigin);
+    } catch (std::exception&) {
+        // Input was not valid, reset the field to what it was.
+        stageOriginYInput.setText(std::to_string(committedStageOriginY));
+    }
 }
 
 } // End namespace ResourceImporter

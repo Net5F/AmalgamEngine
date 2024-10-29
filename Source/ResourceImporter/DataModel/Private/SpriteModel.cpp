@@ -41,6 +41,7 @@ SpriteModel::SpriteModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer)
 , spriteModelBoundsIDChanged{spriteModelBoundsIDChangedSig}
 , spriteCustomModelBoundsChanged{spriteCustomModelBoundsChangedSig}
 , spriteCollisionEnabledChanged{spriteCollisionEnabledChangedSig}
+, spriteStageOriginChanged{spriteStageOriginChangedSig}
 {
     // Reserve the null sprite and sheet's ID (the engine provides it in code, 
     // so we don't need it in the json).
@@ -439,6 +440,21 @@ void SpriteModel::setSpriteCollisionEnabled(SpriteID spriteID,
     sprite.collisionEnabled = newCollisionEnabled;
 
     spriteCollisionEnabledChangedSig.publish(spriteID, newCollisionEnabled);
+}
+
+void SpriteModel::setSpriteStageOrigin(SpriteID spriteID,
+                                       const SDL_Point& newStageOrigin)
+{
+    auto spritePair{spriteMap.find(spriteID)};
+    if (spritePair == spriteMap.end()) {
+        LOG_FATAL("Tried to set stageOrigin using invalid sprite ID.");
+    }
+
+    // Set the new stageOrigin and signal the change.
+    EditorSprite& sprite{spritePair->second};
+    sprite.stageOrigin = newStageOrigin;
+
+    spriteStageOriginChangedSig.publish(spriteID, newStageOrigin);
 }
 
 void SpriteModel::resetModelState()

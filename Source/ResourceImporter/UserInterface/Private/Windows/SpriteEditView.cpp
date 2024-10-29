@@ -61,6 +61,8 @@ SpriteEditView::SpriteEditView(DataModel& inDataModel)
         .connect<&SpriteEditView::onSpriteModelBoundsIDChanged>(*this);
     dataModel.spriteModel.spriteCustomModelBoundsChanged
         .connect<&SpriteEditView::onSpriteCustomModelBoundsChanged>(*this);
+    dataModel.spriteModel.spriteStageOriginChanged
+        .connect<&SpriteEditView::onSpriteStageOriginChanged>(*this);
     dataModel.spriteModel.spriteRemoved
         .connect<&SpriteEditView::onSpriteRemoved>(*this);
 
@@ -168,6 +170,24 @@ void SpriteEditView::onSpriteCustomModelBoundsChanged(
 
     // Update the gizmo.
     boundingBoxGizmo.setBoundingBox(newCustomModelBounds);
+}
+
+void SpriteEditView::onSpriteStageOriginChanged(SpriteID spriteID,
+                                                const SDL_Point& newStageOrigin)
+{
+    // If the sprite isn't active or isn't set to custom bounds, do nothing.
+    const EditorSprite& sprite{dataModel.spriteModel.getSprite(spriteID)};
+    if ((spriteID != activeSpriteID) || sprite.modelBoundsID) {
+        return;
+    }
+
+    // Update up the stage graphic.
+    const SDL_Rect& gizmoClippedExtent{boundingBoxGizmo.getClippedExtent()};
+    SDL_Rect actualSpriteExtent{AUI::ScalingHelpers::logicalToActual(
+        boundingBoxGizmo.getLogicalCenteredSpriteExtent())};
+    stageGraphic.updateStage(sprite.textureExtent, sprite.stageOrigin,
+                             {(gizmoClippedExtent.x + actualSpriteExtent.x),
+                              (gizmoClippedExtent.y + actualSpriteExtent.y)});
 }
 
 void SpriteEditView::onSpriteRemoved(SpriteID spriteID)

@@ -518,7 +518,7 @@ void AnimationPropertiesWindow::saveMinX()
 
         // Apply the new value.
         dataModel.animationModel.setAnimationCustomModelBounds(
-            activeAnimationID, BoundingBox(newModelBounds));
+            activeAnimationID, newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinX));
@@ -541,7 +541,7 @@ void AnimationPropertiesWindow::saveMinY()
 
         // Apply the new value.
         dataModel.animationModel.setAnimationCustomModelBounds(
-            activeAnimationID, BoundingBox(newModelBounds));
+            activeAnimationID, newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinY));
@@ -564,7 +564,7 @@ void AnimationPropertiesWindow::saveMinZ()
 
         // Apply the new value.
         dataModel.animationModel.setAnimationCustomModelBounds(
-            activeAnimationID, BoundingBox(newModelBounds));
+            activeAnimationID, newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         minXInput.setText(std::to_string(committedMinZ));
@@ -594,7 +594,7 @@ void AnimationPropertiesWindow::saveMaxX()
 
         // Apply the new value.
         dataModel.animationModel.setAnimationCustomModelBounds(
-            activeAnimationID, BoundingBox(newModelBounds));
+            activeAnimationID, newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxXInput.setText(std::to_string(committedMaxX));
@@ -625,7 +625,7 @@ void AnimationPropertiesWindow::saveMaxY()
 
         // Apply the new value.
         dataModel.animationModel.setAnimationCustomModelBounds(
-            activeAnimationID, BoundingBox(newModelBounds));
+            activeAnimationID, newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));
@@ -639,7 +639,7 @@ void AnimationPropertiesWindow::saveMaxZ()
         // Convert the input string to a float.
         float newMaxZ{std::stof(maxZInput.getText())};
 
-        // Clamp the value to its lower bound.
+        // Clamp the value to its bounds.
         const EditorAnimation& activeAnimation{
             dataModel.animationModel.getAnimation(activeAnimationID)};
         AM_ASSERT(activeAnimation.frames.size() > 0,
@@ -655,7 +655,7 @@ void AnimationPropertiesWindow::saveMaxZ()
 
         // Apply the new value.
         dataModel.animationModel.setAnimationCustomModelBounds(
-            activeAnimationID, BoundingBox(newModelBounds));
+            activeAnimationID, newModelBounds);
     } catch (std::exception&) {
         // Input was not valid, reset the field to what it was.
         maxYInput.setText(std::to_string(committedMaxY));

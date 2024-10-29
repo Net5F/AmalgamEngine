@@ -66,6 +66,12 @@ public:
     AUI::Text collisionEnabledLabel;
     AUI::Checkbox collisionEnabledInput;
 
+    AUI::Text stageOriginXLabel;
+    MainTextInput stageOriginXInput;
+
+    AUI::Text stageOriginYLabel;
+    MainTextInput stageOriginYInput;
+
 private:
     /**
      * If the new active item is a sprite, loads it's data into this panel.
@@ -89,6 +95,8 @@ private:
         SpriteID spriteID, const BoundingBox& newCustomModelBounds);
     void onSpriteCollisionEnabledChanged(SpriteID spriteID,
                                          bool newCollisionEnabled);
+    void onSpriteStageOriginChanged(SpriteID spriteID,
+                                    const SDL_Point& newStageOrigin);
 
     /**
      * Updates boundingBoxButton to show whether the selection is assignable.
@@ -130,8 +138,10 @@ private:
     void saveMaxY();
     void saveMaxZ();
     void saveCollisionEnabled();
+    void saveStageOriginX();
+    void saveStageOriginY();
 
-    /** The below floats save the committed values, so we can revert to them
+    /** The below variables save the committed values, so we can revert to them
         if the user inputs invalid characters. */
     float committedMinX;
     float committedMinY;
@@ -139,6 +149,8 @@ private:
     float committedMaxX;
     float committedMaxY;
     float committedMaxZ;
+    int committedStageOriginX;
+    int committedStageOriginY;
 
     //-------------------------------------------------------------------------
     // Private child widgets

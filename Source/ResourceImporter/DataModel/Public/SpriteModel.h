@@ -104,6 +104,8 @@ public:
     void setSpriteCustomModelBounds(SpriteID spriteID,
                                     const BoundingBox& newModelBounds);
     void setSpriteCollisionEnabled(SpriteID spriteID, bool newCollisionEnabled);
+    void setSpriteStageOrigin(SpriteID spriteID,
+                              const SDL_Point& newStageOrigin);
 
     /** Resets the model state, setting it back to default. */
     void resetModelState();
@@ -240,6 +242,8 @@ private:
         spriteCustomModelBoundsChangedSig;
     entt::sigh<void(SpriteID spriteID, bool newCollisionEnabled)>
         spriteCollisionEnabledChangedSig;
+    entt::sigh<void(SpriteID spriteID, const SDL_Point& newStageOrigin)>
+        spriteStageOriginChangedSig;
 
 public:
     //-------------------------------------------------------------------------
@@ -279,6 +283,10 @@ public:
     /** A sprite's "collision enabled" field has changed. */
     entt::sink<entt::sigh<void(SpriteID spriteID, bool newCollisionEnabled)>>
         spriteCollisionEnabledChanged;
+    /** A sprite's stage origin has changed. */
+    entt::sink<
+        entt::sigh<void(SpriteID spriteID, const SDL_Point& newStageOrigin)>>
+        spriteStageOriginChanged;
 };
 
 } // namespace ResourceImporter

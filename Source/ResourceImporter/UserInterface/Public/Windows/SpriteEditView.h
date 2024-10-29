@@ -40,6 +40,8 @@ private:
                                       BoundingBoxID newModelBoundsID);
     void onSpriteCustomModelBoundsChanged(
         SpriteID spriteID, const BoundingBox& newCustomModelBounds);
+    void onSpriteStageOriginChanged(SpriteID spriteID,
+                                    const SDL_Point& newStageOrigin);
 
     /**
      * (If active sprite was removed) Sets activeSprite to invalid and returns
