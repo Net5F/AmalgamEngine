@@ -188,6 +188,9 @@ void SpriteEditView::onSpriteStageOriginChanged(SpriteID spriteID,
     stageGraphic.updateStage(sprite.textureExtent, sprite.stageOrigin,
                              {(gizmoClippedExtent.x + actualSpriteExtent.x),
                               (gizmoClippedExtent.y + actualSpriteExtent.y)});
+
+    // Update the gizmo.
+    boundingBoxGizmo.setStageOrigin(sprite.stageOrigin);
 }
 
 void SpriteEditView::onSpriteRemoved(SpriteID spriteID)
