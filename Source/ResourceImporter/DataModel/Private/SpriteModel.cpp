@@ -286,6 +286,11 @@ bool SpriteModel::addSprite(const std::string& imageRelPath,
                                    textureExtent, stageOrigin});
     spriteNameMap.emplace(displayName, numericID);
 
+    // Default to a non-0 bounding box so it's easier to click.
+    EditorSprite& sprite{spriteMap.at(numericID)};
+    static constexpr BoundingBox defaultBox{{0, 0, 0}, {20, 20, 20}};
+    sprite.customModelBounds = defaultBox;
+
     // Add the sprite to its parent sheet.
     EditorSpriteSheet& parentSheet{mgetSpriteSheet(parentSheetID)};
     parentSheet.spriteIDs.push_back(numericID);
@@ -294,7 +299,6 @@ bool SpriteModel::addSprite(const std::string& imageRelPath,
     refreshSpriteSheet(parentSheet);
 
     // Signal the new sprite to the UI.
-    EditorSprite& sprite{spriteMap.at(numericID)};
     spriteAddedSig.publish(numericID, sprite, parentSheetID);
 
     // Add the sprite to an animation if necessary.
