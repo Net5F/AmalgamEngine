@@ -349,6 +349,10 @@ const Sprite&
     // Get the current sprite for this graphic.
     const EntityGraphicSet& graphicSet{
         graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
+    AM_ASSERT(graphicSet.graphics.contains(clientGraphicState.graphicType),
+              "Tried to get entity sprite that doesn't exist in set. Set: %s, "
+              "Graphic type: %u",
+              graphicSet.displayName.c_str(), clientGraphicState.graphicType);
     const GraphicRef& graphic{
         graphicSet.graphics.at(clientGraphicState.graphicType)};
     const Sprite* sprite{nullptr};

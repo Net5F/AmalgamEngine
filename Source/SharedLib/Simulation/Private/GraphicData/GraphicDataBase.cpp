@@ -369,7 +369,7 @@ void GraphicDataBase::parseSprite(const nlohmann::json& spriteJson)
     // Add the display name and IDs.
     sprite.numericID = spriteJson.at("numericID");
     sprite.displayName = spriteJson.at("displayName").get<std::string>();
-    sprite.stringID = spriteJson.at("stringID").get<std::string>();
+    StringTools::deriveStringID(sprite.displayName, sprite.stringID);
 
     // Add whether the sprite has a bounding box or not.
     sprite.collisionEnabled = spriteJson.at("collisionEnabled");
@@ -391,7 +391,7 @@ void GraphicDataBase::parseAnimation(const nlohmann::json& animationJson)
     // Add the display name and IDs.
     animation.numericID = animationJson.at("numericID");
     animation.displayName = animationJson.at("displayName").get<std::string>();
-    animation.stringID = animationJson.at("stringID").get<std::string>();
+    StringTools::deriveStringID(animation.displayName, animation.stringID);
 
     // Add the frame count and fps.
     animation.frameCount = animationJson.at("frameCount");
@@ -427,10 +427,10 @@ void GraphicDataBase::parseTerrainGraphicSet(const nlohmann::json& graphicSetJso
     // Add a graphic set to the appropriate vector.
     GraphicRef nullSprite{sprites[0]};
     TerrainGraphicSet& graphicSet{terrainGraphicSets.emplace_back(
-        GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
-                   graphicSetJson.at("stringID").get<std::string>(),
+        GraphicSet{graphicSetJson.at("displayName").get<std::string>(), "",
                    graphicSetJson.at("numericID")},
         constructAndFillArray<Terrain::Height::Count>(nullSprite))};
+    StringTools::deriveStringID(graphicSet.displayName, graphicSet.stringID);
 
     // Add the graphics.
     std::size_t index{0};
@@ -453,10 +453,10 @@ void GraphicDataBase::parseFloorGraphicSet(
     // Add a graphic set to the appropriate vector.
     GraphicRef nullSprite{sprites[0]};
     FloorGraphicSet& graphicSet{floorGraphicSets.emplace_back(
-        GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
-                   graphicSetJson.at("stringID").get<std::string>(),
+        GraphicSet{graphicSetJson.at("displayName").get<std::string>(), "",
                    graphicSetJson.at("numericID")},
         constructAndFillArray<FloorGraphicSet::VARIATION_COUNT>(nullSprite))};
+    StringTools::deriveStringID(graphicSet.displayName, graphicSet.stringID);
 
     // Add the graphics.
     std::size_t index{0};
@@ -477,7 +477,6 @@ void GraphicDataBase::parseWallGraphicSet(const nlohmann::json& graphicSetJson)
 {
     Uint16 numericID{graphicSetJson.at("numericID")};
     std::string displayName{graphicSetJson.at("displayName").get<std::string>()};
-    std::string stringID{graphicSetJson.at("stringID").get<std::string>()};
 
     // Add the graphics.
     const nlohmann::json& graphicIDJson{graphicSetJson.at("graphicIDs")};
@@ -487,10 +486,11 @@ void GraphicDataBase::parseWallGraphicSet(const nlohmann::json& graphicSetJson)
     GraphicRef northeastGraphic{getGraphic(graphicIDJson[3].get<GraphicID>())};
 
     // Save the graphic set in the appropriate vector.
-    wallGraphicSets.emplace_back(
-        GraphicSet{displayName, stringID, numericID},
+    WallGraphicSet& graphicSet{wallGraphicSets.emplace_back(
+        GraphicSet{displayName, "", numericID},
         std::array<GraphicRef, Wall::Type::Count>{
-            westGraphic, northGraphic, northwestGraphic, northeastGraphic});
+            westGraphic, northGraphic, northwestGraphic, northeastGraphic})};
+    StringTools::deriveStringID(graphicSet.displayName, graphicSet.stringID);
 }
 
 void GraphicDataBase::parseObjectGraphicSet(
@@ -499,10 +499,10 @@ void GraphicDataBase::parseObjectGraphicSet(
     // Add a graphic set to the appropriate vector.
     GraphicRef nullSprite{sprites[0]};
     ObjectGraphicSet& graphicSet{objectGraphicSets.emplace_back(
-        GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
-                   graphicSetJson.at("stringID").get<std::string>(),
+        GraphicSet{graphicSetJson.at("displayName").get<std::string>(), "",
                    graphicSetJson.at("numericID")},
         constructAndFillArray<ObjectGraphicSet::VARIATION_COUNT>(nullSprite))};
+    StringTools::deriveStringID(graphicSet.displayName, graphicSet.stringID);
 
     // Add the graphics.
     std::size_t index{0};
@@ -524,9 +524,9 @@ void GraphicDataBase::parseEntityGraphicSet(
 {
     // Add a graphic set to the appropriate vector.
     EntityGraphicSet& graphicSet{entityGraphicSets.emplace_back(
-        GraphicSet{graphicSetJson.at("displayName").get<std::string>(),
-                   graphicSetJson.at("stringID").get<std::string>(),
+        GraphicSet{graphicSetJson.at("displayName").get<std::string>(), "",
                    graphicSetJson.at("numericID")})};
+    StringTools::deriveStringID(graphicSet.displayName, graphicSet.stringID);
 
     // Add the graphics.
     const auto& graphicIDTypesJson{graphicSetJson.at("graphicIDTypes")};

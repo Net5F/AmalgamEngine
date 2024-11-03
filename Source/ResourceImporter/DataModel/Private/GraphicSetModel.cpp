@@ -644,9 +644,6 @@ void GraphicSetModel::saveTerrain(nlohmann::json& json)
     for (auto& graphicSetPair : terrainMap) {
         EditorTerrainGraphicSet& graphicSet{graphicSetPair.second};
         json["terrain"][i]["displayName"] = graphicSet.displayName;
-        std::string stringID{};
-        StringTools::deriveStringID(graphicSet.displayName, stringID);
-        json["terrain"][i]["stringID"] = stringID;
         json["terrain"][i]["numericID"] = graphicSetID++;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["terrain"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
@@ -666,9 +663,6 @@ void GraphicSetModel::saveFloors(nlohmann::json& json)
     for (auto& graphicSetPair : floorMap) {
         EditorFloorGraphicSet& graphicSet{graphicSetPair.second};
         json["floors"][i]["displayName"] = graphicSet.displayName;
-        std::string stringID{};
-        StringTools::deriveStringID(graphicSet.displayName, stringID);
-        json["floors"][i]["stringID"] = stringID;
         json["floors"][i]["numericID"] = graphicSetID++;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["floors"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
@@ -688,9 +682,6 @@ void GraphicSetModel::saveWalls(nlohmann::json& json)
     for (auto& graphicSetPair : wallMap) {
         EditorWallGraphicSet& graphicSet{graphicSetPair.second};
         json["walls"][i]["displayName"] = graphicSet.displayName;
-        std::string stringID{};
-        StringTools::deriveStringID(graphicSet.displayName, stringID);
-        json["walls"][i]["stringID"] = stringID;
         json["walls"][i]["numericID"] = graphicSetID++;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["walls"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
@@ -710,9 +701,6 @@ void GraphicSetModel::saveObjects(nlohmann::json& json)
     for (auto& graphicSetPair : objectMap) {
         EditorObjectGraphicSet& graphicSet{graphicSetPair.second};
         json["objects"][i]["displayName"] = graphicSet.displayName;
-        std::string stringID{};
-        StringTools::deriveStringID(graphicSet.displayName, stringID);
-        json["objects"][i]["stringID"] = stringID;
         json["objects"][i]["numericID"] = graphicSetID++;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["objects"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];

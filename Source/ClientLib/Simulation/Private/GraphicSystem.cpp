@@ -97,24 +97,29 @@ EntityGraphicType GraphicSystem::getUpdatedRunGraphicType(
     // includes that direction, don't change the graphic.
     // This will cause a "strafe" effect when moving ordinally, if the 
     // ordinal graphics are missing but the cardinal are present.
+    EntityGraphicType currentType{clientGraphicState.graphicType};
+    Rotation::Direction currentDirection{
+        toDirection(clientGraphicState.graphicType)};
     bool isDesiredSW{desiredType == EntityGraphicType::RunSouthWest};
     bool isDesiredNW{desiredType == EntityGraphicType::RunNorthWest};
     bool isDesiredNE{desiredType == EntityGraphicType::RunNorthEast};
     bool isDesiredSE{desiredType == EntityGraphicType::RunSouthEast};
-    EntityGraphicType currentType{clientGraphicState.graphicType};
-    if (graphicSet.graphics.contains(currentType)) {
-        Rotation::Direction currentDirection{
-            toDirection(clientGraphicState.graphicType)};
-        bool isCurrentSouth{currentDirection == Rotation::Direction::South};
-        bool isCurrentWest{currentDirection == Rotation::Direction::West};
-        bool isCurrentNorth{currentDirection == Rotation::Direction::North};
-        bool isCurrentEast{currentDirection == Rotation::Direction::East};
-
-        if ((isDesiredSW && (isCurrentSouth || isCurrentWest))
-            || (isDesiredNW && (isCurrentNorth || isCurrentWest))
-            || (isDesiredNE && (isCurrentNorth || isCurrentEast))
-            || (isDesiredSE && (isCurrentSouth || isCurrentEast))) {
-            return toRunGraphicType(currentType);
+    bool isCurrentSouth{currentDirection == Rotation::Direction::South};
+    bool isCurrentWest{currentDirection == Rotation::Direction::West};
+    bool isCurrentNorth{currentDirection == Rotation::Direction::North};
+    bool isCurrentEast{currentDirection == Rotation::Direction::East};
+    if ((isDesiredSW && (isCurrentSouth || isCurrentWest))
+        || (isDesiredNW && (isCurrentNorth || isCurrentWest))
+        || (isDesiredNE && (isCurrentNorth || isCurrentEast))
+        || (isDesiredSE && (isCurrentSouth || isCurrentEast))) {
+        // Try to use a run graphic. Otherwise, fall back to the idle graphic.
+        EntityGraphicType currentTypeAsRun{toRunGraphicType(currentType)};
+        EntityGraphicType currentTypeAsIdle{toIdleGraphicType(currentType)};
+        if (graphicSet.graphics.contains(currentTypeAsRun)) {
+            return currentTypeAsRun;
+        }
+        else if (graphicSet.graphics.contains(currentTypeAsIdle)) {
+            return currentTypeAsIdle;
         }
     }
 
@@ -127,6 +132,12 @@ EntityGraphicType GraphicSystem::getUpdatedRunGraphicType(
     else if ((isDesiredNW || isDesiredNE)
         && graphicSet.graphics.contains(EntityGraphicType::RunNorth)) {
         return EntityGraphicType::RunNorth;
+    }
+
+    // If the graphic set contains the idle version of the desired type, use it.
+    EntityGraphicType desiredTypeAsIdle{toIdleGraphicType(desiredType)};
+    if (graphicSet.graphics.contains(desiredTypeAsIdle)) {
+        return desiredTypeAsIdle;
     }
 
     return EntityGraphicType::IdleSouth;
@@ -144,24 +155,24 @@ EntityGraphicType GraphicSystem::getUpdatedIdleGraphicType(
 
     // If the new rotation is an ordinal direction and the current graphic 
     // includes that direction, don't change the graphic.
+    EntityGraphicType currentType{clientGraphicState.graphicType};
+    EntityGraphicType currentTypeAsIdle{toIdleGraphicType(currentType)};
     bool isDesiredSW{desiredType == EntityGraphicType::IdleSouthWest};
     bool isDesiredNW{desiredType == EntityGraphicType::IdleNorthWest};
     bool isDesiredNE{desiredType == EntityGraphicType::IdleNorthEast};
     bool isDesiredSE{desiredType == EntityGraphicType::IdleSouthEast};
-    EntityGraphicType currentType{clientGraphicState.graphicType};
-    if (graphicSet.graphics.contains(currentType)) {
+    if (graphicSet.graphics.contains(currentTypeAsIdle)) {
         Rotation::Direction currentDirection{
             toDirection(clientGraphicState.graphicType)};
         bool isCurrentSouth{currentDirection == Rotation::Direction::South};
         bool isCurrentWest{currentDirection == Rotation::Direction::West};
         bool isCurrentNorth{currentDirection == Rotation::Direction::North};
         bool isCurrentEast{currentDirection == Rotation::Direction::East};
-
         if ((isDesiredSW && (isCurrentSouth || isCurrentWest))
             || (isDesiredNW && (isCurrentNorth || isCurrentWest))
             || (isDesiredNE && (isCurrentNorth || isCurrentEast))
             || (isDesiredSE && (isCurrentSouth || isCurrentEast))) {
-            return toIdleGraphicType(currentType);
+            return currentTypeAsIdle;
         }
     }
 

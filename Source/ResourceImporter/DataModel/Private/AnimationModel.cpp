@@ -70,11 +70,6 @@ void AnimationModel::save(nlohmann::json& json)
         EditorAnimation& animation{animationPair.second};
         json["animations"][i]["displayName"] = animation.displayName;
 
-        // Derive the string ID from the display name and add it.
-        std::string stringID{};
-        StringTools::deriveStringID(animation.displayName, stringID);
-        json["animations"][i]["stringID"] = stringID;
-
         // Add the numeric ID.
         json["animations"][i]["numericID"] = animationID++;
 

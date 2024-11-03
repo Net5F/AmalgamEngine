@@ -61,7 +61,7 @@ bool SDLHelpers::savePng(const std::string& filePath, SDL_Renderer* renderer,
     SDL_RenderReadPixels(renderer, NULL, surface->format->format,
                          surface->pixels, surface->pitch);
 
-    // Save the texture to a file.
+    // Save the surface to a file.
     int result{IMG_SavePNG(surface, filePath.c_str())};
     SDL_FreeSurface(surface);
 

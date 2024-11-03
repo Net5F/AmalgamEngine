@@ -92,6 +92,10 @@ SDL_Texture* SpriteTools::generateSpriteSheetTexture(
             break;
         }
 
+        // Set the blend mode to NONE, so the sprite's pixels are copied exactly
+        // as-is.
+        SDL_SetTextureBlendMode(spriteTexture, SDL_BLENDMODE_NONE);
+
         // Copy the sprite into the sheet texture;
         SDL_Rect sourceRect{0, 0, sprite.textureExtent.w,
                             sprite.textureExtent.h};

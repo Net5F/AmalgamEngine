@@ -13,6 +13,7 @@ namespace AM
  */
 enum class EngineEntityGraphicType : Uint8 {
     NotSet,
+    /** Note: All graphic sets are expected to contain IdleSouth. */
     IdleSouth,
     IdleSouthWest,
     IdleWest,

@@ -80,6 +80,8 @@ void SpriteModel::save(nlohmann::json& json)
         // Add this sheet's display name.
         EditorSpriteSheet& spriteSheet{sheetPair.second};
         json["spriteSheets"][i]["displayName"] = spriteSheet.displayName;
+        json["spriteSheets"][i]["textureWidth"] = spriteSheet.textureWidth;
+        json["spriteSheets"][i]["textureHeight"] = spriteSheet.textureHeight;
 
         // For each sprite in this sheet.
         for (std::size_t j = 0; j < spriteSheet.spriteIDs.size(); ++j) {
@@ -88,14 +90,13 @@ void SpriteModel::save(nlohmann::json& json)
             json["spriteSheets"][i]["sprites"][j]["displayName"]
                 = sprite.displayName;
 
-            // Derive the string ID from the display name and add it.
-            std::string stringID{};
-            StringTools::deriveStringID(sprite.displayName, stringID);
-            json["spriteSheets"][i]["sprites"][j]["stringID"] = stringID;
-
             // Add the numeric ID.
             json["spriteSheets"][i]["sprites"][j]["numericID"]
                 = spriteID++;
+
+            // Add the path to the sprite's individual image file.
+            json["spriteSheets"][i]["sprites"][j]["imagePath"]
+                = sprite.imagePath;
 
             // Add the sprite sheet texture extent.
             json["spriteSheets"][i]["sprites"][j]["textureExtent"]["x"]
@@ -497,8 +498,8 @@ EditorSprite& SpriteModel::mgetSprite(SpriteID spriteID)
 
 bool SpriteModel::parseSpriteSheet(const nlohmann::json& sheetJson)
 {
-    int sheetID{static_cast<int>(sheetIDPool.reserveID())};
-    spriteSheetMap.emplace(sheetID, EditorSpriteSheet{});
+    SpriteSheetID sheetID{static_cast<SpriteSheetID>(sheetIDPool.reserveID())};
+    spriteSheetMap.emplace(sheetID, EditorSpriteSheet{sheetID});
     EditorSpriteSheet& spriteSheet{spriteSheetMap[sheetID]};
 
     // If the display name isn't unique, fail.
@@ -530,6 +531,12 @@ bool SpriteModel::parseSpriteSheet(const nlohmann::json& sheetJson)
     // Signal the new sheet to the UI.
     sheetAddedSig.publish(sheetID, spriteSheet);
 
+    // Signal the new sprites to the UI.
+    for (SpriteID spriteID : spriteSheet.spriteIDs) {
+        const EditorSprite& sprite{getSprite(spriteID)};
+        spriteAddedSig.publish(spriteID, sprite, spriteSheet.numericID);
+    }
+
     return true;
 }
 
@@ -540,6 +547,7 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     SpriteID spriteID{spriteJson.at("numericID").get<SpriteID>()};
     spriteIDPool.markIDAsReserved(spriteID);
 
+    // Add the sprite to the sprite sheets and the maps.
     spriteMap.emplace(spriteID, EditorSprite{spriteID});
     spriteSheet.spriteIDs.push_back(spriteID);
     EditorSprite& sprite{spriteMap[spriteID]};
@@ -584,6 +592,9 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     sprite.customModelBounds.max.y = spriteJson.at("modelBounds").at("maxY");
     sprite.customModelBounds.min.z = spriteJson.at("modelBounds").at("minZ");
     sprite.customModelBounds.max.z = spriteJson.at("modelBounds").at("maxZ");
+
+    // Note: We signal from parseSpriteSheet() instead of here, so that the 
+    //       sheet can be signalled first.
 
     return true;
 }

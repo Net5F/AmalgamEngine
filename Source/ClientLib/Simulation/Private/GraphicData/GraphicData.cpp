@@ -39,11 +39,19 @@ void GraphicData::parseJson(const nlohmann::json& json, AssetCache& assetCache)
         renderData.resize(sprites.size());
 
         // Parse every sprite sheet in the json.
+        std::string texturePath{};
         for (auto& sheetJson : json["spriteSheets"].items()) {
             // Get this sheet's texture.
-            std::string texturePath{Paths::TEXTURE_DIR};
-            texturePath += sheetJson.value()["relPath"].get<std::string>();
+            texturePath = Paths::TEXTURE_DIR;
+            texturePath += "SpriteSheets/";
+            texturePath += sheetJson.value()["displayName"].get<std::string>();
+            texturePath += ".png";
+
             TextureHandle texture{assetCache.requestTexture(texturePath)};
+            if (!texture) {
+                // Note: requestTexture will LOG_ERROR if the file isn't found.
+                continue;
+            }
 
             // Parse every sprite in this sheet.
             for (auto& spriteJson : sheetJson.value()["sprites"].items()) {
@@ -58,8 +66,8 @@ void GraphicData::parseJson(const nlohmann::json& json, AssetCache& assetCache)
 }
 
 void GraphicData::parseSprite(const nlohmann::json& spriteJson,
-                             const std::string& spriteSheetRelPath,
-                             const TextureHandle& texture)
+                              const std::string& spriteSheetRelPath,
+                              const TextureHandle& texture)
 {
     // Get the numeric identifier.
     SpriteID numericID{spriteJson.at("numericID")};

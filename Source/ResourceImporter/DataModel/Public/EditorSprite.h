@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SpriteID.h"
+#include "SpriteSheetID.h"
 #include "BoundingBoxID.h"
 #include "BoundingBox.h"
 #include <SDL_rect.h>
@@ -20,6 +21,9 @@ class BoundingBoxModel;
 struct EditorSprite {
     /** This sprite's unique numeric identifier. */
     SpriteID numericID{NULL_SPRITE_ID};
+
+    // Note: We don't need to store the sprite sheet ID, since sprite sheets 
+    //       know which sprites they own (both in memory and in json).
 
     /** The relPath to the individual image file for this sprite.
         Note: This path isn't used by the engine, but we need to save it to 

@@ -275,7 +275,7 @@ void GraphicSetEditView::fillSlotGraphicData(GraphicSetSlot& slot,
         }
 
         // Load the sprite's image into the slot.
-        std::string imagePath{dataModel.getWorkingTexturesDir()};
+        std::string imagePath{dataModel.getWorkingIndividualSpritesDir()};
         imagePath += sprite->imagePath;
         slot.spriteImage.setSimpleImage(
             imagePath,

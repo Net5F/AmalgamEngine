@@ -17,7 +17,8 @@ struct EditorSpriteSheet {
     /** This sprite sheet's unique numeric identifier. */
     SpriteSheetID numericID{NULL_SPRITE_SHEET_ID};
 
-    /** Unique display name, shown in the UI.  */
+    /** Unique display name. Shown in the UI, and used as the name of the 
+        exported sprite sheet image file. */
     std::string displayName{""};
 
     /** The width of the generated sprite sheet texture. */
