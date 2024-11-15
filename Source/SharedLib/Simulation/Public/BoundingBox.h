@@ -125,6 +125,16 @@ public:
     [[nodiscard]] BoundingBox moveTo(const Vector3& newMin) const;
 
     /**
+     * Returns this box with its bottom center moved to the given point 
+     * (centered along X/Y axis, min.z == newBottomCenter.z).
+     *
+     * Note: This matches the placement of an entity's Position component, in 
+     *       relation to the entity's bounding volume.
+     */
+    [[nodiscard]] BoundingBox
+        moveBottomCenterTo(const Vector3& newBottomCenter) const;
+
+    /**
      * Returns this box with its position translated by the given amount.
      */
     [[nodiscard]] BoundingBox translateBy(const Vector3& amountToMove) const;

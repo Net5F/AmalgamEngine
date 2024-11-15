@@ -98,18 +98,17 @@ void ComponentUpdateSystem::onGraphicStateUpdated(entt::registry& registry,
     // Note: Entity collision always comes from its IdleSouth graphic.
     auto [position, graphicState, clientGraphicState]
         = registry.get<Position, GraphicState, ClientGraphicState>(entity);
-    GraphicRef newGraphic{
-        graphicData.getEntityGraphicSet(graphicState.graphicSetID)
-            .graphics.at(EntityGraphicType::IdleSouth)};
+    const EntityGraphicSet& graphicSet{
+        graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
 
     // Note: We assume that an entity with GraphicState always has a
     //       Collision.
-    const BoundingBox& modelBounds{newGraphic.getModelBounds()};
+    const BoundingBox& modelBounds{graphicSet.getCollisionModelBounds()};
     const Collision& collision{
         registry.patch<Collision>(entity, [&](Collision& collision) {
             collision.modelBounds = modelBounds;
-            collision.worldBounds
-                = Transforms::modelToWorldEntity(modelBounds, position);
+            collision.worldBounds = Transforms::modelToWorldEntityCollision(
+                modelBounds, position);
         })};
 
     // Update their collision in the locator.

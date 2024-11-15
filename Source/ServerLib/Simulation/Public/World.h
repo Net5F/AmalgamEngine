@@ -90,6 +90,13 @@ public:
     // Helper Functions
     //-------------------------------------------------------------------------
     /**
+     * Teleports the given entity to the given position.
+     * @return true if successful, else false. If false, the entity will 
+     *         remain at its original position.
+     */
+    bool teleportEntity(entt::entity entity, const Vector3& newPosition);
+
+    /**
      * Creates an entity with the given position.
      *
      * @param entityHint (Optional) The entityID to use, if it's available.

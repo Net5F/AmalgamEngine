@@ -145,8 +145,8 @@ void NpcMovementSystem::applyUpdateMessage(
         }
 
         // Move their collision box to their new position.
-        collision.worldBounds
-            = Transforms::modelToWorldEntity(collision.modelBounds, position);
+        collision.worldBounds = Transforms::modelToWorldEntityCollision(
+            collision.modelBounds, position);
     }
 }
 

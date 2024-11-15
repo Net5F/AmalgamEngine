@@ -4,6 +4,7 @@
 #include "Sprite.h"
 #include "SpriteRenderData.h"
 #include "Position.h"
+#include "Vector3.h"
 #include "TilePosition.h"
 #include "TileOffset.h"
 #include "SharedConfig.h"
@@ -13,10 +14,10 @@ namespace AM
 {
 namespace Client
 {
-SDL_FRect
-    ClientTransforms::entityToScreenExtent(const Position& position,
-                                           const SpriteRenderData& renderData,
-                                           const Camera& camera)
+SDL_FRect ClientTransforms::entityToScreenExtent(
+    const Position& position, const Vector3& idleSouthBottomCenter,
+    const Vector3& alignmentOffset, const SpriteRenderData& renderData,
+    const Camera& camera)
 {
     // Transform the position to a point in screen space.
     // Note: This applies the camera's zoom to the position, so we don't need
@@ -29,13 +30,17 @@ SDL_FRect
     screenPoint.x -= (renderData.stageOrigin.x * camera.zoomFactor);
     screenPoint.y -= (renderData.stageOrigin.y * camera.zoomFactor);
 
-    // screenPoint currently would give us a rect that starts at the given
-    // position instead of being centered on it. Pull the point back by a half
-    // tile to center the rect.
-    // Note: This assumes that the sprite is 1 tile large. When we add support
-    //       for other sizes, this will need to be updated.
-    screenPoint.y
-        -= ((SharedConfig::TILE_FACE_SCREEN_HEIGHT / 2.f) * camera.zoomFactor);
+    // Offset the sprite to line up with IdleSouth's modelBounds bottom center.
+    SDL_FPoint idleSouthBottomCenterScreen{
+        Transforms::worldToScreen(idleSouthBottomCenter, camera.zoomFactor)};
+    screenPoint.x -= (idleSouthBottomCenterScreen.x * camera.zoomFactor);
+    screenPoint.y -= (idleSouthBottomCenterScreen.y * camera.zoomFactor);
+
+    // Offset the sprite to account for the alignment offset.
+    SDL_FPoint alignmentOffsetScreen{
+        Transforms::worldToScreen(alignmentOffset, camera.zoomFactor)};
+    screenPoint.x += (alignmentOffsetScreen.x * camera.zoomFactor);
+    screenPoint.y += (alignmentOffsetScreen.y * camera.zoomFactor);
 
     // Apply the camera position adjustment.
     float adjustedX{screenPoint.x - camera.screenExtent.x};

@@ -386,14 +386,25 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
     // Get the iso screen extent for the sprite.
     const SpriteRenderData& renderData{
         graphicData.getRenderData(sprite.numericID)};
-    SDL_FRect screenExtent{
-        ClientTransforms::entityToScreenExtent(position, renderData, camera)};
+    const GraphicState& graphicState{registry.get<GraphicState>(entity)};
+    const EntityGraphicSet& graphicSet{
+        graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
+    const ClientGraphicState& clientGraphicState{
+        registry.get<ClientGraphicState>(entity)};
+
+    SDL_FRect screenExtent{ClientTransforms::entityToScreenExtent(
+        position, graphicSet.getCollisionModelBounds().getBottomCenterPoint(),
+        graphicSet.getRenderAlignmentOffset(clientGraphicState.graphicType),
+        renderData, camera)};
 
     // If the sprite is on screen, push the render info.
     if (isWithinScreenBounds(screenExtent, camera)) {
-        // Get an updated bounding box for this entity.
-        BoundingBox worldBounds{
-            Transforms::modelToWorldEntity(sprite.modelBounds, position)};
+        // TODO: Use clip box here
+        // Get a box for this entity, to use for sorting.
+        BoundingBox worldBounds{Transforms::modelToWorldEntityRender(
+            sprite.modelBounds,
+            graphicSet.getRenderAlignmentOffset(clientGraphicState.graphicType),
+            position)};
 
         // If the UI wants a color mod on this sprite, use it.
         SDL_Color colorMod{getColorMod<entt::entity>(entity)};

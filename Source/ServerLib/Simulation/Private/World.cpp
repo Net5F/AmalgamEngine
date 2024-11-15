@@ -129,6 +129,23 @@ World::World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
 
 World::~World() = default;
 
+bool World::teleportEntity(entt::entity entity, const Vector3& newPosition)
+{
+    auto movementGroup{EnttGroups::getMovementGroup(registry)};
+
+    auto [position, collision] = movementGroup.get<Position, Collision>(entity);
+    position = newPosition;
+    collision.worldBounds = Transforms::modelToWorldEntityCollision(
+        collision.modelBounds, position);
+
+    // Flag that the entity's movement state needs to be synced.
+    // (movement state is auto-synced when Input is dirtied).
+    registry.patch<Input>(entity, [](auto&) {});
+
+    // TODO: Check if valid and return false if not.
+    return true;
+}
+
 entt::entity World::createEntity(const Position& position,
                                  entt::entity entityHint)
 {
@@ -173,7 +190,7 @@ void World::addGraphicsComponents(entt::entity entity,
     const Position& position{registry.get<Position>(entity)};
     const Collision& collision{registry.emplace<Collision>(
         entity, modelBounds,
-        Transforms::modelToWorldEntity(modelBounds, position))};
+        Transforms::modelToWorldEntityCollision(modelBounds, position))};
 
     // Entities with Collision get added to the locator.
     CollisionObjectType::Value objectType{

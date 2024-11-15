@@ -114,8 +114,8 @@ Uint32 PlayerMovementSystem::processPlayerUpdates()
         position = movementUpdate.position;
         movement = movementUpdate.movement;
         rotation = MovementHelpers::calcRotation(rotation, input.inputStates);
-        collision.worldBounds
-            = Transforms::modelToWorldEntity(collision.modelBounds, position);
+        collision.worldBounds = Transforms::modelToWorldEntityCollision(
+            collision.modelBounds, position);
     }
 
     return lastUpdateTick;

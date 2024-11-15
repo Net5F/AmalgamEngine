@@ -7,7 +7,6 @@
 
 namespace AM
 {
-
 /**
  * Holds a reference to either a Sprite or an Animation.
  *

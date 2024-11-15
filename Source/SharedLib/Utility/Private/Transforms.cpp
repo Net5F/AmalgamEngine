@@ -138,23 +138,35 @@ BoundingBox Transforms::modelToWorldTile(const BoundingBox& modelBounds,
     return modelBounds.translateBy(offset);
 }
 
-// TODO: What are we defaulting to?
-// TODO: Once we have alignment anchor, use it here
-BoundingBox Transforms::modelToWorldEntity(const BoundingBox& modelBounds,
-                                           const Position& position)
+BoundingBox
+    Transforms::modelToWorldEntityCollision(const BoundingBox& modelBounds,
+                                            const Position& position)
 {
-    // Place the model-space bounding box at the given position, offset back
-    // by half of the sprite's stage size to center it in the X/Y.
-    // Note: This assumes that the sprite's stage is 1 tile large. When we add
-    //       support for other sizes, this will need to be updated.
-    // Note: We don't need to offset the Z position because sprites are only 
-    //       assumed to be centered on the stage in the X and Y axis. They're
-    //       assumed to start on the stage at Z == 0.
-    Vector3 offset{position.x - (SharedConfig::TILE_WORLD_WIDTH / 2.f),
-                   position.y - (SharedConfig::TILE_WORLD_WIDTH / 2.f),
-                   position.z};
+    // Entities should have their IdleSouth bounding box's bottom center 
+    // aligned with their Position.
+    BoundingBox newBounds{modelBounds};
+    newBounds = newBounds.moveBottomCenterTo(position);
 
-    return modelBounds.translateBy(offset);
+    return newBounds;
+}
+
+BoundingBox Transforms::modelToWorldEntityRender(const BoundingBox& modelBounds,
+                                                 const Vector3& alignmentOffset,
+                                                 const Position& position)
+{
+    // Note: Since both modelToWorldEntity functions are based around centering 
+    //       modelBounds on a Position, we don't actually care about the box's 
+    //       position relative to the stage origin. This lets us avoid needing
+    //       to calculate an offset relative to IdleSouth here.
+
+    // Center the graphic on the entity's Position.
+    BoundingBox newBounds{modelBounds};
+    newBounds = newBounds.moveBottomCenterTo(position);
+
+    // Offset the bounds to place the alignment anchor on the entity's Position.
+    newBounds = newBounds.translateBy(alignmentOffset);
+
+    return newBounds;
 }
 
 } // End namespace AM

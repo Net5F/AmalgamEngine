@@ -225,6 +225,18 @@ BoundingBox BoundingBox::moveTo(const Vector3& newMin) const
     return newBox;
 }
 
+BoundingBox BoundingBox::moveBottomCenterTo(const Vector3& newBottomCenter) const
+{
+    BoundingBox newBox{*this};
+    Vector3 lengths{xLength(), yLength(), zLength()};
+    newBox.min.x = newBottomCenter.x - (lengths.x / 2.f);
+    newBox.min.y = newBottomCenter.y - (lengths.y / 2.f);
+    newBox.min.z = newBottomCenter.z;
+    newBox.max = newBox.min + lengths;
+
+    return newBox;
+}
+
 BoundingBox BoundingBox::translateBy(const Vector3& amountToMove) const
 {
     BoundingBox newBox{*this};

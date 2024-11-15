@@ -3,6 +3,7 @@
 #include "AnimationID.h"
 #include "SpriteID.h"
 #include "BoundingBox.h"
+#include "Vector3.h"
 #include <string>
 #include <vector>
 #include <functional>
@@ -57,6 +58,15 @@ struct Animation {
         Note: Tiles use these bounds, but entities use the bounds defined by 
               their Collision component. */
     BoundingBox modelBounds{};
+
+    /** Only used for entities, during render sorting.
+        When entities change animation, the new animation needs to line up with
+        the old one so the entity doesn't look like it's teleporting around. 
+        If the sprite images already line up, this offset will be 0. Otherwise,
+        this offset will be used to make them line up.
+        We use the IdleSouth graphic as our baseline, so this offset is defined 
+        as: how far this Animation should be moved to align with IdleSouth. */
+    Vector3 entityAlignmentOffset{};
 
     /**
      * Returns the sprite that should be displayed at the given animation time, 

@@ -175,6 +175,12 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
 
 void Renderer::drawBoundingBox(const BoundingBox& box, const Camera& camera)
 {
+    // If the bounding box is flat, don't render it (this avoids rendering the 
+    // floor tile bounds, which typically aren't what you're trying to see). 
+    if (box.isEmpty()) {
+        return;
+    }
+
     // Transform all the vertices to screen space.
     std::vector<SDL_FPoint> verts;
     Vector3 point{box.min.x, box.min.y, box.min.z};

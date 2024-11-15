@@ -78,14 +78,26 @@ public:
                                         const TilePosition& tilePosition);
 
     /**
-     * Places the given model-space bounding volume at the given entity position.
+     * Centers the given model-space bounding volume on the given position.
      *
-     * Note: This function takes care to center the bounds based on the
-     *       sprite's "stage size". If you naively center based on the size of
-     *       the box, you won't get the correct positioning.
+     * For use when calculating entity collision boxes. 
      */
-    static BoundingBox modelToWorldEntity(const BoundingBox& modelBounds,
-                                          const Position& position);
+    static BoundingBox
+        modelToWorldEntityCollision(const BoundingBox& modelBounds,
+                                    const Position& position);
+
+    /**
+     * Centers the given model-space bounding volume on the given position,
+     * then offsets it by alignmentOffset.
+     *
+     * For use in a render sorting context.
+     *
+     * @param alignmentOffset The distance that the given bounds must be offset
+     *                        to align with IdleSouth's modelBounds.
+     */
+    static BoundingBox modelToWorldEntityRender(const BoundingBox& modelBounds,
+                                                const Vector3& alignmentOffset,
+                                                const Position& position);
 
     //-------------------------------------------------------------------------
     // Constants

@@ -178,7 +178,7 @@ void EntityLifetimeSystem::processEntityData(
         const Position& position{registry.get<Position>(newEntity)};
         const Collision& collision{registry.emplace<Collision>(
             newEntity, modelBounds,
-            Transforms::modelToWorldEntity(modelBounds, position))};
+            Transforms::modelToWorldEntityCollision(modelBounds, position))};
 
         // Entities with Collision get added to the locator.
         CollisionObjectType::Value objectType{

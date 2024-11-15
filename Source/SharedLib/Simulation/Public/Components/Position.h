@@ -7,11 +7,10 @@ namespace AM
 /**
  * Represents a position in the world.
  *
- * Note: An entity's position component refers to a centered point under its 
- *       feet (equivalent to BoundingBox::getBottomCenterPoint()). Do not 
- *       confuse this for the 3D center of a bounding box.
- *
  * All entities possess a Position component.
+ *
+ * Note: An entity's graphics will be aligned with its position (specifically, 
+ *       the graphic's alignment anchor will be centered on the position).
  */
 struct Position : Vector3 {
     Position operator=(const Vector3& vector)
