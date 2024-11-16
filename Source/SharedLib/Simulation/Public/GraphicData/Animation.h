@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <optional>
 
 namespace AM
 {
@@ -62,11 +63,9 @@ struct Animation {
     /** Only used for entities, during render sorting.
         When entities change animation, the new animation needs to line up with
         the old one so the entity doesn't look like it's teleporting around. 
-        If the sprite images already line up, this offset will be 0. Otherwise,
-        this offset will be used to make them line up.
-        We use the IdleSouth graphic as our baseline, so this offset is defined 
-        as: how far this Animation should be moved to align with IdleSouth. */
-    Vector3 entityAlignmentOffset{};
+        If non-null, this is the model-space point that should be aligned 
+        with IdleSouth. */
+    std::optional<Vector3> entityAlignmentAnchor{};
 
     /**
      * Returns the sprite that should be displayed at the given animation time, 

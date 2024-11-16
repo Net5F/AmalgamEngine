@@ -10,7 +10,8 @@ namespace AM
 BoundingBox EntityGraphicSet::getCollisionModelBounds() const
 {
     AM_ASSERT(graphics.contains(EntityGraphicType::IdleSouth),
-              "All entity graphic sets must contain IdleSouth.");
+              "Entity graphic set is missing IdleSouth: %s.",
+              displayName.c_str());
 
     const GraphicRef& idleSouthGraphicRef{
         graphics.at(EntityGraphicType::IdleSouth)};
@@ -20,17 +21,39 @@ BoundingBox EntityGraphicSet::getCollisionModelBounds() const
 Vector3 EntityGraphicSet::getRenderAlignmentOffset(
     EntityGraphicType graphicType) const
 {
-    AM_ASSERT(graphics.contains(graphicType),
-              "Requested a graphic type that was not present in the set.");
-
-    const GraphicRef& graphicRef{graphics.at(graphicType)};
-    if (const auto* animation{
-            std::get_if<std::reference_wrapper<const Animation>>(
-                &graphicRef)}) {
-        return animation->get().entityAlignmentOffset;
+    if (!graphics.contains(EntityGraphicType::IdleSouth)) {
+        LOG_ERROR("Entity graphic set is missing IdleSouth: %s.",
+                  displayName.c_str());
+        return {};
+    }
+    if (!graphics.contains(graphicType)) {
+        LOG_ERROR("Entity graphic set is missing requested type: %s, %u.",
+                  displayName.c_str(), graphicType);
+        return {};
     }
 
-    return {};
+    // If the requested graphic is a Sprite, return 0 (sprites don't have 
+    // alignment anchors).
+    const GraphicRef& graphicRef{graphics.at(graphicType)};
+    if (std::holds_alternative<std::reference_wrapper<const Sprite>>(
+            graphicRef)) {
+        return {};
+    }
+
+    // If the requested Animation doesn't have an alignment anchor, return 0.
+    const auto& animation{
+        std::get<std::reference_wrapper<const Animation>>(graphicRef)};
+    if (!(animation.get().entityAlignmentAnchor)) {
+        return {};
+    }
+
+    // Return the difference between the requested animation's alignment 
+    // anchor and the IdleSouth graphic's bottom center.
+    Vector3 idleSouthBottomCenter{graphics.at(EntityGraphicType::IdleSouth)
+                                      .getModelBounds()
+                                      .getBottomCenterPoint()};
+    Vector3 alignmentAnchor{animation.get().entityAlignmentAnchor.value()};
+    return (alignmentAnchor - idleSouthBottomCenter);
 }
 
 } // End namespace AM

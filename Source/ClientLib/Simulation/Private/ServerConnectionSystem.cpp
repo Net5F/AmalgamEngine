@@ -162,8 +162,8 @@ void ServerConnectionSystem::initMockSimState()
     const BoundingBox& modelBounds{graphic.getModelBounds()};
     const Collision& collision{registry.emplace<Collision>(
         newEntity, modelBounds,
-        Transforms::modelToWorldEntityCollision(
-            modelBounds, registry.get<Position>(newEntity)))};
+        Transforms::modelToWorldEntity(modelBounds,
+                                       registry.get<Position>(newEntity)))};
 
     // Entities with Collision get added to the locator.
     CollisionObjectType::Value objectType{

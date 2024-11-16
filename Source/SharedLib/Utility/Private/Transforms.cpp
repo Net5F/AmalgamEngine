@@ -138,33 +138,13 @@ BoundingBox Transforms::modelToWorldTile(const BoundingBox& modelBounds,
     return modelBounds.translateBy(offset);
 }
 
-BoundingBox
-    Transforms::modelToWorldEntityCollision(const BoundingBox& modelBounds,
-                                            const Position& position)
+BoundingBox Transforms::modelToWorldEntity(const BoundingBox& modelBounds,
+                                           const Position& position)
 {
-    // Entities should have their IdleSouth bounding box's bottom center 
+    // Entities should have their IdleSouth bounding box's bottom center
     // aligned with their Position.
     BoundingBox newBounds{modelBounds};
     newBounds = newBounds.moveBottomCenterTo(position);
-
-    return newBounds;
-}
-
-BoundingBox Transforms::modelToWorldEntityRender(const BoundingBox& modelBounds,
-                                                 const Vector3& alignmentOffset,
-                                                 const Position& position)
-{
-    // Note: Since both modelToWorldEntity functions are based around centering 
-    //       modelBounds on a Position, we don't actually care about the box's 
-    //       position relative to the stage origin. This lets us avoid needing
-    //       to calculate an offset relative to IdleSouth here.
-
-    // Center the graphic on the entity's Position.
-    BoundingBox newBounds{modelBounds};
-    newBounds = newBounds.moveBottomCenterTo(position);
-
-    // Offset the bounds to place the alignment anchor on the entity's Position.
-    newBounds = newBounds.translateBy(alignmentOffset);
 
     return newBounds;
 }

@@ -107,8 +107,8 @@ void ComponentUpdateSystem::onGraphicStateUpdated(entt::registry& registry,
     const Collision& collision{
         registry.patch<Collision>(entity, [&](Collision& collision) {
             collision.modelBounds = modelBounds;
-            collision.worldBounds = Transforms::modelToWorldEntityCollision(
-                modelBounds, position);
+            collision.worldBounds
+                = Transforms::modelToWorldEntity(modelBounds, position);
         })};
 
     // Update their collision in the locator.

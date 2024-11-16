@@ -58,8 +58,8 @@ void EntityMover::moveEntity(
     // Note: Since clients calc bounds from the replicated position, we need to 
     //       use the same math here (instead of using resolvedBounds directly) 
     //       or the float result may end up slightly different.
-    collision.worldBounds = Transforms::modelToWorldEntityCollision(
-        collision.modelBounds, position);
+    collision.worldBounds
+        = Transforms::modelToWorldEntity(collision.modelBounds, position);
 
     // Update the direction they're facing, based on their current inputs.
     rotation = MovementHelpers::calcRotation(rotation, inputStates);

@@ -399,12 +399,13 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
 
     // If the sprite is on screen, push the render info.
     if (isWithinScreenBounds(screenExtent, camera)) {
-        // TODO: Use clip box here
         // Get a box for this entity, to use for sorting.
-        BoundingBox worldBounds{Transforms::modelToWorldEntityRender(
-            sprite.modelBounds,
-            graphicSet.getRenderAlignmentOffset(clientGraphicState.graphicType),
-            position)};
+        // Note: We sort using the standard collision model bounds (from 
+        //       IdleSouth). We could instead use the current sprite, but
+        //       that would open us up to potentially sorting boxes that are
+        //       clipping inside of eachother.
+        BoundingBox worldBounds{Transforms::modelToWorldEntity(
+            graphicSet.getCollisionModelBounds(), position)};
 
         // If the UI wants a color mod on this sprite, use it.
         SDL_Color colorMod{getColorMod<entt::entity>(entity)};

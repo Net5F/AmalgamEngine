@@ -79,25 +79,9 @@ public:
 
     /**
      * Centers the given model-space bounding volume on the given position.
-     *
-     * For use when calculating entity collision boxes. 
      */
-    static BoundingBox
-        modelToWorldEntityCollision(const BoundingBox& modelBounds,
-                                    const Position& position);
-
-    /**
-     * Centers the given model-space bounding volume on the given position,
-     * then offsets it by alignmentOffset.
-     *
-     * For use in a render sorting context.
-     *
-     * @param alignmentOffset The distance that the given bounds must be offset
-     *                        to align with IdleSouth's modelBounds.
-     */
-    static BoundingBox modelToWorldEntityRender(const BoundingBox& modelBounds,
-                                                const Vector3& alignmentOffset,
-                                                const Position& position);
+    static BoundingBox modelToWorldEntity(const BoundingBox& modelBounds,
+                                          const Position& position);
 
     //-------------------------------------------------------------------------
     // Constants
