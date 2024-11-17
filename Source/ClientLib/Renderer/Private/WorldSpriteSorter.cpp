@@ -288,7 +288,7 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
 
     // Get the iso screen extent for this sprite.
     const SpriteRenderData& renderData{
-        graphicData.getRenderData(sprite.numericID)};
+        graphicData.getSpriteRenderData(sprite.numericID)};
     SDL_FRect screenExtent{ClientTransforms::tileToScreenExtent(
         layerID.tilePosition, layerID.tileOffset, renderData, camera)};
 
@@ -385,7 +385,7 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
 {
     // Get the iso screen extent for the sprite.
     const SpriteRenderData& renderData{
-        graphicData.getRenderData(sprite.numericID)};
+        graphicData.getSpriteRenderData(sprite.numericID)};
     const GraphicState& graphicState{registry.get<GraphicState>(entity)};
     const EntityGraphicSet& graphicSet{
         graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
@@ -394,7 +394,8 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
 
     SDL_FRect screenExtent{ClientTransforms::entityToScreenExtent(
         position, graphicSet.getCollisionModelBounds().getBottomCenterPoint(),
-        graphicSet.getRenderAlignmentOffset(clientGraphicState.graphicType),
+        graphicData.getRenderAlignmentOffset(graphicState.graphicSetID,
+                                             clientGraphicState.graphicType),
         renderData, camera)};
 
     // If the sprite is on screen, push the render info.

@@ -65,7 +65,7 @@ struct EditorAnimation {
         the old one so the entity doesn't look like it's teleporting around. 
         If non-null, this is the model-space point that should be aligned 
         with IdleSouth. */
-    //std::optional<Vector3> entityAlignmentAnchor{};
+    std::optional<Vector3> entityAlignmentAnchor{};
 
     /**
      * Returns this animation's model-space bounding box.

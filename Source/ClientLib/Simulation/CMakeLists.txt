@@ -42,6 +42,7 @@ target_sources(ClientLib
         Public/Components/ClientGraphicState.h
         Public/Components/InputHistory.h
         Public/Components/NeedsAdjacentChunks.h
+        Public/GraphicData/AnimationRenderData.h
         Public/GraphicData/GraphicData.h
         Public/GraphicData/SpriteRenderData.h
         Public/IconData/IconData.h

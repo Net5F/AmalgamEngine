@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include <optional>
 
 namespace AM
 {
@@ -59,13 +58,6 @@ struct Animation {
         Note: Tiles use these bounds, but entities use the bounds defined by 
               their Collision component. */
     BoundingBox modelBounds{};
-
-    /** Only used for entities, during render sorting.
-        When entities change animation, the new animation needs to line up with
-        the old one so the entity doesn't look like it's teleporting around. 
-        If non-null, this is the model-space point that should be aligned 
-        with IdleSouth. */
-    std::optional<Vector3> entityAlignmentAnchor{};
 
     /**
      * Returns the sprite that should be displayed at the given animation time, 

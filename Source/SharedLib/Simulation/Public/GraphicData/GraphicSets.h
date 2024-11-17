@@ -99,22 +99,6 @@ struct EntityGraphicSet : public GraphicSet {
      * behavior consistent.
      */
     BoundingBox getCollisionModelBounds() const;
-
-    /**
-     * Returns an appropriate world-space offset to use when rendering the 
-     * given graphic from this set.
-     *
-     * If the graphic is an Animation, its entityAlignmentOffset will be 
-     * returned. If the graphic is a Sprite, {0, 0, 0} will be returned 
-     * (Sprites don't support alignment offsets).
-     * 
-     * @pre Our graphics map must contain the given graphicType.
-     *
-     * Note: Alignment offsets aren't used by the sim. Instead, it just centers 
-     *       IdleSouth's bounding box on the entity's Position. The renderer 
-     *       then needs to do some work to make sure the sprite lines up.
-     */
-    Vector3 getRenderAlignmentOffset(EntityGraphicType graphicType) const;
 };
 
 } // namespace AM

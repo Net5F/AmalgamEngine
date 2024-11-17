@@ -17,26 +17,40 @@ GraphicData::GraphicData(const nlohmann::json& resourceDataJson,
     parseJson(resourceDataJson, assetCache);
 }
 
-const SpriteRenderData& GraphicData::getRenderData(SpriteID numericID) const
+const SpriteRenderData&
+    GraphicData::getSpriteRenderData(SpriteID numericID) const
 {
-    if (numericID >= renderData.size()) {
+    if (numericID >= spriteRenderData.size()) {
         LOG_ERROR("Invalid numeric ID while getting sprite render data: %d",
                   numericID);
-        return renderData[0];
+        return spriteRenderData[0];
     }
 
-    return renderData[numericID];
+    return spriteRenderData[numericID];
+}
+
+const AnimationRenderData&
+    GraphicData::getAnimationRenderData(AnimationID numericID) const
+{
+    if (numericID >= animationRenderData.size()) {
+        LOG_ERROR("Invalid numeric ID while getting animation render data: %d",
+                  numericID);
+        return animationRenderData[0];
+    }
+
+    return animationRenderData[numericID];
 }
 
 void GraphicData::parseJson(const nlohmann::json& json, AssetCache& assetCache)
 {
     // Add the null sprite.
-    renderData.emplace_back();
+    spriteRenderData.emplace_back();
 
     // Parse the json and catch any parsing errors.
     try {
-        // Resize our vector.
-        renderData.resize(sprites.size());
+        // Resize our vectors.
+        spriteRenderData.resize(sprites.size());
+        animationRenderData.resize(animations.size());
 
         // Parse every sprite sheet in the json.
         std::string texturePath{};
@@ -58,6 +72,11 @@ void GraphicData::parseJson(const nlohmann::json& json, AssetCache& assetCache)
                 parseSprite(spriteJson.value(), texturePath, texture);
             }
         }
+        
+        // Parse every animation in the json.
+        for (auto& animationJson : json["animations"].items()) {
+            parseAnimation(animationJson.value());
+        }
     } catch (nlohmann::json::type_error& e) {
         LOG_FATAL(
             "Failed to parse sprites and sprite sets in ResourceData.json: %s",
@@ -73,19 +92,75 @@ void GraphicData::parseSprite(const nlohmann::json& spriteJson,
     SpriteID numericID{spriteJson.at("numericID")};
 
     // Add the parent sprite sheet's path and texture.
-    SpriteRenderData& spriteRenderData{renderData[numericID]};
-    spriteRenderData.spriteSheetRelPath = spriteSheetRelPath;
-    spriteRenderData.texture = texture;
+    SpriteRenderData& renderData{spriteRenderData[numericID]};
+    renderData.spriteSheetRelPath = spriteSheetRelPath;
+    renderData.texture = texture;
 
     // Add this sprite's extent within the sprite sheet.
-    spriteRenderData.textureExtent.x = spriteJson.at("textureExtent").at("x");
-    spriteRenderData.textureExtent.y = spriteJson.at("textureExtent").at("y");
-    spriteRenderData.textureExtent.w = spriteJson.at("textureExtent").at("w");
-    spriteRenderData.textureExtent.h = spriteJson.at("textureExtent").at("h");
+    renderData.textureExtent.x = spriteJson.at("textureExtent").at("x");
+    renderData.textureExtent.y = spriteJson.at("textureExtent").at("y");
+    renderData.textureExtent.w = spriteJson.at("textureExtent").at("w");
+    renderData.textureExtent.h = spriteJson.at("textureExtent").at("h");
 
     // Add the stage origin.
-    spriteRenderData.stageOrigin.x = spriteJson.at("stageX");
-    spriteRenderData.stageOrigin.y = spriteJson.at("stageY");
+    renderData.stageOrigin.x = spriteJson.at("stageX");
+    renderData.stageOrigin.y = spriteJson.at("stageY");
+}
+
+void GraphicData::parseAnimation(const nlohmann::json& animationJson)
+{
+    // Get the numeric identifier.
+    AnimationID numericID{animationJson.at("numericID")};
+
+    // Add the entity alignment anchor.
+    AnimationRenderData& renderData{animationRenderData[numericID]};
+    renderData.entityAlignmentAnchor
+        = {animationJson.at("entityAlignmentAnchor").at("x"),
+           animationJson.at("entityAlignmentAnchor").at("y"),
+           animationJson.at("entityAlignmentAnchor").at("z")};
+}
+
+Vector3
+    GraphicData::getRenderAlignmentOffset(EntityGraphicSetID setID,
+                                          EntityGraphicType graphicType) const
+{
+    const EntityGraphicSet& graphicSet{getEntityGraphicSet(setID)};
+    if (!(graphicSet.graphics.contains(EntityGraphicType::IdleSouth))) {
+        LOG_ERROR("Entity graphic set is missing IdleSouth: %s.",
+                  graphicSet.displayName.c_str());
+        return {};
+    }
+    if (!(graphicSet.graphics.contains(graphicType))) {
+        LOG_ERROR("Entity graphic set is missing requested type: %s, %u.",
+                  graphicSet.displayName.c_str(), graphicType);
+        return {};
+    }
+
+    // If the requested graphic is a Sprite, return 0 (sprites don't have 
+    // alignment anchors).
+    const GraphicRef& graphicRef{graphicSet.graphics.at(graphicType)};
+    if (std::holds_alternative<std::reference_wrapper<const Sprite>>(
+            graphicRef)) {
+        return {};
+    }
+
+    // If the requested Animation doesn't have an alignment anchor, return 0.
+    const auto& animation{
+        std::get<std::reference_wrapper<const Animation>>(graphicRef)};
+    const AnimationRenderData& renderData{
+        getAnimationRenderData(animation.get().numericID)};
+    if (!(renderData.entityAlignmentAnchor)) {
+        return {};
+    }
+
+    // Return the difference between the requested animation's alignment 
+    // anchor and the IdleSouth graphic's bottom center.
+    Vector3 idleSouthBottomCenter{
+        graphicSet.graphics.at(EntityGraphicType::IdleSouth)
+            .getModelBounds()
+            .getBottomCenterPoint()};
+    Vector3 alignmentAnchor{renderData.entityAlignmentAnchor.value()};
+    return (alignmentAnchor - idleSouthBottomCenter);
 }
 
 } // End namespace Client

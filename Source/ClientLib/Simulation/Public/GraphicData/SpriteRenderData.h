@@ -11,7 +11,10 @@ namespace Client
 /**
  * Holds a sprite's rendering-related data.
  *
- * See Sprite.h for more info.
+ * We store any rendering-only data separately, so the server can optimally 
+ * access only the data it needs.
+ *
+ * See Sprite.h for the rest of the sprite data.
  */
 struct SpriteRenderData {
     /** The relative path to the sprite sheet image file that holds this
