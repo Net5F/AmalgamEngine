@@ -20,7 +20,7 @@ namespace ResourceImporter
 {
 AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
     DataModel& inDataModel, LibraryWindow& inLibraryWindow)
-: AUI::Window({1617, 0, 303, 705}, "AnimationPropertiesWindow")
+: AUI::Window({1617, 0, 303, 881}, "AnimationPropertiesWindow")
 , mainScreen{inScreen}
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
 , nameInput{{24, 84, 255, 38}, "NameInput"}
@@ -45,6 +45,12 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
 , maxZInput{{150, 602, 129, 38}, "MaxZInput"}
 , collisionEnabledLabel{{24, 652, 210, 27}, "CollisionLabel"}
 , collisionEnabledInput{{257, 654, 22, 22}, "CollisionInput"}
+, alignXLabel{{24, 717, 110, 38}, "AlignXLabel"}
+, alignXInput{{150, 711, 129, 38}, "AlignXInput"}
+, alignYLabel{{24, 767, 110, 38}, "AlignYLabel"}
+, alignYInput{{150, 761, 129, 38}, "AlignYInput"}
+, alignZLabel{{24, 817, 110, 38}, "AlignZLabel"}
+, alignZInput{{150, 811, 129, 38}, "AlignZInput"}
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
 , activeAnimationID{NULL_ANIMATION_ID}
@@ -56,6 +62,9 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
 , committedMaxX{0.0}
 , committedMaxY{0.0}
 , committedMaxZ{0.0}
+, committedAlignX{0.0}
+, committedAlignY{0.0}
+, committedAlignZ{0.0}
 , backgroundImage{{0, 0, logicalExtent.w, logicalExtent.h},
                   "PropertiesBackground"}
 , headerImage{{0, 0, 303, 40}, "PropertiesHeader"}
@@ -88,6 +97,12 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
     children.push_back(maxZInput);
     children.push_back(collisionEnabledLabel);
     children.push_back(collisionEnabledInput);
+    children.push_back(alignXLabel);
+    children.push_back(alignXInput);
+    children.push_back(alignYLabel);
+    children.push_back(alignYInput);
+    children.push_back(alignZLabel);
+    children.push_back(alignZInput);
 
     /* Window setup */
     backgroundImage.setNineSliceImage(
@@ -170,25 +185,43 @@ AnimationPropertiesWindow::AnimationPropertiesWindow(MainScreen& inScreen,
     collisionEnabledInput.setOnChecked([this]() { saveCollisionEnabled(); });
     collisionEnabledInput.setOnUnchecked([this]() { saveCollisionEnabled(); });
 
+    // Entity alignment anchor entry labels.
+    styleLabel(alignXLabel, "Align X", 21);
+    styleLabel(alignYLabel, "Align Y", 21);
+    styleLabel(alignZLabel, "Align Z", 21);
+
+    // Entity alignment anchor entry text inputs.
+    styleTextInput(alignXInput);
+    styleTextInput(alignYInput);
+    styleTextInput(alignZInput);
+    alignXInput.setOnTextCommitted([this]() { saveAlignX(); });
+    alignYInput.setOnTextCommitted([this]() { saveAlignY(); });
+    alignZInput.setOnTextCommitted([this]() { saveAlignZ(); });
+
     // When the active animation is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
         .connect<&AnimationPropertiesWindow::onActiveLibraryItemChanged>(*this);
     AnimationModel& animationModel{dataModel.animationModel};
+    animationModel.animationRemoved
+        .connect<&AnimationPropertiesWindow::onAnimationRemoved>(*this);
     animationModel.animationDisplayNameChanged
-        .connect<&AnimationPropertiesWindow::onAnimationDisplayNameChanged>(*this);
+        .connect<&AnimationPropertiesWindow::onAnimationDisplayNameChanged>(
+            *this);
     animationModel.animationFrameCountChanged
-        .connect<&AnimationPropertiesWindow::onAnimationFrameCountChanged>(*this);
+        .connect<&AnimationPropertiesWindow::onAnimationFrameCountChanged>(
+            *this);
     animationModel.animationFpsChanged
         .connect<&AnimationPropertiesWindow::onAnimationFpsChanged>(*this);
     animationModel.animationModelBoundsIDChanged
-        .connect<&AnimationPropertiesWindow::onAnimationModelBoundsIDChanged>(*this);
-    animationModel.animationCustomModelBoundsChanged
-        .connect<&AnimationPropertiesWindow::onAnimationCustomModelBoundsChanged>(*this);
-    animationModel.animationRemoved.connect<&AnimationPropertiesWindow::onAnimationRemoved>(
-        *this);
-    animationModel.animationCollisionEnabledChanged
-        .connect<&AnimationPropertiesWindow::onAnimationCollisionEnabledChanged>(
+        .connect<&AnimationPropertiesWindow::onAnimationModelBoundsIDChanged>(
             *this);
+    animationModel.animationCustomModelBoundsChanged.connect<
+        &AnimationPropertiesWindow::onAnimationCustomModelBoundsChanged>(*this);
+    animationModel.animationCollisionEnabledChanged.connect<
+        &AnimationPropertiesWindow::onAnimationCollisionEnabledChanged>(*this);
+    animationModel.animationEntityAlignmentAnchorChanged.connect<
+        &AnimationPropertiesWindow::onAnimationEntityAlignmentAnchorChanged>(
+        *this);
 
     // When a library item is selected, update the preview button.
     libraryWindow.selectedItemsChanged
@@ -244,20 +277,24 @@ void AnimationPropertiesWindow::onActiveLibraryItemChanged(
     else {
         collisionEnabledInput.setCurrentState(AUI::Checkbox::State::Unchecked);
     }
-}
 
-void AnimationPropertiesWindow::onAnimationRemoved(AnimationID animationID)
-{
-    if (animationID == activeAnimationID) {
-        activeAnimationID = NULL_ANIMATION_ID;
-        nameInput.setText("");
-        boundingBoxNameLabel.setText("");
-        minXInput.setText("");
-        minYInput.setText("");
-        minZInput.setText("");
-        maxXInput.setText("");
-        maxYInput.setText("");
-        maxZInput.setText("");
+    const std::optional<Vector3>& animationEntityAlignmentAnchor{
+        newActiveAnimation->entityAlignmentAnchor};
+    if (animationEntityAlignmentAnchor) {
+        alignXInput.setText(
+            toRoundedString(animationEntityAlignmentAnchor.value().x));
+        alignYInput.setText(
+            toRoundedString(animationEntityAlignmentAnchor.value().y));
+        alignZInput.setText(
+            toRoundedString(animationEntityAlignmentAnchor.value().z));
+        alignXInput.enable();
+        alignYInput.enable();
+        alignZInput.enable();
+    }
+    else  {
+        alignXInput.disable();
+        alignYInput.disable();
+        alignZInput.disable();
     }
 }
 
@@ -282,21 +319,6 @@ void AnimationPropertiesWindow::onAnimationFpsChanged(AnimationID animationID,
 {
     if (animationID == activeAnimationID) {
         fpsInput.setText(std::to_string(newFps));
-    }
-}
-
-void AnimationPropertiesWindow::onAnimationCollisionEnabledChanged(
-    AnimationID animationID, bool newCollisionEnabled)
-{
-    if (animationID == activeAnimationID) {
-        if (newCollisionEnabled) {
-            collisionEnabledInput.setCurrentState(
-                AUI::Checkbox::State::Checked);
-        }
-        else {
-            collisionEnabledInput.setCurrentState(
-                AUI::Checkbox::State::Unchecked);
-        }
     }
 }
 
@@ -347,6 +369,61 @@ void AnimationPropertiesWindow::onAnimationCustomModelBoundsChanged(
         maxZInput.setText(toRoundedString(newCustomModelBounds.max.z));
     }
 }
+
+void AnimationPropertiesWindow::onAnimationCollisionEnabledChanged(
+    AnimationID animationID, bool newCollisionEnabled)
+{
+    if (animationID == activeAnimationID) {
+        if (newCollisionEnabled) {
+            collisionEnabledInput.setCurrentState(
+                AUI::Checkbox::State::Checked);
+        }
+        else {
+            collisionEnabledInput.setCurrentState(
+                AUI::Checkbox::State::Unchecked);
+        }
+    }
+}
+
+void AnimationPropertiesWindow::onAnimationEntityAlignmentAnchorChanged(
+    AnimationID animationID,
+    const std::optional<Vector3>& newEntityAlignmentAnchor)
+{
+    if (animationID == activeAnimationID) {
+        if (newEntityAlignmentAnchor) {
+            alignXInput.setText(
+                toRoundedString(newEntityAlignmentAnchor.value().x));
+            alignYInput.setText(
+                toRoundedString(newEntityAlignmentAnchor.value().y));
+            alignZInput.setText(
+                toRoundedString(newEntityAlignmentAnchor.value().z));
+            alignXInput.enable();
+            alignYInput.enable();
+            alignZInput.enable();
+        }
+        else {
+            alignXInput.disable();
+            alignYInput.disable();
+            alignZInput.disable();
+        }
+    }
+}
+
+void AnimationPropertiesWindow::onAnimationRemoved(AnimationID animationID)
+{
+    if (animationID == activeAnimationID) {
+        activeAnimationID = NULL_ANIMATION_ID;
+        nameInput.setText("");
+        boundingBoxNameLabel.setText("");
+        minXInput.setText("");
+        minYInput.setText("");
+        minZInput.setText("");
+        maxXInput.setText("");
+        maxYInput.setText("");
+        maxZInput.setText("");
+    }
+}
+
 void AnimationPropertiesWindow::onLibrarySelectedItemsChanged(
     const std::vector<LibraryListItem*>& selectedItems)
 {
@@ -668,6 +745,102 @@ void AnimationPropertiesWindow::saveCollisionEnabled()
                            == AUI::Checkbox::State::Checked)};
     dataModel.animationModel.setAnimationCollisionEnabled(activeAnimationID,
                                                     collisionEnabled);
+}
+
+void AnimationPropertiesWindow::saveAlignX()
+{
+    // Validate the user input as a valid float.
+    try {
+        // Convert the input string to a float.
+        float newAlignX{std::stof(alignXInput.getText())};
+
+        // Clamp the value to its bounds.
+        const EditorAnimation& activeAnimation{
+            dataModel.animationModel.getAnimation(activeAnimationID)};
+        AM_ASSERT(activeAnimation.frames.size() > 0,
+                  "Animation must always have at least 1 frame.");
+        const EditorSprite& firstSprite{activeAnimation.frames[0].sprite.get()};
+        BoundingBox stageWorldExtent{SpriteTools::calcSpriteStageWorldExtent(
+            firstSprite.textureExtent, firstSprite.stageOrigin)};
+
+        AM_ASSERT(activeAnimation.entityAlignmentAnchor,
+                  "Tried to set value while entity alignment anchor was null");
+        Vector3 newEntityAlignmentAnchor{
+            activeAnimation.entityAlignmentAnchor.value()};
+        newEntityAlignmentAnchor.x
+            = std::clamp(newAlignX, 0.f, stageWorldExtent.max.x);
+
+        // Apply the new value.
+        dataModel.animationModel.setAnimationEntityAlignmentAnchor(
+            activeAnimationID, newEntityAlignmentAnchor);
+    } catch (std::exception&) {
+        // Input was not valid, reset the field to what it was.
+        alignXInput.setText(std::to_string(committedAlignX));
+    }
+}
+
+void AnimationPropertiesWindow::saveAlignY()
+{
+    // Validate the user input as a valid float.
+    try {
+        // Convert the input string to a float.
+        float newAlignY{std::stof(alignYInput.getText())};
+
+        // Clamp the value to its bounds.
+        const EditorAnimation& activeAnimation{
+            dataModel.animationModel.getAnimation(activeAnimationID)};
+        AM_ASSERT(activeAnimation.frames.size() > 0,
+                  "Animation must always have at least 1 frame.");
+        const EditorSprite& firstSprite{activeAnimation.frames[0].sprite.get()};
+        BoundingBox stageWorldExtent{SpriteTools::calcSpriteStageWorldExtent(
+            firstSprite.textureExtent, firstSprite.stageOrigin)};
+
+        AM_ASSERT(activeAnimation.entityAlignmentAnchor,
+                  "Tried to set value while entity alignment anchor was null");
+        Vector3 newEntityAlignmentAnchor{
+            activeAnimation.entityAlignmentAnchor.value()};
+        newEntityAlignmentAnchor.y
+            = std::clamp(newAlignY, 0.f, stageWorldExtent.max.y);
+
+        // Apply the new value.
+        dataModel.animationModel.setAnimationEntityAlignmentAnchor(
+            activeAnimationID, newEntityAlignmentAnchor);
+    } catch (std::exception&) {
+        // Input was not valid, reset the field to what it was.
+        alignYInput.setText(std::to_string(committedAlignY));
+    }
+}
+
+void AnimationPropertiesWindow::saveAlignZ()
+{
+    // Validate the user input as a valid float.
+    try {
+        // Convert the input string to a float.
+        float newAlignZ{std::stof(alignZInput.getText())};
+
+        // Clamp the value to its bounds.
+        const EditorAnimation& activeAnimation{
+            dataModel.animationModel.getAnimation(activeAnimationID)};
+        AM_ASSERT(activeAnimation.frames.size() > 0,
+                  "Animation must always have at least 1 frame.");
+        const EditorSprite& firstSprite{activeAnimation.frames[0].sprite.get()};
+        BoundingBox stageWorldExtent{SpriteTools::calcSpriteStageWorldExtent(
+            firstSprite.textureExtent, firstSprite.stageOrigin)};
+
+        AM_ASSERT(activeAnimation.entityAlignmentAnchor,
+                  "Tried to set value while entity alignment anchor was null");
+        Vector3 newEntityAlignmentAnchor{
+            activeAnimation.entityAlignmentAnchor.value()};
+        newEntityAlignmentAnchor.z
+            = std::clamp(newAlignZ, 0.f, stageWorldExtent.max.z);
+
+        // Apply the new value.
+        dataModel.animationModel.setAnimationEntityAlignmentAnchor(
+            activeAnimationID, newEntityAlignmentAnchor);
+    } catch (std::exception&) {
+        // Input was not valid, reset the field to what it was.
+        alignYInput.setText(std::to_string(committedAlignY));
+    }
 }
 
 } // End namespace ResourceImporter

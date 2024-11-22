@@ -11,6 +11,7 @@
 #include "BoundingBoxPropertiesWindow.h"
 #include "SpriteEditView.h"
 #include "SpritePropertiesWindow.h"
+#include "AnimationElementsWindow.h"
 #include "AnimationEditView.h"
 #include "AnimationPropertiesWindow.h"
 #include "GraphicSetEditView.h"
@@ -110,6 +111,7 @@ private:
     SpriteSheetEditView spriteSheetEditView;
     BoundingBoxEditView boundingBoxEditView;
     SpriteEditView spriteEditView;
+    AnimationElementsWindow animationElementsWindow;
     AnimationEditView animationEditView;
     GraphicSetEditView graphicSetEditView;
     EntityGraphicSetEditView entityGraphicSetEditView;

@@ -16,7 +16,8 @@ MainScreen::MainScreen(DataModel& inDataModel)
 , spriteSheetEditView{dataModel}
 , boundingBoxEditView{dataModel, libraryWindow}
 , spriteEditView{dataModel}
-, animationEditView{dataModel, libraryWindow}
+, animationElementsWindow{*this, dataModel}
+, animationEditView{dataModel, libraryWindow, animationElementsWindow}
 , iconEditView{dataModel}
 , graphicSetEditView{dataModel, libraryWindow}
 , entityGraphicSetEditView{dataModel, libraryWindow}
@@ -41,6 +42,7 @@ MainScreen::MainScreen(DataModel& inDataModel)
     windows.push_back(spriteSheetEditView);
     windows.push_back(boundingBoxEditView);
     windows.push_back(spriteEditView);
+    windows.push_back(animationElementsWindow);
     windows.push_back(animationEditView);
     windows.push_back(graphicSetEditView);
     windows.push_back(entityGraphicSetEditView);
@@ -164,6 +166,7 @@ MainScreen::MainScreen(DataModel& inDataModel)
     boundingBoxPropertiesWindow.setIsVisible(false);
     spriteEditView.setIsVisible(false);
     spritePropertiesWindow.setIsVisible(false);
+    animationElementsWindow.setIsVisible(false);
     animationEditView.setIsVisible(false);
     animationPropertiesWindow.setIsVisible(false);
     graphicSetEditView.setIsVisible(false);
@@ -280,6 +283,7 @@ void MainScreen::onActiveLibraryItemChanged(
     boundingBoxPropertiesWindow.setIsVisible(false);
     spriteEditView.setIsVisible(false);
     spritePropertiesWindow.setIsVisible(false);
+    animationElementsWindow.setIsVisible(false);
     animationEditView.setIsVisible(false);
     animationPropertiesWindow.setIsVisible(false);
     graphicSetEditView.setIsVisible(false);
@@ -303,6 +307,7 @@ void MainScreen::onActiveLibraryItemChanged(
         spritePropertiesWindow.setIsVisible(true);
     }
     else if (holds_alternative<EditorAnimation>(newActiveItem)) {
+        animationElementsWindow.setIsVisible(true);
         animationEditView.setIsVisible(true);
         animationPropertiesWindow.setIsVisible(true);
     }

@@ -66,6 +66,9 @@ public:
                                     const BoundingBox& newModelBounds);
     void setAnimationCollisionEnabled(AnimationID animationID,
                                       bool newCollisionEnabled);
+    void setAnimationEntityAlignmentAnchor(
+        AnimationID animationID,
+        const std::optional<Vector3>& newEntityAlignmentAnchor);
     /**
      * Adds the given sprite as a frame in the given animation.
      * The sprite will be added to the first empty frame. If there are no 
@@ -157,6 +160,9 @@ private:
         animationCustomModelBoundsChangedSig;
     entt::sigh<void(AnimationID animationID, bool newCollisionEnabled)>
         animationCollisionEnabledChangedSig;
+    entt::sigh<void(AnimationID animationID,
+                    const std::optional<Vector3>& newEntityAlignmentAnchor)>
+        animationEntityAlignmentAnchorChangedSig;
 
 public:
     //-------------------------------------------------------------------------
@@ -204,6 +210,13 @@ public:
     entt::sink<
         entt::sigh<void(AnimationID animationID, bool newCollisionEnabled)>>
         animationCollisionEnabledChanged;
+
+    /** An animation's entity alignment anchor has been added, removed, or 
+        updated. */
+    entt::sink<entt::sigh<void(
+        AnimationID animationID,
+        const std::optional<Vector3>& newEntityAlignmentAnchor)>>
+        animationEntityAlignmentAnchorChanged;
 };
 
 } // namespace ResourceImporter

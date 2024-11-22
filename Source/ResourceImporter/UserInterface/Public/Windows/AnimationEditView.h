@@ -1,8 +1,10 @@
 #pragma once
 
+#include "AnimationElementsWindow.h"
 #include "LibraryItemData.h"
 #include "StageGraphic.h"
 #include "BoundingBoxGizmo.h"
+#include "PointGizmo.h"
 #include "AUI/Window.h"
 #include "AUI/Screen.h"
 #include "AUI/Text.h"
@@ -29,7 +31,8 @@ public:
     //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    AnimationEditView(DataModel& inDataModel, LibraryWindow& inLibraryWindow);
+    AnimationEditView(DataModel& inDataModel, LibraryWindow& inLibraryWindow,
+                      AnimationElementsWindow& inAnimationElementsWindow);
 
     //-------------------------------------------------------------------------
     // Base class overrides
@@ -54,6 +57,9 @@ private:
                                          BoundingBoxID newModelBoundsID);
     void onAnimationCustomModelBoundsChanged(
         AnimationID animationID, const BoundingBox& newCustomModelBounds);
+    void onAnimationEntityAlignmentAnchorChanged(
+        AnimationID animationID,
+        const std::optional<Vector3>& newEntityAlignmentAnchor);
 
     /**
      * (If active animation was removed) Sets activeAnimation to invalid and 
@@ -67,6 +73,12 @@ private:
     void onGizmoBoundingBoxUpdated(const BoundingBox& updatedBounds);
 
     /**
+     * Pushes the gizmo's updated entity alignment anchor to the model.
+     */
+    void onGizmoEntityAlignmentAnchorUpdated(
+        const Vector3& updatedEntityAlignmentAnchor);
+
+    /**
      * Displays the timeline's new selected sprite.
      */
     void onTimelineSelectionChanged(Uint8 selectedFrameNumber);
@@ -75,6 +87,11 @@ private:
      * Tells the model to move the sprite.
      */
     void onTimelineSpriteMoved(Uint8 oldFrameNumber, Uint8 newFrameNumber);
+
+    /**
+     * Enables the appropriate gizmo for the selected element.
+     */
+    void onElementSelected(AnimationElementsWindow::ElementType type);
 
     /**
      * Styles the given text.
@@ -86,6 +103,9 @@ private:
 
     /** Used to get the currently selected list item. */
     LibraryWindow& libraryWindow;
+
+    /** Used to know when the user selects a different element. */
+    AnimationElementsWindow& animationElementsWindow;
 
     /** The active animation's ID. */
     AnimationID activeAnimationID;
@@ -107,6 +127,9 @@ private:
 
     /** The gizmo for editing the animation's bounding box. */
     BoundingBoxGizmo boundingBoxGizmo;
+
+    /** The gizmo for editing the animation's entity alignment anchor. */
+    PointGizmo entityAlignmentAnchorGizmo;
 
     /** Holds the AnimationTimeline so it can be scrolled horizontally. */
     AUI::ScrollArea timelineScrollArea;

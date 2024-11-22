@@ -24,6 +24,7 @@ AnimationModel::AnimationModel(DataModel& inDataModel)
 , animationModelBoundsIDChangedSig{}
 , animationCustomModelBoundsChangedSig{}
 , animationCollisionEnabledChangedSig{}
+, animationEntityAlignmentAnchorChangedSig{}
 , animationAdded{animationAddedSig}
 , animationRemoved{animationRemovedSig}
 , animationDisplayNameChanged{animationDisplayNameChangedSig}
@@ -33,6 +34,8 @@ AnimationModel::AnimationModel(DataModel& inDataModel)
 , animationModelBoundsIDChanged{animationModelBoundsIDChangedSig}
 , animationCustomModelBoundsChanged{animationCustomModelBoundsChangedSig}
 , animationCollisionEnabledChanged{animationCollisionEnabledChangedSig}
+, animationEntityAlignmentAnchorChanged{
+      animationEntityAlignmentAnchorChangedSig}
 {
     // Reserve the null animation ID (the engine provides it in code, 
     // so we don't need it in the json).
@@ -122,6 +125,18 @@ void AnimationModel::save(nlohmann::json& json)
             = animationModelBounds.min.z;
         json["animations"][i]["modelBounds"]["maxZ"]
             = animationModelBounds.max.z;
+
+        // Add the entity alignment anchor, if present.
+        if (animation.entityAlignmentAnchor) {
+            const Vector3& alignmentAnchor{
+                animation.entityAlignmentAnchor.value()};
+            json["animations"][i]["entityAlignmentAnchor"]["x"]
+                = alignmentAnchor.x;
+            json["animations"][i]["entityAlignmentAnchor"]["y"]
+                = alignmentAnchor.y;
+            json["animations"][i]["entityAlignmentAnchor"]["z"]
+                = alignmentAnchor.z;
+        }
 
         i++;
     }
@@ -253,6 +268,24 @@ void AnimationModel::setAnimationCollisionEnabled(AnimationID animationID,
 
     animationCollisionEnabledChangedSig.publish(animationID,
                                                 newCollisionEnabled);
+}
+
+void AnimationModel::setAnimationEntityAlignmentAnchor(
+    AnimationID animationID,
+    const std::optional<Vector3>& newEntityAlignmentAnchor)
+{
+    auto animationPair{animationMap.find(animationID)};
+    if (animationPair == animationMap.end()) {
+        LOG_FATAL(
+            "Tried to set entityAlignmentAnchor using invalid animation ID.");
+    }
+
+    // Set the new entityAlignmentAnchor and signal the change.
+    EditorAnimation& animation{animationPair->second};
+    animation.entityAlignmentAnchor = newEntityAlignmentAnchor;
+
+    animationEntityAlignmentAnchorChangedSig.publish(animationID,
+                                                     newEntityAlignmentAnchor);
 }
 
 void AnimationModel::addAnimationFrame(AnimationID animationID,
@@ -449,6 +482,14 @@ bool AnimationModel::parseAnimation(const nlohmann::json& animationJson)
         = animationJson.at("modelBounds").at("minZ");
     animation.customModelBounds.max.z
         = animationJson.at("modelBounds").at("maxZ");
+
+    // Add entityAlignmentAnchor, if present.
+    if (animationJson.contains("entityAlignmentAnchor")) {
+        animation.entityAlignmentAnchor
+            = {animationJson.at("entityAlignmentAnchor").at("x"),
+               animationJson.at("entityAlignmentAnchor").at("y"),
+               animationJson.at("entityAlignmentAnchor").at("z")};
+    }
 
     // Signal the new animation to the UI.
     animationAddedSig.publish(animationID, animation);

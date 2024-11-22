@@ -1,5 +1,6 @@
 target_sources(ResourceImporter
     PRIVATE
+        Private/Widgets/AnimationElementsListItem.cpp
         Private/Widgets/AnimationTimeline.cpp
         Private/Widgets/BoundingBoxGizmo.cpp
         Private/Widgets/GraphicSetSlot.cpp
@@ -9,6 +10,7 @@ target_sources(ResourceImporter
         Private/Widgets/MainTextInput.cpp
         Private/Widgets/MainThumbnail.cpp
         Private/Widgets/ParentListItem.cpp
+        Private/Widgets/PointGizmo.cpp
         Private/Widgets/StageGraphic.cpp
         Private/Widgets/TimelineFrame.cpp
         Private/Widgets/TimelineScrubber.cpp
@@ -16,6 +18,7 @@ target_sources(ResourceImporter
         Private/Windows/AddIconSheetDialog.cpp
         Private/Windows/AddSpriteDialog.cpp
         Private/Windows/AnimationEditView.cpp
+        Private/Windows/AnimationElementsWindow.cpp
         Private/Windows/AnimationPropertiesWindow.cpp
         Private/Windows/BoundingBoxEditView.cpp
         Private/Windows/BoundingBoxPropertiesWindow.cpp
@@ -39,6 +42,7 @@ target_sources(ResourceImporter
         Private/TitleScreen.cpp
         Private/UserInterface.cpp
     PUBLIC
+        Public/Widgets/AnimationElementsListItem.h
         Public/Widgets/AnimationTimeline.h
         Public/Widgets/BoundingBoxGizmo.h
         Public/Widgets/GraphicSetSlot.h
@@ -48,6 +52,7 @@ target_sources(ResourceImporter
         Public/Widgets/MainTextInput.h
         Public/Widgets/MainThumbnail.h
         Public/Widgets/ParentListItem.h
+        Public/Widgets/PointGizmo.h
         Public/Widgets/StageGraphic.h
         Public/Widgets/TimelineFrame.h
         Public/Widgets/TimelineScrubber.h
@@ -55,6 +60,7 @@ target_sources(ResourceImporter
         Public/Windows/AddIconSheetDialog.h
         Public/Windows/AddSpriteDialog.h
         Public/Windows/AnimationEditView.h
+        Public/Windows/AnimationElementsWindow.h
         Public/Windows/AnimationPropertiesWindow.h
         Public/Windows/BoundingBoxEditView.h
         Public/Windows/BoundingBoxPropertiesWindow.h

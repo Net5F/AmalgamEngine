@@ -10,25 +10,45 @@ namespace AM
 namespace ResourceImporter
 {
 /**
- * A selectable list item, used in the library window.
+ * A selectable list item, used in the animation elements window.
  *
  * Interactions:
  *   Mouse-over to hover.
  *   Click once to "select", putting this widget into a "selected" state.
- *   Double-click to "activate". Does not change internal state.
  *
  * The rendering order for this widget's children is:
  *   Background: hoveredImage, selectedImage
  *   Foreground: text
  */
-class LibraryListItem : public AUI::Widget
+class AnimationElementsListItem : public AUI::Widget
 {
 public:
     //-------------------------------------------------------------------------
+    // Public definitions
+    //-------------------------------------------------------------------------
+    /**
+     * Used to track this widget's visual and logical state.
+     */
+    enum class State { Normal, Hovered, Selected, Disabled };
+
+    //-------------------------------------------------------------------------
     // Public interface
     //-------------------------------------------------------------------------
-    LibraryListItem(const std::string& inText,
-                    const std::string& inDebugName = "LibraryListItem");
+    AnimationElementsListItem(const SDL_Rect& inLogicalExtent,
+                              const std::string& inText,
+                              const std::string& inDebugName
+                              = "AnimationElementsListItem");
+
+    /**
+     * Enabled this list item, allowing it to respond to user input.
+     */
+    void enable();
+
+    /**
+     * Disables this list item, causing it to ignore user input and render with
+     * grey text.
+     */
+    void disable();
 
     /**
      * Selects this widget and calls onSelected.
@@ -52,38 +72,12 @@ public:
      */
     void deselect();
 
-    bool getIsHovered() const;
-    bool getIsSelected() const;
+    State getCurrentState() const;
 
     /**
      * Sets the left padding. Used to define the visual hierarchy in the list.
      */
     void setLeftPadding(int inLeftPadding);
-
-    /**
-     * The types of list items that we hold in the library.
-     */
-    enum Type {
-        SpriteSheet,
-        Sprite,
-        Animation,
-        BoundingBox,
-        Terrain,
-        Floor,
-        Wall,
-        Object,
-        Entity,
-        IconSheet,
-        Icon,
-        Count,
-        None
-    };
-    Type type;
-
-    /** Alongside type, associates this list item with the model data that it
-        represents.
-        Note: For unsigned IDs, this can be cast to Uint16 or Uint32. */
-    int ID;
 
     //-------------------------------------------------------------------------
     // Public child widgets
@@ -103,19 +97,15 @@ public:
      * @param inOnSelected A callback that expects a pointer to the widget
      *                     that was selected.
      */
-    void setOnSelected(std::function<void(LibraryListItem*)> inOnSelected);
+    void setOnSelected(
+        std::function<void(AnimationElementsListItem*)> inOnSelected);
 
     /**
      * @param inOnDeselected A callback that expects a pointer to the
      *                       widget that was deselected.
      */
-    void setOnDeselected(std::function<void(LibraryListItem*)> inOnDeselected);
-
-    /**
-     * @param inOnActivated A callback that expects a pointer to the widget
-     *                      that was activated.
-     */
-    void setOnActivated(std::function<void(LibraryListItem*)> inOnActivated);
+    void setOnDeselected(
+        std::function<void(AnimationElementsListItem*)> inOnDeselected);
 
     //-------------------------------------------------------------------------
     // Base class overrides
@@ -132,23 +122,16 @@ public:
     void onMouseLeave() override;
 
 protected:
-    /** Sets isHovered and updates the visibility of hoveredImage. */
-    void setIsHovered(bool inIsHovered);
-    /** Sets isSelected and updates the visibility of selectedImage. */
-    void setIsSelected(bool inIsSelected);
+    /**
+     * Sets currentState and updates child widget visibility.
+     */
+    void setCurrentState(State inState);
 
-    /** Returns true if shift or ctrl are currently held. */
-    bool modifierKeyIsHeld();
+    std::function<void(AnimationElementsListItem*)> onSelected;
+    std::function<void(AnimationElementsListItem*)> onDeselected;
 
-    std::function<void(LibraryListItem*)> onSelected;
-    std::function<void(LibraryListItem*)> onDeselected;
-    std::function<void(LibraryListItem*)> onActivated;
-
-    /** Tracks whether the mouse is currently hovering over this widget. */
-    bool isHovered;
-
-    /** Tracks whether this widget is currently selected. */
-    bool isSelected;
+    /** Tracks this button's current visual and logical state. */
+    State currentState;
 };
 
 } // End namespace ResourceImporter

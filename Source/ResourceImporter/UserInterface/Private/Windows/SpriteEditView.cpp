@@ -18,7 +18,7 @@ SpriteEditView::SpriteEditView(DataModel& inDataModel)
 , checkerboardImage{{0, 0, 100, 100}, "BackgroundImage"}
 , stageGraphic{logicalExtent}
 , spriteImage{{0, 0, 100, 100}, "SpriteImage"}
-, boundingBoxGizmo{{0, 52, 1297, 732}, inDataModel}
+, boundingBoxGizmo{{0, 52, 1297, 732}}
 , descText{{24, 806, 1240, 200}, "DescText"}
 {
     // Add our children so they're included in rendering, etc.

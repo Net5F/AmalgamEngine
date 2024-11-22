@@ -72,12 +72,11 @@ LibraryWindow::LibraryWindow(MainScreen& inScreen, DataModel& inDataModel)
     libraryContainer.push_back(std::move(iconSheetContainer));
 
     /* Add list item button */
-    addButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR
-                                         + "LibraryWindow/NewIcon.png");
+    addButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR + "Icons/Plus.png");
     addButton.hoveredImage.setSimpleImage(Paths::TEXTURE_DIR
-                                          + "LibraryWindow/NewHoveredIcon.png");
+                                          + "Icons/PlusHovered.png");
     addButton.pressedImage.setSimpleImage(Paths::TEXTURE_DIR
-                                          + "LibraryWindow/NewIcon.png");
+                                          + "Icons/Plus.png");
 
     addButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     addButton.text.setText("");

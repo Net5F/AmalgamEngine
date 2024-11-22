@@ -9,6 +9,8 @@ namespace ResourceImporter
 LibraryListItem::LibraryListItem(const std::string& inText,
                                  const std::string& inDebugName)
 : AUI::Widget({0, 0, 318, 30}, inDebugName)
+, type{}
+, ID{0}
 , hoveredImage({0, 0, logicalExtent.w, logicalExtent.h})
 , selectedImage({0, 0, logicalExtent.w, logicalExtent.h})
 , text({0, 0, logicalExtent.w, logicalExtent.h})

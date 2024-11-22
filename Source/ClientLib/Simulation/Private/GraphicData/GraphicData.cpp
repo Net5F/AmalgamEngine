@@ -114,10 +114,12 @@ void GraphicData::parseAnimation(const nlohmann::json& animationJson)
 
     // Add the entity alignment anchor.
     AnimationRenderData& renderData{animationRenderData[numericID]};
-    renderData.entityAlignmentAnchor
-        = {animationJson.at("entityAlignmentAnchor").at("x"),
-           animationJson.at("entityAlignmentAnchor").at("y"),
-           animationJson.at("entityAlignmentAnchor").at("z")};
+    if (animationJson.contains("entityAlignmentAnchor")) {
+        renderData.entityAlignmentAnchor
+            = {animationJson.at("entityAlignmentAnchor").at("x"),
+               animationJson.at("entityAlignmentAnchor").at("y"),
+               animationJson.at("entityAlignmentAnchor").at("z")};
+    }
 }
 
 Vector3
@@ -153,14 +155,14 @@ Vector3
         return {};
     }
 
-    // Return the difference between the requested animation's alignment 
-    // anchor and the IdleSouth graphic's bottom center.
+    // Return the difference between the IdleSouth graphic's bottom center and 
+    // the requested animation's alignment anchor.
     Vector3 idleSouthBottomCenter{
         graphicSet.graphics.at(EntityGraphicType::IdleSouth)
             .getModelBounds()
             .getBottomCenterPoint()};
     Vector3 alignmentAnchor{renderData.entityAlignmentAnchor.value()};
-    return (alignmentAnchor - idleSouthBottomCenter);
+    return (idleSouthBottomCenter - alignmentAnchor);
 }
 
 } // End namespace Client

@@ -71,17 +71,20 @@ public:
     AUI::Text collisionEnabledLabel;
     AUI::Checkbox collisionEnabledInput;
 
+    AUI::Text alignXLabel;
+    MainTextInput alignXInput;
+
+    AUI::Text alignYLabel;
+    MainTextInput alignYInput;
+
+    AUI::Text alignZLabel;
+    MainTextInput alignZInput;
+
 private:
     /**
      * If the new active item is a animation, loads it's data into this panel.
      */
     void onActiveLibraryItemChanged(const LibraryItemData& newActiveItem);
-
-    /**
-     * (If active animation was removed) Sets this panel back to its default 
-     * state.
-     */
-    void onAnimationRemoved(AnimationID animationID);
 
     /**
      * (If ID matches active animation) Updates this panel with the active 
@@ -99,6 +102,15 @@ private:
         AnimationID animationID, const BoundingBox& newCustomModelBounds);
     void onAnimationCollisionEnabledChanged(AnimationID animationID,
                                             bool newCollisionEnabled);
+    void onAnimationEntityAlignmentAnchorChanged(
+        AnimationID animationID,
+        const std::optional<Vector3>& newEntityAlignmentAnchor);
+
+    /**
+     * (If active animation was removed) Sets this panel back to its default 
+     * state.
+     */
+    void onAnimationRemoved(AnimationID animationID);
 
     /**
      * Updates boundingBoxButton to show whether the selection is assignable.
@@ -142,6 +154,9 @@ private:
     void saveMaxY();
     void saveMaxZ();
     void saveCollisionEnabled();
+    void saveAlignX();
+    void saveAlignY();
+    void saveAlignZ();
 
     /** The below floats save the committed values, so we can revert to them
         if the user inputs invalid characters. */
@@ -153,6 +168,9 @@ private:
     float committedMaxX;
     float committedMaxY;
     float committedMaxZ;
+    float committedAlignX;
+    float committedAlignY;
+    float committedAlignZ;
 
     //-------------------------------------------------------------------------
     // Private child widgets

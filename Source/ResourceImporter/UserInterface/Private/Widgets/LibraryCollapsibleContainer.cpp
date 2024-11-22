@@ -13,15 +13,11 @@ LibraryCollapsibleContainer::LibraryCollapsibleContainer(
     expandedImage.setLogicalExtent({8, 4, 20, 20});
     collapsedImage.setLogicalExtent({8, 4, 20, 20});
     expandedImage.setMultiResImage(
-        {{{1600, 900},
-          (Paths::TEXTURE_DIR + "LibraryWindow/ExpandedIcon_1600.png")},
-         {{1920, 1080},
-          (Paths::TEXTURE_DIR + "LibraryWindow/ExpandedIcon_1920.png")}});
+        {{{1600, 900}, (Paths::TEXTURE_DIR + "Icons/Expanded_1600.png")},
+         {{1920, 1080}, (Paths::TEXTURE_DIR + "Icons/Expanded_1920.png")}});
     collapsedImage.setMultiResImage(
-        {{{1600, 900},
-          (Paths::TEXTURE_DIR + "LibraryWindow/CollapsedIcon_1600.png")},
-         {{1920, 1080},
-          (Paths::TEXTURE_DIR + "LibraryWindow/CollapsedIcon_1920.png")}});
+        {{{1600, 900}, (Paths::TEXTURE_DIR + "Icons/Collapsed_1600.png")},
+         {{1920, 1080}, (Paths::TEXTURE_DIR + "Icons/Collapsed_1920.png")}});
 
     // Set our text properties.
     headerText.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);

@@ -1,9 +1,7 @@
 #include "BoundingBoxGizmo.h"
-#include "MainScreen.h"
-#include "DataModel.h"
 #include "Transforms.h"
-#include "Position.h"
 #include "Camera.h"
+#include "Position.h"
 #include "SpriteTools.h"
 #include "SharedConfig.h"
 #include "Log.h"
@@ -18,9 +16,8 @@ namespace AM
 {
 namespace ResourceImporter
 {
-BoundingBoxGizmo::BoundingBoxGizmo(const SDL_Rect& inLogicalExtent, DataModel& inDataModel)
+BoundingBoxGizmo::BoundingBoxGizmo(const SDL_Rect& inLogicalExtent)
 : AUI::Widget(inLogicalExtent, "BoundingBoxGizmo")
-, dataModel{inDataModel}
 , lastUsedScreenSize{0, 0}
 , boundingBox{}
 , isEnabled{true}
@@ -142,8 +139,8 @@ void BoundingBoxGizmo::render(const SDL_Point& windowTopLeft)
 AUI::EventResult BoundingBoxGizmo::onMouseDown(AUI::MouseButtonType buttonType,
                                                const SDL_Point& cursorPosition)
 {
-    // Only respond to the left mouse button.
-    if (buttonType != AUI::MouseButtonType::Left) {
+    // Do nothing if disabled. Only respond to the left mouse button.
+    if (!isEnabled || (buttonType != AUI::MouseButtonType::Left)) {
         return AUI::EventResult{.wasHandled{false}};
     }
 
@@ -264,7 +261,7 @@ void BoundingBoxGizmo::updateStageExtent()
 
 void BoundingBoxGizmo::refreshGraphics()
 {
-    // Calculate where the sprite's model bounds are on the screen.
+    // Calculate where the bounding box is on the screen.
     std::vector<SDL_Point> screenPoints{};
     calcBoundingBoxScreenPoints(screenPoints);
 
@@ -280,7 +277,7 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 
     // Note: The expected behavior is to move along the x/y plane and
     //       leave minZ where it was.
-    BoundingBox updatedBounds(boundingBox);
+    BoundingBox updatedBounds{boundingBox};
     float& minX{updatedBounds.min.x};
     float& minY{updatedBounds.min.y};
     float& maxX{updatedBounds.max.x};
@@ -307,7 +304,7 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
         minY = 0;
     }
 
-    // If we moved outside the tile bounds, bring the box bounds back in.
+    // If we moved outside the stage bounds, bring the box bounds back in.
     if (maxX > stageWorldExtent.max.x) {
         float diff{maxX - stageWorldExtent.max.x};
         minX -= diff;
@@ -320,8 +317,8 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
     }
 
     // Signal the updated bounding box.
-    // Note: We don't update our internal bounding box until our owner 
-    //       saves the update in the model and calls setBoundingBox().
+    // Note: We don't update our internal bounding box until our owner saves the
+    //       update in the model and it signals us.
     if (onBoundingBoxUpdated) {
         onBoundingBoxUpdated(updatedBounds);
     }
@@ -330,7 +327,7 @@ void BoundingBoxGizmo::updatePositionBounds(const Position& mouseWorldPos)
 void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    BoundingBox updatedBounds(boundingBox);
+    BoundingBox updatedBounds{boundingBox};
     updatedBounds.min.x = std::clamp(mouseWorldPos.x, 0.f, updatedBounds.max.x);
 
     // Signal the updated bounding box.
@@ -344,7 +341,7 @@ void BoundingBoxGizmo::updateXBounds(const Position& mouseWorldPos)
 void BoundingBoxGizmo::updateYBounds(const Position& mouseWorldPos)
 {
     // Clamp the new value to its bounds.
-    BoundingBox updatedBounds(boundingBox);
+    BoundingBox updatedBounds{boundingBox};
     updatedBounds.min.y = std::clamp(mouseWorldPos.y, 0.f, updatedBounds.max.y);
 
     // Signal the updated bounding box.
@@ -372,7 +369,7 @@ void BoundingBoxGizmo::updateZBounds(int mouseScreenYPos)
     mouseZHeight = Transforms::screenYToWorldZ(mouseZHeight, 1.f);
 
     // Set maxZ, making sure it doesn't go below minZ or beyond the stage.
-    BoundingBox updatedBounds(boundingBox);
+    BoundingBox updatedBounds{boundingBox};
     updatedBounds.max.z
         = std::clamp(mouseZHeight, updatedBounds.min.z, stageWorldExtent.max.z);
 
@@ -519,6 +516,7 @@ void BoundingBoxGizmo::renderControls(const SDL_Point& windowTopLeft)
     offsetExtent.x += windowTopLeft.x;
     offsetExtent.y += windowTopLeft.y;
 
+    SDL_SetRenderDrawBlendMode(AUI::Core::getRenderer(), SDL_BLENDMODE_BLEND);
     SDL_SetRenderDrawColor(AUI::Core::getRenderer(), 0, 0, 0,
                            static_cast<Uint8>(alpha));
     SDL_RenderFillRect(AUI::Core::getRenderer(), &offsetExtent);
