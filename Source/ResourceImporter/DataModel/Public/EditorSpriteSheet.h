@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SpriteSheetID.h"
+#include "SpriteID.h"
 #include <SDL_rect.h>
 #include <string>
 #include <vector>
@@ -27,7 +28,7 @@ struct EditorSpriteSheet {
     int textureHeight{0};
 
     /** The runtime IDs for each sprite in this sheet. */
-    std::vector<int> spriteIDs{};
+    std::vector<SpriteID> spriteIDs{};
 };
 
 } // namespace ResourceImporter

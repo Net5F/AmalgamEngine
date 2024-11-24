@@ -42,6 +42,7 @@ AUI::EventResult ParentListItem::onMouseDown(AUI::MouseButtonType buttonType,
         //       we only react to clicking on the text region, so we can just 
         //       call its handler.
         LibraryListItem::onMouseDown(buttonType, cursorPosition);
+        return AUI::EventResult{.wasHandled{true}};
     }
 
     // Note: If our arrow was clicked, it'll be handled when this propagates

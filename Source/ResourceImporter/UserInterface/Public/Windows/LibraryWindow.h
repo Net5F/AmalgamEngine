@@ -142,6 +142,11 @@ private:
     void processSelectedListItem(LibraryListItem* selectedListItem);
 
     /**
+     * If the given list item is selected, removes it from the vector.
+     */
+    void processDeselectedListItem(LibraryListItem* deselectedListItem);
+
+    /**
      * Removes the given list item widget from the library and all secondary
      * data structures.
      */

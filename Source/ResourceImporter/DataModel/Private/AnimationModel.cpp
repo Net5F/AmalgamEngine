@@ -168,6 +168,11 @@ void AnimationModel::remAnimation(AnimationID animationID)
     animationNameMap.erase(animationIt->second.displayName);
     animationMap.erase(animationIt);
 
+    // Clear this animation from any sets that reference it.
+    dataModel.graphicSetModel.removeGraphicIDFromSets(toGraphicID(animationID));
+    dataModel.entityGraphicSetModel.removeGraphicIDFromSets(
+        toGraphicID(animationID));
+
     // Signal that the animation was erased.
     animationRemovedSig.publish(animationID);
 }

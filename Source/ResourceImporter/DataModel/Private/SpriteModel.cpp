@@ -208,7 +208,10 @@ void SpriteModel::remSpriteSheet(SpriteSheetID sheetID)
     }
 
     // Erase all of the sheet's sprites.
-    for (SpriteID spriteID : sheetIt->second.spriteIDs) {
+    // Note: We need to make a copy of the IDs vector, since the original 
+    //       will be modified as we iterate.
+    std::vector<SpriteID> spriteIDs{sheetIt->second.spriteIDs};
+    for (SpriteID spriteID : spriteIDs) {
         remSprite(spriteID);
     }
 
@@ -319,7 +322,7 @@ void SpriteModel::remSprite(SpriteID spriteID)
     // Find the sheet that contains this sprite and remove it.
     EditorSpriteSheet* parentSpriteSheet{nullptr};
     for (auto& [spriteSheetID, spriteSheet] : spriteSheetMap) {
-        std::vector<int>& spriteIDs{spriteSheet.spriteIDs};
+        std::vector<SpriteID>& spriteIDs{spriteSheet.spriteIDs};
         for (auto it{spriteIDs.begin()}; it != spriteIDs.end(); ++it) {
             if (*it == spriteID) {
                 spriteIDs.erase(it);

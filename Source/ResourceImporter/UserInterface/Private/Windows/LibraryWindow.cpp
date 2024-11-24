@@ -149,6 +149,9 @@ void LibraryWindow::onFocusLost(AUI::FocusLostType focusLostType)
     for (LibraryListItem* listItem : tempSelectedListItems) {
         listItem->deselect();
     }
+
+    // Signal that the selections were updated.
+    selectedItemsChangedSig.publish(selectedListItems);
 }
 
 AUI::EventResult LibraryWindow::onKeyDown(SDL_Keycode keyCode)
@@ -205,8 +208,7 @@ void LibraryWindow::onSpriteSheetAdded(SpriteSheetID sheetID,
         processSelectedListItem(selectedListItem);
     });
     sheetListItem->setOnDeselected([this](LibraryListItem* deselectedListItem) {
-        // Note: Deselect is handled in OnSelected and FocusLost.
-        selectedItemsChangedSig.publish(selectedListItems);
+        processDeselectedListItem(deselectedListItem);
     });
     sheetListItem->setOnActivated(
         [this, sheetID](LibraryListItem* activatedListItem) {
@@ -236,8 +238,7 @@ void LibraryWindow::onSpriteAdded(SpriteID spriteID, const EditorSprite& sprite,
         processSelectedListItem(selectedListItem);
     });
     spriteListItem->setOnDeselected([this](LibraryListItem* deselectedListItem) {
-        // Note: Deselect is handled in OnSelected and FocusLost.
-        selectedItemsChangedSig.publish(selectedListItems);
+        processDeselectedListItem(deselectedListItem);
     });
     spriteListItem->setOnActivated(
         [this, spriteID](LibraryListItem* activatedListItem) {
@@ -269,8 +270,7 @@ void LibraryWindow::onAnimationAdded(AnimationID animationID,
     });
     animationListItem->setOnDeselected(
         [this](LibraryListItem* deselectedListItem) {
-        // Note: Deselect is handled in OnSelected and FocusLost.
-        selectedItemsChangedSig.publish(selectedListItems);
+        processDeselectedListItem(deselectedListItem);
     });
     animationListItem->setOnActivated(
         [this, animationID](LibraryListItem*) {
@@ -302,8 +302,7 @@ void LibraryWindow::onBoundingBoxAdded(BoundingBoxID boundingBoxID,
     });
     boundingBoxListItem->setOnDeselected(
         [this](LibraryListItem* deselectedListItem) {
-        // Note: Deselect is handled in OnSelected and FocusLost.
-        selectedItemsChangedSig.publish(selectedListItems);
+        processDeselectedListItem(deselectedListItem);
     });
     boundingBoxListItem->setOnActivated(
         [this, boundingBoxID](LibraryListItem*) {
@@ -750,7 +749,7 @@ void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
 
     // If we're shift or ctrl+clicking and have existing selections, check if 
     // the new selection is the same type.
-    if ((shiftIsHeld || ctrlIsHeld) && (selectedListItems.size() > 0)
+    if ((shiftIsHeld || ctrlIsHeld) && !(selectedListItems.empty())
         && (selectedListItems[0]->type != selectedListItem->type)) {
         // Not the same type. Ignore this selection.
         selectedListItem->deselect();
@@ -761,11 +760,19 @@ void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
     // and the new one.
     if (shiftIsHeld) {
         // TODO: Implement.
+        selectedListItem->deselect();
         return;
     }
     else if (ctrlIsHeld) {
-        // Add the new selection to the list.
-        selectedListItems.push_back(selectedListItem);
+        // If the item is already selected, deselect it.
+        auto it{std::ranges::find(selectedListItems, selectedListItem)};
+        if (it != selectedListItems.end()) {
+            selectedListItems.erase(it);
+        }
+        else {
+            // Not already selected. Add the new selection to the list.
+            selectedListItems.push_back(selectedListItem);
+        }
     }
     else {
         // Normal click. Deselect all of our selected list items.
@@ -780,6 +787,21 @@ void LibraryWindow::processSelectedListItem(LibraryListItem* selectedListItem)
 
     // Signal that the selections were updated.
     selectedItemsChangedSig.publish(selectedListItems);
+}
+
+void LibraryWindow::processDeselectedListItem(
+    LibraryListItem* deselectedListItem)
+{
+    // If the item is present in selectedListItems, erase it.
+    // Note: If this event originated in onFocusLost(), the list item will 
+    //       already be erased.
+    auto it{std::ranges::find(selectedListItems, deselectedListItem)};
+    if (it != selectedListItems.end()) {
+        selectedListItems.erase(it);
+
+        // Signal that the selections were updated.
+        selectedItemsChangedSig.publish(selectedListItems);
+    }
 }
 
 void LibraryWindow::removeListItem(LibraryListItem* listItem)
