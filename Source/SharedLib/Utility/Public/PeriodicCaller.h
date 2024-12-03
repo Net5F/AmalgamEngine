@@ -86,8 +86,8 @@ private:
     /**
      * Determines behavior of update() when it detects that multiple time steps
      * have passed since the last time it was called.
-     * If true, will only call givenFunct once (and log a warning.)
-     * If false, will call givenFunct for each time step (and log warnings.)
+     * If true, will only call givenFunct once (and log a warning).
+     * If false, will call givenFunct for each time step (and log warnings).
      */
     const bool skipLateSteps;
 
