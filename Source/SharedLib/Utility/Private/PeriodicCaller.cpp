@@ -41,6 +41,8 @@ void PeriodicCaller::update()
 
     // Process as many time steps as have accumulated.
     while (accumulatedTime >= timestepS) {
+        double updateStartTime{timer.getTime()};
+
         // Call whichever function we were given on construction.
         if (givenFunctNoTimestep != nullptr) {
             givenFunctNoTimestep();
@@ -51,7 +53,7 @@ void PeriodicCaller::update()
 
         // Check our execution time.
         double executionTime{timer.getTime()};
-        if (executionTime > timestepS) {
+        if ((executionTime - updateStartTime) > timestepS) {
             LOG_INFO("%s overran its update timestep. executionTime: %.5fs",
                      debugName.c_str(), executionTime);
         }

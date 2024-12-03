@@ -31,7 +31,7 @@ public:
     static constexpr std::size_t MAX_ITEM_CUSTOM_INTERACTIONS{64};
 
     /** The maximum map size that we'll load, in tiles. */
-    static constexpr std::size_t MAX_MAP_WIDTH_TILES{1'000};
+    static constexpr std::size_t MAX_MAP_WIDTH_TILES{1'024};
 
     /** The x and y axis width, in world units, of our tiles. */
     static constexpr std::size_t TILE_WORLD_WIDTH{32};
