@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SDL_render.h>
 #include <string>
 
 namespace AM
@@ -37,17 +38,17 @@ public:
     static constexpr unsigned int FULLSCREEN_MODE{0};
 
     /**
-     * Sets the quality of scaling algorithm used.
-     * "nearest" = Nearest pixel sampling.
-     * "linear" = Linear filtering (supported by OpenGL and Direct3D).
-     * "best" = Ansiotropic filtering (supported by Direct3D).
+     * Sets the quality of scaling/filtering algorithm used for sprite 
+     * textures (i.e any textures rendered by Renderer).
+     * 
+     * UI textures ignore this setting.
      */
-    static constexpr char SCALING_QUALITY[] = "linear";
+    static constexpr SDL_ScaleMode SPRITE_SCALING_QUALITY{SDL_ScaleModeLinear};
 
     /** The rate at which the user interfaces fires off tick() events. */
-    static constexpr unsigned int UI_TICKS_PER_SECOND = 30;
-    static constexpr double UI_TICK_TIMESTEP_S
-        = 1.0 / static_cast<double>(UI_TICKS_PER_SECOND);
+    static constexpr unsigned int UI_TICKS_PER_SECOND{30};
+    static constexpr double UI_TICK_TIMESTEP_S{
+        1.0 / static_cast<double>(UI_TICKS_PER_SECOND)};
 };
 
 } // End namespace ResourceImporter

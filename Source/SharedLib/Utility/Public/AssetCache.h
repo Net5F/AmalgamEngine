@@ -33,9 +33,11 @@ public:
      *
      * @param resourceID An abstract resource ID (for textures added using 
      *                   addTexture()), or the full path to an image file.
+     * @param scaleMode The filtering/scaling mode that this texture should use.
      * @return A valid texture if one was found, else nullptr.
      */
-    std::shared_ptr<SDL_Texture> requestTexture(const std::string& resourceID);
+    std::shared_ptr<SDL_Texture> requestTexture(const std::string& resourceID,
+                                                SDL_ScaleMode scaleMode);
 
     /**
      * Adds the given texture to the cache, using the given ID.

@@ -53,9 +53,6 @@ Application::Application()
             LOG_FATAL("Invalid fullscreen value: %d", Config::FULLSCREEN_MODE);
     }
 
-    // Set scaling quality.
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, Config::SCALING_QUALITY);
-
     // Set up our event filter.
     SDL_SetEventFilter(&Application::filterEvents, this);
 }

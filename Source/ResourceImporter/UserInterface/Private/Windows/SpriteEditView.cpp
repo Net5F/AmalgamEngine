@@ -3,6 +3,7 @@
 #include "EditorSprite.h"
 #include "DataModel.h"
 #include "SpriteID.h"
+#include "Config.h"
 #include "Paths.h"
 #include "AUI/ScalingHelpers.h"
 
@@ -90,7 +91,8 @@ void SpriteEditView::onActiveLibraryItemChanged(
     fullImagePath += newActiveSprite->imagePath;
     spriteImage.setSimpleImage(fullImagePath,
                                {0, 0, newActiveSprite->textureExtent.w,
-                                newActiveSprite->textureExtent.h});
+                                newActiveSprite->textureExtent.h},
+                               Config::SPRITE_SCALING_QUALITY);
 
     // Set up the gizmo with the new sprite's size and data.
     // Note: The sprite's native size is used as the logical size.

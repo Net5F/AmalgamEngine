@@ -3,6 +3,7 @@
 #include "LibraryWindow.h"
 #include "AnimationTimeline.h"
 #include "SpriteID.h"
+#include "Config.h"
 #include "Paths.h"
 #include "AUI/Core.h"
 #include "AUI/ScalingHelpers.h"
@@ -338,7 +339,8 @@ void AnimationEditView::onTimelineSelectionChanged(Uint8 selectedFrameNumber)
     imagePath += selectedSprite->imagePath;
     spriteImage.setSimpleImage(imagePath,
                                {0, 0, selectedSprite->textureExtent.w,
-                                selectedSprite->textureExtent.h});
+                                selectedSprite->textureExtent.h},
+                               Config::SPRITE_SCALING_QUALITY);
 
     // Update the stage origin in the gizmos.
     boundingBoxGizmo.setStageOrigin(selectedSprite->stageOrigin);

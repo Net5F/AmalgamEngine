@@ -9,7 +9,8 @@ AssetCache::AssetCache(SDL_Renderer* inSdlRenderer)
 }
 
 std::shared_ptr<SDL_Texture>
-    AssetCache::requestTexture(const std::string& resourceID)
+    AssetCache::requestTexture(const std::string& resourceID,
+                               SDL_ScaleMode scaleMode)
 {
     // If the texture is already in the cache, return it.
     auto it{textureCache.find(resourceID)};
@@ -28,6 +29,9 @@ std::shared_ptr<SDL_Texture>
     // Wrap the texture in a shared_ptr.
     std::shared_ptr<SDL_Texture> texture{
         rawTexture, [](SDL_Texture* p) { SDL_DestroyTexture(p); }};
+
+    // Set the texture's filtering/scaling quality.
+    SDL_SetTextureScaleMode(texture.get(), scaleMode);
 
     // Save the texture in the cache.
     textureCache[resourceID] = texture;

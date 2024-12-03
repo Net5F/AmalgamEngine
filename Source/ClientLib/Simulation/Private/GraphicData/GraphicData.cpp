@@ -1,6 +1,7 @@
 #include "GraphicData.h"
 #include "AssetCache.h"
 #include "SpriteID.h"
+#include "Config.h"
 #include "Paths.h"
 #include "Log.h"
 #include "nlohmann/json.hpp"
@@ -61,7 +62,8 @@ void GraphicData::parseJson(const nlohmann::json& json, AssetCache& assetCache)
             texturePath += sheetJson.value()["displayName"].get<std::string>();
             texturePath += ".png";
 
-            TextureHandle texture{assetCache.requestTexture(texturePath)};
+            TextureHandle texture{assetCache.requestTexture(
+                texturePath, Config::SPRITE_SCALING_QUALITY)};
             if (!texture) {
                 // Note: requestTexture will LOG_ERROR if the file isn't found.
                 continue;

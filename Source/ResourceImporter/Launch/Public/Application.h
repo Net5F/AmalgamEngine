@@ -77,7 +77,9 @@ private:
     static int filterEvents(void* userData, SDL_Event* event);
 
     SDL2pp::SDL sdl;
+
     SDL2pp::Window sdlWindow;
+
     /** The SDL renderer that we use to render the UI and world.
         We use SDL2pp::Renderer for convenience of initialization here, but
         all other parts of the engine directly use SDL_Renderer (so that we

@@ -1,8 +1,8 @@
 target_sources(ResourceImporter
-	PRIVATE
-		Private/Renderer.cpp
-	PUBLIC
-		Public/Renderer.h
+    PRIVATE
+        Private/Renderer.cpp
+    PUBLIC
+        Public/Renderer.h
 )
 
 target_include_directories(ResourceImporter

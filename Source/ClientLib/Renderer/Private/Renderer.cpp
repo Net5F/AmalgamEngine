@@ -29,8 +29,6 @@ Renderer::Renderer(SDL_Renderer* inSdlRenderer, World& inWorld,
 , worldSpriteSorter{world.registry, world.tileMap, graphicData, ui}
 , extension{nullptr}
 {
-    // Set scaling quality.
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, Config::SCALING_QUALITY);
 }
 
 void Renderer::render()

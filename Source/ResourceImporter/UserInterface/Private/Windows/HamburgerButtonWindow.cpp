@@ -21,12 +21,14 @@ HamburgerButtonWindow::HamburgerButtonWindow(MainScreen& inScreen)
         (Paths::TEXTURE_DIR + "WindowBackground.png"), {1, 1, 1, 1});
 
     /* Buttons. */
-    hamburgerButton.normalImage.setSimpleImage(Paths::TEXTURE_DIR
-                                               + "HamburgerButton/Normal.png");
+    hamburgerButton.normalImage.setSimpleImage(
+        Paths::TEXTURE_DIR + "HamburgerButton/Normal.png", SDL_ScaleModeLinear);
     hamburgerButton.hoveredImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "HamburgerButton/Hovered.png");
+        Paths::TEXTURE_DIR + "HamburgerButton/Hovered.png",
+        SDL_ScaleModeLinear);
     hamburgerButton.pressedImage.setSimpleImage(
-        Paths::TEXTURE_DIR + "HamburgerButton/Pressed.png");
+        Paths::TEXTURE_DIR + "HamburgerButton/Pressed.png",
+        SDL_ScaleModeLinear);
     hamburgerButton.text.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 33);
     hamburgerButton.text.setText("");
 
