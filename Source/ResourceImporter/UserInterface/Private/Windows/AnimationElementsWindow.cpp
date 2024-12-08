@@ -11,7 +11,7 @@ namespace ResourceImporter
 {
 AnimationElementsWindow::AnimationElementsWindow(MainScreen& inScreen,
                                                  DataModel& inDataModel)
-: AUI::Window({1617, 882, 303, 121}, "AnimationElementsWindow")
+: AUI::Window({1617, 881, 303, 121}, "AnimationElementsWindow")
 , mainScreen{inScreen}
 , dataModel{inDataModel}
 , activeAnimationID{NULL_ANIMATION_ID}
