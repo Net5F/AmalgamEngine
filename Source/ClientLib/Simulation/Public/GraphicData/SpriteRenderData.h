@@ -32,6 +32,9 @@ struct SpriteRenderData {
         The "stage" is the coordinate space that we overlay onto the sprite 
         image. */
     SDL_Point stageOrigin{0, 0};
+
+    /** If true, this sprite will have its alpha premultiplied. */
+    bool premultiplyAlpha{false};
 };
 
 } // End namespace Client

@@ -143,9 +143,25 @@ void Renderer::renderWorld(const Camera& camera, double alpha)
         // Apply the alpha mod that the UI gave us.
         SDL_SetTextureAlphaMod(renderData.texture.get(), colorMod.a);
 
-        // Render the sprite.
-        SDL_RenderCopyF(sdlRenderer, renderData.texture.get(),
-                        &(renderData.textureExtent), &(spriteInfo.screenExtent));
+        // Render the sprite with an appropriate blend mode.
+        if (renderData.premultiplyAlpha) {
+            static SDL_BlendMode premultipliedAlphaBlendMode{
+                SDL_ComposeCustomBlendMode(
+                    SDL_BLENDFACTOR_ONE, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+                    SDL_BLENDOPERATION_ADD, SDL_BLENDFACTOR_ONE,
+                    SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA,
+                    SDL_BLENDOPERATION_ADD)};
+            SDL_SetTextureBlendMode(renderData.texture.get(),
+                                    premultipliedAlphaBlendMode);
+            SDL_RenderCopyF(sdlRenderer, renderData.texture.get(),
+                            &(renderData.textureExtent), &(spriteInfo.screenExtent));
+        }
+        else {
+            SDL_SetTextureBlendMode(renderData.texture.get(),
+                                    SDL_BLENDMODE_BLEND);
+            SDL_RenderCopyF(sdlRenderer, renderData.texture.get(),
+                            &(renderData.textureExtent), &(spriteInfo.screenExtent));
+        }
 
         // If the UI gave us a color mod to apply, render an additional sprite
         // with an additive blend mode and apply the color to that.

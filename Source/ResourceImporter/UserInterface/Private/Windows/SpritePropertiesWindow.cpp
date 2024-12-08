@@ -22,7 +22,7 @@ namespace ResourceImporter
 SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
                                                DataModel& inDataModel,
                                                LibraryWindow& inLibraryWindow)
-: AUI::Window({1617, 0, 303, 705}, "SpritePropertiesWindow")
+: AUI::Window({1617, 0, 303, 770}, "SpritePropertiesWindow")
 , mainScreen{inScreen}
 , nameLabel{{24, 52, 65, 28}, "NameLabel"}
 , nameInput{{24, 84, 255, 38}, "NameInput"}
@@ -47,6 +47,8 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
 , stageOriginXInput{{150, 591, 129, 38}, "StageOriginXInput"}
 , stageOriginYLabel{{24, 647, 110, 38}, "StageOriginYLabel"}
 , stageOriginYInput{{150, 641, 129, 38}, "StageOriginYInput"}
+, premultiplyAlphaLabel{{24, 717, 210, 27}, "PremultiplyLabel"}
+, premultiplyAlphaInput{{257, 719, 22, 22}, "PremultiplyInput"}
 , dataModel{inDataModel}
 , libraryWindow{inLibraryWindow}
 , activeSpriteID{NULL_SPRITE_ID}
@@ -90,6 +92,8 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
     children.push_back(stageOriginXInput);
     children.push_back(stageOriginYLabel);
     children.push_back(stageOriginYInput);
+    children.push_back(premultiplyAlphaLabel);
+    children.push_back(premultiplyAlphaInput);
 
     /* Window setup */
     backgroundImage.setNineSliceImage(
@@ -165,6 +169,16 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
     stageOriginXInput.setOnTextCommitted([this]() { saveStageOriginX(); });
     stageOriginYInput.setOnTextCommitted([this]() { saveStageOriginY(); });
 
+    /* Premultiply alpha entry. */
+    styleLabel(premultiplyAlphaLabel, "Premultiply alpha", 21);
+
+    premultiplyAlphaInput.uncheckedImage.setSimpleImage(
+        Paths::TEXTURE_DIR + "Checkbox/Unchecked.png");
+    premultiplyAlphaInput.checkedImage.setSimpleImage(Paths::TEXTURE_DIR
+                                                      + "Checkbox/Checked.png");
+    premultiplyAlphaInput.setOnChecked([this]() { savePremultiplyAlpha(); });
+    premultiplyAlphaInput.setOnUnchecked([this]() { savePremultiplyAlpha(); });
+
     // When the active sprite is updated, update it in this widget.
     dataModel.activeLibraryItemChanged
         .connect<&SpritePropertiesWindow::onActiveLibraryItemChanged>(*this);
@@ -182,6 +196,9 @@ SpritePropertiesWindow::SpritePropertiesWindow(MainScreen& inScreen,
             *this);
     spriteModel.spriteStageOriginChanged
         .connect<&SpritePropertiesWindow::onSpriteStageOriginChanged>(*this);
+    spriteModel.spritePremultiplyAlphaChanged
+        .connect<&SpritePropertiesWindow::onSpritePremultiplyAlphaChanged>(
+            *this);
 
     // When a library item is selected, update the preview button.
     libraryWindow.selectedItemsChanged
@@ -234,6 +251,13 @@ void SpritePropertiesWindow::onActiveLibraryItemChanged(
     else {
         collisionEnabledInput.setCurrentState(AUI::Checkbox::State::Unchecked);
     }
+
+    if (newActiveSprite->premultiplyAlpha) {
+        premultiplyAlphaInput.setCurrentState(AUI::Checkbox::State::Checked);
+    }
+    else {
+        premultiplyAlphaInput.setCurrentState(AUI::Checkbox::State::Unchecked);
+    }
 }
 
 void SpritePropertiesWindow::onSpriteRemoved(SpriteID spriteID)
@@ -248,8 +272,10 @@ void SpritePropertiesWindow::onSpriteRemoved(SpriteID spriteID)
         maxXInput.setText("");
         maxYInput.setText("");
         maxZInput.setText("");
+        collisionEnabledInput.setCurrentState(AUI::Checkbox::State::Unchecked);
         stageOriginXInput.setText("");
         stageOriginYInput.setText("");
+        premultiplyAlphaInput.setCurrentState(AUI::Checkbox::State::Unchecked);
     }
 }
 
@@ -330,6 +356,21 @@ void SpritePropertiesWindow::onSpriteStageOriginChanged(
     if (spriteID == activeSpriteID) {
         stageOriginXInput.setText(std::to_string(newStageOrigin.x));
         stageOriginYInput.setText(std::to_string(newStageOrigin.y));
+    }
+}
+
+void SpritePropertiesWindow::onSpritePremultiplyAlphaChanged(
+    SpriteID spriteID, bool newPremultiplyAlpha)
+{
+    if (spriteID == activeSpriteID) {
+        if (newPremultiplyAlpha) {
+            premultiplyAlphaInput.setCurrentState(
+                AUI::Checkbox::State::Checked);
+        }
+        else {
+            premultiplyAlphaInput.setCurrentState(
+                AUI::Checkbox::State::Unchecked);
+        }
     }
 }
 
@@ -631,6 +672,14 @@ void SpritePropertiesWindow::saveStageOriginY()
         // Input was not valid, reset the field to what it was.
         stageOriginYInput.setText(std::to_string(committedStageOriginY));
     }
+}
+
+void SpritePropertiesWindow::savePremultiplyAlpha()
+{
+    bool premultiplyAlpha{(premultiplyAlphaInput.getCurrentState()
+                           == AUI::Checkbox::State::Checked)};
+    dataModel.spriteModel.setSpritePremultiplyAlpha(activeSpriteID,
+                                                    premultiplyAlpha);
 }
 
 } // End namespace ResourceImporter

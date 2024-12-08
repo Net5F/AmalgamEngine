@@ -58,6 +58,9 @@ struct EditorSprite {
         bounding box. */
     BoundingBox customModelBounds{};
 
+    /** If true, this sprite will have its alpha premultiplied. */
+    bool premultiplyAlpha{false};
+
     /**
      * Returns this sprite's model-space bounding box.
      *

@@ -72,13 +72,15 @@ public:
      * @param parentSheetID The ID of the sprite's parent sprite sheet.
      * @param stageOriginX/Y Where the stage should begin, relative to the top 
      *                       left of the sprite image.
+     * @param premultiplyAlpha If true, this sprite will have its alpha 
+     *                         premultiplied.
      *
      * @return true if successful. If false, getErrorString() will return more
      *         information.
      */
     bool addSprite(const std::string& imageRelPath, SpriteSheetID parentSheetID,
                    const std::string& stageOriginX,
-                   const std::string& stageOriginY);
+                   const std::string& stageOriginY, bool premultiplyAlpha);
 
     /**
      * Removes the sprite with the given ID from the sprite map.
@@ -106,6 +108,7 @@ public:
     void setSpriteCollisionEnabled(SpriteID spriteID, bool newCollisionEnabled);
     void setSpriteStageOrigin(SpriteID spriteID,
                               const SDL_Point& newStageOrigin);
+    void setSpritePremultiplyAlpha(SpriteID spriteID, bool newPremultiplyAlpha);
 
     /** Resets the model state, setting it back to default. */
     void resetModelState();
@@ -244,6 +247,8 @@ private:
         spriteCollisionEnabledChangedSig;
     entt::sigh<void(SpriteID spriteID, const SDL_Point& newStageOrigin)>
         spriteStageOriginChangedSig;
+    entt::sigh<void(SpriteID spriteID, bool newPremultiplyAlpha)>
+        spritePremultiplyAlphaChangedSig;
 
 public:
     //-------------------------------------------------------------------------
@@ -287,6 +292,9 @@ public:
     entt::sink<
         entt::sigh<void(SpriteID spriteID, const SDL_Point& newStageOrigin)>>
         spriteStageOriginChanged;
+    /** A sprite's "premultiply alpha" field has changed. */
+    entt::sink<entt::sigh<void(SpriteID spriteID, bool newPremultiplyAlpha)>>
+        spritePremultiplyAlphaChanged;
 };
 
 } // namespace ResourceImporter

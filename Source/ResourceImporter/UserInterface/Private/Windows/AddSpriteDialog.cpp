@@ -14,10 +14,12 @@ AddSpriteDialog::AddSpriteDialog(MainScreen& inMainScreen,
 , shadowImage({0, 0, logicalExtent.w, logicalExtent.h})
 , backgroundImage({719, 208, 523, 506})
 , headerText({747, 228, 280, 60})
-, stageOriginXLabel({747, 300, 160, 38})
-, stageOriginXInput({923, 300, 180, 38})
-, stageOriginYLabel({747, 350, 160, 38})
-, stageOriginYInput({923, 350, 180, 38})
+, stageOriginXLabel({747, 300, 210, 38})
+, stageOriginXInput({967, 300, 180, 38})
+, stageOriginYLabel({747, 350, 210, 38})
+, stageOriginYInput({967, 350, 180, 38})
+, premultiplyAlphaLabel({747, 400, 210, 38})
+, premultiplyAlphaInput({967, 408, 22, 22})
 , addButton({1098, 640, 120, 50}, "Add")
 , cancelButton({958, 640, 120, 50}, "Cancel")
 , mainScreen{inMainScreen}
@@ -34,6 +36,8 @@ AddSpriteDialog::AddSpriteDialog(MainScreen& inMainScreen,
     children.push_back(stageOriginXInput);
     children.push_back(stageOriginYLabel);
     children.push_back(stageOriginYInput);
+    children.push_back(premultiplyAlphaLabel);
+    children.push_back(premultiplyAlphaInput);
     children.push_back(addButton);
     children.push_back(cancelButton);
     children.push_back(errorText);
@@ -51,23 +55,33 @@ AddSpriteDialog::AddSpriteDialog(MainScreen& inMainScreen,
     headerText.setText("Add sprite");
 
     /* Stage origin entry. */
-    stageOriginXLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
-    stageOriginXLabel.setColor({255, 255, 255, 255});
-    stageOriginXLabel.setVerticalAlignment(
-        AUI::Text::VerticalAlignment::Center);
-    stageOriginXLabel.setText("Stage Origin X");
+    auto styleLabel
+        = [&](AUI::Text& label, const std::string& text, int fontSize) {
+        label.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), fontSize);
+        label.setVerticalAlignment(AUI::Text::VerticalAlignment::Center);
+        label.setColor({255, 255, 255, 255});
+        label.setText(text);
+    };
+    styleLabel(stageOriginXLabel, "Stage Origin X", 21);
 
-    stageOriginXInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    stageOriginXInput.setPadding({0, 8, 0, 8});
+    auto styleTextInput = [&](AUI::TextInput& textInput) {
+        textInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
+        textInput.setPadding({0, 8, 0, 8});
+    };
+    styleTextInput(stageOriginXInput);
 
-    stageOriginYLabel.setFont((Paths::FONT_DIR + "B612-Regular.ttf"), 21);
-    stageOriginYLabel.setColor({255, 255, 255, 255});
-    stageOriginYLabel.setVerticalAlignment(
-        AUI::Text::VerticalAlignment::Center);
-    stageOriginYLabel.setText("Stage Origin Y");
+    styleLabel(stageOriginYLabel, "Stage Origin Y", 21);
+    styleTextInput(stageOriginYInput);
 
-    stageOriginYInput.setTextFont((Paths::FONT_DIR + "B612-Regular.ttf"), 18);
-    stageOriginYInput.setPadding({0, 8, 0, 8});
+    /* Premultiply alpha entry. */
+    styleLabel(premultiplyAlphaLabel, "Premultiply alpha", 21);
+
+    premultiplyAlphaInput.uncheckedImage.setSimpleImage(
+        Paths::TEXTURE_DIR + "Checkbox/Unchecked.png");
+    premultiplyAlphaInput.checkedImage.setSimpleImage(Paths::TEXTURE_DIR
+                                                      + "Checkbox/Checked.png");
+    premultiplyAlphaInput.setOnChecked([this]() {});
+    premultiplyAlphaInput.setOnUnchecked([this]() {});
 
     /* Confirmation buttons. */
     // Add a callback to validate the input and add the new sprites.
@@ -75,10 +89,12 @@ AddSpriteDialog::AddSpriteDialog(MainScreen& inMainScreen,
         // Pass the user-inputted data to the model.
         bool allSpritesAdded{true};
         for (const std::string& spriteImageRelPath : spriteImageRelPaths) {
+            bool premultiplyAlpha{premultiplyAlphaInput.getCurrentState()
+                                  == AUI::Checkbox::State::Checked};
             if (!(dataModel.spriteModel.addSprite(
                     spriteImageRelPath, activeSpriteSheetID,
-                    stageOriginXInput.getText(),
-                    stageOriginYInput.getText()))) {
+                    stageOriginXInput.getText(), stageOriginYInput.getText(),
+                    premultiplyAlpha))) {
                 std::string errorString{"Failed to add sprite: "};
                 errorString += dataModel.spriteModel.getErrorString();
                 mainScreen.openErrorDialog(errorString);
@@ -144,6 +160,7 @@ void AddSpriteDialog::clear()
     stageOriginXInput.setText("");
     stageOriginYInput.setText("");
     errorText.setText("");
+    premultiplyAlphaInput.setCurrentState(AUI::Checkbox::State::Unchecked);
 }
 
 } // End namespace ResourceImporter

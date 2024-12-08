@@ -62,8 +62,9 @@ void GraphicData::parseJson(const nlohmann::json& json, AssetCache& assetCache)
             texturePath += sheetJson.value()["displayName"].get<std::string>();
             texturePath += ".png";
 
-            TextureHandle texture{assetCache.requestTexture(
-                texturePath, Config::SPRITE_SCALING_QUALITY)};
+            TextureHandle texture{};
+            texture = assetCache.requestTexture(
+                texturePath, Config::SPRITE_SCALING_QUALITY);
             if (!texture) {
                 // Note: requestTexture will LOG_ERROR if the file isn't found.
                 continue;
@@ -107,6 +108,9 @@ void GraphicData::parseSprite(const nlohmann::json& spriteJson,
     // Add the stage origin.
     renderData.stageOrigin.x = spriteJson.at("stageX");
     renderData.stageOrigin.y = spriteJson.at("stageY");
+
+    // Add the premultiply alpha setting.
+    renderData.premultiplyAlpha = spriteJson.at("premultiplyAlpha");
 }
 
 void GraphicData::parseAnimation(const nlohmann::json& animationJson)

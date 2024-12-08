@@ -32,6 +32,8 @@ SpriteModel::SpriteModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer)
 , spriteModelBoundsIDChangedSig{}
 , spriteCustomModelBoundsChangedSig{}
 , spriteCollisionEnabledChangedSig{}
+, spriteStageOriginChangedSig{}
+, spritePremultiplyAlphaChangedSig{}
 , sheetAdded{sheetAddedSig}
 , sheetRemoved{sheetRemovedSig}
 , spriteAdded{spriteAddedSig}
@@ -42,11 +44,28 @@ SpriteModel::SpriteModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer)
 , spriteCustomModelBoundsChanged{spriteCustomModelBoundsChangedSig}
 , spriteCollisionEnabledChanged{spriteCollisionEnabledChangedSig}
 , spriteStageOriginChanged{spriteStageOriginChangedSig}
+, spritePremultiplyAlphaChanged{spritePremultiplyAlphaChangedSig}
 {
     // Reserve the null sprite and sheet's ID (the engine provides it in code, 
     // so we don't need it in the json).
     spriteIDPool.reserveID();
     sheetIDPool.reserveID();
+
+    // Check that ARGB8888 is supported (it should always be, but just to be 
+    // safe).
+    // Note: We standardize on ARGB8888 for our texture generation, so it 
+    //       doesn't vary based on the host platform.
+    SDL_RendererInfo info{};
+    SDL_GetRendererInfo(sdlRenderer, &info);
+    bool argb8888Found{false};
+    for (auto pixelFormat : info.texture_formats) {
+        if (pixelFormat == SDL_PIXELFORMAT_ARGB8888) {
+            argb8888Found = true;
+        }
+    }
+    if (!argb8888Found) {
+        LOG_FATAL("Platform must support ARGB8888 pixel format.");
+    }
 }
 
 bool SpriteModel::load(const nlohmann::json& json)
@@ -141,6 +160,10 @@ void SpriteModel::save(nlohmann::json& json)
                 = spriteModelBounds.min.z;
             json["spriteSheets"][i]["sprites"][j]["modelBounds"]["maxZ"]
                 = spriteModelBounds.max.z;
+
+            // Add premultiplyAlpha.
+            json["spriteSheets"][i]["sprites"][j]["premultiplyAlpha"]
+                = sprite.premultiplyAlpha;
         }
 
         i++;
@@ -226,7 +249,8 @@ void SpriteModel::remSpriteSheet(SpriteSheetID sheetID)
 bool SpriteModel::addSprite(const std::string& imageRelPath,
                             SpriteSheetID parentSheetID,
                             const std::string& stageOriginX,
-                            const std::string& stageOriginY)
+                            const std::string& stageOriginY,
+                            bool premultiplyAlpha)
 {
     // Get the file name from the image path (we use the file name as the 
     // sprite's display name).
@@ -286,8 +310,12 @@ bool SpriteModel::addSprite(const std::string& imageRelPath,
     // Add the new sprite to the maps.
     SpriteID numericID{static_cast<SpriteID>(spriteIDPool.reserveID())};
     spriteMap.emplace(numericID,
-                      EditorSprite{numericID, imageRelPath, displayName,
-                                   textureExtent, stageOrigin});
+                      EditorSprite{.numericID = numericID,
+                                   .imagePath = imageRelPath,
+                                   .displayName = displayName,
+                                   .textureExtent = textureExtent,
+                                   .stageOrigin = stageOrigin,
+                                   .premultiplyAlpha = premultiplyAlpha});
     spriteNameMap.emplace(displayName, numericID);
 
     // Default to a non-0 bounding box so it's easier to click.
@@ -435,6 +463,21 @@ void SpriteModel::setSpriteCustomModelBounds(SpriteID spriteID,
     spriteCustomModelBoundsChangedSig.publish(spriteID, newModelBounds);
 }
 
+void SpriteModel::setSpriteStageOrigin(SpriteID spriteID,
+                                       const SDL_Point& newStageOrigin)
+{
+    auto spritePair{spriteMap.find(spriteID)};
+    if (spritePair == spriteMap.end()) {
+        LOG_FATAL("Tried to set stageOrigin using invalid sprite ID.");
+    }
+
+    // Set the new stageOrigin and signal the change.
+    EditorSprite& sprite{spritePair->second};
+    sprite.stageOrigin = newStageOrigin;
+
+    spriteStageOriginChangedSig.publish(spriteID, newStageOrigin);
+}
+
 void SpriteModel::setSpriteCollisionEnabled(SpriteID spriteID,
                                             bool newCollisionEnabled)
 {
@@ -450,19 +493,19 @@ void SpriteModel::setSpriteCollisionEnabled(SpriteID spriteID,
     spriteCollisionEnabledChangedSig.publish(spriteID, newCollisionEnabled);
 }
 
-void SpriteModel::setSpriteStageOrigin(SpriteID spriteID,
-                                       const SDL_Point& newStageOrigin)
+void SpriteModel::setSpritePremultiplyAlpha(SpriteID spriteID,
+                                            bool newPremultiplyAlpha)
 {
     auto spritePair{spriteMap.find(spriteID)};
     if (spritePair == spriteMap.end()) {
-        LOG_FATAL("Tried to set stageOrigin using invalid sprite ID.");
+        LOG_FATAL("Tried to set premultiplyAlpha using invalid sprite ID.");
     }
 
-    // Set the new stageOrigin and signal the change.
+    // Set the new premultiplyAlpha and signal the change.
     EditorSprite& sprite{spritePair->second};
-    sprite.stageOrigin = newStageOrigin;
+    sprite.premultiplyAlpha = newPremultiplyAlpha;
 
-    spriteStageOriginChangedSig.publish(spriteID, newStageOrigin);
+    spritePremultiplyAlphaChangedSig.publish(spriteID, newPremultiplyAlpha);
 }
 
 void SpriteModel::resetModelState()
@@ -596,6 +639,9 @@ bool SpriteModel::parseSprite(const nlohmann::json& spriteJson,
     sprite.customModelBounds.min.z = spriteJson.at("modelBounds").at("minZ");
     sprite.customModelBounds.max.z = spriteJson.at("modelBounds").at("maxZ");
 
+    // Add premultiplyAlpha.
+    sprite.premultiplyAlpha = spriteJson.at("premultiplyAlpha");
+
     // Note: We signal from parseSpriteSheet() instead of here, so that the 
     //       sheet can be signalled first.
 
@@ -656,6 +702,10 @@ void SpriteModel::refreshSpriteSheet(EditorSpriteSheet& spriteSheet)
             maxSpriteHeight = sprite.textureExtent.h;
         }
     }
+
+    // Add 2px padding to avoid bleed when using texture filtering.
+    maxSpriteWidth += 2;
+    maxSpriteHeight += 2;
 
     // Find the power of two that our texture's side lengths should equal, in 
     // order to fit all of the sprites (assuming a square grid).

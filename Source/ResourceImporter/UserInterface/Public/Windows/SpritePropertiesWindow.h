@@ -72,6 +72,9 @@ public:
     AUI::Text stageOriginYLabel;
     MainTextInput stageOriginYInput;
 
+    AUI::Text premultiplyAlphaLabel;
+    AUI::Checkbox premultiplyAlphaInput;
+
 private:
     /**
      * If the new active item is a sprite, loads it's data into this panel.
@@ -97,6 +100,8 @@ private:
                                          bool newCollisionEnabled);
     void onSpriteStageOriginChanged(SpriteID spriteID,
                                     const SDL_Point& newStageOrigin);
+    void onSpritePremultiplyAlphaChanged(SpriteID spriteID,
+                                         bool newPremultiplyAlpha);
 
     /**
      * Updates boundingBoxButton to show whether the selection is assignable.
@@ -140,6 +145,7 @@ private:
     void saveCollisionEnabled();
     void saveStageOriginX();
     void saveStageOriginY();
+    void savePremultiplyAlpha();
 
     /** The below variables save the committed values, so we can revert to them
         if the user inputs invalid characters. */

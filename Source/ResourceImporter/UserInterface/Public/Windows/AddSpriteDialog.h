@@ -6,6 +6,7 @@
 #include "AUI/Window.h"
 #include "AUI/Image.h"
 #include "AUI/Text.h"
+#include "AUI/Checkbox.h"
 
 namespace AM
 {
@@ -49,6 +50,10 @@ public:
     MainTextInput stageOriginXInput;
     AUI::Text stageOriginYLabel;
     MainTextInput stageOriginYInput;
+
+    // Premultiply alpha entry
+    AUI::Text premultiplyAlphaLabel;
+    AUI::Checkbox premultiplyAlphaInput;
 
     /** Right-side confirmation button. Adds the sprites. */
     MainButton addButton;

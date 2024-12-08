@@ -36,6 +36,19 @@ public:
     static SDL_Texture*
         generateSpriteSheetTexture(const DataModel& dataModel,
                                    const EditorSpriteSheet& spriteSheet);
+
+private:
+    /**
+     * Attempts to load the image at the given path. If successful, 
+     * premultiplies its alpha and returns it.
+     *
+     * Note: The given image must have straight-multiplied alpha. If it's 
+     *       already premultiplied, this will do it again.
+     *
+     * @return A valid texture if successful, else nullptr (loading failed).
+     */
+    static SDL_Texture*
+        loadAndPremultiplyTexture(const std::string& fullImagePath);
 };
 
 } // End namespace ResourceImporter
