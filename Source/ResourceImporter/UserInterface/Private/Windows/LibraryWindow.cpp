@@ -162,6 +162,13 @@ AUI::EventResult LibraryWindow::onKeyDown(SDL_Keycode keyCode)
         if (selectedListItems.size() == 0) {
             return AUI::EventResult{.wasHandled{false}};
         }
+        // If any animations are selected, do nothing (animations can't be 
+        // deleted, users need to delete their sprites instead).
+        for (LibraryListItem* listItem : selectedListItems) {
+            if (listItem->type == LibraryListItem::Type::Animation) {
+                return AUI::EventResult{.wasHandled{false}};
+            }
+        }
 
         // Add the selected items to a vector so any accidental selection
         // changes don't affect the operation.
@@ -845,6 +852,8 @@ void LibraryWindow::removeListItem(LibraryListItem* listItem)
             break;
         }
         default: {
+            // Note: We purposely don't support deleting animations, since 
+            //       they're automatically managed based on sprite filenames.
             LOG_FATAL("Unsupported list item type.");
         }
     }

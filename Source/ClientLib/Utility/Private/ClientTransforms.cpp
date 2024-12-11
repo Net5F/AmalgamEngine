@@ -33,14 +33,14 @@ SDL_FRect ClientTransforms::entityToScreenExtent(
     // Offset the sprite to line up with IdleSouth's modelBounds bottom center.
     SDL_FPoint idleSouthBottomCenterScreen{
         Transforms::worldToScreen(idleSouthBottomCenter, camera.zoomFactor)};
-    screenPoint.x -= (idleSouthBottomCenterScreen.x * camera.zoomFactor);
-    screenPoint.y -= (idleSouthBottomCenterScreen.y * camera.zoomFactor);
+    screenPoint.x -= idleSouthBottomCenterScreen.x;
+    screenPoint.y -= idleSouthBottomCenterScreen.y;
 
     // Offset the sprite to account for the alignment offset.
     SDL_FPoint alignmentOffsetScreen{
         Transforms::worldToScreen(alignmentOffset, camera.zoomFactor)};
-    screenPoint.x += (alignmentOffsetScreen.x * camera.zoomFactor);
-    screenPoint.y += (alignmentOffsetScreen.y * camera.zoomFactor);
+    screenPoint.x += alignmentOffsetScreen.x;
+    screenPoint.y += alignmentOffsetScreen.y;
 
     // Apply the camera position adjustment.
     float adjustedX{screenPoint.x - camera.screenExtent.x};

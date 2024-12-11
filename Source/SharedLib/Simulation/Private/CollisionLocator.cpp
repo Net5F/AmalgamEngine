@@ -38,6 +38,9 @@ void CollisionLocator::setGridSize(const TileExtent& mapTileExtent)
     // Resize the grid to fit the map.
     collisionGrid.resize(gridCellExtent.size());
     terrainGrid.resize(gridTileExtent.size());
+
+    // Init the terrain grid as empty.
+    std::ranges::fill(terrainGrid, EMPTY_TERRAIN);
 }
 
 void CollisionLocator::updateEntity(entt::entity entity,
