@@ -12,7 +12,7 @@ BoundingBoxModel::BoundingBoxModel(DataModel& inDataModel)
 : dataModel{inDataModel}
 , boundingBoxMap{}
 , boundingBoxNameMap{}
-, boundingBoxIDPool{MAX_BOUNDING_BOXES}
+, boundingBoxIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
 , errorString{}
 , boundingBoxAddedSig{}
 , boundingBoxRemovedSig{}
@@ -53,7 +53,6 @@ void BoundingBoxModel::save(nlohmann::json& json)
 
     // Fill the json with each bounding box in the model.
     int i{0};
-    BoundingBoxID boundingBoxID{1};
     for (auto& boundsPair : boundingBoxMap) {
         // Add the display name.
         EditorBoundingBox& bounds{boundsPair.second};
@@ -63,7 +62,7 @@ void BoundingBoxModel::save(nlohmann::json& json)
         //       directly refers to these bounding boxes.
 
         // Add the numeric ID.
-        json["boundingBoxes"][i]["numericID"] = boundingBoxID++;
+        json["boundingBoxes"][i]["numericID"] = bounds.numericID;
 
         // Add the model-space bounds.
         json["boundingBoxes"][i]["modelBounds"]["minX"]
@@ -131,6 +130,9 @@ void BoundingBoxModel::remBoundingBox(BoundingBoxID boundingBoxID)
     if (boundingBoxIt == boundingBoxMap.end()) {
         LOG_FATAL("Invalid ID while removing bounding box.");
     }
+
+    // Free the boundingBox's ID.
+    boundingBoxIDPool.freeID(boundingBoxID);
 
     // Erase the bounding box.
     boundingBoxNameMap.erase(boundingBoxIt->second.displayName);

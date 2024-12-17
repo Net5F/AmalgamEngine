@@ -16,8 +16,8 @@ IconModel::IconModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer)
 , sdlRenderer{inSdlRenderer}
 , iconSheetMap{}
 , iconMap{}
-, sheetIDPool{MAX_ICON_SHEETS}
-, iconIDPool{MAX_ICONS}
+, sheetIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
+, iconIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
 , errorString{}
 , sheetAddedSig{}
 , sheetRemovedSig{}
@@ -59,7 +59,6 @@ void IconModel::save(nlohmann::json& json)
     /* Fill the json with our current model data. */
     // For each icon sheet.
     int i{0};
-    IconID iconID{1};
     for (auto& sheetPair : iconSheetMap) {
         // Add this sheet's relative path.
         EditorIconSheet& iconSheet{sheetPair.second};
@@ -77,7 +76,7 @@ void IconModel::save(nlohmann::json& json)
             json["iconSheets"][i]["icons"][j]["stringID"] = stringID;
 
             // Add the numeric ID.
-            json["iconSheets"][i]["icons"][j]["numericID"] = iconID++;
+            json["iconSheets"][i]["icons"][j]["numericID"] = icon.numericID;
 
             // Add the icon sheet texture extent.
             json["iconSheets"][i]["icons"][j]["textureExtent"]["x"]
@@ -194,6 +193,9 @@ void IconModel::remIconSheet(int sheetID)
         remIcon(iconID);
     }
 
+    // Free the sheet's ID.
+    sheetIDPool.freeID(sheetID);
+
     // Erase the sheet.
     iconSheetMap.erase(sheetIt);
 
@@ -208,6 +210,9 @@ void IconModel::remIcon(IconID iconID)
     if (iconIt == iconMap.end()) {
         LOG_FATAL("Invalid ID while removing icon.");
     }
+
+    // Free the icon's ID.
+    iconIDPool.freeID(iconID);
 
     // Erase the icon.
     iconMap.erase(iconIt);

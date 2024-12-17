@@ -76,9 +76,6 @@ public:
     const std::string& getErrorString();
 
 private:
-    // Note: This was arbitrarily chosen and can be increased if necessary.
-    static constexpr std::size_t MAX_BOUNDING_BOXES{1000};
-
     /**
      * @param boundsJson  The json to parse. Must be a valid bounding box
      *                    section from ResourceData.json.

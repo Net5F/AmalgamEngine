@@ -92,10 +92,6 @@ public:
     const std::string& getErrorString();
 
 private:
-    // Note: These were arbitrarily chosen and can be increased if necessary.
-    static constexpr std::size_t MAX_ICON_SHEETS{1000};
-    static constexpr std::size_t MAX_ICONS{MAX_ICON_SHEETS * 100};
-
     /**
      * @param sheetJson The json to parse. Must be a valid icon sheet section
      *                  from ResourceData.json.

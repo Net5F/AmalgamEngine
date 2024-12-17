@@ -110,6 +110,12 @@ protected:
     void parseJson(const nlohmann::json& json);
 
     /**
+     * Resizes the vectors to fit the graphics and graphic sets in the given 
+     * json.
+     */
+    void resizeVectors(const nlohmann::json& json);
+
+    /**
      * Parses the given sprite json and adds the resulting sprite to the
      * sprites vector.
 

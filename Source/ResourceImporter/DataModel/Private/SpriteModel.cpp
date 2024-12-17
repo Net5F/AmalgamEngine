@@ -21,8 +21,8 @@ SpriteModel::SpriteModel(DataModel& inDataModel, SDL_Renderer* inSdlRenderer)
 , sdlRenderer{inSdlRenderer}
 , spriteSheetMap{}
 , spriteMap{}
-, sheetIDPool{MAX_SPRITE_SHEETS}
-, spriteIDPool{MAX_SPRITES}
+, sheetIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
+, spriteIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
 , errorString{}
 , sheetAddedSig{}
 , sheetRemovedSig{}
@@ -94,7 +94,6 @@ void SpriteModel::save(nlohmann::json& json)
     /* Fill the json with our current model data. */
     // For each sprite sheet.
     int i{0};
-    SpriteID spriteID{1};
     for (auto& sheetPair : spriteSheetMap) {
         // Add this sheet's display name.
         EditorSpriteSheet& spriteSheet{sheetPair.second};
@@ -111,7 +110,7 @@ void SpriteModel::save(nlohmann::json& json)
 
             // Add the numeric ID.
             json["spriteSheets"][i]["sprites"][j]["numericID"]
-                = spriteID++;
+                = sprite.numericID;
 
             // Add the path to the sprite's individual image file.
             json["spriteSheets"][i]["sprites"][j]["imagePath"]
@@ -237,6 +236,9 @@ void SpriteModel::remSpriteSheet(SpriteSheetID sheetID)
     for (SpriteID spriteID : spriteIDs) {
         remSprite(spriteID);
     }
+
+    // Free the sheet's ID.
+    sheetIDPool.freeID(sheetID);
 
     // Erase the sheet.
     spriteSheetNameMap.erase(sheetIt->second.displayName);
@@ -376,6 +378,9 @@ void SpriteModel::remSprite(SpriteID spriteID)
     dataModel.graphicSetModel.removeGraphicIDFromSets(toGraphicID(spriteID));
     dataModel.entityGraphicSetModel.removeGraphicIDFromSets(
         toGraphicID(spriteID));
+
+    // Free the sprite's ID.
+    spriteIDPool.freeID(spriteID);
 
     // Erase the sprite.
     spriteNameMap.erase(spriteIt->second.displayName);

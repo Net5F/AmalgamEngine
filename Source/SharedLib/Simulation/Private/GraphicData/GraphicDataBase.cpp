@@ -296,6 +296,9 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
 
     // Parse the json and catch any parsing errors.
     try {
+        // Resize the vectors to fit everything in the json.
+        resizeVectors(json);
+
         // Iterate every sprite sheet and add all of their sprites.
         for (auto& sheetJson : json.at("spriteSheets").items()) {
             for (auto& spriteJson : sheetJson.value().at("sprites").items()) {
@@ -361,13 +364,92 @@ void GraphicDataBase::parseJson(const nlohmann::json& json)
     }
 }
 
+void GraphicDataBase::resizeVectors(const nlohmann::json& json)
+{
+    // For each category of graphics, find the max ID and resize the vector.
+    // Note: We have to find the max ID instead of just getting the array 
+    //       size because there may be ID gaps.
+
+    // Sprite
+    GraphicRef nullSprite{sprites.at(NULL_SPRITE_ID)};
+    SpriteID maxSpriteID{0};
+    for (auto& sheetJson : json.at("spriteSheets").items()) {
+        for (auto& spriteJson : sheetJson.value().at("sprites").items()) {
+            SpriteID spriteID{spriteJson.value().at("numericID")};
+            maxSpriteID = std::max(maxSpriteID, spriteID);
+        }
+    }
+    sprites.resize(maxSpriteID + 1);
+
+    // Animation
+    AnimationID maxAnimationID{0};
+    for (auto& animationJson : json.at("animations").items()) {
+        AnimationID animationID{animationJson.value().at("numericID")};
+        maxAnimationID = std::max(maxAnimationID, animationID);
+    }
+    animations.resize(maxAnimationID + 1);
+
+    // Terrain
+    // Note: We need to initialize them with constructAndFillArray() because
+    //       GraphicRef has no default constructor (must always be valid).
+    TerrainGraphicSetID maxTerrainID{0};
+    for (auto& terrainJson : json.at("terrain").items()) {
+        TerrainGraphicSetID terrainID{terrainJson.value().at("numericID")};
+        maxTerrainID = std::max(maxTerrainID, terrainID);
+    }
+    TerrainGraphicSet terrainGraphicSet{.graphics{
+        constructAndFillArray<Terrain::Height::Count>(nullSprite)}};
+    terrainGraphicSets.resize(maxTerrainID + 1, terrainGraphicSet);
+
+    // Floors
+    FloorGraphicSetID maxFloorID{0};
+    for (auto& floorJson : json.at("floors").items()) {
+        FloorGraphicSetID floorID{floorJson.value().at("numericID")};
+        maxFloorID = std::max(maxFloorID, floorID);
+    }
+    FloorGraphicSet floorGraphicSet{
+        .graphics{constructAndFillArray<FloorGraphicSet::VARIATION_COUNT>(
+            nullSprite)}};
+    floorGraphicSets.resize(maxFloorID + 1, floorGraphicSet);
+
+    // Walls
+    WallGraphicSetID maxWallID{0};
+    for (auto& wallJson : json.at("walls").items()) {
+        WallGraphicSetID wallID{wallJson.value().at("numericID")};
+        maxWallID = std::max(maxWallID, wallID);
+    }
+    WallGraphicSet wallGraphicSet{
+        .graphics{constructAndFillArray<Wall::Type::Count>(nullSprite)}};
+    wallGraphicSets.resize(maxWallID + 1, wallGraphicSet);
+
+    // Objects
+    ObjectGraphicSetID maxObjectID{0};
+    for (auto& objectJson : json.at("objects").items()) {
+        ObjectGraphicSetID objectID{objectJson.value().at("numericID")};
+        maxObjectID = std::max(maxObjectID, objectID);
+    }
+    ObjectGraphicSet objectGraphicSet{
+        .graphics{constructAndFillArray<ObjectGraphicSet::VARIATION_COUNT>(
+            nullSprite)}};
+    objectGraphicSets.resize(maxObjectID + 1, objectGraphicSet);
+
+    // Entities
+    EntityGraphicSetID maxEntityID{0};
+    for (auto& entityJson : json.at("entities").items()) {
+        EntityGraphicSetID entityID{entityJson.value().at("numericID")};
+        maxEntityID = std::max(maxEntityID, entityID);
+    }
+    entityGraphicSets.resize(maxEntityID + 1);
+}
+
 void GraphicDataBase::parseSprite(const nlohmann::json& spriteJson)
 {
     // Add the sprite to the sprites vector.
-    Sprite& sprite{sprites.emplace_back()};
+    SpriteID numericID{spriteJson.at("numericID")};
+    Sprite& sprite{sprites.at(numericID)};
 
     // Add the display name and IDs.
-    sprite.numericID = spriteJson.at("numericID");
+    sprite.numericID = numericID;
     sprite.displayName = spriteJson.at("displayName").get<std::string>();
     StringTools::deriveStringID(sprite.displayName, sprite.stringID);
 
@@ -386,10 +468,11 @@ void GraphicDataBase::parseSprite(const nlohmann::json& spriteJson)
 void GraphicDataBase::parseAnimation(const nlohmann::json& animationJson)
 {
     // Add the animation to the animations vector.
-    Animation& animation{animations.emplace_back()};
+    AnimationID numericID{animationJson.at("numericID")};
+    Animation& animation{animations.at(numericID)};
 
     // Add the display name and IDs.
-    animation.numericID = animationJson.at("numericID");
+    animation.numericID = numericID;
     animation.displayName = animationJson.at("displayName").get<std::string>();
     StringTools::deriveStringID(animation.displayName, animation.stringID);
 
@@ -425,12 +508,13 @@ void GraphicDataBase::parseAnimation(const nlohmann::json& animationJson)
 void GraphicDataBase::parseTerrainGraphicSet(const nlohmann::json& graphicSetJson)
 {
     // Add a graphic set to the appropriate vector.
-    GraphicRef nullSprite{sprites[0]};
-    TerrainGraphicSet& graphicSet{terrainGraphicSets.emplace_back(
-        GraphicSet{graphicSetJson.at("displayName").get<std::string>(), "",
-                   graphicSetJson.at("numericID")},
-        constructAndFillArray<Terrain::Height::Count>(nullSprite))};
+    TerrainGraphicSetID numericID{graphicSetJson.at("numericID")};
+    TerrainGraphicSet& graphicSet{terrainGraphicSets.at(numericID)};
+    graphicSet.numericID = numericID;
+    graphicSet.displayName
+        = graphicSetJson.at("displayName").get<std::string>();
     StringTools::deriveStringID(graphicSet.displayName, graphicSet.stringID);
+    GraphicRef nullSprite{sprites[NULL_SPRITE_ID]};
 
     // Add the graphics.
     std::size_t index{0};
@@ -451,12 +535,13 @@ void GraphicDataBase::parseFloorGraphicSet(
     const nlohmann::json& graphicSetJson)
 {
     // Add a graphic set to the appropriate vector.
-    GraphicRef nullSprite{sprites[0]};
-    FloorGraphicSet& graphicSet{floorGraphicSets.emplace_back(
-        GraphicSet{graphicSetJson.at("displayName").get<std::string>(), "",
-                   graphicSetJson.at("numericID")},
-        constructAndFillArray<FloorGraphicSet::VARIATION_COUNT>(nullSprite))};
+    FloorGraphicSetID numericID{graphicSetJson.at("numericID")};
+    FloorGraphicSet& graphicSet{floorGraphicSets.at(numericID)};
+    graphicSet.numericID = numericID;
+    graphicSet.displayName
+        = graphicSetJson.at("displayName").get<std::string>();
     StringTools::deriveStringID(graphicSet.displayName, graphicSet.stringID);
+    GraphicRef nullSprite{sprites[NULL_SPRITE_ID]};
 
     // Add the graphics.
     std::size_t index{0};
@@ -475,10 +560,7 @@ void GraphicDataBase::parseFloorGraphicSet(
 
 void GraphicDataBase::parseWallGraphicSet(const nlohmann::json& graphicSetJson)
 {
-    Uint16 numericID{graphicSetJson.at("numericID")};
-    std::string displayName{graphicSetJson.at("displayName").get<std::string>()};
-
-    // Add the graphics.
+    // Collect the wall graphics.
     const nlohmann::json& graphicIDJson{graphicSetJson.at("graphicIDs")};
     GraphicRef westGraphic{getGraphic(graphicIDJson[0].get<GraphicID>())};
     GraphicRef northGraphic{getGraphic(graphicIDJson[1].get<GraphicID>())};
@@ -486,23 +568,29 @@ void GraphicDataBase::parseWallGraphicSet(const nlohmann::json& graphicSetJson)
     GraphicRef northeastGraphic{getGraphic(graphicIDJson[3].get<GraphicID>())};
 
     // Save the graphic set in the appropriate vector.
-    WallGraphicSet& graphicSet{wallGraphicSets.emplace_back(
-        GraphicSet{displayName, "", numericID},
-        std::array<GraphicRef, Wall::Type::Count>{
-            westGraphic, northGraphic, northwestGraphic, northeastGraphic})};
+    WallGraphicSetID numericID{graphicSetJson.at("numericID")};
+    WallGraphicSet& graphicSet{wallGraphicSets.at(numericID)};
+    graphicSet.numericID = numericID;
+    graphicSet.displayName
+        = graphicSetJson.at("displayName").get<std::string>();
     StringTools::deriveStringID(graphicSet.displayName, graphicSet.stringID);
+    graphicSet.graphics = std::array<GraphicRef, Wall::Type::Count>{
+        westGraphic, northGraphic, northwestGraphic, northeastGraphic};
 }
 
 void GraphicDataBase::parseObjectGraphicSet(
     const nlohmann::json& graphicSetJson)
 {
     // Add a graphic set to the appropriate vector.
-    GraphicRef nullSprite{sprites[0]};
-    ObjectGraphicSet& graphicSet{objectGraphicSets.emplace_back(
-        GraphicSet{graphicSetJson.at("displayName").get<std::string>(), "",
-                   graphicSetJson.at("numericID")},
-        constructAndFillArray<ObjectGraphicSet::VARIATION_COUNT>(nullSprite))};
+    ObjectGraphicSetID numericID{graphicSetJson.at("numericID")};
+    ObjectGraphicSet& graphicSet{objectGraphicSets.at(numericID)};
+    graphicSet.numericID = numericID;
+    graphicSet.displayName
+        = graphicSetJson.at("displayName").get<std::string>();
     StringTools::deriveStringID(graphicSet.displayName, graphicSet.stringID);
+    GraphicRef nullSprite{sprites[NULL_SPRITE_ID]};
+    graphicSet.graphics
+        = constructAndFillArray<ObjectGraphicSet::VARIATION_COUNT>(nullSprite);
 
     // Add the graphics.
     std::size_t index{0};
@@ -523,9 +611,11 @@ void GraphicDataBase::parseEntityGraphicSet(
     const nlohmann::json& graphicSetJson)
 {
     // Add a graphic set to the appropriate vector.
-    EntityGraphicSet& graphicSet{entityGraphicSets.emplace_back(
-        GraphicSet{graphicSetJson.at("displayName").get<std::string>(), "",
-                   graphicSetJson.at("numericID")})};
+    EntityGraphicSetID numericID{graphicSetJson.at("numericID")};
+    EntityGraphicSet& graphicSet{entityGraphicSets.at(numericID)};
+    graphicSet.numericID = numericID;
+    graphicSet.displayName
+        = graphicSetJson.at("displayName").get<std::string>();
     StringTools::deriveStringID(graphicSet.displayName, graphicSet.stringID);
 
     // Add the graphics.

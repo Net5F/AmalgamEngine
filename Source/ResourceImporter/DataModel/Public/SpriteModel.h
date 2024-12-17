@@ -116,10 +116,6 @@ public:
     const std::string& getErrorString();
 
 private:
-    // Note: These were arbitrarily chosen and can be increased if necessary.
-    static constexpr std::size_t MAX_SPRITE_SHEETS{1000};
-    static constexpr std::size_t MAX_SPRITES{MAX_SPRITE_SHEETS * 100};
-
     // Note: These are named differently to disambiguate them, since they aren't 
     //       accessible outside of this class.
     EditorSpriteSheet& mgetSpriteSheet(SpriteSheetID sheetID);

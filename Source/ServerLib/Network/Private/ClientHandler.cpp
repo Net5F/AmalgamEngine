@@ -19,7 +19,8 @@ ClientHandler::ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher,
 : network{inNetwork}
 , dispatcher{inDispatcher}
 , messageProcessor{inMessageProcessor}
-, idPool{Config::MAX_CLIENTS}
+, idPool{IDPool::ReservationStrategy::MarchForward,
+         3}
 , clientCount{0}
 , clientSet{std::make_shared<SocketSet>(Config::MAX_CLIENTS)}
 , acceptor{Config::SERVER_PORT, clientSet}

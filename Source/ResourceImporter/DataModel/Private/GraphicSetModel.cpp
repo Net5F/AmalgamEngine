@@ -9,10 +9,10 @@ namespace ResourceImporter
 {
 GraphicSetModel::GraphicSetModel(DataModel& inDataModel)
 : dataModel{inDataModel}
-, terrainIDPool{SDL_MAX_UINT16}
-, floorIDPool{SDL_MAX_UINT16}
-, wallIDPool{SDL_MAX_UINT16}
-, objectIDPool{SDL_MAX_UINT16}
+, terrainIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
+, floorIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
+, wallIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
+, objectIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
 , errorString{}
 , terrainAddedSig{}
 , floorAddedSig{}
@@ -211,6 +211,9 @@ void GraphicSetModel::remTerrain(TerrainGraphicSetID terrainID)
         LOG_FATAL("Invalid ID while removing terrain.");
     }
 
+    // Free the terrain's ID.
+    terrainIDPool.freeID(terrainID);
+
     // Erase the terrain.
     terrainMap.erase(terrainIt);
 
@@ -225,6 +228,9 @@ void GraphicSetModel::remFloor(FloorGraphicSetID floorID)
     if (floorIt == floorMap.end()) {
         LOG_FATAL("Invalid ID while removing floor.");
     }
+
+    // Free the floor's ID.
+    floorIDPool.freeID(floorID);
 
     // Erase the floor.
     floorMap.erase(floorIt);
@@ -241,6 +247,9 @@ void GraphicSetModel::remWall(WallGraphicSetID wallID)
         LOG_FATAL("Invalid ID while removing wall.");
     }
 
+    // Free the wall's ID.
+    wallIDPool.freeID(wallID);
+
     // Erase the wall.
     wallMap.erase(wallIt);
 
@@ -255,6 +264,9 @@ void GraphicSetModel::remObject(ObjectGraphicSetID objectID)
     if (objectIt == objectMap.end()) {
         LOG_FATAL("Invalid ID while removing object.");
     }
+
+    // Free the object's ID.
+    objectIDPool.freeID(objectID);
 
     // Erase the object.
     objectMap.erase(objectIt);
@@ -640,11 +652,10 @@ void GraphicSetModel::saveTerrain(nlohmann::json& json)
 
     // Fill the json with each terrain graphic set in the model.
     int i{0};
-    TerrainGraphicSetID graphicSetID{1};
     for (auto& graphicSetPair : terrainMap) {
         EditorTerrainGraphicSet& graphicSet{graphicSetPair.second};
         json["terrain"][i]["displayName"] = graphicSet.displayName;
-        json["terrain"][i]["numericID"] = graphicSetID++;
+        json["terrain"][i]["numericID"] = graphicSet.numericID;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["terrain"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
         }
@@ -659,11 +670,10 @@ void GraphicSetModel::saveFloors(nlohmann::json& json)
 
     // Fill the json with each floor graphic set in the model.
     int i{0};
-    FloorGraphicSetID graphicSetID{1};
     for (auto& graphicSetPair : floorMap) {
         EditorFloorGraphicSet& graphicSet{graphicSetPair.second};
         json["floors"][i]["displayName"] = graphicSet.displayName;
-        json["floors"][i]["numericID"] = graphicSetID++;
+        json["floors"][i]["numericID"] = graphicSet.numericID;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["floors"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
         }
@@ -678,11 +688,10 @@ void GraphicSetModel::saveWalls(nlohmann::json& json)
 
     // Fill the json with each wall graphic set in the model.
     int i{0};
-    WallGraphicSetID graphicSetID{1};
     for (auto& graphicSetPair : wallMap) {
         EditorWallGraphicSet& graphicSet{graphicSetPair.second};
         json["walls"][i]["displayName"] = graphicSet.displayName;
-        json["walls"][i]["numericID"] = graphicSetID++;
+        json["walls"][i]["numericID"] = graphicSet.numericID;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["walls"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
         }
@@ -697,11 +706,10 @@ void GraphicSetModel::saveObjects(nlohmann::json& json)
 
     // Fill the json with each object graphic set in the model.
     int i{0};
-    ObjectGraphicSetID graphicSetID{1};
     for (auto& graphicSetPair : objectMap) {
         EditorObjectGraphicSet& graphicSet{graphicSetPair.second};
         json["objects"][i]["displayName"] = graphicSet.displayName;
-        json["objects"][i]["numericID"] = graphicSetID++;
+        json["objects"][i]["numericID"] = graphicSet.numericID;
         for (std::size_t j = 0; j < graphicSet.graphicIDs.size(); ++j) {
             json["objects"][i]["graphicIDs"][j] = graphicSet.graphicIDs[j];
         }

@@ -94,9 +94,6 @@ public:
     const std::string& getErrorString();
 
 private:
-    // Note: This was arbitrarily chosen and can be increased if necessary.
-    static constexpr std::size_t MAX_ANIMATIONS{1000};
-
     /**
      * @param animationJson  The json to parse. Must be a valid animation
      *                       section from ResourceData.json.

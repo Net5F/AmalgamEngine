@@ -4,76 +4,132 @@
 
 namespace AM
 {
-IDPool::IDPool(std::size_t inPoolSize)
-: poolSize{inPoolSize}
-, containerSize{poolSize + SAFETY_BUFFER}
-// Note: We initialize this to -1 since reserveID() always checks for the
-//       next index. If we started at 0, our first ID would be 1.
-, lastAddedIndex{-1}
+IDPool::IDPool(ReservationStrategy inStrategy, std::size_t initialPoolSize)
+: strategy{inStrategy}
 , reservedIDCount{0}
-, IDs(containerSize)
+, nextMarchID{0}
+, nextLowestID{0}
+, IDs(initialPoolSize)
 {
+    // Make sure the initial size is > 0, otherwise our resizes will never 
+    // grow.
+    if (initialPoolSize == 0) {
+        IDs.resize(1);
+    }
 }
 
 unsigned int IDPool::reserveID()
 {
-    if (reservedIDCount > poolSize) {
-        LOG_FATAL("Tried to reserve ID when all were taken.");
-        return 0;
+    if (strategy == ReservationStrategy::MarchForward) {
+        // Reserve nextMarchID.
+        unsigned int returnID{nextMarchID};
+        IDs[nextMarchID] = true;
+        reservedIDCount++;
+
+        // Find and set the next march ID.
+        setNextMarchID();
+
+        return returnID;
+    }
+    else if (strategy == ReservationStrategy::ReuseLowest) {
+        // Reserve nextLowestID.
+        unsigned int returnID{nextLowestID};
+        IDs[nextLowestID] = true;
+        reservedIDCount++;
+
+        // Find and set the next lowest ID.
+        setNextLowestID();
+
+        return returnID;
     }
 
-    // Find the next empty index.
-    for (std::size_t i = 1; i < poolSize; ++i) {
-        // If this index is false (ID is unused).
-        std::size_t index{(lastAddedIndex + i) % containerSize};
-        if (!IDs[index]) {
-            IDs[index] = true;
-            lastAddedIndex = static_cast<int>(index);
-            reservedIDCount++;
-
-            return static_cast<unsigned int>(index);
-        }
-    }
-
-    LOG_FATAL("Couldn't find an empty index when one should exist.");
+    LOG_FATAL("Couldn't find a free ID when one should exist.");
     return 0;
 }
 
 void IDPool::markIDAsReserved(unsigned int ID)
 {
-    if (ID > containerSize) {
-        LOG_FATAL("ID out of bounds.");
-    }
-
-    if (!IDs[ID]) {
-        reservedIDCount++;
+    // If the ID isn't allocated, resize.
+    if (ID >= IDs.size()) {
+        IDs.resize(ID);
     }
 
     IDs[ID] = true;
+    reservedIDCount++;
 
-    if (static_cast<int>(ID) > lastAddedIndex) {
-        lastAddedIndex = ID;
+    // If we're marching and this ID is the highest, find the next march ID.
+    if ((strategy == ReservationStrategy::MarchForward)
+        && (ID >= nextMarchID)) {
+        setNextMarchID();
+    }
+    // Else if we're reusing lowest and this is the lowest ID, find the next 
+    // free ID.
+    else if ((strategy == ReservationStrategy::ReuseLowest)
+        && (ID == nextLowestID)) {
+        setNextLowestID();
     }
 }
 
 void IDPool::freeID(unsigned int ID)
 {
-    if (ID > containerSize) {
-        LOG_FATAL("ID out of bounds.");
+    if (ID > IDs.size()) {
+        LOG_FATAL("ID out of bounds: %u", ID);
     }
 
+    // If the ID is reserved, free it.
     if (IDs[ID]) {
         IDs[ID] = false;
         reservedIDCount--;
+
+        // If we're reusing lowest and this is the lowest ID, set it.
+        if ((strategy == ReservationStrategy::ReuseLowest)
+            && (ID < nextLowestID)) {
+            nextLowestID = ID;
+        }
     }
     else {
-        LOG_FATAL("Tried to free an unused ID.");
+        LOG_FATAL("Tried to free an unused ID: %u", ID);
     }
 }
 
 void IDPool::freeAllIDs()
 {
     std::fill(IDs.begin(), IDs.end(), false);
+}
+
+void IDPool::setNextMarchID()
+{
+    // If we're out of IDs, double our capacity.
+    if (reservedIDCount == IDs.size()) {
+        IDs.resize(IDs.size() * 2);
+    }
+
+    // March to the next ID, wrapping and searching if necessary.
+    // Note: We add 1 to nextMarchID to avoid choosing the same one.
+    for (std::size_t i{0}; i < (IDs.size() - 1); ++i) {
+        std::size_t index{(nextMarchID + 1 + i) % IDs.size()};
+        if (!IDs[index]) {
+            nextMarchID = static_cast<unsigned int>(index);
+            return;
+        }
+    }
+}
+
+void IDPool::setNextLowestID()
+{
+    // If we're out of IDs, double our capacity.
+    if (reservedIDCount == IDs.size()) {
+        IDs.resize(IDs.size() * 2);
+    }
+
+    // Find the next available ID.
+    // Note: We add 1 to nextLowestID to avoid choosing the same one.
+    for (std::size_t i{nextLowestID + 1}; i < IDs.size(); ++i) {
+        if (!IDs[i]) {
+            nextLowestID = static_cast<unsigned int>(i);
+            return;
+        }
+    }
 }
 
 } // namespace AM

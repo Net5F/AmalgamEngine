@@ -22,7 +22,24 @@ namespace AM
 class IDPool
 {
 public:
-    IDPool(std::size_t inPoolSize);
+    /** The strategy to use when reserving IDs. */
+    enum class ReservationStrategy {
+         /** Marches forward, e.g. if 0-10 were reserved and freed, 11 will 
+             still be the next reserved ID. After we reserve the last ID, we 
+             wrap back around. This aims to remove situations where an ID was 
+             reserved, freed, and re-reserved while old data exists in the 
+             system. */
+        MarchForward,
+        ReuseLowest
+    };
+
+    /**
+     * @param inStrategy The reservation strategy to use.
+     * @param initialPoolSize The initial size of this ID pool. Must be > 0.
+     *                        If the pool runs out of IDs, it will automatically
+     *                        grow.
+     */
+    IDPool(ReservationStrategy inStrategy, std::size_t initialPoolSize);
 
     /**
      * Reserves and returns the next empty ID.
@@ -51,23 +68,35 @@ public:
     void freeAllIDs();
 
 private:
-    /** Extra room so that we don't run into reuse issues when almost all IDs
-        are reserved.
-        Note: If this isn't sufficient, you can just make your pool much
-              larger than the number of IDs you plan on using. */
-    static constexpr std::size_t SAFETY_BUFFER{100};
+    // Note: It'd be more ideal if we didn't allocate for new IDs until the ID 
+    //       was actually needed. Our logic seems simpler if we do this "pre-
+    //       find the next ID" approach, though.
+    /**
+     * Starting at nextMarchID, finds the next free ID, wrapping and searching 
+     * if necessary.
+     * @post nextMarchID is set to the next free ID to use. If no IDs are 
+     *       available, the IDs vector will be resized to allocate more.
+     */
+    void setNextMarchID();
 
-    /** The maximum number of IDs that we can give out. */
-    std::size_t poolSize;
+    /**
+     * Starting at nextLowestID, searches for the next free ID.
+     * @post nextLowestID is set to the next free ID to use. If no IDs are 
+     *       available, the IDs vector will be resized to allocate more.
+     */
+    void setNextLowestID();
 
-    /** The size of our container. Equal to poolSize + SAFETY_BUFFER. */
-    std::size_t containerSize;
-
-    /** The last index that we added an ID to. */
-    int lastAddedIndex;
+    /** The strategy to use when reserving IDs. */
+    ReservationStrategy strategy;
 
     /** The number of currently reserved IDs. */
     std::size_t reservedIDCount;
+
+    /** The next ID to use for the MarchForward strategy. */
+    unsigned int nextMarchID;
+
+    /** The lowest ID that is free for use, for the ReuseLowest strategy. */
+    unsigned int nextLowestID;
 
     /** If ID 'x' is available, IDs[x] will be true. Else, it will be false. */
     std::vector<bool> IDs;

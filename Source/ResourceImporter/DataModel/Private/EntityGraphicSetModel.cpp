@@ -9,7 +9,7 @@ namespace ResourceImporter
 {
 EntityGraphicSetModel::EntityGraphicSetModel(DataModel& inDataModel)
 : dataModel{inDataModel}
-, entityIDPool{SDL_MAX_UINT16}
+, entityIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
 , errorString{}
 , entityAddedSig{}
 , entityRemovedSig{}
@@ -50,11 +50,10 @@ void EntityGraphicSetModel::save(nlohmann::json& json)
 
     // Fill the json with each entity graphic set in the model.
     int i{0};
-    EntityGraphicSetID graphicSetID{1};
     for (auto& graphicSetPair : entityMap) {
         EditorEntityGraphicSet& graphicSet{graphicSetPair.second};
         json["entities"][i]["displayName"] = graphicSet.displayName;
-        json["entities"][i]["numericID"] = graphicSetID++;
+        json["entities"][i]["numericID"] = graphicSet.numericID;
 
         // Note: Types/Values are parallel arrays to save file space. If we 
         //       switch to a binary format, they can be combined into a single 
@@ -104,6 +103,9 @@ void EntityGraphicSetModel::remEntity(EntityGraphicSetID entityID)
     if (entityIt == entityMap.end()) {
         LOG_FATAL("Invalid ID while removing entity.");
     }
+
+    // Free the entity's ID.
+    entityIDPool.freeID(entityID);
 
     // Erase the entity.
     entityMap.erase(entityIt);

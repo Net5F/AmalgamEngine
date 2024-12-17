@@ -14,7 +14,7 @@ struct InputChangeRequest;
 
 namespace LTC
 {
-struct NetworkSimulation;
+class NetworkSimulation;
 
 /**
  * Represents the Simulation for a single simulated client.

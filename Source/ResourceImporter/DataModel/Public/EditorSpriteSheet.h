@@ -15,7 +15,10 @@ namespace ResourceImporter
  * Part of SpriteModel.
  */
 struct EditorSpriteSheet {
-    /** This sprite sheet's unique numeric identifier. */
+    /** This sprite sheet's unique numeric identifier.
+        Note: Sprite sheet numeric IDs aren't saved to the json or used by 
+              the engine, so we just generate new ones each time the 
+              importer is ran. */
     SpriteSheetID numericID{NULL_SPRITE_SHEET_ID};
 
     /** Unique display name. Shown in the UI, and used as the name of the 
@@ -27,7 +30,7 @@ struct EditorSpriteSheet {
     /** The height of the generated sprite sheet texture. */
     int textureHeight{0};
 
-    /** The runtime IDs for each sprite in this sheet. */
+    /** The numeric IDs for each sprite in this sheet. */
     std::vector<SpriteID> spriteIDs{};
 };
 

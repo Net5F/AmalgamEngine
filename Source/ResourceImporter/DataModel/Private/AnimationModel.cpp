@@ -13,7 +13,7 @@ AnimationModel::AnimationModel(DataModel& inDataModel)
 : dataModel{inDataModel}
 , animationMap{}
 , animationNameMap{}
-, animationIDPool{MAX_ANIMATIONS}
+, animationIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
 , errorString{}
 , animationAddedSig{}
 , animationRemovedSig{}
@@ -67,14 +67,13 @@ void AnimationModel::save(nlohmann::json& json)
 
     // Fill the json with each animation in the model.
     int i{0};
-    AnimationID animationID{1};
     for (auto& animationPair : animationMap) {
         // Add the display name.
         EditorAnimation& animation{animationPair.second};
         json["animations"][i]["displayName"] = animation.displayName;
 
         // Add the numeric ID.
-        json["animations"][i]["numericID"] = animationID++;
+        json["animations"][i]["numericID"] = animation.numericID;
 
         // Add the frame count and fps.
         json["animations"][i]["frameCount"] = animation.frameCount;
@@ -163,6 +162,9 @@ void AnimationModel::remAnimation(AnimationID animationID)
     if (animationIt == animationMap.end()) {
         LOG_FATAL("Invalid ID while removing animation.");
     }
+
+    // Free the animation's ID.
+    animationIDPool.freeID(animationID);
 
     // Erase the animation.
     animationNameMap.erase(animationIt->second.displayName);
