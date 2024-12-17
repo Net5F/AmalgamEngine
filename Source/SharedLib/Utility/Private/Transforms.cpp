@@ -53,23 +53,28 @@ Vector3 Transforms::screenToWorldMinimum(const SDL_FPoint& screenPoint,
     return {worldX, worldY, 0};
 }
 
-Vector3 Transforms::screenToWorldTarget(const SDL_FPoint& screenPoint,
-                                        const Camera& camera)
+std::optional<Vector3>
+    Transforms::screenToWorldTarget(const SDL_FPoint& screenPoint,
+                                    const Camera& camera)
 {
     // Find the T where a ray cast from screenPoint intersects the camera 
     // target's Z plane.
-    Ray ray{screenToWorldRay(screenPoint, camera)};
-    BoundingBox zPlane{{-1'000'000.f, -1'000'000.f, -0.1f},
-                       {1'000'000.f, 1'000'000.f, camera.target.z}};
-    float intersectT{zPlane.getMinIntersection(ray)};
-    AM_ASSERT(intersectT > 0, "Screen ray failed to intersect Z plane.");
+    if (std::optional<Ray> rayOpt{screenToWorldRay(screenPoint, camera)}) {
+        Ray& ray{rayOpt.value()};
+        BoundingBox zPlane{{-1'000'000.f, -1'000'000.f, -0.1f},
+                           {1'000'000.f, 1'000'000.f, camera.target.z}};
+        float intersectT{zPlane.getMinIntersection(ray)};
+        AM_ASSERT(intersectT > 0, "Screen ray failed to intersect Z plane.");
 
-    // Return the intersected point.
-    return ray.getPointAtT(intersectT);
+        // Return the intersected point.
+        return ray.getPointAtT(intersectT);
+    }
+
+    return std::nullopt;
 }
 
-Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
-                                 const Camera& camera)
+std::optional<Ray> Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
+                                                const Camera& camera)
 {
     // Ref: https://gamedev.stackexchange.com/a/206067/124282
 
@@ -84,39 +89,17 @@ Ray Transforms::screenToWorldRay(const SDL_FPoint& screenPoint,
                      TILE_FACE_HEIGHT_WORLD_TO_SCREEN}};
     rayToCamera.direction.normalize();
     float tMax{camera.viewBounds.getMaxIntersection(rayToCamera)};
-    AM_ASSERT(tMax > 0, "Screen ray failed to intersect camera bounds.");
+    if (tMax <= 0) {
+        // rayToCamera failed to intersect the camera's view bounds.
+        return std::nullopt;
+    }
 
     Vector3 viewBoundsIntersection{rayToCamera.getPointAtT(tMax)};
 
     // Return a ray that starts at the intersected position and points towards 
     // the minimum.
-    return {viewBoundsIntersection,
-            -rayToCamera.direction.x,
-            -rayToCamera.direction.y,
-            -rayToCamera.direction.z};
-}
-
-TilePosition Transforms::screenToWorldTile(const SDL_FPoint& screenPoint,
-                                           const Camera& camera)
-{
-    // Find the Z position of the highest tile that the camera's target is 
-    // standing above.
-    int tileZCoord{
-        static_cast<int>(camera.target.z / SharedConfig::TILE_WORLD_HEIGHT)};
-    float tileZWorld{static_cast<float>(tileZCoord)
-                     * SharedConfig::TILE_WORLD_HEIGHT};
-
-    // Find the T where a ray cast from screenPoint intersects the tile's 
-    // Z plane.
-    Ray ray{screenToWorldRay(screenPoint, camera)};
-    BoundingBox zPlane{{-1'000'000.f, -1'000'000.f, -0.1f},
-                       {1'000'000.f, 1'000'000.f, tileZWorld}};
-    float intersectT{zPlane.getMinIntersection(ray)};
-    AM_ASSERT(intersectT > 0, "Screen ray failed to intersect Z plane.");
-
-    // Return the intersected tile position.
-    Vector3 intersectPoint{ray.getPointAtT(intersectT)};
-    return TilePosition{intersectPoint};
+    return Ray{viewBoundsIntersection, -rayToCamera.direction.x,
+               -rayToCamera.direction.y, -rayToCamera.direction.z};
 }
 
 float Transforms::screenYToWorldZ(float yCoord, float zoomFactor)

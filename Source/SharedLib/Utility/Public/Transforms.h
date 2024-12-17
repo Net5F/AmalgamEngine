@@ -6,6 +6,7 @@
 #include "Ray.h"
 #include "SharedConfig.h"
 #include <SDL_rect.h>
+#include <optional>
 
 namespace AM
 {
@@ -36,6 +37,8 @@ public:
     /**
      * Converts a point in screen space to a point in world space, with 
      * Z == 0.
+     * Note: Since this is just a simple conversion, we don't do any bounds 
+     *       checking. It's on you to make sure the returned value is valid.
      */
     static Vector3 screenToWorldMinimum(const SDL_FPoint& screenPoint,
                                         const Camera& camera);
@@ -43,26 +46,28 @@ public:
     /**
      * Converts a point in screen space to a point in world space, with 
      * Z == camera.target.z.
+     * @return If screenPoint doesn't intersect the camera's view bounds, 
+     *         returns null.
      */
-    static Vector3 screenToWorldTarget(const SDL_FPoint& screenPoint,
-                                       const Camera& camera);
+    static std::optional<Vector3>
+        screenToWorldTarget(const SDL_FPoint& screenPoint,
+                            const Camera& camera);
 
     /**
      * Converts a point in screen space to a ray in world space.
-     * @return A ray starting at the closest intersection between screenPoint 
-     *         and the camera's view bounds, pointing in the normalized 
-     *         direction of the camera.
+     * @return If successful, returns a ray starting at the closest intersection
+     *         between screenPoint and the camera's view bounds, pointing in 
+     *         the normalized direction that the camera is facing.
+     *         If screenPoint doesn't intersect the camera's view bounds, 
+     *         returns null.
+     *
+     * Note: This can return null if the camera is zoomed out. We don't change
+     *       the camera position or expand the view bounds when zooming (zoom 
+     *       is just done by scaling), so you can end up seeing outside of the 
+     *       camera's view bounds.
      */
-    static Ray screenToWorldRay(const SDL_FPoint& screenPoint,
-                                const Camera& camera);
-
-    /**
-     * Converts a point in screen space to a tile position in world space.
-     * Note: The resulting tile will be aligned along the Z axis with the given 
-     *       camera.target.z. To select higher or lower tiles, move the camera.
-     */
-    static TilePosition screenToWorldTile(const SDL_FPoint& screenPoint,
-                                          const Camera& camera);
+    static std::optional<Ray> screenToWorldRay(const SDL_FPoint& screenPoint,
+                                               const Camera& camera);
 
     /**
      * Converts a Y coordinate in screen space to a Z coordinate in world space.

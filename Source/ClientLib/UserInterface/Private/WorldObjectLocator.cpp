@@ -62,8 +62,12 @@ WorldObjectID
 
     // Cast a world-space ray from the plane formed by camera.target.z to the 
     // given point on the screen.
-    Ray ray{Transforms::screenToWorldRay(SDLHelpers::pointToFPoint(screenPoint),
-                                         camera)};
+    std::optional<Ray> rayOpt{Transforms::screenToWorldRay(
+        SDLHelpers::pointToFPoint(screenPoint), camera)};
+    if (!(rayOpt.has_value())) {
+        return {};
+    }
+    Ray& ray{rayOpt.value()};
 
     // Calc the ratio of how long we have to travel along the ray to
     // fully move through 1 cell in each direction.
@@ -137,7 +141,7 @@ WorldObjectID
         }
     }
 
-    // No intersected object found. Return an empty type.
+    // No intersected object found. Return null.
     return {};
 }
 
