@@ -52,7 +52,7 @@ std::size_t Tile::removeLayers(const TileOffset& tileOffset, TileLayer::Type lay
 }
 
 std::size_t Tile::removeLayers(TileLayer::Type layerType, Uint16 graphicSetID,
-                       Uint8 graphicValue)
+                               Uint8 graphicValue)
 {
     // Erase any layers with a matching type, graphic index, and graphic set.
     std::size_t numErased{0};

@@ -15,6 +15,7 @@
 #include "Collision.h"
 #include "GraphicState.h"
 #include "ClientGraphicState.h"
+#include "Floor.h"
 #include "VariantTools.h"
 #include <SDL_rect.h>
 #include <cmath>
@@ -321,10 +322,15 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
     // Calc the sprite's world bounds.
     BoundingBox worldBounds{};
     if (layerID.type == TileLayer::Type::Terrain) {
-        // Terrain is unique: we ignore the sprite's modelBounds and instead 
+        // For terrain, we ignore the sprite's modelBounds and instead 
         // generate a bounding volume based on the terrain type.
         worldBounds = Terrain::calcWorldBounds(layerID.tilePosition,
                                                layerID.graphicValue);
+    }
+    else if (layerID.type == TileLayer::Type::Floor) {
+        // For floors, we ignore the sprite's modelBounds and instead 
+        // generate a flat, tile-sized bounding volume.
+        worldBounds = Floor::calcWorldBounds(layerID.tilePosition);
     }
     else {
         worldBounds = Transforms::modelToWorldTile(sprite.modelBounds,

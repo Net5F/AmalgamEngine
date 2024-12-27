@@ -31,6 +31,11 @@ struct Terrain {
      *
      * Since we only have one terrain shape, this is enough information to 
      * describe which graphic to use for a given piece of terrain.
+     *
+     * Note: When a tile's terrain height changes, all of the other tile 
+     *       layers are adjusted to match. This keeps walls, floors, etc from 
+     *       getting trapped under the new terrain geometry, but anything that  
+     *       was meant to stay the same must be manually re-adjusted.
      */
     enum Height : Uint8 {
         Flat,
@@ -91,8 +96,6 @@ struct Terrain {
     /**
      * Returns a bounding volume matching the given terrain value, translated to
      * world space and offset to the given tile coords.
-     *
-     * Note: Terrain always uses AABBs for collision volumes.
      */
     static BoundingBox calcWorldBounds(const TilePosition& tilePosition,
                                        Value value);

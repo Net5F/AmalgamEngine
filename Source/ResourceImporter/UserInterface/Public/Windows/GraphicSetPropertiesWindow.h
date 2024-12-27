@@ -4,6 +4,7 @@
 #include "AUI/Image.h"
 #include "AUI/Text.h"
 #include "MainTextInput.h"
+#include "MainButton.h"
 #include "LibraryItemData.h"
 #include "GraphicSets.h"
 
@@ -33,10 +34,11 @@ public:
     //-------------------------------------------------------------------------
     // Public child widgets
     //-------------------------------------------------------------------------
-    /** All fields below directly match a data field in an
-        Editor<type>GraphicSet class. */
     AUI::Text nameLabel;
     MainTextInput nameInput;
+
+    /** Only used when a Floor graphic set is loaded. */
+    MainButton setDefaultGraphicBoundsButton;
 
 private:
     /**
@@ -63,6 +65,13 @@ private:
     template<typename T>
     void loadActiveGraphicSet(GraphicSet::Type graphicSetType,
                              const T& newActiveGraphicSet);
+
+    /**
+     * Sets the modelBounds of each sprite in this set to 
+     * DEFAULT_FLOOR_SPRITE_BOUNDS.
+     * Only used when a Floor graphic set is loaded.
+     */
+    void onSetDefaultGraphicBoundsButtonPressed();
 
     /** Used while setting user-inputted graphic set data. */
     DataModel& dataModel;

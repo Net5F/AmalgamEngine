@@ -135,11 +135,6 @@ public:
         this / TILE_WORLD_HEIGHT can be thought of as our "Z scaling factor" */
     static constexpr unsigned int TILE_SIDE_SCREEN_HEIGHT{168};
 
-    /** The total width of a standard tile sprite. */
-    static constexpr unsigned int TILE_SPRITE_WIDTH{256};
-    /** The total height of a standard tile sprite. */
-    static constexpr unsigned int TILE_SPRITE_HEIGHT{512};
-
     /** The number of world units around the player that are considered to be
         within the player's view range.
         Used to determine how much of the world should be rendered. */

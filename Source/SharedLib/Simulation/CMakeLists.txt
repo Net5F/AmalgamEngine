@@ -8,7 +8,6 @@ target_sources(SharedLib
         Private/MovementHelpers.cpp
         Private/Ray.cpp
         Private/ResourceData.cpp
-        Private/Terrain.cpp
         Private/Vector3.cpp
         Private/Components/Camera.cpp
         Private/Components/Interaction.cpp
@@ -26,6 +25,8 @@ target_sources(SharedLib
         Private/TileMap/Chunk.cpp
         Private/TileMap/ChunkExtent.cpp
         Private/TileMap/ChunkPosition.cpp
+        Private/TileMap/Floor.cpp
+        Private/TileMap/Terrain.cpp
         Private/TileMap/Tile.cpp
         Private/TileMap/TileExtent.cpp
         Private/TileMap/TileLayer.cpp
@@ -86,6 +87,7 @@ target_sources(SharedLib
         Public/TileMap/ChunkExtent.h
         Public/TileMap/ChunkPosition.h
         Public/TileMap/ChunkSnapshot.h
+        Public/TileMap/Floor.h
         Public/TileMap/Terrain.h
         Public/TileMap/Tile.h
         Public/TileMap/TileLayer.h

@@ -167,7 +167,7 @@ bool TileMapBase::remFloor(const TilePosition& tilePosition,
     if (trackTileUpdates) {
         tileUpdateHistory.emplace_back(
             TileRemoveLayer{tilePosition,
-                            {},
+                            tileOffset,
                             TileLayer::Type::Floor,
                             graphicSetID,
                             static_cast<Uint8>(rotation)});
@@ -712,40 +712,46 @@ void TileMapBase::addNorthWall(const TilePosition& tilePosition,
     // Rebuild the affected tile's collision.
     rebuildTileCollision(*tile, tilePosition);
 
+    /* Add a NW gap fill, if necessary. */
     // If there's a tile to the NE that we might've formed a corner with.
     TilePosition northeastPos{tilePosition.x + 1, tilePosition.y - 1,
                               tilePosition.z};
-    if (const Tile* northeastTile{cgetTile(northeastPos)}) {
-        // If the NorthEast tile has a West wall.
-        if (const TileLayer* 
-              northeastWestWall{northeastTile->findLayer(TileLayer::Type::Wall,
-                                                         Wall::Type::West)}) {
-            // Note: We know this tile is valid cause there's a NorthEast tile.
-            TilePosition eastPos{tilePosition.x + 1, tilePosition.y,
-                                 tilePosition.z};
-            auto [eastChunk, eastTile] = getOrCreateTile(eastPos);
+    const Tile* northeastTile{cgetTile(northeastPos)};
+    if (!northeastTile) {
+        return;
+    };
 
-            // We formed a corner. Check if the tile to the East has a wall.
-            if (eastTile->getLayers(TileLayer::Type::Wall).size() == 0) {
-                // The East tile has no walls. Add a NorthWestGapFill.
-                addTileLayer(*eastChunk, *eastTile, {}, TileLayer::Type::Wall,
-                             graphicSet, Wall::Type::NorthWestGapFill);
-                rebuildTileCollision(*eastTile, eastPos);
-            }
-            else if (TileLayer* eastNorthWestGapFill{
-                         eastTile->findLayer(TileLayer::Type::Wall,
-                                             Wall::Type::NorthWestGapFill)}) {
-                // The East tile has a NW gap fill. If its graphic set no longer
-                // matches either surrounding wall, make it match the new wall.
-                int gapFillID{eastNorthWestGapFill->graphicSet.get().numericID};
-                int newNorthID{graphicSet.numericID};
-                int westID{northeastWestWall->graphicSet.get().numericID};
-                if ((gapFillID != newNorthID) && (gapFillID != westID)) {
-                    eastNorthWestGapFill->graphicSet = graphicSet;
-                }
-                rebuildTileCollision(*eastTile, eastPos);
-            }
+    // If the NorthEast tile has a West wall.
+    const TileLayer* northeastWestWall{
+        northeastTile->findLayer(TileLayer::Type::Wall, Wall::Type::West)};
+    if (!northeastWestWall) {
+        return;
+    }
+
+    // We formed a corner. Check if the tile to the East has a wall.
+    // Note: We know this tile is in the map bounds cause there's a NorthEast 
+    //       tile, but the chunk may not exist yet.
+    TilePosition eastPos{tilePosition.x + 1, tilePosition.y,
+                         tilePosition.z};
+    auto [eastChunk, eastTile] = getOrCreateTile(eastPos);
+    if (eastTile->getLayers(TileLayer::Type::Wall).size() == 0) {
+        // The East tile has no walls. Add a NorthWestGapFill.
+        addTileLayer(*eastChunk, *eastTile, {}, TileLayer::Type::Wall,
+                     graphicSet, Wall::Type::NorthWestGapFill);
+        rebuildTileCollision(*eastTile, eastPos);
+    }
+    else if (TileLayer* eastNorthWestGapFill{
+                 eastTile->findLayer(TileLayer::Type::Wall,
+                                     Wall::Type::NorthWestGapFill)}) {
+        // The East tile has a NW gap fill. If its graphic set no longer
+        // matches either surrounding wall, make it match the new wall.
+        int gapFillID{eastNorthWestGapFill->graphicSet.get().numericID};
+        int newNorthID{graphicSet.numericID};
+        int westID{northeastWestWall->graphicSet.get().numericID};
+        if ((gapFillID != newNorthID) && (gapFillID != westID)) {
+            eastNorthWestGapFill->graphicSet = graphicSet;
         }
+        rebuildTileCollision(*eastTile, eastPos);
     }
 }
 
@@ -784,43 +790,50 @@ void TileMapBase::addWestWall(const TilePosition& tilePosition,
     // Rebuild the affected tile's collision.
     rebuildTileCollision(*tile, tilePosition);
 
+    /* Add a NW gap fill, if necessary. */
     // If there's a tile to the SW that we might've formed a corner with.
     TilePosition southwestPos{tilePosition.x - 1, tilePosition.y + 1,
                               tilePosition.z};
-    if (const Tile* southwestTile{cgetTile(southwestPos)}) {
-        // If the SouthWest tile has a North wall or a NE gap fill.
-        const TileLayer* southwestNorthWall{
-            southwestTile->findLayer(TileLayer::Type::Wall, Wall::Type::North)};
-        const TileLayer* southwestNorthEastGapFill{southwestTile->findLayer(
-            TileLayer::Type::Wall, Wall::Type::NorthEastGapFill)};
-        if (southwestNorthWall || southwestNorthEastGapFill) {
-            // We formed a corner. Check if the tile to the South has a wall.
-            // Note: We know this tile is valid cause there's a SouthWest tile.
-            TilePosition southPos{tilePosition.x, tilePosition.y + 1,
-                                  tilePosition.z};
-            auto [southChunk, southTile] = getOrCreateTile(southPos);
-            if (southTile->getLayers(TileLayer::Type::Wall).size() == 0) {
-                // The South tile has no walls. Add a NorthWestGapFill.
-                addTileLayer(*southChunk, *southTile, {}, TileLayer::Type::Wall,
-                             graphicSet, Wall::Type::NorthWestGapFill);
-            }
-            else if (TileLayer* southNorthWestGapFill{southTile->findLayer(
-                         TileLayer::Type::Wall, Wall::Type::NorthWestGapFill)}) {
-                // The South tile has a NW gap fill. If its graphic set no longer
-                // matches either surrounding wall, make it match the new wall.
-                int gapFillID{southNorthWestGapFill->graphicSet.get().numericID};
-                int newWestID{graphicSet.numericID};
-                int northID{southwestNorthWall
-                                ? southwestNorthWall->graphicSet.get().numericID
-                                : southwestNorthEastGapFill->graphicSet.get()
-                                      .numericID};
-                if ((gapFillID != newWestID) && (gapFillID != northID)) {
-                    southNorthWestGapFill->graphicSet = graphicSet;
-                }
-            }
-            rebuildTileCollision(*southTile, southPos);
+    const Tile* southwestTile{cgetTile(southwestPos)};
+    if (!southwestTile) {
+        return;
+    }
+
+    // If the SouthWest tile has a North wall or a NE gap fill.
+    const TileLayer* southwestNorthWall{
+        southwestTile->findLayer(TileLayer::Type::Wall, Wall::Type::North)};
+    const TileLayer* southwestNorthEastGapFill{southwestTile->findLayer(
+        TileLayer::Type::Wall, Wall::Type::NorthEastGapFill)};
+    if (!southwestNorthWall && !southwestNorthEastGapFill) {
+        return;
+    }
+
+    // We formed a corner. Check if the tile to the South has a wall.
+    // Note: We know this tile is in the map bounds cause there's a SouthWest 
+    //       tile, but the chunk may not exist yet.
+    TilePosition southPos{tilePosition.x, tilePosition.y + 1,
+                          tilePosition.z};
+    auto [southChunk, southTile] = getOrCreateTile(southPos);
+    if (southTile->getLayers(TileLayer::Type::Wall).size() == 0) {
+        // The South tile has no walls. Add a NorthWestGapFill.
+        addTileLayer(*southChunk, *southTile, {}, TileLayer::Type::Wall,
+                     graphicSet, Wall::Type::NorthWestGapFill);
+    }
+    else if (TileLayer* southNorthWestGapFill{southTile->findLayer(
+                 TileLayer::Type::Wall, Wall::Type::NorthWestGapFill)}) {
+        // The South tile has a NW gap fill. If its graphic set no longer
+        // matches either surrounding wall, make it match the new wall.
+        int gapFillID{southNorthWestGapFill->graphicSet.get().numericID};
+        int newWestID{graphicSet.numericID};
+        int northID{southwestNorthWall
+                        ? southwestNorthWall->graphicSet.get().numericID
+                        : southwestNorthEastGapFill->graphicSet.get()
+                              .numericID};
+        if ((gapFillID != newWestID) && (gapFillID != northID)) {
+            southNorthWestGapFill->graphicSet = graphicSet;
         }
     }
+    rebuildTileCollision(*southTile, southPos);
 }
 
 Tile* TileMapBase::remTileLayer(const TilePosition& tilePosition,
