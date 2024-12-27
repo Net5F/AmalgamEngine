@@ -49,6 +49,9 @@ private:
     Simulation& simulation;
     World& world;
     Network& network;
+
+    /** The index within ZOOM_LEVELS that is currently selected. */
+    std::size_t currentZoomLevelIndex;
 };
 
 } // namespace Client

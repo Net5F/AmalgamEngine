@@ -19,6 +19,7 @@ PlayerInputSystem::PlayerInputSystem(Simulation& inSimulation, World& inWorld,
 : simulation{inSimulation}
 , world{inWorld}
 , network{inNetwork}
+, currentZoomLevelIndex{Config::DEFAULT_ZOOM_LEVEL_INDEX}
 {
 }
 
@@ -104,20 +105,19 @@ void PlayerInputSystem::processMouseWheel(SDL_MouseWheelEvent& wheelEvent)
 
     // Only process zoom if the player has a camera.
     if (world.registry.all_of<Camera>(world.playerEntity)) {
-        /* Zoom the player's camera based on the mouse wheel movement. */
-        Camera& camera{world.registry.get<Camera>(world.playerEntity)};
+        // Update the current zoom level based on the mouse wheel movement.
+        // Note: We zoom a set amount per tick regardless of how much they
+        //       scrolled.
+        if ((wheelEvent.y > 0)
+            && (currentZoomLevelIndex < (Config::ZOOM_LEVELS.size()) - 1)) {
+            currentZoomLevelIndex++;
+        }
+        else if ((wheelEvent.y < 0) && (currentZoomLevelIndex > 0)) {
+            currentZoomLevelIndex--;
+        }
 
-        if (wheelEvent.y > 0) {
-            // Zoom in a set amount per tick regardless of how much they
-            // scrolled.
-            camera.zoomFactor += camera.zoomSensitivity;
-        }
-        else {
-            // Zoom out.
-            if (camera.zoomFactor > camera.zoomSensitivity) {
-                camera.zoomFactor -= camera.zoomSensitivity;
-            }
-        }
+        Camera& camera{world.registry.get<Camera>(world.playerEntity)};
+        camera.zoomFactor = Config::ZOOM_LEVELS.at(currentZoomLevelIndex);
     }
 }
 

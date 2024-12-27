@@ -43,9 +43,6 @@ struct Camera {
     /** The amount that this camera is zoomed in or out. 1.0 is no zoom. */
     float zoomFactor{1.0};
 
-    /** How quickly the camera zooms. */
-    float zoomSensitivity{0.1f};
-
     /**
      * Returns the tile extent that is in view of this camera.
      *
