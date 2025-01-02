@@ -17,6 +17,11 @@ if (AM_BUILD_RESOURCE_IMPORTER)
     add_subdirectory(ResourceImporter)
 endif()
 
+# Configure Tools.
+if (AM_BUILD_TOOLS)
+    add_subdirectory(Tools)
+endif()
+
 # Configure tests.
 if (AM_BUILD_TESTS)
     add_subdirectory(Tests)

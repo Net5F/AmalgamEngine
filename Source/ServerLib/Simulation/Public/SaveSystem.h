@@ -61,8 +61,9 @@ private:
     /** Used to track how much time has passed since the last save. */
     Timer saveTimer;
 
-    /** A scratch buffer used while serializing data. */
-    BinaryBuffer workBuffer;
+    /** Scratch buffers used while serializing data. */
+    BinaryBuffer workBuffer1;
+    BinaryBuffer workBuffer2;
 };
 
 } // namespace Server

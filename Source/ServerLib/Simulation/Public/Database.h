@@ -10,6 +10,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+#include <span>
 
 namespace AM
 {
@@ -65,13 +66,14 @@ public:
      * Adds or overwrites an entity table entry.
      *
      * @param entity The entity entry to update.
-     * @param entityDataBuffer A serialized PersistedEntityData struct.
-     * @param dataSize The size of entityDataBuffer.
-     * Note: We would normally use a std::span, but it would be extra work 
-     *       in this case for no gain.
+     * @param engineComponentData A serialized 
+     *                            std::vector<EnginePersistedComponent>.
+     * @param projectComponentData A serialized 
+     *                             std::vector<ProjectPersistedComponent>.
      */
-    void saveEntityData(entt::entity entity, Uint8* entityDataBuffer,
-                        std::size_t dataSize);
+    void saveEntityData(entt::entity entity,
+                        std::span<const Uint8> engineComponentData,
+                        std::span<const Uint8> projectComponentData);
 
     /**
      * Attempts to delete an entity table entry for the given entity.
@@ -83,19 +85,32 @@ public:
     /**
      * Calls the given callback on each entity data entry.
      *
-     * @param callback A callback of form void(entt::entity, const Uint8*,
-     *                 std::size_t) that expects the entity's ID, and a 
-     *                 serialized PersistedEntityData struct.
+     * @param callback A callback of form void(entt::entity, 
+     *                 std::span<const Uint8>, std::span<const Uint8>) that 
+     *                 expects the entity's ID, a serialized 
+     *                 std::vector<EnginePersistedComponent>, and a serialized 
+     *                 std::vector<ProjectPersistedComponent>.
      */
     template<typename Func>
     void iterateEntities(Func callback)
     {
         while (iterateEntitiesQuery->executeStep()) {
-            SQLite::Column dataColumn{iterateEntitiesQuery->getColumn(1)};
+            SQLite::Column engineComponentDataColumn{
+                iterateEntitiesQuery->getColumn(1)};
+            SQLite::Column projectComponentDataColumn{
+                iterateEntitiesQuery->getColumn(2)};
             callback(static_cast<entt::entity>(
                          iterateEntitiesQuery->getColumn(0).getInt()),
-                     static_cast<const Uint8*>(dataColumn.getBlob()),
-                     dataColumn.getBytes());
+                     std::span<const Uint8>{
+                         static_cast<const Uint8*>(
+                             engineComponentDataColumn.getBlob()),
+                         static_cast<std::size_t>(
+                             engineComponentDataColumn.getBytes())},
+                     std::span<const Uint8>{
+                         static_cast<const Uint8*>(
+                             projectComponentDataColumn.getBlob()),
+                         static_cast<std::size_t>(
+                             projectComponentDataColumn.getBytes())});
         }
         iterateEntitiesQuery->reset();
     }
@@ -107,11 +122,9 @@ public:
      * Adds or overwrites an item table entry.
      *
      * @param itemID The item entry to update.
-     * @param itemDataBuffer A serialized Item struct.
-     * @param dataSize The size of itemDataBuffer.
+     * @param itemData A serialized Item struct.
      */
-    void saveItemData(ItemID itemID, Uint8* itemDataBuffer,
-                      std::size_t dataSize);
+    void saveItemData(ItemID itemID, std::span<const Uint8> itemData);
 
     /**
      * Attempts to delete an item table entry for the given item.
@@ -146,12 +159,11 @@ public:
     /**
      * Adds or overwrites the entity stored value ID map entry.
      *
-     * @param entityStoredValueIDMapBuffer A serialized 
-     *                                     World::entityStoredValueIDMap.
-     * @param dataSize The size of entityStoredValueIDDataBuffer.
+     * @param entityStoredValueIDMapData A serialized 
+     *                                   World::entityStoredValueIDMap.
      */
-    void saveEntityStoredValueIDMap(Uint8* entityStoredValueIDMapBuffer,
-                                    std::size_t dataSize);
+    void saveEntityStoredValueIDMap(
+        std::span<const Uint8> entityStoredValueIDMapData);
 
     /**
      * Calls the given callback on the entity stored value ID map data entry.
@@ -173,12 +185,10 @@ public:
     /**
      * Adds or overwrites the entity stored value ID map entry.
      *
-     * @param globalStoredValueMapBuffer A serialized 
-     *                                   World::globalStoredValueMap.
-     * @param dataSize The size of globalStoredValueMapBuffer.
+     * @param globalStoredValueMapData A serialized World::globalStoredValueMap.
      */
-    void saveGlobalStoredValueMap(Uint8* globalStoredValueMapBuffer,
-                                  std::size_t dataSize);
+    void saveGlobalStoredValueMap(
+        std::span<const Uint8> globalStoredValueMapData);
 
     /**
      * Calls the given callback on the entity stored value ID map data entry.
@@ -199,12 +209,16 @@ public:
 
 protected:
     /**
-     * Creates our tables, if they don't already exist.
-     *
-     * Note: If things ever get sufficiently complicated, we can switch to a 
-     *       schema.
+     * Creates our tables in Database.db3, if they don't already exist.
      */
     void initTables();
+
+    /**
+     * Compares each version number from the database to the current version 
+     * numbers in code. If the data version doesn't match the code version, 
+     * prints an appropriate error and exits.
+     */
+    void checkDataVersions();
 
     /**
      * Thread function.
@@ -218,7 +232,7 @@ protected:
         with it in another thread. */
     SQLite::Database database;
 
-    /** File database. Used to persist our data to a file. */
+    /** File-backed database. Used to persist our data to a file. */
     SQLite::Database backupDatabase;
 
     /** If valid, this is the current ongoing transaction. */

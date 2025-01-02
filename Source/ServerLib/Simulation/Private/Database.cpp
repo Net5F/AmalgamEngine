@@ -1,9 +1,11 @@
 #include "Database.h"
-#include "SQLiteCpp/VariadicBind.h"
-#include "SQLiteCpp/Backup.h"
+#include "EnginePersistedComponentTypes.h"
+#include "ProjectPersistedComponentTypes.h"
 #include "Paths.h"
 #include "AMAssert.h"
 #include "Log.h"
+#include "SQLiteCpp/VariadicBind.h"
+#include "SQLiteCpp/Backup.h"
 
 #include <sqlite3.h>
 
@@ -44,13 +46,20 @@ Database::Database()
 , insertGlobalStoredValueMapQuery{nullptr}
 , getGlobalStoredValueMapQuery{nullptr}
 {
+    // If any of our tables don't exist in Database.db3, initialize them.
     initTables();
+
+    // Load the data from Database.db3 into our in-memory database.
+    SQLite::Backup backup(database, backupDatabase);
+    backup.executeStep(-1);
 
     // Note: We build these queries after initTables() because they'll 
     //       segfault if there's no DB with the expected fields.
     insertEntityQuery = std::make_unique<SQLite::Statement>(
-        database, "INSERT INTO entities VALUES (?, ?) "
-                  "ON CONFLICT(id) DO UPDATE SET data=excluded.data");
+        database, "INSERT INTO entities VALUES (?, ?, ?) "
+                  "ON CONFLICT(id) DO UPDATE SET "
+                  "engineComponents=excluded.engineComponents, "
+                  "projectComponents=excluded.projectComponents");
     deleteEntityQuery = std::make_unique<SQLite::Statement>(
         database, "DELETE FROM entities WHERE id=?");
     iterateEntitiesQuery = std::make_unique<SQLite::Statement>(
@@ -73,6 +82,9 @@ Database::Database()
         database, "UPDATE globalStoredValueMap SET data=(?)");
     getGlobalStoredValueMapQuery = std::make_unique<SQLite::Statement>(
         backupDatabase, "SELECT * FROM globalStoredValueMap");
+
+    // Check for any out of date data.
+    checkDataVersions();
 
     // Start the backup thread.
     backupThreadObj = std::thread(&Database::performBackup, this);
@@ -137,13 +149,16 @@ bool Database::backupIsInProgress()
     return backupRequested.load();
 }
 
-void Database::saveEntityData(entt::entity entity, Uint8* entityDataBuffer,
-                              std::size_t dataSize)
+void Database::saveEntityData(entt::entity entity,
+                              std::span<const Uint8> engineComponentData,
+                              std::span<const Uint8> projectComponentData)
 {
     try {
         insertEntityQuery->bind(1, static_cast<Uint32>(entity));
-        insertEntityQuery->bind(2, entityDataBuffer,
-                                static_cast<int>(dataSize));
+        insertEntityQuery->bind(2, engineComponentData.data(),
+                                static_cast<int>(engineComponentData.size()));
+        insertEntityQuery->bind(3, projectComponentData.data(),
+                                static_cast<int>(projectComponentData.size()));
 
         insertEntityQuery->exec();
 
@@ -166,12 +181,12 @@ void Database::deleteEntityData(entt::entity entity)
     }
 }
 
-void Database::saveItemData(ItemID itemID, Uint8* entityDataBuffer,
-                              std::size_t dataSize)
+void Database::saveItemData(ItemID itemID, std::span<const Uint8> itemData)
 {
     try {
         insertItemQuery->bind(1, static_cast<Uint32>(itemID));
-        insertItemQuery->bind(2, entityDataBuffer, static_cast<int>(dataSize));
+        insertItemQuery->bind(2, itemData.data(),
+                              static_cast<int>(itemData.size()));
 
         insertItemQuery->exec();
 
@@ -194,12 +209,13 @@ void Database::deleteItemData(ItemID itemID)
     }
 }
 
-void Database::saveEntityStoredValueIDMap(Uint8* entityStoredValueIDMapBuffer,
-                                          std::size_t dataSize)
+void Database::saveEntityStoredValueIDMap(
+    std::span<const Uint8> entityStoredValueIDMapData)
 {
     try {
-        insertEntityStoredValueIDMapQuery->bind(1, entityStoredValueIDMapBuffer,
-                                                static_cast<int>(dataSize));
+        insertEntityStoredValueIDMapQuery->bind(
+            1, entityStoredValueIDMapData.data(),
+            static_cast<int>(entityStoredValueIDMapData.size()));
 
         insertEntityStoredValueIDMapQuery->exec();
 
@@ -210,12 +226,13 @@ void Database::saveEntityStoredValueIDMap(Uint8* entityStoredValueIDMapBuffer,
     }
 }
 
-void Database::saveGlobalStoredValueMap(Uint8* globalStoredValueMapBuffer,
-                                        std::size_t dataSize)
+void Database::saveGlobalStoredValueMap(
+    std::span<const Uint8> globalStoredValueMapData)
 {
     try {
-        insertGlobalStoredValueMapQuery->bind(1, globalStoredValueMapBuffer,
-                                              static_cast<int>(dataSize));
+        insertGlobalStoredValueMapQuery->bind(
+            1, globalStoredValueMapData.data(),
+            static_cast<int>(globalStoredValueMapData.size()));
 
         insertGlobalStoredValueMapQuery->exec();
 
@@ -227,54 +244,124 @@ void Database::saveGlobalStoredValueMap(Uint8* globalStoredValueMapBuffer,
 
 void Database::initTables()
 {
+    // The below commands define the schema for Database.db3.
+    // Note: We only need to init the file-backed database, since the in-memory
+    //       database will copy it.
     try {
-        if (!(database.tableExists("entities"))) {
-            database.exec(
-                "CREATE TABLE entities (id INTEGER PRIMARY KEY, data BLOB)");
+        // Version numbers for all data in this database that needs to support 
+        // migration.
+        if (!backupDatabase.tableExists("versions")) {
+            backupDatabase.exec(
+                "CREATE TABLE versions (id INTEGER PRIMARY KEY, "
+                "name TEXT, versionNumber INTEGER)");
+
+            SQLite::Statement insertVersionQuery{
+                backupDatabase, "INSERT INTO versions VALUES (?, ?, ?)"};
+
+            int versionsKey{0};
+            insertVersionQuery.bind(1, versionsKey++);
+            insertVersionQuery.bind(2, "EngineComponents");
+            insertVersionQuery.bind(3, ENGINE_COMPONENTS_VERSION);
+            insertVersionQuery.exec();
+            insertVersionQuery.reset();
+
+            insertVersionQuery.bind(1, versionsKey++);
+            insertVersionQuery.bind(2, "ProjectComponents");
+            insertVersionQuery.bind(3, PROJECT_COMPONENTS_VERSION);
+            insertVersionQuery.exec();
+            insertVersionQuery.reset();
         }
 
-        if (!(database.tableExists("items"))) {
-            database.exec(
+        // Entity components.
+        if (!backupDatabase.tableExists("entities")) {
+            // The component lists need to be serialized separately, so we can 
+            // migrate them separately. If we tried to serialize them together, 
+            // there may be situations where both lists need to be updated at 
+            // the same time, which we can't do with a split migration setup.
+            backupDatabase.exec(
+                "CREATE TABLE entities (id INTEGER PRIMARY KEY, "
+                "engineComponents BLOB, projectComponents BLOB)");
+        }
+
+        // Items.
+        if (!backupDatabase.tableExists("items")) {
+            backupDatabase.exec(
                 "CREATE TABLE items (id INTEGER PRIMARY KEY, data BLOB)");
         }
 
-        if (!(database.tableExists("entityStoredValueIDMap"))) {
-            database.exec("CREATE TABLE entityStoredValueIDMap (data BLOB)");
-            database.exec("INSERT INTO entityStoredValueIDMap VALUES('')");
-        }
-
-        if (!(database.tableExists("globalStoredValueMap"))) {
-            database.exec("CREATE TABLE globalStoredValueMap (data BLOB)");
-            database.exec("INSERT INTO globalStoredValueMap VALUES('')");
-        }
-
-        // Note: We need to init the backup database for the first load, before
-        //       any backups have been performed.
-        if (!(backupDatabase.tableExists("entities"))) {
-            backupDatabase.exec(
-                "CREATE TABLE entities (id INTEGER PRIMARY KEY, data BLOB)");
-        }
-
-        if (!(backupDatabase.tableExists("items"))) {
-            backupDatabase.exec(
-                "CREATE TABLE items (id INTEGER PRIMARY KEY, data BLOB)");
-        }
-
-        if (!(backupDatabase.tableExists("entityStoredValueIDMap"))) {
+        // Entity stored values, stored as a single serialized map.
+        if (!backupDatabase.tableExists("entityStoredValueIDMap")) {
             backupDatabase.exec(
                 "CREATE TABLE entityStoredValueIDMap (data BLOB)");
+            // Since we're only storing 1 value in this table, we init the row
+            // here so we can use UPDATEs later.
             backupDatabase.exec(
                 "INSERT INTO entityStoredValueIDMap VALUES('')");
         }
 
-        if (!(backupDatabase.tableExists("globalStoredValueMap"))) {
+        // Global stored values, stored as a single serialized map.
+        if (!backupDatabase.tableExists("globalStoredValueMap")) {
             backupDatabase.exec(
                 "CREATE TABLE globalStoredValueMap (data BLOB)");
-            backupDatabase.exec(
-                "INSERT INTO globalStoredValueMap VALUES('')");
+            // Since we're only storing 1 value in this table, we init the row
+            // here so we can use UPDATEs later.
+            backupDatabase.exec("INSERT INTO globalStoredValueMap VALUES('')");
         }
     } catch (std::exception& e) {
         LOG_ERROR("Failed to init table: %s", e.what());
+    }
+}
+
+void Database::checkDataVersions()
+{
+    // Iterate through each version row.
+    SQLite::Statement getVersionQuery{database, "SELECT * FROM versions"};
+    std::vector<std::string> requiredMigrations{};
+    while (getVersionQuery.executeStep()) {
+        const char* name{getVersionQuery.getColumn(1).getText()};
+        unsigned int versionNumber{
+            static_cast<unsigned int>(getVersionQuery.getColumn(2).getInt())};
+
+        // Match the name to one of our expected names and check the version 
+        // number. If it's newer than the code, fail immediately. If it's 
+        // older, push the required migrations.
+        if (std::strcmp(name, "EngineComponents") == 0) {
+            if (versionNumber > ENGINE_COMPONENTS_VERSION) {
+                LOG_FATAL("Database load error: Data version (v%u) is newer "
+                          "than code (v%u) (EngineComponents).",
+                          versionNumber, ENGINE_COMPONENTS_VERSION);
+            }
+            else if (versionNumber < ENGINE_COMPONENTS_VERSION) {
+                requiredMigrations.push_back(
+                    "EngineComponents v" + std::to_string(versionNumber)
+                    + " -> v" + std::to_string(ENGINE_COMPONENTS_VERSION));
+            }
+        }
+        else if (std::strcmp(name, "ProjectComponents") == 0) {
+            std::string dataVersion{std::to_string(versionNumber)};
+            std::string codeVersion{std::to_string(PROJECT_COMPONENTS_VERSION)};
+            if (versionNumber > PROJECT_COMPONENTS_VERSION) {
+                LOG_FATAL("Database load error: Data version (v%u) is newer "
+                          "than code (v%u) (ProjectComponents).",
+                          versionNumber, PROJECT_COMPONENTS_VERSION);
+            }
+            else if (versionNumber < PROJECT_COMPONENTS_VERSION) {
+                requiredMigrations.push_back(
+                    "ProjectComponents v" + std::to_string(versionNumber)
+                    + " -> v" + std::to_string(PROJECT_COMPONENTS_VERSION));
+            }
+        }
+    }
+
+    // If any data is out of date, print the required migrations and exit.
+    if (!(requiredMigrations.empty())) {
+        std::string errorText{"Database load error: Data version is older than "
+                              "code version.\nRequired migrations:"};
+        for (const std::string migrationText : requiredMigrations) {
+            errorText += "\n    " + migrationText;
+        }
+
+        LOG_FATAL("%s", errorText.c_str());
     }
 }
 
@@ -288,7 +375,7 @@ void Database::performBackup()
         // Execute all backup steps at once.
         try {
             SQLite::Backup backup(backupDatabase, database);
-            backup.executeStep();
+            backup.executeStep(-1);
         } catch (std::exception& e) {
             LOG_ERROR("Failed to save database to file: %s", e.what());
         }

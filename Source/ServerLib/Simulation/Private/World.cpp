@@ -7,6 +7,8 @@
 #include "ClientSimData.h"
 #include "ReplicatedComponentList.h"
 #include "ReplicatedComponent.h"
+#include "EnginePersistedComponentTypes.h"
+#include "ProjectPersistedComponentTypes.h"
 #include "Position.h"
 #include "PreviousPosition.h"
 #include "Movement.h"
@@ -14,7 +16,6 @@
 #include "GraphicState.h"
 #include "Collision.h"
 #include "EntityInitScript.h"
-#include "PersistedEntityData.h"
 #include "Deserialize.h"
 #include "Transforms.h"
 #include "SharedConfig.h"
@@ -419,13 +420,19 @@ void World::onEntityDestroyed(entt::entity entity)
 
 void World::loadNonClientEntities()
 {
-    auto loadEntity
-        = [&](entt::entity entity, const Uint8* entityDataBuffer,
-              std::size_t dataSize) {
-        // Deserialize the entity's data.
-        PersistedEntityData persistedEntityData{};
-        Deserialize::fromBuffer(entityDataBuffer, dataSize,
-                                persistedEntityData);
+    std::vector<EnginePersistedComponent> engineComponents{};
+    std::vector<ProjectPersistedComponent> projectComponents{};
+    auto loadEntity = [&](entt::entity entity,
+                          std::span<const Uint8> engineComponentData,
+                          std::span<const Uint8> projectComponentData) {
+        engineComponents.clear();
+        projectComponents.clear();
+
+        // Deserialize the entity's component data.
+        Deserialize::fromBuffer(engineComponentData.data(),
+                                engineComponentData.size(), engineComponents);
+        Deserialize::fromBuffer(projectComponentData.data(),
+                                projectComponentData.size(), projectComponents);
 
         // Add the entity to the registry.
         entt::entity newEntity{registry.create(entity)};
@@ -435,12 +442,14 @@ void World::loadNonClientEntities()
                       newEntity, entity);
         }
 
-        // Add RelicatedComponentList so it gets updated as we add others.
+        // Add RelicatedComponentList so it gets updated as we add other 
+        // components.
         registry.emplace<ReplicatedComponentList>(newEntity);
 
         // Load the entity's persisted components into the registry.
-        for (const PersistedComponent& componentVariant :
-             persistedEntityData.components) {
+        // Engine components
+        for (const EnginePersistedComponent& componentVariant :
+             engineComponents) {
             std::visit(VariantTools::Overload(
                 [&](const Rotation& rotation) {
                     // Note: We only persist Rotation, but it implies the 
@@ -452,6 +461,17 @@ void World::loadNonClientEntities()
                     //       the rest of the graphics components.
                     addGraphicsComponents(newEntity, graphicState);
                 },
+                [&](const auto& component) {
+                    using T = std::decay_t<decltype(component)>;
+                    registry.emplace<T>(newEntity, component);
+                }),
+                componentVariant);
+        }
+
+        // Project components
+        for (const ProjectPersistedComponent& componentVariant :
+             projectComponents) {
+            std::visit(VariantTools::Overload(
                 [&](const auto& component) {
                     using T = std::decay_t<decltype(component)>;
                     registry.emplace<T>(newEntity, component);
