@@ -147,15 +147,19 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
         }
 
         const Sprite& sprite{getEntitySprite(graphicState, clientGraphicState)};
-        pushEntitySprite(entity, renderPosition, sprite, camera);
+        pushEntitySprite(entity, renderPosition, sprite, camera,
+                         graphicState.graphicSetID,
+                         clientGraphicState.graphicType);
     }
 
     // Gather all of the UI's phantom entity sprites.
     for (const PhantomSpriteInfo& info : phantomSprites) {
         if (info.layerType == TileLayer::Type::None) {
             GraphicRef graphic{getPhantomGraphic(info)};
-            pushEntitySprite(entt::null, info.position,
-                             graphic.getFirstSprite(), camera);
+            pushEntitySprite(
+                entt::null, info.position, graphic.getFirstSprite(), camera,
+                static_cast<EntityGraphicSetID>(info.graphicSet->numericID),
+                static_cast<EntityGraphicType>(info.graphicValue));
         }
     }
 }
@@ -387,21 +391,19 @@ const Sprite&
 void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
                                          const Position& position,
                                          const Sprite& sprite,
-                                         const Camera& camera)
+                                         const Camera& camera,
+                                         EntityGraphicSetID graphicSetID,
+                                         EntityGraphicType graphicType)
 {
     // Get the iso screen extent for the sprite.
     const SpriteRenderData& renderData{
         graphicData.getSpriteRenderData(sprite.numericID)};
-    const GraphicState& graphicState{registry.get<GraphicState>(entity)};
     const EntityGraphicSet& graphicSet{
-        graphicData.getEntityGraphicSet(graphicState.graphicSetID)};
-    const ClientGraphicState& clientGraphicState{
-        registry.get<ClientGraphicState>(entity)};
+        graphicData.getEntityGraphicSet(graphicSetID)};
 
     SDL_FRect screenExtent{ClientTransforms::entityToScreenExtent(
         position, graphicSet.getCollisionModelBounds().getBottomCenterPoint(),
-        graphicData.getRenderAlignmentOffset(graphicState.graphicSetID,
-                                             clientGraphicState.graphicType),
+        graphicData.getRenderAlignmentOffset(graphicSetID, graphicType),
         renderData, camera)};
 
     // If the sprite is on screen, push the render info.

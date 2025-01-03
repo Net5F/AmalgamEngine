@@ -3,6 +3,7 @@
 #include "SpriteSortInfo.h"
 #include "PhantomSpriteInfo.h"
 #include "SpriteColorModInfo.h"
+#include "EntityGraphicType.h"
 #include "Timer.h"
 #include "entt/entity/registry.hpp"
 #include <vector>
@@ -103,7 +104,9 @@ private:
      * Pushes the given entity sprite into the sorting vector.
      */
     void pushEntitySprite(entt::entity entity, const Position& position,
-                          const Sprite& sprite, const Camera& camera);
+                          const Sprite& sprite, const Camera& camera,
+                          EntityGraphicSetID graphicSetID,
+                          EntityGraphicType graphicType);
 
     /**
      * Sorts the sprites into their draw order (farthest sprite first).
