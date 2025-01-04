@@ -95,22 +95,22 @@ public:
     void iterateEntities(Func callback)
     {
         while (iterateEntitiesQuery->executeStep()) {
-            SQLite::Column engineComponentDataColumn{
+            SQLite::Column idColumn{iterateEntitiesQuery->getColumn(0)};
+            SQLite::Column engineComponentsColumn{
                 iterateEntitiesQuery->getColumn(1)};
-            SQLite::Column projectComponentDataColumn{
+            SQLite::Column projectComponentsColumn{
                 iterateEntitiesQuery->getColumn(2)};
-            callback(static_cast<entt::entity>(
-                         iterateEntitiesQuery->getColumn(0).getInt()),
-                     std::span<const Uint8>{
-                         static_cast<const Uint8*>(
-                             engineComponentDataColumn.getBlob()),
-                         static_cast<std::size_t>(
-                             engineComponentDataColumn.getBytes())},
-                     std::span<const Uint8>{
-                         static_cast<const Uint8*>(
-                             projectComponentDataColumn.getBlob()),
-                         static_cast<std::size_t>(
-                             projectComponentDataColumn.getBytes())});
+            callback(
+                static_cast<entt::entity>(idColumn.getInt()),
+                std::span<const Uint8>{
+                    static_cast<const Uint8*>(engineComponentsColumn.getBlob()),
+                    static_cast<std::size_t>(
+                        engineComponentsColumn.getBytes())},
+                std::span<const Uint8>{
+                    static_cast<const Uint8*>(
+                        projectComponentsColumn.getBlob()),
+                    static_cast<std::size_t>(
+                        projectComponentsColumn.getBytes())});
         }
         iterateEntitiesQuery->reset();
     }
@@ -144,11 +144,12 @@ public:
     void iterateItems(Func callback)
     {
         while (iterateItemsQuery->executeStep()) {
+            SQLite::Column idColumn{iterateItemsQuery->getColumn(0)};
             SQLite::Column dataColumn{iterateItemsQuery->getColumn(1)};
-            callback(static_cast<ItemID>(
-                         iterateItemsQuery->getColumn(0).getInt()),
-                     static_cast<const Uint8*>(dataColumn.getBlob()),
-                     dataColumn.getBytes());
+            callback(static_cast<ItemID>(idColumn.getInt()),
+                     std::span<const Uint8>{
+                         static_cast<const Uint8*>(dataColumn.getBlob()),
+                         static_cast<std::size_t>(dataColumn.getBytes())});
         }
         iterateItemsQuery->reset();
     }
@@ -176,8 +177,9 @@ public:
     {
         getEntityStoredValueIDMapQuery->executeStep();
         SQLite::Column dataColumn{getEntityStoredValueIDMapQuery->getColumn(0)};
-        callback(static_cast<const Uint8*>(dataColumn.getBlob()),
-                 dataColumn.getBytes());
+        callback(std::span<const Uint8>{
+            static_cast<const Uint8*>(dataColumn.getBlob()),
+            static_cast<std::size_t>(dataColumn.getBytes())});
 
         getEntityStoredValueIDMapQuery->reset();
     }
@@ -201,8 +203,9 @@ public:
     {
         getGlobalStoredValueMapQuery->executeStep();
         SQLite::Column dataColumn{getGlobalStoredValueMapQuery->getColumn(0)};
-        callback(static_cast<const Uint8*>(dataColumn.getBlob()),
-                 dataColumn.getBytes());
+        callback(std::span<const Uint8>{
+            static_cast<const Uint8*>(dataColumn.getBlob()),
+            static_cast<std::size_t>(dataColumn.getBytes())});
 
         getGlobalStoredValueMapQuery->reset();
     }

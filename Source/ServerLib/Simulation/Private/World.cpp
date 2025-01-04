@@ -423,16 +423,17 @@ void World::loadNonClientEntities()
     std::vector<EnginePersistedComponent> engineComponents{};
     std::vector<ProjectPersistedComponent> projectComponents{};
     auto loadEntity = [&](entt::entity entity,
-                          std::span<const Uint8> engineComponentData,
-                          std::span<const Uint8> projectComponentData) {
+                          std::span<const Uint8> engineComponentBuffer,
+                          std::span<const Uint8> projectComponentBuffer) {
         engineComponents.clear();
         projectComponents.clear();
 
         // Deserialize the entity's component data.
-        Deserialize::fromBuffer(engineComponentData.data(),
-                                engineComponentData.size(), engineComponents);
-        Deserialize::fromBuffer(projectComponentData.data(),
-                                projectComponentData.size(), projectComponents);
+        Deserialize::fromBuffer(engineComponentBuffer.data(),
+                                engineComponentBuffer.size(), engineComponents);
+        Deserialize::fromBuffer(projectComponentBuffer.data(),
+                                projectComponentBuffer.size(),
+                                projectComponents);
 
         // Find the Position component.
         // Note: We do this separately because we know every entity has a 
@@ -502,11 +503,10 @@ void World::loadNonClientEntities()
 
 void World::loadItems()
 {
-    auto loadItem = [&](ItemID itemID, const Uint8* itemDataBuffer,
-                        std::size_t dataSize) {
+    auto loadItem = [&](ItemID itemID, std::span<const Uint8> itemBuffer) {
         // Deserialize the item's data.
         Item item{};
-        Deserialize::fromBuffer(itemDataBuffer, dataSize, item);
+        Deserialize::fromBuffer(itemBuffer.data(), itemBuffer.size(), item);
         item.numericID = itemID;
 
         // Add the item to ItemData.
@@ -519,9 +519,9 @@ void World::loadItems()
 void World::loadStoredValues()
 {
     // Load the entity stored value IDs.
-    auto loadEntityMap = [&](const Uint8* dataBuffer, std::size_t dataSize) {
-        if (dataSize > 0) {
-            Deserialize::fromBuffer(dataBuffer, dataSize,
+    auto loadEntityMap = [&](std::span<const Uint8> dataBuffer) {
+        if (dataBuffer.size() > 0) {
+            Deserialize::fromBuffer(dataBuffer.data(), dataBuffer.size(),
                                     entityStoredValueIDMap);
         }
     };
@@ -529,9 +529,10 @@ void World::loadStoredValues()
     database->getEntityStoredValueIDMap(std::move(loadEntityMap));
 
     // Load the global stored values.
-    auto loadGlobalMap = [&](const Uint8* dataBuffer, std::size_t dataSize) {
-        if (dataSize > 0) {
-            Deserialize::fromBuffer(dataBuffer, dataSize, globalStoredValueMap);
+    auto loadGlobalMap = [&](std::span<const Uint8> dataBuffer) {
+        if (dataBuffer.size() > 0) {
+            Deserialize::fromBuffer(dataBuffer.data(), dataBuffer.size(),
+                                    globalStoredValueMap);
         }
     };
 

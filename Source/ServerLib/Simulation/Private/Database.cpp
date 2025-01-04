@@ -154,7 +154,7 @@ void Database::saveEntityData(entt::entity entity,
                               std::span<const Uint8> projectComponentData)
 {
     try {
-        insertEntityQuery->bind(1, static_cast<Uint32>(entity));
+        insertEntityQuery->bind(1, static_cast<int>(entity));
         insertEntityQuery->bind(2, engineComponentData.data(),
                                 static_cast<int>(engineComponentData.size()));
         insertEntityQuery->bind(3, projectComponentData.data(),
@@ -171,7 +171,7 @@ void Database::saveEntityData(entt::entity entity,
 void Database::deleteEntityData(entt::entity entity)
 {
     try {
-        deleteEntityQuery->bind(1, static_cast<Uint32>(entity));
+        deleteEntityQuery->bind(1, static_cast<int>(entity));
 
         deleteEntityQuery->exec();
 
@@ -184,7 +184,7 @@ void Database::deleteEntityData(entt::entity entity)
 void Database::saveItemData(ItemID itemID, std::span<const Uint8> itemData)
 {
     try {
-        insertItemQuery->bind(1, static_cast<Uint32>(itemID));
+        insertItemQuery->bind(1, static_cast<int>(itemID));
         insertItemQuery->bind(2, itemData.data(),
                               static_cast<int>(itemData.size()));
 
@@ -199,7 +199,7 @@ void Database::saveItemData(ItemID itemID, std::span<const Uint8> itemData)
 void Database::deleteItemData(ItemID itemID)
 {
     try {
-        deleteItemQuery->bind(1, static_cast<Uint32>(itemID));
+        deleteItemQuery->bind(1, static_cast<int>(itemID));
 
         deleteItemQuery->exec();
 

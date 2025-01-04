@@ -18,7 +18,9 @@ enum class MigrationStatus
 {
     Success,
     /** A migration function is missing. */
-    ImplementationMissing
+    ImplementationMissing,
+    /** An error occured while performing a database query. */
+    DatabaseError
 };
 
 struct MigrationInfo

@@ -34,15 +34,18 @@ void MigrationRunner::migrate(SQLite::Database& database,
                     MigrationStatus status{migrationInfo.migrationFunction(
                         database, versionNumber, migrationInfo.codeVersion)};
                     if (status == MigrationStatus::Success) {
-                        std::printf("%s migrated to v%u\n",
+                        std::printf("%s migrated to v%u.\n",
                                     migrationInfo.name.c_str(),
                                     migrationInfo.codeVersion);
                     }
                     else if (status == MigrationStatus::ImplementationMissing) {
                         LOG_FATAL("Migration error: Implementation is missing "
-                                  "for %s v%u -> v%u",
+                                  "for %s v%u -> v%u.",
                                   migrationInfo.name.c_str(), versionNumber,
                                   migrationInfo.codeVersion);
+                    }
+                    else {
+                        LOG_FATAL("Error while performing migration.");
                     }
                 }
                 else {
@@ -53,6 +56,8 @@ void MigrationRunner::migrate(SQLite::Database& database,
             }
         }
     }
+
+    std::printf("Migration complete.\n");
 }
 
 } // End namespace DM
