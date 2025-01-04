@@ -434,23 +434,40 @@ void World::loadNonClientEntities()
         Deserialize::fromBuffer(projectComponentData.data(),
                                 projectComponentData.size(), projectComponents);
 
+        // Find the Position component.
+        // Note: We do this separately because we know every entity has a 
+        //       Position, and we need it for createEntity() (and we want to 
+        //       use createEntity() to centralize logic and avoid bugs).
+        const Position* position{nullptr};
+        for (const EnginePersistedComponent& componentVariant :
+             engineComponents) {
+            if (const Position*
+                tempPosition{std::get_if<Position>(&componentVariant)}) {
+                position = tempPosition;
+                break;
+            }
+        }
+        if (!position) {
+            LOG_INFO("Tried to load entity with no Position. Skipping.");
+            return;
+        }
+
         // Add the entity to the registry.
-        entt::entity newEntity{registry.create(entity)};
+        entt::entity newEntity{createEntity(*position, entity)};
         if (newEntity != entity) {
             LOG_FATAL("Created entity ID doesn't match saved entity ID. "
                       "Created: %u, saved: %u",
                       newEntity, entity);
         }
 
-        // Add RelicatedComponentList so it gets updated as we add other 
-        // components.
-        registry.emplace<ReplicatedComponentList>(newEntity);
-
         // Load the entity's persisted components into the registry.
         // Engine components
         for (const EnginePersistedComponent& componentVariant :
              engineComponents) {
             std::visit(VariantTools::Overload(
+                [&](const Position&) {
+                    // Do nothing, we already added the position above.
+                },
                 [&](const Rotation& rotation) {
                     // Note: We only persist Rotation, but it implies the 
                     //       rest of the movement components.
