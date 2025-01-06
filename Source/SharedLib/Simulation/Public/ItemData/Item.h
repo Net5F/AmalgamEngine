@@ -4,7 +4,7 @@
 #include "ItemID.h"
 #include "IconID.h"
 #include "ItemInteractionType.h"
-#include "ItemProperties.h"
+#include "ItemProperty.h"
 #include "ItemCombination.h"
 #include "ItemInitScript.h"
 #include "Log.h"
@@ -32,7 +32,7 @@ struct Item {
     static constexpr std::size_t MAX_INTERACTIONS{
         SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS + BUILTIN_INTERACTION_COUNT};
 
-    /** The maximum number of interactions that an item can support. */
+    /** The maximum number of properties that an item can support. */
     static constexpr std::size_t MAX_PROPERTIES{50};
 
     /** The maximum number of combinations that an item can support. */

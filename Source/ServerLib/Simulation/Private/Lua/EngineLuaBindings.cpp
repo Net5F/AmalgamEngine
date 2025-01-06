@@ -11,7 +11,7 @@
 #include "Inventory.h"
 #include "StoredValues.h"
 #include "SystemMessage.h"
-#include "ItemProperties.h"
+#include "ItemProperty.h"
 #include "InventoryHelpers.h"
 #include "sol/sol.hpp"
 #include <time.h>
@@ -43,6 +43,7 @@ EngineLuaBindings::EngineLuaBindings(
 void EngineLuaBindings::addBindings()
 {
     // Add the GLOBAL Lua constant to the non-init environments.
+    // Note: GLOBAL can be used instead an entity ID when setting stored values.
     Uint32 nullEntityID{entt::to_integral(entt::entity{entt::null})};
     entityItemHandlerLua.luaState["GLOBAL"] = nullEntityID;
     dialogueLua.luaState["GLOBAL"] = nullEntityID;

@@ -81,6 +81,7 @@ target_sources(SharedLib
         Public/ItemData/ItemDataBase.h
         Public/ItemData/ItemID.h
         Public/ItemData/ItemInitScript.h
+        Public/ItemData/ItemProperty.h
         Public/TileMap/CellExtent.h
         Public/TileMap/CellPosition.h
         Public/TileMap/Chunk.h
@@ -98,6 +99,7 @@ target_sources(SharedLib
         Public/TileMap/TileOffset.h
         Public/TileMap/TilePosition.h
         Public/TileMap/Wall.h
+        Public/TypeLists/EngineItemPropertyTypes.h
         Public/TypeLists/EngineReplicatedComponentTypes.h
 )
 
