@@ -16,7 +16,25 @@
 namespace AM
 {
 /**
- * Holds the data for a single item.
+ * A single item.
+ *
+ * Items have "interactions", and "properties". Interactions define what users 
+ * can do with the item, and properties hold data that can be used while 
+ * handling interactions.
+ * The engine provides some generic interactions and properties, and more can 
+ * be defined by the project.
+ *
+ * Items are typically defined using a Lua "init script". After that, all 
+ * logic is handled in C++. We use this pattern because it provides a good 
+ * balance between expressiveness, developer effort, and performance.
+ *
+ * When an interaction occurs, an event will be pushed into a queue. A system 
+ * can then use Simulation::popItemInteractionRequest() to handle the 
+ * interaction.
+ * Built-in interactions like "Examine", "Combine", and "Use" are handled 
+ * automatically by the engine, outside of the queue system.
+ * When an item is used on an entity, that entity's "item handler" Lua script 
+ * will be ran.
  */
 struct Item {
     /** The max length of a display name. Also the max for string IDs, since
