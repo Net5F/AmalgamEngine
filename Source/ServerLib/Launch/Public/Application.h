@@ -71,7 +71,7 @@ private:
         the scheduler to come back to us after exactly 1ms though, so we busy
         wait if something needs to be called soon.
         Higher value == more CPU usage. */
-    static constexpr double SLEEP_MINIMUM_TIME_S = .003;
+    static constexpr double SLEEP_MINIMUM_TIME_S{.003};
 
     //-------------------------------------------------------------------------
     // SDL Objects

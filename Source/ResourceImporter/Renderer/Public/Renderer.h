@@ -24,7 +24,7 @@ public:
     Renderer(SDL_Renderer* inSdlRenderer, UserInterface& inUI);
 
     /**
-     * First renders all tiles in view, then renders all entities in view.
+     * Renders the UI.
      */
     void render();
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Log.h"
-
 #include <SDL_render.h>
 #include <SDL_image.h>
 
