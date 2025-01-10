@@ -1,9 +1,9 @@
 target_sources(ResourceImporter
     PRIVATE
-		Private/main.cpp
-		Private/Application.cpp
+        Private/main.cpp
+        Private/Application.cpp
     PUBLIC
-		Public/Application.h
+        Public/Application.h
 )
 
 target_include_directories(ResourceImporter

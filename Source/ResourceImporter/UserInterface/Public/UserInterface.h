@@ -20,10 +20,6 @@ namespace ResourceImporter
  * This class handles creation and management of the user interface.
  *
  * Additionally, it provides a way for the renderer to access the UI data.
- *
- * Note: This UI setup is currently an exploration in not using signals.
- *       Eventually, this will be updated to use signals for better separation
- *       between the UI and back-end logic.
  */
 class UserInterface : public OSEventHandler
 {
