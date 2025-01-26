@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Item.h"
+#include "ItemInitScript.h"
 #include "HashTools.h"
 #include "entt/signal/sigh.hpp"
 #include <SDL_stdinc.h>
@@ -37,29 +38,19 @@ public:
     virtual ~ItemDataBase() = default;
 
     /**
-     * Creates a new item with the given ID.
-     * If newItem.numericID == NULL_ITEM_ID, uses the next sequential ID.
+     * Creates a new item or updates an existing one. The resulting item will 
+     * exactly match referenceItem, with a version matching the given version.
      *
-     * Note: The new item's stringID will be derived from newItem's displayName,
-     *       regardless of what newItem's stringID is.
-     *
-     * @return If an item with the given ID or displayName exists, does nothing
-     *         and returns nullptr. Else, returns the new item.
+     * Note: Unlike createItem() and updateItem(), this copies referenceItem's 
+     *       IDs and version number with no modification. Only use this when 
+     *       loading from the database/cache, or when a client is loading a 
+     *       server-given item definition.
+     * 
+     * @param referenceItem The item to copy when creating the new item.
+     * @param version The item's current version number.
+     * @return The new item.
      */
-    virtual const Item* createItem(const Item& newItem);
-
-    /**
-     * Updates the item at newItem.numericID to match the given item, then
-     * increments its version number.
-     *
-     * Note: The updated item's stringID will be derived from newItem's
-     *       displayName, regardless of what newItem's stringID is.
-     *
-     * @return If no item with the given ID exists or newItem's displayName is
-     *         changed but already taken, returns nullptr. Else, returns the
-     *         updated item.
-     */
-    virtual const Item* updateItem(const Item& newItem);
+    const Item* loadItem(const Item& referenceItem, ItemVersion version);
 
     /**
      * @return If no item with the given ID exists, returns nullptr. Else,
@@ -78,7 +69,7 @@ public:
     const Item* getItem(ItemID numericID) const;
 
     /**
-     * Get an item's version number.
+     * Returns an item's version number.
      * Version numbers increase incrementally each time an item's definition
      * is changed.
      *
@@ -88,7 +79,7 @@ public:
     ItemVersion getItemVersion(ItemID numericID);
 
     /**
-     * Get a reference to the map containing all the items.
+     * Returns a reference to the map containing all the items.
      */
     const std::unordered_map<ItemID, Item>& getAllItems() const;
 
@@ -116,7 +107,6 @@ protected:
     /** A scratch buffer used while processing string IDs. */
     std::string workStringID;
 
-private:
     entt::sigh<void(ItemID)> itemCreatedSig;
     entt::sigh<void(ItemID)> itemUpdatedSig;
 

@@ -56,30 +56,33 @@ Database::Database()
     // Note: We build these queries after initTables() because they'll 
     //       segfault if there's no DB with the expected fields.
     insertEntityQuery = std::make_unique<SQLite::Statement>(
-        database, "INSERT INTO entities VALUES (?, ?, ?) "
-                  "ON CONFLICT(id) DO UPDATE SET "
-                  "engineComponents=excluded.engineComponents, "
-                  "projectComponents=excluded.projectComponents");
+        database,
+        "INSERT INTO entities VALUES (?, ?, ?) "
+        "ON CONFLICT(id) DO UPDATE SET "
+        "serializedEngineComponents=excluded.serializedEngineComponents, "
+        "serializedProjectComponents=excluded.serializedProjectComponents");
     deleteEntityQuery = std::make_unique<SQLite::Statement>(
         database, "DELETE FROM entities WHERE id=?");
     iterateEntitiesQuery = std::make_unique<SQLite::Statement>(
         backupDatabase, "SELECT * FROM entities");
 
     insertItemQuery = std::make_unique<SQLite::Statement>(
-        database, "INSERT INTO items VALUES (?, ?) "
-                  "ON CONFLICT(id) DO UPDATE SET data=excluded.data");
+        database,
+        "INSERT INTO items VALUES (?, ?, ?, ?) "
+        "ON CONFLICT(id) DO UPDATE SET serializedItem=excluded.serializedItem, "
+        "version=excluded.version, initScript=excluded.initScript");
     deleteItemQuery = std::make_unique<SQLite::Statement>(
         database, "DELETE FROM items WHERE id=?");
     iterateItemsQuery = std::make_unique<SQLite::Statement>(
         backupDatabase, "SELECT * FROM items");
 
     insertEntityStoredValueIDMapQuery = std::make_unique<SQLite::Statement>(
-        database, "UPDATE entityStoredValueIDMap SET data=(?)");
+        database, "UPDATE entityStoredValueIDMap SET serializedMap=(?)");
     getEntityStoredValueIDMapQuery = std::make_unique<SQLite::Statement>(
         backupDatabase, "SELECT * FROM entityStoredValueIDMap");
 
     insertGlobalStoredValueMapQuery = std::make_unique<SQLite::Statement>(
-        database, "UPDATE globalStoredValueMap SET data=(?)");
+        database, "UPDATE globalStoredValueMap SET serializedMap=(?)");
     getGlobalStoredValueMapQuery = std::make_unique<SQLite::Statement>(
         backupDatabase, "SELECT * FROM globalStoredValueMap");
 
@@ -150,15 +153,17 @@ bool Database::backupIsInProgress()
 }
 
 void Database::saveEntityData(entt::entity entity,
-                              std::span<const Uint8> engineComponentData,
-                              std::span<const Uint8> projectComponentData)
+                              std::span<const Uint8> serializedEngineComponents,
+                              std::span<const Uint8> serializedProjectComponents)
 {
     try {
         insertEntityQuery->bind(1, static_cast<int>(entity));
-        insertEntityQuery->bind(2, engineComponentData.data(),
-                                static_cast<int>(engineComponentData.size()));
-        insertEntityQuery->bind(3, projectComponentData.data(),
-                                static_cast<int>(projectComponentData.size()));
+        insertEntityQuery->bind(
+            2, serializedEngineComponents.data(),
+            static_cast<int>(serializedEngineComponents.size()));
+        insertEntityQuery->bind(
+            3, serializedProjectComponents.data(),
+            static_cast<int>(serializedProjectComponents.size()));
 
         insertEntityQuery->exec();
 
@@ -181,12 +186,17 @@ void Database::deleteEntityData(entt::entity entity)
     }
 }
 
-void Database::saveItemData(ItemID itemID, std::span<const Uint8> itemData)
+void Database::saveItemData(ItemID itemID,
+                            std::span<const Uint8> serializedItem,
+                            ItemVersion version, std::string_view initScript)
 {
     try {
         insertItemQuery->bind(1, static_cast<int>(itemID));
-        insertItemQuery->bind(2, itemData.data(),
-                              static_cast<int>(itemData.size()));
+        insertItemQuery->bind(2, serializedItem.data(),
+                              static_cast<int>(serializedItem.size()));
+        insertItemQuery->bind(3, static_cast<int>(version));
+        insertItemQuery->bind(4, initScript.data(),
+                              static_cast<int>(initScript.size()));
 
         insertItemQuery->exec();
 
@@ -209,13 +219,11 @@ void Database::deleteItemData(ItemID itemID)
     }
 }
 
-void Database::saveEntityStoredValueIDMap(
-    std::span<const Uint8> entityStoredValueIDMapData)
+void Database::saveEntityStoredValueIDMap(std::span<const Uint8> serializedMap)
 {
     try {
         insertEntityStoredValueIDMapQuery->bind(
-            1, entityStoredValueIDMapData.data(),
-            static_cast<int>(entityStoredValueIDMapData.size()));
+            1, serializedMap.data(), static_cast<int>(serializedMap.size()));
 
         insertEntityStoredValueIDMapQuery->exec();
 
@@ -226,13 +234,11 @@ void Database::saveEntityStoredValueIDMap(
     }
 }
 
-void Database::saveGlobalStoredValueMap(
-    std::span<const Uint8> globalStoredValueMapData)
+void Database::saveGlobalStoredValueMap(std::span<const Uint8> serializedMap)
 {
     try {
         insertGlobalStoredValueMapQuery->bind(
-            1, globalStoredValueMapData.data(),
-            static_cast<int>(globalStoredValueMapData.size()));
+            1, serializedMap.data(), static_cast<int>(serializedMap.size()));
 
         insertGlobalStoredValueMapQuery->exec();
 
@@ -280,19 +286,21 @@ void Database::initTables()
             // the same time, which we can't do with a split migration setup.
             backupDatabase.exec(
                 "CREATE TABLE entities (id INTEGER PRIMARY KEY, "
-                "engineComponents BLOB, projectComponents BLOB)");
+                "serializedEngineComponents BLOB, serializedProjectComponents "
+                "BLOB)");
         }
 
         // Items.
         if (!backupDatabase.tableExists("items")) {
             backupDatabase.exec(
-                "CREATE TABLE items (id INTEGER PRIMARY KEY, data BLOB)");
+                "CREATE TABLE items (id INTEGER PRIMARY KEY, "
+                "serializedItem BLOB, version INTEGER, initScript TEXT)");
         }
 
         // Entity stored values, stored as a single serialized map.
         if (!backupDatabase.tableExists("entityStoredValueIDMap")) {
             backupDatabase.exec(
-                "CREATE TABLE entityStoredValueIDMap (data BLOB)");
+                "CREATE TABLE entityStoredValueIDMap (serializedMap BLOB)");
             // Since we're only storing 1 value in this table, we init the row
             // here so we can use UPDATEs later.
             backupDatabase.exec(
@@ -302,7 +310,7 @@ void Database::initTables()
         // Global stored values, stored as a single serialized map.
         if (!backupDatabase.tableExists("globalStoredValueMap")) {
             backupDatabase.exec(
-                "CREATE TABLE globalStoredValueMap (data BLOB)");
+                "CREATE TABLE globalStoredValueMap (serializedMap BLOB)");
             // Since we're only storing 1 value in this table, we init the row
             // here so we can use UPDATEs later.
             backupDatabase.exec("INSERT INTO globalStoredValueMap VALUES('')");

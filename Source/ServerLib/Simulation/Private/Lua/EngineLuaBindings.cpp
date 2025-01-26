@@ -38,10 +38,15 @@ EngineLuaBindings::EngineLuaBindings(
 , currentDialogueTopic{nullptr}
 , workString{}
 {
-}
+    // Initialize the Lua environments.
+    // Note: We only allow the base library, to avoid giving scripts unsafe 
+    //       access to our system.
+    entityInitLua.luaState.open_libraries(sol::lib::base);
+    entityItemHandlerLua.luaState.open_libraries(sol::lib::base);
+    itemInitLua.luaState.open_libraries(sol::lib::base);
+    dialogueLua.luaState.open_libraries(sol::lib::base);
+    dialogueChoiceConditionLua.luaState.open_libraries(sol::lib::base);
 
-void EngineLuaBindings::addBindings()
-{
     // Add the GLOBAL Lua constant to the non-init environments.
     // Note: GLOBAL can be used instead an entity ID when setting stored values.
     Uint32 nullEntityID{entt::to_integral(entt::entity{entt::null})};
@@ -49,6 +54,7 @@ void EngineLuaBindings::addBindings()
     dialogueLua.luaState["GLOBAL"] = nullEntityID;
     dialogueChoiceConditionLua.luaState["GLOBAL"] = nullEntityID;
 
+    // Add our bindings.
     addEntityInitBindings();
     addEntityItemHandlerBindings();
     addItemInitBindings();
@@ -294,17 +300,8 @@ void EngineLuaBindings::setDescription(std::string_view description)
     // add the ItemDescription property.
     Item* item{itemInitLua.selfItem};
 
-    // If the item already has a description, overwrite it.
-    for (ItemProperty& itemProperty : item->properties) {
-        if (auto* itemDescription{
-                std::get_if<ItemDescription>(&itemProperty)}) {
-            itemDescription->text = description;
-            return;
-        }
-    }
-
-    // The item doesn't already have a description. Add one.
-    item->properties.emplace_back(ItemDescription{std::string{description}});
+    // Update the description.
+    item->description = description;
 }
 
 void EngineLuaBindings::setMaxStackSize(Uint8 newMaxStackSize)

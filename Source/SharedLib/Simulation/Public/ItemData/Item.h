@@ -6,7 +6,6 @@
 #include "ItemInteractionType.h"
 #include "ItemProperty.h"
 #include "ItemCombination.h"
-#include "ItemInitScript.h"
 #include "Log.h"
 #include "bitsery/ext/std_variant.h"
 #include <SDL_stdinc.h>
@@ -37,25 +36,6 @@ namespace AM
  * will be ran.
  */
 struct Item {
-    /** The max length of a display name. Also the max for string IDs, since
-        they're derived from display name. */
-    static constexpr std::size_t MAX_DISPLAY_NAME_LENGTH{50};
-
-    /** The number of built-in interactions that every item supports: UseOn,
-        Destroy, and Examine. */
-    static constexpr std::size_t BUILTIN_INTERACTION_COUNT{3};
-
-    /** The total number of interactions that an item can support, including
-        the built-ins. */
-    static constexpr std::size_t MAX_INTERACTIONS{
-        SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS + BUILTIN_INTERACTION_COUNT};
-
-    /** The maximum number of properties that an item can support. */
-    static constexpr std::size_t MAX_PROPERTIES{50};
-
-    /** The maximum number of combinations that an item can support. */
-    static constexpr std::size_t MAX_COMBINATIONS{50};
-
     /** Unique display name, shown in the UI.  */
     std::string displayName{"Null"};
 
@@ -74,6 +54,9 @@ struct Item {
     /** How large a stack of this item can be, e.g. in an inventory slot. */
     Uint8 maxStackSize{1};
 
+    /** The item's description text. Used by the Examine interaction. */
+    std::string description{};
+
     /** The interactions that this item supports.
         The first interaction in this list is the default interaction. */
     std::vector<ItemInteractionType> supportedInteractions{};
@@ -88,8 +71,27 @@ struct Item {
               you'll need to build a separate UI/workflow. */
     std::vector<ItemCombination> itemCombinations{};
 
-    /** This item's init script. */
-    ItemInitScript initScript{};
+    /** The max length of a display name. Also the max for string IDs, since
+        they're derived from display name. */
+    static constexpr std::size_t MAX_DISPLAY_NAME_LENGTH{50};
+
+    /** The max length of an item's description text. */
+    static constexpr std::size_t MAX_DESCRIPTION_LENGTH{500};
+
+    /** The number of built-in interactions that every item supports: UseOn,
+        Destroy, and Examine. */
+    static constexpr std::size_t BUILTIN_INTERACTION_COUNT{3};
+
+    /** The total number of interactions that an item can support, including
+        the built-ins. */
+    static constexpr std::size_t MAX_INTERACTIONS{
+        SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS + BUILTIN_INTERACTION_COUNT};
+
+    /** The maximum number of properties that an item can support. */
+    static constexpr std::size_t MAX_PROPERTIES{50};
+
+    /** The maximum number of combinations that an item can support. */
+    static constexpr std::size_t MAX_COMBINATIONS{50};
 
     /**
      * Adds the given interaction to supportedInteractions.
@@ -182,6 +184,7 @@ void serialize(S& serializer, Item& item)
     serializer.value2b(item.numericID);
     serializer.value2b(item.iconID);
     serializer.value1b(item.maxStackSize);
+    serializer.text1b(item.description, Item::MAX_DESCRIPTION_LENGTH);
     serializer.container1b(item.supportedInteractions,
                            SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS);
     serializer.container(item.properties, Item::MAX_PROPERTIES,
@@ -191,7 +194,6 @@ void serialize(S& serializer, Item& item)
                                             bitsery::ext::StdVariant{});
                          });
     serializer.container(item.itemCombinations, Item::MAX_COMBINATIONS);
-    serializer.object(item.initScript);
 }
 
 } // namespace AM

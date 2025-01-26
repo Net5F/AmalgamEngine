@@ -55,14 +55,6 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData)
 , scriptDataSystem{world, network}
 , saveSystem{world}
 {
-    // Initialize the Lua environments and add our bindings.
-    entityInitLua->luaState.open_libraries(sol::lib::base);
-    entityItemHandlerLua->luaState.open_libraries(sol::lib::base);
-    itemInitLua->luaState.open_libraries(sol::lib::base);
-    dialogueLua->luaState.open_libraries(sol::lib::base, sol::lib::os);
-    dialogueChoiceConditionLua->luaState.open_libraries(sol::lib::base);
-    engineLuaBindings.addBindings();
-
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
     network.registerCurrentTickPtr(&currentTick);

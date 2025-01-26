@@ -256,20 +256,16 @@ std::string World::runEntityInitScript(entt::entity entity,
     return returnString;
 }
 
-std::string World::runItemInitScript(Item& item,
-                                     const ItemInitScript& initScript)
+std::string World::runItemInitScript(Item& item, std::string_view initScript)
 {
     // Run the given script on the given item.
     itemInitLua.selfItem = &item;
-    auto result{itemInitLua.luaState.script(initScript.script,
-                                            &sol::script_pass_on_error)};
+    auto result{
+        itemInitLua.luaState.script(initScript, &sol::script_pass_on_error)};
 
-    // If the init script ran successfully, save it.
+    // If the init script failed, return the error.
     std::string returnString{""};
-    if (result.valid()) {
-        item.initScript = initScript;
-    }
-    else {
+    if (!(result.valid())) {
         // Error while running the init script. Return the error.
         sol::error err = result;
         returnString = err.what();
@@ -423,16 +419,17 @@ void World::loadNonClientEntities()
     std::vector<EnginePersistedComponent> engineComponents{};
     std::vector<ProjectPersistedComponent> projectComponents{};
     auto loadEntity = [&](entt::entity entity,
-                          std::span<const Uint8> engineComponentBuffer,
-                          std::span<const Uint8> projectComponentBuffer) {
+                          std::span<const Uint8> serializedEngineComponents,
+                          std::span<const Uint8> serializedProjectComponents) {
         engineComponents.clear();
         projectComponents.clear();
 
         // Deserialize the entity's component data.
-        Deserialize::fromBuffer(engineComponentBuffer.data(),
-                                engineComponentBuffer.size(), engineComponents);
-        Deserialize::fromBuffer(projectComponentBuffer.data(),
-                                projectComponentBuffer.size(),
+        Deserialize::fromBuffer(serializedEngineComponents.data(),
+                                serializedEngineComponents.size(),
+                                engineComponents);
+        Deserialize::fromBuffer(serializedProjectComponents.data(),
+                                serializedProjectComponents.size(),
                                 projectComponents);
 
         // Find the Position component.
@@ -503,14 +500,15 @@ void World::loadNonClientEntities()
 
 void World::loadItems()
 {
-    auto loadItem = [&](ItemID itemID, std::span<const Uint8> itemBuffer) {
-        // Deserialize the item's data.
-        Item item{};
-        Deserialize::fromBuffer(itemBuffer.data(), itemBuffer.size(), item);
-        item.numericID = itemID;
+    auto loadItem = [&](ItemID itemID, std::span<const Uint8> serializedItem,
+                        ItemVersion version, std::string_view initScript) {
+        // Initialize the item's non-script-provided fields.
+        Item item{.numericID = itemID};
+        Deserialize::fromBuffer(serializedItem.data(), serializedItem.size(),
+                                item);
 
         // Add the item to ItemData.
-        itemData.createItem(item);
+        itemData.loadItem(item, version, initScript);
     };
 
     database->iterateItems(std::move(loadItem));
@@ -519,9 +517,9 @@ void World::loadItems()
 void World::loadStoredValues()
 {
     // Load the entity stored value IDs.
-    auto loadEntityMap = [&](std::span<const Uint8> dataBuffer) {
-        if (dataBuffer.size() > 0) {
-            Deserialize::fromBuffer(dataBuffer.data(), dataBuffer.size(),
+    auto loadEntityMap = [&](std::span<const Uint8> serializedMap) {
+        if (serializedMap.size() > 0) {
+            Deserialize::fromBuffer(serializedMap.data(), serializedMap.size(),
                                     entityStoredValueIDMap);
         }
     };
@@ -529,9 +527,9 @@ void World::loadStoredValues()
     database->getEntityStoredValueIDMap(std::move(loadEntityMap));
 
     // Load the global stored values.
-    auto loadGlobalMap = [&](std::span<const Uint8> dataBuffer) {
-        if (dataBuffer.size() > 0) {
-            Deserialize::fromBuffer(dataBuffer.data(), dataBuffer.size(),
+    auto loadGlobalMap = [&](std::span<const Uint8> serializedMap) {
+        if (serializedMap.size() > 0) {
+            Deserialize::fromBuffer(serializedMap.data(), serializedMap.size(),
                                     globalStoredValueMap);
         }
     };

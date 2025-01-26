@@ -50,6 +50,11 @@ public:
 
     ~World();
 
+    /**
+     * Loads the world state from the database.
+     */
+    void loadState();
+
     //-------------------------------------------------------------------------
     // World State
     //-------------------------------------------------------------------------
@@ -138,7 +143,7 @@ public:
      * @return If the init script failed to run, returns a string
      *         describing the issue. Else, returns an empty string.
      */
-    std::string runItemInitScript(Item& item, const ItemInitScript& initScript);
+    std::string runItemInitScript(Item& item, std::string_view initScript);
 
     /**
      * Returns the numeric ID for the given entity stored value string ID.

@@ -19,8 +19,20 @@ struct ItemCache
         cache. */
     static constexpr std::size_t MAX_ITEMS{10000};
 
-    std::vector<Item> items{};
+    struct ItemEntry {
+        Item item{};
+        ItemVersion version{};
+    };
+
+    std::vector<ItemEntry> items{};
 };
+
+template<typename S>
+void serialize(S& serializer, ItemCache::ItemEntry& itemEntry)
+{
+    serializer.object(itemEntry.item);
+    serializer.value2b(itemEntry.version);
+}
 
 template<typename S>
 void serialize(S& serializer, ItemCache& itemCache)

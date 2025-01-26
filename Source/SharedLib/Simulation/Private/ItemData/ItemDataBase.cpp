@@ -19,80 +19,32 @@ ItemDataBase::ItemDataBase()
 {
 }
 
-const Item* ItemDataBase::createItem(const Item& item)
+const Item* ItemDataBase::loadItem(const Item& referenceItem,
+                                   ItemVersion version)
 {
-    // If the numeric ID is taken, do nothing.
-    if (itemMap.find(item.numericID) != itemMap.end()) {
-        return nullptr;
-    }
+    // Check if the item already exists, so we can signal properly later.
+    bool itemExisted{itemMap.find(referenceItem.numericID) != itemMap.end()};
 
-    // Derive the string ID. If it's taken, do nothing.
-    StringTools::deriveStringID(item.displayName, workStringID);
-    if (itemStringMap.find(workStringID) != itemStringMap.end()) {
-        return nullptr;
-    }
-
-    // If the new item doesn't have a desired ID, use the next sequential ID.
-    ItemID newItemID{item.numericID};
-    if (newItemID == NULL_ITEM_ID) {
-        newItemID = nextItemID;
-    }
-
-    // Add the item to our maps.
+    // Add or update the item in our maps.
     // Note: When we insert into an unordered_map, references to the map's
     //       elements are guaranteed to remain valid (for itemStringMap).
-    itemMap[newItemID] = item;
-    Item& newItem{itemMap[newItemID]};
-    newItem.stringID = workStringID;
-    newItem.numericID = newItemID;
-    itemVersionMap[newItemID] = 0;
-    itemStringMap[workStringID] = &newItem;
+    itemMap[referenceItem.numericID] = referenceItem;
+    Item& item{itemMap[referenceItem.numericID]};
+    itemVersionMap[item.numericID] = version;
+    itemStringMap[item.stringID] = &item;
 
     // Always update nextItemID to be 1 greater than the highest ID.
-    if (newItemID >= nextItemID) {
-        nextItemID = (newItemID + 1);
+    if (item.numericID >= nextItemID) {
+        nextItemID = (item.numericID + 1);
     }
 
-    // Signal that an item has been created.
-    itemCreatedSig.publish(newItemID);
-
-    return &newItem;
-}
-
-const Item* ItemDataBase::updateItem(const Item& newItem)
-{
-    // If the item doesn't exist, do nothing.
-    auto itemIt{itemMap.find(newItem.numericID)};
-    if (itemIt == itemMap.end()) {
-        return nullptr;
+    // Signal that an item has been updated or created.
+    if (itemExisted) {
+        itemUpdatedSig.publish(item.numericID);
     }
-
-    // If the new derived string ID doesn't match the old one.
-    StringTools::deriveStringID(newItem.displayName, workStringID);
-    Item& item{itemIt->second};
-    if (workStringID != item.stringID) {
-        // If the new ID is taken, do nothing.
-        auto stringIt{itemStringMap.find(workStringID)};
-        if (stringIt != itemStringMap.end()) {
-            return nullptr;
-        }
-        else {
-            // New ID isn't taken. Add it to the string ID map and remove the
-            // old one.
-            itemStringMap[workStringID] = &item;
-            itemStringMap.erase(item.stringID);
-        }
+    else {
+        itemCreatedSig.publish(item.numericID);
     }
-
-    // Update the item.
-    item = newItem;
-    item.stringID = workStringID;
-
-    // Increment the version.
-    itemVersionMap[newItem.numericID]++;
-
-    // Signal that an item has been updated.
-    itemUpdatedSig.publish(newItem.numericID);
 
     return &item;
 }

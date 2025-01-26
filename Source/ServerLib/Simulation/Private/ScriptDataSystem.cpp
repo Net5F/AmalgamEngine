@@ -52,7 +52,9 @@ void ScriptDataSystem::sendItemInitScript(
     if (const Item* item{world.itemData.getItem(initScriptRequest.itemID)}) {
         network.serializeAndSend(
             initScriptRequest.netID,
-            ItemInitScriptResponse{item->numericID, {item->initScript}});
+            ItemInitScriptResponse{
+                item->numericID,
+                world.itemData.getItemInitScript(item->numericID)});
     }
 }
 

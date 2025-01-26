@@ -134,7 +134,10 @@ void SaveSystem::saveItems()
         Serialize::toBuffer(workBuffer1.data(), workBuffer1.size(),
                             *updatedItem);
 
-        world.database->saveItemData(updatedItem->numericID, workBuffer1);
+        world.database->saveItemData(
+            updatedItem->numericID, workBuffer1,
+            world.itemData.getItemVersion(updatedItem->numericID),
+            world.itemData.getItemInitScript(updatedItem->numericID).script);
     }
 
     updatedItems.clear();

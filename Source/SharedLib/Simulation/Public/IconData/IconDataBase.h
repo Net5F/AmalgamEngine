@@ -42,7 +42,7 @@ public:
     const Icon& getIcon(IconID numericID) const;
 
     /**
-     * Get a reference to a vector containing all the icons.
+     * Returns a reference to a vector containing all the icons.
      */
     const std::vector<Icon>& getAllIcons() const;
 

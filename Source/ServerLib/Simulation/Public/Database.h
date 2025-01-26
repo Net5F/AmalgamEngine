@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ItemID.h"
+#include "IconID.h"
 #include "SQLiteCpp/SQLiteCpp.h"
 #include "entt/fwd.hpp"
 #include <SDL_stdinc.h>
@@ -11,6 +12,7 @@
 #include <condition_variable>
 #include <atomic>
 #include <span>
+#include <string_view>
 
 namespace AM
 {
@@ -66,14 +68,14 @@ public:
      * Adds or overwrites an entity table entry.
      *
      * @param entity The entity entry to update.
-     * @param engineComponentData A serialized 
-     *                            std::vector<EnginePersistedComponent>.
-     * @param projectComponentData A serialized 
-     *                             std::vector<ProjectPersistedComponent>.
+     * @param serializedEngineComponents A serialized
+     * std::vector<EnginePersistedComponent>.
+     * @param serializedrojectComponents A serialized 
+     * std::vector<ProjectPersistedComponent>.
      */
     void saveEntityData(entt::entity entity,
-                        std::span<const Uint8> engineComponentData,
-                        std::span<const Uint8> projectComponentData);
+                        std::span<const Uint8> serializedEngineComponents,
+                        std::span<const Uint8> serializedProjectComponents);
 
     /**
      * Attempts to delete an entity table entry for the given entity.
@@ -122,9 +124,9 @@ public:
      * Adds or overwrites an item table entry.
      *
      * @param itemID The item entry to update.
-     * @param itemData A serialized Item struct.
      */
-    void saveItemData(ItemID itemID, std::span<const Uint8> itemData);
+    void saveItemData(ItemID itemID, std::span<const Uint8> serializedItem,
+                      ItemVersion version, std::string_view initScript);
 
     /**
      * Attempts to delete an item table entry for the given item.
@@ -136,20 +138,27 @@ public:
     /**
      * Calls the given callback on each item data entry.
      *
-     * @param callback A callback of form void(ItemID, const Uint8*,
-     *                 std::size_t) that expects the item's ID, and a 
-     *                 serialized Item struct.
+     * @param callback A callback of form void(ItemID, std::span<const Uint8>, 
+     *                 ItemVersion, std::string_view) that expects the item's ID,
+     *                 a serialized Item struct, and the item's version and init 
+     *                 script.
      */
     template<typename Func>
     void iterateItems(Func callback)
     {
         while (iterateItemsQuery->executeStep()) {
             SQLite::Column idColumn{iterateItemsQuery->getColumn(0)};
-            SQLite::Column dataColumn{iterateItemsQuery->getColumn(1)};
+            SQLite::Column itemColumn{iterateItemsQuery->getColumn(1)};
+            SQLite::Column versionColumn{iterateItemsQuery->getColumn(2)};
+            SQLite::Column initScriptColumn{iterateItemsQuery->getColumn(3)};
             callback(static_cast<ItemID>(idColumn.getInt()),
                      std::span<const Uint8>{
-                         static_cast<const Uint8*>(dataColumn.getBlob()),
-                         static_cast<std::size_t>(dataColumn.getBytes())});
+                         static_cast<const Uint8*>(itemColumn.getBlob()),
+                         static_cast<std::size_t>(itemColumn.getBytes())},
+                     static_cast<ItemVersion>(versionColumn.getInt()),
+                     std::string_view{initScriptColumn.getText(),
+                                      static_cast<std::size_t>(
+                                          initScriptColumn.getBytes())});
         }
         iterateItemsQuery->reset();
     }
@@ -160,52 +169,49 @@ public:
     /**
      * Adds or overwrites the entity stored value ID map entry.
      *
-     * @param entityStoredValueIDMapData A serialized 
-     *                                   World::entityStoredValueIDMap.
+     * @param serializedMap A serialized World::entityStoredValueIDMap.
      */
-    void saveEntityStoredValueIDMap(
-        std::span<const Uint8> entityStoredValueIDMapData);
+    void saveEntityStoredValueIDMap(std::span<const Uint8> serializedMap);
 
     /**
      * Calls the given callback on the entity stored value ID map data entry.
      *
-     * @param callback A callback of form void(const Uint8*, std::size_t) that 
-     *                 expects a serialized entity stored value ID map.
+     * @param callback A callback of form void(std::span<const Uint8>) that 
+     *                 expects a serialized EntityStoredValueIDMap.
      */
     template<typename Func>
     void getEntityStoredValueIDMap(Func callback)
     {
         getEntityStoredValueIDMapQuery->executeStep();
-        SQLite::Column dataColumn{getEntityStoredValueIDMapQuery->getColumn(0)};
+        SQLite::Column mapColumn{getEntityStoredValueIDMapQuery->getColumn(0)};
         callback(std::span<const Uint8>{
-            static_cast<const Uint8*>(dataColumn.getBlob()),
-            static_cast<std::size_t>(dataColumn.getBytes())});
+            static_cast<const Uint8*>(mapColumn.getBlob()),
+            static_cast<std::size_t>(mapColumn.getBytes())});
 
         getEntityStoredValueIDMapQuery->reset();
     }
 
     /**
-     * Adds or overwrites the entity stored value ID map entry.
+     * Adds or overwrites the global stored value map entry.
      *
-     * @param globalStoredValueMapData A serialized World::globalStoredValueMap.
+     * @param serializedMap A serialized World::globalStoredValueMap.
      */
-    void saveGlobalStoredValueMap(
-        std::span<const Uint8> globalStoredValueMapData);
+    void saveGlobalStoredValueMap(std::span<const Uint8> serializedMap);
 
     /**
-     * Calls the given callback on the entity stored value ID map data entry.
+     * Calls the given callback on the global stored value map data entry.
      *
-     * @param callback A callback of form void(const Uint8*, std::size_t) that 
-     *                 expects a serialized entity stored value ID map.
+     * @param callback A callback of form void(std::span<const Uint8>) that 
+     *                 expects a serialized GlobalStoredValueMap.
      */
     template<typename Func>
     void getGlobalStoredValueMap(Func callback)
     {
         getGlobalStoredValueMapQuery->executeStep();
-        SQLite::Column dataColumn{getGlobalStoredValueMapQuery->getColumn(0)};
+        SQLite::Column mapColumn{getGlobalStoredValueMapQuery->getColumn(0)};
         callback(std::span<const Uint8>{
-            static_cast<const Uint8*>(dataColumn.getBlob()),
-            static_cast<std::size_t>(dataColumn.getBytes())});
+            static_cast<const Uint8*>(mapColumn.getBlob()),
+            static_cast<std::size_t>(mapColumn.getBytes())});
 
         getGlobalStoredValueMapQuery->reset();
     }

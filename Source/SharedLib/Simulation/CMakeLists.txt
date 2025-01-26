@@ -99,7 +99,6 @@ target_sources(SharedLib
         Public/TileMap/TileOffset.h
         Public/TileMap/TilePosition.h
         Public/TileMap/Wall.h
-        Public/TypeLists/EngineItemPropertyTypes.h
         Public/TypeLists/EngineReplicatedComponentTypes.h
 )
 

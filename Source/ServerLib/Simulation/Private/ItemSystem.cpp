@@ -96,10 +96,11 @@ void ItemSystem::processItemUpdates()
                 if (it != updatedItems.end()) {
                     const Item& item{*(world.itemData.getItem(itemSlot.ID))};
                     network.serializeAndSend(
-                        client.netID, ItemUpdate{item.displayName,
-                                                 item.stringID, item.numericID,
-                                                 item.iconID, item.maxStackSize,
-                                                 item.supportedInteractions});
+                        client.netID,
+                        ItemUpdate{
+                            item.displayName, item.numericID, item.iconID,
+                            item.maxStackSize, item.supportedInteractions,
+                            world.itemData.getItemVersion(item.numericID)});
                 }
             }
         }
@@ -126,12 +127,12 @@ void ItemSystem::itemUpdated(ItemID itemID)
 
 void ItemSystem::examineItem(const Item* item, NetworkID clientID)
 {
-    // If the item in the given slot has a description, send it.
-    if (const ItemDescription*
-          itemDescription{item->getProperty<ItemDescription>()}) {
-        network.serializeAndSend(clientID,
-                                 SystemMessage{itemDescription->text});
-    }
+    // Send the item's description.
+    // Note: Since all items have a description, you could imagine sending it  
+    //       with the initial ItemUpdate. To save data, we send it when 
+    //       requested instead (we assume that people are rarely going to 
+    //       examine items, compared to how often we send ItemUpdates).
+    network.serializeAndSend(clientID, SystemMessage{item->description});
 }
 
 void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
@@ -224,7 +225,6 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
     Item item{};
     item.displayName = itemInitRequest.displayName;
     item.iconID = itemInitRequest.iconID;
-    item.initScript = itemInitRequest.initScript;
 
     // Run the init script. If there was an error, return early.
     if (!(runItemInitScript(itemInitRequest.netID, itemInitRequest.initScript,
@@ -233,15 +233,16 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
     }
 
     // Create the item (should always succeed since we checked the string ID).
-    const Item* newItem{world.itemData.createItem(item)};
+    const Item* newItem{
+        world.itemData.createItem(item, itemInitRequest.initScript.script)};
     AM_ASSERT(newItem != nullptr, "Failed to create item.");
 
     // Send the requester the new item's definition.
-    network.serializeAndSend(itemInitRequest.netID,
-                             ItemUpdate{newItem->displayName, newItem->stringID,
-                                        newItem->numericID, newItem->iconID,
-                                        newItem->maxStackSize,
-                                        newItem->supportedInteractions});
+    network.serializeAndSend(
+        itemInitRequest.netID,
+        ItemUpdate{newItem->displayName, newItem->numericID, newItem->iconID,
+                   newItem->maxStackSize, newItem->supportedInteractions,
+                   world.itemData.getItemVersion(newItem->numericID)});
 }
 
 void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
@@ -274,7 +275,6 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
     item.displayName = itemChangeRequest.displayName;
     item.numericID = itemChangeRequest.itemID;
     item.iconID = itemChangeRequest.iconID;
-    item.initScript = itemChangeRequest.initScript;
 
     // Run the init script. If there was an error, return early.
     if (!(runItemInitScript(itemChangeRequest.netID,
@@ -283,7 +283,8 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
     }
 
     // Update the item (should always succeed since we checked the ID).
-    const Item* updatedItem{world.itemData.updateItem(item)};
+    const Item* updatedItem{
+        world.itemData.updateItem(item, itemChangeRequest.initScript.script)};
     AM_ASSERT(updatedItem != nullptr, "Failed to update item.");
 
     // Send the requester the new item's definition.
@@ -291,10 +292,10 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
     //       them this update, which isn't a big deal.
     network.serializeAndSend(
         itemChangeRequest.netID,
-        ItemUpdate{updatedItem->displayName, updatedItem->stringID,
-                   updatedItem->numericID, updatedItem->iconID,
-                   updatedItem->maxStackSize,
-                   updatedItem->supportedInteractions});
+        ItemUpdate{updatedItem->displayName, updatedItem->numericID,
+                   updatedItem->iconID, updatedItem->maxStackSize,
+                   updatedItem->supportedInteractions,
+                   world.itemData.getItemVersion(updatedItem->numericID)});
 }
 
 void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
@@ -307,10 +308,9 @@ void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
                 itemWasFound = true;
                 network.serializeAndSend(
                     itemDataRequest.netID,
-                    ItemUpdate{item->displayName, item->stringID,
-                               item->numericID, item->iconID,
-                               item->maxStackSize,
-                               item->supportedInteractions});
+                    ItemUpdate{item->displayName, item->numericID, item->iconID,
+                               item->maxStackSize, item->supportedInteractions,
+                               world.itemData.getItemVersion(item->numericID)});
             }
         },
         itemDataRequest.itemID);
@@ -340,7 +340,7 @@ bool ItemSystem::runItemInitScript(NetworkID clientID,
                                    const ItemInitScript& initScript, Item& item)
 {
     // Run the given init script.
-    std::string resultString{world.runItemInitScript(item, initScript)};
+    std::string resultString{world.runItemInitScript(item, initScript.script)};
 
     // If there was an error while running the script, tell the user and return
     // false.

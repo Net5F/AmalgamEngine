@@ -6,6 +6,7 @@
 #include "ItemCache.h"
 #include "Serialize.h"
 #include "Deserialize.h"
+#include "StringTools.h"
 #include "Paths.h"
 #include "Log.h"
 #include <filesystem>
@@ -19,8 +20,6 @@ ItemSystem::ItemSystem(World& inWorld, Network& inNetwork)
 , network{inNetwork}
 , itemUpdateQueue{network.getEventDispatcher()}
 , combineItemsQueue{network.getEventDispatcher()}
-, itemUpdateSig{}
-, itemUpdate{itemUpdateSig}
 {
     // Load all items from ItemCache.bin into ItemData.
     loadItemCache();
@@ -37,22 +36,15 @@ void ItemSystem::processItemUpdates()
     // Process any waiting item definition updates.
     ItemUpdate itemUpdate{};
     while (itemUpdateQueue.pop(itemUpdate)) {
-        // If the item exists, update it (even if there are no changes, it
-        // doesn't hurt to update it).
-        Item item{itemUpdate.displayName,  "",
-                  itemUpdate.itemID,       itemUpdate.iconID,
-                  itemUpdate.maxStackSize, itemUpdate.supportedInteractions};
-        const Item* newItem{nullptr};
-        if (itemData.getItem(itemUpdate.itemID)) {
-            newItem = itemData.updateItem(item);
-        }
-        else {
-            // Item doesn't exist, create it.
-            newItem = itemData.createItem(item);
-        }
-
-        // Signal that we received an item update.
-        itemUpdateSig.publish(*newItem);
+        // Load the given item definition into ItemData, overwriting any 
+        // existing item if present.
+        Item item{.displayName = itemUpdate.displayName,
+                  .numericID = itemUpdate.numericID,
+                  .iconID = itemUpdate.iconID,
+                  .maxStackSize = itemUpdate.maxStackSize,
+                  .supportedInteractions = itemUpdate.supportedInteractions};
+        StringTools::deriveStringID(itemUpdate.displayName, item.stringID);
+        itemData.loadItem(item, itemUpdate.version);
     }
 
     // Process any waiting item combinations.
@@ -94,8 +86,8 @@ void ItemSystem::loadItemCache()
     }
 
     // Push all cached items into ItemData.
-    for (const Item& item : itemCache.items) {
-        world.itemData.createItem(item);
+    for (const ItemCache::ItemEntry& itemEntry : itemCache.items) {
+        world.itemData.loadItem(itemEntry.item, itemEntry.version);
     }
 }
 
@@ -108,7 +100,7 @@ void ItemSystem::saveItemCache()
 
     int index{0};
     for (auto& [itemID, item] : items) {
-        itemCache.items[index] = item;
+        itemCache.items[index] = {item, world.itemData.getItemVersion(itemID)};
         index++;
     }
 

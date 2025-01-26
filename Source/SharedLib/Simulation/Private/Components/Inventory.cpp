@@ -115,20 +115,22 @@ const ItemCombination* Inventory::combineItems(Uint8 sourceSlotIndex,
                                                Uint8 targetSlotIndex,
                                                const ItemDataBase& itemData)
 {
-    // If either slot is invalid or empty, return false.
+    // If either slot is invalid or empty, do nothing.
     if (!slotIndexIsValid(sourceSlotIndex) || !slotIndexIsValid(targetSlotIndex)
         || (slots[sourceSlotIndex].count == 0)
         || (slots[targetSlotIndex].count == 0)) {
         return nullptr;
     }
 
-    // Get the items in the given slots.
-    // Note: We don't need to check if they exist since we do so before adding
-    //       them to the inventory.
+    // Get the items in the given slots. If either item no longer exists, do 
+    // nothing.
     ItemID sourceItemID{slots[sourceSlotIndex].ID};
     ItemID targetItemID{slots[targetSlotIndex].ID};
     const Item* sourceItem{itemData.getItem(sourceItemID)};
     const Item* targetItem{itemData.getItem(targetItemID)};
+    if (!sourceItem || !targetItem) {
+        return nullptr;
+    }
 
     // Try to find a matching combination in either item's list.
     const ItemCombination* matchingCombination{nullptr};

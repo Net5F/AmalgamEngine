@@ -211,14 +211,6 @@ entt::sink<entt::sigh<void(ConnectionError)>>
     return serverConnectionSystem.serverConnectionError;
 }
 
-entt::sink<entt::sigh<void(const Item&)>>& Simulation::getItemUpdateSink()
-{
-    if (!itemSystem) {
-        LOG_FATAL("Tried to call uninitialized system.");
-    }
-    return itemSystem->itemUpdate;
-}
-
 void Simulation::initializeSystems()
 {
     // Initialize our engine systems.

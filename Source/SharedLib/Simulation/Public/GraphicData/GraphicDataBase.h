@@ -85,12 +85,12 @@ public:
         getEntityGraphicSet(EntityGraphicSetID numericID) const;
 
     /**
-     * Get a reference to a vector containing all the sprites.
+     * Returns a reference to a vector containing all the sprites.
      */
     const std::vector<Sprite>& getAllSprites() const;
 
     /**
-     * Get a reference to a vector containing all the graphic sets of a
+     * Returns a reference to a vector containing all the graphic sets of a
      * particular type.
      */
     const std::vector<TerrainGraphicSet>& getAllTerrainGraphicSets() const;
