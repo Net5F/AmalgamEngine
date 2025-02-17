@@ -1,5 +1,5 @@
 #include "WorldSpriteSorter.h"
-#include "TileMap.h"
+#include "World.h"
 #include "GraphicData.h"
 #include "UserInterface.h"
 #include "Camera.h"
@@ -17,6 +17,7 @@
 #include "ClientGraphicState.h"
 #include "Floor.h"
 #include "VariantTools.h"
+#include "Timer.h"
 #include <SDL_rect.h>
 #include <cmath>
 #include <algorithm>
@@ -25,19 +26,16 @@ namespace AM
 {
 namespace Client
 {
-WorldSpriteSorter::WorldSpriteSorter(entt::registry& inRegistry,
-                                     const TileMap& inTileMap,
+WorldSpriteSorter::WorldSpriteSorter(World& inWorld,
                                      const GraphicData& inGraphicData,
                                      const UserInterface& inUI)
-: registry(inRegistry)
-, tileMap{inTileMap}
+: world{inWorld}
 , graphicData{inGraphicData}
 , ui{inUI}
 , phantomSprites{}
 , spriteColorMods{}
 , sortedSprites{}
 , spritesToSort{}
-, animationTimer{}
 , lastAnimationTimestamp{}
 , currentAnimationTimestamp{}
 {
@@ -47,7 +45,7 @@ void WorldSpriteSorter::sortSprites(const Camera& camera, double alpha)
 {
     // Get our new timestamp.
     lastAnimationTimestamp = currentAnimationTimestamp;
-    currentAnimationTimestamp = animationTimer.getTime();
+    currentAnimationTimestamp = Timer::getGlobalTime();
 
     // Clear the old data.
     sortedSprites.clear();
@@ -92,7 +90,7 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
 {
     // Gather all tiles that are in view.
     TileExtent tileViewExtent{
-        camera.getTileViewExtent(tileMap.getTileExtent())};
+        camera.getTileViewExtent(world.tileMap.getTileExtent())};
     for (int z{tileViewExtent.z}; z <= tileViewExtent.zMax(); ++z) {
         for (int y{tileViewExtent.y}; y <= tileViewExtent.yMax(); ++y) {
             for (int x{tileViewExtent.x}; x <= tileViewExtent.xMax(); ++x) {
@@ -100,7 +98,7 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
 
                 // Push all of this tile's sprites into the appropriate vectors.
                 // Note: tile will be nullptr if the chunk is empty.
-                if (const Tile* tile{tileMap.cgetTile(tilePosition)}) {
+                if (const Tile * tile{world.tileMap.cgetTile(tilePosition)}) {
                     pushTerrainSprites(*tile, camera, tilePosition);
                     pushFloorSprite(*tile, camera, tilePosition);
                     pushWallSprites(*tile, camera, tilePosition);
@@ -132,8 +130,11 @@ void WorldSpriteSorter::gatherTileSpriteInfo(const Camera& camera)
 void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
                                                double alpha)
 {
+    entt::registry& registry{world.registry};
+
     // Gather all entities that have a Position and GraphicState.
-    auto view = registry.view<Position, GraphicState, ClientGraphicState>();
+    auto view
+        = registry.view<Position, GraphicState, ClientGraphicState>();
     for (entt::entity entity : view) {
         auto [position, graphicState, clientGraphicState]
             = view.get<Position, GraphicState, ClientGraphicState>(entity);
@@ -160,6 +161,26 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
                 entt::null, info.position, graphic.getFirstSprite(), camera,
                 static_cast<EntityGraphicSetID>(info.graphicSet->numericID),
                 static_cast<EntityGraphicType>(info.graphicValue));
+        }
+    }
+}
+
+void WorldSpriteSorter::gatherAVEffectSpriteInfo(const Camera& camera,
+                                                 double alpha)
+{
+    // Gather all audio/visual effect instances.
+    for (auto& [id, instance] : world.audioVisualEffects) {
+        // Calc a lerp'd position.
+        Position renderPosition{instance.position};
+        renderPosition = MovementHelpers::interpolatePosition(
+            instance.prevPosition, instance.position, alpha);
+
+        // Push every graphic from the current phase (a single phase can have 
+        // multiple graphics).
+        for (GraphicID& graphicID :
+             instance.effect.getGraphicsAtPhase(instance.currentPhaseIndex)) {
+            const Sprite& sprite{getAVEffectSprite(instance, graphicID)};
+            pushAVEffectSprite(instance, renderPosition, sprite, camera);
         }
     }
 }
@@ -289,7 +310,8 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
                                        bool isFullPhantom)
 {
     // Get the current sprite for this graphic.
-    const Sprite& sprite{graphic.getSpriteAtTime(animationTimer.getTime())};
+    // Note: We sync tile animations to the global timer so they all line up.
+    const Sprite& sprite{graphic.getSpriteAtTime(Timer::getGlobalTime())};
 
     // Get the iso screen extent for this sprite.
     const SpriteRenderData& renderData{
@@ -379,7 +401,7 @@ const Sprite&
 
             // If this animation just began, set its start time.
             if (clientGraphicState.setStartTime) {
-                clientGraphicState.animationStartTime = animationTimer.getTime();
+                clientGraphicState.animationStartTime = Timer::getGlobalTime();
                 clientGraphicState.setStartTime = false;
             }
         }
@@ -428,6 +450,66 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
         // Push the entity's render info for this frame.
         spritesToSort.emplace_back(&sprite, ownerID, worldBounds, screenExtent,
                                    colorMod);
+    }
+}
+
+const Sprite&
+    WorldSpriteSorter::getAVEffectSprite(AudioVisualEffectInstance& instance,
+                                         GraphicID graphicID)
+{
+    // Get the current sprite for this graphic.
+    GraphicRef graphic{graphicData.getGraphic(graphicID)};
+    const Sprite* sprite{nullptr};
+    std::visit(
+        VariantTools::Overload{
+            [&](std::reference_wrapper<const Sprite> spriteRef) {
+                sprite = &(spriteRef.get());
+            },
+            [&](std::reference_wrapper<const Animation> animation) {
+                // Calc how far we are into this animation and get the
+                // appropriate sprite.
+                double animationTime{currentAnimationTimestamp
+                                     - instance.phaseStartTime};
+                sprite
+                    = &(animation.get().getSpriteAtTime(animationTime));
+
+                // If this phase just began, set its start time.
+                if (instance.setStartTime) {
+                    instance.phaseStartTime
+                        = Timer::getGlobalTime();
+                    instance.setStartTime = false;
+                }
+            }},
+        graphic);
+
+    return *sprite;
+}
+
+void WorldSpriteSorter::pushAVEffectSprite(AudioVisualEffectInstance& instance,
+                                           const Position& position,
+                                           const Sprite& sprite,
+                                           const Camera& camera)
+{
+    // Get the iso screen extent for the sprite.
+    const SpriteRenderData& renderData{
+        graphicData.getSpriteRenderData(sprite.numericID)};
+    SDL_FRect screenExtent{ClientTransforms::avEffectToScreenExtent(
+        position, sprite.modelBounds.getBottomCenterPoint(), renderData,
+        camera)};
+
+    // If the sprite is on screen, push the render info.
+    if (isWithinScreenBounds(screenExtent, camera)) {
+        // Get a box for this effect, to use for sorting.
+        BoundingBox worldBounds{
+            Transforms::modelToWorldEntity(sprite.modelBounds, position)};
+
+        // AV effects shouldn't be selectable by the UI, so we don't give 
+        // them an owner (which keeps them from being added to the UI's 
+        // object locator).
+        WorldObjectID ownerID{std::monostate{}};
+
+        // Push the effect's render info for this frame.
+        spritesToSort.emplace_back(&sprite, ownerID, worldBounds, screenExtent);
     }
 }
 
@@ -584,7 +666,7 @@ GraphicRef WorldSpriteSorter::getPhantomGraphic(
 
 Uint8 WorldSpriteSorter::getTerrainHeight(const TilePosition& tilePosition)
 {
-    if (const Tile* tile{tileMap.getTile(tilePosition)}) {
+    if (const Tile* tile{world.tileMap.cgetTile(tilePosition)}) {
         if (auto* terrain{tile->findLayer(TileLayer::Type::Terrain)}) {
             Terrain::Height height{
                 Terrain::getTotalHeight(terrain->graphicValue)};

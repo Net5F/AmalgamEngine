@@ -32,4 +32,10 @@ double Timer::getTimeAndReset()
     return deltaTicks * period;
 }
 
+double Timer::getGlobalTime()
+{
+    static Timer timer{};
+    return timer.getTime();
+}
+
 } // namespace AM

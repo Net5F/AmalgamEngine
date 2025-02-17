@@ -32,8 +32,15 @@ struct ItemUpdate {
     /** How large a stack of this item can be, e.g. in an inventory slot. */
     Uint8 maxStackSize{1};
 
-    /** The interactions that this item supports. */
+    /** The custom interactions that this item supports.
+        The first interaction in this list is the default interaction.
+        Built-in interactions aren't present in this vector, and will instead 
+        be added by the UI. */
     std::vector<ItemInteractionType> supportedInteractions{};
+
+    /** The AV effects for each interaction, indexed to match 
+        supportedInteractions. */
+    std::vector<AudioVisualEffect> interactionAVEffects{};
 
     /** The item's current version number. */
     ItemVersion version{};
@@ -48,6 +55,8 @@ void serialize(S& serializer, ItemUpdate& itemUpdate)
     serializer.value1b(itemUpdate.maxStackSize);
     serializer.container1b(itemUpdate.supportedInteractions,
                            SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS);
+    serializer.container(itemUpdate.interactionAVEffects,
+                         SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS);
     serializer.value2b(itemUpdate.version);
 }
 

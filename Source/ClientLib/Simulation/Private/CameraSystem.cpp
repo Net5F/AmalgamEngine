@@ -1,5 +1,4 @@
 #include "CameraSystem.h"
-#include "Simulation.h"
 #include "World.h"
 #include "Camera.h"
 #include "Position.h"

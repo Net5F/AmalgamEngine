@@ -33,6 +33,9 @@ Application::Application()
 , eventHandlers{this, &userInterface, &renderer}
 , exitRequested{false}
 {
+    // Initialize the global timer.
+    Timer::getGlobalTime();
+
     // Initialize nativefiledialog.
     if (NFD_Init() != NFD_OKAY) {
         LOG_FATAL("Nativefiledialog failed to initialize properly.");

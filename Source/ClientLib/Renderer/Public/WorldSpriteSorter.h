@@ -4,8 +4,7 @@
 #include "PhantomSpriteInfo.h"
 #include "SpriteColorModInfo.h"
 #include "EntityGraphicType.h"
-#include "Timer.h"
-#include "entt/entity/registry.hpp"
+#include "GraphicID.h"
 #include <vector>
 
 struct SDL_FRect;
@@ -16,10 +15,11 @@ struct Camera;
 class Tile;
 struct TileLayerID;
 struct GraphicState;
+struct AudioVisualEffectInstance;
 
 namespace Client
 {
-class TileMap;
+class World;
 class GraphicData;
 class UserInterface;
 struct ClientGraphicState;
@@ -31,8 +31,7 @@ struct ClientGraphicState;
 class WorldSpriteSorter
 {
 public:
-    WorldSpriteSorter(entt::registry& inRegistry, const TileMap& inTileMap,
-                      const GraphicData& inGraphicData,
+    WorldSpriteSorter(World& inWorld, const GraphicData& inGraphicData,
                       const UserInterface& inUI);
 
     /**
@@ -74,6 +73,11 @@ private:
      */
     void gatherEntitySpriteInfo(const Camera& camera, double alpha);
 
+    /**
+     * Performs the audio/visual effect portion of the gather step.
+     */
+    void gatherAVEffectSpriteInfo(const Camera& camera, double alpha);
+
     // All of these just call pushTileSprite(), but Floor and Wall also check
     // if the UI wants to swap any of their sprites with a phantom.
     void pushTerrainSprites(const Tile& tile, const Camera& camera,
@@ -107,6 +111,21 @@ private:
                           const Sprite& sprite, const Camera& camera,
                           EntityGraphicSetID graphicSetID,
                           EntityGraphicType graphicType);
+
+    /**
+     * Returns the current sprite for the given AV effect data, or nullptr if 
+     * the effect is using an empty animation.
+     * Updates the effect's animation state data if necessary.
+     */
+    const Sprite& getAVEffectSprite(AudioVisualEffectInstance& instance,
+                                    GraphicID graphicID);
+
+    /**
+     * Pushes the given AV effect sprite into the sorting vector.
+     */
+    void pushAVEffectSprite(AudioVisualEffectInstance& instance,
+                            const Position& position, const Sprite& sprite,
+                            const Camera& camera);
 
     /**
      * Sorts the sprites into their draw order (farthest sprite first).
@@ -157,11 +176,8 @@ private:
      */
     Uint8 getTerrainHeight(const TilePosition& tilePosition);
 
-    /** Used for gathering sprites. */
-    entt::registry& registry;
-
-    /** Used for gathering tiles. */
-    const TileMap& tileMap;
+    /** Used for gathering graphics. */
+    World& world;
 
     /** Used for getting graphic render data. */
     const GraphicData& graphicData;
@@ -185,17 +201,12 @@ private:
         gatherSpriteInfo() and sorted during sortSpritesByDepth(). */
     std::vector<SpriteSortInfo> spritesToSort;
 
-    /** The timer used for animations. Having a single timer allows us to 
-        keep animations in sync if we care to (which we do for tiles), or to 
-        just use timestamps to know which frame of an animation to display. */
-    Timer animationTimer;
-
-    /** The timestamp from animationTimer that we're using during the current 
-        render frame. */
+    /** The global timestamp that we're using during the current render 
+        frame. */
     double lastAnimationTimestamp;
 
-    /** The timestamp from animationTimer that we used during the last render 
-        frame. Allows us to calculate time deltas. */
+    /** The global timestamp that we used during the last render frame. 
+        Allows us to calculate time deltas. */
     double currentAnimationTimestamp;
 };
 

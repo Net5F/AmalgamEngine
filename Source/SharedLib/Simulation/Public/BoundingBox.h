@@ -15,7 +15,6 @@ struct TilePosition;
  * A 3D axis-aligned box shape.
  */
 struct BoundingBox {
-public:
     /** This box's minimum point */
     Vector3 min;
 

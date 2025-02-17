@@ -26,7 +26,7 @@ Renderer::Renderer(SDL_Renderer* inSdlRenderer, World& inWorld,
 , ui{inUI}
 , graphicData{inGraphicData}
 , getSimTickProgress{inGetSimTickProgress}
-, worldSpriteSorter{world.registry, world.tileMap, graphicData, ui}
+, worldSpriteSorter{world, graphicData, ui}
 , extension{nullptr}
 {
 }

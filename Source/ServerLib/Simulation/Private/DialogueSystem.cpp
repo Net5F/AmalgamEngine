@@ -50,8 +50,8 @@ void DialogueSystem::processTalkInteraction(entt::entity clientEntity,
 {
     const Dialogue* dialogue{world.registry.try_get<Dialogue>(targetEntity)};
     if (!dialogue) {
-        // This can happen if the init script has an addTalkInteraction() 
-        // but doesn't have any topic() declarations.
+        // Note: This can happen if the init script has an addTalkInteraction() 
+        //       but doesn't have any topic() declarations.
         network.serializeAndSend(
             clientID,
             SystemMessage{"Error: Tried to Talk to entity that has no "

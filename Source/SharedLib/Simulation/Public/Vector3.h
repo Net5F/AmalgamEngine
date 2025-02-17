@@ -47,13 +47,21 @@ struct Vector3 {
     /**
      * Returns the dot product of this vector and the given vector.
      */
-    [[nodiscard]] float dot(const Vector3& other);
+    [[nodiscard]] float dot(const Vector3& other) const;
 
     /**
      * Returns a new vector slid along a plane defined by the given normal.
      * (i.e. returns the component of this vector that lies along the plane)
      */
-    [[nodiscard]] Vector3 slide(const Vector3& normal);
+    [[nodiscard]] Vector3 slide(const Vector3& normal) const;
+
+    /**
+     * Assuming this Vector3 is a point, returns a new point moved towards  
+     * otherPoint by the given distance.
+     * If the distance is sufficient to reach otherPoint, returns otherPoint.
+     */
+    [[nodiscard]] Vector3 moveTowards(const Vector3& otherPoint,
+                                      float distance) const;
 
     /**
      * Returns the squared distance between this vector and the given

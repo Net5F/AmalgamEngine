@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "Timer.h"
 #include "Config.h"
 #include "SharedConfig.h"
 #include "UserConfig.h"
@@ -46,6 +47,9 @@ Application::Application()
     // Note: We pass this separately from the above initialization to avoid a
     //       circular dependency between Simulation and UserInterface.
     userInterface.setWorld(simulation.getWorld());
+
+    // Initialize the global timer.
+    Timer::getGlobalTime();
 
     // Set fullscreen mode.
     unsigned int fullscreenMode{UserConfig::get().getFullscreenMode()};

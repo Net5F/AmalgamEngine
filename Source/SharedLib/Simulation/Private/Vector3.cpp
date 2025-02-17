@@ -87,14 +87,31 @@ void Vector3::normalize()
     *this /= length;
 }
 
-float Vector3::dot(const Vector3& other)
+float Vector3::dot(const Vector3& other) const
 {
     return (x * other.x) + (y * other.y) + (z * other.z);
 }
 
-Vector3 Vector3::slide(const Vector3& normal)
+Vector3 Vector3::slide(const Vector3& normal) const
 {
     return *this - (normal * dot(normal));
+}
+
+Vector3 Vector3::moveTowards(const Vector3& otherPoint, float distance) const
+{
+    float squaredDistanceToOther{squaredDistanceTo(otherPoint)};
+    float squaredDistance{distance * distance};
+
+    // If we can reach it, return otherPoint.
+    if (squaredDistance >= squaredDistanceToOther) {
+        return otherPoint;
+    }
+
+    // Can't reach. Calculate the intermediate point.
+    Vector3 vector{otherPoint - *this};
+    vector.normalize();
+    vector *= distance;
+    return *this + vector;
 }
 
 float Vector3::squaredDistanceTo(const Vector3& other) const

@@ -42,7 +42,8 @@ void ItemSystem::processItemUpdates()
                   .numericID = itemUpdate.numericID,
                   .iconID = itemUpdate.iconID,
                   .maxStackSize = itemUpdate.maxStackSize,
-                  .supportedInteractions = itemUpdate.supportedInteractions};
+                  .supportedInteractions = itemUpdate.supportedInteractions,
+                  .interactionAVEffects = itemUpdate.interactionAVEffects};
         StringTools::deriveStringID(itemUpdate.displayName, item.stringID);
         itemData.loadItem(item, itemUpdate.version);
     }

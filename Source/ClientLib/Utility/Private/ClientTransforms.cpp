@@ -83,5 +83,37 @@ SDL_FRect ClientTransforms::tileToScreenExtent(
     return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
 }
 
+SDL_FRect ClientTransforms::avEffectToScreenExtent(
+    const Position& position, const Vector3& spriteBottomCenter,
+    const SpriteRenderData& renderData, const Camera& camera)
+{
+    // Transform the position to a point in screen space.
+    // Note: This applies the camera's zoom to the position, so we don't need
+    //       to do it again.
+    SDL_FPoint screenPoint{
+        Transforms::worldToScreen(position, camera.zoomFactor)};
+
+    // Offset the sprite to line up with where the "stage" starts within the 
+    // image.
+    screenPoint.x -= (renderData.stageOrigin.x * camera.zoomFactor);
+    screenPoint.y -= (renderData.stageOrigin.y * camera.zoomFactor);
+
+    // Offset the sprite to line up with its modelBounds bottom center.
+    SDL_FPoint idleSouthBottomCenterScreen{
+        Transforms::worldToScreen(spriteBottomCenter, camera.zoomFactor)};
+    screenPoint.x -= idleSouthBottomCenterScreen.x;
+    screenPoint.y -= idleSouthBottomCenterScreen.y;
+
+    // Apply the camera position adjustment.
+    float adjustedX{screenPoint.x - camera.screenExtent.x};
+    float adjustedY{screenPoint.y - camera.screenExtent.y};
+
+    // Apply the camera's zoom to the sprite size.
+    float zoomedWidth{renderData.textureExtent.w * camera.zoomFactor};
+    float zoomedHeight{renderData.textureExtent.h * camera.zoomFactor};
+
+    return {adjustedX, adjustedY, zoomedWidth, zoomedHeight};
+}
+
 } // End namespace Client
 } // End namespace AM

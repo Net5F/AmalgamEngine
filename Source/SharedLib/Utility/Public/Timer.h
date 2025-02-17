@@ -31,6 +31,12 @@ public:
      */
     double getTimeAndReset();
 
+    /**
+     * Returns a monotonic amount of time since this function was first called 
+     * (usually during app startup).
+     */
+    static double getGlobalTime();
+
 private:
     /** How fast the processor is running. SDL sets this once on init and 
         never changes it.  */

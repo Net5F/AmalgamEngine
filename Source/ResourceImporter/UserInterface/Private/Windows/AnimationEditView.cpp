@@ -52,7 +52,7 @@ AnimationEditView::AnimationEditView(
     descText.setText(
         "To play the animation: press the space bar. To move sprites within "
         "the timeline: right click and drag.\n\nEntity Alignment Anchors are "
-        "only relevent to entity animations. Use them to manually align "
+        "only relevant to entity animations. Use them to manually align "
         "animations that don't naturally align with IdleSouth. If an animation "
         "does align with IdleSouth, no anchor is necessary.");
 

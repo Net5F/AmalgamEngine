@@ -42,6 +42,16 @@ public:
                                         const TileOffset& tileOffset,
                                         const SpriteRenderData& renderData,
                                         const Camera& camera);
+
+    /**
+     * Calculates where an AV effect should be drawn on screen.
+     *
+     * @return A final screen space extent for the effect.
+     */
+    static SDL_FRect avEffectToScreenExtent(const Position& position,
+                                            const Vector3& spriteBottomCenter,
+                                            const SpriteRenderData& renderData,
+                                            const Camera& camera);
 };
 
 } // End namespace Client

@@ -1,5 +1,6 @@
 target_sources(ClientLib
     PRIVATE
+        Private/AudioVisualEffectSystem.cpp
         Private/CameraSystem.cpp
         Private/ChunkUpdateSystem.cpp
         Private/ComponentUpdateSystem.cpp
@@ -20,6 +21,7 @@ target_sources(ClientLib
         Private/ItemData/ItemData.cpp
         Private/TileMap/TileMap.cpp
     PUBLIC
+        Public/AudioVisualEffectSystem.h
         Public/CameraSystem.h
         Public/ChunkUpdateSystem.h
         Public/ComponentUpdateSystem.h

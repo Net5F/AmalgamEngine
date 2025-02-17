@@ -4,6 +4,7 @@
 #include "ItemID.h"
 #include "IconID.h"
 #include "ItemInteractionType.h"
+#include "AudioVisualEffect.h"
 #include "ItemProperty.h"
 #include "ItemCombination.h"
 #include "Log.h"
@@ -15,7 +16,7 @@
 namespace AM
 {
 /**
- * A single item.
+ * A single item's definition.
  *
  * Items have "interactions", and "properties". Interactions define what users 
  * can do with the item, and properties hold data that can be used while 
@@ -57,9 +58,17 @@ struct Item {
     /** The item's description text. Used by the Examine interaction. */
     std::string description{};
 
-    /** The interactions that this item supports.
-        The first interaction in this list is the default interaction. */
+    /** The custom interactions that this item supports.
+        The first interaction in this list is the default interaction.
+        Built-in interactions aren't present in this vector, and will instead 
+        be added by the UI. */
     std::vector<ItemInteractionType> supportedInteractions{};
+
+    /** The AV effects for each interaction, indexed to match 
+        supportedInteractions.
+        Note: We keep this separate since supportedInteractions is accessed  
+              in performance-sensitive contexts. */
+    std::vector<AudioVisualEffect> interactionAVEffects{};
 
     /** The properties that are attached to this item.
         Properties hold data that gets used when handling interactions. */
@@ -179,6 +188,9 @@ struct Item {
 template<typename S>
 void serialize(S& serializer, Item& item)
 {
+    // Note: We only serialize items for persistance. For replication, we use 
+    //       ItemUpdate.
+
     serializer.text1b(item.displayName, Item::MAX_DISPLAY_NAME_LENGTH);
     serializer.text1b(item.stringID, Item::MAX_DISPLAY_NAME_LENGTH);
     serializer.value2b(item.numericID);
@@ -187,6 +199,8 @@ void serialize(S& serializer, Item& item)
     serializer.text1b(item.description, Item::MAX_DESCRIPTION_LENGTH);
     serializer.container1b(item.supportedInteractions,
                            SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS);
+    serializer.container(item.interactionAVEffects,
+                         SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS);
     serializer.container(item.properties, Item::MAX_PROPERTIES,
                          [](S& serializer, ItemProperty& property) {
                              // Note: This calls serialize() for each type.

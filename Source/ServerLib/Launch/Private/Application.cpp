@@ -26,6 +26,9 @@ Application::Application()
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
 , exitRequested{false}
 {
+    // Initialize the global timer.
+    Timer::getGlobalTime();
+
     // Enable delay reporting.
     simCaller.reportDelays(Simulation::SIM_DELAYED_TIME_S);
 }
