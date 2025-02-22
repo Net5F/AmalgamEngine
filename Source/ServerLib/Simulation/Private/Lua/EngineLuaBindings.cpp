@@ -4,6 +4,7 @@
 #include "ItemInitLua.h"
 #include "DialogueLua.h"
 #include "DialogueChoiceConditionLua.h"
+#include "GraphicData.h"
 #include "World.h"
 #include "Network.h"
 #include "Interaction.h"
@@ -25,13 +26,14 @@ EngineLuaBindings::EngineLuaBindings(
     EntityInitLua& inEntityInitLua,
     EntityItemHandlerLua& inEntityItemHandlerLua, ItemInitLua& inItemInitLua,
     DialogueLua& inDialogueLua,
-    DialogueChoiceConditionLua& inDialogueChoiceConditionLua, World& inWorld,
-    Network& inNetwork)
+    DialogueChoiceConditionLua& inDialogueChoiceConditionLua,
+    const GraphicData& inGraphicData, World& inWorld, Network& inNetwork)
 : entityInitLua{inEntityInitLua}
 , entityItemHandlerLua{inEntityItemHandlerLua}
 , itemInitLua{inItemInitLua}
 , dialogueLua{inDialogueLua}
 , dialogueChoiceConditionLua{inDialogueChoiceConditionLua}
+, graphicData{inGraphicData}
 , world{inWorld}
 , network{inNetwork}
 , dialogueChoiceLua{std::make_unique<sol::state>()}

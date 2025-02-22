@@ -4,7 +4,6 @@
 #include "ItemID.h"
 #include "IconID.h"
 #include "ItemInteractionType.h"
-#include "AudioVisualEffect.h"
 #include "ItemProperty.h"
 #include "ItemCombination.h"
 #include "Log.h"
@@ -64,12 +63,6 @@ struct Item {
         be added by the UI. */
     std::vector<ItemInteractionType> supportedInteractions{};
 
-    /** The AV effects for each interaction, indexed to match 
-        supportedInteractions.
-        Note: We keep this separate since supportedInteractions is accessed  
-              in performance-sensitive contexts. */
-    std::vector<AudioVisualEffect> interactionAVEffects{};
-
     /** The properties that are attached to this item.
         Properties hold data that gets used when handling interactions. */
     std::vector<ItemProperty> properties{};
@@ -80,30 +73,9 @@ struct Item {
               you'll need to build a separate UI/workflow. */
     std::vector<ItemCombination> itemCombinations{};
 
-    /** The max length of a display name. Also the max for string IDs, since
-        they're derived from display name. */
-    static constexpr std::size_t MAX_DISPLAY_NAME_LENGTH{50};
-
-    /** The max length of an item's description text. */
-    static constexpr std::size_t MAX_DESCRIPTION_LENGTH{500};
-
-    /** The number of built-in interactions that every item supports: UseOn,
-        Destroy, and Examine. */
-    static constexpr std::size_t BUILTIN_INTERACTION_COUNT{3};
-
-    /** The total number of interactions that an item can support, including
-        the built-ins. */
-    static constexpr std::size_t MAX_INTERACTIONS{
-        SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS + BUILTIN_INTERACTION_COUNT};
-
-    /** The maximum number of properties that an item can support. */
-    static constexpr std::size_t MAX_PROPERTIES{50};
-
-    /** The maximum number of combinations that an item can support. */
-    static constexpr std::size_t MAX_COMBINATIONS{50};
-
     /**
-     * Adds the given interaction to supportedInteractions.
+     * Adds the given interaction to supportedInteractions, and adds an 
+     * associated (empty) effect to interactionAVEffects.
      * @return true if the interaction was added, else false (already present 
      *         or array was full).
      */
@@ -183,6 +155,28 @@ struct Item {
 
         return nullptr;
     }
+
+    /** The max length of a display name. Also the max for string IDs, since
+        they're derived from display name. */
+    static constexpr std::size_t MAX_DISPLAY_NAME_LENGTH{50};
+
+    /** The max length of an item's description text. */
+    static constexpr std::size_t MAX_DESCRIPTION_LENGTH{500};
+
+    /** The number of built-in interactions that every item supports: UseOn,
+        Destroy, and Examine. */
+    static constexpr std::size_t BUILTIN_INTERACTION_COUNT{3};
+
+    /** The total number of interactions that an item can support, including
+        the built-ins. */
+    static constexpr std::size_t MAX_INTERACTIONS{
+        SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS + BUILTIN_INTERACTION_COUNT};
+
+    /** The maximum number of properties that an item can support. */
+    static constexpr std::size_t MAX_PROPERTIES{50};
+
+    /** The maximum number of combinations that an item can support. */
+    static constexpr std::size_t MAX_COMBINATIONS{50};
 };
 
 template<typename S>
@@ -199,8 +193,6 @@ void serialize(S& serializer, Item& item)
     serializer.text1b(item.description, Item::MAX_DESCRIPTION_LENGTH);
     serializer.container1b(item.supportedInteractions,
                            SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS);
-    serializer.container(item.interactionAVEffects,
-                         SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS);
     serializer.container(item.properties, Item::MAX_PROPERTIES,
                          [](S& serializer, ItemProperty& property) {
                              // Note: This calls serialize() for each type.

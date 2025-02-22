@@ -29,6 +29,7 @@ class InventorySystem;
 class ComponentUpdateSystem;
 class GraphicSystem;
 class CameraSystem;
+class AVSequenceSystem;
 
 /**
  * Manages the simulation, including world state and system processing.
@@ -101,7 +102,7 @@ public:
 
     /** Our connection to the server has encountered an error and the
         simulation has stopped running. */
-    entt::sink<entt::sigh<void(ConnectionError)>>
+    entt::sink<entt::sigh<void(ConnectionError)>>&
         getServerConnectionErrorSink();
 
 private:
@@ -152,6 +153,7 @@ private:
     std::unique_ptr<ComponentUpdateSystem> componentUpdateSystem;
     std::unique_ptr<GraphicSystem> graphicSystem;
     std::unique_ptr<CameraSystem> cameraSystem;
+    std::unique_ptr<AVSequenceSystem> avSequenceSystem;
 };
 
 } // namespace Client

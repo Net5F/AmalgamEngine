@@ -9,6 +9,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <string_view>
 
 namespace AM
 {
@@ -33,43 +34,49 @@ public:
 
     /**
      * Returns the sprite with the given string ID.
-     * Errors in debug if the given ID doesn't exist.
+     * Errors in debug if the given ID doesn't exist, returns the null sprite 
+     * in release.
      */
-    const Sprite& getSprite(const std::string& stringID);
+    const Sprite& getSprite(std::string_view stringID) const;
 
     /**
      * Returns the sprite with the given numeric ID.
-     * Errors in debug if the given ID doesn't exist.
+     * Errors in debug if the given ID doesn't exist, returns the null sprite 
+     * in release.
      */
     const Sprite& getSprite(SpriteID numericID) const;
 
     /**
      * Returns the animation with the given string ID.
-     * Errors in debug if the given ID doesn't exist.
+     * Errors in debug if the given ID doesn't exist, returns the null 
+     * animation in release.
      */
-    const Animation& getAnimation(const std::string& stringID);
+    const Animation& getAnimation(std::string_view stringID) const;
 
     /**
      * Returns the animation with the given numeric ID.
-     * Errors in debug if the given ID doesn't exist.
+     * Errors in debug if the given ID doesn't exist, returns the null 
+     * animation in release.
      */
     const Animation& getAnimation(AnimationID numericID) const;
 
     /**
      * Returns the graphic with the given numeric ID.
-     * Errors in debug if the given ID doesn't exist.
+     * Errors in debug if the given ID doesn't exist, returns the null 
+     * graphic in release.
      */
     GraphicRef getGraphic(GraphicID numericID) const;
 
     /**
      * Returns the graphic set with the given string ID.
-     * Errors if the given ID doesn't exist.
+     * Errors in debug if the given ID doesn't exist, returns the null set 
+     * in release.
      */
-    const TerrainGraphicSet& getTerrainGraphicSet(const std::string& stringID);
-    const FloorGraphicSet& getFloorGraphicSet(const std::string& stringID);
-    const WallGraphicSet& getWallGraphicSet(const std::string& stringID);
-    const ObjectGraphicSet& getObjectGraphicSet(const std::string& stringID);
-    const EntityGraphicSet& getEntityGraphicSet(const std::string& stringID);
+    const TerrainGraphicSet& getTerrainGraphicSet(std::string_view stringID);
+    const FloorGraphicSet& getFloorGraphicSet(std::string_view stringID);
+    const WallGraphicSet& getWallGraphicSet(std::string_view stringID);
+    const ObjectGraphicSet& getObjectGraphicSet(std::string_view stringID);
+    const EntityGraphicSet& getEntityGraphicSet(std::string_view stringID);
 
     /**
      * Returns the sprite set with the given numeric ID.
@@ -178,9 +185,6 @@ protected:
         objectGraphicSetStringMap;
     std::unordered_map<std::string, const EntityGraphicSet*>
         entityGraphicSetStringMap;
-
-    /** A scratch buffer used while processing string IDs. */
-    std::string workStringID;
 };
 
 } // End namespace AM

@@ -21,6 +21,7 @@ struct EntityItemHandlerLua;
 struct ItemInitLua;
 struct DialogueLua;
 struct DialogueChoiceConditionLua;
+class GraphicData;
 class World;
 class Network;
 
@@ -37,7 +38,8 @@ public:
                       EntityItemHandlerLua& inEntityItemHandlerLua,
                       ItemInitLua& inItemInitLua, DialogueLua& inDialogueLua,
                       DialogueChoiceConditionLua& inDialogueChoiceConditionLua,
-                      World& inWorld, Network& inNetwork);
+                      const GraphicData& inGraphicData, World& inWorld,
+                      Network& inNetwork);
 
     /**
      * Adds our bindings to the lua object.
@@ -269,6 +271,7 @@ private:
     ItemInitLua& itemInitLua;
     DialogueLua& dialogueLua;
     DialogueChoiceConditionLua& dialogueChoiceConditionLua;
+    const GraphicData& graphicData;
     World& world;
     Network& network;
 

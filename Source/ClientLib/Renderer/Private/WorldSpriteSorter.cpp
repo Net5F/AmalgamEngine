@@ -165,11 +165,11 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
     }
 }
 
-void WorldSpriteSorter::gatherAVEffectSpriteInfo(const Camera& camera,
-                                                 double alpha)
+void WorldSpriteSorter::gatherAVSequenceSpriteInfo(const Camera& camera,
+                                                   double alpha)
 {
-    // Gather all audio/visual effect instances.
-    for (auto& [id, instance] : world.audioVisualEffects) {
+    // Gather all audio/visual sequence instances.
+    for (auto& [id, instance] : world.avSequences) {
         // Calc a lerp'd position.
         Position renderPosition{instance.position};
         renderPosition = MovementHelpers::interpolatePosition(
@@ -178,9 +178,12 @@ void WorldSpriteSorter::gatherAVEffectSpriteInfo(const Camera& camera,
         // Push every graphic from the current phase (a single phase can have 
         // multiple graphics).
         for (GraphicID& graphicID :
-             instance.effect.getGraphicsAtPhase(instance.currentPhaseIndex)) {
-            const Sprite& sprite{getAVEffectSprite(instance, graphicID)};
-            pushAVEffectSprite(instance, renderPosition, sprite, camera);
+             instance.sequence.getGraphicsAtPhase(instance.currentPhaseIndex)) {
+            GraphicRef graphic{graphicData.getGraphic(graphicID)};
+
+            const Sprite& sprite{getAVSequenceSprite(instance, graphic)};
+            pushAVSequenceSprite(instance, renderPosition, graphic, sprite,
+                                 camera);
         }
     }
 }
@@ -359,7 +362,7 @@ void WorldSpriteSorter::pushTileSprite(const GraphicRef& graphic,
         worldBounds = Floor::calcWorldBounds(layerID.tilePosition);
     }
     else {
-        worldBounds = Transforms::modelToWorldTile(sprite.modelBounds,
+        worldBounds = Transforms::modelToWorldTile(graphic.getModelBounds(),
                                                    layerID.tilePosition);
     }
     worldBounds.min.x += layerID.tileOffset.x;
@@ -454,11 +457,10 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
 }
 
 const Sprite&
-    WorldSpriteSorter::getAVEffectSprite(AudioVisualEffectInstance& instance,
-                                         GraphicID graphicID)
+    WorldSpriteSorter::getAVSequenceSprite(AVSequenceInstance& instance,
+                                           const GraphicRef& graphic)
 {
     // Get the current sprite for this graphic.
-    GraphicRef graphic{graphicData.getGraphic(graphicID)};
     const Sprite* sprite{nullptr};
     std::visit(
         VariantTools::Overload{
@@ -485,30 +487,31 @@ const Sprite&
     return *sprite;
 }
 
-void WorldSpriteSorter::pushAVEffectSprite(AudioVisualEffectInstance& instance,
-                                           const Position& position,
-                                           const Sprite& sprite,
-                                           const Camera& camera)
+void WorldSpriteSorter::pushAVSequenceSprite(AVSequenceInstance& instance,
+                                             const Position& position,
+                                             const GraphicRef& graphic,
+                                             const Sprite& sprite,
+                                             const Camera& camera)
 {
     // Get the iso screen extent for the sprite.
+    const BoundingBox& modelBounds{graphic.getModelBounds()};
     const SpriteRenderData& renderData{
         graphicData.getSpriteRenderData(sprite.numericID)};
     SDL_FRect screenExtent{ClientTransforms::avEffectToScreenExtent(
-        position, sprite.modelBounds.getBottomCenterPoint(), renderData,
-        camera)};
+        position, modelBounds.getBottomCenterPoint(), renderData, camera)};
 
     // If the sprite is on screen, push the render info.
     if (isWithinScreenBounds(screenExtent, camera)) {
         // Get a box for this effect, to use for sorting.
         BoundingBox worldBounds{
-            Transforms::modelToWorldEntity(sprite.modelBounds, position)};
+            Transforms::modelToWorldEntity(modelBounds, position)};
 
-        // AV effects shouldn't be selectable by the UI, so we don't give 
-        // them an owner (which keeps them from being added to the UI's 
+        // AV sequence graphics shouldn't be selectable by the UI, so we don't 
+        // give them an owner (which keeps them from being added to the UI's 
         // object locator).
         WorldObjectID ownerID{std::monostate{}};
 
-        // Push the effect's render info for this frame.
+        // Push the sequence's render info for this frame.
         spritesToSort.emplace_back(&sprite, ownerID, worldBounds, screenExtent);
     }
 }

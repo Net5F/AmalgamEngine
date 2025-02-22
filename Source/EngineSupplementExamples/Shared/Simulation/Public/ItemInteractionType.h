@@ -14,8 +14,8 @@ enum class ItemInteractionType : Uint8 {
     NotSet = static_cast<Uint8>(EngineItemInteractionType::NotSet),
 
     // Note: All items support Examine, Destroy (handled by
-    // InventoryDeleteItem),
-    //       and UseOn (handled by CombineItems and UseItemOnEntityRequest).
+    //       InventoryDeleteItem), and UseOn (handled by CombineItems and 
+    //       UseItemOnEntityRequest).
     UseOn = static_cast<Uint8>(EngineItemInteractionType::UseOn),
     Destroy = static_cast<Uint8>(EngineItemInteractionType::Destroy),
     Examine = static_cast<Uint8>(EngineItemInteractionType::Examine),

@@ -32,6 +32,10 @@ constexpr auto constructAndFillArray(T&& x)
 
 namespace AM
 {
+/** A scratch buffer used while processing string IDs.
+    Must be file-local so it can be accessed by const functions. */
+std::string workStringID{};
+
 GraphicDataBase::GraphicDataBase(const nlohmann::json& resourceDataJson)
 : sprites{}
 , animations{}
@@ -44,13 +48,12 @@ GraphicDataBase::GraphicDataBase(const nlohmann::json& resourceDataJson)
 , floorGraphicSetStringMap{}
 , wallGraphicSetStringMap{}
 , objectGraphicSetStringMap{}
-, workStringID{}
 {
     // Parse the json structure to construct our sprites and animations.
     parseJson(resourceDataJson);
 }
 
-const Sprite& GraphicDataBase::getSprite(const std::string& stringID)
+const Sprite& GraphicDataBase::getSprite(std::string_view stringID) const
 {
     // Derive string ID in case the user accidentally passed a display name.
     StringTools::deriveStringID(stringID, workStringID);
@@ -76,7 +79,7 @@ const Sprite& GraphicDataBase::getSprite(SpriteID numericID) const
     return sprites[numericID];
 }
 
-const Animation& GraphicDataBase::getAnimation(const std::string& stringID)
+const Animation& GraphicDataBase::getAnimation(std::string_view stringID) const
 {
     // Derive string ID in case the user accidentally passed a display name.
     StringTools::deriveStringID(stringID, workStringID);
@@ -115,7 +118,7 @@ GraphicRef GraphicDataBase::getGraphic(GraphicID numericID) const
 }
 
 const TerrainGraphicSet&
-    GraphicDataBase::getTerrainGraphicSet(const std::string& stringID)
+    GraphicDataBase::getTerrainGraphicSet(std::string_view stringID)
 {
     StringTools::deriveStringID(stringID, workStringID);
     auto it{terrainGraphicSetStringMap.find(workStringID)};
@@ -129,7 +132,7 @@ const TerrainGraphicSet&
 }
 
 const FloorGraphicSet&
-    GraphicDataBase::getFloorGraphicSet(const std::string& stringID)
+    GraphicDataBase::getFloorGraphicSet(std::string_view stringID)
 {
     // Derive string ID in case the user accidentally passed a display name.
     StringTools::deriveStringID(stringID, workStringID);
@@ -145,7 +148,7 @@ const FloorGraphicSet&
 }
 
 const WallGraphicSet&
-    GraphicDataBase::getWallGraphicSet(const std::string& stringID)
+    GraphicDataBase::getWallGraphicSet(std::string_view stringID)
 {
     StringTools::deriveStringID(stringID, workStringID);
     auto it{wallGraphicSetStringMap.find(workStringID)};
@@ -159,7 +162,7 @@ const WallGraphicSet&
 }
 
 const ObjectGraphicSet&
-    GraphicDataBase::getObjectGraphicSet(const std::string& stringID)
+    GraphicDataBase::getObjectGraphicSet(std::string_view stringID)
 {
     StringTools::deriveStringID(stringID, workStringID);
     auto it{objectGraphicSetStringMap.find(workStringID)};
@@ -173,7 +176,7 @@ const ObjectGraphicSet&
 }
 
 const EntityGraphicSet&
-    GraphicDataBase::getEntityGraphicSet(const std::string& stringID)
+    GraphicDataBase::getEntityGraphicSet(std::string_view stringID)
 {
     StringTools::deriveStringID(stringID, workStringID);
     auto it{entityGraphicSetStringMap.find(workStringID)};

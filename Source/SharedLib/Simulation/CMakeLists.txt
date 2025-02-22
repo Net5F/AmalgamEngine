@@ -1,6 +1,6 @@
 target_sources(SharedLib
     PRIVATE
-        Private/AudioVisualEffect.cpp
+        Private/AVSequence.cpp
         Private/BoundingBox.cpp
         Private/CollisionLocator.cpp
         Private/Cylinder.cpp
@@ -34,9 +34,9 @@ target_sources(SharedLib
         Private/TileMap/TileMapBase.cpp
         Private/TileMap/TilePosition.cpp
     PUBLIC
-        Public/AudioVisualEffect.h
-        Public/AudioVisualEffectID.h
-        Public/AudioVisualEffectInstance.h
+        Public/AVSequence.h
+        Public/AVSequenceID.h
+        Public/AVSequenceInstance.h
         Public/BoundingBox.h
         Public/BoundingBoxID.h
         Public/CollisionLocator.h

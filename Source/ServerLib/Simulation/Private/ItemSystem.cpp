@@ -100,7 +100,6 @@ void ItemSystem::processItemUpdates()
                         ItemUpdate{
                             item.displayName, item.numericID, item.iconID,
                             item.maxStackSize, item.supportedInteractions,
-                            item.interactionAVEffects,
                             world.itemData.getItemVersion(item.numericID)});
                 }
             }
@@ -243,7 +242,6 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
         itemInitRequest.netID,
         ItemUpdate{newItem->displayName, newItem->numericID, newItem->iconID,
                    newItem->maxStackSize, newItem->supportedInteractions,
-                   newItem->interactionAVEffects,
                    world.itemData.getItemVersion(newItem->numericID)});
 }
 
@@ -297,7 +295,6 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
         ItemUpdate{updatedItem->displayName, updatedItem->numericID,
                    updatedItem->iconID, updatedItem->maxStackSize,
                    updatedItem->supportedInteractions,
-                   updatedItem->interactionAVEffects,
                    world.itemData.getItemVersion(updatedItem->numericID)});
 }
 
@@ -313,7 +310,6 @@ void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
                     itemDataRequest.netID,
                     ItemUpdate{item->displayName, item->numericID, item->iconID,
                                item->maxStackSize, item->supportedInteractions,
-                               item->interactionAVEffects,
                                world.itemData.getItemVersion(item->numericID)});
             }
         },

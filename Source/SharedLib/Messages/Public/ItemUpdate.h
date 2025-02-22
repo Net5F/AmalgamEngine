@@ -38,10 +38,6 @@ struct ItemUpdate {
         be added by the UI. */
     std::vector<ItemInteractionType> supportedInteractions{};
 
-    /** The AV effects for each interaction, indexed to match 
-        supportedInteractions. */
-    std::vector<AudioVisualEffect> interactionAVEffects{};
-
     /** The item's current version number. */
     ItemVersion version{};
 };
@@ -55,8 +51,6 @@ void serialize(S& serializer, ItemUpdate& itemUpdate)
     serializer.value1b(itemUpdate.maxStackSize);
     serializer.container1b(itemUpdate.supportedInteractions,
                            SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS);
-    serializer.container(itemUpdate.interactionAVEffects,
-                         SharedConfig::MAX_ITEM_CUSTOM_INTERACTIONS);
     serializer.value2b(itemUpdate.version);
 }
 

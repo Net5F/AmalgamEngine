@@ -2,24 +2,24 @@
 
 namespace AM
 {
-struct AudioVisualEffectInstance;
+struct AVSequenceInstance;
 namespace Client
 {
 class World;
 
 /**
- * Maintains World::audioVisualEffects. Updates the effects, and deletes them 
+ * Maintains World::avSequences. Updates the sequences, and deletes them 
  * when they finish their final phase.
  */
-class AudioVisualEffectSystem
+class AVSequenceSystem
 {
 public:
-    AudioVisualEffectSystem(World& inWorld);
+    AVSequenceSystem(World& inWorld);
 
     /**
-     * Update every effect, and delete any that are finished.
+     * Update every sequence, and delete any that are finished.
      */
-    void updateEffects();
+    void updateSequences();
 
 private:
     enum class MoveResult {
@@ -36,10 +36,10 @@ private:
     static constexpr double MOVEMENT_TIMEOUT_S{20};
 
     /**
-     * Attempts to move the given effect instance based on the given effect 
+     * Attempts to move the given sequence instance based on the given sequence 
      * definition, and returns an appropriate result.
      */
-    MoveResult moveEffect(AudioVisualEffectInstance& instance);
+    MoveResult moveSequence(AVSequenceInstance& instance);
 
     World& world;
 };

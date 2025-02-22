@@ -11,18 +11,14 @@ namespace AM
 {
 
 /**
- * Describes an audio/visual effect that should occur when interacting with an 
- * item, casting a spell, etc.
+ * Describes an audio/visual sequence that should occur when interacting with 
+ * an item, casting a spell, etc.
  *
- * AV effects consist of "movement phases" (e.g. "move from self to target, 
+ * AV sequences consist of "movement phases" (e.g. "move from self to target, 
  * then follow the target for 5 seconds"). Each phase's audio/visual elements 
  * follow the movement until it's completed, then the next phase is started.
- * 
- * To the server, AV effects are just data that it must keep track of along 
- * with the rest of an item/spell/etc definition. It doesn't do any processing 
- * on them.
  */
-struct AudioVisualEffect {
+struct AVSequence {
     /**
      * Note: Some contexts may not have access to every movement type, e.g.
      *       item interactions not having a target. In such cases, it's up to 
@@ -69,9 +65,21 @@ struct AudioVisualEffect {
 
     // TODO: std::vector<SoundID> sounds{};
 
-    /** Used as a "we should never hit this" cap on the container lengths. */
-    static constexpr std::size_t MAX_MOVEMENT_PHASES{SDL_MAX_UINT8};
-    static constexpr std::size_t MAX_GRAPHICS{SDL_MAX_UINT8};
+    // TODO: entity graphics to play (one shots)
+    //       one for self, one for target? or vector?
+
+    /**
+     * Adds the given movement phase to the end of the vector.
+     */
+    void addMovementPhase(MovementType movementType, Uint8 movementSpeed,
+                          Uint8 durationS);
+
+    /**
+     * Adds the given graphic to the last phase that's currently in 
+     * movementPhases.
+     * Errors in debug if movementPhases is empty(), does nothing in release.
+     */
+    void addGraphic(GraphicID graphicID);
 
     /**
      * Returns true if any phase in this effect has a movementType that 
@@ -89,10 +97,20 @@ struct AudioVisualEffect {
      * Returns all graphics for the given movement phase.
      */
     std::span<GraphicID> getGraphicsAtPhase(Uint8 phaseIndex);
+
+    /** Used as a "we should never hit this" cap on the container lengths. */
+    static constexpr std::size_t MAX_MOVEMENT_PHASES{SDL_MAX_UINT8};
+    static constexpr std::size_t MAX_GRAPHICS{SDL_MAX_UINT8};
+
+private:
+    /**
+     * Returns the index of the given phase's first graphic.
+     */
+    std::size_t getStartIndexForPhaseGraphics(Uint8 phaseIndex);
 };
 
 template<typename S>
-void serialize(S& serializer, AudioVisualEffect::MovementPhase& movementPhase)
+void serialize(S& serializer, AVSequence::MovementPhase& movementPhase)
 {
     serializer.value1b(movementPhase.movementType);
     serializer.value1b(movementPhase.movementSpeed);
@@ -101,12 +119,12 @@ void serialize(S& serializer, AudioVisualEffect::MovementPhase& movementPhase)
 }
 
 template<typename S>
-void serialize(S& serializer, AudioVisualEffect& audioVisualEffect)
+void serialize(S& serializer, AVSequence& audioVisualSequence)
 {
-    serializer.container(audioVisualEffect.movementPhases,
-                         AudioVisualEffect::MAX_MOVEMENT_PHASES);
-    serializer.container4b(audioVisualEffect.graphics,
-                           AudioVisualEffect::MAX_GRAPHICS);
+    serializer.container(audioVisualSequence.movementPhases,
+                         AVSequence::MAX_MOVEMENT_PHASES);
+    serializer.container4b(audioVisualSequence.graphics,
+                           AVSequence::MAX_GRAPHICS);
 }
 
 } // End namespace AM

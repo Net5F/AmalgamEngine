@@ -30,8 +30,13 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData)
 , dialogueChoiceConditionLua{std::make_unique<DialogueChoiceConditionLua>()}
 , world{inGraphicData, *entityInitLua, *itemInitLua}
 , currentTick{0}
-, engineLuaBindings{*entityInitLua, *entityItemHandlerLua,       *itemInitLua,
-                    *dialogueLua,   *dialogueChoiceConditionLua, world,
+, engineLuaBindings{*entityInitLua,
+                    *entityItemHandlerLua,
+                    *itemInitLua,
+                    *dialogueLua,
+                    *dialogueChoiceConditionLua,
+                    inGraphicData,
+                    world,
                     network}
 , extension{nullptr}
 , entityInteractionRequestQueue{inNetwork.getEventDispatcher()}

@@ -7,101 +7,102 @@ namespace Client
 {
 World::World(GraphicData& graphicData)
 : registry{}
-, audioVisualEffects{}
+, avSequences{}
 , itemData{}
 , playerEntity{entt::null}
 , entityLocator{registry}
 , collisionLocator{}
 , tileMap{graphicData, collisionLocator}
-, audioVisualEffectIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
+, avSequenceIDPool{IDPool::ReservationStrategy::ReuseLowest, 32}
 {
     // Initialize our entt groups, before anyone tries to use them.
     EnttGroups::init(registry);
 
-    // Reserve the null AV effect ID.
-    audioVisualEffectIDPool.reserveID();
+    // Reserve the null AV sequence ID.
+    avSequenceIDPool.reserveID();
 }
 
-AudioVisualEffectID
-    World::addAudioVisualEffect(const AudioVisualEffect& avEffect,
+AVSequenceID
+    World::addAVSequence(const AVSequence& avEffect,
                                 entt::entity selfEntity,
                                 entt::entity targetEntity)
 {
-    // If the effect doesn't have any phases, fail.
+    // If the sequence doesn't have any phases, fail.
     if (avEffect.movementPhases.empty()) {
-        return NULL_AUDIO_VISUAL_EFFECT_ID;
+        return NULL_AV_SEQUENCE_ID;
     }
 
-    // If the effect uses the Self entity and selfEntity doesn't exist, fail.
+    // If the sequence uses the Self entity and selfEntity doesn't exist, fail.
     Position* selfEntityPos{nullptr};
     if (avEffect.movementUsesSelf()) {
         selfEntityPos = registry.try_get<Position>(selfEntity);
         if (!selfEntityPos) {
-            return NULL_AUDIO_VISUAL_EFFECT_ID;
+            return NULL_AV_SEQUENCE_ID;
         }
     }
 
-    // If the effect uses the Target entity and targetEntity doesn't exist, fail.
+    // If the sequence uses the Target entity and targetEntity doesn't exist, 
+    // fail.
     Position* targetEntityPos{nullptr};
     if (avEffect.movementUsesTarget()) {
         targetEntityPos = registry.try_get<Position>(targetEntity);
         if (!targetEntityPos) {
-            return NULL_AUDIO_VISUAL_EFFECT_ID;
+            return NULL_AV_SEQUENCE_ID;
         }
     }
 
-    // Reserve an ID and create an empty effect instance.
-    AudioVisualEffectID effectID{
-        static_cast<AudioVisualEffectID>(audioVisualEffectIDPool.reserveID())};
-    audioVisualEffects.emplace(effectID, AudioVisualEffectInstance{});
-    AudioVisualEffectInstance& effectInstance{audioVisualEffects.at(effectID)};
+    // Reserve an ID and create an empty sequence instance.
+    AVSequenceID sequenceID{
+        static_cast<AVSequenceID>(avSequenceIDPool.reserveID())};
+    avSequences.emplace(sequenceID, AVSequenceInstance{});
+    AVSequenceInstance& sequenceInstance{avSequences.at(sequenceID)};
 
-    // Fill the instance with the effect's data.
-    effectInstance.effect = avEffect;
-    effectInstance.selfEntity = selfEntity;
-    effectInstance.targetEntity = targetEntity;
+    // Fill the instance with the sequence's data.
+    sequenceInstance.sequence = avEffect;
+    sequenceInstance.selfEntity = selfEntity;
+    sequenceInstance.targetEntity = targetEntity;
     if (selfEntityPos) {
-        effectInstance.selfPosition = *selfEntityPos;
+        sequenceInstance.selfPosition = *selfEntityPos;
     }
     if (targetEntityPos) {
-        effectInstance.targetPosition = *targetEntityPos;
+        sequenceInstance.targetPosition = *targetEntityPos;
     }
-    effectInstance.setStartTime = true;
+    sequenceInstance.setStartTime = true;
     // Note: We don't init phaseStartTime here because its timer shouldn't 
     //       start until it's actually rendered.
 
     // Init the instance's position based on the movement type of the 
-    // effect's first phase.
-    using MovementType = AudioVisualEffect::MovementType;
+    // sequence's first phase.
+    using MovementType = AVSequence::MovementType;
     MovementType movementType{avEffect.movementPhases.at(0).movementType};
     if ((movementType == MovementType::SelfToTarget)
         || (movementType == MovementType::FollowSelf)
         || (movementType == MovementType::StaticSelf)) {
-        effectInstance.position = effectInstance.selfPosition;
+        sequenceInstance.position = sequenceInstance.selfPosition;
     }
     else if ((movementType == MovementType::TargetToSelf)
         || (movementType == MovementType::FollowTarget)
         || (movementType == MovementType::StaticTarget)) {
-        effectInstance.position = effectInstance.targetPosition;
+        sequenceInstance.position = sequenceInstance.targetPosition;
     }
-    effectInstance.prevPosition = effectInstance.position;
+    sequenceInstance.prevPosition = sequenceInstance.position;
 
-    return effectID;
+    return sequenceID;
 }
 
-void World::remAudioVisualEffect(AudioVisualEffectID avEffectID)
+void World::remAVSequence(AVSequenceID avEffectID)
 {
-    // Find the effect in the map.
-    auto avEffectIt{audioVisualEffects.find(avEffectID)};
-    if (avEffectIt == audioVisualEffects.end()) {
-        LOG_FATAL("Invalid ID while removing AV effect.");
+    // Find the sequence in the map.
+    auto avEffectIt{avSequences.find(avEffectID)};
+    if (avEffectIt == avSequences.end()) {
+        LOG_FATAL("Invalid ID while removing AV sequence.");
     }
 
-    // Free the effect's ID.
-    audioVisualEffectIDPool.freeID(avEffectID);
+    // Free the sequence's ID.
+    avSequenceIDPool.freeID(avEffectID);
 
-    // Erase the effect.
-    audioVisualEffects.erase(avEffectIt);
+    // Erase the sequence.
+    avSequences.erase(avEffectIt);
 }
 
 } // End namespace Client

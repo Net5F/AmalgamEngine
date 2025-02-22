@@ -1,5 +1,5 @@
-#include "AudioVisualEffectSystem.h"
-#include "AudioVisualEffectInstance.h"
+#include "AVSequenceSystem.h"
+#include "AVSequenceInstance.h"
 #include "World.h"
 #include "Position.h"
 #include "Timer.h"
@@ -9,29 +9,29 @@ namespace AM
 {
 namespace Client
 {
-AudioVisualEffectSystem::AudioVisualEffectSystem(World& inWorld)
+AVSequenceSystem::AVSequenceSystem(World& inWorld)
 : world{inWorld}
 {
 }
 
-void AudioVisualEffectSystem::updateEffects()
+void AVSequenceSystem::updateSequences()
 {
-    // Iterate every phase, updating and erasing as necessary.
-    for (auto it{world.audioVisualEffects.begin()};
-         it != world.audioVisualEffects.end();) {
-        // If this effect has completed, kill it and continue.
-        AudioVisualEffectInstance& instance{it->second};
+    // Iterate every sequence, updating and erasing as necessary.
+    for (auto it{world.avSequences.begin()};
+         it != world.avSequences.end();) {
+        // If this sequence has completed, kill it and continue.
+        AVSequenceInstance& instance{it->second};
         if (instance.currentPhaseIndex
-            >= instance.effect.movementPhases.size()) {
-            it = world.audioVisualEffects.erase(it);
+            >= instance.sequence.movementPhases.size()) {
+            it = world.avSequences.erase(it);
             continue;
         }
 
-        // Move the effect, if necessary. If the movement failed, kill this 
-        // effect and continue.
-        MoveResult moveResult{moveEffect(instance)};
+        // Move the sequence, if necessary. If the movement failed, kill this 
+        // sequence and continue.
+        MoveResult moveResult{moveSequence(instance)};
         if (moveResult == MoveResult::Failure) {
-            it = world.audioVisualEffects.erase(it);
+            it = world.avSequences.erase(it);
             continue;
         }
 
@@ -45,13 +45,13 @@ void AudioVisualEffectSystem::updateEffects()
     }
 }
 
-AudioVisualEffectSystem::MoveResult
-    AudioVisualEffectSystem::moveEffect(AudioVisualEffectInstance& instance)
+AVSequenceSystem::MoveResult
+    AVSequenceSystem::moveSequence(AVSequenceInstance& instance)
 {
-    using MovementType = AudioVisualEffect::MovementType;
+    using MovementType = AVSequence::MovementType;
 
     auto& currentPhase{
-        instance.effect.movementPhases.at(instance.currentPhaseIndex)};
+        instance.sequence.movementPhases.at(instance.currentPhaseIndex)};
     MovementType movementType{currentPhase.movementType};
 
     // If this phase's movement uses the initiating entity's current position, 

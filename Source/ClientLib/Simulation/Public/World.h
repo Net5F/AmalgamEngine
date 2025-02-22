@@ -1,7 +1,7 @@
 #pragma once
 
-#include "AudioVisualEffectID.h"
-#include "AudioVisualEffectInstance.h"
+#include "AVSequenceID.h"
+#include "AVSequenceInstance.h"
 #include "ItemData.h"
 #include "TileMap.h"
 #include "EntityLocator.h"
@@ -36,9 +36,8 @@ public:
     /** Entity data registry. */
     entt::registry registry;
 
-    /** Our active audio/visual effect instances. */
-    std::unordered_map<AudioVisualEffectID, AudioVisualEffectInstance>
-        audioVisualEffects;
+    /** Our active audio/visual sequence instances. */
+    std::unordered_map<AVSequenceID, AVSequenceInstance> avSequences;
 
     /** Item data templates. */
     ItemData itemData;
@@ -58,33 +57,33 @@ public:
     TileMap tileMap;
 
     /**
-     * Adds a client-only AV effect instance to the world.
+     * Adds a client-only AV sequence instance to the world.
      *
-     * @param selfEntity The entity that the effect is targeting. If avEffect
-     *                   ever requires a Self entity, this is required. Else,
-     *                   this may be entt::null.
-     * @param targetEntity The entity that the effect is targeting. If avEffect
-     *                     ever requires a Target entity, this is required. 
-     *                     Else, this may be entt::null.
-     * @return If successful, returns the new effect's ID. Else, returns 
-     *         null (effect has no phases, required entity was invalid).
+     * @param selfEntity The entity that the sequence is targeting. If 
+     *                   avSequence ever requires a Self entity, this is 
+     *                   required. Else, this may be entt::null.
+     * @param targetEntity The entity that the sequence is targeting. If 
+     *                     avSequence ever requires a Target entity, this is 
+     *                     required. Else, this may be entt::null.
+     * @return If successful, returns the new sequence's ID. Else, returns 
+     *         null (sequence has no phases, required entity was invalid).
      */
-    AudioVisualEffectID addAudioVisualEffect(const AudioVisualEffect& avEffect,
-                                             entt::entity selfEntity,
-                                             entt::entity targetEntity);
+    AVSequenceID addAVSequence(const AVSequence& avSequence,
+                               entt::entity selfEntity,
+                               entt::entity targetEntity);
 
     /**
-     * Removes an AV effect from the world.
+     * Removes an AV sequence from the world.
      * 
-     * Only needed if you want to prematurely cancel an effect, or remove an 
-     * infinite-duration effect. Otherwise, all effects are automatically 
+     * Only needed if you want to prematurely cancel a sequence, or remove an 
+     * infinite-duration sequence. Otherwise, all sequences are automatically 
      * removed when their last phase completes.
      */
-    void remAudioVisualEffect(AudioVisualEffectID avEffectID);
+    void remAVSequence(AVSequenceID avSequenceID);
 
 private:
-    /** Used for generating runtime IDs for AV effect instances. */
-    IDPool audioVisualEffectIDPool;
+    /** Used for generating runtime IDs for AV sequence instances. */
+    IDPool avSequenceIDPool;
 };
 
 } // namespace Client
