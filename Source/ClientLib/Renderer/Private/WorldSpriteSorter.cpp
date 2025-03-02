@@ -165,29 +165,6 @@ void WorldSpriteSorter::gatherEntitySpriteInfo(const Camera& camera,
     }
 }
 
-void WorldSpriteSorter::gatherAVSequenceSpriteInfo(const Camera& camera,
-                                                   double alpha)
-{
-    // Gather all audio/visual sequence instances.
-    for (auto& [id, instance] : world.avSequences) {
-        // Calc a lerp'd position.
-        Position renderPosition{instance.position};
-        renderPosition = MovementHelpers::interpolatePosition(
-            instance.prevPosition, instance.position, alpha);
-
-        // Push every graphic from the current phase (a single phase can have 
-        // multiple graphics).
-        for (GraphicID& graphicID :
-             instance.sequence.getGraphicsAtPhase(instance.currentPhaseIndex)) {
-            GraphicRef graphic{graphicData.getGraphic(graphicID)};
-
-            const Sprite& sprite{getAVSequenceSprite(instance, graphic)};
-            pushAVSequenceSprite(instance, renderPosition, graphic, sprite,
-                                 camera);
-        }
-    }
-}
-
 void WorldSpriteSorter::pushTerrainSprites(
     const Tile& tile, const Camera& camera, const TilePosition& tilePosition)
 {
@@ -453,66 +430,6 @@ void WorldSpriteSorter::pushEntitySprite(entt::entity entity,
         // Push the entity's render info for this frame.
         spritesToSort.emplace_back(&sprite, ownerID, worldBounds, screenExtent,
                                    colorMod);
-    }
-}
-
-const Sprite&
-    WorldSpriteSorter::getAVSequenceSprite(AVSequenceInstance& instance,
-                                           const GraphicRef& graphic)
-{
-    // Get the current sprite for this graphic.
-    const Sprite* sprite{nullptr};
-    std::visit(
-        VariantTools::Overload{
-            [&](std::reference_wrapper<const Sprite> spriteRef) {
-                sprite = &(spriteRef.get());
-            },
-            [&](std::reference_wrapper<const Animation> animation) {
-                // Calc how far we are into this animation and get the
-                // appropriate sprite.
-                double animationTime{currentAnimationTimestamp
-                                     - instance.phaseStartTime};
-                sprite
-                    = &(animation.get().getSpriteAtTime(animationTime));
-
-                // If this phase just began, set its start time.
-                if (instance.setStartTime) {
-                    instance.phaseStartTime
-                        = Timer::getGlobalTime();
-                    instance.setStartTime = false;
-                }
-            }},
-        graphic);
-
-    return *sprite;
-}
-
-void WorldSpriteSorter::pushAVSequenceSprite(AVSequenceInstance& instance,
-                                             const Position& position,
-                                             const GraphicRef& graphic,
-                                             const Sprite& sprite,
-                                             const Camera& camera)
-{
-    // Get the iso screen extent for the sprite.
-    const BoundingBox& modelBounds{graphic.getModelBounds()};
-    const SpriteRenderData& renderData{
-        graphicData.getSpriteRenderData(sprite.numericID)};
-    SDL_FRect screenExtent{ClientTransforms::avEffectToScreenExtent(
-        position, modelBounds.getBottomCenterPoint(), renderData, camera)};
-
-    // If the sprite is on screen, push the render info.
-    if (isWithinScreenBounds(screenExtent, camera)) {
-        // Get a box for this effect, to use for sorting.
-        BoundingBox worldBounds{
-            Transforms::modelToWorldEntity(modelBounds, position)};
-
-        // AV sequence graphics shouldn't be selectable by the UI, so we don't 
-        // give them an owner (which keeps them from being added to the UI's 
-        // object locator).
-        WorldObjectID ownerID{std::monostate{}};
-
-        // Push the sequence's render info for this frame.
-        spritesToSort.emplace_back(&sprite, ownerID, worldBounds, screenExtent);
     }
 }
 

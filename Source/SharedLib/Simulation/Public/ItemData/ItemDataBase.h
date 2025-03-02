@@ -22,7 +22,7 @@ namespace AM
  * an entity's Inventory.
  *
  * Also adds the "Null" item. The null item can't be overwritten or edited, but
- * it can be accessed through getItem() to get a default icon to use.
+ * it can be accessed through getItem() to get a default item to use.
  *
  * Note: Once created, items can't be deleted. You can, however, repurpose an
  *       ID by updating that item's definition.
@@ -103,9 +103,6 @@ protected:
     /** Tracks the next numeric item ID to use (typically 1 greater than the
         highest ID in our maps). */
     ItemID nextItemID{};
-
-    /** A scratch buffer used while processing string IDs. */
-    std::string workStringID;
 
     entt::sigh<void(ItemID)> itemCreatedSig;
     entt::sigh<void(ItemID)> itemUpdatedSig;

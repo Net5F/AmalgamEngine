@@ -1,6 +1,5 @@
 target_sources(SharedLib
     PRIVATE
-        Private/AVSequence.cpp
         Private/BoundingBox.cpp
         Private/CollisionLocator.cpp
         Private/Cylinder.cpp
@@ -34,9 +33,6 @@ target_sources(SharedLib
         Private/TileMap/TileMapBase.cpp
         Private/TileMap/TilePosition.cpp
     PUBLIC
-        Public/AVSequence.h
-        Public/AVSequenceID.h
-        Public/AVSequenceInstance.h
         Public/BoundingBox.h
         Public/BoundingBoxID.h
         Public/CollisionLocator.h

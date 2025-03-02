@@ -13,7 +13,6 @@
 #include "ComponentUpdateSystem.h"
 #include "GraphicSystem.h"
 #include "CameraSystem.h"
-#include "AVSequenceSystem.h"
 #include "Item.h"
 #include "Config.h"
 #include "Log.h"
@@ -165,9 +164,6 @@ void Simulation::tick()
         // Move all cameras to their new positions.
         cameraSystem->moveCameras();
 
-        // Update audio/visual sequences.
-        avSequenceSystem->updateSequences();
-
         // Call the project's post-everything logic.
         if (extension != nullptr) {
             extension->afterAll();
@@ -234,7 +230,6 @@ void Simulation::initializeSystems()
         *this, world, network, graphicData);
     graphicSystem = std::make_unique<GraphicSystem>(world, graphicData);
     cameraSystem = std::make_unique<CameraSystem>(world);
-    avSequenceSystem = std::make_unique<AVSequenceSystem>(world);
 
     // Tell the project to initialize its systems.
     if (extension != nullptr) {

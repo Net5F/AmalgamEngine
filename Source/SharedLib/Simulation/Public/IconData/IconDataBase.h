@@ -33,7 +33,7 @@ public:
      * Returns the icon with the given string ID.
      * Errors if the given ID doesn't exist.
      */
-    const Icon& getIcon(const std::string& stringID);
+    const Icon& getIcon(const std::string& stringID) const;
 
     /**
      * Returns the icon with the given numeric ID.
@@ -70,9 +70,6 @@ private:
 
     /** A map for easily looking up icons by their string ID. */
     std::unordered_map<std::string, const Icon*> iconStringMap;
-
-    /** A scratch buffer used while processing string IDs. */
-    std::string workStringID;
 };
 
 } // End namespace AM

@@ -1,12 +1,9 @@
 #pragma once
 
-#include "AVSequenceID.h"
-#include "AVSequenceInstance.h"
 #include "ItemData.h"
 #include "TileMap.h"
 #include "EntityLocator.h"
 #include "CollisionLocator.h"
-#include "IDPool.h"
 #include "entt/entity/registry.hpp"
 
 struct SDL_Rect;
@@ -36,9 +33,6 @@ public:
     /** Entity data registry. */
     entt::registry registry;
 
-    /** Our active audio/visual sequence instances. */
-    std::unordered_map<AVSequenceID, AVSequenceInstance> avSequences;
-
     /** Item data templates. */
     ItemData itemData;
 
@@ -55,35 +49,6 @@ public:
 
     /** The tile map that makes up the world. */
     TileMap tileMap;
-
-    /**
-     * Adds a client-only AV sequence instance to the world.
-     *
-     * @param selfEntity The entity that the sequence is targeting. If 
-     *                   avSequence ever requires a Self entity, this is 
-     *                   required. Else, this may be entt::null.
-     * @param targetEntity The entity that the sequence is targeting. If 
-     *                     avSequence ever requires a Target entity, this is 
-     *                     required. Else, this may be entt::null.
-     * @return If successful, returns the new sequence's ID. Else, returns 
-     *         null (sequence has no phases, required entity was invalid).
-     */
-    AVSequenceID addAVSequence(const AVSequence& avSequence,
-                               entt::entity selfEntity,
-                               entt::entity targetEntity);
-
-    /**
-     * Removes an AV sequence from the world.
-     * 
-     * Only needed if you want to prematurely cancel a sequence, or remove an 
-     * infinite-duration sequence. Otherwise, all sequences are automatically 
-     * removed when their last phase completes.
-     */
-    void remAVSequence(AVSequenceID avSequenceID);
-
-private:
-    /** Used for generating runtime IDs for AV sequence instances. */
-    IDPool avSequenceIDPool;
 };
 
 } // namespace Client

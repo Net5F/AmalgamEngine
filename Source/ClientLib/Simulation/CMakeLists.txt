@@ -1,6 +1,5 @@
 target_sources(ClientLib
     PRIVATE
-        Private/AVSequenceSystem.cpp
         Private/CameraSystem.cpp
         Private/ChunkUpdateSystem.cpp
         Private/ComponentUpdateSystem.cpp
@@ -21,7 +20,6 @@ target_sources(ClientLib
         Private/ItemData/ItemData.cpp
         Private/TileMap/TileMap.cpp
     PUBLIC
-        Public/AVSequenceSystem.h
         Public/CameraSystem.h
         Public/ChunkUpdateSystem.h
         Public/ComponentUpdateSystem.h

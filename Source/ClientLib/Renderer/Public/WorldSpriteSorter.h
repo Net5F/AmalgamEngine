@@ -15,7 +15,6 @@ struct Camera;
 class Tile;
 struct TileLayerID;
 struct GraphicState;
-struct AVSequenceInstance;
 
 namespace Client
 {
@@ -73,11 +72,6 @@ private:
      */
     void gatherEntitySpriteInfo(const Camera& camera, double alpha);
 
-    /**
-     * Performs the audio/visual sequence portion of the gather step.
-     */
-    void gatherAVSequenceSpriteInfo(const Camera& camera, double alpha);
-
     // All of these just call pushTileSprite(), but Floor and Wall also check
     // if the UI wants to swap any of their sprites with a phantom.
     void pushTerrainSprites(const Tile& tile, const Camera& camera,
@@ -111,22 +105,6 @@ private:
                           const Sprite& sprite, const Camera& camera,
                           EntityGraphicSetID graphicSetID,
                           EntityGraphicType graphicType);
-
-    /**
-     * Returns the current sprite for the given AV sequence data, or nullptr 
-     * if the sequence is using an empty animation.
-     * Updates the sequence's animation state data if necessary.
-     */
-    const Sprite& getAVSequenceSprite(AVSequenceInstance& instance,
-                                      const GraphicRef& graphic);
-
-    /**
-     * Pushes the given AV sequence sprite into the sorting vector.
-     */
-    void pushAVSequenceSprite(AVSequenceInstance& instance,
-                              const Position& position,
-                              const GraphicRef& graphic, const Sprite& sprite,
-                              const Camera& camera);
 
     /**
      * Sorts the sprites into their draw order (farthest sprite first).

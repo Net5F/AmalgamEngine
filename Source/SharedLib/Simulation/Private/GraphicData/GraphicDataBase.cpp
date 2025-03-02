@@ -21,8 +21,12 @@ constexpr auto array_repeat_impl(T&& x, std::index_sequence<Indices...>)
 
 } // namespace detail
 
-// Used to fill our non-default-constructible GraphicRef arrays.
-// Ref: https://stackoverflow.com/a/63821008/4258629
+namespace
+{
+/**
+ * Used to fill our non-default-constructible GraphicRef arrays.
+ * Ref: https://stackoverflow.com/a/63821008/4258629
+ */
 template<size_t N, class T>
 constexpr auto constructAndFillArray(T&& x)
 {
@@ -30,11 +34,13 @@ constexpr auto constructAndFillArray(T&& x)
                                      std::make_index_sequence<N>());
 }
 
-namespace AM
-{
 /** A scratch buffer used while processing string IDs.
     Must be file-local so it can be accessed by const functions. */
 std::string workStringID{};
+}
+
+namespace AM
+{
 
 GraphicDataBase::GraphicDataBase(const nlohmann::json& resourceDataJson)
 : sprites{}

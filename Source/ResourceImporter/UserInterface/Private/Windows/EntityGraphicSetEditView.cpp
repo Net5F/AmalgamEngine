@@ -4,7 +4,7 @@
 #include "SpriteID.h"
 #include "LibraryItemData.h"
 #include "Paths.h"
-#include "EntityGraphicDisplayData.h"
+#include "DisplayStrings.h"
 #include "AUI/Core.h"
 
 namespace AM

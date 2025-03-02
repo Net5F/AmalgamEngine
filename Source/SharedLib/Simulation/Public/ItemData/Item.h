@@ -74,8 +74,7 @@ struct Item {
     std::vector<ItemCombination> itemCombinations{};
 
     /**
-     * Adds the given interaction to supportedInteractions, and adds an 
-     * associated (empty) effect to interactionAVEffects.
+     * Adds the given interaction to supportedInteractions.
      * @return true if the interaction was added, else false (already present 
      *         or array was full).
      */

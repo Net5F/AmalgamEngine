@@ -4,18 +4,24 @@
 #include "Log.h"
 #include "nlohmann/json.hpp"
 
+namespace
+{
+/** A scratch buffer used while processing string IDs.
+    Must be file-local so it can be accessed by const functions. */
+std::string workStringID{};
+}
+
 namespace AM
 {
 IconDataBase::IconDataBase(const nlohmann::json& resourceDataJson)
 : icons{}
 , iconStringMap{}
-, workStringID{}
 {
     // Parse the json structure to construct our icons.
     parseJson(resourceDataJson);
 }
 
-const Icon& IconDataBase::getIcon(const std::string& stringID)
+const Icon& IconDataBase::getIcon(const std::string& stringID) const
 {
     // Derive string ID in case the user accidentally passed a display name.
     StringTools::deriveStringID(stringID, workStringID);

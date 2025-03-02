@@ -3,6 +3,13 @@
 #include "Log.h"
 #include <algorithm>
 
+namespace
+{
+/** A scratch buffer used while processing string IDs.
+    Must be file-local so it can be accessed by const functions. */
+std::string workStringID{};
+}
+
 namespace AM
 {
 namespace Server

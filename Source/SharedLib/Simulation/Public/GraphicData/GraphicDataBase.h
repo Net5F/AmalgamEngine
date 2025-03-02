@@ -80,7 +80,7 @@ public:
 
     /**
      * Returns the sprite set with the given numeric ID.
-     * Errors if the given ID doesn't exist.
+     * Errors if the given ID doesn't exist, returns the null set in release.
      */
     const TerrainGraphicSet&
         getTerrainGraphicSet(TerrainGraphicSetID numericID) const;

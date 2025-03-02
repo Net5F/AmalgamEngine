@@ -4,6 +4,13 @@
 #include "Log.h"
 #include "AMAssert.h"
 
+namespace
+{
+/** A scratch buffer used while processing string IDs.
+    Must be file-local so it can be accessed by const functions. */
+std::string workStringID{};
+}
+
 namespace AM
 {
 ItemDataBase::ItemDataBase()
@@ -11,12 +18,17 @@ ItemDataBase::ItemDataBase()
 , itemStringMap{}
 , itemVersionMap{}
 , nextItemID{NULL_ITEM_ID + 1}
-, workStringID{}
 , itemCreatedSig{}
 , itemUpdatedSig{}
 , itemCreated{itemCreatedSig}
 , itemUpdated{itemUpdatedSig}
 {
+    // Add the null item.
+    Item& newItem{itemMap[NULL_ITEM_ID]};
+    newItem.stringID = "null";
+    newItem.numericID = NULL_ITEM_ID;
+    itemVersionMap[NULL_ITEM_ID] = 0;
+    itemStringMap["null"] = &newItem;
 }
 
 const Item* ItemDataBase::loadItem(const Item& referenceItem,
