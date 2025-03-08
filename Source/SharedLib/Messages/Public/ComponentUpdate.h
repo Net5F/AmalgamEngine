@@ -9,6 +9,7 @@
 
 namespace AM
 {
+// TODO: We don't track removed components. Do we want to?
 /**
  * Sent by the server when a nearby entity's components are updated.
  */
