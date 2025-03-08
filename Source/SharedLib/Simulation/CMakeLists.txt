@@ -9,6 +9,7 @@ target_sources(SharedLib
         Private/Ray.cpp
         Private/ResourceData.cpp
         Private/Vector3.cpp
+        Private/CastableData/CastableData.cpp
         Private/Components/Camera.cpp
         Private/Components/Interaction.cpp
         Private/Components/Inventory.cpp
@@ -51,6 +52,10 @@ target_sources(SharedLib
         Public/ReplicatedComponent.h
         Public/ResourceData.h
         Public/Vector3.h
+        Public/CastableData/AVEntity.h
+        Public/CastableData/Castable.h
+        Public/CastableData/CastableData.h
+        Public/CastableData/VisualEffect.h
         Public/Components/Camera.h
         Public/Components/Collision.h
         Public/Components/EntityInitScript.h
@@ -105,6 +110,7 @@ target_sources(SharedLib
 target_include_directories(SharedLib
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/Private
+        ${CMAKE_CURRENT_SOURCE_DIR}/Private/CastableData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/Components
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/GraphicData
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/IconData
@@ -112,6 +118,7 @@ target_include_directories(SharedLib
         ${CMAKE_CURRENT_SOURCE_DIR}/Private/TileMap
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
+        ${CMAKE_CURRENT_SOURCE_DIR}/Public/CastableData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/Components
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/GraphicData
         ${CMAKE_CURRENT_SOURCE_DIR}/Public/IconData

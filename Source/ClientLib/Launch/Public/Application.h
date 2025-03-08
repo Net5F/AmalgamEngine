@@ -9,6 +9,7 @@
 #include "ResourceData.h"
 #include "GraphicData.h"
 #include "IconData.h"
+#include "CastableData.h"
 #include "QueuedEvents.h"
 #include "UserInterface.h"
 #include "PeriodicCaller.h"
@@ -157,6 +158,8 @@ private:
     GraphicData graphicData;
 
     IconData iconData;
+
+    CastableData castableData;
 
     Network network;
     /** Calls network.tick() at the network tick rate. */

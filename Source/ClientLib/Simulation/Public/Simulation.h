@@ -11,6 +11,7 @@
 namespace AM
 {
 class EventDispatcher;
+class CastableData;
 struct Item;
 
 namespace Client
@@ -45,7 +46,7 @@ public:
     static constexpr double SIM_DELAYED_TIME_S{.001};
 
     Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
-               GraphicData& inGraphicData);
+               GraphicData& inGraphicData, CastableData& inCastableData);
 
     ~Simulation();
 
@@ -117,6 +118,7 @@ private:
         send messages. */
     Network& network;
     GraphicData& graphicData;
+    CastableData& castableData;
 
     /** The local world's state. */
     World world;

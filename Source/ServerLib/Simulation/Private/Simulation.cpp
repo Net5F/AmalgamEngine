@@ -1,5 +1,6 @@
 #include "Simulation.h"
 #include "Network.h"
+#include "CastableData.h"
 #include "EntityInitLua.h"
 #include "EntityItemHandlerLua.h"
 #include "ItemInitLua.h"
@@ -21,7 +22,8 @@ namespace AM
 {
 namespace Server
 {
-Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData)
+Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData,
+                       CastableData& castableData)
 : network{inNetwork}
 , entityInitLua{std::make_unique<EntityInitLua>()}
 , entityItemHandlerLua{std::make_unique<EntityItemHandlerLua>()}
@@ -126,15 +128,15 @@ bool Simulation::popItemInteractionRequest(ItemInteractionType interactionType,
     // If there's a waiting message of the given type, validate it.
     std::queue<ItemInteractionRequest>& queue{
         itemInteractionQueueMap[interactionType]};
-    if (!(queue.empty())) {
+    while (!(queue.empty())) {
         ItemInteractionRequest interactionRequest{queue.front()};
         queue.pop();
 
         // Find the client's entity ID.
         auto it{world.netIDMap.find(interactionRequest.netID)};
         if (it == world.netIDMap.end()) {
-            // Client doesn't exist (may have disconnected), do nothing.
-            return false;
+            // Client doesn't exist (may have disconnected), skip this request.
+            continue;
         }
         entt::entity clientEntity{it->second};
 
@@ -145,7 +147,8 @@ bool Simulation::popItemInteractionRequest(ItemInteractionType interactionType,
         if (!item
             || !(item->supportsInteraction(
                 interactionRequest.interactionType))) {
-            return false;
+            // Interaction isn't supported, skip this request.
+            continue;
         }
 
         // Request is valid. Return it.

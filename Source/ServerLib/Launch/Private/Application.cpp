@@ -18,10 +18,11 @@ Application::Application()
 , resourceData{}
 , graphicData{resourceData.get()}
 , iconData{resourceData.get()}
+, castableData{}
 , network{}
 , networkCaller{std::bind_front(&Network::tick, &network),
                 SharedConfig::SERVER_NETWORK_TICK_TIMESTEP_S, "Network", true}
-, simulation{network, graphicData}
+, simulation{network, graphicData, castableData}
 , simCaller{std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
 , exitRequested{false}

@@ -39,6 +39,7 @@ target_sources(ClientLib
         Public/TileUpdateSystem.h
         Public/World.h
         Public/WorldObjectID.h
+        Public/Components/AVEffects.h
         Public/Components/ClientGraphicState.h
         Public/Components/InputHistory.h
         Public/Components/NeedsAdjacentChunks.h

@@ -1,6 +1,7 @@
 #include "Simulation.h"
 #include "Network.h"
 #include "GraphicData.h"
+#include "CastableData.h"
 #include "ISimulationExtension.h"
 #include "ChunkUpdateSystem.h"
 #include "TileUpdateSystem.h"
@@ -25,9 +26,10 @@ namespace AM
 namespace Client
 {
 Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
-                       GraphicData& inGraphicData)
+                       GraphicData& inGraphicData, CastableData& inCastableData)
 : network{inNetwork}
 , graphicData{inGraphicData}
+, castableData{inCastableData}
 , world{inGraphicData}
 , currentTick{0}
 , extension{nullptr}

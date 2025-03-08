@@ -30,6 +30,8 @@
 
 namespace AM
 {
+class CastableData;
+
 namespace Server
 {
 class Network;
@@ -55,7 +57,8 @@ public:
     /** An unreasonable amount of time for the sim tick to be late by. */
     static constexpr double SIM_DELAYED_TIME_S{.001};
 
-    Simulation(Network& inNetwork, GraphicData& inGraphicData);
+    Simulation(Network& inNetwork, GraphicData& inGraphicData,
+               CastableData& inCastableData);
 
     ~Simulation();
 

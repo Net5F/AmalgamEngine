@@ -6,6 +6,7 @@
 #include "ResourceData.h"
 #include "GraphicData.h"
 #include "IconData.h"
+#include "CastableData.h"
 #include "PeriodicCaller.h"
 #include "SDLNetInitializer.h"
 #include "IMessageProcessorExtension.h"
@@ -90,6 +91,8 @@ private:
     GraphicData graphicData;
 
     IconData iconData;
+
+    CastableData castableData;
 
     Network network;
     /** Calls network.tick() at the network tick rate. */
