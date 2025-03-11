@@ -5,14 +5,7 @@
 namespace AM
 {
 /**
- * All of the project's component types that are relevant to the client.
- *
- * When a client comes in range of an entity, an Init message that includes
- * these components will be sent (if the entity possesses any of them).
- *
- * In other words, adding components to this list will cause them to be sent
- * once. If you want a component to additionally be sent whenever it's updated,
- * add it to ProjectObservedComponentTypes.
+ * See EngineReplicatedComponentTypes.h for more info.
  */
 using ProjectReplicatedComponentTypes = boost::mp11::mp_list<>;
 

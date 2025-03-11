@@ -17,7 +17,7 @@ class GraphicData;
 
 /**
  * Observes component updates based on the ObservedComponentTypes lists in
- * EngineObservedComponents.h and ProjectObservedComponents.h.
+ * EngineObservedComponentTypes.h and ProjectObservedComponentTypes.h.
  *
  * When an observed component is updated, sends an update message to all nearby
  * clients.

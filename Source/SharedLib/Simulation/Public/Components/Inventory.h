@@ -15,6 +15,10 @@ struct ItemCombination;
  *
  * All client entities have an inventory. Non-client entities may or may not
  * have one.
+ *
+ * Note: This isn't auto-replicated, because it's only relevant to the server, 
+ *       and to the client that owns it. Instead, the client adds an Inventory 
+ *       for the player entity, and we send custom messages to replicate it.
  */
 struct Inventory {
 public:

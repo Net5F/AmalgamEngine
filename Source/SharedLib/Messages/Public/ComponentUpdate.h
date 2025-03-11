@@ -9,7 +9,6 @@
 
 namespace AM
 {
-// TODO: We don't track removed components. Do we want to?
 /**
  * Sent by the server when a nearby entity's components are updated.
  */
@@ -27,6 +26,10 @@ struct ComponentUpdate {
 
     /** The entity's updated components. */
     std::vector<ReplicatedComponent> components{};
+
+    /** The indices (from ReplicatedComponentTypes) of any of the entity's 
+        components that were destroyed. */
+    //std::vector<Uint8> destroyedComponents{};
 };
 
 template<typename S>
@@ -43,6 +46,8 @@ void serialize(S& serializer, ComponentUpdate& componentUpdate)
                           serializer.ext(component, bitsery::ext::StdVariant{});
                       });
     });
+    //serializer.container(componentUpdate.destroyedComponents,
+    //                     boost::mp11::mp_size<ReplicatedComponentTypes>::value);
 }
 
 } // End namespace AM
