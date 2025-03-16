@@ -47,6 +47,7 @@ target_sources(SharedLib
         Public/EngineItemInteractionType.h
         Public/EntityLocator.h
         Public/EntityMover.h
+        Public/EnttObserver.h
         Public/MovementHelpers.h
         Public/Ray.h
         Public/ReplicatedComponent.h

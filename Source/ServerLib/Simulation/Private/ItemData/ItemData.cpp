@@ -24,8 +24,9 @@ ItemData::ItemData()
 const Item* ItemData::createItem(const Item& referenceItem,
                                  std::string_view initScript)
 {
-    // If the numeric ID is taken, do nothing.
-    if (itemMap.find(referenceItem.numericID) != itemMap.end()) {
+    // If the numeric ID is non-null and taken, do nothing.
+    if ((referenceItem.numericID != NULL_ITEM_ID)
+        && (itemMap.find(referenceItem.numericID) != itemMap.end())) {
         return nullptr;
     }
 

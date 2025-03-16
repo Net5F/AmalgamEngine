@@ -21,9 +21,12 @@ MovementSyncSystem::MovementSyncSystem(Simulation& inSimulation, World& inWorld,
 , network{inNetwork}
 , updatedEntities{}
 , entitiesToSend{}
-, inputObserver{world.registry,
-                entt::collector.update<Input>().update<MovementModifiers>()}
+, movementSyncObserver{}
 {
+    // Observe Input and MovementModifiers. Everything else can be handled 
+    // client-side.
+    movementSyncObserver.bind(world.registry);
+    movementSyncObserver.on_update<Input>().on_update<MovementModifiers>();
 }
 
 void MovementSyncSystem::sendMovementUpdates()
@@ -36,11 +39,11 @@ void MovementSyncSystem::sendMovementUpdates()
 
     // Push all the updated entities into a vector and sort them.
     updatedEntities.clear();
-    for (entt::entity entity : inputObserver) {
+    for (entt::entity entity : movementSyncObserver) {
         updatedEntities.push_back(entity);
     }
     std::sort(updatedEntities.begin(), updatedEntities.end());
-    inputObserver.clear();
+    movementSyncObserver.clear();
 
     // Send clients the updated movement state of any nearby entities that have
     // changed inputs, teleported, etc.

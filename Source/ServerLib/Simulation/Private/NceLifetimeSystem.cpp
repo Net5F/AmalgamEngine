@@ -57,33 +57,30 @@ void NceLifetimeSystem::setExtension(ISimulationExtension* inExtension)
 void NceLifetimeSystem::handleInitRequest(
     const EntityInitRequest& entityInitRequest)
 {
-    // If the project says the request isn't valid, skip it.
+    // If the project says the request isn't valid, do nothing.
     if ((extension != nullptr)
         && !(extension->isEntityInitRequestValid(entityInitRequest))) {
         return;
     }
 
-    // If the message contains an entity ID, re-initialize the given entity.
-    if (entityInitRequest.entity != entt::null) {
-        // Double-check that the ID is actually in use.
-        if (world.registry.valid(entityInitRequest.entity)) {
-            // Remove it from the locators.
-            world.entityLocator.removeEntity(entityInitRequest.entity);
-            if (world.registry.all_of<Collision>(entityInitRequest.entity)) {
-                world.collisionLocator.removeEntity(entityInitRequest.entity);
-            }
-
-            // This is an existing entity. Remove all of its components.
-            for (auto [id, storage] : world.registry.storage()) {
-                storage.remove(entityInitRequest.entity);
-            }
-
-            // Queue an init for next tick.
-            // Note: Since the entity was removed from the locator, AOISystem
-            //       will tell nearby clients to delete it. Then, when we re-
-            //       init it, AOISystem will send them the new data.
-            entityReInitQueue.push(entityInitRequest);
+    // If the message contains a valid entity ID, re-initialize the given entity.
+    if (world.registry.valid(entityInitRequest.entity)) {
+        // If the requested entity is a client entity, do nothing (we don't 
+        // allow clients to re-init client entities).
+        if (world.registry.all_of<IsClientEntity>(entityInitRequest.entity)) {
+            return;
         }
+
+        // Destroy the entity.
+        // Note: This will cause it to be removed from the entity locator, 
+        //       triggering ClientAOISystem to tell peers to delete it.
+        //       Then, when we re-init it, ClientAOISystem will send them 
+        //       the new data. This ensures that we don't leave any old 
+        //       components.
+        world.registry.destroy(entityInitRequest.entity);
+
+        // Queue an init for next tick.
+        entityReInitQueue.push(entityInitRequest);
     }
     else {
         // No ID, create a new entity and initialize it.

@@ -1,9 +1,8 @@
 #pragma once
 
 #include "InventoryOperation.h"
+#include "EnttObserver.h"
 #include "QueuedEvents.h"
-#include "entt/entity/observer.hpp"
-#include "entt/entity/registry.hpp"
 
 namespace AM
 {
@@ -63,7 +62,7 @@ private:
 
     /** Observes player Inventory component creation so we can send the initial
         inventory state to a newly-logged-on player. */
-    entt::observer playerInventoryObserver;
+    EnttObserver::TwoComponent playerInventoryObserver;
 
     EventQueue<InventoryOperation> inventoryOperationQueue;
 };

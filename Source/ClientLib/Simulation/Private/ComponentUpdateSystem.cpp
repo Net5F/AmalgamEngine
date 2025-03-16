@@ -79,7 +79,8 @@ void ComponentUpdateSystem::processComponentUpdate(
 {
     entt::registry& registry{world.registry};
 
-    for (const auto& componentVariant : componentUpdate.components) {
+    // Construct or update any updated components.
+    for (const auto& componentVariant : componentUpdate.updatedComponents) {
         std::visit(
             [&](const auto& component) {
                 using T = std::decay_t<decltype(component)>;
@@ -87,6 +88,17 @@ void ComponentUpdateSystem::processComponentUpdate(
                                                component);
             },
             componentVariant);
+    }
+
+    // Destroy any destroyed components.
+    for (Uint8 componentIndex : componentUpdate.destroyedComponents) {
+        boost::mp11::mp_with_index<
+            boost::mp11::mp_size<ReplicatedComponentTypes>>(
+            componentIndex, [&](auto I) {
+                using ComponentType
+                    = boost::mp11::mp_at_c<ReplicatedComponentTypes, I>;
+                registry.remove<ComponentType>(componentUpdate.entity);
+            });
     }
 }
 

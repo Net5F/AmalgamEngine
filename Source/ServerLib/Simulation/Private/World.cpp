@@ -400,14 +400,15 @@ Position World::getGroupedSpawnPoint()
 
 void World::onEntityDestroyed(entt::entity entity)
 {
+    // Note: Only ClientConnectionSystem should be destroying client entities, 
+    //       so we don't handle netIDMap cleanup here.
+
     // Remove it from the locators.
     // Note: Client entities could easily be removed where we delete them, but 
     //       NCEs may be deleted at any point by project code, so we handle it
     //       here to avoid bugs. 
     entityLocator.removeEntity(entity);
-    if (registry.all_of<Collision>(entity)) {
-        collisionLocator.removeEntity(entity);
-    }
+    collisionLocator.removeEntity(entity);
 
     // If the entity is in the database, delete it (does nothing if it isn't).
     // Note: This is to delete non-client entities, since they get persisted.

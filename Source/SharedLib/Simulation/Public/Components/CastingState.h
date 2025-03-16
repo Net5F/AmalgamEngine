@@ -5,14 +5,16 @@
 namespace AM
 {
 
-// TODO: Is this what we want? Who gets a CastingState? Would be nice to 
-//       remove when not in use, but would that be expensive?
-//       Options:
-//         Every entity has a CastingState, it has a bool isCasting to check.
-//         CastingState is added only if an entity is casting, use any_of<> 
-//         to check.
 /**
+ * Tracks whether an entity is currently casting a Castable.
  * 
+ * This component will only be present on an entity if a cast is currently 
+ * ongoing. It gets removed when the cast ends.
+ *
+ * Note: We manually replicate this component. If we auto-replicated, all 
+ *       destructions would be replicated. By handling it manually, we can get 
+ *       away with only sending CastStarted and CastCanceled (a successful cast 
+ *       can be assumed when there's no cancelation before endTick).
  */
 struct CastingState {
     enum class CastableType : Uint8 {

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "entt/entity/registry.hpp"
-#include "entt/entity/observer.hpp"
+#include "EnttObserver.h"
 
 namespace AM
 {
@@ -72,8 +71,9 @@ private:
         for. */
     std::vector<entt::entity> entitiesToSend;
 
-    /** Observes Input component updates so we know when to sync. */
-    entt::observer inputObserver;
+    /** Observes updates to movement sync-relevant components so we know when 
+        to sync. */
+    EnttObserver::OneComponent movementSyncObserver;
 };
 
 } // namespace Server

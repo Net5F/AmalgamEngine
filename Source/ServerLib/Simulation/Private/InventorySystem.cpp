@@ -22,15 +22,21 @@ InventorySystem::InventorySystem(World& inWorld, Network& inNetwork)
 , inventoryOperationQueue{inNetwork.getEventDispatcher()}
 {
     // Observe player Inventory construction events.
-    playerInventoryObserver.connect(
-        world.registry, entt::collector.group<ClientSimData, Inventory>());
+    playerInventoryObserver.bind(world.registry);
+    playerInventoryObserver
+        .on_construct<ClientSimData, &EnttObserver::twoComponentCallback>()
+        .on_construct<Inventory, &EnttObserver::twoComponentCallback>();
 }
 
 void InventorySystem::sendInventoryInits()
 {
     // If a player Inventory was constructed, send the initial state to that
     // player.
-    for (entt::entity entity : playerInventoryObserver) {
+    for (auto [entity, hasBothComponents] : playerInventoryObserver.each()) {
+        if (!hasBothComponents) {
+            continue;
+        }
+
         auto [client, inventory]
             = world.registry.get<ClientSimData, Inventory>(entity);
 
@@ -47,9 +53,9 @@ void InventorySystem::sendInventoryInits()
         if (inventoryInit.slots.size() > 0) {
             network.serializeAndSend(client.netID, inventoryInit);
         }
-    }
 
-    playerInventoryObserver.clear();
+        playerInventoryObserver.remove(entity);
+    }
 }
 
 void InventorySystem::processInventoryUpdates()

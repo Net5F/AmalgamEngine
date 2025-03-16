@@ -147,7 +147,8 @@ void CollisionLocator::removeEntity(entt::entity entity)
     // If we aren't already tracking this entity, do nothing.
     auto entityIt{entityMap.find(entity)};
     if (entityIt == entityMap.end()) {
-        LOG_ERROR("Tried to remove entity that wasn't added to this locator.");
+        // Note: Entities may not have collision, so it's fine to not find 
+        //       them in this locator.
         return;
     }
 

@@ -6,12 +6,12 @@
 #include "EngineObservedComponentTypes.h"
 #include "ProjectObservedComponentTypes.h"
 #include "ReplicatedComponent.h"
+#include "EnttObserver.h"
 #include "ClientSimData.h"
 #include "Cylinder.h"
 #include "Collision.h"
 #include "SharedConfig.h"
 #include "Log.h"
-#include "entt/entity/observer.hpp"
 #include "boost/mp11/algorithm.hpp"
 #include "boost/mp11/map.hpp"
 #include "boost/mp11/bind.hpp"
@@ -29,9 +29,15 @@ using ObservedComponentTypes
     = boost::mp11::mp_append<EngineObservedComponentTypes,
                              ProjectObservedComponentTypes>;
 
-/** A group and update observer for each observed component type. */
-std::array<entt::observer, boost::mp11::mp_size<ObservedComponentTypes>::value>
-    observers{};
+/** A construct and update observer for each observed component type. */
+std::array<EnttObserver::OneComponent,
+           boost::mp11::mp_size<ObservedComponentTypes>::value>
+    updateObservers{};
+
+/** A destruct observer for each observed component type. */
+std::array<EnttObserver::OneComponent,
+           boost::mp11::mp_size<ObservedComponentTypes>::value>
+    destroyObservers{};
 
 ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,
                                          World& inWorld, Network& inNetwork,
@@ -49,11 +55,15 @@ ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,
 
         // TODO: If a client is near an entity when it's constructed, it'll
         //       receive both an EntityInit and a ComponentUpdate (from the
-        //       group observer). It'd be nice if we could find a way to just
+        //       construct observer). It'd be nice if we could find a way to just
         //       send one, but until then it isn't a huge cost.
-        observers[typeIndex].connect(world.registry,
-                                     entt::collector.group<ComponentType>()
-                                         .template update<ComponentType>());
+        updateObservers[typeIndex].bind(world.registry);
+        updateObservers[typeIndex]
+            .on_construct<ComponentType>()
+            .on_update<ComponentType>();
+
+        destroyObservers[typeIndex].bind(world.registry);
+        destroyObservers[typeIndex].on_destroy<ComponentType>();
     });
 }
 
@@ -63,36 +73,56 @@ void ComponentSyncSystem::sendUpdates()
 
     entt::registry& registry{world.registry};
 
-    // TODO: We build a message for each updated entity, even if there aren't
-    //       any clients nearby to send it to. There may be ways to optimize by
-    //       making it client-by-client like MovementSyncSystem.
-    // Build an EntityUpdate for each entity that has an updated component.
+    // TODO: We build a message for each updated entity, even if it doesn't 
+    //       exist anymore or there aren't any clients nearby to send it to.
+    //       There may be ways to optimize by making it client-by-client like 
+    //       MovementSyncSystem.
+    // Build an EntityUpdate for each entity that has constructed, updated, 
+    // or destroyed components.
     boost::mp11::mp_for_each<ObservedComponentTypes>([&](auto I) {
         using ComponentType = decltype(I);
-        constexpr std::size_t typeIndex{
+        constexpr std::size_t observedTypeIndex{
             boost::mp11::mp_find<ObservedComponentTypes,
                                  ComponentType>::value};
+        constexpr std::size_t replicatedTypeIndex{
+            boost::mp11::mp_find<ReplicatedComponentTypes,
+                                 ComponentType>::value};
 
-        // For each entity that was updated, push its components into its
-        // message.
-        for (entt::entity entity : observers[typeIndex]) {
+        // For each entity that has a constructed or updated component of this 
+        // type, push the component into the entity's message.
+        for (entt::entity entity : updateObservers[observedTypeIndex]) {
             if constexpr (std::is_empty_v<ComponentType>) {
                 // Note: Can't registry.get() empty types.
-                componentUpdateMap[entity].components.push_back(
+                componentUpdateMap[entity].updatedComponents.push_back(
                     ComponentType{});
             }
             else {
                 const auto& component{registry.get<ComponentType>(entity)};
-                componentUpdateMap[entity].components.emplace_back(component);
+                componentUpdateMap[entity].updatedComponents.emplace_back(
+                    component);
             }
         }
 
-        observers[typeIndex].clear();
+        // For each entity that has a destroyed component of this type, push 
+        // the component into the entity's message.
+        // Note: The message uses the index from ReplicatedComponentTypes.
+        for (entt::entity entity : destroyObservers[observedTypeIndex]) {
+            componentUpdateMap[entity].destroyedComponents.emplace_back(
+                static_cast<Uint8>(replicatedTypeIndex));
+        }
+
+        updateObservers[observedTypeIndex].clear();
+        destroyObservers[observedTypeIndex].clear();
     });
 
     // Send each update to all nearby clients.
     auto view{registry.view<Position, ClientSimData>()};
     for (auto& [updatedEntity, componentUpdate] : componentUpdateMap) {
+        // If the entity doesn't exist anymore, skip it.
+        if (!(world.registry.valid(updatedEntity))) {
+            continue;
+        }
+
         // Serialize the message.
         componentUpdate.entity = updatedEntity;
         componentUpdate.tickNum = simulation.getCurrentTick();
@@ -107,7 +137,7 @@ void ComponentSyncSystem::sendUpdates()
         }
         else {
             const auto& updatedEntityPosition{
-                view.get<Position>(updatedEntity)};
+                world.registry.get<Position>(updatedEntity)};
             entitiesInRange = &(world.entityLocator.getEntities(
                 {updatedEntityPosition, SharedConfig::AOI_RADIUS,
                  SharedConfig::AOI_HALF_HEIGHT}));

@@ -74,6 +74,8 @@ void EntityLocator::removeEntity(entt::entity entity)
     // If we aren't already tracking this entity, error.
     auto entityIt{entityMap.find(entity)};
     if (entityIt == entityMap.end()) {
+        // Note: Since every entity has a position, we expect them to always 
+        //       be in this locator.
         LOG_ERROR("Tried to remove entity that wasn't added to this locator.");
         return;
     }

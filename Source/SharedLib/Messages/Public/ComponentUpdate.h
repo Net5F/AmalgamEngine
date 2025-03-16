@@ -24,12 +24,13 @@ struct ComponentUpdate {
     /** The entity's ID. */
     entt::entity entity{entt::null};
 
-    /** The entity's updated components. */
-    std::vector<ReplicatedComponent> components{};
+    /** The entity's constructed or updated components (we treat them the 
+        same). */
+    std::vector<ReplicatedComponent> updatedComponents{};
 
     /** The indices (from ReplicatedComponentTypes) of any of the entity's 
         components that were destroyed. */
-    //std::vector<Uint8> destroyedComponents{};
+    std::vector<Uint8> destroyedComponents{};
 };
 
 template<typename S>
@@ -38,7 +39,7 @@ void serialize(S& serializer, ComponentUpdate& componentUpdate)
     serializer.value4b(componentUpdate.tickNum);
     serializer.value4b(componentUpdate.entity);
     serializer.enableBitPacking([&](typename S::BPEnabledType& sbp) {
-        sbp.container(componentUpdate.components,
+        sbp.container(componentUpdate.updatedComponents,
                       boost::mp11::mp_size<ReplicatedComponentTypes>::value,
                       [](typename S::BPEnabledType& serializer,
                          ReplicatedComponent& component) {
@@ -46,8 +47,9 @@ void serialize(S& serializer, ComponentUpdate& componentUpdate)
                           serializer.ext(component, bitsery::ext::StdVariant{});
                       });
     });
-    //serializer.container(componentUpdate.destroyedComponents,
-    //                     boost::mp11::mp_size<ReplicatedComponentTypes>::value);
+    serializer.container1b(
+        componentUpdate.destroyedComponents,
+        boost::mp11::mp_size<ReplicatedComponentTypes>::value);
 }
 
 } // End namespace AM
