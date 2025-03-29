@@ -4,7 +4,7 @@
 #include "InventoryAddItem.h"
 #include "InventoryRemoveItem.h"
 #include "InventoryMoveItem.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include "bitsery/ext/std_variant.h"
 #include <variant>
 

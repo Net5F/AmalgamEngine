@@ -24,13 +24,6 @@ namespace AM
 static constexpr std::size_t MAX_BATCH_SIZE{2 << 14};
 
 //--------------------------------------------------------------------------
-// Typedefs
-//--------------------------------------------------------------------------
-/** Represents a single network client. Will be reused if the client
-    disconnects. */
-using NetworkID = Uint32;
-
-//--------------------------------------------------------------------------
 // Headers
 //--------------------------------------------------------------------------
 // TODO: Do we just want to replace these with bitsery? Their only restriction

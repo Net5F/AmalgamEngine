@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include "entt/fwd.hpp"
 #include <memory>
 

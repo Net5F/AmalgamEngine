@@ -5,7 +5,7 @@
 #include "Position.h"
 #include "GraphicState.h"
 #include "EntityInitScript.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
 

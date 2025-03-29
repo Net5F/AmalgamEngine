@@ -1,13 +1,7 @@
 #include "MovementSystem.h"
 #include "MovementHelpers.h"
 #include "World.h"
-#include "Input.h"
-#include "Position.h"
-#include "PreviousPosition.h"
-#include "Movement.h"
-#include "MovementModifiers.h"
-#include "Rotation.h"
-#include "Collision.h"
+#include "EnttGroups.h"
 #include "SharedConfig.h"
 #include "Transforms.h"
 #include "Log.h"
@@ -29,11 +23,9 @@ void MovementSystem::processMovements()
     ZoneScoped;
 
     // Move all entities that have the required components.
-    auto group
-        = world.registry.group<Input, Position, PreviousPosition, Movement,
-                               MovementModifiers, Rotation, Collision>();
+    auto movementGroup = EnttGroups::getMovementGroup(world.registry);
     for (auto [entity, input, position, previousPosition, movement,
-               movementMods, rotation, collision] : group.each()) {
+               movementMods, rotation, collision] : movementGroup.each()) {
         // Save their old position.
         previousPosition = position;
 

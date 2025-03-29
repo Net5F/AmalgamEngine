@@ -2,7 +2,7 @@
 
 #include "EngineMessageType.h"
 #include "Input.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include <SDL_stdinc.h>
 
 namespace AM

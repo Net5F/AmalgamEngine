@@ -10,6 +10,7 @@ namespace Client
 {
 class World;
 class Network;
+class ItemData;
 
 /**
  * Processes item definition updates and item combination updates.
@@ -17,7 +18,7 @@ class Network;
 class ItemSystem
 {
 public:
-    ItemSystem(World& inWorld, Network& inNetwork);
+    ItemSystem(World& inWorld, Network& inNetwork, ItemData& inItemData);
 
     /**
      * Processes item update messages.
@@ -35,10 +36,12 @@ private:
      */
     void saveItemCache();
 
-    /** Used for accessing item data. */
+    /** Used for updating inventories. */
     World& world;
     /** Used for sending requests and receiving item data. */
     Network& network;
+    /** Used for accessing item data and subscribing to updates. */
+    ItemData& itemData;
 
     EventQueue<ItemUpdate> itemUpdateQueue;
     EventQueue<CombineItems> combineItemsQueue;

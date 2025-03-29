@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CastableID.h"
+#include "CastInfo.h"
 #include <SDL_stdinc.h>
 
 namespace AM
@@ -16,21 +18,12 @@ namespace AM
  *       away with only sending CastStarted and CastCanceled (a successful cast 
  *       can be assumed when there's no cancelation before endTick).
  */
-struct CastingState {
-    enum class CastableType : Uint8 {
-        ItemInteraction,
-        EntityInteraction,
-        Spell
-    };
+struct CastState {
+    /** The current cast's info. */
+    CastInfo castInfo{};
 
-    /** The type of castable that's being cast. */
-    CastableType castableType{};
-
-    /** The value of the enum associated with castableType, either 
-        ItemInteractionType, EntityInteractionType, or SpellType. */
-    Uint8 castableEnumValue{};
-
-    /** The tick that this cast will finish on. */
+    /** The tick that this cast will finish on. If 0, this cast hasn't been 
+        processed for the first time yet. */
     Uint32 endTick{};
 };
 

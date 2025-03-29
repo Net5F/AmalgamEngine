@@ -10,6 +10,7 @@ namespace Client
 {
 class World;
 class Network;
+class ItemData;
 
 /**
  * Processes inventory updates and requests needed item definitions.
@@ -17,7 +18,8 @@ class Network;
 class InventorySystem
 {
 public:
-    InventorySystem(World& inWorld, Network& inNetwork);
+    InventorySystem(World& inWorld, Network& inNetwork,
+                    const ItemData& inItemData);
 
     /**
      * Processes inventory update messages.
@@ -50,6 +52,7 @@ private:
     World& world;
     /** Used for sending requests and receiving inventory data. */
     Network& network;
+    const ItemData& itemData;
 
     EventQueue<InventoryInit> inventoryInitQueue;
     EventQueue<InventoryOperation> inventoryOperationQueue;

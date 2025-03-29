@@ -58,7 +58,7 @@ public:
      * Note: The null item doesn't technically exist, but we return a useful
      *       default for it.
      */
-    const Item* getItem(std::string_view stringID);
+    const Item* getItem(std::string_view stringID) const;
 
     /**
      * @return If no item with the given ID exists, returns nullptr. Else,
@@ -76,7 +76,7 @@ public:
      * @return If no item with the given ID exists, returns 0. Else, returns
      *         the item's version number.
      */
-    ItemVersion getItemVersion(ItemID numericID);
+    ItemVersion getItemVersion(ItemID numericID) const;
 
     /**
      * Returns a reference to the map containing all the items.

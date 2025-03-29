@@ -7,9 +7,10 @@
 namespace AM
 {
 struct DialogueResponse;
+struct CastInfo;
+
 namespace Server
 {
-class Simulation;
 class World;
 class Network;
 struct DialogueLua;
@@ -26,7 +27,7 @@ struct DialogueChoiceConditionLua;
 class DialogueSystem
 {
 public:
-    DialogueSystem(Simulation& inSimulation, Network& inNetwork,
+    DialogueSystem(World& inWorld, Network& inNetwork,
                    DialogueLua& inDialogueLua,
                    DialogueChoiceConditionLua& inDialogueChoiceConditionLua);
 
@@ -47,11 +48,8 @@ private:
 
     /**
      * Processes a Talk interaction, sending appropriate response messages.
-     * Note: We pass the indivual members so we can avoid the big Simulation.h 
-     *       include.
      */
-    void processTalkInteraction(entt::entity clientEntity,
-                                entt::entity targetEntity, NetworkID clientID);
+    void processTalkInteraction(const CastInfo& castInfo);
 
     /**
      * Runs the given topic's topicScript.
@@ -111,8 +109,6 @@ private:
                               entt::entity targetEntity, NetworkID clientID,
                               DialogueResponse& response);
 
-    /** Used for getting Talk interaction requests. */
-    Simulation& simulation;
     /** Used for validating requests and fetching dialogue data. */
     World& world;
     /** Used for receiving dialogue requests and sending dialogue to clients. */

@@ -119,7 +119,7 @@ private:
     MessageProcessor& messageProcessor;
 
     /** Used for generating network IDs. */
-    IDPool idPool;
+    IDPool networkIDPool;
 
     /** The number of clients that are currently connected. */
     unsigned int clientCount;

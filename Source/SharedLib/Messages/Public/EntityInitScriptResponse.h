@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include "EntityInitScript.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"

@@ -22,7 +22,7 @@ static_assert(SharedConfig::TILE_WORLD_WIDTH <= SDL_MAX_UINT8,
 static_assert(SharedConfig::TILE_WORLD_HEIGHT <= SDL_MAX_UINT8,
               "TILE_WORLD_HEIGHT must fit within a Uint8 for TileOffset.");
 
-TileMapBase::TileMapBase(GraphicDataBase& inGraphicData,
+TileMapBase::TileMapBase(const GraphicDataBase& inGraphicData,
                          CollisionLocator& inCollisionLocator,
                          bool inTrackTileUpdates)
 : graphicData{inGraphicData}

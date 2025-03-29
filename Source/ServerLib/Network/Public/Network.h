@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SharedConfig.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include "ClientMap.h"
 #include "MessageProcessor.h"
 #include "ClientHandler.h"

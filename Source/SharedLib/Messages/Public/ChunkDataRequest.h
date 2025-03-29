@@ -3,7 +3,7 @@
 #include "EngineMessageType.h"
 #include "ChunkPosition.h"
 #include "ChunkUpdate.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include <vector>
 
 namespace AM

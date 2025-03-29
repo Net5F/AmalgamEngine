@@ -1,7 +1,7 @@
 #pragma once
 
 #include "OSEventHandler.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 
 namespace AM
 {

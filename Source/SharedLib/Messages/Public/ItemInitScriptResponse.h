@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include "ItemInitScript.h"
 #include "ItemID.h"
 #include <string>

@@ -1,6 +1,7 @@
 #include "InventoryHelpers.h"
 #include "World.h"
 #include "Network.h"
+#include "ItemData.h"
 #include "Inventory.h"
 #include "ClientSimData.h"
 #include "InventoryOperation.h"
@@ -11,13 +12,12 @@ namespace AM
 namespace Server
 {
 
-InventoryHelpers::AddResult
-    InventoryHelpers::addItem(ItemID itemID, Uint8 count,
-                              entt::entity entityToAddTo, World& world,
-                              Network& network)
+InventoryHelpers::AddResult InventoryHelpers::addItem(
+    ItemID itemID, Uint8 count, entt::entity entityToAddTo,
+    const ItemData& itemData, World& world, Network& network)
 {
     // Try to add the item.
-    auto* item{world.itemData.getItem(itemID)};
+    auto* item{itemData.getItem(itemID)};
     auto& inventory{world.registry.get_or_emplace<Inventory>(entityToAddTo)};
     if (item && inventory.addItem(itemID, count, item->maxStackSize)) {
         // Success. If the target is a client entity, update it.
@@ -25,7 +25,7 @@ InventoryHelpers::AddResult
                 world.registry.try_get<ClientSimData>(entityToAddTo)}) {
             InventoryOperation operation{InventoryAddItem{
                 entityToAddTo, itemID, count, item->maxStackSize,
-                world.itemData.getItemVersion(itemID)}};
+                itemData.getItemVersion(itemID)}};
             network.serializeAndSend(client->netID, operation);
         }
 
@@ -41,13 +41,13 @@ InventoryHelpers::AddResult
     }
 }
 
-InventoryHelpers::AddResult
-    InventoryHelpers::addItem(std::string_view itemID, Uint8 count,
-                              entt::entity entityToAddTo, World& world,
-                              Network& network)
+InventoryHelpers::AddResult InventoryHelpers::addItem(
+    std::string_view itemID, Uint8 count, entt::entity entityToAddTo,
+    const ItemData& itemData, World& world, Network& network)
 {
-    if (const Item * item{world.itemData.getItem(itemID)}) {
-        return addItem(item->numericID, count, entityToAddTo, world, network);
+    if (const Item * item{itemData.getItem(itemID)}) {
+        return addItem(item->numericID, count, entityToAddTo, itemData, world,
+                       network);
     }
 
     return AddResult::ItemNotFound;
@@ -83,11 +83,11 @@ InventoryHelpers::RemoveResult
 InventoryHelpers::RemoveResult
     InventoryHelpers::removeItem(std::string_view itemID, Uint8 count,
                                  entt::entity entityToRemoveFrom, World& world,
-                                 Network& network)
+                                 Network& network, const ItemData& itemData)
 {
     // If the entity's inventory has enough copies of the item to satisfy the
     // requested count, remove them.
-    const Item* item{world.itemData.getItem(itemID)};
+    const Item* item{itemData.getItem(itemID)};
     auto* inventory{world.registry.try_get<Inventory>(entityToRemoveFrom)};
     if (item && inventory
         && (inventory->getItemCount(item->numericID) >= count)) {

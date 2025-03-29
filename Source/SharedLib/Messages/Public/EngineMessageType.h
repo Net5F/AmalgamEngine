@@ -24,15 +24,14 @@ enum class EngineMessageType : Uint8 {
     EntityInitRequest,
     EntityDeleteRequest,
     EntityInitScriptRequest,
-    EntityInteractionRequest,
     ItemInitRequest,
     ItemChangeRequest,
     ItemDataRequest,
     ItemInitScriptRequest,
-    ItemInteractionRequest,
     CombineItemsRequest,
     UseItemOnEntityRequest,
     DialogueChoiceRequest,
+    CastRequest,
 
     // Server -> Client Messages
     ExplicitConfirmation,
@@ -50,6 +49,8 @@ enum class EngineMessageType : Uint8 {
     ItemInitScriptResponse,
     CombineItems,
     DialogueResponse,
+    CastFailed,
+    CastStarted,
 
     // Bidirectional Messages
     TileAddLayer,

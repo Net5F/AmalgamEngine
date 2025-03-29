@@ -20,7 +20,7 @@ namespace AM
 {
 namespace Server
 {
-TileMap::TileMap(GraphicData& inGraphicData,
+TileMap::TileMap(const GraphicData& inGraphicData,
                  CollisionLocator& inCollisionLocator)
 : TileMapBase{inGraphicData, inCollisionLocator, true}
 {

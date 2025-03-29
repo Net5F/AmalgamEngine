@@ -18,6 +18,7 @@ namespace Client
 {
 class Network;
 class GraphicData;
+class ItemData;
 class ISimulationExtension;
 class ChunkUpdateSystem;
 class TileUpdateSystem;
@@ -46,7 +47,8 @@ public:
     static constexpr double SIM_DELAYED_TIME_S{.001};
 
     Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
-               GraphicData& inGraphicData, CastableData& inCastableData);
+               GraphicData& inGraphicData, ItemData& inItemData,
+               CastableData& inCastableData);
 
     ~Simulation();
 
@@ -118,6 +120,7 @@ private:
         send messages. */
     Network& network;
     GraphicData& graphicData;
+    ItemData& itemData;
     CastableData& castableData;
 
     /** The local world's state. */

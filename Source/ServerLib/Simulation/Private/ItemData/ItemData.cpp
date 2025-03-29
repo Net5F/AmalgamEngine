@@ -24,9 +24,8 @@ ItemData::ItemData()
 const Item* ItemData::createItem(const Item& referenceItem,
                                  std::string_view initScript)
 {
-    // If the numeric ID is non-null and taken, do nothing.
-    if ((referenceItem.numericID != NULL_ITEM_ID)
-        && (itemMap.find(referenceItem.numericID) != itemMap.end())) {
+    // If the numeric ID is taken, do nothing.
+    if (itemMap.find(referenceItem.numericID) != itemMap.end()) {
         return nullptr;
     }
 
@@ -116,7 +115,7 @@ const Item* ItemData::loadItem(const Item& referenceItem, ItemVersion version,
     return item;
 }
 
-const ItemInitScript& ItemData::getItemInitScript(ItemID numericID)
+const ItemInitScript& ItemData::getItemInitScript(ItemID numericID) const
 {
     // Attempt to find the given numeric ID.
     auto it{itemInitScriptMap.find(numericID)};

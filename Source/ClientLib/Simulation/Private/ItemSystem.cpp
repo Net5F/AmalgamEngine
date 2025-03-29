@@ -1,6 +1,7 @@
 #include "ItemSystem.h"
 #include "World.h"
 #include "Network.h"
+#include "ItemData.h"
 #include "Inventory.h"
 #include "ItemDataRequest.h"
 #include "ItemCache.h"
@@ -15,9 +16,10 @@ namespace AM
 {
 namespace Client
 {
-ItemSystem::ItemSystem(World& inWorld, Network& inNetwork)
+ItemSystem::ItemSystem(World& inWorld, Network& inNetwork, ItemData& inItemData)
 : world{inWorld}
 , network{inNetwork}
+, itemData{inItemData}
 , itemUpdateQueue{network.getEventDispatcher()}
 , combineItemsQueue{network.getEventDispatcher()}
 {
@@ -25,14 +27,12 @@ ItemSystem::ItemSystem(World& inWorld, Network& inNetwork)
     loadItemCache();
 
     // When an item is created or updated, save it to the cache.
-    world.itemData.itemCreated.connect<&ItemSystem::saveItemCache>(this);
-    world.itemData.itemUpdated.connect<&ItemSystem::saveItemCache>(this);
+    itemData.itemCreated.connect<&ItemSystem::saveItemCache>(this);
+    itemData.itemUpdated.connect<&ItemSystem::saveItemCache>(this);
 }
 
 void ItemSystem::processItemUpdates()
 {
-    ItemData& itemData{world.itemData};
-
     // Process any waiting item definition updates.
     ItemUpdate itemUpdate{};
     while (itemUpdateQueue.pop(itemUpdate)) {
@@ -61,8 +61,8 @@ void ItemSystem::processItemUpdates()
         // If we don't have the latest definition for the new item, request
         // it.
         ItemID resultItemID{combineItems.resultItemID};
-        if (!(world.itemData.getItem(resultItemID))
-            || (world.itemData.getItemVersion(resultItemID)
+        if (!(itemData.getItem(resultItemID))
+            || (itemData.getItemVersion(resultItemID)
                 < combineItems.resultItemVersion)) {
             network.serializeAndSend(ItemDataRequest{resultItemID});
         }
@@ -87,7 +87,7 @@ void ItemSystem::loadItemCache()
 
     // Push all cached items into ItemData.
     for (const ItemCache::ItemEntry& itemEntry : itemCache.items) {
-        world.itemData.loadItem(itemEntry.item, itemEntry.version);
+        itemData.loadItem(itemEntry.item, itemEntry.version);
     }
 }
 
@@ -95,12 +95,12 @@ void ItemSystem::saveItemCache()
 {
     // Gather all items from ItemData.
     ItemCache itemCache{};
-    const auto& items{world.itemData.getAllItems()};
+    const auto& items{itemData.getAllItems()};
     itemCache.items.resize(items.size());
 
     int index{0};
     for (auto& [itemID, item] : items) {
-        itemCache.items[index] = {item, world.itemData.getItemVersion(itemID)};
+        itemCache.items[index] = {item, itemData.getItemVersion(itemID)};
         index++;
     }
 

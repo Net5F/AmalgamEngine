@@ -1,6 +1,7 @@
 #include "InventorySystem.h"
 #include "World.h"
 #include "Network.h"
+#include "ItemData.h"
 #include "Inventory.h"
 #include "ItemDataRequest.h"
 #include "AMAssert.h"
@@ -11,9 +12,11 @@ namespace AM
 {
 namespace Client
 {
-InventorySystem::InventorySystem(World& inWorld, Network& inNetwork)
+InventorySystem::InventorySystem(World& inWorld, Network& inNetwork,
+                                 const ItemData& inItemData)
 : world{inWorld}
 , network{inNetwork}
+, itemData{inItemData}
 , inventoryInitQueue{network.getEventDispatcher()}
 , inventoryOperationQueue{network.getEventDispatcher()}
 {
@@ -53,8 +56,8 @@ void InventorySystem::initInventory(const InventoryInit& inventoryInit)
                 // If this slot is non-empty and we don't have the latest 
                 // definition for the item in it, add it to the vector.
                 if (itemSlot.ID
-                    && (!(world.itemData.getItem(itemSlot.ID))
-                        || (world.itemData.getItemVersion(itemSlot.ID)
+                    && (!(itemData.getItem(itemSlot.ID))
+                        || (itemData.getItemVersion(itemSlot.ID)
                             < itemSlot.version))) {
                     itemsToRequest.push_back(itemSlot.ID);
                 }
@@ -84,8 +87,8 @@ void InventorySystem::processOperation(const InventoryAddItem& inventoryAddItem)
                 // Successfully added. If we don't have the latest definition
                 // for the item, request it.
                 ItemVersion itemVersion{inventoryAddItem.version};
-                if (!(world.itemData.getItem(itemID))
-                    || (world.itemData.getItemVersion(itemID) < itemVersion)) {
+                if (!(itemData.getItem(itemID))
+                    || (itemData.getItemVersion(itemID) < itemVersion)) {
                     network.serializeAndSend(ItemDataRequest{itemID});
                 }
             }

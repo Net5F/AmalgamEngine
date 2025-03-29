@@ -97,7 +97,7 @@ void ComponentUpdateSystem::processComponentUpdate(
             componentIndex, [&](auto I) {
                 using ComponentType
                     = boost::mp11::mp_at_c<ReplicatedComponentTypes, I>;
-                registry.remove<ComponentType>(componentUpdate.entity);
+                registry.erase<ComponentType>(componentUpdate.entity);
             });
     }
 }

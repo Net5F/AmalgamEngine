@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Peer.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include "Config.h"
 #include "CircularBuffer.h"
 #include "Timer.h"

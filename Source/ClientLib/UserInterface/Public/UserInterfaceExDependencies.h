@@ -12,6 +12,7 @@ class Simulation;
 class WorldObjectLocator;
 class Network;
 class GraphicData;
+class ItemData;
 class IconData;
 
 /**
@@ -40,6 +41,9 @@ public:
 
     /** Used for getting icon data. */
     IconData& iconData;
+
+    /** Used for getting item data and subscribing to updates. */
+    ItemData& itemData;
 };
 
 } // namespace Client

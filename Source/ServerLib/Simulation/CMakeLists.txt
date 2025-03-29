@@ -1,7 +1,8 @@
 target_sources(ServerLib
     PRIVATE
         Private/AISystem.cpp
-        Private/CastableSystem.cpp
+        Private/CastHelper.cpp
+        Private/CastSystem.cpp
         Private/ChunkStreamingSystem.cpp
         Private/ClientAOISystem.cpp
         Private/ClientConnectionSystem.cpp
@@ -30,7 +31,8 @@ target_sources(ServerLib
     PUBLIC
         Public/AILogic.h
         Public/AISystem.h
-        Public/CastableSystem.h
+        Public/CastHelper.h
+        Public/CastSystem.h
         Public/ChunkStreamingSystem.h
         Public/ClientAOISystem.h
         Public/ClientConnectionSystem.h

@@ -1,5 +1,7 @@
 #include "World.h"
 #include "GraphicData.h"
+#include "ItemData.h"
+#include "CastableData.h"
 #include "EnttGroups.h"
 #include "EntityInitLua.h"
 #include "ItemInitLua.h"
@@ -60,18 +62,19 @@ void onComponentDestroyed(entt::registry& registry, entt::entity entity)
     }
 }
 
-World::World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
+World::World(const GraphicData& inGraphicData, ItemData& inItemData,
+             const CastableData& inCastableData, EntityInitLua& inEntityInitLua,
              ItemInitLua& inItemInitLua)
-: registry{}
-, itemData{}
+: graphicData{inGraphicData}
+, registry{}
 , entityLocator{registry}
 , collisionLocator{}
 , tileMap{inGraphicData, collisionLocator}
 , entityStoredValueIDMap{}
 , globalStoredValueMap{}
+, castHelper{*this, inItemData, inCastableData}
 , database{std::make_unique<Database>()}
 , netIDMap{}
-, graphicData{inGraphicData}
 , entityInitLua{inEntityInitLua}
 , itemInitLua{inItemInitLua}
 , nextStoredValueID{NULL_ENTITY_STORED_VALUE_ID + 1}
@@ -122,7 +125,7 @@ World::World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
     loadNonClientEntities();
 
     // Load our saved item definitions.
-    loadItems();
+    loadItems(inItemData);
 
     // Load our saved stored value data.
     loadStoredValues();
@@ -499,7 +502,7 @@ void World::loadNonClientEntities()
     database->iterateEntities(std::move(loadEntity));
 }
 
-void World::loadItems()
+void World::loadItems(ItemData& itemData)
 {
     auto loadItem = [&](ItemID itemID, std::span<const Uint8> serializedItem,
                         ItemVersion version, std::string_view initScript) {

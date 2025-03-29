@@ -1,7 +1,9 @@
 #pragma once
 
-#include "EntityGraphicType.h"
+#include "CastableID.h"
+#include "CastableProjectData.h"
 #include "CastableRequirementType.h"
+#include "EntityGraphicType.h"
 #include "VisualEffect.h"
 #include "AVEntity.h"
 #include <functional>
@@ -30,6 +32,9 @@ namespace AM
  *         A/V effects.
  */
 struct Castable {
+    /** This Castable's unique ID. */
+    CastableID castableID{};
+
     enum class TargetToolType {
         /** No extra targeting required (likely self-cast). */
         None,
@@ -38,7 +43,6 @@ struct Castable {
         /** Place a circle on the ground. */
         Circle 
     };
-
     /** The type of UI tool to present to the user when casting.
         Determines what data will be packed into the "cast request" message.
         The user's current targeted entity will always be provided (if there 
@@ -57,6 +61,9 @@ struct Castable {
 
     /** How long the caster must wait to cast this interaction again. */
     float cooldownTime{};
+
+    /** Project-specific data. */
+    CastableProjectData projectData{};
 
     struct Requirement {
         CastableRequirementType type{};
@@ -78,9 +85,9 @@ struct Castable {
 
     /** If true, the client will play the "cast complete" graphics when the 
         predicted cast (which starts as soon as the player input is received) 
-        completes. If false, the graphics won't be played until we receive a 
-        confirmation from the server that the cast was successful. */
-    bool predictCastComplete{};
+        completes. If false, the graphics won't be played until the client 
+        receives a confirmation from the server that the cast was successful. */
+    bool predictCastComplete{true};
 
     /** The client-only visual effects to show when this cast is successful. */
     std::vector<VisualEffect> castCompleteVisualEffects{};

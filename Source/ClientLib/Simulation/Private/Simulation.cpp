@@ -1,6 +1,7 @@
 #include "Simulation.h"
 #include "Network.h"
 #include "GraphicData.h"
+#include "ItemData.h"
 #include "CastableData.h"
 #include "ISimulationExtension.h"
 #include "ChunkUpdateSystem.h"
@@ -26,9 +27,11 @@ namespace AM
 namespace Client
 {
 Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
-                       GraphicData& inGraphicData, CastableData& inCastableData)
+                       GraphicData& inGraphicData, ItemData& inItemData,
+                       CastableData& inCastableData)
 : network{inNetwork}
 , graphicData{inGraphicData}
+, itemData{inItemData}
 , castableData{inCastableData}
 , world{inGraphicData}
 , currentTick{0}
@@ -226,8 +229,9 @@ void Simulation::initializeSystems()
         = std::make_unique<PlayerMovementSystem>(*this, world, network);
     npcMovementSystem
         = std::make_unique<NpcMovementSystem>(*this, world, network);
-    itemSystem = std::make_unique<ItemSystem>(world, network);
-    inventorySystem = std::make_unique<InventorySystem>(world, network);
+    itemSystem = std::make_unique<ItemSystem>(world, network, itemData);
+    inventorySystem
+        = std::make_unique<InventorySystem>(world, network, itemData);
     componentUpdateSystem = std::make_unique<ComponentUpdateSystem>(
         *this, world, network, graphicData);
     graphicSystem = std::make_unique<GraphicSystem>(world, graphicData);

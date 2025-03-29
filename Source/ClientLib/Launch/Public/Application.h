@@ -9,6 +9,7 @@
 #include "ResourceData.h"
 #include "GraphicData.h"
 #include "IconData.h"
+#include "ItemData.h"
 #include "CastableData.h"
 #include "QueuedEvents.h"
 #include "UserInterface.h"
@@ -159,6 +160,8 @@ private:
 
     IconData iconData;
 
+    ItemData itemData;
+
     CastableData castableData;
 
     Network network;
@@ -211,7 +214,9 @@ template<typename T>
 void Application::registerSimulationExtension()
 {
     SimulationExDependencies simulationDeps{
-        simulation, userInterface.getEventDispatcher(), network, graphicData};
+        simulation, userInterface.getEventDispatcher(),
+        network,    graphicData,
+        iconData,   itemData, castableData};
 
     simulation.setExtension(std::make_unique<T>(simulationDeps));
 }
@@ -225,7 +230,8 @@ void Application::registerUserInterfaceExtension()
                                        network,
                                        sdlRenderer.Get(),
                                        graphicData,
-                                       iconData};
+                                       iconData,
+                                       itemData};
 
     userInterface.setExtension(std::make_unique<T>(uiDeps));
 }

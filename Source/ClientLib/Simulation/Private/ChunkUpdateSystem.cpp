@@ -45,7 +45,7 @@ void ChunkUpdateSystem::requestNeededUpdates()
     if (registry.all_of<NeedsAdjacentChunks>(world.playerEntity)) {
         requestAllInRangeChunks(ChunkPosition(currentPosition));
 
-        registry.remove<NeedsAdjacentChunks>(world.playerEntity);
+        registry.erase<NeedsAdjacentChunks>(world.playerEntity);
     }
     // If we moved, check if we're in range of any new chunks.
     else if (previousPosition != currentPosition) {

@@ -57,7 +57,7 @@ public:
      * @param inTrackTileUpdates  If true, tile updates will be pushed into
      *                            tileUpdateHistory.
      */
-    TileMapBase(GraphicDataBase& inGraphicData,
+    TileMapBase(const GraphicDataBase& inGraphicData,
                 CollisionLocator& inCollisionLocator, bool inTrackTileUpdates);
 
     /**
@@ -463,7 +463,7 @@ protected:
     static constexpr Uint16 MAP_FORMAT_VERSION{1};
 
     /** Used to get graphics while constructing tiles. */
-    GraphicDataBase& graphicData;
+    const GraphicDataBase& graphicData;
 
     /** Used when rebuilding tile collision. */
     CollisionLocator& collisionLocator;

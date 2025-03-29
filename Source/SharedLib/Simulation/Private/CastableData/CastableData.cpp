@@ -10,82 +10,59 @@ CastableData::CastableData()
 , entityInteractionMap{}
 , spellMap{}
 {
-    // Add an empty struct, to use as a default return.
-    itemInteractionMap.emplace(ItemInteractionType::NotSet, ItemInteraction{});
-    entityInteractionMap.emplace(EntityInteractionType::NotSet,
-                                 EntityInteraction{});
-    spellMap.emplace(SpellType::NotSet, Spell{});
+    // Init all of the project's Castables.
+    CastableInit::initCastables(
+        [this](CastableID castableID, const Castable& castable) {
+            addCastable(castableID, castable);
+        });
 
-    // Init each type of castable.
-    CastableInit::initItemInteractions(
-        [this](ItemInteractionType type,
-               const ItemInteraction& itemInteraction) {
-            addItemInteraction(type, itemInteraction);
-        });
-    CastableInit::initEntityInteractions(
-        [this](EntityInteractionType type,
-               const EntityInteraction& itemInteraction) {
-            addEntityInteraction(type, itemInteraction);
-        });
-    CastableInit::initSpells(
-        [this](SpellType type, const Spell& itemInteraction) {
-            addSpell(type, itemInteraction);
-        });
+    // Note: We intentionally don't have a "null castable", because we want the 
+    //       getters to return nullptr if there isn't a real castable to return.
 }
 
-const ItemInteraction&
-    CastableData::getItemInteraction(ItemInteractionType type) const
+const Castable* CastableData::getCastable(CastableID castableID) const
 {
-    // Attempt to find the interaction.
-    auto it{itemInteractionMap.find(type)};
-    if (it == itemInteractionMap.end()) {
-        LOG_ERROR("Tried to get invalid item interaction.");
-        return itemInteractionMap.at(ItemInteractionType::NotSet);
+    // Attempt to find the Castable.
+    if (auto* type{std::get_if<ItemInteractionType>(&castableID)}) {
+        auto it{itemInteractionMap.find(*type)};
+        if (it != itemInteractionMap.end()) {
+            return &(it->second);
+        }
+    }
+    else if (auto* type{std::get_if<EntityInteractionType>(&castableID)}) {
+        auto it{entityInteractionMap.find(*type)};
+        if (it != entityInteractionMap.end()) {
+            return &(it->second);
+        }
+    }
+    else if (auto* type{std::get_if<SpellType>(&castableID)}) {
+        auto it{spellMap.find(*type)};
+        if (it != spellMap.end()) {
+            return &(it->second);
+        }
+    }
+    else {
+        LOG_ERROR("Tried to get Castable with invalid type.");
     }
 
-    return it->second;
+    // Failed to find the requested castable.
+    return nullptr;
 }
 
-const EntityInteraction&
-    CastableData::getEntityInteraction(EntityInteractionType type) const
+void CastableData::addCastable(CastableID castableID, const Castable& castable)
 {
-    // Attempt to find the interaction.
-    auto it{entityInteractionMap.find(type)};
-    if (it == entityInteractionMap.end()) {
-        LOG_ERROR("Tried to get invalid entity interaction.");
-        return entityInteractionMap.at(EntityInteractionType::NotSet);
+    if (auto* type{std::get_if<ItemInteractionType>(&castableID)}) {
+        itemInteractionMap[*type] = castable;
     }
-
-    return it->second;
-}
-
-const Spell& CastableData::getSpell(SpellType type) const
-{
-    // Attempt to find the spell.
-    auto it{spellMap.find(type)};
-    if (it == spellMap.end()) {
-        LOG_ERROR("Tried to get invalid spell.");
-        return spellMap.at(SpellType::NotSet);
+    else if (auto* type{std::get_if<EntityInteractionType>(&castableID)}) {
+        entityInteractionMap[*type] = castable;
     }
-
-    return it->second;
-}
-
-void CastableData::addItemInteraction(ItemInteractionType type,
-                                      const ItemInteraction& itemInteraction)
-{
-    itemInteractionMap[type] = itemInteraction;
-}
-
-void CastableData::addEntityInteraction(EntityInteractionType type,
-                                        const EntityInteraction& entityInteraction)
-{
-    entityInteractionMap[type] = entityInteraction;
-}
-
-void CastableData::addSpell(SpellType type, const Spell& spell)
-{
-    spellMap[type] = spell;
+    else if (auto* type{std::get_if<SpellType>(&castableID)}) {
+        spellMap[*type] = castable;
+    }
+    else {
+        LOG_ERROR("Tried to add Castable with invalid type.");
+    }
 }
 
 } // End namespace AM

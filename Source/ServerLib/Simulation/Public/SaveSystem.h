@@ -9,8 +9,8 @@ namespace AM
 {
 namespace Server
 {
-
 class World;
+class ItemData;
 
 /**
  * Periodically saves the world's data:
@@ -21,7 +21,7 @@ class World;
 class SaveSystem
 {
 public:
-    SaveSystem(World& inWorld);
+    SaveSystem(World& inWorld, ItemData& inItemData);
 
     /**
      * If data is due for saving, saves it.
@@ -53,6 +53,7 @@ private:
     void saveStoredValues();
 
     World& world;
+    ItemData& itemData;
 
     /** Holds a history of items that have been updated.
         Used to know which items need to be saved. */

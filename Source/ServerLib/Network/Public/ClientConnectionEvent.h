@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include <variant>
 
 namespace AM

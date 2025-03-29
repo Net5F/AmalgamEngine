@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include <SDL_stdinc.h>
 
 namespace AM

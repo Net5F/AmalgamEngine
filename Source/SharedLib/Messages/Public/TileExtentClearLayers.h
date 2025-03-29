@@ -3,7 +3,7 @@
 #include "EngineMessageType.h"
 #include "TileExtent.h"
 #include "TileLayer.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include <SDL_stdinc.h>
 
 namespace AM

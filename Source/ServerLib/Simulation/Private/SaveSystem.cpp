@@ -1,5 +1,6 @@
 #include "SaveSystem.h"
 #include "World.h"
+#include "ItemData.h"
 #include "Config.h"
 #include "Database.h"
 #include "EnginePersistedComponentTypes.h"
@@ -40,15 +41,16 @@ void addComponentsToVector(entt::registry& registry, entt::entity entity,
     });
 }
 
-SaveSystem::SaveSystem(World& inWorld)
+SaveSystem::SaveSystem(World& inWorld, ItemData& inItemData)
 : world{inWorld}
+, itemData{inItemData}
 , updatedItems{}
 , saveTimer{}
 , workBuffer1{}
 {
     // When an item is created or updated, add it to updatedItems.
-    world.itemData.itemCreated.connect<&SaveSystem::itemUpdated>(this);
-    world.itemData.itemUpdated.connect<&SaveSystem::itemUpdated>(this);
+    itemData.itemCreated.connect<&SaveSystem::itemUpdated>(this);
+    itemData.itemUpdated.connect<&SaveSystem::itemUpdated>(this);
 }
 
 void SaveSystem::saveIfNecessary()
@@ -127,7 +129,7 @@ void SaveSystem::saveItems()
 
     // Queue all of our item save queries.
     for (ItemID itemID : updatedItems) {
-        const Item* updatedItem{world.itemData.getItem(itemID)};
+        const Item* updatedItem{itemData.getItem(itemID)};
 
         workBuffer1.clear();
         workBuffer1.resize(Serialize::measureSize(*updatedItem));
@@ -136,8 +138,8 @@ void SaveSystem::saveItems()
 
         world.database->saveItemData(
             updatedItem->numericID, workBuffer1,
-            world.itemData.getItemVersion(updatedItem->numericID),
-            world.itemData.getItemInitScript(updatedItem->numericID).script);
+            itemData.getItemVersion(updatedItem->numericID),
+            itemData.getItemInitScript(updatedItem->numericID).script);
     }
 
     updatedItems.clear();

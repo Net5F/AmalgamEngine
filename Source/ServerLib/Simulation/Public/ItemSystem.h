@@ -1,22 +1,24 @@
 #pragma once
 
 #include "ItemID.h"
-#include "ItemInteractionRequest.h"
 #include "CombineItemsRequest.h"
 #include "UseItemOnEntityRequest.h"
 #include "ItemInitRequest.h"
 #include "ItemChangeRequest.h"
 #include "ItemDataRequest.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include "QueuedEvents.h"
 
 namespace AM
 {
+struct CastInfo;
+
 namespace Server
 {
 class Simulation;
 class World;
 class Network;
+class ItemData;
 class ISimulationExtension;
 struct EntityItemHandlerLua;
 struct EntityItemHandlerScript;
@@ -28,13 +30,14 @@ class ItemSystem
 {
 public:
     ItemSystem(Simulation& inSimulation, Network& inNetwork,
+               ItemData& inItemData,
                EntityItemHandlerLua& inEntityItemHandlerLua);
 
     /**
-     * Processes the interactions that every item supports (UseOn, Destroy,
-     * and Examine).
+     * Processes the "Use On" item interactions (combine items, use item on 
+     * entity).
      */
-    void processItemInteractions();
+    void processUseItemInteractions();
 
     /**
      * Processes item definition updates and requests.
@@ -52,7 +55,7 @@ private:
     /**
      * Sends the given item's examine text to the given client.
      */
-    void examineItem(const Item* item, NetworkID clientID);
+    void examineItem(const CastInfo& castInfo);
 
     /**
      * Tries to combine the given items in the given player's inventory. If the
@@ -117,6 +120,8 @@ private:
     World& world;
     /** Used for receiving requests and sending item and inventory data. */
     Network& network;
+    /** Used for getting item data and subscribing to updates. */
+    ItemData& itemData;
     /** Used to run entity item handler scripts. */
     EntityItemHandlerLua& entityItemHandlerLua;
     /** If non-nullptr, contains the project's simulation extension functions.

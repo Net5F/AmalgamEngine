@@ -5,6 +5,7 @@
 #include "DialogueLua.h"
 #include "DialogueChoiceConditionLua.h"
 #include "GraphicData.h"
+#include "ItemData.h"
 #include "World.h"
 #include "Network.h"
 #include "Interaction.h"
@@ -27,13 +28,15 @@ EngineLuaBindings::EngineLuaBindings(
     EntityItemHandlerLua& inEntityItemHandlerLua, ItemInitLua& inItemInitLua,
     DialogueLua& inDialogueLua,
     DialogueChoiceConditionLua& inDialogueChoiceConditionLua,
-    const GraphicData& inGraphicData, World& inWorld, Network& inNetwork)
+    const GraphicData& inGraphicData, const ItemData& inItemData,
+    World& inWorld, Network& inNetwork)
 : entityInitLua{inEntityInitLua}
 , entityItemHandlerLua{inEntityItemHandlerLua}
 , itemInitLua{inItemInitLua}
 , dialogueLua{inDialogueLua}
 , dialogueChoiceConditionLua{inDialogueChoiceConditionLua}
 , graphicData{inGraphicData}
+, itemData{inItemData}
 , world{inWorld}
 , network{inNetwork}
 , dialogueChoiceLua{std::make_unique<sol::state>()}
@@ -251,7 +254,7 @@ void EngineLuaBindings::addItemHandler(std::string_view itemID,
                                        std::string_view handlerScript)
 {
     // If the given item exists, add the given handler.
-    if (const Item * item{world.itemData.getItem(itemID)}) {
+    if (const Item * item{itemData.getItem(itemID)}) {
         entt::entity entity{entityInitLua.selfEntity};
         ItemHandlers& itemHandlers{
             world.registry.get_or_emplace<ItemHandlers>(entity)};
@@ -316,8 +319,8 @@ void EngineLuaBindings::addCombination(std::string_view otherItemID,
                                        std::string_view description)
 {
     // Try to add the given combination.
-    const Item* otherItem{world.itemData.getItem(otherItemID)};
-    const Item* resultItem{world.itemData.getItem(resultItemID)};
+    const Item* otherItem{itemData.getItem(otherItemID)};
+    const Item* resultItem{itemData.getItem(resultItemID)};
     if (otherItem && resultItem) {
         Item* item{itemInitLua.selfItem};
         item->itemCombinations.emplace_back(otherItem->numericID,
@@ -386,8 +389,8 @@ bool EngineLuaBindings::addItem(entt::entity entityToAddTo,
     }
 
     // Try to add the item, sending update messages appropriately.
-    auto result{InventoryHelpers::addItem(itemID, count, entityToAddTo, world,
-                                          network)};
+    auto result{InventoryHelpers::addItem(itemID, count, entityToAddTo,
+                                          itemData, world, network)};
     if (result == InventoryHelpers::AddResult::InventoryFull) {
         throw std::runtime_error{"Failed to add item: Inventory is full."};
     }
@@ -413,7 +416,7 @@ bool EngineLuaBindings::removeItem(entt::entity entityToRemoveFrom,
     // Note: This will walk the whole inventory, looking for enough copies of
     //       the item to satisfy the given count.
     auto result{InventoryHelpers::removeItem(itemID, count, entityToRemoveFrom,
-                                             world, network)};
+                                             world, network, itemData)};
     if (result == InventoryHelpers::RemoveResult::InsufficientItemCount) {
         throw std::runtime_error{
             "Failed to remove item: Insufficient item count."};
@@ -442,7 +445,7 @@ std::size_t EngineLuaBindings::getItemCount(entt::entity entityToCount,
     }
 
     // Try to return the count for the given item.
-    const Item* item{world.itemData.getItem(itemID)};
+    const Item* item{itemData.getItem(itemID)};
     auto* inventory{world.registry.try_get<Inventory>(entityToCount)};
     if (item && inventory) {
         return inventory->getItemCount(item->numericID);

@@ -26,6 +26,7 @@ Application::Application()
 , resourceData{}
 , graphicData{resourceData.get(), assetCache}
 , iconData{resourceData.get()}
+, itemData{}
 , castableData{}
 , network{}
 , networkCaller{std::bind_front(&Network::tick, &network),
@@ -36,7 +37,7 @@ Application::Application()
 , uiCaller{std::bind_front(&UserInterface::tick, &userInterface),
            Config::UI_TICK_TIMESTEP_S, "UserInterface", true}
 , simulation{userInterface.getEventDispatcher(), network, graphicData,
-             castableData}
+             itemData, castableData}
 , simCaller{std::bind_front(&Simulation::tick, &simulation),
             SharedConfig::SIM_TICK_TIMESTEP_S, "Sim", false}
 , renderer{sdlRenderer.Get(), simulation.getWorld(), userInterface, graphicData,

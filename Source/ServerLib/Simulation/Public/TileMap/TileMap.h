@@ -30,7 +30,8 @@ public:
      *
      * Errors if TileMap.bin doesn't exist or it fails to parse.
      */
-    TileMap(GraphicData& inGraphicData, CollisionLocator& inCollisionLocator);
+    TileMap(const GraphicData& inGraphicData,
+            CollisionLocator& inCollisionLocator);
 
     /**
      * Attempts to save the current tile map state to TileMap.bin.

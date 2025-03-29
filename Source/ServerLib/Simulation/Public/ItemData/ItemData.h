@@ -64,7 +64,7 @@ public:
      * @return If no item with the given ID exists, returns {}. Else, returns 
      *         the item's init script.
      */
-    const ItemInitScript& getItemInitScript(ItemID numericID);
+    const ItemInitScript& getItemInitScript(ItemID numericID) const;
 
 private:
     // Note: We bring this into the private namespace so that outside consumers

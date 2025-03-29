@@ -1,12 +1,14 @@
 #include "ItemSystem.h"
 #include "Simulation.h"
 #include "World.h"
-#include "Database.h"
 #include "Network.h"
+#include "ItemData.h"
+#include "Database.h"
 #include "EntityItemHandlerLua.h"
 #include "ISimulationExtension.h"
 #include "ClientSimData.h"
 #include "Inventory.h"
+#include "Castable.h"
 #include "ItemHandlers.h"
 #include "ItemUpdate.h"
 #include "ItemError.h"
@@ -22,10 +24,12 @@ namespace AM
 namespace Server
 {
 ItemSystem::ItemSystem(Simulation& inSimulation, Network& inNetwork,
+                       ItemData& inItemData,
                        EntityItemHandlerLua& inEntityItemHandlerLua)
 : simulation{inSimulation}
 , world{inSimulation.getWorld()}
 , network{inNetwork}
+, itemData{inItemData}
 , entityItemHandlerLua{inEntityItemHandlerLua}
 , extension{nullptr}
 , updatedItems{}
@@ -36,18 +40,17 @@ ItemSystem::ItemSystem(Simulation& inSimulation, Network& inNetwork,
 , itemDataRequestQueue{inNetwork.getEventDispatcher()}
 {
     // When an item is updated, add it to updatedItems.
-    world.itemData.itemUpdated.connect<&ItemSystem::itemUpdated>(this);
+    itemData.itemUpdated.connect<&ItemSystem::itemUpdated>(this);
+
+    // Register a callback for item Examine interactions.
+    world.castHelper.setOnItemInteractionCompleted(
+        ItemInteractionType::Examine,
+        [this](const CastInfo& castInfo) { examineItem(castInfo); });
 }
 
-void ItemSystem::processItemInteractions()
+void ItemSystem::processUseItemInteractions()
 {
-    // Process any waiting interactions.
-    Simulation::ItemInteractionData examineRequest{};
-    while (simulation.popItemInteractionRequest(ItemInteractionType::Examine,
-                                                examineRequest)) {
-        examineItem(examineRequest.item, examineRequest.clientID);
-    }
-
+    // Process any waiting messages.
     CombineItemsRequest combineItemsRequest{};
     while (combineItemsRequestQueue.pop(combineItemsRequest)) {
         combineItems(combineItemsRequest.sourceSlotIndex,
@@ -94,13 +97,13 @@ void ItemSystem::processItemUpdates()
                 auto it{std::find(updatedItems.begin(), updatedItems.end(),
                                   itemSlot.ID)};
                 if (it != updatedItems.end()) {
-                    const Item& item{*(world.itemData.getItem(itemSlot.ID))};
+                    const Item& item{*(itemData.getItem(itemSlot.ID))};
                     network.serializeAndSend(
                         client.netID,
                         ItemUpdate{
                             item.displayName, item.numericID, item.iconID,
                             item.maxStackSize, item.supportedInteractions,
-                            world.itemData.getItemVersion(item.numericID)});
+                            itemData.getItemVersion(item.numericID)});
                 }
             }
         }
@@ -125,14 +128,15 @@ void ItemSystem::itemUpdated(ItemID itemID)
     updatedItems.emplace_back(itemID);
 }
 
-void ItemSystem::examineItem(const Item* item, NetworkID clientID)
+void ItemSystem::examineItem(const CastInfo& castInfo)
 {
     // Send the item's description.
     // Note: Since all items have a description, you could imagine sending it  
     //       with the initial ItemUpdate. To save data, we send it when 
     //       requested instead (we assume that people are rarely going to 
     //       examine items, compared to how often we send ItemUpdates).
-    network.serializeAndSend(clientID, SystemMessage{item->description});
+    network.serializeAndSend(castInfo.clientID,
+                             SystemMessage{castInfo.item->description});
 }
 
 void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
@@ -146,12 +150,12 @@ void ItemSystem::combineItems(Uint8 sourceSlotIndex, Uint8 targetSlotIndex,
         // If the combination is successful, tell the client.
         auto& inventory{world.registry.get<Inventory>(clientEntity)};
         const ItemCombination* combination{inventory.combineItems(
-            sourceSlotIndex, targetSlotIndex, world.itemData)};
+            sourceSlotIndex, targetSlotIndex, itemData)};
         if (combination) {
             ItemID resultItemID{combination->resultItemID};
-            const Item* item{world.itemData.getItem(resultItemID)};
+            const Item* item{itemData.getItem(resultItemID)};
             ItemVersion resultItemVersion{
-                world.itemData.getItemVersion(resultItemID)};
+                itemData.getItemVersion(resultItemID)};
             network.serializeAndSend(
                 clientID,
                 CombineItems{sourceSlotIndex, targetSlotIndex, resultItemID,
@@ -211,7 +215,7 @@ void ItemSystem::useItemOnEntity(Uint8 sourceSlotIndex,
 void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 {
     // If the string ID is already in use, send an error.
-    if (world.itemData.getItem(itemInitRequest.displayName)) {
+    if (itemData.getItem(itemInitRequest.displayName)) {
         std::string stringID{};
         StringTools::deriveStringID(itemInitRequest.displayName, stringID);
         network.serializeAndSend(itemInitRequest.netID,
@@ -234,7 +238,7 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
 
     // Create the item (should always succeed since we checked the string ID).
     const Item* newItem{
-        world.itemData.createItem(item, itemInitRequest.initScript.script)};
+        itemData.createItem(item, itemInitRequest.initScript.script)};
     AM_ASSERT(newItem != nullptr, "Failed to create item.");
 
     // Send the requester the new item's definition.
@@ -242,19 +246,19 @@ void ItemSystem::handleInitRequest(const ItemInitRequest& itemInitRequest)
         itemInitRequest.netID,
         ItemUpdate{newItem->displayName, newItem->numericID, newItem->iconID,
                    newItem->maxStackSize, newItem->supportedInteractions,
-                   world.itemData.getItemVersion(newItem->numericID)});
+                   itemData.getItemVersion(newItem->numericID)});
 }
 
 void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
 {
     // Check that the numeric ID exists.
     ItemError::Type errorType{ItemError::NotSet};
-    if (!(world.itemData.getItem(itemChangeRequest.itemID))) {
+    if (!(itemData.getItem(itemChangeRequest.itemID))) {
         errorType = ItemError::NumericIDNotFound;
     }
     // Check that the string ID isn't taken by another item.
     else if (const Item*
-                 item{world.itemData.getItem(itemChangeRequest.displayName)};
+                 item{itemData.getItem(itemChangeRequest.displayName)};
              item && (item->numericID != itemChangeRequest.itemID)) {
         errorType = ItemError::StringIDInUse;
     }
@@ -284,7 +288,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
 
     // Update the item (should always succeed since we checked the ID).
     const Item* updatedItem{
-        world.itemData.updateItem(item, itemChangeRequest.initScript.script)};
+        itemData.updateItem(item, itemChangeRequest.initScript.script)};
     AM_ASSERT(updatedItem != nullptr, "Failed to update item.");
 
     // Send the requester the new item's definition.
@@ -295,7 +299,7 @@ void ItemSystem::handleChangeRequest(const ItemChangeRequest& itemChangeRequest)
         ItemUpdate{updatedItem->displayName, updatedItem->numericID,
                    updatedItem->iconID, updatedItem->maxStackSize,
                    updatedItem->supportedInteractions,
-                   world.itemData.getItemVersion(updatedItem->numericID)});
+                   itemData.getItemVersion(updatedItem->numericID)});
 }
 
 void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
@@ -304,13 +308,13 @@ void ItemSystem::handleDataRequest(const ItemDataRequest& itemDataRequest)
     bool itemWasFound{false};
     std::visit(
         [&](auto& itemID) {
-            if (const Item * item{world.itemData.getItem(itemID)}) {
+            if (const Item * item{itemData.getItem(itemID)}) {
                 itemWasFound = true;
                 network.serializeAndSend(
                     itemDataRequest.netID,
                     ItemUpdate{item->displayName, item->numericID, item->iconID,
                                item->maxStackSize, item->supportedInteractions,
-                               world.itemData.getItemVersion(item->numericID)});
+                               itemData.getItemVersion(item->numericID)});
             }
         },
         itemDataRequest.itemID);

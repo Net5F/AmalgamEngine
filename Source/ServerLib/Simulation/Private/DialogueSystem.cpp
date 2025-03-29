@@ -15,28 +15,23 @@ namespace AM
 namespace Server
 {
 DialogueSystem::DialogueSystem(
-    Simulation& inSimulation, Network& inNetwork, DialogueLua& inDialogueLua,
+    World& inWorld, Network& inNetwork, DialogueLua& inDialogueLua,
     DialogueChoiceConditionLua& inDialogueChoiceConditionLua)
-: simulation{inSimulation}
-, world{inSimulation.getWorld()}
+: world{inWorld}
 , network{inNetwork}
 , dialogueLua{inDialogueLua}
 , dialogueChoiceConditionLua{inDialogueChoiceConditionLua}
 , workString{}
 , dialogueChoiceRequestQueue{inNetwork.getEventDispatcher()}
 {
+    // Register a callback for entity Talk interactions.
+    world.castHelper.setOnEntityInteractionCompleted(
+        EntityInteractionType::Talk,
+        [this](const CastInfo& castInfo) { processTalkInteraction(castInfo); });
 }
 
 void DialogueSystem::processDialogueInteractions()
 {
-    // Process any waiting Talk interactions.
-    Simulation::EntityInteractionData talkRequest{};
-    while (simulation.popEntityInteractionRequest(EntityInteractionType::Talk,
-                                                  talkRequest)) {
-        processTalkInteraction(talkRequest.clientEntity,
-                               talkRequest.targetEntity, talkRequest.clientID);
-    }
-
     // Process any waiting dialogue choice requests.
     DialogueChoiceRequest dialogueChoiceRequest{};
     while (dialogueChoiceRequestQueue.pop(dialogueChoiceRequest)) {
@@ -44,16 +39,15 @@ void DialogueSystem::processDialogueInteractions()
     }
 }
 
-void DialogueSystem::processTalkInteraction(entt::entity clientEntity,
-                                            entt::entity targetEntity,
-                                            NetworkID clientID)
+void DialogueSystem::processTalkInteraction(const CastInfo& castInfo)
 {
-    const Dialogue* dialogue{world.registry.try_get<Dialogue>(targetEntity)};
+    const Dialogue* dialogue{
+        world.registry.try_get<Dialogue>(castInfo.targetEntity)};
     if (!dialogue) {
         // Note: This can happen if the init script has an addTalkInteraction() 
         //       but doesn't have any topic() declarations.
         network.serializeAndSend(
-            clientID,
+            castInfo.clientID,
             SystemMessage{"Error: Tried to Talk to entity that has no "
                           "Dialogue component."});
         return;
@@ -63,29 +57,29 @@ void DialogueSystem::processTalkInteraction(entt::entity clientEntity,
 
     // Run the topic script, following any setNextTopic() and pushing dialogue 
     // events into the response.
-    DialogueResponse dialogueResponse{targetEntity, 0};
-    dialogueLua.luaState["user"] = clientEntity;
-    dialogueLua.luaState["self"] = targetEntity;
-    dialogueLua.clientID = clientID;
+    DialogueResponse dialogueResponse{castInfo.targetEntity, 0};
+    dialogueLua.luaState["user"] = castInfo.casterEntity;
+    dialogueLua.luaState["self"] = castInfo.targetEntity;
+    dialogueLua.clientID = castInfo.clientID;
     dialogueLua.dialogueEvents = &(dialogueResponse.dialogueEvents);
 
     std::size_t topicNavigationCount{0};
     const Dialogue::Topic* lastTopic{&(dialogue->topics[0])};
     const Dialogue::Topic* nextTopic{
-        runTopic(*dialogue, dialogue->topics[0], clientID)};
+        runTopic(*dialogue, dialogue->topics[0], castInfo.clientID)};
     while (nextTopic && (topicNavigationCount < TOPIC_NAVIGATION_MAX)) {
         lastTopic = nextTopic;
-        nextTopic = runTopic(*dialogue, *nextTopic, clientID);
+        nextTopic = runTopic(*dialogue, *nextTopic, castInfo.clientID);
         topicNavigationCount++;
     }
 
     // Add the last topic's choices to the response.
-    addChoicesToResponse(lastTopic->choices, clientEntity,
-                         targetEntity, clientID,
+    addChoicesToResponse(lastTopic->choices, castInfo.casterEntity,
+                         castInfo.targetEntity, castInfo.clientID,
                          dialogueResponse);
 
     // Send the dialogue to the client.
-    network.serializeAndSend(clientID, dialogueResponse);
+    network.serializeAndSend(castInfo.clientID, dialogueResponse);
 }
 
 void DialogueSystem::processDialogueChoice(

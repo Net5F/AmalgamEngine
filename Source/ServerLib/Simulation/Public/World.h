@@ -1,28 +1,32 @@
 #pragma once
 
-#include "ItemData.h"
 #include "TileMap.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include "EntityLocator.h"
 #include "CollisionLocator.h"
 #include "EntityStoredValueID.h"
 #include "EntityStoredValueIDMap.h"
 #include "GlobalStoredValueMap.h"
+#include "CastHelper.h"
 #include "SpawnStrategy.h"
 #include "entt/entity/registry.hpp"
 #include <unordered_map>
+#include <string_view>
 #include <random>
 
 namespace AM
 {
+class CastableData;
 struct Position;
 struct GraphicState;
 struct EntityInitScript;
 struct ItemInitScript;
+struct Item;
 
 namespace Server
 {
 class GraphicData;
+class ItemData;
 class Database;
 struct EntityInitLua;
 struct ItemInitLua;
@@ -44,8 +48,13 @@ struct ItemInitLua;
  */
 class World
 {
+private:
+    /** Used to get graphics info. */
+    const GraphicData& graphicData;
+
 public:
-    World(GraphicData& inGraphicData, EntityInitLua& inEntityInitLua,
+    World(const GraphicData& inGraphicData, ItemData& inItemData,
+          const CastableData& inCastableData, EntityInitLua& inEntityInitLua,
           ItemInitLua& inItemInitLua);
 
     ~World();
@@ -55,9 +64,6 @@ public:
     //-------------------------------------------------------------------------
     /** Entity data registry. */
     entt::registry registry;
-
-    /** Item data templates. */
-    ItemData itemData;
 
     /** Spatial partitioning grid for efficiently locating entities by
         their position. */
@@ -77,6 +83,9 @@ public:
         Note: Stored values are often cast to different types, but their 
               underlying type is always Uint32. */
     GlobalStoredValueMap globalStoredValueMap;
+
+    /** Helper class for casting Castables. */
+    CastHelper castHelper;
 
     /** The database for saving and loading world data.
         Kept as a pointer to speed up compilation. */
@@ -200,15 +209,12 @@ private:
     /**
      * Loads our saved items and adds them to itemData.
      */
-    void loadItems();
+    void loadItems(ItemData& itemData);
 
     /**
      * Loads our saved entity stored value IDs and global stored values.
      */
     void loadStoredValues();
-
-    /** Used to get graphics info. */
-    const GraphicData& graphicData;
 
     /** Used to run entity init scripts. */
     EntityInitLua& entityInitLua;

@@ -139,8 +139,8 @@ void ComponentSyncSystem::sendUpdates()
             const auto& updatedEntityPosition{
                 world.registry.get<Position>(updatedEntity)};
             entitiesInRange = &(world.entityLocator.getEntities(
-                {updatedEntityPosition, SharedConfig::AOI_RADIUS,
-                 SharedConfig::AOI_HALF_HEIGHT}));
+                Cylinder{updatedEntityPosition, SharedConfig::AOI_RADIUS,
+                         SharedConfig::AOI_HALF_HEIGHT}));
         }
 
         // Send the update to all nearby clients.

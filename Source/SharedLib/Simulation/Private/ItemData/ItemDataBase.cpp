@@ -23,12 +23,8 @@ ItemDataBase::ItemDataBase()
 , itemCreated{itemCreatedSig}
 , itemUpdated{itemUpdatedSig}
 {
-    // Add the null item.
-    Item& newItem{itemMap[NULL_ITEM_ID]};
-    newItem.stringID = "null";
-    newItem.numericID = NULL_ITEM_ID;
-    itemVersionMap[NULL_ITEM_ID] = 0;
-    itemStringMap["null"] = &newItem;
+    // Note: We intentionally don't have a "null item", because we want the 
+    //       getters to return nullptr if there isn't a real item to return.
 }
 
 const Item* ItemDataBase::loadItem(const Item& referenceItem,
@@ -61,7 +57,7 @@ const Item* ItemDataBase::loadItem(const Item& referenceItem,
     return &item;
 }
 
-const Item* ItemDataBase::getItem(std::string_view stringID)
+const Item* ItemDataBase::getItem(std::string_view stringID) const
 {
     // Derive string ID in case the user accidentally passed a display name.
     StringTools::deriveStringID(stringID, workStringID);
@@ -86,7 +82,7 @@ const Item* ItemDataBase::getItem(ItemID numericID) const
     return &(it->second);
 }
 
-ItemVersion ItemDataBase::getItemVersion(ItemID numericID)
+ItemVersion ItemDataBase::getItemVersion(ItemID numericID) const
 {
     // Attempt to find the given numeric ID.
     auto it{itemVersionMap.find(numericID)};

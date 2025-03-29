@@ -5,7 +5,7 @@
 #include "IconID.h"
 #include "ItemInitScript.h"
 #include "Item.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include <string>
 
 namespace AM

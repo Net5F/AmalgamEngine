@@ -10,6 +10,7 @@ namespace Server
 {
 class World;
 class Network;
+class ItemData;
 
 /**
  * Handles sending Lua scripts to clients.
@@ -21,7 +22,8 @@ class Network;
 class ScriptDataSystem
 {
 public:
-    ScriptDataSystem(World& inWorld, Network& inNetwork);
+    ScriptDataSystem(World& inWorld, Network& inNetwork,
+                     const ItemData& itemData);
 
     /**
      * Processes script data requests, sending script data if the request is
@@ -30,10 +32,12 @@ public:
     void sendScripts();
 
 private:
-    /** Used for fetching script data. */
+    /** Used for accessing script data. */
     World& world;
     /** Used for receiving script requests and sending scripts to clients. */
     Network& network;
+    /** Used for accessing item data. */
+    const ItemData& itemData;
 
     /**
      * Sends the requested init script.

@@ -2,6 +2,7 @@
 
 #include "ItemID.h"
 #include "Dialogue.h"
+#include "NetworkID.h"
 #include "entt/fwd.hpp"
 #include <SDL_stdinc.h>
 #include <string_view>
@@ -24,6 +25,7 @@ struct DialogueChoiceConditionLua;
 class GraphicData;
 class World;
 class Network;
+class ItemData;
 
 /**
  * Holds any functionality that the engine wants to expose to Lua.
@@ -38,13 +40,9 @@ public:
                       EntityItemHandlerLua& inEntityItemHandlerLua,
                       ItemInitLua& inItemInitLua, DialogueLua& inDialogueLua,
                       DialogueChoiceConditionLua& inDialogueChoiceConditionLua,
-                      const GraphicData& inGraphicData, World& inWorld,
+                      const GraphicData& inGraphicData,
+                      const ItemData& inItemData, World& inWorld,
                       Network& inNetwork);
-
-    /**
-     * Adds our bindings to the lua object.
-     */
-    void addBindings();
 
 private:
     void addEntityInitBindings();
@@ -272,6 +270,7 @@ private:
     DialogueLua& dialogueLua;
     DialogueChoiceConditionLua& dialogueChoiceConditionLua;
     const GraphicData& graphicData;
+    const ItemData& itemData;
     World& world;
     Network& network;
 

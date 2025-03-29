@@ -1,6 +1,7 @@
 #include "ScriptDataSystem.h"
 #include "World.h"
 #include "Network.h"
+#include "ItemData.h"
 #include "EntityInitScriptResponse.h"
 #include "ItemInitScriptResponse.h"
 #include "Log.h"
@@ -11,9 +12,11 @@ namespace AM
 {
 namespace Server
 {
-ScriptDataSystem::ScriptDataSystem(World& inWorld, Network& inNetwork)
+ScriptDataSystem::ScriptDataSystem(World& inWorld, Network& inNetwork,
+                                   const ItemData& inItemData)
 : world{inWorld}
 , network{inNetwork}
+, itemData{inItemData}
 , entityInitScriptRequestQueue{inNetwork.getEventDispatcher()}
 , itemInitScriptRequestQueue{inNetwork.getEventDispatcher()}
 {
@@ -49,12 +52,11 @@ void ScriptDataSystem::sendItemInitScript(
     const ItemInitScriptRequest& initScriptRequest)
 {
     // If the given item is valid, send its init script.
-    if (const Item* item{world.itemData.getItem(initScriptRequest.itemID)}) {
+    if (const Item* item{itemData.getItem(initScriptRequest.itemID)}) {
         network.serializeAndSend(
             initScriptRequest.netID,
             ItemInitScriptResponse{
-                item->numericID,
-                world.itemData.getItemInitScript(item->numericID)});
+                item->numericID, itemData.getItemInitScript(item->numericID)});
     }
 }
 

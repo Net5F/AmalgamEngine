@@ -11,15 +11,14 @@
 #include "EntityInitRequest.h"
 #include "EntityDeleteRequest.h"
 #include "EntityInitScriptRequest.h"
-#include "EntityInteractionRequest.h"
 #include "ItemDataRequest.h"
 #include "ItemInitRequest.h"
 #include "ItemChangeRequest.h"
 #include "ItemInitScriptRequest.h"
-#include "ItemInteractionRequest.h"
 #include "CombineItemsRequest.h"
 #include "UseItemOnEntityRequest.h"
 #include "DialogueChoiceRequest.h"
+#include "CastRequest.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
@@ -106,11 +105,6 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
-        case EngineMessageType::EntityInteractionRequest: {
-            dispatchWithNetID<EntityInteractionRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
-            break;
-        }
         case EngineMessageType::ItemDataRequest: {
             dispatchWithNetID<ItemDataRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
@@ -131,11 +125,6 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }
-        case EngineMessageType::ItemInteractionRequest: {
-            dispatchWithNetID<ItemInteractionRequest>(
-                netID, {messageBuffer, messageSize}, networkEventDispatcher);
-            break;
-        }
         case EngineMessageType::CombineItemsRequest: {
             dispatchWithNetID<CombineItemsRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
@@ -148,6 +137,11 @@ Sint64 MessageProcessor::processReceivedMessage(NetworkID netID,
         }
         case EngineMessageType::DialogueChoiceRequest: {
             dispatchWithNetID<DialogueChoiceRequest>(
+                netID, {messageBuffer, messageSize}, networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::CastRequest: {
+            dispatchWithNetID<CastRequest>(
                 netID, {messageBuffer, messageSize}, networkEventDispatcher);
             break;
         }

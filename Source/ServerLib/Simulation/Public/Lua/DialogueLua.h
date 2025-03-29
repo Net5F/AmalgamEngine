@@ -1,6 +1,7 @@
 #pragma once
 
 #include "DialogueEvent.h"
+#include "NetworkID.h"
 #include "sol/sol.hpp"
 #include "entt/fwd.hpp"
 

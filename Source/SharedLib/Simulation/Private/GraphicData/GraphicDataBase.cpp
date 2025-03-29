@@ -124,7 +124,7 @@ GraphicRef GraphicDataBase::getGraphic(GraphicID numericID) const
 }
 
 const TerrainGraphicSet&
-    GraphicDataBase::getTerrainGraphicSet(std::string_view stringID)
+    GraphicDataBase::getTerrainGraphicSet(std::string_view stringID) const
 {
     StringTools::deriveStringID(stringID, workStringID);
     auto it{terrainGraphicSetStringMap.find(workStringID)};
@@ -138,7 +138,7 @@ const TerrainGraphicSet&
 }
 
 const FloorGraphicSet&
-    GraphicDataBase::getFloorGraphicSet(std::string_view stringID)
+    GraphicDataBase::getFloorGraphicSet(std::string_view stringID) const
 {
     // Derive string ID in case the user accidentally passed a display name.
     StringTools::deriveStringID(stringID, workStringID);
@@ -154,7 +154,7 @@ const FloorGraphicSet&
 }
 
 const WallGraphicSet&
-    GraphicDataBase::getWallGraphicSet(std::string_view stringID)
+    GraphicDataBase::getWallGraphicSet(std::string_view stringID) const
 {
     StringTools::deriveStringID(stringID, workStringID);
     auto it{wallGraphicSetStringMap.find(workStringID)};
@@ -168,7 +168,7 @@ const WallGraphicSet&
 }
 
 const ObjectGraphicSet&
-    GraphicDataBase::getObjectGraphicSet(std::string_view stringID)
+    GraphicDataBase::getObjectGraphicSet(std::string_view stringID) const
 {
     StringTools::deriveStringID(stringID, workStringID);
     auto it{objectGraphicSetStringMap.find(workStringID)};
@@ -182,7 +182,7 @@ const ObjectGraphicSet&
 }
 
 const EntityGraphicSet&
-    GraphicDataBase::getEntityGraphicSet(std::string_view stringID)
+    GraphicDataBase::getEntityGraphicSet(std::string_view stringID) const
 {
     StringTools::deriveStringID(stringID, workStringID);
     auto it{entityGraphicSetStringMap.find(workStringID)};

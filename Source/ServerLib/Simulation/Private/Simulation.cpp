@@ -1,5 +1,6 @@
 #include "Simulation.h"
 #include "Network.h"
+#include "ItemData.h"
 #include "CastableData.h"
 #include "EntityInitLua.h"
 #include "EntityItemHandlerLua.h"
@@ -7,7 +8,6 @@
 #include "DialogueLua.h"
 #include "DialogueChoiceConditionLua.h"
 #include "ISimulationExtension.h"
-#include "EntityInteractionRequest.h"
 #include "Interaction.h"
 #include "Inventory.h"
 #include "SystemMessage.h"
@@ -23,14 +23,14 @@ namespace AM
 namespace Server
 {
 Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData,
-                       CastableData& castableData)
+                       ItemData& inItemData, CastableData& castableData)
 : network{inNetwork}
 , entityInitLua{std::make_unique<EntityInitLua>()}
 , entityItemHandlerLua{std::make_unique<EntityItemHandlerLua>()}
 , itemInitLua{std::make_unique<ItemInitLua>()}
 , dialogueLua{std::make_unique<DialogueLua>()}
 , dialogueChoiceConditionLua{std::make_unique<DialogueChoiceConditionLua>()}
-, world{inGraphicData, *entityInitLua, *itemInitLua}
+, world{inGraphicData, inItemData, castableData, *entityInitLua, *itemInitLua}
 , currentTick{0}
 , engineLuaBindings{*entityInitLua,
                     *entityItemHandlerLua,
@@ -38,13 +38,10 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData,
                     *dialogueLua,
                     *dialogueChoiceConditionLua,
                     inGraphicData,
+                    inItemData,
                     world,
                     network}
 , extension{nullptr}
-, entityInteractionRequestQueue{inNetwork.getEventDispatcher()}
-, itemInteractionRequestQueue{inNetwork.getEventDispatcher()}
-, entityInteractionQueueMap{}
-, itemInteractionQueueMap{}
 , clientConnectionSystem{*this, world, network, inGraphicData}
 , nceLifetimeSystem{world, network}
 , componentChangeSystem{world, network, inGraphicData}
@@ -52,15 +49,16 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData,
 , inputSystem{*this, world, network}
 , movementSystem{world}
 , aiSystem{world}
-, itemSystem{*this, network, *entityItemHandlerLua}
-, inventorySystem{world, network}
-, dialogueSystem{*this, network, *dialogueLua, *dialogueChoiceConditionLua}
+, castSystem{*this, world, network, inItemData, castableData}
+, itemSystem{*this, network, inItemData, *entityItemHandlerLua}
+, inventorySystem{world, network, inItemData}
+, dialogueSystem{world, network, *dialogueLua, *dialogueChoiceConditionLua}
 , clientAOISystem{*this, world, network}
 , movementSyncSystem{*this, world, network}
 , componentSyncSystem{*this, world, network, inGraphicData}
 , chunkStreamingSystem{world, network}
-, scriptDataSystem{world, network}
-, saveSystem{world}
+, scriptDataSystem{world, network, inItemData}
+, saveSystem{world, inItemData}
 {
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
@@ -68,99 +66,6 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData,
 }
 
 Simulation::~Simulation() = default;
-
-bool Simulation::popEntityInteractionRequest(
-    EntityInteractionType interactionType, EntityInteractionData& data)
-{
-    // If there's a waiting message of the given type, validate it.
-    std::queue<EntityInteractionRequest>& queue{
-        entityInteractionQueueMap[interactionType]};
-    if (!(queue.empty())) {
-        EntityInteractionRequest interactionRequest{queue.front()};
-        queue.pop();
-        entt::registry& registry{world.registry};
-
-        // Find the client's entity ID.
-        auto it{world.netIDMap.find(interactionRequest.netID)};
-        if (it == world.netIDMap.end()) {
-            // Client doesn't exist (may have disconnected), do nothing.
-            return false;
-        }
-        entt::entity clientEntity{it->second};
-        entt::entity targetEntity{interactionRequest.targetEntity};
-
-        // Check that the target exists.
-        if (!(registry.valid(targetEntity))) {
-            return false;
-        }
-
-        // Check that the client is in range of the target.
-        const Position& clientPosition{registry.get<Position>(clientEntity)};
-        const Position& targetPosition{registry.get<Position>(targetEntity)};
-        if (clientPosition.squaredDistanceTo(targetPosition)
-            > SharedConfig::SQUARED_INTERACTION_DISTANCE) {
-            network.serializeAndSend(
-                interactionRequest.netID,
-                SystemMessage{"You must move closer to interact with that."});
-            return false;
-        }
-
-        // Check that the target actually has this interaction type.
-        if (auto* interaction{registry.try_get<Interaction>(targetEntity)};
-            !interaction
-            || !(interaction->supports(interactionRequest.interactionType))) {
-            return false;
-        }
-
-        // Request is valid. Return it.
-        data.clientEntity = clientEntity;
-        data.targetEntity = targetEntity;
-        data.clientID = interactionRequest.netID;
-        return true;
-    }
-
-    return false;
-}
-
-bool Simulation::popItemInteractionRequest(ItemInteractionType interactionType,
-                                           ItemInteractionData& data)
-{
-    // If there's a waiting message of the given type, validate it.
-    std::queue<ItemInteractionRequest>& queue{
-        itemInteractionQueueMap[interactionType]};
-    while (!(queue.empty())) {
-        ItemInteractionRequest interactionRequest{queue.front()};
-        queue.pop();
-
-        // Find the client's entity ID.
-        auto it{world.netIDMap.find(interactionRequest.netID)};
-        if (it == world.netIDMap.end()) {
-            // Client doesn't exist (may have disconnected), skip this request.
-            continue;
-        }
-        entt::entity clientEntity{it->second};
-
-        // Check that the item exists and actually has this interaction type.
-        const auto& inventory{world.registry.get<Inventory>(clientEntity)};
-        const Item* item{
-            inventory.getItem(interactionRequest.slotIndex, world.itemData)};
-        if (!item
-            || !(item->supportsInteraction(
-                interactionRequest.interactionType))) {
-            // Interaction isn't supported, skip this request.
-            continue;
-        }
-
-        // Request is valid. Return it.
-        data.clientEntity = clientEntity;
-        data.slotIndex = interactionRequest.slotIndex;
-        data.clientID = interactionRequest.netID;
-        data.item = item;
-        return true;
-    }
-
-    return false;
-}
 
 World& Simulation::getWorld()
 {
@@ -219,9 +124,6 @@ void Simulation::tick()
     // Receive and process tile update requests.
     tileUpdateSystem.updateTiles();
 
-    // Sort any waiting interaction messages into their type-based queues.
-    sortInteractionMessages();
-
     // Call the project's pre-movement logic.
     if (extension != nullptr) {
         extension->afterMapAndConnectionUpdates();
@@ -239,8 +141,11 @@ void Simulation::tick()
     // Run all of our AI.
     aiSystem.processAITick();
 
-    // Process any waiting item interaction messages.
-    itemSystem.processItemInteractions();
+    // Process any cast requests and ongoing casts.
+    castSystem.processCasts();
+
+    // Process any waiting "use item" interaction messages.
+    itemSystem.processUseItemInteractions();
 
     // Process and send item definition updates.
     itemSystem.processItemUpdates();
@@ -299,22 +204,6 @@ void Simulation::setExtension(std::unique_ptr<ISimulationExtension> inExtension)
     extension = std::move(inExtension);
     nceLifetimeSystem.setExtension(extension.get());
     tileUpdateSystem.setExtension(extension.get());
-}
-
-void Simulation::sortInteractionMessages()
-{
-    // Push each message into the associated queue, based on its type enum.
-    EntityInteractionRequest entityInteractionRequest{};
-    while (entityInteractionRequestQueue.pop(entityInteractionRequest)) {
-        entityInteractionQueueMap[entityInteractionRequest.interactionType]
-            .push(entityInteractionRequest);
-    }
-
-    ItemInteractionRequest itemInteractionRequest{};
-    while (itemInteractionRequestQueue.pop(itemInteractionRequest)) {
-        itemInteractionQueueMap[itemInteractionRequest.interactionType].push(
-            itemInteractionRequest);
-    }
 }
 
 } // namespace Server

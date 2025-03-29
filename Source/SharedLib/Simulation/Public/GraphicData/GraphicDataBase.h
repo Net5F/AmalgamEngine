@@ -72,11 +72,14 @@ public:
      * Errors in debug if the given ID doesn't exist, returns the null set 
      * in release.
      */
-    const TerrainGraphicSet& getTerrainGraphicSet(std::string_view stringID);
-    const FloorGraphicSet& getFloorGraphicSet(std::string_view stringID);
-    const WallGraphicSet& getWallGraphicSet(std::string_view stringID);
-    const ObjectGraphicSet& getObjectGraphicSet(std::string_view stringID);
-    const EntityGraphicSet& getEntityGraphicSet(std::string_view stringID);
+    const TerrainGraphicSet&
+        getTerrainGraphicSet(std::string_view stringID) const;
+    const FloorGraphicSet& getFloorGraphicSet(std::string_view stringID) const;
+    const WallGraphicSet& getWallGraphicSet(std::string_view stringID) const;
+    const ObjectGraphicSet&
+        getObjectGraphicSet(std::string_view stringID) const;
+    const EntityGraphicSet&
+        getEntityGraphicSet(std::string_view stringID) const;
 
     /**
      * Returns the sprite set with the given numeric ID.

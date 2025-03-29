@@ -19,8 +19,7 @@ ClientHandler::ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher,
 : network{inNetwork}
 , dispatcher{inDispatcher}
 , messageProcessor{inMessageProcessor}
-, idPool{IDPool::ReservationStrategy::MarchForward,
-         3}
+, networkIDPool{IDPool::ReservationStrategy::MarchForward, 8}
 , clientCount{0}
 , clientSet{std::make_shared<SocketSet>(Config::MAX_CLIENTS)}
 , acceptor{Config::SERVER_PORT, clientSet}
@@ -32,6 +31,9 @@ ClientHandler::ClientHandler(Network& inNetwork, EventDispatcher& inDispatcher,
     // Start the send and receive threads.
     receiveThreadObj = std::thread(&ClientHandler::serviceClients, this);
     sendThreadObj = std::thread(&ClientHandler::sendClientUpdates, this);
+
+    // Reserve the null network ID.
+    networkIDPool.reserveID();
 }
 
 ClientHandler::~ClientHandler()
@@ -133,7 +135,7 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
     // Note: newPeer adds itself to the socket set.
     std::unique_ptr<Peer> newPeer{acceptor.accept()};
     while (newPeer != nullptr) {
-        NetworkID newID{idPool.reserveID()};
+        NetworkID newID{static_cast<NetworkID>(networkIDPool.reserveID())};
         LOG_INFO("New client connected. Assigning netID: %u", newID);
 
         {
@@ -143,7 +145,7 @@ void ClientHandler::acceptNewClients(ClientMap& clientMap)
                       .try_emplace(newID, std::make_shared<Client>(
                                               newID, std::move(newPeer)))
                       .second)) {
-                idPool.freeID(newID);
+                networkIDPool.freeID(newID);
                 LOG_FATAL(
                     "Ran out of room in client map or key already existed.");
             }
@@ -175,7 +177,7 @@ void ClientHandler::eraseDisconnectedClients(ClientMap& clientMap)
                 std::unique_lock writeLock{network.getClientMapMutex()};
 
                 // Erase the disconnected client.
-                idPool.freeID(it->first);
+                networkIDPool.freeID(it->first);
                 it = clientMap.erase(it);
             }
 

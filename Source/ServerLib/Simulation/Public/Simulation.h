@@ -1,11 +1,7 @@
 #pragma once
 
-#include "EntityInteractionType.h"
-#include "ItemInteractionType.h"
 #include "World.h"
 #include "EngineLuaBindings.h"
-#include "EntityInteractionRequest.h"
-#include "ItemInteractionRequest.h"
 #include "ClientConnectionSystem.h"
 #include "NceLifetimeSystem.h"
 #include "ComponentChangeSystem.h"
@@ -13,6 +9,7 @@
 #include "InputSystem.h"
 #include "MovementSystem.h"
 #include "AISystem.h"
+#include "CastSystem.h"
 #include "ItemSystem.h"
 #include "InventorySystem.h"
 #include "DialogueSystem.h"
@@ -22,10 +19,8 @@
 #include "ChunkStreamingSystem.h"
 #include "ScriptDataSystem.h"
 #include "SaveSystem.h"
-#include "QueuedEvents.h"
 #include <SDL_stdinc.h>
 #include <atomic>
-#include <queue>
 #include <memory>
 
 namespace AM
@@ -36,6 +31,7 @@ namespace Server
 {
 class Network;
 class GraphicData;
+class ItemData;
 struct EntityInitLua;
 struct EntityItemHandlerLua;
 struct ItemInitLua;
@@ -58,59 +54,9 @@ public:
     static constexpr double SIM_DELAYED_TIME_S{.001};
 
     Simulation(Network& inNetwork, GraphicData& inGraphicData,
-               CastableData& inCastableData);
+               ItemData& inItemData, CastableData& inCastableData);
 
     ~Simulation();
-
-    // Note: Since the <Entity|Item>InteractionRequest messages are consumed by
-    //       different systems depending on their type, we receive and queue
-    //       the messages here. Systems can use these functions to pop them.
-    struct EntityInteractionData {
-        /** The ID of the entity performing the interaction. */
-        entt::entity clientEntity{entt::null};
-        /** The ID of the entity that the interaction is being performed on. */
-        entt::entity targetEntity{entt::null};
-        /** The network ID of the client performing the interaction. */
-        NetworkID clientID{0};
-    };
-    /**
-     * Pops the next entity interaction request of the given type off the queue,
-     * checks it for validity, and returns its data.
-     *
-     * Entity interactions occur when the user left-clicks an entity, or right-
-     * clicks and selects an interaction from the menu.
-     *
-     * @param interactionType The type of interaction request to return.
-     * @param[out] data If return==true, holds the interaction data.
-     * @return true if a valid request was waiting, else false.
-     */
-    bool popEntityInteractionRequest(EntityInteractionType interactionType,
-                                     EntityInteractionData& data);
-
-    struct ItemInteractionData {
-        /** The ID of the entity performing the interaction. */
-        entt::entity clientEntity{entt::null};
-        /** The inventory slot of the item that the interaction is being
-            performed on. */
-        Uint8 slotIndex{0};
-        /** The item that the interaction is being performed on. */
-        const Item* item{nullptr};
-        /** The network ID of the client performing the interaction. */
-        NetworkID clientID{0};
-    };
-    /**
-     * Pops the next item interaction request of the given type off the queue,
-     * checks it for validity, and returns its data.
-     *
-     * Item interactions occur when the user left-clicks an item, or right-
-     * clicks and selects an interaction from the menu.
-     *
-     * @param interactionType The type of interaction request to return.
-     * @param[out] data If return==true, holds the interaction data.
-     * @return true if a valid request was waiting, else false.
-     */
-    bool popItemInteractionRequest(ItemInteractionType interactionType,
-                                   ItemInteractionData& data);
 
     /**
      * Returns a reference to the simulation's world state.
@@ -143,11 +89,6 @@ public:
     void setExtension(std::unique_ptr<ISimulationExtension> inExtension);
 
 private:
-    /**
-     * Sorts any received interaction messages to the appropriate queue.
-     */
-    void sortInteractionMessages();
-
     /** Used to receive events (through the Network's dispatcher) and to
         send messages. */
     Network& network;
@@ -183,19 +124,6 @@ private:
         the appropriate time. */
     std::unique_ptr<ISimulationExtension> extension;
 
-    // Note: We receive the generic interaction request messages here and
-    //       dispatch each specific interaction to the appropriate system.
-    EventQueue<EntityInteractionRequest> entityInteractionRequestQueue;
-    EventQueue<ItemInteractionRequest> itemInteractionRequestQueue;
-
-    /** Holds the received entity interaction requests of each type. */
-    std::unordered_map<EntityInteractionType,
-                       std::queue<EntityInteractionRequest>>
-        entityInteractionQueueMap;
-    /** Holds the received item interaction requests of each type. */
-    std::unordered_map<ItemInteractionType, std::queue<ItemInteractionRequest>>
-        itemInteractionQueueMap;
-
     //-------------------------------------------------------------------------
     // Systems
     //-------------------------------------------------------------------------
@@ -206,6 +134,7 @@ private:
     InputSystem inputSystem;
     MovementSystem movementSystem;
     AISystem aiSystem;
+    CastSystem castSystem;
     ItemSystem itemSystem;
     InventorySystem inventorySystem;
     DialogueSystem dialogueSystem;

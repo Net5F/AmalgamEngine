@@ -1,22 +1,24 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "NetworkDefs.h"
-#include "ItemInteractionType.h"
+#include "NetworkID.h"
+#include "CastableID.h"
+#include "Vector3.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
 #include <SDL_stdinc.h>
 
 namespace AM
 {
+
 /**
- * Used to request that an interaction be performed.
+ * Used to request that a castable be cast.
  */
-struct ItemInteractionRequest {
+struct CastRequest {
     // The MessageType enum value that this message corresponds to.
     // Declares this struct as a message that the Network can send and receive.
     static constexpr EngineMessageType MESSAGE_TYPE{
-        EngineMessageType::ItemInteractionRequest};
+        EngineMessageType::CastRequest};
 
     //--------------------------------------------------------------------------
     // Networked data
@@ -26,15 +28,21 @@ struct ItemInteractionRequest {
     //       interaction with. NPC state is in the past, and the client entity's
     //       predicted state (e.g. position) wouldn't be useful to sync to.
 
-    /** The inventory slot of the item that the interaction is being performed
-        on. */
+    /** The castable that's being cast. */
+    CastableID castableID{};
+
+    /** If castableID is an ItemInteractionType, this is the inventory slot of 
+        the item that is being used. */
     Uint8 slotIndex{0};
 
-    /** The type of interaction to perform.
-        Note: UseOn and Destroy are handled by other messages (see
-              ItemInteractionType). If you send them using this message, they'll
-              be ignored. */
-    ItemInteractionType interactionType{};
+    /** The target entity. If castableID is an EntityInteractionType, this will
+        always be present. Otherwise, this will be filled if the client has a 
+        current target. */
+    entt::entity targetEntity{entt::null};
+
+    /** The target position. If the requested Castable has a targetToolType 
+        that selects a position, this will be filled.*/
+    Vector3 targetPosition{};
 
     //--------------------------------------------------------------------------
     // Local data
@@ -49,10 +57,12 @@ struct ItemInteractionRequest {
 };
 
 template<typename S>
-void serialize(S& serializer, ItemInteractionRequest& interactionRequest)
+void serialize(S& serializer, CastRequest& castRequest)
 {
-    serializer.value1b(interactionRequest.slotIndex);
-    serializer.value1b(interactionRequest.interactionType);
+    serializer.object(castRequest.castableID);
+    serializer.value1b(castRequest.slotIndex);
+    serializer.value4b(castRequest.targetEntity);
+    serializer.object(castRequest.targetPosition);
 }
 
 } // End namespace AM

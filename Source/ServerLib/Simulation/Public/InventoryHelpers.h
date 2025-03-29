@@ -12,6 +12,7 @@ namespace Server
 {
 class World;
 class Network;
+class ItemData;
 
 /**
  * Static functions for manipulating inventories.
@@ -55,14 +56,16 @@ public:
      * inventory.
      */
     static AddResult addItem(ItemID itemID, Uint8 count,
-                             entt::entity entityToAddTo, World& world,
+                             entt::entity entityToAddTo,
+                             const ItemData& itemData, World& world,
                              Network& network);
 
     /**
      * Overload for string IDs.
      */
     static AddResult addItem(std::string_view itemID, Uint8 count,
-                             entt::entity entityToAddTo, World& world,
+                             entt::entity entityToAddTo,
+                             const ItemData& itemData, World& world,
                              Network& network);
 
     /**
@@ -81,7 +84,8 @@ public:
      */
     static RemoveResult removeItem(std::string_view itemID, Uint8 count,
                                    entt::entity entityToRemoveFrom,
-                                   World& world, Network& network);
+                                   World& world, Network& network,
+                                   const ItemData& itemData);
 };
 
 } // namespace Server

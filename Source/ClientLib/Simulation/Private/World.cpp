@@ -7,7 +7,6 @@ namespace Client
 {
 World::World(GraphicData& graphicData)
 : registry{}
-, itemData{}
 , playerEntity{entt::null}
 , entityLocator{registry}
 , collisionLocator{}

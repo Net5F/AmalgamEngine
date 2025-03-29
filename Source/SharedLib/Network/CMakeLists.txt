@@ -9,6 +9,7 @@ target_sources(SharedLib
         Public/Acceptor.h
         Public/DispatchMessage.h
         Public/NetworkDefs.h
+        Public/NetworkID.h
         Public/Peer.h
         Public/SocketSet.h
         Public/TcpSocket.h

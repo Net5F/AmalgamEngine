@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EngineMessageType.h"
-#include "NetworkDefs.h"
+#include "NetworkID.h"
 #include "ItemID.h"
 
 namespace AM

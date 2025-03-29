@@ -1,5 +1,8 @@
 target_sources(SharedLib
     PUBLIC
+        Public/CastFailed.h
+        Public/CastRequest.h
+        Public/CastStarted.h
         Public/ChunkDataRequest.h
         Public/ChunkUpdate.h
         Public/ChunkWireSnapshot.h
@@ -16,7 +19,6 @@ target_sources(SharedLib
         Public/EntityInitRequest.h
         Public/EntityInitScriptRequest.h
         Public/EntityInitScriptResponse.h
-        Public/EntityInteractionRequest.h
         Public/ExplicitConfirmation.h
         Public/GraphicStateChangeRequest.h
         Public/Heartbeat.h
@@ -33,7 +35,6 @@ target_sources(SharedLib
         Public/ItemInitRequest.h
         Public/ItemInitScriptRequest.h
         Public/ItemInitScriptResponse.h
-        Public/ItemInteractionRequest.h
         Public/ItemUpdate.h
         Public/MovementState.h
         Public/MovementUpdate.h

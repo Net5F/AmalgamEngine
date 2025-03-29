@@ -1,6 +1,7 @@
 #include "InventorySystem.h"
 #include "World.h"
 #include "Network.h"
+#include "ItemData.h"
 #include "ISimulationExtension.h"
 #include "ClientSimData.h"
 #include "Inventory.h"
@@ -14,9 +15,11 @@ namespace AM
 {
 namespace Server
 {
-InventorySystem::InventorySystem(World& inWorld, Network& inNetwork)
+InventorySystem::InventorySystem(World& inWorld, Network& inNetwork,
+                                 const ItemData& inItemData)
 : world{inWorld}
 , network{inNetwork}
+, itemData{inItemData}
 , extension{nullptr}
 , playerInventoryObserver{}
 , inventoryOperationQueue{inNetwork.getEventDispatcher()}
@@ -44,7 +47,7 @@ void InventorySystem::sendInventoryInits()
         for (const Inventory::ItemSlot& itemSlot : inventory.slots) {
             ItemVersion version{0};
             if (itemSlot.ID) {
-                version = world.itemData.getItemVersion(itemSlot.ID);
+                version = itemData.getItemVersion(itemSlot.ID);
             }
             inventoryInit.slots.emplace_back(itemSlot.ID, itemSlot.count,
                                              version);
@@ -88,7 +91,7 @@ void InventorySystem::processOperation(NetworkID clientID,
     // Try to add the item, sending messages appropriately.
     auto result{InventoryHelpers::addItem(inventoryAddItem.itemID,
                                           inventoryAddItem.count, entityToAddTo,
-                                          world, network)};
+                                          itemData, world, network)};
     if (result == InventoryHelpers::AddResult::InventoryFull) {
         network.serializeAndSend(
             clientID, SystemMessage{"Failed to add item: Inventory is full."});
