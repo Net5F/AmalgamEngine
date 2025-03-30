@@ -34,7 +34,7 @@ public:
     void sendUpdates();
 
 private:
-    /** Used to get the current tick number. */
+    /** Used to get the current tick. */
     Simulation& simulation;
     /** Used for fetching component data. */
     World& world;

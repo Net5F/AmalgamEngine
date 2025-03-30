@@ -30,7 +30,7 @@ class Network;
 class CastSystem
 {
 public:
-    CastSystem(Simulation& inSimulation, World& inWorld, Network& inNetwork,
+    CastSystem(Simulation& inSimulation, Network& inNetwork,
                const ItemData& inItemData, const CastableData& inCastableData);
 
     /**
@@ -60,8 +60,11 @@ private:
      */
     void handleCast(const CastInfo& castInfo);
 
+    /** Used to get the current tick. */
     Simulation& simulation;
+    /** Used to access entity data and castHelper. */
     World& world;
+    /** Used to send CastFailed and CastStarted messages. */
     Network& network;
     const ItemData& itemData;
     const CastableData& castableData;

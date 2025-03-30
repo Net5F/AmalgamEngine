@@ -20,11 +20,11 @@ namespace AM
 namespace Server
 {
 
-CastSystem::CastSystem(Simulation& inSimulation, World& inWorld,
-                       Network& inNetwork, const ItemData& inItemData,
+CastSystem::CastSystem(Simulation& inSimulation, Network& inNetwork,
+                       const ItemData& inItemData,
                        const CastableData& inCastableData)
 : simulation{inSimulation}
-, world{inWorld}
+, world{simulation.getWorld()}
 , network{inNetwork}
 , itemData{inItemData}
 , castableData{inCastableData}

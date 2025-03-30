@@ -15,7 +15,6 @@ struct CastInfo;
 
 namespace Server
 {
-class Simulation;
 class World;
 class Network;
 class ItemData;
@@ -29,8 +28,7 @@ struct EntityItemHandlerScript;
 class ItemSystem
 {
 public:
-    ItemSystem(Simulation& inSimulation, Network& inNetwork,
-               ItemData& inItemData,
+    ItemSystem(World& inWorld, Network& inNetwork, ItemData& inItemData,
                EntityItemHandlerLua& inEntityItemHandlerLua);
 
     /**
@@ -114,8 +112,6 @@ private:
         entt::entity targetEntity,
         const EntityItemHandlerScript& itemHandlerScript);
 
-    /** Used for getting Examine interaction requests. */
-    Simulation& simulation;
     /** Used for accessing item and inventory data. */
     World& world;
     /** Used for receiving requests and sending item and inventory data. */

@@ -49,8 +49,8 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData,
 , inputSystem{*this, world, network}
 , movementSystem{world}
 , aiSystem{world}
-, castSystem{*this, world, network, inItemData, castableData}
-, itemSystem{*this, network, inItemData, *entityItemHandlerLua}
+, castSystem{*this, network, inItemData, castableData}
+, itemSystem{world, network, inItemData, *entityItemHandlerLua}
 , inventorySystem{world, network, inItemData}
 , dialogueSystem{world, network, *dialogueLua, *dialogueChoiceConditionLua}
 , clientAOISystem{*this, world, network}

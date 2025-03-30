@@ -10,8 +10,8 @@ namespace AM
 /**
  * Tracks whether an entity is currently casting a Castable.
  * 
- * This component will only be present on an entity if a cast is currently 
- * ongoing. It gets removed when the cast ends.
+ * To optimize performance, this component will only be present on an entity if 
+ * a cast is currently ongoing. It gets removed when the cast ends.
  *
  * Note: We manually replicate this component. If we auto-replicated, all 
  *       destructions would be replicated. By handling it manually, we can get 

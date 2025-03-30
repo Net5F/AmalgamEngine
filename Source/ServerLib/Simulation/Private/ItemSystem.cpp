@@ -1,5 +1,4 @@
 #include "ItemSystem.h"
-#include "Simulation.h"
 #include "World.h"
 #include "Network.h"
 #include "ItemData.h"
@@ -23,11 +22,10 @@ namespace AM
 {
 namespace Server
 {
-ItemSystem::ItemSystem(Simulation& inSimulation, Network& inNetwork,
+ItemSystem::ItemSystem(World& inWorld, Network& inNetwork,
                        ItemData& inItemData,
                        EntityItemHandlerLua& inEntityItemHandlerLua)
-: simulation{inSimulation}
-, world{inSimulation.getWorld()}
+: world{inWorld}
 , network{inNetwork}
 , itemData{inItemData}
 , entityItemHandlerLua{inEntityItemHandlerLua}
