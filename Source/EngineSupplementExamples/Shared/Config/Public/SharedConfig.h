@@ -71,12 +71,6 @@ public:
         to be within the entity's "Area of Interest" cylinder. */
     static constexpr float AOI_HALF_HEIGHT{TILE_WORLD_HEIGHT * 3};
 
-    /** How close you need to be to an entity, in world units, to interact
-        with it. */
-    static constexpr float INTERACTION_DISTANCE{TILE_WORLD_WIDTH * 1};
-    static constexpr float SQUARED_INTERACTION_DISTANCE{INTERACTION_DISTANCE
-                                                        * INTERACTION_DISTANCE};
-
     /** The string ID of the default graphic set for entities. */
     static constexpr const char* DEFAULT_ENTITY_GRAPHIC_SET{"ghost"};
 

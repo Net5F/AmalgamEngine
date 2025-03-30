@@ -73,58 +73,74 @@ CastFailureType
     return CastFailureType::None;
 }
 
-//void CastSystem::processEntityInteractionCastRequest(
-//    const CastRequest& castRequest)
-//{
-    //// If there's a waiting message of the given type, validate it.
-    //std::queue<EntityInteractionRequest>& queue{
-    //    entityInteractionQueueMap[interactionType]};
-    //if (!(queue.empty())) {
-    //    EntityInteractionRequest interactionRequest{queue.front()};
-    //    queue.pop();
-    //    entt::registry& registry{world.registry};
+CastFailureType
+    CastHelper::castEntityInteraction(const CastEntityInteractionParams& params)
+{
+    // Check that the requested interaction has an associated Castable.
+    const Castable* castable{castableData.getCastable(params.interactionType)};
+    if (!castable) {
+        return CastFailureType::InvalidCastable;
+    }
 
-    //    // Find the client's entity ID.
-    //    auto it{world.netIDMap.find(interactionRequest.netID)};
-    //    if (it == world.netIDMap.end()) {
-    //        // Client doesn't exist (may have disconnected), do nothing.
-    //        return false;
-    //    }
-    //    entt::entity clientEntity{it->second};
-    //    entt::entity targetEntity{interactionRequest.targetEntity};
+    // Perform the shared validation checks.
+    CastFailureType failureType{
+        performSharedChecks(*castable, params.casterEntity, params.targetEntity,
+                            params.targetPosition)};
+    if (failureType != CastFailureType::None) {
+        return failureType;
+    }
 
-    //    // Check that the target exists.
-    //    if (!(registry.valid(targetEntity))) {
-    //        return false;
-    //    }
+    // We check above that the target entity is valid if one was provided, but 
+    // entity interactions require a target entity. Check that it's non-null.
+    if (params.targetEntity == entt::null) {
+        return CastFailureType::InvalidTargetEntity;
+    }
 
-    //    // Check that the client is in range of the target.
-    //    const Position& clientPosition{registry.get<Position>(clientEntity)};
-    //    const Position& targetPosition{registry.get<Position>(targetEntity)};
-    //    if (clientPosition.squaredDistanceTo(targetPosition)
-    //        > SharedConfig::SQUARED_INTERACTION_DISTANCE) {
-    //        network.serializeAndSend(
-    //            interactionRequest.netID,
-    //            SystemMessage{"You must move closer to interact with that."});
-    //        return false;
-    //    }
+    // Add a CastState to the entity (we checked above that they aren't already 
+    // casting).
+    world.registry.emplace<CastState>(
+        params.casterEntity,
+        CastState{.castInfo{castable, params.casterEntity, nullptr,
+                            params.targetEntity, params.targetPosition,
+                            params.clientID},
+                  .endTick{0}});
 
-    //    // Check that the target actually has this interaction type.
-    //    if (auto* interaction{registry.try_get<Interaction>(targetEntity)};
-    //        !interaction
-    //        || !(interaction->supports(interactionRequest.interactionType))) {
-    //        return false;
-    //    }
+    return CastFailureType::None;
+}
 
-    //    // Request is valid. Return it.
-    //    data.clientEntity = clientEntity;
-    //    data.targetEntity = targetEntity;
-    //    data.clientID = interactionRequest.netID;
-    //    return true;
-    //}
+CastFailureType CastHelper::castSpell(const CastSpellParams& params)
+{
+    // Check that the requested interaction has an associated Castable.
+    const Castable* castable{castableData.getCastable(params.interactionType)};
+    if (!castable) {
+        return CastFailureType::InvalidCastable;
+    }
 
-    //return false;
-//}
+    // Perform the shared validation checks.
+    CastFailureType failureType{
+        performSharedChecks(*castable, params.casterEntity, params.targetEntity,
+                            params.targetPosition)};
+    if (failureType != CastFailureType::None) {
+        return failureType;
+    }
+
+    // We check above that the target entity is valid if one was provided, but 
+    // entity interactions require a target entity. Check that it's non-null.
+    if (params.targetEntity == entt::null) {
+        return CastFailureType::InvalidTargetEntity;
+    }
+
+    // Add a CastState to the entity (we checked above that they aren't already 
+    // casting).
+    world.registry.emplace<CastState>(
+        params.casterEntity,
+        CastState{.castInfo{castable, params.casterEntity, nullptr,
+                            params.targetEntity, params.targetPosition,
+                            params.clientID},
+                  .endTick{0}});
+
+    return CastFailureType::None;
+}
 
 void CastHelper::setOnItemInteractionCompleted(
     ItemInteractionType interactionType,
@@ -151,21 +167,40 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
                                                 entt::entity targetEntity,
                                                 const Vector3& targetPosition)
 {
+    entt::registry& registry{world.registry};
+
+    // Check that the caster entity exists.
+    // Note: This should only be able to happen if a non-CastSystem caller 
+    //       doesn't fill the struct properly.
+    if (registry.valid(targetEntity)) {
+        return CastFailureType::InvalidCasterEntity;
+    }
+
     // Check that the caster isn't already casting.
-    if (world.registry.all_of<CastState>(casterEntity)) {
+    if (registry.all_of<CastState>(casterEntity)) {
         return CastFailureType::AlreadyCasting;
     }
 
-    // If the Castable requires a target entity, check that it exists.
-    if ((castable.targetToolType == Castable::TargetToolType::Entity)
-        && !(world.registry.valid(targetEntity))) {
-        return CastFailureType::InvalidTargetEntity;
+    // If a target entity was provided or the Castable requires a target entity.
+    if ((targetEntity != entt::null)
+        || (castable.targetToolType == Castable::TargetToolType::Entity)) {
+        // Check that the target entity exists.
+        if (registry.valid(targetEntity)) {
+            return CastFailureType::InvalidTargetEntity;
+        }
+
+        // Check that the caster is in range of the target entity.
+        const Position& casterPosition{registry.get<Position>(casterEntity)};
+        const Position& targetPosition{registry.get<Position>(targetEntity)};
+        float squaredRange{castable.range * castable.range};
+        if (casterPosition.squaredDistanceTo(targetPosition) > squaredRange) {
+            return CastFailureType::OutOfRange;
+        }
     }
 
     // If the Castable requires a target position, check that it's in range.
     if (castable.targetToolType == Castable::TargetToolType::Circle) {
-        const Position& casterEntityPos{
-            world.registry.get<Position>(casterEntity)};
+        const Position& casterEntityPos{registry.get<Position>(casterEntity)};
         if (!(world.tileMap.getTileExtent().contains(casterEntityPos))) {
             return CastFailureType::InvalidTargetPosition;
         }
@@ -179,7 +214,7 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
 
     // Run the project's validation of the Castable's requirements.
     bool projectValidationSucceeded{
-        validateCast(casterEntity, castable, world.registry)};
+        validateCast(casterEntity, castable, registry)};
     if (!projectValidationSucceeded) {
         return CastFailureType::ProjectValidationFailed;
     }

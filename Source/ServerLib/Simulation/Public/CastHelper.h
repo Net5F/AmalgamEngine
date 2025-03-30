@@ -43,6 +43,25 @@ public:
     CastFailureType
         castItemInteraction(const CastItemInteractionParams& params);
 
+    struct CastEntityInteractionParams;
+    /**
+     * Casts an entity interaction, using the given info.
+     * 
+     * @return None if the cast is successful, otherwise returns the reason for
+     *         failure.
+     */
+    CastFailureType
+        castEntityInteraction(const CastEntityInteractionParams& params);
+
+    struct CastSpellParams;
+    /**
+     * Casts a spell, using the given info.
+     * 
+     * @return None if the cast is successful, otherwise returns the reason for
+     *         failure.
+     */
+    CastFailureType castSpell(const CastSpellParams& params);
+
     // Note: These functions are just to provide a friendly interface. The 
     //       maps are public, so you could just add to them directly.
     /**
@@ -113,6 +132,37 @@ public:
         /** The slot of the item that is being used, within casterEntity's 
             inventory. */
         Uint8 slotIndex{};
+        /** (Optional) The target entity. If the Castable's targetToolType is 
+            Entity, this must be valid. */
+        entt::entity targetEntity{};
+        /** (Optional) The target position. If the Castable's targetToolType 
+            is Circle, this must be valid. */
+        const Vector3& targetPosition{};
+        /** (Optional) The client that requested this cast. If present, any 
+            failure messages will be sent to this client. */
+        NetworkID clientID{};
+    };
+
+    struct CastEntityInteractionParams {
+        /** The entity interaction to cast. */
+        EntityInteractionType interactionType{};
+        /** The entity that is casting. */
+        entt::entity casterEntity{};
+        /** The target entity. */
+        entt::entity targetEntity{};
+        /** (Optional) The target position. If the Castable's targetToolType 
+            is Circle, this must be valid. */
+        const Vector3& targetPosition{};
+        /** (Optional) The client that requested this cast. If present, any 
+            failure messages will be sent to this client. */
+        NetworkID clientID{};
+    };
+
+    struct CastSpellParams {
+        /** The item interaction to cast. */
+        SpellType interactionType{};
+        /** The entity that is casting. */
+        entt::entity casterEntity{};
         /** (Optional) The target entity. If the Castable's targetToolType is 
             Entity, this must be valid. */
         entt::entity targetEntity{};

@@ -64,9 +64,15 @@ void CastSystem::processCastRequests()
         }
         else if (auto* type{
                 std::get_if<EntityInteractionType>(&castRequest.castableID)}) {
+            failureType = world.castHelper.castEntityInteraction(
+                {*type, clientEntity, castRequest.targetEntity,
+                 castRequest.targetPosition, castRequest.netID});
         }
         else if (auto* type{
                 std::get_if<SpellType>(&castRequest.castableID)}) {
+            failureType = world.castHelper.castSpell(
+                {*type, clientEntity, castRequest.targetEntity,
+                 castRequest.targetPosition, castRequest.netID});
         }
         else {
             LOG_ERROR("Tried to cast Castable with invalid type.");
@@ -78,8 +84,6 @@ void CastSystem::processCastRequests()
                 castRequest.netID,
                 {clientEntity, castRequest.castableID, failureType});
         }
-
-
     }
 }
 

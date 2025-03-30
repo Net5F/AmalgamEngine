@@ -227,18 +227,6 @@ const Dialogue* DialogueSystem::validateChoiceRequest(
 {
     entt::registry& registry{world.registry};
 
-    // Check that the client is in range of the target.
-    const Position& clientPosition{registry.get<Position>(clientEntity)};
-    const Position& targetPosition{
-        registry.get<Position>(choiceRequest.targetEntity)};
-    if (clientPosition.squaredDistanceTo(targetPosition)
-        > SharedConfig::SQUARED_INTERACTION_DISTANCE) {
-        network.serializeAndSend(
-            choiceRequest.netID,
-            SystemMessage{"You're too far away to continue talking."});
-        return nullptr;
-    }
-
     // Check that the dialogue is valid.
     const Dialogue* dialogue{
         registry.try_get<Dialogue>(choiceRequest.targetEntity)};

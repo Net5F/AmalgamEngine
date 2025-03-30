@@ -23,6 +23,8 @@ enum class CastFailureType : Uint8 {
     /** The target item or entity doesn't support the requested interaction 
         type. */
     InteractionNotSupported,
+    /** The caster entity doesn't exist. */
+    InvalidCasterEntity,
     /** The target entity doesn't exist. */
     InvalidTargetEntity,
     /** The target position is outside of the tile map. */
