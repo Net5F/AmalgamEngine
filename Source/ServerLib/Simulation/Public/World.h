@@ -25,6 +25,7 @@ struct Item;
 
 namespace Server
 {
+class Simulation;
 class GraphicData;
 class ItemData;
 class Database;
@@ -53,9 +54,9 @@ private:
     const GraphicData& graphicData;
 
 public:
-    World(const GraphicData& inGraphicData, ItemData& inItemData,
-          const CastableData& inCastableData, EntityInitLua& inEntityInitLua,
-          ItemInitLua& inItemInitLua);
+    World(Simulation& inSimulation, const GraphicData& inGraphicData,
+          ItemData& inItemData, const CastableData& inCastableData,
+          EntityInitLua& inEntityInitLua, ItemInitLua& inItemInitLua);
 
     ~World();
 
@@ -207,6 +208,16 @@ private:
     void loadNonClientEntities();
 
     /**
+     * Initializes any components that have lazy-updated timers.
+     *
+     * Note: We update them on load instead of on save, because we don't want 
+     *       to add time to the save operation.
+     * Note: If the project ever needs to do this same sort of thing, we can 
+     *       either add a signal or an extension function.
+     */
+    void initTimerComponents(entt::entity entity);
+
+    /**
      * Loads our saved items and adds them to itemData.
      */
     void loadItems(ItemData& itemData);
@@ -215,6 +226,9 @@ private:
      * Loads our saved entity stored value IDs and global stored values.
      */
     void loadStoredValues();
+
+    /** Used to get the current tick. */
+    Simulation& simulation;
 
     /** Used to run entity init scripts. */
     EntityInitLua& entityInitLua;

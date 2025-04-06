@@ -1,4 +1,5 @@
 #include "World.h"
+#include "Simulation.h"
 #include "GraphicData.h"
 #include "ItemData.h"
 #include "CastableData.h"
@@ -17,6 +18,7 @@
 #include "MovementModifiers.h"
 #include "GraphicState.h"
 #include "Collision.h"
+#include "CastCooldown.h"
 #include "EntityInitScript.h"
 #include "Deserialize.h"
 #include "Transforms.h"
@@ -62,17 +64,18 @@ void onComponentDestroyed(entt::registry& registry, entt::entity entity)
     }
 }
 
-World::World(const GraphicData& inGraphicData, ItemData& inItemData,
-             const CastableData& inCastableData, EntityInitLua& inEntityInitLua,
-             ItemInitLua& inItemInitLua)
-: graphicData{inGraphicData}
+World::World(Simulation& inSimulation, const GraphicData& inGraphicData,
+             ItemData& inItemData, const CastableData& inCastableData,
+             EntityInitLua& inEntityInitLua, ItemInitLua& inItemInitLua)
+: simulation{inSimulation}
+, graphicData{inGraphicData}
 , registry{}
 , entityLocator{registry}
 , collisionLocator{}
 , tileMap{inGraphicData, collisionLocator}
 , entityStoredValueIDMap{}
 , globalStoredValueMap{}
-, castHelper{*this, inItemData, inCastableData}
+, castHelper{simulation, inItemData, inCastableData}
 , database{std::make_unique<Database>()}
 , netIDMap{}
 , entityInitLua{inEntityInitLua}
@@ -497,9 +500,27 @@ void World::loadNonClientEntities()
                 }),
                 componentVariant);
         }
+
+        // Init any components with lazy-updated timers.
+        initTimerComponents(newEntity);
     };
 
     database->iterateEntities(std::move(loadEntity));
+}
+
+void World::initTimerComponents(entt::entity entity)
+{
+    const SaveTimestamp* saveTimestamp{registry.try_get<SaveTimestamp>(entity)};
+    if (!saveTimestamp) {
+        LOG_ERROR("Entity was just loaded but has no SaveTimestamp.");
+        return;
+    }
+
+    // Init CastCooldown, if present.
+    if (CastCooldown* castCooldown{registry.try_get<CastCooldown>(entity)}) {
+        castCooldown->initAfterLoad(saveTimestamp->lastSavedTick,
+                                    simulation.getCurrentTick());
+    }
 }
 
 void World::loadItems(ItemData& itemData)

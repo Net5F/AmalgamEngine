@@ -30,13 +30,11 @@ using ObservedComponentTypes
                              ProjectObservedComponentTypes>;
 
 /** A construct and update observer for each observed component type. */
-std::array<EnttObserver::OneComponent,
-           boost::mp11::mp_size<ObservedComponentTypes>::value>
+std::array<EnttObserver, boost::mp11::mp_size<ObservedComponentTypes>::value>
     updateObservers{};
 
 /** A destruct observer for each observed component type. */
-std::array<EnttObserver::OneComponent,
-           boost::mp11::mp_size<ObservedComponentTypes>::value>
+std::array<EnttObserver, boost::mp11::mp_size<ObservedComponentTypes>::value>
     destroyObservers{};
 
 ComponentSyncSystem::ComponentSyncSystem(Simulation& inSimulation,

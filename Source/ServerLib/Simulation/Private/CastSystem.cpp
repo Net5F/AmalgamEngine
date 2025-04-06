@@ -7,9 +7,12 @@
 #include "Inventory.h"
 #include "Castable.h"
 #include "CastState.h"
+#include "CastCooldown.h"
+#include "CastCooldownInit.h"
 #include "ValidateCast.h"
 #include "CastFailed.h"
 #include "CastStarted.h"
+#include "SaveTimestamp.h"
 #include "EnttGroups.h"
 #include "ClientSimData.h"
 #include "Cylinder.h"
@@ -28,8 +31,36 @@ CastSystem::CastSystem(Simulation& inSimulation, Network& inNetwork,
 , network{inNetwork}
 , itemData{inItemData}
 , castableData{inCastableData}
+, playerCastCooldownObserver{}
 , castRequestQueue{inNetwork.getEventDispatcher()}
 {
+    // Observe player CastCooldown construction events.
+    playerCastCooldownObserver.bind(world.registry);
+    playerCastCooldownObserver.on_construct<ClientSimData>()
+        .on_construct<CastCooldown>();
+
+    // Note: When CastCooldown is loaded from the DB, it gets initialized in 
+    //       World::initTimerComponents.
+}
+
+void CastSystem::sendCastCooldownInits()
+{
+    // If a player CastCooldown was constructed, send the initial state to that
+    // player.
+    // Note: This may happen when the player first logs in, or when they first 
+    //       cast a Castable with a cooldown (since we don't add CastCooldown 
+    //       to every entity).
+    for (entt::entity entity : playerCastCooldownObserver) {
+        if (world.registry.all_of<ClientSimData, CastCooldown>(entity)) {
+            continue;
+        }
+        auto [client, castCooldown]
+            = world.registry.get<ClientSimData, CastCooldown>(entity);
+
+        network.serializeAndSend(client.netID, CastCooldownInit{castCooldown});
+    }
+
+    playerCastCooldownObserver.clear();
 }
 
 void CastSystem::processCasts()
@@ -89,8 +120,8 @@ void CastSystem::processCastRequests()
 
 void CastSystem::updateCasts()
 {
-    auto view = world.registry.view<CastState>();
-    auto movementGroup = EnttGroups::getMovementGroup(world.registry);
+    auto view{world.registry.view<CastState>()};
+    auto movementGroup{EnttGroups::getMovementGroup(world.registry)};
     Uint32 currentTick{simulation.getCurrentTick()};
 
     // Iterate each entity that is currently casting.
@@ -116,7 +147,41 @@ void CastSystem::updateCasts()
 
 void CastSystem::startCast(CastState& castState)
 {
-    /* Send a CastStarted message to all nearby clients. */
+    // Send a CastStarted to all nearby clients.
+    sendCastStarted(castState);
+
+    // Track the GCD.
+    // Note: If CastCooldown gets created here, its lastUpdateTick will be set 
+    //       to currentTick.
+    Uint32 currentTick{simulation.getCurrentTick()};
+    CastInfo& castInfo{castState.castInfo};
+    CastCooldown& castCooldown{world.registry.get_or_emplace<CastCooldown>(
+        castInfo.casterEntity, currentTick)};
+    castCooldown.gcdTicksRemaining = SharedConfig::CAST_GLOBAL_COOLDOWN_TICKS;
+
+    // If this castable has a cooldown, track it.
+    if (castInfo.castable->cooldownTime > 0) {
+        Uint32 castTimeTicks{
+            static_cast<Uint32>(castInfo.castable->cooldownTime
+                                / SharedConfig::SIM_TICK_TIMESTEP_S)};
+        castCooldown.cooldowns.emplace_back(castInfo.castable->castableID,
+                                            castTimeTicks);
+    }
+
+    // If this is an instant cast, handle it immediately.
+    if (castInfo.castable->castTime == 0) {
+        handleCast(castInfo);
+    }
+    else {
+        // Not an instant cast. Set its end tick.
+        Uint32 castTimeTicks{static_cast<Uint32>(
+            castInfo.castable->castTime / SharedConfig::SIM_TICK_TIMESTEP_S)};
+        castState.endTick = currentTick + castTimeTicks;
+    }
+}
+
+void CastSystem::sendCastStarted(CastState& castState)
+{
     // Serialize a CastStarted message.
     CastInfo& castInfo{castState.castInfo};
     CastStarted castStarted{.casterEntity{castInfo.casterEntity},
@@ -148,18 +213,6 @@ void CastSystem::startCast(CastState& castState)
             const auto& client{view.get<ClientSimData>(entity)};
             network.send(client.netID, message);
         }
-    }
-
-    /* Handle the cast. */
-    // If this is an instant cast, handle it immediately.
-    if (castInfo.castable->castTime == 0) {
-        handleCast(castInfo);
-    }
-    else {
-        // Not an instant cast. Set its end tick.
-        Uint32 castTimeTicks{static_cast<Uint32>(
-            castInfo.castable->castTime / SharedConfig::SIM_TICK_TIMESTEP_S)};
-        castState.endTick = simulation.getCurrentTick() + castTimeTicks;
     }
 }
 

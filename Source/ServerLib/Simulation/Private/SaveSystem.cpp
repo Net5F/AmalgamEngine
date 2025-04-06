@@ -1,4 +1,5 @@
 #include "SaveSystem.h"
+#include "Simulation.h"
 #include "World.h"
 #include "ItemData.h"
 #include "Config.h"
@@ -6,6 +7,7 @@
 #include "EnginePersistedComponentTypes.h"
 #include "ProjectPersistedComponentTypes.h"
 #include "ClientSimData.h"
+#include "SaveTimestamp.h"
 #include "Serialize.h"
 #include "Log.h"
 #include "boost/mp11/algorithm.hpp"
@@ -41,8 +43,9 @@ void addComponentsToVector(entt::registry& registry, entt::entity entity,
     });
 }
 
-SaveSystem::SaveSystem(World& inWorld, ItemData& inItemData)
-: world{inWorld}
+SaveSystem::SaveSystem(Simulation& inSimulation, ItemData& inItemData)
+: simulation{inSimulation}
+, world{simulation.getWorld()}
 , itemData{inItemData}
 , updatedItems{}
 , saveTimer{}
@@ -91,11 +94,18 @@ void SaveSystem::saveNonClientEntities()
     //       save those.
 
     // Queue all of our entity save queries.
+    Uint32 currentTick{simulation.getCurrentTick()};
     auto view{
         world.registry.view<entt::entity>(entt::exclude_t<ClientSimData>{})};
     std::vector<EnginePersistedComponent> engineComponents{};
     std::vector<ProjectPersistedComponent> projectComponents{};
     for (entt::entity entity : view) {
+        // Update the entity's SaveTimestamp.
+        SaveTimestamp& saveTimestamp{
+            world.registry.get_or_emplace<SaveTimestamp>(entity)};
+        saveTimestamp.lastSavedTick = currentTick;
+
+        // Save the entity's data.
         engineComponents.clear();
         projectComponents.clear();
 

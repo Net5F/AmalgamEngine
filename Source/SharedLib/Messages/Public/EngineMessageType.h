@@ -44,6 +44,7 @@ enum class EngineMessageType : Uint8 {
     ComponentUpdate,
     ChunkUpdate,
     InventoryInit,
+    CastCooldownInit,
     ItemError,
     ItemUpdate,
     ItemInitScriptResponse,

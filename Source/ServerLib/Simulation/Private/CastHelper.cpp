@@ -1,4 +1,5 @@
 #include "CastSystem.h"
+#include "Simulation.h"
 #include "World.h"
 #include "ItemData.h"
 #include "CastableData.h"
@@ -10,6 +11,7 @@
 #include "CastStarted.h"
 #include "Position.h"
 #include "ClientSimData.h"
+#include "CastCooldown.h"
 #include "Cylinder.h"
 #include "SharedConfig.h"
 
@@ -18,9 +20,10 @@ namespace AM
 namespace Server
 {
 
-CastHelper::CastHelper(World& inWorld, const ItemData& inItemData,
+CastHelper::CastHelper(Simulation& inSimulation, const ItemData& inItemData,
                        const CastableData& inCastableData)
-: world{inWorld}
+: simulation{inSimulation}
+, world{simulation.getWorld()}
 , itemData{inItemData}
 , castableData{inCastableData}
 , onItemInteractionCompletedMap{}
@@ -179,6 +182,14 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     // Check that the caster isn't already casting.
     if (registry.all_of<CastState>(casterEntity)) {
         return CastFailureType::AlreadyCasting;
+    }
+
+    // Check that this cast isn't on cooldown, and the GCD isn't active.
+    if (auto* castCooldown{registry.try_get<CastCooldown>(casterEntity)}) {
+        if (castCooldown->isCastOnCooldown(castable.castableID,
+                                           simulation.getCurrentTick())) {
+            return CastFailureType::OnCooldown;
+        }
     }
 
     // If a target entity was provided or the Castable requires a target entity.

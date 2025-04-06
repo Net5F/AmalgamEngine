@@ -16,8 +16,9 @@ struct Vector3;
 
 namespace Server
 {
-class ItemData;
+class Simulation;
 class World;
+class ItemData;
 
 /**
  * Helper class for casting Castables. Also owns the maps that contain the 
@@ -30,7 +31,7 @@ class World;
 class CastHelper
 {
 public:
-    CastHelper(World& inWorld, const ItemData& inItemData,
+    CastHelper(Simulation& inSimulation, const ItemData& inItemData,
                const CastableData& inCastableData);
 
     struct CastItemInteractionParams;
@@ -119,6 +120,8 @@ private:
                                         entt::entity targetEntity,
                                         const Vector3& targetPosition);
 
+    /** Used to get the current tick. */
+    Simulation& simulation;
     World& world;
     const ItemData& itemData;
     const CastableData& castableData;

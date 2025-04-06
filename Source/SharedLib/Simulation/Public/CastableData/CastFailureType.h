@@ -16,6 +16,8 @@ enum class CastFailureType : Uint8 {
     InvalidCastable,
     /** The caster entity is already casting something. */
     AlreadyCasting,
+    /** The requested cast is on cooldown, or the GCD is active. */
+    OnCooldown,
     /** The target entity or position is out of range of the caster. */
     OutOfRange,
     /** The target item does not exist. */

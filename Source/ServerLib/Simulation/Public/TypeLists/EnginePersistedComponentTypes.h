@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SaveTimestamp.h"
 #include "Name.h"
 #include "Position.h"
 #include "Rotation.h"
@@ -9,6 +10,7 @@
 #include "Dialogue.h"
 #include "EntityInitScript.h"
 #include "StoredValues.h"
+#include "CastCooldown.h"
 #include "boost/mp11/list.hpp"
 #include "bitsery/traits/vector.h"
 #include "bitsery/ext/std_variant.h"
@@ -40,9 +42,9 @@ static constexpr unsigned int ENGINE_COMPONENTS_VERSION{0};
  *       GraphicState implies Collision (graphics components).
  */
 using EnginePersistedComponentTypes
-    = boost::mp11::mp_list<Name, Position, Rotation, GraphicState, Interaction,
-                           ItemHandlers, Dialogue, EntityInitScript,
-                           StoredValues>;
+    = boost::mp11::mp_list<SaveTimestamp, Name, Position, Rotation,
+                           GraphicState, Interaction, ItemHandlers, Dialogue,
+                           EntityInitScript, StoredValues, CastCooldown>;
 
 /**
  * A variant that holds a persisted engine component.

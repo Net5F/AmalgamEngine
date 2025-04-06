@@ -66,7 +66,7 @@ private:
 
     /** Observes player Inventory component creation so we can send the initial
         inventory state to a newly-logged-on player. */
-    EnttObserver::TwoComponent playerInventoryObserver;
+    EnttObserver playerInventoryObserver;
 
     EventQueue<InventoryOperation> inventoryOperationQueue;
 };

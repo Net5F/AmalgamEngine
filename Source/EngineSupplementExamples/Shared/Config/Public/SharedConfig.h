@@ -86,6 +86,12 @@ public:
         intended to be a consistent, small movement. */
     static constexpr float VERTICAL_FALL_MOVE_VELOCITY{15};
 
+    /** The length of the global cooldown for casting. */
+    static constexpr double CAST_GLOBAL_COOLDOWN_S{1.0};
+    static constexpr unsigned int CAST_GLOBAL_COOLDOWN_TICKS{
+        static_cast<unsigned int>(CAST_GLOBAL_COOLDOWN_S
+                                  / SIM_TICK_TIMESTEP_S)};
+
     //-------------------------------------------------------------------------
     // Network
     //-------------------------------------------------------------------------

@@ -9,6 +9,7 @@ namespace AM
 {
 namespace Server
 {
+class Simulation;
 class World;
 class ItemData;
 
@@ -21,7 +22,7 @@ class ItemData;
 class SaveSystem
 {
 public:
-    SaveSystem(World& inWorld, ItemData& inItemData);
+    SaveSystem(Simulation& inSimulation, ItemData& inItemData);
 
     /**
      * If data is due for saving, saves it.
@@ -52,6 +53,7 @@ private:
      */
     void saveStoredValues();
 
+    Simulation& simulation;
     World& world;
     ItemData& itemData;
 

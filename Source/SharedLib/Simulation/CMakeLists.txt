@@ -11,6 +11,7 @@ target_sources(SharedLib
         Private/Vector3.cpp
         Private/CastableData/CastableData.cpp
         Private/Components/Camera.cpp
+        Private/Components/CastCooldown.cpp
         Private/Components/Interaction.cpp
         Private/Components/Inventory.cpp
         Private/GraphicData/Animation.cpp
@@ -61,6 +62,7 @@ target_sources(SharedLib
         Public/CastableData/CastInfo.h
         Public/CastableData/VisualEffect.h
         Public/Components/Camera.h
+        Public/Components/CastCooldown.h
         Public/Components/CastState.h
         Public/Components/Collision.h
         Public/Components/EntityInitScript.h
@@ -75,6 +77,7 @@ target_sources(SharedLib
         Public/Components/Position.h
         Public/Components/PreviousPosition.h
         Public/Components/Rotation.h
+        Public/Components/SaveTimestamp.h
         Public/GraphicData/Animation.h
         Public/GraphicData/AnimationID.h
         Public/GraphicData/GraphicDataBase.h

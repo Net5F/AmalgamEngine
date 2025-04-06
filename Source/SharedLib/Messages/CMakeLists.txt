@@ -1,5 +1,6 @@
 target_sources(SharedLib
     PUBLIC
+        Public/CastCooldownInit.h
         Public/CastFailed.h
         Public/CastRequest.h
         Public/CastStarted.h

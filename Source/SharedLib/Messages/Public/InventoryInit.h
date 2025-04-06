@@ -9,7 +9,9 @@
 namespace AM
 {
 /**
- * Sent by the server when a player connects and needs their full inventory.
+ * Sent by the server when a client needs their full inventory.
+ * After the full inventory is sent, we can send smaller update messages as 
+ * items are added, moved, and removed.
  *
  * Note: This is currently only used for player inventories. If we reuse it for
  *       NPC inventories, we can add an entity ID field.

@@ -51,18 +51,25 @@ const Castable* CastableData::getCastable(CastableID castableID) const
 
 void CastableData::addCastable(CastableID castableID, const Castable& castable)
 {
+    // Create the new castable (will overwrite an existing castable, if present).
+    Castable* newCastable{};
     if (auto* type{std::get_if<ItemInteractionType>(&castableID)}) {
-        itemInteractionMap[*type] = castable;
+        newCastable = &(itemInteractionMap[*type]);
     }
     else if (auto* type{std::get_if<EntityInteractionType>(&castableID)}) {
-        entityInteractionMap[*type] = castable;
+        newCastable = &(entityInteractionMap[*type]);
     }
     else if (auto* type{std::get_if<SpellType>(&castableID)}) {
-        spellMap[*type] = castable;
+        newCastable = &(spellMap[*type]);
     }
     else {
         LOG_ERROR("Tried to add Castable with invalid type.");
+        return;
     }
+
+    // Copy the given castable and make sure it's set to use the given ID.
+    *newCastable = castable;
+    newCastable->castableID = castableID;
 }
 
 } // End namespace AM

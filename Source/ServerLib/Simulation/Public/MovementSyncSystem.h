@@ -73,7 +73,7 @@ private:
 
     /** Observes updates to movement sync-relevant components so we know when 
         to sync. */
-    EnttObserver::OneComponent movementSyncObserver;
+    EnttObserver movementSyncObserver;
 };
 
 } // namespace Server

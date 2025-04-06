@@ -30,7 +30,8 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData,
 , itemInitLua{std::make_unique<ItemInitLua>()}
 , dialogueLua{std::make_unique<DialogueLua>()}
 , dialogueChoiceConditionLua{std::make_unique<DialogueChoiceConditionLua>()}
-, world{inGraphicData, inItemData, castableData, *entityInitLua, *itemInitLua}
+, world{*this,        inGraphicData,  inItemData,
+        castableData, *entityInitLua, *itemInitLua}
 , currentTick{0}
 , engineLuaBindings{*entityInitLua,
                     *entityItemHandlerLua,
@@ -58,7 +59,7 @@ Simulation::Simulation(Network& inNetwork, GraphicData& inGraphicData,
 , componentSyncSystem{*this, world, network, inGraphicData}
 , chunkStreamingSystem{world, network}
 , scriptDataSystem{world, network, inItemData}
-, saveSystem{world, inItemData}
+, saveSystem{*this, inItemData}
 {
     // Register our current tick pointer with the classes that care.
     Log::registerCurrentTickPtr(&currentTick);
@@ -171,6 +172,9 @@ void Simulation::tick()
 
     // Send initial Inventory state.
     inventorySystem.sendInventoryInits();
+
+    // Send initial CastCooldown state.
+    castSystem.sendCastCooldownInits();
 
     // Send any remaining updated entity component state to nearby clients.
     componentSyncSystem.sendUpdates();
