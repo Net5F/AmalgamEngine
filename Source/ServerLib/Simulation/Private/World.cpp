@@ -75,7 +75,7 @@ World::World(Simulation& inSimulation, const GraphicData& inGraphicData,
 , tileMap{inGraphicData, collisionLocator}
 , entityStoredValueIDMap{}
 , globalStoredValueMap{}
-, castHelper{simulation, inItemData, inCastableData}
+, castHelper{inSimulation, inItemData, inCastableData}
 , database{std::make_unique<Database>()}
 , netIDMap{}
 , entityInitLua{inEntityInitLua}

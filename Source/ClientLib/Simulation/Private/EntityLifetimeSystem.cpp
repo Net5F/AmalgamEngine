@@ -30,8 +30,8 @@ namespace Client
 
 EntityLifetimeSystem::EntityLifetimeSystem(Simulation& inSimulation,
                                            World& inWorld,
-                                           GraphicData& inGraphicData,
-                                           Network& inNetwork)
+                                           Network& inNetwork,
+                                           GraphicData& inGraphicData)
 : simulation{inSimulation}
 , world{inWorld}
 , graphicData{inGraphicData}

@@ -61,6 +61,7 @@ target_sources(ServerLib
         Public/SpawnStrategy.h
         Public/TileUpdateSystem.h
         Public/World.h
+        Public/Components/CastState.h
         Public/Components/ClientSimData.h
         Public/Components/Dialogue.h
         Public/Components/ItemHandlers.h

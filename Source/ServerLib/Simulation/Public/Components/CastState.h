@@ -6,6 +6,8 @@
 
 namespace AM
 {
+namespace Server
+{
 
 /**
  * Tracks whether an entity is currently casting a Castable.
@@ -13,10 +15,8 @@ namespace AM
  * To optimize performance, this component will only be present on an entity if 
  * a cast is currently ongoing. It gets removed when the cast ends.
  *
- * Note: We manually replicate this component. If we auto-replicated, all 
- *       destructions would be replicated. By handling it manually, we can get 
- *       away with only sending CastStarted and CastCanceled (a successful cast 
- *       can be assumed when there's no cancelation before endTick).
+ * Note: This is server-only because the client needs its own version to track 
+ *       additional data.
  */
 struct CastState {
     /** The current cast's info. */
@@ -27,4 +27,5 @@ struct CastState {
     Uint32 endTick{};
 };
 
+} // namespace Server
 } // namespace AM

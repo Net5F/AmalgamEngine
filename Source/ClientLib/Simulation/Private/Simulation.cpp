@@ -12,6 +12,7 @@
 #include "NpcMovementSystem.h"
 #include "ItemSystem.h"
 #include "InventorySystem.h"
+#include "CastSystem.h"
 #include "ComponentUpdateSystem.h"
 #include "GraphicSystem.h"
 #include "CameraSystem.h"
@@ -33,7 +34,7 @@ Simulation::Simulation(EventDispatcher& inUiEventDispatcher, Network& inNetwork,
 , graphicData{inGraphicData}
 , itemData{inItemData}
 , castableData{inCastableData}
-, world{inGraphicData}
+, world{*this, network, inGraphicData, inItemData, inCastableData}
 , currentTick{0}
 , extension{nullptr}
 , serverConnectionSystem{world, inUiEventDispatcher, network, inGraphicData,
@@ -54,12 +55,12 @@ World& Simulation::getWorld()
     return world;
 }
 
-Uint32 Simulation::getCurrentTick()
+Uint32 Simulation::getCurrentTick() const
 {
     return currentTick;
 }
 
-Uint32 Simulation::getReplicationTick()
+Uint32 Simulation::getReplicationTick() const
 {
     return (currentTick + replicationTickOffset.get());
 }
@@ -153,6 +154,9 @@ void Simulation::tick()
         // Process any waiting inventory updates.
         inventorySystem->processInventoryUpdates();
 
+        // Process ongoing casts and any waiting cast updates.
+        castSystem->processCasts();
+
         // Call the project's post-sim-update logic.
         if (extension != nullptr) {
             extension->afterSimUpdate();
@@ -222,7 +226,7 @@ void Simulation::initializeSystems()
     chunkUpdateSystem = std::make_unique<ChunkUpdateSystem>(world, network);
     tileUpdateSystem = std::make_unique<TileUpdateSystem>(world, network);
     entityLifetimeSystem = std::make_unique<EntityLifetimeSystem>(
-        *this, world, graphicData, network);
+        *this, world, network, graphicData);
     playerInputSystem
         = std::make_unique<PlayerInputSystem>(*this, world, network);
     playerMovementSystem
@@ -232,6 +236,8 @@ void Simulation::initializeSystems()
     itemSystem = std::make_unique<ItemSystem>(world, network, itemData);
     inventorySystem
         = std::make_unique<InventorySystem>(world, network, itemData);
+    castSystem = std::make_unique<CastSystem>(*this, network, graphicData,
+                                              castableData);
     componentUpdateSystem = std::make_unique<ComponentUpdateSystem>(
         *this, world, network, graphicData);
     graphicSystem = std::make_unique<GraphicSystem>(world, graphicData);

@@ -1,5 +1,6 @@
 #include "Animation.h"
 #include "Sprite.h"
+#include "SharedConfig.h"
 #include "Log.h"
 
 namespace AM
@@ -29,6 +30,17 @@ const Sprite& Animation::getSpriteAtTime(double animationTime) const
     }
 
     return *sprite;
+}
+
+double Animation::getLengthS() const
+{
+    return frameCount / static_cast<double>(fps);
+}
+
+Uint32 Animation::getLengthTicks() const
+{
+    double lengthS{getLengthS()};
+    return static_cast<Uint32>(lengthS / SharedConfig::SIM_TICK_TIMESTEP_S);
 }
 
 } // End namespace AM

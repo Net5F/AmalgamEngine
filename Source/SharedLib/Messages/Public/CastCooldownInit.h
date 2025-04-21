@@ -25,7 +25,7 @@ struct CastCooldownInit {
 template<typename S>
 void serialize(S& serializer, CastCooldownInit& castCooldownInit)
 {
-    serializer.object(castCooldownInit);
+    serializer.object(castCooldownInit.castCooldown);
 }
 
 } // namespace AM

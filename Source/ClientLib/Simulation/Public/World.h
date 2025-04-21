@@ -3,15 +3,21 @@
 #include "TileMap.h"
 #include "EntityLocator.h"
 #include "CollisionLocator.h"
+#include "CastHelper.h"
 #include "entt/entity/registry.hpp"
 
 struct SDL_Rect;
 
 namespace AM
 {
+class CastableData;
+
 namespace Client
 {
+class Simulation;
+class Network;
 class GraphicData;
+class ItemData;
 
 /**
  * Owns and manages the persistence of all world state.
@@ -27,7 +33,9 @@ class GraphicData;
 class World
 {
 public:
-    World(GraphicData& graphicData);
+    World(Simulation& inSimulation, Network& inNetwork,
+          const GraphicData& inGraphicData, const ItemData& inItemData,
+          const CastableData& inCastableData);
 
     /** Entity data registry. */
     entt::registry registry;
@@ -45,6 +53,9 @@ public:
 
     /** The tile map that makes up the world. */
     TileMap tileMap;
+
+    /** Helper class for casting Castables. */
+    CastHelper castHelper;
 };
 
 } // namespace Client

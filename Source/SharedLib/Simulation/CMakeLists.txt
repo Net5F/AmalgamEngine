@@ -9,6 +9,7 @@ target_sources(SharedLib
         Private/Ray.cpp
         Private/ResourceData.cpp
         Private/Vector3.cpp
+        Private/CastableData/Castable.cpp
         Private/CastableData/CastableData.cpp
         Private/Components/Camera.cpp
         Private/Components/CastCooldown.cpp
@@ -60,10 +61,10 @@ target_sources(SharedLib
         Public/CastableData/CastableID.h
         Public/CastableData/CastFailureType.h
         Public/CastableData/CastInfo.h
+        Public/CastableData/EngineCastableDef.h
         Public/CastableData/VisualEffect.h
         Public/Components/Camera.h
         Public/Components/CastCooldown.h
-        Public/Components/CastState.h
         Public/Components/Collision.h
         Public/Components/EntityInitScript.h
         Public/Components/GraphicState.h

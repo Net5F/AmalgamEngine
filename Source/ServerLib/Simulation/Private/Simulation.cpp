@@ -98,7 +98,7 @@ DialogueChoiceConditionLua& Simulation::getDialogueChoiceConditionLua()
     return *dialogueChoiceConditionLua;
 }
 
-Uint32 Simulation::getCurrentTick()
+Uint32 Simulation::getCurrentTick() const
 {
     return currentTick;
 }

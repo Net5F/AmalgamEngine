@@ -6,6 +6,7 @@
 #include "EntityGraphicType.h"
 #include "VisualEffect.h"
 #include "AVEntity.h"
+#include "Cylinder.h"
 #include <functional>
 #include <vector>
 #include <variant>
@@ -51,16 +52,20 @@ struct Castable {
     TargetToolType targetToolType{};
 
     /** How far away the target can be. */
-    float range{};
+    float range{0};
 
-    /** If targetToolType == Cylinder, this is the radius of the circle. */
-    float radius{};
+    /** If targetToolType == Circle, this is the radius of the circle. */
+    float radius{0};
 
-    /** How long this interaction takes to cast. */
-    float castTime{};
+    /** How long this castable takes to cast. */
+    float castTime{0};
 
-    /** How long the caster must wait to cast this interaction again. */
-    float cooldownTime{};
+    /** How long the caster must wait to cast this castable again. */
+    float cooldownTime{0};
+
+    /** If true, casting this castable will trigger the global cooldown (see 
+        SharedConfig::CAST_GLOBAL_COOLDOWN_S). */
+    bool triggersGCD{true};
 
     /** Project-specific data. */
     CastableProjectData projectData{};
@@ -69,31 +74,37 @@ struct Castable {
         CastableRequirementType type{};
         int value{};
     };
-
     /** The requirements to cast this castable. */
     std::vector<Requirement> requirements{};
 
-    /** The graphic to loop while this interaction is being cast. */
-    EntityGraphicType castingGraphicType{};
+    /** The graphic to loop while this castable is being cast. */
+    EntityGraphicType castingGraphicType{EntityGraphicType::NotSet};
 
     // TODO: castingSoundType
 
-    /** The graphic to play when this interaction is successfully cast. */
-    EntityGraphicType castCompleteGraphicType{};
+    /** The graphic to play when this castable is successfully cast. */
+    EntityGraphicType castCompleteGraphicType{EntityGraphicType::NotSet};
 
     // TODO: castCompleteSoundType
-
-    /** If true, the client will play the "cast complete" graphics when the 
-        predicted cast (which starts as soon as the player input is received) 
-        completes. If false, the graphics won't be played until the client 
-        receives a confirmation from the server that the cast was successful. */
-    bool predictCastComplete{true};
 
     /** The client-only visual effects to show when this cast is successful. */
     std::vector<VisualEffect> castCompleteVisualEffects{};
 
     /** The client-only A/V entities to spawn when this cast is successful. */
     std::vector<AVEntity> castCompleteAVEntities{};
+
+    /**
+     * Returns a target cylinder centered on the given position along the X/Y 
+     * axes, and sitting on top of it along the Z axis.
+     *
+     * Only valid if targetToolType == Circle and radius is set.
+     */
+    Cylinder getTargetCylinder(const Vector3& position) const;
+
+    /**
+     * Returns true if this castable has any graphics or effects.
+     */
+    bool hasVisuals() const;
 };
 
 } // namespace AM

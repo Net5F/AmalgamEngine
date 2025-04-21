@@ -1,5 +1,6 @@
 #include "CastableData.h"
-#include "CastableInit.h"
+#include "EngineCastableDef.h"
+#include "CastableDef.h"
 #include "Log.h"
 
 namespace AM
@@ -10,8 +11,14 @@ CastableData::CastableData()
 , entityInteractionMap{}
 , spellMap{}
 {
+    // Init all of the engine's Castables.
+    EngineCastableDef::defineCastables(
+        [this](CastableID castableID, const Castable& castable) {
+            addCastable(castableID, castable);
+        });
+
     // Init all of the project's Castables.
-    CastableInit::initCastables(
+    CastableDef::defineCastables(
         [this](CastableID castableID, const Castable& castable) {
             addCastable(castableID, castable);
         });

@@ -17,7 +17,6 @@ namespace AM
 {
 class CastableData;
 struct Castable;
-struct CastState;
 
 namespace Server
 {
@@ -25,6 +24,7 @@ class ItemData;
 class Simulation;
 class World;
 class Network;
+struct CastState;
 
 /**
  * Handles cast requests and all processing of ongoing casts.
@@ -58,9 +58,15 @@ private:
     void updateCasts();
 
     /**
-     * Sends a CastStarted message and sets the given cast's end tick.
+     * Sends a CastStarted message and sets any entity state related to the 
+     * cast being started.
      */
     void startCast(CastState& castState);
+
+    /**
+     * Finishes the given cast.
+     */
+    void finishCast(CastState& castState);
 
     /**
      * Sends a CastStarted message to all nearby clients.
@@ -71,12 +77,6 @@ private:
      * Passes the given cast to the associated callback, if one is registered.
      */
     void handleCast(const CastInfo& castInfo);
-
-    /**
-     * Initializes any CastCooldown components on loaded entities.
-     */
-    void onCastCooldownConstructed(entt::registry& registry,
-                                   entt::entity entity);
 
     /** Used to get the current tick. */
     Simulation& simulation;

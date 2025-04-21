@@ -23,7 +23,9 @@ struct CastInfo {
     entt::entity casterEntity{entt::null};
 
     /** If this is an ItemInteraction cast, this is the item that's being 
-        used. */
+        used. 
+        Note: This field isn't filled when using this struct in Client code. 
+              If needed, we can change this. See CastStarted.h. */
     const Item* item{nullptr};
 
     /** The ID of the target entity. If this is an EntityInteraction cast, this 

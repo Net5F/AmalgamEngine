@@ -51,7 +51,7 @@ void CastSystem::sendCastCooldownInits()
     //       cast a Castable with a cooldown (since we don't add CastCooldown 
     //       to every entity).
     for (entt::entity entity : playerCastCooldownObserver) {
-        if (world.registry.all_of<ClientSimData, CastCooldown>(entity)) {
+        if (!(world.registry.all_of<ClientSimData, CastCooldown>(entity))) {
             continue;
         }
         auto [client, castCooldown]
@@ -121,7 +121,6 @@ void CastSystem::processCastRequests()
 void CastSystem::updateCasts()
 {
     auto view{world.registry.view<CastState>()};
-    auto movementGroup{EnttGroups::getMovementGroup(world.registry)};
     Uint32 currentTick{simulation.getCurrentTick()};
 
     // Iterate each entity that is currently casting.
@@ -131,33 +130,51 @@ void CastSystem::updateCasts()
             startCast(castState);
             continue;
         }
+
         // If the entity has moved, cancel the cast.
-        else if (auto [position, prevPosition]
-                 = movementGroup.get<Position, PreviousPosition>(entity);
-                 position != prevPosition) {
-            world.registry.erase<CastState>(entity);
+        if (PreviousPosition* prevPosition{
+                world.registry.try_get<PreviousPosition>(entity)}) {
+            Position& position{world.registry.get<Position>(entity)};
+            if (position != *prevPosition) {
+                world.registry.erase<CastState>(entity);
+                continue;
+            }
         }
-        // If the cast has finished, handle it.
-        else if (currentTick == castState.endTick) {
-            handleCast(castState.castInfo);
-            world.registry.erase<CastState>(entity);
+
+        // If the cast has reached its finish time, finish it.
+        if (currentTick == castState.endTick) {
+            finishCast(castState);
+            continue;
         }
     }
 }
 
 void CastSystem::startCast(CastState& castState)
 {
-    // Send a CastStarted to all nearby clients.
-    sendCastStarted(castState);
+    // Note: CastHelper ensures that castState.castInfo.casterEntity is the 
+    //       same entity that owns castState.
 
-    // Track the GCD.
-    // Note: If CastCooldown gets created here, its lastUpdateTick will be set 
-    //       to currentTick.
-    Uint32 currentTick{simulation.getCurrentTick()};
+    // If this castable has any visuals, send a CastStarted to all nearby 
+    // clients.
+    // Note: If it has no visuals, there's no reason for a client to replicate
+    //       it. Thus, we can skip sending the message.
     CastInfo& castInfo{castState.castInfo};
+    if (castInfo.castable->hasVisuals()) {
+        sendCastStarted(castState);
+    }
+
+    // If this cast triggers the GCD, track it.
+    // Note: If CastCooldown gets created here, its lastUpdateTick will be
+    //       set to currentTick.
+    // Note: CastCooldown may get created here even if it isn't used. That's 
+    //       fine, the entity has at least shown the capability to cast things.
+    Uint32 currentTick{simulation.getCurrentTick()};
     CastCooldown& castCooldown{world.registry.get_or_emplace<CastCooldown>(
         castInfo.casterEntity, currentTick)};
-    castCooldown.gcdTicksRemaining = SharedConfig::CAST_GLOBAL_COOLDOWN_TICKS;
+    if (castInfo.castable->triggersGCD) {
+        castCooldown.gcdTicksRemaining
+            = SharedConfig::CAST_GLOBAL_COOLDOWN_TICKS;
+    }
 
     // If this castable has a cooldown, track it.
     if (castInfo.castable->cooldownTime > 0) {
@@ -168,9 +185,9 @@ void CastSystem::startCast(CastState& castState)
                                             castTimeTicks);
     }
 
-    // If this is an instant cast, handle it immediately.
+    // If this is an instant cast, finish it immediately.
     if (castInfo.castable->castTime == 0) {
-        handleCast(castInfo);
+        finishCast(castState);
     }
     else {
         // Not an instant cast. Set its end tick.
@@ -180,13 +197,18 @@ void CastSystem::startCast(CastState& castState)
     }
 }
 
+void CastSystem::finishCast(CastState& castState)
+{
+    handleCast(castState.castInfo);
+    world.registry.erase<CastState>(castState.castInfo.casterEntity);
+}
+
 void CastSystem::sendCastStarted(CastState& castState)
 {
     // Serialize a CastStarted message.
     CastInfo& castInfo{castState.castInfo};
     CastStarted castStarted{.casterEntity{castInfo.casterEntity},
                             .castableID{castInfo.castable->castableID},
-                            .itemID{castInfo.item->numericID},
                             .targetEntity{castInfo.targetEntity},
                             .targetPosition{castInfo.targetPosition}};
     BinaryBufferSharedPtr message{network.serialize(castStarted)};
@@ -207,9 +229,11 @@ void CastSystem::sendCastStarted(CastState& castState)
     }
 
     // Send the update to all nearby clients.
+    // Note: We skip the caster so that they don't restart a cast that they're
+    //       already replicating.
     auto view{world.registry.view<Position, ClientSimData>()};
     for (entt::entity entity : *entitiesInRange) {
-        if (view.contains(entity)) {
+        if ((entity != castInfo.casterEntity) && view.contains(entity)) {
             const auto& client{view.get<ClientSimData>(entity)};
             network.send(client.netID, message);
         }

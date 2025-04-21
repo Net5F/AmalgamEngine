@@ -1,5 +1,7 @@
 target_sources(ClientLib
     PRIVATE
+        Private/CastHelper.cpp
+        Private/CastSystem.cpp
         Private/CameraSystem.cpp
         Private/ChunkUpdateSystem.cpp
         Private/ComponentUpdateSystem.cpp
@@ -20,6 +22,8 @@ target_sources(ClientLib
         Private/ItemData/ItemData.cpp
         Private/TileMap/TileMap.cpp
     PUBLIC
+        Public/CastHelper.h
+        Public/CastSystem.h
         Public/CameraSystem.h
         Public/ChunkUpdateSystem.h
         Public/ComponentUpdateSystem.h
@@ -40,6 +44,7 @@ target_sources(ClientLib
         Public/World.h
         Public/WorldObjectID.h
         Public/Components/AVEffects.h
+        Public/Components/ClientCastState.h
         Public/Components/ClientGraphicState.h
         Public/Components/InputHistory.h
         Public/Components/NeedsAdjacentChunks.h

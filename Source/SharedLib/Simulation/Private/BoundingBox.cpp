@@ -37,6 +37,16 @@ BoundingBox::BoundingBox(const TileExtent& tileExtent)
     max.z = (tileExtent.z + tileExtent.zLength) * TILE_WORLD_HEIGHT;
 }
 
+BoundingBox::BoundingBox(const Cylinder& cylinder)
+: min{(cylinder.center.x - cylinder.radius),
+      (cylinder.center.y - cylinder.radius),
+      (cylinder.center.z - cylinder.radius)}
+, max{(cylinder.center.x + cylinder.radius),
+      (cylinder.center.y + cylinder.radius),
+      (cylinder.center.z + cylinder.radius)}
+{
+}
+
 float BoundingBox::xLength() const
 {
     return (max.x - min.x);
@@ -151,6 +161,12 @@ bool BoundingBox::contains(const BoundingBox& boundingBox) const
     return (min.x <= boundingBox.min.x) && (max.x >= boundingBox.max.x)
            && (min.y <= boundingBox.min.y) && (max.y >= boundingBox.max.y)
            && (min.z <= boundingBox.min.z) && (max.z >= boundingBox.max.z);
+}
+
+bool BoundingBox::contains(const Cylinder& cylinder) const
+{
+    BoundingBox cylinderWrapper(cylinder);
+    return contains(cylinderWrapper);
 }
 
 bool BoundingBox::contains(const Vector3& worldPoint) const

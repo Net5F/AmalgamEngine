@@ -6,6 +6,8 @@
 
 namespace AM
 {
+namespace Client
+{
 
 /**
  * Tracks all audio/visual effects that are currently active on an entity.
@@ -17,4 +19,5 @@ struct AVEffects {
     std::vector<AVEffect> avEffects{};
 };
 
+} // namespace Client
 } // namespace AM

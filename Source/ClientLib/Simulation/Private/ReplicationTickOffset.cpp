@@ -22,7 +22,7 @@ void ReplicationTickOffset::applyAdjustment(int adjustment)
     }
 }
 
-int ReplicationTickOffset::get()
+int ReplicationTickOffset::get() const
 {
     return offset;
 }

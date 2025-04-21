@@ -75,7 +75,7 @@ public:
     /**
      * Returns the simulation's current tick number.
      */
-    Uint32 getCurrentTick();
+    Uint32 getCurrentTick() const;
 
     /**
      * Updates accumulatedTime. If greater than the tick timestep, processes

@@ -23,7 +23,7 @@ public:
     /**
      * Returns the value of this tick offset.
      */
-    int get();
+    int get() const;
 
 private:
     /** How far into the past to replicate at.

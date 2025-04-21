@@ -7,6 +7,7 @@ namespace AM
 struct ChunkExtent;
 struct CellExtent;
 struct BoundingBox;
+struct Cylinder;
 struct Vector3;
 
 /**
@@ -44,6 +45,12 @@ struct TileExtent : public DiscreteExtent<DiscreteImpl::TileTag> {
      *         false.
      */
     bool contains(const BoundingBox& box) const;
+
+    /**
+     * @return true if the given cylinder is fully within this extent, else
+     *         false.
+     */
+    bool contains(const Cylinder& cylinder) const;
 
     /**
      * @return true if the given world point is within this extent.

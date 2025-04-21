@@ -25,7 +25,7 @@ class EntityLifetimeSystem
 {
 public:
     EntityLifetimeSystem(Simulation& inSimulation, World& inWorld,
-                         GraphicData& inGraphicData, Network& inNetwork);
+                         Network& inNetwork, GraphicData& inGraphicData);
 
     /**
      * Processes any waiting EntityInit or EntityDelete messages.

@@ -12,11 +12,14 @@
 #include "ComponentUpdate.h"
 #include "ChunkUpdate.h"
 #include "InventoryInit.h"
+#include "CastCooldownInit.h"
 #include "ItemError.h"
 #include "ItemUpdate.h"
 #include "ItemInitScriptResponse.h"
 #include "CombineItems.h"
 #include "DialogueResponse.h"
+#include "CastFailed.h"
+#include "CastStarted.h"
 #include "TileAddLayer.h"
 #include "TileRemoveLayer.h"
 #include "TileClearLayers.h"
@@ -91,6 +94,11 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
                                            networkEventDispatcher);
             break;
         }
+        case EngineMessageType::CastCooldownInit: {
+            dispatchMessage<CastCooldownInit>(messageBuffer, messageSize,
+                                              networkEventDispatcher);
+            break;
+        }
         case EngineMessageType::ItemError: {
             dispatchMessage<ItemError>(messageBuffer, messageSize,
                                        networkEventDispatcher);
@@ -114,6 +122,16 @@ void MessageProcessor::processReceivedMessage(Uint8 messageType,
         case EngineMessageType::DialogueResponse: {
             dispatchMessage<DialogueResponse>(messageBuffer, messageSize,
                                               networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::CastFailed: {
+            dispatchMessage<CastFailed>(messageBuffer, messageSize,
+                                        networkEventDispatcher);
+            break;
+        }
+        case EngineMessageType::CastStarted: {
+            dispatchMessage<CastStarted>(messageBuffer, messageSize,
+                                         networkEventDispatcher);
             break;
         }
         case EngineMessageType::TileAddLayer: {

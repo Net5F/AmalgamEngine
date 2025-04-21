@@ -12,25 +12,21 @@ class CastableData;
 struct Castable;
 struct Vector3;
 
-namespace Server
+namespace Client
 {
 class Simulation;
 class World;
+class Network;
 class ItemData;
 
 /**
- * Helper class for casting Castables. Also owns the maps that contain the 
- * cast handler callbacks.
- *
- * Note: "Helper" isn't the greatest name for this, since it also is the 
- *       only way to register handler callbacks. "world.castHelper" seems 
- *       like a pretty communicative, friendly interface though.
+ * Helper class for casting Castables.
  */
 class CastHelper
 {
 public:
-    CastHelper(Simulation& inSimulation, const ItemData& inItemData,
-               const CastableData& inCastableData);
+    CastHelper(Simulation& inSimulation, Network& inNetwork,
+               const ItemData& inItemData, const CastableData& inCastableData);
 
     /**
      * Casts an item interaction, using the given info.
@@ -118,9 +114,12 @@ private:
     /** Used to get the current tick. */
     Simulation& simulation;
     World& world;
+    /** Used to send cast requests. We could send them in CastSystem, but we 
+        do it here to reduce latency as much as possible. */
+    Network& network;
     const ItemData& itemData;
     const CastableData& castableData;
 };
 
-} // End namespace Server
+} // End namespace Client 
 } // End namespace AM

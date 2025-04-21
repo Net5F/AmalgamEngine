@@ -29,6 +29,11 @@ struct BoundingBox {
     {
     }
 
+    /**
+     * Constructs a box that tightly wraps the given cylinder.
+     */
+    BoundingBox(const Cylinder& cylinder);
+
     BoundingBox(const TileExtent& tileExtent);
 
     bool operator==(const BoundingBox& other) const;
@@ -93,6 +98,12 @@ struct BoundingBox {
      * Note: Shared edges are considered to be contained.
      */
     bool contains(const BoundingBox& boundingBox) const;
+
+    /**
+     * Returns true if this box fully encloses the given cylinder.
+     * Note: Shared edges are considered to be contained.
+     */
+    bool contains(const Cylinder& cylinder) const;
 
     /**
      * Returns true if this box contains the given world point.

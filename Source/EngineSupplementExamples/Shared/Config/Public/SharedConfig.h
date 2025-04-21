@@ -86,6 +86,12 @@ public:
         intended to be a consistent, small movement. */
     static constexpr float VERTICAL_FALL_MOVE_VELOCITY{15};
 
+    /** The distance above a casting target circle that will be included in 
+        the area of effect. */
+    static constexpr float CAST_TARGET_CYLINDER_HEIGHT{3};
+    static constexpr float CAST_TARGET_CYLINDER_HALF_HEIGHT{
+        CAST_TARGET_CYLINDER_HEIGHT / 2.0};
+
     /** The length of the global cooldown for casting. */
     static constexpr double CAST_GLOBAL_COOLDOWN_S{1.0};
     static constexpr unsigned int CAST_GLOBAL_COOLDOWN_TICKS{

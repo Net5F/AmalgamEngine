@@ -2,6 +2,7 @@
 #include "ChunkExtent.h"
 #include "CellExtent.h"
 #include "BoundingBox.h"
+#include "Cylinder.h"
 #include "Vector3.h"
 #include "MovementHelpers.h"
 #include "SharedConfig.h"
@@ -89,6 +90,12 @@ bool TileExtent::contains(const BoundingBox& box) const
 {
     BoundingBox extentBox(*this);
     return extentBox.contains(box);
+}
+
+bool TileExtent::contains(const Cylinder& cylinder) const
+{
+    BoundingBox extentBox(*this);
+    return extentBox.contains(cylinder);
 }
 
 bool TileExtent::contains(const Vector3& worldPoint) const

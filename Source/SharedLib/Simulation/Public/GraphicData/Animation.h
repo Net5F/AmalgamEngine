@@ -64,6 +64,16 @@ struct Animation {
      * or nullptr if this animation has no frames.
      */
     const Sprite& getSpriteAtTime(double animationTime) const;
+
+    /**
+     * Returns the animation's length in seconds.
+     */
+    double getLengthS() const;
+
+    /**
+     * Returns the animation's length in ticks.
+     */
+    Uint32 getLengthTicks() const;
 };
 
 } // namespace AM

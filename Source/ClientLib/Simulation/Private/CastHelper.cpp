@@ -1,29 +1,32 @@
 #include "CastHelper.h"
 #include "Simulation.h"
 #include "World.h"
+#include "Network.h"
 #include "ItemData.h"
 #include "CastableData.h"
 #include "Inventory.h"
 #include "Castable.h"
-#include "CastState.h"
+#include "ClientCastState.h"
 #include "ValidateCast.h"
 #include "CastFailed.h"
 #include "CastStarted.h"
+#include "CastRequest.h"
 #include "Position.h"
-#include "ClientSimData.h"
 #include "CastCooldown.h"
 #include "Cylinder.h"
 #include "SharedConfig.h"
 
 namespace AM
 {
-namespace Server
+namespace Client
 {
 
-CastHelper::CastHelper(Simulation& inSimulation, const ItemData& inItemData,
+CastHelper::CastHelper(Simulation& inSimulation, Network& inNetwork,
+                       const ItemData& inItemData,
                        const CastableData& inCastableData)
 : simulation{inSimulation}
 , world{inSimulation.getWorld()}
+, network{inNetwork}
 , itemData{inItemData}
 , castableData{inCastableData}
 , onItemInteractionCompletedMap{}
@@ -64,14 +67,18 @@ CastFailureType
         return failureType;
     }
 
-    // Add a CastState to the entity (we checked above that they aren't already 
-    // casting).
-    world.registry.emplace<CastState>(
+    // Add a ClientCastState to the entity (we replace in case they're in the 
+    // CastComplete state).
+    world.registry.emplace_or_replace<ClientCastState>(
         params.casterEntity,
-        CastState{.castInfo{castable, params.casterEntity, item,
-                            params.targetEntity, params.targetPosition,
-                            params.clientID},
-                  .endTick{0}});
+        ClientCastState{.castInfo{castable, params.casterEntity, item,
+                                  params.targetEntity, params.targetPosition},
+                        .endTick{0}});
+
+    // Send a cast request.
+    network.serializeAndSend(CastRequest{castable->castableID, params.slotIndex,
+                                         params.targetEntity,
+                                         params.targetPosition});
 
     return CastFailureType::None;
 }
@@ -99,14 +106,17 @@ CastFailureType
         return CastFailureType::InvalidTargetEntity;
     }
 
-    // Add a CastState to the entity (we checked above that they aren't already 
-    // casting).
-    world.registry.emplace<CastState>(
+    // Add a ClientCastState to the entity (we replace in case they're in the 
+    // CastComplete state).
+    world.registry.emplace_or_replace<ClientCastState>(
         params.casterEntity,
-        CastState{.castInfo{castable, params.casterEntity, nullptr,
-                            params.targetEntity, params.targetPosition,
-                            params.clientID},
-                  .endTick{0}});
+        ClientCastState{.castInfo{castable, params.casterEntity, nullptr,
+                                  params.targetEntity, params.targetPosition},
+                        .endTick{0}});
+
+    // Send a cast request.
+    network.serializeAndSend(CastRequest{
+        castable->castableID, 0, params.targetEntity, params.targetPosition});
 
     return CastFailureType::None;
 }
@@ -133,14 +143,17 @@ CastFailureType CastHelper::castSpell(const CastSpellParams& params)
         return CastFailureType::InvalidTargetEntity;
     }
 
-    // Add a CastState to the entity (we checked above that they aren't already 
-    // casting).
-    world.registry.emplace<CastState>(
+    // Add a ClientCastState to the entity (we replace in case they're in the 
+    // CastComplete state).
+    world.registry.emplace_or_replace<ClientCastState>(
         params.casterEntity,
-        CastState{.castInfo{castable, params.casterEntity, nullptr,
-                            params.targetEntity, params.targetPosition,
-                            params.clientID},
-                  .endTick{0}});
+        ClientCastState{.castInfo{castable, params.casterEntity, nullptr,
+                                  params.targetEntity, params.targetPosition},
+                        .endTick{0}});
+
+    // Send a cast request.
+    network.serializeAndSend(CastRequest{
+        castable->castableID, 0, params.targetEntity, params.targetPosition});
 
     return CastFailureType::None;
 }
@@ -180,7 +193,9 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
     }
 
     // Check that the caster isn't already casting.
-    if (registry.all_of<CastState>(casterEntity)) {
+    // Note: If it's in the CastComplete state, we're fine with overwriting it.
+    if (const auto* castState{registry.try_get<ClientCastState>(casterEntity)};
+        castState && (castState->state == ClientCastState::State::Casting)) {
         return CastFailureType::AlreadyCasting;
     }
 
@@ -225,15 +240,8 @@ CastFailureType CastHelper::performSharedChecks(const Castable& castable,
         }
     }
 
-    // Run the project's validation of the Castable's requirements.
-    bool projectValidationSucceeded{
-        validateCast(casterEntity, castable, registry)};
-    if (!projectValidationSucceeded) {
-        return CastFailureType::ProjectValidationFailed;
-    }
-
     return CastFailureType::None;
 };
 
-} // namespace Server
+} // namespace Client 
 } // namespace AM

@@ -2,7 +2,6 @@
 
 #include "EngineMessageType.h"
 #include "CastableID.h"
-#include "ItemID.h"
 #include "Vector3.h"
 #include "entt/fwd.hpp"
 #include "entt/entity/entity.hpp"
@@ -25,9 +24,9 @@ struct CastStarted {
     /** The castable that is being cast. */
     CastableID castableID{};
 
-    /** If castableID is an ItemInteractionType, this is the item that is 
-        being used. */
-    ItemID itemID{NULL_ITEM_ID};
+    // Note: We don't send the item ID because it doesn't seem like it'd ever 
+    //       be useful (it's only useful to the server when handling the cast). 
+    //       If a use case comes up for it, we can add it.
 
     /** The target entity. If castableID is an EntityInteractionType, this will
         always be present. Otherwise, this will be filled if the client has a 
@@ -44,7 +43,6 @@ void serialize(S& serializer, CastStarted& castStarted)
 {
     serializer.value4b(castStarted.casterEntity);
     serializer.object(castStarted.castableID);
-    serializer.value2b(castStarted.itemID);
     serializer.value4b(castStarted.targetEntity);
     serializer.object(castStarted.targetPosition);
 }

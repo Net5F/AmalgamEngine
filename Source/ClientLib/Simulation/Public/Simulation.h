@@ -28,6 +28,7 @@ class PlayerMovementSystem;
 class NpcMovementSystem;
 class ItemSystem;
 class InventorySystem;
+class CastSystem;
 class ComponentUpdateSystem;
 class GraphicSystem;
 class CameraSystem;
@@ -65,7 +66,7 @@ public:
      *
      * Note: This is used for predicted state (such as player movement).
      */
-    Uint32 getCurrentTick();
+    Uint32 getCurrentTick() const;
 
     /**
      * Returns the tick that we're replicating non-predicted server state at.
@@ -76,7 +77,7 @@ public:
      *
      * Note: This is used for non-predicted state (such as NPC movement).
      */
-    Uint32 getReplicationTick();
+    Uint32 getReplicationTick() const;
 
     /**
      * Processes the next sim iteration.
@@ -154,6 +155,7 @@ private:
     std::unique_ptr<NpcMovementSystem> npcMovementSystem;
     std::unique_ptr<ItemSystem> itemSystem;
     std::unique_ptr<InventorySystem> inventorySystem;
+    std::unique_ptr<CastSystem> castSystem;
     std::unique_ptr<ComponentUpdateSystem> componentUpdateSystem;
     std::unique_ptr<GraphicSystem> graphicSystem;
     std::unique_ptr<CameraSystem> cameraSystem;
